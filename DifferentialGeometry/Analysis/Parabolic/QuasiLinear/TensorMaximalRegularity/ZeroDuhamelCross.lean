@@ -109,7 +109,7 @@ private theorem homMode_zero (hT : 0 < T)
 private theorem homField_zero (hT : 0 < T)
     (h_compact : IsCompactOperator (tensorResolventL2
       (I := I) (M := M) g r s)) :
-    maxRegHomogeneousSolFieldHa1 (I := I) (M := M) a T
+    maxRegHomogeneousSolFieldTraceScale (I := I) (M := M) a T
         (0 : tensorHs (I := I) (M := M) g r s (a + 2)) = 0 := by
   refine timeModeCoeff_injective (I := I) (M := M) h_compact (fun i => ?_)
   rw [maxRegHomogeneousSolFieldHa1_timeModeCoeff (I := I) (M := M)
@@ -165,7 +165,7 @@ theorem zeroRepr_norm_le (hT : 0 < T) (hT1 : T ≤ 1)
       2 * Real.sqrt (1 + T) * ‖f‖ := by
   set u := zeroDuhamelCross (I := I) (M := M)
     hT hT1 h_compact f with hu
-  have hsq := u.repr_sq_le_norms hT ht
+  have hsq := u.normSq_repr_le_init_add_integral hT ht
   have hzero : u.repr 0 =
       (0 : tensorHs (I := I) (M := M) g r s (a + 1)) := by
     simpa only [hu] using
@@ -186,9 +186,39 @@ theorem zeroRepr_norm_le (hT : 0 < T) (hT1 : T ≤ 1)
       ‖u.hiL2‖ * ‖u.lo.deriv‖ ≤
         ((1 + T) * ‖f‖) * (2 * ‖f‖) :=
     mul_le_mul hhi hderiv (norm_nonneg _) (by positivity)
+  have hholder :
+      (∫ s in Set.Icc (0 : ℝ) T, ‖u.hiL2 s‖ * ‖u.lo.deriv s‖) ≤
+        ‖u.hiL2‖ * ‖u.lo.deriv‖ := by
+    have hhiLp : MemLp (fun s => ‖u.hiL2 s‖) (ENNReal.ofReal 2) (timeMeasure T) := by
+      convert (Lp.memLp u.hiL2).norm using 1 <;> norm_num
+    have hloLp : MemLp (fun s => ‖u.lo.deriv s‖) (ENNReal.ofReal 2) (timeMeasure T) := by
+      convert (Lp.memLp u.lo.deriv).norm using 1 <;> norm_num
+    have h := MeasureTheory.integral_mul_norm_le_Lp_mul_Lq
+      (μ := timeMeasure T) (f := fun s => ‖u.hiL2 s‖)
+      (g := fun s => ‖u.lo.deriv s‖) Real.HolderConjugate.two_two
+      hhiLp hloLp
+    rw [TimeSobolev.norm_eq_sqrt_integral,
+      TimeSobolev.norm_eq_sqrt_integral, Real.sqrt_eq_rpow,
+      Real.sqrt_eq_rpow]
+    simpa only [timeMeasure, norm_norm, Real.rpow_two] using h
+  have hcross :
+      (∫ s in (0 : ℝ)..t, 2 * (‖u.hiL2 s‖ * ‖u.lo.deriv s‖)) ≤
+        2 * (‖u.hiL2‖ * ‖u.lo.deriv‖) := by
+    rw [intervalIntegral.integral_of_le ht.1]
+    calc
+      (∫ s in Set.Ioc (0 : ℝ) t, 2 * (‖u.hiL2 s‖ * ‖u.lo.deriv s‖))
+          ≤ ∫ s in Set.Icc (0 : ℝ) T, 2 * (‖u.hiL2 s‖ * ‖u.lo.deriv s‖) := by
+            refine setIntegral_mono_set u.integrableOn_energyBound
+              (Eventually.of_forall fun s => by positivity) ?_
+            exact HasSubset.Subset.eventuallyLE
+              (fun x hx => ⟨le_of_lt hx.1, le_trans hx.2 ht.2⟩)
+      _ = 2 * (∫ s in Set.Icc (0 : ℝ) T, ‖u.hiL2 s‖ * ‖u.lo.deriv s‖) := by
+            rw [← MeasureTheory.integral_const_mul]
+      _ ≤ 2 * (‖u.hiL2‖ * ‖u.lo.deriv‖) :=
+            mul_le_mul_of_nonneg_left hholder (by positivity)
   have hsq' :
       ‖u.repr t‖ ^ 2 ≤ 4 * (1 + T) * ‖f‖ ^ 2 := by
-    nlinarith [hsq, hmul]
+    nlinarith [hsq, hcross, hmul]
   have hbase : 0 ≤ 1 + T := by linarith
   have hrhs : 0 ≤ 2 * Real.sqrt (1 + T) * ‖f‖ := by positivity
   refine (sq_le_sq₀ (norm_nonneg _) hrhs).1 ?_

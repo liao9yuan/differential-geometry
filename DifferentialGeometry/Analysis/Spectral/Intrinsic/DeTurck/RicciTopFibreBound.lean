@@ -120,8 +120,13 @@ theorem dagTop_cap_unif :
     (I := I) (M := M) g 2
     (fullRaisedEndoField (I := I) (M := M) g gm) 0 x
   simp only [iteratedCovGrad_zero, Nat.add_zero, Nat.reduceAdd] at hslot
-  rw [← sharpFlatEndoCc_eq_slotInsert_fullRaised
-    (I := I) (M := M) g gm] at hslot
+  have hbase :
+      endoSlotZeroCcTensor (I := I) (M := M) g 0
+          (fullRaisedEndoField (I := I) (M := M) g gm) =
+        sharpFlatEndoCc (I := I) g gm :=
+    (sharpFlatEndoCc_eq_slotInsert_fullRaised
+      (I := I) (M := M) g gm).symm
+  rw [hbase] at hslot
   have hE :
       riemannianFiberNormSq (I := I) (M := M) g 3 3 x
           ((slotInsertEndoCc (I := I) (M := M) g 2
@@ -146,8 +151,41 @@ theorem dagTop_cap_unif :
         reindexCoeffGen (I := I) (M := M) g 3 3 E1
           (Equiv.swap (1 : Fin 3) 2)) := by
     dsimp only [Y, Z]
-    rw [appCcRS_smul_right, appCcRS_sub_right,
-      appCcRS_add_right, perm_re, perm_re, perm_re]
+    let A : SmoothCcTensor g 3 3 :=
+      permCoeff (I := I) (M := M) g (Equiv.swap (0 : Fin 3) 2)
+    let Bp : SmoothCcTensor g 3 3 :=
+      permCoeff (I := I) (M := M) g (finRotate 3)
+    let C : SmoothCcTensor g 3 3 :=
+      permCoeff (I := I) (M := M) g (Equiv.swap (1 : Fin 3) 2)
+    have hinner :
+        appCcRS (I := I) (M := M) g 3 3 3 E1 (A + Bp - C) =
+          reindexCoeffGen (I := I) (M := M) g 3 3 E1
+              (Equiv.swap (0 : Fin 3) 2) +
+            reindexCoeffGen (I := I) (M := M) g 3 3 E1 (finRotate 3) -
+            reindexCoeffGen (I := I) (M := M) g 3 3 E1
+              (Equiv.swap (1 : Fin 3) 2) := by
+      calc
+        appCcRS (I := I) (M := M) g 3 3 3 E1 (A + Bp - C) =
+            appCcRS (I := I) (M := M) g 3 3 3 E1 (A + Bp) -
+              appCcRS (I := I) (M := M) g 3 3 3 E1 C :=
+          appCcRS_sub_right (I := I) (M := M) g 3 3 3 E1 (A + Bp) C
+        _ = (appCcRS (I := I) (M := M) g 3 3 3 E1 A +
+              appCcRS (I := I) (M := M) g 3 3 3 E1 Bp) -
+              appCcRS (I := I) (M := M) g 3 3 3 E1 C := by
+          exact congrArg
+            (fun X => X - appCcRS (I := I) (M := M) g 3 3 3 E1 C)
+            (appCcRS_add_right (I := I) (M := M) g 3 3 3 E1 A Bp)
+        _ = _ := by
+          dsimp only [A, Bp, C]
+          rw [perm_re, perm_re, perm_re]
+    calc
+      appCcRS (I := I) (M := M) g 3 3 3 E1
+          ((1 / 2 : ℝ) • (A + Bp - C)) =
+        (1 / 2 : ℝ) • appCcRS (I := I) (M := M) g 3 3 3 E1
+          (A + Bp - C) :=
+        appCcRS_smul_right (I := I) (M := M) g 3 3 3
+          (1 / 2 : ℝ) E1 (A + Bp - C)
+      _ = _ := congrArg ((1 / 2 : ℝ) • ·) hinner
   let q : ℝ := riemannianFiberNormSq (I := I) (M := M) g 3 3 x
     (E1.toSection x)
   have hq0 : 0 ≤ q := riemannianFiberNormSq_nonneg _ _ _ _ _

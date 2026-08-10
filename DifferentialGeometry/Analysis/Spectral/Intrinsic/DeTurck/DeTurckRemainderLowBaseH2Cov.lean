@@ -587,7 +587,8 @@ theorem curvSub
     (g : SmoothRiemannianMetric I M) (T U : SmoothCcTensor g 0 2) :
     lrCurvF (I := I) (M := M) g T - lrCurvF (I := I) (M := M) g U =
       lrCurvF (I := I) (M := M) g (T - U) := by
-  rw [lrCurvF, lrCurvF, lrCurvF, appCcRS_sub_right, appCcRS_sub_right]
+  simp only [lrCurvF, riemannCurvatureCoeffField]
+  rw [appCcRS_sub_right, appCcRS_sub_right]
   module
 
 /-- **`H²` bound for the curvature head.**  `lrCurvF` contracts the state
@@ -716,7 +717,8 @@ theorem quadTelB
             armSlotEndoCc (I := I) (M := M) g 2
               (bdConnPair (I := I) (M := M) g gU))
           (lrOmegaHat (I := I) (M := M) g gT) := by
-  rw [lrQB, lrQB, appCcRS_sub_right, appCcRS_sub_left]
+  simp only [lrQB, connDiffQuadraticPairedTensor, bdConnPair, lrOmegaHat, appCcRS]
+  rw [appCcRS_sub_right, appCcRS_sub_left]
   module
 
 /-- Telescoping of the `lrQA` block. -/
@@ -736,7 +738,8 @@ theorem quadTelA
               (bdConnPair (I := I) (M := M) g gU))
           (domDomCongrSection (I := I) g (Equiv.swap (0 : Fin 3) 1)
             (lrOmegaHat (I := I) (M := M) g gT)) := by
-  rw [lrQA, lrQA, domSub, appCcRS_sub_right, appCcRS_sub_left]
+  simp only [lrQA, connDiffQuadraticComposedTensor, bdConnPair, lrOmegaHat, appCcRS]
+  rw [domSub, appCcRS_sub_right, appCcRS_sub_left]
   module
 
 set_option maxHeartbeats 1600000 in
@@ -841,8 +844,9 @@ theorem quadPairH2
           (lrQA (I := I) (M := M) g gT - lrQA (I := I) (M := M) g gU) +
         domDomCongrSection (I := I) g lrPermC
           (lrQA (I := I) (M := M) g gT - lrQA (I := I) (M := M) g gU) := by
-    simp only [lrQuadF, domSub]
-    abel
+    simp only [lrQuadF, connDiffQuadraticCurvatureTerm, lrQB,
+      connDiffQuadraticPairedTensor, lrQA, connDiffQuadraticComposedTensor, domSub]
+    abel_nf
   rw [hsplit]
   refine (quadSixH2 (I := I) (M := M) g _ _ hQBd hQAd).trans (le_of_eq ?_)
   ring
@@ -1742,6 +1746,7 @@ theorem lieCovH2Pair
             rsDomDomCongrSection (I := I) (M := M) g 2 6 lieCovSigma
               (slotExtendIter (I := I) (M := M) g 0 4 2
                 (lieCovR4 (I := I) (M := M) g U hδU hδZ s)))) := by
+    simp only [appCcRS]
     rw [appCcRS_sub_left, appCcRS_sub_right]
     module
   rw [htel, jetSmul, neg_one_sq, one_mul]

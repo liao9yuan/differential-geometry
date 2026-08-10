@@ -90,7 +90,7 @@ structure IsLowRealizeUnif
 curvature-action constants. -/
 noncomputable def lowRealizeData
     (gBase : SmoothRiemannianMetric I M) (Λ Kb₀ Kb₁ : ℝ) : LowRegRealizeData where
-  threshold := deTurckArmContractionThreshold'' (Module.finrank ℝ E)
+  threshold := deTurckArmContractionThresholdSharp (Module.finrank ℝ E)
   radius := actionRealizeRad (morreyTwoC (I := I) (M := M) gBase Λ)
     (unifPtCurvZeroC (Module.finrank ℝ E) Λ Kb₀ Kb₁)
     (Module.finrank ℝ E)

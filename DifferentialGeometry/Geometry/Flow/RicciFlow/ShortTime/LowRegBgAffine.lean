@@ -283,6 +283,17 @@ theorem lowreg_N_bg_affine
     set A := lowCoreDataBg (I := I) (M := M)
       g gB hρ.le hδ0 hδ_le hreal' S with hA
     set S' := lowRadial (I := I) (M := M) g ρ S with hS'
+    have hsmoothN :
+        deTurckSmoothRemainderTensorHs (I := I) (M := M) g gB 1
+            (symmS (I := I) (M := M) g S) hδ
+            (hreal _ (symm_h2_of_state (I := I) (M := M) g S hball)) =
+          smoothCcToTensorHs (I := I) (M := M) g ((1 : ℕ) : ℝ)
+            (deTurckSmoothRemainder (I := I) g gB
+              (symmS (I := I) (M := M) g S) hδ
+              (hreal _ (symm_h2_of_state (I := I) (M := M) g S hball))) := by
+      exact smoothN_eq (I := I) (M := M) g gB 1
+        (symmS (I := I) (M := M) g S) hδ
+        (hreal _ (symm_h2_of_state (I := I) (M := M) g S hball))
     have hLHS : tensorHsCongr (I := I) (M := M) g 0 2
           (show ((1 : ℕ) : ℝ) = (1 : ℝ) by norm_num)
           (lowRegN (I := I) (M := M) g gB hR hδ hreal v) =
@@ -292,7 +303,7 @@ theorem lowreg_N_bg_affine
             (hreal _ (symm_h2_of_state (I := I) (M := M) g S hball))) := by
       rw [hveq,
         lowRegN_on_smooth (I := I) (M := M) g gB hR hδ hreal hcore S hball,
-        smoothN_eq, congr_cc, ccHs_eq]
+        hsmoothN, congr_cc, ccHs_eq]
     have hu : tensorHsCongr (I := I) (M := M) g 0 2
           (show ((1 : ℕ) : ℝ) + 2 = (3 : ℝ) by norm_num)
           (v.1 : tensorHs (I := I) (M := M) g 0 2 (((1 : ℕ) : ℝ) + 2)) =

@@ -21,8 +21,7 @@ namespace Integral
 namespace Connection
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]
-  [InnerProductSpace Real E] [FiniteDimensional Real E]
-  [CompleteSpace E] [NeZero (Module.finrank Real E)]
+  [FiniteDimensional Real E] [CompleteSpace E]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners Real E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
   [IsManifold I ∞ M] [I.Boundaryless] [BoundarylessManifold I M]

@@ -488,6 +488,14 @@ theorem exists_baseOperatorField_apply_eq_pureRGenuineDiffOp (g : SmoothRiemanni
       rw [pureRGenuineEndoFib_eq_comp (I := I) (M := M) g m W x]
       rfl
 
+/-- Compatibility name for the order-zero curvature operator-field factorization. -/
+theorem exists_pureRGenuineDiffOp_base_appCc (g : SmoothRiemannianMetric I M) :
+    ∃ Φ₀ : ∀ r : ℕ, SmoothCcTensor g (r + 0) (r + 0),
+      ∀ (r : ℕ) (W : SmoothCcTensor g 0 r),
+        pureRGenuineDiffOp (I := I) (M := M) g 0 r W =
+          appCc (I := I) (M := M) g (r + 0) (r + 0) (Φ₀ r) W :=
+  exists_baseOperatorField_apply_eq_pureRGenuineDiffOp (I := I) (M := M) g
+
 theorem exists_proportional_pureRGenuineDiffOp_highOrder (g : SmoothRiemannianMetric I M) :
     ∃ kappaHigh : ℕ → ℕ → ℝ, (∀ p r, 0 ≤ kappaHigh p r) ∧
       ∀ (p r : ℕ) (W : SmoothCcTensor g 0 r) (x : M),

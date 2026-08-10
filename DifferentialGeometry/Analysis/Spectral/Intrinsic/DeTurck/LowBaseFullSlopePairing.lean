@@ -73,15 +73,15 @@ theorem lowBase_path_nf
     let hδ_lt : δ < 1 := lt_of_le_of_lt hδ_le (by norm_num)
     let A := lowBaseData (I := I) (M := M) g g_bg T hδ_lt hδ hδZ
     A.a2 (I := I) (M := M) T + A.a1 (I := I) (M := M) T =
-      appCc (I := I) (M := M) g 2 2
+      operatorFieldApply (I := I) (M := M) g 2 2
           (rhsLow0PathIntegral (I := I) (M := M) g g_bg T 0
               hδ_lt hδ hδ_lt hδZ +
             phiMetCurvCoeff (I := I) g g_bg g) T +
-        appCc (I := I) (M := M) g 3 2
+        operatorFieldApply (I := I) (M := M) g 3 2
           (rhsLow1PathIntegral (I := I) (M := M) g g_bg T 0
             hδ_lt hδ hδ_lt hδZ)
           (iteratedCovGrad (I := I) g 0 2 1 T) +
-        appCc (I := I) (M := M) g 4 2
+        operatorFieldApply (I := I) (M := M) g 4 2
           (rhsTopPathIntegral (I := I) (M := M) g g_bg T 0
               hδ_lt hδ hδ_lt hδZ -
             deTurckPhiMetTotal (I := I) (M := M) g g_bg g)
@@ -123,10 +123,10 @@ theorem lowBase_path_nf
   simp only [deTurckPrincipalCometricArm, deTurckPrincipalCometricCoeff,
     sub_self, appCc_zero_left, add_zero] at htop
   have hlap : rawTensorConnLapSmooth (I := I) g 0 2 T =
-      appCc (I := I) (M := M) g 4 2
+      operatorFieldApply (I := I) (M := M) g 4 2
           (deTurckPhiMetTotal (I := I) (M := M) g g_bg g)
           (iteratedCovGrad (I := I) g 0 2 2 T) -
-        appCc (I := I) (M := M) g 2 2
+        operatorFieldApply (I := I) (M := M) g 2 2
           (phiMetCurvCoeff (I := I) g g_bg g) T := by
     exact (eq_sub_iff_add_eq).2 htop.symm
   rw [hlap]
@@ -162,21 +162,21 @@ theorem lowBase_L_nf
     let LT := oneMinusConnLapSmooth (I := I) g 0 2 T
     let B02 :=
       oneMinusConnLapSmooth (I := I) g 0 2
-          (appCc (I := I) (M := M) g 2 2 P0 T) +
+          (operatorFieldApply (I := I) (M := M) g 2 2 P0 T) +
         (oneMinusConnLapSmooth (I := I) g 0 2
-            (appCc (I := I) (M := M) g 4 2 P2
+            (operatorFieldApply (I := I) (M := M) g 4 2 P2
               (iteratedCovGrad (I := I) g 0 2 2 T)) -
-          appCc (I := I) (M := M) g 4 2 P2
+          operatorFieldApply (I := I) (M := M) g 4 2 P2
             (iteratedCovGrad (I := I) g 0 2 2 LT))
     oneMinusConnLapSmooth (I := I) g 0 2
           (A.a2 (I := I) (M := M) T + A.a1 (I := I) (M := M) T) -
-        appCc (I := I) (M := M) g 4 2 (P2 - Φ0)
+        operatorFieldApply (I := I) (M := M) g 4 2 (P2 - Φ0)
           (iteratedCovGrad (I := I) g 0 2 2 LT) =
       B02 +
         oneMinusConnLapSmooth (I := I) g 0 2
-          (appCc (I := I) (M := M) g 3 2 P1
+          (operatorFieldApply (I := I) (M := M) g 3 2 P1
             (iteratedCovGrad (I := I) g 0 2 1 T)) +
-        appCc (I := I) (M := M) g 2 2 K0 LT := by
+        operatorFieldApply (I := I) (M := M) g 2 2 K0 LT := by
   classical
   let hδ_lt : δ < 1 := lt_of_le_of_lt hδ_le (by norm_num)
   let A := lowBaseData (I := I) (M := M) g g_bg T hδ_lt hδ hδZ
@@ -191,11 +191,11 @@ theorem lowBase_L_nf
   let LT := oneMinusConnLapSmooth (I := I) g 0 2 T
   let B02 :=
     oneMinusConnLapSmooth (I := I) g 0 2
-        (appCc (I := I) (M := M) g 2 2 P0 T) +
+        (operatorFieldApply (I := I) (M := M) g 2 2 P0 T) +
       (oneMinusConnLapSmooth (I := I) g 0 2
-          (appCc (I := I) (M := M) g 4 2 P2
+          (operatorFieldApply (I := I) (M := M) g 4 2 P2
             (iteratedCovGrad (I := I) g 0 2 2 T)) -
-        appCc (I := I) (M := M) g 4 2 P2
+        operatorFieldApply (I := I) (M := M) g 4 2 P2
           (iteratedCovGrad (I := I) g 0 2 2 LT))
   dsimp only
   have hpath := lowBase_path_nf (I := I) (M := M) g g_bg T hTsymm
@@ -242,15 +242,15 @@ theorem lowBase_L_nf
   simp only [deTurckPrincipalCometricArm, deTurckPrincipalCometricCoeff,
     sub_self, appCc_zero_left, add_zero] at htopT htopLT
   have hinside :
-      appCc (I := I) (M := M) g 2 2 (P0 + K0) T +
-          appCc (I := I) (M := M) g 3 2 P1
+      operatorFieldApply (I := I) (M := M) g 2 2 (P0 + K0) T +
+          operatorFieldApply (I := I) (M := M) g 3 2 P1
             (iteratedCovGrad (I := I) g 0 2 1 T) +
-          appCc (I := I) (M := M) g 4 2 (P2 - Φ0)
+          operatorFieldApply (I := I) (M := M) g 4 2 (P2 - Φ0)
             (iteratedCovGrad (I := I) g 0 2 2 T) =
-        (appCc (I := I) (M := M) g 2 2 P0 T +
-            appCc (I := I) (M := M) g 3 2 P1
+        (operatorFieldApply (I := I) (M := M) g 2 2 P0 T +
+            operatorFieldApply (I := I) (M := M) g 3 2 P1
               (iteratedCovGrad (I := I) g 0 2 1 T) +
-            appCc (I := I) (M := M) g 4 2 P2
+            operatorFieldApply (I := I) (M := M) g 4 2 P2
               (iteratedCovGrad (I := I) g 0 2 2 T)) -
           rawTensorConnLapSmooth (I := I) g 0 2 T := by
     rw [appCc_add_left, appCc_sub_left, htopT]
@@ -273,13 +273,13 @@ theorem low0_path_refold
     (hdeltaZ : gFibreOpBound (I := I) (M := M) g
       (ccTensorBilinSymm (I := I) g
         (0 : SmoothCcTensor g 0 2)) delta) :
-    appCc (I := I) (M := M) g 2 2
+    operatorFieldApply (I := I) (M := M) g 2 2
         (rhsLow0PathIntegral (I := I) (M := M) g g_bg T 0
           hdelta_lt hdelta hdelta_lt hdeltaZ) T =
-      appCc (I := I) (M := M) g 2 2
+      operatorFieldApply (I := I) (M := M) g 2 2
           (rhsRefold0Int (I := I) (M := M) g g_bg T
             hdelta_lt hdelta hdeltaZ) T +
-        appCc (I := I) (M := M) g 2 2
+        operatorFieldApply (I := I) (M := M) g 2 2
           (edgeTopPairInt (I := I) (M := M) g T T hdelta_lt
             hdelta hdeltaZ ricciRefoldQA ricciRefoldQB
               lieRefoldQ lieRefoldEps) T := by
@@ -347,12 +347,12 @@ theorem low0_path_refold
       (I := I) (M := M) g 2 2 Q T S hS hSI hQ hcQ x v]
   have hIR : IntervalIntegrable (fun s : Real =>
       unitModel (I := I) (M := M) g 2
-        (appCc (I := I) (M := M) g 2 2 (R s) T) x v)
+        (operatorFieldApply (I := I) (M := M) g 2 2 (R s) T) x v)
       volume 0 1 :=
     coeffApp_integrable (I := I) (M := M) g 2 2 R T S hSI hcR x v
   have hIQ : IntervalIntegrable (fun s : Real =>
       unitModel (I := I) (M := M) g 2
-        (appCc (I := I) (M := M) g 2 2 (Q s) T) x v)
+        (operatorFieldApply (I := I) (M := M) g 2 2 (Q s) T) x v)
       volume 0 1 :=
     coeffApp_integrable (I := I) (M := M) g 2 2 Q T S hSI hcQ x v
   rw [← intervalIntegral.integral_add hIR hIQ]
@@ -360,20 +360,20 @@ theorem low0_path_refold
   have hsI : s ∈ Set.Icc (0 : Real) 1 := by
     simpa only [Set.uIcc_of_le zero_le_one] using hs
   have hdiag :
-      appCc (I := I) (M := M) g 2 2 (Q s) T =
-        appCc (I := I) (M := M) g 4 2
+      operatorFieldApply (I := I) (M := M) g 2 2 (Q s) T =
+        operatorFieldApply (I := I) (M := M) g 4 2
           (rhsRefold2 (I := I) (M := M) g T hdelta hdeltaZ s)
           (iteratedCovGrad (I := I) g 0 2 2 T) := by
-    change appCc (I := I) (M := M) g 2 2
+    change operatorFieldApply (I := I) (M := M) g 2 2
         (edgeTopPair (I := I) (M := M) g T hdelta hdeltaZ
           ricciRefoldQA ricciRefoldQB lieRefoldQ lieRefoldEps s) T = _
     simpa only [rhsRefold2, ricciRefold2, lieRefold2] using
       edgeTopPair_apply (I := I) (M := M) g T hdelta hdeltaZ
         ricciRefoldQA ricciRefoldQB lieRefoldQ lieRefoldEps s
   have hpoint :
-      appCc (I := I) (M := M) g 2 2 (A s) T =
-        appCc (I := I) (M := M) g 2 2 (R s) T +
-          appCc (I := I) (M := M) g 2 2 (Q s) T := by
+      operatorFieldApply (I := I) (M := M) g 2 2 (A s) T =
+        operatorFieldApply (I := I) (M := M) g 2 2 (R s) T +
+          operatorFieldApply (I := I) (M := M) g 2 2 (Q s) T := by
     rw [hdiag]
     simpa only [A, R] using rhsLow0_refold (I := I) (M := M)
       g g_bg T hTsymm hdelta_lt hdelta hdeltaZ hsI
@@ -404,32 +404,32 @@ theorem b02_raw_nf
     let LT := oneMinusConnLapSmooth (I := I) g 0 2 T
     let B02 :=
       oneMinusConnLapSmooth (I := I) g 0 2
-          (appCc (I := I) (M := M) g 2 2 P0 T) +
+          (operatorFieldApply (I := I) (M := M) g 2 2 P0 T) +
         (oneMinusConnLapSmooth (I := I) g 0 2
-            (appCc (I := I) (M := M) g 4 2 P2
+            (operatorFieldApply (I := I) (M := M) g 4 2 P2
               (iteratedCovGrad (I := I) g 0 2 2 T)) -
-          appCc (I := I) (M := M) g 4 2 P2
+          operatorFieldApply (I := I) (M := M) g 4 2 P2
             (iteratedCovGrad (I := I) g 0 2 2 LT))
     let PairComm :=
       oneMinusConnLapSmooth (I := I) g 0 2
-          (appCc (I := I) (M := M) g 2 2 (Q T) T) -
-        appCc (I := I) (M := M) g 2 2 (Q LT) T -
-        appCc (I := I) (M := M) g 2 2 (Q T) LT +
-        appCc (I := I) (M := M) g 2 2 (Q T) T
+          (operatorFieldApply (I := I) (M := M) g 2 2 (Q T) T) -
+        operatorFieldApply (I := I) (M := M) g 2 2 (Q LT) T -
+        operatorFieldApply (I := I) (M := M) g 2 2 (Q T) LT +
+        operatorFieldApply (I := I) (M := M) g 2 2 (Q T) T
     let RawComm :=
       oneMinusConnLapSmooth (I := I) g 0 2
-          (appCc (I := I) (M := M) g 2 2 R0 T) + PairComm
+          (operatorFieldApply (I := I) (M := M) g 2 2 R0 T) + PairComm
     let TopComm :=
       oneMinusConnLapSmooth (I := I) g 0 2
-          (appCc (I := I) (M := M) g 4 2 P2
+          (operatorFieldApply (I := I) (M := M) g 4 2 P2
             (iteratedCovGrad (I := I) g 0 2 2 T)) -
-        appCc (I := I) (M := M) g 4 2 P2
+        operatorFieldApply (I := I) (M := M) g 4 2 P2
           (iteratedCovGrad (I := I) g 0 2 2 LT)
     B02 =
       RawComm + TopComm +
-        appCc (I := I) (M := M) g 2 2 (Q LT) T +
-        appCc (I := I) (M := M) g 2 2 (Q T) LT -
-        appCc (I := I) (M := M) g 2 2 (Q T) T := by
+        operatorFieldApply (I := I) (M := M) g 2 2 (Q LT) T +
+        operatorFieldApply (I := I) (M := M) g 2 2 (Q T) LT -
+        operatorFieldApply (I := I) (M := M) g 2 2 (Q T) T := by
   classical
   dsimp only
   rw [low0_path_refold (I := I) (M := M) g g_bg T hTsymm
@@ -461,33 +461,33 @@ theorem b02_center_nf
     let Q := fun U : SmoothCcTensor g 0 2 =>
       edgeTopPairInt (I := I) (M := M) g T U hdelta_lt
         hdelta hdeltaZ ricciRefoldQA ricciRefoldQB lieRefoldQ lieRefoldEps
-    let Z := appCc (I := I) (M := M) g 2 2 (Q T) T
+    let Z := operatorFieldApply (I := I) (M := M) g 2 2 (Q T) T
     let Cross :=
-      appCc (I := I) (M := M) g 2 2 (Q LT) T +
-        appCc (I := I) (M := M) g 2 2 (Q T) LT
+      operatorFieldApply (I := I) (M := M) g 2 2 (Q LT) T +
+        operatorFieldApply (I := I) (M := M) g 2 2 (Q T) LT
     let PairComm :=
       oneMinusConnLapSmooth (I := I) g 0 2 Z -
-        appCc (I := I) (M := M) g 2 2 (Q LT) T -
-        appCc (I := I) (M := M) g 2 2 (Q T) LT + Z
+        operatorFieldApply (I := I) (M := M) g 2 2 (Q LT) T -
+        operatorFieldApply (I := I) (M := M) g 2 2 (Q T) LT + Z
     let C := P2 - Φ0
     let B02 :=
       oneMinusConnLapSmooth (I := I) g 0 2
-          (appCc (I := I) (M := M) g 2 2 P0 T) +
+          (operatorFieldApply (I := I) (M := M) g 2 2 P0 T) +
         (oneMinusConnLapSmooth (I := I) g 0 2
-            (appCc (I := I) (M := M) g 4 2 P2
+            (operatorFieldApply (I := I) (M := M) g 4 2 P2
               (iteratedCovGrad (I := I) g 0 2 2 T)) -
-          appCc (I := I) (M := M) g 4 2 P2
+          operatorFieldApply (I := I) (M := M) g 4 2 P2
             (iteratedCovGrad (I := I) g 0 2 2 LT))
     let J :=
       oneMinusConnLapSmooth (I := I) g 0 2
-          (appCc (I := I) (M := M) g 2 2 (R0 + K0) T) +
+          (operatorFieldApply (I := I) (M := M) g 2 2 (R0 + K0) T) +
         PairComm +
         (oneMinusConnLapSmooth (I := I) g 0 2
-            (appCc (I := I) (M := M) g 4 2 C
+            (operatorFieldApply (I := I) (M := M) g 4 2 C
               (iteratedCovGrad (I := I) g 0 2 2 T)) -
-          appCc (I := I) (M := M) g 4 2 C
+          operatorFieldApply (I := I) (M := M) g 4 2 C
             (iteratedCovGrad (I := I) g 0 2 2 LT)) - Z
-    B02 + appCc (I := I) (M := M) g 2 2 K0 LT = J + Cross := by
+    B02 + operatorFieldApply (I := I) (M := M) g 2 2 K0 LT = J + Cross := by
   classical
   dsimp only
   have hraw := b02_raw_nf (I := I) (M := M) g g_bg T hTsymm

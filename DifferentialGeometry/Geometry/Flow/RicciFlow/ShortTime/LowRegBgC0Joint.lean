@@ -987,13 +987,16 @@ theorem omega_one
         (omegaOne (I := I) (M := M) g gm)
         (covGrad (I := I) (M := M) g 0 2 T) =
       lrOmegaHat (I := I) (M := M) g gm := by
-  rw [omegaOne, ← appCc_assoc, ← appCc_assoc]
+  rw [omegaOne]
+  simp only [appCcRS, appCc]
+  rw [← appCc_assoc, ← appCc_assoc]
   have hconn : appCc (I := I) (M := M) g 3 3
       (LowBaseInternal.connLowOp (I := I) (M := M) g gm)
       (covGrad (I := I) (M := M) g 0 2 T) =
       connDiffLoweredCc (I := I) g gm := by
     simpa only [appCcRS_zero_eq_appCc] using
       LowBaseInternal.connLow_app (I := I) (M := M) g gm T hT htie
+  simp only [appCc] at hconn
   rw [hconn]
   have hperm : appCc (I := I) (M := M) g 3 3
       (permCoeff (I := I) (M := M) g (finRotate 3))
@@ -1003,6 +1006,7 @@ theorem omega_one
     simpa only [appCcRS_zero_eq_appCc] using
       perm_app (I := I) (M := M) g (finRotate 3)
         (connDiffLoweredCc (I := I) g gm)
+  simp only [appCc] at hperm
   rw [hperm]
   rfl
 
@@ -1129,15 +1133,23 @@ theorem quad_op
       (qbOne (I := I) (M := M) g gm)
       (covGrad (I := I) (M := M) g 0 2 T) =
       lrQB (I := I) (M := M) g gm := by
-    rw [qbOne, ← appCc_assoc,
-      omega_one (I := I) (M := M) g gm T hT htie]
+    rw [qbOne]
+    simp only [appCcRS, appCc]
+    rw [← appCc_assoc]
+    have hω := omega_one (I := I) (M := M) g gm T hT htie
+    simp only [appCc] at hω
+    rw [hω]
     rfl
   have hqa : appCc (I := I) (M := M) g 3 4
       (qaOne (I := I) (M := M) g gm)
       (covGrad (I := I) (M := M) g 0 2 T) =
       lrQA (I := I) (M := M) g gm := by
-    rw [qaOne, ← appCc_assoc, ← appCc_assoc,
-      omega_one (I := I) (M := M) g gm T hT htie]
+    rw [qaOne]
+    simp only [appCcRS, appCc]
+    rw [← appCc_assoc, ← appCc_assoc]
+    have hω := omega_one (I := I) (M := M) g gm T hT htie
+    simp only [appCc] at hω
+    rw [hω]
     have hperm : appCc (I := I) (M := M) g 3 3
         (permCoeff (I := I) (M := M) g (Equiv.swap (0 : Fin 3) 1))
         (lrOmegaHat (I := I) (M := M) g gm) =
@@ -1146,16 +1158,26 @@ theorem quad_op
       simpa only [appCcRS_zero_eq_appCc] using
         perm_app (I := I) (M := M) g (Equiv.swap (0 : Fin 3) 1)
           (lrOmegaHat (I := I) (M := M) g gm)
+    simp only [appCc] at hperm
     rw [hperm]
     rfl
+  simp only [appCc] at hqb hqa
   rw [← appCc_assoc, ← appCc_assoc, ← appCc_assoc, ← appCc_assoc,
     ← appCc_assoc]
   rw [hqb, hqa]
-  rw [← appCcRS_zero_eq_appCc, perm_app,
-    ← appCcRS_zero_eq_appCc, perm_app,
-    ← appCcRS_zero_eq_appCc, perm_app,
-    ← appCcRS_zero_eq_appCc, perm_app,
-    ← appCcRS_zero_eq_appCc, perm_app]
+  have hqbPerm := perm_app (I := I) (M := M) g (Equiv.swap (0 : Fin 4) 1)
+    (lrQB (I := I) (M := M) g gm)
+  simp only [appCcRS_zero_eq_appCc, appCc] at hqbPerm
+  have hqaA := perm_app (I := I) (M := M) g lrPermA
+    (lrQA (I := I) (M := M) g gm)
+  have hqa02 := perm_app (I := I) (M := M) g (Equiv.swap (0 : Fin 4) 2)
+    (lrQA (I := I) (M := M) g gm)
+  have hqaB := perm_app (I := I) (M := M) g lrPermB
+    (lrQA (I := I) (M := M) g gm)
+  have hqaC := perm_app (I := I) (M := M) g lrPermC
+    (lrQA (I := I) (M := M) g gm)
+  simp only [appCcRS_zero_eq_appCc, appCc] at hqaA hqa02 hqaB hqaC
+  rw [hqbPerm, hqaA, hqa02, hqaB, hqaC]
   rfl
 
 theorem lrQuad_joint
@@ -1497,7 +1519,9 @@ theorem prod23Smul
     (W : SmoothCcTensor g 0 2) :
     prod23 (I := I) (M := M) g (a • W) =
       a • prod23 (I := I) (M := M) g W := by
-  rw [prod23, slotIterSmul, appCcRS_smul_right]
+  rw [prod23, slotIterSmul]
+  simp only [appCcRS]
+  rw [appCcRS_smul_right]
   rfl
 
 theorem innerOneSmul
@@ -1545,7 +1569,9 @@ theorem aaOneSmul
     (W : SmoothCcTensor g 0 2) :
     aaOne (I := I) (M := M) g gm (a • W) =
       a • aaOne (I := I) (M := M) g gm W := by
-  rw [aaOne, aaKerOneSmul, appCcRS_smul_right]
+  rw [aaOne, aaKerOneSmul]
+  simp only [appCcRS]
+  rw [appCcRS_smul_right]
   rfl
 
 theorem daTransSmul
@@ -1635,7 +1661,9 @@ theorem quadMidSmul
     (W : SmoothCcTensor g 0 2) :
     quadMid (I := I) (M := M) g gm (a • W) =
       a • quadMid (I := I) (M := M) g gm W := by
-  rw [quadMid, prod23Smul, appCcRS_smul_right]
+  rw [quadMid, prod23Smul]
+  simp only [appCcRS]
+  rw [appCcRS_smul_right]
   rfl
 
 theorem quadActSmul

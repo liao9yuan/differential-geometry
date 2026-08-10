@@ -160,6 +160,9 @@ theorem riemannianFiberNormSq_sharpFlatEndoCc_le_of_lt_one
         rw [← hnE]
         ring
 
+abbrev rfns_sharpFlatEndoCc_le_of_lt_one :=
+  @riemannianFiberNormSq_sharpFlatEndoCc_le_of_lt_one
+
 omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
     [T2Space M] [SigmaCompactSpace M] in
 private lemma g0_inner_sharpFlatRaiseEndo_eq_g1

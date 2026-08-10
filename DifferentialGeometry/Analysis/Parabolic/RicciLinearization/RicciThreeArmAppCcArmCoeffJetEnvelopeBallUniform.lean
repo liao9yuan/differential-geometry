@@ -12,7 +12,7 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.ConnectionDifferenc
 import DifferentialGeometry.Geometry.Flow.DeTurckVFChartCoord
 import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.RiemannianFiberNormSq.FiberNormSubadditivity
 import DifferentialGeometry.Analysis.Sobolev.Embedding.SobolevEmbeddingCm
-import DifferentialGeometry.Analysis.Parabolic.RicciLinearization.ConvexPerturbationPointwiseC2
+import DifferentialGeometry.Analysis.Sobolev.Embedding.ConvexPerturbationPointwiseC2
 import DifferentialGeometry.Analysis.Sobolev.TensorHilbert.InverseMetricPerturbationFibreBound
 import DifferentialGeometry.Analysis.Parabolic.RicciLinearization.RealizedFamCurvatureJetBound
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurckCoefficients.RealizeMetricChartGramDifference
@@ -290,7 +290,7 @@ theorem exists_arm1Koszul_realizedFam_rfns_ballUniform
   classical
   obtain ⟨Csob, hCsob_nn, hCsob⟩ :=
     DifferentialGeometry.PDE.RicciFlow.exists_Csob_convexPerturbation_pointwise_C2_le
-      (I := I) (M := M) g₀ a ha_super
+      (I := I) (M := M) (E := E) g₀ a ha_super
   obtain ⟨Λarm1, hΛarm1_nn, hΛarm1⟩ :=
     exists_arm1Koszul_realizedFam_pointwise_le_of_jetEnvelope (I := I) (M := M) g₀ hδ₀
       (Csob * R) (by positivity)
@@ -360,7 +360,7 @@ theorem exists_riemannArm0_curvCoeff_realizedFam_rfns_ballUniform
   classical
   obtain ⟨Csob, hCsob_nn, hCsob⟩ :=
     DifferentialGeometry.PDE.RicciFlow.exists_Csob_convexPerturbation_pointwise_C2_le
-      (I := I) (M := M) g₀ a ha_super
+      (I := I) (M := M) (E := E) g₀ a ha_super
   obtain ⟨Λcurv, hΛcurv_nn, hΛcurv⟩ :=
     exists_riemannArm0_curvCoeff_realizedFam_pointwise_le_of_jetEnvelope (I := I) (M := M) g₀ hδ₀
       (Csob * R) (by positivity)

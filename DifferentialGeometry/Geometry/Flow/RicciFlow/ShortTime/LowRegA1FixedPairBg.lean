@@ -3,7 +3,7 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.LowRegBgForceArms
 import DifferentialGeometry.Analysis.Spectral.Tensor.Estimates.H2H3FirstOrder
 import DifferentialGeometry.Analysis.Spectral.Tensor.Estimates.H2PointwiseUnif
 import DifferentialGeometry.Analysis.Spectral.Tensor.SobolevScale.FiniteSpectralPairing
-import DifferentialGeometry.Analysis.Sobolev.Tensor.CrossScaleCauchySchwarz
+import DifferentialGeometry.Analysis.Spectral.Tensor.SobolevScale.CrossScaleCauchySchwarz
 import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.LowRegRHSSymm
 
 /-!
@@ -190,10 +190,22 @@ private theorem lowArm_symm
     simpa only [zero_smul] using
       (symmS_smul (I := I) (M := M) g (0 : ℝ)
         (0 : SmoothCcTensor g 0 2))
-  rw [← hsplitT, symmS_sub,
-    symmS_smoothRem (I := I) (M := M) g gBase T hδ hT hTsymm,
+  have hsT :=
+    symmS_smoothRem (I := I) (M := M) g gBase T hδ hT hTsymm
+  change ccTensor02Symm (I := I) (M := M) g
+      (deTurckSmoothRemainder (I := I) g gBase T hδ hT) = _ at hsT
+  have hsZ :=
     symmS_smoothRem (I := I) (M := M) g gBase
-      (0 : SmoothCcTensor g 0 2) hδ hZ hzero]
+      (0 : SmoothCcTensor g 0 2) hδ hZ hzero
+  change ccTensor02Symm (I := I) (M := M) g
+      (deTurckSmoothRemainder (I := I) g gBase
+        (0 : SmoothCcTensor g 0 2) hδ hZ) = _ at hsZ
+  rw [← hsplitT]
+  change ccTensor02Symm (I := I) (M := M) g
+      (deTurckSmoothRemainder (I := I) g gBase T hδ hT -
+        deTurckSmoothRemainder (I := I) g gBase
+          (0 : SmoothCcTensor g 0 2) hδ hZ) = _
+  rw [symmS_sub, hsT, hsZ]
 
 /-- The signed Rung-3 Galerkin pairing of the complete fixed-background arm is
 exactly the diagonal complementary-iterate pairing of the retracted state with
@@ -243,7 +255,10 @@ theorem galArmPair3_diag
   have hrep : T = θ • symmS (I := I) (M := M) g
       (finiteEigenCombo (I := I) (M := M) g F c) := by
     dsimp only [T, θ]
-    rw [galCoreRep, symmS_smul]
+    rw [galCoreRep]
+    change ccTensor02Symm (I := I) (M := M) g (_ • _) =
+      _ • ccTensor02Symm (I := I) (M := M) g _
+    rw [symmS_smul]
   have hpair := finite_symm_scale (I := I) (M := M) g F c
     (A.a2 (I := I) (M := M) T + A.a1 (I := I) (M := M) T)
     1 2 θ hA

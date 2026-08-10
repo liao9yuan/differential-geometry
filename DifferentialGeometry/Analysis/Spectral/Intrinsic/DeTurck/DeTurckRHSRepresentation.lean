@@ -57,7 +57,9 @@ private theorem rawConnLap_symmS
       rawTensorConnLapSmooth (I := I) g₀ 0 2 S +
         domDomCongrSection (I := I) g₀ (Equiv.swap (0 : Fin 2) 1)
           (rawTensorConnLapSmooth (I := I) g₀ 0 2 S) := by
-    rw [← hadd, symmS, hhalf, hadd,
+    rw [← hadd]
+    simp only [ccTensor02Symm]
+    rw [hhalf, hadd,
       rawTensorConnLapSmooth_domDomCongrSection (I := I) (M := M) g₀
         (Equiv.swap (0 : Fin 2) 1) S]
   have hgoal : symmS (I := I) (M := M) g₀
@@ -67,7 +69,11 @@ private theorem rawConnLap_symmS
             (symmS (I := I) (M := M) g₀ S) +
           rawTensorConnLapSmooth (I := I) g₀ 0 2
             (symmS (I := I) (M := M) g₀ S)) := by
-    rw [symmS, ← hLV]
+    change (1 / 2 : ℝ) •
+        (rawTensorConnLapSmooth (I := I) g₀ 0 2 S +
+          domDomCongrSection (I := I) g₀ (Equiv.swap (0 : Fin 2) 1)
+            (rawTensorConnLapSmooth (I := I) g₀ 0 2 S)) = _
+    rw [← hLV]
   rw [hgoal, smul_add, hhalf]
 
 omit [BoundarylessManifold I M] in

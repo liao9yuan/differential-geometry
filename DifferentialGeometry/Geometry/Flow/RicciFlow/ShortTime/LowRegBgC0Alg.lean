@@ -550,6 +550,8 @@ theorem koszul_one_app
     simpa only [appCcRS_zero_eq_appCc] using
       perm_app (I := I) (M := M) g ρ
         (covGrad (I := I) (M := M) g 0 2 T)
+  simp only [appCcRS, appCc]
+  simp only [appCc] at hp
   rw [appCcRS_zero_eq_appCc, koszulOne, appCc_smul_left,
     appCc_sub_left, appCc_add_left, hp, hp, hp]
   rw [koszulCovecCc, symmSCovGrad3, hs]
@@ -572,14 +574,23 @@ theorem mcd_one_app
         (mcdOne (I := I) (M := M) g)
         (covGrad (I := I) (M := M) g 0 2 T) =
       lc0Kappa (I := I) (M := M) g gm g := by
+  simp only [appCcRS, appCc]
   rw [appCcRS_zero_eq_appCc, mcdOne, ← appCc_assoc]
-  rw [show appCc (I := I) (M := M) g 3 3
+  rw [show operatorFieldApply (I := I) (M := M) g 3 3
       (koszulOne (I := I) (M := M) g)
       (covGrad (I := I) (M := M) g 0 2 T) =
         koszulCovecCc (I := I) g T by
-      rw [← appCcRS_zero_eq_appCc]
-      exact koszul_one_app (I := I) (M := M) g T hT]
-  rw [← appCcRS_zero_eq_appCc, perm_app]
+      simpa only [appCcRS, appCc] using
+        koszul_one_app (I := I) (M := M) g T hT]
+  have hp : operatorFieldApply (I := I) (M := M) g 3 3
+      (permCoeff (I := I) (M := M) g (finRotate 3).symm)
+      (koszulCovecCc (I := I) g T) =
+        domDomCongrSection (I := I) g (finRotate 3).symm
+          (koszulCovecCc (I := I) g T) := by
+    simpa only [appCcRS_zero_eq_appCc] using
+      perm_app (I := I) (M := M) g (finRotate 3).symm
+        (koszulCovecCc (I := I) g T)
+  rw [hp]
   exact (kappa_self (I := I) (M := M) g gm T htie).symm
 
 def block23 : Equiv.Perm (Fin 5) :=
@@ -599,8 +610,14 @@ theorem prod23_app
         (prod23 (I := I) (M := M) g W) K =
       appCcRS (I := I) (M := M) g 0 2 5
         (slotExtendIter (I := I) (M := M) g 0 3 2 K) W := by
+  have hp (ρ : Equiv.Perm (Fin 5)) (S : SmoothCcTensor g 0 5) :
+      ccOperatorFieldComp (I := I) (M := M) g 0 5 5
+          (permCoeff (I := I) (M := M) g ρ) S =
+        domDomCongrSection (I := I) g ρ S := by
+    simpa only [appCcRS] using perm_app (I := I) (M := M) g ρ S
+  simp only [appCcRS, appCc]
   rw [appCcRS_zero_eq_appCc, appCcRS_zero_eq_appCc, prod23,
-    ← appCc_assoc, ← appCcRS_zero_eq_appCc, perm_app]
+    ← appCc_assoc, ← appCcRS_zero_eq_appCc, hp]
   apply smoothCcTensor_ext_of_unitModel (I := I) (M := M) g
   intro x
   rw [domDomCongrSection_unitModel]
@@ -693,6 +710,8 @@ theorem amix_half_one
     simpa only [appCcRS_zero_eq_appCc] using
       mcd_one_app (I := I) (M := M) g gm P hP htie
   rw [lc0AMixHalfRF]
+  simp only [appCcRS, appCc]
+  simp only [appCcRS, appCc] at hprod hconn
   conv_lhs =>
     rw [← appCc_assoc, ← appCc_assoc, ← appCc_assoc, ← appCc_assoc]
   rw [hprod, ← hconn]
@@ -723,11 +742,14 @@ theorem amix_one
       appCc (I := I) (M := M) g 3 2
         (amixOne (I := I) (M := M) g gm gB W)
         (covGrad (I := I) (M := M) g 0 2 P) := by
+  simp only [appCcRS, appCc]
   rw [lc0AMixFormRF, appCc_smul_left, appCc_add_left]
-  rw [amix_half_one (I := I) (M := M) g gm gB P W
-      LieCorr0Core.lieCorr0AMixPerm2 hP htie]
-  rw [amix_half_one (I := I) (M := M) g gm gB P W
-      (lc0SwapPermRF * LieCorr0Core.lieCorr0AMixPerm2) hP htie]
+  have hhalf := amix_half_one (I := I) (M := M) g gm gB P W
+    LieCorr0Core.lieCorr0AMixPerm2 hP htie
+  have hhalf' := amix_half_one (I := I) (M := M) g gm gB P W
+    (lc0SwapPermRF * LieCorr0Core.lieCorr0AMixPerm2) hP htie
+  simp only [appCcRS, appCc] at hhalf hhalf'
+  rw [hhalf, hhalf']
   rw [amixOne, appCc_smul_left, appCc_add_left]
 
 noncomputable def vbCore
@@ -761,11 +783,16 @@ theorem vb_one
       appCc (I := I) (M := M) g 3 2
         (vbOne (I := I) (M := M) g gm W)
         (covGrad (I := I) (M := M) g 0 2 P) := by
+  simp only [appCcRS, appCc]
+  have hip := ipLow_swap (I := I) (M := M) g (wOmega (I := I) (M := M) g gm g) W
+  have hw := wOmega_refold (I := I) (M := M) g gm
+  have hconn := LowBaseInternal.connLow_app (I := I) (M := M) g gm P hP htie
+  simp only [appCcRS, appCc] at hip hw hconn
   rw [lc0VBFormRF, appCc_smul_left]
   rw [← appCc_assoc, ← appCc_assoc]
-  rw [ipLow_swap]
-  rw [wOmega_refold, appCcRS_zero_eq_appCc]
-  rw [← LowBaseInternal.connLow_app (I := I) (M := M) g gm P hP htie]
+  rw [hip]
+  rw [hw, appCcRS_zero_eq_appCc]
+  rw [← hconn]
   rw [appCcRS_zero_eq_appCc]
   rw [vbOne, vbCore, appCc_smul_left]
   conv_rhs =>
@@ -787,15 +814,16 @@ theorem inner_one
       appCc (I := I) (M := M) g 3 3
         (innerOne (I := I) (M := M) g W)
         (connDiffLoweredCc (I := I) g gm) := by
+  simp only [appCcRS, appCc]
   rw [innerOne, ← appCc_assoc]
-  rw [show appCc (I := I) (M := M) g 3 3
+  rw [show operatorFieldApply (I := I) (M := M) g 3 3
       (permCoeff (I := I) (M := M) g (finRotate 3))
       (connDiffLoweredCc (I := I) g gm) =
         domDomCongrSection (I := I) g (finRotate 3)
           (connDiffLoweredCc (I := I) g gm) by
-    rw [← appCcRS_zero_eq_appCc]
-    exact perm_app (I := I) (M := M) g (finRotate 3)
-      (connDiffLoweredCc (I := I) g gm)]
+    simpa only [appCcRS, appCc] using
+      perm_app (I := I) (M := M) g (finRotate 3)
+        (connDiffLoweredCc (I := I) g gm)]
   apply smoothCcTensor_ext_of_unitModel (I := I) (M := M) g
   intro x
   apply ContinuousMultilinearMap.ext
@@ -867,6 +895,7 @@ theorem inner_act
         (covGrad (I := I) (M := M) g 0 2 P) := by
   rw [inner_one (I := I) (M := M) g gm W]
   rw [← LowBaseInternal.connLow_app (I := I) (M := M) g gm P hP htie]
+  simp only [appCcRS, appCc]
   rw [innerAct, ← appCc_assoc]
   rw [appCcRS_zero_eq_appCc]
 
@@ -994,9 +1023,12 @@ theorem aa_mid_act
       appCc (I := I) (M := M) g 3 4
         (aaMidOne (I := I) (M := M) g gm W mid out)
         (covGrad (I := I) (M := M) g 0 2 P) := by
+  simp only [appCcRS, appCc]
+  have hinner := inner_act (I := I) (M := M) g gm P W hP htie
+  simp only [appCcRS, appCc] at hinner
   conv_lhs =>
     rw [← appCc_assoc, ← appCc_assoc, ← appCc_assoc]
-  rw [inner_act (I := I) (M := M) g gm P W hP htie]
+  rw [hinner]
   rw [aaMidOne]
   conv_rhs =>
     rw [← appCc_assoc, ← appCc_assoc, ← appCc_assoc]
@@ -1109,9 +1141,12 @@ theorem aa_bare_act
       appCc (I := I) (M := M) g 3 4
         (aaBareOne (I := I) (M := M) g gm W out)
         (covGrad (I := I) (M := M) g 0 2 P) := by
+  simp only [appCcRS, appCc]
+  have hinner := inner_act (I := I) (M := M) g gm P W hP htie
+  simp only [appCcRS, appCc] at hinner
   conv_lhs =>
     rw [← appCc_assoc, ← appCc_assoc]
-  rw [inner_act (I := I) (M := M) g gm P W hP htie]
+  rw [hinner]
   rw [aaBareOne]
   conv_rhs =>
     rw [← appCc_assoc, ← appCc_assoc]
@@ -1230,14 +1265,17 @@ theorem aa_one
       appCc (I := I) (M := M) g 3 2
         (aaOne (I := I) (M := M) g gm W)
         (covGrad (I := I) (M := M) g 0 2 P) := by
+  simp only [appCcRS, appCc]
   rw [ricciAAArm, ← appCc_assoc, aaKer_eq]
   simp only [appCc_add_left]
-  rw [aa0_act (I := I) (M := M) g gm P W hP htie,
-    aa1_act (I := I) (M := M) g gm P W hP htie,
-    aa2_act (I := I) (M := M) g gm P W hP htie,
-    aa3_act (I := I) (M := M) g gm P W hP htie,
-    aa4_act (I := I) (M := M) g gm P W hP htie,
-    aa5_act (I := I) (M := M) g gm P W hP htie]
+  have h0 := aa0_act (I := I) (M := M) g gm P W hP htie
+  have h1 := aa1_act (I := I) (M := M) g gm P W hP htie
+  have h2 := aa2_act (I := I) (M := M) g gm P W hP htie
+  have h3 := aa3_act (I := I) (M := M) g gm P W hP htie
+  have h4 := aa4_act (I := I) (M := M) g gm P W hP htie
+  have h5 := aa5_act (I := I) (M := M) g gm P W hP htie
+  simp only [appCcRS, appCc] at h0 h1 h2 h3 h4 h5
+  rw [h0, h1, h2, h3, h4, h5]
   rw [aaOne, ← appCc_assoc, aaKerOne]
   simp only [appCc_add_left]
 
@@ -1271,9 +1309,14 @@ theorem symm_input
         (ccInputSymm (I := I) (M := M) g C) W =
       appCc (I := I) (M := M) g 2 2 C
         (symmS (I := I) (M := M) g W) := by
-  rw [ccInputSymm, appCc_smul_left, appCc_add_left, ← appCc_assoc,
-    cc_swap_app (I := I) (M := M) g W]
-  rw [symmS, appCc_smul_right, appCc_add_right]
+  simp only [appCcRS, appCc]
+  simp only [ccInputSymm, ccInputSlotSymm]
+  have hswap := cc_swap_app (I := I) (M := M) g W
+  simp only [appCcRS, appCc] at hswap
+  rw [appCc_smul_left, appCc_add_left, ← appCc_assoc,
+    hswap]
+  simp only [symmS, ccTensor02Symm]
+  rw [appCc_smul_right, appCc_add_right]
 
 noncomputable def ricciOne
     (g gm : SmoothRiemannianMetric I M) (W : SmoothCcTensor g 0 2) :
@@ -1295,11 +1338,16 @@ theorem ricci_one
       appCc (I := I) (M := M) g 3 2
         (ricciOne (I := I) (M := M) g gm W)
         (covGrad (I := I) (M := M) g 0 2 P) := by
-  rw [LowBaseInternal.ricciGoodLow, symm_input,
+  simp only [appCcRS, appCc]
+  have hsymmInput := symm_input (I := I) (M := M) g
+    (LowBaseInternal.ricciLow (I := I) (M := M) g gm P) W
+  have haa := aa_one (I := I) (M := M) g gm P W hP htie
+  have hda := LowBaseInternal.ricciDA_one (I := I) (M := M) g gm P
+    (symmS (I := I) (M := M) g W)
+  simp only [appCcRS, appCc] at hsymmInput haa hda
+  rw [LowBaseInternal.ricciGoodLow, hsymmInput,
     LowBaseInternal.ricciLow, appCc_add_left]
-  rw [aa_one (I := I) (M := M) g gm P W hP htie]
-  rw [LowBaseInternal.ricciDA_one (I := I) (M := M) g gm P
-    (symmS (I := I) (M := M) g W)]
+  rw [haa, hda]
   rw [ricciOne, appCc_add_left]
 
 theorem self_decomp

@@ -458,6 +458,7 @@ theorem inv_slot_pair_h3
   let Y : SmoothCcTensor g 2 2 := appCcRS (I := I) (M := M) g 2 2 2 LU X
   let H3 : ℝ := Kh * (1 + A ^ 2)
   have hsymm : symmS (I := I) (M := M) g (T - U) = T - U := by
+    change ccTensor02Symm (I := I) (M := M) g (T - U) = T - U
     rw [symmS_sub,
       symmS_eq_self_of_ccTensorBilin_symm (I := I) (M := M) g T hT,
       symmS_eq_self_of_ccTensorBilin_symm (I := I) (M := M) g U hU]
@@ -768,8 +769,13 @@ theorem trace1_pair_h3
         gInvDiffSlotCoeff (I := I) g gT -
           gInvDiffSlotCoeff (I := I) g gU := by
       dsimp only [D₁, Λ]
-      rw [slotInsertEndoCc_sub,
-        ← gInvDiffSlotCoeff_eq_slotInsertEndoCc (I := I) g gT,
+      rw [slotInsertEndoCc_sub]
+      change endoSlotZeroCcTensor (I := I) (M := M) g 1
+          (gInvDiffRaisedEndoField (I := I) g gT) -
+          endoSlotZeroCcTensor (I := I) (M := M) g 1
+            (gInvDiffRaisedEndoField (I := I) g gU) =
+        gInvDiffSlotCoeff (I := I) g gT - gInvDiffSlotCoeff (I := I) g gU
+      rw [← gInvDiffSlotCoeff_eq_slotInsertEndoCc (I := I) g gT,
         ← gInvDiffSlotCoeff_eq_slotInsertEndoCc (I := I) g gU]
     have hD₁3 : lowJetSq (I := I) (M := M) g 3 D₁ ≤
         (Bi R * Q) ^ 2 := by

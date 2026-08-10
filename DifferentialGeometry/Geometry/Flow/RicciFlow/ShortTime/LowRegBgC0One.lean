@@ -906,9 +906,13 @@ theorem omegaOnePairH2
           (permCoeff (I := I) (M := M) g (finRotate 3))
           (LowBaseInternal.connLowOp (I := I) (M := M) g gU)) ≤
         (Cc * N) ^ 2
-    rw [← appCcRS_sub_right,
-      perm_rs (I := I) (M := M) g,
-      rspermH2 (I := I) (M := M) g]
+    simp only [appCcRS]
+    rw [← appCcRS_sub_right]
+    have hp := perm_rs (I := I) (M := M) g (finRotate 3)
+      (LowBaseInternal.connLowOp (I := I) (M := M) g gT -
+        LowBaseInternal.connLowOp (I := I) (M := M) g gU)
+    simp only [appCcRS] at hp
+    rw [hp, rspermH2 (I := I) (M := M) g]
     have hc := hcp T U gT gU hTtie hUtie hTnc hUnc
     exact hc.trans (pow_le_pow_left₀
       (mul_nonneg hCc (norm_nonneg _))
@@ -1123,8 +1127,11 @@ theorem qbaOnePairH2
         appCcRS (I := I) (M := M) g 3 3 3
           (permCoeff (I := I) (M := M) g (Equiv.swap (0 : Fin 3) 1)) OU) ≤
       (Bod R * D) ^ 2
-    rw [← appCcRS_sub_right, perm_rs (I := I) (M := M) g,
-      rspermH2 (I := I) (M := M) g]
+    simp only [appCcRS]
+    rw [← appCcRS_sub_right]
+    have hp := perm_rs (I := I) (M := M) g (Equiv.swap (0 : Fin 3) 1) (OT - OU)
+    simp only [appCcRS] at hp
+    rw [hp, rspermH2 (I := I) (M := M) g]
     exact hoD
   have haraw := happ LT LU ST SU
     (Ld R * (1 + A) * D) (Bl R * (1 + A))
@@ -1288,8 +1295,12 @@ theorem quadOpPairH2
             appCcRS (I := I) (M := M) g 3 4 4
               (permCoeff (I := I) (M := M) g σ)
               (qaOne (I := I) (M := M) g gU)) ≤ S ^ 2 := by
-    rw [← appCcRS_sub_right, perm_rs (I := I) (M := M) g,
-      rspermH2 (I := I) (M := M) g]
+    simp only [appCcRS]
+    rw [← appCcRS_sub_right]
+    have hp := perm_rs (I := I) (M := M) g σ
+      (qaOne (I := I) (M := M) g gT - qaOne (I := I) (M := M) g gU)
+    simp only [appCcRS] at hp
+    rw [hp, rspermH2 (I := I) (M := M) g]
     exact ha
   have hQ0 : lowJetSq (I := I) (M := M) g 2 Q0 ≤ S ^ 2 := by
     change lowJetSq (I := I) (M := M) g 2
@@ -1299,8 +1310,12 @@ theorem quadOpPairH2
         appCcRS (I := I) (M := M) g 3 4 4
           (permCoeff (I := I) (M := M) g (Equiv.swap (0 : Fin 4) 1))
           (qbOne (I := I) (M := M) g gU)) ≤ S ^ 2
-    rw [← appCcRS_sub_right, perm_rs (I := I) (M := M) g,
-      rspermH2 (I := I) (M := M) g]
+    simp only [appCcRS]
+    rw [← appCcRS_sub_right]
+    have hp := perm_rs (I := I) (M := M) g (Equiv.swap (0 : Fin 4) 1)
+      (qbOne (I := I) (M := M) g gT - qbOne (I := I) (M := M) g gU)
+    simp only [appCcRS] at hp
+    rw [hp, rspermH2 (I := I) (M := M) g]
     exact hq
   have hQ1 : lowJetSq (I := I) (M := M) g 2 Q1 ≤ S ^ 2 := by
     simpa only [Q1] using hq
@@ -2149,8 +2164,11 @@ theorem quadActPairH2
           (permCoeff (I := I) (M := M) g lieCovSigma) MT -
         appCcRS (I := I) (M := M) g 3 6 6
           (permCoeff (I := I) (M := M) g lieCovSigma) MU) ≤ _
-    rw [← appCcRS_sub_right, perm_rs (I := I) (M := M) g,
-      rspermH2 (I := I) (M := M) g]
+    simp only [appCcRS]
+    rw [← appCcRS_sub_right]
+    have hp := perm_rs (I := I) (M := M) g lieCovSigma (MT - MU)
+    simp only [appCcRS] at hp
+    rw [hp, rspermH2 (I := I) (M := M) g]
     exact hmD
   have hsT : lowJetSq (I := I) (M := M) g 2 ST ≤
       (Bmb R * (1 + A)) ^ 2 := by

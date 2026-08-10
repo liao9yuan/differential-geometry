@@ -1,7 +1,7 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.LowRegForceArms
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.LowRegA2PerIndex
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.LowRegA1PerIndex
-import DifferentialGeometry.Analysis.Sobolev.Tensor.CrossScaleCauchySchwarz
+import DifferentialGeometry.Analysis.Spectral.Tensor.SobolevScale.CrossScaleCauchySchwarz
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.HeatSemigroup.GalerkinParabolicEnergy
 
 /-!
@@ -162,7 +162,15 @@ theorem galRepJet_le (g₀ : SmoothRiemannianMetric I M) (n : ℕ) :
       (galCoreRep (I := I) (M := M) g₀ R F c) =
         θ • symmS (I := I) (M := M) g₀
           (finiteEigenCombo (I := I) (M := M) g₀ F c) := by
-    rw [galCoreRep, symmS_smul]
+    rw [galCoreRep]
+    change ccTensor02Symm (I := I) (M := M) g₀
+        (min 1 (R / ‖galLowView (I := I) (M := M) g₀ 1
+          (finiteEigenComboHs (I := I) (M := M) g₀ F c
+            (((1 : ℕ) : ℝ) + 2))‖) •
+          finiteEigenCombo (I := I) (M := M) g₀ F c) =
+      θ • ccTensor02Symm (I := I) (M := M) g₀
+        (finiteEigenCombo (I := I) (M := M) g₀ F c)
+    rw [symmS_smul, ← hθdef]
   have hstep : ∀ j : ℕ,
       ‖iteratedCovGrad (I := I) g₀ 0 2 j
           (symmS (I := I) (M := M) g₀
@@ -662,7 +670,7 @@ theorem galArmMassOrd (hDim : Module.finrank ℝ E = 3)
         Cδ ^ 2 := by
     intro S c x
     exact (hsplit _
-      (DeTurckRemainderTameLipschitz.ccTensorBilin_symmS_symm (I := I) (M := M)
+      (ccTensorBilin_symmS_symm (I := I) (M := M)
         g₀ (galCoreRep (I := I) (M := M) g₀ R S c))
       hδ3 hδ0 (galRepFib (I := I) (M := M) g₀ hR hreal S c)
       (lowregFibZero (I := I) (M := M) g₀ hR hreal)).2 x
@@ -677,7 +685,7 @@ theorem galArmMassOrd (hDim : Module.finrank ℝ E = 3)
     tensorSobolevWeight (I := I) (M := M) i (3 : ℝ) * (c i) ^ 2) with hs3def
   have hs4nn : (0 : ℝ) ≤ s4 := by rw [hs4def]; positivity
   have hs3nn : (0 : ℝ) ≤ s3 := by rw [hs3def]; positivity
-  have hsym := DeTurckRemainderTameLipschitz.ccTensorBilin_symmS_symm
+  have hsym := ccTensorBilin_symmS_symm
     (I := I) (M := M) g₀ (galCoreRep (I := I) (M := M) g₀ R F c)
   -- the jet handles of the trajectory representative
   have h5 : Real.sqrt (∑ j ∈ Finset.range 5,

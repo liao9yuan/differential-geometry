@@ -61,13 +61,13 @@ private theorem cc_toFun_ext
 
 private noncomputable def fullSlot2
     (g gm : SmoothRiemannianMetric I M) : SmoothCcTensor g 2 2 :=
-  slotInsertEndoCc (I := I) (M := M) g 1
+  endoSlotZeroCcTensor (I := I) (M := M) g 1
     (fullRaisedEndoField (I := I) (M := M) g gm)
 
 private noncomputable def perturbSlot2
     (g : SmoothRiemannianMetric I M) (T : SmoothCcTensor g 0 2) :
     SmoothCcTensor g 2 2 :=
-  slotInsertEndoCc (I := I) (M := M) g 1
+  endoSlotZeroCcTensor (I := I) (M := M) g 1
     (symmRaiseEndo (I := I) (M := M) g T)
 
 set_option backward.isDefEq.respectTransparency false in
@@ -76,12 +76,12 @@ private theorem insertSucc_eq_c2
     (g : SmoothRiemannianMetric I M) (s : ℕ)
     (Λ : ContMDiffSection I (E →L[ℝ] E) ∞
       (fun x : M => TangentSpace I x →L[ℝ] TangentSpace I x)) :
-    slotInsertEndoCc (I := I) (M := M) g (s + 1) Λ =
+    endoSlotZeroCcTensor (I := I) (M := M) g (s + 1) Λ =
       reindexCoeffGen (I := I) (M := M) g (s + 2) (s + 2)
         (rsDomDomCongrSection (I := I) (M := M) g (s + 2) (s + 2)
           (Equiv.swap (0 : Fin (s + 2)) 1)
           (slotExtend (I := I) (M := M) g (s + 1) (s + 1)
-            (slotInsertEndoCc (I := I) (M := M) g s Λ)))
+            (endoSlotZeroCcTensor (I := I) (M := M) g s Λ)))
         (Equiv.swap (0 : Fin (s + 2)) 1) := by
   classical
   apply SmoothCcTensor.ext
@@ -94,14 +94,14 @@ private theorem insertSucc_eq_c2
   intro m
   change Tensor0SSpace.toModel
       ((show Tensor0SSpace (s + 2) I x →L[ℝ] Tensor0SSpace (s + 2) I x from
-        (slotInsertEndoCc (I := I) (M := M) g (s + 1) Λ).toSection x) D) m =
+        (endoSlotZeroCcTensor (I := I) (M := M) g (s + 1) Λ).toSection x) D) m =
     Tensor0SSpace.toModel
       ((show Tensor0SSpace (s + 2) I x →L[ℝ] Tensor0SSpace (s + 2) I x from
         (reindexCoeffGen (I := I) (M := M) g (s + 2) (s + 2)
           (rsDomDomCongrSection (I := I) (M := M) g (s + 2) (s + 2)
             (Equiv.swap (0 : Fin (s + 2)) 1)
             (slotExtend (I := I) (M := M) g (s + 1) (s + 1)
-              (slotInsertEndoCc (I := I) (M := M) g s Λ)))
+              (endoSlotZeroCcTensor (I := I) (M := M) g s Λ)))
           (Equiv.swap (0 : Fin (s + 2)) 1)).toSection x) D) m
   rw [slotInsertEndoCc_toSection, slotInsertEndoFib_apply_eval]
   rw [reindexCoeffGen_toSection, reindexCoeffFibGen_apply,
@@ -158,41 +158,41 @@ private theorem insertSucc_icg_sq
     (Λ : ContMDiffSection I (E →L[ℝ] E) ∞
       (fun x : M => TangentSpace I x →L[ℝ] TangentSpace I x)) :
     ‖iteratedCovGrad (I := I) g (s + 2) (s + 2) i
-        (slotInsertEndoCc (I := I) (M := M) g (s + 1) Λ)‖ ^ 2 ≤
+        (endoSlotZeroCcTensor (I := I) (M := M) g (s + 1) Λ)‖ ^ 2 ≤
       (Module.finrank ℝ E : ℝ) *
         ‖iteratedCovGrad (I := I) g (s + 1) (s + 1) i
-          (slotInsertEndoCc (I := I) (M := M) g s Λ)‖ ^ 2 := by
+          (endoSlotZeroCcTensor (I := I) (M := M) g s Λ)‖ ^ 2 := by
   let F : M → ℝ := fun x =>
     (Module.finrank ℝ E : ℝ) *
       riemannianFiberNormSq (I := I) (M := M) g
         (s + 1) ((s + 1) + i) x
         ((iteratedCovGrad (I := I) g (s + 1) (s + 1) i
-          (slotInsertEndoCc (I := I) (M := M) g s Λ)).toSection x)
+          (endoSlotZeroCcTensor (I := I) (M := M) g s Λ)).toSection x)
   have hF : MeasureTheory.Integrable F
       (riemannianVolumeMeasure (I := I) (M := M) g) := by
     dsimp only [F]
     exact (integrable_riemannianFiberNormSq_toSection
       (I := I) (M := M) g (s + 1) ((s + 1) + i)
       (iteratedCovGrad (I := I) g (s + 1) (s + 1) i
-        (slotInsertEndoCc (I := I) (M := M) g s Λ))).const_mul _
+        (endoSlotZeroCcTensor (I := I) (M := M) g s Λ))).const_mul _
   have hpt : ∀ x : M,
       riemannianFiberNormSq (I := I) (M := M) g
           (s + 2) ((s + 2) + i) x
           ((iteratedCovGrad (I := I) g (s + 2) (s + 2) i
-            (slotInsertEndoCc (I := I) (M := M) g (s + 1) Λ)).toSection x) ≤
+            (endoSlotZeroCcTensor (I := I) (M := M) g (s + 1) Λ)).toSection x) ≤
         F x := by
     intro x
     have heq :
         riemannianFiberNormSq (I := I) (M := M) g
             (s + 2) ((s + 2) + i) x
             ((iteratedCovGrad (I := I) g (s + 2) (s + 2) i
-              (slotInsertEndoCc (I := I) (M := M) g
+              (endoSlotZeroCcTensor (I := I) (M := M) g
                 (s + 1) Λ)).toSection x) =
           riemannianFiberNormSq (I := I) (M := M) g
             (s + 2) ((s + 2) + i) x
             ((iteratedCovGrad (I := I) g (s + 2) (s + 2) i
               (slotExtend (I := I) (M := M) g (s + 1) (s + 1)
-                (slotInsertEndoCc (I := I) (M := M) g s Λ))).toSection x) := by
+                (endoSlotZeroCcTensor (I := I) (M := M) g s Λ))).toSection x) := by
       rw [insertSucc_eq_c2 (I := I) (M := M) g s Λ]
       simpa only [Nat.add_assoc] using
         rfns_iteratedCovGrad_rsDomDomCongr_both_eq
@@ -200,25 +200,25 @@ private theorem insertSucc_icg_sq
           (Equiv.swap (0 : Fin (s + 2)) 1)
           (Equiv.swap (0 : Fin (s + 2)) 1)
           (slotExtend (I := I) (M := M) g (s + 1) (s + 1)
-            (slotInsertEndoCc (I := I) (M := M) g s Λ)) i x
+            (endoSlotZeroCcTensor (I := I) (M := M) g s Λ)) i x
     rw [heq]
     simpa only [F, Nat.add_assoc] using
       rfns_iteratedCovGrad_slotExtend_le
         (I := I) (M := M) g (s + 1) (s + 1)
-        (slotInsertEndoCc (I := I) (M := M) g s Λ) i x
+        (endoSlotZeroCcTensor (I := I) (M := M) g s Λ) i x
   have hsq := normSq_le_integral_of_pointwise_fiberNormSq_le_rs
     (I := I) (M := M) g (s + 2) ((s + 2) + i)
     (iteratedCovGrad (I := I) g (s + 2) (s + 2) i
-      (slotInsertEndoCc (I := I) (M := M) g (s + 1) Λ))
+      (endoSlotZeroCcTensor (I := I) (M := M) g (s + 1) Λ))
     F hF hpt
   have hint :
       ∫ x, riemannianFiberNormSq (I := I) (M := M) g
           (s + 1) ((s + 1) + i) x
           ((iteratedCovGrad (I := I) g (s + 1) (s + 1) i
-            (slotInsertEndoCc (I := I) (M := M) g s Λ)).toSection x)
+            (endoSlotZeroCcTensor (I := I) (M := M) g s Λ)).toSection x)
         ∂(riemannianVolumeMeasure (I := I) (M := M) g) =
       ‖iteratedCovGrad (I := I) g (s + 1) (s + 1) i
-        (slotInsertEndoCc (I := I) (M := M) g s Λ)‖ ^ 2 := by
+        (endoSlotZeroCcTensor (I := I) (M := M) g s Λ)‖ ^ 2 := by
     rw [SmoothCcTensor.norm_def,
       tensorL2Norm_sq_toFun_eq_integral_riemannianFiberNormSq_rs
         (I := I) (M := M) g (s + 1) ((s + 1) + i)]
@@ -237,24 +237,24 @@ private theorem insertSucc_jet_c2
     (Λ : ContMDiffSection I (E →L[ℝ] E) ∞
       (fun x : M => TangentSpace I x →L[ℝ] TangentSpace I x)) :
     c2JetSq (I := I) (M := M) g
-        (slotInsertEndoCc (I := I) (M := M) g (s + 1) Λ) ≤
+        (endoSlotZeroCcTensor (I := I) (M := M) g (s + 1) Λ) ≤
       (Module.finrank ℝ E : ℝ) *
         c2JetSq (I := I) (M := M) g
-          (slotInsertEndoCc (I := I) (M := M) g s Λ) := by
+          (endoSlotZeroCcTensor (I := I) (M := M) g s Λ) := by
   unfold c2JetSq
   calc
     (∑ j ∈ Finset.range 3,
         ‖iteratedCovGrad (I := I) g (s + 2) (s + 2) j
-          (slotInsertEndoCc (I := I) (M := M) g (s + 1) Λ)‖ ^ 2) ≤
+          (endoSlotZeroCcTensor (I := I) (M := M) g (s + 1) Λ)‖ ^ 2) ≤
       ∑ j ∈ Finset.range 3, (Module.finrank ℝ E : ℝ) *
         ‖iteratedCovGrad (I := I) g (s + 1) (s + 1) j
-          (slotInsertEndoCc (I := I) (M := M) g s Λ)‖ ^ 2 := by
+          (endoSlotZeroCcTensor (I := I) (M := M) g s Λ)‖ ^ 2 := by
         exact Finset.sum_le_sum fun j _ =>
           insertSucc_icg_sq (I := I) (M := M) g s j Λ
     _ = (Module.finrank ℝ E : ℝ) *
         ∑ j ∈ Finset.range 3,
           ‖iteratedCovGrad (I := I) g (s + 1) (s + 1) j
-            (slotInsertEndoCc (I := I) (M := M) g s Λ)‖ ^ 2 := by
+            (endoSlotZeroCcTensor (I := I) (M := M) g s Λ)‖ ^ 2 := by
       rw [Finset.mul_sum]
 
 private theorem insert3_jet_c2
@@ -262,64 +262,64 @@ private theorem insert3_jet_c2
     (Λ : ContMDiffSection I (E →L[ℝ] E) ∞
       (fun x : M => TangentSpace I x →L[ℝ] TangentSpace I x)) :
     c2JetSq (I := I) (M := M) g
-        (slotInsertEndoCc (I := I) (M := M) g 3 Λ) ≤
+        (endoSlotZeroCcTensor (I := I) (M := M) g 3 Λ) ≤
       (Module.finrank ℝ E : ℝ) ^ 2 *
         c2JetSq (I := I) (M := M) g
-          (slotInsertEndoCc (I := I) (M := M) g 1 Λ) := by
+          (endoSlotZeroCcTensor (I := I) (M := M) g 1 Λ) := by
   have hfr : (0 : ℝ) ≤ Module.finrank ℝ E := Nat.cast_nonneg _
   calc
     c2JetSq (I := I) (M := M) g
-        (slotInsertEndoCc (I := I) (M := M) g 3 Λ) ≤
+        (endoSlotZeroCcTensor (I := I) (M := M) g 3 Λ) ≤
       (Module.finrank ℝ E : ℝ) *
         c2JetSq (I := I) (M := M) g
-          (slotInsertEndoCc (I := I) (M := M) g 2 Λ) :=
+          (endoSlotZeroCcTensor (I := I) (M := M) g 2 Λ) :=
       insertSucc_jet_c2 (I := I) (M := M) g 2 Λ
     _ ≤ (Module.finrank ℝ E : ℝ) *
         ((Module.finrank ℝ E : ℝ) *
           c2JetSq (I := I) (M := M) g
-            (slotInsertEndoCc (I := I) (M := M) g 1 Λ)) :=
+            (endoSlotZeroCcTensor (I := I) (M := M) g 1 Λ)) :=
       mul_le_mul_of_nonneg_left
         (insertSucc_jet_c2 (I := I) (M := M) g 1 Λ) hfr
     _ = (Module.finrank ℝ E : ℝ) ^ 2 *
         c2JetSq (I := I) (M := M) g
-          (slotInsertEndoCc (I := I) (M := M) g 1 Λ) := by ring
+          (endoSlotZeroCcTensor (I := I) (M := M) g 1 Λ) := by ring
 
 private theorem insert5_jet_c2
     (g : SmoothRiemannianMetric I M)
     (Λ : ContMDiffSection I (E →L[ℝ] E) ∞
       (fun x : M => TangentSpace I x →L[ℝ] TangentSpace I x)) :
     c2JetSq (I := I) (M := M) g
-        (slotInsertEndoCc (I := I) (M := M) g 5 Λ) ≤
+        (endoSlotZeroCcTensor (I := I) (M := M) g 5 Λ) ≤
       (Module.finrank ℝ E : ℝ) ^ 4 *
         c2JetSq (I := I) (M := M) g
-          (slotInsertEndoCc (I := I) (M := M) g 1 Λ) := by
+          (endoSlotZeroCcTensor (I := I) (M := M) g 1 Λ) := by
   have hfr : (0 : ℝ) ≤ Module.finrank ℝ E := Nat.cast_nonneg _
   calc
     c2JetSq (I := I) (M := M) g
-        (slotInsertEndoCc (I := I) (M := M) g 5 Λ) ≤
+        (endoSlotZeroCcTensor (I := I) (M := M) g 5 Λ) ≤
       (Module.finrank ℝ E : ℝ) *
         c2JetSq (I := I) (M := M) g
-          (slotInsertEndoCc (I := I) (M := M) g 4 Λ) :=
+          (endoSlotZeroCcTensor (I := I) (M := M) g 4 Λ) :=
       insertSucc_jet_c2 (I := I) (M := M) g 4 Λ
     _ ≤ (Module.finrank ℝ E : ℝ) *
         ((Module.finrank ℝ E : ℝ) *
           c2JetSq (I := I) (M := M) g
-            (slotInsertEndoCc (I := I) (M := M) g 3 Λ)) :=
+            (endoSlotZeroCcTensor (I := I) (M := M) g 3 Λ)) :=
       mul_le_mul_of_nonneg_left
         (insertSucc_jet_c2 (I := I) (M := M) g 3 Λ) hfr
     _ = (Module.finrank ℝ E : ℝ) ^ 2 *
         c2JetSq (I := I) (M := M) g
-          (slotInsertEndoCc (I := I) (M := M) g 3 Λ) := by ring
+          (endoSlotZeroCcTensor (I := I) (M := M) g 3 Λ) := by ring
     _ ≤ (Module.finrank ℝ E : ℝ) ^ 2 *
         ((Module.finrank ℝ E : ℝ) ^ 2 *
           c2JetSq (I := I) (M := M) g
-            (slotInsertEndoCc (I := I) (M := M) g 1 Λ)) := by
+            (endoSlotZeroCcTensor (I := I) (M := M) g 1 Λ)) := by
       exact mul_le_mul_of_nonneg_left
         (insert3_jet_c2 (I := I) (M := M) g Λ)
         (sq_nonneg _)
     _ = (Module.finrank ℝ E : ℝ) ^ 4 *
         c2JetSq (I := I) (M := M) g
-          (slotInsertEndoCc (I := I) (M := M) g 1 Λ) := by ring
+          (endoSlotZeroCcTensor (I := I) (M := M) g 1 Λ) := by ring
 
 set_option linter.unusedSectionVars false in
 private theorem slot_icg_sq_c2
@@ -685,6 +685,30 @@ private theorem raised_sub_factor
       rw [hRT, hRU, hP]
       noncomm_ring
 
+private theorem endoSlotZero_add_c2
+    (g : SmoothRiemannianMetric I M) (s : ℕ)
+    (A B : ContMDiffSection I (E →L[ℝ] E) ∞
+      (fun x : M => TangentSpace I x →L[ℝ] TangentSpace I x)) :
+    endoSlotZeroCcTensor (I := I) (M := M) g s (A + B) =
+      endoSlotZeroCcTensor (I := I) (M := M) g s A +
+        endoSlotZeroCcTensor (I := I) (M := M) g s B := by
+  change slotInsertEndoCc (I := I) (M := M) g s (A + B) =
+    slotInsertEndoCc (I := I) (M := M) g s A +
+      slotInsertEndoCc (I := I) (M := M) g s B
+  exact slotInsertEndoCc_add (I := I) (M := M) g s A B
+
+private theorem endoSlotZero_sub_c2
+    (g : SmoothRiemannianMetric I M) (s : ℕ)
+    (A B : ContMDiffSection I (E →L[ℝ] E) ∞
+      (fun x : M => TangentSpace I x →L[ℝ] TangentSpace I x)) :
+    endoSlotZeroCcTensor (I := I) (M := M) g s (A - B) =
+      endoSlotZeroCcTensor (I := I) (M := M) g s A -
+        endoSlotZeroCcTensor (I := I) (M := M) g s B := by
+  change slotInsertEndoCc (I := I) (M := M) g s (A - B) =
+    slotInsertEndoCc (I := I) (M := M) g s A -
+      slotInsertEndoCc (I := I) (M := M) g s B
+  exact slotInsertEndoCc_sub (I := I) (M := M) g s A B
+
 set_option backward.isDefEq.respectTransparency false in
 private theorem invSlot_factor
     (g gT gU : SmoothRiemannianMetric I M)
@@ -697,14 +721,14 @@ private theorem invSlot_factor
         g.inner y v w + ccTensorBilinSymm (I := I) g U y v w) :
     gInvDiffSlotCoeff (I := I) g gT -
         gInvDiffSlotCoeff (I := I) g gU =
-      -appCcRS (I := I) (M := M) g 2 2 2
+      -ccOperatorFieldComp (I := I) (M := M) g 2 2 2
         (fullSlot2 (I := I) (M := M) g gU)
-        (appCcRS (I := I) (M := M) g 2 2 2
+        (ccOperatorFieldComp (I := I) (M := M) g 2 2 2
           (perturbSlot2 (I := I) (M := M) g (T - U))
           (fullSlot2 (I := I) (M := M) g gT)) := by
   rw [gInvDiffSlotCoeff_eq_slotInsertEndoCc (I := I) g gT,
     gInvDiffSlotCoeff_eq_slotInsertEndoCc (I := I) g gU,
-    ← slotInsertEndoCc_sub]
+    ← endoSlotZero_sub_c2]
   apply SmoothCcTensor.ext
   apply ContMDiffSection.ext
   intro x
@@ -753,13 +777,13 @@ theorem invSlot_sub_factor
         g.inner y v w + ccTensorBilinSymm (I := I) g U y v w) :
     gInvDiffSlotCoeff (I := I) g gT -
         gInvDiffSlotCoeff (I := I) g gU =
-      -appCcRS (I := I) (M := M) g 2 2 2
-        (slotInsertEndoCc (I := I) (M := M) g 1
+      -ccOperatorFieldComp (I := I) (M := M) g 2 2 2
+        (endoSlotZeroCcTensor (I := I) (M := M) g 1
           (fullRaisedEndoField (I := I) (M := M) g gU))
-        (appCcRS (I := I) (M := M) g 2 2 2
-          (slotInsertEndoCc (I := I) (M := M) g 1
+        (ccOperatorFieldComp (I := I) (M := M) g 2 2 2
+          (endoSlotZeroCcTensor (I := I) (M := M) g 1
             (symmRaiseEndo (I := I) (M := M) g (T - U)))
-          (slotInsertEndoCc (I := I) (M := M) g 1
+          (endoSlotZeroCcTensor (I := I) (M := M) g 1
             (fullRaisedEndoField (I := I) (M := M) g gT))) := by
   simpa only [fullSlot2, perturbSlot2] using
     invSlot_factor (I := I) (M := M) g gT gU T U hTtie hUtie
@@ -802,14 +826,14 @@ private theorem perm_icg_norm_c2
 private theorem symm_icg_norm_c2
     (g : SmoothRiemannianMetric I M) (T : SmoothCcTensor g 0 2) (k : ℕ) :
     ‖iteratedCovGrad (I := I) g 0 2 k
-        (symmS (I := I) (M := M) g T)‖ ≤
+        (ccTensor02Symm (I := I) (M := M) g T)‖ ≤
       ‖iteratedCovGrad (I := I) g 0 2 k T‖ := by
   classical
   let Tsw : SmoothCcTensor g 0 2 :=
     domDomCongrSection (I := I) g (Equiv.swap (0 : Fin 2) 1) T
   have hiter :
       iteratedCovGrad (I := I) g 0 2 k
-          (symmS (I := I) (M := M) g T) =
+          (ccTensor02Symm (I := I) (M := M) g T) =
         (1 / 2 : ℝ) • iteratedCovGrad (I := I) g 0 2 k T +
           (1 / 2 : ℝ) • iteratedCovGrad (I := I) g 0 2 k Tsw := by
     dsimp only [Tsw]
@@ -833,7 +857,7 @@ private theorem symm_jet_c2
     (g : SmoothRiemannianMetric I M)
     (T : SmoothCcTensor g 0 2) :
     c2JetSq (I := I) (M := M) g
-        (symmS (I := I) (M := M) g T) ≤
+        (ccTensor02Symm (I := I) (M := M) g T) ≤
       c2JetSq (I := I) (M := M) g T := by
   unfold c2JetSq
   exact Finset.sum_le_sum fun i _ =>
@@ -874,10 +898,10 @@ private theorem domperm_sub_c2
 private theorem symmS_sub_c2
     (g : SmoothRiemannianMetric I M)
     (T U : SmoothCcTensor g 0 2) :
-    symmS (I := I) (M := M) g (T - U) =
-      symmS (I := I) (M := M) g T -
-        symmS (I := I) (M := M) g U := by
-  simp only [symmS]
+    ccTensor02Symm (I := I) (M := M) g (T - U) =
+      ccTensor02Symm (I := I) (M := M) g T -
+        ccTensor02Symm (I := I) (M := M) g U := by
+  simp only [ccTensor02Symm]
   rw [domperm_sub_c2]
   module
 
@@ -896,9 +920,9 @@ private theorem jet3_smul_c2
 private theorem appCc_sub_right_c2
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (Φ : SmoothCcTensor g r s) (A B : SmoothCcTensor g 0 r) :
-    appCc (I := I) (M := M) g r s Φ (A - B) =
-      appCc (I := I) (M := M) g r s Φ A -
-        appCc (I := I) (M := M) g r s Φ B := by
+    operatorFieldApply (I := I) (M := M) g r s Φ (A - B) =
+      operatorFieldApply (I := I) (M := M) g r s Φ A -
+        operatorFieldApply (I := I) (M := M) g r s Φ B := by
   rw [sub_eq_add_neg, appCc_add_right]
   rw [show -B = (-1 : ℝ) • B by simp, appCc_smul_right]
   module
@@ -909,25 +933,25 @@ private theorem insert1_icg_le
     (Λ : ContMDiffSection I (E →L[ℝ] E) ∞
       (fun x : M => TangentSpace I x →L[ℝ] TangentSpace I x)) :
     ‖iteratedCovGrad (I := I) g 2 2 i
-        (slotInsertEndoCc (I := I) (M := M) g 1 Λ)‖ ≤
+        (endoSlotZeroCcTensor (I := I) (M := M) g 1 Λ)‖ ≤
       3 * ‖iteratedCovGrad (I := I) g 1 1 i
-        (slotInsertEndoCc (I := I) (M := M) g 0 Λ)‖ := by
+        (endoSlotZeroCcTensor (I := I) (M := M) g 0 Λ)‖ := by
   classical
   set F : M → ℝ := fun x => 3 *
     riemannianFiberNormSq (I := I) (M := M) g 1 (1 + i) x
       ((iteratedCovGrad (I := I) g 1 1 i
-        (slotInsertEndoCc (I := I) (M := M) g 0 Λ)).toSection x)
+        (endoSlotZeroCcTensor (I := I) (M := M) g 0 Λ)).toSection x)
   have hFint : MeasureTheory.Integrable F
       (riemannianVolumeMeasure (I := I) (M := M) g) := by
     dsimp only [F]
     exact (integrable_riemannianFiberNormSq_toSection
       (I := I) (M := M) g 1 (1 + i)
         (iteratedCovGrad (I := I) g 1 1 i
-          (slotInsertEndoCc (I := I) (M := M) g 0 Λ))).const_mul _
+          (endoSlotZeroCcTensor (I := I) (M := M) g 0 Λ))).const_mul _
   have hpt : ∀ x,
       riemannianFiberNormSq (I := I) (M := M) g 2 (2 + i) x
           ((iteratedCovGrad (I := I) g 2 2 i
-            (slotInsertEndoCc (I := I) (M := M) g 1 Λ)).toSection x) ≤
+            (endoSlotZeroCcTensor (I := I) (M := M) g 1 Λ)).toSection x) ≤
         F x := by
     intro x
     have h := rfns_iteratedCovGrad_slotInsertEndoCc_le_endo
@@ -938,14 +962,14 @@ private theorem insert1_icg_le
   have hsq := normSq_le_integral_of_pointwise_fiberNormSq_le_rs
     (I := I) (M := M) g 2 (2 + i)
       (iteratedCovGrad (I := I) g 2 2 i
-        (slotInsertEndoCc (I := I) (M := M) g 1 Λ)) F hFint hpt
+        (endoSlotZeroCcTensor (I := I) (M := M) g 1 Λ)) F hFint hpt
   have hint :
       ∫ x, riemannianFiberNormSq (I := I) (M := M) g 1 (1 + i) x
           ((iteratedCovGrad (I := I) g 1 1 i
-            (slotInsertEndoCc (I := I) (M := M) g 0 Λ)).toSection x)
+            (endoSlotZeroCcTensor (I := I) (M := M) g 0 Λ)).toSection x)
           ∂(riemannianVolumeMeasure (I := I) (M := M) g) =
         ‖iteratedCovGrad (I := I) g 1 1 i
-          (slotInsertEndoCc (I := I) (M := M) g 0 Λ)‖ ^ 2 := by
+          (endoSlotZeroCcTensor (I := I) (M := M) g 0 Λ)‖ ^ 2 := by
     rw [SmoothCcTensor.norm_def,
       tensorL2Norm_sq_toFun_eq_integral_riemannianFiberNormSq_rs
         (I := I) (M := M) g 1 (1 + i)]
@@ -954,14 +978,14 @@ private theorem insert1_icg_le
     (mul_nonneg (by norm_num) (norm_nonneg _))
   calc
     ‖iteratedCovGrad (I := I) g 2 2 i
-        (slotInsertEndoCc (I := I) (M := M) g 1 Λ)‖ ^ 2
+        (endoSlotZeroCcTensor (I := I) (M := M) g 1 Λ)‖ ^ 2
         ≤ 3 * ‖iteratedCovGrad (I := I) g 1 1 i
-          (slotInsertEndoCc (I := I) (M := M) g 0 Λ)‖ ^ 2 := hsq
+          (endoSlotZeroCcTensor (I := I) (M := M) g 0 Λ)‖ ^ 2 := hsq
     _ ≤ (3 * ‖iteratedCovGrad (I := I) g 1 1 i
-        (slotInsertEndoCc (I := I) (M := M) g 0 Λ)‖) ^ 2 := by
+        (endoSlotZeroCcTensor (I := I) (M := M) g 0 Λ)‖) ^ 2 := by
       nlinarith [sq_nonneg
         ‖iteratedCovGrad (I := I) g 1 1 i
-          (slotInsertEndoCc (I := I) (M := M) g 0 Λ)‖]
+          (endoSlotZeroCcTensor (I := I) (M := M) g 0 Λ)‖]
 
 private theorem perturbSlot2_icg_le
     (hDim : Module.finrank ℝ E = 3)
@@ -973,30 +997,30 @@ private theorem perturbSlot2_icg_le
   have hslot := insert1_icg_le (I := I) (M := M) hDim g i Λ
   have hbase :
       ‖iteratedCovGrad (I := I) g 1 1 i
-          (slotInsertEndoCc (I := I) (M := M) g 0 Λ)‖ ≤
+          (endoSlotZeroCcTensor (I := I) (M := M) g 0 Λ)‖ ≤
         ‖iteratedCovGrad (I := I) g 0 2 i T‖ := by
-    rw [show slotInsertEndoCc (I := I) (M := M) g 0 Λ =
+    rw [show endoSlotZeroCcTensor (I := I) (M := M) g 0 Λ =
         cometricRaiseSlot0Field (I := I) (M := M) g 0
           (domDomCongrSection (I := I) g
             (Equiv.swap (0 : Fin 2) 1)
-            (symmS (I := I) (M := M) g T)) from by
+            (ccTensor02Symm (I := I) (M := M) g T)) from by
       simpa only [Λ] using insert_symmRaise_eq (I := I) (M := M) g T]
     calc
       _ = ‖iteratedCovGrad (I := I) g 0 2 i
           (domDomCongrSection (I := I) g
             (Equiv.swap (0 : Fin 2) 1)
-            (symmS (I := I) (M := M) g T))‖ := by
+            (ccTensor02Symm (I := I) (M := M) g T))‖ := by
             simpa only [Nat.zero_add, Nat.reduceAdd] using
               norm_iCG_cometricRaiseSlot0Field_eq
                 (I := I) (M := M) g 0
                 (domDomCongrSection (I := I) g
                   (Equiv.swap (0 : Fin 2) 1)
-                  (symmS (I := I) (M := M) g T)) i
+                  (ccTensor02Symm (I := I) (M := M) g T)) i
       _ = ‖iteratedCovGrad (I := I) g 0 2 i
-          (symmS (I := I) (M := M) g T)‖ :=
+          (ccTensor02Symm (I := I) (M := M) g T)‖ :=
         perm_icg_norm_c2 (I := I) (M := M) g
           (Equiv.swap (0 : Fin 2) 1)
-          (symmS (I := I) (M := M) g T) i
+          (ccTensor02Symm (I := I) (M := M) g T) i
       _ ≤ _ := symm_icg_norm_c2 (I := I) (M := M) g T i
   exact hslot.trans
     (mul_le_mul_of_nonneg_left hbase (by norm_num))
@@ -1030,7 +1054,7 @@ private theorem fullSlot2_decomp
       gInvDiffSlotCoeff (I := I) g gm +
         fullSlot2 (I := I) (M := M) g g := by
   rw [fullSlot2, fullField_decomp_c2 (I := I) (M := M) g gm,
-    slotInsertEndoCc_add,
+    endoSlotZero_add_c2,
     gInvDiffSlotCoeff_eq_slotInsertEndoCc (I := I) g gm]
   rfl
 
@@ -1284,7 +1308,7 @@ theorem invCoeff_h2_lip
         (Cp * N) ^ 2 := by
     simpa only [N] using hpert (T - U)
   let Mid : SmoothCcTensor g 2 2 :=
-    appCcRS (I := I) (M := M) g 2 2 2
+    ccOperatorFieldComp (I := I) (M := M) g 2 2 2
       (perturbSlot2 (I := I) (M := M) g (T - U))
       (fullSlot2 (I := I) (M := M) g gT)
   have hMid :
@@ -1296,7 +1320,7 @@ theorem invCoeff_h2_lip
       (fullSlot2 (I := I) (M := M) g gT)
       (Cp * N) A (mul_nonneg hCp hN) hA hpert hfullT
   let Out : SmoothCcTensor g 2 2 :=
-    appCcRS (I := I) (M := M) g 2 2 2
+    ccOperatorFieldComp (I := I) (M := M) g 2 2 2
       (fullSlot2 (I := I) (M := M) g gU) Mid
   have hOut :
       (∑ j ∈ Finset.range 3,
@@ -1426,9 +1450,9 @@ private theorem trace24_h2_lip
     gInvDiffRaisedEndoField (I := I) g gT -
       gInvDiffRaisedEndoField (I := I) g gU
   let D₂ : SmoothCcTensor g 4 4 :=
-    slotInsertEndoCc (I := I) (M := M) g 3 Λ
+    endoSlotZeroCcTensor (I := I) (M := M) g 3 Λ
   let D₄ : SmoothCcTensor g 6 6 :=
-    slotInsertEndoCc (I := I) (M := M) g 5 Λ
+    endoSlotZeroCcTensor (I := I) (M := M) g 5 Λ
   have hN : 0 ≤ N := norm_nonneg _
   have hinvJet :
       c2JetSq (I := I) (M := M) g
@@ -1438,11 +1462,11 @@ private theorem trace24_h2_lip
     simpa only [c2JetSq, N] using
       (hinv T U gT gU hTtie hUtie hT hU).2
   have hslot1 :
-      slotInsertEndoCc (I := I) (M := M) g 1 Λ =
+      endoSlotZeroCcTensor (I := I) (M := M) g 1 Λ =
         gInvDiffSlotCoeff (I := I) g gT -
           gInvDiffSlotCoeff (I := I) g gU := by
     dsimp only [Λ]
-    rw [slotInsertEndoCc_sub,
+    rw [endoSlotZero_sub_c2,
       ← gInvDiffSlotCoeff_eq_slotInsertEndoCc (I := I) g gT,
       ← gInvDiffSlotCoeff_eq_slotInsertEndoCc (I := I) g gU]
   have hD₂ :
@@ -1452,7 +1476,7 @@ private theorem trace24_h2_lip
       c2JetSq (I := I) (M := M) g D₂ ≤
           (Module.finrank ℝ E : ℝ) ^ 2 *
             c2JetSq (I := I) (M := M) g
-              (slotInsertEndoCc (I := I) (M := M) g 1 Λ) := by
+              (endoSlotZeroCcTensor (I := I) (M := M) g 1 Λ) := by
         simpa only [D₂] using
           insert3_jet_c2 (I := I) (M := M) g Λ
       _ = 9 * c2JetSq (I := I) (M := M) g
@@ -1470,7 +1494,7 @@ private theorem trace24_h2_lip
       c2JetSq (I := I) (M := M) g D₄ ≤
           (Module.finrank ℝ E : ℝ) ^ 4 *
             c2JetSq (I := I) (M := M) g
-              (slotInsertEndoCc (I := I) (M := M) g 1 Λ) := by
+              (endoSlotZeroCcTensor (I := I) (M := M) g 1 Λ) := by
         simpa only [D₄] using
           insert5_jet_c2 (I := I) (M := M) g Λ
       _ = 81 * c2JetSq (I := I) (M := M) g
@@ -1484,51 +1508,51 @@ private theorem trace24_h2_lip
   have htrace₂ :
       pureTrace (I := I) (M := M) g gT 2 -
           pureTrace (I := I) (M := M) g gU 2 =
-        appCcRS (I := I) (M := M) g 4 4 2 F₂ D₂ := by
+        ccOperatorFieldComp (I := I) (M := M) g 4 4 2 F₂ D₂ := by
     rw [pureTrace_split (I := I) (M := M) g gT 2,
       pureTrace_split (I := I) (M := M) g gU 2]
     calc
-      (appCcRS (I := I) (M := M) g 4 4 2 F₂
-            (slotInsertEndoCc (I := I) (M := M) g 3
+      (ccOperatorFieldComp (I := I) (M := M) g 4 4 2 F₂
+            (endoSlotZeroCcTensor (I := I) (M := M) g 3
               (gInvDiffRaisedEndoField (I := I) g gT)) + F₂) -
-          (appCcRS (I := I) (M := M) g 4 4 2 F₂
-            (slotInsertEndoCc (I := I) (M := M) g 3
+          (ccOperatorFieldComp (I := I) (M := M) g 4 4 2 F₂
+            (endoSlotZeroCcTensor (I := I) (M := M) g 3
               (gInvDiffRaisedEndoField (I := I) g gU)) + F₂) =
-        appCcRS (I := I) (M := M) g 4 4 2 F₂
-            (slotInsertEndoCc (I := I) (M := M) g 3
+        ccOperatorFieldComp (I := I) (M := M) g 4 4 2 F₂
+            (endoSlotZeroCcTensor (I := I) (M := M) g 3
               (gInvDiffRaisedEndoField (I := I) g gT)) -
-          appCcRS (I := I) (M := M) g 4 4 2 F₂
-            (slotInsertEndoCc (I := I) (M := M) g 3
+          ccOperatorFieldComp (I := I) (M := M) g 4 4 2 F₂
+            (endoSlotZeroCcTensor (I := I) (M := M) g 3
               (gInvDiffRaisedEndoField (I := I) g gU)) := by abel
-      _ = appCcRS (I := I) (M := M) g 4 4 2 F₂ D₂ := by
+      _ = ccOperatorFieldComp (I := I) (M := M) g 4 4 2 F₂ D₂ := by
         rw [← appCcRS_sub_right]
         congr 1
         dsimp only [D₂, Λ]
-        rw [slotInsertEndoCc_sub]
+        rw [endoSlotZero_sub_c2]
   have htrace₄ :
       pureTrace (I := I) (M := M) g gT 4 -
           pureTrace (I := I) (M := M) g gU 4 =
-        appCcRS (I := I) (M := M) g 6 6 4 F₄ D₄ := by
+        ccOperatorFieldComp (I := I) (M := M) g 6 6 4 F₄ D₄ := by
     rw [pureTrace_split (I := I) (M := M) g gT 4,
       pureTrace_split (I := I) (M := M) g gU 4]
     calc
-      (appCcRS (I := I) (M := M) g 6 6 4 F₄
-            (slotInsertEndoCc (I := I) (M := M) g 5
+      (ccOperatorFieldComp (I := I) (M := M) g 6 6 4 F₄
+            (endoSlotZeroCcTensor (I := I) (M := M) g 5
               (gInvDiffRaisedEndoField (I := I) g gT)) + F₄) -
-          (appCcRS (I := I) (M := M) g 6 6 4 F₄
-            (slotInsertEndoCc (I := I) (M := M) g 5
+          (ccOperatorFieldComp (I := I) (M := M) g 6 6 4 F₄
+            (endoSlotZeroCcTensor (I := I) (M := M) g 5
               (gInvDiffRaisedEndoField (I := I) g gU)) + F₄) =
-        appCcRS (I := I) (M := M) g 6 6 4 F₄
-            (slotInsertEndoCc (I := I) (M := M) g 5
+        ccOperatorFieldComp (I := I) (M := M) g 6 6 4 F₄
+            (endoSlotZeroCcTensor (I := I) (M := M) g 5
               (gInvDiffRaisedEndoField (I := I) g gT)) -
-          appCcRS (I := I) (M := M) g 6 6 4 F₄
-            (slotInsertEndoCc (I := I) (M := M) g 5
+          ccOperatorFieldComp (I := I) (M := M) g 6 6 4 F₄
+            (endoSlotZeroCcTensor (I := I) (M := M) g 5
               (gInvDiffRaisedEndoField (I := I) g gU)) := by abel
-      _ = appCcRS (I := I) (M := M) g 6 6 4 F₄ D₄ := by
+      _ = ccOperatorFieldComp (I := I) (M := M) g 6 6 4 F₄ D₄ := by
         rw [← appCcRS_sub_right]
         congr 1
         dsimp only [D₄, Λ]
-        rw [slotInsertEndoCc_sub]
+        rw [endoSlotZero_sub_c2]
   have hF₂ : c2JetSq (I := I) (M := M) g F₂ ≤ A₂ ^ 2 := by
     rw [hA₂sq]
   have hF₄ : c2JetSq (I := I) (M := M) g F₄ ≤ A₄ ^ 2 := by
@@ -1739,10 +1763,10 @@ private theorem pairTrace_h2_lip
   obtain ⟨hd₂, hd₄⟩ :=
     htrace T U gT gU hTtie hUtie hT hU
   let Q₁ : SmoothCcTensor g 6 2 :=
-    appCcRS (I := I) (M := M) g 6 4 2
+    ccOperatorFieldComp (I := I) (M := M) g 6 4 2
       (P₂ gT - P₂ gU) (P₄ gT)
   let Q₂ : SmoothCcTensor g 6 2 :=
-    appCcRS (I := I) (M := M) g 6 4 2
+    ccOperatorFieldComp (I := I) (M := M) g 6 4 2
       (P₂ gU) (P₄ gT - P₄ gU)
   have hQ₁ :
       c2JetSq (I := I) (M := M) g Q₁ ≤
@@ -1936,10 +1960,10 @@ private theorem curvMono_h2_lip
   let X : SmoothCcTensor g 0 2 → SmoothCcTensor g 4 6 :=
     fun W => monoExtC2 (I := I) (M := M) g σ W
   let Q₁ : SmoothCcTensor g 4 2 :=
-    appCcRS (I := I) (M := M) g 4 6 2
+    ccOperatorFieldComp (I := I) (M := M) g 4 6 2
       (P gT - P gU) (X S)
   let Q₂ : SmoothCcTensor g 4 2 :=
-    appCcRS (I := I) (M := M) g 4 6 2
+    ccOperatorFieldComp (I := I) (M := M) g 4 6 2
       (P gU) (X S - X R)
   have hN : 0 ≤ N := norm_nonneg _
   have hT₁ :
@@ -2025,8 +2049,8 @@ private theorem curvMono_h2_lip
     rw [LowBaseInternal.curvMono_eq (I := I) (M := M) g gT S σ,
       LowBaseInternal.curvMono_eq (I := I) (M := M) g gU R σ]
     change
-      appCcRS (I := I) (M := M) g 4 6 2 (P gT) (X S) -
-          appCcRS (I := I) (M := M) g 4 6 2 (P gU) (X R) =
+      ccOperatorFieldComp (I := I) (M := M) g 4 6 2 (P gT) (X S) -
+          ccOperatorFieldComp (I := I) (M := M) g 4 6 2 (P gU) (X R) =
         Q₁ + Q₂
     dsimp only [Q₁, Q₂]
     rw [appCcRS_sub_left, appCcRS_sub_right]
@@ -2248,10 +2272,10 @@ private theorem lieRefold_pair_lip
   have hD : 0 ≤ D := mul_nonneg hChs hN
   have hsymmT :
       c2JetSq (I := I) (M := M) g
-          (symmS (I := I) (M := M) g T) ≤ A ^ 2 := by
+          (ccTensor02Symm (I := I) (M := M) g T) ≤ A ^ 2 := by
     calc
       c2JetSq (I := I) (M := M) g
-          (symmS (I := I) (M := M) g T) ≤
+          (ccTensor02Symm (I := I) (M := M) g T) ≤
           c2JetSq (I := I) (M := M) g T :=
         symm_jet_c2 (I := I) (M := M) g T
       _ ≤ (Chs *
@@ -2264,12 +2288,12 @@ private theorem lieRefold_pair_lip
       _ = A ^ 2 := rfl
   have hsymmDiff :
       c2JetSq (I := I) (M := M) g
-          (symmS (I := I) (M := M) g T -
-            symmS (I := I) (M := M) g U) ≤ D ^ 2 := by
+          (ccTensor02Symm (I := I) (M := M) g T -
+            ccTensor02Symm (I := I) (M := M) g U) ≤ D ^ 2 := by
     rw [← symmS_sub_c2 (I := I) (M := M) g T U]
     calc
       c2JetSq (I := I) (M := M) g
-          (symmS (I := I) (M := M) g (T - U)) ≤
+          (ccTensor02Symm (I := I) (M := M) g (T - U)) ≤
           c2JetSq (I := I) (M := M) g (T - U) :=
         symm_jet_c2 (I := I) (M := M) g (T - U)
       _ ≤ (Chs * N) ^ 2 := by
@@ -2278,21 +2302,21 @@ private theorem lieRefold_pair_lip
   let V : Fin 3 → SmoothCcTensor g 4 2 := fun i =>
     curvatureRefoldMonomialCoeffField (I := I) (M := M) g gmT
         (ccTensorUnitValueSection (I := I) (M := M) g
-          (symmS (I := I) (M := M) g T))
+          (ccTensor02Symm (I := I) (M := M) g T))
         (ccTensorUnitValueSection_contMDiff (I := I) (M := M) g
-          (symmS (I := I) (M := M) g T)) (lieRefoldQ i) -
+          (ccTensor02Symm (I := I) (M := M) g T)) (lieRefoldQ i) -
       curvatureRefoldMonomialCoeffField (I := I) (M := M) g gmU
         (ccTensorUnitValueSection (I := I) (M := M) g
-          (symmS (I := I) (M := M) g U))
+          (ccTensor02Symm (I := I) (M := M) g U))
         (ccTensorUnitValueSection_contMDiff (I := I) (M := M) g
-          (symmS (I := I) (M := M) g U)) (lieRefoldQ i)
+          (ccTensor02Symm (I := I) (M := M) g U)) (lieRefoldQ i)
   let W : Fin 3 → SmoothCcTensor g 4 2 := fun i =>
     lieRefoldEps i • V i
   have hV (i : Fin 3) :
       c2JetSq (I := I) (M := M) g (V i) ≤ (K * N) ^ 2 := by
     have hraw := hmono P Q gmT gmU hPtie hQtie hPnorm hQnorm
-      (symmS (I := I) (M := M) g T)
-      (symmS (I := I) (M := M) g U)
+      (ccTensor02Symm (I := I) (M := M) g T)
+      (ccTensor02Symm (I := I) (M := M) g U)
       (lieRefoldQ i) A D hA hD hsymmT hsymmDiff
     have hinside :
         A *
@@ -2527,9 +2551,9 @@ private theorem daWeight_pair_lip
   let F : SmoothRiemannianMetric I M → SmoothCcTensor g 2 2 :=
     fun gm => fullSlot2 (I := I) (M := M) g gm
   let Q₁ : SmoothCcTensor g 0 2 :=
-    appCc (I := I) (M := M) g 2 2 (F gT - F gU) T
+    operatorFieldApply (I := I) (M := M) g 2 2 (F gT - F gU) T
   let Q₂ : SmoothCcTensor g 0 2 :=
-    appCc (I := I) (M := M) g 2 2 (F gU) (T - U)
+    operatorFieldApply (I := I) (M := M) g 2 2 (F gU) (T - U)
   have hN : 0 ≤ N := norm_nonneg _
   have hT₁ :
       ‖ccTensorToHs (I := I) (M := M) g 2 (2 : ℝ) T‖ ≤ ρ₁ :=
@@ -2606,8 +2630,8 @@ private theorem daWeight_pair_lip
           LowBaseInternal.daWeight (I := I) (M := M) g gU U =
         Q₁ + Q₂ := by
     change
-      appCc (I := I) (M := M) g 2 2 (F gT) T -
-          appCc (I := I) (M := M) g 2 2 (F gU) U =
+      operatorFieldApply (I := I) (M := M) g 2 2 (F gT) T -
+          operatorFieldApply (I := I) (M := M) g 2 2 (F gU) U =
         Q₁ + Q₂
     dsimp only [Q₁, Q₂]
     rw [appCc_sub_left, appCc_sub_right_c2]
@@ -2635,7 +2659,7 @@ private theorem daWeight_pair_lip
         B ^ 2 := by
     change
       c2JetSq (I := I) (M := M) g
-        (appCc (I := I) (M := M) g 2 2 (F gT) T) ≤ B ^ 2
+        (operatorFieldApply (I := I) (M := M) g 2 2 (F gT) T) ≤ B ^ 2
     have hraw := happ (F gT) T Bf (Chs * ρ)
       hBf (mul_nonneg hChs hρ0) hFT hTjet
     simpa only [c2JetSq, B] using hraw
@@ -2844,7 +2868,7 @@ private theorem daTrans_h2_bdd
 
 private noncomputable def fullInsert2C2
     (g gm : SmoothRiemannianMetric I M) : SmoothCcTensor g 3 3 :=
-  slotInsertEndoCc (I := I) (M := M) g 2
+  endoSlotZeroCcTensor (I := I) (M := M) g 2
     (fullRaisedEndoField (I := I) (M := M) g gm)
 
 private noncomputable def koszulOpC2
@@ -2891,11 +2915,11 @@ private theorem fullInsert2_pair
   have hN : 0 ≤ N := norm_nonneg _
   have hraw := (hinv T U gT gU hTtie hUtie hT hU).2
   have hslot₁ :
-      slotInsertEndoCc (I := I) (M := M) g 1 Λ =
+      endoSlotZeroCcTensor (I := I) (M := M) g 1 Λ =
         gInvDiffSlotCoeff (I := I) g gT -
           gInvDiffSlotCoeff (I := I) g gU := by
     dsimp only [Λ]
-    rw [slotInsertEndoCc_sub]
+    rw [endoSlotZero_sub_c2]
     change
       fullSlot2 (I := I) (M := M) g gT -
           fullSlot2 (I := I) (M := M) g gU =
@@ -2908,15 +2932,15 @@ private theorem fullInsert2_pair
   have hslot₂ :
       fullInsert2C2 (I := I) (M := M) g gT -
           fullInsert2C2 (I := I) (M := M) g gU =
-        slotInsertEndoCc (I := I) (M := M) g 2 Λ := by
+        endoSlotZeroCcTensor (I := I) (M := M) g 2 Λ := by
     dsimp only [fullInsert2C2, Λ]
-    rw [slotInsertEndoCc_sub]
+    rw [endoSlotZero_sub_c2]
   rw [hslot₂]
   calc
     c2JetSq (I := I) (M := M) g
-        (slotInsertEndoCc (I := I) (M := M) g 2 Λ) ≤
+        (endoSlotZeroCcTensor (I := I) (M := M) g 2 Λ) ≤
       3 * c2JetSq (I := I) (M := M) g
-        (slotInsertEndoCc (I := I) (M := M) g 1 Λ) := by
+        (endoSlotZeroCcTensor (I := I) (M := M) g 1 Λ) := by
       simpa only [hDim, Nat.cast_ofNat] using
         insertSucc_jet_c2 (I := I) (M := M) g 1 Λ
     _ = 3 * c2JetSq (I := I) (M := M) g
@@ -3072,7 +3096,7 @@ private theorem connLow_pair
     fullInsert2C2 (I := I) (M := M) g gT -
       fullInsert2C2 (I := I) (M := M) g gU
   let Mid : SmoothCcTensor g 3 3 :=
-    appCcRS (I := I) (M := M) g 3 3 3 D K
+    ccOperatorFieldComp (I := I) (M := M) g 3 3 3 D K
   have hN : 0 ≤ N := norm_nonneg _
   have hD :
       c2JetSq (I := I) (M := M) g D ≤ (Cf * N) ^ 2 := by
@@ -3091,20 +3115,20 @@ private theorem connLow_pair
   have heq :
       LowBaseInternal.connLowOp (I := I) (M := M) g gT -
           LowBaseInternal.connLowOp (I := I) (M := M) g gU =
-        appCcRS (I := I) (M := M) g 3 3 3 P Mid := by
+        ccOperatorFieldComp (I := I) (M := M) g 3 3 3 P Mid := by
     change
-      appCcRS (I := I) (M := M) g 3 3 3 P
-            (appCcRS (I := I) (M := M) g 3 3 3
+      ccOperatorFieldComp (I := I) (M := M) g 3 3 3 P
+            (ccOperatorFieldComp (I := I) (M := M) g 3 3 3
               (fullInsert2C2 (I := I) (M := M) g gT) K) -
-          appCcRS (I := I) (M := M) g 3 3 3 P
-            (appCcRS (I := I) (M := M) g 3 3 3
+          ccOperatorFieldComp (I := I) (M := M) g 3 3 3 P
+            (ccOperatorFieldComp (I := I) (M := M) g 3 3 3
               (fullInsert2C2 (I := I) (M := M) g gU) K) =
-        appCcRS (I := I) (M := M) g 3 3 3 P Mid
+        ccOperatorFieldComp (I := I) (M := M) g 3 3 3 P Mid
     rw [← appCcRS_sub_right, ← appCcRS_sub_left]
   rw [heq]
   calc
     c2JetSq (I := I) (M := M) g
-        (appCcRS (I := I) (M := M) g 3 3 3 P Mid) ≤
+        (ccOperatorFieldComp (I := I) (M := M) g 3 3 3 P Mid) ≤
       (Ca * AP * (Ca * (Cf * N) * AK)) ^ 2 :=
         happ P Mid AP (Ca * (Cf * N) * AK)
           hAP
@@ -3159,7 +3183,7 @@ private theorem connLow_bdd
   let F : SmoothCcTensor g 3 3 :=
     fullInsert2C2 (I := I) (M := M) g gT
   let Mid : SmoothCcTensor g 3 3 :=
-    appCcRS (I := I) (M := M) g 3 3 3 F K
+    ccOperatorFieldComp (I := I) (M := M) g 3 3 3 F K
   have hF : c2JetSq (I := I) (M := M) g F ≤ BF ^ 2 := by
     simpa only [F] using hfull T gT hTtie hT
   have hK :
@@ -3173,7 +3197,7 @@ private theorem connLow_bdd
         (Ca * BF * AK) ^ 2 :=
     happ F K BF AK hBF hAK hF hK
   change c2JetSq (I := I) (M := M) g
-      (appCcRS (I := I) (M := M) g 3 3 3 P Mid) ≤ B ^ 2
+      (ccOperatorFieldComp (I := I) (M := M) g 3 3 3 P Mid) ≤ B ^ 2
   calc
     _ ≤ (Ca * AP * (Ca * BF * AK)) ^ 2 :=
       happ P Mid AP (Ca * BF * AK) hAP
@@ -3251,20 +3275,20 @@ private theorem dagTop_pair
   have heq :
       LowBaseInternal.dagTopOp (I := I) (M := M) g gT -
           LowBaseInternal.dagTopOp (I := I) (M := M) g gU =
-        appCcRS (I := I) (M := M) g 4 4 4 P S := by
+        ccOperatorFieldComp (I := I) (M := M) g 4 4 4 P S := by
     change
-      appCcRS (I := I) (M := M) g 4 4 4 P
+      ccOperatorFieldComp (I := I) (M := M) g 4 4 4 P
             (slotExtend (I := I) (M := M) g 3 3
               (LowBaseInternal.connLowOp (I := I) (M := M) g gT)) -
-          appCcRS (I := I) (M := M) g 4 4 4 P
+          ccOperatorFieldComp (I := I) (M := M) g 4 4 4 P
             (slotExtend (I := I) (M := M) g 3 3
               (LowBaseInternal.connLowOp (I := I) (M := M) g gU)) =
-        appCcRS (I := I) (M := M) g 4 4 4 P S
+        ccOperatorFieldComp (I := I) (M := M) g 4 4 4 P S
     rw [← appCcRS_sub_right, ← slotExtend_sub]
   rw [heq]
   calc
     c2JetSq (I := I) (M := M) g
-        (appCcRS (I := I) (M := M) g 4 4 4 P S) ≤
+        (ccOperatorFieldComp (I := I) (M := M) g 4 4 4 P S) ≤
       (Ca * AP * (3 * Cc * N)) ^ 2 :=
         happ P S AP (3 * Cc * N) hAP
           (mul_nonneg (mul_nonneg (by norm_num) hCc) hN) hP hS
@@ -3328,7 +3352,7 @@ private theorem dagTop_bdd
       c2JetSq (I := I) (M := M) g P ≤ AP ^ 2 := by
     rw [hAPsq]
   change c2JetSq (I := I) (M := M) g
-      (appCcRS (I := I) (M := M) g 4 4 4 P S) ≤ B ^ 2
+      (ccOperatorFieldComp (I := I) (M := M) g 4 4 4 P S) ≤ B ^ 2
   calc
     _ ≤ (Ca * AP * (3 * Bc)) ^ 2 :=
       happ P S AP (3 * Bc) hAP
@@ -3350,13 +3374,13 @@ set_option backward.isDefEq.respectTransparency false in
 private theorem appCcRS_smul_left_c2
     (g : SmoothRiemannianMetric I M) (a b c : ℕ)
     (s : ℝ) (Φ : SmoothCcTensor g b c) (W : SmoothCcTensor g a b) :
-    appCcRS (I := I) (M := M) g a b c (s • Φ) W =
-      s • appCcRS (I := I) (M := M) g a b c Φ W := by
+    ccOperatorFieldComp (I := I) (M := M) g a b c (s • Φ) W =
+      s • ccOperatorFieldComp (I := I) (M := M) g a b c Φ W := by
   apply SmoothCcTensor.ext
   apply ContMDiffSection.ext
   intro x
-  rw [show ((s • appCcRS (I := I) (M := M) g a b c Φ W).toSection x) =
-      s • (appCcRS (I := I) (M := M) g a b c Φ W).toSection x from by
+  rw [show ((s • ccOperatorFieldComp (I := I) (M := M) g a b c Φ W).toSection x) =
+      s • (ccOperatorFieldComp (I := I) (M := M) g a b c Φ W).toSection x from by
     rw [SmoothCcTensor.toSection_smul]
     rfl]
   rw [appCcRS_toSection, appCcRS_toSection]
@@ -3431,9 +3455,9 @@ private theorem ricciRad_pair
   let N : ℝ :=
     ‖ccTensorToHs (I := I) (M := M) g 2 (2 : ℝ) (T - U)‖
   let Q₁ : SmoothCcTensor g 4 2 :=
-    appCcRS (I := I) (M := M) g 4 4 2 (DT - DU) GT
+    ccOperatorFieldComp (I := I) (M := M) g 4 4 2 (DT - DU) GT
   let Q₂ : SmoothCcTensor g 4 2 :=
-    appCcRS (I := I) (M := M) g 4 4 2 DU (GT - GU)
+    ccOperatorFieldComp (I := I) (M := M) g 4 4 2 DU (GT - GU)
   have hN : 0 ≤ N := norm_nonneg _
   have hsabs : ‖s‖ ≤ (1 : ℝ) := by
     rw [Real.norm_eq_abs, abs_of_nonneg hs.1]
@@ -3540,8 +3564,8 @@ private theorem ricciRad_pair
         dsimp only [K₂]
         ring ▸ hraw)
   have hprod :
-      appCcRS (I := I) (M := M) g 4 4 2 DT GT -
-          appCcRS (I := I) (M := M) g 4 4 2 DU GU =
+      ccOperatorFieldComp (I := I) (M := M) g 4 4 2 DT GT -
+          ccOperatorFieldComp (I := I) (M := M) g 4 4 2 DU GU =
         Q₁ + Q₂ := by
     dsimp only [Q₁, Q₂]
     rw [appCcRS_sub_left, appCcRS_sub_right]
@@ -3550,7 +3574,7 @@ private theorem ricciRad_pair
       (-2 * s : ℝ) •
           LowBaseInternal.ricciTop (I := I) (M := M) g gmT T =
         (-2 : ℝ) •
-          appCcRS (I := I) (M := M) g 4 4 2 DT GT := by
+          ccOperatorFieldComp (I := I) (M := M) g 4 4 2 DT GT := by
     dsimp only [LowBaseInternal.ricciTop, DT, GT, P]
     rw [daTrans_smul (I := I) (M := M) g gmT s T]
     rw [appCcRS_smul_left_c2]
@@ -3559,7 +3583,7 @@ private theorem ricciRad_pair
       (-2 * s : ℝ) •
           LowBaseInternal.ricciTop (I := I) (M := M) g gmU U =
         (-2 : ℝ) •
-          appCcRS (I := I) (M := M) g 4 4 2 DU GU := by
+          ccOperatorFieldComp (I := I) (M := M) g 4 4 2 DU GU := by
     dsimp only [LowBaseInternal.ricciTop, DU, GU, Q]
     rw [daTrans_smul (I := I) (M := M) g gmU s U]
     rw [appCcRS_smul_left_c2]
@@ -3622,10 +3646,10 @@ theorem invGeomOp_lip
         ‖ccTensorToHs (I := I) (M := M) g 2 (2 : ℝ) T‖ ≤ ρ →
         ‖ccTensorToHs (I := I) (M := M) g 2 (2 : ℝ) U‖ ≤ ρ →
         ‖appHs (I := I) (M := M) g 4 4 2
-              (slotInsertEndoCc (I := I) (M := M) g 3
+              (endoSlotZeroCcTensor (I := I) (M := M) g 3
                 (gInvDiffRaisedEndoField (I := I) g gT)) -
             appHs (I := I) (M := M) g 4 4 2
-              (slotInsertEndoCc (I := I) (M := M) g 3
+              (endoSlotZeroCcTensor (I := I) (M := M) g 3
                 (gInvDiffRaisedEndoField (I := I) g gU))‖ ≤
           C * ‖ccTensorToHs (I := I) (M := M) g 2 (2 : ℝ) T -
             ccTensorToHs (I := I) (M := M) g 2 (2 : ℝ) U‖ := by
@@ -4751,7 +4775,7 @@ private theorem trace1_h2_lip
     gInvDiffRaisedEndoField (I := I) g gT -
       gInvDiffRaisedEndoField (I := I) g gU
   let D₁ : SmoothCcTensor g 3 3 :=
-    slotInsertEndoCc (I := I) (M := M) g 2 Λ
+    endoSlotZeroCcTensor (I := I) (M := M) g 2 Λ
   have hN : 0 ≤ N := norm_nonneg _
   have hinvJet :
       c2JetSq (I := I) (M := M) g
@@ -4761,11 +4785,11 @@ private theorem trace1_h2_lip
     simpa only [c2JetSq, N] using
       (hinv T U gT gU hTtie hUtie hT hU).2
   have hslot1 :
-      slotInsertEndoCc (I := I) (M := M) g 1 Λ =
+      endoSlotZeroCcTensor (I := I) (M := M) g 1 Λ =
         gInvDiffSlotCoeff (I := I) g gT -
           gInvDiffSlotCoeff (I := I) g gU := by
     dsimp only [Λ]
-    rw [slotInsertEndoCc_sub,
+    rw [endoSlotZero_sub_c2,
       ← gInvDiffSlotCoeff_eq_slotInsertEndoCc (I := I) g gT,
       ← gInvDiffSlotCoeff_eq_slotInsertEndoCc (I := I) g gU]
   have hD₁ :
@@ -4775,7 +4799,7 @@ private theorem trace1_h2_lip
       c2JetSq (I := I) (M := M) g D₁ ≤
           (Module.finrank ℝ E : ℝ) *
             c2JetSq (I := I) (M := M) g
-              (slotInsertEndoCc (I := I) (M := M) g 1 Λ) := by
+              (endoSlotZeroCcTensor (I := I) (M := M) g 1 Λ) := by
         simpa only [D₁, Nat.reduceAdd] using
           insertSucc_jet_c2 (I := I) (M := M) g 1 Λ
       _ = 3 * c2JetSq (I := I) (M := M) g
@@ -4789,27 +4813,27 @@ private theorem trace1_h2_lip
   have htrace₁ :
       pureTrace (I := I) (M := M) g gT 1 -
           pureTrace (I := I) (M := M) g gU 1 =
-        appCcRS (I := I) (M := M) g 3 3 1 F₁ D₁ := by
+        ccOperatorFieldComp (I := I) (M := M) g 3 3 1 F₁ D₁ := by
     rw [pureTrace_split (I := I) (M := M) g gT 1,
       pureTrace_split (I := I) (M := M) g gU 1]
     calc
-      (appCcRS (I := I) (M := M) g 3 3 1 F₁
-            (slotInsertEndoCc (I := I) (M := M) g 2
+      (ccOperatorFieldComp (I := I) (M := M) g 3 3 1 F₁
+            (endoSlotZeroCcTensor (I := I) (M := M) g 2
               (gInvDiffRaisedEndoField (I := I) g gT)) + F₁) -
-          (appCcRS (I := I) (M := M) g 3 3 1 F₁
-            (slotInsertEndoCc (I := I) (M := M) g 2
+          (ccOperatorFieldComp (I := I) (M := M) g 3 3 1 F₁
+            (endoSlotZeroCcTensor (I := I) (M := M) g 2
               (gInvDiffRaisedEndoField (I := I) g gU)) + F₁) =
-        appCcRS (I := I) (M := M) g 3 3 1 F₁
-            (slotInsertEndoCc (I := I) (M := M) g 2
+        ccOperatorFieldComp (I := I) (M := M) g 3 3 1 F₁
+            (endoSlotZeroCcTensor (I := I) (M := M) g 2
               (gInvDiffRaisedEndoField (I := I) g gT)) -
-          appCcRS (I := I) (M := M) g 3 3 1 F₁
-            (slotInsertEndoCc (I := I) (M := M) g 2
+          ccOperatorFieldComp (I := I) (M := M) g 3 3 1 F₁
+            (endoSlotZeroCcTensor (I := I) (M := M) g 2
               (gInvDiffRaisedEndoField (I := I) g gU)) := by abel
-      _ = appCcRS (I := I) (M := M) g 3 3 1 F₁ D₁ := by
+      _ = ccOperatorFieldComp (I := I) (M := M) g 3 3 1 F₁ D₁ := by
         rw [← appCcRS_sub_right]
         congr 1
         dsimp only [D₁, Λ]
-        rw [slotInsertEndoCc_sub]
+        rw [endoSlotZero_sub_c2]
   have hF₁ : c2JetSq (I := I) (M := M) g F₁ ≤ A₁ ^ 2 := by
     rw [hA₁sq]
   rw [htrace₁]
@@ -4946,27 +4970,27 @@ private theorem insert4_jet_c2
     (Λ : ContMDiffSection I (E →L[ℝ] E) ∞
       (fun x : M => TangentSpace I x →L[ℝ] TangentSpace I x)) :
     c2JetSq (I := I) (M := M) g
-        (slotInsertEndoCc (I := I) (M := M) g 4 Λ) ≤
+        (endoSlotZeroCcTensor (I := I) (M := M) g 4 Λ) ≤
       (Module.finrank ℝ E : ℝ) ^ 3 *
         c2JetSq (I := I) (M := M) g
-          (slotInsertEndoCc (I := I) (M := M) g 1 Λ) := by
+          (endoSlotZeroCcTensor (I := I) (M := M) g 1 Λ) := by
   have hfr : (0 : ℝ) ≤ Module.finrank ℝ E := Nat.cast_nonneg _
   calc
     c2JetSq (I := I) (M := M) g
-        (slotInsertEndoCc (I := I) (M := M) g 4 Λ) ≤
+        (endoSlotZeroCcTensor (I := I) (M := M) g 4 Λ) ≤
       (Module.finrank ℝ E : ℝ) *
         c2JetSq (I := I) (M := M) g
-          (slotInsertEndoCc (I := I) (M := M) g 3 Λ) :=
+          (endoSlotZeroCcTensor (I := I) (M := M) g 3 Λ) :=
       insertSucc_jet_c2 (I := I) (M := M) g 3 Λ
     _ ≤ (Module.finrank ℝ E : ℝ) *
         ((Module.finrank ℝ E : ℝ) ^ 2 *
           c2JetSq (I := I) (M := M) g
-            (slotInsertEndoCc (I := I) (M := M) g 1 Λ)) :=
+            (endoSlotZeroCcTensor (I := I) (M := M) g 1 Λ)) :=
       mul_le_mul_of_nonneg_left
         (insert3_jet_c2 (I := I) (M := M) g Λ) hfr
     _ = (Module.finrank ℝ E : ℝ) ^ 3 *
         c2JetSq (I := I) (M := M) g
-          (slotInsertEndoCc (I := I) (M := M) g 1 Λ) := by ring
+          (endoSlotZeroCcTensor (I := I) (M := M) g 1 Λ) := by ring
 
 set_option maxHeartbeats 1600000 in
 private theorem trace3_h2_lip
@@ -5017,7 +5041,7 @@ private theorem trace3_h2_lip
     gInvDiffRaisedEndoField (I := I) g gT -
       gInvDiffRaisedEndoField (I := I) g gU
   let D₃ : SmoothCcTensor g 5 5 :=
-    slotInsertEndoCc (I := I) (M := M) g 4 Λ
+    endoSlotZeroCcTensor (I := I) (M := M) g 4 Λ
   have hN : 0 ≤ N := norm_nonneg _
   have hinvJet :
       c2JetSq (I := I) (M := M) g
@@ -5027,11 +5051,11 @@ private theorem trace3_h2_lip
     simpa only [c2JetSq, N] using
       (hinv T U gT gU hTtie hUtie hT hU).2
   have hslot1 :
-      slotInsertEndoCc (I := I) (M := M) g 1 Λ =
+      endoSlotZeroCcTensor (I := I) (M := M) g 1 Λ =
         gInvDiffSlotCoeff (I := I) g gT -
           gInvDiffSlotCoeff (I := I) g gU := by
     dsimp only [Λ]
-    rw [slotInsertEndoCc_sub,
+    rw [endoSlotZero_sub_c2,
       ← gInvDiffSlotCoeff_eq_slotInsertEndoCc (I := I) g gT,
       ← gInvDiffSlotCoeff_eq_slotInsertEndoCc (I := I) g gU]
   have hD₃ :
@@ -5041,7 +5065,7 @@ private theorem trace3_h2_lip
       c2JetSq (I := I) (M := M) g D₃ ≤
           (Module.finrank ℝ E : ℝ) ^ 3 *
             c2JetSq (I := I) (M := M) g
-              (slotInsertEndoCc (I := I) (M := M) g 1 Λ) := by
+              (endoSlotZeroCcTensor (I := I) (M := M) g 1 Λ) := by
         simpa only [D₃] using
           insert4_jet_c2 (I := I) (M := M) g Λ
       _ = 27 * c2JetSq (I := I) (M := M) g
@@ -5055,27 +5079,27 @@ private theorem trace3_h2_lip
   have htrace₃ :
       pureTrace (I := I) (M := M) g gT 3 -
           pureTrace (I := I) (M := M) g gU 3 =
-        appCcRS (I := I) (M := M) g 5 5 3 F₃ D₃ := by
+        ccOperatorFieldComp (I := I) (M := M) g 5 5 3 F₃ D₃ := by
     rw [pureTrace_split (I := I) (M := M) g gT 3,
       pureTrace_split (I := I) (M := M) g gU 3]
     calc
-      (appCcRS (I := I) (M := M) g 5 5 3 F₃
-            (slotInsertEndoCc (I := I) (M := M) g 4
+      (ccOperatorFieldComp (I := I) (M := M) g 5 5 3 F₃
+            (endoSlotZeroCcTensor (I := I) (M := M) g 4
               (gInvDiffRaisedEndoField (I := I) g gT)) + F₃) -
-          (appCcRS (I := I) (M := M) g 5 5 3 F₃
-            (slotInsertEndoCc (I := I) (M := M) g 4
+          (ccOperatorFieldComp (I := I) (M := M) g 5 5 3 F₃
+            (endoSlotZeroCcTensor (I := I) (M := M) g 4
               (gInvDiffRaisedEndoField (I := I) g gU)) + F₃) =
-        appCcRS (I := I) (M := M) g 5 5 3 F₃
-            (slotInsertEndoCc (I := I) (M := M) g 4
+        ccOperatorFieldComp (I := I) (M := M) g 5 5 3 F₃
+            (endoSlotZeroCcTensor (I := I) (M := M) g 4
               (gInvDiffRaisedEndoField (I := I) g gT)) -
-          appCcRS (I := I) (M := M) g 5 5 3 F₃
-            (slotInsertEndoCc (I := I) (M := M) g 4
+          ccOperatorFieldComp (I := I) (M := M) g 5 5 3 F₃
+            (endoSlotZeroCcTensor (I := I) (M := M) g 4
               (gInvDiffRaisedEndoField (I := I) g gU)) := by abel
-      _ = appCcRS (I := I) (M := M) g 5 5 3 F₃ D₃ := by
+      _ = ccOperatorFieldComp (I := I) (M := M) g 5 5 3 F₃ D₃ := by
         rw [← appCcRS_sub_right]
         congr 1
         dsimp only [D₃, Λ]
-        rw [slotInsertEndoCc_sub]
+        rw [endoSlotZero_sub_c2]
   have hF₃ : c2JetSq (I := I) (M := M) g F₃ ≤ A₃ ^ 2 := by
     rw [hA₃sq]
   rw [htrace₃]

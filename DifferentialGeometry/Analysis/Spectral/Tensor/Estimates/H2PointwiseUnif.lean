@@ -1,5 +1,6 @@
 import DifferentialGeometry.Analysis.Spectral.Tensor.Estimates.H2Pointwise
 import DifferentialGeometry.Analysis.Spectral.Tensor.SobolevScale.UnifBochnerGap
+import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.SmoothPathHs
 
 /-!
 # Class-uniform `H²` → fibre-operator control (item-6 packet, bricks E2 and E5)
@@ -67,19 +68,6 @@ variable
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
 /-! ### Brick E2: the rank-`(0,2)` `smoothCcToTensorHs` face -/
-
-/-- **The two smooth spectral embeddings agree at rank `(0,2)`.**
-
-`ccTensorToHs g₀ 2 σ` (`IteratedCovGradHsJetBound.lean`, rank-generic, the currency of the
-Gårding/Bochner layer) and `smoothCcToTensorHs g₀ σ` (`DeTurckRemainderDefs.lean`,
-rank-`(0,2)` only, the currency of the DeTurck stack and of the realization radius) are
-defined by the SAME eigenbasis coordinates, so they are equal.  This is the bridge that lets
-the class-uniform `H^n` ↔ covariant-jet endpoints be read by the DeTurck files. -/
-theorem ccHs_eq_smoothHs (g₀ : SmoothRiemannianMetric I M) (σ : ℝ)
-    (T : SmoothCcTensor g₀ 0 2) :
-    ccTensorToHs (I := I) (M := M) g₀ 2 σ T =
-      smoothCcToTensorHs (I := I) (M := M) g₀ σ T :=
-  tensorHs.ext (funext fun _ => rfl)
 
 /-- Norm face of `ccHs_eq_smoothHs`. -/
 theorem norm_ccHs_eq_smoothHs (g₀ : SmoothRiemannianMetric I M) (σ : ℝ)
@@ -460,11 +448,11 @@ theorem hs2_op_smoothCc_unif
 
 /-- **The class-uniform metric-realization radius** `P = θ(d) / hs2OpC Cpt Fc d`.
 
-`θ(d) = deTurckArmContractionThreshold'' d` is a dimension-only quantity, and `hs2OpC` is
+`θ(d) = deTurckArmContractionThresholdSharp d` is a dimension-only quantity, and `hs2OpC` is
 closed in `(Cpt, Fc, d)`, so `unifRealizeRad` is a single number for the whole
 `Λ`-comparability class — the class-level replacement of the `∃ R` of `realize_at_thr`. -/
 def unifRealizeRad (Cpt : ℝ) (Fc : ℕ → ℝ) (d : ℕ) : ℝ :=
-  deTurckArmContractionThreshold'' d / hs2OpC Cpt Fc d
+  deTurckArmContractionThresholdSharp d / hs2OpC Cpt Fc d
 
 theorem unifRealizeRad_pos {Cpt : ℝ} (hCpt : 0 ≤ Cpt) {Fc : ℕ → ℝ}
     (hFc : ∀ p, 0 ≤ Fc p) (d : ℕ) : 0 < unifRealizeRad Cpt Fc d :=
@@ -472,7 +460,7 @@ theorem unifRealizeRad_pos {Cpt : ℝ} (hCpt : 0 ≤ Cpt) {Fc : ℕ → ℝ}
 
 /-- The realization radius determined by the finite rank-two curvature-action package. -/
 def actionRealizeRad (Cpt K : ℝ) (d : ℕ) : ℝ :=
-  deTurckArmContractionThreshold'' d / hs2OpActionC Cpt K
+  deTurckArmContractionThresholdSharp d / hs2OpActionC Cpt K
 
 /-- The finite-action realization radius is strictly positive. -/
 theorem actionRealizeRad_pos {Cpt : ℝ} (hCpt : 0 ≤ Cpt) (K : ℝ) (d : ℕ) :
@@ -497,7 +485,7 @@ theorem realize_at_action
       ‖smoothCcToTensorHs (I := I) (M := M) g (((1 : ℕ) : ℝ) + 1) T‖ ≤
           actionRealizeRad Cpt K (Module.finrank ℝ E) →
         gFibreOpBound (I := I) (M := M) g (ccTensorBilinSymm (I := I) g T)
-          (deTurckArmContractionThreshold'' (Module.finrank ℝ E)) := by
+          (deTurckArmContractionThresholdSharp (Module.finrank ℝ E)) := by
   intro T hT
   have hOp : 0 < hs2OpActionC Cpt K := hs2OpActionC_pos hCpt K
   have hTtwo : ‖smoothCcToTensorHs (I := I) (M := M) g (2 : ℝ) T‖ ≤
@@ -511,14 +499,14 @@ theorem realize_at_action
     exact hTtwo
   have hdelta : hs2OpActionC Cpt K *
       ‖ccTensorToHs (I := I) (M := M) g 2 (2 : ℝ) T‖ ≤
-        deTurckArmContractionThreshold'' (Module.finrank ℝ E) := by
+        deTurckArmContractionThresholdSharp (Module.finrank ℝ E) := by
     calc
       hs2OpActionC Cpt K *
           ‖ccTensorToHs (I := I) (M := M) g 2 (2 : ℝ) T‖
           ≤ hs2OpActionC Cpt K *
               actionRealizeRad Cpt K (Module.finrank ℝ E) :=
         mul_le_mul_of_nonneg_left hT' hOp.le
-      _ = deTurckArmContractionThreshold'' (Module.finrank ℝ E) := by
+      _ = deTurckArmContractionThresholdSharp (Module.finrank ℝ E) := by
         unfold actionRealizeRad
         field_simp
   have hsmall := hs2_op_bound_action (I := I) (M := M) hDim g hact hCpt hmorrey T
@@ -533,7 +521,7 @@ radius is the closed `unifRealizeRad Cpt Fc d`.
 
 The conclusion is exactly the `hreal` hypothesis of `lowreg_partial_sol_of_bounds`
 (`ShortTime/UnifClassBounds.lean`) at `P := unifRealizeRad Cpt Fc (finrank ℝ E)` and
-`δ := deTurckArmContractionThreshold'' (finrank ℝ E)`, so the realization radius of the
+`δ := deTurckArmContractionThresholdSharp (finrank ℝ E)`, so the realization radius of the
 six-number solve is no longer an existential. -/
 theorem realize_at_unif
     (hDim : Module.finrank ℝ E = 3)
@@ -553,7 +541,7 @@ theorem realize_at_unif
       ‖smoothCcToTensorHs (I := I) (M := M) g (((1 : ℕ) : ℝ) + 1) T‖ ≤
           unifRealizeRad Cpt Fc (Module.finrank ℝ E) →
         gFibreOpBound (I := I) (M := M) g (ccTensorBilinSymm (I := I) g T)
-          (deTurckArmContractionThreshold'' (Module.finrank ℝ E)) := by
+          (deTurckArmContractionThresholdSharp (Module.finrank ℝ E)) := by
   intro T hT
   have hOp : 0 < hs2OpC Cpt Fc (Module.finrank ℝ E) := hs2OpC_pos hCpt hFc _
   have hTtwo : ‖smoothCcToTensorHs (I := I) (M := M) g (2 : ℝ) T‖ ≤
@@ -567,14 +555,14 @@ theorem realize_at_unif
     exact hTtwo
   have hdelta : hs2OpC Cpt Fc (Module.finrank ℝ E) *
       ‖ccTensorToHs (I := I) (M := M) g 2 (2 : ℝ) T‖ ≤
-        deTurckArmContractionThreshold'' (Module.finrank ℝ E) := by
+        deTurckArmContractionThresholdSharp (Module.finrank ℝ E) := by
     calc
       hs2OpC Cpt Fc (Module.finrank ℝ E) *
           ‖ccTensorToHs (I := I) (M := M) g 2 (2 : ℝ) T‖
           ≤ hs2OpC Cpt Fc (Module.finrank ℝ E) *
               unifRealizeRad Cpt Fc (Module.finrank ℝ E) :=
         mul_le_mul_of_nonneg_left hT' hOp.le
-      _ = deTurckArmContractionThreshold'' (Module.finrank ℝ E) := by
+      _ = deTurckArmContractionThresholdSharp (Module.finrank ℝ E) := by
         unfold unifRealizeRad
         field_simp
   have hsmall := hs2_op_bound_unif (I := I) (M := M) hDim g Fc hFc hcurv hCpt hmorrey T

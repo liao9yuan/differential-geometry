@@ -1,4 +1,6 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.LowRegCoeffJets
+import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.UnifAppH22
+import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.UnifCoeffH2
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.IteratedCovGradFibreNormPermutationInvariance
 import DifferentialGeometry.Analysis.Sobolev.TensorHilbert.RicciConnDiffOrder1TameEnvelope
 
@@ -20,6 +22,7 @@ open scoped Manifold Topology ContDiff ENNReal BigOperators
 namespace DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral
 
 open DifferentialGeometry
+open DifferentialGeometry.HCGCompactness
 open DifferentialGeometry.Integral.L2
 open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.Connection
@@ -54,6 +57,12 @@ private theorem pure_eq
     (g₀ g₁ : SmoothRiemannianMetric I M) :
     ricciArmPrincipalCoeffPure (I := I) (M := M) g₀ g₁ =
       lc0PureDT (I := I) (M := M) g₀ g₁ 2 := rfl
+
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] [SigmaCompactSpace M] in
+private theorem lc0PureDT_eq_pureTrace
+    (g₀ g₁ : SmoothRiemannianMetric I M) :
+    lc0PureDT (I := I) (M := M) g₀ g₁ 2 =
+      pureTrace (I := I) (M := M) g₀ g₁ 2 := rfl
 
 private theorem norm_eq_of_sq_eq {a b : ℝ}
     (ha : 0 ≤ a) (hb : 0 ≤ b) (h : a ^ 2 = b ^ 2) : a = b := by
@@ -558,6 +567,187 @@ theorem ricci1_h2_tame
   have hout := happ
       (ricciCometricFourTraceCastG0 (I := I) g₀ g₁)
       (linearizedRicciConnDiffOrder1KernelField (I := I) g₀ g₁)
+      (2 * Bt R) (15 * (Bc0 R + Bc1 R * A))
+      (mul_nonneg (by norm_num) (hBt R hR))
+      (mul_nonneg (by norm_num)
+        (add_nonneg (hBc0 R hR) (mul_nonneg (hBc1 R hR) hA)))
+      hcast hkernel'
+  have hfactor :
+      Capp * (2 * Bt R) * (15 * (Bc0 R + Bc1 R * A)) =
+        B0 R + B1 R * A := by
+    simp only [B0, B1]
+    ring
+  rw [← hfactor]
+  exact hout
+
+/-- On a closed three-manifold, the order-one Ricci connection-difference
+coefficient has a class-first tame intrinsic `H2` bound.  Its constants are
+selected from the fixed background, the uniform metric class, and the fibre
+smallness ceiling before the class metric varies. -/
+theorem ricci1_h2_unif_core
+    {EU : Type*} [NormedAddCommGroup EU] [InnerProductSpace ℝ EU]
+    [FiniteDimensional ℝ EU] [NeZero (Module.finrank ℝ EU)]
+    {HU : Type*} [TopologicalSpace HU] {IU : ModelWithCorners ℝ EU HU}
+    {MU : Type*} [TopologicalSpace MU] [ChartedSpace HU MU]
+    [IsManifold IU ∞ MU] [CompactSpace MU] [IU.Boundaryless]
+    [BoundarylessManifold IU MU] [T2Space MU] [SigmaCompactSpace MU]
+    (hDim : Module.finrank ℝ EU = 3)
+    (gBase : SmoothRiemannianMetric IU MU) {Λ : ℝ} (hΛ : 1 ≤ Λ)
+    {δ₀ : ℝ} (hδ₀ : δ₀ < 1) :
+    ∃ B0 B1 : ℝ → ℝ,
+      (∀ R : ℝ, 0 ≤ R → 0 ≤ B0 R) ∧
+      (∀ R : ℝ, 0 ≤ R → 0 ≤ B1 R) ∧
+      ∀ g₀ : SmoothRiemannianMetric IU MU,
+        MetricUniformEquivalentOn (I := IU) Set.univ gBase g₀ Λ →
+        MetricCovDerivOrderBoundOn (I := IU) Set.univ 1 g₀ gBase Λ →
+        MetricCovDerivOrderBoundOn (I := IU) Set.univ 2 g₀ gBase Λ →
+        ∀ (g₁ : SmoothRiemannianMetric IU MU) (P : SmoothCcTensor g₀ 0 2),
+          (∀ (y : MU) (v w : TangentSpace IU y),
+            g₁.inner y v w = g₀.inner y v w +
+              ccTensorBilinSymm (I := IU) g₀ P y v w) →
+          ∀ {δ : ℝ}, δ ≤ δ₀ → 0 ≤ δ →
+          gFibreOpBound (I := IU) (M := MU) g₀
+              (ccTensorBilinSymm (I := IU) g₀ P) δ →
+          ∀ (R A : ℝ), 0 ≤ R → 0 ≤ A →
+          (∑ j ∈ Finset.range 3,
+            ‖iteratedCovGrad (I := IU) g₀ 0 2 j P‖ ^ 2) ≤ R ^ 2 →
+          (∑ j ∈ Finset.range 4,
+            ‖iteratedCovGrad (I := IU) g₀ 0 2 j P‖ ^ 2) ≤ A ^ 2 →
+          (∑ i ∈ Finset.range 3,
+            ‖iteratedCovGrad (I := IU) g₀ 3 2 i
+              (linearizedRicciConnDiffOrder1CoeffField
+                (I := IU) (M := MU) g₀ g₁)‖ ^ 2) ≤
+            (B0 R + B1 R * A) ^ 2 := by
+  letI : CompleteSpace EU := FiniteDimensional.complete ℝ EU
+  classical
+  have hΛ0 : 0 ≤ Λ := le_trans (by norm_num) hΛ
+  obtain ⟨Capp, hCapp, happ⟩ :=
+    appRS_h22_unif (I := IU) (M := MU) hDim gBase hΛ 3 4 2
+  obtain ⟨Bt, hBt, htrace⟩ :=
+    trace2_h2_unif (I := IU) (M := MU) hDim gBase hΛ0 hδ₀
+  obtain ⟨Bc0, Bc1, hBc0, hBc1, hconn⟩ :=
+    connLow_tame_unif (I := IU) (M := MU) hDim gBase hΛ0 hδ₀
+  let B0 : ℝ → ℝ := fun R => Capp * (2 * Bt R) * (15 * Bc0 R)
+  let B1 : ℝ → ℝ := fun R => Capp * (2 * Bt R) * (15 * Bc1 R)
+  refine ⟨B0, B1, fun R hR => by
+    exact mul_nonneg
+      (mul_nonneg hCapp (mul_nonneg (by norm_num) (hBt R hR)))
+      (mul_nonneg (by norm_num) (hBc0 R hR)), fun R hR => by
+    exact mul_nonneg
+      (mul_nonneg hCapp (mul_nonneg (by norm_num) (hBt R hR)))
+      (mul_nonneg (by norm_num) (hBc1 R hR)), ?_⟩
+  intro g₀ hEq hjet1 hjet2 g₁ P htie δ hδ_le hδ_nonneg hbound
+    R A hR hA hP2 hP3
+  let pureF : SmoothCcTensor g₀ 4 2 :=
+    ricciArmPrincipalCoeffPure (I := IU) (M := MU) g₀ g₁
+  let R1 : SmoothCcTensor g₀ 4 2 :=
+    reindexCoeffGen (I := IU) (M := MU) g₀ 4 2 pureF fourTraceArgPerm0231
+  let R2 : SmoothCcTensor g₀ 4 2 :=
+    reindexCoeffGen (I := IU) (M := MU) g₀ 4 2 pureF fourTraceArgPerm0321
+  let R3 : SmoothCcTensor g₀ 4 2 :=
+    reindexCoeffGen (I := IU) (M := MU) g₀ 4 2 pureF fourTraceArgPerm2301
+  have hcomb : ricciCometricFourTraceCastG0 (I := IU) g₀ g₁ =
+      ((1 : ℝ) / 2) • (R1 + R2 - pureF - R3) := by
+    simpa only [pureF, R1, R2, R3] using
+      ricciCometricFourTraceCastG0_eq_reindex_combination
+        (I := IU) (M := MU) g₀ g₁
+  have hreindex : ∀ (ρ : Equiv.Perm (Fin 4)) (i : ℕ),
+      ‖iteratedCovGrad (I := IU) g₀ 4 2 i
+        (reindexCoeffGen (I := IU) (M := MU) g₀ 4 2 pureF ρ)‖ =
+      ‖iteratedCovGrad (I := IU) g₀ 4 2 i pureF‖ := by
+    intro ρ i
+    rw [iteratedCovGrad_reindexCoeffGen (I := IU) (M := MU),
+      norm_reindexCoeffGen_eq (I := IU) (M := MU)]
+  have hpure : (∑ i ∈ Finset.range 3,
+      ‖iteratedCovGrad (I := IU) g₀ 4 2 i pureF‖ ^ 2) ≤
+      (Bt R) ^ 2 := by
+    have ht := htrace g₀ hEq hjet1 hjet2 g₁ P htie hδ_le hδ_nonneg hbound
+      (Equiv.refl (Fin 4)) R hR hP2
+    calc
+      _ = ∑ i ∈ Finset.range 3,
+          ‖iteratedCovGrad (I := IU) g₀ 4 2 i
+            (lc0TraceRF (I := IU) (M := MU) g₀ g₁ 2
+              (Equiv.refl (Fin 4)))‖ ^ 2 := by
+        apply Finset.sum_congr rfl
+        intro i _
+        rw [lc0TraceRF, iteratedCovGrad_reindexCoeffGen
+          (I := IU) (M := MU),
+          norm_reindexCoeffGen_eq (I := IU) (M := MU)]
+        dsimp only [pureF]
+        rw [pure_eq (I := IU) (M := MU) g₀ g₁,
+          lc0PureDT_eq_pureTrace (I := IU) (M := MU) g₀ g₁]
+      _ ≤ (Bt R) ^ 2 := ht
+  have hcastNorm : ∀ i : ℕ,
+      ‖iteratedCovGrad (I := IU) g₀ 4 2 i
+        (ricciCometricFourTraceCastG0 (I := IU) g₀ g₁)‖ ≤
+      2 * ‖iteratedCovGrad (I := IU) g₀ 4 2 i pureF‖ := by
+    intro i
+    rw [hcomb, iteratedCovGrad_smul_real,
+      iteratedCovGrad_sub, iteratedCovGrad_sub, iteratedCovGrad_add,
+      norm_smul, Real.norm_eq_abs,
+      show |(1 : ℝ) / 2| = 1 / 2 by norm_num]
+    have h1 := norm_add_le
+      (iteratedCovGrad (I := IU) g₀ 4 2 i R1)
+      (iteratedCovGrad (I := IU) g₀ 4 2 i R2)
+    have h2 := norm_sub_le
+      (iteratedCovGrad (I := IU) g₀ 4 2 i R1 +
+        iteratedCovGrad (I := IU) g₀ 4 2 i R2)
+      (iteratedCovGrad (I := IU) g₀ 4 2 i pureF)
+    have h3 := norm_sub_le
+      (iteratedCovGrad (I := IU) g₀ 4 2 i R1 +
+        iteratedCovGrad (I := IU) g₀ 4 2 i R2 -
+        iteratedCovGrad (I := IU) g₀ 4 2 i pureF)
+      (iteratedCovGrad (I := IU) g₀ 4 2 i R3)
+    rw [show ‖iteratedCovGrad (I := IU) g₀ 4 2 i R1‖ =
+        ‖iteratedCovGrad (I := IU) g₀ 4 2 i pureF‖ by
+          exact hreindex fourTraceArgPerm0231 i,
+      show ‖iteratedCovGrad (I := IU) g₀ 4 2 i R2‖ =
+        ‖iteratedCovGrad (I := IU) g₀ 4 2 i pureF‖ by
+          exact hreindex fourTraceArgPerm0321 i] at h1
+    rw [show ‖iteratedCovGrad (I := IU) g₀ 4 2 i R3‖ =
+        ‖iteratedCovGrad (I := IU) g₀ 4 2 i pureF‖ by
+          exact hreindex fourTraceArgPerm2301 i] at h3
+    linarith [norm_nonneg
+      (iteratedCovGrad (I := IU) g₀ 4 2 i pureF)]
+  have hcast : (∑ i ∈ Finset.range 3,
+      ‖iteratedCovGrad (I := IU) g₀ 4 2 i
+        (ricciCometricFourTraceCastG0 (I := IU) g₀ g₁)‖ ^ 2) ≤
+      (2 * Bt R) ^ 2 := by
+    have hsq : ∀ i : ℕ,
+        ‖iteratedCovGrad (I := IU) g₀ 4 2 i
+          (ricciCometricFourTraceCastG0 (I := IU) g₀ g₁)‖ ^ 2 ≤
+        4 * ‖iteratedCovGrad (I := IU) g₀ 4 2 i pureF‖ ^ 2 := by
+      intro i
+      have h := pow_le_pow_left₀ (norm_nonneg _) (hcastNorm i) 2
+      nlinarith
+    calc
+      _ ≤ ∑ i ∈ Finset.range 3,
+          4 * ‖iteratedCovGrad (I := IU) g₀ 4 2 i pureF‖ ^ 2 :=
+        Finset.sum_le_sum fun i _ => hsq i
+      _ = 4 * (∑ i ∈ Finset.range 3,
+          ‖iteratedCovGrad (I := IU) g₀ 4 2 i pureF‖ ^ 2) := by
+        rw [Finset.mul_sum]
+      _ ≤ 4 * (Bt R) ^ 2 :=
+        mul_le_mul_of_nonneg_left hpure (by norm_num)
+      _ = (2 * Bt R) ^ 2 := by ring
+  have hconnLow := hconn g₀ hEq hjet1 hjet2 g₁ P htie
+    hδ_le hδ_nonneg hbound R A hR hA hP2 hP3
+  have hcore := core_h2 (I := IU) (M := MU) hDim g₀ g₁
+    (Bc0 R + Bc1 R * A) hconnLow
+  have hkernel := kernel_h2 (I := IU) (M := MU) g₀ g₁
+    (3 * (Bc0 R + Bc1 R * A)) hcore
+  have hkernel' : (∑ i ∈ Finset.range 3,
+      ‖iteratedCovGrad (I := IU) g₀ 3 4 i
+        (linearizedRicciConnDiffOrder1KernelField
+          (I := IU) g₀ g₁)‖ ^ 2) ≤
+      (15 * (Bc0 R + Bc1 R * A)) ^ 2 := by
+    convert hkernel using 1
+    all_goals ring
+  rw [linearizedRicciConnDiffOrder1CoeffField_eq_appCcRS
+    (I := IU) (M := MU) g₀ g₁]
+  have hout := happ g₀ hEq hjet1 hjet2
+      (ricciCometricFourTraceCastG0 (I := IU) g₀ g₁)
+      (linearizedRicciConnDiffOrder1KernelField (I := IU) g₀ g₁)
       (2 * Bt R) (15 * (Bc0 R + Bc1 R * A))
       (mul_nonneg (by norm_num) (hBt R hR))
       (mul_nonneg (by norm_num)

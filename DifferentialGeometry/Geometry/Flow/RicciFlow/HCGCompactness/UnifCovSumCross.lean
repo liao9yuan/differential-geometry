@@ -1,6 +1,8 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.FixedDomainMetricBounds
+import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.ConnDiffDerivBound
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.MetricCovDerivLinear
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.MetricLapDiff
+import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.ProductMFoldNorm
 import DifferentialGeometry.Tensor.RSTensor.Tensor0SRiemannian.Comparison
 import DifferentialGeometry.Tensor.RSTensor.FiberMetric.ConnectionDifferenceNorm
 import DifferentialGeometry.Geometry.Metric.ChartGram
@@ -1006,6 +1008,306 @@ theorem covStepDiff_jet_le
           mul_le_mul_of_nonneg_left hstep (by positivity)
     _ = (s : ℝ) * Real.sqrt ((Module.finrank ℝ E : ℝ) ^ (s + 2)) *
           (CA + (3 / 2 : Real) * (Real.sqrt (Λ ^ 3) * Λ')) * (NS + NcovS) := by ring
+
+/-- **Fully-discharged base-Leibniz jet step bound** (brick T-B, the `D_N`-recursion endpoint with
+`hA1` supplied by B2).  Same conclusion shape as `covStepDiff_jet_le`, but the abstract order-1
+connection-difference-derivative bound `hA1` is discharged by `covDerivConnDiff_gJet_le`, instantiating
+`CA = (3/2)·Λ⁴·(Λ'' + Λ·Λ'²)`.  Inputs: `Λ`-comparability of `g₂, g₁` on `K` (`hEq`), the first- and
+second-order metric covariant-derivative bounds `Λ', Λ''` of `g₁` measured against `g₂`
+(`hJet1`, `hJet2`, the `∇₂A` discharge), and a matching first-order bound of `g₂` against `g₁`
+(`hJet1'`, the a=0 `A`-atom `NA` fold that `covStepDiff_jet_le` performs internally). -/
+theorem covStepDiff_of_jets
+    [I.Boundaryless] [CompactSpace M]
+    {K : Set M} (g₁ g₂ : SmoothRiemannianMetric I M) (s : ℕ)
+    (S : Tensor0SBundle.Tensor0SField (𝕜 := Real) (E := E) (H := H)
+      (I := I) (M := M) (n := (∞ : WithTop ℕ∞)) s)
+    (x : M) {Λ Λ' Λ'' : ℝ}
+    (hEq : MetricUniformEquivalentOn (I := I) K g₂ g₁ Λ)
+    (hJet1 : MetricCovDerivOrderBoundOn (I := I) K 1 g₁ g₂ Λ')
+    (hJet2 : MetricCovDerivOrderBoundOn (I := I) K 2 g₁ g₂ Λ'')
+    (hJet1' : MetricCovDerivOrderBoundOn (I := I) K 1 g₂ g₁ Λ')
+    (hx : x ∈ K) :
+    Real.sqrt (normSq0S (I := I) g₂ x (s + 2)
+        (covStep (I := I) g₂ (s + 1) (diffStep (I := I) g₁ g₂ s S) x)) ≤
+      (s : ℝ) * Real.sqrt ((Module.finrank ℝ E : ℝ) ^ (s + 2)) *
+        (3 / 2 * Λ ^ 4 * (Λ'' + Λ * Λ' ^ 2) +
+          (3 / 2 : Real) * (Real.sqrt (Λ ^ 3) * Λ')) *
+        (Real.sqrt (normSq0S (I := I) g₂ x s (S x)) +
+          Real.sqrt (normSq0S (I := I) g₂ x (s + 1) (covStep (I := I) g₂ s S x))) := by
+  have hJ2nn : (0 : ℝ) ≤ metricCovDerivNorm (I := I) 2 g₁ g₂ x := Real.sqrt_nonneg _
+  have hJ1nn : (0 : ℝ) ≤ metricCovDerivNorm (I := I) 1 g₁ g₂ x := Real.sqrt_nonneg _
+  have hL''nn : (0 : ℝ) ≤ Λ'' := le_trans hJ2nn (hJet2 x hx)
+  have hL'nn : (0 : ℝ) ≤ Λ' := le_trans hJ1nn (hJet1 x hx)
+  have hLnn : (0 : ℝ) ≤ Λ := le_trans zero_le_one hEq.1
+  have hCA : (0 : ℝ) ≤ 3 / 2 * Λ ^ 4 * (Λ'' + Λ * Λ' ^ 2) := by positivity
+  exact covStepDiff_jet_le (I := I) g₁ g₂ s S x hCA
+    (fun v w u => DifferentialGeometry.Geometry.Curvature.covDerivConnDiff_gJet_le
+      (I := I) hEq hJet1 hJet2 hx v w u)
+    (metricUniformEquivalentOn_symm (I := I) hEq) hJet1' hx
+
+/-! #### The `∇₁ᴺ`-jet telescoping bound `D_N` (brick T-B, the recursion endpoint)
+
+The full norm telescoping `|iterCov g₁ r T N|_{g₂} ≤ D_N·∑_{k≤N}|iterCov g₂ r T k|_{g₂}`.  Direct
+induction on `N` via `iterCov_succ` and the split `covStep g₁ = covStep g₂ + diffStep`: the step
+produces `G_{N+1} ≤ P_{N+1} + R_N + cstep(r+N)·G_N` (`P_k` the `∇₂`-jets, `cstep` the single-step
+`diffStep_jet_one_le` constant), whose single obstruction is the base-covariant derivative
+`R_N = |covStep g₂ (telescAccum N)|_{g₂}` of the telescoping accumulator.  `R_0 = 0` and
+`R_1 = |covStep g₂ (diffStep g₁ g₂ r T)|_{g₂}` is exactly `covStepDiff_of_jets` (the a=1 piece), so
+`N ≤ 2` is unconditional; `R_m` for `m ≥ 2` needs `∇₂^a A` (`a ≥ 2`), the schematic frontier, factored
+as the single hypothesis `hAcc`. -/
+
+/-- Internal `g`-orthonormal basis at `x` with identity inverse-metric matrix, packaged for the
+telescoping fibre-norm triangle inequalities. -/
+private theorem exists_g_onbasis (g : SmoothRiemannianMetric I M) (x : M) :
+    ∃ basis : Module.Basis (Fin (Module.finrank Real (TangentSpace I x))) Real (TangentSpace I x),
+      (∀ i j, g.inner x (basis i) (basis j) = if i = j then (1 : Real) else 0) ∧
+        MetricInverseInBasis_gen (I := I) g x basis
+          (identityInvMetric (Idx := Fin (Module.finrank Real (TangentSpace I x)))) := by
+  classical
+  let D := (tangentMetricData_gen (I := I) g x).metric
+  letI : InnerProductSpace.Core Real (TangentSpace I x) := D.toCore
+  letI : NormedAddCommGroup (TangentSpace I x) :=
+    @InnerProductSpace.Core.toNormedAddCommGroup Real (TangentSpace I x) _ _ _ D.toCore
+  letI : InnerProductSpace Real (TangentSpace I x) :=
+    @InnerProductSpace.ofCore Real (TangentSpace I x) _ _ _ D.toCore.toCore
+  let ob := stdOrthonormalBasis Real (TangentSpace I x)
+  let basis := ob.toBasis
+  have hON : ∀ i j, g.inner x (basis i) (basis j) = if i = j then (1 : Real) else 0 := by
+    intro i j
+    have hinner : Inner.inner Real (ob i) (ob j) = D.inner (ob i) (ob j) :=
+      MetricFiberData.toCore_inner D (ob i) (ob j)
+    change g.inner x (ob.toBasis i) (ob.toBasis j) = if i = j then (1 : Real) else 0
+    rw [← TangentMetricData_gen.inner_eq_gen
+      (tangentMetricData_gen (I := I) g x) (ob.toBasis i) (ob.toBasis j)]
+    change D.inner (ob i) (ob j) = if i = j then (1 : Real) else 0
+    rw [← hinner]; exact ob.inner_eq_ite i j
+  have hinv : MetricInverseInBasis_gen (I := I) g x basis
+      (identityInvMetric (Idx := Fin (Module.finrank Real (TangentSpace I x)))) := by
+    intro i j
+    constructor <;> simp [identityInvMetric, diagonalInvMetric, hON]
+  exact ⟨basis, hON, hinv⟩
+
+/-- The fibre norm of the zero tensor vanishes. -/
+private theorem sqrt_normSq0S_zero (g : SmoothRiemannianMetric I M) (x : M) (s : ℕ) :
+    Real.sqrt (normSq0S (I := I) g x s (0 : Tensor0SBundle.Tensor0SSpace s I x)) = 0 := by
+  classical
+  obtain ⟨basis, _, hinv⟩ := exists_g_onbasis (I := I) g x
+  rw [normSq0S_identity_eq_sum_sq (I := I) g x s basis hinv]
+  rw [show (∑ slots : Fin s → Fin (Module.finrank Real (TangentSpace I x)),
+      (component0S (I := I) basis (0 : Tensor0SBundle.Tensor0SSpace s I x) slots) ^ 2) = 0 from ?_]
+  · exact Real.sqrt_zero
+  · refine Finset.sum_eq_zero (fun slots _ => ?_)
+    rw [component0S_apply]; simp
+
+/-- **The explicit `D_N` constant tower** for the `∇₁ᴺ`-jet telescoping bound.  `Dtower n q r Racc N`
+realizes the recursion `D₀ = 1`, `D_{N+1} = 1 + Racc N + ((r+N)·√(n^{r+N+1})·q)·D_N`, with
+`q = (3/2)·√(Λ³)·Λ'` the folded single-step jet constant and `Racc N` the accumulator base-derivative
+bound at level `N` (`n = finrank ℝ E`). -/
+noncomputable def Dtower (n : ℕ) (q : ℝ) (r : ℕ) (Racc : ℕ → ℝ) : ℕ → ℝ
+  | 0 => 1
+  | (N + 1) => 1 + Racc N +
+      (((r + N : ℕ) : ℝ) * Real.sqrt ((n : ℝ) ^ (r + N + 1)) * q) * Dtower n q r Racc N
+
+/-- The constant tower is nonnegative when `q` and every `Racc m` are. -/
+private theorem Dtower_nonneg (n : ℕ) {q : ℝ} (hq : 0 ≤ q) (r : ℕ) {Racc : ℕ → ℝ}
+    (hR : ∀ m, 0 ≤ Racc m) (N : ℕ) : 0 ≤ Dtower n q r Racc N := by
+  induction N with
+  | zero => simp [Dtower]
+  | succ N ih =>
+      have h1 : 0 ≤ Racc N := hR N
+      have h2 : (0 : ℝ) ≤ ((r + N : ℕ) : ℝ) * Real.sqrt ((n : ℝ) ^ (r + N + 1)) * q := by
+        positivity
+      have h3 : (0 : ℝ) ≤ (((r + N : ℕ) : ℝ) * Real.sqrt ((n : ℝ) ^ (r + N + 1)) * q) *
+          Dtower n q r Racc N := mul_nonneg h2 ih
+      simp only [Dtower]; linarith
+
+set_option maxHeartbeats 1600000 in
+set_option synthInstance.maxHeartbeats 400000 in
+/-- **The `∇₁ᴺ`-jet telescoping bound (brick T-B, the `D_N` recursion endpoint), conditional form.**
+
+Under `Λ`-comparability of `g₁, g₂` and a first-order metric covariant-derivative bound `Λ'` on `K`,
+the `g₂`-fibre norm of the `∇₁`-iterated derivative `iterCov g₁ r T N` is controlled at `x ∈ K` by the
+explicit constant tower `Dtower` times the sum of the `∇₂`-jets `∑_{k≤N} |iterCov g₂ r T k|_{g₂}`.
+
+The single frontier is the hypothesis `hAcc`, bounding the base-covariant derivative of the telescoping
+accumulator `covStep g₂ (telescAccum g₁ g₂ r T m)` at each level `m < N` by `Racc m · ∑_{k≤m+1} P_k`.
+`hAcc` is a theorem at `m = 0` (the accumulator is `0`) and `m = 1` (it is `diffStep g₁ g₂ r T`, so
+`covStepDiff_of_jets` applies — the a=1 jet of the connection difference); for `m ≥ 2` it requires the
+higher `∇₂^a A` jets (`a ≥ 2`), the remaining schematic frontier.  See `iterCovG1_two` for the
+unconditional `N = 2` instance. -/
+theorem iterCovG1_le
+    [I.Boundaryless] [CompactSpace M]
+    {K : Set M} (g₁ g₂ : SmoothRiemannianMetric I M) (r : ℕ)
+    (T : Tensor0SBundle.Tensor0SField (𝕜 := Real) (E := E) (H := H)
+      (I := I) (M := M) (n := (∞ : WithTop ℕ∞)) r)
+    (x : M) {Λ Λ' : ℝ} (Racc : ℕ → ℝ) (hRnn : ∀ m, 0 ≤ Racc m)
+    (hEq : MetricUniformEquivalentOn (I := I) K g₁ g₂ Λ)
+    (hjet : MetricCovDerivOrderBoundOn (I := I) K 1 g₂ g₁ Λ')
+    (hx : x ∈ K) (N : ℕ)
+    (hAcc : ∀ m, m < N →
+      Real.sqrt (normSq0S (I := I) g₂ x (r + m + 1)
+          (covStep (I := I) g₂ (r + m) (telescAccum (I := I) g₁ g₂ r T m) x)) ≤
+        Racc m * ∑ k ∈ Finset.range (m + 2),
+          Real.sqrt (normSq0S (I := I) g₂ x (r + k) (iterCov (I := I) g₂ r T k x))) :
+    Real.sqrt (normSq0S (I := I) g₂ x (r + N) (iterCov (I := I) g₁ r T N x)) ≤
+      Dtower (Module.finrank ℝ E) ((3 / 2 : ℝ) * (Real.sqrt (Λ ^ 3) * Λ')) r Racc N *
+        ∑ k ∈ Finset.range (N + 1),
+          Real.sqrt (normSq0S (I := I) g₂ x (r + k) (iterCov (I := I) g₂ r T k x)) := by
+  classical
+  obtain ⟨basis, _hON, hinv⟩ := exists_g_onbasis (I := I) g₂ x
+  have hΛ'nn : (0 : ℝ) ≤ Λ' := le_trans (Real.sqrt_nonneg _) (hjet x hx)
+  have hLnn : (0 : ℝ) ≤ Λ := le_trans zero_le_one hEq.1
+  have hqnn : (0 : ℝ) ≤ (3 / 2 : ℝ) * (Real.sqrt (Λ ^ 3) * Λ') := by positivity
+  have hSnn : ∀ M : ℕ, 0 ≤ ∑ k ∈ Finset.range (M + 1),
+      Real.sqrt (normSq0S (I := I) g₂ x (r + k) (iterCov (I := I) g₂ r T k x)) :=
+    fun M => Finset.sum_nonneg (fun k _ => Real.sqrt_nonneg _)
+  induction N with
+  | zero =>
+      -- `iterCov g₁ r T 0 = T = iterCov g₂ r T 0`, `Dtower 0 = 1`, sum is the `k = 0` term.
+      simp only [Dtower, one_mul]
+      rw [Finset.sum_range_one]
+      exact le_of_eq rfl
+  | succ N ih =>
+      have ihN := ih (fun m hm => hAcc m (Nat.lt_succ_of_lt hm))
+      -- field identity in `covStep` form (every summand at the uniform rank `(r + N) + 1`)
+      have hidF : iterCov (I := I) g₁ r T (N + 1)
+          = (covStep (I := I) g₂ (r + N) (iterCov (I := I) g₂ r T N)
+              + covStep (I := I) g₂ (r + N) (telescAccum (I := I) g₁ g₂ r T N))
+            + diffStep (I := I) g₁ g₂ (r + N) (iterCov (I := I) g₁ r T N) := by
+        calc iterCov (I := I) g₁ r T (N + 1)
+            = covStep (I := I) g₁ (r + N) (iterCov (I := I) g₁ r T N) :=
+              iterCov_succ (I := I) g₁ r T N
+          _ = covStep (I := I) g₂ (r + N) (iterCov (I := I) g₁ r T N)
+              + diffStep (I := I) g₁ g₂ (r + N) (iterCov (I := I) g₁ r T N) := by
+                rw [diffStep]; abel
+          _ = _ := by rw [iterCov_telescoping (I := I) g₁ g₂ r T N, covStep_add]
+      have hidx : iterCov (I := I) g₁ r T (N + 1) x
+          = (covStep (I := I) g₂ (r + N) (iterCov (I := I) g₂ r T N) x
+              + covStep (I := I) g₂ (r + N) (telescAccum (I := I) g₁ g₂ r T N) x)
+            + diffStep (I := I) g₁ g₂ (r + N) (iterCov (I := I) g₁ r T N) x := by
+        rw [hidF]; simp only [ContMDiffSection.coe_add, Pi.add_apply]
+      -- rewrite the goal's top `∇₂`-jet term into the matching `covStep` form and split the sum
+      rw [Finset.sum_range_succ, iterCov_succ (I := I) g₂ r T N]
+      -- abbreviate the three heavy fibre values as opaque locals so the fibre-norm triangle and the
+      -- `hAcc`/`diffStep` bounds unify against variables rather than the `covStep`/`diffStep` bodies
+      set a := covStep (I := I) g₂ (r + N) (iterCov (I := I) g₂ r T N) x with ha
+      set b := covStep (I := I) g₂ (r + N) (telescAccum (I := I) g₁ g₂ r T N) x with hb
+      set c := diffStep (I := I) g₁ g₂ (r + N) (iterCov (I := I) g₁ r T N) x with hc
+      clear_value a b c
+      set SN := ∑ k ∈ Finset.range (N + 1),
+        Real.sqrt (normSq0S (I := I) g₂ x (r + k) (iterCov (I := I) g₂ r T k x)) with hSNdef
+      set DN := Dtower (Module.finrank ℝ E) ((3 / 2 : ℝ) * (Real.sqrt (Λ ^ 3) * Λ')) r Racc N
+        with hDNdef
+      set cstep := ((r + N : ℕ) : ℝ) * Real.sqrt ((Module.finrank ℝ E : ℝ) ^ (r + N + 1)) *
+        ((3 / 2 : ℝ) * (Real.sqrt (Λ ^ 3) * Λ')) with hcstep
+      have hDsucc : Dtower (Module.finrank ℝ E) ((3 / 2 : ℝ) * (Real.sqrt (Λ ^ 3) * Λ'))
+            r Racc (N + 1) = 1 + Racc N + cstep * DN := by
+        rw [hcstep, hDNdef]; rfl
+      -- normalize the top `∇₂`-jet term to the uniform rank `r + N + 1` (cheap: `a` is opaque)
+      rw [hDsucc, show Real.sqrt (normSq0S (I := I) g₂ x (r + (N + 1)) a)
+        = Real.sqrt (normSq0S (I := I) g₂ x (r + N + 1) a) from rfl]
+      -- the fibre-norm triangle on the opaque pieces `a, b, c` (all at the uniform rank `r + N + 1`)
+      have htri :
+          Real.sqrt (normSq0S (I := I) g₂ x (r + (N + 1)) (iterCov (I := I) g₁ r T (N + 1) x)) ≤
+            Real.sqrt (normSq0S (I := I) g₂ x (r + N + 1) a)
+              + Real.sqrt (normSq0S (I := I) g₂ x (r + N + 1) b)
+              + Real.sqrt (normSq0S (I := I) g₂ x (r + N + 1) c) := by
+        rw [hidx]
+        refine le_trans (sqrt_normSq0S_add_le (I := I) g₂ (a + b) c basis hinv) ?_
+        exact add_le_add (sqrt_normSq0S_add_le (I := I) g₂ a b basis hinv) (le_refl _)
+      -- the accumulator piece via `hAcc`
+      have hboundB :
+          Real.sqrt (normSq0S (I := I) g₂ x (r + N + 1) b) ≤
+            Racc N * (SN + Real.sqrt (normSq0S (I := I) g₂ x (r + N + 1) a)) := by
+        have h := hAcc N (Nat.lt_succ_self N)
+        rw [Finset.sum_range_succ, iterCov_succ (I := I) g₂ r T N, ← hSNdef, ← ha, ← hb] at h
+        exact h
+      -- the diffStep piece via `diffStep_jet_one_le`, then the induction hypothesis
+      have hboundC :=
+        diffStep_jet_one_le (I := I) g₁ g₂ (r + N) (iterCov (I := I) g₁ r T N) hEq hjet hx
+      rw [← hc, ← hcstep] at hboundC
+      have hcstep_nn : 0 ≤ cstep := by rw [hcstep]; positivity
+      have hC2 : Real.sqrt (normSq0S (I := I) g₂ x (r + N + 1) c) ≤ cstep * (DN * SN) :=
+        le_trans hboundC (mul_le_mul_of_nonneg_left ihN hcstep_nn)
+      -- nonnegativity facts
+      have hDN_nn : 0 ≤ DN := by
+        rw [hDNdef]; exact Dtower_nonneg (Module.finrank ℝ E) hqnn r hRnn N
+      have hSN_nn : 0 ≤ SN := by rw [hSNdef]; exact hSnn N
+      have hRN_nn : 0 ≤ Racc N := hRnn N
+      have hAterm_nn : 0 ≤ Real.sqrt (normSq0S (I := I) g₂ x (r + N + 1) a) := Real.sqrt_nonneg _
+      nlinarith [htri, hboundB, hC2, hSN_nn, hRN_nn, hcstep_nn, hDN_nn, hAterm_nn,
+        mul_nonneg (mul_nonneg hcstep_nn hDN_nn) hAterm_nn,
+        mul_nonneg (mul_nonneg hcstep_nn hDN_nn) hSN_nn,
+        mul_nonneg hRN_nn hSN_nn, mul_nonneg hRN_nn hAterm_nn]
+
+/-- The telescoping accumulator at level `1` is the single-step connection difference of `T`. -/
+private theorem telescAccum_one (g₁ g₂ : SmoothRiemannianMetric I M) (r : ℕ)
+    (T : Tensor0SBundle.Tensor0SField (𝕜 := Real) (E := E) (H := H)
+      (I := I) (M := M) (n := (∞ : WithTop ℕ∞)) r) :
+    telescAccum (I := I) g₁ g₂ r T 1 = diffStep (I := I) g₁ g₂ r T := by
+  have hunfold : telescAccum (I := I) g₁ g₂ r T 1
+      = covStep (I := I) g₁ r (telescAccum (I := I) g₁ g₂ r T 0)
+        + diffStep (I := I) g₁ g₂ r T := rfl
+  rw [hunfold, show telescAccum (I := I) g₁ g₂ r T 0 = 0 from rfl, covStep_zero', zero_add]
+
+set_option maxHeartbeats 1600000 in
+/-- **The `∇₁²`-jet telescoping bound (brick T-B), unconditional `N = 2` instance.**
+
+The `N = 2` case of `iterCovG1_le`, discharging the accumulator hypothesis `hAcc` outright: at `m = 0`
+the accumulator is `0`, and at `m = 1` it is `diffStep g₁ g₂ r T`, so its base-covariant derivative is
+bounded by `covStepDiff_of_jets` (the a=1 connection-difference-derivative jet).  This validates the
+`D_N` recursion scheme and constant tower on the first level where an `A`-insertion meets an outer
+`∇₂`.  The metric jets carry the session-12 role asymmetry: `hjet` measures `∇g₂` against `g₁`, while
+`hJet1`/`hJet2` measure `∇g₁`/`∇²g₁` against `g₂`. -/
+theorem iterCovG1_two
+    [I.Boundaryless] [CompactSpace M]
+    {K : Set M} (g₁ g₂ : SmoothRiemannianMetric I M) (r : ℕ)
+    (T : Tensor0SBundle.Tensor0SField (𝕜 := Real) (E := E) (H := H)
+      (I := I) (M := M) (n := (∞ : WithTop ℕ∞)) r)
+    (x : M) {Λ Λ' Λ'' : ℝ}
+    (hEq : MetricUniformEquivalentOn (I := I) K g₁ g₂ Λ)
+    (hjet : MetricCovDerivOrderBoundOn (I := I) K 1 g₂ g₁ Λ')
+    (hJet1 : MetricCovDerivOrderBoundOn (I := I) K 1 g₁ g₂ Λ')
+    (hJet2 : MetricCovDerivOrderBoundOn (I := I) K 2 g₁ g₂ Λ'')
+    (hx : x ∈ K) :
+    Real.sqrt (normSq0S (I := I) g₂ x (r + 2) (iterCov (I := I) g₁ r T 2 x)) ≤
+      Dtower (Module.finrank ℝ E) ((3 / 2 : ℝ) * (Real.sqrt (Λ ^ 3) * Λ')) r
+          (fun m => if m = 1 then
+            (r : ℝ) * Real.sqrt ((Module.finrank ℝ E : ℝ) ^ (r + 2)) *
+              (3 / 2 * Λ ^ 4 * (Λ'' + Λ * Λ' ^ 2) + (3 / 2 : ℝ) * (Real.sqrt (Λ ^ 3) * Λ'))
+          else 0) 2 *
+        ∑ k ∈ Finset.range 3,
+          Real.sqrt (normSq0S (I := I) g₂ x (r + k) (iterCov (I := I) g₂ r T k x)) := by
+  have hLnn : (0 : ℝ) ≤ Λ := le_trans zero_le_one hEq.1
+  have hL'nn : (0 : ℝ) ≤ Λ' := le_trans (Real.sqrt_nonneg _) (hjet x hx)
+  have hL''nn : (0 : ℝ) ≤ Λ'' := le_trans (Real.sqrt_nonneg _) (hJet2 x hx)
+  have hCA_nn : (0 : ℝ) ≤ (r : ℝ) * Real.sqrt ((Module.finrank ℝ E : ℝ) ^ (r + 2)) *
+      (3 / 2 * Λ ^ 4 * (Λ'' + Λ * Λ' ^ 2) + (3 / 2 : ℝ) * (Real.sqrt (Λ ^ 3) * Λ')) := by positivity
+  refine iterCovG1_le (I := I) g₁ g₂ r T x
+    (fun m => if m = 1 then
+      (r : ℝ) * Real.sqrt ((Module.finrank ℝ E : ℝ) ^ (r + 2)) *
+        (3 / 2 * Λ ^ 4 * (Λ'' + Λ * Λ' ^ 2) + (3 / 2 : ℝ) * (Real.sqrt (Λ ^ 3) * Λ'))
+      else 0) (fun m => by dsimp only; split <;> [exact hCA_nn; exact le_refl 0])
+    hEq hjet hx 2 ?_
+  intro m hm
+  interval_cases m
+  · -- `m = 0`: the accumulator is `0`
+    simp only [if_neg (by norm_num : (0 : ℕ) ≠ 1), zero_mul]
+    rw [show telescAccum (I := I) g₁ g₂ r T 0 = 0 from rfl, covStep_zero']
+    simp only [ContMDiffSection.coe_zero, Pi.zero_apply, sqrt_normSq0S_zero, le_refl]
+  · -- `m = 1`: the accumulator is `diffStep g₁ g₂ r T`; bound its `∇₂` by `covStepDiff_of_jets`
+    simp only [reduceIte]
+    rw [telescAccum_one (I := I) g₁ g₂ r T]
+    refine le_trans (covStepDiff_of_jets (I := I) g₁ g₂ r T x
+      (metricUniformEquivalentOn_symm (I := I) hEq) hJet1 hJet2 hjet hx) ?_
+    rw [Finset.sum_range_succ, Finset.sum_range_succ, Finset.sum_range_one]
+    refine mul_le_mul_of_nonneg_left ?_ hCA_nn
+    have hA : Real.sqrt (normSq0S (I := I) g₂ x r (T x))
+        = Real.sqrt (normSq0S (I := I) g₂ x (r + 0) (iterCov (I := I) g₂ r T 0 x)) := rfl
+    have hB : Real.sqrt (normSq0S (I := I) g₂ x (r + 1) (covStep (I := I) g₂ r T x))
+        = Real.sqrt (normSq0S (I := I) g₂ x (r + 1) (iterCov (I := I) g₂ r T 1 x)) := rfl
+    rw [hA, hB]
+    exact le_add_of_nonneg_right (Real.sqrt_nonneg _)
 
 end DiffStepNorm
 

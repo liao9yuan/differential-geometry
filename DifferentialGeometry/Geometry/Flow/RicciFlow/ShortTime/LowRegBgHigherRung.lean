@@ -71,7 +71,7 @@ theorem galArmMassHmBg (g₀ g_bg : SmoothRiemannianMetric I M)
       ccTensorBilin (I := I) g₀ T x u v =
         ccTensorBilin (I := I) g₀ T x v u := by
     dsimp only [T]
-    exact DeTurckRemainderTameLipschitz.ccTensorBilin_symmS_symm
+    exact ccTensorBilin_symmS_symm
       (I := I) (M := M) g₀ _
   have hδg : gFibreOpBound (I := I) (M := M) g₀
       (ccTensorBilinSymm (I := I) g₀ T) δ := by

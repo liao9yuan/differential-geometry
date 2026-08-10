@@ -1,7 +1,7 @@
 import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.RiemannianFiberNormSq.RiemannianFiberNormSqRiemannOpHigherRankParseval
 
-/-! # Compatibility import for higher-rank curvature-operator Parseval
+/-!
+# Compatibility re-export for higher-rank Riemann-operator Parseval identities
 
-The intrinsic higher-rank Parseval estimate lives with the connection-Laplacian analytic API.
+The implementation lives in the analysis hierarchy; this module preserves the former import path.
 -/
-

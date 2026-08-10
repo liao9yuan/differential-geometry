@@ -4,6 +4,9 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.UnifAppH22
 import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.UnifCoeffH2
 import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.UnifFixedConnH2
 import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.UnifGridH1
+import DifferentialGeometry.Analysis.Sobolev.TensorHilbert.DeTurckVFEndoInsertTopSep
+import DifferentialGeometry.Analysis.Sobolev.TensorHilbert.LieCorr0CoefficientRefold
+import DifferentialGeometry.Analysis.Sobolev.TensorHilbert.LieCorr0VBRefold
 
 /-!
 # Class-first insertion-difference H1 bound
@@ -219,8 +222,30 @@ theorem insert_h1_unif
         (wCA (I := I) (M := M) g₀ g₁) OD := by
     dsimp only [AD, OD]
     unfold wAlphaB
-    rw [← appCcRS_zero_eq_appCc, ← appCcRS_zero_eq_appCc,
-      ← appCcRS_sub_right]
+    calc
+      appCc (I := I) (M := M) g₀ 1 2 (wCA (I := I) (M := M) g₀ g₁)
+            (wOmega (I := I) (M := M) g₀ g₁ g₀) -
+          appCc (I := I) (M := M) g₀ 1 2 (wCA (I := I) (M := M) g₀ g₁)
+            (wOmega (I := I) (M := M) g₀ g₁ gBase) =
+        appCcRS (I := I) (M := M) g₀ 0 1 2 (wCA (I := I) (M := M) g₀ g₁)
+            (wOmega (I := I) (M := M) g₀ g₁ g₀) -
+          appCcRS (I := I) (M := M) g₀ 0 1 2 (wCA (I := I) (M := M) g₀ g₁)
+            (wOmega (I := I) (M := M) g₀ g₁ gBase) := by
+          exact congrArg₂ (fun X Y => X - Y)
+            (appCcRS_zero_eq_appCc (I := I) (M := M) g₀ 1 2
+              (wCA (I := I) (M := M) g₀ g₁)
+              (wOmega (I := I) (M := M) g₀ g₁ g₀)).symm
+            (appCcRS_zero_eq_appCc (I := I) (M := M) g₀ 1 2
+              (wCA (I := I) (M := M) g₀ g₁)
+              (wOmega (I := I) (M := M) g₀ g₁ gBase)).symm
+      _ = appCcRS (I := I) (M := M) g₀ 0 1 2
+          (wCA (I := I) (M := M) g₀ g₁)
+          (wOmega (I := I) (M := M) g₀ g₁ g₀ -
+            wOmega (I := I) (M := M) g₀ g₁ gBase) :=
+        (appCcRS_sub_right (I := I) (M := M) g₀ 0 1 2
+          (wCA (I := I) (M := M) g₀ g₁)
+          (wOmega (I := I) (M := M) g₀ g₁ g₀)
+          (wOmega (I := I) (M := M) g₀ g₁ gBase)).symm
   have hAD : (∑ i ∈ Finset.range 2,
       ‖iteratedCovGrad (I := I) g₀ 0 2 i AD‖ ^ 2) ≤ (BA R) ^ 2 := by
     rw [hADform]

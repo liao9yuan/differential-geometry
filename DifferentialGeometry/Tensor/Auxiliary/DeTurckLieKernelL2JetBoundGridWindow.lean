@@ -1,6 +1,6 @@
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.RicciDeTurckSectionDifference
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.CovDerivConnDiffQuadraticBound
-import DifferentialGeometry.Analysis.Parabolic.RicciLinearization.ConvexPerturbationPointwiseC2
+import DifferentialGeometry.Analysis.Sobolev.Embedding.ConvexPerturbationPointwiseC2
 import DifferentialGeometry.Analysis.Parabolic.RicciLinearization.RicciDifferenceMeanValue
 import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.RiemannianFiberNormSq.RiemannianFiberNormSqSmoothCcUniformBound
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.OperatorFieldFibreNormJet
@@ -64,6 +64,9 @@ open DifferentialGeometry.Analysis.Sobolev.TensorHilbert
 
 def antidiagonalTupleGridPartialSum (b : ℕ → ℝ) (m : ℕ) : ℝ :=
   ∑ k ∈ Finset.range m, Combinatorics.antidiagonalTupleGrid b k
+
+/-- Compatibility name for the DLa antidiagonal grid window. -/
+abbrev dLaGridWin := antidiagonalTupleGridPartialSum
 
 lemma dLaGridWin_nonneg (b : ℕ → ℝ) (hb : ∀ j, 0 ≤ b j) (m : ℕ) :
     0 ≤ antidiagonalTupleGridPartialSum b m :=
@@ -199,6 +202,9 @@ private lemma antidiagonalTupleGrid_mul_le_dla (b : ℕ → ℝ) (hb : ∀ j, 0 
 def antidiagonalTuplePairCount (m1 m2 : ℕ) : ℝ :=
   ∑ k1 ∈ Finset.range m1, ∑ k2 ∈ Finset.range m2, antidiagonalTupleTotalCount k1 *
     antidiagonalTupleTotalCount k2
+
+/-- Compatibility name for the product coefficient of two DLa grid windows. -/
+abbrev dLaPairCount := antidiagonalTuplePairCount
 
 lemma dLaPairCount_nonneg (m1 m2 : ℕ) : 0 ≤ antidiagonalTuplePairCount m1 m2 :=
   Finset.sum_nonneg fun k1 _ => Finset.sum_nonneg fun k2 _ =>

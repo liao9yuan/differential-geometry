@@ -1,4 +1,6 @@
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.EdgeRefoldPairing
+import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.EdgeRefoldPairingPolarized
+import DifferentialGeometry.Analysis.Spectral.Tensor.Estimates.AppCcLpProduct
 import DifferentialGeometry.Analysis.Sobolev.TensorHilbert.DeTurckLieKernelL2JetBound
 
 /-!

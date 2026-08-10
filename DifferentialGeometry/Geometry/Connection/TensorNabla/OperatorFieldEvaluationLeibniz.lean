@@ -79,13 +79,12 @@ open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.L2
 open DifferentialGeometry.Analysis.Parabolic.TensorSpectral
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
-  [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
+  [FiniteDimensional ℝ E]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
   [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
   [T2Space M] [SigmaCompactSpace M]
-variable [CompleteSpace E]
 
 /-- **The order-`0` fibrewise-curvature-operator factorisation hypothesis.** For a recursive operator
 family `op`, this records the two structural facts that fix the order-`0` base `op 0 r` to a *fibrewise*
@@ -144,6 +143,8 @@ set_option maxHeartbeats 1600000 in
 set_option synthInstance.maxHeartbeats 1600000 in
 attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
   Tensor0SBundle.tensorRSSpace_normedSpace in
+omit [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
+    [T2Space M] [SigmaCompactSpace M] in
 /-- **The intrinsic-fibre-norm/`g`-bundle-norm bridge** (proved). Under the `(r, s)`-tensor
 Riemannian bundle instance `tensorRS_riemannianBundle g r s`, the intrinsic squared Riemannian fibre
 norm `riemannianFiberNormSq g r s x z` coincides with the squared bundle-fibre norm `‖z‖²`. The proof
@@ -174,6 +175,8 @@ set_option maxHeartbeats 3200000 in
 set_option synthInstance.maxHeartbeats 1600000 in
 attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
   Tensor0SBundle.tensorRSSpace_normedSpace in
+omit [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
+    [T2Space M] [SigmaCompactSpace M] in
 /-- **P4 — the fibrewise Cauchy–Schwarz for an operator-field evaluation** (proved). For a fibrewise
 continuous-linear operator `φ : TensorRSSpace 0 r I x →L[ℝ] TensorRSSpace 0 s I x` between tensor
 fibres at a point `x`, the intrinsic squared Riemannian fibre norm of the evaluation `φ v` is
@@ -219,9 +222,25 @@ theorem riemannianFiberNormSq_clm_apply_le
           · exact φg.le_opNorm v
     _ = ‖φg‖ ^ 2 * ‖v‖ ^ 2 := by ring
 
+/-- Compatibility name for the pointwise-linear, value-local order-zero
+operator fingerprint. -/
+abbrev IsPointwiseLinearLocalOperator
+    (g : SmoothRiemannianMetric I M)
+    (op : ∀ (p r : ℕ), SmoothCcTensor g 0 r → SmoothCcTensor g 0 (r + p)) : Prop :=
+  IsOrderZeroCurvFactor g op
+
+/-- Pointwise scalar homogeneity of an order-zero operator. -/
+theorem order_zero_apply_smul_of_pointwise_smul
+    (g : SmoothRiemannianMetric I M) (r : ℕ)
+    (op : ∀ (p r : ℕ), SmoothCcTensor g 0 r → SmoothCcTensor g 0 (r + p))
+    (hbase : IsPointwiseLinearLocalOperator (I := I) (M := M) g op)
+    (c : ℝ) (W₁ W₂ : SmoothCcTensor g 0 r) (x : M)
+    (hval : W₂.toSection x = c • W₁.toSection x) :
+    (op 0 r W₂).toSection x = c • (op 0 r W₁).toSection x :=
+  op_zero_value_homogeneous (I := I) (M := M) g r op hbase c W₁ W₂ x hval
+
 end Connection
 end Integral
 end DifferentialGeometry
 
 end
-

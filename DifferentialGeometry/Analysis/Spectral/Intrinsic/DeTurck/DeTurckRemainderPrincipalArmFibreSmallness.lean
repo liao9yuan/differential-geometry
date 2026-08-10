@@ -55,8 +55,7 @@ private theorem iteratedCovGrad_comp_l2_sq_eq_rs
   simpa only [Nat.add_assoc] using hrw
 
 theorem exists_coeffAction_iteratedCovGrad_l2_coeffJetEnvelope_dataJetWindow_le_of_lowOrder
-    (g₀ : SmoothRiemannianMetric I M) (a : ℕ)
-    (_ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) {R₀ : ℝ} (hR₀ : 0 ≤ R₀)
+    (g₀ : SmoothRiemannianMetric I M) (a : ℕ) {R₀ : ℝ} (hR₀ : 0 ≤ R₀)
     (Kc : ℕ → ℝ) (hKc_nn : ∀ i, 0 ≤ Kc i) :
     ∃ Cm : ℕ → ℝ, (∀ q, 0 ≤ Cm q) ∧
       ∀ (m : ℕ), m ≤ 1 →
@@ -66,7 +65,7 @@ theorem exists_coeffAction_iteratedCovGrad_l2_coeffJetEnvelope_dataJetWindow_le_
           ‖iteratedCovGrad (I := I) g₀ (2 + m) 2 i C‖ ^ 2 ≤
             Kc i * (1 + ∑ j ∈ Finset.range (i + 2),
               ‖iteratedCovGrad (I := I) g₀ 0 2 j T₀‖ ^ 2)) →
-        ∀ q : ℕ, q + (Module.finrank ℝ E / 2 + 3) ≤ a →
+        ∀ q : ℕ, q + Module.finrank ℝ E / 2 ≤ a →
           ‖iteratedCovGrad (I := I) g₀ 0 2 q
               (operatorFieldApply (I := I) (M := M) g₀ (2 + m) 2 C
                 (iteratedCovGrad (I := I) g₀ 0 2 m T₀))‖ ≤
@@ -333,7 +332,7 @@ private theorem iteratedCovGrad_comp_jetSum_le
 
 theorem exists_coeffAction_iteratedCovGrad_l2_coeffJetEnvelope_dataJetWindow_le_of_highOrder
     (g₀ : SmoothRiemannianMetric I M) (a : ℕ)
-    (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) {R₀ : ℝ} (hR₀ : 0 ≤ R₀)
+    (ha : Module.finrank ℝ E / 2 ≤ a) {R₀ : ℝ} (hR₀ : 0 ≤ R₀)
     (Kc : ℕ → ℝ) (hKc_nn : ∀ i, 0 ≤ Kc i) (Λ : ℝ) (hΛ_nn : 0 ≤ Λ) :
     ∃ Cm : ℕ → ℝ, (∀ q, 0 ≤ Cm q) ∧
       ∀ (m : ℕ), m ≤ 1 →
@@ -345,7 +344,7 @@ theorem exists_coeffAction_iteratedCovGrad_l2_coeffJetEnvelope_dataJetWindow_le_
           ‖iteratedCovGrad (I := I) g₀ (2 + m) 2 i C‖ ^ 2 ≤
             Kc i * (1 + ∑ j ∈ Finset.range (i + 2),
               ‖iteratedCovGrad (I := I) g₀ 0 2 j T₀‖ ^ 2)) →
-        ∀ q : ℕ, a ≤ q + (Module.finrank ℝ E / 2 + 3) →
+        ∀ q : ℕ, Module.finrank ℝ E / 2 + m ≤ q →
           ‖iteratedCovGrad (I := I) g₀ 0 2 q
               (operatorFieldApply (I := I) (M := M) g₀ (2 + m) 2 C
                 (iteratedCovGrad (I := I) g₀ 0 2 m T₀))‖ ≤
@@ -550,9 +549,15 @@ theorem exists_coeffAction_iteratedCovGrad_l2_coeffJetEnvelope_dataJetWindow_le_
     · rw [h]; have := hD_nn 0 q; linarith
   exact mul_le_mul_of_nonneg_right hDle (Real.sqrt_nonneg _)
 
+/-- The order-generic jet window of the first-order low-base arms.
+
+The derivative budget is `2 * (finrank ℝ E / 2) ≤ a`.  Splitting at
+`finrank ℝ E / 2 + m` keeps the coefficient's Sobolev jet window inside the
+a-priori ball in the low band and the data's sup-window inside the output
+window in the high band. -/
 theorem exists_coeffAction_iteratedCovGrad_l2_coeffJetEnvelope_dataJetWindow_le
     (g₀ : SmoothRiemannianMetric I M) (a : ℕ)
-    (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) {R₀ : ℝ} (hR₀ : 0 ≤ R₀)
+    (ha : 2 * (Module.finrank ℝ E / 2) ≤ a) {R₀ : ℝ} (hR₀ : 0 ≤ R₀)
     (Kc : ℕ → ℝ) (hKc_nn : ∀ i, 0 ≤ Kc i) (Λ : ℝ) (hΛ_nn : 0 ≤ Λ) :
     ∃ Cm : ℕ → ℝ, (∀ q, 0 ≤ Cm q) ∧
       ∀ (m : ℕ), m ≤ 1 →
@@ -573,24 +578,28 @@ theorem exists_coeffAction_iteratedCovGrad_l2_coeffJetEnvelope_dataJetWindow_le
   classical
   obtain ⟨CmA, hCmA_nn, hA⟩ :=
     exists_coeffAction_iteratedCovGrad_l2_coeffJetEnvelope_dataJetWindow_le_of_lowOrder
-      (I := I) (M := M) g₀ a ha_super hR₀ Kc hKc_nn
+      (I := I) (M := M) g₀ a hR₀ Kc hKc_nn
   obtain ⟨CmB, hCmB_nn, hB⟩ :=
     exists_coeffAction_iteratedCovGrad_l2_coeffJetEnvelope_dataJetWindow_le_of_highOrder
-      (I := I) (M := M) g₀ a ha_super hR₀ Kc hKc_nn Λ hΛ_nn
+      (I := I) (M := M) g₀ a (by omega) hR₀ Kc hKc_nn Λ hΛ_nn
   refine ⟨fun q => CmA q + CmB q,
     fun q => add_nonneg (hCmA_nn q) (hCmB_nn q), ?_⟩
   intro m hm C T₀ hball hsup henv q
   have hsqrt_nn : 0 ≤ Real.sqrt (∑ i ∈ Finset.range (q + 1 + 1),
       ‖iteratedCovGrad (I := I) g₀ 0 2 i T₀‖ ^ 2) := Real.sqrt_nonneg _
-  rcases le_total (q + (Module.finrank ℝ E / 2 + 3)) a with hband | hband
-  · refine le_trans (hA m hm C T₀ hball henv q hband) ?_
+  rcases lt_or_ge q (Module.finrank ℝ E / 2 + m) with hband | hband
+  · refine le_trans (hA m hm C T₀ hball henv q (by omega)) ?_
     have := mul_le_mul_of_nonneg_right
       (show CmA q ≤ CmA q + CmB q by have := hCmB_nn q; linarith) hsqrt_nn
     linarith
-  · refine le_trans (hB m hm C T₀ hball hsup henv q hband) ?_
+  · refine le_trans (hB m hm C T₀ hball hsup henv q (by omega)) ?_
     have := mul_le_mul_of_nonneg_right
       (show CmB q ≤ CmA q + CmB q by have := hCmA_nn q; linarith) hsqrt_nn
     linarith
+
+/-- Compatibility name for the coefficient-action jet-window estimate. -/
+alias exists_appCc_iteratedCovGrad_l2_coeffJetEnvelope_dataJetWindow_le :=
+  exists_coeffAction_iteratedCovGrad_l2_coeffJetEnvelope_dataJetWindow_le
 
 theorem
     exists_deTurckSmoothRemainderDiff_sub_principalCometricArm_smallThirdArm_iteratedCovGrad_jet_le
@@ -659,7 +668,7 @@ theorem
       (I := I) (M := M) g₀ g_bg a ha_super hR₀ hδ_le hδ_fibre
   obtain ⟨Cm, hCm_nn, hM2⟩ :=
     exists_coeffAction_iteratedCovGrad_l2_coeffJetEnvelope_dataJetWindow_le
-      (I := I) (M := M) g₀ a ha_super hR₀ Kc hKc_nn Λ hΛ_nn
+      (I := I) (M := M) g₀ a (by omega) hR₀ Kc hKc_nn Λ hΛ_nn
   refine ⟨εC, hεC_nn, hεC_cap, hεC_cap', Kc, hKc_nn, εa, hεa_nn, hεa_cap, Λ, hΛ_nn,
     Cm, hCm_nn, fun T₀ hTsymm hball => ?_⟩
   obtain ⟨C₀, C₁, C₂, hid, hC₂sup, hC₀sup, hC₁sup, hC₀jet, hC₁jet, hC₂jet⟩ :=

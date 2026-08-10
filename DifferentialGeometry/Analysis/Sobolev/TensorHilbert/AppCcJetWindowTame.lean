@@ -135,6 +135,16 @@ theorem operatorFieldApply_l2_le_of_pointwise_fiberNormSq_bound_right
   exact operatorFieldCompose_l2_le_of_pointwise_fiberNormSq_bound_right (I := I) (M := M) g 0 r s Φ
     W B hB hW
 
+/-- Compatibility name for the left-pointwise operator-field application
+estimate. -/
+abbrev appCc_l2_le_of_pointwise_fiberNormSq_bound_left :=
+  @operatorFieldApply_l2_le_of_pointwise_fiberNormSq_bound_left
+
+/-- Compatibility name for the right-pointwise operator-field application
+estimate. -/
+abbrev appCc_l2_le_of_pointwise_fiberNormSq_bound_right :=
+  @operatorFieldApply_l2_le_of_pointwise_fiberNormSq_bound_right
+
 attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
   Tensor0SBundle.tensorRSSpace_normedSpace in
 theorem exists_iteratedCovGrad_fiberNormSq_le_smoothCcToTensorHs_sq

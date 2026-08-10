@@ -161,7 +161,7 @@ theorem exists_ricciArmOrder0RiemannCoeff_realizedFam_riemannianFiberNormSq_ball
     rfns_iteratedCovGrad_ricciArmOrder0RiemannCoeff_backgroundDifference_diagonalProductGrid_le
       (I := I) (M := M) g₀ (max_lt hδ₀ one_pos)
   obtain ⟨Csob, hCsob_nn, hCsob⟩ :=
-    exists_Csob_convexPerturbation_pointwise_C2_le (I := I) (M := M) g₀ a ha_super
+    exists_Csob_convexPerturbation_pointwise_C2_le (I := I) (M := M) (E := E) g₀ a ha_super
   obtain ⟨Kbg, hKbg_nn, hKbg_bd⟩ :=
     exists_bound_riemannianFiberNormSq_smoothCcTensor (I := I) (M := M) g₀ 2 2
       (ricciArmOrder0RiemannCoeff (I := I) (M := M) g₀ g₀)

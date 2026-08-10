@@ -923,6 +923,30 @@ theorem riemannianFiberNormSq_iteratedCovGrad_deTurckLieConnDiffDerivCoeffField_
       (le_of_eq (by rw [hCfield_def, hW_def])))) ?_
   exact le_of_eq (by ring)
 
+/-- Compatibility statement of the pointwise top-separated DLa coefficient
+bound in the original DLa grid notation. -/
+theorem rfns_iCG_dLaField_topsep (g₀ g_bg : SmoothRiemannianMetric I M)
+    {δ₀ : ℝ} (hδ₀ : δ₀ < 1) :
+    ∃ Ktop : ℝ, 0 ≤ Ktop ∧ ∃ Kc : ℕ → ℝ, (∀ i, 0 ≤ Kc i) ∧
+      ∀ (g₁ : SmoothRiemannianMetric I M) (T : SmoothCcTensor g₀ 0 2)
+        (htie : ∀ (y : M) (v w : TangentSpace I y),
+          g₁.inner y v w = g₀.inner y v w + ccTensorBilinSymm (I := I) g₀ T y v w)
+        {δ : ℝ} (hδ_le : δ ≤ δ₀) (hδ0 : 0 ≤ δ)
+        (hbound : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+        (i : ℕ) (x : M),
+        riemannianFiberNormSq (I := I) (M := M) g₀ 2 (2 + i) x
+            ((iteratedCovGrad (I := I) g₀ 2 2 i
+              (deTurckLieDLaCoeffField (I := I) (M := M) g₀ g₁ g_bg)).toSection x) ≤
+          Ktop * appCcGdiag (E := E) i * appCcGdiag (E := E) i *
+              riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + (i + 2)) x
+                ((iteratedCovGrad (I := I) g₀ 0 2 (i + 2) T).toSection x) +
+          Kc i * dLaGridWin
+            (fun l => riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + l) x
+              ((iteratedCovGrad (I := I) g₀ 0 2 l T).toSection x)) (i + 3) := by
+  simpa only [deTurckLieDLaCoeffField, appCcGdiag, dLaGridWin] using
+    riemannianFiberNormSq_iteratedCovGrad_deTurckLieConnDiffDerivCoeffField_topSeparated_le
+      (I := I) (M := M) g₀ g_bg hδ₀
+
 /-! ### Summation helpers (copied verbatim from `DLaTopSeparated`). -/
 
 end DLaGridBrick

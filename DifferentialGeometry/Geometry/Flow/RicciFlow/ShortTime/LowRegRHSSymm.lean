@@ -147,7 +147,7 @@ theorem ddc_swap_sub (g : SmoothRiemannianMetric I M)
 theorem symmS_of_swap (g₀ : SmoothRiemannianMetric I M) {X : SmoothCcTensor g₀ 0 2}
     (h : domDomCongrSection (I := I) g₀ (Equiv.swap (0 : Fin 2) 1) X = X) :
     symmS (I := I) (M := M) g₀ X = X := by
-  rw [symmS, h, ← two_smul ℝ X, smul_smul,
+  simp only [symmS, ccTensor02Symm, h, ← two_smul ℝ X, smul_smul,
     show (1 / 2 : ℝ) * 2 = 1 by norm_num, one_smul]
 
 /-- The slot swap fixes every symmetrized tensor. -/

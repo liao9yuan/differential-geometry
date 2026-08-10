@@ -115,22 +115,22 @@ fixed operator-field arms. -/
 private theorem mcd_corr_sub (g₀ : SmoothRiemannianMetric I M)
     (ΦA ΦB : SmoothCcTensor g₀ 3 3) (W₁ W₂ : SmoothCcTensor g₀ 0 3) :
     (W₁ +
-        ((1 / 2 : ℝ) • appCc (I := I) (M := M) g₀ 3 3 ΦA W₁ +
-          (1 / 2 : ℝ) • appCc (I := I) (M := M) g₀ 3 3 ΦB W₁)) -
+        ((1 / 2 : ℝ) • operatorFieldApply (I := I) (M := M) g₀ 3 3 ΦA W₁ +
+          (1 / 2 : ℝ) • operatorFieldApply (I := I) (M := M) g₀ 3 3 ΦB W₁)) -
       (W₂ +
-        ((1 / 2 : ℝ) • appCc (I := I) (M := M) g₀ 3 3 ΦA W₂ +
-          (1 / 2 : ℝ) • appCc (I := I) (M := M) g₀ 3 3 ΦB W₂)) =
+        ((1 / 2 : ℝ) • operatorFieldApply (I := I) (M := M) g₀ 3 3 ΦA W₂ +
+          (1 / 2 : ℝ) • operatorFieldApply (I := I) (M := M) g₀ 3 3 ΦB W₂)) =
       (W₁ - W₂) +
-        ((1 / 2 : ℝ) • appCc (I := I) (M := M) g₀ 3 3 ΦA (W₁ - W₂) +
-          (1 / 2 : ℝ) • appCc (I := I) (M := M) g₀ 3 3 ΦB (W₁ - W₂)) := by
-  have hA : appCc (I := I) (M := M) g₀ 3 3 ΦA (W₁ - W₂) =
-      appCc (I := I) (M := M) g₀ 3 3 ΦA W₁ -
-        appCc (I := I) (M := M) g₀ 3 3 ΦA W₂ := by
+        ((1 / 2 : ℝ) • operatorFieldApply (I := I) (M := M) g₀ 3 3 ΦA (W₁ - W₂) +
+          (1 / 2 : ℝ) • operatorFieldApply (I := I) (M := M) g₀ 3 3 ΦB (W₁ - W₂)) := by
+  have hA : operatorFieldApply (I := I) (M := M) g₀ 3 3 ΦA (W₁ - W₂) =
+      operatorFieldApply (I := I) (M := M) g₀ 3 3 ΦA W₁ -
+        operatorFieldApply (I := I) (M := M) g₀ 3 3 ΦA W₂ := by
     simpa only [appCcRS_zero_eq_appCc] using
       appCcRS_sub_right (I := I) (M := M) g₀ 0 3 3 ΦA W₁ W₂
-  have hB : appCc (I := I) (M := M) g₀ 3 3 ΦB (W₁ - W₂) =
-      appCc (I := I) (M := M) g₀ 3 3 ΦB W₁ -
-        appCc (I := I) (M := M) g₀ 3 3 ΦB W₂ := by
+  have hB : operatorFieldApply (I := I) (M := M) g₀ 3 3 ΦB (W₁ - W₂) =
+      operatorFieldApply (I := I) (M := M) g₀ 3 3 ΦB W₁ -
+        operatorFieldApply (I := I) (M := M) g₀ 3 3 ΦB W₂ := by
     simpa only [appCcRS_zero_eq_appCc] using
       appCcRS_sub_right (I := I) (M := M) g₀ 0 3 3 ΦB W₁ W₂
   rw [hA, hB]
@@ -211,7 +211,7 @@ theorem mcdBgAtgw (g₀ gB : SmoothRiemannianMetric I M) :
           SPhi i * Combinatorics.antidiagonalTupleGridWindow
             (gridBase (I := I) (M := M) g₀ P y) (i + 1)) →
       HasMarkWin (I := I) (M := M) g₀ P
-        (appCc (I := I) (M := M) g₀ 3 3 Φ W) 0
+        (operatorFieldApply (I := I) (M := M) g₀ 3 3 Φ W) 0
         (foldConst (E := E) 0 0 SPhi KW) := by
     intro Φ hwin
     rw [← appCcRS_zero_eq_appCc (I := I) (M := M) g₀ 3 3]
@@ -296,7 +296,7 @@ theorem mcdMark (g₀ : SmoothRiemannianMetric I M) {δ₀ : ℝ} (hδ₀ : δ�
           SPhi n * Combinatorics.antidiagonalTupleGridWindow
             (gridBase (I := I) (M := M) g₀ P y) (n + 1)) →
       HasMarkWin (I := I) (M := M) g₀ P
-        (appCc (I := I) (M := M) g₀ 3 3 Φ (wXi (I := I) (M := M) g₀ g₁ g₀)) 1
+        (operatorFieldApply (I := I) (M := M) g₀ 3 3 Φ (wXi (I := I) (M := M) g₀ g₁ g₀)) 1
         (foldConst (E := E) 0 0 SPhi Kwx) := by
     intro Φ hwin
     rw [← appCcRS_zero_eq_appCc (I := I) (M := M) g₀ 3 3]
@@ -343,7 +343,7 @@ theorem wOmegaMark (g₀ : SmoothRiemannianMetric I M) {δ₀ : ℝ} (hδ₀ : �
     mkOfWin (I := I) (M := M) g₀ P _ (fun l y => hcg g₁ P htie hδ_le hδ0 hδ l y)
   refine mkCongr (I := I) (M := M) g₀ P
     (show wOmega (I := I) (M := M) g₀ g₁ g₀ =
-      appCcRS (I := I) (M := M) g₀ 0 3 1 (cometricCastG0 (I := I) g₀ g₁)
+      ccOperatorFieldComp (I := I) (M := M) g₀ 0 3 1 (cometricCastG0 (I := I) g₀ g₁)
         (wXi (I := I) (M := M) g₀ g₁ g₀) from by
       rw [appCcRS_zero_eq_appCc (I := I) (M := M) g₀ 3 1, wOmega]) ?_
   simpa using mkApp (I := I) (M := M) g₀ P _ _ hKcg_nn hKwx_nn hCast

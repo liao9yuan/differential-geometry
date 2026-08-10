@@ -47,7 +47,7 @@ Only the metric evolves: the path and its velocity are held fixed.  The
 Ricci-flow equation differentiates the squared speed, the square-root chain
 rule differentiates the speed, and compactness of the parameter interval
 justifies differentiation under the interval integral. -/
-theorem pathLength_timeDeriv_of_ricciFlow
+private theorem pathLength_timeDeriv_of_ricciFlow
     {D : RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
     (hS : IsSolutionOn (I := I) S)
@@ -260,7 +260,7 @@ theorem pathLength_timeDeriv_of_ricciFlow
 
 /-- A quadratic Ricci bound gives the expected lower bound for the time
 derivative of the length of a fixed regular path. -/
-theorem pathLength_deriv_ge
+private theorem pathLength_deriv_ge
     {D : RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
     (hS : IsSolutionOn (I := I) S)

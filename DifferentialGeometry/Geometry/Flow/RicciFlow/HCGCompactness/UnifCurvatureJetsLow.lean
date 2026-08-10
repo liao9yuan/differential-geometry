@@ -1,6 +1,6 @@
-import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.UnifCurvatureJetBound
+import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.UnifCurvatureSup
 import DifferentialGeometry.Geometry.Curvature.PerturbedCurvatureOperatorBound
-import DifferentialGeometry.Geometry.Curvature.CovDerivConnDiffQuadraticBound
+import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.CovDerivConnDiffQuadraticBound
 
 /-!
 # Low-order class-uniform curvature and connection-difference bounds (brick E3)

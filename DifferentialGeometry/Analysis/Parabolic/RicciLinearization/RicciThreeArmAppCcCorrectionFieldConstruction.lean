@@ -12,7 +12,7 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.ConnectionDifferenc
 import DifferentialGeometry.Geometry.Flow.DeTurckVFChartCoord
 import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.RiemannianFiberNormSq.FiberNormSubadditivity
 import DifferentialGeometry.Analysis.Sobolev.Embedding.SobolevEmbeddingCm
-import DifferentialGeometry.Analysis.Parabolic.RicciLinearization.ConvexPerturbationPointwiseC2
+import DifferentialGeometry.Analysis.Sobolev.Embedding.ConvexPerturbationPointwiseC2
 import DifferentialGeometry.Analysis.Sobolev.TensorHilbert.InverseMetricPerturbationFibreBound
 import DifferentialGeometry.Analysis.Parabolic.RicciLinearization.RealizedFamCurvatureJetBound
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurckCoefficients.RealizeMetricChartGramDifference
@@ -584,9 +584,9 @@ theorem ricciArmBaseFields_lichnerowicz_uniform_rfns_ballUniform
               ΛC := by
   classical
   obtain ⟨Λcurv, hΛcurv_nn, hcurv⟩ :=
-    exists_riemannArm0_curvCoeff_realizedFam_rfns_ballUniform (I := I) (M := M) g₀ a ha_super hR hδ₀
+    exists_riemannArm0_curvCoeff_realizedFam_rfns_ballUniform (I := I) (M := M) (E := E) g₀ a ha_super hR hδ₀
   obtain ⟨Λcom, hΛcom_nn, hcom⟩ :=
-    exists_lichnerowicz_cometric_realizedFam_rfns_ballUniform (I := I) (M := M) g₀ a ha_super hR hδ₀
+    exists_lichnerowicz_cometric_realizedFam_rfns_ballUniform (I := I) (M := M) (E := E) g₀ a ha_super hR hδ₀
   set K : ℝ := max Λcurv Λcom with hK_def
   have hK_nn : 0 ≤ K := le_trans hΛcurv_nn (le_max_left _ _)
   refine ⟨Real.sqrt (4 * K), Real.sqrt_nonneg _, ?_⟩
@@ -678,7 +678,7 @@ theorem exists_arm1Base_realizedFam_rfns_ballUniform
   classical
   obtain ⟨Csob, hCsob_nn, hCsob⟩ :=
     DifferentialGeometry.PDE.RicciFlow.exists_Csob_convexPerturbation_pointwise_C2_le
-      (I := I) (M := M) g₀ a ha_super
+      (I := I) (M := M) (E := E) g₀ a ha_super
   obtain ⟨Λarm1, hΛarm1_nn, hΛarm1⟩ :=
     exists_arm1Koszul_realizedFam_pointwise_le_of_jetEnvelope (I := I) (M := M) g₀ hδ₀
       (Csob * R) (by positivity)
@@ -712,7 +712,7 @@ theorem exists_arm0_arm1_corrField_rfns_ballUniform
     ricciArmBaseFields_lichnerowicz_uniform_rfns_ballUniform
       (I := I) (M := M) g₀ g₀ a ha_super hR hδ₀
   obtain ⟨Λarm1, hΛarm1_nn, harm1⟩ :=
-    exists_arm1Base_realizedFam_rfns_ballUniform (I := I) (M := M) g₀ a ha_super hR hδ₀
+    exists_arm1Base_realizedFam_rfns_ballUniform (I := I) (M := M) (E := E) g₀ a ha_super hR hδ₀
   have hCΓ_nn : 0 ≤ corrFieldChristoffelBound (I := I) (M := M) g₀ a R δ₀ :=
     corrFieldChristoffelBound_nonneg (I := I) (M := M) g₀ a R δ₀
   refine ⟨(ΛCbase + Real.sqrt Λarm1) +
@@ -807,7 +807,7 @@ theorem ricciArmFields_concrete_lichnerowicz_uniform_rfns_ballUniform
     ricciArmBaseFields_lichnerowicz_uniform_rfns_ballUniform (I := I) (M := M) g₀ g_bg a ha_super hR
       hδ₀
   obtain ⟨Λcorr, hΛcorr_nn, hcorr⟩ :=
-    exists_arm0_arm1_corrField_rfns_ballUniform (I := I) (M := M) g₀ a ha_super hR hδ₀
+    exists_arm0_arm1_corrField_rfns_ballUniform (I := I) (M := M) (E := E) g₀ a ha_super hR hδ₀
   refine ⟨max ΛCbase Λcorr, le_trans hΛCbase_nn (le_max_left _ _), ?_⟩
   intro T T' δ hδ_le hδ δ' hδ'_le hδ' hTball hT'ball s hs x
   obtain ⟨_hbase0, hbase2⟩ := hbase T T' hδ_le hδ hδ'_le hδ' hTball hT'ball s hs x

@@ -59,7 +59,7 @@ theorem deTurckLieDLaCoeffField_realizedFam_rfns_order0_ballUniform
   have hκ_nn : 0 ≤ κ := Real.sqrt_nonneg _
   obtain ⟨Csob, hCsob_nn, hCsob⟩ :=
     DifferentialGeometry.PDE.RicciFlow.exists_Csob_convexPerturbation_pointwise_C2_le
-      (I := I) (M := M) g₀ a ha_super
+      (I := I) (M := M) (E := E) g₀ a ha_super
   set B : ℝ := Csob * R with hB_def
   have hB_nn : 0 ≤ B := mul_nonneg hCsob_nn hR
   obtain ⟨Cq, hCq_nn, hCq⟩ :=

@@ -168,6 +168,13 @@ def tensorComponentEuclideanChart (g : SmoothRiemannianMetric I M) (r s : ℕ)
     ∘ (extChartAt I α).symm
     ∘ (toEuclidean (E := E)).symm
 
+/-- Compatibility name for a raw Euclidean chart component. -/
+abbrev rawPullR (g : SmoothRiemannianMetric I M) (r s : ℕ)
+    (S : SmoothCcTensor g r s) (α : M)
+    (Idx : Fin r → Fin (Module.finrank ℝ E))
+    (Jdx : Fin s → Fin (Module.finrank ℝ E)) : EuclN → ℝ :=
+  tensorComponentEuclideanChart (I := I) (M := M) g r s S α Idx Jdx
+
 omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
     [T2Space M] [SigmaCompactSpace M] in
 lemma rawPullR_eq (g : SmoothRiemannianMetric I M) (r s : ℕ)
@@ -221,6 +228,11 @@ def tensorComponentAbsSum (g : SmoothRiemannianMetric I M) (r s : ℕ)
   ∑ q : (Fin r → Fin (Module.finrank ℝ E)) ×
         (Fin s → Fin (Module.finrank ℝ E)),
     |tensorComponentEuclideanChart (I := I) (M := M) g r s S α q.1 q.2 y|
+
+/-- Compatibility name for the absolute sum of raw chart components. -/
+abbrev zeroContentR (g : SmoothRiemannianMetric I M) (r s : ℕ)
+    (S : SmoothCcTensor g r s) (α : M) (y : EuclN) : ℝ :=
+  tensorComponentAbsSum (I := I) (M := M) g r s S α y
 
 omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
     [T2Space M] [SigmaCompactSpace M] in

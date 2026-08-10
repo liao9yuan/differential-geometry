@@ -41,6 +41,10 @@ def tensorLeadingSlotEvalCLM (s : ℕ) (x : M) (p : TangentSpace I x) :
         rw [map_smul]
         rfl }
 
+/-- Compatibility name for evaluation in the leading covariant slot. -/
+abbrev slotFeedFib (s : ℕ) (x : M) (p : TangentSpace I x) :=
+  tensorLeadingSlotEvalCLM (I := I) (M := M) s x p
+
 omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
     [T2Space M] [SigmaCompactSpace M] [CompleteSpace E] in
 @[simp] lemma slotFeedFib_apply (s : ℕ) (x : M) (p : TangentSpace I x)
@@ -60,6 +64,10 @@ def tensorLeadingPairSlotEvalCLM (s : ℕ) (x : M) (p q : TangentSpace I x) :
     Tensor0SSpace (s + 2) I x →L[ℝ] Tensor0SSpace s I x :=
   (tensorLeadingSlotEvalCLM (I := I) (M := M) s x q).comp
     (tensorLeadingSlotEvalCLM (I := I) (M := M) (s + 1) x p)
+
+/-- Compatibility name for evaluation in the leading pair of covariant slots. -/
+abbrev leadingPairFeedFib (s : ℕ) (x : M) (p q : TangentSpace I x) :=
+  tensorLeadingPairSlotEvalCLM (I := I) (M := M) s x p q
 
 omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
     [T2Space M] [SigmaCompactSpace M] [CompleteSpace E] in
@@ -114,6 +122,10 @@ def tensorRank4PermuteCLM (x : M) (σ : Equiv.Perm (Fin 4)) :
       map_smul' := fun c G => by
         rw [Tensor0SSpace.toModel_smul, domDomCongr4_smul, ofModel4_smul]
         rfl }
+
+/-- Compatibility name for permutation of the four covariant slots. -/
+abbrev slotPerm4Fib (x : M) (σ : Equiv.Perm (Fin 4)) :=
+  tensorRank4PermuteCLM (I := I) (M := M) x σ
 
 omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
     [T2Space M] [SigmaCompactSpace M] [CompleteSpace E] in

@@ -211,7 +211,7 @@ theorem ricci0_h1_unif
       _ ≤ 4 * (Bt R) ^ 2 :=
         mul_le_mul_of_nonneg_left hpure (by norm_num)
       _ = (2 * Bt R) ^ 2 := by ring
-  rw [linearizedRicciConnDiffOrder0CoeffField_eq_appCcRS
+  rw [linearizedRicciConnDiffOrder0CoeffField_eq_ricciCometricFourTrace_comp_kernelField
     (I := I) (M := M) g₀ g₁]
   have hout := happ g₀ hEq hjet1 hjet2
     (ricciCometricFourTraceCastG0 (I := I) g₀ g₁)

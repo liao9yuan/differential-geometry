@@ -70,18 +70,18 @@ private theorem refoldMono_smul
   intro v
   change
     Tensor0SSpace.toModel
-        (refoldKernelContractionMonomialFibFixedFrame
+        (curvatureRefoldMonomialFrameContraction
           (I := I) (M := M)
-          (ccTensorFourUnitValueSection (I := I) (M := M) g (a • G))
+          (ccTensorRank4EvalAtUnitZeroSec (I := I) (M := M) g (a • G))
           sigma (smoothOrthoFrame (I := I) g1 x) x D) v =
       a * Tensor0SSpace.toModel
-        (refoldKernelContractionMonomialFibFixedFrame
+        (curvatureRefoldMonomialFrameContraction
           (I := I) (M := M)
-          (ccTensorFourUnitValueSection (I := I) (M := M) g G)
+          (ccTensorRank4EvalAtUnitZeroSec (I := I) (M := M) g G)
           sigma (smoothOrthoFrame (I := I) g1 x) x D) v
   rw [refoldKernelContractionMonomialFibFixedFrame_toModel,
     refoldKernelContractionMonomialFibFixedFrame_toModel]
-  simp only [ccTensorFourUnitValueSection, SmoothCcTensor.toSection_smul,
+  simp only [ccTensorRank4EvalAtUnitZeroSec, SmoothCcTensor.toSection_smul,
     ContMDiffSection.coe_smul, Pi.smul_apply]
   have hGsmul :
       ((a • (G.toSection x) : TensorRSSpace 0 4 I x)
@@ -359,7 +359,7 @@ theorem mono_h2_tame
                   norm (iteratedCovGrad (I := I) g 0 2 (i + 2) P) ^ 2) +
                 (B A) ^ 2 := by
   obtain ⟨K, hK, hraw⟩ :=
-    rfns_iteratedCovGrad_refoldKernelContractionMonomialField_topSeparated_and_lowerWindow_le
+    riemannianFiberNormSq_iteratedCovGrad_refoldKernelContrMonomial_topSeparated_lowerWindow_le
       (I := I) (M := M) g hdelta0_lt
   let Ctop : Nat -> Real := fun _ =>
     2 * (((1 / (1 - delta0)) ^ 2) ^ 2)
@@ -373,7 +373,7 @@ theorem mono_h2_tame
   refine ⟨Ctop, hCtop, B, hB, ?_⟩
   intro g1 P delta sigma A htie hPsymm hdelta_le hdelta_nonneg hbound hA hPjet
   have hsymm :
-      symmS (I := I) (M := M) g P = P :=
+      ccTensor02Symm (I := I) (M := M) g P = P :=
     symmS_eq_self_of_ccTensorBilin_symm
       (I := I) (M := M) g P hPsymm
   exact hint P
@@ -386,19 +386,19 @@ theorem mono_h2_tame
           (refoldKernelContractionMonomialField
             (I := I) (M := M) g g1
             (iteratedCovGrad (I := I) g 0 2 2
-              (symmS (I := I) (M := M) g P)) sigma)).toSection x
+              (ccTensor02Symm (I := I) (M := M) g P)) sigma)).toSection x
       let Htop : TensorRSSpace 2 (2 + i) I x :=
-        (appCcRS (I := I) (M := M) g 2 (6 + i) (2 + i)
+        (ccOperatorFieldComp (I := I) (M := M) g 2 (6 + i) (2 + i)
           (appCcLeibnizPsi (I := I) (M := M) g 6 2
-            (mvPairTraceOp (I := I) (M := M) g g1) i i)
+            (secondMetricPairTraceOp (I := I) (M := M) g g1) i i)
           (iteratedCovGrad (I := I) g 2 6 i
-            (rsDomDomCongrSection (I := I) (M := M) g 2 6 sigmaE
+            (rsDomDomCongrSection (I := I) (M := M) g 2 6 ricciFoldRemainderSlotPerm
               (slotExtendIter (I := I) (M := M) g 0 4 2
                 (domDomCongrSection (I := I) g
                   (Equiv.swap (0 : Fin 4) 2 *
                     Equiv.swap (1 : Fin 4) 3 * sigma)
                   (iteratedCovGrad (I := I) g 0 2 2
-                    (symmS (I := I) (M := M) g P))))))).toSection x
+                    (ccTensor02Symm (I := I) (M := M) g P))))))).toSection x
       let head : Real :=
         riemannianFiberNormSq (I := I) (M := M) g 0
           (2 + (i + 2)) x
@@ -680,7 +680,7 @@ theorem ricciConn_h2_tame
                   norm (iteratedCovGrad (I := I) g 0 2 (i + 2) P) ^ 2) +
                 (B A) ^ 2 := by
   obtain ⟨C, hC, hpoint⟩ :=
-    rfns_iteratedCovGrad_linearizedRicciConnDiffOrder0CoeffField_topAmplitude_le
+    riemannianFiberNormSq_iteratedCovGrad_linearizedRicciConnDiffOrder0CoeffField_topAmplitude_le
       (I := I) (M := M) g hdelta0_lt hdelta0_half
   let Ctop : Nat -> Real := fun _ =>
     ((21 / 4 : Real) * (Module.finrank Real E : Real) *
@@ -735,7 +735,7 @@ theorem ricciKer_h2_tame
                   norm (iteratedCovGrad (I := I) g 0 2 (i + 2) P) ^ 2) +
                 (B A) ^ 2 := by
   obtain ⟨C, hC, hpoint⟩ :=
-    rfns_iteratedCovGrad_refoldKernelContractionField_symmSSecondGradient_topAmplitude_le
+    riemannianFiberNormSq_iteratedCovGrad_refoldKernelContr_symmSecondCovGrad_topAmplitude_le
       (I := I) (M := M) g hdelta0_lt hdelta0_half
   let Ctop : Nat -> Real := fun _ =>
     ((23 / 20 : Real) * (Module.finrank Real E : Real) *
@@ -747,7 +747,7 @@ theorem ricciKer_h2_tame
   refine ⟨Ctop, hCtop, B, hB, ?_⟩
   intro g1 P delta A htie hPsymm hdelta_le hdelta_nonneg hbound hA hPjet
   have hsymm :
-      symmS (I := I) (M := M) g P = P :=
+      ccTensor02Symm (I := I) (M := M) g P = P :=
     symmS_eq_self_of_ccTensorBilin_symm
       (I := I) (M := M) g P hPsymm
   exact hint P
@@ -798,23 +798,23 @@ theorem ricciBase_h2_tame
   intro g1 P delta A hdelta_le hbound htie hA hPjet
   have hsymm : forall j,
       norm (iteratedCovGrad (I := I) g 0 2 j
-          (symmS (I := I) (M := M) g P)) ^ 2 <=
+          (ccTensor02Symm (I := I) (M := M) g P)) ^ 2 <=
         norm (iteratedCovGrad (I := I) g 0 2 j P) ^ 2 := by
     intro j
     have hnorm :=
-      norm_iteratedCovGrad_symmS_le (I := I) (M := M) g P j
+      norm_iteratedCovGrad_tensorSymmetrization_le (I := I) (M := M) g P j
     nlinarith [norm_nonneg (iteratedCovGrad (I := I) g 0 2 j
-      (symmS (I := I) (M := M) g P)),
+      (ccTensor02Symm (I := I) (M := M) g P)),
       norm_nonneg (iteratedCovGrad (I := I) g 0 2 j P)]
   have hlow :
       (∑ j ∈ Finset.range 4,
         norm (iteratedCovGrad (I := I) g 0 2 j
-          (symmS (I := I) (M := M) g P)) ^ 2) <= A ^ 2 :=
+          (ccTensor02Symm (I := I) (M := M) g P)) ^ 2) <= A ^ 2 :=
     (Finset.sum_le_sum fun j _ => hsymm j).trans hPjet
   have htop :
       (∑ j ∈ Finset.range 5,
         norm (iteratedCovGrad (I := I) g 0 2 j
-          (symmS (I := I) (M := M) g P)) ^ 2) <=
+          (ccTensor02Symm (I := I) (M := M) g P)) ^ 2) <=
         A ^ 2 + norm (iteratedCovGrad (I := I) g 0 2 4 P) ^ 2 := by
     rw [show 5 = 4 + 1 by omega, Finset.sum_range_succ]
     exact add_le_add hlow (hsymm 4)
@@ -830,10 +830,10 @@ theorem ricciBase_h2_tame
             ricciArmOrder0CurvCoeff (I := I) (M := M) g g1)) ^ 2)
         <= Ktop * (∑ j ∈ Finset.range 5,
               norm (iteratedCovGrad (I := I) g 0 2 j
-                (symmS (I := I) (M := M) g P)) ^ 2) +
+                (ccTensor02Symm (I := I) (M := M) g P)) ^ 2) +
             Klow * (1 + ∑ j ∈ Finset.range 4,
               norm (iteratedCovGrad (I := I) g 0 2 j
-                (symmS (I := I) (M := M) g P)) ^ 2) := hraw
+                (ccTensor02Symm (I := I) (M := M) g P)) ^ 2) := hraw
     _ <= Ktop *
           (A ^ 2 + norm (iteratedCovGrad (I := I) g 0 2 4 P) ^ 2) +
         Klow * (1 + A ^ 2) := by
@@ -893,7 +893,7 @@ theorem dLa_h2_tame
     fun A _ => Real.sqrt_nonneg _
   refine ⟨C4, hC4, B, hB, ?_⟩
   intro g1 P delta A htie hdelta_le hdelta_nonneg hbound hA hPjet
-  let Ps : SmoothCcTensor g 0 2 := symmS (I := I) (M := M) g P
+  let Ps : SmoothCcTensor g 0 2 := ccTensor02Symm (I := I) (M := M) g P
   have htieS : ∀ (y : M) (v w : TangentSpace I y),
       g1.inner y v w =
         g.inner y v w + ccTensorBilinSymm (I := I) g Ps y v w := by
@@ -925,11 +925,11 @@ theorem dLa_h2_tame
         norm (iteratedCovGrad (I := I) g 0 2 j P) ^ 2 := by
     intro j
     have hnorm :=
-      norm_iteratedCovGrad_symmS_le (I := I) (M := M) g P j
+      norm_iteratedCovGrad_tensorSymmetrization_le (I := I) (M := M) g P j
     dsimp only [Ps]
     nlinarith [norm_nonneg
       (iteratedCovGrad (I := I) g 0 2 j
-        (symmS (I := I) (M := M) g P)),
+        (ccTensor02Symm (I := I) (M := M) g P)),
       norm_nonneg (iteratedCovGrad (I := I) g 0 2 j P)]
   have hlow :
       (∑ j ∈ Finset.range 4,
@@ -1068,7 +1068,7 @@ theorem dLb_h2_tame
     fun A _ => Real.sqrt_nonneg _
   refine ⟨C4, hC4, B, hB, ?_⟩
   intro g1 P delta A htie hdelta_le hdelta_nonneg hbound hA hPjet
-  let Ps : SmoothCcTensor g 0 2 := symmS (I := I) (M := M) g P
+  let Ps : SmoothCcTensor g 0 2 := ccTensor02Symm (I := I) (M := M) g P
   have htieS : ∀ (y : M) (v w : TangentSpace I y),
       g1.inner y v w =
         g.inner y v w + ccTensorBilinSymm (I := I) g Ps y v w := by
@@ -1102,11 +1102,11 @@ theorem dLb_h2_tame
         norm (iteratedCovGrad (I := I) g 0 2 j P) ^ 2 := by
     intro j
     have hnorm :=
-      norm_iteratedCovGrad_symmS_le (I := I) (M := M) g P j
+      norm_iteratedCovGrad_tensorSymmetrization_le (I := I) (M := M) g P j
     dsimp only [Ps]
     nlinarith [norm_nonneg
       (iteratedCovGrad (I := I) g 0 2 j
-        (symmS (I := I) (M := M) g P)),
+        (ccTensor02Symm (I := I) (M := M) g P)),
       norm_nonneg (iteratedCovGrad (I := I) g 0 2 j P)]
   have hlow :
       (∑ j ∈ Finset.range 4,
@@ -1243,7 +1243,7 @@ theorem lieCorr_h2_tame
     fun A _ => Real.sqrt_nonneg _
   refine ⟨C4, hC4, B, hB, ?_⟩
   intro g1 P delta A htie hdelta_le hdelta_nonneg hbound hA hPjet
-  let Ps : SmoothCcTensor g 0 2 := symmS (I := I) (M := M) g P
+  let Ps : SmoothCcTensor g 0 2 := ccTensor02Symm (I := I) (M := M) g P
   have hsup : ∀ x : M,
       riemannianFiberNormSq (I := I) (M := M) g 0 2 x
           (Ps.toSection x) <=
@@ -1267,11 +1267,11 @@ theorem lieCorr_h2_tame
         norm (iteratedCovGrad (I := I) g 0 2 j P) ^ 2 := by
     intro j
     have hnorm :=
-      norm_iteratedCovGrad_symmS_le (I := I) (M := M) g P j
+      norm_iteratedCovGrad_tensorSymmetrization_le (I := I) (M := M) g P j
     dsimp only [Ps]
     nlinarith [norm_nonneg
       (iteratedCovGrad (I := I) g 0 2 j
-        (symmS (I := I) (M := M) g P)),
+        (ccTensor02Symm (I := I) (M := M) g P)),
       norm_nonneg (iteratedCovGrad (I := I) g 0 2 j P)]
   have hlow :
       (∑ j ∈ Finset.range 4,

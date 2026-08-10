@@ -110,7 +110,10 @@ theorem low1Ker_jet_bg
     intro x
     have h := rfns_symmS_zero_le_fibreSmall
       (I := I) (M := M) g h30 T hδ_le hδ0 hδg x
-    rwa [symmS_eq_self_of_ccTensorBilin_symm (I := I) (M := M) g T hT] at h
+    have hsT : symmS (I := I) (M := M) g T = T := by
+      simpa only [symmS] using
+        symmS_eq_self_of_ccTensorBilin_symm (I := I) (M := M) g T hT
+    rwa [hsT] at h
   obtain ⟨⟨δ', hδ'0, hδ'_le, hP⟩, htie, hPsup, hPjet⟩ :=
     pathPert_rad (I := I) (M := M) g T hδ0 hδ_le hδ_lt hδg hδZ hTsup hs
   -- the integrand, in the shape the radius-free window covers
@@ -429,7 +432,10 @@ theorem selfLow_jet
     intro x
     have h := rfns_symmS_zero_le_fibreSmall
       (I := I) (M := M) g h30 T hδ_le hδ0 hδg x
-    rwa [symmS_eq_self_of_ccTensorBilin_symm (I := I) (M := M) g T hT] at h
+    have hsT : symmS (I := I) (M := M) g T = T := by
+      simpa only [symmS] using
+        symmS_eq_self_of_ccTensorBilin_symm (I := I) (M := M) g T hT
+    rwa [hsT] at h
   obtain ⟨⟨δ', hδ'0, hδ'_le, hP⟩, htie, hPsup, hPjet⟩ :=
     pathPert_rad (I := I) (M := M) g T hδ0 hδ_le hδ_lt hδg hδZ hTsup hs
   set P : SmoothCcTensor g 0 2 := convexPerturbation (I := I) g T 0 s with hP_def
@@ -448,7 +454,8 @@ theorem selfLow_jet
         ((iteratedCovGrad (I := I) g 0 2 1 P).toSection x) =
         s ^ 2 * riemannianFiberNormSq (I := I) (M := M) g 0 (2 + 1) x
           ((iteratedCovGrad (I := I) g 0 2 1 T).toSection x) := by
-      rw [hPeq, iteratedCovGrad_smul_real (I := I) (M := M) g 0 2 1 s T,
+      rw [hPeq, DifferentialGeometry.Integral.Connection.iteratedCovGrad_smul_real
+        (I := I) (M := M) g 0 2 1 s T,
         SmoothCcTensor.toSection_smul, ContMDiffSection.coe_smul, Pi.smul_apply,
         riemannianFiberNormSq_smul (I := I) (M := M) g 0 (2 + 1) x s _]
     have hT1 := hΛ₁ T hball x
@@ -742,7 +749,8 @@ theorem lieBgJet
   have hPk : ∀ k : ℕ, ‖iteratedCovGrad (I := I) g 0 2 k P‖ ^ 2 ≤
       ‖iteratedCovGrad (I := I) g 0 2 k T‖ ^ 2 := by
     intro k
-    rw [hPeq, iteratedCovGrad_smul_real (I := I) (M := M) g 0 2 k s T, norm_smul,
+    rw [hPeq, DifferentialGeometry.Integral.Connection.iteratedCovGrad_smul_real
+      (I := I) (M := M) g 0 2 k s T, norm_smul,
       Real.norm_eq_abs, mul_pow, sq_abs]
     have hsq : s ^ 2 ≤ 1 := by nlinarith
     nlinarith [sq_nonneg ‖iteratedCovGrad (I := I) g 0 2 k T‖, hsq]
@@ -804,7 +812,7 @@ theorem lieBgJet
     have hxb : Xb =
         deTurckLieDLbCoeffField (I := I) (M := M) g gm g_bg -
           deTurckLieDLbCoeffField (I := I) (M := M) g gm g := by
-      simp only [Xb, endo_eq_dlb]
+      simp only [Xb, DifferentialGeometry.Integral.Connection.endoArm_eq_dlb]
     rw [hxb]
     simpa only [hAb_def, zero_mul, add_zero] using hraw
   have haL : lowJetSq (I := I) (M := M) g i Xa ≤
@@ -922,7 +930,8 @@ theorem insBgJet
   have hPk : ∀ k : ℕ, ‖iteratedCovGrad (I := I) g 0 2 k P‖ ^ 2 ≤
       ‖iteratedCovGrad (I := I) g 0 2 k T‖ ^ 2 := by
     intro k
-    rw [hPeq, iteratedCovGrad_smul_real (I := I) (M := M) g 0 2 k s T,
+    rw [hPeq, DifferentialGeometry.Integral.Connection.iteratedCovGrad_smul_real
+      (I := I) (M := M) g 0 2 k s T,
       norm_smul, Real.norm_eq_abs, mul_pow, sq_abs]
     have hsq : s ^ 2 ≤ 1 := by nlinarith
     nlinarith [sq_nonneg ‖iteratedCovGrad (I := I) g 0 2 k T‖, hsq]
@@ -1094,7 +1103,10 @@ theorem selfLowJetQBg
     intro x
     have h := rfns_symmS_zero_le_fibreSmall
       (I := I) (M := M) g h30 T hδ_le hδ0 hδg x
-    rwa [symmS_eq_self_of_ccTensorBilin_symm (I := I) (M := M) g T hT] at h
+    have hsT : symmS (I := I) (M := M) g T = T := by
+      simpa only [symmS] using
+        symmS_eq_self_of_ccTensorBilin_symm (I := I) (M := M) g T hT
+    rwa [hsT] at h
   obtain ⟨⟨δ', hδ'0, hδ'_le, hP⟩, htie, hPsup, hPjet⟩ :=
     pathPert_rad (I := I) (M := M) g T hδ0 hδ_le hδ_lt hδg hδZ hTsup hs
   set gm : SmoothRiemannianMetric I M := realizedFam (I := I) g T 0 hδg hδZ s with hgm_def
@@ -1112,7 +1124,8 @@ theorem selfLowJetQBg
   have hPk : ∀ k : ℕ, ‖iteratedCovGrad (I := I) g 0 2 k P‖ ^ 2 ≤
       ‖iteratedCovGrad (I := I) g 0 2 k T‖ ^ 2 := by
     intro k
-    rw [hPeq, iteratedCovGrad_smul_real (I := I) (M := M) g 0 2 k s T, norm_smul,
+    rw [hPeq, DifferentialGeometry.Integral.Connection.iteratedCovGrad_smul_real
+      (I := I) (M := M) g 0 2 k s T, norm_smul,
       Real.norm_eq_abs, mul_pow, sq_abs]
     have hsq : s ^ 2 ≤ 1 := by nlinarith
     nlinarith [sq_nonneg ‖iteratedCovGrad (I := I) g 0 2 k T‖, hsq]

@@ -1,6 +1,8 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.LowRegInsertH1
 import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.LowRegRhsOne
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.DeTurckRemainderLowBaseAction
+import DifferentialGeometry.Analysis.Parabolic.RicciLinearization.RiemannCoefficientPalatiniRefoldCovDerivArmPairTrace
+import DifferentialGeometry.Analysis.Parabolic.RicciLinearization.RiemannCoefficientPalatiniRefoldEndoArmGridWindowBounds
 
 /-!
 # Fixed-background low-base coefficient bounds
@@ -39,6 +41,24 @@ variable
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
+private theorem endoSlotZero_sub_h2
+    (g : SmoothRiemannianMetric I M) (s : ℕ)
+    (A B : ContMDiffSection I (E →L[ℝ] E) ∞
+      (fun x : M => TangentSpace I x →L[ℝ] TangentSpace I x)) :
+    endoSlotZeroCcTensor (I := I) (M := M) g s (A - B) =
+      endoSlotZeroCcTensor (I := I) (M := M) g s A -
+        endoSlotZeroCcTensor (I := I) (M := M) g s B := by
+  change slotInsertEndoCc (I := I) (M := M) g s (A - B) =
+    slotInsertEndoCc (I := I) (M := M) g s A -
+      slotInsertEndoCc (I := I) (M := M) g s B
+  exact slotInsertEndoCc_sub (I := I) (M := M) g s A B
+
+private theorem lc0Kappa_eq_metricConnDiffLoweredCc
+    (g₀ g₁ gB : SmoothRiemannianMetric I M) :
+    lc0Kappa (I := I) (M := M) g₀ g₁ gB =
+      metricConnDiffLoweredCc (I := I) (M := M) g₀ g₁ gB := by
+  rfl
+
 private theorem h2Jet_smul
     (g : SmoothRiemannianMetric I M) (r s n : ℕ)
     (a : ℝ) (W : SmoothCcTensor g r s) :
@@ -49,7 +69,8 @@ private theorem h2Jet_smul
   rw [Finset.mul_sum]
   apply Finset.sum_congr rfl
   intro j hj
-  rw [iteratedCovGrad_smul_real, norm_smul, Real.norm_eq_abs, mul_pow, sq_abs]
+  rw [DifferentialGeometry.Integral.Connection.iteratedCovGrad_smul_real,
+    norm_smul, Real.norm_eq_abs, mul_pow, sq_abs]
 
 omit [BoundarylessManifold I M] in
 private theorem lowJetSq_nonneg
@@ -118,7 +139,8 @@ private theorem h2Jet_two
   rw [Finset.mul_sum]
   apply Finset.sum_congr rfl
   intro j hj
-  rw [iteratedCovGrad_smul_real, norm_smul, Real.norm_eq_abs]
+  rw [DifferentialGeometry.Integral.Connection.iteratedCovGrad_smul_real,
+    norm_smul, Real.norm_eq_abs]
   norm_num
   ring
 
@@ -390,7 +412,7 @@ theorem insert_tame
     change SF ≤ AF ^ 2
     rw [show AF ^ 2 = SF by simp only [AF, Real.sq_sqrt hSF]]
   have hODform :
-      OD = appCcRS (I := I) (M := M) g₀ 0 3 1 Tr Fix := by
+      OD = ccOperatorFieldComp (I := I) (M := M) g₀ 0 3 1 Tr Fix := by
     simpa only [OD, Tr, Fix] using
       wOmega_sub_refold (I := I) (M := M) g₀ g₁ g₀ gB
   have hOD : (∑ i ∈ Finset.range 3,
@@ -416,12 +438,20 @@ theorem insert_tame
     wAlphaB (I := I) (M := M) g₀ g₁ g₀ -
       wAlphaB (I := I) (M := M) g₀ g₁ gB
   have hADform :
-      AD = appCcRS (I := I) (M := M) g₀ 0 1 2
+      AD = ccOperatorFieldComp (I := I) (M := M) g₀ 0 1 2
         (wCA (I := I) (M := M) g₀ g₁) OD := by
     dsimp only [AD, OD]
     unfold wAlphaB
+    change operatorFieldApply (I := I) (M := M) g₀ 1 2
+          (wCA (I := I) (M := M) g₀ g₁) (wOmega (I := I) (M := M) g₀ g₁ g₀) -
+        operatorFieldApply (I := I) (M := M) g₀ 1 2
+          (wCA (I := I) (M := M) g₀ g₁) (wOmega (I := I) (M := M) g₀ g₁ gB) =
+      ccOperatorFieldComp (I := I) (M := M) g₀ 0 1 2
+        (wCA (I := I) (M := M) g₀ g₁)
+        (wOmega (I := I) (M := M) g₀ g₁ g₀ -
+          wOmega (I := I) (M := M) g₀ g₁ gB)
     rw [← appCcRS_zero_eq_appCc, ← appCcRS_zero_eq_appCc,
-      ← appCcRS_sub_right]
+      ← ccOperatorFieldComp_sub_right]
   have hAD : (∑ i ∈ Finset.range 3,
       ‖iteratedCovGrad (I := I) g₀ 0 2 i AD‖ ^ 2) ≤ BA ^ 2 := by
     rw [hADform]
@@ -542,8 +572,10 @@ private theorem amixHalf_bg
     lc0AMixHalfRF (I := I) (M := M) g₀ g₁ gB σ -
         lc0AMixHalfRF (I := I) (M := M) g₀ g₁ g₀ σ =
       bgAmixHalf (I := I) (M := M) g₀ g₁ gB σ := by
-  unfold lc0AMixHalfRF bgAmixHalf bgKappa lc0Kappa
-  rw [← appCcRS_sub_right, ← appCcRS_sub_right,
+  unfold lc0AMixHalfRF bgAmixHalf bgKappa
+  rw [lc0Kappa_eq_metricConnDiffLoweredCc,
+    lc0Kappa_eq_metricConnDiffLoweredCc,
+    ← appCcRS_sub_right, ← appCcRS_sub_right,
     ← appCcRS_sub_left, ← slotIter_sub]
 
 /-- The mixed order-zero background difference is twice the sum of the two
@@ -658,11 +690,11 @@ private theorem amixHalf_tame
   let T4 : SmoothCcTensor g₀ 6 4 :=
     lc0TraceRF (I := I) (M := M) g₀ g₁ 4 lieCorr0AMixPerm1
   let Qf : SmoothCcTensor g₀ 2 3 :=
-    appCcRS (I := I) (M := M) g₀ 2 5 3 T3 K0s
+    ccOperatorFieldComp (I := I) (M := M) g₀ 2 5 3 T3 K0s
   let Nf : SmoothCcTensor g₀ 2 6 :=
-    appCcRS (I := I) (M := M) g₀ 2 3 6 KDs Qf
+    ccOperatorFieldComp (I := I) (M := M) g₀ 2 3 6 KDs Qf
   let Mid : SmoothCcTensor g₀ 2 4 :=
-    appCcRS (I := I) (M := M) g₀ 2 6 4 T4 Nf
+    ccOperatorFieldComp (I := I) (M := M) g₀ 2 6 4 T4 Nf
   have hKD : (∑ i ∈ Finset.range 3,
       ‖iteratedCovGrad (I := I) g₀ 0 3 i KD‖ ^ 2) ≤ (BK R) ^ 2 := by
     have hraw := hkd g₁ P htie R hR hP2
@@ -713,7 +745,7 @@ private theorem amixHalf_tame
     simpa only [Mid, Mb] using hmprod T4 Nf (Bt4 R) Nb
       (hBt4 R hR) hNb hT4 hNf
   have hform : bgAmixHalf (I := I) (M := M) g₀ g₁ gB σ =
-      appCcRS (I := I) (M := M) g₀ 2 4 2 T2 Mid := rfl
+      ccOperatorFieldComp (I := I) (M := M) g₀ 2 4 2 T2 Mid := rfl
   rw [hform]
   calc
     _ ≤ Ob ^ 2 := by

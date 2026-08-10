@@ -57,6 +57,10 @@ def deTurckSmoothRemainderTensorHs (g₀ g_bg : SmoothRiemannianMetric I M) (a :
       (a : ℝ) (deTurckSmoothRemainder (I := I) g₀ g_bg T hδ_lt hδ)
       (tensorResolventL2_isCompactOperator (I := I) (M := M) g₀ 0 2)
 
+/-- Compatibility name for the smooth Ricci--DeTurck remainder in the
+intrinsic Sobolev scale. -/
+abbrev deTurckSmoothN := @deTurckSmoothRemainderTensorHs
+
 @[simp] theorem deTurckSmoothN_coeff (g₀ g_bg : SmoothRiemannianMetric I M)
     (a : ℕ) (T : SmoothCcTensor g₀ 0 2)
     {δ : ℝ} (hδ_lt : δ < 1)

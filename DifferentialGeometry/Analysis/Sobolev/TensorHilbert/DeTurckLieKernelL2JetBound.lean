@@ -408,6 +408,106 @@ theorem deTurckLieDLaCoeffField_realizedFam_jetL2_perOrder_ballUniform
           nlinarith [sq_nonneg R]
   linarith [hsum_le]
 
+/-! ### Compatibility extraction surface for class-first finite windows -/
+
+namespace DLaUniformInternal
+
+noncomputable abbrev dlaKernel := @dLaKernelRaisedCc
+noncomputable abbrev dlaLowered := @dLaLoweredCc
+noncomputable abbrev dlaQuad := @dLaQuadCc
+noncomputable abbrev dlaPerturb := @dLaPerturbSharpEndoField
+noncomputable abbrev dlaLoweredPerturb := @dLaLoweredPerturbCc
+noncomputable abbrev dlaLoweredG1 := @dLaLoweredG1Cc
+noncomputable abbrev dlaSym := @dLaSymCc
+noncomputable abbrev dlaPairTrace := @pairTraceOpDla
+abbrev dlaSigma := @sigmaE0dla
+noncomputable abbrev dlaPairCount := dLaPairCount
+abbrev grid_one_le := @one_le_dLaGridWin
+abbrev grid_single_le := @single_le_grid_dla
+abbrev grid_term_le := @grid_le_dLaGridWin
+
+theorem pair_nonneg (m1 m2 : ℕ) : 0 ≤ dlaPairCount m1 m2 :=
+  dLaPairCount_nonneg m1 m2
+
+theorem grid_mul_le (b : ℕ → ℝ) (hb : ∀ j, 0 ≤ b j) (m1 m2 m3 : ℕ)
+    (h3 : m1 + m2 ≤ m3 + 1) :
+    dLaGridWin b m1 * dLaGridWin b m2 ≤
+      dlaPairCount m1 m2 * dLaGridWin b m3 :=
+  dLaGridWin_mul_le b hb m1 m2 m3 h3
+
+abbrev rfns_sub := @rfns_iCG_sub_le_dla
+abbrev rfns_add := @rfns_iCG_add_le_dla
+
+theorem quad_tower
+    (g₀ ga gb : SmoothRiemannianMetric I M)
+    (j : ℕ) (x : M) (b : ℕ → ℝ) (hb : ∀ l, 0 ≤ b l)
+    (Ba Bb : ℕ → ℝ) (hBa_nn : ∀ i, 0 ≤ Ba i) (hBb_nn : ∀ l, 0 ≤ Bb l)
+    (harm : ∀ i, i ≤ j →
+      riemannianFiberNormSq (I := I) (M := M) g₀ 1 (2 + i) x
+        ((iteratedCovGrad (I := I) g₀ 1 2 i
+          (connDiffSection (I := I) ga g₀)).toSection x) ≤
+      Ba i * dLaGridWin b (i + 2))
+    (hin : ∀ l, l ≤ j →
+      riemannianFiberNormSq (I := I) (M := M) g₀ 1 (2 + l) x
+        ((iteratedCovGrad (I := I) g₀ 1 2 l
+          (connDiffSection (I := I) gb g₀)).toSection x) ≤
+      Bb l * dLaGridWin b (l + 2)) :
+    riemannianFiberNormSq (I := I) (M := M) g₀ 1 (3 + j) x
+        ((iteratedCovGrad (I := I) g₀ 1 3 j
+          (dlaQuad (I := I) (M := M) g₀ ga gb)).toSection x) ≤
+      (appCcGdiag (E := E) j * ∑ i ∈ Finset.range (j + 1),
+        (Module.finrank ℝ E : ℝ) * Ba i *
+          ∑ l ∈ Finset.range (j + 1 - i),
+            Bb l * dlaPairCount (i + 2) (l + 2)) *
+        dLaGridWin b (j + 3) :=
+  dLaQuad_tower_of_factors (I := I) (M := M) g₀ ga gb j x b hb
+    Ba Bb hBa_nn hBb_nn harm hin
+
+theorem lower_raise (g₀ g₁ g_bg : SmoothRiemannianMetric I M) :
+    cometricRaiseSlot0Field (I := I) (M := M) g₀ 2
+        (dlaLowered (I := I) (M := M) g₀ g₁ g_bg) =
+      dlaKernel (I := I) (M := M) g₀ g₁ g_bg :=
+  dLaLoweredCc_raise_repr (I := I) (M := M) g₀ g₁ g_bg
+
+abbrev symm_rfns := @rfns_iCG_symmS_le_dla
+
+theorem insert_rfns (g₀ : SmoothRiemannianMetric I M)
+    (T : SmoothCcTensor g₀ 0 2) (j : ℕ) (x : M) :
+    riemannianFiberNormSq (I := I) (M := M) g₀ 4 (4 + j) x
+        ((iteratedCovGrad (I := I) g₀ 4 4 j
+          (slotInsertEndoCc (I := I) (M := M) g₀ 3
+            (dlaPerturb (I := I) (M := M) g₀ T))).toSection x) ≤
+      (Module.finrank ℝ E : ℝ) ^ 3 *
+        riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + j) x
+          ((iteratedCovGrad (I := I) g₀ 0 2 j
+            (symmS (I := I) (M := M) g₀ T)).toSection x) :=
+  rfns_iCG_slotInsert3_dLaPerturb_le (I := I) (M := M) g₀ T j x
+
+abbrev iter_smul := @iteratedCovGrad_smul_dla
+abbrev rfns_smul := @rfns_smul_dla
+
+theorem pair_trace_def (g₀ g₁ : SmoothRiemannianMetric I M) :
+    dlaPairTrace (I := I) (M := M) g₀ g₁ =
+      appCcRS (I := I) (M := M) g₀ 6 4 2
+        (pureTrace (I := I) (M := M) g₀ g₁ 2)
+        (pureTrace (I := I) (M := M) g₀ g₁ 4) := by
+  rfl
+
+theorem dla_field_eq
+    (g₀ g_bg g₁ : SmoothRiemannianMetric I M) (T : SmoothCcTensor g₀ 0 2)
+    (htie : ∀ (y : M) (v w : TangentSpace I y),
+      g₁.inner y v w = g₀.inner y v w + ccTensorBilinSymm (I := I) g₀ T y v w) :
+    deTurckLieDLaCoeffField (I := I) (M := M) g₀ g₁ g_bg =
+      (-1 : ℝ) • appCcRS (I := I) (M := M) g₀ 2 6 2
+        (dlaPairTrace (I := I) (M := M) g₀ g₁)
+        (rsDomDomCongrSection (I := I) (M := M) g₀ 2 6
+          dlaSigma
+          (slotExtendIter (I := I) (M := M) g₀ 0 4 2
+            (dlaSym (I := I) (M := M) g₀ T g₁ g_bg))) :=
+  deTurckLieDLaCoeffField_eq_pairTrace (I := I) (M := M) g₀ g_bg g₁ T htie
+
+end DLaUniformInternal
+
 end DLaGridBrick
 
 end DifferentialGeometry.Integral.Connection

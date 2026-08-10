@@ -5,6 +5,7 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.UnifGagliardo
 import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.UnifAppH12
 import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.UnifCoeffH2
 import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.UnifSlotFreeOne
+import DifferentialGeometry.Analysis.Sobolev.TensorHilbert.LieCorr0CoefficientRefold
 
 /-!
 # Class-first fixed-curvature correction H1 bound

@@ -1,4 +1,4 @@
-import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurckCoefficients.IteratedFDerivProductDifferenceBound
+import DifferentialGeometry.Analysis.Calculus.IteratedFDerivProductDifferenceBound
 import DifferentialGeometry.Analysis.Integration.DivergenceTheorem.LocalFormula
 
 /-!

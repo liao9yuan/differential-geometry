@@ -123,24 +123,27 @@ theorem daWeightPairH2
         (hBe R hR) hD2 hEU hTU2
   have happSub (Φ : SmoothCcTensor g 2 2)
       (V W : SmoothCcTensor g 0 2) :
-      appCc (I := I) (M := M) g 2 2 Φ (V - W) =
-        appCc (I := I) (M := M) g 2 2 Φ V -
-          appCc (I := I) (M := M) g 2 2 Φ W := by
+      operatorFieldApply (I := I) (M := M) g 2 2 Φ (V - W) =
+        operatorFieldApply (I := I) (M := M) g 2 2 Φ V -
+          operatorFieldApply (I := I) (M := M) g 2 2 Φ W := by
     calc
-      appCc (I := I) (M := M) g 2 2 Φ (V - W) =
-          appCcRS (I := I) (M := M) g 0 2 2 Φ (V - W) :=
+      operatorFieldApply (I := I) (M := M) g 2 2 Φ (V - W) =
+          ccOperatorFieldComp (I := I) (M := M) g 0 2 2 Φ (V - W) :=
         (appCcRS_zero_eq_appCc (I := I) (M := M) g 2 2 Φ (V - W)).symm
-      _ = appCcRS (I := I) (M := M) g 0 2 2 Φ V -
-          appCcRS (I := I) (M := M) g 0 2 2 Φ W :=
+      _ = ccOperatorFieldComp (I := I) (M := M) g 0 2 2 Φ V -
+          ccOperatorFieldComp (I := I) (M := M) g 0 2 2 Φ W :=
         appCcRS_sub_right (I := I) (M := M) g 0 2 2 Φ V W
-      _ = appCc (I := I) (M := M) g 2 2 Φ V -
-          appCc (I := I) (M := M) g 2 2 Φ W := by
-        rw [appCcRS_zero_eq_appCc, appCcRS_zero_eq_appCc]
+      _ = operatorFieldApply (I := I) (M := M) g 2 2 Φ V -
+          operatorFieldApply (I := I) (M := M) g 2 2 Φ W :=
+        congrArg₂ (fun A B : SmoothCcTensor g 0 2 => A - B)
+          (appCcRS_zero_eq_appCc (I := I) (M := M) g 2 2 Φ V)
+          (appCcRS_zero_eq_appCc (I := I) (M := M) g 2 2 Φ W)
   have hsplit :
       LowBaseInternal.daWeight (I := I) (M := M) g gT T -
           LowBaseInternal.daWeight (I := I) (M := M) g gU U =
         X + Y := by
     simp only [LowBaseInternal.daWeight, X, Y, ET, EU]
+    simp only [appCc]
     rw [appCc_sub_left, happSub]
     module
   rw [hsplit]
@@ -442,6 +445,7 @@ theorem daOnePairH2
           LowBaseInternal.ricciDAOne (I := I) (M := M) g gU U =
         X + Y := by
     simp only [LowBaseInternal.ricciDAOne, CT, CU, DT, DU, X, Y]
+    simp only [appCcRS]
     rw [appCcRS_sub_left, appCcRS_sub_right]
     module
   have hD2Q : D2 ≤ Q := by

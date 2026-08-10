@@ -25,6 +25,37 @@ variable
       [IsManifold I ∞ M] [CompactSpace M] [I.Boundaryless]
       [T2Space M] [SigmaCompactSpace M]
 
+/-- In dimension three, every positive fibre threshold admits a positive
+spectral `H²` radius on which symmetric perturbations realize metrics. -/
+theorem realize_at_delta
+    (hDim : Module.finrank ℝ E = 3)
+    (g : SmoothRiemannianMetric I M) {δ : ℝ} (hδ : 0 < δ) :
+    ∃ R : ℝ, 0 < R ∧
+      ∀ T : SmoothCcTensor g 0 2,
+        ‖smoothCcToTensorHs (I := I) (M := M) g
+          (((1 : ℕ) : ℝ) + 1) T‖ ≤ R →
+          metricCauchySchwarzBound (I := I) (M := M) g
+            (ccTensorBilinSymm (I := I) g T) δ := by
+  obtain ⟨C, hC, hOp⟩ := hs2_op_bound (I := I) (M := M) hDim g
+  refine ⟨δ / C, div_pos hδ hC, ?_⟩
+  intro T hT
+  rw [Nat.cast_one, show (1 : ℝ) + 1 = 2 by norm_num] at hT
+  have htwo : ccTensorToHs (I := I) (M := M) g 2 (2 : ℝ) T =
+      smoothCcToTensorHs (I := I) (M := M) g (2 : ℝ) T :=
+    tensorHs.ext (funext (fun _ ↦ rfl))
+  have hT' : ‖ccTensorToHs (I := I) (M := M) g 2 (2 : ℝ) T‖ ≤ δ / C := by
+    simpa only [htwo] using hT
+  have hdelta : C * ‖ccTensorToHs (I := I) (M := M) g 2 (2 : ℝ) T‖ ≤ δ := by
+    calc
+      C * ‖ccTensorToHs (I := I) (M := M) g 2 (2 : ℝ) T‖
+          ≤ C * (δ / C) := mul_le_mul_of_nonneg_left hT' hC.le
+      _ = δ := by field_simp
+  have hsmall := hOp T
+  intro x v w
+  refine (hsmall x v w).trans ?_
+  exact mul_le_mul_of_nonneg_right
+    (mul_le_mul_of_nonneg_right hdelta (Real.sqrt_nonneg _)) (Real.sqrt_nonneg _)
+
 /-- In dimension three, a positive spectral `H2` radius directly supplies
 the fibre-smallness needed to realize every smooth perturbation in the state
 ball as a metric. -/

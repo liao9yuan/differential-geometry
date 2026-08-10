@@ -190,8 +190,7 @@ theorem pureAtgw (g₀ : SmoothRiemannianMetric I M) {δ₀ : ℝ} (hδ₀ : δ�
   have hid : ricciArmPrincipalCoeffPure (I := I) (M := M) g₀ g₁ =
       Φ + appCcRS (I := I) (M := M) g₀ 4 4 2 Φ W := by
     have h := ricciArmPrincipalCoeffPure_eq_doubleTrace_add_appCcRS (I := I) g₀ g₁
-    rw [← hΦ_def, ← hW_def] at h
-    exact h
+    simpa only [Φ, W] using h
   rw [hid, iteratedCovGrad_add]
   rw [show ((iteratedCovGrad (I := I) g₀ 4 2 l Φ +
         iteratedCovGrad (I := I) g₀ 4 2 l (appCcRS (I := I) (M := M) g₀ 4 4 2 Φ W)).toSection x) =

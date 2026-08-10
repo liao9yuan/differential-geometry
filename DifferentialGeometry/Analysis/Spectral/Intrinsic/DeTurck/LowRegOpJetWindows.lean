@@ -777,7 +777,7 @@ theorem moserWin_fullSlot (g : SmoothRiemannianMetric I M)
 
 /-- The full raised endomorphism at the background metric is the identity. -/
 private lemma raisedSelf (g : SmoothRiemannianMetric I M) (x : M) :
-    gInvRaisedEndo (I := I) g g x =
+    metricComparisonEndo (I := I) g g x =
       ContinuousLinearMap.id ℝ (TangentSpace I x) := by
   apply ContinuousLinearMap.ext
   intro v
@@ -977,7 +977,18 @@ theorem moserWin_daWeight (g : SmoothRiemannianMetric I M)
       SF ^ 2 * 1), SF * ((Module.finrank ℝ E : ℝ) * δ₀), ?_⟩
   intro T hTsup g₁ P hpert
   have hself := moserWin_self (I := I) (M := M) hδ₀0 hTsup
-  rw [daWeight, ← appCcRS_zero_eq_appCc]
+  rw [daWeight]
+  have happEq :
+      appCc (I := I) (M := M) g 2 2
+          (slotInsertEndoCc (I := I) (M := M) g 1
+            (fullRaisedEndoField (I := I) (M := M) g g₁)) T =
+        appCcRS (I := I) (M := M) g 0 2 2
+          (slotInsertEndoCc (I := I) (M := M) g 1
+            (fullRaisedEndoField (I := I) (M := M) g g₁)) T :=
+    (appCcRS_zero_eq_appCc (I := I) (M := M) g 2 2
+      (slotInsertEndoCc (I := I) (M := M) g 1
+        (fullRaisedEndoField (I := I) (M := M) g g₁)) T).symm
+  rw [happEq]
   exact happ T AF (fun _ => 1) SF ((Module.finrank ℝ E : ℝ) * δ₀) _ _
     (hF T g₁ P hpert) hself
 
@@ -1121,13 +1132,13 @@ theorem moserWin_phiDev (g g_bg : SmoothRiemannianMetric I M)
             deTurckPhiMetTotal (I := I) (M := M) g g_bg g) := by
   obtain ⟨AG, SG, hG⟩ := moserWin_gInvDiff (I := I) (M := M) g hδ₀0 hδ₀
   obtain ⟨CTp, hCTp0, hCTp⟩ :=
-    traceHessianCoeff_sub_background_perOrder_rfns_le_gInvDiffSlotCoeff_rfns
+    traceHessianCoeff_sub_background_perOrder_rfns_le_gInvDiffSlotCoeff
       (I := I) (M := M) g
   obtain ⟨CTj, hCTj0, hCTj⟩ :=
     traceHessianCoeff_sub_background_jetL2_le_gInvDiffSlotCoeff_jetL2
       (I := I) (M := M) g
   obtain ⟨CRp, hCRp0, hCRp⟩ :=
-    ricciArmPrincipalCoeff_sub_background_perOrder_rfns_le_gInvDiffSlotCoeff_rfns
+    ricciArmPrincipalCoeff_sub_background_perOrder_riemannianFiberNormSq_le_gInvDiffSlotCoeff
       (I := I) (M := M) g
   obtain ⟨CRj, hCRj0, hCRj⟩ :=
     ricciArmPrincipalCoeff_sub_background_jetL2_le_gInvDiffSlotCoeff_jetL2

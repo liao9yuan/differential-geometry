@@ -12,7 +12,7 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.ConnectionDifferenc
 import DifferentialGeometry.Geometry.Flow.DeTurckVFChartCoord
 import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.RiemannianFiberNormSq.FiberNormSubadditivity
 import DifferentialGeometry.Analysis.Sobolev.Embedding.SobolevEmbeddingCm
-import DifferentialGeometry.Analysis.Parabolic.RicciLinearization.ConvexPerturbationPointwiseC2
+import DifferentialGeometry.Analysis.Sobolev.Embedding.ConvexPerturbationPointwiseC2
 import DifferentialGeometry.Analysis.Sobolev.TensorHilbert.InverseMetricPerturbationFibreBound
 import DifferentialGeometry.Analysis.Parabolic.RicciLinearization.RealizedFamCurvatureJetBound
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurckCoefficients.RealizeMetricChartGramDifference
@@ -143,6 +143,7 @@ lemma continuousBilinearMap_basis_expand
           f (fun k : Fin 2 => chartModelBasis E (Jdx k)) := hpull
     rw [hpull']; rfl
   rw [Finset.sum_congr rfl (fun Jdx _ => h_pull Jdx)]
+
   rw [← (finTwoArrowEquiv (Fin (Module.finrank ℝ E))).symm.sum_comp
     (fun Jdx : Fin 2 → Fin (Module.finrank ℝ E) =>
       (∏ k : Fin 2, ((chartModelBasis E).repr (v k)) (Jdx k)) *
@@ -159,6 +160,16 @@ lemma continuousBilinearMap_basis_expand
       ((chartModelBasis E).repr (v 0)) k * ((chartModelBasis E).repr (v 1)) i := by
     rw [Fin.prod_univ_two]; rfl
   rw [hbasis, hprod]
+
+/-- Compatibility name for the two-input basis expansion. -/
+lemma cmm_two_basis_expand
+    (f : ContinuousMultilinearMap ℝ (fun _ : Fin 2 => E) ℝ)
+    (v : Fin 2 → E) :
+    f v =
+      ∑ k : Fin (Module.finrank ℝ E), ∑ i : Fin (Module.finrank ℝ E),
+        ((chartModelBasis E).repr (v 0)) k * ((chartModelBasis E).repr (v 1)) i *
+          f ![(chartModelBasis E) k, (chartModelBasis E) i] :=
+  continuousBilinearMap_basis_expand f v
 
 
 omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]

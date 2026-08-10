@@ -388,7 +388,7 @@ theorem galTameState_lip (g₀ : SmoothRiemannianMetric I M) (a : ℕ) {R : ℝ}
       ballRetraction R (L w) - ballRetraction R (L w') := by
     rw [hLapp, hLapp, hv, map_sub, map_sub, galTameRetr_view, galTameRetr_view]
   rw [hview]
-  have hlip := (lipschitzWith_ballRetraction
+  have hlip := (lipschitzWith_one_ballRetraction
     (X := tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 1)) hR).dist_le_mul
       (L w) (L w')
   rw [dist_eq_norm, dist_eq_norm, NNReal.coe_one, one_mul] at hlip

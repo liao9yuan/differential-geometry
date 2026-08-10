@@ -575,7 +575,9 @@ theorem curvZeroPairH2
       (slotExtendIter (I := I) (M := M) g 0 4 2 ZD)
   have hXD_eq : XT - XU = XD := by
     simp only [XT, XU, XD, ZD, slotExtendIter]
-    rw [slotExtend_sub, slotExtend_sub, appCcRS_sub_right]
+    rw [slotExtend_sub, slotExtend_sub]
+    simp only [appCcRS]
+    rw [appCcRS_sub_right]
   have hXT : lowJetSq (I := I) (M := M) g 2 XT ≤ K0 * R ^ 2 := by
     calc
       lowJetSq (I := I) (M := M) g 2 XT ≤
@@ -601,6 +603,7 @@ theorem curvZeroPairH2
           (appCcRS (I := I) (M := M) g 2 6 2 (AT - AU) XT +
             appCcRS (I := I) (M := M) g 2 6 2 AU (XT - XU)) := by
     simp only [curvZero, AT, AU, XT, XU, ZT, ZU]
+    simp only [appCcRS]
     rw [appCcRS_sub_left, appCcRS_sub_right]
     module
   let x : ℝ := S * Cp * N * R
@@ -1069,6 +1072,7 @@ theorem self_one
   have hric := ricci_one (I := I) (M := M) g gm P T hP htie
   have hvb := vb_one (I := I) (M := M) g gm P T hP htie
   have hamix := amix_one (I := I) (M := M) g gm g P T hP htie
+  simp only [appCc] at hric hvb hamix
   rw [self_decomp (I := I) (M := M) g T hT hδ_lt hδ hδZ hs]
   simp only [appCc_add_left, appCc_smul_left]
   rw [vb_refold_rf (I := I) (M := M) g gm,
@@ -1131,6 +1135,7 @@ theorem self_aff_one
         s • covGrad (I := I) (M := M) g 0 2 T by
       exact covGrad_smul (I := I) (M := M) g 0 2 s T]
     simp only [appCc_smul_right]
+  simp only [appCc] at hqT
   rw [self_one (I := I) (M := M) g T hT hδ_lt hδ hδZ hs]
   simp only [lowZeroA, lowOneA, appCc_sub_left, appCc_add_left,
     appCc_smul_left]

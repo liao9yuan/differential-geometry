@@ -80,13 +80,13 @@ theorem flow_to_agree
     P.S.family.metric Q.S.family.metric hTU
   · intro x0 i j
     exact (P.joint x0 i j).mono fun p hp =>
-      ⟨⟨hp.1.1, lt_of_lt_of_le hp.1.2 (min_le_left T U)⟩, hp.2⟩
+      ⟨⟨hp.1.1.le, lt_of_lt_of_le hp.1.2 (min_le_left T U)⟩, hp.2⟩
   · intro x0 i j
     exact ((P.joint x0 i j).continuousOn).mono fun p hp =>
       ⟨⟨hp.1.1, lt_of_lt_of_le hp.1.2 (min_le_left T U)⟩, hp.2⟩
   · intro x0 i j
     exact (Q.joint x0 i j).mono fun p hp =>
-      ⟨⟨hp.1.1, lt_of_lt_of_le hp.1.2 (min_le_right T U)⟩, hp.2⟩
+      ⟨⟨hp.1.1.le, lt_of_lt_of_le hp.1.2 (min_le_right T U)⟩, hp.2⟩
   · intro x0 i j
     exact ((Q.joint x0 i j).continuousOn).mono fun p hp =>
       ⟨⟨hp.1.1, lt_of_lt_of_le hp.1.2 (min_le_right T U)⟩, hp.2⟩

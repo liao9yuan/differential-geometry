@@ -413,7 +413,7 @@ theorem galArmMassOrdBg (hDim : Module.finrank ℝ E = 3)
         Cδ ^ 2 := by
     intro S c x
     exact (hsplit _
-      (DeTurckRemainderTameLipschitz.ccTensorBilin_symmS_symm (I := I) (M := M)
+      (ccTensorBilin_symmS_symm (I := I) (M := M)
         g₀ (galCoreRep (I := I) (M := M) g₀ R S c))
       hδ3 hδ0 (galRepFib (I := I) (M := M) g₀ hR hreal S c)
       (lowregFibZero (I := I) (M := M) g₀ hR hreal)).2 x
@@ -428,7 +428,7 @@ theorem galArmMassOrdBg (hDim : Module.finrank ℝ E = 3)
     tensorSobolevWeight (I := I) (M := M) i (3 : ℝ) * (c i) ^ 2) with hs3def
   have hs4nn : (0 : ℝ) ≤ s4 := by rw [hs4def]; positivity
   have hs3nn : (0 : ℝ) ≤ s3 := by rw [hs3def]; positivity
-  have hsym := DeTurckRemainderTameLipschitz.ccTensorBilin_symmS_symm
+  have hsym := ccTensorBilin_symmS_symm
     (I := I) (M := M) g₀ (galCoreRep (I := I) (M := M) g₀ R F c)
   -- the jet handles of the trajectory representative
   have h5 : Real.sqrt (∑ j ∈ Finset.range 5,

@@ -492,9 +492,10 @@ private lemma jet_fibreNormSq_sup_le_sharp (g₀ : SmoothRiemannianMetric I M) (
   exact ⟨Cemb, hCemb_nn, fun Ψ l x => hCemb l Ψ x⟩
 
 private lemma master_appCc_jet_le_sharp
-    (g₀ : SmoothRiemannianMetric I M) (a : ℕ)
-    (ha : Module.finrank ℝ E + 5 ≤ a) {R₀ : ℝ} (hR₀ : 0 ≤ R₀)
-    (b₀ s₀ dc dd : ℕ) (hdc : dc ≤ 3) (hdd : dd ≤ 3)
+    (g₀ : SmoothRiemannianMetric I M) (a : ℕ) {R₀ : ℝ} (hR₀ : 0 ≤ R₀)
+    (b₀ s₀ dc dd t : ℕ) (hdc : dc ≤ 3) (hdd : dd ≤ 3)
+    (ht1 : t + Module.finrank ℝ E / 2 + 1 + dc ≤ a + 2)
+    (ht2 : Module.finrank ℝ E / 2 + 1 + dd ≤ t + 4)
     (Kc : ℕ → ℝ) (_hKc_nn : ∀ i, 0 ≤ Kc i)
     (Kw : ℕ → ℝ) (_hKw_nn : ∀ l, 0 ≤ Kw l) :
     ∃ Cm : ℕ → ℝ, (∀ q, 0 ≤ Cm q) ∧
@@ -514,7 +515,6 @@ private lemma master_appCc_jet_le_sharp
   classical
   set n := Module.finrank ℝ E with hn
   set w := n / 2 + 2 with hwdef
-  set t := n / 2 + 3 with htdef
   obtain ⟨CembΦ, hCembΦ_nn, hCembΦ⟩ := jet_fibreNormSq_sup_le_sharp (I := I) (M := M) g₀ b₀ s₀
   obtain ⟨CembW, hCembW_nn, hCembW⟩ := jet_fibreNormSq_sup_le_sharp (I := I) (M := M) g₀ 0 b₀
   set KballΦ : ℕ → ℝ := fun i => CembΦ i *
@@ -776,9 +776,10 @@ private lemma master_appCc_jet_le_sharp
   exact hfinalsq
 
 private lemma coeffContraction_Hs_bound_sharp
-    (g₀ : SmoothRiemannianMetric I M) (a : ℕ)
-    (ha : Module.finrank ℝ E + 5 ≤ a) {R₀ : ℝ} (hR₀ : 0 ≤ R₀)
-    (b₀ dc dd : ℕ) (hdc : dc ≤ 3) (hdd : dd ≤ 3)
+    (g₀ : SmoothRiemannianMetric I M) (a : ℕ) {R₀ : ℝ} (hR₀ : 0 ≤ R₀)
+    (b₀ dc dd t : ℕ) (hdc : dc ≤ 3) (hdd : dd ≤ 3)
+    (ht1 : t + Module.finrank ℝ E / 2 + 1 + dc ≤ a + 2)
+    (ht2 : Module.finrank ℝ E / 2 + 1 + dd ≤ t + 4)
     (Kc : ℕ → ℝ) (hKc_nn : ∀ i, 0 ≤ Kc i)
     (Kw : ℕ → ℝ) (hKw_nn : ∀ l, 0 ≤ Kw l) :
     ∃ CE : ℕ → ℝ, (∀ j, 0 ≤ CE j) ∧
@@ -798,7 +799,7 @@ private lemma coeffContraction_Hs_bound_sharp
             (oneMinusConnLapSmoothIter (I := I) g₀ 0 2 p T₀)‖ := by
   classical
   obtain ⟨Cm, hCm_nn, hCm⟩ :=
-    master_appCc_jet_le_sharp (I := I) (M := M) g₀ a ha hR₀ b₀ 2 dc dd hdc hdd
+    master_appCc_jet_le_sharp (I := I) (M := M) g₀ a hR₀ b₀ 2 dc dd t hdc hdd ht1 ht2
       Kc hKc_nn Kw hKw_nn
   have hstep : ∀ j, ∃ c, 0 ≤ c ∧ ∀ (p : ℕ) (T₀ : SmoothCcTensor g₀ 0 2)
       (hball : ‖smoothCcToTensorHs (I := I) (M := M) g₀ ((a : ℝ) + 2) T₀‖ ≤ R₀)
@@ -891,7 +892,7 @@ private lemma sum_sq_le_add_sq {a b x y : ℝ}
 
 theorem exists_coeffContraction_covGrad_secondCovGrad_l2_le
     (g₀ : SmoothRiemannianMetric I M) (a : ℕ)
-    (ha : Module.finrank ℝ E + 5 ≤ a) {R₀ : ℝ} (_hR₀ : 0 ≤ R₀)
+    (ha : max 2 (Module.finrank ℝ E / 2 * 2 + 1) ≤ a) {R₀ : ℝ} (_hR₀ : 0 ≤ R₀)
     (Kc : ℕ → ℝ) (hKc_nn : ∀ i, 0 ≤ Kc i) :
     ∃ Cgrad : ℝ, 0 ≤ Cgrad ∧
       ∀ (C₂ : SmoothCcTensor g₀ (2 + 2) 2) (T₀ : SmoothCcTensor g₀ 0 2),
@@ -1001,7 +1002,7 @@ theorem exists_coeffContraction_covGrad_secondCovGrad_l2_le
 
 theorem exists_rawConnLap_coeffContraction_secondCovGrad_commutator_Hs_family_le
     (g₀ : SmoothRiemannianMetric I M) (a : ℕ)
-    (ha : Module.finrank ℝ E + 5 ≤ a) {R₀ : ℝ} (hR₀ : 0 ≤ R₀)
+    (ha : max 2 (Module.finrank ℝ E / 2 * 2 + 1) ≤ a) {R₀ : ℝ} (hR₀ : 0 ≤ R₀)
     (Kc : ℕ → ℝ) (hKc_nn : ∀ i, 0 ≤ Kc i) :
     ∃ CEcomm : ℕ → ℝ, (∀ j, 0 ≤ CEcomm j) ∧
       ∀ (j : ℕ) (C₂ : SmoothCcTensor g₀ (2 + 2) 2) (T₀ : SmoothCcTensor g₀ 0 2),
@@ -1045,28 +1046,32 @@ theorem exists_rawConnLap_coeffContraction_secondCovGrad_commutator_Hs_family_le
     · exact norm_nonneg _
     · exact le_refl 0
   obtain ⟨Cm4in, hCm4in_nn, hCm4in⟩ :=
-    master_appCc_jet_le_sharp (I := I) (M := M) g₀ a ha hR₀ (2 + 2) (2 + 2) 3 2
-      (by omega) (by omega)
+    master_appCc_jet_le_sharp (I := I) (M := M) g₀ a hR₀ (2 + 2) (2 + 2) 3 2
+      (Module.finrank ℝ E / 2 - 1) (by omega) (by omega) (by omega) (by omega)
       (fun i => KcLin (i + 2)) (fun i => hKcLin_nn _) (fun l => Cbr (l + 2)) (fun l => hCbr_nn _)
   obtain ⟨Cm56in, hCm56in_nn, hCm56in⟩ :=
-    master_appCc_jet_le_sharp (I := I) (M := M) g₀ a ha hR₀ (2 + 2 + 1) (2 + 2) 2 3
-      (by omega) (by omega)
+    master_appCc_jet_le_sharp (I := I) (M := M) g₀ a hR₀ (2 + 2 + 1) (2 + 2) 2 3
+      (Module.finrank ℝ E / 2) (by omega) (by omega) (by omega) (by omega)
       (fun i => Real.sqrt (Module.finrank ℝ E) * KcLin (i + 1))
       (fun i => mul_nonneg (Real.sqrt_nonneg _) (hKcLin_nn _)) (fun l => Cbr (l + 3))
       (fun l => hCbr_nn _)
   obtain ⟨CE2, hCE2_nn, hCE2⟩ :=
-    coeffContraction_Hs_bound_sharp (I := I) (M := M) g₀ a ha hR₀ (2 + 2) 1 2 (by omega) (by omega)
+    coeffContraction_Hs_bound_sharp (I := I) (M := M) g₀ a hR₀ (2 + 2) 1 2
+      (Module.finrank ℝ E / 2 - 1) (by omega) (by omega) (by omega) (by omega)
       KcLin hKcLin_nn (fun l => Kptc2 (1 + l) * Cbr (l + 2))
       (fun l => mul_nonneg (hKptc2_nn _) (hCbr_nn _))
   obtain ⟨CE3, hCE3_nn, hCE3⟩ :=
-    coeffContraction_Hs_bound_sharp (I := I) (M := M) g₀ a ha hR₀ (2 + 2) 1 2 (by omega) (by omega)
+    coeffContraction_Hs_bound_sharp (I := I) (M := M) g₀ a hR₀ (2 + 2) 1 2
+      (Module.finrank ℝ E / 2 - 1) (by omega) (by omega) (by omega) (by omega)
       KcLin hKcLin_nn (fun l => Kptc3 l * Cbr (l + 2))
       (fun l => mul_nonneg (hKptc3_nn _) (hCbr_nn _))
   obtain ⟨CE4, hCE4_nn, hCE4⟩ :=
-    coeffContraction_Hs_bound_sharp (I := I) (M := M) g₀ a ha hR₀ (2 + 2) 0 3 (by omega) (by omega)
+    coeffContraction_Hs_bound_sharp (I := I) (M := M) g₀ a hR₀ (2 + 2) 0 3
+      (Module.finrank ℝ E / 2) (by omega) (by omega) (by omega) (by omega)
       KcDT hKcDT_nn Cm4in hCm4in_nn
   obtain ⟨CE56, hCE56_nn, hCE56⟩ :=
-    coeffContraction_Hs_bound_sharp (I := I) (M := M) g₀ a ha hR₀ (2 + 2) 0 3 (by omega) (by omega)
+    coeffContraction_Hs_bound_sharp (I := I) (M := M) g₀ a hR₀ (2 + 2) 0 3
+      (Module.finrank ℝ E / 2) (by omega) (by omega) (by omega) (by omega)
       KcDT hKcDT_nn Cm56in hCm56in_nn
   refine ⟨fun j => CE2 j + CE3 j + CE4 j + CE56 j + CE56 j,
     fun j => by
@@ -1353,7 +1358,7 @@ theorem exists_rawConnLap_coeffContraction_secondCovGrad_commutator_Hs_family_le
 
 theorem exists_coeffContraction_secondCovGrad_smallFibreCoeff_Hs_family_le
     (g₀ : SmoothRiemannianMetric I M) (a : ℕ)
-    (ha : Module.finrank ℝ E + 5 ≤ a) {R₀ : ℝ} (hR₀ : 0 ≤ R₀)
+    (ha : max 2 (Module.finrank ℝ E / 2 * 2 + 1) ≤ a) {R₀ : ℝ} (hR₀ : 0 ≤ R₀)
     (εC : ℝ) (hεC_nn : 0 ≤ εC) (Kc : ℕ → ℝ) (hKc_nn : ∀ i, 0 ≤ Kc i) :
     ∃ Clower : ℕ → ℝ, (∀ j, 0 ≤ Clower j) ∧
       ∀ (C₂ : SmoothCcTensor g₀ (2 + 2) 2) (T₀ : SmoothCcTensor g₀ 0 2),

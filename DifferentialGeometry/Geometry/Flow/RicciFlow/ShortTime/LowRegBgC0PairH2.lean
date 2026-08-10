@@ -49,6 +49,12 @@ private noncomputable def bgKappa
   lc0Kappa (I := I) (M := M) g gm gB -
     lc0Kappa (I := I) (M := M) g gm g
 
+private theorem lc0Kappa_eq_metricConnDiffLoweredCc
+    (g gm gB : SmoothRiemannianMetric I M) :
+    lc0Kappa (I := I) (M := M) g gm gB =
+      metricConnDiffLoweredCc (I := I) (M := M) g gm gB := by
+  rfl
+
 private theorem bgKappa_pair
     (g gT gU gB : SmoothRiemannianMetric I M)
     (T U : SmoothCcTensor g 0 2)
@@ -103,8 +109,10 @@ private theorem amixHalf_bg
     lc0AMixHalfRF (I := I) (M := M) g gm gB σ -
         lc0AMixHalfRF (I := I) (M := M) g gm g σ =
       bgAmixHalf (I := I) (M := M) g gm gB σ := by
-  unfold lc0AMixHalfRF bgAmixHalf bgKappa lc0Kappa
-  rw [← appCcRS_sub_right, ← appCcRS_sub_right,
+  unfold lc0AMixHalfRF bgAmixHalf bgKappa
+  rw [lc0Kappa_eq_metricConnDiffLoweredCc,
+    lc0Kappa_eq_metricConnDiffLoweredCc,
+    ← appCcRS_sub_right, ← appCcRS_sub_right,
     ← appCcRS_sub_left, ← slotIter_sub]
 
 private theorem bgAmix_eq
@@ -1021,6 +1029,7 @@ private theorem rev3_pair_h2
       (Module.finrank ℝ E : ℝ) ^ 3 *
         lowJetSq (I := I) (M := M) g 2 (T - U) := by
   have hsymm : symmS (I := I) (M := M) g (T - U) = T - U := by
+    change ccTensor02Symm (I := I) (M := M) g (T - U) = T - U
     rw [symmS_sub,
       symmS_eq_self_of_ccTensorBilin_symm (I := I) (M := M) g T hT,
       symmS_eq_self_of_ccTensorBilin_symm (I := I) (M := M) g U hU]

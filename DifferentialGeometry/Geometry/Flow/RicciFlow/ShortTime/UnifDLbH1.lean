@@ -1,4 +1,5 @@
 import DifferentialGeometry.Analysis.Sobolev.TensorHilbert.DeTurckLieCoeffL2JetBound
+import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.CurvatureCoefficientDifferenceJetTower.TsTransport
 import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.UnifInsertH1
 
 /-!
@@ -94,6 +95,46 @@ private theorem raise_sub
     ContinuousLinearMap.sub_apply]
   rfl
 
+omit [NeZero (Module.finrank ℝ E)] in
+private theorem wAlphaB_sub_eq_appCcRS
+    (g₀ g₁ gA gB : SmoothRiemannianMetric I M) :
+    wAlphaB (I := I) (M := M) g₀ g₁ gA -
+        wAlphaB (I := I) (M := M) g₀ g₁ gB =
+      appCcRS (I := I) (M := M) g₀ 0 1 2
+        (wCA (I := I) (M := M) g₀ g₁)
+        (wOmega (I := I) (M := M) g₀ g₁ gA -
+          wOmega (I := I) (M := M) g₀ g₁ gB) := by
+  unfold wAlphaB
+  calc
+    appCc (I := I) (M := M) g₀ 1 2
+          (wCA (I := I) (M := M) g₀ g₁)
+          (wOmega (I := I) (M := M) g₀ g₁ gA) -
+        appCc (I := I) (M := M) g₀ 1 2
+          (wCA (I := I) (M := M) g₀ g₁)
+          (wOmega (I := I) (M := M) g₀ g₁ gB) =
+      appCcRS (I := I) (M := M) g₀ 0 1 2
+          (wCA (I := I) (M := M) g₀ g₁)
+          (wOmega (I := I) (M := M) g₀ g₁ gA) -
+        appCcRS (I := I) (M := M) g₀ 0 1 2
+          (wCA (I := I) (M := M) g₀ g₁)
+          (wOmega (I := I) (M := M) g₀ g₁ gB) := by
+      exact congrArg₂ (fun X Y => X - Y)
+        (appCcRS_zero_eq_appCc (I := I) (M := M) g₀ 1 2
+          (wCA (I := I) (M := M) g₀ g₁)
+          (wOmega (I := I) (M := M) g₀ g₁ gA)).symm
+        (appCcRS_zero_eq_appCc (I := I) (M := M) g₀ 1 2
+          (wCA (I := I) (M := M) g₀ g₁)
+          (wOmega (I := I) (M := M) g₀ g₁ gB)).symm
+    _ = appCcRS (I := I) (M := M) g₀ 0 1 2
+        (wCA (I := I) (M := M) g₀ g₁)
+        (wOmega (I := I) (M := M) g₀ g₁ gA -
+          wOmega (I := I) (M := M) g₀ g₁ gB) :=
+      (appCcRS_sub_right (I := I) (M := M) g₀ 0 1 2
+        (wCA (I := I) (M := M) g₀ g₁)
+        (wOmega (I := I) (M := M) g₀ g₁ gA)
+        (wOmega (I := I) (M := M) g₀ g₁ gB)).symm
+
+set_option maxHeartbeats 800000 in
 /-- **Dimension-three class-first `DLb` background-difference `H1` bound.**
 
 One nonnegative radius function is selected from `(gBase, Λ, δ₀)` before the
@@ -229,8 +270,8 @@ theorem dlbDiff_h1_unif
         (covGrad (I := I) (M := M) g₀ 0 1 OD) := by
     dsimp only [AA, OD]
     unfold wAlphaA
-    rw [← DifferentialGeometry.Analysis.Parabolic.TensorSpectral.domDomCongr_sub,
-      ← covGrad_sub]
+    rw [covGrad_sub,
+      DifferentialGeometry.Integral.Connection.CurvatureCoefficientDifferenceJetTower.tsDomDomCongrSection_sub]
   have hAA : (∑ i ∈ Finset.range 2,
       ‖iteratedCovGrad (I := I) g₀ 0 2 i AA‖ ^ 2) ≤ (BO R) ^ 2 := by
     rw [hAAform, dom_h1_eq]
@@ -241,16 +282,10 @@ theorem dlbDiff_h1_unif
           iteratedCovGrad_zero, iteratedCovGrad_succ]
         nlinarith [sq_nonneg ‖OD‖]
       _ ≤ (BO R) ^ 2 := hOD
-  have hABform :
-      AB = appCcRS (I := I) (M := M) g₀ 0 1 2
-        (wCA (I := I) (M := M) g₀ g₁) OD := by
-    dsimp only [AB, OD]
-    unfold wAlphaB
-    rw [← appCcRS_zero_eq_appCc, ← appCcRS_zero_eq_appCc,
-      ← appCcRS_sub_right]
   have hAB : (∑ i ∈ Finset.range 2,
       ‖iteratedCovGrad (I := I) g₀ 0 2 i AB‖ ^ 2) ≤ (BAB R) ^ 2 := by
-    rw [hABform]
+    dsimp only [AB, OD]
+    rw [wAlphaB_sub_eq_appCcRS (I := I) (M := M)]
     have hnorm := haprod g₀ hEq hjet1 hjet2
       (wCA (I := I) (M := M) g₀ g₁) OD
       (BC R) (BO R) (hBC R hR) (hBO R hR) hCAjet hOD

@@ -1,4 +1,4 @@
-import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.DeTurckRemainderTameLipschitz.Base
+import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.DeTurckRemainderTameLipschitzArmConnLapJetBounds
 import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.LowRegRemainderH1
 import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.UnifTopPathH1
 import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.UnifPathLower

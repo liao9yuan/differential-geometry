@@ -43,7 +43,7 @@ variable
 private local instance instCompleteSpaceE : CompleteSpace E :=
   FiniteDimensional.complete ℝ E
 
-private theorem phi_dev_joint
+theorem phi_dev_joint
     (g₀ g_bg : SmoothRiemannianMetric I M)
     (T T' : SmoothCcTensor g₀ 0 2)
     {δ : ℝ} (hδ : metricCauchySchwarzBound g₀
@@ -77,7 +77,7 @@ private theorem phi_dev_joint
 
 omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless]
   [BoundarylessManifold I M] in
-private theorem norm_sq_add_le
+theorem norm_sq_add_le
     (g₀ : SmoothRiemannianMetric I M) (r s : ℕ)
     (A B : SmoothCcTensor g₀ r s) :
     ‖A + B‖ ^ 2 ≤ 2 * ‖A‖ ^ 2 + 2 * ‖B‖ ^ 2 := by
@@ -89,7 +89,7 @@ private theorem norm_sq_add_le
 
 omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless]
   [BoundarylessManifold I M] in
-private theorem norm_sq_sub_le
+theorem norm_sq_sub_le
     (g₀ : SmoothRiemannianMetric I M) (r s : ℕ)
     (A B : SmoothCcTensor g₀ r s) :
     ‖A - B‖ ^ 2 ≤ 2 * ‖A‖ ^ 2 + 2 * ‖B‖ ^ 2 := by
@@ -100,7 +100,7 @@ private theorem norm_sq_sub_le
   nlinarith [sq_nonneg (‖A‖ - ‖B‖)]
 
 omit [NeZero (Module.finrank ℝ E)] in
-private theorem reindex_norm_sq
+theorem reindex_norm_sq
     (g₀ : SmoothRiemannianMetric I M) (r s i : ℕ)
     (A : SmoothCcTensor g₀ r s) (ρ : Equiv.Perm (Fin r)) :
     ‖iteratedCovGrad (I := I) g₀ r s i
@@ -111,7 +111,7 @@ private theorem reindex_norm_sq
 
 omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [BoundarylessManifold I M]
     [SigmaCompactSpace M] in
-private theorem reindex_sub
+theorem reindex_sub
     (g₀ : SmoothRiemannianMetric I M) (r s : ℕ)
     (A B : SmoothCcTensor g₀ r s) (ρ : Equiv.Perm (Fin r)) :
     reindexCoeffGen (I := I) (M := M) g₀ r s (A - B) ρ =
@@ -431,7 +431,7 @@ theorem path_add_sub_cap
   have hsqrt := Real.sqrt_le_sqrt (hcap t ht)
   simpa only [K, Real.sqrt_sq hΛ] using hsqrt
 
-private theorem convex_hs_bound
+theorem convex_hs_bound
     (g₀ : SmoothRiemannianMetric I M) (T T' : SmoothCcTensor g₀ 0 2)
     {s R : ℝ} (hs0 : 0 ≤ s) (hs1 : s ≤ 1)
     (hT : ‖ccTensorToHs (I := I) (M := M) g₀ 2 (2 : ℝ) T‖ ≤ R)

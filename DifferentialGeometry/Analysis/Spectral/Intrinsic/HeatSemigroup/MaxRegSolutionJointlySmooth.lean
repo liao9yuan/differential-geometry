@@ -18,6 +18,7 @@ import DifferentialGeometry.Analysis.Parabolic.QuasiLinear.TensorMaximalRegulari
 import DifferentialGeometry.Analysis.Parabolic.QuasiLinear.TensorMaximalRegularity.SmallTimeSmoothness
 import DifferentialGeometry.Analysis.Parabolic.TimeSobolev.PointwiseDeriv
 import DifferentialGeometry.Analysis.Spectral.Tensor.SobolevScale.SeriesContinuous
+import DifferentialGeometry.Analysis.Spectral.Tensor.Estimates.H2Pointwise
 import DifferentialGeometry.Analysis.Parabolic.TimeSobolev.TimeH1Modulus
 
 
@@ -122,7 +123,6 @@ private theorem realizedSolField_continuousOn_smoothCcToTensorHs
 
 private theorem realizedFamily_flowDeriv_of_repr
     (g₀ : SmoothRiemannianMetric I M) (a : ℕ)
-    (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a)
     (F_RHS : SmoothRiemannianMetric I M →
       (∀ x : M, TangentSpace I x →L[ℝ] TangentSpace I x →L[ℝ] ℝ))
     (Nsec : ∀ (S : SmoothCcTensor g₀ 0 2) {δ : ℝ} (_hδ_lt : δ < 1)
@@ -218,7 +218,8 @@ private theorem realizedFamily_flowDeriv_of_repr
       rw [hcoeff s hs i]
       exact h
   have hforcing := hForceRepr
-  have ha_lossy : 2 * Module.finrank ℝ E + 4 ≤ a := by omega
+  obtain ⟨m, hm_lossy⟩ : ∃ m : ℕ, 2 * Module.finrank ℝ E + 4 ≤ m :=
+    ⟨2 * Module.finrank ℝ E + 4, le_rfl⟩
   set sW : ℕ := weylSobolevExp (E := E) + 1 with hsW_def
   have hsW_gt : ((weylSobolevExp (E := E) : ℕ) : ℝ) < (sW : ℝ) := by
     rw [hsW_def]; push_cast; linarith
@@ -227,40 +228,40 @@ private theorem realizedFamily_flowDeriv_of_repr
     tensorEigen_summable_negpow (I := I) (M := M) g₀ (sW : ℝ) hsW_gt
   intro t ht x v w
   obtain ⟨C, hC_pos, hC_bd⟩ :=
-    abs_eigenBilinScalar_le (I := I) (M := M) g₀ a ha_lossy x v w
+    abs_eigenBilinScalar_le (I := I) (M := M) g₀ m hm_lossy x v w
   set K : ℝ := Real.sqrt (g₀.inner x v v) * Real.sqrt (g₀.inner x w w) with hK_def
   have hK_nn : 0 ≤ K := mul_nonneg (Real.sqrt_nonneg _) (Real.sqrt_nonneg _)
   have hψ_bd : ∀ i, |eigenBilinScalar (I := I) g₀ x v w i| ≤
-      (C * K) * Real.sqrt (tensorSobolevWeight (I := I) (M := M) i (a : ℝ)) := by
+      (C * K) * Real.sqrt (tensorSobolevWeight (I := I) (M := M) i (m : ℝ)) := by
     intro i
     have := hC_bd i
     rw [hK_def]
     calc |eigenBilinScalar (I := I) g₀ x v w i|
-        ≤ C * Real.sqrt (tensorSobolevWeight (I := I) (M := M) i (a : ℝ)) *
+        ≤ C * Real.sqrt (tensorSobolevWeight (I := I) (M := M) i (m : ℝ)) *
             (Real.sqrt (g₀.inner x v v) * Real.sqrt (g₀.inner x w w)) := this
       _ = C * (Real.sqrt (g₀.inner x v v) * Real.sqrt (g₀.inner x w w)) *
-            Real.sqrt (tensorSobolevWeight (I := I) (M := M) i (a : ℝ)) := by ring
+            Real.sqrt (tensorSobolevWeight (I := I) (M := M) i (m : ℝ)) := by ring
   have hprod_summable : ∀ (c : TensorEigenIdx (I := I) (M := M) g₀ 0 2 → ℝ),
-      Summable (fun i => tensorSobolevWeight (I := I) (M := M) i ((a : ℝ) + (sW : ℝ)) *
+      Summable (fun i => tensorSobolevWeight (I := I) (M := M) i ((m : ℝ) + (sW : ℝ)) *
           (c i) ^ 2) →
       Summable (fun i => c i * eigenBilinScalar (I := I) g₀ x v w i) := by
     intro c hc_sum
     have hdom : Summable (fun i =>
-        (1 / 2 : ℝ) * ((C * K) * (tensorSobolevWeight (I := I) (M := M) i ((a : ℝ) + (sW : ℝ)) *
+        (1 / 2 : ℝ) * ((C * K) * (tensorSobolevWeight (I := I) (M := M) i ((m : ℝ) + (sW : ℝ)) *
             (c i) ^ 2)) +
           (1 / 2 : ℝ) * ((C * K) * tensorSobolevWeight (I := I) (M := M) i (-(sW : ℝ)))) :=
       ((hc_sum.mul_left (C * K)).mul_left (1 / 2)).add
         ((hweyl.mul_left (C * K)).mul_left (1 / 2))
     refine Summable.of_norm_bounded hdom (fun i => ?_)
     have hCK_nn : 0 ≤ C * K := mul_nonneg hC_pos.le hK_nn
-    have hwa_nn : 0 ≤ tensorSobolevWeight (I := I) (M := M) i (a : ℝ) :=
-      tensorSobolevWeight_nonneg (I := I) (M := M) i (a : ℝ)
-    have hwasW_nn : 0 ≤ tensorSobolevWeight (I := I) (M := M) i ((a : ℝ) + (sW : ℝ)) :=
+    have hwa_nn : 0 ≤ tensorSobolevWeight (I := I) (M := M) i (m : ℝ) :=
+      tensorSobolevWeight_nonneg (I := I) (M := M) i (m : ℝ)
+    have hwasW_nn : 0 ≤ tensorSobolevWeight (I := I) (M := M) i ((m : ℝ) + (sW : ℝ)) :=
       tensorSobolevWeight_nonneg (I := I) (M := M) i _
     have hwneg_nn : 0 ≤ tensorSobolevWeight (I := I) (M := M) i (-(sW : ℝ)) :=
       tensorSobolevWeight_nonneg (I := I) (M := M) i _
-    have hsqrt_split : Real.sqrt (tensorSobolevWeight (I := I) (M := M) i (a : ℝ)) =
-        Real.sqrt (tensorSobolevWeight (I := I) (M := M) i ((a : ℝ) + (sW : ℝ))) *
+    have hsqrt_split : Real.sqrt (tensorSobolevWeight (I := I) (M := M) i (m : ℝ)) =
+        Real.sqrt (tensorSobolevWeight (I := I) (M := M) i ((m : ℝ) + (sW : ℝ))) *
           Real.sqrt (tensorSobolevWeight (I := I) (M := M) i (-(sW : ℝ))) := by
       rw [← Real.sqrt_mul hwasW_nn]
       congr 1
@@ -269,41 +270,41 @@ private theorem realizedFamily_flowDeriv_of_repr
       congr 1; ring
     rw [Real.norm_eq_abs, abs_mul]
     calc |c i| * |eigenBilinScalar (I := I) g₀ x v w i|
-        ≤ |c i| * ((C * K) * Real.sqrt (tensorSobolevWeight (I := I) (M := M) i (a : ℝ))) :=
+        ≤ |c i| * ((C * K) * Real.sqrt (tensorSobolevWeight (I := I) (M := M) i (m : ℝ))) :=
           mul_le_mul_of_nonneg_left (hψ_bd i) (abs_nonneg _)
       _ = (C * K) * (|c i| * Real.sqrt (tensorSobolevWeight (I := I) (M := M) i
-            ((a : ℝ) + (sW : ℝ)))) *
+            ((m : ℝ) + (sW : ℝ)))) *
           Real.sqrt (tensorSobolevWeight (I := I) (M := M) i (-(sW : ℝ))) := by
           rw [hsqrt_split]; ring
       _ ≤ (C * K) * ((1 / 2) * ((|c i| * Real.sqrt (tensorSobolevWeight (I := I) (M := M) i
-              ((a : ℝ) + (sW : ℝ)))) ^ 2 +
+              ((m : ℝ) + (sW : ℝ)))) ^ 2 +
             (Real.sqrt (tensorSobolevWeight (I := I) (M := M) i (-(sW : ℝ)))) ^ 2)) := by
           have hAB : (C * K) * (|c i| * Real.sqrt (tensorSobolevWeight (I := I) (M := M) i
-                ((a : ℝ) + (sW : ℝ)))) *
+                ((m : ℝ) + (sW : ℝ)))) *
               Real.sqrt (tensorSobolevWeight (I := I) (M := M) i (-(sW : ℝ))) =
               (C * K) * ((|c i| * Real.sqrt (tensorSobolevWeight (I := I) (M := M) i
-                ((a : ℝ) + (sW : ℝ)))) *
+                ((m : ℝ) + (sW : ℝ)))) *
                 Real.sqrt (tensorSobolevWeight (I := I) (M := M) i (-(sW : ℝ)))) := by ring
           rw [hAB]
           refine mul_le_mul_of_nonneg_left ?_ hCK_nn
           nlinarith [sq_nonneg (|c i| * Real.sqrt (tensorSobolevWeight (I := I) (M := M) i
-              ((a : ℝ) + (sW : ℝ))) -
+              ((m : ℝ) + (sW : ℝ))) -
             Real.sqrt (tensorSobolevWeight (I := I) (M := M) i (-(sW : ℝ))))]
       _ = (1 / 2 : ℝ) * ((C * K) * (tensorSobolevWeight (I := I) (M := M) i
-              ((a : ℝ) + (sW : ℝ)) * (c i) ^ 2)) +
+              ((m : ℝ) + (sW : ℝ)) * (c i) ^ 2)) +
             (1 / 2 : ℝ) * ((C * K) * tensorSobolevWeight (I := I) (M := M) i (-(sW : ℝ))) := by
           rw [mul_pow, Real.sq_sqrt hwasW_nn, Real.sq_sqrt hwneg_nn, sq_abs]; ring
   have hsum_series : ∀ s ∈ Set.Icc (0 : ℝ) T₁,
       Summable (fun i => φ i s * eigenBilinScalar (I := I) g₀ x v w i) := by
     intro s hs
     refine hprod_summable (fun i => φ i s) ?_
-    obtain ⟨B, hB_sum, hB_le⟩ := hφ_mass 0 ((a : ℝ) + (sW : ℝ)) (by positivity)
+    obtain ⟨B, hB_sum, hB_le⟩ := hφ_mass 0 ((m : ℝ) + (sW : ℝ)) (by positivity)
     refine Summable.of_nonneg_of_le (fun i => ?_) (fun i => ?_) hB_sum
     · exact mul_nonneg (tensorSobolevWeight_nonneg (I := I) (M := M) i _) (sq_nonneg _)
     · have hs_icc : s ∈ Set.Icc (0 : ℝ) d₂F := ⟨hs.1, le_trans hs.2 hT₁_le_d2F⟩
       have h := hB_le i s hs_icc
       rwa [iteratedDeriv_zero] at h
-  obtain ⟨Bφ', hBφ'_sum, hBφ'_le⟩ := hφ_mass 1 ((a : ℝ) + (sW : ℝ)) (by positivity)
+  obtain ⟨Bφ', hBφ'_sum, hBφ'_le⟩ := hφ_mass 1 ((m : ℝ) + (sW : ℝ)) (by positivity)
   set u_bd : TensorEigenIdx (I := I) (M := M) g₀ 0 2 → ℝ :=
     fun i => (1 / 2 : ℝ) * ((C * K) * Bφ' i) +
       (1 / 2 : ℝ) * ((C * K) * tensorSobolevWeight (I := I) (M := M) i (-(sW : ℝ)))
@@ -316,39 +317,39 @@ private theorem realizedFamily_flowDeriv_of_repr
     intro i s hs
     have hs_icc : s ∈ Set.Icc (0 : ℝ) d₂F := ⟨hs.1, le_trans hs.2 hT₁_le_d2F⟩
     have hCK_nn : 0 ≤ C * K := mul_nonneg hC_pos.le hK_nn
-    have hwasW_nn : 0 ≤ tensorSobolevWeight (I := I) (M := M) i ((a : ℝ) + (sW : ℝ)) :=
+    have hwasW_nn : 0 ≤ tensorSobolevWeight (I := I) (M := M) i ((m : ℝ) + (sW : ℝ)) :=
       tensorSobolevWeight_nonneg (I := I) (M := M) i _
     have hwneg_nn : 0 ≤ tensorSobolevWeight (I := I) (M := M) i (-(sW : ℝ)) :=
       tensorSobolevWeight_nonneg (I := I) (M := M) i _
-    have hsqrt_split : Real.sqrt (tensorSobolevWeight (I := I) (M := M) i (a : ℝ)) =
-        Real.sqrt (tensorSobolevWeight (I := I) (M := M) i ((a : ℝ) + (sW : ℝ))) *
+    have hsqrt_split : Real.sqrt (tensorSobolevWeight (I := I) (M := M) i (m : ℝ)) =
+        Real.sqrt (tensorSobolevWeight (I := I) (M := M) i ((m : ℝ) + (sW : ℝ))) *
           Real.sqrt (tensorSobolevWeight (I := I) (M := M) i (-(sW : ℝ))) := by
       rw [← Real.sqrt_mul hwasW_nn]
       congr 1
       unfold tensorSobolevWeight
       rw [← Real.rpow_add (lt_of_lt_of_le one_pos (one_le_one_add_lambda (I := I) (M := M) i))]
       congr 1; ring
-    have hbd1 : tensorSobolevWeight (I := I) (M := M) i ((a : ℝ) + (sW : ℝ)) *
+    have hbd1 : tensorSobolevWeight (I := I) (M := M) i ((m : ℝ) + (sW : ℝ)) *
         (φ' i s) ^ 2 ≤ Bφ' i := by
       have h := hBφ'_le i s hs_icc
       rwa [iteratedDeriv_one, show deriv (φ i) s = φ' i s from (hφ_deriv i s).deriv] at h
     rw [Real.norm_eq_abs, abs_mul]
     calc |φ' i s| * |eigenBilinScalar (I := I) g₀ x v w i|
-        ≤ |φ' i s| * ((C * K) * Real.sqrt (tensorSobolevWeight (I := I) (M := M) i (a : ℝ))) :=
+        ≤ |φ' i s| * ((C * K) * Real.sqrt (tensorSobolevWeight (I := I) (M := M) i (m : ℝ))) :=
           mul_le_mul_of_nonneg_left (hψ_bd i) (abs_nonneg _)
       _ = (C * K) * ((|φ' i s| * Real.sqrt (tensorSobolevWeight (I := I) (M := M) i
-            ((a : ℝ) + (sW : ℝ)))) *
+            ((m : ℝ) + (sW : ℝ)))) *
             Real.sqrt (tensorSobolevWeight (I := I) (M := M) i (-(sW : ℝ)))) := by
           rw [hsqrt_split]; ring
       _ ≤ (C * K) * ((1 / 2) * ((|φ' i s| * Real.sqrt (tensorSobolevWeight (I := I) (M := M) i
-            ((a : ℝ) + (sW : ℝ)))) ^ 2 +
+            ((m : ℝ) + (sW : ℝ)))) ^ 2 +
             (Real.sqrt (tensorSobolevWeight (I := I) (M := M) i (-(sW : ℝ)))) ^ 2)) := by
           refine mul_le_mul_of_nonneg_left ?_ hCK_nn
           nlinarith [sq_nonneg (|φ' i s| * Real.sqrt (tensorSobolevWeight (I := I) (M := M) i
-              ((a : ℝ) + (sW : ℝ))) -
+              ((m : ℝ) + (sW : ℝ))) -
             Real.sqrt (tensorSobolevWeight (I := I) (M := M) i (-(sW : ℝ))))]
       _ = (1 / 2 : ℝ) * ((C * K) * (tensorSobolevWeight (I := I) (M := M) i
-            ((a : ℝ) + (sW : ℝ)) * (φ' i s) ^ 2)) +
+            ((m : ℝ) + (sW : ℝ)) * (φ' i s) ^ 2)) +
             (1 / 2 : ℝ) * ((C * K) * tensorSobolevWeight (I := I) (M := M) i (-(sW : ℝ))) := by
           rw [mul_pow, Real.sq_sqrt hwasW_nn, Real.sq_sqrt hwneg_nn, sq_abs]; ring
       _ ≤ (1 / 2 : ℝ) * ((C * K) * Bφ' i) +
@@ -430,7 +431,7 @@ private theorem realizedFamily_flowDeriv_of_repr
       refine (hprod_summable (fun i => tensorL2Coeff (I := I) (M := M) hc
         (SmoothCcTensor.toL2 (g := g₀) (r := 0) (s := 2) R) i) ?_)
       exact smoothCcTensor_tensorL2Coeff_weighted_summable (I := I) (M := M) g₀
-        ((a : ℝ) + (sW : ℝ)) R hc
+        ((m : ℝ) + (sW : ℝ)) R hc
     have heig := ccTensorBilinSymm_eigenSeries_eq (I := I) (M := M) g₀
       (SmoothCcTensor.toL2 (g := g₀) (r := 0) (s := 2) R) hR_mem R
       (SmoothCcTensor.toL2_apply R) x v w hR_sum
@@ -1207,7 +1208,7 @@ theorem maxreg_solution_jointly_smooth_representative_of_nemytskii
           (SmoothCcTensor.toL2 (g := g₀) (r := 0) (s := 2)
             (Nsec (F t) hδ_lt (hF_small t))) i :=
     hForceRepr_fam hT₁_pos hT₁_le hT₁_le_d2F F hδ_lt hF_small hF_pin hball
-  have hF_flow := realizedFamily_flowDeriv_of_repr (I := I) (M := M) g₀ a ha_super
+  have hF_flow := realizedFamily_flowDeriv_of_repr (I := I) (M := M) g₀ a
     F_RHS Nsec hRepr hT hT1 hT₁_pos hT₁_le hd₂F_pos hd₂F_le hT₁_le_d2F u F hδ_lt hF_small
     hF_pin f hf_smooth hf_mass hf_id hForceRepr
   have hcoeff : ∀ t ∈ Set.Icc (0 : ℝ) T₁,
@@ -1259,8 +1260,6 @@ the input the black-box `(N)` assembly needs to choose `τ₀` without appeal to
 qualitative continuity. -/
 theorem maxreg_solution_jointly_smooth_representative_of_tame_nemytskii
     (g₀ : SmoothRiemannianMetric I M) (a : ℕ)
-    (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a)
-    (_ha_eq : a = 4 * Module.finrank ℝ E + 10)
     (F_RHS : SmoothRiemannianMetric I M →
       (∀ x : M, TangentSpace I x →L[ℝ] TangentSpace I x →L[ℝ] ℝ))
     (Nsec : ∀ (S : SmoothCcTensor g₀ 0 2) {δ : ℝ} (_hδ_lt : δ < 1)
@@ -1295,7 +1294,7 @@ theorem maxreg_solution_jointly_smooth_representative_of_tame_nemytskii
     (hC : ∀ (S : SmoothCcTensor g₀ 0 2),
       metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ S)
         (C * ‖smoothCcToTensorHs (I := I) (M := M) g₀ (a : ℝ) S‖))
-    (hfloor : Real.sqrt T * ‖u.deriv‖ ≤ 1 / (2 * C))
+    (hstate : ∀ t ∈ Set.Icc (0 : ℝ) T, ‖timeH1.toFun u t‖ ≤ 1 / (2 * C))
     {R₀ : ℝ} (_hR₀_pos : 0 < R₀)
     (hball_full : ∀ t ∈ Set.Icc (0 : ℝ) T, ∀ S : SmoothCcTensor g₀ 0 2,
         SmoothCcTensor.toL2 (g := g₀) (r := 0) (s := 2) S =
@@ -1437,12 +1436,7 @@ theorem maxreg_solution_jointly_smooth_representative_of_tame_nemytskii
       have hnorm_le : ‖smoothCcToTensorHs (I := I) (M := M) g₀ (a : ℝ) (Fdef t)‖ ≤
           1 / (2 * C) := by
         rw [heq]
-        calc ‖timeH1.toFun u t‖
-            = ‖timeH1.toFun u t - u.init‖ := by rw [hinit, sub_zero]
-          _ ≤ Real.sqrt t * ‖u.deriv‖ := u.norm_toFun_sub_init_le ht_icc
-          _ ≤ Real.sqrt T * ‖u.deriv‖ :=
-              mul_le_mul_of_nonneg_right (Real.sqrt_le_sqrt ht.2) (norm_nonneg _)
-          _ ≤ 1 / (2 * C) := hfloor
+        exact hstate t ht_icc
       intro x v w
       rw [hFt]
       refine le_trans (hC (Fdef t) x v w) ?_
@@ -1491,7 +1485,7 @@ theorem maxreg_solution_jointly_smooth_representative_of_tame_nemytskii
           (SmoothCcTensor.toL2 (g := g₀) (r := 0) (s := 2)
             (Nsec (F t) hδ_lt (hF_small t))) i :=
     hForce F hδ_lt hF_small hF_pin hball
-  have hF_flow := realizedFamily_flowDeriv_of_repr (I := I) (M := M) g₀ a ha_super
+  have hF_flow := realizedFamily_flowDeriv_of_repr (I := I) (M := M) g₀ a
     F_RHS Nsec hRepr hT hT1 hT (le_refl T) hT (le_refl T) (le_refl T) u F hδ_lt hF_small
     hF_pin f hf_smooth hf_mass hf_id hForceRepr
   have hcoeff : ∀ t ∈ Set.Icc (0 : ℝ) T,
@@ -1518,5 +1512,20 @@ theorem maxreg_solution_jointly_smooth_representative_of_tame_nemytskii
     realizedFamily_jointChartGramSmooth (I := I) (M := M) g₀ hT F hδ_lt hF_small
       φ hφ_smooth hcoeff hmodemass
   exact ⟨F, 1 / 2, hδ_lt, hF_small, hF_zero, hF_pin, hF_flow, hF_joint⟩
+
+/-- The dimension-three `H²` fibre-operator constant in the exact
+smooth-Sobolev form consumed by the maximal-regularity endpoint. -/
+theorem hs2_opBound_at_two (hDim : Module.finrank ℝ E = 3)
+    (g₀ : SmoothRiemannianMetric I M) :
+    ∃ C : ℝ, 0 < C ∧ ∀ S : SmoothCcTensor g₀ 0 2,
+      metricCauchySchwarzBound (I := I) (M := M) g₀
+        (ccTensorBilinSymm (I := I) g₀ S)
+        (C * ‖smoothCcToTensorHs (I := I) (M := M) g₀ (((2 : ℕ) : ℝ)) S‖) := by
+  obtain ⟨C, hC_pos, hOp⟩ := hs2_op_bound (I := I) (M := M) hDim g₀
+  refine ⟨C, hC_pos, fun S => ?_⟩
+  have htwo : ccTensorToHs (I := I) (M := M) g₀ 2 (2 : ℝ) S =
+      smoothCcToTensorHs (I := I) (M := M) g₀ (2 : ℝ) S :=
+    tensorHs.ext (funext (fun _ ↦ rfl))
+  simpa only [htwo, Nat.cast_ofNat] using hOp S
 
 end DifferentialGeometry.PDE.RicciFlow

@@ -679,19 +679,19 @@ theorem ricciCometricFourTraceCastG0_order0sup_perOrder_l2_tameEnvelope_generic
       _ ≤ 4 * (2 * aL q + 2 * KD q) * (1 + ∑ j ∈ Finset.range (q + 2),
             ‖iteratedCovGrad (I := I) g₀ 0 2 j P‖ ^ 2) := hprod
 
-private def kOutPerm0312 : Equiv.Perm (Fin 4) :=
+def kOutPerm0312 : Equiv.Perm (Fin 4) :=
   ⟨![0, 3, 1, 2], ![0, 2, 3, 1], by decide, by decide⟩
 
-private def kOutPerm0213 : Equiv.Perm (Fin 4) :=
+def kOutPerm0213 : Equiv.Perm (Fin 4) :=
   ⟨![0, 2, 1, 3], ![0, 2, 1, 3], by decide, by decide⟩
 
-private def kOutPerm2301 : Equiv.Perm (Fin 4) :=
+def kOutPerm2301 : Equiv.Perm (Fin 4) :=
   ⟨![2, 3, 0, 1], ![2, 3, 0, 1], by decide, by decide⟩
 
-private def kOutPerm1302 : Equiv.Perm (Fin 4) :=
+def kOutPerm1302 : Equiv.Perm (Fin 4) :=
   ⟨![1, 3, 0, 2], ![2, 0, 3, 1], by decide, by decide⟩
 
-private def kOutPerm1203 : Equiv.Perm (Fin 4) :=
+def kOutPerm1203 : Equiv.Perm (Fin 4) :=
   ⟨![1, 2, 0, 3], ![2, 0, 1, 3], by decide, by decide⟩
 
 private def kernelInnerSlotSwap01Perm : Equiv.Perm (Fin 3) :=
@@ -699,6 +699,14 @@ private def kernelInnerSlotSwap01Perm : Equiv.Perm (Fin 3) :=
 
 private def kernelInnerSlotCyclePerm : Equiv.Perm (Fin 3) :=
   ⟨![1, 2, 0], ![2, 0, 1], by decide, by decide⟩
+
+/-- Compatibility name for the contravariant transposition used by the
+first, second, and fourth Ricci kernel arms. -/
+def kInPerm102 : Equiv.Perm (Fin 3) := kernelInnerSlotSwap01Perm
+
+/-- Compatibility name for the contravariant cycle used by the third and
+fifth Ricci kernel arms. -/
+def kInPerm120 : Equiv.Perm (Fin 3) := kernelInnerSlotCyclePerm
 
 omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
     [SigmaCompactSpace M] in
@@ -720,7 +728,7 @@ private theorem slotPermCcFib_contMDiff (_g₀ : SmoothRiemannianMetric I M) {d 
   exact congrArg (fun t => TotalSpace.mk' (Tensor0SBundle.Tensor0SModel d ℝ E)
     (E := fun z : M => Tensor0SBundle.Tensor0SSpace d I z) x t) rfl
 
-private def slotPermCc (g₀ : SmoothRiemannianMetric I M) {d : ℕ} (ρ : Equiv.Perm (Fin d)) :
+def slotPermCc (g₀ : SmoothRiemannianMetric I M) {d : ℕ} (ρ : Equiv.Perm (Fin d)) :
     SmoothCcTensor g₀ d d where
   toSection :=
     { toFun := fun x : M =>
@@ -774,7 +782,7 @@ omit [SigmaCompactSpace M] in
 omit [I.Boundaryless] in
 omit [NeZero (Module.finrank ℝ E)] in
 omit [SigmaCompactSpace M] in
-private theorem kernelField_eq_neg_arm_combination (g₀ g₁ : SmoothRiemannianMetric I M) :
+theorem kernelField_eq_neg_arm_combination (g₀ g₁ : SmoothRiemannianMetric I M) :
     linearizedRicciConnDiffOrder1KernelField (I := I) g₀ g₁ =
       -(reindexCoeffGen (I := I) (M := M) g₀ 3 4
           (ccOperatorFieldComp (I := I) (M := M) g₀ 3 4 4
@@ -926,6 +934,10 @@ private lemma c3_norm_five_le {V : Type*} [SeminormedAddCommGroup V] {a b c d e 
 
 def connDiffContrInsertionReindexPerm : Equiv.Perm (Fin 3) :=
   ⟨![2, 0, 1], ![1, 2, 0], by decide, by decide⟩
+
+/-- Compatibility name for the input permutation in the connection-
+difference contraction insertion. -/
+def coreInPerm201 : Equiv.Perm (Fin 3) := connDiffContrInsertionReindexPerm
 
 
 omit [I.Boundaryless] in

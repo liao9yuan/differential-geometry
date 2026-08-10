@@ -242,7 +242,15 @@ theorem edge_center_peel
           appCc (I := I) (M := M) g 4 2 B HT := by
     dsimp only [A]
     simp only [appCc_add_left]
-    rw [hself, hQ]
+    have hself' :
+        operatorFieldApply (I := I) (M := M) g 2 2 R0 T =
+          operatorFieldApply (I := I) (M := M) g 2 2
+              (LowBaseInternal.rhsSelfLow (I := I) (M := M)
+                g g_bg T hdelta hdeltaZ s) T +
+            operatorFieldApply (I := I) (M := M) g 4 2
+              (LowBaseInternal.rhsSelfTop (I := I) (M := M)
+                g T hdelta hdeltaZ s) HT := hself
+    rw [hself', hQ]
     rw [← hBapp]
     module
   have hJ :
@@ -316,8 +324,12 @@ theorem edge_center_peel
       appCc (I := I) (M := M) g 4 2 (B - C) HLT -
       appCc (I := I) (M := M) g 4 2 B G -
       P20 - P11L - P11R - Cross
-  rw [hJ, hLtop,
-    appCc_sub_left (I := I) (M := M) g 4 2 B C HLT]
+  have hsub :
+      appCc (I := I) (M := M) g 4 2 (B - C) HLT =
+        appCc (I := I) (M := M) g 4 2 B HLT -
+          appCc (I := I) (M := M) g 4 2 C HLT :=
+    appCc_sub_left (I := I) (M := M) g 4 2 B C HLT
+  rw [hJ, hLtop, hsub]
   module
 
 end DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral

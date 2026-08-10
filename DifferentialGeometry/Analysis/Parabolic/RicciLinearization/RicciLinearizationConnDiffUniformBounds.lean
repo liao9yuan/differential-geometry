@@ -3,7 +3,7 @@ import DifferentialGeometry.Analysis.Parabolic.RicciLinearization.CorrFieldChris
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.CovGradParametricJointSmooth
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.CovDerivConnDiffQuadraticBound
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.ConnectionDifferenceFibreBound
-import DifferentialGeometry.Analysis.Parabolic.RicciLinearization.ConvexPerturbationPointwiseC2
+import DifferentialGeometry.Analysis.Sobolev.Embedding.ConvexPerturbationPointwiseC2
 import DifferentialGeometry.Analysis.Sobolev.TensorHilbert.InverseMetricPerturbationFibreBound
 import DifferentialGeometry.Geometry.Connection.MetricCompatibility.TensorLoweringParallel
 import DifferentialGeometry.Analysis.Elliptic.MetricBounds
@@ -394,7 +394,7 @@ theorem exists_uniformBound_sqrt_riemannianFiberNormSq_linRicciConnDiffCoeff_of_
             Λ := by
   classical
   obtain ⟨Csob, hCsob_nn, hCsob⟩ :=
-    exists_Csob_convexPerturbation_pointwise_C2_le (I := I) (M := M) g₀ a ha_super
+    exists_Csob_convexPerturbation_pointwise_C2_le (I := I) (M := M) (E := E) g₀ a ha_super
   obtain ⟨C, hC0, hcore⟩ :=
     exists_uniformBound_riemannianFiberNormSq_linearizedRicciConnDiffFib_of_jetEnvelope (I := I)
       (M := M) g₀ hδ₀ (Csob * R)

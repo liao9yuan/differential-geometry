@@ -96,7 +96,7 @@ private lemma toL2_symmS (X : SmoothCcTensor g 0 2) :
       (1 / 2 : ℝ) • (SmoothCcTensor.toL2 X +
         SmoothCcTensor.toL2
           (domDomCongrSection (I := I) g (Equiv.swap (0 : Fin 2) 1) X)) := by
-  simp only [symmS]
+  simp only [symmS, ccTensor02Symm]
   rw [map_smul, map_add]
 
 private lemma inner_toL2_swap (A B : SmoothCcTensor g 0 2) :

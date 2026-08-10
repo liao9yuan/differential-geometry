@@ -362,6 +362,9 @@ theorem traceHessianCoeff_sub_background_perOrder_riemannianFiberNormSq_le_gInvD
       (deTurckPrincipalCometricCoeff (I := I) (M := M) g₀ g₁) traceHessianSlotPerm i x]
   exact hC g₁ i x
 
+abbrev traceHessianCoeff_sub_background_perOrder_rfns_le_gInvDiffSlotCoeff :=
+  @traceHessianCoeff_sub_background_perOrder_riemannianFiberNormSq_le_gInvDiffSlotCoeff
+
 theorem traceHessianCoeff_sub_background_jetL2_le_gInvDiffSlotCoeff_jetL2
     (g₀ : SmoothRiemannianMetric I M) :
     ∃ C : ℕ → ℝ, (∀ i, 0 ≤ C i) ∧

@@ -725,6 +725,10 @@ def connDiffGmLoweredTensor (g₀ gm : SmoothRiemannianMetric I M) : SmoothCcTen
     (endoSlotZeroCcTensor (I := I) (M := M) g₀ 2 (fullRaisedEndoField (I := I) (M := M) gm g₀))
     (domDomCongrSection (I := I) g₀ (finRotate 3) (connDiffLoweredCc (I := I) g₀ gm))
 
+/-- Compatibility name for the moving-metric lowering of the connection
+difference. -/
+abbrev lrOmegaHat := @connDiffGmLoweredTensor
+
 set_option backward.isDefEq.respectTransparency false in
 omit [NeZero (Module.finrank ℝ E)] in
 omit [SigmaCompactSpace M] in
@@ -796,6 +800,12 @@ def connDiffQuadraticComposedTensor (g₀ gm : SmoothRiemannianMetric I M) : Smo
     (armSlotEndoCc (I := I) (M := M) g₀ 2 (connDiffEndo (I := I) (M := M) g₀ gm))
     (domDomCongrSection (I := I) g₀ (Equiv.swap (0 : Fin 3) 1)
       (connDiffGmLoweredTensor (I := I) (M := M) g₀ gm))
+
+/-- Compatibility name for the paired connection-difference quadratic. -/
+abbrev lrQB := @connDiffQuadraticPairedTensor
+
+/-- Compatibility name for the composed connection-difference quadratic. -/
+abbrev lrQA := @connDiffQuadraticComposedTensor
 
 set_option backward.isDefEq.respectTransparency false in
 omit [CompactSpace M] [I.Boundaryless] in
@@ -1024,6 +1034,12 @@ def riemannLoweredContractionB (g₀ : SmoothRiemannianMetric I M) : SmoothCcTen
     (rsDomDomCongrSection (I := I) (M := M) g₀ 2 6 lrSigmaW2
       (slotExtendIter (I := I) (M := M) g₀ 0 4 2
         (riemannLoweredCc (I := I) (M := M) g₀ g₀ g₀)))
+
+/-- Compatibility name for the first frozen Riemann contraction operator. -/
+abbrev lrRiemW1 := @riemannLoweredContractionA
+
+/-- Compatibility name for the second frozen Riemann contraction operator. -/
+abbrev lrRiemW2 := @riemannLoweredContractionB
 
 set_option backward.isDefEq.respectTransparency false in
 private lemma lrRiemW1_toModel (g₀ : SmoothRiemannianMetric I M) (x : M)

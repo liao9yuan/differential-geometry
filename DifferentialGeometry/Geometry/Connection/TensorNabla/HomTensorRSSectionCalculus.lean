@@ -87,6 +87,12 @@ noncomputable def homTensorRSFieldApply (g : SmoothRiemannianMetric I M) (r a c 
       c :=
   homTensorRSApply (I := I) (M := M) g r a c (fun x : M => Q x) Q.contMDiff W
 
+/-- Compatibility name for applying a smooth full mixed-tensor operator field. -/
+noncomputable abbrev appFullSec (g : SmoothRiemannianMetric I M) (r a c : ℕ)
+    (Q : HomTensorRSField (E := E) (M := M) r a c I) (W : SmoothCcTensor g r a) :
+    SmoothCcTensor g r c :=
+  homTensorRSFieldApply (I := I) (M := M) g r a c Q W
+
 set_option backward.isDefEq.respectTransparency false in
 
 omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M]

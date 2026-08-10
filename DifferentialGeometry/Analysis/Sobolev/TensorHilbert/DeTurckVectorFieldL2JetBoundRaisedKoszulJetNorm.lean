@@ -176,7 +176,7 @@ theorem raisedKoszul_order0sup_jetL2_succ_generic
     riemannianFiberNormSq_raisedKoszul_le_of_lt_one (I := I) g₀ (le_max_right δ₀ 0)
       (max_lt hδ₀ one_pos)
   obtain ⟨Csob, hCsob_nn, hCsob⟩ :=
-    exists_Csob_convexPerturbation_pointwise_C2_le (I := I) g₀ a ha_super
+    exists_Csob_convexPerturbation_pointwise_C2_le (I := I) (E := E) g₀ a ha_super
   refine ⟨C * (Csob * R), fun i => ((i : ℝ) + 1) * ((3 / 2) * R) ^ 2,
     mul_nonneg hC_nn (mul_nonneg hCsob_nn hR), fun i => by positivity, ?_⟩
   intro g₁ P δ hδ_le hδ htie hPball

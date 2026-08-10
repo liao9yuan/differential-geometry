@@ -1,6 +1,7 @@
 import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.RiemannianFiberNormSq.RiemannianFiberNormSqRiemannOpDualFrameParseval
 
-/-! # Compatibility import for curvature-operator fibre Parseval
+/-!
+# Compatibility re-export for dual-frame Riemann-operator Parseval identities
 
-The intrinsic fibre Parseval estimate lives with the connection-Laplacian analytic API.
+The implementation lives in the analysis hierarchy; this module preserves the former import path.
 -/

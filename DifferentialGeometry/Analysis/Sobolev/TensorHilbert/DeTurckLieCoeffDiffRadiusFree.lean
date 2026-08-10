@@ -142,7 +142,13 @@ theorem dLaField_perOrder_rf
         (fun l => riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + l) x
           ((iteratedCovGrad (I := I) g₀ 0 2 l P).toSection x)) (i + 3))
       (riemannianVolumeMeasure (I := I) (M := M) g₀) := by
-    simp only [dLaGridWin]
+    rw [show (fun x => dLaGridWin
+        (fun l => riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + l) x
+          ((iteratedCovGrad (I := I) g₀ 0 2 l P).toSection x)) (i + 3)) =
+      (fun x => ∑ k ∈ Finset.range (i + 3),
+        Combinatorics.antidiagonalTupleGrid
+          (fun l => riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + l) x
+            ((iteratedCovGrad (I := I) g₀ 0 2 l P).toSection x)) k) from by rfl]
     exact MeasureTheory.integrable_finset_sum _ (fun k _ => (hAG k).1)
   have htop_int : MeasureTheory.Integrable (fun x =>
       riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + (i + 2)) x
@@ -174,7 +180,13 @@ theorem dLaField_perOrder_rf
         ((iteratedCovGrad (I := I) g₀ 0 2 l P).toSection x)) (i + 3)
       ∂(riemannianVolumeMeasure (I := I) (M := M) g₀)) ≤
       (∑ k ∈ Finset.range (i + 3), K_rf k) * (1 + S') := by
-    simp only [dLaGridWin]
+    rw [show (fun x => dLaGridWin
+        (fun l => riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + l) x
+          ((iteratedCovGrad (I := I) g₀ 0 2 l P).toSection x)) (i + 3)) =
+      (fun x => ∑ k ∈ Finset.range (i + 3),
+        Combinatorics.antidiagonalTupleGrid
+          (fun l => riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + l) x
+            ((iteratedCovGrad (I := I) g₀ 0 2 l P).toSection x)) k) from by rfl]
     rw [MeasureTheory.integral_finset_sum _ (fun k _ => (hAG k).1), Finset.sum_mul]
     refine Finset.sum_le_sum (fun k hk => ?_)
     refine le_trans (hAG k).2 ?_

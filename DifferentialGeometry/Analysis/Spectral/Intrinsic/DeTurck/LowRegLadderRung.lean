@@ -1,6 +1,6 @@
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.LowRegC2JetTower
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.LowRegC01JetTower
-import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.DeTurckRemainderPrincipalArmOpNorm
+import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.DeTurckRemainderPrincipalArmFibreSmallness
 
 /-!
 # The `k`-uniform ladder for the low-base second-order arm
@@ -98,7 +98,7 @@ theorem appCc_cap_hs_le
                 ‖smoothCcToTensorHs (I := I) (M := M) g₀ ((m : ℝ) + 1) T₀‖ := by
   classical
   obtain ⟨Clower, hCl_nn, hfam⟩ :=
-    exists_appCc_secondCovGrad_fibreSmallCoeff_Hs_family_le
+    exists_coeffContraction_secondCovGrad_smallFibreCoeff_Hs_family_le
       (I := I) (M := M) g₀ a ha hR₀ εC hεC_nn Kc hKc_nn
   refine ⟨Clower, hCl_nn, ?_⟩
   intro C₂ T₀ hball hsup hjets m
@@ -666,10 +666,10 @@ theorem a1_ladder_bg
   obtain ⟨Λ1, hΛ1_nn, hcap1⟩ :=
     coeffCap (I := I) (M := M) g 3 a (by omega) (R₀ := R₀) Kc1 hKc1_nn
   obtain ⟨Cm0, hCm0_nn, heng0⟩ :=
-    exists_appCc_iteratedCovGrad_l2_coeffJetEnvelope_dataJetWindow_le
+    exists_coeffAction_iteratedCovGrad_l2_coeffJetEnvelope_dataJetWindow_le
       (I := I) (M := M) g a (by omega) hR₀ Kc0 hKc0_nn Λ0 hΛ0_nn
   obtain ⟨Cm1, hCm1_nn, heng1⟩ :=
-    exists_appCc_iteratedCovGrad_l2_coeffJetEnvelope_dataJetWindow_le
+    exists_coeffAction_iteratedCovGrad_l2_coeffJetEnvelope_dataJetWindow_le
       (I := I) (M := M) g a (by omega) hR₀ Kc1 hKc1_nn Λ1 hΛ1_nn
   choose Chs hChs_nn hhs using fun n : ℕ =>
     exists_smoothCcToTensorHs_le_iteratedCovGrad_sum_general (I := I) (M := M) g n
