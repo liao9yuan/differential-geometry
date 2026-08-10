@@ -29,14 +29,14 @@ private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
-variable [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
+variable [I.Boundaryless] [T2Space M] [CompactSpace M]
 
 noncomputable def laplacianOfChartPOU (g : SmoothRiemannianMetric I M) (α : M) :
     C^∞⟮I, M; ℝ⟯ :=
   ⟨Δ_g (I := I) g (chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯),
     Δ_g_contMDiff (I := I) g (chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯)⟩
 
-omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 @[simp] lemma laplacianOfChartPOU_apply
     (g : SmoothRiemannianMetric I M) (α : M) (x : M) :
     (laplacianOfChartPOU (I := I) (M := M) g α : M → ℝ) x =
