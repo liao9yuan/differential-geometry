@@ -341,6 +341,7 @@ private theorem suspension_level_equation
     rfl
   rw [hd, hw₁, hw₂']
 
+
 private theorem familyChartRep_coefficient_contMDiffOn
     {I : ModelWithCorners ℝ (MorseModel (m + 1)) H} [I.Boundaryless]
     [IsManifold I (⊤ : WithTop ℕ∞) M] (F : M → ℝ → ℝ)
@@ -730,6 +731,40 @@ private theorem familyTangentSection_smul_of_tsupport
   · exact Set.compl_subset_iff_union.mp <| Set.compl_subset_compl.mpr ht'
   · exact ht
   · exact (isClosed_tsupport ψ).isOpen_compl
+
+private theorem suspensionSection_contMDiff
+    {I : ModelWithCorners ℝ (MorseModel (m + 1)) H} [I.Boundaryless]
+    [IsManifold I (⊤ : WithTop ℕ∞) M] [T2Space M] [SigmaCompactSpace M]
+    {W : (x : M) → (s : ℝ) → TangentSpace I x}
+    (hW : ContMDiff (I.prod 𝓘(ℝ, ℝ)) (I.prod 𝓘(ℝ, MorseModel (m + 1))) (↑(⊤ : ℕ∞) : WithTop ℕ∞)
+      (fun q : M × ℝ => (⟨q.1, W q.1 q.2⟩ : TangentBundle I M))) :
+    ContMDiff (I.prod 𝓘(ℝ, ℝ)) ((I.prod 𝓘(ℝ, ℝ)).prod 𝓘(ℝ, (MorseModel (m + 1)) × ℝ))
+      (↑(⊤ : ℕ∞) : WithTop ℕ∞)
+      (fun q : M × ℝ => (⟨q, (show TangentSpace (I.prod 𝓘(ℝ, ℝ)) q from
+        (W q.1 q.2, (1 : ℝ)))⟩ : TangentBundle (I.prod 𝓘(ℝ, ℝ)) (M × ℝ))) := by
+  have hψ : ContMDiff (I.prod 𝓘(ℝ, ℝ)) (𝓘(ℝ, ℝ).prod 𝓘(ℝ, ℝ)) (↑(⊤ : ℕ∞) : WithTop ℕ∞)
+      (fun q : M × ℝ => (⟨q.2, (1 : TangentSpace 𝓘(ℝ, ℝ) q.2)⟩ : TangentBundle 𝓘(ℝ, ℝ) ℝ)) := by
+    have hone : ContMDiff 𝓘(ℝ, ℝ) (𝓘(ℝ, ℝ).prod 𝓘(ℝ, ℝ)) (↑(⊤ : ℕ∞) : WithTop ℕ∞)
+        (fun t : ℝ => (⟨t, (1 : TangentSpace 𝓘(ℝ, ℝ) t)⟩ : TangentBundle 𝓘(ℝ, ℝ) ℝ)) := by
+      intro t₀
+      rw [Bundle.contMDiffAt_section]
+      simpa using (contMDiffAt_const (c := (1 : ℝ)))
+    exact hone.comp contMDiff_snd
+  have hpair : ContMDiff (I.prod 𝓘(ℝ, ℝ))
+      ((I.prod 𝓘(ℝ, MorseModel (m + 1))).prod (𝓘(ℝ, ℝ).prod 𝓘(ℝ, ℝ)))
+      (↑(⊤ : ℕ∞) : WithTop ℕ∞)
+      (fun q : M × ℝ =>
+        ((⟨q.1, W q.1 q.2⟩ : TangentBundle I M),
+          (⟨q.2, (1 : TangentSpace 𝓘(ℝ, ℝ) q.2)⟩ : TangentBundle 𝓘(ℝ, ℝ) ℝ))) :=
+    hW.prodMk hψ
+  have hsymm : ContMDiff ((I.prod 𝓘(ℝ, MorseModel (m + 1))).prod (𝓘(ℝ, ℝ).prod 𝓘(ℝ, ℝ)))
+      ((I.prod 𝓘(ℝ, ℝ)).prod 𝓘(ℝ, (MorseModel (m + 1)) × ℝ))
+      (↑(⊤ : ℕ∞) : WithTop ℕ∞)
+      ((equivTangentBundleProd I M 𝓘(ℝ, ℝ) ℝ).symm) := by
+    haveI : IsManifold I (1 : WithTop ℕ∞) M := IsManifold.of_le (by norm_num : (1 : WithTop ℕ∞) ≤ ∞)
+    haveI : IsManifold 𝓘(ℝ, ℝ) (1 : WithTop ℕ∞) ℝ := IsManifold.of_le (by norm_num : (1 : WithTop ℕ∞) ≤ ∞)
+    exact contMDiff_equivTangentBundleProd_symm
+  exact hsymm.comp hpair
 
 theorem localUnitSpeedFamilyVectorField_at_noncritical
     (I : ModelWithCorners ℝ (MorseModel (m + 1)) H) [I.Boundaryless]
