@@ -2693,6 +2693,52 @@ theorem hopf_rinow_expMapIntrinsic_surjective_of_complete_metric
     exact tensor0SBundle_enorm_eq_riemannianBundle_enorm (I := I) g x v
   exact hopf_rinow_expMapIntrinsic_surjective_minimizing (I := I) (M := M) g hEnorm p q
 
+attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
+  Tensor0SBundle.tangentSpace_normedSpace in
+omit [RiemannianBundle (fun x : M => TangentSpace I x)] in
+theorem minExp_of_complete_metric
+    (g : SmoothRiemannianMetric I M)
+    (hcomplete : RiemannianMetricComplete (I := I) g)
+    (p q : M) (hfin : riemannianEDistOf (I := I) g p q ≠ (⊤ : ENNReal)) :
+    letI : IsManifold I 1 M :=
+      IsManifold.of_le (I := I) (M := M) (n := (∞ : WithTop ℕ∞))
+        (by decide : (1 : WithTop ℕ∞) ≤ (∞ : WithTop ℕ∞))
+    letI : TopologicalSpace.MetrizableSpace M :=
+      Manifold.metrizableSpace I M
+    letI : T3Space M := inferInstance
+    letI : RiemannianBundle (fun x : M => TangentSpace I x) :=
+      ⟨g.toRiemannianMetric⟩
+    letI : IsContinuousRiemannianBundle E (fun x : M => TangentSpace I x) :=
+      ⟨⟨g.inner, g.contMDiff.continuous, by intro x v w; rfl⟩⟩
+    letI : EMetricSpace M := EMetricSpace.ofRiemannianMetric I M
+    letI : PseudoEMetricSpace M :=
+      (EMetricSpace.ofRiemannianMetric I M).toPseudoEMetricSpace
+    letI : CompleteSpace M := hcomplete.complete
+    let hEnorm : IsMetricNorm (I := I) (M := M) g :=
+      fun x v => tensor0SBundle_enorm_eq_riemannianBundle_enorm (I := I) g x v
+    ∃ v : TangentSpace I p, expMapIntrinsic (I := I) g hEnorm p v = q ∧
+      Real.sqrt (g.inner p v v) = (riemannianEDist I p q).toReal := by
+  letI : IsManifold I 1 M :=
+    IsManifold.of_le (I := I) (M := M) (n := (∞ : WithTop ℕ∞))
+      (by decide : (1 : WithTop ℕ∞) ≤ (∞ : WithTop ℕ∞))
+  letI : TopologicalSpace.MetrizableSpace M :=
+    Manifold.metrizableSpace I M
+  letI : T3Space M := inferInstance
+  letI : RiemannianBundle (fun x : M => TangentSpace I x) :=
+    ⟨g.toRiemannianMetric⟩
+  letI : IsContinuousRiemannianBundle E (fun x : M => TangentSpace I x) :=
+    ⟨⟨g.inner, g.contMDiff.continuous, by intro x v w; rfl⟩⟩
+  letI : EMetricSpace M := EMetricSpace.ofRiemannianMetric I M
+  letI : PseudoEMetricSpace M :=
+    (EMetricSpace.ofRiemannianMetric I M).toPseudoEMetricSpace
+  letI : CompleteSpace M := hcomplete.complete
+  have hEnorm : IsMetricNorm (I := I) (M := M) g := by
+    intro x v
+    exact tensor0SBundle_enorm_eq_riemannianBundle_enorm (I := I) g x v
+  have hfin' : riemannianEDist I p q ≠ (⊤ : ENNReal) := by
+    simpa [riemannianEDistOf] using hfin
+  exact minExp_of_ne_top (I := I) (M := M) g hEnorm p q hfin'
+
 end Exponential
 end Riemannian
 end Geometry
