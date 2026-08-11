@@ -23592,6 +23592,110 @@ theorem morseRoundedTransportMap_strict_of_sublevel {m k : ℕ} (hk : k ≤ m + 
       hV₀sm hV₀supp hε₀ hε₀ε₁ hR₀R₁ hRltRp hR₁R hδ0 hρ hρ' hρρ' hε hr2 hf hV₀desc hV₀rate
       x hx hxg
 
+theorem morseLevelDampedTransportMap_level_of_collar {m k : ℕ} (hk : k ≤ m + 1)
+    (c ε r δ ρ ρ' θ R₀ R₁ η ε₀ ε₁ : ℝ) {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M]
+    [ChartedSpace H M] [T2Space M]
+    {I : ModelWithCorners ℝ (MorseModel (m + 1)) H} [I.Boundaryless]
+    [IsManifold I (⊤ : WithTop ℕ∞) M] {f : M → ℝ}
+    (data : MorseChart (m + 1) k hk c I f)
+    (V₀ : (x : M) → TangentSpace I x)
+    (hV₀sm : ContMDiff I (I.prod 𝓘(ℝ, MorseModel (m + 1))) (↑(⊤ : ℕ∞) : WithTop ℕ∞)
+      (fun x : M => (⟨x, V₀ x⟩ : TangentBundle I M)))
+    (hV₀supp : IsCompact (tsupport V₀))
+    (hε₀ : 0 < ε₀) (hε₀ε₁ : ε₀ < ε₁) (hR₀R₁ : R₀ < R₁) (hRltRp : data.R < data.R')
+    (hR₁R : R₁ < data.R)
+    (hδ0 : 0 < δ) (hδr : δ < r ^ 2) (hρ : 0 < ρ) (hρ' : 0 < ρ') (hρρ' : ρ + ρ' ≤ δ)
+    (hε : 0 < ε) (hr2 : r ^ 2 = 2 * ε)
+    (hf : ContMDiff I 𝓘(ℝ, ℝ) (↑(⊤ : ℕ∞) : WithTop ℕ∞) f)
+    (hV₀desc : ∀ x ∈ f ⁻¹' Set.Icc (c - ε - δ) (c + r ^ 2 / 2),
+      (NormedSpace.fromTangentSpace (f x)) ((mfderiv I 𝓘(ℝ, ℝ) f x) (V₀ x)) = -1)
+    (hV₀rate : ∀ x : M,
+      -1 ≤ (NormedSpace.fromTangentSpace (f x)) ((mfderiv I 𝓘(ℝ, ℝ) f x) (V₀ x)) ∧
+      (NormedSpace.fromTangentSpace (f x)) ((mfderiv I 𝓘(ℝ, ℝ) f x) (V₀ x)) ≤ 0)
+    {x : M} (hx : x ∉ data.χ '' {y : MorseModel (m + 1) | morseNorm (m + 1) y ≤ R₁})
+    (hxg : f x ≤ c - ε) :
+    f (morseLevelDampedTransportMap hk c ε r δ ρ ρ' θ R₀ R₁ η ε₀ ε₁ data V₀ hV₀sm hV₀supp hε₀ hε₀ε₁
+      hR₀R₁ hRltRp hR₁R x) = f x - morseLevelDampedTransportTime hk c ε r δ ρ ρ' θ R₀ R₁ η ε₀ data x := by
+  let v : (x : M) → TangentSpace I x := morseRoundedDescentField hk c ε₀ ε₁ R₀ R₁ data V₀
+  have hv : ContMDiff I (I.prod 𝓘(ℝ, MorseModel (m + 1))) (↑(⊤ : ℕ∞) : WithTop ℕ∞)
+      (fun x : M => (⟨x, v x⟩ : TangentBundle I M)) := by
+    simpa [v] using contMDiff_morseRoundedDescentFieldSection hk c ε₀ ε₁ R₀ R₁ data V₀
+      hV₀sm hε₀ hε₀ε₁ hR₀R₁ hRltRp hR₁R
+  have hsupp : IsCompact (tsupport v) := by
+    simpa [v] using isCompact_tsupport_morseRoundedDescentField hk c ε₀ ε₁ R₀ R₁ data V₀ hR₀R₁
+      (le_of_lt hR₁R) hV₀supp
+  have hrate : ∀ x : M,
+      -1 ≤ (NormedSpace.fromTangentSpace (f x)) ((mfderiv I 𝓘(ℝ, ℝ) f x) (v x)) ∧
+      (NormedSpace.fromTangentSpace (f x)) ((mfderiv I 𝓘(ℝ, ℝ) f x) (v x)) ≤ 0 := by
+    intro x
+    have hr := morseRoundedDescentField_rate hk c ε₀ ε₁ R₀ R₁ data V₀ hε₀ hε₀ε₁ hR₀R₁
+      hRltRp (le_of_lt hR₁R) hV₀rate x
+    simpa [v] using hr
+  have hdfOn : ∀ x ∈ f ⁻¹' Set.Icc (c - ε - δ) (c + r ^ 2 / 2),
+      (NormedSpace.fromTangentSpace (f x)) ((mfderiv I 𝓘(ℝ, ℝ) f x) (v x)) = -1 := by
+    intro x hx'
+    have hd := morseRoundedDescentField_descent hk c ε ε₀ ε₁ R₀ R₁ r δ data V₀ hRltRp hε₀
+      hε₀ε₁ hR₀R₁ (le_of_lt hR₁R) hV₀desc (x := x) hx'
+    simpa [v] using hd
+  let hcomplete : ∀ x : M, ∃ γ : ℝ → M, γ 0 = x ∧ IsMIntegralCurve γ v :=
+    exists_globalIntegralCurve_of_compactSupport v hv hsupp
+  have hτ : morseLevelDampedTransportTime hk c ε r δ ρ ρ' θ R₀ R₁ η ε₀ data x =
+      morseFarExpandTimeSmooth c ε δ ρ ρ' (f x) :=
+    morseLevelDampedTransportTime_eq_collar hk c ε r δ ρ ρ' θ R₀ R₁ η ε₀ data hx
+  by_cases hzero : f x ≤ c - ε - δ + ρ'
+  · have hτF : morseFarExpandTimeSmooth c ε δ ρ ρ' (f x) = 0 :=
+      morseFarExpandTimeSmooth_zero hρ hzero
+    have hτ0 : morseLevelDampedTransportTime hk c ε r δ ρ ρ' θ R₀ R₁ η ε₀ data x = 0 := by
+      rw [hτ, hτF]
+    have hΦ : morseLevelDampedTransportMap hk c ε r δ ρ ρ' θ R₀ R₁ η ε₀ ε₁ data V₀ hV₀sm
+        hV₀supp hε₀ hε₀ε₁ hR₀R₁ hRltRp hR₁R x = x := by
+      dsimp [morseLevelDampedTransportMap, v]
+      rw [hτ0]
+      exact curveAt_zero v hcomplete x
+    simp [hΦ, hτ0]
+  · have hxgt : c - ε - δ + ρ' < f x := lt_of_not_ge hzero
+    have hstrip : f x ∈ Set.Icc (c - ε - δ) (c + r ^ 2 / 2) := by
+      constructor
+      · nlinarith [hxgt, hρ']
+      · nlinarith [hxg, hε, hr2]
+    let τ : ℝ := morseLevelDampedTransportTime hk c ε r δ ρ ρ' θ R₀ R₁ η ε₀ data x
+    have hτdef : morseLevelDampedTransportMap hk c ε r δ ρ ρ' θ R₀ R₁ η ε₀ ε₁ data V₀ hV₀sm
+        hV₀supp hε₀ hε₀ε₁ hR₀R₁ hRltRp hR₁R x = curveAt v hcomplete x τ := by
+      dsimp [morseLevelDampedTransportMap, v, τ]
+    have hτle : τ ≤ 0 := by
+      dsimp [τ]
+      exact morseLevelDampedTransportTime_nonpos hk c ε r δ ρ ρ' θ R₀ R₁ η ε₀ data hε hδ0 hδr x
+    have ht1 : f x - (c + r ^ 2 / 2) ≤ τ := by
+      have hAF : f x - morseFarExpandTimeSmooth c ε δ ρ ρ' (f x) ≤ c + r ^ 2 / 2 := by
+        by_cases heq : f x = c - ε
+        · rw [heq]
+          have hτF : morseFarExpandTimeSmooth c ε δ ρ ρ' (c - ε) = -(2 * ε) :=
+            morseFarExpandTimeSmooth_top hρ hε hδ0 hρρ'
+          rw [hτF]
+          rw [hr2]
+          nlinarith
+        · have hlt : f x < c - ε := lt_of_le_of_ne hxg heq
+          have hmono : f x - morseFarExpandTimeSmooth c ε δ ρ ρ' (f x) ≤
+              c - ε - morseFarExpandTimeSmooth c ε δ ρ ρ' (c - ε) :=
+            le_of_lt (morseFarExpandTimeSmooth_levelMap_strictMono hρ hρ' hε hδ0 hlt)
+          have htop : c - ε - morseFarExpandTimeSmooth c ε δ ρ ρ' (c - ε) = c + r ^ 2 / 2 := by
+            have hτF : morseFarExpandTimeSmooth c ε δ ρ ρ' (c - ε) = -(2 * ε) :=
+              morseFarExpandTimeSmooth_top hρ hε hδ0 hρρ'
+            rw [hτF]
+            rw [hr2]
+            ring
+          exact le_trans hmono (by rw [htop])
+      dsimp [τ]
+      rw [hτ]
+      linarith [hAF]
+    have hflowVal := flowValueBackwardOnBand (I := I) f (c - ε - δ) (c + r ^ 2 / 2) hf v hv hsupp
+      hdfOn hrate (hy := hstrip) (ht := hτle) (ht' := ht1)
+    have hmain : f (morseLevelDampedTransportMap hk c ε r δ ρ ρ' θ R₀ R₁ η ε₀ ε₁ data V₀ hV₀sm
+        hV₀supp hε₀ hε₀ε₁ hR₀R₁ hRltRp hR₁R x) = f x - τ := by
+      rw [hτdef]
+      simpa [v] using hflowVal
+    rw [hmain]
+
 private theorem morseFarExpandLevelMap_eq_of_le_upper {c ε δ ρ ρ' : ℝ} (hρ : 0 < ρ)
     (hρ' : 0 < ρ') (hε : 0 < ε) (hδ : 0 < δ) (hρρ' : ρ + ρ' ≤ δ) {t : ℝ} (ht : t ≤ c + ε) :
     ∃ s : ℝ, s ≤ c - ε ∧ s - morseFarExpandTimeSmooth c ε δ ρ ρ' s = t := by
