@@ -3625,6 +3625,23 @@ def morseAttachedDiffeomorphRelative {m k : ℕ} (hk : k ≤ m + 1) (c ε r δ :
         CellAttachment.modelHandleMap_mem_upper hk c ε r hε p⟩ :
         morseUpperSublevel hk c r))
 
+theorem morseAttachedNaturalDiffeomorphRelative {m k : ℕ} (hk : k ≤ m + 1) (c ε r δ : ℝ)
+    (hε : 0 ≤ ε) (hδ0 : 0 < δ) (hδr : δ < r ^ 2) (hr : r ≠ 0) :
+    morseAttachedDiffeomorphRelative hk c ε r δ hε hδ0 hδr hr
+      (hcs₁ := morseAttachedNaturalChartedSpace hk c ε r δ hε hδ0 hδr hr)
+      (hcs₂ := morseUpperChartedSpace hk c r hr)
+      (Ψ := morseAttachedNaturalDiffeomorphUpper hk c ε r δ hε hδ0 hδr hr) := by
+  dsimp [morseAttachedDiffeomorphRelative]
+  constructor
+  · intro a
+    apply Subtype.ext
+    dsimp [morseAttachedNaturalDiffeomorphUpper]
+    exact morseAttachedNaturalDiffeomorphUpper_lower hk c ε r δ hε hδ0 hδr hr a
+  · intro p
+    apply Subtype.ext
+    dsimp [morseAttachedNaturalDiffeomorphUpper]
+    exact morseAttachedNaturalDiffeomorphUpper_handle hk c ε r δ hε hδ0 hδr hr p
+
 theorem morseHandleEmbeddingAttached_attaching {m k : ℕ} (hk : k ≤ m + 1) (c ε r δ : ℝ)
     (hε : 0 ≤ ε) (hδ0 : 0 < δ) (hδr : δ < r ^ 2) (hr : r ≠ 0)
     (p : AttachingRegion k (m + 1 - k)) :
