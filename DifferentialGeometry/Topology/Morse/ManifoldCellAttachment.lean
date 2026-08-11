@@ -20460,6 +20460,28 @@ private lemma modelLevelDampedTransportTime_eq_comb {m k : ℕ} (hk : k ≤ m + 
             morseFarExpandTimeSmooth c ε δ ρ ρ' (morseNormalForm hk c w) := by
   rfl
 
+private lemma transportTime_sub_decomp {m k : ℕ} (hk : k ≤ m + 1)
+    (c ε r δ ρ ρ' θ R₀ R₁ η ε₀ : ℝ) {y z : MorseModel (m + 1)} :
+    modelLevelDampedTransportTime hk c ε r δ ρ ρ' θ R₀ R₁ η ε₀ z -
+        modelLevelDampedTransportTime hk c ε r δ ρ ρ' θ R₀ R₁ η ε₀ y =
+      (1 - Real.smoothTransition ((‖posPart hk z‖ ^ 2 - smoothCap ε r δ (‖negPart hk z‖ ^ 2)) / θ)) *
+            (1 - Real.smoothTransition ((morseNorm (m + 1) z - R₀) / (R₁ - R₀))) *
+              (modelLevelDampedUnstretchTime hk ε r δ c η ε₀ z -
+                modelLevelDampedUnstretchTime hk ε r δ c η ε₀ y) +
+          (1 - (1 - Real.smoothTransition ((‖posPart hk z‖ ^ 2 - smoothCap ε r δ (‖negPart hk z‖ ^ 2)) / θ)) *
+            (1 - Real.smoothTransition ((morseNorm (m + 1) z - R₀) / (R₁ - R₀)))) *
+              (morseFarExpandTimeSmooth c ε δ ρ ρ' (morseNormalForm hk c z) -
+                morseFarExpandTimeSmooth c ε δ ρ ρ' (morseNormalForm hk c y)) +
+          ((1 - Real.smoothTransition ((‖posPart hk z‖ ^ 2 - smoothCap ε r δ (‖negPart hk z‖ ^ 2)) / θ)) *
+              (1 - Real.smoothTransition ((morseNorm (m + 1) z - R₀) / (R₁ - R₀))) -
+            (1 - Real.smoothTransition ((‖posPart hk y‖ ^ 2 - smoothCap ε r δ (‖negPart hk y‖ ^ 2)) / θ)) *
+              (1 - Real.smoothTransition ((morseNorm (m + 1) y - R₀) / (R₁ - R₀)))) *
+                (modelLevelDampedUnstretchTime hk ε r δ c η ε₀ y -
+                  morseFarExpandTimeSmooth c ε δ ρ ρ' (morseNormalForm hk c y)) := by
+  rw [modelLevelDampedTransportTime_eq_comb hk c ε r δ ρ ρ' θ R₀ R₁ η ε₀ y,
+      modelLevelDampedTransportTime_eq_comb hk c ε r δ ρ ρ' θ R₀ R₁ η ε₀ z]
+  ring
+
 private lemma smoothTransition_deriv {x : ℝ} (hx0 : 0 < x) :
     deriv Real.smoothTransition x =
       expNegInvGlue x * expNegInvGlue (1 - x) * (1 / x ^ 2 + 1 / (1 - x) ^ 2) /
