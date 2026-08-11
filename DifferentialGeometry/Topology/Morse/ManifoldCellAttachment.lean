@@ -23904,6 +23904,243 @@ theorem morseLevelDampedTransportMap_level_of_sublevel {m k : ℕ} (hk : k ≤ m
       hV₀sm hV₀supp hε₀ hε₀ε₁ hR₀R₁ hRltRp hR₁R hδ0 hδr hρ hρ' hρρ' hε hR₀ hbig hr2 hθ
       hR₁₂R hr hf hV₀desc hV₀rate (x := x) (hxg := hxg) (hband := hband)
 
+theorem morseLevelDampedTransportMap_injective_of_handle {m k : ℕ} (hk : k ≤ m + 1)
+    (c ε r δ ρ ρ' θ R₀ R₁ η ε₀ ε₁ : ℝ) {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M]
+    [ChartedSpace H M] [T2Space M]
+    {I : ModelWithCorners ℝ (MorseModel (m + 1)) H} [I.Boundaryless]
+    [IsManifold I (⊤ : WithTop ℕ∞) M] {f : M → ℝ}
+    (data : MorseChart (m + 1) k hk c I f)
+    (V₀ : (x : M) → TangentSpace I x)
+    (hV₀sm : ContMDiff I (I.prod 𝓘(ℝ, MorseModel (m + 1))) (↑(⊤ : ℕ∞) : WithTop ℕ∞)
+      (fun x : M => (⟨x, V₀ x⟩ : TangentBundle I M)))
+    (hV₀supp : IsCompact (tsupport V₀))
+    (hε₀ : 0 < ε₀) (hε₀ε₁ : ε₀ < ε₁) (hR₀R₁ : R₀ < R₁) (hRltRp : data.R < data.R')
+    (hR₁R : R₁ < data.R)
+    (hδ0 : 0 < δ) (hδr : δ < r ^ 2) (hρ : 0 < ρ) (hρ' : 0 < ρ') (hρρ' : ρ + ρ' ≤ δ)
+    (hε : 0 < ε) (hR₀ : 0 < R₀) (hbig : 2 * (r ^ 2 + 2 * ε + δ) ≤ R₀ ^ 2)
+    (hr2 : r ^ 2 = 2 * ε) (hθ : 0 < θ) (hR₁₂R : R₁ ≤ data.R) (hr : r ≠ 0)
+    (hη : δ - ρ' ≤ η) (hηδ : η ≤ δ)
+    (hband : 8 * ε + 2 * δ < R₀ * (R₁ - R₀))
+    (hf : ContMDiff I 𝓘(ℝ, ℝ) (↑(⊤ : ℕ∞) : WithTop ℕ∞) f)
+    (hV₀desc : ∀ x ∈ f ⁻¹' Set.Icc (c - ε - δ) (c + r ^ 2 / 2),
+      (NormedSpace.fromTangentSpace (f x)) ((mfderiv I 𝓘(ℝ, ℝ) f x) (V₀ x)) = -1)
+    (hV₀rate : ∀ x : M,
+      -1 ≤ (NormedSpace.fromTangentSpace (f x)) ((mfderiv I 𝓘(ℝ, ℝ) f x) (V₀ x)) ∧
+      (NormedSpace.fromTangentSpace (f x)) ((mfderiv I 𝓘(ℝ, ℝ) f x) (V₀ x)) ≤ 0)
+    (hflowChart : ∀ y : MorseModel (m + 1), y ∈ data.χ.source →
+      ∀ t : ℝ, curveAt (morseRoundedDescentField hk c ε₀ ε₁ R₀ R₁ data V₀)
+        (exists_globalIntegralCurve_of_compactSupport (morseRoundedDescentField hk c ε₀ ε₁ R₀ R₁ data V₀)
+          (contMDiff_morseRoundedDescentFieldSection hk c ε₀ ε₁ R₀ R₁ data V₀ hV₀sm hε₀ hε₀ε₁ hR₀R₁
+            hRltRp hR₁R)
+          (isCompact_tsupport_morseRoundedDescentField hk c ε₀ ε₁ R₀ R₁ data V₀ hR₀R₁
+            (le_of_lt hR₁R) hV₀supp))
+        (data.χ y) t = data.χ (modelFlow hk t y))
+    {x₁ x₂ : M} {y₁ y₂ : MorseModel (m + 1)}
+    (hy₁ : morseNorm (m + 1) y₁ ≤ R₁) (hy₂ : morseNorm (m + 1) y₂ ≤ R₁)
+    (hxy₁ : data.χ y₁ = x₁) (hxy₂ : data.χ y₂ = x₂)
+    (hxg₁ : morseRoundedFunction hk c ε r δ R₀ R₁ data x₁ ≤ c)
+    (hxg₂ : morseRoundedFunction hk c ε r δ R₀ R₁ data x₂ ≤ c)
+    (hstay₁ : morseNorm (m + 1) (modelFlow hk
+      (modelLevelDampedTransportTime hk c ε r δ ρ ρ' θ R₀ R₁ η ε₀ y₁) y₁) ≤ data.R)
+    (hstay₂ : morseNorm (m + 1) (modelFlow hk
+      (modelLevelDampedTransportTime hk c ε r δ ρ ρ' θ R₀ R₁ η ε₀ y₂) y₂) ≤ data.R)
+    (hΦ : morseLevelDampedTransportMap hk c ε r δ ρ ρ' θ R₀ R₁ η ε₀ ε₁ data V₀ hV₀sm hV₀supp
+      hε₀ hε₀ε₁ hR₀R₁ hRltRp hR₁R x₁ = morseLevelDampedTransportMap hk c ε r δ ρ ρ' θ R₀ R₁ η ε₀ ε₁
+        data V₀ hV₀sm hV₀supp hε₀ hε₀ε₁ hR₀R₁ hRltRp hR₁R x₂) :
+    x₁ = x₂ := by
+  let v : (x : M) → TangentSpace I x := morseRoundedDescentField hk c ε₀ ε₁ R₀ R₁ data V₀
+  let hcomplete : ∀ x : M, ∃ γ : ℝ → M, γ 0 = x ∧ IsMIntegralCurve γ v :=
+    exists_globalIntegralCurve_of_compactSupport v
+      (contMDiff_morseRoundedDescentFieldSection hk c ε₀ ε₁ R₀ R₁ data V₀ hV₀sm hε₀ hε₀ε₁ hR₀R₁
+        hRltRp hR₁R)
+      (isCompact_tsupport_morseRoundedDescentField hk c ε₀ ε₁ R₀ R₁ data V₀ hR₀R₁
+        (le_of_lt hR₁R) hV₀supp)
+  have hflowChart' : ∀ y : MorseModel (m + 1), y ∈ data.χ.source →
+      ∀ t : ℝ, curveAt v hcomplete (data.χ y) t = data.χ (modelFlow hk t y) := by
+    intro y hy t
+    simpa [v, hcomplete] using hflowChart y hy t
+  have hsrc₁ : y₁ ∈ data.χ.source := data.hχsrc y₁ (le_trans hy₁ hR₁₂R)
+  have hsrc₂ : y₂ ∈ data.χ.source := data.hχsrc y₂ (le_trans hy₂ hR₁₂R)
+  have hsymm₁ : data.χ.symm x₁ = y₁ := by
+    rw [← hxy₁]
+    exact data.χ.left_inv hsrc₁
+  have hsymm₂ : data.χ.symm x₂ = y₂ := by
+    rw [← hxy₂]
+    exact data.χ.left_inv hsrc₂
+  have hyg₁ : CellAttachment.modelRoundedFunction hk c ε r δ R₀ R₁ y₁ ≤ c := by
+    have heq := morseRoundedFunction_eq_model_of_mem_closedBall hk c ε r δ R₀ R₁ data
+      ⟨y₁, hy₁, hxy₁⟩
+    rw [heq] at hxg₁
+    rwa [hsymm₁] at hxg₁
+  have hyg₂ : CellAttachment.modelRoundedFunction hk c ε r δ R₀ R₁ y₂ ≤ c := by
+    have heq := morseRoundedFunction_eq_model_of_mem_closedBall hk c ε r δ R₀ R₁ data
+      ⟨y₂, hy₂, hxy₂⟩
+    rw [heq] at hxg₂
+    rwa [hsymm₂] at hxg₂
+  have hyatt₁ : y₁ ∈ modelAttachedRegion hk ε r δ :=
+    (CellAttachment.modelRoundedFunction_le_c_iff_mem_attachedRegion hk c ε r δ R₀ R₁ hε hδ0
+      hR₀R₁ (le_of_lt hR₀) hbig y₁).mp hyg₁
+  have hyatt₂ : y₂ ∈ modelAttachedRegion hk ε r δ :=
+    (CellAttachment.modelRoundedFunction_le_c_iff_mem_attachedRegion hk c ε r δ R₀ R₁ hε hδ0
+      hR₀R₁ (le_of_lt hR₀) hbig y₂).mp hyg₂
+  let τy₁ : ℝ := modelLevelDampedTransportTime hk c ε r δ ρ ρ' θ R₀ R₁ η ε₀ y₁
+  let τy₂ : ℝ := modelLevelDampedTransportTime hk c ε r δ ρ ρ' θ R₀ R₁ η ε₀ y₂
+  have hτ₁ : morseLevelDampedTransportTime hk c ε r δ ρ ρ' θ R₀ R₁ η ε₀ data x₁ = τy₁ := by
+    dsimp [τy₁]
+    rw [morseLevelDampedTransportTime_eq_model hk c ε r δ ρ ρ' θ R₀ R₁ η ε₀ data ⟨y₁, hy₁, hxy₁⟩]
+    rw [hsymm₁]
+  have hτ₂ : morseLevelDampedTransportTime hk c ε r δ ρ ρ' θ R₀ R₁ η ε₀ data x₂ = τy₂ := by
+    dsimp [τy₂]
+    rw [morseLevelDampedTransportTime_eq_model hk c ε r δ ρ ρ' θ R₀ R₁ η ε₀ data ⟨y₂, hy₂, hxy₂⟩]
+    rw [hsymm₂]
+  have hflow₁ : morseLevelDampedTransportMap hk c ε r δ ρ ρ' θ R₀ R₁ η ε₀ ε₁ data V₀ hV₀sm
+        hV₀supp hε₀ hε₀ε₁ hR₀R₁ hRltRp hR₁R x₁ = data.χ (modelFlow hk τy₁ y₁) := by
+    dsimp [morseLevelDampedTransportMap, v]
+    rw [hτ₁]
+    simpa [hxy₁] using hflowChart' y₁ hsrc₁ τy₁
+  have hflow₂ : morseLevelDampedTransportMap hk c ε r δ ρ ρ' θ R₀ R₁ η ε₀ ε₁ data V₀ hV₀sm
+        hV₀supp hε₀ hε₀ε₁ hR₀R₁ hRltRp hR₁R x₂ = data.χ (modelFlow hk τy₂ y₂) := by
+    dsimp [morseLevelDampedTransportMap, v]
+    rw [hτ₂]
+    simpa [hxy₂] using hflowChart' y₂ hsrc₂ τy₂
+  have himg : data.χ (modelFlow hk τy₁ y₁) = data.χ (modelFlow hk τy₂ y₂) := by
+    rw [← hflow₁, ← hflow₂]
+    exact hΦ
+  have hsrcf₁ : modelFlow hk τy₁ y₁ ∈ data.χ.source :=
+    data.hχsrc (modelFlow hk τy₁ y₁) (by simpa [τy₁] using hstay₁)
+  have hsrcf₂ : modelFlow hk τy₂ y₂ ∈ data.χ.source :=
+    data.hχsrc (modelFlow hk τy₂ y₂) (by simpa [τy₂] using hstay₂)
+  have hfloweq : modelFlow hk τy₁ y₁ = modelFlow hk τy₂ y₂ :=
+    data.χ.injOn hsrcf₁ hsrcf₂ himg
+  have hneg₁ : negPart hk (modelFlow hk τy₁ y₁) = negPart hk y₁ :=
+    modelFlow_negPart hk τy₁ y₁
+  have hneg₂ : negPart hk (modelFlow hk τy₂ y₂) = negPart hk y₂ :=
+    modelFlow_negPart hk τy₂ y₂
+  have hneg : negPart hk y₁ = negPart hk y₂ := by
+    have hm : negPart hk (modelFlow hk τy₁ y₁) = negPart hk (modelFlow hk τy₂ y₂) := by
+      rw [hfloweq]
+    rwa [hneg₁, hneg₂] at hm
+  have hN₁ : f x₁ = morseNormalForm hk c y₁ := by
+    rw [← hxy₁]
+    exact data.hnorm y₁ (le_trans hy₁ hR₁₂R)
+  have hN₂ : f x₂ = morseNormalForm hk c y₂ := by
+    rw [← hxy₂]
+    exact data.hnorm y₂ (le_trans hy₂ hR₁₂R)
+  have hlev₁ : f x₁ - morseLevelDampedTransportTime hk c ε r δ ρ ρ' θ R₀ R₁ η ε₀ data x₁ =
+      f x₂ - morseLevelDampedTransportTime hk c ε r δ ρ ρ' θ R₀ R₁ η ε₀ data x₂ := by
+    have hL₁ := morseLevelDampedTransportMap_level_of_sublevel hk c ε r δ ρ ρ' θ R₀ R₁ η ε₀ ε₁
+      data V₀ hV₀sm hV₀supp hε₀ hε₀ε₁ hR₀R₁ hRltRp hR₁R hδ0 hδr hρ hρ' hρρ' hε (le_of_lt hR₀) hbig
+      hr2 hθ hR₁₂R hr hη hηδ hf hV₀desc hV₀rate (x := x₁) (hxg := hxg₁)
+    have hL₂ := morseLevelDampedTransportMap_level_of_sublevel hk c ε r δ ρ ρ' θ R₀ R₁ η ε₀ ε₁
+      data V₀ hV₀sm hV₀supp hε₀ hε₀ε₁ hR₀R₁ hRltRp hR₁R hδ0 hδr hρ hρ' hρρ' hε (le_of_lt hR₀) hbig
+      hr2 hθ hR₁₂R hr hη hηδ hf hV₀desc hV₀rate (x := x₂) (hxg := hxg₂)
+    rw [← hL₁, ← hL₂]
+    exact congrArg f hΦ
+  have hL : modelLevelDampedTransportLevelMap hk c ε r δ ρ ρ' θ R₀ R₁ η ε₀ y₁ =
+      modelLevelDampedTransportLevelMap hk c ε r δ ρ ρ' θ R₀ R₁ η ε₀ y₂ := by
+    dsimp [modelLevelDampedTransportLevelMap]
+    rw [hN₁.symm, hN₂.symm]
+    rw [show modelLevelDampedTransportTime hk c ε r δ ρ ρ' θ R₀ R₁ η ε₀ y₁ =
+        morseLevelDampedTransportTime hk c ε r δ ρ ρ' θ R₀ R₁ η ε₀ data x₁ by exact hτ₁.symm]
+    rw [show modelLevelDampedTransportTime hk c ε r δ ρ ρ' θ R₀ R₁ η ε₀ y₂ =
+        morseLevelDampedTransportTime hk c ε r δ ρ ρ' θ R₀ R₁ η ε₀ data x₂ by exact hτ₂.symm]
+    exact hlev₁
+  by_cases hlt₁₂ : ‖posPart hk y₁‖ < ‖posPart hk y₂‖
+  · have hm := modelLevelDampedTransportLevelMap_strictMono hk c ε r δ ρ ρ' θ R₀ R₁ η ε₀
+      hε hδ0 hδr hr2 hρ hθ hε₀ hR₀ hR₀R₁ hη hband hneg hyatt₁ hyatt₂ hlt₁₂
+    nlinarith [hL, hm]
+  · by_cases hlt₂₁ : ‖posPart hk y₂‖ < ‖posPart hk y₁‖
+    · have hm := modelLevelDampedTransportLevelMap_strictMono hk c ε r δ ρ ρ' θ R₀ R₁ η ε₀
+        hε hδ0 hδr hr2 hρ hθ hε₀ hR₀ hR₀R₁ hη hband hneg.symm hyatt₂ hyatt₁ hlt₂₁
+      nlinarith [hL, hm]
+    · have hp : ‖posPart hk y₁‖ = ‖posPart hk y₂‖ :=
+        le_antisymm (le_of_not_gt hlt₂₁) (le_of_not_gt hlt₁₂)
+      have hposf : posPart hk (modelFlow hk τy₁ y₁) = posPart hk (modelFlow hk τy₂ y₂) := by
+        rw [hfloweq]
+      have hpos₁ : posPart hk (modelFlow hk τy₁ y₁) =
+          (Real.sqrt (1 - 2 * τy₁ / ‖posPart hk y₁‖ ^ 2)) • posPart hk y₁ :=
+        modelFlow_posPart hk τy₁ y₁
+      have hpos₂ : posPart hk (modelFlow hk τy₂ y₂) =
+          (Real.sqrt (1 - 2 * τy₂ / ‖posPart hk y₂‖ ^ 2)) • posPart hk y₂ :=
+        modelFlow_posPart hk τy₂ y₂
+      have hsq₁ : 0 < 1 - 2 * τy₁ / ‖posPart hk y₁‖ ^ 2 := by
+        have hτle : τy₁ ≤ 0 := by
+          dsimp [τy₁]
+          exact modelLevelDampedTransportTime_nonpos hk c ε r δ ρ ρ' θ R₀ R₁ η ε₀ hε hδ0 hδr
+            (y := y₁)
+        have hnon : 0 ≤ ‖posPart hk y₁‖ ^ 2 := by positivity
+        have hnum : 2 * τy₁ ≤ 0 := by
+          have hm := mul_nonpos_of_nonpos_of_nonneg hτle (by norm_num : (0 : ℝ) ≤ 2)
+          simpa [mul_comm] using hm
+        have hterm : 2 * τy₁ / ‖posPart hk y₁‖ ^ 2 ≤ 0 :=
+          div_nonpos_of_nonpos_of_nonneg hnum hnon
+        linarith
+      have hsq₂ : 0 < 1 - 2 * τy₂ / ‖posPart hk y₂‖ ^ 2 := by
+        have hτle : τy₂ ≤ 0 := by
+          dsimp [τy₂]
+          exact modelLevelDampedTransportTime_nonpos hk c ε r δ ρ ρ' θ R₀ R₁ η ε₀ hε hδ0 hδr
+            (y := y₂)
+        have hnon : 0 ≤ ‖posPart hk y₂‖ ^ 2 := by positivity
+        have hnum : 2 * τy₂ ≤ 0 := by
+          have hm := mul_nonpos_of_nonpos_of_nonneg hτle (by norm_num : (0 : ℝ) ≤ 2)
+          simpa [mul_comm] using hm
+        have hterm : 2 * τy₂ / ‖posPart hk y₂‖ ^ 2 ≤ 0 :=
+          div_nonpos_of_nonpos_of_nonneg hnum hnon
+        linarith
+      have hs₁ : 0 < Real.sqrt (1 - 2 * τy₁ / ‖posPart hk y₁‖ ^ 2) :=
+        Real.sqrt_pos.2 hsq₁
+      have hs₂ : 0 < Real.sqrt (1 - 2 * τy₂ / ‖posPart hk y₂‖ ^ 2) :=
+        Real.sqrt_pos.2 hsq₂
+      have hyeq : y₁ = y₂ := by
+        by_cases hcocore : posPart hk y₁ = 0
+        · have hp₂ : ‖posPart hk y₂‖ = 0 := by
+            rw [← hp]
+            simp [hcocore]
+          have hpos₂₀ : posPart hk y₂ = 0 := norm_eq_zero.mp hp₂
+          have hy₁' : recombine hk (negPart hk y₁) (posPart hk y₁) = y₁ := recombine_decompose hk y₁
+          have hy₂' : recombine hk (negPart hk y₂) (posPart hk y₂) = y₂ := recombine_decompose hk y₂
+          rw [← hy₁', ← hy₂', hcocore, hpos₂₀, hneg]
+        · have hpn₁ : ‖posPart hk y₁‖ ≠ 0 := by
+            intro hz
+            exact hcocore (norm_eq_zero.mp hz)
+          have hpn₂ : ‖posPart hk y₂‖ ≠ 0 := by
+            intro hz
+            have hz₁ : ‖posPart hk y₁‖ = 0 := by rwa [hp]
+            exact hcocore (norm_eq_zero.mp hz₁)
+          have hposf' : (Real.sqrt (1 - 2 * τy₁ / ‖posPart hk y₁‖ ^ 2)) • posPart hk y₁ =
+              (Real.sqrt (1 - 2 * τy₂ / ‖posPart hk y₂‖ ^ 2)) • posPart hk y₂ := by
+            rwa [hpos₁, hpos₂] at hposf
+          have hs1eq : Real.sqrt (1 - 2 * τy₁ / ‖posPart hk y₁‖ ^ 2) =
+              Real.sqrt (1 - 2 * τy₂ / ‖posPart hk y₂‖ ^ 2) := by
+            have hnormeq : ‖(Real.sqrt (1 - 2 * τy₁ / ‖posPart hk y₁‖ ^ 2)) • posPart hk y₁‖ =
+                ‖(Real.sqrt (1 - 2 * τy₂ / ‖posPart hk y₂‖ ^ 2)) • posPart hk y₂‖ := by
+              rw [hposf']
+            rw [norm_smul, norm_smul, Real.norm_eq_abs, Real.norm_eq_abs,
+              abs_of_nonneg (le_of_lt hs₁), abs_of_nonneg (le_of_lt hs₂), hp] at hnormeq
+            have hmain : Real.sqrt (1 - 2 * τy₁ / ‖posPart hk y₁‖ ^ 2) * ‖posPart hk y₁‖ =
+                Real.sqrt (1 - 2 * τy₂ / ‖posPart hk y₂‖ ^ 2) * ‖posPart hk y₁‖ := by
+              simpa [hp] using hnormeq
+            have hmul := mul_right_cancel₀ hpn₁ hmain
+            exact hmul
+          have hppos : posPart hk y₁ = posPart hk y₂ := by
+            have hmain : (Real.sqrt (1 - 2 * τy₁ / ‖posPart hk y₁‖ ^ 2)) • posPart hk y₁ =
+                (Real.sqrt (1 - 2 * τy₁ / ‖posPart hk y₁‖ ^ 2)) • posPart hk y₂ := by
+              rw [hs1eq]
+              rwa [hs1eq] at hposf'
+            calc
+              posPart hk y₁ = (Real.sqrt (1 - 2 * τy₁ / ‖posPart hk y₁‖ ^ 2))⁻¹ •
+                  ((Real.sqrt (1 - 2 * τy₁ / ‖posPart hk y₁‖ ^ 2)) • posPart hk y₁) := by
+                rw [inv_smul_smul₀ hs₁.ne']
+              _ = (Real.sqrt (1 - 2 * τy₁ / ‖posPart hk y₁‖ ^ 2))⁻¹ •
+                  ((Real.sqrt (1 - 2 * τy₁ / ‖posPart hk y₁‖ ^ 2)) • posPart hk y₂) := by
+                rw [hmain]
+              _ = posPart hk y₂ := by
+                rw [inv_smul_smul₀ hs₁.ne']
+          have hy₁' : recombine hk (negPart hk y₁) (posPart hk y₁) = y₁ := recombine_decompose hk y₁
+          have hy₂' : recombine hk (negPart hk y₂) (posPart hk y₂) = y₂ := recombine_decompose hk y₂
+          rw [← hy₁', ← hy₂', hneg, hppos]
+      rw [← hxy₁, ← hxy₂, hyeq]
+
 private theorem morseFarExpandLevelMap_eq_of_le_upper {c ε δ ρ ρ' : ℝ} (hρ : 0 < ρ)
     (hρ' : 0 < ρ') (hε : 0 < ε) (hδ : 0 < δ) (hρρ' : ρ + ρ' ≤ δ) {t : ℝ} (ht : t ≤ c + ε) :
     ∃ s : ℝ, s ≤ c - ε ∧ s - morseFarExpandTimeSmooth c ε δ ρ ρ' s = t := by
