@@ -15426,6 +15426,57 @@ theorem morseRoundedFunction_no_critical_at_level {m k : ℕ} (hk : k ≤ m + 1)
 
 
 @[reducible]
+noncomputable def morseSublevelIsotopyFamily {m k : ℕ} (hk : k ≤ m + 1)
+    (c ε r δ R₀ R₁ : ℝ) {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M]
+    [ChartedSpace H M] [T2Space M]
+    {I : ModelWithCorners ℝ (MorseModel (m + 1)) H} [I.Boundaryless]
+    [IsManifold I (⊤ : WithTop ℕ∞) M] {f : M → ℝ}
+    (data : MorseChart (m + 1) k hk c I f) (s : ℝ) (x : M) : ℝ :=
+  (1 - s) * (morseRoundedFunction hk c ε r δ R₀ R₁ data x - c) +
+    s * (f x - c - ε)
+
+theorem contMDiff_morseSublevelIsotopyFamily {m k : ℕ} (hk : k ≤ m + 1)
+    (c ε r δ R₀ R₁ R₁' : ℝ) {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M]
+    [ChartedSpace H M] [T2Space M]
+    {I : ModelWithCorners ℝ (MorseModel (m + 1)) H} [I.Boundaryless]
+    [IsManifold I (⊤ : WithTop ℕ∞) M] {f : M → ℝ}
+    (data : MorseChart (m + 1) k hk c I f)
+    (hf : ContMDiff I 𝓘(ℝ, ℝ) (↑(⊤ : ℕ∞) : WithTop ℕ∞) f)
+    (hR : R₀ < R₁) (hR0 : 0 ≤ R₀)
+    (hR₁₂ : R₁ < R₁') (hR₁₂R : R₁' ≤ data.R) (hR₁₂R' : R₁' ≤ data.R') :
+    ContMDiff (I.prod 𝓘(ℝ, ℝ)) 𝓘(ℝ, ℝ) (↑(⊤ : ℕ∞) : WithTop ℕ∞)
+      (fun q : M × ℝ => morseSublevelIsotopyFamily hk c ε r δ R₀ R₁ data q.2 q.1) := by
+  have hround : ContMDiff I 𝓘(ℝ, ℝ) (↑(⊤ : ℕ∞) : WithTop ℕ∞)
+      (morseRoundedFunction hk c ε r δ R₀ R₁ data) :=
+    contMDiff_morseRoundedFunction hk c ε r δ R₀ R₁ R₁' data hf hR hR0 hR₁₂ hR₁₂R hR₁₂R'
+  have hround' : ContMDiff (I.prod 𝓘(ℝ, ℝ)) 𝓘(ℝ, ℝ) (↑(⊤ : ℕ∞) : WithTop ℕ∞)
+      (fun q : M × ℝ => morseRoundedFunction hk c ε r δ R₀ R₁ data q.1) :=
+    hround.comp (contMDiff_fst (I := I) (J := 𝓘(ℝ, ℝ)))
+  have hf' : ContMDiff (I.prod 𝓘(ℝ, ℝ)) 𝓘(ℝ, ℝ) (↑(⊤ : ℕ∞) : WithTop ℕ∞)
+      (fun q : M × ℝ => f q.1) :=
+    hf.comp (contMDiff_fst (I := I) (J := 𝓘(ℝ, ℝ)))
+  have hsnd : ContMDiff (I.prod 𝓘(ℝ, ℝ)) 𝓘(ℝ, ℝ) (↑(⊤ : ℕ∞) : WithTop ℕ∞)
+      (fun q : M × ℝ => q.2) :=
+    contMDiff_snd (I := I) (J := 𝓘(ℝ, ℝ))
+  change ContMDiff (I.prod 𝓘(ℝ, ℝ)) 𝓘(ℝ, ℝ) (↑(⊤ : ℕ∞) : WithTop ℕ∞)
+    (fun q : M × ℝ => (1 - q.2) * (morseRoundedFunction hk c ε r δ R₀ R₁ data q.1 - c) +
+      q.2 * (f q.1 - c - ε))
+  have hc1 : ContMDiff (I.prod 𝓘(ℝ, ℝ)) 𝓘(ℝ, ℝ) (↑(⊤ : ℕ∞) : WithTop ℕ∞)
+      (fun q : M × ℝ => 1 - q.2) :=
+    (contMDiff_const : ContMDiff (I.prod 𝓘(ℝ, ℝ)) 𝓘(ℝ, ℝ) (↑(⊤ : ℕ∞) : WithTop ℕ∞)
+      (fun _ : M × ℝ => (1 : ℝ))).sub hsnd
+  have hc2 : ContMDiff (I.prod 𝓘(ℝ, ℝ)) 𝓘(ℝ, ℝ) (↑(⊤ : ℕ∞) : WithTop ℕ∞)
+      (fun q : M × ℝ => morseRoundedFunction hk c ε r δ R₀ R₁ data q.1 - c) :=
+    hround'.sub (contMDiff_const : ContMDiff (I.prod 𝓘(ℝ, ℝ)) 𝓘(ℝ, ℝ) (↑(⊤ : ℕ∞) : WithTop ℕ∞)
+      (fun _ : M × ℝ => c))
+  have hc4 : ContMDiff (I.prod 𝓘(ℝ, ℝ)) 𝓘(ℝ, ℝ) (↑(⊤ : ℕ∞) : WithTop ℕ∞)
+      (fun q : M × ℝ => f q.1 - c - ε) :=
+    (hf'.sub (contMDiff_const : ContMDiff (I.prod 𝓘(ℝ, ℝ)) 𝓘(ℝ, ℝ) (↑(⊤ : ℕ∞) : WithTop ℕ∞)
+      (fun _ : M × ℝ => c))).sub (contMDiff_const : ContMDiff (I.prod 𝓘(ℝ, ℝ)) 𝓘(ℝ, ℝ)
+        (↑(⊤ : ℕ∞) : WithTop ℕ∞) (fun _ : M × ℝ => ε))
+  exact (hc1.mul hc2).add (hsnd.mul hc4)
+
+@[reducible]
 noncomputable def morseRoundedSublevelChartedSpace {m k : ℕ} (hk : k ≤ m + 1)
     (c ε r δ R₀ R₁ R₁' : ℝ) {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M]
     [ChartedSpace H M] [T2Space M]
