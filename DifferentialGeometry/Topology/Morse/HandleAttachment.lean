@@ -3650,6 +3650,44 @@ theorem modelSublevelFamily_notCritical_of_strip {n k : ℕ} (hk : k ≤ n)
         have hmain : (1 - s) * (1 - τ) * capSlope + (1 - s) * τ + s = 0 := by linarith
         exact hbneq hmain)
 
+noncomputable def modelSublevelCutoffRatio {n k : ℕ} (hk : k ≤ n)
+    (c ε r δ R₀ R₁ ε₀ : ℝ) (y : MorseModel n) : ℝ :=
+  (modelRoundedFunction hk c ε r δ R₀ R₁ y - c + ε₀) /
+    (modelRoundedFunction hk c ε r δ R₀ R₁ y - c - (morseNormalForm hk c y - c - ε))
+
+noncomputable def modelSublevelFamilyCutoff {n k : ℕ} (hk : k ≤ n)
+    (c ε r δ R₀ R₁ ε₀ : ℝ) (θ : ℝ → ℝ) (s : ℝ) (y : MorseModel n) : ℝ :=
+  let γ : ℝ := modelRoundedFunction hk c ε r δ R₀ R₁ y - c
+  let β : ℝ := morseNormalForm hk c y - c - ε
+  let ρ : ℝ := modelSublevelCutoffRatio hk c ε r δ R₀ R₁ ε₀ y
+  (1 - s * θ ρ) * γ + s * θ ρ * β
+
+theorem modelSublevelFamilyCutoff_affine {n k : ℕ} (hk : k ≤ n)
+    (c ε r δ R₀ R₁ ε₀ a : ℝ) (θ : ℝ → ℝ) (s : ℝ) (y : MorseModel n)
+    (hden : modelRoundedFunction hk c ε r δ R₀ R₁ y - c -
+      (morseNormalForm hk c y - c - ε) ≠ 0)
+    (hθ : θ (modelSublevelCutoffRatio hk c ε r δ R₀ R₁ ε₀ y) =
+      a * modelSublevelCutoffRatio hk c ε r δ R₀ R₁ ε₀ y) :
+    modelSublevelFamilyCutoff hk c ε r δ R₀ R₁ ε₀ θ s y =
+      (1 - s * a) * (modelRoundedFunction hk c ε r δ R₀ R₁ y - c) - s * a * ε₀ := by
+  dsimp [modelSublevelFamilyCutoff]
+  let γ : ℝ := modelRoundedFunction hk c ε r δ R₀ R₁ y - c
+  let β : ℝ := morseNormalForm hk c y - c - ε
+  let ρ : ℝ := modelSublevelCutoffRatio hk c ε r δ R₀ R₁ ε₀ y
+  have hρ : (γ - β) * modelSublevelCutoffRatio hk c ε r δ R₀ R₁ ε₀ y = γ + ε₀ := by
+    dsimp [modelSublevelCutoffRatio, γ, β]
+    field_simp [hden]
+  have hmain : (1 - s * θ (modelSublevelCutoffRatio hk c ε r δ R₀ R₁ ε₀ y)) * γ +
+      s * θ (modelSublevelCutoffRatio hk c ε r δ R₀ R₁ ε₀ y) * β =
+      (1 - s * a) * γ - s * a * ε₀ := by
+    rw [hθ]
+    have hring : (1 - s * (a * ρ)) * γ + s * (a * ρ) * β =
+        (1 - s * a) * γ - s * a * ((γ - β) * ρ - γ) := by ring
+    rw [hring]
+    rw [hρ]
+    ring
+  simpa [γ, β, ρ] using hmain
+
 theorem modelAttachedUnstretch_mem_upper_of_roundedSublevel {n k : ℕ} (hk : k ≤ n)
     (c ε r δ R₀ R₁ : ℝ) (hε : 0 < ε) (hδ : 0 < δ) (hδr : δ < r ^ 2)
     (hR : R₀ < R₁) (hR0 : 0 ≤ R₀) (hbig : 2 * (r ^ 2 + 2 * ε + δ) ≤ R₀ ^ 2)
