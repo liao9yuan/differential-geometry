@@ -5199,6 +5199,174 @@ theorem modelAttachedUnstretch_eq_modelFlow {n k : ℕ} (hk : k ≤ n) (ε r δ 
       ring
     rw [harg]
 
+noncomputable def modelLevelDampedUnstretchTime {n k : ℕ} (hk : k ≤ n) (ε r δ : ℝ)
+    (c η ε₀ : ℝ) (y : MorseModel n) : ℝ :=
+  ‖posPart hk y‖ ^ 2 * (1 - (1 + (Real.sqrt ((‖negPart hk y‖ ^ 2 + r ^ 2) /
+    smoothCap ε r δ (‖negPart hk y‖ ^ 2)) - 1) *
+      Real.smoothTransition ((morseNormalForm hk c y - c + ε + η) / ε₀)) ^ 2) / 2
+
+theorem modelLevelDampedUnstretch_eq_modelFlow {n k : ℕ} (hk : k ≤ n) (ε r δ : ℝ)
+    (c η ε₀ : ℝ) (hε : 0 ≤ ε) (hδ0 : 0 < δ) (hδr : δ < r ^ 2) (y : MorseModel n) :
+    modelLevelDampedUnstretch hk ε r δ c η ε₀ y =
+      modelFlow hk (modelLevelDampedUnstretchTime hk ε r δ c η ε₀ y) y := by
+  let S : ℝ := 1 + (Real.sqrt ((‖negPart hk y‖ ^ 2 + r ^ 2) /
+    smoothCap ε r δ (‖negPart hk y‖ ^ 2)) - 1) *
+      Real.smoothTransition ((morseNormalForm hk c y - c + ε + η) / ε₀)
+  by_cases hp : ‖posPart hk y‖ = 0
+  · have hp0 : posPart hk y = 0 := norm_eq_zero.mp hp
+    dsimp [modelLevelDampedUnstretch, modelFlow, modelLevelDampedUnstretchTime, S]
+    rw [hp0]
+    simp
+  · have hpn : ‖posPart hk y‖ ≠ 0 := hp
+    have hp2 : ‖posPart hk y‖ ^ 2 ≠ 0 := pow_ne_zero 2 hpn
+    apply congrArg (fun v : EuclideanSpace ℝ (Fin (n - k)) => recombine hk (negPart hk y) v)
+    dsimp [modelLevelDampedUnstretch, modelFlow, modelLevelDampedUnstretchTime, S]
+    have hsc : 0 < smoothCap ε r δ (‖negPart hk y‖ ^ 2) := smoothCap_pos hδ0 hδr
+    have hU : 1 ≤ Real.sqrt ((‖negPart hk y‖ ^ 2 + r ^ 2) /
+        smoothCap ε r δ (‖negPart hk y‖ ^ 2)) := by
+      have hle : smoothCap ε r δ (‖negPart hk y‖ ^ 2) ≤ ‖negPart hk y‖ ^ 2 + r ^ 2 := by
+        have hmax : max (r ^ 2) (‖negPart hk y‖ ^ 2) ≤ ‖negPart hk y‖ ^ 2 + r ^ 2 := by
+          rw [max_le_iff]
+          constructor <;> nlinarith [sq_nonneg ‖negPart hk y‖]
+        exact le_trans (smoothCap_le_max (ε := ε) (r := r) (δ := δ)
+          (t := ‖negPart hk y‖ ^ 2) hε hδ0) hmax
+      have hr2 : 0 < r ^ 2 := by nlinarith [hδ0, hδr]
+      exact (Real.le_sqrt (by norm_num : (0 : ℝ) ≤ 1)
+        (div_nonneg (by nlinarith [sq_nonneg (‖negPart hk y‖ : ℝ), hr2])
+          (le_of_lt hsc))).2 (by
+        norm_num
+        rw [one_le_div hsc]
+        nlinarith)
+    have hS0 : 0 ≤ S := by
+      have hσ0 : 0 ≤ Real.smoothTransition ((morseNormalForm hk c y - c + ε + η) / ε₀) :=
+        Real.smoothTransition.nonneg _
+      dsimp [S]
+      nlinarith
+    have harg : 1 - 2 * (‖posPart hk y‖ ^ 2 * (1 - (1 + (Real.sqrt ((‖negPart hk y‖ ^ 2 + r ^ 2) /
+          smoothCap ε r δ (‖negPart hk y‖ ^ 2)) - 1) *
+            Real.smoothTransition ((morseNormalForm hk c y - c + ε + η) / ε₀)) ^ 2) / 2) /
+          ‖posPart hk y‖ ^ 2 =
+        (1 + (Real.sqrt ((‖negPart hk y‖ ^ 2 + r ^ 2) /
+          smoothCap ε r δ (‖negPart hk y‖ ^ 2)) - 1) *
+            Real.smoothTransition ((morseNormalForm hk c y - c + ε + η) / ε₀)) ^ 2 := by
+      field_simp [hp2]
+      ring
+    rw [harg]
+    rw [Real.sqrt_sq_eq_abs]
+    rw [abs_of_nonneg hS0]
+
+theorem modelLevelDampedUnstretchTime_zero_of_deep {n k : ℕ} (hk : k ≤ n) (ε r δ : ℝ)
+    (c η ε₀ : ℝ) (hε₀ : 0 < ε₀) (y : MorseModel n)
+    (hy : morseNormalForm hk c y ≤ c - ε - η) :
+    modelLevelDampedUnstretchTime hk ε r δ c η ε₀ y = 0 := by
+  have hσ : Real.smoothTransition ((morseNormalForm hk c y - c + ε + η) / ε₀) = 0 := by
+    apply Real.smoothTransition.zero_of_nonpos
+    exact div_nonpos_of_nonpos_of_nonneg (by nlinarith) (le_of_lt hε₀)
+  dsimp [modelLevelDampedUnstretchTime]
+  rw [hσ]
+  ring
+
+theorem modelLevelDampedUnstretchTime_eq_unstretchTime {n k : ℕ} (hk : k ≤ n) (ε r δ : ℝ)
+    (c η ε₀ : ℝ) (hδ : 0 < δ) (hδr : δ < r ^ 2) (hε₀ : 0 < ε₀) (y : MorseModel n)
+    (hy : c - ε - η + ε₀ ≤ morseNormalForm hk c y) :
+    modelLevelDampedUnstretchTime hk ε r δ c η ε₀ y = modelAttachedUnstretchTime hk ε r δ y := by
+  have hσ : Real.smoothTransition ((morseNormalForm hk c y - c + ε + η) / ε₀) = 1 := by
+    apply Real.smoothTransition.one_of_one_le
+    rw [one_le_div hε₀]
+    nlinarith
+  dsimp [modelLevelDampedUnstretchTime, modelAttachedUnstretchTime]
+  rw [hσ]
+  have hsqrt : (Real.sqrt ((‖negPart hk y‖ ^ 2 + r ^ 2) /
+        smoothCap ε r δ (‖negPart hk y‖ ^ 2))) ^ 2 =
+      (‖negPart hk y‖ ^ 2 + r ^ 2) / smoothCap ε r δ (‖negPart hk y‖ ^ 2) :=
+    Real.sq_sqrt (by
+      have hsc : 0 < smoothCap ε r δ (‖negPart hk y‖ ^ 2) := smoothCap_pos hδ hδr
+      have hr2 : 0 < r ^ 2 := by nlinarith [hδ, hδr]
+      exact div_nonneg (by positivity) (le_of_lt hsc))
+  have hfac : 1 + (Real.sqrt ((‖negPart hk y‖ ^ 2 + r ^ 2) /
+      smoothCap ε r δ (‖negPart hk y‖ ^ 2)) - 1) * 1 =
+      Real.sqrt ((‖negPart hk y‖ ^ 2 + r ^ 2) / smoothCap ε r δ (‖negPart hk y‖ ^ 2)) := by
+    ring
+  rw [hfac]
+  rw [hsqrt]
+
+theorem contDiff_modelLevelDampedUnstretchTime {n k : ℕ} (hk : k ≤ n) (ε r δ : ℝ)
+    (c η ε₀ : ℝ) (hδ : 0 < δ) (hδr : δ < r ^ 2) :
+    ContDiff ℝ (⊤ : ℕ∞) (modelLevelDampedUnstretchTime hk ε r δ c η ε₀) := by
+  have hnormPos : ContDiff ℝ (⊤ : ℕ∞) (fun y : MorseModel n => ‖posPart hk y‖ ^ 2) := by
+    rw [show (fun y : MorseModel n => ‖posPart hk y‖ ^ 2) =
+        fun y : MorseModel n => ∑ i : Fin (n - k), (posPart hk y i) ^ 2 by
+      funext y
+      exact EuclideanSpace.real_norm_sq_eq (posPart hk y)]
+    fun_prop
+  have hnormNeg : ContDiff ℝ (⊤ : ℕ∞) (fun y : MorseModel n => ‖negPart hk y‖ ^ 2) := by
+    rw [show (fun y : MorseModel n => ‖negPart hk y‖ ^ 2) =
+        fun y : MorseModel n => ∑ i : Fin k, (negPart hk y i) ^ 2 by
+      funext y
+      exact EuclideanSpace.real_norm_sq_eq (negPart hk y)]
+    fun_prop
+  have hcap : ContDiff ℝ (⊤ : ℕ∞)
+      (fun y : MorseModel n => smoothCap ε r δ (‖negPart hk y‖ ^ 2)) :=
+    (smoothCap_contDiff ε r δ).comp hnormNeg
+  have hden : ContDiff ℝ (⊤ : ℕ∞)
+      (fun y : MorseModel n => ‖negPart hk y‖ ^ 2 + r ^ 2) :=
+    hnormNeg.add (contDiff_const : ContDiff ℝ (⊤ : ℕ∞) (fun _ : MorseModel n => r ^ 2))
+  have hcap_pos : ∀ y : MorseModel n, 0 < smoothCap ε r δ (‖negPart hk y‖ ^ 2) := by
+    intro y
+    exact smoothCap_pos (ε := ε) (r := r) (δ := δ) (t := ‖negPart hk y‖ ^ 2) hδ hδr
+  have harg : ContDiff ℝ (⊤ : ℕ∞)
+      (fun y : MorseModel n => (‖negPart hk y‖ ^ 2 + r ^ 2) /
+        smoothCap ε r δ (‖negPart hk y‖ ^ 2)) :=
+    hden.div hcap (by intro y; exact ne_of_gt (hcap_pos y))
+  have hsqrt : ContDiff ℝ (⊤ : ℕ∞)
+      (fun y : MorseModel n => Real.sqrt ((‖negPart hk y‖ ^ 2 + r ^ 2) /
+        smoothCap ε r δ (‖negPart hk y‖ ^ 2))) :=
+    harg.sqrt (by
+      intro y
+      have hr2 : 0 < r ^ 2 := by nlinarith [hδ, hδr]
+      exact ne_of_gt (div_pos (by positivity) (hcap_pos y)))
+  have hnf : ContDiff ℝ (⊤ : ℕ∞) (fun y : MorseModel n => morseNormalForm hk c y) := by
+    have hsplit : (fun y : MorseModel n => morseNormalForm hk c y) =
+        fun y : MorseModel n => c + (1 / 2) * (‖posPart hk y‖ ^ 2 - ‖negPart hk y‖ ^ 2) := by
+      funext y
+      exact morseNormalForm_split hk c y
+    rw [hsplit]
+    exact (contDiff_const : ContDiff ℝ (⊤ : ℕ∞) (fun _ : MorseModel n => c)).add
+      ((contDiff_const : ContDiff ℝ (⊤ : ℕ∞) (fun _ : MorseModel n => (1 / 2 : ℝ))).mul
+        (hnormPos.sub hnormNeg))
+  have hσarg : ContDiff ℝ (⊤ : ℕ∞)
+      (fun y : MorseModel n => (morseNormalForm hk c y - c + ε + η) / ε₀) := by
+    have hlin : ContDiff ℝ (⊤ : ℕ∞)
+        (fun y : MorseModel n => morseNormalForm hk c y - c + ε + η) := by
+      have h' : ContDiff ℝ (⊤ : ℕ∞)
+          (fun y : MorseModel n => morseNormalForm hk c y - (c - ε - η)) :=
+        hnf.sub (contDiff_const : ContDiff ℝ (⊤ : ℕ∞) (fun _ : MorseModel n => c - ε - η))
+      convert h' using 1
+      ext y
+      ring
+    exact hlin.div_const ε₀
+  have hσ : ContDiff ℝ (⊤ : ℕ∞)
+      (fun y : MorseModel n => Real.smoothTransition
+        ((morseNormalForm hk c y - c + ε + η) / ε₀)) :=
+    (Real.smoothTransition.contDiff (n := (⊤ : ℕ∞))).comp hσarg
+  have hS : ContDiff ℝ (⊤ : ℕ∞) (fun y : MorseModel n =>
+      1 + (Real.sqrt ((‖negPart hk y‖ ^ 2 + r ^ 2) /
+        smoothCap ε r δ (‖negPart hk y‖ ^ 2)) - 1) *
+          Real.smoothTransition ((morseNormalForm hk c y - c + ε + η) / ε₀)) := by
+    simpa [mul_assoc] using
+      ((contDiff_const : ContDiff ℝ (⊤ : ℕ∞) (fun _ : MorseModel n => (1 : ℝ))).add
+        ((hsqrt.sub (contDiff_const : ContDiff ℝ (⊤ : ℕ∞) (fun _ : MorseModel n => (1 : ℝ)))).mul hσ))
+  have hSsq : ContDiff ℝ (⊤ : ℕ∞) (fun y : MorseModel n =>
+      (1 + (Real.sqrt ((‖negPart hk y‖ ^ 2 + r ^ 2) /
+        smoothCap ε r δ (‖negPart hk y‖ ^ 2)) - 1) *
+          Real.smoothTransition ((morseNormalForm hk c y - c + ε + η) / ε₀)) ^ 2) :=
+    hS.pow 2
+  change ContDiff ℝ (⊤ : ℕ∞) (fun y : MorseModel n =>
+    ‖posPart hk y‖ ^ 2 * (1 - (1 + (Real.sqrt ((‖negPart hk y‖ ^ 2 + r ^ 2) /
+      smoothCap ε r δ (‖negPart hk y‖ ^ 2)) - 1) *
+        Real.smoothTransition ((morseNormalForm hk c y - c + ε + η) / ε₀)) ^ 2) / 2)
+  exact (hnormPos.mul ((contDiff_const : ContDiff ℝ (⊤ : ℕ∞) (fun _ : MorseModel n => (1 : ℝ))).sub hSsq)).div_const 2
+
 theorem modelAttachedUnstretchTime_eq_of_negPart_large {n k : ℕ} (hk : k ≤ n) (ε r δ : ℝ)
     (hδ0 : 0 < δ) {y : MorseModel n} (ht : r ^ 2 + 2 * ε + δ ≤ ‖negPart hk y‖ ^ 2) :
     modelAttachedUnstretchTime hk ε r δ y =
