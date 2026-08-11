@@ -17579,6 +17579,83 @@ theorem morseLevelDampedUnstretchSublevelMap_strict {m k : ℕ} (hk : k ≤ m + 
   exact CellAttachment.modelLevelDampedUnstretch_strict hk c ε r δ R₀ R₁ hε hδ hδr hR hR0
     hbig η ε₀ hatt hg
 
+theorem morseLevelDampedUnstretchSublevelMap_injective {m k : ℕ} (hk : k ≤ m + 1)
+    (c ε r δ R₀ R₁ η ε₀ : ℝ) {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M]
+    [ChartedSpace H M] [T2Space M]
+    {I : ModelWithCorners ℝ (MorseModel (m + 1)) H} [I.Boundaryless]
+    [IsManifold I (⊤ : WithTop ℕ∞) M] {f : M → ℝ}
+    (data : MorseChart (m + 1) k hk c I f)
+    (hε : 0 ≤ ε) (hδ : 0 < δ) (hδr : δ < r ^ 2) (hε₀ : 0 < ε₀) (hR₁R : R₁ < data.R)
+    (hR'b : R₁ ^ 2 + R₁ ^ 2 * (R₁ ^ 2 + r ^ 2) / (r ^ 2 - δ) < data.R ^ 2) :
+    Function.Injective (morseLevelDampedUnstretchSublevelMap hk c ε r δ R₀ R₁ η ε₀ data) := by
+  intro x₁ x₂ h
+  rcases x₁ with ⟨z₁, hb₁⟩
+  rcases x₂ with ⟨z₂, hb₂⟩
+  rcases hb₁ with ⟨y₁, hy₁, hxy₁⟩
+  rcases hb₂ with ⟨y₂, hy₂, hxy₂⟩
+  apply Subtype.ext
+  apply Subtype.ext
+  dsimp [morseLevelDampedUnstretchSublevelMap] at h
+  have hsrc₁ : y₁ ∈ data.χ.source := data.hχsrc y₁ (le_trans hy₁ (le_of_lt hR₁R))
+  have hsrc₂ : y₂ ∈ data.χ.source := data.hχsrc y₂ (le_trans hy₂ (le_of_lt hR₁R))
+  have hsymm₁ : data.χ.symm z₁.1 = y₁ := by
+    rw [← hxy₁]
+    exact data.χ.left_inv hsrc₁
+  have hsymm₂ : data.χ.symm z₂.1 = y₂ := by
+    rw [← hxy₂]
+    exact data.χ.left_inv hsrc₂
+  rw [hsymm₁, hsymm₂] at h
+  have hnorm₁ : morseNorm (m + 1)
+      (CellAttachment.modelLevelDampedUnstretch hk ε r δ c η ε₀ y₁) ≤ data.R := by
+    have hsq := CellAttachment.modelLevelDampedUnstretch_norm_sq_le hk ε r δ c η ε₀
+      hε hδ hδr R₁ hy₁
+    have hle : morseNorm (m + 1)
+        (CellAttachment.modelLevelDampedUnstretch hk ε r δ c η ε₀ y₁) ^ 2 < data.R ^ 2 :=
+      lt_of_le_of_lt hsq hR'b
+    have hnonneg : 0 ≤ morseNorm (m + 1)
+        (CellAttachment.modelLevelDampedUnstretch hk ε r δ c η ε₀ y₁) := by
+      dsimp [morseNorm]
+      exact norm_nonneg _
+    have hRnonneg : 0 ≤ data.R := le_of_lt data.hRpos
+    have habs := sq_lt_sq.mp hle
+    have h1 : |morseNorm (m + 1)
+        (CellAttachment.modelLevelDampedUnstretch hk ε r δ c η ε₀ y₁)| =
+        morseNorm (m + 1) (CellAttachment.modelLevelDampedUnstretch hk ε r δ c η ε₀ y₁) :=
+      abs_of_nonneg hnonneg
+    have h2 : |data.R| = data.R := abs_of_nonneg hRnonneg
+    rw [h1, h2] at habs
+    exact le_of_lt habs
+  have hnorm₂ : morseNorm (m + 1)
+      (CellAttachment.modelLevelDampedUnstretch hk ε r δ c η ε₀ y₂) ≤ data.R := by
+    have hsq := CellAttachment.modelLevelDampedUnstretch_norm_sq_le hk ε r δ c η ε₀
+      hε hδ hδr R₁ hy₂
+    have hle : morseNorm (m + 1)
+        (CellAttachment.modelLevelDampedUnstretch hk ε r δ c η ε₀ y₂) ^ 2 < data.R ^ 2 :=
+      lt_of_le_of_lt hsq hR'b
+    have hnonneg : 0 ≤ morseNorm (m + 1)
+        (CellAttachment.modelLevelDampedUnstretch hk ε r δ c η ε₀ y₂) := by
+      dsimp [morseNorm]
+      exact norm_nonneg _
+    have hRnonneg : 0 ≤ data.R := le_of_lt data.hRpos
+    have habs := sq_lt_sq.mp hle
+    have h1 : |morseNorm (m + 1)
+        (CellAttachment.modelLevelDampedUnstretch hk ε r δ c η ε₀ y₂)| =
+        morseNorm (m + 1) (CellAttachment.modelLevelDampedUnstretch hk ε r δ c η ε₀ y₂) :=
+      abs_of_nonneg hnonneg
+    have h2 : |data.R| = data.R := abs_of_nonneg hRnonneg
+    rw [h1, h2] at habs
+    exact le_of_lt habs
+  have hsrcU₁ : CellAttachment.modelLevelDampedUnstretch hk ε r δ c η ε₀ y₁ ∈ data.χ.source :=
+    data.hχsrc _ hnorm₁
+  have hsrcU₂ : CellAttachment.modelLevelDampedUnstretch hk ε r δ c η ε₀ y₂ ∈ data.χ.source :=
+    data.hχsrc _ hnorm₂
+  have hU : CellAttachment.modelLevelDampedUnstretch hk ε r δ c η ε₀ y₁ =
+      CellAttachment.modelLevelDampedUnstretch hk ε r δ c η ε₀ y₂ :=
+    data.χ.injOn hsrcU₁ hsrcU₂ h
+  have hy : y₁ = y₂ := CellAttachment.modelLevelDampedUnstretch_injective hk ε r δ c η ε₀
+    hε hδ hδr hε₀ hU
+  rw [← hxy₁, ← hxy₂, hy]
+
 theorem isCompact_ballImage {m k : ℕ} (hk : k ≤ m + 1) (c R₁ : ℝ)
     {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M] [ChartedSpace H M] [T2Space M]
     {I : ModelWithCorners ℝ (MorseModel (m + 1)) H} {f : M → ℝ}
