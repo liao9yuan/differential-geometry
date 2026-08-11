@@ -29,24 +29,17 @@ variable
       [IsManifold I ∞ M] [CompactSpace M] [I.Boundaryless]
       [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M]
 
-private theorem exists_lowRealize_below
+private theorem exists_lowRealize_at
     (hDim : Module.finrank ℝ E = 3)
-    (gBase : SmoothRiemannianMetric I M) {Λ deltaCap Rcap : ℝ}
-    (hΛ : 1 ≤ Λ) (hdeltaCap : 0 < deltaCap) (hRcap : 0 < Rcap) :
+    (gBase : SmoothRiemannianMetric I M) {Λ delta Rcap : ℝ}
+    (hΛ : 1 ≤ Λ) (hdelta : 0 < delta) (hdeltathird : delta ≤ 1 / 3)
+    (hRcap : 0 < Rcap) :
     ∃ D : LowRegRealizeData,
       IsLowRealizeUnif (I := I) (M := M) gBase Λ D ∧
-        D.threshold ≤ deltaCap ∧ D.radius ≤ Rcap := by
+        D.threshold = delta ∧ D.radius ≤ Rcap := by
   obtain ⟨D0, hD0⟩ := exists_lowRealize (I := I) (M := M) hDim gBase hΛ
-  let delta : ℝ := min (deltaCap / 2) (1 / 6)
   let radius : ℝ := min (delta * D0.radius / 2) Rcap
   let D : LowRegRealizeData := { threshold := delta, radius := radius }
-  have hdelta : 0 < delta := by
-    dsimp only [delta]
-    exact lt_min (by positivity) (by norm_num)
-  have hdeltathird : delta ≤ 1 / 3 := by
-    exact (min_le_right _ _).trans (by norm_num)
-  have hdeltacap : delta ≤ deltaCap := by
-    exact (min_le_left _ _).trans (by linarith)
   have hradius : 0 < radius := by
     dsimp only [radius]
     exact lt_min (div_pos (mul_pos hdelta hD0.radius_pos) (by norm_num)) hRcap
@@ -75,20 +68,21 @@ private theorem exists_lowRealize_below
           mul_le_mul_of_nonneg_left hCP2 (by positivity)
         _ = delta := by ring
     exact gFibreOpBound_mono_of_le (I := I) (M := M) g _ hcoeff (hlin T)
-  · simpa only [D] using hdeltacap
+  · rfl
   · simpa only [D] using hradiuscap
 
-theorem exists_lowBounds_below
+theorem exists_lowBounds_at
     (hDim : Module.finrank ℝ E = 3)
-    (gBase : SmoothRiemannianMetric I M) {Λ deltaCap Rcap : ℝ}
-    (hΛ : 1 ≤ Λ) (hdeltaCap : 0 < deltaCap) (hRcap : 0 < Rcap) :
+    (gBase : SmoothRiemannianMetric I M) {Λ delta Rcap : ℝ}
+    (hΛ : 1 ≤ Λ) (hdelta : 0 < delta) (hdeltathird : delta ≤ 1 / 3)
+    (hRcap : 0 < Rcap) :
     ∃ K : LowRegBoundData,
       IsLowBoundsUnif (I := I) (M := M) gBase Λ K ∧
-        K.threshold ≤ deltaCap ∧
+        K.threshold = delta ∧
         lowregStateRad K.top K.slope K.outer K.realize ≤ Rcap := by
   obtain ⟨RD, hRD, hRDdelta, hRDradius⟩ :=
-    exists_lowRealize_below (I := I) (M := M) hDim gBase hΛ
-      hdeltaCap hRcap
+    exists_lowRealize_at (I := I) (M := M) hDim gBase hΛ
+      hdelta hdeltathird hRcap
   obtain ⟨ZD, hZD⟩ := exists_lowZero (I := I) (M := M) gBase hΛ
   obtain ⟨rho, Ctop, B0, B1, hrho, hCtop, hB0, hB1, houter⟩ :=
     lowRegN_outer_unif (I := I) (M := M) hDim gBase hΛ
