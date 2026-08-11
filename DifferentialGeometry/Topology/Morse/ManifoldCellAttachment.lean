@@ -20511,6 +20511,26 @@ private lemma modelLevelDampedUnstretchTime_lower_bound {m k : ℕ} (hk : k ≤ 
   dsimp [modelLevelDampedUnstretchTime]
   nlinarith [hmain, hcaple, hval]
 
+private lemma morseFarExpandTimeSmooth_ge_of_le_lower {c ε δ ρ ρ' t : ℝ}
+    (hδ : 0 < δ) (hε : 0 < ε) (ht : t ≤ c - ε) :
+    -(2 * ε) ≤ morseFarExpandTimeSmooth c ε δ ρ ρ' t := by
+  have hge : -(2 * ε) ≤ morseFarExpandTime c ε δ t := morseFarExpandTime_ge hδ hε ht
+  have hle : morseFarExpandTime c ε δ t ≤ 0 := morseFarExpandTime_le_zero hδ hε
+  have hσ0 : 0 ≤ Real.smoothTransition ((t - (c - ε - δ + ρ')) / ρ) :=
+    Real.smoothTransition.nonneg _
+  have hσ1 : Real.smoothTransition ((t - (c - ε - δ + ρ')) / ρ) ≤ 1 :=
+    Real.smoothTransition.le_one _
+  dsimp [morseFarExpandTimeSmooth]
+  have hm : Real.smoothTransition ((t - (c - ε - δ + ρ')) / ρ) *
+        morseFarExpandTime c ε δ t ≥
+      Real.smoothTransition ((t - (c - ε - δ + ρ')) / ρ) * (-(2 * ε)) := by
+    exact mul_le_mul_of_nonneg_left hge hσ0
+  have hσge : -(2 * ε) ≤
+      Real.smoothTransition ((t - (c - ε - δ + ρ')) / ρ) * (-(2 * ε)) := by
+    have hc : -(2 * ε) ≤ 0 := by nlinarith [hε]
+    nlinarith [hσ1]
+  linarith
+
 private lemma modelLevelDampedUnstretch_mem_upper_of_roundedSublevel {m k : ℕ}
     (hk : k ≤ m + 1) (c ε r δ R₀ R₁ η ε₀ : ℝ) (hε : 0 < ε) (hδ : 0 < δ)
     (hδr : δ < r ^ 2) (hR : R₀ < R₁) (hR0 : 0 ≤ R₀)
