@@ -21,6 +21,74 @@ variable {g : SmoothRiemannianMetric I M} {r s : ℕ}
 
 omit [CompactSpace M] in
 omit [NeZero (Module.finrank ℝ E)] in
+theorem abs_sum_sameScale_le
+    (S : Finset (TensorEigenIdx (I := I) (M := M) g r s)) (σ : ℝ)
+    (f h : TensorEigenIdx (I := I) (M := M) g r s → ℝ) :
+    |∑ i ∈ S, tensorSobolevWeight (I := I) (M := M) i σ * (f i * h i)| ≤
+      Real.sqrt (∑ i ∈ S,
+        tensorSobolevWeight (I := I) (M := M) i σ * (f i) ^ 2) *
+      Real.sqrt (∑ i ∈ S,
+        tensorSobolevWeight (I := I) (M := M) i σ * (h i) ^ 2) := by
+  let p : TensorEigenIdx (I := I) (M := M) g r s → ℝ :=
+    fun i => Real.sqrt (tensorSobolevWeight (I := I) (M := M) i σ) * f i
+  let q : TensorEigenIdx (I := I) (M := M) g r s → ℝ :=
+    fun i => Real.sqrt (tensorSobolevWeight (I := I) (M := M) i σ) * h i
+  have hp : ∀ i, p i ^ 2 =
+      tensorSobolevWeight (I := I) (M := M) i σ * (f i) ^ 2 := by
+    intro i
+    dsimp only [p]
+    rw [mul_pow,
+      Real.sq_sqrt (tensorSobolevWeight_nonneg (I := I) (M := M) i σ)]
+  have hq : ∀ i, q i ^ 2 =
+      tensorSobolevWeight (I := I) (M := M) i σ * (h i) ^ 2 := by
+    intro i
+    dsimp only [q]
+    rw [mul_pow,
+      Real.sq_sqrt (tensorSobolevWeight_nonneg (I := I) (M := M) i σ)]
+  have hpq : ∀ i,
+      tensorSobolevWeight (I := I) (M := M) i σ * (f i * h i) = p i * q i := by
+    intro i
+    dsimp only [p, q]
+    have hsqrt := Real.mul_self_sqrt
+      (tensorSobolevWeight_nonneg (I := I) (M := M) i σ)
+    calc
+      _ = (Real.sqrt (tensorSobolevWeight (I := I) (M := M) i σ) *
+          Real.sqrt (tensorSobolevWeight (I := I) (M := M) i σ)) *
+            (f i * h i) := by rw [hsqrt]
+      _ = _ := by ring
+  have hpqsum : ∑ i ∈ S, p i * q i =
+      ∑ i ∈ S, tensorSobolevWeight (I := I) (M := M) i σ * (f i * h i) :=
+    Finset.sum_congr rfl fun i _ => (hpq i).symm
+  have hpsum : ∑ i ∈ S, p i ^ 2 =
+      ∑ i ∈ S, tensorSobolevWeight (I := I) (M := M) i σ * (f i) ^ 2 :=
+    Finset.sum_congr rfl fun i _ => hp i
+  have hqsum : ∑ i ∈ S, q i ^ 2 =
+      ∑ i ∈ S, tensorSobolevWeight (I := I) (M := M) i σ * (h i) ^ 2 :=
+    Finset.sum_congr rfl fun i _ => hq i
+  have hpos := Real.sum_mul_le_sqrt_mul_sqrt S p q
+  have hneg := Real.sum_mul_le_sqrt_mul_sqrt S p (fun i => -q i)
+  have hpos' : ∑ i ∈ S,
+      tensorSobolevWeight (I := I) (M := M) i σ * (f i * h i) ≤
+        Real.sqrt (∑ i ∈ S,
+          tensorSobolevWeight (I := I) (M := M) i σ * (f i) ^ 2) *
+        Real.sqrt (∑ i ∈ S,
+          tensorSobolevWeight (I := I) (M := M) i σ * (h i) ^ 2) := by
+    simpa only [hpqsum, hpsum, hqsum] using hpos
+  have hneg' : -(Real.sqrt (∑ i ∈ S,
+      tensorSobolevWeight (I := I) (M := M) i σ * (f i) ^ 2) *
+        Real.sqrt (∑ i ∈ S,
+          tensorSobolevWeight (I := I) (M := M) i σ * (h i) ^ 2)) ≤
+      ∑ i ∈ S,
+        tensorSobolevWeight (I := I) (M := M) i σ * (f i * h i) := by
+    have hneg'' : -(∑ i ∈ S, p i * q i) ≤
+        Real.sqrt (∑ i ∈ S, p i ^ 2) * Real.sqrt (∑ i ∈ S, q i ^ 2) := by
+      simpa only [mul_neg, Finset.sum_neg_distrib, neg_sq] using hneg
+    rw [hpqsum, hpsum, hqsum] at hneg''
+    linarith
+  exact (abs_le).2 ⟨hneg', hpos'⟩
+
+omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 lemma tensorSobolevWeight_eq_sqrt_succ_mul_sqrt_pred
     (i : TensorEigenIdx (I := I) (M := M) g r s) (σ : ℝ) :
     tensorSobolevWeight (I := I) (M := M) i σ =
@@ -141,6 +209,8 @@ theorem two_mul_sum_crossScale_le_eps
     nlinarith [hkey, hsqA, hsqB, hsqε, hsqεinv, hcross]
   nlinarith [hle, hyoung]
 
+omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 /-- Absolute-value form of the cross-scale Young estimate. It controls a
 signed spectral energy pairing without choosing the sign of the forcing. -/
 theorem two_abs_cross_le_eps
@@ -260,6 +330,8 @@ theorem two_mul_sum_sameScale_le_sqrt
     _ ≤ 2 * (Real.sqrt A * c) := by linarith [hmono]
     _ = 2 * c * Real.sqrt A := by ring
 
+omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 /-- **Parabolic energy closure from a ladder bound on the forcing.**
 
 The forcing coordinates split as `f = fd + fs` on `S`, where the *difference* part
@@ -349,6 +421,8 @@ theorem two_mul_sum_ladder_le
   rw [hsum]
   linarith [hdiff, hstatle]
 
+omit [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 /-- **Parabolic energy closure from a ladder bound carrying an additive constant.**
 
 `two_mul_sum_ladder_le` with the ladder hypothesis widened by a constant term
