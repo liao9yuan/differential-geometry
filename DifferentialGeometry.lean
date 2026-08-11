@@ -3392,6 +3392,7 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.LowRegBgC0Time
 import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.LowRegBgC0Zero
 import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.LowRegBgC1Pair
 import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.LowRegBgC1Time
+import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.LowRegBgC2Pair
 import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.LowRegBgC2Small
 import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.LowRegBgFatouIdent
 import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.LowRegBgForceArms
