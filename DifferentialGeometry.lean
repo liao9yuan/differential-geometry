@@ -3226,6 +3226,7 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.Estimates.H2H3FirstOrder
 import DifferentialGeometry.Analysis.Spectral.Tensor.Estimates.H2H4Principal
 import DifferentialGeometry.Analysis.Spectral.Tensor.Estimates.H2PointwiseUnif
 import DifferentialGeometry.Analysis.Spectral.Tensor.Estimates.H2PrincipalPair
+import DifferentialGeometry.Analysis.Spectral.Tensor.Estimates.H3PrincipalPair
 import DifferentialGeometry.Analysis.Spectral.Tensor.Estimates.H3BoundedGrid
 import DifferentialGeometry.Analysis.Spectral.Tensor.SobolevScale.AppD1Hs
 import DifferentialGeometry.Analysis.Spectral.Tensor.SobolevScale.AppD2Hs
