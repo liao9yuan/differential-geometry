@@ -20354,6 +20354,121 @@ private lemma Real_cosh_ge_one_add_half_sq (u : ℝ) : 1 + u ^ 2 / 2 ≤ Real.co
     norm_num [Finset.sum_range_succ]
   linarith
 
+private lemma exp_neg_mul_exp_neg_div_sq (a b : ℝ) :
+    Real.exp (-a) * Real.exp (-b) / (Real.exp (-a) + Real.exp (-b)) ^ 2 =
+      1 / (2 + 2 * Real.cosh (a - b)) := by
+  have hcosh : 2 + 2 * Real.cosh (a - b) = 2 + Real.exp (a - b) + Real.exp (b - a) := by
+    rw [Real.cosh_eq (a - b)]
+    have harg : -(a - b) = b - a := by ring
+    rw [harg]
+    ring
+  rw [hcosh]
+  have hb : Real.exp (-b) = Real.exp (-a) * Real.exp (a - b) := by
+    rw [← Real.exp_add]
+    congr 1
+    ring
+  have hfac : Real.exp (-a) + Real.exp (-b) = Real.exp (-a) * (1 + Real.exp (a - b)) := by
+    rw [hb]
+    ring
+  have hmid : Real.exp (-a) * Real.exp (-b) / (Real.exp (-a) + Real.exp (-b)) ^ 2 =
+      Real.exp (a - b) / (1 + Real.exp (a - b)) ^ 2 := by
+    rw [hfac]
+    rw [show (Real.exp (-a) * (1 + Real.exp (a - b))) ^ 2 =
+        Real.exp (-a) ^ 2 * (1 + Real.exp (a - b)) ^ 2 by ring]
+    rw [hb]
+    field_simp [Real.exp_ne_zero (-a),
+      show 1 + Real.exp (a - b) ≠ 0 by positivity]
+  have hrid : (1 + Real.exp (a - b)) ^ 2 =
+      Real.exp (a - b) * (2 + Real.exp (a - b) + Real.exp (b - a)) := by
+    have he' : Real.exp (b - a) = (Real.exp (a - b))⁻¹ := by
+      rw [← Real.exp_neg]
+      congr 1
+      ring
+    rw [he']
+    field_simp [Real.exp_ne_zero (a - b)]
+    ring
+  have hr : 1 / (2 + Real.exp (a - b) + Real.exp (b - a)) =
+      Real.exp (a - b) / (1 + Real.exp (a - b)) ^ 2 := by
+    rw [show Real.exp (a - b) / (1 + Real.exp (a - b)) ^ 2 =
+        Real.exp (a - b) / (Real.exp (a - b) * (2 + Real.exp (a - b) + Real.exp (b - a))) by
+      rw [hrid]]
+    field_simp [show 2 + Real.exp (a - b) + Real.exp (b - a) ≠ 0 by positivity,
+      Real.exp_ne_zero (a - b)]
+  calc
+    Real.exp (-a) * Real.exp (-b) / (Real.exp (-a) + Real.exp (-b)) ^ 2
+        = Real.exp (a - b) / (1 + Real.exp (a - b)) ^ 2 := hmid
+    _ = 1 / (2 + Real.exp (a - b) + Real.exp (b - a)) := hr.symm
+
+private lemma smoothTransition_deriv_le_two {x : ℝ} (hx0 : 0 < x) (hx1 : x < 1) :
+    deriv Real.smoothTransition x ≤ 2 := by
+  let a : ℝ := x⁻¹
+  let b : ℝ := (1 - x)⁻¹
+  let g : ℝ := expNegInvGlue x
+  let h : ℝ := expNegInvGlue (1 - x)
+  have hg : g = Real.exp (-a) := by
+    dsimp [g, a, expNegInvGlue]
+    rw [if_neg (not_le.mpr hx0)]
+  have hh : h = Real.exp (-b) := by
+    dsimp [h, b, expNegInvGlue]
+    rw [if_neg (not_le.mpr (sub_pos.mpr hx1))]
+  have hxy0 : 0 < x * (1 - x) := mul_pos hx0 (sub_pos.mpr hx1)
+  have hxy4 : x * (1 - x) ≤ 1 / 4 := by
+    have hsq : 0 ≤ (x - 1 / 2) ^ 2 := sq_nonneg _
+    nlinarith
+  have hmain : g * h * (1 / x ^ 2 + 1 / (1 - x) ^ 2) / (g + h) ^ 2 =
+      (a ^ 2 + b ^ 2) / (2 + 2 * Real.cosh (a - b)) := by
+    rw [hg, hh]
+    have hx : (1 : ℝ) / x ^ 2 = x⁻¹ ^ 2 := by
+      simp [div_eq_mul_inv]
+    have hx' : (1 : ℝ) / (1 - x) ^ 2 = (1 - x)⁻¹ ^ 2 := by
+      simp [div_eq_mul_inv]
+    rw [hx, hx']
+    have he : Real.exp (-x⁻¹) * Real.exp (-(1 - x)⁻¹) /
+          (Real.exp (-x⁻¹) + Real.exp (-(1 - x)⁻¹)) ^ 2 =
+        1 / (2 + 2 * Real.cosh (x⁻¹ - (1 - x)⁻¹)) :=
+      exp_neg_mul_exp_neg_div_sq (x⁻¹) ((1 - x)⁻¹)
+    rw [show Real.exp (-x⁻¹) * Real.exp (-(1 - x)⁻¹) * (x⁻¹ ^ 2 + (1 - x)⁻¹ ^ 2) /
+            (Real.exp (-x⁻¹) + Real.exp (-(1 - x)⁻¹)) ^ 2 =
+            (x⁻¹ ^ 2 + (1 - x)⁻¹ ^ 2) * (Real.exp (-x⁻¹) * Real.exp (-(1 - x)⁻¹) /
+              (Real.exp (-x⁻¹) + Real.exp (-(1 - x)⁻¹)) ^ 2) by
+        ring]
+    rw [he]
+    dsimp [a, b]
+    ring
+  have hab : a ^ 2 + b ^ 2 ≤ 8 + 2 * (a - b) ^ 2 := by
+    have hquad : 0 ≤ 8 * (x * (1 - x)) ^ 2 - 6 * (x * (1 - x)) + 1 := by
+      have h1 : x * (1 - x) ≤ 1 / 4 := hxy4
+      have h2 : 0 ≤ x * (1 - x) := le_of_lt hxy0
+      nlinarith
+    have hy : 0 < x * (1 - x) := hxy0
+    have hy2 : 0 < (x * (1 - x)) ^ 2 := sq_pos_of_pos hy
+    have hx0' : x ≠ 0 := ne_of_gt hx0
+    have h1x0 : 1 - x ≠ 0 := ne_of_gt (sub_pos.mpr hx1)
+    have hmain' : (a ^ 2 + b ^ 2) * (x * (1 - x)) ^ 2 = 1 - 2 * (x * (1 - x)) := by
+      dsimp [a, b]
+      field_simp [hx0', h1x0]
+      ring
+    have hrhs : (8 + 2 * (a - b) ^ 2) * (x * (1 - x)) ^ 2 =
+        8 * (x * (1 - x)) ^ 2 + 2 * (1 - 4 * (x * (1 - x))) := by
+      dsimp [a, b]
+      field_simp [hx0', h1x0]
+      ring
+    by_contra hnot
+    have hlt : 8 + 2 * (a - b) ^ 2 < a ^ 2 + b ^ 2 := lt_of_not_ge hnot
+    have hlt' : (8 + 2 * (a - b) ^ 2) * (x * (1 - x)) ^ 2 <
+        (a ^ 2 + b ^ 2) * (x * (1 - x)) ^ 2 := by
+      exact mul_lt_mul_of_pos_right hlt hy2
+    rw [hrhs, hmain'] at hlt'
+    nlinarith [hquad, hlt']
+  rw [smoothTransition_deriv hx0]
+  have hcosh : 1 + (a - b) ^ 2 / 2 ≤ Real.cosh (a - b) := Real_cosh_ge_one_add_half_sq (a - b)
+  have hmainle : (a ^ 2 + b ^ 2) / (2 + 2 * Real.cosh (a - b)) ≤ 2 := by
+    have hden : 0 < 2 + 2 * Real.cosh (a - b) := by positivity
+    have hnum : a ^ 2 + b ^ 2 ≤ 4 + 4 * Real.cosh (a - b) := by
+      nlinarith [hab, hcosh]
+    exact (div_le_iff₀ hden).2 (by nlinarith [hnum])
+  linarith [hmain, hmainle]
+
 theorem modelLevelDampedTransportLevelMap_strictMono_core {m k : ℕ} (hk : k ≤ m + 1)
     (c ε r δ ρ ρ' θ R₀ R₁ η ε₀ : ℝ) (hθ : 0 < θ) (hR₀R₁ : R₀ < R₁)
     (hε : 0 ≤ ε) (hδ : 0 < δ) (hδr : δ < r ^ 2) (hε₀ : 0 < ε₀)
