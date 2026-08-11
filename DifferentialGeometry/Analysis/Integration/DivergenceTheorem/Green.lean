@@ -456,6 +456,35 @@ theorem expNegIBP
   rw [integral_sub hlap hgrad]
   rw [hbase, sub_self]
 
+theorem laplacian_integral_eq_zero
+    [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
+    (g : SmoothRiemannianMetric I M)
+    {h : M → ℝ} (hh : ContMDiff I 𝓘(ℝ, ℝ) ∞ h) :
+    ∫ x, Δ_g (I := I) g ⟨h, hh⟩ x
+        ∂(riemannianVolumeMeasure (I := I) (M := M) g) = 0 := by
+  classical
+  have hf : ContMDiff I 𝓘(ℝ, ℝ) ∞ (fun _ : M => (1 : ℝ)) := contMDiff_const
+  have hgreen := green_second_integral_smul_laplacian_sub_eq_zero g hf hh
+  have hΔf : ∀ x, Δ_g (I := I) g ⟨fun _ : M => (1 : ℝ), hf⟩ x = 0 := by
+    intro x
+    exact Δ_g_const (I := I) g (c := 1) x
+  have hpointwise : ∀ x : M,
+      (1 : ℝ) * Δ_g (I := I) g ⟨h, hh⟩ x -
+          h x * Δ_g (I := I) g ⟨fun _ : M => (1 : ℝ), hf⟩ x =
+        Δ_g (I := I) g ⟨h, hh⟩ x := by
+    intro x
+    rw [hΔf x]
+    ring
+  calc
+    (∫ x, Δ_g (I := I) g ⟨h, hh⟩ x
+        ∂(riemannianVolumeMeasure (I := I) (M := M) g)) =
+        ∫ x, ((1 : ℝ) * Δ_g (I := I) g ⟨h, hh⟩ x -
+          h x * Δ_g (I := I) g ⟨fun _ : M => (1 : ℝ), hf⟩ x)
+          ∂(riemannianVolumeMeasure (I := I) (M := M) g) := by
+      apply MeasureTheory.integral_congr_ae
+      exact Filter.Eventually.of_forall (fun x => (hpointwise x).symm)
+    _ = 0 := hgreen
+
 end DivergenceTheorem
 end Integral
 end DifferentialGeometry

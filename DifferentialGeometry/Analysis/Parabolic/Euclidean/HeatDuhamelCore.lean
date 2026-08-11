@@ -40,13 +40,13 @@ theorem slice_compact (f : ℝ × V → ℝ) (hfc : HasCompactSupport f) (s : �
   exact hy
 
 omit [MeasurableSpace V] [BorelSpace V] [Nontrivial V] in
-private theorem heat_sub_fderiv {t : ℝ} (ht : 0 < t) (v x y : V) :
+private theorem heat_sub_fderiv {t : ℝ} (v x y : V) :
     fderiv ℝ (fun z : V ↦ heatKernel t (x - z)) y v =
       -heatD1 t v (x - y) := by
   have hsub : HasFDerivAt (fun z : V ↦ x - z)
       ((0 : V →L[ℝ] V) - ContinuousLinearMap.id ℝ V) y :=
     (hasFDerivAt_const (x := y) (c := x)).sub (hasFDerivAt_id y)
-  have h := (heatKernel_hasFDeriv ht (x - y)).comp y hsub
+  have h := (heatKernel_hasFDeriv (t := t) (x - y)).comp y hsub
   have h' : HasFDerivAt (fun z : V ↦ heatKernel t (x - z))
       ((heatD1Map t (x - y)).comp
         ((0 : V →L[ℝ] V) - ContinuousLinearMap.id ℝ V)) y := by
@@ -55,13 +55,13 @@ private theorem heat_sub_fderiv {t : ℝ} (ht : 0 < t) (v x y : V) :
   simp
 
 omit [MeasurableSpace V] [BorelSpace V] [Nontrivial V] in
-private theorem d1_sub_fderiv {t : ℝ} (ht : 0 < t) (v w x y : V) :
+private theorem d1_sub_fderiv {t : ℝ} (v w x y : V) :
     fderiv ℝ (fun z : V ↦ heatD1 t v (x - z)) y w =
       -heatD2 t v w (x - y) := by
   have hsub : HasFDerivAt (fun z : V ↦ x - z)
       ((0 : V →L[ℝ] V) - ContinuousLinearMap.id ℝ V) y :=
     (hasFDerivAt_const (x := y) (c := x)).sub (hasFDerivAt_id y)
-  have h := (heatD1_hasFDeriv ht v (x - y)).comp y hsub
+  have h := (heatD1_hasFDeriv (t := t) v (x - y)).comp y hsub
   have h' : HasFDerivAt (fun z : V ↦ heatD1 t v (x - z))
       ((heatD2Map t v (x - y)).comp
         ((0 : V →L[ℝ] V) - ContinuousLinearMap.id ℝ V)) y := by
@@ -72,7 +72,7 @@ private theorem d1_sub_fderiv {t : ℝ} (ht : 0 < t) (v w x y : V) :
 omit [Nontrivial V] in
 /-- Move one spatial derivative of the heat kernel onto a smooth compactly
 supported scalar source. -/
-theorem heatD1_ibp {t : ℝ} (ht : 0 < t) (v x : V) (g : V → ℝ)
+theorem heatD1_ibp {t : ℝ} (v x : V) (g : V → ℝ)
     (hg : ContDiff ℝ ∞ g) (hgc : HasCompactSupport g) :
     ∫ y : V, heatD1 t v (x - y) * g y =
       ∫ y : V, heatKernel t (x - y) * fderiv ℝ g y v := by
@@ -92,7 +92,7 @@ theorem heatD1_ibp {t : ℝ} (ht : 0 < t) (v x : V) (g : V → ℝ)
     (hg.continuous.mul hD1).integrable_of_hasCompactSupport hgc.mul_right
   have hfg' : Integrable (fun y : V ↦
       g y * fderiv ℝ (fun z : V ↦ heatKernel t (x - z)) y v) := by
-    simpa only [heat_sub_fderiv ht v x, mul_neg] using hraw.neg
+    simpa only [heat_sub_fderiv (t := t) v x, mul_neg] using hraw.neg
   have hfg : Integrable (fun y : V ↦ g y * heatKernel t (x - y)) :=
     (hg.continuous.mul hK).integrable_of_hasCompactSupport hgc.mul_right
   have hparts :=
@@ -102,15 +102,15 @@ theorem heatD1_ibp {t : ℝ} (ht : 0 < t) (v x : V) (g : V → ℝ)
       hf'g hfg' hfg
       (fun y _ ↦ hg.differentiable (by simp) y)
       (fun y _ ↦
-        ((heatKernel_hasFDeriv ht (x - y)).comp y
+        ((heatKernel_hasFDeriv (x - y)).comp y
           ((hasFDerivAt_const (x := y) (c := x)).sub (hasFDerivAt_id y))).differentiableAt)
-  simp only [heat_sub_fderiv ht v x, mul_neg, integral_neg, neg_inj] at hparts
+  simp only [heat_sub_fderiv (t := t) v x, mul_neg, integral_neg, neg_inj] at hparts
   simpa only [mul_comm] using hparts
 
 omit [Nontrivial V] in
 /-- Move the second spatial derivative of the heat kernel onto one derivative
 of a smooth compactly supported scalar source. -/
-theorem heatD2_ibp {t : ℝ} (ht : 0 < t) (v w x : V) (g : V → ℝ)
+theorem heatD2_ibp {t : ℝ} (v w x : V) (g : V → ℝ)
     (hg : ContDiff ℝ ∞ g) (hgc : HasCompactSupport g) :
     ∫ y : V, heatD2 t v w (x - y) * g y =
       ∫ y : V, heatD1 t v (x - y) * fderiv ℝ g y w := by
@@ -130,7 +130,7 @@ theorem heatD2_ibp {t : ℝ} (ht : 0 < t) (v w x : V) (g : V → ℝ)
     (hg.continuous.mul hD2).integrable_of_hasCompactSupport hgc.mul_right
   have hfg' : Integrable (fun y : V ↦
       g y * fderiv ℝ (fun z : V ↦ heatD1 t v (x - z)) y w) := by
-    simpa only [d1_sub_fderiv ht v w x, mul_neg] using hraw.neg
+    simpa only [d1_sub_fderiv (t := t) v w x, mul_neg] using hraw.neg
   have hfg : Integrable (fun y : V ↦ g y * heatD1 t v (x - y)) :=
     (hg.continuous.mul hD1).integrable_of_hasCompactSupport hgc.mul_right
   have hparts :=
@@ -140,9 +140,9 @@ theorem heatD2_ibp {t : ℝ} (ht : 0 < t) (v w x : V) (g : V → ℝ)
       hf'g hfg' hfg
       (fun y _ ↦ hg.differentiable (by simp) y)
       (fun y _ ↦
-        ((heatD1_hasFDeriv ht v (x - y)).comp y
+        ((heatD1_hasFDeriv v (x - y)).comp y
           ((hasFDerivAt_const (x := y) (c := x)).sub (hasFDerivAt_id y))).differentiableAt)
-  simp only [d1_sub_fderiv ht v w x, mul_neg, integral_neg, neg_inj] at hparts
+  simp only [d1_sub_fderiv (t := t) v w x, mul_neg, integral_neg, neg_inj] at hparts
   simpa only [mul_comm] using hparts
 
 omit [FiniteDimensional ℝ V] [MeasurableSpace V] [BorelSpace V] [Nontrivial V] in
@@ -154,44 +154,44 @@ private theorem dir_smooth (g : V → ℝ) (hg : ContDiff ℝ ∞ g) (v : V) :
 omit [Nontrivial V] in
 /-- Move both spatial derivatives of the heat kernel onto a smooth compactly
 supported scalar source. -/
-theorem heatD2_ibp2 {t : ℝ} (ht : 0 < t) (v w x : V) (g : V → ℝ)
+theorem heatD2_ibp2 {t : ℝ} (v w x : V) (g : V → ℝ)
     (hg : ContDiff ℝ ∞ g) (hgc : HasCompactSupport g) :
     ∫ y : V, heatD2 t v w (x - y) * g y =
       ∫ y : V, heatKernel t (x - y) *
         fderiv ℝ (fun z : V ↦ fderiv ℝ g z w) y v := by
-  rw [heatD2_ibp ht v w x g hg hgc]
-  exact heatD1_ibp ht v x (fun y : V ↦ fderiv ℝ g y w)
+  rw [heatD2_ibp v w x g hg hgc]
+  exact heatD1_ibp v x (fun y : V ↦ fderiv ℝ g y w)
     (dir_smooth g hg w) (hgc.fderiv_apply (𝕜 := ℝ) w)
 
 omit [Nontrivial V] in
 /-- Slice form of the one-derivative transfer identity. -/
-theorem heatD1_slice_ibp {t : ℝ} (ht : 0 < t) (v x : V) (s : ℝ)
+theorem heatD1_slice_ibp {t : ℝ} (v x : V) (s : ℝ)
     (f : ℝ × V → ℝ) (hf : ContDiff ℝ ∞ f) (hfc : HasCompactSupport f) :
     ∫ y : V, heatD1 t v (x - y) * f (s, y) =
       ∫ y : V, heatKernel t (x - y) *
         fderiv ℝ (fun z : V ↦ f (s, z)) y v :=
-  heatD1_ibp ht v x (fun y : V ↦ f (s, y))
+  heatD1_ibp v x (fun y : V ↦ f (s, y))
     (hf.comp (contDiff_prodMk_right s)) (slice_compact f hfc s)
 
 omit [Nontrivial V] in
 /-- Slice form of the one-step second-derivative transfer identity. -/
-theorem heatD2_slice_ibp {t : ℝ} (ht : 0 < t) (v w x : V) (s : ℝ)
+theorem heatD2_slice_ibp {t : ℝ} (v w x : V) (s : ℝ)
     (f : ℝ × V → ℝ) (hf : ContDiff ℝ ∞ f) (hfc : HasCompactSupport f) :
     ∫ y : V, heatD2 t v w (x - y) * f (s, y) =
       ∫ y : V, heatD1 t v (x - y) *
         fderiv ℝ (fun z : V ↦ f (s, z)) y w :=
-  heatD2_ibp ht v w x (fun y : V ↦ f (s, y))
+  heatD2_ibp v w x (fun y : V ↦ f (s, y))
     (hf.comp (contDiff_prodMk_right s)) (slice_compact f hfc s)
 
 omit [Nontrivial V] in
 /-- Slice form of the two-derivative transfer identity. -/
-theorem heatD2_slice2 {t : ℝ} (ht : 0 < t) (v w x : V) (s : ℝ)
+theorem heatD2_slice2 {t : ℝ} (v w x : V) (s : ℝ)
     (f : ℝ × V → ℝ) (hf : ContDiff ℝ ∞ f) (hfc : HasCompactSupport f) :
     ∫ y : V, heatD2 t v w (x - y) * f (s, y) =
       ∫ y : V, heatKernel t (x - y) *
         fderiv ℝ (fun z : V ↦
           fderiv ℝ (fun q : V ↦ f (s, q)) z w) y v :=
-  heatD2_ibp2 ht v w x (fun y : V ↦ f (s, y))
+  heatD2_ibp2 v w x (fun y : V ↦ f (s, y))
     (hf.comp (contDiff_prodMk_right s)) (slice_compact f hfc s)
 
 /-- Spatial directional derivative of a scalar space-time source. -/
@@ -213,7 +213,7 @@ theorem heatPot1_eq_pot0 {t : ℝ} (ht : 0 < t) (w : V) (f : ℝ × V → ℝ)
   rw [Set.uIoc_of_le ht.le] at hs
   have hstlt : s < t := lt_of_le_of_ne hs.2 hst
   simpa only [smul_eq_mul, spaceDeriv] using
-    heatD1_slice_ibp (sub_pos.mpr hstlt) w x s f hf hfc
+    heatD1_slice_ibp w x s f hf hfc
 
 omit [Nontrivial V] in
 /-- The ordinary heat potential has zero initial value. -/

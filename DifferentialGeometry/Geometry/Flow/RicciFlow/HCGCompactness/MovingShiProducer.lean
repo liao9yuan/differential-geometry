@@ -20,6 +20,8 @@ namespace DifferentialGeometry.PDE.RicciFlow
 open Bundle Set DifferentialGeometry.Tensor0SBundle
 
 open DifferentialGeometry.Geometry.Operator
+open DifferentialGeometry.Analysis.Parabolic
+open DifferentialGeometry.Geometry.Connection
 open DifferentialGeometry.HCGCompactness
 open scoped Manifold ContDiff BigOperators
 

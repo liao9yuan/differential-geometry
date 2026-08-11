@@ -60,6 +60,11 @@ class HasSmoothBoundary
 
   inwardCoordE : E
 
+  inwardCoordE_enters :
+    ∀ y ∈ frontier (Set.range I), ∃ ε : ℝ, 0 < ε ∧
+      ∀ t ∈ Set.Ioc 0 ε,
+        y + t • inwardCoordE ∈ interior (Set.range I)
+
   inwardCoordE_transverse :
     ∀ y : boundaryE, inwardCoordE ∉ Set.range
       (fderiv ℝ ((I : H → E) ∘ inclH ∘ boundaryI.symm) y)

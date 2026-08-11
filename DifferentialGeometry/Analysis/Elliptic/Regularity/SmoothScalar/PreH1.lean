@@ -173,6 +173,62 @@ lemma SmoothScalar.continuous_inner_grad
   TangentBundle.continuous_g_inner_of_smooth_sections (I := I) g
     (grad_g (I := I) g ⟨f.toFun, f.smooth⟩) (grad_g (I := I) g ⟨h.toFun, h.smooth⟩)
 
+omit [I.Boundaryless] [T2Space M] [CompactSpace M] in
+def SmoothScalar.gradientSqSup
+    {g : SmoothRiemannianMetric I M} (f : SmoothScalar g) : ℝ :=
+  max (sSup (Set.range (fun x : M =>
+    g.inner x
+      (gradFun (I := I) g f.toFun x)
+      (gradFun (I := I) g f.toFun x)))) 0
+
+omit [I.Boundaryless] [T2Space M] [CompactSpace M] in
+theorem SmoothScalar.gradientSqSup_nonneg
+    {g : SmoothRiemannianMetric I M} (f : SmoothScalar g) :
+    0 ≤ f.gradientSqSup :=
+  le_max_right _ _
+
+omit [I.Boundaryless] [T2Space M] [CompactSpace M] in
+theorem SmoothScalar.gradientSqSup_le
+    {g : SmoothRiemannianMetric I M} (f : SmoothScalar g) {B : ℝ}
+    (hB : 0 ≤ B)
+    (hbound : ∀ x : M,
+      g.inner x
+          (gradFun (I := I) g f.toFun x)
+          (gradFun (I := I) g f.toFun x) ≤ B) :
+    f.gradientSqSup ≤ B := by
+  unfold gradientSqSup
+  apply max_le
+  · rcases isEmpty_or_nonempty M with hM | hM
+    · have hrange : Set.range (fun x : M =>
+          g.inner x
+            (gradFun (I := I) g f.toFun x)
+            (gradFun (I := I) g f.toFun x)) = (∅ : Set ℝ) := by
+        rw [Set.range_eq_empty_iff]
+        exact hM
+      rw [hrange, Real.sSup_empty]
+      exact hB
+    · letI : Nonempty M := hM
+      apply csSup_le (Set.range_nonempty _)
+      intro b hb
+      obtain ⟨x, rfl⟩ := hb
+      exact hbound x
+  · exact hB
+
+omit [T2Space M] in
+theorem SmoothScalar.inner_grad_self_le_gradientSqSup
+    {g : SmoothRiemannianMetric I M} (f : SmoothScalar g) (x : M) :
+    g.inner x
+        (gradFun (I := I) g f.toFun x)
+        (gradFun (I := I) g f.toFun x) ≤
+      f.gradientSqSup := by
+  have hcontinuous : Continuous (fun y : M =>
+      g.inner y
+        (gradFun (I := I) g f.toFun y)
+        (gradFun (I := I) g f.toFun y)) := by
+    simpa only [grad_g_apply] using f.continuous_inner_grad f
+  exact (le_csSup (isCompact_range hcontinuous).bddAbove
+    (Set.mem_range_self x)).trans (le_max_left _ _)
+
 omit [Module.Finite ℝ E] [I.Boundaryless] [T2Space M] [CompactSpace M] in
 lemma SmoothScalar.continuous_mul {g : SmoothRiemannianMetric I M}
     (f h : SmoothScalar g) :

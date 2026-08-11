@@ -27,6 +27,7 @@ universe u uE uH
 namespace DifferentialGeometry.PDE.RicciFlow
 
 open Bundle Filter Set DifferentialGeometry.Tensor0SBundle
+open DifferentialGeometry.Analysis.Parabolic
 open DifferentialGeometry.Analysis.Laplacian
 
 open DifferentialGeometry.Geometry.Operator

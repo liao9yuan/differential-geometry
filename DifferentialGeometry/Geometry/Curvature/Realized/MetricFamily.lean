@@ -65,6 +65,26 @@ structure MetricConnectionFamilyOn (D : RealTimeInterval) where
 
 namespace MetricConnectionFamily
 
+def restrict
+    (G : MetricConnectionFamily (I := I) (M := M) Real)
+    (D : RealTimeInterval) :
+    MetricConnectionFamilyOn (I := I) (M := M) D where
+  metric := G.metric
+  connection := G.connection
+  metricCompatible := fun t => G.metricCompatible (t : Real)
+
+@[simp] theorem restrict_metric
+    (G : MetricConnectionFamily (I := I) (M := M) Real)
+    (D : RealTimeInterval) (t : Real) :
+    (G.restrict D).metric t = G.metric t := by
+  rfl
+
+@[simp] theorem restrict_connection
+    (G : MetricConnectionFamily (I := I) (M := M) Real)
+    (D : RealTimeInterval) (t : Real) :
+    (G.restrict D).connection t = G.connection t := by
+  rfl
+
 @[simp] theorem metric_mk
     (metric : Time -> SmoothRiemannianMetric I M)
     (connection : Time -> CovariantDerivative I E (TangentSpace I : M -> Type _))

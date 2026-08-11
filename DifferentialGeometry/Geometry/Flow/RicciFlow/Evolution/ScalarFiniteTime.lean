@@ -157,16 +157,16 @@ theorem of_continuousOn
     {scalar : Real -> M -> Real} {T : Real}
     (hcont : ContinuousOn
       (fun p : Real × M => scalar p.1 p.2)
-      (DifferentialGeometry.PDE.RicciFlow.spacetimeSlab (M := M) T)) :
+      (DifferentialGeometry.Analysis.Parabolic.spacetimeSlab (M := M) T)) :
     ScalarBoundedAboveOnSlab (M := M) scalar T := by
   have hcompact : IsCompact
-    (DifferentialGeometry.PDE.RicciFlow.spacetimeSlab (M := M) T) := by
-    unfold DifferentialGeometry.PDE.RicciFlow.spacetimeSlab
+    (DifferentialGeometry.Analysis.Parabolic.spacetimeSlab (M := M) T) := by
+    unfold DifferentialGeometry.Analysis.Parabolic.spacetimeSlab
     exact isCompact_Icc.prod isCompact_univ
   have himage :
       IsCompact
         ((fun p : Real × M => scalar p.1 p.2) ''
-          DifferentialGeometry.PDE.RicciFlow.spacetimeSlab (M := M) T) :=
+          DifferentialGeometry.Analysis.Parabolic.spacetimeSlab (M := M) T) :=
     hcompact.image_of_continuousOn hcont
   rcases himage.bddAbove with ⟨B, hB⟩
   refine ⟨B, ?_⟩
@@ -177,6 +177,7 @@ end ScalarBoundedAboveOnSlab
 
 
 
+omit [CompleteSpace E] [T2Space M] in
 theorem scalarLowerBarrierBoundUpToPole_of_scalarEvolution_closedOpen
     [I.Boundaryless] [CompactSpace M]
     [VectorBundle Real E (TangentSpace I : M -> Type _)]
@@ -203,7 +204,7 @@ theorem scalarLowerBarrierBoundUpToPole_of_scalarEvolution_closedOpen
       T < scalarBlowupTime n c0 ->
         forall t : Real, t ∈ Set.Icc 0 T ->
           LipschitzOnWith (K T) (fun a : Real => scalarLowerReaction n a t)
-            (DifferentialGeometry.PDE.RicciFlow.scalarWMPValueSet (M := M) T scalar
+            (DifferentialGeometry.Analysis.Parabolic.scalarWeakMaximumPrincipleValueSet (M := M) T scalar
               (scalarLowerBarrier n c0))) :
     ScalarLowerBarrierBoundUpToPole (M := M) scalar n c0 omega := by
   intro T hT_pos hT_omega hT_blow x
@@ -225,6 +226,7 @@ theorem scalarLowerBarrierBoundUpToPole_of_scalarEvolution_closedOpen
 
 
 
+omit [CompleteSpace E] [T2Space M] in
 theorem positive_scalar_finite_time_of_scalarEvolution_closedOpen
     [I.Boundaryless] [CompactSpace M] [Nonempty M]
     [VectorBundle Real E (TangentSpace I : M -> Type _)]
@@ -237,7 +239,7 @@ theorem positive_scalar_finite_time_of_scalarEvolution_closedOpen
     (hinit_pos : forall x : M, 0 < scalar 0 x)
     (hscalar_cont : forall T : Real, 0 <= T -> T < omega ->
       ContinuousOn (fun p : Real × M => scalar p.1 p.2)
-        (DifferentialGeometry.PDE.RicciFlow.spacetimeSlab (M := M) T))
+        (DifferentialGeometry.Analysis.Parabolic.spacetimeSlab (M := M) T))
     (hreg : forall T : Real, 0 < T -> T < omega ->
       T < scalarBlowupTime n c0 ->
         ScalarLowerBoundWMPRegularity (I := I) G T n c0 scalar (K T))
@@ -255,7 +257,7 @@ theorem positive_scalar_finite_time_of_scalarEvolution_closedOpen
       T < scalarBlowupTime n c0 ->
         forall t : Real, t ∈ Set.Icc 0 T ->
           LipschitzOnWith (K T) (fun a : Real => scalarLowerReaction n a t)
-            (DifferentialGeometry.PDE.RicciFlow.scalarWMPValueSet (M := M) T scalar
+            (DifferentialGeometry.Analysis.Parabolic.scalarWeakMaximumPrincipleValueSet (M := M) T scalar
               (scalarLowerBarrier n c0))) :
     omega <= scalarBlowupTime n c0 := by
   have hc0 : 0 < c0 :=
@@ -283,6 +285,7 @@ theorem positive_scalar_finite_time_of_scalarEvolution_closedOpen
 
 
 
+omit [CompleteSpace E] [T2Space M] in
 theorem finiteTime3D
     [I.Boundaryless] [CompactSpace M] [Nonempty M]
     [VectorBundle Real E (TangentSpace I : M -> Type _)]
@@ -295,7 +298,7 @@ theorem finiteTime3D
     (hinit_pos : forall x : M, 0 < scalar 0 x)
     (hscalar_cont : forall T : Real, 0 <= T -> T < omega ->
       ContinuousOn (fun p : Real × M => scalar p.1 p.2)
-        (DifferentialGeometry.PDE.RicciFlow.spacetimeSlab (M := M) T))
+        (DifferentialGeometry.Analysis.Parabolic.spacetimeSlab (M := M) T))
     (hreg : forall T : Real, 0 < T -> T < omega ->
       T < scalarBlowupTime 3 c0 ->
         ScalarLowerBoundWMPRegularity (I := I) G T 3 c0 scalar (K T))
@@ -313,7 +316,7 @@ theorem finiteTime3D
       T < scalarBlowupTime 3 c0 ->
         forall t : Real, t ∈ Set.Icc 0 T ->
           LipschitzOnWith (K T) (fun a : Real => scalarLowerReaction 3 a t)
-            (DifferentialGeometry.PDE.RicciFlow.scalarWMPValueSet (M := M) T scalar
+            (DifferentialGeometry.Analysis.Parabolic.scalarWeakMaximumPrincipleValueSet (M := M) T scalar
               (scalarLowerBarrier 3 c0))) :
     0 < c0 ∧ omega <= 3 / (2 * c0) := by
   have hc0 : 0 < c0 :=

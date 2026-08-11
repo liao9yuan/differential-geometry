@@ -29,8 +29,9 @@ noncomputable section
 namespace DifferentialGeometry.PDE.RicciFlow
 
 open Bundle Filter Set
-
 open DifferentialGeometry.Geometry.Operator
+open DifferentialGeometry.Analysis.Parabolic
+open DifferentialGeometry.Geometry.Connection
 open scoped Manifold ContDiff BigOperators Bundle Topology
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]
@@ -2198,7 +2199,7 @@ private theorem GfunCut_space_diff
 
 namespace BernsteinTower
 
-omit [NeZero (Module.finrank Real E)] in
+omit [NeZero (Module.finrank Real E)] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 /-- **Fixed-order complete-noncompact Bernstein estimate from quantitative cutoffs.**
 
 The cutoff family localizes the graded Bernstein polynomial to one compact
@@ -2501,7 +2502,7 @@ theorem estimate_cutoff_at
             simpa only [F, bBar, bCore, bErr] using hsub
           rw [hop]
           linarith
-        have hw_nonneg := strict_barrier_cpt (I := I) G B.T (le_of_lt B.hT)
+        have hw_nonneg := strict_barrier_cpt (I := I) G B.T
           (fun _ z ↦ (0 : TangentSpace I z)) w (cut.support n)
           (cut.support_compact n) hw_out hw_cont hw0 hw_time hw_mdiff hw_grad
           hw_negative
@@ -2567,7 +2568,7 @@ theorem estimate_cutoff_at
       rw [towerConst_sq B.hc B.hα]
       exact hlimit.trans hfinal
 
-omit [NeZero (Module.finrank Real E)] in
+omit [NeZero (Module.finrank Real E)] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 /-- **Point-centered complete Bernstein estimate from barrier cutoffs.**
 
 The cutoff family may depend on the point being estimated.  The family
@@ -2816,7 +2817,7 @@ theorem estimate_barrier_at
             dsimp only [bBar, bErr]
             linarith [hrec.2.2.2]
         have hw_nonneg := strict_barrier_cpt_of_upperSupport
-          (I := I) G B.T (le_of_lt B.hT)
+          (I := I) G B.T
           (fun _ z ↦ (0 : TangentSpace I z)) w (cut.support n)
           (cut.support_compact n) hw_out hw_cont hw0 hsupport
         intro s hs y
@@ -2897,7 +2898,7 @@ theorem estimate_barrier_at
       rw [towerConst_sq B.hc B.hα]
       exact hlimit.trans hfinal
 
-omit [NeZero (Module.finrank Real E)] in
+omit [NeZero (Module.finrank Real E)] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 /-- All-order compatibility wrapper for `estimate_cutoff_at`. -/
 theorem estimate_of_cutoff
     {G : MetricConnectionFamily (I := I) (M := M) Real}

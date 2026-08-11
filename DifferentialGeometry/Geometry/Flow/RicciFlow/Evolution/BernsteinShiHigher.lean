@@ -581,7 +581,7 @@ structure BernsteinTower
 
 
   hw_cont : ∀ k : ℕ, ContinuousOn (fun p : Real × M => w k p.1 p.2)
-    (DifferentialGeometry.PDE.RicciFlow.spacetimeSlab (M := M) T)
+    (DifferentialGeometry.Analysis.Parabolic.spacetimeSlab (M := M) T)
 
   hw_space : ∀ k : ℕ, ∀ t : Real, t ∈ Set.Icc 0 T -> 0 < t -> ∀ y : M,
     MDifferentiableAt I 𝓘(Real, Real) (w k t) y
@@ -891,7 +891,7 @@ theorem Gfun_parabolic_eq (B : BernsteinTower (I := I) G) (m : ℕ)
     (dvec : ℕ -> Real)
     (hd : ∀ i ∈ Finset.range (m + 1),
       HasDerivWithinAt (fun s : Real => B.w i s x) (dvec i) (Set.Icc 0 B.T) t) :
-    DifferentialGeometry.PDE.RicciFlow.parabolicOperatorWithDrift (I := I) G B.T
+    DifferentialGeometry.Analysis.Parabolic.parabolicOperatorWithDrift (I := I) G B.T
         (fun _t x => (0 : TangentSpace I x)) (Gfun (I := I) B m) t x =
       (∑ i ∈ Finset.range (m + 1),
           Gcoef (I := I) B m i * ((i : Real) * t ^ (i - 1) * B.w i t x)) +
@@ -904,7 +904,7 @@ theorem Gfun_parabolic_eq (B : BernsteinTower (I := I) G) (m : ℕ)
     have huniq : UniqueDiffWithinAt Real (Set.Icc 0 B.T) t :=
       (uniqueDiffOn_Icc B.hT).uniqueDiffWithinAt htmem
     exact (Gfun_hasDerivWithin (I := I) B m htmem htpos x dvec hd).derivWithin huniq
-  rw [DifferentialGeometry.PDE.RicciFlow.parabolicOperatorWithDrift_eq, htime]
+  rw [DifferentialGeometry.Analysis.Parabolic.parabolicOperatorWithDrift_eq, htime]
   rw [Gfun_heatOp (I := I) B m htmem htpos x]
   rw [← Finset.sum_sub_distrib, ← Finset.sum_add_distrib]
   apply Finset.sum_congr rfl
@@ -1034,7 +1034,7 @@ theorem Gfun_dissipative (B : BernsteinTower (I := I) G)
     (htmem : t ∈ Set.Icc 0 B.T) (htpos : 0 < t) (x : M)
     (hIH : ∀ j, j < m →
       t ^ j * B.w j t x ≤ (towerConst B.c B.α j) ^ 2 * B.K ^ 2) :
-    DifferentialGeometry.PDE.RicciFlow.parabolicOperatorWithDrift (I := I) G B.T
+    DifferentialGeometry.Analysis.Parabolic.parabolicOperatorWithDrift (I := I) G B.T
         (fun _t y => (0 : TangentSpace I y)) (Gfun (I := I) B m) t x +
       2 * (t ^ m * B.w (m + 1) t x) ≤
         (towerBarTop B.c (towerConst B.c B.α) m +
@@ -1191,6 +1191,7 @@ theorem Gfun_dissipative (B : BernsteinTower (I := I) G)
   rw [hforce]
   linarith [hmid_le, htop_le, hWnonpos]
 
+omit [CompleteSpace E] [T2Space M] in
 /-- **Bernstein–Bando–Shi higher derivative estimate (parametric core).**
 
 For a uniform derivative tower on a closed manifold, every level satisfies the
@@ -1224,7 +1225,7 @@ theorem estimate [CompactSpace M] (B : BernsteinTower (I := I) G) :
         calc s * B.K <= (B.α / B.K) * B.K := mul_le_mul_of_nonneg_right hsle (le_of_lt B.hK)
           _ = B.α := div_mul_cancel₀ B.α (ne_of_gt B.hK)
       have hsub : ∀ s : Real, s ∈ Set.Icc 0 B.T -> 0 < s -> ∀ y : M,
-          DifferentialGeometry.PDE.RicciFlow.parabolicOperatorWithDrift (I := I) G B.T
+          DifferentialGeometry.Analysis.Parabolic.parabolicOperatorWithDrift (I := I) G B.T
             (fun _t x => (0 : TangentSpace I x)) (Gfun (I := I) B m) s y <= bBar := by
         intro s hsmem hspos y
         have hdiss := Gfun_dissipative (I := I) B hmpos hsmem hspos y
@@ -1279,7 +1280,7 @@ theorem estimate [CompactSpace M] (B : BernsteinTower (I := I) G) :
       have hGcont : ContinuousOn
           (fun p : Real × M =>
             (aBar + bBar * p.1) - Gfun (I := I) B m p.1 p.2)
-          (DifferentialGeometry.PDE.RicciFlow.spacetimeSlab (M := M) B.T) := by
+          (DifferentialGeometry.Analysis.Parabolic.spacetimeSlab (M := M) B.T) := by
         apply ContinuousOn.sub
         · exact (continuous_const.add (continuous_const.mul continuous_fst)).continuousOn
         · have heq : (fun p : Real × M => Gfun (I := I) B m p.1 p.2) =
@@ -1295,7 +1296,7 @@ theorem estimate [CompactSpace M] (B : BernsteinTower (I := I) G) :
           · exact B.hw_cont i
       have hPartA : ∀ s : Real, s ∈ Set.Icc 0 B.T -> ∀ y : M,
           Gfun (I := I) B m s y <= aBar + bBar * s := by
-        apply scalar_subsolution_affine_bound (I := I) G B.T (le_of_lt B.hT)
+        apply scalar_subsolution_affine_bound (I := I) G B.T
           (fun _t x => (0 : TangentSpace I x)) (Gfun (I := I) B m) aBar bBar hGcont
           (fun s hs hsp y => hGtime s hs hsp y)
           (fun s hs hsp y => hGspace s hs hsp y)
@@ -1359,6 +1360,7 @@ theorem estimate [CompactSpace M] (B : BernsteinTower (I := I) G) :
       have hGle : Gfun (I := I) B m t x <= aBar + bBar * t := hPartA t htmem x
       rw [towerConst_sq B.hc B.hα]
       linarith [hwm_le_G, hGle, hfinal]
+omit [CompleteSpace E] [T2Space M] in
 /-- The on-diagonal bound in the textbook shape
 `w m (t,x) ≤ (towerConst c α m)² K²/tᵐ` for `t ∈ (0,T]`, an immediate corollary of `estimate`. -/
 theorem estimate_div [CompactSpace M] (B : BernsteinTower (I := I) G)

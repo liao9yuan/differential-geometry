@@ -467,6 +467,20 @@ omit [FiniteDimensional ℝ E] in
 
 
 
+theorem driftTerm_eq_zero_at_spatial_min_of_isInteriorPoint
+    (G : MetricConnectionFamily (I := I) (M := M) Time)
+    (t : Time) (X : (x : M) -> TangentSpace I x)
+    {f : M -> Real} {x : M}
+    (hmin : IsLocalMin f x)
+    (hx : I.IsInteriorPoint x)
+    (hf : MDifferentiableAt I 𝓘(Real, Real) f x) :
+    driftTerm (I := I) G t X f x = 0 := by
+  unfold driftTerm gradientAt
+  rw [gradientFun_eq_zero_at_spatial_min_of_isInteriorPoint
+    (I := I) (G.metric t) hmin hx hf]
+  simp
+
+
 theorem driftTerm_eq_zero_at_spatial_min
     [I.Boundaryless]
     (G : MetricConnectionFamily (I := I) (M := M) Time)
@@ -474,10 +488,9 @@ theorem driftTerm_eq_zero_at_spatial_min
     {f : M -> Real} {x : M}
     (hmin : IsLocalMin f x)
     (hf : MDifferentiableAt I 𝓘(Real, Real) f x) :
-    driftTerm (I := I) G t X f x = 0 := by
-  unfold driftTerm gradientAt
-  rw [gradientFun_eq_zero_at_spatial_min (I := I) (G.metric t) hmin hf]
-  simp
+    driftTerm (I := I) G t X f x = 0 :=
+  driftTerm_eq_zero_at_spatial_min_of_isInteriorPoint
+    (I := I) G t X hmin BoundarylessManifold.isInteriorPoint hf
 
 
 def LaplacianNonnegativeAtSpatialMinFamily
@@ -500,6 +513,63 @@ theorem laplacianNonnegativeAtSpatialMinFamily_of_realizedMetricFamily
     (G.connection t) (G.metric t) (G.metricCompatible t)
 
 
+theorem laplacianAt_nonpos_at_spatial_max
+    [I.Boundaryless]
+    [VectorBundle Real E (TangentSpace I : M -> Type _)]
+    [ContMDiffVectorBundle 1 E (TangentSpace I : M -> Type _) I]
+    (G : MetricConnectionFamily (I := I) (M := M) Time)
+    (t : Time) {f : M -> Real} {x : M}
+    (hmax : IsLocalMax f x)
+    (hf : ContMDiff I 𝓘(Real, Real) ∞ f) :
+    laplacianAt (I := I) G t f x <= 0 := by
+  have hmdiff : forall y : M, MDifferentiableAt I 𝓘(Real, Real) f y :=
+    fun y => hf.mdifferentiable (by simp) y
+  have hgrad : MDiffAt (T% fun y : M =>
+      gradientFun (I := I) (G.metric t) f y) x :=
+    gradientFun_mdiffAt (I := I) (G.metric t) hf x
+  have hneggrad : MDiffAt (T% fun y : M =>
+      gradientFun (I := I) (G.metric t) (-f) y) x := by
+    have heq :
+        (T% fun y : M => gradientFun (I := I) (G.metric t) (-f) y) =
+          (T% fun y : M => -gradientFun (I := I) (G.metric t) f y) := by
+      funext y
+      apply congrArg (fun q =>
+        (⟨y, q⟩ : TotalSpace E (TangentSpace I : M -> Type _)))
+      exact gradientFun_neg (I := I) (G.metric t) (hmdiff y)
+    rw [heq]
+    exact mdifferentiableAt_neg_section hgrad
+  have hneg : 0 <= laplacianAt (I := I) G t (-f) x :=
+    laplacian_nonneg_at_spatial_min_of_metricCompatible
+      (I := I) (G.connection t) (G.metric t) (G.metricCompatible t)
+      hmax.neg (hmdiff x).neg (Filter.Eventually.of_forall (fun y => (hmdiff y).neg)) hneggrad
+  have hlin := laplacianAt_smul (I := I) G t (-1 : Real) hmdiff hgrad
+  have hfun : (-f) = (-1 : Real) • f := by
+    funext y
+    simp
+  rw [hfun, hlin] at hneg
+  linarith
+
+
+theorem heatOperatorWithDrift_at_spatial_min_nonneg_of_isInteriorPoint
+    [VectorBundle Real E (TangentSpace I : M -> Type _)]
+    [ContMDiffVectorBundle 1 E (TangentSpace I : M -> Type _) I]
+    (G : MetricConnectionFamily (I := I) (M := M) Time)
+    (t : Time) (X : (x : M) -> TangentSpace I x)
+    {f : M -> Real} {x : M}
+    (hmin : IsLocalMin f x)
+    (hx : I.IsInteriorPoint x)
+    (hf : MDifferentiableAt I 𝓘(Real, Real) f x)
+    (hf_near : ∀ᶠ y in nhds x, MDifferentiableAt I 𝓘(Real, Real) f y)
+    (hgrad : MDiffAt (T% fun y : M => gradientFun (I := I) (G.metric t) f y) x) :
+    0 <= heatOperatorWithDrift (I := I) G t X f x := by
+  unfold heatOperatorWithDrift
+  rw [driftTerm_eq_zero_at_spatial_min_of_isInteriorPoint
+    (I := I) G t X hmin hx hf, add_zero]
+  exact laplacian_nonneg_at_spatial_min_of_metricCompatible_of_isInteriorPoint
+    (I := I) (G.connection t) (G.metric t) (G.metricCompatible t)
+      hmin hx hf hf_near hgrad
+
+
 theorem heatOperatorWithDrift_at_spatial_min_nonneg
     [I.Boundaryless]
     [VectorBundle Real E (TangentSpace I : M -> Type _)]
@@ -511,11 +581,9 @@ theorem heatOperatorWithDrift_at_spatial_min_nonneg
     (hf : MDifferentiableAt I 𝓘(Real, Real) f x)
     (hf_near : ∀ᶠ y in nhds x, MDifferentiableAt I 𝓘(Real, Real) f y)
     (hgrad : MDiffAt (T% fun y : M => gradientFun (I := I) (G.metric t) f y) x) :
-    0 <= heatOperatorWithDrift (I := I) G t X f x := by
-  unfold heatOperatorWithDrift
-  rw [driftTerm_eq_zero_at_spatial_min (I := I) G t X hmin hf, add_zero]
-  exact laplacian_nonneg_at_spatial_min_of_metricCompatible (I := I)
-    (G.connection t) (G.metric t) (G.metricCompatible t) hmin hf hf_near hgrad
+    0 <= heatOperatorWithDrift (I := I) G t X f x :=
+  heatOperatorWithDrift_at_spatial_min_nonneg_of_isInteriorPoint
+    (I := I) G t X hmin BoundarylessManifold.isInteriorPoint hf hf_near hgrad
 
 end
 

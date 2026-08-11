@@ -103,6 +103,35 @@ theorem coreLap_apply
           ((stdOrthonormalBasis ℝ V) i) := by
   simp [coreLap]
 
+theorem coreLap_norm_le
+    (d2u : BoundedContinuousFunction V (V →L[ℝ] V →L[ℝ] F)) :
+    ‖coreLap d2u‖ ≤ Module.finrank ℝ V * ‖d2u‖ := by
+  rw [BoundedContinuousFunction.norm_le (mul_nonneg (Nat.cast_nonneg _)
+    (norm_nonneg d2u))]
+  intro x
+  calc
+    ‖coreLap d2u x‖ ≤ Module.finrank ℝ V * ‖d2u x‖ := by
+      have h := lapEval_dist_le (V := V) (F := F) (d2u x) 0
+      simpa only [map_zero, dist_zero_right] using h
+    _ ≤ Module.finrank ℝ V * ‖d2u‖ :=
+      mul_le_mul_of_nonneg_left (d2u.norm_coe_le_norm x)
+        (Nat.cast_nonneg _)
+
+theorem coreLap_holder
+    {alpha K : NNReal}
+    (d2u : BoundedContinuousFunction V (V →L[ℝ] V →L[ℝ] F))
+    (h : HolderWith K alpha d2u) :
+    HolderWith (Module.finrank ℝ V * K) alpha (coreLap d2u) := by
+  have hlip : LipschitzWith (Module.finrank ℝ V : NNReal)
+      (lapEval (V := V) (F := F)) := by
+    apply LipschitzWith.of_dist_le_mul
+    intro A B
+    simpa only [Nat.cast_ofNat, NNReal.smul_def, smul_eq_mul] using
+      lapEval_dist_le (V := V) (F := F) A B
+  have hcomp := hlip.holderWith.comp h
+  simpa only [coreLap, Function.comp_apply, NNReal.coe_natCast,
+    NNReal.coe_one, NNReal.rpow_one, mul_one, one_mul] using hcomp
+
 end CoreOperators
 
 section ScaledEvolution

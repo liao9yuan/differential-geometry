@@ -63,7 +63,7 @@ theorem heatShift_memLp {t p : ℝ} (ht : 0 < t) (hp : 0 < p) (x : V) :
   have hcont : Continuous (fun y : V ↦ heatKernel t (x - y)) := by
     have hkcont : Continuous (heatKernel t : V → ℝ) :=
       continuous_iff_continuousAt.mpr fun z ↦
-        (heatKernel_hasFDeriv ht z).continuousAt
+        (heatKernel_hasFDeriv z).continuousAt
     exact hkcont.comp (continuous_const.sub continuous_id)
   apply (integrable_norm_rpow_iff hcont.aestronglyMeasurable
     (ENNReal.ofReal_pos.mpr hp).ne' ENNReal.ofReal_ne_top).mp

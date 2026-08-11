@@ -1,6 +1,7 @@
 import DifferentialGeometry.Geometry.Connection.LeviCivita.DivergenceFrameInvariance
 import DifferentialGeometry.Geometry.Operator.Laplacian
-open DifferentialGeometry.Geometry.Curvature
+import DifferentialGeometry.Geometry.Operator.GradientRegularity
+
 open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Connection
 
@@ -109,6 +110,37 @@ theorem laplacian_levi_eq
       Δ_g (I := I) g ⟨_, hf⟩ x := by
   have hdiv := divergence_levi_eq (I := I) g (grad_g (I := I) g ⟨_, hf⟩) x
   simpa only [laplacian_eq, grad_g_apply, Δ_g_def] using hdiv
+
+omit [NeZero (Module.finrank Real E)] in
+omit [CompactSpace M] in
+omit [SigmaCompactSpace M] in
+theorem Δ_g_congr_of_eventuallyEq
+    (g : SmoothRiemannianMetric I M) {f h : M → Real} {x : M}
+    (hf : ContMDiff I 𝓘(Real, Real) ∞ f)
+    (hh : ContMDiff I 𝓘(Real, Real) ∞ h)
+    (heq : f =ᶠ[nhds x] h) :
+    Δ_g (I := I) g ⟨f, hf⟩ x = Δ_g (I := I) g ⟨h, hh⟩ x := by
+  rw [← laplacian_levi_eq (I := I) g hf x]
+  rw [← laplacian_levi_eq (I := I) g hh x]
+  exact laplacian_congr_of_eventuallyEq (I := I)
+    (LeviCivita (I := I) g) g hf.contMDiffAt hh.contMDiffAt heq
+
+omit [NeZero (Module.finrank Real E)] in
+omit [CompactSpace M] in
+omit [SigmaCompactSpace M] in
+theorem Δ_g_neg
+    (g : SmoothRiemannianMetric I M) {f : M → Real} {x : M}
+    (hf : ContMDiff I 𝓘(Real, Real) ∞ f) :
+    Δ_g (I := I) g ⟨fun y => -f y, hf.neg⟩ x =
+      -Δ_g (I := I) g ⟨f, hf⟩ x := by
+  classical
+  let F : C^∞⟮I, M; ℝ⟯ := ⟨f, hf⟩
+  have hadd := Δ_g_add (I := I) g F (-F) x
+  have hcancel : Δ_g (I := I) g (F + -F) x = 0 := by
+    rw [add_neg_cancel]
+    exact Δ_g_const (I := I) g (0 : Real) x
+  change Δ_g (I := I) g (-F) x = -Δ_g (I := I) g F x
+  linarith
 
 omit [NeZero (Module.finrank Real E)] in
 omit [CompactSpace M] in

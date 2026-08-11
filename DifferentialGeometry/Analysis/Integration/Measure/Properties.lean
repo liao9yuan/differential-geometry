@@ -21,6 +21,24 @@ namespace DifferentialGeometry
 namespace Integral
 namespace Measure
 
+theorem prod_mono
+    {X Y : Type*} [MeasurableSpace X] [MeasurableSpace Y]
+    {mu₁ mu₂ : Measure X} {nu₁ nu₂ : Measure Y}
+    [SFinite mu₁] [SFinite mu₂] [SFinite nu₁] [SFinite nu₂]
+    (hmu : mu₁ ≤ mu₂) (hnu : nu₁ ≤ nu₂) :
+    mu₁.prod nu₁ ≤ mu₂.prod nu₂ := by
+  calc
+    mu₁.prod nu₁ ≤ mu₁.prod nu₂ := by
+      apply Measure.le_iff.mpr
+      intro s hs
+      rw [Measure.prod_apply hs, Measure.prod_apply hs]
+      exact lintegral_mono fun _ => hnu _
+    _ ≤ mu₂.prod nu₂ := by
+      apply Measure.le_iff.mpr
+      intro s hs
+      rw [Measure.prod_apply_symm hs, Measure.prod_apply_symm hs]
+      exact lintegral_mono fun _ => hmu _
+
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [Module.Finite ℝ E]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}

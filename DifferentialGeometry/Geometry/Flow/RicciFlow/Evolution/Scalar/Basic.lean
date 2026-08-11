@@ -96,7 +96,7 @@ theorem scalarEvolutionEquationOn_of_contractedBianchi
 
 
 omit [TopologicalSpace M] [SigmaCompactSpace M] [T2Space M] in
-theorem msm110_ch6_1_scalar_curvature_evolution
+theorem scalar_curvature_evolution
     {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
     (scalar scalarLap contractedRicciHessian ricciNormSq : Real -> M -> Real)
     (hpre : ScalarPreBianchiEvolutionEquationOn (D := D)
@@ -105,6 +105,18 @@ theorem msm110_ch6_1_scalar_curvature_evolution
       scalarLap contractedRicciHessian) :
     ScalarEvolutionEquationOn (D := D) scalar scalarLap ricciNormSq :=
   scalarEvolutionEquationOn_of_contractedBianchi
+    (M := M) scalar scalarLap contractedRicciHessian ricciNormSq hpre hbianchi
+
+omit [TopologicalSpace M] [SigmaCompactSpace M] [T2Space M] in
+theorem msm110_ch6_1_scalar_curvature_evolution
+    {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
+    (scalar scalarLap contractedRicciHessian ricciNormSq : Real -> M -> Real)
+    (hpre : ScalarPreBianchiEvolutionEquationOn (D := D)
+      scalar scalarLap contractedRicciHessian ricciNormSq)
+    (hbianchi : ScalarContractedBianchiReductionOn (D := D)
+      scalarLap contractedRicciHessian) :
+    ScalarEvolutionEquationOn (D := D) scalar scalarLap ricciNormSq :=
+  scalar_curvature_evolution
     (M := M) scalar scalarLap contractedRicciHessian ricciNormSq hpre hbianchi
 
 

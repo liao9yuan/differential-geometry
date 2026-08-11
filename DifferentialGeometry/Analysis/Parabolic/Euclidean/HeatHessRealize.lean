@@ -270,7 +270,7 @@ private theorem dampPast_eq_conv {δ : ℝ} (hδ : 0 < δ) (v w : V)
           ((∫ y : V, heatKernel (z.fst - s) (z.snd - y) *
             fderiv ℝ (fun q : V =>
               fderiv ℝ (fun r : V => f (s, r)) q w) y v : ℝ) : ℂ) := by
-            rw [heatD2_slice2 ht v w z.snd s f (hf := hf) (hfc := hfc)]
+            rw [heatD2_slice2 v w z.snd s f (hf := hf) (hfc := hfc)]
       _ = Complex.exp (((-δ * (z.fst - s) : ℝ) : ℂ)) *
           ∫ y : V, ((heatKernel (z.fst - s) (z.snd - y) *
             fderiv ℝ (fun q : V =>

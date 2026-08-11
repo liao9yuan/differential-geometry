@@ -36,6 +36,7 @@ namespace BernsteinTower
 
 
 
+omit [CompleteSpace E] [T2Space M] in
 theorem estimate_of_heat
     {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
     (G : DifferentialGeometry.Geometry.Curvature.MetricConnectionFamily
@@ -55,7 +56,7 @@ theorem estimate_of_heat
       DifferentialGeometry.Geometry.Curvature.heatOperatorWithDrift (I := I) G t
         (fun _y : M => (0 : TangentSpace I _y)) (w k t) x = wLap k t x)
     (hw_cont : forall k : Nat, ContinuousOn (fun p : Real × M => w k p.1 p.2)
-      (DifferentialGeometry.PDE.RicciFlow.spacetimeSlab (M := M) T))
+      (DifferentialGeometry.Analysis.Parabolic.spacetimeSlab (M := M) T))
     (hw_space : forall k : Nat, forall t : Real, t ∈ Set.Icc 0 T -> 0 < t -> forall y : M,
       MDifferentiableAt I (modelWithCornersSelf Real Real) (w k t) y)
     (hw_grad : forall k : Nat, forall t : Real, t ∈ Set.Icc 0 T -> 0 < t -> forall x : M,

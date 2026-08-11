@@ -48,6 +48,19 @@ theorem linPullBcf_apply (L : V ≃L[ℝ] V)
     (u : BoundedContinuousFunction V F) (x : V) :
     linPullBcf L u x = u (L x) := rfl
 
+omit [NormedSpace ℝ F] in
+theorem norm_linPullBcf (L : V ≃L[ℝ] V)
+    (u : BoundedContinuousFunction V F) :
+    ‖linPullBcf L u‖ = ‖u‖ := by
+  apply le_antisymm
+  · rw [BoundedContinuousFunction.norm_le (norm_nonneg u)]
+    intro x
+    exact u.norm_coe_le_norm (L x)
+  · rw [BoundedContinuousFunction.norm_le (norm_nonneg (linPullBcf L u))]
+    intro x
+    simpa only [linPullBcf_apply, ContinuousLinearEquiv.apply_symm_apply] using
+      (linPullBcf L u).norm_coe_le_norm (L.symm x)
+
 /-- Precompose a continuous linear map by `L`, bundled as a continuous
 linear operation on the operator space. -/
 def precompJet (L : V ≃L[ℝ] V) :
@@ -59,6 +72,11 @@ def precompJet (L : V ≃L[ℝ] V) :
 theorem precompJet_apply (L : V ≃L[ℝ] V) (D : V →L[ℝ] F) (v : V) :
     precompJet L D v = D (L v) := by
   simp [precompJet, ContinuousLinearMap.compL_apply]
+
+theorem norm_precompJet_le (L : V ≃L[ℝ] V) (D : V →L[ℝ] F) :
+    ‖precompJet L D‖ ≤ ‖(L : V →L[ℝ] V)‖ * ‖D‖ := by
+  rw [mul_comm]
+  exact D.opNorm_comp_le (L : V →L[ℝ] V)
 
 /-- Apply `L` in both slots of a bounded bilinear map. -/
 def pushHess (L : V ≃L[ℝ] V) :
@@ -73,6 +91,40 @@ theorem pushHess_apply (L : V ≃L[ℝ] V)
     (B : V →L[ℝ] V →L[ℝ] F) (v w : V) :
     pushHess L B v w = B (L v) (L w) := by
   simp [pushHess, precompJet, ContinuousLinearMap.compL_apply]
+
+theorem norm_pushHess_le (L : V ≃L[ℝ] V)
+    (B : V →L[ℝ] V →L[ℝ] F) :
+    ‖pushHess L B‖ ≤ ‖(L : V →L[ℝ] V)‖ ^ 2 * ‖B‖ := by
+  apply ContinuousLinearMap.opNorm_le_bound _
+    (mul_nonneg (sq_nonneg _) (norm_nonneg B))
+  intro v
+  apply ContinuousLinearMap.opNorm_le_bound _
+    (mul_nonneg (mul_nonneg (sq_nonneg _) (norm_nonneg B)) (norm_nonneg v))
+  intro w
+  rw [pushHess_apply]
+  calc
+    ‖B (L v) (L w)‖ ≤ ‖B (L v)‖ * ‖L w‖ :=
+      (B (L v)).le_opNorm (L w)
+    _ ≤ (‖B‖ * ‖L v‖) *
+        (‖(L : V →L[ℝ] V)‖ * ‖w‖) := by
+      gcongr
+      · exact B.le_opNorm (L v)
+      · exact (L : V →L[ℝ] V).le_opNorm w
+    _ ≤ (‖B‖ * (‖(L : V →L[ℝ] V)‖ * ‖v‖)) *
+        (‖(L : V →L[ℝ] V)‖ * ‖w‖) := by
+      gcongr
+      exact (L : V →L[ℝ] V).le_opNorm v
+    _ = (‖(L : V →L[ℝ] V)‖ ^ 2 * ‖B‖ * ‖v‖) * ‖w‖ := by
+      ring
+
+theorem lipschitzWith_pushHess (L : V ≃L[ℝ] V) :
+    LipschitzWith (‖(L : V →L[ℝ] V)‖₊ ^ 2)
+      (pushHess (F := F) L) := by
+  apply LipschitzWith.of_dist_le_mul
+  intro B C
+  rw [dist_eq_norm, ← map_sub]
+  simpa only [NNReal.coe_pow, coe_nnnorm, dist_eq_norm] using
+    norm_pushHess_le L (B - C)
 
 /-- The first derivative jet of a pullback. -/
 def pullJet1 (L : V ≃L[ℝ] V)

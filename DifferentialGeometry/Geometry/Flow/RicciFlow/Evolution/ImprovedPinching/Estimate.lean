@@ -348,7 +348,7 @@ theorem pinchQuotient_parabolic_nonpos
         (DifferentialGeometry.PDE.RicciFlow.twoTensorSecToFamily (I := I) (M := M) S.ricci)
         S.scalar T delta) :
     ∀ t : Real, t ∈ Set.Icc 0 T -> 0 < t -> ∀ x : M,
-      DifferentialGeometry.PDE.RicciFlow.parabolicOperatorWithDrift (I := I)
+      DifferentialGeometry.Analysis.Parabolic.parabolicOperatorWithDrift (I := I)
         (flowG (I := I) S) T
         (pinchDriftVector (I := I) (flowG (I := I) S) S.scalar epsilon)
         (pinchQuotient (I := I) S epsilon) t x <= 0 := by
@@ -399,7 +399,7 @@ theorem pinchQuotient_parabolic_nonpos
     pinchBookRHS_le_drift_sol (I := I) (M := M) S hdim
       (hscalar t (hIcc_subset ht) x) hdelta0 heps0 heps1 hepsilon
       ht hric hpinch
-  unfold DifferentialGeometry.PDE.RicciFlow.parabolicOperatorWithDrift
+  unfold DifferentialGeometry.Analysis.Parabolic.parabolicOperatorWithDrift
   rw [hderiv, hheat]
   linarith
 
@@ -611,7 +611,7 @@ private theorem ricciNorm_slabCont
     (hD : D = DifferentialGeometry.Geometry.Curvature.RealTimeInterval.closedOpen 0 omega h0ω)
     (hTω : T < omega) :
     ContinuousOn (fun p : Real × M => ricciNorm (I := I) S p.1 p.2)
-      (DifferentialGeometry.PDE.RicciFlow.spacetimeSlab (M := M) T) := by
+      (DifferentialGeometry.Analysis.Parabolic.spacetimeSlab (M := M) T) := by
   classical
   refine continuousOn_of_locally_continuousOn ?_
   intro p hp
@@ -626,7 +626,7 @@ private theorem ricciNorm_slabCont
     intro q hq
     rcases hq with ⟨hslab, _hu_time, hu_space⟩
     have hslab' : q.1 ∈ Set.Icc 0 T ∧ q.2 ∈ (Set.univ : Set M) := by
-      simpa [DifferentialGeometry.PDE.RicciFlow.spacetimeSlab] using hslab
+      simpa [DifferentialGeometry.Analysis.Parabolic.spacetimeSlab] using hslab
     constructor
     · rw [hD]
       exact ⟨hslab'.1.1, lt_of_le_of_lt hslab'.1.2 hTω⟩
@@ -648,25 +648,25 @@ theorem pinchQuotient_slab_continuous_of_ricciNorm
     (hscalar : ∀ t : Real, t ∈ D.carrier -> ∀ x : M, 0 < S.scalar t x)
     (hricciNorm_cont :
       ContinuousOn (fun p : Real × M => ricciNorm (I := I) S p.1 p.2)
-        (DifferentialGeometry.PDE.RicciFlow.spacetimeSlab (M := M) T)) :
+        (DifferentialGeometry.Analysis.Parabolic.spacetimeSlab (M := M) T)) :
     ContinuousOn
       (fun p : Real × M => C - pinchQuotient (I := I) S epsilon p.1 p.2)
-      (DifferentialGeometry.PDE.RicciFlow.spacetimeSlab (M := M) T) := by
+      (DifferentialGeometry.Analysis.Parabolic.spacetimeSlab (M := M) T) := by
   have hscalar_cont : ContinuousOn (fun p : Real × M => S.scalar p.1 p.2)
-      (DifferentialGeometry.PDE.RicciFlow.spacetimeSlab (M := M) T) := by
-    simpa [DifferentialGeometry.PDE.RicciFlow.spacetimeSlab] using
+      (DifferentialGeometry.Analysis.Parabolic.spacetimeSlab (M := M) T) := by
+    simpa [DifferentialGeometry.Analysis.Parabolic.spacetimeSlab] using
       (SolutionOn.scalar_continuousOn (I := I) (M := M) S
         hS.isSolution hS.scalarSTCont T
         (by
           intro t ht
           rw [hD]
           exact ⟨ht.1, lt_of_le_of_lt ht.2 hTω⟩))
-  have hscalar_ne : ∀ p : Real × M, p ∈ DifferentialGeometry.PDE.RicciFlow.spacetimeSlab
+  have hscalar_ne : ∀ p : Real × M, p ∈ DifferentialGeometry.Analysis.Parabolic.spacetimeSlab
     (M := M) T ->
       S.scalar p.1 p.2 ≠ 0 ∨ 0 ≤ -(2 - epsilon) := by
     intro p hp
     have hp' : p.1 ∈ Set.Icc 0 T ∧ p.2 ∈ (Set.univ : Set M) := by
-      simpa [DifferentialGeometry.PDE.RicciFlow.spacetimeSlab] using hp
+      simpa [DifferentialGeometry.Analysis.Parabolic.spacetimeSlab] using hp
     have hpD : p.1 ∈ D.carrier := by
       rw [hD]
       exact ⟨hp'.1.1, lt_of_le_of_lt hp'.1.2 hTω⟩
@@ -674,17 +674,17 @@ theorem pinchQuotient_slab_continuous_of_ricciNorm
   have htf_cont : ContinuousOn
       (fun p : Real × M =>
         tfRicNormSq S.scalar (ricciNorm (I := I) S) p.1 p.2)
-      (DifferentialGeometry.PDE.RicciFlow.spacetimeSlab (M := M) T) := by
+      (DifferentialGeometry.Analysis.Parabolic.spacetimeSlab (M := M) T) := by
     simpa [tfRicNormSq, tracefreeRicciNormSqOf,
       tracefreeRicciNormSqAtOf, div_eq_mul_inv] using
       hricciNorm_cont.sub ((hscalar_cont.pow 2).mul continuousOn_const)
   have hpow_cont : ContinuousOn
       (fun p : Real × M => S.scalar p.1 p.2 ^ (-(2 - epsilon)))
-      (DifferentialGeometry.PDE.RicciFlow.spacetimeSlab (M := M) T) :=
+      (DifferentialGeometry.Analysis.Parabolic.spacetimeSlab (M := M) T) :=
     hscalar_cont.rpow_const hscalar_ne
   have hquot_cont : ContinuousOn
       (fun p : Real × M => pinchQuotient (I := I) S epsilon p.1 p.2)
-      (DifferentialGeometry.PDE.RicciFlow.spacetimeSlab (M := M) T) := by
+      (DifferentialGeometry.Analysis.Parabolic.spacetimeSlab (M := M) T) := by
     simpa [pinchQuotient, quotField] using htf_cont.mul hpow_cont
   exact continuousOn_const.sub hquot_cont
 
@@ -838,13 +838,13 @@ theorem pinchQuot_slab_bound
     (hinit : ∀ x : M, pinchQuotient (I := I) S epsilon 0 x <= C)
     (hw_cont : ContinuousOn
       (fun p : Real × M => C - pinchQuotient (I := I) S epsilon p.1 p.2)
-      (DifferentialGeometry.PDE.RicciFlow.spacetimeSlab (M := M) T)) :
+      (DifferentialGeometry.Analysis.Parabolic.spacetimeSlab (M := M) T)) :
     ∀ t : Real, t ∈ Set.Icc 0 T -> ∀ x : M,
       pinchQuotient (I := I) S epsilon t x <= C := by
   classical
   have hsub :
       ∀ t : Real, t ∈ Set.Icc 0 T -> 0 < t -> ∀ x : M,
-        DifferentialGeometry.PDE.RicciFlow.parabolicOperatorWithDrift (I := I)
+        DifferentialGeometry.Analysis.Parabolic.parabolicOperatorWithDrift (I := I)
           (flowG (I := I) S) T
           (pinchDriftVector (I := I) (flowG (I := I) S) S.scalar epsilon)
           (pinchQuotient (I := I) S epsilon) t x <= 0 :=
@@ -947,11 +947,11 @@ theorem pinchQuot_slab_bound
     simpa [τ] using mdifferentiableAt_neg_section hPgrad
   have hoperator_neg : ∀ t : Real, t ∈ Set.Icc 0 T -> 0 < t ->
       ∀ x : M,
-        DifferentialGeometry.PDE.RicciFlow.parabolicOperatorWithDrift (I := I)
+        DifferentialGeometry.Analysis.Parabolic.parabolicOperatorWithDrift (I := I)
           (flowG (I := I) S) T
           (pinchDriftVector (I := I) (flowG (I := I) S) S.scalar epsilon)
           (fun s y => C - pinchQuotient (I := I) S epsilon s y) t x =
-        - DifferentialGeometry.PDE.RicciFlow.parabolicOperatorWithDrift (I := I)
+        - DifferentialGeometry.Analysis.Parabolic.parabolicOperatorWithDrift (I := I)
           (flowG (I := I) S) T
           (pinchDriftVector (I := I) (flowG (I := I) S) S.scalar epsilon)
           (pinchQuotient (I := I) S epsilon) t x := by
@@ -987,13 +987,13 @@ theorem pinchQuot_slab_bound
       simpa [τ] using
         pinchQuotient_grad_pos (I := I) S hS epsilon
           (fun τ y => hscalar (τ : Real) (D.regular_subset τ.2) y) τ x
-    exact DifferentialGeometry.PDE.RicciFlow.parabolic_const_sub (I := I) (flowG (I := I) S) T
+    exact DifferentialGeometry.Analysis.Parabolic.parabolic_const_sub (I := I) (flowG (I := I) S) T
       (pinchDriftVector (I := I) (flowG (I := I) S) S.scalar epsilon)
       (pinchQuotient (I := I) S epsilon) C t x
       ((uniqueDiffOn_Icc hTpos).uniqueDiffWithinAt ht)
       hu_time hu_space hu_grad
-  exact DifferentialGeometry.PDE.RicciFlow.scalar_sub_const_posReg (I := I)
-    (flowG (I := I) S) T hT
+  exact DifferentialGeometry.Analysis.Parabolic.scalar_sub_const_positive_region (I := I)
+    (flowG (I := I) S) T
     (pinchDriftVector (I := I) (flowG (I := I) S) S.scalar epsilon)
     (pinchQuotient (I := I) S epsilon) C
     hw_cont hw_time hw_mdiff hw_grad hinit hsub hoperator_neg
@@ -1120,12 +1120,12 @@ theorem pinchEstimate_sol
     have hpinchT := hpinchAll t ht0 htω
     have hricciNorm_cont : ContinuousOn
         (fun p : Real × M => ricciNorm (I := I) S p.1 p.2)
-        (DifferentialGeometry.PDE.RicciFlow.spacetimeSlab (M := M) t) :=
+        (DifferentialGeometry.Analysis.Parabolic.spacetimeSlab (M := M) t) :=
       ricciNorm_slabCont (I := I) (M := M) S hS h0ω hD htω
     have hw_cont : ContinuousOn
         (fun p : Real × M =>
           C - pinchQuotient (I := I) S epsilon p.1 p.2)
-        (DifferentialGeometry.PDE.RicciFlow.spacetimeSlab (M := M) t) :=
+        (DifferentialGeometry.Analysis.Parabolic.spacetimeSlab (M := M) t) :=
       pinchQuotient_slab_continuous_of_ricciNorm (I := I) (M := M)
         S hS h0ω hD htω hscalar hricciNorm_cont
     have hbound :=
