@@ -1,5 +1,6 @@
 import DifferentialGeometry.Tensor.RSTensor.Tensor0SRiemannian.Comparison
 import DifferentialGeometry.Tensor.RSTensor.ContractionLeibniz
+open DifferentialGeometry.Geometry.Curvature
 
 set_option autoImplicit false
 set_option backward.isDefEq.respectTransparency false
@@ -18,6 +19,7 @@ set_option backward.isDefEq.respectTransparency false
 
 noncomputable section
 
+namespace DifferentialGeometry
 namespace Tensor0SBundle
 
 open scoped Manifold ContDiff BigOperators
@@ -108,3 +110,4 @@ theorem normSq0S_domDomCongr {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
   rw [Tensor0SSpace.domDomCongr_apply]
 
 end Tensor0SBundle
+end DifferentialGeometry

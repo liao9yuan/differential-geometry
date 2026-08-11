@@ -3,6 +3,7 @@ import DifferentialGeometry.Analysis.Integration.EntropyMix
 import DifferentialGeometry.Analysis.Integration.L2.Basic
 import DifferentialGeometry.Geometry.Metric.MetricBounds
 import Mathlib.Analysis.SpecificLimits.Basic
+open DifferentialGeometry.Geometry.Operator
 
 set_option autoImplicit false
 
@@ -19,7 +20,7 @@ namespace DifferentialGeometry.PDE.RicciFlow.Entropy
 noncomputable section
 
 open MeasureTheory Filter
-open DifferentialGeometry.Integral.Connection
+open DifferentialGeometry.Geometry.Operator
 open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Analysis.Integration
 open DifferentialGeometry.Analysis.Laplacian
@@ -146,7 +147,7 @@ private theorem energy_mix_le
     (metric_inner_self_nonneg (I := I) (M := M) g x _) <|
       hcoef.trans ha1
 
-variable [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
+variable [T2Space M] [CompactSpace M]
 variable [Nonempty M]
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup

@@ -21,6 +21,10 @@ import DifferentialGeometry.Tensor.RSTensor.Tensor0SRiemannian.Comparison
 import DifferentialGeometry.Tensor.RSTensor.Tensor0SRiemannian.Product
 import DifferentialGeometry.Tensor.RSTensor.Tensor0SRiemannian.Smooth
 import DifferentialGeometry.Tensor.RSTensor.MetricCompatibility
+import DifferentialGeometry.Geometry.Operator.Operators
+open DifferentialGeometry.Tensor.RicciIdentity
+open DifferentialGeometry.Geometry.Curvature
+
 
 set_option autoImplicit false
 
@@ -39,11 +43,12 @@ set_option autoImplicit false
 
 noncomputable section
 
-namespace DifferentialGeometry.Integral.Connection
+open DifferentialGeometry.Geometry.Operator
+namespace DifferentialGeometry.Geometry.Curvature
 
 attribute [local instance] Fintype.ofFinite Classical.propDecidable
 
-open Bundle Tensor0SBundle
+open Bundle DifferentialGeometry.Tensor0SBundle
 open scoped Manifold ContDiff
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]
@@ -320,7 +325,7 @@ theorem extDeriv_metricTrace_eq_traceNabla
     [T2Space M]
     (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
     (g : SmoothRiemannianMetric I M)
-    (hmc : DifferentialGeometry.Integral.Connection.IsMetricCompatible_gen (I := I) cov g)
+    (hmc : DifferentialGeometry.Geometry.Connection.IsMetricCompatible_gen (I := I) cov g)
     (A : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
       (n := (∞ : WithTop ℕ∞)) 2)
     (nablaA :
@@ -407,7 +412,7 @@ theorem traceNablaHessianRealizesDLapAt_of_lapTrace
     [T2Space M]
     (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
     (g : SmoothRiemannianMetric I M)
-    (hmc : DifferentialGeometry.Integral.Connection.IsMetricCompatible_gen (I := I) cov g)
+    (hmc : DifferentialGeometry.Geometry.Connection.IsMetricCompatible_gen (I := I) cov g)
     (u : M -> Real)
     (nablaDuSec : TwoTensorSection (I := I) (M := M))
     (nabla2DuSec :
@@ -475,7 +480,7 @@ theorem traceNablaHessianRealizesDLapAt_of_traceAt
     [T2Space M]
     (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
     (g : SmoothRiemannianMetric I M)
-    (hmc : DifferentialGeometry.Integral.Connection.IsMetricCompatible_gen (I := I) cov g)
+    (hmc : DifferentialGeometry.Geometry.Connection.IsMetricCompatible_gen (I := I) cov g)
     (u : M -> Real)
     (nablaDuSec : TwoTensorSection (I := I) (M := M))
     (nabla2DuSec :
@@ -1118,8 +1123,8 @@ theorem hessian_components_of_nabla_du
   have hvec : vec2 (X0 x) Y = fun a : Fin 2 => basis (slots a) := by
     funext a
     fin_cases a
-    · simp [X0, Y, vec2, DifferentialGeometry.Integral.Connection.vec2, hfields (slots 0)]
-    · simp [Y, vec2, DifferentialGeometry.Integral.Connection.vec2]
+    · simp [X0, Y, vec2, DifferentialGeometry.Geometry.Curvature.vec2, hfields (slots 0)]
+    · simp [Y, vec2, DifferentialGeometry.Geometry.Curvature.vec2]
   have hn := hnabla X0 Y
   have hh := hHess X0 Y
   change nablaDu x (fun a : Fin 2 => basis (slots a)) =
@@ -1521,7 +1526,7 @@ theorem fundamental_bochner_of_terms_of_normSecond_realizes
     {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
     (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
     (g : SmoothRiemannianMetric I M)
-    (hmc : DifferentialGeometry.Integral.Connection.IsMetricCompatible_gen (I := I) cov g)
+    (hmc : DifferentialGeometry.Geometry.Connection.IsMetricCompatible_gen (I := I) cov g)
     (Ric : Tensor02Section (I := I) (M := M))
     (Rm04 : Tensor04Section (I := I) (M := M))
     (gInvFrame : InverseMetricComponents M Idx)
@@ -1671,7 +1676,7 @@ theorem fundamental_bochner_of_lc
     (gInvFrame : InverseMetricComponents M Idx)
     (frame : Idx -> (x : M) -> TangentSpace I x)
     (hRm13 : Rm13RealizesConnection (I := I)
-      (DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric (I := I) g) Rm13)
+      (DifferentialGeometry.Geometry.Connection.leviCivitaConnectionOfMetric (I := I) g) Rm13)
     (hRic13 : RicciTensorRealizesRm13Trace (I := I) Ric Rm13)
     (hRic04 : RicciTensorRealizesRm04TraceInFrame (I := I) Ric Rm04 gInvFrame frame)
     (u : M -> Real)
@@ -1690,14 +1695,14 @@ theorem fundamental_bochner_of_lc
       Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) 2 x)
     (hdu : DuFieldRealizes (I := I) u duSec)
     (hnabla : NablaOneFormRealizesAt (I := I)
-      (DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric (I := I) g) duSec
+      (DifferentialGeometry.Geometry.Connection.leviCivitaConnectionOfMetric (I := I) g) duSec
         nablaDu x)
     (hnabla2 : Nabla2OneFormRealizesAt (I := I)
-      (DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric (I := I) g) duSec
+      (DifferentialGeometry.Geometry.Connection.leviCivitaConnectionOfMetric (I := I) g) duSec
         nablaDuSec x nabla2Du)
     (hlap :
       laplacian (I := I)
-        (DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric (I := I) g) g
+        (DifferentialGeometry.Geometry.Connection.leviCivitaConnectionOfMetric (I := I) g) g
         (fun y : M =>
           inner0S (I := I) g y 1
             (differential1FormFun (I := I) u y)
@@ -1707,7 +1712,7 @@ theorem fundamental_bochner_of_lc
       (differential1FormFun (I := I) u x) (nablaDu x) nabla2Du normSecond)
     (hrough : RoughLap0SRealizesMetricTrace (I := I) g (s := 1) (roughDu x) nabla2Du)
     (hdlap : TraceNablaHessianRealizesDLapAt (I := I)
-      (DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric (I := I) g) g u
+      (DifferentialGeometry.Geometry.Connection.leviCivitaConnectionOfMetric (I := I) g) g u
         nabla2Du)
     (hsymm : OneFormLastTwoSymmAt (I := I) nabla2Du)
     (hthird : OneFormThirdCovDerivCommAt (I := I) Rm13
@@ -1717,24 +1722,24 @@ theorem fundamental_bochner_of_lc
       component0S (I := I) basis (nablaDu x) slots =
         component0S (I := I) basis (Hess x) slots) :
     (1 / 2 : Real) * laplacian (I := I)
-        (DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric (I := I) g) g
+        (DifferentialGeometry.Geometry.Connection.leviCivitaConnectionOfMetric (I := I) g) g
         (gradNormSq (I := I) g u) x =
       g.inner x
           (gradientFun (I := I) g
             (laplacian (I := I)
-              (DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric (I := I) g) g
+              (DifferentialGeometry.Geometry.Connection.leviCivitaConnectionOfMetric (I := I) g) g
                 u) x)
           (gradientFun (I := I) g u x) +
         hessianNormSq (I := I) g Hess x +
           ricciGradGrad (I := I) Ric g u x := by
   refine fundamental_bochner_of_components (I := I)
-    (DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric (I := I) g) g Ric Rm13
+    (DifferentialGeometry.Geometry.Connection.leviCivitaConnectionOfMetric (I := I) g) g Ric Rm13
       Rm04
     gInvFrame frame hRm13 hRic13 hRic04 u Hess nablaDu roughDu
     basis gInvAt hinv duSec nablaDuSec nabla2Du normSecond
     hdu hnabla hnabla2 hlap htrace hrough hdlap ?_ hHessComp
   exact one_form_ricci_trace_comm_of_lc (I := I)
-    (DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric (I := I) g) g Ric Rm13 u
+    (DifferentialGeometry.Geometry.Connection.leviCivitaConnectionOfMetric (I := I) g) g Ric Rm13 u
       basis
     gInvAt duSec nablaDu nablaDuSec nabla2Du
     hinv hRm13 hRic13 hdu hnabla hnabla2 hsymm hthird hSkew
@@ -1752,7 +1757,7 @@ theorem fundamental_bochner_of_lc_terms
     (gInvFrame : InverseMetricComponents M Idx)
     (frame : Idx -> (x : M) -> TangentSpace I x)
     (hRm13 : Rm13RealizesConnection (I := I)
-      (DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric (I := I) g) Rm13)
+      (DifferentialGeometry.Geometry.Connection.leviCivitaConnectionOfMetric (I := I) g) Rm13)
     (hRic13 : RicciTensorRealizesRm13Trace (I := I) Ric Rm13)
     (hRic04 : RicciTensorRealizesRm04TraceInFrame (I := I) Ric Rm04 gInvFrame frame)
     (u : M -> Real)
@@ -1773,18 +1778,18 @@ theorem fundamental_bochner_of_lc_terms
       Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) 2 x)
     (hfields : SmoothBasisFieldsAt (I := I) basis X)
     (hHess : HessianRealizesNablaDuAt (I := I)
-      (DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric (I := I) g) duSec Hess
+      (DifferentialGeometry.Geometry.Connection.leviCivitaConnectionOfMetric (I := I) g) duSec Hess
         x)
     (hdu : DuFieldRealizes (I := I) u duSec)
     (hnabla : NablaOneFormRealizesAt (I := I)
-      (DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric (I := I) g) duSec
+      (DifferentialGeometry.Geometry.Connection.leviCivitaConnectionOfMetric (I := I) g) duSec
         nablaDu x)
     (hnabla2 : Nabla2OneFormRealizesAt (I := I)
-      (DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric (I := I) g) duSec
+      (DifferentialGeometry.Geometry.Connection.leviCivitaConnectionOfMetric (I := I) g) duSec
         nablaDuSec x nabla2Du)
     (hlapTrace :
       laplacian (I := I)
-        (DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric (I := I) g) g
+        (DifferentialGeometry.Geometry.Connection.leviCivitaConnectionOfMetric (I := I) g) g
         (fun y : M =>
           inner0S (I := I) g y 1
             (differential1FormFun (I := I) u y)
@@ -1794,19 +1799,19 @@ theorem fundamental_bochner_of_lc_terms
       (differential1FormFun (I := I) u x) (nablaDu x) nabla2Du normSecond)
     (hrough : RoughLap0SRealizesMetricTrace (I := I) g (s := 1) (roughDu x) nabla2Du)
     (hdlap : TraceNablaHessianRealizesDLapAt (I := I)
-      (DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric (I := I) g) g u
+      (DifferentialGeometry.Geometry.Connection.leviCivitaConnectionOfMetric (I := I) g) g u
         nabla2Du)
     (hsymm : OneFormLastTwoSymmAt (I := I) nabla2Du)
     (hthird : OneFormThirdCovDerivCommAt (I := I) Rm13
       (differential1FormFun (I := I) u x) nabla2Du)
     (hSkew : Rm13MetricSkewAt (I := I) g x (Rm13 x)) :
     (1 / 2 : Real) * laplacian (I := I)
-        (DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric (I := I) g) g
+        (DifferentialGeometry.Geometry.Connection.leviCivitaConnectionOfMetric (I := I) g) g
         (gradNormSq (I := I) g u) x =
       g.inner x
           (gradientFun (I := I) g
             (laplacian (I := I)
-              (DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric (I := I) g) g
+              (DifferentialGeometry.Geometry.Connection.leviCivitaConnectionOfMetric (I := I) g) g
                 u) x)
           (gradientFun (I := I) g u x) +
         hessianNormSq (I := I) g Hess x +
@@ -1820,11 +1825,11 @@ theorem fundamental_bochner_of_lc_terms
       hinv normSecond Fin.elim0]
     rw [← scalarLapTraceAt_eq_firstTwo (I := I) g normSecond]
   · exact oneForm_norm_second_product_of_metric_compatible (I := I)
-      (DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric (I := I) g) g
+      (DifferentialGeometry.Geometry.Connection.leviCivitaConnectionOfMetric (I := I) g) g
       basis gInvAt duSec (differential1FormFun (I := I) u) nablaDu
       nablaDuSec nabla2Du normSecond hsecond
   · exact hessian_components_of_nabla_du (I := I)
-      (DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric (I := I) g) basis X
+      (DifferentialGeometry.Geometry.Connection.leviCivitaConnectionOfMetric (I := I) g) basis X
         duSec Hess
       nablaDu hfields hHess hnabla
 
@@ -1841,7 +1846,7 @@ theorem fundamental_bochner_of_lc_terms_of_normSecond_realizes
     (gInvFrame : InverseMetricComponents M Idx)
     (frame : Idx -> (x : M) -> TangentSpace I x)
     (hRm13 : Rm13RealizesConnection (I := I)
-      (DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric (I := I) g) Rm13)
+      (DifferentialGeometry.Geometry.Connection.leviCivitaConnectionOfMetric (I := I) g) Rm13)
     (hRic13 : RicciTensorRealizesRm13Trace (I := I) Ric Rm13)
     (hRic04 : RicciTensorRealizesRm04TraceInFrame (I := I) Ric Rm04 gInvFrame frame)
     (u : M -> Real)
@@ -1864,14 +1869,14 @@ theorem fundamental_bochner_of_lc_terms_of_normSecond_realizes
       Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) 2 y)
     (hfields : SmoothBasisFieldsAt (I := I) basis X)
     (hHess : HessianRealizesNablaDuAt (I := I)
-      (DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric (I := I) g) duSec Hess
+      (DifferentialGeometry.Geometry.Connection.leviCivitaConnectionOfMetric (I := I) g) duSec Hess
         x)
     (hdu : DuFieldRealizes (I := I) u duSec)
     (hnabla : NablaOneFormRealizesAt (I := I)
-      (DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric (I := I) g) duSec
+      (DifferentialGeometry.Geometry.Connection.leviCivitaConnectionOfMetric (I := I) g) duSec
         nablaDu x)
     (hnabla2 : Nabla2OneFormRealizesAt (I := I)
-      (DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric (I := I) g) duSec
+      (DifferentialGeometry.Geometry.Connection.leviCivitaConnectionOfMetric (I := I) g) duSec
         nablaDuSec x nabla2Du)
     (hnormSecond : normSecondSec x = normSecond)
     (hnormDu : DuFieldRealizes (I := I)
@@ -1880,7 +1885,7 @@ theorem fundamental_bochner_of_lc_terms_of_normSecond_realizes
           (differential1FormFun (I := I) u y)
           (differential1FormFun (I := I) u y)) normDuSec)
     (hnormHess : HessianRealizesNablaDuAt (I := I)
-      (DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric (I := I) g)
+      (DifferentialGeometry.Geometry.Connection.leviCivitaConnectionOfMetric (I := I) g)
       normDuSec normSecondSec x)
     (hnormGrad : MDiffAt (T% fun y : M =>
       gradientFun (I := I) g
@@ -1892,26 +1897,26 @@ theorem fundamental_bochner_of_lc_terms_of_normSecond_realizes
       (differential1FormFun (I := I) u x) (nablaDu x) nabla2Du normSecond)
     (hrough : RoughLap0SRealizesMetricTrace (I := I) g (s := 1) (roughDu x) nabla2Du)
     (hdlap : TraceNablaHessianRealizesDLapAt (I := I)
-      (DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric (I := I) g) g u
+      (DifferentialGeometry.Geometry.Connection.leviCivitaConnectionOfMetric (I := I) g) g u
         nabla2Du)
     (hsymm : OneFormLastTwoSymmAt (I := I) nabla2Du)
     (hthird : OneFormThirdCovDerivCommAt (I := I) Rm13
       (differential1FormFun (I := I) u x) nabla2Du)
     (hSkew : Rm13MetricSkewAt (I := I) g x (Rm13 x)) :
     (1 / 2 : Real) * laplacian (I := I)
-        (DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric (I := I) g) g
+        (DifferentialGeometry.Geometry.Connection.leviCivitaConnectionOfMetric (I := I) g) g
         (gradNormSq (I := I) g u) x =
       g.inner x
           (gradientFun (I := I) g
             (laplacian (I := I)
-              (DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric (I := I) g) g
+              (DifferentialGeometry.Geometry.Connection.leviCivitaConnectionOfMetric (I := I) g) g
                 u) x)
           (gradientFun (I := I) g u x) +
         hessianNormSq (I := I) g Hess x +
           ricciGradGrad (I := I) Ric g u x := by
   have hlapDirect :
       laplacian (I := I)
-      (DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric (I := I) g) g
+      (DifferentialGeometry.Geometry.Connection.leviCivitaConnectionOfMetric (I := I) g) g
       (fun y : M =>
         inner0S (I := I) g y 1
           (differential1FormFun (I := I) u y)
@@ -1919,8 +1924,8 @@ theorem fundamental_bochner_of_lc_terms_of_normSecond_realizes
         scalarLapTraceAt (I := I) g normSecond := by
     simpa [hnormSecond] using
       scalarLapTraceAt_of_nablaDu (I := I)
-        (DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric (I := I) g) g
-        (DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric_isMetricCompatible
+        (DifferentialGeometry.Geometry.Connection.leviCivitaConnectionOfMetric (I := I) g) g
+        (DifferentialGeometry.Geometry.Connection.leviCivitaConnectionOfMetric_isMetricCompatible
           (I := I) g)
         basis gInvAt hinv
         (fun y : M =>
@@ -1933,11 +1938,11 @@ theorem fundamental_bochner_of_lc_terms_of_normSecond_realizes
     basis gInvAt hinv duSec nablaDuSec nabla2Du normSecond
     hdu hnabla hnabla2 hlapDirect ?_ hrough hdlap hsymm hthird hSkew ?_
   · exact oneForm_norm_second_product_of_metric_compatible (I := I)
-      (DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric (I := I) g) g
+      (DifferentialGeometry.Geometry.Connection.leviCivitaConnectionOfMetric (I := I) g) g
       basis gInvAt duSec (differential1FormFun (I := I) u) nablaDu
       nablaDuSec nabla2Du normSecond hsecond
   · exact hessian_components_of_nabla_du (I := I)
-      (DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric (I := I) g) basis X
+      (DifferentialGeometry.Geometry.Connection.leviCivitaConnectionOfMetric (I := I) g) basis X
         duSec Hess
       nablaDu hfields hHess hnabla
 
@@ -1953,9 +1958,9 @@ theorem fundamental_bochner_of_lc_terms_of_rm04_skew
     (gInvFrame : InverseMetricComponents M Idx)
     (frame : Idx -> (x : M) -> TangentSpace I x)
     (hRm13 : Rm13RealizesConnection (I := I)
-      (DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric (I := I) g) Rm13)
+      (DifferentialGeometry.Geometry.Connection.leviCivitaConnectionOfMetric (I := I) g) Rm13)
     (hRm04 : Rm04RealizesConnection (I := I) g
-      (DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric (I := I) g) Rm04)
+      (DifferentialGeometry.Geometry.Connection.leviCivitaConnectionOfMetric (I := I) g) Rm04)
     (hRic13 : RicciTensorRealizesRm13Trace (I := I) Ric Rm13)
     (hRic04 : RicciTensorRealizesRm04TraceInFrame (I := I) Ric Rm04 gInvFrame frame)
     (u : M -> Real)
@@ -1976,18 +1981,18 @@ theorem fundamental_bochner_of_lc_terms_of_rm04_skew
       Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) 2 x)
     (hfields : SmoothBasisFieldsAt (I := I) basis X)
     (hHess : HessianRealizesNablaDuAt (I := I)
-      (DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric (I := I) g) duSec Hess
+      (DifferentialGeometry.Geometry.Connection.leviCivitaConnectionOfMetric (I := I) g) duSec Hess
         x)
     (hdu : DuFieldRealizes (I := I) u duSec)
     (hnabla : NablaOneFormRealizesAt (I := I)
-      (DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric (I := I) g) duSec
+      (DifferentialGeometry.Geometry.Connection.leviCivitaConnectionOfMetric (I := I) g) duSec
         nablaDu x)
     (hnabla2 : Nabla2OneFormRealizesAt (I := I)
-      (DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric (I := I) g) duSec
+      (DifferentialGeometry.Geometry.Connection.leviCivitaConnectionOfMetric (I := I) g) duSec
         nablaDuSec x nabla2Du)
     (hlapTrace :
       laplacian (I := I)
-        (DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric (I := I) g) g
+        (DifferentialGeometry.Geometry.Connection.leviCivitaConnectionOfMetric (I := I) g) g
         (fun y : M =>
           inner0S (I := I) g y 1
             (differential1FormFun (I := I) u y)
@@ -1997,19 +2002,19 @@ theorem fundamental_bochner_of_lc_terms_of_rm04_skew
       (differential1FormFun (I := I) u x) (nablaDu x) nabla2Du normSecond)
     (hrough : RoughLap0SRealizesMetricTrace (I := I) g (s := 1) (roughDu x) nabla2Du)
     (hdlap : TraceNablaHessianRealizesDLapAt (I := I)
-      (DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric (I := I) g) g u
+      (DifferentialGeometry.Geometry.Connection.leviCivitaConnectionOfMetric (I := I) g) g u
         nabla2Du)
     (hsymm : OneFormLastTwoSymmAt (I := I) nabla2Du)
     (hthird : OneFormThirdCovDerivCommAt (I := I) Rm13
       (differential1FormFun (I := I) u x) nabla2Du)
     (hRm04Skew : Rm04OutputSkewAt (I := I) (Rm04 x)) :
     (1 / 2 : Real) * laplacian (I := I)
-        (DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric (I := I) g) g
+        (DifferentialGeometry.Geometry.Connection.leviCivitaConnectionOfMetric (I := I) g) g
         (gradNormSq (I := I) g u) x =
       g.inner x
           (gradientFun (I := I) g
             (laplacian (I := I)
-              (DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric (I := I) g) g
+              (DifferentialGeometry.Geometry.Connection.leviCivitaConnectionOfMetric (I := I) g) g
                 u) x)
           (gradientFun (I := I) g u x) +
         hessianNormSq (I := I) g Hess x +
@@ -2020,7 +2025,7 @@ theorem fundamental_bochner_of_lc_terms_of_rm04_skew
     hfields hHess hdu hnabla hnabla2 hlapTrace hsecond hrough hdlap
     hsymm hthird ?_
   exact rm13MetricSkewAt_of_realizes_outputSkew (I := I) g
-    (DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric (I := I) g) Rm13 Rm04
+    (DifferentialGeometry.Geometry.Connection.leviCivitaConnectionOfMetric (I := I) g) Rm13 Rm04
     hRm13 hRm04 hRm04Skew
 
-end DifferentialGeometry.Integral.Connection
+end DifferentialGeometry.Geometry.Curvature

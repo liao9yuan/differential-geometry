@@ -1,5 +1,8 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.MaximumPrinciple.TensorWeak.BarrierCore
 import Mathlib.Analysis.Normed.Module.Multilinear.Curry
+open DifferentialGeometry.PDE.RicciFlow
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Geometry.Curvature
 
 set_option autoImplicit false
 set_option backward.isDefEq.respectTransparency false
@@ -13,11 +16,11 @@ set_option backward.isDefEq.respectTransparency false
 
 
 
-namespace DifferentialGeometry.Integral.Connection
+namespace DifferentialGeometry.PDE.RicciFlow
 
 noncomputable section
 
-open Bundle Tensor0SBundle Set
+open Bundle DifferentialGeometry.Tensor0SBundle Set
 open scoped Manifold ContDiff
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]
@@ -135,7 +138,7 @@ theorem tensor02_realizes_ext
   intro m
   have hm : m = vec2 (I := I) (m 0) (m 1) := by
     funext i
-    fin_cases i <;> simp [vec2, DifferentialGeometry.Integral.Connection.vec2]
+    fin_cases i <;> simp [vec2, DifferentialGeometry.Geometry.Curvature.vec2]
   rw [hm, hT, hU]
 
 
@@ -241,15 +244,15 @@ theorem Tensor02ReactionAt.toRawSymm_output_bilin
       have hleft :
           Function.update m (0 : Fin 2) (X + Y) = vec2 (I := I) (X + Y) Z := by
         funext i
-        fin_cases i <;> simp [m, vec2, DifferentialGeometry.Integral.Connection.vec2,
+        fin_cases i <;> simp [m, vec2, DifferentialGeometry.Geometry.Curvature.vec2,
           Function.update]
       have hX : Function.update m (0 : Fin 2) X = vec2 (I := I) X Z := by
         funext i
-        fin_cases i <;> simp [m, vec2, DifferentialGeometry.Integral.Connection.vec2,
+        fin_cases i <;> simp [m, vec2, DifferentialGeometry.Geometry.Curvature.vec2,
           Function.update]
       have hY : Function.update m (0 : Fin 2) Y = vec2 (I := I) Y Z := by
         funext i
-        fin_cases i <;> simp [m, vec2, DifferentialGeometry.Integral.Connection.vec2,
+        fin_cases i <;> simp [m, vec2, DifferentialGeometry.Geometry.Curvature.vec2,
           Function.update]
       simpa [hleft, hX, hY] using hmap
     · intro c X Z
@@ -262,11 +265,11 @@ theorem Tensor02ReactionAt.toRawSymm_output_bilin
       have hleft :
           Function.update m (0 : Fin 2) (c • X) = vec2 (I := I) (c • X) Z := by
         funext i
-        fin_cases i <;> simp [m, vec2, DifferentialGeometry.Integral.Connection.vec2,
+        fin_cases i <;> simp [m, vec2, DifferentialGeometry.Geometry.Curvature.vec2,
           Function.update]
       have hX : Function.update m (0 : Fin 2) X = vec2 (I := I) X Z := by
         funext i
-        fin_cases i <;> simp [m, vec2, DifferentialGeometry.Integral.Connection.vec2,
+        fin_cases i <;> simp [m, vec2, DifferentialGeometry.Geometry.Curvature.vec2,
           Function.update]
       simpa [hleft, hX, smul_eq_mul] using hmap
     · intro X Y Z
@@ -279,15 +282,15 @@ theorem Tensor02ReactionAt.toRawSymm_output_bilin
       have hleft :
           Function.update m (1 : Fin 2) (Y + Z) = vec2 (I := I) X (Y + Z) := by
         funext i
-        fin_cases i <;> simp [m, vec2, DifferentialGeometry.Integral.Connection.vec2,
+        fin_cases i <;> simp [m, vec2, DifferentialGeometry.Geometry.Curvature.vec2,
           Function.update]
       have hY : Function.update m (1 : Fin 2) Y = vec2 (I := I) X Y := by
         funext i
-        fin_cases i <;> simp [m, vec2, DifferentialGeometry.Integral.Connection.vec2,
+        fin_cases i <;> simp [m, vec2, DifferentialGeometry.Geometry.Curvature.vec2,
           Function.update]
       have hZ : Function.update m (1 : Fin 2) Z = vec2 (I := I) X Z := by
         funext i
-        fin_cases i <;> simp [m, vec2, DifferentialGeometry.Integral.Connection.vec2,
+        fin_cases i <;> simp [m, vec2, DifferentialGeometry.Geometry.Curvature.vec2,
           Function.update]
       simpa [hleft, hY, hZ] using hmap
     · intro c X Z
@@ -300,14 +303,14 @@ theorem Tensor02ReactionAt.toRawSymm_output_bilin
       have hleft :
           Function.update m (1 : Fin 2) (c • Z) = vec2 (I := I) X (c • Z) := by
         funext i
-        fin_cases i <;> simp [m, vec2, DifferentialGeometry.Integral.Connection.vec2,
+        fin_cases i <;> simp [m, vec2, DifferentialGeometry.Geometry.Curvature.vec2,
           Function.update]
       have hZ : Function.update m (1 : Fin 2) Z = vec2 (I := I) X Z := by
         funext i
-        fin_cases i <;> simp [m, vec2, DifferentialGeometry.Integral.Connection.vec2,
+        fin_cases i <;> simp [m, vec2, DifferentialGeometry.Geometry.Curvature.vec2,
           Function.update]
       simpa [hleft, hZ, smul_eq_mul] using hmap
   · constructor <;> simp [Tensor02ReactionAt.toRawSymm, hA]
 
 end
-end DifferentialGeometry.Integral.Connection
+end DifferentialGeometry.PDE.RicciFlow

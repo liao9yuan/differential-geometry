@@ -12,6 +12,7 @@ set_option backward.isDefEq.respectTransparency false
 open Bundle Set IsManifold ContinuousLinearMap
 open scoped Manifold Topology Bundle ContDiff BigOperators
 
+namespace DifferentialGeometry
 namespace Tensor0SBundle
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
@@ -123,7 +124,7 @@ private theorem covGradBundle_baseSet_eq (r s : ℕ) (α : M) :
     (trivializationAt E (TangentSpace I) α).baseSet
   rw [tensorRSBundle_baseSet_eq (I := I) r s α, Set.inter_self]
 
-open TensorMultilinear in
+open DifferentialGeometry.TensorMultilinear in
 private theorem tensor0S_trivFibre_apply (n : ℕ) (α : M) {b : M}
     (hb : b ∈ (trivializationAt (Tensor0SModel n ℝ E)
       (fun x : M => Tensor0SSpace n I x) α).baseSet)
@@ -146,7 +147,7 @@ private theorem tensor0S_trivFibre_apply (n : ℕ) (α : M) {b : M}
   conv_lhs => rw [hX]
   exact hkey
 
-open TensorMultilinear in
+open DifferentialGeometry.TensorMultilinear in
 theorem covGradBundleEquiv_trivializationAt_eq (r s : ℕ) (α : M) {b : M}
     (hb : b ∈ (trivializationAt E (TangentSpace I) α).baseSet)
     (Φ : TangentSpace I b →L[ℝ] TensorRSSpace r s I b) :
@@ -407,4 +408,5 @@ end SmoothEquiv
 
 end Tensor0SBundle
 
+end DifferentialGeometry
 end

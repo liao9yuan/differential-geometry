@@ -13,6 +13,7 @@ noncomputable section
 open Manifold Metric Module Set
 open scoped Manifold RealInnerProductSpace
 open DifferentialGeometry.Integral.Measure DifferentialGeometry.Integral.DivergenceTheorem
+open DifferentialGeometry.Geometry.Operator
 
 namespace DifferentialGeometry
 namespace Geometry

@@ -21,7 +21,7 @@ noncomputable section
 open Set Function Filter Bundle
 open scoped Topology Manifold ContDiff
 
-namespace DifferentialGeometry.PDE.RicciFlow.ODE
+namespace DifferentialGeometry.Analysis.ODE
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] [FiniteDimensional ℝ E]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
@@ -68,4 +68,4 @@ theorem slice_mfderiv_continuousAt_of_jointFlow
   simp only [mfderivWithin_univ] at hcont
   exact hcont
 
-end DifferentialGeometry.PDE.RicciFlow.ODE
+end DifferentialGeometry.Analysis.ODE

@@ -5,6 +5,8 @@ import DifferentialGeometry.Tensor.RSTensor.QuadraticBounds.Unit
 import DifferentialGeometry.Tensor.RSTensor.Tensor0SRiemannian.Comparison
 import DifferentialGeometry.Tensor.RSTensor.NablaOnTensors.ConnectionDifference
 import DifferentialGeometry.Tensor.RSTensor.NablaOnTensors.HigherOrder
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Geometry.Curvature
 
 set_option autoImplicit false
 
@@ -390,8 +392,8 @@ def ConnDiffFieldRealizes
     D x =
       Tensor0SBundle.connectionDifferenceTensorAt
         (I := I)
-        (DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric (I := I) g)
-        (DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric (I := I) h) x
+        (DifferentialGeometry.Geometry.Connection.leviCivitaConnectionOfMetric (I := I) g)
+        (DifferentialGeometry.Geometry.Connection.leviCivitaConnectionOfMetric (I := I) h) x
 
 
 
@@ -419,7 +421,7 @@ def ConnDiffDerivRealizes
     ConnDiffFieldRealizes (I := I) g h D ∧
       Tensor0SBundle.HigherCovDerivRSRealizes
         (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
-        (DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric (I := I) h) D k Dk
+        (DifferentialGeometry.Geometry.Connection.leviCivitaConnectionOfMetric (I := I) h) D k Dk
 
 
 

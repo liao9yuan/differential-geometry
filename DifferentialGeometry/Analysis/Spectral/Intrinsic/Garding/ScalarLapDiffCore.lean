@@ -1,5 +1,10 @@
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.Garding.MetricLapDiffCore
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.Garding.ScalarNonautTame
+open DifferentialGeometry.Analysis.Sobolev DifferentialGeometry.Analysis.Sobolev.IntrinsicSobolev.SmoothCcTensorHs
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Geometry.Connection
+open DifferentialGeometry.Geometry.Operator
 
 
 
@@ -12,17 +17,18 @@ noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
 
-open Bundle Manifold MeasureTheory Set Filter Tensor0SBundle
+open Bundle Manifold MeasureTheory Set Filter DifferentialGeometry.Tensor0SBundle
 open scoped Manifold Topology ContDiff ENNReal BigOperators
 
-namespace DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral
+namespace DifferentialGeometry.Analysis.Spectral
 
-open DifferentialGeometry.Integral.Connection
+
+open DifferentialGeometry.Geometry.Operator
 open DifferentialGeometry.Integral.DivergenceTheorem
 open DifferentialGeometry.Integral.L2
 open DifferentialGeometry.Analysis.Parabolic.TensorSpectral
 open DifferentialGeometry.PDE.DeTurck
-open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.DeTurck
+open DifferentialGeometry.Analysis.Spectral.DeTurck
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]
   [FiniteDimensional Real E] [NeZero (Module.finrank Real E)]
@@ -327,12 +333,10 @@ theorem scalarLapDiff_eq
     (q h : SmoothRiemannianMetric I M) (U : SmoothCcTensor q 0 0) (x : M) :
     TensorRSField.scalar0 (n := (∞ : WithTop ℕ∞))
         (scalarLapDiffCc (I := I) q h U).toSection x =
-      Δ_g (I := I) h
-          (TensorRSField.scalar0_smooth
-            (n := (∞ : WithTop ℕ∞)) U.toSection) x -
-        Δ_g (I := I) q
-          (TensorRSField.scalar0_smooth
-            (n := (∞ : WithTop ℕ∞)) U.toSection) x := by
+      Δ_g (I := I) h ⟨_, (TensorRSField.scalar0_smooth
+            (n := (∞ : WithTop ℕ∞)) U.toSection)⟩ x -
+        Δ_g (I := I) q ⟨_, (TensorRSField.scalar0_smooth
+            (n := (∞ : WithTop ℕ∞)) U.toSection)⟩ x := by
   let f := TensorRSField.scalar0 (n := (∞ : WithTop ℕ∞)) U.toSection
   let hf := TensorRSField.scalar0_smooth
     (n := (∞ : WithTop ℕ∞)) U.toSection
@@ -480,6 +484,6 @@ theorem lapDiffCore_eq_cc
   intro x
   exact clm0_ext (I := I) (M := M) (lapDiff_unit (I := I) (M := M) q h v x)
 
-end DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral
+end DifferentialGeometry.Analysis.Spectral
 
 end

@@ -1,5 +1,8 @@
 import DifferentialGeometry.Tensor.RSTensor.FiberMetric.Tensor0SMetricDeriv
 import DifferentialGeometry.Geometry.Operator.RoughLaplacian
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Geometry.Operator
 
 set_option autoImplicit false
 
@@ -59,6 +62,7 @@ set_option autoImplicit false
 
 
 
+namespace DifferentialGeometry
 namespace Tensor0SBundle
 
 noncomputable section
@@ -231,7 +235,8 @@ section Intrinsic
 
 variable {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
 
-open DifferentialGeometry.Integral.Connection
+
+open DifferentialGeometry.Geometry.Operator
 
 
 
@@ -401,7 +406,7 @@ theorem tensorNormBochnerSplit_coord {s : Nat} {x : M}
       funext a
       fin_cases a
       · simp [metricTraceInput, vec2,
-          DifferentialGeometry.Integral.Connection.vec2]
+          DifferentialGeometry.Geometry.Curvature.vec2]
       · rfl
     rw [hinput, hprod i j]
     have hRough :
@@ -521,3 +526,4 @@ end Intrinsic
 end
 
 end Tensor0SBundle
+end DifferentialGeometry

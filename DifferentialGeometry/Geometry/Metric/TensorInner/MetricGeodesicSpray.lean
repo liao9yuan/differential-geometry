@@ -14,6 +14,7 @@ set_option autoImplicit false
 
 noncomputable section
 
+namespace DifferentialGeometry
 namespace MetricKoszul
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]
   [ContinuousDualEquiv E]
@@ -435,3 +436,4 @@ theorem metricSpray_conv
       (fun _ => contDiffOn_snd) contDiffOn_snd hneg_cd hnegInf_cd)
 
 end MetricKoszul
+end DifferentialGeometry

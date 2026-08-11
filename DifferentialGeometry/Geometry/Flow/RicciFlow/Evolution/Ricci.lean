@@ -8,6 +8,8 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.Ricci.CoordinateId
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.Ricci.Lichnerowicz
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.Ricci.QuadraticBound
 
+namespace DifferentialGeometry
+
 /-!
 # Ricci Evolution by Tracing Riemann Evolution
 
@@ -15,3 +17,4 @@ Compatibility umbrella for the split Ricci evolution route.  Public declaration
 names remain in their original namespaces; downstream imports of
 `DifferentialGeometry.PDE.RicciFlow.Evolution.Ricci` should continue to work unchanged.
 -/
+end DifferentialGeometry

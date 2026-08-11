@@ -1,10 +1,12 @@
 import DifferentialGeometry.Tensor.Multilinear.Basis
 import DifferentialGeometry.Tensor.RSTensor.Defs
+open DifferentialGeometry.Tensor.Multilinear
 
 
 
 noncomputable section
 
+namespace DifferentialGeometry
 namespace Tensor0SBundle
 
 open Bundle Module
@@ -211,3 +213,4 @@ theorem basisTensor0S_component
 end Tensor0S
 
 end Tensor0SBundle
+end DifferentialGeometry

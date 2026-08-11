@@ -1,4 +1,10 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.RmRealizationBridge
+open DifferentialGeometry.Tensor.RSTensor
+open DifferentialGeometry.Tensor.RicciIdentity
+open DifferentialGeometry.PDE.RicciFlow
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Geometry.Connection
 
 set_option autoImplicit false
 
@@ -45,7 +51,7 @@ namespace DifferentialGeometry.PDE.RicciFlow
 
 attribute [local instance] Fintype.ofFinite Classical.propDecidable
 
-open Bundle Tensor0SBundle
+open Bundle DifferentialGeometry.Tensor0SBundle
 open DifferentialGeometry.Tensor.Coordinates
 open scoped Manifold ContDiff BigOperators
 
@@ -68,7 +74,7 @@ variable [CompleteSpace E] [SigmaCompactSpace M] [T2Space M]
 
 section Field
 
-variable {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
+variable {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
 
 
 
@@ -142,7 +148,7 @@ end Field
 
 section Bridge
 
-variable {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
+variable {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
 
 
 
@@ -310,7 +316,7 @@ end Bridge
 
 section RicciIdentity
 
-variable {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
+variable {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
 
 
 
@@ -318,7 +324,7 @@ omit [I.Boundaryless] in
 omit [SigmaCompactSpace M] in
 theorem nablaKRm04_nabla0SSectionRealizes
     (S : SolutionOn (I := I) (M := M) D) (t : Real) (k : ℕ) :
-    DifferentialGeometry.Integral.Connection.Nabla0SSectionRealizes (I := I) (4 + k)
+    DifferentialGeometry.Tensor.RicciIdentity.Nabla0SSectionRealizes (I := I) (4 + k)
       (S.family.connection t) (nablaKRm04Field (I := I) S t k)
       (nablaKRm04Field (I := I) S t (k + 1)) := by
   intro y X slots
@@ -333,7 +339,7 @@ omit [I.Boundaryless] in
 omit [SigmaCompactSpace M] in
 theorem nablaKRm04_nabla20SRealizesAt
     (S : SolutionOn (I := I) (M := M) D) (t : Real) (k : ℕ) (x : M) :
-    DifferentialGeometry.Integral.Connection.Nabla20SRealizesAt (I := I) (4 + k)
+    DifferentialGeometry.Tensor.RicciIdentity.Nabla20SRealizesAt (I := I) (4 + k)
       (S.family.connection t) (nablaKRm04Field (I := I) S t k)
       (nablaKRm04Field (I := I) S t (k + 1)) x
       (nablaKRm04Field (I := I) S t (k + 2) x) := by
@@ -352,9 +358,9 @@ omit [SigmaCompactSpace M] in
 theorem nablaKRm04_ricciIdentityAt
     (S : SolutionOn (I := I) (M := M) D)
     (hS : IsSolutionOn (I := I) S)
-    (t : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime D)
+    (t : DifferentialGeometry.Geometry.Curvature.RealTimeInterval.RegularTime D)
     (k : ℕ) (x : M) :
-    DifferentialGeometry.Integral.Connection.Tensor0SRicciIdentityAt (I := I)
+    DifferentialGeometry.Tensor.RSTensor.Tensor0SRicciIdentityAt (I := I)
       (S.base.rm13 (t : Real)) (nablaKRm04Field (I := I) S (t : Real) k x)
       (nablaKRm04Field (I := I) S (t : Real) (k + 2) x) := by
   have hcov :
@@ -363,10 +369,10 @@ theorem nablaKRm04_ricciIdentityAt
     connSmoothOfSol (I := I) S hS (t : Real) (D.regular_subset t.2)
   have htor : (S.family.connection (t : Real)).torsion x = 0 := by
     have htf :=
-      DifferentialGeometry.Integral.Connection.torsionFree_of_isLeviCivita
+      DifferentialGeometry.Geometry.Connection.torsionFree_of_isLeviCivita
         (I := I) (lcAt_regular (I := I) S hS t)
-    simpa [DifferentialGeometry.Integral.Connection.IsTorsionFreeAt] using htf x
-  exact DifferentialGeometry.Integral.Connection.tensor0S_ricciIdentity_of_torsionFree
+    simpa [DifferentialGeometry.Geometry.Connection.IsTorsionFreeAt] using htf x
+  exact DifferentialGeometry.Tensor.RicciIdentity.tensor0S_ricciIdentity_of_torsionFree
     (I := I) (S.family.connection (t : Real)) hcov (S.base.rm13 (t : Real))
     (nablaKRm04Field (I := I) S (t : Real) k)
     (nablaKRm04Field (I := I) S (t : Real) (k + 1))

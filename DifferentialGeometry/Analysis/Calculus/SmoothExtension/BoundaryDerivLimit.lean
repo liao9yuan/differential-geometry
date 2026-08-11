@@ -1,5 +1,7 @@
 import Mathlib.Analysis.Calculus.MeanValue
 
+namespace DifferentialGeometry.Analysis.Calculus.SmoothExtension
+
 
 
 
@@ -102,3 +104,7 @@ theorem hasDerivWithinAt_Ici_of_tendsto_nhdsGT
         mul_le_mul_of_nonneg_left h (le_of_lt (inv_pos.2 hta'))
     _ = ε / 2 := by field_simp
     _ < ε := by linarith
+
+end
+
+end DifferentialGeometry.Analysis.Calculus.SmoothExtension

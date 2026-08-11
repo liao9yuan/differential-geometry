@@ -7,7 +7,7 @@ import Mathlib.Geometry.Manifold.MFDeriv.Basic
 
 
 
-namespace DifferentialGeometry.PDE.RicciFlow.ODE
+namespace DifferentialGeometry.Analysis.ODE
 
 open Bundle
 open scoped Manifold ContDiff
@@ -52,4 +52,4 @@ theorem compose_flow_with_reversed_flow_is_id
             ((ContinuousLinearMap.id ℝ ℝ).smulRight (X t (Φ t x)))) ∧
         (∀ t ∈ Set.Ico (0 : ℝ) T, ∀ x : M, Φ_rev t (Φ t x) = x) := h
 
-end DifferentialGeometry.PDE.RicciFlow.ODE
+end DifferentialGeometry.Analysis.ODE

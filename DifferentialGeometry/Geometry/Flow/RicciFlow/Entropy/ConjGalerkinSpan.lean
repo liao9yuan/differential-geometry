@@ -3,6 +3,10 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.Entropy.ConjCriticalSpan
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Entropy.ConjGalerkinLimit
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Entropy.ConjGalerkinOn
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Entropy.ConjPotentialSpan
+open DifferentialGeometry.Analysis.Sobolev
+open DifferentialGeometry.PDE.RicciFlow DifferentialGeometry.Analysis.Spectral
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Geometry.Curvature
 
 /-!
 # Compact-span scalar Galerkin compactness
@@ -20,10 +24,10 @@ open scoped Manifold Topology ContDiff ENNReal BigOperators
 namespace DifferentialGeometry.PDE.RicciFlow.Entropy
 
 open DifferentialGeometry.Analysis.Parabolic.TensorHeatEquation
-open DifferentialGeometry.Integral.Connection
+
 open DifferentialGeometry.Integral.L2
 open DifferentialGeometry.Integral.Measure
-open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral
+open DifferentialGeometry.Analysis.Spectral
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]
   [FiniteDimensional Real E] [NeZero (Module.finrank Real E)]
@@ -31,7 +35,7 @@ variable {H : Type*} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
   [IsManifold I ∞ M] [CompactSpace M] [I.Boundaryless]
-  [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M]
+  [BoundarylessManifold I M] [T2Space M]
 
 private local instance : CompleteSpace E := FiniteDimensional.complete Real E
 
@@ -55,7 +59,7 @@ theorem gal_span
               IsConjGalSubseq (I := I) (M := M) S T h u0 V phi ulim := by
   classical
   obtain ⟨ρ2, hρ2, hρ2one, hA2⟩ :=
-    lapA20_span (I := I) (M := M) S.family hS.smoothMetric hab
+    lapA20_span (I := I) (M := M) S.family.metric hS.smoothMetric hab
   obtain ⟨ρc, hρc, hρcone, hcritSpan⟩ :=
     scalar_crit_span (I := I) (M := M) S hS hab
   let ρ : Real := min ρ2 ρc
@@ -122,7 +126,7 @@ theorem gallim_span
   obtain ⟨ρg, hρg, hρgone, hgal⟩ :=
     gal_span (I := I) (M := M) S hS hab
   obtain ⟨ρa, hρa, hρaone, hA20⟩ :=
-    lapA20_span (I := I) (M := M) S.family hS.smoothMetric hab
+    lapA20_span (I := I) (M := M) S.family.metric hS.smoothMetric hab
   let ρ : Real := min ρg ρa
   have hρ : 0 < ρ := lt_min hρg hρa
   have hρone : ρ ≤ 1 := (min_le_left ρg ρa).trans hρgone

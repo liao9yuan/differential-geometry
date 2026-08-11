@@ -1,5 +1,6 @@
 import DifferentialGeometry.Analysis.Sobolev.Intrinsic.EquivalenceReverse
 import Mathlib.MeasureTheory.Function.LpSeminorm.LpNorm
+open DifferentialGeometry.Geometry.Operator
 
 set_option autoImplicit false
 
@@ -17,6 +18,7 @@ noncomputable section
 open MeasureTheory
 open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.DivergenceTheorem
+open DifferentialGeometry.Geometry.Operator
 open scoped Manifold ContDiff
 
 
@@ -132,7 +134,7 @@ theorem sobolev_lpNorm
   have hgrad_cont : Continuous gradNorm := by
     have hinner := TangentBundle.continuous_g_inner_of_smooth_sections
       (I := I) (M := M) g
-      (grad_g (I := I) g hu) (grad_g (I := I) g hu)
+      (grad_g (I := I) g ⟨_, hu⟩) (grad_g (I := I) g ⟨_, hu⟩)
     exact Real.continuous_sqrt.comp (by
       simpa only [gradNorm, grad_g_apply] using hinner)
   have hu_mem : MemLp u (ENNReal.ofReal p) μ := by

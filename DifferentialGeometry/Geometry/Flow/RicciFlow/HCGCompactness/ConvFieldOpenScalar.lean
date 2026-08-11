@@ -1,5 +1,8 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.ConvFieldOpen
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.ConvFieldPDE
+open DifferentialGeometry.PDE.RicciFlow
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Geometry.Curvature
 
 set_option autoImplicit false
 
@@ -12,9 +15,9 @@ subsequence and one limit metric family supplied by `OpenConvOut`.
 
 noncomputable section
 
-open Set Function Filter Bundle Manifold TopologicalSpace Tensor0SBundle
+open Set Function Filter Bundle Manifold TopologicalSpace DifferentialGeometry.Tensor0SBundle
 open scoped Manifold Topology ContDiff BigOperators
-open DifferentialGeometry.Integral.Connection
+
 
 namespace DifferentialGeometry
 namespace HCGCompactness

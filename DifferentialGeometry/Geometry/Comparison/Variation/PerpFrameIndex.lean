@@ -3,6 +3,8 @@ import DifferentialGeometry.Geometry.Comparison.Variation.JacobiCoord
 import DifferentialGeometry.Geometry.Comparison.Variation.PerpFrame
 import DifferentialGeometry.Geometry.Comparison.Variation.SecondVariation
 import DifferentialGeometry.Geometry.Curvature.CurvatureOperator.RicciConnection
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Geometry.Curvature
 
 set_option autoImplicit false
 
@@ -141,8 +143,8 @@ def perpCurvOp (g : SmoothRiemannianMetric I M) (γ : ℝ → M)
   (Matrix.toLpLin 2 2
     (fun i j =>
       g.inner (γ t)
-        ((DifferentialGeometry.Integral.Connection.riemannOp
-            (DifferentialGeometry.Integral.Connection.LeviCivita (I := I) g)
+        ((DifferentialGeometry.Geometry.Curvature.riemannOp
+            (DifferentialGeometry.Geometry.Connection.LeviCivita (I := I) g)
             (γ t))
           (F j t) (mfderiv 𝓘(ℝ, ℝ) I γ t (1 : ℝ))
           (mfderiv 𝓘(ℝ, ℝ) I γ t (1 : ℝ)))
@@ -157,8 +159,8 @@ theorem perpCurvOp_apply
     (t : ℝ) (y : EuclideanSpace ℝ ι) (i : ι) :
     perpCurvOp (I := I) g γ F t y i =
       ∑ j, g.inner (γ t)
-        ((DifferentialGeometry.Integral.Connection.riemannOp
-            (DifferentialGeometry.Integral.Connection.LeviCivita (I := I) g)
+        ((DifferentialGeometry.Geometry.Curvature.riemannOp
+            (DifferentialGeometry.Geometry.Connection.LeviCivita (I := I) g)
             (γ t))
           (F j t) (mfderiv 𝓘(ℝ, ℝ) I γ t (1 : ℝ))
           (mfderiv 𝓘(ℝ, ℝ) I γ t (1 : ℝ)))
@@ -222,7 +224,7 @@ theorem perpCurv_smooth
       (E × (E →L[ℝ] E →L[ℝ] E →L[ℝ] E)) :=
     Prod.normedSpace
   have hR0 :=
-    (DifferentialGeometry.Integral.Connection.riemannOp_section_contMDiff
+    (DifferentialGeometry.Geometry.Curvature.riemannOp_section_contMDiff
       (I := I) (M := M) g).comp hγ
   have hR1 (j : ι) :=
     ContMDiff.clm_bundle_apply
@@ -232,8 +234,8 @@ theorem perpCurv_smooth
         TangentSpace I x →L[ℝ] TangentSpace I x →L[ℝ] TangentSpace I x)
       (b := γ)
       (ϕ := fun t =>
-        DifferentialGeometry.Integral.Connection.riemannOp
-          (DifferentialGeometry.Integral.Connection.LeviCivita (I := I) g)
+        DifferentialGeometry.Geometry.Curvature.riemannOp
+          (DifferentialGeometry.Geometry.Connection.LeviCivita (I := I) g)
           (γ t))
       (v := fun t => F j t) hR0 (hF j)
   have hR2 (j : ι) :=
@@ -243,8 +245,8 @@ theorem perpCurv_smooth
       (E₂ := fun x : M => TangentSpace I x →L[ℝ] TangentSpace I x)
       (b := γ)
       (ϕ := fun t =>
-        (DifferentialGeometry.Integral.Connection.riemannOp
-          (DifferentialGeometry.Integral.Connection.LeviCivita (I := I) g)
+        (DifferentialGeometry.Geometry.Curvature.riemannOp
+          (DifferentialGeometry.Geometry.Connection.LeviCivita (I := I) g)
           (γ t)) (F j t))
       (v := fun t => mfderiv 𝓘(ℝ, ℝ) I γ t (1 : ℝ))
       (hR1 j) hvel
@@ -255,15 +257,15 @@ theorem perpCurv_smooth
       (E₂ := fun x : M => TangentSpace I x)
       (b := γ)
       (ϕ := fun t =>
-        (DifferentialGeometry.Integral.Connection.riemannOp
-          (DifferentialGeometry.Integral.Connection.LeviCivita (I := I) g)
+        (DifferentialGeometry.Geometry.Curvature.riemannOp
+          (DifferentialGeometry.Geometry.Connection.LeviCivita (I := I) g)
           (γ t)) (F j t) (mfderiv 𝓘(ℝ, ℝ) I γ t (1 : ℝ)))
       (v := fun t => mfderiv 𝓘(ℝ, ℝ) I γ t (1 : ℝ))
       (hR2 j) hvel
   have hcoeff (i j : ι) : ContDiff ℝ ∞
       (fun t : ℝ => g.inner (γ t)
-        ((DifferentialGeometry.Integral.Connection.riemannOp
-          (DifferentialGeometry.Integral.Connection.LeviCivita (I := I) g)
+        ((DifferentialGeometry.Geometry.Curvature.riemannOp
+          (DifferentialGeometry.Geometry.Connection.LeviCivita (I := I) g)
           (γ t)) (F j t) (mfderiv 𝓘(ℝ, ℝ) I γ t (1 : ℝ))
             (mfderiv 𝓘(ℝ, ℝ) I γ t (1 : ℝ)))
         (F i t)) :=
@@ -487,8 +489,8 @@ theorem perpCurv_coeff
       if i = j then 1 else 0)
     (i : ι) :
     g.inner (γ t) (F i t)
-        ((DifferentialGeometry.Integral.Connection.riemannOp
-            (DifferentialGeometry.Integral.Connection.LeviCivita (I := I) g)
+        ((DifferentialGeometry.Geometry.Curvature.riemannOp
+            (DifferentialGeometry.Geometry.Connection.LeviCivita (I := I) g)
             (γ t))
           (Y t) (curveVelocity (I := I) γ t)
           (curveVelocity (I := I) γ t)) =
@@ -510,8 +512,8 @@ theorem perpCurv_coeff
     (curveVelocity (I := I) γ t) (Y t) hcard hvel hFperp hYperp hON
   have hcurv := congrArg
     (fun Z : TangentSpace I (γ t) =>
-      (DifferentialGeometry.Integral.Connection.riemannOp
-        (DifferentialGeometry.Integral.Connection.LeviCivita (I := I) g)
+      (DifferentialGeometry.Geometry.Curvature.riemannOp
+        (DifferentialGeometry.Geometry.Connection.LeviCivita (I := I) g)
         (γ t))
         Z (curveVelocity (I := I) γ t) (curveVelocity (I := I) γ t))
     hYexp
@@ -524,8 +526,8 @@ theorem perpCurv_coeff
   simp only [perpCoeff_apply]
   refine Finset.sum_congr rfl fun j _ => ?_
   rw [g.symm (γ t) (F i t)
-    ((DifferentialGeometry.Integral.Connection.riemannOp
-      (DifferentialGeometry.Integral.Connection.LeviCivita (I := I) g)
+    ((DifferentialGeometry.Geometry.Curvature.riemannOp
+      (DifferentialGeometry.Geometry.Connection.LeviCivita (I := I) g)
       (γ t))
       (F j t) (curveVelocity (I := I) γ t)
       (curveVelocity (I := I) γ t))]
@@ -630,24 +632,24 @@ theorem jacobi_perp_of_ends
       (I := I) g γ t hγ).mpr (hgeo.hasGeodesicEquationAt t)
   have hcurvzero (t : ℝ) :
       g.inner (γ t) (curveVelocity (I := I) γ t)
-        ((DifferentialGeometry.Integral.Connection.riemannOp
-            (DifferentialGeometry.Integral.Connection.LeviCivita (I := I) g)
+        ((DifferentialGeometry.Geometry.Curvature.riemannOp
+            (DifferentialGeometry.Geometry.Connection.LeviCivita (I := I) g)
             (γ t))
           (J t) (curveVelocity (I := I) γ t)
           (curveVelocity (I := I) γ t)) = 0 := by
     have hRzero :
-        (DifferentialGeometry.Integral.Connection.riemannOp
-            (DifferentialGeometry.Integral.Connection.LeviCivita (I := I) g)
+        (DifferentialGeometry.Geometry.Curvature.riemannOp
+            (DifferentialGeometry.Geometry.Connection.LeviCivita (I := I) g)
             (γ t))
           (curveVelocity (I := I) γ t) (curveVelocity (I := I) γ t)
           (curveVelocity (I := I) γ t) = 0 := by
-      have hswap := DifferentialGeometry.Integral.Connection.riemannOp_swap
-        (DifferentialGeometry.Integral.Connection.LeviCivita (I := I) g)
+      have hswap := DifferentialGeometry.Geometry.Curvature.riemannOp_swap
+        (DifferentialGeometry.Geometry.Connection.LeviCivita (I := I) g)
         (γ t) (curveVelocity (I := I) γ t)
         (curveVelocity (I := I) γ t) (curveVelocity (I := I) γ t)
       set a :=
-        (DifferentialGeometry.Integral.Connection.riemannOp
-            (DifferentialGeometry.Integral.Connection.LeviCivita (I := I) g)
+        (DifferentialGeometry.Geometry.Curvature.riemannOp
+            (DifferentialGeometry.Geometry.Connection.LeviCivita (I := I) g)
             (γ t))
           (curveVelocity (I := I) γ t) (curveVelocity (I := I) γ t)
           (curveVelocity (I := I) γ t) with ha
@@ -661,27 +663,27 @@ theorem jacobi_perp_of_ends
       exact (smul_eq_zero.mp hsmul).resolve_left hne
     calc
       g.inner (γ t) (curveVelocity (I := I) γ t)
-          ((DifferentialGeometry.Integral.Connection.riemannOp
-              (DifferentialGeometry.Integral.Connection.LeviCivita (I := I) g)
+          ((DifferentialGeometry.Geometry.Curvature.riemannOp
+              (DifferentialGeometry.Geometry.Connection.LeviCivita (I := I) g)
               (γ t))
             (J t) (curveVelocity (I := I) γ t)
             (curveVelocity (I := I) γ t)) =
         g.inner (γ t)
-          ((DifferentialGeometry.Integral.Connection.riemannOp
-              (DifferentialGeometry.Integral.Connection.LeviCivita (I := I) g)
+          ((DifferentialGeometry.Geometry.Curvature.riemannOp
+              (DifferentialGeometry.Geometry.Connection.LeviCivita (I := I) g)
               (γ t))
             (J t) (curveVelocity (I := I) γ t)
             (curveVelocity (I := I) γ t))
           (curveVelocity (I := I) γ t) :=
         g.symm (γ t) _ _
       _ = g.inner (γ t) (J t)
-          ((DifferentialGeometry.Integral.Connection.riemannOp
-              (DifferentialGeometry.Integral.Connection.LeviCivita (I := I) g)
+          ((DifferentialGeometry.Geometry.Curvature.riemannOp
+              (DifferentialGeometry.Geometry.Connection.LeviCivita (I := I) g)
               (γ t))
             (curveVelocity (I := I) γ t)
             (curveVelocity (I := I) γ t)
             (curveVelocity (I := I) γ t)) :=
-        DifferentialGeometry.Integral.Connection.riemannOp_diag_symm
+        DifferentialGeometry.Geometry.Curvature.riemannOp_diag_symm
           (I := I) g (γ t) (curveVelocity (I := I) γ t) (J t)
           (curveVelocity (I := I) γ t)
       _ = 0 := by rw [hRzero, map_zero]
@@ -833,8 +835,8 @@ theorem perpCurv_inner
     (y z : EuclideanSpace ℝ ι) (t : ℝ) :
     inner ℝ (perpCurvOp (I := I) g γ F t y) z =
       g.inner (γ t)
-        ((DifferentialGeometry.Integral.Connection.riemannOp
-            (DifferentialGeometry.Integral.Connection.LeviCivita (I := I) g)
+        ((DifferentialGeometry.Geometry.Curvature.riemannOp
+            (DifferentialGeometry.Geometry.Connection.LeviCivita (I := I) g)
             (γ t))
           (∑ j, y j • F j t)
           (mfderiv 𝓘(ℝ, ℝ) I γ t (1 : ℝ))
@@ -861,13 +863,13 @@ theorem perpCurv_symm
     inner ℝ (perpCurvOp (I := I) g γ F t y) z =
       inner ℝ y (perpCurvOp (I := I) g γ F t z) := by
   rw [perpCurv_inner (I := I) g γ F y z t]
-  rw [DifferentialGeometry.Integral.Connection.riemannOp_diag_symm
+  rw [DifferentialGeometry.Geometry.Curvature.riemannOp_diag_symm
     (I := I) g (γ t) (mfderiv 𝓘(ℝ, ℝ) I γ t (1 : ℝ))
     (∑ j, y j • F j t) (∑ i, z i • F i t)]
   rw [g.symm (γ t)
     (∑ j, y j • F j t)
-    ((DifferentialGeometry.Integral.Connection.riemannOp
-        (DifferentialGeometry.Integral.Connection.LeviCivita (I := I) g)
+    ((DifferentialGeometry.Geometry.Curvature.riemannOp
+        (DifferentialGeometry.Geometry.Connection.LeviCivita (I := I) g)
         (γ t))
       (∑ i, z i • F i t)
       (mfderiv 𝓘(ℝ, ℝ) I γ t (1 : ℝ))

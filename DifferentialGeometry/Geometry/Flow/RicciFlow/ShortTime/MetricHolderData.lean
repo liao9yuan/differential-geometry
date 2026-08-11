@@ -1,6 +1,10 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.MetricWkpData
 import Mathlib.Analysis.Calculus.MeanValue
 import Mathlib.Topology.MetricSpace.HolderNorm
+open DifferentialGeometry.PDE.RicciFlow
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Geometry.Connection
 
 /-!
 # Uniform low-order Holder data for metric families
@@ -20,7 +24,7 @@ route.  It does not use a high Sobolev norm and it does not use ellipticity.
 
 noncomputable section
 
-open Bundle Manifold Set Tensor0SBundle
+open Bundle Manifold Set DifferentialGeometry.Tensor0SBundle
 open scoped Manifold Topology ContDiff NNReal ENNReal BigOperators
 
 namespace DifferentialGeometry.PDE.RicciFlow
@@ -37,7 +41,7 @@ variable
     {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
     {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
       [IsManifold I ∞ M] [CompactSpace M] [I.Boundaryless]
-      [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M]
+      [BoundarylessManifold I M] [T2Space M]
 
 local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 

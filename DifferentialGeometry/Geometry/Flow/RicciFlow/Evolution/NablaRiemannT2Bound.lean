@@ -1,6 +1,10 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.RmRaisingBridge
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.NablaRiemannOrthoFrame
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.NablaRiemannHeat
+open DifferentialGeometry.Tensor.RSTensor
+open DifferentialGeometry.PDE.RicciFlow
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Geometry.Curvature
 
 set_option autoImplicit false
 
@@ -65,9 +69,9 @@ noncomputable section
 
 namespace DifferentialGeometry.PDE.RicciFlow
 
-open Bundle Tensor0SBundle
+open Bundle DifferentialGeometry.Tensor0SBundle
 open DifferentialGeometry.Tensor.Coordinates
-open DifferentialGeometry.Integral.Connection
+
 open scoped Manifold ContDiff BigOperators
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]
@@ -293,7 +297,7 @@ section OrthoBasisFrame
 omit [I.Boundaryless] [IsManifold I 2 M] in
 omit [SigmaCompactSpace M] [T2Space M] in
 theorem exists_orthoBasisFrameAt
-    {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
+    {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D) (t : Real) (x₀ : M) :
     ∃ (n : ℕ) (frame : Fin n → (x : M) → TangentSpace I x)
       (basis : Module.Basis (Fin n) Real (TangentSpace I x₀)),
@@ -351,7 +355,7 @@ variable {n : ℕ}
 
 omit [I.Boundaryless] in
 theorem abs_nablaLapComm_T2_orthoBasis_le
-    {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
+    {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D) (t : Real) (x₀ : M)
     (frame : Fin n → (x : M) → TangentSpace I x)
     (basis : Module.Basis (Fin n) Real (TangentSpace I x₀))
@@ -443,7 +447,7 @@ theorem compNormSqMulti_eq_compNormSq5
 
 omit [I.Boundaryless] in
 theorem abs_nablaLapComm_T2_orthoFrame_le
-    {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
+    {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D) (t : Real) (x₀ : M) :
     ∃ (n : ℕ) (frame : Fin n → (x : M) → TangentSpace I x),
       (∀ i j : Fin n,
@@ -478,7 +482,7 @@ theorem abs_nablaLapComm_T2_orthoFrame_le
       refine Finset.sum_congr rfl fun j _ => ?_
       refine Finset.sum_congr rfl fun k _ => ?_
       refine Finset.sum_congr rfl fun l _ => ?_
-      simp only [DifferentialGeometry.Integral.Connection.rm04Comp]
+      simp only [DifferentialGeometry.Geometry.Curvature.rm04Comp]
       rw [hframe i, hframe j, hframe k, hframe l]
     have hNab :
         compNormSqMulti (fun idx : Fin 5 → Fin n =>

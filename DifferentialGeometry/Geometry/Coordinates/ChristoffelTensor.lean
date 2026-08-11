@@ -2,6 +2,8 @@ import DifferentialGeometry.Geometry.Coordinates.Christoffel
 import DifferentialGeometry.Geometry.Coordinates.Tensor
 import DifferentialGeometry.Tensor.RSTensor.NablaOnTensors.ConnectionDifference
 import DifferentialGeometry.Tensor.RSTensor.TensorRSRiemannian
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Geometry.Curvature
 
 set_option autoImplicit false
 
@@ -17,7 +19,7 @@ namespace DifferentialGeometry.Tensor.Coordinates
 
 noncomputable section
 
-open Bundle Module Tensor0SBundle
+open Bundle Module DifferentialGeometry.Tensor0SBundle
 open scoped BigOperators Manifold ContDiff
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]

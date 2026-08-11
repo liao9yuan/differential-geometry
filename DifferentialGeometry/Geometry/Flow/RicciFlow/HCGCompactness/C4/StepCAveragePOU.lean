@@ -1,1 +1,4 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.C4.HatUniformData
+
+namespace DifferentialGeometry
+end DifferentialGeometry

@@ -3,6 +3,8 @@ import DifferentialGeometry.Geometry.Coordinates.MetricCompatibility.Covariant
 import DifferentialGeometry.Geometry.Coordinates.MetricCompatibility.Coordinate
 import DifferentialGeometry.Tensor.RSTensor.CotangentRiemannian
 import DifferentialGeometry.Bundle.LocalFrameRegularity
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Geometry.Curvature
 
 set_option autoImplicit false
 
@@ -15,9 +17,10 @@ set_option autoImplicit false
 
 noncomputable section
 
-namespace DifferentialGeometry.Integral.Connection
+namespace DifferentialGeometry.Geometry.Operator
 
-open Bundle Tensor0SBundle
+
+open Bundle DifferentialGeometry.Tensor0SBundle
 open DifferentialGeometry.Tensor.Coordinates
 open scoped BigOperators Manifold ContDiff Topology
 
@@ -225,4 +228,4 @@ theorem mdiffAt_const_mul_sub_const_smul_gradientFun
     exact gradientFun_mdiffAt (I := I) g hu y
   simpa [u] using scalar_mul_grad_mdiffAt (I := I) g hudiff hugrad
 
-end DifferentialGeometry.Integral.Connection
+end DifferentialGeometry.Geometry.Operator

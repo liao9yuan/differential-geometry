@@ -11,6 +11,7 @@ import Mathlib.Topology.VectorBundle.Basic
 import Mathlib.LinearAlgebra.Trace
 
 
+namespace DifferentialGeometry
 namespace Tensor0SBundle
 noncomputable section
 
@@ -1060,3 +1061,4 @@ end FieldContraction
 
 end
 end Tensor0SBundle
+end DifferentialGeometry

@@ -4,6 +4,8 @@ import DifferentialGeometry.Geometry.Comparison.Volume.Packing
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.BoundedGeometry
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.C4.PointedEmetric
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.C4.StepAInputs
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Geometry.Curvature
 
 set_option autoImplicit false
 
@@ -80,9 +82,9 @@ theorem exists_pairR_of_boundedGeometry
         ENNReal.ofReal (Real.sqrt ((Blo ^ 2) ^ Module.finrank Real E)) *
             (ENNReal.ofReal (Rlo ^ Module.finrank Real E) *
               (Integral.Measure.modelHaar (E := E)) (Metric.ball (0 : E) 1)) ≤
-          Integral.Measure.riemannianVolumeMeasure (I := I) (M := Y.M) Y.metric
+          DifferentialGeometry.Integral.Measure.riemannianVolumeMeasure (I := I) (M := Y.M) Y.metric
             (Metric.ball p s) ∧
-        Integral.Measure.riemannianVolumeMeasure (I := I) (M := Y.M) Y.metric
+        DifferentialGeometry.Integral.Measure.riemannianVolumeMeasure (I := I) (M := Y.M) Y.metric
             (Metric.ball p s) ≤
           ENNReal.ofReal
             (Real.sqrt (((Module.finrank Real E).factorial : Real) *
@@ -170,9 +172,9 @@ theorem exists_pairR_of_seqBoundedGeometry
         ENNReal.ofReal (Real.sqrt ((Blo ^ 2) ^ Module.finrank Real E)) *
             (ENNReal.ofReal (Rlo ^ Module.finrank Real E) *
               (Integral.Measure.modelHaar (E := E)) (Metric.ball (0 : E) 1)) ≤
-          Integral.Measure.riemannianVolumeMeasure (I := I) (M := Y.M) Y.metric
+          DifferentialGeometry.Integral.Measure.riemannianVolumeMeasure (I := I) (M := Y.M) Y.metric
             (Metric.ball p s) ∧
-        Integral.Measure.riemannianVolumeMeasure (I := I) (M := Y.M) Y.metric
+        DifferentialGeometry.Integral.Measure.riemannianVolumeMeasure (I := I) (M := Y.M) Y.metric
             (Metric.ball p s) ≤
           ENNReal.ofReal
             (Real.sqrt (((Module.finrank Real E).factorial : Real) *
@@ -282,7 +284,7 @@ structure UniformBallPack
       letI : MetricSpace Y.M := ms k
       letI : MeasurableSpace Y.M := borel Y.M
       ENNReal.ofReal (L m r) ≤
-        Integral.Measure.riemannianVolumeMeasure (I := I) (M := Y.M) Y.metric
+        DifferentialGeometry.Integral.Measure.riemannianVolumeMeasure (I := I) (M := Y.M) Y.metric
           (Metric.ball p (r / 2))
   upper : ∀ m : Real, ∀ k : Nat, ∀ z : (X.obj k).M, ∀ {r : Real},
     0 < r → m * r ≤ r0 →
@@ -294,7 +296,7 @@ structure UniformBallPack
       letI : SigmaCompactSpace Y.M := Y.sigmaCompact
       letI : MetricSpace Y.M := ms k
       letI : MeasurableSpace Y.M := borel Y.M
-      Integral.Measure.riemannianVolumeMeasure (I := I) (M := Y.M) Y.metric
+      DifferentialGeometry.Integral.Measure.riemannianVolumeMeasure (I := I) (M := Y.M) Y.metric
           (Metric.ball z ((m + 1 / 2) * r)) ≤
         ENNReal.ofReal (U m r)
 
@@ -323,7 +325,7 @@ def toVCInput {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
     letI : SigmaCompactSpace Y.M := Y.sigmaCompact
     letI : MetricSpace Y.M := h.ms k
     letI : MeasurableSpace Y.M := borel Y.M
-    let μ := Integral.Measure.riemannianVolumeMeasure (I := I) (M := Y.M) Y.metric
+    let μ := DifferentialGeometry.Integral.Measure.riemannianVolumeMeasure (I := I) (M := Y.M) Y.metric
     have hsep_metric :
         ∀ i ∈ J, ∀ j ∈ J, i ≠ j →
           r ≤ @Dist.dist Y.M _ (centers i) (centers j) := by

@@ -1,6 +1,9 @@
 import DifferentialGeometry.Geometry.Exponential.LocalAddition
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.SolutionRestrictOpen
 import DifferentialGeometry.Geometry.Geodesic.OpenSubtype
+open DifferentialGeometry.PDE.RicciFlow
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Geometry.Curvature
 
 set_option autoImplicit false
 
@@ -37,7 +40,7 @@ open scoped Manifold Topology ContDiff
 open DifferentialGeometry.Geometry.Riemannian.Exponential
 open DifferentialGeometry.Geometry.Riemannian.Geodesic
 open DifferentialGeometry.HCGCompactness
-open DifferentialGeometry.Integral.Connection
+
 open DifferentialGeometry.Integral.Measure
 
 namespace DifferentialGeometry.PDE.RicciFlow
@@ -48,7 +51,7 @@ variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
   [I.Boundaryless]
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
   [IsManifold I ∞ M] [CompactSpace M] [BoundarylessManifold I M]
-  [T2Space M] [SigmaCompactSpace M]
+  [T2Space M]
 
 /-- A metric family restricted to the open connected component of `p`. -/
 noncomputable def compRestrict
@@ -58,7 +61,7 @@ noncomputable def compRestrict
   exact fun t => (g t).restrictOpen (I := I) (connCompOpen (I := I) p)
 
 omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [CompactSpace M]
-  [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
+  [BoundarylessManifold I M] [T2Space M] in
 private theorem compBase_mem
     (p : M) (x₀ y : connCompOpen (I := I) p)
     (hy : y ∈ (trivializationAt E (TangentSpace I) x₀).baseSet) :
@@ -69,7 +72,7 @@ private theorem compBase_mem
 
 omit [NeZero (Module.finrank ℝ E)]
   [BoundarylessManifold I M]
-  [SigmaCompactSpace M] in
+  in
 /-- Equality of two initial metrics survives restriction to a connected component. -/
 theorem compRestrict_init
     (g₁ g₂ : ℝ → SmoothRiemannianMetric I M) (p : M) (a : ℝ)
@@ -80,7 +83,7 @@ theorem compRestrict_init
     (fun g : SmoothRiemannianMetric I M =>
       g.restrictOpen (I := I) (connCompOpen (I := I) p)) h₀
 
-omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] in
 /-- Open-slab joint chart-Gram smoothness survives restriction to a connected component. -/
 theorem compRestrict_smooth
     (g : ℝ → SmoothRiemannianMetric I M) (p : M) {a b : ℝ}
@@ -114,7 +117,7 @@ theorem compRestrict_smooth
     (chartGram_open (I := I) (g q.1) (connCompOpen (I := I) p) x₀ q.2
       hsource i j)
 
-omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] in
 /-- Closed-edge joint chart-Gram continuity survives restriction to a connected component. -/
 theorem compRestrict_cont
     (g : ℝ → SmoothRiemannianMetric I M) (p : M) {a b : ℝ}
@@ -171,7 +174,7 @@ theorem compRestrict_pde
 /-! ## Reassembling componentwise uniqueness -/
 
 omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [CompactSpace M]
-  [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
+  [BoundarylessManifold I M] [T2Space M] in
 private theorem metric_ext
     (g h : SmoothRiemannianMetric I M)
     (hinner : ∀ (x : M) (v w : TangentSpace I x),
@@ -185,7 +188,7 @@ private theorem metric_ext
   subst hi
   rfl
 
-omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] in
 /-- Equality of two metrics on every connected-component restriction implies
 equality of the ambient metrics.  It is enough at `x` to inspect the component
 anchored at `x` and evaluate the restricted equality at `connCompPt x`. -/

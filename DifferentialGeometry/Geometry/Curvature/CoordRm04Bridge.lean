@@ -1,5 +1,6 @@
 import DifferentialGeometry.Geometry.Curvature.MetricLeviCivitaReconcile
 import DifferentialGeometry.Geometry.Connection.ChartBridge.RiemannBasisIdentity
+open DifferentialGeometry.Geometry.Curvature
 
 
 
@@ -16,11 +17,12 @@ import DifferentialGeometry.Geometry.Connection.ChartBridge.RiemannBasisIdentity
 
 
 
+open DifferentialGeometry.Geometry.Connection
 namespace DifferentialGeometry
 
 open Bundle Manifold Set
 open scoped Manifold Topology ContDiff
-open DifferentialGeometry.Integral.Connection
+
 open CovariantDerivative
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]

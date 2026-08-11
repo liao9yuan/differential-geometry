@@ -6,6 +6,10 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.MovingShiProd
 import DifferentialGeometry.Analysis.Spectral.Tensor.UniformChartBounds.ChartGramUniformContinuity
 import DifferentialGeometry.Geometry.Metric.ChartGram
 import DifferentialGeometry.Geometry.Curvature.RicciOperatorNormBound
+open DifferentialGeometry.PDE.RicciFlow
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Geometry.Operator
 
 
 
@@ -19,16 +23,18 @@ import DifferentialGeometry.Geometry.Curvature.RicciOperatorNormBound
 
 
 
+open DifferentialGeometry.Geometry.Connection
 namespace DifferentialGeometry.PDE.RicciFlow
 
 open Bundle Set Filter
 open scoped Manifold ContDiff Topology
 open DifferentialGeometry
-open DifferentialGeometry.Integral.Connection
+
+open DifferentialGeometry.Geometry.Operator
 open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.HCGCompactness
 open DifferentialGeometry.Analysis.Parabolic.TensorSpectral
-open Tensor0SBundle
+open DifferentialGeometry.Tensor0SBundle
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
     [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
@@ -269,12 +275,12 @@ private theorem chartJet0_le_of_equiv
     (hgRef : ∀ (a : Fin (Module.finrank ℝ E)) (b : M), b ∈ Q →
       chartGramMatrix gRef α₀ b a a ≤ M0)
     (i j : Fin (Module.finrank ℝ E)) {x : M} (hx : x ∈ Q) :
-    |Integral.DivergenceTheorem.chartGramOnE (I := I) g α₀ i j (extChartAt I α₀ x)| ≤ C * M0 := by
+    |DifferentialGeometry.Geometry.Operator.chartGramOnE (I := I) g α₀ i j (extChartAt I α₀ x)| ≤ C * M0 := by
   have hxsrc : x ∈ (extChartAt I α₀).source := by
     rw [extChartAt_source]; exact goodSet_subset_chartSource α₀ (hQ hx)
-  have hred : Integral.DivergenceTheorem.chartGramOnE (I := I) g α₀ i j (extChartAt I α₀ x)
+  have hred : DifferentialGeometry.Geometry.Operator.chartGramOnE (I := I) g α₀ i j (extChartAt I α₀ x)
       = chartGramMatrix g α₀ x i j := by
-    rw [Integral.DivergenceTheorem.chartGramOnE_def, (extChartAt I α₀).left_inv hxsrc]
+    rw [DifferentialGeometry.Geometry.Operator.chartGramOnE_def, (extChartAt I α₀).left_inv hxsrc]
   rw [hred]
   exact chartGramEntry_le_of_equiv gRef g hC0 hM0 α₀ hequiv hgRef i j hx
 
@@ -461,6 +467,7 @@ theorem ric_quad_le_of_soln
 
 
 
+omit [SigmaCompactSpace M] in
 theorem movingShi_of_soln
     {alpha omega : ℝ} {hαω : alpha < omega}
     {S : SolutionOn (I := I) (M := M) (RealTimeInterval.closedOpen alpha omega hαω)}
@@ -477,6 +484,7 @@ theorem movingShi_of_soln
 
 
 
+omit [SigmaCompactSpace M] in
 theorem shiCovBound_of_soln
     {alpha omega : ℝ} {hαω : alpha < omega}
     {S : SolutionOn (I := I) (M := M) (RealTimeInterval.closedOpen alpha omega hαω)}
@@ -581,6 +589,7 @@ theorem shiCovBound_of_soln
 
 
 
+omit [SigmaCompactSpace M] in
 theorem extendInputs_of_soln
     {alpha omega : ℝ} {hαω : alpha < omega}
     {S : SolutionOn (I := I) (M := M) (RealTimeInterval.closedOpen alpha omega hαω)}

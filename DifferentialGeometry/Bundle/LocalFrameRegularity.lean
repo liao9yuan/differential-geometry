@@ -19,7 +19,7 @@ namespace DifferentialGeometry
 attribute [local instance] Fintype.ofFinite Classical.propDecidable
 
 open Bundle
-open Tensor0SBundle
+open DifferentialGeometry.Tensor0SBundle
 open scoped Manifold ContDiff Topology
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]

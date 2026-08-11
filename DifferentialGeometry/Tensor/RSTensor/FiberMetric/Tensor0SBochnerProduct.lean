@@ -3,6 +3,10 @@ import DifferentialGeometry.Tensor.RSTensor.FiberMetric.Tensor0SInnerLeibniz
 import DifferentialGeometry.Tensor.RSTensor.Tensor0SRiemannian.Comparison
 import DifferentialGeometry.Geometry.Connection.TensorNabla.Tensor0SPartialEval
 import DifferentialGeometry.Geometry.Operator.HessianTraceRealization
+open DifferentialGeometry.Tensor.RicciIdentity
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Geometry.Operator
 
 set_option autoImplicit false
 set_option backward.isDefEq.respectTransparency false
@@ -49,12 +53,15 @@ set_option backward.isDefEq.respectTransparency false
 
 
 
+open DifferentialGeometry.Geometry.Connection
+namespace DifferentialGeometry
 namespace Tensor0SBundle
 
 noncomputable section
 
 open scoped Manifold ContDiff BigOperators Topology
-open DifferentialGeometry.Integral.Connection
+
+open DifferentialGeometry.Geometry.Operator
 open DifferentialGeometry.Tensor.Coordinates
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]
@@ -739,3 +746,4 @@ theorem tensorNormBochnerSplit_mc {s : ℕ}
 end
 
 end Tensor0SBundle
+end DifferentialGeometry

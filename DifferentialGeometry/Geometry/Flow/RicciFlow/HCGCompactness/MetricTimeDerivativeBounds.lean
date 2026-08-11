@@ -6,6 +6,9 @@ import Mathlib.Analysis.InnerProductSpace.Spectrum
 import Mathlib.Analysis.SpecialFunctions.Log.Deriv
 import Mathlib.MeasureTheory.Integral.IntervalIntegral.Basic
 import DifferentialGeometry.Geometry.Connection.LeviCivita.Variation.Connection
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Geometry.Connection
 
 
 set_option autoImplicit false
@@ -248,9 +251,9 @@ variable [Fintype Idx]
 
 theorem norm_componentVec3
     (A : Idx -> Idx -> Idx -> Real) :
-    ‖componentVec3 A‖ = Real.sqrt (DifferentialGeometry.Integral.Connection.componentL2Sq3 A) := by
+    ‖componentVec3 A‖ = Real.sqrt (DifferentialGeometry.Geometry.Connection.componentL2Sq3 A) := by
   rw [EuclideanSpace.norm_eq]
-  simp [componentVec3, DifferentialGeometry.Integral.Connection.componentL2Sq3, Real.norm_eq_abs,
+  simp [componentVec3, DifferentialGeometry.Geometry.Connection.componentL2Sq3, Real.norm_eq_abs,
     sq_abs]
 
 end FintypeNorm
@@ -347,9 +350,9 @@ theorem componentL2_le_initial_add
             (A' s p.1 p.2.1 p.2.2) s)
     (hbound :
       forall s : Real, s ∈ Set.uIcc a b ->
-        Real.sqrt (DifferentialGeometry.Integral.Connection.componentL2Sq3 (A' s)) <= L) :
-    Real.sqrt (DifferentialGeometry.Integral.Connection.componentL2Sq3 (A b)) <=
-      L * |b - a| + Real.sqrt (DifferentialGeometry.Integral.Connection.componentL2Sq3 (A a)) := by
+        Real.sqrt (DifferentialGeometry.Geometry.Connection.componentL2Sq3 (A' s)) <= L) :
+    Real.sqrt (DifferentialGeometry.Geometry.Connection.componentL2Sq3 (A b)) <=
+      L * |b - a| + Real.sqrt (DifferentialGeometry.Geometry.Connection.componentL2Sq3 (A a)) := by
   have hvecDeriv :
       forall s : Real, s ∈ Set.uIcc a b ->
         HasDerivAt (fun r : Real => componentVec3 (A r))
@@ -380,9 +383,9 @@ theorem componentL2_le_initial_add_within
             (A' s p.1 p.2.1 p.2.2) (Set.uIcc a b) s)
     (hbound :
       forall s : Real, s ∈ Set.uIcc a b ->
-        Real.sqrt (DifferentialGeometry.Integral.Connection.componentL2Sq3 (A' s)) <= L) :
-    Real.sqrt (DifferentialGeometry.Integral.Connection.componentL2Sq3 (A b)) <=
-      L * |b - a| + Real.sqrt (DifferentialGeometry.Integral.Connection.componentL2Sq3 (A a)) := by
+        Real.sqrt (DifferentialGeometry.Geometry.Connection.componentL2Sq3 (A' s)) <= L) :
+    Real.sqrt (DifferentialGeometry.Geometry.Connection.componentL2Sq3 (A b)) <=
+      L * |b - a| + Real.sqrt (DifferentialGeometry.Geometry.Connection.componentL2Sq3 (A a)) := by
   have hvecDeriv :
       forall s : Real, s ∈ Set.uIcc a b ->
         HasDerivWithinAt (fun r : Real => componentVec3 (A r))
@@ -416,9 +419,9 @@ theorem componentL2_le_initial_add_on_subset
             (A' s p.1 p.2.1 p.2.2) S s)
     (hbound :
       forall s : Real, s ∈ Set.uIcc a b ->
-        Real.sqrt (DifferentialGeometry.Integral.Connection.componentL2Sq3 (A' s)) <= L) :
-    Real.sqrt (DifferentialGeometry.Integral.Connection.componentL2Sq3 (A b)) <=
-      L * |b - a| + Real.sqrt (DifferentialGeometry.Integral.Connection.componentL2Sq3 (A a)) := by
+        Real.sqrt (DifferentialGeometry.Geometry.Connection.componentL2Sq3 (A' s)) <= L) :
+    Real.sqrt (DifferentialGeometry.Geometry.Connection.componentL2Sq3 (A b)) <=
+      L * |b - a| + Real.sqrt (DifferentialGeometry.Geometry.Connection.componentL2Sq3 (A a)) := by
   refine componentL2_le_initial_add_within
     (A := A) (A' := A') (a := a) (b := b) (L := L) ?_ hbound
   intro s hs p
@@ -447,16 +450,16 @@ theorem gammaL2_le_initial_add
             -nablaRic s i j k - nablaRic s j i k + nablaRic s k i j)
     (hRic :
       forall s : Real, s ∈ Set.uIcc a b ->
-        Real.sqrt (DifferentialGeometry.Integral.Connection.componentL2Sq3 (nablaRic s)) <= R) :
-    Real.sqrt (DifferentialGeometry.Integral.Connection.componentL2Sq3 (Gamma b)) <=
+        Real.sqrt (DifferentialGeometry.Geometry.Connection.componentL2Sq3 (nablaRic s)) <= R) :
+    Real.sqrt (DifferentialGeometry.Geometry.Connection.componentL2Sq3 (Gamma b)) <=
       3 * R * |b - a| +
-        Real.sqrt (DifferentialGeometry.Integral.Connection.componentL2Sq3 (Gamma a)) := by
+        Real.sqrt (DifferentialGeometry.Geometry.Connection.componentL2Sq3 (Gamma a)) := by
   refine componentL2_le_initial_add
     (A := Gamma) (A' := dGamma) (a := a) (b := b) (L := 3 * R)
     hderiv ?_
   intro s hs
   exact le_trans
-    (DifferentialGeometry.Integral.Connection.gammaEvol_l2_le (Idx := Idx) (nablaRic s) (dGamma s)
+    (DifferentialGeometry.Geometry.Connection.gammaEvol_l2_le (Idx := Idx) (nablaRic s) (dGamma s)
       (hcombo s hs))
     (mul_le_mul_of_nonneg_left (hRic s hs) (by norm_num : (0 : Real) <= 3))
 
@@ -477,16 +480,16 @@ theorem gammaL2_le_initial_add_within
             -nablaRic s i j k - nablaRic s j i k + nablaRic s k i j)
     (hRic :
       forall s : Real, s ∈ Set.uIcc a b ->
-        Real.sqrt (DifferentialGeometry.Integral.Connection.componentL2Sq3 (nablaRic s)) <= R) :
-    Real.sqrt (DifferentialGeometry.Integral.Connection.componentL2Sq3 (Gamma b)) <=
+        Real.sqrt (DifferentialGeometry.Geometry.Connection.componentL2Sq3 (nablaRic s)) <= R) :
+    Real.sqrt (DifferentialGeometry.Geometry.Connection.componentL2Sq3 (Gamma b)) <=
       3 * R * |b - a| +
-        Real.sqrt (DifferentialGeometry.Integral.Connection.componentL2Sq3 (Gamma a)) := by
+        Real.sqrt (DifferentialGeometry.Geometry.Connection.componentL2Sq3 (Gamma a)) := by
   refine componentL2_le_initial_add_within
     (A := Gamma) (A' := dGamma) (a := a) (b := b) (L := 3 * R)
     hderiv ?_
   intro s hs
   exact le_trans
-    (DifferentialGeometry.Integral.Connection.gammaEvol_l2_le (Idx := Idx) (nablaRic s) (dGamma s)
+    (DifferentialGeometry.Geometry.Connection.gammaEvol_l2_le (Idx := Idx) (nablaRic s) (dGamma s)
       (hcombo s hs))
     (mul_le_mul_of_nonneg_left (hRic s hs) (by norm_num : (0 : Real) <= 3))
 
@@ -508,16 +511,16 @@ theorem gammaL2_le_initial_add_on_subset
             -nablaRic s i j k - nablaRic s j i k + nablaRic s k i j)
     (hRic :
       forall s : Real, s ∈ Set.uIcc a b ->
-        Real.sqrt (DifferentialGeometry.Integral.Connection.componentL2Sq3 (nablaRic s)) <= R) :
-    Real.sqrt (DifferentialGeometry.Integral.Connection.componentL2Sq3 (Gamma b)) <=
+        Real.sqrt (DifferentialGeometry.Geometry.Connection.componentL2Sq3 (nablaRic s)) <= R) :
+    Real.sqrt (DifferentialGeometry.Geometry.Connection.componentL2Sq3 (Gamma b)) <=
       3 * R * |b - a| +
-        Real.sqrt (DifferentialGeometry.Integral.Connection.componentL2Sq3 (Gamma a)) := by
+        Real.sqrt (DifferentialGeometry.Geometry.Connection.componentL2Sq3 (Gamma a)) := by
   refine componentL2_le_initial_add_on_subset
     (A := Gamma) (A' := dGamma) (S := S) (a := a) (b := b)
     (L := 3 * R) hsub hderiv ?_
   intro s hs
   exact le_trans
-    (DifferentialGeometry.Integral.Connection.gammaEvol_l2_le (Idx := Idx) (nablaRic s) (dGamma s)
+    (DifferentialGeometry.Geometry.Connection.gammaEvol_l2_le (Idx := Idx) (nablaRic s) (dGamma s)
       (hcombo s hs))
     (mul_le_mul_of_nonneg_left (hRic s hs) (by norm_num : (0 : Real) <= 3))
 
@@ -529,11 +532,11 @@ theorem gammaL2_le_initial_add_on_subset
 
 theorem gammaL2_le_initial_add_regular
     (Gamma dGamma nablaRic : Real -> Idx -> Idx -> Idx -> Real)
-    {D : DifferentialGeometry.Integral.Connection.RealTimeInterval} {a b R : Real}
+    {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval} {a b R : Real}
     (hsub : Set.uIcc a b ⊆ D.carrier)
     (hregular : forall s : Real, s ∈ Set.uIcc a b -> s ∈ D.regular)
     (hderiv :
-      forall t : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime D,
+      forall t : DifferentialGeometry.Geometry.Curvature.RealTimeInterval.RegularTime D,
         forall p : Idx × Idx × Idx,
           HasDerivWithinAt
             (fun r : Real => Gamma r p.1 p.2.1 p.2.2)
@@ -545,10 +548,10 @@ theorem gammaL2_le_initial_add_regular
             -nablaRic s i j k - nablaRic s j i k + nablaRic s k i j)
     (hRic :
       forall s : Real, s ∈ Set.uIcc a b ->
-        Real.sqrt (DifferentialGeometry.Integral.Connection.componentL2Sq3 (nablaRic s)) <= R) :
-    Real.sqrt (DifferentialGeometry.Integral.Connection.componentL2Sq3 (Gamma b)) <=
+        Real.sqrt (DifferentialGeometry.Geometry.Connection.componentL2Sq3 (nablaRic s)) <= R) :
+    Real.sqrt (DifferentialGeometry.Geometry.Connection.componentL2Sq3 (Gamma b)) <=
       3 * R * |b - a| +
-        Real.sqrt (DifferentialGeometry.Integral.Connection.componentL2Sq3 (Gamma a)) := by
+        Real.sqrt (DifferentialGeometry.Geometry.Connection.componentL2Sq3 (Gamma a)) := by
   refine gammaL2_le_initial_add_on_subset
     (Gamma := Gamma) (dGamma := dGamma) (nablaRic := nablaRic)
     (S := D.carrier) (a := a) (b := b) (R := R) hsub ?_ hcombo hRic

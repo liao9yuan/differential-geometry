@@ -3,6 +3,8 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.Uhlenbeck
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.RiemannNormHeatProducer
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.BernsteinShi
 import Mathlib.Analysis.SpecialFunctions.Pow.Real
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Geometry.Curvature
 
 set_option autoImplicit false
 
@@ -453,7 +455,7 @@ variable {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
 omit [TopologicalSpace M] [SigmaCompactSpace M] [T2Space M] in
 theorem nablaRm04NormSqInFrame_eq_compNormSq5
     (nablaRm04 : Real -> M -> Idx -> Idx -> Idx -> Idx -> Idx -> Real)
-    (gInv : Real -> DifferentialGeometry.Integral.Connection.InverseMetricComponents M Idx)
+    (gInv : Real -> DifferentialGeometry.Geometry.Curvature.InverseMetricComponents M Idx)
     (t : Real) (x : M)
     (horth : InverseMetricOrthonormalAt (M := M) gInv t x) :
     nablaRm04NormSqInFrame (M := M) nablaRm04 gInv t x =
@@ -489,14 +491,14 @@ theorem nablaRm04NormSqInFrame_eq_compNormSq5
 
 
 def nablaRmReactionInFrame
-    (Rm04 : Real -> DifferentialGeometry.Integral.Connection.Tensor04Section (I := I) (M := M))
+    (Rm04 : Real -> DifferentialGeometry.Geometry.Curvature.Tensor04Section (I := I) (M := M))
     (nablaRm04 : Real -> M -> Idx -> Idx -> Idx -> Idx -> Idx -> Real)
     (frame : Idx -> (x : M) -> TangentSpace I x) :
     Real -> M -> Real :=
   fun t x =>
     nablaRmReactionDown
       (fun a b c d : Idx =>
-        DifferentialGeometry.Integral.Connection.rm04Comp (I := I) (Rm04 t) frame x a b c d)
+        DifferentialGeometry.Geometry.Curvature.rm04Comp (I := I) (Rm04 t) frame x a b c d)
       (fun m a b c d : Idx => nablaRm04 t x m a b c d)
 
 
@@ -506,9 +508,9 @@ def nablaRmReactionInFrame
 
 omit [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 theorem abs_nablaRmReactionInFrame_le
-    (Rm04 : Real -> DifferentialGeometry.Integral.Connection.Tensor04Section (I := I) (M := M))
+    (Rm04 : Real -> DifferentialGeometry.Geometry.Curvature.Tensor04Section (I := I) (M := M))
     (nablaRm04 : Real -> M -> Idx -> Idx -> Idx -> Idx -> Idx -> Real)
-    (gInv : Real -> DifferentialGeometry.Integral.Connection.InverseMetricComponents M Idx)
+    (gInv : Real -> DifferentialGeometry.Geometry.Curvature.InverseMetricComponents M Idx)
     (frame : Idx -> (x : M) -> TangentSpace I x)
     (t : Real) (x : M)
     (horth : InverseMetricOrthonormalAt (M := M) gInv t x) :
@@ -539,9 +541,9 @@ theorem abs_nablaRmReactionInFrame_le
 
 
 def NablaRm04NormHeatEquationOn
-    {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
+    {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
     (nablaRmNormSq nablaRmNormLap nabla2RmNormSq reaction : Real -> M -> Real) : Prop :=
-  ∀ (t : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime D) (x : M),
+  ∀ (t : DifferentialGeometry.Geometry.Curvature.RealTimeInterval.RegularTime D) (x : M),
     HasDerivWithinAt
       (fun s : Real => nablaRmNormSq s x)
       (nablaRmNormLap (t : Real) x +
@@ -563,20 +565,20 @@ def NablaRm04NormHeatEquationOn
 
 omit [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 theorem nablaRm04NormHeatBoundSharp_of_components
-    {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
-    (Rm04 : Real -> DifferentialGeometry.Integral.Connection.Tensor04Section (I := I) (M := M))
+    {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
+    (Rm04 : Real -> DifferentialGeometry.Geometry.Curvature.Tensor04Section (I := I) (M := M))
     (nablaRm04 : Real -> M -> Idx -> Idx -> Idx -> Idx -> Idx -> Real)
-    (gInv : Real -> DifferentialGeometry.Integral.Connection.InverseMetricComponents M Idx)
+    (gInv : Real -> DifferentialGeometry.Geometry.Curvature.InverseMetricComponents M Idx)
     (frame : Idx -> (x : M) -> TangentSpace I x)
     (nablaRmNormLap nabla2RmNormSq : Real -> M -> Real)
-    (horth : ∀ (t : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime D)
+    (horth : ∀ (t : DifferentialGeometry.Geometry.Curvature.RealTimeInterval.RegularTime D)
       (x : M),
       InverseMetricOrthonormalAt (M := M) gInv (t : Real) x)
     (h_heat : NablaRm04NormHeatEquationOn
       (D := D) (nablaRm04NormSqInFrame (M := M) nablaRm04 gInv)
       nablaRmNormLap nabla2RmNormSq
       (nablaRmReactionInFrame (I := I) Rm04 nablaRm04 frame)) :
-    ∀ (t : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime D) (x : M),
+    ∀ (t : DifferentialGeometry.Geometry.Curvature.RealTimeInterval.RegularTime D) (x : M),
       ∃ d : Real,
         HasDerivWithinAt
           (fun s : Real => nablaRm04NormSqInFrame (M := M) nablaRm04 gInv s x)
@@ -616,16 +618,16 @@ theorem nablaRm04NormHeatBoundSharp_of_components
 
 omit [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 theorem nablaRm04NormHeatBoundOn_of_components
-    {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
-    (Rm04 : Real -> DifferentialGeometry.Integral.Connection.Tensor04Section (I := I) (M := M))
+    {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
+    (Rm04 : Real -> DifferentialGeometry.Geometry.Curvature.Tensor04Section (I := I) (M := M))
     (nablaRm04 : Real -> M -> Idx -> Idx -> Idx -> Idx -> Idx -> Real)
-    (gInv : Real -> DifferentialGeometry.Integral.Connection.InverseMetricComponents M Idx)
+    (gInv : Real -> DifferentialGeometry.Geometry.Curvature.InverseMetricComponents M Idx)
     (frame : Idx -> (x : M) -> TangentSpace I x)
     (nablaRmNormLap nabla2RmNormSq : Real -> M -> Real)
-    (horth : ∀ (t : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime D)
+    (horth : ∀ (t : DifferentialGeometry.Geometry.Curvature.RealTimeInterval.RegularTime D)
       (x : M),
       InverseMetricOrthonormalAt (M := M) gInv (t : Real) x)
-    (hnabla2_nonneg : ∀ (t : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime
+    (hnabla2_nonneg : ∀ (t : DifferentialGeometry.Geometry.Curvature.RealTimeInterval.RegularTime
       D)
       (x : M), 0 ≤ nabla2RmNormSq (t : Real) x)
     (h_heat : NablaRm04NormHeatEquationOn

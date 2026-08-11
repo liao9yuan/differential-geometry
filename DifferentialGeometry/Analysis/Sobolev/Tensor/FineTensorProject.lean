@@ -1,6 +1,8 @@
 import DifferentialGeometry.Analysis.Sobolev.Tensor.ChartWkpCompat
 import DifferentialGeometry.Analysis.Sobolev.Tensor.FineTensorWkp
 import DifferentialGeometry.Analysis.Sobolev.Chart.SmoothDensity.FineChartCover
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Geometry.Curvature
 
 /-!
 # Finite-chart projection through genuine tensor sections
@@ -25,7 +27,7 @@ noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
 
-open Bundle Manifold MeasureTheory Set Filter Tensor0SBundle
+open Bundle Manifold MeasureTheory Set Filter DifferentialGeometry.Tensor0SBundle
 open scoped Manifold Topology ContDiff ENNReal BigOperators
 
 namespace DifferentialGeometry

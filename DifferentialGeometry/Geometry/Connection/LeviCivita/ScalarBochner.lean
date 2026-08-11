@@ -2,6 +2,10 @@ import DifferentialGeometry.Geometry.Curvature.Bochner.ScalarBochner
 import DifferentialGeometry.Geometry.Connection.LeviCivita.Curvature.LeviCivita
 import DifferentialGeometry.Geometry.Connection.LeviCivita.Curvature.Realized
 import DifferentialGeometry.Geometry.Connection.LeviCivita.Hessian
+open DifferentialGeometry.Tensor.RicciIdentity
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Geometry.Operator
 
 set_option autoImplicit false
 
@@ -14,10 +18,11 @@ set_option autoImplicit false
 
 noncomputable section
 
-namespace DifferentialGeometry.Integral.Connection
 
-open Bundle Tensor0SBundle
-open DifferentialGeometry.Integral.Connection
+namespace DifferentialGeometry.Geometry.Connection
+
+open Bundle DifferentialGeometry.Tensor0SBundle
+open DifferentialGeometry.Geometry.Operator
 open scoped Manifold ContDiff BigOperators
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]
@@ -574,7 +579,7 @@ theorem lc_bochner_rm04
     oneFormThirdCovDerivCommAt_of_leviCivita (I := I)
       g Rm13 duSec nablaDuSec (differential1FormFun (I := I) u x)
       (nabla2DuSec x) hRm13 (by simpa [duField] using hdu x) hnabla2
-  exact DifferentialGeometry.Integral.Connection.fundamental_bochner_of_lc_terms_of_rm04_skew
+  exact DifferentialGeometry.Geometry.Curvature.fundamental_bochner_of_lc_terms_of_rm04_skew
     (I := I)
     g Ric Rm13 Rm04 gInvFrame frame hRm13 hRm04 hRic13 hRic04 u
     (fun y : M => nablaDuSec y) (fun y : M => nablaDuSec y)
@@ -582,4 +587,4 @@ theorem lc_bochner_rm04
     normSecond hfields hHessLocal hdu hnablaLocal hnabla2 hlapTrace hsecond hrough
     hdlap hsymm hthird hRm04Skew
 
-end DifferentialGeometry.Integral.Connection
+end DifferentialGeometry.Geometry.Connection

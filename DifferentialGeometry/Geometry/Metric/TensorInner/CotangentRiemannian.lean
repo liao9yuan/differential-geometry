@@ -3,6 +3,7 @@ import Mathlib.LinearAlgebra.Dual.Basis
 
 
 
+namespace DifferentialGeometry
 namespace Tensor0SBundle
 
 noncomputable section
@@ -421,3 +422,4 @@ theorem cotangentMetricData_inner_eq_coord
 end
 
 end Tensor0SBundle
+end DifferentialGeometry

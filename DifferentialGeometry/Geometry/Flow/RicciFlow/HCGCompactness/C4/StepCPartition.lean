@@ -1,5 +1,6 @@
 import Mathlib.Geometry.Manifold.PartitionOfUnity
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.C4.GoodCoveringSeq
+open DifferentialGeometry.Geometry.Curvature
 
 set_option autoImplicit false
 

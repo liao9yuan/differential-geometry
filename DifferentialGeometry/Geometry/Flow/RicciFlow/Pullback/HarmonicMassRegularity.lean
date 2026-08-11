@@ -1,6 +1,11 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Pullback.HarmonicStateMass
 import DifferentialGeometry.Analysis.Integration.Measure.FamilyContinuity
 import Mathlib.Analysis.Calculus.MeanValue
+open DifferentialGeometry.Analysis.Spectral
+open DifferentialGeometry.PDE.RicciFlow
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Geometry.Connection
 
 /-!
 # Regularity of the finite state-dependent HMF mass
@@ -26,7 +31,7 @@ shrinking is used.
 
 noncomputable section
 
-open Bundle Filter Manifold MeasureTheory Set Tensor0SBundle
+open Bundle Filter Manifold MeasureTheory Set DifferentialGeometry.Tensor0SBundle
 open scoped Manifold ENNReal NNReal Topology ContDiff
 
 namespace DifferentialGeometry.PDE.RicciFlow.Pullback
@@ -42,7 +47,7 @@ variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
   [I.Boundaryless]
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
   [IsManifold I ∞ M] [CompactSpace M] [T2Space M]
-  [SigmaCompactSpace M] [BoundarylessManifold I M] [ConnectedSpace M]
+  [BoundarylessManifold I M] [ConnectedSpace M]
 
 private local instance : MeasurableSpace M := borel M
 
@@ -250,7 +255,7 @@ theorem hmfSpecMassPt_cd
 
 /-! ## Uniform coefficient Lipschitz bounds -/
 
-omit [CompactSpace M] [T2Space M] [SigmaCompactSpace M]
+omit [CompactSpace M] [T2Space M]
   [ConnectedSpace M] in
 /-- Joint continuity gives continuity of every parameter slice whose
 parameter lies in the prescribed set. -/
@@ -267,7 +272,7 @@ private theorem continuous_slice_of_continuousOn_prod
 
 omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
   [I.Boundaryless] [IsManifold I ∞ M] [CompactSpace M] [T2Space M]
-  [SigmaCompactSpace M] [BoundarylessManifold I M] [ConnectedSpace M] in
+  [BoundarylessManifold I M] [ConnectedSpace M] in
 /-- Joint `C¹` regularity gives differentiability of every coefficient slice
 at every coefficient lying in the joint regularity domain. -/
 private theorem mdifferentiable_coeff_slice
@@ -310,7 +315,7 @@ theorem hmfSpecMassPt_continuous
     hmass.continuousOn hu
 
 omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
-  [I.Boundaryless] [CompactSpace M] [T2Space M] [SigmaCompactSpace M]
+  [I.Boundaryless] [CompactSpace M] [T2Space M]
   [BoundarylessManifold I M] [ConnectedSpace M] in
 /-- Joint `C¹` regularity on an open coefficient ball makes the coefficient
 Fréchet derivative jointly continuous on every strictly smaller closed ball.
@@ -361,7 +366,7 @@ private theorem partialFderiv_cont
   exact hD'.continuousAt.continuousWithinAt
 
 omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
-  [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
+  [I.Boundaryless] [T2Space M]
   [BoundarylessManifold I M] [ConnectedSpace M] in
 /-- A jointly `C¹` Banach-valued family on a coefficient ball is uniformly
 Lipschitz in the coefficient on a smaller closed ball, uniformly in the

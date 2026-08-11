@@ -1,5 +1,5 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Pullback.Cartan.EvaluationFormChainRule
-import DifferentialGeometry.Geometry.Curvature.CurvatureOperator.RicciTensor
+import DifferentialGeometry.Geometry.Flow.RicciFlow.Pullback.RicciTensor
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Pullback.TimeDerivativeChainRule
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.RemainderShortTimeExistence
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.MetricRealization.DeTurckGeometricNonlinearity
@@ -17,8 +17,12 @@ import DifferentialGeometry.Analysis.ODE.TimeDependentFlow.Regularity.BareFlowFr
 import DifferentialGeometry.Analysis.ODE.TimeDependentFlow.SmoothDependence.GlobalClosedManifold
 import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTimeAssembly.RicciFlowPdeAtZero
 import DifferentialGeometry.Geometry.Curvature.MetricLeviCivitaReconcile
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Geometry.Operator
 
 
+open DifferentialGeometry.Geometry.Connection
 namespace DifferentialGeometry.PDE.RicciFlow
 
 open Bundle
@@ -27,11 +31,11 @@ open DifferentialGeometry
 open DifferentialGeometry.PDE
 open DifferentialGeometry.PDE.RicciFlow
 open DifferentialGeometry.PDE.DeTurck
-open DifferentialGeometry.PDE.RicciFlow.ODE
+open DifferentialGeometry.Analysis.ODE
 open DifferentialGeometry.PDE.RicciFlow.Pullback
-open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral
-open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.MetricRealization
-open DifferentialGeometry.Integral.Connection
+open DifferentialGeometry.Analysis.Spectral.MetricRealization
+
+open DifferentialGeometry.Geometry.Operator
 open DifferentialGeometry.Integral.DivergenceTheorem
 open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Analysis.Parabolic.TensorHeatEquation
@@ -52,7 +56,7 @@ namespace RicciContInMetricAux
 
 open DifferentialGeometry.Integral.DivergenceTheorem
 open DifferentialGeometry.Integral.Measure
-open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.DeTurckCoefficients
+open DifferentialGeometry.Analysis.Spectral.DeTurckCoefficients
 
 omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [BoundarylessManifold I M]
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
@@ -512,7 +516,7 @@ namespace RicciContJointAux
 
 open DifferentialGeometry.Integral.DivergenceTheorem
 open DifferentialGeometry.Integral.Measure
-open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.DeTurckCoefficients
+open DifferentialGeometry.Analysis.Spectral.DeTurckCoefficients
 
 variable (g_DT : ℝ → SmoothRiemannianMetric I M) (α : M) (Sp : Set (ℝ × M))
 
@@ -1086,7 +1090,7 @@ theorem gfam_inner_continuous_on
     (hg_joint : ∀ (α : M) (i j : Fin (Module.finrank ℝ E)),
       ContinuousOn
         (fun q : ℝ × M =>
-          Integral.DivergenceTheorem.chartGramOnE (I := I) (g_DT q.1) α i j
+          DifferentialGeometry.Geometry.Operator.chartGramOnE (I := I) (g_DT q.1) α i j
             (extChartAt I α q.2))
         (Set.Icc 0 T ×ˢ (chartAt H α).source))
     (hΦ_orbit : ∀ y : M,
@@ -1128,7 +1132,7 @@ theorem gfam_inner_continuous_on
         hbase0 horbit ((hΦ_total x w).continuousWithinAt hs₀)) j
   have hgram : ∀ i j : Fin (Module.finrank ℝ E),
       ContinuousWithinAt
-        (fun s : ℝ => Integral.DivergenceTheorem.chartGramOnE (I := I) (g_DT s) α i j
+        (fun s : ℝ => DifferentialGeometry.Geometry.Operator.chartGramOnE (I := I) (g_DT s) α i j
           (extChartAt I α ((Φ_fam s : M → M) x))) (Set.Ico 0 T) s₀ := by
     intro i j
     set Sp : Set (ℝ × M) := Set.Icc 0 T ×ˢ (chartAt H α).source with hSp
@@ -1163,7 +1167,7 @@ theorem gfam_inner_continuous_on
             ((chartModelBasis E).repr
               (e.continuousLinearMapAt ℝ ((Φ_fam s : M → M) x)
                 (mfderiv I I (Φ_fam s : M → M) x w))) j *
-            Integral.DivergenceTheorem.chartGramOnE (I := I) (g_DT s) α i j
+            DifferentialGeometry.Geometry.Operator.chartGramOnE (I := I) (g_DT s) α i j
               (extChartAt I α ((Φ_fam s : M → M) x)) := by
     intro s hb hsr
     exact g_inner_eq_chart_sum (I := I) (g_DT s) α hb hsr
@@ -1176,7 +1180,7 @@ theorem gfam_inner_continuous_on
         ((chartModelBasis E).repr
           (e.continuousLinearMapAt ℝ ((Φ_fam s : M → M) x)
             (mfderiv I I (Φ_fam s : M → M) x w))) j *
-        Integral.DivergenceTheorem.chartGramOnE (I := I) (g_DT s) α i j
+        DifferentialGeometry.Geometry.Operator.chartGramOnE (I := I) (g_DT s) α i j
           (extChartAt I α ((Φ_fam s : M → M) x))) (Set.Ico 0 T) s₀ := by
     refine cwa_finset_sum _ (fun i _ => ?_)
     refine cwa_finset_sum _ (fun j _ => ?_)
@@ -1201,7 +1205,7 @@ theorem ricci_gfam_continuous_on
     (hC2 : ∀ (α : M) (i j : Fin (Module.finrank ℝ E)) (k : ℕ), k ≤ 2 →
         ContinuousOn
           (fun q : ℝ × M => iteratedFDeriv ℝ k
-            (Integral.DivergenceTheorem.chartGramOnE (I := I) (g_DT q.1) α i j)
+            (DifferentialGeometry.Geometry.Operator.chartGramOnE (I := I) (g_DT q.1) α i j)
             (extChartAt I α q.2))
           (Set.Icc 0 T ×ˢ chartLeviCivitaGoodSet (I := I) α))
     (hΦ0 : ∀ y : M,
@@ -1253,7 +1257,7 @@ theorem ricci_gfam_continuous_on
   have hgoodSp : ∀ qp ∈ Sp, qp.2 ∈ chartLeviCivitaGoodSet (I := I) α := fun qp hqp => hqp.2
   have hjet : ∀ (k : ℕ), k ≤ 2 → ∀ a b : Fin (Module.finrank ℝ E),
       ContinuousOn (fun qp : ℝ × M => iteratedFDeriv ℝ k
-        (Integral.DivergenceTheorem.chartGramOnE (I := I) (g_DT qp.1) α a b)
+        (DifferentialGeometry.Geometry.Operator.chartGramOnE (I := I) (g_DT qp.1) α a b)
         (extChartAt I α qp.2)) Sp :=
     fun k hk a b => hC2 α a b k hk
   have hric : ∀ p q : Fin (Module.finrank ℝ E),
@@ -1325,7 +1329,7 @@ theorem ricci_continuous_in_metric_time
       ∀ i j : Fin (Module.finrank ℝ E), ∀ k : ℕ, k ≤ 2 →
         ContinuousOn
           (fun s : ℝ => iteratedFDeriv ℝ k
-            (Integral.DivergenceTheorem.chartGramOnE (I := I) (g_DT s) α i j)
+            (DifferentialGeometry.Geometry.Operator.chartGramOnE (I := I) (g_DT s) α i j)
             (extChartAt I α y))
           (Set.Icc 0 T)) :
     ContinuousOn (fun s : ℝ => ricciTensor (I := I) (g_DT s) x v w) (Set.Icc 0 T) := by
@@ -1341,17 +1345,17 @@ theorem ricci_continuous_in_metric_time
     exact chartLeviCivitaGoodSet_mem_baseSet (I := I) hxgood
   have h0 : ∀ a b : Fin (Module.finrank ℝ E),
       ContinuousOn (fun t : ℝ => iteratedFDeriv ℝ 0
-        (Integral.DivergenceTheorem.chartGramOnE (I := I) (g_DT t) x a b)
+        (DifferentialGeometry.Geometry.Operator.chartGramOnE (I := I) (g_DT t) x a b)
         (extChartAt I x x)) (Set.Icc 0 T) :=
     fun a b => hC2 x x hxgood a b 0 (by norm_num)
   have h1 : ∀ a b : Fin (Module.finrank ℝ E),
       ContinuousOn (fun t : ℝ => iteratedFDeriv ℝ 1
-        (Integral.DivergenceTheorem.chartGramOnE (I := I) (g_DT t) x a b)
+        (DifferentialGeometry.Geometry.Operator.chartGramOnE (I := I) (g_DT t) x a b)
         (extChartAt I x x)) (Set.Icc 0 T) :=
     fun a b => hC2 x x hxgood a b 1 (by norm_num)
   have h2 : ∀ a b : Fin (Module.finrank ℝ E),
       ContinuousOn (fun t : ℝ => iteratedFDeriv ℝ 2
-        (Integral.DivergenceTheorem.chartGramOnE (I := I) (g_DT t) x a b)
+        (DifferentialGeometry.Geometry.Operator.chartGramOnE (I := I) (g_DT t) x a b)
         (extChartAt I x x)) (Set.Icc 0 T) :=
     fun a b => hC2 x x hxgood a b 2 (by norm_num)
   have hbridge : ∀ t : ℝ,
@@ -1485,7 +1489,7 @@ theorem metricScalar_chartTrace_eq [I.Boundaryless]
     · simp only [hgram]
       rw [← Matrix.mul_apply, chartGramMatrix_mul_chartInvGramMatrix (I := I) g α hbase,
         Matrix.one_apply]
-  have htrace := DifferentialGeometry.Integral.Connection.metricTracePair0SAt_eq_sum_basis
+  have htrace := DifferentialGeometry.Geometry.Operator.metricTracePair0SAt_eq_sum_basis
     (I := I) g (chartBasisFamily (I := I) α hbase)
     (fun k l => chartInvGramMatrix (I := I) g α x k l) hinv (metricRicciAt (I := I) g x)
   unfold metricScalarAt
@@ -1530,7 +1534,7 @@ theorem chartScalar_jointContinuousOn [I.Boundaryless]
     (ricciChartFrameComp_jointContinuousOn (I := I) g_DT α Sp hgood h0 h1 h2 i j)
 
 open RicciContInMetricAux
-  DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.DeTurckCoefficients in
+  DifferentialGeometry.Analysis.Spectral.DeTurckCoefficients in
 omit [CompactSpace M] [I.Boundaryless] in
 omit [NeZero (Module.finrank ℝ E)] in
 omit [SigmaCompactSpace M] in
@@ -1541,7 +1545,7 @@ theorem lieDeriv_deTurckVF_continuous_in_metric_time
       ∀ i j : Fin (Module.finrank ℝ E), ∀ k : ℕ, k ≤ 2 →
         ContinuousOn
           (fun s : ℝ => iteratedFDeriv ℝ k
-            (Integral.DivergenceTheorem.chartGramOnE (I := I) (g_DT s) α i j)
+            (DifferentialGeometry.Geometry.Operator.chartGramOnE (I := I) (g_DT s) α i j)
             (extChartAt I α y))
           (Set.Icc 0 T)) :
     ContinuousOn (fun s : ℝ =>
@@ -1558,17 +1562,17 @@ theorem lieDeriv_deTurckVF_continuous_in_metric_time
     exact chartLeviCivitaGoodSet_mem_baseSet (I := I) hxgood
   have h0 : ∀ a b : Fin (Module.finrank ℝ E),
       ContinuousOn (fun t : ℝ => iteratedFDeriv ℝ 0
-        (Integral.DivergenceTheorem.chartGramOnE (I := I) (g_DT t) x a b)
+        (DifferentialGeometry.Geometry.Operator.chartGramOnE (I := I) (g_DT t) x a b)
         (extChartAt I x x)) (Set.Icc 0 T) :=
     fun a b => hC2 x x hxgood a b 0 (by norm_num)
   have h1 : ∀ a b : Fin (Module.finrank ℝ E),
       ContinuousOn (fun t : ℝ => iteratedFDeriv ℝ 1
-        (Integral.DivergenceTheorem.chartGramOnE (I := I) (g_DT t) x a b)
+        (DifferentialGeometry.Geometry.Operator.chartGramOnE (I := I) (g_DT t) x a b)
         (extChartAt I x x)) (Set.Icc 0 T) :=
     fun a b => hC2 x x hxgood a b 1 (by norm_num)
   have h2 : ∀ a b : Fin (Module.finrank ℝ E),
       ContinuousOn (fun t : ℝ => iteratedFDeriv ℝ 2
-        (Integral.DivergenceTheorem.chartGramOnE (I := I) (g_DT t) x a b)
+        (DifferentialGeometry.Geometry.Operator.chartGramOnE (I := I) (g_DT t) x a b)
         (extChartAt I x x)) (Set.Icc 0 T) :=
     fun a b => hC2 x x hxgood a b 2 (by norm_num)
   have hbridge : ∀ t : ℝ,

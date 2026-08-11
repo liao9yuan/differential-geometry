@@ -5,6 +5,10 @@ import DifferentialGeometry.Geometry.Curvature.RicciOperatorNormBound
 import DifferentialGeometry.Geometry.Curvature.MetricLeviCivitaReconcile
 import DifferentialGeometry.Geometry.Curvature.Bochner.OrthonormalFrameTrace
 import DifferentialGeometry.Tensor.RSTensor.Tensor0SRiemannian.Comparison
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Geometry.Connection
+open DifferentialGeometry.Geometry.Operator
 
 set_option autoImplicit false
 
@@ -25,9 +29,10 @@ attribute [local instance] Fintype.ofFinite
 namespace HCGCompactness
 
 open scoped Manifold ContDiff BigOperators
-open DifferentialGeometry.Integral.Connection
-open DifferentialGeometry.Integral.Connection.CovariantDerivative
-open Tensor0SBundle
+
+open DifferentialGeometry.Geometry.Operator
+open DifferentialGeometry.Geometry.Curvature.CovariantDerivative
+open DifferentialGeometry.Tensor0SBundle
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]
 variable [FiniteDimensional Real E] [CompleteSpace E]
@@ -551,13 +556,13 @@ omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M]
 theorem ricciSection_eq_ricciTensor
     [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M]
     (g : SmoothRiemannianMetric I M) (x : M) (v w : TangentSpace I x) :
-    DifferentialGeometry.Integral.Connection.CovariantDerivative.ricciSection
+    DifferentialGeometry.Geometry.Curvature.CovariantDerivative.ricciSection
         (I := I) (M := M)
-        (DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric (I := I) g)
+        (DifferentialGeometry.Geometry.Connection.leviCivitaConnectionOfMetric (I := I) g)
         (leviCivitaConnectionOfMetric_contMDiffCovariantDerivativeLocally
           (I := I) (M := M) g) x (vec2 (I := I) v w)
       = ricciTensor (I := I) g x v w := by
-  rw [DifferentialGeometry.Integral.Connection.CovariantDerivative.ricciSection_apply]
+  rw [DifferentialGeometry.Geometry.Curvature.CovariantDerivative.ricciSection_apply]
   exact metricRicciAt_apply_eq_ricciTensor (I := I) g x v w
 
 

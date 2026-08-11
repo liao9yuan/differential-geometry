@@ -34,8 +34,8 @@ private local instance : BorelSpace M := ⟨rfl⟩
 /-- On a chart source, the canonical Riemannian volume measure is exactly the
 corresponding chart-local measure. -/
 theorem volume_restrict_eq
-    [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
-    (g : DifferentialGeometry.Integral.Measure.SmoothRiemannianMetric I M)
+    [T2Space M] [CompactSpace M]
+    (g : DifferentialGeometry.SmoothRiemannianMetric I M)
     (α : M) :
     (DifferentialGeometry.Integral.Measure.riemannianVolumeMeasure
         (I := I) (M := M) g).restrict (chartAt H α).source =
@@ -55,8 +55,8 @@ theorem volume_restrict_eq
 /-- An integrable function supported in one chart has the same chart-local and
 global Riemannian integrals. -/
 theorem chart_int_eq_global
-    [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
-    (g : DifferentialGeometry.Integral.Measure.SmoothRiemannianMetric I M)
+    [T2Space M] [CompactSpace M]
+    (g : DifferentialGeometry.SmoothRiemannianMetric I M)
     (α : M) {f : M → ℝ}
     (hf : Integrable f
       (DifferentialGeometry.Integral.Measure.chartLocalMeasure (I := I) g α))
@@ -323,7 +323,7 @@ private lemma extChartAtSymmGlob_measurable (α : M) :
     (extChartAt_target_measurableSet (I := I) (M := M) α)
 
 lemma chartLocalMeasure_lintegral_via_chartTargetEuclid
-    (g : DifferentialGeometry.Integral.Measure.SmoothRiemannianMetric I M) (α : M)
+    (g : DifferentialGeometry.SmoothRiemannianMetric I M) (α : M)
     {F : M → ℝ≥0∞} (hF : Measurable F) :
     ∫⁻ x, F x ∂(DifferentialGeometry.Integral.Measure.chartLocalMeasure (I := I) g α) =
       (euclideanHaarFactor E : ℝ≥0∞) *
@@ -448,7 +448,7 @@ lemma chartLocalMeasure_lintegral_via_chartTargetEuclid
 /-- A Euclidean-volume almost-everywhere property transfers to the chart-local
 measure after evaluation in the fixed chart coordinates. -/
 lemma ae_chart_of_volume
-    (g : DifferentialGeometry.Integral.Measure.SmoothRiemannianMetric I M) (α : M)
+    (g : DifferentialGeometry.SmoothRiemannianMetric I M) (α : M)
     {P : EuclN E → Prop} (hP : MeasurableSet {y | P y})
     (h : ∀ᵐ y ∂(volume : Measure (EuclN E)), P y) :
     ∀ᵐ x ∂(DifferentialGeometry.Integral.Measure.chartLocalMeasure (I := I) g α),
@@ -531,7 +531,7 @@ lemma ae_chart_of_volume
 
 /-- The chart density is strictly positive at points of the chart target. -/
 lemma chartDensity_pos_on_target
-    (g : DifferentialGeometry.Integral.Measure.SmoothRiemannianMetric I M) (α : M)
+    (g : DifferentialGeometry.SmoothRiemannianMetric I M) (α : M)
     {y : E} (hy : y ∈ (extChartAt I α).target) :
     0 < DifferentialGeometry.Integral.Measure.chartDensity g α
       ((extChartAt I α).symm y) := by
@@ -544,7 +544,7 @@ lemma chartDensity_pos_on_target
     (I := I) (M := M)] at hsource
 
 lemma chartDensity_symm_continuousOn_target
-    (g : DifferentialGeometry.Integral.Measure.SmoothRiemannianMetric I M) (α : M) :
+    (g : DifferentialGeometry.SmoothRiemannianMetric I M) (α : M) :
     ContinuousOn
       (fun y : E =>
         DifferentialGeometry.Integral.Measure.chartDensity g α
@@ -559,7 +559,7 @@ lemma chartDensity_symm_continuousOn_target
     (I := I) (M := M)] at hsource
 
 lemma exists_sup_chartDensity_on_compact_pos
-    (g : DifferentialGeometry.Integral.Measure.SmoothRiemannianMetric I M) (α : M)
+    (g : DifferentialGeometry.SmoothRiemannianMetric I M) (α : M)
     {K : Set E} (hK_compact : IsCompact K) (hKne : K.Nonempty)
     (hK_sub : K ⊆ (extChartAt I α).target) :
     ∃ M_sup : ℝ, 0 < M_sup ∧ ∀ y ∈ K,
@@ -579,7 +579,7 @@ lemma exists_sup_chartDensity_on_compact_pos
     fun y hy => hy₀_max hy⟩
 
 lemma exists_inf_chartDensity_on_compact
-    (g : DifferentialGeometry.Integral.Measure.SmoothRiemannianMetric I M) (α : M)
+    (g : DifferentialGeometry.SmoothRiemannianMetric I M) (α : M)
     {K : Set E} (hK_compact : IsCompact K) (hKne : K.Nonempty)
     (hK_sub : K ⊆ (extChartAt I α).target) :
     ∃ M_inf : ℝ, 0 < M_inf ∧ ∀ y ∈ K,
@@ -669,8 +669,8 @@ lemma chartPushedRaw_eq_zero_off_image_tsupport
   exact subset_tsupport _ (Function.mem_support.mpr hu_ne)
 
 lemma lintegral_enorm_pow_riemannianMeasure_eq_chartLocalMeasure_of_supportIn
-    [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
-    (g : DifferentialGeometry.Integral.Measure.SmoothRiemannianMetric I M) (α : M)
+    [T2Space M] [CompactSpace M]
+    (g : DifferentialGeometry.SmoothRiemannianMetric I M) (α : M)
     {u : M → ℝ} (hu_meas : Measurable u)
     (hu_supp : tsupport u ⊆ (chartAt H α).source)
     {p : ℝ} (hp_pos : 0 < p) :
@@ -689,8 +689,8 @@ lemma lintegral_enorm_pow_riemannianMeasure_eq_chartLocalMeasure_of_supportIn
     rw [enorm_zero, ENNReal.zero_rpow_of_pos hp_pos]
 
 lemma lintegral_enorm_pow_riemannianMeasure_eq_const_mul_chartTargetEuclid
-    [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
-    (g : DifferentialGeometry.Integral.Measure.SmoothRiemannianMetric I M) (α : M)
+    [T2Space M] [CompactSpace M]
+    (g : DifferentialGeometry.SmoothRiemannianMetric I M) (α : M)
     {u : M → ℝ} (hu_meas : Measurable u)
     (hu_supp : tsupport u ⊆ (chartAt H α).source)
     {p : ℝ} (hp_pos : 0 < p) :
@@ -718,8 +718,8 @@ lemma lintegral_enorm_pow_riemannianMeasure_eq_const_mul_chartTargetEuclid
   rw [chartPushedRaw_apply_of_mem (I := I) (M := M) α u hy]
 
 theorem lintegral_riemannianMeasure_le_const_mul_lintegral_chartPushedRaw
-    [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
-    (g : DifferentialGeometry.Integral.Measure.SmoothRiemannianMetric I M) (α : M)
+    [T2Space M] [CompactSpace M]
+    (g : DifferentialGeometry.SmoothRiemannianMetric I M) (α : M)
     {u : M → ℝ} (hu_meas : Measurable u)
     (hu_supp : tsupport u ⊆ (chartAt H α).source)
     {p : ℝ} (hp_pos : 0 < p) :
@@ -844,8 +844,8 @@ theorem lintegral_riemannianMeasure_le_const_mul_lintegral_chartPushedRaw
     exact zero_le _
 
 theorem eLpNorm_riemannianMeasure_le_const_mul_eLpNorm_chartPushedRaw
-    [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
-    (g : DifferentialGeometry.Integral.Measure.SmoothRiemannianMetric I M) (α : M)
+    [T2Space M] [CompactSpace M]
+    (g : DifferentialGeometry.SmoothRiemannianMetric I M) (α : M)
     {p : ℝ≥0∞} (hp_one : 1 ≤ p) (hp_top : p ≠ (⊤ : ℝ≥0∞))
     {u : M → ℝ} (hu_meas : Measurable u)
     (hu_supp : tsupport u ⊆ (chartAt H α).source) :
@@ -901,8 +901,8 @@ theorem eLpNorm_riemannianMeasure_le_const_mul_eLpNorm_chartPushedRaw
   rw [← ENNReal.ofReal_rpow_of_pos hC_pos]
 
 theorem lintegral_chartPushedRaw_le_const_mul_lintegral_riemannianMeasure
-    [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
-    (g : DifferentialGeometry.Integral.Measure.SmoothRiemannianMetric I M) (α : M)
+    [T2Space M] [CompactSpace M]
+    (g : DifferentialGeometry.SmoothRiemannianMetric I M) (α : M)
     {u : M → ℝ} (hu_meas : Measurable u)
     (hu_supp : tsupport u ⊆ (chartAt H α).source)
     {p : ℝ} (hp_pos : 0 < p) :
@@ -1045,8 +1045,8 @@ theorem lintegral_chartPushedRaw_le_const_mul_lintegral_riemannianMeasure
     exact zero_le _
 
 theorem eLpNorm_chartPushedRaw_le_const_mul_eLpNorm_riemannianMeasure
-    [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
-    (g : DifferentialGeometry.Integral.Measure.SmoothRiemannianMetric I M) (α : M)
+    [T2Space M] [CompactSpace M]
+    (g : DifferentialGeometry.SmoothRiemannianMetric I M) (α : M)
     {p : ℝ≥0∞} (hp_one : 1 ≤ p) (hp_top : p ≠ (⊤ : ℝ≥0∞))
     {u : M → ℝ} (hu_meas : Measurable u)
     (hu_supp : tsupport u ⊆ (chartAt H α).source) :
@@ -1094,8 +1094,8 @@ theorem eLpNorm_chartPushedRaw_le_const_mul_eLpNorm_riemannianMeasure
   rw [← ENNReal.ofReal_rpow_of_pos hC_pos]
 
 theorem lintegral_riemannianMeasure_le_const_mul_lintegral_chartPushedRaw_uniform
-    [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
-    (g : DifferentialGeometry.Integral.Measure.SmoothRiemannianMetric I M) (α : M)
+    [T2Space M] [CompactSpace M]
+    (g : DifferentialGeometry.SmoothRiemannianMetric I M) (α : M)
     {K : Set E} (hK_compact : IsCompact K) (hK_ne : K.Nonempty)
     (hK_sub : K ⊆ (extChartAt I α).target) :
     ∃ C_K : ℝ, 0 < C_K ∧ ∀ {u : M → ℝ}, Measurable u →
@@ -1197,8 +1197,8 @@ theorem lintegral_riemannianMeasure_le_const_mul_lintegral_chartPushedRaw_unifor
         · exact NNReal.coe_nonneg _
 
 theorem eLpNorm_riemannianMeasure_le_const_mul_eLpNorm_chartPushedRaw_uniform
-    [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
-    (g : DifferentialGeometry.Integral.Measure.SmoothRiemannianMetric I M) (α : M)
+    [T2Space M] [CompactSpace M]
+    (g : DifferentialGeometry.SmoothRiemannianMetric I M) (α : M)
     {K : Set E} (hK_compact : IsCompact K) (hK_ne : K.Nonempty)
     (hK_sub : K ⊆ (extChartAt I α).target)
     {p : ℝ≥0∞} (hp_one : 1 ≤ p) (hp_top : p ≠ (⊤ : ℝ≥0∞)) :
@@ -1275,8 +1275,8 @@ private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
 theorem lintegral_chartPushedRaw_le_const_mul_lintegral_riemannianMeasure_uniform
-    [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
-    (g : DifferentialGeometry.Integral.Measure.SmoothRiemannianMetric I M) (α : M)
+    [T2Space M] [CompactSpace M]
+    (g : DifferentialGeometry.SmoothRiemannianMetric I M) (α : M)
     {K : Set E} (hK_compact : IsCompact K) (hK_ne : K.Nonempty)
     (hK_sub : K ⊆ (extChartAt I α).target) :
     ∃ C_K : ℝ, 0 < C_K ∧ ∀ {u : M → ℝ}, Measurable u →
@@ -1399,8 +1399,8 @@ theorem lintegral_chartPushedRaw_le_const_mul_lintegral_riemannianMeasure_unifor
   rwa [ENNReal.mul_le_iff_le_inv hD_pos hD_ne_top] at h_step
 
 theorem eLpNorm_chartPushedRaw_le_const_mul_eLpNorm_riemannianMeasure_uniform
-    [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
-    (g : DifferentialGeometry.Integral.Measure.SmoothRiemannianMetric I M) (α : M)
+    [T2Space M] [CompactSpace M]
+    (g : DifferentialGeometry.SmoothRiemannianMetric I M) (α : M)
     {K : Set E} (hK_compact : IsCompact K) (hK_ne : K.Nonempty)
     (hK_sub : K ⊆ (extChartAt I α).target)
     {p : ℝ≥0∞} (hp_one : 1 ≤ p) (hp_top : p ≠ (⊤ : ℝ≥0∞)) :
@@ -1533,7 +1533,7 @@ private lemma chartPushedRaw_sub_pointwise (α : M) (u v : M → ℝ)
 
 private lemma chartPushedRaw_aeEq_zero_of_ae_zero_riemannianMeasure
     [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
-    (g : DifferentialGeometry.Integral.Measure.SmoothRiemannianMetric I M) (α : M)
+    (g : DifferentialGeometry.SmoothRiemannianMetric I M) (α : M)
     {d : M → ℝ} (hd_meas : Measurable d)
     (hd_ae : d =ᵐ[DifferentialGeometry.Integral.Measure.riemannianMeasure (I := I) g
         (DifferentialGeometry.Integral.Measure.chartAtlasPOU I M)] (fun _ => (0 : ℝ))) :
@@ -1708,8 +1708,8 @@ private lemma chartPushedRaw_aeEq_zero_of_ae_zero_riemannianMeasure
   exact hy hy_in
 
 theorem chartPushedRaw_aeEq_of_ae_eq_riemannianMeasure
-    [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
-    (g : DifferentialGeometry.Integral.Measure.SmoothRiemannianMetric I M) (α : M)
+    [T2Space M] [CompactSpace M]
+    (g : DifferentialGeometry.SmoothRiemannianMetric I M) (α : M)
     {u v : M → ℝ}
     (h_meas_u : Measurable u) (h_meas_v : Measurable v)
     (h_ae : u =ᵐ[DifferentialGeometry.Integral.Measure.riemannianMeasure (I := I) g
@@ -1740,8 +1740,8 @@ theorem chartPushedRaw_aeEq_of_ae_eq_riemannianMeasure
   linarith [sub_eq_zero.mp hyz]
 
 theorem chartPushed_aeEq_of_ae_eq_riemannianMeasure
-    [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
-    (g : DifferentialGeometry.Integral.Measure.SmoothRiemannianMetric I M) (α : M)
+    [T2Space M] [CompactSpace M]
+    (g : DifferentialGeometry.SmoothRiemannianMetric I M) (α : M)
     {u v : M → ℝ}
     (h_meas_u : Measurable u) (h_meas_v : Measurable v)
     (h_ae : u =ᵐ[DifferentialGeometry.Integral.Measure.riemannianMeasure (I := I) g

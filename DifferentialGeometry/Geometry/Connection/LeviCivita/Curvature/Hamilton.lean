@@ -1,13 +1,18 @@
 import DifferentialGeometry.Geometry.Connection.LeviCivita.Curvature.DifferentiatedSecondBianchi
 import DifferentialGeometry.Geometry.Curvature.CurvatureActionLower
+open DifferentialGeometry.Tensor.RSTensor
+open DifferentialGeometry.Tensor.RicciIdentity
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Geometry.Curvature
 
 set_option autoImplicit false
 
 noncomputable section
 
-namespace DifferentialGeometry.Integral.Connection
 
-open Bundle Tensor0SBundle
+namespace DifferentialGeometry.Geometry.Connection
+
+open Bundle DifferentialGeometry.Tensor0SBundle
 open scoped Topology Manifold ContDiff BigOperators
 
 /-!
@@ -992,4 +997,4 @@ theorem hamiltonRm04Id
   simp [hamiltonRmReact, Rcomp, A, B, C, D]
   linear_combination hRaw
 
-end DifferentialGeometry.Integral.Connection
+end DifferentialGeometry.Geometry.Connection

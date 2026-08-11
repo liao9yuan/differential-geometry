@@ -187,6 +187,7 @@ import DifferentialGeometry.Tensor.RSTensor.Coordinates.Field
 
 
 
+namespace DifferentialGeometry
 namespace Tensor0SBundle
 noncomputable section
 
@@ -407,3 +408,4 @@ variable (n : WithTop ℕ∞)
 
 end
 end Tensor0SBundle
+end DifferentialGeometry

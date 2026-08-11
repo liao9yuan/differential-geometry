@@ -3,6 +3,19 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.MetricDerivNo
 import DifferentialGeometry.Geometry.Curvature.RestrictOpenRm04
 import DifferentialGeometry.Geometry.Curvature.Realized.MetricFamilyContinuity
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Basic.Core
+open DifferentialGeometry.Tensor.RicciIdentity
+open DifferentialGeometry.Tensor.RSTensor
+open DifferentialGeometry.Tensor.Auxiliary
+open DifferentialGeometry.PDE.RicciFlow
+open DifferentialGeometry.Geometry.Connection
+open DifferentialGeometry.Tensor.RicciIdentity
+open DifferentialGeometry.Tensor.RSTensor
+open DifferentialGeometry.Tensor.Auxiliary
+open DifferentialGeometry.Geometry.Connection
+open DifferentialGeometry.Tensor.RSTensor
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Geometry.Connection
 
 set_option autoImplicit false
 
@@ -26,9 +39,10 @@ set_option autoImplicit false
 
 noncomputable section
 
-open Set Function Filter Bundle Manifold Tensor0SBundle
+open Set Function Filter Bundle Manifold DifferentialGeometry.Tensor0SBundle
 open scoped Manifold Topology ContDiff ENNReal
-open DifferentialGeometry.Integral.Connection
+
+open DifferentialGeometry.Geometry.Operator
 open DifferentialGeometry.PDE.RicciFlow (SolutionOn IsSolutionOn MetricVariationEquationOn
   ricciNorm SolutionFamily RicciAtFamily)
 
@@ -200,7 +214,7 @@ theorem metricRm04_restrictOpen_eval
 
 
 
-variable {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
+variable {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
 
 
 def solutionOn_restrictOpen
@@ -349,7 +363,7 @@ theorem metricFamilySmoothOn_restrictOpen
     (U : TopologicalSpace.Opens M)
     [SigmaCompactSpace U] [T2Space U] [BoundarylessManifold I U]
     [IsManifold I 1 U] [IsManifold I ((∞ : WithTop ℕ∞) + 1) U] :
-    MetricFamilySmoothOn (I := I) D (solutionOn_restrictOpen (I := I) S U).family where
+    MetricFamilySmoothOn (I := I) D (solutionOn_restrictOpen (I := I) S U).family.metric where
   coeff x X Y := hS.smoothMetric.coeff (x : M) X Y
   coeff_cont x X Y := hS.smoothMetric.coeff_cont (x : M) X Y
   metricTensor_cont := by
@@ -513,7 +527,7 @@ theorem ricciNormSpace_restrictOpen
       (ricciNorm (I := I) (solutionOn_restrictOpen (I := I) S U) t) x := by
   have hsmooth : ContMDiff I 𝓘(ℝ, ℝ) (∞ : WithTop ℕ∞)
       (ricciNorm (I := I) (solutionOn_restrictOpen (I := I) S U) t) := by
-    refine (DifferentialGeometry.Integral.Connection.normSq02_smooth (I := I) (M := U)
+    refine (DifferentialGeometry.Tensor.RSTensor.normSq02_smooth (I := I) (M := U)
       ((solutionOn_restrictOpen (I := I) S U).family.metric t)
       (metricRicci (I := I) (M := U)
         ((solutionOn_restrictOpen (I := I) S U).family.metric t))).congr ?_
@@ -561,14 +575,14 @@ theorem isSolutionOn_restrictOpen
     intro t _ht x
     have hsmooth : ContMDiff I 𝓘(ℝ, ℝ) (∞ : WithTop ℕ∞)
         (ricciNorm (I := I) (solutionOn_restrictOpen (I := I) S U) t) := by
-      refine (DifferentialGeometry.Integral.Connection.normSq02_smooth (I := I) (M := U)
+      refine (DifferentialGeometry.Tensor.RSTensor.normSq02_smooth (I := I) (M := U)
         ((solutionOn_restrictOpen (I := I) S U).family.metric t)
         (metricRicci (I := I) (M := U)
           ((solutionOn_restrictOpen (I := I) S U).family.metric t))).congr ?_
       intro y
       simp only [ricciNorm, SolutionOn.ricci, SolutionOn.family,
         SolutionFamily.ricci_apply, SolutionFamily.ricciAt, metricRicci_apply]
-    exact DifferentialGeometry.Integral.Connection.gradientFun_mdiffAt (I := I)
+    exact DifferentialGeometry.Geometry.Operator.gradientFun_mdiffAt (I := I)
       ((solutionOn_restrictOpen (I := I) S U).family.metric t) hsmooth x
 
 end HCGCompactness

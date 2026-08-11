@@ -1,5 +1,6 @@
 import DifferentialGeometry.Geometry.Curvature.Realized.MetricFamily
 import DifferentialGeometry.Bundle.LocalFrameRegularity
+open DifferentialGeometry.Geometry.Curvature
 
 set_option autoImplicit false
 
@@ -16,7 +17,7 @@ noncomputable section
 
 universe u uE uH
 
-namespace DifferentialGeometry.Integral.Connection
+namespace DifferentialGeometry.Geometry.Curvature
 
 open Bundle
 open scoped Manifold ContDiff Topology BigOperators
@@ -35,14 +36,14 @@ namespace MetricFamilySmoothOn
 omit [CompleteSpace E] in
 theorem pairSmoothAt
     {D : RealTimeInterval}
-    {G : RealizedMetricFamilyOn (I := I) (M := M) D}
-    (hG : MetricFamilySmoothOn (I := I) (M := M) D G)
+    {g_fam : ℝ → SmoothRiemannianMetric I M}
+    (hG : MetricFamilySmoothOn (I := I) (M := M) D g_fam)
     {t : Real} {x : M} (hDreg : D.regular ∈ 𝓝 t)
     (V : Fin 2 → ContMDiffSection I E (∞ : WithTop ℕ∞)
       (TangentSpace I : M → Type _)) :
     ContMDiffAt (𝓘(Real, Real).prod I) 𝓘(Real, Real) (∞ : WithTop ℕ∞)
       (fun q : Real × M =>
-        (G.metric q.1).inner q.2 ((V 0) q.2) ((V 1) q.2))
+        (g_fam q.1).inner q.2 ((V 0) q.2) ((V 1) q.2))
       (t, x) := by
   classical
   let e := trivializationAt E (TangentSpace I : M → Type _) x
@@ -59,7 +60,7 @@ theorem pairSmoothAt
       ContMDiffAt (𝓘(Real, Real).prod I) 𝓘(Real, Real)
         (∞ : WithTop ℕ∞)
         (fun q : Real × M =>
-          (G.metric q.1).inner q.2
+          (g_fam q.1).inner q.2
             (e.localFrame b i q.2) (e.localFrame b j q.2))
         (t, x) := fun i j =>
     (hcompOn i j).contMDiffAt hmemProd
@@ -75,7 +76,7 @@ theorem pairSmoothAt
           ∑ i, ∑ j,
             e.localFrame_coeff I b i q.2 ((V 0) q.2) *
               e.localFrame_coeff I b j q.2 ((V 1) q.2) *
-              (G.metric q.1).inner q.2
+              (g_fam q.1).inner q.2
                 (e.localFrame b i q.2) (e.localFrame b j q.2))
         (t, x) := by
     refine ContMDiffAt.sum fun i _ => ContMDiffAt.sum fun j _ => ?_
@@ -94,8 +95,8 @@ theorem pairSmoothAt
     (continuous_snd.tendsto (t, x)).eventually (hev0.and hev1)
   filter_upwards [hev] with q hq
   have hexp :
-      (G.metric q.1).inner q.2 ((V 0) q.2) ((V 1) q.2) =
-        (G.metric q.1).inner q.2
+      (g_fam q.1).inner q.2 ((V 0) q.2) ((V 1) q.2) =
+        (g_fam q.1).inner q.2
           (∑ i, e.localFrame_coeff I b i q.2 ((V 0) q.2) • e.localFrame b i q.2)
           (∑ j, e.localFrame_coeff I b j q.2 ((V 1) q.2) • e.localFrame b j q.2) := by
     rw [← hq.1, ← hq.2]
@@ -107,6 +108,6 @@ theorem pairSmoothAt
     ring
 
 end MetricFamilySmoothOn
-end DifferentialGeometry.Integral.Connection
+end DifferentialGeometry.Geometry.Curvature
 
 end

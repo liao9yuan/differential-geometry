@@ -1,13 +1,15 @@
 import DifferentialGeometry.Geometry.Curvature.Riemann.Basic.Pointwise
+open DifferentialGeometry.Tensor.Multilinear
+open DifferentialGeometry.Geometry.Curvature
 
 noncomputable section
 
 set_option autoImplicit false
 
-open Bundle Tensor0SBundle DifferentialGeometry.Integral.Connection
+open Bundle DifferentialGeometry.Tensor0SBundle
 open scoped BigOperators Manifold ContDiff Topology
 
-namespace DifferentialGeometry.Integral.Connection
+namespace DifferentialGeometry.Geometry.Curvature
 
 variable {E : Type _} [NormedAddCommGroup E] [NormedSpace ℝ E] [FiniteDimensional ℝ E]
   [CompleteSpace E]
@@ -163,7 +165,7 @@ theorem connectionRiemannCurvatureField_eq_smooth_of_eventuallyEq_tangentConst
     simpa [Xc] using hXx
   have hYval : tangentConstAt (I := I) x Y x = Ys x := by
     simpa [Yc] using hYx
-  simp only [DifferentialGeometry.Integral.Connection.connectionRiemannCurvatureField]
+  simp only [DifferentialGeometry.Geometry.Curvature.connectionRiemannCurvatureField]
   rw [hcovZY, hcovZX, hZ_at, hbr]
   rw [hXval, hYval]
 
@@ -629,4 +631,4 @@ theorem ricciSection_eq_trace
 
 end CovariantDerivative
 
-end DifferentialGeometry.Integral.Connection
+end DifferentialGeometry.Geometry.Curvature

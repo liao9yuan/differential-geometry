@@ -1,4 +1,8 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Perelman.NoncollapseSpan
+open DifferentialGeometry.Analysis.Spectral
+open DifferentialGeometry.PDE.RicciFlow
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Geometry.Curvature
 
 set_option autoImplicit false
 
@@ -10,14 +14,15 @@ noncollapsing theorem when the flow interval is `[0, ω)`.  It still starts at a
 strictly positive time.  The remaining initial-time producer is separate.
 -/
 
+open DifferentialGeometry.Geometry.Connection
 namespace DifferentialGeometry.PDE.RicciFlow.Perelman
 
 noncomputable section
 
-open Bundle MeasureTheory Set Tensor0SBundle
+open Bundle MeasureTheory Set DifferentialGeometry.Tensor0SBundle
 open scoped Manifold ContDiff ENNReal
 open DifferentialGeometry.Geometry.Riemannian.VolumeComparison
-open DifferentialGeometry.Integral.Connection
+
 open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.PDE.RicciFlow.Entropy
 
@@ -30,7 +35,7 @@ variable {H : Type uH} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H}
 variable [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 variable [IsManifold I 1 M]
-variable [T3Space M] [SigmaCompactSpace M] [ConnectedSpace M] [CompactSpace M]
+variable [T3Space M] [ConnectedSpace M] [CompactSpace M]
 variable [I.Boundaryless] [BoundarylessManifold I M]
 
 private local instance : CompleteSpace E := FiniteDimensional.complete Real E

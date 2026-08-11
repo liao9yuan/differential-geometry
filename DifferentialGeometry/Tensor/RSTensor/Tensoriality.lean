@@ -45,6 +45,7 @@ set_option backward.isDefEq.respectTransparency false
 
 open scoped Manifold Topology ContDiff
 
+namespace DifferentialGeometry
 namespace Tensor0SBundle
 
 variable {K : Type*} [NontriviallyNormedField K]
@@ -164,3 +165,4 @@ theorem tensorialAt_applyInput_evalOutput {r s : ℕ} {x : M}
 end TensorRSSpace
 
 end Tensor0SBundle
+end DifferentialGeometry

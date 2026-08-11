@@ -16,7 +16,7 @@ noncomputable section
 
 namespace DifferentialGeometry.Tensor.Coordinates
 
-open Bundle Set TensorLieDeriv Filter
+open Bundle Set DifferentialGeometry.TensorLieDeriv Filter
 open scoped Manifold ContDiff Topology
 
 variable {𝕜 : Type*} [NontriviallyNormedField 𝕜] [CompleteSpace 𝕜]

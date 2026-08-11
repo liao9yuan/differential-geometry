@@ -30,7 +30,7 @@ namespace DifferentialGeometry
 namespace Geometry
 namespace Riemannian
 
-open Tensor0SBundle
+open DifferentialGeometry.Tensor0SBundle
 open scoped Manifold ContDiff
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]

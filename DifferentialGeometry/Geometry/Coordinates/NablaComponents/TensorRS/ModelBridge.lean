@@ -1,4 +1,5 @@
 import DifferentialGeometry.Geometry.Coordinates.NablaComponents.TensorRS.Basic
+open DifferentialGeometry.Tensor.Multilinear
 
 
 
@@ -13,7 +14,7 @@ noncomputable section
 
 namespace DifferentialGeometry.Tensor.Coordinates
 
-open Bundle Set Tensor0SBundle TensorLieDeriv
+open Bundle Set DifferentialGeometry.Tensor0SBundle DifferentialGeometry.TensorLieDeriv
 open scoped BigOperators Manifold ContDiff Topology
 
 variable {𝕜 : Type*} [NontriviallyNormedField 𝕜] [CompleteSpace 𝕜]

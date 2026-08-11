@@ -1,6 +1,9 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.LowRegSmoothBridge
 import DifferentialGeometry.Analysis.Parabolic.QuasiLinear.CrossScaleParabolicTraceEnergy
 import DifferentialGeometry.Analysis.Parabolic.QuasiLinear.TensorMaximalRegularity.SolutionFieldLink
+open DifferentialGeometry.PDE.RicciFlow DifferentialGeometry.Analysis.Parabolic DifferentialGeometry.Analysis.Spectral
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Geometry.Curvature
 
 /-!
 # First same-horizon low-regularity bootstrap
@@ -19,7 +22,7 @@ noncomputable section
 open Bundle Manifold MeasureTheory Set
 open scoped Manifold Topology ContDiff ENNReal NNReal InnerProductSpace
 
-namespace DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral
+namespace DifferentialGeometry.PDE.RicciFlow
 
 open DifferentialGeometry
 open DifferentialGeometry.Integral.Measure
@@ -51,7 +54,6 @@ def duhamelCross (g : SmoothRiemannianMetric I M) (r s : ℕ) (a : ℝ)
     (tensorResolventL2_isCompactOperator (I := I) (M := M) g r s) u₀ f
 
 omit [NeZero (Module.finrank ℝ E)]
-  [CompactSpace M]
   [BoundarylessManifold I M] in
 /-- The intermediate representative realizes the continuous lower carrier at
 every time of the original interval. -/
@@ -66,7 +68,6 @@ theorem crossRepr_toFun
   rfl
 
 omit [NeZero (Module.finrank ℝ E)]
-  [CompactSpace M]
   [BoundarylessManifold I M] in
 /-- The intermediate representative is the intermediate inclusion of the top
 companion field almost everywhere on the original interval. -/
@@ -118,7 +119,6 @@ theorem duhRepr_field_ae
       (duhamelCross (I := I) (M := M) g r s a hT hT1 u₀ f) hT
 
 omit [NeZero (Module.finrank ℝ E)]
-  [CompactSpace M]
   [BoundarylessManifold I M] in
 /-- An almost-everywhere intermediate-order ball bound for the top companion
 holds for the cross-scale representative at every time.  The proof uses the
@@ -182,6 +182,6 @@ theorem duhRepr_ball
   filter_upwards [hstate] with t ht
   exact ht
 
-end DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral
+end DifferentialGeometry.PDE.RicciFlow
 
 end

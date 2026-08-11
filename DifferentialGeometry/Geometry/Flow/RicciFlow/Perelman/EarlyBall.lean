@@ -1,5 +1,9 @@
 import DifferentialGeometry.Geometry.Comparison.Volume.FamilySmallBall
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Perelman.NoncollapseOpen
+open DifferentialGeometry.Analysis.Spectral
+open DifferentialGeometry.PDE.RicciFlow
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Geometry.Curvature
 
 set_option autoImplicit false
 
@@ -12,14 +16,15 @@ already in `NoncollapseOpen`; the compact-uniform volume producer is imported
 from `FamilySmallBall`.
 -/
 
+open DifferentialGeometry.Geometry.Connection
 namespace DifferentialGeometry.PDE.RicciFlow.Perelman
 
 noncomputable section
 
-open Bundle MeasureTheory Set Tensor0SBundle
+open Bundle MeasureTheory Set DifferentialGeometry.Tensor0SBundle
 open scoped Manifold ContDiff ENNReal
 open DifferentialGeometry.Geometry.Riemannian.VolumeComparison
-open DifferentialGeometry.Integral.Connection
+
 
 universe u uE uH
 
@@ -30,7 +35,7 @@ variable {H : Type uH} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H}
 variable [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 variable [IsManifold I 1 M]
-variable [T3Space M] [SigmaCompactSpace M] [ConnectedSpace M] [CompactSpace M]
+variable [T3Space M] [ConnectedSpace M] [CompactSpace M]
 variable [I.Boundaryless] [BoundarylessManifold I M]
 
 private local instance : CompleteSpace E := FiniteDimensional.complete Real E
@@ -59,7 +64,7 @@ theorem early_vol_low
               {x : M | DifferentialGeometry.riemannianEDistOf
                 (I := I) (S.base.metric t) p x < ENNReal.ofReal r} := by
   simpa only [SolutionOn.family_metric] using
-    family_vol_low (I := I) (M := M) h0omega S.family hS.smoothMetric hrho
+    family_vol_low (I := I) (M := M) h0omega S.family.metric hS.smoothMetric hrho
 
 omit [ConnectedSpace M] [BoundarylessManifold I M] in
 /-- Flow-ball form of `early_vol_low`.  This is only the definitional adapter
@@ -88,7 +93,7 @@ theorem early_ball_low
     SolutionOn.family_metric] using
       hvol t ht B.center B.radius_pos hBrho hsq
 
-omit [NeZero (Module.finrank Real E)] [ConnectedSpace M] [CompactSpace M]
+omit [NeZero (Module.finrank Real E)] [ConnectedSpace M]
   [I.Boundaryless] [BoundarylessManifold I M] in
 private theorem kappa_mono
     {D : RealTimeInterval} {S : SolutionOn (I := I) (M := M) D}

@@ -34,6 +34,7 @@ set_option backward.isDefEq.respectTransparency false
 
 
 
+namespace DifferentialGeometry
 namespace Tensor0SBundle
 
 noncomputable section
@@ -227,3 +228,4 @@ end NormSqContinuity
 end
 
 end Tensor0SBundle
+end DifferentialGeometry

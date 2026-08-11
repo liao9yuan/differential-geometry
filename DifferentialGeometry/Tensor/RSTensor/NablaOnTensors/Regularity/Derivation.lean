@@ -29,9 +29,10 @@ import DifferentialGeometry.Bundle.PartialMfderiv.FixedBase
 
 
 
+namespace DifferentialGeometry
 namespace Tensor0SBundle
 
-open Bundle Set TensorLieDeriv
+open Bundle Set DifferentialGeometry.TensorLieDeriv
 open scoped BigOperators Manifold ContDiff Topology
 
 variable {𝕜 : Type*} [NontriviallyNormedField 𝕜] [CompleteSpace 𝕜]
@@ -1321,3 +1322,4 @@ theorem nabla0SFun_eval_coordFrame_moving_raw {s : ℕ}
               ((cov (V a) x₀) (X x₀))) := by
           rw [hcorr_sum]
 end Tensor0SBundle
+end DifferentialGeometry

@@ -1,12 +1,18 @@
 import DifferentialGeometry.Geometry.Curvature.Components.Christoffel
+import DifferentialGeometry.Geometry.Operator.RoughLaplacian
+open DifferentialGeometry.Tensor.RSTensor
+open DifferentialGeometry.Tensor.RicciIdentity
+open DifferentialGeometry.Geometry.Curvature
+
 
 set_option autoImplicit false
 
 noncomputable section
 
-namespace DifferentialGeometry.Integral.Connection
+open DifferentialGeometry.Geometry.Operator
+namespace DifferentialGeometry.Geometry.Curvature
 
-open Bundle Tensor0SBundle
+open Bundle DifferentialGeometry.Tensor0SBundle
 open scoped Manifold ContDiff BigOperators
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]
@@ -240,4 +246,4 @@ theorem one_form_third_comm_coord_of_christoffelCurv
   exact hcoord'
 
 end CoordinateChristoffelCurvature
-end DifferentialGeometry.Integral.Connection
+end DifferentialGeometry.Geometry.Curvature

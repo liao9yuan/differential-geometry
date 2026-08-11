@@ -9,6 +9,11 @@ import DifferentialGeometry.Geometry.Metric.ChartGram
 import DifferentialGeometry.Analysis.Calculus.SpaceJet
 import DifferentialGeometry.Analysis.Calculus.TimeSliceSwap
 import DifferentialGeometry.Analysis.Calculus.TimeSliceBootstrap
+open DifferentialGeometry.PDE.RicciFlow
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Geometry.Connection
+open DifferentialGeometry.Geometry.Operator
 
 
 
@@ -43,11 +48,12 @@ namespace HCGCompactness
 
 open scoped Manifold ContDiff Topology BigOperators
 open Bundle
-open DifferentialGeometry.Integral.Connection
+
+open DifferentialGeometry.Geometry.Operator
 open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.DivergenceTheorem
 open DifferentialGeometry.PDE.RicciFlow (SolutionOn)
-open Tensor0SBundle
+open DifferentialGeometry.Tensor0SBundle
 open Filter Topology
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]
@@ -231,7 +237,7 @@ theorem metricTensorContLim
     (hkcont : ∀ (k : ℕ) (x₀ : M) (i j : Fin (Module.finrank Real E)), ContinuousOn
       (fun p : ℝ × M => chartGramMatrix (I := I) (gSeq k p.1) x₀ p.2 i j)
       (Set.Icc β ψ ×ˢ (trivializationAt E (TangentSpace I) x₀).baseSet)) :
-    DifferentialGeometry.Integral.Connection.Tensor0SFamilyContinuousOnSet
+    DifferentialGeometry.Geometry.Curvature.Tensor0SFamilyContinuousOnSet
       (I := I) (M := M) 2 (Set.Icc β ψ)
       (fun t x => Tensor0SBundle.metricTensorField (I := I) (gInf t) x) := by
   apply metricTensorCont_of_chartGram (I := I) (K := Set.Icc β ψ) gInf
@@ -413,10 +419,10 @@ private theorem gSeqJet_contOn
     sourceDomSigmaOf (I := I) Φ k (hsrc k)
   letI sourceT2 : T2Space ↥(sourceOpen (I := I) Φ k) :=
     sourceDomT2 (I := I) Φ k
-  let Vi := @Integral.Connection.restrictOpenTangentSection E inferInstance
+  let Vi := @DifferentialGeometry.Geometry.Curvature.restrictOpenTangentSection E inferInstance
     inferInstance inferInstance H inferInstance I P.M P.topology P.charted P.smooth
     (sourceOpen (I := I) Φ k) sourceSigma sourceT2 σi
-  let Vj := @Integral.Connection.restrictOpenTangentSection E inferInstance
+  let Vj := @DifferentialGeometry.Geometry.Curvature.restrictOpenTangentSection E inferInstance
     inferInstance inferInstance H inferInstance I P.M P.topology P.charted P.smooth
     (sourceOpen (I := I) Φ k) sourceSigma sourceT2 σj
   letI : IsManifold I 1 (SourceDomain (I := I) Φ k) :=
@@ -509,11 +515,11 @@ private theorem gSeqJet_contOn
     have hcorez : core p.2 = (⟨z, hps⟩ : SourceDomain (I := I) Φ k) := by
       simp only [core, dif_pos hps, z]
     have hViz : Vi (⟨z, hps⟩ : SourceDomain (I := I) Φ k) = σi z := by
-      exact @Integral.Connection.restrictOpenTangentSection_apply E inferInstance
+      exact @DifferentialGeometry.Geometry.Curvature.restrictOpenTangentSection_apply E inferInstance
         inferInstance inferInstance H inferInstance I P.M P.topology P.charted P.smooth
         (sourceOpen (I := I) Φ k) sourceSigma sourceT2 σi ⟨z, hps⟩
     have hVjz : Vj (⟨z, hps⟩ : SourceDomain (I := I) Φ k) = σj z := by
-      exact @Integral.Connection.restrictOpenTangentSection_apply E inferInstance
+      exact @DifferentialGeometry.Geometry.Curvature.restrictOpenTangentSection_apply E inferInstance
         inferInstance inferInstance H inferInstance I P.M P.topology P.charted P.smooth
         (sourceOpen (I := I) Φ k) sourceSigma sourceT2 σj ⟨z, hps⟩
     have hV0 : V 0 (⟨z, hps⟩ : SourceDomain (I := I) Φ k) = σi z := by
@@ -1444,7 +1450,7 @@ theorem smoothMetric
       (RealTimeInterval.openInterval a b t₀ ht₀)
       ({ base := { metric := co.gInf } } :
         SolutionOn (I := I) (M := P.M)
-          (RealTimeInterval.openInterval a b t₀ ht₀)).family := by
+          (RealTimeInterval.openInterval a b t₀ ht₀)).family.metric := by
   letI : TopologicalSpace P.M := P.topology
   letI : ChartedSpace H P.M := P.charted
   letI : T2Space P.M := P.t2
@@ -1576,7 +1582,7 @@ theorem smoothMetric_of_conv
       (RealTimeInterval.openInterval a b t₀ ht₀)
       ({ base := { metric := co.gInf } } :
         SolutionOn (I := I) (M := P.M)
-          (RealTimeInterval.openInterval a b t₀ ht₀)).family := by
+          (RealTimeInterval.openInterval a b t₀ ht₀)).family.metric := by
   apply OpenConvOut.smoothMetric (Φ := Φ) ht₀ co
   intro n
   apply ConvOut.gramSmooth (Φ := Φ) (co := OpenConvOut.at_window Φ co n)

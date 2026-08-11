@@ -1,4 +1,5 @@
 import DifferentialGeometry.Analysis.Calculus.BallRetraction
+open DifferentialGeometry.Analysis.Calculus
 noncomputable section
 
 open scoped InnerProductSpace

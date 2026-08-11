@@ -1,6 +1,8 @@
 import Mathlib.Analysis.InnerProductSpace.Spectrum
 import DifferentialGeometry.Tensor.RSTensor.Tensor0SRiemannian.Coordinate
 import DifferentialGeometry.Tensor.RSTensor.Tensor0SRiemannian.KroneckerQuadForm
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Geometry.Curvature
 
 set_option autoImplicit false
 
@@ -12,6 +14,7 @@ set_option autoImplicit false
 
 
 
+namespace DifferentialGeometry
 namespace Tensor0SBundle
 
 noncomputable section
@@ -855,3 +858,4 @@ end PointwiseCS
 end
 
 end Tensor0SBundle
+end DifferentialGeometry

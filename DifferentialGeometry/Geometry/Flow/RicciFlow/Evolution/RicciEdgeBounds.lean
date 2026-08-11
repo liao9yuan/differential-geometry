@@ -1,6 +1,11 @@
 import DifferentialGeometry.Geometry.Curvature.Realized.MetricFamilyContinuity
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.ChartRicciJetIdentity
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.ExtendedSolutionRegularity
+open DifferentialGeometry.PDE.RicciFlow
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Geometry.Connection
+open DifferentialGeometry.Geometry.Operator
 
 set_option autoImplicit false
 
@@ -24,10 +29,10 @@ open Bundle Filter MeasureTheory Set
 open scoped Manifold ContDiff Interval Topology
 open DifferentialGeometry
 open DifferentialGeometry.Analysis
-open DifferentialGeometry.Integral.Connection
+
+open DifferentialGeometry.Geometry.Operator
 open DifferentialGeometry.Integral.DivergenceTheorem
 open DifferentialGeometry.Integral.Measure
-open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.DeTurckCoefficients
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]
     [FiniteDimensional Real E] [NeZero (Module.finrank Real E)]
@@ -39,6 +44,7 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
 omit [NeZero (Module.finrank ℝ E)]
   [BoundarylessManifold I M]
   [I.Boundaryless] in
+omit [SigmaCompactSpace M] in
 /-- Joint chart-Gram regularity up to the initial time gives one metric
 equivalence constant on every compact initial subinterval.  This is the
 zeroth-order component of the regularizing-edge estimates used in smooth
@@ -214,12 +220,12 @@ theorem ricciEdgeIntegral
   have hRicFam := ricciCont_interior_of_chartGram (I := I) g a b hsmooth
   have hRicEval : ContinuousOn
       (fun r : ℝ => metricRicciAt (I := I) (g r) x
-        (DifferentialGeometry.Integral.Connection.vec2 v w)) (Set.Ioo a b) := by
+        (DifferentialGeometry.Geometry.Curvature.vec2 v w)) (Set.Ioo a b) := by
     rw [continuousOn_iff_continuous_restrict]
     exact hRicFam.eval_continuous (P := {r : ℝ // r ∈ Set.Ioo a b})
       (τ := Subtype.val) (b := fun _ => x) continuous_subtype_val
       (fun r => r.2) continuous_const
-      (v := fun i _ => DifferentialGeometry.Integral.Connection.vec2 v w i)
+      (v := fun i _ => DifferentialGeometry.Geometry.Curvature.vec2 v w i)
       (fun _ => continuous_const)
   have hRic : ContinuousOn
       (fun r : ℝ => ricciTensor (I := I) (g r) x v w) (Set.Ioo a b) := by

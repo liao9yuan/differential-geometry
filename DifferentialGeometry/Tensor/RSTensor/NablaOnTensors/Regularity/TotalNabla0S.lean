@@ -3,6 +3,7 @@ import DifferentialGeometry.Tensor.RSTensor.NablaOnTensors.Regularity.Tensor0S
 import DifferentialGeometry.Bundle.Frame
 import Mathlib.Geometry.Manifold.VectorBundle.LocalFrame
 import Mathlib.Geometry.Manifold.BumpFunction
+open DifferentialGeometry.Tensor.Multilinear
 
 
 
@@ -14,9 +15,10 @@ import Mathlib.Geometry.Manifold.BumpFunction
 
 
 
+namespace DifferentialGeometry
 namespace Tensor0SBundle
 
-open Bundle Set TensorLieDeriv
+open Bundle Set DifferentialGeometry.TensorLieDeriv
 open scoped Manifold ContDiff Topology
 
 noncomputable section
@@ -195,3 +197,4 @@ noncomputable def CanonicalSpatialDerivs0S.of_smooth_connection {s : ℕ}
 end
 
 end Tensor0SBundle
+end DifferentialGeometry

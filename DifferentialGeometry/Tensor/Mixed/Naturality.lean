@@ -2,6 +2,7 @@
 
 
 import DifferentialGeometry.Tensor.Mixed.DualFiber
+open DifferentialGeometry.Tensor.Multilinear
 
 noncomputable section
 

@@ -1,5 +1,8 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Pullback.HarmonicDensityJoint
 import DifferentialGeometry.Analysis.Integration.Measure.CompactParametricIntegral
+open DifferentialGeometry.PDE.RicciFlow
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Geometry.Curvature
 
 /-!
 # The finite state-dependent harmonic-map mass
@@ -18,7 +21,7 @@ the present operator at the identity map, not the nonlinear Galerkin mass.
 
 noncomputable section
 
-open Bundle Manifold MeasureTheory Set Tensor0SBundle
+open Bundle Manifold MeasureTheory Set DifferentialGeometry.Tensor0SBundle
 open scoped Manifold Topology ContDiff
 
 namespace DifferentialGeometry.PDE.RicciFlow.Pullback
@@ -81,7 +84,7 @@ variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
   [I.Boundaryless]
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
   [IsManifold I ∞ M] [CompactSpace M] [T2Space M]
-  [SigmaCompactSpace M] [BoundarylessManifold I M] [ConnectedSpace M]
+  [BoundarylessManifold I M] [ConnectedSpace M]
 
 private local instance : MeasurableSpace M := borel M
 
@@ -90,7 +93,7 @@ private local instance : BorelSpace M := ⟨rfl⟩
 /-! ## Coefficient derivative of the local addition -/
 
 omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless]
-    [IsManifold I ∞ M] [CompactSpace M] [T2Space M] [SigmaCompactSpace M]
+    [IsManifold I ∞ M] [CompactSpace M] [T2Space M]
     [BoundarylessManifold I M] [ConnectedSpace M] in
 private theorem mfderiv_affine_line_apply
     {V : Type*} [NormedAddCommGroup V] [NormedSpace ℝ V]
@@ -127,7 +130,7 @@ private theorem mfderiv_affine_line_apply
   exact hcomp.trans hgoal
 
 omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless]
-    [IsManifold I ∞ M] [CompactSpace M] [T2Space M] [SigmaCompactSpace M]
+    [IsManifold I ∞ M] [CompactSpace M] [T2Space M]
     [BoundarylessManifold I M] [ConnectedSpace M] in
 private theorem mfderiv_euclidean_affine_line_apply
     {J : Type*} [Fintype J]

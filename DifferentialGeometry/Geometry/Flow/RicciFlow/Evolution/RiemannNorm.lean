@@ -1,5 +1,7 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.Ricci
 import Mathlib.Tactic.Ring
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Geometry.Curvature
 
 set_option autoImplicit false
 
@@ -37,47 +39,47 @@ variable {Idx : Type*} [Fintype Idx]
 
 
 def raisedRm04CompInFrame
-    (Rm04 : Real -> DifferentialGeometry.Integral.Connection.Tensor04Section (I := I) (M := M))
-    (gInv : Real -> DifferentialGeometry.Integral.Connection.InverseMetricComponents M Idx)
+    (Rm04 : Real -> DifferentialGeometry.Geometry.Curvature.Tensor04Section (I := I) (M := M))
+    (gInv : Real -> DifferentialGeometry.Geometry.Curvature.InverseMetricComponents M Idx)
     (frame : Idx -> (x : M) -> TangentSpace I x)
     (t : Real) (x : M) (a b c d : Idx) : Real :=
   ∑ p : Idx, ∑ q : Idx, ∑ r : Idx, ∑ s : Idx,
     gInv t x a p * gInv t x b q * gInv t x c r * gInv t x d s *
-      DifferentialGeometry.Integral.Connection.rm04Comp (I := I) (Rm04 t) frame x p q r s
+      DifferentialGeometry.Geometry.Curvature.rm04Comp (I := I) (Rm04 t) frame x p q r s
 
 omit [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 @[simp] theorem raisedRm04CompInFrame_apply
-    (Rm04 : Real -> DifferentialGeometry.Integral.Connection.Tensor04Section (I := I) (M := M))
-    (gInv : Real -> DifferentialGeometry.Integral.Connection.InverseMetricComponents M Idx)
+    (Rm04 : Real -> DifferentialGeometry.Geometry.Curvature.Tensor04Section (I := I) (M := M))
+    (gInv : Real -> DifferentialGeometry.Geometry.Curvature.InverseMetricComponents M Idx)
     (frame : Idx -> (x : M) -> TangentSpace I x)
     (t : Real) (x : M) (a b c d : Idx) :
     raisedRm04CompInFrame (I := I) Rm04 gInv frame t x a b c d =
       ∑ p : Idx, ∑ q : Idx, ∑ r : Idx, ∑ s : Idx,
         gInv t x a p * gInv t x b q * gInv t x c r * gInv t x d s *
-          DifferentialGeometry.Integral.Connection.rm04Comp (I := I) (Rm04 t) frame x p q r s := by
+          DifferentialGeometry.Geometry.Curvature.rm04Comp (I := I) (Rm04 t) frame x p q r s := by
   rfl
 
 
 
 def rm04NormSqInFrame
-    (Rm04 : Real -> DifferentialGeometry.Integral.Connection.Tensor04Section (I := I) (M := M))
-    (gInv : Real -> DifferentialGeometry.Integral.Connection.InverseMetricComponents M Idx)
+    (Rm04 : Real -> DifferentialGeometry.Geometry.Curvature.Tensor04Section (I := I) (M := M))
+    (gInv : Real -> DifferentialGeometry.Geometry.Curvature.InverseMetricComponents M Idx)
     (frame : Idx -> (x : M) -> TangentSpace I x) :
     Real -> M -> Real :=
   fun t x =>
     ∑ a : Idx, ∑ b : Idx, ∑ c : Idx, ∑ d : Idx,
-      DifferentialGeometry.Integral.Connection.rm04Comp (I := I) (Rm04 t) frame x a b c d *
+      DifferentialGeometry.Geometry.Curvature.rm04Comp (I := I) (Rm04 t) frame x a b c d *
         raisedRm04CompInFrame (I := I) Rm04 gInv frame t x a b c d
 
 omit [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 @[simp] theorem rm04NormSqInFrame_apply
-    (Rm04 : Real -> DifferentialGeometry.Integral.Connection.Tensor04Section (I := I) (M := M))
-    (gInv : Real -> DifferentialGeometry.Integral.Connection.InverseMetricComponents M Idx)
+    (Rm04 : Real -> DifferentialGeometry.Geometry.Curvature.Tensor04Section (I := I) (M := M))
+    (gInv : Real -> DifferentialGeometry.Geometry.Curvature.InverseMetricComponents M Idx)
     (frame : Idx -> (x : M) -> TangentSpace I x)
     (t : Real) (x : M) :
     rm04NormSqInFrame (I := I) Rm04 gInv frame t x =
       ∑ a : Idx, ∑ b : Idx, ∑ c : Idx, ∑ d : Idx,
-        DifferentialGeometry.Integral.Connection.rm04Comp (I := I) (Rm04 t) frame x a b c d *
+        DifferentialGeometry.Geometry.Curvature.rm04Comp (I := I) (Rm04 t) frame x a b c d *
           raisedRm04CompInFrame (I := I) Rm04 gInv frame t x a b c d := by
   rfl
 
@@ -91,10 +93,10 @@ private def derivProduct5RHS
 
 
 def raisedRm04DerivRHSInFrame
-    {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
+    {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
-    (Rm04 : Real -> DifferentialGeometry.Integral.Connection.Tensor04Section (I := I) (M := M))
-    (gInv : Real -> DifferentialGeometry.Integral.Connection.InverseMetricComponents M Idx)
+    (Rm04 : Real -> DifferentialGeometry.Geometry.Curvature.Tensor04Section (I := I) (M := M))
+    (gInv : Real -> DifferentialGeometry.Geometry.Curvature.InverseMetricComponents M Idx)
     (frame : Idx -> (x : M) -> TangentSpace I x)
     (rm04Dt : Real -> M -> Idx -> Idx -> Idx -> Idx -> Real)
     (t : Real) (x : M) (a b c d : Idx) : Real :=
@@ -104,7 +106,7 @@ def raisedRm04DerivRHSInFrame
       (gInv t x b q)
       (gInv t x c r)
       (gInv t x d s)
-      (DifferentialGeometry.Integral.Connection.rm04Comp (I := I) (Rm04 t) frame x p q r s)
+      (DifferentialGeometry.Geometry.Curvature.rm04Comp (I := I) (Rm04 t) frame x p q r s)
       (inverseMetricEvolutionRHSInFrame (I := I) S gInv frame t x a p)
       (inverseMetricEvolutionRHSInFrame (I := I) S gInv frame t x b q)
       (inverseMetricEvolutionRHSInFrame (I := I) S gInv frame t x c r)
@@ -113,17 +115,17 @@ def raisedRm04DerivRHSInFrame
 
 
 def rm04NormDerivRHSInFrame
-    {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
+    {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
-    (Rm04 : Real -> DifferentialGeometry.Integral.Connection.Tensor04Section (I := I) (M := M))
-    (gInv : Real -> DifferentialGeometry.Integral.Connection.InverseMetricComponents M Idx)
+    (Rm04 : Real -> DifferentialGeometry.Geometry.Curvature.Tensor04Section (I := I) (M := M))
+    (gInv : Real -> DifferentialGeometry.Geometry.Curvature.InverseMetricComponents M Idx)
     (frame : Idx -> (x : M) -> TangentSpace I x)
     (rm04Dt : Real -> M -> Idx -> Idx -> Idx -> Idx -> Real)
     (t : Real) (x : M) : Real :=
   ∑ a : Idx, ∑ b : Idx, ∑ c : Idx, ∑ d : Idx,
     (rm04Dt t x a b c d *
         raisedRm04CompInFrame (I := I) Rm04 gInv frame t x a b c d +
-      DifferentialGeometry.Integral.Connection.rm04Comp (I := I) (Rm04 t) frame x a b c d *
+      DifferentialGeometry.Geometry.Curvature.rm04Comp (I := I) (Rm04 t) frame x a b c d *
         raisedRm04DerivRHSInFrame (I := I) S Rm04 gInv frame rm04Dt
           t x a b c d)
 
@@ -131,13 +133,13 @@ def rm04NormDerivRHSInFrame
 
 
 def Rm04NormRawDerivativeEquationOn
-    {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
+    {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
-    (Rm04 : Real -> DifferentialGeometry.Integral.Connection.Tensor04Section (I := I) (M := M))
-    (gInv : Real -> DifferentialGeometry.Integral.Connection.InverseMetricComponents M Idx)
+    (Rm04 : Real -> DifferentialGeometry.Geometry.Curvature.Tensor04Section (I := I) (M := M))
+    (gInv : Real -> DifferentialGeometry.Geometry.Curvature.InverseMetricComponents M Idx)
     (frame : Idx -> (x : M) -> TangentSpace I x)
     (rm04Dt : Real -> M -> Idx -> Idx -> Idx -> Idx -> Real) : Prop :=
-  ∀ (t : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime D) (x : M),
+  ∀ (t : DifferentialGeometry.Geometry.Curvature.RealTimeInterval.RegularTime D) (x : M),
     HasDerivWithinAt
       (fun s : Real => rm04NormSqInFrame (I := I) Rm04 gInv frame s x)
       (rm04NormDerivRHSInFrame (I := I) S Rm04 gInv frame rm04Dt
@@ -148,8 +150,8 @@ def Rm04NormRawDerivativeEquationOn
 
 def roughLapRm04InnerInFrame
     (roughLapRm04 : Real -> M -> Idx -> Idx -> Idx -> Idx -> Real)
-    (Rm04 : Real -> DifferentialGeometry.Integral.Connection.Tensor04Section (I := I) (M := M))
-    (gInv : Real -> DifferentialGeometry.Integral.Connection.InverseMetricComponents M Idx)
+    (Rm04 : Real -> DifferentialGeometry.Geometry.Curvature.Tensor04Section (I := I) (M := M))
+    (gInv : Real -> DifferentialGeometry.Geometry.Curvature.InverseMetricComponents M Idx)
     (frame : Idx -> (x : M) -> TangentSpace I x) :
     Real -> M -> Real :=
   fun t x =>
@@ -160,7 +162,7 @@ def roughLapRm04InnerInFrame
 
 def nablaRm04NormSqInFrame
     (nablaRm04 : Real -> M -> Idx -> Idx -> Idx -> Idx -> Idx -> Real)
-    (gInv : Real -> DifferentialGeometry.Integral.Connection.InverseMetricComponents M Idx) :
+    (gInv : Real -> DifferentialGeometry.Geometry.Curvature.InverseMetricComponents M Idx) :
     Real -> M -> Real :=
   fun t x =>
     ∑ a : Idx, ∑ b : Idx,
@@ -175,23 +177,23 @@ def nablaRm04NormSqInFrame
 
 
 def Rm04NormDerivativeSimplifiesInFrame
-    {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
+    {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
-    (Rm04 : Real -> DifferentialGeometry.Integral.Connection.Tensor04Section (I := I) (M := M))
-    (gInv : Real -> DifferentialGeometry.Integral.Connection.InverseMetricComponents M Idx)
+    (Rm04 : Real -> DifferentialGeometry.Geometry.Curvature.Tensor04Section (I := I) (M := M))
+    (gInv : Real -> DifferentialGeometry.Geometry.Curvature.InverseMetricComponents M Idx)
     (frame : Idx -> (x : M) -> TangentSpace I x)
     (rm04Dt : Real -> M -> Idx -> Idx -> Idx -> Idx -> Real)
     (roughLapInner reaction : Real -> M -> Real) : Prop :=
-  ∀ (t : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime D) (x : M),
+  ∀ (t : DifferentialGeometry.Geometry.Curvature.RealTimeInterval.RegularTime D) (x : M),
     rm04NormDerivRHSInFrame (I := I) S Rm04 gInv frame rm04Dt
         (t : Real) x =
       2 * roughLapInner (t : Real) x + reaction (t : Real) x
 
 
 def Rm04NormTimeDerivativeComponentsOn
-    {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
+    {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
     (rmNormSq roughLapInner reaction : Real -> M -> Real) : Prop :=
-  ∀ (t : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime D) (x : M),
+  ∀ (t : DifferentialGeometry.Geometry.Curvature.RealTimeInterval.RegularTime D) (x : M),
     HasDerivWithinAt
       (fun s : Real => rmNormSq s x)
       (2 * roughLapInner (t : Real) x + reaction (t : Real) x)
@@ -202,10 +204,10 @@ def Rm04NormTimeDerivativeComponentsOn
 
 omit [SigmaCompactSpace M] [T2Space M] in
 theorem rm04NormTimeDerivativeComponentsOn_of_rawDerivative
-    {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
+    {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
-    (Rm04 : Real -> DifferentialGeometry.Integral.Connection.Tensor04Section (I := I) (M := M))
-    (gInv : Real -> DifferentialGeometry.Integral.Connection.InverseMetricComponents M Idx)
+    (Rm04 : Real -> DifferentialGeometry.Geometry.Curvature.Tensor04Section (I := I) (M := M))
+    (gInv : Real -> DifferentialGeometry.Geometry.Curvature.InverseMetricComponents M Idx)
     (frame : Idx -> (x : M) -> TangentSpace I x)
     (rm04Dt : Real -> M -> Idx -> Idx -> Idx -> Idx -> Real)
     (roughLapInner reaction : Real -> M -> Real)
@@ -229,9 +231,9 @@ def Rm04NormLaplacianComponentsOn
 
 
 def Rm04NormHeatEquationOn
-    {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
+    {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
     (rmNormSq rmNormLap nablaRmNormSq reaction : Real -> M -> Real) : Prop :=
-  ∀ (t : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime D) (x : M),
+  ∀ (t : DifferentialGeometry.Geometry.Curvature.RealTimeInterval.RegularTime D) (x : M),
     HasDerivWithinAt
       (fun s : Real => rmNormSq s x)
       (rmNormLap (t : Real) x +
@@ -243,7 +245,7 @@ def Rm04NormHeatEquationOn
 
 omit [TopologicalSpace M] [SigmaCompactSpace M] [T2Space M] in
 theorem rm04NormHeatEquationOn_of_components
-    {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
+    {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
     (rmNormSq rmNormLap roughLapInner nablaRmNormSq reaction : Real -> M -> Real)
     (h_dt : Rm04NormTimeDerivativeComponentsOn
       (D := D) rmNormSq roughLapInner reaction)
@@ -265,10 +267,10 @@ theorem rm04NormHeatEquationOn_of_components
 
 omit [SigmaCompactSpace M] [T2Space M] in
 theorem rm04NormHeatEquationOn_of_rawDerivative
-    {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
+    {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
-    (Rm04 : Real -> DifferentialGeometry.Integral.Connection.Tensor04Section (I := I) (M := M))
-    (gInv : Real -> DifferentialGeometry.Integral.Connection.InverseMetricComponents M Idx)
+    (Rm04 : Real -> DifferentialGeometry.Geometry.Curvature.Tensor04Section (I := I) (M := M))
+    (gInv : Real -> DifferentialGeometry.Geometry.Curvature.InverseMetricComponents M Idx)
     (frame : Idx -> (x : M) -> TangentSpace I x)
     (rm04Dt : Real -> M -> Idx -> Idx -> Idx -> Idx -> Real)
     (rmNormLap roughLapInner nablaRmNormSq reaction : Real -> M -> Real)

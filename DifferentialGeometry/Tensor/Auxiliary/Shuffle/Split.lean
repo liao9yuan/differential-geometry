@@ -8,6 +8,7 @@ import Mathlib.LinearAlgebra.Alternating.DomCoprod
 
 
 
+namespace DifferentialGeometry
 namespace ShuffleSplit
 
 attribute [local instance] Fintype.ofFinite Classical.propDecidable
@@ -141,3 +142,4 @@ theorem permCongr_inv_mul {α β : Type*}
     h_inv, Equiv.symm_apply_apply]
 
 end ShuffleSplit
+end DifferentialGeometry

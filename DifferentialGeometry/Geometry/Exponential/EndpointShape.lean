@@ -1,8 +1,13 @@
+import DifferentialGeometry.Geometry.Metric.TensorInner.TangentNormDiamond
 import DifferentialGeometry.Geometry.Exponential.BranchRadius
 import DifferentialGeometry.Geometry.Exponential.IntrinsicGauss
 import DifferentialGeometry.Geometry.Exponential.JacobiVariation
 import DifferentialGeometry.Geometry.Connection.ChartBridge.Hessian
 import DifferentialGeometry.Geometry.Comparison.Variation.CovariantChainRule
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Geometry.Connection
+open DifferentialGeometry.Geometry.Operator
 
 set_option autoImplicit false
 
@@ -26,7 +31,8 @@ namespace Exponential
 
 open DifferentialGeometry.Geometry.Riemannian.CovariantDerivativeAlong
 open DifferentialGeometry.Geometry.Riemannian.Variation
-open DifferentialGeometry.Integral.Connection
+
+open DifferentialGeometry.Geometry.Operator
 open DifferentialGeometry.Integral.DivergenceTheorem
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]
@@ -48,8 +54,7 @@ variable [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
 the affine line `u + r • w`. -/
 noncomputable def intrinsicJacobi
     (g : SmoothRiemannianMetric I M)
-    (hEnorm : ∀ (y : M) (v : TangentSpace I y),
-      ‖v‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner y v v)))
+    (hEnorm : IsMetricNorm (I := I) (M := M) g)
     (p : M) (u w : TangentSpace I p) (s : Real) :
     TangentSpace I
       (intrinsicGeodesic (I := I) g hEnorm p u s) :=
@@ -62,8 +67,7 @@ noncomputable def intrinsicJacobi
 the corresponding launch pairing. -/
 theorem intrinsicJacobi_perp
     (g : SmoothRiemannianMetric I M)
-    (hEnorm : ∀ (y : M) (v : TangentSpace I y),
-      ‖v‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner y v v)))
+    (hEnorm : IsMetricNorm (I := I) (M := M) g)
     (p : M) (u w : TangentSpace I p) :
     g.inner
         (intrinsicGeodesic (I := I) g hEnorm p u 1)
@@ -125,8 +129,7 @@ affine change of initial velocity is the terminal Jacobi derivative, together
 with the derivative of the normalizing launch length. -/
 theorem endpointJacobi_eq
     (g : SmoothRiemannianMetric I M)
-    (hEnorm : ∀ (y : M) (v : TangentSpace I y),
-      ‖v‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner y v v)))
+    (hEnorm : IsMetricNorm (I := I) (M := M) g)
     (p : M) {u w : TangentSpace I p}
     (hu_pos : 0 < g.inner p u u) :
     let F : Real → Real → M := fun s t =>

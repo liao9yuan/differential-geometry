@@ -1,4 +1,6 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.NablaRiemannHeat
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Geometry.Curvature
 
 set_option autoImplicit false
 
@@ -107,10 +109,10 @@ variable {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
 
 
 def MultiLevelTimeDerivOn {r : ℕ}
-    {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
+    {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
     (level : Real -> M -> (Fin r → Idx) → Real)
     (levelDt : Real -> M -> (Fin r → Idx) → Real) : Prop :=
-  ∀ (t : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime D) (x : M)
+  ∀ (t : DifferentialGeometry.Geometry.Curvature.RealTimeInterval.RegularTime D) (x : M)
     (m : Fin r → Idx),
     HasDerivWithinAt
       (fun s : Real => level s x m)
@@ -157,10 +159,10 @@ def multiReactionDown {r : ℕ}
 
 omit [TopologicalSpace M] [SigmaCompactSpace M] [T2Space M] [DecidableEq Idx] in
 theorem hasDerivWithinAt_compNormSqMulti {r : ℕ}
-    {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
+    {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
     (level levelDt : Real -> M -> (Fin r → Idx) → Real)
     (h_dt : MultiLevelTimeDerivOn (D := D) level levelDt)
-    (t : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime D) (x : M) :
+    (t : DifferentialGeometry.Geometry.Curvature.RealTimeInterval.RegularTime D) (x : M) :
     HasDerivWithinAt
       (fun s : Real => compNormSqMulti (level s x))
       (2 * compPairMulti (levelDt (t : Real) x) (level (t : Real) x))
@@ -211,7 +213,7 @@ theorem hasDerivWithinAt_compNormSqMulti {r : ℕ}
 
 omit [TopologicalSpace M] [SigmaCompactSpace M] [T2Space M] [DecidableEq Idx] in
 theorem multiNormHeatEquationOn_of_components {r : ℕ}
-    {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
+    {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
     (level levelDt levelLap : Real -> M -> (Fin r → Idx) → Real)
     (nextLevel : Real -> M -> (Fin (r + 1) → Idx) → Real)
     (normSq normLap nextNormSq : Real -> M -> Real)
@@ -219,7 +221,7 @@ theorem multiNormHeatEquationOn_of_components {r : ℕ}
     (h_normSq : MultiNormSqDef (M := M) level normSq)
     (h_lap : MultiNormLaplacianSplit (M := M) level levelLap nextLevel
       normLap nextNormSq) :
-    ∀ (t : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime D) (x : M),
+    ∀ (t : DifferentialGeometry.Geometry.Curvature.RealTimeInterval.RegularTime D) (x : M),
       HasDerivWithinAt
         (fun s : Real => normSq s x)
         (normLap (t : Real) x +

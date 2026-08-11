@@ -1,5 +1,8 @@
 import DifferentialGeometry.Geometry.Operator.Gradient
 import DifferentialGeometry.Geometry.Connection.TensorNabla.CotangentExtension
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Geometry.Operator
 
 
 noncomputable section
@@ -7,8 +10,9 @@ noncomputable section
 open Bundle Manifold Set
 open scoped Manifold Topology ContDiff
 
+
 namespace DifferentialGeometry
-namespace Integral
+namespace Geometry
 namespace Connection
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
@@ -18,6 +22,7 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.DivergenceTheorem
+open DifferentialGeometry.Geometry.Operator
 
 theorem gradient_eq_gradFun
     (g : SmoothRiemannianMetric I M) (f : M → ℝ) (x : M) :
@@ -229,5 +234,5 @@ theorem gradFun_contMDiff_total_section [I.Boundaryless]
   gradFun_contMDiff_total (I := I) g hf
 
 end Connection
-end Integral
+end Geometry
 end DifferentialGeometry

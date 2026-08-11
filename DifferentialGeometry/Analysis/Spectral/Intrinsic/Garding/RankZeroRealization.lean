@@ -10,6 +10,12 @@ import DifferentialGeometry.Geometry.Connection.ChartTensorNabla.Agreement.Tenso
 import DifferentialGeometry.Geometry.Curvature.CovGradRoughLap.GradientField
 import DifferentialGeometry.Analysis.Sobolev.Embedding.SobolevEmbeddingCm
 import DifferentialGeometry.Tensor.RSTensor.RankZero
+open DifferentialGeometry.Analysis.Sobolev DifferentialGeometry.Analysis.Sobolev.IntrinsicSobolev.SmoothCcTensorHs
+open DifferentialGeometry.Analysis.Elliptic
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Geometry.Connection
+open DifferentialGeometry.Geometry.Operator
 
 
 
@@ -23,15 +29,15 @@ noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
 
-open Bundle Manifold MeasureTheory Set Filter Tensor0SBundle
+open Bundle Manifold MeasureTheory Set Filter DifferentialGeometry.Tensor0SBundle
 open scoped Manifold Topology ContDiff ENNReal BigOperators
 
 namespace DifferentialGeometry
-namespace PDE
-namespace RicciFlow
-namespace IntrinsicSpectral
+namespace Analysis
+namespace Spectral
 
-open DifferentialGeometry.Integral.Connection
+
+open DifferentialGeometry.Geometry.Operator
 open DifferentialGeometry.Integral.L2
 open DifferentialGeometry.Analysis.Parabolic.TensorSpectral
 open DifferentialGeometry.Analysis.Parabolic.TensorHeatEquation
@@ -58,7 +64,6 @@ noncomputable def scalarScaleLap (g : SmoothRiemannianMetric I M) :
         (by norm_num : (2 : ℝ) = 0 + 2)).toContinuousLinearEquiv.toContinuousLinearMap
 
 omit [BoundarylessManifold I M] in
-omit [CompactSpace M] in
 omit [NeZero (Module.finrank ℝ E)] in
 @[simp] theorem scalarScaleLap_coeff
     (g : SmoothRiemannianMetric I M)
@@ -95,14 +100,13 @@ theorem scalarLapHs_core
 
 
 
-omit [CompactSpace M] in
+omit [CompactSpace M] [SigmaCompactSpace M] in
 theorem rawLap_cc_scalar
     (g : SmoothRiemannianMetric I M) (S : SmoothCcTensor g 0 0) (x : M) :
     TensorRSField.scalar0 (n := (∞ : WithTop ℕ∞))
         (rawTensorConnLapSmooth (I := I) g 0 0 S).toSection x =
-      DifferentialGeometry.Integral.DivergenceTheorem.Δ_g (I := I) g
-        (TensorRSField.scalar0_smooth
-          (n := (∞ : WithTop ℕ∞)) S.toSection) x := by
+      DifferentialGeometry.Geometry.Operator.Δ_g (I := I) g ⟨_, (TensorRSField.scalar0_smooth
+          (n := (∞ : WithTop ℕ∞)) S.toSection)⟩ x := by
   let f := TensorRSField.scalar0 (n := (∞ : WithTop ℕ∞)) S.toSection
   let hf := TensorRSField.scalar0_smooth
     (n := (∞ : WithTop ℕ∞)) S.toSection
@@ -131,11 +135,10 @@ theorem rawLap_cc_scalar
       ((Tensor0SNabla.tensor0Iso I M x).symm
         (laplacian (I := I) (LeviCivita (I := I) g) g f x)) = _
   rw [ContinuousLinearEquiv.apply_symm_apply,
-    DifferentialGeometry.Integral.Connection.laplacian_levi_eq
+    DifferentialGeometry.Geometry.Operator.laplacian_levi_eq
       (I := I) g hf x]
 
 omit [BoundarylessManifold I M] in
-omit [CompactSpace M] in
 omit [NeZero (Module.finrank ℝ E)] in
 theorem norm_scalarLap_le
     (g : SmoothRiemannianMetric I M)
@@ -428,9 +431,8 @@ theorem grad_repr_norm
   nlinarith [le_trans hgreen hprod,
     norm_nonneg (covGrad (I := I) (M := M) g 0 0 S), norm_nonneg v]
 
-end IntrinsicSpectral
-end RicciFlow
-end PDE
+end Spectral
+end Analysis
 end DifferentialGeometry
 
 end

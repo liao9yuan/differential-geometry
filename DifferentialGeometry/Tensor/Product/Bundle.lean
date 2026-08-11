@@ -3,6 +3,7 @@
 
 import DifferentialGeometry.Tensor.Product.Pretrivialization
 import DifferentialGeometry.Tensor.Product.Fiber
+open DifferentialGeometry.Tensor.Product
 
 open scoped Topology
 open scoped TensorProduct

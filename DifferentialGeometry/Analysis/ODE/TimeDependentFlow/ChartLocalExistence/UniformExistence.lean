@@ -2,7 +2,7 @@ import DifferentialGeometry.Analysis.ODE.TimeDependentFlow.ChartLocalExistence.P
 import Mathlib.Geometry.Manifold.IsManifold.InteriorBoundary
 
 
-namespace DifferentialGeometry.PDE.RicciFlow.ODE
+namespace DifferentialGeometry.Analysis.ODE
 
 open Bundle
 open scoped Manifold ContDiff
@@ -115,4 +115,4 @@ theorem time_dependent_vf_uniform_existence_time_on_closed_mfd
       exact ⟨hs.1, hs.2.trans (hTmin_le α hα)⟩
     exact hderiv.mono hsub
 
-end DifferentialGeometry.PDE.RicciFlow.ODE
+end DifferentialGeometry.Analysis.ODE

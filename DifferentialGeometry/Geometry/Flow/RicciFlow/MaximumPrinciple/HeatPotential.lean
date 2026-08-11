@@ -1,6 +1,10 @@
 import DifferentialGeometry.Analysis.Parabolic.ScalarTimeDependent
 import DifferentialGeometry.Geometry.Flow.RicciFlow.MaximumPrinciple.ScalarWeak
 import DifferentialGeometry.Geometry.Operator.GradientRegularity
+open DifferentialGeometry.PDE.RicciFlow
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Geometry.Operator
 
 set_option autoImplicit false
 
@@ -13,12 +17,14 @@ set_option autoImplicit false
 
 
 
+open DifferentialGeometry.Geometry.Connection
 namespace DifferentialGeometry.Analysis.Parabolic
 
 noncomputable section
 
 open Bundle Set Filter
-open DifferentialGeometry.Integral.Connection
+
+open DifferentialGeometry.Geometry.Operator
 open scoped Manifold ContDiff Topology
 
 universe u uE uH
@@ -31,9 +37,9 @@ variable {M : Type u} [TopologicalSpace M] [ChartedSpace H M]
 variable [IsManifold I ∞ M]
 
 private theorem heat_pot_nonneg_on_strict_subinterval
-    [I.Boundaryless] [SigmaCompactSpace M] [T2Space M] [CompactSpace M]
+    [I.Boundaryless] [T2Space M] [CompactSpace M]
     [VectorBundle Real E (TangentSpace I : M -> Type _)]
-    (G : RealizedMetricFamily (I := I) (M := M) Real)
+    (G : MetricConnectionFamily (I := I) (M := M) Real)
     {T : Real} (hT : 0 <= T) (V u : Real -> M -> Real)
     (hsol : IsHeatPotOn (RealTimeInterval.closed 0 T hT) G V u)
     (C : Real)
@@ -142,9 +148,9 @@ private theorem heat_pot_nonneg_on_strict_subinterval
   exact (mul_nonneg_iff_of_pos_left (Real.exp_pos (-C * t))).mp hprod
 
 theorem heat_pot_nonneg
-    [I.Boundaryless] [SigmaCompactSpace M] [T2Space M] [CompactSpace M]
+    [I.Boundaryless] [T2Space M] [CompactSpace M]
     [VectorBundle Real E (TangentSpace I : M -> Type _)]
-    (G : RealizedMetricFamily (I := I) (M := M) Real)
+    (G : MetricConnectionFamily (I := I) (M := M) Real)
     {T : Real} (hT : 0 <= T) (V u : Real -> M -> Real)
     (hsol : IsHeatPotOn (RealTimeInterval.closed 0 T hT) G V u)
     (C : Real)
@@ -213,9 +219,9 @@ theorem heat_pot_nonneg
 
 omit [CompleteSpace E] in
 private theorem heat_pot_exp_rescale_barrier_operator_nonneg
-    [I.Boundaryless] [SigmaCompactSpace M] [T2Space M] [CompactSpace M]
+    [I.Boundaryless] [T2Space M] [CompactSpace M]
     [VectorBundle Real E (TangentSpace I : M -> Type _)]
-    (G : RealizedMetricFamily (I := I) (M := M) Real)
+    (G : MetricConnectionFamily (I := I) (M := M) Real)
     {T : Real} (hT : 0 <= T) (V u : Real -> M -> Real)
     (hsol : IsHeatPotOn (RealTimeInterval.closed 0 T hT) G V u)
     (C c : Real)
@@ -307,9 +313,9 @@ private theorem heat_pot_exp_rescale_barrier_operator_nonneg
     _ = Real.exp (C * t) * (V t x * u t x + C * u t x) - 0 := by ring
 
 private theorem heat_pot_exp_rescale_lower_bound_on_strict_subinterval
-    [I.Boundaryless] [SigmaCompactSpace M] [T2Space M] [CompactSpace M]
+    [I.Boundaryless] [T2Space M] [CompactSpace M]
     [VectorBundle Real E (TangentSpace I : M -> Type _)]
-    (G : RealizedMetricFamily (I := I) (M := M) Real)
+    (G : MetricConnectionFamily (I := I) (M := M) Real)
     {T : Real} (hT : 0 <= T) (V u : Real -> M -> Real)
     (hsol : IsHeatPotOn (RealTimeInterval.closed 0 T hT) G V u)
     (C c : Real)
@@ -386,9 +392,9 @@ private theorem heat_pot_exp_rescale_lower_bound_on_strict_subinterval
   exact sub_nonneg.mp (by simpa only [w, z] using hw_nonneg t ht x)
 
 theorem heat_pot_pos
-    [I.Boundaryless] [SigmaCompactSpace M] [T2Space M] [CompactSpace M]
+    [I.Boundaryless] [T2Space M] [CompactSpace M]
     [VectorBundle Real E (TangentSpace I : M -> Type _)]
-    (G : RealizedMetricFamily (I := I) (M := M) Real)
+    (G : MetricConnectionFamily (I := I) (M := M) Real)
     {T : Real} (hT : 0 <= T) (V u : Real -> M -> Real)
     (hsol : IsHeatPotOn (RealTimeInterval.closed 0 T hT) G V u)
     (C : Real)

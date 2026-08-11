@@ -4,6 +4,7 @@ import DifferentialGeometry.Geometry.Comparison.Variation.SecondVariationMinimis
 import DifferentialGeometry.Geometry.Comparison.Variation.VariationFieldSmooth
 import DifferentialGeometry.Geometry.Exponential.ConjugatePoint
 import DifferentialGeometry.Geometry.Exponential.IntrinsicSmooth
+open DifferentialGeometry.Geometry.Curvature
 
 set_option autoImplicit false
 
@@ -50,8 +51,7 @@ theorem not_conj_of_min_len
     [IsRiemannianManifold I M] [CompleteSpace M]
     [IsContinuousRiemannianBundle E (fun x : M => TangentSpace I x)]
     (g : SmoothRiemannianMetric I M)
-    (hEnorm : ∀ (x : M) (w : TangentSpace I x),
-      ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner x w w)))
+    (hEnorm : IsMetricNorm (I := I) (M := M) g)
     (p : M) (u : E)
     (hunit : g.inner p u u = 1)
     (L : ℝ) (hL : 0 < L)
@@ -391,8 +391,7 @@ theorem not_conj_of_min
     [IsRiemannianManifold I M] [CompleteSpace M]
     [IsContinuousRiemannianBundle E (fun x : M => TangentSpace I x)]
     (g : SmoothRiemannianMetric I M)
-    (hEnorm : ∀ (x : M) (w : TangentSpace I x),
-      ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner x w w)))
+    (hEnorm : IsMetricNorm (I := I) (M := M) g)
     (p : M) (u : E)
     (hunit : g.inner p u u = 1)
     (hmin : ∀ η : ℝ → M,

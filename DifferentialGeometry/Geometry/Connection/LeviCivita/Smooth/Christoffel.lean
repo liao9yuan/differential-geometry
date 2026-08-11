@@ -1,15 +1,16 @@
 import DifferentialGeometry.Geometry.Connection.LeviCivita.Smooth.Model
+open DifferentialGeometry.Geometry.Curvature
 
 set_option autoImplicit false
 
 noncomputable section
 
-namespace DifferentialGeometry.Integral.Connection
+
+namespace DifferentialGeometry.Geometry.Connection
 
 open Bundle
-open DifferentialGeometry.Integral.Connection
 open DifferentialGeometry.Tensor.Coordinates
-open Tensor0SBundle
+open DifferentialGeometry.Tensor0SBundle
 open scoped Manifold ContDiff Topology
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]
@@ -953,4 +954,4 @@ theorem leviCivitaChristoffelModelRHS_contDiffWithinAt_of_mem
     metricFlatModelInChart_component_deriv_contDiffWithinAt_of_mem
       (I := I) g x₀ hy l i j
   exact hinv.mul ((h₁.add h₂).sub h₃)
-end DifferentialGeometry.Integral.Connection
+end DifferentialGeometry.Geometry.Connection

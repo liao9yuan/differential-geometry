@@ -1,4 +1,7 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.ScalarLowerBound
+open DifferentialGeometry.PDE.RicciFlow
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Geometry.Curvature
 
 set_option autoImplicit false
 
@@ -24,7 +27,7 @@ variable [FiniteDimensional Real E]
 variable {H : Type*} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
-variable [CompleteSpace E] [SigmaCompactSpace M] [T2Space M]
+variable [CompleteSpace E] [T2Space M]
 
 
 
@@ -110,7 +113,7 @@ theorem exists_lt_scalarLowerBarrier_before_blowup
     field_simp [ne_of_gt hc0, ne_of_gt hC_pos]
   exact ⟨T, hT_pos, hT_lt, by simpa [hbar_eq] using hB_lt_C⟩
 
-omit [TopologicalSpace M] [SigmaCompactSpace M] [T2Space M] in
+omit [TopologicalSpace M] [T2Space M] in
 theorem scalar_endpoint_le_blowupTime_of_lower_barrier_bound
     [Nonempty M]
     {scalar : Real -> M -> Real} {n c0 omega : Real}
@@ -135,7 +138,7 @@ theorem scalar_endpoint_le_blowupTime_of_lower_barrier_bound
 
 namespace InitialScalarMinimum
 
-omit [TopologicalSpace M] [SigmaCompactSpace M] [T2Space M] in
+omit [TopologicalSpace M] [T2Space M] in
 theorem pos_of_forall_pos
     {scalar : Real -> M -> Real} {c0 : Real}
     (hmin : InitialScalarMinimum (M := M) scalar c0)
@@ -148,22 +151,22 @@ end InitialScalarMinimum
 
 namespace ScalarBoundedAboveOnSlab
 
-omit [SigmaCompactSpace M] [T2Space M] in
+omit [T2Space M] in
 theorem of_continuousOn
     [CompactSpace M]
     {scalar : Real -> M -> Real} {T : Real}
     (hcont : ContinuousOn
       (fun p : Real × M => scalar p.1 p.2)
-      (DifferentialGeometry.Integral.Connection.spacetimeSlab (M := M) T)) :
+      (DifferentialGeometry.PDE.RicciFlow.spacetimeSlab (M := M) T)) :
     ScalarBoundedAboveOnSlab (M := M) scalar T := by
   have hcompact : IsCompact
-    (DifferentialGeometry.Integral.Connection.spacetimeSlab (M := M) T) := by
-    unfold DifferentialGeometry.Integral.Connection.spacetimeSlab
+    (DifferentialGeometry.PDE.RicciFlow.spacetimeSlab (M := M) T) := by
+    unfold DifferentialGeometry.PDE.RicciFlow.spacetimeSlab
     exact isCompact_Icc.prod isCompact_univ
   have himage :
       IsCompact
         ((fun p : Real × M => scalar p.1 p.2) ''
-          DifferentialGeometry.Integral.Connection.spacetimeSlab (M := M) T) :=
+          DifferentialGeometry.PDE.RicciFlow.spacetimeSlab (M := M) T) :=
     hcompact.image_of_continuousOn hcont
   rcases himage.bddAbove with ⟨B, hB⟩
   refine ⟨B, ?_⟩
@@ -178,7 +181,7 @@ theorem scalarLowerBarrierBoundUpToPole_of_scalarEvolution_closedOpen
     [I.Boundaryless] [CompactSpace M]
     [VectorBundle Real E (TangentSpace I : M -> Type _)]
     {omega : Real} (h0ω : 0 < omega)
-    (G : DifferentialGeometry.Integral.Connection.RealizedMetricFamily (I := I) (M := M) Real)
+    (G : DifferentialGeometry.Geometry.Curvature.MetricConnectionFamily (I := I) (M := M) Real)
     (n c0 : Real) (hn : 0 < n) (hc0 : 0 < c0)
     (scalar scalarLap ricciNormSq : Real -> M -> Real)
     (K : Real -> NNReal)
@@ -186,7 +189,7 @@ theorem scalarLowerBarrierBoundUpToPole_of_scalarEvolution_closedOpen
       T < scalarBlowupTime n c0 ->
         ScalarLowerBoundWMPRegularity (I := I) G T n c0 scalar (K T))
     (hevol : ScalarEvolutionEquationOn
-      (D := DifferentialGeometry.Integral.Connection.RealTimeInterval.closedOpen 0 omega h0ω)
+      (D := DifferentialGeometry.Geometry.Curvature.RealTimeInterval.closedOpen 0 omega h0ω)
       scalar scalarLap ricciNormSq)
     (hlap : forall T : Real, 0 < T -> T < omega ->
       T < scalarBlowupTime n c0 ->
@@ -200,7 +203,7 @@ theorem scalarLowerBarrierBoundUpToPole_of_scalarEvolution_closedOpen
       T < scalarBlowupTime n c0 ->
         forall t : Real, t ∈ Set.Icc 0 T ->
           LipschitzOnWith (K T) (fun a : Real => scalarLowerReaction n a t)
-            (DifferentialGeometry.Integral.Connection.scalarWMPValueSet (M := M) T scalar
+            (DifferentialGeometry.PDE.RicciFlow.scalarWMPValueSet (M := M) T scalar
               (scalarLowerBarrier n c0))) :
     ScalarLowerBarrierBoundUpToPole (M := M) scalar n c0 omega := by
   intro T hT_pos hT_omega hT_blow x
@@ -226,7 +229,7 @@ theorem positive_scalar_finite_time_of_scalarEvolution_closedOpen
     [I.Boundaryless] [CompactSpace M] [Nonempty M]
     [VectorBundle Real E (TangentSpace I : M -> Type _)]
     {omega : Real} (h0ω : 0 < omega)
-    (G : DifferentialGeometry.Integral.Connection.RealizedMetricFamily (I := I) (M := M) Real)
+    (G : DifferentialGeometry.Geometry.Curvature.MetricConnectionFamily (I := I) (M := M) Real)
     (n c0 : Real) (hn : 0 < n)
     (scalar scalarLap ricciNormSq : Real -> M -> Real)
     (K : Real -> NNReal)
@@ -234,12 +237,12 @@ theorem positive_scalar_finite_time_of_scalarEvolution_closedOpen
     (hinit_pos : forall x : M, 0 < scalar 0 x)
     (hscalar_cont : forall T : Real, 0 <= T -> T < omega ->
       ContinuousOn (fun p : Real × M => scalar p.1 p.2)
-        (DifferentialGeometry.Integral.Connection.spacetimeSlab (M := M) T))
+        (DifferentialGeometry.PDE.RicciFlow.spacetimeSlab (M := M) T))
     (hreg : forall T : Real, 0 < T -> T < omega ->
       T < scalarBlowupTime n c0 ->
         ScalarLowerBoundWMPRegularity (I := I) G T n c0 scalar (K T))
     (hevol : ScalarEvolutionEquationOn
-      (D := DifferentialGeometry.Integral.Connection.RealTimeInterval.closedOpen 0 omega h0ω)
+      (D := DifferentialGeometry.Geometry.Curvature.RealTimeInterval.closedOpen 0 omega h0ω)
       scalar scalarLap ricciNormSq)
     (hlap : forall T : Real, 0 < T -> T < omega ->
       T < scalarBlowupTime n c0 ->
@@ -252,7 +255,7 @@ theorem positive_scalar_finite_time_of_scalarEvolution_closedOpen
       T < scalarBlowupTime n c0 ->
         forall t : Real, t ∈ Set.Icc 0 T ->
           LipschitzOnWith (K T) (fun a : Real => scalarLowerReaction n a t)
-            (DifferentialGeometry.Integral.Connection.scalarWMPValueSet (M := M) T scalar
+            (DifferentialGeometry.PDE.RicciFlow.scalarWMPValueSet (M := M) T scalar
               (scalarLowerBarrier n c0))) :
     omega <= scalarBlowupTime n c0 := by
   have hc0 : 0 < c0 :=
@@ -284,7 +287,7 @@ theorem finiteTime3D
     [I.Boundaryless] [CompactSpace M] [Nonempty M]
     [VectorBundle Real E (TangentSpace I : M -> Type _)]
     {omega : Real} (h0ω : 0 < omega)
-    (G : DifferentialGeometry.Integral.Connection.RealizedMetricFamily (I := I) (M := M) Real)
+    (G : DifferentialGeometry.Geometry.Curvature.MetricConnectionFamily (I := I) (M := M) Real)
     (c0 : Real)
     (scalar scalarLap ricciNormSq : Real -> M -> Real)
     (K : Real -> NNReal)
@@ -292,12 +295,12 @@ theorem finiteTime3D
     (hinit_pos : forall x : M, 0 < scalar 0 x)
     (hscalar_cont : forall T : Real, 0 <= T -> T < omega ->
       ContinuousOn (fun p : Real × M => scalar p.1 p.2)
-        (DifferentialGeometry.Integral.Connection.spacetimeSlab (M := M) T))
+        (DifferentialGeometry.PDE.RicciFlow.spacetimeSlab (M := M) T))
     (hreg : forall T : Real, 0 < T -> T < omega ->
       T < scalarBlowupTime 3 c0 ->
         ScalarLowerBoundWMPRegularity (I := I) G T 3 c0 scalar (K T))
     (hevol : ScalarEvolutionEquationOn
-      (D := DifferentialGeometry.Integral.Connection.RealTimeInterval.closedOpen 0 omega h0ω)
+      (D := DifferentialGeometry.Geometry.Curvature.RealTimeInterval.closedOpen 0 omega h0ω)
       scalar scalarLap ricciNormSq)
     (hlap : forall T : Real, 0 < T -> T < omega ->
       T < scalarBlowupTime 3 c0 ->
@@ -310,7 +313,7 @@ theorem finiteTime3D
       T < scalarBlowupTime 3 c0 ->
         forall t : Real, t ∈ Set.Icc 0 T ->
           LipschitzOnWith (K T) (fun a : Real => scalarLowerReaction 3 a t)
-            (DifferentialGeometry.Integral.Connection.scalarWMPValueSet (M := M) T scalar
+            (DifferentialGeometry.PDE.RicciFlow.scalarWMPValueSet (M := M) T scalar
               (scalarLowerBarrier 3 c0))) :
     0 < c0 ∧ omega <= 3 / (2 * c0) := by
   have hc0 : 0 < c0 :=

@@ -2,6 +2,8 @@ import DifferentialGeometry.Geometry.Curvature.Riemann.Basic.Field
 import DifferentialGeometry.Geometry.Curvature.Riemann.Basic.Pointwise
 import DifferentialGeometry.Geometry.Curvature.Riemann.Basic.Sections
 import DifferentialGeometry.Geometry.Connection.LeviCivita.Torsion
+open DifferentialGeometry.Geometry.Curvature
+
 
 
 
@@ -17,10 +19,10 @@ noncomputable section
 
 set_option autoImplicit false
 
-open Bundle DifferentialGeometry.Integral.Connection
+open Bundle
 open scoped Manifold ContDiff
 
-namespace DifferentialGeometry.Integral.Connection
+namespace DifferentialGeometry.Geometry.Curvature
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]
 variable [FiniteDimensional Real E] [CompleteSpace E]
@@ -103,22 +105,22 @@ theorem leviCivita_connectionRiemannCurvatureField_eq_nabla2VectorField_skew
     {X Y Z : RawTangentField (I := I) (M := M)} {x : M}
     (hX : MDiffAt (T% X) x) (hY : MDiffAt (T% Y) x) :
     connectionRiemannCurvatureField (I := I)
-        (DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric (I := I) g) X Y Z x =
+        (DifferentialGeometry.Geometry.Connection.leviCivitaConnectionOfMetric (I := I) g) X Y Z x =
       nabla2VectorField (I := I)
-          (DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric (I := I) g) X Y Z x
+          (DifferentialGeometry.Geometry.Connection.leviCivitaConnectionOfMetric (I := I) g) X Y Z x
             -
         nabla2VectorField (I := I)
-          (DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric (I := I) g) Y X Z
+          (DifferentialGeometry.Geometry.Connection.leviCivitaConnectionOfMetric (I := I) g) Y X Z
             x := by
   refine connectionRiemannCurvatureField_eq_nabla2VectorField_skew_of_torsion_zero
-    (I := I) (DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric (I := I) g) hX
+    (I := I) (DifferentialGeometry.Geometry.Connection.leviCivitaConnectionOfMetric (I := I) g) hX
       hY ?_
   have htf :=
-    DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric_isTorsionFree (I := I) g
-  change (DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric (I := I) g).torsion
+    DifferentialGeometry.Geometry.Connection.leviCivitaConnectionOfMetric_isTorsionFree (I := I) g
+  change (DifferentialGeometry.Geometry.Connection.leviCivitaConnectionOfMetric (I := I) g).torsion
     x
     (X x) (Y x) = 0
   rw [htf x]
   simp
 
-end DifferentialGeometry.Integral.Connection
+end DifferentialGeometry.Geometry.Curvature

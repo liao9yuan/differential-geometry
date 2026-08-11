@@ -1,10 +1,13 @@
 import DifferentialGeometry.Geometry.Connection.LeviCivita.Variation.RicciCoord
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Geometry.Curvature
 
 set_option autoImplicit false
 
 noncomputable section
 
-namespace DifferentialGeometry.Integral.Connection
+
+namespace DifferentialGeometry.Geometry.Connection
 
 open Bundle
 open scoped Manifold ContDiff BigOperators
@@ -36,7 +39,7 @@ def scalarHessCoordAt
     (i j : CoordinateIdx (𝕜 := Real) E) : Real :=
   scalarCoordSecondAt (I := I) f x0 i j -
     ∑ p : CoordinateIdx (𝕜 := Real) E,
-      DifferentialGeometry.Integral.Connection.christoffelCoordAt (I := I) cov x0 i j p *
+      DifferentialGeometry.Geometry.Curvature.christoffelCoordAt (I := I) cov x0 i j p *
         scalarCoordDerivAt (I := I) f x0 p
 
 
@@ -77,7 +80,7 @@ theorem gammaTraceCovVar
   classical
   let Idx := CoordinateIdx (𝕜 := Real) E
   let Gamma : Idx -> Idx -> Idx -> Real :=
-    fun a b c => DifferentialGeometry.Integral.Connection.christoffelCoordAt (I := I) cov x0 a b c
+    fun a b c => DifferentialGeometry.Geometry.Curvature.christoffelCoordAt (I := I) cov x0 a b c
   let A : Idx -> Idx -> Idx -> Real := fun k a b => gammaDot x0 k a b
   let D : Real :=
     ∑ p : Idx,
@@ -242,7 +245,7 @@ theorem scalarSecond_of_fixedBaseRegular
 omit [CompleteSpace E] [SigmaCompactSpace M] [T2Space M]
     [DecidableEq (CoordinateIdx (𝕜 := Real) E)] in
 theorem lcHessVarCoord
-    (G : DifferentialGeometry.Integral.Connection.RealizedMetricFamily (I := I) (M := M) Real)
+    (G : DifferentialGeometry.Geometry.Curvature.MetricConnectionFamily (I := I) (M := M) Real)
     (timeSet : Set Real) (base : Real) (x0 : M)
     (f : Real -> M -> Real) (h : M -> Real)
     (gammaDot :
@@ -265,12 +268,12 @@ theorem lcHessVarCoord
       HasDerivWithinAt
         (fun s : Real =>
           ∑ p : CoordinateIdx (𝕜 := Real) E,
-            DifferentialGeometry.Integral.Connection.christoffelCoordAt (I := I) (G.connection s) x0
+            DifferentialGeometry.Geometry.Curvature.christoffelCoordAt (I := I) (G.connection s) x0
               i j p *
               scalarCoordDerivAt (I := I) (f s) x0 p)
         (∑ p : CoordinateIdx (𝕜 := Real) E,
           (gammaDot x0 p i j * scalarCoordDerivAt (I := I) (f base) x0 p +
-            DifferentialGeometry.Integral.Connection.christoffelCoordAt (I := I) (G.connection base)
+            DifferentialGeometry.Geometry.Curvature.christoffelCoordAt (I := I) (G.connection base)
               x0 i j p *
               scalarCoordDerivAt (I := I) h x0 p))
         timeSet
@@ -285,7 +288,7 @@ theorem lcHessVarCoord
         (scalarCoordSecondAt (I := I) h x0 i j -
           ∑ p : CoordinateIdx (𝕜 := Real) E,
             (gammaDot x0 p i j * scalarCoordDerivAt (I := I) (f base) x0 p +
-              DifferentialGeometry.Integral.Connection.christoffelCoordAt (I := I)
+              DifferentialGeometry.Geometry.Curvature.christoffelCoordAt (I := I)
                 (G.connection base) x0 i j p *
                 scalarCoordDerivAt (I := I) h x0 p))
         timeSet
@@ -327,7 +330,7 @@ def ricciHessVarCoordRHS
 
 omit [SigmaCompactSpace M] [T2Space M] [DecidableEq (CoordinateIdx (𝕜 := Real) E)] in
 theorem lcRicciHessVarCoord
-    (G : DifferentialGeometry.Integral.Connection.RealizedMetricFamily (I := I) (M := M) Real)
+    (G : DifferentialGeometry.Geometry.Curvature.MetricConnectionFamily (I := I) (M := M) Real)
     (hLC : ∀ s : Real,
       IsLeviCivita (I := I) (G.connection s) (G.metric s))
     (timeSet : Set Real) (base : Real) (x0 : M)
@@ -342,7 +345,7 @@ theorem lcRicciHessVarCoord
     (i j : CoordinateIdx (𝕜 := Real) E) :
     HasDerivWithinAt
       (fun s : Real =>
-        DifferentialGeometry.Integral.Connection.christoffelRicciCoeffAt (I := I) (G.connection s)
+        DifferentialGeometry.Geometry.Curvature.christoffelRicciCoeffAt (I := I) (G.connection s)
           x0 i j +
           scalarHessCoordAt (I := I) (G.connection s) (f s) x0 i j)
       (ricciHessVarCoordRHS (I := I) (G.connection base) gammaDot
@@ -374,7 +377,7 @@ def shiftedScalarHessCoordAt
 
 omit [SigmaCompactSpace M] [T2Space M] [DecidableEq (CoordinateIdx (𝕜 := Real) E)] in
 theorem lcRicciHessVarShifted
-    (G : DifferentialGeometry.Integral.Connection.RealizedMetricFamily (I := I) (M := M) Real)
+    (G : DifferentialGeometry.Geometry.Curvature.MetricConnectionFamily (I := I) (M := M) Real)
     (hLC : ∀ s : Real,
       IsLeviCivita (I := I) (G.connection s) (G.metric s))
     (timeSet : Set Real) (base : Real) (x0 : M)
@@ -393,7 +396,7 @@ theorem lcRicciHessVarShifted
           scalarHessCoordAt (I := I) (G.connection base) metricTrace x0 i j) :
     HasDerivWithinAt
       (fun s : Real =>
-        DifferentialGeometry.Integral.Connection.christoffelRicciCoeffAt (I := I) (G.connection s)
+        DifferentialGeometry.Geometry.Curvature.christoffelRicciCoeffAt (I := I) (G.connection s)
           x0 i j +
           scalarHessCoordAt (I := I) (G.connection s) (f s) x0 i j)
       (gammaWeightedDivCoordAt (I := I) (G.connection base) gammaDot
@@ -414,7 +417,7 @@ theorem lcRicciHessVarShifted
 
 omit [SigmaCompactSpace M] [T2Space M] [DecidableEq (CoordinateIdx (𝕜 := Real) E)] in
 theorem lcTraceVar
-    (G : DifferentialGeometry.Integral.Connection.RealizedMetricFamily (I := I) (M := M) Real)
+    (G : DifferentialGeometry.Geometry.Curvature.MetricConnectionFamily (I := I) (M := M) Real)
     (hLC : ∀ s : Real,
       IsLeviCivita (I := I) (G.connection s) (G.metric s))
     (timeSet : Set Real) (base : Real) (x0 : M)
@@ -444,13 +447,13 @@ theorem lcTraceVar
       (fun s : Real =>
         trace2 (gInvPath s)
           (fun i j : CoordinateIdx (𝕜 := Real) E =>
-            DifferentialGeometry.Integral.Connection.christoffelRicciCoeffAt (I := I)
+            DifferentialGeometry.Geometry.Curvature.christoffelRicciCoeffAt (I := I)
               (G.connection s) x0 i j +
               scalarHessCoordAt (I := I) (G.connection s) (f s) x0 i j))
       ((Finset.univ : Finset (CoordinateIdx (𝕜 := Real) E)).sum fun i =>
         (Finset.univ : Finset (CoordinateIdx (𝕜 := Real) E)).sum fun j =>
           gInvDot i j *
-            (DifferentialGeometry.Integral.Connection.christoffelRicciCoeffAt (I := I)
+            (DifferentialGeometry.Geometry.Curvature.christoffelRicciCoeffAt (I := I)
               (G.connection base)
                 x0 i j +
               scalarHessCoordAt (I := I) (G.connection base) (f base)
@@ -471,7 +474,7 @@ theorem lcTraceVar
 
 omit [SigmaCompactSpace M] [T2Space M] [DecidableEq (CoordinateIdx (𝕜 := Real) E)] in
 theorem lcRicciHessShifted_of_trace
-    (G : DifferentialGeometry.Integral.Connection.RealizedMetricFamily (I := I) (M := M) Real)
+    (G : DifferentialGeometry.Geometry.Curvature.MetricConnectionFamily (I := I) (M := M) Real)
     (hLC : ∀ s : Real,
       IsLeviCivita (I := I) (G.connection s) (G.metric s))
     (timeSet : Set Real) (base : Real) (x0 : M)
@@ -503,7 +506,7 @@ theorem lcRicciHessShifted_of_trace
         (scalarCoordDerivFun (I := I) metricTrace x0 j) x0) :
     HasDerivWithinAt
       (fun s : Real =>
-        DifferentialGeometry.Integral.Connection.christoffelRicciCoeffAt (I := I) (G.connection s)
+        DifferentialGeometry.Geometry.Curvature.christoffelRicciCoeffAt (I := I) (G.connection s)
           x0 i j +
           scalarHessCoordAt (I := I) (G.connection s) (f s) x0 i j)
       (gammaWeightedDivCoordAt (I := I) (G.connection base) gammaDot
@@ -526,7 +529,7 @@ theorem lcRicciHessShifted_of_trace
 
 omit [SigmaCompactSpace M] [T2Space M] [DecidableEq (CoordinateIdx (𝕜 := Real) E)] in
 theorem lcTraceVar_of_trace
-    (G : DifferentialGeometry.Integral.Connection.RealizedMetricFamily (I := I) (M := M) Real)
+    (G : DifferentialGeometry.Geometry.Curvature.MetricConnectionFamily (I := I) (M := M) Real)
     (hLC : ∀ s : Real,
       IsLeviCivita (I := I) (G.connection s) (G.metric s))
     (timeSet : Set Real) (base : Real) (x0 : M)
@@ -570,13 +573,13 @@ theorem lcTraceVar_of_trace
       (fun s : Real =>
         trace2 (gInvPath s)
           (fun i j : CoordinateIdx (𝕜 := Real) E =>
-            DifferentialGeometry.Integral.Connection.christoffelRicciCoeffAt (I := I)
+            DifferentialGeometry.Geometry.Curvature.christoffelRicciCoeffAt (I := I)
               (G.connection s) x0 i j +
               scalarHessCoordAt (I := I) (G.connection s) (f s) x0 i j))
       ((Finset.univ : Finset (CoordinateIdx (𝕜 := Real) E)).sum fun i =>
         (Finset.univ : Finset (CoordinateIdx (𝕜 := Real) E)).sum fun j =>
           gInvDot i j *
-            (DifferentialGeometry.Integral.Connection.christoffelRicciCoeffAt (I := I)
+            (DifferentialGeometry.Geometry.Curvature.christoffelRicciCoeffAt (I := I)
               (G.connection base)
                 x0 i j +
               scalarHessCoordAt (I := I) (G.connection base) (f base)
@@ -601,7 +604,7 @@ theorem lcTraceVar_of_trace
 
 omit [SigmaCompactSpace M] [T2Space M] [DecidableEq (CoordinateIdx (𝕜 := Real) E)] in
 theorem lcTraceVar_inv
-    (G : DifferentialGeometry.Integral.Connection.RealizedMetricFamily (I := I) (M := M) Real)
+    (G : DifferentialGeometry.Geometry.Curvature.MetricConnectionFamily (I := I) (M := M) Real)
     (hLC : ∀ s : Real,
       IsLeviCivita (I := I) (G.connection s) (G.metric s))
     (timeSet : Set Real) (base : Real) (x0 : M)
@@ -648,12 +651,12 @@ theorem lcTraceVar_inv
       (fun s : Real =>
         trace2 (gInvPath s)
           (fun i j : CoordinateIdx (𝕜 := Real) E =>
-            DifferentialGeometry.Integral.Connection.christoffelRicciCoeffAt (I := I)
+            DifferentialGeometry.Geometry.Curvature.christoffelRicciCoeffAt (I := I)
               (G.connection s) x0 i j +
               scalarHessCoordAt (I := I) (G.connection s) (f s) x0 i j))
       (-trace2 metricVariation
           (fun i j : CoordinateIdx (𝕜 := Real) E =>
-            DifferentialGeometry.Integral.Connection.christoffelRicciCoeffAt (I := I)
+            DifferentialGeometry.Geometry.Curvature.christoffelRicciCoeffAt (I := I)
               (G.connection base)
                 x0 i j +
               scalarHessCoordAt (I := I) (G.connection base) (f base)
@@ -673,7 +676,7 @@ theorem lcTraceVar_inv
   refine htrace.congr_deriv ?_
   exact trace2_neg gInvDot metricVariation
     (fun i j : CoordinateIdx (𝕜 := Real) E =>
-      DifferentialGeometry.Integral.Connection.christoffelRicciCoeffAt (I := I) (G.connection base)
+      DifferentialGeometry.Geometry.Curvature.christoffelRicciCoeffAt (I := I) (G.connection base)
           x0 i j +
         scalarHessCoordAt (I := I) (G.connection base) (f base)
           x0 i j)
@@ -690,10 +693,10 @@ theorem lcTraceVar_inv
 
 omit [SigmaCompactSpace M] [T2Space M] in
 theorem lcTraceShifted
-    (G : DifferentialGeometry.Integral.Connection.RealizedMetricFamily (I := I) (M := M) Real)
+    (G : DifferentialGeometry.Geometry.Curvature.MetricConnectionFamily (I := I) (M := M) Real)
     (hLC : ∀ s : Real,
       IsLeviCivita (I := I) (G.connection s) (G.metric s))
-    (gInv : DifferentialGeometry.Integral.Connection.InverseMetricComponents M
+    (gInv : DifferentialGeometry.Geometry.Curvature.InverseMetricComponents M
       (CoordinateIdx (𝕜 := Real) E))
     (timeSet : Set Real) (base : Real) (x0 : M)
     (f : Real -> M -> Real) (h metricTrace : M -> Real)
@@ -703,7 +706,7 @@ theorem lcTraceShifted
       M -> CoordinateIdx (𝕜 := Real) E -> CoordinateIdx (𝕜 := Real) E ->
         CoordinateIdx (𝕜 := Real) E -> Real)
     (hinv :
-      DifferentialGeometry.Integral.Connection.InverseMetricComponentsInFrame
+      DifferentialGeometry.Geometry.Curvature.InverseMetricComponentsInFrame
         (I := I) (G.metric base) gInv (coordinateFrameAt (I := I) x0))
     (hmetricVar :
       metricVarOn (I := I) G (coordinateFrameAt (I := I) x0) base
@@ -746,7 +749,7 @@ theorem lcTraceShifted
         (scalarCoordDerivFun (I := I) metricTrace x0 j) x0) :
     HasDerivWithinAt
       (fun s : Real =>
-        DifferentialGeometry.Integral.Connection.christoffelRicciCoeffAt (I := I) (G.connection s)
+        DifferentialGeometry.Geometry.Curvature.christoffelRicciCoeffAt (I := I) (G.connection s)
           x0 i j +
           scalarHessCoordAt (I := I) (G.connection s) (f s) x0 i j)
       (gammaWeightedDivCoordAt (I := I) (G.connection base) gammaDot
@@ -764,7 +767,7 @@ theorem lcTraceShifted
   have hcoordGamma : gammaCoordDerivAt (I := I) G timeSet base x0 gammaDot := by
     intro a b c
     have h := hgammaLocal x0 hx0 a b c
-    simpa [gammaCoordDerivAt, DifferentialGeometry.Integral.Connection.christoffelCoordAt, frame,
+    simpa [gammaCoordDerivAt, DifferentialGeometry.Geometry.Curvature.christoffelCoordAt, frame,
       hframe] using
       h.hasDerivWithinAt
   have hcov :
@@ -857,4 +860,4 @@ theorem lcTraceShifted
 
 end RicciCoordVariation
 
-end DifferentialGeometry.Integral.Connection
+end DifferentialGeometry.Geometry.Connection

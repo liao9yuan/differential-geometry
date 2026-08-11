@@ -39,6 +39,7 @@ set_option autoImplicit false
 
 
 
+namespace DifferentialGeometry
 namespace Tensor0SBundle
 
 noncomputable section
@@ -170,3 +171,4 @@ end TangentMetricData_gen
 end
 
 end Tensor0SBundle
+end DifferentialGeometry

@@ -2,6 +2,10 @@ import DifferentialGeometry.Analysis.Parabolic.QuasiLinear.CrossScaleParabolicTr
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.GalerkinCompactness
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.TensorHsInterpolationLimit
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Entropy.ConjGalerkinEnergy
+open DifferentialGeometry.PDE.RicciFlow DifferentialGeometry.Analysis.Spectral
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Geometry.Connection
 
 set_option autoImplicit false
 
@@ -24,8 +28,8 @@ namespace DifferentialGeometry.PDE.RicciFlow.Entropy
 
 open DifferentialGeometry.Analysis.Parabolic.QuasiLinear
 open DifferentialGeometry.Analysis.Parabolic.TensorHeatEquation
-open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral
-open DifferentialGeometry.Integral.Connection
+open DifferentialGeometry.Analysis.Spectral
+
 open DifferentialGeometry.Integral.L2
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]
@@ -34,7 +38,7 @@ variable {H : Type*} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
   [IsManifold I ∞ M] [CompactSpace M] [I.Boundaryless]
-  [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M]
+  [BoundarylessManifold I M] [T2Space M]
 
 private local instance : CompleteSpace E := FiniteDimensional.complete Real E
 
@@ -91,7 +95,6 @@ structure IsConjGalSubseq
         (ulim t i) ^ 2 ≤ Bound
 
 omit [BoundarylessManifold I M] in
-omit [CompactSpace M] in
 omit [NeZero (Module.finrank ℝ E)] in
 private theorem gal_lim_mass
     (q : SmoothRiemannianMetric I M) {tau : Real}
@@ -199,7 +202,7 @@ private lemma real_abs_neg_mul_add_le {lam v c A K : ℝ} (hlam : 0 ≤ lam)
 private lemma scalarGalPert_continuousOn_of_parts
     {D : RealTimeInterval} (S : SolutionOn (I := I) (M := M) D)
     (T : D.RegularTime) {tau : Real}
-    (h2 : ContinuousOn (fun t => lapDiffA20 (I := I) (M := M) S.family T t)
+    (h2 : ContinuousOn (fun t => lapDiffA20 (I := I) (M := M) S.family.metric T t)
       (Icc (0 : Real) tau))
     (h1 : ContinuousOn (fun t => conjA1 (I := I) (M := M) S T t)
       (Icc (0 : Real) tau)) :
@@ -428,7 +431,7 @@ theorem scalar_gal_subseq
   obtain ⟨tauE, htauE, htauE_one, hsolve⟩ := hgal
   obtain ⟨tau2, htau2, _htau2_one, hcont2, _hmeas2, _hbound2,
       _hboundAE2⟩ :=
-    lapDiffA20_short (I := I) (M := M) S.family hS.smoothMetric T
+    lapDiffA20_short (I := I) (M := M) S.family.metric hS.smoothMetric T
       (epsilon := (1 : Real)) zero_lt_one
   obtain ⟨tau1, htau1, _htau1_one, _C1, hcont1, _hmeas1, _hbound1,
       _hboundAE1⟩ := conjA1_short (I := I) (M := M) S hS T

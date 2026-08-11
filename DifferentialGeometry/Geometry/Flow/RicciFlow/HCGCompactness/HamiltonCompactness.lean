@@ -1,5 +1,7 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.SolutionCompactness
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.C4.SolutionCompactnessInputs
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Geometry.Curvature
 
 set_option autoImplicit false
 
@@ -54,7 +56,7 @@ theorem compactnessSol
     {α b : Real} (h0 : (0 : Real) ∈ Set.Ioo α b)
     (X : PointedFlowSeq.{u, uE, uH} (I := I))
     (hD : X.D =
-      DifferentialGeometry.Integral.Connection.RealTimeInterval.openInterval
+      DifferentialGeometry.Geometry.Curvature.RealTimeInterval.openInterval
         α b 0 h0)
     (hcomplete : CompleteInput (I := I) X)
     (hcurv : CurvBoundInput (I := I) X)

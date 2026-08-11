@@ -98,6 +98,7 @@ set_option autoImplicit false
 
 noncomputable section
 
+namespace DifferentialGeometry
 namespace Tensor0SBundle
 
 set_option backward.isDefEq.respectTransparency false
@@ -227,3 +228,4 @@ theorem contract_contravariant_first_model_apply
 end Contractions
 
 end Tensor0SBundle
+end DifferentialGeometry

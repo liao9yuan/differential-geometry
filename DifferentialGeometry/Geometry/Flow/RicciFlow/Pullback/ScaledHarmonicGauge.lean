@@ -2,6 +2,8 @@ import DifferentialGeometry.Bundle.VectorField
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Pullback.DeTurckNaturality
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Pullback.HarmonicTension
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Pullback.InverseFamily
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Geometry.Curvature
 
 /-!
 # Density-scaled harmonic-map gauges
@@ -20,7 +22,7 @@ open scoped Manifold ContDiff
 namespace DifferentialGeometry.PDE.RicciFlow.Pullback
 
 open DifferentialGeometry
-open DifferentialGeometry.Integral.Connection
+
 open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.PDE.DeTurck
 
@@ -108,7 +110,7 @@ theorem ricci_pullback_drift
       ContMDiff I (I.prod 𝓘(ℝ, E)) ∞
         (fun z : M => TotalSpace.mk' E (E := TangentSpace I) z
           (Diffeomorph.pushforward (Φ_fam s) (Z s) z)) := fun s =>
-    ODE.flowFamily_pushforward_contMDiff (I := I) Φ_fam s (Z s).contMDiff
+    DifferentialGeometry.Analysis.ODE.flowFamily_pushforward_contMDiff (I := I) Φ_fam s (Z s).contMDiff
   let Y : ℝ → VectorField (I := I) (M := M) := fun s =>
     ⟨Diffeomorph.pushforward (Φ_fam s) (Z s), hPush s⟩
   have hYode : ∀ z : M, ∀ s ∈ Set.Ioo (0 : ℝ) T,
@@ -199,7 +201,7 @@ theorem fixed_pullback_drift
       ContMDiff I (I.prod 𝓘(ℝ, E)) ∞
         (fun z : M => TotalSpace.mk' E (E := TangentSpace I) z
           (Diffeomorph.pushforward (Φ_fam s) (Z s) z)) := fun s =>
-    ODE.flowFamily_pushforward_contMDiff (I := I) Φ_fam s (Z s).contMDiff
+    DifferentialGeometry.Analysis.ODE.flowFamily_pushforward_contMDiff (I := I) Φ_fam s (Z s).contMDiff
   let Y : ℝ → VectorField (I := I) (M := M) := fun s =>
     ⟨Diffeomorph.pushforward (Φ_fam s) (Z s), hPush s⟩
   have hYode : ∀ z : M, ∀ s ∈ Set.Ioo (0 : ℝ) T,

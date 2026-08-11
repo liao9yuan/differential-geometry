@@ -5,6 +5,9 @@ import DifferentialGeometry.Geometry.Curvature.Components.RicciTrace
 import DifferentialGeometry.Geometry.Curvature.Components.LocalFrame
 import DifferentialGeometry.Geometry.Curvature.Components.Christoffel
 import DifferentialGeometry.Geometry.Curvature.Components.RicciIdentity
+open DifferentialGeometry.Tensor.RicciIdentity
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Geometry.Curvature
 
 set_option autoImplicit false
 
@@ -18,10 +21,10 @@ set_option autoImplicit false
 
 noncomputable section
 
-namespace DifferentialGeometry.Integral.Connection
 
-open Tensor0SBundle
-open DifferentialGeometry.Integral.Connection
+namespace DifferentialGeometry.Geometry.Connection
+
+open DifferentialGeometry.Tensor0SBundle
 open scoped Manifold ContDiff
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]
@@ -175,4 +178,4 @@ theorem oneFormRicciIdentity_of_smooth_connection_apply
     (oneFormRicciIdentity_of_smooth_connection (I := I) cov Rm13 x alpha
       nabla2Alpha hRm hcov hcov_one hcoord) X Y Z
 
-end DifferentialGeometry.Integral.Connection
+end DifferentialGeometry.Geometry.Connection

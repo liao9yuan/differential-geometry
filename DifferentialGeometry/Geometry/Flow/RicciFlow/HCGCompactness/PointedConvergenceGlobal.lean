@@ -2,6 +2,8 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.PointedConver
 import DifferentialGeometry.Geometry.Comparison.BonnetMyers.Headlines
 import DifferentialGeometry.Geometry.Metric.TensorInner.TangentNormDiamond
 import Mathlib.Topology.Connected.Clopen
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Geometry.Curvature
 
 set_option autoImplicit false
 

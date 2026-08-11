@@ -3,6 +3,8 @@ import DifferentialGeometry.Geometry.Exponential.DiagInvReadout
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.C4.NormalMetricExtend
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.C4.NormalDiagAt
 import Mathlib.Topology.OpenPartialHomeomorph.Composition
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Geometry.Curvature
 
 set_option autoImplicit false
 

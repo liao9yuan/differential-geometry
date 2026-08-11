@@ -9,7 +9,7 @@ noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
 
-open Manifold Set Filter Bundle Tensor0SBundle
+open Manifold Set Filter Bundle DifferentialGeometry.Tensor0SBundle
 open scoped Manifold Topology ContDiff BigOperators Matrix
 
 namespace DifferentialGeometry

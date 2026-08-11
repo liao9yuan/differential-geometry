@@ -2,6 +2,7 @@ import DifferentialGeometry.Analysis.Elliptic.Regularity.H1Compl.Defs
 import Mathlib.MeasureTheory.Function.L2Space
 import Mathlib.MeasureTheory.Function.LpSpace.Indicator
 import Mathlib.Analysis.Normed.Operator.Extend
+open DifferentialGeometry.Geometry.Operator
 
 
 noncomputable section
@@ -21,13 +22,14 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.DivergenceTheorem
+open DifferentialGeometry.Geometry.Operator
 
 private local instance : MeasurableSpace E := borel E
 private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
-variable [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
+variable [I.Boundaryless] [T2Space M] [CompactSpace M]
 
 omit [I.Boundaryless] in
 lemma SmoothScalar.memLp_two {g : SmoothRiemannianMetric I M}
@@ -92,9 +94,9 @@ lemma SmoothScalar.norm_smoothToLp_sq_le {g : SmoothRiemannianMetric I M}
   rw [f.norm_smoothToLp_sq, f.norm_sq_eq_inner_self]
   unfold smoothScalarH1Inner
   have h_grad_nonneg :
-      0 ≤ ∫ x, g.inner x ((grad_g (I := I) g f.smooth :
+      0 ≤ ∫ x, g.inner x ((grad_g (I := I) g ⟨f.toFun, f.smooth⟩ :
               Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) x)
-            ((grad_g (I := I) g f.smooth :
+            ((grad_g (I := I) g ⟨f.toFun, f.smooth⟩ :
               Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) x)
           ∂(riemannianVolumeMeasure (I := I) (M := M) g) :=
     f.integral_inner_grad_self_nonneg

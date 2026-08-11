@@ -1,5 +1,8 @@
 import DifferentialGeometry.Analysis.Calculus.MovingImplicit
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Pullback.ConnAddTarget
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Geometry.Connection
 
 /-!
 # Vertical invertibility of the harmonic-map local addition

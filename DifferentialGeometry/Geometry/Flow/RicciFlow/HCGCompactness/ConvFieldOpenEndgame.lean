@@ -3,6 +3,10 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.ConvFieldOpen
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.ConvFieldOpenScalar
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.ConvFieldEndgame
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.ExtendedSolutionRegularity
+open DifferentialGeometry.PDE.RicciFlow
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Geometry.Connection
 
 set_option autoImplicit false
 
@@ -17,9 +21,9 @@ ambient open interval is used.
 
 noncomputable section
 
-open Set Function Filter Bundle Manifold Tensor0SBundle
+open Set Function Filter Bundle Manifold DifferentialGeometry.Tensor0SBundle
 open scoped Manifold Topology ContDiff BigOperators
-open DifferentialGeometry.Integral.Connection
+
 open DifferentialGeometry.PDE.RicciFlow (SolutionOn IsSolutionOn)
 
 namespace DifferentialGeometry
@@ -101,7 +105,7 @@ theorem isSolution
   have hgram := OpenConvOut.gramSmooth (I := I) (Φ := Φ) ht₀ hD co
   have hsmooth : MetricFamilySmoothOn (I := I) (M := P.M) X.D
       ({ base := { metric := co.gInf } } :
-        SolutionOn (I := I) (M := P.M) X.D).family := by
+        SolutionOn (I := I) (M := P.M) X.D).family.metric := by
     exact hD.symm ▸
       OpenConvOut.smoothMetric_of_conv (I := I) (Φ := Φ) ht₀ hD co
   have hpde : ∀ t ∈ X.D.regular, ∀ (x : P.M) (v w : TangentSpace I x),

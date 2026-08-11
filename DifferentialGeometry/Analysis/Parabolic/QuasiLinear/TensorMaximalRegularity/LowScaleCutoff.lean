@@ -1,4 +1,7 @@
 import DifferentialGeometry.Analysis.Calculus.BallRetraction
+open DifferentialGeometry.Analysis.Calculus
+
+namespace DifferentialGeometry.Analysis.Parabolic.QuasiLinear.TensorMaximalRegularity
 set_option autoImplicit false
 set_option relaxedAutoImplicit false
 set_option maxSynthPendingDepth 3
@@ -264,3 +267,5 @@ theorem lowScaleCutoff_sub_le
       linarith
 
 end NormedDifference
+
+end DifferentialGeometry.Analysis.Parabolic.QuasiLinear.TensorMaximalRegularity

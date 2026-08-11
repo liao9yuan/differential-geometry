@@ -1,13 +1,16 @@
 import DifferentialGeometry.Geometry.Connection.LeviCivita.Curvature.Realized
 import DifferentialGeometry.Tensor.RSTensor.NablaDomDomCongr
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Geometry.Curvature
 
 set_option autoImplicit false
 
 noncomputable section
 
-namespace DifferentialGeometry.Integral.Connection
 
-open Bundle Tensor0SBundle
+namespace DifferentialGeometry.Geometry.Connection
+
+open Bundle DifferentialGeometry.Tensor0SBundle
 open scoped Topology Manifold ContDiff BigOperators
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]
@@ -45,13 +48,13 @@ theorem canRmSecond_nabla
     (g : SmoothRiemannianMetric I M)
     {x : M} (V A X Y Z W : TangentSpace I x) :
     let cov :=
-      DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric
+      DifferentialGeometry.Geometry.Connection.leviCivitaConnectionOfMetric
         (I := I) g
     let hcov :=
-      DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric_contMDiffCovariantDerivativeLocally
+      DifferentialGeometry.Geometry.Connection.leviCivitaConnectionOfMetric_contMDiffCovariantDerivativeLocally
         (I := I) (M := M) g
     let Rm04 : Tensor04Section (I := I) (M := M) :=
-      DifferentialGeometry.Integral.Connection.CovariantDerivative.rm04Section
+      DifferentialGeometry.Geometry.Curvature.CovariantDerivative.rm04Section
         (I := I) g cov hcov
     let nablaRm04 : Tensor0SField (𝕜 := Real) (E := E) (H := H)
         (I := I) (M := M) (n := (∞ : WithTop ℕ∞)) 5 :=
@@ -67,13 +70,13 @@ theorem canRmSecond_nabla
       nabla2Rm04 (Fin.cons V (vec5 (I := I) Y A X Z W)) = 0 := by
   classical
   let cov :=
-    DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric
+    DifferentialGeometry.Geometry.Connection.leviCivitaConnectionOfMetric
       (I := I) g
   let hcov :=
-    DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric_contMDiffCovariantDerivativeLocally
+    DifferentialGeometry.Geometry.Connection.leviCivitaConnectionOfMetric_contMDiffCovariantDerivativeLocally
       (I := I) (M := M) g
   let Rm04 : Tensor04Section (I := I) (M := M) :=
-    DifferentialGeometry.Integral.Connection.CovariantDerivative.rm04Section
+    DifferentialGeometry.Geometry.Curvature.CovariantDerivative.rm04Section
       (I := I) g cov hcov
   let nablaRm04 : Tensor0SField (𝕜 := Real) (E := E) (H := H)
       (I := I) (M := M) (n := (∞ : WithTop ℕ∞)) 5 :=
@@ -182,4 +185,4 @@ theorem canRmSecond_nabla
     rw [Function.comp_apply, cons_apply_frontExtendEquiv, htail]
   simpa [h1, h2] using heval
 
-end DifferentialGeometry.Integral.Connection
+end DifferentialGeometry.Geometry.Connection

@@ -1,5 +1,6 @@
 import DifferentialGeometry.Analysis.Heat.Smoothing.SmoothingSpectralLift
 import DifferentialGeometry.Analysis.Elliptic.LichnerowiczSpectral
+open DifferentialGeometry.Geometry.Curvature
 
 noncomputable section
 
@@ -25,7 +26,7 @@ private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
-variable [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
+variable [I.Boundaryless] [T2Space M] [CompactSpace M]
 
 lemma oneMinusLapHeat_one_apply
     (g : SmoothRiemannianMetric I M) (t : ℝ)

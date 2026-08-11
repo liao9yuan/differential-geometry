@@ -1,5 +1,10 @@
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.DeTurckRHSSectionRealizeUnitModel
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurckCoefficients.RHSThreeArmCancel
+open DifferentialGeometry.Analysis.Sobolev DifferentialGeometry.PDE.RicciFlow
+open DifferentialGeometry.Analysis.Spectral
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Geometry.Connection
 
 
 
@@ -15,20 +20,20 @@ noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
 
-open Set Bundle Manifold Tensor0SBundle ContinuousLinearMap MeasureTheory intervalIntegral
+open Set Bundle Manifold DifferentialGeometry.Tensor0SBundle ContinuousLinearMap MeasureTheory intervalIntegral
 open scoped Topology Manifold BigOperators ContDiff
 
-namespace DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.DeTurckCoefficients
+namespace DifferentialGeometry.Analysis.Spectral.DeTurckCoefficients
 
 open DifferentialGeometry
 open DifferentialGeometry.Integral.L2
 open DifferentialGeometry.Integral.Measure
-open DifferentialGeometry.Integral.Connection
+
 open DifferentialGeometry.Integral.DivergenceTheorem
 open DifferentialGeometry.Analysis.Parabolic.TensorSpectral
 open DifferentialGeometry.PDE.DeTurck.RicciLinearization
 open DifferentialGeometry.PDE.DeTurck.DeTurckLinearization
-open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.MetricRealization
+open DifferentialGeometry.Analysis.Spectral.MetricRealization
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
@@ -418,4 +423,4 @@ theorem rhsArm_sub_eq_paths
       (iteratedCovGrad (I := I) g₀ 0 2 2 (T - T'))
       (realizedSmallSet (δ := δ) (δ' := δ')) hSopen hSI hj2 hc2]
 
-end DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.DeTurckCoefficients
+end DifferentialGeometry.Analysis.Spectral.DeTurckCoefficients

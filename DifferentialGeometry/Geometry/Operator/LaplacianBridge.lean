@@ -1,5 +1,8 @@
 import DifferentialGeometry.Geometry.Connection.LeviCivita.DivergenceFrameInvariance
 import DifferentialGeometry.Geometry.Operator.Laplacian
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Geometry.Connection
 
 set_option autoImplicit false
 
@@ -12,13 +15,14 @@ set_option autoImplicit false
 
 noncomputable section
 
+
 open Bundle Manifold Set
 open scoped Manifold ContDiff BigOperators
 
-namespace DifferentialGeometry.Integral.Connection
+namespace DifferentialGeometry.Geometry.Operator
 
 open DifferentialGeometry.Integral.DivergenceTheorem
-open Tensor0SBundle
+open DifferentialGeometry.Tensor0SBundle
 
 universe u uE uH
 
@@ -102,22 +106,22 @@ theorem laplacian_levi_eq
     (g : SmoothRiemannianMetric I M) {f : M → Real}
     (hf : ContMDiff I 𝓘(Real, Real) ∞ f) (x : M) :
     laplacian (I := I) (LeviCivita (I := I) g) g f x =
-      Δ_g (I := I) g hf x := by
-  have hdiv := divergence_levi_eq (I := I) g (grad_g (I := I) g hf) x
+      Δ_g (I := I) g ⟨_, hf⟩ x := by
+  have hdiv := divergence_levi_eq (I := I) g (grad_g (I := I) g ⟨_, hf⟩) x
   simpa only [laplacian_eq, grad_g_apply, Δ_g_def] using hdiv
 
 omit [NeZero (Module.finrank Real E)] in
 omit [CompactSpace M] in
 omit [SigmaCompactSpace M] in
 theorem laplacianAt_eq_delta
-    (G : RealizedMetricFamily (I := I) (M := M) Real) (t : Real)
+    (G : MetricConnectionFamily (I := I) (M := M) Real) (t : Real)
     {f : M → Real} (hf : ContMDiff I 𝓘(Real, Real) ∞ f)
     (hconn : G.connection t = LeviCivita (I := I) (G.metric t)) (x : M) :
-    laplacianAt (I := I) G t f x = Δ_g (I := I) (G.metric t) hf x := by
+    laplacianAt (I := I) G t f x = Δ_g (I := I) (G.metric t) ⟨_, hf⟩ x := by
   unfold laplacianAt
   rw [hconn]
   exact laplacian_levi_eq (I := I) (G.metric t) hf x
 
-end DifferentialGeometry.Integral.Connection
+end DifferentialGeometry.Geometry.Operator
 
 end

@@ -16,6 +16,7 @@ set_option autoImplicit false
 
 noncomputable section
 
+namespace DifferentialGeometry
 namespace Tensor0SBundle
 
 set_option backward.isDefEq.respectTransparency false
@@ -261,3 +262,4 @@ theorem componentRS_connectionDifferenceTensorAt
   simp [basisTensor0S_apply]
 
 end Tensor0SBundle
+end DifferentialGeometry

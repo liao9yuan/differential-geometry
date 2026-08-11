@@ -2,6 +2,8 @@ import DifferentialGeometry.Geometry.Connection.ChartTensorNabla.Agreement.Chart
 import DifferentialGeometry.Geometry.Connection.TensorNabla.Tensor0SNabla
 import DifferentialGeometry.Geometry.Connection.TensorNabla.Tensor0SPartialEval
 import DifferentialGeometry.Tensor.RSTensor.NablaOnTensors.Regularity.Tensor0S
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Geometry.Curvature
 
 /-!
 # Agreement of the chart/model `nabla0SFun` with the abstract bundled `(0, s)` covariant derivative
@@ -15,7 +17,7 @@ covariant-derivative formalisms on `(0, s)`-tensors (see
   `totalNabla0S`/`metricCovDeriv`, built by trivialising to the model and reading the
   local connection endomorphism; and
 * the **abstract** bundled derivative
-  `Tensor0SNabla.tensor0SCovariantDerivative I M s cov` (built recursively via the
+  `DifferentialGeometry.Tensor0SNabla.tensor0SCovariantDerivative I M s cov` (built recursively via the
   curry isomorphism into the Hom-bundle).
 
 ## Route
@@ -47,10 +49,11 @@ set_option backward.isDefEq.respectTransparency false
 
 open Bundle Manifold Set Filter
 open scoped Manifold Topology ContDiff BigOperators
-open Tensor0SBundle
+open DifferentialGeometry.Tensor0SBundle
+
 
 namespace DifferentialGeometry
-namespace Integral
+namespace Geometry
 namespace Connection
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
@@ -60,8 +63,8 @@ variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
   [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M]
 
-open Tensor0SNabla
-open Tensor0SPartialEval
+open DifferentialGeometry.Tensor0SNabla
+open DifferentialGeometry.Tensor0SPartialEval
 open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.DivergenceTheorem
 
@@ -153,7 +156,7 @@ private lemma cmlm_cons_eq_curry (s : ℕ) {x : M}
   exact (TensorMultilinear.tensor0S_curry_apply_eval (I := I) (M := M)
     (T := T x) (v0 := v0) (vs := m)).symm
 
-omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] in
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] [SigmaCompactSpace M] in
 /-- **Tensor-derivation (Leibniz) rule for the abstract `(0, s)` covariant
 derivative, closed intrinsic form.**  Induction on `s`; the step uses the
 Hom-bundle product rule and the rank-`s` inductive hypothesis on the partial
@@ -335,7 +338,7 @@ theorem abstractDerivEval_aux
     simp only [hcons0, hconsSucc]
     ring
 
-omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] in
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] in
 /-- **Headline agreement.**  The chart/model derivative `nabla0SFun s (LeviCivita g)`
 of a smooth `(0, s)`-tensor field agrees, as a fibre `(0, s)`-tensor, with the
 abstract bundled covariant derivative built from the Levi-Civita connection. -/
@@ -366,7 +369,7 @@ theorem nabla0SFun_eq_tensor0SCovariantDerivative
       α.contMDiff (fun a => (V a).contMDiff) X.contMDiff x]
 
 end Connection
-end Integral
+end Geometry
 end DifferentialGeometry
 
 end

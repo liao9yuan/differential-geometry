@@ -1,5 +1,7 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.ConvFieldOpenLower
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.MetricCompleteness
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Geometry.Curvature
 
 set_option autoImplicit false
 
@@ -15,7 +17,7 @@ noncomputable section
 
 open Set Bundle Manifold
 open scoped Manifold Topology ContDiff
-open DifferentialGeometry.Integral.Connection
+
 
 namespace DifferentialGeometry
 namespace HCGCompactness

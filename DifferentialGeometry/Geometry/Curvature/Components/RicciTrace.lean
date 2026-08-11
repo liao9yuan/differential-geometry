@@ -1,12 +1,14 @@
 import DifferentialGeometry.Geometry.Curvature.Components.TraceOneForm
+open DifferentialGeometry.Geometry.Curvature
+
 
 set_option autoImplicit false
 
 noncomputable section
 
-namespace DifferentialGeometry.Integral.Connection
+namespace DifferentialGeometry.Geometry.Curvature
 
-open Bundle Tensor0SBundle
+open Bundle DifferentialGeometry.Tensor0SBundle
 open scoped Manifold ContDiff BigOperators
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]
@@ -294,4 +296,4 @@ theorem scalar_eq_trace_ricci
         gInv i j * ricciCompAt (I := I) basis Ric i j := by
   rw [hScalar]
   simp_rw [ricciCompAt_apply]
-end DifferentialGeometry.Integral.Connection
+end DifferentialGeometry.Geometry.Curvature

@@ -1,6 +1,7 @@
 import DifferentialGeometry.Analysis.Calculus.RatioMonotonicity
 import Mathlib.Analysis.Calculus.Deriv.Pow
 import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
+open DifferentialGeometry.Analysis.Calculus
 
 /-!
 # Hyperbolic radial comparison model

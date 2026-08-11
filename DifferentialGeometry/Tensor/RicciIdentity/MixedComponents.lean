@@ -6,6 +6,7 @@ import DifferentialGeometry.Geometry.Coordinates.NablaComponents.TensorRS.Specia
 import DifferentialGeometry.Tensor.Auxiliary.DerivationAlgebra
 import DifferentialGeometry.Tensor.RSTensor.Components
 import DifferentialGeometry.Tensor.RSTensor.NablaOnTensors.HigherOrder
+open DifferentialGeometry.Tensor.Auxiliary
 
 set_option autoImplicit false
 
@@ -19,11 +20,11 @@ set_option autoImplicit false
 
 noncomputable section
 
-namespace DifferentialGeometry.Integral.Connection
+namespace DifferentialGeometry.Tensor.RicciIdentity
 
 attribute [local instance] Fintype.ofFinite Classical.propDecidable
 
-open Bundle Tensor0SBundle
+open Bundle DifferentialGeometry.Tensor0SBundle
 open scoped Manifold ContDiff BigOperators
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]
@@ -549,4 +550,4 @@ theorem mixedRicciIdentityCoord_of_coordinate_second_product
 
 end MixedComponentAlgebra
 
-end DifferentialGeometry.Integral.Connection
+end DifferentialGeometry.Tensor.RicciIdentity

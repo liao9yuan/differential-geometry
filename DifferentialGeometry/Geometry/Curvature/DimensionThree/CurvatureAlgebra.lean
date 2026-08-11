@@ -21,7 +21,7 @@ import Mathlib.Tactic
 
 noncomputable section
 
-namespace DifferentialGeometry.Integral.Connection
+namespace DifferentialGeometry.Geometry.Curvature
 
 open scoped BigOperators
 
@@ -353,4 +353,4 @@ theorem displayedRiemannFromRicci3D_of_algebraic_curvature_symmetries
   have hrhs := displayedRiemannFromRicciRhs3_eq_neg_stdRhs hRic_symm i j k l
   linarith
 
-end DifferentialGeometry.Integral.Connection
+end DifferentialGeometry.Geometry.Curvature

@@ -1,1 +1,4 @@
 import DifferentialGeometry.Geometry.Curvature.Riemann.HigherOrder
+
+namespace DifferentialGeometry
+end DifferentialGeometry

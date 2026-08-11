@@ -1,6 +1,8 @@
 import DifferentialGeometry.Geometry.Metric.SmoothMetricFromCoeff
 import DifferentialGeometry.Geometry.Metric.OpenSubtype
 import DifferentialGeometry.Geometry.Curvature.Riemann.Basic.Field
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Geometry.Curvature
 
 
 
@@ -236,7 +238,7 @@ lemma chiGU_coeff_cmdiffAt (U : Opens M)
   have hgUinner : ContMDiffAt I 𝓘(ℝ, ℝ) ∞
       (fun z : U => gU.inner z
         (frameVec (I := I) x₀ i (z : M)) (frameVec (I := I) x₀ j (z : M))) ⟨x, hxU⟩ :=
-    DifferentialGeometry.Integral.Connection.CovariantDerivative.metric_inner_contMDiffAt
+    DifferentialGeometry.Geometry.Curvature.CovariantDerivative.metric_inner_contMDiffAt
       (I := I) (M := U) gU
       (frameVec_sub_cmdiffAt (I := I) U x₀ i hxb hxU)
       (frameVec_sub_cmdiffAt (I := I) U x₀ j hxb hxU) le_rfl
@@ -298,7 +300,7 @@ lemma bumpForm_coeff_contMDiffOn (R : SmoothRiemannianMetric I M) (U : Opens M)
     have hfrj := frameVec_cmdiffAt' (I := I) x₀ j hx
     have hg : ContMDiffAt I 𝓘(ℝ, ℝ) ∞
         (fun y : M => R.inner y (frameVec (I := I) x₀ i y) (frameVec (I := I) x₀ j y)) x :=
-      DifferentialGeometry.Integral.Connection.CovariantDerivative.metric_inner_contMDiffAt
+      DifferentialGeometry.Geometry.Curvature.CovariantDerivative.metric_inner_contMDiffAt
         (I := I) R hfri hfrj le_rfl
     have hχ1x : ContMDiffAt I 𝓘(ℝ, ℝ) ∞ (fun y : M => 1 - χ y) x :=
       contMDiffAt_const.sub (hχ x)

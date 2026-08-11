@@ -1,6 +1,10 @@
+import DifferentialGeometry.Geometry.Metric.TensorInner.TangentNormDiamond
 import DifferentialGeometry.Analysis.ODE.TimeDependentFlow.SmoothDependence.CompactTrajectory
 import DifferentialGeometry.Geometry.Exponential.IntrinsicExpContinuity
-import DifferentialGeometry.Geometry.Topology.FiberBundleT2
+import DifferentialGeometry.Topology.FiberBundleT2
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Geometry.Connection
 
 /-!
 # The intrinsic geodesic velocity lift
@@ -39,8 +43,7 @@ def intrinsicVelocityLift
     [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
     [IsContinuousRiemannianBundle E (fun (x : M) => TangentSpace I x)]
     (g : SmoothRiemannianMetric I M)
-    (hEnorm : ∀ (x : M) (w : TangentSpace I x),
-      ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner x w w)))
+    (hEnorm : IsMetricNorm (I := I) (M := M) g)
     (p : M) (v : TangentSpace I p) (s : ℝ) : TangentBundle I M :=
   ⟨intrinsicGeodesic (I := I) g hEnorm p v s,
     (mfderiv 𝓘(ℝ, ℝ) I (intrinsicGeodesic (I := I) g hEnorm p v) s :
@@ -52,8 +55,7 @@ attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
     [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
     [IsContinuousRiemannianBundle E (fun (x : M) => TangentSpace I x)]
     (g : SmoothRiemannianMetric I M)
-    (hEnorm : ∀ (x : M) (w : TangentSpace I x),
-      ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner x w w)))
+    (hEnorm : IsMetricNorm (I := I) (M := M) g)
     (p : M) (v : TangentSpace I p) (s : ℝ) :
     (intrinsicVelocityLift (I := I) g hEnorm p v s).proj =
       intrinsicGeodesic (I := I) g hEnorm p v s := rfl
@@ -64,8 +66,7 @@ attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
     [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
     [IsContinuousRiemannianBundle E (fun (x : M) => TangentSpace I x)]
     (g : SmoothRiemannianMetric I M)
-    (hEnorm : ∀ (x : M) (w : TangentSpace I x),
-      ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner x w w)))
+    (hEnorm : IsMetricNorm (I := I) (M := M) g)
     (p : M) (v : TangentSpace I p) :
     intrinsicVelocityLift (I := I) g hEnorm p v 0 =
       (⟨p, v⟩ : TangentBundle I M) := by
@@ -82,8 +83,7 @@ theorem lift_isIntegral
     [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
     [IsContinuousRiemannianBundle E (fun (x : M) => TangentSpace I x)]
     (g : SmoothRiemannianMetric I M)
-    (hEnorm : ∀ (x : M) (w : TangentSpace I x),
-      ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner x w w)))
+    (hEnorm : IsMetricNorm (I := I) (M := M) g)
     (p : M) (v : TangentSpace I p) :
     IsMIntegralCurve (intrinsicVelocityLift (I := I) g hEnorm p v)
       (geodesicVectorField (I := I) g) := by
@@ -141,13 +141,12 @@ theorem velocityLift_one
     [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
     [IsContinuousRiemannianBundle E (fun (x : M) => TangentSpace I x)]
     (g : SmoothRiemannianMetric I M)
-    (hEnorm : ∀ (x : M) (w : TangentSpace I x),
-      ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner x w w))) :
+    (hEnorm : IsMetricNorm (I := I) (M := M) g) :
     ContMDiff I.tangent I.tangent ∞
       (fun u : TangentBundle I M =>
         intrinsicVelocityLift (I := I) g hEnorm u.proj u.snd 1) := by
   have hslice :=
-    DifferentialGeometry.PDE.RicciFlow.ODE.flow_slice_smooth
+    DifferentialGeometry.Analysis.ODE.flow_slice_smooth
       (I := I.tangent) (v := geodesicVectorField (I := I) g)
       (Geodesic.geodesicVF_smooth (I := I) g)
       (D := Set.univ) isOpen_univ (a := (-1 : ℝ)) (b := 2) (t₀ := 0)
@@ -172,8 +171,7 @@ theorem intrinsicExp_smooth
     [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
     [IsContinuousRiemannianBundle E (fun (x : M) => TangentSpace I x)]
     (g : SmoothRiemannianMetric I M)
-    (hEnorm : ∀ (x : M) (w : TangentSpace I x),
-      ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner x w w))) :
+    (hEnorm : IsMetricNorm (I := I) (M := M) g) :
     ContMDiff I.tangent I ∞
       (fun u : TangentBundle I M =>
         expMapIntrinsic (I := I) g hEnorm u.proj u.snd) := by
@@ -191,8 +189,7 @@ theorem intrinsicFiber_smooth
     [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
     [IsContinuousRiemannianBundle E (fun (x : M) => TangentSpace I x)]
     (g : SmoothRiemannianMetric I M)
-    (hEnorm : ∀ (x : M) (w : TangentSpace I x),
-      ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner x w w)))
+    (hEnorm : IsMetricNorm (I := I) (M := M) g)
     (p : M) :
     ContMDiff 𝓘(ℝ, E) I ∞
       (fun v : E => expMapIntrinsic (I := I) g hEnorm p
@@ -239,8 +236,7 @@ theorem intrinsicVar_smooth
     [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
     [IsContinuousRiemannianBundle E (fun (x : M) => TangentSpace I x)]
     (g : SmoothRiemannianMetric I M)
-    (hEnorm : ∀ (x : M) (w : TangentSpace I x),
-      ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner x w w)))
+    (hEnorm : IsMetricNorm (I := I) (M := M) g)
     (p : M) (x w : E) :
     ContMDiff (𝓘(ℝ, ℝ).prod 𝓘(ℝ, ℝ)) I ∞
       (fun q : ℝ × ℝ =>

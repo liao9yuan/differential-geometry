@@ -3,6 +3,12 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.RmRealizationBridg
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.IteratedNablaRmTower
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.NablaRiemannTimeDeriv
 import DifferentialGeometry.Tensor.RSTensor.MetricTrace.Connection
+open DifferentialGeometry.Tensor.RSTensor
+open DifferentialGeometry.PDE.RicciFlow
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Geometry.Connection
+open DifferentialGeometry.Geometry.Operator
 
 set_option autoImplicit false
 set_option backward.isDefEq.respectTransparency false
@@ -75,9 +81,10 @@ noncomputable section
 
 namespace DifferentialGeometry.PDE.RicciFlow
 
-open Bundle Tensor0SBundle
+open Bundle DifferentialGeometry.Tensor0SBundle
 open DifferentialGeometry.Tensor.Coordinates
-open DifferentialGeometry.Integral.Connection
+
+open DifferentialGeometry.Geometry.Operator
 open scoped Manifold ContDiff BigOperators
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]
@@ -109,7 +116,7 @@ variable {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
 
 
 def nablaKRm04NormSqIntrinsic
-    {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
+    {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D) (k : ℕ) : Real -> M -> Real :=
   fun t x => normSq0S (I := I) (S.base.metric t) x (4 + k)
     (nablaKRm04Field (I := I) S t k x)
@@ -123,7 +130,7 @@ def nablaKRm04NormSqIntrinsic
 
 
 def nablaKRm04ReactionIntrinsic
-    {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
+    {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D) (k : ℕ)
     (basis : (x : M) -> Module.Basis Idx Real (TangentSpace I x))
     (gInv : Real -> M -> Idx -> Idx -> Real)
@@ -147,7 +154,7 @@ def nablaKRm04ReactionIntrinsic
 
 
 def nablaKReactionAt
-    {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
+    {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D) (k : ℕ) (t : Real) (x : M)
     {Idx : Type*} [Fintype Idx]
     (basis : Module.Basis Idx Real (TangentSpace I x))
@@ -175,7 +182,7 @@ end Fields
 omit [I.Boundaryless] in
 omit [SigmaCompactSpace M] in
 theorem nablaKNorm_smooth
-    {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
+    {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D) (t : Real) (k : ℕ) :
     ContMDiff I 𝓘(Real, Real) (∞ : WithTop ℕ∞)
       (nablaKRm04NormSqIntrinsic (I := I) S k t) := by
@@ -185,7 +192,7 @@ theorem nablaKNorm_smooth
 
 
 noncomputable def nablaKNormDu
-    {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
+    {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D) (t : Real) (k : ℕ) :
     Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
       (n := (∞ : WithTop ℕ∞)) 1 :=
@@ -197,7 +204,7 @@ omit [I.Boundaryless]
 /-- The differential of `|∇^k Rm|²` satisfies the curvature-tower Kato bound
 `|d|∇^k Rm|²|² ≤ 4 |∇^k Rm|² |∇^(k+1) Rm|²`. -/
 theorem towerNorm_grad_le
-    {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
+    {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D) (k : Nat) (t : Real) (x : M) :
     (S.base.metric t).inner x
         (gradientFun (I := I) (S.base.metric t)
@@ -226,7 +233,7 @@ theorem towerNorm_grad_le
 
 /-- Canonical Hessian of the fixed-time scalar field `|∇ᵏRm|²`. -/
 noncomputable def nablaKNormHess
-    {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
+    {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D) (t : Real) (k : ℕ) :
     Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
       (n := (∞ : WithTop ℕ∞)) 2 :=
@@ -236,7 +243,7 @@ noncomputable def nablaKNormHess
 
 
 noncomputable def nablaKNormLap
-    {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
+    {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D) (k : ℕ) : Real → M → Real :=
   fun t x => laplacian (I := I) (S.family.connection t) (S.base.metric t)
     (nablaKRm04NormSqIntrinsic (I := I) S k t) x
@@ -259,9 +266,9 @@ omit [I.Boundaryless] in
 omit [SigmaCompactSpace M] in
 theorem nablaKNormHeatAt
     [FiniteDimensional Real E]
-    {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
+    {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D) (k : ℕ)
-    (t : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime D)
+    (t : DifferentialGeometry.Geometry.Curvature.RealTimeInterval.RegularTime D)
     (x : M)
     (basis : Module.Basis Idx Real (TangentSpace I x))
     (gInv : Real → Idx → Idx → Real)
@@ -425,7 +432,7 @@ omit [I.Boundaryless] in
 omit [SigmaCompactSpace M] in
 theorem nablaKRm04NormHeatEquationOn_intrinsic
     [FiniteDimensional Real E]
-    {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
+    {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D) (k : ℕ)
     (basis : (x : M) -> Module.Basis Idx Real (TangentSpace I x))
     (gInv : Real -> M -> Idx -> Idx -> Real)
@@ -453,7 +460,7 @@ theorem nablaKRm04NormHeatEquationOn_intrinsic
       nablaKRmNormLap t x =
         metricTrace0S2InBasis (I := I) (basis x) (gInv t x)
           (normSecond t x) Fin.elim0)
-    (hT : ∀ (t : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime D)
+    (hT : ∀ (t : DifferentialGeometry.Geometry.Curvature.RealTimeInterval.RegularTime D)
       (x : M) (I0 : Fin (4 + k) -> Idx),
       HasDerivWithinAt
         (fun r : Real =>
@@ -461,7 +468,7 @@ theorem nablaKRm04NormHeatEquationOn_intrinsic
             (fun i => basis x i) I0)
         (tensor0SComponent (I := I) (Tdot (t : Real) x) (fun i => basis x i) I0)
         D.carrier (t : Real))
-    (hgInvDt : ∀ (t : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime D)
+    (hgInvDt : ∀ (t : DifferentialGeometry.Geometry.Curvature.RealTimeInterval.RegularTime D)
       (x : M) (i j : Idx),
       HasDerivWithinAt (fun r : Real => gInv r x i j)
         (2 * (∑ p : Idx, ∑ q : Idx,
@@ -718,7 +725,7 @@ section Nonneg
 omit [I.Boundaryless] in
 omit [SigmaCompactSpace M] in
 theorem nablaKRm04NormSqIntrinsic_nonneg
-    {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
+    {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D) (k : ℕ) (t : Real) (x : M) :
     0 ≤ nablaKRm04NormSqIntrinsic (I := I) S k t x := by
   unfold nablaKRm04NormSqIntrinsic

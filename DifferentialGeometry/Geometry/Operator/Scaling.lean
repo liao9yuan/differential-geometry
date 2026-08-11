@@ -1,5 +1,6 @@
 import DifferentialGeometry.Geometry.Metric.Scaling
 import DifferentialGeometry.Geometry.Operator.Operators
+open DifferentialGeometry.Geometry.Curvature
 
 set_option autoImplicit false
 
@@ -9,7 +10,7 @@ set_option autoImplicit false
 
 
 
-namespace DifferentialGeometry.Integral.Connection
+namespace DifferentialGeometry.Geometry.Operator
 
 noncomputable section
 
@@ -38,15 +39,15 @@ private theorem metricSharp_scaleMetric
         (scaleMetric (I := I) c hc g).inner x
           (c⁻¹ • metricSharp (I := I) g x alpha) w := by
           have hinner :
-              ((g.inner x) ((metricFlatEquiv (I := I) g x).symm alpha)) w =
+              ((g.inner x) (metricSharp (I := I) g x alpha)) w =
                 alpha w := by
-            simpa [metricSharp] using inner_metricSharp (I := I) g x alpha w
+            exact inner_metricSharp (I := I) g x alpha w
           symm
           calc
             (scaleMetric (I := I) c hc g).inner x
                 (c⁻¹ • metricSharp (I := I) g x alpha) w =
                 c * (c⁻¹ *
-                  ((g.inner x) ((metricFlatEquiv (I := I) g x).symm alpha)) w) := by
+                  ((g.inner x) (metricSharp (I := I) g x alpha)) w) := by
                   rw [scaleMetric_inner]
                   simp only [metricSharp, map_smul, ContinuousLinearMap.coe_smul',
                     Pi.smul_apply, smul_eq_mul]
@@ -133,4 +134,4 @@ theorem laplacian_scaleMetric_const_smul
 
 end
 
-end DifferentialGeometry.Integral.Connection
+end DifferentialGeometry.Geometry.Operator

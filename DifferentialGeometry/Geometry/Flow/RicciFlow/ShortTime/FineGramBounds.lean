@@ -1,5 +1,9 @@
 import DifferentialGeometry.Analysis.Sobolev.Chart.SmoothDensity.FineChartCover
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.MetricPreconv
+open DifferentialGeometry.PDE.RicciFlow
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Geometry.Operator
 
 /-!
 # Uniform raw Gram jets on finite refined chart carriers
@@ -54,7 +58,7 @@ theorem bufferGram3_bnd
             ∀ y ∈ chartBuffer (extChartAt I α) K r₀,
               ∀ i j : Fin (Module.finrank ℝ E),
                 ‖iteratedFDeriv ℝ q
-                  (DifferentialGeometry.Integral.DivergenceTheorem.chartGramOnE
+                  (DifferentialGeometry.Geometry.Operator.chartGramOnE
                     (I := I) (gSeq k) α i j) (extChartAt I α y)‖ ≤ C := by
   classical
   obtain ⟨r₀, hr₀, hcollar, hbufferCpt, hbufferSrc⟩ :=
@@ -101,7 +105,7 @@ theorem fineGram_of_orders
           ((extChartAt I α) (z.1 : K)) (2 * ε),
           ∀ i j : Fin (Module.finrank ℝ E),
             ‖iteratedFDeriv ℝ r
-              (DifferentialGeometry.Integral.DivergenceTheorem.chartGramOnE
+              (DifferentialGeometry.Geometry.Operator.chartGramOnE
                 (I := I) (gSeq k) α i j) (extChartAt I α y)‖ ≤ C := by
   classical
   have hper : ∀ z : S, ∃ C : ℝ, 0 ≤ C ∧
@@ -110,7 +114,7 @@ theorem fineGram_of_orders
           ((extChartAt I α) (z.1 : K)) (2 * ε),
           ∀ i j : Fin (Module.finrank ℝ E),
             ‖iteratedFDeriv ℝ r
-              (DifferentialGeometry.Integral.DivergenceTheorem.chartGramOnE
+              (DifferentialGeometry.Geometry.Operator.chartGramOnE
                 (I := I) (gSeq k) α i j) (extChartAt I α y)‖ ≤ C := by
     intro z
     let Kc : Set M := chartClosedBall (extChartAt I α)
@@ -157,7 +161,7 @@ theorem fineGram3_bnd
           ((extChartAt I α) (z.1 : K)) (2 * ε),
           ∀ i j : Fin (Module.finrank ℝ E),
             ‖iteratedFDeriv ℝ q
-              (DifferentialGeometry.Integral.DivergenceTheorem.chartGramOnE
+              (DifferentialGeometry.Geometry.Operator.chartGramOnE
                 (I := I) (gSeq k) α i j) (extChartAt I α y)‖ ≤ C := by
   classical
   choose Cq hCq hbound using fun q : Fin 4 =>

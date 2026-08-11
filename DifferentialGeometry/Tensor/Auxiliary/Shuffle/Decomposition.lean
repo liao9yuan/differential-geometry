@@ -9,6 +9,7 @@ import Mathlib.GroupTheory.Perm.Option
 import Mathlib.LinearAlgebra.Alternating.DomCoprod
 import Mathlib.Logic.Equiv.Fin.Basic
 import Mathlib.Tactic.Group
+open DifferentialGeometry
 
 namespace ContinuousAlternatingMap
 

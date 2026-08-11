@@ -7,6 +7,10 @@ import DifferentialGeometry.Geometry.Coordinates.NablaComponents.OneForm.Connect
 import DifferentialGeometry.Geometry.Coordinates.NablaComponents.OneForm.Moving
 import DifferentialGeometry.Geometry.Coordinates.NablaComponents.OneForm.Smoothness
 import DifferentialGeometry.Geometry.Coordinates.NablaComponents.TwoTensor
+open DifferentialGeometry.Tensor.RicciIdentity
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Geometry.Operator
 
 set_option autoImplicit false
 
@@ -21,10 +25,11 @@ set_option autoImplicit false
 
 noncomputable section
 
-namespace DifferentialGeometry.Integral.Connection
 
-open Bundle Tensor0SBundle
-open DifferentialGeometry.Integral.Connection
+namespace DifferentialGeometry.Geometry.Connection
+
+open Bundle DifferentialGeometry.Tensor0SBundle
+open DifferentialGeometry.Geometry.Operator
 open DifferentialGeometry.Tensor.Coordinates
 open scoped Manifold ContDiff BigOperators
 
@@ -315,4 +320,4 @@ theorem oneFormLastTwoSymmAt_of_leviCivita_du
   rw [hleft, hright]
   simpa [vec2] using hs
 
-end DifferentialGeometry.Integral.Connection
+end DifferentialGeometry.Geometry.Connection

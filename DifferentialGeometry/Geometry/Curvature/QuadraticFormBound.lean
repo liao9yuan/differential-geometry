@@ -1,4 +1,5 @@
 import DifferentialGeometry.Geometry.Curvature.Tensor
+open DifferentialGeometry.Geometry.Curvature
 
 set_option autoImplicit false
 
@@ -20,7 +21,7 @@ set_option autoImplicit false
 
 noncomputable section
 
-namespace DifferentialGeometry.Integral.Connection
+namespace DifferentialGeometry.Geometry.Curvature
 
 open scoped Manifold ContDiff BigOperators Topology
 
@@ -111,4 +112,4 @@ theorem tensor02_quadForm_abs_le_of_unit_bound
     intro u hu
     exact le_trans (le_abs_self _) (hunit u hu)
 
-end DifferentialGeometry.Integral.Connection
+end DifferentialGeometry.Geometry.Curvature

@@ -8,6 +8,18 @@ import DifferentialGeometry.Geometry.Connection.ChartBridge.Ricci
 import DifferentialGeometry.Geometry.Connection.ChartBridge.RiemannBasisIdentity
 import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTimeAssembly.RicciContinuityInMetricTime
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.MetricPreconvWindowAllPt
+open DifferentialGeometry.Tensor.RicciIdentity
+open DifferentialGeometry.Tensor.RSTensor
+open DifferentialGeometry.Tensor.Auxiliary
+open DifferentialGeometry.PDE.RicciFlow
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Geometry.Connection
+open DifferentialGeometry.Analysis.Spectral
+open DifferentialGeometry.Analysis.Elliptic
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Geometry.Connection
+open DifferentialGeometry.Geometry.Operator
 
 set_option autoImplicit false
 
@@ -51,11 +63,12 @@ namespace DifferentialGeometry
 namespace HCGCompactness
 
 open scoped Manifold ContDiff Topology BigOperators
-open DifferentialGeometry.Integral.Connection
+
+open DifferentialGeometry.Geometry.Operator
 open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.DivergenceTheorem
-open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.DeTurckCoefficients
-open Tensor0SBundle TensorLieDeriv
+open DifferentialGeometry.Analysis.Spectral.DeTurckCoefficients
+open DifferentialGeometry.Tensor0SBundle DifferentialGeometry.TensorLieDeriv
 open Filter Topology
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]
@@ -2088,9 +2101,9 @@ theorem scalarSub_le_dNorm
         = chartInvGramMatrix (I := I) g x x i j := by
     intro g i j
     rw [chartInvGramOnE_def, extChartAt_to_inv]
-  rw [PDE.RicciFlow.metricScalar_chartTrace_eq (I := I) u x
+  rw [DifferentialGeometry.PDE.RicciFlow.metricScalar_chartTrace_eq (I := I) u x
       (self_mem_chartLeviCivitaGoodSet (I := I) x),
-    PDE.RicciFlow.metricScalar_chartTrace_eq (I := I) u' x
+    DifferentialGeometry.PDE.RicciFlow.metricScalar_chartTrace_eq (I := I) u' x
       (self_mem_chartLeviCivitaGoodSet (I := I) x)]
   simp only [hbr]
   have hdiff : (∑ i : Fin (Module.finrank Real E), ∑ j : Fin (Module.finrank Real E),

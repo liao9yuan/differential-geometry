@@ -5,6 +5,9 @@ import Mathlib.Analysis.SpecialFunctions.Log.Basic
 import Mathlib.Analysis.Calculus.MeanValue
 import Mathlib.Analysis.Normed.Group.Tannery
 import Mathlib.Analysis.Calculus.Deriv.Slope
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Geometry.Connection
 
 
 noncomputable section
@@ -337,9 +340,8 @@ theorem abstractSpectralSemigroup_hasDerivAt (b : HilbertBasis ι ℝ X)
 end Parabolic
 end Analysis
 
-namespace PDE
-namespace RicciFlow
-namespace IntrinsicSpectral
+namespace Analysis
+namespace Spectral
 
 open Bundle Manifold MeasureTheory
 open scoped Manifold Topology ContDiff RealInnerProductSpace InnerProductSpace
@@ -374,9 +376,8 @@ theorem tensorHeatSemigroup_intrinsic_hasDerivAt
       (tensorResolventL2_isCompactOperator (I := I) (M := M) g r s))
     (fun i => tensor_lambda_nonneg (I := I) (M := M) i) ht u₀
 
-end IntrinsicSpectral
-end RicciFlow
-end PDE
+end Spectral
+end Analysis
 end DifferentialGeometry
 
 end

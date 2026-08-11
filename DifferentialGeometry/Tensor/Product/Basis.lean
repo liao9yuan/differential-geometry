@@ -4,6 +4,8 @@
 import DifferentialGeometry.Tensor.Product.Bundle
 import Mathlib.LinearAlgebra.TensorProduct.Basis
 
+namespace DifferentialGeometry.Tensor.Product
+
 
 noncomputable section
 
@@ -58,7 +60,7 @@ section smooth
 
 set_option backward.isDefEq.respectTransparency false
 
-open Bundle Set
+open _root_.Bundle Set
 
 open scoped Manifold Topology Bundle
 
@@ -87,8 +89,8 @@ theorem contMDiff_tensorProductSection_iff_coord
     (b₁ : Module.Basis (Fin d₁) 𝕜 F₁)
     (b₂ : Module.Basis (Fin d₂) 𝕜 F₂)
     (f : ∀ x : B, E₁ x ⊗[𝕜] E₂ x) :
-    letI := Bundle.TensorProduct.tensorFiberTopology 𝕜 F₁ F₂ E₁ E₂
-    letI := Bundle.TensorProduct.fiberBundle
+    letI := _root_.Bundle.TensorProduct.tensorFiberTopology 𝕜 F₁ F₂ E₁ E₂
+    letI := _root_.Bundle.TensorProduct.fiberBundle
       (𝕜 := 𝕜) (B := B) (F₁ := F₁) (F₂ := F₂) (E₁ := E₁) (E₂ := E₂)
     ContMDiff IB (IB.prod 𝓘(𝕜, F₁ ⊗[𝕜] F₂)) n
       (fun x => TotalSpace.mk' (F₁ ⊗[𝕜] F₂) x (f x)) ↔
@@ -97,8 +99,8 @@ theorem contMDiff_tensorProductSection_iff_coord
         (fun x => (tensorProduct_basis b₁ b₂).repr
           (trivializationAt (F₁ ⊗[𝕜] F₂)
             (fun x => E₁ x ⊗[𝕜] E₂ x) x₀ ⟨x, f x⟩).2 p) x₀ := by
-  letI := Bundle.TensorProduct.tensorFiberTopology 𝕜 F₁ F₂ E₁ E₂
-  letI := Bundle.TensorProduct.fiberBundle
+  letI := _root_.Bundle.TensorProduct.tensorFiberTopology 𝕜 F₁ F₂ E₁ E₂
+  letI := _root_.Bundle.TensorProduct.fiberBundle
     (𝕜 := 𝕜) (B := B) (F₁ := F₁) (F₂ := F₂) (E₁ := E₁) (E₂ := E₂)
   letI : ChartedSpace (ModelProd HB (F₁ ⊗[𝕜] F₂))
       (TotalSpace (F₁ ⊗[𝕜] F₂) (fun x => E₁ x ⊗[𝕜] E₂ x)) :=
@@ -121,3 +123,5 @@ theorem contMDiff_tensorProductSection_iff_coord
 end smooth
 
 end
+
+end DifferentialGeometry.Tensor.Product

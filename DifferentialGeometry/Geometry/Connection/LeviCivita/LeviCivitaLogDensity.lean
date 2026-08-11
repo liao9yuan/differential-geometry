@@ -1,6 +1,7 @@
-import DifferentialGeometry.Integration.DivergenceTheorem.Gradient
+import DifferentialGeometry.Analysis.Integration.DivergenceTheorem.Gradient
 import DifferentialGeometry.Geometry.Operator.Hessian
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurckCoefficients.ChristoffelPerturbation
+open DifferentialGeometry.Geometry.Operator
 
 set_option autoImplicit false
 
@@ -24,7 +25,8 @@ set_option autoImplicit false
 
 
 
-namespace DifferentialGeometry.Integral.Connection
+
+namespace DifferentialGeometry.Geometry.Connection
 
 open Bundle
 open scoped Manifold ContDiff BigOperators
@@ -40,6 +42,7 @@ variable [SigmaCompactSpace M] [T2Space M]
 
 open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.DivergenceTheorem
+open DifferentialGeometry.Geometry.Operator
 
 
 
@@ -214,4 +217,4 @@ theorem lcTrace_logDensity
         chartChristoffel (I := I) g x p a a (extChartAt I x x) := by
           exact (lcTrace_halfTrace (I := I) g x p).symm
 
-end DifferentialGeometry.Integral.Connection
+end DifferentialGeometry.Geometry.Connection

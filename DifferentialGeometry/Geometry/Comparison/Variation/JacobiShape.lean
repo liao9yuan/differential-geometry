@@ -1,5 +1,7 @@
 import DifferentialGeometry.Analysis.Calculus.MatrixRiccati
 import DifferentialGeometry.Geometry.Comparison.Variation.JacobiGram
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Geometry.Curvature
 
 /-!
 # Shape matrices of Jacobi families
@@ -43,8 +45,8 @@ def curveCurvGram (g : SmoothRiemannianMetric I M) (γ : ℝ → M)
     (V : ι → ∀ t, TangentSpace I (γ t)) (t : ℝ) : Matrix ι ι ℝ :=
   Matrix.of fun i j =>
     g.inner (γ t)
-      ((DifferentialGeometry.Integral.Connection.riemannOp
-        (DifferentialGeometry.Integral.Connection.LeviCivita (I := I) g) (γ t))
+      ((DifferentialGeometry.Geometry.Curvature.riemannOp
+        (DifferentialGeometry.Geometry.Connection.LeviCivita (I := I) g) (γ t))
         (V i t) (curveVelocity (I := I) γ t) (curveVelocity (I := I) γ t))
       (V j t)
 

@@ -1,6 +1,9 @@
 import DifferentialGeometry.Tensor.RSTensor.TensorRSRiemannian
 import DifferentialGeometry.Tensor.RSTensor.FiberMetric.Tensor0SMetric
 import DifferentialGeometry.Geometry.Connection.MetricCompatibility.TensorLoweringParallel
+open DifferentialGeometry.Tensor.RSTensor
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Geometry.Curvature
 
 set_option autoImplicit false
 set_option backward.isDefEq.respectTransparency false
@@ -18,12 +21,12 @@ set_option backward.isDefEq.respectTransparency false
 noncomputable section
 
 namespace DifferentialGeometry
-namespace Integral
-namespace Connection
+namespace Tensor
+namespace RSTensor
 
-open Bundle Manifold Set Tensor0SBundle
+open Bundle Manifold Set DifferentialGeometry.Tensor0SBundle
 open scoped Manifold Topology ContDiff BigOperators
-open TensorMetricLowering Tensor0SNabla TensorRSNabla
+open DifferentialGeometry.TensorMetricLowering DifferentialGeometry.Tensor0SNabla DifferentialGeometry.TensorRSNabla
 open DifferentialGeometry.Integral.L2
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
@@ -125,6 +128,6 @@ theorem normSqRS_eq_normSq0S_lowerAllSpace
   rw [hsep]
   rfl
 
-end Connection
-end Integral
+end RSTensor
+end Tensor
 end DifferentialGeometry

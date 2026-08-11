@@ -1,6 +1,12 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Pullback.HarmonicGalerkin
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Pullback.HarmonicTension
 import DifferentialGeometry.Analysis.Integration.Measure.FamilyContinuityParam
+open DifferentialGeometry.Analysis.Calculus
+open DifferentialGeometry.PDE.RicciFlow
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Geometry.Connection
+open DifferentialGeometry.Geometry.Operator
 
 /-!
 # Dirichlet energy in exponential-section coordinates
@@ -25,7 +31,7 @@ incorrect (Lean's total `fderiv` is zero when total differentiability fails).
 
 noncomputable section
 
-open Bundle Manifold MeasureTheory Set Tensor0SBundle
+open Bundle Manifold MeasureTheory Set DifferentialGeometry.Tensor0SBundle
 open scoped Bundle Manifold Topology ContDiff ENNReal NNReal BigOperators
 
 namespace DifferentialGeometry.PDE.RicciFlow.Pullback
@@ -34,10 +40,11 @@ open DifferentialGeometry
 open DifferentialGeometry.Analysis.Parabolic.TensorSpectral
 open DifferentialGeometry.Analysis.Sobolev.TensorHilbert
 open DifferentialGeometry.Geometry.Riemannian.Exponential
-open DifferentialGeometry.Integral.Connection
+
+open DifferentialGeometry.Geometry.Operator
 open DifferentialGeometry.Integral.L2
 open DifferentialGeometry.Integral.Measure
-open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.MetricRealization
+open DifferentialGeometry.Analysis.Spectral.MetricRealization
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E]
@@ -46,7 +53,7 @@ variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
   [I.Boundaryless]
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
   [IsManifold I ∞ M] [CompactSpace M] [T2Space M]
-  [SigmaCompactSpace M] [BoundarylessManifold I M] [ConnectedSpace M]
+  [BoundarylessManifold I M] [ConnectedSpace M]
 
 /-! ## The global intrinsic local addition on a connected component -/
 
@@ -81,7 +88,7 @@ attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
 
 omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
   [I.Boundaryless] [CompactSpace M]
-  [T2Space M] [SigmaCompactSpace M] [BoundarylessManifold I M]
+  [T2Space M] [BoundarylessManifold I M]
   [ConnectedSpace M] in
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
@@ -139,7 +146,7 @@ noncomputable def hmfAdd
       (⟨x, hmfUnknown (I := I) q S x⟩ : TangentBundle I M)).2
 
 omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless]
-  [CompactSpace M] [T2Space M] [SigmaCompactSpace M]
+  [CompactSpace M] [T2Space M]
   [BoundarylessManifold I M] [ConnectedSpace M] in
 @[simp] theorem hmfUnknown_zero
     (q : SmoothRiemannianMetric I M) (x : M) :

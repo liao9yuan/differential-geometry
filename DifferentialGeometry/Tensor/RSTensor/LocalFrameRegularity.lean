@@ -12,9 +12,10 @@ import DifferentialGeometry.Tensor.Multilinear.BundleSmoothEvalRealized
 
 set_option autoImplicit false
 
+namespace DifferentialGeometry
 namespace Tensor0SBundle
 
-open Bundle Set TensorLieDeriv
+open Bundle Set DifferentialGeometry.TensorLieDeriv
 open scoped BigOperators Manifold ContDiff Topology
 
 variable {𝕜 : Type*} [NontriviallyNormedField 𝕜] [CompleteSpace 𝕜]
@@ -239,3 +240,4 @@ theorem tensor0S_eval_tangentConstInChart_contMDiffAt
 
 
 end Tensor0SBundle
+end DifferentialGeometry

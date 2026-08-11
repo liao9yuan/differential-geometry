@@ -1,12 +1,15 @@
 import DifferentialGeometry.Geometry.Curvature.Components.Lowering
+open DifferentialGeometry.Tensor.RicciIdentity
+open DifferentialGeometry.Geometry.Curvature
+
 
 set_option autoImplicit false
 
 noncomputable section
 
-namespace DifferentialGeometry.Integral.Connection
+namespace DifferentialGeometry.Geometry.Curvature
 
-open Bundle Tensor0SBundle
+open Bundle DifferentialGeometry.Tensor0SBundle
 open scoped Manifold ContDiff BigOperators
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]
@@ -207,4 +210,4 @@ theorem curvatureTraceOneFormEqRicVectorAt_of_metric_dual
             Y curvatureVector]
     _ = Ric x (vec2 Y curvatureVector) := by
           rw [hRic x]
-end DifferentialGeometry.Integral.Connection
+end DifferentialGeometry.Geometry.Curvature

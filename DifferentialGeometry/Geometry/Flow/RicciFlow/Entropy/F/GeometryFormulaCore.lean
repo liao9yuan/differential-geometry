@@ -1,8 +1,12 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Entropy.F.Formula510Core
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Geometry.Operator
 
 
 set_option autoImplicit false
 
+open DifferentialGeometry.Geometry.Connection
 namespace DifferentialGeometry.PDE.RicciFlow.Entropy
 
 noncomputable section
@@ -11,7 +15,7 @@ open Filter MeasureTheory
 open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Tensor.Coordinates
 open DifferentialGeometry.Coordinates
-open Tensor0SBundle
+open DifferentialGeometry.Tensor0SBundle
 open scoped Manifold ContDiff
 
 variable {M : Type*}
@@ -41,7 +45,7 @@ private local instance : BorelSpace M := ⟨rfl⟩
 
 theorem firstVariationIntegral_eq_pre510
     [T2Space M] [SigmaCompactSpace M]
-    (G : DifferentialGeometry.Integral.Connection.RealizedMetricFamily (I := I) (M := M) Real)
+    (G : DifferentialGeometry.Geometry.Curvature.MetricConnectionFamily (I := I) (M := M) Real)
     {scalarCurvaturePath gradPotentialNormSqPath potentialPath :
       Real -> M -> Real}
     {s0 : Real}
@@ -127,7 +131,7 @@ theorem firstVariationIntegral_eq_pre510
 
 theorem closedIntegral_eq_pre510
     [T2Space M] [SigmaCompactSpace M]
-    (G : DifferentialGeometry.Integral.Connection.RealizedMetricFamily (I := I) (M := M) Real)
+    (G : DifferentialGeometry.Geometry.Curvature.MetricConnectionFamily (I := I) (M := M) Real)
     {s0 : Real}
     {scalarCurvature lapPotential gradPotentialNormSq potential
       potentialVariation metricVariationTrace metricVariationRicciHess
@@ -197,7 +201,7 @@ theorem closedIntegral_eq_pre510
 
 theorem firstVar_pre510_closed
     [T2Space M] [SigmaCompactSpace M]
-    (G : DifferentialGeometry.Integral.Connection.RealizedMetricFamily (I := I) (M := M) Real)
+    (G : DifferentialGeometry.Geometry.Curvature.MetricConnectionFamily (I := I) (M := M) Real)
     {scalarCurvaturePath gradPotentialNormSqPath potentialPath :
       Real -> M -> Real}
     {s0 : Real}
@@ -325,7 +329,7 @@ theorem bracketClosed_eventually
 
 theorem closedCompare
     [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
-    (G : DifferentialGeometry.Integral.Connection.RealizedMetricFamily (I := I) (M := M) Real)
+    (G : DifferentialGeometry.Geometry.Curvature.MetricConnectionFamily (I := I) (M := M) Real)
     {scalarCurvaturePath lapPotentialPath gradPotentialNormSqPath
       potentialPath : Real -> M -> Real}
     {s0 : Real}
@@ -458,7 +462,7 @@ theorem closedCompare
 
 theorem firstVar_pre510_weighted
     [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
-    (G : DifferentialGeometry.Integral.Connection.RealizedMetricFamily (I := I) (M := M) Real)
+    (G : DifferentialGeometry.Geometry.Curvature.MetricConnectionFamily (I := I) (M := M) Real)
     {scalarCurvaturePath lapPotentialPath gradPotentialNormSqPath
       potentialPath : Real -> M -> Real}
     {s0 : Real}
@@ -554,7 +558,7 @@ theorem firstVar_pre510_weighted
 
 theorem firstVar_pre510_ibp
     [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
-    (G : DifferentialGeometry.Integral.Connection.RealizedMetricFamily (I := I) (M := M) Real)
+    (G : DifferentialGeometry.Geometry.Curvature.MetricConnectionFamily (I := I) (M := M) Real)
     {scalarCurvaturePath lapPotentialPath gradPotentialNormSqPath
       potentialPath : Real -> M -> Real}
     {s0 : Real}
@@ -733,23 +737,23 @@ theorem formula510_of_connTrace
     (hlap :
       ∀ x : M,
         lapPotential x =
-          DifferentialGeometry.Integral.DivergenceTheorem.Δ_g
-            (I := I) g hpotential x)
+          DifferentialGeometry.Geometry.Operator.Δ_g
+            (I := I) g ⟨_, hpotential⟩ x)
     (hgradSq :
       ∀ x : M,
         gradPotentialNormSq x =
           g.inner x
-            ((DifferentialGeometry.Integral.DivergenceTheorem.grad_g
-              (I := I) g hpotential :
+            ((DifferentialGeometry.Geometry.Operator.grad_g
+              (I := I) g ⟨_, hpotential⟩ :
               Cₛ^∞⟮I; E, (TangentSpace I : M -> Type _)⟯) x)
-            ((DifferentialGeometry.Integral.DivergenceTheorem.grad_g
-              (I := I) g hpotential :
+            ((DifferentialGeometry.Geometry.Operator.grad_g
+              (I := I) g ⟨_, hpotential⟩ :
               Cₛ^∞⟮I; E, (TangentSpace I : M -> Type _)⟯) x))
     (hshift :
       ∀ x : M,
         shiftedTrace x =
-          DifferentialGeometry.Integral.DivergenceTheorem.Δ_g
-            (I := I) g hq x)
+          DifferentialGeometry.Geometry.Operator.Δ_g
+            (I := I) g ⟨_, hq⟩ x)
     (hqeq :
       ∀ x : M,
         q x = potentialVariation x - metricVariationTrace x / 2) :
@@ -771,14 +775,14 @@ theorem formula510_of_connTrace
         ∫ x,
           expWeightedMeasureVariationFactor potentialVariation
             metricVariationTrace x *
-            (DifferentialGeometry.Integral.DivergenceTheorem.Δ_g
-                (I := I) g hpotential x -
+            (DifferentialGeometry.Geometry.Operator.Δ_g
+                (I := I) g ⟨_, hpotential⟩ x -
               g.inner x
-                ((DifferentialGeometry.Integral.DivergenceTheorem.grad_g
-                  (I := I) g hpotential :
+                ((DifferentialGeometry.Geometry.Operator.grad_g
+                  (I := I) g ⟨_, hpotential⟩ :
                   Cₛ^∞⟮I; E, (TangentSpace I : M -> Type _)⟯) x)
-                ((DifferentialGeometry.Integral.DivergenceTheorem.grad_g
-                  (I := I) g hpotential :
+                ((DifferentialGeometry.Geometry.Operator.grad_g
+                  (I := I) g ⟨_, hpotential⟩ :
                   Cₛ^∞⟮I; E, (TangentSpace I : M -> Type _)⟯) x))
         ∂(expNegPotentialWeightedMeasure
             (riemannianVolumeMeasure (I := I) (M := M) g) potential) :=
@@ -800,14 +804,14 @@ theorem formula510_of_connTrace
         ∫ x,
           expWeightedMeasureVariationFactor potentialVariation
             metricVariationTrace x *
-            (DifferentialGeometry.Integral.DivergenceTheorem.Δ_g
-                (I := I) g hpotential x -
+            (DifferentialGeometry.Geometry.Operator.Δ_g
+                (I := I) g ⟨_, hpotential⟩ x -
               g.inner x
-                ((DifferentialGeometry.Integral.DivergenceTheorem.grad_g
-                  (I := I) g hpotential :
+                ((DifferentialGeometry.Geometry.Operator.grad_g
+                  (I := I) g ⟨_, hpotential⟩ :
                   Cₛ^∞⟮I; E, (TangentSpace I : M -> Type _)⟯) x)
-                ((DifferentialGeometry.Integral.DivergenceTheorem.grad_g
-                  (I := I) g hpotential :
+                ((DifferentialGeometry.Geometry.Operator.grad_g
+                  (I := I) g ⟨_, hpotential⟩ :
                   Cₛ^∞⟮I; E, (TangentSpace I : M -> Type _)⟯) x))
         ∂(expNegPotentialWeightedMeasure
             (riemannianVolumeMeasure (I := I) (M := M) g) potential) := hshift_eq

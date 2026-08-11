@@ -31,15 +31,19 @@ import DifferentialGeometry.Tensor.RSTensor.MetricTrace.Higher
 import DifferentialGeometry.Bundle.PartialMfderiv.Basic
 import DifferentialGeometry.Bundle.PartialMfderiv.ModelMixed
 import DifferentialGeometry.Bundle.PartialMfderiv.FixedBase
+open DifferentialGeometry.Tensor.RSTensor
+open DifferentialGeometry.Tensor.RicciIdentity
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Geometry.Curvature
 
 set_option autoImplicit false
 
 noncomputable section
 
-namespace DifferentialGeometry.Integral.Connection
 
-open Bundle Tensor0SBundle
-open DifferentialGeometry.Integral.Connection
+namespace DifferentialGeometry.Geometry.Connection
+
+open Bundle DifferentialGeometry.Tensor0SBundle
 open DifferentialGeometry.Tensor.Coordinates
 open scoped Topology Manifold ContDiff
 
@@ -244,7 +248,7 @@ private theorem nabla0SFun_two_eval_smooth_slots
   let V : Fin 2 -> (p : M) -> TangentSpace I p := fun a p => Vsec a p
   have hslots : (fun a : Fin 2 => V a x) = vec2 (Y x) (Z x) := by
     funext a
-    fin_cases a <;> simp [V, Vsec, vec2, DifferentialGeometry.Integral.Connection.vec2]
+    fin_cases a <;> simp [V, Vsec, vec2, DifferentialGeometry.Geometry.Curvature.vec2]
   have hpair : MDifferentiableAt I 𝓘(Real, Real)
       (fun p : M => A p (fun a : Fin 2 => V a p)) x := by
     have hEval := TensorMultilinear.contMDiff_tensor0SField_apply
@@ -288,13 +292,13 @@ private theorem nabla0SFun_two_eval_smooth_slots
             ((cov (V 0) x) (X x)) =
           vec2 ((cov (fun p : M => Y p) x) (X x)) (Z x) := by
       funext q
-      fin_cases q <;> simp [V, Vsec, vec2, DifferentialGeometry.Integral.Connection.vec2]
+      fin_cases q <;> simp [V, Vsec, vec2, DifferentialGeometry.Geometry.Curvature.vec2]
     have h1 :
         Function.update (fun b : Fin 2 => V b x) 1
             ((cov (V 1) x) (X x)) =
           vec2 (Y x) ((cov (fun p : M => Z p) x) (X x)) := by
       funext q
-      fin_cases q <;> simp [V, Vsec, vec2, DifferentialGeometry.Integral.Connection.vec2]
+      fin_cases q <;> simp [V, Vsec, vec2, DifferentialGeometry.Geometry.Curvature.vec2]
     rw [Fin.sum_univ_two]
     rw [h0, h1]
   have hscalar :
@@ -303,7 +307,7 @@ private theorem nabla0SFun_two_eval_smooth_slots
     funext p
     congr 1
     funext a
-    fin_cases a <;> simp [V, Vsec, vec2, DifferentialGeometry.Integral.Connection.vec2]
+    fin_cases a <;> simp [V, Vsec, vec2, DifferentialGeometry.Geometry.Curvature.vec2]
   calc
     (nabla0SFun (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
       2 cov X A x) (vec2 (Y x) (Z x))
@@ -729,7 +733,7 @@ private theorem connectionRiemannCurvatureField_eq_smooth_of_eventuallyEq_tangen
   have hYval : tangentConstAt (I := I) x Y x = Ys x := by
     simpa [Yc] using hYx
   simp only [connectionRiemannCurvatureField,
-    DifferentialGeometry.Integral.Connection.connectionRiemannCurvatureField]
+    DifferentialGeometry.Geometry.Curvature.connectionRiemannCurvatureField]
   rw [hcovZY, hcovZX, hZ_at, hbr]
   rw [hXval, hYval]
 
@@ -901,7 +905,7 @@ private theorem connectionRiemannCurvatureField_metric_skew_at_of_metricCompatib
       simpa [Zc] using mdifferentiableAt_tangentConstAt_of_mem (I := I) x Z hp
     have hWp : MDiffAt (T% Wc) p := by
       simpa [Wc] using mdifferentiableAt_tangentConstAt_of_mem (I := I) x W hp
-    have hmetric := DifferentialGeometry.Integral.Connection.metric_compatible_apply (I := I) hmc
+    have hmetric := DifferentialGeometry.Geometry.Connection.metric_compatible_apply (I := I) hmc
       (x := p) Yc Zc Wc hYp hZp hWp
     simpa [directionalDerivAlong, extDerivFun, NormedSpace.fromTangentSpace, f, YZc, YWc]
       using hmetric
@@ -917,7 +921,7 @@ private theorem connectionRiemannCurvatureField_metric_skew_at_of_metricCompatib
       simpa [Zc] using mdifferentiableAt_tangentConstAt_of_mem (I := I) x Z hp
     have hWp : MDiffAt (T% Wc) p := by
       simpa [Wc] using mdifferentiableAt_tangentConstAt_of_mem (I := I) x W hp
-    have hmetric := DifferentialGeometry.Integral.Connection.metric_compatible_apply (I := I) hmc
+    have hmetric := DifferentialGeometry.Geometry.Connection.metric_compatible_apply (I := I) hmc
       (x := p) Xc Zc Wc hXp hZp hWp
     simpa [directionalDerivAlong, extDerivFun, NormedSpace.fromTangentSpace, f, XZc, XWc]
       using hmetric
@@ -936,14 +940,14 @@ private theorem connectionRiemannCurvatureField_metric_skew_at_of_metricCompatib
           g.inner x (YZc x) ((cov Wc x) (Xc x))) +
         (g.inner x ((cov Zc x) (Xc x)) (YWc x) +
           g.inner x (Zc x) ((cov YWc x) (Xc x))) := by
-    have h1 := DifferentialGeometry.Integral.Connection.metric_compatible_apply (I := I) hmc
+    have h1 := DifferentialGeometry.Geometry.Connection.metric_compatible_apply (I := I) hmc
       (x := x) Xc YZc Wc hX hYZ hW
     have h1' :
         directionalDerivAlong (I := I) Xc (fun p : M => g.inner p (YZc p) (Wc p)) x =
           g.inner x ((cov YZc x) (Xc x)) (Wc x) +
             g.inner x (YZc x) ((cov Wc x) (Xc x)) := by
       simpa [directionalDerivAlong, extDerivFun, NormedSpace.fromTangentSpace] using h1
-    have h2 := DifferentialGeometry.Integral.Connection.metric_compatible_apply (I := I) hmc
+    have h2 := DifferentialGeometry.Geometry.Connection.metric_compatible_apply (I := I) hmc
       (x := x) Xc Zc YWc hX hZ hYW
     have h2' :
         directionalDerivAlong (I := I) Xc (fun p : M => g.inner p (Zc p) (YWc p)) x =
@@ -970,14 +974,14 @@ private theorem connectionRiemannCurvatureField_metric_skew_at_of_metricCompatib
           g.inner x (XZc x) ((cov Wc x) (Yc x))) +
         (g.inner x ((cov Zc x) (Yc x)) (XWc x) +
           g.inner x (Zc x) ((cov XWc x) (Yc x))) := by
-    have h1 := DifferentialGeometry.Integral.Connection.metric_compatible_apply (I := I) hmc
+    have h1 := DifferentialGeometry.Geometry.Connection.metric_compatible_apply (I := I) hmc
       (x := x) Yc XZc Wc hY hXZ hW
     have h1' :
         directionalDerivAlong (I := I) Yc (fun p : M => g.inner p (XZc p) (Wc p)) x =
           g.inner x ((cov XZc x) (Yc x)) (Wc x) +
             g.inner x (XZc x) ((cov Wc x) (Yc x)) := by
       simpa [directionalDerivAlong, extDerivFun, NormedSpace.fromTangentSpace] using h1
-    have h2 := DifferentialGeometry.Integral.Connection.metric_compatible_apply (I := I) hmc
+    have h2 := DifferentialGeometry.Geometry.Connection.metric_compatible_apply (I := I) hmc
       (x := x) Yc Zc XWc hY hZ hXW
     have h2' :
         directionalDerivAlong (I := I) Yc (fun p : M => g.inner p (Zc p) (XWc p)) x =
@@ -1001,7 +1005,7 @@ private theorem connectionRiemannCurvatureField_metric_skew_at_of_metricCompatib
       directionalDerivAlong (I := I) Bc f x =
         g.inner x ((cov Zc x) (Bc x)) (Wc x) +
           g.inner x (Zc x) ((cov Wc x) (Bc x)) := by
-    have hmetric := DifferentialGeometry.Integral.Connection.metric_compatible_apply (I := I) hmc
+    have hmetric := DifferentialGeometry.Geometry.Connection.metric_compatible_apply (I := I) hmc
       (x := x) Bc Zc Wc hB hZ hW
     simpa [directionalDerivAlong, extDerivFun, NormedSpace.fromTangentSpace, f] using hmetric
   have hcomm :=
@@ -1055,7 +1059,7 @@ private theorem connectionRiemannCurvatureField_metric_skew_at_of_metricCompatib
   change g.inner x W ((connectionRiemannCurvatureField (I := I) cov Xc Yc Zc) x) =
       -g.inner x Z ((connectionRiemannCurvatureField (I := I) cov Xc Yc Wc) x)
   simpa [connectionRiemannCurvatureField,
-    DifferentialGeometry.Integral.Connection.connectionRiemannCurvatureField, YZc, YWc, XZc, XWc,
+    DifferentialGeometry.Geometry.Curvature.connectionRiemannCurvatureField, YZc, YWc, XZc, XWc,
       Bc,
     hXc_self, hYc_self] using hgoal
 
@@ -1091,7 +1095,7 @@ theorem rm04InputSkewAt_of_leviCivita_realizes
   have hleft := hRm04 Ysec Xsec Zsec Wsec x
   have hright := hRm04 Xsec Ysec Zsec Wsec x
   have hswap :=
-    DifferentialGeometry.Integral.Connection.connectionRiemannCurvatureField_swap
+    DifferentialGeometry.Geometry.Curvature.connectionRiemannCurvatureField_swap
       (I := I) (leviCivitaConnectionOfMetric (I := I) g)
       Xsec Ysec Zsec x
   have hinner :
@@ -1141,7 +1145,7 @@ theorem rm04InputSkew_ofRealizes
   have hleft := hRm04 Ysec Xsec Zsec Wsec x
   have hright := hRm04 Xsec Ysec Zsec Wsec x
   have hswap :=
-    DifferentialGeometry.Integral.Connection.connectionRiemannCurvatureField_swap
+    DifferentialGeometry.Geometry.Curvature.connectionRiemannCurvatureField_swap
       (I := I) cov Xsec Ysec Zsec x
   have hinner :
       g.inner x (Wsec x)
@@ -1702,4 +1706,4 @@ theorem tensor0S_ricciIdentity_of_leviCivita
   simpa [IsTorsionFreeAt] using htf x
 
 
-end DifferentialGeometry.Integral.Connection
+end DifferentialGeometry.Geometry.Connection

@@ -1,5 +1,9 @@
+import DifferentialGeometry.Geometry.Metric.TensorInner.TangentNormDiamond
 import DifferentialGeometry.Geometry.Metric.Scaling
+import Mathlib.Geometry.Manifold.Riemannian.Basic
 import Mathlib.Geometry.Manifold.Riemannian.PathELength
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Geometry.Curvature
 
 set_option autoImplicit false
 
@@ -46,7 +50,7 @@ theorem riemannianEDistOf_self
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-private theorem edistOf_iInf
+theorem edistOf_iInf
     (g : SmoothRiemannianMetric I M) (x y : M) :
     riemannianEDistOf (I := I) g x y =
       ⨅ (γ : Path x y) (_ : CMDiff 1 γ),
@@ -61,6 +65,23 @@ private theorem edistOf_iInf
   refine lintegral_congr fun t => ?_
   rw [← ofReal_norm_eq_enorm, norm_eq_sqrt_real_inner]
   congr 2
+
+attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
+  Tensor0SBundle.tangentSpace_normedSpace in
+theorem riemannianEDistOf_eq_riemannianEDist
+    [RiemannianBundle (fun (x : M) ↦ TangentSpace I x)]
+    [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
+    [IsContinuousRiemannianBundle E (fun (x : M) ↦ TangentSpace I x)]
+    (g : SmoothRiemannianMetric I M)
+    (hEnorm : DifferentialGeometry.Geometry.Riemannian.IsMetricNorm (I := I) (M := M) g)
+    (x y : M) :
+    riemannianEDistOf (I := I) g x y = riemannianEDist I x y := by
+  rw [edistOf_iInf (I := I) g x y]
+  rw [Manifold.riemannianEDist]
+  refine iInf_congr fun γ => ?_
+  refine iInf_congr fun hγ => ?_
+  refine lintegral_congr fun t => ?_
+  rw [hEnorm]
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in

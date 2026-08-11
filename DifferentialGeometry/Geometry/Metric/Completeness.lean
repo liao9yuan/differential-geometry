@@ -1,6 +1,8 @@
 import Mathlib.Geometry.Manifold.Metrizable
 import Mathlib.Geometry.Manifold.Riemannian.Basic
 import DifferentialGeometry.Geometry.Metric.DistanceScaling
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Geometry.Curvature
 
 set_option autoImplicit false
 

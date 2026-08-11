@@ -16,7 +16,7 @@ noncomputable section
 open Set Function Filter Metric Bundle
 open scoped Topology NNReal ContDiff Manifold
 
-namespace DifferentialGeometry.PDE.RicciFlow.ODE
+namespace DifferentialGeometry.Analysis.ODE
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E]
@@ -236,6 +236,6 @@ theorem flow_slice_smooth [CompleteSpace E] [I.Boundaryless]
   exact (show ContMDiffAt I I ∞ (fun y => F y target) x from
     (hsub htarget).1).contMDiffWithinAt
 
-end DifferentialGeometry.PDE.RicciFlow.ODE
+end DifferentialGeometry.Analysis.ODE
 
 end

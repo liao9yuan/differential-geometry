@@ -3,6 +3,7 @@ import DifferentialGeometry.Geometry.Metric.Basic
 import DifferentialGeometry.Bundle.PartialMfderiv.Basic
 import DifferentialGeometry.Bundle.PartialMfderiv.ModelMixed
 import DifferentialGeometry.Bundle.PartialMfderiv.FixedBase
+import DifferentialGeometry.Geometry.Operator.Gradient
 import Mathlib.Analysis.Calculus.LocalExtr.Basic
 import Mathlib.Analysis.SpecialFunctions.Log.Deriv
 import Mathlib.Analysis.SpecialFunctions.Pow.Deriv
@@ -23,7 +24,7 @@ set_option autoImplicit false
 
 
 
-namespace DifferentialGeometry.Integral.Connection
+namespace DifferentialGeometry.Geometry.Operator
 
 noncomputable section
 
@@ -40,48 +41,6 @@ variable {Time : Type*}
 private instance tangentSpace_finiteDimensional (x : M) :
     FiniteDimensional Real (TangentSpace I x) :=
   inferInstanceAs (FiniteDimensional Real E)
-
-
-
-
-def metricFlatLinear (g : SmoothRiemannianMetric I M) (x : M) :
-    TangentSpace I x →ₗ[Real] Module.Dual Real (TangentSpace I x) where
-  toFun v := (g.inner x v).toLinearMap
-  map_add' v w := by
-    ext u
-    change g.inner x (v + w) u = g.inner x v u + g.inner x w u
-    simp
-  map_smul' c v := by
-    ext u
-    change g.inner x (c • v) u = c • g.inner x v u
-    simp
-
-omit [FiniteDimensional ℝ E] in
-@[simp] theorem metricFlatLinear_apply
-    (g : SmoothRiemannianMetric I M) (x : M)
-    (v w : TangentSpace I x) :
-    metricFlatLinear (I := I) g x v w = g.inner x v w := by
-  rfl
-
-
-omit [FiniteDimensional ℝ E] in
-theorem metricFlatLinear_injective
-    (g : SmoothRiemannianMetric I M) (x : M) :
-    Function.Injective (metricFlatLinear (I := I) g x) := by
-  intro v w hvw
-  have hzero : forall z : TangentSpace I x, g.inner x (v - w) z = 0 := by
-    intro z
-    have h := congrArg (fun L : Module.Dual Real (TangentSpace I x) => L z) hvw
-    simp only [metricFlatLinear_apply] at h
-    have hsub : g.inner x (v - w) z = g.inner x v z - g.inner x w z := by
-      rw [map_sub]
-      rfl
-    rw [hsub, sub_eq_zero]
-    exact h
-  by_contra hne
-  have hvw_ne : v - w ≠ 0 := sub_ne_zero.mpr hne
-  have hpos : 0 < g.inner x (v - w) (v - w) := g.pos x (v - w) hvw_ne
-  exact (lt_irrefl (0 : Real)) ((hzero (v - w)) ▸ hpos)
 
 omit [FiniteDimensional ℝ E] [IsManifold I ∞ M] in
 private theorem metricFlatLinear_finrank_eq (x : M) :
@@ -103,40 +62,16 @@ def metricFlatEquiv (g : SmoothRiemannianMetric I M) (x : M) :
     metricFlatEquiv (I := I) g x v w = g.inner x v w := by
   rfl
 
-
-def metricSharp (g : SmoothRiemannianMetric I M) (x : M)
-    (alpha : Module.Dual Real (TangentSpace I x)) : TangentSpace I x :=
-  (metricFlatEquiv (I := I) g x).symm alpha
-
-@[simp] theorem metricSharp_eq
+theorem metricSharp_eq
     (g : SmoothRiemannianMetric I M) (x : M)
     (alpha : Module.Dual Real (TangentSpace I x)) :
     metricSharp (I := I) g x alpha =
       (metricFlatEquiv (I := I) g x).symm alpha := by
-  rfl
-
-
-theorem inner_metricSharp
-    (g : SmoothRiemannianMetric I M) (x : M)
-    (alpha : Module.Dual Real (TangentSpace I x)) (w : TangentSpace I x) :
-    g.inner x (metricSharp (I := I) g x alpha) w = alpha w := by
-  change metricFlatEquiv (I := I) g x
-      ((metricFlatEquiv (I := I) g x).symm alpha) w = alpha w
-  have h :
-      metricFlatEquiv (I := I) g x
-          ((metricFlatEquiv (I := I) g x).symm alpha) = alpha :=
-    LinearEquiv.apply_symm_apply (metricFlatEquiv (I := I) g x) alpha
-  exact congrArg (fun L : Module.Dual Real (TangentSpace I x) => L w) h
-
-
-theorem inner_metricSharp_right
-    (g : SmoothRiemannianMetric I M) (x : M)
-    (alpha : Module.Dual Real (TangentSpace I x)) (w : TangentSpace I x) :
-    g.inner x w (metricSharp (I := I) g x alpha) = alpha w := by
-  rw [g.symm x w (metricSharp (I := I) g x alpha)]
-  exact inner_metricSharp (I := I) g x alpha w
-
-
+  rw [metricSharp_def]
+  have h : metricFlatMap (I := I) g x = metricFlatEquiv (I := I) g x := by
+    ext v w
+    rw [metricFlatMap_apply, metricFlatEquiv_apply]
+  rw [h]
 
 
 def gradientFun (g : SmoothRiemannianMetric I M) (f : M -> Real) (x : M) :
@@ -1300,4 +1235,4 @@ end AlgebraicRules
 
 end
 
-end DifferentialGeometry.Integral.Connection
+end DifferentialGeometry.Geometry.Operator

@@ -1,7 +1,11 @@
+import DifferentialGeometry.Geometry.Metric.TensorInner.TangentNormDiamond
 import DifferentialGeometry.Geometry.Exponential.BranchRadius
 import DifferentialGeometry.Geometry.Exponential.CartanNorm
 import DifferentialGeometry.Geometry.Exponential.DiagInvFixed
 import DifferentialGeometry.Geometry.Metric.Polarization
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Geometry.Connection
 
 set_option autoImplicit false
 
@@ -114,8 +118,7 @@ omit [T2Space (TangentBundle I M)]
 quadratic form between curvature-one manifolds. -/
 theorem cartanMap_sq
     (g : SmoothRiemannianMetric I M)
-    (hEnorm : ∀ (x : M) (w : TangentSpace I x),
-      ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner x w w)))
+    (hEnorm : IsMetricNorm (I := I) (M := M) g)
     (g' : SmoothRiemannianMetric I' M')
     (hEnorm' : ∀ (x : M') (w : TangentSpace I' x),
       ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g'.inner x w w)))
@@ -123,13 +126,13 @@ theorem cartanMap_sq
     (p' : M') (i : E ≃L[ℝ] E)
     (hi : ∀ a b : E, g'.inner p' (i a) (i b) = g.inner p a b)
     (hR : ∀ (x : M) (X Y Z : TangentSpace I x),
-      (DifferentialGeometry.Integral.Connection.riemannOp
-          (DifferentialGeometry.Integral.Connection.LeviCivita (I := I) g) x)
+      (DifferentialGeometry.Geometry.Curvature.riemannOp
+          (DifferentialGeometry.Geometry.Connection.LeviCivita (I := I) g) x)
         X Y Z =
           g.inner x Y Z • X - g.inner x X Z • Y)
     (hR' : ∀ (x : M') (X Y Z : TangentSpace I' x),
-      (DifferentialGeometry.Integral.Connection.riemannOp
-          (DifferentialGeometry.Integral.Connection.LeviCivita (I := I') g') x)
+      (DifferentialGeometry.Geometry.Curvature.riemannOp
+          (DifferentialGeometry.Geometry.Connection.LeviCivita (I := I') g') x)
         X Y Z =
           g'.inner x Y Z • X - g'.inner x X Z • Y)
     {x : M} (hx : (p, x) ∈ B.dom) (Y : TangentSpace I x) :
@@ -229,8 +232,7 @@ omit [T2Space (TangentBundle I M)]
 Riemannian inner product between curvature-one manifolds. -/
 theorem cartanMap_inner
     (g : SmoothRiemannianMetric I M)
-    (hEnorm : ∀ (x : M) (w : TangentSpace I x),
-      ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner x w w)))
+    (hEnorm : IsMetricNorm (I := I) (M := M) g)
     (g' : SmoothRiemannianMetric I' M')
     (hEnorm' : ∀ (x : M') (w : TangentSpace I' x),
       ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g'.inner x w w)))
@@ -238,13 +240,13 @@ theorem cartanMap_inner
     (p' : M') (i : E ≃L[ℝ] E)
     (hi : ∀ a b : E, g'.inner p' (i a) (i b) = g.inner p a b)
     (hR : ∀ (x : M) (X Y Z : TangentSpace I x),
-      (DifferentialGeometry.Integral.Connection.riemannOp
-          (DifferentialGeometry.Integral.Connection.LeviCivita (I := I) g) x)
+      (DifferentialGeometry.Geometry.Curvature.riemannOp
+          (DifferentialGeometry.Geometry.Connection.LeviCivita (I := I) g) x)
         X Y Z =
           g.inner x Y Z • X - g.inner x X Z • Y)
     (hR' : ∀ (x : M') (X Y Z : TangentSpace I' x),
-      (DifferentialGeometry.Integral.Connection.riemannOp
-          (DifferentialGeometry.Integral.Connection.LeviCivita (I := I') g') x)
+      (DifferentialGeometry.Geometry.Curvature.riemannOp
+          (DifferentialGeometry.Geometry.Connection.LeviCivita (I := I') g') x)
         X Y Z =
           g'.inner x Y Z • X - g'.inner x X Z • Y)
     {x : M} (hx : (p, x) ∈ B.dom)
@@ -407,8 +409,7 @@ omit [T2Space (TangentBundle I M)]
 Riemannian inner product. -/
 theorem cartanPD_inner
     (g : SmoothRiemannianMetric I M)
-    (hEnorm : ∀ (x : M) (w : TangentSpace I x),
-      ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner x w w)))
+    (hEnorm : IsMetricNorm (I := I) (M := M) g)
     (g' : SmoothRiemannianMetric I' M')
     (hEnorm' : ∀ (x : M') (w : TangentSpace I' x),
       ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g'.inner x w w)))
@@ -417,13 +418,13 @@ theorem cartanPD_inner
     (i : E ≃L[ℝ] E)
     (hi : ∀ a b : E, g'.inner p' (i a) (i b) = g.inner p a b)
     (hR : ∀ (x : M) (X Y Z : TangentSpace I x),
-      (DifferentialGeometry.Integral.Connection.riemannOp
-          (DifferentialGeometry.Integral.Connection.LeviCivita (I := I) g) x)
+      (DifferentialGeometry.Geometry.Curvature.riemannOp
+          (DifferentialGeometry.Geometry.Connection.LeviCivita (I := I) g) x)
         X Y Z =
           g.inner x Y Z • X - g.inner x X Z • Y)
     (hR' : ∀ (x : M') (X Y Z : TangentSpace I' x),
-      (DifferentialGeometry.Integral.Connection.riemannOp
-          (DifferentialGeometry.Integral.Connection.LeviCivita (I := I') g') x)
+      (DifferentialGeometry.Geometry.Curvature.riemannOp
+          (DifferentialGeometry.Geometry.Connection.LeviCivita (I := I') g') x)
         X Y Z =
           g'.inner x Y Z • X - g'.inner x X Z • Y)
     {x : M} (hx : x ∈ (cartanPD B B' i).source)

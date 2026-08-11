@@ -14,7 +14,7 @@ import Mathlib.Tactic.Ring
 
 open scoped BigOperators
 
-namespace DifferentialGeometry.Integral.Connection
+namespace DifferentialGeometry.Tensor.Auxiliary
 
 
 
@@ -172,4 +172,4 @@ theorem contractUpper_first_product_of_scalar_derivation
     (hDsum (fun A z => theta z A * beta z A K))
     (fun A => by rw [hDmul, hthetaD A, hbetaD A K])
 
-end DifferentialGeometry.Integral.Connection
+end DifferentialGeometry.Tensor.Auxiliary

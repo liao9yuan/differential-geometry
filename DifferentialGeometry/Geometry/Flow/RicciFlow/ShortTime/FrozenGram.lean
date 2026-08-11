@@ -1,5 +1,8 @@
 import DifferentialGeometry.Analysis.Parabolic.Euclidean.HeatKernelSPD
 import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.LowRegCoefficients
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Geometry.Operator
 
 /-!
 # Frozen inverse-Gram coordinate equivalences
@@ -19,6 +22,7 @@ open scoped ContDiff Manifold Topology BigOperators RealInnerProductSpace
 open DifferentialGeometry
 open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.DivergenceTheorem
+open DifferentialGeometry.Geometry.Operator
 open DifferentialGeometry.Analysis.Parabolic.Euclidean
 
 variable
@@ -27,10 +31,10 @@ variable
     {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
     {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
       [IsManifold I ∞ M] [CompactSpace M] [I.Boundaryless]
-      [T2Space M] [SigmaCompactSpace M]
+      [T2Space M]
 
 omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M]
-  [SigmaCompactSpace M] in
+  in
 private lemma frozenGram_quad
     (g : SmoothRiemannianMetric I M) (alpha b : M)
     (x : EuclideanSpace ℝ (Fin (Module.finrank ℝ E))) :

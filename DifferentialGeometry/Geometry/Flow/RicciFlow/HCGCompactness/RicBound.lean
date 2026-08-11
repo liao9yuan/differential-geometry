@@ -6,6 +6,10 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.RicBoundClaim
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.RicBoundGoodFrame
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.MetricCovDerivArityBridge
 import DifferentialGeometry.Geometry.Curvature.RicciOperatorNormBound
+open DifferentialGeometry.PDE.RicciFlow
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Geometry.Connection
 
 set_option autoImplicit false
 
@@ -55,9 +59,9 @@ namespace DifferentialGeometry
 namespace HCGCompactness
 
 open scoped Manifold ContDiff Topology
-open Bundle Tensor0SBundle
+open Bundle DifferentialGeometry.Tensor0SBundle
 open DifferentialGeometry.Tensor.Coordinates
-open DifferentialGeometry.Integral.Connection
+
 open DifferentialGeometry.PDE.RicciFlow
 
 variable {E : Type uE} [NormedAddCommGroup E] [NormedSpace Real E]
@@ -70,7 +74,6 @@ variable [IsManifold I 1 M] [IsManifold I 2 M]
 variable [VectorBundle Real E (TangentSpace I : M → Type _)]
 variable [ContMDiffVectorBundle 1 E (TangentSpace I : M → Type _) I]
 
-open DifferentialGeometry.PDE.RicciFlow in
 omit [Module.Finite ℝ E] [I.Boundaryless] [T2Space M]
     [SigmaCompactSpace M] [IsManifold I 2 M]
     [VectorBundle ℝ E (TangentSpace I : M → Type _)]
@@ -126,10 +129,10 @@ noncomputable def ricCovTower
     Tensor0SBundle.Tensor0SField (𝕜 := Real) (E := E) (H := H)
       (I := I) (M := M) (n := (∞ : WithTop ℕ∞)) (2 + s) :=
   iterCov (I := I) gRef 2
-    (DifferentialGeometry.Integral.Connection.CovariantDerivative.ricciSection
+    (DifferentialGeometry.Geometry.Curvature.CovariantDerivative.ricciSection
       (I := I) (M := M)
-      (DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric (I := I) g)
-      (DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric_contMDiffCovariantDerivativeLocally
+      (DifferentialGeometry.Geometry.Connection.leviCivitaConnectionOfMetric (I := I) g)
+      (DifferentialGeometry.Geometry.Connection.leviCivitaConnectionOfMetric_contMDiffCovariantDerivativeLocally
         (I := I) (M := M) g)) s
 
 /-- **The moving-metric Shi bound** (MSM135 Lemma 3.11 hypothesis (3.5)): on the

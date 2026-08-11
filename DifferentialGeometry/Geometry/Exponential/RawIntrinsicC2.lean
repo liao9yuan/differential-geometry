@@ -1,5 +1,9 @@
+import DifferentialGeometry.Geometry.Metric.TensorInner.TangentNormDiamond
 import DifferentialGeometry.Geometry.Exponential.IntrinsicExp
-import DifferentialGeometry.Geometry.Topology.FiberBundleT2
+import DifferentialGeometry.Topology.FiberBundleT2
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Geometry.Connection
 
 set_option autoImplicit false
 
@@ -41,8 +45,7 @@ variable [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
 complete intrinsic exponential. -/
 theorem exp_eq_intr_of_c2
     (g : SmoothRiemannianMetric I M)
-    (hEnorm : ∀ (x : M) (w : TangentSpace I x),
-      ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner x w w)))
+    (hEnorm : IsMetricNorm (I := I) (M := M) g)
     (p : M) {u : E}
     (hu : ‖u‖ < expMapC2Radius (I := I) g p) :
     expMap (I := I) g p (show TangentSpace I p from u) =
@@ -185,8 +188,7 @@ theorem exp_eq_intr_of_c2
 germ at every vector in the named `C²` ball. -/
 theorem exp_germ_eq_intr
     (g : SmoothRiemannianMetric I M)
-    (hEnorm : ∀ (x : M) (w : TangentSpace I x),
-      ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner x w w)))
+    (hEnorm : IsMetricNorm (I := I) (M := M) g)
     (p : M) {u : E}
     (hu : ‖u‖ < expMapC2Radius (I := I) g p) :
     (fun w : E =>

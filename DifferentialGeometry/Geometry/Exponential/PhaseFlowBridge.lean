@@ -1,5 +1,6 @@
 import DifferentialGeometry.Analysis.ODE.PhaseFlowPerturbation
 import DifferentialGeometry.Geometry.Exponential.DiagExpDerivative
+open DifferentialGeometry.Geometry.Curvature
 
 set_option autoImplicit false
 

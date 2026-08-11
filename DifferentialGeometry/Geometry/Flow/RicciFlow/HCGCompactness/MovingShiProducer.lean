@@ -3,6 +3,13 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.StarSum.SolutionTo
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.TowerNormRegularity
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.RicciTowerTrace
 import DifferentialGeometry.Geometry.Operator.GradientRegularity
+open DifferentialGeometry.PDE.RicciFlow
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Geometry.Connection
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Geometry.Connection
+open DifferentialGeometry.Geometry.Operator
 
 set_option autoImplicit false
 
@@ -10,8 +17,9 @@ noncomputable section
 
 namespace DifferentialGeometry.PDE.RicciFlow
 
-open Bundle Set Tensor0SBundle
-open DifferentialGeometry.Integral.Connection
+open Bundle Set DifferentialGeometry.Tensor0SBundle
+
+open DifferentialGeometry.Geometry.Operator
 open DifferentialGeometry.HCGCompactness
 open scoped Manifold ContDiff BigOperators
 
@@ -21,11 +29,10 @@ variable {H : Type*} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H} [I.Boundaryless]
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
 variable [IsManifold I ∞ M] [IsManifold I 1 M] [IsManifold I 2 M]
-variable [SigmaCompactSpace M] [T2Space M] [CompactSpace M] [BoundarylessManifold I M]
+variable [T2Space M] [CompactSpace M] [BoundarylessManifold I M]
 
 omit [NeZero (Module.finrank Real E)] [I.Boundaryless] [IsManifold I 2 M]
   [CompactSpace M] [BoundarylessManifold I M] in
-omit [SigmaCompactSpace M] in
 theorem rm04_bound_can
     {alpha omega : Real} {hAlphaOmega : alpha < omega}
     {S : SolutionOn (I := I) (M := M)

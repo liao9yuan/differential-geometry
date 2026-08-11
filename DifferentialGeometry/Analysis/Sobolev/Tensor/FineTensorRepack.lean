@@ -1,5 +1,7 @@
 import DifferentialGeometry.Analysis.Sobolev.Tensor.FineTensorProject
 import DifferentialGeometry.Analysis.Sobolev.Tensor.ChartWkpBoundK
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Geometry.Curvature
 
 /-!
 # Sobolev reassembly from fine tensor blocks
@@ -17,7 +19,7 @@ noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
 
-open Bundle Manifold MeasureTheory Set Filter Tensor0SBundle
+open Bundle Manifold MeasureTheory Set Filter DifferentialGeometry.Tensor0SBundle
 open scoped Manifold Topology ContDiff ENNReal BigOperators
 
 namespace DifferentialGeometry

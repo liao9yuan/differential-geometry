@@ -2,6 +2,9 @@ import DifferentialGeometry.Geometry.Connection.Laplacian.ConnectionLaplacian
 import DifferentialGeometry.Geometry.Connection.ChartBridge.Hessian
 import DifferentialGeometry.Geometry.Operator.RoughLaplacian
 import Mathlib.Topology.Algebra.Module.FiniteDimensionBilinear
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Geometry.Operator
 
 
 noncomputable section
@@ -9,8 +12,9 @@ noncomputable section
 open Bundle Manifold Set FiberBundle
 open scoped Manifold Topology ContDiff
 
+
 namespace DifferentialGeometry
-namespace Integral
+namespace Geometry
 namespace Connection
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
@@ -22,8 +26,9 @@ variable [SigmaCompactSpace M] [T2Space M]
 
 open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.DivergenceTheorem
+open DifferentialGeometry.Geometry.Operator
 open DifferentialGeometry.Tensor.Coordinates
-open Tensor0SBundle
+open DifferentialGeometry.Tensor0SBundle
 
 /-- The chart Hessian at `x`, packaged as an intrinsic covariant two-tensor.
 
@@ -80,11 +85,11 @@ theorem lap_eq_hess_on [I.Boundaryless]
   rw [hessFun_eq_cov_local (I := I) g hU hf hx]
   rfl
 
-omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] [T2Space M] [SigmaCompactSpace M] in
 theorem connLaplacian_function_eq_chartLaplacian [I.Boundaryless]
     (g : SmoothRiemannianMetric I M)
     {f : M → ℝ} (hf : ContMDiff I 𝓘(ℝ, ℝ) ∞ f) (x : M) :
-    connLaplacian_function (I := I) g hf x = Δ_g (I := I) g hf x := rfl
+    connLaplacian_function (I := I) g hf x = Δ_g (I := I) g ⟨_, hf⟩ x := rfl
 
 omit [NeZero (Module.finrank ℝ E)] in
 theorem traceFun_abstractHessian_eq_laplacian [I.Boundaryless]
@@ -93,7 +98,7 @@ theorem traceFun_abstractHessian_eq_laplacian [I.Boundaryless]
     (h_orth : ∀ i j : Fin (Module.finrank ℝ E),
       chartInvGramMatrix (I := I) g x x i j = if i = j then (1 : ℝ) else 0) :
     traceFun (I := I) (M := M) (abstractHessianBilin (I := I) g f) x =
-      Δ_g (I := I) g hf x := by
+      Δ_g (I := I) g ⟨_, hf⟩ x := by
   classical
   have hM : chartHessianMatrixIdentity (I := I) g f x :=
     chartHessianMatrixIdentity_holds (I := I) g hf x
@@ -104,7 +109,7 @@ theorem traceFun_abstractHessian_eq_laplacian [I.Boundaryless]
   have h2 : traceFun (I := I) (M := M) (hessFun (I := I) g f) x =
       chartHessTrace (I := I) g f x :=
     traceFun_hessFun_eq_chartHessTrace_of_orthonormal (I := I) g f x h_orth
-  have h3 : chartHessTrace (I := I) g f x = Δ_g (I := I) g hf x :=
+  have h3 : chartHessTrace (I := I) g f x = Δ_g (I := I) g ⟨_, hf⟩ x :=
     chartHessTrace_eq_laplacian_pointwise_of_boundaryless (I := I) g hf x
   rw [← h1, h2, h3]
 
@@ -120,5 +125,5 @@ theorem traceFun_abstractHessian_eq_connLaplacian [I.Boundaryless]
   exact traceFun_abstractHessian_eq_laplacian (I := I) g hf x h_orth
 
 end Connection
-end Integral
+end Geometry
 end DifferentialGeometry

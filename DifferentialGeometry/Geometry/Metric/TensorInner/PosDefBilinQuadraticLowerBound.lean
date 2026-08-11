@@ -1,5 +1,7 @@
 import DifferentialGeometry.Geometry.Metric.TensorInner.PosDefBilinBoundedUnitBall
 
+namespace DifferentialGeometry
+
 set_option autoImplicit false
 
 
@@ -68,3 +70,5 @@ theorem posDef_bilin_quadratic_lower_bound
     have hv0 : v = 0 := Subsingleton.elim v 0
     subst hv0
     simp
+end
+end DifferentialGeometry

@@ -5,6 +5,13 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.Ricci.QuadraticBou
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.Basic
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.RicciTowerTrace
 import DifferentialGeometry.Geometry.Operator.GradientRegularity
+open DifferentialGeometry.PDE.RicciFlow
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Geometry.Connection
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Geometry.Connection
+open DifferentialGeometry.Geometry.Operator
 
 set_option autoImplicit false
 
@@ -26,8 +33,9 @@ universe u uE uH
 namespace DifferentialGeometry
 namespace HCGCompactness
 
-open Bundle Set Tensor0SBundle
-open DifferentialGeometry.Integral.Connection
+open Bundle Set DifferentialGeometry.Tensor0SBundle
+
+open DifferentialGeometry.Geometry.Operator
 open DifferentialGeometry.PDE.RicciFlow
 open scoped Manifold ContDiff BigOperators Bundle
 
@@ -134,14 +142,14 @@ private theorem metric_pde_start
       let tau : RealTimeInterval.RegularTime D :=
         ⟨s, hreg ⟨hs.1, hs.2.le⟩⟩
       have hraw := metricDerivAt (I := I) S hS tau x v w
-      simpa [SolutionFamily.ricciAt, PDE.RicciFlow.metricRicciAt,
+      simpa [SolutionFamily.ricciAt,
         metricRicciAt_apply_eq_ricciTensor] using hraw.hasDerivWithinAt
     exact (deriv_Ici_start halphaPsi _ _ (hmetricCont x v w) hecont hint).mono
       (fun _ hs ↦ hs.1)
   · let tau : RealTimeInterval.RegularTime D :=
       ⟨t, hreg ⟨halphaT, ht.2⟩⟩
     have hraw := metricDerivAt (I := I) S hS tau x v w
-    simpa [SolutionFamily.ricciAt, PDE.RicciFlow.metricRicciAt,
+    simpa [SolutionFamily.ricciAt,
       metricRicciAt_apply_eq_ricciTensor] using hraw.hasDerivWithinAt
 
 private theorem exp_bounds_log
@@ -236,7 +244,7 @@ attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
 private theorem exists_trunc_tower
     {D : RealTimeInterval}
-    (G : RealizedMetricFamily (I := I) (M := M) Real)
+    (G : MetricConnectionFamily (I := I) (M := M) Real)
     {w wLap : Nat → Real → M → Real}
     (levelC : Nat → Real)
     (K aScale T : Real)
@@ -462,7 +470,7 @@ attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
 /-- Legacy fixed-order adapter to the unsupported global complete estimate. -/
 private theorem complete_of_heat
     {D : RealTimeInterval}
-    (G : RealizedMetricFamily (I := I) (M := M) Real)
+    (G : MetricConnectionFamily (I := I) (M := M) Real)
     {w wLap : Nat → Real → M → Real}
     (levelC : Nat → Real)
     (K aScale T : Real)
@@ -531,7 +539,7 @@ attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
 Kato control through the requested order. -/
 private theorem complete_of_cutoff
     {D : RealTimeInterval}
-    (G : RealizedMetricFamily (I := I) (M := M) Real)
+    (G : MetricConnectionFamily (I := I) (M := M) Real)
     {w wLap : Nat → Real → M → Real}
     (levelC : Nat → Real)
     (K aScale T : Real)
@@ -602,7 +610,7 @@ attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
 family and Kato control through the requested order. -/
 private theorem complete_of_barrier
     {D : RealTimeInterval}
-    (G : RealizedMetricFamily (I := I) (M := M) Real)
+    (G : MetricConnectionFamily (I := I) (M := M) Real)
     {w wLap : Nat → Real → M → Real}
     (levelC : Nat → Real)
     (K aScale T : Real)

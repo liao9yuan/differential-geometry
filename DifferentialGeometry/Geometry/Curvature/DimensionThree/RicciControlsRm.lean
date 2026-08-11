@@ -7,6 +7,9 @@ import DifferentialGeometry.Tensor.RSTensor.Tensor0SRiemannian.Product
 import DifferentialGeometry.Tensor.RSTensor.Tensor0SRiemannian.Smooth
 import Mathlib.Analysis.InnerProductSpace.Spectrum
 import Mathlib.Tactic
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Geometry.Connection
+open DifferentialGeometry.Geometry.Operator
 
 
 
@@ -19,9 +22,10 @@ import Mathlib.Tactic
 
 noncomputable section
 
-namespace DifferentialGeometry.Integral.Connection
+namespace DifferentialGeometry.Geometry.Curvature
 
-open DifferentialGeometry.Integral.Connection Tensor0SBundle
+open DifferentialGeometry.Tensor0SBundle
+open DifferentialGeometry.Geometry.Operator
 open scoped Manifold ContDiff BigOperators
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]
@@ -431,7 +435,7 @@ theorem exists_orthonormalBasisAt
 theorem metricTrace_eq_ricciEnd
     (g : SmoothRiemannianMetric I M)
     (Ric : Tensor02At (I := I) (M := M) x) :
-    DifferentialGeometry.Integral.Connection.metricTracePair0SAt (I := I) g Ric =
+    DifferentialGeometry.Geometry.Operator.metricTracePair0SAt (I := I) g Ric =
       LinearMap.trace Real (TangentSpace I x)
         (ricciEndAt (I := I) g Ric) := by
   classical
@@ -449,7 +453,7 @@ theorem metricTrace_eq_ricciEnd
     simpa [basis, gInv] using
       Tensor.Coordinates.inverseMetricFlatModelInChart_metricInverseInBasis_center
         (I := I) g x
-  rw [DifferentialGeometry.Integral.Connection.metricTracePair0SAt_eq_sum_basis (I := I) g basis
+  rw [DifferentialGeometry.Geometry.Operator.metricTracePair0SAt_eq_sum_basis (I := I) g basis
     gInv hinv]
   rw [linearMap_trace_eq_sum_inv_inner_apply (I := I) g x basis gInv hinv]
   refine Finset.sum_congr rfl fun i _ => ?_
@@ -465,7 +469,7 @@ theorem metricTrace_pos_of_posDef
     (hdim : Module.finrank Real (TangentSpace I x) = 3)
     (hpos : forall v : TangentSpace I x, v ≠ 0 ->
       0 < Ric (vec2 (I := I) v v)) :
-    0 < DifferentialGeometry.Integral.Connection.metricTracePair0SAt (I := I) g Ric := by
+    0 < DifferentialGeometry.Geometry.Operator.metricTracePair0SAt (I := I) g Ric := by
   classical
   let D := (tangentMetricData_gen (I := I) g x).metric
   letI : InnerProductSpace.Core Real (TangentSpace I x) := D.toCore
@@ -678,7 +682,7 @@ theorem coordInner0S_four_delta3_eq_stdRmNormSq3
   rw [sum_delta3_slots4_contract]
   rw [sum_fin_four_fun]
   unfold stdRmNormSq3 standardRmCompAt rm04CompAt component0S
-    tensor0SComponent DifferentialGeometry.Integral.Connection.slots4
+    tensor0SComponent DifferentialGeometry.Geometry.Curvature.slots4
   simp [Fin.sum_univ_three]
 
 
@@ -921,4 +925,4 @@ theorem normSqLeOfFirstData
   exact traceDataOfFirst (I := I) horth (hcurv basis horth)
     (hRic basis horth) (hScalar basis horth)
 
-end DifferentialGeometry.Integral.Connection
+end DifferentialGeometry.Geometry.Curvature

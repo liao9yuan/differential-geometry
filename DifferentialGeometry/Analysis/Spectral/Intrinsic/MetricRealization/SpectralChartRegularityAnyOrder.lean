@@ -5,6 +5,9 @@ import DifferentialGeometry.Analysis.Sobolev.Euclidean.Completeness.IteratedSobo
 import DifferentialGeometry.Analysis.Sobolev.Euclidean.IteratedSobolevSpace.IteratedSobolevQuant
 import DifferentialGeometry.Analysis.Elliptic.TensorRegularity.Bootstrap.BootstrapMixed
 import DifferentialGeometry.Analysis.Parabolic.MaximalRegularity.Plancherel
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Geometry.Connection
 
 
 
@@ -65,9 +68,8 @@ open scoped Manifold Topology ContDiff ENNReal BigOperators
   RealInnerProductSpace InnerProductSpace
 
 namespace DifferentialGeometry
-namespace PDE
-namespace RicciFlow
-namespace IntrinsicSpectral
+namespace Analysis
+namespace Spectral
 namespace MetricRealization
 
 open DifferentialGeometry.Integral.Measure
@@ -96,7 +98,6 @@ local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
 
 
-omit [CompactSpace M] in
 omit [NeZero (Module.finrank ℝ E)] in
 theorem resolvent_eigenvalue_inv_eq_one_add_lambda
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
@@ -208,7 +209,6 @@ private def eigenFinsetSeq (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (fun m => (Encodable.decode₂
       (TensorSpectral.TensorEigenIdx (I := I) (M := M) g r s) m).toFinset)
 
-omit [CompactSpace M] in
 omit [NeZero (Module.finrank ℝ E)] in
 private lemma eigenFinsetSeq_monotone (g : SmoothRiemannianMetric I M) (r s : ℕ)
     [Encodable (TensorSpectral.TensorEigenIdx (I := I) (M := M) g r s)] :
@@ -218,7 +218,6 @@ private lemma eigenFinsetSeq_monotone (g : SmoothRiemannianMetric I M) (r s : �
   exact Finset.biUnion_subset_biUnion_of_subset_left _
     (Finset.range_subset_range.mpr hab)
 
-omit [CompactSpace M] in
 omit [NeZero (Module.finrank ℝ E)] in
 private lemma eigenFinsetSeq_mem (g : SmoothRiemannianMetric I M) (r s : ℕ)
     [Encodable (TensorSpectral.TensorEigenIdx (I := I) (M := M) g r s)]
@@ -231,7 +230,6 @@ private lemma eigenFinsetSeq_mem (g : SmoothRiemannianMetric I M) (r s : ℕ)
   rw [Option.mem_toFinset]
   exact Encodable.decode₂_encode i
 
-omit [CompactSpace M] in
 omit [NeZero (Module.finrank ℝ E)] in
 private lemma eigenFinsetSeq_tendsto (g : SmoothRiemannianMetric I M) (r s : ℕ)
     [Encodable (TensorSpectral.TensorEigenIdx (I := I) (M := M) g r s)] :
@@ -717,9 +715,8 @@ theorem spectralSmoothRealizesAsSmooth_of_eigenvalueTailSummable
     (tensorSuperCriticalReconstruct (I := I) (M := M) g r s)
 
 end MetricRealization
-end IntrinsicSpectral
-end RicciFlow
-end PDE
+end Spectral
+end Analysis
 end DifferentialGeometry
 
 end

@@ -1,4 +1,6 @@
 import DifferentialGeometry.Geometry.Exponential.LocalDiffeomorphism
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Geometry.Curvature
 
 
 

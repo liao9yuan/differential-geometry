@@ -2,6 +2,8 @@ import DifferentialGeometry.Analysis.ODE.TimeDependentFlow.FromZeroManifoldOrbit
 import Mathlib.Geometry.Manifold.MFDeriv.Atlas
 import Mathlib.Geometry.Manifold.MFDeriv.Tangent
 import Mathlib.Geometry.Manifold.MFDeriv.FDeriv
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Geometry.Curvature
 
 /-!
 # From-`0` uniqueness of the bare manifold flow under the weak `t = 0` datum
@@ -36,7 +38,8 @@ The basepoint chart is pinned to `α` throughout, so the chart reads are
 open Set Function Filter Metric Bundle
 open scoped Topology NNReal ContDiff Manifold
 
-namespace DifferentialGeometry.PDE.RicciFlow.ODE
+open DifferentialGeometry.Geometry.Connection
+namespace DifferentialGeometry.Analysis.ODE
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] [FiniteDimensional ℝ E]
   [CompleteSpace E]
@@ -201,4 +204,4 @@ theorem bare_fromZero_local
   have hpb : (extChartAt I α).symm (f₁ t) = (extChartAt I α).symm (f₂ t) := by rw [hfeq]
   rwa [hf₁, hf₂, (extChartAt I α).left_inv hsrc₁, (extChartAt I α).left_inv hsrc₂] at hpb
 
-end DifferentialGeometry.PDE.RicciFlow.ODE
+end DifferentialGeometry.Analysis.ODE

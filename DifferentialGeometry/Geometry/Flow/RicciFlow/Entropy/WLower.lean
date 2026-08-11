@@ -2,6 +2,9 @@ import DifferentialGeometry.Analysis.Sobolev.Manifold.LogSobolev
 import DifferentialGeometry.Geometry.Connection.ChartBridge.Gradient
 import DifferentialGeometry.Geometry.Curvature.Metric
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Entropy.WEstimate
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Geometry.Operator
 
 set_option autoImplicit false
 
@@ -13,12 +16,14 @@ set_option autoImplicit false
 
 
 
+open DifferentialGeometry.Geometry.Connection
 namespace DifferentialGeometry.PDE.RicciFlow.Entropy
 
 noncomputable section
 
 open MeasureTheory Set
-open DifferentialGeometry.Integral.Connection
+
+open DifferentialGeometry.Geometry.Operator
 open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.DivergenceTheorem
 open DifferentialGeometry.Analysis.Sobolev
@@ -36,7 +41,7 @@ theorem w_fixed_lower
     [FiniteDimensional Real E]
     {H : Type*} [TopologicalSpace H] {I : ModelWithCorners Real E H}
     {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
-    [CompactSpace M] [T2Space M] [SigmaCompactSpace M] [I.Boundaryless]
+    [CompactSpace M] [T2Space M] [I.Boundaryless]
     (g : SmoothRiemannianMetric I M) (hdim : Module.finrank Real E = 3)
     (tauMax : Real) :
     ∃ B : Real, ∀ {tau : Real}, tau ∈ Ioc 0 tauMax ->
@@ -96,7 +101,7 @@ theorem w_fixed_lower
   have henergy_cont : Continuous energy := by
     have hinner := TangentBundle.continuous_g_inner_of_smooth_sections
       (I := I) (M := M) g
-      (grad_g (I := I) g hv) (grad_g (I := I) g hv)
+      (grad_g (I := I) g ⟨_, hv⟩) (grad_g (I := I) g ⟨_, hv⟩)
     simpa only [energy, grad_g_apply] using hinner
   have hv2cont : Continuous (fun x => v x ^ 2) := hv.continuous.pow 2
   have hR2cont : Continuous (fun x => R x * v x ^ 2) := hRcont.mul hv2cont
@@ -215,7 +220,7 @@ theorem w_density_lower
     [FiniteDimensional Real E]
     {H : Type*} [TopologicalSpace H] {I : ModelWithCorners Real E H}
     {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
-    [CompactSpace M] [T2Space M] [SigmaCompactSpace M] [I.Boundaryless]
+    [CompactSpace M] [T2Space M] [I.Boundaryless]
     (g : SmoothRiemannianMetric I M) (hdim : Module.finrank Real E = 3)
     (tauMax : Real) :
     ∃ B : Real, ∀ {tau : Real}, tau ∈ Ioc 0 tauMax ->

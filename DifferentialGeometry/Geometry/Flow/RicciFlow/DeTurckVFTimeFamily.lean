@@ -1,10 +1,14 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.DeTurckShortTime
-import DifferentialGeometry.Geometry.Flow.VectorField
-import DifferentialGeometry.Geometry.Flow.VectorFieldSmooth
+import DifferentialGeometry.Analysis.Parabolic.DeTurckLinearization.VectorField
+import DifferentialGeometry.Analysis.Parabolic.DeTurckLinearization.VectorFieldSmooth
 import DifferentialGeometry.Analysis.Parabolic.DeTurckRicci.DeTurckVectorFieldContinuousInMetric
-import DifferentialGeometry.Geometry.Flow.DeTurckVFChartCoord
+import DifferentialGeometry.Analysis.Parabolic.DeTurckLinearization.DeTurckVFChartCoord
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Geometry.Operator
 
 
+open DifferentialGeometry.Geometry.Connection
 namespace DifferentialGeometry.PDE.RicciFlow
 
 open Bundle Set
@@ -12,7 +16,8 @@ open scoped Manifold ContDiff
 open DifferentialGeometry
 open DifferentialGeometry.PDE
 open DifferentialGeometry.PDE.DeTurck
-open DifferentialGeometry.Integral.Connection
+
+open DifferentialGeometry.Geometry.Operator
 open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.DivergenceTheorem
 

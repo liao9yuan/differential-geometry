@@ -7,6 +7,7 @@ import Mathlib.Topology.Algebra.Module.LinearMap
 
 
 
+namespace DifferentialGeometry
 namespace Tensor0SBundle
 
 noncomputable section
@@ -1344,3 +1345,4 @@ theorem coord_normSq0S_eq_coord
 end
 
 end Tensor0SBundle
+end DifferentialGeometry

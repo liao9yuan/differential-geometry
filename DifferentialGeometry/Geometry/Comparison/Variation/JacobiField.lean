@@ -1,4 +1,6 @@
 import DifferentialGeometry.Geometry.Comparison.Variation.CovariantCommutationCurvature
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Geometry.Curvature
 
 set_option autoImplicit false
 
@@ -51,8 +53,8 @@ def IsJacobiAt (g : SmoothRiemannianMetric I M) (γ : ℝ → M)
     (J : ∀ t : ℝ, TangentSpace I (γ t)) (t : ℝ) : Prop :=
   covDerivAlong (I := I) g γ
       (fun s : ℝ => covDerivAlong (I := I) g γ J s) t
-    + (DifferentialGeometry.Integral.Connection.riemannOp
-        (DifferentialGeometry.Integral.Connection.LeviCivita (I := I) g) (γ t))
+    + (DifferentialGeometry.Geometry.Curvature.riemannOp
+        (DifferentialGeometry.Geometry.Connection.LeviCivita (I := I) g) (γ t))
         (J t) (curveVelocity (I := I) γ t) (curveVelocity (I := I) γ t)
     = 0
 
@@ -72,15 +74,15 @@ theorem isJacobiAlong_iff (g : SmoothRiemannianMetric I M) (γ : ℝ → M)
       ∀ t : ℝ,
         covDerivAlong (I := I) g γ
             (fun s : ℝ => covDerivAlong (I := I) g γ J s) t
-          = - (DifferentialGeometry.Integral.Connection.riemannOp
-              (DifferentialGeometry.Integral.Connection.LeviCivita (I := I) g) (γ t))
+          = - (DifferentialGeometry.Geometry.Curvature.riemannOp
+              (DifferentialGeometry.Geometry.Connection.LeviCivita (I := I) g) (γ t))
               (J t) (curveVelocity (I := I) γ t) (curveVelocity (I := I) γ t) := by
   constructor
   · intro hJ t
     have h : covDerivAlong (I := I) g γ
           (fun s : ℝ => covDerivAlong (I := I) g γ J s) t
-        + (DifferentialGeometry.Integral.Connection.riemannOp
-            (DifferentialGeometry.Integral.Connection.LeviCivita (I := I) g) (γ t))
+        + (DifferentialGeometry.Geometry.Curvature.riemannOp
+            (DifferentialGeometry.Geometry.Connection.LeviCivita (I := I) g) (γ t))
             (J t) (curveVelocity (I := I) γ t) (curveVelocity (I := I) γ t)
         = 0 := hJ t
     linear_combination (norm := module) h
@@ -88,8 +90,8 @@ theorem isJacobiAlong_iff (g : SmoothRiemannianMetric I M) (γ : ℝ → M)
     have h := hJ t
     change covDerivAlong (I := I) g γ
           (fun s : ℝ => covDerivAlong (I := I) g γ J s) t
-        + (DifferentialGeometry.Integral.Connection.riemannOp
-            (DifferentialGeometry.Integral.Connection.LeviCivita (I := I) g) (γ t))
+        + (DifferentialGeometry.Geometry.Curvature.riemannOp
+            (DifferentialGeometry.Geometry.Connection.LeviCivita (I := I) g) (γ t))
             (J t) (curveVelocity (I := I) γ t) (curveVelocity (I := I) γ t)
         = 0
     linear_combination (norm := module) h
@@ -103,13 +105,13 @@ theorem jacobi_d2_eq
     (hJ : IsJacobiAt (I := I) g γ J t) :
     covDerivAlong (I := I) g γ
         (fun s : ℝ => covDerivAlong (I := I) g γ J s) t
-      = - (DifferentialGeometry.Integral.Connection.riemannOp
-          (DifferentialGeometry.Integral.Connection.LeviCivita (I := I) g) (γ t))
+      = - (DifferentialGeometry.Geometry.Curvature.riemannOp
+          (DifferentialGeometry.Geometry.Connection.LeviCivita (I := I) g) (γ t))
           (J t) (curveVelocity (I := I) γ t) (curveVelocity (I := I) γ t) := by
   change covDerivAlong (I := I) g γ
         (fun s : ℝ => covDerivAlong (I := I) g γ J s) t
-      + (DifferentialGeometry.Integral.Connection.riemannOp
-          (DifferentialGeometry.Integral.Connection.LeviCivita (I := I) g) (γ t))
+      + (DifferentialGeometry.Geometry.Curvature.riemannOp
+          (DifferentialGeometry.Geometry.Connection.LeviCivita (I := I) g) (γ t))
           (J t) (curveVelocity (I := I) γ t) (curveVelocity (I := I) γ t)
       = 0 at hJ
   linear_combination (norm := module) hJ
@@ -148,7 +150,7 @@ theorem wronskian_deriv_at
   have hsub := hleft.sub hright
   have hJ2 := jacobi_d2_eq (I := I) g γ J hJ
   have hK2 := jacobi_d2_eq (I := I) g γ K hK
-  have hcurv := DifferentialGeometry.Integral.Connection.riemannOp_diag_symm
+  have hcurv := DifferentialGeometry.Geometry.Curvature.riemannOp_diag_symm
     (I := I) g (γ t) (curveVelocity (I := I) γ t) (J t) (K t)
   refine (hsub.congr_deriv ?_)
   rw [hJ2, hK2]
@@ -250,11 +252,11 @@ theorem ode_bound_of_isJacobiAt
     (hJ : IsJacobiAt (I := I) g γ J t)
     (hcurv :
       g.inner (γ t)
-        ((DifferentialGeometry.Integral.Connection.riemannOp
-          (DifferentialGeometry.Integral.Connection.LeviCivita (I := I) g) (γ t))
+        ((DifferentialGeometry.Geometry.Curvature.riemannOp
+          (DifferentialGeometry.Geometry.Connection.LeviCivita (I := I) g) (γ t))
           (J t) (curveVelocity (I := I) γ t) (curveVelocity (I := I) γ t))
-        ((DifferentialGeometry.Integral.Connection.riemannOp
-          (DifferentialGeometry.Integral.Connection.LeviCivita (I := I) g) (γ t))
+        ((DifferentialGeometry.Geometry.Curvature.riemannOp
+          (DifferentialGeometry.Geometry.Connection.LeviCivita (I := I) g) (γ t))
           (J t) (curveVelocity (I := I) γ t) (curveVelocity (I := I) γ t))
       ≤ K ^ 2 * g.inner (γ t) (J t) (J t)) :
     g.inner (γ t)
@@ -266,14 +268,14 @@ theorem ode_bound_of_isJacobiAt
   have hD :
       covDerivAlong (I := I) g γ
           (fun s : ℝ => covDerivAlong (I := I) g γ J s) t
-        = - (DifferentialGeometry.Integral.Connection.riemannOp
-            (DifferentialGeometry.Integral.Connection.LeviCivita (I := I) g) (γ t))
+        = - (DifferentialGeometry.Geometry.Curvature.riemannOp
+            (DifferentialGeometry.Geometry.Connection.LeviCivita (I := I) g) (γ t))
             (J t) (curveVelocity (I := I) γ t) (curveVelocity (I := I) γ t) := by
     have h := hJ
     change covDerivAlong (I := I) g γ
           (fun s : ℝ => covDerivAlong (I := I) g γ J s) t
-        + (DifferentialGeometry.Integral.Connection.riemannOp
-            (DifferentialGeometry.Integral.Connection.LeviCivita (I := I) g) (γ t))
+        + (DifferentialGeometry.Geometry.Curvature.riemannOp
+            (DifferentialGeometry.Geometry.Connection.LeviCivita (I := I) g) (γ t))
             (J t) (curveVelocity (I := I) γ t) (curveVelocity (I := I) γ t)
         = 0 at h
     linear_combination (norm := module) h

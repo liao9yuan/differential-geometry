@@ -1,4 +1,6 @@
 import DifferentialGeometry.Analysis.Parabolic.QuasiLinear.TensorMaximalRegularity.SubcriticalSmallTime
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Geometry.Curvature
 
 /-!
 # Mixed critical--subcritical forcing fixed point
@@ -114,8 +116,7 @@ def mixedMap (a : Real) {T : Real} (hT : 0 < T) (hT1 : T ≤ 1)
       nemytskiiHa1 (I := I) (M := M) hN1
         (maxRegDuhamelSolFieldHa1 (I := I) (M := M) a hT hT1 u0 force)
 
-omit [NeZero (Module.finrank ℝ E)]
-  [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 @[simp] theorem mixedMap_apply (hT : 0 < T) (hT1 : T ≤ 1)
     (u0 : tensorHs (I := I) (M := M) g r s (a + 2))
     {L2 : NNReal}
@@ -134,8 +135,7 @@ omit [NeZero (Module.finrank ℝ E)]
           (maxRegDuhamelSolFieldHa1 (I := I) (M := M) a hT hT1 u0 force) :=
   rfl
 
-omit [NeZero (Module.finrank ℝ E)]
-  [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 /-- The mixed map has contraction modulus
 `L2 * (1 + T) + L1 * (2 * sqrt T)`. -/
 theorem mixedMap_dist_le
@@ -220,8 +220,7 @@ theorem mixedMap_dist_le
     _ = ((L2 : Real) * (1 + T) + (L1 : Real) * (2 * Real.sqrt T)) *
           ‖force - force'‖ := by ring
 
-omit [NeZero (Module.finrank ℝ E)]
-  [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 /-- The mixed forcing map is a contraction under its transparent combined
 smallness condition. -/
 theorem mixedMap_contract
@@ -254,8 +253,7 @@ theorem mixedMap_contract
       force force'
     simpa only [NNReal.coe_mk] using h
 
-omit [NeZero (Module.finrank ℝ E)]
-  [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 /-- Strong existence for the fixed reference heat equation with a mixed
 critical--subcritical nonlinear forcing. -/
 theorem mixed_strong_exists
@@ -316,8 +314,7 @@ theorem mixed_strong_exists
       (h_compact := h_compact) (a := a) (T := T) hT hT1 u0 forceStar]
     exact congrArg₂ (fun x y => x + y) rfl hforce
 
-omit [NeZero (Module.finrank ℝ E)]
-  [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 /-- Uniqueness of forcing-space fixed points for the same mixed nonlinear
 equation. -/
 theorem mixed_strong_unique

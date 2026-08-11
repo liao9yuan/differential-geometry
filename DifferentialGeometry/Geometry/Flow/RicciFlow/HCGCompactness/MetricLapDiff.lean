@@ -3,6 +3,10 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.MetricCovDeri
 import DifferentialGeometry.Geometry.Connection.ChartBridge.HessFrobenius
 import DifferentialGeometry.Geometry.Operator.LaplacianBridge
 import DifferentialGeometry.Tensor.RSTensor.FiberMetric.ConnectionDifferenceNorm
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Geometry.Connection
+open DifferentialGeometry.Geometry.Operator
 
 set_option autoImplicit false
 
@@ -23,7 +27,8 @@ namespace DifferentialGeometry
 namespace HCGCompactness
 
 open Bundle
-open DifferentialGeometry.Integral.Connection
+
+open DifferentialGeometry.Geometry.Operator
 open DifferentialGeometry.Integral.DivergenceTheorem
 open scoped Manifold ContDiff Topology BigOperators
 
@@ -215,7 +220,7 @@ omit [SigmaCompactSpace M] in
 private theorem delta_eq_lap
     (g : SmoothRiemannianMetric I M)
     {f : M -> Real} (hf : ContMDiff I 𝓘(Real, Real) ∞ f) (x : M) :
-    Δ_g (I := I) g hf x =
+    Δ_g (I := I) g ⟨_, hf⟩ x =
       laplacian (I := I) (leviCivitaConnectionOfMetric (I := I) g) g f x := by
   exact (laplacian_levi_eq (E := E) (H := H) (I := I) (M := M)
     (g := g) (f := f) hf x).symm
@@ -232,7 +237,7 @@ private theorem lapDiff_sq_core
         (Tensor0SBundle.normSq0S (I := I) g x 2
           (metricTensor0S (I := I) h x - metricTensor0S (I := I) g x)) <= rho)
     (hone : metricDerivNorm (I := I) 1 h g g x <= rho) :
-    (Δ_g (I := I) h hf x - Δ_g (I := I) g hf x) ^ 2 <=
+    (Δ_g (I := I) h ⟨_, hf⟩ x - Δ_g (I := I) g ⟨_, hf⟩ x) ^ 2 <=
       8 * (Module.finrank Real E : Real) ^ 2 * rho ^ 2 *
           Tensor0SBundle.normSq0S (I := I) g x 2
             (leviHessSec (I := I) g f hf x) +
@@ -410,7 +415,7 @@ private theorem lapDiff_sq_core
     (leviCivitaConnectionOfMetric_isMetricCompatible (I := I) h)
     (leviCivitaConnectionOfMetric_isMetricCompatible (I := I) g)
     f hf x
-  have hlap : Δ_g (I := I) h hf x - Δ_g (I := I) g hf x = a - b := by
+  have hlap : Δ_g (I := I) h ⟨_, hf⟩ x - Δ_g (I := I) g ⟨_, hf⟩ x = a - b := by
     have hh := delta_eq_lap (I := I) h hf x
     have hg := delta_eq_lap (I := I) g hf x
     rw [hh, hg]
@@ -449,7 +454,7 @@ theorem lapDiff_sq_le
     (hsmall :
       (Module.finrank Real E : Real) *
         metricDerivNormSupOn (I := I) Set.univ 1 h g g <= (1 / 2 : Real)) :
-    (Δ_g (I := I) h hf x - Δ_g (I := I) g hf x) ^ 2 <=
+    (Δ_g (I := I) h ⟨_, hf⟩ x - Δ_g (I := I) g ⟨_, hf⟩ x) ^ 2 <=
       8 * (Module.finrank Real E : Real) ^ 2 *
           (metricDerivNormSupOn (I := I) Set.univ 1 h g g) ^ 2 *
           Tensor0SBundle.normSq0S (I := I) g x 2

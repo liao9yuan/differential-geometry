@@ -5,13 +5,14 @@ import DifferentialGeometry.Tensor.RSTensor.Derivation.NablaOnTensors
 
 
 
+namespace DifferentialGeometry
 namespace Tensor0SBundle
 
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
 
-open Bundle Set IsManifold ContinuousLinearMap VectorField Filter Function TensorLieDeriv
+open Bundle Set IsManifold ContinuousLinearMap VectorField Filter Function DifferentialGeometry.TensorLieDeriv
 open scoped Manifold Topology Bundle ContDiff
 
 variable {𝕜 : Type*} [NontriviallyNormedField 𝕜]
@@ -128,3 +129,4 @@ theorem tensor0S_eval_covariantDerivative_slot_contMDiff {s : ℕ}
 end RealDerivationSmoothness
 
 end Tensor0SBundle
+end DifferentialGeometry

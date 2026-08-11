@@ -1,6 +1,9 @@
 import DifferentialGeometry.Analysis.ODE.TimeDependentFlow.Regularity.PushforwardSmooth
-import DifferentialGeometry.Geometry.Flow.DeTurckVFConnDiffVariation
-import DifferentialGeometry.Geometry.Connection.LeviCivita.CovariantDerivativePointwise
+import DifferentialGeometry.Analysis.Parabolic.DeTurckLinearization.DeTurckVFConnDiffVariation
+import DifferentialGeometry.Geometry.Flow.RicciFlow.Pullback.CovariantDerivativePointwise
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Geometry.Connection
 noncomputable section
 
 open Bundle Manifold
@@ -9,7 +12,7 @@ open scoped Manifold ContDiff
 namespace DifferentialGeometry.PDE.RicciFlow.Pullback
 
 open DifferentialGeometry
-open DifferentialGeometry.Integral.Connection
+
 open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.PDE.DeTurck
 
@@ -43,7 +46,7 @@ theorem connDiff_push
       MDiffAt (fun y : M => (⟨y, σ y⟩ : TangentBundle I M)) x :=
     σ.mdifferentiableAt
   have hpushSmooth :=
-    ODE.flowFamily_pushforward_contMDiff (E := E) (H := H) (M := M) (I := I)
+    DifferentialGeometry.Analysis.ODE.flowFamily_pushforward_contMDiff (E := E) (H := H) (M := M) (I := I)
       (fun _ : ℝ => Φ) (0 : ℝ) (Y := fun z => σ z) σ.contMDiff
   have hpush :
       MDiffAt

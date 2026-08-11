@@ -1,7 +1,9 @@
+import DifferentialGeometry.Geometry.Metric.TensorInner.TangentNormDiamond
 import DifferentialGeometry.Geometry.Exponential.IntrinsicVelocity
 
 
 /-!
+open DifferentialGeometry.Analysis.ODE
 # Chart-composed regularity of the intrinsic exponential map
 
 **L1 of the A0′ `VolumeComparisonInput` lane** (`HCGCompactness/C4/A0PRIME_VOLUME_PLAN.md`).
@@ -71,8 +73,7 @@ theorem expChart_contDiffAt
     [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
     [IsContinuousRiemannianBundle E (fun (x : M) ↦ TangentSpace I x)]
     (g : SmoothRiemannianMetric I M)
-    (hEnorm : ∀ (x : M) (w : TangentSpace I x),
-      ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner x w w)))
+    (hEnorm : IsMetricNorm (I := I) (M := M) g)
     (p : M) (v : E) (y₀ : M)
     (hy : expMapIntrinsic (I := I) g hEnorm p (show TangentSpace I p from v)
       ∈ (chartAt H y₀).source) :

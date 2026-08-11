@@ -1,4 +1,5 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.StarSum.SpatialMember
+open DifferentialGeometry.PDE.RicciFlow
 
 set_option autoImplicit false
 

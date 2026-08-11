@@ -1,6 +1,9 @@
 import DifferentialGeometry.Geometry.Operator.LaplacianMinimum
 import DifferentialGeometry.Geometry.Operator.GradientRegularity
 import DifferentialGeometry.Geometry.Curvature.Realized.MetricFamily
+import DifferentialGeometry.Geometry.Operator.Operators
+open DifferentialGeometry.Geometry.Curvature
+
 
 set_option autoImplicit false
 
@@ -12,7 +15,8 @@ set_option autoImplicit false
 
 
 
-namespace DifferentialGeometry.Integral.Connection
+open DifferentialGeometry.Geometry.Operator
+namespace DifferentialGeometry.Geometry.Curvature
 
 noncomputable section
 
@@ -33,56 +37,56 @@ private instance tangentSpace_finiteDimensional (x : M) :
 
 
 def gradientAt
-    (G : RealizedMetricFamily (I := I) (M := M) Time)
+    (G : MetricConnectionFamily (I := I) (M := M) Time)
     (t : Time) (f : M -> Real) (x : M) : TangentSpace I x :=
   gradientFun (I := I) (G.metric t) f x
 
 
 def divergenceAt
-    (G : RealizedMetricFamily (I := I) (M := M) Time)
+    (G : MetricConnectionFamily (I := I) (M := M) Time)
     (t : Time) (X : (x : M) -> TangentSpace I x) (x : M) : Real :=
   divergence (I := I) (G.connection t) X x
 
 
 def laplacianAt
-    (G : RealizedMetricFamily (I := I) (M := M) Time)
+    (G : MetricConnectionFamily (I := I) (M := M) Time)
     (t : Time) (f : M -> Real) (x : M) : Real :=
   laplacian (I := I) (G.connection t) (G.metric t) f x
 
 
 def driftTerm
-    (G : RealizedMetricFamily (I := I) (M := M) Time)
+    (G : MetricConnectionFamily (I := I) (M := M) Time)
     (t : Time) (X : (x : M) -> TangentSpace I x)
     (f : M -> Real) (x : M) : Real :=
   (G.metric t).inner x (X x) (gradientAt (I := I) G t f x)
 
 
 def heatOperatorWithDrift
-    (G : RealizedMetricFamily (I := I) (M := M) Time)
+    (G : MetricConnectionFamily (I := I) (M := M) Time)
     (t : Time) (X : (x : M) -> TangentSpace I x)
     (f : M -> Real) (x : M) : Real :=
   laplacianAt (I := I) G t f x + driftTerm (I := I) G t X f x
 
 
 def heatOperator
-    (G : RealizedMetricFamily (I := I) (M := M) Time)
+    (G : MetricConnectionFamily (I := I) (M := M) Time)
     (t : Time) (f : M -> Real) (x : M) : Real :=
   laplacianAt (I := I) G t f x
 
 @[simp] theorem driftTerm_zero_drift
-    (G : RealizedMetricFamily (I := I) (M := M) Time)
+    (G : MetricConnectionFamily (I := I) (M := M) Time)
     (t : Time) (f : M -> Real) (x : M) :
     driftTerm (I := I) G t (fun y : M => (0 : TangentSpace I y)) f x = 0 := by
   simp [driftTerm]
 
 @[simp] theorem heatOperator_eq_laplacianAt
-    (G : RealizedMetricFamily (I := I) (M := M) Time)
+    (G : MetricConnectionFamily (I := I) (M := M) Time)
     (t : Time) (f : M -> Real) (x : M) :
     heatOperator (I := I) G t f x = laplacianAt (I := I) G t f x := by
   rfl
 
 theorem heatOperatorWithDrift_zero_drift
-    (G : RealizedMetricFamily (I := I) (M := M) Time)
+    (G : MetricConnectionFamily (I := I) (M := M) Time)
     (t : Time) (f : M -> Real) (x : M) :
     heatOperatorWithDrift (I := I) G t
         (fun y : M => (0 : TangentSpace I y)) f x =
@@ -96,7 +100,7 @@ variable [VectorBundle Real E (TangentSpace I : M -> Type _)]
 
 omit [VectorBundle ℝ E (TangentSpace I : M → Type _)] in
 theorem driftTerm_sub_const
-    (G : RealizedMetricFamily (I := I) (M := M) Time)
+    (G : MetricConnectionFamily (I := I) (M := M) Time)
     (t : Time) (X : (x : M) -> TangentSpace I x)
     {f : M -> Real} (c : Real) {x : M}
     (hf : MDifferentiableAt I 𝓘(Real, Real) f x) :
@@ -110,7 +114,7 @@ theorem driftTerm_sub_const
 
 omit [VectorBundle ℝ E (TangentSpace I : M → Type _)] in
 theorem driftTerm_const_smul
-    (G : RealizedMetricFamily (I := I) (M := M) Time)
+    (G : MetricConnectionFamily (I := I) (M := M) Time)
     (t : Time) (X : (x : M) -> TangentSpace I x)
     (a : Real) {f : M -> Real} {x : M}
     (hf : MDifferentiableAt I 𝓘(Real, Real) f x) :
@@ -123,7 +127,7 @@ theorem driftTerm_const_smul
 omit [VectorBundle ℝ E (TangentSpace I : M → Type _)] in
 /-- The drift term is additive in the scalar field. -/
 theorem driftTerm_add
-    (G : RealizedMetricFamily (I := I) (M := M) Time)
+    (G : MetricConnectionFamily (I := I) (M := M) Time)
     (t : Time) (X : (x : M) -> TangentSpace I x)
     {f h : M -> Real} {x : M}
     (hf : MDifferentiableAt I 𝓘(Real, Real) f x)
@@ -138,7 +142,7 @@ theorem driftTerm_add
 omit [VectorBundle ℝ E (TangentSpace I : M → Type _)] in
 /-- The heat operator with drift is unchanged by subtracting a spatial constant. -/
 theorem heatOperatorWithDrift_sub_const
-    (G : RealizedMetricFamily (I := I) (M := M) Time)
+    (G : MetricConnectionFamily (I := I) (M := M) Time)
     (t : Time) (X : (x : M) -> TangentSpace I x)
     {f : M -> Real} (c : Real)
     (hf : forall y : M, MDifferentiableAt I 𝓘(Real, Real) f y)
@@ -151,7 +155,7 @@ theorem heatOperatorWithDrift_sub_const
 
 
 theorem heatOperatorWithDrift_const_smul
-    (G : RealizedMetricFamily (I := I) (M := M) Time)
+    (G : MetricConnectionFamily (I := I) (M := M) Time)
     (t : Time) (X : (x : M) -> TangentSpace I x)
     (a : Real) {f : M -> Real} {x : M}
     (hf : forall y : M, MDifferentiableAt I 𝓘(Real, Real) f y)
@@ -166,7 +170,7 @@ theorem heatOperatorWithDrift_const_smul
 
 
 theorem laplacianAt_sub
-    (G : RealizedMetricFamily (I := I) (M := M) Time)
+    (G : MetricConnectionFamily (I := I) (M := M) Time)
     (t : Time) {f h : M -> Real} {x : M}
     (hf : forall y : M, MDifferentiableAt I 𝓘(Real, Real) f y)
     (hh : forall y : M, MDifferentiableAt I 𝓘(Real, Real) h y)
@@ -183,7 +187,7 @@ theorem laplacianAt_sub
 
 
 theorem laplacianAt_smul
-    (G : RealizedMetricFamily (I := I) (M := M) Time)
+    (G : MetricConnectionFamily (I := I) (M := M) Time)
     (t : Time) (a : Real) {f : M -> Real} {x : M}
     (hf : forall y : M, MDifferentiableAt I 𝓘(Real, Real) f y)
     (hgrad : MDiffAt (T% fun y : M =>
@@ -196,7 +200,7 @@ theorem laplacianAt_smul
 
 /-- Family-facing addition rule for the scalar Laplacian. -/
 theorem laplacianAt_add
-    (G : RealizedMetricFamily (I := I) (M := M) Time)
+    (G : MetricConnectionFamily (I := I) (M := M) Time)
     (t : Time) {f h : M -> Real} {x : M}
     (hf : forall y : M, MDifferentiableAt I 𝓘(Real, Real) f y)
     (hh : forall y : M, MDifferentiableAt I 𝓘(Real, Real) h y)
@@ -218,7 +222,7 @@ theorem laplacianAt_add
   exact divergence_add (I := I) (G.connection t) inferInstance hgradf hgradh
 omit [VectorBundle ℝ E (TangentSpace I : M → Type _)] in
 theorem gradientAt_mul
-    (G : RealizedMetricFamily (I := I) (M := M) Time)
+    (G : MetricConnectionFamily (I := I) (M := M) Time)
     (t : Time) {f h : M -> Real} {x : M}
     (hf : MDifferentiableAt I 𝓘(Real, Real) f x)
     (hh : MDifferentiableAt I 𝓘(Real, Real) h x) :
@@ -231,7 +235,7 @@ theorem gradientAt_mul
 omit [VectorBundle ℝ E (TangentSpace I : M → Type _)] in
 /-- The drift term satisfies the scalar product rule. -/
 theorem driftTerm_mul
-    (G : RealizedMetricFamily (I := I) (M := M) Time)
+    (G : MetricConnectionFamily (I := I) (M := M) Time)
     (t : Time) (X : (x : M) -> TangentSpace I x)
     {f h : M -> Real} {x : M}
     (hf : MDifferentiableAt I 𝓘(Real, Real) f x)
@@ -246,7 +250,7 @@ theorem driftTerm_mul
 omit [VectorBundle ℝ E (TangentSpace I : M → Type _)] in
 /-- Family-facing chain rule for the realized gradient of a real power. -/
 theorem gradientAt_rpow
-    (G : RealizedMetricFamily (I := I) (M := M) Time)
+    (G : MetricConnectionFamily (I := I) (M := M) Time)
     (t : Time) {f : M -> Real} {x : M} (p : Real)
     (hf : MDifferentiableAt I 𝓘(Real, Real) f x)
     (hpos : 0 < f x) :
@@ -257,7 +261,7 @@ theorem gradientAt_rpow
 
 
 theorem laplacianAt_mul
-    (G : RealizedMetricFamily (I := I) (M := M) Time)
+    (G : MetricConnectionFamily (I := I) (M := M) Time)
     (t : Time) {f h : M -> Real} {x : M}
     (hf : forall y : M, MDifferentiableAt I 𝓘(Real, Real) f y)
     (hh : forall y : M, MDifferentiableAt I 𝓘(Real, Real) h y)
@@ -282,7 +286,7 @@ theorem laplacianAt_mul
 
 
 theorem laplacianAt_mul_of_scalarRegular
-    (G : RealizedMetricFamily (I := I) (M := M) Time)
+    (G : MetricConnectionFamily (I := I) (M := M) Time)
     (t : Time) {f h : M -> Real} {x : M}
     (hf : forall y : M, MDifferentiableAt I 𝓘(Real, Real) f y)
     (hh : forall y : M, MDifferentiableAt I 𝓘(Real, Real) h y)
@@ -303,7 +307,7 @@ theorem laplacianAt_mul_of_scalarRegular
 
 /-- The drifted heat operator satisfies the scalar chain rule. -/
 theorem heatDrift_comp
-    (G : RealizedMetricFamily (I := I) (M := M) Time)
+    (G : MetricConnectionFamily (I := I) (M := M) Time)
     (t : Time) (X : (x : M) -> TangentSpace I x)
     {φ : Real -> Real} {f : M -> Real} {x : M}
     (hφ : Differentiable Real φ)
@@ -327,7 +331,7 @@ theorem heatDrift_comp
 
 /-- The drifted heat operator satisfies the scalar product rule. -/
 theorem heatDrift_mul
-    (G : RealizedMetricFamily (I := I) (M := M) Time)
+    (G : MetricConnectionFamily (I := I) (M := M) Time)
     (t : Time) (X : (x : M) -> TangentSpace I x)
     {f h : M -> Real} {x : M}
     (hf : forall y : M, MDifferentiableAt I 𝓘(Real, Real) f y)
@@ -349,7 +353,7 @@ theorem heatDrift_mul
 
 /-- The drifted heat operator is additive in the scalar field. -/
 theorem heatDrift_add
-    (G : RealizedMetricFamily (I := I) (M := M) Time)
+    (G : MetricConnectionFamily (I := I) (M := M) Time)
     (t : Time) (X : (x : M) -> TangentSpace I x)
     {f h : M -> Real} {x : M}
     (hf : forall y : M, MDifferentiableAt I 𝓘(Real, Real) f y)
@@ -368,7 +372,7 @@ theorem heatDrift_add
 
 /-- Family-facing scalar real-power rule for the realized Laplacian. -/
 theorem laplacianAt_rpow
-    (G : RealizedMetricFamily (I := I) (M := M) Time)
+    (G : MetricConnectionFamily (I := I) (M := M) Time)
     (t : Time) {f : M -> Real} {x : M} (p : Real)
     (hf : forall y : M, MDifferentiableAt I 𝓘(Real, Real) f y)
     (hpos : forall y : M, 0 < f y)
@@ -386,7 +390,7 @@ theorem laplacianAt_rpow
 
 
 theorem laplacianAt_sq
-    (G : RealizedMetricFamily (I := I) (M := M) Time)
+    (G : MetricConnectionFamily (I := I) (M := M) Time)
     (t : Time) {f : M -> Real} {x : M}
     (hf_all : forall y : M, MDifferentiableAt I 𝓘(Real, Real) f y)
     (hf_x : MDifferentiableAt I 𝓘(Real, Real) f x)
@@ -423,7 +427,7 @@ theorem laplacianAt_sq
 
 
 theorem laplacianAt_sq_of_scalarRegular
-    (G : RealizedMetricFamily (I := I) (M := M) Time)
+    (G : MetricConnectionFamily (I := I) (M := M) Time)
     (t : Time) {f : M -> Real} {x : M}
     (hf : ∀ y : M, MDifferentiableAt I 𝓘(Real, Real) f y)
     (hgrad : ∀ y : M, MDiffAt (T% fun z : M =>
@@ -440,21 +444,21 @@ theorem laplacianAt_sq_of_scalarRegular
 end FamilyAlgebraicRules
 
 @[simp] theorem gradientAt_eq
-    (G : RealizedMetricFamily (I := I) (M := M) Time)
+    (G : MetricConnectionFamily (I := I) (M := M) Time)
     (t : Time) (f : M -> Real) (x : M) :
     gradientAt (I := I) G t f x = gradientFun (I := I) (G.metric t) f x := by
   rfl
 
 omit [FiniteDimensional ℝ E] in
 @[simp] theorem divergenceAt_eq
-    (G : RealizedMetricFamily (I := I) (M := M) Time)
+    (G : MetricConnectionFamily (I := I) (M := M) Time)
     (t : Time) (X : (x : M) -> TangentSpace I x) (x : M) :
     divergenceAt (I := I) G t X x =
       divergence (I := I) (G.connection t) X x := by
   rfl
 
 @[simp] theorem laplacianAt_eq
-    (G : RealizedMetricFamily (I := I) (M := M) Time)
+    (G : MetricConnectionFamily (I := I) (M := M) Time)
     (t : Time) (f : M -> Real) (x : M) :
     laplacianAt (I := I) G t f x =
       laplacian (I := I) (G.connection t) (G.metric t) f x := by
@@ -465,7 +469,7 @@ omit [FiniteDimensional ℝ E] in
 
 theorem driftTerm_eq_zero_at_spatial_min
     [I.Boundaryless]
-    (G : RealizedMetricFamily (I := I) (M := M) Time)
+    (G : MetricConnectionFamily (I := I) (M := M) Time)
     (t : Time) (X : (x : M) -> TangentSpace I x)
     {f : M -> Real} {x : M}
     (hmin : IsLocalMin f x)
@@ -479,7 +483,7 @@ theorem driftTerm_eq_zero_at_spatial_min
 def LaplacianNonnegativeAtSpatialMinFamily
     [I.Boundaryless]
     [VectorBundle Real E (TangentSpace I : M -> Type _)]
-    (G : RealizedMetricFamily (I := I) (M := M) Time) : Prop :=
+    (G : MetricConnectionFamily (I := I) (M := M) Time) : Prop :=
   forall t : Time,
     LaplacianNonnegativeAtSpatialMin (I := I) (G.connection t) (G.metric t)
 
@@ -489,7 +493,7 @@ theorem laplacianNonnegativeAtSpatialMinFamily_of_realizedMetricFamily
     [I.Boundaryless]
     [VectorBundle Real E (TangentSpace I : M -> Type _)]
     [ContMDiffVectorBundle 1 E (TangentSpace I : M -> Type _) I]
-    (G : RealizedMetricFamily (I := I) (M := M) Time) :
+    (G : MetricConnectionFamily (I := I) (M := M) Time) :
     LaplacianNonnegativeAtSpatialMinFamily (I := I) G := by
   intro t
   exact laplacianNonnegativeAtSpatialMin_of_metricCompatible (I := I)
@@ -500,7 +504,7 @@ theorem heatOperatorWithDrift_at_spatial_min_nonneg
     [I.Boundaryless]
     [VectorBundle Real E (TangentSpace I : M -> Type _)]
     [ContMDiffVectorBundle 1 E (TangentSpace I : M -> Type _) I]
-    (G : RealizedMetricFamily (I := I) (M := M) Time)
+    (G : MetricConnectionFamily (I := I) (M := M) Time)
     (t : Time) (X : (x : M) -> TangentSpace I x)
     {f : M -> Real} {x : M}
     (hmin : IsLocalMin f x)
@@ -515,4 +519,4 @@ theorem heatOperatorWithDrift_at_spatial_min_nonneg
 
 end
 
-end DifferentialGeometry.Integral.Connection
+end DifferentialGeometry.Geometry.Curvature

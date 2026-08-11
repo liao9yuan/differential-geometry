@@ -1,6 +1,8 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Entropy.Defs
 import DifferentialGeometry.Analysis.Integration.Measure.VolumeVariation
 import Mathlib.Analysis.SpecialFunctions.Pow.Deriv
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Geometry.Curvature
 
 set_option autoImplicit false
 
@@ -195,8 +197,8 @@ private local instance : BorelSpace M := ⟨rfl⟩
 
 
 theorem weightedMeasureIntegral_hasDerivAt_at
-    [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
-    (G : DifferentialGeometry.Integral.Connection.RealizedMetricFamily
+    [T2Space M] [CompactSpace M]
+    (G : DifferentialGeometry.Geometry.Curvature.MetricConnectionFamily
       (I := I) (M := M) Real)
     {n : Nat} {tauPath : Real -> Real}
     {potentialPath : Real -> M -> Real}
@@ -282,8 +284,8 @@ theorem weightedMeasureIntegral_hasDerivAt_at
 
 
 theorem wEntropyBaseIntegral_hasDerivAt_at
-    [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
-    (G : DifferentialGeometry.Integral.Connection.RealizedMetricFamily
+    [T2Space M] [CompactSpace M]
+    (G : DifferentialGeometry.Geometry.Curvature.MetricConnectionFamily
       (I := I) (M := M) Real)
     {n : Nat} {tauPath : Real -> Real}
     {scalarCurvaturePath gradPotentialNormSqPath potentialPath :
@@ -401,8 +403,8 @@ theorem WEntropyHasFirstVariationAt_of_baseIntegral_hasDerivAt
 
 
 theorem WEntropyHasFirstVariationAt_of_volumeVariation
-    [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
-    (G : DifferentialGeometry.Integral.Connection.RealizedMetricFamily
+    [T2Space M] [CompactSpace M]
+    (G : DifferentialGeometry.Geometry.Curvature.MetricConnectionFamily
       (I := I) (M := M) Real)
     {n : Nat} {tauPath : Real -> Real}
     {scalarCurvaturePath gradPotentialNormSqPath potentialPath :

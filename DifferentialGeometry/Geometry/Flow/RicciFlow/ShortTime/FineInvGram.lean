@@ -1,6 +1,10 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.FineGramBounds
 import DifferentialGeometry.Analysis.Spectral.Tensor.UniformChartBounds.GramInvUniformEigenvalueLowerBound
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurckCoefficients.ChristoffelPerturbation
+open DifferentialGeometry.PDE.RicciFlow
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Geometry.Operator
 
 /-!
 # Uniform inverse-Gram variation on fine chart carriers
@@ -29,7 +33,8 @@ open DifferentialGeometry.Analysis.Sobolev.Chart
 open DifferentialGeometry.Analysis.Parabolic.TensorSpectral
 open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.DivergenceTheorem
-open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.DeTurckCoefficients
+open DifferentialGeometry.Geometry.Operator
+open DifferentialGeometry.Analysis.Calculus.DeTurckCoefficients DifferentialGeometry.Analysis.Spectral.DeTurckCoefficients
 
 variable
     {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
@@ -37,7 +42,7 @@ variable
     {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
     {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
       [IsManifold I ∞ M] [CompactSpace M] [I.Boundaryless]
-      [T2Space M] [SigmaCompactSpace M]
+      [T2Space M]
 
 omit [NeZero (Module.finrank ℝ E)] in
 /-- Metric equivalence gives one entrywise inverse-Gram bound on a fixed
@@ -91,7 +96,7 @@ omit [NeZero (Module.finrank ℝ E)]
   [CompactSpace M]
   [I.Boundaryless]
   [T2Space M]
-  [SigmaCompactSpace M] in
+  in
 /-- An order-one raw Gram operator-norm bound on a chart buffer gives a
 uniform bound for every first coordinate partial there. -/
 theorem gramD_buffer_bnd
@@ -142,7 +147,7 @@ theorem gramD_buffer_bnd
 omit [NeZero (Module.finrank ℝ E)]
   [CompactSpace M]
   [T2Space M]
-  [SigmaCompactSpace M] in
+  in
 /-- Entrywise inverse-Gram and first Gram-partial bounds control every first
 coordinate partial of the inverse Gram matrix on the fixed buffer. -/
 theorem invGramD_buffer_bnd
@@ -182,7 +187,7 @@ omit [NeZero (Module.finrank ℝ E)]
   [CompactSpace M]
   [I.Boundaryless]
   [T2Space M]
-  [SigmaCompactSpace M] in
+  in
 /-- Uniform first coordinate partial bounds give a full Fréchet derivative
 operator-norm bound for each inverse-Gram entry. -/
 theorem invGram_fderiv_bnd
@@ -227,7 +232,7 @@ theorem invGram_fderiv_bnd
 omit [NeZero (Module.finrank ℝ E)]
   [CompactSpace M]
   [T2Space M]
-  [SigmaCompactSpace M] in
+  in
 /-- A derivative bound on the fixed buffer gives the uniform Lipschitz
 freezing estimate on every smaller coordinate closed ball. -/
 theorem invGram_freeze_lip

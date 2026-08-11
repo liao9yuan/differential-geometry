@@ -14,7 +14,7 @@ set_option autoImplicit false
 
 
 
-namespace DifferentialGeometry.Integral.Connection
+namespace DifferentialGeometry.Geometry.Connection
 
 open Bundle
 open scoped Manifold ContDiff
@@ -75,4 +75,4 @@ theorem metric_compatible_apply
 
 end Pointwise
 
-end DifferentialGeometry.Integral.Connection
+end DifferentialGeometry.Geometry.Connection

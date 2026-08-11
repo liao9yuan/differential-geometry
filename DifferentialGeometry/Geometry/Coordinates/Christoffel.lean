@@ -18,6 +18,7 @@ set_option autoImplicit false
 
 
 
+open DifferentialGeometry.Analysis
 namespace DifferentialGeometry.Tensor.Coordinates
 
 noncomputable section

@@ -1,5 +1,8 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.ExtendedSolutionRegularity
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.SmoothStrongPair
+open DifferentialGeometry.PDE.RicciFlow DifferentialGeometry.Analysis.Spectral
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Geometry.Curvature
 
 /-!
 # Interior Ricci--DeTurck uniqueness from chart-Gram regularity
@@ -19,16 +22,16 @@ open scoped Manifold Topology ContDiff
 namespace DifferentialGeometry.PDE.RicciFlow
 
 open DifferentialGeometry
-open DifferentialGeometry.Integral.Connection
+
 open DifferentialGeometry.Integral.Measure
-open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral
+open DifferentialGeometry.Analysis.Spectral DifferentialGeometry.PDE.RicciFlow
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
   [IsManifold I ∞ M] [CompactSpace M] [I.Boundaryless]
-  [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M]
+  [BoundarylessManifold I M] [T2Space M]
 
 private theorem continuousOn_prod_slice
     {α β γ : Type*} [TopologicalSpace α] [TopologicalSpace β] [TopologicalSpace γ]
@@ -39,7 +42,7 @@ private theorem continuousOn_prod_slice
     (fun _y hy => ⟨hy, hx⟩)
 
 omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless]
-  [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
+  [BoundarylessManifold I M] [T2Space M] in
 /-- Two smooth Riemannian metrics are equal if their Gram matrices agree in
 the chart basis centred at every base point. -/
 theorem metric_eq_chartGram
@@ -78,7 +81,7 @@ theorem metric_eq_chartGram
       rfl
 
 omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless]
-  [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
+  [BoundarylessManifold I M] [T2Space M] in
 /-- Equality on a left half-window passes to its right endpoint from the
 existing joint chart-Gram `C⁰` regularity.  This is the closedness input for
 forward Ricci--DeTurck continuation. -/
@@ -176,13 +179,13 @@ theorem chartRD_local
   let D : RealTimeInterval := RealTimeInterval.closedOpen a b hab
   let Sol₁ : SolutionOn (I := I) (M := M) D := { base := { metric := g₁ } }
   let Sol₂ : SolutionOn (I := I) (M := M) D := { base := { metric := g₂ } }
-  let G₁ : RealizedMetricFamilyOn (I := I) (M := M) D := Sol₁.family
-  let G₂ : RealizedMetricFamilyOn (I := I) (M := M) D := Sol₂.family
-  have hG₁ : MetricFamilySmoothOn (I := I) (M := M) D G₁ := by
+  let G₁ : MetricConnectionFamilyOn (I := I) (M := M) D := Sol₁.family
+  let G₂ : MetricConnectionFamilyOn (I := I) (M := M) D := Sol₂.family
+  have hG₁ : MetricFamilySmoothOn (I := I) (M := M) D G₁.metric := by
     simpa only [D, G₁, Sol₁] using
       metricFamilySmoothOn_of_chartGram (I := I) (M := M)
         g₁ hab hsmooth₁ hcont₁
-  have hG₂ : MetricFamilySmoothOn (I := I) (M := M) D G₂ := by
+  have hG₂ : MetricFamilySmoothOn (I := I) (M := M) D G₂.metric := by
     simpa only [D, G₂, Sol₂] using
       metricFamilySmoothOn_of_chartGram (I := I) (M := M)
         g₂ hab hsmooth₂ hcont₂
@@ -209,7 +212,7 @@ theorem chartRD_local
     simpa only [G₂, Sol₂, SolutionOn.family, SolutionFamily.connection,
       add_comm] using hpde.comp_add_const t c
   obtain ⟨T, hT, huniq⟩ := metricRD_local (I := I) (M := M)
-    G₁ G₂ hG₁ hG₂ (g₁ c) g_bg c hS h0S hmap rfl (by
+    G₁.metric G₂.metric hG₁ hG₂ (g₁ c) g_bg c hS h0S hmap rfl (by
       simpa only [G₂, Sol₂, SolutionOn.family] using hagree.symm) hshift₁ hshift₂
   refine ⟨T, hT, ?_⟩
   intro t ht

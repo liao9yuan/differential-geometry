@@ -1,5 +1,5 @@
-import DifferentialGeometry.Geometry.Connection.LeviCivita.LeviCivita
-import DifferentialGeometry.Geometry.Flow.RicciFlow.Pullback.PushforwardVF
+import DifferentialGeometry.Geometry.Flow.RicciFlow.Pullback.LeviCivita
+import DifferentialGeometry.Analysis.Parabolic.DeTurckRicci.Pullback.PushforwardVF
 
 
 
@@ -8,12 +8,13 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.Pullback.PushforwardVF
 
 
 
+open DifferentialGeometry.Geometry.Connection
 namespace DifferentialGeometry.PDE.RicciFlow.Pullback
 
 open Bundle
 open scoped Manifold ContDiff
 open DifferentialGeometry
-open DifferentialGeometry.Integral.Connection
+
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]

@@ -1,5 +1,6 @@
 import DifferentialGeometry.Geometry.Curvature.Basic
 import DifferentialGeometry.Tensor.RSTensor.Field
+open DifferentialGeometry.Geometry.Curvature
 
 set_option autoImplicit false
 set_option backward.isDefEq.respectTransparency false
@@ -13,9 +14,9 @@ set_option backward.isDefEq.respectTransparency false
 
 noncomputable section
 
-namespace DifferentialGeometry.Integral.Connection
+namespace DifferentialGeometry.Geometry.Curvature
 
-open Bundle Tensor0SBundle
+open Bundle DifferentialGeometry.Tensor0SBundle
 open scoped Manifold ContDiff BigOperators
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]
@@ -113,4 +114,4 @@ theorem scalarCurvatureFromRicciTraceInFrame_realizes
 
 end MetricTrace
 
-end DifferentialGeometry.Integral.Connection
+end DifferentialGeometry.Geometry.Curvature

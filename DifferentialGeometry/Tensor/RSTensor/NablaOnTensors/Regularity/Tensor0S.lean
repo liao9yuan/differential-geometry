@@ -1,15 +1,17 @@
 import DifferentialGeometry.Tensor.RSTensor.NablaOnTensors.Regularity.Derivation
 import DifferentialGeometry.Tensor.RSTensor.LocalFrameRegularity
 import DifferentialGeometry.Tensor.RSTensor.Derivation.NablaOnTensors
+open DifferentialGeometry.Tensor.Multilinear
 
 
 
 
 
 
+namespace DifferentialGeometry
 namespace Tensor0SBundle
 
-open Bundle Set TensorLieDeriv
+open Bundle Set DifferentialGeometry.TensorLieDeriv
 open scoped BigOperators Manifold ContDiff Topology
 
 variable {𝕜 : Type*} [NontriviallyNormedField 𝕜] [CompleteSpace 𝕜]
@@ -993,3 +995,4 @@ theorem nabla0S_reg (s : ℕ)
   exact hsec
 
 end Tensor0SBundle
+end DifferentialGeometry

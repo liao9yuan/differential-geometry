@@ -1,15 +1,18 @@
 import DifferentialGeometry.Geometry.Connection.LeviCivita.Smooth.MetricCoord
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Geometry.Operator
 
 set_option autoImplicit false
 
 noncomputable section
 
-namespace DifferentialGeometry.Integral.Connection
+
+namespace DifferentialGeometry.Geometry.Connection
 
 open Bundle
-open DifferentialGeometry.Integral.Connection
+open DifferentialGeometry.Geometry.Operator
 open DifferentialGeometry.Tensor.Coordinates
-open Tensor0SBundle
+open DifferentialGeometry.Tensor0SBundle
 open scoped Manifold ContDiff Topology
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]
@@ -456,4 +459,4 @@ noncomputable def metricFlatModelInChart_component
     (i j : CoordinateIdx (𝕜 := Real) E) (y : E) : Real :=
   metricFlatModelInChart (I := I) g x₀ y
     ((Module.finBasis Real E) i) ((Module.finBasis Real E) j)
-end DifferentialGeometry.Integral.Connection
+end DifferentialGeometry.Geometry.Connection

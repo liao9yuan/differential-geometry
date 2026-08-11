@@ -8,9 +8,8 @@ open Set
 open scoped Topology BigOperators ContDiff
 
 namespace DifferentialGeometry
-namespace PDE
-namespace RicciFlow
-namespace IntrinsicSpectral
+namespace Analysis
+namespace Calculus
 namespace DeTurckCoefficients
 
 open DifferentialGeometry.Integral.Measure
@@ -184,9 +183,8 @@ theorem iteratedFDerivSeminorm_partialDeriv_le
   omega
 
 end DeTurckCoefficients
-end IntrinsicSpectral
-end RicciFlow
-end PDE
+end Calculus
+end Analysis
 end DifferentialGeometry
 
 end

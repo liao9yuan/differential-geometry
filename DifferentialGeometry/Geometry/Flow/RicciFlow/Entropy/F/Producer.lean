@@ -1,17 +1,23 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Entropy.F.ConnectionTrace
+open DifferentialGeometry.Tensor.RSTensor
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Geometry.Operator
 
 
 set_option autoImplicit false
 
+open DifferentialGeometry.Geometry.Connection
 namespace DifferentialGeometry.PDE.RicciFlow.Entropy
 
 noncomputable section
 
 open Filter MeasureTheory
 open DifferentialGeometry.Integral.Measure
-open DifferentialGeometry.Integral.Connection
+
+open DifferentialGeometry.Geometry.Operator
 open DifferentialGeometry.Tensor.Coordinates
-open Tensor0SBundle
+open DifferentialGeometry.Tensor0SBundle
 open scoped Manifold ContDiff
 
 variable {M : Type*}
@@ -45,7 +51,7 @@ private local instance : BorelSpace M := ⟨rfl⟩
 
 omit [NeZero (Module.finrank ℝ E)] in
 theorem formula510_of_connTraceField
-    [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
+    [I.Boundaryless] [T2Space M] [CompactSpace M]
     (g : SmoothRiemannianMetric I M)
     (A : Tensor0SBundle.TensorRSField (𝕜 := Real) (E := E) (H := H)
       (I := I) (M := M) (n := (∞ : WithTop ℕ∞)) 1 2)
@@ -106,23 +112,23 @@ theorem formula510_of_connTraceField
     (hlap :
       ∀ x : M,
         lapPotential x =
-          DifferentialGeometry.Integral.DivergenceTheorem.Δ_g
-            (I := I) g hpotential x)
+          DifferentialGeometry.Geometry.Operator.Δ_g
+            (I := I) g ⟨_, hpotential⟩ x)
     (hgradSq :
       ∀ x : M,
         gradPotentialNormSq x =
           g.inner x
-            ((DifferentialGeometry.Integral.DivergenceTheorem.grad_g
-              (I := I) g hpotential :
+            ((DifferentialGeometry.Geometry.Operator.grad_g
+              (I := I) g ⟨_, hpotential⟩ :
               Cₛ^∞⟮I; E, (TangentSpace I : M -> Type _)⟯) x)
-            ((DifferentialGeometry.Integral.DivergenceTheorem.grad_g
-              (I := I) g hpotential :
+            ((DifferentialGeometry.Geometry.Operator.grad_g
+              (I := I) g ⟨_, hpotential⟩ :
               Cₛ^∞⟮I; E, (TangentSpace I : M -> Type _)⟯) x))
     (hshift :
       ∀ x : M,
         shiftedTrace x =
-          DifferentialGeometry.Integral.DivergenceTheorem.Δ_g
-            (I := I) g hq x)
+          DifferentialGeometry.Geometry.Operator.Δ_g
+            (I := I) g ⟨_, hq⟩ x)
     (hqeq :
       ∀ x : M,
         q x = potentialVariation x - metricVariationTrace x / 2) :
@@ -142,7 +148,7 @@ theorem formula510_of_connTraceField
 
 omit [NeZero (Module.finrank ℝ E)] in
 theorem formula510_of_trace
-    [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
+    [I.Boundaryless] [T2Space M] [CompactSpace M]
     (g : SmoothRiemannianMetric I M)
     (A : Tensor0SBundle.TensorRSField (𝕜 := Real) (E := E) (H := H)
       (I := I) (M := M) (n := (∞ : WithTop ℕ∞)) 1 2)
@@ -195,23 +201,23 @@ theorem formula510_of_trace
     (hlap :
       ∀ x : M,
         lapPotential x =
-          DifferentialGeometry.Integral.DivergenceTheorem.Δ_g
-            (I := I) g hpotential x)
+          DifferentialGeometry.Geometry.Operator.Δ_g
+            (I := I) g ⟨_, hpotential⟩ x)
     (hgradSq :
       ∀ x : M,
         gradPotentialNormSq x =
           g.inner x
-            ((DifferentialGeometry.Integral.DivergenceTheorem.grad_g
-              (I := I) g hpotential :
+            ((DifferentialGeometry.Geometry.Operator.grad_g
+              (I := I) g ⟨_, hpotential⟩ :
               Cₛ^∞⟮I; E, (TangentSpace I : M -> Type _)⟯) x)
-            ((DifferentialGeometry.Integral.DivergenceTheorem.grad_g
-              (I := I) g hpotential :
+            ((DifferentialGeometry.Geometry.Operator.grad_g
+              (I := I) g ⟨_, hpotential⟩ :
               Cₛ^∞⟮I; E, (TangentSpace I : M -> Type _)⟯) x))
     (hshift :
       ∀ x : M,
         shiftedTrace x =
-          DifferentialGeometry.Integral.DivergenceTheorem.Δ_g
-            (I := I) g hq x)
+          DifferentialGeometry.Geometry.Operator.Δ_g
+            (I := I) g ⟨_, hq⟩ x)
     (hqeq :
       ∀ x : M,
         q x = potentialVariation x - metricVariationTrace x / 2) :
@@ -237,7 +243,7 @@ theorem formula510_of_trace
 
 omit [NeZero (Module.finrank ℝ E)] in
 theorem formula510_of_components
-    [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
+    [I.Boundaryless] [T2Space M] [CompactSpace M]
     (g : SmoothRiemannianMetric I M)
     (A : Tensor0SBundle.TensorRSField (𝕜 := Real) (E := E) (H := H)
       (I := I) (M := M) (n := (∞ : WithTop ℕ∞)) 1 2)
@@ -311,7 +317,7 @@ theorem formula510_of_components
         (fun y : M => fun a b : CoordinateIdx (𝕜 := Real) E =>
           inverseMetricFlatModelInChart_component (I := I) g x a b
             (extChartAt I x y))
-        (DifferentialGeometry.Integral.Connection.LeviCivita (I := I) g)
+        (DifferentialGeometry.Geometry.Connection.LeviCivita (I := I) g)
         (coordinateFrameAt (I := I) x)
         (coordinateFrameAt_isLocalFrame_one (I := I) x)
         x d i j = 0)
@@ -321,7 +327,7 @@ theorem formula510_of_components
             (coordinateFrameAt (I := I) x d x) +
           (∑ a : CoordinateIdx (𝕜 := Real) E,
             christoffelSymbolInFrame
-              (DifferentialGeometry.Integral.Connection.LeviCivita (I := I) g)
+              (DifferentialGeometry.Geometry.Connection.LeviCivita (I := I) g)
               (coordinateFrameAt (I := I) x)
               (coordinateFrameAt_isLocalFrame_one (I := I) x) x d a k *
               componentRS (I := I)
@@ -331,7 +337,7 @@ theorem formula510_of_components
                 (fun q : Fin 2 => if q = 0 then i else j)) -
           (∑ a : CoordinateIdx (𝕜 := Real) E,
             christoffelSymbolInFrame
-              (DifferentialGeometry.Integral.Connection.LeviCivita (I := I) g)
+              (DifferentialGeometry.Geometry.Connection.LeviCivita (I := I) g)
               (coordinateFrameAt (I := I) x)
               (coordinateFrameAt_isLocalFrame_one (I := I) x) x d i a *
               componentRS (I := I)
@@ -341,7 +347,7 @@ theorem formula510_of_components
                 (fun q : Fin 2 => if q = 0 then a else j)) -
           (∑ a : CoordinateIdx (𝕜 := Real) E,
             christoffelSymbolInFrame
-              (DifferentialGeometry.Integral.Connection.LeviCivita (I := I) g)
+              (DifferentialGeometry.Geometry.Connection.LeviCivita (I := I) g)
               (coordinateFrameAt (I := I) x)
               (coordinateFrameAt_isLocalFrame_one (I := I) x) x d j a *
               componentRS (I := I)
@@ -350,32 +356,32 @@ theorem formula510_of_components
                 (A x) (fun _ : Fin 1 => k)
                 (fun q : Fin 2 => if q = 0 then i else a)))
     (hGamma : ∀ x : M, ∀ d a k : CoordinateIdx (𝕜 := Real) E,
-      christoffelSymbolInFrame (DifferentialGeometry.Integral.Connection.LeviCivita (I := I) g)
+      christoffelSymbolInFrame (DifferentialGeometry.Geometry.Connection.LeviCivita (I := I) g)
         (coordinateFrameAt (I := I) x)
         (coordinateFrameAt_isLocalFrame_one (I := I) x) x d a k =
-      christoffelSymbolInFrame (DifferentialGeometry.Integral.Connection.LeviCivita (I := I) g)
+      christoffelSymbolInFrame (DifferentialGeometry.Geometry.Connection.LeviCivita (I := I) g)
         (coordinateFrameAt (I := I) x)
         (coordinateFrameAt_isLocalFrame_one (I := I) x) x a d k)
     (hlap :
       ∀ x : M,
         lapPotential x =
-          DifferentialGeometry.Integral.DivergenceTheorem.Δ_g
-            (I := I) g hpotential x)
+          DifferentialGeometry.Geometry.Operator.Δ_g
+            (I := I) g ⟨_, hpotential⟩ x)
     (hgradSq :
       ∀ x : M,
         gradPotentialNormSq x =
           g.inner x
-            ((DifferentialGeometry.Integral.DivergenceTheorem.grad_g
-              (I := I) g hpotential :
+            ((DifferentialGeometry.Geometry.Operator.grad_g
+              (I := I) g ⟨_, hpotential⟩ :
               Cₛ^∞⟮I; E, (TangentSpace I : M -> Type _)⟯) x)
-            ((DifferentialGeometry.Integral.DivergenceTheorem.grad_g
-              (I := I) g hpotential :
+            ((DifferentialGeometry.Geometry.Operator.grad_g
+              (I := I) g ⟨_, hpotential⟩ :
               Cₛ^∞⟮I; E, (TangentSpace I : M -> Type _)⟯) x))
     (hshift :
       ∀ x : M,
         shiftedTrace x =
-          DifferentialGeometry.Integral.DivergenceTheorem.Δ_g
-            (I := I) g hq x)
+          DifferentialGeometry.Geometry.Operator.Δ_g
+            (I := I) g ⟨_, hq⟩ x)
     (hqeq :
       ∀ x : M,
         q x = potentialVariation x - metricVariationTrace x / 2) :
@@ -389,7 +395,7 @@ theorem formula510_of_components
         connTraceRawDiv (I := I) g A x =
           gammaRawDivergenceTrace (I := I) g nablaChristoffelVariation x :=
     connTraceRaw_of_components (I := I)
-      (cov := DifferentialGeometry.Integral.Connection.LeviCivita (I := I) g) g rfl A
+      (cov := DifferentialGeometry.Geometry.Connection.LeviCivita (I := I) g) g rfl A
       nablaChristoffelVariation hzero hNabla hGamma
   have hweighted :
       ∀ x : M,
@@ -415,8 +421,8 @@ theorem formula510_of_components
 
 omit [NeZero (Module.finrank ℝ E)] in
 theorem formula510_producer
-    [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
-    (G : DifferentialGeometry.Integral.Connection.RealizedMetricFamily
+    [I.Boundaryless] [T2Space M] [CompactSpace M]
+    (G : DifferentialGeometry.Geometry.Curvature.MetricConnectionFamily
       (I := I) (M := M) Real)
     {s0 : Real}
     (A : Tensor0SBundle.TensorRSField (𝕜 := Real) (E := E) (H := H)
@@ -560,7 +566,7 @@ theorem formula510_producer
         (fun y : M => fun a b : CoordinateIdx (𝕜 := Real) E =>
           inverseMetricFlatModelInChart_component (I := I) (G.metric s0) x a b
             (extChartAt I x y))
-        (DifferentialGeometry.Integral.Connection.LeviCivita (I := I) (G.metric s0))
+        (DifferentialGeometry.Geometry.Connection.LeviCivita (I := I) (G.metric s0))
         (coordinateFrameAt (I := I) x)
         (coordinateFrameAt_isLocalFrame_one (I := I) x)
         x d i j = 0)
@@ -570,7 +576,7 @@ theorem formula510_producer
             (coordinateFrameAt (I := I) x d x) +
           (∑ a : CoordinateIdx (𝕜 := Real) E,
             christoffelSymbolInFrame
-              (DifferentialGeometry.Integral.Connection.LeviCivita (I := I) (G.metric s0))
+              (DifferentialGeometry.Geometry.Connection.LeviCivita (I := I) (G.metric s0))
               (coordinateFrameAt (I := I) x)
               (coordinateFrameAt_isLocalFrame_one (I := I) x) x d a k *
               componentRS (I := I)
@@ -580,7 +586,7 @@ theorem formula510_producer
                 (fun q : Fin 2 => if q = 0 then i else j)) -
           (∑ a : CoordinateIdx (𝕜 := Real) E,
             christoffelSymbolInFrame
-              (DifferentialGeometry.Integral.Connection.LeviCivita (I := I) (G.metric s0))
+              (DifferentialGeometry.Geometry.Connection.LeviCivita (I := I) (G.metric s0))
               (coordinateFrameAt (I := I) x)
               (coordinateFrameAt_isLocalFrame_one (I := I) x) x d i a *
               componentRS (I := I)
@@ -590,7 +596,7 @@ theorem formula510_producer
                 (fun q : Fin 2 => if q = 0 then a else j)) -
           (∑ a : CoordinateIdx (𝕜 := Real) E,
             christoffelSymbolInFrame
-              (DifferentialGeometry.Integral.Connection.LeviCivita (I := I) (G.metric s0))
+              (DifferentialGeometry.Geometry.Connection.LeviCivita (I := I) (G.metric s0))
               (coordinateFrameAt (I := I) x)
               (coordinateFrameAt_isLocalFrame_one (I := I) x) x d j a *
               componentRS (I := I)
@@ -600,33 +606,33 @@ theorem formula510_producer
                 (fun q : Fin 2 => if q = 0 then i else a)))
     (hGamma : ∀ x : M, ∀ d a k : CoordinateIdx (𝕜 := Real) E,
       christoffelSymbolInFrame
-        (DifferentialGeometry.Integral.Connection.LeviCivita (I := I) (G.metric s0))
+        (DifferentialGeometry.Geometry.Connection.LeviCivita (I := I) (G.metric s0))
         (coordinateFrameAt (I := I) x)
         (coordinateFrameAt_isLocalFrame_one (I := I) x) x d a k =
       christoffelSymbolInFrame
-        (DifferentialGeometry.Integral.Connection.LeviCivita (I := I) (G.metric s0))
+        (DifferentialGeometry.Geometry.Connection.LeviCivita (I := I) (G.metric s0))
         (coordinateFrameAt (I := I) x)
         (coordinateFrameAt_isLocalFrame_one (I := I) x) x a d k)
     (hlap :
       ∀ x : M,
         lapPotential x =
-          DifferentialGeometry.Integral.DivergenceTheorem.Δ_g
-            (I := I) (G.metric s0) hpotential x)
+          DifferentialGeometry.Geometry.Operator.Δ_g
+            (I := I) (G.metric s0) ⟨_, hpotential⟩ x)
     (hgradSq :
       ∀ x : M,
         gradPotentialNormSq x =
           (G.metric s0).inner x
-            ((DifferentialGeometry.Integral.DivergenceTheorem.grad_g
-              (I := I) (G.metric s0) hpotential :
+            ((DifferentialGeometry.Geometry.Operator.grad_g
+              (I := I) (G.metric s0) ⟨_, hpotential⟩ :
               Cₛ^∞⟮I; E, (TangentSpace I : M -> Type _)⟯) x)
-            ((DifferentialGeometry.Integral.DivergenceTheorem.grad_g
-              (I := I) (G.metric s0) hpotential :
+            ((DifferentialGeometry.Geometry.Operator.grad_g
+              (I := I) (G.metric s0) ⟨_, hpotential⟩ :
               Cₛ^∞⟮I; E, (TangentSpace I : M -> Type _)⟯) x))
     (hshift :
       ∀ x : M,
         shiftedTrace x =
-          DifferentialGeometry.Integral.DivergenceTheorem.Δ_g
-            (I := I) (G.metric s0) hq x)
+          DifferentialGeometry.Geometry.Operator.Δ_g
+            (I := I) (G.metric s0) ⟨_, hq⟩ x)
     (hqeq :
       ∀ x : M,
         q x = potentialVariation x - metricVariationTrace x / 2) :

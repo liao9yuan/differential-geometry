@@ -1,6 +1,11 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.MovingShiPullback
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Basic.Core
 import DifferentialGeometry.Geometry.Curvature.Realized.MetricFamilyContinuity
+open DifferentialGeometry.Tensor.RSTensor
+open DifferentialGeometry.PDE.RicciFlow
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Geometry.Connection
 
 
 
@@ -13,9 +18,10 @@ import DifferentialGeometry.Geometry.Curvature.Realized.MetricFamilyContinuity
 
 noncomputable section
 
-open Set Function Filter Bundle Manifold Tensor0SBundle
+open Set Function Filter Bundle Manifold DifferentialGeometry.Tensor0SBundle
 open scoped Manifold Topology ContDiff ENNReal
-open DifferentialGeometry.Integral.Connection
+
+open DifferentialGeometry.Geometry.Operator
 open DifferentialGeometry.HCGCompactness
 
 namespace DifferentialGeometry
@@ -173,7 +179,7 @@ theorem metricFamilySmoothOn_pullback
     {D : RealTimeInterval}
     (S : SolutionOn (I := I) (M := N) D) (hS : IsSolutionOn (I := I) S)
     (Φ : M ≃ₘ⟮I, I⟯ N) :
-    MetricFamilySmoothOn (I := I) D (solutionOn_pullback (I := I) S Φ).family where
+    MetricFamilySmoothOn (I := I) D (solutionOn_pullback (I := I) S Φ).family.metric where
   coeff x X Y := by
     rw [pullback_coeff_eq (I := I) S Φ x X Y]
     exact hS.smoothMetric.coeff (Φ x)
@@ -529,14 +535,14 @@ theorem isSolutionOn_pullback
     intro t _ht x
     have hsmooth : ContMDiff I 𝓘(ℝ, ℝ) (∞ : WithTop ℕ∞)
         (ricciNorm (I := I) (solutionOn_pullback (I := I) S Φ) t) := by
-      refine (DifferentialGeometry.Integral.Connection.normSq02_smooth (I := I) (M := M)
+      refine (DifferentialGeometry.Tensor.RSTensor.normSq02_smooth (I := I) (M := M)
         ((solutionOn_pullback (I := I) S Φ).family.metric t)
         (metricRicci (I := I) (M := M)
           ((solutionOn_pullback (I := I) S Φ).family.metric t))).congr ?_
       intro y
       simp only [ricciNorm, SolutionOn.ricci, SolutionOn.family,
         SolutionFamily.ricci_apply, SolutionFamily.ricciAt, metricRicci_apply]
-    exact DifferentialGeometry.Integral.Connection.gradientFun_mdiffAt (I := I)
+    exact DifferentialGeometry.Geometry.Operator.gradientFun_mdiffAt (I := I)
       ((solutionOn_pullback (I := I) S Φ).family.metric t) hsmooth x
 
 

@@ -1,6 +1,9 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.StarSum.TimeRecursion
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.StarSum.ResidualLedger
 import DifferentialGeometry.Geometry.Connection.LeviCivita.Curvature.Hamilton
+open DifferentialGeometry.PDE.RicciFlow
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Geometry.Curvature
 
 set_option autoImplicit false
 
@@ -38,7 +41,7 @@ variable {I : ModelWithCorners Real E H} [I.Boundaryless]
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 variable [IsManifold I 1 M] [IsManifold I 2 M]
 variable [CompleteSpace E] [SigmaCompactSpace M] [T2Space M]
-variable {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
+variable {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
 
 set_option backward.isDefEq.respectTransparency false in
 omit [I.Boundaryless]
@@ -67,7 +70,7 @@ theorem e0Field_cost_any {Idx : Type*} [Fintype Idx]
 eight generators of `e0Field`. -/
 def rmBaseReact {Idx : Type*} [Fintype Idx]
     (R : (Fin 4 -> Idx) -> Real) (m : Fin 4 -> Idx) : Real :=
-  DifferentialGeometry.Integral.Connection.hamiltonRmReact R m
+  DifferentialGeometry.Geometry.Connection.hamiltonRmReact R m
 
 set_option backward.isDefEq.respectTransparency false in
 omit [I.Boundaryless]

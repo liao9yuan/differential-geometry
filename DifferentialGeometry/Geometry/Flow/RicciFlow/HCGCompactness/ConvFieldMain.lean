@@ -1,5 +1,8 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.ConvFieldAssembly
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.MetricPreconvWindowAllPt
+open DifferentialGeometry.PDE.RicciFlow
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Geometry.Curvature
 
 set_option autoImplicit false
 
@@ -38,7 +41,7 @@ noncomputable section
 
 open Set Function Filter Bundle Manifold TopologicalSpace
 open scoped Manifold Topology ContDiff BigOperators
-open DifferentialGeometry.Integral.Connection
+
 open DifferentialGeometry.PDE.RicciFlow (SolutionOn IsSolutionOn)
 
 namespace DifferentialGeometry
@@ -464,7 +467,7 @@ private theorem ofRP_supOn_def
           (resSrc (I := I) Φ hsrc k (gInf t))
           (refRes (I := I) Φ R hsrc k) := rfl
 
-open Tensor0SBundle in
+open DifferentialGeometry.Tensor0SBundle in
 include finiteE in
 omit neZeroE [I.Boundaryless] in
 theorem ofRP_supOn_eq

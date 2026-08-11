@@ -1,4 +1,8 @@
 import DifferentialGeometry.Geometry.Comparison.Volume.BishopPolarFramed
+import DifferentialGeometry.Geometry.Metric.Completeness
+open DifferentialGeometry.Analysis.Calculus
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Geometry.Curvature
 
 /-!
 # Local Bishop comparison for center-metric normal balls
@@ -287,11 +291,10 @@ attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
 antitone ratio of its polar density to the hyperbolic model density. -/
 theorem exists_framed_ratio
     [PseudoEMetricSpace M] [RiemannianBundle (fun x : M => TangentSpace I x)]
-    [IsRiemannianManifold I M] [CompleteSpace M] [ConnectedSpace M]
+    [IsRiemannianManifold I M] [CompleteSpace M]
     [IsContinuousRiemannianBundle E (fun x : M => TangentSpace I x)]
     (g : SmoothRiemannianMetric I M)
-    (hEnorm : ∀ (x : M) (w : TangentSpace I x),
-      ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner x w w)))
+    (hEnorm : IsMetricNorm (I := I) (M := M) g)
     (p : M) (q : Real) (hq : 0 ≤ q)
     (hd : 0 < Module.finrank Real E - 1)
     (hRic : RicciBoundedBelow (I := I) g
@@ -508,11 +511,10 @@ attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
 /-- Local Bishop comparison for framed normal balls, in cross-multiplied form. -/
 theorem normalBall_cross
     [PseudoEMetricSpace M] [RiemannianBundle (fun x : M => TangentSpace I x)]
-    [IsRiemannianManifold I M] [CompleteSpace M] [ConnectedSpace M]
+    [IsRiemannianManifold I M] [CompleteSpace M]
     [IsContinuousRiemannianBundle E (fun x : M => TangentSpace I x)]
     (g : SmoothRiemannianMetric I M)
-    (hEnorm : ∀ (x : M) (w : TangentSpace I x),
-      ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner x w w)))
+    (hEnorm : IsMetricNorm (I := I) (M := M) g)
     (p : M) (q : Real) (hq : 0 ≤ q)
     (hd : 0 < Module.finrank Real E - 1)
     (hRic : RicciBoundedBelow (I := I) g
@@ -620,11 +622,10 @@ attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
 antitone on one center-dependent interval. -/
 theorem normalBall_ratio
     [PseudoEMetricSpace M] [RiemannianBundle (fun x : M => TangentSpace I x)]
-    [IsRiemannianManifold I M] [CompleteSpace M] [ConnectedSpace M]
+    [IsRiemannianManifold I M] [CompleteSpace M]
     [IsContinuousRiemannianBundle E (fun x : M => TangentSpace I x)]
     (g : SmoothRiemannianMetric I M)
-    (hEnorm : ∀ (x : M) (w : TangentSpace I x),
-      ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner x w w)))
+    (hEnorm : IsMetricNorm (I := I) (M := M) g)
     (p : M) (q : Real) (hq : 0 ≤ q)
     (hd : 0 < Module.finrank Real E - 1)
     (hRic : RicciBoundedBelow (I := I) g
@@ -649,5 +650,72 @@ theorem normalBall_ratio
   rw [← ENNReal.mul_div_right_comm]
   rw [ENNReal.le_div_iff_mul_le (Or.inl hmr0) (Or.inl ENNReal.ofReal_ne_top)]
   exact hcross hr.1 hrR hR.2
+
+attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
+  Tensor0SBundle.tangentSpace_normedSpace in
+theorem normalBall_cross_of_complete_metric
+    [ConnectedSpace M]
+    (g : SmoothRiemannianMetric I M)
+    (hcomplete : RiemannianMetricComplete (I := I) g)
+    (p : M) (q : Real) (hq : 0 ≤ q)
+    (hd : 0 < Module.finrank Real E - 1)
+    (hRic : RicciBoundedBelow (I := I) g
+      (-(((Module.finrank Real E - 1 : Nat) : Real) * q ^ 2))) :
+    ∃ ρ : Real, 0 < ρ ∧ ∀ {r R : Real},
+      0 < r → r ≤ R → R < ρ →
+        normalBallVolume (I := I) g p R *
+            ENNReal.ofReal (hypRadVol q (Module.finrank Real E - 1) r) ≤
+          normalBallVolume (I := I) g p r *
+            ENNReal.ofReal (hypRadVol q (Module.finrank Real E - 1) R) := by
+  letI : IsManifold I 1 M :=
+    IsManifold.of_le (I := I) (M := M) (n := (⊤ : WithTop ℕ∞))
+      (by decide : (1 : WithTop ℕ∞) ≤ (⊤ : WithTop ℕ∞))
+  letI : TopologicalSpace.MetrizableSpace M :=
+    Manifold.metrizableSpace I M
+  letI : T3Space M := inferInstance
+  letI : RiemannianBundle (fun x : M => TangentSpace I x) :=
+    ⟨g.toRiemannianMetric⟩
+  letI : IsContinuousRiemannianBundle E (fun x : M => TangentSpace I x) :=
+    ⟨⟨g.inner, g.contMDiff.continuous, by intro x v w; rfl⟩⟩
+  letI : EMetricSpace M := EMetricSpace.ofRiemannianMetric I M
+  letI : PseudoEMetricSpace M := inferInstance
+  letI : CompleteSpace M := hcomplete.complete
+  have hEnorm : IsMetricNorm (I := I) (M := M) g := by
+    intro x v
+    exact tensor0SBundle_enorm_eq_riemannianBundle_enorm (I := I) g x v
+  exact normalBall_cross (I := I) (M := M) g hEnorm p q hq hd hRic
+
+attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
+  Tensor0SBundle.tangentSpace_normedSpace in
+theorem normalBall_ratio_of_complete_metric
+    [ConnectedSpace M]
+    (g : SmoothRiemannianMetric I M)
+    (hcomplete : RiemannianMetricComplete (I := I) g)
+    (p : M) (q : Real) (hq : 0 ≤ q)
+    (hd : 0 < Module.finrank Real E - 1)
+    (hRic : RicciBoundedBelow (I := I) g
+      (-(((Module.finrank Real E - 1 : Nat) : Real) * q ^ 2))) :
+    ∃ ρ : Real, 0 < ρ ∧
+      AntitoneOn
+        (fun R => normalBallVolume (I := I) g p R /
+          ENNReal.ofReal (hypRadVol q (Module.finrank Real E - 1) R))
+        (Ioo (0 : Real) ρ) := by
+  letI : IsManifold I 1 M :=
+    IsManifold.of_le (I := I) (M := M) (n := (⊤ : WithTop ℕ∞))
+      (by decide : (1 : WithTop ℕ∞) ≤ (⊤ : WithTop ℕ∞))
+  letI : TopologicalSpace.MetrizableSpace M :=
+    Manifold.metrizableSpace I M
+  letI : T3Space M := inferInstance
+  letI : RiemannianBundle (fun x : M => TangentSpace I x) :=
+    ⟨g.toRiemannianMetric⟩
+  letI : IsContinuousRiemannianBundle E (fun x : M => TangentSpace I x) :=
+    ⟨⟨g.inner, g.contMDiff.continuous, by intro x v w; rfl⟩⟩
+  letI : EMetricSpace M := EMetricSpace.ofRiemannianMetric I M
+  letI : PseudoEMetricSpace M := inferInstance
+  letI : CompleteSpace M := hcomplete.complete
+  have hEnorm : IsMetricNorm (I := I) (M := M) g := by
+    intro x v
+    exact tensor0SBundle_enorm_eq_riemannianBundle_enorm (I := I) g x v
+  exact normalBall_ratio (I := I) (M := M) g hEnorm p q hq hd hRic
 
 end DifferentialGeometry.Geometry.Riemannian.VolumeComparison

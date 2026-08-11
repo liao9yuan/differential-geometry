@@ -5,6 +5,8 @@ import DifferentialGeometry.Tensor.RSTensor.Tensor0SRiemannian.Product
 import DifferentialGeometry.Tensor.RSTensor.Tensor0SRiemannian.Smooth
 import Mathlib.LinearAlgebra.Trace
 import DifferentialGeometry.Tensor.RSTensor.FiberMetric.TensorRSMetric
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Geometry.Curvature
 
 set_option autoImplicit false
 
@@ -22,6 +24,7 @@ set_option autoImplicit false
 
 
 
+namespace DifferentialGeometry
 namespace Tensor0SBundle
 
 noncomputable section
@@ -294,3 +297,4 @@ theorem sqrt_normSqRS_apply
 end
 
 end Tensor0SBundle
+end DifferentialGeometry

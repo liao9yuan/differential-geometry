@@ -8,6 +8,12 @@ import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.RiemannianFibe
 import DifferentialGeometry.Geometry.Connection.MetricCompatibility.TensorLoweringParallel
 import DifferentialGeometry.Geometry.Curvature.Components.RicciTrace
 import DifferentialGeometry.Tensor.RSTensor.Tensor0SRiemannian.Comparison
+open DifferentialGeometry.Analysis.Sobolev
+open DifferentialGeometry.Analysis.Elliptic
+open DifferentialGeometry.PDE.RicciFlow
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Geometry.Connection
 
 /-!
 # The metric-jet ↔ iterated-covariant-gradient norm bridge (`normBridge`)
@@ -48,12 +54,12 @@ set_option autoImplicit false
 noncomputable section
 
 
-open Bundle Manifold Set Filter Tensor0SBundle
+open Bundle Manifold Set Filter DifferentialGeometry.Tensor0SBundle
 open scoped Manifold Topology ContDiff BigOperators
 open DifferentialGeometry.Analysis.Parabolic.TensorSpectral
-open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.MetricRealization
+open DifferentialGeometry.Analysis.Spectral.MetricRealization
 open DifferentialGeometry.HCGCompactness
-open DifferentialGeometry.Integral.Connection
+
 open DifferentialGeometry.Integral.L2
 
 namespace DifferentialGeometry
@@ -65,7 +71,7 @@ variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
   [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
-  [T2Space M] [SigmaCompactSpace M]
+  [T2Space M]
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
@@ -158,7 +164,7 @@ private lemma iterCovGrad_unit_eq_iterCov
     rfl
 
 omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
-  [T2Space M] [SigmaCompactSpace M] in
+  [T2Space M] in
 /-- **The `r = 0` index-lowering is unit-evaluation.**  Replica of the (private) upstream
 `lowerAllUpperIndices_zero_apply_unitModel`: lowering the model coercion of a `(0, s)`-tensor
 section against no upper slots is exactly evaluating the section on the unit `(0,0)`-tensor. -/
@@ -178,7 +184,7 @@ private lemma lowerAllUpper_zero_eq_unit
   rfl
 
 omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
-  [T2Space M] [SigmaCompactSpace M] in
+  [T2Space M] in
 /-- **Fibre-inner bridge (`(0, s)`).**  The `gBase`-Riemannian squared fibre norm of a smooth
 `(0, s)`-tensor section (the currency of the abstract `iteratedCovGrad` jet envelope) equals the
 intrinsic `normSq0S` of its unit-value (the currency of `metricCovDeriv`/`MetricCovDerivOrderBoundOn`).

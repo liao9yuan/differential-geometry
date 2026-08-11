@@ -2,6 +2,13 @@ import DifferentialGeometry.Analysis.Spectral.Intrinsic.Garding.ScalarNonautExac
 import DifferentialGeometry.Analysis.Spectral.Tensor.SobolevScale.ScalarWeyl
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Entropy.ConjGalerkinClassical
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Entropy.ConjPotentialSpan
+open DifferentialGeometry.Analysis.Sobolev
+open DifferentialGeometry.Analysis.Elliptic
+open DifferentialGeometry.PDE.RicciFlow DifferentialGeometry.Analysis.Spectral
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Geometry.Connection
+open DifferentialGeometry.Geometry.Operator
 
 /-!
 # Exact-interval scalar Galerkin reconstruction
@@ -21,12 +28,13 @@ open DifferentialGeometry.Analysis.Parabolic.MaximalRegularity
 open DifferentialGeometry.Analysis.Parabolic.QuasiLinear
 open DifferentialGeometry.Analysis.Parabolic.TensorHeatEquation
 open DifferentialGeometry.Analysis.Parabolic.TimeSobolev
-open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral
-open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.MetricRealization
-open DifferentialGeometry.Integral.Connection
+open DifferentialGeometry.Analysis.Spectral
+open DifferentialGeometry.Analysis.Spectral.MetricRealization
+
+open DifferentialGeometry.Geometry.Operator
 open DifferentialGeometry.Integral.DivergenceTheorem
 open DifferentialGeometry.Integral.L2
-open Tensor0SBundle
+open DifferentialGeometry.Tensor0SBundle
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]
   [FiniteDimensional Real E] [NeZero (Module.finrank Real E)]
@@ -34,7 +42,7 @@ variable {H : Type*} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
   [IsManifold I ∞ M] [CompactSpace M] [I.Boundaryless]
-  [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M]
+  [BoundarylessManifold I M] [T2Space M]
 
 private local instance : CompleteSpace E := FiniteDimensional.complete Real E
 
@@ -59,7 +67,7 @@ theorem galVel_lift_on
         tensorHsZeroEquivL2 (I := I) (M := M)
             (tensorResolventL2_isCompactOperator
               (I := I) (M := M) (S.family.metric (T : Real)) 0 0)
-            (lapDiffA20 (I := I) (M := M) S.family T s v.1) =
+            (lapDiffA20 (I := I) (M := M) S.family.metric T s v.1) =
           lapDiffCore (I := I) (M := M) (S.family.metric (T : Real))
             (S.family.metric ((T : Real) - s)) v) :
     ∀ m : Nat, ∃ w : Icc (0 : Real) tau →
@@ -73,9 +81,9 @@ theorem galVel_lift_on
         ∀ t, w t = galLimVelCan hτ.le hlim m (t : Real) := by
   classical
   have hnorm :=
-    lapHs_norm_on (I := I) (M := M) S.family hS.smoothMetric T hreg
+    lapHs_norm_on (I := I) (M := M) S.family.metric hS.smoothMetric T hreg
   have hEq :=
-    lapHs_A20_on (I := I) (M := M) S.family T hcore
+    lapHs_A20_on (I := I) (M := M) S.family.metric T hcore
   let q : SmoothRiemannianMetric I M := S.family.metric (T : Real)
   let K : Set Real := Icc (0 : Real) tau
   let R : Set Real := {s : Real | (T : Real) - s ∈ D.regular}
@@ -301,7 +309,7 @@ theorem galVel_lift_on
             (g := q) (r := 0) (s := 0) h0k
             (lapDiffHs (I := I) (M := M) q
               (S.family.metric ((T : Real) - t)) (m + 1) U) =
-          lapDiffA20 (I := I) (M := M) S.family T t U₂ := by
+          lapDiffA20 (I := I) (M := M) S.family.metric T t U₂ := by
       calc
         _ = tensorHs.castEquiv (I := I) (M := M)
             (g := q) (r := 0) (s := 0) hzero
@@ -315,7 +323,7 @@ theorem galVel_lift_on
               (S.family.metric ((T : Real) - t)) 0
               (tensorHs.castEquiv (I := I) (M := M)
                 (g := q) (r := 0) (s := 0) h20 U₂)) := by rw [hU0]
-        _ = lapDiffA20 (I := I) (M := M) S.family T t U₂ :=
+        _ = lapDiffA20 (I := I) (M := M) S.family.metric T t U₂ :=
           hEq t t.2 U₂
     have hPot :
         tensorHsInclusion (I := I) (M := M)
@@ -405,7 +413,7 @@ theorem galExt_deriv_on
         tensorHsZeroEquivL2 (I := I) (M := M)
             (tensorResolventL2_isCompactOperator
               (I := I) (M := M) (S.family.metric (T : Real)) 0 0)
-            (lapDiffA20 (I := I) (M := M) S.family T s v.1) =
+            (lapDiffA20 (I := I) (M := M) S.family.metric T s v.1) =
           lapDiffCore (I := I) (M := M) (S.family.metric (T : Real))
             (S.family.metric ((T : Real) - s)) v) :
     ∀ m : Nat, ∃ w : Real →
@@ -513,7 +521,7 @@ theorem galExt_ode_on
         tensorHsZeroEquivL2 (I := I) (M := M)
             (tensorResolventL2_isCompactOperator
               (I := I) (M := M) (S.family.metric (T : Real)) 0 0)
-            (lapDiffA20 (I := I) (M := M) S.family T s v.1) =
+            (lapDiffA20 (I := I) (M := M) S.family.metric T s v.1) =
           lapDiffCore (I := I) (M := M) (S.family.metric (T : Real))
             (S.family.metric ((T : Real) - s)) v) :
     ∀ m : Nat, ∀ t ∈ Ioo (0 : Real) tau,
@@ -548,7 +556,7 @@ theorem galExt_smooth_on
         tensorHsZeroEquivL2 (I := I) (M := M)
             (tensorResolventL2_isCompactOperator
               (I := I) (M := M) (S.family.metric (T : Real)) 0 0)
-            (lapDiffA20 (I := I) (M := M) S.family T s v.1) =
+            (lapDiffA20 (I := I) (M := M) S.family.metric T s v.1) =
           lapDiffCore (I := I) (M := M) (S.family.metric (T : Real))
             (S.family.metric ((T : Real) - s)) v) :
     ∀ m : Nat, ContDiffOn Real ∞
@@ -612,7 +620,7 @@ theorem galExt_smooth_on
                 (S.family.metric ((T : Real) - t)) (m + 1) (U t))
               (Ioo (0 : Real) tau) := by
             simpa only [q] using
-              lapHs_dyn_on (I := I) (M := M) S.family hS.smoothMetric T
+              lapHs_dyn_on (I := I) (M := M) S.family.metric hS.smoothMetric T
                 hreg (m + 1) k U hU
           have hpot : ContDiffOn Real k
               (fun t => scalarPotHs (I := I) (M := M) q
@@ -675,7 +683,7 @@ theorem galJet_mass_on
         tensorHsZeroEquivL2 (I := I) (M := M)
             (tensorResolventL2_isCompactOperator
               (I := I) (M := M) (S.family.metric (T : Real)) 0 0)
-            (lapDiffA20 (I := I) (M := M) S.family T s v.1) =
+            (lapDiffA20 (I := I) (M := M) S.family.metric T s v.1) =
           lapDiffCore (I := I) (M := M) (S.family.metric (T : Real))
             (S.family.metric ((T : Real) - s)) v) :
     ∀ ⦃a b : Real⦄, 0 < a → a ≤ b → b < tau →
@@ -806,7 +814,7 @@ theorem galJoint_fin_on
         tensorHsZeroEquivL2 (I := I) (M := M)
             (tensorResolventL2_isCompactOperator
               (I := I) (M := M) (S.family.metric (T : Real)) 0 0)
-            (lapDiffA20 (I := I) (M := M) S.family T s v.1) =
+            (lapDiffA20 (I := I) (M := M) S.family.metric T s v.1) =
           lapDiffCore (I := I) (M := M) (S.family.metric (T : Real))
             (S.family.metric ((T : Real) - s)) v) :
     ∀ ⦃a b : Real⦄, 0 < a → a < b → b < tau → ∀ N : Nat,
@@ -869,7 +877,7 @@ theorem galJoint_on
         tensorHsZeroEquivL2 (I := I) (M := M)
             (tensorResolventL2_isCompactOperator
               (I := I) (M := M) (S.family.metric (T : Real)) 0 0)
-            (lapDiffA20 (I := I) (M := M) S.family T s v.1) =
+            (lapDiffA20 (I := I) (M := M) S.family.metric T s v.1) =
           lapDiffCore (I := I) (M := M) (S.family.metric (T : Real))
             (S.family.metric ((T : Real) - s)) v) :
     ContMDiffOn (𝓘(Real, Real).prod I) 𝓘(Real) ∞
@@ -925,7 +933,7 @@ theorem galPde_on
         tensorHsZeroEquivL2 (I := I) (M := M)
             (tensorResolventL2_isCompactOperator
               (I := I) (M := M) (S.family.metric (T : Real)) 0 0)
-            (lapDiffA20 (I := I) (M := M) S.family T s v.1) =
+            (lapDiffA20 (I := I) (M := M) S.family.metric T s v.1) =
           lapDiffCore (I := I) (M := M) (S.family.metric (T : Real))
             (S.family.metric ((T : Real) - s)) v) :
     ∀ t ∈ Ioo (0 : Real) tau, ∀ x : M,
@@ -1159,16 +1167,16 @@ theorem galPde_on
     hderiv.congr_deriv (hderivSeries.trans hseriesW)
   have hWscalar :
       TensorRSField.scalar0 (n := (∞ : WithTop ℕ∞)) W.toSection x =
-        Δ_g (I := I) h hf x + (zeta : M → Real) x * f x := by
+        Δ_g (I := I) h ⟨_, hf⟩ x + (zeta : M → Real) x * f x := by
     simp only [W, SmoothCcTensor.toSection_add, TensorRSField.scalar0_add,
       Pi.add_apply, rawLap_cc_scalar (I := I) (M := M) q U x,
       scalarLapDiff_eq (I := I) (M := M) q h U x,
-      DifferentialGeometry.Integral.Connection.scalar0_smul_cc
+      DifferentialGeometry.Analysis.Sobolev.scalar0_smul_cc
         (I := I) (M := M) q zeta U x, f]
     ring
   have hlap :
       laplacianAt (I := I) (flowG (I := I) S) ((T : Real) - t) f x =
-        Δ_g (I := I) h hf x := by
+        Δ_g (I := I) h ⟨_, hf⟩ x := by
     simpa only [h] using
       (laplacianAt_eq_delta (I := I) (M := M)
         (flowG (I := I) S) ((T : Real) - t) hf (by rfl) x)
@@ -1197,7 +1205,7 @@ theorem gallim_on
         tensorHsZeroEquivL2 (I := I) (M := M)
             (tensorResolventL2_isCompactOperator
               (I := I) (M := M) (S.family.metric (T : Real)) 0 0)
-            (lapDiffA20 (I := I) (M := M) S.family T s v.1) =
+            (lapDiffA20 (I := I) (M := M) S.family.metric T s v.1) =
           lapDiffCore (I := I) (M := M) (S.family.metric (T : Real))
             (S.family.metric ((T : Real) - s)) v) :
     DifferentialGeometry.Analysis.Parabolic.IsHeatPotOn

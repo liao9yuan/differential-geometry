@@ -2,6 +2,9 @@ import DifferentialGeometry.Analysis.Elliptic.Lichnerowicz
 import DifferentialGeometry.Analysis.Spectral.Scalar.EigenBasis
 import DifferentialGeometry.Analysis.Heat.Semigroup.Defs
 import DifferentialGeometry.Analysis.Heat.Smoothing.SmoothingOfClosed
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Geometry.Operator
 
 noncomputable section
 
@@ -20,7 +23,8 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.DivergenceTheorem
-open DifferentialGeometry.Integral.Connection
+open DifferentialGeometry.Geometry.Operator
+
 open DifferentialGeometry.Analysis.HeatEquation
 
 private local instance : MeasurableSpace E := borel E
@@ -28,7 +32,7 @@ private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
-variable [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
+variable [I.Boundaryless] [T2Space M] [CompactSpace M]
 
 omit [NeZero (Module.finrank ℝ E)] in
 theorem H1ComplToLp_inj_on_laplacianDomain
@@ -79,7 +83,7 @@ theorem laplacianEigenfunction_smooth_representative
     ∃ s : SmoothScalar g,
       spectralBasisFun (I := I) (M := M) g i =ᵐ[
         riemannianVolumeMeasure (I := I) (M := M) g] s.toFun ∧
-      (∀ x : M, Δ_g (I := I) g s.smooth x =
+      (∀ x : M, Δ_g (I := I) g ⟨s.toFun, s.smooth⟩ x =
         -(laplacianEigenvalueOf i.1.val) * s.toFun x) := by
   classical
   set μ_g : Measure M := riemannianVolumeMeasure (I := I) (M := M) g with hμ_g_def
@@ -183,13 +187,13 @@ theorem laplacianEigenfunction_smooth_representative
     rw [← h_op_smooth, ← h_op_eigen]
     rw [h_lap_eq]
   set Δf_smooth : SmoothScalar g :=
-    ⟨Δ_g (I := I) g hf_smooth, Δ_g_contMDiff (I := I) g hf_smooth⟩
+    ⟨Δ_g (I := I) g ⟨_, hf_smooth⟩, Δ_g_contMDiff (I := I) g ⟨_, hf_smooth⟩⟩
     with hΔf_smooth_def
   have h_diff_eq : f_smooth - f_smooth.oneSubLapClassical = Δf_smooth := by
     apply SmoothScalar.ext
     funext x
     change (f_smooth.toFun - f_smooth.oneSubLapClassical.toFun) x =
-      Δ_g (I := I) g hf_smooth x
+      Δ_g (I := I) g ⟨_, hf_smooth⟩ x
     rw [Pi.sub_apply, SmoothScalar.oneSubLapClassical_toFun, Pi.sub_apply]
     ring
   have h_smoothToLp_diff :
@@ -219,7 +223,7 @@ theorem laplacianEigenfunction_smooth_representative
         smoothToLp (I := I) (M := M) g neg_lam_f_smooth :=
     h_Δlp_eq.trans h_smoothToLp_neg_lam_f.symm
   have h_Δf_ae_neg_lam_f :
-      (fun x : M => Δ_g (I := I) g hf_smooth x) =ᵐ[μ_g]
+      (fun x : M => Δ_g (I := I) g ⟨_, hf_smooth⟩ x) =ᵐ[μ_g]
       (fun x : M => -(laplacianEigenvalueOf i.1.val) * f x) := by
     have h_lhs_ae : (smoothToLp (I := I) (M := M) g Δf_smooth :
         Lp ℝ 2 μ_g) =ᵐ[μ_g] Δf_smooth.toFun :=
@@ -227,7 +231,7 @@ theorem laplacianEigenfunction_smooth_representative
     have h_rhs_ae : (smoothToLp (I := I) (M := M) g neg_lam_f_smooth :
         Lp ℝ 2 μ_g) =ᵐ[μ_g] neg_lam_f_smooth.toFun :=
       MemLp.coeFn_toLp neg_lam_f_smooth.memLp_two
-    have h_lhs_explicit : Δf_smooth.toFun = (fun x : M => Δ_g (I := I) g hf_smooth x) := rfl
+    have h_lhs_explicit : Δf_smooth.toFun = (fun x : M => Δ_g (I := I) g ⟨_, hf_smooth⟩ x) := rfl
     have h_rhs_explicit : neg_lam_f_smooth.toFun =
         (fun x : M => -(laplacianEigenvalueOf i.1.val) * f x) := by
       funext x
@@ -244,13 +248,13 @@ theorem laplacianEigenfunction_smooth_representative
     exact h_lhs_ae.symm.trans (h_lp_ae.trans h_rhs_ae)
   have h_pos : (riemannianVolumeMeasure (I := I) (M := M) g).IsOpenPosMeasure :=
     riemannianVolumeMeasure_isOpenPosMeasure (I := I) (M := M) g
-  have h_Δf_cont : Continuous (fun x : M => Δ_g (I := I) g hf_smooth x) :=
-    (Δ_g_contMDiff (I := I) g hf_smooth).continuous
+  have h_Δf_cont : Continuous (fun x : M => Δ_g (I := I) g ⟨_, hf_smooth⟩ x) :=
+    (Δ_g_contMDiff (I := I) g ⟨_, hf_smooth⟩).continuous
   have h_neg_lam_f_cont :
       Continuous (fun x : M => -(laplacianEigenvalueOf i.1.val) * f x) :=
     continuous_const.mul hf_smooth.continuous
   have h_Δf_eq_neg_lam_f :
-      (fun x : M => Δ_g (I := I) g hf_smooth x) =
+      (fun x : M => Δ_g (I := I) g ⟨_, hf_smooth⟩ x) =
       (fun x : M => -(laplacianEigenvalueOf i.1.val) * f x) :=
     (Continuous.ae_eq_iff_eq _ h_Δf_cont h_neg_lam_f_cont).mp h_Δf_ae_neg_lam_f
   refine ⟨f_smooth, ?_, ?_⟩

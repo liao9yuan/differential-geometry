@@ -2,6 +2,9 @@ import DifferentialGeometry.Geometry.Connection.LeviCivita.KoszulFormula
 import DifferentialGeometry.Geometry.Coordinates.Christoffel
 import DifferentialGeometry.Geometry.Coordinates.CoordinateFrame
 import DifferentialGeometry.Tensor.RSTensor.CotangentRiemannian
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Geometry.Operator
 
 set_option autoImplicit false
 
@@ -12,12 +15,13 @@ set_option autoImplicit false
 
 
 
-namespace DifferentialGeometry.Integral.Connection
+
+namespace DifferentialGeometry.Geometry.Connection
 
 open Bundle
-open DifferentialGeometry.Integral.Connection
+open DifferentialGeometry.Geometry.Operator
 open DifferentialGeometry.Tensor.Coordinates
-open Tensor0SBundle
+open DifferentialGeometry.Tensor0SBundle
 open scoped Manifold ContDiff
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]
@@ -61,7 +65,7 @@ theorem torsion_free_apply
 omit [SigmaCompactSpace M] [T2Space M] in
 theorem torsion_free_family_apply
     {D : RealTimeInterval}
-    {G : RealizedMetricFamilyOn (I := I) (M := M) D}
+    {G : MetricConnectionFamilyOn (I := I) (M := M) D}
     (htf : IsTorsionFreeFamilyOn (I := I) G)
     (t : RealTimeInterval.FlowTime D)
     {x : M} {X Y : (p : M) -> TangentSpace I p}
@@ -421,4 +425,4 @@ theorem leviCivitaConnectionOfMetric_isLeviCivita
     (leviCivitaConnectionOfMetric_isMetricCompatible (I := I) g)
     (leviCivitaConnectionOfMetric_isTorsionFree (I := I) g)
 
-end DifferentialGeometry.Integral.Connection
+end DifferentialGeometry.Geometry.Connection

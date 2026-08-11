@@ -1,7 +1,9 @@
 import DifferentialGeometry.Geometry.Metric.LocalIsometryRigidity
 import DifferentialGeometry.Geometry.Metric.Sphere.IsometryExtension
-import DifferentialGeometry.Geometry.Topology.FiberBundleT2
+import DifferentialGeometry.Topology.FiberBundleT2
 import Mathlib.Analysis.Normed.Module.Connected
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Geometry.Curvature
 
 /-!
 # Orthogonal representations of round-sphere actions

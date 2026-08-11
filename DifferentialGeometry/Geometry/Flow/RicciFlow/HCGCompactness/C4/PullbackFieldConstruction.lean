@@ -6,6 +6,7 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.MetricCovDeri
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.MovingShiRestrictOpen
 import DifferentialGeometry.Tensor.RSTensor.Coordinates.OpensRestrict
 import DifferentialGeometry.Tensor.RSTensor.MetricCompatibility
+open DifferentialGeometry.Geometry.Curvature
 
 set_option autoImplicit false
 

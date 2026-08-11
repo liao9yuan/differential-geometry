@@ -3,9 +3,11 @@
 
 import DifferentialGeometry.Tensor.Multilinear.Basis
 import DifferentialGeometry.Tensor.Multilinear.Fiber
+open DifferentialGeometry.Tensor.Multilinear
 
 
 noncomputable section
+namespace DifferentialGeometry
 
 set_option backward.isDefEq.respectTransparency false
 
@@ -148,4 +150,5 @@ theorem toScalarField_smulByFun
 
 end MultilinearSection
 
+end DifferentialGeometry
 end

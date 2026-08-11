@@ -1,6 +1,8 @@
 import DifferentialGeometry.Analysis.Calculus.BumpClamp
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.C4.StepB1Producers
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.C4.StepCProducers
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Geometry.Curvature
 
 set_option autoImplicit false
 
@@ -14,6 +16,7 @@ set_option autoImplicit false
 
 
 
+open DifferentialGeometry.Geometry.Connection
 namespace DifferentialGeometry
 namespace HCGCompactness
 

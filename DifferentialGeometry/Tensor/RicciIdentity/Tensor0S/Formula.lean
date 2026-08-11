@@ -1,4 +1,9 @@
 import DifferentialGeometry.Tensor.RicciIdentity.Tensor0S.Realization
+import DifferentialGeometry.Geometry.Operator.RoughLaplacian
+open DifferentialGeometry.Tensor.RSTensor
+open DifferentialGeometry.Tensor.RicciIdentity
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Geometry.Curvature
 
 set_option autoImplicit false
 
@@ -11,9 +16,10 @@ set_option autoImplicit false
 
 noncomputable section
 
-namespace DifferentialGeometry.Integral.Connection
+open DifferentialGeometry.Geometry.Operator
+namespace DifferentialGeometry.Tensor.RicciIdentity
 
-open Bundle Tensor0SBundle
+open Bundle DifferentialGeometry.Tensor0SBundle
 open DifferentialGeometry.Tensor.SlotAlgebra
 open scoped Manifold ContDiff BigOperators
 
@@ -1016,4 +1022,4 @@ theorem ricci_identity_0s {x : M} {s : ℕ}
     comm = curvatureAction :=
   h
 
-end DifferentialGeometry.Integral.Connection
+end DifferentialGeometry.Tensor.RicciIdentity

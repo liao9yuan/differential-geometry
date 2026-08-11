@@ -1,4 +1,6 @@
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.MetricRealization.HeatOutputRealize
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Geometry.Curvature
 
 
 
@@ -74,14 +76,13 @@ import DifferentialGeometry.Analysis.Spectral.Intrinsic.MetricRealization.HeatOu
 
 noncomputable section
 
-open Bundle Manifold MeasureTheory Set Filter Tensor0SBundle
+open Bundle Manifold MeasureTheory Set Filter DifferentialGeometry.Tensor0SBundle
 open scoped Manifold Topology ContDiff ENNReal BigOperators
   RealInnerProductSpace InnerProductSpace
 
 namespace DifferentialGeometry
-namespace PDE
-namespace RicciFlow
-namespace IntrinsicSpectral
+namespace Analysis
+namespace Spectral
 namespace MetricRealization
 
 open DifferentialGeometry.Integral.Measure
@@ -235,7 +236,6 @@ def EigenvalueTailSummable (g : SmoothRiemannianMetric I M) (r s : ℕ) : Prop :
 
 
 
-omit [CompactSpace M] in
 omit [NeZero (Module.finrank ℝ E)] in
 private lemma eigenvalueTail_eq_weight
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (p : ℝ)
@@ -395,9 +395,8 @@ theorem spectralSmooth_realizesAsSmooth_of_reduction
   exact h_recon u (fun k α P₀ => h_reg u h_memAll k α P₀)
 
 end MetricRealization
-end IntrinsicSpectral
-end RicciFlow
-end PDE
+end Spectral
+end Analysis
 end DifferentialGeometry
 
 end

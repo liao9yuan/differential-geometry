@@ -4,6 +4,8 @@ import DifferentialGeometry.Geometry.Exponential.CartanNorm
 import DifferentialGeometry.Geometry.Metric.Polarization
 import DifferentialGeometry.Geometry.Metric.Sphere.RadialLog
 import Mathlib.Analysis.Normed.Module.Connected
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Geometry.Curvature
 
 set_option autoImplicit false
 
@@ -64,8 +66,7 @@ variable [RiemannianBundle (fun x : N => TangentSpace J x)]
 on the whole sphere by the total round logarithm. -/
 def punctCartan
     (g : SmoothRiemannianMetric J N)
-    (hEnorm : ∀ (x : N) (w : TangentSpace J x),
-      ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner x w w)))
+    (hEnorm : DifferentialGeometry.Geometry.Riemannian.IsMetricNorm (I := J) (M := N) g)
     (p' : N) (i : EuclideanSpace ℝ (Fin n) ≃L[ℝ]
       EuclideanSpace ℝ (Fin n))
     (p x : sphere (0 : A) 1) : N :=
@@ -85,8 +86,7 @@ omit [FiniteDimensional ℝ A]
 target-center value. -/
 @[simp] theorem punctCartan_self
     (g : SmoothRiemannianMetric J N)
-    (hEnorm : ∀ (x : N) (w : TangentSpace J x),
-      ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner x w w)))
+    (hEnorm : DifferentialGeometry.Geometry.Riemannian.IsMetricNorm (I := J) (M := N) g)
     (p' : N) (i : EuclideanSpace ℝ (Fin n) ≃L[ℝ]
       EuclideanSpace ℝ (Fin n))
     (p : sphere (0 : A) 1) :
@@ -101,8 +101,7 @@ theorem punctCartan_smooth
       ‖w‖ₑ = ENNReal.ofReal
         (Real.sqrt ((roundMetric (E := A) (n := n)).inner x w w)))
     (g : SmoothRiemannianMetric J N)
-    (hEnorm : ∀ (x : N) (w : TangentSpace J x),
-      ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner x w w)))
+    (hEnorm : DifferentialGeometry.Geometry.Riemannian.IsMetricNorm (I := J) (M := N) g)
     (p' : N) (i : EuclideanSpace ℝ (Fin n) ≃L[ℝ]
       EuclideanSpace ℝ (Fin n))
     (p : sphere (0 : A) 1) :
@@ -139,8 +138,7 @@ theorem punctCartan_mfd
       ‖w‖ₑ = ENNReal.ofReal
         (Real.sqrt ((roundMetric (E := A) (n := n)).inner x w w)))
     (g : SmoothRiemannianMetric J N)
-    (hEnorm : ∀ (x : N) (w : TangentSpace J x),
-      ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner x w w)))
+    (hEnorm : DifferentialGeometry.Geometry.Riemannian.IsMetricNorm (I := J) (M := N) g)
     (p' : N) (i : EuclideanSpace ℝ (Fin n) ≃L[ℝ]
       EuclideanSpace ℝ (Fin n))
     (p : sphere (0 : A) 1) :
@@ -214,16 +212,15 @@ theorem punctCartan_sq
       ‖w‖ₑ = ENNReal.ofReal
         (Real.sqrt ((roundMetric (E := A) (n := n)).inner x w w)))
     (g : SmoothRiemannianMetric J N)
-    (hEnorm : ∀ (x : N) (w : TangentSpace J x),
-      ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner x w w)))
+    (hEnorm : DifferentialGeometry.Geometry.Riemannian.IsMetricNorm (I := J) (M := N) g)
     (p : sphere (0 : A) 1) (p' : N)
     (i : EuclideanSpace ℝ (Fin n) ≃L[ℝ] EuclideanSpace ℝ (Fin n))
     (hi : ∀ a b : EuclideanSpace ℝ (Fin n),
       g.inner p' (i a) (i b) =
         (roundMetric (E := A) (n := n)).inner p a b)
     (hR : ∀ (x : N) (X Y Z : TangentSpace J x),
-      (DifferentialGeometry.Integral.Connection.riemannOp
-          (DifferentialGeometry.Integral.Connection.LeviCivita (I := J) g) x)
+      (DifferentialGeometry.Geometry.Curvature.riemannOp
+          (DifferentialGeometry.Geometry.Connection.LeviCivita (I := J) g) x)
         X Y Z =
           g.inner x Y Z • X - g.inner x X Z • Y)
     {x : sphere (0 : A) 1} (hx : x ≠ -p)
@@ -365,16 +362,15 @@ theorem punctCartan_inner
       ‖w‖ₑ = ENNReal.ofReal
         (Real.sqrt ((roundMetric (E := A) (n := n)).inner x w w)))
     (g : SmoothRiemannianMetric J N)
-    (hEnorm : ∀ (x : N) (w : TangentSpace J x),
-      ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner x w w)))
+    (hEnorm : DifferentialGeometry.Geometry.Riemannian.IsMetricNorm (I := J) (M := N) g)
     (p : sphere (0 : A) 1) (p' : N)
     (i : EuclideanSpace ℝ (Fin n) ≃L[ℝ] EuclideanSpace ℝ (Fin n))
     (hi : ∀ a b : EuclideanSpace ℝ (Fin n),
       g.inner p' (i a) (i b) =
         (roundMetric (E := A) (n := n)).inner p a b)
     (hR : ∀ (x : N) (X Y Z : TangentSpace J x),
-      (DifferentialGeometry.Integral.Connection.riemannOp
-          (DifferentialGeometry.Integral.Connection.LeviCivita (I := J) g) x)
+      (DifferentialGeometry.Geometry.Curvature.riemannOp
+          (DifferentialGeometry.Geometry.Connection.LeviCivita (I := J) g) x)
         X Y Z =
           g.inner x Y Z • X - g.inner x X Z • Y)
     {x : sphere (0 : A) 1} (hx : x ≠ -p)
@@ -398,16 +394,15 @@ theorem punctCartan_local
       ‖w‖ₑ = ENNReal.ofReal
         (Real.sqrt ((roundMetric (E := A) (n := n)).inner x w w)))
     (g : SmoothRiemannianMetric J N)
-    (hEnorm : ∀ (x : N) (w : TangentSpace J x),
-      ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner x w w)))
+    (hEnorm : DifferentialGeometry.Geometry.Riemannian.IsMetricNorm (I := J) (M := N) g)
     (p : sphere (0 : A) 1) (p' : N)
     (i : EuclideanSpace ℝ (Fin n) ≃L[ℝ] EuclideanSpace ℝ (Fin n))
     (hi : ∀ a b : EuclideanSpace ℝ (Fin n),
       g.inner p' (i a) (i b) =
         (roundMetric (E := A) (n := n)).inner p a b)
     (hR : ∀ (x : N) (X Y Z : TangentSpace J x),
-      (DifferentialGeometry.Integral.Connection.riemannOp
-          (DifferentialGeometry.Integral.Connection.LeviCivita (I := J) g) x)
+      (DifferentialGeometry.Geometry.Curvature.riemannOp
+          (DifferentialGeometry.Geometry.Connection.LeviCivita (I := J) g) x)
         X Y Z =
           g.inner x Y Z • X - g.inner x X Z • Y) :
     IsLocalDiffeomorphOn (𝓡 n) J ∞

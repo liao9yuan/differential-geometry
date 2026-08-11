@@ -1,6 +1,7 @@
 import DifferentialGeometry.Geometry.Geodesic.Equation
 import DifferentialGeometry.Geometry.Connection.MetricCompatibility.ChartGramChristoffel
 import Mathlib.Analysis.ODE.Gronwall
+open DifferentialGeometry.Geometry.Operator
 
 
 
@@ -583,6 +584,7 @@ theorem HasParallelTransportChart.linear_combination
 section MetricCompatibilityAlongCurve
 
 open DifferentialGeometry.Integral.DivergenceTheorem
+open DifferentialGeometry.Geometry.Operator
 
 variable {g : SmoothRiemannianMetric I M} {α : M} {γ : ℝ → M}
 

@@ -2,6 +2,10 @@ import DifferentialGeometry.Analysis.Elliptic.Regularity.Hessian.ChartAlphaWeakH
 import DifferentialGeometry.Analysis.Elliptic.Regularity.Hessian.PairingLapDom
 import DifferentialGeometry.Analysis.Elliptic.Regularity.Hessian.TensorChartSmooth
 import DifferentialGeometry.Analysis.Sobolev.Chart.ChartTransition.MeasurablePullback
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Geometry.Connection
+open DifferentialGeometry.Geometry.Operator
 
 
 noncomputable section
@@ -22,7 +26,8 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.DivergenceTheorem
-open DifferentialGeometry.Integral.Connection
+open DifferentialGeometry.Geometry.Operator
+
 open DifferentialGeometry.Analysis.Laplacian.MetricExtension
   hiding chartTargetEuclid chartTargetEuclid_isOpen
 open DifferentialGeometry.Analysis.Laplacian.LaplacianDomainPerChartWitness
@@ -55,6 +60,7 @@ noncomputable def chartTensorPairingLocal
             chartHessianPhiOnEuclid (I := I) (M := M) g α φ i j y *
             chartTensorWeakHessianRaw (I := I) (M := M) g α hu_h k l y
 
+omit [SigmaCompactSpace M] in
 omit [NeZero (Module.finrank ℝ E)] in
 @[simp] lemma chartTensorPairingLocal_def
     (g : SmoothRiemannianMetric I M) (α : M) (φ : C^∞⟮I, M; ℝ⟯)
@@ -655,6 +661,7 @@ private noncomputable def chartTensorPairingLocalMExt
   chartTensorPairingLocal (I := I) (M := M) g α φ hu_h
     ((toEuclidean (E := E)) (extChartAt I α x))
 
+omit [SigmaCompactSpace M] in
 omit [NeZero (Module.finrank ℝ E)] in
 private lemma chartTensorPairingLocalMExt_def
     (g : SmoothRiemannianMetric I M) (φ : C^∞⟮I, M; ℝ⟯) (α : M)

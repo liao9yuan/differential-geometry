@@ -12,7 +12,7 @@ import DifferentialGeometry.Analysis.ODE.TimeDependentFlow.SmoothDependence.Mani
 
 
 
-namespace DifferentialGeometry.PDE.RicciFlow.ODE
+namespace DifferentialGeometry.Analysis.ODE
 
 open Set Function Bundle
 open scoped Manifold Topology ContDiff
@@ -74,4 +74,4 @@ theorem corrected_chartflow_eq_bareflow
     (le_refl _)
     α (mem_extChartAt_source (I := I) α)
 
-end DifferentialGeometry.PDE.RicciFlow.ODE
+end DifferentialGeometry.Analysis.ODE

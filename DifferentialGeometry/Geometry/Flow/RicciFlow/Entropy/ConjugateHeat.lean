@@ -3,6 +3,10 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.MaximumPrinciple.ScalarWeak
 import DifferentialGeometry.Analysis.Parabolic.ScalarTimeDependent
 import DifferentialGeometry.Analysis.Integration.DivergenceTheorem.Family
 import Mathlib.Analysis.Calculus.MeanValue
+open DifferentialGeometry.PDE.RicciFlow
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Geometry.Operator
 
 set_option autoImplicit false
 
@@ -14,6 +18,7 @@ set_option autoImplicit false
 
 
 
+open DifferentialGeometry.Geometry.Connection
 namespace DifferentialGeometry.PDE.RicciFlow.Entropy
 
 noncomputable section
@@ -21,6 +26,7 @@ noncomputable section
 open MeasureTheory
 open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.DivergenceTheorem
+open DifferentialGeometry.Geometry.Operator
 open DifferentialGeometry.PDE.RicciFlow.Evolution.Volume
 open scoped Manifold ContDiff
 
@@ -38,10 +44,10 @@ variable [IsManifold I ∞ M]
 
 
 def reverseFamily
-    (G : DifferentialGeometry.Integral.Connection.RealizedMetricFamily
+    (G : DifferentialGeometry.Geometry.Curvature.MetricConnectionFamily
       (I := I) (M := M) Real)
     (T : Real) :
-    DifferentialGeometry.Integral.Connection.RealizedMetricFamily
+    DifferentialGeometry.Geometry.Curvature.MetricConnectionFamily
       (I := I) (M := M) Real where
   metric := fun s => G.metric (T - s)
   connection := fun s => G.connection (T - s)
@@ -49,7 +55,7 @@ def reverseFamily
 
 omit [FiniteDimensional ℝ E] in
 @[simp] theorem reverse_metric
-    (G : DifferentialGeometry.Integral.Connection.RealizedMetricFamily
+    (G : DifferentialGeometry.Geometry.Curvature.MetricConnectionFamily
       (I := I) (M := M) Real)
     (T s : Real) :
     (reverseFamily G T).metric s = G.metric (T - s) := by
@@ -61,8 +67,8 @@ The new reverse time `r` reads the old solution at `r - a`; simultaneously
 moving the terminal anchor from `T` to `T + a` leaves the underlying original
 metric time unchanged. -/
 theorem heat_pot_add
-    (D : DifferentialGeometry.Integral.Connection.RealTimeInterval)
-    (G : DifferentialGeometry.Integral.Connection.RealizedMetricFamily
+    (D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval)
+    (G : DifferentialGeometry.Geometry.Curvature.MetricConnectionFamily
       (I := I) (M := M) Real)
     (V u : Real → M → Real) (T a : Real)
     (h : DifferentialGeometry.Analysis.Parabolic.IsHeatPotOn D
@@ -110,14 +116,14 @@ theorem heat_pot_add
     have htime : T - (r - a) = T + a - r := by ring
     have hcomp' :
         HasDerivAt (fun s : Real => u (s - a) x)
-          (DifferentialGeometry.Integral.Connection.laplacianAt
+          (DifferentialGeometry.Geometry.Curvature.laplacianAt
               (I := I) (reverseFamily G T) (r - a) (u (r - a)) x +
             V (r - a) x * u (r - a) x) r := by
       simpa only [Function.comp_apply, mul_one] using hcomp
     convert hcomp' using 1
     all_goals
       simp only [reverseFamily,
-        DifferentialGeometry.Integral.Connection.laplacianAt, htime]
+        DifferentialGeometry.Geometry.Curvature.laplacianAt, htime]
 
 /-- Read a spacetime scalar field backwards from terminal time `T`. -/
 def reverseHeat (T : Real) (u : Real → M → Real) : Real → M → Real :=
@@ -145,24 +151,24 @@ theorem reverse_deriv
 
 
 theorem conj_heat_forward
-    (G : DifferentialGeometry.Integral.Connection.RealizedMetricFamily
+    (G : DifferentialGeometry.Geometry.Curvature.MetricConnectionFamily
       (I := I) (M := M) Real)
     (scalar u : Real → M → Real) (T s : Real) (x : M)
     (hu : DifferentiableAt Real (fun t : Real => u t x) (T - s))
     (hconj : deriv (fun t : Real => u t x) (T - s) =
-      -DifferentialGeometry.Integral.Connection.laplacianAt
+      -DifferentialGeometry.Geometry.Curvature.laplacianAt
           (I := I) G (T - s) (u (T - s)) x +
         scalar (T - s) x * u (T - s) x) :
     deriv (fun r : Real => reverseHeat T u r x) s =
-      DifferentialGeometry.Integral.Connection.laplacianAt
+      DifferentialGeometry.Geometry.Curvature.laplacianAt
           (I := I) (reverseFamily G T) s (reverseHeat T u s) x -
         scalar (T - s) x * reverseHeat T u s x := by
   rw [reverse_deriv T u s x hu, hconj]
   change
-    -(-DifferentialGeometry.Integral.Connection.laplacianAt
+    -(-DifferentialGeometry.Geometry.Curvature.laplacianAt
           (I := I) G (T - s) (u (T - s)) x +
         scalar (T - s) x * u (T - s) x) =
-      DifferentialGeometry.Integral.Connection.laplacianAt
+      DifferentialGeometry.Geometry.Curvature.laplacianAt
           (I := I) G (T - s) (u (T - s)) x -
         scalar (T - s) x * u (T - s) x
   ring
@@ -170,24 +176,24 @@ theorem conj_heat_forward
 
 
 theorem conj_heat_backward
-    (G : DifferentialGeometry.Integral.Connection.RealizedMetricFamily
+    (G : DifferentialGeometry.Geometry.Curvature.MetricConnectionFamily
       (I := I) (M := M) Real)
     (scalar v : Real → M → Real) (T t : Real) (x : M)
     (hv : DifferentiableAt Real (fun s : Real => v s x) (T - t))
     (hforward : deriv (fun s : Real => v s x) (T - t) =
-      DifferentialGeometry.Integral.Connection.laplacianAt
+      DifferentialGeometry.Geometry.Curvature.laplacianAt
           (I := I) (reverseFamily G T) (T - t) (v (T - t)) x -
         scalar t x * v (T - t) x) :
     deriv (fun s : Real => reverseHeat T v s x) t =
-      -DifferentialGeometry.Integral.Connection.laplacianAt
+      -DifferentialGeometry.Geometry.Curvature.laplacianAt
           (I := I) G t (reverseHeat T v t) x +
         scalar t x * reverseHeat T v t x := by
   rw [reverse_deriv T v t x hv, hforward]
   change
-    -(DifferentialGeometry.Integral.Connection.laplacianAt
+    -(DifferentialGeometry.Geometry.Curvature.laplacianAt
           (I := I) G (T - (T - t)) (v (T - t)) x -
         scalar t x * v (T - t) x) =
-      -DifferentialGeometry.Integral.Connection.laplacianAt
+      -DifferentialGeometry.Geometry.Curvature.laplacianAt
           (I := I) G t (v (T - t)) x + scalar t x * v (T - t) x
   rw [show T - (T - t) = t by ring]
   ring
@@ -204,8 +210,8 @@ omit [TopologicalSpace M] in
 
 
 def IsConjHeatOn
-    (D : DifferentialGeometry.Integral.Connection.RealTimeInterval)
-    (G : DifferentialGeometry.Integral.Connection.RealizedMetricFamily
+    (D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval)
+    (G : DifferentialGeometry.Geometry.Curvature.MetricConnectionFamily
       (I := I) (M := M) Real)
     (scalar u : Real → M → Real) (T : Real) : Prop :=
   DifferentialGeometry.Analysis.Parabolic.IsHeatPotOn D (reverseFamily G T)
@@ -214,8 +220,8 @@ def IsConjHeatOn
 
 
 theorem conj_heat_of_pot
-    (D : DifferentialGeometry.Integral.Connection.RealTimeInterval)
-    (G : DifferentialGeometry.Integral.Connection.RealizedMetricFamily
+    (D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval)
+    (G : DifferentialGeometry.Geometry.Curvature.MetricConnectionFamily
       (I := I) (M := M) Real)
     (scalar v : Real → M → Real) (T : Real)
     (h : DifferentialGeometry.Analysis.Parabolic.IsHeatPotOn D
@@ -226,15 +232,15 @@ theorem conj_heat_of_pot
 
 
 theorem heat_pot_to_conj
-    (D : DifferentialGeometry.Integral.Connection.RealTimeInterval)
-    (G : DifferentialGeometry.Integral.Connection.RealizedMetricFamily
+    (D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval)
+    (G : DifferentialGeometry.Geometry.Curvature.MetricConnectionFamily
       (I := I) (M := M) Real)
     (scalar v : Real → M → Real) (T t : Real)
     (h : DifferentialGeometry.Analysis.Parabolic.IsHeatPotOn D
       (reverseFamily G T) (fun s x => -scalar (T - s) x) v)
     (ht : T - t ∈ D.regular) (x : M) :
     HasDerivAt (fun s : Real => reverseHeat T v s x)
-      (-DifferentialGeometry.Integral.Connection.laplacianAt
+      (-DifferentialGeometry.Geometry.Curvature.laplacianAt
           (I := I) G t (reverseHeat T v t) x +
         scalar t x * reverseHeat T v t x) t := by
   have hsub : HasDerivAt (fun s : Real => T - s) (-1) t := by
@@ -243,9 +249,9 @@ theorem heat_pot_to_conj
   have hcomp := (h.equation (T - t) ht x).comp t hsub
   convert hcomp using 1
   change
-    -DifferentialGeometry.Integral.Connection.laplacianAt
+    -DifferentialGeometry.Geometry.Curvature.laplacianAt
           (I := I) G t (v (T - t)) x + scalar t x * v (T - t) x =
-      (DifferentialGeometry.Integral.Connection.laplacianAt
+      (DifferentialGeometry.Geometry.Curvature.laplacianAt
           (I := I) G (T - (T - t)) (v (T - t)) x +
         -scalar (T - (T - t)) x * v (T - t) x) * -1
   rw [show T - (T - t) = t by ring]
@@ -258,8 +264,8 @@ theorem heat_pot_to_conj
 
 
 theorem conj_heat_mass_deriv
-    [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
-    (G : DifferentialGeometry.Integral.Connection.RealizedMetricFamily
+    [I.Boundaryless] [T2Space M] [CompactSpace M]
+    (G : DifferentialGeometry.Geometry.Curvature.MetricConnectionFamily
       (I := I) (M := M) Real)
     (scalar u : Real → M → Real) {t : Real}
     (hg : MetricFamilyRegularAt (I := I)
@@ -270,7 +276,7 @@ theorem conj_heat_mass_deriv
       (-2 : Real) * scalar t x)
     (hconj : ∀ x : M,
       deriv (fun s : Real => u s x) t =
-        -Δ_g (I := I) (G.metric t) huSmooth x + scalar t x * u t x) :
+        -Δ_g (I := I) (G.metric t) ⟨_, huSmooth⟩ x + scalar t x * u t x) :
     HasDerivAt
       (fun s : Real =>
         ∫ x, u s x ∂(volumeMeasureFamily (I := I) (M := M) G s))
@@ -283,7 +289,7 @@ theorem conj_heat_mass_deriv
       (f := fun _ : M => (1 : Real)) (h := u t)
       contMDiff_const huSmooth t
   have hlap :
-      ∫ x, Δ_g (I := I) (G.metric t) huSmooth x
+      ∫ x, Δ_g (I := I) (G.metric t) ⟨_, huSmooth⟩ x
         ∂(volumeMeasureFamily (I := I) (M := M) G t) = 0 := by
     simpa only [one_mul, Δ_g_const, mul_zero, sub_zero] using hgreen
   have hmass :
@@ -292,7 +298,7 @@ theorem conj_heat_mass_deriv
     calc
       (∫ x, (deriv (fun s : Real => u s x) t - scalar t x * u t x)
           ∂(volumeMeasureFamily (I := I) (M := M) G t)) =
-          ∫ x, -Δ_g (I := I) (G.metric t) huSmooth x
+          ∫ x, -Δ_g (I := I) (G.metric t) ⟨_, huSmooth⟩ x
             ∂(volumeMeasureFamily (I := I) (M := M) G t) := by
         apply integral_congr_ae
         filter_upwards with x
@@ -304,8 +310,8 @@ theorem conj_heat_mass_deriv
 
 
 theorem conj_heat_mass_eq
-    [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
-    (G : DifferentialGeometry.Integral.Connection.RealizedMetricFamily
+    [I.Boundaryless] [T2Space M] [CompactSpace M]
+    (G : DifferentialGeometry.Geometry.Curvature.MetricConnectionFamily
       (I := I) (M := M) Real)
     (scalar u : Real → M → Real) {a b : Real} (hab : a ≤ b)
     (hg : MetricFamilyRegularAt (I := I)
@@ -317,7 +323,7 @@ theorem conj_heat_mass_eq
       traceTimeDerivMetricAt (I := I) G t x = (-2 : Real) * scalar t x)
     (hconj : ∀ (t : Real) (ht : t ∈ Set.Icc a b) (x : M),
       deriv (fun s : Real => u s x) t =
-        -Δ_g (I := I) (G.metric t) (huSmooth t ht) x +
+        -Δ_g (I := I) (G.metric t) ⟨u t, huSmooth t ht⟩ x +
           scalar t x * u t x) :
     (∫ x, u b x ∂(volumeMeasureFamily (I := I) (M := M) G b)) =
       ∫ x, u a x ∂(volumeMeasureFamily (I := I) (M := M) G a) := by
@@ -344,8 +350,8 @@ theorem conj_heat_mass_eq
 
 
 theorem conj_heat_mass_one
-    [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
-    (G : DifferentialGeometry.Integral.Connection.RealizedMetricFamily
+    [I.Boundaryless] [T2Space M] [CompactSpace M]
+    (G : DifferentialGeometry.Geometry.Curvature.MetricConnectionFamily
       (I := I) (M := M) Real)
     (scalar u : Real → M → Real) {a b : Real}
     (hg : MetricFamilyRegularAt (I := I)
@@ -357,7 +363,7 @@ theorem conj_heat_mass_one
       traceTimeDerivMetricAt (I := I) G t x = (-2 : Real) * scalar t x)
     (hconj : ∀ (t : Real) (ht : t ∈ Set.Icc a b) (x : M),
       deriv (fun s : Real => u s x) t =
-        -Δ_g (I := I) (G.metric t) (huSmooth t ht) x +
+        -Δ_g (I := I) (G.metric t) ⟨u t, huSmooth t ht⟩ x +
           scalar t x * u t x)
     (hmass : (∫ x, u b x ∂(volumeMeasureFamily (I := I) (M := M) G b)) = 1) :
     ∀ t ∈ Set.Icc a b,

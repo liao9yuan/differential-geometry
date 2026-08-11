@@ -1,6 +1,17 @@
 import DifferentialGeometry.Geometry.Curvature.Metric
 import DifferentialGeometry.Geometry.Comparison.Volume.BallVolume
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.InjectivityRadius
+open DifferentialGeometry.Tensor.RicciIdentity
+open DifferentialGeometry.Tensor.RSTensor
+open DifferentialGeometry.Tensor.Auxiliary
+open DifferentialGeometry.PDE.RicciFlow
+open DifferentialGeometry.Geometry.Connection
+open DifferentialGeometry.Tensor.RicciIdentity
+open DifferentialGeometry.Tensor.RSTensor
+open DifferentialGeometry.Tensor.Auxiliary
+open DifferentialGeometry.Geometry.Connection
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Geometry.Curvature
 
 set_option autoImplicit false
 
@@ -51,8 +62,8 @@ noncomputable def curvCovDerivStep
   haveI : IsManifold I ((∞ : WithTop ℕ∞) + 1) M := by
     change IsManifold I ∞ M
     infer_instance
-  let cov := DifferentialGeometry.Integral.Connection.metricCov (I := I) (M := M) g
-  let hcov := DifferentialGeometry.Integral.Connection.metricCov_smooth (I := I) (M := M) g
+  let cov := DifferentialGeometry.Geometry.Curvature.metricCov (I := I) (M := M) g
+  let hcov := DifferentialGeometry.Geometry.Curvature.metricCov_smooth (I := I) (M := M) g
   let hreg :=
     Tensor0SBundle.totalNabla0S_reg (E := E) (H := H)
       (I := I) (M := M) (a + 4) cov hcov A
@@ -79,7 +90,7 @@ noncomputable def curvCovDeriv
       haveI : IsManifold I ((∞ : WithTop ℕ∞) + 1) M := by
         change IsManifold I ∞ M
         infer_instance
-      exact DifferentialGeometry.Integral.Connection.metricRm04 (I := I) (M := M) g)
+      exact DifferentialGeometry.Geometry.Curvature.metricRm04 (I := I) (M := M) g)
     (fun k A =>
       by
         simpa [Nat.add_assoc, Nat.add_comm, Nat.add_left_comm] using
@@ -129,7 +140,7 @@ theorem rm04Bound_of_curv0
   intro x
   simpa [Geometry.Riemannian.VolumeComparison.Rm04GlobalBound,
     HasCurvDerivBound, curvDerivNorm, curvDerivNormSq, curvCovDeriv,
-    DifferentialGeometry.Integral.Connection.metricRm04_apply] using hX x
+    DifferentialGeometry.Geometry.Curvature.metricRm04_apply] using hX x
 
 
 
@@ -192,7 +203,7 @@ theorem rm04Bound_of_seq
 
 
 def HasSpacetimeCurvBound
-    {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
+    {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
     (F : PointedFlowData.{u, uE, uH} (I := I) D) (C : Real) : Prop :=
   forall t : Real, t ∈ D.carrier ->
     forall x : F.M, F.rmNormSq (I := I) t x <= C
@@ -201,7 +212,7 @@ def HasSpacetimeCurvBound
 
 
 def HasSpacetimeCurvDerivBound
-    {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
+    {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
     (F : PointedFlowData.{u, uE, uH} (I := I) D) (k : Nat) (C : Real) : Prop :=
   letI : TopologicalSpace F.M := F.topology
   letI : ChartedSpace H F.M := F.charted

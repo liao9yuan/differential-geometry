@@ -1,6 +1,9 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Pullback.ChainRule
 import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTimeFlow.ConjugatingFlowProperties
 import DifferentialGeometry.Analysis.ODE.TimeDependentFlow.Regularity.PushforwardSmooth
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Geometry.Connection
 
 /-!
 # Algebraic pullback identities for inverse diffeomorphisms
@@ -15,7 +18,7 @@ noncomputable section
 namespace DifferentialGeometry.PDE.RicciFlow.Pullback
 
 open Bundle Filter
-open DifferentialGeometry.Integral.Connection
+
 open scoped Manifold ContDiff Topology
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
@@ -357,7 +360,7 @@ theorem ricci_pullback_DT
       ContMDiff I (I.prod 𝓘(ℝ, E)) ∞
         (fun z : M => TotalSpace.mk' E (E := TangentSpace I) z
           (Diffeomorph.pushforward (Φ_fam s) (W s) z)) := fun s =>
-    ODE.flowFamily_pushforward_contMDiff (I := I) Φ_fam s (W s).contMDiff
+    DifferentialGeometry.Analysis.ODE.flowFamily_pushforward_contMDiff (I := I) Φ_fam s (W s).contMDiff
   let Y : ℝ → Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯ := fun s =>
     ⟨Diffeomorph.pushforward (Φ_fam s) (W s), hPush s⟩
   have hYode : ∀ z : M, ∀ s ∈ Set.Ioo (0 : ℝ) T,

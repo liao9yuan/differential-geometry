@@ -13,6 +13,7 @@ set_option autoImplicit false
 
 
 noncomputable section
+namespace DifferentialGeometry
 
 open RealInnerProductSpace
 
@@ -90,8 +91,10 @@ theorem normalizedEquiv_symm_norm_le_one :
       nlinarith [norm_nonneg eta]
 
 end ContinuousDualEquiv
+end DifferentialGeometry
 
 namespace IsCoercive
+open DifferentialGeometry
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]
 instance [FiniteDimensional Real E] : FiniteDimensional Real (StrongDual Real E) :=
   inferInstanceAs (FiniteDimensional Real (E →L[Real] Real))

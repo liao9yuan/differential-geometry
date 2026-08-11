@@ -241,7 +241,7 @@ private theorem chart_int_cont_param
 -- The global statement unfolds the finite atlas decomposition at each parameter.
 theorem integral_family_cont_param
     [FirstCountableTopology P]
-    [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
+    [T2Space M] [CompactSpace M]
     {g : P → SmoothRiemannianMetric I M}
     {f : P → M → ℝ} {K : Set P}
     (hK : IsCompact K)

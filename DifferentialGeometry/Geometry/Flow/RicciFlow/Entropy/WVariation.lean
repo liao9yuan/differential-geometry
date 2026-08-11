@@ -5,6 +5,10 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.Entropy.FlowVariation
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Entropy.PotentialGeometry
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Entropy.WeightedHessian
 import Mathlib.Analysis.Calculus.Deriv.MeanValue
+open DifferentialGeometry.PDE.RicciFlow DifferentialGeometry.Analysis.Spectral
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Geometry.Operator
 
 set_option autoImplicit false
 
@@ -17,17 +21,19 @@ set_option autoImplicit false
 
 
 
+open DifferentialGeometry.Geometry.Connection
 namespace DifferentialGeometry.PDE.RicciFlow.Entropy
 
 noncomputable section
 
-open Bundle Filter MeasureTheory Tensor0SBundle
-open DifferentialGeometry.Integral.Connection
+open Bundle Filter MeasureTheory DifferentialGeometry.Tensor0SBundle
+
+open DifferentialGeometry.Geometry.Operator
 open DifferentialGeometry.Integral.DivergenceTheorem
 open DifferentialGeometry.Integral.L2
 open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Analysis.Parabolic.TensorHeatEquation
-open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral
+open DifferentialGeometry.Analysis.Spectral DifferentialGeometry.PDE.RicciFlow
 open scoped Manifold ContDiff Topology
 
 universe u uE uH
@@ -39,7 +45,7 @@ variable [FiniteDimensional Real E]
 variable {H : Type uH} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H}
 variable [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
-variable [SigmaCompactSpace M] [T2Space M]
+variable [T2Space M]
 
 private local instance : CompleteSpace E := FiniteDimensional.complete Real E
 private local instance : MeasurableSpace M := borel M
@@ -156,7 +162,7 @@ theorem w_rev_hasDerivAt
       ContMDiffOn (𝓘(Real, Real).prod I) 𝓘(Real, Real) ∞
         (fun p : Real × M => q p.1 p.2) (U ×ˢ Set.univ) := by
     simpa only [q] using
-      gradSq_joint (I := I) G hUo hgram f hf
+      gradSq_joint (I := I) G.metric hUo hgram f hf
   have huU :
       ContMDiffOn (𝓘(Real, Real).prod I) 𝓘(Real, Real) ∞
         (fun p : Real × M => u p.1 p.2) (U ×ˢ Set.univ) :=
@@ -378,11 +384,11 @@ theorem w_rev_square
   let q0 : M -> Real := fun x =>
     g.inner x (gradientFun (I := I) g (f s) x)
       (gradientFun (I := I) g (f s) x)
-  let L0 : M -> Real := Δ_g (I := I) g hf
+  let L0 : M -> Real := Δ_g (I := I) g ⟨_, hf⟩
   let ft0 : M -> Real := fun x =>
     L0 x - q0 x + R0 x - (n : Real) / (2 * s)
   let Rt0 : M -> Real := fun x =>
-    -(Δ_g (I := I) g (metricScalar_smooth (I := I) (M := M) g) x +
+    -(Δ_g (I := I) g ⟨_, (metricScalar_smooth (I := I) (M := M) g)⟩ x +
       2 * normSq0S (I := I) g x 2
         (metricRicciAt (I := I) (M := M) g x))
   let qt0 : M -> Real := fun x =>
@@ -409,10 +415,10 @@ theorem w_rev_square
       (metricScalarAt (I := I) (M := M) g)
     exact metricScalar_smooth (I := I) (M := M) g
   have hLf (x : M) :
-      laplacianAt (I := I) G s (f s) x = Δ_g (I := I) g hf x := by
+      laplacianAt (I := I) G s (f s) x = Δ_g (I := I) g ⟨_, hf⟩ x := by
     exact laplacianAt_eq_delta (I := I) G s hf hconn x
   have hLR (x : M) :
-      laplacianAt (I := I) G s (R s) x = Δ_g (I := I) g hR x := by
+      laplacianAt (I := I) G s (R s) x = Δ_g (I := I) g ⟨_, hR⟩ x := by
     exact laplacianAt_eq_delta (I := I) G s hR hconn x
   have hric (x : M) :
       S.ricci (T - s) x = metricRicciAt (I := I) (M := M) g x := by

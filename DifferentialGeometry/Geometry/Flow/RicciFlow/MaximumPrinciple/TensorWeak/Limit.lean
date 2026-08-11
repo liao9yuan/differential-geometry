@@ -1,14 +1,29 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.MaximumPrinciple.TensorWeak.Compactness
+open DifferentialGeometry.Tensor.RicciIdentity
+open DifferentialGeometry.Tensor.RSTensor
+open DifferentialGeometry.Tensor.Auxiliary
+open DifferentialGeometry.PDE.RicciFlow
+open DifferentialGeometry.Tensor.RicciIdentity
+open DifferentialGeometry.Tensor.RSTensor
+open DifferentialGeometry.Tensor.Auxiliary
+open DifferentialGeometry.Tensor.RicciIdentity
+open DifferentialGeometry.Tensor.RSTensor
+open DifferentialGeometry.Tensor.Auxiliary
+open DifferentialGeometry.Tensor.RicciIdentity
+open DifferentialGeometry.Tensor.RSTensor
+open DifferentialGeometry.Tensor.Auxiliary
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Geometry.Curvature
 
 
 set_option autoImplicit false
 set_option backward.isDefEq.respectTransparency false
 
-namespace DifferentialGeometry.Integral.Connection
+namespace DifferentialGeometry.PDE.RicciFlow
 
 noncomputable section
 
-open Bundle Tensor0SBundle Set
+open Bundle DifferentialGeometry.Tensor0SBundle Set
 open scoped Manifold ContDiff
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]
@@ -404,7 +419,7 @@ namespace TensorWMPSectionCore
 
 omit [IsManifold I 2 M] in
 theorem ofCompact
-    [CompactSpace M] [SigmaCompactSpace M] [T2Space M]
+    [CompactSpace M] [T2Space M]
     {G : Real -> SmoothRiemannianMetric I M}
     {S : TwoTensorSecFamily (I := I) (M := M)}
     {X : TimeDependentVectorField (I := I) (M := M)}
@@ -458,7 +473,7 @@ theorem ofCompact
 
 omit [IsManifold I 2 M] in
 theorem ofTotal
-    [CompactSpace M] [SigmaCompactSpace M] [T2Space M]
+    [CompactSpace M] [T2Space M]
     {G : Real -> SmoothRiemannianMetric I M}
     {S : TwoTensorSecFamily (I := I) (M := M)}
     {X : TimeDependentVectorField (I := I) (M := M)}
@@ -505,11 +520,11 @@ theorem ofTotal
     (G := G) (S := S) (X := X) (N := N) (T := T)
     hsym hbar
     (fun delta t0 hdelta hsub =>
-      DifferentialGeometry.Integral.Connection.metricFamQuadCont (I := I) (M := M)
+      DifferentialGeometry.PDE.RicciFlow.metricFamQuadCont (I := I) (M := M)
         G (Set.Icc t0 (t0 + delta))
         (hMetric delta t0 hdelta hsub))
     (fun delta t0 hdelta hsub =>
-      DifferentialGeometry.Integral.Connection.tensorQuadCont (I := I) (M := M)
+      DifferentialGeometry.PDE.RicciFlow.tensorQuadCont (I := I) (M := M)
         S (Set.Icc t0 (t0 + delta))
         (hTensor delta t0 hdelta hsub))
     hFixed
@@ -517,15 +532,15 @@ theorem ofTotal
 
 omit [IsManifold I 2 M] in
 theorem ofSmoothMetric
-    [CompactSpace M] [SigmaCompactSpace M] [T2Space M]
+    [CompactSpace M] [T2Space M]
     {D : RealTimeInterval}
-    (G : RealizedMetricFamilyOn (I := I) (M := M) D)
+    (G : MetricConnectionFamilyOn (I := I) (M := M) D)
     {S : TwoTensorSecFamily (I := I) (M := M)}
     {X : TimeDependentVectorField (I := I) (M := M)}
     {N : TwoTensorReaction (I := I) (M := M)}
     {T : Real}
     (hTsub : Set.Icc 0 T ⊆ D.carrier)
-    (hG : MetricFamilySmoothOn (I := I) (M := M) D G)
+    (hG : MetricFamilySmoothOn (I := I) (M := M) D G.metric)
     (hsym :
       TwoTensorFamilySymmetricOn (I := I) (M := M)
         (twoTensorSecToFamily (I := I) (M := M) S) (Set.Icc 0 T))
@@ -559,7 +574,7 @@ theorem ofSmoothMetric
     hsym hbar
     (fun _delta _t0 _hdelta hsub =>
       metricTensor_tangentBundle_cont_of_metricFamilySmoothOn
-        (I := I) (M := M) G hG
+        (I := I) (M := M) G.metric hG
         (fun _t ht => hTsub (hsub ht)))
     hTensor hFixed
 
@@ -614,7 +629,7 @@ def toCore
 
 omit [IsManifold I 2 M] in
 theorem ofCompact
-    [CompactSpace M] [SigmaCompactSpace M] [T2Space M]
+    [CompactSpace M] [T2Space M]
     {G : Real -> SmoothRiemannianMetric I M}
     {S : TwoTensorSecFamily (I := I) (M := M)}
     {X : TimeDependentVectorField (I := I) (M := M)}
@@ -686,7 +701,7 @@ theorem ofCompact
 
 omit [IsManifold I 2 M] in
 theorem ofTotal
-    [CompactSpace M] [SigmaCompactSpace M] [T2Space M]
+    [CompactSpace M] [T2Space M]
     {G : Real -> SmoothRiemannianMetric I M}
     {S : TwoTensorSecFamily (I := I) (M := M)}
     {X : TimeDependentVectorField (I := I) (M := M)}
@@ -749,11 +764,11 @@ theorem ofTotal
     (G := G) (S := S) (X := X) (N := N) (T := T)
     hsym hbar
     (fun delta t0 hdelta hsub =>
-      DifferentialGeometry.Integral.Connection.metricFamQuadCont (I := I) (M := M)
+      DifferentialGeometry.PDE.RicciFlow.metricFamQuadCont (I := I) (M := M)
         G (Set.Icc t0 (t0 + delta))
         (hMetric delta t0 hdelta hsub))
     (fun delta t0 hdelta hsub =>
-      DifferentialGeometry.Integral.Connection.tensorQuadCont (I := I) (M := M)
+      DifferentialGeometry.PDE.RicciFlow.tensorQuadCont (I := I) (M := M)
         S (Set.Icc t0 (t0 + delta))
         (hTensor delta t0 hdelta hsub))
     hFixed hSigns
@@ -763,15 +778,15 @@ theorem ofTotal
 
 omit [IsManifold I 2 M] in
 theorem ofSmoothMetric
-    [CompactSpace M] [SigmaCompactSpace M] [T2Space M]
+    [CompactSpace M] [T2Space M]
     {D : RealTimeInterval}
-    (G : RealizedMetricFamilyOn (I := I) (M := M) D)
+    (G : MetricConnectionFamilyOn (I := I) (M := M) D)
     {S : TwoTensorSecFamily (I := I) (M := M)}
     {X : TimeDependentVectorField (I := I) (M := M)}
     {N : TwoTensorReaction (I := I) (M := M)}
     {T : Real}
     (hTsub : Set.Icc 0 T ⊆ D.carrier)
-    (hG : MetricFamilySmoothOn (I := I) (M := M) D G)
+    (hG : MetricFamilySmoothOn (I := I) (M := M) D G.metric)
     (hsym :
       TwoTensorFamilySymmetricOn (I := I) (M := M)
         (twoTensorSecToFamily (I := I) (M := M) S) (Set.Icc 0 T))
@@ -821,7 +836,7 @@ theorem ofSmoothMetric
     hsym hbar
     (fun _delta _t0 _hdelta hsub =>
       metricTensor_tangentBundle_cont_of_metricFamilySmoothOn
-        (I := I) (M := M) G hG
+        (I := I) (M := M) G.metric hG
         (fun _t ht => hTsub (hsub ht)))
     hTensor hFixed hSigns
 
@@ -856,4 +871,4 @@ end TensorWMPSectionReg
 
 end
 
-end DifferentialGeometry.Integral.Connection
+end DifferentialGeometry.PDE.RicciFlow

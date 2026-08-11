@@ -7,13 +7,15 @@ import Mathlib.Geometry.Manifold.VectorBundle.Riemannian
 import Mathlib.Geometry.Manifold.VectorBundle.Tangent
 import Mathlib.Analysis.Calculus.ContDiff.FiniteDimension
 
+namespace DifferentialGeometry
+
 
 
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
 
-open Bundle Manifold Tensor0SBundle
+open Bundle Manifold DifferentialGeometry.Tensor0SBundle
 
 open scoped Manifold Topology Bundle ContDiff
 
@@ -102,3 +104,4 @@ def RiemannianMetric.to02Tensor {I : ModelWithCorners ℝ E H} {n : WithTop ℕ�
       (x₀ := x₀) hx⟩
 
 end
+end DifferentialGeometry

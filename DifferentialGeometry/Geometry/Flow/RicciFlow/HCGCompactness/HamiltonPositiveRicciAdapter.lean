@@ -1,6 +1,10 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.RicciFlowConvergence
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.MetricCovDerivPullbackCross
 import DifferentialGeometry.Geometry.Flow.RicciFlow.DimensionThree.HamiltonPositiveRicci
+open DifferentialGeometry.PDE.RicciFlow
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Geometry.Connection
 
 set_option autoImplicit false
 
@@ -230,7 +234,7 @@ theorem tf_decay0_of_cgh
     {g0 : SmoothRiemannianMetric I M}
     (P : Ham3FlowPackage (I := I) (M := M) g0)
     (hD : P.D =
-      DifferentialGeometry.Integral.Connection.RealTimeInterval.closedOpen
+      DifferentialGeometry.Geometry.Curvature.RealTimeInterval.closedOpen
         0 omega h0omega)
     (Q : Ham3BlowupData M)
     (hsel : Ham3PointSel (I := I) P Q)
@@ -354,7 +358,7 @@ theorem round0_of_cgh
     {g0 : SmoothRiemannianMetric I M}
     (P : Ham3FlowPackage (I := I) (M := M) g0)
     (hD : P.D =
-      DifferentialGeometry.Integral.Connection.RealTimeInterval.closedOpen
+      DifferentialGeometry.Geometry.Curvature.RealTimeInterval.closedOpen
         0 omega h0omega)
     (Q : Ham3BlowupData M)
     (hsel : Ham3PointSel (I := I) P Q)
