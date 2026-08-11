@@ -16,6 +16,7 @@ open DifferentialGeometry.Integral.Connection
 open DifferentialGeometry.Analysis.Parabolic.TensorSpectral
 open DifferentialGeometry.Analysis.Parabolic.TensorHeatEquation
 open DifferentialGeometry.PDE.RicciFlow
+open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.MetricRealization
 
 variable
     {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
@@ -24,6 +25,104 @@ variable
     {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
       [IsManifold I ∞ M] [CompactSpace M] [I.Boundaryless]
       [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M]
+
+theorem riem_action_h2_split
+    (hDim : Module.finrank ℝ E = 3)
+    (g : SmoothRiemannianMetric I M) :
+    ∃ ρ D F : ℝ, 0 < ρ ∧ 0 ≤ D ∧ 0 ≤ F ∧
+      ∀ (P : SmoothCcTensor g 0 2) (gP : SmoothRiemannianMetric I M),
+        (∀ (x : M) (u v : TangentSpace I x),
+          gP.inner x u v = g.inner x u v +
+            ccTensorBilinSymm (I := I) g P x u v) →
+        ‖ccTensorToHs (I := I) (M := M) g 2 (2 : ℝ) P‖ ≤ ρ →
+        ∀ (W : SmoothCcTensor g 0 2) (R A : ℝ),
+          0 ≤ R → 0 ≤ A →
+          ‖ccTensorToHs (I := I) (M := M) g 2 (2 : ℝ) P‖ ≤ R →
+          lowJetSq (I := I) (M := M) g 2 W ≤ A ^ 2 →
+          lowJetSq (I := I) (M := M) g 2
+              (appCc (I := I) (M := M) g 2 2
+                (lc0Riem (I := I) (M := M) g gP) W) ≤
+            (D * R * A + F * A) ^ 2 := by
+  obtain ⟨ρ, Cp, hρ, hCp, hpair⟩ :=
+    riem_pair_h2 (I := I) (M := M) hDim g
+  obtain ⟨Ca, hCa, happ⟩ :=
+    appRS_h2_h2_h2 (I := I) (M := M) hDim g 0 2 2
+  let J : ℝ := lowJetSq (I := I) (M := M) g 2
+    (lc0Riem (I := I) (M := M) g g)
+  let Q : ℝ := Real.sqrt J
+  let D : ℝ := 2 * Ca * Cp
+  let F : ℝ := 2 * Ca * Q
+  have hJ : 0 ≤ J :=
+    Finset.sum_nonneg fun _ _ => sq_nonneg _
+  have hQ : 0 ≤ Q := Real.sqrt_nonneg _
+  refine ⟨ρ, D, F, hρ,
+    mul_nonneg (mul_nonneg (by norm_num) hCa) hCp,
+    mul_nonneg (mul_nonneg (by norm_num) hCa) hQ, ?_⟩
+  intro P gP hPtie hPρ W R A hR hA hPR hW
+  let Z : SmoothCcTensor g 2 2 :=
+    lc0Riem (I := I) (M := M) g gP -
+      lc0Riem (I := I) (M := M) g g
+  let Y₁ : SmoothCcTensor g 0 2 :=
+    appCc (I := I) (M := M) g 2 2 Z W
+  let Y₀ : SmoothCcTensor g 0 2 :=
+    appCc (I := I) (M := M) g 2 2
+      (lc0Riem (I := I) (M := M) g g) W
+  have hzeroTie : ∀ (x : M) (u v : TangentSpace I x),
+      g.inner x u v = g.inner x u v +
+        ccTensorBilinSymm (I := I) g
+          (0 : SmoothCcTensor g 0 2) x u v := by
+    intro x u v
+    rw [show (0 : SmoothCcTensor g 0 2) =
+        (0 : ℝ) • (0 : SmoothCcTensor g 0 2) from (zero_smul ℝ _).symm,
+      ccTensorBilinSymm_smul]
+    ring
+  have hzeroHs : ‖ccTensorToHs (I := I) (M := M) g 2 (2 : ℝ)
+      (0 : SmoothCcTensor g 0 2)‖ ≤ ρ := by
+    rw [show (0 : SmoothCcTensor g 0 2) =
+        (0 : ℝ) • (0 : SmoothCcTensor g 0 2) from (zero_smul ℝ _).symm,
+      ccTensorToHs_smul, zero_smul, norm_zero]
+    exact hρ.le
+  have hZ : lowJetSq (I := I) (M := M) g 2 Z ≤ (Cp * R) ^ 2 := by
+    have hraw := hpair P (0 : SmoothCcTensor g 0 2) gP g
+      hPtie hzeroTie hPρ hzeroHs
+    have hnorm : ‖ccTensorToHs (I := I) (M := M) g 2 (2 : ℝ)
+        (P - (0 : SmoothCcTensor g 0 2))‖ ≤ R := by
+      simpa only [sub_zero] using hPR
+    exact hraw.trans
+      (pow_le_pow_left₀ (mul_nonneg hCp (norm_nonneg _))
+        (mul_le_mul_of_nonneg_left hnorm hCp) 2)
+  have hY₁ : lowJetSq (I := I) (M := M) g 2 Y₁ ≤
+      (Ca * (Cp * R) * A) ^ 2 := by
+    simpa only [Y₁, Z, lowJetSq, appCcRS_zero_eq_appCc] using
+      happ Z W (Cp * R) A (mul_nonneg hCp hR) hA hZ hW
+  have hbase : lowJetSq (I := I) (M := M) g 2
+      (lc0Riem (I := I) (M := M) g g) ≤ Q ^ 2 := by
+    simpa only [J, Q] using (Real.sq_sqrt hJ).symm.le
+  have hY₀ : lowJetSq (I := I) (M := M) g 2 Y₀ ≤
+      (Ca * Q * A) ^ 2 := by
+    simpa only [Y₀, lowJetSq, appCcRS_zero_eq_appCc] using
+      happ (lc0Riem (I := I) (M := M) g g) W Q A hQ hA hbase hW
+  have hsplit :
+      appCc (I := I) (M := M) g 2 2
+          (lc0Riem (I := I) (M := M) g gP) W = Y₁ + Y₀ := by
+    dsimp only [Y₁, Y₀, Z]
+    rw [← appCc_add_left]
+    congr 1
+    module
+  rw [hsplit]
+  calc
+    lowJetSq (I := I) (M := M) g 2 (Y₁ + Y₀) ≤
+        2 * (lowJetSq (I := I) (M := M) g 2 Y₁ +
+          lowJetSq (I := I) (M := M) g 2 Y₀) :=
+      jetAdd (I := I) (M := M) g 2 Y₁ Y₀
+    _ ≤ 2 * ((Ca * (Cp * R) * A) ^ 2 + (Ca * Q * A) ^ 2) := by
+      gcongr
+    _ ≤ (D * R * A + F * A) ^ 2 := by
+      dsimp only [D, F]
+      nlinarith [sq_nonneg (Ca * (Cp * R) * A),
+        sq_nonneg (Ca * Q * A),
+        mul_nonneg (mul_nonneg (mul_nonneg hCa hCp) hR) hA,
+        mul_nonneg (mul_nonneg hCa hQ) hA]
 
 private lemma two_mul_le_eps {eta x y : ℝ} (heta : 0 < eta) :
     2 * x * y ≤ eta * x ^ 2 + eta⁻¹ * y ^ 2 := by
