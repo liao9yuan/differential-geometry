@@ -19303,6 +19303,60 @@ noncomputable def morseLevelDampedTransportMap {m k : ℕ} (hk : k ≤ m + 1)
         (le_of_lt hR₁R) hV₀supp))
     x (morseLevelDampedTransportTime hk c ε r δ ρ ρ' θ R₀ R₁ η ε₀ data x)
 
+theorem modelLevelDampedUnstretchTime_nonpos {n k : ℕ} (hk : k ≤ n) (ε r δ : ℝ)
+    (c η ε₀ : ℝ) (hε : 0 ≤ ε) (hδ : 0 < δ) (hδr : δ < r ^ 2) (y : MorseModel n) :
+    modelLevelDampedUnstretchTime hk ε r δ c η ε₀ y ≤ 0 := by
+  have hsc : 0 < smoothCap ε r δ (‖negPart hk y‖ ^ 2) := smoothCap_pos hδ hδr
+  have hU : 1 ≤ Real.sqrt ((‖negPart hk y‖ ^ 2 + r ^ 2) / smoothCap ε r δ (‖negPart hk y‖ ^ 2)) := by
+    have hle : smoothCap ε r δ (‖negPart hk y‖ ^ 2) ≤ ‖negPart hk y‖ ^ 2 + r ^ 2 := by
+      have hmax : max (r ^ 2) (‖negPart hk y‖ ^ 2) ≤ ‖negPart hk y‖ ^ 2 + r ^ 2 := by
+        rw [max_le_iff]
+        constructor <;> nlinarith [sq_nonneg ‖negPart hk y‖]
+      exact le_trans (smoothCap_le_max (ε := ε) (r := r) (δ := δ)
+        (t := ‖negPart hk y‖ ^ 2) hε hδ) hmax
+    exact (Real.le_sqrt (by norm_num : (0 : ℝ) ≤ 1)
+      (div_nonneg (by positivity : 0 ≤ ‖negPart hk y‖ ^ 2 + r ^ 2) (le_of_lt hsc))).2 (by
+      norm_num
+      rw [one_le_div hsc]
+      nlinarith)
+  have hσ0 : 0 ≤ Real.smoothTransition ((morseNormalForm hk c y - c + ε + η) / ε₀) :=
+    Real.smoothTransition.nonneg _
+  have hSge1 : 1 ≤ 1 + (Real.sqrt ((‖negPart hk y‖ ^ 2 + r ^ 2) /
+      smoothCap ε r δ (‖negPart hk y‖ ^ 2)) - 1) *
+        Real.smoothTransition ((morseNormalForm hk c y - c + ε + η) / ε₀) := by
+    nlinarith [hU, hσ0]
+  dsimp [modelLevelDampedUnstretchTime]
+  have h1 : 1 - (1 + (Real.sqrt ((‖negPart hk y‖ ^ 2 + r ^ 2) /
+      smoothCap ε r δ (‖negPart hk y‖ ^ 2)) - 1) *
+        Real.smoothTransition ((morseNormalForm hk c y - c + ε + η) / ε₀)) ^ 2 ≤ 0 := by
+    have hnon : 0 ≤ 1 + (Real.sqrt ((‖negPart hk y‖ ^ 2 + r ^ 2) /
+        smoothCap ε r δ (‖negPart hk y‖ ^ 2)) - 1) *
+          Real.smoothTransition ((morseNormalForm hk c y - c + ε + η) / ε₀) := by
+      nlinarith [hU, hσ0]
+    nlinarith [sq_nonneg (1 + (Real.sqrt ((‖negPart hk y‖ ^ 2 + r ^ 2) /
+      smoothCap ε r δ (‖negPart hk y‖ ^ 2)) - 1) *
+        Real.smoothTransition ((morseNormalForm hk c y - c + ε + η) / ε₀)), hSge1]
+  have hpos : 0 ≤ ‖posPart hk y‖ ^ 2 := by positivity
+  nlinarith
+
+private lemma modelLevelDampedTransportTime_eq_attached_comb {m k : ℕ} (hk : k ≤ m + 1)
+    (c ε r δ ρ ρ' θ R₀ R₁ η ε₀ : ℝ) (hθ : 0 < θ) {y : MorseModel (m + 1)}
+    (hy : y ∈ modelAttachedRegion hk ε r δ) :
+    modelLevelDampedTransportTime hk c ε r δ ρ ρ' θ R₀ R₁ η ε₀ y =
+      (1 - Real.smoothTransition ((morseNorm (m + 1) y - R₀) / (R₁ - R₀))) *
+          modelLevelDampedUnstretchTime hk ε r δ c η ε₀ y +
+        Real.smoothTransition ((morseNorm (m + 1) y - R₀) / (R₁ - R₀)) *
+          morseFarExpandTimeSmooth c ε δ ρ ρ' (morseNormalForm hk c y) := by
+  dsimp [modelLevelDampedTransportTime]
+  have hβ₁ : 1 - Real.smoothTransition
+      ((‖posPart hk y‖ ^ 2 - smoothCap ε r δ (‖negPart hk y‖ ^ 2)) / θ) = 1 := by
+    have harg : (‖posPart hk y‖ ^ 2 - smoothCap ε r δ (‖negPart hk y‖ ^ 2)) / θ ≤ 0 := by
+      exact div_nonpos_of_nonpos_of_nonneg (by simpa [modelAttachedRegion] using hy) (le_of_lt hθ)
+    rw [Real.smoothTransition.zero_of_nonpos harg]
+    norm_num
+  rw [hβ₁]
+  ring
+
 theorem morseLevelDampedTransportMap_deep {m k : ℕ} (hk : k ≤ m + 1)
     (c ε r δ ρ ρ' θ R₀ R₁ η ε₀ ε₁ : ℝ) {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M]
     [ChartedSpace H M] [T2Space M]
