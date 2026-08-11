@@ -3458,6 +3458,7 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.UnifEdgeCarrierH4
 import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.UnifEdgeDefectPair
 import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.UnifEdgeSwapPair
 import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.UnifFixedConnH2
+import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.UnifGalRungThree
 import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.UnifGradSlot
 import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.UnifGridH1
 import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.UnifGridH2
