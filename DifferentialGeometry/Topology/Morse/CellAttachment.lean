@@ -1849,6 +1849,39 @@ theorem modelFlow_posPart_norm_sq_neg {n k : ℕ} (hk : k ≤ n) (t : ℝ) (y : 
   rw [sub_mul, one_mul]
   rw [div_mul_cancel₀ (2 * t) (ne_of_gt hb2pos)]
 
+theorem modelFlow_norm_le_of_nonneg {n k : ℕ} (hk : k ≤ n) (t : ℝ) (y : MorseModel n)
+    (ht0 : 0 ≤ t) :
+    morseNorm n (modelFlow hk t y) ≤ morseNorm n y := by
+  have hneg : ‖negPart hk (modelFlow hk t y)‖ ^ 2 = ‖negPart hk y‖ ^ 2 := by
+    rw [modelFlow_negPart]
+  have hpos : ‖posPart hk (modelFlow hk t y)‖ ^ 2 ≤ ‖posPart hk y‖ ^ 2 := by
+    rw [modelFlow_posPart]
+    rw [norm_smul]
+    rw [Real.norm_eq_abs, abs_of_nonneg (Real.sqrt_nonneg _)]
+    rw [mul_pow]
+    have hsc : (Real.sqrt (1 - 2 * t / ‖posPart hk y‖ ^ 2)) ^ 2 ≤ 1 := by
+      have hle : 1 - 2 * t / ‖posPart hk y‖ ^ 2 ≤ 1 := by
+        have hnum : 0 ≤ 2 * t := by
+          have hm := mul_nonneg ht0 (by norm_num : (0 : ℝ) ≤ 2)
+          simpa [mul_comm] using hm
+        have hnon : 0 ≤ 2 * t / ‖posPart hk y‖ ^ 2 :=
+          div_nonneg hnum (sq_nonneg _)
+        nlinarith
+      have hs : Real.sqrt (1 - 2 * t / ‖posPart hk y‖ ^ 2) ≤ 1 := Real.sqrt_le_one.mpr hle
+      have hsq : 0 ≤ Real.sqrt (1 - 2 * t / ‖posPart hk y‖ ^ 2) := Real.sqrt_nonneg _
+      have hm : |Real.sqrt (1 - 2 * t / ‖posPart hk y‖ ^ 2)| ≤ |(1 : ℝ)| := by
+        rw [abs_of_nonneg hsq, abs_of_nonneg (by norm_num : (0 : ℝ) ≤ 1)]
+        exact hs
+      simpa using sq_le_sq.mpr hm
+    have hp : 0 ≤ ‖posPart hk y‖ ^ 2 := by positivity
+    nlinarith [hsc, hp]
+  apply le_of_sq_le_sq
+  · rw [morseNorm_sq_eq_negPart_add_posPart hk (modelFlow hk t y),
+      morseNorm_sq_eq_negPart_add_posPart hk y]
+    nlinarith [hneg, hpos]
+  · dsimp [morseNorm]
+    exact norm_nonneg _
+
 theorem modelFlow_up_posPart_norm_sq {n k : ℕ} (hk : k ≤ n) (t : ℝ) (y : MorseModel n)
     (ht0 : 0 ≤ t) (hy : 0 < ‖posPart hk y‖) :
     ‖posPart hk (modelFlow hk (-t) y)‖ ^ 2 = ‖posPart hk y‖ ^ 2 + 2 * t := by
