@@ -20301,6 +20301,61 @@ private lemma modelLevelDampedStretchFactor_nonneg {n k : ℕ} (hk : k ≤ n) (�
     Real.smoothTransition.nonneg _
   nlinarith [hU, hσ]
 
+private lemma modelLevelDampedStretchFactor_mono {m k : ℕ} (hk : k ≤ m + 1) (ε r δ : ℝ)
+    (c η ε₀ : ℝ) (hε : 0 ≤ ε) (hδ : 0 < δ) (hδr : δ < r ^ 2) (hε₀ : 0 < ε₀)
+    {y z : MorseModel (m + 1)}
+    (hneg : negPart hk y = negPart hk z)
+    (hlt : ‖posPart hk y‖ < ‖posPart hk z‖) :
+    1 + (Real.sqrt ((‖negPart hk y‖ ^ 2 + r ^ 2) /
+        smoothCap ε r δ (‖negPart hk y‖ ^ 2)) - 1) *
+          Real.smoothTransition ((morseNormalForm hk c y - c + ε + η) / ε₀) ≤
+      1 + (Real.sqrt ((‖negPart hk z‖ ^ 2 + r ^ 2) /
+        smoothCap ε r δ (‖negPart hk z‖ ^ 2)) - 1) *
+          Real.smoothTransition ((morseNormalForm hk c z - c + ε + η) / ε₀) := by
+  have hsqrt : Real.sqrt ((‖negPart hk y‖ ^ 2 + r ^ 2) /
+        smoothCap ε r δ (‖negPart hk y‖ ^ 2)) =
+      Real.sqrt ((‖negPart hk z‖ ^ 2 + r ^ 2) /
+        smoothCap ε r δ (‖negPart hk z‖ ^ 2)) := by
+    congr 1
+    rw [hneg]
+  have hf : morseNormalForm hk c y < morseNormalForm hk c z := by
+    rw [morseNormalForm_split hk c y, morseNormalForm_split hk c z]
+    have hnegsq : ‖negPart hk y‖ ^ 2 = ‖negPart hk z‖ ^ 2 := by rw [hneg]
+    have hsqlt : ‖posPart hk y‖ ^ 2 < ‖posPart hk z‖ ^ 2 :=
+      sq_lt_sq.mpr (by
+        rw [abs_of_nonneg (norm_nonneg _), abs_of_nonneg (norm_nonneg _)]
+        exact hlt)
+    nlinarith [hnegsq, hsqlt]
+  have hσ : Real.smoothTransition ((morseNormalForm hk c y - c + ε + η) / ε₀) ≤
+      Real.smoothTransition ((morseNormalForm hk c z - c + ε + η) / ε₀) :=
+    Real.smoothTransition.monotone (by
+      exact div_le_div_of_nonneg_right (by linarith) (le_of_lt hε₀))
+  have hsc : 0 < smoothCap ε r δ (‖negPart hk y‖ ^ 2) := smoothCap_pos hδ hδr
+  have hU : 1 ≤ Real.sqrt ((‖negPart hk y‖ ^ 2 + r ^ 2) /
+      smoothCap ε r δ (‖negPart hk y‖ ^ 2)) := by
+    have hle : smoothCap ε r δ (‖negPart hk y‖ ^ 2) ≤ ‖negPart hk y‖ ^ 2 + r ^ 2 := by
+      have hmax : max (r ^ 2) (‖negPart hk y‖ ^ 2) ≤ ‖negPart hk y‖ ^ 2 + r ^ 2 := by
+        rw [max_le_iff]
+        constructor <;> nlinarith [sq_nonneg ‖negPart hk y‖]
+      exact le_trans (smoothCap_le_max (ε := ε) (r := r) (δ := δ)
+        (t := ‖negPart hk y‖ ^ 2) hε hδ) hmax
+    exact (Real.le_sqrt (by norm_num : (0 : ℝ) ≤ 1)
+      (div_nonneg (by positivity : 0 ≤ ‖negPart hk y‖ ^ 2 + r ^ 2) (le_of_lt hsc))).2 (by
+      norm_num
+      rw [one_le_div hsc]
+      nlinarith)
+  have hfac : 0 ≤ Real.sqrt ((‖negPart hk y‖ ^ 2 + r ^ 2) /
+        smoothCap ε r δ (‖negPart hk y‖ ^ 2)) - 1 := by linarith
+  have hmul : (Real.sqrt ((‖negPart hk y‖ ^ 2 + r ^ 2) /
+        smoothCap ε r δ (‖negPart hk y‖ ^ 2)) - 1) *
+          Real.smoothTransition ((morseNormalForm hk c y - c + ε + η) / ε₀) ≤
+      (Real.sqrt ((‖negPart hk y‖ ^ 2 + r ^ 2) /
+        smoothCap ε r δ (‖negPart hk y‖ ^ 2)) - 1) *
+          Real.smoothTransition ((morseNormalForm hk c z - c + ε + η) / ε₀) := by
+    exact mul_le_mul_of_nonneg_left hσ hfac
+  rw [← hsqrt]
+  nlinarith [hmul]
+
 private lemma smoothTransition_deriv {x : ℝ} (hx0 : 0 < x) :
     deriv Real.smoothTransition x =
       expNegInvGlue x * expNegInvGlue (1 - x) * (1 / x ^ 2 + 1 / (1 - x) ^ 2) /
