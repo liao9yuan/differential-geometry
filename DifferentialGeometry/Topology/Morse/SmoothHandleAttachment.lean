@@ -844,6 +844,95 @@ theorem morse_smooth_handle_attachment_relative {m : ℕ} {H : Type} [Topologica
       exact curveAt_eq_self_of_not_mem_tsupport v hv hcomplete hx _
     exact (htie x).trans hflow
 
+theorem morse_smooth_handle_attachment_relative_natural {m : ℕ} {H : Type} [TopologicalSpace H]
+    {M : Type} [TopologicalSpace M] [ChartedSpace H M] [T2Space M] [SigmaCompactSpace M]
+    (I : ModelWithCorners ℝ (MorseModel (m + 1)) H) [I.Boundaryless]
+    [IsManifold I (⊤ : WithTop ℕ∞) M] (f : M → ℝ)
+    (hf : ContMDiff I 𝓘(ℝ, ℝ) (⊤ : WithTop ℕ∞) f)
+    (p : M) (c : ℝ) (k : ℕ) (hk : k ≤ m + 1)
+    (hnd : IsNondegenerateCriticalPointAt I f p)
+    (hindex : sigNeg (chartHessianAt (g := fun y => f ((extChartAt I p).symm y)) (extChartAt I p p)) = k)
+    (hfp : f p = c)
+    (a : ℝ) (ha : 0 < a)
+    (hcompact : IsCompact (f ⁻¹' Set.Icc (c - a) (c + a)))
+    (hunique : ∀ x : M, f x ∈ Set.Icc (c - a) (c + a) →
+      x = p ∨ ¬ IsCriticalPointAt I f x) :
+    ∃ ε : ℝ, ∃ hε : 0 < ε, ∃ _ : ε ≤ a,
+    ∃ g : M → ℝ,
+      ∃ hg : ContMDiff I 𝓘(ℝ, ℝ) (↑(⊤ : ℕ∞) : WithTop ℕ∞) g,
+      (∀ x : M, g x ≤ f x) ∧
+      ({x : M | g x ≤ c + ε} = sublevel f (c + ε)) ∧
+      (∀ x : M, f x ≤ c - ε → g x ≤ c - ε) ∧
+      ∃ v : (x : M) → TangentSpace I x,
+        ContMDiff I (I.prod 𝓘(ℝ, MorseModel (m + 1))) (↑(⊤ : ℕ∞) : WithTop ℕ∞)
+          (fun x : M => (⟨x, v x⟩ : TangentBundle I M)) ∧
+        IsCompact (tsupport v) ∧
+        (∀ x ∈ g ⁻¹' Set.Icc (c - ε) (c + ε),
+          (NormedSpace.fromTangentSpace (g x)) ((mfderiv I 𝓘(ℝ, ℝ) g x) (v x)) = -1) ∧
+        (∀ x,
+          -1 ≤ (NormedSpace.fromTangentSpace (g x)) ((mfderiv I 𝓘(ℝ, ℝ) g x) (v x)) ∧
+          (NormedSpace.fromTangentSpace (g x)) ((mfderiv I 𝓘(ℝ, ℝ) g x) (v x)) ≤ 0) ∧
+        ∃ Φ : Diffeomorph I I M M (↑(⊤ : ℕ∞) : WithTop ℕ∞),
+          Φ.toEquiv '' sublevel g (c - ε) = sublevel f (c + ε) ∧
+          (∀ x : M, x ∉ tsupport v → Φ.toEquiv x = x) ∧
+          (∃ η : ℝ, 0 < η ∧ ∀ x : M, g x ≤ c - ε - η → Φ.toEquiv x = x) ∧
+          ∃ r : ℝ, ∃ hr : r ≠ 0, ∃ _ : r ^ 2 = 2 * ε,
+          ∃ δ₁ : ℝ, ∃ hδ₁₀ : 0 < δ₁, ∃ hδ₁r : δ₁ < r ^ 2,
+          ∃ φ : AttachingRegion k (m + 1 - k) → SublevelSpace f (c - ε),
+            (∀ p : AttachingRegion k (m + 1 - k), f (φ p).1 = c - ε) ∧
+            Function.Injective φ ∧
+            Topology.IsClosedEmbedding φ ∧
+            (∀ hk0 : NeZero k, ∀ hl0 : NeZero (m + 1 - k),
+              ∃ hreg_f : ∀ x : M, f x = c - ε → ¬ IsCriticalPointAt I f x,
+                ∃ φ₀ : AttachingRegion k (m + 1 - k) → LevelSetSpace f (c - ε),
+                  @ContMDiff ℝ _
+                    (EuclideanSpace ℝ (Fin (k - 1)) ×
+                      EuclideanSpace ℝ (Fin ((m + 1 - k - 1) + 1))) _ _
+                    (ModelProd (EuclideanSpace ℝ (Fin (k - 1)))
+                      (EuclideanHalfSpace ((m + 1 - k - 1) + 1))) _
+                    ((𝓡 (k - 1)).prod (modelWithCornersEuclideanHalfSpace ((m + 1 - k - 1) + 1)))
+                    (AttachingRegion k (m + 1 - k)) _ (attachingRegionChartedSpace k (m + 1 - k))
+                    (MorseModel m) _ _ (MorseModel m) _
+                    (𝓘(ℝ, MorseModel m)) (LevelSetSpace f (c - ε)) _
+                    (manifoldLevelSetChartedSpace I f (c - ε) (hf.of_le le_top) hreg_f)
+                    (⊤ : ℕ∞)
+                    φ₀ ∧
+                  Topology.IsClosedEmbedding φ₀ ∧
+                  ∀ p : AttachingRegion k (m + 1 - k), (φ₀ p).1 = (φ p).1) ∧
+            @IsManifold ℝ _ (MorseModel (m + 1)) _ _ (MorseHalfSpace m) _
+              (morseModelWithCornersHalfSpace m) (⊤ : ℕ∞)
+              (morseAttachedSpace hk c ε r δ₁ (le_of_lt hε) hδ₁₀ hδ₁r hr) _
+              (morseAttachedNaturalChartedSpace hk c ε r δ₁ (le_of_lt hε) hδ₁₀ hδ₁r hr) ∧
+            ∃ Ψ : @Diffeomorph ℝ _ (MorseModel (m + 1)) _ _ (MorseModel (m + 1)) _ _
+              (MorseHalfSpace m) _ (MorseHalfSpace m) _ (morseModelWithCornersHalfSpace m)
+              (morseModelWithCornersHalfSpace m)
+              (morseAttachedSpace hk c ε r δ₁ (le_of_lt hε) hδ₁₀ hδ₁r hr) _
+              (morseAttachedNaturalChartedSpace hk c ε r δ₁ (le_of_lt hε) hδ₁₀ hδ₁r hr)
+              (morseUpperSublevel hk c r) _ (morseUpperChartedSpace hk c r hr)
+              (⊤ : ℕ∞),
+              morseAttachedDiffeomorphRelative hk c ε r δ₁ (le_of_lt hε) hδ₁₀ hδ₁r hr
+                (hcs₁ := morseAttachedNaturalChartedSpace hk c ε r δ₁ (le_of_lt hε) hδ₁₀ hδ₁r hr)
+                (hcs₂ := morseUpperChartedSpace hk c r hr)
+                (Ψ := Ψ) ∧
+            ∃ φc : C(CellBoundary k, SublevelSpace f (c - ε)),
+                Nonempty (HomotopyEquivUnder
+                  (X := SublevelSpace f (c - ε)) (Y := SublevelSpace f (c + ε))
+                  (Z := CellAdjunctionSpace k φc)
+                  (toBase := sublevelInclusion f (by linarith [hε]))
+                  (fromBase := ContinuousMap.mk (adjunctionLower (i := cellBoundaryInclusion k) φc)
+                    (continuous_adjunctionLower (i := cellBoundaryInclusion k) φc)))  := by
+  rcases morse_smooth_handle_attachment_relative (m := m) (H := H) (M := M) I f hf p c k hk hnd hindex
+    hfp a ha hcompact hunique with
+    ⟨ε, hε, hεa, g, hg, hg_le, hgup, hglow, v, hv, hsupp, hdf, hrate, Φ, htransport, htie,
+      ⟨η, hη, hηmain⟩, r, hr, hrsq, δ₁, hδ₁₀, hδ₁r, φ, hφb, hφinj, hφcl, hsmooth, hmani,
+      Ψ₀, hrel₀, ⟨φc, hcelladj⟩⟩
+  refine ⟨ε, hε, hεa, g, hg, hg_le, hgup, hglow, v, hv, hsupp, hdf, hrate, Φ, htransport, htie,
+    ⟨η, hη, hηmain⟩, r, hr, hrsq, δ₁, hδ₁₀, hδ₁r, φ, hφb, hφinj, hφcl, hsmooth, ?_, ?_⟩
+  · exact morseAttachedNaturalIsManifold hk c ε r δ₁ (le_of_lt hε) hδ₁₀ hδ₁r hr
+  · refine ⟨morseAttachedNaturalDiffeomorphUpper hk c ε r δ₁ (le_of_lt hε) hδ₁₀ hδ₁r hr,
+      morseAttachedNaturalDiffeomorphRelative hk c ε r δ₁ (le_of_lt hε) hδ₁₀ hδ₁r hr,
+      ⟨φc, hcelladj⟩⟩
+
 theorem one_critical_point_cell_attachment {m : ℕ} {H : Type} [TopologicalSpace H] {M : Type}
     [TopologicalSpace M] [ChartedSpace H M] [T2Space M] [SigmaCompactSpace M]
     (I : ModelWithCorners ℝ (MorseModel (m + 1)) H) [I.Boundaryless]
