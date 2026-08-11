@@ -20498,6 +20498,33 @@ private lemma smoothTransition_lipschitz_on {x y : ℝ} (hx : x ∈ Set.Ioo 0 1)
   rw [h1, h2]
   exact hmain
 
+private lemma morseFarExpandTimeSmooth_antiMonotone {c ε δ ρ ρ' : ℝ} (hρ : 0 < ρ)
+    (hδ : 0 < δ) (hε : 0 < ε)
+    {t₁ t₂ : ℝ} (ht : t₁ ≤ t₂) :
+    morseFarExpandTimeSmooth c ε δ ρ ρ' t₂ ≤ morseFarExpandTimeSmooth c ε δ ρ ρ' t₁ := by
+  have hτ := morseFarExpandTime_antiMonotone (c := c) (ε := ε) (δ := δ) hδ hε ht
+  have hτ₂0 : morseFarExpandTime c ε δ t₂ ≤ 0 :=
+    morseFarExpandTime_le_zero (c := c) (ε := ε) (δ := δ) hδ hε
+  have hσ₁ : 0 ≤ Real.smoothTransition ((t₁ - (c - ε - δ + ρ')) / ρ) :=
+    Real.smoothTransition.nonneg _
+  have hmonoarg : (t₁ - (c - ε - δ + ρ')) / ρ ≤ (t₂ - (c - ε - δ + ρ')) / ρ := by
+    exact div_le_div_of_nonneg_right (by linarith) (le_of_lt hρ)
+  have hσmono : Real.smoothTransition ((t₁ - (c - ε - δ + ρ')) / ρ) ≤
+      Real.smoothTransition ((t₂ - (c - ε - δ + ρ')) / ρ) :=
+    Real.smoothTransition.monotone hmonoarg
+  dsimp [morseFarExpandTimeSmooth]
+  have h₁ : Real.smoothTransition ((t₂ - (c - ε - δ + ρ')) / ρ) *
+        morseFarExpandTime c ε δ t₂ ≤
+      Real.smoothTransition ((t₁ - (c - ε - δ + ρ')) / ρ) *
+        morseFarExpandTime c ε δ t₂ := by
+    exact mul_le_mul_of_nonpos_right hσmono hτ₂0
+  have h₂ : Real.smoothTransition ((t₁ - (c - ε - δ + ρ')) / ρ) *
+        morseFarExpandTime c ε δ t₂ ≤
+      Real.smoothTransition ((t₁ - (c - ε - δ + ρ')) / ρ) *
+        morseFarExpandTime c ε δ t₁ := by
+    exact mul_le_mul_of_nonneg_left hτ hσ₁
+  exact le_trans h₁ h₂
+
 theorem modelLevelDampedTransportLevelMap_strictMono_core {m k : ℕ} (hk : k ≤ m + 1)
     (c ε r δ ρ ρ' θ R₀ R₁ η ε₀ : ℝ) (hθ : 0 < θ) (hR₀R₁ : R₀ < R₁)
     (hε : 0 ≤ ε) (hδ : 0 < δ) (hδr : δ < r ^ 2) (hε₀ : 0 < ε₀)
