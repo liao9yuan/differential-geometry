@@ -2949,6 +2949,49 @@ theorem contMDiffAt_sublevelSetEqIdentityInterior {m : ℕ} (g f : MorseModel (m
         rfl
       · simp [extChartAt, hchart₁']
 
+theorem sublevelSetEq_boundary_imp_boundary {m : ℕ} (g f : MorseModel (m + 1) → ℝ) (a : ℝ)
+    (hset : {x : MorseModel (m + 1) | g x ≤ a} = {x : MorseModel (m + 1) | f x ≤ a})
+    (hg_le : ∀ x : MorseModel (m + 1), g x ≤ f x)
+    (x : MorseModel (m + 1)) (hgx : g x = a) : f x = a := by
+  have hf_le : f x ≤ a := by
+    have : x ∈ {x : MorseModel (m + 1) | f x ≤ a} := by
+      rw [← hset]
+      exact le_of_eq hgx
+    exact this
+  have hf_ge : a ≤ f x := by
+    rw [← hgx]
+    exact hg_le x
+  exact le_antisymm hf_le hf_ge
+
+theorem sublevelSetEq_boundary_imp_boundary_of_le {m : ℕ} (g f : MorseModel (m + 1) → ℝ) (a : ℝ)
+    (hg : ContDiff ℝ (⊤ : ℕ∞) g)
+    (hreg_f : ∀ x : MorseModel (m + 1), f x = a → fderiv ℝ f x ≠ 0)
+    (hset : {x : MorseModel (m + 1) | g x ≤ a} = {x : MorseModel (m + 1) | f x ≤ a})
+    (x : MorseModel (m + 1)) (hfx : f x = a) : g x = a := by
+  by_contra hne
+  have hgxle : g x ≤ a := by
+    change x ∈ {x : MorseModel (m + 1) | g x ≤ a}
+    rw [hset]
+    exact le_of_eq hfx
+  have hgxlt : g x < a := lt_of_le_of_ne hgxle hne
+  have hint : x ∈ interior {y : MorseModel (m + 1) | f y ≤ a} := by
+    have hsub : {y : MorseModel (m + 1) | g y < a} ⊆
+        {y : MorseModel (m + 1) | f y ≤ a} := by
+      intro y hy
+      change y ∈ {x : MorseModel (m + 1) | f x ≤ a}
+      rw [← hset]
+      change g y ≤ a
+      exact le_of_lt (by change g y < a; exact hy)
+    exact (interior_maximal hsub (isOpen_Iio.preimage hg.continuous)) hgxlt
+  have hmax : IsLocalMax f x := by
+    rw [IsLocalMax]
+    have hnhd : {y : MorseModel (m + 1) | f y ≤ a} ∈ 𝓝 x :=
+      mem_interior_iff_mem_nhds.mp hint
+    filter_upwards [hnhd] with y hy
+    rwa [← hfx] at hy
+  have hder : fderiv ℝ f x = 0 := hmax.fderiv_eq_zero
+  exact (hreg_f x hfx) hder
+
 
 noncomputable def sublevelInteriorTransitionUnderlying {m : ℕ} (c₁ c₂ : ℝ) :
     MorseModel (m + 1) → MorseModel (m + 1) :=
@@ -3639,6 +3682,105 @@ theorem contMDiffAt_sublevelBoundaryMap {m : ℕ} (g₁ g₂ : MorseModel (m + 1
     rw [OpenPartialHomeomorph.extend_coe]
     rw [OpenPartialHomeomorph.extend_coe_symm]
     simpa using hred
+
+theorem contMDiff_sublevelSetEqMap {m : ℕ} (g f : MorseModel (m + 1) → ℝ) (a : ℝ)
+    (hg : ContDiff ℝ (⊤ : ℕ∞) g) (hf : ContDiff ℝ (⊤ : ℕ∞) f)
+    (hreg_g : ∀ x : MorseModel (m + 1), g x = a → fderiv ℝ g x ≠ 0)
+    (hreg_f : ∀ x : MorseModel (m + 1), f x = a → fderiv ℝ f x ≠ 0)
+    (hset : {x : MorseModel (m + 1) | g x ≤ a} = {x : MorseModel (m + 1) | f x ≤ a})
+    (hbnd : ∀ x : MorseModel (m + 1), g x = a → f x = a)
+    (hcs₁ : ChartedSpace (MorseHalfSpace m) (SublevelSpace g a) :=
+      sublevelChartedSpace g a hg hreg_g)
+    (hcs₂ : ChartedSpace (MorseHalfSpace m) (SublevelSpace f a) :=
+      sublevelChartedSpace f a hf hreg_f)
+    (hchart₁ : ∀ y : SublevelSpace g a, hcs₁.chartAt y =
+      (if h : g y.1 = a then sublevelBoundaryChart g a y h hg (hreg_g y.1 h)
+        else sublevelInteriorChart g a y (lt_of_le_of_ne (show g y.1 ≤ a from y.2) h) hg) := by
+      intro y
+      rfl)
+    (hchart₂ : ∀ y : SublevelSpace f a, hcs₂.chartAt y =
+      (if h : f y.1 = a then sublevelBoundaryChart f a y h hf (hreg_f y.1 h)
+        else sublevelInteriorChart f a y (lt_of_le_of_ne (show f y.1 ≤ a from y.2) h) hf) := by
+      intro y
+      rfl) :
+    ContMDiff (morseModelWithCornersHalfSpace m) (morseModelWithCornersHalfSpace m) (⊤ : ℕ∞)
+      (fun y : SublevelSpace g a => (⟨y.1, by
+        have : y.1 ∈ {x : MorseModel (m + 1) | f x ≤ a} := by
+          rw [← hset]
+          exact y.2
+        exact this⟩ : SublevelSpace f a)) := by
+  intro x
+  by_cases hx : g x.1 = a
+  · exact contMDiffAt_sublevelBoundaryMap g f a a hg hf hreg_g hreg_f x hx id contDiff_id
+      (fun y hy => by
+        change f y ≤ a
+        have : y ∈ {x : MorseModel (m + 1) | f x ≤ a} := by
+          rw [← hset]
+          exact hy
+        exact this)
+      (fun y hy => hbnd y hy)
+      (hcs₁ := hcs₁) (hcs₂ := hcs₂) (hchart₁ := hchart₁) (hchart₂ := hchart₂)
+  · have hxlt : g x.1 < a := lt_of_le_of_ne (show g x.1 ≤ a from x.2) hx
+    exact contMDiffAt_sublevelSetEqIdentityInterior g f a hg hf hreg_g hreg_f hset x hxlt
+      (hcs₁ := hcs₁) (hcs₂ := hcs₂) (hchart₁ := hchart₁) (hchart₂ := hchart₂)
+
+theorem sublevelSetEqDiffeomorph {m : ℕ} (g f : MorseModel (m + 1) → ℝ) (a : ℝ)
+    (hg : ContDiff ℝ (⊤ : ℕ∞) g) (hf : ContDiff ℝ (⊤ : ℕ∞) f)
+    (hreg_g : ∀ x : MorseModel (m + 1), g x = a → fderiv ℝ g x ≠ 0)
+    (hreg_f : ∀ x : MorseModel (m + 1), f x = a → fderiv ℝ f x ≠ 0)
+    (hset : {x : MorseModel (m + 1) | g x ≤ a} = {x : MorseModel (m + 1) | f x ≤ a})
+    (hg_le : ∀ x : MorseModel (m + 1), g x ≤ f x)
+    (hcs₁ : ChartedSpace (MorseHalfSpace m) (SublevelSpace g a) :=
+      sublevelChartedSpace g a hg hreg_g)
+    (hcs₂ : ChartedSpace (MorseHalfSpace m) (SublevelSpace f a) :=
+      sublevelChartedSpace f a hf hreg_f)
+    (hchart₁ : ∀ y : SublevelSpace g a, hcs₁.chartAt y =
+      (if h : g y.1 = a then sublevelBoundaryChart g a y h hg (hreg_g y.1 h)
+        else sublevelInteriorChart g a y (lt_of_le_of_ne (show g y.1 ≤ a from y.2) h) hg) := by
+      intro y
+      rfl)
+    (hchart₂ : ∀ y : SublevelSpace f a, hcs₂.chartAt y =
+      (if h : f y.1 = a then sublevelBoundaryChart f a y h hf (hreg_f y.1 h)
+        else sublevelInteriorChart f a y (lt_of_le_of_ne (show f y.1 ≤ a from y.2) h) hf) := by
+      intro y
+      rfl) :
+    Nonempty (@Diffeomorph ℝ _ (MorseModel (m + 1)) _ _ (MorseModel (m + 1)) _ _
+      (MorseHalfSpace m) _ (MorseHalfSpace m) _ (morseModelWithCornersHalfSpace m)
+      (morseModelWithCornersHalfSpace m)
+      (SublevelSpace g a) _ hcs₁ (SublevelSpace f a) _ hcs₂ (⊤ : ℕ∞)) := by
+  classical
+  letI := hcs₁
+  letI := hcs₂
+  let toFun : SublevelSpace g a → SublevelSpace f a := fun y => ⟨y.1, by
+    change y.1 ∈ {x : MorseModel (m + 1) | f x ≤ a}
+    rw [← hset]
+    exact y.2⟩
+  let invFun : SublevelSpace f a → SublevelSpace g a := fun y => ⟨y.1, by
+    change y.1 ∈ {x : MorseModel (m + 1) | g x ≤ a}
+    rw [hset]
+    exact y.2⟩
+  let e : SublevelSpace g a ≃ SublevelSpace f a :=
+    { toFun := toFun, invFun := invFun, left_inv := by intro y; rfl,
+      right_inv := by intro y; rfl }
+  have hbnd' : ∀ x : MorseModel (m + 1), f x = a → g x = a := by
+    exact sublevelSetEq_boundary_imp_boundary_of_le g f a hg hreg_f hset
+  have hto : ContMDiff (morseModelWithCornersHalfSpace m) (morseModelWithCornersHalfSpace m) (⊤ : ℕ∞)
+      toFun := by
+    simpa [toFun] using contMDiff_sublevelSetEqMap g f a hg hf hreg_g hreg_f hset
+      (sublevelSetEq_boundary_imp_boundary g f a hset hg_le)
+      (hcs₁ := hcs₁) (hcs₂ := hcs₂) (hchart₁ := hchart₁) (hchart₂ := hchart₂)
+  have hinv : ContMDiff (morseModelWithCornersHalfSpace m) (morseModelWithCornersHalfSpace m) (⊤ : ℕ∞)
+      invFun := by
+    simpa [invFun] using contMDiff_sublevelSetEqMap f g a hf hg hreg_f hreg_g hset.symm hbnd'
+      (hcs₁ := hcs₂) (hcs₂ := hcs₁) (hchart₁ := hchart₂) (hchart₂ := hchart₁)
+  let d : @Diffeomorph ℝ _ (MorseModel (m + 1)) _ _ (MorseModel (m + 1)) _ _
+      (MorseHalfSpace m) _ (MorseHalfSpace m) _ (morseModelWithCornersHalfSpace m)
+      (morseModelWithCornersHalfSpace m)
+      (SublevelSpace g a) _ hcs₁ (SublevelSpace f a) _ hcs₂ (⊤ : ℕ∞) := by
+    refine { toEquiv := e, contMDiff_toFun := ?_, contMDiff_invFun := ?_ }
+    · simpa [toFun] using hto
+    · simpa [invFun] using hinv
+  exact ⟨d⟩
 
 theorem contMDiffAt_sublevelBoundaryMap_on {m : ℕ} (g₁ g₂ : MorseModel (m + 1) → ℝ)
     (a₁ a₂ : ℝ) (hg₁ : ContDiff ℝ (⊤ : ℕ∞) g₁) (hg₂ : ContDiff ℝ (⊤ : ℕ∞) g₂)
