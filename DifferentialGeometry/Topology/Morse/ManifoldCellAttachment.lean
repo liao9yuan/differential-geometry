@@ -18421,6 +18421,34 @@ theorem morseRoundedDescentField_eq_modelField_of_handleCore {m k : ℕ} (hk : k
   rw [hmodel]
   simp
 
+theorem morseRoundedDescentField_eq_modelField_of_chart {m k : ℕ} (hk : k ≤ m + 1)
+    (c ε₀ ε₁ R₀ R₁ : ℝ) {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M]
+    [ChartedSpace H M] {I : ModelWithCorners ℝ (MorseModel (m + 1)) H} {f : M → ℝ}
+    (data : MorseChart (m + 1) k hk c I f)
+    (V₀ : (x : M) → TangentSpace I x)
+    (hV₀chart : ∀ y : MorseModel (m + 1), y ∈ data.χ.source →
+      V₀ (data.χ y) = mfderiv 𝓘(ℝ, MorseModel (m + 1)) I data.χ y
+        (CellAttachment.modelFlowField hk y))
+    {y : MorseModel (m + 1)} (hy : y ∈ data.χ.source) :
+    morseRoundedDescentField hk c ε₀ ε₁ R₀ R₁ data V₀ (data.χ y) =
+      mfderiv 𝓘(ℝ, MorseModel (m + 1)) I data.χ y (CellAttachment.modelFlowField hk y) := by
+  have hz' : data.χ y ∈ data.χ.target := data.χ.map_source hy
+  have hleft : data.χ.symm (data.χ y) = y := data.χ.left_inv hy
+  have hmodel : morseRoundedModelField hk c ε₀ ε₁ R₀ R₁ data V₀ y =
+      mfderiv 𝓘(ℝ, MorseModel (m + 1)) I data.χ y (CellAttachment.modelFlowField hk y) := by
+    dsimp [morseRoundedModelField]
+    have hV : V₀ (data.χ y) =
+        mfderiv 𝓘(ℝ, MorseModel (m + 1)) I data.χ y
+          (CellAttachment.modelFlowField hk y) :=
+      hV₀chart y hy
+    rw [hV]
+    simp
+  dsimp [morseRoundedDescentField]
+  rw [dif_pos hz']
+  rw [hleft]
+  rw [hmodel]
+  simp
+
 theorem contMDiff_morseRoundedDescentFieldSection {m k : ℕ} (hk : k ≤ m + 1)
     (c ε₀ ε₁ R₀ R₁ : ℝ) {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M]
     [ChartedSpace H M] [T2Space M]
