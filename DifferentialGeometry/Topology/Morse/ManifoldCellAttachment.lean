@@ -11,6 +11,7 @@ import DifferentialGeometry.Topology.Morse.ModifiedFunction
 import DifferentialGeometry.Topology.Morse.NoCriticalValues
 import DifferentialGeometry.Topology.Morse.RegularSublevel
 import Mathlib.Topology.MetricSpace.Bounded
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.Series
 
 namespace DifferentialGeometry.Topology.Morse
 
@@ -20319,23 +20320,39 @@ private lemma smoothTransition_deriv {x : ℝ} (hx0 : 0 < x) :
   have hden : HasDerivAt (fun y : ℝ => g y + g (1 - y))
       (g x / x ^ 2 - g (1 - x) / (1 - x) ^ 2) x := hg'.add hh'
   have hden0 : g x + g (1 - x) ≠ 0 := ne_of_gt (Real.smoothTransition.pos_denom x)
-  have hσ : HasDerivAt Real.smoothTransition
-      ((g x / x ^ 2 * (g x + g (1 - x)) -
-          g x * (g x / x ^ 2 - g (1 - x) / (1 - x) ^ 2)) /
+  have hconv : (g x / x ^ 2 * (g x + g (1 - x)) -
+        g x * (g x / x ^ 2 - g (1 - x) / (1 - x) ^ 2)) /
+      (g x + g (1 - x)) ^ 2 =
+      g x * g (1 - x) * (1 / x ^ 2 + 1 / (1 - x) ^ 2) /
+        (g x + g (1 - x)) ^ 2 := by
+    field_simp [hden0]
+    ring
+  have hσ : HasDerivAt (fun y : ℝ => g y / (g y + g (1 - y)))
+      (g x * g (1 - x) * (1 / x ^ 2 + 1 / (1 - x) ^ 2) /
         (g x + g (1 - x)) ^ 2) x := by
-    simpa [g, Real.smoothTransition] using hnum.div hden hden0
+    have hdiv := hnum.div hden hden0
+    simpa [hconv] using hdiv
   have hmain : HasDerivAt Real.smoothTransition
       (expNegInvGlue x * expNegInvGlue (1 - x) * (1 / x ^ 2 + 1 / (1 - x) ^ 2) /
         (expNegInvGlue x + expNegInvGlue (1 - x)) ^ 2) x := by
-    have hconv : (g x / x ^ 2 * (g x + g (1 - x)) -
-          g x * (g x / x ^ 2 - g (1 - x) / (1 - x) ^ 2)) /
-        (g x + g (1 - x)) ^ 2 =
-        g x * g (1 - x) * (1 / x ^ 2 + 1 / (1 - x) ^ 2) /
-          (g x + g (1 - x)) ^ 2 := by
-      field_simp [hden0]
-      ring
-    simpa [g, hconv] using hσ
+    have hfuneq : (fun y : ℝ => g y / (g y + g (1 - y))) = Real.smoothTransition := by
+      funext y
+      dsimp [g, Real.smoothTransition]
+    simpa [g, hfuneq] using hσ
   exact hmain.deriv
+
+private lemma Real_cosh_ge_one_add_half_sq (u : ℝ) : 1 + u ^ 2 / 2 ≤ Real.cosh u := by
+  have hsum : HasSum (fun n : ℕ => u ^ (2 * n) / Nat.factorial (2 * n)) (Real.cosh u) :=
+    Real.hasSum_cosh u
+  have hsumle : (∑ i ∈ Finset.range 2, u ^ (2 * i) / Nat.factorial (2 * i)) ≤ Real.cosh u := by
+    exact sum_le_hasSum (Finset.range 2) (fun i hi => by
+      have hsq : 0 ≤ u ^ (2 * i) := by
+        rw [mul_comm 2 i, pow_mul]
+        exact sq_nonneg (u ^ i)
+      exact div_nonneg hsq (Nat.cast_nonneg _)) hsum
+  have hval : (∑ i ∈ Finset.range 2, u ^ (2 * i) / Nat.factorial (2 * i)) = 1 + u ^ 2 / 2 := by
+    norm_num [Finset.sum_range_succ]
+  linarith
 
 theorem modelLevelDampedTransportLevelMap_strictMono_core {m k : ℕ} (hk : k ≤ m + 1)
     (c ε r δ ρ ρ' θ R₀ R₁ η ε₀ : ℝ) (hθ : 0 < θ) (hR₀R₁ : R₀ < R₁)
