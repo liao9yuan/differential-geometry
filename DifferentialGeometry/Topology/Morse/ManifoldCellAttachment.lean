@@ -20449,6 +20449,17 @@ private lemma modelLevelDampedUnstretchTime_abs_increasing {m k : ℕ} (hk : k �
   rw [abs_of_nonpos hle0y, abs_of_nonpos hle0z]
   linarith
 
+private lemma modelLevelDampedTransportTime_eq_comb {m k : ℕ} (hk : k ≤ m + 1)
+    (c ε r δ ρ ρ' θ R₀ R₁ η ε₀ : ℝ) (w : MorseModel (m + 1)) :
+    modelLevelDampedTransportTime hk c ε r δ ρ ρ' θ R₀ R₁ η ε₀ w =
+      (1 - Real.smoothTransition ((‖posPart hk w‖ ^ 2 - smoothCap ε r δ (‖negPart hk w‖ ^ 2)) / θ)) *
+          (1 - Real.smoothTransition ((morseNorm (m + 1) w - R₀) / (R₁ - R₀))) *
+            modelLevelDampedUnstretchTime hk ε r δ c η ε₀ w +
+        (1 - (1 - Real.smoothTransition ((‖posPart hk w‖ ^ 2 - smoothCap ε r δ (‖negPart hk w‖ ^ 2)) / θ)) *
+          (1 - Real.smoothTransition ((morseNorm (m + 1) w - R₀) / (R₁ - R₀)))) *
+            morseFarExpandTimeSmooth c ε δ ρ ρ' (morseNormalForm hk c w) := by
+  rfl
+
 private lemma smoothTransition_deriv {x : ℝ} (hx0 : 0 < x) :
     deriv Real.smoothTransition x =
       expNegInvGlue x * expNegInvGlue (1 - x) * (1 / x ^ 2 + 1 / (1 - x) ^ 2) /
