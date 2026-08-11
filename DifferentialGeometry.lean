@@ -3471,6 +3471,7 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.UnifLow1PathPair
 import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.UnifLowBasePairH4
 import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.UnifLowBoundsSmall
 import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.UnifLowRegFatou
+import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.UnifLowSolveH3
 import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.UnifNZeroBound
 import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.UnifNZeroClass
 import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.UnifPathLower
