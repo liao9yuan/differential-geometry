@@ -4409,6 +4409,88 @@ theorem cutoffTransition_deriv_lt_one {a ε' w t : ℝ} (ha0 : 0 ≤ a) (hε' : 
     nlinarith [hle, hslope]
   exact hmain
 
+theorem cutoffTransition_le_mul {a ε' w t : ℝ} (ha0 : 0 ≤ a) (ht0 : 0 ≤ t) :
+    cutoffTransition a ε' w t ≤ a * t := by
+  dsimp [cutoffTransition]
+  by_cases ht : t ≤ 0
+  · rw [if_pos ht]
+    have h : 0 ≤ a * t := mul_nonneg ha0 ht0
+    exact h
+  · rw [if_neg ht]
+    by_cases htε : t ≤ ε'
+    · rw [if_pos htε]
+      have hσ : Real.smoothTransition ((t / ε') ^ w) ≤ 1 := Real.smoothTransition.le_one _
+      have ht0' : 0 < t := lt_of_not_ge ht
+      have hmain : a * t * Real.smoothTransition ((t / ε') ^ w) ≤ a * t :=
+        by simpa using (mul_le_mul_of_nonneg_left hσ (mul_nonneg ha0 (le_of_lt ht0')))
+      exact hmain
+    · rw [if_neg htε]
+
+theorem cutoffTransition_deriv_le {a ε' w t : ℝ} (ha0 : 0 ≤ a) (hε' : 0 < ε')
+    (ht0 : 0 < t) (htε : t < ε') (hw : 0 < w) :
+    deriv (cutoffTransition a ε' w) t ≤ a * (1 + 40 * w) := by
+  have hmid := cutoffTransition_deriv_middle (a := a) (ε' := ε') (w := w) (t := t) hε' ht0 htε
+  rw [hmid]
+  have hσ : Real.smoothTransition ((t / ε') ^ w) ≤ 1 := Real.smoothTransition.le_one _
+  have hσ' : deriv Real.smoothTransition ((t / ε') ^ w) ≤ 40 :=
+    Real.smoothTransition_deriv_le_forty _
+  have hσ'0 : 0 ≤ deriv Real.smoothTransition ((t / ε') ^ w) := smoothTransition_deriv_nonneg _
+  have hv : (t / ε') ^ w ≤ 1 := by
+    have htdiv : t / ε' ≤ 1 := div_le_one_of_le₀ (le_of_lt htε) (le_of_lt hε')
+    have htd : 0 ≤ t / ε' := div_nonneg (le_of_lt ht0) (le_of_lt hε')
+    have hle := Real.rpow_le_rpow htd htdiv (le_of_lt hw)
+    have hone : (1 : ℝ) ^ w = 1 := Real.one_rpow w
+    rwa [hone] at hle
+  have hv0 : 0 ≤ (t / ε') ^ w :=
+    Real.rpow_nonneg (div_nonneg (le_of_lt ht0) (le_of_lt hε')) w
+  have hterm : w * (t / ε') ^ w * deriv Real.smoothTransition ((t / ε') ^ w) ≤ w * 40 := by
+    have h1 : (t / ε') ^ w * deriv Real.smoothTransition ((t / ε') ^ w) ≤ 1 * 40 := by
+      exact mul_le_mul hv hσ' hσ'0 (by norm_num)
+    have hmul := mul_le_mul_of_nonneg_left h1 (le_of_lt hw)
+    simpa [mul_assoc, mul_left_comm, mul_comm] using hmul
+  have hsum : Real.smoothTransition ((t / ε') ^ w) +
+      w * (t / ε') ^ w * deriv Real.smoothTransition ((t / ε') ^ w) ≤ 1 + 40 * w := by
+    nlinarith [hσ, hterm]
+  have hmain : a * (Real.smoothTransition ((t / ε') ^ w) +
+      w * (t / ε') ^ w * deriv Real.smoothTransition ((t / ε') ^ w)) ≤ a * (1 + 40 * w) :=
+    mul_le_mul_of_nonneg_left hsum ha0
+  exact hmain
+
+theorem cutoffTransition_junction_bound {a ε' w t : ℝ} (ha0 : 0 ≤ a) (hε' : 0 < ε')
+    (hε'1 : ε' ≤ 1) (ht0 : 0 < t) (htε : t < ε') (hw : 0 < w)
+    (hslope : a * (1 + 40 * w + ε') < 1) :
+    cutoffTransition a ε' w t + deriv (cutoffTransition a ε' w) t * (1 - t) < 1 := by
+  have hle : cutoffTransition a ε' w t ≤ a * t :=
+    cutoffTransition_le_mul ha0 (le_of_lt ht0)
+  have hder : deriv (cutoffTransition a ε' w) t ≤ a * (1 + 40 * w) :=
+    cutoffTransition_deriv_le ha0 hε' ht0 htε hw
+  have ht1 : 1 - t ≤ 1 := by linarith [ht0]
+  have ht1' : 0 ≤ 1 - t := by nlinarith [hε'1, htε]
+  have h1 : deriv (cutoffTransition a ε' w) t * (1 - t) ≤ a * (1 + 40 * w) * 1 := by
+    have hder0 : 0 ≤ deriv (cutoffTransition a ε' w) t := by
+      have hmid := cutoffTransition_deriv_middle (a := a) (ε' := ε') (w := w) (t := t) hε' ht0 htε
+      rw [hmid]
+      have h1 : 0 ≤ Real.smoothTransition ((t / ε') ^ w) := Real.smoothTransition.nonneg _
+      have h2 : 0 ≤ w * (t / ε') ^ w * deriv Real.smoothTransition ((t / ε') ^ w) := by
+        have h3 : 0 ≤ (t / ε') ^ w := Real.rpow_nonneg (div_nonneg (le_of_lt ht0) (le_of_lt hε')) w
+        have h4 : 0 ≤ deriv Real.smoothTransition ((t / ε') ^ w) := smoothTransition_deriv_nonneg _
+        have hw0 : 0 ≤ w := le_of_lt hw
+        positivity
+      have hsum : 0 ≤ Real.smoothTransition ((t / ε') ^ w) +
+          w * (t / ε') ^ w * deriv Real.smoothTransition ((t / ε') ^ w) := by
+        nlinarith [h1, h2]
+      exact mul_nonneg ha0 hsum
+    have hmul := mul_le_mul hder ht1 ht1' (by positivity)
+    simpa [mul_assoc] using hmul
+  have h2 : a * t + a * (1 + 40 * w) ≤ a * (1 + 40 * w + ε') := by
+    have htε' : t < ε' := htε
+    nlinarith [htε']
+  have hmain : cutoffTransition a ε' w t + deriv (cutoffTransition a ε' w) t * (1 - t) ≤
+      a * t + a * (1 + 40 * w) := by
+    nlinarith [hle, h1]
+  have hfinal : a * (1 + 40 * w + ε') < 1 := hslope
+  nlinarith [hmain, h2, hfinal]
+
 noncomputable def cutoffFunction (a ε' w η₁ : ℝ) (t : ℝ) : ℝ :=
   if t ≤ 0 then 0 else if t ≤ ε' then
     a * t * Real.smoothTransition ((t / ε') ^ w)
