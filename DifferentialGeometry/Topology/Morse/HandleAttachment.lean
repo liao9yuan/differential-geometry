@@ -5103,6 +5103,43 @@ theorem modelAttachedUnstretch_strict_of_roundedSublevel {n k : ℕ} (hk : k ≤
     (modelRoundedFunction_lt_c_iff_attachedFunction_lt hk c ε r δ R₀ R₁ hε hδ hR hR0 hbig y).mp hy
   exact modelAttachedFunction_unstretch_strict hk c ε r δ hδ hδr y hyatt hA
 
+theorem modelLevelDampedUnstretch_boundary {n k : ℕ} (hk : k ≤ n) (c ε r δ R₀ R₁ : ℝ)
+    (hε : 0 < ε) (hδ : 0 < δ) (hδr : δ < r ^ 2) (hR : R₀ < R₁) (hR0 : 0 ≤ R₀)
+    (hbig : 2 * (r ^ 2 + 2 * ε + δ) ≤ R₀ ^ 2) (η ε₀ : ℝ) (hact : ε₀ + δ / 2 < η)
+    (hε₀ : 0 < ε₀) {y : MorseModel n} (hy : y ∈ modelAttachedRegion hk ε r δ)
+    (hg : modelRoundedFunction hk c ε r δ R₀ R₁ y = c) :
+    morseNormalForm hk c (modelLevelDampedUnstretch hk ε r δ c η ε₀ y) = c + r ^ 2 / 2 := by
+  have hA : modelAttachedFunction hk c ε r δ y = c :=
+    (modelRoundedFunction_eq_c_iff_attachedFunction_eq hk c ε r δ R₀ R₁ hε hδ hR hR0 hbig y).mp hg
+  have hp_eq : ‖posPart hk y‖ ^ 2 = smoothCap ε r δ (‖negPart hk y‖ ^ 2) := by
+    have hsplit : modelAttachedFunction hk c ε r δ y =
+        c + (1 / 2) * (‖posPart hk y‖ ^ 2 - smoothCap ε r δ (‖negPart hk y‖ ^ 2)) := by
+      dsimp [modelAttachedFunction]
+    nlinarith [hA, hsplit]
+  have hf_ge : c - ε - δ / 2 ≤ morseNormalForm hk c y := by
+    have hcap : ‖negPart hk y‖ ^ 2 - 2 * ε - δ ≤ smoothCap ε r δ (‖negPart hk y‖ ^ 2) :=
+      smoothCap_ge_sub_two_mul_eps (ε := ε) (δ := δ) hδ
+    have hf : morseNormalForm hk c y = c + (1 / 2) * (‖posPart hk y‖ ^ 2 - ‖negPart hk y‖ ^ 2) :=
+      morseNormalForm_split hk c y
+    rw [hf, hp_eq]
+    nlinarith [hcap]
+  have hf_gt : c - ε - η + ε₀ < morseNormalForm hk c y := by nlinarith [hf_ge, hact]
+  have hEq := modelLevelDampedUnstretch_eq_unstretch hk ε r δ c η ε₀ hε₀ y (le_of_lt hf_gt)
+  rw [hEq]
+  exact modelAttachedFunction_unstretch_boundary hk c ε r δ hδ hδr y hy hA
+
+theorem modelLevelDampedUnstretch_strict {n k : ℕ} (hk : k ≤ n) (c ε r δ R₀ R₁ : ℝ)
+    (hε : 0 < ε) (hδ : 0 < δ) (hδr : δ < r ^ 2) (hR : R₀ < R₁) (hR0 : 0 ≤ R₀)
+    (hbig : 2 * (r ^ 2 + 2 * ε + δ) ≤ R₀ ^ 2) (η ε₀ : ℝ)
+    {y : MorseModel n} (hy : y ∈ modelAttachedRegion hk ε r δ)
+    (hg : modelRoundedFunction hk c ε r δ R₀ R₁ y < c) :
+    morseNormalForm hk c (modelLevelDampedUnstretch hk ε r δ c η ε₀ y) < c + r ^ 2 / 2 := by
+  have hle := modelLevelDampedUnstretch_f_le_unstretch_f hk c ε r δ η ε₀ (le_of_lt hε) hδ hδr y
+  have hA : modelAttachedFunction hk c ε r δ y < c :=
+    (modelRoundedFunction_lt_c_iff_attachedFunction_lt hk c ε r δ R₀ R₁ hε hδ hR hR0 hbig y).mp hg
+  have hstrict := modelAttachedFunction_unstretch_strict hk c ε r δ hδ hδr y hy hA
+  exact lt_of_le_of_lt hle hstrict
+
 theorem modelAttachedStretch_mem_roundedSublevel {n k : ℕ} (hk : k ≤ n)
     (c ε r δ R₀ R₁ : ℝ) (hε : 0 < ε) (hδ : 0 < δ) (hδr : δ < r ^ 2)
     (hR : R₀ < R₁) (hR0 : 0 ≤ R₀) (hbig : 2 * (r ^ 2 + 2 * ε + δ) ≤ R₀ ^ 2)
