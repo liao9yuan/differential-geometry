@@ -17656,6 +17656,196 @@ theorem morseLevelDampedUnstretchSublevelMap_injective {m k : ℕ} (hk : k ≤ m
     hε hδ hδr hε₀ hU
   rw [← hxy₁, ← hxy₂, hy]
 
+noncomputable def morseLevelRadiusDampedUnstretchMap {m k : ℕ} (hk : k ≤ m + 1)
+    (c ε r δ η ε₀ R₀ R₁ : ℝ) {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M]
+    [ChartedSpace H M] [T2Space M]
+    {I : ModelWithCorners ℝ (MorseModel (m + 1)) H} [I.Boundaryless]
+    [IsManifold I (⊤ : WithTop ℕ∞) M] {f : M → ℝ}
+    (data : MorseChart (m + 1) k hk c I f) (x : M) : M := by
+  classical
+  exact if hx : x ∈ data.χ '' {y : MorseModel (m + 1) | morseNorm (m + 1) y ≤ R₁} then
+    data.χ (CellAttachment.modelLevelRadiusDampedUnstretch hk ε r δ c η ε₀ R₀ R₁ (data.χ.symm x))
+  else x
+
+theorem morseLevelRadiusDampedUnstretchMap_eq_model {m k : ℕ} (hk : k ≤ m + 1)
+    (c ε r δ η ε₀ R₀ R₁ : ℝ) {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M]
+    [ChartedSpace H M] [T2Space M]
+    {I : ModelWithCorners ℝ (MorseModel (m + 1)) H} [I.Boundaryless]
+    [IsManifold I (⊤ : WithTop ℕ∞) M] {f : M → ℝ}
+    (data : MorseChart (m + 1) k hk c I f) {x : M}
+    (hx : x ∈ data.χ '' {y : MorseModel (m + 1) | morseNorm (m + 1) y ≤ R₁}) :
+    morseLevelRadiusDampedUnstretchMap hk c ε r δ η ε₀ R₀ R₁ data x =
+      data.χ (CellAttachment.modelLevelRadiusDampedUnstretch hk ε r δ c η ε₀ R₀ R₁ (data.χ.symm x)) := by
+  dsimp [morseLevelRadiusDampedUnstretchMap]
+  rw [if_pos hx]
+
+theorem morseLevelRadiusDampedUnstretchMap_eq_self_of_not_mem_ball {m k : ℕ} (hk : k ≤ m + 1)
+    (c ε r δ η ε₀ R₀ R₁ : ℝ) {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M]
+    [ChartedSpace H M] [T2Space M]
+    {I : ModelWithCorners ℝ (MorseModel (m + 1)) H} [I.Boundaryless]
+    [IsManifold I (⊤ : WithTop ℕ∞) M] {f : M → ℝ}
+    (data : MorseChart (m + 1) k hk c I f) {x : M}
+    (hx : x ∉ data.χ '' {y : MorseModel (m + 1) | morseNorm (m + 1) y ≤ R₁}) :
+    morseLevelRadiusDampedUnstretchMap hk c ε r δ η ε₀ R₀ R₁ data x = x := by
+  dsimp [morseLevelRadiusDampedUnstretchMap]
+  rw [if_neg hx]
+
+theorem modelLevelRadiusDampedUnstretch_mem_ball {n k : ℕ} (hk : k ≤ n) (ε r δ : ℝ)
+    (c η ε₀ R₀ R₁ : ℝ) (hε : 0 ≤ ε) (hδ : 0 < δ) (hδr : δ < r ^ 2) (hR : R₀ < R₁) (hR0 : 0 ≤ R₀)
+    (R R' : ℝ) (hR₁R : R₁ ≤ R) (hRltRp : R < R') (hR'b : R₁ ^ 2 + R₁ ^ 2 * (R₁ ^ 2 + r ^ 2) / (r ^ 2 - δ) < R' ^ 2)
+    {y : MorseModel n} (hy : morseNorm n y < R) :
+    modelLevelRadiusDampedUnstretch hk ε r δ c η ε₀ R₀ R₁ y ∈ Metric.ball (0 : MorseModel n) R' := by
+  rw [mem_ball_zero_iff]
+  by_cases hy₁ : morseNorm n y ≤ R₁
+  · have hb := modelLevelRadiusDampedUnstretch_norm_sq_le hk ε r δ c η ε₀ R₀ R₁ hε hδ hδr hy₁
+    have hlt : morseNorm n (modelLevelRadiusDampedUnstretch hk ε r δ c η ε₀ R₀ R₁ y) ^ 2 < R' ^ 2 := by
+      nlinarith [hb, hR'b]
+    have hnon : 0 ≤ morseNorm n (modelLevelRadiusDampedUnstretch hk ε r δ c η ε₀ R₀ R₁ y) := norm_nonneg _
+    have hR'0 : 0 ≤ R' := by
+      have hbnd : 0 ≤ R₁ ^ 2 + R₁ ^ 2 * (R₁ ^ 2 + r ^ 2) / (r ^ 2 - δ) := by
+        have h1 : 0 ≤ R₁ ^ 2 := by positivity
+        have hden : 0 < r ^ 2 - δ := by nlinarith [hδ, hδr]
+        have h2 : 0 ≤ R₁ ^ 2 * (R₁ ^ 2 + r ^ 2) / (r ^ 2 - δ) :=
+          div_nonneg (mul_nonneg h1 (by positivity)) (le_of_lt hden)
+        nlinarith
+      have hR₁pos : 0 < R₁ := by nlinarith [hR, hR0]
+      have hRpos : 0 < R := lt_of_lt_of_le hR₁pos hR₁R
+      have hR'pos : 0 < R' := lt_trans hRpos hRltRp
+      exact le_of_lt hR'pos
+    have hmain : morseNorm n (modelLevelRadiusDampedUnstretch hk ε r δ c η ε₀ R₀ R₁ y) < R' := by
+      rw [← abs_of_nonneg hnon]
+      rw [← abs_of_nonneg hR'0]
+      exact sq_lt_sq.mp hlt
+    exact lt_of_le_of_lt (morseNorm_piNorm_le (modelLevelRadiusDampedUnstretch hk ε r δ c η ε₀ R₀ R₁ y)) hmain
+  · have hgt : R₁ < morseNorm n y := lt_of_not_ge hy₁
+    have hle : R₁ ≤ morseNorm n y := le_of_lt hgt
+    have heq := modelLevelRadiusDampedUnstretch_eq_self_of_norm_large hk ε r δ c η ε₀ R₀ R₁ hR hR0 y hle
+    rw [heq]
+    exact lt_of_le_of_lt (morseNorm_piNorm_le y) (lt_trans hy hRltRp)
+
+theorem contMDiff_morseLevelRadiusDampedUnstretchMap {m k : ℕ} (hk : k ≤ m + 1)
+    (c ε r δ η ε₀ R₀ R₁ : ℝ) {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M]
+    [ChartedSpace H M] [T2Space M]
+    {I : ModelWithCorners ℝ (MorseModel (m + 1)) H} [I.Boundaryless]
+    [IsManifold I (⊤ : WithTop ℕ∞) M] {f : M → ℝ}
+    (data : MorseChart (m + 1) k hk c I f)
+    (hε : 0 ≤ ε) (hδ : 0 < δ) (hδr : δ < r ^ 2) (hR : R₀ < R₁) (hR0 : 0 ≤ R₀)
+    (hR₁R : R₁ < data.R) (hRltRp : data.R < data.R')
+    (hR'b : R₁ ^ 2 + R₁ ^ 2 * (R₁ ^ 2 + r ^ 2) / (r ^ 2 - δ) < data.R' ^ 2) :
+    ContMDiff I I (↑(⊤ : ℕ∞) : WithTop ℕ∞)
+      (morseLevelRadiusDampedUnstretchMap hk c ε r δ η ε₀ R₀ R₁ data) := by
+  let U₁ : Set M := data.χ '' {y : MorseModel (m + 1) | morseNorm (m + 1) y < data.R}
+  let U₂ : Set M := (data.χ '' {y : MorseModel (m + 1) | morseNorm (m + 1) y ≤ R₁})ᶜ
+  have hmodelOn : ContMDiffOn 𝓘(ℝ, MorseModel (m + 1)) 𝓘(ℝ, MorseModel (m + 1)) (↑(⊤ : ℕ∞) : WithTop ℕ∞)
+      (modelLevelRadiusDampedUnstretch hk ε r δ c η ε₀ R₀ R₁)
+      (Metric.ball (0 : MorseModel (m + 1)) data.R') := by
+    have hcontDiff : ContDiff ℝ (⊤ : ℕ∞)
+        (modelLevelRadiusDampedUnstretch hk ε r δ c η ε₀ R₀ R₁) :=
+      contDiff_modelLevelRadiusDampedUnstretch hk ε r δ c η ε₀ R₀ R₁ hδ hδr hR hR0
+    exact ((contMDiffOn_iff_contDiffOn (𝕜 := ℝ) (E := MorseModel (m + 1)) (E' := MorseModel (m + 1))
+      (f := modelLevelRadiusDampedUnstretch hk ε r δ c η ε₀ R₀ R₁)
+      (s := Metric.ball (0 : MorseModel (m + 1)) data.R') (n := (↑(⊤ : ℕ∞) : WithTop ℕ∞))).mpr
+      hcontDiff.contDiffOn)
+  have h₁ : ContMDiffOn I I (↑(⊤ : ℕ∞) : WithTop ℕ∞)
+      (morseLevelRadiusDampedUnstretchMap hk c ε r δ η ε₀ R₀ R₁ data) U₁ := by
+    have hχsymm : ContMDiffOn I 𝓘(ℝ, MorseModel (m + 1)) (⊤ : ℕ∞) data.χ.symm U₁ := by
+      have hsub : U₁ ⊆ data.χ '' Metric.ball (0 : MorseModel (m + 1)) data.R' := by
+        intro x hx
+        rcases hx with ⟨y, hy, hxy⟩
+        refine ⟨y, ?_, hxy⟩
+        rw [mem_ball_zero_iff]
+        exact lt_of_le_of_lt (morseNorm_piNorm_le y) (lt_trans hy hRltRp)
+      exact data.hχsymmOn.mono hsub
+    have hmap : Set.MapsTo data.χ.symm U₁ (Metric.ball (0 : MorseModel (m + 1)) data.R') := by
+      intro x hx
+      rcases hx with ⟨y, hy, hxy⟩
+      have hsymm : data.χ.symm x = y := by
+        rw [← hxy]
+        exact data.χ.left_inv (data.hχsrc y (le_of_lt hy))
+      rw [hsymm]
+      rw [mem_ball_zero_iff]
+      exact lt_of_le_of_lt (morseNorm_piNorm_le y) (lt_trans hy hRltRp)
+    have hcomp : ContMDiffOn I 𝓘(ℝ, MorseModel (m + 1)) (↑(⊤ : ℕ∞) : WithTop ℕ∞)
+        (modelLevelRadiusDampedUnstretch hk ε r δ c η ε₀ R₀ R₁ ∘ data.χ.symm) U₁ :=
+      hmodelOn.comp hχsymm hmap
+    have hχOn : ContMDiffOn 𝓘(ℝ, MorseModel (m + 1)) I (⊤ : ℕ∞) data.χ
+        (Metric.ball (0 : MorseModel (m + 1)) data.R') :=
+      data.hχon
+    have hmapsTo : Set.MapsTo (fun x : M => modelLevelRadiusDampedUnstretch hk ε r δ c η ε₀ R₀ R₁
+        (data.χ.symm x))
+        U₁ (Metric.ball (0 : MorseModel (m + 1)) data.R') := by
+      intro x hx
+      rcases hx with ⟨y, hy, hxy⟩
+      have hsymm : data.χ.symm x = y := by
+        rw [← hxy]
+        exact data.χ.left_inv (data.hχsrc y (le_of_lt hy))
+      change modelLevelRadiusDampedUnstretch hk ε r δ c η ε₀ R₀ R₁ (data.χ.symm x) ∈
+        Metric.ball (0 : MorseModel (m + 1)) data.R'
+      rw [hsymm]
+      exact modelLevelRadiusDampedUnstretch_mem_ball hk ε r δ c η ε₀ R₀ R₁ hε hδ hδr hR hR0
+        data.R data.R' (le_of_lt hR₁R) hRltRp hR'b hy
+    have hcomp' : ContMDiffOn I I (↑(⊤ : ℕ∞) : WithTop ℕ∞)
+        (fun x : M => data.χ (modelLevelRadiusDampedUnstretch hk ε r δ c η ε₀ R₀ R₁
+          (data.χ.symm x))) U₁ :=
+      hχOn.comp hcomp hmapsTo
+    have hEq : Set.EqOn (morseLevelRadiusDampedUnstretchMap hk c ε r δ η ε₀ R₀ R₁ data)
+        (fun x : M => data.χ (modelLevelRadiusDampedUnstretch hk ε r δ c η ε₀ R₀ R₁
+          (data.χ.symm x))) U₁ := by
+      intro x hx
+      by_cases hxball : x ∈ data.χ '' {y : MorseModel (m + 1) | morseNorm (m + 1) y ≤ R₁}
+      · exact morseLevelRadiusDampedUnstretchMap_eq_model hk c ε r δ η ε₀ R₀ R₁ data hxball
+      · have hR₁le : R₁ ≤ morseNorm (m + 1) (data.χ.symm x) := by
+          by_contra hnot
+          have hlt : morseNorm (m + 1) (data.χ.symm x) < R₁ := lt_of_not_ge hnot
+          exact hxball ⟨data.χ.symm x, le_of_lt hlt, by
+            rcases hx with ⟨y, hy, hxy⟩
+            have hsymm : data.χ.symm x = y := by
+              rw [← hxy]
+              exact data.χ.left_inv (data.hχsrc y (le_of_lt hy))
+            rw [hsymm]
+            exact hxy⟩
+        have hmodel := modelLevelRadiusDampedUnstretch_eq_self_of_norm_large hk ε r δ c η ε₀ R₀ R₁
+          hR hR0 (data.χ.symm x) hR₁le
+        have hmap' : morseLevelRadiusDampedUnstretchMap hk c ε r δ η ε₀ R₀ R₁ data x =
+            data.χ (modelLevelRadiusDampedUnstretch hk ε r δ c η ε₀ R₀ R₁ (data.χ.symm x)) := by
+          rw [morseLevelRadiusDampedUnstretchMap_eq_self_of_not_mem_ball hk c ε r δ η ε₀ R₀ R₁
+            data hxball]
+          rw [hmodel]
+          rcases hx with ⟨y, hy, hxy⟩
+          have hsymm : data.χ.symm x = y := by
+            rw [← hxy]
+            exact data.χ.left_inv (data.hχsrc y (le_of_lt hy))
+          rw [hsymm]
+          exact hxy.symm
+        exact hmap'
+    exact hcomp'.congr hEq
+  have h₂ : ContMDiffOn I I (↑(⊤ : ℕ∞) : WithTop ℕ∞)
+      (morseLevelRadiusDampedUnstretchMap hk c ε r δ η ε₀ R₀ R₁ data) U₂ := by
+    have hEq : Set.EqOn (morseLevelRadiusDampedUnstretchMap hk c ε r δ η ε₀ R₀ R₁ data)
+        (fun x : M => x) U₂ := by
+      intro x hx
+      exact morseLevelRadiusDampedUnstretchMap_eq_self_of_not_mem_ball hk c ε r δ η ε₀ R₀ R₁
+        data hx
+    exact (contMDiffOn_id : ContMDiffOn I I (↑(⊤ : ℕ∞) : WithTop ℕ∞) (fun x : M => x) U₂).congr hEq
+  have hU₁open : IsOpen U₁ := by
+    dsimp [U₁]
+    exact isOpen_chiBallImage data.χ data.R (fun y hy => data.hχsrc y (le_of_lt hy))
+  have hU₂open : IsOpen U₂ := by
+    dsimp [U₂]
+    exact isOpen_compl_ballImage hk c R₁ data (le_of_lt hR₁R)
+  have hcover : U₁ ∪ U₂ = Set.univ := by
+    ext x
+    constructor
+    · intro hx
+      trivial
+    · intro hx
+      by_cases hxball : x ∈ data.χ '' {y : MorseModel (m + 1) | morseNorm (m + 1) y ≤ R₁}
+      · exact Or.inl (by
+          rcases hxball with ⟨y, hy, hxy⟩
+          exact ⟨y, lt_of_le_of_lt hy hR₁R, hxy⟩)
+      · exact Or.inr (by simpa [U₂] using hxball)
+  exact contMDiff_of_contMDiffOn_union_of_isOpen h₁ h₂ hcover hU₁open hU₂open
+
 theorem isCompact_ballImage {m k : ℕ} (hk : k ≤ m + 1) (c R₁ : ℝ)
     {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M] [ChartedSpace H M] [T2Space M]
     {I : ModelWithCorners ℝ (MorseModel (m + 1)) H} {f : M → ℝ}
