@@ -4299,6 +4299,116 @@ theorem cutoffTransition_affine_slope {a ε' w t : ℝ} (hε' : 0 < ε') (htε :
     ring
   exact hloc.deriv_eq.trans hder
 
+theorem cutoffTransition_deriv_middle {a ε' w t : ℝ} (hε' : 0 < ε') (ht0 : 0 < t)
+    (htε : t < ε') :
+    deriv (cutoffTransition a ε' w) t =
+      a * (Real.smoothTransition ((t / ε') ^ w) +
+        w * (t / ε') ^ w * deriv Real.smoothTransition ((t / ε') ^ w)) := by
+  have hloc : cutoffTransition a ε' w =ᶠ[nhds t]
+      (fun u : ℝ => a * u * Real.smoothTransition ((u / ε') ^ w)) := by
+    exact Filter.eventually_of_mem (Ioo_mem_nhds ht0 htε) (by
+      intro u hu
+      dsimp [cutoffTransition]
+      have hu0 : 0 < u := hu.1
+      have huε : u < ε' := hu.2
+      rw [if_neg (not_le_of_gt hu0)]
+      rw [if_pos (le_of_lt huε)])
+  have hder : deriv (fun u : ℝ => a * u * Real.smoothTransition ((u / ε') ^ w)) t =
+      a * (Real.smoothTransition ((t / ε') ^ w) +
+        w * (t / ε') ^ w * deriv Real.smoothTransition ((t / ε') ^ w)) := by
+    have h1diff : DifferentiableAt ℝ (fun u : ℝ => a * u) t :=
+      (differentiableAt_const a).mul differentiableAt_id
+    have hg : DifferentiableAt ℝ (fun u : ℝ => u / ε') t :=
+      differentiableAt_id.div (differentiableAt_const ε') (ne_of_gt hε')
+    have hpowdiff : DifferentiableAt ℝ (fun u : ℝ => (u / ε') ^ w) t :=
+      hg.rpow_const (Or.inl (ne_of_gt (div_pos ht0 hε')))
+    have h2diff : DifferentiableAt ℝ (fun u : ℝ => Real.smoothTransition ((u / ε') ^ w)) t :=
+      by fun_prop
+    rw [show (fun u : ℝ => a * u * Real.smoothTransition ((u / ε') ^ w)) =
+        (fun u : ℝ => a * u) * (fun u : ℝ => Real.smoothTransition ((u / ε') ^ w)) by rfl]
+    rw [deriv_mul h1diff h2diff]
+    have h1' : deriv (fun u : ℝ => a * u) t = a := by
+      rw [deriv_const_mul (c := a) (d := fun u : ℝ => u) (x := t) (hd := differentiableAt_id)]
+      have hid : deriv (fun u : ℝ => u) t = 1 := by simp
+      rw [hid]
+      simp
+    have hlin' : deriv (fun u : ℝ => u / ε') t = 1 / ε' := by
+      rw [show (fun u : ℝ => u / ε') = id / (fun _ : ℝ => ε') by rfl]
+      rw [deriv_div differentiableAt_id (differentiableAt_const ε') (ne_of_gt hε')]
+      simp
+      field_simp [hε'.ne']
+    have hpow' : deriv (fun u : ℝ => (u / ε') ^ w) t = w * (t / ε') ^ (w - 1) / ε' := by
+      rw [show (fun u : ℝ => (u / ε') ^ w) =
+          (fun x : ℝ => x ^ w) ∘ (fun u : ℝ => u / ε') by rfl]
+      rw [deriv_comp (h₂ := fun x : ℝ => x ^ w) (h := fun u : ℝ => u / ε') (x := t)
+        (Real.differentiableAt_rpow_const_of_ne w (ne_of_gt (div_pos ht0 hε'))) hg]
+      rw [Real.deriv_rpow_const (t / ε') w]
+      rw [hlin']
+      ring
+    have h2' : deriv (fun u : ℝ => Real.smoothTransition ((u / ε') ^ w)) t =
+        w * (t / ε') ^ (w - 1) / ε' * deriv Real.smoothTransition ((t / ε') ^ w) := by
+      rw [show (fun u : ℝ => Real.smoothTransition ((u / ε') ^ w)) =
+          Real.smoothTransition ∘ (fun u : ℝ => (u / ε') ^ w) by rfl]
+      have hσdiff : DifferentiableAt ℝ Real.smoothTransition ((t / ε') ^ w) := by
+        fun_prop
+      rw [deriv_comp (h₂ := Real.smoothTransition) (h := fun u : ℝ => (u / ε') ^ w) (x := t)
+        hσdiff hpowdiff]
+      rw [hpow']
+      ring
+    rw [h1', h2']
+    have hvt : t * (t / ε') ^ (w - 1) / ε' = (t / ε') ^ w := by
+      have htd : 0 < t / ε' := div_pos ht0 hε'
+      have hmain : (t / ε') * (t / ε') ^ (w - 1) = (t / ε') ^ w := by
+        have hstep : (t / ε') ^ (1 : ℝ) * (t / ε') ^ (w - 1) = (t / ε') ^ (1 + (w - 1)) :=
+          (Real.rpow_add htd (1 : ℝ) (w - 1)).symm
+        have hmain0 : (t / ε') * (t / ε') ^ (w - 1) = (t / ε') ^ (1 + (w - 1)) := by
+          simpa [Real.rpow_one] using hstep
+        rw [hmain0]
+        ring_nf
+      calc
+        t * (t / ε') ^ (w - 1) / ε' = (t / ε') * (t / ε') ^ (w - 1) := by
+          field_simp [hε'.ne']
+        _ = (t / ε') ^ w := hmain
+    have hrew : a * Real.smoothTransition ((t / ε') ^ w) +
+        (a * t) * (w * (t / ε') ^ (w - 1) / ε' * deriv Real.smoothTransition ((t / ε') ^ w)) =
+        a * (Real.smoothTransition ((t / ε') ^ w) +
+          w * (t * (t / ε') ^ (w - 1) / ε') * deriv Real.smoothTransition ((t / ε') ^ w)) := by
+      ring
+    rw [hrew, hvt]
+  rw [hloc.deriv_eq]
+  exact hder
+
+theorem cutoffTransition_deriv_lt_one {a ε' w t : ℝ} (ha0 : 0 ≤ a) (hε' : 0 < ε')
+    (ht0 : 0 < t) (htε : t < ε') (hw : 0 < w) (hslope : a * (1 + 40 * w) < 1) :
+    deriv (cutoffTransition a ε' w) t < 1 := by
+  have hmid := cutoffTransition_deriv_middle (a := a) (ε' := ε') (w := w) (t := t) hε' ht0 htε
+  rw [hmid]
+  have hσ : Real.smoothTransition ((t / ε') ^ w) ≤ 1 := Real.smoothTransition.le_one _
+  have hσ' : deriv Real.smoothTransition ((t / ε') ^ w) ≤ 40 :=
+    Real.smoothTransition_deriv_le_forty _
+  have hσ'0 : 0 ≤ deriv Real.smoothTransition ((t / ε') ^ w) := smoothTransition_deriv_nonneg _
+  have hv : (t / ε') ^ w ≤ 1 := by
+    have htdiv : t / ε' ≤ 1 := div_le_one_of_le₀ (le_of_lt htε) (le_of_lt hε')
+    have htd : 0 ≤ t / ε' := div_nonneg (le_of_lt ht0) (le_of_lt hε')
+    have hle := Real.rpow_le_rpow htd htdiv (le_of_lt hw)
+    have hone : (1 : ℝ) ^ w = 1 := Real.one_rpow w
+    rwa [hone] at hle
+  have hv0 : 0 ≤ (t / ε') ^ w :=
+    Real.rpow_nonneg (div_nonneg (le_of_lt ht0) (le_of_lt hε')) w
+  have hterm : w * (t / ε') ^ w * deriv Real.smoothTransition ((t / ε') ^ w) ≤ w * 40 := by
+    have h1 : (t / ε') ^ w * deriv Real.smoothTransition ((t / ε') ^ w) ≤ 1 * 40 := by
+      exact mul_le_mul hv hσ' hσ'0 (by norm_num)
+    have hmul := mul_le_mul_of_nonneg_left h1 (le_of_lt hw)
+    simpa [mul_assoc, mul_left_comm, mul_comm] using hmul
+  have hsum : Real.smoothTransition ((t / ε') ^ w) +
+      w * (t / ε') ^ w * deriv Real.smoothTransition ((t / ε') ^ w) ≤ 1 + 40 * w := by
+    nlinarith [hσ, hterm]
+  have hmain : a * (Real.smoothTransition ((t / ε') ^ w) +
+      w * (t / ε') ^ w * deriv Real.smoothTransition ((t / ε') ^ w)) < 1 := by
+    have hle := mul_le_mul_of_nonneg_left hsum ha0
+    nlinarith [hle, hslope]
+  exact hmain
+
 theorem modelAttachedUnstretch_mem_upper_of_roundedSublevel {n k : ℕ} (hk : k ≤ n)
     (c ε r δ R₀ R₁ : ℝ) (hε : 0 < ε) (hδ : 0 < δ) (hδr : δ < r ^ 2)
     (hR : R₀ < R₁) (hR0 : 0 ≤ R₀) (hbig : 2 * (r ^ 2 + 2 * ε + δ) ≤ R₀ ^ 2)
