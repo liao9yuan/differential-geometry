@@ -2527,6 +2527,25 @@ theorem contDiff_morseHalfSpaceShift {m : ℕ} (c : ℝ) :
     HAdd.hAdd x (HSMul.hSMul c levelSetLastBasis))
   fun_prop
 
+noncomputable def sublevelInteriorBoundaryTransitionUnderlyingCross {m : ℕ}
+    (g f : MorseModel (m + 1) → ℝ) (a : ℝ)
+    (x₁ : SublevelSpace g a) (hx₁ : g x₁.1 < a)
+    (x₂ : SublevelSpace f a) (hx₂ : f x₂.1 = a)
+    (hg : ContDiff ℝ (⊤ : ℕ∞) g) (hf : ContDiff ℝ (⊤ : ℕ∞) f) (hr₂ : fderiv ℝ f x₂.1 ≠ 0) :
+    MorseModel (m + 1) → MorseModel (m + 1) :=
+  fun v => sublevelBoundaryChartValue f a x₂ hx₂ hf hr₂
+    (morseHalfSpaceShift (-sublevelInteriorShift g a x₁ hx₁ hg) v)
+
+theorem contDiff_sublevelInteriorBoundaryTransitionUnderlyingCross {m : ℕ}
+    (g f : MorseModel (m + 1) → ℝ) (a : ℝ)
+    (x₁ : SublevelSpace g a) (hx₁ : g x₁.1 < a)
+    (x₂ : SublevelSpace f a) (hx₂ : f x₂.1 = a)
+    (hg : ContDiff ℝ (⊤ : ℕ∞) g) (hf : ContDiff ℝ (⊤ : ℕ∞) f) (hr₂ : fderiv ℝ f x₂.1 ≠ 0) :
+    ContDiff ℝ (⊤ : ℕ∞) (sublevelInteriorBoundaryTransitionUnderlyingCross g f a x₁ hx₁ x₂ hx₂ hg hf hr₂) := by
+  unfold sublevelInteriorBoundaryTransitionUnderlyingCross
+  exact (contDiff_sublevelBoundaryChartValue f a x₂ hx₂ hf hr₂).comp
+    (contDiff_morseHalfSpaceShift (-sublevelInteriorShift g a x₁ hx₁ hg))
+
 noncomputable def sublevelInteriorTransitionUnderlying {m : ℕ} (c₁ c₂ : ℝ) :
     MorseModel (m + 1) → MorseModel (m + 1) :=
   fun x => HAdd.hAdd (HAdd.hAdd x (HSMul.hSMul c₁ levelSetLastBasis))
