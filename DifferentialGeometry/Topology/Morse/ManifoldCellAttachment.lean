@@ -20300,6 +20300,43 @@ private lemma modelLevelDampedStretchFactor_nonneg {n k : ℕ} (hk : k ≤ n) (�
     Real.smoothTransition.nonneg _
   nlinarith [hU, hσ]
 
+private lemma smoothTransition_deriv {x : ℝ} (hx0 : 0 < x) :
+    deriv Real.smoothTransition x =
+      expNegInvGlue x * expNegInvGlue (1 - x) * (1 / x ^ 2 + 1 / (1 - x) ^ 2) /
+        (expNegInvGlue x + expNegInvGlue (1 - x)) ^ 2 := by
+  let g : ℝ → ℝ := expNegInvGlue
+  have hg' : HasDerivAt g (g x / x ^ 2) x := by
+    have h := expNegInvGlue.hasDerivAt_polynomial_eval_inv_mul (1 : Polynomial ℝ) x
+    simpa [g, div_eq_mul_inv, mul_comm] using h
+  have hh' : HasDerivAt (fun y : ℝ => g (1 - y)) (-(g (1 - x) / (1 - x) ^ 2)) x := by
+    have hg1 := expNegInvGlue.hasDerivAt_polynomial_eval_inv_mul (1 : Polynomial ℝ) (1 - x)
+    have hg1' : HasDerivAt g (g (1 - x) / (1 - x) ^ 2) (1 - x) := by
+      simpa [g, div_eq_mul_inv, mul_comm] using hg1
+    have hneg : HasDerivAt (fun y : ℝ => 1 - y) (-1) x := by
+      simpa using (hasDerivAt_const (x := x) (c := (1 : ℝ))).sub (hasDerivAt_id x)
+    simpa [Function.comp_def, neg_div] using (hg1'.comp x hneg)
+  have hnum : HasDerivAt (fun y : ℝ => g y) (g x / x ^ 2) x := hg'
+  have hden : HasDerivAt (fun y : ℝ => g y + g (1 - y))
+      (g x / x ^ 2 - g (1 - x) / (1 - x) ^ 2) x := hg'.add hh'
+  have hden0 : g x + g (1 - x) ≠ 0 := ne_of_gt (Real.smoothTransition.pos_denom x)
+  have hσ : HasDerivAt Real.smoothTransition
+      ((g x / x ^ 2 * (g x + g (1 - x)) -
+          g x * (g x / x ^ 2 - g (1 - x) / (1 - x) ^ 2)) /
+        (g x + g (1 - x)) ^ 2) x := by
+    simpa [g, Real.smoothTransition] using hnum.div hden hden0
+  have hmain : HasDerivAt Real.smoothTransition
+      (expNegInvGlue x * expNegInvGlue (1 - x) * (1 / x ^ 2 + 1 / (1 - x) ^ 2) /
+        (expNegInvGlue x + expNegInvGlue (1 - x)) ^ 2) x := by
+    have hconv : (g x / x ^ 2 * (g x + g (1 - x)) -
+          g x * (g x / x ^ 2 - g (1 - x) / (1 - x) ^ 2)) /
+        (g x + g (1 - x)) ^ 2 =
+        g x * g (1 - x) * (1 / x ^ 2 + 1 / (1 - x) ^ 2) /
+          (g x + g (1 - x)) ^ 2 := by
+      field_simp [hden0]
+      ring
+    simpa [g, hconv] using hσ
+  exact hmain.deriv
+
 theorem modelLevelDampedTransportLevelMap_strictMono_core {m k : ℕ} (hk : k ≤ m + 1)
     (c ε r δ ρ ρ' θ R₀ R₁ η ε₀ : ℝ) (hθ : 0 < θ) (hR₀R₁ : R₀ < R₁)
     (hε : 0 ≤ ε) (hδ : 0 < δ) (hδr : δ < r ^ 2) (hε₀ : 0 < ε₀)
