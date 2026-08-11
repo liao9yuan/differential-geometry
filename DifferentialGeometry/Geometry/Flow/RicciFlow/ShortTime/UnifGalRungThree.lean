@@ -160,6 +160,86 @@ theorem gal_arm_pair3_unif
         oneMinusConnLapSmoothIter_zero] using hmain
     _ ≤ eta * E4 + G * (E3 + E3 ^ 2) := hrhs
 
+theorem gal_arm_pair3_unif_of_mem
+    (hDim : Module.finrank ℝ E = 3)
+    (gBase : SmoothRiemannianMetric I M)
+    {Λ : ℝ} (hΛ : 1 ≤ Λ) :
+    ∀ {eta : ℝ}, 0 < eta →
+      ∃ delta R0 : ℝ,
+        0 < delta ∧ delta ≤ 1 / 3 ∧ 0 < R0 ∧ R0 ≤ 1 ∧
+        ∀ g : SmoothRiemannianMetric I M,
+          MetricUniformEquivalentOn (I := I) Set.univ gBase g Λ →
+          (∀ a : ℕ, a ≤ 3 →
+            MetricCovDerivOrderBoundOn (I := I) Set.univ a g gBase Λ) →
+          ∃ G : ℝ, 0 ≤ G ∧
+            ∀ {R : ℝ} (hR : 0 ≤ R) (_hRR0 : R ≤ R0)
+              (hdelta_lt : delta < 1)
+              (hreal : ∀ T : SmoothCcTensor g 0 2,
+                ‖smoothCcToTensorHs (I := I) (M := M) g
+                    (((1 : ℕ) : ℝ) + 1) T‖ ≤ R →
+                  gFibreOpBound (I := I) (M := M) g
+                    (ccTensorBilinSymm (I := I) g T) delta),
+              ∀ (F : Finset (TensorEigenIdx (I := I) (M := M) g 0 2))
+                (c : TensorEigenIdx (I := I) (M := M) g 0 2 → ℝ),
+                ‖galLowView (I := I) (M := M) g 1
+                    (finiteEigenComboHs (I := I) (M := M) g F c
+                      (((1 : ℕ) : ℝ) + 2))‖ ≤ R →
+                2 * |∑ i ∈ F,
+                    tensorSobolevWeight (I := I) (M := M) i (3 : ℝ) *
+                      (c i * (galArmVecBg (I := I) (M := M) g gBase
+                        hR hdelta_lt hreal F c).coeff i)| ≤
+                  eta * (∑ i ∈ F,
+                    tensorSobolevWeight (I := I) (M := M) i (4 : ℝ) * (c i) ^ 2) +
+                  G * ((∑ i ∈ F,
+                    tensorSobolevWeight (I := I) (M := M) i (3 : ℝ) * (c i) ^ 2) +
+                    (∑ i ∈ F,
+                      tensorSobolevWeight (I := I) (M := M) i (3 : ℝ) *
+                        (c i) ^ 2) ^ 2) := by
+  intro eta heta
+  obtain ⟨delta, R0, hdelta, hdeltathird, hR0, hR0one, hpair⟩ :=
+    gal_arm_pair3_unif (I := I) (M := M) hDim gBase hΛ heta
+  refine ⟨delta, R0, hdelta, hdeltathird, hR0, hR0one, ?_⟩
+  intro g hEq hjet
+  obtain ⟨G, hG, hpairG⟩ := hpair g hEq hjet
+  refine ⟨G, hG, ?_⟩
+  intro R hR hRR0 hdelta_lt hreal F c hmem
+  have hraw := hpairG hR hRR0 hdelta_lt hreal F c
+  set q : ℝ := ‖galLowView (I := I) (M := M) g 1
+    (finiteEigenComboHs (I := I) (M := M) g F c
+      (((1 : ℕ) : ℝ) + 2))‖ with hq
+  by_cases hq0 : q = 0
+  · have hview : galLowView (I := I) (M := M) g 1
+        (finiteEigenComboHs (I := I) (M := M) g F c
+          (((1 : ℕ) : ℝ) + 2)) = 0 := by
+      exact norm_eq_zero.mp (by simpa only [q] using hq0)
+    have hcombo : finiteEigenComboHs (I := I) (M := M) g F c
+          (((1 : ℕ) : ℝ) + 2) = 0 := by
+      refine tensorHsInclusion_injective (I := I) (M := M) (g := g) (r := 0)
+        (s := 2) (show (((1 : ℕ) : ℝ) + 1) ≤ ((1 : ℕ) : ℝ) + 2 by
+          norm_num) ?_
+      simpa only [galLowView, map_zero] using hview
+    have hc : ∀ i ∈ F, c i = 0 := by
+      intro i hi
+      have hcoeff := congrArg (fun u => u.coeff i) hcombo
+      simpa only [finiteEigenComboHs_coeff, if_pos hi, tensorHs.zero_coeff] using hcoeff
+    have hE3 : 0 ≤ ∑ i ∈ F,
+        tensorSobolevWeight (I := I) (M := M) i (3 : ℝ) * (c i) ^ 2 :=
+      Finset.sum_nonneg fun i _ => mul_nonneg
+        (tensorSobolevWeight_nonneg (I := I) (M := M) i 3) (sq_nonneg _)
+    have hE4 : 0 ≤ ∑ i ∈ F,
+        tensorSobolevWeight (I := I) (M := M) i (4 : ℝ) * (c i) ^ 2 :=
+      Finset.sum_nonneg fun i _ => mul_nonneg
+        (tensorSobolevWeight_nonneg (I := I) (M := M) i 4) (sq_nonneg _)
+    rw [Finset.sum_eq_zero fun i hi => by rw [hc i hi]; ring]
+    simpa only [abs_zero, mul_zero] using
+      add_nonneg (mul_nonneg heta.le hE4)
+        (mul_nonneg hG (add_nonneg hE3
+          (sq_nonneg (∑ i ∈ F,
+            tensorSobolevWeight (I := I) (M := M) i (3 : ℝ) * (c i) ^ 2))))
+  · have hqpos : 0 < q := lt_of_le_of_ne (by positivity) (Ne.symm hq0)
+    have hone : (1 : ℝ) ≤ R / q := (one_le_div hqpos).2 (by simpa only [q] using hmem)
+    simpa only [q, min_eq_left hone, one_mul] using hraw
+
 end DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral
 
 end
