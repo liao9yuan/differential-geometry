@@ -8565,6 +8565,265 @@ theorem morseFarExpandTimeSmooth_levelMap_ge_deep {c ε δ ρ ρ' t : ℝ} (hρ 
       exact div_nonneg (mul_nonneg (mul_nonneg hβ hu) (by nlinarith [hε])) (le_of_lt hδ)
     nlinarith
 
+theorem morseFarExpandTimeSmooth_deriv_nonpos {c ε δ ρ ρ' : ℝ} (hρ : 0 < ρ)
+    (hρ' : 0 < ρ') (hε : 0 < ε) (hδ : 0 < δ) (t : ℝ) :
+    deriv (morseFarExpandTimeSmooth c ε δ ρ ρ') t ≤ 0 := by
+  by_cases ht₁ : t < c - ε - δ + ρ'
+  · have hloc : morseFarExpandTimeSmooth c ε δ ρ ρ' =ᶠ[nhds t]
+        (fun _ : ℝ => (0 : ℝ)) := by
+      exact Filter.eventually_of_mem (Iio_mem_nhds ht₁) (by
+        intro u hu
+        exact morseFarExpandTimeSmooth_zero hρ (le_of_lt hu))
+    have hder : deriv (morseFarExpandTimeSmooth c ε δ ρ ρ') t = 0 := by
+      rw [hloc.deriv_eq]
+      simp
+    linarith
+  · have htgt : c - ε - δ < t := by
+      have hge : c - ε - δ + ρ' ≤ t := le_of_not_gt ht₁
+      linarith
+    let β : ℝ → ℝ := fun u => Real.smoothTransition ((u - (c - ε - δ + ρ')) / ρ)
+    let h : ℝ → ℝ := fun u => -(u - c + ε + δ) * (2 * ε) / δ
+    have hloc : morseFarExpandTimeSmooth c ε δ ρ ρ' =ᶠ[nhds t] (fun u : ℝ => β u * h u) := by
+      exact Filter.eventually_of_mem (Ioi_mem_nhds htgt) (by
+        intro u hu
+        dsimp [β, h, morseFarExpandTimeSmooth]
+        rw [morseFarExpandTime_eq hδ hu])
+    have hargDiff : HasDerivAt (fun u : ℝ => (u - (c - ε - δ + ρ')) / ρ) (1 / ρ) t := by
+      have hsub : HasDerivAt (fun u : ℝ => u - (c - ε - δ + ρ')) 1 t :=
+        (hasDerivAt_id t).sub_const (c - ε - δ + ρ')
+      simpa using hsub.div_const ρ
+    have hσdiff : DifferentiableAt ℝ Real.smoothTransition ((t - (c - ε - δ + ρ')) / ρ) :=
+      by
+        fun_prop
+    have hβdiff : DifferentiableAt ℝ β t := by
+      dsimp [β]
+      exact hσdiff.comp t hargDiff.differentiableAt
+    have hderβ : deriv β t = deriv Real.smoothTransition ((t - (c - ε - δ + ρ')) / ρ) * (1 / ρ) := by
+      have hc := deriv_comp (h₂ := Real.smoothTransition)
+        (h := fun u : ℝ => (u - (c - ε - δ + ρ')) / ρ) (x := t)
+        (hh₂ := hσdiff) (hh := hargDiff.differentiableAt)
+      have harg' : deriv (fun u : ℝ => (u - (c - ε - δ + ρ')) / ρ) t = 1 / ρ := hargDiff.deriv
+      dsimp [β]
+      change deriv (Real.smoothTransition ∘ (fun u : ℝ => (u - (c - ε - δ + ρ')) / ρ)) t =
+        deriv Real.smoothTransition ((t - (c - ε - δ + ρ')) / ρ) * (1 / ρ)
+      rw [hc, harg']
+    have hβ0 : 0 ≤ β t := by
+      dsimp [β]
+      exact Real.smoothTransition.nonneg _
+    have hβ'0 : 0 ≤ deriv β t := by
+      rw [hderβ]
+      exact mul_nonneg (smoothTransition_deriv_nonneg _) (by positivity)
+    have hh0 : h t ≤ 0 := by
+      dsimp [h]
+      have hw0 : 0 ≤ t - c + ε + δ := by linarith
+      exact div_nonpos_of_nonpos_of_nonneg (by nlinarith) (le_of_lt hδ)
+    have hhdiff : DifferentiableAt ℝ h t := by
+      dsimp [h]
+      fun_prop
+    have hderh : deriv h t = -(2 * ε) / δ := by
+      have hw : HasDerivAt (fun u : ℝ => u - c + ε + δ) 1 t :=
+        by
+          have hw' : HasDerivAt (fun u : ℝ => u - (c - ε - δ)) 1 t :=
+            (hasDerivAt_id t).sub_const (c - ε - δ)
+          convert hw' using 1
+          ext u
+          ring
+      have hmain : HasDerivAt (fun u : ℝ => -(u - c + ε + δ) * (2 * ε) / δ) (-(2 * ε) / δ) t := by
+        have hbase : HasDerivAt (fun u : ℝ => (-(2 * ε) / δ) * (u - c + ε + δ)) (-(2 * ε) / δ) t := by
+          simpa [mul_one] using (hasDerivAt_const_mul (-(2 * ε) / δ)).comp t hw
+        convert hbase using 1
+        ext u
+        ring
+      have hd := hmain.deriv
+      dsimp [h]
+      exact hd
+    have hderh0 : deriv h t ≤ 0 := by
+      rw [hderh]
+      exact div_nonpos_of_nonpos_of_nonneg (by linarith) (le_of_lt hδ)
+    have hprodDiff : DifferentiableAt ℝ (fun u : ℝ => β u * h u) t := hβdiff.mul hhdiff
+    have hder' : deriv (fun u : ℝ => β u * h u) t = deriv β t * h t + β t * deriv h t :=
+      deriv_mul hβdiff hhdiff
+    have hmain : deriv β t * h t + β t * deriv h t ≤ 0 := by
+      have h1 : deriv β t * h t ≤ 0 := mul_nonpos_of_nonneg_of_nonpos hβ'0 hh0
+      have h2 : β t * deriv h t ≤ 0 := mul_nonpos_of_nonneg_of_nonpos hβ0 hderh0
+      linarith
+    have hlocder : deriv (morseFarExpandTimeSmooth c ε δ ρ ρ') t =
+        deriv (fun u : ℝ => β u * h u) t := hloc.deriv_eq
+    rw [hlocder, hder']
+    exact hmain
+
+theorem morseFarExpandTimeSmooth_nonpos {c ε δ ρ ρ' t : ℝ} (hδ : 0 < δ)
+    (hε : 0 < ε) :
+    morseFarExpandTimeSmooth c ε δ ρ ρ' t ≤ 0 := by
+  dsimp [morseFarExpandTimeSmooth]
+  have hσ : 0 ≤ Real.smoothTransition ((t - (c - ε - δ + ρ')) / ρ) :=
+    Real.smoothTransition.nonneg _
+  have hτ : morseFarExpandTime c ε δ t ≤ 0 := morseFarExpandTime_le_zero hδ hε
+  exact mul_nonpos_of_nonneg_of_nonpos hσ hτ
+
+theorem morseFarExpandTimeSmooth_levelMap_deriv_pos {c ε δ ρ ρ' : ℝ} (hρ : 0 < ρ)
+    (hρ' : 0 < ρ') (hε : 0 < ε) (hδ : 0 < δ) (t : ℝ) :
+    0 < deriv (fun u : ℝ => u - morseFarExpandTimeSmooth c ε δ ρ ρ' u) t := by
+  have hτdiff : DifferentiableAt ℝ (morseFarExpandTimeSmooth c ε δ ρ ρ') t :=
+    ContDiffAt.differentiableAt
+      ((contDiff_morseFarExpandTimeSmooth (c := c) (ε := ε) hρ hρ' hδ).contDiffAt)
+      (by decide)
+  have hsub := deriv_sub (f := fun u : ℝ => u) (g := morseFarExpandTimeSmooth c ε δ ρ ρ')
+    (x := t) (hf := differentiableAt_id) (hg := hτdiff)
+  have hder : deriv (fun u : ℝ => u - morseFarExpandTimeSmooth c ε δ ρ ρ' u) t =
+      1 - deriv (morseFarExpandTimeSmooth c ε δ ρ ρ') t := by
+    simpa using hsub
+  rw [hder]
+  have hτ' : deriv (morseFarExpandTimeSmooth c ε δ ρ ρ') t ≤ 0 :=
+    morseFarExpandTimeSmooth_deriv_nonpos hρ hρ' hε hδ t
+  linarith
+
+theorem morseFarExpandTimeSmooth_levelMap_surj {c ε δ ρ ρ' : ℝ} (hρ : 0 < ρ) (hρ' : 0 < ρ')
+    (hε : 0 < ε) (hδ : 0 < δ) (hρρ' : ρ + ρ' ≤ δ) (u : ℝ) :
+    ∃ t : ℝ, t - morseFarExpandTimeSmooth c ε δ ρ ρ' t = u := by
+  let L : ℝ → ℝ := fun t => t - morseFarExpandTimeSmooth c ε δ ρ ρ' t
+  have hLcont : Continuous L := by
+    dsimp [L]
+    exact continuous_id.sub (contDiff_morseFarExpandTimeSmooth (c := c) (ε := ε) hρ hρ' hδ).continuous
+  by_cases hu : u ≤ c + ε
+  · let t₁ : ℝ := min u (c - ε - δ + ρ')
+    have ht₁deep : t₁ ≤ c - ε - δ + ρ' := min_le_right _ _
+    have hL₁ : L t₁ = t₁ := by
+      dsimp [L]
+      rw [morseFarExpandTimeSmooth_zero hρ ht₁deep]
+      ring
+    have hleft : L (c - ε) = c + ε := by
+      dsimp [L]
+      rw [morseFarExpandTimeSmooth_top hρ hε hδ hρρ']
+      ring
+    have hmem : u ∈ Set.Icc (L t₁) (L (c - ε)) := by
+      constructor
+      · rw [hL₁]
+        exact min_le_left u (c - ε - δ + ρ')
+      · rw [hleft]
+        exact hu
+    have hlt : t₁ ≤ c - ε := by
+      have h₂ : c - ε - δ + ρ' ≤ c - ε := by nlinarith [hρ', hδ]
+      exact le_trans ht₁deep h₂
+    have hivt := intermediate_value_Icc (a := t₁) (b := c - ε) hlt
+      (f := L) (hLcont.continuousOn)
+    rcases hivt hmem with ⟨t, ht, htL⟩
+    exact ⟨t, htL⟩
+  · have hugt : c + ε < u := lt_of_not_ge hu
+    have hleft : L (c - ε) = c + ε := by
+      dsimp [L]
+      rw [morseFarExpandTimeSmooth_top hρ hε hδ hρρ']
+      ring
+    have hright : u ≤ L u := by
+      dsimp [L]
+      have hτ0 : morseFarExpandTimeSmooth c ε δ ρ ρ' u ≤ 0 :=
+        morseFarExpandTimeSmooth_nonpos hδ hε
+      linarith
+    have hmem : u ∈ Set.Icc (L (c - ε)) (L u) := by
+      constructor
+      · rw [hleft]
+        exact le_of_lt hugt
+      · exact hright
+    have hivt := intermediate_value_Icc (a := c - ε) (b := u) (by linarith)
+      (f := L) (hLcont.continuousOn)
+    rcases hivt hmem with ⟨t, ht, htL⟩
+    exact ⟨t, htL⟩
+
+theorem morseFarExpandTimeSmooth_levelMap_unique {c ε δ ρ ρ' : ℝ} (hρ : 0 < ρ)
+    (hρ' : 0 < ρ') (hε : 0 < ε) (hδ : 0 < δ) {t₁ t₂ : ℝ}
+    (h₁ : t₁ - morseFarExpandTimeSmooth c ε δ ρ ρ' t₁ =
+      t₂ - morseFarExpandTimeSmooth c ε δ ρ ρ' t₂) :
+    t₁ = t₂ := by
+  by_contra hne
+  rcases lt_or_gt_of_ne hne with hlt | hgt
+  · have hmono := morseFarExpandTimeSmooth_levelMap_strictMono (c := c) (ε := ε) (δ := δ)
+      (ρ := ρ) (ρ' := ρ') hρ hρ' hε hδ hlt
+    linarith
+  · have hmono := morseFarExpandTimeSmooth_levelMap_strictMono (c := c) (ε := ε) (δ := δ)
+      (ρ := ρ) (ρ' := ρ') hρ hρ' hε hδ hgt
+    linarith
+
+noncomputable def morseFarExpandLevelInverse (c ε δ ρ ρ' : ℝ) (hρ : 0 < ρ) (hρ' : 0 < ρ')
+    (hε : 0 < ε) (hδ : 0 < δ) (hρρ' : ρ + ρ' ≤ δ) (u : ℝ) : ℝ :=
+  Classical.choose (morseFarExpandTimeSmooth_levelMap_surj (c := c) hρ hρ' hε hδ hρρ' u)
+
+theorem morseFarExpandLevelInverse_spec {c ε δ ρ ρ' : ℝ} (hρ : 0 < ρ) (hρ' : 0 < ρ')
+    (hε : 0 < ε) (hδ : 0 < δ) (hρρ' : ρ + ρ' ≤ δ) (u : ℝ) :
+    morseFarExpandLevelInverse c ε δ ρ ρ' hρ hρ' hε hδ hρρ' u -
+        morseFarExpandTimeSmooth c ε δ ρ ρ' (morseFarExpandLevelInverse c ε δ ρ ρ' hρ hρ' hε hδ hρρ' u) = u :=
+  Classical.choose_spec (morseFarExpandTimeSmooth_levelMap_surj (c := c) hρ hρ' hε hδ hρρ' u)
+
+theorem morseFarExpandLevelInverse_mem_lower {c ε δ ρ ρ' : ℝ} (hρ : 0 < ρ) (hρ' : 0 < ρ')
+    (hε : 0 < ε) (hδ : 0 < δ) (hρρ' : ρ + ρ' ≤ δ) (u : ℝ) (hu : u ≤ c + ε) :
+    morseFarExpandLevelInverse c ε δ ρ ρ' hρ hρ' hε hδ hρρ' u ≤ c - ε := by
+  let L : ℝ → ℝ := fun t => t - morseFarExpandTimeSmooth c ε δ ρ ρ' t
+  have hstrict : StrictMono L := by
+    intro t₁ t₂ hlt
+    dsimp [L]
+    exact morseFarExpandTimeSmooth_levelMap_strictMono hρ hρ' hε hδ hlt
+  have hspec : L (morseFarExpandLevelInverse c ε δ ρ ρ' hρ hρ' hε hδ hρρ' u) = u := by
+    dsimp [L]
+    exact morseFarExpandLevelInverse_spec hρ hρ' hε hδ hρρ' u
+  have htop : L (c - ε) = c + ε := by
+    dsimp [L]
+    rw [morseFarExpandTimeSmooth_top hρ hε hδ hρρ']
+    ring
+  have hle : L (morseFarExpandLevelInverse c ε δ ρ ρ' hρ hρ' hε hδ hρρ' u) ≤ L (c - ε) := by
+    rw [hspec, htop]
+    exact hu
+  exact (hstrict.le_iff_le).mp hle
+
+theorem contDiff_morseFarExpandLevelInverse {c ε δ ρ ρ' : ℝ} (hρ : 0 < ρ) (hρ' : 0 < ρ')
+    (hε : 0 < ε) (hδ : 0 < δ) (hρρ' : ρ + ρ' ≤ δ) :
+    ContDiff ℝ (⊤ : ℕ∞) (morseFarExpandLevelInverse c ε δ ρ ρ' hρ hρ' hε hδ hρρ') := by
+  rw [contDiff_iff_contDiffAt]
+  intro u₀
+  let L : ℝ → ℝ := fun t => t - morseFarExpandTimeSmooth c ε δ ρ ρ' t
+  let s : ℝ → ℝ := morseFarExpandLevelInverse c ε δ ρ ρ' hρ hρ' hε hδ hρρ'
+  have hspec : ∀ u : ℝ, L (s u) = u := by
+    intro u
+    dsimp [s, L]
+    exact morseFarExpandLevelInverse_spec hρ hρ' hε hδ hρρ' u
+  have hstrict : StrictMono L := by
+    intro t₁ t₂ hlt
+    dsimp [L]
+    exact morseFarExpandTimeSmooth_levelMap_strictMono hρ hρ' hε hδ hlt
+  let a : ℝ := s u₀
+  have hLa : L a = u₀ := by
+    simpa [a] using hspec u₀
+  have hτdiff : DifferentiableAt ℝ (morseFarExpandTimeSmooth c ε δ ρ ρ') a :=
+    ContDiffAt.differentiableAt
+      ((contDiff_morseFarExpandTimeSmooth (c := c) (ε := ε) hρ hρ' hδ).contDiffAt)
+      (by decide)
+  have hLdiff : DifferentiableAt ℝ L a := by
+    dsimp [L]
+    exact differentiableAt_id.sub hτdiff
+  have hLderiv_ne : deriv L a ≠ 0 := by
+    have hpos : 0 < deriv (fun u : ℝ => u - morseFarExpandTimeSmooth c ε δ ρ ρ' u) a :=
+      morseFarExpandTimeSmooth_levelMap_deriv_pos hρ hρ' hε hδ a
+    dsimp [L]
+    exact ne_of_gt hpos
+  have hLhas : HasDerivAt L (deriv L a) a := hLdiff.hasDerivAt
+  have hLfderiv : HasFDerivAt L
+      (ContinuousLinearEquiv.unitsEquivAut ℝ (Units.mk0 (deriv L a) hLderiv_ne) : ℝ →L[ℝ] ℝ) a := by
+    exact hLhas.hasFDerivAt_equiv hLderiv_ne
+  have hLcontAt : ContDiffAt ℝ (⊤ : ℕ∞) L a := by
+    dsimp [L]
+    exact (contDiff_id.sub (contDiff_morseFarExpandTimeSmooth (c := c) (ε := ε) hρ hρ' hδ)).contDiffAt
+  have hliCont : ContDiffAt ℝ (⊤ : ℕ∞) (hLcontAt.localInverse hLfderiv (by decide)) u₀ := by
+    have hmain : ContDiffAt ℝ (⊤ : ℕ∞) (hLcontAt.localInverse hLfderiv (by decide)) (L a) :=
+      hLcontAt.to_localInverse hLfderiv (by decide)
+    simpa [hLa] using hmain
+  have hstrictfd := hLcontAt.hasStrictFDerivAt' hLfderiv (by decide)
+  have hleft : ∀ᶠ x in nhds a, s (L x) = x := by
+    filter_upwards [Filter.univ_mem] with x hx
+    exact hstrict.injective (by rw [hspec (L x)])
+  have hagree : ∀ᶠ y in nhds u₀, s y = hLcontAt.localInverse hLfderiv (by decide) y := by
+    have hmain := hstrictfd.localInverse_unique hleft
+    simpa [hLa] using hmain
+  have hsCont : ContDiffAt ℝ (⊤ : ℕ∞) s u₀ := hliCont.congr_of_eventuallyEq hagree
+  simpa [s] using hsCont
+
 theorem morseRoundedExpandTime_interface {m k : ℕ} (hk : k ≤ m + 1) (c ε r δ : ℝ)
     (hε : 0 < ε) (hδ : 0 < δ) (hr2 : r ^ 2 = 2 * ε)
     {y : MorseModel (m + 1)}
