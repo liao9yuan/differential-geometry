@@ -4409,39 +4409,38 @@ theorem cutoffTransition_deriv_lt_one {a ε' w t : ℝ} (ha0 : 0 ≤ a) (hε' : 
     nlinarith [hle, hslope]
   exact hmain
 
-noncomputable def cutoffFunction (a ε' w η₁ η : ℝ) (t : ℝ) : ℝ :=
+noncomputable def cutoffFunction (a ε' w η₁ : ℝ) (t : ℝ) : ℝ :=
   if t ≤ 0 then 0 else if t ≤ ε' then
     a * t * Real.smoothTransition ((t / ε') ^ w)
   else if t ≤ 1 - η₁ then a * t
-  else if t ≤ 1 - η then
-    a * t + (1 - a * t) * Real.smoothTransition ((t - (1 - η₁)) / (η - η₁))
+  else if t ≤ 1 then
+    a * t + (1 - a * t) * Real.smoothTransition ((t - (1 - η₁)) / η₁)
   else 1
 
-theorem cutoffFunction_nonpos {a ε' w η₁ η t : ℝ} (ht : t ≤ 0) :
-    cutoffFunction a ε' w η₁ η t = 0 := by
+theorem cutoffFunction_nonpos {a ε' w η₁ t : ℝ} (ht : t ≤ 0) :
+    cutoffFunction a ε' w η₁ t = 0 := by
   dsimp [cutoffFunction]
   rw [if_pos ht]
 
-theorem cutoffFunction_eq_affine {a ε' w η₁ η t : ℝ} (hε' : 0 < ε') (htε : ε' < t)
+theorem cutoffFunction_eq_affine {a ε' w η₁ t : ℝ} (hε' : 0 < ε') (htε : ε' < t)
     (ht₁ : t ≤ 1 - η₁) :
-    cutoffFunction a ε' w η₁ η t = a * t := by
+    cutoffFunction a ε' w η₁ t = a * t := by
   dsimp [cutoffFunction]
   rw [if_neg (not_le_of_gt (lt_trans hε' htε))]
   rw [if_neg (not_le_of_gt htε)]
   rw [if_pos ht₁]
 
-theorem cutoffFunction_eq_one {a ε' w η₁ η t : ℝ} (hη : 1 - η < t) (ht0 : 0 < t)
-    (htε : ε' < t) (ht₁ : 1 - η₁ < t) :
-    cutoffFunction a ε' w η₁ η t = 1 := by
+theorem cutoffFunction_eq_one {a ε' w η₁ t : ℝ} (hη₁ : 0 < η₁) (hε'1 : ε' < 1)
+    (ht1 : 1 < t) :
+    cutoffFunction a ε' w η₁ t = 1 := by
   dsimp [cutoffFunction]
-  rw [if_neg (not_le_of_gt ht0)]
-  rw [if_neg (not_le_of_gt htε)]
-  rw [if_neg (not_le_of_gt ht₁)]
-  rw [if_neg (not_le_of_gt hη)]
+  rw [if_neg (not_le_of_gt (by nlinarith [ht1]))]
+  rw [if_neg (not_le_of_gt (by nlinarith [hε'1, ht1]))]
+  rw [if_neg (not_le_of_gt (by nlinarith [hη₁, ht1]))]
+  rw [if_neg (not_le_of_gt ht1)]
 
-theorem cutoffFunction_nonneg {a ε' w η₁ η t : ℝ} (ha : 0 ≤ a) (ha1 : a ≤ 1)
-    (hη₁ : 0 < η₁) (hη₁η : η₁ < η) :
-    0 ≤ cutoffFunction a ε' w η₁ η t := by
+theorem cutoffFunction_nonneg {a ε' w η₁ t : ℝ} (ha : 0 ≤ a) (ha1 : a ≤ 1) :
+    0 ≤ cutoffFunction a ε' w η₁ t := by
   dsimp [cutoffFunction]
   by_cases ht : t ≤ 0
   · rw [if_pos ht]
@@ -4456,13 +4455,12 @@ theorem cutoffFunction_nonneg {a ε' w η₁ η t : ℝ} (ha : 0 ≤ a) (ha1 : a
       · rw [if_pos ht₁]
         exact mul_nonneg ha ht0
       · rw [if_neg ht₁]
-        by_cases ht₂ : t ≤ 1 - η
+        by_cases ht₂ : t ≤ 1
         · rw [if_pos ht₂]
-          have hσ : 0 ≤ Real.smoothTransition ((t - (1 - η₁)) / (η - η₁)) :=
+          have hσ : 0 ≤ Real.smoothTransition ((t - (1 - η₁)) / η₁) :=
             Real.smoothTransition.nonneg _
           have h1 : 0 ≤ a * t := mul_nonneg ha ht0
-          have hη0 : 0 < η := lt_trans hη₁ hη₁η
-          have ht1 : t ≤ 1 := by nlinarith [ht₂, hη0]
+          have ht1 : t ≤ 1 := ht₂
           have hat : a * t ≤ 1 := by
             simpa using (mul_le_mul ha1 ht1 ht0 (by norm_num : 0 ≤ (1 : ℝ)))
           have h2 : 0 ≤ 1 - a * t := by linarith
@@ -4471,9 +4469,9 @@ theorem cutoffFunction_nonneg {a ε' w η₁ η t : ℝ} (ha : 0 ≤ a) (ha1 : a
         · rw [if_neg ht₂]
           exact zero_le_one
 
-theorem cutoffFunction_le_one {a ε' w η₁ η t : ℝ} (ha0 : 0 ≤ a) (ha : a ≤ 1)
-    (hη₁η : η₁ < η) (ht1 : t ≤ 1) :
-    cutoffFunction a ε' w η₁ η t ≤ 1 := by
+theorem cutoffFunction_le_one {a ε' w η₁ t : ℝ} (ha0 : 0 ≤ a) (ha : a ≤ 1)
+    (ht1 : t ≤ 1) :
+    cutoffFunction a ε' w η₁ t ≤ 1 := by
   dsimp [cutoffFunction]
   by_cases ht : t ≤ 0
   · rw [if_pos ht]
@@ -4495,17 +4493,17 @@ theorem cutoffFunction_le_one {a ε' w η₁ η t : ℝ} (ha0 : 0 ≤ a) (ha : a
       · rw [if_pos ht₁]
         simpa using (mul_le_mul ha ht1 ht0 (by norm_num : 0 ≤ (1 : ℝ)))
       · rw [if_neg ht₁]
-        by_cases ht₂ : t ≤ 1 - η
+        by_cases ht₂ : t ≤ 1
         · rw [if_pos ht₂]
-          have hσ : Real.smoothTransition ((t - (1 - η₁)) / (η - η₁)) ≤ 1 :=
+          have hσ : Real.smoothTransition ((t - (1 - η₁)) / η₁) ≤ 1 :=
             Real.smoothTransition.le_one _
-          have hσ0 : 0 ≤ Real.smoothTransition ((t - (1 - η₁)) / (η - η₁)) :=
+          have hσ0 : 0 ≤ Real.smoothTransition ((t - (1 - η₁)) / η₁) :=
             Real.smoothTransition.nonneg _
           have hat1 : a * t ≤ 1 := by
             nlinarith [ha, ht1, ht0, ha0]
           have htail : 0 ≤ 1 - a * t := by linarith
           have hmul := mul_le_mul_of_nonneg_left hσ htail
-          have hmain : a * t + (1 - a * t) * Real.smoothTransition ((t - (1 - η₁)) / (η - η₁)) ≤
+          have hmain : a * t + (1 - a * t) * Real.smoothTransition ((t - (1 - η₁)) / η₁) ≤
               a * t + (1 - a * t) := by
             nlinarith [hmul]
           have hmain' : a * t + (1 - a * t) ≤ 1 := by nlinarith [hat1]
@@ -4690,10 +4688,10 @@ theorem modelRoundedFunction_ratio_nonpos_of_posPart_eq_zero {n k : ℕ} (hk : k
   dsimp [modelSublevelCutoffRatio]
   exact div_nonpos_of_nonpos_of_nonneg (le_of_lt hγ) (le_of_lt hpos)
 
-theorem cutoffFunction_deriv_affine {a ε' w η₁ η t : ℝ} (hε' : 0 < ε')
+theorem cutoffFunction_deriv_affine {a ε' w η₁ t : ℝ} (hε' : 0 < ε')
     (htε : ε' < t) (ht₁ : t < 1 - η₁) :
-    deriv (cutoffFunction a ε' w η₁ η) t = a := by
-  have hloc : cutoffFunction a ε' w η₁ η =ᶠ[nhds t] (fun u : ℝ => a * u) := by
+    deriv (cutoffFunction a ε' w η₁) t = a := by
+  have hloc : cutoffFunction a ε' w η₁ =ᶠ[nhds t] (fun u : ℝ => a * u) := by
     exact Filter.eventually_of_mem
       (Ioo_mem_nhds htε ht₁) (by
     intro u hu
@@ -4714,10 +4712,10 @@ theorem cutoffFunction_deriv_affine {a ε' w η₁ η t : ℝ} (hε' : 0 < ε')
   rw [hloc.deriv_eq]
   exact hder
 
-theorem cutoffFunction_differentiableAt_affine {a ε' w η₁ η t : ℝ} (hε' : 0 < ε')
+theorem cutoffFunction_differentiableAt_affine {a ε' w η₁ t : ℝ} (hε' : 0 < ε')
     (htε : ε' < t) (ht₁ : t < 1 - η₁) :
-    DifferentiableAt ℝ (cutoffFunction a ε' w η₁ η) t := by
-  have hloc : cutoffFunction a ε' w η₁ η =ᶠ[nhds t] (fun u : ℝ => a * u) := by
+    DifferentiableAt ℝ (cutoffFunction a ε' w η₁) t := by
+  have hloc : cutoffFunction a ε' w η₁ =ᶠ[nhds t] (fun u : ℝ => a * u) := by
     exact Filter.eventually_of_mem
       (Ioo_mem_nhds htε ht₁) (by
     intro u hu
@@ -4728,13 +4726,13 @@ theorem cutoffFunction_differentiableAt_affine {a ε' w η₁ η t : ℝ} (hε' 
     rw [if_neg (not_le_of_gt hu0)]
     rw [if_neg (not_le_of_gt huε)]
     rw [if_pos (le_of_lt hu₁)])
-  have hloc' : cutoffFunction a ε' w η₁ η =ᶠ[nhds t] (fun x : ℝ => a) * id := by
+  have hloc' : cutoffFunction a ε' w η₁ =ᶠ[nhds t] (fun x : ℝ => a) * id := by
     filter_upwards [hloc] with u hu
     simpa using hu
   exact ((differentiableAt_const a).mul differentiableAt_id).congr_of_eventuallyEq hloc'
 
 theorem modelSublevelFamilyCutoff_notCritical_of_affine_ratio {n k : ℕ} (hk : k ≤ n)
-    (c ε r δ R₀ R₁ ε₀ a ε' w η₁ η : ℝ)
+    (c ε r δ R₀ R₁ ε₀ a ε' w η₁ : ℝ)
     (hε : 0 < ε) (hδ : 0 < δ) (hδr : δ < r ^ 2) (hr : r ^ 2 = 2 * ε)
     (hR : R₀ < R₁) (hR0 : 0 ≤ R₀) (hbig : 2 * (r ^ 2 + 2 * ε + δ) ≤ R₀ ^ 2)
     (hδR : 40 * δ < R₁ ^ 2 - R₀ ^ 2)
@@ -4745,9 +4743,9 @@ theorem modelSublevelFamilyCutoff_notCritical_of_affine_ratio {n k : ℕ} (hk : 
     (hρ : ε' < modelSublevelCutoffRatio hk c ε r δ R₀ R₁ ε₀ y)
     (hρ₁ : modelSublevelCutoffRatio hk c ε r δ R₀ R₁ ε₀ y < 1 - η₁) :
     fderiv ℝ (fun z => modelSublevelFamilyCutoff hk c ε r δ R₀ R₁ ε₀
-      (cutoffFunction a ε' w η₁ η) s z) y ≠ 0 := by
+      (cutoffFunction a ε' w η₁) s z) y ≠ 0 := by
   intro hcrit
-  let θ : ℝ → ℝ := cutoffFunction a ε' w η₁ η
+  let θ : ℝ → ℝ := cutoffFunction a ε' w η₁
   let ρ : ℝ := modelSublevelCutoffRatio hk c ε r δ R₀ R₁ ε₀ y
   let wp : MorseModel n := recombine hk (0 : EuclideanSpace ℝ (Fin k)) (posPart hk y)
   let G : ℝ := morseNormalForm hk c y - c + ε - (modelAttachedFunction hk c ε r δ y - c)
@@ -4858,6 +4856,136 @@ theorem modelSublevelFamilyCutoff_notCritical_of_affine_ratio {n k : ℕ} (hk : 
       hε hδ hδr hr hR hR0 hbig hε₀ hp0 hden
   have hε'ρ : ε' < modelSublevelCutoffRatio hk c ε r δ R₀ R₁ ε₀ y := hρ
   linarith
+
+theorem modelSublevelFamilyCutoff_notCritical_of_ratio_neg {n k : ℕ} (hk : k ≤ n)
+    (c ε r δ R₀ R₁ ε₀ a ε' w η₁ : ℝ)
+    (hε : 0 < ε) (hδ : 0 < δ) (hδr : δ < r ^ 2)
+    (hR : R₀ < R₁) (hR0 : 0 ≤ R₀) (hbig : 2 * (r ^ 2 + 2 * ε + δ) ≤ R₀ ^ 2)
+    (hδR : 40 * δ < R₁ ^ 2 - R₀ ^ 2)
+    (hε₀ : 2 * ε₀ < min (min ε (r ^ 2 / 2)) ((r ^ 2 - δ) / 2))
+    (s : ℝ) (y : MorseModel n)
+    (hρ : modelSublevelCutoffRatio hk c ε r δ R₀ R₁ ε₀ y < 0)
+    (hy : |modelSublevelFamilyCutoff hk c ε r δ R₀ R₁ ε₀ (cutoffFunction a ε' w η₁) s y| ≤ 2 * ε₀) :
+    fderiv ℝ (fun z => modelSublevelFamilyCutoff hk c ε r δ R₀ R₁ ε₀
+      (cutoffFunction a ε' w η₁) s z) y ≠ 0 := by
+  have hρcont : ContinuousAt (fun z : MorseModel n =>
+      modelSublevelCutoffRatio hk c ε r δ R₀ R₁ ε₀ z) y := by
+    have hγ : ContinuousAt (fun z : MorseModel n =>
+        modelRoundedFunction hk c ε r δ R₀ R₁ z - c) y :=
+      (contDiff_modelRoundedFunction hk c ε r δ R₀ R₁).continuous.continuousAt.sub continuousAt_const
+    have hβ : ContinuousAt (fun z : MorseModel n => morseNormalForm hk c z - c - ε) y :=
+      (contDiff_morseNormalForm hk c).continuous.continuousAt.sub continuousAt_const |>.sub
+        continuousAt_const
+    have hden : modelRoundedFunction hk c ε r δ R₀ R₁ y - c -
+        (morseNormalForm hk c y - c - ε) ≠ 0 := by
+      intro h0
+      have hz : modelSublevelCutoffRatio hk c ε r δ R₀ R₁ ε₀ y = 0 := by
+        dsimp [modelSublevelCutoffRatio]
+        rw [h0]
+        simp
+      rw [hz] at hρ
+      linarith
+    have hnum : ContinuousAt (fun z : MorseModel n =>
+        modelRoundedFunction hk c ε r δ R₀ R₁ z - c + ε₀) y :=
+      hγ.add continuousAt_const
+    have hdenf : ContinuousAt (fun z : MorseModel n =>
+        modelRoundedFunction hk c ε r δ R₀ R₁ z - c -
+          (morseNormalForm hk c z - c - ε)) y :=
+      hγ.sub hβ
+    exact hnum.div hdenf hden
+  have hρneg : ∀ᶠ z in nhds y, modelSublevelCutoffRatio hk c ε r δ R₀ R₁ ε₀ z < 0 := by
+    have hmain := hρcont.eventually_lt (by fun_prop : ContinuousAt (fun _ : MorseModel n => (0 : ℝ)) y) hρ
+    simpa using hmain
+  have hloc : (fun z : MorseModel n => modelSublevelFamilyCutoff hk c ε r δ R₀ R₁ ε₀
+        (cutoffFunction a ε' w η₁) s z) =ᶠ[nhds y]
+      (fun z : MorseModel n => modelSublevelFamily hk c ε r δ R₀ R₁ 0 z) := by
+    filter_upwards [hρneg] with z hz
+    dsimp [modelSublevelFamilyCutoff, modelSublevelFamily]
+    have hθ0 : cutoffFunction a ε' w η₁ (modelSublevelCutoffRatio hk c ε r δ R₀ R₁ ε₀ z) = 0 :=
+      cutoffFunction_nonpos (le_of_lt hz)
+    rw [hθ0]
+    ring
+  have hy0 : |modelSublevelFamily hk c ε r δ R₀ R₁ 0 y| ≤ 2 * ε₀ := by
+    have hmain : modelSublevelFamilyCutoff hk c ε r δ R₀ R₁ ε₀
+        (cutoffFunction a ε' w η₁) s y = modelSublevelFamily hk c ε r δ R₀ R₁ 0 y :=
+      hloc.self_of_nhds
+    rw [← hmain]
+    exact hy
+  have hne0 := modelSublevelFamily_notCritical_of_strip hk c ε r δ R₀ R₁ ε₀ hε hδ hδr hR hR0
+    hbig hδR hε₀ (0 : ℝ) (by norm_num) y hy0
+  have hder : fderiv ℝ (fun z => modelSublevelFamilyCutoff hk c ε r δ R₀ R₁ ε₀
+      (cutoffFunction a ε' w η₁) s z) y =
+      fderiv ℝ (fun z => modelSublevelFamily hk c ε r δ R₀ R₁ 0 z) y :=
+    hloc.fderiv_eq
+  rw [hder]
+  exact hne0
+
+theorem modelSublevelFamilyCutoff_notCritical_of_ratio_top {n k : ℕ} (hk : k ≤ n)
+    (c ε r δ R₀ R₁ ε₀ a ε' w η₁ : ℝ)
+    (hε : 0 < ε) (hδ : 0 < δ) (hδr : δ < r ^ 2)
+    (hR : R₀ < R₁) (hR0 : 0 ≤ R₀) (hbig : 2 * (r ^ 2 + 2 * ε + δ) ≤ R₀ ^ 2)
+    (hδR : 40 * δ < R₁ ^ 2 - R₀ ^ 2)
+    (hε₀ : 2 * ε₀ < min (min ε (r ^ 2 / 2)) ((r ^ 2 - δ) / 2))
+    (hη₁ : 0 < η₁) (hε'1 : ε' < 1)
+    (s : ℝ) (hs : s ∈ Set.Icc (0 : ℝ) 1) (y : MorseModel n)
+    (hρ : 1 < modelSublevelCutoffRatio hk c ε r δ R₀ R₁ ε₀ y)
+    (hy : |modelSublevelFamilyCutoff hk c ε r δ R₀ R₁ ε₀ (cutoffFunction a ε' w η₁) s y| ≤ 2 * ε₀) :
+    fderiv ℝ (fun z => modelSublevelFamilyCutoff hk c ε r δ R₀ R₁ ε₀
+      (cutoffFunction a ε' w η₁) s z) y ≠ 0 := by
+  have hρcont : ContinuousAt (fun z : MorseModel n =>
+      modelSublevelCutoffRatio hk c ε r δ R₀ R₁ ε₀ z) y := by
+    have hγ : ContinuousAt (fun z : MorseModel n =>
+        modelRoundedFunction hk c ε r δ R₀ R₁ z - c) y :=
+      (contDiff_modelRoundedFunction hk c ε r δ R₀ R₁).continuous.continuousAt.sub continuousAt_const
+    have hβ : ContinuousAt (fun z : MorseModel n => morseNormalForm hk c z - c - ε) y :=
+      (contDiff_morseNormalForm hk c).continuous.continuousAt.sub continuousAt_const |>.sub
+        continuousAt_const
+    have hden : modelRoundedFunction hk c ε r δ R₀ R₁ y - c -
+        (morseNormalForm hk c y - c - ε) ≠ 0 := by
+      intro h0
+      have hz : modelSublevelCutoffRatio hk c ε r δ R₀ R₁ ε₀ y = 0 := by
+        dsimp [modelSublevelCutoffRatio]
+        rw [h0]
+        simp
+      have hz' : (1 : ℝ) < 0 := by simpa [hz] using hρ
+      linarith
+    have hnum : ContinuousAt (fun z : MorseModel n =>
+        modelRoundedFunction hk c ε r δ R₀ R₁ z - c + ε₀) y :=
+      hγ.add continuousAt_const
+    have hdenf : ContinuousAt (fun z : MorseModel n =>
+        modelRoundedFunction hk c ε r δ R₀ R₁ z - c -
+          (morseNormalForm hk c z - c - ε)) y :=
+      hγ.sub hβ
+    exact hnum.div hdenf hden
+  have hρtop : ∀ᶠ z in nhds y, 1 < modelSublevelCutoffRatio hk c ε r δ R₀ R₁ ε₀ z := by
+    have hmain : ∀ᶠ z in nhds y,
+        modelSublevelCutoffRatio hk c ε r δ R₀ R₁ ε₀ z ∈ Set.Ioi (1 : ℝ) :=
+      hρcont.tendsto.eventually (isOpen_Ioi.mem_nhds hρ)
+    filter_upwards [hmain] with z hz
+    exact hz
+  have hloc : (fun z : MorseModel n => modelSublevelFamilyCutoff hk c ε r δ R₀ R₁ ε₀
+        (cutoffFunction a ε' w η₁) s z) =ᶠ[nhds y]
+      (fun z : MorseModel n => modelSublevelFamily hk c ε r δ R₀ R₁ s z) := by
+    filter_upwards [hρtop] with z hz
+    dsimp [modelSublevelFamilyCutoff, modelSublevelFamily]
+    have hθ1 : cutoffFunction a ε' w η₁ (modelSublevelCutoffRatio hk c ε r δ R₀ R₁ ε₀ z) = 1 :=
+      cutoffFunction_eq_one hη₁ hε'1 hz
+    rw [hθ1]
+    ring
+  have hy0 : |modelSublevelFamily hk c ε r δ R₀ R₁ s y| ≤ 2 * ε₀ := by
+    have hmain : modelSublevelFamilyCutoff hk c ε r δ R₀ R₁ ε₀
+        (cutoffFunction a ε' w η₁) s y = modelSublevelFamily hk c ε r δ R₀ R₁ s y :=
+      hloc.self_of_nhds
+    rw [← hmain]
+    exact hy
+  have hne0 := modelSublevelFamily_notCritical_of_strip hk c ε r δ R₀ R₁ ε₀ hε hδ hδr hR hR0
+    hbig hδR hε₀ s hs y hy0
+  have hder : fderiv ℝ (fun z => modelSublevelFamilyCutoff hk c ε r δ R₀ R₁ ε₀
+      (cutoffFunction a ε' w η₁) s z) y =
+      fderiv ℝ (fun z => modelSublevelFamily hk c ε r δ R₀ R₁ s z) y :=
+    hloc.fderiv_eq
+  rw [hder]
+  exact hne0
 
 theorem modelAttachedUnstretch_mem_upper_of_roundedSublevel {n k : ℕ} (hk : k ≤ n)
     (c ε r δ R₀ R₁ : ℝ) (hε : 0 < ε) (hδ : 0 < δ) (hδr : δ < r ^ 2)
