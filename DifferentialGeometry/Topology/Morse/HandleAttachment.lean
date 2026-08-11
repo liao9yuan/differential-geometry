@@ -2199,6 +2199,85 @@ theorem fderiv_modelRoundedFunction_ne_zero {n k : ℕ} (hk : k ≤ n)
     rw [hfderiv]
     exact hderε
 
+noncomputable def modelSublevelFamily {n k : ℕ} (hk : k ≤ n) (c ε r δ R₀ R₁ : ℝ)
+    (s : ℝ) (y : MorseModel n) : ℝ :=
+  (1 - s) * (modelRoundedFunction hk c ε r δ R₀ R₁ y - c) +
+    s * (morseNormalForm hk c y - c - ε)
+
+theorem smoothCap_ge_sub_two_mul_eps {ε r δ t : ℝ} (hδ : 0 < δ) :
+    t - 2 * ε - δ ≤ smoothCap ε r δ t := by
+  by_cases ht₁ : t ≤ r ^ 2 + 2 * ε - δ
+  · rw [smoothCap_lower hδ ht₁]
+    nlinarith
+  · by_cases ht₂ : r ^ 2 + 2 * ε + δ ≤ t
+    · rw [smoothCap_upper hδ ht₂]
+      nlinarith
+    · have hmid : r ^ 2 + 2 * ε - δ < t ∧ t < r ^ 2 + 2 * ε + δ := by
+        constructor <;> linarith
+      dsimp [smoothCap]
+      have hτ : 0 ≤ Real.smoothTransition ((t - (r ^ 2 + 2 * ε - δ)) / (2 * δ)) :=
+        Real.smoothTransition.nonneg _
+      have hτle : Real.smoothTransition ((t - (r ^ 2 + 2 * ε - δ)) / (2 * δ)) ≤ 1 :=
+        Real.smoothTransition.le_one _
+      have hw : t - 2 * ε - r ^ 2 ∈ Set.Icc (-δ) δ := by
+        constructor <;> nlinarith [hmid.1, hmid.2]
+      have hprod : (t - 2 * ε - r ^ 2) * (Real.smoothTransition ((t - (r ^ 2 + 2 * ε - δ)) / (2 * δ)) - 1) ≥ -δ := by
+        by_cases hw0 : 0 ≤ t - 2 * ε - r ^ 2
+        · have hσm1 : -1 ≤ Real.smoothTransition ((t - (r ^ 2 + 2 * ε - δ)) / (2 * δ)) - 1 := by linarith [hτle]
+          have h1 : (t - 2 * ε - r ^ 2) * (Real.smoothTransition ((t - (r ^ 2 + 2 * ε - δ)) / (2 * δ)) - 1) ≥
+              (t - 2 * ε - r ^ 2) * (-1) := mul_le_mul_of_nonneg_left hσm1 hw0
+          have hwle : t - 2 * ε - r ^ 2 ≤ δ := hw.2
+          nlinarith [h1, hwle]
+        · have hσm1 : Real.smoothTransition ((t - (r ^ 2 + 2 * ε - δ)) / (2 * δ)) - 1 ≤ 0 := by linarith [hτle]
+          have h1 : 0 ≤ (t - 2 * ε - r ^ 2) * (Real.smoothTransition ((t - (r ^ 2 + 2 * ε - δ)) / (2 * δ)) - 1) :=
+            mul_nonneg_of_nonpos_of_nonpos (le_of_not_ge hw0) hσm1
+          nlinarith [h1, hδ]
+      have hb : r ^ 2 + (t - 2 * ε - r ^ 2) * Real.smoothTransition ((t - (r ^ 2 + 2 * ε - δ)) / (2 * δ)) ≥
+          t - 2 * ε - δ := by
+        have hcalc : r ^ 2 + (t - 2 * ε - r ^ 2) * Real.smoothTransition ((t - (r ^ 2 + 2 * ε - δ)) / (2 * δ)) -
+            (t - 2 * ε - δ) = δ + (t - 2 * ε - r ^ 2) * (Real.smoothTransition ((t - (r ^ 2 + 2 * ε - δ)) / (2 * δ)) - 1) := by
+          ring
+        have hd : 0 ≤ r ^ 2 + (t - 2 * ε - r ^ 2) * Real.smoothTransition ((t - (r ^ 2 + 2 * ε - δ)) / (2 * δ)) -
+            (t - 2 * ε - δ) := by
+          rw [hcalc]
+          nlinarith [hprod, hδ]
+        linarith
+      exact hb
+
+theorem deriv_smoothCap_eq_one_of_gt {ε r δ t : ℝ} (hδ : 0 < δ) (ht : r ^ 2 + 2 * ε + δ < t) :
+    deriv (smoothCap ε r δ) t = 1 := by
+  have hloc : smoothCap ε r δ =ᶠ[nhds t] (fun t : ℝ => t - 2 * ε) := by
+    refine Filter.eventuallyEq_of_mem ((isOpen_Ioi : IsOpen {t : ℝ | r ^ 2 + 2 * ε + δ < t}).mem_nhds ht) ?_
+    intro t' ht'
+    exact smoothCap_upper hδ (le_of_lt ht')
+  have hder : deriv (fun t : ℝ => t - 2 * ε) t = 1 := by
+    simp
+  rw [← hder]
+  exact hloc.deriv_eq
+
+theorem smoothTransition_deriv_nonneg (x : ℝ) : 0 ≤ deriv Real.smoothTransition x := by
+  by_cases hx : x ≤ 0 ∨ 1 ≤ x
+  · rcases hx with hxle | hxge
+    · rw [Real.smoothTransition_deriv_zero_of_nonpos x hxle]
+    · rw [Real.smoothTransition_deriv_zero_of_one_le x hxge]
+  · have hx0 : 0 < x := by
+      rw [not_or] at hx
+      exact lt_of_not_ge hx.1
+    have hx1 : x < 1 := by
+      rw [not_or] at hx
+      exact lt_of_not_ge hx.2
+    rw [Real.smoothTransition_deriv_eq hx0 hx1]
+    have hE1 : 0 < expNegInvGlue x := expNegInvGlue.pos_of_pos hx0
+    have hE2 : 0 < expNegInvGlue (1 - x) := expNegInvGlue.pos_of_pos (by linarith)
+    have hx2 : 0 < x⁻¹ ^ 2 := sq_pos_of_ne_zero (inv_ne_zero (ne_of_gt hx0))
+    have hx3 : 0 < (1 - x)⁻¹ ^ 2 := sq_pos_of_ne_zero (inv_ne_zero (ne_of_gt (by linarith)))
+    have hsum' : 0 < x⁻¹ ^ 2 + (1 - x)⁻¹ ^ 2 := by linarith
+    have hnum : 0 < expNegInvGlue x * expNegInvGlue (1 - x) * (x⁻¹ ^ 2 + (1 - x)⁻¹ ^ 2) :=
+      mul_pos (mul_pos hE1 hE2) hsum'
+    have hsum : 0 < expNegInvGlue x + expNegInvGlue (1 - x) := by positivity
+    have hden : 0 < (expNegInvGlue x + expNegInvGlue (1 - x)) ^ 2 := by positivity
+    exact div_nonneg hnum.le hden.le
+
 theorem modelAttachedUnstretch_mem_upper_of_roundedSublevel {n k : ℕ} (hk : k ≤ n)
     (c ε r δ R₀ R₁ : ℝ) (hε : 0 < ε) (hδ : 0 < δ) (hδr : δ < r ^ 2)
     (hR : R₀ < R₁) (hR0 : 0 ≤ R₀) (hbig : 2 * (r ^ 2 + 2 * ε + δ) ≤ R₀ ^ 2)
