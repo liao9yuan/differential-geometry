@@ -20383,6 +20383,27 @@ theorem modelLevelDampedUnstretch_imageLevel_strictMono {m k : ℕ} (hk : k ≤ 
     rw [hnegU]
   nlinarith [hsqlt, hnegsq]
 
+theorem modelLevelDampedTransportLevelMap_strictMono_deep {m k : ℕ} (hk : k ≤ m + 1)
+    (c ε r δ ρ ρ' θ R₀ R₁ η ε₀ : ℝ) (hρ : 0 < ρ) (hε₀ : 0 < ε₀)
+    (hη : δ - ρ' ≤ η) {y z : MorseModel (m + 1)}
+    (hneg : negPart hk y = negPart hk z)
+    (hly : morseNormalForm hk c y ≤ c - ε - η)
+    (hlz : morseNormalForm hk c z ≤ c - ε - η)
+    (hlt : ‖posPart hk y‖ < ‖posPart hk z‖) :
+    modelLevelDampedTransportLevelMap hk c ε r δ ρ ρ' θ R₀ R₁ η ε₀ y <
+      modelLevelDampedTransportLevelMap hk c ε r δ ρ ρ' θ R₀ R₁ η ε₀ z := by
+  rw [modelLevelDampedTransportLevelMap_eq_normalForm_of_deep hk c ε r δ ρ ρ' θ R₀ R₁ η ε₀
+      hρ hε₀ hη hly,
+      modelLevelDampedTransportLevelMap_eq_normalForm_of_deep hk c ε r δ ρ ρ' θ R₀ R₁ η ε₀
+      hρ hε₀ hη hlz]
+  rw [morseNormalForm_split hk c y, morseNormalForm_split hk c z]
+  have hnegsq : ‖negPart hk y‖ ^ 2 = ‖negPart hk z‖ ^ 2 := by rw [hneg]
+  have hsqlt : ‖posPart hk y‖ ^ 2 < ‖posPart hk z‖ ^ 2 := by
+    exact sq_lt_sq.mpr (by
+      rw [abs_of_nonneg (norm_nonneg _), abs_of_nonneg (norm_nonneg _)]
+      exact hlt)
+  nlinarith [hsqlt, hnegsq]
+
 private lemma modelLevelDampedUnstretch_mem_upper_of_roundedSublevel {m k : ℕ}
     (hk : k ≤ m + 1) (c ε r δ R₀ R₁ η ε₀ : ℝ) (hε : 0 < ε) (hδ : 0 < δ)
     (hδr : δ < r ^ 2) (hR : R₀ < R₁) (hR0 : 0 ≤ R₀)
