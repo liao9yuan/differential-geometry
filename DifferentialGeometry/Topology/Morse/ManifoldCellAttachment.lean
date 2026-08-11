@@ -20438,6 +20438,79 @@ private lemma attachedRegion_normalForm_le_of_negPart_large {m k : ℕ} (hk : k 
   rw [morseNormalForm_split hk c y]
   nlinarith [hpos, hcap]
 
+private lemma modelLevelDampedUnstretchTime_lower_bound {m k : ℕ} (hk : k ≤ m + 1)
+    (ε r δ : ℝ) (c η ε₀ : ℝ) (hε : 0 ≤ ε) (hδ : 0 < δ) (hδr : δ < r ^ 2)
+    (hr2 : r ^ 2 = 2 * ε) {y : MorseModel (m + 1)}
+    (hy : y ∈ modelAttachedRegion hk ε r δ)
+    (hneg : r ^ 2 + 2 * ε + δ ≤ ‖negPart hk y‖ ^ 2) :
+    -(2 * ε) ≤ modelLevelDampedUnstretchTime hk ε r δ c η ε₀ y := by
+  have hpos : ‖posPart hk y‖ ^ 2 ≤ smoothCap ε r δ (‖negPart hk y‖ ^ 2) := by
+    simpa [modelAttachedRegion] using hy
+  have hcap : smoothCap ε r δ (‖negPart hk y‖ ^ 2) = ‖negPart hk y‖ ^ 2 - 2 * ε :=
+    smoothCap_upper hδ hneg
+  have hsc : 0 < smoothCap ε r δ (‖negPart hk y‖ ^ 2) := smoothCap_pos hδ hδr
+  let u : ℝ := Real.sqrt ((‖negPart hk y‖ ^ 2 + r ^ 2) /
+    smoothCap ε r δ (‖negPart hk y‖ ^ 2))
+  have hU : 1 ≤ u := by
+    have hle : smoothCap ε r δ (‖negPart hk y‖ ^ 2) ≤ ‖negPart hk y‖ ^ 2 + r ^ 2 := by
+      have hmax : max (r ^ 2) (‖negPart hk y‖ ^ 2) ≤ ‖negPart hk y‖ ^ 2 + r ^ 2 := by
+        rw [max_le_iff]
+        constructor <;> nlinarith [sq_nonneg ‖negPart hk y‖]
+      exact le_trans (smoothCap_le_max (ε := ε) (r := r) (δ := δ)
+        (t := ‖negPart hk y‖ ^ 2) hε hδ) hmax
+    dsimp [u]
+    exact (Real.le_sqrt (by norm_num : (0 : ℝ) ≤ 1)
+      (div_nonneg (by positivity : 0 ≤ ‖negPart hk y‖ ^ 2 + r ^ 2) (le_of_lt hsc))).2 (by
+      norm_num
+      rw [one_le_div hsc]
+      nlinarith)
+  have hσ0 : 0 ≤ Real.smoothTransition ((morseNormalForm hk c y - c + ε + η) / ε₀) :=
+    Real.smoothTransition.nonneg _
+  have hσ1 : Real.smoothTransition ((morseNormalForm hk c y - c + ε + η) / ε₀) ≤ 1 :=
+    Real.smoothTransition.le_one _
+  have hSge1 : 1 ≤ 1 + (u - 1) *
+      Real.smoothTransition ((morseNormalForm hk c y - c + ε + η) / ε₀) := by
+    dsimp [u] at hU ⊢
+    nlinarith [hU, hσ0]
+  have hSleU : 1 + (u - 1) *
+      Real.smoothTransition ((morseNormalForm hk c y - c + ε + η) / ε₀) ≤ u := by
+    dsimp [u]
+    nlinarith [hU, hσ1]
+  have hSsq : (1 + (u - 1) *
+      Real.smoothTransition ((morseNormalForm hk c y - c + ε + η) / ε₀)) ^ 2 ≤ u ^ 2 := by
+    have hnon1 : 0 ≤ 1 + (u - 1) *
+        Real.smoothTransition ((morseNormalForm hk c y - c + ε + η) / ε₀) := by linarith
+    have hnon2 : 0 ≤ u := by linarith
+    exact sq_le_sq.mpr (by
+      rw [abs_of_nonneg hnon1, abs_of_nonneg hnon2]
+      exact hSleU)
+  have hmain : ‖posPart hk y‖ ^ 2 * (1 - u ^ 2) / 2 ≤
+      ‖posPart hk y‖ ^ 2 * (1 - (1 + (u - 1) *
+        Real.smoothTransition ((morseNormalForm hk c y - c + ε + η) / ε₀)) ^ 2) / 2 := by
+    have hle : 1 - u ^ 2 ≤ 1 - (1 + (u - 1) *
+        Real.smoothTransition ((morseNormalForm hk c y - c + ε + η) / ε₀)) ^ 2 := by
+      nlinarith [hSsq]
+    have hnon : 0 ≤ ‖posPart hk y‖ ^ 2 := by positivity
+    nlinarith [hle, hnon]
+  have hcaple : smoothCap ε r δ (‖negPart hk y‖ ^ 2) * (1 - u ^ 2) / 2 ≤
+      ‖posPart hk y‖ ^ 2 * (1 - u ^ 2) / 2 := by
+    have hnon : 1 - u ^ 2 ≤ 0 := by nlinarith [hU]
+    have hcore := mul_le_mul_of_nonpos_right hpos hnon
+    nlinarith
+  have hval : smoothCap ε r δ (‖negPart hk y‖ ^ 2) * (1 - u ^ 2) / 2 =
+      -(2 * ε) := by
+    have hu2 : u ^ 2 = (‖negPart hk y‖ ^ 2 + r ^ 2) /
+        smoothCap ε r δ (‖negPart hk y‖ ^ 2) := by
+      dsimp [u]
+      exact Real.sq_sqrt (div_nonneg (by positivity : 0 ≤ ‖negPart hk y‖ ^ 2 + r ^ 2)
+        (le_of_lt hsc))
+    rw [hu2]
+    have hc : smoothCap ε r δ (‖negPart hk y‖ ^ 2) ≠ 0 := ne_of_gt hsc
+    field_simp [hc]
+    nlinarith [hcap, hr2]
+  dsimp [modelLevelDampedUnstretchTime]
+  nlinarith [hmain, hcaple, hval]
+
 private lemma modelLevelDampedUnstretch_mem_upper_of_roundedSublevel {m k : ℕ}
     (hk : k ≤ m + 1) (c ε r δ R₀ R₁ η ε₀ : ℝ) (hε : 0 < ε) (hδ : 0 < δ)
     (hδr : δ < r ^ 2) (hR : R₀ < R₁) (hR0 : 0 ≤ R₀)
