@@ -3213,8 +3213,7 @@ theorem manifoldSublevelDiffeomorphOfDiffeomorph [I.Boundaryless]
         (hchart₁ := hchart₂) (hchart₂ := hchart₁)
   exact ⟨d⟩
 
-theorem manifoldSublevelSetEq_boundary_imp_boundary {H : Type} [TopologicalSpace H]
-    {M : Type} [TopologicalSpace M] [ChartedSpace H M]
+theorem manifoldSublevelSetEq_boundary_imp_boundary {M : Type}
     (g f : M → ℝ) (a : ℝ)
     (hset : {x : M | g x ≤ a} = {x : M | f x ≤ a})
     (hg_le : ∀ x : M, g x ≤ f x)
@@ -4009,7 +4008,7 @@ theorem manifoldSublevelDiffeomorphOfSetEq [I.Boundaryless]
     { toFun := toFun, invFun := invFun, left_inv := by intro y; rfl,
       right_inv := by intro y; rfl }
   have hbnd : ∀ x : M, g x = a → f x = a :=
-    manifoldSublevelSetEq_boundary_imp_boundary (H := H) g f a hset hg_le
+    manifoldSublevelSetEq_boundary_imp_boundary g f a hset hg_le
   have hbnd' : ∀ x : M, f x = a → g x = a :=
     manifoldSublevelSetEq_boundary_imp_boundary_of_le (I := I) g f a hg hf hreg_f hset
   have hto : ContMDiff (morseModelWithCornersHalfSpace m) (morseModelWithCornersHalfSpace m) (⊤ : ℕ∞)
