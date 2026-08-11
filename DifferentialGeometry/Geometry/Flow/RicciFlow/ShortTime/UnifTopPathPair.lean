@@ -1,4 +1,6 @@
 import DifferentialGeometry.Analysis.Spectral.Tensor.Estimates.H2PrincipalPair
+import DifferentialGeometry.Analysis.Spectral.Tensor.Estimates.H3PrincipalPair
+import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.UnifAppH1
 import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.UnifConvexJets
 import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.UnifTopPathDev
 
@@ -152,6 +154,89 @@ theorem top_pair_h4_unif
     exact (smoothCcToTensorHs_add_two_norm_eq_oneMinusConnLap
       (I := I) (M := M) g 2 U).symm
   rwa [hshift] at h
+
+theorem top_pair_h5_unif
+    (hDim : Module.finrank ℝ E = 3)
+    (gBase : SmoothRiemannianMetric I M)
+    {Λ : ℝ} (hΛ : 1 ≤ Λ) :
+    ∃ ρ C : ℝ, 0 < ρ ∧ 0 ≤ C ∧
+      ∀ g : SmoothRiemannianMetric I M,
+        MetricUniformEquivalentOn (I := I) Set.univ gBase g Λ →
+        (∀ a : ℕ, a ≤ 3 →
+          MetricCovDerivOrderBoundOn (I := I) Set.univ a g gBase Λ) →
+        ∀ (T T' : SmoothCcTensor g 0 2)
+          {δ : ℝ} (hδ_lt : δ < 1)
+          (hδ : gFibreOpBound g
+            (ccTensorBilinSymm (I := I) g T) δ)
+          {δ' : ℝ} (hδ'_lt : δ' < 1)
+          (hδ' : gFibreOpBound g
+            (ccTensorBilinSymm (I := I) g T') δ')
+          {R : ℝ}, 0 ≤ R → R ≤ ρ →
+          ‖ccTensorToHs (I := I) (M := M) g 2 (2 : ℝ) T‖ ≤ R →
+          ‖ccTensorToHs (I := I) (M := M) g 2 (2 : ℝ) T'‖ ≤ R →
+          ∀ U : SmoothCcTensor g 0 2,
+          let Φ := rhsTopPathIntegral (I := I) (M := M) g gBase T T'
+              hδ_lt hδ hδ'_lt hδ' -
+            deTurckPhiMetTotal (I := I) (M := M) g gBase g
+          |tensorL2Inner (I := I) (M := M) g 0 2
+              (oneMinusConnLapSmooth (I := I) g 0 2
+                (oneMinusConnLapSmooth (I := I) g 0 2
+                  (oneMinusConnLapSmooth (I := I) g 0 2 U))).toFun
+              (appCc (I := I) (M := M) g 4 2 Φ
+                (iteratedCovGrad (I := I) g 0 2 2
+                  (oneMinusConnLapSmooth (I := I) g 0 2 U))).toFun| ≤
+            C * R *
+              ‖ccTensorToHs (I := I) (M := M) g 2 (5 : ℝ) U‖ ^ 2 := by
+  obtain ⟨ρ, Cdev, hρ, hCdev, hdev⟩ :=
+    top_path_dev_unif (I := I) (M := M) hDim gBase hΛ
+  obtain ⟨Capp, hCapp, happ⟩ :=
+    appCc_h23_unif (I := I) (M := M) hDim gBase hΛ
+  let C : ℝ := Capp * Cdev
+  refine ⟨ρ, C, hρ, mul_nonneg hCapp hCdev, ?_⟩
+  intro g hEq hjet T T' δ hδ_lt hδ δ' hδ'_lt hδ' R hR hRρ hT hT' U
+  let W : SmoothCcTensor g 0 2 :=
+    oneMinusConnLapSmooth (I := I) g 0 2 U
+  let Φ : SmoothCcTensor g 4 2 :=
+    rhsTopPathIntegral (I := I) (M := M) g gBase T T'
+        hδ_lt hδ hδ'_lt hδ' -
+      deTurckPhiMetTotal (I := I) (M := M) g gBase g
+  let A : SmoothCcTensor g 0 2 :=
+    appCc (I := I) (M := M) g 4 2 Φ
+      (iteratedCovGrad (I := I) g 0 2 2 W)
+  obtain ⟨_, hΦ⟩ := hdev g hEq hjet T T' hδ_lt hδ hδ'_lt hδ'
+    hR hRρ hT hT'
+  have hA :
+      ‖ccTensorToHs (I := I) (M := M) g 2 (1 : ℝ) A‖ ≤
+        Capp * (Cdev * R) *
+          ‖ccTensorToHs (I := I) (M := M) g 2 (3 : ℝ) W‖ := by
+    simpa only [A, Φ] using happ g hEq hjet Φ W (Cdev * R)
+      (mul_nonneg hCdev hR) hΦ
+  have hpair := oneMinusConnLapSmooth_pair_h3_h1
+    (I := I) (M := M) g W A
+  have hshift :
+      ‖ccTensorToHs (I := I) (M := M) g 2 (3 : ℝ) W‖ =
+        ‖ccTensorToHs (I := I) (M := M) g 2 (5 : ℝ) U‖ := by
+    rw [norm_ccHs_eq_smoothHs, norm_ccHs_eq_smoothHs]
+    exact (smoothCcToTensorHs_add_two_norm_eq_oneMinusConnLap
+      (I := I) (M := M) g 3 U).symm
+  change
+    |tensorL2Inner (I := I) (M := M) g 0 2
+        (oneMinusConnLapSmooth (I := I) g 0 2
+          (oneMinusConnLapSmooth (I := I) g 0 2 W)).toFun A.toFun| ≤
+      C * R *
+        ‖ccTensorToHs (I := I) (M := M) g 2 (5 : ℝ) U‖ ^ 2
+  calc
+    _ ≤ ‖ccTensorToHs (I := I) (M := M) g 2 (3 : ℝ) W‖ *
+        ‖ccTensorToHs (I := I) (M := M) g 2 (1 : ℝ) A‖ := hpair
+    _ ≤ ‖ccTensorToHs (I := I) (M := M) g 2 (3 : ℝ) W‖ *
+        (Capp * (Cdev * R) *
+          ‖ccTensorToHs (I := I) (M := M) g 2 (3 : ℝ) W‖) :=
+      mul_le_mul_of_nonneg_left hA (norm_nonneg _)
+    _ = C * R *
+        ‖ccTensorToHs (I := I) (M := M) g 2 (5 : ℝ) U‖ ^ 2 := by
+      rw [hshift]
+      dsimp only [C]
+      ring
 
 /-- For every prescribed principal-energy coefficient, one class-first `H²`
 cap absorbs twice the absolute top-path principal form into the order-four

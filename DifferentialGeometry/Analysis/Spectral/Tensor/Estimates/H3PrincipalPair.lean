@@ -1,4 +1,5 @@
 import DifferentialGeometry.Analysis.Spectral.Tensor.Estimates.H2PrincipalPair
+import DifferentialGeometry.Analysis.Spectral.Tensor.SobolevScale.H1Jet
 import DifferentialGeometry.Analysis.Spectral.Tensor.SobolevScale.UnifBochnerGap
 
 set_option autoImplicit false
@@ -24,6 +25,70 @@ variable
       [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M]
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
+
+theorem oneMinusConnLapSmooth_pair_h3_h1
+    (g : SmoothRiemannianMetric I M) (W A : SmoothCcTensor g 0 2) :
+    |tensorL2Inner (I := I) (M := M) g 0 2
+        (oneMinusConnLapSmooth (I := I) g 0 2
+          (oneMinusConnLapSmooth (I := I) g 0 2 W)).toFun A.toFun| ≤
+      ‖ccTensorToHs (I := I) (M := M) g 2 (3 : ℝ) W‖ *
+        ‖ccTensorToHs (I := I) (M := M) g 2 (1 : ℝ) A‖ := by
+  let L : SmoothCcTensor g 0 2 :=
+    oneMinusConnLapSmooth (I := I) g 0 2 W
+  let V : SmoothCcTensor g 0 2 :=
+    oneMinusConnLapSmooth (I := I) g 0 2 L
+  let y : ℝ := ‖ccTensorToHs (I := I) (M := M) g 2 (3 : ℝ) W‖
+  let z : ℝ := ‖ccTensorToHs (I := I) (M := M) g 2 (1 : ℝ) A‖
+  let a : ℝ := ‖L‖
+  let b : ℝ := ‖covGrad (I := I) (M := M) g 0 2 L‖
+  let c : ℝ := ‖A‖
+  let d : ℝ := ‖covGrad (I := I) (M := M) g 0 2 A‖
+  have hy : 0 ≤ y := norm_nonneg _
+  have hz : 0 ≤ z := norm_nonneg _
+  have ha : 0 ≤ a := norm_nonneg _
+  have hb : 0 ≤ b := norm_nonneg _
+  have hc : 0 ≤ c := norm_nonneg _
+  have hd : 0 ≤ d := norm_nonneg _
+  have hW : y ^ 2 = a ^ 2 + b ^ 2 := by
+    have hodd := smoothCcToTensorHs_odd_norm_sq_eq_toL2_iter_add_covGrad
+      (I := I) (M := M) g 1 W
+    simpa only [y, a, b, L, Nat.reduceMul, Nat.reduceAdd, Nat.cast_ofNat,
+      norm_ccHs_eq_smoothHs, oneMinusConnLapSmoothIter_succ,
+      oneMinusConnLapSmoothIter_zero, SmoothCcTensor.norm_toL2] using hodd
+  have hA : z ^ 2 = c ^ 2 + d ^ 2 := by
+    simpa only [z, c, d] using cc_h1_jet_sq (I := I) (M := M) g A
+  have hcs : a * c + b * d ≤ y * z := by
+    apply (sq_le_sq₀ (add_nonneg (mul_nonneg ha hc) (mul_nonneg hb hd))
+      (mul_nonneg hy hz)).mp
+    rw [mul_pow, hW, hA]
+    nlinarith [sq_nonneg (a * d - b * c)]
+  have hsplit := oneMinusConnLapSmooth_l2Inner_eq_add_covGrad
+    (I := I) (M := M) g 0 2 L A
+  change tensorL2Inner (I := I) (M := M) g 0 2 V.toFun A.toFun = _ at hsplit
+  have hp₀ :
+      |tensorL2Inner (I := I) (M := M) g 0 2 L.toFun A.toFun| ≤ a * c := by
+    rw [← SmoothCcTensor.inner_def (I := I) (M := M) L A]
+    exact abs_real_inner_le_norm L A
+  have hp₁ :
+      |tensorL2Inner (I := I) (M := M) g 0 3
+          (covGrad (I := I) (M := M) g 0 2 L).toFun
+          (covGrad (I := I) (M := M) g 0 2 A).toFun| ≤ b * d := by
+    rw [← SmoothCcTensor.inner_def (I := I) (M := M)
+      (covGrad (I := I) (M := M) g 0 2 L)
+      (covGrad (I := I) (M := M) g 0 2 A)]
+    exact abs_real_inner_le_norm _ _
+  change |tensorL2Inner (I := I) (M := M) g 0 2 V.toFun A.toFun| ≤ y * z
+  calc
+    _ = |tensorL2Inner (I := I) (M := M) g 0 2 L.toFun A.toFun +
+        tensorL2Inner (I := I) (M := M) g 0 3
+          (covGrad (I := I) (M := M) g 0 2 L).toFun
+          (covGrad (I := I) (M := M) g 0 2 A).toFun| := congrArg abs hsplit
+    _ ≤ |tensorL2Inner (I := I) (M := M) g 0 2 L.toFun A.toFun| +
+        |tensorL2Inner (I := I) (M := M) g 0 3
+          (covGrad (I := I) (M := M) g 0 2 L).toFun
+          (covGrad (I := I) (M := M) g 0 2 A).toFun| := abs_add_le _ _
+    _ ≤ a * c + b * d := add_le_add hp₀ hp₁
+    _ ≤ y * z := hcs
 
 theorem appD2_pair_h3
     (g : SmoothRiemannianMetric I M) {K₀ K₁ B₀ B₁ : ℝ}
