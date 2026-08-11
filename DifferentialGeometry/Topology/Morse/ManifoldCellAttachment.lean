@@ -21003,6 +21003,326 @@ private lemma modelLevelDampedTransportTime_band_bounds {m k : ℕ} (hk : k ≤ 
           exact mul_nonpos_of_nonneg_of_nonpos hσ hle)
     nlinarith
 
+private noncomputable def bandSigma {m : ℕ} (R₀ R₁ : ℝ) (w : MorseModel (m + 1)) : ℝ :=
+  Real.smoothTransition ((morseNorm (m + 1) w - R₀) / (R₁ - R₀))
+
+private noncomputable def bandBeta {m k : ℕ} (hk : k ≤ m + 1) (ε r δ θ R₀ R₁ : ℝ)
+    (w : MorseModel (m + 1)) : ℝ :=
+  (1 - Real.smoothTransition ((‖posPart hk w‖ ^ 2 - smoothCap ε r δ (‖negPart hk w‖ ^ 2)) / θ)) *
+    (1 - bandSigma R₀ R₁ w)
+
+private noncomputable def bandTauU {m k : ℕ} (hk : k ≤ m + 1) (ε r δ c η ε₀ : ℝ)
+    (w : MorseModel (m + 1)) : ℝ :=
+  modelLevelDampedUnstretchTime hk ε r δ c η ε₀ w
+
+private noncomputable def bandTauF {m k : ℕ} (hk : k ≤ m + 1) (c ε δ ρ ρ' : ℝ)
+    (w : MorseModel (m + 1)) : ℝ :=
+  morseFarExpandTimeSmooth c ε δ ρ ρ' (morseNormalForm hk c w)
+
+private lemma bandSigma_eq {m : ℕ} (R₀ R₁ : ℝ) (w : MorseModel (m + 1)) :
+    bandSigma R₀ R₁ w = Real.smoothTransition ((morseNorm (m + 1) w - R₀) / (R₁ - R₀)) :=
+  rfl
+
+private lemma bandBeta_eq {m k : ℕ} (hk : k ≤ m + 1) (ε r δ θ R₀ R₁ : ℝ)
+    (w : MorseModel (m + 1)) :
+    bandBeta hk ε r δ θ R₀ R₁ w =
+      (1 - Real.smoothTransition ((‖posPart hk w‖ ^ 2 - smoothCap ε r δ (‖negPart hk w‖ ^ 2)) / θ)) *
+        (1 - bandSigma R₀ R₁ w) :=
+  rfl
+
+private lemma bandTauU_eq {m k : ℕ} (hk : k ≤ m + 1) (ε r δ c η ε₀ : ℝ)
+    (w : MorseModel (m + 1)) :
+    bandTauU hk ε r δ c η ε₀ w = modelLevelDampedUnstretchTime hk ε r δ c η ε₀ w :=
+  rfl
+
+private lemma bandTauF_eq {m k : ℕ} (hk : k ≤ m + 1) (c ε δ ρ ρ' : ℝ)
+    (w : MorseModel (m + 1)) :
+    bandTauF hk c ε δ ρ ρ' w = morseFarExpandTimeSmooth c ε δ ρ ρ' (morseNormalForm hk c w) :=
+  rfl
+
+private lemma modelLevelDampedTransportTime_eq_band {m k : ℕ} (hk : k ≤ m + 1)
+    (c ε r δ ρ ρ' θ R₀ R₁ η ε₀ : ℝ) (w : MorseModel (m + 1)) :
+    modelLevelDampedTransportTime hk c ε r δ ρ ρ' θ R₀ R₁ η ε₀ w =
+      bandBeta hk ε r δ θ R₀ R₁ w * bandTauU hk ε r δ c η ε₀ w +
+        (1 - bandBeta hk ε r δ θ R₀ R₁ w) * bandTauF hk c ε δ ρ ρ' w := by
+  rfl
+
+private lemma bandBeta_eq_sub_sigma {m k : ℕ} (hk : k ≤ m + 1) (ε r δ θ R₀ R₁ : ℝ)
+    (hθ : 0 < θ) {w : MorseModel (m + 1)} (hw : w ∈ modelAttachedRegion hk ε r δ) :
+    bandBeta hk ε r δ θ R₀ R₁ w = 1 - bandSigma R₀ R₁ w := by
+  rw [bandBeta_eq, bandSigma_eq]
+  have hσ₁ : Real.smoothTransition
+      ((‖posPart hk w‖ ^ 2 - smoothCap ε r δ (‖negPart hk w‖ ^ 2)) / θ) = 0 := by
+    rw [Real.smoothTransition.zero_of_nonpos (by
+      have hp : ‖posPart hk w‖ ^ 2 - smoothCap ε r δ (‖negPart hk w‖ ^ 2) ≤ 0 := by
+        simpa [modelAttachedRegion] using hw
+      exact div_nonpos_of_nonpos_of_nonneg hp (le_of_lt hθ))]
+  rw [hσ₁]
+  ring
+
+private lemma bandSigma_mem_Ioo {m : ℕ} (R₀ R₁ : ℝ) (hR₀R₁ : R₀ < R₁)
+    {w : MorseModel (m + 1)} (hR₀w : R₀ < morseNorm (m + 1) w)
+    (hwR₁ : morseNorm (m + 1) w < R₁) :
+    ((morseNorm (m + 1) w - R₀) / (R₁ - R₀)) ∈ Set.Ioo (0 : ℝ) 1 := by
+  constructor
+  · exact div_pos (sub_pos.mpr hR₀w) (sub_pos.mpr hR₀R₁)
+  · rw [div_lt_one (sub_pos.mpr hR₀R₁)]
+    linarith
+
+private lemma bandTransportTime_sub_le {m k : ℕ} (hk : k ≤ m + 1)
+    (c ε r δ ρ ρ' θ R₀ R₁ η ε₀ : ℝ) {y z : MorseModel (m + 1)}
+    (hβz0 : 0 ≤ bandBeta hk ε r δ θ R₀ R₁ z)
+    (hβz1 : bandBeta hk ε r δ θ R₀ R₁ z ≤ 1)
+    (hβle : bandBeta hk ε r δ θ R₀ R₁ z ≤ bandBeta hk ε r δ θ R₀ R₁ y)
+    (hτu : bandTauU hk ε r δ c η ε₀ z ≤ bandTauU hk ε r δ c η ε₀ y)
+    (hτF : bandTauF hk c ε δ ρ ρ' z ≤ bandTauF hk c ε δ ρ ρ' y)
+    (hτu_low : -(2 * ε) ≤ bandTauU hk ε r δ c η ε₀ y)
+    (hτF_nonpos : bandTauF hk c ε δ ρ ρ' y ≤ 0) :
+    modelLevelDampedTransportTime hk c ε r δ ρ ρ' θ R₀ R₁ η ε₀ z -
+        modelLevelDampedTransportTime hk c ε r δ ρ ρ' θ R₀ R₁ η ε₀ y ≤
+      2 * ε * (bandBeta hk ε r δ θ R₀ R₁ y - bandBeta hk ε r δ θ R₀ R₁ z) := by
+  rw [modelLevelDampedTransportTime_eq_band hk c ε r δ ρ ρ' θ R₀ R₁ η ε₀ z,
+      modelLevelDampedTransportTime_eq_band hk c ε r δ ρ ρ' θ R₀ R₁ η ε₀ y]
+  have hβzy : bandBeta hk ε r δ θ R₀ R₁ z - bandBeta hk ε r δ θ R₀ R₁ y ≤ 0 :=
+    sub_nonpos.mpr hβle
+  have hτ : -(2 * ε) ≤ bandTauU hk ε r δ c η ε₀ y - bandTauF hk c ε δ ρ ρ' y := by
+    linarith
+  have h3 : (bandBeta hk ε r δ θ R₀ R₁ z - bandBeta hk ε r δ θ R₀ R₁ y) *
+        (bandTauU hk ε r δ c η ε₀ y - bandTauF hk c ε δ ρ ρ' y) ≤
+      (bandBeta hk ε r δ θ R₀ R₁ z - bandBeta hk ε r δ θ R₀ R₁ y) * (-(2 * ε)) :=
+    mul_le_mul_of_nonpos_left hτ hβzy
+  have hnorm : (bandBeta hk ε r δ θ R₀ R₁ z - bandBeta hk ε r δ θ R₀ R₁ y) * (-(2 * ε)) =
+      2 * ε * (bandBeta hk ε r δ θ R₀ R₁ y - bandBeta hk ε r δ θ R₀ R₁ z) := by
+    ring
+  rw [hnorm] at h3
+  have h1 : bandBeta hk ε r δ θ R₀ R₁ z *
+        (bandTauU hk ε r δ c η ε₀ z - bandTauU hk ε r δ c η ε₀ y) ≤ 0 :=
+    mul_nonpos_of_nonneg_of_nonpos hβz0 (sub_nonpos.mpr hτu)
+  have h2 : (1 - bandBeta hk ε r δ θ R₀ R₁ z) *
+        (bandTauF hk c ε δ ρ ρ' z - bandTauF hk c ε δ ρ ρ' y) ≤ 0 :=
+    mul_nonpos_of_nonneg_of_nonpos (sub_nonneg.mpr hβz1) (sub_nonpos.mpr hτF)
+  have hdecomp : bandBeta hk ε r δ θ R₀ R₁ z * bandTauU hk ε r δ c η ε₀ z +
+        (1 - bandBeta hk ε r δ θ R₀ R₁ z) * bandTauF hk c ε δ ρ ρ' z -
+        (bandBeta hk ε r δ θ R₀ R₁ y * bandTauU hk ε r δ c η ε₀ y +
+          (1 - bandBeta hk ε r δ θ R₀ R₁ y) * bandTauF hk c ε δ ρ ρ' y) =
+      bandBeta hk ε r δ θ R₀ R₁ z *
+          (bandTauU hk ε r δ c η ε₀ z - bandTauU hk ε r δ c η ε₀ y) +
+        (1 - bandBeta hk ε r δ θ R₀ R₁ z) *
+          (bandTauF hk c ε δ ρ ρ' z - bandTauF hk c ε δ ρ ρ' y) +
+        (bandBeta hk ε r δ θ R₀ R₁ z - bandBeta hk ε r δ θ R₀ R₁ y) *
+          (bandTauU hk ε r δ c η ε₀ y - bandTauF hk c ε δ ρ ρ' y) := by
+    ring
+  nlinarith
+
+private lemma bandBetaSubBound {m k : ℕ} (hk : k ≤ m + 1) (ε r δ θ R₀ R₁ : ℝ)
+    (hε : 0 < ε) (hθ : 0 < θ) (hR₀ : 0 < R₀) (hR₀R₁ : R₀ < R₁)
+    (hband : 8 * ε < R₀ * (R₁ - R₀)) {y z : MorseModel (m + 1)}
+    (hly : y ∈ modelAttachedRegion hk ε r δ) (hlz : z ∈ modelAttachedRegion hk ε r δ)
+    (hRy : R₀ < morseNorm (m + 1) y) (hRz : morseNorm (m + 1) z < R₁)
+    (hneg : negPart hk y = negPart hk z)
+    (hlt : ‖posPart hk y‖ < ‖posPart hk z‖) :
+    2 * ε * (bandBeta hk ε r δ θ R₀ R₁ y - bandBeta hk ε r δ θ R₀ R₁ z) <
+      (‖posPart hk z‖ ^ 2 - ‖posPart hk y‖ ^ 2) / 4 := by
+  have hsqlt : ‖posPart hk y‖ ^ 2 < ‖posPart hk z‖ ^ 2 := by
+    exact sq_lt_sq.mpr (by
+      rw [abs_of_nonneg (norm_nonneg _), abs_of_nonneg (norm_nonneg _)]
+      exact hlt)
+  have hnegsq : ‖negPart hk y‖ ^ 2 = ‖negPart hk z‖ ^ 2 := by rw [hneg]
+  have hRzRy : morseNorm (m + 1) y < morseNorm (m + 1) z := by
+    have hsq : morseNorm (m + 1) y ^ 2 < morseNorm (m + 1) z ^ 2 := by
+      rw [morseNorm_sq_eq_negPart_add_posPart hk y, morseNorm_sq_eq_negPart_add_posPart hk z]
+      nlinarith [hnegsq, hsqlt]
+    have habs := sq_lt_sq.mp hsq
+    rw [abs_of_nonneg (norm_nonneg _), abs_of_nonneg (norm_nonneg _)] at habs
+    exact habs
+  have hR₀z : R₀ < morseNorm (m + 1) z := lt_trans hRy hRzRy
+  have hRyR₁ : morseNorm (m + 1) y < R₁ := lt_trans hRzRy hRz
+  have hβsub : bandBeta hk ε r δ θ R₀ R₁ y - bandBeta hk ε r δ θ R₀ R₁ z =
+      bandSigma R₀ R₁ z - bandSigma R₀ R₁ y := by
+    rw [bandBeta_eq_sub_sigma hk ε r δ θ R₀ R₁ hθ hly,
+        bandBeta_eq_sub_sigma hk ε r δ θ R₀ R₁ hθ hlz]
+    ring
+  have hσ₂mono : bandSigma R₀ R₁ y ≤ bandSigma R₀ R₁ z := by
+    rw [bandSigma_eq, bandSigma_eq]
+    exact Real.smoothTransition.monotone (by
+      exact div_le_div_of_nonneg_right (by linarith [hRzRy]) (le_of_lt (sub_pos.mpr hR₀R₁)))
+  have hσdiff : |bandSigma R₀ R₁ z - bandSigma R₀ R₁ y| ≤
+      2 * |(morseNorm (m + 1) z - R₀) / (R₁ - R₀) - (morseNorm (m + 1) y - R₀) / (R₁ - R₀)| := by
+    rw [bandSigma_eq, bandSigma_eq]
+    exact smoothTransition_lipschitz_on
+      (bandSigma_mem_Ioo R₀ R₁ hR₀R₁ hR₀z hRz)
+      (bandSigma_mem_Ioo R₀ R₁ hR₀R₁ hRy hRyR₁)
+  have hargdiff : |(morseNorm (m + 1) z - R₀) / (R₁ - R₀) -
+        (morseNorm (m + 1) y - R₀) / (R₁ - R₀)| =
+      (morseNorm (m + 1) z - morseNorm (m + 1) y) / (R₁ - R₀) := by
+    have hden : R₁ - R₀ ≠ 0 := ne_of_gt (sub_pos.mpr hR₀R₁)
+    have hsub : (morseNorm (m + 1) z - R₀) / (R₁ - R₀) -
+          (morseNorm (m + 1) y - R₀) / (R₁ - R₀) =
+        (morseNorm (m + 1) z - morseNorm (m + 1) y) / (R₁ - R₀) := by
+      field_simp [hden]
+      ring
+    have hnon : 0 ≤ (morseNorm (m + 1) z - morseNorm (m + 1) y) / (R₁ - R₀) :=
+      div_nonneg (by linarith [hRzRy]) (le_of_lt (sub_pos.mpr hR₀R₁))
+    rw [hsub, abs_of_nonneg hnon]
+  have hσdiff' : |bandSigma R₀ R₁ z - bandSigma R₀ R₁ y| ≤
+      2 * (morseNorm (m + 1) z - morseNorm (m + 1) y) / (R₁ - R₀) := by
+    rw [hargdiff] at hσdiff
+    simpa [mul_div_assoc] using hσdiff
+  have hRdiff : morseNorm (m + 1) z - morseNorm (m + 1) y =
+      (‖posPart hk z‖ ^ 2 - ‖posPart hk y‖ ^ 2) /
+        (morseNorm (m + 1) z + morseNorm (m + 1) y) := by
+    have hprod : (morseNorm (m + 1) z - morseNorm (m + 1) y) *
+        (morseNorm (m + 1) z + morseNorm (m + 1) y) =
+        ‖posPart hk z‖ ^ 2 - ‖posPart hk y‖ ^ 2 := by
+      calc
+        (morseNorm (m + 1) z - morseNorm (m + 1) y) *
+            (morseNorm (m + 1) z + morseNorm (m + 1) y)
+            = morseNorm (m + 1) z ^ 2 - morseNorm (m + 1) y ^ 2 := by ring
+        _ = (‖posPart hk z‖ ^ 2 + ‖negPart hk z‖ ^ 2) -
+              (‖posPart hk y‖ ^ 2 + ‖negPart hk y‖ ^ 2) := by
+          rw [morseNorm_sq_eq_negPart_add_posPart hk z,
+              morseNorm_sq_eq_negPart_add_posPart hk y]
+          ring
+        _ = ‖posPart hk z‖ ^ 2 - ‖posPart hk y‖ ^ 2 := by
+          rw [hneg]
+          ring
+    have hzpos : 0 < morseNorm (m + 1) z := lt_trans (lt_trans hR₀ hRy) hRzRy
+    have hypos : 0 ≤ morseNorm (m + 1) y := by
+      dsimp [morseNorm]
+      exact norm_nonneg _
+    have hsum : 0 < morseNorm (m + 1) z + morseNorm (m + 1) y := by
+      nlinarith [hzpos, hypos]
+    rw [eq_div_iff (ne_of_gt hsum)]
+    exact hprod
+  have hRlt : morseNorm (m + 1) z - morseNorm (m + 1) y <
+      (‖posPart hk z‖ ^ 2 - ‖posPart hk y‖ ^ 2) / (2 * R₀) := by
+    rw [hRdiff]
+    exact div_lt_div_of_pos_left (sub_pos.mpr hsqlt) (by positivity : (0 : ℝ) < 2 * R₀)
+      (by nlinarith [hRy, hRzRy])
+  have hRbd : 2 * (morseNorm (m + 1) z - morseNorm (m + 1) y) / (R₁ - R₀) <
+      (‖posPart hk z‖ ^ 2 - ‖posPart hk y‖ ^ 2) / (R₀ * (R₁ - R₀)) := by
+    have hmul : 2 * (morseNorm (m + 1) z - morseNorm (m + 1) y) <
+        2 * ((‖posPart hk z‖ ^ 2 - ‖posPart hk y‖ ^ 2) / (2 * R₀)) :=
+      mul_lt_mul_of_pos_left hRlt (by norm_num)
+    have hdiv : 2 * (morseNorm (m + 1) z - morseNorm (m + 1) y) / (R₁ - R₀) <
+        2 * ((‖posPart hk z‖ ^ 2 - ‖posPart hk y‖ ^ 2) / (2 * R₀)) / (R₁ - R₀) :=
+      div_lt_div_of_pos_right hmul (sub_pos.mpr hR₀R₁)
+    have hnorm : 2 * ((‖posPart hk z‖ ^ 2 - ‖posPart hk y‖ ^ 2) / (2 * R₀)) / (R₁ - R₀) =
+        (‖posPart hk z‖ ^ 2 - ‖posPart hk y‖ ^ 2) / (R₀ * (R₁ - R₀)) := by
+      field_simp [ne_of_gt (by positivity : (0 : ℝ) < R₀), ne_of_gt (sub_pos.mpr hR₀R₁)]
+    rw [← hnorm]
+    exact hdiv
+  have hσlt : |bandSigma R₀ R₁ z - bandSigma R₀ R₁ y| <
+      (‖posPart hk z‖ ^ 2 - ‖posPart hk y‖ ^ 2) / (8 * ε) := by
+    exact lt_of_le_of_lt hσdiff' (lt_trans hRbd (by
+      exact div_lt_div_of_pos_left (sub_pos.mpr hsqlt) (by positivity : (0 : ℝ) < 8 * ε)
+        (by nlinarith [hband])))
+  have hβdiff : bandBeta hk ε r δ θ R₀ R₁ y - bandBeta hk ε r δ θ R₀ R₁ z <
+      (‖posPart hk z‖ ^ 2 - ‖posPart hk y‖ ^ 2) / (8 * ε) := by
+    rw [hβsub]
+    have hnon : 0 ≤ bandSigma R₀ R₁ z - bandSigma R₀ R₁ y := sub_nonneg.mpr hσ₂mono
+    have habs : bandSigma R₀ R₁ z - bandSigma R₀ R₁ y ≤
+        |bandSigma R₀ R₁ z - bandSigma R₀ R₁ y| := le_abs_self _
+    exact lt_of_le_of_lt habs hσlt
+  have hm := mul_lt_mul_of_pos_left hβdiff (by positivity : (0 : ℝ) < 2 * ε)
+  have hnorm : 2 * ε * ((‖posPart hk z‖ ^ 2 - ‖posPart hk y‖ ^ 2) / (8 * ε)) =
+      (‖posPart hk z‖ ^ 2 - ‖posPart hk y‖ ^ 2) / 4 := by
+    field_simp [ne_of_gt hε]
+    ring
+  rw [hnorm] at hm
+  exact hm
+
+theorem modelLevelDampedTransportLevelMap_strictMono_band {m k : ℕ} (hk : k ≤ m + 1)
+    (c ε r δ ρ ρ' θ R₀ R₁ η ε₀ : ℝ) (hε : 0 < ε) (hδ : 0 < δ) (hδr : δ < r ^ 2)
+    (hr2 : r ^ 2 = 2 * ε) (hρ : 0 < ρ) (hθ : 0 < θ) (hε₀ : 0 < ε₀) (hR₀ : 0 < R₀)
+    (hR₀R₁ : R₀ < R₁) (hbig : 2 * (r ^ 2 + 2 * ε + δ) ≤ R₀ ^ 2)
+    (hband : 8 * ε < R₀ * (R₁ - R₀)) {y z : MorseModel (m + 1)}
+    (hneg : negPart hk y = negPart hk z)
+    (hly : y ∈ modelAttachedRegion hk ε r δ) (hlz : z ∈ modelAttachedRegion hk ε r δ)
+    (hRy : R₀ < morseNorm (m + 1) y) (hRz : morseNorm (m + 1) z < R₁)
+    (hlt : ‖posPart hk y‖ < ‖posPart hk z‖) :
+    modelLevelDampedTransportLevelMap hk c ε r δ ρ ρ' θ R₀ R₁ η ε₀ y <
+      modelLevelDampedTransportLevelMap hk c ε r δ ρ ρ' θ R₀ R₁ η ε₀ z := by
+  have hsqlt : ‖posPart hk y‖ ^ 2 < ‖posPart hk z‖ ^ 2 := by
+    exact sq_lt_sq.mpr (by
+      rw [abs_of_nonneg (norm_nonneg _), abs_of_nonneg (norm_nonneg _)]
+      exact hlt)
+  have hnegsq : ‖negPart hk y‖ ^ 2 = ‖negPart hk z‖ ^ 2 := by rw [hneg]
+  have hf : morseNormalForm hk c y < morseNormalForm hk c z := by
+    rw [morseNormalForm_split hk c y, morseNormalForm_split hk c z]
+    nlinarith [hnegsq, hsqlt]
+  have hΔf : 0 < morseNormalForm hk c z - morseNormalForm hk c y := sub_pos.mpr hf
+  have hΔf_eq : morseNormalForm hk c z - morseNormalForm hk c y =
+      (‖posPart hk z‖ ^ 2 - ‖posPart hk y‖ ^ 2) / 2 := by
+    rw [morseNormalForm_split hk c z, morseNormalForm_split hk c y]
+    nlinarith [hnegsq]
+  have hRzRy : morseNorm (m + 1) y < morseNorm (m + 1) z := by
+    have hsq : morseNorm (m + 1) y ^ 2 < morseNorm (m + 1) z ^ 2 := by
+      rw [morseNorm_sq_eq_negPart_add_posPart hk y, morseNorm_sq_eq_negPart_add_posPart hk z]
+      nlinarith [hnegsq, hsqlt]
+    have habs := sq_lt_sq.mp hsq
+    rw [abs_of_nonneg (norm_nonneg _), abs_of_nonneg (norm_nonneg _)] at habs
+    exact habs
+  have hnegYlarge : r ^ 2 + 2 * ε + δ ≤ ‖negPart hk y‖ ^ 2 :=
+    attachedRegion_negPart_large_of_norm_gt hk ε r δ R₀ (le_of_lt hε) hδ (le_of_lt hR₀) hbig
+      hly hRy
+  have hfYle : morseNormalForm hk c y ≤ c - ε :=
+    attachedRegion_normalForm_le_of_negPart_large hk c ε r δ hδ hly hnegYlarge
+  have hτu : bandTauU hk ε r δ c η ε₀ z ≤ bandTauU hk ε r δ c η ε₀ y := by
+    rw [bandTauU_eq, bandTauU_eq]
+    exact modelLevelDampedUnstretchTime_antiMono hk ε r δ c η ε₀ (le_of_lt hε) hδ hδr hε₀
+      hneg hlt
+  have hτF : bandTauF hk c ε δ ρ ρ' z ≤ bandTauF hk c ε δ ρ ρ' y := by
+    rw [bandTauF_eq, bandTauF_eq]
+    exact morseFarExpandTimeSmooth_antiMonotone hρ hδ hε (le_of_lt hf)
+  have hτu_low : -(2 * ε) ≤ bandTauU hk ε r δ c η ε₀ y := by
+    rw [bandTauU_eq]
+    exact modelLevelDampedUnstretchTime_lower_bound hk ε r δ c η ε₀ (le_of_lt hε) hδ hδr hr2
+      hly hnegYlarge
+  have hτF_nonpos : bandTauF hk c ε δ ρ ρ' y ≤ 0 := by
+    rw [bandTauF_eq]
+    exact morseFarExpandTimeSmooth_nonpos hδ hε
+  have hβz0 : 0 ≤ bandBeta hk ε r δ θ R₀ R₁ z := by
+    rw [bandBeta_eq_sub_sigma hk ε r δ θ R₀ R₁ hθ hlz]
+    exact sub_nonneg.mpr (Real.smoothTransition.le_one
+      ((morseNorm (m + 1) z - R₀) / (R₁ - R₀)))
+  have hβz1 : bandBeta hk ε r δ θ R₀ R₁ z ≤ 1 := by
+    rw [bandBeta_eq_sub_sigma hk ε r δ θ R₀ R₁ hθ hlz, bandSigma_eq]
+    linarith [Real.smoothTransition.nonneg ((morseNorm (m + 1) z - R₀) / (R₁ - R₀))]
+  have hβsub : bandBeta hk ε r δ θ R₀ R₁ y - bandBeta hk ε r δ θ R₀ R₁ z =
+      bandSigma R₀ R₁ z - bandSigma R₀ R₁ y := by
+    rw [bandBeta_eq_sub_sigma hk ε r δ θ R₀ R₁ hθ hly,
+        bandBeta_eq_sub_sigma hk ε r δ θ R₀ R₁ hθ hlz]
+    ring
+  have hσ₂mono : bandSigma R₀ R₁ y ≤ bandSigma R₀ R₁ z := by
+    rw [bandSigma_eq, bandSigma_eq]
+    exact Real.smoothTransition.monotone (by
+      exact div_le_div_of_nonneg_right (by linarith [hRzRy]) (le_of_lt (sub_pos.mpr hR₀R₁)))
+  have hβle : bandBeta hk ε r δ θ R₀ R₁ z ≤ bandBeta hk ε r δ θ R₀ R₁ y := by
+    nlinarith [hβsub, hσ₂mono]
+  have hβdiffε : 2 * ε * (bandBeta hk ε r δ θ R₀ R₁ y - bandBeta hk ε r δ θ R₀ R₁ z) <
+      (‖posPart hk z‖ ^ 2 - ‖posPart hk y‖ ^ 2) / 4 :=
+    bandBetaSubBound hk ε r δ θ R₀ R₁ hε hθ hR₀ hR₀R₁ hband hly hlz hRy hRz hneg hlt
+  have hTle : modelLevelDampedTransportTime hk c ε r δ ρ ρ' θ R₀ R₁ η ε₀ z -
+        modelLevelDampedTransportTime hk c ε r δ ρ ρ' θ R₀ R₁ η ε₀ y ≤
+      2 * ε * (bandBeta hk ε r δ θ R₀ R₁ y - bandBeta hk ε r δ θ R₀ R₁ z) :=
+    bandTransportTime_sub_le hk c ε r δ ρ ρ' θ R₀ R₁ η ε₀ hβz0 hβz1 hβle hτu hτF
+      hτu_low hτF_nonpos
+  have hbd1 : (morseNormalForm hk c z - morseNormalForm hk c y) -
+      2 * ε * (bandBeta hk ε r δ θ R₀ R₁ y - bandBeta hk ε r δ θ R₀ R₁ z) ≤
+      modelLevelDampedTransportLevelMap hk c ε r δ ρ ρ' θ R₀ R₁ η ε₀ z -
+        modelLevelDampedTransportLevelMap hk c ε r δ ρ ρ' θ R₀ R₁ η ε₀ y := by
+    dsimp [modelLevelDampedTransportLevelMap]
+    linarith [hTle]
+  have hbd2 : (morseNormalForm hk c z - morseNormalForm hk c y) / 2 <
+      (morseNormalForm hk c z - morseNormalForm hk c y) -
+        2 * ε * (bandBeta hk ε r δ θ R₀ R₁ y - bandBeta hk ε r δ θ R₀ R₁ z) := by
+    linarith [hβdiffε, hΔf_eq]
+  have hmain : 0 < modelLevelDampedTransportLevelMap hk c ε r δ ρ ρ' θ R₀ R₁ η ε₀ z -
+      modelLevelDampedTransportLevelMap hk c ε r δ ρ ρ' θ R₀ R₁ η ε₀ y := by
+    exact lt_trans (div_pos hΔf (by norm_num)) (lt_of_lt_of_le hbd2 hbd1)
+  exact (sub_pos.mp hmain)
+
 private lemma modelLevelDampedUnstretch_mem_upper_of_roundedSublevel {m k : ℕ}
     (hk : k ≤ m + 1) (c ε r δ R₀ R₁ η ε₀ : ℝ) (hε : 0 < ε) (hδ : 0 < δ)
     (hδr : δ < r ^ 2) (hR : R₀ < R₁) (hR0 : 0 ≤ R₀)
