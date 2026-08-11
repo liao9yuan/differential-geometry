@@ -74,7 +74,7 @@ theorem edge_center_pair_abs_of_carrier
                 {s : ℝ}, s ∈ Set.Icc (0 : ℝ) 1 →
               ∀ {R : ℝ}, 0 ≤ R → R ≤ R2 →
               ‖ccTensorToHs (I := I) (M := M) g 2 (2 : ℝ) T‖ ≤ R →
-              ∀ {Gc : ℝ}, 0 ≤ Gc →
+              ∀ {Lc : ℝ},
               let gs := realizedFam (I := I) g T 0 hdelta hdeltaZ s
               let R0 := rhsRefold0 (I := I) (M := M) g gBase T
                 hdelta hdeltaZ s
@@ -111,11 +111,11 @@ theorem edge_center_pair_abs_of_carrier
                       (appCc (I := I) (M := M) g 2 2 A T)).toFun| ≤
                   (eta / 4) *
                       ‖ccTensorToHs (I := I) (M := M) g 2 (4 : ℝ) T‖ ^ 2 +
-                    Gc * ‖ccTensorToHs (I := I) (M := M) g 2 (3 : ℝ) T‖ ^ 2 →
+                    Lc →
                 2 * |tensorL2Inner (I := I) (M := M) g 0 2 V.toFun
                     (J + Cross).toFun| ≤
                   eta * ‖ccTensorToHs (I := I) (M := M) g 2 (4 : ℝ) T‖ ^ 2 +
-                    (Gc + Gd) *
+                    Lc + Gd *
                       ‖ccTensorToHs (I := I) (M := M) g 2 (3 : ℝ) T‖ ^ 2 := by
   intro eta heta
   let e : ℝ := eta / 4
@@ -138,7 +138,7 @@ theorem edge_center_pair_abs_of_carrier
     bg_pair_abs_unif (I := I) (M := M) gBase hΛ he g hEq hjet
   refine ⟨Gd, hGd, ?_⟩
   intro T hTsymm delta hdelta_le hdelta0 hdelta hdeltaZ s hs
-    R hR hRle hT2 Gc hGc
+    R hR hRle hT2 Lc
   dsimp only
   let gs := realizedFam (I := I) g T 0 hdelta hdeltaZ s
   let R0 := rhsRefold0 (I := I) (M := M) g gBase T hdelta hdeltaZ s
@@ -280,7 +280,7 @@ theorem edge_center_pair_abs_of_carrier
   have hc' :
       2 * |tensorL2Inner (I := I) (M := M) g 0 2 V.toFun Yc.toFun| ≤
         e * ‖ccTensorToHs (I := I) (M := M) g 2 (4 : ℝ) T‖ ^ 2 +
-          Gc * ‖ccTensorToHs (I := I) (M := M) g 2 (3 : ℝ) T‖ ^ 2 := by
+          Lc := by
     simpa only [Yc, V, A, K0, LT, e] using hcarrier
   calc
     2 * |tensorL2Inner (I := I) (M := M) g 0 2 V.toFun
@@ -294,11 +294,11 @@ theorem edge_center_pair_abs_of_carrier
       mul_le_mul_of_nonneg_left habs (by norm_num)
     _ ≤ (e + e + e + e) *
           ‖ccTensorToHs (I := I) (M := M) g 2 (4 : ℝ) T‖ ^ 2 +
-        (Gc + Gd) *
+        Lc + Gd *
           ‖ccTensorToHs (I := I) (M := M) g 2 (3 : ℝ) T‖ ^ 2 := by
       nlinarith only [hc', hp', hd', hcorners]
     _ = eta * ‖ccTensorToHs (I := I) (M := M) g 2 (4 : ℝ) T‖ ^ 2 +
-        (Gc + Gd) *
+        Lc + Gd *
           ‖ccTensorToHs (I := I) (M := M) g 2 (3 : ℝ) T‖ ^ 2 := by
       dsimp only [e]
       ring

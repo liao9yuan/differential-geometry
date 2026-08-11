@@ -432,6 +432,7 @@ import DifferentialGeometry.Analysis.Integration.L2.Pairing.CauchySchwarz
 import DifferentialGeometry.Analysis.Integration.L2.Pairing.Defs
 import DifferentialGeometry.Analysis.Integration.L2.Pairing.MovingFrameBracketDivergence
 import DifferentialGeometry.Analysis.Integration.L2.ParametricFiberInnerSmooth
+import DifferentialGeometry.Analysis.Integration.L2.PathIntegralCoeffFieldPairing
 import DifferentialGeometry.Analysis.Integration.L2.SmoothSections.Defs
 import DifferentialGeometry.Analysis.Integration.L2.SmoothSections.GenuineCurvatureField
 import DifferentialGeometry.Analysis.Integration.L2.SmoothSections.Integrability
@@ -3157,6 +3158,7 @@ import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.EdgeCenterNormal
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.EdgePathBound
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.EdgePathPairing
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.LowBaseFullSlopePairing
+import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.LowBaseCenterPathPairing
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.LowRegA1PerIndex
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.LowRegA2PerIndex
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.LowRegBaseForce

@@ -1,5 +1,7 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.UnifLow1PathPair
 import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.LowRegBgH2
+import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.LowRegBgC2Pair
+import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.LowBaseCenterPathPairing
 import DifferentialGeometry.Analysis.Spectral.Tensor.SobolevScale.Inclusion
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.LowRegC01JetTower
 
@@ -7,17 +9,20 @@ set_option autoImplicit false
 
 noncomputable section
 
-open Bundle Manifold Set Filter Tensor0SBundle
+open Bundle Manifold MeasureTheory Set Filter Tensor0SBundle intervalIntegral
 open scoped Manifold Topology ContDiff BigOperators RealInnerProductSpace
 
 namespace DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral
 
 open DifferentialGeometry
+open DifferentialGeometry.HCGCompactness
 open DifferentialGeometry.Integral.L2
 open DifferentialGeometry.Integral.Connection
 open DifferentialGeometry.Analysis.Parabolic.TensorSpectral
 open DifferentialGeometry.Analysis.Parabolic.TensorHeatEquation
 open DifferentialGeometry.PDE.RicciFlow
+open DifferentialGeometry.PDE.DeTurck.RicciLinearization
+open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.DeTurckCoefficients
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.MetricRealization
 
 variable
@@ -285,8 +290,7 @@ theorem rhs_self_bg_corr_action_h2
 
 theorem edge_carrier_h2
     (hDim : Module.finrank ℝ E = 3)
-    (g gB : SmoothRiemannianMetric I M)
-    (R3 : ℝ) (hR3 : 0 ≤ R3) :
+    (g gB : SmoothRiemannianMetric I M) :
     ∃ D : ℝ, 0 ≤ D ∧
       ∀ (T : SmoothCcTensor g 0 2)
         (_hT : ∀ (x : M) (u v : TangentSpace I x),
@@ -299,36 +303,33 @@ theorem edge_carrier_h2
             (ccTensorBilinSymm (I := I) g
               (0 : SmoothCcTensor g 0 2)) δ)
           {s : ℝ}, s ∈ Set.Icc (0 : ℝ) 1 →
-        ‖ccTensorToHs (I := I) (M := M) g 2 (3 : ℝ) T‖ ≤ R3 →
         ‖ccTensorToHs (I := I) (M := M) g 2 (2 : ℝ)
             (appCc (I := I) (M := M) g 2 2
               (LowBaseInternal.rhsSelfLow (I := I) (M := M)
                   g gB T hδ hδZ s +
                 phiMetCurvCoeff (I := I) g gB g) T)‖ ≤
           D * ‖ccTensorToHs (I := I) (M := M) g 2 (2 : ℝ) T‖ *
-            (1 + ‖ccTensorToHs (I := I) (M := M) g 2 (3 : ℝ) T‖) := by
+            (1 + ‖ccTensorToHs (I := I) (M := M) g 2 (3 : ℝ) T‖ ^ 2) := by
   obtain ⟨C2, hC2, hjet2⟩ := hs2_low2 (I := I) (M := M) g 2
   obtain ⟨C3, hC3, hjet3⟩ := hsJet_le (I := I) (M := M) g 2 3
   obtain ⟨K0, K2, hK0, hK2, hself⟩ :=
     selfLowJetQBg (I := I) (M := M) hDim g gB
   obtain ⟨Ca, hCa, happ⟩ :=
     appRS_h2_h2_h2 (I := I) (M := M) hDim g 0 2 2
-  let A3 : ℝ := C3 * R3
-  let Qs : ℝ := Real.sqrt
-    ((K0 2 + K2 2 * A3 ^ 2) * (1 + A3 ^ 2))
+  let Ks : ℝ := (K0 2 + K2 2 * C3 ^ 2) * (1 + C3 ^ 2)
+  let Qs : ℝ := Real.sqrt Ks
   let Jc : ℝ := lowJetSq (I := I) (M := M) g 2
     (phiMetCurvCoeff (I := I) g gB g)
   let Qc : ℝ := Real.sqrt Jc
   let Q : ℝ := Real.sqrt (2 * (Qs ^ 2 + Qc ^ 2))
   let D : ℝ := 3 * hsTwoJetC (Module.finrank ℝ E) * Ca * Q * C2
-  have hA3 : 0 ≤ A3 := mul_nonneg hC3 hR3
-  have hKs : 0 ≤ (K0 2 + K2 2 * A3 ^ 2) * (1 + A3 ^ 2) :=
-    mul_nonneg
-      (add_nonneg (hK0 2) (mul_nonneg (hK2 2) (sq_nonneg A3)))
-      (add_nonneg (by norm_num) (sq_nonneg A3))
+  have hKs : 0 ≤ Ks := by
+    dsimp only [Ks]
+    exact mul_nonneg
+      (add_nonneg (hK0 2) (mul_nonneg (hK2 2) (sq_nonneg C3)))
+      (add_nonneg (by norm_num) (sq_nonneg C3))
   have hQs : 0 ≤ Qs := Real.sqrt_nonneg _
-  have hQs_sq : Qs ^ 2 =
-      (K0 2 + K2 2 * A3 ^ 2) * (1 + A3 ^ 2) := by
+  have hQs_sq : Qs ^ 2 = Ks := by
     simpa only [Qs] using Real.sq_sqrt hKs
   have hJc : 0 ≤ Jc :=
     Finset.sum_nonneg fun _ _ => sq_nonneg _
@@ -346,7 +347,7 @@ theorem edge_carrier_h2
         (mul_nonneg
           (mul_nonneg (by norm_num) (hsTwoJetC_nonneg _)) hCa) hQ) hC2
   refine ⟨D, hD, ?_⟩
-  intro T _hT δ hδ0 hδ_le hδ hδZ s hs hT3cap
+  intro T _hT δ hδ0 hδ_le hδ hδZ s hs
   let x : ℝ := ‖ccTensorToHs (I := I) (M := M) g 2 (2 : ℝ) T‖
   let y : ℝ := ‖ccTensorToHs (I := I) (M := M) g 2 (3 : ℝ) T‖
   let S : SmoothCcTensor g 2 2 :=
@@ -359,7 +360,7 @@ theorem edge_carrier_h2
   have hy : 0 ≤ y := norm_nonneg _
   have hsum3 :
       ∑ j ∈ Finset.range 4,
-          ‖iteratedCovGrad (I := I) g 0 2 j T‖ ^ 2 ≤ A3 ^ 2 := by
+          ‖iteratedCovGrad (I := I) g 0 2 j T‖ ^ 2 ≤ (C3 * y) ^ 2 := by
     have hsq :
         ∑ j ∈ Finset.range 4,
             ‖iteratedCovGrad (I := I) g 0 2 j T‖ ^ 2 ≤
@@ -374,13 +375,10 @@ theorem edge_carrier_h2
         (Finset.sum_nonneg fun j _ =>
           norm_nonneg (iteratedCovGrad (I := I) g 0 2 j T))
         (by simpa only [y] using hjet3 T) 2
-      _ ≤ A3 ^ 2 := by
-        exact pow_le_pow_left₀ (mul_nonneg hC3 hy)
-          (mul_le_mul_of_nonneg_left
-            (by simpa only [y] using hT3cap) hC3) 2
   have hshift :
       ∑ j ∈ Finset.range 3,
-          ‖iteratedCovGrad (I := I) g 0 2 (1 + j) T‖ ^ 2 ≤ A3 ^ 2 := by
+          ‖iteratedCovGrad (I := I) g 0 2 (1 + j) T‖ ^ 2 ≤
+            (C3 * y) ^ 2 := by
     refine (show
       ∑ j ∈ Finset.range 3,
           ‖iteratedCovGrad (I := I) g 0 2 (1 + j) T‖ ^ 2 ≤
@@ -390,48 +388,87 @@ theorem edge_carrier_h2
         zero_add, Nat.reduceAdd]
       nlinarith [sq_nonneg
         ‖iteratedCovGrad (I := I) g 0 2 0 T‖]).trans hsum3
-  have hS : lowJetSq (I := I) (M := M) g 2 S ≤ Qs ^ 2 := by
-    rw [hQs_sq]
+  have hS : lowJetSq (I := I) (M := M) g 2 S ≤
+      (Qs * (1 + y ^ 2)) ^ 2 := by
     refine (hself T _hT hδ0 hδ_le hδ hδZ 2 s hs).trans ?_
     let U : ℝ := ∑ j ∈ Finset.range 3,
       ‖iteratedCovGrad (I := I) g 0 2 (1 + j) T‖ ^ 2
     let V : ℝ := ∑ j ∈ Finset.range 4,
       ‖iteratedCovGrad (I := I) g 0 2 j T‖ ^ 2
-    have hU : U ≤ A3 ^ 2 := by simpa only [U] using hshift
-    have hV : V ≤ A3 ^ 2 := by simpa only [V] using hsum3
+    have hU : U ≤ (C3 * y) ^ 2 := by simpa only [U] using hshift
+    have hV : V ≤ (C3 * y) ^ 2 := by simpa only [V] using hsum3
+    have hU0 : 0 ≤ U := Finset.sum_nonneg fun j _ => sq_nonneg _
     have hV0 : 0 ≤ V := Finset.sum_nonneg fun j _ => sq_nonneg _
+    have hfirst : K0 2 + K2 2 * U ≤
+        (K0 2 + K2 2 * C3 ^ 2) * (1 + y ^ 2) := by
+      calc
+        K0 2 + K2 2 * U ≤ K0 2 + K2 2 * (C3 * y) ^ 2 :=
+          add_le_add le_rfl (mul_le_mul_of_nonneg_left hU (hK2 2))
+        _ ≤ (K0 2 + K2 2 * C3 ^ 2) * (1 + y ^ 2) := by
+          nlinarith [hK0 2, hK2 2, sq_nonneg C3, sq_nonneg y]
+    have hsecond : 1 + V ≤ (1 + C3 ^ 2) * (1 + y ^ 2) := by
+      calc
+        1 + V ≤ 1 + (C3 * y) ^ 2 := add_le_add le_rfl hV
+        _ ≤ (1 + C3 ^ 2) * (1 + y ^ 2) := by
+          nlinarith [sq_nonneg C3, sq_nonneg y]
+    rw [show (Qs * (1 + y ^ 2)) ^ 2 =
+      Ks * (1 + y ^ 2) ^ 2 by rw [mul_pow, hQs_sq]]
     change (K0 2 + K2 2 * U) * (1 + V) ≤
-      (K0 2 + K2 2 * A3 ^ 2) * (1 + A3 ^ 2)
-    exact mul_le_mul
-      (add_le_add le_rfl (mul_le_mul_of_nonneg_left hU (hK2 2)))
-      (add_le_add le_rfl hV)
-      (add_nonneg (by norm_num) hV0)
-      (add_nonneg (hK0 2) (mul_nonneg (hK2 2) (sq_nonneg A3)))
-  have hC : lowJetSq (I := I) (M := M) g 2 C ≤ Qc ^ 2 := by
-    change Jc ≤ Qc ^ 2
-    rw [hQc_sq]
-  have hSC : lowJetSq (I := I) (M := M) g 2 (S + C) ≤ Q ^ 2 := by
-    rw [hQ_sq]
-    exact (jetAdd (I := I) (M := M) g 2 S C).trans
-      (mul_le_mul_of_nonneg_left (add_le_add hS hC) (by norm_num))
+      Ks * (1 + y ^ 2) ^ 2
+    calc
+      _ ≤ ((K0 2 + K2 2 * C3 ^ 2) * (1 + y ^ 2)) *
+          ((1 + C3 ^ 2) * (1 + y ^ 2)) :=
+        mul_le_mul hfirst hsecond (add_nonneg (by norm_num) hV0)
+          (mul_nonneg
+            (add_nonneg (hK0 2) (mul_nonneg (hK2 2) (sq_nonneg C3)))
+            (add_nonneg (by norm_num) (sq_nonneg y)))
+      _ = Ks * (1 + y ^ 2) ^ 2 := by
+        dsimp only [Ks]
+        ring
+  have hC : lowJetSq (I := I) (M := M) g 2 C ≤
+      (Qc * (1 + y ^ 2)) ^ 2 := by
+    dsimp only [C]
+    change Jc ≤ (Qc * (1 + y ^ 2)) ^ 2
+    rw [← hQc_sq]
+    exact pow_le_pow_left₀ hQc
+      (le_mul_of_one_le_right hQc (by nlinarith [sq_nonneg y])) 2
+  have hSC : lowJetSq (I := I) (M := M) g 2 (S + C) ≤
+      (Q * (1 + y ^ 2)) ^ 2 := by
+    refine (jetAdd (I := I) (M := M) g 2 S C).trans ?_
+    calc
+      2 * (lowJetSq (I := I) (M := M) g 2 S +
+          lowJetSq (I := I) (M := M) g 2 C) ≤
+          2 * ((Qs * (1 + y ^ 2)) ^ 2 +
+            (Qc * (1 + y ^ 2)) ^ 2) :=
+        mul_le_mul_of_nonneg_left (add_le_add hS hC) (by norm_num)
+      _ = (Q * (1 + y ^ 2)) ^ 2 := by
+        calc
+          2 * ((Qs * (1 + y ^ 2)) ^ 2 +
+              (Qc * (1 + y ^ 2)) ^ 2) =
+              2 * (Qs ^ 2 + Qc ^ 2) * (1 + y ^ 2) ^ 2 := by ring
+          _ = Q ^ 2 * (1 + y ^ 2) ^ 2 := by rw [hQ_sq]
+          _ = (Q * (1 + y ^ 2)) ^ 2 := by ring
   have hT2 : lowJetSq (I := I) (M := M) g 2 T ≤ (C2 * x) ^ 2 := by
     simpa only [x] using hjet2 T
   have hY : lowJetSq (I := I) (M := M) g 2 Y ≤
-      (Ca * Q * (C2 * x)) ^ 2 := by
+      (Ca * (Q * (1 + y ^ 2)) * (C2 * x)) ^ 2 := by
     simpa only [Y, appCcRS_zero_eq_appCc] using
-      happ (S + C) T Q (C2 * x) hQ (mul_nonneg hC2 hx) hSC hT2
+      happ (S + C) T (Q * (1 + y ^ 2)) (C2 * x)
+        (mul_nonneg hQ (add_nonneg (by norm_num) (sq_nonneg y)))
+        (mul_nonneg hC2 hx) hSC hT2
   have hsp := hs_two_norm_le_of_low_jet (I := I) (M := M) g Y
-    (mul_nonneg (mul_nonneg hCa hQ) (mul_nonneg hC2 hx)) hY
+    (mul_nonneg
+      (mul_nonneg hCa
+        (mul_nonneg hQ (add_nonneg (by norm_num) (sq_nonneg y))))
+      (mul_nonneg hC2 hx)) hY
   change ‖ccTensorToHs (I := I) (M := M) g 2 (2 : ℝ) Y‖ ≤
-    D * x * (1 + y)
+    D * x * (1 + y ^ 2)
   calc
     _ ≤ 3 * hsTwoJetC (Module.finrank ℝ E) *
-        (Ca * Q * (C2 * x)) := hsp
-    _ = D * x := by
+        (Ca * (Q * (1 + y ^ 2)) * (C2 * x)) := hsp
+    _ = D * x * (1 + y ^ 2) := by
       dsimp only [D]
       ring
-    _ ≤ D * x * (1 + y) := by
-      nlinarith [mul_nonneg hD hx]
 
 private lemma two_mul_le_eps {eta x y : ℝ} (heta : 0 < eta) :
     2 * x * y ≤ eta * x ^ 2 + eta⁻¹ * y ^ 2 := by
@@ -444,6 +481,120 @@ private lemma two_mul_le_eps {eta x y : ℝ} (heta : 0 < eta) :
     ring
   rw [hexpand] at hs
   linarith
+
+theorem carrier_pair_abs_of_h2_poly
+    (g : SmoothRiemannianMetric I M)
+    (T Y : SmoothCcTensor g 0 2)
+    {eta D R : ℝ}
+    (heta : 0 < eta) (hR1 : R ≤ 1)
+    (hT2 : ‖ccTensorToHs (I := I) (M := M) g 2 (2 : ℝ) T‖ ≤ R)
+    (hY :
+      ‖ccTensorToHs (I := I) (M := M) g 2 (2 : ℝ) Y‖ ≤
+        D * ‖ccTensorToHs (I := I) (M := M) g 2 (2 : ℝ) T‖ *
+          (1 + ‖ccTensorToHs (I := I) (M := M) g 2 (3 : ℝ) T‖ ^ 2)) :
+    2 * |tensorL2Inner (I := I) (M := M) g 0 2
+        (oneMinusConnLapSmooth (I := I) g 0 2
+          (oneMinusConnLapSmooth (I := I) g 0 2 T)).toFun
+        (oneMinusConnLapSmooth (I := I) g 0 2 Y).toFun| ≤
+      eta * ‖ccTensorToHs (I := I) (M := M) g 2 (4 : ℝ) T‖ ^ 2 +
+        (eta / 2)⁻¹ * D ^ 2 *
+          (‖ccTensorToHs (I := I) (M := M) g 2 (3 : ℝ) T‖ ^ 2 +
+            ‖ccTensorToHs (I := I) (M := M) g 2 (3 : ℝ) T‖ ^ 4) := by
+  let x : ℝ := ‖ccTensorToHs (I := I) (M := M) g 2 (2 : ℝ) T‖
+  let y : ℝ := ‖ccTensorToHs (I := I) (M := M) g 2 (3 : ℝ) T‖
+  let z : ℝ := ‖ccTensorToHs (I := I) (M := M) g 2 (4 : ℝ) T‖
+  let e : ℝ := eta / 2
+  let LT : SmoothCcTensor g 0 2 :=
+    oneMinusConnLapSmooth (I := I) g 0 2 T
+  let L2T : SmoothCcTensor g 0 2 :=
+    oneMinusConnLapSmooth (I := I) g 0 2 LT
+  let LY : SmoothCcTensor g 0 2 :=
+    oneMinusConnLapSmooth (I := I) g 0 2 Y
+  have hx : 0 ≤ x := norm_nonneg _
+  have he : 0 < e := by
+    dsimp only [e]
+    positivity
+  have hxR : x ≤ R := by simpa only [x] using hT2
+  have hx1 : x ≤ 1 := hxR.trans hR1
+  have hxy : x ≤ y := by
+    let S3 := ccTensorToHs (I := I) (M := M) g 2 (3 : ℝ) T
+    have hinc := tensorHsInclusion_norm_le (I := I) (M := M)
+      (g := g) (r := 0) (s := 2) (show (2 : ℝ) ≤ 3 by norm_num) S3
+    have heq :
+        tensorHsInclusion (I := I) (M := M) (g := g) (r := 0) (s := 2)
+            (show (2 : ℝ) ≤ 3 by norm_num) S3 =
+          ccTensorToHs (I := I) (M := M) g 2 (2 : ℝ) T := by
+      ext i
+      simp only [S3, tensorHsInclusion_coeff_apply, ccTensorToHs_coeff]
+    simpa only [x, y, S3, heq] using hinc
+  have hL2T : ‖L2T‖ = z := by
+    have heven := smoothCcToTensorHs_even_norm_eq_toL2_iter
+      (I := I) (M := M) g 2 T
+    change ‖smoothCcToTensorHs (I := I) (M := M) g (4 : ℝ) T‖ =
+      ‖SmoothCcTensor.toL2 L2T‖ at heven
+    rw [SmoothCcTensor.norm_toL2] at heven
+    simpa only [z, norm_ccHs_eq_smoothHs] using heven.symm
+  have hLY : ‖LY‖ =
+      ‖ccTensorToHs (I := I) (M := M) g 2 (2 : ℝ) Y‖ := by
+    have heven := smoothCcToTensorHs_even_norm_eq_toL2_iter
+      (I := I) (M := M) g 1 Y
+    change ‖smoothCcToTensorHs (I := I) (M := M) g (2 : ℝ) Y‖ =
+      ‖SmoothCcTensor.toL2 LY‖ at heven
+    rw [SmoothCcTensor.norm_toL2] at heven
+    simpa only [norm_ccHs_eq_smoothHs] using heven.symm
+  have hpair :
+      |tensorL2Inner (I := I) (M := M) g 0 2 L2T.toFun LY.toFun| ≤
+        ‖L2T‖ * ‖LY‖ := by
+    rw [← SmoothCcTensor.inner_def (I := I) (M := M) L2T LY]
+    exact abs_real_inner_le_norm L2T LY
+  have hY' :
+      ‖ccTensorToHs (I := I) (M := M) g 2 (2 : ℝ) Y‖ ≤
+        D * x + D * x * y ^ 2 := by
+    simpa only [x, y] using hY.trans_eq (by ring)
+  have hfirst : 2 * z * (D * x) ≤
+      e * z ^ 2 + e⁻¹ * D ^ 2 * y ^ 2 := by
+    have hsq := pow_le_pow_left₀ hx hxy 2
+    have hprod : (D * x) ^ 2 ≤ D ^ 2 * y ^ 2 := by
+      have hfac := mul_nonneg (sq_nonneg D) (sub_nonneg.mpr hsq)
+      nlinarith
+    calc
+      2 * z * (D * x) ≤ e * z ^ 2 + e⁻¹ * (D * x) ^ 2 :=
+        two_mul_le_eps he
+      _ ≤ e * z ^ 2 + e⁻¹ * D ^ 2 * y ^ 2 := by
+        simpa only [mul_assoc] using add_le_add le_rfl
+          (mul_le_mul_of_nonneg_left hprod (inv_nonneg.mpr he.le))
+  have hsecond : 2 * z * (D * x * y ^ 2) ≤
+      e * z ^ 2 + e⁻¹ * D ^ 2 * y ^ 4 := by
+    have hx2 : x ^ 2 ≤ 1 := by nlinarith
+    have hprod : (D * x * y ^ 2) ^ 2 ≤ D ^ 2 * y ^ 4 := by
+      have hfac := mul_nonneg (mul_nonneg (sq_nonneg D) (sq_nonneg (y ^ 2)))
+        (sub_nonneg.mpr hx2)
+      nlinarith [sq_nonneg y]
+    calc
+      2 * z * (D * x * y ^ 2) ≤
+          e * z ^ 2 + e⁻¹ * (D * x * y ^ 2) ^ 2 :=
+        two_mul_le_eps he
+      _ ≤ e * z ^ 2 + e⁻¹ * D ^ 2 * y ^ 4 := by
+        simpa only [mul_assoc] using add_le_add le_rfl
+          (mul_le_mul_of_nonneg_left hprod (inv_nonneg.mpr he.le))
+  change
+    2 * |tensorL2Inner (I := I) (M := M) g 0 2 L2T.toFun LY.toFun| ≤ _
+  calc
+    2 * |tensorL2Inner (I := I) (M := M) g 0 2 L2T.toFun LY.toFun| ≤
+        2 * (z * ‖ccTensorToHs (I := I) (M := M) g 2 (2 : ℝ) Y‖) := by
+      rw [← hL2T, ← hLY]
+      exact mul_le_mul_of_nonneg_left hpair (by norm_num)
+    _ ≤ 2 * z * (D * x + D * x * y ^ 2) := by
+      simpa only [mul_assoc] using
+        mul_le_mul_of_nonneg_left hY'
+          (mul_nonneg (by norm_num) (norm_nonneg _))
+    _ = 2 * z * (D * x) + 2 * z * (D * x * y ^ 2) := by ring
+    _ ≤ (e * z ^ 2 + e⁻¹ * D ^ 2 * y ^ 2) +
+          (e * z ^ 2 + e⁻¹ * D ^ 2 * y ^ 4) :=
+      add_le_add hfirst hsecond
+    _ = eta * z ^ 2 + (eta / 2)⁻¹ * D ^ 2 * (y ^ 2 + y ^ 4) := by
+      dsimp only [e]
+      ring
 
 theorem carrier_pair_abs_of_h2
     (g : SmoothRiemannianMetric I M)
@@ -855,6 +1006,253 @@ theorem carrier_pair_abs_of_linear_quadratic_h2
           2 * C * R * z ^ 2 := by
       dsimp only [e]
       ring
+
+theorem edge_center_h4_unif
+    (hDim : Module.finrank ℝ E = 3)
+    (gBase : SmoothRiemannianMetric I M)
+    {Λ : ℝ} (hΛ : 1 ≤ Λ) :
+    ∀ {eta : ℝ}, 0 < eta →
+      ∃ delta2 R2 : ℝ,
+        0 < delta2 ∧ delta2 ≤ 1 / 3 ∧ 0 < R2 ∧ R2 ≤ 1 ∧
+        ∀ g : SmoothRiemannianMetric I M,
+          MetricUniformEquivalentOn (I := I) Set.univ gBase g Λ →
+          (∀ a : ℕ, a ≤ 3 →
+            MetricCovDerivOrderBoundOn (I := I) Set.univ a g gBase Λ) →
+          ∃ G : ℝ, 0 ≤ G ∧
+            ∀ (T : SmoothCcTensor g 0 2)
+              (_hTsymm : ∀ (x : M) (u v : TangentSpace I x),
+                ccTensorBilin (I := I) g T x u v =
+                  ccTensorBilin (I := I) g T x v u)
+              {delta : ℝ}, delta ≤ delta2 → 0 ≤ delta →
+              ∀ (hdelta : gFibreOpBound (I := I) (M := M) g
+                  (ccTensorBilinSymm (I := I) g T) delta)
+                (hdeltaZ : gFibreOpBound (I := I) (M := M) g
+                  (ccTensorBilinSymm (I := I) g
+                    (0 : SmoothCcTensor g 0 2)) delta)
+                {s : ℝ}, s ∈ Set.Icc (0 : ℝ) 1 →
+              ∀ {R : ℝ}, 0 ≤ R → R ≤ R2 →
+              ‖ccTensorToHs (I := I) (M := M) g 2 (2 : ℝ) T‖ ≤ R →
+              let gs := realizedFam (I := I) g T 0 hdelta hdeltaZ s
+              let R0 := rhsRefold0 (I := I) (M := M) g gBase T
+                hdelta hdeltaZ s
+              let K0 := phiMetCurvCoeff (I := I) g gBase g
+              let LT := oneMinusConnLapSmooth (I := I) g 0 2 T
+              let HT := iteratedCovGrad (I := I) g 0 2 2 T
+              let HLT := iteratedCovGrad (I := I) g 0 2 2 LT
+              let Q : SmoothCcTensor g 0 2 → SmoothCcTensor g 2 2 := fun U =>
+                edgeTopPairBi (I := I) (M := M) g T U hdelta hdeltaZ
+                  ricciRefoldQA ricciRefoldQB lieRefoldQ lieRefoldEps s
+              let Z := appCc (I := I) (M := M) g 2 2 (Q T) T
+              let Cross :=
+                appCc (I := I) (M := M) g 2 2 (Q LT) T +
+                  appCc (I := I) (M := M) g 2 2 (Q T) LT
+              let PairComm :=
+                oneMinusConnLapSmooth (I := I) g 0 2 Z -
+                  appCc (I := I) (M := M) g 2 2 (Q LT) T -
+                  appCc (I := I) (M := M) g 2 2 (Q T) LT + Z
+              let C : SmoothCcTensor g 4 2 :=
+                deTurckPhiMetTotal (I := I) (M := M) g gBase gs -
+                  deTurckPhiMetTotal (I := I) (M := M) g gBase g
+              let J :=
+                oneMinusConnLapSmooth (I := I) g 0 2
+                    (appCc (I := I) (M := M) g 2 2 (R0 + K0) T) +
+                  PairComm +
+                  (oneMinusConnLapSmooth (I := I) g 0 2
+                      (appCc (I := I) (M := M) g 4 2 C HT) -
+                    appCc (I := I) (M := M) g 4 2 C HLT) - Z
+              let V := oneMinusConnLapSmooth (I := I) g 0 2 LT
+              2 * |tensorL2Inner (I := I) (M := M) g 0 2 V.toFun
+                    (J + Cross).toFun| ≤
+                eta * ‖ccTensorToHs (I := I) (M := M) g 2 (4 : ℝ) T‖ ^ 2 +
+                  G * (‖ccTensorToHs (I := I) (M := M) g 2 (3 : ℝ) T‖ ^ 2 +
+                    ‖ccTensorToHs (I := I) (M := M) g 2 (3 : ℝ) T‖ ^ 4) := by
+  intro eta heta
+  obtain ⟨delta2, R2, hdelta2, hdelta2third, hR2, hR2one, hcenter⟩ :=
+    edge_center_pair_abs_of_carrier (I := I) (M := M)
+      hDim gBase hΛ heta
+  refine ⟨delta2, R2, hdelta2, hdelta2third, hR2, hR2one, ?_⟩
+  intro g hEq hjet
+  obtain ⟨Gd, hGd, hcenterG⟩ := hcenter g hEq hjet
+  obtain ⟨D, hD, hcarrier⟩ :=
+    edge_carrier_h2 (I := I) (M := M) hDim g gBase
+  let Gc : ℝ := (eta / 8)⁻¹ * D ^ 2
+  let G : ℝ := Gc + Gd
+  have hGc : 0 ≤ Gc := by
+    dsimp only [Gc]
+    exact mul_nonneg (inv_nonneg.mpr (by positivity)) (sq_nonneg D)
+  have hG : 0 ≤ G := add_nonneg hGc hGd
+  refine ⟨G, hG, ?_⟩
+  intro T hTsymm delta hdelta_le hdelta0 hdelta hdeltaZ s hs
+    R hR hRle hT2
+  let A : SmoothCcTensor g 2 2 :=
+    LowBaseInternal.rhsSelfLow (I := I) (M := M)
+        g gBase T hdelta hdeltaZ s +
+      phiMetCurvCoeff (I := I) g gBase g
+  let Y : SmoothCcTensor g 0 2 :=
+    appCc (I := I) (M := M) g 2 2 A T
+  let y : ℝ := ‖ccTensorToHs (I := I) (M := M) g 2 (3 : ℝ) T‖
+  have hdelta_third : delta ≤ 1 / 3 := hdelta_le.trans hdelta2third
+  have hY := hcarrier T hTsymm hdelta0 hdelta_third
+    hdelta hdeltaZ hs
+  have hRone : R ≤ 1 := hRle.trans hR2one
+  have hpair := carrier_pair_abs_of_h2_poly
+    (I := I) (M := M) g T Y (eta := eta / 4)
+    (by positivity) hRone hT2 (by
+      simpa only [A, Y] using hY)
+  have hpair' :
+      2 * |tensorL2Inner (I := I) (M := M) g 0 2
+          (oneMinusConnLapSmooth (I := I) g 0 2
+            (oneMinusConnLapSmooth (I := I) g 0 2 T)).toFun
+          (oneMinusConnLapSmooth (I := I) g 0 2 Y).toFun| ≤
+        (eta / 4) *
+            ‖ccTensorToHs (I := I) (M := M) g 2 (4 : ℝ) T‖ ^ 2 +
+          Gc * (y ^ 2 + y ^ 4) := by
+    have heq : eta / 4 / 2 = eta / 8 := by ring
+    simpa only [Gc, y, heq] using hpair
+  have hassembled := hcenterG T hTsymm hdelta_le hdelta0
+    hdelta hdeltaZ hs hR hRle hT2 (Lc := Gc * (y ^ 2 + y ^ 4)) (by
+      simpa only [Y, A, y] using hpair')
+  dsimp only at hassembled ⊢
+  have hy4 : 0 ≤ y ^ 4 := by positivity
+  calc
+    _ ≤ eta * ‖ccTensorToHs (I := I) (M := M) g 2 (4 : ℝ) T‖ ^ 2 +
+        Gc * (y ^ 2 + y ^ 4) + Gd * y ^ 2 := by
+      simpa only [y] using hassembled
+    _ ≤ eta * ‖ccTensorToHs (I := I) (M := M) g 2 (4 : ℝ) T‖ ^ 2 +
+        G * (y ^ 2 + y ^ 4) := by
+      dsimp only [G]
+      nlinarith [mul_nonneg hGd hy4]
+
+theorem edge_center_path_h4_unif
+    (hDim : Module.finrank ℝ E = 3)
+    (gBase : SmoothRiemannianMetric I M)
+    {Λ : ℝ} (hΛ : 1 ≤ Λ) :
+    ∀ {eta : ℝ}, 0 < eta →
+      ∃ delta2 R2 : ℝ,
+        0 < delta2 ∧ delta2 ≤ 1 / 3 ∧ 0 < R2 ∧ R2 ≤ 1 ∧
+        ∀ g : SmoothRiemannianMetric I M,
+          MetricUniformEquivalentOn (I := I) Set.univ gBase g Λ →
+          (∀ a : ℕ, a ≤ 3 →
+            MetricCovDerivOrderBoundOn (I := I) Set.univ a g gBase Λ) →
+          ∃ G : ℝ, 0 ≤ G ∧
+            ∀ (T : SmoothCcTensor g 0 2)
+              (_hTsymm : ∀ (x : M) (u v : TangentSpace I x),
+                ccTensorBilin (I := I) g T x u v =
+                  ccTensorBilin (I := I) g T x v u)
+              {delta : ℝ}, delta ≤ delta2 → 0 ≤ delta →
+              ∀ (hdelta_lt : delta < 1)
+                (hdelta : gFibreOpBound (I := I) (M := M) g
+                  (ccTensorBilinSymm (I := I) g T) delta)
+                (hdeltaZ : gFibreOpBound (I := I) (M := M) g
+                  (ccTensorBilinSymm (I := I) g
+                    (0 : SmoothCcTensor g 0 2)) delta)
+                {R : ℝ}, 0 ≤ R → R ≤ R2 →
+              ‖ccTensorToHs (I := I) (M := M) g 2 (2 : ℝ) T‖ ≤ R →
+              let P0 := rhsLow0PathIntegral (I := I) (M := M) g gBase T 0
+                hdelta_lt hdelta hdelta_lt hdeltaZ
+              let P2 := rhsTopPathIntegral (I := I) (M := M) g gBase T 0
+                hdelta_lt hdelta hdelta_lt hdeltaZ
+              let K0 := phiMetCurvCoeff (I := I) g gBase g
+              let LT := oneMinusConnLapSmooth (I := I) g 0 2 T
+              let HT := iteratedCovGrad (I := I) g 0 2 2 T
+              let HLT := iteratedCovGrad (I := I) g 0 2 2 LT
+              let B02 :=
+                oneMinusConnLapSmooth (I := I) g 0 2
+                    (appCc (I := I) (M := M) g 2 2 P0 T) +
+                  (oneMinusConnLapSmooth (I := I) g 0 2
+                      (appCc (I := I) (M := M) g 4 2 P2 HT) -
+                    appCc (I := I) (M := M) g 4 2 P2 HLT)
+              let V := oneMinusConnLapSmooth (I := I) g 0 2 LT
+              2 * |tensorL2Inner (I := I) (M := M) g 0 2 V.toFun
+                    (B02 + appCc (I := I) (M := M) g 2 2 K0 LT).toFun| ≤
+                eta * ‖ccTensorToHs (I := I) (M := M) g 2 (4 : ℝ) T‖ ^ 2 +
+                  G * (‖ccTensorToHs (I := I) (M := M) g 2 (3 : ℝ) T‖ ^ 2 +
+                    ‖ccTensorToHs (I := I) (M := M) g 2 (3 : ℝ) T‖ ^ 4) := by
+  intro eta heta
+  obtain ⟨delta2, R2, hdelta2, hdelta2third, hR2, hR2one, hpoint⟩ :=
+    edge_center_h4_unif (I := I) (M := M) hDim gBase hΛ heta
+  refine ⟨delta2, R2, hdelta2, hdelta2third, hR2, hR2one, ?_⟩
+  intro g hEq hjet
+  obtain ⟨G, hG, hpointG⟩ := hpoint g hEq hjet
+  refine ⟨G, hG, ?_⟩
+  intro T hTsymm delta hdelta_le hdelta0 hdelta_lt hdelta hdeltaZ R hR hRle hT2
+  let P0 := rhsLow0PathIntegral (I := I) (M := M) g gBase T 0
+    hdelta_lt hdelta hdelta_lt hdeltaZ
+  let P2 := rhsTopPathIntegral (I := I) (M := M) g gBase T 0
+    hdelta_lt hdelta hdelta_lt hdeltaZ
+  let K0 := phiMetCurvCoeff (I := I) g gBase g
+  let LT := oneMinusConnLapSmooth (I := I) g 0 2 T
+  let HT := iteratedCovGrad (I := I) g 0 2 2 T
+  let HLT := iteratedCovGrad (I := I) g 0 2 2 LT
+  let B02 :=
+    oneMinusConnLapSmooth (I := I) g 0 2
+        (appCc (I := I) (M := M) g 2 2 P0 T) +
+      (oneMinusConnLapSmooth (I := I) g 0 2
+          (appCc (I := I) (M := M) g 4 2 P2 HT) -
+        appCc (I := I) (M := M) g 4 2 P2 HLT)
+  let V := oneMinusConnLapSmooth (I := I) g 0 2 LT
+  let Js := fun s : ℝ =>
+    let gs := realizedFam (I := I) g T 0 hdelta hdeltaZ s
+    let R0s := rhsRefold0 (I := I) (M := M) g gBase T hdelta hdeltaZ s
+    let Qs := fun U : SmoothCcTensor g 0 2 =>
+      edgeTopPairBi (I := I) (M := M) g T U hdelta hdeltaZ
+        ricciRefoldQA ricciRefoldQB lieRefoldQ lieRefoldEps s
+    let Zs := appCc (I := I) (M := M) g 2 2 (Qs T) T
+    let PairComms := oneMinusConnLapSmooth (I := I) g 0 2 Zs -
+      appCc (I := I) (M := M) g 2 2 (Qs LT) T -
+      appCc (I := I) (M := M) g 2 2 (Qs T) LT + Zs
+    let Cs := deTurckPhiMetTotal (I := I) (M := M) g gBase gs -
+      deTurckPhiMetTotal (I := I) (M := M) g gBase g
+    oneMinusConnLapSmooth (I := I) g 0 2
+        (appCc (I := I) (M := M) g 2 2 (R0s + K0) T) +
+      PairComms +
+      (oneMinusConnLapSmooth (I := I) g 0 2
+          (appCc (I := I) (M := M) g 4 2 Cs HT) -
+        appCc (I := I) (M := M) g 4 2 Cs HLT) - Zs
+  let Crosss := fun s : ℝ =>
+    let Qs := fun U : SmoothCcTensor g 0 2 =>
+      edgeTopPairBi (I := I) (M := M) g T U hdelta hdeltaZ
+        ricciRefoldQA ricciRefoldQB lieRefoldQ lieRefoldEps s
+    appCc (I := I) (M := M) g 2 2 (Qs LT) T +
+      appCc (I := I) (M := M) g 2 2 (Qs T) LT
+  let f : ℝ → ℝ := fun s => Inner.inner ℝ V (Js s + Crosss s)
+  let Cb : ℝ :=
+    eta * ‖ccTensorToHs (I := I) (M := M) g 2 (4 : ℝ) T‖ ^ 2 +
+      G * (‖ccTensorToHs (I := I) (M := M) g 2 (3 : ℝ) T‖ ^ 2 +
+        ‖ccTensorToHs (I := I) (M := M) g 2 (3 : ℝ) T‖ ^ 4)
+  obtain ⟨hpair, hfInt⟩ :=
+    b02_center_pair_eq_intervalIntegral_and_intervalIntegrable
+      (I := I) (M := M) g gBase T V hTsymm hdelta_lt hdelta hdeltaZ
+  have hfInt' : IntervalIntegrable f volume 0 1 := by
+    simpa only [f, Js, Crosss, V, LT, HT, HLT, K0] using hfInt
+  have hpointwise : ∀ s ∈ Set.Icc (0 : ℝ) 1, 2 * |f s| ≤ Cb := by
+    intro s hs
+    simpa only [f, Cb, Js, Crosss, V, LT, HT, HLT, K0,
+      SmoothCcTensor.inner_def] using
+      hpointG T hTsymm hdelta_le hdelta0 hdelta hdeltaZ hs hR hRle hT2
+  have habs := intervalIntegral.abs_integral_le_integral_abs
+    (μ := volume) (f := f) (a := (0 : ℝ)) (b := 1) (by norm_num)
+  have hmono : (∫ s in (0 : ℝ)..1, 2 * |f s|) ≤
+      ∫ _s in (0 : ℝ)..1, Cb := by
+    exact intervalIntegral.integral_mono_on (by norm_num)
+      (hfInt'.abs.const_mul 2) _root_.intervalIntegrable_const hpointwise
+  change 2 * |tensorL2Inner (I := I) (M := M) g 0 2 V.toFun
+      (B02 + appCc (I := I) (M := M) g 2 2 K0 LT).toFun| ≤ Cb
+  calc
+    2 * |tensorL2Inner (I := I) (M := M) g 0 2 V.toFun
+        (B02 + appCc (I := I) (M := M) g 2 2 K0 LT).toFun| =
+        2 * |∫ s in (0 : ℝ)..1, f s| := by
+      rw [← SmoothCcTensor.inner_def]
+      simpa only [f, B02, P0, P2, K0, LT, HT, HLT, V] using congrArg
+        (fun z : ℝ => 2 * |z|) hpair
+    _ ≤ 2 * (∫ s in (0 : ℝ)..1, |f s|) :=
+      mul_le_mul_of_nonneg_left habs (by norm_num)
+    _ = ∫ s in (0 : ℝ)..1, 2 * |f s| := by
+      rw [intervalIntegral.integral_const_mul]
+    _ ≤ ∫ _s in (0 : ℝ)..1, Cb := hmono
+    _ = Cb := by
+      rw [intervalIntegral.integral_const]
+      norm_num
 
 end DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral
 
