@@ -17368,6 +17368,217 @@ theorem morseRoundedUnstretchMap_mem_upper {m k : ℕ} (hk : k ≤ m + 1)
     rw [hg'] at hx
     nlinarith [sq_nonneg r]
 
+noncomputable def morseLevelDampedUnstretchSublevelMap {m k : ℕ} (hk : k ≤ m + 1)
+    (c ε r δ R₀ R₁ η ε₀ : ℝ) {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M]
+    [ChartedSpace H M] [T2Space M]
+    {I : ModelWithCorners ℝ (MorseModel (m + 1)) H} [I.Boundaryless]
+    [IsManifold I (⊤ : WithTop ℕ∞) M] {f : M → ℝ}
+    (data : MorseChart (m + 1) k hk c I f)
+    (x : {z : SublevelSpace (morseRoundedFunction hk c ε r δ R₀ R₁ data) c //
+      z.1 ∈ data.χ '' {y : MorseModel (m + 1) | morseNorm (m + 1) y ≤ R₁}}) : M :=
+  data.χ (CellAttachment.modelLevelDampedUnstretch hk ε r δ c η ε₀ (data.χ.symm x.1.1))
+
+theorem morseLevelDampedUnstretchSublevelMap_mem_upper {m k : ℕ} (hk : k ≤ m + 1)
+    (c ε r δ R₀ R₁ η ε₀ : ℝ) {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M]
+    [ChartedSpace H M] [T2Space M]
+    {I : ModelWithCorners ℝ (MorseModel (m + 1)) H} [I.Boundaryless]
+    [IsManifold I (⊤ : WithTop ℕ∞) M] {f : M → ℝ}
+    (data : MorseChart (m + 1) k hk c I f)
+    (hε : 0 < ε) (hδ : 0 < δ) (hδr : δ < r ^ 2) (hR : R₀ < R₁) (hR0 : 0 ≤ R₀)
+    (hbig : 2 * (r ^ 2 + 2 * ε + δ) ≤ R₀ ^ 2) (hR₁R : R₁ < data.R)
+    (hR'b : R₁ ^ 2 + R₁ ^ 2 * (R₁ ^ 2 + r ^ 2) / (r ^ 2 - δ) < data.R ^ 2)
+    (x : {z : SublevelSpace (morseRoundedFunction hk c ε r δ R₀ R₁ data) c //
+      z.1 ∈ data.χ '' {y : MorseModel (m + 1) | morseNorm (m + 1) y ≤ R₁}}) :
+    f (morseLevelDampedUnstretchSublevelMap hk c ε r δ R₀ R₁ η ε₀ data x) ≤ c + r ^ 2 / 2 := by
+  rcases x with ⟨z, hzball⟩
+  rcases hzball with ⟨y, hy, hxy⟩
+  dsimp [morseLevelDampedUnstretchSublevelMap]
+  have hsrc : y ∈ data.χ.source := data.hχsrc y (le_trans hy (le_of_lt hR₁R))
+  have hsymm : data.χ.symm z.1 = y := by
+    rw [← hxy]
+    exact data.χ.left_inv hsrc
+  rw [hsymm]
+  have hg : CellAttachment.modelRoundedFunction hk c ε r δ R₀ R₁ y ≤ c := by
+    have hg' := morseRoundedFunction_eq_model_of_mem_closedBall hk c ε r δ R₀ R₁ data ⟨y, hy, hxy⟩
+    have hz2 : morseRoundedFunction hk c ε r δ R₀ R₁ data z.1 ≤ c := z.2
+    rw [hg', hsymm] at hz2
+    exact hz2
+  have hatt : y ∈ CellAttachment.modelAttachedRegion hk ε r δ :=
+    (CellAttachment.modelRoundedFunction_le_c_iff_mem_attachedRegion hk c ε r δ R₀ R₁
+      hε hδ hR hR0 hbig y).mp hg
+  have hnormImage : morseNorm (m + 1)
+      (CellAttachment.modelLevelDampedUnstretch hk ε r δ c η ε₀ y) ≤ data.R := by
+    have hsq := CellAttachment.modelLevelDampedUnstretch_norm_sq_le hk ε r δ c η ε₀
+      (le_of_lt hε) hδ hδr R₁ hy
+    have hle : morseNorm (m + 1)
+        (CellAttachment.modelLevelDampedUnstretch hk ε r δ c η ε₀ y) ^ 2 < data.R ^ 2 :=
+      lt_of_le_of_lt hsq hR'b
+    have hnonneg : 0 ≤ morseNorm (m + 1)
+        (CellAttachment.modelLevelDampedUnstretch hk ε r δ c η ε₀ y) := by
+      dsimp [morseNorm]
+      exact norm_nonneg _
+    have hRnonneg : 0 ≤ data.R := le_of_lt data.hRpos
+    have habs := sq_lt_sq.mp hle
+    have h1 : |morseNorm (m + 1)
+        (CellAttachment.modelLevelDampedUnstretch hk ε r δ c η ε₀ y)| =
+        morseNorm (m + 1) (CellAttachment.modelLevelDampedUnstretch hk ε r δ c η ε₀ y) :=
+      abs_of_nonneg hnonneg
+    have h2 : |data.R| = data.R := abs_of_nonneg hRnonneg
+    rw [h1, h2] at habs
+    exact le_of_lt habs
+  have hval : f (data.χ (CellAttachment.modelLevelDampedUnstretch hk ε r δ c η ε₀ y)) =
+      CellAttachment.morseNormalForm hk c
+        (CellAttachment.modelLevelDampedUnstretch hk ε r δ c η ε₀ y) :=
+    data.hnorm _ hnormImage
+  rw [hval]
+  exact CellAttachment.modelLevelDampedUnstretch_mem_upper hk c ε r δ η ε₀ hε hδ hδr hatt
+
+theorem morseLevelDampedUnstretchSublevelMap_deep {m k : ℕ} (hk : k ≤ m + 1)
+    (c ε r δ R₀ R₁ η ε₀ : ℝ) {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M]
+    [ChartedSpace H M] [T2Space M]
+    {I : ModelWithCorners ℝ (MorseModel (m + 1)) H} [I.Boundaryless]
+    [IsManifold I (⊤ : WithTop ℕ∞) M] {f : M → ℝ}
+    (data : MorseChart (m + 1) k hk c I f)
+    (hε₀ : 0 < ε₀) (hR₁R : R₁ < data.R)
+    {x : {z : SublevelSpace (morseRoundedFunction hk c ε r δ R₀ R₁ data) c //
+      z.1 ∈ data.χ '' {y : MorseModel (m + 1) | morseNorm (m + 1) y ≤ R₁}}}
+    (hdeep : f x.1.1 ≤ c - ε - η) :
+    morseLevelDampedUnstretchSublevelMap hk c ε r δ R₀ R₁ η ε₀ data x = x.1.1 := by
+  rcases x with ⟨z, hzball⟩
+  rcases hzball with ⟨y, hy, hxy⟩
+  dsimp [morseLevelDampedUnstretchSublevelMap]
+  have hsrc : y ∈ data.χ.source := data.hχsrc y (le_trans hy (le_of_lt hR₁R))
+  have hsymm : data.χ.symm z.1 = y := by
+    rw [← hxy]
+    exact data.χ.left_inv hsrc
+  rw [hsymm]
+  have hf : f z.1 = CellAttachment.morseNormalForm hk c y := by
+    rw [← hxy]
+    exact data.hnorm y (le_trans hy (le_of_lt hR₁R))
+  have hdeep' : CellAttachment.morseNormalForm hk c y ≤ c - ε - η := by
+    change f z.1 ≤ c - ε - η at hdeep
+    rwa [hf] at hdeep
+  have hEq := CellAttachment.modelLevelDampedUnstretch_eq_self_of_deep hk ε r δ c η ε₀ hε₀ y hdeep'
+  rw [hEq]
+  exact hxy
+
+theorem morseLevelDampedUnstretchSublevelMap_boundary {m k : ℕ} (hk : k ≤ m + 1)
+    (c ε r δ R₀ R₁ η ε₀ : ℝ) {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M]
+    [ChartedSpace H M] [T2Space M]
+    {I : ModelWithCorners ℝ (MorseModel (m + 1)) H} [I.Boundaryless]
+    [IsManifold I (⊤ : WithTop ℕ∞) M] {f : M → ℝ}
+    (data : MorseChart (m + 1) k hk c I f)
+    (hε : 0 < ε) (hδ : 0 < δ) (hδr : δ < r ^ 2) (hR : R₀ < R₁) (hR0 : 0 ≤ R₀)
+    (hbig : 2 * (r ^ 2 + 2 * ε + δ) ≤ R₀ ^ 2) (hact : ε₀ + δ / 2 < η)
+    (hε₀ : 0 < ε₀) (hR₁R : R₁ < data.R)
+    (hR'b : R₁ ^ 2 + R₁ ^ 2 * (R₁ ^ 2 + r ^ 2) / (r ^ 2 - δ) < data.R ^ 2)
+    {x : {z : SublevelSpace (morseRoundedFunction hk c ε r δ R₀ R₁ data) c //
+      z.1 ∈ data.χ '' {y : MorseModel (m + 1) | morseNorm (m + 1) y ≤ R₁}}}
+    (hz : morseRoundedFunction hk c ε r δ R₀ R₁ data x.1.1 = c) :
+    f (morseLevelDampedUnstretchSublevelMap hk c ε r δ R₀ R₁ η ε₀ data x) = c + r ^ 2 / 2 := by
+  change morseRoundedFunction hk c ε r δ R₀ R₁ data x.1.1 = c at hz
+  rcases x with ⟨z, hzball⟩
+  rcases hzball with ⟨y, hy, hxy⟩
+  dsimp [morseLevelDampedUnstretchSublevelMap]
+  have hsrc : y ∈ data.χ.source := data.hχsrc y (le_trans hy (le_of_lt hR₁R))
+  have hsymm : data.χ.symm z.1 = y := by
+    rw [← hxy]
+    exact data.χ.left_inv hsrc
+  rw [hsymm]
+  have hg : CellAttachment.modelRoundedFunction hk c ε r δ R₀ R₁ y = c := by
+    have hg' := morseRoundedFunction_eq_model_of_mem_closedBall hk c ε r δ R₀ R₁ data ⟨y, hy, hxy⟩
+    have hz' : morseRoundedFunction hk c ε r δ R₀ R₁ data z.1 = c := hz
+    rw [hg', hsymm] at hz'
+    exact hz'
+  have hatt : y ∈ CellAttachment.modelAttachedRegion hk ε r δ :=
+    (CellAttachment.modelRoundedFunction_le_c_iff_mem_attachedRegion hk c ε r δ R₀ R₁
+      hε hδ hR hR0 hbig y).mp (le_of_eq hg)
+  have hnormImage : morseNorm (m + 1)
+      (CellAttachment.modelLevelDampedUnstretch hk ε r δ c η ε₀ y) ≤ data.R := by
+    have hsq := CellAttachment.modelLevelDampedUnstretch_norm_sq_le hk ε r δ c η ε₀
+      (le_of_lt hε) hδ hδr R₁ hy
+    have hle : morseNorm (m + 1)
+        (CellAttachment.modelLevelDampedUnstretch hk ε r δ c η ε₀ y) ^ 2 < data.R ^ 2 :=
+      lt_of_le_of_lt hsq hR'b
+    have hnonneg : 0 ≤ morseNorm (m + 1)
+        (CellAttachment.modelLevelDampedUnstretch hk ε r δ c η ε₀ y) := by
+      dsimp [morseNorm]
+      exact norm_nonneg _
+    have hRnonneg : 0 ≤ data.R := le_of_lt data.hRpos
+    have habs := sq_lt_sq.mp hle
+    have h1 : |morseNorm (m + 1)
+        (CellAttachment.modelLevelDampedUnstretch hk ε r δ c η ε₀ y)| =
+        morseNorm (m + 1) (CellAttachment.modelLevelDampedUnstretch hk ε r δ c η ε₀ y) :=
+      abs_of_nonneg hnonneg
+    have h2 : |data.R| = data.R := abs_of_nonneg hRnonneg
+    rw [h1, h2] at habs
+    exact le_of_lt habs
+  have hval : f (data.χ (CellAttachment.modelLevelDampedUnstretch hk ε r δ c η ε₀ y)) =
+      CellAttachment.morseNormalForm hk c
+        (CellAttachment.modelLevelDampedUnstretch hk ε r δ c η ε₀ y) :=
+    data.hnorm _ hnormImage
+  rw [hval]
+  exact CellAttachment.modelLevelDampedUnstretch_boundary hk c ε r δ R₀ R₁ hε hδ hδr hR hR0
+    hbig η ε₀ hact hε₀ hatt hg
+
+theorem morseLevelDampedUnstretchSublevelMap_strict {m k : ℕ} (hk : k ≤ m + 1)
+    (c ε r δ R₀ R₁ η ε₀ : ℝ) {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M]
+    [ChartedSpace H M] [T2Space M]
+    {I : ModelWithCorners ℝ (MorseModel (m + 1)) H} [I.Boundaryless]
+    [IsManifold I (⊤ : WithTop ℕ∞) M] {f : M → ℝ}
+    (data : MorseChart (m + 1) k hk c I f)
+    (hε : 0 < ε) (hδ : 0 < δ) (hδr : δ < r ^ 2) (hR : R₀ < R₁) (hR0 : 0 ≤ R₀)
+    (hbig : 2 * (r ^ 2 + 2 * ε + δ) ≤ R₀ ^ 2) (hR₁R : R₁ < data.R)
+    (hR'b : R₁ ^ 2 + R₁ ^ 2 * (R₁ ^ 2 + r ^ 2) / (r ^ 2 - δ) < data.R ^ 2)
+    {x : {z : SublevelSpace (morseRoundedFunction hk c ε r δ R₀ R₁ data) c //
+      z.1 ∈ data.χ '' {y : MorseModel (m + 1) | morseNorm (m + 1) y ≤ R₁}}}
+    (hz : morseRoundedFunction hk c ε r δ R₀ R₁ data x.1.1 < c) :
+    f (morseLevelDampedUnstretchSublevelMap hk c ε r δ R₀ R₁ η ε₀ data x) < c + r ^ 2 / 2 := by
+  change morseRoundedFunction hk c ε r δ R₀ R₁ data x.1.1 < c at hz
+  rcases x with ⟨z, hzball⟩
+  rcases hzball with ⟨y, hy, hxy⟩
+  dsimp [morseLevelDampedUnstretchSublevelMap]
+  have hsrc : y ∈ data.χ.source := data.hχsrc y (le_trans hy (le_of_lt hR₁R))
+  have hsymm : data.χ.symm z.1 = y := by
+    rw [← hxy]
+    exact data.χ.left_inv hsrc
+  rw [hsymm]
+  have hg : CellAttachment.modelRoundedFunction hk c ε r δ R₀ R₁ y < c := by
+    have hg' := morseRoundedFunction_eq_model_of_mem_closedBall hk c ε r δ R₀ R₁ data ⟨y, hy, hxy⟩
+    have hz' : morseRoundedFunction hk c ε r δ R₀ R₁ data z.1 < c := hz
+    rw [hg', hsymm] at hz'
+    exact hz'
+  have hatt : y ∈ CellAttachment.modelAttachedRegion hk ε r δ :=
+    (CellAttachment.modelRoundedFunction_le_c_iff_mem_attachedRegion hk c ε r δ R₀ R₁
+      hε hδ hR hR0 hbig y).mp (le_of_lt hg)
+  have hnormImage : morseNorm (m + 1)
+      (CellAttachment.modelLevelDampedUnstretch hk ε r δ c η ε₀ y) ≤ data.R := by
+    have hsq := CellAttachment.modelLevelDampedUnstretch_norm_sq_le hk ε r δ c η ε₀
+      (le_of_lt hε) hδ hδr R₁ hy
+    have hle : morseNorm (m + 1)
+        (CellAttachment.modelLevelDampedUnstretch hk ε r δ c η ε₀ y) ^ 2 < data.R ^ 2 :=
+      lt_of_le_of_lt hsq hR'b
+    have hnonneg : 0 ≤ morseNorm (m + 1)
+        (CellAttachment.modelLevelDampedUnstretch hk ε r δ c η ε₀ y) := by
+      dsimp [morseNorm]
+      exact norm_nonneg _
+    have hRnonneg : 0 ≤ data.R := le_of_lt data.hRpos
+    have habs := sq_lt_sq.mp hle
+    have h1 : |morseNorm (m + 1)
+        (CellAttachment.modelLevelDampedUnstretch hk ε r δ c η ε₀ y)| =
+        morseNorm (m + 1) (CellAttachment.modelLevelDampedUnstretch hk ε r δ c η ε₀ y) :=
+      abs_of_nonneg hnonneg
+    have h2 : |data.R| = data.R := abs_of_nonneg hRnonneg
+    rw [h1, h2] at habs
+    exact le_of_lt habs
+  have hval : f (data.χ (CellAttachment.modelLevelDampedUnstretch hk ε r δ c η ε₀ y)) =
+      CellAttachment.morseNormalForm hk c
+        (CellAttachment.modelLevelDampedUnstretch hk ε r δ c η ε₀ y) :=
+    data.hnorm _ hnormImage
+  rw [hval]
+  exact CellAttachment.modelLevelDampedUnstretch_strict hk c ε r δ R₀ R₁ hε hδ hδr hR hR0
+    hbig η ε₀ hatt hg
+
 theorem isCompact_ballImage {m k : ℕ} (hk : k ≤ m + 1) (c R₁ : ℝ)
     {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M] [ChartedSpace H M] [T2Space M]
     {I : ModelWithCorners ℝ (MorseModel (m + 1)) H} {f : M → ℝ}
