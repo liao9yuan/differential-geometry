@@ -1829,6 +1829,26 @@ theorem modelFlow_posPart_norm_sq {n k : ℕ} (hk : k ≤ n) (t : ℝ) (y : Mors
   · rw [sub_mul, one_mul]
     rw [div_mul_cancel₀ (2 * t) hb2]
 
+theorem modelFlow_posPart_norm_sq_neg {n k : ℕ} (hk : k ≤ n) (t : ℝ) (y : MorseModel n)
+    (ht0 : t ≤ 0) (hp : ‖posPart hk y‖ ≠ 0) :
+    ‖posPart hk (modelFlow hk t y)‖ ^ 2 = ‖posPart hk y‖ ^ 2 - 2 * t := by
+  rw [modelFlow_posPart]
+  rw [norm_smul]
+  rw [Real.norm_eq_abs, abs_of_nonneg (Real.sqrt_nonneg _)]
+  rw [mul_pow]
+  have hb2pos : 0 < ‖posPart hk y‖ ^ 2 :=
+    sq_pos_of_pos (lt_of_le_of_ne (norm_nonneg _) (Ne.symm hp))
+  have hsq : 0 ≤ 1 - 2 * t / ‖posPart hk y‖ ^ 2 := by
+    have hnum : 2 * t ≤ 0 := by
+      have hm := mul_nonpos_of_nonpos_of_nonneg ht0 (by norm_num : (0 : ℝ) ≤ 2)
+      simpa [mul_comm] using hm
+    have hterm : 2 * t / ‖posPart hk y‖ ^ 2 ≤ 0 :=
+      div_nonpos_of_nonpos_of_nonneg hnum (le_of_lt hb2pos)
+    nlinarith
+  rw [Real.sq_sqrt hsq]
+  rw [sub_mul, one_mul]
+  rw [div_mul_cancel₀ (2 * t) (ne_of_gt hb2pos)]
+
 theorem modelFlow_up_posPart_norm_sq {n k : ℕ} (hk : k ≤ n) (t : ℝ) (y : MorseModel n)
     (ht0 : 0 ≤ t) (hy : 0 < ‖posPart hk y‖) :
     ‖posPart hk (modelFlow hk (-t) y)‖ ^ 2 = ‖posPart hk y‖ ^ 2 + 2 * t := by
