@@ -20469,6 +20469,35 @@ private lemma smoothTransition_deriv_le_two {x : ℝ} (hx0 : 0 < x) (hx1 : x < 1
     exact (div_le_iff₀ hden).2 (by nlinarith [hnum])
   linarith [hmain, hmainle]
 
+private lemma smoothTransition_deriv_abs_le_two_on {x : ℝ} (hx0 : 0 < x) (hx1 : x < 1) :
+    |deriv Real.smoothTransition x| ≤ 2 := by
+  have hnon : 0 ≤ deriv Real.smoothTransition x := by
+    rw [smoothTransition_deriv hx0]
+    have hg : 0 ≤ expNegInvGlue x := expNegInvGlue.nonneg x
+    have hh : 0 ≤ expNegInvGlue (1 - x) := expNegInvGlue.nonneg (1 - x)
+    have hsum : 0 ≤ 1 / x ^ 2 + 1 / (1 - x) ^ 2 := by positivity
+    exact div_nonneg (mul_nonneg (mul_nonneg hg hh) hsum) (sq_nonneg _)
+  rw [abs_of_nonneg hnon]
+  exact smoothTransition_deriv_le_two hx0 hx1
+
+private lemma smoothTransition_lipschitz_on {x y : ℝ} (hx : x ∈ Set.Ioo 0 1) (hy : y ∈ Set.Ioo 0 1) :
+    |Real.smoothTransition x - Real.smoothTransition y| ≤ 2 * |x - y| := by
+  have hseg : ∀ z ∈ (Set.Ioo 0 1 : Set ℝ), DifferentiableAt ℝ Real.smoothTransition z := by
+    intro z hz
+    have hc : ContDiffAt ℝ 1 Real.smoothTransition z :=
+      (Real.smoothTransition.contDiff (n := (1 : ℕ∞))).contDiffAt
+    exact hc.differentiableAt_one
+  have hbnd : ∀ z ∈ (Set.Ioo 0 1 : Set ℝ), |deriv Real.smoothTransition z| ≤ 2 := by
+    intro z hz
+    exact smoothTransition_deriv_abs_le_two_on hz.1 hz.2
+  have hmain := Convex.norm_image_sub_le_of_norm_deriv_le (s := (Set.Ioo 0 1 : Set ℝ)) (C := (2 : ℝ))
+    (f := Real.smoothTransition) hseg hbnd (convex_Ioo 0 1) hx hy
+  have h1 : |Real.smoothTransition x - Real.smoothTransition y| =
+      |Real.smoothTransition y - Real.smoothTransition x| := abs_sub_comm _ _
+  have h2 : |x - y| = |y - x| := abs_sub_comm _ _
+  rw [h1, h2]
+  exact hmain
+
 theorem modelLevelDampedTransportLevelMap_strictMono_core {m k : ℕ} (hk : k ≤ m + 1)
     (c ε r δ ρ ρ' θ R₀ R₁ η ε₀ : ℝ) (hθ : 0 < θ) (hR₀R₁ : R₀ < R₁)
     (hε : 0 ≤ ε) (hδ : 0 < δ) (hδr : δ < r ^ 2) (hε₀ : 0 < ε₀)
