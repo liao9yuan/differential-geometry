@@ -20404,6 +20404,40 @@ theorem modelLevelDampedTransportLevelMap_strictMono_deep {m k : ℕ} (hk : k �
       exact hlt)
   nlinarith [hsqlt, hnegsq]
 
+private lemma attachedRegion_negPart_large_of_norm_gt {m k : ℕ} (hk : k ≤ m + 1)
+    (ε r δ R₀ : ℝ) (hε : 0 ≤ ε) (hδ0 : 0 < δ)
+    (hR₀ : 0 ≤ R₀) (hbig : 2 * (r ^ 2 + 2 * ε + δ) ≤ R₀ ^ 2)
+    {y : MorseModel (m + 1)} (hy : y ∈ modelAttachedRegion hk ε r δ)
+    (hR : R₀ < morseNorm (m + 1) y) :
+    r ^ 2 + 2 * ε + δ ≤ ‖negPart hk y‖ ^ 2 := by
+  by_contra hnot
+  have hlt : ‖negPart hk y‖ ^ 2 < r ^ 2 + 2 * ε + δ := lt_of_not_ge hnot
+  have hnormle : morseNorm (m + 1) y ^ 2 < R₀ ^ 2 := by
+    have hmain := modelAttached_norm_sq_lt_of_negPart_lt hk ε r δ hε hδ0 hy hlt
+    nlinarith [hbig, hmain]
+  have hle : morseNorm (m + 1) y ≤ R₀ := by
+    have hnon : 0 ≤ morseNorm (m + 1) y := by
+      dsimp [morseNorm]
+      exact norm_nonneg _
+    have habs := sq_lt_sq.mp hnormle
+    have h1 : |morseNorm (m + 1) y| = morseNorm (m + 1) y := abs_of_nonneg hnon
+    have h2 : |R₀| = R₀ := abs_of_nonneg hR₀
+    rw [h1, h2] at habs
+    exact le_of_lt habs
+  exact (not_lt_of_ge hle) hR
+
+private lemma attachedRegion_normalForm_le_of_negPart_large {m k : ℕ} (hk : k ≤ m + 1)
+    (c ε r δ : ℝ) (hδ : 0 < δ) {y : MorseModel (m + 1)}
+    (hy : y ∈ modelAttachedRegion hk ε r δ)
+    (hneg : r ^ 2 + 2 * ε + δ ≤ ‖negPart hk y‖ ^ 2) :
+    morseNormalForm hk c y ≤ c - ε := by
+  have hpos : ‖posPart hk y‖ ^ 2 ≤ smoothCap ε r δ (‖negPart hk y‖ ^ 2) := by
+    simpa [modelAttachedRegion] using hy
+  have hcap : smoothCap ε r δ (‖negPart hk y‖ ^ 2) = ‖negPart hk y‖ ^ 2 - 2 * ε :=
+    smoothCap_upper hδ hneg
+  rw [morseNormalForm_split hk c y]
+  nlinarith [hpos, hcap]
+
 private lemma modelLevelDampedUnstretch_mem_upper_of_roundedSublevel {m k : ℕ}
     (hk : k ≤ m + 1) (c ε r δ R₀ R₁ η ε₀ : ℝ) (hε : 0 < ε) (hδ : 0 < δ)
     (hδr : δ < r ^ 2) (hR : R₀ < R₁) (hR0 : 0 ≤ R₀)
