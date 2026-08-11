@@ -53,12 +53,15 @@ private theorem endoSlotZero_sub_h2
       slotInsertEndoCc (I := I) (M := M) g s B
   exact slotInsertEndoCc_sub (I := I) (M := M) g s A B
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless]
+    [SigmaCompactSpace M] in
 private theorem lc0Kappa_eq_metricConnDiffLoweredCc
     (g₀ g₁ gB : SmoothRiemannianMetric I M) :
     lc0Kappa (I := I) (M := M) g₀ g₁ gB =
       metricConnDiffLoweredCc (I := I) (M := M) g₀ g₁ gB := by
   rfl
 
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] in
 private theorem h2Jet_smul
     (g : SmoothRiemannianMetric I M) (r s n : ℕ)
     (a : ℝ) (W : SmoothCcTensor g r s) :
@@ -72,7 +75,7 @@ private theorem h2Jet_smul
   rw [DifferentialGeometry.Integral.Connection.iteratedCovGrad_smul_real,
     norm_smul, Real.norm_eq_abs, mul_pow, sq_abs]
 
-omit [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] in
 private theorem lowJetSq_nonneg
     (g : SmoothRiemannianMetric I M) {r s : ℕ} (m : ℕ)
     (W : SmoothCcTensor g r s) :
@@ -129,6 +132,7 @@ private theorem hs3_of_jet3
     _ ≤ C * (2 * A) := mul_le_mul_of_nonneg_left hJ hC
     _ = D * A := by simp only [D]; ring
 
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] in
 private theorem h2Jet_two
     (g : SmoothRiemannianMetric I M) (r s n : ℕ)
     (W : SmoothCcTensor g r s) :
@@ -144,6 +148,7 @@ private theorem h2Jet_two
   norm_num
   ring
 
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] in
 private theorem h2Jet_sum2
     (g : SmoothRiemannianMetric I M) (r s n : ℕ)
     (W Z : SmoothCcTensor g r s) (A B : ℝ)
@@ -183,6 +188,7 @@ private theorem h2Jet_sum2
       ring
     _ ≤ 2 * (A ^ 2 + B ^ 2) := by gcongr
 
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] in
 private theorem h2Jet_sub
     (g : SmoothRiemannianMetric I M) (r s n : ℕ)
     (W Z : SmoothCcTensor g r s) (A B : ℝ)
@@ -199,6 +205,7 @@ private theorem h2Jet_sub
   simpa only [sub_eq_add_neg] using
     h2Jet_sum2 (I := I) (M := M) g r s n W (-Z) A B hW hZneg
 
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] in
 private theorem h2Jet_sum4
     (g : SmoothRiemannianMetric I M) (r s n : ℕ)
     (W X Y Z : SmoothCcTensor g r s) (A B C D : ℝ)
@@ -235,7 +242,7 @@ private theorem h2Jet_sum4
       rw [hABsq, hCDsq]
       ring
 
-omit [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] in
 /-- A jet-square bound through order three controls the single top covariant
 derivative.  This is the bridge feeding the tame grid producers. -/
 private theorem topNorm_le
@@ -552,6 +559,8 @@ private noncomputable def bgAmixHalf
           (slotExtendIter (I := I) (M := M) g₀ 0 3 2
             (lc0Kappa (I := I) (M := M) g₀ g₁ g₀)))))
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless]
+    [BoundarylessManifold I M] [SigmaCompactSpace M] in
 private theorem slotIter_sub
     (g₀ : SmoothRiemannianMetric I M) (r s w : ℕ)
     (A B : SmoothCcTensor g₀ r s) :
@@ -566,6 +575,7 @@ private theorem slotIter_sub
       rw [ih, slotExtend_sub]
       rfl
 
+omit [NeZero (Module.finrank ℝ E)] in
 private theorem amixHalf_bg
     (g₀ g₁ gB : SmoothRiemannianMetric I M)
     (σ : Equiv.Perm (Fin 4)) :
@@ -1003,6 +1013,40 @@ private theorem bgCorrFam_tame
       simp only [B0, B1, V]
       ring
 
+theorem rhs_self_bg_corr_h2
+    (hDim : Module.finrank ℝ E = 3)
+    (g₀ gB : SmoothRiemannianMetric I M)
+    {δ₀ : ℝ} (hδ₀ : δ₀ < 1) :
+    ∃ B0 B1 : ℝ → ℝ,
+      (∀ R : ℝ, 0 ≤ R → 0 ≤ B0 R) ∧
+      (∀ R : ℝ, 0 ≤ R → 0 ≤ B1 R) ∧
+      ∀ (T : SmoothCcTensor g₀ 0 2)
+        {δ : ℝ} (_hδ_le : δ ≤ δ₀) (_hδ_nonneg : 0 ≤ δ)
+        (hδ : gFibreOpBound (I := I) (M := M) g₀
+          (ccTensorBilinSymm (I := I) g₀ T) δ)
+        (hδZ : gFibreOpBound (I := I) (M := M) g₀
+          (ccTensorBilinSymm (I := I) g₀
+            (0 : SmoothCcTensor g₀ 0 2)) δ)
+        (R A : ℝ), 0 ≤ R → 0 ≤ A →
+        (∑ j ∈ Finset.range 3,
+          ‖iteratedCovGrad (I := I) g₀ 0 2 j T‖ ^ 2) ≤ R ^ 2 →
+        (∑ j ∈ Finset.range 4,
+          ‖iteratedCovGrad (I := I) g₀ 0 2 j T‖ ^ 2) ≤ A ^ 2 →
+        ∀ s ∈ Set.Icc (0 : ℝ) 1,
+          (∑ i ∈ Finset.range 3,
+            ‖iteratedCovGrad (I := I) g₀ 2 2 i
+              (LowBaseInternal.rhsSelfLow (I := I) (M := M)
+                  g₀ gB T hδ hδZ s -
+                LowBaseInternal.rhsSelfLow (I := I) (M := M)
+                  g₀ g₀ T hδ hδZ s)‖ ^ 2) ≤
+            (B0 R + B1 R * A) ^ 2 := by
+  obtain ⟨B0, B1, hB0, hB1, hcorr⟩ :=
+    bgCorrFam_tame (I := I) (M := M) hDim g₀ gB hδ₀
+  refine ⟨B0, B1, hB0, hB1, ?_⟩
+  intro T δ hδ_le hδ_nonneg hδ hδZ R A hR hA hT2 hT3 s hs
+  simpa only [bgCorrFam] using
+    hcorr T hδ_le hδ_nonneg hδ hδZ R A hR hA hT2 hT3 s hs
+
 set_option linter.unusedVariables false in
 /-- One-parameter wrapper around `bgCorrFam_tame` for callers that use a single
 `H3` jet size. -/
@@ -1204,6 +1248,7 @@ theorem bgCorr_h2
   intro s hs
   exact hfam T hδ_le hδ_nonneg hδ hδZ A hA hT s hs
 
+omit [NeZero (Module.finrank ℝ E)] in
 private theorem fixedBg_h2
     (g₀ gB : SmoothRiemannianMetric I M) :
     ∃ B : ℝ, 0 ≤ B ∧
