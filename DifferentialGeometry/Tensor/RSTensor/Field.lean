@@ -1,5 +1,6 @@
-
-
+/-
+Authors: Yuan Liao, Jack McCarthy
+-/
 import DifferentialGeometry.Tensor.RSTensor.Defs
 import DifferentialGeometry.Tensor.Multilinear.Fiber
 import DifferentialGeometry.Tensor.Multilinear.Bundle

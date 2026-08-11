@@ -1,3 +1,7 @@
+/-
+Author: Yuan Liao
+Coauthor: Ayush Khaitan, Jack McCarthy
+-/
 import DifferentialGeometry.Tensor.RSTensor.Defs
 import Mathlib.Geometry.Manifold.VectorBundle.SmoothSection
 import Mathlib.Geometry.Manifold.VectorField.Pullback

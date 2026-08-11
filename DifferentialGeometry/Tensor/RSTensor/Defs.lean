@@ -1,5 +1,6 @@
-
-
+/-
+Authors: Yuan Liao, Jack McCarthy
+-/
 import DifferentialGeometry.Tensor.Multilinear.Fiber
 import DifferentialGeometry.Tensor.Multilinear.Curry
 import Mathlib.Geometry.Manifold.VectorBundle.Hom
