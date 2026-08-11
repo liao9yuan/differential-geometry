@@ -3,6 +3,8 @@ set -euo pipefail
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "$ROOT"
+audit_tmp="$(mktemp -d "${TMPDIR:-/tmp}/differential-geometry-audit.XXXXXX")"
+trap 'rm -rf "$audit_tmp"' EXIT
 
 echo "== Building audit modules from current source =="
 modules=(
@@ -58,6 +60,36 @@ if [ "$missing" -ne 0 ]; then
   exit 1
 fi
 
+echo "== Checking canonical author headers =="
+author_manifest="Scripts/author_headers.manifest"
+if [ "$(wc -l < "$author_manifest")" -ne 56 ]; then
+  echo "FAIL: author header manifest must contain exactly 56 surviving files"
+  exit 1
+fi
+awk '{print $2}' "$author_manifest" | sort > "$audit_tmp/author_manifest_paths"
+(rg -l 'Jack McCarthy' DifferentialGeometry --glob '*.lean' || true) | sort \
+  > "$audit_tmp/author_actual_paths"
+if ! diff -u "$audit_tmp/author_manifest_paths" "$audit_tmp/author_actual_paths"; then
+  echo "FAIL: files carrying Jack-uploaded author headers differ from the canonical manifest"
+  exit 1
+fi
+author_mismatch=0
+while read -r expected file; do
+  if [ ! -f "$file" ]; then
+    echo "FAIL: author-attributed file is missing: $file"
+    author_mismatch=1
+    continue
+  fi
+  actual=$(awk '{print} /^-\/$/{exit}' "$file" | shasum -a 256 | awk '{print $1}')
+  if [ "$actual" != "$expected" ]; then
+    echo "FAIL: canonical author header changed in $file"
+    author_mismatch=1
+  fi
+done < "$author_manifest"
+if [ "$author_mismatch" -ne 0 ]; then
+  exit 1
+fi
+
 echo "== Checking for forbidden constructs in de Rham sources and audit scripts =="
 if rg -n "set_option (maxHeartbeats|maxRecDepth|synthInstance.maxHeartbeats)|#check |#print |#eval |#reduce |logInfo |\bsorry\b|\badmit\b|^axiom |\btrustMe\b" \
     DifferentialGeometry/Tensor DifferentialGeometry/Bundle DifferentialGeometry/Analysis/Calculus/AnalyticTransfer.lean \
@@ -102,9 +134,9 @@ if rg -n "\b(sorry|admit|axiom|trustMe)\b" \
 fi
 
 echo "== Checking build warnings against allowlist =="
-lake build DifferentialGeometry > /tmp/audit_build.log 2>&1 || { cat /tmp/audit_build.log; echo "FAIL: root build failed"; exit 1; }
-grep "warning" /tmp/audit_build.log | sed -E 's/^warning: //' | sort > /tmp/audit_warnings.txt
-if ! diff -u Scripts/warnings.allowlist /tmp/audit_warnings.txt; then
+lake build DifferentialGeometry > "$audit_tmp/build.log" 2>&1 || { cat "$audit_tmp/build.log"; echo "FAIL: root build failed"; exit 1; }
+(grep "warning" "$audit_tmp/build.log" || true) | sed -E 's/^warning: //' | sort > "$audit_tmp/warnings.txt"
+if ! diff -u Scripts/warnings.allowlist "$audit_tmp/warnings.txt"; then
   echo "FAIL: build warnings differ from the allowlist (add new warnings only with owner approval)"
   exit 1
 fi
