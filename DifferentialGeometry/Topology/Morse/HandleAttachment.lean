@@ -3688,6 +3688,543 @@ theorem modelSublevelFamilyCutoff_affine {n k : ℕ} (hk : k ≤ n)
     ring
   simpa [γ, β, ρ] using hmain
 
+theorem differentiableAt_modelSublevelFamily {n k : ℕ} (hk : k ≤ n)
+    (c ε r δ R₀ R₁ s : ℝ) (y : MorseModel n) :
+    DifferentiableAt ℝ (fun z : MorseModel n => modelSublevelFamily hk c ε r δ R₀ R₁ s z) y := by
+  have h1 : DifferentiableAt ℝ (fun z : MorseModel n => modelRoundedFunction hk c ε r δ R₀ R₁ z - c) y :=
+    (differentiableAt_modelRoundedFunction hk c ε r δ R₀ R₁ y).sub (differentiableAt_const c)
+  have h2 : DifferentiableAt ℝ (fun z : MorseModel n => morseNormalForm hk c z - c - ε) y :=
+    ((contDiff_morseNormalForm hk c).differentiable (by
+      exact_mod_cast (ne_top_of_lt zero_lt_one).symm) |>.differentiableAt.sub
+      (differentiableAt_const c)).sub (differentiableAt_const ε)
+  dsimp [modelSublevelFamily]
+  exact (h1.const_mul (1 - s)).add (h2.const_mul s)
+
+theorem fderiv_modelRoundedFunction_direction_pos_value {n k : ℕ} (hk : k ≤ n)
+    (c ε r δ R₀ R₁ : ℝ) (hR : R₀ < R₁) (hR0 : 0 ≤ R₀) (y : MorseModel n) :
+    fderiv ℝ (fun z : MorseModel n => modelRoundedFunction hk c ε r δ R₀ R₁ z - c) y
+      (recombine hk (0 : EuclideanSpace ℝ (Fin k)) (posPart hk y)) =
+      ‖posPart hk y‖ ^ 2 *
+        (1 + 2 * (morseNormalForm hk c y - c + ε - (modelAttachedFunction hk c ε r δ y - c)) *
+          (deriv Real.smoothTransition ((morseNorm n y ^ 2 - R₀ ^ 2) / (R₁ ^ 2 - R₀ ^ 2)) /
+            (R₁ ^ 2 - R₀ ^ 2))) := by
+  have hfun : (fun z : MorseModel n => modelSublevelFamily hk c ε r δ R₀ R₁ 0 z) =
+      fun z : MorseModel n => modelRoundedFunction hk c ε r δ R₀ R₁ z - c := by
+    funext z
+    dsimp [modelSublevelFamily]
+    ring
+  have hd := fderiv_modelSublevelFamily_direction_pos hk c ε r δ R₀ R₁ (0 : ℝ) hR hR0 y
+  rw [← hfun]
+  simpa using hd
+
+theorem fderiv_modelRoundedFunction_direction_neg_value {n k : ℕ} (hk : k ≤ n)
+    (c ε r δ R₀ R₁ : ℝ) (hR : R₀ < R₁) (hR0 : 0 ≤ R₀) (y : MorseModel n) :
+    fderiv ℝ (fun z : MorseModel n => modelRoundedFunction hk c ε r δ R₀ R₁ z - c) y
+      (recombine hk (negPart hk y) (0 : EuclideanSpace ℝ (Fin (n - k)))) =
+      ‖negPart hk y‖ ^ 2 *
+        (-((1 - Real.smoothTransition ((morseNorm n y ^ 2 - R₀ ^ 2) / (R₁ ^ 2 - R₀ ^ 2))) *
+              deriv (smoothCap ε r δ) (‖negPart hk y‖ ^ 2) +
+            Real.smoothTransition ((morseNorm n y ^ 2 - R₀ ^ 2) / (R₁ ^ 2 - R₀ ^ 2))) +
+          2 * (morseNormalForm hk c y - c + ε - (modelAttachedFunction hk c ε r δ y - c)) *
+            (deriv Real.smoothTransition ((morseNorm n y ^ 2 - R₀ ^ 2) / (R₁ ^ 2 - R₀ ^ 2)) /
+              (R₁ ^ 2 - R₀ ^ 2))) := by
+  have hfun : (fun z : MorseModel n => modelSublevelFamily hk c ε r δ R₀ R₁ 0 z) =
+      fun z : MorseModel n => modelRoundedFunction hk c ε r δ R₀ R₁ z - c := by
+    funext z
+    dsimp [modelSublevelFamily]
+    ring
+  have hd := fderiv_modelSublevelFamily_direction_neg hk c ε r δ R₀ R₁ (0 : ℝ) hR hR0 y
+  rw [← hfun]
+  simpa using hd
+
+theorem fderiv_modelSublevelFamilyCutoff_direction_pos {n k : ℕ} (hk : k ≤ n)
+    (c ε r δ R₀ R₁ ε₀ : ℝ) (hR : R₀ < R₁) (hR0 : 0 ≤ R₀) (θ : ℝ → ℝ) (s : ℝ)
+    (y : MorseModel n)
+    (hθ : DifferentiableAt ℝ θ (modelSublevelCutoffRatio hk c ε r δ R₀ R₁ ε₀ y))
+    (hden : modelRoundedFunction hk c ε r δ R₀ R₁ y - c -
+      (morseNormalForm hk c y - c - ε) ≠ 0) :
+    fderiv ℝ (fun z : MorseModel n => modelSublevelFamilyCutoff hk c ε r δ R₀ R₁ ε₀ θ s z) y
+      (recombine hk (0 : EuclideanSpace ℝ (Fin k)) (posPart hk y)) =
+      ‖posPart hk y‖ ^ 2 *
+        ((1 - s * θ (modelSublevelCutoffRatio hk c ε r δ R₀ R₁ ε₀ y) -
+            s * deriv θ (modelSublevelCutoffRatio hk c ε r δ R₀ R₁ ε₀ y) *
+              (1 - modelSublevelCutoffRatio hk c ε r δ R₀ R₁ ε₀ y)) *
+            (1 + 2 * (morseNormalForm hk c y - c + ε -
+              (modelAttachedFunction hk c ε r δ y - c)) *
+                (deriv Real.smoothTransition ((morseNorm n y ^ 2 - R₀ ^ 2) / (R₁ ^ 2 - R₀ ^ 2)) /
+                  (R₁ ^ 2 - R₀ ^ 2))) +
+          s * (θ (modelSublevelCutoffRatio hk c ε r δ R₀ R₁ ε₀ y) -
+            modelSublevelCutoffRatio hk c ε r δ R₀ R₁ ε₀ y *
+              deriv θ (modelSublevelCutoffRatio hk c ε r δ R₀ R₁ ε₀ y))) := by
+  let γ : MorseModel n → ℝ := fun z => modelRoundedFunction hk c ε r δ R₀ R₁ z - c
+  let β : MorseModel n → ℝ := fun z => morseNormalForm hk c z - c - ε
+  let ρ : MorseModel n → ℝ := fun z => modelSublevelCutoffRatio hk c ε r δ R₀ R₁ ε₀ z
+  let wp : MorseModel n := recombine hk (0 : EuclideanSpace ℝ (Fin k)) (posPart hk y)
+  let G : ℝ := morseNormalForm hk c y - c + ε - (modelAttachedFunction hk c ε r δ y - c)
+  let τSlope : ℝ := deriv Real.smoothTransition ((morseNorm n y ^ 2 - R₀ ^ 2) / (R₁ ^ 2 - R₀ ^ 2)) /
+    (R₁ ^ 2 - R₀ ^ 2)
+  let q : ℝ := 1 + 2 * G * τSlope
+  have hγ : DifferentiableAt ℝ γ y := by
+    dsimp [γ]
+    exact (differentiableAt_modelRoundedFunction hk c ε r δ R₀ R₁ y).sub (differentiableAt_const c)
+  have hβ : DifferentiableAt ℝ β y := by
+    dsimp [β]
+    exact ((contDiff_morseNormalForm hk c).differentiable (by
+      exact_mod_cast (ne_top_of_lt zero_lt_one).symm) |>.differentiableAt.sub
+      (differentiableAt_const c)).sub (differentiableAt_const ε)
+  have hρ : DifferentiableAt ℝ ρ y := by
+    dsimp [ρ, modelSublevelCutoffRatio]
+    have hden' : γ y - β y ≠ 0 := by
+      dsimp [γ, β]
+      exact hden
+    change DifferentiableAt ℝ (fun z : MorseModel n => (γ z + ε₀) * (γ z - β z)⁻¹) y
+    exact (hγ.add (differentiableAt_const ε₀)).mul ((hγ.sub hβ).inv hden')
+  have hθρ : DifferentiableAt ℝ (fun z => θ (ρ z)) y := hθ.comp y hρ
+  have hsplit : (fun z : MorseModel n => modelSublevelFamilyCutoff hk c ε r δ R₀ R₁ ε₀ θ s z) =
+      (fun z : MorseModel n => modelSublevelFamily hk c ε r δ R₀ R₁ s z) +
+        (fun z : MorseModel n => s * (θ (ρ z) - 1) * (β z - γ z)) := by
+    funext z
+    dsimp [modelSublevelFamilyCutoff, modelSublevelFamily, ρ, β, γ]
+    ring
+  have hdγ : fderiv ℝ γ y wp = ‖posPart hk y‖ ^ 2 * q := by
+    dsimp [γ, wp, q, G, τSlope]
+    exact fderiv_modelRoundedFunction_direction_pos_value hk c ε r δ R₀ R₁ hR hR0 y
+  have hdβ : fderiv ℝ β y wp = ‖posPart hk y‖ ^ 2 := by
+    dsimp [β, wp]
+    have hfuneq : (fun z : MorseModel n => morseNormalForm hk c z - c - ε) =
+        (fun z : MorseModel n => morseNormalForm hk c z) - (fun _ : MorseModel n => c + ε) := by
+      funext z
+      change morseNormalForm hk c z - c - ε = morseNormalForm hk c z - (c + ε)
+      ring
+    rw [hfuneq]
+    rw [fderiv_sub (f := fun z : MorseModel n => morseNormalForm hk c z)
+      (g := fun _ : MorseModel n => c + ε)
+      (hf := (contDiff_morseNormalForm hk c).differentiable (by
+        exact_mod_cast (ne_top_of_lt zero_lt_one).symm) |>.differentiableAt)
+      (hg := differentiableAt_const (c + ε))]
+    simp [fderiv_morseNormalForm_direction_pos hk c y]
+  have hdγβ : fderiv ℝ (fun z => β z - γ z) y wp = ‖posPart hk y‖ ^ 2 * (1 - q) := by
+    rw [show (fun z : MorseModel n => β z - γ z) = β - γ by rfl]
+    rw [fderiv_sub (f := β) (g := γ) (hf := hβ) (hg := hγ)]
+    simp [ContinuousLinearMap.sub_apply, hdβ, hdγ]
+    ring
+  have hdρ : fderiv ℝ ρ y wp = ‖posPart hk y‖ ^ 2 * ((1 - ρ y) * q + ρ y) / (γ y - β y) := by
+    have hγβ : γ y - β y ≠ 0 := by
+      dsimp [γ, β]
+      exact hden
+    have hγβdiff : DifferentiableAt ℝ (fun z => γ z - β z) y := hγ.sub hβ
+    have hγβinv : DifferentiableAt ℝ (fun z => (γ z - β z)⁻¹) y := hγβdiff.inv hγβ
+    have hγβinv_val : fderiv ℝ (fun z => (γ z - β z)⁻¹) y wp =
+        -(γ y - β y)⁻¹ ^ 2 * (fderiv ℝ (fun z => γ z - β z) y wp) := by
+      have hinv := hasFDerivAt_inv (𝕜 := ℝ) hγβ
+      have hcomp :=
+        HasFDerivAt.comp (g := fun x : ℝ => x⁻¹) (hg := hinv) (f := fun z => γ z - β z)
+          (hf := hγβdiff.hasFDerivAt)
+      have hcompf : fderiv ℝ (fun z => (γ z - β z)⁻¹) y =
+          (ContinuousLinearMap.toSpanSingleton ℝ (-((γ y - β y) ^ 2)⁻¹) : ℝ →L[ℝ] ℝ).comp
+            (fderiv ℝ (fun z => γ z - β z) y) := by
+        simpa using hcomp.fderiv
+      calc
+        fderiv ℝ (fun z => (γ z - β z)⁻¹) y wp
+            = ((ContinuousLinearMap.toSpanSingleton ℝ (-((γ y - β y) ^ 2)⁻¹) : ℝ →L[ℝ] ℝ).comp
+                (fderiv ℝ (fun z => γ z - β z) y)) wp := by rw [hcompf]
+        _ = -(γ y - β y)⁻¹ ^ 2 * (fderiv ℝ (fun z => γ z - β z) y wp) := by
+              simp [ContinuousLinearMap.comp_apply]
+              field_simp
+    have hnum : fderiv ℝ (fun z => γ z + ε₀) y wp = ‖posPart hk y‖ ^ 2 * q := by
+      rw [show (fun z : MorseModel n => γ z + ε₀) = γ + (fun _ : MorseModel n => ε₀) by rfl]
+      rw [fderiv_add (f := γ) (g := fun _ : MorseModel n => ε₀) (hf := hγ)
+        (hg := differentiableAt_const ε₀)]
+      simp [hdγ]
+    have hdenf : fderiv ℝ (fun z => γ z - β z) y wp = ‖posPart hk y‖ ^ 2 * (q - 1) := by
+      rw [show (fun z : MorseModel n => γ z - β z) = γ - β by rfl]
+      rw [fderiv_sub (f := γ) (g := β) (hf := hγ) (hg := hβ)]
+      simp [ContinuousLinearMap.sub_apply, hdγ, hdβ]
+      ring
+    have hρdef : (fun z : MorseModel n => ρ z) = fun z => (γ z + ε₀) * (γ z - β z)⁻¹ := by
+      funext z
+      dsimp [ρ]
+      rfl
+    have hmain : fderiv ℝ ρ y wp =
+        ‖posPart hk y‖ ^ 2 * q * (γ y - β y)⁻¹ +
+          (γ y + ε₀) * (-(γ y - β y)⁻¹ ^ 2 * (‖posPart hk y‖ ^ 2 * (q - 1))) := by
+      rw [show fderiv ℝ ρ y = fderiv ℝ (fun z : MorseModel n => ρ z) y by rfl]
+      rw [hρdef]
+      have hprod : (fun z : MorseModel n => (γ z + ε₀) * (γ z - β z)⁻¹) =
+          (fun z : MorseModel n => γ z + ε₀) * (fun z : MorseModel n => (γ z - β z)⁻¹) := by
+        rfl
+      rw [hprod]
+      have hγp : DifferentiableAt ℝ (fun z => γ z + ε₀) y := hγ.add (differentiableAt_const ε₀)
+      have hmul := fderiv_mul (x := y) (c := fun z => γ z + ε₀)
+        (d := fun z => (γ z - β z)⁻¹) (hc := hγp) (hd := hγβinv)
+      rw [hmul]
+      rw [ContinuousLinearMap.add_apply, ContinuousLinearMap.smul_apply,
+        ContinuousLinearMap.smul_apply]
+      rw [hγβinv_val, hnum, hdenf]
+      simp [smul_eq_mul]
+      field_simp [hγβ]
+      ring
+    have hρval : ρ y = (γ y + ε₀) / (γ y - β y) := rfl
+    dsimp [ρ] at hρval
+    have hlin : (γ y + ε₀) = ρ y * (γ y - β y) := by
+      dsimp [ρ]
+      rw [hρval]
+      field_simp [hγβ]
+    have hlin1 : 1 - ρ y = (γ y - β y - (γ y + ε₀)) / (γ y - β y) := by
+      rw [hlin]
+      field_simp [hγβ]
+    have hfinal : ‖posPart hk y‖ ^ 2 * q * (γ y - β y)⁻¹ +
+          (γ y + ε₀) * (-(γ y - β y)⁻¹ ^ 2 * (‖posPart hk y‖ ^ 2 * (q - 1))) =
+        ‖posPart hk y‖ ^ 2 * ((1 - ρ y) * q + ρ y) / (γ y - β y) := by
+      rw [hlin]
+      field_simp [hγβ]
+      ring
+    rw [hmain, hfinal]
+  have hdθρ : fderiv ℝ (fun z => θ (ρ z)) y wp =
+      deriv θ (ρ y) * (‖posPart hk y‖ ^ 2 * ((1 - ρ y) * q + ρ y) / (γ y - β y)) := by
+    have hchain : fderiv ℝ (fun z => θ (ρ z)) y =
+        (fderiv ℝ θ (ρ y)).comp (fderiv ℝ ρ y) := by
+      have hcomp :=
+        HasFDerivAt.comp (g := θ) (hg := hθ.hasFDerivAt) (f := ρ) (hf := hρ.hasFDerivAt)
+      exact hcomp.fderiv
+    have hθapp : ∀ u : ℝ, (fderiv ℝ θ (ρ y)) u = deriv θ (ρ y) * u := by
+      intro u
+      have h1 : (fderiv ℝ θ (ρ y)) 1 = deriv θ (ρ y) := by
+        simp [fderiv_apply_one_eq_deriv (𝕜 := ℝ) (f := θ) (x := ρ y)]
+      have hlin : (fderiv ℝ θ (ρ y)) u = u • (fderiv ℝ θ (ρ y)) 1 := by
+        calc
+          (fderiv ℝ θ (ρ y)) u = (fderiv ℝ θ (ρ y)) (u • (1 : ℝ)) := by
+            congr 1
+            simp
+          _ = u • (fderiv ℝ θ (ρ y)) 1 := map_smul _ _ _
+      rw [hlin, h1]
+      rw [smul_eq_mul]
+      ring
+    rw [hchain]
+    simp only [ContinuousLinearMap.comp_apply]
+    rw [hθapp, hdρ]
+  have hcorr : fderiv ℝ (fun z => s * (θ (ρ z) - 1) * (β z - γ z)) y wp =
+      s * ‖posPart hk y‖ ^ 2 *
+        ((θ (ρ y) - 1) * (1 - q) - deriv θ (ρ y) * ((1 - ρ y) * q + ρ y)) := by
+    have hprod1 : DifferentiableAt ℝ (fun z => θ (ρ z) - 1) y := hθρ.sub (differentiableAt_const 1)
+    have hprod2 : DifferentiableAt ℝ (fun z => β z - γ z) y := hβ.sub hγ
+    have hmain : fderiv ℝ (fun z => (θ (ρ z) - 1) * (β z - γ z)) y wp =
+        (θ (ρ y) - 1) * fderiv ℝ (fun z => β z - γ z) y wp +
+          (β y - γ y) * fderiv ℝ (fun z => θ (ρ z)) y wp := by
+      have hmul := fderiv_mul (x := y) (c := fun z => θ (ρ z) - 1)
+        (d := fun z => β z - γ z) (hc := hprod1) (hd := hprod2)
+      have hθρ1 : fderiv ℝ (fun z => θ (ρ z) - 1) y = fderiv ℝ (fun z => θ (ρ z)) y := by
+        rw [show (fun z : MorseModel n => θ (ρ z) - 1) =
+            (fun z : MorseModel n => θ (ρ z)) - (fun _ : MorseModel n => 1) by rfl]
+        rw [fderiv_sub (f := fun z => θ (ρ z)) (g := fun _ : MorseModel n => 1)
+          (hf := hθρ) (hg := differentiableAt_const 1)]
+        simp
+      have hmain' : fderiv ℝ (fun z => (θ (ρ z) - 1) * (β z - γ z)) y =
+          (θ (ρ y) - 1) • fderiv ℝ (fun z => β z - γ z) y +
+            (β y - γ y) • fderiv ℝ (fun z => θ (ρ z)) y := by
+        rw [show (fun z : MorseModel n => (θ (ρ z) - 1) * (β z - γ z)) =
+            (fun z : MorseModel n => θ (ρ z) - 1) * (fun z : MorseModel n => β z - γ z) by rfl]
+        rw [hmul, hθρ1]
+      rw [hmain']
+      simp [ContinuousLinearMap.add_apply, ContinuousLinearMap.smul_apply]
+    have hval : (β y - γ y) * fderiv ℝ (fun z => θ (ρ z)) y wp =
+        ‖posPart hk y‖ ^ 2 * (-(1 - ρ y) * q - ρ y) * deriv θ (ρ y) := by
+      have hβγ : β y - γ y = -(γ y - β y) := by ring
+      rw [hβγ, hdθρ]
+      have hγβ : γ y - β y ≠ 0 := by
+        dsimp [γ, β]
+        exact hden
+      field_simp [hγβ]
+      ring
+    have hmain' : fderiv ℝ (fun z => (θ (ρ z) - 1) * (β z - γ z)) y wp =
+        ‖posPart hk y‖ ^ 2 *
+          ((θ (ρ y) - 1) * (1 - q) - deriv θ (ρ y) * ((1 - ρ y) * q + ρ y)) := by
+      rw [hmain, hdγβ, hval]
+      ring
+    have hsmul : fderiv ℝ (fun z => s * (θ (ρ z) - 1) * (β z - γ z)) y wp =
+        s * fderiv ℝ (fun z => (θ (ρ z) - 1) * (β z - γ z)) y wp := by
+      have hd : DifferentiableAt ℝ (fun z => s * ((θ (ρ z) - 1) * (β z - γ z))) y :=
+        (differentiableAt_const s).mul (hprod1.mul hprod2)
+      rw [show (fun z : MorseModel n => s * (θ (ρ z) - 1) * (β z - γ z)) =
+          (fun z : MorseModel n => s * ((θ (ρ z) - 1) * (β z - γ z))) by
+        funext z
+        ring]
+      rw [fderiv_const_mul (a := fun z : MorseModel n => (θ (ρ z) - 1) * (β z - γ z))
+        (b := s) (ha := hprod1.mul hprod2)]
+      simp [ContinuousLinearMap.smul_apply]
+    rw [hsmul, hmain']
+    ring
+  have hnaive : fderiv ℝ (fun z : MorseModel n => modelSublevelFamily hk c ε r δ R₀ R₁ s z) y wp =
+      ‖posPart hk y‖ ^ 2 * (1 + 2 * (1 - s) * G * τSlope) := by
+    have hd := fderiv_modelSublevelFamily_direction_pos hk c ε r δ R₀ R₁ s hR hR0 y
+    dsimp [wp, G, τSlope] at hd ⊢
+    simpa using hd
+  have htotal : fderiv ℝ (fun z : MorseModel n => modelSublevelFamilyCutoff hk c ε r δ R₀ R₁ ε₀ θ s z) y wp =
+      ‖posPart hk y‖ ^ 2 *
+        ((1 + 2 * (1 - s) * G * τSlope) +
+          s * ((θ (ρ y) - 1) * (1 - q) - deriv θ (ρ y) * ((1 - ρ y) * q + ρ y))) := by
+    rw [hsplit]
+    rw [fderiv_add (f := fun z : MorseModel n => modelSublevelFamily hk c ε r δ R₀ R₁ s z)
+      (g := fun z : MorseModel n => s * (θ (ρ z) - 1) * (β z - γ z))
+      (hf := differentiableAt_modelSublevelFamily hk c ε r δ R₀ R₁ s y)
+      (hg := ((differentiableAt_const s).mul (hθρ.sub (differentiableAt_const 1))).mul (hβ.sub hγ))]
+    simp [ContinuousLinearMap.add_apply, hnaive, hcorr]
+    ring
+  have hgoal : (1 + 2 * (1 - s) * G * τSlope) +
+        s * ((θ (ρ y) - 1) * (1 - q) - deriv θ (ρ y) * ((1 - ρ y) * q + ρ y)) =
+      (1 - s * θ (ρ y) - s * deriv θ (ρ y) * (1 - ρ y)) * q +
+        s * (θ (ρ y) - ρ y * deriv θ (ρ y)) := by
+    dsimp [q]
+    ring
+  rw [htotal]
+  dsimp [wp, ρ, γ, β, G, τSlope, q]
+  rw [hgoal]
+
+theorem fderiv_modelSublevelFamilyCutoff_direction_neg {n k : ℕ} (hk : k ≤ n)
+    (c ε r δ R₀ R₁ ε₀ : ℝ) (hR : R₀ < R₁) (hR0 : 0 ≤ R₀) (θ : ℝ → ℝ) (s : ℝ)
+    (y : MorseModel n)
+    (hθ : DifferentiableAt ℝ θ (modelSublevelCutoffRatio hk c ε r δ R₀ R₁ ε₀ y))
+    (hden : modelRoundedFunction hk c ε r δ R₀ R₁ y - c -
+      (morseNormalForm hk c y - c - ε) ≠ 0) :
+    fderiv ℝ (fun z : MorseModel n => modelSublevelFamilyCutoff hk c ε r δ R₀ R₁ ε₀ θ s z) y
+      (recombine hk (negPart hk y) (0 : EuclideanSpace ℝ (Fin (n - k)))) =
+      ‖negPart hk y‖ ^ 2 *
+        ((1 - s * θ (modelSublevelCutoffRatio hk c ε r δ R₀ R₁ ε₀ y) -
+            s * deriv θ (modelSublevelCutoffRatio hk c ε r δ R₀ R₁ ε₀ y) *
+              (1 - modelSublevelCutoffRatio hk c ε r δ R₀ R₁ ε₀ y)) *
+            (-((1 - Real.smoothTransition ((morseNorm n y ^ 2 - R₀ ^ 2) / (R₁ ^ 2 - R₀ ^ 2))) *
+                  deriv (smoothCap ε r δ) (‖negPart hk y‖ ^ 2) +
+                Real.smoothTransition ((morseNorm n y ^ 2 - R₀ ^ 2) / (R₁ ^ 2 - R₀ ^ 2))) +
+              2 * (morseNormalForm hk c y - c + ε - (modelAttachedFunction hk c ε r δ y - c)) *
+                (deriv Real.smoothTransition ((morseNorm n y ^ 2 - R₀ ^ 2) / (R₁ ^ 2 - R₀ ^ 2)) /
+                  (R₁ ^ 2 - R₀ ^ 2))) -
+          s * (θ (modelSublevelCutoffRatio hk c ε r δ R₀ R₁ ε₀ y) -
+            modelSublevelCutoffRatio hk c ε r δ R₀ R₁ ε₀ y *
+              deriv θ (modelSublevelCutoffRatio hk c ε r δ R₀ R₁ ε₀ y))) := by
+  let γ : MorseModel n → ℝ := fun z => modelRoundedFunction hk c ε r δ R₀ R₁ z - c
+  let β : MorseModel n → ℝ := fun z => morseNormalForm hk c z - c - ε
+  let ρ : MorseModel n → ℝ := fun z => modelSublevelCutoffRatio hk c ε r δ R₀ R₁ ε₀ z
+  let wm : MorseModel n := recombine hk (negPart hk y) (0 : EuclideanSpace ℝ (Fin (n - k)))
+  let G : ℝ := morseNormalForm hk c y - c + ε - (modelAttachedFunction hk c ε r δ y - c)
+  let τ : ℝ := Real.smoothTransition ((morseNorm n y ^ 2 - R₀ ^ 2) / (R₁ ^ 2 - R₀ ^ 2))
+  let capSlope : ℝ := deriv (smoothCap ε r δ) (‖negPart hk y‖ ^ 2)
+  let τSlope : ℝ := deriv Real.smoothTransition ((morseNorm n y ^ 2 - R₀ ^ 2) / (R₁ ^ 2 - R₀ ^ 2)) /
+    (R₁ ^ 2 - R₀ ^ 2)
+  let p : ℝ := -((1 - τ) * capSlope + τ) + 2 * G * τSlope
+  have hγ : DifferentiableAt ℝ γ y := by
+    dsimp [γ]
+    exact (differentiableAt_modelRoundedFunction hk c ε r δ R₀ R₁ y).sub (differentiableAt_const c)
+  have hβ : DifferentiableAt ℝ β y := by
+    dsimp [β]
+    exact ((contDiff_morseNormalForm hk c).differentiable (by
+      exact_mod_cast (ne_top_of_lt zero_lt_one).symm) |>.differentiableAt.sub
+      (differentiableAt_const c)).sub (differentiableAt_const ε)
+  have hρ : DifferentiableAt ℝ ρ y := by
+    dsimp [ρ, modelSublevelCutoffRatio]
+    have hden' : γ y - β y ≠ 0 := by
+      dsimp [γ, β]
+      exact hden
+    change DifferentiableAt ℝ (fun z : MorseModel n => (γ z + ε₀) * (γ z - β z)⁻¹) y
+    exact (hγ.add (differentiableAt_const ε₀)).mul ((hγ.sub hβ).inv hden')
+  have hθρ : DifferentiableAt ℝ (fun z => θ (ρ z)) y := hθ.comp y hρ
+  have hsplit : (fun z : MorseModel n => modelSublevelFamilyCutoff hk c ε r δ R₀ R₁ ε₀ θ s z) =
+      (fun z : MorseModel n => modelSublevelFamily hk c ε r δ R₀ R₁ s z) +
+        (fun z : MorseModel n => s * (θ (ρ z) - 1) * (β z - γ z)) := by
+    funext z
+    dsimp [modelSublevelFamilyCutoff, modelSublevelFamily, ρ, β, γ]
+    ring
+  have hdγ : fderiv ℝ γ y wm = ‖negPart hk y‖ ^ 2 * p := by
+    dsimp [γ, wm, p, G, τ, capSlope, τSlope]
+    exact fderiv_modelRoundedFunction_direction_neg_value hk c ε r δ R₀ R₁ hR hR0 y
+  have hdβ : fderiv ℝ β y wm = -‖negPart hk y‖ ^ 2 := by
+    dsimp [β, wm]
+    have hfuneq : (fun z : MorseModel n => morseNormalForm hk c z - c - ε) =
+        (fun z : MorseModel n => morseNormalForm hk c z) - (fun _ : MorseModel n => c + ε) := by
+      funext z
+      change morseNormalForm hk c z - c - ε = morseNormalForm hk c z - (c + ε)
+      ring
+    rw [hfuneq]
+    rw [fderiv_sub (f := fun z : MorseModel n => morseNormalForm hk c z)
+      (g := fun _ : MorseModel n => c + ε)
+      (hf := (contDiff_morseNormalForm hk c).differentiable (by
+        exact_mod_cast (ne_top_of_lt zero_lt_one).symm) |>.differentiableAt)
+      (hg := differentiableAt_const (c + ε))]
+    simp [fderiv_morseNormalForm_direction_neg hk c y]
+  have hdγβ : fderiv ℝ (fun z => β z - γ z) y wm = ‖negPart hk y‖ ^ 2 * (-1 - p) := by
+    rw [show (fun z : MorseModel n => β z - γ z) = β - γ by rfl]
+    rw [fderiv_sub (f := β) (g := γ) (hf := hβ) (hg := hγ)]
+    simp [ContinuousLinearMap.sub_apply, hdβ, hdγ]
+    ring
+  have hdρ : fderiv ℝ ρ y wm = ‖negPart hk y‖ ^ 2 * ((1 - ρ y) * p - ρ y) / (γ y - β y) := by
+    have hγβ : γ y - β y ≠ 0 := by
+      dsimp [γ, β]
+      exact hden
+    have hγβdiff : DifferentiableAt ℝ (fun z => γ z - β z) y := hγ.sub hβ
+    have hγβinv : DifferentiableAt ℝ (fun z => (γ z - β z)⁻¹) y := hγβdiff.inv hγβ
+    have hγβinv_val : fderiv ℝ (fun z => (γ z - β z)⁻¹) y wm =
+        -(γ y - β y)⁻¹ ^ 2 * (fderiv ℝ (fun z => γ z - β z) y wm) := by
+      have hinv := hasFDerivAt_inv (𝕜 := ℝ) hγβ
+      have hcomp :=
+        HasFDerivAt.comp (g := fun x : ℝ => x⁻¹) (hg := hinv) (f := fun z => γ z - β z)
+          (hf := hγβdiff.hasFDerivAt)
+      have hcompf : fderiv ℝ (fun z => (γ z - β z)⁻¹) y =
+          (ContinuousLinearMap.toSpanSingleton ℝ (-((γ y - β y) ^ 2)⁻¹) : ℝ →L[ℝ] ℝ).comp
+            (fderiv ℝ (fun z => γ z - β z) y) := by
+        simpa using hcomp.fderiv
+      calc
+        fderiv ℝ (fun z => (γ z - β z)⁻¹) y wm
+            = ((ContinuousLinearMap.toSpanSingleton ℝ (-((γ y - β y) ^ 2)⁻¹) : ℝ →L[ℝ] ℝ).comp
+                (fderiv ℝ (fun z => γ z - β z) y)) wm := by rw [hcompf]
+        _ = -(γ y - β y)⁻¹ ^ 2 * (fderiv ℝ (fun z => γ z - β z) y wm) := by
+              simp [ContinuousLinearMap.comp_apply]
+              field_simp
+    have hnum : fderiv ℝ (fun z => γ z + ε₀) y wm = ‖negPart hk y‖ ^ 2 * p := by
+      rw [show (fun z : MorseModel n => γ z + ε₀) = γ + (fun _ : MorseModel n => ε₀) by rfl]
+      rw [fderiv_add (f := γ) (g := fun _ : MorseModel n => ε₀) (hf := hγ)
+        (hg := differentiableAt_const ε₀)]
+      simp [hdγ]
+    have hdenf : fderiv ℝ (fun z => γ z - β z) y wm = ‖negPart hk y‖ ^ 2 * (p + 1) := by
+      rw [show (fun z : MorseModel n => γ z - β z) = γ - β by rfl]
+      rw [fderiv_sub (f := γ) (g := β) (hf := hγ) (hg := hβ)]
+      simp [ContinuousLinearMap.sub_apply, hdγ, hdβ]
+      ring
+    have hρdef : (fun z : MorseModel n => ρ z) = fun z => (γ z + ε₀) * (γ z - β z)⁻¹ := by
+      funext z
+      dsimp [ρ]
+      rfl
+    have hmain : fderiv ℝ ρ y wm =
+        ‖negPart hk y‖ ^ 2 * p * (γ y - β y)⁻¹ +
+          (γ y + ε₀) * (-(γ y - β y)⁻¹ ^ 2 * (‖negPart hk y‖ ^ 2 * (p + 1))) := by
+      rw [show fderiv ℝ ρ y = fderiv ℝ (fun z : MorseModel n => ρ z) y by rfl]
+      rw [hρdef]
+      have hprod : (fun z : MorseModel n => (γ z + ε₀) * (γ z - β z)⁻¹) =
+          (fun z : MorseModel n => γ z + ε₀) * (fun z : MorseModel n => (γ z - β z)⁻¹) := by
+        rfl
+      rw [hprod]
+      have hγp : DifferentiableAt ℝ (fun z => γ z + ε₀) y := hγ.add (differentiableAt_const ε₀)
+      have hmul := fderiv_mul (x := y) (c := fun z => γ z + ε₀)
+        (d := fun z => (γ z - β z)⁻¹) (hc := hγp) (hd := hγβinv)
+      rw [hmul]
+      rw [ContinuousLinearMap.add_apply, ContinuousLinearMap.smul_apply,
+        ContinuousLinearMap.smul_apply]
+      rw [hγβinv_val, hnum, hdenf]
+      simp [smul_eq_mul]
+      field_simp [hγβ]
+      ring
+    have hρval : ρ y = (γ y + ε₀) / (γ y - β y) := rfl
+    dsimp [ρ] at hρval
+    have hlin : (γ y + ε₀) = ρ y * (γ y - β y) := by
+      dsimp [ρ]
+      rw [hρval]
+      field_simp [hγβ]
+    have hfinal : ‖negPart hk y‖ ^ 2 * p * (γ y - β y)⁻¹ +
+          (γ y + ε₀) * (-(γ y - β y)⁻¹ ^ 2 * (‖negPart hk y‖ ^ 2 * (p + 1))) =
+        ‖negPart hk y‖ ^ 2 * ((1 - ρ y) * p - ρ y) / (γ y - β y) := by
+      rw [hlin]
+      field_simp [hγβ]
+      ring
+    rw [hmain, hfinal]
+  have hdθρ : fderiv ℝ (fun z => θ (ρ z)) y wm =
+      deriv θ (ρ y) * (‖negPart hk y‖ ^ 2 * ((1 - ρ y) * p - ρ y) / (γ y - β y)) := by
+    have hchain : fderiv ℝ (fun z => θ (ρ z)) y =
+        (fderiv ℝ θ (ρ y)).comp (fderiv ℝ ρ y) := by
+      have hcomp :=
+        HasFDerivAt.comp (g := θ) (hg := hθ.hasFDerivAt) (f := ρ) (hf := hρ.hasFDerivAt)
+      exact hcomp.fderiv
+    have hθapp : ∀ u : ℝ, (fderiv ℝ θ (ρ y)) u = deriv θ (ρ y) * u := by
+      intro u
+      have h1 : (fderiv ℝ θ (ρ y)) 1 = deriv θ (ρ y) := by
+        simp [fderiv_apply_one_eq_deriv (𝕜 := ℝ) (f := θ) (x := ρ y)]
+      have hlin : (fderiv ℝ θ (ρ y)) u = u • (fderiv ℝ θ (ρ y)) 1 := by
+        calc
+          (fderiv ℝ θ (ρ y)) u = (fderiv ℝ θ (ρ y)) (u • (1 : ℝ)) := by
+            congr 1
+            simp
+          _ = u • (fderiv ℝ θ (ρ y)) 1 := map_smul _ _ _
+      rw [hlin, h1]
+      rw [smul_eq_mul]
+      ring
+    rw [hchain]
+    simp only [ContinuousLinearMap.comp_apply]
+    rw [hθapp, hdρ]
+  have hcorr : fderiv ℝ (fun z => s * (θ (ρ z) - 1) * (β z - γ z)) y wm =
+      s * ‖negPart hk y‖ ^ 2 *
+        ((θ (ρ y) - 1) * (-1 - p) - deriv θ (ρ y) * ((1 - ρ y) * p - ρ y)) := by
+    have hprod1 : DifferentiableAt ℝ (fun z => θ (ρ z) - 1) y := hθρ.sub (differentiableAt_const 1)
+    have hprod2 : DifferentiableAt ℝ (fun z => β z - γ z) y := hβ.sub hγ
+    have hmain : fderiv ℝ (fun z => (θ (ρ z) - 1) * (β z - γ z)) y wm =
+        (θ (ρ y) - 1) * fderiv ℝ (fun z => β z - γ z) y wm +
+          (β y - γ y) * fderiv ℝ (fun z => θ (ρ z)) y wm := by
+      have hmul := fderiv_mul (x := y) (c := fun z => θ (ρ z) - 1)
+        (d := fun z => β z - γ z) (hc := hprod1) (hd := hprod2)
+      have hθρ1 : fderiv ℝ (fun z => θ (ρ z) - 1) y = fderiv ℝ (fun z => θ (ρ z)) y := by
+        rw [show (fun z : MorseModel n => θ (ρ z) - 1) =
+            (fun z : MorseModel n => θ (ρ z)) - (fun _ : MorseModel n => 1) by rfl]
+        rw [fderiv_sub (f := fun z => θ (ρ z)) (g := fun _ : MorseModel n => 1)
+          (hf := hθρ) (hg := differentiableAt_const 1)]
+        simp
+      have hmain' : fderiv ℝ (fun z => (θ (ρ z) - 1) * (β z - γ z)) y =
+          (θ (ρ y) - 1) • fderiv ℝ (fun z => β z - γ z) y +
+            (β y - γ y) • fderiv ℝ (fun z => θ (ρ z)) y := by
+        rw [show (fun z : MorseModel n => (θ (ρ z) - 1) * (β z - γ z)) =
+            (fun z : MorseModel n => θ (ρ z) - 1) * (fun z : MorseModel n => β z - γ z) by rfl]
+        rw [hmul, hθρ1]
+      rw [hmain']
+      simp [ContinuousLinearMap.add_apply, ContinuousLinearMap.smul_apply]
+    have hval : (β y - γ y) * fderiv ℝ (fun z => θ (ρ z)) y wm =
+        ‖negPart hk y‖ ^ 2 * (-(1 - ρ y) * p + ρ y) * deriv θ (ρ y) := by
+      have hβγ : β y - γ y = -(γ y - β y) := by ring
+      rw [hβγ, hdθρ]
+      have hγβ : γ y - β y ≠ 0 := by
+        dsimp [γ, β]
+        exact hden
+      field_simp [hγβ]
+      ring
+    have hmain' : fderiv ℝ (fun z => (θ (ρ z) - 1) * (β z - γ z)) y wm =
+        ‖negPart hk y‖ ^ 2 *
+          ((θ (ρ y) - 1) * (-1 - p) - deriv θ (ρ y) * ((1 - ρ y) * p - ρ y)) := by
+      rw [hmain, hdγβ, hval]
+      ring
+    have hsmul : fderiv ℝ (fun z => s * (θ (ρ z) - 1) * (β z - γ z)) y wm =
+        s * fderiv ℝ (fun z => (θ (ρ z) - 1) * (β z - γ z)) y wm := by
+      have hd : DifferentiableAt ℝ (fun z => s * ((θ (ρ z) - 1) * (β z - γ z))) y :=
+        (differentiableAt_const s).mul (hprod1.mul hprod2)
+      rw [show (fun z : MorseModel n => s * (θ (ρ z) - 1) * (β z - γ z)) =
+          (fun z : MorseModel n => s * ((θ (ρ z) - 1) * (β z - γ z))) by
+        funext z
+        ring]
+      rw [fderiv_const_mul (a := fun z : MorseModel n => (θ (ρ z) - 1) * (β z - γ z))
+        (b := s) (ha := hprod1.mul hprod2)]
+      simp [ContinuousLinearMap.smul_apply]
+    rw [hsmul, hmain']
+    ring
+  have hnaive : fderiv ℝ (fun z : MorseModel n => modelSublevelFamily hk c ε r δ R₀ R₁ s z) y wm =
+      ‖negPart hk y‖ ^ 2 * ((1 - s) * p - s) := by
+    have hd := fderiv_modelSublevelFamily_direction_neg hk c ε r δ R₀ R₁ s hR hR0 y
+    dsimp [wm, G, τ, capSlope, τSlope, p] at hd ⊢
+    rw [hd]
+    ring
+  have htotal : fderiv ℝ (fun z : MorseModel n => modelSublevelFamilyCutoff hk c ε r δ R₀ R₁ ε₀ θ s z) y wm =
+      ‖negPart hk y‖ ^ 2 *
+        (((1 - s) * p - s) +
+          s * ((θ (ρ y) - 1) * (-1 - p) - deriv θ (ρ y) * ((1 - ρ y) * p - ρ y))) := by
+    rw [hsplit]
+    rw [fderiv_add (f := fun z : MorseModel n => modelSublevelFamily hk c ε r δ R₀ R₁ s z)
+      (g := fun z : MorseModel n => s * (θ (ρ z) - 1) * (β z - γ z))
+      (hf := differentiableAt_modelSublevelFamily hk c ε r δ R₀ R₁ s y)
+      (hg := ((differentiableAt_const s).mul (hθρ.sub (differentiableAt_const 1))).mul (hβ.sub hγ))]
+    simp [ContinuousLinearMap.add_apply, hnaive, hcorr]
+    ring
+  have hgoal : ((1 - s) * p - s) +
+        s * ((θ (ρ y) - 1) * (-1 - p) - deriv θ (ρ y) * ((1 - ρ y) * p - ρ y)) =
+      (1 - s * θ (ρ y) - s * deriv θ (ρ y) * (1 - ρ y)) * p -
+        s * (θ (ρ y) - ρ y * deriv θ (ρ y)) := by
+    dsimp [p]
+    ring
+  rw [htotal]
+  dsimp [wm, ρ, γ, β, G, τ, capSlope, τSlope, p]
+  rw [hgoal]
+
 theorem modelAttachedUnstretch_mem_upper_of_roundedSublevel {n k : ℕ} (hk : k ≤ n)
     (c ε r δ R₀ R₁ : ℝ) (hε : 0 < ε) (hδ : 0 < δ) (hδr : δ < r ^ 2)
     (hR : R₀ < R₁) (hR0 : 0 ≤ R₀) (hbig : 2 * (r ^ 2 + 2 * ε + δ) ≤ R₀ ^ 2)
