@@ -20346,6 +20346,43 @@ theorem modelLevelDampedTransportLevelMap_strictMono_core {m k : ℕ} (hk : k �
     rw [hnegU]
   nlinarith [hsqlt, hnegsq]
 
+theorem modelLevelDampedUnstretch_imageLevel_strictMono {m k : ℕ} (hk : k ≤ m + 1)
+    (c ε r δ η ε₀ : ℝ) (hε : 0 ≤ ε) (hδ : 0 < δ) (hδr : δ < r ^ 2) (hε₀ : 0 < ε₀)
+    {y z : MorseModel (m + 1)} (hneg : negPart hk y = negPart hk z)
+    (hlt : ‖posPart hk y‖ < ‖posPart hk z‖) :
+    morseNormalForm hk c (modelLevelDampedUnstretch hk ε r δ c η ε₀ y) <
+      morseNormalForm hk c (modelLevelDampedUnstretch hk ε r δ c η ε₀ z) := by
+  rw [morseNormalForm_split hk c (modelLevelDampedUnstretch hk ε r δ c η ε₀ y),
+      morseNormalForm_split hk c (modelLevelDampedUnstretch hk ε r δ c η ε₀ z)]
+  have hposlt : ‖posPart hk (modelLevelDampedUnstretch hk ε r δ c η ε₀ y)‖ <
+      ‖posPart hk (modelLevelDampedUnstretch hk ε r δ c η ε₀ z)‖ := by
+    rw [modelLevelDampedUnstretch_posPart, modelLevelDampedUnstretch_posPart]
+    have hmain := modelLevelDampedUnstretch_radial_strictMono hk ε r δ c η ε₀ hε hδ hδr hε₀
+      hneg hlt
+    have hfac_y : 0 ≤ 1 + (Real.sqrt ((‖negPart hk y‖ ^ 2 + r ^ 2) /
+        smoothCap ε r δ (‖negPart hk y‖ ^ 2)) - 1) *
+          Real.smoothTransition ((morseNormalForm hk c y - c + ε + η) / ε₀) :=
+      modelLevelDampedStretchFactor_nonneg hk ε r δ c η ε₀ hε hδ hδr y
+    have hfac_z : 0 ≤ 1 + (Real.sqrt ((‖negPart hk z‖ ^ 2 + r ^ 2) /
+        smoothCap ε r δ (‖negPart hk z‖ ^ 2)) - 1) *
+          Real.smoothTransition ((morseNormalForm hk c z - c + ε + η) / ε₀) :=
+      modelLevelDampedStretchFactor_nonneg hk ε r δ c η ε₀ hε hδ hδr z
+    rw [norm_smul, norm_smul, Real.norm_eq_abs, Real.norm_eq_abs]
+    rw [abs_of_nonneg hfac_y, abs_of_nonneg hfac_z]
+    simpa [mul_comm, mul_left_comm, mul_assoc] using hmain
+  have hnegU : negPart hk (modelLevelDampedUnstretch hk ε r δ c η ε₀ y) =
+      negPart hk (modelLevelDampedUnstretch hk ε r δ c η ε₀ z) := by
+    rw [modelLevelDampedUnstretch_negPart, modelLevelDampedUnstretch_negPart, hneg]
+  have hsqlt : ‖posPart hk (modelLevelDampedUnstretch hk ε r δ c η ε₀ y)‖ ^ 2 <
+      ‖posPart hk (modelLevelDampedUnstretch hk ε r δ c η ε₀ z)‖ ^ 2 := by
+    exact sq_lt_sq.mpr (by
+      rw [abs_of_nonneg (norm_nonneg _), abs_of_nonneg (norm_nonneg _)]
+      exact hposlt)
+  have hnegsq : ‖negPart hk (modelLevelDampedUnstretch hk ε r δ c η ε₀ y)‖ ^ 2 =
+      ‖negPart hk (modelLevelDampedUnstretch hk ε r δ c η ε₀ z)‖ ^ 2 := by
+    rw [hnegU]
+  nlinarith [hsqlt, hnegsq]
+
 private lemma modelLevelDampedUnstretch_mem_upper_of_roundedSublevel {m k : ℕ}
     (hk : k ≤ m + 1) (c ε r δ R₀ R₁ η ε₀ : ℝ) (hε : 0 < ε) (hδ : 0 < δ)
     (hδr : δ < r ^ 2) (hR : R₀ < R₁) (hR0 : 0 ≤ R₀)
