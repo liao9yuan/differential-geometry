@@ -20531,6 +20531,72 @@ private lemma morseFarExpandTimeSmooth_ge_of_le_lower {c ε δ ρ ρ' t : ℝ}
     nlinarith [hσ1]
   linarith
 
+private lemma modelLevelDampedTransportTime_band_bounds {m k : ℕ} (hk : k ≤ m + 1)
+    (c ε r δ ρ ρ' θ R₀ R₁ η ε₀ : ℝ) (hε : 0 < ε) (hδ : 0 < δ) (hδr : δ < r ^ 2)
+    (hr2 : r ^ 2 = 2 * ε) {y : MorseModel (m + 1)}
+    (hy : y ∈ modelAttachedRegion hk ε r δ)
+    (hneg : r ^ 2 + 2 * ε + δ ≤ ‖negPart hk y‖ ^ 2) :
+    -(2 * ε) ≤ modelLevelDampedTransportTime hk c ε r δ ρ ρ' θ R₀ R₁ η ε₀ y ∧
+      modelLevelDampedTransportTime hk c ε r δ ρ ρ' θ R₀ R₁ η ε₀ y ≤ 0 := by
+  let β : ℝ := (1 - Real.smoothTransition
+    ((‖posPart hk y‖ ^ 2 - smoothCap ε r δ (‖negPart hk y‖ ^ 2)) / θ)) *
+      (1 - Real.smoothTransition ((morseNorm (m + 1) y - R₀) / (R₁ - R₀)))
+  have hβ0 : 0 ≤ β := by
+    dsimp [β]
+    exact mul_nonneg (sub_nonneg.mpr (Real.smoothTransition.le_one _))
+      (sub_nonneg.mpr (Real.smoothTransition.le_one _))
+  have hβ1 : β ≤ 1 := by
+    dsimp [β]
+    have h₁ : 1 - Real.smoothTransition
+        ((‖posPart hk y‖ ^ 2 - smoothCap ε r δ (‖negPart hk y‖ ^ 2)) / θ) ≤ 1 := by
+      linarith [Real.smoothTransition.nonneg
+        ((‖posPart hk y‖ ^ 2 - smoothCap ε r δ (‖negPart hk y‖ ^ 2)) / θ)]
+    have h₂ : 1 - Real.smoothTransition ((morseNorm (m + 1) y - R₀) / (R₁ - R₀)) ≤ 1 := by
+      linarith [Real.smoothTransition.nonneg ((morseNorm (m + 1) y - R₀) / (R₁ - R₀))]
+    simpa using mul_le_mul h₁ h₂ (sub_nonneg.mpr (Real.smoothTransition.le_one _))
+      (by norm_num : (0 : ℝ) ≤ 1)
+  constructor
+  · have hτu : -(2 * ε) ≤ modelLevelDampedUnstretchTime hk ε r δ c η ε₀ y :=
+      modelLevelDampedUnstretchTime_lower_bound hk ε r δ c η ε₀ (le_of_lt hε) hδ hδr hr2 hy hneg
+    have hτF : -(2 * ε) ≤ morseFarExpandTimeSmooth c ε δ ρ ρ'
+        (morseNormalForm hk c y) :=
+      morseFarExpandTimeSmooth_ge_of_le_lower hδ hε
+        (attachedRegion_normalForm_le_of_negPart_large hk c ε r δ hδ hy hneg)
+    have hτu0 : modelLevelDampedUnstretchTime hk ε r δ c η ε₀ y ≤ 0 :=
+      modelLevelDampedUnstretchTime_nonpos hk ε r δ c η ε₀ (le_of_lt hε) hδ hδr y
+    have hτF0 : morseFarExpandTimeSmooth c ε δ ρ ρ' (morseNormalForm hk c y) ≤ 0 := by
+      have hle := morseFarExpandTime_le_zero (c := c) (ε := ε) (δ := δ) hδ hε
+        (t := morseNormalForm hk c y)
+      have hσ : 0 ≤ Real.smoothTransition
+          ((morseNormalForm hk c y - (c - ε - δ + ρ')) / ρ) :=
+        Real.smoothTransition.nonneg _
+      dsimp [morseFarExpandTimeSmooth]
+      exact mul_nonpos_of_nonneg_of_nonpos hσ hle
+    dsimp [modelLevelDampedTransportTime]
+    have h₁ : β * modelLevelDampedUnstretchTime hk ε r δ c η ε₀ y ≥ β * (-(2 * ε)) := by
+      exact mul_le_mul_of_nonneg_left hτu hβ0
+    have h₂ : (1 - β) * morseFarExpandTimeSmooth c ε δ ρ ρ' (morseNormalForm hk c y) ≥
+        (1 - β) * (-(2 * ε)) := by
+      exact mul_le_mul_of_nonneg_left hτF (sub_nonneg.mpr hβ1)
+    have hβge : -(2 * ε) ≤ β * (-(2 * ε)) + (1 - β) * (-(2 * ε)) := by
+      nlinarith [hβ0, hβ1]
+    linarith
+  · dsimp [modelLevelDampedTransportTime]
+    have h₁ : β * modelLevelDampedUnstretchTime hk ε r δ c η ε₀ y ≤ 0 :=
+      mul_nonpos_of_nonneg_of_nonpos hβ0
+        (modelLevelDampedUnstretchTime_nonpos hk ε r δ c η ε₀ (le_of_lt hε) hδ hδr y)
+    have h₂ : (1 - β) * morseFarExpandTimeSmooth c ε δ ρ ρ' (morseNormalForm hk c y) ≤ 0 :=
+      mul_nonpos_of_nonneg_of_nonpos (sub_nonneg.mpr hβ1)
+        (by
+          have hle := morseFarExpandTime_le_zero (c := c) (ε := ε) (δ := δ) hδ hε
+            (t := morseNormalForm hk c y)
+          have hσ : 0 ≤ Real.smoothTransition
+              ((morseNormalForm hk c y - (c - ε - δ + ρ')) / ρ) :=
+            Real.smoothTransition.nonneg _
+          dsimp [morseFarExpandTimeSmooth]
+          exact mul_nonpos_of_nonneg_of_nonpos hσ hle)
+    nlinarith
+
 private lemma modelLevelDampedUnstretch_mem_upper_of_roundedSublevel {m k : ℕ}
     (hk : k ≤ m + 1) (c ε r δ R₀ R₁ η ε₀ : ℝ) (hε : 0 < ε) (hδ : 0 < δ)
     (hδr : δ < r ^ 2) (hR : R₀ < R₁) (hR0 : 0 ≤ R₀)
