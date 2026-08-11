@@ -3516,6 +3516,90 @@ theorem morseAttachedHomotopyEquivCellAdjunction {m k : ℕ} (hk : k ≤ m + 1) 
   refine ⟨(morseAttachedHomeoUpper hk c ε r δ (le_of_lt hε) hδ0 hδr' hr).toHomotopyEquiv.trans ?_⟩
   exact (hUpper.toHomotopyEquiv.trans (CellAttachment.cellAttachmentModel hk c ε hε))
 
+noncomputable def morseAttachedNaturalDiffeomorphUpper {m k : ℕ} (hk : k ≤ m + 1) (c ε r δ : ℝ)
+    (hε : 0 ≤ ε) (hδ0 : 0 < δ) (hδr : δ < r ^ 2) (hr : r ≠ 0) :
+    @Diffeomorph ℝ _ (MorseModel (m + 1)) _ _ (MorseModel (m + 1)) _ _
+      (MorseHalfSpace m) _ (MorseHalfSpace m) _ (morseModelWithCornersHalfSpace m)
+      (morseModelWithCornersHalfSpace m)
+      (morseAttachedSpace hk c ε r δ hε hδ0 hδr hr) _ (morseAttachedNaturalChartedSpace hk c ε r δ hε hδ0 hδr hr)
+      (morseUpperSublevel hk c r) _ (morseUpperChartedSpace hk c r hr)
+      (⊤ : ℕ∞) := by
+  classical
+  letI : ChartedSpace (MorseHalfSpace m) (morseAttachedSpace hk c ε r δ hε hδ0 hδr hr) :=
+    morseAttachedNaturalChartedSpace hk c ε r δ hε hδ0 hδr hr
+  letI : ChartedSpace (MorseHalfSpace m) (morseHandleSublevel hk c ε r δ) :=
+    morseHandleSublevelChartedSpace hk c ε r δ hδ0 hδr
+  letI : ChartedSpace (MorseHalfSpace m) (morseUpperSublevel hk c r) :=
+    morseUpperChartedSpace hk c r hr
+  exact (morseAttachedNaturalDiffeomorphRounded hk c ε r δ hε hδ0 hδr hr).trans
+    (modelAttachedSublevelDiffeomorph hk c ε r δ hδ0 hδr hr).symm
+
+theorem morseAttachedNaturalDiffeomorphUpper_lower {m k : ℕ} (hk : k ≤ m + 1) (c ε r δ : ℝ)
+    (hε : 0 ≤ ε) (hδ0 : 0 < δ) (hδr : δ < r ^ 2) (hr : r ≠ 0) (a : morseLowerSublevel hk c ε) :
+    CellAttachment.modelAttachedUnstretch hk ε r δ
+      (morseAttachedNaturalDiffeomorphRounded hk c ε r δ hε hδ0 hδr hr
+        (DifferentialGeometry.Topology.adjunctionCell
+          (i := fun a : morseLowerSublevel hk c ε => a)
+          (morseHandleGlueMap hk c ε r δ hε hδ0 hδr hr) a)).1 = a.1 := by
+  classical
+  letI : ChartedSpace (MorseHalfSpace m) (morseAttachedSpace hk c ε r δ hε hδ0 hδr hr) :=
+    morseAttachedNaturalChartedSpace hk c ε r δ hε hδ0 hδr hr
+  letI : ChartedSpace (MorseHalfSpace m) (morseHandleSublevel hk c ε r δ) :=
+    morseHandleSublevelChartedSpace hk c ε r δ hδ0 hδr
+  letI : ChartedSpace (MorseHalfSpace m) (morseUpperSublevel hk c r) :=
+    morseUpperChartedSpace hk c r hr
+  have hmaniH : @IsManifold ℝ _ (MorseModel (m + 1)) _ _ (MorseHalfSpace m) _
+      (morseModelWithCornersHalfSpace m) (⊤ : ℕ∞)
+      (morseHandleSublevel hk c ε r δ) _ _ :=
+    sublevelIsManifold (m := m) (CellAttachment.modelAttachedFunction hk c ε r δ) c
+      (CellAttachment.contDiff_modelAttachedFunction hk c ε r δ)
+      (CellAttachment.fderiv_modelAttachedFunction_ne_zero hk c ε r δ hδ0 hδr)
+  letI := hmaniH
+  dsimp [morseAttachedNaturalDiffeomorphRounded, morseAttachedNaturalHomeo]
+  change CellAttachment.modelAttachedUnstretch hk ε r δ
+    ((morseAttachedLowerHomeo hk c ε r δ hε hδ0 hδr hr).symm
+      (DifferentialGeometry.Topology.adjunctionCell
+        (i := fun a : morseLowerSublevel hk c ε => a)
+        (morseHandleGlueMap hk c ε r δ hε hδ0 hδr hr) a)).1 = a.1
+  rw [morseAttachedLowerHomeo_cell hk c ε r δ hε hδ0 hδr hr a]
+  exact CellAttachment.modelAttachedUnstretch_stretch hk ε r δ hδ0 hδr hr a.1
+
+theorem morseAttachedNaturalDiffeomorphUpper_handle {m k : ℕ} (hk : k ≤ m + 1) (c ε r δ : ℝ)
+    (hε : 0 ≤ ε) (hδ0 : 0 < δ) (hδr : δ < r ^ 2) (hr : r ≠ 0) (p : StandardHandle k (m + 1 - k)) :
+    CellAttachment.modelAttachedUnstretch hk ε r δ
+      (morseAttachedNaturalDiffeomorphRounded hk c ε r δ hε hδ0 hδr hr
+        (morseHandleEmbeddingAttached hk c ε r δ hε hδ0 hδr hr p)).1 =
+    CellAttachment.modelHandleMap hk ε r p := by
+  classical
+  letI : ChartedSpace (MorseHalfSpace m) (morseAttachedSpace hk c ε r δ hε hδ0 hδr hr) :=
+    morseAttachedNaturalChartedSpace hk c ε r δ hε hδ0 hδr hr
+  letI : ChartedSpace (MorseHalfSpace m) (morseHandleSublevel hk c ε r δ) :=
+    morseHandleSublevelChartedSpace hk c ε r δ hδ0 hδr
+  letI : ChartedSpace (MorseHalfSpace m) (morseUpperSublevel hk c r) :=
+    morseUpperChartedSpace hk c r hr
+  have hmaniH : @IsManifold ℝ _ (MorseModel (m + 1)) _ _ (MorseHalfSpace m) _
+      (morseModelWithCornersHalfSpace m) (⊤ : ℕ∞)
+      (morseHandleSublevel hk c ε r δ) _ _ :=
+    sublevelIsManifold (m := m) (CellAttachment.modelAttachedFunction hk c ε r δ) c
+      (CellAttachment.contDiff_modelAttachedFunction hk c ε r δ)
+      (CellAttachment.fderiv_modelAttachedFunction_ne_zero hk c ε r δ hδ0 hδr)
+  letI := hmaniH
+  let b : morseHandleSublevel hk c ε r δ :=
+    ⟨CellAttachment.modelAttachedStretch hk ε r δ (CellAttachment.modelHandleMap hk ε r p),
+      morseUpperSublevel_mem_stretch_handle hk c ε r δ hδ0 hδr hr
+        ⟨CellAttachment.modelHandleMap hk ε r p,
+          CellAttachment.modelHandleMap_mem_upper hk c ε r hε p⟩⟩
+  dsimp [morseHandleEmbeddingAttached, morseAttachedNaturalDiffeomorphRounded, morseAttachedNaturalHomeo, b]
+  change CellAttachment.modelAttachedUnstretch hk ε r δ
+    ((morseAttachedLowerHomeo hk c ε r δ hε hδ0 hδr hr).symm
+      (morseAttachedLowerHomeo hk c ε r δ hε hδ0 hδr hr b)).1 =
+    CellAttachment.modelHandleMap hk ε r p
+  have hleft : (morseAttachedLowerHomeo hk c ε r δ hε hδ0 hδr hr).symm
+      ((morseAttachedLowerHomeo hk c ε r δ hε hδ0 hδr hr) b) = b :=
+    (morseAttachedLowerHomeo hk c ε r δ hε hδ0 hδr hr).left_inv b
+  simpa [hleft] using (CellAttachment.modelAttachedUnstretch_stretch hk ε r δ hδ0 hδr hr
+    (CellAttachment.modelHandleMap hk ε r p))
+
 def morseAttachedDiffeomorphRelative {m k : ℕ} (hk : k ≤ m + 1) (c ε r δ : ℝ)
     (hε : 0 ≤ ε) (hδ0 : 0 < δ) (hδr : δ < r ^ 2) (hr : r ≠ 0)
     (hcs₁ : ChartedSpace (MorseHalfSpace m) (morseAttachedSpace hk c ε r δ hε hδ0 hδr hr) :=
