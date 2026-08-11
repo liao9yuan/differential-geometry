@@ -19441,6 +19441,69 @@ private lemma modelLevelDampedTransportTime_eq_attached_comb {m k : ℕ} (hk : k
   rw [hβ₁]
   ring
 
+private lemma modelLevelDampedTransportTime_nonpos {m k : ℕ} (hk : k ≤ m + 1)
+    (c ε r δ ρ ρ' θ R₀ R₁ η ε₀ : ℝ) (hε : 0 < ε) (hδ : 0 < δ) (hδr : δ < r ^ 2)
+    {y : MorseModel (m + 1)} :
+    modelLevelDampedTransportTime hk c ε r δ ρ ρ' θ R₀ R₁ η ε₀ y ≤ 0 := by
+  dsimp [modelLevelDampedTransportTime]
+  have ht_u : modelLevelDampedUnstretchTime hk ε r δ c η ε₀ y ≤ 0 :=
+    modelLevelDampedUnstretchTime_nonpos hk ε r δ c η ε₀ (le_of_lt hε) hδ hδr y
+  have ht_f : morseFarExpandTimeSmooth c ε δ ρ ρ' (morseNormalForm hk c y) ≤ 0 := by
+    have hle := morseFarExpandTime_le_zero (c := c) (ε := ε) (δ := δ) hδ hε
+      (t := morseNormalForm hk c y)
+    have hσ : 0 ≤ Real.smoothTransition
+        ((morseNormalForm hk c y - (c - ε - δ + ρ')) / ρ) :=
+      Real.smoothTransition.nonneg _
+    dsimp [morseFarExpandTimeSmooth]
+    exact mul_nonpos_of_nonneg_of_nonpos hσ hle
+  have hσ₁ : Real.smoothTransition
+      ((‖posPart hk y‖ ^ 2 - smoothCap ε r δ (‖negPart hk y‖ ^ 2)) / θ) ∈
+      Set.Icc (0 : ℝ) 1 :=
+    ⟨Real.smoothTransition.nonneg _, Real.smoothTransition.le_one _⟩
+  have hσ₂ : Real.smoothTransition ((morseNorm (m + 1) y - R₀) / (R₁ - R₀)) ∈
+      Set.Icc (0 : ℝ) 1 :=
+    ⟨Real.smoothTransition.nonneg _, Real.smoothTransition.le_one _⟩
+  have hβ0 : 0 ≤ (1 - Real.smoothTransition
+      ((‖posPart hk y‖ ^ 2 - smoothCap ε r δ (‖negPart hk y‖ ^ 2)) / θ)) *
+        (1 - Real.smoothTransition ((morseNorm (m + 1) y - R₀) / (R₁ - R₀))) := by
+    exact mul_nonneg (sub_nonneg.mpr hσ₁.2) (sub_nonneg.mpr hσ₂.2)
+  have hβ1 : (1 - Real.smoothTransition
+      ((‖posPart hk y‖ ^ 2 - smoothCap ε r δ (‖negPart hk y‖ ^ 2)) / θ)) *
+        (1 - Real.smoothTransition ((morseNorm (m + 1) y - R₀) / (R₁ - R₀))) ≤ 1 := by
+    have h₁ : 1 - Real.smoothTransition
+        ((‖posPart hk y‖ ^ 2 - smoothCap ε r δ (‖negPart hk y‖ ^ 2)) / θ) ≤ 1 := by
+      linarith [hσ₁.1]
+    have h₂ : 1 - Real.smoothTransition ((morseNorm (m + 1) y - R₀) / (R₁ - R₀)) ≤ 1 := by
+      linarith [hσ₂.1]
+    simpa using mul_le_mul h₁ h₂ (sub_nonneg.mpr hσ₂.2) (by norm_num : (0 : ℝ) ≤ 1)
+  have h₁ : (1 - Real.smoothTransition
+      ((‖posPart hk y‖ ^ 2 - smoothCap ε r δ (‖negPart hk y‖ ^ 2)) / θ)) *
+        (1 - Real.smoothTransition ((morseNorm (m + 1) y - R₀) / (R₁ - R₀))) *
+        modelLevelDampedUnstretchTime hk ε r δ c η ε₀ y ≤ 0 := by
+    exact mul_nonpos_of_nonneg_of_nonpos hβ0 ht_u
+  have h₂ : (1 - (1 - Real.smoothTransition
+      ((‖posPart hk y‖ ^ 2 - smoothCap ε r δ (‖negPart hk y‖ ^ 2)) / θ)) *
+        (1 - Real.smoothTransition ((morseNorm (m + 1) y - R₀) / (R₁ - R₀)))) *
+        morseFarExpandTimeSmooth c ε δ ρ ρ' (morseNormalForm hk c y) ≤ 0 := by
+    exact mul_nonpos_of_nonneg_of_nonpos (sub_nonneg.mpr hβ1) ht_f
+  nlinarith
+
+theorem morseLevelDampedTransportTime_nonpos {m k : ℕ} (hk : k ≤ m + 1)
+    (c ε r δ ρ ρ' θ R₀ R₁ η ε₀ : ℝ) {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M]
+    [ChartedSpace H M] {I : ModelWithCorners ℝ (MorseModel (m + 1)) H} {f : M → ℝ}
+    (data : MorseChart (m + 1) k hk c I f)
+    (hε : 0 < ε) (hδ : 0 < δ) (hδr : δ < r ^ 2)
+    (x : M) : morseLevelDampedTransportTime hk c ε r δ ρ ρ' θ R₀ R₁ η ε₀ data x ≤ 0 := by
+  by_cases hx : x ∈ data.χ '' {y : MorseModel (m + 1) | morseNorm (m + 1) y ≤ R₁}
+  · rw [morseLevelDampedTransportTime_eq_model hk c ε r δ ρ ρ' θ R₀ R₁ η ε₀ data hx]
+    exact modelLevelDampedTransportTime_nonpos hk c ε r δ ρ ρ' θ R₀ R₁ η ε₀ hε hδ hδr
+  · rw [morseLevelDampedTransportTime_eq_collar hk c ε r δ ρ ρ' θ R₀ R₁ η ε₀ data hx]
+    have hle := morseFarExpandTime_le_zero (c := c) (ε := ε) (δ := δ) hδ hε (t := f x)
+    have hσ : 0 ≤ Real.smoothTransition ((f x - (c - ε - δ + ρ')) / ρ) :=
+      Real.smoothTransition.nonneg _
+    dsimp [morseFarExpandTimeSmooth]
+    exact mul_nonpos_of_nonneg_of_nonpos hσ hle
+
 theorem morseLevelDampedTransportMap_deep {m k : ℕ} (hk : k ≤ m + 1)
     (c ε r δ ρ ρ' θ R₀ R₁ η ε₀ ε₁ : ℝ) {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M]
     [ChartedSpace H M] [T2Space M]
