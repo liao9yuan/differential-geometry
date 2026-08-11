@@ -20356,6 +20356,99 @@ private lemma modelLevelDampedStretchFactor_mono {m k : ℕ} (hk : k ≤ m + 1) 
   rw [← hsqrt]
   nlinarith [hmul]
 
+private lemma modelLevelDampedUnstretchTime_antiMono {m k : ℕ} (hk : k ≤ m + 1)
+    (ε r δ : ℝ) (c η ε₀ : ℝ) (hε : 0 ≤ ε) (hδ : 0 < δ) (hδr : δ < r ^ 2) (hε₀ : 0 < ε₀)
+    {y z : MorseModel (m + 1)} (hneg : negPart hk y = negPart hk z)
+    (hlt : ‖posPart hk y‖ < ‖posPart hk z‖) :
+    modelLevelDampedUnstretchTime hk ε r δ c η ε₀ z ≤
+      modelLevelDampedUnstretchTime hk ε r δ c η ε₀ y := by
+  let Sy : ℝ := 1 + (Real.sqrt ((‖negPart hk y‖ ^ 2 + r ^ 2) /
+      smoothCap ε r δ (‖negPart hk y‖ ^ 2)) - 1) *
+        Real.smoothTransition ((morseNormalForm hk c y - c + ε + η) / ε₀)
+  let Sz : ℝ := 1 + (Real.sqrt ((‖negPart hk z‖ ^ 2 + r ^ 2) /
+      smoothCap ε r δ (‖negPart hk z‖ ^ 2)) - 1) *
+        Real.smoothTransition ((morseNormalForm hk c z - c + ε + η) / ε₀)
+  have hSy1 : 1 ≤ Sy := by
+    dsimp [Sy]
+    have hU : 1 ≤ Real.sqrt ((‖negPart hk y‖ ^ 2 + r ^ 2) /
+        smoothCap ε r δ (‖negPart hk y‖ ^ 2)) := by
+      have hsc : 0 < smoothCap ε r δ (‖negPart hk y‖ ^ 2) := smoothCap_pos hδ hδr
+      have hle : smoothCap ε r δ (‖negPart hk y‖ ^ 2) ≤ ‖negPart hk y‖ ^ 2 + r ^ 2 := by
+        have hmax : max (r ^ 2) (‖negPart hk y‖ ^ 2) ≤ ‖negPart hk y‖ ^ 2 + r ^ 2 := by
+          rw [max_le_iff]
+          constructor <;> nlinarith [sq_nonneg ‖negPart hk y‖]
+        exact le_trans (smoothCap_le_max (ε := ε) (r := r) (δ := δ)
+          (t := ‖negPart hk y‖ ^ 2) hε hδ) hmax
+      exact (Real.le_sqrt (by norm_num : (0 : ℝ) ≤ 1)
+        (div_nonneg (by positivity : 0 ≤ ‖negPart hk y‖ ^ 2 + r ^ 2) (le_of_lt hsc))).2 (by
+        norm_num
+        rw [one_le_div hsc]
+        nlinarith)
+    have hσ : 0 ≤ Real.smoothTransition ((morseNormalForm hk c y - c + ε + η) / ε₀) :=
+      Real.smoothTransition.nonneg _
+    nlinarith [hU, hσ]
+  have hSz1 : 1 ≤ Sz := by
+    dsimp [Sz]
+    have hU : 1 ≤ Real.sqrt ((‖negPart hk z‖ ^ 2 + r ^ 2) /
+        smoothCap ε r δ (‖negPart hk z‖ ^ 2)) := by
+      have hsc : 0 < smoothCap ε r δ (‖negPart hk z‖ ^ 2) := smoothCap_pos hδ hδr
+      have hle : smoothCap ε r δ (‖negPart hk z‖ ^ 2) ≤ ‖negPart hk z‖ ^ 2 + r ^ 2 := by
+        have hmax : max (r ^ 2) (‖negPart hk z‖ ^ 2) ≤ ‖negPart hk z‖ ^ 2 + r ^ 2 := by
+          rw [max_le_iff]
+          constructor <;> nlinarith [sq_nonneg ‖negPart hk z‖]
+        exact le_trans (smoothCap_le_max (ε := ε) (r := r) (δ := δ)
+          (t := ‖negPart hk z‖ ^ 2) hε hδ) hmax
+      exact (Real.le_sqrt (by norm_num : (0 : ℝ) ≤ 1)
+        (div_nonneg (by positivity : 0 ≤ ‖negPart hk z‖ ^ 2 + r ^ 2) (le_of_lt hsc))).2 (by
+        norm_num
+        rw [one_le_div hsc]
+        nlinarith)
+    have hσ : 0 ≤ Real.smoothTransition ((morseNormalForm hk c z - c + ε + η) / ε₀) :=
+      Real.smoothTransition.nonneg _
+    nlinarith [hU, hσ]
+  have hmono : Sy ≤ Sz := by
+    dsimp [Sy, Sz]
+    exact modelLevelDampedStretchFactor_mono hk ε r δ c η ε₀ hε hδ hδr hε₀ hneg hlt
+  have hsqy : ‖posPart hk y‖ ^ 2 ≤ ‖posPart hk z‖ ^ 2 := by
+    exact sq_le_sq.mpr (by
+      rw [abs_of_nonneg (norm_nonneg _), abs_of_nonneg (norm_nonneg _)]
+      exact le_of_lt hlt)
+  have hSsq : Sy ^ 2 ≤ Sz ^ 2 := by
+    have hSy0 : 0 ≤ Sy := by linarith
+    have hSz0 : 0 ≤ Sz := by linarith
+    exact sq_le_sq.mpr (by
+      rw [abs_of_nonneg hSy0, abs_of_nonneg hSz0]
+      exact hmono)
+  have hmain : ‖posPart hk y‖ ^ 2 * (Sy ^ 2 - 1) ≤ ‖posPart hk z‖ ^ 2 * (Sz ^ 2 - 1) := by
+    have h₁ : ‖posPart hk y‖ ^ 2 * (Sz ^ 2 - 1) ≤ ‖posPart hk z‖ ^ 2 * (Sz ^ 2 - 1) := by
+      have hSz1' : 0 ≤ Sz ^ 2 - 1 := by nlinarith [hSz1]
+      exact mul_le_mul_of_nonneg_right hsqy hSz1'
+    have h₂ : ‖posPart hk y‖ ^ 2 * (Sy ^ 2 - 1) ≤ ‖posPart hk y‖ ^ 2 * (Sz ^ 2 - 1) := by
+      have hsqp : 0 ≤ ‖posPart hk y‖ ^ 2 := by positivity
+      have hsub : Sy ^ 2 - 1 ≤ Sz ^ 2 - 1 := by linarith
+      exact mul_le_mul_of_nonneg_left hsub hsqp
+    exact le_trans h₂ h₁
+  dsimp [modelLevelDampedUnstretchTime, Sy, Sz]
+  dsimp [Sy, Sz] at hmain
+  have hg1 : ‖posPart hk z‖ ^ 2 * (1 - Sz ^ 2) / 2 = -(‖posPart hk z‖ ^ 2 * (Sz ^ 2 - 1) / 2) := by ring
+  have hg2 : ‖posPart hk y‖ ^ 2 * (1 - Sy ^ 2) / 2 = -(‖posPart hk y‖ ^ 2 * (Sy ^ 2 - 1) / 2) := by ring
+  rw [hg1, hg2]
+  linarith [hmain]
+
+private lemma modelLevelDampedUnstretchTime_abs_increasing {m k : ℕ} (hk : k ≤ m + 1)
+    (ε r δ : ℝ) (c η ε₀ : ℝ) (hε : 0 ≤ ε) (hδ : 0 < δ) (hδr : δ < r ^ 2) (hε₀ : 0 < ε₀)
+    {y z : MorseModel (m + 1)} (hneg : negPart hk y = negPart hk z)
+    (hlt : ‖posPart hk y‖ < ‖posPart hk z‖) :
+    |modelLevelDampedUnstretchTime hk ε r δ c η ε₀ y| ≤
+      |modelLevelDampedUnstretchTime hk ε r δ c η ε₀ z| := by
+  have hanti := modelLevelDampedUnstretchTime_antiMono hk ε r δ c η ε₀ hε hδ hδr hε₀ hneg hlt
+  have hle0y : modelLevelDampedUnstretchTime hk ε r δ c η ε₀ y ≤ 0 :=
+    modelLevelDampedUnstretchTime_nonpos hk ε r δ c η ε₀ hε hδ hδr y
+  have hle0z : modelLevelDampedUnstretchTime hk ε r δ c η ε₀ z ≤ 0 :=
+    modelLevelDampedUnstretchTime_nonpos hk ε r δ c η ε₀ hε hδ hδr z
+  rw [abs_of_nonpos hle0y, abs_of_nonpos hle0z]
+  linarith
+
 private lemma smoothTransition_deriv {x : ℝ} (hx0 : 0 < x) :
     deriv Real.smoothTransition x =
       expNegInvGlue x * expNegInvGlue (1 - x) * (1 / x ^ 2 + 1 / (1 - x) ^ 2) /
