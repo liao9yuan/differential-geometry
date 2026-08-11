@@ -4,7 +4,6 @@ import DifferentialGeometry.Bundle.Equiv
 import Mathlib.Geometry.Manifold.VectorBundle.Hom
 import Mathlib.Analysis.Normed.Module.Multilinear.Curry
 
-
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false

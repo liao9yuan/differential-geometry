@@ -55,15 +55,6 @@ variable [CompleteSpace 𝕜]
 
 section ModelCovariantDerivative
 
-
-
-
-
-
-
-
-
-
 omit [CompleteSpace 𝕜] in
 theorem covariantDeriv_tensor0SModelAt_apply_slots {s : ℕ}
     (dα_X : Tensor0SModel (𝕜 := 𝕜) (E := E) s)
@@ -98,7 +89,6 @@ theorem covariantDeriv_tensor0SModelWithin_apply_slots {s : ℕ}
   exact covariantDeriv_tensor0SModelAt_apply_slots (𝕜 := 𝕜) (E := E)
     (fderivWithin 𝕜 α u x (X x)) (ΓX x) (α x) slots
 
-
 theorem lieDeriv_correctionL_apply_slots {s : ℕ}
     (ΓX : E →L[𝕜] E)
     (α : Tensor0SModel (𝕜 := 𝕜) (E := E) s)
@@ -117,10 +107,6 @@ theorem lieDeriv_correctionL_apply_slots {s : ℕ}
   · subst hb
     simp
   · simp [Function.update, hb]
-
-
-
-
 
 omit [CompleteSpace 𝕜] in
 theorem fderivWithin_tensor0SModel_eval_linear_slots {s : ℕ}
@@ -178,8 +164,6 @@ theorem fderivWithin_tensor0SModel_eval_linear_slots {s : ℕ}
   · subst hb
     simp
   · simp [Function.update, hb]
-
-
 
 omit [CompleteSpace 𝕜] in
 theorem fderivWithin_tensor0SModel_eval_slots {s : ℕ}

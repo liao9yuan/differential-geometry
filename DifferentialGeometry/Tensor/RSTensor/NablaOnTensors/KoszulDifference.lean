@@ -41,9 +41,6 @@ variable [ContMDiffVectorBundle 1 E (TangentSpace I : M -> Type _) I]
 variable [T2Space M] [IsManifold I 1 M]
 variable [CompleteSpace E] [SigmaCompactSpace M]
 
-
-
-
 omit [T2Space M] [SigmaCompactSpace M] in
 theorem difference_symm_at
     (cov cov' : CovariantDerivative I E (TangentSpace I : M -> Type _))
@@ -90,9 +87,6 @@ theorem difference_symm_at
   rw [h1, h2]
   linear_combination (norm := module) ht' - ht
 
-
-
-
 omit [CompleteSpace E] [SigmaCompactSpace M] in
 theorem nabla_metric_two_term
     (cov cov' : CovariantDerivative I E (TangentSpace I : M -> Type _))
@@ -117,9 +111,6 @@ theorem nabla_metric_two_term
   simp only [metricTensorField_apply, if_true,
     show ((1 : Fin 2) = 0) = False from by simp, if_false] at hsub
   exact neg_injective hsub
-
-
-
 
 omit [SigmaCompactSpace M] in
 theorem koszul_difference

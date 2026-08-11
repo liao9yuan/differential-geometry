@@ -1,10 +1,9 @@
-
-
-
+/-
+Authors: Jack McCarthy
+-/
 import DifferentialGeometry.Tensor.Multilinear.Basis
 import DifferentialGeometry.Tensor.Multilinear.Fiber
 open DifferentialGeometry.Tensor.Multilinear
-
 
 noncomputable section
 namespace DifferentialGeometry

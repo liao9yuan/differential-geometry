@@ -52,21 +52,9 @@ variable {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners Real E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 
-
-
-
-
-
-
-
-
-
-
 section CoordAlgebra
 
 variable {Idx : Type*} [Fintype Idx]
-
-
 
 private theorem sum_reorder_b_out {s : Nat} {α : Type*} [AddCommMonoid α]
     (F : (Fin s -> Idx) -> (Fin s -> Idx) -> Fin s -> α) :
@@ -81,22 +69,12 @@ private theorem sum_reorder_b_out {s : Nat} {α : Type*} [AddCommMonoid α]
   rw [Finset.sum_comm
     (f := fun I0 b : _ => ∑ J0 : Fin s -> Idx, F I0 J0 b)]
 
-
-
-
-
-
-
-
-
-
 def christoffelCorrComp {s : Nat}
     (Γ : Idx -> Idx -> Real)
     (cA : (Fin s -> Idx) -> Real) :
     (Fin s -> Idx) -> Real :=
   fun I0 =>
     ∑ b : Fin s, ∑ a : Idx, Γ (I0 b) a * cA (Function.update I0 b a)
-
 
 theorem coordContract_sub_left {s : Nat}
     (gInv : Idx -> Idx -> Real)
@@ -111,7 +89,6 @@ theorem coordContract_sub_left {s : Nat}
   refine Finset.sum_congr rfl fun J0 _ => ?_
   ring
 
-
 theorem coordContract_sub_right {s : Nat}
     (gInv : Idx -> Idx -> Real)
     (cA cB cB' : (Fin s -> Idx) -> Real) :
@@ -125,8 +102,6 @@ theorem coordContract_sub_right {s : Nat}
   refine Finset.sum_congr rfl fun J0 _ => ?_
   ring
 
-
-
 def slotSwap {s : Nat} [DecidableEq (Fin s)] (b : Fin s) :
     ((Fin s -> Idx) × Idx) ≃ ((Fin s -> Idx) × Idx) where
   toFun p := (Function.update p.1 b p.2, p.1 b)
@@ -137,9 +112,6 @@ def slotSwap {s : Nat} [DecidableEq (Fin s)] (b : Fin s) :
   right_inv p := by
     obtain ⟨I0, c⟩ := p
     simp only [Function.update_idem, Function.update_self, Function.update_eq_self]
-
-
-
 
 theorem coordContractDt_firstPart_slot {s : Nat}
     (gInv Γ : Idx -> Idx -> Real)
@@ -228,9 +200,6 @@ theorem coordContractDt_firstPart_slot {s : Nat}
   rw [hprod]
   ring
 
-
-
-
 theorem coordContractDt_secondPart_slot {s : Nat}
     (gInv Γ : Idx -> Idx -> Real)
     (cA cB : (Fin s -> Idx) -> Real) (b : Fin s) :
@@ -298,16 +267,6 @@ theorem coordContractDt_secondPart_slot {s : Nat}
     rw [Function.update_of_ne (Finset.ne_of_mem_erase ha)]
   rw [hprod]
   ring
-
-
-
-
-
-
-
-
-
-
 
 theorem coordContractDt_eq_neg_christoffelCorr {s : Nat}
     (gInv Γ : Idx -> Idx -> Real)
@@ -414,22 +373,12 @@ theorem coordContractDt_eq_neg_christoffelCorr {s : Nat}
 
 end CoordAlgebra
 
-
-
-
-
-
-
-
 section DirectionalDeriv
 
 variable {Idx : Type} [Fintype Idx]
 
 open DifferentialGeometry.Tensor.Coordinates (extDerivFun_mul_real
   extDerivFun_finset_sum_real)
-
-
-
 
 omit [FiniteDimensional ℝ E] [IsManifold I ∞ M] in
 theorem extDerivFun_finset_prod_real
@@ -472,8 +421,6 @@ theorem extDerivFun_finset_prod_real
       rw [hother]
       ring
 
-
-
 omit [Fintype Idx] in
 omit [FiniteDimensional ℝ E] [IsManifold I ∞ M] in
 theorem extDerivFun_coordContract_summand {s : Nat}
@@ -508,17 +455,6 @@ theorem extDerivFun_coordContract_summand {s : Nat}
   rw [extDerivFun_finset_prod_real (Finset.univ : Finset (Fin s))
     (fun a y => U y (I0 a) (J0 a)) v (fun a _ => hU (I0 a) (J0 a))]
   ring
-
-
-
-
-
-
-
-
-
-
-
 
 omit [FiniteDimensional ℝ E] [IsManifold I ∞ M] in
 theorem extDerivFun_coordContract {s : Nat}
@@ -607,19 +543,9 @@ theorem extDerivFun_coordContract {s : Nat}
 
 end DirectionalDeriv
 
-
-
 section Leibniz
 
 open DifferentialGeometry.Tensor.Coordinates
-
-
-
-
-
-
-
-
 
 theorem inner0S_nabla {s : Nat}
     (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
@@ -847,17 +773,12 @@ theorem inner0S_nabla {s : Nat}
     exact hbasis (A x) (nabla0SFun (E := E) (H := H) (I := I) (M := M) s cov X B x)
   linarith [hgroupA, hgroupB]
 
-
 theorem inner0S_symm {s : Nat}
     (g : DifferentialGeometry.SmoothRiemannianMetric I M) (x : M)
     (A B : Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) s x) :
     inner0S (I := I) g x s A B = inner0S (I := I) g x s B A := by
   unfold inner0S MetricFiberData.inner
   exact (tensor0SMetricData (I := I) g x s).symm A B
-
-
-
-
 
 theorem normSq0S_nabla {s : Nat}
     (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))

@@ -1,6 +1,6 @@
-
-
-
+/-
+Authors: Jack McCarthy
+-/
 import DifferentialGeometry.Tensor.RSTensor.Coordinates.Field
 import DifferentialGeometry.Tensor.RSTensor.Derivation.Contract
 import Mathlib.Geometry.Manifold.VectorBundle.Riemannian

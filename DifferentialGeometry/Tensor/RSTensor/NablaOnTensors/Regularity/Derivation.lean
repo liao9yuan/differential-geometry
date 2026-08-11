@@ -1185,12 +1185,6 @@ theorem nablaRSFun_sub_raw {r s : ℕ}
 
 set_option backward.isDefEq.respectTransparency false in
 
-
-
-
-
-
-
 theorem nabla0SFun_eval_coordFrame_moving_raw {s : ℕ}
     (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
     (X : ContMDiffSection I E (∞ : WithTop ℕ∞) (TangentSpace I : M -> Type _))

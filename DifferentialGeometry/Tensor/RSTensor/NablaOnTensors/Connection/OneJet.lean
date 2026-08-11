@@ -76,8 +76,6 @@ private theorem tangentFieldModelInChart_sum_tangentConst_model
           rw [map_smul, hconst i, hright]
     _ = F y := b.sum_repr (F y)
 
-
-
 omit [I.Boundaryless] in
 theorem exists_cov_zero_at
     (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
@@ -364,8 +362,6 @@ theorem exists_cov_zero_at
     exact hvec
   refine ⟨V, hV_val, ?_⟩
   rw [hcov_congr, hcovVloc]
-
-
 
 omit [I.Boundaryless] in
 theorem exists_cov_zero_at_apply

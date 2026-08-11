@@ -17,12 +17,6 @@ open DifferentialGeometry.Geometry.Curvature
 
 set_option autoImplicit false
 
-
-
-
-
-
-
 open DifferentialGeometry.Geometry.Operator
 namespace DifferentialGeometry.Tensor.RSTensor
 
@@ -37,8 +31,6 @@ variable [FiniteDimensional Real E]
 variable {H : Type*} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
-
-
 
 private def connTraceEvalLin
     (g : SmoothRiemannianMetric I M)
@@ -73,8 +65,6 @@ private def connTraceEvalLin
     intro j _
     simp [mul_left_comm]
 
-
-
 def connTraceOneFormAt
     (g : SmoothRiemannianMetric I M)
     {x : M}
@@ -106,7 +96,6 @@ def connTraceOneFormAt
       (I := I) g x)
     (A (dualToCotangent_gen (I := I) ((tangentFlatLinear_gen (I := I) g x) V))) Fin.elim0
 
-
 theorem connTraceOneFormAt_coord
     {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
     (g : SmoothRiemannianMetric I M)
@@ -126,7 +115,6 @@ theorem connTraceOneFormAt_coord
   rw [metricTraceFirstTwo0SAt_eq_sum_basis (I := I) g basis gInv hinv]
   rfl
 
-
 def connTraceAt
     (g : SmoothRiemannianMetric I M)
     {x : M}
@@ -141,7 +129,6 @@ def connTraceAt
     connTraceAt (I := I) g A =
       cotangentSharp_gen (I := I) g x (connTraceOneFormAt (I := I) g A) := by
   rfl
-
 
 theorem connTraceAt_coord
     {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
@@ -340,9 +327,6 @@ private theorem traceAlg
         · intro hp
           exact False.elim (hp (Finset.mem_univ _))
 
-
-
-
 theorem connTraceCoeff
     {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
     (g : SmoothRiemannianMetric I M)
@@ -436,8 +420,6 @@ private theorem gInvComp_contMDiffAt
       (mem_extChartAt_source (I := I) x₀))
   simpa [f, Function.comp_def] using hcompAt
 
-
-
 private theorem trace02_eventually
     (g : SmoothRiemannianMetric I M)
     (A : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
@@ -485,7 +467,6 @@ private theorem trace02_eventually
       fin_cases q <;>
         simp [basis, coordinateFrameAt_basis_apply, DifferentialGeometry.Geometry.Curvature.vec2]
 
-
 theorem trace02_smooth
     (g : SmoothRiemannianMetric I M)
     (A : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
@@ -514,8 +495,6 @@ theorem trace02_smooth
         (𝕜 := Real) (I := I) (M := M) A x₀
         (fun q : Fin 2 => if q = 0 then i else j))
   exact hRhs.congr_of_eventuallyEq (trace02_eventually (I := I) g A x₀)
-
-
 
 private theorem normSq02_eventually
     (g : SmoothRiemannianMetric I M)
@@ -559,8 +538,6 @@ private theorem normSq02_eventually
     funext q; fin_cases q <;> simp [basis, coordinateFrameAt_basis_apply]
   rw [e1, e2]
 
-
-
 theorem normSq02_smooth
     (g : SmoothRiemannianMetric I M)
     (A : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
@@ -600,8 +577,6 @@ theorem normSq02_smooth
         (fun q : Fin 2 => if q = 0 then k else l))
   exact hRhs.congr_of_eventuallyEq (normSq02_eventually (I := I) g A x₀)
 
-
-
 private theorem normSq0S_eventually
     (g : SmoothRiemannianMetric I M) {s : Nat}
     (A : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
@@ -638,8 +613,6 @@ private theorem normSq0S_eventually
     funext a
     simp [basis, coordinateFrameAt_basis_apply]
   rw [hI, hJ]
-
-
 
 theorem normSq0S_smooth {s : Nat}
     (g : SmoothRiemannianMetric I M)
@@ -787,7 +760,6 @@ private theorem connTraceCoeff_contMDiffAt
   exact hRhs.congr_of_eventuallyEq
     (connTraceCoeff_eventually (I := I) g A x₀ p)
 
-
 def connTraceField
     (g : SmoothRiemannianMetric I M)
     (A : TensorRSField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
@@ -806,7 +778,6 @@ def connTraceField
       (n := (∞ : WithTop ℕ∞)) 1 2)
     (x : M) :
     connTraceField (I := I) g A x = connTraceAt (I := I) g (A x) := rfl
-
 
 theorem connTraceField_coord
     (g : SmoothRiemannianMetric I M)

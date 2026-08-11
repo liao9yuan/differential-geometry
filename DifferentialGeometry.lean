@@ -1,4 +1,5 @@
 import DifferentialGeometry.Analysis.Calculus.AnisotropicJointContDiff
+import DifferentialGeometry.Analysis.Calculus.AnalyticTransfer
 import DifferentialGeometry.Analysis.Calculus.ApproximatesLinearOn
 import DifferentialGeometry.Analysis.Calculus.BallRetraction
 import DifferentialGeometry.Analysis.Calculus.BumpClamp
@@ -1704,6 +1705,7 @@ import DifferentialGeometry.Analysis.Parabolic.RicciLinearization.RicciDifferenc
 import DifferentialGeometry.Bundle.Section
 import DifferentialGeometry.Bundle.SectionRealized
 import DifferentialGeometry.Bundle.SmoothScalarGerm
+import DifferentialGeometry.Bundle.TangentCoordChange
 import DifferentialGeometry.Bundle.TensorBundles
 import DifferentialGeometry.Bundle.TensorBundlesRealized
 import DifferentialGeometry.Bundle.VectorField
@@ -2929,12 +2931,18 @@ import DifferentialGeometry.Tensor.Auxiliary.Perm
 import DifferentialGeometry.Tensor.Auxiliary.PredualBasis
 import DifferentialGeometry.Tensor.Auxiliary.Shuffle.Decomposition
 import DifferentialGeometry.Tensor.Auxiliary.Shuffle.Derivative
+import DifferentialGeometry.Tensor.Auxiliary.Shuffle.Placement
 import DifferentialGeometry.Tensor.Auxiliary.Shuffle.Split
 import DifferentialGeometry.Tensor.Auxiliary.SlotAlgebra
 import DifferentialGeometry.Tensor.Exterior.Basic
-import DifferentialGeometry.Tensor.Exterior.Congr
+import DifferentialGeometry.Tensor.Exterior.Cochain
 import DifferentialGeometry.Tensor.Exterior.Defs
-import DifferentialGeometry.Tensor.Exterior.Rough
+import DifferentialGeometry.Tensor.Exterior.Exact
+import DifferentialGeometry.Tensor.Exterior.Leibniz
+import DifferentialGeometry.Tensor.Exterior.Model
+import DifferentialGeometry.Tensor.Exterior.ModelDifferentialForm
+import DifferentialGeometry.Tensor.Exterior.Pullback
+import DifferentialGeometry.Tensor.Exterior.ZeroForm
 import DifferentialGeometry.Tensor.Mixed.Bundle
 import DifferentialGeometry.Tensor.Mixed.DualFiber
 import DifferentialGeometry.Tensor.Mixed.DualMultilinearTransition

@@ -46,7 +46,6 @@ noncomputable section
 
 open scoped Manifold ContDiff
 
-
 namespace MetricFiberData
 
 variable {V : Type*} [AddCommGroup V] [Module Real V] [FiniteDimensional Real V]
@@ -56,13 +55,7 @@ private theorem dual_finrank_eq :
     Module.finrank Real V = Module.finrank Real (Module.Dual Real V) :=
   Subspace.dual_finrank_eq.symm
 
-
-
-
-
-
 variable {W : Type*} [AddCommGroup W] [Module Real W] [FiniteDimensional Real W]
-
 
 end MetricFiberData
 
@@ -71,12 +64,10 @@ variable {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners Real E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 
-
 abbrev SmoothMetric_gen
     (I : ModelWithCorners Real E H) (M : Type*)
     [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M] : Type _ :=
   Bundle.ContMDiffRiemannianMetric I ∞ E (TangentSpace I : M -> Type _)
-
 
 def tangentFlatLinear_gen (g : SmoothMetric_gen I M) (x : M) :
     TangentSpace I x →ₗ[Real] Module.Dual Real (TangentSpace I x) where
@@ -97,7 +88,6 @@ omit [FiniteDimensional ℝ E] in
     tangentFlatLinear_gen (I := I) g x v w = g.inner x v w := by
   rfl
 
-
 omit [FiniteDimensional ℝ E] in
 theorem tangentFlatLinear_injective_gen
     (g : SmoothMetric_gen I M) (x : M) :
@@ -117,7 +107,6 @@ theorem tangentFlatLinear_injective_gen
   have hpos : 0 < g.inner x (v - w) (v - w) := g.pos x (v - w) hvw_ne
   exact (lt_irrefl (0 : Real)) ((hzero (v - w)) ▸ hpos)
 
-
 def tangentFlatEquiv_gen (g : SmoothMetric_gen I M) (x : M) :
     TangentSpace I x ≃ₗ[Real] Module.Dual Real (TangentSpace I x) :=
   LinearMap.linearEquivOfInjective
@@ -131,16 +120,11 @@ def tangentFlatEquiv_gen (g : SmoothMetric_gen I M) (x : M) :
     tangentFlatEquiv_gen (I := I) g x v w = g.inner x v w := by
   rfl
 
-
-
-
-
 structure TangentMetricData_gen
     (g : SmoothMetric_gen I M) (x : M) where
   metric : MetricFiberData (TangentSpace I x)
   realizes_inner : forall X Y : TangentSpace I x,
     metric.inner X Y = g.inner x X Y
-
 
 def tangentMetricData_gen (g : SmoothMetric_gen I M) (x : M) :
     TangentMetricData_gen (I := I) g x where

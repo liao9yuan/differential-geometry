@@ -1,6 +1,6 @@
-
-
-
+/-
+Authors: Jack McCarthy
+-/
 import DifferentialGeometry.Tensor.Multilinear.Bundle
 import DifferentialGeometry.Tensor.Multilinear.Basis
 open DifferentialGeometry.Tensor.Multilinear

@@ -25,7 +25,6 @@ variable {H : Type*} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 
-
 omit [FiniteDimensional ℝ E] in
 theorem metricInvBasis_scale
     (c : Real) (hc : 0 < c) (g : SmoothRiemannianMetric I M)
@@ -57,7 +56,6 @@ theorem metricInvBasis_scale
             field_simp [hc0]
       _ = if i = k then 1 else 0 := (hinv i k).2
 
-
 theorem normSq0S_smul
     (g : SmoothRiemannianMetric I M) {x : M} {s : Nat}
     (c : Real) (A : Tensor0SSpace (𝕜 := Real) (E := E) (H := H)
@@ -71,8 +69,6 @@ theorem normSq0S_smul
     _ = c * D.flat A (c • A) := by rfl
     _ = c * (c * D.flat A A) := by rw [(D.flat A).map_smul]; rfl
     _ = c ^ 2 * D.flat A A := by ring
-
-
 
 theorem normSq0S_scale
     (c : Real) (hc : 0 < c) (g : SmoothRiemannianMetric I M)
@@ -107,8 +103,6 @@ theorem normSq0S_scale
   apply Finset.sum_congr rfl
   intro j _hj
   ring
-
-
 
 theorem normSq0S_two_scale
     (c : Real) (hc : 0 < c) (g : SmoothRiemannianMetric I M)

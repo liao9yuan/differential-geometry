@@ -24,7 +24,6 @@ variable [CompleteSpace 𝕜]
 variable [IsManifold I 1 M] [IsManifold I 2 M]
 variable [IsManifold I (∞ : WithTop ℕ∞) M]
 
-
 omit [IsManifold I ∞ M] in
 theorem nabla0SFun_apply_selfChart_slots (s : ℕ)
     (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
@@ -54,9 +53,6 @@ theorem nabla0SFun_apply_selfChart_slots (s : ℕ)
   rw [extChartAt_to_inv]
   rfl
 
-
-
-
 end
 
 noncomputable section RealDerivationSmoothness
@@ -70,17 +66,6 @@ variable {H₀ : Type*} [TopologicalSpace H₀]
 variable {I₀ : ModelWithCorners Real E₀ H₀}
 variable {M₀ : Type*} [TopologicalSpace M₀] [ChartedSpace H₀ M₀]
 variable [IsManifold I₀ ∞ M₀]
-
-
-
-
-
-
-
-
-
-
-
 
 theorem tensor0S_eval_covariantDerivative_slot_contMDiff {s : ℕ}
     (cov : CovariantDerivative I₀ E₀ (TangentSpace I₀ : M₀ → Type _))

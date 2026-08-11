@@ -37,16 +37,12 @@ variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners Real E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 variable {Time : Type*}
 
-
-
 def componentL2SqRS
     {x : M} {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
     (basis : Module.Basis Idx Real (TangentSpace I x))
     {r s : Nat} (A : TensorRSSpace r s I x) : Real :=
   ∑ upper : Fin r -> Idx, ∑ lower : Fin s -> Idx,
     (componentRS_gen (I := I) basis A upper lower) ^ 2
-
-
 
 theorem normSqRS_identity_eq_componentL2SqRS
     {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
@@ -90,8 +86,6 @@ theorem normSqRS_identity_eq_componentL2SqRS
       (componentRS_gen (I := I) basis A upper lower) ^ 2
   ring
 
-
-
 theorem normSqRS_one_two_identity_eq_sum
     {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
     (g : SmoothMetric_gen I M) (x : M)
@@ -109,8 +103,6 @@ theorem normSqRS_one_two_identity_eq_sum
   apply Finset.sum_congr rfl
   intro k _
   rw [sum_fin_two_fun]
-
-
 
 theorem componentRS_sq_le_componentL2SqRS
     {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
@@ -142,8 +134,6 @@ theorem componentRS_sq_le_componentL2SqRS
             (componentRS_gen (I := I) basis A upper' lower')))
       (by simp)
   exact h_lower.trans h_upper
-
-
 
 theorem abs_componentRS_le_sqrt_normSqRS
     {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
@@ -182,9 +172,6 @@ theorem abs_componentRS_le_sqrt_normSqRS
         (Real.sqrt (normSqRS (I := I) (g := g) (x := x) r s A)) ^ 2 := by
     simpa [sq_abs] using hsq
   exact abs_le_of_sq_le_sq hsq_no_abs (Real.sqrt_nonneg _)
-
-
-
 
 theorem sqrt_normSqRS_apply
     (g : SmoothMetric_gen I M) {x : M} {r s : Nat}
@@ -292,7 +279,6 @@ theorem sqrt_normSqRS_apply
             (component0S (I := I) basis input upper) ^ 2) := by
       rw [Real.sqrt_mul (Finset.sum_nonneg fun _ _ =>
         Finset.sum_nonneg fun _ _ => sq_nonneg _)]
-
 
 end
 

@@ -5,7 +5,6 @@ import DifferentialGeometry.Tensor.Multilinear.Bundle
 import Mathlib.Geometry.Manifold.VectorBundle.Tangent
 import Mathlib.Geometry.Manifold.VectorBundle.Basic
 
-
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false

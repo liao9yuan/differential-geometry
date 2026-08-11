@@ -320,7 +320,6 @@ theorem tangentConst_covariantDeriv_apply_contMDiffAt
 
 set_option backward.isDefEq.respectTransparency false in
 
-
 theorem tensor0S_eval_tangentConst_covariantDerivative_slot_contMDiffAt
     {s : ℕ}
     (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
@@ -652,10 +651,6 @@ theorem localCovariantDerivTensor0SAt_constInChart_contMDiffAt
 
 set_option backward.isDefEq.respectTransparency false in
 
-
-
-
-
 theorem nabla0SFun_eval_smooth_slots {s : ℕ}
     (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
     (X : ContMDiffSection I E (∞ : WithTop ℕ∞) (TangentSpace I : M -> Type _))
@@ -718,7 +713,6 @@ theorem nabla0SFun_eval_smooth_slots {s : ℕ}
 
 set_option backward.isDefEq.respectTransparency false in
 
-
 omit [IsManifold I 2 M] in
 theorem tensor0SField_eval_smooth_slots_contMDiffAt {s : ℕ}
     (α : Tensor0SField (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M)
@@ -744,7 +738,6 @@ theorem tensor0SField_eval_smooth_slots_contMDiffAt {s : ℕ}
     using hEval
 
 set_option backward.isDefEq.respectTransparency false in
-
 
 omit [IsManifold I 2 M] in
 theorem tensor0SField_eval_C1_slots_contMDiffAt_one {s : ℕ}
@@ -832,7 +825,6 @@ theorem nabla0SFun_eval_C1_slots {s : ℕ}
       (I := I) cov X V α x₀ hpair hV_md hVmodel hcoord
 
 set_option backward.isDefEq.respectTransparency false in
-
 
 theorem nabla0SFun_eval_tangentConstInChart_contMDiffAt
     {s : ℕ}
@@ -939,8 +931,6 @@ theorem nabla0SFun_eval_tangentConstInChart_contMDiffAt
     (I := I) cov X V α p hpair_md hV_md hVmodel_p hcoord_p]
 
 set_option backward.isDefEq.respectTransparency false in
-
-
 
 theorem nabla0S_reg (s : ℕ)
     (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))

@@ -26,19 +26,6 @@ variable [CompleteSpace 𝕜]
 
 section ModelCovariantDerivative
 
-
-
-
-
-
-
-
-
-
-
-
-
-
 theorem contDiffWithinAt_covariantDeriv_tensor0SModelWithin (s : ℕ)
     {m n' : WithTop ℕ∞} {X : E → E} {ΓX : E → E →L[𝕜] E}
     {α : E → Tensor0SModel (𝕜 := 𝕜) (E := E) s}
@@ -68,12 +55,6 @@ theorem contDiffWithinAt_covariantDeriv_tensor0SModelWithin (s : ℕ)
     simpa [lieDeriv_correctionL] using hCorrOp.clm_apply hα_m
   simpa [covariantDeriv_tensor0SModelWithin, covariantDeriv_tensor0SModelAt] using
     hprincipal.sub hCorr
-
-
-
-
-
-
 
 theorem contDiffWithinAt_covariantDeriv_tensorRSModelWithin (r s : ℕ)
     {m n' : WithTop ℕ∞} {X : E → E} {ΓX : E → E →L[𝕜] E}

@@ -32,8 +32,6 @@ variable {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners Real E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 
-
-
 def metricTensorField
     [IsManifold I 1 M] [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
     (g : DifferentialGeometry.SmoothRiemannianMetric I M) :
@@ -56,10 +54,6 @@ theorem metricTensorField_apply
     (v : Fin 2 -> TangentSpace I x) :
     metricTensorField (I := I) g x v = g.inner x (v 0) (v 1) := by
   simp [metricTensorField]
-
-
-
-
 
 theorem nabla_metric_eval
     [IsManifold I 1 M] [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
@@ -113,7 +107,6 @@ theorem nabla_metric_eval
   rw [heval, hsum, hderiv]
   ring
 
-
 theorem nabla_metric_zero
     [T2Space M] [IsManifold I 1 M] [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
     (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
@@ -146,7 +139,6 @@ theorem nabla_metric_zero
   convert hzero using 2
   ext a
   exact (hV a).symm
-
 
 theorem nabla_zero
     [T2Space M] [IsManifold I 1 M] [IsManifold I 2 M]
@@ -195,7 +187,6 @@ theorem nabla_zero
   ext a
   exact (hV a).symm
 
-
 theorem zero_realizes_nabla
     [T2Space M] [IsManifold I 1 M] [IsManifold I 2 M]
     [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
@@ -212,8 +203,6 @@ theorem zero_realizes_nabla
   change (0 : Real) = 0
   rfl
 
-
-
 theorem zero_realizes_metric
     [T2Space M] [IsManifold I 1 M] [IsManifold I 2 M]
     [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
@@ -228,8 +217,6 @@ theorem zero_realizes_metric
   rw [nabla_metric_zero (I := I) cov g hmc X x]
   change (0 : Real) = 0
   rfl
-
-
 
 omit [FiniteDimensional ℝ E] [IsManifold I ∞ M] in
 private theorem extDerivFun_mul_real
@@ -246,11 +233,6 @@ private theorem extDerivFun_mul_real
     (I := I) (f := f) (g := h) hf hh v
   simpa [extDerivFun, Pi.smul_apply, smul_eq_mul, mul_comm, mul_left_comm,
     mul_assoc] using hprod
-
-
-
-
-
 
 theorem nabla_smul_metric
     [T2Space M] [IsManifold I 1 M] [IsManifold I 2 M]
@@ -400,8 +382,6 @@ theorem nabla_smul_metric
             linarith [hmetric_zero]
           rw [show mfun x = metricSec x (fun a : Fin 2 => V a x) from rfl, hdm]
           ring
-
-
 
 noncomputable def metricDerivsZero
     [T2Space M] [IsManifold I 1 M] [IsManifold I 2 M]

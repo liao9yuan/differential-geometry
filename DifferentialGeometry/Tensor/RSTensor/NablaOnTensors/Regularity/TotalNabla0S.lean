@@ -32,11 +32,6 @@ variable [IsManifold I 1 M] [IsManifold I 2 M] [IsManifold I ∞ M]
 
 set_option backward.isDefEq.respectTransparency false in
 
-
-
-
-
-
 theorem totalNabla0S_eval_tangentConstInChart_contMDiffAt
     {s : ℕ}
     (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
@@ -111,7 +106,6 @@ theorem totalNabla0S_eval_tangentConstInChart_contMDiffAt
 
 set_option backward.isDefEq.respectTransparency false in
 
-
 theorem totalNabla0S_reg (s : ℕ)
     (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
     (hcov : CovariantDerivative.ContMDiffCovariantDerivativeLocally cov
@@ -166,8 +160,6 @@ theorem totalNabla0S_reg (s : ℕ)
     rw [ContinuousMultilinearMap.compContinuousLinearMap_apply]
     congr
   exact hsec
-
-
 
 noncomputable def CanonicalSpatialDerivs0S.of_smooth_connection {s : ℕ}
     (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))

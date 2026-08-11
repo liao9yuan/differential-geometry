@@ -28,14 +28,6 @@ variable [CompleteSpace 𝕜]
 
 section SmoothVectorFieldRSNabla
 
-
-
-
-
-
-
-
-
 variable [IsManifold I 1 M] [IsManifold I (n + 1) M]
 
 omit [CompleteSpace 𝕜] in
@@ -64,7 +56,6 @@ theorem tensor0SModelInChart_center_eq_tensor0SModelAt (s : ℕ) (x₀ : M)
   unfold tensor0SModelInChart
   rw [extChartAt_to_inv]
 
-
 omit [CompleteSpace 𝕜] in
 theorem tensor0SModelInChart_apply (s : ℕ) (x₀ : M)
     (A : (x : M) →
@@ -86,8 +77,6 @@ noncomputable def tensorRSModelAt (r s : ℕ) (x₀ x : M)
   exact ((trivializationAt (TensorRSModel r s 𝕜 E)
     (fun x => TensorRSSpace r s I x) x₀) ⟨x, T⟩).2
 
-
-
 omit [CompleteSpace 𝕜] in
 theorem tensorRSModelAt_trivializationAt_symm (r s : ℕ) (x₀ : M)
     (T : TensorRSModel r s 𝕜 E) :
@@ -104,8 +93,6 @@ theorem tensorRSModelAt_trivializationAt_symm (r s : ℕ) (x₀ : M)
         (mem_baseSet_trivializationAt (TensorRSModel r s 𝕜 E)
           (fun x => TensorRSSpace r s I x) x₀)
         T)
-
-
 
 noncomputable def tensorRSModelInChart (r s : ℕ) (x₀ : M)
     (T : (x : M) →

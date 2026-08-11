@@ -76,16 +76,11 @@ variable [NormedAddCommGroup W] [NormedSpace 𝕜 W]
 variable [FiniteDimensional 𝕜 U]
 variable {ι κ : Type*} [Fintype ι] [Fintype κ] [DecidableEq ι]
 
-
-
-
 noncomputable def continuousLinearMap_homBasis
     (bU : Module.Basis ι 𝕜 U) (bW : Module.Basis κ 𝕜 W) :
     Module.Basis (κ × ι) 𝕜 (U →L[𝕜] W) :=
   (bU.linearMap bW).map
     (LinearMap.toContinuousLinearMap : (U →ₗ[𝕜] W) ≃ₗ[𝕜] U →L[𝕜] W)
-
-
 
 theorem continuousLinearMap_homBasis_repr
     (bU : Module.Basis ι 𝕜 U) (bW : Module.Basis κ 𝕜 W)
@@ -103,9 +98,6 @@ theorem continuousLinearMap_homBasis_repr
 
 end HomBasis
 
-
-
-
 noncomputable def tensorRSModel_basis {d : ℕ}
     (bE : Module.Basis (Fin d) 𝕜 E) (r s : ℕ) :
     Module.Basis ((Fin r → Fin d) × (Fin s → Fin d)) 𝕜 (TensorRSModel r s 𝕜 E) :=
@@ -113,9 +105,6 @@ noncomputable def tensorRSModel_basis {d : ℕ}
   let bS := continuousMultilinearMap_basis (𝕜 := 𝕜) (F := E) bE s
   (continuousLinearMap_homBasis (𝕜 := 𝕜) bR bS).reindex
     (Equiv.prodComm (Fin s → Fin d) (Fin r → Fin d))
-
-
-
 
 theorem tensorRSModel_basis_repr {d : ℕ}
     (bE : Module.Basis (Fin d) 𝕜 E) (r s : ℕ)
@@ -134,9 +123,6 @@ section SmoothCriterion
 
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners 𝕜 E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
-
-
-
 
 theorem contMDiffAt_tensorRSModel_of_apply_basis_eval_basis
     {d r s : ℕ} (bE : Module.Basis (Fin d) 𝕜 E)
@@ -177,18 +163,11 @@ variable {x₀ x : M}
 
 namespace Tensor0SSpace
 
-
-
-
-
-
 noncomputable def constInChart (s : ℕ) (x₀ : M)
     (β : Tensor0SModel s 𝕜 E) (x : M) : Tensor0SSpace s I x := by
   letI := tensor0SBundle_topology (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M) s
   exact (trivializationAt (Tensor0SModel s 𝕜 E)
     (fun x => Tensor0SSpace s I x) x₀).symmL 𝕜 x β
-
-
 
 omit [CompleteSpace 𝕜] in
 theorem trivializationAt_apply (s : ℕ)
@@ -204,9 +183,6 @@ theorem trivializationAt_apply (s : ℕ)
     T (fun i => (trivializationAt E (TangentSpace I) x₀).symmL 𝕜 x (v i))
   rw [Bundle.Trivialization.continuousMultilinearMap_apply]
   rfl
-
-
-
 
 omit [CompleteSpace 𝕜] in
 theorem continuousLinearEquivAt_apply (s : ℕ)
@@ -224,9 +200,6 @@ theorem continuousLinearEquivAt_apply (s : ℕ)
       T (fun i => (trivializationAt E (TangentSpace I) x₀).symmL 𝕜 x (v i))
   exact trivializationAt_apply (𝕜 := 𝕜) (I := I) (x₀ := x₀) (x := x) s hx T v
 
-
-
-
 omit [CompleteSpace 𝕜] in
 theorem continuousLinearMapAt_apply (s : ℕ)
     (hx : x ∈ (trivializationAt E (TangentSpace I) x₀).baseSet)
@@ -243,10 +216,6 @@ theorem continuousLinearMapAt_apply (s : ℕ)
         (fun x => Tensor0SSpace s I x) x₀ ⟨x, y⟩).2 from
       (trivializationAt _ _ x₀).coe_linearMapAt_of_mem (R := 𝕜) hx]
   rfl
-
-
-
-
 
 omit [CompleteSpace 𝕜] in
 theorem constInChart_apply (s : ℕ)
@@ -275,8 +244,6 @@ theorem constInChart_apply (s : ℕ)
 end Tensor0SSpace
 
 namespace TensorRSSpace
-
-
 
 omit [CompleteSpace 𝕜] in
 theorem trivializationAt_apply (r s : ℕ)
@@ -314,9 +281,6 @@ theorem trivializationAt_apply (r s : ℕ)
   rw [hβ]
   exact Tensor0SSpace.continuousLinearEquivAt_apply
     (𝕜 := 𝕜) (I := I) (x₀ := x₀) (x := x) s hx _ v
-
-
-
 
 theorem trivializationAt_basis_coord {d r s : ℕ}
     (bE : Module.Basis (Fin d) 𝕜 E)

@@ -1,8 +1,8 @@
-
-
-
-
-
+/-
+Copyright (c) 2026 Jack McCarthy. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: Jack McCarthy
+-/
 import DifferentialGeometry.Tensor.Auxiliary.Shuffle.Split
 import Mathlib.GroupTheory.Perm.Finite
 import Mathlib.GroupTheory.Perm.Option
@@ -67,6 +67,7 @@ noncomputable def finSuccSumOptionEquiv {m n : ℕ} :
       Sum.inl 0 := by
   simp [finSuccSumOptionEquiv]
 
+@[nolint unusedArguments]
 def normalizeLeft (σ : Equiv.Perm (Fin (m + 1) ⊕ Fin (n + 1)))
     (k : Fin (m + 1)) (_hk : σ⁻¹ (Sum.inl 0) = Sum.inl k) :
     Equiv.Perm (Fin (m + 1) ⊕ Fin (n + 1)) :=
@@ -88,6 +89,7 @@ theorem normalizeLeft_coset (σ : Equiv.Perm (Fin (m + 1) ⊕ Fin (n + 1)))
   refine ⟨⟨(Equiv.swap 0 k)⁻¹, 1⟩, ?_⟩
   simp [normalizeLeft, Equiv.Perm.sumCongrHom_apply]
 
+@[nolint unusedArguments]
 noncomputable def restrictComplement
     (σ : Equiv.Perm (Fin (m + 1) ⊕ Fin (n + 1)))
     (_hfix : σ (Sum.inl 0) = Sum.inl 0) :
@@ -488,6 +490,7 @@ noncomputable def finSumSuccOptionEquiv {m n : ℕ} :
   apply (finSumSuccOptionEquiv (m := m) (n := n)).injective
   rw [Equiv.apply_symm_apply]; exact (finSumSuccOptionEquiv_inr_succ b).symm
 
+@[nolint unusedArguments]
 def normalizeRight (σ : Equiv.Perm (Fin (m + 1) ⊕ Fin (n + 1)))
     (k : Fin (n + 1)) (_hk : σ⁻¹ (Sum.inl 0) = Sum.inr k) :
     Equiv.Perm (Fin (m + 1) ⊕ Fin (n + 1)) :=
@@ -501,6 +504,7 @@ theorem normalizeRight_fixes (σ : Equiv.Perm (Fin (m + 1) ⊕ Fin (n + 1)))
     Equiv.sumCongr_apply, Sum.map_inr, Equiv.swap_apply_left]
   rw [← hk]; simp
 
+@[nolint unusedArguments]
 noncomputable def restrictComplementRight
     (σ : Equiv.Perm (Fin (m + 1) ⊕ Fin (n + 1)))
     (_hfix : σ (Sum.inr 0) = Sum.inr 0) :

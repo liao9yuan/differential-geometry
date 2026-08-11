@@ -7,13 +7,6 @@ open DifferentialGeometry.Geometry.Curvature
 
 set_option autoImplicit false
 
-
-
-
-
-
-
-
 noncomputable section
 
 open DifferentialGeometry.Geometry.Operator
@@ -29,8 +22,6 @@ variable {H : Type*} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 
-
-
 def Nabla0SRealizesAt
     [IsManifold I 1 M] [IsManifold I 2 M]
     [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
@@ -45,7 +36,6 @@ def Nabla0SRealizesAt
       nabla0SFun (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
         s cov X alpha x slots
 
-
 def Nabla0SSectionRealizes
     [IsManifold I 1 M] [IsManifold I 2 M]
     [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
@@ -53,8 +43,6 @@ def Nabla0SSectionRealizes
     (alpha : Tensor0SSection (I := I) (M := M) s)
     (nablaAlpha : Tensor0SSection (I := I) (M := M) (s + 1)) : Prop :=
   ∀ x : M, Nabla0SRealizesAt (I := I) s cov alpha (fun y => nablaAlpha y) x
-
-
 
 def Nabla20SRealizesAt
     [IsManifold I 1 M] [IsManifold I 2 M]
@@ -72,8 +60,6 @@ def Nabla20SRealizesAt
       nabla2Alpha (Fin.cons (X x) slots) =
         nabla0SFun (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
           (s + 1) cov X nablaAlpha x slots
-
-
 
 theorem Nabla0SSectionRealizes.eval_smooth_slots
     [IsManifold I 1 M] [IsManifold I 2 M]
@@ -108,10 +94,6 @@ theorem Nabla0SSectionRealizes.eval_smooth_slots
             (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
             cov X V alpha x
 
-
-
-
-
 theorem Nabla0SSectionRealizes.eval_point_vector_smooth_slots
     [IsManifold I 1 M] [IsManifold I 2 M]
     [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
@@ -137,8 +119,6 @@ theorem Nabla0SSectionRealizes.eval_point_vector_smooth_slots
   have h0 := Nabla0SSectionRealizes.eval_smooth_slots
     (I := I) h Wsec V x
   simpa [hWsec] using h0
-
-
 
 theorem Nabla0SSectionRealizes.eval_C1_slots
     [IsManifold I 1 M] [IsManifold I 2 M]
@@ -174,9 +154,6 @@ theorem Nabla0SSectionRealizes.eval_C1_slots
           exact nabla0SFun_eval_C1_slots
             (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
             cov X V alpha x hV_at
-
-
-
 
 theorem Nabla20SRealizesAt.eval_smooth_slots
     [IsManifold I 1 M] [IsManifold I 2 M]
@@ -349,6 +326,5 @@ lemma first_slot_torsionCorrection_eq
   change L C - L A + L B = -L (A - B - C)
   rw [map_sub, map_sub]
   abel
-
 
 end DifferentialGeometry.Tensor.RicciIdentity

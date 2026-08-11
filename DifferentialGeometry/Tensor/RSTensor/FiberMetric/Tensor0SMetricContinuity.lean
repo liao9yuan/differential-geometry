@@ -48,10 +48,6 @@ variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 variable [IsManifold I 1 M]
 
-
-
-
-
 theorem tensor0SField_eval_cmdAt_slots {s : ℕ}
     (α : Tensor0SField (𝕜 := ℝ) (E := E) (H := H) (I := I) (M := M)
       (n := (∞ : WithTop ℕ∞)) s)
@@ -69,9 +65,6 @@ theorem tensor0SField_eval_cmdAt_slots {s : ℕ}
 section NormSqContinuity
 
 variable (g : DifferentialGeometry.SmoothRiemannianMetric I M)
-
-
-
 
 theorem normSq0S_contAt {s : ℕ}
     (T : Tensor0SField (𝕜 := ℝ) (E := E) (H := H) (I := I) (M := M)
@@ -213,9 +206,6 @@ theorem normSq0S_contAt {s : ℕ}
       congrArg (T y) (funext fun a => (e.localFrame_apply_of_mem_baseSet b hy).symm)
     rw [h1, h2]
   exact hF.congr hev.symm
-
-
-
 
 theorem normSq0S_cont {s : ℕ}
     (T : Tensor0SField (𝕜 := ℝ) (E := E) (H := H) (I := I) (M := M)

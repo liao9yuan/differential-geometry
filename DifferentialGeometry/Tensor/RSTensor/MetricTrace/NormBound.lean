@@ -6,13 +6,6 @@ open DifferentialGeometry.Geometry.Operator
 
 set_option autoImplicit false
 
-
-
-
-
-
-
-
 noncomputable section
 
 namespace DifferentialGeometry
@@ -30,8 +23,6 @@ variable {I : ModelWithCorners Real E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 variable {x : M}
 
-
-
 theorem component_le_sqrt
     (g : SmoothMetric_gen I M)
     {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
@@ -47,8 +38,6 @@ theorem component_le_sqrt
   exact Finset.single_le_sum
     (fun slots' _ => sq_nonneg (component0S (I := I) basis A slots'))
     (Finset.mem_univ slots)
-
-
 
 theorem trace_normSq_le
     (g : DifferentialGeometry.SmoothRiemannianMetric I M)
@@ -124,8 +113,6 @@ theorem trace_normSq_le
         sourceNorm := by rw [Real.sq_sqrt hsource]
     _ = (Fintype.card (Fin s -> Idx) : Real) * (Fintype.card Idx : Real) ^ 2 *
         normSq0S (I := I) g x (s + 2) T := rfl
-
-
 
 theorem trace_normSq_rank_le
     (g : DifferentialGeometry.SmoothRiemannianMetric I M)

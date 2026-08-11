@@ -1341,7 +1341,6 @@ theorem coord_normSq0S_eq_coord
   rw [← normSq0S_eq_coord (I := I) g x s basis₁ gInv₁ hinv₁ A,
     ← normSq0S_eq_coord (I := I) g x s basis₂ gInv₂ hinv₂ A]
 
-
 end
 
 end Tensor0SBundle

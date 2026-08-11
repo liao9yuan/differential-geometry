@@ -1,6 +1,6 @@
-
-
-
+/-
+Authors: Jack McCarthy
+-/
 import DifferentialGeometry.Tensor.Mixed.Field
 import DifferentialGeometry.Tensor.Mixed.DualFiber
 import DifferentialGeometry.Tensor.Mixed.Naturality
@@ -374,7 +374,6 @@ private theorem mixedToTensorTrivTransition {r s : ℕ} (x₀ x : B)
   rw [hf_eq]
   exact dualTensorMultilinearTrivTransition x₀ x hx Φ hΦ u
 
-
 theorem mixedToTensor_triv_eq_bundle {r s : ℕ} (x₀ x : B)
     (hx : x ∈ (trivializationAt F E x₀).baseSet)
     (T : Bundle.continuousMultilinearMap 𝕜 r F E x →L[𝕜]
@@ -517,7 +516,6 @@ theorem tensorToMixed_triv_eq_bundle {r s : ℕ} (x₀ x : B)
   rw [hfwd]
   exact (LinearEquiv.symm_apply_apply _ _).symm
 
-
 omit [ContMDiffVectorBundle n F E IB] in
 theorem multilinearHomTensorEquivAt_bundle_smooth {r s : ℕ} :
     ContMDiff
@@ -569,7 +567,6 @@ theorem multilinearHomTensorEquivAt_bundle_smooth {r s : ℕ} :
         (mem_baseSet_trivializationAt F E p₀.proj)
     ] with p hp
     exact mixedToTensor_triv_eq_bundle p₀.proj p.proj hp p.snd
-
 
 omit [ContMDiffVectorBundle n F E IB] in
 theorem multilinearHomTensorEquivAt_bundle_symm_smooth {r s : ℕ} :

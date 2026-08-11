@@ -1,6 +1,6 @@
-
-
-
+/-
+Authors: Jack McCarthy
+-/
 import DifferentialGeometry.Tensor.Multilinear.Bundle
 
 namespace DifferentialGeometry.Tensor.Multilinear

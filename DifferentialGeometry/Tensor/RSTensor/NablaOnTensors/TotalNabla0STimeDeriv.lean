@@ -4,28 +4,6 @@ import DifferentialGeometry.Bundle.PartialMfderiv.FixedBase
 set_option autoImplicit false
 set_option backward.isDefEq.respectTransparency false
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 noncomputable section
 
 namespace DifferentialGeometry
@@ -41,18 +19,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
 variable [IsManifold I 1 M] [IsManifold I 2 M]
 variable [IsManifold I (∞ : WithTop ℕ∞) M]
 variable [T2Space M]
-
-
-
-
-
-
-
-
-
-
-
-
 
 omit [CompleteSpace E] [T2Space M] in
 theorem nabla0SFun_hasDerivWithinAt_pt {s : ℕ}
@@ -101,8 +67,6 @@ theorem nabla0SFun_hasDerivWithinAt_pt {s : ℕ}
     rw [key]
     exact HasDerivWithinAt.sum (fun (a : Fin s) (_ : a ∈ Finset.univ) => hpt a)
 
-
-
 omit [CompleteSpace E] [T2Space M] in
 theorem nabla0SFun_hasDerivWithinAt {s : ℕ}
     (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
@@ -134,12 +98,6 @@ theorem nabla0SFun_hasDerivWithinAt {s : ℕ}
       timeSet t :=
   nabla0SFun_hasDerivWithinAt_pt cov X V α β timeSet x₀ t
     (hswap t x₀ (Set.mem_singleton x₀) (X x₀)) hpt
-
-
-
-
-
-
 
 omit [CompleteSpace E] [T2Space M] in
 theorem totalNabla0SFun_hasDerivWithinAt_pt {s : ℕ}
@@ -175,8 +133,6 @@ theorem totalNabla0SFun_hasDerivWithinAt_pt {s : ℕ}
       timeSet t := by
   simpa only [totalNabla0SFun_apply_section] using
     nabla0SFun_hasDerivWithinAt_pt cov X V α β timeSet x₀ t hswap hpt
-
-
 
 omit [CompleteSpace E] [T2Space M] in
 theorem totalNabla0SFun_hasDerivWithinAt {s : ℕ}

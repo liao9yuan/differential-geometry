@@ -31,10 +31,8 @@ section DiagonalCoordinate
 variable {Idx : Type*} [DecidableEq Idx]
 variable {x : M}
 
-
 def diagonalInvMetric (μ : Idx -> Real) : Idx -> Idx -> Real :=
   fun i j => if i = j then μ i else 0
-
 
 def identityInvMetric : Idx -> Idx -> Real :=
   diagonalInvMetric (fun _ : Idx => 1)
@@ -85,7 +83,6 @@ private theorem prod_mu_le_pow
 
 variable [Fintype Idx]
 
-
 omit [FiniteDimensional ℝ E] in
 theorem coordInner0S_diagonal_eq_sum
     (s : Nat) (μ : Idx -> Real)
@@ -111,7 +108,6 @@ theorem coordInner0S_diagonal_eq_sum
   · intro hnotmem
     exact False.elim (hnotmem (Finset.mem_univ I0))
 
-
 omit [FiniteDimensional ℝ E] in
 theorem coordInner0S_identity_eq_sum_sq
     (s : Nat) (A : Tensor0SSpace s I x)
@@ -126,7 +122,6 @@ theorem coordInner0S_identity_eq_sum_sq
       (tensor0SComponent (I := I) A (fun i => basis i) I0) ^ 2
   rw [coordInner0S_diagonal_eq_sum (I := I) (x := x) s (fun _ : Idx => 1) A basis]
   simp
-
 
 omit [FiniteDimensional ℝ E] in
 theorem coordInner0S_identity_eq_sum
@@ -151,8 +146,6 @@ theorem coordInner0S_identity_eq_sum
     ring
   · intro hnotmem
     exact False.elim (hnotmem (Finset.mem_univ I0))
-
-
 
 theorem inner0S_basisTensor_left_identity
     (g : SmoothMetric_gen I M) (x : M) (s : Nat)
@@ -186,8 +179,6 @@ theorem inner0S_basisTensor_left_identity
   · intro hnotmem
     exact False.elim (hnotmem (Finset.mem_univ slots))
 
-
-
 theorem inner0S_basisTensor_right_identity
     (g : SmoothMetric_gen I M) (x : M) (s : Nat)
     (basis : Module.Basis Idx Real (TangentSpace I x))
@@ -219,8 +210,6 @@ theorem inner0S_basisTensor_right_identity
     ring
   · intro hnotmem
     exact False.elim (hnotmem (Finset.mem_univ slots))
-
-
 
 theorem normSq0S_identity_eq_sum_sq
     (g : SmoothMetric_gen I M) (x : M) (s : Nat)
@@ -293,8 +282,6 @@ theorem normSq0S_le_card_of_component_bound
     _ = (Fintype.card (Fin s -> Idx) : Real) * B ^ 2 := by
           rw [Finset.sum_const, Finset.card_univ, nsmul_eq_mul]
 
-
-
 theorem normSq0S_three_identity_eq_sum
     (g : SmoothMetric_gen I M) (x : M)
     (basis : Module.Basis Idx Real (TangentSpace I x))
@@ -310,12 +297,6 @@ theorem normSq0S_three_identity_eq_sum
   apply Finset.sum_congr rfl
   intro d _
   rw [sum_fin_two_fun]
-
-
-
-
-
-
 
 omit [FiniteDimensional ℝ E] in
 theorem coordInner0S_diagonal_le_pow_identity
@@ -335,12 +316,6 @@ theorem coordInner0S_diagonal_le_pow_identity
   exact mul_le_mul_of_nonneg_right
     (prod_mu_le_pow (μ := μ) (C := C) hμ_nonneg hμ_le I0)
     (sq_nonneg _)
-
-
-
-
-
-
 
 omit [FiniteDimensional ℝ E] in
 theorem coordInner0S_identity_le_pow_diagonal
@@ -369,14 +344,6 @@ theorem coordInner0S_identity_le_pow_diagonal
           mul_le_mul_of_nonneg_left hprod (by positivity)
   nlinarith [hge1, sq_nonneg (tensor0SComponent (I := I) A (fun i => basis i) I0)]
 
-
-
-
-
-
-
-
-
 theorem normSq0S_diag_le
     (g h : SmoothMetric_gen I M) (x : M) (s : Nat)
     (basis : Module.Basis Idx Real (TangentSpace I x))
@@ -392,12 +359,6 @@ theorem normSq0S_diag_le
   rw [normSq0S_eq_coord (I := I) h x s basis (diagonalInvMetric μ) hhinv A,
     normSq0S_eq_coord (I := I) g x s basis (identityInvMetric (Idx := Idx)) hginv A]
   exact coordInner0S_diagonal_le_pow_identity (I := I) (x := x) s μ C hμ_nonneg hμ_le A basis
-
-
-
-
-
-
 
 omit [FiniteDimensional ℝ E] in
 theorem coordInner0S_identity_le_pow_quad
@@ -434,11 +395,6 @@ theorem coordInner0S_identity_le_pow_quad
               tensor0SComponent (I := I) A (fun i => basis i) J0)) :=
         mul_le_mul_of_nonneg_left hkey (le_of_lt (pow_pos hC s))
 
-
-
-
-
-
 theorem sum_comp_sq_le_pow_normSq0S
     (g : SmoothMetric_gen I M) (x : M) (s : Nat)
     (basis : Module.Basis Idx Real (TangentSpace I x))
@@ -454,11 +410,6 @@ theorem sum_comp_sq_le_pow_normSq0S
   rw [normSq0S_eq_coord (I := I) g x s basis Q hginv A,
     ← coordInner0S_identity_eq_sum_sq (I := I) (x := x) s A basis]
   exact coordInner0S_identity_le_pow_quad (I := I) (x := x) s Q C hC hQsymm hQlb A basis
-
-
-
-
-
 
 theorem normSq0S_le_pow_sum_comp_sq
     (g : SmoothMetric_gen I M) (x : M) (s : Nat)
@@ -488,12 +439,6 @@ theorem normSq0S_le_pow_sum_comp_sq
 end DiagonalCoordinate
 
 section MetricEquiv
-
-
-
-
-
-
 
 theorem exists_diagInv_of_equiv
     (g h : SmoothMetric_gen I M) (x : M) {C : Real}
@@ -633,7 +578,6 @@ theorem exists_diagInv_of_equiv
         exact False.elim (hj (Finset.mem_univ j))
   exact ⟨mu, basis, hginv, hhinv, hmu_nonneg, hmu_le⟩
 
-
 omit [FiniteDimensional ℝ E] in
 theorem metric_equiv_symm
     (g h : SmoothMetric_gen I M) (x : M) {C : Real}
@@ -663,8 +607,6 @@ theorem metric_equiv_symm
       _ <= C * h.inner x v v :=
         mul_le_mul_of_nonneg_left hlow hC_nonneg
 
-
-
 theorem normSq0S_upper_le_of_equiv
     (g h : SmoothMetric_gen I M) (x : M) (s : Nat) {C : Real}
     (hC : 1 <= C)
@@ -680,8 +622,6 @@ theorem normSq0S_upper_le_of_equiv
   exact normSq0S_diag_le
     (I := I) (g := g) (h := h) (x := x) (s := s)
     basis mu C hginv hhinv hmu_nonneg hmu_le T
-
-
 
 theorem normSq0S_lower_le_of_equiv
     (g h : SmoothMetric_gen I M) (x : M) (s : Nat) {C : Real}
@@ -701,8 +641,6 @@ theorem normSq0S_lower_le_of_equiv
   have hpow_pos : 0 < C ^ s := pow_pos hC_pos s
   rw [inv_mul_le_iff₀ hpow_pos]
   exact hupper
-
-
 
 theorem normSq0S_le_of_metric_equiv
     (g h : SmoothMetric_gen I M) (x : M) (s : Nat) {C : Real}
@@ -725,11 +663,6 @@ theorem normSq0S_le_of_metric_equiv
   constructor
   · simpa using hlower
   · simpa using hupper
-
-
-
-
-
 
 theorem sqrt_normSq0S_le_of_metric_equiv
     (g h : SmoothMetric_gen I M) (x : M) (s : Nat) {C : Real}
@@ -754,7 +687,6 @@ section PointwiseCS
 
 variable {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
 
-
 private theorem sqrt_prod {α : Type*} (s : Finset α) (f : α -> Real)
     (hf : ∀ a ∈ s, 0 <= f a) :
     Real.sqrt (∏ a ∈ s, f a) = ∏ a ∈ s, Real.sqrt (f a) := by
@@ -765,11 +697,6 @@ private theorem sqrt_prod {α : Type*} (s : Finset α) (f : α -> Real)
       rw [Finset.prod_cons, Finset.prod_cons,
         Real.sqrt_mul (hf a (Finset.mem_cons_self a s)),
         ih (fun b hb => hf b (Finset.mem_cons_of_mem hb))]
-
-
-
-
-
 
 omit [Fintype Idx] in
 theorem abs_apply_le_sqrt_normSq0S [Finite Idx]

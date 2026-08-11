@@ -297,12 +297,7 @@ theorem hom_nonneg [AddCommGroup V] [Module Real V] [FiniteDimensional Real V]
   · exact homFlatLinear_comm DV DW
   · exact homFlatLinear_nonneg DV DW
 
-
 end MetricFiberData
-
-
-
-
 
 end
 

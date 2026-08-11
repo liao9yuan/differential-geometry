@@ -1,6 +1,6 @@
-
-
-
+/-
+Authors: Yuan Liao, Jack McCarthy
+-/
 import DifferentialGeometry.Tensor.RSTensor.Defs
 import DifferentialGeometry.Tensor.RSTensor.Basis
 import DifferentialGeometry.Tensor.Product.Defs
@@ -121,7 +121,6 @@ theorem Tensor0SField.fromScalarField_apply [CompleteSpace 𝕜]
 noncomputable def Tensor0SField.toScalarField
     (α : Tensor0SField n 0 (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M)) : M → 𝕜 :=
   fun x => Tensor0SSpace.toModel (α x) Fin.elim0
-
 
 omit [IsManifold I (n + 1) M] in
 theorem Tensor0SField.toScalarField_contMDiff [CompleteSpace 𝕜]
@@ -294,7 +293,6 @@ theorem Tensor0SField.toRS0_apply {s : ℕ} [CompleteSpace 𝕜]
     (x : M) (c : Tensor0SSpace 0 I x) :
     α.toTensorRSField n x c = tensor0SSpace_evalScalar x c • α x :=
   rfl
-
 
 omit [IsManifold I (n + 1) M] in
 theorem Tensor0SField.toRS0_eq {s : ℕ} [CompleteSpace 𝕜]
