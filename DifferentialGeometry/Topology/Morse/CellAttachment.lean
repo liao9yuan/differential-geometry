@@ -7,6 +7,7 @@ import Mathlib.Topology.Homotopy.Equiv
 import Mathlib.Analysis.SpecialFunctions.Sqrt
 import Mathlib.Analysis.Complex.ExponentialBounds
 import DifferentialGeometry.Analysis.Calculus.Taylor
+import Mathlib.Geometry.Manifold.ContMDiff.NormedSpace
 
 namespace DifferentialGeometry.Topology.Morse
 
@@ -6846,6 +6847,12 @@ theorem contDiff_modelLowerRoundMap {n k : ℕ} (hk : k ≤ n) (ε r δ θ : ℝ
       simp
     rw [hcoord]
     fun_prop
+
+theorem contMDiff_modelLowerRoundMap {n k : ℕ} (hk : k ≤ n) (ε r δ θ : ℝ)
+    (hθ : 0 < θ) (hδ : 0 < δ) (hδr : δ < r ^ 2) (hθr : θ < r ^ 2) :
+    ContMDiff (modelWithCornersSelf ℝ (MorseModel n)) (modelWithCornersSelf ℝ (MorseModel n)) (⊤ : ℕ∞)
+      (modelLowerRoundMap hk ε r δ θ) :=
+  contMDiff_iff_contDiff.mpr (contDiff_modelLowerRoundMap hk ε r δ θ hθ hδ hδr hθr)
 
 noncomputable def modelRoundCapInterp (ε r : ℝ) (a b : ℝ) : ℝ :=
   (1 - a) / ((1 - a) + (1 - b) * (r ^ 2 / (r ^ 2 * b + 2 * ε)))
