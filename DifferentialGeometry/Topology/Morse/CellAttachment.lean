@@ -6718,6 +6718,78 @@ theorem modelLowerRoundMap_mem_attached {n k : ℕ} (hk : k ≤ n) (c ε r δ θ
     norm_num
     exact smoothCap_nonneg hδ hδr
 
+noncomputable def modelLowerRoundBound (ε r δ θ : ℝ) (t : ℝ) : ℝ :=
+  modelRoundScale ε r δ θ t ^ 2 * (t - 2 * ε)
+
+theorem modelLowerRoundBound_eq_self_of_le {ε r δ θ t : ℝ} (hθ : 0 < θ)
+    (ht : t ≤ r ^ 2 + 2 * ε - θ) :
+    modelLowerRoundBound ε r δ θ t = t - 2 * ε := by
+  dsimp [modelLowerRoundBound]
+  rw [modelRoundScale_eq_one_of_le hθ ht]
+  ring
+
+theorem modelLowerRoundBound_eq_self_of_ge {ε r δ θ t : ℝ} (hθ : 0 < θ) (hδ : 0 < δ)
+    (ht : r ^ 2 + 2 * ε + δ ≤ t) :
+    modelLowerRoundBound ε r δ θ t = t - 2 * ε := by
+  dsimp [modelLowerRoundBound]
+  rw [modelRoundScale_eq_one_of_ge hθ hδ ht]
+  ring
+
+noncomputable def modelRoundCapInterp (ε r : ℝ) (a b : ℝ) : ℝ :=
+  (1 - a) / ((1 - a) + (1 - b) * (r ^ 2 / (r ^ 2 * b + 2 * ε)))
+
+theorem modelRoundCapInterp_eq_zero_of_eq_one {ε r a b : ℝ} (ha : a = 1) :
+    modelRoundCapInterp ε r a b = 0 := by
+  dsimp [modelRoundCapInterp]
+  rw [ha]
+  simp only [sub_self, zero_add, zero_div]
+
+theorem modelRoundCapInterp_eq_one_of_eq_one {ε r a b : ℝ} (hb : b = 1) (ha : a ≠ 1) :
+    modelRoundCapInterp ε r a b = 1 := by
+  dsimp [modelRoundCapInterp]
+  rw [hb]
+  simp only [sub_self, zero_mul, add_zero]
+  exact div_self (sub_ne_zero.mpr ha.symm)
+
+theorem modelRoundCapInterp_eq_cocore {ε r a b : ℝ} (ha : a = 0) (hε : 0 < ε)
+    (hb0 : 0 ≤ b) (hb1 : b ≤ 1) :
+    modelRoundCapInterp ε r a b = (r ^ 2 * b + 2 * ε) / (r ^ 2 + 2 * ε) := by
+  dsimp [modelRoundCapInterp]
+  rw [ha]
+  simp only [sub_zero]
+  have hdenpos : 0 < (1 : ℝ) + (1 - b) * (r ^ 2 / (r ^ 2 * b + 2 * ε)) := by
+    have h1 : 0 < r ^ 2 * b + 2 * ε := by nlinarith [hε, hb0, sq_nonneg r]
+    have h2 : 0 ≤ (1 - b) * (r ^ 2 / (r ^ 2 * b + 2 * ε)) := by
+      exact mul_nonneg (by nlinarith [hb1]) (div_nonneg (sq_nonneg r) (le_of_lt h1))
+    nlinarith
+  have hden : (1 : ℝ) + (1 - b) * (r ^ 2 / (r ^ 2 * b + 2 * ε)) ≠ 0 := ne_of_gt hdenpos
+  have hε2 : r ^ 2 + 2 * ε ≠ 0 := by nlinarith [hε]
+  have hbden : r ^ 2 * b + 2 * ε ≠ 0 := by nlinarith [hε, hb0, sq_nonneg r]
+  rw [div_eq_iff hden]
+  have hD : (1 : ℝ) + (1 - b) * (r ^ 2 / (r ^ 2 * b + 2 * ε)) =
+      (r ^ 2 + 2 * ε) / (r ^ 2 * b + 2 * ε) := by
+    field_simp [hbden, hε2]
+    ring
+  rw [hD]
+  field_simp [hbden, hε2]
+
+noncomputable def modelRoundCapQ (ε r δ θ : ℝ) (a b : ℝ) : ℝ :=
+  (1 - modelRoundCapInterp ε r a b) *
+      modelLowerRoundBound ε r δ θ ((2 * ε + r ^ 2 * b) * a) +
+    modelRoundCapInterp ε r a b * smoothCap ε r δ ((2 * ε + r ^ 2 * b) * a)
+
+theorem modelRoundCapQ_eq_lowerBound_of_eq_one {ε r δ θ a b : ℝ} (ha : a = 1) :
+    modelRoundCapQ ε r δ θ a b = modelLowerRoundBound ε r δ θ (2 * ε + r ^ 2 * b) := by
+  dsimp [modelRoundCapQ]
+  rw [modelRoundCapInterp_eq_zero_of_eq_one ha, ha]
+  simp
+
+theorem modelRoundCapQ_eq_smoothCap_of_eq_one {ε r δ θ a b : ℝ} (hb : b = 1) (ha : a ≠ 1) :
+    modelRoundCapQ ε r δ θ a b = smoothCap ε r δ ((2 * ε + r ^ 2) * a) := by
+  dsimp [modelRoundCapQ]
+  rw [modelRoundCapInterp_eq_one_of_eq_one hb ha, hb]
+  simp
+
 end CellAttachment
 
 end
