@@ -2591,6 +2591,32 @@ theorem modelLowerAttachingChartPoint_fix {n k : ℕ} (hk : k ≤ n) (ε : ℝ)
   rw [hsmul']
 
 
+theorem modelLowerAttachingChartPoint_mem_modelHandle_sublevel {n k : ℕ} (hk : k ≤ n)
+    (c ε r : ℝ) (hε : 0 ≤ ε) {y : MorseModel n} (hpos : posPart hk y ≠ 0)
+    (hneg : ‖negPart hk y‖ ≤ r) (hlo : 2 * ε ≤ ‖negPart hk y‖ ^ 2) :
+    modelLowerAttachingChartPoint hk ε y ∈ modelHandle hk ε r ∧
+      morseNormalForm hk c (modelLowerAttachingChartPoint hk ε y) ≤ c - ε := by
+  let z := modelLowerAttachingChartPoint hk ε y
+  have hε' : 0 ≤ ‖negPart hk y‖ ^ 2 - 2 * ε := by linarith
+  have hpnorm : ‖posPart hk z‖ ^ 2 = ‖negPart hk y‖ ^ 2 - 2 * ε := by
+    dsimp [z]
+    exact modelLowerAttachingChartPoint_posPart_norm_sq hk ε hpos hε'
+  have hn : negPart hk z = negPart hk y := by
+    dsimp [z]
+    exact modelLowerAttachingChartPoint_negPart hk ε y
+  constructor
+  · dsimp [modelHandle]
+    constructor
+    · rw [hpnorm]
+      have hle : ‖negPart hk y‖ ^ 2 ≤ r ^ 2 := by
+        exact sq_le_sq' (by linarith [norm_nonneg (negPart hk y)]) hneg
+      nlinarith [hε]
+    · rw [hn, hpnorm]
+      nlinarith
+  · rw [morseNormalForm_split hk c z, hn, hpnorm]
+    nlinarith
+
+
 theorem modelHandle_meets_lower_sublevel {n k : ℕ} (hk : k ≤ n) (c ε r : ℝ) (hε : 0 < ε)
     (hr : r ≠ 0) :
     modelHandle hk ε r ∩ sublevel (morseNormalForm hk c) (c - ε) =
