@@ -334,6 +334,80 @@ private theorem metricFrameComp_Ioo
   rw [Bundle.contMDiffWithinAt_totalSpace] at hpx
   exact hpx.2
 
+omit [CompleteSpace E] [T2Space M] [SigmaCompactSpace M] in
+private theorem metricCLMSection_reg
+    [NeZero (Module.finrank Real E)]
+    (D : RealTimeInterval)
+    (g : ℝ → SmoothRiemannianMetric I M)
+    (hgram : ∀ (x₀ : M) (i j : Fin (Module.finrank ℝ E)),
+      ContMDiffOn (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ) ∞
+        (fun p : ℝ × M => chartGramMatrix (I := I) (g p.1) x₀ p.2 i j)
+        (D.regular ×ˢ (trivializationAt E (TangentSpace I) x₀).baseSet)) :
+    ContMDiffOn (𝓘(ℝ, ℝ).prod I)
+      (I.prod 𝓘(ℝ, E →L[ℝ] E →L[ℝ] ℝ)) ∞
+      (fun q : ℝ × M => TotalSpace.mk' (E →L[ℝ] E →L[ℝ] ℝ)
+        (E := fun y => TangentSpace I y →L[ℝ] TangentSpace I y →L[ℝ] ℝ) q.2
+        ((g q.1).inner q.2))
+      (D.regular ×ˢ Set.univ) := by
+  intro p hp
+  obtain ⟨a, b, ht, hwin⟩ := D.exists_Icc_regular hp.1
+  have hgramIoo : ∀ (x₀ : M) (i j : Fin (Module.finrank ℝ E)),
+      ContMDiffOn (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ) ∞
+        (fun q : ℝ × M => chartGramMatrix (I := I) (g q.1) x₀ q.2 i j)
+        (Set.Ioo a b ×ˢ
+          (trivializationAt E (TangentSpace I) x₀).baseSet) := by
+    intro x₀ i j
+    exact (hgram x₀ i j).mono fun q hq =>
+      ⟨hwin ⟨le_of_lt hq.1.1, le_of_lt hq.1.2⟩, hq.2⟩
+  have hlocal :=
+    metricCLMSection_Ioo (I := I) g a b hgramIoo p ⟨ht, Set.mem_univ _⟩
+  have hnhds : Set.Ioo a b ×ˢ (Set.univ : Set M) ∈ 𝓝 p :=
+    prod_mem_nhds (Ioo_mem_nhds ht.1 ht.2) Filter.univ_mem
+  exact (hlocal.contMDiffAt hnhds).contMDiffWithinAt
+
+omit [CompleteSpace E] [T2Space M] [SigmaCompactSpace M] in
+private theorem metricFrameComp_reg
+    [NeZero (Module.finrank Real E)]
+    (D : RealTimeInterval)
+    (g : ℝ → SmoothRiemannianMetric I M)
+    (hgram : ∀ (x₀ : M) (i j : Fin (Module.finrank ℝ E)),
+      ContMDiffOn (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ) ∞
+        (fun p : ℝ × M => chartGramMatrix (I := I) (g p.1) x₀ p.2 i j)
+        (D.regular ×ˢ (trivializationAt E (TangentSpace I) x₀).baseSet))
+    {Idx : Type*}
+    (frame : Idx → (x : M) → TangentSpace I x) {u : Set M}
+    (hframe : IsLocalFrameOn I E (∞ : WithTop ℕ∞) frame u) (i j : Idx) :
+    ContMDiffOn (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ, ℝ) ∞
+      (fun p : ℝ × M => (g p.1).inner p.2 (frame i p.2) (frame j p.2))
+      (D.regular ×ˢ u) := by
+  have hψ : ContMDiffOn (𝓘(ℝ, ℝ).prod I)
+      (I.prod 𝓘(ℝ, E →L[ℝ] E →L[ℝ] ℝ)) ∞
+      (fun q : ℝ × M => TotalSpace.mk' (E →L[ℝ] E →L[ℝ] ℝ)
+        (E := fun y => TangentSpace I y →L[ℝ] TangentSpace I y →L[ℝ] ℝ) q.2
+        ((g q.1).inner q.2))
+      (D.regular ×ˢ u) :=
+    (metricCLMSection_reg (I := I) D g hgram).mono
+      (fun q hq => ⟨hq.1, Set.mem_univ _⟩)
+  have hv : ContMDiffOn (𝓘(ℝ, ℝ).prod I) (I.prod 𝓘(ℝ, E)) ∞
+      (fun p : ℝ × M => TotalSpace.mk' E p.2 (frame i p.2))
+      (D.regular ×ˢ u) :=
+    (hframe.contMDiffOn i).comp contMDiffOn_snd (fun p hp => hp.2)
+  have hw : ContMDiffOn (𝓘(ℝ, ℝ).prod I) (I.prod 𝓘(ℝ, E)) ∞
+      (fun p : ℝ × M => TotalSpace.mk' E p.2 (frame j p.2))
+      (D.regular ×ˢ u) :=
+    (hframe.contMDiffOn j).comp contMDiffOn_snd (fun p hp => hp.2)
+  have happ := ContMDiffOn.clm_bundle_apply₂ (F₁ := E) (F₂ := E) (F₃ := ℝ)
+    (E₁ := TangentSpace I (M := M)) (E₂ := TangentSpace I (M := M))
+    (E₃ := Bundle.Trivial M ℝ)
+    (b := fun p : ℝ × M => p.2) (s := D.regular ×ˢ u)
+    (ψ := fun p : ℝ × M => (g p.1).inner p.2)
+    (v := fun p : ℝ × M => frame i p.2)
+    (w := fun p : ℝ × M => frame j p.2) hψ hv hw
+  intro p hp
+  have hpx := happ p hp
+  rw [Bundle.contMDiffWithinAt_totalSpace] at hpx
+  exact hpx.2
+
 section OpenInterval
 
 variable [NeZero (Module.finrank Real E)]
