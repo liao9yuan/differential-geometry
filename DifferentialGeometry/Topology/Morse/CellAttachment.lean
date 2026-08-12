@@ -6951,6 +6951,86 @@ theorem modelHandleRoundMap_mem_attached {n k : ℕ} (hk : k ≤ n) (ε r δ θ 
       rw [Real.sq_sqrt harg]
     simpa [a, b, t, hneg] using hnorm
 
+theorem modelHandleRoundMap_attaching_eq_lower {n k : ℕ} (hk : k ≤ n) (ε r δ θ : ℝ)
+    (hε : 0 < ε) (hδ : 0 < δ) (hθ : 0 < θ) (hδr : δ < r ^ 2) (hr : 0 < r)
+    (p : StandardHandle k (n - k)) (hp : ‖(p.1 : EuclideanSpace ℝ (Fin k))‖ = 1) :
+    modelHandleRoundMap hk ε r δ θ p =
+      modelLowerRoundMap hk ε r δ θ (modelHandleMap hk ε r p) := by
+  rw [← recombine_decompose hk (modelHandleRoundMap hk ε r δ θ p)]
+  rw [← recombine_decompose hk (modelLowerRoundMap hk ε r δ θ (modelHandleMap hk ε r p))]
+  have hneg : negPart hk (modelHandleRoundMap hk ε r δ θ p) =
+      negPart hk (modelLowerRoundMap hk ε r δ θ (modelHandleMap hk ε r p)) := by
+    rw [modelHandleRoundMap_negPart]
+    rw [modelLowerRoundMap_negPart]
+    rw [modelHandleMap_negPart]
+  have hpos : posPart hk (modelHandleRoundMap hk ε r δ θ p) =
+      posPart hk (modelLowerRoundMap hk ε r δ θ (modelHandleMap hk ε r p)) := by
+    rw [modelHandleRoundMap_posPart]
+    rw [modelLowerRoundMap_posPart]
+    rw [modelHandleMap_posPart]
+    let w : EuclideanSpace ℝ (Fin (n - k)) := p.2
+    let t : ℝ := 2 * ε + r ^ 2 * ‖w‖ ^ 2
+    have hq0 : modelRoundCapQ ε r δ θ (‖(p.1 : EuclideanSpace ℝ (Fin k))‖ ^ 2) (‖w‖ ^ 2) =
+        modelRoundScale ε r δ θ t ^ 2 * (t - 2 * ε) := by
+      have hq' := modelRoundCapQ_eq_lowerBound_of_eq_one (ε := ε) (r := r) (δ := δ) (θ := θ)
+        (a := ‖(p.1 : EuclideanSpace ℝ (Fin k))‖ ^ 2) (b := ‖w‖ ^ 2) (by
+          have hnon : 0 ≤ ‖(p.1 : EuclideanSpace ℝ (Fin k))‖ := norm_nonneg _
+          nlinarith [hp])
+      dsimp [modelLowerRoundBound] at hq'
+      simpa [t] using hq'
+    by_cases hw : w = 0
+    · simp [w, hw]
+    · have hwn : ‖w‖ ≠ 0 := norm_ne_zero_iff.mpr hw
+      have hwpos : 0 < ‖w‖ := lt_of_le_of_ne (norm_nonneg w) (Ne.symm hwn)
+      have ht : 2 * ε < t := by
+        have hr2 : 0 < r ^ 2 := sq_pos_of_pos hr
+        have hw2 : 0 < ‖w‖ ^ 2 := sq_pos_of_pos hwpos
+        have hprod : 0 < r ^ 2 * ‖w‖ ^ 2 := mul_pos hr2 hw2
+        dsimp [t]
+        nlinarith [hprod]
+      have hsc_nonneg : 0 ≤ modelRoundScale ε r δ θ t := modelRoundScale_nonneg hδ hθ hδr ht
+      have hsc_eq : Real.sqrt (modelRoundCapQ ε r δ θ (‖(p.1 : EuclideanSpace ℝ (Fin k))‖ ^ 2)
+          (‖w‖ ^ 2)) / ‖w‖ = modelRoundScale ε r δ θ t * r := by
+        rw [hq0]
+        have hte : t - 2 * ε = r ^ 2 * ‖w‖ ^ 2 := by
+          dsimp [t]
+          ring
+        rw [hte]
+        have hprod : modelRoundScale ε r δ θ t ^ 2 * (r ^ 2 * ‖w‖ ^ 2) =
+            (modelRoundScale ε r δ θ t * r * ‖w‖) ^ 2 := by
+          ring
+        rw [hprod]
+        rw [Real.sqrt_sq_eq_abs]
+        rw [abs_of_nonneg (mul_nonneg (mul_nonneg hsc_nonneg (le_of_lt hr)) (norm_nonneg w))]
+        field_simp [hwn]
+      rw [hsc_eq]
+      rw [smul_smul]
+      congr 1
+      have harg2 : 0 ≤ 2 * ε + r ^ 2 * ‖w‖ ^ 2 := by
+        nlinarith [hε, sq_nonneg ‖w‖]
+      have hneg_norm : ‖negPart hk (modelHandleMap hk ε r p)‖ ^ 2 = t := by
+        rw [modelHandleMap_negPart]
+        rw [norm_smul]
+        rw [Real.norm_eq_abs]
+        rw [abs_of_nonneg (Real.sqrt_nonneg _)]
+        rw [mul_pow]
+        rw [Real.sq_sqrt harg2]
+        have hu : ‖(p.1 : EuclideanSpace ℝ (Fin k))‖ ^ 2 = 1 := by
+          have hnon : 0 ≤ ‖(p.1 : EuclideanSpace ℝ (Fin k))‖ := norm_nonneg _
+          nlinarith [hp]
+        dsimp [t]
+        nlinarith [hu]
+      rw [hneg_norm]
+  have hpairs : (negPart hk (modelHandleRoundMap hk ε r δ θ p),
+      posPart hk (modelHandleRoundMap hk ε r δ θ p)) =
+      (negPart hk (modelLowerRoundMap hk ε r δ θ (modelHandleMap hk ε r p)),
+        posPart hk (modelLowerRoundMap hk ε r δ θ (modelHandleMap hk ε r p))) := by
+    apply Prod.ext
+    · exact hneg
+    · exact hpos
+  exact congrArg (fun q : EuclideanSpace ℝ (Fin k) × EuclideanSpace ℝ (Fin (n - k)) =>
+    recombine hk q.1 q.2) hpairs
+
 end CellAttachment
 
 end
