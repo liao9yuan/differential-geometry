@@ -12315,6 +12315,46 @@ theorem handleRoundEmbedding_mem_rounded {m k : ℕ} (hk : k ≤ m + 1) (c ε r 
       exact (abs_lt_of_sq_lt_sq' (lt_of_le_of_lt hneg hlt) hR).2
     exact hlt'
 
+theorem handleRoundAttachingEmbedding_mem_rounded {m k : ℕ} (hk : k ≤ m + 1) (c ε r δ θ : ℝ)
+    {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M] [T2Space M] [ChartedSpace H M]
+    {I : ModelWithCorners ℝ (MorseModel (m + 1)) H} {f : M → ℝ}
+    (data : MorseChart (m + 1) k hk c I f)
+    (hε : 0 < ε) (hδ : 0 < δ) (hθ : 0 < θ) (hδr : δ < r ^ 2)
+    (hεr' : Real.sqrt (2 * ε + 2 * r ^ 2) < data.R / 2)
+    (p : AttachingRegion k (m + 1 - k)) :
+    handleRoundAttachingEmbedding hk c ε r δ θ data p ∈ morseRoundedAttachment hk c ε r δ data := by
+  dsimp [morseRoundedAttachment]
+  left
+  refine ⟨modelLowerRoundMap hk ε r δ θ (cocoreModelPoint hk ε r p), ?_, rfl⟩
+  constructor
+  · exact modelLowerRoundMap_mem_attached hk c ε r δ θ hδ hθ hδr (cocoreModelPoint hk ε r p)
+      (le_of_eq (morseNormalForm_cocoreModelPoint hk c ε r (le_of_lt hε) p))
+  · have hneg : ‖negPart hk (cocoreModelPoint hk ε r p)‖ ^ 2 ≤ 2 * ε + r ^ 2 := by
+      dsimp [cocoreModelPoint]
+      rw [negPart_recombine]
+      rw [negPart_cellMap_norm_sq hk
+        (Real.sqrt (2 * ε + r ^ 2 * ‖(p.2 : EuclideanSpace ℝ (Fin (m + 1 - k)))‖ ^ 2))
+        (p.1 : EuclideanSpace ℝ (Fin k))]
+      rw [Real.sq_sqrt (by nlinarith [hε, sq_nonneg (‖(p.2 : EuclideanSpace ℝ (Fin (m + 1 - k)))‖ : ℝ)])]
+      rw [p.1.2]
+      have hb1 : ‖(p.2 : EuclideanSpace ℝ (Fin (m + 1 - k)))‖ ^ 2 ≤ 1 := by
+        have hnon : 0 ≤ ‖(p.2 : EuclideanSpace ℝ (Fin (m + 1 - k)))‖ := norm_nonneg _
+        simpa using sq_le_sq' (by linarith [hnon]) p.2.2
+      nlinarith [hb1, sq_nonneg r]
+    have hlt : 2 * ε + r ^ 2 < (data.R / 2) ^ 2 := by
+      have hsq : (Real.sqrt (2 * ε + 2 * r ^ 2)) ^ 2 < (data.R / 2) ^ 2 := by
+        have hs : 0 ≤ Real.sqrt (2 * ε + 2 * r ^ 2) := Real.sqrt_nonneg _
+        have hRpos : 0 < data.R / 2 := by nlinarith [data.hRpos]
+        exact sq_lt_sq' (by linarith [hs, hRpos]) hεr'
+      have hsq' : (Real.sqrt (2 * ε + 2 * r ^ 2)) ^ 2 = 2 * ε + 2 * r ^ 2 :=
+        Real.sq_sqrt (by nlinarith [hε, sq_nonneg r])
+      rw [hsq'] at hsq
+      nlinarith [hsq]
+    have hlt' : ‖negPart hk (cocoreModelPoint hk ε r p)‖ < data.R / 2 := by
+      have hR : 0 ≤ data.R / 2 := by nlinarith [data.hRpos]
+      exact (abs_lt_of_sq_lt_sq' (lt_of_le_of_lt hneg hlt) hR).2
+    simpa [modelLowerRoundMap_negPart] using hlt'
+
 theorem range_handleEmbedding_subset_ballImage {m k : ℕ} (hk : k ≤ m + 1) (c ε r : ℝ)
     {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M] [ChartedSpace H M]
     {I : ModelWithCorners ℝ (MorseModel (m + 1)) H} {f : M → ℝ}
