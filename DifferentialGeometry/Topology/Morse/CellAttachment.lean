@@ -6654,6 +6654,34 @@ theorem modelRoundScale_nonneg {ε r δ θ t : ℝ} (hδ : 0 < δ) (hθ : 0 < θ
     dsimp [modelRoundRatio]
     nlinarith [hsqrt]
 
+theorem modelRoundScale_pos {ε r δ θ t : ℝ} (hδ : 0 < δ) (hθ : 0 < θ)
+    (hδr : δ < r ^ 2) (hθr : θ < r ^ 2) :
+    0 < modelRoundScale ε r δ θ t := by
+  by_cases ht2 : 2 * ε < t
+  · have hratio_pos : 0 < modelRoundRatio ε r δ t := by
+      dsimp [modelRoundRatio]
+      exact div_pos (smoothCap_pos hδ hδr) (by linarith [ht2])
+    have hsqrt : 0 < Real.sqrt (modelRoundRatio ε r δ t) := Real.sqrt_pos.2 hratio_pos
+    let τ : ℝ := Real.smoothTransition ((t - (r ^ 2 + 2 * ε - θ)) / θ)
+    have hτ0 : 0 ≤ τ := Real.smoothTransition.nonneg _
+    have hτ1 : τ ≤ 1 := Real.smoothTransition.le_one _
+    have hscale : modelRoundScale ε r δ θ t =
+        (1 - τ) + τ * Real.sqrt (modelRoundRatio ε r δ t) := by
+      dsimp [modelRoundScale, τ]
+      ring
+    rw [hscale]
+    have h1 : 0 ≤ 1 - τ := by linarith [hτ1]
+    by_cases hτzero : τ = 0
+    · rw [hτzero]
+      nlinarith [h1]
+    · have hτpos : 0 < τ := lt_of_le_of_ne hτ0 (Ne.symm hτzero)
+      have hprod : 0 < τ * Real.sqrt (modelRoundRatio ε r δ t) := mul_pos hτpos hsqrt
+      nlinarith [h1, hprod]
+  · have ht_le : t ≤ 2 * ε := le_of_not_gt ht2
+    have hle : t ≤ r ^ 2 + 2 * ε - θ := by nlinarith [ht_le, hθr]
+    rw [modelRoundScale_eq_one_of_le hθ hle]
+    norm_num
+
 theorem modelRoundScale_le_sqrt_ratio {ε r δ θ t : ℝ} (hδ : 0 < δ) (hθ : 0 < θ)
     (hδr : δ < r ^ 2) (ht : 2 * ε < t) :
     modelRoundScale ε r δ θ t ≤ Real.sqrt (modelRoundRatio ε r δ t) := by
@@ -7587,6 +7615,107 @@ theorem modelRoundScale_sq_lt_ratio {ε r δ θ t : ℝ} (hδ : 0 < δ) (hθ : 0
   rw [Real.sq_sqrt hratio0] at hsq'
   exact hsq'
 
+noncomputable def modelCapRoundedLowerFunctionInner {n k : ℕ} (hk : k ≤ n)
+    (c ε r δ θ : ℝ) (y : MorseModel n) : ℝ :=
+  c + (1 / 2) *
+    (‖posPart hk y‖ ^ (2 : ℕ) - modelLowerRoundBound ε r δ θ (‖negPart hk y‖ ^ (2 : ℕ)))
+
+theorem contDiff_modelCapRoundedLowerFunctionInner {n k : ℕ} (hk : k ≤ n)
+    (c ε r δ θ : ℝ) (hθ : 0 < θ) (hδ : 0 < δ) (hδr : δ < r ^ 2) (hθr : θ < r ^ 2) :
+    ContDiff ℝ (⊤ : ℕ∞) (modelCapRoundedLowerFunctionInner hk c ε r δ θ) := by
+  have hneg : ContDiff ℝ (⊤ : ℕ∞) (fun y : MorseModel n => ‖negPart hk y‖ ^ 2) := by
+    rw [show (fun y : MorseModel n => ‖negPart hk y‖ ^ 2) =
+        fun y : MorseModel n => ∑ i : Fin k, (negPart hk y i) ^ 2 by
+      funext y
+      exact EuclideanSpace.real_norm_sq_eq (negPart hk y)]
+    fun_prop
+  have hpos : ContDiff ℝ (⊤ : ℕ∞) (fun y : MorseModel n => ‖posPart hk y‖ ^ 2) := by
+    rw [show (fun y : MorseModel n => ‖posPart hk y‖ ^ 2) =
+        fun y : MorseModel n => ∑ j : Fin (n - k), (posPart hk y j) ^ 2 by
+      funext y
+      exact EuclideanSpace.real_norm_sq_eq (posPart hk y)]
+    fun_prop
+  have hbound : ContDiff ℝ (⊤ : ℕ∞)
+      (fun y : MorseModel n => modelLowerRoundBound ε r δ θ (‖negPart hk y‖ ^ 2)) :=
+    (contDiff_modelLowerRoundBound hθ hδ hδr hθr).comp hneg
+  change ContDiff ℝ (⊤ : ℕ∞) (fun y : MorseModel n =>
+    c + (1 / 2) * (‖posPart hk y‖ ^ 2 - modelLowerRoundBound ε r δ θ (‖negPart hk y‖ ^ 2)))
+  exact (contDiff_const : ContDiff ℝ (⊤ : ℕ∞) (fun _ : MorseModel n => c)).add
+    (((contDiff_const : ContDiff ℝ (⊤ : ℕ∞) (fun _ : MorseModel n => (1 / 2 : ℝ))).mul
+      (hpos.sub hbound)))
+
+theorem modelCapRoundedLowerFunctionInner_le_c_iff {n k : ℕ} (hk : k ≤ n)
+    (c ε r δ θ : ℝ) (hθ : 0 < θ) (hδ : 0 < δ) (hδr : δ < r ^ 2) (hθr : θ < r ^ 2)
+    (y : MorseModel n) :
+    modelCapRoundedLowerFunctionInner hk c ε r δ θ y ≤ c ↔
+      y ∈ modelLowerRoundMap hk ε r δ θ '' (sublevel (morseNormalForm hk c) (c - ε)) := by
+  let t : ℝ := ‖negPart hk y‖ ^ 2
+  have hscale_pos : 0 < modelRoundScale ε r δ θ t := by
+    exact modelRoundScale_pos hδ hθ hδr hθr
+  have hscale_ne : modelRoundScale ε r δ θ t ≠ 0 := ne_of_gt hscale_pos
+  constructor
+  · intro hy
+    let z : MorseModel n := recombine hk (negPart hk y)
+      ((modelRoundScale ε r δ θ t)⁻¹ • posPart hk y)
+    have hround : modelLowerRoundMap hk ε r δ θ z = y := by
+      have hneg : negPart hk (modelLowerRoundMap hk ε r δ θ z) = negPart hk y := by
+        dsimp [modelLowerRoundMap, z]
+        rw [negPart_recombine, negPart_recombine]
+      have hpos : posPart hk (modelLowerRoundMap hk ε r δ θ z) = posPart hk y := by
+        dsimp [modelLowerRoundMap, z]
+        rw [posPart_recombine, negPart_recombine, posPart_recombine]
+        change (modelRoundScale ε r δ θ t) • ((modelRoundScale ε r δ θ t)⁻¹ • posPart hk y) = posPart hk y
+        rw [smul_smul]
+        rw [mul_inv_cancel₀ hscale_ne]
+        simp
+      rw [← recombine_decompose hk (modelLowerRoundMap hk ε r δ θ z)]
+      rw [hneg, hpos]
+      exact recombine_decompose hk y
+    refine ⟨z, ?_, hround⟩
+    change morseNormalForm hk c z ≤ c - ε
+    rw [morseNormalForm_split hk c z]
+    dsimp [z]
+    rw [negPart_recombine, posPart_recombine]
+    have hpos' : ‖(modelRoundScale ε r δ θ t)⁻¹ • posPart hk y‖ ^ 2 =
+        ((modelRoundScale ε r δ θ t)⁻¹) ^ 2 * ‖posPart hk y‖ ^ 2 := by
+      rw [norm_smul]
+      rw [Real.norm_eq_abs]
+      rw [mul_pow]
+      rw [sq_abs]
+    have hinner : ‖posPart hk y‖ ^ 2 ≤ modelLowerRoundBound ε r δ θ t := by
+      have hy' : c + (1 / 2) *
+          (‖posPart hk y‖ ^ 2 - modelLowerRoundBound ε r δ θ (‖negPart hk y‖ ^ 2)) ≤ c := by
+        simpa [modelCapRoundedLowerFunctionInner] using hy
+      nlinarith
+    have hinner' : ((modelRoundScale ε r δ θ t)⁻¹) ^ 2 * ‖posPart hk y‖ ^ 2 ≤
+        t - 2 * ε := by
+      have hsq : ((modelRoundScale ε r δ θ t)⁻¹) ^ 2 * modelLowerRoundBound ε r δ θ t = t - 2 * ε := by
+        dsimp [modelLowerRoundBound]
+        have hden : modelRoundScale ε r δ θ t ^ 2 ≠ 0 := pow_ne_zero 2 hscale_ne
+        field_simp [hden]
+      nlinarith [hinner, hsq]
+    have hz : c + (1 / 2) * (((modelRoundScale ε r δ θ t)⁻¹) ^ 2 * ‖posPart hk y‖ ^ 2 - t) ≤ c - ε := by
+      nlinarith [hinner']
+    simpa [hpos', t] using hz
+  · intro hy
+    rcases hy with ⟨z, hz, hzr⟩
+    rw [← hzr]
+    dsimp [modelCapRoundedLowerFunctionInner]
+    rw [modelLowerRoundMap_posPart, modelLowerRoundMap_negPart]
+    rw [norm_smul]
+    rw [Real.norm_eq_abs]
+    rw [mul_pow, sq_abs]
+    have hle : ‖posPart hk z‖ ^ 2 ≤ ‖negPart hk z‖ ^ 2 - 2 * ε := by
+      have hsplit := morseNormalForm_split hk c z
+      change morseNormalForm hk c z ≤ c - ε at hz
+      nlinarith [hsplit, hz]
+    have hmain : modelRoundScale ε r δ θ (‖negPart hk z‖ ^ 2) ^ 2 *
+        ‖posPart hk z‖ ^ 2 ≤
+        modelLowerRoundBound ε r δ θ (‖negPart hk z‖ ^ 2) := by
+      dsimp [modelLowerRoundBound]
+      exact mul_le_mul_of_nonneg_left hle (sq_nonneg (modelRoundScale ε r δ θ (‖negPart hk z‖ ^ 2)))
+    nlinarith [hmain]
+
 theorem modelLowerRoundBound_lt_smoothCap {ε r δ θ t : ℝ} (hδ : 0 < δ) (hθ : 0 < θ)
     (hδr : δ < r ^ 2) (ht : 2 * ε < t) (ht0 : t < r ^ 2 + 2 * ε) :
     modelLowerRoundBound ε r δ θ t < smoothCap ε r δ t := by
@@ -8280,6 +8409,126 @@ theorem modelRoundCapQ_pos_of_b_pos {ε r δ θ a b : ℝ} (hε : 0 < ε) (hδ :
         ht_lt (by dsimp [t])
       rw [hq]
       exact mul_pos (sq_pos_of_pos hr) hb
+
+theorem modelRoundCapQ_ge_lowerBound_of_ge {ε r δ θ a b : ℝ} (hε : 0 < ε)
+    (hδ : 0 < δ) (hθ : 0 < θ) (hδr : δ < r ^ 2) (hθr : θ < r ^ 2) (hr : 0 < r)
+    (ha0 : 0 ≤ a) (ha1 : a ≤ 1) (hb0 : 0 ≤ b) (hb1 : b ≤ 1)
+    (ht : 2 * ε ≤ (2 * ε + r ^ 2 * b) * a) :
+    modelLowerRoundBound ε r δ θ ((2 * ε + r ^ 2 * b) * a) ≤ modelRoundCapQ ε r δ θ a b := by
+  let t : ℝ := (2 * ε + r ^ 2 * b) * a
+  by_cases ht2 : 2 * ε < t
+  · exact modelRoundCapQ_ge_lowerBound hε hδ hθ hδr ha1 hb0 hb1 ht2
+  · have hteq : t = 2 * ε := le_antisymm (le_of_not_gt ht2) ht
+    have hL : modelLowerRoundBound ε r δ θ t = 0 := by
+      have hsc : modelRoundScale ε r δ θ t = 1 := by
+        have hle : t ≤ r ^ 2 + 2 * ε - θ := by nlinarith [hteq, hθr]
+        exact modelRoundScale_eq_one_of_le hθ hle
+      dsimp [modelLowerRoundBound]
+      rw [hsc, hteq]
+      ring
+    have hq : 0 ≤ modelRoundCapQ ε r δ θ a b :=
+      modelRoundCapQ_nonneg hε hδ hθ hδr hθr hr ha0 ha1 hb0 hb1
+    rwa [hL]
+
+theorem modelRoundCapQ_eq_lowerBound_imp_eq_one_of_ge {ε r δ θ a b : ℝ} (hε : 0 < ε)
+    (hδ : 0 < δ) (hθ : 0 < θ) (hδr : δ < r ^ 2) (hθr : θ < r ^ 2) (hr : 0 < r)
+    (ha0 : 0 ≤ a) (ha1 : a ≤ 1) (hb0 : 0 ≤ b) (hb1 : b ≤ 1)
+    (ht : 2 * ε ≤ (2 * ε + r ^ 2 * b) * a)
+    (hq : modelRoundCapQ ε r δ θ a b =
+      modelLowerRoundBound ε r δ θ ((2 * ε + r ^ 2 * b) * a)) :
+    a = 1 := by
+  let t : ℝ := (2 * ε + r ^ 2 * b) * a
+  by_cases ht2 : 2 * ε < t
+  · exact modelRoundCapQ_eq_lowerBound_imp_eq_one hε hδ hθ hδr ha0 ha1 hb0 hb1 ht2 hq
+  · have hteq : t = 2 * ε := le_antisymm (le_of_not_gt ht2) ht
+    have hL : modelLowerRoundBound ε r δ θ t = 0 := by
+      have hsc : modelRoundScale ε r δ θ t = 1 := by
+        have hle : t ≤ r ^ 2 + 2 * ε - θ := by nlinarith [hteq, hθr]
+        exact modelRoundScale_eq_one_of_le hθ hle
+      dsimp [modelLowerRoundBound]
+      rw [hsc, hteq]
+      ring
+    have hq0 : modelRoundCapQ ε r δ θ a b = 0 := by
+      rw [hq, hL]
+    by_cases ha : a = 1
+    · exact ha
+    · have ha_lt : a < 1 := lt_of_le_of_ne ha1 ha
+      by_cases hb0' : b = 0
+      · have ht' : t = 2 * ε * a := by
+          dsimp [t]
+          rw [hb0']
+          ring
+        have hmain : 2 * ε * a = 2 * ε := by
+          have h1 : (2 * ε + r ^ 2 * b) * a = 2 * ε := by
+            simpa [t] using hteq
+          rw [hb0'] at h1
+          simpa using h1
+        nlinarith [hε, ha_lt, hmain]
+      · have hb_pos : 0 < b := lt_of_le_of_ne hb0 (Ne.symm hb0')
+        have hqpos : 0 < modelRoundCapQ ε r δ θ a b :=
+          modelRoundCapQ_pos_of_b_pos hε hδ hθ hδr hθr hr ha0 ha1 hb0 hb1 hb_pos
+        nlinarith [hq0, hqpos]
+
+theorem modelHandleRoundMap_mem_lowerRound_iff {n k : ℕ} (hk : k ≤ n)
+    (c ε r δ θ : ℝ) (hε : 0 < ε) (hδ : 0 < δ) (hθ : 0 < θ)
+    (hδr : δ < r ^ 2) (hθr : θ < r ^ 2) (hr : 0 < r) (p : StandardHandle k (n - k)) :
+    modelHandleRoundMap hk ε r δ θ p ∈
+        modelLowerRoundMap hk ε r δ θ '' (sublevel (morseNormalForm hk c) (c - ε)) ↔
+      ‖(p.1 : EuclideanSpace ℝ (Fin k))‖ = 1 := by
+  let a : ℝ := ‖(p.1 : EuclideanSpace ℝ (Fin k))‖ ^ 2
+  let b : ℝ := ‖(p.2 : EuclideanSpace ℝ (Fin (n - k)))‖ ^ 2
+  let t : ℝ := (2 * ε + r ^ 2 * b) * a
+  have ha0 : 0 ≤ a := by dsimp [a]; exact sq_nonneg _
+  have ha1 : a ≤ 1 := by
+    dsimp [a]
+    have hnon : 0 ≤ ‖(p.1 : EuclideanSpace ℝ (Fin k))‖ := norm_nonneg _
+    have hle := sq_le_sq' (by linarith [hnon]) p.1.2
+    simpa using hle
+  have hb0 : 0 ≤ b := by dsimp [b]; exact sq_nonneg _
+  have hb1 : b ≤ 1 := by
+    dsimp [b]
+    have hnon : 0 ≤ ‖(p.2 : EuclideanSpace ℝ (Fin (n - k)))‖ := norm_nonneg _
+    have hle := sq_le_sq' (by linarith [hnon]) p.2.2
+    simpa using hle
+  constructor
+  · intro hy
+    have hinner : modelCapRoundedLowerFunctionInner hk c ε r δ θ
+        (modelHandleRoundMap hk ε r δ θ p) ≤ c :=
+      (modelCapRoundedLowerFunctionInner_le_c_iff hk c ε r δ θ hθ hδ hδr hθr
+        (modelHandleRoundMap hk ε r δ θ p)).mpr hy
+    have hinner' : c + (1 / 2) *
+        (modelRoundCapQ ε r δ θ a b - modelLowerRoundBound ε r δ θ t) ≤ c := by
+      have hpos := modelHandleRoundMap_posPart_norm_sq hk ε r δ θ hε hδ hθ hδr hθr hr p
+      have hneg := modelHandleRoundMap_negPart_norm_sq hk ε r δ θ (le_of_lt hε) p
+      simpa [modelCapRoundedLowerFunctionInner, a, b, t, hpos, hneg] using hinner
+    have hq_le : modelRoundCapQ ε r δ θ a b ≤ modelLowerRoundBound ε r δ θ t := by
+      nlinarith
+    have ht : 2 * ε ≤ t := by
+      have hq_nonneg : 0 ≤ modelRoundCapQ ε r δ θ a b :=
+        modelRoundCapQ_nonneg hε hδ hθ hδr hθr hr ha0 ha1 hb0 hb1
+      have hL_nonneg : 0 ≤ modelLowerRoundBound ε r δ θ t := by nlinarith [hq_le, hq_nonneg]
+      have hsc_pos : 0 < modelRoundScale ε r δ θ t := modelRoundScale_pos hδ hθ hδr hθr
+      have hsc_sq_pos : 0 < modelRoundScale ε r δ θ t ^ 2 := sq_pos_of_pos hsc_pos
+      have hLprod : 0 ≤ modelRoundScale ε r δ θ t ^ 2 * (t - 2 * ε) := by
+        simpa [modelLowerRoundBound] using hL_nonneg
+      have hsub_nonneg : 0 ≤ t - 2 * ε := nonneg_of_mul_nonneg_right hLprod hsc_sq_pos
+      nlinarith
+    have hq_ge : modelLowerRoundBound ε r δ θ t ≤ modelRoundCapQ ε r δ θ a b :=
+      modelRoundCapQ_ge_lowerBound_of_ge hε hδ hθ hδr hθr hr ha0 ha1 hb0 hb1 ht
+    have hq_eq : modelRoundCapQ ε r δ θ a b = modelLowerRoundBound ε r δ θ t :=
+      le_antisymm hq_le hq_ge
+    have haeq : a = 1 :=
+      modelRoundCapQ_eq_lowerBound_imp_eq_one_of_ge hε hδ hθ hδr hθr hr ha0 ha1 hb0 hb1 ht hq_eq
+    have hsq : ‖(p.1 : EuclideanSpace ℝ (Fin k))‖ ^ 2 = 1 := by simpa [a] using haeq
+    have hsqor : ‖(p.1 : EuclideanSpace ℝ (Fin k))‖ = 1 ∨
+        ‖(p.1 : EuclideanSpace ℝ (Fin k))‖ = -1 := sq_eq_one_iff.mp hsq
+    rcases hsqor with h | h
+    · exact h
+    · linarith [norm_nonneg (p.1 : EuclideanSpace ℝ (Fin k))]
+  · intro hp
+    rw [modelHandleRoundMap_attaching_eq_lower hk ε r δ θ hε hδ hθ hδr hr p hp]
+    refine ⟨modelHandleMap hk ε r p, ?_, rfl⟩
+    exact le_of_eq ((modelHandleMap_f_eq_lower_iff hk c ε r hε p).2 hp)
 
 theorem modelHandleRoundMap_posPart_eq_of_scalar {n k : ℕ} (_hk : k ≤ n) (ε r δ θ : ℝ)
     (hε : 0 < ε) (hδ : 0 < δ) (hθ : 0 < θ) (hδr : δ < r ^ 2) (hθr : θ < r ^ 2) (hr : 0 < r)
