@@ -12089,6 +12089,55 @@ noncomputable def morseRoundedAttachment {m k : ℕ} (hk : k ≤ m + 1) (c ε r 
     (sublevel f (c - ε) ∩
       (morseChartCoreBallImage hk c data ∩ morseChartBallImage hk c data)ᶜ)
 
+theorem handleRoundEmbedding_mem_rounded {m k : ℕ} (hk : k ≤ m + 1) (c ε r δ θ : ℝ)
+    {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M] [T2Space M] [ChartedSpace H M]
+    {I : ModelWithCorners ℝ (MorseModel (m + 1)) H} {f : M → ℝ}
+    (data : MorseChart (m + 1) k hk c I f)
+    (hε : 0 < ε) (hδ : 0 < δ) (hθ : 0 < θ) (hδr : δ < r ^ 2)
+    (hεr' : Real.sqrt (2 * ε + 2 * r ^ 2) < data.R / 2)
+    (p : StandardHandle k (m + 1 - k)) :
+    handleRoundEmbedding hk c ε r δ θ data p ∈ morseRoundedAttachment hk c ε r δ data := by
+  dsimp [morseRoundedAttachment]
+  left
+  refine ⟨modelHandleRoundMap hk ε r δ θ p, ?_, rfl⟩
+  constructor
+  · exact modelHandleRoundMap_mem_attached hk ε r δ θ hε hδ hθ hδr p
+  · have hneg : ‖negPart hk (modelHandleRoundMap hk ε r δ θ p)‖ ^ 2 ≤ 2 * ε + r ^ 2 := by
+      rw [modelHandleRoundMap_negPart_norm_sq hk ε r δ θ (le_of_lt hε) p]
+      have ha1 : ‖(p.1 : EuclideanSpace ℝ (Fin k))‖ ^ 2 ≤ 1 := by
+        have hnon : 0 ≤ ‖(p.1 : EuclideanSpace ℝ (Fin k))‖ := norm_nonneg _
+        simpa using sq_le_sq' (by linarith [hnon]) p.1.2
+      have hb1 : ‖(p.2 : EuclideanSpace ℝ (Fin (m + 1 - k)))‖ ^ 2 ≤ 1 := by
+        have hnon : 0 ≤ ‖(p.2 : EuclideanSpace ℝ (Fin (m + 1 - k)))‖ := norm_nonneg _
+        simpa using sq_le_sq' (by linarith [hnon]) p.2.2
+      have hb : r ^ 2 * ‖(p.2 : EuclideanSpace ℝ (Fin (m + 1 - k)))‖ ^ 2 ≤ r ^ 2 := by
+        simpa using (mul_le_mul_of_nonneg_left hb1 (sq_nonneg r) :
+          r ^ 2 * ‖(p.2 : EuclideanSpace ℝ (Fin (m + 1 - k)))‖ ^ 2 ≤ r ^ 2 * 1)
+      have hB : 2 * ε + r ^ 2 * ‖(p.2 : EuclideanSpace ℝ (Fin (m + 1 - k)))‖ ^ 2 ≤ 2 * ε + r ^ 2 := by
+        nlinarith [hb]
+      have hB0 : 0 ≤ 2 * ε + r ^ 2 * ‖(p.2 : EuclideanSpace ℝ (Fin (m + 1 - k)))‖ ^ 2 := by
+        nlinarith [hε, sq_nonneg (‖(p.2 : EuclideanSpace ℝ (Fin (m + 1 - k)))‖ : ℝ)]
+      calc
+        (2 * ε + r ^ 2 * ‖(p.2 : EuclideanSpace ℝ (Fin (m + 1 - k)))‖ ^ 2) *
+            ‖(p.1 : EuclideanSpace ℝ (Fin k))‖ ^ 2
+            ≤ (2 * ε + r ^ 2 * ‖(p.2 : EuclideanSpace ℝ (Fin (m + 1 - k)))‖ ^ 2) * 1 :=
+              mul_le_mul_of_nonneg_left ha1 hB0
+        _ = 2 * ε + r ^ 2 * ‖(p.2 : EuclideanSpace ℝ (Fin (m + 1 - k)))‖ ^ 2 := by ring
+        _ ≤ 2 * ε + r ^ 2 := hB
+    have hlt : 2 * ε + r ^ 2 < (data.R / 2) ^ 2 := by
+      have hsq : (Real.sqrt (2 * ε + 2 * r ^ 2)) ^ 2 < (data.R / 2) ^ 2 := by
+        have hs : 0 ≤ Real.sqrt (2 * ε + 2 * r ^ 2) := Real.sqrt_nonneg _
+        have hRpos : 0 < data.R / 2 := by nlinarith [data.hRpos]
+        exact sq_lt_sq' (by linarith [hs, hRpos]) hεr'
+      have hsq' : (Real.sqrt (2 * ε + 2 * r ^ 2)) ^ 2 = 2 * ε + 2 * r ^ 2 :=
+        Real.sq_sqrt (by nlinarith [hε, sq_nonneg r])
+      rw [hsq'] at hsq
+      nlinarith [hsq]
+    have hlt' : ‖negPart hk (modelHandleRoundMap hk ε r δ θ p)‖ < data.R / 2 := by
+      have hR : 0 ≤ data.R / 2 := by nlinarith [data.hRpos]
+      exact (abs_lt_of_sq_lt_sq' (lt_of_le_of_lt hneg hlt) hR).2
+    exact hlt'
+
 theorem range_handleEmbedding_subset_ballImage {m k : ℕ} (hk : k ≤ m + 1) (c ε r : ℝ)
     {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M] [ChartedSpace H M]
     {I : ModelWithCorners ℝ (MorseModel (m + 1)) H} {f : M → ℝ}
