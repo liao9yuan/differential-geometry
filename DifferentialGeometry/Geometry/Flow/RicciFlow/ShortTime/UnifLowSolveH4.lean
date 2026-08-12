@@ -32,12 +32,15 @@ variable
       [IsManifold I ∞ M] [CompactSpace M] [I.Boundaryless]
       [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M]
 
-theorem lowreg_solve_h4_unif
+theorem lowreg_solve_h4_unif_below
     (hDim : Module.finrank ℝ E = 3)
     (gBase : SmoothRiemannianMetric I M)
-    {Λ : ℝ} (hΛ : 1 ≤ Λ) :
+    {Λ δcap Rcap : ℝ} (hΛ : 1 ≤ Λ)
+    (hδcap : 0 < δcap) (hRcap : 0 < Rcap) :
     ∃ K : LowRegBoundData,
       IsLowBoundsUnif (I := I) (M := M) gBase Λ K ∧
+        K.threshold ≤ δcap ∧
+        lowregStateRad K.top K.slope K.outer K.realize ≤ Rcap ∧
         ∃ (T : ℝ) (hT : 0 < T) (hT1 : T ≤ 1),
           ∀ (g : SmoothRiemannianMetric I M),
             MetricUniformEquivalentOn (I := I) Set.univ gBase g Λ →
@@ -49,7 +52,8 @@ theorem lowreg_solve_h4_unif
                 (tensorHs (I := I) (M := M) g 0 2 ((1 : ℕ) : ℝ)) T)
               (fseq : ℕ → timeL2
                 (tensorHs (I := I) (M := M) g 0 2 ((1 : ℕ) : ℝ)) T)
-              (Φ3 Φ4 Φ5 : ℝ),
+              (Φ3 Φ4 Φ5 : ℝ)
+              (hK : IsLowBoundsAt (I := I) (M := M) g gBase K),
               IsBgSolveAt (I := I) (M := M) g gBase K
                   hT hT1
                   u gforce (lowregStateRad K.top K.slope K.outer K.realize) ∧
@@ -61,6 +65,20 @@ theorem lowreg_solve_h4_unif
                       (𝓝 (perModeConv
                         (TensorEigenIdx.lambda (I := I) (M := M) i)
                         (fun s => (timeModeCoeff (I := I) (M := M) gforce i) s) t))) ∧
+                (∀ N, ∀ t ∈ Set.Ico (0 : ℝ) T,
+                  ∀ i ∈ eigenIdxFinset (I := I) (M := M) g N,
+                  HasDerivWithinAt
+                    (fun s => lowregProjMode (I := I) (M := M) g fseq N s i)
+                    (-(TensorEigenIdx.lambda (I := I) (M := M) i) *
+                        lowregProjMode (I := I) (M := M) g fseq N t i +
+                      galTameForce (I := I) (M := M) g 1
+                        (lowregStateRad_pos K.top_nonneg K.slope_nonneg
+                          K.outer_pos K.realize_pos).le
+                        (lowregNfun (I := I) (M := M) g gBase K.threshold_lt
+                          K.top_nonneg K.slope_nonneg K.outer_pos K.realize_pos hK.hreal)
+                        (eigenIdxFinset (I := I) (M := M) g N)
+                        (lowregProjMode (I := I) (M := M) g fseq N t) i)
+                    (Set.Ici t) t) ∧
                 (∀ N : ℕ, ∀ t ∈ Set.Icc (0 : ℝ) T,
                   galerkinEnergy (I := I) (M := M)
                     (eigenIdxFinset (I := I) (M := M) g N)
@@ -74,9 +92,10 @@ theorem lowreg_solve_h4_unif
                     (eigenIdxFinset (I := I) (M := M) g N)
                     (lowregProjMode (I := I) (M := M) g fseq N) 5 t
                     ∂(timeMeasure T) ≤ Φ5 := by
-  obtain ⟨delta, R0, hdelta, hdeltathird, hR0, _hR0one, hpairs⟩ :=
-    gal_arm_pair3_pair4_unif_of_mem (I := I) (M := M)
-      hDim gBase hΛ one_pos one_pos
+  obtain ⟨delta, R0, hdelta, hdeltathird, hδcaple, hR0, _hR0one,
+      hRcaple, hpairs⟩ :=
+    gal_arm_pair3_pair4_unif_of_mem_below (I := I) (M := M)
+      hDim gBase hΛ hδcap hRcap
   obtain ⟨K, hKunif, hKdelta, hKstate⟩ :=
     exists_lowBounds_at (I := I) (M := M) hDim gBase hΛ
       hdelta hdeltathird hR0
@@ -87,7 +106,7 @@ theorem lowreg_solve_h4_unif
     exact lowregHorizon_pos K.top_nonneg K.base_nonneg K.slope_nonneg
       K.zero_nonneg K.outer_pos K.realize_pos
   have hT1 : T ≤ 1 := lowregHorizon_le_one
-  refine ⟨K, hKunif, T, hT, hT1, ?_⟩
+  refine ⟨K, hKunif, hδcaple, hKstate.trans hRcaple, T, hT, hT1, ?_⟩
   intro g hEq hjet
   have hK := hKunif.bounds g hEq hjet
   obtain ⟨u, gforce, hsolve⟩ :=
@@ -181,9 +200,82 @@ theorem lowreg_solve_h4_unif
       hK.hreal hK.core_cont hK.htame hG4
       (by simpa only [R, hreal] using hpair4'') fseq
       (fun N => (hpack N).2.1) (fun N => (hpack N).2.2.1) hΦ3 hΦD4
-  refine ⟨u, gforce, fseq, Φ3, Φ4, Φ5, hsolveAt, ?_, hΦ3, hΦ4, hΦ5⟩
-  intro i t ht
-  simpa only [lowregProjMode] using hmode i t ht
+  let U : ℕ → ℝ → TensorEigenIdx (I := I) (M := M) g 0 2 → ℝ :=
+    lowregProjMode (I := I) (M := M) g fseq
+  have hUcont : ∀ N, ∀ i ∈ eigenIdxFinset (I := I) (M := M) g N,
+      ContinuousOn (fun t => U N t i) (Set.Icc (0 : ℝ) T) :=
+    fun N i _ => lowregProjMode_cont (I := I) (M := M) g hT.le fseq N i
+  have hUderiv : ∀ N, ∀ t ∈ Set.Ico (0 : ℝ) T,
+      ∀ i ∈ eigenIdxFinset (I := I) (M := M) g N,
+      HasDerivWithinAt (fun s => U N s i)
+        (-(TensorEigenIdx.lambda (I := I) (M := M) i) * U N t i +
+          galTameForce (I := I) (M := M) g 1 hR
+            (lowregNfun (I := I) (M := M) g gBase K.threshold_lt K.top_nonneg
+              K.slope_nonneg K.outer_pos K.realize_pos hK.hreal)
+            (eigenIdxFinset (I := I) (M := M) g N) (U N t) i)
+        (Set.Ici t) t := by
+    intro N t ht i _
+    refine lowregModeDeriv (I := I) (M := M) g hT hR N fseq i ?_ ?_ ht
+    · exact lowregForceCont (I := I) (M := M) g gBase K.threshold_lt
+        K.top_nonneg K.base_nonneg K.slope_nonneg K.outer_pos K.realize_pos
+        hK.hreal hK.htame N (U N) (fun j _ => hUcont N j (by assumption)) i
+    · exact lowregForceMode (I := I) (M := M) g hR hT hT1 N fseq
+        ((hpack N).2.1) ((hpack N).2.2.1) i
+  refine ⟨u, gforce, fseq, Φ3, Φ4, Φ5, hK, hsolveAt, ?_, ?_, hΦ3, hΦ4, hΦ5⟩
+  · intro i t ht
+    simpa only [lowregProjMode] using hmode i t ht
+  · simpa only [U] using hUderiv
+
+theorem lowreg_solve_h4_unif
+    (hDim : Module.finrank ℝ E = 3)
+    (gBase : SmoothRiemannianMetric I M)
+    {Λ : ℝ} (hΛ : 1 ≤ Λ) :
+    ∃ K : LowRegBoundData,
+      IsLowBoundsUnif (I := I) (M := M) gBase Λ K ∧
+        ∃ (T : ℝ) (hT : 0 < T) (hT1 : T ≤ 1),
+          ∀ (g : SmoothRiemannianMetric I M),
+            MetricUniformEquivalentOn (I := I) Set.univ gBase g Λ →
+            (∀ a : ℕ, a ≤ 3 →
+              MetricCovDerivOrderBoundOn (I := I) Set.univ a g gBase Λ) →
+            ∃ (u : MaxRegSolutionSpace (I := I) (M := M)
+                ((1 : ℕ) : ℝ) T)
+              (gforce : timeL2
+                (tensorHs (I := I) (M := M) g 0 2 ((1 : ℕ) : ℝ)) T)
+              (fseq : ℕ → timeL2
+                (tensorHs (I := I) (M := M) g 0 2 ((1 : ℕ) : ℝ)) T)
+              (Φ3 Φ4 Φ5 : ℝ),
+              IsBgSolveAt (I := I) (M := M) g gBase K
+                  hT hT1
+                  u gforce (lowregStateRad K.top K.slope K.outer K.realize) ∧
+                (∀ (i : TensorEigenIdx (I := I) (M := M) g 0 2),
+                  ∀ t ∈ Set.Icc (0 : ℝ) T,
+                    Tendsto
+                      (fun N => lowregProjMode (I := I) (M := M) g fseq N t i)
+                      atTop
+                      (𝓝 (perModeConv
+                        (TensorEigenIdx.lambda (I := I) (M := M) i)
+                        (fun s => (timeModeCoeff (I := I) (M := M) gforce i) s) t))) ∧
+                (∀ N : ℕ, ∀ t ∈ Set.Icc (0 : ℝ) T,
+                  galerkinEnergy (I := I) (M := M)
+                    (eigenIdxFinset (I := I) (M := M) g N)
+                    (lowregProjMode (I := I) (M := M) g fseq N) 3 t ≤ Φ3) ∧
+                (∀ N : ℕ, ∀ t ∈ Set.Icc (0 : ℝ) T,
+                  galerkinEnergy (I := I) (M := M)
+                    (eigenIdxFinset (I := I) (M := M) g N)
+                    (lowregProjMode (I := I) (M := M) g fseq N) 4 t ≤ Φ4) ∧
+                ∀ N : ℕ, ∫ t,
+                  galerkinEnergy (I := I) (M := M)
+                    (eigenIdxFinset (I := I) (M := M) g N)
+                    (lowregProjMode (I := I) (M := M) g fseq N) 5 t
+                    ∂(timeMeasure T) ≤ Φ5 := by
+  obtain ⟨K, hKunif, _hδcap, _hRcap, T, hT, hT1, hsolve⟩ :=
+    lowreg_solve_h4_unif_below (I := I) (M := M) hDim gBase hΛ
+      (by norm_num : (0 : ℝ) < 1) (by norm_num : (0 : ℝ) < 1)
+  refine ⟨K, hKunif, T, hT, hT1, ?_⟩
+  intro g hEq hjet
+  obtain ⟨u, gforce, fseq, Φ3, Φ4, Φ5, _hK, hsolveAt, hconv,
+      _hderiv, hE3, hE4, hE5⟩ := hsolve g hEq hjet
+  exact ⟨u, gforce, fseq, Φ3, Φ4, Φ5, hsolveAt, hconv, hE3, hE4, hE5⟩
 
 end DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral
 

@@ -1,23 +1,8 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.LowRegDirectJet
 import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.LowRegBgAllMass
 import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.LowRegUnifBounds
+import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.UnifLowSolveAllMass
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.DeTurckRHSRepresentation
-
-/-!
-# Same-horizon bootstrap for the fixed-background low solve
-
-This module isolates the one analytic producer still missing from the uniform
-short-time-existence lane.  The class-first fixed point is already available at
-Sobolev order one.  The packet below records exactly the order-two carrier and
-closed-slab forcing regularity consumed by the existing, background-generic
-joint-smoothness endpoint.
-
-The conversion from such a packet to a smooth Ricci--DeTurck metric family is
-proved here.  The production metricwise route is `bg_packet_of_adapt`, which
-consumes the adapted solve and its all-order mass.  The older
-`bg_packet_of_solve` frontier remains visible because a bare solve does not
-contain the absorption data needed to construct that adapted package.
--/
 
 noncomputable section
 
@@ -288,40 +273,6 @@ theorem bg_packet_of_adapt (hDim : Module.finrank ℝ E = 3)
       (fun σ => lowreg_loMassBg (I := I) (M := M) hDim g g_bg K
         hT hT1 uLo gforce hlo σ)
 
-/-- **The remaining analytic frontier.**  Bootstrap the class-first order-one
-fixed-background solve to the order-two closed-slab packet without shortening
-its horizon. -/
-theorem bg_packet_of_solve (hDim : Module.finrank ℝ E = 3)
-    (g g_bg : SmoothRiemannianMetric I M)
-    (K : LowRegBoundData)
-    (hK : IsLowBoundsAt (I := I) (M := M) g g_bg K)
-    {T : ℝ} (hT : 0 < T) (hT1 : T ≤ 1)
-    (u : MaxRegSolutionSpace (I := I) (M := M) ((1 : ℕ) : ℝ) T)
-    (gforce : timeL2
-      (tensorHs (I := I) (M := M) g 0 2 ((1 : ℕ) : ℝ)) T)
-    (hsol : IsLowSolveBg (I := I) (M := M) g g_bg K hK hT hT1 u gforce) :
-    Nonempty (BgSmoothPacket (I := I) (M := M) g g_bg K T) := by
-  sorry
-
-/-- A class-first low solve yields a smooth fixed-background DeTurck solution
-on the same horizon. -/
-theorem lowreg_dt_of_solve (hDim : Module.finrank ℝ E = 3)
-    (g g_bg : SmoothRiemannianMetric I M)
-    (K : LowRegBoundData)
-    (hK : IsLowBoundsAt (I := I) (M := M) g g_bg K)
-    {T : ℝ} (hT : 0 < T) (hT1 : T ≤ 1)
-    (u : MaxRegSolutionSpace (I := I) (M := M) ((1 : ℕ) : ℝ) T)
-    (gforce : timeL2
-      (tensorHs (I := I) (M := M) g 0 2 ((1 : ℕ) : ℝ)) T)
-    (hsol : IsLowSolveBg (I := I) (M := M) g g_bg K hK hT hT1 u gforce) :
-    ∃ g_DT : ℝ → SmoothRiemannianMetric I M,
-      IsQuasilinearMetricParabolicSolution (I := I)
-        (deTurckRicciRHS (I := I) g_bg) g T g_DT ∧
-      JointChartGramSmooth (I := I) T g_DT := by
-  obtain ⟨P⟩ := bg_packet_of_solve (I := I) (M := M) hDim g g_bg K hK
-    hT hT1 u gforce hsol
-  exact dt_of_bg_packet (I := I) (M := M) g g_bg K hK hT hT1 P
-
 /-- Every three-dimensional order-three metric class has a common horizon for
 smooth Ricci--DeTurck solutions against the fixed class background. -/
 theorem lowreg_dt_unif (hDim : Module.finrank ℝ E = 3)
@@ -334,21 +285,16 @@ theorem lowreg_dt_unif (hDim : Module.finrank ℝ E = 3)
         ∃ g_DT : ℝ → SmoothRiemannianMetric I M,
           IsQuasilinearMetricParabolicSolution (I := I)
             (deTurckRicciRHS (I := I) gBase) g T g_DT ∧
-          JointChartGramSmooth (I := I) T g_DT := by
-  obtain ⟨U, hU, hsolve⟩ :=
-    lowreg_solve_unif (I := I) (M := M) hDim gBase hΛ
-  let T : ℝ := min
-    (lowregHorizon U.top U.base U.slope U.zeroBd U.outer U.realize) 1
-  have hT : 0 < T := lt_min hU one_pos
-  have hTh : T ≤ lowregHorizon U.top U.base U.slope U.zeroBd U.outer U.realize :=
-    min_le_left _ _
-  have hT1 : T ≤ 1 := min_le_right _ _
+      JointChartGramSmooth (I := I) T g_DT := by
+  obtain ⟨K, _hKunif, T, hT, hT1, hsolve⟩ :=
+    lowreg_solve_all_mass_unif (I := I) (M := M) hDim gBase hΛ
   refine ⟨T, hT, ?_⟩
   intro g hEq hjet
-  obtain ⟨K, hK, u, gforce, _hcap, hsol⟩ :=
-    hsolve g hEq hjet hT hTh hT1
-  exact lowreg_dt_of_solve (I := I) (M := M) hDim g gBase K hK hT hT1
-    u gforce hsol
+  obtain ⟨u, gforce, hsolveAt, hmass⟩ := hsolve g hEq hjet
+  obtain ⟨P⟩ := bg_packet_of_mass (I := I) (M := M) g gBase K
+    hsolveAt.bounds hT hT1 u gforce hsolveAt.solve hmass
+  exact dt_of_bg_packet (I := I) (M := M) g gBase K
+    hsolveAt.bounds hT hT1 P
 
 end DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral
 
