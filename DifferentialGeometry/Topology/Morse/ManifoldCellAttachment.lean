@@ -15568,33 +15568,71 @@ theorem isClosed_range_handleCell {m k : ℕ} (hk : k ≤ m + 1) (c ε r : ℝ)
     exact (isCompact_univ.image (continuous_cell (morseAttachingEmbedding hk c ε r data hε hεr)))
   exact hcomp.isClosed
 
-noncomputable def morseHandleAdjunctionLowerPushedChart {m k : ℕ} (hk : k ≤ m + 1) (c ε r : ℝ)
+theorem isClosed_range_handleLower {m k : ℕ} (hk : k ≤ m + 1) (c ε r : ℝ)
+    {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M] [ChartedSpace H M] [T2Space M]
+    {I : ModelWithCorners ℝ (MorseModel (m + 1)) H} {f : M → ℝ}
+    (data : MorseChart (m + 1) k hk c I f)
+    (hε : 0 < ε) (hr : r ≠ 0) (hεr : Real.sqrt (2 * ε + 2 * r ^ 2) ≤ data.R)
+    (hcont : Continuous f) :
+    IsClosed (Set.range (Handle.lower (morseAttachingEmbedding hk c ε r data hε hεr))) := by
+  let h : Handle.AdjunctionSpace k (m + 1 - k)
+      (morseAttachingEmbedding hk c ε r data hε hεr) ≃ₜ
+      {x : M // x ∈ sublevel f (c - ε) ∪ Set.range (handleEmbedding hk c ε r data)} :=
+    morseHandleAdjunctionHomeoUnion hk c ε r data hε hr hεr hcont
+  have hIm : h '' Set.range (Handle.lower (morseAttachingEmbedding hk c ε r data hε hεr)) =
+      {y : {x : M // x ∈ sublevel f (c - ε) ∪ Set.range (handleEmbedding hk c ε r data)} |
+        y.1 ∈ sublevel f (c - ε)} := by
+    ext y
+    constructor
+    · rintro ⟨z, hz, rfl⟩
+      rcases hz with ⟨x, rfl⟩
+      rw [morseHandleAdjunctionHomeoUnion_lower hk c ε r data hε hr hεr hcont x]
+      exact x.2
+    · intro hy
+      refine ⟨Handle.lower (morseAttachingEmbedding hk c ε r data hε hεr) ⟨y.1, hy⟩, ⟨⟨y.1, hy⟩, rfl⟩, ?_⟩
+      apply Subtype.ext
+      rw [morseHandleAdjunctionHomeoUnion_lower hk c ε r data hε hr hεr hcont ⟨y.1, hy⟩]
+  have hcl : IsClosed {y : {x : M // x ∈ sublevel f (c - ε) ∪ Set.range (handleEmbedding hk c ε r data)} |
+      y.1 ∈ sublevel f (c - ε)} := by
+    have hcont' : Continuous f := hcont
+    simpa [Set.preimage] using (isClosed_Iic.preimage (hcont'.comp continuous_subtype_val))
+  have hcl' : IsClosed (h '' Set.range (Handle.lower (morseAttachingEmbedding hk c ε r data hε hεr))) := by
+    rw [hIm]
+    exact hcl
+  have hEq : h.symm '' (h '' Set.range (Handle.lower (morseAttachingEmbedding hk c ε r data hε hεr))) =
+      Set.range (Handle.lower (morseAttachingEmbedding hk c ε r data hε hεr)) := by
+    rw [← Set.image_comp]
+    simp
+  rw [← hEq]
+  exact h.symm.isClosedMap (h '' Set.range (Handle.lower (morseAttachingEmbedding hk c ε r data hε hεr))) hcl'
+
+noncomputable def morseHandleAdjunctionCellPushedChart {m k : ℕ} (hk : k ≤ m + 1) (c ε r : ℝ)
     {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M] [ChartedSpace H M] [T2Space M]
     {I : ModelWithCorners ℝ (MorseModel (m + 1)) H} {f : M → ℝ}
     (data : MorseChart (m + 1) k hk c I f)
     (hε : 0 < ε) (hr : r ≠ 0) (hεr : Real.sqrt (2 * ε + 2 * r ^ 2) ≤ data.R)
     (hcont : Continuous f)
-    (c₁ : OpenPartialHomeomorph (SublevelSpace f (c - ε)) (MorseHalfSpace m)) :
+    (c₂ : OpenPartialHomeomorph (StandardHandle k (m + 1 - k)) (MorseHalfSpace m)) :
     OpenPartialHomeomorph (Handle.AdjunctionSpace k (m + 1 - k)
       (morseAttachingEmbedding hk c ε r data hε hεr)) (MorseHalfSpace m) := by
   classical
   let A' : Type := Handle.AdjunctionSpace k (m + 1 - k) (morseAttachingEmbedding hk c ε r data hε hεr)
-  let X : Type := SublevelSpace f (c - ε)
-  let lr : X ≃ₜ {z : A' // z ∈ Set.range (Handle.lower (morseAttachingEmbedding hk c ε r data hε hεr))} :=
-    morseHandleAdjunctionLowerRangeHomeo hk c ε r data hε hr hεr hcont
-  let S : Set A' := Set.range (Handle.lower (morseAttachingEmbedding hk c ε r data hε hεr))
-  let T : Set A' := Set.range (Handle.cell (morseAttachingEmbedding hk c ε r data hε hεr))
-  let source : Set A' := {z : A' | ∃ hzr : z ∈ S, z ∉ T ∧ lr.symm ⟨z, hzr⟩ ∈ c₁.source}
-  let target : Set (MorseHalfSpace m) := {y : MorseHalfSpace m | y ∈ c₁.target ∧ (lr (c₁.symm y)).1 ∉ T}
+  let cr : StandardHandle k (m + 1 - k) ≃ₜ {z : A' //
+      z ∈ Set.range (Handle.cell (morseAttachingEmbedding hk c ε r data hε hεr))} :=
+    morseHandleAdjunctionCellRangeHomeo hk c ε r data hε hr hεr hcont
+  let S : Set A' := Set.range (Handle.cell (morseAttachingEmbedding hk c ε r data hε hεr))
+  let T : Set A' := Set.range (Handle.lower (morseAttachingEmbedding hk c ε r data hε hεr))
+  let source : Set A' := {z : A' | ∃ hzr : z ∈ S, z ∉ T ∧ cr.symm ⟨z, hzr⟩ ∈ c₂.source}
+  let target : Set (MorseHalfSpace m) := {y : MorseHalfSpace m | y ∈ c₂.target ∧ (cr (c₂.symm y)).1 ∉ T}
   have hmem : ∀ z : A', z ∈ source → z ∈ S := by
     intro z hz
     rcases hz with ⟨hzr, hzc, hz₁⟩
     exact hzr
   let toFun : A' → MorseHalfSpace m := fun z =>
-    if hz : z ∈ source then c₁ (lr.symm ⟨z, hmem z hz⟩)
+    if hz : z ∈ source then c₂ (cr.symm ⟨z, hmem z hz⟩)
     else Classical.choice (show Nonempty (MorseHalfSpace m) from ⟨⟨0, by simp⟩⟩)
-  let invFun : MorseHalfSpace m → A' := fun y => (lr (c₁.symm y)).1
-  have htoFun : ∀ {z : A'} (hz : z ∈ source), toFun z = c₁ (lr.symm ⟨z, hmem z hz⟩) := by
+  let invFun : MorseHalfSpace m → A' := fun y => (cr (c₂.symm y)).1
+  have htoFun : ∀ {z : A'} (hz : z ∈ source), toFun z = c₂ (cr.symm ⟨z, hmem z hz⟩) := by
     intro z hz
     dsimp [toFun]
     rw [dif_pos hz]
@@ -15604,42 +15642,42 @@ noncomputable def morseHandleAdjunctionLowerPushedChart {m k : ℕ} (hk : k ≤ 
       have hto := htoFun hz
       rcases hz with ⟨hzr, hzc, hz₁⟩
       rw [hto]
-      refine ⟨c₁.map_source hz₁, ?_⟩
-      have hc : c₁.symm (c₁ (lr.symm ⟨z, hzr⟩)) = lr.symm ⟨z, hzr⟩ := c₁.left_inv hz₁
-      have hl : (lr (lr.symm ⟨z, hzr⟩)).1 = z :=
-        congrArg Subtype.val (lr.apply_symm_apply ⟨z, hzr⟩)
+      refine ⟨c₂.map_source hz₁, ?_⟩
+      have hc : c₂.symm (c₂ (cr.symm ⟨z, hzr⟩)) = cr.symm ⟨z, hzr⟩ := c₂.left_inv hz₁
+      have hl : (cr (cr.symm ⟨z, hzr⟩)).1 = z :=
+        congrArg Subtype.val (cr.apply_symm_apply ⟨z, hzr⟩)
       simpa [hc, hl, hmem] using hzc
     · intro y hy
       rcases hy with ⟨hy₁, hyc⟩
       dsimp [invFun]
       refine ⟨?_, hyc, ?_⟩
-      · exact (lr (c₁.symm y)).2
-      · have hback : lr.symm ⟨(lr (c₁.symm y)).1, (lr (c₁.symm y)).2⟩ = c₁.symm y :=
-          lr.symm_apply_apply (c₁.symm y)
-        simpa [hback] using c₁.map_target hy₁
+      · exact (cr (c₂.symm y)).2
+      · have hback : cr.symm ⟨(cr (c₂.symm y)).1, (cr (c₂.symm y)).2⟩ = c₂.symm y :=
+          cr.symm_apply_apply (c₂.symm y)
+        simpa [hback] using c₂.map_target hy₁
     · intro z hz
       have hto := htoFun hz
       rcases hz with ⟨hzr, hzc, hz₁⟩
       dsimp [invFun]
       rw [hto]
-      have hc : c₁.symm (c₁ (lr.symm ⟨z, hzr⟩)) = lr.symm ⟨z, hzr⟩ := c₁.left_inv hz₁
+      have hc : c₂.symm (c₂ (cr.symm ⟨z, hzr⟩)) = cr.symm ⟨z, hzr⟩ := c₂.left_inv hz₁
       rw [hc]
-      exact congrArg Subtype.val (lr.apply_symm_apply ⟨z, hzr⟩)
+      exact congrArg Subtype.val (cr.apply_symm_apply ⟨z, hzr⟩)
     · intro y hy
       rcases hy with ⟨hy₁, hyc⟩
-      have hback : lr.symm ⟨(lr (c₁.symm y)).1, (lr (c₁.symm y)).2⟩ = c₁.symm y :=
-        lr.symm_apply_apply (c₁.symm y)
-      have hto : toFun (invFun y) = c₁ (c₁.symm y) := by
+      have hback : cr.symm ⟨(cr (c₂.symm y)).1, (cr (c₂.symm y)).2⟩ = c₂.symm y :=
+        cr.symm_apply_apply (c₂.symm y)
+      have hto : toFun (invFun y) = c₂ (c₂.symm y) := by
         dsimp [invFun]
-        rw [htoFun ⟨(lr (c₁.symm y)).2, hyc, by simpa [hback] using c₁.map_target hy₁⟩]
+        rw [htoFun ⟨(cr (c₂.symm y)).2, hyc, by simpa [hback] using c₂.map_target hy₁⟩]
         rw [hback]
       rw [hto]
-      exact c₁.right_inv hy₁
+      exact c₂.right_inv hy₁
   refine ⟨pe, ?_, ?_, ?_, ?_⟩
   · have hOpenST : IsOpen (S \ T) :=
-      isOpen_morseHandleAdjunction_lowerPart hk c ε r data hε hr hεr hcont
+      isOpen_morseHandleAdjunction_cellPart hk c ε r data hε hr hεr hcont
     let srcU : Set {z : A' // z ∈ S \ T} := {w : {z : A' // z ∈ S \ T} |
-      lr.symm ⟨(w : A'), w.2.1⟩ ∈ c₁.source}
+      cr.symm ⟨(w : A'), w.2.1⟩ ∈ c₂.source}
     have hSrcImage : source = (↑) '' srcU := by
       dsimp [source, srcU]
       ext z
@@ -15651,23 +15689,23 @@ noncomputable def morseHandleAdjunctionLowerPushedChart {m k : ℕ} (hk : k ≤ 
       · rintro ⟨w, hw, rfl⟩
         refine ⟨w.2.1, w.2.2, hw⟩
     have hOpenSrcU : IsOpen srcU := by
-      have hg : Continuous (fun w : {z : A' // z ∈ S \ T} => lr.symm ⟨(w : A'), w.2.1⟩) :=
-        lr.symm.continuous.comp (Continuous.subtype_mk continuous_subtype_val (by intro w; exact w.2.1))
-      simpa [srcU] using c₁.open_source.preimage hg
+      have hg : Continuous (fun w : {z : A' // z ∈ S \ T} => cr.symm ⟨(w : A'), w.2.1⟩) :=
+        cr.symm.continuous.comp (Continuous.subtype_mk continuous_subtype_val (by intro w; exact w.2.1))
+      simpa [srcU] using c₂.open_source.preimage hg
     change IsOpen source
     rw [hSrcImage]
     exact hOpenST.isOpenMap_subtype_val srcU hOpenSrcU
   · have hclT : IsClosed T :=
-      isClosed_range_handleCell hk c ε r data hε hr hεr hcont
+      isClosed_range_handleLower hk c ε r data hε hr hεr hcont
     have hOpenTc : IsOpen (Set.compl T) := hclT.isOpen_compl
-    have hPre : IsOpen {y : MorseHalfSpace m | y ∈ c₁.target ∧ (lr (c₁.symm y)).1 ∈ Set.compl T} := by
-      let Tc : Set (MorseHalfSpace m) := c₁.target
-      have hContT : Continuous (fun y : Tc => (lr (c₁.symm y)).1) :=
-        continuous_subtype_val.comp (lr.continuous.comp (continuousOn_iff_continuous_restrict.mp c₁.continuousOn_invFun))
-      have hPreT : IsOpen {y : Tc | (lr (c₁.symm y)).1 ∈ Set.compl T} :=
+    have hPre : IsOpen {y : MorseHalfSpace m | y ∈ c₂.target ∧ (cr (c₂.symm y)).1 ∈ Set.compl T} := by
+      let Tc : Set (MorseHalfSpace m) := c₂.target
+      have hContT : Continuous (fun y : Tc => (cr (c₂.symm y)).1) :=
+        continuous_subtype_val.comp (cr.continuous.comp (continuousOn_iff_continuous_restrict.mp c₂.continuousOn_invFun))
+      have hPreT : IsOpen {y : Tc | (cr (c₂.symm y)).1 ∈ Set.compl T} :=
         hOpenTc.preimage hContT
-      have hImg : {y : MorseHalfSpace m | y ∈ c₁.target ∧ (lr (c₁.symm y)).1 ∈ Set.compl T} =
-          (↑) '' {y : Tc | (lr (c₁.symm y)).1 ∈ Set.compl T} := by
+      have hImg : {y : MorseHalfSpace m | y ∈ c₂.target ∧ (cr (c₂.symm y)).1 ∈ Set.compl T} =
+          (↑) '' {y : Tc | (cr (c₂.symm y)).1 ∈ Set.compl T} := by
         ext y
         constructor
         · intro hy
@@ -15675,19 +15713,19 @@ noncomputable def morseHandleAdjunctionLowerPushedChart {m k : ℕ} (hk : k ≤ 
         · rintro ⟨w, hw, rfl⟩
           exact ⟨w.2, hw⟩
       rw [hImg]
-      exact c₁.open_target.isOpenMap_subtype_val {y : Tc | (lr (c₁.symm y)).1 ∈ Set.compl T} hPreT
+      exact c₂.open_target.isOpenMap_subtype_val {y : Tc | (cr (c₂.symm y)).1 ∈ Set.compl T} hPreT
     simpa [target, Set.compl, Set.diff_eq] using hPre
   · have hmain : Continuous (fun w : source => toFun (w : A')) := by
-      have hmap : Continuous (fun w : source => lr.symm ⟨(w : A'), hmem (w : A') w.2⟩) :=
-        lr.symm.continuous.comp (Continuous.subtype_mk continuous_subtype_val (by intro w; exact hmem (w : A') w.2))
-      have hmt : Set.MapsTo (fun w : source => lr.symm ⟨(w : A'), hmem (w : A') w.2⟩) Set.univ c₁.source := by
+      have hmap : Continuous (fun w : source => cr.symm ⟨(w : A'), hmem (w : A') w.2⟩) :=
+        cr.symm.continuous.comp (Continuous.subtype_mk continuous_subtype_val (by intro w; exact hmem (w : A') w.2))
+      have hmt : Set.MapsTo (fun w : source => cr.symm ⟨(w : A'), hmem (w : A') w.2⟩) Set.univ c₂.source := by
         intro w hw
         rcases w.2 with ⟨hzr, hzc, hz₁⟩
         simpa [hmem] using hz₁
-      have hcomp : Continuous (fun w : source => c₁ (lr.symm ⟨(w : A'), hmem (w : A') w.2⟩)) := by
-        have hco : ContinuousOn (fun w : source => c₁ (lr.symm ⟨(w : A'), hmem (w : A') w.2⟩)) Set.univ :=
-          c₁.continuousOn.comp hmap.continuousOn hmt
-        change Continuous (fun w : source => c₁ (lr.symm ⟨(w : A'), hmem (w : A') w.2⟩))
+      have hcomp : Continuous (fun w : source => c₂ (cr.symm ⟨(w : A'), hmem (w : A') w.2⟩)) := by
+        have hco : ContinuousOn (fun w : source => c₂ (cr.symm ⟨(w : A'), hmem (w : A') w.2⟩)) Set.univ :=
+          c₂.continuousOn.comp hmap.continuousOn hmt
+        change Continuous (fun w : source => c₂ (cr.symm ⟨(w : A'), hmem (w : A') w.2⟩))
         exact continuousOn_univ.mp hco
       refine hcomp.congr ?_
       intro w
@@ -15696,10 +15734,10 @@ noncomputable def morseHandleAdjunctionLowerPushedChart {m k : ℕ} (hk : k ≤ 
   · have hmain : Continuous (fun w : target => invFun (w : MorseHalfSpace m)) := by
       dsimp [invFun]
       refine continuous_subtype_val.comp ?_
-      have hc₁ : Continuous (fun w : target => c₁.symm (w : MorseHalfSpace m)) :=
-        (continuousOn_iff_continuous_restrict.mp c₁.continuousOn_invFun).comp
+      have hc₂ : Continuous (fun w : target => c₂.symm (w : MorseHalfSpace m)) :=
+        (continuousOn_iff_continuous_restrict.mp c₂.continuousOn_invFun).comp
           (Continuous.subtype_mk continuous_subtype_val (by intro w; exact w.2.1))
-      exact lr.continuous.comp hc₁
+      exact cr.continuous.comp hc₂
     exact continuousOn_iff_continuous_restrict.mpr hmain
 
 
