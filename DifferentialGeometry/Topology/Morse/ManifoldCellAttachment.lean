@@ -1902,6 +1902,13 @@ noncomputable def handleEmbedding {n k : ℕ} (hk : k ≤ n) (c ε r : ℝ)
     StandardHandle k (n - k) → M :=
   fun p => data.χ (modelHandleMap hk ε r p)
 
+noncomputable def handleRoundEmbedding {n k : ℕ} (hk : k ≤ n) (c ε r δ θ : ℝ)
+    {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M] [ChartedSpace H M]
+    {I : ModelWithCorners ℝ (MorseModel n) H} {f : M → ℝ}
+    (data : MorseChart n k hk c I f) :
+    StandardHandle k (n - k) → M :=
+  fun p => data.χ (modelHandleRoundMap hk ε r δ θ p)
+
 theorem handleEmbedding_f_value {n k : ℕ} (hk : k ≤ n) (c ε r : ℝ)
     {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M] [ChartedSpace H M]
     {I : ModelWithCorners ℝ (MorseModel n) H} {f : M → ℝ}
@@ -1911,6 +1918,39 @@ theorem handleEmbedding_f_value {n k : ℕ} (hk : k ≤ n) (c ε r : ℝ)
     f (handleEmbedding hk c ε r data p) = morseNormalForm hk c (modelHandleMap hk ε r p) := by
   change f (data.χ (modelHandleMap hk ε r p)) = morseNormalForm hk c (modelHandleMap hk ε r p)
   rw [data.hnorm (modelHandleMap hk ε r p) (le_trans (modelHandleMap_norm_le hk ε r hε p) hεr)]
+
+theorem handleRoundEmbedding_f_value {n k : ℕ} (hk : k ≤ n) (c ε r δ θ : ℝ)
+    {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M] [ChartedSpace H M]
+    {I : ModelWithCorners ℝ (MorseModel n) H} {f : M → ℝ}
+    (data : MorseChart n k hk c I f)
+    (hε : 0 < ε) (hδ : 0 < δ) (hθ : 0 < θ) (hδr : δ < r ^ 2) (hθr : θ < r ^ 2) (hr : 0 < r)
+    (hεr : Real.sqrt (2 * ε + 2 * r ^ 2) ≤ data.R)
+    (p : StandardHandle k (n - k)) :
+    f (handleRoundEmbedding hk c ε r δ θ data p) =
+      morseNormalForm hk c (modelHandleRoundMap hk ε r δ θ p) := by
+  change f (data.χ (modelHandleRoundMap hk ε r δ θ p)) =
+    morseNormalForm hk c (modelHandleRoundMap hk ε r δ θ p)
+  rw [data.hnorm (modelHandleRoundMap hk ε r δ θ p)
+    (le_trans (modelHandleRoundMap_norm_le hk ε r δ θ hε hδ hθ hδr hθr hr p) hεr)]
+
+theorem handleRoundEmbedding_attaching_eq_lower {n k : ℕ} (hk : k ≤ n) (c ε r δ θ : ℝ)
+    {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M] [ChartedSpace H M]
+    {I : ModelWithCorners ℝ (MorseModel n) H} {f : M → ℝ}
+    (data : MorseChart n k hk c I f)
+    (hε : 0 < ε) (hδ : 0 < δ) (hθ : 0 < θ) (hδr : δ < r ^ 2) (hr : 0 < r)
+    (p : AttachingRegion k (n - k)) :
+    handleRoundEmbedding hk c ε r δ θ data (attachingInclusion k (n - k) p) =
+      data.χ (modelLowerRoundMap hk ε r δ θ (cocoreModelPoint hk ε r p)) := by
+  dsimp [handleRoundEmbedding, attachingInclusion]
+  change data.χ (modelHandleRoundMap hk ε r δ θ (cellBoundaryInclusion k p.1, p.2)) =
+    data.χ (modelLowerRoundMap hk ε r δ θ (cocoreModelPoint hk ε r p))
+  have h1 := modelHandleRoundMap_attaching_eq_lower hk ε r δ θ hε hδ hθ hδr hr
+    (cellBoundaryInclusion k p.1, p.2) (by
+      change ‖((cellBoundaryInclusion k p.1 : ClosedCell k) : EuclideanSpace ℝ (Fin k))‖ = 1
+      simpa [cellBoundaryInclusion] using p.1.2)
+  have h2 := modelHandleMap_attachingRegion hk ε r p.1 p.2
+  rw [h1]
+  simpa [cocoreModelPoint] using (congrArg (fun z : MorseModel n => data.χ (modelLowerRoundMap hk ε r δ θ z)) h2)
 
 theorem handleEmbedding_attachingRegion {n k : ℕ} (hk : k ≤ n) (c ε r : ℝ)
     {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M] [ChartedSpace H M]
