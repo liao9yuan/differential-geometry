@@ -266,6 +266,62 @@ theorem galArmPair3_diag
   simpa only [galArmVecBg, smoothCcToTensorHs_coeff, Nat.reduceAdd,
     T, hT, hZ, A] using hpair
 
+theorem galArmPair4_diag
+    (g gBase : SmoothRiemannianMetric I M) {R δ : ℝ}
+    (hR : 0 ≤ R) (hδ : δ < 1) (hδ0 : 0 ≤ δ) (hδ3 : δ ≤ 1 / 3)
+    (hreal : ∀ T : SmoothCcTensor g 0 2,
+      ‖smoothCcToTensorHs (I := I) (M := M) g
+        (((1 : ℕ) : ℝ) + 1) T‖ ≤ R →
+        gFibreOpBound (I := I) (M := M) g
+          (ccTensorBilinSymm (I := I) g T) δ)
+    (F : Finset (TensorEigenIdx (I := I) (M := M) g 0 2))
+    (c : TensorEigenIdx (I := I) (M := M) g 0 2 → ℝ) :
+    let θ : ℝ := min 1 (R / ‖galLowView (I := I) (M := M) g 1
+      (finiteEigenComboHs (I := I) (M := M) g F c (((1 : ℕ) : ℝ) + 2))‖)
+    let T : SmoothCcTensor g 0 2 :=
+      symmS (I := I) (M := M) g
+        (galCoreRep (I := I) (M := M) g R F c)
+    let hT := galRepFib (I := I) (M := M) g hR hreal F c
+    let hZ := lowregFibZero (I := I) (M := M) g hR hreal
+    let A := lowBaseData (I := I) (M := M) g gBase T hδ hT hZ
+    θ * (∑ i ∈ F, tensorSobolevWeight (I := I) (M := M) i (4 : ℝ) *
+        (c i * (galArmVecBg (I := I) (M := M) g gBase
+          hR hδ hreal F c).coeff i)) =
+      tensorL2Inner (I := I) (M := M) g 0 2
+        (oneMinusConnLapSmoothIter (I := I) g 0 2 3 T).toFun
+        (oneMinusConnLapSmoothIter (I := I) g 0 2 1
+          (A.a2 (I := I) (M := M) T +
+            A.a1 (I := I) (M := M) T)).toFun := by
+  classical
+  let θ : ℝ := min 1 (R / ‖galLowView (I := I) (M := M) g 1
+    (finiteEigenComboHs (I := I) (M := M) g F c (((1 : ℕ) : ℝ) + 2))‖)
+  let T : SmoothCcTensor g 0 2 :=
+    symmS (I := I) (M := M) g
+      (galCoreRep (I := I) (M := M) g R F c)
+  let hT := galRepFib (I := I) (M := M) g hR hreal F c
+  let hZ := lowregFibZero (I := I) (M := M) g hR hreal
+  let A := lowBaseData (I := I) (M := M) g gBase T hδ hT hZ
+  have hTfix : symmS (I := I) (M := M) g T = T := by
+    dsimp only [T]
+    exact symmS_idem (I := I) (M := M) g _
+  have hA : symmS (I := I) (M := M) g
+      (A.a2 (I := I) (M := M) T + A.a1 (I := I) (M := M) T) =
+        A.a2 (I := I) (M := M) T + A.a1 (I := I) (M := M) T := by
+    exact lowArm_symm (I := I) (M := M) g gBase T hTfix hδ hδ0 hδ3 hT hZ
+  have hrep : T = θ • symmS (I := I) (M := M) g
+      (finiteEigenCombo (I := I) (M := M) g F c) := by
+    dsimp only [T, θ]
+    rw [galCoreRep]
+    change ccTensor02Symm (I := I) (M := M) g (_ • _) =
+      _ • ccTensor02Symm (I := I) (M := M) g _
+    rw [symmS_smul]
+  have hpair := finite_symm_scale (I := I) (M := M) g F c
+    (A.a2 (I := I) (M := M) T + A.a1 (I := I) (M := M) T)
+    1 3 θ hA
+  rw [← hrep] at hpair
+  simpa only [galArmVecBg, smoothCcToTensorHs_coeff, Nat.reduceAdd,
+    T, hT, hZ, A] using hpair
+
 set_option maxHeartbeats 2400000 in
 set_option synthInstance.maxHeartbeats 2400000 in
 /-- The complete fixed-background order-one correction obeys the Rung-3
