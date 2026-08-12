@@ -1620,6 +1620,83 @@ theorem contDiff_modelRoundedFunction {n k : ℕ} (hk : k ≤ n) (c ε r δ R₀
     (contDiff_morseNormalForm hk c).add contDiff_const
   exact (hF₁.add ((hF₂.sub hF₁).mul htrans))
 
+noncomputable def modelCapRoundedLowerFunction {n k : ℕ} (hk : k ≤ n) (c ε r δ θ R₀ R₁ : ℝ)
+    (y : MorseModel n) : ℝ :=
+  modelCapRoundedLowerFunctionInner hk c ε r δ θ y +
+    (morseNormalForm hk c y + ε - modelCapRoundedLowerFunctionInner hk c ε r δ θ y) *
+      Real.smoothTransition ((morseNorm n y ^ 2 - R₀ ^ 2) / (R₁ ^ 2 - R₀ ^ 2))
+
+theorem modelCapRoundedLowerFunction_eq_inner_of_norm_le {n k : ℕ} (hk : k ≤ n)
+    (c ε r δ θ R₀ R₁ : ℝ) (hR : R₀ < R₁) (hR0 : 0 ≤ R₀) {y : MorseModel n}
+    (hy : morseNorm n y ≤ R₀) :
+    modelCapRoundedLowerFunction hk c ε r δ θ R₀ R₁ y =
+      modelCapRoundedLowerFunctionInner hk c ε r δ θ y := by
+  dsimp [modelCapRoundedLowerFunction]
+  have harg : (morseNorm n y ^ 2 - R₀ ^ 2) / (R₁ ^ 2 - R₀ ^ 2) ≤ 0 := by
+    have hsq : morseNorm n y ^ 2 ≤ R₀ ^ 2 := by
+      have hnon : 0 ≤ morseNorm n y := by
+        dsimp [morseNorm]
+        exact norm_nonneg _
+      exact sq_le_sq' (by nlinarith [hnon, hR0]) hy
+    have hden : 0 < R₁ ^ 2 - R₀ ^ 2 := by
+      have h01 : R₀ ^ 2 < R₁ ^ 2 := by
+        have h0 : 0 ≤ R₁ := by nlinarith [hR0, hR]
+        exact sq_lt_sq.mpr (by
+          rw [abs_of_nonneg hR0, abs_of_nonneg h0]
+          exact hR)
+      nlinarith
+    exact div_nonpos_of_nonpos_of_nonneg (sub_nonpos.mpr hsq) (le_of_lt hden)
+  rw [Real.smoothTransition.zero_of_nonpos harg]
+  ring
+
+theorem modelCapRoundedLowerFunction_eq_morse_add_eps_of_norm_ge {n k : ℕ} (hk : k ≤ n)
+    (c ε r δ θ R₀ R₁ : ℝ) (hR : R₀ < R₁) (hR0 : 0 ≤ R₀) {y : MorseModel n}
+    (hy : R₁ ≤ morseNorm n y) :
+    modelCapRoundedLowerFunction hk c ε r δ θ R₀ R₁ y = morseNormalForm hk c y + ε := by
+  dsimp [modelCapRoundedLowerFunction]
+  have harg : 1 ≤ (morseNorm n y ^ 2 - R₀ ^ 2) / (R₁ ^ 2 - R₀ ^ 2) := by
+    have hsq : R₁ ^ 2 ≤ morseNorm n y ^ 2 := by
+      have hnon : 0 ≤ morseNorm n y := by
+        dsimp [morseNorm]
+        exact norm_nonneg _
+      exact sq_le_sq' (by nlinarith [hR0, hR]) hy
+    have hden : 0 < R₁ ^ 2 - R₀ ^ 2 := by
+      have h01 : R₀ ^ 2 < R₁ ^ 2 := by
+        have h0 : 0 ≤ R₁ := by nlinarith [hR0, hR]
+        exact sq_lt_sq.mpr (by
+          rw [abs_of_nonneg hR0, abs_of_nonneg h0]
+          exact hR)
+      nlinarith
+    exact (one_le_div hden).mpr (by nlinarith [hsq])
+  rw [Real.smoothTransition.one_of_one_le harg]
+  ring
+
+theorem contDiff_modelCapRoundedLowerFunction {n k : ℕ} (hk : k ≤ n)
+    (c ε r δ θ R₀ R₁ : ℝ) (hθ : 0 < θ) (hδ : 0 < δ) (hδr : δ < r ^ 2) (hθr : θ < r ^ 2) :
+    ContDiff ℝ (⊤ : ℕ∞) (modelCapRoundedLowerFunction hk c ε r δ θ R₀ R₁) := by
+  change ContDiff ℝ (⊤ : ℕ∞) (fun y : MorseModel n =>
+    modelCapRoundedLowerFunctionInner hk c ε r δ θ y +
+      (morseNormalForm hk c y + ε - modelCapRoundedLowerFunctionInner hk c ε r δ θ y) *
+        Real.smoothTransition ((morseNorm n y ^ 2 - R₀ ^ 2) / (R₁ ^ 2 - R₀ ^ 2)))
+  have hnormSq : ContDiff ℝ (⊤ : ℕ∞) (fun y : MorseModel n => morseNorm n y ^ 2) := by
+    dsimp [morseNorm]
+    have hlin : ContDiff ℝ (⊤ : ℕ∞) (fun y : MorseModel n =>
+        (WithLp.toLp 2 y : EuclideanSpace ℝ (Fin n))) := by
+      simpa using ((PiLp.continuousLinearEquiv 2 ℝ (fun _ : Fin n => ℝ)).symm.contDiff)
+    exact hlin.norm_sq ℝ
+  have harg : ContDiff ℝ (⊤ : ℕ∞) (fun y : MorseModel n =>
+      (morseNorm n y ^ 2 - R₀ ^ 2) / (R₁ ^ 2 - R₀ ^ 2)) := by
+    exact ((hnormSq.sub (contDiff_const : ContDiff ℝ (⊤ : ℕ∞) (fun _ : MorseModel n => R₀ ^ 2))).div_const (R₁ ^ 2 - R₀ ^ 2))
+  have htrans : ContDiff ℝ (⊤ : ℕ∞) (fun y : MorseModel n =>
+      Real.smoothTransition ((morseNorm n y ^ 2 - R₀ ^ 2) / (R₁ ^ 2 - R₀ ^ 2))) :=
+    (Real.smoothTransition.contDiff (n := (⊤ : ℕ∞))).comp harg
+  have hF₁ : ContDiff ℝ (⊤ : ℕ∞) (fun y : MorseModel n =>
+      modelCapRoundedLowerFunctionInner hk c ε r δ θ y) :=
+    contDiff_modelCapRoundedLowerFunctionInner hk c ε r δ θ hθ hδ hδr hθr
+  have hF₂ : ContDiff ℝ (⊤ : ℕ∞) (fun y : MorseModel n => morseNormalForm hk c y + ε) :=
+    (contDiff_morseNormalForm hk c).add contDiff_const
+  exact (hF₁.add ((hF₂.sub hF₁).mul htrans))
+
 theorem modelRoundedFunction_eq_morse_add_eps_of_negPart_large {n k : ℕ} (hk : k ≤ n)
     (c ε r δ R₀ R₁ : ℝ) (hδ : 0 < δ) {y : MorseModel n}
     (hy : r ^ 2 + 2 * ε + δ ≤ ‖negPart hk y‖ ^ 2) :
