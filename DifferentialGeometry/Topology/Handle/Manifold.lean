@@ -175,6 +175,25 @@ theorem contMDiff_homeomorph_symm_of_chartedSpaceOfHomeomorph {𝕜 : Type*}
   have hmd : ContMDiffOn I I n h.symm c0.source := hcomp.congr (by intro z hz; exact heq z hz)
   exact hmd.contMDiffAt (c0.open_source.mem_nhds (mem_chart_source (H := H) (M := X) y))
 
+theorem contMDiff_of_contMDiff_comp_homeo {𝕜 : Type*} [NontriviallyNormedField 𝕜]
+    {E H : Type*} [NormedAddCommGroup E] [NormedSpace 𝕜 E] [TopologicalSpace H]
+    {X : Type*} [TopologicalSpace X] [ChartedSpace H X] {X' : Type*} [TopologicalSpace X']
+    {E' H' : Type*} [NormedAddCommGroup E'] [NormedSpace 𝕜 E'] [TopologicalSpace H']
+    {I' : ModelWithCorners 𝕜 E' H'} {M : Type*} [TopologicalSpace M] [ChartedSpace H' M]
+    (h : X' ≃ₜ X) (I : ModelWithCorners 𝕜 E H) (n : WithTop ℕ∞) [IsManifold I n X]
+    (f : M → X') (hf : ContMDiff I' I n (fun m : M => h (f m))) :
+    @ContMDiff 𝕜 _ E' _ _ H' _ I' M _ _ E _ _ H _ I X' _ (chartedSpaceOfHomeomorph h) n f := by
+  classical
+  letI : ChartedSpace H X' := chartedSpaceOfHomeomorph h
+  letI : IsManifold I n X' := isManifoldOfHomeomorph I h
+  have hsymm : ContMDiff I I n (h.symm) :=
+    contMDiff_homeomorph_symm_of_chartedSpaceOfHomeomorph (𝕜 := 𝕜) h I n
+  have hfun : f = fun m : M => h.symm (h (f m)) := by
+    funext m
+    exact (h.left_inv (f m)).symm
+  rw [hfun]
+  exact hsymm.comp hf
+
 noncomputable def closedCellPermute {n : ℕ} (e : Fin n ≃ Fin n) :
     EuclideanSpace ℝ (Fin n) ≃ₗᵢ[ℝ] EuclideanSpace ℝ (Fin n) :=
   (EuclideanSpace.basisFun (Fin n) ℝ).reindex e |>.repr
