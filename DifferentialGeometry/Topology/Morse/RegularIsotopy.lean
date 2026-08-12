@@ -1823,6 +1823,128 @@ private lemma snd_range_of_deriv_unit
   exact ⟨hlo, le_trans hup hu.2⟩
 
 
+private lemma scalarFlow_smoothTransition_bounds
+    {s₀ : ℝ} (hs₀ : s₀ ∈ Set.Icc 0 1) {σ : ℝ → ℝ} (hσ0 : σ 0 = s₀)
+    (hσ : IsMIntegralCurve (I := 𝓘(ℝ, ℝ)) (M := ℝ) (E := ℝ) (H := ℝ) σ
+      (fun s : ℝ => (Real.smoothTransition (2 - s) * Real.smoothTransition (s + 1) :
+        TangentSpace 𝓘(ℝ, ℝ) s))) :
+    ∀ t : ℝ, σ t ∈ Set.Ioo (-1) 2 := by
+  let χt : ℝ → ℝ := fun s => Real.smoothTransition (2 - s) * Real.smoothTransition (s + 1)
+  have hχt_m1 : χt (-1) = 0 := by
+    dsimp [χt]
+    have h2 : Real.smoothTransition ((-1) + 1) = 0 := by
+      rw [show (-1 : ℝ) + 1 = 0 by norm_num]
+      exact Real.smoothTransition.zero
+    rw [h2, mul_zero]
+  have hχt_2 : χt 2 = 0 := by
+    dsimp [χt]
+    have h1 : Real.smoothTransition (2 - 2) = 0 := by
+      rw [show (2 : ℝ) - 2 = 0 by norm_num]
+      exact Real.smoothTransition.zero
+    rw [h1, zero_mul]
+  have hχt_sm : ContMDiff 𝓘(ℝ, ℝ) (𝓘(ℝ, ℝ).prod 𝓘(ℝ, ℝ)) (↑(⊤ : ℕ∞) : WithTop ℕ∞)
+      (fun x : ℝ => (⟨x, (χt x : TangentSpace 𝓘(ℝ, ℝ) x)⟩ : TangentBundle 𝓘(ℝ, ℝ) ℝ)) := by
+    intro x
+    rw [Bundle.contMDiffAt_totalSpace]
+    constructor
+    · exact contMDiffAt_id
+    · have hχt : ContMDiffAt 𝓘(ℝ, ℝ) 𝓘(ℝ, ℝ) (↑(⊤ : ℕ∞) : WithTop ℕ∞) χt x := by
+        have hfull : ContMDiff 𝓘(ℝ, ℝ) 𝓘(ℝ, ℝ) (↑(⊤ : ℕ∞) : WithTop ℕ∞) χt := by
+          dsimp [χt]
+          exact ((Real.smoothTransition.contDiff.comp (contDiff_const.sub contDiff_id)).mul
+            (Real.smoothTransition.contDiff.comp (contDiff_id.add contDiff_const))).contMDiff
+        exact hfull x
+      have heq : ∀ y : ℝ, (trivializationAt ℝ (TangentSpace 𝓘(ℝ, ℝ)) x
+          (⟨y, (χt y : TangentSpace 𝓘(ℝ, ℝ) y)⟩ : TangentBundle 𝓘(ℝ, ℝ) ℝ)).2 = χt y := by
+        intro y
+        simp
+      exact hχt.congr_of_eventuallyEq (Filter.Eventually.of_forall heq)
+  have hσ' : IsMIntegralCurve (I := 𝓘(ℝ, ℝ)) (M := ℝ) (E := ℝ) (H := ℝ) σ
+      (fun s : ℝ => (χt s : TangentSpace 𝓘(ℝ, ℝ) s)) := by
+    simpa [χt] using hσ
+  intro t
+  have hne_m1 : ∀ c : ℝ, σ c ≠ -1 := by
+    intro c h
+    have hc : IsMIntegralCurve (I := 𝓘(ℝ, ℝ)) (M := ℝ) (E := ℝ) (H := ℝ)
+        (fun _ : ℝ => (-1 : ℝ)) (fun s : ℝ => (χt s : TangentSpace 𝓘(ℝ, ℝ) s)) :=
+      isMIntegralCurve_iff_isMIntegralCurveOn.mpr
+        (isMIntegralCurveOn_const_of_eq_zero (I := 𝓘(ℝ, ℝ)) (M := ℝ) (E := ℝ) (H := ℝ)
+          (v := fun s : ℝ => (χt s : TangentSpace 𝓘(ℝ, ℝ) s)) (-1 : ℝ) (by
+            exact hχt_m1))
+    have heq : σ = fun _ : ℝ => (-1 : ℝ) := by
+      exact isMIntegralCurve_eq_of_contMDiff (t₀ := c)
+        (I := 𝓘(ℝ, ℝ)) (H := ℝ) (M := ℝ) (E := ℝ)
+        (v := fun s : ℝ => (χt s : TangentSpace 𝓘(ℝ, ℝ) s))
+        (γ := σ) (γ' := fun _ : ℝ => (-1 : ℝ))
+        (hv := hχt_sm.of_le (by norm_num : (1 : WithTop ℕ∞) ≤ ∞))
+        (fun t : ℝ => BoundarylessManifold.isInteriorPoint (I := 𝓘(ℝ, ℝ)) (M := ℝ) (x := σ t))
+        hσ' hc (by
+          simpa using h)
+    have hc0 : σ 0 = -1 := by rw [heq]
+    linarith [hσ0, hs₀.1, hc0]
+  have hne_2 : ∀ c : ℝ, σ c ≠ 2 := by
+    intro c h
+    have hc : IsMIntegralCurve (I := 𝓘(ℝ, ℝ)) (M := ℝ) (E := ℝ) (H := ℝ)
+        (fun _ : ℝ => (2 : ℝ)) (fun s : ℝ => (χt s : TangentSpace 𝓘(ℝ, ℝ) s)) :=
+      isMIntegralCurve_iff_isMIntegralCurveOn.mpr
+        (isMIntegralCurveOn_const_of_eq_zero (I := 𝓘(ℝ, ℝ)) (M := ℝ) (E := ℝ) (H := ℝ)
+          (v := fun s : ℝ => (χt s : TangentSpace 𝓘(ℝ, ℝ) s)) (2 : ℝ) (by
+            exact hχt_2))
+    have heq : σ = fun _ : ℝ => (2 : ℝ) := by
+      exact isMIntegralCurve_eq_of_contMDiff (t₀ := c)
+        (I := 𝓘(ℝ, ℝ)) (H := ℝ) (M := ℝ) (E := ℝ)
+        (v := fun s : ℝ => (χt s : TangentSpace 𝓘(ℝ, ℝ) s))
+        (γ := σ) (γ' := fun _ : ℝ => (2 : ℝ))
+        (hv := hχt_sm.of_le (by norm_num : (1 : WithTop ℕ∞) ≤ ∞))
+        (fun t : ℝ => BoundarylessManifold.isInteriorPoint (I := 𝓘(ℝ, ℝ)) (M := ℝ) (x := σ t))
+        hσ' hc (by
+          simpa using h)
+    have hc0 : σ 0 = 2 := by rw [heq]
+    linarith [hσ0, hs₀.2, hc0]
+  have hle1 : -1 < σ t := by
+    by_contra hnot
+    have hle : σ t ≤ -1 := le_of_not_gt hnot
+    have hmem : -1 ∈ Set.uIcc (σ 0) (σ t) := by
+      rw [hσ0]
+      change min s₀ (σ t) ≤ -1 ∧ -1 ≤ max s₀ (σ t)
+      constructor
+      · have hmin : min s₀ (σ t) = σ t := by
+          apply min_eq_right
+          linarith [hs₀.1, hle]
+        rw [hmin]
+        exact hle
+      · have hmax : max s₀ (σ t) = s₀ := by
+          apply max_eq_left
+          linarith [hs₀.1, hle]
+        rw [hmax]
+        linarith [hs₀.1]
+    have himg := intermediate_value_uIcc (f := σ) (a := 0) (b := t)
+      (hf := (continuousOn_univ.mpr hσ.continuous).mono (by intro z hz; trivial))
+    rcases himg hmem with ⟨c, hc, hcval⟩
+    exact hne_m1 c hcval
+  have hle2 : σ t < 2 := by
+    by_contra hnot
+    have hge : 2 ≤ σ t := le_of_not_gt hnot
+    have hmem : 2 ∈ Set.uIcc (σ 0) (σ t) := by
+      rw [hσ0]
+      change min s₀ (σ t) ≤ 2 ∧ 2 ≤ max s₀ (σ t)
+      constructor
+      · have hmin : min s₀ (σ t) = s₀ := by
+          apply min_eq_left
+          linarith [hs₀.2, hge]
+        rw [hmin]
+        linarith [hs₀.2]
+      · have hmax : max s₀ (σ t) = σ t := by
+          apply max_eq_right
+          linarith [hs₀.2, hge]
+        rw [hmax]
+        exact hge
+    have himg := intermediate_value_uIcc (f := σ) (a := 0) (b := t)
+      (hf := (continuousOn_univ.mpr hσ.continuous).mono (by intro z hz; trivial))
+    rcases himg hmem with ⟨c, hc, hcval⟩
+    exact hne_2 c hcval
+  exact ⟨hle1, hle2⟩
+
 private lemma sublevel_const_of_deriv_eq_zero_below
     {f : ℝ → ℝ} (hf : DifferentiableOn ℝ f Set.univ) {L : ℝ} (_hL : 0 < L)
     (hf0 : f 0 ≤ -L) (hderiv : ∀ t : ℝ, f t ∈ Set.Icc (-L) L → deriv f t = 0)
