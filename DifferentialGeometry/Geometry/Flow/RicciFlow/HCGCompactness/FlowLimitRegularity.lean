@@ -713,6 +713,163 @@ private theorem gSeqJet_contOn
   · exact hCgrow
 
 omit [NeZero (Module.finrank ℝ E)] in
+theorem gramJets_of_stage
+    {R : letI : TopologicalSpace P.M := P.topology
+      letI : ChartedSpace H P.M := P.charted
+      letI : IsManifold I ∞ P.M := P.smooth
+      SmoothRiemannianMetric I P.M}
+    {bf : BumpFamily (I := I) Φ} {hsrc : SrcSigma Φ} {htgt : TgtSigma Φ}
+    {β ψ : Real}
+    (co : ConvOut (I := I) Φ R bf hsrc htgt β ψ)
+    (hstage : letI : TopologicalSpace P.M := P.topology
+      letI : ChartedSpace H P.M := P.charted
+      letI : T2Space P.M := P.t2
+      letI : IsManifold I ∞ P.M := P.smooth
+      ∀ (r : Nat) (x₀ : P.M) (i j : Fin (Module.finrank Real E))
+        (C : Set E), IsCompact C →
+        C ⊆ (extChartAt I x₀).target →
+        ∀ᶠ k : Nat in atTop,
+          ContinuousOn
+            (fun p : Real × E =>
+              iteratedFDeriv Real r
+                (chartGramOnE (I := I)
+                  (gSeqExt (I := I) Φ R bf hsrc htgt (co.φ k) p.1)
+                  x₀ i j) p.2)
+            (Set.Icc β ψ ×ˢ C)) :
+    letI : TopologicalSpace P.M := P.topology
+    letI : ChartedSpace H P.M := P.charted
+    letI : T2Space P.M := P.t2
+    letI : IsManifold I ∞ P.M := P.smooth
+    ∀ (r : Nat) (x₀ : P.M) (i j : Fin (Module.finrank Real E)),
+      ContinuousOn
+        (fun p : Real × E =>
+          iteratedFDeriv Real r
+            (chartGramOnE (I := I) (co.gInf p.1) x₀ i j) p.2)
+        (Set.Icc β ψ ×ˢ interior (extChartAt I x₀).target) := by
+  letI : TopologicalSpace P.M := P.topology
+  letI : ChartedSpace H P.M := P.charted
+  letI : T2Space P.M := P.t2
+  letI : IsManifold I ∞ P.M := P.smooth
+  letI : SigmaCompactSpace P.M := P.sigmaCompact
+  letI : IsManifold I 1 P.M :=
+    IsManifold.of_le (I := I) (M := P.M) (n := (∞ : WithTop ℕ∞))
+      (by decide : (1 : WithTop ℕ∞) ≤ ∞)
+  letI : IsManifold I 2 P.M :=
+    IsManifold.of_le (I := I) (M := P.M) (n := (∞ : WithTop ℕ∞))
+      (by decide : (2 : WithTop ℕ∞) ≤ ∞)
+  letI : IsManifold I ((∞ : WithTop ℕ∞) + 1) P.M := by
+    change IsManifold I ∞ P.M
+    infer_instance
+  classical
+  intro r x₀ i j p₀ hp₀
+  obtain ⟨C, hCc, hCint, hCsub⟩ :=
+    exists_compact_subset isOpen_interior hp₀.2
+  have hCtgt : C ⊆ (extChartAt I x₀).target := hCsub.trans interior_subset
+  let K : Set P.M := (extChartAt I x₀).symm '' C
+  have hKc : IsCompact K := by
+    dsimp only [K]
+    exact hCc.image_of_continuousOn
+      ((continuousOn_extChartAt_symm (I := I) x₀).mono hCtgt)
+  have hKchart : K ⊆ (chartAt H x₀).source := by
+    rintro y ⟨z, hz, rfl⟩
+    rw [← extChartAt_source_eq_chartAt_source (I := I)]
+    exact (extChartAt I x₀).map_target (hCtgt hz)
+  obtain ⟨Cjet, hCjet0, hjet⟩ :=
+    chartJet_sub_le (I := I) R x₀ hKc hKchart r
+  let A : Real := Cjet * ((r + 1 : Nat) : Real)
+  have hA0 : 0 ≤ A := by
+    dsimp only [A]
+    positivity
+  have hden : 0 < A + 1 := by linarith
+  have htu : TendstoUniformlyOn
+      (fun (k : Nat) (p : Real × E) =>
+        iteratedFDeriv Real r
+          (chartGramOnE (I := I)
+            (gSeqExt (I := I) Φ R bf hsrc htgt (co.φ k) p.1) x₀ i j) p.2)
+      (fun p : Real × E =>
+        iteratedFDeriv Real r
+          (chartGramOnE (I := I) (co.gInf p.1) x₀ i j) p.2)
+      atTop (Set.Icc β ψ ×ˢ C) := by
+    rw [Metric.tendstoUniformlyOn_iff]
+    intro ε hε
+    let δ : Real := ε / (A + 1)
+    have hδ : 0 < δ := by
+      dsimp only [δ]
+      positivity
+    obtain ⟨k₀, hk₀⟩ := co.convPt K hKc r δ hδ
+    filter_upwards [Filter.eventually_ge_atTop k₀] with k hk
+    rintro ⟨t, z⟩ ⟨ht, hz⟩
+    let y : P.M := (extChartAt I x₀).symm z
+    have hzTarget : z ∈ (extChartAt I x₀).target := hCtgt hz
+    have hyK : y ∈ K := ⟨z, hz, rfl⟩
+    have hright : extChartAt I x₀ y = z :=
+      (extChartAt I x₀).right_inv hzTarget
+    have hsum :
+        (∑ q ∈ Finset.range (r + 1),
+          metricDerivNorm (I := I) q
+            (gSeqExt (I := I) Φ R bf hsrc htgt (co.φ k) t)
+            (co.gInf t) R y) ≤ ((r + 1 : Nat) : Real) * δ := by
+      calc
+        _ ≤ ∑ _q ∈ Finset.range (r + 1), δ := by
+          apply Finset.sum_le_sum
+          intro q hq
+          exact (hk₀ k hk t ht q
+            (Nat.lt_succ_iff.mp (Finset.mem_range.mp hq)) y hyK).le
+        _ = ((r + 1 : Nat) : Real) * δ := by
+          rw [Finset.sum_const, Finset.card_range, nsmul_eq_mul]
+    have hbound := hjet
+      (gSeqExt (I := I) Φ R bf hsrc htgt (co.φ k) t) (co.gInf t) y hyK i j
+    rw [hright] at hbound
+    calc
+      dist
+          (iteratedFDeriv Real r
+            (chartGramOnE (I := I) (co.gInf t) x₀ i j) z)
+          (iteratedFDeriv Real r
+            (chartGramOnE (I := I)
+              (gSeqExt (I := I) Φ R bf hsrc htgt (co.φ k) t) x₀ i j) z) =
+          ‖iteratedFDeriv Real r
+              (chartGramOnE (I := I)
+                (gSeqExt (I := I) Φ R bf hsrc htgt (co.φ k) t) x₀ i j) z -
+            iteratedFDeriv Real r
+              (chartGramOnE (I := I) (co.gInf t) x₀ i j) z‖ := by
+            rw [dist_eq_norm, norm_sub_rev]
+      _ ≤ Cjet * ∑ q ∈ Finset.range (r + 1),
+          metricDerivNorm (I := I) q
+            (gSeqExt (I := I) Φ R bf hsrc htgt (co.φ k) t)
+            (co.gInf t) R y := hbound
+      _ ≤ Cjet * (((r + 1 : Nat) : Real) * δ) :=
+        mul_le_mul_of_nonneg_left hsum hCjet0
+      _ = A * δ := by
+        simp only [A]
+        ring
+      _ < (A + 1) * δ := mul_lt_mul_of_pos_right (by linarith) hδ
+      _ = ε := by
+        rw [mul_comm]
+        simpa only [δ] using div_mul_cancel₀ ε hden.ne'
+  have hkcont : ∀ᶠ k : Nat in atTop, ContinuousOn
+      (fun p : Real × E =>
+        iteratedFDeriv Real r
+          (chartGramOnE (I := I)
+            (gSeqExt (I := I) Φ R bf hsrc htgt (co.φ k) p.1) x₀ i j) p.2)
+      (Set.Icc β ψ ×ˢ C) :=
+    hstage r x₀ i j C hCc hCtgt
+  have hcOn : ContinuousOn
+      (fun p : Real × E =>
+        iteratedFDeriv Real r
+          (chartGramOnE (I := I) (co.gInf p.1) x₀ i j) p.2)
+      (Set.Icc β ψ ×ˢ C) :=
+    htu.continuousOn hkcont.frequently
+  have hmem : Set.Icc β ψ ×ˢ C ∈
+      𝓝[Set.Icc β ψ ×ˢ interior (extChartAt I x₀).target] p₀ := by
+    have hnhds : (Set.univ ×ˢ interior C : Set (Real × E)) ∈ 𝓝 p₀ :=
+      prod_mem_nhds Filter.univ_mem (isOpen_interior.mem_nhds hCint)
+    refine Filter.mem_of_superset (inter_mem_nhdsWithin _ hnhds) ?_
+    rintro ⟨t, z⟩ ⟨⟨ht, _⟩, _, hzC⟩
+    exact ⟨ht, interior_subset hzC⟩
+  exact (hcOn.continuousWithinAt
+    ⟨hp₀.1, interior_subset hCint⟩).mono_of_mem_nhdsWithin hmem
+
+omit [NeZero (Module.finrank ℝ E)] in
 /-- Every finite spatial chart jet of the fixed-window limit metric is jointly
 continuous in time and chart position.  This is the locally uniform limit of
 the corresponding finite-stage jets; the conversion from covariant metric
