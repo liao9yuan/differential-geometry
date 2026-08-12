@@ -6861,6 +6861,96 @@ theorem modelHandleRoundMap_posPart {n k : ℕ} (hk : k ≤ n) (ε r δ θ : ℝ
   dsimp [modelHandleRoundMap]
   rw [posPart_recombine]
 
+theorem norm_smul_div_norm_sq {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
+    (q : ℝ) (w : E) (hw : w ≠ 0) :
+    ‖((Real.sqrt q / ‖w‖) • w : E)‖ ^ 2 = (Real.sqrt q) ^ 2 := by
+  have hw' : ‖w‖ ≠ 0 := by
+    intro h
+    exact hw (norm_eq_zero.mp h)
+  rw [norm_smul]
+  rw [Real.norm_eq_abs]
+  rw [abs_of_nonneg (div_nonneg (Real.sqrt_nonneg q) (norm_nonneg w))]
+  rw [mul_pow]
+  rw [div_pow]
+  rw [div_mul_cancel₀ _ (pow_ne_zero 2 hw')]
+
+theorem modelHandleRoundMap_mem_attached {n k : ℕ} (hk : k ≤ n) (ε r δ θ : ℝ)
+    (hε : 0 < ε) (hδ : 0 < δ) (hθ : 0 < θ) (hδr : δ < r ^ 2)
+    (p : StandardHandle k (n - k)) :
+    modelHandleRoundMap hk ε r δ θ p ∈ modelAttachedRegion hk ε r δ := by
+  dsimp [modelAttachedRegion]
+  rw [modelHandleRoundMap_posPart]
+  rw [modelHandleRoundMap_negPart]
+  let a : ℝ := ‖(p.1 : EuclideanSpace ℝ (Fin k))‖ ^ 2
+  let b : ℝ := ‖(p.2 : EuclideanSpace ℝ (Fin (n - k)))‖ ^ 2
+  let t : ℝ := (2 * ε + r ^ 2 * b) * a
+  have ha1 : a ≤ 1 := by
+    dsimp [a]
+    have hnon : 0 ≤ ‖(p.1 : EuclideanSpace ℝ (Fin k))‖ := norm_nonneg _
+    have hle := sq_le_sq' (by linarith [hnon]) p.1.2
+    simpa using hle
+  have hb0 : 0 ≤ b := by
+    dsimp [b]
+    exact sq_nonneg _
+  have hb1 : b ≤ 1 := by
+    dsimp [b]
+    have hnon : 0 ≤ ‖(p.2 : EuclideanSpace ℝ (Fin (n - k)))‖ := norm_nonneg _
+    have hle := sq_le_sq' (by linarith [hnon]) p.2.2
+    simpa using hle
+  have hφ0 : 0 ≤ modelRoundCapInterp ε r a b := by
+    exact modelRoundCapInterp_nonneg hε ha1 hb0 hb1
+  have hφ1 : modelRoundCapInterp ε r a b ≤ 1 := by
+    exact modelRoundCapInterp_le_one hε ha1 hb0 hb1
+  have hq_le : modelRoundCapQ ε r δ θ a b ≤ smoothCap ε r δ t := by
+    dsimp [modelRoundCapQ]
+    have hsc : modelLowerRoundBound ε r δ θ t ≤ smoothCap ε r δ t := by
+      by_cases ht : 2 * ε < t
+      · exact modelLowerRoundBound_le_smoothCap hδ hθ hδr ht
+      · have ht' : t ≤ 2 * ε := le_of_not_gt ht
+        have hb0' : modelLowerRoundBound ε r δ θ t ≤ 0 := by
+          dsimp [modelLowerRoundBound]
+          exact mul_nonpos_of_nonneg_of_nonpos (sq_nonneg _) (by nlinarith [ht'])
+        exact le_trans hb0' (smoothCap_nonneg hδ hδr)
+    have hmul : (1 - modelRoundCapInterp ε r a b) *
+        (modelLowerRoundBound ε r δ θ t - smoothCap ε r δ t) ≤ 0 := by
+      nlinarith [hφ1, hsc]
+    nlinarith [hmul]
+  by_cases hw : (p.2 : EuclideanSpace ℝ (Fin (n - k))) = 0
+  · have hzero : ((Real.sqrt (modelRoundCapQ ε r δ θ a b) / ‖(p.2 : EuclideanSpace ℝ (Fin (n - k)))‖) •
+        (p.2 : EuclideanSpace ℝ (Fin (n - k))) : EuclideanSpace ℝ (Fin (n - k))) = 0 := by
+      rw [hw]
+      simp
+    rw [hzero]
+    norm_num
+    exact smoothCap_nonneg hδ hδr
+  · have hnorm' := norm_smul_div_norm_sq (modelRoundCapQ ε r δ θ a b)
+      (p.2 : EuclideanSpace ℝ (Fin (n - k))) hw
+    have hsq : (Real.sqrt (modelRoundCapQ ε r δ θ a b)) ^ 2 ≤ smoothCap ε r δ t := by
+      by_cases hq0 : 0 ≤ modelRoundCapQ ε r δ θ a b
+      · rw [Real.sq_sqrt hq0]
+        exact hq_le
+      · have hsqrt : Real.sqrt (modelRoundCapQ ε r δ θ a b) = 0 :=
+          Real.sqrt_eq_zero_of_nonpos (le_of_not_ge hq0)
+        rw [hsqrt]
+        norm_num
+        exact smoothCap_nonneg hδ hδr
+    have hnorm : ‖((Real.sqrt (modelRoundCapQ ε r δ θ a b) / ‖(p.2 : EuclideanSpace ℝ (Fin (n - k)))‖) •
+        (p.2 : EuclideanSpace ℝ (Fin (n - k))) : EuclideanSpace ℝ (Fin (n - k)))‖ ^ 2 ≤
+        smoothCap ε r δ t := by
+      rw [hnorm']
+      exact hsq
+    have hneg : ‖(Real.sqrt (2 * ε + r ^ 2 * ‖(p.2 : EuclideanSpace ℝ (Fin (n - k)))‖ ^ 2) •
+        (p.1 : EuclideanSpace ℝ (Fin k)) : EuclideanSpace ℝ (Fin k))‖ ^ 2 = t := by
+      dsimp [t, b]
+      rw [norm_smul]
+      rw [Real.norm_eq_abs]
+      rw [abs_of_nonneg (Real.sqrt_nonneg _)]
+      rw [mul_pow]
+      have harg : 0 ≤ 2 * ε + r ^ 2 * ‖(p.2 : EuclideanSpace ℝ (Fin (n - k)))‖ ^ 2 := by
+        nlinarith [hε, sq_nonneg (‖(p.2 : EuclideanSpace ℝ (Fin (n - k)))‖ : ℝ)]
+      rw [Real.sq_sqrt harg]
+    simpa [a, b, t, hneg] using hnorm
+
 end CellAttachment
 
 end
