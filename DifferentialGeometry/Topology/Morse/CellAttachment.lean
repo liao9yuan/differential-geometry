@@ -7046,6 +7046,92 @@ theorem modelRoundCapQ_ge_lowerBound {ε r δ θ a b : ℝ} (hε : 0 < ε) (hδ 
     nlinarith [hφ0, hsc]
   nlinarith [hmul]
 
+theorem modelRoundGap_lt_zero_of_lt {ε r δ t : ℝ} (hδ : 0 < δ) (ht : t < r ^ 2 + 2 * ε) :
+    modelRoundGap ε r δ t < 0 := by
+  dsimp [modelRoundGap]
+  have hcoef : t - 2 * ε - r ^ 2 < 0 := by nlinarith [ht]
+  have hτ1 : Real.smoothTransition ((t - (r ^ 2 + 2 * ε - δ)) / (2 * δ)) < 1 := by
+    have harg : (t - (r ^ 2 + 2 * ε - δ)) / (2 * δ) < 1 := by
+      have hden : 0 < 2 * δ := by positivity
+      exact (div_lt_iff₀ hden).2 (by nlinarith [ht])
+    exact Real.smoothTransition.lt_one_of_lt_one harg
+  have hmul : (t - 2 * ε - r ^ 2) *
+      (1 - Real.smoothTransition ((t - (r ^ 2 + 2 * ε - δ)) / (2 * δ))) < 0 := by
+    nlinarith [hcoef, hτ1]
+  change t - 2 * ε - (r ^ 2 + (t - 2 * ε - r ^ 2) *
+    Real.smoothTransition ((t - (r ^ 2 + 2 * ε - δ)) / (2 * δ))) < 0
+  nlinarith [hmul]
+
+theorem modelRoundRatio_gt_one_of_lt {ε r δ t : ℝ} (hδ : 0 < δ) (ht : 2 * ε < t)
+    (ht0 : t < r ^ 2 + 2 * ε) :
+    1 < modelRoundRatio ε r δ t := by
+  have hgap : modelRoundGap ε r δ t < 0 := modelRoundGap_lt_zero_of_lt hδ ht0
+  dsimp [modelRoundRatio, modelRoundGap] at hgap ⊢
+  have hden : 0 < t - 2 * ε := by linarith [ht]
+  rw [one_lt_div₀ hden]
+  nlinarith [hgap]
+
+theorem modelRoundScale_sq_lt_ratio {ε r δ θ t : ℝ} (hδ : 0 < δ) (hθ : 0 < θ)
+    (hδr : δ < r ^ 2) (ht : 2 * ε < t) (ht0 : t < r ^ 2 + 2 * ε) :
+    modelRoundScale ε r δ θ t ^ 2 < modelRoundRatio ε r δ t := by
+  have hratio1 : 1 < Real.sqrt (modelRoundRatio ε r δ t) := by
+    have hratio : 1 < modelRoundRatio ε r δ t := modelRoundRatio_gt_one_of_lt hδ ht ht0
+    have hratio0 : 0 ≤ modelRoundRatio ε r δ t := by nlinarith [hratio]
+    have hsq : 1 < (Real.sqrt (modelRoundRatio ε r δ t)) ^ 2 := by
+      rw [Real.sq_sqrt hratio0]
+      exact hratio
+    have hnon : 0 ≤ Real.sqrt (modelRoundRatio ε r δ t) := Real.sqrt_nonneg _
+    nlinarith [hsq, hnon]
+  have hτ1 : Real.smoothTransition ((t - (r ^ 2 + 2 * ε - θ)) / θ) < 1 := by
+    have harg : (t - (r ^ 2 + 2 * ε - θ)) / θ < 1 := by
+      have hden : 0 < θ := hθ
+      exact (div_lt_iff₀ hden).2 (by nlinarith [ht0])
+    exact Real.smoothTransition.lt_one_of_lt_one harg
+  have hscale : modelRoundScale ε r δ θ t < Real.sqrt (modelRoundRatio ε r δ t) := by
+    dsimp [modelRoundScale]
+    have hmul : (1 - Real.smoothTransition ((t - (r ^ 2 + 2 * ε - θ)) / θ)) *
+        (1 - Real.sqrt (modelRoundRatio ε r δ t)) < 0 := by
+      nlinarith [hτ1, hratio1]
+    have hring : 1 - Real.smoothTransition ((t - (r ^ 2 + 2 * ε - θ)) / θ) *
+          (1 - Real.sqrt (modelRoundRatio ε r δ t)) -
+        Real.sqrt (modelRoundRatio ε r δ t) =
+        (1 - Real.smoothTransition ((t - (r ^ 2 + 2 * ε - θ)) / θ)) *
+          (1 - Real.sqrt (modelRoundRatio ε r δ t)) := by
+      ring
+    have hsub : 1 - Real.smoothTransition ((t - (r ^ 2 + 2 * ε - θ)) / θ) *
+          (1 - Real.sqrt (modelRoundRatio ε r δ t)) -
+        Real.sqrt (modelRoundRatio ε r δ t) < 0 := by
+      rw [hring]
+      exact hmul
+    linarith
+  have hnon : 0 ≤ modelRoundScale ε r δ θ t := modelRoundScale_nonneg hδ hθ hδr ht
+  have hsqrt : 0 ≤ Real.sqrt (modelRoundRatio ε r δ t) := Real.sqrt_nonneg _
+  have habs : |modelRoundScale ε r δ θ t| < |Real.sqrt (modelRoundRatio ε r δ t)| := by
+    rw [abs_of_nonneg hnon, abs_of_nonneg hsqrt]
+    exact hscale
+  have hsq' : modelRoundScale ε r δ θ t ^ 2 < (Real.sqrt (modelRoundRatio ε r δ t)) ^ 2 := by
+    exact (sq_lt_sq.mpr habs)
+  have hratio0 : 0 ≤ modelRoundRatio ε r δ t := by
+    have hratio : 1 < modelRoundRatio ε r δ t := modelRoundRatio_gt_one_of_lt hδ ht ht0
+    nlinarith [hratio]
+  rw [Real.sq_sqrt hratio0] at hsq'
+  exact hsq'
+
+theorem modelLowerRoundBound_lt_smoothCap {ε r δ θ t : ℝ} (hδ : 0 < δ) (hθ : 0 < θ)
+    (hδr : δ < r ^ 2) (ht : 2 * ε < t) (ht0 : t < r ^ 2 + 2 * ε) :
+    modelLowerRoundBound ε r δ θ t < smoothCap ε r δ t := by
+  dsimp [modelLowerRoundBound]
+  have hsc := modelRoundScale_sq_lt_ratio hδ hθ hδr ht ht0
+  have hden : 0 < t - 2 * ε := by linarith [ht]
+  have hratio : modelRoundRatio ε r δ t * (t - 2 * ε) = smoothCap ε r δ t := by
+    dsimp [modelRoundRatio]
+    have hne : t - 2 * ε ≠ 0 := ne_of_gt hden
+    rw [div_mul_cancel₀ _ hne]
+  have hmul : modelRoundScale ε r δ θ t ^ 2 * (t - 2 * ε) <
+      modelRoundRatio ε r δ t * (t - 2 * ε) := by
+    exact mul_lt_mul_of_pos_right hsc hden
+  nlinarith [hmul, hratio]
+
 end CellAttachment
 
 end
