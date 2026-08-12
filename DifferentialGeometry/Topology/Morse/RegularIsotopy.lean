@@ -1822,6 +1822,131 @@ private lemma snd_range_of_deriv_unit
     linarith
   exact ⟨hlo, le_trans hup hu.2⟩
 
+
+private lemma sublevel_const_of_deriv_eq_zero_below
+    {f : ℝ → ℝ} (hf : DifferentiableOn ℝ f Set.univ) {L : ℝ} (_hL : 0 < L)
+    (hf0 : f 0 ≤ -L) (hderiv : ∀ t : ℝ, f t ∈ Set.Icc (-L) L → deriv f t = 0)
+    {t₁ : ℝ} (ht₁ : t₁ ∈ Set.Icc 0 1) : f t₁ ≤ -L := by
+  by_contra hnot
+  have hgt : -L < f t₁ := lt_of_not_ge hnot
+  let A : Set ℝ := {t : ℝ | t ∈ Set.Icc 0 t₁ ∧ f t ≤ -L}
+  have hAne : A.Nonempty := ⟨0, ⟨⟨le_rfl, ht₁.1⟩, hf0⟩⟩
+  have hAbdd : BddAbove A := ⟨t₁, by intro t ht; exact ht.1.2⟩
+  let τ : ℝ := sSup A
+  have hA0 : 0 ∈ A := ⟨⟨le_rfl, ht₁.1⟩, hf0⟩
+  have hτ0 : 0 ≤ τ := le_csSup hAbdd hA0
+  have hτt₁ : τ ≤ t₁ := csSup_le hAne (by intro t ht; exact ht.1.2)
+  have hcont : ContinuousAt f τ := (hf.continuousOn τ trivial).continuousAt Filter.univ_mem
+  have hfτ_le : f τ ≤ -L := by
+    have hcl : τ ∈ closure A := csSup_mem_closure hAne hAbdd
+    have hright : ∀ᶠ u in nhdsWithin τ A, f u ≤ -L := by
+      rw [Filter.eventually_iff_exists_mem]
+      exact ⟨A ∩ Set.univ, inter_mem_nhdsWithin A Filter.univ_mem, by intro u hu; exact hu.1.2⟩
+    have htend : Tendsto f (nhdsWithin τ A) (nhds (f τ)) := hcont.tendsto.mono_left nhdsWithin_le_nhds
+    haveI : (nhdsWithin τ A).NeBot := mem_closure_iff_nhdsWithin_neBot.mp hcl
+    exact le_of_tendsto htend hright
+  have hfτ_ge : -L ≤ f τ := by
+    by_cases hτt₁' : τ = t₁
+    · rw [hτt₁']
+      exact le_of_lt hgt
+    · have hlt : τ < t₁ := lt_of_le_of_ne hτt₁ (by intro h; exact hτt₁' h)
+      by_contra hle
+      have hlt' : f τ < -L := lt_of_not_ge hle
+      have hU : {u : ℝ | f u < -L} ∈ nhds τ :=
+        hcont.preimage_mem_nhds (isOpen_Iio.mem_nhds hlt')
+      rcases Metric.mem_nhds_iff.mp hU with ⟨δ, hδ, hball⟩
+      let η : ℝ := min δ ((t₁ - τ) / 2)
+      have hη0 : 0 < η := lt_min hδ (div_pos (sub_pos.mpr hlt) (by norm_num))
+      have hτη : τ + η / 2 < t₁ := by
+        dsimp [η]
+        have hmin : min δ ((t₁ - τ) / 2) ≤ (t₁ - τ) / 2 := min_le_right δ ((t₁ - τ) / 2)
+        nlinarith [hmin, hlt]
+      have hτη' : τ < τ + η / 2 := by linarith [hη0]
+      have hmem : τ + η / 2 ∈ A := by
+        refine ⟨⟨le_trans hτ0 (le_of_lt hτη'), le_of_lt hτη⟩, ?_⟩
+        have hin : τ + η / 2 ∈ Metric.ball τ δ := by
+          rw [Metric.mem_ball, Real.dist_eq]
+          rw [abs_of_pos (sub_pos.mpr hτη')]
+          have hηle : η ≤ δ := min_le_left δ ((t₁ - τ) / 2)
+          dsimp [η] at hηle
+          nlinarith [hη0, hηle]
+        exact le_of_lt (hball hin)
+      have hle_sup : τ + η / 2 ≤ τ := le_csSup hAbdd hmem
+      have hη2 : 0 < η / 2 := by positivity
+      nlinarith [hη2, hle_sup]
+  have hfτ : f τ = -L := le_antisymm hfτ_le hfτ_ge
+  by_cases hτt₁' : τ = t₁
+  · exact hnot (by simpa [hτt₁'] using hfτ_le)
+  · have hlt : τ < t₁ := lt_of_le_of_ne hτt₁ (by intro h; exact hτt₁' h)
+    have hτL : f τ < L := by
+      rw [hfτ]
+      have hL' : 0 < L := _hL
+      linarith
+    have hcontU : {u : ℝ | f u < L} ∈ nhds τ :=
+      hcont.preimage_mem_nhds (isOpen_Iio.mem_nhds hτL)
+    rcases Metric.mem_nhds_iff.mp hcontU with ⟨δ, hδ, hball⟩
+    have hδ' : 0 < min δ ((t₁ - τ) / 2) :=
+      lt_min hδ (div_pos (sub_pos.mpr hlt) (by norm_num))
+    let ε : ℝ := min δ ((t₁ - τ) / 2)
+    have hε0 : 0 < ε := hδ'
+    have hτε : τ + ε < t₁ := by
+      dsimp [ε]
+      have hmin : min δ ((t₁ - τ) / 2) ≤ (t₁ - τ) / 2 := min_le_right δ ((t₁ - τ) / 2)
+      nlinarith [hmin, hlt]
+    have hfgt : ∀ t : ℝ, t ∈ Set.Ioo τ (τ + ε) → -L < f t := by
+      intro t ht
+      have htnotA : t ∉ A := by
+        intro htA
+        have hs : t ≤ τ := le_csSup hAbdd htA
+        linarith [ht.1, hs]
+      have htI : t ∈ Set.Icc 0 t₁ := ⟨le_trans hτ0 (le_of_lt ht.1), le_of_lt (lt_of_lt_of_le ht.2 (le_of_lt hτε))⟩
+      have hnotle : ¬ f t ≤ -L := by
+        intro hle
+        exact htnotA ⟨htI, hle⟩
+      exact lt_of_not_ge hnotle
+    have hflt : ∀ t : ℝ, t ∈ Set.Ioo τ (τ + ε) → f t < L := by
+      intro t ht
+      have hin : t ∈ Metric.ball τ δ := by
+        rw [Metric.mem_ball, Real.dist_eq]
+        rw [abs_of_pos (sub_pos.mpr ht.1)]
+        change t - τ < δ
+        have hle' : t - τ < ε := by linarith [ht.2]
+        have hεle : ε ≤ δ := by
+          dsimp [ε]
+          exact min_le_left δ ((t₁ - τ) / 2)
+        nlinarith [hεle, hle']
+      exact hball hin
+    have hcst : ∀ t : ℝ, t ∈ Set.Ioo τ (τ + ε) → f t = f (τ + ε / 2) := by
+      intro t ht
+      have hc := (isOpen_Ioo.is_const_of_deriv_eq_zero isPreconnected_Ioo (f := f)
+        (s := Set.Ioo τ (τ + ε)) (hf.mono (by intro v hv; trivial)))
+      have hder : EqOn (deriv f) 0 (Set.Ioo τ (τ + ε)) := by
+        intro v hv
+        have hstrip : f v ∈ Set.Icc (-L) L := by
+          constructor
+          · exact le_of_lt (hfgt v hv)
+          · exact le_of_lt (hflt v hv)
+        exact hderiv v hstrip
+      exact hc hder (x := t) (y := τ + ε / 2) ht (by constructor <;> linarith [hε0])
+    have hclosed : IsClosed {t : ℝ | f t = f (τ + ε / 2)} := by
+      exact isClosed_eq (continuousOn_univ.mp hf.continuousOn) continuous_const
+    have hmemτ : τ ∈ {t : ℝ | f t = f (τ + ε / 2)} := by
+      have hcl : τ ∈ closure (Set.Ioo τ (τ + ε)) := by
+        rw [closure_Ioo (by linarith [hε0] : τ ≠ τ + ε)]
+        constructor <;> linarith [hε0]
+      have hsub : Set.Ioo τ (τ + ε) ⊆ {t : ℝ | f t = f (τ + ε / 2)} := by
+        intro u hu
+        exact hcst u hu
+      exact hclosed.closure_subset (closure_mono hsub hcl)
+    have hconst : ∀ t : ℝ, t ∈ Set.Ioo τ (τ + ε) → f t = f τ := by
+      intro t ht
+      exact (hcst t ht).trans hmemτ.symm
+    have hmid : τ + ε / 2 ∈ Set.Ioo τ (τ + ε) := by
+      constructor <;> linarith [hε0]
+    have hconstmid : f (τ + ε / 2) = f τ := hconst (τ + ε / 2) hmid
+    have hgtmid : -L < f (τ + ε / 2) := hfgt (τ + ε / 2) hmid
+    rw [hfτ] at hconstmid
+    linarith [hgtmid, hconstmid]
 theorem exists_relDiffeomorph_sublevel_of_regularFamily
     (I : ModelWithCorners ℝ (MorseModel (m + 1)) H) [I.Boundaryless]
     [IsManifold I (⊤ : WithTop ℕ∞) M] [T2Space M] [SigmaCompactSpace M]
