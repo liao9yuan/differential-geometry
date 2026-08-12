@@ -7528,6 +7528,18 @@ theorem modelHandleRoundMap_posPart_norm_sq {n k : ℕ} (hk : k ≤ n) (ε r δ 
       Real.sq_sqrt hq0
     rw [hnorm', hsq]
 
+theorem modelHandleRoundMap_negPart_norm_sq {n k : ℕ} (hk : k ≤ n) (ε r δ θ : ℝ)
+    (hε : 0 ≤ ε) (p : StandardHandle k (n - k)) :
+    ‖negPart hk (modelHandleRoundMap hk ε r δ θ p)‖ ^ 2 =
+      (2 * ε + r ^ 2 * ‖(p.2 : EuclideanSpace ℝ (Fin (n - k)))‖ ^ 2) *
+        ‖(p.1 : EuclideanSpace ℝ (Fin k))‖ ^ 2 := by
+  rw [modelHandleRoundMap_negPart]
+  rw [norm_smul]
+  rw [Real.norm_eq_abs]
+  rw [abs_of_nonneg (Real.sqrt_nonneg _)]
+  rw [mul_pow]
+  rw [Real.sq_sqrt (by nlinarith [hε, sq_nonneg (‖(p.2 : EuclideanSpace ℝ (Fin (n - k)))‖ : ℝ)])]
+
 end CellAttachment
 
 end
