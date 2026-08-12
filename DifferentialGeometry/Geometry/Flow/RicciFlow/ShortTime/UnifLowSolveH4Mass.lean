@@ -31,6 +31,47 @@ variable
       [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M]
 
 omit [BoundarylessManifold I M] in
+theorem lowreg_sol_field_mass_four_of_energy
+    (g : SmoothRiemannianMetric I M) {T : ℝ}
+    (gforce : timeL2
+      (tensorHs (I := I) (M := M) g 0 2 ((1 : ℕ) : ℝ)) T)
+    (fseq : ℕ → timeL2
+      (tensorHs (I := I) (M := M) g 0 2 ((1 : ℕ) : ℝ)) T)
+    (Φ : ℝ)
+    (hconv : ∀ (i : TensorEigenIdx (I := I) (M := M) g 0 2),
+      ∀ t ∈ Set.Icc (0 : ℝ) T,
+        Tendsto
+          (fun N => lowregProjMode (I := I) (M := M) g fseq N t i)
+          atTop
+          (𝓝 (perModeConv
+            (TensorEigenIdx.lambda (I := I) (M := M) i)
+            (fun s => (timeModeCoeff (I := I) (M := M) gforce i) s) t)))
+    (hΦ : ∀ N : ℕ, ∀ t ∈ Set.Icc (0 : ℝ) T,
+      galerkinEnergy (I := I) (M := M)
+        (eigenIdxFinset (I := I) (M := M) g N)
+        (lowregProjMode (I := I) (M := M) g fseq N) 4 t ≤ Φ) :
+    ∀ t ∈ Set.Icc (0 : ℝ) T,
+      Summable (fun i => tensorSobolevWeight (I := I) (M := M) i 4 *
+        (perModeConv
+          (TensorEigenIdx.lambda (I := I) (M := M) i)
+          (fun s => (timeModeCoeff (I := I) (M := M) gforce i) s) t) ^ 2) ∧
+      ∑' i, tensorSobolevWeight (I := I) (M := M) i 4 *
+        (perModeConv
+          (TensorEigenIdx.lambda (I := I) (M := M) i)
+          (fun s => (timeModeCoeff (I := I) (M := M) gforce i) s) t) ^ 2 ≤ Φ := by
+  intro t ht
+  exact fatou_sq_mass
+    (eigenIdxFinset (I := I) (M := M) g)
+    (tendsto_eigenIdxFinset_atTop (I := I) (M := M) g)
+    (fun i => tensorSobolevWeight (I := I) (M := M) i 4)
+    (fun i => tensorSobolevWeight_nonneg (I := I) (M := M) i 4)
+    (fun N i => lowregProjMode (I := I) (M := M) g fseq N t i)
+    (fun i => perModeConv
+      (TensorEigenIdx.lambda (I := I) (M := M) i)
+      (fun s => (timeModeCoeff (I := I) (M := M) gforce i) s) t)
+    (fun i => hconv i t ht) Φ (fun N => hΦ N t ht)
+
+omit [BoundarylessManifold I M] in
 theorem lowreg_sol_field_mass_five_of_integral_energy
     (g : SmoothRiemannianMetric I M) {T : ℝ} (hT : 0 ≤ T)
     (gforce : timeL2
@@ -87,16 +128,30 @@ theorem lowreg_solve_h4_mass_unif
               IsBgSolveAt (I := I) (M := M) g gBase K
                   hT hT1
                   u gforce (lowregStateRad K.top K.slope K.outer K.realize) ∧
+                (∃ C4 : ℝ, ∀ t ∈ Set.Icc (0 : ℝ) T,
+                  Summable (fun i =>
+                    tensorSobolevWeight (I := I) (M := M) i 4 *
+                      (perModeConv
+                        (TensorEigenIdx.lambda (I := I) (M := M) i)
+                        (fun s => (timeModeCoeff (I := I) (M := M)
+                          gforce i) s) t) ^ 2) ∧
+                  ∑' i, tensorSobolevWeight (I := I) (M := M) i 4 *
+                    (perModeConv
+                      (TensorEigenIdx.lambda (I := I) (M := M) i)
+                      (fun s => (timeModeCoeff (I := I) (M := M)
+                        gforce i) s) t) ^ 2 ≤ C4) ∧
                 Summable (solFieldMass (I := I) (M := M) hT.le gforce 5) := by
   obtain ⟨K, hKunif, T, hT, hT1, hsolve⟩ :=
     lowreg_solve_h4_unif (I := I) (M := M) hDim gBase hΛ
   refine ⟨K, hKunif, T, hT, hT1, ?_⟩
   intro g hEq hjet
-  obtain ⟨u, gforce, fseq, _Φ3, _Φ4, Φ5, hsolveAt, hconv, _hΦ3, _hΦ4, hΦ5⟩ :=
+  obtain ⟨u, gforce, fseq, _Φ3, Φ4, Φ5, hsolveAt, hconv, _hΦ3, hΦ4, hΦ5⟩ :=
     hsolve g hEq hjet
-  refine ⟨u, gforce, hsolveAt, ?_⟩
-  exact lowreg_sol_field_mass_five_of_integral_energy
-    (I := I) (M := M) g hT.le gforce fseq Φ5 hconv hΦ5
+  refine ⟨u, gforce, hsolveAt, ⟨Φ4, ?_⟩, ?_⟩
+  · exact lowreg_sol_field_mass_four_of_energy
+      (I := I) (M := M) g gforce fseq Φ4 hconv hΦ4
+  · exact lowreg_sol_field_mass_five_of_integral_energy
+      (I := I) (M := M) g hT.le gforce fseq Φ5 hconv hΦ5
 
 end DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral
 
