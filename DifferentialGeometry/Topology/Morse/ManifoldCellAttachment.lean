@@ -15785,6 +15785,75 @@ theorem morseHandleAdjunction_attachingCell_eq_lower {m k : ℕ} (hk : k ≤ m +
     _ = Handle.lower (morseAttachingEmbedding hk c ε r data hε hεr) x := by
       rw [hφ]
 
+noncomputable def morseLowerAttachingChartPoint {m k : ℕ} (hk : k ≤ m + 1) (c ε : ℝ)
+    {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M] [ChartedSpace H M]
+    {I : ModelWithCorners ℝ (MorseModel (m + 1)) H} {f : M → ℝ}
+    (data : MorseChart (m + 1) k hk c I f) (x : M) : M := by
+  classical
+  exact if hx : x ∈ data.χ '' {y : MorseModel (m + 1) | morseNorm (m + 1) y ≤ data.R} then
+    data.χ (CellAttachment.modelLowerAttachingChartPoint hk ε (data.χ.symm x))
+  else x
+
+theorem morseLowerAttachingChartPoint_model_norm_sq_le {m k : ℕ} (hk : k ≤ m + 1) (c ε r : ℝ)
+    {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M] [ChartedSpace H M]
+    {I : ModelWithCorners ℝ (MorseModel (m + 1)) H} {f : M → ℝ}
+    (data : MorseChart (m + 1) k hk c I f)
+    (hε : 0 ≤ ε)
+    (hR : 2 * (r ^ 2 + ε) ≤ data.R ^ 2)
+    {x : M} (hx : x ∈ data.χ '' {y : MorseModel (m + 1) | morseNorm (m + 1) y ≤ data.R})
+    (hneg : ‖negPart hk (data.χ.symm x)‖ ≤ r) :
+    morseNorm (m + 1) (data.χ.symm (morseLowerAttachingChartPoint hk c ε data x)) ^ 2 ≤
+      2 * ε + 2 * r ^ 2 := by
+  have hxmem := hx
+  rcases hx with ⟨y, hy, hxy⟩
+  have hsymm : data.χ.symm x = y := by
+    rw [← hxy]
+    exact data.χ.left_inv (data.hχsrc y hy)
+  simp only [morseLowerAttachingChartPoint, dif_pos hxmem]
+  have hneg' : ‖negPart hk (CellAttachment.modelLowerAttachingChartPoint hk ε y)‖ ^ 2 ≤ r ^ 2 := by
+    rw [CellAttachment.modelLowerAttachingChartPoint_negPart hk ε y]
+    have hneg_r : ‖negPart hk y‖ ≤ r := by simpa [hsymm] using hneg
+    have hnonneg : 0 ≤ ‖negPart hk y‖ := norm_nonneg _
+    exact (sq_le_sq.mpr (by
+      rw [abs_of_nonneg hnonneg, abs_of_nonneg (by linarith [hnonneg, hneg_r] : 0 ≤ r)]
+      exact hneg_r))
+  have hpos' : ‖posPart hk (CellAttachment.modelLowerAttachingChartPoint hk ε y)‖ ^ 2 ≤
+      2 * ε + ‖negPart hk y‖ ^ 2 := by
+    by_cases hpos : posPart hk y = 0
+    · have hmap : CellAttachment.modelLowerAttachingChartPoint hk ε y =
+          recombine hk (negPart hk y) (Real.sqrt (2 * ε + ‖negPart hk y‖ ^ 2) • (0 : EuclideanSpace ℝ (Fin (m + 1 - k)))) := by
+        dsimp [CellAttachment.modelLowerAttachingChartPoint]
+        rw [hpos]
+        simp [norm_zero, inv_zero]
+      rw [hmap, posPart_recombine, smul_zero, norm_zero, zero_pow (by norm_num : (2 : ℕ) ≠ 0)]
+      nlinarith [hε, sq_nonneg ‖negPart hk y‖]
+    · have hposn := CellAttachment.modelLowerAttachingChartPoint_posPart_norm_sq hk ε hε hpos
+      rw [hposn]
+  have hnorm' : morseNorm (m + 1) (CellAttachment.modelLowerAttachingChartPoint hk ε y) ^ 2 ≤
+      2 * ε + 2 * r ^ 2 := by
+    have hsq := CellAttachment.morseNorm_sq_eq_negPart_add_posPart hk
+      (CellAttachment.modelLowerAttachingChartPoint hk ε y)
+    rw [hsq]
+    have hneg_r : ‖negPart hk y‖ ≤ r := by simpa [hsymm] using hneg
+    have hneg_r_sq : ‖negPart hk y‖ ^ 2 ≤ r ^ 2 := by
+      have hnonneg : 0 ≤ ‖negPart hk y‖ := norm_nonneg _
+      exact (sq_le_sq.mpr (by
+        rw [abs_of_nonneg hnonneg, abs_of_nonneg (by linarith [hnonneg, hneg_r] : 0 ≤ r)]
+        exact hneg_r))
+    nlinarith [hneg', hpos', hneg_r_sq]
+  have hsymm' : data.χ.symm (data.χ (CellAttachment.modelLowerAttachingChartPoint hk ε y)) =
+      CellAttachment.modelLowerAttachingChartPoint hk ε y := by
+    exact data.χ.left_inv (data.hχsrc (CellAttachment.modelLowerAttachingChartPoint hk ε y)
+      (by
+        have hle2 : 2 * ε + 2 * r ^ 2 ≤ data.R ^ 2 := by
+          nlinarith [hR]
+        have habs := sq_le_sq.mp (le_trans hnorm' hle2)
+        rw [abs_of_nonneg (norm_nonneg _), abs_of_nonneg (le_of_lt data.hRpos)] at habs
+        exact habs))
+  rw [hsymm]
+  rw [hsymm']
+  exact hnorm'
+
 
 theorem morseHandleAdjunctionEquivRoundedSublevel_symm_rel_deep {m k : ℕ} (hk : k ≤ m + 1)
     (c ε r δ R₀ R₁ η : ℝ) {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M]
