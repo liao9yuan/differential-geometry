@@ -26,6 +26,7 @@ private local instance : BorelSpace M := ⟨rfl⟩
 
 open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Analysis.Laplacian
+open DifferentialGeometry.Geometry.Operator
 open DifferentialGeometry.Integral.DivergenceTheorem
 
 variable [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
@@ -124,7 +125,7 @@ theorem heatMass_deriv_zero
       apply MeasureTheory.integral_congr_ae
       exact hae
     rw [hint_congr]
-    have htoFun : du_smooth.toFun = Δ_g (I := I) g u_smooth.smooth := by
+    have htoFun : du_smooth.toFun = Δ_g (I := I) g u_smooth.toContMDiffMap := by
       rw [← congrArg SmoothScalar.toFun hlap]
       exact SmoothScalar.laplacian_toFun u_smooth
     rw [htoFun]

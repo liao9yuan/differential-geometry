@@ -41,7 +41,6 @@ def tensorHeatMildSolutionHsDeriv
       (g := g) (r := r) (s := s) σ)
     (fun i => tensor_lambda_nonneg (I := I) (M := M) i) T₀ F F' t
 
-omit [CompactSpace M] in
 omit [NeZero (Module.finrank ℝ E)] in
 theorem tensorHeatMildSolutionHsDeriv_coeff
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (σ : ℝ)
@@ -82,7 +81,6 @@ theorem tensorHeatMildSolutionHsDeriv_coeff
             (tensorHeatMildSolutionHs (I := I) (M := M)
               g r s σ T₀ F t).coeff i + (F t).coeff i) := by ring
 
-omit [CompactSpace M] in
 omit [NeZero (Module.finrank ℝ E)] in
 theorem tensorHeatMildSolutionHs_hasDerivAt_of_hasDerivAt_aux
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (σ : ℝ)
@@ -129,7 +127,6 @@ def tensorHeatMildSolutionHsLiftOfHasDerivAt
     ring
   exact tensorHsAddTwoOfOneAddLambdaMul (I := I) (M := M) σ U Z hZcoeff
 
-omit [CompactSpace M] in
 omit [NeZero (Module.finrank ℝ E)] in
 @[simp] theorem tensorHeatMildSolutionHsLiftOfHasDerivAt_coeff
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (σ : ℝ)
@@ -143,7 +140,6 @@ omit [NeZero (Module.finrank ℝ E)] in
         g r s σ T₀ F t).coeff i :=
   rfl
 
-omit [CompactSpace M] in
 omit [NeZero (Module.finrank ℝ E)] in
 theorem tensorHsInclusion_tensorHeatMildSolutionHsLiftOfHasDerivAt
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (σ : ℝ)
@@ -161,7 +157,6 @@ theorem tensorHsInclusion_tensorHeatMildSolutionHsLiftOfHasDerivAt
   rw [tensorHsInclusion_coeff_apply,
     tensorHeatMildSolutionHsLiftOfHasDerivAt_coeff]
 
-omit [CompactSpace M] in
 omit [NeZero (Module.finrank ℝ E)] in
 theorem tensorHeatMildSolutionHs_hasDerivAt_of_hasDerivAt
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (σ : ℝ)
@@ -188,7 +183,6 @@ theorem tensorHeatMildSolutionHs_hasDerivAt_of_hasDerivAt
   rw [tensorScaleLaplacian_coeff,
     tensorHeatMildSolutionHsLiftOfHasDerivAt_coeff]
 
-omit [CompactSpace M] in
 omit [NeZero (Module.finrank ℝ E)] in
 theorem deriv_tensorHeatMildSolutionHs_eq_tensorScaleLaplacian_add_of_hasDerivAt
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (σ : ℝ)
@@ -203,7 +197,6 @@ theorem deriv_tensorHeatMildSolutionHs_eq_tensorScaleLaplacian_add_of_hasDerivAt
   (tensorHeatMildSolutionHs_hasDerivAt_of_hasDerivAt
     (I := I) (M := M) g r s σ T₀ hF hF' ht).deriv
 
-omit [CompactSpace M] in
 omit [NeZero (Module.finrank ℝ E)] in
 theorem tensorHeatMildSolutionHs_differentiableOn_of_hasDerivAt
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (σ : ℝ)
@@ -228,7 +221,6 @@ def tensorHeatMildSolutionHsLiftOfContDiff
       (fun q => (hF.differentiable one_ne_zero q).hasDerivAt)
       hF.continuous_deriv_one t ht
 
-omit [CompactSpace M] in
 omit [NeZero (Module.finrank ℝ E)] in
 @[simp] theorem tensorHeatMildSolutionHsLiftOfContDiff_coeff
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (σ : ℝ)
@@ -242,7 +234,6 @@ omit [NeZero (Module.finrank ℝ E)] in
         g r s σ T₀ F t).coeff i :=
   rfl
 
-omit [CompactSpace M] in
 omit [NeZero (Module.finrank ℝ E)] in
 theorem tensorHsInclusion_tensorHeatMildSolutionHsLiftOfContDiff
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (σ : ℝ)
@@ -259,7 +250,6 @@ theorem tensorHsInclusion_tensorHeatMildSolutionHsLiftOfContDiff
   rw [tensorHsInclusion_coeff_apply,
     tensorHeatMildSolutionHsLiftOfContDiff_coeff]
 
-omit [CompactSpace M] in
 omit [NeZero (Module.finrank ℝ E)] in
 theorem tensorHeatMildSolutionHs_hasDerivAt_of_contDiff
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (σ : ℝ)
@@ -277,7 +267,6 @@ theorem tensorHeatMildSolutionHs_hasDerivAt_of_contDiff
       (fun q => (hF.differentiable one_ne_zero q).hasDerivAt)
       hF.continuous_deriv_one ht
 
-omit [CompactSpace M] in
 omit [NeZero (Module.finrank ℝ E)] in
 theorem deriv_tensorHeatMildSolutionHs_eq_tensorScaleLaplacian_add_of_contDiff
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (σ : ℝ)
@@ -291,7 +280,6 @@ theorem deriv_tensorHeatMildSolutionHs_eq_tensorScaleLaplacian_add_of_contDiff
   (tensorHeatMildSolutionHs_hasDerivAt_of_contDiff
     (I := I) (M := M) g r s σ T₀ hF ht).deriv
 
-omit [CompactSpace M] in
 omit [NeZero (Module.finrank ℝ E)] in
 theorem tensorHeatMildSolutionHs_differentiableOn_of_contDiff
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (σ : ℝ)

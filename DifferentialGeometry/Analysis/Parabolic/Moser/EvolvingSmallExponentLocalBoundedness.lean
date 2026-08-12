@@ -13,7 +13,7 @@ namespace DifferentialGeometry.Analysis.Parabolic.Moser
 
 open DifferentialGeometry.Analysis.Laplacian
 open DifferentialGeometry.Analysis.Parabolic.Energy
-open DifferentialGeometry.Integral.Connection
+open DifferentialGeometry.Geometry.Operator
 open DifferentialGeometry.Integral.DivergenceTheorem
 open DifferentialGeometry.Integral.Measure
 
@@ -197,7 +197,7 @@ theorem evolving_local_boundedness_of_subsolution_of_lt_two_of_volume_le
     (hpde : ∀ t ∈ Icc τ D, ∀ x : M,
       deriv (fun s => u s x) t ≤
         Δ_g (I := I) (g t)
-          (smoothScalarSlice (I := I) (g t) u hu t).smooth x)
+          (smoothScalarSlice (I := I) (g t) u hu t).toContMDiffMap x)
     (htrace : ∀ t ∈ Icc τ D, ∀ x : M,
       traceTimeDerivMetric (I := I) g t x ≤ B)
     (hrho : ∀ t ∈ Icc τ D, ∀ x : M,
@@ -320,7 +320,7 @@ theorem evolving_local_boundedness_of_subsolution_of_lt_two_of_volume_le
     have hpdeOuter : ∀ s ∈ Icc aOuter bOuter, ∀ y : M,
         deriv (fun q => u q y) s ≤
           Δ_g (I := I) (g s)
-            (smoothScalarSlice (I := I) (g s) u hu s).smooth y := by
+            (smoothScalarSlice (I := I) (g s) u hu s).toContMDiffMap y := by
       intro s hs y
       exact hpde s ⟨haOuterτ.trans hs.1, hs.2.trans hbOuterD⟩ y
     have hnormBound : ∀ s ∈ Icc aOuter bOuter, ∀ y,
@@ -541,7 +541,7 @@ private theorem evolving_local_boundedness_of_subsolution_of_two_le_of_volume_le
     (hpde : ∀ t ∈ Icc τ D, ∀ x : M,
       deriv (fun s => u s x) t ≤
         Δ_g (I := I) (g t)
-          (smoothScalarSlice (I := I) (g t) u hu t).smooth x)
+          (smoothScalarSlice (I := I) (g t) u hu t).toContMDiffMap x)
     (htrace : ∀ t ∈ Icc τ D, ∀ x : M,
       traceTimeDerivMetric (I := I) g t x ≤ B)
     (hrho : ∀ t ∈ Icc τ D, ∀ x : M,
@@ -613,7 +613,7 @@ private theorem evolving_local_boundedness_of_subsolution_of_two_le_of_volume_le
   have hpdeOuter : ∀ s ∈ Icc aOuter bOuter, ∀ y : M,
       deriv (fun q => u q y) s ≤
         Δ_g (I := I) (g s)
-          (smoothScalarSlice (I := I) (g s) u hu s).smooth y := by
+          (smoothScalarSlice (I := I) (g s) u hu s).toContMDiffMap y := by
     intro s hs y
     exact hpde s ⟨hτaOuter.le.trans hs.1, hs.2.trans hbOuterD.le⟩ y
   have hDmoving : 0 ≤ Dmoving := evolvingMoserLocalizedMass_nonneg
@@ -760,7 +760,7 @@ theorem evolving_local_boundedness_of_subsolution_rpow_of_volume_le
     (hpde : ∀ t ∈ Icc τ D, ∀ x : M,
       deriv (fun s => u s x) t ≤
         Δ_g (I := I) (g t)
-          (smoothScalarSlice (I := I) (g t) u hu t).smooth x)
+          (smoothScalarSlice (I := I) (g t) u hu t).toContMDiffMap x)
     (htrace : ∀ t ∈ Icc τ D, ∀ x : M,
       traceTimeDerivMetric (I := I) g t x ≤ B)
     (hrho : ∀ t ∈ Icc τ D, ∀ x : M,

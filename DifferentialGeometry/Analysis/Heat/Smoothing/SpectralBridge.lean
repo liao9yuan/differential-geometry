@@ -37,10 +37,12 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.L2
 open DifferentialGeometry.Analysis.Laplacian
+open DifferentialGeometry.Analysis.Elliptic
 open DifferentialGeometry.Analysis.Parabolic.TensorHeatEquation
-open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral
 open DifferentialGeometry.Analysis.Parabolic.TensorSpectral
-open DifferentialGeometry.Integral.Connection
+open DifferentialGeometry.Analysis.Spectral
+open DifferentialGeometry.Geometry.Connection
+open DifferentialGeometry.Geometry.Operator
 open DifferentialGeometry.Integral.DivergenceTheorem
 open Tensor0SBundle
 
@@ -205,7 +207,7 @@ theorem tensorEigen00_rawLap_eq
     simp
   · simp [hji]
 
-omit [CompactSpace M] in
+omit [SigmaCompactSpace M] [CompactSpace M] in
 private lemma rawLapSection_eq_toRS0 (g : SmoothRiemannianMetric I M)
     (S : SmoothCcTensor g 0 0) (x : M) :
     rawTensorConnLap g 0 0 (fun y : M => S.toSection y) x =
@@ -225,7 +227,7 @@ private lemma laplacian_scalar0_smooth (g : SmoothRiemannianMetric I M)
       (TensorRSField.scalar0 (n := (∞ : WithTop ℕ∞)) S.toSection)) := by
   have hf : ContMDiff I 𝓘(ℝ, ℝ) ∞ (TensorRSField.scalar0 (n := (∞ : WithTop ℕ∞)) S.toSection) :=
     TensorRSField.scalar0_smooth (n := (∞ : WithTop ℕ∞)) S.toSection
-  refine (Δ_g_contMDiff (I := I) g hf).congr ?_
+  refine (Δ_g_contMDiff (I := I) g ⟨_, hf⟩).congr ?_
   intro x
   exact laplacian_levi_eq (I := I) g hf x
 
@@ -241,7 +243,7 @@ private lemma tensor0Iso_fromScalarField
         (fun _ : Fin 0 => TangentSpace I y) (f y))) = f y
   rfl
 
-omit [CompactSpace M] in
+omit [SigmaCompactSpace M] [CompactSpace M] in
 theorem scalar0_rawLap_eq_scalarLap
     (g : SmoothRiemannianMetric I M) (S : SmoothCcTensor g 0 0) (x : M) :
     TensorRSField.scalar0 (n := (∞ : WithTop ℕ∞))

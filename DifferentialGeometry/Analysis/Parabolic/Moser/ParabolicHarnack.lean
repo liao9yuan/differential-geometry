@@ -13,6 +13,7 @@ open scoped ContDiff Manifold Topology
 namespace DifferentialGeometry.Analysis.Parabolic.Moser
 
 open DifferentialGeometry.Analysis.Laplacian
+open DifferentialGeometry.Geometry.Operator
 open DifferentialGeometry.Analysis.Parabolic.Energy
 open DifferentialGeometry.Integral.DivergenceTheorem
 
@@ -106,7 +107,7 @@ theorem harnack_on_separated_cylinders
     (hmass : 0 < cutoffMass (I := I) (M := M) averagingCutoff)
     (hpde : ∀ t ∈ Icc A D, ∀ x : M,
       deriv (fun q ↦ u q x) t =
-        Δ_g (I := I) g (smoothScalarSlice (I := I) g u hu t).smooth x) :
+        Δ_g (I := I) g (smoothScalarSlice (I := I) g u hu t).toContMDiffMap x) :
     ∀ t ∈ Icc earlyLower earlyUpper, ∀ x : M,
       (bombieriGiustiSpatialCutoff rho innerLower innerUpper 0).toFun x ≠ 0 →
       ∀ q ∈ Icc lateLower lateUpper, ∀ y : M,
@@ -145,7 +146,7 @@ theorem harnack_on_separated_cylinders
   have hvpos : ∀ t x, 0 < v t x := fun t x ↦ inv_pos.mpr (hpos t x)
   have hvpde : ∀ t ∈ Icc c d, ∀ x : M,
       deriv (fun s ↦ v s x) t ≤
-        Δ_g (I := I) g (smoothScalarSlice (I := I) g v hv t).smooth x := by
+        Δ_g (I := I) g (smoothScalarSlice (I := I) g v hv t).toContMDiffMap x := by
     intro t ht x
     have h := rpow_subsolution_of_supersolution
       (I := I) (M := M) g u (fun _ _ ↦ 0) hu hpos
@@ -203,7 +204,6 @@ theorem harnack_on_separated_cylinders
           u q y := by
       rfl
 
-
 theorem harnack_on_separated_cylinders_of_global_volume_normalization
     (g : SmoothRiemannianMetric I M)
     (hdim : 2 < (Module.finrank ℝ E : ℝ))
@@ -235,7 +235,7 @@ theorem harnack_on_separated_cylinders_of_global_volume_normalization
       (D - A) * (DifferentialGeometry.Integral.Measure.riemannianVolumeMeasure (I := I) (M := M) g).real Set.univ ≤ 1)
     (hpde : ∀ t ∈ Icc A D, ∀ x : M,
       deriv (fun q ↦ u q x) t =
-        Δ_g (I := I) g (smoothScalarSlice (I := I) g u hu t).smooth x) :
+        Δ_g (I := I) g (smoothScalarSlice (I := I) g u hu t).toContMDiffMap x) :
     ∀ t ∈ Icc α β, ∀ x : M, ∀ q ∈ Icc γ δ, ∀ y : M,
       u t x ≤
         separatedCylinderHarnackFactor (I := I) (M := M)
@@ -403,7 +403,7 @@ theorem harnack_on_standard_separated_cylinders_of_global_volume_normalization
       (D - A) * (DifferentialGeometry.Integral.Measure.riemannianVolumeMeasure (I := I) (M := M) g).real Set.univ ≤ 1)
     (hpde : ∀ t ∈ Icc A D, ∀ x : M,
       deriv (fun q ↦ u q x) t =
-        Δ_g (I := I) g (smoothScalarSlice (I := I) g u hu t).smooth x) :
+        Δ_g (I := I) g (smoothScalarSlice (I := I) g u hu t).toContMDiffMap x) :
     ∀ t ∈ Icc (A + (D - A) / 8) (A + (D - A) / 4), ∀ x : M,
       ∀ q ∈ Icc (A + 3 * (D - A) / 4) (A + 7 * (D - A) / 8), ∀ y : M,
         u t x ≤
@@ -475,7 +475,7 @@ theorem harnack_on_standard_separated_cylinders_of_poincare_inequality
       (D - A) * (DifferentialGeometry.Integral.Measure.riemannianVolumeMeasure (I := I) (M := M) g).real Set.univ ≤ 1)
     (hpde : ∀ t ∈ Icc A D, ∀ x : M,
       deriv (fun q ↦ u q x) t =
-        Δ_g (I := I) g (smoothScalarSlice (I := I) g u hu t).smooth x) :
+        Δ_g (I := I) g (smoothScalarSlice (I := I) g u hu t).toContMDiffMap x) :
     ∀ t ∈ Icc (A + (D - A) / 8) (A + (D - A) / 4), ∀ x : M,
       ∀ q ∈ Icc (A + 3 * (D - A) / 4) (A + 7 * (D - A) / 8), ∀ y : M,
         u t x ≤

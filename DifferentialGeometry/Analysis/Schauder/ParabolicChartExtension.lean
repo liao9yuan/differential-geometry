@@ -10,7 +10,9 @@ namespace DifferentialGeometry.Analysis.Schauder
 
 open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.DivergenceTheorem
-open DifferentialGeometry.Integral.Connection
+open DifferentialGeometry.Geometry.Connection
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Geometry.Operator
 open DifferentialGeometry.Analysis.Parabolic.Euclidean
 
 universe u uE uH

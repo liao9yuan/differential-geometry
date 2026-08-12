@@ -12,7 +12,8 @@ namespace DifferentialGeometry.Analysis.Parabolic
 
 open DifferentialGeometry.Analysis.Laplacian
 open DifferentialGeometry.Analysis.Parabolic.Energy
-open DifferentialGeometry.Integral.Connection
+open DifferentialGeometry.Geometry.Connection
+open DifferentialGeometry.Geometry.Operator
 open DifferentialGeometry.Integral.DivergenceTheorem
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] [Module.Finite ℝ E]
@@ -67,12 +68,13 @@ theorem laplacian_exponentialTimeRescale
       (fun p : ℝ × M => u p.1 p.2)) (t : ℝ) (x : M) :
     Δ_g (I := I) g
         (smoothScalarSlice (I := I) g (exponentialTimeRescale rate center u)
-          (contMDiff_exponentialTimeRescale rate center u hu) t).smooth x =
+          (contMDiff_exponentialTimeRescale rate center u hu) t).toContMDiffMap x =
       Real.exp (rate * t - center) *
-        Δ_g (I := I) g (smoothScalarSlice (I := I) g u hu t).smooth x := by
+        Δ_g (I := I) g (smoothScalarSlice (I := I) g u hu t).toContMDiffMap x := by
   let ut := smoothScalarSlice (I := I) g u hu t
   let vt := smoothScalarSlice (I := I) g (exponentialTimeRescale rate center u)
     (contMDiff_exponentialTimeRescale rate center u hu) t
+  unfold SmoothScalar.toContMDiffMap
   rw [← laplacian_levi_eq (I := I) g vt.smooth x,
     ← laplacian_levi_eq (I := I) g ut.smooth x]
   simpa only [vt, ut, smoothScalarSlice_toFun, exponentialTimeRescale,
@@ -80,7 +82,7 @@ theorem laplacian_exponentialTimeRescale
     laplacian_const_smul (I := I) (LeviCivita (I := I) g) g
       (Real.exp (rate * t - center))
       (fun y => ut.smooth.mdifferentiable (by simp) y)
-      ((grad_g (I := I) g ut.smooth).mdifferentiable x)
+      ((grad_g (I := I) g ut.toContMDiffMap).mdifferentiable x)
 
 theorem exponential_time_rescale_supersolution
     (g : SmoothRiemannianMetric I M)
@@ -91,11 +93,11 @@ theorem exponential_time_rescale_supersolution
     (hpos : ∀ t x, 0 < u t x)
     {t : ℝ} {x : M}
     (hpde :
-      Δ_g (I := I) g (smoothScalarSlice (I := I) g u hu t).smooth x ≤
+      Δ_g (I := I) g (smoothScalarSlice (I := I) g u hu t).toContMDiffMap x ≤
         deriv (fun s => u s x) t) :
     Δ_g (I := I) g
         (smoothScalarSlice (I := I) g (exponentialTimeRescale rate center u)
-          (contMDiff_exponentialTimeRescale rate center u hu) t).smooth x ≤
+          (contMDiff_exponentialTimeRescale rate center u hu) t).toContMDiffMap x ≤
       deriv (fun s => exponentialTimeRescale rate center u s x) t := by
   rw [laplacian_exponentialTimeRescale (I := I) (M := M) g rate center u hu t x,
     deriv_exponentialTimeRescale (I := I) (M := M) rate center u hu t x]

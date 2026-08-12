@@ -9,6 +9,7 @@ open scoped ContDiff Manifold Topology
 namespace DifferentialGeometry.Analysis.Parabolic.Moser
 
 open DifferentialGeometry.Analysis.Laplacian
+open DifferentialGeometry.Geometry.Operator
 open DifferentialGeometry.Analysis.Parabolic.Energy
 open DifferentialGeometry.Integral.DivergenceTheorem
 open DifferentialGeometry.Integral.Measure
@@ -394,7 +395,7 @@ theorem early_evolving_log_superlevel_tail_with_center_gap_of_supersolution
     (htrace : ∀ t ∈ Icc a τ, ∀ x : M,
       |(1 / 2) * traceTimeDerivMetric (I := I) g t x| ≤ H)
     (hpde : ∀ t ∈ Icc a τ, ∀ x : M,
-      Δ_g (I := I) (g t) (smoothScalarSlice (I := I) (g t) u hu t).smooth x ≤
+      Δ_g (I := I) (g t) (smoothScalarSlice (I := I) (g t) u hu t).toContMDiffMap x ≤
         deriv (fun q => u q x) t) :
     (evolvingShiftedLogCenter
           (I := I) (M := M) g averagingCutoff u Ccenter H base τ -
@@ -465,7 +466,7 @@ theorem late_evolving_log_sublevel_tail_with_center_gap_of_supersolution
     (htrace : ∀ t ∈ Icc τ b, ∀ x : M,
       |(1 / 2) * traceTimeDerivMetric (I := I) g t x| ≤ H)
     (hpde : ∀ t ∈ Icc τ b, ∀ x : M,
-      Δ_g (I := I) (g t) (smoothScalarSlice (I := I) (g t) u hu t).smooth x ≤
+      Δ_g (I := I) (g t) (smoothScalarSlice (I := I) (g t) u hu t).toContMDiffMap x ≤
         deriv (fun q => u q x) t) :
     (evolvingShiftedLogCenter
           (I := I) (M := M) g averagingCutoff u Ccenter H base s -
@@ -538,7 +539,7 @@ theorem integrated_early_evolving_log_superlevel_tail_of_supersolution
     (hmass_le : ∀ t ∈ Icc a τ,
       evolvingCutoffMass (I := I) (M := M) g averagingCutoff t ≤ W)
     (hpde : ∀ t ∈ Icc a τ, ∀ x : M,
-      Δ_g (I := I) (g t) (smoothScalarSlice (I := I) (g t) u hu t).smooth x ≤
+      Δ_g (I := I) (g t) (smoothScalarSlice (I := I) (g t) u hu t).toContMDiffMap x ≤
         deriv (fun q => u q x) t) :
     (∫ s in a..τ,
       evolvingLocalizedSuperlevelMass
@@ -666,7 +667,7 @@ theorem integrated_late_evolving_log_sublevel_tail_of_supersolution
     (hmass_le : ∀ t ∈ Icc τ b,
       evolvingCutoffMass (I := I) (M := M) g averagingCutoff t ≤ W)
     (hpde : ∀ t ∈ Icc τ b, ∀ x : M,
-      Δ_g (I := I) (g t) (smoothScalarSlice (I := I) (g t) u hu t).smooth x ≤
+      Δ_g (I := I) (g t) (smoothScalarSlice (I := I) (g t) u hu t).toContMDiffMap x ≤
         deriv (fun q => u q x) t) :
     (∫ s in τ..b,
       evolvingLocalizedSublevelMass
@@ -796,7 +797,7 @@ theorem integrated_early_centered_evolving_log_superlevel_tail_of_supersolution
     (hdeviationMass_le : ∀ t ∈ Icc a τ,
       evolvingCutoffMass (I := I) (M := M) g deviationCutoff t ≤ Wdeviation)
     (hpde : ∀ t ∈ Icc a τ, ∀ x : M,
-      Δ_g (I := I) (g t) (smoothScalarSlice (I := I) (g t) u hu t).smooth x ≤
+      Δ_g (I := I) (g t) (smoothScalarSlice (I := I) (g t) u hu t).toContMDiffMap x ≤
         deriv (fun q => u q x) t) :
     (∫ s in a..τ,
       evolvingLocalizedSuperlevelMass
@@ -942,7 +943,7 @@ theorem integrated_late_centered_evolving_log_sublevel_tail_of_supersolution
     (hdeviationMass_le : ∀ t ∈ Icc τ b,
       evolvingCutoffMass (I := I) (M := M) g deviationCutoff t ≤ Wdeviation)
     (hpde : ∀ t ∈ Icc τ b, ∀ x : M,
-      Δ_g (I := I) (g t) (smoothScalarSlice (I := I) (g t) u hu t).smooth x ≤
+      Δ_g (I := I) (g t) (smoothScalarSlice (I := I) (g t) u hu t).toContMDiffMap x ≤
         deriv (fun q => u q x) t) :
     (∫ s in τ..b,
       evolvingLocalizedSublevelMass
@@ -1088,7 +1089,7 @@ theorem integrated_early_evolving_log_superlevel_tail_of_exponentialTimeRescale_
       evolvingLogCenterDrift
         (I := I) (M := M) g averagingCutoff Ccenter H t ≤ rate)
     (hpde : ∀ t ∈ Icc a τ, ∀ x : M,
-      Δ_g (I := I) (g t) (smoothScalarSlice (I := I) (g t) u hu t).smooth x ≤
+      Δ_g (I := I) (g t) (smoothScalarSlice (I := I) (g t) u hu t).toContMDiffMap x ≤
         deriv (fun s ↦ u s x) t) :
     let center := evolvingLocalizedAverage
       (I := I) (M := M) g averagingCutoff
@@ -1200,7 +1201,7 @@ theorem integrated_late_evolving_log_sublevel_tail_of_exponentialTimeRescale_of_
       evolvingLogCenterDrift
         (I := I) (M := M) g averagingCutoff Ccenter H t ≤ rate)
     (hpde : ∀ t ∈ Icc τ b, ∀ x : M,
-      Δ_g (I := I) (g t) (smoothScalarSlice (I := I) (g t) u hu t).smooth x ≤
+      Δ_g (I := I) (g t) (smoothScalarSlice (I := I) (g t) u hu t).toContMDiffMap x ≤
         deriv (fun s ↦ u s x) t) :
     let center := evolvingLocalizedAverage
       (I := I) (M := M) g averagingCutoff

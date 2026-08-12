@@ -12,7 +12,7 @@ namespace DifferentialGeometry.Analysis.Parabolic.Moser
 
 open DifferentialGeometry.Analysis.Laplacian
 open DifferentialGeometry.Analysis.Parabolic.Energy
-open DifferentialGeometry.Integral.Connection
+open DifferentialGeometry.Geometry.Operator
 open DifferentialGeometry.Integral.DivergenceTheorem
 open DifferentialGeometry.Integral.Measure
 
@@ -58,7 +58,7 @@ theorem localizedSpacetimeRpowNorm_inv_le_evolvingReciprocalReverseCost_of_volum
       localizedSobolevConstant (I := I) (M := M) (g t) hdim ≤ C)
     (hpde : ∀ t ∈ Icc a t₁, ∀ x : M,
       Δ_g (I := I) (g t)
-          (smoothScalarSlice (I := I) (g t) u hu t).smooth x ≤
+          (smoothScalarSlice (I := I) (g t) u hu t).toContMDiffMap x ≤
         deriv (fun s => u s x) t)
     (htrace : ∀ t ∈ Icc a t₁, ∀ x : M,
       traceTimeDerivMetric (I := I) g t x ≤ B)

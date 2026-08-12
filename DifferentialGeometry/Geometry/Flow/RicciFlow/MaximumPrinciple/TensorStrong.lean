@@ -3,11 +3,14 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.MaximumPrinciple.TensorWeak.
 set_option autoImplicit false
 set_option backward.isDefEq.respectTransparency false
 
-namespace DifferentialGeometry.Integral.Connection
+namespace DifferentialGeometry.PDE.RicciFlow
 
 noncomputable section
 
 open Bundle Tensor0SBundle Set
+open DifferentialGeometry.Geometry.Connection
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Geometry.Operator
 open scoped Manifold ContDiff
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]
@@ -61,7 +64,7 @@ theorem tensor_positive_definite_on_of_nonnegative_of_strict_supersolution
     (hcovInf : ∀ t : Real, CovariantDerivative.ContMDiffCovariantDerivativeLocally
       (cov t) (∞ : WithTop ℕ∞))
     (hmc : ∀ t : Real,
-      DifferentialGeometry.Integral.Connection.IsMetricCompatible_gen
+      DifferentialGeometry.Geometry.Connection.IsMetricCompatible_gen
         (I := I) (cov t) (G t))
     (hspatial : TensorSpatialDerivs (I := I) (M := M) cov S nablaS nabla2S) :
     TwoTensorFamilyPositiveDefiniteOn (I := I) (M := M)
@@ -236,4 +239,4 @@ theorem tensor_positive_definite_on_of_null_reaction_lower_bound
 
 end
 
-end DifferentialGeometry.Integral.Connection
+end DifferentialGeometry.PDE.RicciFlow

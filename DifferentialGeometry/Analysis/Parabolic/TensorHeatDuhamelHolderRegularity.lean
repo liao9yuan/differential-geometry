@@ -41,7 +41,6 @@ def tensorHeatMildSolutionHsHolderDeriv
       (g := g) (r := r) (s := s) σ)
     (fun i => tensor_lambda_nonneg (I := I) (M := M) i) T₀ F t
 
-omit [CompactSpace M] in
 omit [NeZero (Module.finrank ℝ E)] in
 theorem tensorHeatMildSolutionHsHolderDeriv_coeff
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (σ : ℝ)
@@ -103,7 +102,6 @@ def tensorHeatMildSolutionHsLiftOfHolder
     ring
   exact tensorHsAddTwoOfOneAddLambdaMul (I := I) (M := M) σ U Z hZcoeff
 
-omit [CompactSpace M] in
 omit [NeZero (Module.finrank ℝ E)] in
 @[simp] theorem tensorHeatMildSolutionHsLiftOfHolder_coeff
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (σ : ℝ)
@@ -117,7 +115,6 @@ omit [NeZero (Module.finrank ℝ E)] in
         g r s σ T₀ F t).coeff i :=
   rfl
 
-omit [CompactSpace M] in
 omit [NeZero (Module.finrank ℝ E)] in
 theorem tensorHsInclusion_tensorHeatMildSolutionHsLiftOfHolder
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (σ : ℝ)
@@ -135,7 +132,6 @@ theorem tensorHsInclusion_tensorHeatMildSolutionHsLiftOfHolder
   rw [tensorHsInclusion_coeff_apply,
     tensorHeatMildSolutionHsLiftOfHolder_coeff]
 
-omit [CompactSpace M] in
 omit [NeZero (Module.finrank ℝ E)] in
 theorem tensorHeatMildSolutionHsHolderDeriv_eq_tensorScaleLaplacian_add
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (σ : ℝ)
@@ -159,7 +155,6 @@ theorem tensorHeatMildSolutionHsHolderDeriv_eq_tensorScaleLaplacian_add
   rw [tensorScaleLaplacian_coeff,
     tensorHeatMildSolutionHsLiftOfHolder_coeff]
 
-omit [CompactSpace M] in
 omit [NeZero (Module.finrank ℝ E)] in
 private theorem tensorHeatMildSolutionHs_hasDerivAt_holder_candidate
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (σ : ℝ)
@@ -185,7 +180,6 @@ private theorem tensorHeatMildSolutionHs_hasDerivAt_holder_candidate
   simpa only [b, tensorHeatMildSolutionHsHolderDeriv] using
     habstract.congr_of_eventuallyEq heq
 
-omit [CompactSpace M] in
 omit [NeZero (Module.finrank ℝ E)] in
 theorem tensorHeatMildSolutionHs_hasDerivAt_of_holder
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (σ : ℝ)
@@ -204,7 +198,6 @@ theorem tensorHeatMildSolutionHs_hasDerivAt_of_holder
   exact tensorHeatMildSolutionHsHolderDeriv_eq_tensorScaleLaplacian_add
     (I := I) (M := M) g r s σ T₀ hα hF ht
 
-omit [CompactSpace M] in
 omit [NeZero (Module.finrank ℝ E)] in
 theorem deriv_tensorHeatMildSolutionHs_eq_tensorScaleLaplacian_add_of_holder
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (σ : ℝ)
@@ -219,7 +212,6 @@ theorem deriv_tensorHeatMildSolutionHs_eq_tensorScaleLaplacian_add_of_holder
   (tensorHeatMildSolutionHs_hasDerivAt_of_holder
     (I := I) (M := M) g r s σ T₀ hα hF ht).deriv
 
-omit [CompactSpace M] in
 omit [NeZero (Module.finrank ℝ E)] in
 theorem tensorHeatMildSolutionHs_differentiableOn_of_holder
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (σ : ℝ)
@@ -233,7 +225,6 @@ theorem tensorHeatMildSolutionHs_differentiableOn_of_holder
   exact (tensorHeatMildSolutionHs_hasDerivAt_of_holder
     (I := I) (M := M) g r s σ T₀ hα hF ht).differentiableAt.differentiableWithinAt
 
-omit [CompactSpace M] in
 omit [NeZero (Module.finrank ℝ E)] in
 theorem tensorHeatMildSolutionHsHolderDeriv_continuousOn
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (σ : ℝ)
@@ -251,7 +242,6 @@ theorem tensorHeatMildSolutionHsHolderDeriv_continuousOn
       (fun i => tensor_lambda_nonneg (I := I) (M := M) i)
       T₀ hα hF
 
-omit [CompactSpace M] in
 omit [NeZero (Module.finrank ℝ E)] in
 theorem tensorHeatMildSolutionHs_contDiffOn_one_of_holder
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (σ : ℝ)
@@ -273,7 +263,6 @@ theorem tensorHeatMildSolutionHs_contDiffOn_one_of_holder
     exact (tensorHeatMildSolutionHs_hasDerivAt_holder_candidate
       (I := I) (M := M) g r s σ T₀ hα hF ht).deriv
 
-omit [CompactSpace M] in
 omit [NeZero (Module.finrank ℝ E)] in
 theorem tensorHeatMildSolutionHsHolderDeriv_coeff_of_holderOn
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (σ : ℝ)
@@ -338,7 +327,6 @@ def tensorHeatMildSolutionHsLiftOfHolderOn
     ring
   exact tensorHsAddTwoOfOneAddLambdaMul (I := I) (M := M) σ U Z hZcoeff
 
-omit [CompactSpace M] in
 omit [NeZero (Module.finrank ℝ E)] in
 @[simp] theorem tensorHeatMildSolutionHsLiftOfHolderOn_coeff
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (σ : ℝ)
@@ -354,7 +342,6 @@ omit [NeZero (Module.finrank ℝ E)] in
         g r s σ T₀ F t).coeff i :=
   rfl
 
-omit [CompactSpace M] in
 omit [NeZero (Module.finrank ℝ E)] in
 theorem tensorHsInclusion_tensorHeatMildSolutionHsLiftOfHolderOn
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (σ : ℝ)
@@ -373,7 +360,6 @@ theorem tensorHsInclusion_tensorHeatMildSolutionHsLiftOfHolderOn
   rw [tensorHsInclusion_coeff_apply,
     tensorHeatMildSolutionHsLiftOfHolderOn_coeff]
 
-omit [CompactSpace M] in
 omit [NeZero (Module.finrank ℝ E)] in
 theorem tensorHeatMildSolutionHsHolderDeriv_eq_tensorScaleLaplacian_add_of_holderOn
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (σ : ℝ)
@@ -398,7 +384,6 @@ theorem tensorHeatMildSolutionHsHolderDeriv_eq_tensorScaleLaplacian_add_of_holde
   rw [tensorScaleLaplacian_coeff,
     tensorHeatMildSolutionHsLiftOfHolderOn_coeff]
 
-omit [CompactSpace M] in
 omit [NeZero (Module.finrank ℝ E)] in
 private theorem tensorHeatMildSolutionHs_hasDerivAt_holderOn_candidate
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (σ : ℝ)
@@ -425,7 +410,6 @@ private theorem tensorHeatMildSolutionHs_hasDerivAt_holderOn_candidate
   simpa only [b, tensorHeatMildSolutionHsHolderDeriv] using
     habstract.congr_of_eventuallyEq heq
 
-omit [CompactSpace M] in
 omit [NeZero (Module.finrank ℝ E)] in
 theorem tensorHeatMildSolutionHs_hasDerivAt_of_holderOn
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (σ : ℝ)
@@ -445,7 +429,6 @@ theorem tensorHeatMildSolutionHs_hasDerivAt_of_holderOn
   exact tensorHeatMildSolutionHsHolderDeriv_eq_tensorScaleLaplacian_add_of_holderOn
     (I := I) (M := M) g r s σ T₀ hα hF ht
 
-omit [CompactSpace M] in
 omit [NeZero (Module.finrank ℝ E)] in
 theorem deriv_tensorHeatMildSolutionHs_eq_tensorScaleLaplacian_add_of_holderOn
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (σ : ℝ)
@@ -461,7 +444,6 @@ theorem deriv_tensorHeatMildSolutionHs_eq_tensorScaleLaplacian_add_of_holderOn
   (tensorHeatMildSolutionHs_hasDerivAt_of_holderOn
     (I := I) (M := M) g r s σ T₀ hα hF ht).deriv
 
-omit [CompactSpace M] in
 omit [NeZero (Module.finrank ℝ E)] in
 theorem tensorHeatMildSolutionHs_differentiableOn_of_holderOn
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (σ : ℝ)
@@ -476,7 +458,6 @@ theorem tensorHeatMildSolutionHs_differentiableOn_of_holderOn
   exact (tensorHeatMildSolutionHs_hasDerivAt_of_holderOn
     (I := I) (M := M) g r s σ T₀ hα hF ht).differentiableAt.differentiableWithinAt
 
-omit [CompactSpace M] in
 omit [NeZero (Module.finrank ℝ E)] in
 theorem tensorHeatMildSolutionHsHolderDeriv_continuousOn_of_holderOn
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (σ : ℝ)
@@ -495,7 +476,6 @@ theorem tensorHeatMildSolutionHsHolderDeriv_continuousOn_of_holderOn
       (fun i => tensor_lambda_nonneg (I := I) (M := M) i)
       T₀ hα hF
 
-omit [CompactSpace M] in
 omit [NeZero (Module.finrank ℝ E)] in
 theorem tensorHeatMildSolutionHs_contDiffOn_one_of_holderOn
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (σ : ℝ)

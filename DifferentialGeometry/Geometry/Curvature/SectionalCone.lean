@@ -7,7 +7,7 @@ set_option autoImplicit false
 
 noncomputable section
 
-namespace DifferentialGeometry.Integral.Connection
+namespace DifferentialGeometry.Geometry.Curvature
 
 open Bundle Tensor0SBundle
 open DifferentialGeometry.Analysis.Convex
@@ -57,4 +57,4 @@ theorem metricAlgebraicCurvatureTensorAt_mem_algebraicSectionalNonnegativeCone_i
         0 ≤ metricRm04StdAt (I := I) (M := M) g x v w w v := by
   simp
 
-end DifferentialGeometry.Integral.Connection
+end DifferentialGeometry.Geometry.Curvature

@@ -6,7 +6,7 @@ set_option autoImplicit false
 noncomputable section
 
 open Set Function Topology Bundle Manifold MeasureTheory
-open DifferentialGeometry.Integral.Connection
+open DifferentialGeometry.Geometry.Operator
 open scoped Manifold ContDiff Topology
 
 namespace DifferentialGeometry

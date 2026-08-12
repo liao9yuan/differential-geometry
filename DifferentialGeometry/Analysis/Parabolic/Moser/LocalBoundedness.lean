@@ -14,6 +14,7 @@ namespace DifferentialGeometry.Analysis.Parabolic.Moser
 
 open DifferentialGeometry.Analysis.Parabolic.Energy
 open DifferentialGeometry.Analysis.Laplacian
+open DifferentialGeometry.Geometry.Operator
 open DifferentialGeometry.Integral.DivergenceTheorem
 open DifferentialGeometry.Integral.Measure
 
@@ -398,7 +399,7 @@ theorem moserLocalizedMass_succ_le_of_subsolution
     {p₀ a τ t₁ : ℝ} (hp₀ : 2 ≤ p₀) (haτ : a < τ) (hτt₁ : τ ≤ t₁)
     (hpde : ∀ t ∈ Icc a t₁, ∀ x : M,
       deriv (fun s => u s x) t ≤
-        Δ_g (I := I) g (smoothScalarSlice (I := I) g u hu t).smooth x)
+        Δ_g (I := I) g (smoothScalarSlice (I := I) g u hu t).toContMDiffMap x)
     (k : ℕ) :
     moserLocalizedMass (I := I) (M := M) (Module.finrank ℝ E)
         rho u p₀ a τ t₁ (k + 1) ≤
@@ -599,7 +600,7 @@ theorem moserLocalizedMass_succ_le_majorant
     {p₀ a τ t₁ : ℝ} (hp₀ : 2 ≤ p₀) (haτ : a < τ) (hτt₁ : τ ≤ t₁)
     (hpde : ∀ t ∈ Icc a t₁, ∀ x : M,
       deriv (fun s => u s x) t ≤
-        Δ_g (I := I) g (smoothScalarSlice (I := I) g u hu t).smooth x)
+        Δ_g (I := I) g (smoothScalarSlice (I := I) g u hu t).toContMDiffMap x)
     (k : ℕ) :
     moserLocalizedMass (I := I) (M := M) (Module.finrank ℝ E)
         rho u p₀ a τ t₁ (k + 1) ≤
@@ -656,7 +657,7 @@ theorem moserNormalizedMass_succ_le_of_subsolution
     {p₀ a τ t₁ : ℝ} (hp₀ : 2 ≤ p₀) (haτ : a < τ) (hτt₁ : τ ≤ t₁)
     (hpde : ∀ t ∈ Icc a t₁, ∀ x : M,
       deriv (fun s => u s x) t ≤
-        Δ_g (I := I) g (smoothScalarSlice (I := I) g u hu t).smooth x)
+        Δ_g (I := I) g (smoothScalarSlice (I := I) g u hu t).toContMDiffMap x)
     (k : ℕ) :
     moserNormalizedMass (I := I) (M := M) (Module.finrank ℝ E)
         rho u p₀ a τ t₁ (k + 1) ≤
@@ -701,7 +702,7 @@ theorem moserNormalizedMass_le_of_subsolution
     {p₀ a τ t₁ : ℝ} (hp₀ : 2 ≤ p₀) (haτ : a < τ) (hτt₁ : τ ≤ t₁)
     (hpde : ∀ t ∈ Icc a t₁, ∀ x : M,
       deriv (fun s => u s x) t ≤
-        Δ_g (I := I) g (smoothScalarSlice (I := I) g u hu t).smooth x)
+        Δ_g (I := I) g (smoothScalarSlice (I := I) g u hu t).toContMDiffMap x)
     (k : ℕ) :
     moserNormalizedMass (I := I) (M := M) (Module.finrank ℝ E)
         rho u p₀ a τ t₁ k ≤
@@ -760,7 +761,7 @@ theorem local_boundedness_of_subsolution
     {p₀ a τ t₁ : ℝ} (hp₀ : 2 ≤ p₀) (haτ : a < τ) (hτt₁ : τ ≤ t₁)
     (hpde : ∀ t ∈ Icc a t₁, ∀ x : M,
       deriv (fun s => u s x) t ≤
-        Δ_g (I := I) g (smoothScalarSlice (I := I) g u hu t).smooth x) :
+        Δ_g (I := I) g (smoothScalarSlice (I := I) g u hu t).toContMDiffMap x) :
     ∀ t ∈ Ioo τ t₁, ∀ x : M, 1 < rho.toFun x →
       u t x ≤ moserLocalBound (I := I) (M := M) g hdim rho u p₀ a τ t₁ := by
   let n := Module.finrank ℝ E
@@ -858,7 +859,7 @@ theorem reciprocal_local_boundedness_of_supersolution
     (hpos : ∀ t x, 0 < u t x)
     {p₀ a τ t₁ : ℝ} (hp₀ : 2 ≤ p₀) (haτ : a < τ) (hτt₁ : τ ≤ t₁)
     (hpde : ∀ t ∈ Icc a t₁, ∀ x : M,
-      Δ_g (I := I) g (smoothScalarSlice (I := I) g u hu t).smooth x ≤
+      Δ_g (I := I) g (smoothScalarSlice (I := I) g u hu t).toContMDiffMap x ≤
         deriv (fun s => u s x) t) :
     ∀ t ∈ Ioo τ t₁, ∀ x : M, 1 < rho.toFun x →
       (u t x)⁻¹ ≤
@@ -888,7 +889,7 @@ theorem reciprocal_local_boundedness_of_supersolution_rpow
     (hpos : ∀ t x, 0 < u t x)
     {p a τ t₁ : ℝ} (hp : 0 < p) (haτ : a < τ) (hτt₁ : τ ≤ t₁)
     (hpde : ∀ t ∈ Icc a t₁, ∀ x : M,
-      Δ_g (I := I) g (smoothScalarSlice (I := I) g u hu t).smooth x ≤
+      Δ_g (I := I) g (smoothScalarSlice (I := I) g u hu t).toContMDiffMap x ≤
         deriv (fun s => u s x) t) :
     let v : ℝ → M → ℝ := fun t x => u t x ^ (-p / 2)
     let B := moserLocalBoundFactor (I := I) (M := M)
@@ -909,7 +910,7 @@ theorem reciprocal_local_boundedness_of_supersolution_rpow
     Real.rpow_pos_of_pos (hpos t x) _
   have hvpde : ∀ t ∈ Icc a t₁, ∀ x : M,
       deriv (fun s => v s x) t ≤
-        Δ_g (I := I) g (smoothScalarSlice (I := I) g v hv t).smooth x := by
+        Δ_g (I := I) g (smoothScalarSlice (I := I) g v hv t).toContMDiffMap x := by
     intro t ht x
     have h := rpow_subsolution_of_supersolution
       (I := I) (M := M) g u (fun _ _ => 0) hu hpos
@@ -965,7 +966,7 @@ theorem localizedSpacetimeRpowNorm_inv_reverse_holder_of_supersolution
     (hmeasure : localizedSpacetimeMeasure (I := I) (M := M)
       (spatialMoserCutoff rho 0) a t₁ ≠ 0)
     (hpde : ∀ t ∈ Icc a t₁, ∀ x : M,
-      Δ_g (I := I) g (smoothScalarSlice (I := I) g u hu t).smooth x ≤
+      Δ_g (I := I) g (smoothScalarSlice (I := I) g u hu t).toContMDiffMap x ≤
         deriv (fun s => u s x) t) :
     let B := moserLocalBoundFactor (I := I) (M := M)
       g hdim rho 2 a τ t₁

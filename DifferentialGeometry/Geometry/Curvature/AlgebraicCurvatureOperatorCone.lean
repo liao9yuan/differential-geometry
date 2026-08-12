@@ -5,7 +5,7 @@ set_option backward.isDefEq.respectTransparency false
 
 noncomputable section
 
-namespace DifferentialGeometry.Integral.Connection
+namespace DifferentialGeometry.Geometry.Curvature
 
 open Bundle Tensor0SBundle
 open DifferentialGeometry.Analysis.Convex
@@ -234,4 +234,4 @@ theorem algebraicCurvatureOperatorNonnegative_dualZeroFace_map_pullback
   rw [algebraicCurvatureOperatorQuadraticEval_pullback]
   simp
 
-end DifferentialGeometry.Integral.Connection
+end DifferentialGeometry.Geometry.Curvature

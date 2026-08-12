@@ -6,7 +6,7 @@ set_option autoImplicit false
 
 noncomputable section
 
-namespace DifferentialGeometry.Integral.Connection
+namespace DifferentialGeometry.Geometry.Curvature
 
 open Bundle Tensor0SBundle
 open scoped Manifold ContDiff BigOperators
@@ -148,4 +148,4 @@ theorem algebraicCurvatureOperatorNonnegative_of_components_eq_reaction
   exact DifferentialGeometry.Dim3Reaction.curvatureOperatorQuadraticEval3_reaction_nonneg
     K12 K13 K23 h12 h13 h23 c _ _
 
-end DifferentialGeometry.Integral.Connection
+end DifferentialGeometry.Geometry.Curvature

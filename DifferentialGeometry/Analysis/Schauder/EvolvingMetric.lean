@@ -13,6 +13,7 @@ namespace DifferentialGeometry.Geometry.Curvature.MetricFamilySmoothOn
 open DifferentialGeometry.Analysis.Schauder
 open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.DivergenceTheorem
+open DifferentialGeometry.Geometry.Operator
 
 universe u uE uH
 
@@ -327,7 +328,6 @@ theorem exists_parabolicChartDriftCoefficient_schauder_bounds
     simpa only [Q, Kb, parabolicChartDriftCoefficient,
       Set.restrict_apply, Pi.neg_apply] using hneg
 
-
 theorem exists_uniform_parabolic_chart_operator_coefficient_schauder_bounds_of_finite
     {D : RealTimeInterval}
     {G : MetricConnectionFamilyOn (I := I) (M := M) D}
@@ -591,7 +591,6 @@ theorem exists_finite_buffered_chart_cover_with_uniform_parabolic_operator_coeff
   · intro x k
     rw [← hpreimage x]
     exact hb x k
-
 
 end DifferentialGeometry.Geometry.Curvature.MetricFamilySmoothOn
 

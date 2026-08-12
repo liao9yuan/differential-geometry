@@ -15,7 +15,9 @@ open DifferentialGeometry.Analysis.Parabolic.Energy
 open DifferentialGeometry.Analysis.Calculus
 open DifferentialGeometry.Geometry.Riemannian.Exponential
 open DifferentialGeometry.Integral.DivergenceTheorem
-open DifferentialGeometry.Integral.Connection
+open DifferentialGeometry.Geometry.Connection
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Geometry.Operator
 open DifferentialGeometry.Integral.Measure
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] [FiniteDimensional ℝ E]
@@ -193,14 +195,14 @@ private theorem laplacianAt_time_contDiffAt_on
     filter_upwards [IsOpen.mem_nhds D.regular_isOpen ht₀] with t ht
     have hconn : G.connection t = LeviCivita (G.metric t) := hGconn t (D.regular_subset ht)
     have hlap : laplacianAt (I := I) G t (u t) x =
-        Δ_g (I := I) g (hslice t (D.regular_subset ht)) x := by
+        Δ_g (I := I) g ⟨u t, hslice t (D.regular_subset ht)⟩ x := by
       rw [laplacianAt_eq_delta (I := I) G t (hslice t (D.regular_subset ht)) hconn x]
       rw [hGmetric t (D.regular_subset ht)]
-    have hvw : Δ_g (I := I) g (hslice t (D.regular_subset ht)) x =
+    have hvw : Δ_g (I := I) g ⟨u t, hslice t (D.regular_subset ht)⟩ x =
         (∑ i : Fin (Module.finrank ℝ E),
           partialDeriv (E := E) i (chartVossWeylIntegrand (I := I) g α (u t) i) ((extChartAt I α) x)) /
           chartDensityOnE (I := I) g α ((extChartAt I α) x) := by
-      have hvw0 : Δ_g (I := I) g (hslice t (D.regular_subset ht)) x =
+      have hvw0 : Δ_g (I := I) g ⟨u t, hslice t (D.regular_subset ht)⟩ x =
           chartVossWeylLaplacian (I := I) g α (u t) x :=
         voss_weyl_laplacian_formula_pointwise (I := I) g α
           (hslice t (D.regular_subset ht)) hxsrc
@@ -345,7 +347,7 @@ theorem heat_solution_one_point_harnack_of_nonnegative_ricci
     (hu : ContMDiff (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ, ℝ) ∞ (fun p : ℝ × M => u p.1 p.2))
     (hpos : ∀ t x, 0 < u t x)
     (hpde : ∀ t x, deriv (fun s => u s x) t =
-      Δ_g (I := I) g (smoothScalarSlice (I := I) g u hu t).smooth x)
+      Δ_g (I := I) g (smoothScalarSlice (I := I) g u hu t).toContMDiffMap x)
     {a b : ℝ} (ha : 0 < a) (hab : a ≤ b) (x : M) :
     u a x ≤ (b / a) ^ ((Module.finrank ℝ E : ℝ) / 2) * u b x := by
   classical
@@ -364,9 +366,9 @@ theorem heat_solution_one_point_harnack_of_nonnegative_ricci
       have hder : HasDerivAt (fun s => u s x) (deriv (fun s => u s x) τ) τ :=
         (ContDiff.differentiable hslice_cd (by norm_num) τ).hasDerivAt
       have hlap : laplacianAt (I := I) G τ (u τ) x =
-          Δ_g (I := I) g (smoothScalarSlice (I := I) g u hu τ).smooth x := by
+          Δ_g (I := I) g (smoothScalarSlice (I := I) g u hu τ).toContMDiffMap x := by
         change laplacianAt (I := I) G τ (smoothScalarSlice (I := I) g u hu τ).toFun x =
-          Δ_g (I := I) g (smoothScalarSlice (I := I) g u hu τ).smooth x
+          Δ_g (I := I) g (smoothScalarSlice (I := I) g u hu τ).toContMDiffMap x
         rw [laplacianAt_eq_delta (I := I) G τ (smoothScalarSlice (I := I) g u hu τ).smooth (by rfl) x]
         rfl
       have hderiv : deriv (fun s => u s x) τ = laplacianAt (I := I) G τ (u τ) x := by
@@ -763,7 +765,7 @@ theorem heat_solution_harnack_of_nonnegative_ricci
     (hu : ContMDiff (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ, ℝ) ∞ (fun p : ℝ × M => u p.1 p.2))
     (hpos : ∀ t x, 0 < u t x)
     (hpde : ∀ t x, deriv (fun s => u s x) t =
-      Δ_g (I := I) g (smoothScalarSlice (I := I) g u hu t).smooth x)
+      Δ_g (I := I) g (smoothScalarSlice (I := I) g u hu t).toContMDiffMap x)
     {a b : ℝ} (ha : 0 < a) (hab : a < b) (x y : M) :
     u a x ≤ (b / a) ^ ((Module.finrank ℝ E : ℝ) / 2) *
       Real.exp ((riemannianEDist I x y).toReal ^ 2 / (4 * (b - a))) * u b y := by
@@ -783,9 +785,9 @@ theorem heat_solution_harnack_of_nonnegative_ricci
       have hder : HasDerivAt (fun s => u s x) (deriv (fun s => u s x) τ) τ :=
         (ContDiff.differentiable hslice_cd (by norm_num) τ).hasDerivAt
       have hlap : laplacianAt (I := I) G τ (u τ) x =
-          Δ_g (I := I) g (smoothScalarSlice (I := I) g u hu τ).smooth x := by
+          Δ_g (I := I) g (smoothScalarSlice (I := I) g u hu τ).toContMDiffMap x := by
         change laplacianAt (I := I) G τ (smoothScalarSlice (I := I) g u hu τ).toFun x =
-          Δ_g (I := I) g (smoothScalarSlice (I := I) g u hu τ).smooth x
+          Δ_g (I := I) g (smoothScalarSlice (I := I) g u hu τ).toContMDiffMap x
         rw [laplacianAt_eq_delta (I := I) G τ (smoothScalarSlice (I := I) g u hu τ).smooth (by rfl) x]
         rfl
       have hderiv : deriv (fun s => u s x) τ = laplacianAt (I := I) G τ (u τ) x := by
@@ -796,7 +798,6 @@ theorem heat_solution_harnack_of_nonnegative_ricci
     (I := I) (M := M) g hEnorm hRic D u huOn (by simpa [D] using hu.contMDiffOn)
     (fun τ hτ x => hpos τ x)
     ha hab (by intro τ hτ; trivial) (by intro τ hτ; trivial) (by intro τ hτ; trivial) x y
-
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
@@ -893,7 +894,7 @@ theorem heat_solution_harnack_uniform_upper_bound_of_nonnegative_ricci
     (hu : ContMDiff (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ, ℝ) ∞ (fun p : ℝ × M => u p.1 p.2))
     (hpos : ∀ t x, 0 < u t x)
     (hpde : ∀ t x, deriv (fun s => u s x) t =
-      Δ_g (I := I) g (smoothScalarSlice (I := I) g u hu t).smooth x)
+      Δ_g (I := I) g (smoothScalarSlice (I := I) g u hu t).toContMDiffMap x)
     {a b : ℝ} (ha : 0 < a) (hab : a < b) (y₀ : M) :
     ∃ C : ℝ, 0 < C ∧ ∀ x : M, u a x ≤ C * u b y₀ := by
   classical

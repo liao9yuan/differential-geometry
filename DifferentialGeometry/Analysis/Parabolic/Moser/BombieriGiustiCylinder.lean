@@ -10,7 +10,7 @@ open scoped ContDiff Manifold Topology
 namespace DifferentialGeometry.Analysis.Parabolic.Moser
 
 open DifferentialGeometry.Analysis.Laplacian
-open DifferentialGeometry.Integral.Connection
+open DifferentialGeometry.Geometry.Operator
 open DifferentialGeometry.Integral.DivergenceTheorem
 
 def bombieriGiustiInvScale (k : ℕ) : ℝ :=

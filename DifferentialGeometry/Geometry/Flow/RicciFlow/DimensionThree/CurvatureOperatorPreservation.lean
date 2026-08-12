@@ -9,7 +9,8 @@ noncomputable section
 
 namespace DifferentialGeometry.PDE.RicciFlow
 
-open DifferentialGeometry.Integral.Connection
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Geometry.Operator
 open Bundle Tensor0SBundle
 open scoped Manifold ContDiff BigOperators
 
@@ -21,16 +22,14 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
 variable [IsManifold I ∞ M]
 
 noncomputable def ricciUpperBoundSec
-    {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
+    {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
     [SigmaCompactSpace M] [T2Space M]
     (S : SolutionOn (I := I) (M := M) D) :
     TwoTensorSecFamily (I := I) (M := M) :=
   fun t => (-1 : Real) • pinchSec (I := I) S (1 / 2) t
 
-
-
 theorem ricciUpperBoundSec_at_point
-    {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
+    {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
     [SigmaCompactSpace M] [T2Space M]
     (S : SolutionOn (I := I) (M := M) D)
     (t : Real) (x : M) :
@@ -61,11 +60,9 @@ theorem ricciUpperBoundSec_at_point
         Tensor0SSpace.sub_apply 2 x A B slots]
     _ = B slots - A slots := by ring
 
-
-
 @[simp]
 theorem ricciUpperBoundSec_apply
-    {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
+    {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
     [SigmaCompactSpace M] [T2Space M]
     (S : SolutionOn (I := I) (M := M) D)
     (t : Real) (x : M) (v w : TangentSpace I x) :
@@ -91,16 +88,16 @@ theorem ricciUpperBoundSec_apply
               (metricTensorField (I := I) (S.base.metric t) x) (vec2 (I := I) v w)]
           simp only [metricTensorField_apply]
           have h0 : vec2 (I := I) v w 0 = v := by
-            unfold DifferentialGeometry.Integral.Connection.vec2
+            unfold DifferentialGeometry.Geometry.Curvature.vec2
             simp
           have h1 : vec2 (I := I) v w 1 = w := by
-            unfold DifferentialGeometry.Integral.Connection.vec2
+            unfold DifferentialGeometry.Geometry.Curvature.vec2
             norm_num
           rw [h0, h1]
           simp [SolutionOn.ricciAt, SolutionFamily.ricciAt]
 
 theorem ricciUpperBoundSec_symm
-    {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
+    {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
     [SigmaCompactSpace M] [T2Space M]
     (S : SolutionOn (I := I) (M := M) D) (U : Set Real) :
     TwoTensorFamilySymmetricOn (I := I) (M := M)
@@ -114,27 +111,27 @@ theorem ricciUpperBoundSec_symm
     ricciUpperBoundSec_apply (I := I) S t x w v, hRic, hg]
 
 noncomputable def ricciUpperBoundNablaModel
-    {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
+    {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
     [CompleteSpace E] [SigmaCompactSpace M] [T2Space M]
     (S : SolutionOn (I := I) (M := M) D) :
     TensorNabla1SecFamily (I := I) (M := M) :=
   fun t => -pinchNablaModel (I := I) S (1 / 2) t
 
 noncomputable def ricciUpperBoundNab2ModelSec
-    {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
+    {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
     [CompleteSpace E] [SigmaCompactSpace M] [T2Space M]
     (S : SolutionOn (I := I) (M := M) D) :
     TensorNabla2SecFamily (I := I) (M := M) :=
   fun t => -pinchNab2ModelSec (I := I) S (1 / 2) t
 
 private def ricciUpperBoundCoordTime
-    {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
+    {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
     [SigmaCompactSpace M] [T2Space M]
     (S : SolutionOn (I := I) (M := M) D)
     (t : Real) (x : M) (v : TangentSpace I x) : Real :=
   -(ricciCoordQuadRHS (I := I) S t x v) +
     (1 / 2) *
-      ((DifferentialGeometry.Integral.Connection.laplacianAt (I := I) (flowG (I := I) S) t
+      ((DifferentialGeometry.Geometry.Curvature.laplacianAt (I := I) (flowG (I := I) S) t
             (S.scalar t) x +
           2 * normSq0S (I := I) (S.family.metric t) x 2 (S.ricci t x)) *
           (S.family.metric t).inner x v v +
@@ -142,7 +139,7 @@ private def ricciUpperBoundCoordTime
           ((-2 : Real) * S.ricciAt t x (vec2 (I := I) v v)))
 
 private def ricciUpperBoundCoordReact
-    {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
+    {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
     [SigmaCompactSpace M] [T2Space M]
     (S : SolutionOn (I := I) (M := M) D)
     (t : Real) (x : M) (v : TangentSpace I x) : Real :=
@@ -166,7 +163,7 @@ noncomputable def ricciUpperBoundReact : TwoTensorReaction (I := I) (M := M) :=
     (fun _t g _x A => ricciUpperBoundReactAt (I := I) g A)
 
 private theorem ricciUpperBoundReact_eval
-    {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
+    {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
     [SigmaCompactSpace M] [T2Space M]
     (S : SolutionOn (I := I) (M := M) D)
     (t : Real) (x : M) (v : TangentSpace I x) :
@@ -261,7 +258,7 @@ private theorem ricciUpperBoundReactAt_eq_neg_shift
           congr 1
 
 private theorem ricciUpperBoundReactAt_of_solution
-    {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
+    {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
     [SigmaCompactSpace M] [T2Space M]
     (S : SolutionOn (I := I) (M := M) D)
     {t : Real} {x : M}
@@ -316,16 +313,15 @@ private theorem ricciUpperBoundReactAt_of_solution
     SolutionOn.ricciAt, SolutionFamily.ricciAt]
 
 private theorem ricciUpperBoundNab2ModelSec_neg
-    {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
+    {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
     [SigmaCompactSpace M] [T2Space M]
     (S : SolutionOn (I := I) (M := M) D)
     (t : Real) (x : M) :
     (ricciUpperBoundNab2ModelSec S t) x = -pinchNab2Model S (1 / 2) t x := by
   simp [ricciUpperBoundNab2ModelSec, pinchNab2ModelSec_apply]
 
-
 private theorem ricciUpperBoundHeat_coord
-    {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
+    {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
     [SigmaCompactSpace M] [T2Space M]
     (S : SolutionOn (I := I) (M := M) D)
     (t : Real) (x : M) (v : TangentSpace I x) :
@@ -333,7 +329,7 @@ private theorem ricciUpperBoundHeat_coord
         (fun _y : M => 0)
         (ricciUpperBoundNab2ModelSec S t x) (ricciUpperBoundNablaModel S t x) v =
       (1 / 2) *
-          (DifferentialGeometry.Integral.Connection.laplacianAt (I := I) (flowG (I := I) S) t
+          (DifferentialGeometry.Geometry.Curvature.laplacianAt (I := I) (flowG (I := I) S) t
             (S.scalar t) x) * (S.base.metric t).inner x v v -
         ricciCoordRough S t x v := by
   classical
@@ -363,11 +359,11 @@ private theorem ricciUpperBoundHeat_coord
 
 private theorem ricciUpperBoundQuadDeriv_coord
     [I.Boundaryless]
-    {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
+    {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
     [CompleteSpace E] [SigmaCompactSpace M] [T2Space M]
     (S : SolutionOn (I := I) (M := M) D)
     (hS : IsSmoothSolutionOn (I := I) (M := M) S)
-    (t : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime D)
+    (t : DifferentialGeometry.Geometry.Curvature.RealTimeInterval.RegularTime D)
     (x : M) (v : TangentSpace I x) :
     HasDerivWithinAt
       (fun s : Real =>
@@ -410,7 +406,7 @@ private theorem ricciUpperBoundQuadDeriv_coord
 
 private theorem ricciUpperBoundParabolic_of_react
     [I.Boundaryless]
-    {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
+    {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
     [CompleteSpace E] [SigmaCompactSpace M] [T2Space M]
     (S : SolutionOn (I := I) (M := M) D)
     (hS : IsSmoothSolutionOn (I := I) (M := M) S)
@@ -447,7 +443,7 @@ private theorem ricciUpperBoundParabolic_of_react
           (ricciUpperBoundReact t (S.base.metric t)
             (twoTensorSecToFamily (I := I) (M := M) (ricciUpperBoundSec S) t)) x v v =
         ((1 / 2) *
-            (DifferentialGeometry.Integral.Connection.laplacianAt (I := I) (flowG (I := I) S) t
+            (DifferentialGeometry.Geometry.Curvature.laplacianAt (I := I) (flowG (I := I) S) t
               (S.scalar t) x) * (S.base.metric t).inner x v v -
           ricciCoordRough S t x v) + ricciUpperBoundCoordReact S t x v := by
             rw [hheat, hN]
@@ -459,7 +455,7 @@ private theorem ricciUpperBoundParabolic_of_react
 
 theorem ricciUpperBoundParabolic
     [I.Boundaryless]
-    {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
+    {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
     [CompleteSpace E] [SigmaCompactSpace M] [T2Space M]
     (S : SolutionOn (I := I) (M := M) D)
     (hS : IsSmoothSolutionOn (I := I) (M := M) S)
@@ -478,7 +474,6 @@ theorem ricciUpperBoundParabolic
     (fun t _ht x v => by
       rw [ricciUpperBoundReact_eval (I := I) S t x v]
       exact ricciUpperBoundReactAt_of_solution (I := I) S (hdim x) (t := t) (x := x) v)
-
 
 omit [FiniteDimensional ℝ E] [IsManifold I ∞ M] in
 private theorem twoBlockDet_nonneg
@@ -547,7 +542,7 @@ private theorem ricciUpperBoundReactAt_block
   let trA := metricTracePair0SAt (I := I) g A
   let Ric : Tensor02At (I := I) (M := M) x := trA • metricTensorField (I := I) g x - A
   let RicComp : Fin 3 → Fin 3 → Real := fun i j =>
-    (a + b) * DifferentialGeometry.Integral.Connection.delta3 i j - shiftBlockS3 a b c i j
+    (a + b) * DifferentialGeometry.Geometry.Curvature.delta3 i j - shiftBlockS3 a b c i j
   have htrA : trA = a + b := by
     dsimp [trA]
     rw [metricTrace_comp_orthonormal (I := I) (M := M) basis horth A]
@@ -560,16 +555,16 @@ private theorem ricciUpperBoundReactAt_block
     rw [htrA]
     have hmetric :
         metricTensorField (I := I) g x (vec2 (I := I) (basis i) (basis j)) =
-          DifferentialGeometry.Integral.Connection.delta3 i j := by
+          DifferentialGeometry.Geometry.Curvature.delta3 i j := by
       simp [metricTensorField_apply, horth i j,
-        vec2, DifferentialGeometry.Integral.Connection.vec2]
+        vec2, DifferentialGeometry.Geometry.Curvature.vec2]
     calc
       ((a + b) • metricTensorField (I := I) g x - A) (vec2 (I := I) (basis i) (basis j))
           = ((a + b) • metricTensorField (I := I) g x) (vec2 (I := I) (basis i) (basis j)) -
               A (vec2 (I := I) (basis i) (basis j)) :=
             Tensor0SSpace.sub_apply 2 x ((a + b) • metricTensorField (I := I) g x) A
               (vec2 (I := I) (basis i) (basis j))
-      _ = (a + b) * DifferentialGeometry.Integral.Connection.delta3 i j -
+      _ = (a + b) * DifferentialGeometry.Geometry.Curvature.delta3 i j -
               shiftBlockS3 a b c i j := by
             rw [show ((a + b) • metricTensorField (I := I) g x) (vec2 (I := I) (basis i) (basis j)) =
                   (a + b) * metricTensorField (I := I) g x (vec2 (I := I) (basis i) (basis j)) from
@@ -580,7 +575,7 @@ private theorem ricciUpperBoundReactAt_block
     rw [metricTrace_comp_orthonormal (I := I) (M := M) basis horth Ric]
     simp_rw [hRicComp, ricciScal3]
     simp [RicComp, Fin.sum_univ_three, shiftBlockS3,
-      DifferentialGeometry.Integral.Connection.delta3]
+      DifferentialGeometry.Geometry.Curvature.delta3]
     ring
   have hnorm : inner0S (I := I) g x 2 Ric Ric = ricciNorm3 RicComp := by
     rw [ricciNorm3_comp_orthonormal (I := I) (M := M) basis horth Ric]
@@ -600,8 +595,8 @@ private theorem ricciUpperBoundReactAt_block
   have hmetric00 :
       metricTensorField (I := I) g x (vec2 (I := I) (basis 0) (basis 0)) = 1 := by
     simp [metricTensorField_apply, horth 0 0,
-      vec2, DifferentialGeometry.Integral.Connection.vec2,
-      DifferentialGeometry.Integral.Connection.delta3]
+      vec2, DifferentialGeometry.Geometry.Curvature.vec2,
+      DifferentialGeometry.Geometry.Curvature.delta3]
   have hmain :
       ricciUpperBoundReactAt (I := I) g A (vec2 (I := I) (basis 0) (basis 0)) =
         inner0S (I := I) g x 2 Ric Ric * 1 -
@@ -691,7 +686,7 @@ private theorem ricciUpperBoundReactAt_block
           rw [hnorm, hsc, hRicComp 0 0, hreact]
     _ = 2 * (a * b - c ^ 2) := by
           simp [RicComp, ricciNorm3, ricciPresReact, ricciSq3, ricciScal3,
-            shiftBlockS3, stdRmOfRic3, DifferentialGeometry.Integral.Connection.delta3,
+            shiftBlockS3, stdRmOfRic3, DifferentialGeometry.Geometry.Curvature.delta3,
             Fin.sum_univ_three]
           ring
 
@@ -794,7 +789,6 @@ theorem ricciUpperBoundReact_null
   null_of_symm (I := I) (M := M) (ricciUpperBoundReact_symmInputOn (I := I) G U)
     (ricciUpperBoundReact_null_symm (I := I) G U hdim)
 
-
 private theorem ricciUpperBoundReactAt_shift_invariant
     (g : SmoothRiemannianMetric I M) {x : M}
     (hdim : Module.finrank Real (TangentSpace I x) = 3)
@@ -826,7 +820,7 @@ private theorem ricciUpperBoundReactAt_shift_invariant
   exact congrArg Neg.neg hshift'
 
 private theorem ricciUpperBoundReact_barrier_eq
-    {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
+    {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
     [SigmaCompactSpace M] [T2Space M]
     (S : SolutionOn (I := I) (M := M) D)
     {x : M}
@@ -884,10 +878,10 @@ private theorem ricciUpperBoundReact_barrier_eq
           (vec2 (I := I) X Y)]
     simp only [metricTensorField_apply]
     have h0 : vec2 (I := I) X Y 0 = X := by
-      unfold DifferentialGeometry.Integral.Connection.vec2
+      unfold DifferentialGeometry.Geometry.Curvature.vec2
       simp
     have h1 : vec2 (I := I) X Y 1 = Y := by
-      unfold DifferentialGeometry.Integral.Connection.vec2
+      unfold DifferentialGeometry.Geometry.Curvature.vec2
       norm_num
     rw [h0, h1]
     dsimp [Araw]
@@ -914,9 +908,8 @@ private theorem ricciUpperBoundReact_barrier_eq
   rw [← ricciUpperBoundReact_eval (I := I) S t x v]
   rfl
 
-
 private theorem ricciUpperBoundSpatialModel
-    {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
+    {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
     [CompleteSpace E] [SigmaCompactSpace M] [T2Space M]
     (S : SolutionOn (I := I) (M := M) D) :
     TensorSpatialDerivs (I := I) (M := M)
@@ -934,7 +927,7 @@ private theorem ricciUpperBoundSpatialModel
       pinchNab2Model, pinchNablaModel] using hneg
 
 private theorem ricciUpperBoundSec_neg_pinch_eval
-    {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
+    {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
     [SigmaCompactSpace M] [T2Space M]
     (S : SolutionOn (I := I) (M := M) D)
     (t : Real) (x : M) (v w : TangentSpace I x) :
@@ -960,7 +953,7 @@ private theorem ricciUpperBoundSec_neg_pinch_eval
   ring
 
 private theorem ricciUpperBoundSecFamilyContinuousOnSet
-    {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
+    {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
     [SigmaCompactSpace M] [T2Space M]
     (S : SolutionOn (I := I) (M := M) D)
     (hS : IsSolutionOn (I := I) S) {T : Real}
@@ -975,7 +968,7 @@ private theorem ricciUpperBoundSecFamilyContinuousOnSet
   simpa [ricciUpperBoundSec] using hmono
 
 private theorem ricciUpperBoundSec_tangentBundle_cont
-    {D : DifferentialGeometry.Integral.Connection.RealTimeInterval} {K : Set Real}
+    {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval} {K : Set Real}
     [SigmaCompactSpace M] [T2Space M]
     (S : SolutionOn (I := I) (M := M) D)
     (hS : IsSolutionOn (I := I) S) {T : Real}
@@ -990,7 +983,7 @@ private theorem ricciUpperBoundSec_tangentBundle_cont
       (ricciUpperBoundSecFamilyContinuousOnSet (I := I) S hS hTsub) hK)
 
 private theorem ricciUpperBoundBarrierReg
-    {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
+    {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
     [CompactSpace M] [SigmaCompactSpace M] [T2Space M]
     (S : SolutionOn (I := I) (M := M) D)
     (hS : IsSolutionOn (I := I) S) {T : Real}
@@ -1052,7 +1045,7 @@ private theorem ricciUpperBoundBarrierReg
     simp
 
 private theorem ricciUpperBoundSecCore
-    {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
+    {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
     [CompactSpace M] [SigmaCompactSpace M] [T2Space M]
     (S : SolutionOn (I := I) (M := M) D)
     (hS : IsSolutionOn (I := I) S) {T : Real}
@@ -1079,7 +1072,7 @@ theorem ricciUpperBoundPreserved
     [VectorBundle Real E (TangentSpace I : M -> Type _)]
     [ContMDiffVectorBundle (1 : WithTop ℕ∞) E (TangentSpace I : M -> Type _) I]
     [ContMDiffVectorBundle (∞ : WithTop ℕ∞) E (TangentSpace I : M -> Type _) I]
-    {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
+    {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
     [CompleteSpace E] [CompactSpace M] [SigmaCompactSpace M]
     {S : SolutionOn (I := I) (M := M) D}
     (hS : IsSmoothSolutionOn (I := I) (M := M) S)
@@ -1104,47 +1097,47 @@ theorem ricciUpperBoundPreserved
       spatial := ricciUpperBoundSpatialModel (I := I) S }
 
 theorem ricci_upper_bound_of_metricCurvatureOperatorNonnegative
-    {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
+    {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
     [SigmaCompactSpace M] [T2Space M]
     (S : SolutionOn (I := I) (M := M) D)
     {t : Real} {x : M}
     (hdim : Module.finrank Real (TangentSpace I x) = 3)
-    (hcone : DifferentialGeometry.Integral.Connection.metricAlgebraicCurvatureTensorAt
+    (hcone : DifferentialGeometry.Geometry.Curvature.metricAlgebraicCurvatureTensorAt
         (I := I) (M := M) (S.base.metric t) x ∈
-      DifferentialGeometry.Integral.Connection.algebraicCurvatureOperatorNonnegativeCone) :
+      DifferentialGeometry.Geometry.Curvature.algebraicCurvatureOperatorNonnegativeCone) :
     ∀ v : TangentSpace I x,
       S.ricciAt t x (vec2 (I := I) v v) ≤
         (S.scalar t x / 2) * (S.base.metric t).inner x v v := by
-  have hsymm : DifferentialGeometry.Integral.Connection.RicciSymAt (I := I) (S.ricciAt t x) :=
+  have hsymm : DifferentialGeometry.Geometry.Curvature.RicciSymAt (I := I) (S.ricciAt t x) :=
     ricciAt_symm (I := I) S t x
   have htrace : ∀ basis : Module.Basis (Fin 3) Real (TangentSpace I x),
       OrthonormalBasisAt (I := I) (S.base.metric t) x basis →
         RiemannFromRicci3DTraceDataAt (I := I) (S.base.metric t) (-(S.ricciAt t x))
           (-(S.scalar t x))
-          (DifferentialGeometry.Integral.Connection.metricAlgebraicCurvatureTensorAt
+          (DifferentialGeometry.Geometry.Curvature.metricAlgebraicCurvatureTensorAt
             (I := I) (M := M) (S.base.metric t) x :
-              DifferentialGeometry.Integral.Connection.Tensor04At (I := I) (M := M) x) basis := by
+              DifferentialGeometry.Geometry.Curvature.Tensor04At (I := I) (M := M) x) basis := by
     intro basis horth
     have htd := traceData_metricTrace (I := I) (M := M) S (t := t) (x := x) horth
     have hsc : S.scalar t x =
-        DifferentialGeometry.Integral.Connection.metricTracePair0SAt (I := I)
+        DifferentialGeometry.Geometry.Operator.metricTracePair0SAt (I := I)
           (S.base.metric t) (S.ricciAt t x) := by
       simp
     have hrm : S.base.rm04 t x =
-        DifferentialGeometry.Integral.Connection.metricRm04At (I := I) (M := M)
+        DifferentialGeometry.Geometry.Curvature.metricRm04At (I := I) (M := M)
           (S.base.metric t) x := by
       rfl
     rw [hrm] at htd
     simpa [hsc] using htd
   intro v
-  exact (DifferentialGeometry.Integral.Connection.algebraicCurvatureOperatorNonnegative_iff_ricci_upper_bound3
+  exact (DifferentialGeometry.Geometry.Curvature.algebraicCurvatureOperatorNonnegative_iff_ricci_upper_bound3
     (I := I) (M := M) (g := S.base.metric t) (Ric := S.ricciAt t x) (scalar := S.scalar t x)
-    (A := DifferentialGeometry.Integral.Connection.metricAlgebraicCurvatureTensorAt
+    (A := DifferentialGeometry.Geometry.Curvature.metricAlgebraicCurvatureTensorAt
       (I := I) (M := M) (S.base.metric t) x)
     (hdim := hdim) (hsymm := hsymm) (htrace := htrace)).mp hcone v
 
 theorem metricCurvatureOperatorNonnegative_of_ricci_upper_bound_at
-    {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
+    {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
     [SigmaCompactSpace M] [T2Space M]
     (S : SolutionOn (I := I) (M := M) D)
     {t : Real} {x : M}
@@ -1152,60 +1145,58 @@ theorem metricCurvatureOperatorNonnegative_of_ricci_upper_bound_at
     (hUpper : ∀ v : TangentSpace I x,
       S.ricciAt t x (vec2 (I := I) v v) ≤
         (S.scalar t x / 2) * (S.base.metric t).inner x v v) :
-    DifferentialGeometry.Integral.Connection.metricAlgebraicCurvatureTensorAt
+    DifferentialGeometry.Geometry.Curvature.metricAlgebraicCurvatureTensorAt
         (I := I) (M := M) (S.base.metric t) x ∈
-      DifferentialGeometry.Integral.Connection.algebraicCurvatureOperatorNonnegativeCone := by
-  have hsymm : DifferentialGeometry.Integral.Connection.RicciSymAt (I := I) (S.ricciAt t x) :=
+      DifferentialGeometry.Geometry.Curvature.algebraicCurvatureOperatorNonnegativeCone := by
+  have hsymm : DifferentialGeometry.Geometry.Curvature.RicciSymAt (I := I) (S.ricciAt t x) :=
     ricciAt_symm (I := I) S t x
   have htrace : ∀ basis : Module.Basis (Fin 3) Real (TangentSpace I x),
       OrthonormalBasisAt (I := I) (S.base.metric t) x basis →
         RiemannFromRicci3DTraceDataAt (I := I) (S.base.metric t) (-(S.ricciAt t x))
           (-(S.scalar t x))
-          (DifferentialGeometry.Integral.Connection.metricAlgebraicCurvatureTensorAt
+          (DifferentialGeometry.Geometry.Curvature.metricAlgebraicCurvatureTensorAt
             (I := I) (M := M) (S.base.metric t) x :
-              DifferentialGeometry.Integral.Connection.Tensor04At (I := I) (M := M) x) basis := by
+              DifferentialGeometry.Geometry.Curvature.Tensor04At (I := I) (M := M) x) basis := by
     intro basis horth
     have htd := traceData_metricTrace (I := I) (M := M) S (t := t) (x := x) horth
     have hsc : S.scalar t x =
-        DifferentialGeometry.Integral.Connection.metricTracePair0SAt (I := I)
+        DifferentialGeometry.Geometry.Operator.metricTracePair0SAt (I := I)
           (S.base.metric t) (S.ricciAt t x) := by
       simp
     have hrm : S.base.rm04 t x =
-        DifferentialGeometry.Integral.Connection.metricRm04At (I := I) (M := M)
+        DifferentialGeometry.Geometry.Curvature.metricRm04At (I := I) (M := M)
           (S.base.metric t) x := by
       rfl
     rw [hrm] at htd
     simpa [hsc] using htd
-  exact (DifferentialGeometry.Integral.Connection.algebraicCurvatureOperatorNonnegative_iff_ricci_upper_bound3
+  exact (DifferentialGeometry.Geometry.Curvature.algebraicCurvatureOperatorNonnegative_iff_ricci_upper_bound3
     (I := I) (M := M) (g := S.base.metric t) (Ric := S.ricciAt t x) (scalar := S.scalar t x)
-    (A := DifferentialGeometry.Integral.Connection.metricAlgebraicCurvatureTensorAt
+    (A := DifferentialGeometry.Geometry.Curvature.metricAlgebraicCurvatureTensorAt
       (I := I) (M := M) (S.base.metric t) x)
     (hdim := hdim) (hsymm := hsymm) (htrace := htrace)).mpr hUpper
 
-
 theorem metricCurvatureOperatorNonnegative_of_ricci_upper_bound
     [T2Space M] [SigmaCompactSpace M]
-    {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
+    {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
     (hdim : ∀ x : M, Module.finrank ℝ (TangentSpace I x) = 3)
     (hUpper : ∀ (t : ℝ) (x : M) (v : TangentSpace I x),
       S.ricciAt t x (vec2 (I := I) v v) ≤
         (S.scalar t x / 2) * (S.base.metric t).inner x v v) :
     ∀ (t : ℝ) (x : M),
-      DifferentialGeometry.Integral.Connection.metricAlgebraicCurvatureTensorAt
+      DifferentialGeometry.Geometry.Curvature.metricAlgebraicCurvatureTensorAt
         (I := I) (M := M) (S.base.metric t) x ∈
-          DifferentialGeometry.Integral.Connection.algebraicCurvatureOperatorNonnegativeCone :=
+          DifferentialGeometry.Geometry.Curvature.algebraicCurvatureOperatorNonnegativeCone :=
   fun t x =>
     metricCurvatureOperatorNonnegative_of_ricci_upper_bound_at (I := I) S (hdim x)
       (t := t) (x := x) (fun v => hUpper t x v)
-
 
 theorem metricCurvatureOperatorNonnegative_preserved
     [I.Boundaryless] [T2Space M]
     [VectorBundle Real E (TangentSpace I : M -> Type _)]
     [ContMDiffVectorBundle (1 : WithTop ℕ∞) E (TangentSpace I : M -> Type _) I]
     [ContMDiffVectorBundle (∞ : WithTop ℕ∞) E (TangentSpace I : M -> Type _) I]
-    {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
+    {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
     [CompleteSpace E] [CompactSpace M] [SigmaCompactSpace M]
     {S : SolutionOn (I := I) (M := M) D}
     (hS : IsSmoothSolutionOn (I := I) (M := M) S)
@@ -1215,13 +1206,13 @@ theorem metricCurvatureOperatorNonnegative_preserved
     (hTsub : Set.Icc 0 T ⊆ D.carrier)
     (hTreg : Set.Ioc 0 T ⊆ D.regular)
     (hinit : ∀ x : M,
-      DifferentialGeometry.Integral.Connection.metricAlgebraicCurvatureTensorAt
+      DifferentialGeometry.Geometry.Curvature.metricAlgebraicCurvatureTensorAt
         (I := I) (M := M) (S.base.metric 0) x ∈
-      DifferentialGeometry.Integral.Connection.algebraicCurvatureOperatorNonnegativeCone) :
+      DifferentialGeometry.Geometry.Curvature.algebraicCurvatureOperatorNonnegativeCone) :
     ∀ t, t ∈ Set.Icc 0 T -> ∀ x : M,
-      DifferentialGeometry.Integral.Connection.metricAlgebraicCurvatureTensorAt
+      DifferentialGeometry.Geometry.Curvature.metricAlgebraicCurvatureTensorAt
         (I := I) (M := M) (S.base.metric t) x ∈
-      DifferentialGeometry.Integral.Connection.algebraicCurvatureOperatorNonnegativeCone := by
+      DifferentialGeometry.Geometry.Curvature.algebraicCurvatureOperatorNonnegativeCone := by
   have hinitUpper :
       TwoTensorFamilyNonnegativeAtTime (I := I) (M := M)
         (twoTensorSecToFamily (I := I) (M := M) (ricciUpperBoundSec S)) 0 := by

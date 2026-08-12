@@ -10,7 +10,9 @@ noncomputable section
 
 open Bundle Set
 open DifferentialGeometry.Analysis.Convex
-open DifferentialGeometry.Integral.Connection
+open DifferentialGeometry.Geometry.Connection
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Geometry.Operator
 open scoped Manifold ContDiff
 
 universe u uE uH uF
@@ -154,7 +156,7 @@ theorem properCone_dualScalarization_eq_zero_of_terminal_eq_zero_of_metricFamily
     {tau : Real} (htau : tau ∈ Set.Ioo 0 T)
     (hmem : ∀ t : Real, t ∈ Set.Icc 0 tau → ∀ x : M, u t x ∈ C)
     {D : RealTimeInterval}
-    (hG : MetricFamilySmoothOn (I := I) (M := M) D (G.restrict D))
+    (hG : MetricFamilySmoothOn (I := I) (M := M) D G.metric)
     (hslab : Set.Icc 0 tau ⊆ D.regular)
     (hconn : ∀ t ∈ Set.Icc 0 tau,
       G.connection t = LeviCivita (I := I) (G.metric t))
@@ -188,7 +190,7 @@ theorem properCone_mem_dualZeroFace_of_terminal_eq_zero_of_metricFamilySmoothOn
     {tau : Real} (htau : tau ∈ Set.Ioo 0 T)
     (hmem : ∀ t : Real, t ∈ Set.Icc 0 tau → ∀ x : M, u t x ∈ C)
     {D : RealTimeInterval}
-    (hG : MetricFamilySmoothOn (I := I) (M := M) D (G.restrict D))
+    (hG : MetricFamilySmoothOn (I := I) (M := M) D G.metric)
     (hslab : Set.Icc 0 tau ⊆ D.regular)
     (hconn : ∀ t ∈ Set.Icc 0 tau,
       G.connection t = LeviCivita (I := I) (G.metric t))

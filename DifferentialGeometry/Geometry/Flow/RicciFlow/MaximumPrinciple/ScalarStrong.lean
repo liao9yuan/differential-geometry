@@ -10,7 +10,9 @@ noncomputable section
 
 open Bundle Set Tensor0SBundle
 open DifferentialGeometry.Analysis.Parabolic
-open DifferentialGeometry.Integral.Connection
+open DifferentialGeometry.Geometry.Connection
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Geometry.Operator
 open scoped Manifold ContDiff Topology
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]
@@ -73,7 +75,7 @@ theorem scalar_curvature_positive_of_nonnegative_initial
   let X : Real → (x : M) → TangentSpace I x :=
     fun _ x ↦ (0 : TangentSpace I x)
   have hsolution : IsSolutionOn (I := I) S := hS.toIsSolutionOn
-  have hmetricSmooth : MetricFamilySmoothOn (I := I) (M := M) D (G.restrict D) := by
+  have hmetricSmooth : MetricFamilySmoothOn (I := I) (M := M) D G.metric := by
     exact hsolution.smoothMetric
   have hscalarContinuous : ContinuousOn
       (fun p : Real × M ↦ S.scalar p.1 p.2)

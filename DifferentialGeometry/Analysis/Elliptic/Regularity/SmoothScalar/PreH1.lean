@@ -7,7 +7,6 @@ import Mathlib.Analysis.InnerProductSpace.Defs
 import Mathlib.MeasureTheory.Integral.Bochner.Basic
 open DifferentialGeometry.Geometry.Operator
 
-
 noncomputable section
 
 open Bundle Manifold MeasureTheory Set Filter
@@ -40,6 +39,15 @@ structure SmoothScalar (g : SmoothRiemannianMetric I M) where
 namespace SmoothScalar
 
 variable {g : SmoothRiemannianMetric I M}
+
+def toContMDiffMap (f : SmoothScalar g) : C^∞⟮I, M; ℝ⟯ :=
+  ⟨f.toFun, f.smooth⟩
+
+omit [Module.Finite ℝ E] in
+@[simp]
+theorem coe_toContMDiffMap (f : SmoothScalar g) :
+    ⇑f.toContMDiffMap = f.toFun :=
+  rfl
 
 omit [Module.Finite ℝ E] in
 @[ext] theorem ext {f h : SmoothScalar g} (hfh : f.toFun = h.toFun) : f = h := by

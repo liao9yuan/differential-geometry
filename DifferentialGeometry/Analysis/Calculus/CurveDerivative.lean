@@ -1,11 +1,12 @@
 import Mathlib.Geometry.Manifold.MFDeriv.SpecificFunctions
-import DifferentialGeometry.Geometry.Operator.Gradient
+import DifferentialGeometry.Geometry.Operator.Operators
 import DifferentialGeometry.Geometry.Curvature.Realized.TimeInterval
 
 noncomputable section
 
 open Set Filter Bundle Manifold DifferentialGeometry
-open DifferentialGeometry.Integral.Connection
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Geometry.Operator
 open scoped Manifold ContDiff Topology
 
 namespace DifferentialGeometry.Analysis.Calculus

@@ -14,7 +14,9 @@ namespace DifferentialGeometry.Analysis.Schauder
 
 open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.DivergenceTheorem
-open DifferentialGeometry.Integral.Connection
+open DifferentialGeometry.Geometry.Connection
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Geometry.Operator
 open DifferentialGeometry.Analysis.Parabolic.Euclidean
 
 variable {E H M : Type*}
@@ -316,7 +318,7 @@ theorem parabolicPotentialTerm_euclideanChartRepresentation
 
 omit [NeZero (Module.finrank Real E)] in
 theorem parabolicVariableMatrixLap_add_driftTerm_eq_laplacian_in_euclideanChart
-    [I.Boundaryless] [SigmaCompactSpace M] [T2Space M]
+    [I.Boundaryless] [T2Space M]
     (g : Real → SmoothRiemannianMetric I M) (alpha : M)
     (u : Real → M → Real) (p : ParabolicPoint (EuclN E))
     (hu : ContMDiff I 𝓘(Real, Real) ∞ (u p.time))
@@ -344,7 +346,7 @@ theorem parabolicVariableMatrixLap_add_driftTerm_eq_laplacian_in_euclideanChart
 
 omit [NeZero (Module.finrank Real E)] in
 theorem parabolicNondivergenceOperator_eq_intrinsic_in_euclideanChart
-    [I.Boundaryless] [SigmaCompactSpace M] [T2Space M]
+    [I.Boundaryless] [T2Space M]
     (g : Real → SmoothRiemannianMetric I M) (V : Real → M → Real)
     (alpha : M) (u : Real → M → Real) (p : ParabolicPoint (EuclN E))
     (hu : ContMDiff I 𝓘(Real, Real) ∞ (u p.time))
@@ -383,7 +385,7 @@ theorem parabolicNondivergenceOperator_eq_intrinsic_in_euclideanChart
 
 omit [NeZero (Module.finrank Real E)] in
 theorem parabolicNondivergenceOperatorInEuclideanChart_eq_intrinsic
-    [I.Boundaryless] [SigmaCompactSpace M] [T2Space M]
+    [I.Boundaryless] [T2Space M]
     (g : Real → SmoothRiemannianMetric I M) (V : Real → M → Real)
     (alpha : M) (u : Real → M → Real) (p : ParabolicPoint (EuclN E))
     (hu : ContMDiff I 𝓘(Real, Real) ∞ (u p.time))
@@ -402,7 +404,7 @@ theorem parabolicNondivergenceOperatorInEuclideanChart_eq_intrinsic
 
 omit [NeZero (Module.finrank Real E)] in
 theorem parabolicNondivergenceOperator_euclideanChartRepresentation_eq_laplacianAt
-    [I.Boundaryless] [SigmaCompactSpace M] [T2Space M]
+    [I.Boundaryless] [T2Space M]
     (G : MetricConnectionFamily (I := I) (M := M) Real)
     (V : Real → M → Real) (alpha : M) (u : Real → M → Real)
     (p : ParabolicPoint (EuclN E))

@@ -10,7 +10,8 @@ noncomputable section
 open Bundle Tensor0SBundle Set
 open DifferentialGeometry.Analysis.Convex
 open DifferentialGeometry.Analysis.InnerProductSpace
-open DifferentialGeometry.Integral.Connection
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Geometry.Operator
 open scoped Manifold ContDiff
 
 universe u uE uH

@@ -41,7 +41,6 @@ def tensorHeatSemigroupHsExt
   else
     ContinuousLinearMap.id ℝ (tensorHs (I := I) (M := M) g r s σ)
 
-omit [CompactSpace M] in
 omit [NeZero (Module.finrank ℝ E)] in
 @[simp] theorem tensorHeatSemigroupHsExt_zero
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (σ : ℝ) :
@@ -51,7 +50,6 @@ omit [NeZero (Module.finrank ℝ E)] in
   unfold tensorHeatSemigroupHsExt
   simp
 
-omit [CompactSpace M] in
 omit [NeZero (Module.finrank ℝ E)] in
 theorem tensorHeatSemigroupHsExt_of_pos
     {g : SmoothRiemannianMetric I M} {r s : ℕ} {σ t : ℝ} (ht : 0 < t) :
@@ -61,7 +59,6 @@ theorem tensorHeatSemigroupHsExt_of_pos
   unfold tensorHeatSemigroupHsExt
   simp [ht]
 
-omit [CompactSpace M] in
 omit [NeZero (Module.finrank ℝ E)] in
 theorem tensorHeatSemigroupHsExt_of_nonpos
     {g : SmoothRiemannianMetric I M} {r s : ℕ} {σ t : ℝ} (ht : t ≤ 0) :
@@ -71,7 +68,6 @@ theorem tensorHeatSemigroupHsExt_of_nonpos
   unfold tensorHeatSemigroupHsExt
   simp [not_lt.mpr ht]
 
-omit [CompactSpace M] in
 omit [NeZero (Module.finrank ℝ E)] in
 theorem tensorHeatSemigroupHsExt_add
     {g : SmoothRiemannianMetric I M} {r s : ℕ} {σ t u : ℝ}
@@ -89,7 +85,6 @@ theorem tensorHeatSemigroupHsExt_add
     tensorHeatSemigroupHsExt_of_pos (I := I) (M := M) hu]
   exact tensorHeatSemigroupHs_add_comp (I := I) (M := M) ht hu
 
-omit [CompactSpace M] in
 omit [NeZero (Module.finrank ℝ E)] in
 theorem tensorHeatSemigroupHsExt_opNorm_le_one
     {g : SmoothRiemannianMetric I M} {r s : ℕ} {σ t : ℝ} (ht : 0 ≤ t) :
@@ -100,7 +95,6 @@ theorem tensorHeatSemigroupHsExt_opNorm_le_one
   rw [tensorHeatSemigroupHsExt_of_pos (I := I) (M := M) ht]
   exact tensorHeatSemigroupHs_opNorm_le_one (I := I) (M := M) ht
 
-omit [CompactSpace M] in
 omit [NeZero (Module.finrank ℝ E)] in
 theorem tensorHeatSemigroupHsExt_coeff
     {g : SmoothRiemannianMetric I M} {r s : ℕ} {σ t : ℝ} (ht : 0 ≤ t)
@@ -116,7 +110,6 @@ theorem tensorHeatSemigroupHsExt_coeff
   rw [tensorHeatSemigroupHsExt_of_pos (I := I) (M := M) ht]
   exact tensorHeatSemigroupHs_coeff (I := I) (M := M) ht T i
 
-omit [CompactSpace M] in
 omit [NeZero (Module.finrank ℝ E)] in
 theorem tensorHsInclusion_tensorHeatSemigroupHsExt
     {g : SmoothRiemannianMetric I M} {r s : ℕ} {τ σ t : ℝ}
@@ -135,7 +128,6 @@ theorem tensorHsInclusion_tensorHeatSemigroupHsExt
     tensorHeatSemigroupHsExt_coeff (I := I) (M := M) ht,
     tensorHsInclusion_coeff_apply]
 
-omit [CompactSpace M] in
 omit [NeZero (Module.finrank ℝ E)] in
 theorem tensorHeatSemigroupHsExt_eq_abstractSpectralSemigroup
     {g : SmoothRiemannianMetric I M} {r s : ℕ} {σ t : ℝ} (ht : 0 ≤ t) :
@@ -173,7 +165,6 @@ theorem tensorHeatSemigroupHsExt_eq_abstractSpectralSemigroup
             (fun i => tensor_lambda_nonneg (I := I) (M := M) i) t T).coeff i :=
       habs.symm
 
-omit [CompactSpace M] in
 omit [NeZero (Module.finrank ℝ E)] in
 theorem tensorHeatSemigroupHsExt_continuousOn
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (σ : ℝ)
@@ -190,7 +181,6 @@ theorem tensorHeatSemigroupHsExt_continuousOn
     (tensorHeatSemigroupHsExt_eq_abstractSpectralSemigroup
       (I := I) (M := M) (g := g) (r := r) (s := s) (σ := σ) ht)
 
-omit [CompactSpace M] in
 omit [NeZero (Module.finrank ℝ E)] in
 theorem hasDerivAt_tensorHeatSemigroupHsExt_eq_tensorScaleLaplacian
     (g : SmoothRiemannianMetric I M) (r s : ℕ) {σ t : ℝ} (ht : 0 < t)
@@ -226,7 +216,6 @@ theorem hasDerivAt_tensorHeatSemigroupHsExt_eq_tensorScaleLaplacian
     heatDerivCoeff_def]
   ring
 
-omit [CompactSpace M] in
 omit [NeZero (Module.finrank ℝ E)] in
 theorem deriv_tensorHeatSemigroupHsExt_eq_tensorScaleLaplacian
     (g : SmoothRiemannianMetric I M) (r s : ℕ) {σ t : ℝ} (ht : 0 < t)
@@ -239,7 +228,6 @@ theorem deriv_tensorHeatSemigroupHsExt_eq_tensorScaleLaplacian
   (hasDerivAt_tensorHeatSemigroupHsExt_eq_tensorScaleLaplacian
     (I := I) (M := M) g r s ht T).deriv
 
-omit [CompactSpace M] in
 omit [NeZero (Module.finrank ℝ E)] in
 theorem tensorHeatSemigroupHsExt_differentiableOn
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (σ : ℝ)
@@ -263,7 +251,6 @@ def tensorHsBoundedC0Semigroup
   continuousOn_apply := fun T =>
     tensorHeatSemigroupHsExt_continuousOn (I := I) (M := M) g r s σ T
 
-omit [CompactSpace M] in
 omit [NeZero (Module.finrank ℝ E)] in
 @[simp] theorem tensorHsBoundedC0Semigroup_apply
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (σ t : ℝ) :

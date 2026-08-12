@@ -6,7 +6,7 @@ set_option autoImplicit false
 
 noncomputable section
 
-namespace DifferentialGeometry.Integral.Connection
+namespace DifferentialGeometry.Geometry.Curvature
 
 open Bundle Tensor0SBundle
 open scoped Manifold ContDiff BigOperators
@@ -475,4 +475,4 @@ theorem curvatureOperatorUpperBoundReaction_null_nonneg3
     nlinarith [hsum]
   rw [hreaction]
   exact mul_nonneg (mul_nonneg (by norm_num : (0 : ℝ) ≤ 2) hl2) hl3
-end DifferentialGeometry.Integral.Connection
+end DifferentialGeometry.Geometry.Curvature

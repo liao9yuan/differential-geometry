@@ -13,7 +13,7 @@ namespace DifferentialGeometry.Analysis.Parabolic.Moser
 
 open DifferentialGeometry.Analysis.Laplacian
 open DifferentialGeometry.Analysis.Parabolic.Energy
-open DifferentialGeometry.Integral.Connection
+open DifferentialGeometry.Geometry.Operator
 open DifferentialGeometry.Integral.DivergenceTheorem
 open DifferentialGeometry.Integral.Measure
 
@@ -114,7 +114,7 @@ theorem evolving_harnack_on_separated_cylinders
     (hpde : ∀ t ∈ Icc A D, ∀ x : M,
       deriv (fun s => u s x) t =
         Δ_g (I := I) (g t)
-          (smoothScalarSlice (I := I) (g t) u hu t).smooth x)
+          (smoothScalarSlice (I := I) (g t) u hu t).toContMDiffMap x)
     (hVzero : V ≠ 0) (hVtop : V ≠ ⊤)
     (hvolume : ∀ t ∈ Icc A D,
       riemannianMeasureFamily (I := I) (M := M) g t ≤
@@ -178,7 +178,7 @@ theorem evolving_harnack_on_separated_cylinders
   have hpde_v : ∀ t ∈ Icc A D, ∀ x : M,
       deriv (fun s => v s x) t =
         Δ_g (I := I) (g t)
-          (smoothScalarSlice (I := I) (g t) v hv t).smooth x := by
+          (smoothScalarSlice (I := I) (g t) v hv t).toContMDiffMap x := by
     intro t ht x
     have hjoint := hclamp_eq (t, x) ⟨ht, Set.mem_univ x⟩
     have htime :
@@ -192,9 +192,9 @@ theorem evolving_harnack_on_separated_cylinders
     calc
       deriv (fun s => v s x) t = deriv (fun s => u s x) t := htime.deriv_eq
       _ = Δ_g (I := I) (g t)
-          (smoothScalarSlice (I := I) (g t) u hu t).smooth x := hpde t ht x
+          (smoothScalarSlice (I := I) (g t) u hu t).toContMDiffMap x := hpde t ht x
       _ = Δ_g (I := I) (g t)
-          (smoothScalarSlice (I := I) (g t) v hv t).smooth x := by
+          (smoothScalarSlice (I := I) (g t) v hv t).toContMDiffMap x := by
         exact (Δ_g_congr_of_eventuallyEq (I := I) (g t)
           (smoothScalarSlice (I := I) (g t) v hv t).smooth
           (smoothScalarSlice (I := I) (g t) u hu t).smooth hspace).symm

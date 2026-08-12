@@ -11,7 +11,7 @@ open scoped ContDiff Manifold Topology
 namespace DifferentialGeometry.Analysis.Parabolic.Energy
 
 open DifferentialGeometry.Analysis.Laplacian
-open DifferentialGeometry.Integral.Connection
+open DifferentialGeometry.Geometry.Operator
 open DifferentialGeometry.Integral.DivergenceTheorem
 open DifferentialGeometry.Integral.Measure
 
@@ -36,7 +36,7 @@ theorem localized_energy_differential_of_supersolution
       (fun p : ℝ × M => error p.1 p.2))
     (t : ℝ)
     (hpde : ∀ x : M,
-      Δ_g (I := I) g (smoothScalarSlice (I := I) g u hu t).smooth x +
+      Δ_g (I := I) g (smoothScalarSlice (I := I) g u hu t).toContMDiffMap x +
           dissipation t x ≤
         deriv (fun s => u s x) t)
     (hcross : ∀ x : M,
@@ -72,11 +72,11 @@ theorem localized_energy_differential_of_supersolution
           (gradientFun (I := I) g cutoff.toFun x)
           (gradientFun (I := I) g ut.toFun x)) := by
     have hinner := contMDiff_g_inner_of_smooth_sections (I := I) (M := M) g
-      (grad_g (I := I) g cutoff.smooth) (grad_g (I := I) g ut.smooth)
+      (grad_g (I := I) g cutoff.toContMDiffMap) (grad_g (I := I) g ut.toContMDiffMap)
     exact cutoff.smooth.continuous.mul
       (by simpa only [grad_g_apply] using hinner.continuous)
-  have hlap_cont : Continuous (fun x : M => Δ_g (I := I) g ut.smooth x) :=
-    (Δ_g_contMDiff (I := I) g ut.smooth).continuous
+  have hlap_cont : Continuous (fun x : M => Δ_g (I := I) g ut.toContMDiffMap x) :=
+    (Δ_g_contMDiff (I := I) g ut.toContMDiffMap).continuous
   let F : C^∞⟮𝓘(ℝ, ℝ).prod I, ℝ × M; ℝ⟯ := ⟨fun p => u p.1 p.2, hu⟩
   have htime_cont : Continuous (fun x : M => deriv (fun s => u s x) t) := by
     have hpartial := DifferentialGeometry.contMDiff_partial_deriv_fst I F
@@ -94,7 +94,7 @@ theorem localized_energy_differential_of_supersolution
           (gradientFun (I := I) g ut.toFun x)) μ :=
     hcross_cont.integrable_of_hasCompactSupport (HasCompactSupport.of_compactSpace _)
   have hlap_int : Integrable (fun x : M =>
-      cutoff.toFun x ^ 2 * Δ_g (I := I) g ut.smooth x) μ :=
+      cutoff.toFun x ^ 2 * Δ_g (I := I) g ut.toContMDiffMap x) μ :=
     ((cutoff.smooth.continuous.pow 2).mul hlap_cont)
       |>.integrable_of_hasCompactSupport (HasCompactSupport.of_compactSpace _)
   have htime_int : Integrable (fun x : M =>
@@ -102,14 +102,14 @@ theorem localized_energy_differential_of_supersolution
     ((cutoff.smooth.continuous.pow 2).mul htime_cont)
       |>.integrable_of_hasCompactSupport (HasCompactSupport.of_compactSpace _)
   have hpointwise : ∀ x : M,
-      cutoff.toFun x ^ 2 * Δ_g (I := I) g ut.smooth x +
+      cutoff.toFun x ^ 2 * Δ_g (I := I) g ut.toContMDiffMap x +
           cutoff.toFun x ^ 2 * dissipation t x ≤
         cutoff.toFun x ^ 2 * deriv (fun s => u s x) t := by
     intro x
     have hmul := mul_le_mul_of_nonneg_left (hpde x) (sq_nonneg (cutoff.toFun x))
     simpa only [mul_add] using hmul
   have htime_le :
-      (∫ x, cutoff.toFun x ^ 2 * Δ_g (I := I) g ut.smooth x ∂μ) +
+      (∫ x, cutoff.toFun x ^ 2 * Δ_g (I := I) g ut.toContMDiffMap x ∂μ) +
           ∫ x, cutoff.toFun x ^ 2 * dissipation t x ∂μ ≤
         ∫ x, cutoff.toFun x ^ 2 * deriv (fun s => u s x) t ∂μ := by
     rw [← integral_add hlap_int hdissipation_int]
@@ -119,25 +119,20 @@ theorem localized_energy_differential_of_supersolution
       (I := I) g test.smooth ut.smooth (HasCompactSupport.of_compactSpace _)
   have htest_pointwise : ∀ x : M,
       g.inner x
-          ((grad_g (I := I) g test.smooth :
-            Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) x)
-          ((grad_g (I := I) g ut.smooth :
-            Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) x) =
+          (gradientFun (I := I) g test.toFun x)
+          (gradientFun (I := I) g ut.toFun x) =
         2 * cutoff.toFun x *
           g.inner x
             (gradientFun (I := I) g cutoff.toFun x)
             (gradientFun (I := I) g ut.toFun x) := by
     intro x
-    rw [grad_g_apply, grad_g_apply]
-    change g.inner x
-        (gradientFun (I := I) g (fun y => cutoff.toFun y ^ 2) x)
-        (gradientFun (I := I) g ut.toFun x) = _
+    dsimp only [test]
     rw [gradientFun_pow (I := I) g 1
       (cutoff.smooth.mdifferentiable (by simp) x)]
     simp only [map_smul, ContinuousLinearMap.smul_apply, smul_eq_mul]
     ring
   have hlap_identity :
-      (∫ x, cutoff.toFun x ^ 2 * Δ_g (I := I) g ut.smooth x ∂μ) =
+      (∫ x, cutoff.toFun x ^ 2 * Δ_g (I := I) g ut.toContMDiffMap x ∂μ) =
         -2 * ∫ x, cutoff.toFun x *
           g.inner x
             (gradientFun (I := I) g cutoff.toFun x)
@@ -147,7 +142,7 @@ theorem localized_energy_differential_of_supersolution
             g.inner x
               (gradientFun (I := I) g cutoff.toFun x)
               (gradientFun (I := I) g ut.toFun x) ∂μ =
-          -∫ x, cutoff.toFun x ^ 2 * Δ_g (I := I) g ut.smooth x ∂μ := by
+          -∫ x, cutoff.toFun x ^ 2 * Δ_g (I := I) g ut.toContMDiffMap x ∂μ := by
       calc
         2 * ∫ x, cutoff.toFun x *
               g.inner x
@@ -159,14 +154,13 @@ theorem localized_energy_differential_of_supersolution
                 (gradientFun (I := I) g ut.toFun x)) ∂μ := by
               rw [integral_const_mul]
         _ = ∫ x, g.inner x
-              ((grad_g (I := I) g test.smooth :
-                Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) x)
-              ((grad_g (I := I) g ut.smooth :
-                Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) x) ∂μ := by
+              (gradientFun (I := I) g test.toFun x)
+              (gradientFun (I := I) g ut.toFun x) ∂μ := by
               exact integral_congr_ae (ae_of_all μ fun x => by
                 simpa only [mul_assoc] using (htest_pointwise x).symm)
-        _ = -∫ x, cutoff.toFun x ^ 2 * Δ_g (I := I) g ut.smooth x ∂μ := by
-              simpa only [μ, test, ut, smoothScalarSlice_toFun] using hgreen
+        _ = -∫ x, cutoff.toFun x ^ 2 * Δ_g (I := I) g ut.toContMDiffMap x ∂μ := by
+              simpa only [μ, test, ut, smoothScalarSlice_toFun,
+                grad_g_apply] using hgreen
     linarith
   have hcross_integral :
       2 * ∫ x, cutoff.toFun x *

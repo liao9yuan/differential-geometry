@@ -1,7 +1,6 @@
 import DifferentialGeometry.Analysis.Parabolic.Energy.EvolvingCaccioppoli
 import DifferentialGeometry.Analysis.Parabolic.Moser.Sobolev
 
-
 noncomputable section
 
 open Bundle Manifold MeasureTheory Set
@@ -11,7 +10,7 @@ namespace DifferentialGeometry.Analysis.Parabolic.Moser
 
 open DifferentialGeometry.Analysis.Laplacian
 open DifferentialGeometry.Analysis.Parabolic.Energy
-open DifferentialGeometry.Integral.Connection
+open DifferentialGeometry.Geometry.Operator
 open DifferentialGeometry.Integral.Measure
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] [Module.Finite ℝ E]

@@ -9,7 +9,7 @@ noncomputable section
 
 open Bundle Set
 open DifferentialGeometry.Analysis.Convex
-open DifferentialGeometry.Integral.Connection
+open DifferentialGeometry.Geometry.Curvature
 open scoped Manifold ContDiff
 
 universe u uE uH uF

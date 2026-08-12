@@ -5,7 +5,7 @@ set_option autoImplicit false
 
 noncomputable section
 
-namespace DifferentialGeometry.Integral.Connection
+namespace DifferentialGeometry.Geometry.Curvature
 
 open Bundle Tensor0SBundle
 open scoped Manifold ContDiff BigOperators
@@ -31,4 +31,4 @@ theorem metricAlgebraicCurvatureTensorAt_mem_curvatureOperatorNonnegativeCone_if
   simp [algebraicCurvatureOperatorQuadraticEval,
     metricRm04StdAt_apply]
 
-end DifferentialGeometry.Integral.Connection
+end DifferentialGeometry.Geometry.Curvature

@@ -4,6 +4,7 @@ import DifferentialGeometry.Analysis.Schauder.Composition
 noncomputable section
 
 open Real Set
+open DifferentialGeometry.Analysis.Calculus
 open scoped InnerProductSpace NNReal
 
 namespace DifferentialGeometry.Analysis.Schauder
@@ -37,6 +38,7 @@ theorem parabolicTimeCenteredBallRetraction_apply
       parabolicPoint (p.time - tau) (ballRetraction R p.space) :=
   rfl
 
+set_option linter.unusedSectionVars false in
 @[simp]
 theorem parabolicTimeCenteredBallRetraction_time
     (tau R : Real) (p : ParabolicPoint V) :
@@ -51,6 +53,7 @@ theorem parabolicTimeCenteredBallRetraction_space
   rfl
 
 omit [NormedAddCommGroup F] in
+set_option linter.unusedSectionVars false in
 @[simp]
 theorem parabolicTimeCenteredBallRetractionExtension_apply
     (tau R : Real) (f : ParabolicPoint V → F) (p : ParabolicPoint V) :
@@ -66,6 +69,7 @@ theorem parabolicBallRetraction_apply
   simp only [parabolicBallRetraction,
     parabolicTimeCenteredBallRetraction_apply, sub_zero]
 
+set_option linter.unusedSectionVars false in
 theorem parabolicBallRetraction_time
     (R : Real) (p : ParabolicPoint V) :
     (parabolicBallRetraction R p).time = p.time :=
@@ -79,6 +83,7 @@ theorem parabolicBallRetraction_space
   rfl
 
 omit [NormedAddCommGroup F] in
+set_option linter.unusedSectionVars false in
 @[simp]
 theorem parabolicBallRetractionExtension_apply
     (R : Real) (f : ParabolicPoint V → F) (p : ParabolicPoint V) :

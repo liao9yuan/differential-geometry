@@ -10,6 +10,8 @@ open MeasureTheory Set
 
 namespace DifferentialGeometry.Analysis.Parabolic.Moser
 
+open DifferentialGeometry.Geometry.Operator
+
 variable {α : Type*} [MeasurableSpace α]
 
 def bombieriGiustiExponent (p₀ c₀ β : ℝ) : ℝ :=
@@ -955,7 +957,7 @@ theorem early_localizedSpacetimeMeasure_log_superlevel_tail_of_supersolution
     {a τ r : ℝ} (haτ : a ≤ τ) (hr : 0 < r)
     (hmass : 0 < cutoffMass (I := I) (M := M) averagingCutoff)
     (hpde : ∀ t ∈ Icc a τ, ∀ x : M,
-      Δ_g (I := I) g (smoothScalarSlice (I := I) g u hu t).smooth x ≤
+      Δ_g (I := I) g (smoothScalarSlice (I := I) g u hu t).toContMDiffMap x ≤
         deriv (fun q => u q x) t) :
     (localizedSpacetimeMeasure (I := I) (M := M) deviationCutoff a τ).real
         {z | r < Real.log
@@ -992,7 +994,7 @@ theorem late_localizedSpacetimeMeasure_neg_log_superlevel_tail_of_supersolution
     {τ b r : ℝ} (hτb : τ ≤ b) (hr : 0 < r)
     (hmass : 0 < cutoffMass (I := I) (M := M) averagingCutoff)
     (hpde : ∀ t ∈ Icc τ b, ∀ x : M,
-      Δ_g (I := I) g (smoothScalarSlice (I := I) g u hu t).smooth x ≤
+      Δ_g (I := I) g (smoothScalarSlice (I := I) g u hu t).toContMDiffMap x ≤
         deriv (fun q => u q x) t) :
     (localizedSpacetimeMeasure (I := I) (M := M) deviationCutoff τ b).real
         {z | r < -Real.log
@@ -1052,7 +1054,7 @@ theorem early_localizedSpacetimeRpowNorm_le_exp_tsum_bombieriGiustiThreshold_of_
     (houter : ∀ k x, (cutoff k).toFun x ^ 2 ≤ outer.toFun x ^ 2)
     (hmass : 0 < cutoffMass (I := I) (M := M) averagingCutoff)
     (hpde : ∀ t ∈ Icc A τ, ∀ x : M,
-      Δ_g (I := I) g (smoothScalarSlice (I := I) g u hu t).smooth x ≤
+      Δ_g (I := I) g (smoothScalarSlice (I := I) g u hu t).toContMDiffMap x ≤
         deriv (fun q => u q x) t)
     (hreverse : ∀ k {p : ℝ}, 0 < p → p < p₀ →
       localizedSpacetimeRpowNorm (I := I) (M := M) (cutoff k)
@@ -1137,7 +1139,7 @@ theorem late_localizedSpacetimeRpowNorm_inv_le_exp_tsum_bombieriGiustiThreshold_
     (houter : ∀ k x, (cutoff k).toFun x ^ 2 ≤ outer.toFun x ^ 2)
     (hmass : 0 < cutoffMass (I := I) (M := M) averagingCutoff)
     (hpde : ∀ t ∈ Icc τ D, ∀ x : M,
-      Δ_g (I := I) g (smoothScalarSlice (I := I) g u hu t).smooth x ≤
+      Δ_g (I := I) g (smoothScalarSlice (I := I) g u hu t).toContMDiffMap x ≤
         deriv (fun q => u q x) t)
     (hreverse : ∀ k {p : ℝ}, 0 < p → p < p₀ →
       localizedSpacetimeRpowNorm (I := I) (M := M) (cutoff k)
@@ -1215,7 +1217,7 @@ theorem early_integral_rpow_le_of_supersolution
     (haτ : a ≤ τ) (hr : 0 < r)
     (hmass : 0 < cutoffMass (I := I) (M := M) averagingCutoff)
     (hpde : ∀ t ∈ Icc a τ, ∀ x : M,
-      Δ_g (I := I) g (smoothScalarSlice (I := I) g u hu t).smooth x ≤
+      Δ_g (I := I) g (smoothScalarSlice (I := I) g u hu t).toContMDiffMap x ≤
         deriv (fun s => u s x) t)
     (hq_int :
       let v := exponentialTimeRescale
@@ -1260,7 +1262,7 @@ theorem late_integral_neg_rpow_le_of_supersolution
     (hτb : τ ≤ b) (hr : 0 < r)
     (hmass : 0 < cutoffMass (I := I) (M := M) averagingCutoff)
     (hpde : ∀ t ∈ Icc τ b, ∀ x : M,
-      Δ_g (I := I) g (smoothScalarSlice (I := I) g u hu t).smooth x ≤
+      Δ_g (I := I) g (smoothScalarSlice (I := I) g u hu t).toContMDiffMap x ≤
         deriv (fun s => u s x) t)
     (hq_int :
       let v := exponentialTimeRescale

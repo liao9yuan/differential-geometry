@@ -12,7 +12,7 @@ namespace DifferentialGeometry.Analysis.Parabolic.Moser
 
 open DifferentialGeometry.Analysis.Laplacian
 open DifferentialGeometry.Analysis.Parabolic.Energy
-open DifferentialGeometry.Integral.Connection
+open DifferentialGeometry.Geometry.Operator
 open DifferentialGeometry.Integral.DivergenceTheorem
 open DifferentialGeometry.Integral.Measure
 
@@ -48,7 +48,7 @@ theorem evolving_weak_harnack_of_localized_crossover_of_volume_le
       localizedSobolevConstant (I := I) (M := M) (g t) hdim ≤ C)
     (hpde : ∀ t ∈ Icc a t₁, ∀ x : M,
       Δ_g (I := I) (g t)
-          (smoothScalarSlice (I := I) (g t) u hu t).smooth x ≤
+          (smoothScalarSlice (I := I) (g t) u hu t).toContMDiffMap x ≤
         deriv (fun s ↦ u s x) t)
     (htrace : ∀ t ∈ Icc a t₁, ∀ x : M,
       traceTimeDerivMetric (I := I) g t x ≤ B)
@@ -123,7 +123,7 @@ theorem evolving_weak_harnack_of_localized_rpow_crossover_of_volume_le
       localizedSobolevConstant (I := I) (M := M) (g t) hdim ≤ C)
     (hpde : ∀ t ∈ Icc a t₁, ∀ x : M,
       Δ_g (I := I) (g t)
-          (smoothScalarSlice (I := I) (g t) u hu t).smooth x ≤
+          (smoothScalarSlice (I := I) (g t) u hu t).toContMDiffMap x ≤
         deriv (fun s ↦ u s x) t)
     (htrace : ∀ t ∈ Icc a t₁, ∀ x : M,
       traceTimeDerivMetric (I := I) g t x ≤ B)
@@ -197,7 +197,7 @@ theorem evolving_harnack_of_localized_crossover_of_volume_le
     (hpde : ∀ t ∈ Icc a t₁, ∀ x : M,
       deriv (fun s ↦ u s x) t =
         Δ_g (I := I) (g t)
-          (smoothScalarSlice (I := I) (g t) u hu t).smooth x)
+          (smoothScalarSlice (I := I) (g t) u hu t).toContMDiffMap x)
     (htrace : ∀ t ∈ Icc a t₁, ∀ x : M,
       traceTimeDerivMetric (I := I) g t x ≤ B)
     (hgradient : ∀ k t, t ∈ Icc a t₁ → ∀ x : M,

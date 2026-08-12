@@ -11,7 +11,8 @@ noncomputable section
 open Bundle Set Filter
 open DifferentialGeometry.Analysis.Convex
 open DifferentialGeometry.Analysis.ODE
-open DifferentialGeometry.Integral.Connection
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Geometry.Operator
 open scoped Manifold ContDiff Topology RealInnerProductSpace NNReal
 
 universe u uE uH uF
@@ -22,7 +23,8 @@ variable {H : Type uH} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H}
 variable {M : Type u} [TopologicalSpace M] [ChartedSpace H M]
 variable [IsManifold I ∞ M]
-variable {F : Type uF} [NormedAddCommGroup F] [InnerProductSpace Real F] [CompleteSpace F]
+variable {F : Type uF} [NormedAddCommGroup F] [InnerProductSpace Real F]
+  [completeF : CompleteSpace F]
 
 structure IsInnerProductHeatReactionOn
     (D : RealTimeInterval)
@@ -59,6 +61,7 @@ private theorem deriv_nonneg_at_right_endpoint_of_isMaxOn_Icc
   rw [heval] at hnonpos
   nlinarith
 
+include completeF in
 theorem closed_convex_heat_reaction_mem_of_supporting_normal
     [I.Boundaryless] [CompactSpace M]
     [VectorBundle Real E (TangentSpace I : M → Type _)]
@@ -288,6 +291,7 @@ theorem closed_convex_heat_reaction_mem_of_supporting_normal
       exact hIco s ⟨le_of_lt hs, hslt⟩ x
   · exact hIco t ⟨ht.1, htlt⟩ x
 
+include completeF in
 theorem closed_convex_heat_reaction_mem_of_tangent
     [I.Boundaryless] [CompactSpace M]
     [VectorBundle Real E (TangentSpace I : M → Type _)]
@@ -339,6 +343,7 @@ theorem properCone_heat_reaction_mem_of_tangent
   closed_convex_heat_reaction_mem_of_tangent
     (I := I) G hT C C.nonempty C.isClosed C.convex reaction u hsol L hL htangent hinit
 
+include completeF in
 theorem properCone_heat_reaction_mem_of_dualZeroFace_nonneg
     [I.Boundaryless] [CompactSpace M]
     [VectorBundle Real E (TangentSpace I : M → Type _)]

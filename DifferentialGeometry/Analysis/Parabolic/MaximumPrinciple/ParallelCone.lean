@@ -13,7 +13,7 @@ open Bundle Set
 open DifferentialGeometry.Analysis.Convex
 open DifferentialGeometry.Analysis.ODE
 open DifferentialGeometry.Geometry.Connection
-open DifferentialGeometry.Integral.Connection
+open DifferentialGeometry.Geometry.Curvature
 open scoped Manifold ContDiff
 
 universe u uE uH uF

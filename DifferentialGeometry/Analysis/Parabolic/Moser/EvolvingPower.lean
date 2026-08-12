@@ -1,7 +1,6 @@
 import DifferentialGeometry.Analysis.Parabolic.Moser.EvolvingSobolev
 import DifferentialGeometry.Analysis.Parabolic.Moser.Power
 
-
 noncomputable section
 
 open Bundle Manifold MeasureTheory Set
@@ -11,7 +10,7 @@ namespace DifferentialGeometry.Analysis.Parabolic.Moser
 
 open DifferentialGeometry.Analysis.Laplacian
 open DifferentialGeometry.Analysis.Parabolic.Energy
-open DifferentialGeometry.Integral.Connection
+open DifferentialGeometry.Geometry.Operator
 open DifferentialGeometry.Integral.DivergenceTheorem
 open DifferentialGeometry.Integral.Measure
 
@@ -55,7 +54,7 @@ theorem caccioppoli_evolving_positive_rpow_of_supersolution
     (htrace : ∀ x : M,
       -traceTimeDerivMetric (I := I) g t x ≤ B)
     (hpde : ∀ x : M,
-      Δ_g (I := I) (g t) (smoothScalarSlice (I := I) (g t) u hu t).smooth x ≤
+      Δ_g (I := I) (g t) (smoothScalarSlice (I := I) (g t) u hu t).toContMDiffMap x ≤
         deriv (fun s => u s x) t) :
     (2 * (1 - q) / q) *
         evolvingLocalizedDirichletEnergy
@@ -202,7 +201,7 @@ theorem weighted_caccioppoli_evolving_positive_rpow_of_supersolution
     (htrace : ∀ t ∈ Icc a b, ∀ x : M,
       -traceTimeDerivMetric (I := I) g t x ≤ B)
     (hpde : ∀ t ∈ Icc a b, ∀ x : M,
-      Δ_g (I := I) (g t) (smoothScalarSlice (I := I) (g t) u hu t).smooth x ≤
+      Δ_g (I := I) (g t) (smoothScalarSlice (I := I) (g t) u hu t).toContMDiffMap x ≤
         deriv (fun s => u s x) t) :
     weight a * evolvingLocalizedL2Mass
           (I := I) (M := M) g cutoff (fun s x => u s x ^ (q / 2)) a -
@@ -339,7 +338,7 @@ theorem backward_caccioppoli_evolving_inner_energy_positive_rpow_of_supersolutio
     (htrace : ∀ t ∈ Icc a b, ∀ x : M,
       -traceTimeDerivMetric (I := I) g t x ≤ B)
     (hpde : ∀ t ∈ Icc a b, ∀ x : M,
-      Δ_g (I := I) (g t) (smoothScalarSlice (I := I) (g t) u hu t).smooth x ≤
+      Δ_g (I := I) (g t) (smoothScalarSlice (I := I) (g t) u hu t).toContMDiffMap x ≤
         deriv (fun s => u s x) t)
     (hrhs_le : ∀ t ∈ Icc a t₁,
       (∫ s in t..b,
@@ -451,7 +450,7 @@ theorem caccioppoli_evolving_rpow_of_subsolution
     (hpde : ∀ t ∈ Icc a b, ∀ x : M,
       deriv (fun s => u s x) t ≤
         Δ_g (I := I) (g t)
-          (smoothScalarSlice (I := I) (g t) u hu t).smooth x + source t x) :
+          (smoothScalarSlice (I := I) (g t) u hu t).toContMDiffMap x + source t x) :
     weight b * evolvingLocalizedL2Mass
           (I := I) (M := M) g cutoff (fun s x => u s x ^ q) b -
         weight a * evolvingLocalizedL2Mass
@@ -518,7 +517,7 @@ theorem evolving_rpow_moser_step_le
     (hpde : ∀ t ∈ Icc a t₁, ∀ x : M,
       deriv (fun s => u s x) t ≤
         Δ_g (I := I) (g t)
-          (smoothScalarSlice (I := I) (g t) u hu t).smooth x + source t x)
+          (smoothScalarSlice (I := I) (g t) u hu t).toContMDiffMap x + source t x)
     (hrhs_le : ∀ t ∈ Icc t₀ t₁,
       (∫ s in a..t,
         dweight s * evolvingLocalizedL2Mass
@@ -556,7 +555,7 @@ theorem evolving_rpow_moser_step_le
       deriv (fun s => u s x ^ q) t ≤
         Δ_g (I := I) (g t)
             (smoothScalarSlice (I := I) (g t)
-              (fun s x => u s x ^ q) huq t).smooth x +
+              (fun s x => u s x ^ q) huq t).toContMDiffMap x +
           sourceq t x := by
     intro t ht x
     simpa only [huq, sourceq] using rpow_subsolution
@@ -600,7 +599,7 @@ theorem evolving_rpow_moser_step_homogeneous_le
     (hpde : ∀ s ∈ Icc a t₁, ∀ x : M,
       deriv (fun r => u r x) s ≤
         Δ_g (I := I) (g s)
-          (smoothScalarSlice (I := I) (g s) u hu s).smooth x)
+          (smoothScalarSlice (I := I) (g s) u hu s).toContMDiffMap x)
     (hcutoff_le : ∀ x : M, cutoff x ^ 2 ≤ outer x ^ 2)
     (hgrad : ∀ s ∈ Icc a t₁, ∀ x : M,
       (g s).inner x

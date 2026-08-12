@@ -40,7 +40,6 @@ def tensorHeatMildSolutionHs
     tensorHs (I := I) (M := M) g r s σ :=
   duhamel (tensorHsBoundedC0Semigroup (I := I) (M := M) g r s σ) T₀ F t
 
-omit [CompactSpace M] in
 omit [NeZero (Module.finrank ℝ E)] in
 theorem tensorHeatMildSolutionHs_apply
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (σ : ℝ)
@@ -52,7 +51,6 @@ theorem tensorHeatMildSolutionHs_apply
           tensorHeatSemigroupHsExt (I := I) (M := M) g r s σ (t - τ) (F τ) :=
   rfl
 
-omit [CompactSpace M] in
 omit [NeZero (Module.finrank ℝ E)] in
 theorem tensorHeatMildSolutionHs_eq_abstractSpectralDuhamel
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (σ : ℝ)
@@ -77,7 +75,6 @@ theorem tensorHeatMildSolutionHs_eq_abstractSpectralDuhamel
       (I := I) (M := M) (g := g) (r := r) (s := s) (σ := σ)
       (sub_nonneg.mpr hτ.2))
 
-omit [CompactSpace M] in
 omit [NeZero (Module.finrank ℝ E)] in
 @[simp] theorem tensorHeatMildSolutionHs_zero
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (σ : ℝ)
@@ -87,7 +84,6 @@ omit [NeZero (Module.finrank ℝ E)] in
   duhamel_zero
     (tensorHsBoundedC0Semigroup (I := I) (M := M) g r s σ) T₀ F
 
-omit [CompactSpace M] in
 omit [NeZero (Module.finrank ℝ E)] in
 theorem tensorHeatMildSolutionHs_integrable
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (σ : ℝ)
@@ -99,7 +95,6 @@ theorem tensorHeatMildSolutionHs_integrable
   duhamel_integrable
     (tensorHsBoundedC0Semigroup (I := I) (M := M) g r s σ) hF ht
 
-omit [CompactSpace M] in
 omit [NeZero (Module.finrank ℝ E)] in
 theorem tensorHsInclusion_tensorHeatMildSolutionHs
     (g : SmoothRiemannianMetric I M) (r s : ℕ) {τ σ : ℝ}
@@ -129,7 +124,6 @@ theorem tensorHsInclusion_tensorHeatMildSolutionHs
   exact tensorHsInclusion_tensorHeatSemigroupHsExt
     (I := I) (M := M) hτσ (sub_nonneg.mpr hq.2) (F q)
 
-omit [CompactSpace M] in
 omit [NeZero (Module.finrank ℝ E)] in
 theorem tensorHeatMildSolutionHs_continuousOn
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (σ : ℝ)
@@ -141,7 +135,6 @@ theorem tensorHeatMildSolutionHs_continuousOn
   duhamel_continuousOn
     (tensorHsBoundedC0Semigroup (I := I) (M := M) g r s σ) T₀ hF
 
-omit [CompactSpace M] in
 omit [NeZero (Module.finrank ℝ E)] in
 theorem tensorHeatMildSolutionHs_hasDerivAt_of_strong_data
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (σ : ℝ)
@@ -213,7 +206,6 @@ theorem tensorHeatMildSolutionHs_hasDerivAt_of_strong_data
     tensorHsInclusion_coeff_apply, tensorScaleLaplacian_coeff]
   ring
 
-omit [CompactSpace M] in
 omit [NeZero (Module.finrank ℝ E)] in
 theorem deriv_tensorHeatMildSolutionHs_eq_tensorScaleLaplacian_add_of_strong_data
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (σ : ℝ)
@@ -235,7 +227,6 @@ theorem deriv_tensorHeatMildSolutionHs_eq_tensorScaleLaplacian_add_of_strong_dat
   (tensorHeatMildSolutionHs_hasDerivAt_of_strong_data
     (I := I) (M := M) g r s σ T₀ hF ht).deriv
 
-omit [CompactSpace M] in
 omit [NeZero (Module.finrank ℝ E)] in
 theorem tensorHeatMildSolutionHs_differentiableOn_of_strong_data
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (σ : ℝ)
@@ -253,7 +244,6 @@ theorem tensorHeatMildSolutionHs_differentiableOn_of_strong_data
   exact (tensorHeatMildSolutionHs_hasDerivAt_of_strong_data
     (I := I) (M := M) g r s σ T₀ hF ht).differentiableAt.differentiableWithinAt
 
-omit [CompactSpace M] in
 omit [NeZero (Module.finrank ℝ E)] in
 theorem tensorHeatMildSolutionHs_zero_forcing
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (σ t : ℝ)

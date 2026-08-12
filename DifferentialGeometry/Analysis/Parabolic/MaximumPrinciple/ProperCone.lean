@@ -8,7 +8,7 @@ namespace DifferentialGeometry.Analysis.Parabolic
 noncomputable section
 
 open Bundle Set
-open DifferentialGeometry.Integral.Connection
+open DifferentialGeometry.Geometry.Curvature
 open scoped Manifold ContDiff RealInnerProductSpace
 
 universe u uE uH uF

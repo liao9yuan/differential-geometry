@@ -16,7 +16,7 @@ namespace Variation
 
 open Tensor0SBundle
 open DifferentialGeometry.Analysis.Convex
-open DifferentialGeometry.Integral.Connection
+open DifferentialGeometry.Geometry.Curvature
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]
   [FiniteDimensional Real E] [NeZero (Module.finrank Real E)]

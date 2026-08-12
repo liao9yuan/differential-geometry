@@ -32,10 +32,13 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.L2
-open DifferentialGeometry.Integral.Connection
+open DifferentialGeometry.Geometry.Connection
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Geometry.Operator
+open DifferentialGeometry.Analysis.Elliptic
 open DifferentialGeometry.Analysis.Laplacian
-open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral
-open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.MetricRealization
+open DifferentialGeometry.Analysis.Spectral
+open DifferentialGeometry.Analysis.Spectral.MetricRealization
 open DifferentialGeometry.Analysis.Parabolic.TensorHeatEquation
 open DifferentialGeometry.Analysis.Parabolic.TensorSpectral
 open Tensor0SBundle
@@ -1087,7 +1090,7 @@ private lemma nat_add_neg_self (N q : ℕ) : (((N + q : ℕ) : ℝ) + (-(q : ℝ
   push_cast
   ring
 
-omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma summable_exp_mul_pow
     (g : SmoothRiemannianMetric I M) (htail : EigenvalueTailSummable g 0 0) (N : ℕ)
     {a t : ℝ} (ha : 0 < a) (hat : a ≤ t) :
@@ -3584,14 +3587,14 @@ private lemma lift_jets_jointContMDiffOn
     ContMDiffOn (I.prod 𝓘(ℝ, ℝ)) (I.prod 𝓘(ℝ, TensorRSModel 0 (0 + j) ℝ E)) ∞
       (fun q : M × ℝ => TotalSpace.mk' (TensorRSModel 0 (0 + j) ℝ E)
         (E := fun z : M => TensorRSSpace 0 (0 + j) I z) q.1
-          ((PDE.RicciFlow.iteratedCovGrad g 0 0 j (scalarCcLift g (F q.2))).toSection q.1))
+          ((Analysis.Sobolev.iteratedCovGrad g 0 0 j (scalarCcLift g (F q.2))).toSection q.1))
       ((Set.univ : Set M) ×ˢ U) := by
   induction j with
   | zero =>
       simpa using hLift
   | succ j ih =>
       exact covGrad_step_jointContMDiffOn (I := I) (M := M) g 0 (0 + j)
-        (fun t => PDE.RicciFlow.iteratedCovGrad g 0 0 j (scalarCcLift g (F t)))
+        (fun t => Analysis.Sobolev.iteratedCovGrad g 0 0 j (scalarCcLift g (F t)))
         U ih
 
 omit [NeZero (Module.finrank ℝ E)] in
@@ -3604,30 +3607,30 @@ private lemma jet_l2Norm_contDiff
           ((scalarCcLift g (F q.2)).toSection q.1))
       ((Set.univ : Set M) ×ˢ U)) :
     ContinuousOn (fun t : ℝ =>
-      ‖PDE.RicciFlow.iteratedCovGrad g 0 0 j (scalarCcLift g (F t))‖ ^ 2)
+      ‖Analysis.Sobolev.iteratedCovGrad g 0 0 j (scalarCcLift g (F t))‖ ^ 2)
       (Set.Icc a b) := by
   have hjet : ContMDiffOn (I.prod 𝓘(ℝ, ℝ)) (I.prod 𝓘(ℝ, TensorRSModel 0 (0 + j) ℝ E)) ∞
       (fun q : M × ℝ => TotalSpace.mk' (TensorRSModel 0 (0 + j) ℝ E)
         (E := fun z : M => TensorRSSpace 0 (0 + j) I z) q.1
-          ((PDE.RicciFlow.iteratedCovGrad g 0 0 j (scalarCcLift g (F q.2))).toSection q.1))
+          ((Analysis.Sobolev.iteratedCovGrad g 0 0 j (scalarCcLift g (F q.2))).toSection q.1))
       ((Set.univ : Set M) ×ˢ U) := by
     induction j with
     | zero => simpa using hLift
     | succ j ih =>
         exact covGrad_step_jointContMDiffOn (I := I) (M := M) g 0 (0 + j)
-          (fun t => PDE.RicciFlow.iteratedCovGrad g 0 0 j (scalarCcLift g (F t)))
+          (fun t => Analysis.Sobolev.iteratedCovGrad g 0 0 j (scalarCcLift g (F t)))
           U ih
   have hfib : ContinuousOn (fun p : ℝ × M =>
       riemannianFiberNormSq (I := I) (M := M) g 0 (0 + j) p.2
-        ((PDE.RicciFlow.iteratedCovGrad g 0 0 j (scalarCcLift g (F p.1))).toSection p.2))
+        ((Analysis.Sobolev.iteratedCovGrad g 0 0 j (scalarCcLift g (F p.1))).toSection p.2))
       (Set.Icc a b ×ˢ (Set.univ : Set M)) := by
     exact fiberNormSq_jointContinuousOn_aux (I := I) (M := M) g 0 (0 + j)
-      (fun t => PDE.RicciFlow.iteratedCovGrad g 0 0 j (scalarCcLift g (F t))) U
+      (fun t => Analysis.Sobolev.iteratedCovGrad g 0 0 j (scalarCcLift g (F t))) U
       hU hjet
   have hbridge : (fun t : ℝ =>
-        ‖PDE.RicciFlow.iteratedCovGrad g 0 0 j (scalarCcLift g (F t))‖ ^ 2) =
+        ‖Analysis.Sobolev.iteratedCovGrad g 0 0 j (scalarCcLift g (F t))‖ ^ 2) =
       (fun t : ℝ => ∫ x, riemannianFiberNormSq (I := I) (M := M) g 0 (0 + j) x
-          ((PDE.RicciFlow.iteratedCovGrad g 0 0 j (scalarCcLift g (F t))).toSection x)
+          ((Analysis.Sobolev.iteratedCovGrad g 0 0 j (scalarCcLift g (F t))).toSection x)
         ∂(riemannianVolumeMeasure (I := I) (M := M) g)) := by
     funext t
     rw [SmoothCcTensor.norm_def, tensorL2Norm_sq_toFun_eq_integral_riemannianFiberNormSq]
@@ -3637,12 +3640,12 @@ private lemma jet_l2Norm_contDiff
   have hk : IsCompact (Set.univ : Set M) := isCompact_univ
   have hfs : ∀ p, ∀ x, p ∈ Set.Icc a b → x ∉ (Set.univ : Set M) →
       riemannianFiberNormSq (I := I) (M := M) g 0 (0 + j) x
-        ((PDE.RicciFlow.iteratedCovGrad g 0 0 j (scalarCcLift g (F p))).toSection x) = 0 := by
+        ((Analysis.Sobolev.iteratedCovGrad g 0 0 j (scalarCcLift g (F p))).toSection x) = 0 := by
     intro p x hp hx
     exact False.elim (hx (Set.mem_univ x))
   have hfib' : ContinuousOn (Function.uncurry (fun (t : ℝ) (x : M) =>
       riemannianFiberNormSq (I := I) (M := M) g 0 (0 + j) x
-        ((PDE.RicciFlow.iteratedCovGrad g 0 0 j (scalarCcLift g (F t))).toSection x)))
+        ((Analysis.Sobolev.iteratedCovGrad g 0 0 j (scalarCcLift g (F t))).toSection x)))
       (Set.Icc a b ×ˢ (Set.univ : Set M)) := by
     simpa [Function.uncurry] using hfib
   simpa using (continuousOn_integral_of_compact_support
@@ -3763,15 +3766,15 @@ private lemma tensorHsNorm_uniform_bdd_of_liftJointSmooth
       ‖ccTensorToHs (I := I) (M := M) g 0 (m : ℝ) (scalarCcLift g (F t))‖ ≤ C := by
   classical
   have hjet_bdd (j : ℕ) : ∃ C : ℝ, 0 ≤ C ∧ ∀ t ∈ Set.Icc a b,
-      ‖PDE.RicciFlow.iteratedCovGrad g 0 0 j (scalarCcLift g (F t))‖ ≤ C := by
+      ‖Analysis.Sobolev.iteratedCovGrad g 0 0 j (scalarCcLift g (F t))‖ ≤ C := by
     have hcont := jet_l2Norm_contDiff (I := I) (M := M) g F j a b hU hLift
     obtain ⟨x, hx, hmax⟩ := IsCompact.exists_isMaxOn isCompact_Icc
       (show (Set.Icc a b).Nonempty by exact ⟨a, by simp [hab]⟩) hcont
-    refine ⟨‖PDE.RicciFlow.iteratedCovGrad g 0 0 j (scalarCcLift g (F x))‖,
+    refine ⟨‖Analysis.Sobolev.iteratedCovGrad g 0 0 j (scalarCcLift g (F x))‖,
       norm_nonneg _, fun t ht => ?_⟩
     have hb := hmax ht
-    have hle : ‖PDE.RicciFlow.iteratedCovGrad g 0 0 j (scalarCcLift g (F t))‖ ≤
-        ‖PDE.RicciFlow.iteratedCovGrad g 0 0 j (scalarCcLift g (F x))‖ := by
+    have hle : ‖Analysis.Sobolev.iteratedCovGrad g 0 0 j (scalarCcLift g (F t))‖ ≤
+        ‖Analysis.Sobolev.iteratedCovGrad g 0 0 j (scalarCcLift g (F x))‖ := by
       exact le_of_sq_le_sq hb (norm_nonneg _)
     simpa using hle
   obtain ⟨K, hK, hle⟩ := hs_le_jet (I := I) (M := M) g 0 m
@@ -3779,7 +3782,7 @@ private lemma tensorHsNorm_uniform_bdd_of_liftJointSmooth
   have hBnn (j : ℕ) : 0 ≤ B j := (hjet_bdd j).choose_spec.1
   have hjets : ∀ t ∈ Set.Icc a b,
       (∑ j ∈ Finset.range (m + 1),
-        ‖PDE.RicciFlow.iteratedCovGrad g 0 0 j (scalarCcLift g (F t))‖) ≤
+        ‖Analysis.Sobolev.iteratedCovGrad g 0 0 j (scalarCcLift g (F t))‖) ≤
       ∑ j ∈ Finset.range (m + 1), B j := by
     intro t ht
     exact Finset.sum_le_sum (fun j hj => (hjet_bdd j).choose_spec.2 t ht)
@@ -3789,7 +3792,7 @@ private lemma tensorHsNorm_uniform_bdd_of_liftJointSmooth
     calc
       ‖ccTensorToHs (I := I) (M := M) g 0 (m : ℝ) (scalarCcLift g (F t))‖
           ≤ K * ∑ j ∈ Finset.range (m + 1),
-              ‖PDE.RicciFlow.iteratedCovGrad g 0 0 j (scalarCcLift g (F t))‖ := hle _
+              ‖Analysis.Sobolev.iteratedCovGrad g 0 0 j (scalarCcLift g (F t))‖ := hle _
       _ ≤ K * ∑ j ∈ Finset.range (m + 1), B j :=
             mul_le_mul_of_nonneg_left (hjets t ht) hK
 
@@ -5692,7 +5695,7 @@ noncomputable def scalarForcedSlice
         convert hc using 1
       exact (contMDiffOn_univ.mp hsliceOn)⟩
 
-omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma summable_abs_mul_hsWeight_of_weighted
     (g : SmoothRiemannianMetric I M)
     (d : TensorEigenIdx00 g → ℝ)
@@ -7938,7 +7941,6 @@ theorem scalarForcedFlow_slice_toL2_eq_mildSolution_of_jointSmoothForcing
     rfl
   · exact scalarForcedSlice_toL2_eq_mildSolution_on (I := I) (M := M) g u₀ f hU hf hε hεT hIcc hcf hderiv ht
 
-
 private lemma summable_tensorSobolevWeight_mul_coeff_sq_of_smooth
     (g : SmoothRiemannianMetric I M) (u₀ : SmoothScalar g) (σ : ℝ) :
     Summable (fun i : TensorEigenIdx00 g =>
@@ -8119,7 +8121,7 @@ theorem scalarHeatFlowTensor_smoothInitial_strict_pos_of_nonzero
     (I := I) (M := M) g u₀ htail hT
   have ht0 : 0 < t := (Set.mem_Ioo.mp ht).1
   let D : RealTimeInterval := RealTimeInterval.closed (-1) (t + 1) (by linarith : -1 ≤ t + 1)
-  have hG : MetricFamilySmoothOn (I := I) (M := M) D ((stationaryMetricFamily g).restrict D) :=
+  have hG : MetricFamilySmoothOn (I := I) (M := M) D (stationaryMetricFamily g).metric :=
     metricFamilySmoothOn_stationary (I := I) (M := M) g D
   have hslab : Set.Icc 0 t ⊆ D.regular := by
     intro s hs

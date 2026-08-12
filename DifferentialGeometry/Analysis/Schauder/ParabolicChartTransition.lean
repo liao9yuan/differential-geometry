@@ -21,7 +21,7 @@ variable {E F H M : Type*}
 
 omit [NormedAddCommGroup F] [NormedSpace Real F] in
 theorem parabolicEuclideanChartRepresentation_eq_parabolicSpatialPullback_chartTransitionEuclid
-    [FiniteDimensional Real E] [I.Boundaryless]
+    [FiniteDimensional Real E]
     (gamma delta : M) (u : Real → M → F) (J : Set Real) :
     Set.EqOn (fun p ↦
         parabolicEuclideanChartRepresentation I gamma u p.time p.space)
@@ -609,7 +609,7 @@ theorem exists_eParabolicC2HolderGaugeInEuclideanChartsOn_le_of_chartTransitions
 
 theorem isBoundedParabolicC2HolderInEuclideanChartsOn_of_chartTransitions_of_nested_source_balls
     [FiniteDimensional Real E] [I.Boundaryless] [IsManifold I ∞ M]
-    {A : Type*} [Finite A] (center source : A → M)
+    {A : Type*} (center source : A → M)
     (s : A → Set (EuclideanSpace Real
       (Fin (Module.finrank Real E))))
     (hs : ∀ i, IsCompact (s i)) (hsconv : ∀ i, Convex Real (s i))

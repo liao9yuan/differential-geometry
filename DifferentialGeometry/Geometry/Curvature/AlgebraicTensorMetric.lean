@@ -6,9 +6,10 @@ set_option backward.isDefEq.respectTransparency false
 
 noncomputable section
 
-namespace DifferentialGeometry.Integral.Connection
+namespace DifferentialGeometry.Geometry.Curvature
 
 open Bundle Tensor0SBundle
+open DifferentialGeometry.Geometry.Connection
 open scoped Manifold ContDiff
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]
@@ -57,4 +58,4 @@ theorem metricAlgebraicCurvatureTensorAt_coe
         metricRm04At (I := I) (M := M) g x :=
   rfl
 
-end DifferentialGeometry.Integral.Connection
+end DifferentialGeometry.Geometry.Curvature

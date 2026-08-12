@@ -4,12 +4,14 @@ import DifferentialGeometry.Geometry.Boundary.NormalDerivative
 
 set_option autoImplicit false
 
-namespace DifferentialGeometry.Integral.Connection
+namespace DifferentialGeometry.Analysis.Parabolic
 
 noncomputable section
 
 open Bundle Set
 open DifferentialGeometry.Analysis.Parabolic
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Geometry.Operator
 open DifferentialGeometry.Integral.DivergenceTheorem
 open DifferentialGeometry.Integral.DivergenceTheorem.WithBoundary
 open scoped Manifold ContDiff Topology
@@ -343,4 +345,4 @@ theorem scalar_hopf_boundary_point_of_barrier_with_boundary
 
 end
 
-end DifferentialGeometry.Integral.Connection
+end DifferentialGeometry.Analysis.Parabolic

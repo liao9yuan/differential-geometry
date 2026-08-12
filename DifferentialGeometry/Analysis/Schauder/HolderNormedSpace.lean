@@ -84,7 +84,7 @@ instance (alpha : NNReal) :
     Norm (BoundedHolderSpace (X := X) (F := F) alpha) where
   norm f := (eHolderGauge alpha f).toReal
 
-instance boundedHolderSpaceNormedSpaceCore (alpha : NNReal) :
+theorem boundedHolderSpace_normedSpaceCore (alpha : NNReal) :
     NormedSpace.Core Real
       (BoundedHolderSpace (X := X) (F := F) alpha) where
   norm_nonneg _ := ENNReal.toReal_nonneg
@@ -131,13 +131,13 @@ instance (alpha : NNReal) :
     NormedAddCommGroup
       (BoundedHolderSpace (X := X) (F := F) alpha) :=
   NormedAddCommGroup.ofCore
-    (boundedHolderSpaceNormedSpaceCore (X := X) (F := F) alpha)
+    (boundedHolderSpace_normedSpaceCore (X := X) (F := F) alpha)
 
 instance (alpha : NNReal) :
     NormedSpace Real
       (BoundedHolderSpace (X := X) (F := F) alpha) :=
   NormedSpace.ofCore
-    (boundedHolderSpaceNormedSpaceCore (X := X) (F := F) alpha)
+    (boundedHolderSpace_normedSpaceCore (X := X) (F := F) alpha)
 
 theorem norm_boundedHolderSpace_eq {alpha : NNReal}
     (f : BoundedHolderSpace (X := X) (F := F) alpha) :
@@ -317,7 +317,7 @@ instance (k : Nat) (alpha : NNReal) :
     Norm (ContDiffHolderSpace (V := V) (F := F) k alpha) where
   norm f := (eContDiffHolderGaugeOn k alpha Set.univ f).toReal
 
-instance contDiffHolderSpaceNormedSpaceCore (k : Nat) (alpha : NNReal) :
+theorem contDiffHolderSpace_normedSpaceCore (k : Nat) (alpha : NNReal) :
     NormedSpace.Core Real
       (ContDiffHolderSpace (V := V) (F := F) k alpha) where
   norm_nonneg _ := ENNReal.toReal_nonneg
@@ -373,13 +373,13 @@ instance (k : Nat) (alpha : NNReal) :
     NormedAddCommGroup
       (ContDiffHolderSpace (V := V) (F := F) k alpha) :=
   NormedAddCommGroup.ofCore
-    (contDiffHolderSpaceNormedSpaceCore (V := V) (F := F) k alpha)
+    (contDiffHolderSpace_normedSpaceCore (V := V) (F := F) k alpha)
 
 instance (k : Nat) (alpha : NNReal) :
     NormedSpace Real
       (ContDiffHolderSpace (V := V) (F := F) k alpha) :=
   NormedSpace.ofCore
-    (contDiffHolderSpaceNormedSpaceCore (V := V) (F := F) k alpha)
+    (contDiffHolderSpace_normedSpaceCore (V := V) (F := F) k alpha)
 
 theorem norm_contDiffHolderSpace_eq {k : Nat} {alpha : NNReal}
     (f : ContDiffHolderSpace (V := V) (F := F) k alpha) :
@@ -500,7 +500,7 @@ instance (alpha : NNReal) :
     Norm (ParabolicC2HolderSpace (V := V) (F := F) alpha) where
   norm u := (eParabolicC2HolderGaugeOn alpha Set.univ u).toReal
 
-instance parabolicC2HolderSpaceNormedSpaceCore (alpha : NNReal) :
+theorem parabolicC2HolderSpace_normedSpaceCore (alpha : NNReal) :
     NormedSpace.Core Real
       (ParabolicC2HolderSpace (V := V) (F := F) alpha) where
   norm_nonneg _ := ENNReal.toReal_nonneg
@@ -561,13 +561,13 @@ instance (alpha : NNReal) :
     NormedAddCommGroup
       (ParabolicC2HolderSpace (V := V) (F := F) alpha) :=
   NormedAddCommGroup.ofCore
-    (parabolicC2HolderSpaceNormedSpaceCore (V := V) (F := F) alpha)
+    (parabolicC2HolderSpace_normedSpaceCore (V := V) (F := F) alpha)
 
 instance (alpha : NNReal) :
     NormedSpace Real
       (ParabolicC2HolderSpace (V := V) (F := F) alpha) :=
   NormedSpace.ofCore
-    (parabolicC2HolderSpaceNormedSpaceCore (V := V) (F := F) alpha)
+    (parabolicC2HolderSpace_normedSpaceCore (V := V) (F := F) alpha)
 
 theorem norm_parabolicC2HolderSpace_eq {alpha : NNReal}
     (u : ParabolicC2HolderSpace (V := V) (F := F) alpha) :

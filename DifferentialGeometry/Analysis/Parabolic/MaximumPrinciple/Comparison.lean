@@ -8,7 +8,7 @@ noncomputable section
 
 open Bundle Set
 open DifferentialGeometry.Analysis.Parabolic
-open DifferentialGeometry.Integral.Connection
+open DifferentialGeometry.Geometry.Curvature
 open scoped Manifold ContDiff
 
 universe u uE uH
@@ -106,12 +106,14 @@ end
 
 end DifferentialGeometry.Analysis.Parabolic
 
-namespace DifferentialGeometry.Integral.Connection
+namespace DifferentialGeometry.Analysis.Parabolic
 
 noncomputable section
 
 open Bundle Set
 open DifferentialGeometry.Analysis.Parabolic
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Geometry.Operator
 open scoped Manifold ContDiff Topology
 
 universe u uE uH
@@ -361,14 +363,15 @@ theorem scalar_strong_minimum_principle_time_dependent_metric_with_drift_and_pot
 
 end
 
-end DifferentialGeometry.Integral.Connection
+end DifferentialGeometry.Analysis.Parabolic
 
 namespace DifferentialGeometry.Analysis.Parabolic
 
 noncomputable section
 
 open Bundle Set
-open DifferentialGeometry.Integral.Connection
+open DifferentialGeometry.Geometry.Connection
+open DifferentialGeometry.Geometry.Curvature
 open scoped Manifold ContDiff
 
 universe u uE uH
@@ -394,7 +397,7 @@ theorem heat_pot_strict_comparison_of_initial_lt_of_metricFamilySmoothOn
     {c : M} (hc : u 0 c < v 0 c)
     {tau : Real} (htau : tau ∈ Set.Ioo 0 T)
     {D : RealTimeInterval}
-    (hG : MetricFamilySmoothOn (I := I) (M := M) D (G.restrict D))
+    (hG : MetricFamilySmoothOn (I := I) (M := M) D G.metric)
     (hslab : Set.Icc 0 tau ⊆ D.regular)
     (hconn : ∀ t ∈ Set.Icc 0 tau,
       G.connection t = LeviCivita (I := I) (G.metric t))
@@ -428,7 +431,7 @@ theorem heat_strict_comparison_of_initial_lt_of_metricFamilySmoothOn
     {c : M} (hc : u 0 c < v 0 c)
     {tau : Real} (htau : tau ∈ Set.Ioo 0 T)
     {D : RealTimeInterval}
-    (hG : MetricFamilySmoothOn (I := I) (M := M) D (G.restrict D))
+    (hG : MetricFamilySmoothOn (I := I) (M := M) D G.metric)
     (hslab : Set.Icc 0 tau ⊆ D.regular)
     (hconn : ∀ t ∈ Set.Icc 0 tau,
       G.connection t = LeviCivita (I := I) (G.metric t))

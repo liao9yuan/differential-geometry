@@ -15,7 +15,9 @@ namespace DifferentialGeometry
 namespace Integral
 namespace DivergenceTheorem
 
-open DifferentialGeometry.Integral.Connection
+open DifferentialGeometry.Geometry.Connection
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Geometry.Operator
 open Tensor0SBundle
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
@@ -247,11 +249,11 @@ theorem laplacian_sq_le_dim_mul_hessianFrobeniusSq_of_boundaryless
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
     (g : SmoothRiemannianMetric I M)
     {f : M → ℝ} (hf : ContMDiff I 𝓘(ℝ, ℝ) ∞ f) (x : M) :
-    (Δ_g (I := I) g hf x)^2 ≤
+    (Δ_g (I := I) g ⟨f, hf⟩ x)^2 ≤
       (Module.finrank ℝ E : ℝ) * chartHessFrobeniusSq (I := I) g f x := by
   classical
   obtain ⟨basis, hON⟩ := exists_gOrthonormalBasis (I := I) g x
-  have htr : Δ_g (I := I) g hf x =
+  have htr : Δ_g (I := I) g ⟨f, hf⟩ x =
       ∑ i : Fin (Module.finrank ℝ E), hessFun (I := I) g f x (basis i) (basis i) := by
     have hlap : laplacian (I := I) (LeviCivita (I := I) g) g f x =
         metricTracePair0SAt (I := I) g (hessTensorAt (I := I) g f x) :=
@@ -295,7 +297,7 @@ theorem laplacian_sq_le_dim_mul_hessianFrobeniusSq_of_boundaryless
       chartHessFrobeniusSq (I := I) g f x :=
     Eq.trans (Eq.symm hpv)
       (hessianTrace_chart_norm_of_boundaryless (I := I) g hf x)
-  have htr' : (Δ_g (I := I) g hf x)^2 ≤
+  have htr' : (Δ_g (I := I) g ⟨f, hf⟩ x)^2 ≤
       (Module.finrank ℝ E : ℝ) *
         ∑ i : Fin (Module.finrank ℝ E),
           ∑ j : Fin (Module.finrank ℝ E),

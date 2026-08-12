@@ -13,7 +13,7 @@ namespace DifferentialGeometry.Analysis.Parabolic.Moser
 
 open DifferentialGeometry.Analysis.Laplacian
 open DifferentialGeometry.Analysis.Parabolic.Energy
-open DifferentialGeometry.Integral.Connection
+open DifferentialGeometry.Geometry.Operator
 open DifferentialGeometry.Integral.DivergenceTheorem
 open DifferentialGeometry.Integral.Measure
 
@@ -385,7 +385,7 @@ theorem localizedSpacetimeRpowMoment_gain_le_of_evolving_supersolution
           (gradFun (I := I) (g t) rho.toFun x)
           (gradFun (I := I) (g t) rho.toFun x) ≤ G)
     (hpde : ∀ t ∈ Icc a outerTime, ∀ x : M,
-      Δ_g (I := I) (g t) (smoothScalarSlice (I := I) (g t) u hu t).smooth x ≤
+      Δ_g (I := I) (g t) (smoothScalarSlice (I := I) (g t) u hu t).toContMDiffMap x ≤
         deriv (fun s => u s x) t)
     (Cfixed Cmoving : ℝ≥0∞)
     (hCfixed : Cfixed ≠ ⊤) (hCmoving : Cmoving ≠ ⊤)
@@ -578,7 +578,7 @@ theorem nestedForwardMoserNorm_succ_le_of_evolving_supersolution
           (gradFun (I := I) (g t) rho.toFun x)
           (gradFun (I := I) (g t) rho.toFun x) ≤ G)
     (hpde : ∀ t ∈ Icc a (upperTime k), ∀ x : M,
-      Δ_g (I := I) (g t) (smoothScalarSlice (I := I) (g t) u hu t).smooth x ≤
+      Δ_g (I := I) (g t) (smoothScalarSlice (I := I) (g t) u hu t).toContMDiffMap x ≤
         deriv (fun s => u s x) t)
     (hVtop : V ≠ ⊤)
     (hvolume : ∀ t ∈ Icc a (upperTime k),
@@ -681,7 +681,7 @@ theorem nestedForwardMoserNorm_succ_le_exp_of_evolving_supersolution
           (gradFun (I := I) (g t) rho.toFun x)
           (gradFun (I := I) (g t) rho.toFun x) ≤ G)
     (hpde : ∀ t ∈ Icc a b, ∀ x : M,
-      Δ_g (I := I) (g t) (smoothScalarSlice (I := I) (g t) u hu t).smooth x ≤
+      Δ_g (I := I) (g t) (smoothScalarSlice (I := I) (g t) u hu t).toContMDiffMap x ≤
         deriv (fun s => u s x) t)
     (hVtop : V ≠ ⊤)
     (hvolume : ∀ t ∈ Icc a b,
@@ -826,7 +826,7 @@ theorem nestedForwardMoserNorm_le_exp_of_evolving_supersolution
           (gradFun (I := I) (g t) rho.toFun x)
           (gradFun (I := I) (g t) rho.toFun x) ≤ G)
     (hpde : ∀ t ∈ Icc a b, ∀ x : M,
-      Δ_g (I := I) (g t) (smoothScalarSlice (I := I) (g t) u hu t).smooth x ≤
+      Δ_g (I := I) (g t) (smoothScalarSlice (I := I) (g t) u hu t).toContMDiffMap x ≤
         deriv (fun s => u s x) t)
     (hVtop : V ≠ ⊤)
     (hvolume : ∀ t ∈ Icc a b,
@@ -923,7 +923,7 @@ theorem nestedForwardMoserNorm_le_evolvingReverseCost_rpow_of_supersolution
           (gradFun (I := I) (g t) rho.toFun x)
           (gradFun (I := I) (g t) rho.toFun x) ≤ G)
     (hpde : ∀ t ∈ Icc a b, ∀ x : M,
-      Δ_g (I := I) (g t) (smoothScalarSlice (I := I) (g t) u hu t).smooth x ≤
+      Δ_g (I := I) (g t) (smoothScalarSlice (I := I) (g t) u hu t).toContMDiffMap x ≤
         deriv (fun s => u s x) t)
     (hVtop : V ≠ ⊤)
     (hvolume : ∀ t ∈ Icc a b,
@@ -1023,7 +1023,7 @@ theorem nestedForwardMoserNorm_interpolation_step_le_exp_of_evolving_supersoluti
           (gradFun (I := I) (g t) rho.toFun x)
           (gradFun (I := I) (g t) rho.toFun x) ≤ G)
     (hpde : ∀ t ∈ Icc a b, ∀ x : M,
-      Δ_g (I := I) (g t) (smoothScalarSlice (I := I) (g t) u hu t).smooth x ≤
+      Δ_g (I := I) (g t) (smoothScalarSlice (I := I) (g t) u hu t).toContMDiffMap x ≤
         deriv (fun s => u s x) t)
     (hVtop : V ≠ ⊤)
     (hvolume : ∀ t ∈ Icc a b,
@@ -1174,7 +1174,7 @@ theorem nestedForwardMoserNorm_interpolation_le_evolvingReverseCost_rpow_of_supe
           (gradFun (I := I) (g t) rho.toFun x)
           (gradFun (I := I) (g t) rho.toFun x) ≤ G)
     (hpde : ∀ t ∈ Icc a b, ∀ x : M,
-      Δ_g (I := I) (g t) (smoothScalarSlice (I := I) (g t) u hu t).smooth x ≤
+      Δ_g (I := I) (g t) (smoothScalarSlice (I := I) (g t) u hu t).toContMDiffMap x ≤
         deriv (fun s => u s x) t)
     (hVtop : V ≠ ⊤)
     (hvolume : ∀ t ∈ Icc a b,
@@ -1395,7 +1395,7 @@ theorem exists_nested_forward_moser_reverse_holder_of_evolving_supersolution
           (gradFun (I := I) (g t) rho.toFun x)
           (gradFun (I := I) (g t) rho.toFun x) ≤ G)
     (hpde : ∀ t ∈ Icc a b, ∀ x : M,
-      Δ_g (I := I) (g t) (smoothScalarSlice (I := I) (g t) u hu t).smooth x ≤
+      Δ_g (I := I) (g t) (smoothScalarSlice (I := I) (g t) u hu t).toContMDiffMap x ≤
         deriv (fun s => u s x) t)
     (hVtop : V ≠ ⊤)
     (hvolume : ∀ t ∈ Icc a b,
@@ -1508,7 +1508,7 @@ theorem localizedSpacetimeRpowNorm_le_evolvingReverseCost_of_supersolution_of_lt
           (gradFun (I := I) (g t) rho.toFun x)
           (gradFun (I := I) (g t) rho.toFun x) ≤ G)
     (hpde : ∀ t ∈ Icc a b, ∀ x : M,
-      Δ_g (I := I) (g t) (smoothScalarSlice (I := I) (g t) u hu t).smooth x ≤
+      Δ_g (I := I) (g t) (smoothScalarSlice (I := I) (g t) u hu t).toContMDiffMap x ≤
         deriv (fun s => u s x) t)
     (hVtop : V ≠ ⊤)
     (hvolume : ∀ t ∈ Icc a b,

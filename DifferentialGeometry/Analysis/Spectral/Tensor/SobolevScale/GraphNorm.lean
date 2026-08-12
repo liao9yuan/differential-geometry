@@ -28,7 +28,6 @@ private local instance : BorelSpace M := ⟨rfl⟩
 
 variable {g : SmoothRiemannianMetric I M} {r s : ℕ}
 
-omit [CompactSpace M] in
 omit [NeZero (Module.finrank ℝ E)] in
 private theorem tensorSobolevWeight_mul_one_add_lambda_sq
     (τ : ℝ) (i : TensorEigenIdx (I := I) (M := M) g r s) :
@@ -62,7 +61,6 @@ def tensorHsAddTwoOfOneAddLambdaMul (τ : ℝ)
     rw [hmass]
     exact z.weighted_summable
 
-omit [CompactSpace M] in
 omit [NeZero (Module.finrank ℝ E)] in
 @[simp] theorem tensorHsAddTwoOfOneAddLambdaMul_coeff (τ : ℝ)
     (u z : tensorHs (I := I) (M := M) g r s τ)

@@ -3,12 +3,15 @@ import DifferentialGeometry.Geometry.Operator.MetricFamilyRegularity
 
 set_option autoImplicit false
 
-namespace DifferentialGeometry.Integral.Connection
+namespace DifferentialGeometry.Analysis.Parabolic
 
 noncomputable section
 
 open Bundle Set
 open DifferentialGeometry.Analysis.Parabolic
+open DifferentialGeometry.Geometry.Connection
+open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Geometry.Operator
 open scoped Manifold ContDiff Topology
 
 universe u uE uH
@@ -27,7 +30,7 @@ theorem scalar_strong_maximum_principle_time_dependent_metric_of_metricFamilySmo
     (G : MetricConnectionFamily (I := I) (M := M) Real)
     {T : Real} (hT : 0 < T)
     {D : RealTimeInterval}
-    (hG : MetricFamilySmoothOn (I := I) (M := M) D (G.restrict D))
+    (hG : MetricFamilySmoothOn (I := I) (M := M) D G.metric)
     (hslab : Set.Icc 0 T ⊆ D.regular)
     (hconn : ∀ t ∈ Set.Icc 0 T,
       G.connection t = LeviCivita (I := I) (G.metric t))
@@ -61,7 +64,7 @@ theorem scalar_strong_maximum_principle_time_dependent_metric_positive_of_metric
     (G : MetricConnectionFamily (I := I) (M := M) Real)
     {T : Real} (hT : 0 < T)
     {D : RealTimeInterval}
-    (hG : MetricFamilySmoothOn (I := I) (M := M) D (G.restrict D))
+    (hG : MetricFamilySmoothOn (I := I) (M := M) D G.metric)
     (hslab : Set.Icc 0 T ⊆ D.regular)
     (hconn : ∀ t ∈ Set.Icc 0 T,
       G.connection t = LeviCivita (I := I) (G.metric t))
@@ -96,7 +99,7 @@ theorem scalar_strong_maximum_principle_time_dependent_metric_with_potential_of_
     (G : MetricConnectionFamily (I := I) (M := M) Real)
     {T : Real} (hT : 0 < T)
     {D : RealTimeInterval}
-    (hG : MetricFamilySmoothOn (I := I) (M := M) D (G.restrict D))
+    (hG : MetricFamilySmoothOn (I := I) (M := M) D G.metric)
     (hslab : Set.Icc 0 T ⊆ D.regular)
     (hconn : ∀ t ∈ Set.Icc 0 T,
       G.connection t = LeviCivita (I := I) (G.metric t))
@@ -132,7 +135,7 @@ theorem scalar_strong_maximum_principle_time_dependent_metric_with_potential_pos
     (G : MetricConnectionFamily (I := I) (M := M) Real)
     {T : Real} (hT : 0 < T)
     {D : RealTimeInterval}
-    (hG : MetricFamilySmoothOn (I := I) (M := M) D (G.restrict D))
+    (hG : MetricFamilySmoothOn (I := I) (M := M) D G.metric)
     (hslab : Set.Icc 0 T ⊆ D.regular)
     (hconn : ∀ t ∈ Set.Icc 0 T,
       G.connection t = LeviCivita (I := I) (G.metric t))
@@ -169,7 +172,7 @@ theorem scalar_strong_maximum_principle_time_dependent_metric_with_drift_and_pot
     (G : MetricConnectionFamily (I := I) (M := M) Real)
     {T : Real} (hT : 0 < T)
     {D : RealTimeInterval}
-    (hG : MetricFamilySmoothOn (I := I) (M := M) D (G.restrict D))
+    (hG : MetricFamilySmoothOn (I := I) (M := M) D G.metric)
     (hslab : Set.Icc 0 T ⊆ D.regular)
     (hconn : ∀ t ∈ Set.Icc 0 T,
       G.connection t = LeviCivita (I := I) (G.metric t))
@@ -212,7 +215,7 @@ theorem scalar_strong_maximum_principle_time_dependent_metric_with_drift_and_pot
     (G : MetricConnectionFamily (I := I) (M := M) Real)
     {T : Real} (hT : 0 < T)
     {D : RealTimeInterval}
-    (hG : MetricFamilySmoothOn (I := I) (M := M) D (G.restrict D))
+    (hG : MetricFamilySmoothOn (I := I) (M := M) D G.metric)
     (hslab : Set.Icc 0 T ⊆ D.regular)
     (hconn : ∀ t ∈ Set.Icc 0 T,
       G.connection t = LeviCivita (I := I) (G.metric t))
@@ -256,7 +259,7 @@ theorem scalar_strong_maximum_principle_time_dependent_metric_with_drift_of_metr
     (G : MetricConnectionFamily (I := I) (M := M) Real)
     {T : Real} (hT : 0 < T)
     {D : RealTimeInterval}
-    (hG : MetricFamilySmoothOn (I := I) (M := M) D (G.restrict D))
+    (hG : MetricFamilySmoothOn (I := I) (M := M) D G.metric)
     (hslab : Set.Icc 0 T ⊆ D.regular)
     (hconn : ∀ t ∈ Set.Icc 0 T,
       G.connection t = LeviCivita (I := I) (G.metric t))
@@ -297,7 +300,7 @@ theorem scalar_strong_maximum_principle_time_dependent_metric_with_drift_positiv
     (G : MetricConnectionFamily (I := I) (M := M) Real)
     {T : Real} (hT : 0 < T)
     {D : RealTimeInterval}
-    (hG : MetricFamilySmoothOn (I := I) (M := M) D (G.restrict D))
+    (hG : MetricFamilySmoothOn (I := I) (M := M) D G.metric)
     (hslab : Set.Icc 0 T ⊆ D.regular)
     (hconn : ∀ t ∈ Set.Icc 0 T,
       G.connection t = LeviCivita (I := I) (G.metric t))
@@ -335,4 +338,4 @@ theorem scalar_strong_maximum_principle_time_dependent_metric_with_drift_positiv
 
 end
 
-end DifferentialGeometry.Integral.Connection
+end DifferentialGeometry.Analysis.Parabolic

@@ -9,6 +9,7 @@ open scoped NNReal RealInnerProductSpace
 
 namespace DifferentialGeometry.Analysis.Parabolic.Euclidean
 
+open DifferentialGeometry.Analysis.Calculus
 open DifferentialGeometry.Analysis.Schauder
 
 private abbrev Euc (n : Type*) := EuclideanSpace Real n
@@ -131,7 +132,7 @@ theorem parabolicMatrixCoefficientRescaleExtension_posDef
 
 omit [DecidableEq n] in
 theorem parabolicNondivergenceOperator_timeCenteredRescaleExtension
-    {F : Type*} [Nonempty n]
+    {F : Type*}
     [NormedAddCommGroup F] [NormedSpace Real F]
     (tau : Real) {R : Real} (rho : NNReal)
     (p0 : ParabolicPoint (Euc n))
@@ -237,7 +238,7 @@ theorem parabolicNondivergenceOperator_timeCenteredRescaleExtension
 
 omit [DecidableEq n] in
 theorem parabolicNondivergenceOperator_timeCenteredRescaleExtension_holderWith
-    {F : Type*} [Nonempty n]
+    {F : Type*}
     [NormedAddCommGroup F] [NormedSpace Real F]
     {alpha K : NNReal} {P Q : Set (ParabolicPoint (Euc n))}
     (tau : Real) {R : Real} (rho : NNReal)
@@ -287,7 +288,7 @@ theorem parabolicNondivergenceOperator_timeCenteredRescaleExtension_holderWith
 
 omit [DecidableEq n] in
 theorem norm_parabolicNondivergenceOperator_timeCenteredRescaleExtension_le
-    {F : Type*} [Nonempty n]
+    {F : Type*}
     [NormedAddCommGroup F] [NormedSpace Real F]
     {P Q : Set (ParabolicPoint (Euc n))}
     (tau : Real) {R : Real} (rho : NNReal)

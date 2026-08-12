@@ -4,7 +4,6 @@ import DifferentialGeometry.Analysis.Integration.Holder.Weighted
 import DifferentialGeometry.Analysis.Integration.Measure.CompactParametricIntegral
 import DifferentialGeometry.Analysis.Sobolev.Manifold.IntrinsicEmbedding
 
-
 noncomputable section
 
 open Bundle Manifold MeasureTheory Set
@@ -14,7 +13,7 @@ namespace DifferentialGeometry.Analysis.Parabolic.Moser
 
 open DifferentialGeometry.Analysis.Laplacian
 open DifferentialGeometry.Analysis.Parabolic.Energy
-open DifferentialGeometry.Integral.Connection
+open DifferentialGeometry.Geometry.Operator
 open DifferentialGeometry.Integral.DivergenceTheorem
 open DifferentialGeometry.Integral.Measure
 

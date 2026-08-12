@@ -14,7 +14,7 @@ namespace DifferentialGeometry.Analysis.Parabolic.Moser
 
 open DifferentialGeometry.Analysis.CutoffProfile
 open DifferentialGeometry.Analysis.Laplacian
-open DifferentialGeometry.Integral.Connection
+open DifferentialGeometry.Geometry.Operator
 open DifferentialGeometry.Integral.DivergenceTheorem
 
 def moserCutoffLevel (k : ℕ) : ℝ :=
