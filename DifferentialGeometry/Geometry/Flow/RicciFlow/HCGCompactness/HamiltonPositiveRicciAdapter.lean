@@ -1,5 +1,10 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.RicciFlowConvergence
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.MetricCovDerivPullbackCross
+import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.MovingShiOpen
+import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.AllTimesBoundsFlow
+import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.FixedDomainMetricBounds
+import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.NoncollapseInjectivity
+import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.OpenWindowEquiv
 import DifferentialGeometry.Geometry.Flow.RicciFlow.DimensionThree.HamiltonPositiveRicci
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.SolutionTimeRestrict
 
@@ -431,6 +436,340 @@ private theorem ham3_shi_rm
           (ham3BlowupScale (I := I) P Q j) ^ 2) := hmul
     _ = (100 : Real) ^ 2 := by
       field_simp [ne_of_gt hscale]
+
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
+private theorem ham3_ball_rm
+    {omega : Real} (h0omega : 0 < omega)
+    {g0 : SmoothRiemannianMetric I M}
+    (P : Ham3FlowPackage (I := I) (M := M) g0)
+    (hD : P.D =
+      DifferentialGeometry.Integral.Connection.RealTimeInterval.closedOpen
+        0 omega h0omega)
+    (Q : Ham3BlowupData M)
+    (hsel : Ham3PointSel (I := I) P Q)
+    (hwindow : Ham3Window (I := I) P Q ham3_r0)
+    (hrm : Ham3RmBound (I := I) P Q)
+    {r : Real} (hr : 0 < r) (hrle : r ≤ ham3_r0)
+    (i : Nat) :
+    (ham3RescaledBall (I := I) P Q hsel
+      (ham3Start (I := I) P Q hsel hwindow + i) r hr).IsRmControlled := by
+  let j := ham3Start (I := I) P Q hsel hwindow + i
+  let B := ham3RescaledBall (I := I) P Q hsel j r hr
+  change B.IsRmControlled
+  unfold PDE.RicciFlow.Perelman.FlowMetricBall.IsRmControlled
+  dsimp only [B, ham3RescaledBall, ham3RescaledZero]
+  have hrsq : r ^ 2 ≤ ham3_r0 ^ 2 := by
+    nlinarith
+      [mul_nonneg (sub_nonneg.mpr hrle)
+        (add_nonneg hr.le ham3_r0_pos.le)]
+  constructor
+  · intro t ht
+    apply ham3_shi_car (I := I) h0omega P hD Q hsel hwindow i
+    refine ⟨?_, ht.2⟩
+    dsimp only [ham3ShiLeft]
+    nlinarith [ht.1, hrsq, sq_nonneg ham3_r0]
+  · intro t ht x _hx
+    have htShi : t ∈ Set.Icc ham3ShiLeft 0 := by
+      refine ⟨?_, ht.2⟩
+      dsimp only [ham3ShiLeft]
+      nlinarith [ht.1, hrsq, sq_nonneg ham3_r0]
+    have hsq :=
+      ham3_shi_rm (I := I) P Q hsel hwindow hrm i t htShi x
+    change r ^ 4 *
+        Tensor0SBundle.normSq0S (I := I)
+          ((ham3RescaledSol (I := I) P Q hsel j).base.metric t) x 4
+          ((ham3RescaledSol (I := I) P Q hsel j).base.rm04 t x) ≤ 1
+    have hmul :=
+      mul_le_mul_of_nonneg_left hsq (pow_nonneg hr.le 4)
+    calc
+      r ^ 4 *
+            Tensor0SBundle.normSq0S (I := I)
+              ((ham3RescaledSol (I := I) P Q hsel j).base.metric t) x 4
+              ((ham3RescaledSol (I := I) P Q hsel j).base.rm04 t x)
+          ≤ r ^ 4 * (100 : Real) ^ 2 := hmul
+      _ ≤ ham3_r0 ^ 4 * (100 : Real) ^ 2 := by
+        gcongr
+      _ = 1 := by
+        norm_num [ham3_r0]
+
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
+private theorem ham3_win_equiv
+    {omega : Real} (h0omega : 0 < omega)
+    {g0 : SmoothRiemannianMetric I M}
+    (P : Ham3FlowPackage (I := I) (M := M) g0)
+    (hD : P.D =
+      DifferentialGeometry.Integral.Connection.RealTimeInterval.closedOpen
+        0 omega h0omega)
+    (Q : Ham3BlowupData M)
+    (hsel : Ham3PointSel (I := I) P Q)
+    (hwindow : Ham3Window (I := I) P Q ham3_r0)
+    (hrm : Ham3RmBound (I := I) P Q) :
+    ∃ A Bmax : Real, 0 ≤ A ∧ 1 ≤ Bmax ∧
+      (∀ t : Real, t ∈ Set.Icc (-(ham3_r0 ^ 2)) 0 →
+        metricEquivalenceFactor 1 A t 0 ≤ Bmax) ∧
+      ∀ i : Nat,
+        MetricUniformEquivalentOnWindow (I := I) Set.univ
+          (-(ham3_r0 ^ 2)) 0
+          ((ham3RescaledSol (I := I) P Q hsel
+            (ham3Start (I := I) P Q hsel hwindow + i)).family.metric 0)
+          (fun _ t ↦
+            (ham3RescaledSol (I := I) P Q hsel
+              (ham3Start (I := I) P Q hsel hwindow + i)).family.metric t)
+          (fun t ↦ metricEquivalenceFactor 1 A t 0) := by
+  let C : Real := (100 : Real) ^ 2
+  let A : Real := (Module.finrank Real E : Real) ^ 2 * Real.sqrt C
+  let timeRadius : Real := ham3_r0 ^ 2
+  let Bmax : Real := Real.exp (2 * A * timeRadius)
+  have hC : 0 ≤ C := by
+    dsimp only [C]
+    positivity
+  have hA : 0 ≤ A := by
+    dsimp only [A]
+    positivity
+  have hRadius : 0 ≤ timeRadius := by
+    dsimp only [timeRadius]
+    positivity
+  have hBmax : 1 ≤ Bmax := by
+    dsimp only [Bmax]
+    exact Real.one_le_exp
+      (mul_nonneg (mul_nonneg (by norm_num) hA) hRadius)
+  have habs : ∀ t : Real, t ∈ Set.Icc (-(ham3_r0 ^ 2)) 0 →
+      |t| ≤ timeRadius := by
+    intro t ht
+    rw [abs_of_nonpos ht.2]
+    dsimp only [timeRadius]
+    nlinarith [ht.1]
+  have hB : ∀ t : Real, t ∈ Set.Icc (-(ham3_r0 ^ 2)) 0 →
+      metricEquivalenceFactor 1 A t 0 ≤ Bmax := by
+    intro t ht
+    rw [metricEquivalenceFactor]
+    simp only [one_mul, sub_zero]
+    dsimp only [Bmax]
+    apply Real.exp_le_exp.mpr
+    exact mul_le_mul_of_nonneg_left (habs t ht)
+      (mul_nonneg (by norm_num) hA)
+  refine ⟨A, Bmax, hA, hBmax, hB, ?_⟩
+  intro i
+  let j := ham3Start (I := I) P Q hsel hwindow + i
+  let Draw := DifferentialGeometry.PDE.RicciFlow.paraInterval P.D
+    (Q.time j) (ham3BlowupScale (I := I) P Q j)
+    (hsel.1 j) (hsel.2.2.1 j)
+  let Sraw : DifferentialGeometry.PDE.RicciFlow.SolutionOn
+      (I := I) (M := M) Draw :=
+    ham3RescaledSol (I := I) P Q hsel j
+  have hraw : DifferentialGeometry.PDE.RicciFlow.IsSolutionOn
+      (I := I) Sraw := by
+    exact DifferentialGeometry.PDE.RicciFlow.paraSol (I := I) P.S
+      P.isSmooth.isSolution (Q.time j)
+      (ham3BlowupScale (I := I) P Q j)
+      (hsel.1 j) (hsel.2.2.1 j)
+  let Sseq : Nat → DifferentialGeometry.PDE.RicciFlow.SolutionOn
+      (I := I) (M := M) Draw := fun _ ↦ Sraw
+  have hSseq : ∀ n : Nat,
+      DifferentialGeometry.PDE.RicciFlow.IsSolutionOn (I := I) (Sseq n) :=
+    fun _ ↦ hraw
+  have hcarrier : Set.Icc (-(ham3_r0 ^ 2)) 0 ⊆ Draw.carrier := by
+    intro t ht
+    apply ham3_shi_car (I := I) h0omega P hD Q hsel hwindow i
+    refine ⟨?_, ht.2⟩
+    dsimp only [ham3ShiLeft]
+    nlinarith [sq_pos_of_pos ham3_r0_pos, ht.1]
+  have hregular : Set.Icc (-(ham3_r0 ^ 2)) 0 ⊆ Draw.regular := by
+    intro t ht
+    apply ham3_shi_reg (I := I) h0omega P hD Q hsel hwindow i
+    refine ⟨?_, ht.2⟩
+    dsimp only [ham3ShiLeft]
+    nlinarith [sq_pos_of_pos ham3_r0_pos, ht.1]
+  have hquad :=
+    DifferentialGeometry.Integral.Connection.twoTensorQuadBound_of_solutions
+      (I := I)
+      Sseq Set.univ (-(ham3_r0 ^ 2)) 0 C hcarrier
+    (fun _ t ht x _hx ↦ by
+      simpa only [Sseq, Sraw, C, j] using
+        ham3_shi_rm (I := I) P Q hsel hwindow hrm i t
+          (by
+            refine ⟨?_, ht.2⟩
+            dsimp only [ham3ShiLeft]
+            nlinarith [sq_pos_of_pos ham3_r0_pos, ht.1])
+          x)
+  have hequiv0 : ∀ n : Nat,
+      MetricUniformEquivalentOn (I := I) Set.univ
+        (Sraw.family.metric 0) ((Sseq n).family.metric 0) 1 := by
+    intro n
+    refine ⟨le_rfl, ?_⟩
+    intro x _hx v
+    simp only [Sseq, inv_one, one_mul]
+    exact ⟨le_rfl, le_rfl⟩
+  have hzero : (0 : Real) ∈ Set.Icc (-(ham3_r0 ^ 2)) 0 :=
+    ⟨neg_nonpos.mpr (sq_nonneg ham3_r0), le_rfl⟩
+  have hequiv :=
+    metricUniformEquivalentOnWindow_of_solutions' (I := I)
+      Sseq hSseq Set.univ (-(ham3_r0 ^ 2)) 0 0 1 A
+      (Sraw.family.metric 0) hregular hzero le_rfl hA hequiv0 hquad.2
+  simpa only [Sseq, Sraw, j] using hequiv
+
+private theorem ham3_win_shi
+    {omega : Real} (h0omega : 0 < omega)
+    (hcompact : CompactSpace M)
+    {g0 : SmoothRiemannianMetric I M}
+    (P : Ham3FlowPackage (I := I) (M := M) g0)
+    (hD : P.D =
+      DifferentialGeometry.Integral.Connection.RealTimeInterval.closedOpen
+        0 omega h0omega)
+    (Q : Ham3BlowupData M)
+    (hsel : Ham3PointSel (I := I) P Q)
+    (hwindow : Ham3Window (I := I) P Q ham3_r0)
+    (hrm : Ham3RmBound (I := I) P Q) :
+    ∀ N : Nat, ∃ KShi : Real, 0 ≤ KShi ∧
+      ∀ i : Nat,
+        MovingShiBoundOn (I := I) Set.univ
+          (-(ham3_r0 ^ 2)) 0
+          (fun _ t ↦
+            (ham3RescaledSol (I := I) P Q hsel
+              (ham3Start (I := I) P Q hsel hwindow + i)).family.metric t)
+          N KShi := by
+  letI : CompactSpace M := hcompact
+  intro N
+  let KShi : Real :=
+    shiOpenConst (Module.finrank Real E) ((100 : Real) ^ 2)
+      ham3ShiLeft (-(ham3_r0 ^ 2)) 0 N
+  refine ⟨KShi, shiOpenConst_nonneg _ _ _ _ _ _, ?_⟩
+  intro i
+  let j := ham3Start (I := I) P Q hsel hwindow + i
+  let Draw := DifferentialGeometry.PDE.RicciFlow.paraInterval P.D
+    (Q.time j) (ham3BlowupScale (I := I) P Q j)
+    (hsel.1 j) (hsel.2.2.1 j)
+  let Sraw : DifferentialGeometry.PDE.RicciFlow.SolutionOn
+      (I := I) (M := M) Draw :=
+    ham3RescaledSol (I := I) P Q hsel j
+  have hraw : DifferentialGeometry.PDE.RicciFlow.IsSolutionOn
+      (I := I) Sraw := by
+    exact DifferentialGeometry.PDE.RicciFlow.paraSol (I := I) P.S
+      P.isSmooth.isSolution (Q.time j)
+      (ham3BlowupScale (I := I) P Q j)
+      (hsel.1 j) (hsel.2.2.1 j)
+  let Fraw : PointedFlowData (I := I) Draw :=
+    { M := M
+      topology := inferInstance
+      charted := inferInstance
+      smooth := inferInstance
+      sigmaCompact := inferInstance
+      t2 := inferInstance
+      t2TangentBundle := inferInstance
+      basepoint := Q.point j
+      S := Sraw
+      isSolution := hraw }
+  have hcomplete :
+      MetricComplete (I := I) (Fraw.atTime (I := I) ham3ShiLeft) := by
+    dsimp only [MetricComplete, PointedFlowData.atTime]
+    refine @complete_of_compact Fraw.M ?_ ?_
+    simpa only [Fraw] using hcompact
+  have halphaBeta : ham3ShiLeft < -(ham3_r0 ^ 2) := by
+    dsimp only [ham3ShiLeft]
+    nlinarith [sq_pos_of_pos ham3_r0_pos]
+  have hbetaZero : -(ham3_r0 ^ 2) ≤ (0 : Real) :=
+    neg_nonpos.mpr (sq_nonneg ham3_r0)
+  have hShi := movingShi_of_bound (I := I) Fraw
+    halphaBeta hbetaZero
+    (ham3_shi_car (I := I) h0omega P hD Q hsel hwindow i)
+    (ham3_shi_reg (I := I) h0omega P hD Q hsel hwindow i)
+    hcomplete (by positivity : (0 : Real) ≤ (100 : Real) ^ 2)
+    (by
+      intro t ht x
+      change Tensor0SBundle.normSq0S (I := I)
+          (Sraw.family.metric t) x 4 (Sraw.base.rm04 t x) ≤
+        (100 : Real) ^ 2
+      simpa only [Sraw, j] using
+        ham3_shi_rm (I := I) P Q hsel hwindow hrm i t ht x)
+    N
+  simpa only [Fraw, Sraw, j, KShi] using hShi
+
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
+private theorem ham3_src_rm
+    {omega : Real} (h0omega : 0 < omega)
+    {g0 : SmoothRiemannianMetric I M}
+    (P : Ham3FlowPackage (I := I) (M := M) g0)
+    (hD : P.D =
+      DifferentialGeometry.Integral.Connection.RealTimeInterval.closedOpen
+        0 omega h0omega)
+    (Q : Ham3BlowupData M)
+    (hsel : Ham3PointSel (I := I) P Q)
+    (hwindow : Ham3Window (I := I) P Q ham3_r0)
+    (hrm : Ham3RmBound (I := I) P Q)
+    {r : Real} (hr : 0 < r) (hrle : r ≤ ham3_r0)
+    (i : Nat) :
+    let X := ham3SourceSeq (I := I) h0omega P hD Q hsel hwindow
+    let hzero : (0 : Real) ∈ X.D.carrier := by
+      change (0 : Real) ∈ Set.Icc (-(ham3_r0 ^ 2)) 0
+      exact ⟨neg_nonpos.mpr (sq_nonneg ham3_r0), le_rfl⟩
+    letI : TopologicalSpace (X.term i).M := (X.term i).topology
+    letI : ChartedSpace H (X.term i).M := (X.term i).charted
+    letI : IsManifold I ∞ (X.term i).M := (X.term i).smooth
+    letI : IsManifold I 1 (X.term i).M :=
+      IsManifold.of_le (I := I) (M := (X.term i).M) (n := ∞)
+        (by decide : (1 : WithTop ℕ∞) ≤ ∞)
+    letI : IsManifold I ((∞ : WithTop ℕ∞) + 1) (X.term i).M := by
+      change IsManifold I ∞ (X.term i).M
+      infer_instance
+    letI : SigmaCompactSpace (X.term i).M := (X.term i).sigmaCompact
+    letI : T2Space (X.term i).M := (X.term i).t2
+    (PointedFlowData.baseFlowBall (I := I) (X.term i)
+      hzero r hr).IsRmControlled := by
+  let X := ham3SourceSeq (I := I) h0omega P hD Q hsel hwindow
+  let hzero : (0 : Real) ∈ X.D.carrier := by
+    change (0 : Real) ∈ Set.Icc (-(ham3_r0 ^ 2)) 0
+    exact ⟨neg_nonpos.mpr (sq_nonneg ham3_r0), le_rfl⟩
+  letI : TopologicalSpace (X.term i).M := (X.term i).topology
+  letI : ChartedSpace H (X.term i).M := (X.term i).charted
+  letI : IsManifold I ∞ (X.term i).M := (X.term i).smooth
+  letI : IsManifold I 1 (X.term i).M :=
+    IsManifold.of_le (I := I) (M := (X.term i).M) (n := ∞)
+      (by decide : (1 : WithTop ℕ∞) ≤ ∞)
+  letI : IsManifold I ((∞ : WithTop ℕ∞) + 1) (X.term i).M := by
+    change IsManifold I ∞ (X.term i).M
+    infer_instance
+  letI : SigmaCompactSpace (X.term i).M := (X.term i).sigmaCompact
+  letI : T2Space (X.term i).M := (X.term i).t2
+  let B := PointedFlowData.baseFlowBall (I := I) (X.term i)
+    hzero r hr
+  change B.IsRmControlled
+  unfold PDE.RicciFlow.Perelman.FlowMetricBall.IsRmControlled
+  have hrsq : r ^ 2 ≤ ham3_r0 ^ 2 := by
+    nlinarith
+      [mul_nonneg (sub_nonneg.mpr hrle)
+        (add_nonneg hr.le ham3_r0_pos.le)]
+  constructor
+  · intro t ht
+    have ht' : t ∈ Set.Icc ((0 : Real) - r ^ 2) 0 := by
+      simpa only [B, PointedFlowData.baseFlowBall] using ht
+    change t ∈ Set.Icc (-(ham3_r0 ^ 2)) 0
+    exact ⟨by linarith [ht'.1, hrsq], ht'.2⟩
+  · intro t ht x _hx
+    have ht' : t ∈ Set.Icc ((0 : Real) - r ^ 2) 0 := by
+      simpa only [B, PointedFlowData.baseFlowBall] using ht
+    let j := ham3Start (I := I) P Q hsel hwindow + i
+    have htShi : t ∈ Set.Icc ham3ShiLeft 0 := by
+      refine ⟨?_, ht'.2⟩
+      dsimp only [ham3ShiLeft]
+      linarith [ht'.1, hrsq, sq_nonneg ham3_r0]
+    have hsq :=
+      ham3_shi_rm (I := I) P Q hsel hwindow hrm i t htShi x
+    change r ^ 4 *
+        Tensor0SBundle.normSq0S (I := I)
+          ((ham3RescaledSol (I := I) P Q hsel j).base.metric t) x 4
+          ((ham3RescaledSol (I := I) P Q hsel j).base.rm04 t x) ≤ 1
+    have hmul :=
+      mul_le_mul_of_nonneg_left hsq (pow_nonneg hr.le 4)
+    calc
+      r ^ 4 *
+            Tensor0SBundle.normSq0S (I := I)
+              ((ham3RescaledSol (I := I) P Q hsel j).base.metric t) x 4
+              ((ham3RescaledSol (I := I) P Q hsel j).base.rm04 t x)
+          ≤ r ^ 4 * (100 : Real) ^ 2 := hmul
+      _ ≤ ham3_r0 ^ 4 * (100 : Real) ^ 2 := by
+        gcongr
+      _ = 1 := by
+        norm_num [ham3_r0]
 
 def cghToHam3
     (X : PointedFlowSeq.{u, uE, uH} (I := I))
