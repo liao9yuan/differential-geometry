@@ -1716,6 +1716,21 @@ theorem modelCapRoundedLowerFunction_eq_morse_add_eps_of_negPart_large {n k : �
   rw [hinner]
   ring
 
+theorem modelCapRoundedLowerFunctionInner_eq_morse_add_eps_of_negPart_large {n k : ℕ} (hk : k ≤ n)
+    (c ε r δ θ : ℝ) (hθ : 0 < θ) (hδ : 0 < δ) {y : MorseModel n}
+    (hy : r ^ 2 + 2 * ε + δ ≤ ‖negPart hk y‖ ^ 2) :
+    modelCapRoundedLowerFunctionInner hk c ε r δ θ y = morseNormalForm hk c y + ε := by
+  have hsc : modelRoundScale ε r δ θ (‖negPart hk y‖ ^ 2) = 1 :=
+    modelRoundScale_eq_one_of_ge hθ hδ hy
+  dsimp [modelCapRoundedLowerFunctionInner]
+  rw [morseNormalForm_split]
+  have hL : modelLowerRoundBound ε r δ θ (‖negPart hk y‖ ^ 2) = ‖negPart hk y‖ ^ 2 - 2 * ε := by
+    dsimp [modelLowerRoundBound]
+    rw [hsc]
+    ring
+  rw [hL]
+  ring
+
 theorem modelCapRoundedLowerFunction_le_c_iff_of_norm_le {n k : ℕ} (hk : k ≤ n)
     (c ε r δ θ R₀ R₁ : ℝ) (hθ : 0 < θ) (hδ : 0 < δ) (hδr : δ < r ^ 2) (hθr : θ < r ^ 2)
     (hR : R₀ < R₁) (hR0 : 0 ≤ R₀) {y : MorseModel n} (hy : morseNorm n y ≤ R₀) :
