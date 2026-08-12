@@ -7190,6 +7190,101 @@ theorem modelRoundCapQ_eq_lowerBound_imp_eq_one {ε r δ θ a b : ℝ} (hε : 0 
     have ha_ge : 1 ≤ a := le_trans hdiv1 hdiv
     exact le_antisymm ha1 ha_ge
 
+theorem modelRoundScale_pos_of_ge {ε r δ θ t : ℝ} (hδ : 0 < δ) (hθ : 0 < θ) (hδr : δ < r ^ 2)
+    (hθr : θ < r ^ 2) (ht : 2 * ε ≤ t) :
+    0 < modelRoundScale ε r δ θ t := by
+  by_cases ht0 : 2 * ε < t
+  · by_cases ht1 : t ≤ r ^ 2 + 2 * ε
+    · have hratio1 : 1 ≤ Real.sqrt (modelRoundRatio ε r δ t) := by
+        by_cases ht2 : t < r ^ 2 + 2 * ε
+        · have hgt : 1 < modelRoundRatio ε r δ t := modelRoundRatio_gt_one_of_lt hδ ht0 ht2
+          have hratio0 : 0 ≤ modelRoundRatio ε r δ t := by nlinarith [hgt]
+          have hsq : 1 < (Real.sqrt (modelRoundRatio ε r δ t)) ^ 2 := by
+            rw [Real.sq_sqrt hratio0]
+            exact hgt
+          have hnon : 0 ≤ Real.sqrt (modelRoundRatio ε r δ t) := Real.sqrt_nonneg _
+          nlinarith [hsq, hnon]
+        · have ht2' : r ^ 2 + 2 * ε ≤ t := le_of_not_gt ht2
+          have heq : t = r ^ 2 + 2 * ε := le_antisymm ht1 ht2'
+          have hcap : smoothCap ε r δ t = t - 2 * ε := by
+            subst t
+            dsimp [smoothCap]
+            ring
+          dsimp [modelRoundRatio]
+          rw [hcap]
+          have hdiv : (t - 2 * ε) / (t - 2 * ε) = 1 := div_self (by
+            have hpos : 0 < t - 2 * ε := by linarith [ht0]
+            linarith)
+          rw [hdiv]
+          rw [Real.sqrt_one]
+      have hτ0 : 0 ≤ Real.smoothTransition ((t - (r ^ 2 + 2 * ε - θ)) / θ) :=
+        Real.smoothTransition.nonneg _
+      have hle : 1 - Real.sqrt (modelRoundRatio ε r δ t) ≤ 0 := by nlinarith [hratio1]
+      have hmul : Real.smoothTransition ((t - (r ^ 2 + 2 * ε - θ)) / θ) *
+          (1 - Real.sqrt (modelRoundRatio ε r δ t)) ≤ 0 := by
+        nlinarith [hτ0, hle]
+      dsimp [modelRoundScale]
+      nlinarith [hmul]
+    · have ht1' : r ^ 2 + 2 * ε < t := lt_of_not_ge ht1
+      have hτ1 : 1 ≤ (t - (r ^ 2 + 2 * ε - θ)) / θ := by
+        have hden : 0 < θ := hθ
+        exact (le_div_iff₀ hden).2 (by nlinarith [ht1'])
+      dsimp [modelRoundScale]
+      rw [Real.smoothTransition.one_of_one_le hτ1]
+      have hden : 0 < t - 2 * ε := by linarith [ht0]
+      have hnum : 0 < smoothCap ε r δ t := smoothCap_pos hδ hδr
+      have hratio : 0 < smoothCap ε r δ t / (t - 2 * ε) := div_pos hnum hden
+      have hsqrt : 0 < Real.sqrt (smoothCap ε r δ t / (t - 2 * ε)) := Real.sqrt_pos.2 hratio
+      dsimp [modelRoundRatio]
+      nlinarith [hsqrt]
+  · have ht' : t = 2 * ε := le_antisymm (le_of_not_gt ht0) ht
+    have hsc : modelRoundScale ε r δ θ (2 * ε) = 1 := by
+      dsimp [modelRoundScale]
+      have harg : (2 * ε - (r ^ 2 + 2 * ε - θ)) / θ ≤ 0 := by
+        have hden : 0 < θ := hθ
+        exact (div_le_iff₀ hden).2 (by nlinarith [hθr])
+      rw [Real.smoothTransition.zero_of_nonpos harg]
+      simp [modelRoundRatio]
+    rw [ht', hsc]
+    norm_num
+
+theorem modelLowerRoundMap_injective {n k : ℕ} (hk : k ≤ n) (c ε r δ θ : ℝ)
+    (hδ : 0 < δ) (hθ : 0 < θ) (hδr : δ < r ^ 2) (hθr : θ < r ^ 2)
+    {y z : MorseModel n} (hy : y ∈ sublevel (morseNormalForm hk c) (c - ε))
+    (_hz : z ∈ sublevel (morseNormalForm hk c) (c - ε))
+    (h : modelLowerRoundMap hk ε r δ θ y = modelLowerRoundMap hk ε r δ θ z) : y = z := by
+  have hneg : negPart hk y = negPart hk z := by
+    have hneg' := congrArg (negPart hk) h
+    simpa [modelLowerRoundMap_negPart] using hneg'
+  have hpos : posPart hk y = posPart hk z := by
+    have hpos' := congrArg (posPart hk) h
+    rw [modelLowerRoundMap_posPart, modelLowerRoundMap_posPart] at hpos'
+    have ht : ‖negPart hk y‖ ^ 2 = ‖negPart hk z‖ ^ 2 := by
+      exact congrArg (fun v : EuclideanSpace ℝ (Fin k) => ‖v‖ ^ 2) hneg
+    have hsc : modelRoundScale ε r δ θ (‖negPart hk y‖ ^ 2) =
+        modelRoundScale ε r δ θ (‖negPart hk z‖ ^ 2) := by
+      rw [ht]
+    have hsc_pos : 0 < modelRoundScale ε r δ θ (‖negPart hk y‖ ^ 2) := by
+      have hle : 2 * ε ≤ ‖negPart hk y‖ ^ 2 := by
+        have hsplit := morseNormalForm_split hk c y
+        change morseNormalForm hk c y ≤ c - ε at hy
+        have hpos0 : 0 ≤ ‖posPart hk y‖ ^ 2 := sq_nonneg _
+        nlinarith [hsplit, hy, hpos0]
+      exact modelRoundScale_pos_of_ge hδ hθ hδr hθr hle
+    have hsmul : (modelRoundScale ε r δ θ (‖negPart hk y‖ ^ 2) •
+        posPart hk y : EuclideanSpace ℝ (Fin (n - k))) =
+        modelRoundScale ε r δ θ (‖negPart hk z‖ ^ 2) • posPart hk z := hpos'
+    rw [← hsc] at hsmul
+    exact (smul_right_injective (EuclideanSpace ℝ (Fin (n - k))) (r :=
+      modelRoundScale ε r δ θ (‖negPart hk y‖ ^ 2)) (ne_of_gt hsc_pos)) hsmul
+  rw [← recombine_decompose hk y, ← recombine_decompose hk z]
+  have hpairs : (negPart hk y, posPart hk y) = (negPart hk z, posPart hk z) := by
+    apply Prod.ext
+    · exact hneg
+    · exact hpos
+  exact congrArg (fun q : EuclideanSpace ℝ (Fin k) × EuclideanSpace ℝ (Fin (n - k)) =>
+    recombine hk q.1 q.2) hpairs
+
 end CellAttachment
 
 end
