@@ -3,9 +3,12 @@ import Mathlib.Analysis.Calculus.ContDiff.Operations
 import Mathlib.Analysis.Calculus.FDeriv.Basic
 import Mathlib.Analysis.Calculus.FDeriv.CompCLM
 import Mathlib.Analysis.Calculus.FDeriv.Mul
+import Mathlib.Analysis.Calculus.Deriv.CompMul
+import Mathlib.Analysis.Calculus.Deriv.Shift
 import Mathlib.MeasureTheory.Integral.IntervalIntegral.Basic
 import Mathlib.MeasureTheory.Integral.IntervalIntegral.ContDiff
 import Mathlib.MeasureTheory.Integral.IntervalIntegral.IntegrationByParts
+import DifferentialGeometry.Analysis.Calculus.ParametricIntervalIntegral
 
 namespace DifferentialGeometry
 namespace Analysis
@@ -193,6 +196,74 @@ theorem fderiv_fderiv_translate (g : E → ℝ) (hg : ContDiff ℝ 2 g) (c y : E
     fderiv ℝ (fderiv ℝ (fun z : E => g (z + c))) y
         = fderiv ℝ (fun z : E => fderiv ℝ g (z + c)) y := by rw [hfun]
     _ = fderiv ℝ (fderiv ℝ g) (y + c) := fderiv_translate (fderiv ℝ g) c y hd
+
+namespace Calculus
+
+variable {F : Type} [NormedAddCommGroup F] [NormedSpace ℝ F] [CompleteSpace F]
+
+def hadamardFactor (f : ℝ → F) (a : ℝ) (x : ℝ) : F :=
+  ∫ t in (0 : ℝ)..1, deriv f (a + t * (x - a))
+
+theorem hadamardFactor_contDiff (f : ℝ → F) (hf : ContDiff ℝ (⊤ : ℕ∞) f) (a : ℝ) :
+    ContDiff ℝ (⊤ : ℕ∞) (hadamardFactor f a) := by
+  have hderiv : ContDiff ℝ (⊤ : ℕ∞) (deriv f) :=
+    (contDiff_infty_iff_deriv.mp hf).2
+  have hH : ContDiffOn ℝ (⊤ : ℕ∞)
+      (fun p : ℝ × ℝ => deriv f (a + p.2 * (p.1 - a))) Set.univ := by
+    have hinner : ContDiff ℝ (⊤ : ℕ∞) (fun p : ℝ × ℝ => a + p.2 * (p.1 - a)) := by
+      fun_prop
+    exact hderiv.comp_contDiffOn hinner.contDiffOn
+  have hmain := contDiffOn_paramIntervalIntegral
+    (f := fun x : ℝ => fun t : ℝ => deriv f (a + t * (x - a))) hH
+  exact contDiffOn_univ.mp (by simpa [hadamardFactor] using hmain)
+
+theorem hadamard_factorization (f : ℝ → F) (hf : ContDiff ℝ (⊤ : ℕ∞) f) (a x : ℝ) :
+    f x - f a = (x - a) • hadamardFactor f a x := by
+  let w : ℝ := x - a
+  let φ : ℝ → F := fun t => f (a + t * w)
+  have hφ : ContDiff ℝ (⊤ : ℕ∞) φ := by
+    dsimp [φ]
+    have hinner : ContDiff ℝ (⊤ : ℕ∞) (fun t : ℝ => a + t * w) := by
+      fun_prop
+    exact hf.comp hinner
+  have hφ₁ : ContDiffOn ℝ 1 φ (Set.Icc (0 : ℝ) 1) :=
+    (hφ.contDiffOn.of_le (by decide : (1 : WithTop ℕ∞) ≤ (↑(⊤ : ℕ∞) : WithTop ℕ∞))).mono
+      (Set.subset_univ _)
+  have hFTC : (∫ t in (0 : ℝ)..1, deriv φ t) = φ 1 - φ 0 :=
+    intervalIntegral.integral_deriv_of_contDiffOn_Icc hφ₁ (by norm_num)
+  have hderivφ : ∀ t : ℝ, deriv φ t = w • deriv f (a + t * w) := by
+    intro t
+    dsimp [φ]
+    have hrewrite : (fun t : ℝ => f (a + t * w)) =
+        fun t : ℝ => (fun u : ℝ => f (a + u)) (w * t) := by
+      funext t
+      rw [mul_comm t w]
+    rw [hrewrite]
+    rw [deriv_comp_mul_left (c := w) (f := fun u : ℝ => f (a + u)) (x := t)]
+    rw [deriv_comp_const_add]
+    rw [mul_comm w t]
+  calc
+    f x - f a = φ 1 - φ 0 := by
+      dsimp [φ, w]
+      have h1 : a + 1 * (x - a) = x := by ring
+      have h0 : a + 0 * (x - a) = a := by ring
+      rw [h1, h0]
+    _ = ∫ t in (0 : ℝ)..1, deriv φ t := hFTC.symm
+    _ = ∫ t in (0 : ℝ)..1, w • deriv f (a + t * w) := by
+      apply intervalIntegral.integral_congr
+      intro t ht
+      exact hderivφ t
+    _ = w • ∫ t in (0 : ℝ)..1, deriv f (a + t * w) := by
+      rw [intervalIntegral.integral_smul]
+    _ = (x - a) • hadamardFactor f a x := by
+      simp [hadamardFactor, w]
+
+theorem exists_contDiff_hadamardFactor (f : ℝ → F) (hf : ContDiff ℝ (⊤ : ℕ∞) f) (a : ℝ) :
+    ∃ g : ℝ → F, ContDiff ℝ (⊤ : ℕ∞) g ∧
+      ∀ x : ℝ, f x - f a = (x - a) • g x :=
+  ⟨hadamardFactor f a, hadamardFactor_contDiff f hf a, hadamard_factorization f hf a⟩
+
+end Calculus
 
 end
 
