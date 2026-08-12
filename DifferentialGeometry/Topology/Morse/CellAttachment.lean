@@ -7405,6 +7405,23 @@ theorem modelRoundCapQ_eq_zero_of_b_eq_zero {ε r δ θ a : ℝ} (hε : 0 < ε) 
     field_simp [hden2]
     ring
 
+theorem modelRoundCapQ_eq_cocore {ε r δ θ b : ℝ} (hε : 0 < ε) (hδ : 0 < δ) (hθ : 0 < θ)
+    (hδr : δ < r ^ 2) (hθr : θ < r ^ 2) (hb0 : 0 ≤ b) (hb1 : b ≤ 1) :
+    modelRoundCapQ ε r δ θ 0 b = r ^ 2 * b := by
+  have hsc : modelRoundScale ε r δ θ 0 = 1 := by
+    have hle : 0 ≤ r ^ 2 + 2 * ε - θ := by nlinarith [hθr]
+    exact modelRoundScale_eq_one_of_le hθ hle
+  have hcap : smoothCap ε r δ 0 = r ^ 2 := by
+    have hle : 0 ≤ r ^ 2 + 2 * ε - δ := by nlinarith [hδr]
+    exact smoothCap_lower hδ hle
+  have hφ : modelRoundCapInterp ε r 0 b = (r ^ 2 * b + 2 * ε) / (r ^ 2 + 2 * ε) :=
+    modelRoundCapInterp_eq_cocore rfl hε hb0 hb1
+  dsimp [modelRoundCapQ, modelLowerRoundBound]
+  simp only [mul_zero]
+  rw [hφ, hsc, hcap]
+  field_simp [hε.ne']
+  ring
+
 end CellAttachment
 
 end
