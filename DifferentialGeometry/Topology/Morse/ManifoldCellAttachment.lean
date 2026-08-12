@@ -2107,6 +2107,28 @@ theorem contMDiff_handleRoundAttachingEmbedding {m k : ℕ} (hk : k ≤ m + 1) (
     exact hχ
   exact hχ'.congr (by intro p; rfl)
 
+theorem handleRoundEmbedding_injective {n k : ℕ} (hk : k ≤ n) (c ε r δ θ : ℝ)
+    {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M] [ChartedSpace H M]
+    {I : ModelWithCorners ℝ (MorseModel n) H} {f : M → ℝ}
+    (data : MorseChart n k hk c I f)
+    (hε : 0 < ε) (hδ : 0 < δ) (hθ : 0 < θ) (hδr : δ < r ^ 2) (hθr : θ < r ^ 2) (hr : 0 < r)
+    (hεr : Real.sqrt (2 * ε + 2 * r ^ 2) ≤ data.R) :
+    Function.Injective (handleRoundEmbedding hk c ε r δ θ data) := by
+  intro p q h
+  have hχ : data.χ (modelHandleRoundMap hk ε r δ θ p) = data.χ (modelHandleRoundMap hk ε r δ θ q) := by
+    simpa [handleRoundEmbedding] using h
+  have hnormb : ∀ x : StandardHandle k (n - k),
+      morseNorm n (modelHandleRoundMap hk ε r δ θ x) ≤ data.R := by
+    intro x
+    exact le_trans (modelHandleRoundMap_norm_le hk ε r δ θ hε hδ hθ hδr hθr hr x) hεr
+  have hsrc_p : modelHandleRoundMap hk ε r δ θ p ∈ data.χ.source :=
+    data.hχsrc (modelHandleRoundMap hk ε r δ θ p) (hnormb p)
+  have hsrc_q : modelHandleRoundMap hk ε r δ θ q ∈ data.χ.source :=
+    data.hχsrc (modelHandleRoundMap hk ε r δ θ q) (hnormb q)
+  have hy : modelHandleRoundMap hk ε r δ θ p = modelHandleRoundMap hk ε r δ θ q :=
+    data.χ.injOn hsrc_p hsrc_q hχ
+  exact modelHandleRoundMap_injective hk ε r δ θ hε hδ hθ hδr hθr hr p q hy
+
 theorem handleEmbedding_attachingRegion {n k : ℕ} (hk : k ≤ n) (c ε r : ℝ)
     {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M] [ChartedSpace H M]
     {I : ModelWithCorners ℝ (MorseModel n) H} {f : M → ℝ}
