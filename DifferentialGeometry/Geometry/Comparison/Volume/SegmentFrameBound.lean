@@ -23,7 +23,7 @@ open DifferentialGeometry.Geometry.Riemannian.Variation
 open DifferentialGeometry.Geometry.Riemannian.BonnetMyers
 open Tensor0SBundle
 
-variable {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]
+variable {E : Type*} [NormedAddCommGroup E]
   [InnerProductSpace Real E] [FiniteDimensional Real E]
   [NeZero (Module.finrank Real E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners Real E H}
@@ -39,6 +39,7 @@ variable [RiemannianBundle (fun x : M ↦ TangentSpace I x)]
 variable [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
   [IsContinuousRiemannianBundle E (fun x : M ↦ TangentSpace I x)]
 
+omit [T2Space (TangentBundle I M)] in
 private theorem fullDens_eq_trans
     (g : SmoothRiemannianMetric I M)
     (hEnorm : ∀ (y : M) (w : TangentSpace I y),
@@ -219,6 +220,7 @@ private theorem fullDens_eq_trans
           (fun i => intrinsicJacobi (I := I) g hEnorm p u (v i)) 1 := by
           congr 2
 
+omit [T2Space (TangentBundle I M)] in
 /-- Multiplying the endpoint exponential density at `t • u` by the radial
 Jacobian power `t^(n-1)` recovers the transverse Jacobi density at time `t`. -/
 theorem expDens_scale
