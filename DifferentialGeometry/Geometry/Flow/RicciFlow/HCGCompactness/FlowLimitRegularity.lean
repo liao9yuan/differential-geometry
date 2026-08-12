@@ -1209,6 +1209,62 @@ private theorem gramModel_to_mfld
       ((extChartAt I x₀).symm (extChartAt I x₀ x)) i j
   rw [(extChartAt I x₀).left_inv hxsrc]
 
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] in
+private theorem gramModel_to_mfld_Icc
+    (g : Real → letI : TopologicalSpace P.M := P.topology
+      letI : ChartedSpace H P.M := P.charted
+      letI : IsManifold I ∞ P.M := P.smooth
+      SmoothRiemannianMetric I P.M)
+    {β ψ : Real} (x₀ : P.M) (i j : Fin (Module.finrank Real E))
+    (hmodel : letI : TopologicalSpace P.M := P.topology
+      letI : ChartedSpace H P.M := P.charted
+      letI : IsManifold I ∞ P.M := P.smooth
+      ContDiffOn Real ∞
+        (fun p : Real × E => chartGramOnE (I := I) (g p.1) x₀ i j p.2)
+        (Set.Icc β ψ ×ˢ interior (extChartAt I x₀).target)) :
+    letI : TopologicalSpace P.M := P.topology
+    letI : ChartedSpace H P.M := P.charted
+    letI : T2Space P.M := P.t2
+    letI : IsManifold I ∞ P.M := P.smooth
+    ContMDiffOn (𝓘(Real, Real).prod I) 𝓘(Real) ∞
+      (fun p : Real × P.M => chartGramMatrix (I := I) (g p.1) x₀ p.2 i j)
+      (Set.Icc β ψ ×ˢ (trivializationAt E (TangentSpace I) x₀).baseSet) := by
+  letI : TopologicalSpace P.M := P.topology
+  letI : ChartedSpace H P.M := P.charted
+  letI : T2Space P.M := P.t2
+  letI : IsManifold I ∞ P.M := P.smooth
+  let S : Set (Real × P.M) :=
+    Set.Icc β ψ ×ˢ (trivializationAt E (TangentSpace I) x₀).baseSet
+  let U : Set (Real × E) :=
+    Set.Icc β ψ ×ˢ interior (extChartAt I x₀).target
+  let f : Real × P.M → Real × E := fun p => (p.1, extChartAt I x₀ p.2)
+  have hf : ContMDiffOn (𝓘(Real, Real).prod I) 𝓘(Real, Real × E) ∞ f S := by
+    refine ContMDiffOn.prodMk_space contMDiffOn_fst ?_
+    refine (contMDiffOn_extChartAt (I := I) (n := ∞) (x := x₀)).comp
+      contMDiffOn_snd ?_
+    rintro ⟨t, x⟩ ⟨_, hx⟩
+    simpa only [trivializationAt_baseSet_eq_chartAt_source] using hx
+  have hmaps : Set.MapsTo f S U := by
+    rintro ⟨t, x⟩ ⟨ht, hx⟩
+    have hxsrc : x ∈ (extChartAt I x₀).source := by
+      rw [extChartAt_source_eq_chartAt_source (I := I)]
+      simpa only [trivializationAt_baseSet_eq_chartAt_source] using hx
+    exact ⟨ht, extChartAt_target_subset_interior_of_boundaryless (I := I) x₀
+      ((extChartAt I x₀).map_source hxsrc)⟩
+  have hcomp : ContMDiffOn (𝓘(Real, Real).prod I) 𝓘(Real) ∞
+      (fun p : Real × P.M =>
+        chartGramOnE (I := I) (g p.1) x₀ i j (extChartAt I x₀ p.2)) S :=
+    hmodel.contMDiffOn.comp hf hmaps
+  refine hcomp.congr ?_
+  rintro ⟨t, x⟩ ⟨_, hx⟩
+  have hxsrc : x ∈ (extChartAt I x₀).source := by
+    rw [extChartAt_source_eq_chartAt_source (I := I)]
+    simpa only [trivializationAt_baseSet_eq_chartAt_source] using hx
+  change chartGramMatrix (I := I) (g t) x₀ x i j =
+    chartGramMatrix (I := I) (g t) x₀
+      ((extChartAt I x₀).symm (extChartAt I x₀ x)) i j
+  rw [(extChartAt I x₀).left_inv hxsrc]
+
 /-- Fixed-window joint spacetime smoothness of the limit metric in the
 trivialization-based chart-Gram readout. This is the remaining analytic
 regularity frontier. -/
@@ -1410,6 +1466,200 @@ theorem gramSmooth
     rcases p with ⟨t, y⟩
     rfl
   exact gramModel_to_mfld (I := I) (g := co.gInf) x₀ i j hmodel
+
+theorem gramSmoothIcc
+    {R : letI : TopologicalSpace P.M := P.topology
+      letI : ChartedSpace H P.M := P.charted
+      letI : IsManifold I ∞ P.M := P.smooth
+      SmoothRiemannianMetric I P.M}
+    {bf : BumpFamily (I := I) Φ} {hsrc : SrcSigma Φ} {htgt : TgtSigma Φ}
+    {β ψ : Real} (hβψ : β < ψ) (hwin : Set.Icc β ψ ⊆ X.D.regular)
+    (co : ConvOut (I := I) Φ R bf hsrc htgt β ψ) :
+    letI : TopologicalSpace P.M := P.topology
+    letI : ChartedSpace H P.M := P.charted
+    letI : T2Space P.M := P.t2
+    letI : IsManifold I ∞ P.M := P.smooth
+    ∀ (x₀ : P.M) (i j : Fin (Module.finrank ℝ E)),
+      ContMDiffOn (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ) ∞
+        (fun p : ℝ × P.M => chartGramMatrix (I := I) (co.gInf p.1) x₀ p.2 i j)
+        (Set.Icc β ψ ×ˢ (trivializationAt E (TangentSpace I) x₀).baseSet) := by
+  letI : TopologicalSpace P.M := P.topology
+  letI : ChartedSpace H P.M := P.charted
+  letI : T2Space P.M := P.t2
+  letI : IsManifold I ∞ P.M := P.smooth
+  letI : SigmaCompactSpace P.M := P.sigmaCompact
+  letI : IsManifold I 1 P.M :=
+    IsManifold.of_le (I := I) (M := P.M) (n := (∞ : WithTop ℕ∞))
+      (by decide : (1 : WithTop ℕ∞) ≤ ∞)
+  letI : IsManifold I 2 P.M :=
+    IsManifold.of_le (I := I) (M := P.M) (n := (∞ : WithTop ℕ∞))
+      (by decide : (2 : WithTop ℕ∞) ≤ ∞)
+  letI : IsManifold I ((∞ : WithTop ℕ∞) + 1) P.M := by
+    change IsManifold I ∞ P.M
+    infer_instance
+  classical
+  let MatRow := Fin (Module.finrank Real E) → Real
+  let MatVal := Fin (Module.finrank Real E) → MatRow
+  let MatD1 := E →L[Real] MatVal
+  let MatD2 := E →L[Real] MatD1
+  letI : NormedAddCommGroup MatRow := Pi.normedAddCommGroup
+  letI : NormedSpace Real MatRow := Pi.normedSpace
+  letI : NormedAddCommGroup MatVal := Pi.normedAddCommGroup
+  letI : NormedSpace Real MatVal := Pi.normedSpace
+  letI : NormedAddCommGroup MatD1 := ContinuousLinearMap.toNormedAddCommGroup
+  letI : NormedSpace Real MatD1 := ContinuousLinearMap.toNormedSpace
+  letI : NormedAddCommGroup MatD2 := ContinuousLinearMap.toNormedAddCommGroup
+  letI : NormedSpace Real MatD2 := ContinuousLinearMap.toNormedSpace
+  letI : NormedAddCommGroup (MatD1 × MatD2) := Prod.normedAddCommGroup
+  letI : NormedSpace Real (MatD1 × MatD2) := Prod.normedSpace
+  letI : NormedAddCommGroup (MatVal × (MatD1 × MatD2)) := Prod.normedAddCommGroup
+  letI : NormedSpace Real (MatVal × (MatD1 × MatD2)) := Prod.normedSpace
+  intro x₀ i j
+  let G : Real → E →
+      (Fin (Module.finrank Real E) → Fin (Module.finrank Real E) → Real) :=
+    fun t => chartGramPi (I := I) (co.gInf t) x₀
+  let J : Set Real := Set.Icc β ψ
+  let V : Set E := interior (extChartAt I x₀).target
+  let U : Set (Real × E) := J ×ˢ V
+  let RHS : Real → E →
+      (Fin (Module.finrank Real E) → Fin (Module.finrank Real E) → Real) :=
+    fun t y => Analysis.jetRicciFlow (chartModelBasis E) (Analysis.jet2 (G t) y)
+  let Ω : Set (Analysis.MatJet E (Module.finrank Real E)) :=
+    {p | (Matrix.of p.1).det ≠ 0}
+  have hV : IsOpen V := isOpen_interior
+  have hGs : ∀ t ∈ J, ContDiffOn Real ∞ (G t) V := by
+    intro t ht
+    refine contDiffOn_pi.mpr fun a => contDiffOn_pi.mpr fun b => ?_
+    exact (chartGramOnE_contDiffOn (I := I) (co.gInf t) x₀ a b).mono interior_subset
+  have hG₁s : ∀ t ∈ J,
+      ContDiffOn Real ∞ (fun y => fderiv Real (G t) y) V := by
+    intro t ht y hy
+    have hAt : ContDiffAt Real ∞ (G t) y :=
+      (hGs t ht y hy).contDiffAt (hV.mem_nhds hy)
+    exact (hAt.fderiv_right (m := ∞)
+      (by rw [ENat.coe_top_add_one])).contDiffWithinAt
+  have hG₂s : ∀ t ∈ J,
+      ContDiffOn Real ∞
+        (fun y => fderiv Real (fun z => fderiv Real (G t) z) y) V := by
+    intro t ht y hy
+    have hAt : ContDiffAt Real ∞ (fun z => fderiv Real (G t) z) y :=
+      (hG₁s t ht y hy).contDiffAt (hV.mem_nhds hy)
+    exact (hAt.fderiv_right (m := ∞)
+      (by rw [ENat.coe_top_add_one])).contDiffWithinAt
+  have hJetSlices : ∀ t ∈ J,
+      ContDiffOn Real ∞ (fun y => Analysis.jet2 (G t) y) V := by
+    intro t ht
+    simpa only [Analysis.jet2] using
+      (hGs t ht).prodMk ((hG₁s t ht).prodMk (hG₂s t ht))
+  have hdet : Continuous
+      (fun p : Analysis.MatJet E (Module.finrank Real E) => (Matrix.of p.1).det) :=
+    (Analysis.contDiff_det_of_entries
+      (fun p : Analysis.MatJet E (Module.finrank Real E) => Matrix.of p.1)
+      (fun a b => Analysis.contDiff_jetVal a b)).continuous
+  have hΩ : IsOpen Ω := by
+    simpa only [Ω, Set.mem_setOf_eq] using
+      (isOpen_ne_fun hdet (continuous_const : Continuous
+        (fun _ : Analysis.MatJet E (Module.finrank Real E) => (0 : Real))))
+  have hΦ : ContDiffOn Real ∞
+      (Analysis.jetRicciFlow (chartModelBasis E)) Ω := by
+    intro p hp
+    exact (Analysis.contDiffAt_jetRicciFlow (chartModelBasis E) hp).contDiffWithinAt
+  have hJetMaps : Set.MapsTo
+      (Function.uncurry (fun t y => Analysis.jet2 (G t) y)) (J ×ˢ V) Ω := by
+    rintro ⟨t, y⟩ ⟨ht, hy⟩
+    change (Matrix.of (Analysis.jet2 (G t) y).1).det ≠ 0
+    set x : P.M := (extChartAt I x₀).symm y with hx
+    have hyt : y ∈ (extChartAt I x₀).target := interior_subset hy
+    have hxsrc : x ∈ (extChartAt I x₀).source :=
+      (extChartAt I x₀).map_target hyt
+    have hxbase : x ∈ (trivializationAt E (TangentSpace I) x₀).baseSet := by
+      rw [trivializationAt_baseSet_eq_chartAt_source,
+        ← extChartAt_source_eq_chartAt_source (I := I)]
+      exact hxsrc
+    have hmat : Matrix.of (Analysis.jet2 (G t) y).1 =
+        chartGramMatrix (I := I) (co.gInf t) x₀ x := by
+      ext a b
+      simp only [Analysis.jet2, G, Matrix.of_apply, chartGramPi_apply,
+        chartGramOnE_def, hx]
+    rw [hmat]
+    exact (chartGramMatrix_det_pos (I := I) (co.gInf t) x₀ hxbase).ne'
+  have hRhsSlices : ∀ t ∈ J, ContDiffOn Real ∞ (RHS t) V := by
+    intro t ht
+    have hmaps : Set.MapsTo (fun y => Analysis.jet2 (G t) y) V Ω :=
+      mapsTo_prod_slice hJetMaps ht
+    simpa only [RHS, Function.comp_apply] using
+      hΦ.comp (hJetSlices t ht) hmaps
+  have hpde : ∀ t ∈ J, ∀ y ∈ V,
+      HasDerivWithinAt (fun s => G s y) (RHS t y) J t := by
+    intro t ht y hy
+    refine hasDerivWithinAt_pi.mpr fun a => hasDerivWithinAt_pi.mpr fun b => ?_
+    have hab := gramPDE (I := I) (Φ := Φ) hwin co x₀ a b (t := t) ht (y := y) hy
+    simpa only [G, RHS, chartGramPi_apply] using hab
+  have hbase : Analysis.SpaceJetDiff 0 G J V := by
+    intro r
+    apply contDiffOn_zero.2
+    exact gramPiJets (I := I) (Φ := Φ) hwin co r x₀
+  have hAll : ∀ q : Nat, Analysis.SpaceJetDiff q G J V := by
+    intro q
+    induction q with
+    | zero => exact hbase
+    | succ q ih =>
+        have hJetQ : Analysis.SpaceJetDiff q
+            (fun t y => Analysis.jet2 (G t) y) J V :=
+          ih.jet2 hV hGs
+        have hRhsQ : Analysis.SpaceJetDiff q RHS J V := by
+          simpa only [RHS] using
+            Analysis.spaceJet_comp_Icc
+              (Φ := Analysis.jetRicciFlow (chartModelBasis E))
+              (u := fun t y => Analysis.jet2 (G t) y)
+              hV hΩ hJetMaps hΦ hJetSlices hJetQ
+        intro r
+        have hpdeR : ∀ p ∈ U,
+            HasDerivWithinAt
+              (fun s => iteratedFDeriv Real r (G s) p.2)
+              (iteratedFDeriv Real r (RHS p.1) p.2) J p.1 := by
+          intro p hp
+          exact Analysis.hasDerivWithin_iterF (G := G) (R := RHS) hV r
+            hGs hRhsSlices hpde (fun m _ => (hRhsQ m).continuousOn)
+            hp.1 hp.2
+        have hslice : ∀ p ∈ U,
+            HasFDerivAt
+              (fun y => iteratedFDeriv Real r (G p.1) y)
+              (fderiv Real (iteratedFDeriv Real r (G p.1)) p.2) p.2 := by
+          intro p hp
+          have hAt : ContDiffAt Real ∞ (G p.1) p.2 :=
+            (hGs p.1 hp.1 p.2 hp.2).contDiffAt (hV.mem_nhds hp.2)
+          have hJetAt : ContDiffAt Real 1
+              (iteratedFDeriv Real r (G p.1)) p.2 :=
+            hAt.iteratedFDeriv_right (m := 1) (i := r)
+              (by exact_mod_cast le_top)
+          exact (hJetAt.differentiableAt (by norm_num)).hasFDerivAt
+        have hstep := Analysis.contDiffIcc_succ (q := q) hβψ hV hpdeR hslice
+          (hRhsQ r) (ih.jet_fderiv r)
+        simpa only [Nat.succ_eq_add_one] using hstep
+  have hGinf : ContDiffOn Real ∞ (Function.uncurry G) U := by
+    rw [contDiffOn_infty]
+    intro q
+    have hraw :=
+      (continuousMultilinearCurryFin0 Real E
+        (Fin (Module.finrank Real E) → Fin (Module.finrank Real E) → Real)).contDiff.comp_contDiffOn
+        (hAll q 0)
+    exact hraw.congr fun p _ => by
+      rcases p with ⟨t, y⟩
+      rfl
+  have hrow : ContDiffOn Real ∞
+      (fun p : Real × E => (Function.uncurry G p) i) U :=
+    (contDiffOn_pi.mp hGinf) i
+  have hentry : ContDiffOn Real ∞
+      (fun p : Real × E => (Function.uncurry G p) i j) U :=
+    (contDiffOn_pi.mp hrow) j
+  have hmodel : ContDiffOn Real ∞
+      (fun p : Real × E => chartGramOnE (I := I) (co.gInf p.1) x₀ i j p.2)
+      (Set.Icc β ψ ×ˢ interior (extChartAt I x₀).target) := by
+    refine hentry.congr fun p _ => ?_
+    rcases p with ⟨t, y⟩
+    rfl
+  exact gramModel_to_mfld_Icc (I := I) (g := co.gInf) x₀ i j hmodel
 
 end ConvOut
 
