@@ -12366,6 +12366,29 @@ noncomputable def handleRoundAttachingEmbeddingSubtype {m k : ℕ} (hk : k ≤ m
   fun p => ⟨handleRoundAttachingEmbedding hk c ε r δ θ data p,
     handleRoundAttachingEmbedding_mem_rounded hk c ε r δ θ data hε hδ hθ hδr hεr' p⟩
 
+noncomputable def morseCapRoundedLowerSublevel {m k : ℕ} (hk : k ≤ m + 1) (c ε r δ θ : ℝ)
+    {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M] [ChartedSpace H M]
+    {I : ModelWithCorners ℝ (MorseModel (m + 1)) H} {f : M → ℝ}
+    (data : MorseChart (m + 1) k hk c I f) : Set M :=
+  data.χ '' (modelLowerRoundMap hk ε r δ θ '' (sublevel (morseNormalForm hk c) (c - ε))) ∪
+    (sublevel f (c - ε) ∩
+      (morseChartCoreBallImage hk c data ∩ morseChartBallImage hk c data)ᶜ)
+
+theorem handleRoundAttachingEmbedding_mem_capRoundedLowerSublevel {m k : ℕ}
+    (hk : k ≤ m + 1) (c ε r δ θ : ℝ)
+    {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M] [T2Space M] [ChartedSpace H M]
+    {I : ModelWithCorners ℝ (MorseModel (m + 1)) H} {f : M → ℝ}
+    (data : MorseChart (m + 1) k hk c I f)
+    (hε : 0 < ε)
+    (p : AttachingRegion k (m + 1 - k)) :
+    handleRoundAttachingEmbedding hk c ε r δ θ data p ∈
+      morseCapRoundedLowerSublevel hk c ε r δ θ data := by
+  dsimp [morseCapRoundedLowerSublevel, handleRoundAttachingEmbedding]
+  left
+  refine ⟨modelLowerRoundMap hk ε r δ θ (cocoreModelPoint hk ε r p), ?_, rfl⟩
+  refine ⟨cocoreModelPoint hk ε r p,
+    le_of_eq (morseNormalForm_cocoreModelPoint hk c ε r (le_of_lt hε) p), rfl⟩
+
 theorem range_handleEmbedding_subset_ballImage {m k : ℕ} (hk : k ≤ m + 1) (c ε r : ℝ)
     {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M] [ChartedSpace H M]
     {I : ModelWithCorners ℝ (MorseModel (m + 1)) H} {f : M → ℝ}
