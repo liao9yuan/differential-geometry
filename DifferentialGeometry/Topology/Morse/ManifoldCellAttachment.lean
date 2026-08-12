@@ -14620,8 +14620,164 @@ theorem no_critical_morseSublevelIsotopyFamily {m k : ℕ} (hk : k ≤ m + 1)
     exact hreg hcritf
 
 
+
+theorem isCompact_morseSublevelIsotopyFamily_strip {m k : ℕ} (hk : k ≤ m + 1)
+    (c ε r δ R₀ R₁ R₁' a : ℝ) {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M]
+    [ChartedSpace H M] [T2Space M]
+    {I : ModelWithCorners ℝ (MorseModel (m + 1)) H} [I.Boundaryless]
+    [IsManifold I (⊤ : WithTop ℕ∞) M] {f : M → ℝ}
+    (data : MorseChart (m + 1) k hk c I f)
+    (hf : ContMDiff I 𝓘(ℝ, ℝ) (↑(⊤ : ℕ∞) : WithTop ℕ∞) f)
+    (ε₀ : ℝ) (hε : 0 < ε) (hR : R₀ < R₁) (hR0 : 0 ≤ R₀)
+    (hR₁₂ : R₁ < R₁') (hR₁₂R : R₁' ≤ data.R) (hR₁₂R' : R₁' ≤ data.R')
+    (haε : ε + 2 * ε₀ ≤ a)
+    (hcompact : IsCompact (f ⁻¹' Set.Icc (c - a) (c + a))) :
+    IsCompact {q : M × ℝ | |morseSublevelIsotopyFamily hk c ε r δ R₀ R₁ data q.2 q.1| ≤ 2 * ε₀ ∧
+      q.2 ∈ Set.Icc 0 1} := by
+  classical
+  let F : M × ℝ → ℝ := fun q => morseSublevelIsotopyFamily hk c ε r δ R₀ R₁ data q.2 q.1
+  have hFcont : Continuous F := by
+    dsimp [F]
+    exact (contMDiff_morseSublevelIsotopyFamily hk c ε r δ R₀ R₁ R₁' data hf hR hR0 hR₁₂ hR₁₂R hR₁₂R').continuous
+  let A : Set (M × ℝ) := (data.χ '' {y : MorseModel (m + 1) | CellAttachment.morseNorm (m + 1) y ≤ R₁}) ×ˢ Set.Icc 0 1
+  let B : Set (M × ℝ) := (f ⁻¹' Set.Icc (c - a) (c + a)) ×ˢ Set.Icc 0 1
+  have hSclosed : IsClosed {q : M × ℝ | |F q| ≤ 2 * ε₀ ∧ q.2 ∈ Set.Icc 0 1} := by
+    have hle : IsClosed {q : M × ℝ | |F q| ≤ 2 * ε₀} := by
+      have hcont : Continuous (fun q : M × ℝ => |F q|) := continuous_abs.comp hFcont
+      exact isClosed_le hcont continuous_const
+    exact hle.inter (isClosed_Icc.preimage continuous_snd)
+  have hsub : {q : M × ℝ | |F q| ≤ 2 * ε₀ ∧ q.2 ∈ Set.Icc 0 1} ⊆ A ∪ B := by
+    intro q hq
+    by_cases hx : q.1 ∈ data.χ '' {y : MorseModel (m + 1) | CellAttachment.morseNorm (m + 1) y ≤ R₁}
+    · left
+      exact ⟨hx, hq.2⟩
+    · right
+      have hg : morseRoundedFunction hk c ε r δ R₀ R₁ data q.1 = f q.1 + ε :=
+        morseRoundedFunction_eq_f_add_eps_of_not_mem_closedBall hk c ε r δ R₀ R₁ data hx
+      have hFval : F q = f q.1 - c + ε * (1 - 2 * q.2) := by
+        dsimp [F, morseSublevelIsotopyFamily]
+        rw [hg]
+        ring
+      have hb1 : |1 - 2 * q.2| ≤ 1 := by
+        rw [abs_le]
+        constructor <;> nlinarith [hq.2.1, hq.2.2]
+      have hb : |f q.1 - c| ≤ a := by
+        have hle : |f q.1 - c| ≤ |F q| + |ε * (1 - 2 * q.2)| := by
+          have hsub' : f q.1 - c = F q - ε * (1 - 2 * q.2) := by
+            rw [hFval]
+            ring
+          rw [hsub']
+          calc
+            |F q - ε * (1 - 2 * q.2)| ≤ |F q| + |ε * (1 - 2 * q.2)| := by
+              rw [sub_eq_add_neg]
+              simpa [abs_neg] using (abs_add_le (F q) (-(ε * (1 - 2 * q.2))) : |F q + (-(ε * (1 - 2 * q.2)))| ≤ |F q| + |-(ε * (1 - 2 * q.2))|)
+            _ = |F q| + |ε * (1 - 2 * q.2)| := rfl
+        have hεb : |ε * (1 - 2 * q.2)| ≤ ε := by
+          rw [abs_mul, abs_of_pos hε]
+          simpa using (mul_le_mul_of_nonneg_left hb1 (le_of_lt hε))
+        have hFb : |F q| ≤ 2 * ε₀ := hq.1
+        exact le_trans hle (by nlinarith [hεb, hFb, haε])
+      have habs := abs_le.mp hb
+      exact ⟨⟨by nlinarith [habs.1], by nlinarith [habs.2]⟩, hq.2⟩
+  have hball : IsCompact {y : MorseModel (m + 1) | CellAttachment.morseNorm (m + 1) y ≤ R₁} := by
+    have hcl : IsClosed {y : MorseModel (m + 1) | CellAttachment.morseNorm (m + 1) y ≤ R₁} := by
+      have hcont : Continuous (fun y : MorseModel (m + 1) => CellAttachment.morseNorm (m + 1) y) := by
+        dsimp [CellAttachment.morseNorm]
+        exact continuous_norm.comp (PiLp.continuous_toLp (p := (2 : ENNReal)) (β := fun _ : Fin (m + 1) => ℝ))
+      exact isClosed_le hcont continuous_const
+    have hbdd : {y : MorseModel (m + 1) | CellAttachment.morseNorm (m + 1) y ≤ R₁} ⊆
+        Metric.closedBall (0 : MorseModel (m + 1)) R₁ := by
+      intro y hy
+      exact Metric.mem_closedBall.mpr (by
+        simpa [dist_eq_norm] using le_trans (CellAttachment.morseNorm_piNorm_le y) hy)
+    exact (isCompact_closedBall (0 : MorseModel (m + 1)) R₁).of_isClosed_subset hcl hbdd
+  have hA : IsCompact A := by
+    have hsrc : {y : MorseModel (m + 1) | CellAttachment.morseNorm (m + 1) y ≤ R₁} ⊆ data.χ.source := by
+      intro y hy
+      exact data.hχsrc y (le_trans hy (le_of_lt (lt_of_lt_of_le hR₁₂ hR₁₂R)))
+    have himg : IsCompact (data.χ '' {y : MorseModel (m + 1) | CellAttachment.morseNorm (m + 1) y ≤ R₁}) :=
+      hball.image_of_continuousOn (data.χ.continuousOn.mono hsrc)
+    dsimp [A]
+    exact himg.prod isCompact_Icc
+  have hB : IsCompact B := by
+    dsimp [B]
+    exact hcompact.prod isCompact_Icc
+  exact (hA.union hB).of_isClosed_subset hSclosed hsub
+
+theorem morseSublevelIsotopyFamily_criticalPoint_not_in_strip {m k : ℕ} (hk : k ≤ m + 1)
+    (c ε r δ R₀ R₁ : ℝ) {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M]
+    [ChartedSpace H M] [T2Space M]
+    {I : ModelWithCorners ℝ (MorseModel (m + 1)) H} [I.Boundaryless]
+    [IsManifold I (⊤ : WithTop ℕ∞) M] {f : M → ℝ}
+    (data : MorseChart (m + 1) k hk c I f)
+    (hε : 0 < ε) (hδ : 0 < δ) (hδr : δ < r ^ 2) (hR : R₀ < R₁) (hR0 : 0 ≤ R₀)
+    (hrsq : r ^ 2 = 2 * ε) (ε₀ : ℝ) (hε₀ : 2 * ε₀ < ε)
+    (s : ℝ) :
+    |morseSublevelIsotopyFamily hk c ε r δ R₀ R₁ data s data.p| > 2 * ε₀ := by
+  classical
+  have hF : morseSublevelIsotopyFamily hk c ε r δ R₀ R₁ data s data.p =
+      CellAttachment.modelSublevelFamily hk c ε r δ R₀ R₁ s 0 := by
+    have hsrc0 : (0 : MorseModel (m + 1)) ∈ data.χ.source :=
+      data.hχsrc 0 (by simpa [CellAttachment.morseNorm] using (le_of_lt data.hRpos))
+    have hg : morseRoundedFunction hk c ε r δ R₀ R₁ data data.p =
+        CellAttachment.modelRoundedFunction hk c ε r δ R₀ R₁ 0 := by
+      have hmem : data.p ∈ data.χ '' {y : MorseModel (m + 1) | CellAttachment.morseNorm (m + 1) y ≤ R₁} := by
+        refine ⟨0, ?_, data.hχ0⟩
+        simpa [CellAttachment.morseNorm] using (le_of_lt (lt_of_le_of_lt hR0 hR))
+      have heq := morseRoundedFunction_eq_model_of_mem_closedBall hk c ε r δ R₀ R₁ data hmem
+      rw [heq]
+      have hsymm : data.χ.symm data.p = 0 := by
+        rw [← data.hχ0]
+        exact data.χ.left_inv hsrc0
+      rw [hsymm]
+    have hf : f data.p = CellAttachment.morseNormalForm hk c 0 := by
+      rw [← data.hχ0]
+      exact data.hnorm 0 (by simpa [CellAttachment.morseNorm] using (le_of_lt data.hRpos))
+    dsimp [morseSublevelIsotopyFamily, CellAttachment.modelSublevelFamily]
+    rw [hg, hf]
+  have hsplit := CellAttachment.modelSublevelFamily_value_split hk c ε r δ R₀ R₁ s (0 : MorseModel (m + 1))
+    (by
+      have hz : CellAttachment.posPart hk (0 : MorseModel (m + 1)) = 0 := by
+        ext j
+        simp [CellAttachment.posPart]
+      simp [hz])
+  have hval : CellAttachment.modelSublevelFamily hk c ε r δ R₀ R₁ s 0 = -ε := by
+    have hτ0 : Real.smoothTransition ((CellAttachment.morseNorm (m + 1) (0 : MorseModel (m + 1)) ^ 2 - R₀ ^ 2) /
+        (R₁ ^ 2 - R₀ ^ 2)) = 0 := by
+      apply Real.smoothTransition.zero_of_nonpos
+      have hden : 0 < R₁ ^ 2 - R₀ ^ 2 := by
+        have hlt : |R₀| < |R₁| := by
+          rw [abs_of_nonneg hR0, abs_of_nonneg (le_of_lt (lt_of_le_of_lt hR0 hR))]
+          exact hR
+        have hsq : R₀ ^ 2 < R₁ ^ 2 := sq_lt_sq.mpr hlt
+        nlinarith
+      have hnum : 0 ≤ R₀ ^ 2 := by positivity
+      simp [CellAttachment.morseNorm]
+      have hnum' : -R₀ ^ 2 ≤ 0 := by nlinarith [hnum]
+      simpa using (div_nonpos_of_nonpos_of_nonneg hnum' (le_of_lt hden))
+    have hneg0 : ‖CellAttachment.negPart hk (0 : MorseModel (m + 1))‖ ^ 2 = 0 := by
+      have hz : CellAttachment.negPart hk (0 : MorseModel (m + 1)) = 0 := by
+        ext j
+        simp [CellAttachment.negPart]
+      rw [hz]
+      simp
+    have hcap : CellAttachment.smoothCap ε r δ 0 = r ^ 2 := by
+      exact CellAttachment.smoothCap_lower hδ (by nlinarith [hδr, hε])
+    rw [hsplit]
+    rw [hτ0]
+    rw [hneg0]
+    rw [hcap]
+    rw [hrsq]
+    ring
+  rw [hF, hval]
+  have habs : |-ε| = ε := by
+    rw [abs_of_neg (neg_neg_of_pos hε)]
+    ring
+  rw [habs]
+  nlinarith [hε₀]
+
 theorem no_critical_morseSublevelIsotopyFamily_strip {m k : ℕ} (hk : k ≤ m + 1)
-    (c ε r δ R₀ R₁ R₁' ε₀ : ℝ) {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M]
+    (c ε r δ R₀ R₁ R₁' a ε₀ : ℝ) {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M]
     [ChartedSpace H M] [T2Space M]
     {I : ModelWithCorners ℝ (MorseModel (m + 1)) H} [I.Boundaryless]
     [IsManifold I (⊤ : WithTop ℕ∞) M] {f : M → ℝ}
@@ -14631,22 +14787,24 @@ theorem no_critical_morseSublevelIsotopyFamily_strip {m k : ℕ} (hk : k ≤ m +
     (hε₀le : 2 * ε₀ < min (min ε (r ^ 2 / 2)) ((r ^ 2 - δ) / 2))
     (hR₁₂ : R₁ < R₁') (hR₁₂R : R₁' ≤ data.R) (hR₁₂R' : R₁' ≤ data.R')
     (hf : ContMDiff I 𝓘(ℝ, ℝ) (↑(⊤ : ℕ∞) : WithTop ℕ∞) f)
-    (hreg_f : ∀ x : M, f x ∈ Set.Icc (c - ε - 2 * ε₀) (c + ε + 2 * ε₀) → ¬ IsCriticalPointAt I f x)
+    (haε : ε + 2 * ε₀ ≤ a)
+    (hunique : ∀ x : M, f x ∈ Set.Icc (c - a) (c + a) →
+      x = data.p ∨ ¬ IsCriticalPointAt I f x)
     (s : ℝ) (hs : s ∈ Set.Icc (0 : ℝ) 1) {x : M}
     (hx : |morseSublevelIsotopyFamily hk c ε r δ R₀ R₁ data s x| ≤ 2 * ε₀) :
     ¬ IsCriticalPointAt I (fun z : M => morseSublevelIsotopyFamily hk c ε r δ R₀ R₁ data s z) x := by
-  by_cases hb : x ∈ data.χ '' {y : MorseModel (m + 1) | morseNorm (m + 1) y ≤ R₁}
+  by_cases hb : x ∈ data.χ '' {y : MorseModel (m + 1) | CellAttachment.morseNorm (m + 1) y ≤ R₁}
   · rcases hb with ⟨y, hy, hxy⟩
     have hsrc : y ∈ data.χ.source := data.hχsrc y (le_trans hy (le_trans (le_of_lt hR₁₂) hR₁₂R))
     have hsymm : data.χ.symm x = y := by
       rw [← hxy]
       exact data.χ.left_inv hsrc
-    have hyR : morseNorm (m + 1) y < data.R' :=
+    have hyR : CellAttachment.morseNorm (m + 1) y < data.R' :=
       lt_of_lt_of_le (lt_of_le_of_lt hy hR₁₂) hR₁₂R'
     have hyRball : y ∈ Metric.ball (0 : MorseModel (m + 1)) data.R' := by
       rw [Metric.mem_ball, dist_zero_right]
-      exact lt_of_le_of_lt (morseNorm_piNorm_le y) hyR
-    have hyRs : morseNorm (m + 1) y < data.R :=
+      exact lt_of_le_of_lt (CellAttachment.morseNorm_piNorm_le y) hyR
+    have hyRs : CellAttachment.morseNorm (m + 1) y < data.R :=
       lt_of_lt_of_le (lt_of_le_of_lt hy hR₁₂) hR₁₂R
     have hsrc' : y ∈ data.χ.source := data.hχsrc y (le_of_lt hyRs)
     have hmodelVal : |CellAttachment.modelSublevelFamily hk c ε r δ R₀ R₁ s y| ≤ 2 * ε₀ := by
@@ -14656,7 +14814,7 @@ theorem no_critical_morseSublevelIsotopyFamily_strip {m k : ℕ} (hk : k ≤ m +
             CellAttachment.modelRoundedFunction hk c ε r δ R₀ R₁ y := by
           rw [morseRoundedFunction_eq_model_of_mem_closedBall hk c ε r δ R₀ R₁ data ⟨y, hy, hxy⟩]
           rw [← hsymm]
-        have h2 : f x = morseNormalForm hk c y := by
+        have h2 : f x = CellAttachment.morseNormalForm hk c y := by
           rw [← hxy]
           exact data.hnorm y (le_of_lt hyRs)
         dsimp [morseSublevelIsotopyFamily, CellAttachment.modelSublevelFamily]
@@ -14711,14 +14869,14 @@ theorem no_critical_morseSublevelIsotopyFamily_strip {m k : ℕ} (hk : k ≤ m +
     have hloc : Filter.Eventually (fun z : M =>
         morseSublevelIsotopyFamily hk c ε r δ R₀ R₁ data s z =
           CellAttachment.modelSublevelFamily hk c ε r δ R₀ R₁ s (data.χ.symm z)) (nhds x) := by
-      have hcontNorm : Continuous (fun w : MorseModel (m + 1) => morseNorm (m + 1) w) := by
-        dsimp [morseNorm]
+      have hcontNorm : Continuous (fun w : MorseModel (m + 1) => CellAttachment.morseNorm (m + 1) w) := by
+        dsimp [CellAttachment.morseNorm]
         exact continuous_norm.comp (PiLp.continuous_toLp (p := (2 : ENNReal)) (β := fun _ : Fin (m + 1) => ℝ))
-      have hopen : IsOpen (data.χ '' {w : MorseModel (m + 1) | morseNorm (m + 1) w < R₁'}) := by
+      have hopen : IsOpen (data.χ '' {w : MorseModel (m + 1) | CellAttachment.morseNorm (m + 1) w < R₁'}) := by
         exact data.χ.isOpen_image_of_subset_source (isOpen_lt hcontNorm continuous_const) (by
           intro w hw
           exact data.hχsrc w (le_of_lt (lt_of_lt_of_le hw hR₁₂R)))
-      have hmem : x ∈ data.χ '' {w : MorseModel (m + 1) | morseNorm (m + 1) w < R₁'} := by
+      have hmem : x ∈ data.χ '' {w : MorseModel (m + 1) | CellAttachment.morseNorm (m + 1) w < R₁'} := by
         exact ⟨y, lt_of_le_of_lt hy hR₁₂, hxy⟩
       refine Filter.mem_of_superset (hopen.mem_nhds hmem) ?_
       intro z hz
@@ -14728,7 +14886,7 @@ theorem no_critical_morseSublevelIsotopyFamily_strip {m k : ℕ} (hk : k ≤ m +
           CellAttachment.modelRoundedFunction hk c ε r δ R₀ R₁ (data.χ.symm z) := by
         exact morseRoundedFunction_eq_model_of_ball' hk c ε r δ R₀ R₁ R₁' data hR hR0 hR₁₂ hR₁₂R
           ⟨w, hw, hzw⟩
-      have h2 : f z = morseNormalForm hk c w := by
+      have h2 : f z = CellAttachment.morseNormalForm hk c w := by
         rw [← hzw]
         exact data.hnorm w (le_of_lt (lt_of_lt_of_le hw hR₁₂R))
       dsimp [morseSublevelIsotopyFamily, CellAttachment.modelSublevelFamily]
@@ -14788,10 +14946,10 @@ theorem no_critical_morseSublevelIsotopyFamily_strip {m k : ℕ} (hk : k ≤ m +
         Filter.EventuallyEq.mfderiv_eq (I := 𝓘(ℝ, MorseModel (m + 1))) (I' := 𝓘(ℝ, MorseModel (m + 1)))
           (x := y) (f₁ := fun z : MorseModel (m + 1) => data.χ.symm (data.χ z))
           (f := fun z : MorseModel (m + 1) => z) (by
-            have hcontNorm : Continuous (fun z : MorseModel (m + 1) => morseNorm (m + 1) z) := by
-              dsimp [morseNorm]
+            have hcontNorm : Continuous (fun z : MorseModel (m + 1) => CellAttachment.morseNorm (m + 1) z) := by
+              dsimp [CellAttachment.morseNorm]
               exact continuous_norm.comp (PiLp.continuous_toLp (p := (2 : ENNReal)) (β := fun _ : Fin (m + 1) => ℝ))
-            have hnh : {z : MorseModel (m + 1) | morseNorm (m + 1) z < data.R} ∈ nhds y :=
+            have hnh : {z : MorseModel (m + 1) | CellAttachment.morseNorm (m + 1) z < data.R} ∈ nhds y :=
               (isOpen_lt hcontNorm continuous_const).mem_nhds hyRs
             refine Filter.mem_of_superset hnh ?_
             intro z hz
@@ -14834,122 +14992,99 @@ theorem no_critical_morseSublevelIsotopyFamily_strip {m k : ℕ} (hk : k ≤ m +
       have hv := congrArg (fun L : (MorseModel (m + 1) →L[ℝ] ℝ) => L v) hfinal
       simpa using hv
     exact hFder hcontr
-  · have hval : f x ∈ Set.Icc (c - ε - 2 * ε₀) (c + ε + 2 * ε₀) := by
+  · have hval : f x ∈ Set.Icc (c - a) (c + a) := by
       have h1 : morseRoundedFunction hk c ε r δ R₀ R₁ data x = f x + ε :=
         morseRoundedFunction_eq_f_add_eps_of_not_mem_closedBall hk c ε r δ R₀ R₁ data hb
-      have hbnd : |(1 - s) * (f x + ε - c) + s * (f x - c - ε)| ≤ 2 * ε₀ := by
-        simpa [morseSublevelIsotopyFamily, h1] using hx
-      have hrew : (1 - s) * (f x + ε - c) + s * (f x - c - ε) =
-          f x - c + (1 - 2 * s) * ε := by ring
-      rw [hrew] at hbnd
-      have hshift : |f x - c| ≤ 2 * ε₀ + |(1 - 2 * s) * ε| := by
-        have hbnd' : |f x - (c - (1 - 2 * s) * ε)| ≤ 2 * ε₀ := by
-          simpa [sub_eq_add_neg, add_assoc, add_comm, add_left_comm] using hbnd
-        have habs := abs_sub_le_iff.mp hbnd'
-        have htri : |f x - c| ≤ |f x - (c - (1 - 2 * s) * ε)| + |(1 - 2 * s) * ε| := by
-          have h1 : |f x - c| = |(f x - (c - (1 - 2 * s) * ε)) - ((1 - 2 * s) * ε)| := by
-            have hEq : f x - c = (f x - (c - (1 - 2 * s) * ε)) - ((1 - 2 * s) * ε) := by ring
-            rw [hEq]
-          have h2 : |(f x - (c - (1 - 2 * s) * ε)) - ((1 - 2 * s) * ε)| ≤
-              |f x - (c - (1 - 2 * s) * ε)| + |(1 - 2 * s) * ε| := by
-            have hsub : (f x - (c - (1 - 2 * s) * ε)) - ((1 - 2 * s) * ε) =
-                (f x - (c - (1 - 2 * s) * ε)) + (-((1 - 2 * s) * ε)) := by ring
-            rw [hsub]
-            simpa [abs_neg] using
-              (abs_add_le (f x - (c - (1 - 2 * s) * ε)) (-((1 - 2 * s) * ε)))
-          rw [h1]
-          exact h2
-        nlinarith [htri, habs]
-      have h1s : |1 - 2 * s| ≤ 1 := by
+      dsimp [morseSublevelIsotopyFamily] at hx
+      have hFval : (1 - s) * (f x + ε - c) + s * (f x - c - ε) = f x - c + (1 - 2 * s) * ε := by ring
+      have hb1 : |1 - 2 * s| ≤ 1 := by
         rw [abs_le]
         constructor <;> nlinarith [hs.1, hs.2]
-      have hεb : |(1 - 2 * s) * ε| ≤ ε := by
-        rw [abs_mul]
-        have hεabs : |ε| = ε := abs_of_nonneg (le_of_lt hε)
-        rw [hεabs]
-        have h1 : |1 - 2 * s| * ε ≤ 1 * ε :=
-          mul_le_mul_of_nonneg_right h1s (le_of_lt hε)
-        nlinarith
-      have hmain : |f x - c| ≤ 2 * ε₀ + ε := by nlinarith [hshift, hεb]
-      have hle1 : c - ε - 2 * ε₀ ≤ f x := by
-        have hle : -(2 * ε₀ + ε) ≤ f x - c := by
-          rw [abs_le] at hmain
-          exact hmain.1
-        nlinarith
-      have hle2 : f x ≤ c + ε + 2 * ε₀ := by
-        have hle : f x - c ≤ 2 * ε₀ + ε := by
-          rw [abs_le] at hmain
-          exact hmain.2
-        nlinarith
-      exact ⟨hle1, hle2⟩
-    have hreg : ¬ IsCriticalPointAt I f x := hreg_f x hval
-    have hconst : f x - c + (1 - 2 * s) * ε = -c + (1 - 2 * s) * ε + f x := by ring
-    have heqF : (fun z : M => morseSublevelIsotopyFamily hk c ε r δ R₀ R₁ data s z) =ᶠ[nhds x]
-        (fun z : M => f z - c + (1 - 2 * s) * ε) := by
-      have hcontNorm : Continuous (fun w : MorseModel (m + 1) => morseNorm (m + 1) w) := by
-        dsimp [morseNorm]
-        exact continuous_norm.comp (PiLp.continuous_toLp (p := (2 : ENNReal)) (β := fun _ : Fin (m + 1) => ℝ))
-      have hcmp : IsCompact ({w : MorseModel (m + 1) | morseNorm (m + 1) w ≤ R₁} : Set (MorseModel (m + 1))) := by
-        have hbounded : Bornology.IsBounded {w : MorseModel (m + 1) | morseNorm (m + 1) w ≤ R₁} := by
-          rw [Metric.isBounded_iff]
-          refine ⟨2 * R₁, ?_⟩
-          intro a ha b hb
-          have ha' : ‖a‖ ≤ R₁ := le_trans (morseNorm_piNorm_le a) ha
-          have hb' : ‖b‖ ≤ R₁ := le_trans (morseNorm_piNorm_le b) hb
-          rw [dist_eq_norm]
-          exact le_trans (norm_sub_le a b) (by nlinarith)
-        have hclosed' : IsClosed {w : MorseModel (m + 1) | morseNorm (m + 1) w ≤ R₁} := by
-          have hpre : IsClosed ((fun w : MorseModel (m + 1) => morseNorm (m + 1) w) ⁻¹' Set.Iic R₁) :=
-            by simpa using (hcontNorm.continuousOn.preimage_isClosed_of_isClosed isClosed_univ isClosed_Iic)
-          simpa using hpre
-        exact Metric.isCompact_iff_isClosed_bounded.2 ⟨hclosed', hbounded⟩
-      have hsrc' : {w : MorseModel (m + 1) | morseNorm (m + 1) w ≤ R₁} ⊆ data.χ.source := by
-        intro w hw
-        exact data.hχsrc w (le_trans hw (le_trans (le_of_lt hR₁₂) hR₁₂R))
-      have hclosedimg : IsClosed (data.χ '' {w : MorseModel (m + 1) | morseNorm (m + 1) w ≤ R₁}) := by
-        have himg : IsCompact (data.χ '' {w : MorseModel (m + 1) | morseNorm (m + 1) w ≤ R₁}) :=
-          hcmp.image_of_continuousOn (data.χ.continuousOn.mono hsrc')
-        exact himg.isClosed
-      have hopen : IsOpen (data.χ '' {w : MorseModel (m + 1) | morseNorm (m + 1) w ≤ R₁})ᶜ :=
-        isOpen_compl_iff.mpr hclosedimg
-      refine Filter.mem_of_superset (hopen.mem_nhds hb) ?_
-      intro z hz
-      have h1 : morseRoundedFunction hk c ε r δ R₀ R₁ data z = f z + ε :=
-        morseRoundedFunction_eq_f_add_eps_of_not_mem_closedBall hk c ε r δ R₀ R₁ data hz
-      dsimp [morseSublevelIsotopyFamily]
-      rw [h1]
-      ring
-    intro hcrit
-    have hcrit' : IsCriticalPointAt I (fun z : M => f z - c + (1 - 2 * s) * ε) x := by
-      change mfderiv I 𝓘(ℝ, ℝ) (fun z : M =>
-        morseSublevelIsotopyFamily hk c ε r δ R₀ R₁ data s z) x = 0 at hcrit
-      change mfderiv I 𝓘(ℝ, ℝ) (fun z : M => f z - c + (1 - 2 * s) * ε) x = 0
-      have hfmdF : MDifferentiableAt I 𝓘(ℝ, ℝ) (fun z : M =>
-          morseSublevelIsotopyFamily hk c ε r δ R₀ R₁ data s z) x := by
-        have hF : ContMDiff I 𝓘(ℝ, ℝ) (↑(⊤ : ℕ∞) : WithTop ℕ∞)
-            (fun z : M => morseSublevelIsotopyFamily hk c ε r δ R₀ R₁ data s z) := by
-          exact (contMDiff_morseSublevelIsotopyFamily hk c ε r δ R₀ R₁ R₁' data hf hR hR0 hR₁₂ hR₁₂R hR₁₂R').comp
-            (contMDiff_id.prodMk contMDiff_const)
-        exact hF.contMDiffAt.mdifferentiableAt (by simp)
-      have hfmdF' : MDifferentiableAt I 𝓘(ℝ, ℝ) (fun z : M => f z - c + (1 - 2 * s) * ε) x := by
-        exact (hf.contMDiffAt.sub contMDiffAt_const).add contMDiffAt_const |>.mdifferentiableAt (by simp)
-      have heq := Filter.EventuallyEq.mfderiv_eq (I := I) (I' := 𝓘(ℝ, ℝ)) (x := x)
-        (f₁ := fun z : M => morseSublevelIsotopyFamily hk c ε r δ R₀ R₁ data s z)
-        (f := fun z : M => f z - c + (1 - 2 * s) * ε) heqF
-      rw [heq] at hcrit
-      exact hcrit
-    have hcritf : IsCriticalPointAt I f x := by
-      exact (constant_shift_criticalPoint (m := m) (H := H) (M := M) (I := I)
-        (f := f) (x := x) (a := -c + (1 - 2 * s) * ε) hf (by
-          simpa [sub_eq_add_neg, add_assoc, add_comm, add_left_comm] using hcrit'))
-    exact hreg hcritf
-
-
-
-
-
-
-
+      have hbnd : |f x - c| ≤ 2 * ε₀ + ε := by
+        have hmain : |f x - c + (1 - 2 * s) * ε| ≤ 2 * ε₀ := by
+          rw [← hFval]
+          simpa [h1] using hx
+        have hsub' : f x - c = (f x - c + (1 - 2 * s) * ε) - (1 - 2 * s) * ε := by ring
+        have htri : |f x - c| ≤ |f x - c + (1 - 2 * s) * ε| + |(1 - 2 * s) * ε| := by
+          calc
+            |f x - c| = |(f x - c + (1 - 2 * s) * ε) + (-((1 - 2 * s) * ε))| := by
+              apply congrArg abs
+              ring
+            _ ≤ |f x - c + (1 - 2 * s) * ε| + |(1 - 2 * s) * ε| := by
+              simpa [abs_neg] using (abs_add_le (f x - c + (1 - 2 * s) * ε)
+                (-((1 - 2 * s) * ε)) : |(f x - c + (1 - 2 * s) * ε) + (-((1 - 2 * s) * ε))| ≤
+                  |f x - c + (1 - 2 * s) * ε| + |-((1 - 2 * s) * ε)|)
+        have hεb : |(1 - 2 * s) * ε| ≤ ε := by
+          rw [abs_mul, abs_of_pos hε]
+          simpa using (mul_le_mul_of_nonneg_right hb1 (le_of_lt hε))
+        nlinarith [htri, hmain, hεb]
+      have habs := abs_le.mp hbnd
+      constructor <;> nlinarith [habs.1, habs.2, haε]
+    rcases hunique x hval with hxp | hnc
+    · have hpimg : data.p ∈ data.χ '' {y : MorseModel (m + 1) | CellAttachment.morseNorm (m + 1) y ≤ R₁} := by
+        refine ⟨0, ?_, data.hχ0⟩
+        simpa [CellAttachment.morseNorm] using (le_of_lt (lt_of_le_of_lt hR0 hR))
+      exact False.elim (hb (by simpa [hxp] using hpimg))
+    · have hconst : f x - c + (1 - 2 * s) * ε = -c + (1 - 2 * s) * ε + f x := by ring
+      have heqF : (fun z : M => morseSublevelIsotopyFamily hk c ε r δ R₀ R₁ data s z) =ᶠ[nhds x]
+          (fun z : M => f z - c + (1 - 2 * s) * ε) := by
+        have hcontNorm : Continuous (fun w : MorseModel (m + 1) => CellAttachment.morseNorm (m + 1) w) := by
+          dsimp [CellAttachment.morseNorm]
+          exact continuous_norm.comp (PiLp.continuous_toLp (p := (2 : ENNReal)) (β := fun _ : Fin (m + 1) => ℝ))
+        have hcmp : IsCompact ({w : MorseModel (m + 1) | CellAttachment.morseNorm (m + 1) w ≤ R₁} : Set (MorseModel (m + 1))) := by
+          have hbounded : Bornology.IsBounded {w : MorseModel (m + 1) | CellAttachment.morseNorm (m + 1) w ≤ R₁} := by
+            rw [Metric.isBounded_iff]
+            refine ⟨2 * R₁, ?_⟩
+            intro a ha b hb
+            have ha' : ‖a‖ ≤ R₁ := le_trans (CellAttachment.morseNorm_piNorm_le a) ha
+            have hb' : ‖b‖ ≤ R₁ := le_trans (CellAttachment.morseNorm_piNorm_le b) hb
+            rw [dist_eq_norm]
+            exact le_trans (norm_sub_le a b) (by nlinarith)
+          have hclosed' : IsClosed {w : MorseModel (m + 1) | CellAttachment.morseNorm (m + 1) w ≤ R₁} := by
+            have hpre : IsClosed ((fun w : MorseModel (m + 1) => CellAttachment.morseNorm (m + 1) w) ⁻¹' Set.Iic R₁) :=
+              by simpa using (hcontNorm.continuousOn.preimage_isClosed_of_isClosed isClosed_univ isClosed_Iic)
+            simpa using hpre
+          exact Metric.isCompact_iff_isClosed_bounded.2 ⟨hclosed', hbounded⟩
+        have hsrc' : {w : MorseModel (m + 1) | CellAttachment.morseNorm (m + 1) w ≤ R₁} ⊆ data.χ.source := by
+          intro w hw
+          exact data.hχsrc w (le_trans hw (le_trans (le_of_lt hR₁₂) hR₁₂R))
+        have hclosedimg : IsClosed (data.χ '' {w : MorseModel (m + 1) | CellAttachment.morseNorm (m + 1) w ≤ R₁}) := by
+          have himg : IsCompact (data.χ '' {w : MorseModel (m + 1) | CellAttachment.morseNorm (m + 1) w ≤ R₁}) :=
+            hcmp.image_of_continuousOn (data.χ.continuousOn.mono hsrc')
+          exact himg.isClosed
+        have hopen : IsOpen (data.χ '' {w : MorseModel (m + 1) | CellAttachment.morseNorm (m + 1) w ≤ R₁})ᶜ :=
+          isOpen_compl_iff.mpr hclosedimg
+        refine Filter.mem_of_superset (hopen.mem_nhds hb) ?_
+        intro z hz
+        have h1 : morseRoundedFunction hk c ε r δ R₀ R₁ data z = f z + ε :=
+          morseRoundedFunction_eq_f_add_eps_of_not_mem_closedBall hk c ε r δ R₀ R₁ data hz
+        dsimp [morseSublevelIsotopyFamily]
+        rw [h1]
+        ring
+      intro hcrit
+      have hcrit' : IsCriticalPointAt I (fun z : M => f z - c + (1 - 2 * s) * ε) x := by
+        change mfderiv I 𝓘(ℝ, ℝ) (fun z : M =>
+          morseSublevelIsotopyFamily hk c ε r δ R₀ R₁ data s z) x = 0 at hcrit
+        change mfderiv I 𝓘(ℝ, ℝ) (fun z : M => f z - c + (1 - 2 * s) * ε) x = 0
+        have hfmdF : MDifferentiableAt I 𝓘(ℝ, ℝ) (fun z : M =>
+            morseSublevelIsotopyFamily hk c ε r δ R₀ R₁ data s z) x := by
+          have hF : ContMDiff I 𝓘(ℝ, ℝ) (↑(⊤ : ℕ∞) : WithTop ℕ∞)
+              (fun z : M => morseSublevelIsotopyFamily hk c ε r δ R₀ R₁ data s z) := by
+            exact (contMDiff_morseSublevelIsotopyFamily hk c ε r δ R₀ R₁ R₁' data hf hR hR0 hR₁₂ hR₁₂R hR₁₂R').comp
+              (contMDiff_id.prodMk contMDiff_const)
+          exact hF.contMDiffAt.mdifferentiableAt (by simp)
+        have hfmdF' : MDifferentiableAt I 𝓘(ℝ, ℝ) (fun z : M => f z - c + (1 - 2 * s) * ε) x := by
+          exact (hf.contMDiffAt.sub contMDiffAt_const).add contMDiffAt_const |>.mdifferentiableAt (by simp)
+        have heq := Filter.EventuallyEq.mfderiv_eq (I := I) (I' := 𝓘(ℝ, ℝ)) (x := x)
+          (f₁ := fun z : M => morseSublevelIsotopyFamily hk c ε r δ R₀ R₁ data s z)
+          (f := fun z : M => f z - c + (1 - 2 * s) * ε) heqF
+        rw [heq] at hcrit
+        exact hcrit
+      have hcritf : IsCriticalPointAt I f x := by
+        exact (constant_shift_criticalPoint (m := m) (H := H) (M := M) (I := I)
+          (f := f) (x := x) (a := -c + (1 - 2 * s) * ε) hf (by
+            simpa [sub_eq_add_neg, add_assoc, add_comm, add_left_comm] using hcrit'))
+      exact hnc hcritf
 @[reducible]
 noncomputable def morseRoundedSublevelChartedSpace {m k : ℕ} (hk : k ≤ m + 1)
     (c ε r δ R₀ R₁ R₁' : ℝ) {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M]
