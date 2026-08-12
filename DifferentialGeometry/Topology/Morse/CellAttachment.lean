@@ -7132,6 +7132,64 @@ theorem modelLowerRoundBound_lt_smoothCap {ε r δ θ t : ℝ} (hδ : 0 < δ) (h
     exact mul_lt_mul_of_pos_right hsc hden
   nlinarith [hmul, hratio]
 
+theorem modelRoundCapQ_eq_lowerBound_imp_eq_one {ε r δ θ a b : ℝ} (hε : 0 < ε) (hδ : 0 < δ)
+    (hθ : 0 < θ) (hδr : δ < r ^ 2) (ha0 : 0 ≤ a) (ha1 : a ≤ 1) (hb0 : 0 ≤ b) (hb1 : b ≤ 1)
+    (ht : 2 * ε < (2 * ε + r ^ 2 * b) * a)
+    (hq : modelRoundCapQ ε r δ θ a b =
+      modelLowerRoundBound ε r δ θ ((2 * ε + r ^ 2 * b) * a)) :
+    a = 1 := by
+  let t : ℝ := (2 * ε + r ^ 2 * b) * a
+  by_cases ht0 : t < r ^ 2 + 2 * ε
+  · have hlt : modelLowerRoundBound ε r δ θ t < smoothCap ε r δ t :=
+      modelLowerRoundBound_lt_smoothCap hδ hθ hδr ht ht0
+    have hφ0 : modelRoundCapInterp ε r a b = 0 := by
+      have hq' : (1 - modelRoundCapInterp ε r a b) * modelLowerRoundBound ε r δ θ t +
+          modelRoundCapInterp ε r a b * smoothCap ε r δ t =
+          modelLowerRoundBound ε r δ θ t := by
+        simpa [modelRoundCapQ, t] using hq
+      have hmul : modelRoundCapInterp ε r a b *
+          (smoothCap ε r δ t - modelLowerRoundBound ε r δ θ t) = 0 := by
+        nlinarith [hq']
+      have hdiff : smoothCap ε r δ t - modelLowerRoundBound ε r δ θ t ≠ 0 := by linarith [hlt]
+      exact (mul_eq_zero.mp hmul).resolve_right hdiff
+    have h1 : 0 < r ^ 2 * b + 2 * ε := by nlinarith [hε, hb0, sq_nonneg r]
+    have h2 : 0 ≤ (1 - b) * (r ^ 2 / (r ^ 2 * b + 2 * ε)) := by
+      exact mul_nonneg (by nlinarith [hb1]) (div_nonneg (sq_nonneg r) (le_of_lt h1))
+    by_cases ha1' : a = 1
+    · exact ha1'
+    · have ha : 0 < 1 - a := by
+        have ha_lt : a < 1 := lt_of_le_of_ne ha1 ha1'
+        linarith
+      have hden : (1 - a) + (1 - b) * (r ^ 2 / (r ^ 2 * b + 2 * ε)) ≠ 0 := by
+        nlinarith [ha, h2]
+      have hnum : 1 - a = 0 := by
+        dsimp [modelRoundCapInterp] at hφ0
+        exact (div_eq_zero_iff.mp hφ0).resolve_right hden
+      nlinarith [hnum]
+  · have ht0' : r ^ 2 + 2 * ε ≤ t := le_of_not_gt ht0
+    have h1 : 0 ≤ 2 * ε + r ^ 2 * b := by nlinarith [hε, hb0, sq_nonneg r]
+    have h2 : 2 * ε + r ^ 2 * b ≤ 2 * ε + r ^ 2 := by nlinarith [hb1]
+    have h3 : (2 * ε + r ^ 2 * b) * a ≤ (2 * ε + r ^ 2) * a :=
+      mul_le_mul_of_nonneg_right h2 ha0
+    have h5 : 0 ≤ 2 * ε + r ^ 2 := by nlinarith [hε]
+    have h4 : (2 * ε + r ^ 2) * a ≤ 2 * ε + r ^ 2 :=
+      mul_le_of_le_one_right h5 ha1
+    have hle : t ≤ r ^ 2 + 2 * ε := by
+      dsimp [t]
+      nlinarith [h3, h4]
+    have heq : t = r ^ 2 + 2 * ε := le_antisymm hle ht0'
+    have hden : 2 * ε + r ^ 2 * b ≠ 0 := ne_of_gt (by nlinarith [hε, hb0, sq_nonneg r])
+    have hdiv : (2 * ε + r ^ 2) / (2 * ε + r ^ 2 * b) ≤ a := by
+      have hmain : 2 * ε + r ^ 2 ≤ a * (2 * ε + r ^ 2 * b) := by
+        dsimp [t] at heq
+        nlinarith [heq]
+      exact (div_le_iff₀ (by nlinarith [hε, hb0, sq_nonneg r])).2 hmain
+    have hdiv1 : 1 ≤ (2 * ε + r ^ 2) / (2 * ε + r ^ 2 * b) := by
+      rw [one_le_div₀ (by nlinarith [hε, hb0, sq_nonneg r])]
+      exact h2
+    have ha_ge : 1 ≤ a := le_trans hdiv1 hdiv
+    exact le_antisymm ha1 ha_ge
+
 end CellAttachment
 
 end
