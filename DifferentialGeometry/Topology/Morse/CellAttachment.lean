@@ -7285,6 +7285,47 @@ theorem modelLowerRoundMap_injective {n k : ℕ} (hk : k ≤ n) (c ε r δ θ : 
   exact congrArg (fun q : EuclideanSpace ℝ (Fin k) × EuclideanSpace ℝ (Fin (n - k)) =>
     recombine hk q.1 q.2) hpairs
 
+theorem modelRoundCapInterp_eq {ε r a b t : ℝ} (hε : 0 < ε) (hr : 0 < r) (ha0 : 0 < a)
+    (_ha1 : a ≤ 1) (hb0 : 0 ≤ b) (_hb1 : b ≤ 1) (ht0 : t < r ^ 2 + 2 * ε) (htpos : 0 < t)
+    (ht : t = (2 * ε + r ^ 2 * b) * a) :
+    modelRoundCapInterp ε r a b = t * (1 - a) / (a * (r ^ 2 + 2 * ε - t)) := by
+  have h1 : 0 < r ^ 2 * b + 2 * ε := by nlinarith [hε, hb0, sq_nonneg r]
+  have hta : t / a = 2 * ε + r ^ 2 * b := by
+    field_simp [ne_of_gt ha0]
+    nlinarith [ht]
+  have h1mb : 1 - b = ((r ^ 2 + 2 * ε) * a - t) / (r ^ 2 * a) := by
+    have hrb : r ^ 2 * a * b = t - 2 * ε * a := by
+      have hmain : t = 2 * ε * a + r ^ 2 * a * b := by nlinarith [ht]
+      nlinarith [hmain]
+    have hden : r ^ 2 * a ≠ 0 := by
+      have hr2 : r ^ 2 ≠ 0 := by
+        intro h
+        have hsq : r ^ 2 = 0 := h
+        nlinarith [sq_pos_of_pos hr, hsq]
+      exact mul_ne_zero hr2 (ne_of_gt ha0)
+    rw [eq_div_iff hden]
+    ring_nf
+    nlinarith [hrb]
+  have hden : (1 - a) + (1 - b) * (r ^ 2 / (r ^ 2 * b + 2 * ε)) =
+      a * (r ^ 2 + 2 * ε - t) / t := by
+    rw [h1mb]
+    have h2 : r ^ 2 * b + 2 * ε = t / a := by nlinarith [hta]
+    rw [h2]
+    field_simp [ne_of_gt ha0, ne_of_gt htpos,
+      (mul_ne_zero (by
+        intro h
+        have hsq : r ^ 2 = 0 := h
+        nlinarith [sq_pos_of_pos hr, hsq]) (ne_of_gt ha0))]
+    ring
+  dsimp [modelRoundCapInterp]
+  rw [hden]
+  have h8 : a * (r ^ 2 + 2 * ε - t) / t ≠ 0 := by
+    have h9 : 0 < a * (r ^ 2 + 2 * ε - t) := by
+      have h10 : 0 < r ^ 2 + 2 * ε - t := by nlinarith [ht0]
+      nlinarith [ha0, h10]
+    exact ne_of_gt (div_pos h9 htpos)
+  field_simp [ne_of_gt ha0, ne_of_gt htpos, h8]
+
 end CellAttachment
 
 end
