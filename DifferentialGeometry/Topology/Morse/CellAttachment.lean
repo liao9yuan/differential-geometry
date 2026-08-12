@@ -7747,6 +7747,126 @@ theorem modelHandleRoundMap_negPart_eq_of_scalar {n k : ℕ} (_hk : k ≤ n) (ε
     Real.sqrt (2 * ε + r ^ 2 * ‖(p.2 : EuclideanSpace ℝ (Fin (n - k)))‖ ^ 2))
     hsqrt_ne) hs_inj
 
+theorem modelHandleRoundMap_injective_cocore {n k : ℕ} (hk : k ≤ n) (ε r δ θ : ℝ)
+    (hε : 0 < ε) (hδ : 0 < δ) (hθ : 0 < θ) (hδr : δ < r ^ 2) (hθr : θ < r ^ 2) (hr : 0 < r)
+    (p p' : StandardHandle k (n - k))
+    (h : modelHandleRoundMap hk ε r δ θ p = modelHandleRoundMap hk ε r δ θ p')
+    (ht0 : ‖(p.1 : EuclideanSpace ℝ (Fin k))‖ = 0) (ht0' : ‖(p'.1 : EuclideanSpace ℝ (Fin k))‖ = 0) :
+    p = p' := by
+  let b : ℝ := ‖(p.2 : EuclideanSpace ℝ (Fin (n - k)))‖ ^ 2
+  let b' : ℝ := ‖(p'.2 : EuclideanSpace ℝ (Fin (n - k)))‖ ^ 2
+  have hb0 : 0 ≤ b := by dsimp [b]; exact sq_nonneg _
+  have hb1 : b ≤ 1 := by
+    dsimp [b]
+    have hnon : 0 ≤ ‖(p.2 : EuclideanSpace ℝ (Fin (n - k)))‖ := norm_nonneg _
+    have hle := sq_le_sq' (by linarith [hnon]) p.2.2
+    simpa using hle
+  have hb0' : 0 ≤ b' := by dsimp [b']; exact sq_nonneg _
+  have hb1' : b' ≤ 1 := by
+    dsimp [b']
+    have hnon : 0 ≤ ‖(p'.2 : EuclideanSpace ℝ (Fin (n - k)))‖ := norm_nonneg _
+    have hle := sq_le_sq' (by linarith [hnon]) p'.2.2
+    simpa using hle
+  have hq : modelRoundCapQ ε r δ θ 0 b = modelRoundCapQ ε r δ θ 0 b' := by
+    have hnorms : ‖posPart hk (modelHandleRoundMap hk ε r δ θ p)‖ ^ 2 =
+        ‖posPart hk (modelHandleRoundMap hk ε r δ θ p')‖ ^ 2 := by
+      exact congrArg (fun v : EuclideanSpace ℝ (Fin (n - k)) => ‖v‖ ^ 2) (congrArg (posPart hk) h)
+    have hqn : ‖posPart hk (modelHandleRoundMap hk ε r δ θ p)‖ ^ 2 = modelRoundCapQ ε r δ θ 0 b := by
+      have hqn0 := modelHandleRoundMap_posPart_norm_sq hk ε r δ θ hε hδ hθ hδr hθr hr p
+      have hu : ‖(p.1 : EuclideanSpace ℝ (Fin k))‖ ^ 2 = 0 := by
+        have hz : (p.1 : EuclideanSpace ℝ (Fin k)) = 0 := norm_eq_zero.mp ht0
+        simp [hz]
+      simpa [b, hu] using hqn0
+    have hqn' : ‖posPart hk (modelHandleRoundMap hk ε r δ θ p')‖ ^ 2 =
+        modelRoundCapQ ε r δ θ 0 b' := by
+      have hqn0 := modelHandleRoundMap_posPart_norm_sq hk ε r δ θ hε hδ hθ hδr hθr hr p'
+      have hu : ‖(p'.1 : EuclideanSpace ℝ (Fin k))‖ ^ 2 = 0 := by
+        have hz : (p'.1 : EuclideanSpace ℝ (Fin k)) = 0 := norm_eq_zero.mp ht0'
+        simp [hz]
+      simpa [b', hu] using hqn0
+    rw [hqn, hqn'] at hnorms
+    exact hnorms
+  have hb_eq : b = b' := by
+    have hq0 := modelRoundCapQ_eq_cocore hε hδ hθ hδr hθr hb0 hb1
+    have hq0' := modelRoundCapQ_eq_cocore hε hδ hθ hδr hθr hb0' hb1'
+    have hmain : r ^ 2 * b = r ^ 2 * b' := by
+      rw [← hq0, ← hq0']
+      exact hq
+    have hr2 : r ^ 2 ≠ 0 := by
+      intro hz
+      nlinarith [sq_pos_of_pos hr, hz]
+    exact (mul_left_cancel₀ hr2) hmain
+  have hu : (p.1 : EuclideanSpace ℝ (Fin k)) = (p'.1 : EuclideanSpace ℝ (Fin k)) := by
+    have hz : (p.1 : EuclideanSpace ℝ (Fin k)) = 0 := norm_eq_zero.mp ht0
+    rw [hz]
+    have hz' : (p'.1 : EuclideanSpace ℝ (Fin k)) = 0 := norm_eq_zero.mp ht0'
+    rw [hz']
+  have hw : (p.2 : EuclideanSpace ℝ (Fin (n - k))) = (p'.2 : EuclideanSpace ℝ (Fin (n - k))) := by
+    by_cases hb0z : b = 0
+    · have hw0 : (p.2 : EuclideanSpace ℝ (Fin (n - k))) = 0 := by
+        have hsq : ‖(p.2 : EuclideanSpace ℝ (Fin (n - k)))‖ ^ 2 = 0 := by simpa [b] using hb0z
+        exact norm_eq_zero.mp (sq_eq_zero_iff.mp hsq)
+      rw [hw0]
+      have hw0' : (p'.2 : EuclideanSpace ℝ (Fin (n - k))) = 0 := by
+        have hsq : ‖(p'.2 : EuclideanSpace ℝ (Fin (n - k)))‖ ^ 2 = 0 := by
+          have : b' = 0 := by simpa [hb_eq] using hb0z
+          simpa [b'] using this
+        exact norm_eq_zero.mp (sq_eq_zero_iff.mp hsq)
+      rw [hw0']
+    · have hbneq : (p.2 : EuclideanSpace ℝ (Fin (n - k))) ≠ 0 := by
+        intro hz
+        have hsq : ‖(p.2 : EuclideanSpace ℝ (Fin (n - k)))‖ ^ 2 = 0 := by
+          have hsq1 : ‖(p.2 : EuclideanSpace ℝ (Fin (n - k)))‖ ^ 2 =
+              ‖(0 : EuclideanSpace ℝ (Fin (n - k)))‖ ^ 2 :=
+            congrArg (fun v : EuclideanSpace ℝ (Fin (n - k)) => ‖v‖ ^ 2) hz
+          norm_num at hsq1
+          simpa using hsq1
+        have hb0sq : b = 0 := by
+          change ‖(p.2 : EuclideanSpace ℝ (Fin (n - k)))‖ ^ 2 = 0
+          exact hsq
+        exact hb0z hb0sq
+      have hbb' : ‖(p.2 : EuclideanSpace ℝ (Fin (n - k)))‖ ^ 2 =
+          ‖(p'.2 : EuclideanSpace ℝ (Fin (n - k)))‖ ^ 2 := by
+        simpa [b, b', hb_eq]
+      have hqq' : modelRoundCapQ ε r δ θ 0 (‖(p.2 : EuclideanSpace ℝ (Fin (n - k)))‖ ^ 2) =
+          modelRoundCapQ ε r δ θ 0 (‖(p'.2 : EuclideanSpace ℝ (Fin (n - k)))‖ ^ 2) := by
+        simp [b, b'] at hq
+        exact hq
+      have hqq'' : modelRoundCapQ ε r δ θ (‖(p.1 : EuclideanSpace ℝ (Fin k))‖ ^ 2)
+            (‖(p.2 : EuclideanSpace ℝ (Fin (n - k)))‖ ^ 2) =
+          modelRoundCapQ ε r δ θ (‖(p'.1 : EuclideanSpace ℝ (Fin k))‖ ^ 2)
+            (‖(p'.2 : EuclideanSpace ℝ (Fin (n - k)))‖ ^ 2) := by
+        have hu0 : (p.1 : EuclideanSpace ℝ (Fin k)) = 0 := norm_eq_zero.mp ht0
+        have hu0' : (p'.1 : EuclideanSpace ℝ (Fin k)) = 0 := norm_eq_zero.mp ht0'
+        simpa [hu0, hu0', b, b'] using hq
+      have hpos' : ((Real.sqrt (modelRoundCapQ ε r δ θ 0 (‖(p.2 : EuclideanSpace ℝ (Fin (n - k)))‖ ^ 2)) /
+            ‖(p.2 : EuclideanSpace ℝ (Fin (n - k)))‖) •
+              (p.2 : EuclideanSpace ℝ (Fin (n - k))) : EuclideanSpace ℝ (Fin (n - k))) =
+          (Real.sqrt (modelRoundCapQ ε r δ θ 0 (‖(p'.2 : EuclideanSpace ℝ (Fin (n - k)))‖ ^ 2)) /
+            ‖(p'.2 : EuclideanSpace ℝ (Fin (n - k)))‖) •
+              (p'.2 : EuclideanSpace ℝ (Fin (n - k))) := by
+        have hpos0 := congrArg (posPart hk) h
+        rw [modelHandleRoundMap_posPart, modelHandleRoundMap_posPart] at hpos0
+        have hu0 : (p.1 : EuclideanSpace ℝ (Fin k)) = 0 := norm_eq_zero.mp ht0
+        have hu0' : (p'.1 : EuclideanSpace ℝ (Fin k)) = 0 := norm_eq_zero.mp ht0'
+        simpa [hu0, hu0'] using hpos0
+      have hpos'' : ((Real.sqrt (modelRoundCapQ ε r δ θ (‖(p.1 : EuclideanSpace ℝ (Fin k))‖ ^ 2)
+              (‖(p.2 : EuclideanSpace ℝ (Fin (n - k)))‖ ^ 2)) / ‖(p.2 : EuclideanSpace ℝ (Fin (n - k)))‖) •
+                (p.2 : EuclideanSpace ℝ (Fin (n - k))) : EuclideanSpace ℝ (Fin (n - k))) =
+            (Real.sqrt (modelRoundCapQ ε r δ θ (‖(p'.1 : EuclideanSpace ℝ (Fin k))‖ ^ 2)
+                (‖(p'.2 : EuclideanSpace ℝ (Fin (n - k)))‖ ^ 2)) / ‖(p'.2 : EuclideanSpace ℝ (Fin (n - k)))‖) •
+                  (p'.2 : EuclideanSpace ℝ (Fin (n - k))) := by
+        have hu0 : (p.1 : EuclideanSpace ℝ (Fin k)) = 0 := norm_eq_zero.mp ht0
+        have hu0' : (p'.1 : EuclideanSpace ℝ (Fin k)) = 0 := norm_eq_zero.mp ht0'
+        simpa [hu0, hu0'] using hpos'
+      exact modelHandleRoundMap_posPart_eq_of_scalar hk ε r δ θ hε hδ hθ hδr hθr hr p p'
+        hbneq hbb' hqq'' hpos''
+  apply Prod.ext
+  · apply Subtype.ext
+    exact hu
+  · apply Subtype.ext
+    exact hw
+
 end CellAttachment
 
 end
