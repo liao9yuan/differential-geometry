@@ -6,6 +6,7 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.Basic
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.ExtendedSolutionRegularity
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.ImprovedPinching
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.LocalPinching
+import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.MaximalFlow
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.RicciPinchingPreservation
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.ScalarFiniteTime
 import DifferentialGeometry.Geometry.Flow.RicciFlow.ParabolicRescaling
@@ -47,7 +48,7 @@ namespace HamiltonPositiveRicci
 open Bundle
 open scoped Manifold ContDiff
 
-variable {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]
+variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace Real E]
 variable [FiniteDimensional Real E] [NeZero (Module.finrank Real E)] [CompleteSpace E]
 variable {H : Type*} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H}
@@ -514,7 +515,7 @@ def LimitRoundAt (L : Ham3CGHLimitData (I := I) M) (t : Real) : Prop :=
 
 
 theorem ham3_short_exists
-    {E0 : Type*} [NormedAddCommGroup E0] [NormedSpace Real E0]
+    {E0 : Type*} [NormedAddCommGroup E0] [InnerProductSpace Real E0]
     [FiniteDimensional Real E0] [NeZero (Module.finrank Real E0)] [CompleteSpace E0]
     {H0 : Type*} [TopologicalSpace H0] {I0 : ModelWithCorners Real E0 H0}
     {M0 : Type u} [TopologicalSpace M0] [ChartedSpace H0 M0] [IsManifold I0 ∞ M0]
@@ -654,9 +655,28 @@ theorem ham3_flow_exists_normalized
     exists omega : Real, exists h0ω : 0 < omega,
       exists P : Ham3FlowPackage (I := I) (M := M) g0,
         P.D = DifferentialGeometry.Integral.Connection.RealTimeInterval.closedOpen 0 omega h0ω := by
-
-  have _hshort := ham3_short_smooth_solution (I := I) (M := M) hM g0
-  sorry
+  letI : CompactSpace M := hM.1
+  letI : ConnectedSpace M := hM.2.1
+  letI : I.Boundaryless := hM.2.2.1
+  have hdim : Module.finrank Real E = 3 := hM.2.2.2
+  have hscalar_pos : ∀ x : M,
+      0 < metricScalarAt (I := I) (M := M) g0 x :=
+    scalar_pos_of_ricci (I := I) (M := M) g0 hdim hpos
+  rcases exists_max_flow (I := I) (M := M) g0 hdim hscalar_pos with
+    ⟨omega, h0ω, Smax, hSmax, hstart, hmax⟩
+  have hcurv : Rm04NormSqUnboundedAt (I := I) Smax Smax.base.rm04 :=
+    rmUnbounded_of_maximal (I := I) hdim hSmax hmax
+      (rm04Realizes_metric (I := I) Smax)
+  let P : Ham3FlowPackage (I := I) (M := M) g0 :=
+    { D := DifferentialGeometry.Integral.Connection.RealTimeInterval.closedOpen 0 omega h0ω
+      S := Smax
+      isSmooth := smoothOfSol (I := I) Smax hSmax
+      startsAt := by simpa using hstart
+      curvUnbounded := by
+        intro K
+        rcases hcurv K with ⟨t, x, ht0, htω, hK⟩
+        exact ⟨t, x, ⟨ht0, htω⟩, by simpa [curvatureNormSq] using hK⟩ }
+  exact ⟨omega, h0ω, P, rfl⟩
 
 
 theorem ham3_flow_exists
