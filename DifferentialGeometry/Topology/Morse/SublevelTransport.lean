@@ -232,6 +232,212 @@ theorem exists_morseRoundedSublevel_diffeomorph_upperSublevel_of_morseChart
     dsimp [d, e, invFun]
     exact (hDfix x hx_global).2
 
+theorem exists_morseHandleAdjunction_diffeomorph_upperSublevel_of_morseChart
+    {m k : ℕ} (hk : k ≤ m + 1)
+    (c ε r δ R₀ R₁ R₁' a η ε₀ : ℝ) {H : Type} [TopologicalSpace H] {M : Type}
+    [TopologicalSpace M] [ChartedSpace H M] [T2Space M] [SigmaCompactSpace M]
+    {I : ModelWithCorners ℝ (MorseModel (m + 1)) H} [I.Boundaryless]
+    [IsManifold I (⊤ : WithTop ℕ∞) M] {f : M → ℝ}
+    (data : MorseChart (m + 1) k hk c I f)
+    (hε : 0 < ε) (hε₀ : 0 < ε₀) (hδ : 0 < δ) (hδr : δ < r ^ 2) (hr : 0 < r)
+    (hR : R₀ < R₁) (hR0 : 0 ≤ R₀)
+    (hbig : 2 * (r ^ 2 + 2 * ε + δ) ≤ R₀ ^ 2) (hδR : 40 * δ < R₁ ^ 2 - R₀ ^ 2)
+    (hε₀le : 2 * ε₀ < min (min ε (r ^ 2 / 2)) ((r ^ 2 - δ) / 2))
+    (hR₁₂ : R₁ < R₁') (hR₁₂R : R₁' ≤ data.R) (hR₁₂R' : R₁' ≤ data.R')
+    (hf : ContMDiff I 𝓘(ℝ, ℝ) (↑(⊤ : ℕ∞) : WithTop ℕ∞) f)
+    (haε : ε + 2 * ε₀ ≤ a)
+    (hcompact : IsCompact (f ⁻¹' Set.Icc (c - a) (c + a)))
+    (hunique : ∀ x : M, f x ∈ Set.Icc (c - a) (c + a) →
+      x = data.p ∨ ¬ IsCriticalPointAt I f x)
+    (hreg_f : ∀ x : M, f x = c - ε → ¬ IsCriticalPointAt I f x)
+    (hη : r ^ 2 + δ ≤ 2 * η) (hηε₀ : 2 * ε₀ < η)
+    (hεr' : Real.sqrt (2 * ε + 2 * r ^ 2) < data.R / 2)
+    (hbigR : r ^ 2 + ε + δ ≤ data.R ^ 2 / 8)
+    (hRbig : r ^ 2 + 2 * ε + δ ≤ (data.R / 2) ^ 2)
+    (hR₁big : 2 * (data.R / 2) ^ 2 - 2 * ε ≤ R₁ ^ 2)
+    (hR₁₂R₀ : R₁ ≤ data.R)
+    (hcont : Continuous f) :
+    ∃ e₂ : @Diffeomorph ℝ _ (MorseModel (m + 1)) _ _ (MorseModel (m + 1)) _ _
+      (MorseHalfSpace m) _ (MorseHalfSpace m) _ (morseModelWithCornersHalfSpace m)
+      (morseModelWithCornersHalfSpace m)
+      (SublevelSpace (morseRoundedFunction hk c ε r δ R₀ R₁ data) c) _
+      (morseRoundedSublevelChartedSpace hk c ε r δ R₀ R₁ R₁' data hε hδ hδr hR hR0 hbig
+        hR₁₂ hR₁₂R hR₁₂R' hf hreg_f)
+      (SublevelSpace f (c + ε)) _
+      (manifoldSublevelChartedSpace I f (c + ε) hf
+        (fun _x hx => morseFunction_no_critical_at_upper_level_of_morseChart hk c ε a ε₀ data
+          hε hε₀ haε hunique hx))
+      (⊤ : ℕ∞),
+    ∃ e : @Diffeomorph ℝ _ (MorseModel (m + 1)) _ _ (MorseModel (m + 1)) _ _
+      (MorseHalfSpace m) _ (MorseHalfSpace m) _ (morseModelWithCornersHalfSpace m)
+      (morseModelWithCornersHalfSpace m)
+      (Handle.AdjunctionSpace k (m + 1 - k)
+        (morseAttachingEmbedding hk c ε r data hε
+          (le_trans (le_of_lt hεr') (by nlinarith [data.hRpos] : data.R / 2 ≤ data.R)))) _
+      (morseHandleAdjunctionChartedSpace hk c ε r δ R₀ R₁ R₁' data hε hδ hδr hr hεr' hbigR
+        hR hR0 hbig hRbig hR₁big hR₁₂R₀ hR₁₂ hR₁₂R hR₁₂R' hcont hf hreg_f)
+      (SublevelSpace f (c + ε)) _
+      (manifoldSublevelChartedSpace I f (c + ε) hf
+        (fun _x hx => morseFunction_no_critical_at_upper_level_of_morseChart hk c ε a ε₀ data
+          hε hε₀ haε hunique hx))
+      (⊤ : ℕ∞),
+      (∀ z : Handle.AdjunctionSpace k (m + 1 - k)
+          (morseAttachingEmbedding hk c ε r data hε
+            (le_trans (le_of_lt hεr') (by nlinarith [data.hRpos] : data.R / 2 ≤ data.R))),
+        (e z).1 = (e₂ (morseHandleAdjunctionEquivRoundedSublevel hk c ε r δ R₀ R₁ data
+          hε hδ hδr hr hεr' hbigR hR hR0 hbig hRbig hR₁big hR₁₂R₀ hcont z)).1) ∧
+      (∀ x : M, f x ≤ c - ε - η → ∀ hx : f x ≤ c - ε,
+        (e (Handle.lower (morseAttachingEmbedding hk c ε r data hε
+          (le_trans (le_of_lt hεr') (by nlinarith [data.hRpos] : data.R / 2 ≤ data.R)))
+          ⟨x, hx⟩)).1 = x) ∧
+      (∀ y : M, (hydeep : f y ≤ c - ε - η) → ∀ hy : f y ≤ c + ε,
+        ∀ z : Handle.AdjunctionSpace k (m + 1 - k)
+            (morseAttachingEmbedding hk c ε r data hε
+              (le_trans (le_of_lt hεr') (by nlinarith [data.hRpos] : data.R / 2 ≤ data.R))),
+          e z = ⟨y, hy⟩ →
+            z = Handle.lower (morseAttachingEmbedding hk c ε r data hε
+              (le_trans (le_of_lt hεr') (by nlinarith [data.hRpos] : data.R / 2 ≤ data.R)))
+              ⟨y, by
+                have hsum : 0 ≤ r ^ 2 + δ := by positivity
+                have hη0 : 0 ≤ η := by nlinarith [hη, hsum]
+                change f y ≤ c - ε
+                nlinarith [hydeep, hη0]⟩) := by
+  classical
+  let φ : Handle.AttachingRegion k (m + 1 - k) → SublevelSpace f (c - ε) :=
+    morseAttachingEmbedding hk c ε r data hε
+      (le_trans (le_of_lt hεr') (by nlinarith [data.hRpos] : data.R / 2 ≤ data.R))
+  let h : Handle.AdjunctionSpace k (m + 1 - k) φ ≃ₜ
+      SublevelSpace (morseRoundedFunction hk c ε r δ R₀ R₁ data) c :=
+    morseHandleAdjunctionEquivRoundedSublevel hk c ε r δ R₀ R₁ data hε hδ hδr hr hεr' hbigR
+      hR hR0 hbig hRbig hR₁big hR₁₂R₀ hcont
+  letI : ChartedSpace (MorseHalfSpace m)
+      (Handle.AdjunctionSpace k (m + 1 - k) φ) :=
+    morseHandleAdjunctionChartedSpace hk c ε r δ R₀ R₁ R₁' data hε hδ hδr hr hεr' hbigR
+      hR hR0 hbig hRbig hR₁big hR₁₂R₀ hR₁₂ hR₁₂R hR₁₂R' hcont hf hreg_f
+  letI : ChartedSpace (MorseHalfSpace m)
+      (SublevelSpace (morseRoundedFunction hk c ε r δ R₀ R₁ data) c) :=
+    morseRoundedSublevelChartedSpace hk c ε r δ R₀ R₁ R₁' data hε hδ hδr hR hR0 hbig
+      hR₁₂ hR₁₂R hR₁₂R' hf hreg_f
+  letI : IsManifold (morseModelWithCornersHalfSpace m) (⊤ : ℕ∞)
+      (SublevelSpace (morseRoundedFunction hk c ε r δ R₀ R₁ data) c) :=
+    morseRoundedSublevelIsManifold hk c ε r δ R₀ R₁ R₁' data hε hδ hδr hR hR0 hbig
+      hR₁₂ hR₁₂R hR₁₂R' hf hreg_f
+  letI : ChartedSpace (MorseHalfSpace m) (SublevelSpace f (c + ε)) :=
+    manifoldSublevelChartedSpace I f (c + ε) hf
+      (fun _x hx => morseFunction_no_critical_at_upper_level_of_morseChart hk c ε a ε₀ data
+        hε hε₀ haε hunique hx)
+  let hD : @Diffeomorph ℝ _ (MorseModel (m + 1)) _ _ (MorseModel (m + 1)) _ _
+      (MorseHalfSpace m) _ (MorseHalfSpace m) _ (morseModelWithCornersHalfSpace m)
+      (morseModelWithCornersHalfSpace m)
+      (Handle.AdjunctionSpace k (m + 1 - k) φ) _
+      (morseHandleAdjunctionChartedSpace hk c ε r δ R₀ R₁ R₁' data hε hδ hδr hr hεr' hbigR
+        hR hR0 hbig hRbig hR₁big hR₁₂R₀ hR₁₂ hR₁₂R hR₁₂R' hcont hf hreg_f)
+      (SublevelSpace (morseRoundedFunction hk c ε r δ R₀ R₁ data) c) _
+      (morseRoundedSublevelChartedSpace hk c ε r δ R₀ R₁ R₁' data hε hδ hδr hR hR0 hbig
+        hR₁₂ hR₁₂R hR₁₂R' hf hreg_f)
+      (⊤ : ℕ∞) :=
+    morseHandleAdjunctionDiffeomorphRoundedSublevel hk c ε r δ R₀ R₁ R₁' data hε hδ hδr hr
+      hεr' hbigR hR hR0 hbig hRbig hR₁big hR₁₂R₀ hR₁₂ hR₁₂R hR₁₂R' hcont hf hreg_f
+  rcases exists_morseRoundedSublevel_diffeomorph_upperSublevel_of_morseChart (m := m) (k := k)
+    (hk := hk) (c := c) (ε := ε) (r := r) (δ := δ) (R₀ := R₀) (R₁ := R₁) (R₁' := R₁')
+    (a := a) (η := η) (ε₀ := ε₀) (data := data)
+    hε hε₀ hδ hδr hR hR0 hbig hδR hε₀le hR₁₂ hR₁₂R hR₁₂R' hf haε hcompact hunique hreg_f
+    hη hηε₀ (hcs₁ := morseRoundedSublevelChartedSpace hk c ε r δ R₀ R₁ R₁' data hε hδ hδr
+      hR hR0 hbig hR₁₂ hR₁₂R hR₁₂R' hf hreg_f) with ⟨e₂, hrel⟩
+  let e : @Diffeomorph ℝ _ (MorseModel (m + 1)) _ _ (MorseModel (m + 1)) _ _
+      (MorseHalfSpace m) _ (MorseHalfSpace m) _ (morseModelWithCornersHalfSpace m)
+      (morseModelWithCornersHalfSpace m)
+      (Handle.AdjunctionSpace k (m + 1 - k) φ) _
+      (morseHandleAdjunctionChartedSpace hk c ε r δ R₀ R₁ R₁' data hε hδ hδr hr hεr' hbigR
+        hR hR0 hbig hRbig hR₁big hR₁₂R₀ hR₁₂ hR₁₂R hR₁₂R' hcont hf hreg_f)
+      (SublevelSpace f (c + ε)) _
+      (manifoldSublevelChartedSpace I f (c + ε) hf
+        (fun _x hx => morseFunction_no_critical_at_upper_level_of_morseChart hk c ε a ε₀ data
+          hε hε₀ haε hunique hx))
+      (⊤ : ℕ∞) :=
+    hD.trans e₂
+  have hcomm : ∀ z : Handle.AdjunctionSpace k (m + 1 - k) φ,
+      (e z).1 = (e₂ (h z)).1 := by
+    intro z
+    change (e z).1 = (e₂.toFun (h z)).1
+    rfl
+  refine ⟨e₂, e, ?_, ?_, ?_⟩
+  · intro z
+    exact hcomm z
+  · intro x hx_global hx
+    have hlower : (h (Handle.lower φ ⟨x, hx⟩)).1 = x := by
+      dsimp [φ]
+      exact morseHandleAdjunctionEquivRoundedSublevel_lower hk c ε r δ R₀ R₁ η data hε hδ hδr hr
+        hεr' hbigR hR hR0 hbig hRbig hR₁big hR₁₂R₀ hcont hη hx_global
+    have hmem : morseRoundedFunction hk c ε r δ R₀ R₁ data x ≤ c := by
+      have hb := morseSublevelIsotopyFamily_le_neg_eta_of_deep hk c ε r δ R₀ R₁ R₁' η data
+        (le_of_lt hε) hδ hR₁₂ hR₁₂R hη hx_global 0 (by norm_num)
+      have hF0 : morseSublevelIsotopyFamily hk c ε r δ R₀ R₁ data 0 x =
+          morseRoundedFunction hk c ε r δ R₀ R₁ data x - c := by
+        dsimp [morseSublevelIsotopyFamily]
+        ring
+      rw [hF0] at hb
+      have hsum : 0 ≤ r ^ 2 + δ := by positivity
+      have hη0 : 0 ≤ η := by
+        have h2η : 0 ≤ 2 * η := le_trans hsum hη
+        linarith only [h2η]
+      linarith only [hb, hη0]
+    have hfix : (e₂ ⟨x, hmem⟩).1 = x := (hrel x hx_global hmem).1
+    have hH : h (Handle.lower φ ⟨x, hx⟩) = ⟨x, hmem⟩ := by
+      apply Subtype.ext
+      exact hlower
+    change (e (Handle.lower φ ⟨x, hx⟩)).1 = x
+    rw [hcomm (Handle.lower φ ⟨x, hx⟩)]
+    rw [hH]
+    exact hfix
+  · intro y hy_global hy z hz
+    have hmem : morseRoundedFunction hk c ε r δ R₀ R₁ data y ≤ c := by
+      have hb := morseSublevelIsotopyFamily_le_neg_eta_of_deep hk c ε r δ R₀ R₁ R₁' η data
+        (le_of_lt hε) hδ hR₁₂ hR₁₂R hη hy_global 0 (by norm_num)
+      have hF0 : morseSublevelIsotopyFamily hk c ε r δ R₀ R₁ data 0 y =
+          morseRoundedFunction hk c ε r δ R₀ R₁ data y - c := by
+        dsimp [morseSublevelIsotopyFamily]
+        ring
+      rw [hF0] at hb
+      have hsum : 0 ≤ r ^ 2 + δ := by positivity
+      have hη0 : 0 ≤ η := by
+        have h2η : 0 ≤ 2 * η := le_trans hsum hη
+        linarith only [h2η]
+      linarith only [hb, hη0]
+    have hfix : (e₂.symm ⟨y, hy⟩).1 = y := (hrel y hy_global hmem).2 hy
+    have hmem_lower : f y ≤ c - ε := by
+      have hsum : 0 ≤ r ^ 2 + δ := by positivity
+      have hη0 : 0 ≤ η := by
+        have h2η : 0 ≤ 2 * η := le_trans hsum hη
+        linarith only [h2η]
+      linarith only [hy_global, hη0]
+    have hsymm : h.symm ⟨y, hmem⟩ = Handle.lower φ ⟨y, hmem_lower⟩ := by
+      dsimp [φ]
+      exact morseHandleAdjunctionEquivRoundedSublevel_symm_rel_deep hk c ε r δ R₀ R₁ η data
+        hε hδ hδr hr hεr' hbigR hR hR0 hbig hRbig hR₁big hR₁₂R₀ hcont hη hy_global hmem
+    have hfix' : e₂.symm ⟨y, hy⟩ = ⟨y, hmem⟩ := by
+      apply Subtype.ext
+      exact hfix
+    have heq : h.symm (e₂.symm ⟨y, hy⟩) = Handle.lower φ ⟨y, hmem_lower⟩ := by
+      rw [hfix']
+      exact hsymm
+    have hz' : e₂ (h z) = ⟨y, hy⟩ := by
+      change e₂ (h z) = ⟨y, hy⟩
+      simpa [e] using hz
+    have hz'' : h z = ⟨y, hmem⟩ := by
+      calc
+        h z = e₂.symm (e₂ (h z)) := by simp
+        _ = e₂.symm ⟨y, hy⟩ := by rw [hz']
+        _ = ⟨y, hmem⟩ := hfix'
+    have hfinal : z = Handle.lower φ ⟨y, hmem_lower⟩ := by
+      calc
+        z = h.symm (h z) := (h.symm_apply_apply z).symm
+        _ = h.symm ⟨y, hmem⟩ := by rw [hz'']
+        _ = Handle.lower φ ⟨y, hmem_lower⟩ := hsymm
+    exact hfinal.trans (congrArg (Handle.lower φ) (by
+      apply Subtype.ext
+      rfl))
+
 end
 
 end DifferentialGeometry.Topology.Morse

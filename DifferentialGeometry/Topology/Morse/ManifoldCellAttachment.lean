@@ -15222,6 +15222,69 @@ theorem morseHandleAdjunctionEquivRoundedSublevel_lower {m k : ℕ} (hk : k ≤ 
       exact le_trans hx (by nlinarith [hη0])⟩]
   exact morseSharpUnionRound_eq_self_of_deep hk c ε r δ η data hδ hδr hη hx
 
+theorem morseHandleAdjunctionHomeoUnion_symm_lower {m k : ℕ} (hk : k ≤ m + 1) (c ε r : ℝ)
+    {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M] [ChartedSpace H M] [T2Space M]
+    {I : ModelWithCorners ℝ (MorseModel (m + 1)) H} {f : M → ℝ}
+    (data : MorseChart (m + 1) k hk c I f)
+    (hε : 0 < ε) (hr : r ≠ 0) (hεr : Real.sqrt (2 * ε + 2 * r ^ 2) ≤ data.R)
+    (hcont : Continuous f)
+    (x : SublevelSpace f (c - ε)) :
+    (morseHandleAdjunctionHomeoUnion hk c ε r data hε hr hεr hcont).symm
+      ⟨x.1, Or.inl x.2⟩ = Handle.lower (morseAttachingEmbedding hk c ε r data hε hεr) x := by
+  have hto : (morseHandleAdjunctionHomeoUnion hk c ε r data hε hr hεr hcont)
+      (Handle.lower (morseAttachingEmbedding hk c ε r data hε hεr) x) = ⟨x.1, Or.inl x.2⟩ :=
+    morseHandleAdjunctionHomeoUnion_lower hk c ε r data hε hr hεr hcont x
+  exact ((morseHandleAdjunctionHomeoUnion hk c ε r data hε hr hεr hcont).symm_apply_eq).mpr
+    hto.symm
+
+theorem morseHandleAdjunctionEquivRoundedSublevel_symm_rel_deep {m k : ℕ} (hk : k ≤ m + 1)
+    (c ε r δ R₀ R₁ η : ℝ) {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M]
+    [ChartedSpace H M] [T2Space M]
+    {I : ModelWithCorners ℝ (MorseModel (m + 1)) H} {f : M → ℝ}
+    (data : MorseChart (m + 1) k hk c I f)
+    (hε : 0 < ε) (hδ : 0 < δ) (hδr : δ < r ^ 2) (hr : 0 < r)
+    (hεr' : Real.sqrt (2 * ε + 2 * r ^ 2) < data.R / 2)
+    (hbigR : r ^ 2 + ε + δ ≤ data.R ^ 2 / 8)
+    (hR : R₀ < R₁) (hR0 : 0 ≤ R₀) (hbig : 2 * (r ^ 2 + 2 * ε + δ) ≤ R₀ ^ 2)
+    (hRbig : r ^ 2 + 2 * ε + δ ≤ (data.R / 2) ^ 2)
+    (hR₁big : 2 * (data.R / 2) ^ 2 - 2 * ε ≤ R₁ ^ 2)
+    (hR₁₂R : R₁ ≤ data.R)
+    (hcont : Continuous f) (hη : r ^ 2 + δ ≤ 2 * η)
+    {y : M} (hy : f y ≤ c - ε - η)
+    (hy_round : morseRoundedFunction hk c ε r δ R₀ R₁ data y ≤ c) :
+    (morseHandleAdjunctionEquivRoundedSublevel hk c ε r δ R₀ R₁ data hε hδ hδr hr hεr' hbigR
+      hR hR0 hbig hRbig hR₁big hR₁₂R hcont).symm ⟨y, hy_round⟩ =
+      Handle.lower (morseAttachingEmbedding hk c ε r data hε
+        (le_trans (le_of_lt hεr') (by nlinarith [data.hRpos] : data.R / 2 ≤ data.R)))
+        ⟨y, by
+          have hsum : 0 ≤ r ^ 2 + δ := by positivity
+          have hη0 : 0 ≤ η := by nlinarith [hη, hsum]
+          change f y ≤ c - ε
+          nlinarith [hy, hη0]⟩ := by
+  have hto : (morseHandleAdjunctionEquivRoundedSublevel hk c ε r δ R₀ R₁ data hε hδ hδr hr hεr'
+      hbigR hR hR0 hbig hRbig hR₁big hR₁₂R hcont)
+      (Handle.lower (morseAttachingEmbedding hk c ε r data hε
+        (le_trans (le_of_lt hεr') (by nlinarith [data.hRpos] : data.R / 2 ≤ data.R)))
+        ⟨y, by
+          have hsum : 0 ≤ r ^ 2 + δ := by positivity
+          have hη0 : 0 ≤ η := by nlinarith [hη, hsum]
+          change f y ≤ c - ε
+          nlinarith [hy, hη0]⟩) = ⟨y, hy_round⟩ := by
+    apply Subtype.ext
+    exact morseHandleAdjunctionEquivRoundedSublevel_lower hk c ε r δ R₀ R₁ η data hε hδ hδr hr
+      hεr' hbigR hR hR0 hbig hRbig hR₁big hR₁₂R hcont hη (x := y) hy
+  exact (congrArg (fun z => (morseHandleAdjunctionEquivRoundedSublevel hk c ε r δ R₀ R₁ data
+      hε hδ hδr hr hεr' hbigR hR hR0 hbig hRbig hR₁big hR₁₂R hcont).symm z) hto.symm).trans
+    ((morseHandleAdjunctionEquivRoundedSublevel hk c ε r δ R₀ R₁ data hε hδ hδr hr hεr' hbigR
+      hR hR0 hbig hRbig hR₁big hR₁₂R hcont).left_inv
+      (Handle.lower (morseAttachingEmbedding hk c ε r data hε
+        (le_trans (le_of_lt hεr') (by nlinarith [data.hRpos] : data.R / 2 ≤ data.R)))
+        ⟨y, by
+          have hsum : 0 ≤ r ^ 2 + δ := by positivity
+          have hη0 : 0 ≤ η := by nlinarith [hη, hsum]
+          change f y ≤ c - ε
+          nlinarith [hy, hη0]⟩))
+
 @[reducible]
 noncomputable def morseHandleAdjunctionChartedSpace {m k : ℕ} (hk : k ≤ m + 1)
     (c ε r δ R₀ R₁ R₁' : ℝ) {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M]
