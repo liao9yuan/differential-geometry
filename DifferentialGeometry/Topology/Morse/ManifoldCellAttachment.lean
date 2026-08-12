@@ -684,6 +684,71 @@ theorem cocoreModelPoint_norm_le {n k : ℕ} (hk : k ≤ n) (ε r : ℝ) (hε : 
     nlinarith [hw, sq_nonneg r, hR2]
   · exact Real.sqrt_nonneg _
 
+theorem modelLowerRoundMap_cocore_norm_le {n k : ℕ} (hk : k ≤ n) (ε r δ θ : ℝ)
+    (hε : 0 < ε) (hδ : 0 < δ) (hθ : 0 < θ) (hδr : δ < r ^ 2)
+    (p : CellBoundary k × ClosedCell (n - k)) :
+    morseNorm n (modelLowerRoundMap hk ε r δ θ (cocoreModelPoint hk ε r p)) ≤
+      Real.sqrt (2 * ε + 2 * r ^ 2) := by
+  apply le_of_sq_le_sq
+  · rw [morseNorm_sq_eq_negPart_add_posPart hk]
+    rw [modelLowerRoundMap_negPart, modelLowerRoundMap_posPart]
+    have hsqrt : (Real.sqrt (2 * ε + 2 * r ^ 2)) ^ 2 = 2 * ε + 2 * r ^ 2 :=
+      Real.sq_sqrt (by nlinarith [hε, sq_nonneg r])
+    have hneg : ‖negPart hk (cocoreModelPoint hk ε r p)‖ ^ 2 =
+        2 * ε + r ^ 2 * ‖(p.2 : EuclideanSpace ℝ (Fin (n - k)))‖ ^ 2 := by
+      dsimp [cocoreModelPoint]
+      rw [negPart_recombine]
+      rw [negPart_cellMap_norm_sq hk
+        (Real.sqrt (2 * ε + r ^ 2 * ‖(p.2 : EuclideanSpace ℝ (Fin (n - k)))‖ ^ 2))
+        (p.1 : EuclideanSpace ℝ (Fin k))]
+      rw [Real.sq_sqrt (by nlinarith [hε, sq_nonneg (‖(p.2 : EuclideanSpace ℝ (Fin (n - k)))‖ : ℝ)])]
+      rw [p.1.2]
+      ring
+    have hpos : ‖posPart hk (cocoreModelPoint hk ε r p)‖ ^ 2 =
+        r ^ 2 * ‖(p.2 : EuclideanSpace ℝ (Fin (n - k)))‖ ^ 2 := by
+      dsimp [cocoreModelPoint]
+      rw [posPart_recombine]
+      rw [norm_smul]
+      rw [Real.norm_eq_abs]
+      rw [mul_pow, sq_abs]
+    have hb1 : ‖(p.2 : EuclideanSpace ℝ (Fin (n - k)))‖ ^ 2 ≤ 1 := by
+      have hnon : 0 ≤ ‖(p.2 : EuclideanSpace ℝ (Fin (n - k)))‖ := norm_nonneg _
+      simpa using sq_le_sq' (by linarith [hnon]) p.2.2
+    have hpos' : ‖modelRoundScale ε r δ θ (‖negPart hk (cocoreModelPoint hk ε r p)‖ ^ 2) •
+        posPart hk (cocoreModelPoint hk ε r p)‖ ^ 2 ≤ r ^ 2 := by
+      rw [norm_smul]
+      rw [Real.norm_eq_abs]
+      rw [mul_pow, sq_abs]
+      rw [hneg, hpos]
+      by_cases hb0 : ‖(p.2 : EuclideanSpace ℝ (Fin (n - k)))‖ ^ 2 = 0
+      · rw [hb0]
+        norm_num
+        exact sq_nonneg r
+      · have hbpos : 0 < ‖(p.2 : EuclideanSpace ℝ (Fin (n - k)))‖ ^ 2 :=
+          lt_of_le_of_ne (sq_nonneg _) (Ne.symm hb0)
+        have ht : 2 * ε < 2 * ε + r ^ 2 * ‖(p.2 : EuclideanSpace ℝ (Fin (n - k)))‖ ^ 2 := by
+          nlinarith [hbpos]
+        have hbound := modelLowerRoundBound_le_smoothCap hδ hθ hδr ht
+        have hbound' : modelRoundScale ε r δ θ
+            (2 * ε + r ^ 2 * ‖(p.2 : EuclideanSpace ℝ (Fin (n - k)))‖ ^ 2) ^ 2 *
+              (r ^ 2 * ‖(p.2 : EuclideanSpace ℝ (Fin (n - k)))‖ ^ 2) ≤ r ^ 2 := by
+          dsimp [modelLowerRoundBound] at hbound
+          have harg : (2 * ε + r ^ 2 * ‖(p.2 : EuclideanSpace ℝ (Fin (n - k)))‖ ^ 2) - 2 * ε =
+              r ^ 2 * ‖(p.2 : EuclideanSpace ℝ (Fin (n - k)))‖ ^ 2 := by ring
+          rw [harg] at hbound
+          have hsmooth : smoothCap ε r δ (2 * ε + r ^ 2 * ‖(p.2 : EuclideanSpace ℝ (Fin (n - k)))‖ ^ 2) ≤ r ^ 2 := by
+            dsimp [smoothCap]
+            have hcoef : (2 * ε + r ^ 2 * ‖(p.2 : EuclideanSpace ℝ (Fin (n - k)))‖ ^ 2) - 2 * ε - r ^ 2 ≤ 0 := by
+              nlinarith [hb1]
+            have hτ : 0 ≤ Real.smoothTransition
+                (((2 * ε + r ^ 2 * ‖(p.2 : EuclideanSpace ℝ (Fin (n - k)))‖ ^ 2) - (r ^ 2 + 2 * ε - δ)) / (2 * δ)) :=
+              Real.smoothTransition.nonneg _
+            nlinarith [hcoef, hτ]
+          exact le_trans hbound hsmooth
+        exact hbound'
+    nlinarith [hneg, hpos', hsqrt, hb1]
+  · exact Real.sqrt_nonneg _
+
 theorem cocoreModelPoint_surjective_levelSet {n k : ℕ} (hk : k ≤ n) (c ε R : ℝ)
     (hε : 0 < ε) (hR : 0 ≤ R) (hRε : 2 * ε < R ^ 2)
     (y : MorseModel n) (hy : morseNormalForm hk c y = c - ε) (hnorm : morseNorm n y ≤ R) :
