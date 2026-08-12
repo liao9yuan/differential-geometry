@@ -1147,6 +1147,117 @@ private theorem nablaK_restrict
   simp only [
     DifferentialGeometry.PDE.RicciFlow.SolutionOn.timeRestrict_base]
 
+noncomputable def source_deriv
+    {omega : Real} (h0omega : 0 < omega)
+    (hcompact : CompactSpace M)
+    (hdim : Module.finrank Real E = 3)
+    {g0 : SmoothRiemannianMetric I M}
+    (P : Ham3FlowPackage (I := I) (M := M) g0)
+    (hD : P.D =
+      DifferentialGeometry.Integral.Connection.RealTimeInterval.closedOpen
+        0 omega h0omega)
+    (Q : Ham3BlowupData M)
+    (hsel : Ham3PointSel (I := I) P Q)
+    (hrm : Ham3RmBound (I := I) P Q)
+    (hwindow : Ham3Window (I := I) P Q ham3_r0) :
+    FlowDerivativeInput (I := I)
+      (ham3SourceSeq (I := I) h0omega P hD Q hsel hwindow) := by
+  classical
+  letI : CompactSpace M := hcompact
+  let X := ham3SourceSeq (I := I) h0omega P hD Q hsel hwindow
+  let Cderiv : Nat -> Real := fun k =>
+    Real.sqrt
+      (rmOpenBound (Module.finrank Real E) ((100 : Real) ^ 2)
+        ham3ShiLeft (-(ham3_r0 ^ 2)) 0 k k)
+  have halphaBeta : ham3ShiLeft < -(ham3_r0 ^ 2) := by
+    dsimp only [ham3ShiLeft]
+    nlinarith [sq_pos_of_pos ham3_r0_pos]
+  have hbetaZero : -(ham3_r0 ^ 2) ≤ (0 : Real) :=
+    neg_nonpos.mpr (sq_nonneg ham3_r0)
+  have hsp : FlowDerivBounds (I := I) X := by
+    refine
+      { C := Cderiv
+        nonneg := fun k => Real.sqrt_nonneg _
+        bound := ?_ }
+    intro i k
+    letI : TopologicalSpace (X.term i).M := (X.term i).topology
+    letI : ChartedSpace H (X.term i).M := (X.term i).charted
+    letI : IsManifold I ∞ (X.term i).M := (X.term i).smooth
+    letI : IsManifold I ((∞ : WithTop ℕ∞) + 1) (X.term i).M := by
+      change IsManifold I ∞ (X.term i).M
+      infer_instance
+    letI : SigmaCompactSpace (X.term i).M := (X.term i).sigmaCompact
+    letI : T2Space (X.term i).M := (X.term i).t2
+    let j := ham3Start (I := I) P Q hsel hwindow + i
+    let Draw := DifferentialGeometry.PDE.RicciFlow.paraInterval P.D
+      (Q.time j) (ham3BlowupScale (I := I) P Q j)
+      (hsel.1 j) (hsel.2.2.1 j)
+    let Sraw : DifferentialGeometry.PDE.RicciFlow.SolutionOn
+        (I := I) (M := M) Draw :=
+      ham3RescaledSol (I := I) P Q hsel j
+    have hraw : DifferentialGeometry.PDE.RicciFlow.IsSolutionOn
+        (I := I) Sraw := by
+      exact DifferentialGeometry.PDE.RicciFlow.paraSol (I := I) P.S
+        P.isSmooth.isSolution (Q.time j)
+        (ham3BlowupScale (I := I) P Q j)
+        (hsel.1 j) (hsel.2.2.1 j)
+    let Fraw : PointedFlowData (I := I) Draw :=
+      { M := M
+        topology := inferInstance
+        charted := inferInstance
+        smooth := inferInstance
+        sigmaCompact := inferInstance
+        t2 := inferInstance
+        t2TangentBundle := inferInstance
+        basepoint := Q.point j
+        S := Sraw
+        isSolution := hraw }
+    have hcomplete :
+        MetricComplete (I := I) (Fraw.atTime (I := I) ham3ShiLeft) := by
+      dsimp only [MetricComplete, PointedFlowData.atTime]
+      refine @complete_of_compact Fraw.M ?_ ?_
+      simpa only [Fraw] using hcompact
+    have hsq := movingRm_of_bound (I := I) Fraw
+      halphaBeta hbetaZero
+      (ham3_shi_car (I := I) h0omega P hD Q hsel hwindow i)
+      (ham3_shi_reg (I := I) h0omega P hD Q hsel hwindow i)
+      hcomplete (by positivity : (0 : Real) ≤ (100 : Real) ^ 2)
+      (by
+        intro t ht x
+        change Tensor0SBundle.normSq0S (I := I)
+            (Sraw.family.metric t) x 4 (Sraw.base.rm04 t x) ≤
+          (100 : Real) ^ 2
+        simpa only [Sraw, j] using
+          ham3_shi_rm (I := I) P Q hsel hwindow hrm i t ht x)
+      k
+    unfold HasSpacetimeCurvDerivBound
+    intro t ht x
+    have ht' : t ∈ Set.Icc (-(ham3_r0 ^ 2)) 0 := by
+      change t ∈ Set.Icc (-(ham3_r0 ^ 2)) 0 at ht
+      exact ht
+    unfold curvDerivNorm Cderiv
+    change Real.sqrt
+        (curvDerivNormSq k ((X.term i).S.base.metric t) x) ≤
+      Real.sqrt
+        (rmOpenBound (Module.finrank Real E) ((100 : Real) ^ 2)
+          ham3ShiLeft (-(ham3_r0 ^ 2)) 0 k k)
+    rw [curvNormSq_eq (S := (X.term i).S)]
+    apply Real.sqrt_le_sqrt
+    change DifferentialGeometry.PDE.RicciFlow.nablaKRm04NormSqIntrinsic
+        (I := I)
+        ((ham3RescaledSol (I := I) P Q hsel j).timeRestrict ham3CommonD)
+        k t x ≤
+      rmOpenBound (Module.finrank Real E) ((100 : Real) ^ 2)
+        ham3ShiLeft (-(ham3_r0 ^ 2)) 0 k k
+    rw [nablaK_restrict]
+    simpa only [Fraw, Sraw, j] using hsq k le_rfl t ht' x
+  have hzero : (0 : Real) ∈ X.D.carrier := by
+    change (0 : Real) ∈ Set.Icc (-(ham3_r0 ^ 2)) 0
+    exact ⟨hbetaZero, le_rfl⟩
+  exact
+    { spacetime := hsp
+      at_zero_geom := hsp.at_time hzero }
+
 def cghToHam3
     (X : PointedFlowSeq.{u, uE, uH} (I := I))
     (origIndex : Nat -> Nat) (horig : StrictMono origIndex)
