@@ -7422,6 +7422,72 @@ theorem modelRoundCapQ_eq_cocore {ε r δ θ b : ℝ} (hε : 0 < ε) (hδ : 0 < 
   field_simp [hε.ne']
   ring
 
+theorem modelRoundCapQ_algebra_low {ε r a b t : ℝ} (hapos : 0 < a)
+    (ht0 : t < r ^ 2 + 2 * ε) (ht : t = (2 * ε + r ^ 2 * b) * a) :
+    (1 - t * (1 - a) / (a * (r ^ 2 + 2 * ε - t))) * (t - 2 * ε) +
+        t * (1 - a) / (a * (r ^ 2 + 2 * ε - t)) * r ^ 2 = r ^ 2 * b := by
+  have hden : a * (r ^ 2 + 2 * ε - t) ≠ 0 := by
+    have hd1 : 0 < r ^ 2 + 2 * ε - t := by nlinarith [ht0]
+    have hd : 0 < a * (r ^ 2 + 2 * ε - t) := by nlinarith [hapos, hd1]
+    exact ne_of_gt hd
+  have hden2 : a * (r ^ 2 + 2 * ε - (2 * ε + r ^ 2 * b) * a) ≠ 0 := by
+    rw [ht] at hden
+    exact hden
+  rw [ht]
+  have hD : r ^ 2 + 2 * ε - (2 * ε + r ^ 2 * b) * a ≠ 0 := by
+    have hd : 0 < r ^ 2 + 2 * ε - (2 * ε + r ^ 2 * b) * a := by nlinarith [ht0, ht]
+    exact ne_of_gt hd
+  field_simp [hden2, hD]
+  ring
+
+theorem modelRoundCapQ_nonneg {ε r δ θ a b : ℝ} (hε : 0 < ε) (hδ : 0 < δ) (hθ : 0 < θ)
+    (hδr : δ < r ^ 2) (hθr : θ < r ^ 2) (hr : 0 < r) (ha0 : 0 ≤ a) (ha1 : a ≤ 1)
+    (hb0 : 0 ≤ b) (hb1 : b ≤ 1) :
+    0 ≤ modelRoundCapQ ε r δ θ a b := by
+  let t : ℝ := (2 * ε + r ^ 2 * b) * a
+  by_cases ht : 2 * ε ≤ t
+  · have hb0' : 0 ≤ modelLowerRoundBound ε r δ θ t := by
+      dsimp [modelLowerRoundBound]
+      exact mul_nonneg (sq_nonneg _) (by nlinarith [ht])
+    have hφ0 : 0 ≤ modelRoundCapInterp ε r a b := modelRoundCapInterp_nonneg hε ha1 hb0 hb1
+    have hφ1 : modelRoundCapInterp ε r a b ≤ 1 := modelRoundCapInterp_le_one hε ha1 hb0 hb1
+    have hsc : 0 ≤ smoothCap ε r δ t := smoothCap_nonneg hδ hδr
+    have hmul : modelRoundCapInterp ε r a b * smoothCap ε r δ t ≥ 0 := by nlinarith [hφ0, hsc]
+    have hq' : 0 ≤ (1 - modelRoundCapInterp ε r a b) * modelLowerRoundBound ε r δ θ t +
+        modelRoundCapInterp ε r a b * smoothCap ε r δ t := by
+      nlinarith [hb0', hφ1, hmul]
+    dsimp [modelRoundCapQ]
+    simpa [t] using hq'
+  · have ht' : t < 2 * ε := lt_of_not_ge ht
+    by_cases ha : a = 0
+    · have hq0 := modelRoundCapQ_eq_cocore hε hδ hθ hδr hθr hb0 hb1
+      rw [ha, hq0]
+      exact mul_nonneg (sq_nonneg r) hb0
+    · have hapos : 0 < a := by
+        by_contra h
+        have hle : a ≤ 0 := le_of_not_gt h
+        exact ha (le_antisymm hle ha0)
+      have h1 : 0 < 2 * ε + r ^ 2 * b := by nlinarith [hε, hb0, sq_nonneg r]
+      have htpos : 0 < t := by
+        dsimp [t]
+        exact mul_pos h1 hapos
+      have ht0 : t < r ^ 2 + 2 * ε := by
+        dsimp [t]
+        nlinarith [ht']
+      have hφ := modelRoundCapInterp_eq hε hr hapos ha1 hb0 hb1 ht0 htpos (by dsimp [t])
+      have hbound : modelLowerRoundBound ε r δ θ t = t - 2 * ε := by
+        have hle : t ≤ r ^ 2 + 2 * ε - θ := by nlinarith [ht', hθr]
+        exact modelLowerRoundBound_eq_self_of_le hθ hle
+      have hsm : smoothCap ε r δ t = r ^ 2 := by
+        have hle : t ≤ r ^ 2 + 2 * ε - δ := by nlinarith [ht', hδr]
+        exact smoothCap_lower hδ hle
+      have hq : modelRoundCapQ ε r δ θ a b = r ^ 2 * b := by
+        dsimp [modelRoundCapQ]
+        rw [hφ, hbound, hsm]
+        exact modelRoundCapQ_algebra_low hapos ht0 (by dsimp [t])
+      rw [hq]
+      exact mul_nonneg (sq_nonneg r) hb0
+
 end CellAttachment
 
 end
