@@ -7488,6 +7488,46 @@ theorem modelRoundCapQ_nonneg {ε r δ θ a b : ℝ} (hε : 0 < ε) (hδ : 0 < �
       rw [hq]
       exact mul_nonneg (sq_nonneg r) hb0
 
+theorem modelHandleRoundMap_posPart_norm_sq {n k : ℕ} (hk : k ≤ n) (ε r δ θ : ℝ)
+    (hε : 0 < ε) (hδ : 0 < δ) (hθ : 0 < θ) (hδr : δ < r ^ 2) (hθr : θ < r ^ 2) (hr : 0 < r)
+    (p : StandardHandle k (n - k)) :
+    ‖posPart hk (modelHandleRoundMap hk ε r δ θ p)‖ ^ 2 =
+      modelRoundCapQ ε r δ θ (‖(p.1 : EuclideanSpace ℝ (Fin k))‖ ^ 2)
+        (‖(p.2 : EuclideanSpace ℝ (Fin (n - k)))‖ ^ 2) := by
+  rw [modelHandleRoundMap_posPart]
+  let a : ℝ := ‖(p.1 : EuclideanSpace ℝ (Fin k))‖ ^ 2
+  let b : ℝ := ‖(p.2 : EuclideanSpace ℝ (Fin (n - k)))‖ ^ 2
+  have ha0 : 0 ≤ a := by dsimp [a]; exact sq_nonneg _
+  have ha1 : a ≤ 1 := by
+    dsimp [a]
+    have hnon : 0 ≤ ‖(p.1 : EuclideanSpace ℝ (Fin k))‖ := norm_nonneg _
+    have hle := sq_le_sq' (by linarith [hnon]) p.1.2
+    simpa using hle
+  have hb0 : 0 ≤ b := by dsimp [b]; exact sq_nonneg _
+  have hb1 : b ≤ 1 := by
+    dsimp [b]
+    have hnon : 0 ≤ ‖(p.2 : EuclideanSpace ℝ (Fin (n - k)))‖ := norm_nonneg _
+    have hle := sq_le_sq' (by linarith [hnon]) p.2.2
+    simpa using hle
+  have hq0 : 0 ≤ modelRoundCapQ ε r δ θ a b :=
+    modelRoundCapQ_nonneg hε hδ hθ hδr hθr hr ha0 ha1 hb0 hb1
+  by_cases hw : (p.2 : EuclideanSpace ℝ (Fin (n - k))) = 0
+  · have hzero : ((Real.sqrt (modelRoundCapQ ε r δ θ a b) / ‖(p.2 : EuclideanSpace ℝ (Fin (n - k)))‖) •
+        (p.2 : EuclideanSpace ℝ (Fin (n - k))) : EuclideanSpace ℝ (Fin (n - k))) = 0 := by
+      rw [hw]
+      simp
+    rw [hzero]
+    have hq0' : modelRoundCapQ ε r δ θ a b = 0 := by
+      have hqz := modelRoundCapQ_eq_zero_of_b_eq_zero hε hδ hθ hδr hθr hr ha1
+      simpa [a, b, hw] using hqz
+    rw [hq0']
+    norm_num
+  · have hnorm' := norm_smul_div_norm_sq (modelRoundCapQ ε r δ θ a b)
+      (p.2 : EuclideanSpace ℝ (Fin (n - k))) hw
+    have hsq : (Real.sqrt (modelRoundCapQ ε r δ θ a b)) ^ 2 = modelRoundCapQ ε r δ θ a b :=
+      Real.sq_sqrt hq0
+    rw [hnorm', hsq]
+
 end CellAttachment
 
 end
