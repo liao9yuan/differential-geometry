@@ -12675,6 +12675,58 @@ noncomputable def morseHandleRoundAdjunctionHomeoUnion {m k : ℕ}
     (disjoint_handleRoundEmbedding_capRoundedLowerSublevel hk c ε r δ θ data hε hδ hθ hδr hθr hr hεr hεr')
     (isClosed_morseCapRoundedLowerSublevel hk c ε r δ θ data hθ hδ hδr hθr hcont)
 
+theorem morseHandleRoundAdjunctionHomeoUnion_lower {m k : ℕ} (hk : k ≤ m + 1) (c ε r δ θ : ℝ)
+    {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M] [T2Space M] [ChartedSpace H M]
+    {I : ModelWithCorners ℝ (MorseModel (m + 1)) H} {f : M → ℝ}
+    (data : MorseChart (m + 1) k hk c I f)
+    (hε : 0 < ε) (hδ : 0 < δ) (hθ : 0 < θ) (hδr : δ < r ^ 2) (hθr : θ < r ^ 2) (hr : 0 < r)
+    (hεr : Real.sqrt (2 * ε + 2 * r ^ 2) ≤ data.R)
+    (hεr' : Real.sqrt (2 * ε + 2 * r ^ 2) < data.R / 2)
+    (hcont : Continuous f)
+    [NeZero k] [NeZero (m + 1 - k)]
+    (x : {x : M // x ∈ morseCapRoundedLowerSublevel hk c ε r δ θ data}) :
+    morseHandleRoundAdjunctionHomeoUnion hk c ε r δ θ data hε hδ hθ hδr hθr hr hεr hεr' hcont
+      (Handle.lower (handleRoundAttachingEmbeddingCapSubtype hk c ε r δ θ data hε hδ hθ hδr hθr hεr') x) =
+      ⟨x, Or.inl x.2⟩ := by
+  exact Handle.adjunctionHomeomorphUnionImage_lower
+    (φ := handleRoundAttachingEmbeddingCapSubtype hk c ε r δ θ data hε hδ hθ hδr hθr hεr')
+    (c := handleRoundEmbedding hk c ε r δ θ data)
+    (hφ := by
+      intro a
+      dsimp [handleRoundAttachingEmbeddingCapSubtype]
+      exact (handleRoundEmbedding_attaching_eq_lower hk c ε r δ θ data hε hδ hθ hδr hr a).symm)
+    (hc := handleRoundEmbedding_injective hk c ε r δ θ data hε hδ hθ hδr hθr hr hεr)
+    (hcont := handleRoundEmbedding_continuous hk c ε r δ θ data hε hδ hθ hδr hθr hr hεr)
+    (hmeet := disjoint_handleRoundEmbedding_capRoundedLowerSublevel hk c ε r δ θ data hε hδ hθ hδr hθr hr hεr hεr')
+    (hclosed := isClosed_morseCapRoundedLowerSublevel hk c ε r δ θ data hθ hδ hδr hθr hcont)
+    x
+
+theorem morseHandleRoundAdjunctionHomeoUnion_cell {m k : ℕ} (hk : k ≤ m + 1) (c ε r δ θ : ℝ)
+    {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M] [T2Space M] [ChartedSpace H M]
+    {I : ModelWithCorners ℝ (MorseModel (m + 1)) H} {f : M → ℝ}
+    (data : MorseChart (m + 1) k hk c I f)
+    (hε : 0 < ε) (hδ : 0 < δ) (hθ : 0 < θ) (hδr : δ < r ^ 2) (hθr : θ < r ^ 2) (hr : 0 < r)
+    (hεr : Real.sqrt (2 * ε + 2 * r ^ 2) ≤ data.R)
+    (hεr' : Real.sqrt (2 * ε + 2 * r ^ 2) < data.R / 2)
+    (hcont : Continuous f)
+    [NeZero k] [NeZero (m + 1 - k)]
+    (p : StandardHandle k (m + 1 - k)) :
+    morseHandleRoundAdjunctionHomeoUnion hk c ε r δ θ data hε hδ hθ hδr hθr hr hεr hεr' hcont
+      (Handle.cell (handleRoundAttachingEmbeddingCapSubtype hk c ε r δ θ data hε hδ hθ hδr hθr hεr') p) =
+      ⟨handleRoundEmbedding hk c ε r δ θ data p, Or.inr ⟨p, rfl⟩⟩ := by
+  exact Handle.adjunctionHomeomorphUnionImage_cell
+    (φ := handleRoundAttachingEmbeddingCapSubtype hk c ε r δ θ data hε hδ hθ hδr hθr hεr')
+    (c := handleRoundEmbedding hk c ε r δ θ data)
+    (hφ := by
+      intro a
+      dsimp [handleRoundAttachingEmbeddingCapSubtype]
+      exact (handleRoundEmbedding_attaching_eq_lower hk c ε r δ θ data hε hδ hθ hδr hr a).symm)
+    (hc := handleRoundEmbedding_injective hk c ε r δ θ data hε hδ hθ hδr hθr hr hεr)
+    (hcont := handleRoundEmbedding_continuous hk c ε r δ θ data hε hδ hθ hδr hθr hr hεr)
+    (hmeet := disjoint_handleRoundEmbedding_capRoundedLowerSublevel hk c ε r δ θ data hε hδ hθ hδr hθr hr hεr hεr')
+    (hclosed := isClosed_morseCapRoundedLowerSublevel hk c ε r δ θ data hθ hδ hδr hθr hcont)
+    p
+
 theorem range_handleEmbedding_subset_ballImage {m k : ℕ} (hk : k ≤ m + 1) (c ε r : ℝ)
     {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M] [ChartedSpace H M]
     {I : ModelWithCorners ℝ (MorseModel (m + 1)) H} {f : M → ℝ}
