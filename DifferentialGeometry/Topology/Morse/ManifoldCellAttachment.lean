@@ -15348,6 +15348,211 @@ noncomputable def morseHandleAdjunctionCellRangeHomeo {m k : ℕ} (hk : k ≤ m 
       exact ⟨d, rfl⟩)
   exact Continuous.homeoOfEquivCompactToT2 (f := f) hfcont
 
+theorem isClosed_range_handleEmbedding {m k : ℕ} (hk : k ≤ m + 1) (c ε r : ℝ)
+    {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M] [ChartedSpace H M] [T2Space M]
+    {I : ModelWithCorners ℝ (MorseModel (m + 1)) H} {f : M → ℝ}
+    (data : MorseChart (m + 1) k hk c I f)
+    (hε : 0 < ε) (hεr : Real.sqrt (2 * ε + 2 * r ^ 2) ≤ data.R) :
+    IsClosed (Set.range (handleEmbedding hk c ε r data)) := by
+  have hcomp : IsCompact (Set.range (handleEmbedding hk c ε r data)) := by
+    rw [← Set.image_univ]
+    exact (isCompact_univ.image (handleEmbedding_continuous hk c ε r data hε hεr))
+  exact hcomp.isClosed
+
+theorem isOpen_morseHandleAdjunction_cellPart {m k : ℕ} (hk : k ≤ m + 1) (c ε r : ℝ)
+    {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M] [ChartedSpace H M] [T2Space M]
+    {I : ModelWithCorners ℝ (MorseModel (m + 1)) H} {f : M → ℝ}
+    (data : MorseChart (m + 1) k hk c I f)
+    (hε : 0 < ε) (hr : r ≠ 0) (hεr : Real.sqrt (2 * ε + 2 * r ^ 2) ≤ data.R)
+    (hcont : Continuous f) :
+    IsOpen (Set.range (Handle.cell (morseAttachingEmbedding hk c ε r data hε hεr)) \
+      Set.range (Handle.lower (morseAttachingEmbedding hk c ε r data hε hεr))) := by
+  let h : Handle.AdjunctionSpace k (m + 1 - k) (morseAttachingEmbedding hk c ε r data hε hεr) ≃ₜ
+      {x : M // x ∈ sublevel f (c - ε) ∪ Set.range (handleEmbedding hk c ε r data)} :=
+    morseHandleAdjunctionHomeoUnion hk c ε r data hε hr hεr hcont
+  let S : Set (Handle.AdjunctionSpace k (m + 1 - k) (morseAttachingEmbedding hk c ε r data hε hεr)) :=
+    Set.range (Handle.cell (morseAttachingEmbedding hk c ε r data hε hεr)) \
+      Set.range (Handle.lower (morseAttachingEmbedding hk c ε r data hε hεr))
+  have hIm : h '' S = {y : {x : M // x ∈ sublevel f (c - ε) ∪
+        Set.range (handleEmbedding hk c ε r data)} |
+      y.1 ∈ Set.range (handleEmbedding hk c ε r data) \ sublevel f (c - ε)} := by
+    ext y
+    constructor
+    · rintro ⟨z, hz, rfl⟩
+      rcases hz.1 with ⟨d, rfl⟩
+      rw [morseHandleAdjunctionHomeoUnion_cell hk c ε r data hε hr hεr hcont d]
+      constructor
+      · exact ⟨d, rfl⟩
+      · intro hy
+        apply hz.2
+        have hiff := (handleEmbedding_mem_lower_iff hk c ε r data hε hεr d).mp hy
+        have hreg : d ∈ attachingRegion k (m + 1 - k) := by
+          simpa [attachingRegion] using hiff
+        rcases (Set.mem_range.mp (by rw [range_attachingInclusion]; exact hreg)) with ⟨a, ha⟩
+        refine ⟨morseAttachingEmbedding hk c ε r data hε hεr a, ?_⟩
+        rw [← ha]
+        exact (Handle.adjunction_coherence (morseAttachingEmbedding hk c ε r data hε hεr) a).symm
+    · intro hy
+      rcases hy.1 with ⟨d, hd⟩
+      have hyc : y = h (Handle.cell (morseAttachingEmbedding hk c ε r data hε hεr) d) := by
+        apply Subtype.ext
+        rw [morseHandleAdjunctionHomeoUnion_cell hk c ε r data hε hr hεr hcont d]
+        exact hd.symm
+      refine ⟨h.symm y, ?_, ?_⟩
+      · constructor
+        · rw [hyc]
+          exact ⟨d, (h.symm_apply_apply (Handle.cell (morseAttachingEmbedding hk c ε r data hε hεr) d)).symm⟩
+        · intro hl
+          apply hy.2
+          rcases hl with ⟨x, hx⟩
+          have hyx : y = h (Handle.lower (morseAttachingEmbedding hk c ε r data hε hεr) x) := by
+            calc
+              y = h (h.symm y) := (h.apply_symm_apply y).symm
+              _ = h (Handle.lower (morseAttachingEmbedding hk c ε r data hε hεr) x) := by
+                rw [hx]
+          have hy1' : y.1 = x.1 := by
+            rw [hyx]
+            rw [morseHandleAdjunctionHomeoUnion_lower hk c ε r data hε hr hεr hcont x]
+          rw [hy1']
+          exact x.2
+      · exact h.apply_symm_apply y
+  have hOpen : IsOpen ({y : {x : M // x ∈ sublevel f (c - ε) ∪
+        Set.range (handleEmbedding hk c ε r data)} |
+      y.1 ∈ Set.range (handleEmbedding hk c ε r data) \ sublevel f (c - ε)}) := by
+    have hclS : IsClosed (sublevel f (c - ε)) := isClosed_Iic.preimage hcont
+    have hOpenM : IsOpen (Set.compl (sublevel f (c - ε))) := hclS.isOpen_compl
+    have hPre : IsOpen ((Set.compl (sublevel f (c - ε))).preimage (fun y : {x : M //
+        x ∈ sublevel f (c - ε) ∪ Set.range (handleEmbedding hk c ε r data)} => y.1)) :=
+      hOpenM.preimage continuous_subtype_val
+    have hEqSet : {y : {x : M // x ∈ sublevel f (c - ε) ∪
+          Set.range (handleEmbedding hk c ε r data)} |
+        y.1 ∈ Set.range (handleEmbedding hk c ε r data) \ sublevel f (c - ε)} =
+        {y : {x : M // x ∈ sublevel f (c - ε) ∪
+          Set.range (handleEmbedding hk c ε r data)} |
+        y.1 ∉ sublevel f (c - ε)} := by
+      ext y
+      constructor
+      · intro hy
+        exact hy.2
+      · intro hy
+        have hyU : y.1 ∈ sublevel f (c - ε) ∪ Set.range (handleEmbedding hk c ε r data) := y.2
+        rcases hyU with hsub | hrng
+        · exact False.elim (hy hsub)
+        · exact ⟨hrng, hy⟩
+    rw [hEqSet]
+    exact hPre
+  have hEq : h.symm '' (h '' S) = S := by
+    rw [← Set.image_comp]
+    simp
+  change IsOpen S
+  rw [← hEq]
+  have hOpenS : IsOpen (h '' S) := hIm ▸ hOpen
+  exact h.symm.isOpenMap (h '' S) hOpenS
+
+theorem isOpen_morseHandleAdjunction_lowerPart {m k : ℕ} (hk : k ≤ m + 1) (c ε r : ℝ)
+    {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M] [ChartedSpace H M] [T2Space M]
+    {I : ModelWithCorners ℝ (MorseModel (m + 1)) H} {f : M → ℝ}
+    (data : MorseChart (m + 1) k hk c I f)
+    (hε : 0 < ε) (hr : r ≠ 0) (hεr : Real.sqrt (2 * ε + 2 * r ^ 2) ≤ data.R)
+    (hcont : Continuous f) :
+    IsOpen (Set.range (Handle.lower (morseAttachingEmbedding hk c ε r data hε hεr)) \
+      Set.range (Handle.cell (morseAttachingEmbedding hk c ε r data hε hεr))) := by
+  let h : Handle.AdjunctionSpace k (m + 1 - k) (morseAttachingEmbedding hk c ε r data hε hεr) ≃ₜ
+      {x : M // x ∈ sublevel f (c - ε) ∪ Set.range (handleEmbedding hk c ε r data)} :=
+    morseHandleAdjunctionHomeoUnion hk c ε r data hε hr hεr hcont
+  let S : Set (Handle.AdjunctionSpace k (m + 1 - k) (morseAttachingEmbedding hk c ε r data hε hεr)) :=
+    Set.range (Handle.lower (morseAttachingEmbedding hk c ε r data hε hεr)) \
+      Set.range (Handle.cell (morseAttachingEmbedding hk c ε r data hε hεr))
+  have hIm : h '' S = {y : {x : M // x ∈ sublevel f (c - ε) ∪
+        Set.range (handleEmbedding hk c ε r data)} |
+      y.1 ∈ sublevel f (c - ε) \ Set.range (handleEmbedding hk c ε r data)} := by
+    ext y
+    constructor
+    · rintro ⟨z, hz, rfl⟩
+      rcases hz.1 with ⟨x, rfl⟩
+      rw [morseHandleAdjunctionHomeoUnion_lower hk c ε r data hε hr hεr hcont x]
+      constructor
+      · exact x.2
+      · intro hy
+        apply hz.2
+        rcases hy with ⟨d, hd⟩
+        have hiff := (handleEmbedding_mem_lower_iff hk c ε r data hε hεr d).mp (by
+          rw [hd]
+          exact x.2)
+        have hreg : d ∈ attachingRegion k (m + 1 - k) := by
+          simpa [attachingRegion] using hiff
+        rcases (Set.mem_range.mp (by rw [range_attachingInclusion]; exact hreg)) with ⟨a, ha⟩
+        have hxφ : x = morseAttachingEmbedding hk c ε r data hε hεr a := by
+          apply Subtype.ext
+          calc
+            x.1 = handleEmbedding hk c ε r data d := hd.symm
+            _ = handleEmbedding hk c ε r data (attachingInclusion k (m + 1 - k) a) := by
+              rw [ha]
+            _ = (morseAttachingEmbedding hk c ε r data hε hεr a).1 :=
+              (morseAttachingEmbedding_eq_handleEmbedding hk c ε r data hε hεr a).symm
+        refine ⟨d, ?_⟩
+        rw [hxφ, ← ha]
+        exact Handle.adjunction_coherence (morseAttachingEmbedding hk c ε r data hε hεr) a
+    · intro hy
+      have hyc : y = h (Handle.lower (morseAttachingEmbedding hk c ε r data hε hεr)
+          ⟨y.1, hy.1⟩) := by
+        apply Subtype.ext
+        rw [morseHandleAdjunctionHomeoUnion_lower hk c ε r data hε hr hεr hcont ⟨y.1, hy.1⟩]
+      refine ⟨h.symm y, ?_, ?_⟩
+      · constructor
+        · rw [hyc]
+          exact ⟨⟨y.1, hy.1⟩, (h.symm_apply_apply (Handle.lower
+            (morseAttachingEmbedding hk c ε r data hε hεr) ⟨y.1, hy.1⟩)).symm⟩
+        · intro hl
+          apply hy.2
+          rcases hl with ⟨d, hd⟩
+          have hy1 : y.1 = handleEmbedding hk c ε r data d := by
+            have hyx : y = h (Handle.cell (morseAttachingEmbedding hk c ε r data hε hεr) d) := by
+              calc
+                y = h (h.symm y) := (h.apply_symm_apply y).symm
+                _ = h (Handle.cell (morseAttachingEmbedding hk c ε r data hε hεr) d) := by
+                  rw [hd]
+            rw [hyx]
+            rw [morseHandleAdjunctionHomeoUnion_cell hk c ε r data hε hr hεr hcont d]
+          rw [hy1]
+          exact ⟨d, rfl⟩
+      · exact h.apply_symm_apply y
+  have hOpen : IsOpen ({y : {x : M // x ∈ sublevel f (c - ε) ∪
+        Set.range (handleEmbedding hk c ε r data)} |
+      y.1 ∈ sublevel f (c - ε) \ Set.range (handleEmbedding hk c ε r data)}) := by
+    have hclR : IsClosed (Set.range (handleEmbedding hk c ε r data)) :=
+      isClosed_range_handleEmbedding hk c ε r data hε hεr
+    have hOpenM : IsOpen (Set.compl (Set.range (handleEmbedding hk c ε r data))) :=
+      hclR.isOpen_compl
+    have hPre : IsOpen ((Set.compl (Set.range (handleEmbedding hk c ε r data))).preimage
+        (fun y : {x : M // x ∈ sublevel f (c - ε) ∪
+          Set.range (handleEmbedding hk c ε r data)} => y.1)) :=
+      hOpenM.preimage continuous_subtype_val
+    have hEqSet : {y : {x : M // x ∈ sublevel f (c - ε) ∪
+          Set.range (handleEmbedding hk c ε r data)} |
+        y.1 ∈ sublevel f (c - ε) \ Set.range (handleEmbedding hk c ε r data)} =
+        {y : {x : M // x ∈ sublevel f (c - ε) ∪
+          Set.range (handleEmbedding hk c ε r data)} |
+        y.1 ∉ Set.range (handleEmbedding hk c ε r data)} := by
+      ext y
+      constructor
+      · intro hy
+        exact hy.2
+      · intro hy
+        have hyU : y.1 ∈ sublevel f (c - ε) ∪ Set.range (handleEmbedding hk c ε r data) := y.2
+        rcases hyU with hsub | hrng
+        · exact ⟨hsub, hy⟩
+        · exact False.elim (hy hrng)
+    rw [hEqSet]
+    exact hPre
+  have hEq : h.symm '' (h '' S) = S := by
+    rw [← Set.image_comp]
+    simp
+  change IsOpen S
+  rw [← hEq]
+  have hOpenS : IsOpen (h '' S) := hIm ▸ hOpen
+  exact h.symm.isOpenMap (h '' S) hOpenS
+
 theorem morseHandleAdjunctionEquivRoundedSublevel_symm_rel_deep {m k : ℕ} (hk : k ≤ m + 1)
     (c ε r δ R₀ R₁ η : ℝ) {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M]
     [ChartedSpace H M] [T2Space M]
