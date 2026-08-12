@@ -12355,6 +12355,17 @@ theorem handleRoundAttachingEmbedding_mem_rounded {m k : ℕ} (hk : k ≤ m + 1)
       exact (abs_lt_of_sq_lt_sq' (lt_of_le_of_lt hneg hlt) hR).2
     simpa [modelLowerRoundMap_negPart] using hlt'
 
+noncomputable def handleRoundAttachingEmbeddingSubtype {m k : ℕ} (hk : k ≤ m + 1) (c ε r δ θ : ℝ)
+    {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M] [T2Space M] [ChartedSpace H M]
+    {I : ModelWithCorners ℝ (MorseModel (m + 1)) H} {f : M → ℝ}
+    (data : MorseChart (m + 1) k hk c I f)
+    (hε : 0 < ε) (hδ : 0 < δ) (hθ : 0 < θ) (hδr : δ < r ^ 2)
+    (hεr' : Real.sqrt (2 * ε + 2 * r ^ 2) < data.R / 2) :
+    AttachingRegion k (m + 1 - k) →
+      {x : M // x ∈ morseRoundedAttachment hk c ε r δ data} :=
+  fun p => ⟨handleRoundAttachingEmbedding hk c ε r δ θ data p,
+    handleRoundAttachingEmbedding_mem_rounded hk c ε r δ θ data hε hδ hθ hδr hεr' p⟩
+
 theorem range_handleEmbedding_subset_ballImage {m k : ℕ} (hk : k ≤ m + 1) (c ε r : ℝ)
     {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M] [ChartedSpace H M]
     {I : ModelWithCorners ℝ (MorseModel (m + 1)) H} {f : M → ℝ}
