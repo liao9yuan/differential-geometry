@@ -7369,6 +7369,42 @@ theorem modelRoundCapInterp_injective_fixed_t {ε r a₁ a₂ b₁ b₂ t : ℝ}
   have hinv : (a₁⁻¹)⁻¹ = (a₂⁻¹)⁻¹ := congrArg Inv.inv hrecip
   simpa using hinv
 
+theorem modelRoundCapQ_eq_zero_of_b_eq_zero {ε r δ θ a : ℝ} (hε : 0 < ε) (hδ : 0 < δ)
+    (hθ : 0 < θ) (hδr : δ < r ^ 2) (hθr : θ < r ^ 2) (hr : 0 < r) (ha : a ≤ 1) :
+    modelRoundCapQ ε r δ θ a 0 = 0 := by
+  by_cases ha1 : a = 1
+  · have hq' := modelRoundCapQ_eq_lowerBound_of_eq_one (ε := ε) (r := r) (δ := δ) (θ := θ)
+      (a := a) (b := 0) ha1
+    rw [hq']
+    dsimp [modelLowerRoundBound]
+    have hsc : modelRoundScale ε r δ θ (2 * ε + r ^ 2 * 0) = 1 := by
+      have hle : 2 * ε + r ^ 2 * 0 ≤ r ^ 2 + 2 * ε - θ := by nlinarith [hθr]
+      exact modelRoundScale_eq_one_of_le hθ hle
+    rw [hsc]
+    ring_nf
+  · have hsc : modelRoundScale ε r δ θ (2 * ε * a) = 1 := by
+      have hle : 2 * ε * a ≤ r ^ 2 + 2 * ε - θ := by nlinarith [hθr, ha]
+      exact modelRoundScale_eq_one_of_le hθ hle
+    have hcap : smoothCap ε r δ (2 * ε * a) = r ^ 2 := by
+      have hle : 2 * ε * a ≤ r ^ 2 + 2 * ε - δ := by nlinarith [hδr, ha]
+      exact smoothCap_lower hδ hle
+    have hlt : a < 1 := lt_of_le_of_ne ha ha1
+    have h1 : 0 < 1 - a := by linarith [hlt]
+    have h2 : 0 < r ^ 2 / (2 * ε) := div_pos (sq_pos_of_pos hr) (by positivity)
+    have hsum : 0 < (1 - a) + r ^ 2 / (2 * ε) := by nlinarith [h1, h2]
+    dsimp [modelRoundCapQ, modelLowerRoundBound, modelRoundCapInterp]
+    simp only [sub_zero, add_zero, mul_zero, zero_add, one_mul]
+    rw [hsc, hcap]
+    have hden2 : (1 - a) * (2 * ε) + r ^ 2 ≠ 0 := by
+      have hmul : 2 * ε * ((1 - a) + r ^ 2 / (2 * ε)) = (1 - a) * (2 * ε) + r ^ 2 := by
+        field_simp [hε.ne']
+      have hprod : 0 < 2 * ε * ((1 - a) + r ^ 2 / (2 * ε)) := mul_pos (by positivity) hsum
+      have hpos : 0 < (1 - a) * (2 * ε) + r ^ 2 := by
+        rwa [hmul] at hprod
+      exact ne_of_gt hpos
+    field_simp [hden2]
+    ring
+
 end CellAttachment
 
 end
