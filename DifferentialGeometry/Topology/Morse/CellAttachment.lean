@@ -6,6 +6,7 @@ import Mathlib.Topology.Homotopy.Basic
 import Mathlib.Topology.Homotopy.Equiv
 import Mathlib.Analysis.SpecialFunctions.Sqrt
 import Mathlib.Analysis.Complex.ExponentialBounds
+import DifferentialGeometry.Analysis.Calculus.Taylor
 
 namespace DifferentialGeometry.Topology.Morse
 
@@ -7029,6 +7030,190 @@ theorem modelRoundCapQ_eq_smoothCap_of_eq_one {ε r δ θ a b : ℝ} (hb : b = 1
   dsimp [modelRoundCapQ]
   rw [modelRoundCapInterp_eq_one_of_eq_one hb ha, hb]
   simp
+
+private theorem smoothCap_eq_rSq_of_vertex {ε r δ : ℝ} :
+    smoothCap ε r δ (r ^ 2 + 2 * ε) = r ^ 2 := by
+  dsimp [smoothCap]
+  ring
+
+private theorem modelRoundScale_eq_one_of_vertex {ε r δ θ : ℝ} (hθ : 0 < θ) (hr : r ≠ 0) :
+    modelRoundScale ε r δ θ (r ^ 2 + 2 * ε) = 1 := by
+  dsimp [modelRoundScale]
+  have harg : (r ^ 2 + 2 * ε - (r ^ 2 + 2 * ε - θ)) / θ = 1 := by
+    field_simp [ne_of_gt hθ]
+    ring
+  rw [harg]
+  have hratio : modelRoundRatio ε r δ (r ^ 2 + 2 * ε) = 1 := by
+    dsimp [modelRoundRatio]
+    rw [smoothCap_eq_rSq_of_vertex]
+    have hden : (r ^ 2 + 2 * ε) - 2 * ε = r ^ 2 := by ring
+    rw [hden]
+    rw [div_self (pow_ne_zero 2 hr)]
+  rw [hratio]
+  rw [Real.sqrt_one]
+  rw [Real.smoothTransition.one]
+  ring
+
+private theorem modelLowerRoundBound_eq_rSq_of_vertex {ε r δ θ : ℝ} (hθ : 0 < θ) (hr : r ≠ 0) :
+    modelLowerRoundBound ε r δ θ (r ^ 2 + 2 * ε) = r ^ 2 := by
+  dsimp [modelLowerRoundBound]
+  rw [modelRoundScale_eq_one_of_vertex hθ hr]
+  have harg : (r ^ 2 + 2 * ε) - 2 * ε = r ^ 2 := by ring
+  rw [harg]
+  ring
+
+noncomputable def modelRoundCapGap (ε r δ θ : ℝ) (t : ℝ) : ℝ :=
+  smoothCap ε r δ t - modelLowerRoundBound ε r δ θ t
+
+theorem contDiff_modelRoundCapGap {ε r δ θ : ℝ} (hθ : 0 < θ) (hδ : 0 < δ)
+    (hδr : δ < r ^ 2) (hθr : θ < r ^ 2) :
+    ContDiff ℝ (⊤ : ℕ∞) (modelRoundCapGap ε r δ θ) := by
+  simpa [modelRoundCapGap] using
+    ((smoothCap_contDiff ε r δ).sub (contDiff_modelLowerRoundBound hθ hδ hδr hθr))
+
+noncomputable def modelRoundCapFactor (ε r δ θ : ℝ) (t : ℝ) : ℝ :=
+  - DifferentialGeometry.Analysis.Calculus.hadamardFactor (modelRoundCapGap ε r δ θ)
+      (r ^ 2 + 2 * ε) t
+
+theorem modelRoundCapGap_eq_factor {ε r δ θ : ℝ} (hθ : 0 < θ) (hδ : 0 < δ)
+    (hδr : δ < r ^ 2) (hθr : θ < r ^ 2) (t : ℝ) :
+    modelRoundCapGap ε r δ θ t = (r ^ 2 + 2 * ε - t) * modelRoundCapFactor ε r δ θ t := by
+  have hsq : 0 < r ^ 2 := lt_trans hθ hθr
+  have hr : r ≠ 0 := by
+    intro h
+    subst h
+    nlinarith
+  have hD : ContDiff ℝ (⊤ : ℕ∞) (modelRoundCapGap ε r δ θ) :=
+    contDiff_modelRoundCapGap hθ hδ hδr hθr
+  have hgap0 : modelRoundCapGap ε r δ θ (r ^ 2 + 2 * ε) = 0 := by
+    change smoothCap ε r δ (r ^ 2 + 2 * ε) -
+      modelLowerRoundBound ε r δ θ (r ^ 2 + 2 * ε) = 0
+    rw [smoothCap_eq_rSq_of_vertex, modelLowerRoundBound_eq_rSq_of_vertex hθ hr]
+    ring
+  have hhad := DifferentialGeometry.Analysis.Calculus.hadamard_factorization
+    (f := modelRoundCapGap ε r δ θ) hD
+    (a := r ^ 2 + 2 * ε) (x := t)
+  have hhad' : modelRoundCapGap ε r δ θ t =
+      (t - (r ^ 2 + 2 * ε)) * DifferentialGeometry.Analysis.Calculus.hadamardFactor
+        (modelRoundCapGap ε r δ θ) (r ^ 2 + 2 * ε) t := by
+    simpa [hgap0] using hhad
+  dsimp [modelRoundCapFactor]
+  rw [hhad']
+  ring
+
+theorem contDiff_modelRoundCapFactor {ε r δ θ : ℝ} (hθ : 0 < θ) (hδ : 0 < δ)
+    (hδr : δ < r ^ 2) (hθr : θ < r ^ 2) :
+    ContDiff ℝ (⊤ : ℕ∞) (modelRoundCapFactor ε r δ θ) := by
+  have hD : ContDiff ℝ (⊤ : ℕ∞) (modelRoundCapGap ε r δ θ) :=
+    contDiff_modelRoundCapGap hθ hδ hδr hθr
+  simpa [modelRoundCapFactor] using
+    (DifferentialGeometry.Analysis.Calculus.hadamardFactor_contDiff
+      (modelRoundCapGap ε r δ θ) hD (r ^ 2 + 2 * ε)).neg
+
+noncomputable def modelRoundCapQext (ε r δ θ : ℝ) (a b : ℝ) : ℝ :=
+  modelLowerRoundBound ε r δ θ ((2 * ε + r ^ 2 * b) * a) +
+    ((2 * ε + r ^ 2 * b) - (2 * ε + r ^ 2 * b) * a) *
+      modelRoundCapFactor ε r δ θ ((2 * ε + r ^ 2 * b) * a)
+
+theorem contDiff_modelRoundCapQext {ε r δ θ : ℝ} (hθ : 0 < θ) (hδ : 0 < δ)
+    (hδr : δ < r ^ 2) (hθr : θ < r ^ 2) :
+    ContDiff ℝ (⊤ : ℕ∞) (fun p : ℝ × ℝ => modelRoundCapQext ε r δ θ p.1 p.2) := by
+  have hinner : ContDiff ℝ (⊤ : ℕ∞) (fun p : ℝ × ℝ => (2 * ε + r ^ 2 * p.2) * p.1) := by
+    fun_prop
+  have hL : ContDiff ℝ (⊤ : ℕ∞)
+      (fun p : ℝ × ℝ => modelLowerRoundBound ε r δ θ ((2 * ε + r ^ 2 * p.2) * p.1)) :=
+    (contDiff_modelLowerRoundBound hθ hδ hδr hθr).comp hinner
+  have hH : ContDiff ℝ (⊤ : ℕ∞)
+      (fun p : ℝ × ℝ => modelRoundCapFactor ε r δ θ ((2 * ε + r ^ 2 * p.2) * p.1)) :=
+    (contDiff_modelRoundCapFactor hθ hδ hδr hθr).comp hinner
+  have hcoef : ContDiff ℝ (⊤ : ℕ∞)
+      (fun p : ℝ × ℝ => (2 * ε + r ^ 2 * p.2) - (2 * ε + r ^ 2 * p.2) * p.1) := by
+    fun_prop
+  dsimp [modelRoundCapQext]
+  exact hL.add (hcoef.mul hH)
+
+private theorem modelRoundCapInterp_denom_eq {ε r a b : ℝ} (hB : b * r ^ 2 + 2 * ε ≠ 0) :
+    (1 - a) + (1 - b) * (r ^ 2 / (r ^ 2 * b + 2 * ε)) =
+      (r ^ 2 + 2 * ε - (r ^ 2 * b + 2 * ε) * a) / (r ^ 2 * b + 2 * ε) := by
+  field_simp [hB]
+  ring
+
+theorem modelRoundCapQeq_Qext {ε r δ θ : ℝ} (hε : 0 < ε) (hθ : 0 < θ)
+    (hδ : 0 < δ) (hδr : δ < r ^ 2) (hθr : θ < r ^ 2) {a b : ℝ}
+    (ha1 : a ≤ 1) (hb0 : 0 ≤ b) (hb1 : b ≤ 1) :
+    modelRoundCapQ ε r δ θ a b = modelRoundCapQext ε r δ θ a b := by
+  by_cases ha : a = 1
+  · have hq := modelRoundCapQ_eq_lowerBound_of_eq_one (ε := ε) (r := r) (δ := δ) (θ := θ)
+      (a := a) (b := b) ha
+    rw [hq]
+    dsimp [modelRoundCapQext]
+    rw [ha]
+    simp
+  · have ha_lt : a < 1 := lt_of_le_of_ne ha1 ha
+    let B : ℝ := 2 * ε + r ^ 2 * b
+    let t : ℝ := (2 * ε + r ^ 2 * b) * a
+    let T : ℝ := r ^ 2 + 2 * ε
+    have hBpos : 0 < B := by
+      dsimp [B]
+      nlinarith [hε, hb0, sq_nonneg r]
+    have hBne : B ≠ 0 := ne_of_gt hBpos
+    have hBle : B ≤ T := by
+      dsimp [B, T]
+      nlinarith [hb1]
+    have ht_lt : t < T := by
+      dsimp [t, T]
+      nlinarith [ha_lt, hBpos, hBle]
+    have htne : t ≠ T := ne_of_lt ht_lt
+    have hTtne : T - t ≠ 0 := by
+      intro h
+      have h' : t = T := by linarith
+      exact htne h'
+    have hdenom : (1 - a) + (1 - b) * (r ^ 2 / B) = (T - t) / B := by
+      have hB' : b * r ^ 2 + 2 * ε ≠ 0 := by
+        intro h
+        apply hBne
+        dsimp [B]
+        nlinarith
+      dsimp [B, t, T]
+      rw [add_comm (2 * ε) (r ^ 2 * b)]
+      exact modelRoundCapInterp_denom_eq (ε := ε) (r := r) (a := a) (b := b) hB'
+    have hQ : modelRoundCapQ ε r δ θ a b =
+        modelLowerRoundBound ε r δ θ t + modelRoundCapInterp ε r a b * modelRoundCapGap ε r δ θ t := by
+      dsimp [modelRoundCapQ, modelRoundCapGap, t]
+      ring
+    have hgap : modelRoundCapGap ε r δ θ t = (T - t) * modelRoundCapFactor ε r δ θ t := by
+      dsimp [T]
+      exact modelRoundCapGap_eq_factor hθ hδ hδr hθr t
+    have hmain : modelRoundCapQ ε r δ θ a b =
+        modelLowerRoundBound ε r δ θ t + (B - B * a) * modelRoundCapFactor ε r δ θ t := by
+      calc
+        modelRoundCapQ ε r δ θ a b
+            = modelLowerRoundBound ε r δ θ t +
+                modelRoundCapInterp ε r a b * modelRoundCapGap ε r δ θ t := hQ
+        _ = modelLowerRoundBound ε r δ θ t +
+              modelRoundCapInterp ε r a b * ((T - t) * modelRoundCapFactor ε r δ θ t) := by
+                rw [hgap]
+        _ = modelLowerRoundBound ε r δ θ t +
+              (B - B * a) * modelRoundCapFactor ε r δ θ t := by
+                congr 1
+                dsimp [modelRoundCapInterp]
+                rw [show (1 - a) + (1 - b) * (r ^ 2 / (r ^ 2 * b + 2 * ε)) =
+                    (1 - a) + (1 - b) * (r ^ 2 / B) by
+                  dsimp [B]
+                  ring_nf]
+                rw [hdenom]
+                field_simp [hBne, hTtne]
+    rw [hmain]
+    rfl
+
+theorem contDiffOn_modelRoundCapQ_closed {ε r δ θ : ℝ} (hε : 0 < ε)
+    (hθ : 0 < θ) (hδ : 0 < δ) (hδr : δ < r ^ 2) (hθr : θ < r ^ 2) :
+    ContDiffOn ℝ (⊤ : ℕ∞) (fun p : ℝ × ℝ => modelRoundCapQ ε r δ θ p.1 p.2)
+      {p : ℝ × ℝ | 0 ≤ p.1 ∧ p.1 ≤ 1 ∧ 0 ≤ p.2 ∧ p.2 ≤ 1} := by
+  refine (contDiff_modelRoundCapQext (ε := ε) (r := r) (δ := δ) (θ := θ)
+    hθ hδ hδr hθr).contDiffOn.congr ?_
+  intro p hp
+  exact modelRoundCapQeq_Qext hε hθ hδ hδr hθr hp.2.1 hp.2.2.1 hp.2.2.2
 
 theorem modelLowerRoundBound_le_smoothCap {ε r δ θ t : ℝ} (hδ : 0 < δ) (hθ : 0 < θ)
     (hδr : δ < r ^ 2) (ht : 2 * ε < t) :
