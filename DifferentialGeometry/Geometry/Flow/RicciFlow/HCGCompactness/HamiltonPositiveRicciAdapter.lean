@@ -1122,6 +1122,31 @@ theorem ham3_limit_soln
   · simpa only [hcarrier] using hricciCont
   · simpa only [hcarrier] using hrm04Cont
 
+private theorem nablaK_restrict
+    {D D' : DifferentialGeometry.Integral.Connection.RealTimeInterval}
+    (S : DifferentialGeometry.PDE.RicciFlow.SolutionOn (I := I) (M := M) D)
+    (k : Nat) (t : Real) (x : M) :
+    DifferentialGeometry.PDE.RicciFlow.nablaKRm04NormSqIntrinsic
+        (I := I) (S.timeRestrict D') k t x =
+      DifferentialGeometry.PDE.RicciFlow.nablaKRm04NormSqIntrinsic
+        (I := I) S k t x := by
+  have hfield :
+      DifferentialGeometry.PDE.RicciFlow.nablaKRm04Field
+          (I := I) (S.timeRestrict D') t k =
+        DifferentialGeometry.PDE.RicciFlow.nablaKRm04Field (I := I) S t k := by
+    induction k with
+    | zero => rfl
+    | succ k ih =>
+        rw [DifferentialGeometry.PDE.RicciFlow.nablaKRm04Field_succ,
+          DifferentialGeometry.PDE.RicciFlow.nablaKRm04Field_succ, ih]
+        simp only [
+          DifferentialGeometry.PDE.RicciFlow.SolutionOn.family_connection,
+          DifferentialGeometry.PDE.RicciFlow.SolutionOn.timeRestrict_base]
+  unfold DifferentialGeometry.PDE.RicciFlow.nablaKRm04NormSqIntrinsic
+  rw [hfield]
+  simp only [
+    DifferentialGeometry.PDE.RicciFlow.SolutionOn.timeRestrict_base]
+
 def cghToHam3
     (X : PointedFlowSeq.{u, uE, uH} (I := I))
     (origIndex : Nat -> Nat) (horig : StrictMono origIndex)
