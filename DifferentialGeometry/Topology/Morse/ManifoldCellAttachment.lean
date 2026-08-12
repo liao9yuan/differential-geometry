@@ -15741,6 +15741,51 @@ noncomputable def morseHandleAdjunctionCellPushedChart {m k : ℕ} (hk : k ≤ m
     exact continuousOn_iff_continuous_restrict.mpr hmain
 
 
+noncomputable def morseAttachingEmbeddingInverse {m k : ℕ} (hk : k ≤ m + 1) (c ε r : ℝ)
+    {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M] [ChartedSpace H M] [T2Space M]
+    {I : ModelWithCorners ℝ (MorseModel (m + 1)) H} {f : M → ℝ}
+    (data : MorseChart (m + 1) k hk c I f)
+    (hε : 0 < ε) (hεr : Real.sqrt (2 * ε + 2 * r ^ 2) ≤ data.R)
+    (x : SublevelSpace f (c - ε))
+    (hx : x ∈ Set.range (morseAttachingEmbedding hk c ε r data hε hεr)) :
+    AttachingRegion k (m + 1 - k) :=
+  Classical.choose hx
+
+theorem morseAttachingEmbeddingInverse_spec {m k : ℕ} (hk : k ≤ m + 1) (c ε r : ℝ)
+    {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M] [ChartedSpace H M] [T2Space M]
+    {I : ModelWithCorners ℝ (MorseModel (m + 1)) H} {f : M → ℝ}
+    (data : MorseChart (m + 1) k hk c I f)
+    (hε : 0 < ε) (hεr : Real.sqrt (2 * ε + 2 * r ^ 2) ≤ data.R)
+    (x : SublevelSpace f (c - ε))
+    (hx : x ∈ Set.range (morseAttachingEmbedding hk c ε r data hε hεr)) :
+    morseAttachingEmbedding hk c ε r data hε hεr (morseAttachingEmbeddingInverse hk c ε r data hε hεr x hx) = x :=
+  Classical.choose_spec hx
+
+theorem morseHandleAdjunction_attachingCell_eq_lower {m k : ℕ} (hk : k ≤ m + 1) (c ε r : ℝ)
+    {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M] [ChartedSpace H M] [T2Space M]
+    {I : ModelWithCorners ℝ (MorseModel (m + 1)) H} {f : M → ℝ}
+    (data : MorseChart (m + 1) k hk c I f)
+    (hε : 0 < ε) (hεr : Real.sqrt (2 * ε + 2 * r ^ 2) ≤ data.R)
+    (x : SublevelSpace f (c - ε))
+    (hx : x ∈ Set.range (morseAttachingEmbedding hk c ε r data hε hεr)) :
+    Handle.cell (morseAttachingEmbedding hk c ε r data hε hεr)
+      (attachingInclusion k (m + 1 - k) (morseAttachingEmbeddingInverse hk c ε r data hε hεr x hx)) =
+    Handle.lower (morseAttachingEmbedding hk c ε r data hε hεr) x := by
+  have hφ : morseAttachingEmbedding hk c ε r data hε hεr
+      (morseAttachingEmbeddingInverse hk c ε r data hε hεr x hx) = x :=
+    morseAttachingEmbeddingInverse_spec hk c ε r data hε hεr x hx
+  calc
+    Handle.cell (morseAttachingEmbedding hk c ε r data hε hεr)
+        (attachingInclusion k (m + 1 - k) (morseAttachingEmbeddingInverse hk c ε r data hε hεr x hx)) =
+        Handle.lower (morseAttachingEmbedding hk c ε r data hε hεr)
+          (morseAttachingEmbedding hk c ε r data hε hεr
+            (morseAttachingEmbeddingInverse hk c ε r data hε hεr x hx)) :=
+      Handle.adjunction_coherence (morseAttachingEmbedding hk c ε r data hε hεr)
+        (morseAttachingEmbeddingInverse hk c ε r data hε hεr x hx)
+    _ = Handle.lower (morseAttachingEmbedding hk c ε r data hε hεr) x := by
+      rw [hφ]
+
+
 theorem morseHandleAdjunctionEquivRoundedSublevel_symm_rel_deep {m k : ℕ} (hk : k ≤ m + 1)
     (c ε r δ R₀ R₁ η : ℝ) {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M]
     [ChartedSpace H M] [T2Space M]
