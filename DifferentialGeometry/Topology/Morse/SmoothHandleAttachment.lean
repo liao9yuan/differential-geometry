@@ -1216,6 +1216,91 @@ theorem contMDiff_morseRoundedSublevelFamily {m k : ℕ} (hk : k ≤ m + 1) (c �
         q.2 * (f q.1 - (c + ε))) :=
     hterm₁.add hterm₂
   simpa [morseRoundedSublevelFamily] using hsum
+
+theorem isCompact_morseRoundedSublevelFamily_strip {m k : ℕ} (hk : k ≤ m + 1)
+    (c ε r δ R₀ R₁ R₁' a : ℝ) {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M]
+    [ChartedSpace H M] [T2Space M]
+    {I : ModelWithCorners ℝ (MorseModel (m + 1)) H} [I.Boundaryless]
+    [IsManifold I (⊤ : WithTop ℕ∞) M] {f : M → ℝ}
+    (data : MorseChart (m + 1) k hk c I f)
+    (hf : ContMDiff I 𝓘(ℝ, ℝ) (↑(⊤ : ℕ∞) : WithTop ℕ∞) f)
+    (ε₀ : ℝ) (hε : 0 < ε) (hR : R₀ < R₁) (hR0 : 0 ≤ R₀)
+    (hR₁₂ : R₁ < R₁') (hR₁₂R : R₁' ≤ data.R) (hR₁₂R' : R₁' ≤ data.R')
+    (haε : ε + 2 * ε₀ ≤ a)
+    (hcompact : IsCompact (f ⁻¹' Set.Icc (c - a) (c + a))) :
+    IsCompact {q : M × ℝ | |morseRoundedSublevelFamily hk c ε r δ R₀ R₁ data q.1 q.2| ≤ 2 * ε₀ ∧
+      q.2 ∈ Set.Icc 0 1} := by
+  classical
+  let F : M × ℝ → ℝ := fun q => morseRoundedSublevelFamily hk c ε r δ R₀ R₁ data q.1 q.2
+  have hFcont : Continuous F := by
+    dsimp [F]
+    exact (contMDiff_morseRoundedSublevelFamily hk c ε r δ R₀ R₁ R₁' data hf hR hR0 hR₁₂ hR₁₂R hR₁₂R').continuous
+  let A : Set (M × ℝ) := (data.χ '' {y : MorseModel (m + 1) | CellAttachment.morseNorm (m + 1) y ≤ R₁}) ×ˢ Set.Icc 0 1
+  let B : Set (M × ℝ) := (f ⁻¹' Set.Icc (c - a) (c + a)) ×ˢ Set.Icc 0 1
+  have hSclosed : IsClosed {q : M × ℝ | |F q| ≤ 2 * ε₀ ∧ q.2 ∈ Set.Icc 0 1} := by
+    have hle : IsClosed {q : M × ℝ | |F q| ≤ 2 * ε₀} := by
+      have hcont : Continuous (fun q : M × ℝ => |F q|) := continuous_abs.comp hFcont
+      exact isClosed_le hcont continuous_const
+    exact hle.inter (isClosed_Icc.preimage continuous_snd)
+  have hsub : {q : M × ℝ | |F q| ≤ 2 * ε₀ ∧ q.2 ∈ Set.Icc 0 1} ⊆ A ∪ B := by
+    intro q hq
+    by_cases hx : q.1 ∈ data.χ '' {y : MorseModel (m + 1) | CellAttachment.morseNorm (m + 1) y ≤ R₁}
+    · left
+      exact ⟨hx, hq.2⟩
+    · right
+      have hg : morseRoundedFunction hk c ε r δ R₀ R₁ data q.1 = f q.1 + ε :=
+        morseRoundedFunction_eq_f_add_eps_of_not_mem_closedBall hk c ε r δ R₀ R₁ data hx
+      have hFval : F q = f q.1 - c + ε * (1 - 2 * q.2) := by
+        dsimp [F, morseRoundedSublevelFamily]
+        rw [hg]
+        ring
+      have hb1 : |1 - 2 * q.2| ≤ 1 := by
+        rw [abs_le]
+        constructor <;> nlinarith [hq.2.1, hq.2.2]
+      have hb : |f q.1 - c| ≤ a := by
+        have hle : |f q.1 - c| ≤ |F q| + |ε * (1 - 2 * q.2)| := by
+          have hsub' : f q.1 - c = F q - ε * (1 - 2 * q.2) := by
+            rw [hFval]
+            ring
+          rw [hsub']
+          calc
+            |F q - ε * (1 - 2 * q.2)| ≤ |F q| + |ε * (1 - 2 * q.2)| := by
+              rw [sub_eq_add_neg]
+              simpa [abs_neg] using (abs_add_le (F q) (-(ε * (1 - 2 * q.2))) : |F q + (-(ε * (1 - 2 * q.2)))| ≤ |F q| + |-(ε * (1 - 2 * q.2))|)
+            _ = |F q| + |ε * (1 - 2 * q.2)| := rfl
+        have hεb : |ε * (1 - 2 * q.2)| ≤ ε := by
+          rw [abs_mul, abs_of_pos hε]
+          simpa using (mul_le_mul_of_nonneg_left hb1 (le_of_lt hε))
+        have hFb : |F q| ≤ 2 * ε₀ := by
+          change |morseRoundedSublevelFamily hk c ε r δ R₀ R₁ data q.1 q.2| ≤ 2 * ε₀
+          exact hq.1
+        exact le_trans hle (by nlinarith [hεb, hFb, haε])
+      have habs := abs_le.mp hb
+      exact ⟨⟨by nlinarith [habs.1], by nlinarith [habs.2]⟩, hq.2⟩
+  have hball : IsCompact {y : MorseModel (m + 1) | CellAttachment.morseNorm (m + 1) y ≤ R₁} := by
+    have hcl : IsClosed {y : MorseModel (m + 1) | CellAttachment.morseNorm (m + 1) y ≤ R₁} := by
+      have hcont : Continuous (fun y : MorseModel (m + 1) => CellAttachment.morseNorm (m + 1) y) := by
+        dsimp [CellAttachment.morseNorm]
+        exact continuous_norm.comp (PiLp.continuous_toLp (p := (2 : ENNReal)) (β := fun _ : Fin (m + 1) => ℝ))
+      exact isClosed_le hcont continuous_const
+    have hbdd : {y : MorseModel (m + 1) | CellAttachment.morseNorm (m + 1) y ≤ R₁} ⊆
+        Metric.closedBall (0 : MorseModel (m + 1)) R₁ := by
+      intro y hy
+      exact Metric.mem_closedBall.mpr (by
+        simpa [dist_eq_norm] using le_trans (CellAttachment.morseNorm_piNorm_le y) hy)
+    exact (isCompact_closedBall (0 : MorseModel (m + 1)) R₁).of_isClosed_subset hcl hbdd
+  have hA : IsCompact A := by
+    have hsrc : {y : MorseModel (m + 1) | CellAttachment.morseNorm (m + 1) y ≤ R₁} ⊆ data.χ.source := by
+      intro y hy
+      exact data.hχsrc y (le_trans hy (le_of_lt (lt_of_lt_of_le hR₁₂ hR₁₂R)))
+    have himg : IsCompact (data.χ '' {y : MorseModel (m + 1) | CellAttachment.morseNorm (m + 1) y ≤ R₁}) :=
+      hball.image_of_continuousOn (data.χ.continuousOn.mono hsrc)
+    dsimp [A]
+    exact himg.prod isCompact_Icc
+  have hB : IsCompact B := by
+    dsimp [B]
+    exact hcompact.prod isCompact_Icc
+  exact (hA.union hB).of_isClosed_subset hSclosed hsub
 end ManifoldCellAttachment
 
 end
