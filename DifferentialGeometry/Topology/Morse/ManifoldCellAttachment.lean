@@ -14330,7 +14330,7 @@ theorem constant_shift_criticalPoint {m : ℕ} {H : Type} [TopologicalSpace H] {
   simpa using hcrit
 
 
-theorem no_critical_morseSublevelIsotopyFamily {m k : ℕ} (hk : k ≤ m + 1)
+private theorem no_critical_morseSublevelIsotopyFamily {m k : ℕ} (hk : k ≤ m + 1)
     (c ε r δ R₀ R₁ R₁' : ℝ) {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M]
     [ChartedSpace H M] [T2Space M]
     {I : ModelWithCorners ℝ (MorseModel (m + 1)) H} [I.Boundaryless]
