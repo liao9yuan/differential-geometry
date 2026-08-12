@@ -8543,6 +8543,345 @@ theorem modelHandleRoundMap_injective {n k : ℕ} (hk : k ≤ n) (ε r δ θ : �
         exact modelHandleRoundMap_injective_of_eq hk ε r δ θ hε hδ hθ hδr hθr hr p p' h
           (by simpa [b, b'] using hb_eq)
 
+theorem modelRoundCapQ_pos_at_handle {ε r δ θ a b : ℝ} (hε : 0 < ε) (hδ : 0 < δ)
+    (hθ : 0 < θ) (hδr : δ < r ^ 2) (hθr : θ < r ^ 2) (hr : 0 < r) (ha0 : 0 ≤ a)
+    (ha1 : a < 1) (hb0 : 0 ≤ b) (hb1 : b ≤ 1) (hb : 0 < b) :
+    0 < modelRoundCapQ ε r δ θ a b := by
+  by_cases hb' : b < 1
+  · exact modelRoundCapQ_pos_of_b_pos hε hδ hθ hδr hθr hr ha0 (le_of_lt ha1) hb0 hb1 hb
+  · have hbeq : b = 1 := le_antisymm hb1 (le_of_not_gt hb')
+    have hane : a ≠ 1 := by linarith [ha1]
+    have hq := modelRoundCapQ_eq_smoothCap_of_eq_one (ε := ε) (r := r) (δ := δ) (θ := θ)
+      (a := a) (b := b) hbeq hane
+    rw [hq]
+    exact smoothCap_pos hδ hδr
+
+noncomputable def modelHandleRoundMapAmbient {n k : ℕ} (hk : k ≤ n) (ε r δ θ : ℝ)
+    (p : EuclideanSpace ℝ (Fin k) × EuclideanSpace ℝ (Fin (n - k))) : MorseModel n :=
+  recombine hk
+    (Real.sqrt (2 * ε + r ^ 2 * ‖p.2‖ ^ 2) • p.1)
+    ((Real.sqrt (modelRoundCapQ ε r δ θ (‖p.1‖ ^ 2) (‖p.2‖ ^ 2)) / ‖p.2‖) • p.2)
+
+theorem modelHandleRoundMap_eq_ambient {n k : ℕ} (hk : k ≤ n) (ε r δ θ : ℝ)
+    (p : StandardHandle k (n - k)) :
+    modelHandleRoundMap hk ε r δ θ p =
+      modelHandleRoundMapAmbient hk ε r δ θ
+        (⟨(p.1 : EuclideanSpace ℝ (Fin k)), (p.2 : EuclideanSpace ℝ (Fin (n - k)))⟩) := by
+  rfl
+
+theorem contDiffOn_modelHandleRoundMap_ambient {n k : ℕ} (hk : k ≤ n) (ε r δ θ : ℝ)
+    (hε : 0 < ε) (hδ : 0 < δ) (hθ : 0 < θ) (hδr : δ < r ^ 2) (hθr : θ < r ^ 2) (hr : 0 < r) :
+    ContDiffOn ℝ (⊤ : ℕ∞) (modelHandleRoundMapAmbient hk ε r δ θ)
+      {p : EuclideanSpace ℝ (Fin k) × EuclideanSpace ℝ (Fin (n - k)) |
+        ‖p.1‖ < 1 ∧ ‖p.2‖ < 1} := by
+  let S₀ : Set (EuclideanSpace ℝ (Fin k) × EuclideanSpace ℝ (Fin (n - k))) :=
+    {p : EuclideanSpace ℝ (Fin k) × EuclideanSpace ℝ (Fin (n - k)) | ‖p.1‖ < 1 ∧ ‖p.2‖ < 1}
+  let S₁ : Set (EuclideanSpace ℝ (Fin k) × EuclideanSpace ℝ (Fin (n - k))) :=
+    {p : EuclideanSpace ℝ (Fin k) × EuclideanSpace ℝ (Fin (n - k)) |
+      ‖p.1‖ < 1 ∧ 0 < ‖p.2‖ ∧ ‖p.2‖ < 1}
+  let S₂ : Set (EuclideanSpace ℝ (Fin k) × EuclideanSpace ℝ (Fin (n - k))) :=
+    {p : EuclideanSpace ℝ (Fin k) × EuclideanSpace ℝ (Fin (n - k)) | ‖p.1‖ < 1 ∧
+      ‖p.2‖ ^ 2 < 1 - δ / r ^ 2 ∧ ‖p.2‖ ^ 2 < 1 - θ / r ^ 2}
+  have hA : ContDiff ℝ (⊤ : ℕ∞) (fun x : EuclideanSpace ℝ (Fin k) => ‖x‖ ^ 2) := by
+    rw [show (fun x : EuclideanSpace ℝ (Fin k) => ‖x‖ ^ 2) =
+        fun x : EuclideanSpace ℝ (Fin k) => ∑ i : Fin k, (x i) ^ 2 by
+      funext x
+      exact EuclideanSpace.real_norm_sq_eq x]
+    fun_prop
+  have hB : ContDiff ℝ (⊤ : ℕ∞) (fun y : EuclideanSpace ℝ (Fin (n - k)) => ‖y‖ ^ 2) := by
+    rw [show (fun y : EuclideanSpace ℝ (Fin (n - k)) => ‖y‖ ^ 2) =
+        fun y : EuclideanSpace ℝ (Fin (n - k)) => ∑ j : Fin (n - k), (y j) ^ 2 by
+      funext y
+      exact EuclideanSpace.real_norm_sq_eq y]
+    fun_prop
+  have hAOn : ContDiffOn ℝ (⊤ : ℕ∞)
+      (fun p : EuclideanSpace ℝ (Fin k) × EuclideanSpace ℝ (Fin (n - k)) => ‖p.1‖ ^ 2) Set.univ :=
+    hA.comp (by fun_prop : ContDiff ℝ (⊤ : ℕ∞)
+      (fun p : EuclideanSpace ℝ (Fin k) × EuclideanSpace ℝ (Fin (n - k)) => p.1)) |>.contDiffOn
+  have hBOn : ContDiffOn ℝ (⊤ : ℕ∞)
+      (fun p : EuclideanSpace ℝ (Fin k) × EuclideanSpace ℝ (Fin (n - k)) => ‖p.2‖ ^ 2) Set.univ :=
+    hB.comp (by fun_prop : ContDiff ℝ (⊤ : ℕ∞)
+      (fun p : EuclideanSpace ℝ (Fin k) × EuclideanSpace ℝ (Fin (n - k)) => p.2)) |>.contDiffOn
+  have hpairOn : ContDiffOn ℝ (⊤ : ℕ∞)
+      (Prod.map (fun x : EuclideanSpace ℝ (Fin k) => ‖x‖ ^ 2)
+        (fun y : EuclideanSpace ℝ (Fin (n - k)) => ‖y‖ ^ 2)) Set.univ :=
+    ContDiff.prodMap hA hB |>.contDiffOn
+  have hpair : ContDiffOn ℝ (⊤ : ℕ∞)
+      (fun p : EuclideanSpace ℝ (Fin k) × EuclideanSpace ℝ (Fin (n - k)) =>
+        (‖p.1‖ ^ 2, ‖p.2‖ ^ 2)) S₁ := by
+    change ContDiffOn ℝ (⊤ : ℕ∞)
+      (Prod.map (fun x : EuclideanSpace ℝ (Fin k) => ‖x‖ ^ 2)
+        (fun y : EuclideanSpace ℝ (Fin (n - k)) => ‖y‖ ^ 2)) S₁
+    exact hpairOn.mono (by intro p hp; trivial)
+  have hsq₁ : ∀ p ∈ S₁, ‖p.1‖ ^ 2 < 1 := by
+    intro p hp
+    rcases hp with ⟨hpu, hpv₀, hpv₁⟩
+    have hneg : (-1 : ℝ) < ‖p.1‖ := lt_of_lt_of_le (by norm_num) (norm_nonneg _)
+    simpa using sq_lt_sq' hneg hpu
+  have hsq₂ : ∀ p ∈ S₁, ‖p.2‖ ^ 2 < 1 := by
+    intro p hp
+    rcases hp with ⟨hpu, hpv₀, hpv₁⟩
+    have hneg : (-1 : ℝ) < ‖p.2‖ := lt_of_lt_of_le (by norm_num) (norm_nonneg _)
+    simpa using sq_lt_sq' hneg hpv₁
+  have hq : ContDiffOn ℝ (⊤ : ℕ∞)
+      (fun p : EuclideanSpace ℝ (Fin k) × EuclideanSpace ℝ (Fin (n - k)) =>
+        modelRoundCapQ ε r δ θ (‖p.1‖ ^ 2) (‖p.2‖ ^ 2)) S₁ := by
+    refine (contDiffOn_modelRoundCapQ_handle hε hr hθ hδ hδr hθr).comp
+      (s := S₁) (t := {q : ℝ × ℝ | q.1 < 1 ∧ 0 ≤ q.2 ∧ q.2 ≤ 1})
+      hpair
+      (by
+        intro p hp
+        rcases hp with ⟨hpu, hpv₀, hpv₁⟩
+        exact ⟨hsq₁ p ⟨hpu, hpv₀, hpv₁⟩, sq_nonneg (‖p.2‖ : ℝ),
+          le_of_lt (hsq₂ p ⟨hpu, hpv₀, hpv₁⟩)⟩)
+  have hqpos₁ : ∀ p ∈ S₁, modelRoundCapQ ε r δ θ (‖p.1‖ ^ 2) (‖p.2‖ ^ 2) ≠ 0 := by
+    intro p hp
+    have ha0 : 0 ≤ ‖p.1‖ ^ 2 := sq_nonneg _
+    have ha1 : ‖p.1‖ ^ 2 < 1 := hsq₁ p hp
+    have hb0 : 0 ≤ ‖p.2‖ ^ 2 := sq_nonneg _
+    have hb1 : ‖p.2‖ ^ 2 ≤ 1 := le_of_lt (hsq₂ p hp)
+    have hb : 0 < ‖p.2‖ ^ 2 := by
+      rcases hp with ⟨hpu, hpv₀, hpv₁⟩
+      exact sq_pos_of_pos hpv₀
+    exact ne_of_gt (modelRoundCapQ_pos_at_handle hε hδ hθ hδr hθr hr ha0 ha1 hb0 hb1 hb)
+  have hsqrt₁ : ContDiffOn ℝ (⊤ : ℕ∞)
+      (fun p : EuclideanSpace ℝ (Fin k) × EuclideanSpace ℝ (Fin (n - k)) =>
+        Real.sqrt (modelRoundCapQ ε r δ θ (‖p.1‖ ^ 2) (‖p.2‖ ^ 2))) S₁ :=
+    hq.sqrt hqpos₁
+  have hnorm₂ : ContDiffOn ℝ (⊤ : ℕ∞)
+      (fun p : EuclideanSpace ℝ (Fin k) × EuclideanSpace ℝ (Fin (n - k)) => ‖p.2‖) S₁ := by
+    have hcont₂ : ContDiffOn ℝ (⊤ : ℕ∞)
+        (fun p : EuclideanSpace ℝ (Fin k) × EuclideanSpace ℝ (Fin (n - k)) => p.2) S₁ := by
+      fun_prop
+    refine ContDiffOn.norm ℝ hcont₂ ?_
+    intro p hp
+    rcases hp with ⟨hpu, hpv₀, hpv₁⟩
+    exact (norm_ne_zero_iff.mp (ne_of_gt hpv₀))
+  have hdiv₁ : ContDiffOn ℝ (⊤ : ℕ∞)
+      (fun p : EuclideanSpace ℝ (Fin k) × EuclideanSpace ℝ (Fin (n - k)) =>
+        Real.sqrt (modelRoundCapQ ε r δ θ (‖p.1‖ ^ 2) (‖p.2‖ ^ 2)) / ‖p.2‖) S₁ :=
+    hsqrt₁.div hnorm₂ (by
+      intro p hp
+      rcases hp with ⟨hpu, hpv₀, hpv₁⟩
+      exact ne_of_gt hpv₀)
+  have hsqrtArg : ContDiffOn ℝ (⊤ : ℕ∞)
+      (fun p : EuclideanSpace ℝ (Fin k) × EuclideanSpace ℝ (Fin (n - k)) =>
+        Real.sqrt (2 * ε + r ^ 2 * ‖p.2‖ ^ 2)) S₁ := by
+    have harg : ContDiffOn ℝ (⊤ : ℕ∞)
+        (fun p : EuclideanSpace ℝ (Fin k) × EuclideanSpace ℝ (Fin (n - k)) =>
+          2 * ε + r ^ 2 * ‖p.2‖ ^ 2) S₁ :=
+      (contDiff_const : ContDiff ℝ (⊤ : ℕ∞)
+        (fun _p : EuclideanSpace ℝ (Fin k) × EuclideanSpace ℝ (Fin (n - k)) => 2 * ε)).contDiffOn.add
+        ((contDiff_const : ContDiff ℝ (⊤ : ℕ∞)
+          (fun _p : EuclideanSpace ℝ (Fin k) × EuclideanSpace ℝ (Fin (n - k)) => r ^ 2)).contDiffOn.mul
+          (hBOn.mono (by intro p hp; trivial)))
+    exact harg.sqrt (by
+      intro p hp
+      have hpos : 0 < 2 * ε + r ^ 2 * ‖p.2‖ ^ 2 := by nlinarith [hε, sq_nonneg (‖p.2‖ : ℝ)]
+      exact ne_of_gt hpos)
+  have hS₁ : ContDiffOn ℝ (⊤ : ℕ∞) (modelHandleRoundMapAmbient hk ε r δ θ) S₁ := by
+    have hmain : ContDiffOn ℝ (⊤ : ℕ∞)
+        (fun p : EuclideanSpace ℝ (Fin k) × EuclideanSpace ℝ (Fin (n - k)) =>
+          recombine hk (Real.sqrt (2 * ε + r ^ 2 * ‖p.2‖ ^ 2) • p.1)
+            ((Real.sqrt (modelRoundCapQ ε r δ θ (‖p.1‖ ^ 2) (‖p.2‖ ^ 2)) / ‖p.2‖) • p.2)) S₁ := by
+      rw [contDiffOn_pi]
+      intro i
+      by_cases hi : i.val < k
+      · have hcoord : (fun p : EuclideanSpace ℝ (Fin k) × EuclideanSpace ℝ (Fin (n - k)) =>
+            recombine hk (Real.sqrt (2 * ε + r ^ 2 * ‖p.2‖ ^ 2) • p.1)
+              ((Real.sqrt (modelRoundCapQ ε r δ θ (‖p.1‖ ^ 2) (‖p.2‖ ^ 2)) / ‖p.2‖) • p.2) i) =
+            fun p : EuclideanSpace ℝ (Fin k) × EuclideanSpace ℝ (Fin (n - k)) =>
+              Real.sqrt (2 * ε + r ^ 2 * ‖p.2‖ ^ 2) * p.1 ⟨i.val, hi⟩ := by
+          funext p
+          change (recombine hk (Real.sqrt (2 * ε + r ^ 2 * ‖p.2‖ ^ 2) • p.1)
+            ((Real.sqrt (modelRoundCapQ ε r δ θ (‖p.1‖ ^ 2) (‖p.2‖ ^ 2)) / ‖p.2‖) • p.2)) i =
+            Real.sqrt (2 * ε + r ^ 2 * ‖p.2‖ ^ 2) * p.1 ⟨i.val, hi⟩
+          have hneq : i = negIdx hk ⟨i.val, hi⟩ := by
+            apply Fin.ext
+            rfl
+          conv_lhs => rw [hneq]
+          rw [recombine_negPart hk (Real.sqrt (2 * ε + r ^ 2 * ‖p.2‖ ^ 2) • p.1)
+            ((Real.sqrt (modelRoundCapQ ε r δ θ (‖p.1‖ ^ 2) (‖p.2‖ ^ 2)) / ‖p.2‖) • p.2)
+            ⟨i.val, hi⟩]
+          rfl
+        rw [hcoord]
+        exact hsqrtArg.mul (by fun_prop : ContDiffOn ℝ (⊤ : ℕ∞)
+          (fun p : EuclideanSpace ℝ (Fin k) × EuclideanSpace ℝ (Fin (n - k)) =>
+            p.1 ⟨i.val, hi⟩) S₁)
+      · have hi' : i.val - k < n - k := by omega
+        have hcoord : (fun p : EuclideanSpace ℝ (Fin k) × EuclideanSpace ℝ (Fin (n - k)) =>
+            recombine hk (Real.sqrt (2 * ε + r ^ 2 * ‖p.2‖ ^ 2) • p.1)
+              ((Real.sqrt (modelRoundCapQ ε r δ θ (‖p.1‖ ^ 2) (‖p.2‖ ^ 2)) / ‖p.2‖) • p.2) i) =
+            fun p : EuclideanSpace ℝ (Fin k) × EuclideanSpace ℝ (Fin (n - k)) =>
+              (Real.sqrt (modelRoundCapQ ε r δ θ (‖p.1‖ ^ 2) (‖p.2‖ ^ 2)) / ‖p.2‖) *
+                p.2 ⟨i.val - k, hi'⟩ := by
+          funext p
+          change (recombine hk (Real.sqrt (2 * ε + r ^ 2 * ‖p.2‖ ^ 2) • p.1)
+            ((Real.sqrt (modelRoundCapQ ε r δ θ (‖p.1‖ ^ 2) (‖p.2‖ ^ 2)) / ‖p.2‖) • p.2)) i =
+            (Real.sqrt (modelRoundCapQ ε r δ θ (‖p.1‖ ^ 2) (‖p.2‖ ^ 2)) / ‖p.2‖) *
+              p.2 ⟨i.val - k, hi'⟩
+          have hneq : i = posIdx hk ⟨i.val - k, hi'⟩ := by
+            apply Fin.ext
+            dsimp [posIdx]
+            omega
+          conv_lhs => rw [hneq]
+          rw [recombine_posPart hk (Real.sqrt (2 * ε + r ^ 2 * ‖p.2‖ ^ 2) • p.1)
+            ((Real.sqrt (modelRoundCapQ ε r δ θ (‖p.1‖ ^ 2) (‖p.2‖ ^ 2)) / ‖p.2‖) • p.2)
+            ⟨i.val - k, hi'⟩]
+          rfl
+        rw [hcoord]
+        exact hdiv₁.mul (by fun_prop : ContDiffOn ℝ (⊤ : ℕ∞)
+          (fun p : EuclideanSpace ℝ (Fin k) × EuclideanSpace ℝ (Fin (n - k)) =>
+            p.2 ⟨i.val - k, hi'⟩) S₁)
+    exact ContDiffOn.congr (f := fun p : EuclideanSpace ℝ (Fin k) × EuclideanSpace ℝ (Fin (n - k)) =>
+      recombine hk (Real.sqrt (2 * ε + r ^ 2 * ‖p.2‖ ^ 2) • p.1)
+        ((Real.sqrt (modelRoundCapQ ε r δ θ (‖p.1‖ ^ 2) (‖p.2‖ ^ 2)) / ‖p.2‖) • p.2))
+      (s := S₁) hmain (by
+        intro p hp
+        rfl)
+  have hsqrtArg₂ : ContDiffOn ℝ (⊤ : ℕ∞)
+      (fun p : EuclideanSpace ℝ (Fin k) × EuclideanSpace ℝ (Fin (n - k)) =>
+        Real.sqrt (2 * ε + r ^ 2 * ‖p.2‖ ^ 2)) S₂ := by
+    have harg : ContDiffOn ℝ (⊤ : ℕ∞)
+        (fun p : EuclideanSpace ℝ (Fin k) × EuclideanSpace ℝ (Fin (n - k)) =>
+          2 * ε + r ^ 2 * ‖p.2‖ ^ 2) S₂ :=
+      (contDiff_const : ContDiff ℝ (⊤ : ℕ∞)
+        (fun _p : EuclideanSpace ℝ (Fin k) × EuclideanSpace ℝ (Fin (n - k)) => 2 * ε)).contDiffOn.add
+        ((contDiff_const : ContDiff ℝ (⊤ : ℕ∞)
+          (fun _p : EuclideanSpace ℝ (Fin k) × EuclideanSpace ℝ (Fin (n - k)) => r ^ 2)).contDiffOn.mul
+          (hBOn.mono (by intro p hp; trivial)))
+    exact harg.sqrt (by
+      intro p hp
+      have hpos : 0 < 2 * ε + r ^ 2 * ‖p.2‖ ^ 2 := by nlinarith [hε, sq_nonneg (‖p.2‖ : ℝ)]
+      exact ne_of_gt hpos)
+  have hS₂ : ContDiffOn ℝ (⊤ : ℕ∞) (modelHandleRoundMapAmbient hk ε r δ θ) S₂ := by
+    have hmain : ContDiffOn ℝ (⊤ : ℕ∞)
+        (fun p : EuclideanSpace ℝ (Fin k) × EuclideanSpace ℝ (Fin (n - k)) =>
+          recombine hk (Real.sqrt (2 * ε + r ^ 2 * ‖p.2‖ ^ 2) • p.1) (r • p.2)) S₂ := by
+      rw [contDiffOn_pi]
+      intro i
+      by_cases hi : i.val < k
+      · have hcoord : (fun p : EuclideanSpace ℝ (Fin k) × EuclideanSpace ℝ (Fin (n - k)) =>
+            recombine hk (Real.sqrt (2 * ε + r ^ 2 * ‖p.2‖ ^ 2) • p.1) (r • p.2) i) =
+            fun p : EuclideanSpace ℝ (Fin k) × EuclideanSpace ℝ (Fin (n - k)) =>
+              Real.sqrt (2 * ε + r ^ 2 * ‖p.2‖ ^ 2) * p.1 ⟨i.val, hi⟩ := by
+          funext p
+          change (recombine hk (Real.sqrt (2 * ε + r ^ 2 * ‖p.2‖ ^ 2) • p.1) (r • p.2)) i =
+            Real.sqrt (2 * ε + r ^ 2 * ‖p.2‖ ^ 2) * p.1 ⟨i.val, hi⟩
+          have hneq : i = negIdx hk ⟨i.val, hi⟩ := by
+            apply Fin.ext
+            rfl
+          conv_lhs => rw [hneq]
+          rw [recombine_negPart hk (Real.sqrt (2 * ε + r ^ 2 * ‖p.2‖ ^ 2) • p.1) (r • p.2)
+            ⟨i.val, hi⟩]
+          rfl
+        rw [hcoord]
+        exact hsqrtArg₂.mul (by fun_prop : ContDiffOn ℝ (⊤ : ℕ∞)
+          (fun p : EuclideanSpace ℝ (Fin k) × EuclideanSpace ℝ (Fin (n - k)) =>
+            p.1 ⟨i.val, hi⟩) S₂)
+      · have hi' : i.val - k < n - k := by omega
+        have hcoord : (fun p : EuclideanSpace ℝ (Fin k) × EuclideanSpace ℝ (Fin (n - k)) =>
+            recombine hk (Real.sqrt (2 * ε + r ^ 2 * ‖p.2‖ ^ 2) • p.1) (r • p.2) i) =
+            fun p : EuclideanSpace ℝ (Fin k) × EuclideanSpace ℝ (Fin (n - k)) =>
+              r * p.2 ⟨i.val - k, hi'⟩ := by
+          funext p
+          change (recombine hk (Real.sqrt (2 * ε + r ^ 2 * ‖p.2‖ ^ 2) • p.1) (r • p.2)) i =
+            r * p.2 ⟨i.val - k, hi'⟩
+          have hneq : i = posIdx hk ⟨i.val - k, hi'⟩ := by
+            apply Fin.ext
+            dsimp [posIdx]
+            omega
+          conv_lhs => rw [hneq]
+          rw [recombine_posPart hk (Real.sqrt (2 * ε + r ^ 2 * ‖p.2‖ ^ 2) • p.1) (r • p.2)
+            ⟨i.val - k, hi'⟩]
+          rfl
+        rw [hcoord]
+        exact (contDiff_const : ContDiff ℝ (⊤ : ℕ∞)
+          (fun _p : EuclideanSpace ℝ (Fin k) × EuclideanSpace ℝ (Fin (n - k)) => r)).contDiffOn.mul
+          (by fun_prop : ContDiffOn ℝ (⊤ : ℕ∞)
+            (fun p : EuclideanSpace ℝ (Fin k) × EuclideanSpace ℝ (Fin (n - k)) =>
+              p.2 ⟨i.val - k, hi'⟩) S₂)
+    refine ContDiffOn.congr (f := fun p : EuclideanSpace ℝ (Fin k) × EuclideanSpace ℝ (Fin (n - k)) =>
+      recombine hk (Real.sqrt (2 * ε + r ^ 2 * ‖p.2‖ ^ 2) • p.1) (r • p.2))
+      (s := S₂) hmain ?_
+    intro p hp
+    rcases hp with ⟨hpu, hbδ, hbθ⟩
+    have hneg : (-1 : ℝ) < ‖p.1‖ := lt_of_lt_of_le (by norm_num) (norm_nonneg _)
+    have hle : ‖p.1‖ ^ 2 < 1 := by simpa using sq_lt_sq' hneg hpu
+    have hqflat : modelRoundCapQ ε r δ θ (‖p.1‖ ^ 2) (‖p.2‖ ^ 2) = r ^ 2 * ‖p.2‖ ^ 2 := by
+      refine modelRoundCapQ_eq_r2b_of_flat hε hδ hθ hδr hr ?_ ?_ hbδ hbθ
+      · nlinarith [sq_nonneg (‖p.1‖ : ℝ)]
+      · exact sq_nonneg (‖p.2‖ : ℝ)
+    have hposEq : (Real.sqrt (modelRoundCapQ ε r δ θ (‖p.1‖ ^ 2) (‖p.2‖ ^ 2)) / ‖p.2‖) • p.2 = r • p.2 := by
+      by_cases hv : p.2 = 0
+      · simp [hv]
+      · have hnorm_ne : ‖p.2‖ ≠ 0 := norm_ne_zero_iff.mpr hv
+        have hsqrt : Real.sqrt (r ^ 2 * ‖p.2‖ ^ 2) = r * ‖p.2‖ := by
+          have hrew : (r * ‖p.2‖) ^ 2 = r ^ 2 * ‖p.2‖ ^ 2 := by ring
+          have hsq : Real.sqrt ((r * ‖p.2‖) ^ 2) = |r * ‖p.2‖| := Real.sqrt_sq_eq_abs _
+          rw [← hrew]
+          rw [hsq]
+          rw [abs_of_nonneg (mul_nonneg (le_of_lt hr) (norm_nonneg _))]
+        have hmain : Real.sqrt (modelRoundCapQ ε r δ θ (‖p.1‖ ^ 2) (‖p.2‖ ^ 2)) / ‖p.2‖ = r := by
+          rw [hqflat, hsqrt]
+          field_simp [hnorm_ne]
+        rw [hmain]
+    dsimp [modelHandleRoundMapAmbient]
+    rw [hposEq]
+  have hcover₁ : ∀ p ∈ S₀, p ∈ S₁ → S₁ ∈ nhds p := by
+    intro p hp hps₁
+    rcases hps₁ with ⟨hpu, hpv₀, hpv₁⟩
+    have hnorm₁ : Continuous (fun x : EuclideanSpace ℝ (Fin k) => ‖x‖) := continuous_norm
+    have hnorm₂ : Continuous (fun y : EuclideanSpace ℝ (Fin (n - k)) => ‖y‖) := continuous_norm
+    have hopen₁ : IsOpen S₁ := by
+      dsimp [S₁]
+      exact ((IsOpen.preimage (hnorm₁.comp continuous_fst) isOpen_Iio).inter
+        ((IsOpen.preimage (hnorm₂.comp continuous_snd) isOpen_Ioi).inter
+          (IsOpen.preimage (hnorm₂.comp continuous_snd) isOpen_Iio)))
+    exact hopen₁.mem_nhds ⟨hpu, hpv₀, hpv₁⟩
+  have hcover₂ : ∀ p ∈ S₀, p ∈ S₂ → S₂ ∈ nhds p := by
+    intro p hp hps₂
+    rcases hps₂ with ⟨hpu, hbδ, hbθ⟩
+    have hnorm₁ : Continuous (fun x : EuclideanSpace ℝ (Fin k) => ‖x‖) := continuous_norm
+    have hnorm₂ : Continuous (fun y : EuclideanSpace ℝ (Fin (n - k)) => ‖y‖) := continuous_norm
+    have hopen₂ : IsOpen S₂ := by
+      dsimp [S₂]
+      exact ((IsOpen.preimage (hnorm₁.comp continuous_fst) isOpen_Iio).inter
+        ((IsOpen.preimage (hnorm₂.comp continuous_snd |>.pow 2) isOpen_Iio).inter
+          (IsOpen.preimage (hnorm₂.comp continuous_snd |>.pow 2) isOpen_Iio)))
+    exact hopen₂.mem_nhds ⟨hpu, hbδ, hbθ⟩
+  intro p hp
+  rcases hp with ⟨hpu, hpv⟩
+  by_cases hv : ‖p.2‖ = 0
+  · have hpS₂ : p ∈ S₂ := by
+      constructor
+      · exact hpu
+      constructor
+      · have hmain : ‖p.2‖ ^ 2 < 1 - δ / r ^ 2 := by
+          rw [hv]
+          have hpos : 0 < 1 - δ / r ^ 2 := by
+            have hδr' : δ / r ^ 2 < 1 := by
+              exact (div_lt_one (sq_pos_of_pos hr)).mpr hδr
+            nlinarith
+          nlinarith [hpos]
+        exact hmain
+      · have hmain : ‖p.2‖ ^ 2 < 1 - θ / r ^ 2 := by
+          rw [hv]
+          have hpos : 0 < 1 - θ / r ^ 2 := by
+            have hθr' : θ / r ^ 2 < 1 := by
+              exact (div_lt_one (sq_pos_of_pos hr)).mpr hθr
+            nlinarith
+          nlinarith [hpos]
+        exact hmain
+    exact (hS₂.contDiffAt (hcover₂ p ⟨hpu, hpv⟩ hpS₂)).contDiffWithinAt
+  · have hpS₁ : p ∈ S₁ := by
+      constructor
+      · exact hpu
+      constructor
+      · exact lt_of_le_of_ne (norm_nonneg _) (Ne.symm hv)
+      · exact hpv
+    exact (hS₁.contDiffAt (hcover₁ p ⟨hpu, hpv⟩ hpS₁)).contDiffWithinAt
+
 end CellAttachment
 
 end
