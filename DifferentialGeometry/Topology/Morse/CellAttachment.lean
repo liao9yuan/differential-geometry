@@ -7540,6 +7540,104 @@ theorem modelHandleRoundMap_negPart_norm_sq {n k : ℕ} (hk : k ≤ n) (ε r δ 
   rw [mul_pow]
   rw [Real.sq_sqrt (by nlinarith [hε, sq_nonneg (‖(p.2 : EuclideanSpace ℝ (Fin (n - k)))‖ : ℝ)])]
 
+theorem modelRoundCapQ_eq_r2b_of_t_lt {ε r δ θ a b t : ℝ} (hε : 0 < ε) (hδ : 0 < δ)
+    (hθ : 0 < θ) (hδr : δ < r ^ 2) (hθr : θ < r ^ 2) (hr : 0 < r) (hapos : 0 < a) (ha1 : a ≤ 1)
+    (hb0 : 0 ≤ b) (hb1 : b ≤ 1) (ht0 : t < r ^ 2 + 2 * ε) (htpos : 0 < t)
+    (ht : t < 2 * ε) (hteq : t = (2 * ε + r ^ 2 * b) * a) :
+    modelRoundCapQ ε r δ θ a b = r ^ 2 * b := by
+  have hφ := modelRoundCapInterp_eq hε hr hapos ha1 hb0 hb1 ht0 htpos hteq
+  have hbound : modelLowerRoundBound ε r δ θ t = t - 2 * ε := by
+    have hle : t ≤ r ^ 2 + 2 * ε - θ := by nlinarith [ht, hθr]
+    exact modelLowerRoundBound_eq_self_of_le hθ hle
+  have hsm : smoothCap ε r δ t = r ^ 2 := by
+    have hle : t ≤ r ^ 2 + 2 * ε - δ := by nlinarith [ht, hδr]
+    exact smoothCap_lower hδ hle
+  dsimp [modelRoundCapQ]
+  rw [hteq] at hbound hsm
+  rw [hφ, hbound, hsm]
+  rw [hteq]
+  have hden2 : a * (r ^ 2 + 2 * ε - (2 * ε + r ^ 2 * b) * a) ≠ 0 := by
+    have hd1 : 0 < r ^ 2 + 2 * ε - (2 * ε + r ^ 2 * b) * a := by nlinarith [ht0, hteq]
+    have hd : 0 < a * (r ^ 2 + 2 * ε - (2 * ε + r ^ 2 * b) * a) := by nlinarith [hapos, hd1]
+    exact ne_of_gt hd
+  have hD : r ^ 2 + 2 * ε - (2 * ε + r ^ 2 * b) * a ≠ 0 := by
+    have hd : 0 < r ^ 2 + 2 * ε - (2 * ε + r ^ 2 * b) * a := by nlinarith [ht0, hteq]
+    exact ne_of_gt hd
+  field_simp [hden2, hD]
+  ring
+
+theorem modelRoundCapQ_pos_of_b_pos {ε r δ θ a b : ℝ} (hε : 0 < ε) (hδ : 0 < δ) (hθ : 0 < θ)
+    (hδr : δ < r ^ 2) (hθr : θ < r ^ 2) (hr : 0 < r) (ha0 : 0 ≤ a) (ha1 : a ≤ 1)
+    (hb0 : 0 ≤ b) (hb1 : b ≤ 1) (hb : 0 < b) :
+    0 < modelRoundCapQ ε r δ θ a b := by
+  let t : ℝ := (2 * ε + r ^ 2 * b) * a
+  by_cases ht : 2 * ε ≤ t
+  · by_cases ht' : t = 2 * ε
+    · have ha_lt : a < 1 := by
+        have hmain : (2 * ε + r ^ 2 * b) * a = 2 * ε := by simpa [t] using ht'
+        have h1 : 0 < 2 * ε + r ^ 2 * b := by nlinarith [hε, hb0, sq_nonneg r]
+        have h2 : a = 2 * ε / (2 * ε + r ^ 2 * b) := by
+          have h3 : (2 * ε + r ^ 2 * b) * (2 * ε / (2 * ε + r ^ 2 * b)) = 2 * ε :=
+            mul_div_cancel₀ _ (ne_of_gt h1)
+          nlinarith [hmain, h3]
+        have hden : 2 * ε < 2 * ε + r ^ 2 * b := by nlinarith [hb, hr]
+        have h4 : 2 * ε / (2 * ε + r ^ 2 * b) < 1 := by
+          rw [div_lt_one₀ (by nlinarith [hε, hb0, sq_nonneg r] : 0 < 2 * ε + r ^ 2 * b)]
+          exact hden
+        rw [h2]
+        exact h4
+      have hφ_pos : 0 < modelRoundCapInterp ε r a b := by
+        have hpos : 0 < 1 - a := by nlinarith [ha_lt]
+        dsimp [modelRoundCapInterp]
+        have h1 : 0 < r ^ 2 * b + 2 * ε := by nlinarith [hε, hb0, sq_nonneg r]
+        have h2 : 0 ≤ (1 - b) * (r ^ 2 / (r ^ 2 * b + 2 * ε)) := by
+          exact mul_nonneg (by nlinarith [hb1]) (div_nonneg (sq_nonneg r) (le_of_lt h1))
+        have hden : 0 < (1 - a) + (1 - b) * (r ^ 2 / (r ^ 2 * b + 2 * ε)) := by
+          nlinarith [hpos, h2]
+        exact div_pos hpos hden
+      have hsc : 0 < smoothCap ε r δ t := smoothCap_pos hδ hδr
+      have hbnd : modelLowerRoundBound ε r δ θ t = 0 := by
+        have hsc_eq : modelRoundScale ε r δ θ t = 1 := by
+          have hle : t ≤ r ^ 2 + 2 * ε - θ := by nlinarith [ht', hθr]
+          exact modelRoundScale_eq_one_of_le hθ hle
+        dsimp [modelLowerRoundBound]
+        rw [hsc_eq, ht']
+        ring
+      dsimp [modelRoundCapQ]
+      rw [hbnd]
+      have hφ0 : 0 ≤ modelRoundCapInterp ε r a b := le_of_lt hφ_pos
+      nlinarith [hφ0, hsc]
+    · have ht2 : 2 * ε < t := lt_of_le_of_ne ht (by
+        intro h
+        exact ht' h.symm)
+      have hbnd_pos : 0 < modelLowerRoundBound ε r δ θ t := by
+        have hsc_pos : 0 < modelRoundScale ε r δ θ t := modelRoundScale_pos_of_ge hδ hθ hδr hθr ht
+        dsimp [modelLowerRoundBound]
+        exact mul_pos (sq_pos_of_pos hsc_pos) (by nlinarith [ht2])
+      have hge : modelLowerRoundBound ε r δ θ t ≤ modelRoundCapQ ε r δ θ a b :=
+        modelRoundCapQ_ge_lowerBound hε hδ hθ hδr ha1 hb0 hb1 ht2
+      exact lt_of_lt_of_le hbnd_pos hge
+  · have ht_lt : t < 2 * ε := lt_of_not_ge ht
+    by_cases ha0' : a = 0
+    · have hq0 := modelRoundCapQ_eq_cocore hε hδ hθ hδr hθr hb0 hb1
+      rw [ha0', hq0]
+      exact mul_pos (sq_pos_of_pos hr) hb
+    · have ha_pos : 0 < a := by
+        by_contra hzero
+        have hle : a ≤ 0 := le_of_not_gt hzero
+        have : a = 0 := le_antisymm hle ha0
+        exact ha0' this
+      have ht0 : t < r ^ 2 + 2 * ε := by
+        nlinarith [ht_lt, hr]
+      have htpos : 0 < t := by
+        have h1 : 0 < 2 * ε + r ^ 2 * b := by nlinarith [hε, hb0, sq_nonneg r]
+        dsimp [t]
+        exact mul_pos h1 ha_pos
+      have hq := modelRoundCapQ_eq_r2b_of_t_lt hε hδ hθ hδr hθr hr ha_pos ha1 hb0 hb1 ht0 htpos
+        ht_lt (by dsimp [t])
+      rw [hq]
+      exact mul_pos (sq_pos_of_pos hr) hb
+
 end CellAttachment
 
 end
