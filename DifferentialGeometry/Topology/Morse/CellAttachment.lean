@@ -7326,6 +7326,49 @@ theorem modelRoundCapInterp_eq {ε r a b t : ℝ} (hε : 0 < ε) (hr : 0 < r) (h
     exact ne_of_gt (div_pos h9 htpos)
   field_simp [ne_of_gt ha0, ne_of_gt htpos, h8]
 
+theorem modelRoundCapInterp_injective_fixed_t {ε r a₁ a₂ b₁ b₂ t : ℝ} (hε : 0 < ε)
+    (hr : 0 < r) (ha1₀ : 0 < a₁) (ha2₀ : 0 < a₂) (hb1₀ : 0 ≤ b₁) (hb2₀ : 0 ≤ b₂)
+    (ha1₁ : a₁ ≤ 1) (ha2₁ : a₂ ≤ 1) (hb1₁ : b₁ ≤ 1) (hb2₁ : b₂ ≤ 1)
+    (ht0 : t < r ^ 2 + 2 * ε) (htpos : 0 < t)
+    (ht₁ : t = (2 * ε + r ^ 2 * b₁) * a₁) (ht₂ : t = (2 * ε + r ^ 2 * b₂) * a₂)
+    (hφ : modelRoundCapInterp ε r a₁ b₁ = modelRoundCapInterp ε r a₂ b₂) :
+    a₁ = a₂ := by
+  have hφ1 := modelRoundCapInterp_eq hε hr ha1₀ ha1₁ hb1₀
+    hb1₁ ht0 htpos ht₁
+  have hφ2 := modelRoundCapInterp_eq hε hr ha2₀ ha2₁ hb2₀
+    hb2₁ ht0 htpos ht₂
+  have hD : r ^ 2 + 2 * ε - t ≠ 0 := by
+    have hDpos : 0 < r ^ 2 + 2 * ε - t := by nlinarith [ht0]
+    linarith
+  have hq : t / (r ^ 2 + 2 * ε - t) ≠ 0 := div_ne_zero (ne_of_gt htpos) hD
+  have hmul : t * (1 - a₁) / (a₁ * (r ^ 2 + 2 * ε - t)) =
+      t * (1 - a₂) / (a₂ * (r ^ 2 + 2 * ε - t)) := by
+    rw [← hφ1, ← hφ2]
+    exact hφ
+  have hsplit₁ : t * (1 - a₁) / (a₁ * (r ^ 2 + 2 * ε - t)) =
+      (1 - a₁) / a₁ * (t / (r ^ 2 + 2 * ε - t)) := by
+    field_simp [ne_of_gt ha1₀, hD, ne_of_gt htpos]
+  have hsplit₂ : t * (1 - a₂) / (a₂ * (r ^ 2 + 2 * ε - t)) =
+      (1 - a₂) / a₂ * (t / (r ^ 2 + 2 * ε - t)) := by
+    field_simp [ne_of_gt ha2₀, hD, ne_of_gt htpos]
+  have hmul' : (1 - a₁) / a₁ * (t / (r ^ 2 + 2 * ε - t)) =
+      (1 - a₂) / a₂ * (t / (r ^ 2 + 2 * ε - t)) := by
+    rw [← hsplit₁, ← hsplit₂]
+    exact hmul
+  have hmain : (1 - a₁) / a₁ = (1 - a₂) / a₂ := by
+    exact mul_right_cancel₀ hq hmul'
+  have h1 : (1 - a₁) / a₁ = a₁⁻¹ - 1 := by
+    field_simp [ne_of_gt ha1₀]
+  have h2 : (1 - a₂) / a₂ = a₂⁻¹ - 1 := by
+    field_simp [ne_of_gt ha2₀]
+  have hrecip : a₁⁻¹ = a₂⁻¹ := by
+    have hm : a₁⁻¹ - 1 = a₂⁻¹ - 1 := by
+      rw [← h1, ← h2]
+      exact hmain
+    linarith
+  have hinv : (a₁⁻¹)⁻¹ = (a₂⁻¹)⁻¹ := congrArg Inv.inv hrecip
+  simpa using hinv
+
 end CellAttachment
 
 end
