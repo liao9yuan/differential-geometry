@@ -988,6 +988,140 @@ theorem ham3_limit_jets
     (co.φ k) r x₀ i j hCtgt
   simpa only [K] using hkgrow (co.φ k) (hk.trans (co.hφ.id_le k))
 
+theorem ham3_gram_smooth
+    {omega : Real} (h0omega : 0 < omega)
+    {g0 : SmoothRiemannianMetric I M}
+    (P : Ham3FlowPackage (I := I) (M := M) g0)
+    (hD : P.D =
+      DifferentialGeometry.Integral.Connection.RealTimeInterval.closedOpen
+        0 omega h0omega)
+    (Q : Ham3BlowupData M)
+    (hsel : Ham3PointSel (I := I) P Q)
+    (hwindow : Ham3Window (I := I) P Q ham3_r0)
+    {P₀ : PointedRiemannianManifold.{u, uE, uH} (I := I)}
+    {subseq : Nat → Nat}
+    (Φ : PointedCGHMaps (I := I)
+      (ham3SourceSeq (I := I) h0omega P hD Q hsel hwindow) P₀ subseq)
+    {R : letI : TopologicalSpace P₀.M := P₀.topology
+      letI : ChartedSpace H P₀.M := P₀.charted
+      letI : IsManifold I ∞ P₀.M := P₀.smooth
+      SmoothRiemannianMetric I P₀.M}
+    {bf : BumpFamily (I := I) Φ} {hsrc : SrcSigma Φ} {htgt : TgtSigma Φ}
+    (co : ConvOut (I := I) Φ R bf hsrc htgt (-(ham3_r0 ^ 2)) 0) :
+    letI : TopologicalSpace P₀.M := P₀.topology
+    letI : ChartedSpace H P₀.M := P₀.charted
+    letI : T2Space P₀.M := P₀.t2
+    letI : IsManifold I ∞ P₀.M := P₀.smooth
+    ∀ (x₀ : P₀.M) (i j : Fin (Module.finrank Real E)),
+      ContMDiffOn (𝓘(Real, Real).prod I) 𝓘(Real) ∞
+        (fun p : Real × P₀.M =>
+          DifferentialGeometry.Integral.Measure.chartGramMatrix
+            (I := I) (co.gInf p.1) x₀ p.2 i j)
+        (Set.Icc (-(ham3_r0 ^ 2)) 0 ×ˢ
+          (trivializationAt E (TangentSpace I) x₀).baseSet) := by
+  letI : TopologicalSpace P₀.M := P₀.topology
+  letI : ChartedSpace H P₀.M := P₀.charted
+  letI : T2Space P₀.M := P₀.t2
+  letI : IsManifold I ∞ P₀.M := P₀.smooth
+  letI : SigmaCompactSpace P₀.M := P₀.sigmaCompact
+  apply ConvOut.gramSmoothIcc (I := I) (Φ := Φ)
+    (neg_lt_zero.mpr (sq_pos_of_pos ham3_r0_pos))
+  · exact Set.Subset.rfl
+  · exact Set.Subset.rfl
+  · exact ham3_limit_jets (I := I) h0omega P hD Q hsel hwindow Φ co
+
+theorem ham3_limit_soln
+    {omega : Real} (h0omega : 0 < omega)
+    {g0 : SmoothRiemannianMetric I M}
+    (P : Ham3FlowPackage (I := I) (M := M) g0)
+    (hD : P.D =
+      DifferentialGeometry.Integral.Connection.RealTimeInterval.closedOpen
+        0 omega h0omega)
+    (Q : Ham3BlowupData M)
+    (hsel : Ham3PointSel (I := I) P Q)
+    (hwindow : Ham3Window (I := I) P Q ham3_r0)
+    {P₀ : PointedRiemannianManifold.{u, uE, uH} (I := I)}
+    {subseq : Nat → Nat}
+    (Φ : PointedCGHMaps (I := I)
+      (ham3SourceSeq (I := I) h0omega P hD Q hsel hwindow) P₀ subseq)
+    {R : letI : TopologicalSpace P₀.M := P₀.topology
+      letI : ChartedSpace H P₀.M := P₀.charted
+      letI : IsManifold I ∞ P₀.M := P₀.smooth
+      SmoothRiemannianMetric I P₀.M}
+    {bf : BumpFamily (I := I) Φ} {hsrc : SrcSigma Φ} {htgt : TgtSigma Φ}
+    (co : ConvOut (I := I) Φ R bf hsrc htgt (-(ham3_r0 ^ 2)) 0) :
+    letI : TopologicalSpace P₀.M := P₀.topology
+    letI : ChartedSpace H P₀.M := P₀.charted
+    letI : T2Space P₀.M := P₀.t2
+    letI : IsManifold I ∞ P₀.M := P₀.smooth
+    letI : SigmaCompactSpace P₀.M := P₀.sigmaCompact
+    DifferentialGeometry.PDE.RicciFlow.IsSolutionOn (I := I)
+      ({ base := { metric := co.gInf } } :
+        DifferentialGeometry.PDE.RicciFlow.SolutionOn
+          (I := I) (M := P₀.M)
+          (ham3SourceSeq (I := I) h0omega P hD Q hsel hwindow).D) := by
+  letI : TopologicalSpace P₀.M := P₀.topology
+  letI : ChartedSpace H P₀.M := P₀.charted
+  letI : T2Space P₀.M := P₀.t2
+  letI : IsManifold I ∞ P₀.M := P₀.smooth
+  letI : SigmaCompactSpace P₀.M := P₀.sigmaCompact
+  let J : Set Real := Set.Icc (-(ham3_r0 ^ 2)) 0
+  have hJlt : -(ham3_r0 ^ 2) < (0 : Real) :=
+    neg_lt_zero.mpr (sq_pos_of_pos ham3_r0_pos)
+  have hJ : UniqueDiffOn Real J := by
+    simpa only [J] using uniqueDiffOn_Icc hJlt
+  have hcarrier :
+      (ham3SourceSeq (I := I) h0omega P hD Q hsel hwindow).D.carrier = J := by
+    simpa only [J] using sourceSeq_carrier (I := I) h0omega P hD Q hsel hwindow
+  have hcarrierSub :
+      (ham3SourceSeq (I := I) h0omega P hD Q hsel hwindow).D.carrier ⊆ J := by
+    simpa only [hcarrier] using (Set.Subset.rfl : J ⊆ J)
+  have hjoint := ham3_gram_smooth (I := I) h0omega P hD Q hsel hwindow Φ co
+  have hsmooth :=
+    ConvOut.metricSmooth (I := I) (Φ := Φ) hcarrier co
+  have hpde : ∀ t ∈
+      (ham3SourceSeq (I := I) h0omega P hD Q hsel hwindow).D.regular,
+      ∀ (x : P₀.M) (v w : TangentSpace I x),
+        HasDerivAt (fun s : Real => (co.gInf s).inner x v w)
+          ((-2 : Real) *
+            DifferentialGeometry.Integral.Connection.ricciTensor
+              (I := I) (co.gInf t) x v w) t := by
+    intro t ht x v w
+    exact ConvOut.metricPDE_regular (I := I) (Φ := Φ)
+      hcarrierSub co ht x v w
+  have hscalarCont :
+      ContinuousOn
+        (fun q : Real × P₀.M =>
+          DifferentialGeometry.Integral.Connection.metricScalarAt
+            (I := I) (co.gInf q.1) q.2)
+        ((ham3SourceSeq (I := I) h0omega P hD Q hsel hwindow).D.carrier ×ˢ
+          (Set.univ : Set P₀.M)) := by
+    simpa only [hcarrier, J] using
+      DifferentialGeometry.PDE.RicciFlow.scalarCont_of_joint
+        (I := I) co.gInf J hJ hjoint
+  have hscalarTime : ∀ t ∈
+      (ham3SourceSeq (I := I) h0omega P hD Q hsel hwindow).D.carrier,
+      ∀ x : P₀.M,
+        DifferentiableWithinAt Real
+          (fun s : Real =>
+            DifferentialGeometry.Integral.Connection.metricScalarAt
+              (I := I) (co.gInf s) x)
+          (ham3SourceSeq (I := I) h0omega P hD Q hsel hwindow).D.carrier t := by
+    intro t ht x
+    have htJ : t ∈ J := hcarrier ▸ ht
+    have htime :=
+      DifferentialGeometry.PDE.RicciFlow.scalarTime_of_joint
+        (I := I) co.gInf J hJ hjoint t htJ x
+    simpa only [hcarrier] using htime
+  have hricciCont := DifferentialGeometry.PDE.RicciFlow.ricciCont_of_joint
+    (I := I) co.gInf J hJ hjoint
+  have hrm04Cont := DifferentialGeometry.PDE.RicciFlow.rm04Cont_of_joint
+    (I := I) co.gInf J hJ hjoint
+  apply DifferentialGeometry.PDE.RicciFlow.isSolutionOn_of_reg
+    (I := I) co.gInf hsmooth hpde hscalarCont hscalarTime
+  · simpa only [hcarrier] using hricciCont
+  · simpa only [hcarrier] using hrm04Cont
+
 def cghToHam3
     (X : PointedFlowSeq.{u, uE, uH} (I := I))
     (origIndex : Nat -> Nat) (horig : StrictMono origIndex)
