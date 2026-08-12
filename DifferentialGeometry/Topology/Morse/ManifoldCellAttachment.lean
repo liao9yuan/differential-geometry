@@ -1715,6 +1715,88 @@ theorem standardHandleZeroContMDiff_of {n : ℕ}
   rw [hfun]
   exact hF'.comp hprod
 
+theorem standardHandleZeroContMDiffOn_of {n : ℕ}
+    (F : EuclideanSpace ℝ (Fin 0) × EuclideanSpace ℝ (Fin n) → MorseModel n)
+    (hF : ContDiffOn ℝ (⊤ : ℕ∞) F (handleSet 0 n))
+    [NeZero n] :
+    @ContMDiff ℝ _
+      (EuclideanSpace ℝ (Fin 0) × EuclideanSpace ℝ (Fin ((n - 1) + 1))) _ _
+      (ModelProd (EuclideanSpace ℝ (Fin 0)) (EuclideanHalfSpace ((n - 1) + 1))) _
+      ((𝓘(ℝ, EuclideanSpace ℝ (Fin 0))).prod (modelWithCornersEuclideanHalfSpace ((n - 1) + 1)))
+      (StandardHandle 0 n) _ (standardHandleZeroChartedSpace n)
+      (MorseModel n) _ _ (MorseModel n) _
+      (𝓘(ℝ, MorseModel n)) (MorseModel n) _ _
+      (⊤ : ℕ∞)
+      (fun p : StandardHandle 0 n =>
+        F ((p.1 : EuclideanSpace ℝ (Fin 0)), (p.2 : EuclideanSpace ℝ (Fin n)))) := by
+  classical
+  letI : ChartedSpace (EuclideanSpace ℝ (Fin 0)) (ClosedCell 0) :=
+    closedCellZeroChartedSpace
+  letI : ChartedSpace (EuclideanHalfSpace ((n - 1) + 1)) (ClosedCell n) :=
+    closedCellChartedSpace n
+  have h1 : ContMDiff (𝓘(ℝ, EuclideanSpace ℝ (Fin 0))) (𝓘(ℝ, EuclideanSpace ℝ (Fin 0)))
+      (⊤ : ℕ∞)
+      (fun u : ClosedCell 0 => (u : EuclideanSpace ℝ (Fin 0))) :=
+    closedCellZeroInclusion_contMDiff
+  have h2 : ContMDiff (modelWithCornersEuclideanHalfSpace ((n - 1) + 1))
+      (𝓘(ℝ, EuclideanSpace ℝ (Fin n))) (⊤ : ℕ∞)
+      (fun v : ClosedCell n => (v : EuclideanSpace ℝ (Fin n))) :=
+    closedCellInclusion_contMDiff_of n
+  have hprod : ContMDiff ((𝓘(ℝ, EuclideanSpace ℝ (Fin 0))).prod
+        (modelWithCornersEuclideanHalfSpace ((n - 1) + 1)))
+      ((𝓘(ℝ, EuclideanSpace ℝ (Fin 0))).prod (𝓘(ℝ, EuclideanSpace ℝ (Fin n)))) (⊤ : ℕ∞)
+      (fun p : StandardHandle 0 n =>
+        ((p.1 : EuclideanSpace ℝ (Fin 0)), (p.2 : EuclideanSpace ℝ (Fin n)))) := by
+    exact ContMDiff.prodMap h1 h2
+  have hF' : ContMDiffOn ((𝓘(ℝ, EuclideanSpace ℝ (Fin 0))).prod
+        (𝓘(ℝ, EuclideanSpace ℝ (Fin n))))
+      (𝓘(ℝ, MorseModel n)) (⊤ : ℕ∞)
+      (fun q : EuclideanSpace ℝ (Fin 0) × EuclideanSpace ℝ (Fin n) => F q)
+      (handleSet 0 n) := by
+    rw [← modelWithCornersSelf_prod, chartedSpaceSelf_prod]
+    exact hF.contMDiffOn
+  have hmaps : Set.MapsTo
+      (fun p : StandardHandle 0 n =>
+        ((p.1 : EuclideanSpace ℝ (Fin 0)), (p.2 : EuclideanSpace ℝ (Fin n))))
+      Set.univ (handleSet 0 n) := by
+    intro p hp
+    dsimp [handleSet]
+    constructor
+    · simpa [Metric.mem_closedBall, dist_eq_norm, sub_zero] using p.1.2
+    · simpa [Metric.mem_closedBall, dist_eq_norm, sub_zero] using p.2.2
+  have hfun : (fun p : StandardHandle 0 n =>
+        F ((p.1 : EuclideanSpace ℝ (Fin 0)), (p.2 : EuclideanSpace ℝ (Fin n)))) =
+      (fun q : EuclideanSpace ℝ (Fin 0) × EuclideanSpace ℝ (Fin n) => F q) ∘
+        (fun p : StandardHandle 0 n =>
+          ((p.1 : EuclideanSpace ℝ (Fin 0)), (p.2 : EuclideanSpace ℝ (Fin n)))) := by
+    funext p
+    rfl
+  rw [hfun]
+  exact contMDiffOn_univ.mp (hF'.comp hprod.contMDiffOn hmaps)
+
+theorem contMDiff_modelHandleRoundMap_zero {n : ℕ} (ε r δ θ : ℝ)
+    (hε : 0 < ε) (hδ : 0 < δ) (hθ : 0 < θ) (hδr : δ < r ^ 2) (hθr : θ < r ^ 2) (hr : 0 < r)
+    [NeZero n] :
+    @ContMDiff ℝ _
+      (EuclideanSpace ℝ (Fin 0) × EuclideanSpace ℝ (Fin ((n - 1) + 1))) _ _
+      (ModelProd (EuclideanSpace ℝ (Fin 0)) (EuclideanHalfSpace ((n - 1) + 1))) _
+      ((𝓘(ℝ, EuclideanSpace ℝ (Fin 0))).prod (modelWithCornersEuclideanHalfSpace ((n - 1) + 1)))
+      (StandardHandle 0 n) _ (standardHandleZeroChartedSpace n)
+      (MorseModel n) _ _ (MorseModel n) _
+      (𝓘(ℝ, MorseModel n)) (MorseModel n) _ _
+      (⊤ : ℕ∞)
+      (modelHandleRoundMap (zero_le n) ε r δ θ) := by
+  have hF : ContDiffOn ℝ (⊤ : ℕ∞) (modelHandleRoundMapAmbient (zero_le n) ε r δ θ)
+      (handleSet 0 n) := by
+    refine (contDiffOn_modelHandleRoundMap_ambient_closed (zero_le n) ε r δ θ hε hδ hθ hδr hθr hr).mono ?_
+    intro p hp
+    dsimp [handleSet] at hp
+    constructor
+    · simpa [Metric.mem_closedBall, dist_eq_norm, sub_zero] using hp.1
+    · simpa [Metric.mem_closedBall, dist_eq_norm, sub_zero] using hp.2
+  have hmd := standardHandleZeroContMDiffOn_of (F := modelHandleRoundMapAmbient (zero_le n) ε r δ θ) hF
+  simpa [modelHandleRoundMap_eq_ambient] using hmd
+
 theorem modelHandleMap_contDiff {n k : ℕ} (hk : k ≤ n) (r ε : ℝ) (hε : 0 < ε) :
     ContDiff ℝ (⊤ : ℕ∞)
       (fun p : EuclideanSpace ℝ (Fin k) × EuclideanSpace ℝ (Fin (n - k)) =>
