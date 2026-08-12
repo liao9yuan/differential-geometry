@@ -1,11 +1,23 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.RicciFlowConvergence
+import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.FlowLimitRegularity
+import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.FlowLimitBuild
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.MetricCovDerivPullbackCross
+import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.MovingShiProducer
+import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.CurvTowerBridge
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.MovingShiOpen
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.AllTimesBoundsFlow
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.FixedDomainMetricBounds
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.NoncollapseInjectivity
+import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.SourceCovLip
+import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.SourceCovLipAssembly
+import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.ConvFieldComplete
+import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.ConvFieldEndgame
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.OpenWindowEquiv
 import DifferentialGeometry.Geometry.Flow.RicciFlow.DimensionThree.HamiltonPositiveRicci
+import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.C4.StepDCanonP4
+import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.C4.MetricCompactnessEndpoint
+import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.C4.MetricCompactnessUncondH6
+import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.ExtendedSolutionRegularity
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.SolutionTimeRestrict
 
 set_option autoImplicit false
@@ -770,6 +782,160 @@ private theorem ham3_src_rm
         gcongr
       _ = 1 := by
         norm_num [ham3_r0]
+
+omit [NeZero (Module.finrank Real E)] in
+theorem ham3_stage_jet
+    {omega : Real} (h0omega : 0 < omega)
+    {g0 : SmoothRiemannianMetric I M}
+    (P : Ham3FlowPackage (I := I) (M := M) g0)
+    (hD : P.D =
+      DifferentialGeometry.Integral.Connection.RealTimeInterval.closedOpen
+        0 omega h0omega)
+    (Q : Ham3BlowupData M)
+    (hsel : Ham3PointSel (I := I) P Q)
+    (hwindow : Ham3Window (I := I) P Q ham3_r0)
+    {P₀ : PointedRiemannianManifold.{u, uE, uH} (I := I)}
+    {subseq : Nat → Nat}
+    (Φ : PointedCGHMaps (I := I)
+      (ham3SourceSeq (I := I) h0omega P hD Q hsel hwindow) P₀ subseq)
+    {R : letI : TopologicalSpace P₀.M := P₀.topology
+      letI : ChartedSpace H P₀.M := P₀.charted
+      letI : IsManifold I ∞ P₀.M := P₀.smooth
+      SmoothRiemannianMetric I P₀.M}
+    {bf : BumpFamily (I := I) Φ} {hsrc : SrcSigma Φ} {htgt : TgtSigma Φ}
+    (k r : Nat) (x₀ : P₀.M) (i j : Fin (Module.finrank Real E))
+    {C : Set E}
+    (hCtarget : letI : TopologicalSpace P₀.M := P₀.topology
+      letI : ChartedSpace H P₀.M := P₀.charted
+      C ⊆ (extChartAt I x₀).target)
+    (hCgrow : letI : TopologicalSpace P₀.M := P₀.topology
+      letI : ChartedSpace H P₀.M := P₀.charted
+      (extChartAt I x₀).symm '' C ⊆ bf.grow k) :
+    letI : TopologicalSpace P₀.M := P₀.topology
+    letI : ChartedSpace H P₀.M := P₀.charted
+    letI : T2Space P₀.M := P₀.t2
+    letI : IsManifold I ∞ P₀.M := P₀.smooth
+    ContinuousOn
+      (fun p : Real × E =>
+        iteratedFDeriv Real r
+          (DifferentialGeometry.Integral.DivergenceTheorem.chartGramOnE (I := I)
+            (gSeqExt (I := I) Φ R bf hsrc htgt k p.1) x₀ i j) p.2)
+      (Set.Icc (-(ham3_r0 ^ 2)) 0 ×ˢ C) := by
+  let X := ham3SourceSeq (I := I) h0omega P hD Q hsel hwindow
+  change PointedCGHMaps (I := I) X P₀ subseq at Φ
+  letI : TopologicalSpace P₀.M := P₀.topology
+  letI : ChartedSpace H P₀.M := P₀.charted
+  letI : T2Space P₀.M := P₀.t2
+  letI : IsManifold I ∞ P₀.M := P₀.smooth
+  letI : SigmaCompactSpace P₀.M := P₀.sigmaCompact
+  letI : TopologicalSpace (X.term (subseq k)).M :=
+    (X.term (subseq k)).topology
+  letI : ChartedSpace H (X.term (subseq k)).M :=
+    (X.term (subseq k)).charted
+  letI : T2Space (X.term (subseq k)).M := (X.term (subseq k)).t2
+  letI : IsManifold I ∞ (X.term (subseq k)).M :=
+    (X.term (subseq k)).smooth
+  letI : IsManifold I 1 (X.term (subseq k)).M :=
+    IsManifold.of_le (I := I) (M := (X.term (subseq k)).M)
+      (n := (∞ : WithTop ℕ∞)) (by decide : (1 : WithTop ℕ∞) ≤ ∞)
+  letI : IsManifold I 2 (X.term (subseq k)).M :=
+    IsManifold.of_le (I := I) (M := (X.term (subseq k)).M)
+      (n := (∞ : WithTop ℕ∞)) (by decide : (2 : WithTop ℕ∞) ≤ ∞)
+  letI : IsManifold I ((∞ : WithTop ℕ∞) + 1) (X.term (subseq k)).M := by
+    change IsManifold I ∞ (X.term (subseq k)).M
+    infer_instance
+  letI : SigmaCompactSpace (X.term (subseq k)).M :=
+    (X.term (subseq k)).sigmaCompact
+  letI : TopologicalSpace (SourceDomain (I := I) Φ k) :=
+    sourceDomTop (I := I) Φ k
+  letI : ChartedSpace H (SourceDomain (I := I) Φ k) :=
+    sourceDomCharted (I := I) Φ k
+  letI : T2Space (SourceDomain (I := I) Φ k) :=
+    sourceDomT2 (I := I) Φ k
+  letI : IsManifold I ∞ (SourceDomain (I := I) Φ k) :=
+    sourceDomSmooth (I := I) Φ k
+  letI : IsManifold I 1 (SourceDomain (I := I) Φ k) :=
+    IsManifold.of_le (I := I) (M := SourceDomain (I := I) Φ k)
+      (n := (∞ : WithTop ℕ∞)) (by decide : (1 : WithTop ℕ∞) ≤ ∞)
+  letI : IsManifold I 2 (SourceDomain (I := I) Φ k) :=
+    IsManifold.of_le (I := I) (M := SourceDomain (I := I) Φ k)
+      (n := (∞ : WithTop ℕ∞)) (by decide : (2 : WithTop ℕ∞) ≤ ∞)
+  letI : IsManifold I ((∞ : WithTop ℕ∞) + 1)
+      (SourceDomain (I := I) Φ k) := by
+    change IsManifold I ∞ (SourceDomain (I := I) Φ k)
+    infer_instance
+  letI : SigmaCompactSpace (SourceDomain (I := I) Φ k) :=
+    sourceDomSigmaOf (I := I) Φ k (hsrc k)
+  letI : SigmaCompactSpace ↥(targetOpen (I := I) Φ k) :=
+    targetDomSigmaOf (I := I) Φ k (htgt k)
+  letI : T2Space ↥(targetOpen (I := I) Φ k) :=
+    targetDomT2 (I := I) Φ k
+  letI : IsManifold I 1 ↥(targetOpen (I := I) Φ k) :=
+    IsManifold.of_le (I := I) (M := ↥(targetOpen (I := I) Φ k))
+      (n := (∞ : WithTop ℕ∞)) (by decide : (1 : WithTop ℕ∞) ≤ ∞)
+  letI : IsManifold I ((∞ : WithTop ℕ∞) + 1)
+      ↥(targetOpen (I := I) Φ k) := by
+    change IsManifold I ∞ ↥(targetOpen (I := I) Φ k)
+    infer_instance
+  letI : TopologicalSpace (TargetDomain (I := I) Φ k) :=
+    targetDomTop (I := I) Φ k
+  letI : ChartedSpace H (TargetDomain (I := I) Φ k) :=
+    targetDomCharted (I := I) Φ k
+  letI : T2Space (TargetDomain (I := I) Φ k) :=
+    targetDomT2 (I := I) Φ k
+  letI : IsManifold I ∞ (TargetDomain (I := I) Φ k) :=
+    targetDomSmooth (I := I) Φ k
+  letI : IsManifold I 1 (TargetDomain (I := I) Φ k) :=
+    IsManifold.of_le (I := I) (M := TargetDomain (I := I) Φ k)
+      (n := (∞ : WithTop ℕ∞)) (by decide : (1 : WithTop ℕ∞) ≤ ∞)
+  letI : IsManifold I 2 (TargetDomain (I := I) Φ k) :=
+    IsManifold.of_le (I := I) (M := TargetDomain (I := I) Φ k)
+      (n := (∞ : WithTop ℕ∞)) (by decide : (2 : WithTop ℕ∞) ≤ ∞)
+  letI : IsManifold I ((∞ : WithTop ℕ∞) + 1)
+      (TargetDomain (I := I) Φ k) := by
+    change IsManifold I ∞ (TargetDomain (I := I) Φ k)
+    infer_instance
+  letI : SigmaCompactSpace (TargetDomain (I := I) Φ k) :=
+    targetDomSigmaOf (I := I) Φ k (htgt k)
+  let j₀ := ham3Start (I := I) P Q hsel hwindow + subseq k
+  let Draw := DifferentialGeometry.PDE.RicciFlow.paraInterval P.D
+    (Q.time j₀) (ham3BlowupScale (I := I) P Q j₀)
+    (hsel.1 j₀) (hsel.2.2.1 j₀)
+  let Sraw : DifferentialGeometry.PDE.RicciFlow.SolutionOn
+      (I := I) (M := (X.term (subseq k)).M) Draw := by
+    change DifferentialGeometry.PDE.RicciFlow.SolutionOn
+      (I := I) (M := M) Draw
+    exact ham3RescaledSol (I := I) P Q hsel j₀
+  have hraw : DifferentialGeometry.PDE.RicciFlow.IsSolutionOn (I := I) Sraw := by
+    change DifferentialGeometry.PDE.RicciFlow.IsSolutionOn (I := I)
+      (ham3RescaledSol (I := I) P Q hsel j₀)
+    exact DifferentialGeometry.PDE.RicciFlow.paraSol (I := I) P.S
+      P.isSmooth.isSolution (Q.time j₀)
+      (ham3BlowupScale (I := I) P Q j₀)
+      (hsel.1 j₀) (hsel.2.2.1 j₀)
+  let S := DifferentialGeometry.PDE.RicciFlow.solutionOn_pullback (I := I)
+    (solutionOn_restrictOpen (I := I) Sraw (targetOpen (I := I) Φ k))
+    (sourceTargetDiff (I := I) Φ k)
+  have hS : DifferentialGeometry.PDE.RicciFlow.IsSolutionOn (I := I) S := by
+    exact DifferentialGeometry.PDE.RicciFlow.isSolutionOn_pullback (I := I)
+      (solutionOn_restrictOpen (I := I) Sraw (targetOpen (I := I) Φ k))
+      (isSolutionOn_restrictOpen (I := I) Sraw hraw
+        (targetOpen (I := I) Φ k))
+      (sourceTargetDiff (I := I) Φ k)
+  have hreg : Set.Icc (-(ham3_r0 ^ 2)) 0 ⊆
+      Draw.regular := by
+    intro t ht
+    apply ham3_shi_reg (I := I) h0omega P hD Q hsel hwindow (subseq k)
+    refine ⟨?_, ht.2⟩
+    dsimp only [ham3ShiLeft]
+    have htleft := ht.1
+    nlinarith [sq_pos_of_pos ham3_r0_pos]
+  apply ConvOut.gSeqJet_of_soln (Φ := Φ) (R := R) (bf := bf)
+    (hsrc := hsrc) (htgt := htgt) k S hS hreg
+  · intro t x v w
+    rfl
+  · exact hCtarget
+  · exact hCgrow
 
 def cghToHam3
     (X : PointedFlowSeq.{u, uE, uH} (I := I))
