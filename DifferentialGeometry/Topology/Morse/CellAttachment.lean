@@ -6525,6 +6525,63 @@ noncomputable def modelRoundScale (ε r δ θ : ℝ) (t : ℝ) : ℝ :=
   1 - Real.smoothTransition ((t - (r ^ 2 + 2 * ε - θ)) / θ) *
     (1 - Real.sqrt (modelRoundRatio ε r δ t))
 
+theorem contDiff_modelRoundScale {ε r δ θ : ℝ} (hθ : 0 < θ) (hδ : 0 < δ) (hδr : δ < r ^ 2)
+    (hθr : θ < r ^ 2) : ContDiff ℝ (⊤ : ℕ∞) (modelRoundScale ε r δ θ) := by
+  have htr : ContDiff ℝ (⊤ : ℕ∞) (fun t : ℝ =>
+      Real.smoothTransition ((t - (r ^ 2 + 2 * ε - θ)) / θ)) := by
+    fun_prop
+  have hU₁ : ContDiffOn ℝ (⊤ : ℕ∞) (modelRoundScale ε r δ θ)
+      {t : ℝ | t < r ^ 2 + 2 * ε - θ} := by
+    exact ContDiffOn.congr (f := fun _ : ℝ => (1 : ℝ))
+      (s := {t : ℝ | t < r ^ 2 + 2 * ε - θ})
+      (by simpa using
+        (contDiff_const : ContDiff ℝ (⊤ : ℕ∞) (fun _ : ℝ => (1 : ℝ))).contDiffOn)
+      (by
+        intro t ht
+        change t < r ^ 2 + 2 * ε - θ at ht
+        dsimp [modelRoundScale]
+        have harg : (t - (r ^ 2 + 2 * ε - θ)) / θ ≤ 0 := by
+          have hden : 0 < θ := hθ
+          exact (div_le_iff₀ hden).2 (by nlinarith [ht])
+        rw [Real.smoothTransition.zero_of_nonpos harg]
+        ring)
+  have hratio : ContDiffOn ℝ (⊤ : ℕ∞) (modelRoundRatio ε r δ)
+      {t : ℝ | 2 * ε < t} :=
+    contDiffOn_modelRoundRatio (ε := ε) (r := r) (δ := δ)
+  have hsqrt : ContDiffOn ℝ (⊤ : ℕ∞) (fun t : ℝ => Real.sqrt (modelRoundRatio ε r δ t))
+      {t : ℝ | 2 * ε < t} := by
+    refine hratio.sqrt ?_
+    intro t ht
+    change 2 * ε < t at ht
+    have hscpos : 0 < smoothCap ε r δ t := smoothCap_pos hδ hδr
+    have hdenpos : 0 < t - 2 * ε := by linarith [ht]
+    dsimp [modelRoundRatio]
+    exact ne_of_gt (div_pos hscpos hdenpos)
+  have hmain : ContDiffOn ℝ (⊤ : ℕ∞)
+      (fun t : ℝ => Real.smoothTransition ((t - (r ^ 2 + 2 * ε - θ)) / θ) *
+        (1 - Real.sqrt (modelRoundRatio ε r δ t))) {t : ℝ | 2 * ε < t} := by
+    have htr' : ContDiffOn ℝ (⊤ : ℕ∞)
+        (fun t : ℝ => Real.smoothTransition ((t - (r ^ 2 + 2 * ε - θ)) / θ))
+        {t : ℝ | 2 * ε < t} :=
+      htr.contDiffOn.mono (Set.subset_univ _)
+    have hsub : ContDiffOn ℝ (⊤ : ℕ∞)
+        (fun t : ℝ => 1 - Real.sqrt (modelRoundRatio ε r δ t))
+        {t : ℝ | 2 * ε < t} :=
+      (contDiff_const : ContDiff ℝ (⊤ : ℕ∞) (fun _ : ℝ => (1 : ℝ))).contDiffOn.sub hsqrt
+    exact htr'.mul hsub
+  have hU₂ : ContDiffOn ℝ (⊤ : ℕ∞) (modelRoundScale ε r δ θ)
+      {t : ℝ | 2 * ε < t} := by
+    dsimp [modelRoundScale]
+    exact (contDiff_const : ContDiff ℝ (⊤ : ℕ∞) (fun _ : ℝ => (1 : ℝ))).contDiffOn.sub hmain
+  rw [contDiff_iff_contDiffAt]
+  intro t
+  by_cases ht : t < r ^ 2 + 2 * ε - θ
+  · exact hU₁.contDiffAt (by exact (isOpen_Iio.mem_nhds ht))
+  · have ht2 : 2 * ε < t := by
+      have hle : r ^ 2 + 2 * ε - θ ≤ t := le_of_not_gt ht
+      nlinarith [hθr]
+    exact hU₂.contDiffAt (by exact (isOpen_Ioi.mem_nhds ht2))
+
 theorem modelRoundScale_eq_one_of_le {ε r δ θ t : ℝ} (hθ : 0 < θ)
     (ht : t ≤ r ^ 2 + 2 * ε - θ) :
     modelRoundScale ε r δ θ t = 1 := by
@@ -6735,8 +6792,124 @@ theorem modelLowerRoundBound_eq_self_of_ge {ε r δ θ t : ℝ} (hθ : 0 < θ) (
   rw [modelRoundScale_eq_one_of_ge hθ hδ ht]
   ring
 
+theorem contDiff_modelLowerRoundBound {ε r δ θ : ℝ} (hθ : 0 < θ) (hδ : 0 < δ)
+    (hδr : δ < r ^ 2) (hθr : θ < r ^ 2) :
+    ContDiff ℝ (⊤ : ℕ∞) (modelLowerRoundBound ε r δ θ) := by
+  have hsc : ContDiff ℝ (⊤ : ℕ∞) (modelRoundScale ε r δ θ) :=
+    contDiff_modelRoundScale hθ hδ hδr hθr
+  have hsq : ContDiff ℝ (⊤ : ℕ∞) (fun t : ℝ => modelRoundScale ε r δ θ t ^ 2) :=
+    hsc.pow 2
+  have hlin : ContDiff ℝ (⊤ : ℕ∞) (fun t : ℝ => t - 2 * ε) := by fun_prop
+  simpa [modelLowerRoundBound] using hsq.mul hlin
+
+theorem contDiff_modelLowerRoundMap {n k : ℕ} (hk : k ≤ n) (ε r δ θ : ℝ)
+    (hθ : 0 < θ) (hδ : 0 < δ) (hδr : δ < r ^ 2) (hθr : θ < r ^ 2) :
+    ContDiff ℝ (⊤ : ℕ∞) (modelLowerRoundMap hk ε r δ θ) := by
+  have hsc : ContDiff ℝ (⊤ : ℕ∞)
+      (fun y : MorseModel n => modelRoundScale ε r δ θ (‖negPart hk y‖ ^ 2)) :=
+    (contDiff_modelRoundScale hθ hδ hδr hθr).comp (contDiff_negPart_normSq hk)
+  rw [contDiff_pi]
+  intro i
+  by_cases hi : i.val < k
+  · have hcoord : (fun y : MorseModel n => modelLowerRoundMap hk ε r δ θ y i) =
+        fun y : MorseModel n => (negPart hk y) ⟨i.val, hi⟩ := by
+      funext y
+      change (modelLowerRoundMap hk ε r δ θ y) i = (negPart hk y) ⟨i.val, hi⟩
+      have hneq : i = negIdx hk ⟨i.val, hi⟩ := by
+        apply Fin.ext
+        rfl
+      conv_lhs => rw [hneq]
+      rw [← recombine_decompose hk (modelLowerRoundMap hk ε r δ θ y)]
+      rw [recombine_negPart hk (negPart hk (modelLowerRoundMap hk ε r δ θ y))
+        (posPart hk (modelLowerRoundMap hk ε r δ θ y)) ⟨i.val, hi⟩]
+      rw [modelLowerRoundMap_negPart]
+    rw [hcoord]
+    fun_prop
+  · have hi' : i.val - k < n - k := by
+      omega
+    have hcoord : (fun y : MorseModel n => modelLowerRoundMap hk ε r δ θ y i) =
+        fun y : MorseModel n =>
+          modelRoundScale ε r δ θ (‖negPart hk y‖ ^ 2) * (posPart hk y) ⟨i.val - k, hi'⟩ := by
+      funext y
+      change (modelLowerRoundMap hk ε r δ θ y) i =
+          modelRoundScale ε r δ θ (‖negPart hk y‖ ^ 2) * (posPart hk y) ⟨i.val - k, hi'⟩
+      have hneq : i = posIdx hk ⟨i.val - k, hi'⟩ := by
+        apply Fin.ext
+        dsimp [posIdx]
+        omega
+      conv_lhs => rw [hneq]
+      rw [← recombine_decompose hk (modelLowerRoundMap hk ε r δ θ y)]
+      rw [recombine_posPart hk (negPart hk (modelLowerRoundMap hk ε r δ θ y))
+        (posPart hk (modelLowerRoundMap hk ε r δ θ y)) ⟨i.val - k, hi'⟩]
+      rw [modelLowerRoundMap_posPart]
+      simp
+    rw [hcoord]
+    fun_prop
+
 noncomputable def modelRoundCapInterp (ε r : ℝ) (a b : ℝ) : ℝ :=
   (1 - a) / ((1 - a) + (1 - b) * (r ^ 2 / (r ^ 2 * b + 2 * ε)))
+
+theorem contDiffOn_modelRoundCapInterp {ε r : ℝ} :
+    ContDiffOn ℝ (⊤ : ℕ∞) (fun p : ℝ × ℝ => modelRoundCapInterp ε r p.1 p.2)
+      {p : ℝ × ℝ | p.1 < 1 ∧ 0 < r ^ 2 * p.2 + 2 * ε ∧
+        (1 - p.1) + (1 - p.2) * (r ^ 2 / (r ^ 2 * p.2 + 2 * ε)) ≠ 0} := by
+  let U : Set (ℝ × ℝ) := {p : ℝ × ℝ | p.1 < 1 ∧ 0 < r ^ 2 * p.2 + 2 * ε ∧
+    (1 - p.1) + (1 - p.2) * (r ^ 2 / (r ^ 2 * p.2 + 2 * ε)) ≠ 0}
+  have hnum : ContDiffOn ℝ (⊤ : ℕ∞) (fun p : ℝ × ℝ => 1 - p.1) U := by
+    fun_prop
+  have hd₁ : ContDiffOn ℝ (⊤ : ℕ∞) (fun p : ℝ × ℝ => 1 - p.2) U := by
+    fun_prop
+  have hd₂ : ContDiffOn ℝ (⊤ : ℕ∞) (fun p : ℝ × ℝ => r ^ 2 * p.2 + 2 * ε) U := by
+    fun_prop
+  have hd₂ne : ∀ p ∈ U, r ^ 2 * p.2 + 2 * ε ≠ 0 := by
+    intro p hp
+    rcases hp with ⟨hp₁, hp₂, hp₃⟩
+    exact ne_of_gt hp₂
+  have hfrac : ContDiffOn ℝ (⊤ : ℕ∞)
+      (fun p : ℝ × ℝ => r ^ 2 / (r ^ 2 * p.2 + 2 * ε)) U := by
+    have hr2 : ContDiffOn ℝ (⊤ : ℕ∞) (fun _p : ℝ × ℝ => r ^ 2) U := by
+      fun_prop
+    exact hr2.div hd₂ hd₂ne
+  have hden : ContDiffOn ℝ (⊤ : ℕ∞)
+      (fun p : ℝ × ℝ => (1 - p.1) + (1 - p.2) * (r ^ 2 / (r ^ 2 * p.2 + 2 * ε))) U :=
+    hnum.add (hd₁.mul hfrac)
+  have hdenne : ∀ p ∈ U, (1 - p.1) + (1 - p.2) * (r ^ 2 / (r ^ 2 * p.2 + 2 * ε)) ≠ 0 := by
+    intro p hp
+    rcases hp with ⟨hp₁, hp₂, hp₃⟩
+    exact hp₃
+  have hmain : ContDiffOn ℝ (⊤ : ℕ∞)
+      (fun p : ℝ × ℝ => (1 - p.1) /
+        ((1 - p.1) + (1 - p.2) * (r ^ 2 / (r ^ 2 * p.2 + 2 * ε)))) U :=
+    hnum.div hden hdenne
+  have heq : (fun p : ℝ × ℝ => modelRoundCapInterp ε r p.1 p.2) =
+      fun p : ℝ × ℝ => (1 - p.1) /
+        ((1 - p.1) + (1 - p.2) * (r ^ 2 / (r ^ 2 * p.2 + 2 * ε))) := by
+    rfl
+  rw [heq]
+  exact hmain
+
+theorem contDiffOn_modelRoundCapInterp_handle {ε r : ℝ} (hε : 0 < ε) (hr : 0 < r) :
+    ContDiffOn ℝ (⊤ : ℕ∞) (fun p : ℝ × ℝ => modelRoundCapInterp ε r p.1 p.2)
+      {p : ℝ × ℝ | p.1 < 1 ∧ 0 ≤ p.2 ∧ p.2 ≤ 1} := by
+  refine (contDiffOn_modelRoundCapInterp).mono ?_
+  intro p hp
+  rcases hp with ⟨hp₁, hp₂₀, hp₂₁⟩
+  constructor
+  · exact hp₁
+  constructor
+  · have hmain : 0 ≤ r ^ 2 * p.2 := mul_nonneg (sq_nonneg r) hp₂₀
+    nlinarith [hε, hmain]
+  · have hc : 0 < r ^ 2 / (r ^ 2 * p.2 + 2 * ε) := by
+      have hden : 0 < r ^ 2 * p.2 + 2 * ε := by
+        have hmain : 0 ≤ r ^ 2 * p.2 := mul_nonneg (sq_nonneg r) hp₂₀
+        nlinarith [hε, hmain]
+      exact div_pos (sq_pos_of_pos hr) hden
+    have h₁ : 0 < 1 - p.1 := by linarith [hp₁]
+    have h₂ : 0 ≤ (1 - p.2) * (r ^ 2 / (r ^ 2 * p.2 + 2 * ε)) := by
+      exact mul_nonneg (by linarith [hp₂₁]) (le_of_lt hc)
+    have hsum : 0 < (1 - p.1) + (1 - p.2) * (r ^ 2 / (r ^ 2 * p.2 + 2 * ε)) := by
+      nlinarith [h₁, h₂]
+    exact ne_of_gt hsum
 
 theorem modelRoundCapInterp_eq_zero_of_eq_one {ε r a b : ℝ} (ha : a = 1) :
     modelRoundCapInterp ε r a b = 0 := by
@@ -6777,6 +6950,73 @@ noncomputable def modelRoundCapQ (ε r δ θ : ℝ) (a b : ℝ) : ℝ :=
   (1 - modelRoundCapInterp ε r a b) *
       modelLowerRoundBound ε r δ θ ((2 * ε + r ^ 2 * b) * a) +
     modelRoundCapInterp ε r a b * smoothCap ε r δ ((2 * ε + r ^ 2 * b) * a)
+
+theorem contDiffOn_modelRoundCapQ {ε r δ θ : ℝ} (hθ : 0 < θ) (hδ : 0 < δ) (hδr : δ < r ^ 2)
+    (hθr : θ < r ^ 2) :
+    ContDiffOn ℝ (⊤ : ℕ∞) (fun p : ℝ × ℝ => modelRoundCapQ ε r δ θ p.1 p.2)
+      {p : ℝ × ℝ | p.1 < 1 ∧ 0 < r ^ 2 * p.2 + 2 * ε ∧
+        (1 - p.1) + (1 - p.2) * (r ^ 2 / (r ^ 2 * p.2 + 2 * ε)) ≠ 0} := by
+  let U : Set (ℝ × ℝ) := {p : ℝ × ℝ | p.1 < 1 ∧ 0 < r ^ 2 * p.2 + 2 * ε ∧
+    (1 - p.1) + (1 - p.2) * (r ^ 2 / (r ^ 2 * p.2 + 2 * ε)) ≠ 0}
+  have hφ : ContDiffOn ℝ (⊤ : ℕ∞) (fun p : ℝ × ℝ => modelRoundCapInterp ε r p.1 p.2) U :=
+    contDiffOn_modelRoundCapInterp.mono (by intro p hp; exact hp)
+  have htU : ContDiffOn ℝ (⊤ : ℕ∞)
+      (fun p : ℝ × ℝ => (2 * ε + r ^ 2 * p.2) * p.1) U := by
+    fun_prop
+  have hB : ContDiffOn ℝ (⊤ : ℕ∞)
+      (fun p : ℝ × ℝ => modelLowerRoundBound ε r δ θ ((2 * ε + r ^ 2 * p.2) * p.1)) U :=
+    (contDiff_modelLowerRoundBound hθ hδ hδr hθr).contDiffOn.comp
+      (s := U) (t := Set.univ)
+      htU (by intro p hp; trivial)
+  have hS : ContDiffOn ℝ (⊤ : ℕ∞)
+      (fun p : ℝ × ℝ => smoothCap ε r δ ((2 * ε + r ^ 2 * p.2) * p.1)) U :=
+    (smoothCap_contDiff ε r δ).contDiffOn.comp
+      (s := U) (t := Set.univ)
+      htU (by intro p hp; trivial)
+  have hmain : ContDiffOn ℝ (⊤ : ℕ∞)
+      (fun p : ℝ × ℝ => (1 - modelRoundCapInterp ε r p.1 p.2) *
+          modelLowerRoundBound ε r δ θ ((2 * ε + r ^ 2 * p.2) * p.1) +
+        modelRoundCapInterp ε r p.1 p.2 * smoothCap ε r δ ((2 * ε + r ^ 2 * p.2) * p.1)) U := by
+    have h₁ : ContDiffOn ℝ (⊤ : ℕ∞)
+        (fun p : ℝ × ℝ => (1 - modelRoundCapInterp ε r p.1 p.2) *
+          modelLowerRoundBound ε r δ θ ((2 * ε + r ^ 2 * p.2) * p.1)) U := by
+      exact (contDiffOn_const.sub hφ).mul hB
+    have h₂ : ContDiffOn ℝ (⊤ : ℕ∞)
+        (fun p : ℝ × ℝ => modelRoundCapInterp ε r p.1 p.2 *
+          smoothCap ε r δ ((2 * ε + r ^ 2 * p.2) * p.1)) U := by
+      exact hφ.mul hS
+    exact h₁.add h₂
+  have heq : (fun p : ℝ × ℝ => modelRoundCapQ ε r δ θ p.1 p.2) =
+      fun p : ℝ × ℝ => (1 - modelRoundCapInterp ε r p.1 p.2) *
+          modelLowerRoundBound ε r δ θ ((2 * ε + r ^ 2 * p.2) * p.1) +
+        modelRoundCapInterp ε r p.1 p.2 * smoothCap ε r δ ((2 * ε + r ^ 2 * p.2) * p.1) := by
+    rfl
+  rw [heq]
+  exact hmain
+
+theorem contDiffOn_modelRoundCapQ_handle {ε r δ θ : ℝ} (hε : 0 < ε) (hr : 0 < r) (hθ : 0 < θ)
+    (hδ : 0 < δ) (hδr : δ < r ^ 2) (hθr : θ < r ^ 2) :
+    ContDiffOn ℝ (⊤ : ℕ∞) (fun p : ℝ × ℝ => modelRoundCapQ ε r δ θ p.1 p.2)
+      {p : ℝ × ℝ | p.1 < 1 ∧ 0 ≤ p.2 ∧ p.2 ≤ 1} := by
+  refine (contDiffOn_modelRoundCapQ hθ hδ hδr hθr).mono ?_
+  intro p hp
+  rcases hp with ⟨hp₁, hp₂₀, hp₂₁⟩
+  constructor
+  · exact hp₁
+  constructor
+  · have hmain : 0 ≤ r ^ 2 * p.2 := mul_nonneg (sq_nonneg r) hp₂₀
+    nlinarith [hε, hmain]
+  · have hc : 0 < r ^ 2 / (r ^ 2 * p.2 + 2 * ε) := by
+      have hden : 0 < r ^ 2 * p.2 + 2 * ε := by
+        have hmain : 0 ≤ r ^ 2 * p.2 := mul_nonneg (sq_nonneg r) hp₂₀
+        nlinarith [hε, hmain]
+      exact div_pos (sq_pos_of_pos hr) hden
+    have h₁ : 0 < 1 - p.1 := by linarith [hp₁]
+    have h₂ : 0 ≤ (1 - p.2) * (r ^ 2 / (r ^ 2 * p.2 + 2 * ε)) := by
+      exact mul_nonneg (by linarith [hp₂₁]) (le_of_lt hc)
+    have hsum : 0 < (1 - p.1) + (1 - p.2) * (r ^ 2 / (r ^ 2 * p.2 + 2 * ε)) := by
+      nlinarith [h₁, h₂]
+    exact ne_of_gt hsum
 
 theorem modelRoundCapQ_eq_lowerBound_of_eq_one {ε r δ θ a b : ℝ} (ha : a = 1) :
     modelRoundCapQ ε r δ θ a b = modelLowerRoundBound ε r δ θ (2 * ε + r ^ 2 * b) := by
@@ -7577,6 +7817,112 @@ theorem modelRoundCapQ_eq_r2b_of_t_lt {ε r δ θ a b t : ℝ} (hε : 0 < ε) (h
     exact ne_of_gt hd
   field_simp [hden2, hD]
   ring
+
+theorem modelRoundCapQ_eq_r2b_of_flat {ε r δ θ a b : ℝ} (hε : 0 < ε) (hδ : 0 < δ)
+    (hθ : 0 < θ) (hδr : δ < r ^ 2) (hr : 0 < r) (ha1 : a ≤ 1)
+    (hb0 : 0 ≤ b) (hb1 : b < 1 - δ / r ^ 2) (hb2 : b < 1 - θ / r ^ 2) :
+    modelRoundCapQ ε r δ θ a b = r ^ 2 * b := by
+  let t : ℝ := (2 * ε + r ^ 2 * b) * a
+  have htδ : t ≤ r ^ 2 + 2 * ε - δ := by
+    have h1 : 2 * ε + r ^ 2 * b ≤ 2 * ε + r ^ 2 - δ := by
+      have hdiv : b * r ^ 2 < (1 - δ / r ^ 2) * r ^ 2 :=
+        mul_lt_mul_of_pos_right hb1 (sq_pos_of_pos hr)
+      have hmain : r ^ 2 * b < r ^ 2 - δ := by
+        calc
+          r ^ 2 * b = b * r ^ 2 := by ring
+          _ < (1 - δ / r ^ 2) * r ^ 2 := hdiv
+          _ = r ^ 2 - δ := by
+            have hr2ne : r ^ 2 ≠ 0 := by
+              intro hz
+              nlinarith [sq_pos_of_pos hr, hz]
+            field_simp [hr2ne]
+      nlinarith [hmain]
+    have h2 : 0 ≤ 2 * ε + r ^ 2 * b := by nlinarith [hε, hb0, sq_nonneg r]
+    nlinarith [mul_le_of_le_one_right h2 ha1, h1]
+  have htθ : t ≤ r ^ 2 + 2 * ε - θ := by
+    have h1 : 2 * ε + r ^ 2 * b ≤ 2 * ε + r ^ 2 - θ := by
+      have hdiv : b * r ^ 2 < (1 - θ / r ^ 2) * r ^ 2 :=
+        mul_lt_mul_of_pos_right hb2 (sq_pos_of_pos hr)
+      have hmain : r ^ 2 * b < r ^ 2 - θ := by
+        calc
+          r ^ 2 * b = b * r ^ 2 := by ring
+          _ < (1 - θ / r ^ 2) * r ^ 2 := hdiv
+          _ = r ^ 2 - θ := by
+            have hr2ne : r ^ 2 ≠ 0 := by
+              intro hz
+              nlinarith [sq_pos_of_pos hr, hz]
+            field_simp [hr2ne]
+      nlinarith [hmain]
+    have h2 : 0 ≤ 2 * ε + r ^ 2 * b := by nlinarith [hε, hb0, sq_nonneg r]
+    nlinarith [mul_le_of_le_one_right h2 ha1, h1]
+  have hbound : modelLowerRoundBound ε r δ θ t = t - 2 * ε :=
+    modelLowerRoundBound_eq_self_of_le hθ htθ
+  have hsm : smoothCap ε r δ t = r ^ 2 := smoothCap_lower hδ htδ
+  have hbden : r ^ 2 * b + 2 * ε ≠ 0 := by
+    have hpos : 0 < r ^ 2 * b + 2 * ε := by nlinarith [hε, hb0, sq_nonneg r]
+    exact ne_of_gt hpos
+  have hb1' : b < 1 := lt_of_lt_of_le hb1 (by
+    have hd : 0 ≤ δ / r ^ 2 := div_nonneg (le_of_lt hδ) (le_of_lt (sq_pos_of_pos hr))
+    nlinarith)
+  have hD : (1 - a) + (1 - b) * (r ^ 2 / (r ^ 2 * b + 2 * ε)) ≠ 0 := by
+    have h₁ : 0 ≤ 1 - a := by linarith [ha1]
+    have h₂ : 0 < 1 - b := by linarith [hb1']
+    have h₃ : 0 < r ^ 2 / (r ^ 2 * b + 2 * ε) :=
+      div_pos (sq_pos_of_pos hr) (by nlinarith [hε, hb0, sq_nonneg r])
+    have hpos : 0 < (1 - a) + (1 - b) * (r ^ 2 / (r ^ 2 * b + 2 * ε)) := by
+      nlinarith [h₁, h₂, h₃]
+    exact ne_of_gt hpos
+  have hDcl : (1 - a) * (r ^ 2 * b + 2 * ε) + (1 - b) * r ^ 2 ≠ 0 := by
+    by_contra hz
+    apply hD
+    have hmain : (1 - a) + (1 - b) * (r ^ 2 / (r ^ 2 * b + 2 * ε)) =
+        ((1 - a) * (r ^ 2 * b + 2 * ε) + (1 - b) * r ^ 2) / (r ^ 2 * b + 2 * ε) := by
+      field_simp [hbden]
+    rw [hmain, hz]
+    simp
+  have hDcl' : -(a * r ^ 2 * b) - a * ε * 2 + r ^ 2 + ε * 2 ≠ 0 := by
+    have hmain : (1 - a) * (r ^ 2 * b + 2 * ε) + (1 - b) * r ^ 2 =
+        -(a * r ^ 2 * b) - a * ε * 2 + r ^ 2 + ε * 2 := by
+      ring
+    rwa [hmain] at hDcl
+  have hφ : modelRoundCapInterp ε r a b =
+      (1 - a) * (r ^ 2 * b + 2 * ε) /
+        ((1 - a) * (r ^ 2 * b + 2 * ε) + (1 - b) * r ^ 2) := by
+    dsimp [modelRoundCapInterp]
+    field_simp [hbden, hD]
+  let N : ℝ := (1 - a) * (r ^ 2 * b + 2 * ε)
+  let Dcl : ℝ := N + (1 - b) * r ^ 2
+  have hφ' : modelRoundCapInterp ε r a b = N / Dcl := by
+    dsimp [N, Dcl]
+    exact hφ
+  have hDcl'' : Dcl ≠ 0 := by
+    dsimp [Dcl]
+    exact hDcl
+  have hφD : modelRoundCapInterp ε r a b * Dcl = N := by
+    rw [hφ']
+    exact div_mul_cancel₀ (b := Dcl) N hDcl''
+  have hq : (1 - modelRoundCapInterp ε r a b) * (t - 2 * ε) +
+        modelRoundCapInterp ε r a b * r ^ 2 = r ^ 2 * b := by
+    apply (mul_right_cancel₀ hDcl'')
+    have hmain : ((1 - modelRoundCapInterp ε r a b) * (t - 2 * ε) +
+          modelRoundCapInterp ε r a b * r ^ 2) * Dcl = r ^ 2 * b * Dcl := by
+      calc
+        ((1 - modelRoundCapInterp ε r a b) * (t - 2 * ε) +
+            modelRoundCapInterp ε r a b * r ^ 2) * Dcl =
+            (t - 2 * ε) * Dcl -
+              (t - 2 * ε) * (modelRoundCapInterp ε r a b * Dcl) +
+                r ^ 2 * (modelRoundCapInterp ε r a b * Dcl) := by
+          ring
+        _ = (t - 2 * ε) * Dcl - (t - 2 * ε) * N + r ^ 2 * N := by rw [hφD]
+        _ = r ^ 2 * b * Dcl := by
+          dsimp [t, N, Dcl]
+          ring
+    exact hmain
+  dsimp [modelRoundCapQ]
+  rw [hbound, hsm]
+  change (1 - modelRoundCapInterp ε r a b) * (t - 2 * ε) +
+      modelRoundCapInterp ε r a b * r ^ 2 = r ^ 2 * b
+  exact hq
 
 theorem modelRoundCapQ_pos_of_b_pos {ε r δ θ a b : ℝ} (hε : 0 < ε) (hδ : 0 < δ) (hθ : 0 < θ)
     (hδr : δ < r ^ 2) (hθr : θ < r ^ 2) (hr : 0 < r) (ha0 : 0 ≤ a) (ha1 : a ≤ 1)
