@@ -115,7 +115,7 @@ theorem lowregProjMode_state_bound
     exact inf_le_right
   simpa only [U] using hle
 
-theorem lowregFatouE3AtBg_of_pair
+theorem lowregFatouE3D4AtBg_of_pair
     (g gBase : SmoothRiemannianMetric I M)
     {δ Ctop B0 B1 ρ P T Bd G : ℝ}
     (hT : 0 < T) (hT1 : T ≤ 1)
@@ -180,10 +180,14 @@ theorem lowregFatouE3AtBg_of_pair
     (hL2H3 : ∀ N : ℕ, ∫ t, galerkinEnergy (I := I) (M := M)
       (eigenIdxFinset (I := I) (M := M) g N)
       (lowregProjMode (I := I) (M := M) g fseq N) 3 t ∂(timeMeasure T) ≤ Bd) :
-    ∃ Φ : ℝ, ∀ N : ℕ, ∀ t ∈ Set.Icc (0 : ℝ) T,
-      galerkinEnergy (I := I) (M := M)
+    ∃ Φ3 Φ4 : ℝ,
+      (∀ N : ℕ, ∀ t ∈ Set.Icc (0 : ℝ) T,
+        galerkinEnergy (I := I) (M := M)
+          (eigenIdxFinset (I := I) (M := M) g N)
+          (lowregProjMode (I := I) (M := M) g fseq N) 3 t ≤ Φ3) ∧
+      (∀ N : ℕ, ∫ t, galerkinEnergy (I := I) (M := M)
         (eigenIdxFinset (I := I) (M := M) g N)
-        (lowregProjMode (I := I) (M := M) g fseq N) 3 t ≤ Φ := by
+        (lowregProjMode (I := I) (M := M) g fseq N) 4 t ∂(timeMeasure T) ≤ Φ4) := by
   classical
   let U : ℕ → ℝ → TensorEigenIdx (I := I) (M := M) g 0 2 → ℝ :=
     lowregProjMode (I := I) (M := M) g fseq
@@ -277,6 +281,45 @@ theorem lowregFatouE3AtBg_of_pair
     have hfin := hL2H3 N
     rw [← hTint] at hfin
     linarith
+  let EE4 : ℕ → ℝ → ℝ := fun N => Set.IccExtend hT.le
+    (fun p : Set.Icc (0 : ℝ) T => galerkinEnergy (I := I) (M := M)
+      (eigenIdxFinset (I := I) (M := M) g N) (U N) 4 p.1)
+  have hEE4c : ∀ N, Continuous (EE4 N) := by
+    intro N
+    exact Continuous.Icc_extend'
+      (galerkinEnergy_continuousOn (I := I) (M := M)
+        (eigenIdxFinset (I := I) (M := M) g N) (U N) 4 (hUcont N)).restrict
+  have hEE4nn : ∀ N, ∀ s : ℝ, 0 ≤ EE4 N s := fun N s =>
+    galerkinEnergy_nonneg (I := I) (M := M) _ _ _ _
+  have hEE4eq : ∀ N, ∀ s ∈ Set.Icc (0 : ℝ) T,
+      EE4 N s = galerkinEnergy (I := I) (M := M)
+        (eigenIdxFinset (I := I) (M := M) g N) (U N) 4 s :=
+    fun N s hs => Set.IccExtend_of_mem hT.le _ hs
+  let D4 : ℕ → ℝ → ℝ := fun N t => ∫ s in (0 : ℝ)..t, EE4 N s
+  have hD4Has : ∀ N, ∀ t : ℝ, HasDerivAt (D4 N) (EE4 N t) t := by
+    intro N t
+    exact intervalIntegral.integral_hasDerivAt_right
+      ((hEE4c N).intervalIntegrable 0 t)
+      (hEE4c N).aestronglyMeasurable.stronglyMeasurableAtFilter
+      (hEE4c N).continuousAt
+  have hD40 : ∀ N, D4 N 0 = 0 := fun N => intervalIntegral.integral_same
+  have hD4nn : ∀ N, ∀ t ∈ Set.Icc (0 : ℝ) T, 0 ≤ D4 N t := by
+    intro N t ht
+    exact intervalIntegral.integral_nonneg ht.1 (fun s _ => hEE4nn N s)
+  have hD4cont : ∀ N, ContinuousOn (D4 N) (Set.Icc (0 : ℝ) T) := by
+    intro N
+    exact (continuous_iff_continuousAt.2
+      (fun t => (hD4Has N t).continuousAt)).continuousOn
+  have hD4deriv : ∀ N, ∀ t ∈ Set.Ico (0 : ℝ) T,
+      HasDerivWithinAt (D4 N)
+        (galerkinEnergy (I := I) (M := M)
+          (eigenIdxFinset (I := I) (M := M) g N) (U N) (3 + 1) t)
+        (Set.Ici t) t := by
+    intro N t ht
+    have h := hD4Has N t
+    rw [hEE4eq N t ⟨ht.1, ht.2.le⟩] at h
+    convert h.hasDerivWithinAt using 1
+    all_goals norm_num
   have hRpos : 0 < lowregStateRad Ctop B1 ρ P :=
     lowregStateRad_pos hCtop hB1 hρ hP
   let hrealR := lowregRealRad (I := I) (M := M) g
@@ -387,24 +430,120 @@ theorem lowregFatouE3AtBg_of_pair
             tensorSobolevWeight (I := I) (M := M) i (3 : ℝ) *
               (U N t i) ^ 2) := add_le_add harm hstatPair'
       _ = _ := by ring
-  refine galRiderBound (I := I) (M := M) (g := g) (r := 0) (s₀ := 2)
+  have hinit : ∀ N, galerkinEnergy (I := I) (M := M)
+      (eigenIdxFinset (I := I) (M := M) g N) (U N) 3 0 ≤ 0 := by
+    intro N
+    have hz : galerkinEnergy (I := I) (M := M)
+        (eigenIdxFinset (I := I) (M := M) g N) (U N) 3 0 = 0 := by
+      unfold galerkinEnergy
+      refine Finset.sum_eq_zero fun i _ => ?_
+      rw [hUinit N i]
+      ring
+    rw [hz]
+  obtain ⟨Bound, hBound⟩ := galRiderDiss (I := I) (M := M) (g := g)
+    (r := 0) (s₀ := 2)
     (U := U) (T := T) (σ := 3)
     (Fseq := fun N t => galTameForce (I := I) (M := M) g 1 hRpos.le
       (lowregNfun (I := I) (M := M) g gBase hδ hCtop hB1 hρ hP hreal)
       (eigenIdxFinset (I := I) (M := M) g N) (U N t))
     (sseq := fun N => eigenIdxFinset (I := I) (M := M) g N)
     (Cδ := 1) (Cmid := 0) (seed := 2 * Cseed 3) (B0 := 0)
-    (c₀ := 0) (Crid := G) (B := Bd) (P := Pr)
+    (c₀ := 0) (Crid := G) (B := Bd) (P := Pr) (D := D4)
     (by norm_num) le_rfl (mul_nonneg (by norm_num) (hCseed 3)) le_rfl hG
-    hPr0 hPrnn hPrcont hPrderiv hPrbd hUcont hUderiv hclosure ?_
-  intro N
-  have hz : galerkinEnergy (I := I) (M := M)
-      (eigenIdxFinset (I := I) (M := M) g N) (U N) 3 0 = 0 := by
-    unfold galerkinEnergy
-    refine Finset.sum_eq_zero fun i _ => ?_
-    rw [hUinit N i]
-    ring
-  rw [hz]
+    hPr0 hPrnn hPrcont hPrderiv hPrbd hD40 hD4nn hD4cont hD4deriv
+    hUcont hUderiv hclosure hinit
+  have hD4time : ∀ N, D4 N T = ∫ t, galerkinEnergy (I := I) (M := M)
+      (eigenIdxFinset (I := I) (M := M) g N) (U N) 4 t ∂(timeMeasure T) := by
+    intro N
+    dsimp only [D4]
+    rw [intervalIntegral.integral_congr
+      (g := fun s => galerkinEnergy (I := I) (M := M)
+        (eigenIdxFinset (I := I) (M := M) g N) (U N) 4 s)
+      (by rw [Set.uIcc_of_le hT.le]; exact fun s hs => hEE4eq N s hs),
+      intervalIntegral.integral_of_le hT.le, timeMeasure,
+      MeasureTheory.integral_Icc_eq_integral_Ioc]
+  refine ⟨Bound, Bound, ?_, ?_⟩
+  · intro N t ht
+    exact (hBound N t ht).1
+  · intro N
+    rw [← hD4time N]
+    have h := (hBound N T ⟨hT.le, le_rfl⟩).2
+    norm_num at h ⊢
+    exact h
+
+theorem lowregFatouE3AtBg_of_pair
+    (g gBase : SmoothRiemannianMetric I M)
+    {δ Ctop B0 B1 ρ P T Bd G : ℝ}
+    (hT : 0 < T) (hT1 : T ≤ 1)
+    (hδ : δ < 1) (hδ0 : 0 ≤ δ) (hδ3 : δ ≤ 1 / 3)
+    (hCtop : 0 ≤ Ctop) (hB0 : 0 ≤ B0) (hB1 : 0 ≤ B1)
+    (hρ : 0 < ρ) (hP : 0 < P)
+    (hreal : ∀ S : SmoothCcTensor g 0 2,
+      ‖smoothCcToTensorHs (I := I) (M := M) g (((1 : ℕ) : ℝ) + 1) S‖ ≤ P →
+        gFibreOpBound (I := I) (M := M) g
+          (ccTensorBilinSymm (I := I) g S) δ)
+    (hcore : Continuous (coreN (I := I) (M := M) g gBase hδ
+      (lowregRealRad (I := I) (M := M) g (Ctop := Ctop) (B1 := B1) (ρ := ρ)
+        hP.le hreal)))
+    (htame : ∀ u v : lowerState (I := I) (M := M) g 1
+        (lowregStateRad Ctop B1 ρ P),
+      ‖lowregNfun (I := I) (M := M) g gBase hδ hCtop hB1 hρ hP hreal u -
+          lowregNfun (I := I) (M := M) g gBase hδ hCtop hB1 hρ hP hreal v‖ ≤
+        Ctop * lowregOuterRad Ctop ρ P *
+            ‖(u.1 : tensorHs (I := I) (M := M) g 0 2
+              (((1 : ℕ) : ℝ) + 2)) - v.1‖ +
+          B0 * ‖galLowView (I := I) (M := M) g 1
+            ((u.1 : tensorHs (I := I) (M := M) g 0 2
+              (((1 : ℕ) : ℝ) + 2)) - v.1)‖ +
+          B1 * (‖(u.1 : tensorHs (I := I) (M := M) g 0 2
+                (((1 : ℕ) : ℝ) + 2))‖ +
+              ‖(v.1 : tensorHs (I := I) (M := M) g 0 2
+                (((1 : ℕ) : ℝ) + 2))‖) *
+            ‖galLowView (I := I) (M := M) g 1
+              ((u.1 : tensorHs (I := I) (M := M) g 0 2
+                (((1 : ℕ) : ℝ) + 2)) - v.1)‖)
+    (hG : 0 ≤ G)
+    (hpair : ∀ (F : Finset (TensorEigenIdx (I := I) (M := M) g 0 2))
+        (c : TensorEigenIdx (I := I) (M := M) g 0 2 → ℝ),
+      ‖galLowView (I := I) (M := M) g 1
+          (finiteEigenComboHs (I := I) (M := M) g F c
+            (((1 : ℕ) : ℝ) + 2))‖ ≤ lowregStateRad Ctop B1 ρ P →
+      2 * |∑ i ∈ F, tensorSobolevWeight (I := I) (M := M) i (3 : ℝ) *
+          (c i * (galArmVecBg (I := I) (M := M) g gBase
+            (lowregStateRad_pos hCtop hB1 hρ hP).le hδ
+            (lowregRealRad (I := I) (M := M) g (Ctop := Ctop) (B1 := B1)
+              (ρ := ρ) hP.le hreal) F c).coeff i)| ≤
+        (∑ i ∈ F,
+          tensorSobolevWeight (I := I) (M := M) i (4 : ℝ) * (c i) ^ 2) +
+        G * ((∑ i ∈ F,
+          tensorSobolevWeight (I := I) (M := M) i (3 : ℝ) * (c i) ^ 2) +
+          (∑ i ∈ F,
+            tensorSobolevWeight (I := I) (M := M) i (3 : ℝ) * (c i) ^ 2) ^ 2))
+    (fseq : ℕ → timeL2 (tensorHs (I := I) (M := M) g 0 2 ((1 : ℕ) : ℝ)) T)
+    (hball : ∀ N : ℕ, ∀ᵐ t ∂(timeMeasure T),
+      maxRegDuhamelSolField (I := I) (M := M) ((1 : ℕ) : ℝ) hT hT1
+          (0 : tensorHs (I := I) (M := M) g 0 2 (((1 : ℕ) : ℝ) + 2))
+          (fseq N) t ∈ lowerState (I := I) (M := M) g 1
+            (lowregStateRad Ctop B1 ρ P))
+    (hnem : ∀ N : ℕ, ⇑(fseq N) =ᵐ[timeMeasure T]
+      fun t => projNfun (I := I) (M := M) g 1 N
+        (lowregNfun (I := I) (M := M) g gBase hδ hCtop hB1 hρ hP hreal)
+        (aeSetLift (zero_mem_lowerState (I := I) (M := M) g 1
+            (lowregStateRad_pos hCtop hB1 hρ hP).le)
+          (maxRegDuhamelSolField (I := I) (M := M) ((1 : ℕ) : ℝ) hT hT1
+            (0 : tensorHs (I := I) (M := M) g 0 2 (((1 : ℕ) : ℝ) + 2))
+            (fseq N)) t))
+    (hL2H3 : ∀ N : ℕ, ∫ t, galerkinEnergy (I := I) (M := M)
+      (eigenIdxFinset (I := I) (M := M) g N)
+      (lowregProjMode (I := I) (M := M) g fseq N) 3 t ∂(timeMeasure T) ≤ Bd) :
+    ∃ Φ : ℝ, ∀ N : ℕ, ∀ t ∈ Set.Icc (0 : ℝ) T,
+      galerkinEnergy (I := I) (M := M)
+        (eigenIdxFinset (I := I) (M := M) g N)
+        (lowregProjMode (I := I) (M := M) g fseq N) 3 t ≤ Φ := by
+  obtain ⟨Φ3, _, hΦ3, _⟩ := lowregFatouE3D4AtBg_of_pair
+    (I := I) (M := M) g gBase hT hT1 hδ hδ0 hδ3 hCtop hB0 hB1 hρ hP
+    hreal hcore htame hG hpair fseq hball hnem hL2H3
+  exact ⟨Φ3, hΦ3⟩
 
 end DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral
 
