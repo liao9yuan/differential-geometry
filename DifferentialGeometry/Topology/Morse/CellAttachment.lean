@@ -6790,6 +6790,77 @@ theorem modelRoundCapQ_eq_smoothCap_of_eq_one {ε r δ θ a b : ℝ} (hb : b = 1
   rw [modelRoundCapInterp_eq_one_of_eq_one hb ha, hb]
   simp
 
+theorem modelLowerRoundBound_le_smoothCap {ε r δ θ t : ℝ} (hδ : 0 < δ) (hθ : 0 < θ)
+    (hδr : δ < r ^ 2) (ht : 2 * ε < t) :
+    modelLowerRoundBound ε r δ θ t ≤ smoothCap ε r δ t := by
+  dsimp [modelLowerRoundBound]
+  have hsc := modelRoundScale_sq_le_ratio hδ hθ hδr ht
+  have hden : 0 < t - 2 * ε := by linarith [ht]
+  have hnum : 0 ≤ smoothCap ε r δ t := smoothCap_nonneg hδ hδr
+  have hratio : modelRoundRatio ε r δ t * (t - 2 * ε) = smoothCap ε r δ t := by
+    dsimp [modelRoundRatio]
+    have hne : t - 2 * ε ≠ 0 := ne_of_gt hden
+    rw [div_mul_cancel₀ _ hne]
+  nlinarith [hsc, hratio]
+
+theorem modelRoundCapInterp_nonneg {ε r a b : ℝ} (hε : 0 < ε) (ha1 : a ≤ 1)
+    (hb0 : 0 ≤ b) (hb1 : b ≤ 1) :
+    0 ≤ modelRoundCapInterp ε r a b := by
+  by_cases ha : a = 1
+  · rw [modelRoundCapInterp_eq_zero_of_eq_one ha]
+  · have ha_lt : a < 1 := lt_of_le_of_ne ha1 ha
+    have ha' : 1 - a > 0 := by linarith
+    dsimp [modelRoundCapInterp]
+    have h1 : 0 < r ^ 2 * b + 2 * ε := by nlinarith [hε, hb0, sq_nonneg r]
+    have h2 : 0 ≤ (1 - b) * (r ^ 2 / (r ^ 2 * b + 2 * ε)) := by
+      exact mul_nonneg (by nlinarith [hb1]) (div_nonneg (sq_nonneg r) (le_of_lt h1))
+    have hden : 0 < (1 - a) + (1 - b) * (r ^ 2 / (r ^ 2 * b + 2 * ε)) := by
+      nlinarith [ha', h2]
+    exact div_nonneg (le_of_lt ha') (le_of_lt hden)
+
+theorem modelRoundCapInterp_le_one {ε r a b : ℝ} (hε : 0 < ε) (ha1 : a ≤ 1)
+    (hb0 : 0 ≤ b) (hb1 : b ≤ 1) :
+    modelRoundCapInterp ε r a b ≤ 1 := by
+  by_cases ha : a = 1
+  · rw [modelRoundCapInterp_eq_zero_of_eq_one ha]
+    norm_num
+  · have ha_lt : a < 1 := lt_of_le_of_ne ha1 ha
+    have ha' : 1 - a > 0 := by linarith
+    dsimp [modelRoundCapInterp]
+    have h1 : 0 < r ^ 2 * b + 2 * ε := by nlinarith [hε, hb0, sq_nonneg r]
+    have h2 : 0 ≤ (1 - b) * (r ^ 2 / (r ^ 2 * b + 2 * ε)) := by
+      exact mul_nonneg (by nlinarith [hb1]) (div_nonneg (sq_nonneg r) (le_of_lt h1))
+    have hden : 0 < (1 - a) + (1 - b) * (r ^ 2 / (r ^ 2 * b + 2 * ε)) := by
+      nlinarith [ha', h2]
+    rw [div_le_iff₀ hden]
+    nlinarith [ha', h2]
+
+noncomputable def modelHandleRoundMap {n k : ℕ} (hk : k ≤ n) (ε r δ θ : ℝ)
+    (p : StandardHandle k (n - k)) : MorseModel n :=
+  recombine hk
+    (Real.sqrt (2 * ε + r ^ 2 * ‖(p.2 : EuclideanSpace ℝ (Fin (n - k)))‖ ^ 2) •
+      (p.1 : EuclideanSpace ℝ (Fin k)))
+    ((Real.sqrt (modelRoundCapQ ε r δ θ (‖(p.1 : EuclideanSpace ℝ (Fin k))‖ ^ 2)
+        (‖(p.2 : EuclideanSpace ℝ (Fin (n - k)))‖ ^ 2)) / ‖(p.2 : EuclideanSpace ℝ (Fin (n - k)))‖) •
+      (p.2 : EuclideanSpace ℝ (Fin (n - k))))
+
+theorem modelHandleRoundMap_negPart {n k : ℕ} (hk : k ≤ n) (ε r δ θ : ℝ)
+    (p : StandardHandle k (n - k)) :
+    negPart hk (modelHandleRoundMap hk ε r δ θ p) =
+      (Real.sqrt (2 * ε + r ^ 2 * ‖(p.2 : EuclideanSpace ℝ (Fin (n - k)))‖ ^ 2) •
+        (p.1 : EuclideanSpace ℝ (Fin k))) := by
+  dsimp [modelHandleRoundMap]
+  rw [negPart_recombine]
+
+theorem modelHandleRoundMap_posPart {n k : ℕ} (hk : k ≤ n) (ε r δ θ : ℝ)
+    (p : StandardHandle k (n - k)) :
+    posPart hk (modelHandleRoundMap hk ε r δ θ p) =
+      ((Real.sqrt (modelRoundCapQ ε r δ θ (‖(p.1 : EuclideanSpace ℝ (Fin k))‖ ^ 2)
+        (‖(p.2 : EuclideanSpace ℝ (Fin (n - k)))‖ ^ 2)) / ‖(p.2 : EuclideanSpace ℝ (Fin (n - k)))‖) •
+        (p.2 : EuclideanSpace ℝ (Fin (n - k)))) := by
+  dsimp [modelHandleRoundMap]
+  rw [posPart_recombine]
+
 end CellAttachment
 
 end
