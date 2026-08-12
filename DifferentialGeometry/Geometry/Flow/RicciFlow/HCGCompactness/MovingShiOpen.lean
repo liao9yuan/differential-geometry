@@ -1,5 +1,7 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.IteratedRmTowerSolution
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.BernsteinComplete
+import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.MetricTimeCompare
+import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.ShiCutoff
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.TowerNormRegularity
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.Ricci.QuadraticBound
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.Basic
@@ -680,9 +682,9 @@ noncomputable def shiOpenConst
     (d : Nat) (C alpha beta psi : Real) (N : Nat) : Real :=
   let K := max 1 C
   let c := max 0
-    (∑ k ∈ Finset.range (N + 1), rmTowerCost d k)
+    (∑ k ∈ Finset.range (N + 2), rmTowerCost d k)
   Real.sqrt
-    (∑ k ∈ Finset.range (N + 1),
+    (∑ k ∈ Finset.range (N + 2),
       (d : Real) ^ ((2 + k) + 2) *
         ((towerConst c (K * (psi - alpha)) k) ^ 2 * K ^ 2 /
           ((beta - alpha) / 2) ^ k))
@@ -815,10 +817,10 @@ theorem movingShi_of_bound
   let aScale : Real := K * (psi - alpha)
   have hScale : 0 ≤ aScale :=
     mul_nonneg hKNonneg (sub_nonneg.mpr halphaPsi.le)
-  let levels : Finset Nat := Finset.range (N + 1)
+  let levels : Finset Nat := Finset.range (N + 2)
   let c : Real := max 0 (∑ k ∈ levels, levelC k)
   have hc : 0 ≤ c := le_max_left _ _
-  have hLevel (k : Nat) (hk : k ≤ N) : levelC k ≤ c := by
+  have hLevel (k : Nat) (hk : k ≤ N + 1) : levelC k ≤ c := by
     have hkMem : k ∈ levels := by
       simp only [levels, Finset.mem_range]
       omega
@@ -985,12 +987,58 @@ theorem movingShi_of_bound
     have hneg := (abs_le.mp (hquad (s + t0) hu x v)).1
     simpa [flowG, S0, SShift, Sco, SolutionOn.timeRestrict,
       SolutionOn.timeShift, SolutionFamily.timeShift] using hneg
+  have hRiemannAlpha :
+      RiemannianMetricComplete (I := I) (F.S.base.metric alpha) := by
+    refine ⟨?complete⟩
+    simpa [MetricComplete] using
+      (MetricComplete.complete (I := I) (F.atTime (I := I) alpha) hcomplete)
+  have ht0mem : t0 ∈ Set.Icc alpha psi := ⟨halphaT0.le, hT0Psi.le⟩
+  have hRiemannT0 :
+      RiemannianMetricComplete (I := I) (S0.base.metric 0) := by
+    have h := complete_of_ricBound (I := I) (S := F.S) (hS := F.isSolution)
+      (a := alpha) (b := t0) (K := A)
+      (hslab := fun s hs => hslab ⟨hs.1, hs.2.trans ht0mem.2⟩)
+      (hreg := fun s hs => hreg ⟨hs.1, hs.2.trans ht0mem.2⟩)
+      (hK := hA)
+      (hric := fun s hs x v => hquad s ⟨hs.1, hs.2.trans ht0mem.2⟩ x v)
+      hRiemannAlpha (s := t0) ⟨halphaT0.le, le_rfl⟩
+    simpa [S0, SShift, Sco, SolutionOn.timeRestrict, SolutionOn.timeShift,
+      SolutionFamily.timeShift] using h
+  have hreg0 : Set.Ioc 0 T ⊆ D0.regular := fun s hs =>
+    hRegular s ⟨hs.1.le, hs.2⟩ hs.1
+  have hcurv0 : ∀ s ∈ Set.Icc 0 T, ∀ y : F.M,
+      nablaKRm04NormSqIntrinsic (I := I) S0 0 s y ≤ K := by
+    intro s hs y
+    have hu : s + t0 ∈ Set.Icc alpha psi := by
+      dsimp only [T] at hs
+      exact ⟨by linarith [halphaT0, hs.1], by linarith [hs.2]⟩
+    have hraw := hcurv (s + t0) hu y
+    have hraw' : nablaKRm04NormSqIntrinsic (I := I) S0 0 s y ≤ C := by
+      simpa [PointedFlowData.rmNormSq, nablaKRm04NormSqIntrinsic,
+        nablaKRm04Field_zero, S0, SShift, Sco, SolutionOn.timeRestrict,
+        SolutionOn.timeShift, SolutionFamily.timeShift] using hraw
+    exact hraw'.trans hCK
+  have hcut : ∀ O : F.M,
+      Nonempty (ShiBarrierCutoffData (I := I) (flowG (I := I) S0) T O) := by
+    exact shiBarrierCutoff_of_sol (I := I) (S := S0) hS0 hT hSlab hreg0
+      hRiemannT0 hKNonneg hcurv0
   intro k hk _i t ht x _hx
   have htShiftMem : t - t0 ∈ Set.Icc 0 T := by
     dsimp only [T]
     exact ⟨by linarith [hT0Beta, ht.1], by linarith [ht.2]⟩
   have htShiftPos : 0 < t - t0 := by linarith [hT0Beta, ht.1]
-  have hEstimate := complete_of_heat (I := I)
+  have hKato : ∀ j : Nat, j ≤ k → ∀ s : Real, s ∈ Set.Icc 0 T → 0 < s →
+      ∀ y : F.M,
+        ((flowG (I := I) S0).metric s).inner y
+            (gradientFun (I := I) ((flowG (I := I) S0).metric s)
+              (nablaKRm04NormSqIntrinsic (I := I) S0 j s) y)
+            (gradientFun (I := I) ((flowG (I := I) S0).metric s)
+              (nablaKRm04NormSqIntrinsic (I := I) S0 j s) y) ≤
+          4 * nablaKRm04NormSqIntrinsic (I := I) S0 j s y *
+            nablaKRm04NormSqIntrinsic (I := I) S0 (j + 1) s y := by
+    intro j _hj s _hs _hspos y
+    simpa [flowG] using towerNorm_grad_le (I := I) (S := S0) j s y
+  have hEstimate := complete_of_barrier (I := I)
     (D := D0) (flowG (I := I) S0)
     (w := nablaKRm04NormSqIntrinsic (I := I) S0)
     (wLap := nablaKNormLap (I := I) S0) levelC
@@ -999,8 +1047,9 @@ theorem movingShi_of_bound
     hw0 hTK hHeat hLap hwCont hwSpace
     (fun j s _hs _hsPos y ↦ gradientFun_mdiffAt (I := I) (S0.base.metric s)
       (nablaKNorm_smooth (I := I) S0 s j) y)
-    k c hc (fun j hj ↦ hLevel j (hj.trans hk))
-    Ceq A hCeq hA hequiv hric htShiftMem htShiftPos x
+    hcut
+    k c hc (fun j hj ↦ hLevel j (hj.trans (Nat.succ_le_succ hk)))
+    hKato htShiftMem htShiftPos x
   have hNum : 0 ≤ (towerConst c aScale k) ^ 2 * K ^ 2 := by positivity
   have hPow : delta ^ k ≤ (t - t0) ^ k := by
     gcongr
