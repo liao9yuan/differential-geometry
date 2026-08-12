@@ -2025,6 +2025,88 @@ theorem handleRoundEmbedding_attaching_eq_lower {n k : ℕ} (hk : k ≤ n) (c ε
   simpa [cocoreModelPoint, handleRoundAttachingEmbedding] using
     (congrArg (fun z : MorseModel n => data.χ (modelLowerRoundMap hk ε r δ θ z)) h2)
 
+theorem contMDiff_handleRoundAttachingEmbedding {m k : ℕ} (hk : k ≤ m + 1) (c ε r δ θ : ℝ)
+    {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M] [ChartedSpace H M]
+    {I : ModelWithCorners ℝ (MorseModel (m + 1)) H} [I.Boundaryless]
+    [IsManifold I (⊤ : WithTop ℕ∞) M] [T2Space M] {f : M → ℝ}
+    (data : MorseChart (m + 1) k hk c I f)
+    (hε : 0 < ε) (hδ : 0 < δ) (hθ : 0 < θ) (hδr : δ < r ^ 2) (hθr : θ < r ^ 2)
+    (hεr' : Real.sqrt (2 * ε + 2 * r ^ 2) < data.R')
+    [NeZero k] [NeZero (m + 1 - k)] :
+    @ContMDiff ℝ _
+      (EuclideanSpace ℝ (Fin (k - 1)) × EuclideanSpace ℝ (Fin ((m + 1 - k - 1) + 1))) _ _
+      (ModelProd (EuclideanSpace ℝ (Fin (k - 1))) (EuclideanHalfSpace ((m + 1 - k - 1) + 1))) _
+      ((𝓡 (k - 1)).prod (modelWithCornersEuclideanHalfSpace ((m + 1 - k - 1) + 1)))
+      (AttachingRegion k (m + 1 - k)) _ (attachingRegionChartedSpace k (m + 1 - k))
+      (MorseModel (m + 1)) _ _ H _ I M _ _
+      (⊤ : ℕ∞)
+      (handleRoundAttachingEmbedding hk c ε r δ θ data) := by
+  classical
+  letI : ChartedSpace (EuclideanSpace ℝ (Fin (k - 1))) (CellBoundary k) :=
+    cellBoundaryChartedSpace k
+  letI : ChartedSpace (EuclideanHalfSpace ((m + 1 - k - 1) + 1)) (ClosedCell (m + 1 - k)) :=
+    closedCellChartedSpace (m + 1 - k)
+  letI : ChartedSpace (EuclideanHalfSpace ((m + 1 - k - 1) + 1)) (ClosedCell ((m + 1 - k - 1) + 1)) :=
+    closedCellChartedSpaceSucc (m + 1 - k - 1)
+  letI : IsManifold (𝓡 (k - 1)) (⊤ : ℕ∞) (CellBoundary k) := cellBoundaryIsManifold k
+  letI : IsManifold (modelWithCornersEuclideanHalfSpace ((m + 1 - k - 1) + 1)) (⊤ : ℕ∞)
+      (ClosedCell ((m + 1 - k - 1) + 1)) := closedCellIsManifold (m + 1 - k - 1)
+  letI : IsManifold (modelWithCornersEuclideanHalfSpace ((m + 1 - k - 1) + 1)) (⊤ : ℕ∞)
+      (ClosedCell (m + 1 - k)) :=
+    isManifoldOfHomeomorph (modelWithCornersEuclideanHalfSpace ((m + 1 - k - 1) + 1))
+      (closedCellReindexHomeo (m + 1 - k))
+  letI : ChartedSpace (ModelProd (EuclideanSpace ℝ (Fin (k - 1)))
+      (EuclideanHalfSpace ((m + 1 - k - 1) + 1))) (AttachingRegion k (m + 1 - k)) :=
+    attachingRegionChartedSpace k (m + 1 - k)
+  let Iatt : ModelWithCorners ℝ
+      (EuclideanSpace ℝ (Fin (k - 1)) × EuclideanSpace ℝ (Fin ((m + 1 - k - 1) + 1)))
+      (ModelProd (EuclideanSpace ℝ (Fin (k - 1))) (EuclideanHalfSpace ((m + 1 - k - 1) + 1))) :=
+    (𝓡 (k - 1)).prod (modelWithCornersEuclideanHalfSpace ((m + 1 - k - 1) + 1))
+  letI : IsManifold Iatt (⊤ : ℕ∞) (AttachingRegion k (m + 1 - k)) :=
+    attachingRegionIsManifold k (m + 1 - k)
+  have hrecomb : ContMDiff Iatt (𝓘(ℝ, MorseModel (m + 1))) (⊤ : ℕ∞)
+      (fun p : AttachingRegion k (m + 1 - k) => cocoreModelPoint hk ε r p) := by
+    simpa [Iatt, cocoreModelPoint] using (attachingRegionContMDiff_of
+      (F := fun q : EuclideanSpace ℝ (Fin k) × EuclideanSpace ℝ (Fin (m + 1 - k)) =>
+        recombine hk (negPart hk (cellMap (Real.sqrt (2 * ε + r ^ 2 * ‖q.2‖ ^ 2)) q.1)) (r • q.2))
+      (recombine_contDiff_cocore hk r ε hε))
+  have hrecombOn : ContMDiffOn Iatt (𝓘(ℝ, MorseModel (m + 1))) (⊤ : ℕ∞)
+      (fun p : AttachingRegion k (m + 1 - k) => cocoreModelPoint hk ε r p) Set.univ := by
+    rw [contMDiffOn_univ]
+    exact hrecomb
+  have hlower : ContMDiff (𝓘(ℝ, MorseModel (m + 1))) (𝓘(ℝ, MorseModel (m + 1))) (⊤ : ℕ∞)
+      (modelLowerRoundMap hk ε r δ θ) :=
+    contMDiff_modelLowerRoundMap hk ε r δ θ hθ hδ hδr hθr
+  have hcomp : ContMDiff Iatt (𝓘(ℝ, MorseModel (m + 1))) (⊤ : ℕ∞)
+      (fun p : AttachingRegion k (m + 1 - k) =>
+        modelLowerRoundMap hk ε r δ θ (cocoreModelPoint hk ε r p)) :=
+    hlower.comp hrecomb
+  have hcompOn : ContMDiffOn Iatt (𝓘(ℝ, MorseModel (m + 1))) (⊤ : ℕ∞)
+      (fun p : AttachingRegion k (m + 1 - k) =>
+        modelLowerRoundMap hk ε r δ θ (cocoreModelPoint hk ε r p)) Set.univ := by
+    rw [contMDiffOn_univ]
+    exact hcomp
+  have hball : ∀ p : AttachingRegion k (m + 1 - k),
+      modelLowerRoundMap hk ε r δ θ (cocoreModelPoint hk ε r p) ∈
+        Metric.ball (0 : MorseModel (m + 1)) data.R' := by
+    intro p
+    have hlt : ‖modelLowerRoundMap hk ε r δ θ (cocoreModelPoint hk ε r p)‖ < data.R' :=
+      lt_of_le_of_lt (morseNorm_piNorm_le (modelLowerRoundMap hk ε r δ θ (cocoreModelPoint hk ε r p)))
+        (lt_of_le_of_lt (modelLowerRoundMap_cocore_norm_le hk ε r δ θ hε hδ hθ hδr p) hεr')
+    simpa [Metric.mem_ball, dist_eq_norm] using hlt
+  have hχ : ContMDiffOn Iatt I (⊤ : ℕ∞)
+      (fun p : AttachingRegion k (m + 1 - k) =>
+        data.χ (modelLowerRoundMap hk ε r δ θ (cocoreModelPoint hk ε r p))) Set.univ := by
+    refine data.hχon.comp hcompOn ?_
+    intro p hp
+    exact hball p
+  have hχ' : ContMDiff Iatt I (⊤ : ℕ∞)
+      (fun p : AttachingRegion k (m + 1 - k) =>
+        data.χ (modelLowerRoundMap hk ε r δ θ (cocoreModelPoint hk ε r p))) := by
+    rw [← contMDiffOn_univ]
+    exact hχ
+  exact hχ'.congr (by intro p; rfl)
+
 theorem handleEmbedding_attachingRegion {n k : ℕ} (hk : k ≤ n) (c ε r : ℝ)
     {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M] [ChartedSpace H M]
     {I : ModelWithCorners ℝ (MorseModel n) H} {f : M → ℝ}
