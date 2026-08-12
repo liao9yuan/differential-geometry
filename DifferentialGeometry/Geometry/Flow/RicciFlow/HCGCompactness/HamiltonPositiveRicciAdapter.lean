@@ -937,6 +937,57 @@ theorem ham3_stage_jet
   · exact hCtarget
   · exact hCgrow
 
+omit [NeZero (Module.finrank Real E)] in
+theorem ham3_limit_jets
+    {omega : Real} (h0omega : 0 < omega)
+    {g0 : SmoothRiemannianMetric I M}
+    (P : Ham3FlowPackage (I := I) (M := M) g0)
+    (hD : P.D =
+      DifferentialGeometry.Integral.Connection.RealTimeInterval.closedOpen
+        0 omega h0omega)
+    (Q : Ham3BlowupData M)
+    (hsel : Ham3PointSel (I := I) P Q)
+    (hwindow : Ham3Window (I := I) P Q ham3_r0)
+    {P₀ : PointedRiemannianManifold.{u, uE, uH} (I := I)}
+    {subseq : Nat → Nat}
+    (Φ : PointedCGHMaps (I := I)
+      (ham3SourceSeq (I := I) h0omega P hD Q hsel hwindow) P₀ subseq)
+    {R : letI : TopologicalSpace P₀.M := P₀.topology
+      letI : ChartedSpace H P₀.M := P₀.charted
+      letI : IsManifold I ∞ P₀.M := P₀.smooth
+      SmoothRiemannianMetric I P₀.M}
+    {bf : BumpFamily (I := I) Φ} {hsrc : SrcSigma Φ} {htgt : TgtSigma Φ}
+    (co : ConvOut (I := I) Φ R bf hsrc htgt (-(ham3_r0 ^ 2)) 0) :
+    letI : TopologicalSpace P₀.M := P₀.topology
+    letI : ChartedSpace H P₀.M := P₀.charted
+    letI : T2Space P₀.M := P₀.t2
+    letI : IsManifold I ∞ P₀.M := P₀.smooth
+    ∀ (r : Nat) (x₀ : P₀.M) (i j : Fin (Module.finrank Real E)),
+      ContinuousOn
+        (fun p : Real × E =>
+          iteratedFDeriv Real r
+            (DifferentialGeometry.Integral.DivergenceTheorem.chartGramOnE
+              (I := I) (co.gInf p.1) x₀ i j) p.2)
+        (Set.Icc (-(ham3_r0 ^ 2)) 0 ×ˢ
+          interior (extChartAt I x₀).target) := by
+  letI : TopologicalSpace P₀.M := P₀.topology
+  letI : ChartedSpace H P₀.M := P₀.charted
+  letI : T2Space P₀.M := P₀.t2
+  letI : IsManifold I ∞ P₀.M := P₀.smooth
+  letI : SigmaCompactSpace P₀.M := P₀.sigmaCompact
+  apply ConvOut.gramJets_of_stage (I := I) (Φ := Φ) co
+  intro r x₀ i j C hCc hCtgt
+  let K : Set P₀.M := (extChartAt I x₀).symm '' C
+  have hKc : IsCompact K := by
+    dsimp only [K]
+    exact hCc.image_of_continuousOn
+      ((continuousOn_extChartAt_symm (I := I) x₀).mono hCtgt)
+  obtain ⟨kgrow, hkgrow⟩ := bf.grow_cover K hKc
+  filter_upwards [Filter.eventually_ge_atTop kgrow] with k hk
+  apply ham3_stage_jet (I := I) h0omega P hD Q hsel hwindow Φ
+    (co.φ k) r x₀ i j hCtgt
+  simpa only [K] using hkgrow (co.φ k) (hk.trans (co.hφ.id_le k))
+
 def cghToHam3
     (X : PointedFlowSeq.{u, uE, uH} (I := I))
     (origIndex : Nat -> Nat) (horig : StrictMono origIndex)
