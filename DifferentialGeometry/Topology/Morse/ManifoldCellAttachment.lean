@@ -15553,6 +15553,20 @@ theorem isOpen_morseHandleAdjunction_lowerPart {m k : ℕ} (hk : k ≤ m + 1) (c
   have hOpenS : IsOpen (h '' S) := hIm ▸ hOpen
   exact h.symm.isOpenMap (h '' S) hOpenS
 
+theorem isClosed_range_handleCell {m k : ℕ} (hk : k ≤ m + 1) (c ε r : ℝ)
+    {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M] [ChartedSpace H M] [T2Space M]
+    {I : ModelWithCorners ℝ (MorseModel (m + 1)) H} {f : M → ℝ}
+    (data : MorseChart (m + 1) k hk c I f)
+    (hε : 0 < ε) (hr : r ≠ 0) (hεr : Real.sqrt (2 * ε + 2 * r ^ 2) ≤ data.R)
+    (hcont : Continuous f) :
+    IsClosed (Set.range (Handle.cell (morseAttachingEmbedding hk c ε r data hε hεr))) := by
+  haveI : T2Space (Handle.AdjunctionSpace k (m + 1 - k)
+      (morseAttachingEmbedding hk c ε r data hε hεr)) :=
+    (morseHandleAdjunctionHomeoUnion hk c ε r data hε hr hεr hcont).symm.t2Space
+  have hcomp : IsCompact (Set.range (Handle.cell (morseAttachingEmbedding hk c ε r data hε hεr))) := by
+    rw [← Set.image_univ]
+    exact (isCompact_univ.image (continuous_cell (morseAttachingEmbedding hk c ε r data hε hεr)))
+  exact hcomp.isClosed
 theorem morseHandleAdjunctionEquivRoundedSublevel_symm_rel_deep {m k : ℕ} (hk : k ≤ m + 1)
     (c ε r δ R₀ R₁ η : ℝ) {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M]
     [ChartedSpace H M] [T2Space M]
