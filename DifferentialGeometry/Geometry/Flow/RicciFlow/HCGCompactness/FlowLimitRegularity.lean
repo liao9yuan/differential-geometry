@@ -2097,6 +2097,127 @@ theorem gramSmoothIcc
     rfl
   exact gramModel_to_mfld_Icc (I := I) (g := co.gInf) x₀ i j hmodel
 
+theorem gramSmooth_regular
+    {R : letI : TopologicalSpace P.M := P.topology
+      letI : ChartedSpace H P.M := P.charted
+      letI : IsManifold I ∞ P.M := P.smooth
+      SmoothRiemannianMetric I P.M}
+    {bf : BumpFamily (I := I) Φ} {hsrc : SrcSigma Φ} {htgt : TgtSigma Φ}
+    {β ψ : Real}
+    (hcarrier : X.D.carrier ⊆ Set.Icc β ψ)
+    (co : ConvOut (I := I) Φ R bf hsrc htgt β ψ) :
+    letI : TopologicalSpace P.M := P.topology
+    letI : ChartedSpace H P.M := P.charted
+    letI : T2Space P.M := P.t2
+    letI : IsManifold I ∞ P.M := P.smooth
+    ∀ (x₀ : P.M) (i j : Fin (Module.finrank Real E)),
+      ContMDiffOn (𝓘(Real, Real).prod I) 𝓘(Real) ∞
+        (fun p : Real × P.M =>
+          chartGramMatrix (I := I) (co.gInf p.1) x₀ p.2 i j)
+        (X.D.regular ×ˢ
+          (trivializationAt E (TangentSpace I) x₀).baseSet) := by
+  letI : TopologicalSpace P.M := P.topology
+  letI : ChartedSpace H P.M := P.charted
+  letI : T2Space P.M := P.t2
+  letI : IsManifold I ∞ P.M := P.smooth
+  letI : SigmaCompactSpace P.M := P.sigmaCompact
+  intro x₀ i j p hp
+  obtain ⟨a, b, ht, hwin⟩ := X.D.exists_Icc_regular hp.1
+  have hsub : Set.Icc a b ⊆ Set.Icc β ψ :=
+    hwin.trans (X.D.regular_subset.trans hcarrier)
+  have hlocal :=
+    ConvOut.gramSmooth (I := I) (Φ := Φ) hwin
+      (ConvOut.restrict (Φ := Φ) co hsub)
+      x₀ i j p ⟨ht, hp.2⟩
+  have hnhds :
+      Set.Ioo a b ×ˢ
+          (trivializationAt E (TangentSpace I) x₀).baseSet ∈ 𝓝 p :=
+    prod_mem_nhds
+      (Ioo_mem_nhds ht.1 ht.2)
+      ((trivializationAt E (TangentSpace I) x₀).open_baseSet.mem_nhds hp.2)
+  exact (hlocal.contMDiffAt hnhds).contMDiffWithinAt
+
+theorem metricSmooth
+    {R : letI : TopologicalSpace P.M := P.topology
+      letI : ChartedSpace H P.M := P.charted
+      letI : IsManifold I ∞ P.M := P.smooth
+      SmoothRiemannianMetric I P.M}
+    {bf : BumpFamily (I := I) Φ} {hsrc : SrcSigma Φ} {htgt : TgtSigma Φ}
+    {β ψ : Real}
+    (hcarrier : X.D.carrier = Set.Icc β ψ)
+    (co : ConvOut (I := I) Φ R bf hsrc htgt β ψ) :
+    letI : TopologicalSpace P.M := P.topology
+    letI : ChartedSpace H P.M := P.charted
+    letI : T2Space P.M := P.t2
+    letI : IsManifold I ∞ P.M := P.smooth
+    letI : SigmaCompactSpace P.M := P.sigmaCompact
+    MetricFamilySmoothOn (I := I) (M := P.M) X.D
+      ({ base := { metric := co.gInf } } :
+        SolutionOn (I := I) (M := P.M) X.D).family := by
+  letI : TopologicalSpace P.M := P.topology
+  letI : ChartedSpace H P.M := P.charted
+  letI : T2Space P.M := P.t2
+  letI : IsManifold I ∞ P.M := P.smooth
+  letI : SigmaCompactSpace P.M := P.sigmaCompact
+  have hcar_le : X.D.carrier ⊆ Set.Icc β ψ := by
+    simpa only [hcarrier] using
+      (Set.Subset.rfl : Set.Icc β ψ ⊆ Set.Icc β ψ)
+  have hwin : Set.Icc β ψ ⊆ X.D.carrier := by
+    simpa only [hcarrier] using
+      (Set.Subset.rfl : Set.Icc β ψ ⊆ Set.Icc β ψ)
+  have hgram := ConvOut.gramSmooth_regular (I := I) (Φ := Φ) hcar_le co
+  have hcontWindow := ConvOut.metric_cont (I := I) (Φ := Φ) hwin co
+  have hcontTensor : Tensor0SFamilyContinuousOnSet (I := I) (M := P.M) 2
+      X.D.carrier
+      (fun t x => metricTensorField (I := I) (co.gInf t) x) := by
+    simpa only [hcarrier] using hcontWindow
+  refine ⟨?_, ?_, hcontTensor, ?_⟩
+  · intro x v w
+    have hcurve : ContMDiffOn 𝓘(ℝ, ℝ) (𝓘(ℝ, ℝ).prod I) ∞
+        (fun t : ℝ => (t, x)) X.D.regular :=
+      contMDiffOn_id.prodMk contMDiffOn_const
+    have hψ' : ContMDiffOn 𝓘(ℝ, ℝ)
+        (I.prod 𝓘(ℝ, E →L[ℝ] E →L[ℝ] ℝ)) ∞
+        (fun t : ℝ => TotalSpace.mk' (E →L[ℝ] E →L[ℝ] ℝ)
+          (E := fun y => TangentSpace I y →L[ℝ] TangentSpace I y →L[ℝ] ℝ) x
+          ((co.gInf t).inner x)) X.D.regular :=
+      (metricCLMSection_reg (I := I) X.D co.gInf hgram).comp
+        hcurve (fun t ht => ⟨ht, Set.mem_univ _⟩)
+    have hv : ContMDiffOn 𝓘(ℝ, ℝ) (I.prod 𝓘(ℝ, E)) ∞
+        (fun _ : ℝ => TotalSpace.mk' E
+          (E := fun y => TangentSpace I y) x v) X.D.regular :=
+      contMDiffOn_const
+    have hw : ContMDiffOn 𝓘(ℝ, ℝ) (I.prod 𝓘(ℝ, E)) ∞
+        (fun _ : ℝ => TotalSpace.mk' E
+          (E := fun y => TangentSpace I y) x w) X.D.regular :=
+      contMDiffOn_const
+    have happ := ContMDiffOn.clm_bundle_apply₂ (F₁ := E) (F₂ := E) (F₃ := ℝ)
+      (E₁ := TangentSpace I (M := P.M)) (E₂ := TangentSpace I (M := P.M))
+      (E₃ := Bundle.Trivial P.M ℝ) (b := fun _ : ℝ => x)
+      (ψ := fun t : ℝ => (co.gInf t).inner x)
+      (v := fun _ : ℝ => v) (w := fun _ : ℝ => w) hψ' hv hw
+    have hscalar : ContMDiffOn 𝓘(ℝ, ℝ) 𝓘(ℝ, ℝ) ∞
+        (fun t : ℝ => (co.gInf t).inner x v w) X.D.regular := by
+      intro t ht
+      have hpt := happ t ht
+      rw [Bundle.contMDiffWithinAt_totalSpace] at hpt
+      exact hpt.2
+    exact hscalar.contDiffOn
+  · intro x v w
+    have hbase : ContinuousOn
+        (fun s : ℝ => metricTensorField (I := I) (co.gInf s) x (vec2 v w))
+        X.D.carrier := by
+      rw [continuousOn_iff_continuous_restrict]
+      exact hcontTensor.eval_continuous
+        (P := {s : ℝ // s ∈ X.D.carrier})
+        (τ := Subtype.val) (b := fun _ => x) continuous_subtype_val
+        (fun p => p.2) continuous_const
+        (v := fun i _ => vec2 v w i) (fun _ => continuous_const)
+    refine hbase.congr (fun s _ => ?_)
+    simp [metricTensorField_apply, vec2]
+  · intro Idx _ frame u hframe i j
+    exact metricFrameComp_reg (I := I) X.D co.gInf hgram frame hframe i j
+
 end ConvOut
 
 namespace OpenConvOut
