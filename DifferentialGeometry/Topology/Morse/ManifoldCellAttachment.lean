@@ -2129,6 +2129,42 @@ theorem handleRoundEmbedding_injective {n k : ℕ} (hk : k ≤ n) (c ε r δ θ 
     data.χ.injOn hsrc_p hsrc_q hχ
   exact modelHandleRoundMap_injective hk ε r δ θ hε hδ hθ hδr hθr hr p q hy
 
+theorem handleRoundEmbedding_continuous {n k : ℕ} (hk : k ≤ n) (c ε r δ θ : ℝ)
+    {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M] [ChartedSpace H M]
+    {I : ModelWithCorners ℝ (MorseModel n) H} {f : M → ℝ}
+    (data : MorseChart n k hk c I f)
+    (hε : 0 < ε) (hδ : 0 < δ) (hθ : 0 < θ) (hδr : δ < r ^ 2) (hθr : θ < r ^ 2) (hr : 0 < r)
+    (hεr : Real.sqrt (2 * ε + 2 * r ^ 2) ≤ data.R) :
+    Continuous (handleRoundEmbedding hk c ε r δ θ data) := by
+  have hproj : Continuous (fun p : StandardHandle k (n - k) =>
+      ((p.1 : EuclideanSpace ℝ (Fin k)), (p.2 : EuclideanSpace ℝ (Fin (n - k))))) := by
+    fun_prop
+  have hcont : ContinuousOn (modelHandleRoundMapAmbient hk ε r δ θ)
+      {q : EuclideanSpace ℝ (Fin k) × EuclideanSpace ℝ (Fin (n - k)) |
+        ‖q.1‖ ≤ 1 ∧ ‖q.2‖ ≤ 1} :=
+    (contDiffOn_modelHandleRoundMap_ambient_closed hk ε r δ θ hε hδ hθ hδr hθr hr).continuousOn
+  have hmmap : Continuous (fun p : StandardHandle k (n - k) =>
+      modelHandleRoundMap hk ε r δ θ p) := by
+    have hcomp : Continuous (fun p : StandardHandle k (n - k) =>
+        modelHandleRoundMapAmbient hk ε r δ θ
+          ((p.1 : EuclideanSpace ℝ (Fin k)), (p.2 : EuclideanSpace ℝ (Fin (n - k))))) :=
+      hcont.comp_continuous hproj (by
+        intro p
+        constructor
+        · simpa using p.1.2
+        · simpa using p.2.2)
+    simpa [modelHandleRoundMap_eq_ambient] using hcomp
+  have hmap : Set.MapsTo (fun p : StandardHandle k (n - k) =>
+      modelHandleRoundMap hk ε r δ θ p) Set.univ data.χ.source := by
+    intro p hp
+    exact data.hχsrc (modelHandleRoundMap hk ε r δ θ p)
+      (le_trans (modelHandleRoundMap_norm_le hk ε r δ θ hε hδ hθ hδr hθr hr p) hεr)
+  have hcontOn : ContinuousOn (fun p : StandardHandle k (n - k) =>
+      data.χ (modelHandleRoundMap hk ε r δ θ p)) Set.univ :=
+    data.χ.continuousOn_toFun.comp hmmap.continuousOn hmap
+  change Continuous (fun p : StandardHandle k (n - k) => data.χ (modelHandleRoundMap hk ε r δ θ p))
+  exact (continuousOn_univ.mp hcontOn)
+
 theorem handleEmbedding_attachingRegion {n k : ℕ} (hk : k ≤ n) (c ε r : ℝ)
     {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M] [ChartedSpace H M]
     {I : ModelWithCorners ℝ (MorseModel n) H} {f : M → ℝ}
@@ -12388,6 +12424,44 @@ theorem handleRoundAttachingEmbedding_mem_capRoundedLowerSublevel {m k : ℕ}
   refine ⟨modelLowerRoundMap hk ε r δ θ (cocoreModelPoint hk ε r p), ?_, rfl⟩
   refine ⟨cocoreModelPoint hk ε r p,
     le_of_eq (morseNormalForm_cocoreModelPoint hk c ε r (le_of_lt hε) p), rfl⟩
+
+noncomputable def handleRoundAttachingEmbeddingCapSubtype {m k : ℕ}
+    (hk : k ≤ m + 1) (c ε r δ θ : ℝ)
+    {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M] [T2Space M] [ChartedSpace H M]
+    {I : ModelWithCorners ℝ (MorseModel (m + 1)) H} {f : M → ℝ}
+    (data : MorseChart (m + 1) k hk c I f)
+    (hε : 0 < ε) :
+    AttachingRegion k (m + 1 - k) →
+      {x : M // x ∈ morseCapRoundedLowerSublevel hk c ε r δ θ data} :=
+  fun p => ⟨handleRoundAttachingEmbedding hk c ε r δ θ data p,
+    handleRoundAttachingEmbedding_mem_capRoundedLowerSublevel hk c ε r δ θ data hε p⟩
+
+noncomputable def morseHandleRoundAdjunctionHomeoUnion {m k : ℕ}
+    (hk : k ≤ m + 1) (c ε r δ θ : ℝ)
+    {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M] [T2Space M] [ChartedSpace H M]
+    {I : ModelWithCorners ℝ (MorseModel (m + 1)) H} {f : M → ℝ}
+    (data : MorseChart (m + 1) k hk c I f)
+    (hε : 0 < ε) (hδ : 0 < δ) (hθ : 0 < θ) (hδr : δ < r ^ 2) (hθr : θ < r ^ 2) (hr : 0 < r)
+    (hεr : Real.sqrt (2 * ε + 2 * r ^ 2) ≤ data.R)
+    (hmeet : Disjoint (handleRoundEmbedding hk c ε r δ θ data ''
+        (Set.univ \ attachingRegion k (m + 1 - k)))
+      (morseCapRoundedLowerSublevel hk c ε r δ θ data))
+    (hclosed : IsClosed (morseCapRoundedLowerSublevel hk c ε r δ θ data))
+    [NeZero k] [NeZero (m + 1 - k)] :
+    Handle.AdjunctionSpace k (m + 1 - k)
+      (handleRoundAttachingEmbeddingCapSubtype hk c ε r δ θ data hε) ≃ₜ
+      {x : M // x ∈ morseCapRoundedLowerSublevel hk c ε r δ θ data ∪
+        Set.range (handleRoundEmbedding hk c ε r δ θ data)} :=
+  Handle.adjunctionHomeomorphUnionImage
+    (φ := handleRoundAttachingEmbeddingCapSubtype hk c ε r δ θ data hε)
+    (c := handleRoundEmbedding hk c ε r δ θ data)
+    (by
+      intro a
+      dsimp [handleRoundAttachingEmbeddingCapSubtype]
+      exact (handleRoundEmbedding_attaching_eq_lower hk c ε r δ θ data hε hδ hθ hδr hr a).symm)
+    (handleRoundEmbedding_injective hk c ε r δ θ data hε hδ hθ hδr hθr hr hεr)
+    (handleRoundEmbedding_continuous hk c ε r δ θ data hε hδ hθ hδr hθr hr hεr)
+    hmeet hclosed
 
 theorem range_handleEmbedding_subset_ballImage {m k : ℕ} (hk : k ≤ m + 1) (c ε r : ℝ)
     {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M] [ChartedSpace H M]
