@@ -1301,6 +1301,79 @@ theorem isCompact_morseRoundedSublevelFamily_strip {m k : ℕ} (hk : k ≤ m + 1
     dsimp [B]
     exact hcompact.prod isCompact_Icc
   exact (hA.union hB).of_isClosed_subset hSclosed hsub
+
+theorem morseRoundedSublevelFamily_criticalPoint_not_in_strip {m k : ℕ} (hk : k ≤ m + 1)
+    (c ε r δ R₀ R₁ : ℝ) {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M]
+    [ChartedSpace H M] [T2Space M]
+    {I : ModelWithCorners ℝ (MorseModel (m + 1)) H} [I.Boundaryless]
+    [IsManifold I (⊤ : WithTop ℕ∞) M] {f : M → ℝ}
+    (data : MorseChart (m + 1) k hk c I f)
+    (hε : 0 < ε) (hδ : 0 < δ) (hδr : δ < r ^ 2) (hR : R₀ < R₁) (hR0 : 0 ≤ R₀)
+    (hrsq : r ^ 2 = 2 * ε) (ε₀ : ℝ) (hε₀ : 2 * ε₀ < ε)
+    (s : ℝ) :
+    |morseRoundedSublevelFamily hk c ε r δ R₀ R₁ data data.p s| > 2 * ε₀ := by
+  classical
+  have hF : morseRoundedSublevelFamily hk c ε r δ R₀ R₁ data data.p s =
+      CellAttachment.modelSublevelFamily hk c ε r δ R₀ R₁ s 0 := by
+    have hsrc0 : (0 : MorseModel (m + 1)) ∈ data.χ.source :=
+      data.hχsrc 0 (by simpa [CellAttachment.morseNorm] using (le_of_lt data.hRpos))
+    have hg : morseRoundedFunction hk c ε r δ R₀ R₁ data data.p =
+        CellAttachment.modelRoundedFunction hk c ε r δ R₀ R₁ 0 := by
+      have hmem : data.p ∈ data.χ '' {y : MorseModel (m + 1) | CellAttachment.morseNorm (m + 1) y ≤ R₁} := by
+        refine ⟨0, ?_, data.hχ0⟩
+        simpa [CellAttachment.morseNorm] using (le_of_lt (lt_of_le_of_lt hR0 hR))
+      have heq := morseRoundedFunction_eq_model_of_mem_closedBall hk c ε r δ R₀ R₁ data hmem
+      rw [heq]
+      have hsymm : data.χ.symm data.p = 0 := by
+        rw [← data.hχ0]
+        exact data.χ.left_inv hsrc0
+      rw [hsymm]
+    have hf : f data.p = CellAttachment.morseNormalForm hk c 0 := by
+      rw [← data.hχ0]
+      exact data.hnorm 0 (by simpa [CellAttachment.morseNorm] using (le_of_lt data.hRpos))
+    dsimp [morseRoundedSublevelFamily, CellAttachment.modelSublevelFamily]
+    rw [hg, hf]
+    ring
+  have hsplit := CellAttachment.modelSublevelFamily_value_split hk c ε r δ R₀ R₁ s (0 : MorseModel (m + 1))
+    (by
+      have hz : CellAttachment.posPart hk (0 : MorseModel (m + 1)) = 0 := by
+        ext j
+        simp [CellAttachment.posPart]
+      simp [hz])
+  have hval : CellAttachment.modelSublevelFamily hk c ε r δ R₀ R₁ s 0 = -ε := by
+    have hτ0 : Real.smoothTransition ((CellAttachment.morseNorm (m + 1) (0 : MorseModel (m + 1)) ^ 2 - R₀ ^ 2) /
+        (R₁ ^ 2 - R₀ ^ 2)) = 0 := by
+      apply Real.smoothTransition.zero_of_nonpos
+      have hden : 0 < R₁ ^ 2 - R₀ ^ 2 := by
+        have hlt : |R₀| < |R₁| := by
+          rw [abs_of_nonneg hR0, abs_of_nonneg (le_of_lt (lt_of_le_of_lt hR0 hR))]
+          exact hR
+        have hsq : R₀ ^ 2 < R₁ ^ 2 := sq_lt_sq.mpr hlt
+        nlinarith
+      have hnum : 0 ≤ R₀ ^ 2 := by positivity
+      simp [CellAttachment.morseNorm]
+      have hnum' : -R₀ ^ 2 ≤ 0 := by nlinarith [hnum]
+      simpa using (div_nonpos_of_nonpos_of_nonneg hnum' (le_of_lt hden))
+    have hcap : CellAttachment.smoothCap ε r δ 0 = r ^ 2 := by
+      exact CellAttachment.smoothCap_lower hδ (by nlinarith [hδr, hε])
+    have hneg0 : ‖CellAttachment.negPart hk (0 : MorseModel (m + 1))‖ ^ 2 = 0 := by
+      have hz : CellAttachment.negPart hk (0 : MorseModel (m + 1)) = 0 := by
+        ext j
+        simp [CellAttachment.negPart]
+      rw [hz]
+      simp
+    rw [hsplit]
+    rw [hτ0]
+    rw [hneg0]
+    rw [hcap]
+    rw [hrsq]
+    ring
+  rw [hF, hval]
+  have habs : |-ε| = ε := by
+    rw [abs_of_neg (neg_neg_of_pos hε)]
+    ring
+  rw [habs]
+  nlinarith [hε₀]
 end ManifoldCellAttachment
 
 end
