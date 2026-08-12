@@ -497,6 +497,7 @@ theorem galerkin_energy_uniform_bound
     fun N t ht => ?_⟩
   exact hkey N k t ht
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] in
 /-- **`N`-uniform per-scale Galerkin energy bound with an `L¹`-in-time coefficient.**
 
 `galerkin_energy_uniform_bound_perScale` with the zeroth-order Grönwall coefficient
@@ -715,6 +716,7 @@ theorem energy_l1_single
         mul_le_mul_of_nonneg_right hZle (Real.exp_nonneg _)
     _ = Real.exp Sbd * gronwallBound B0 (C + 1) (seed ^ 2 / 4 + c₀) T := by ring
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] in
 /-- **`N`-uniform Galerkin energy bound at a single scale, with an `L¹`-in-time
 coefficient and an additive source.**
 
@@ -777,6 +779,59 @@ theorem galerkin_l1_single
       (U N) (Fseq N) σ (fun i hi => hderiv N u hu i hi))
     (fun u hu => by nlinarith [hclosure N u hu]) (hinit N) t ht
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] in
+theorem gal_rider_bound_at
+    {U : ℕ → ℝ → TensorEigenIdx (I := I) (M := M) g r s₀ → ℝ}
+    {Fseq : ℕ → ℝ → TensorEigenIdx (I := I) (M := M) g r s₀ → ℝ}
+    {sseq : ℕ → Finset (TensorEigenIdx (I := I) (M := M) g r s₀)}
+    {T σ ρ Cδ Cmid seed B0 c₀ Crid B : ℝ} {P : ℕ → ℝ → ℝ}
+    (hCδ : Cδ < 2) (hCmid : 0 ≤ Cmid) (hseed : 0 ≤ seed)
+    (hc₀ : 0 ≤ c₀) (hCrid : 0 ≤ Crid)
+    (hP0 : ∀ N, P N 0 = 0)
+    (hPnn : ∀ N, ∀ t ∈ Set.Icc (0 : ℝ) T, 0 ≤ P N t)
+    (hPcont : ∀ N, ContinuousOn (P N) (Set.Icc (0 : ℝ) T))
+    (hPderiv : ∀ N, ∀ t ∈ Set.Ico (0 : ℝ) T,
+      HasDerivWithinAt (P N)
+        (galerkinEnergy (I := I) (M := M) (sseq N) (U N) ρ t) (Set.Ici t) t)
+    (hPbd : ∀ N, ∀ t ∈ Set.Icc (0 : ℝ) T, P N t ≤ B)
+    (hcont : ∀ N, ∀ i ∈ sseq N,
+      ContinuousOn (fun t => U N t i) (Set.Icc (0 : ℝ) T))
+    (hderiv : ∀ N, ∀ t ∈ Set.Ico (0 : ℝ) T, ∀ i ∈ sseq N,
+      HasDerivWithinAt (fun u => U N u i)
+        (-(TensorEigenIdx.lambda (I := I) (M := M) i) * U N t i + Fseq N t i)
+        (Set.Ici t) t)
+    (hclosure : ∀ N : ℕ, ∀ t ∈ Set.Ico (0 : ℝ) T,
+      2 * ∑ i ∈ sseq N, tensorSobolevWeight (I := I) (M := M) i σ *
+          (U N t i * Fseq N t i) ≤
+        Cδ * galerkinEnergy (I := I) (M := M) (sseq N) (U N) (σ + 1) t +
+          (Cmid +
+              Crid * (1 + galerkinEnergy (I := I) (M := M) (sseq N) (U N) ρ t)) *
+            galerkinEnergy (I := I) (M := M) (sseq N) (U N) σ t +
+          seed * Real.sqrt (galerkinEnergy (I := I) (M := M) (sseq N) (U N) σ t) +
+          c₀)
+    (hinit : ∀ N, galerkinEnergy (I := I) (M := M) (sseq N) (U N) σ 0 ≤ B0) :
+    ∃ Bound : ℝ, ∀ N, ∀ t ∈ Set.Icc (0 : ℝ) T,
+      galerkinEnergy (I := I) (M := M) (sseq N) (U N) σ t ≤ Bound := by
+  refine galerkin_l1_single (Cδ := Cδ) (Cmid := Cmid) (seed := seed)
+    (B0 := B0) (c₀ := c₀) (Sbd := Crid * (T + B))
+    (A := fun N t =>
+      Crid * (1 + galerkinEnergy (I := I) (M := M) (sseq N) (U N) ρ t))
+    (S := fun N t => Crid * (t + P N t))
+    hCδ hCmid hseed hc₀ (fun N => by simp only [hP0 N]; ring) ?_ ?_ ?_ ?_
+    hcont hderiv hclosure hinit
+  · intro N t ht
+    exact mul_nonneg hCrid (add_nonneg ht.1 (hPnn N t ht))
+  · intro N
+    exact continuousOn_const.mul (continuousOn_id.add (hPcont N))
+  · intro N t ht
+    have hid : HasDerivWithinAt (fun u : ℝ => u) 1 (Set.Ici t) t :=
+      hasDerivWithinAt_id t _
+    exact (hid.add (hPderiv N t ht)).const_mul Crid
+  · intro N t ht
+    have hle : t + P N t ≤ T + B := add_le_add ht.2 (hPbd N t ht)
+    exact mul_le_mul_of_nonneg_left hle hCrid
+
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] in
 /-- **`N`-uniform single-scale Galerkin bound with the quadratic `L¹` rider.**
 
 `galerkin_l1_single` in the form a low-regularity rung actually produces it: the
@@ -910,6 +965,7 @@ theorem energy_l1_diss
     (fun t ht => by simpa only [zero_mul, neg_zero, zero_add] using hWdiss t ht)
     hWinit
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] in
 /-- **The quadratic Galerkin rider with its next-scale dissipation retained.**
 
 This strengthens `galRiderBound`.  Besides the working-scale energy bound it

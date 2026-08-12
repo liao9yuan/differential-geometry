@@ -3480,11 +3480,13 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.UnifLow1PathH5
 import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.UnifLow1PathPair
 import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.UnifLowBaseA2Affine
 import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.UnifLowBaseC2Fibre
+import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.UnifLowBaseGalArmAffine
 import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.UnifLowBasePairH4
 import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.UnifLowBasePairH5
 import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.UnifLowBoundsSmall
 import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.UnifLowRegFatou
 import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.UnifLowRegH4Diss
+import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.UnifLowRegHigherAffine
 import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.UnifLowSolveH3
 import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.UnifLowSolveH4
 import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.UnifLowSolveH4Mass
