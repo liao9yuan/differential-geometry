@@ -2501,6 +2501,17 @@ noncomputable def standardHandleZeroChartedSpace (l : ℕ) [NeZero l] [Fact (l =
   exact prodChartedSpace (EuclideanSpace ℝ (Fin 0)) (ClosedCell 0)
     (EuclideanHalfSpace ((l - 1) + 1)) (ClosedCell l)
 
+@[reducible]
+noncomputable def standardHandleTopChartedSpace (k : ℕ) [NeZero k] [Fact (k = (k - 1) + 1)] :
+    ChartedSpace (ModelProd (EuclideanHalfSpace ((k - 1) + 1)) (EuclideanSpace ℝ (Fin 0)))
+      (StandardHandle k 0) := by
+  letI : ChartedSpace (EuclideanHalfSpace ((k - 1) + 1)) (ClosedCell k) :=
+    closedCellChartedSpace k
+  letI : ChartedSpace (EuclideanSpace ℝ (Fin 0)) (ClosedCell 0) :=
+    closedCellZeroChartedSpace
+  exact prodChartedSpace (EuclideanHalfSpace ((k - 1) + 1)) (ClosedCell k)
+    (EuclideanSpace ℝ (Fin 0)) (ClosedCell 0)
+
 theorem closedCellInclusion_contMDiff_of (l : ℕ) [NeZero l] [Fact (l = (l - 1) + 1)] :
     @ContMDiff ℝ _ (EuclideanSpace ℝ (Fin ((l - 1) + 1))) _ _
       (EuclideanHalfSpace ((l - 1) + 1)) _ (modelWithCornersEuclideanHalfSpace ((l - 1) + 1))
