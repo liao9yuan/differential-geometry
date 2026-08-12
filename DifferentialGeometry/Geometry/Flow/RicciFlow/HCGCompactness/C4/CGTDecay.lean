@@ -175,7 +175,8 @@ def injDecay_of_bg
   let shiftC : Real :=
     2 ^ n * Real.exp (q * (d : Real) * s)
   let sphereB : Real :=
-    (((modelHaar (E := E)).toSphere Set.univ)).toReal
+    (((volume : Measure
+      (EuclideanSpace Real (Fin n))).toSphere Set.univ)).toReal
   let sphereP : Real :=
     (((volume : Measure E).toSphere Set.univ)).toReal
   let upperC : Real :=
@@ -231,7 +232,8 @@ def injDecay_of_bg
     exact ENNReal.toReal_pos
       (Measure.measure_univ_pos.mpr
         (Measure.toSphere_ne_zero
-          (modelHaar (E := E)))).ne'
+          (volume : Measure
+            (EuclideanSpace Real (Fin n))))).ne'
       (measure_lt_top _ _).ne
   have hsphereP : 0 ≤ sphereP := by
     exact ENNReal.toReal_nonneg
@@ -611,7 +613,8 @@ def injDecay_of_bg
         (by positivity : 0 < 2 * s) hno hRic)
   have hVxRaw :
       Vx ≤
-        (modelHaar (E := E)).toSphere Set.univ *
+        (volume : Measure
+          (EuclideanSpace Real (Fin n))).toSphere Set.univ *
             ENNReal.ofReal (hypRadVol q d (2 * s)) := by
     calc
       Vx ≤
@@ -622,7 +625,8 @@ def injDecay_of_bg
         exact measure_mono
           (edistBall_mono (I := I) x (by linarith : s ≤ 2 * s))
       _ ≤
-          (modelHaar (E := E)).toSphere Set.univ *
+          (volume : Measure
+            (EuclideanSpace Real (Fin n))).toSphere Set.univ *
               ENNReal.ofReal (hypRadVol q d (2 * s)) := by
         simpa only [d, n] using
           (segBall_vol_le (I := I) (X.obj k).metric hEnorm x hq
@@ -643,7 +647,8 @@ def injDecay_of_bg
         ENNReal.ofReal (upperC * s ^ n) :=
     ENNReal.ofReal_le_ofReal hmodelTwo
   have hsphereBEq :
-      (modelHaar (E := E)).toSphere Set.univ =
+      (volume : Measure
+        (EuclideanSpace Real (Fin n))).toSphere Set.univ =
           ENNReal.ofReal sphereB := by
     exact (ENNReal.ofReal_toReal (measure_lt_top _ _).ne).symm
   have hspherePEq :
@@ -656,7 +661,8 @@ def injDecay_of_bg
       Vx ≤ ENNReal.ofReal sphereB * ENNReal.ofReal T := by
     calc
       Vx ≤
-          (modelHaar (E := E)).toSphere Set.univ *
+          (volume : Measure
+            (EuclideanSpace Real (Fin n))).toSphere Set.univ *
               ENNReal.ofReal (hypRadVol q d (2 * s)) := hVxRaw
       _ = ENNReal.ofReal sphereB *
             ENNReal.ofReal (hypRadVol q d (2 * s)) := by
