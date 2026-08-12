@@ -2548,7 +2548,7 @@ theorem mem_modelHandle {n k : ℕ} (hk : k ≤ n) (ε r : ℝ) (hε : 0 < ε) (
 noncomputable def modelLowerAttachingChartPoint {n k : ℕ} (hk : k ≤ n) (ε : ℝ)
     (y : MorseModel n) : MorseModel n :=
   recombine hk (negPart hk y)
-    (Real.sqrt (2 * ε + ‖negPart hk y‖ ^ 2) • ((‖posPart hk y‖)⁻¹ • posPart hk y))
+    (Real.sqrt (‖negPart hk y‖ ^ 2 - 2 * ε) • ((‖posPart hk y‖)⁻¹ • posPart hk y))
 
 theorem modelLowerAttachingChartPoint_negPart {n k : ℕ} (hk : k ≤ n) (ε : ℝ)
     (y : MorseModel n) :
@@ -2557,14 +2557,15 @@ theorem modelLowerAttachingChartPoint_negPart {n k : ℕ} (hk : k ≤ n) (ε : �
   rw [negPart_recombine]
 
 theorem modelLowerAttachingChartPoint_posPart_norm_sq {n k : ℕ} (hk : k ≤ n) (ε : ℝ)
-    (hε : 0 ≤ ε) {y : MorseModel n} (hpos : posPart hk y ≠ 0) :
-    ‖posPart hk (modelLowerAttachingChartPoint hk ε y)‖ ^ 2 = 2 * ε + ‖negPart hk y‖ ^ 2 := by
+    {y : MorseModel n} (hpos : posPart hk y ≠ 0)
+    (hε : ‖negPart hk y‖ ^ 2 - 2 * ε ≥ 0) :
+    ‖posPart hk (modelLowerAttachingChartPoint hk ε y)‖ ^ 2 = ‖negPart hk y‖ ^ 2 - 2 * ε := by
   dsimp [modelLowerAttachingChartPoint]
   rw [posPart_recombine]
   rw [norm_smul]
   rw [Real.norm_eq_abs, abs_of_nonneg (Real.sqrt_nonneg _)]
   rw [mul_pow]
-  rw [Real.sq_sqrt (by nlinarith [hε, sq_nonneg ‖negPart hk y‖])]
+  rw [Real.sq_sqrt hε]
   have hnorm : ‖((‖posPart hk y‖)⁻¹ • posPart hk y : EuclideanSpace ℝ (Fin (n - k)))‖ = 1 := by
     rw [norm_smul, Real.norm_eq_abs, abs_inv, abs_of_nonneg (norm_nonneg _)]
     rw [inv_mul_cancel₀ (norm_ne_zero_iff.mpr hpos)]
@@ -2573,21 +2574,22 @@ theorem modelLowerAttachingChartPoint_posPart_norm_sq {n k : ℕ} (hk : k ≤ n)
 
 theorem modelLowerAttachingChartPoint_fix {n k : ℕ} (hk : k ≤ n) (ε : ℝ)
     {y : MorseModel n} (hpos : posPart hk y ≠ 0)
-    (hfix : ‖posPart hk y‖ ^ 2 = 2 * ε + ‖negPart hk y‖ ^ 2) :
+    (hfix : ‖posPart hk y‖ ^ 2 = ‖negPart hk y‖ ^ 2 - 2 * ε) :
     modelLowerAttachingChartPoint hk ε y = y := by
   dsimp [modelLowerAttachingChartPoint]
   rw [← recombine_decompose hk y]
   simp only [negPart_recombine, posPart_recombine]
-  have hsqrt : Real.sqrt (2 * ε + ‖negPart hk y‖ ^ 2) = ‖posPart hk y‖ := by
+  have hsqrt : Real.sqrt (‖negPart hk y‖ ^ 2 - 2 * ε) = ‖posPart hk y‖ := by
     rw [← hfix]
     exact Real.sqrt_sq_eq_abs (‖posPart hk y‖) |>.trans (abs_of_nonneg (norm_nonneg _))
-  have hsmul' : Real.sqrt (2 * ε + ‖negPart hk y‖ ^ 2) •
+  have hsmul' : Real.sqrt (‖negPart hk y‖ ^ 2 - 2 * ε) •
       ((‖posPart hk y‖)⁻¹ • posPart hk y) = posPart hk y := by
     rw [hsqrt]
     rw [smul_smul]
     rw [mul_inv_cancel₀ (norm_ne_zero_iff.mpr hpos)]
     rw [one_smul]
   rw [hsmul']
+
 
 theorem modelHandle_meets_lower_sublevel {n k : ℕ} (hk : k ≤ n) (c ε r : ℝ) (hε : 0 < ε)
     (hr : r ≠ 0) :
