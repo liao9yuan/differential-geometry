@@ -8064,6 +8064,19 @@ theorem modelHandleRoundMap_norm_le {n k : ℕ} (hk : k ≤ n) (ε r δ θ : ℝ
     nlinarith [hneg, hpos, hsqrt]
   · positivity
 
+theorem modelHandleRoundMap_f_sub {n k : ℕ} (hk : k ≤ n) (c ε r δ θ : ℝ)
+    (hε : 0 < ε) (hδ : 0 < δ) (hθ : 0 < θ) (hδr : δ < r ^ 2) (hθr : θ < r ^ 2) (hr : 0 < r)
+    (p : StandardHandle k (n - k)) :
+    morseNormalForm hk c (modelHandleRoundMap hk ε r δ θ p) - (c - ε) =
+      (1 / 2) * (modelRoundCapQ ε r δ θ (‖(p.1 : EuclideanSpace ℝ (Fin k))‖ ^ 2)
+          (‖(p.2 : EuclideanSpace ℝ (Fin (n - k)))‖ ^ 2) -
+        (2 * ε + r ^ 2 * ‖(p.2 : EuclideanSpace ℝ (Fin (n - k)))‖ ^ 2) *
+          ‖(p.1 : EuclideanSpace ℝ (Fin k))‖ ^ 2 + 2 * ε) := by
+  rw [morseNormalForm_split hk c (modelHandleRoundMap hk ε r δ θ p)]
+  rw [modelHandleRoundMap_posPart_norm_sq hk ε r δ θ hε hδ hθ hδr hθr hr p]
+  rw [modelHandleRoundMap_negPart_norm_sq hk ε r δ θ (le_of_lt hε) p]
+  ring
+
 theorem modelRoundCapQ_eq_r2b_of_t_lt {ε r δ θ a b t : ℝ} (hε : 0 < ε) (hδ : 0 < δ)
     (hθ : 0 < θ) (hδr : δ < r ^ 2) (hθr : θ < r ^ 2) (hr : 0 < r) (hapos : 0 < a) (ha1 : a ≤ 1)
     (hb0 : 0 ≤ b) (hb1 : b ≤ 1) (ht0 : t < r ^ 2 + 2 * ε) (htpos : 0 < t)
