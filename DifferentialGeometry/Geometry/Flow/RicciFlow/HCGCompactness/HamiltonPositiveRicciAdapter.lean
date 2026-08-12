@@ -1,6 +1,7 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.RicciFlowConvergence
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.MetricCovDerivPullbackCross
 import DifferentialGeometry.Geometry.Flow.RicciFlow.DimensionThree.HamiltonPositiveRicci
+import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.SolutionTimeRestrict
 
 set_option autoImplicit false
 
@@ -25,7 +26,7 @@ open scoped Manifold ContDiff
 open DifferentialGeometry.PDE.RicciFlow.HamiltonPositiveRicci
 
 variable {E : Type uE} [NormedAddCommGroup E]
-variable [NormedSpace Real E] [FiniteDimensional Real E]
+variable [InnerProductSpace Real E] [FiniteDimensional Real E]
 variable [NeZero (Module.finrank Real E)] [CompleteSpace E]
 variable {H : Type uH} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H}
@@ -35,6 +36,244 @@ variable [SigmaCompactSpace M] [T2Space M]
 
 
 
+
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
+  [CompleteSpace E] [I.Boundaryless] [SigmaCompactSpace M] [T2Space M] in
+private theorem srm_eq_of_inner
+    {g g' : SmoothRiemannianMetric I M}
+    (h : ∀ (x : M) (v w : TangentSpace I x),
+      g.inner x v w = g'.inner x v w) :
+    g = g' := by
+  obtain ⟨i₁, s₁, p₁, b₁, c₁⟩ := g
+  obtain ⟨i₂, s₂, p₂, b₂, c₂⟩ := g'
+  have hi : i₁ = i₂ :=
+    funext fun x =>
+      ContinuousLinearMap.ext fun v =>
+        ContinuousLinearMap.ext fun w => h x v w
+  subst hi
+  rfl
+
+private def ham3CommonD :
+    DifferentialGeometry.Integral.Connection.RealTimeInterval :=
+  DifferentialGeometry.Integral.Connection.RealTimeInterval.closed
+    (-(ham3_r0 ^ 2)) 0 (neg_nonpos.mpr (sq_nonneg ham3_r0))
+
+private def ham3ShiLeft : Real :=
+  -(2 * ham3_r0 ^ 2)
+
+private noncomputable def ham3WinStart
+    {g0 : SmoothRiemannianMetric I M}
+    (P : Ham3FlowPackage (I := I) (M := M) g0)
+    (Q : Ham3BlowupData M)
+    (hwindow : Ham3Window (I := I) P Q ham3_r0) : Nat :=
+  Classical.choose hwindow
+
+private noncomputable def ham3BufStart
+    {g0 : SmoothRiemannianMetric I M}
+    (P : Ham3FlowPackage (I := I) (M := M) g0)
+    (Q : Ham3BlowupData M)
+    (hsel : Ham3PointSel (I := I) P Q) : Nat :=
+  Classical.choose (hsel.2.2.2.1 (2 * ham3_r0 ^ 2))
+
+private noncomputable def ham3Start
+    {g0 : SmoothRiemannianMetric I M}
+    (P : Ham3FlowPackage (I := I) (M := M) g0)
+    (Q : Ham3BlowupData M)
+    (hsel : Ham3PointSel (I := I) P Q)
+    (hwindow : Ham3Window (I := I) P Q ham3_r0) : Nat :=
+  max (ham3WinStart (I := I) P Q hwindow) (ham3BufStart (I := I) P Q hsel)
+
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
+private theorem ham3Start_spec
+    {g0 : SmoothRiemannianMetric I M}
+    (P : Ham3FlowPackage (I := I) (M := M) g0)
+    (Q : Ham3BlowupData M)
+    (hsel : Ham3PointSel (I := I) P Q)
+    (hwindow : Ham3Window (I := I) P Q ham3_r0) :
+    ∀ i : Nat, ham3Start (I := I) P Q hsel hwindow ≤ i →
+      ∀ s : Real, -(ham3_r0 ^ 2) ≤ s → s ≤ 0 →
+        -(ham3BlowupScale (I := I) P Q i * Q.time i) ≤ s ∧ s ≤ 0 :=
+  fun i hi s hs h0 =>
+    Classical.choose_spec hwindow i
+      (le_trans (Nat.le_max_left _ _) hi) s hs h0
+
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
+private theorem ham3Buf_spec
+    {g0 : SmoothRiemannianMetric I M}
+    (P : Ham3FlowPackage (I := I) (M := M) g0)
+    (Q : Ham3BlowupData M)
+    (hsel : Ham3PointSel (I := I) P Q)
+    (hwindow : Ham3Window (I := I) P Q ham3_r0) :
+    ∀ i : Nat, ham3Start (I := I) P Q hsel hwindow ≤ i →
+      2 * ham3_r0 ^ 2 ≤
+        ham3BlowupScale (I := I) P Q i * Q.time i :=
+  fun i hi =>
+    Classical.choose_spec (hsel.2.2.2.1 (2 * ham3_r0 ^ 2)) i
+      (le_trans (Nat.le_max_right _ _) hi)
+
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
+private theorem ham3_car_subset
+    {omega : Real} (h0omega : 0 < omega)
+    {g0 : SmoothRiemannianMetric I M}
+    (P : Ham3FlowPackage (I := I) (M := M) g0)
+    (hD : P.D =
+      DifferentialGeometry.Integral.Connection.RealTimeInterval.closedOpen
+        0 omega h0omega)
+    (Q : Ham3BlowupData M)
+    (hsel : Ham3PointSel (I := I) P Q)
+    (hwindow : Ham3Window (I := I) P Q ham3_r0)
+    (i : Nat) :
+    ham3CommonD.carrier ⊆
+      (DifferentialGeometry.PDE.RicciFlow.paraInterval P.D
+        (Q.time (ham3Start (I := I) P Q hsel hwindow + i))
+        (ham3BlowupScale (I := I) P Q
+          (ham3Start (I := I) P Q hsel hwindow + i))
+        (hsel.1 (ham3Start (I := I) P Q hsel hwindow + i))
+        (hsel.2.2.1 (ham3Start (I := I) P Q hsel hwindow + i))).carrier := by
+  intro s hs
+  change s ∈ Set.Icc (-(ham3_r0 ^ 2)) 0 at hs
+  let j := ham3Start (I := I) P Q hsel hwindow + i
+  have hj : ham3Start (I := I) P Q hsel hwindow ≤ j := by
+    simpa only [j] using
+      Nat.le_add_right (ham3Start (I := I) P Q hsel hwindow) i
+  have hw := ham3Start_spec (I := I) P Q hsel hwindow j hj s hs.1 hs.2
+  rw [DifferentialGeometry.PDE.RicciFlow.paraInterval_carrier]
+  change ham3RescaledTime (I := I) P Q j s ∈ P.D.carrier
+  rw [hD]
+  have hscale := hsel.1 j
+  have htimeMem := hsel.2.2.1 j
+  rw [hD] at htimeMem
+  have hnum : 0 ≤ ham3BlowupScale (I := I) P Q j * Q.time j + s := by
+    linarith [hw.1]
+  have hlo : 0 ≤ ham3RescaledTime (I := I) P Q j s := by
+    rw [show ham3RescaledTime (I := I) P Q j s =
+        (ham3BlowupScale (I := I) P Q j * Q.time j + s) /
+          ham3BlowupScale (I := I) P Q j by
+      unfold ham3RescaledTime
+      field_simp [ne_of_gt hscale]]
+    exact div_nonneg hnum hscale.le
+  have hsdiv : s / ham3BlowupScale (I := I) P Q j ≤ 0 :=
+    div_nonpos_of_nonpos_of_nonneg hw.2 hscale.le
+  have hhi : ham3RescaledTime (I := I) P Q j s < omega := by
+    unfold ham3RescaledTime
+    linarith [htimeMem.2, hsdiv]
+  exact ⟨hlo, hhi⟩
+
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
+private theorem ham3_reg_subset
+    {omega : Real} (h0omega : 0 < omega)
+    {g0 : SmoothRiemannianMetric I M}
+    (P : Ham3FlowPackage (I := I) (M := M) g0)
+    (hD : P.D =
+      DifferentialGeometry.Integral.Connection.RealTimeInterval.closedOpen
+        0 omega h0omega)
+    (Q : Ham3BlowupData M)
+    (hsel : Ham3PointSel (I := I) P Q)
+    (hwindow : Ham3Window (I := I) P Q ham3_r0)
+    (i : Nat) :
+    ham3CommonD.regular ⊆
+      (DifferentialGeometry.PDE.RicciFlow.paraInterval P.D
+        (Q.time (ham3Start (I := I) P Q hsel hwindow + i))
+        (ham3BlowupScale (I := I) P Q
+          (ham3Start (I := I) P Q hsel hwindow + i))
+        (hsel.1 (ham3Start (I := I) P Q hsel hwindow + i))
+        (hsel.2.2.1 (ham3Start (I := I) P Q hsel hwindow + i))).regular := by
+  intro s hs
+  change s ∈ Set.Ioo (-(ham3_r0 ^ 2)) 0 at hs
+  let j := ham3Start (I := I) P Q hsel hwindow + i
+  have hj : ham3Start (I := I) P Q hsel hwindow ≤ j := by
+    simpa only [j] using
+      Nat.le_add_right (ham3Start (I := I) P Q hsel hwindow) i
+  have hw0 :=
+    ham3Start_spec (I := I) P Q hsel hwindow j hj (-(ham3_r0 ^ 2))
+      le_rfl (neg_nonpos.mpr (sq_nonneg ham3_r0))
+  rw [DifferentialGeometry.PDE.RicciFlow.paraInterval_regular]
+  change ham3RescaledTime (I := I) P Q j s ∈ P.D.regular
+  rw [hD]
+  have hscale := hsel.1 j
+  have htimeMem := hsel.2.2.1 j
+  rw [hD] at htimeMem
+  have hnum : 0 < ham3BlowupScale (I := I) P Q j * Q.time j + s := by
+    linarith [hw0.1, hs.1]
+  have hlo : 0 < ham3RescaledTime (I := I) P Q j s := by
+    rw [show ham3RescaledTime (I := I) P Q j s =
+        (ham3BlowupScale (I := I) P Q j * Q.time j + s) /
+          ham3BlowupScale (I := I) P Q j by
+      unfold ham3RescaledTime
+      field_simp [ne_of_gt hscale]]
+    exact div_pos hnum hscale
+  have hsdiv : s / ham3BlowupScale (I := I) P Q j < 0 :=
+    div_neg_of_neg_of_pos hs.2 hscale
+  have hhi : ham3RescaledTime (I := I) P Q j s < omega := by
+    unfold ham3RescaledTime
+    linarith [htimeMem.2, hsdiv]
+  exact ⟨hlo, hhi⟩
+
+noncomputable def ham3SourceSeq
+    {omega : Real} (h0omega : 0 < omega)
+    {g0 : SmoothRiemannianMetric I M}
+    (P : Ham3FlowPackage (I := I) (M := M) g0)
+    (hD : P.D =
+      DifferentialGeometry.Integral.Connection.RealTimeInterval.closedOpen
+        0 omega h0omega)
+    (Q : Ham3BlowupData M)
+    (hsel : Ham3PointSel (I := I) P Q)
+    (hwindow : Ham3Window (I := I) P Q ham3_r0) :
+    PointedFlowSeq.{u, uE, uH} (I := I) where
+  D := ham3CommonD
+  term := fun i =>
+    { M := M
+      topology := inferInstance
+      charted := inferInstance
+      smooth := inferInstance
+      sigmaCompact := inferInstance
+      t2 := inferInstance
+      t2TangentBundle := inferInstance
+      basepoint := Q.point (ham3Start (I := I) P Q hsel hwindow + i)
+      S :=
+        (ham3RescaledSol (I := I) P Q hsel
+          (ham3Start (I := I) P Q hsel hwindow + i)).timeRestrict ham3CommonD
+      isSolution :=
+        DifferentialGeometry.PDE.RicciFlow.isSoln_timeRestrict (I := I)
+          (DifferentialGeometry.PDE.RicciFlow.paraSol (I := I) P.S
+            P.isSmooth.isSolution
+            (Q.time (ham3Start (I := I) P Q hsel hwindow + i))
+            (ham3BlowupScale (I := I) P Q
+              (ham3Start (I := I) P Q hsel hwindow + i))
+            (hsel.1 (ham3Start (I := I) P Q hsel hwindow + i))
+            (hsel.2.2.1 (ham3Start (I := I) P Q hsel hwindow + i)))
+          (ham3_car_subset (I := I) h0omega P hD Q hsel hwindow i)
+          (ham3_reg_subset (I := I) h0omega P hD Q hsel hwindow i) }
+
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
+@[simp] theorem sourceSeq_carrier
+    {omega : Real} (h0omega : 0 < omega)
+    {g0 : SmoothRiemannianMetric I M}
+    (P : Ham3FlowPackage (I := I) (M := M) g0)
+    (hD : P.D =
+      DifferentialGeometry.Integral.Connection.RealTimeInterval.closedOpen
+        0 omega h0omega)
+    (Q : Ham3BlowupData M)
+    (hsel : Ham3PointSel (I := I) P Q)
+    (hwindow : Ham3Window (I := I) P Q ham3_r0) :
+    (ham3SourceSeq (I := I) h0omega P hD Q hsel hwindow).D.carrier =
+      Set.Icc (-(ham3_r0 ^ 2)) 0 := by
+  rfl
+
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
+@[simp] theorem sourceSeq_regular
+    {omega : Real} (h0omega : 0 < omega)
+    {g0 : SmoothRiemannianMetric I M}
+    (P : Ham3FlowPackage (I := I) (M := M) g0)
+    (hD : P.D =
+      DifferentialGeometry.Integral.Connection.RealTimeInterval.closedOpen
+        0 omega h0omega)
+    (Q : Ham3BlowupData M)
+    (hsel : Ham3PointSel (I := I) P Q)
+    (hwindow : Ham3Window (I := I) P Q ham3_r0) :
+    (ham3SourceSeq (I := I) h0omega P hD Q hsel hwindow).D.regular =
+      Set.Ioo (-(ham3_r0 ^ 2)) 0 := by
+  rfl
 
 def cghToHam3
     (X : PointedFlowSeq.{u, uE, uH} (I := I))
