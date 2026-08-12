@@ -419,6 +419,7 @@ import DifferentialGeometry.Analysis.Integration.EntropyJensen
 import DifferentialGeometry.Analysis.Integration.EntropyMix
 import DifferentialGeometry.Analysis.Integration.L2.Basic
 import DifferentialGeometry.Analysis.Integration.L2.CompactSupport
+import DifferentialGeometry.Analysis.Integration.L2.Fatou
 import DifferentialGeometry.Analysis.Integration.L2.FiniteProductHolderFiberNorm
 import DifferentialGeometry.Analysis.Integration.L2.ForcingFiniteOrderTimeRegularityParametricIntegral
 import DifferentialGeometry.Analysis.Integration.L2.Hilbert.Defs
