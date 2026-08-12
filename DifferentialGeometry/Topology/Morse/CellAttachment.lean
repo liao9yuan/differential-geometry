@@ -7723,6 +7723,30 @@ theorem modelHandleRoundMap_posPart_eq_of_scalar {n k : ℕ} (_hk : k ≤ n) (ε
     Real.sqrt (modelRoundCapQ ε r δ θ a b) / ‖(p.2 : EuclideanSpace ℝ (Fin (n - k)))‖)
     hscalar_ne) hs_inj
 
+theorem modelHandleRoundMap_negPart_eq_of_scalar {n k : ℕ} (_hk : k ≤ n) (ε r : ℝ)
+    (hε : 0 < ε) (p p' : StandardHandle k (n - k))
+    (hbb : ‖(p.2 : EuclideanSpace ℝ (Fin (n - k)))‖ ^ 2 =
+      ‖(p'.2 : EuclideanSpace ℝ (Fin (n - k)))‖ ^ 2)
+    (hneg : (Real.sqrt (2 * ε + r ^ 2 * ‖(p.2 : EuclideanSpace ℝ (Fin (n - k)))‖ ^ 2) •
+        (p.1 : EuclideanSpace ℝ (Fin k)) : EuclideanSpace ℝ (Fin k)) =
+      Real.sqrt (2 * ε + r ^ 2 * ‖(p'.2 : EuclideanSpace ℝ (Fin (n - k)))‖ ^ 2) •
+        (p'.1 : EuclideanSpace ℝ (Fin k))) :
+    (p.1 : EuclideanSpace ℝ (Fin k)) = (p'.1 : EuclideanSpace ℝ (Fin k)) := by
+  have hsqrt_ne : Real.sqrt (2 * ε + r ^ 2 * ‖(p.2 : EuclideanSpace ℝ (Fin (n - k)))‖ ^ 2) ≠ 0 := by
+    have hpos : 0 < 2 * ε + r ^ 2 * ‖(p.2 : EuclideanSpace ℝ (Fin (n - k)))‖ ^ 2 := by
+      nlinarith [hε, sq_nonneg (‖(p.2 : EuclideanSpace ℝ (Fin (n - k)))‖ : ℝ)]
+    exact ne_of_gt (Real.sqrt_pos.2 hpos)
+  have hs_inj : (Real.sqrt (2 * ε + r ^ 2 * ‖(p.2 : EuclideanSpace ℝ (Fin (n - k)))‖ ^ 2) •
+      (p.1 : EuclideanSpace ℝ (Fin k)) : EuclideanSpace ℝ (Fin k)) =
+      Real.sqrt (2 * ε + r ^ 2 * ‖(p.2 : EuclideanSpace ℝ (Fin (n - k)))‖ ^ 2) •
+        (p'.1 : EuclideanSpace ℝ (Fin k)) := by
+    rw [hbb]
+    rw [hbb] at hneg
+    exact hneg
+  exact (smul_right_injective (EuclideanSpace ℝ (Fin k)) (r :=
+    Real.sqrt (2 * ε + r ^ 2 * ‖(p.2 : EuclideanSpace ℝ (Fin (n - k)))‖ ^ 2))
+    hsqrt_ne) hs_inj
+
 end CellAttachment
 
 end
