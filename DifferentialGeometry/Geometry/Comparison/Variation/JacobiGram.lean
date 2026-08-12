@@ -72,6 +72,46 @@ def curveDensity (g : SmoothRiemannianMetric I M) (γ : ℝ → M)
 
 omit [FiniteDimensional ℝ E]
   [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M]
+  [SigmaCompactSpace M] [DecidableEq ι] in
+theorem curveGram_rect
+    {κ : Type*}
+    (g : SmoothRiemannianMetric I M) (γ : ℝ → M)
+    (V : ι → ∀ t, TangentSpace I (γ t))
+    (V' : κ → ∀ t, TangentSpace I (γ t)) (t : ℝ) (C : Matrix ι κ ℝ)
+    (h : ∀ j, V' j t = ∑ i, C i j • V i t) :
+    curveGram (I := I) g γ V' t =
+      Cᵀ * curveGram (I := I) g γ V t * C := by
+  ext i j
+  have hexp :
+      g.inner (γ t) (V' i t) (V' j t) =
+        ∑ k, ∑ l, C k i * C l j * g.inner (γ t) (V k t) (V l t) := by
+    rw [h i, h j]
+    have hL :
+        g.inner (γ t) (∑ k, C k i • V k t) =
+          ∑ k, C k i • g.inner (γ t) (V k t) := by
+      rw [map_sum]
+      exact Finset.sum_congr rfl fun k _ =>
+        ContinuousLinearMap.map_smul _ _ _
+    rw [hL, ContinuousLinearMap.sum_apply]
+    refine Finset.sum_congr rfl fun k _ => ?_
+    rw [ContinuousLinearMap.smul_apply]
+    have hR :
+        g.inner (γ t) (V k t) (∑ l, C l j • V l t) =
+          ∑ l, C l j * g.inner (γ t) (V k t) (V l t) := by
+      rw [map_sum]
+      exact Finset.sum_congr rfl fun l _ => by
+        rw [map_smul, smul_eq_mul]
+    rw [hR, smul_eq_mul, Finset.mul_sum]
+    exact Finset.sum_congr rfl fun l _ => by ring
+  simp only [curveGram, Matrix.of_apply, Matrix.mul_apply,
+    Matrix.transpose_apply]
+  rw [hexp, Finset.sum_comm]
+  refine Finset.sum_congr rfl fun k _ => ?_
+  rw [Finset.sum_mul]
+  exact Finset.sum_congr rfl fun l _ => by ring
+
+omit [FiniteDimensional ℝ E]
+  [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M]
   [SigmaCompactSpace M] [Fintype ι] [DecidableEq ι] in
 /-- The Gram matrix of a finite tangent family is Hermitian. -/
 theorem curveGram_herm
