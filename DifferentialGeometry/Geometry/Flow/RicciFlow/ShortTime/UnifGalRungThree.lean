@@ -27,13 +27,15 @@ variable
       [IsManifold I ∞ M] [CompactSpace M] [I.Boundaryless]
       [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M]
 
-theorem gal_arm_pair3_unif
+theorem gal_arm_pair3_unif_below
     (hDim : Module.finrank ℝ E = 3)
     (gBase : SmoothRiemannianMetric I M)
     {Λ : ℝ} (hΛ : 1 ≤ Λ) :
     ∀ {eta : ℝ}, 0 < eta →
-      ∃ delta R0 : ℝ,
-        0 < delta ∧ delta ≤ 1 / 3 ∧ 0 < R0 ∧ R0 ≤ 1 ∧
+      ∃ delta0 : ℝ,
+        0 < delta0 ∧ delta0 ≤ 1 / 3 ∧
+        ∀ {delta : ℝ}, 0 < delta → delta ≤ delta0 →
+        ∃ R0 : ℝ, 0 < R0 ∧ R0 ≤ 1 ∧
         ∀ g : SmoothRiemannianMetric I M,
           MetricUniformEquivalentOn (I := I) Set.univ gBase g Λ →
           (∀ a : ℕ, a ≤ 3 →
@@ -62,11 +64,15 @@ theorem gal_arm_pair3_unif
                         hR hdelta_lt hreal F c).coeff i))| ≤
                   eta * E4 + G * (E3 + E3 ^ 2) := by
   intro eta heta
-  obtain ⟨delta, R0, hdelta, hdeltathird, hR0, hR0one, hpair⟩ :=
-    low_base_pair_h4_unif (I := I) (M := M) hDim gBase hΛ heta
-  refine ⟨delta, R0, hdelta, hdeltathird, hR0, hR0one, ?_⟩
+  obtain ⟨delta0, hdelta0, hdelta0third, hpair⟩ :=
+    low_base_pair_h4_unif_below (I := I) (M := M) hDim gBase hΛ heta
+  refine ⟨delta0, hdelta0, hdelta0third, ?_⟩
+  intro delta hdelta hdelta_le
+  obtain ⟨R0, hR0, hR0one, hpair0⟩ := hpair hdelta hdelta_le
+  have hdeltathird : delta ≤ 1 / 3 := hdelta_le.trans hdelta0third
+  refine ⟨R0, hR0, hR0one, ?_⟩
   intro g hEq hjet
-  obtain ⟨G, hG, hpairG⟩ := hpair g hEq hjet
+  obtain ⟨G, hG, hpairG⟩ := hpair0 g hEq hjet
   refine ⟨G, hG, ?_⟩
   intro R hR hRR0 hdelta_lt hreal F c
   let theta : ℝ := min 1
@@ -160,13 +166,55 @@ theorem gal_arm_pair3_unif
         oneMinusConnLapSmoothIter_zero] using hmain
     _ ≤ eta * E4 + G * (E3 + E3 ^ 2) := hrhs
 
-theorem gal_arm_pair3_unif_of_mem
+theorem gal_arm_pair3_unif
     (hDim : Module.finrank ℝ E = 3)
     (gBase : SmoothRiemannianMetric I M)
     {Λ : ℝ} (hΛ : 1 ≤ Λ) :
     ∀ {eta : ℝ}, 0 < eta →
       ∃ delta R0 : ℝ,
         0 < delta ∧ delta ≤ 1 / 3 ∧ 0 < R0 ∧ R0 ≤ 1 ∧
+        ∀ g : SmoothRiemannianMetric I M,
+          MetricUniformEquivalentOn (I := I) Set.univ gBase g Λ →
+          (∀ a : ℕ, a ≤ 3 →
+            MetricCovDerivOrderBoundOn (I := I) Set.univ a g gBase Λ) →
+          ∃ G : ℝ, 0 ≤ G ∧
+            ∀ {R : ℝ} (hR : 0 ≤ R) (_hRR0 : R ≤ R0)
+              (hdelta_lt : delta < 1)
+              (hreal : ∀ T : SmoothCcTensor g 0 2,
+                ‖smoothCcToTensorHs (I := I) (M := M) g
+                    (((1 : ℕ) : ℝ) + 1) T‖ ≤ R →
+                  gFibreOpBound (I := I) (M := M) g
+                    (ccTensorBilinSymm (I := I) g T) delta),
+              ∀ (F : Finset (TensorEigenIdx (I := I) (M := M) g 0 2))
+                (c : TensorEigenIdx (I := I) (M := M) g 0 2 → ℝ),
+                let theta : ℝ := min 1
+                  (R / ‖galLowView (I := I) (M := M) g 1
+                    (finiteEigenComboHs (I := I) (M := M) g F c
+                      (((1 : ℕ) : ℝ) + 2))‖)
+                let E3 : ℝ := ∑ i ∈ F,
+                  tensorSobolevWeight (I := I) (M := M) i (3 : ℝ) * (c i) ^ 2
+                let E4 : ℝ := ∑ i ∈ F,
+                  tensorSobolevWeight (I := I) (M := M) i (4 : ℝ) * (c i) ^ 2
+                2 * |theta * (∑ i ∈ F,
+                    tensorSobolevWeight (I := I) (M := M) i (3 : ℝ) *
+                      (c i * (galArmVecBg (I := I) (M := M) g gBase
+                        hR hdelta_lt hreal F c).coeff i))| ≤
+                  eta * E4 + G * (E3 + E3 ^ 2) := by
+  intro eta heta
+  obtain ⟨delta, hdelta, hdeltathird, hpair⟩ :=
+    gal_arm_pair3_unif_below (I := I) (M := M) hDim gBase hΛ heta
+  obtain ⟨R0, hR0, hR0one, hpair0⟩ := hpair hdelta le_rfl
+  exact ⟨delta, R0, hdelta, hdeltathird, hR0, hR0one, hpair0⟩
+
+theorem gal_arm_pair3_unif_of_mem_below
+    (hDim : Module.finrank ℝ E = 3)
+    (gBase : SmoothRiemannianMetric I M)
+    {Λ : ℝ} (hΛ : 1 ≤ Λ) :
+    ∀ {eta : ℝ}, 0 < eta →
+      ∃ delta0 : ℝ,
+        0 < delta0 ∧ delta0 ≤ 1 / 3 ∧
+        ∀ {delta : ℝ}, 0 < delta → delta ≤ delta0 →
+        ∃ R0 : ℝ, 0 < R0 ∧ R0 ≤ 1 ∧
         ∀ g : SmoothRiemannianMetric I M,
           MetricUniformEquivalentOn (I := I) Set.univ gBase g Λ →
           (∀ a : ℕ, a ≤ 3 →
@@ -196,11 +244,14 @@ theorem gal_arm_pair3_unif_of_mem
                       tensorSobolevWeight (I := I) (M := M) i (3 : ℝ) *
                         (c i) ^ 2) ^ 2) := by
   intro eta heta
-  obtain ⟨delta, R0, hdelta, hdeltathird, hR0, hR0one, hpair⟩ :=
-    gal_arm_pair3_unif (I := I) (M := M) hDim gBase hΛ heta
-  refine ⟨delta, R0, hdelta, hdeltathird, hR0, hR0one, ?_⟩
+  obtain ⟨delta0, hdelta0, hdelta0third, hpair⟩ :=
+    gal_arm_pair3_unif_below (I := I) (M := M) hDim gBase hΛ heta
+  refine ⟨delta0, hdelta0, hdelta0third, ?_⟩
+  intro delta hdelta hdelta_le
+  obtain ⟨R0, hR0, hR0one, hpair0⟩ := hpair hdelta hdelta_le
+  refine ⟨R0, hR0, hR0one, ?_⟩
   intro g hEq hjet
-  obtain ⟨G, hG, hpairG⟩ := hpair g hEq hjet
+  obtain ⟨G, hG, hpairG⟩ := hpair0 g hEq hjet
   refine ⟨G, hG, ?_⟩
   intro R hR hRR0 hdelta_lt hreal F c hmem
   have hraw := hpairG hR hRR0 hdelta_lt hreal F c
@@ -239,6 +290,47 @@ theorem gal_arm_pair3_unif_of_mem
   · have hqpos : 0 < q := lt_of_le_of_ne (by positivity) (Ne.symm hq0)
     have hone : (1 : ℝ) ≤ R / q := (one_le_div hqpos).2 (by simpa only [q] using hmem)
     simpa only [q, min_eq_left hone, one_mul] using hraw
+
+theorem gal_arm_pair3_unif_of_mem
+    (hDim : Module.finrank ℝ E = 3)
+    (gBase : SmoothRiemannianMetric I M)
+    {Λ : ℝ} (hΛ : 1 ≤ Λ) :
+    ∀ {eta : ℝ}, 0 < eta →
+      ∃ delta R0 : ℝ,
+        0 < delta ∧ delta ≤ 1 / 3 ∧ 0 < R0 ∧ R0 ≤ 1 ∧
+        ∀ g : SmoothRiemannianMetric I M,
+          MetricUniformEquivalentOn (I := I) Set.univ gBase g Λ →
+          (∀ a : ℕ, a ≤ 3 →
+            MetricCovDerivOrderBoundOn (I := I) Set.univ a g gBase Λ) →
+          ∃ G : ℝ, 0 ≤ G ∧
+            ∀ {R : ℝ} (hR : 0 ≤ R) (_hRR0 : R ≤ R0)
+              (hdelta_lt : delta < 1)
+              (hreal : ∀ T : SmoothCcTensor g 0 2,
+                ‖smoothCcToTensorHs (I := I) (M := M) g
+                    (((1 : ℕ) : ℝ) + 1) T‖ ≤ R →
+                  gFibreOpBound (I := I) (M := M) g
+                    (ccTensorBilinSymm (I := I) g T) delta),
+              ∀ (F : Finset (TensorEigenIdx (I := I) (M := M) g 0 2))
+                (c : TensorEigenIdx (I := I) (M := M) g 0 2 → ℝ),
+                ‖galLowView (I := I) (M := M) g 1
+                    (finiteEigenComboHs (I := I) (M := M) g F c
+                      (((1 : ℕ) : ℝ) + 2))‖ ≤ R →
+                2 * |∑ i ∈ F,
+                    tensorSobolevWeight (I := I) (M := M) i (3 : ℝ) *
+                      (c i * (galArmVecBg (I := I) (M := M) g gBase
+                        hR hdelta_lt hreal F c).coeff i)| ≤
+                  eta * (∑ i ∈ F,
+                    tensorSobolevWeight (I := I) (M := M) i (4 : ℝ) * (c i) ^ 2) +
+                  G * ((∑ i ∈ F,
+                    tensorSobolevWeight (I := I) (M := M) i (3 : ℝ) * (c i) ^ 2) +
+                    (∑ i ∈ F,
+                      tensorSobolevWeight (I := I) (M := M) i (3 : ℝ) *
+                        (c i) ^ 2) ^ 2) := by
+  intro eta heta
+  obtain ⟨delta, hdelta, hdeltathird, hpair⟩ :=
+    gal_arm_pair3_unif_of_mem_below (I := I) (M := M) hDim gBase hΛ heta
+  obtain ⟨R0, hR0, hR0one, hpair0⟩ := hpair hdelta le_rfl
+  exact ⟨delta, R0, hdelta, hdeltathird, hR0, hR0one, hpair0⟩
 
 end DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral
 

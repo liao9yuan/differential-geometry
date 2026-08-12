@@ -31,13 +31,15 @@ variable
       [IsManifold I ∞ M] [CompactSpace M] [I.Boundaryless]
       [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M]
 
-theorem low_base_pair_h5_unif
+theorem low_base_pair_h5_unif_below
     (hDim : Module.finrank ℝ E = 3)
     (gBase : SmoothRiemannianMetric I M)
     {Λ : ℝ} (hΛ : 1 ≤ Λ) :
     ∀ {eta : ℝ}, 0 < eta →
-      ∃ delta R0 : ℝ,
-        0 < delta ∧ delta ≤ 1 / 3 ∧ 0 < R0 ∧ R0 ≤ 1 ∧
+      ∃ delta0 : ℝ,
+        0 < delta0 ∧ delta0 ≤ 1 / 3 ∧
+        ∀ {delta : ℝ}, 0 < delta → delta ≤ delta0 →
+        ∃ R0 : ℝ, 0 < R0 ∧ R0 ≤ 1 ∧
         ∀ g : SmoothRiemannianMetric I M,
           MetricUniformEquivalentOn (I := I) Set.univ gBase g Λ →
           (∀ a : ℕ, a ≤ 3 →
@@ -73,8 +75,11 @@ theorem low_base_pair_h5_unif
   intro eta heta
   let e : ℝ := eta / 3
   have he : 0 < e := by dsimp only [e]; positivity
-  obtain ⟨delta, Re, hdelta, hdeltathird, hRe, hReone, hedge⟩ :=
+  obtain ⟨delta0, Re, hdelta0, hdelta0third, hRe, hReone, hedge⟩ :=
     edge_center_path_h5_unif (I := I) (M := M) hDim gBase hΛ he
+  refine ⟨delta0, hdelta0, hdelta0third, ?_⟩
+  intro delta hdelta hdelta_le
+  have hdeltathird : delta ≤ 1 / 3 := hdelta_le.trans hdelta0third
   obtain ⟨Gl, hGl, hlow⟩ :=
     low1_pair_h5_unif (I := I) (M := M) hDim gBase hΛ
       hdelta.le hdeltathird he
@@ -91,7 +96,7 @@ theorem low_base_pair_h5_unif
     dsimp only [R0]
     exact lt_min hRe hRt
   have hR0one : R0 ≤ 1 := (min_le_left Re Rt).trans hReone
-  refine ⟨delta, R0, hdelta, hdeltathird, hR0, hR0one, ?_⟩
+  refine ⟨R0, hR0, hR0one, ?_⟩
   intro g hEq hjet
   obtain ⟨Ge, hGe, hedgeG⟩ := hedge g hEq hjet
   obtain ⟨Fl, hFl, hlowF⟩ := hlow g hEq hjet
@@ -140,7 +145,7 @@ theorem low_base_pair_h5_unif
   have htopCoeff : 2 * (Ct * R) ≤ e := by
     dsimp only [Dt] at hDtR
     nlinarith
-  have hcenter := hedgeG T hTsymm (delta := delta) le_rfl hdelta.le
+  have hcenter := hedgeG T hTsymm (delta := delta) hdelta_le hdelta.le
     hdelta_lt hdeltaT hdeltaZ hR hRRe hT2
   have hRone : R ≤ 1 := hRR0.trans hR0one
   have hlow1 := hlowF T hTsymm hdeltaT hdeltaZ (hT2.trans hRone)
@@ -225,6 +230,51 @@ theorem low_base_pair_h5_unif
       have hFlP := mul_le_mul_of_nonneg_left hlowShape hFl
       dsimp only [e, G]
       linarith [mul_nonneg hGe hP]
+
+theorem low_base_pair_h5_unif
+    (hDim : Module.finrank ℝ E = 3)
+    (gBase : SmoothRiemannianMetric I M)
+    {Λ : ℝ} (hΛ : 1 ≤ Λ) :
+    ∀ {eta : ℝ}, 0 < eta →
+      ∃ delta R0 : ℝ,
+        0 < delta ∧ delta ≤ 1 / 3 ∧ 0 < R0 ∧ R0 ≤ 1 ∧
+        ∀ g : SmoothRiemannianMetric I M,
+          MetricUniformEquivalentOn (I := I) Set.univ gBase g Λ →
+          (∀ a : ℕ, a ≤ 3 →
+            MetricCovDerivOrderBoundOn (I := I) Set.univ a g gBase Λ) →
+          ∃ G : ℝ, 0 ≤ G ∧
+            ∀ (T : SmoothCcTensor g 0 2)
+              (_hTsymm : ∀ (x : M) (u v : TangentSpace I x),
+                ccTensorBilin (I := I) g T x u v =
+                  ccTensorBilin (I := I) g T x v u)
+              (hdelta_lt : delta < 1)
+              (hdelta : gFibreOpBound (I := I) (M := M) g
+                (ccTensorBilinSymm (I := I) g T) delta)
+              (hdeltaZ : gFibreOpBound (I := I) (M := M) g
+                (ccTensorBilinSymm (I := I) g
+                  (0 : SmoothCcTensor g 0 2)) delta)
+              {R : ℝ}, 0 ≤ R → R ≤ R0 →
+              ‖ccTensorToHs (I := I) (M := M) g 2 (2 : ℝ) T‖ ≤ R →
+              let A := lowBaseData (I := I) (M := M) g gBase T
+                hdelta_lt hdelta hdeltaZ
+              let V := oneMinusConnLapSmooth (I := I) g 0 2
+                (oneMinusConnLapSmooth (I := I) g 0 2
+                  (oneMinusConnLapSmooth (I := I) g 0 2 T))
+              2 * |tensorL2Inner (I := I) (M := M) g 0 2 V.toFun
+                    (oneMinusConnLapSmooth (I := I) g 0 2
+                      (A.a2 (I := I) (M := M) T +
+                        A.a1 (I := I) (M := M) T)).toFun| ≤
+                eta * ‖ccTensorToHs (I := I) (M := M) g 2 (5 : ℝ) T‖ ^ 2 +
+                  G *
+                    (‖ccTensorToHs (I := I) (M := M) g 2 (4 : ℝ) T‖ ^ 2 +
+                      ‖ccTensorToHs (I := I) (M := M) g 2 (3 : ℝ) T‖ ^ 2 *
+                        ‖ccTensorToHs (I := I) (M := M) g 2 (4 : ℝ) T‖ ^ 2 +
+                      ‖ccTensorToHs (I := I) (M := M) g 2 (3 : ℝ) T‖ ^ 4) := by
+  intro eta heta
+  obtain ⟨delta, hdelta, hdeltathird, hpair⟩ :=
+    low_base_pair_h5_unif_below (I := I) (M := M) hDim gBase hΛ heta
+  obtain ⟨R0, hR0, hR0one, hpair0⟩ := hpair hdelta le_rfl
+  exact ⟨delta, R0, hdelta, hdeltathird, hR0, hR0one, hpair0⟩
 
 end DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral
 
