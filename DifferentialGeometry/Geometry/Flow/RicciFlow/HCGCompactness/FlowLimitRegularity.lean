@@ -1600,6 +1600,107 @@ private theorem gramModel_to_mfld_Icc
       ((extChartAt I x₀).symm (extChartAt I x₀ x)) i j
   rw [(extChartAt I x₀).left_inv hxsrc]
 
+theorem gramPDE_regular
+    {R : letI : TopologicalSpace P.M := P.topology
+      letI : ChartedSpace H P.M := P.charted
+      letI : IsManifold I ∞ P.M := P.smooth
+      SmoothRiemannianMetric I P.M}
+    {bf : BumpFamily (I := I) Φ} {hsrc : SrcSigma Φ} {htgt : TgtSigma Φ}
+    {β ψ : Real}
+    (hcarrier : X.D.carrier ⊆ Set.Icc β ψ)
+    (co : ConvOut (I := I) Φ R bf hsrc htgt β ψ)
+    (x₀ : P.M) (i j : Fin (Module.finrank Real E))
+    {t : Real} (ht : t ∈ X.D.regular) {y : E}
+    (hy : letI : TopologicalSpace P.M := P.topology
+      letI : ChartedSpace H P.M := P.charted
+      y ∈ interior (extChartAt I x₀).target) :
+    letI : TopologicalSpace P.M := P.topology
+    letI : ChartedSpace H P.M := P.charted
+    letI : T2Space P.M := P.t2
+    letI : IsManifold I ∞ P.M := P.smooth
+    HasDerivAt
+      (fun s => chartGramOnE (I := I) (co.gInf s) x₀ i j y)
+      ((Analysis.jetRicciFlow (chartModelBasis E)
+        (Analysis.jet2 (chartGramPi (I := I) (co.gInf t) x₀) y)) i j)
+      t := by
+  letI : TopologicalSpace P.M := P.topology
+  letI : ChartedSpace H P.M := P.charted
+  letI : T2Space P.M := P.t2
+  letI : IsManifold I ∞ P.M := P.smooth
+  letI : SigmaCompactSpace P.M := P.sigmaCompact
+  obtain ⟨a, b, htLocal, hwin⟩ := X.D.exists_Icc_regular ht
+  have hsub : Set.Icc a b ⊆ Set.Icc β ψ :=
+    hwin.trans (X.D.regular_subset.trans hcarrier)
+  have hpde := gramPDE (I := I) (Φ := Φ) hwin
+    (ConvOut.restrict (Φ := Φ) co hsub) x₀ i j
+    (Set.Ioo_subset_Icc_self htLocal) hy
+  simpa only [ConvOut.restrict] using
+    hpde.hasDerivAt (Icc_mem_nhds_iff.mpr htLocal)
+
+theorem metricPDE_regular
+    {R : letI : TopologicalSpace P.M := P.topology
+      letI : ChartedSpace H P.M := P.charted
+      letI : IsManifold I ∞ P.M := P.smooth
+      SmoothRiemannianMetric I P.M}
+    {bf : BumpFamily (I := I) Φ} {hsrc : SrcSigma Φ} {htgt : TgtSigma Φ}
+    {β ψ : Real}
+    (hcarrier : X.D.carrier ⊆ Set.Icc β ψ)
+    (co : ConvOut (I := I) Φ R bf hsrc htgt β ψ)
+    {t : Real} (ht : t ∈ X.D.regular) (x : P.M) :
+    letI : TopologicalSpace P.M := P.topology
+    letI : ChartedSpace H P.M := P.charted
+    letI : T2Space P.M := P.t2
+    letI : IsManifold I ∞ P.M := P.smooth
+    letI : SigmaCompactSpace P.M := P.sigmaCompact
+    ∀ v w : TangentSpace I x,
+      HasDerivAt (fun s : Real => (co.gInf s).inner x v w)
+        ((-2 : Real) * ricciTensor (I := I) (co.gInf t) x v w) t := by
+  letI : TopologicalSpace P.M := P.topology
+  letI : ChartedSpace H P.M := P.charted
+  letI : T2Space P.M := P.t2
+  letI : IsManifold I ∞ P.M := P.smooth
+  letI : SigmaCompactSpace P.M := P.sigmaCompact
+  letI : IsManifold I 1 P.M :=
+    IsManifold.of_le (I := I) (M := P.M) (n := (∞ : WithTop ℕ∞))
+      (by decide : (1 : WithTop ℕ∞) ≤ ∞)
+  letI : IsManifold I 2 P.M :=
+    IsManifold.of_le (I := I) (M := P.M) (n := (∞ : WithTop ℕ∞))
+      (by decide : (2 : WithTop ℕ∞) ≤ ∞)
+  letI : IsManifold I ((∞ : WithTop ℕ∞) + 1) P.M := by
+    change IsManifold I ∞ P.M
+    infer_instance
+  classical
+  intro v w
+  have hxgood : x ∈ chartLeviCivitaGoodSet (I := I) x :=
+    self_mem_chartLeviCivitaGoodSet (I := I) (α := x)
+  have hy : extChartAt I x x ∈ interior (extChartAt I x).target :=
+    chartLeviCivitaGoodSet_extChartAt_mem_interior (I := I) hxgood
+  have hbasis (i j : Fin (Module.finrank Real E)) :
+      HasDerivAt
+        (fun s => chartGramOnE (I := I) (co.gInf s) x i j (extChartAt I x x))
+        (-2 * chartRicciTensor (I := I) (co.gInf t) x i j (extChartAt I x x)) t := by
+    have hpde := gramPDE_regular (I := I) (Φ := Φ) hcarrier co x i j ht hy
+    let gt : SmoothRiemannianMetric I P.M := co.gInf t
+    have hStatic : ContDiffOn Real ∞ (chartGramPi (I := I) gt x)
+        (interior (extChartAt I x).target) := by
+      refine contDiffOn_pi.mpr fun a => contDiffOn_pi.mpr fun b => ?_
+      exact (chartGramOnE_contDiffOn (I := I) gt x a b).mono interior_subset
+    have hAt : ContDiffAt Real ∞ (chartGramPi (I := I) gt x) (extChartAt I x x) :=
+      hStatic.contDiffAt (isOpen_interior.mem_nhds hy)
+    have hG : DifferentiableAt Real (chartGramPi (I := I) gt x) (extChartAt I x x) :=
+      hAt.differentiableAt (by simp)
+    have hG1 : ∀ᶠ z in nhds (extChartAt I x x),
+        DifferentiableAt Real (chartGramPi (I := I) gt x) z := by
+      filter_upwards [isOpen_interior.mem_nhds hy] with z hz
+      exact (hStatic.contDiffAt (isOpen_interior.mem_nhds hz)).differentiableAt
+        (by simp)
+    have hG2 : DifferentiableAt Real
+        (fun z => fderiv Real (chartGramPi (I := I) gt x) z) (extChartAt I x x) :=
+      (hAt.fderiv_right (m := ∞) le_rfl).differentiableAt (by simp)
+    have hjet := jetRicciFlow_chartGram (I := I) gt x hy hG hG1 hG2 i j
+    simpa only [gt] using hpde.congr_deriv hjet
+  exact metricPDE_of_gram (I := I) co.gInf x hbasis v w
+
 /-- Fixed-window joint spacetime smoothness of the limit metric in the
 trivialization-based chart-Gram readout. This is the remaining analytic
 regularity frontier. -/
