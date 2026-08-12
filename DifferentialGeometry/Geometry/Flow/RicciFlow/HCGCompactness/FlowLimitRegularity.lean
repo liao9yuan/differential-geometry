@@ -420,6 +420,42 @@ namespace ConvOut
 
 variable [I.Boundaryless]
 
+omit [NeZero (Module.finrank Real E)] in
+theorem metric_cont
+    {R : letI : TopologicalSpace P.M := P.topology
+      letI : ChartedSpace H P.M := P.charted
+      letI : IsManifold I ∞ P.M := P.smooth
+      SmoothRiemannianMetric I P.M}
+    {bf : BumpFamily (I := I) Φ} {hsrc : SrcSigma Φ} {htgt : TgtSigma Φ}
+    {β ψ : Real} (hwin : Set.Icc β ψ ⊆ X.D.carrier)
+    (co : ConvOut (I := I) Φ R bf hsrc htgt β ψ) :
+    letI : TopologicalSpace P.M := P.topology
+    letI : ChartedSpace H P.M := P.charted
+    letI : T2Space P.M := P.t2
+    letI : IsManifold I ∞ P.M := P.smooth
+    Tensor0SFamilyContinuousOnSet (I := I) (M := P.M) 2
+      (Set.Icc β ψ)
+      (fun t x => Tensor0SBundle.metricTensorField (I := I) (co.gInf t) x) := by
+  letI : TopologicalSpace P.M := P.topology
+  letI : ChartedSpace H P.M := P.charted
+  letI : T2Space P.M := P.t2
+  letI : IsManifold I ∞ P.M := P.smooth
+  letI : SigmaCompactSpace P.M := P.sigmaCompact
+  letI : LocallyCompactSpace H := I.locallyCompactSpace
+  letI : LocallyCompactSpace P.M := ChartedSpace.locallyCompactSpace H P.M
+  apply metricTensorContLim (I := I)
+    (gSeq := fun k t =>
+      gSeqExt (I := I) Φ R bf hsrc htgt (co.φ k) t)
+    (gInf := co.gInf) (gRef := R) β ψ
+  · intro K hK ε hε
+    obtain ⟨k₀, hk₀⟩ := co.convPt K hK 0 ε hε
+    refine ⟨k₀, fun k hk t ht x hx => ?_⟩
+    simpa only using hk₀ k hk t ht 0 le_rfl x hx
+  · intro k x₀ i j
+    exact
+      (gSeqExt_gram_cont (I := I) Φ R bf hsrc htgt
+        (co.φ k) x₀ i j).mono (Set.prod_mono hwin Set.Subset.rfl)
+
 omit [NeZero (Module.finrank ℝ E)] in
 private theorem gSeqJet_contOn
     {R : letI : TopologicalSpace P.M := P.topology
