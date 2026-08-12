@@ -7031,6 +7031,21 @@ theorem modelHandleRoundMap_attaching_eq_lower {n k : ℕ} (hk : k ≤ n) (ε r 
   exact congrArg (fun q : EuclideanSpace ℝ (Fin k) × EuclideanSpace ℝ (Fin (n - k)) =>
     recombine hk q.1 q.2) hpairs
 
+theorem modelRoundCapQ_ge_lowerBound {ε r δ θ a b : ℝ} (hε : 0 < ε) (hδ : 0 < δ)
+    (hθ : 0 < θ) (hδr : δ < r ^ 2) (ha1 : a ≤ 1) (hb0 : 0 ≤ b) (hb1 : b ≤ 1)
+    (ht : 2 * ε < (2 * ε + r ^ 2 * b) * a) :
+    modelLowerRoundBound ε r δ θ ((2 * ε + r ^ 2 * b) * a) ≤ modelRoundCapQ ε r δ θ a b := by
+  let t : ℝ := (2 * ε + r ^ 2 * b) * a
+  have hφ0 : 0 ≤ modelRoundCapInterp ε r a b := modelRoundCapInterp_nonneg hε ha1 hb0 hb1
+  have hφ1 : modelRoundCapInterp ε r a b ≤ 1 := modelRoundCapInterp_le_one hε ha1 hb0 hb1
+  have hsc : modelLowerRoundBound ε r δ θ t ≤ smoothCap ε r δ t :=
+    modelLowerRoundBound_le_smoothCap hδ hθ hδr ht
+  dsimp [modelRoundCapQ]
+  have hmul : 0 ≤ modelRoundCapInterp ε r a b *
+      (smoothCap ε r δ t - modelLowerRoundBound ε r δ θ t) := by
+    nlinarith [hφ0, hsc]
+  nlinarith [hmul]
+
 end CellAttachment
 
 end
