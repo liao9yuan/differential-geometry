@@ -1153,6 +1153,69 @@ theorem morseHandleAdjunctionDiffeomorphRounded_handle {m k : ℕ} (hk : k ≤ m
   rw [morseHandleAdjunctionHomeoUnion_cell hk c ε r data hε (ne_of_gt hr)
     (le_trans (le_of_lt hεr') (by nlinarith [data.hRpos] : data.R / 2 ≤ data.R)) hcont d]
 
+
+noncomputable def morseRoundedSublevelFamily {m k : ℕ} (hk : k ≤ m + 1) (c ε r δ R₀ R₁ : ℝ)
+    {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M] [ChartedSpace H M]
+    {I : ModelWithCorners ℝ (MorseModel (m + 1)) H} {f : M → ℝ}
+    (data : MorseChart (m + 1) k hk c I f) (x : M) (s : ℝ) : ℝ :=
+  (1 - s) * (morseRoundedFunction hk c ε r δ R₀ R₁ data x - c) +
+    s * (f x - (c + ε))
+
+theorem morseRoundedSublevelFamily_zero {m k : ℕ} (hk : k ≤ m + 1) (c ε r δ R₀ R₁ : ℝ)
+    {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M] [ChartedSpace H M]
+    {I : ModelWithCorners ℝ (MorseModel (m + 1)) H} {f : M → ℝ}
+    (data : MorseChart (m + 1) k hk c I f) (x : M) :
+    morseRoundedSublevelFamily hk c ε r δ R₀ R₁ data x 0 =
+      morseRoundedFunction hk c ε r δ R₀ R₁ data x - c := by
+  dsimp [morseRoundedSublevelFamily]
+  ring
+
+theorem morseRoundedSublevelFamily_one {m k : ℕ} (hk : k ≤ m + 1) (c ε r δ R₀ R₁ : ℝ)
+    {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M] [ChartedSpace H M]
+    {I : ModelWithCorners ℝ (MorseModel (m + 1)) H} {f : M → ℝ}
+    (data : MorseChart (m + 1) k hk c I f) (x : M) :
+    morseRoundedSublevelFamily hk c ε r δ R₀ R₁ data x 1 = f x - (c + ε) := by
+  dsimp [morseRoundedSublevelFamily]
+  ring
+
+theorem contMDiff_morseRoundedSublevelFamily {m k : ℕ} (hk : k ≤ m + 1) (c ε r δ R₀ R₁ R₁' : ℝ)
+    {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M] [ChartedSpace H M] [T2Space M]
+    {I : ModelWithCorners ℝ (MorseModel (m + 1)) H} [I.Boundaryless]
+    [IsManifold I (⊤ : WithTop ℕ∞) M] {f : M → ℝ}
+    (data : MorseChart (m + 1) k hk c I f)
+    (hf : ContMDiff I 𝓘(ℝ, ℝ) (↑(⊤ : ℕ∞) : WithTop ℕ∞) f)
+    (hR : R₀ < R₁) (hR0 : 0 ≤ R₀)
+    (hR₁₂ : R₁ < R₁') (hR₁₂R : R₁' ≤ data.R) (hR₁₂R' : R₁' ≤ data.R') :
+    ContMDiff (I.prod 𝓘(ℝ, ℝ)) 𝓘(ℝ, ℝ) (↑(⊤ : ℕ∞) : WithTop ℕ∞)
+      (fun q : M × ℝ => morseRoundedSublevelFamily hk c ε r δ R₀ R₁ data q.1 q.2) := by
+  have hg : ContMDiff (I.prod 𝓘(ℝ, ℝ)) 𝓘(ℝ, ℝ) (↑(⊤ : ℕ∞) : WithTop ℕ∞)
+      (fun q : M × ℝ => morseRoundedFunction hk c ε r δ R₀ R₁ data q.1) := by
+    exact (contMDiff_morseRoundedFunction hk c ε r δ R₀ R₁ R₁' data hf hR hR0 hR₁₂ hR₁₂R hR₁₂R').comp
+      (contMDiff_fst (I := I) (J := 𝓘(ℝ, ℝ)))
+  have hgsub : ContMDiff (I.prod 𝓘(ℝ, ℝ)) 𝓘(ℝ, ℝ) (↑(⊤ : ℕ∞) : WithTop ℕ∞)
+      (fun q : M × ℝ => morseRoundedFunction hk c ε r δ R₀ R₁ data q.1 - c) := by
+    exact hg.sub (contMDiff_const (c := (c : ℝ)) (I := I.prod 𝓘(ℝ, ℝ)))
+  have hfst : ContMDiff (I.prod 𝓘(ℝ, ℝ)) 𝓘(ℝ, ℝ) (↑(⊤ : ℕ∞) : WithTop ℕ∞)
+      (fun q : M × ℝ => f q.1) := hf.comp (contMDiff_fst (I := I) (J := 𝓘(ℝ, ℝ)))
+  have hfsub : ContMDiff (I.prod 𝓘(ℝ, ℝ)) 𝓘(ℝ, ℝ) (↑(⊤ : ℕ∞) : WithTop ℕ∞)
+      (fun q : M × ℝ => f q.1 - (c + ε)) := by
+    exact hfst.sub (contMDiff_const (c := (c + ε : ℝ)) (I := I.prod 𝓘(ℝ, ℝ)))
+  have hsnd : ContMDiff (I.prod 𝓘(ℝ, ℝ)) 𝓘(ℝ, ℝ) (↑(⊤ : ℕ∞) : WithTop ℕ∞)
+      (fun q : M × ℝ => q.2) := contMDiff_snd (I := I) (J := 𝓘(ℝ, ℝ))
+  have hones : ContMDiff (I.prod 𝓘(ℝ, ℝ)) 𝓘(ℝ, ℝ) (↑(⊤ : ℕ∞) : WithTop ℕ∞)
+      (fun q : M × ℝ => (1 - q.2 : ℝ)) := by
+    exact (contMDiff_const (c := (1 : ℝ)) (I := I.prod 𝓘(ℝ, ℝ))).sub hsnd
+  have hterm₁ : ContMDiff (I.prod 𝓘(ℝ, ℝ)) 𝓘(ℝ, ℝ) (↑(⊤ : ℕ∞) : WithTop ℕ∞)
+      (fun q : M × ℝ => (1 - q.2) * (morseRoundedFunction hk c ε r δ R₀ R₁ data q.1 - c)) :=
+    hones.mul hgsub
+  have hterm₂ : ContMDiff (I.prod 𝓘(ℝ, ℝ)) 𝓘(ℝ, ℝ) (↑(⊤ : ℕ∞) : WithTop ℕ∞)
+      (fun q : M × ℝ => q.2 * (f q.1 - (c + ε))) :=
+    hsnd.mul hfsub
+  have hsum : ContMDiff (I.prod 𝓘(ℝ, ℝ)) 𝓘(ℝ, ℝ) (↑(⊤ : ℕ∞) : WithTop ℕ∞)
+      (fun q : M × ℝ => (1 - q.2) * (morseRoundedFunction hk c ε r δ R₀ R₁ data q.1 - c) +
+        q.2 * (f q.1 - (c + ε))) :=
+    hterm₁.add hterm₂
+  simpa [morseRoundedSublevelFamily] using hsum
 end ManifoldCellAttachment
 
 end

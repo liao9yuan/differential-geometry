@@ -14284,7 +14284,7 @@ theorem contMDiff_morseSublevelIsotopyFamily {m k : ℕ} (hk : k ≤ m + 1)
   exact (hc1.mul hc2).add (hsnd.mul hc4)
 
 
-theorem constant_shift_criticalPoint {m k : ℕ} {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M]
+theorem constant_shift_criticalPoint {m : ℕ} {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M]
     [ChartedSpace H M] [T2Space M]
     {I : ModelWithCorners ℝ (MorseModel (m + 1)) H} [I.Boundaryless]
     [IsManifold I (⊤ : WithTop ℕ∞) M] {f : M → ℝ}
@@ -14321,10 +14321,10 @@ theorem constant_shift_criticalPoint {m k : ℕ} {H : Type} [TopologicalSpace H]
     exact differentiableWithinAt_const (𝕜 := ℝ) (E := MorseModel (m + 1)) (F := ℝ) (c := a)
   have hconst0 : fderivWithin ℝ (fun _ : MorseModel (m + 1) => a)
       (Set.range I) (extChartAt I x x) = 0 := by
-    simpa using (fderivWithin_const (𝕜 := ℝ) (E := MorseModel (m + 1)) (F := ℝ) (c := a))
+    simp
   have hunique : UniqueDiffWithinAt ℝ (Set.range I) (extChartAt I x x) := by
-    simpa using (I.uniqueDiffOn (extChartAt I x x) (by
-      simpa [ModelWithCorners.range_eq_target] using mem_extChartAt_source _ _))
+    exact (I.uniqueDiffOn (extChartAt I x x) (by
+      simp))
   have hadd := fderivWithin_add (𝕜 := ℝ) (E := MorseModel (m + 1)) (F := ℝ) hunique hgrep hcrep
   rw [hadd, hconst0] at hcrit
   simpa using hcrit
@@ -14614,7 +14614,7 @@ theorem no_critical_morseSublevelIsotopyFamily {m k : ℕ} (hk : k ≤ m + 1)
       rw [heq] at hcrit
       exact hcrit
     have hcritf : IsCriticalPointAt I f x := by
-      exact (constant_shift_criticalPoint (m := m) (k := k) (H := H) (M := M) (I := I)
+      exact (constant_shift_criticalPoint (m := m) (H := H) (M := M) (I := I)
         (f := f) (x := x) (a := -c + (1 - 2 * s) * ε) hf (by
           simpa [sub_eq_add_neg, add_assoc, add_comm, add_left_comm] using hcrit'))
     exact hreg hcritf
@@ -14939,7 +14939,7 @@ theorem no_critical_morseSublevelIsotopyFamily_strip {m k : ℕ} (hk : k ≤ m +
       rw [heq] at hcrit
       exact hcrit
     have hcritf : IsCriticalPointAt I f x := by
-      exact (constant_shift_criticalPoint (m := m) (k := k) (H := H) (M := M) (I := I)
+      exact (constant_shift_criticalPoint (m := m) (H := H) (M := M) (I := I)
         (f := f) (x := x) (a := -c + (1 - 2 * s) * ε) hf (by
           simpa [sub_eq_add_neg, add_assoc, add_comm, add_left_comm] using hcrit'))
     exact hreg hcritf
