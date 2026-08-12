@@ -2512,6 +2512,77 @@ noncomputable def standardHandleTopChartedSpace (k : ℕ) [NeZero k] [Fact (k = 
   exact prodChartedSpace (EuclideanHalfSpace ((k - 1) + 1)) (ClosedCell k)
     (EuclideanSpace ℝ (Fin 0)) (ClosedCell 0)
 
+noncomputable def finSubSelfIso (n : ℕ) :
+    EuclideanSpace ℝ (Fin (n - n)) ≃ₗᵢ[ℝ] EuclideanSpace ℝ (Fin 0) :=
+  (EuclideanSpace.basisFun (Fin (n - n)) ℝ).reindex
+    (Equiv.cast (congrArg Fin (Nat.sub_self n))) |>.repr
+
+noncomputable def closedCellSubSelfHomeo (n : ℕ) : ClosedCell (n - n) ≃ₜ ClosedCell 0 := by
+  let e : EuclideanSpace ℝ (Fin (n - n)) ≃ₗᵢ[ℝ] EuclideanSpace ℝ (Fin 0) := finSubSelfIso n
+  refine { toFun := fun x => ⟨e x.1, by
+             exact (le_of_eq (e.norm_map x.1)).trans x.2⟩,
+           invFun := fun x => ⟨e.symm x.1, by
+             exact (le_of_eq (e.symm.norm_map x.1)).trans x.2⟩,
+           left_inv := by intro x; apply Subtype.ext; exact e.symm_apply_apply x.1,
+           right_inv := by intro x; apply Subtype.ext; exact e.apply_symm_apply x.1,
+           continuous_toFun := by
+             exact Continuous.subtype_mk (e.continuous.comp continuous_subtype_val) (fun x => by
+               exact (le_of_eq (e.norm_map x.1)).trans x.2),
+           continuous_invFun := by
+             exact Continuous.subtype_mk (e.symm.continuous.comp continuous_subtype_val) (fun x => by
+               exact (le_of_eq (e.symm.norm_map x.1)).trans x.2) }
+
+@[reducible]
+noncomputable def closedCellSubSelfChartedSpace (n : ℕ) :
+    ChartedSpace (EuclideanSpace ℝ (Fin 0)) (ClosedCell (n - n)) := by
+  letI : ChartedSpace (EuclideanSpace ℝ (Fin 0)) (ClosedCell 0) := closedCellZeroChartedSpace
+  exact chartedSpaceOfHomeomorph (closedCellSubSelfHomeo n)
+
+@[reducible]
+noncomputable def standardHandleTopSubChartedSpace (n : ℕ) [NeZero n] [Fact (n = (n - 1) + 1)] :
+    ChartedSpace (ModelProd (EuclideanHalfSpace ((n - 1) + 1)) (EuclideanSpace ℝ (Fin 0)))
+      (StandardHandle n (n - n)) := by
+  letI : ChartedSpace (EuclideanHalfSpace ((n - 1) + 1)) (ClosedCell n) :=
+    closedCellChartedSpace n
+  letI : ChartedSpace (EuclideanSpace ℝ (Fin 0)) (ClosedCell (n - n)) :=
+    closedCellSubSelfChartedSpace n
+  exact prodChartedSpace (EuclideanHalfSpace ((n - 1) + 1)) (ClosedCell n)
+    (EuclideanSpace ℝ (Fin 0)) (ClosedCell (n - n))
+
+theorem closedCellSubSelfInclusion_contMDiff (n : ℕ) :
+    @ContMDiff ℝ _
+      (EuclideanSpace ℝ (Fin 0)) _ _ (EuclideanSpace ℝ (Fin 0)) _ (𝓘(ℝ, EuclideanSpace ℝ (Fin 0)))
+      (ClosedCell (n - n)) _ (closedCellSubSelfChartedSpace n)
+      (EuclideanSpace ℝ (Fin (n - n))) _ _ (EuclideanSpace ℝ (Fin (n - n))) _
+      (𝓘(ℝ, EuclideanSpace ℝ (Fin (n - n)))) (EuclideanSpace ℝ (Fin (n - n))) _ _
+      (⊤ : ℕ∞)
+      (fun v : ClosedCell (n - n) => (v : EuclideanSpace ℝ (Fin (n - n)))) := by
+  classical
+  letI : ChartedSpace (EuclideanSpace ℝ (Fin 0)) (ClosedCell 0) := closedCellZeroChartedSpace
+  letI : ChartedSpace (EuclideanSpace ℝ (Fin 0)) (ClosedCell (n - n)) :=
+    chartedSpaceOfHomeomorph (closedCellSubSelfHomeo n)
+  letI : IsManifold (𝓡 0) (⊤ : ℕ∞) (ClosedCell 0) := isManifoldOfHomeomorph (𝓡 0) closedCellZeroHomeo
+  let h : ClosedCell (n - n) ≃ₜ ClosedCell 0 := closedCellSubSelfHomeo n
+  let e : EuclideanSpace ℝ (Fin 0) ≃ₗᵢ[ℝ] EuclideanSpace ℝ (Fin (n - n)) := (finSubSelfIso n).symm
+  have hh : ContMDiff (𝓘(ℝ, EuclideanSpace ℝ (Fin 0))) (𝓘(ℝ, EuclideanSpace ℝ (Fin 0))) (⊤ : ℕ∞)
+      (fun x : ClosedCell (n - n) => (h x : ClosedCell 0)) := by
+    exact contMDiff_homeomorph_of_chartedSpaceOfHomeomorph (H := EuclideanSpace ℝ (Fin 0))
+      (h := h) (𝓘(ℝ, EuclideanSpace ℝ (Fin 0))) (⊤ : ℕ∞)
+  have hz : ContMDiff (𝓘(ℝ, EuclideanSpace ℝ (Fin 0))) (𝓘(ℝ, EuclideanSpace ℝ (Fin 0))) (⊤ : ℕ∞)
+      (fun x : ClosedCell 0 => (x : EuclideanSpace ℝ (Fin 0))) :=
+    closedCellZeroInclusion_contMDiff
+  have he : ContMDiff (𝓘(ℝ, EuclideanSpace ℝ (Fin 0))) (𝓘(ℝ, EuclideanSpace ℝ (Fin (n - n)))) (⊤ : ℕ∞)
+      (fun x : EuclideanSpace ℝ (Fin 0) => e x) := by
+    exact contMDiff_iff_contDiff.mpr (e.contDiff)
+  have hcomp : ContMDiff (𝓘(ℝ, EuclideanSpace ℝ (Fin 0))) (𝓘(ℝ, EuclideanSpace ℝ (Fin (n - n)))) (⊤ : ℕ∞)
+      (fun x : ClosedCell (n - n) => e ((h x : ClosedCell 0) : EuclideanSpace ℝ (Fin 0))) :=
+    he.comp (hz.comp hh)
+  refine ContMDiff.congr (f := fun x : ClosedCell (n - n) =>
+      e ((h x : ClosedCell 0) : EuclideanSpace ℝ (Fin 0))) hcomp ?_
+  intro x
+  dsimp [h, e, closedCellSubSelfHomeo, finSubSelfIso]
+  simp
+
 theorem closedCellInclusion_contMDiff_of (l : ℕ) [NeZero l] [Fact (l = (l - 1) + 1)] :
     @ContMDiff ℝ _ (EuclideanSpace ℝ (Fin ((l - 1) + 1))) _ _
       (EuclideanHalfSpace ((l - 1) + 1)) _ (modelWithCornersEuclideanHalfSpace ((l - 1) + 1))
