@@ -3234,6 +3234,7 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.SobolevScale.AppH2Hs
 import DifferentialGeometry.Analysis.Spectral.Tensor.SobolevScale.ExponentCongr
 import DifferentialGeometry.Analysis.Spectral.Tensor.SobolevScale.H1Jet
 import DifferentialGeometry.Analysis.Spectral.Tensor.SobolevScale.HsTwoJet
+import DifferentialGeometry.Analysis.Spectral.Tensor.SobolevScale.HsThreeJet
 import DifferentialGeometry.Geometry.Comparison.CGTConvexity
 import DifferentialGeometry.Geometry.Comparison.CGTEvenCover
 import DifferentialGeometry.Geometry.Comparison.CGTExpLift
@@ -3472,6 +3473,7 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.UnifInsertH1
 import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.UnifInvCoeffH2
 import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.UnifInvCoeffH3
 import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.UnifInvCoeffLip
+import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.UnifLow1PathH5
 import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.UnifLow1PathPair
 import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.UnifLowBasePairH4
 import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.UnifLowBoundsSmall

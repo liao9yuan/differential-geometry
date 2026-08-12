@@ -34,7 +34,7 @@ variable
       [IsManifold I ∞ M] [CompactSpace M] [I.Boundaryless]
       [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M]
 
-private theorem iter_three_one_pair_abs_le_h5_h3
+theorem oneMinusConnLapSmooth_pair_h5_h3
     (g : SmoothRiemannianMetric I M)
     (T Y : SmoothCcTensor g 0 2) :
     |tensorL2Inner (I := I) (M := M) g 0 2
@@ -606,7 +606,7 @@ theorem carrier_pair_abs_h5_of_h3
     have hs := pow_le_pow_left₀ hP0 hPsmall 2
     nlinarith [hs, sq_nonneg (2 * q - y * q),
       mul_nonneg (sq_nonneg y) (sq_nonneg q)]
-  have hpair := iter_three_one_pair_abs_le_h5_h3
+  have hpair := oneMinusConnLapSmooth_pair_h5_h3
     (I := I) (M := M) g T Y
   have hraw :
       2 * |tensorL2Inner (I := I) (M := M) g 0 2
