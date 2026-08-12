@@ -194,6 +194,28 @@ theorem contMDiff_of_contMDiff_comp_homeo {𝕜 : Type*} [NontriviallyNormedFiel
   rw [hfun]
   exact hsymm.comp hf
 
+theorem contMDiff_lower_of_contMDiff {k l : ℕ} {X M : Type*} [TopologicalSpace X] [TopologicalSpace M]
+    {E H : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] [TopologicalSpace H]
+    {I : ModelWithCorners ℝ E H} [ChartedSpace H M] [IsManifold I (⊤ : ℕ∞) M]
+    {E' H' : Type*} [NormedAddCommGroup E'] [NormedSpace ℝ E'] [TopologicalSpace H']
+    {I' : ModelWithCorners ℝ E' H'} [ChartedSpace H' X]
+    (φ : AttachingRegion k l → X) (e : AdjunctionSpace k l φ ≃ₜ M)
+    (hlower : ContMDiff I' I (⊤ : ℕ∞) (fun x : X => e (lower φ x))) :
+    @ContMDiff ℝ _ E' _ _ H' _ I' X _ _ E _ _ H _ I (AdjunctionSpace k l φ) _
+      (chartedSpaceOfHomeomorph e) (⊤ : ℕ∞) (lower φ) :=
+  contMDiff_of_contMDiff_comp_homeo (h := e) (I := I) (n := (⊤ : ℕ∞)) (f := lower φ) hlower
+
+theorem contMDiff_cell_of_contMDiff {k l : ℕ} {X M : Type*} [TopologicalSpace X] [TopologicalSpace M]
+    {E H : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] [TopologicalSpace H]
+    {I : ModelWithCorners ℝ E H} [ChartedSpace H M] [IsManifold I (⊤ : ℕ∞) M]
+    {E'' H'' : Type*} [NormedAddCommGroup E''] [NormedSpace ℝ E''] [TopologicalSpace H'']
+    {I'' : ModelWithCorners ℝ E'' H''} [ChartedSpace H'' (StandardHandle k l)]
+    (φ : AttachingRegion k l → X) (e : AdjunctionSpace k l φ ≃ₜ M)
+    (hcell : ContMDiff I'' I (⊤ : ℕ∞) (fun d : StandardHandle k l => e (cell φ d))) :
+    @ContMDiff ℝ _ E'' _ _ H'' _ I'' (StandardHandle k l) _ _ E _ _ H _ I (AdjunctionSpace k l φ) _
+      (chartedSpaceOfHomeomorph e) (⊤ : ℕ∞) (cell φ) :=
+  contMDiff_of_contMDiff_comp_homeo (h := e) (I := I) (n := (⊤ : ℕ∞)) (f := cell φ) hcell
+
 noncomputable def closedCellPermute {n : ℕ} (e : Fin n ≃ Fin n) :
     EuclideanSpace ℝ (Fin n) ≃ₗᵢ[ℝ] EuclideanSpace ℝ (Fin n) :=
   (EuclideanSpace.basisFun (Fin n) ℝ).reindex e |>.repr
