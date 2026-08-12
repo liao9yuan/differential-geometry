@@ -7132,6 +7132,18 @@ theorem modelLowerRoundBound_lt_smoothCap {ε r δ θ t : ℝ} (hδ : 0 < δ) (h
     exact mul_lt_mul_of_pos_right hsc hden
   nlinarith [hmul, hratio]
 
+theorem modelLowerRoundBound_lt_smoothCap_of_lt {ε r δ θ t : ℝ} (hδ : 0 < δ) (hθ : 0 < θ)
+    (hδr : δ < r ^ 2) (ht : 0 < t) (ht0 : t < r ^ 2 + 2 * ε) :
+    modelLowerRoundBound ε r δ θ t < smoothCap ε r δ t := by
+  by_cases ht2 : 2 * ε < t
+  · exact modelLowerRoundBound_lt_smoothCap hδ hθ hδr ht2 ht0
+  · have htle : t ≤ 2 * ε := le_of_not_gt ht2
+    have hbnd : modelLowerRoundBound ε r δ θ t ≤ 0 := by
+      dsimp [modelLowerRoundBound]
+      exact mul_nonpos_of_nonneg_of_nonpos (sq_nonneg _) (by nlinarith [htle])
+    have hsm : 0 < smoothCap ε r δ t := smoothCap_pos hδ hδr
+    nlinarith [hbnd, hsm]
+
 theorem modelRoundCapQ_eq_lowerBound_imp_eq_one {ε r δ θ a b : ℝ} (hε : 0 < ε) (hδ : 0 < δ)
     (hθ : 0 < θ) (hδr : δ < r ^ 2) (ha0 : 0 ≤ a) (ha1 : a ≤ 1) (hb0 : 0 ≤ b) (hb1 : b ≤ 1)
     (ht : 2 * ε < (2 * ε + r ^ 2 * b) * a)
