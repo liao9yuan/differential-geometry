@@ -110,10 +110,10 @@ private theorem iter_three_one_pair_abs_le_h5_h3
   rw [hinner, ← hTnorm, ← hYnorm]
   exact abs_real_inner_le_norm _ _
 
-theorem edge_carrier_h3_of_h4_cap
+theorem edge_carrier_h3
     (hDim : Module.finrank ℝ E = 3)
-    (gBase : SmoothRiemannianMetric I M) {Lambda Qcap : ℝ}
-    (hLambda : 1 ≤ Lambda) (hQcap : 0 ≤ Qcap) :
+    (gBase : SmoothRiemannianMetric I M) {Lambda : ℝ}
+    (hLambda : 1 ≤ Lambda) :
     ∀ g : SmoothRiemannianMetric I M,
       MetricUniformEquivalentOn (I := I) Set.univ gBase g Lambda →
       (∀ a : ℕ, a ≤ 3 →
@@ -130,13 +130,20 @@ theorem edge_carrier_h3_of_h4_cap
               (ccTensorBilinSymm (I := I) g
                 (0 : SmoothCcTensor g 0 2)) delta)
             {s : ℝ}, s ∈ Set.Icc (0 : ℝ) 1 →
-          ‖ccTensorToHs (I := I) (M := M) g 2 (4 : ℝ) T‖ ≤ Qcap →
+          ∀ {R : ℝ}, R ≤ 1 →
+          ‖ccTensorToHs (I := I) (M := M) g 2 (2 : ℝ) T‖ ≤ R →
           let A := LowBaseInternal.rhsSelfLow
               (I := I) (M := M) g gBase T hdelta hdeltaZ s +
             phiMetCurvCoeff (I := I) g gBase g
           ‖ccTensorToHs (I := I) (M := M) g 2 (3 : ℝ)
               (appCc (I := I) (M := M) g 2 2 A T)‖ ≤
-            D * ‖ccTensorToHs (I := I) (M := M) g 2 (3 : ℝ) T‖ := by
+            D *
+              (‖ccTensorToHs (I := I) (M := M) g 2 (3 : ℝ) T‖ +
+                ‖ccTensorToHs (I := I) (M := M) g 2 (2 : ℝ) T‖ *
+                  ‖ccTensorToHs (I := I) (M := M) g 2 (4 : ℝ) T‖ +
+                ‖ccTensorToHs (I := I) (M := M) g 2 (2 : ℝ) T‖ *
+                  ‖ccTensorToHs (I := I) (M := M) g 2 (3 : ℝ) T‖ *
+                  ‖ccTensorToHs (I := I) (M := M) g 2 (4 : ℝ) T‖) := by
   obtain ⟨Ca, hCa, happ⟩ :=
     appRS_h3_sup_unif (I := I) (M := M) gBase Lambda 0 2 2
   obtain ⟨Cm0, hCm0, hmor0⟩ :=
@@ -157,38 +164,46 @@ theorem edge_carrier_h3_of_h4_cap
   obtain ⟨hact2, hact3⟩ := hKcurv.bounds g hEq hjet
   obtain ⟨K0, K2, hK0, hK2, hself⟩ :=
     selfLowJetQBg (I := I) (M := M) hDim g gBase
+  obtain ⟨C3, hC3, hjet3⟩ := hsJet_le (I := I) (M := M) g 2 3
   obtain ⟨C4, hC4, hjet4⟩ := hsJet_le (I := I) (M := M) g 2 4
   obtain ⟨Ch, hCh, hhs⟩ := hs_le_jet (I := I) (M := M) g 2 3
-  let W : ℝ := C4 * Qcap
-  let Bself : ℝ := (K0 3 + K2 3 * W ^ 2) * (1 + W ^ 2)
-  let Jc : ℝ := lowJetSq (I := I) (M := M) g 3
+  let A3 : ℝ := (K0 3 + K2 3 * C3 ^ 2) * (1 + C4 ^ 2)
+  let A2 : ℝ := (K0 2 + K2 2 * C3 ^ 2) * (1 + C3 ^ 2)
+  let Jc3 : ℝ := lowJetSq (I := I) (M := M) g 3
     (phiMetCurvCoeff (I := I) g gBase g)
-  let B2 : ℝ := 2 * (Bself + Jc)
-  let B : ℝ := Real.sqrt B2
-  let K : ℝ := Ca *
-    (Ct ^ 2 * B ^ 2 + (Cm2 * B) ^ 2 * Cj ^ 2)
+  let Jc2 : ℝ := lowJetSq (I := I) (M := M) g 2
+    (phiMetCurvCoeff (I := I) g gBase g)
+  let B3 : ℝ := 2 * (A3 + Jc3)
+  let B2 : ℝ := 2 * (A2 + Jc2)
+  let K3 : ℝ := Ca * Ct ^ 2 * B3
+  let K2a : ℝ := Ca * Cm2 ^ 2 * B2 * Cj ^ 2
+  let K : ℝ := 2 * (K3 + K2a)
   let D : ℝ := 2 * Ch * Real.sqrt K
-  have hW : 0 ≤ W := mul_nonneg hC4 hQcap
-  have hBself : 0 ≤ Bself := by
-    dsimp only [Bself]
+  have hA3 : 0 ≤ A3 := by
+    dsimp only [A3]
     exact mul_nonneg
-      (add_nonneg (hK0 3) (mul_nonneg (hK2 3) (sq_nonneg W)))
-      (add_nonneg (by norm_num) (sq_nonneg W))
-  have hJc : 0 ≤ Jc := Finset.sum_nonneg fun _ _ => sq_nonneg _
-  have hB2 : 0 ≤ B2 := mul_nonneg (by norm_num) (add_nonneg hBself hJc)
-  have hB : 0 ≤ B := Real.sqrt_nonneg _
-  have hBsq : B ^ 2 = B2 := by
-    simpa only [B] using Real.sq_sqrt hB2
+      (add_nonneg (hK0 3) (mul_nonneg (hK2 3) (sq_nonneg C3)))
+      (add_nonneg (by norm_num) (sq_nonneg C4))
+  have hA2 : 0 ≤ A2 := by
+    dsimp only [A2]
+    exact mul_nonneg
+      (add_nonneg (hK0 2) (mul_nonneg (hK2 2) (sq_nonneg C3)))
+      (add_nonneg (by norm_num) (sq_nonneg C3))
+  have hJc3 : 0 ≤ Jc3 := Finset.sum_nonneg fun _ _ => sq_nonneg _
+  have hJc2 : 0 ≤ Jc2 := Finset.sum_nonneg fun _ _ => sq_nonneg _
+  have hB3 : 0 ≤ B3 := mul_nonneg (by norm_num) (add_nonneg hA3 hJc3)
+  have hB2 : 0 ≤ B2 := mul_nonneg (by norm_num) (add_nonneg hA2 hJc2)
+  have hK3 : 0 ≤ K3 := by dsimp only [K3]; positivity
+  have hK2a : 0 ≤ K2a := by dsimp only [K2a]; positivity
   have hK : 0 ≤ K := by
     dsimp only [K]
-    exact mul_nonneg hCa
-      (add_nonneg (mul_nonneg (sq_nonneg Ct) (sq_nonneg B))
-        (mul_nonneg (sq_nonneg (Cm2 * B)) (sq_nonneg Cj)))
+    exact mul_nonneg (by norm_num) (add_nonneg hK3 hK2a)
   have hD : 0 ≤ D := by
     dsimp only [D]
     exact mul_nonneg (mul_nonneg (by norm_num) hCh) (Real.sqrt_nonneg _)
   refine ⟨D, hD, ?_⟩
-  intro T hTsymm delta hdelta_le hdelta0 hdelta hdeltaZ s hs hT4
+  intro T hTsymm delta hdelta_le hdelta0 hdelta hdeltaZ s hs
+    R hRone hT2
   let x : ℝ := ‖ccTensorToHs (I := I) (M := M) g 2 (2 : ℝ) T‖
   let y : ℝ := ‖ccTensorToHs (I := I) (M := M) g 2 (3 : ℝ) T‖
   let q : ℝ := ‖ccTensorToHs (I := I) (M := M) g 2 (4 : ℝ) T‖
@@ -203,75 +218,213 @@ theorem edge_carrier_h3_of_h4_cap
   have hxy : x ≤ y := by
     dsimp only [x, y]
     exact ccToHs_norm_mono (I := I) (M := M) g 2 (by norm_num) T
-  have hqcap : q ≤ Qcap := by simpa only [q] using hT4
+  have hxone : x ≤ 1 := hT2.trans hRone
+  have hinterp : y ^ 2 ≤ x * q := by
+    exact prodOfParam hx hq (fun t ht => by
+      simpa only [x, y, q] using
+        specInterp3 (I := I) (M := M) g 2 T ht)
+  have hsum4 :
+      ∑ j ∈ Finset.range 4,
+          ‖iteratedCovGrad (I := I) g 0 2 j T‖ ≤ C3 * y := by
+    simpa only [y, Nat.reduceAdd] using hjet3 T
+  have hsq4 :
+      ∑ j ∈ Finset.range 4,
+          ‖iteratedCovGrad (I := I) g 0 2 j T‖ ^ 2 ≤ (C3 * y) ^ 2 := by
+    calc
+      _ ≤ (∑ j ∈ Finset.range 4,
+          ‖iteratedCovGrad (I := I) g 0 2 j T‖) ^ 2 :=
+        Finset.sum_sq_le_sq_sum_of_nonneg fun j _ => norm_nonneg _
+      _ ≤ (C3 * y) ^ 2 := pow_le_pow_left₀
+        (Finset.sum_nonneg fun j _ => norm_nonneg _) hsum4 2
   have hsum5 :
       ∑ j ∈ Finset.range 5,
-          ‖iteratedCovGrad (I := I) g 0 2 j T‖ ≤ W := by
-    calc
-      _ ≤ C4 * q := by simpa only [q, Nat.reduceAdd] using hjet4 T
-      _ ≤ C4 * Qcap := mul_le_mul_of_nonneg_left hqcap hC4
-      _ = W := rfl
+          ‖iteratedCovGrad (I := I) g 0 2 j T‖ ≤ C4 * q := by
+    simpa only [q, Nat.reduceAdd] using hjet4 T
   have hsq5 :
       ∑ j ∈ Finset.range 5,
-          ‖iteratedCovGrad (I := I) g 0 2 j T‖ ^ 2 ≤ W ^ 2 := by
+          ‖iteratedCovGrad (I := I) g 0 2 j T‖ ^ 2 ≤ (C4 * q) ^ 2 := by
     calc
       _ ≤ (∑ j ∈ Finset.range 5,
           ‖iteratedCovGrad (I := I) g 0 2 j T‖) ^ 2 :=
         Finset.sum_sq_le_sq_sum_of_nonneg fun j _ => norm_nonneg _
-      _ ≤ W ^ 2 := pow_le_pow_left₀
+      _ ≤ (C4 * q) ^ 2 := pow_le_pow_left₀
         (Finset.sum_nonneg fun j _ => norm_nonneg _) hsum5 2
   have hshift :
       ∑ j ∈ Finset.range 3,
-          ‖iteratedCovGrad (I := I) g 0 2 (1 + j) T‖ ^ 2 ≤ W ^ 2 := by
+          ‖iteratedCovGrad (I := I) g 0 2 (1 + j) T‖ ^ 2 ≤
+            (C3 * y) ^ 2 := by
     refine (show
       ∑ j ∈ Finset.range 3,
           ‖iteratedCovGrad (I := I) g 0 2 (1 + j) T‖ ^ 2 ≤
-        ∑ j ∈ Finset.range 5,
+        ∑ j ∈ Finset.range 4,
           ‖iteratedCovGrad (I := I) g 0 2 j T‖ ^ 2 by
       simp only [Finset.sum_range_succ, Finset.sum_range_zero,
         zero_add, Nat.reduceAdd]
-      nlinarith [sq_nonneg ‖iteratedCovGrad (I := I) g 0 2 0 T‖,
-        sq_nonneg ‖iteratedCovGrad (I := I) g 0 2 4 T‖]).trans hsq5
-  have hS : lowJetSq (I := I) (M := M) g 3 S ≤ Bself := by
+      nlinarith [sq_nonneg ‖iteratedCovGrad (I := I) g 0 2 0 T‖]).trans hsq4
+  have hS3 : lowJetSq (I := I) (M := M) g 3 S ≤
+      A3 * (1 + y ^ 2) * (1 + q ^ 2) := by
     have hraw := hself T hTsymm hdelta0 hdelta_le hdelta hdeltaZ 3 s hs
     let U : ℝ := ∑ j ∈ Finset.range 3,
       ‖iteratedCovGrad (I := I) g 0 2 (1 + j) T‖ ^ 2
     let V : ℝ := ∑ j ∈ Finset.range 5,
       ‖iteratedCovGrad (I := I) g 0 2 j T‖ ^ 2
-    have hU : U ≤ W ^ 2 := by simpa only [U] using hshift
-    have hV : V ≤ W ^ 2 := by simpa only [V] using hsq5
+    have hU : U ≤ (C3 * y) ^ 2 := by simpa only [U] using hshift
+    have hV : V ≤ (C4 * q) ^ 2 := by simpa only [V] using hsq5
     have hU0 : 0 ≤ U := Finset.sum_nonneg fun j _ => sq_nonneg _
     have hV0 : 0 ≤ V := Finset.sum_nonneg fun j _ => sq_nonneg _
-    have hfirst : K0 3 + K2 3 * U ≤ K0 3 + K2 3 * W ^ 2 :=
+    have hfirst : K0 3 + K2 3 * U ≤ K0 3 + K2 3 * (C3 * y) ^ 2 :=
       add_le_add le_rfl (mul_le_mul_of_nonneg_left hU (hK2 3))
-    have hsecond : 1 + V ≤ 1 + W ^ 2 := add_le_add le_rfl hV
+    have hsecond : 1 + V ≤ 1 + (C4 * q) ^ 2 := add_le_add le_rfl hV
+    have hfactor1 : K0 3 + K2 3 * (C3 * y) ^ 2 ≤
+        (K0 3 + K2 3 * C3 ^ 2) * (1 + y ^ 2) := by
+      calc
+        _ ≤ (K0 3 + K2 3 * (C3 * y) ^ 2) +
+            (K2 3 * C3 ^ 2 + K0 3 * y ^ 2) :=
+          le_add_of_nonneg_right (add_nonneg
+            (mul_nonneg (hK2 3) (sq_nonneg C3))
+            (mul_nonneg (hK0 3) (sq_nonneg y)))
+        _ = _ := by ring
+    have hfactor2 : 1 + (C4 * q) ^ 2 ≤
+        (1 + C4 ^ 2) * (1 + q ^ 2) := by
+      calc
+        _ ≤ (1 + (C4 * q) ^ 2) + (C4 ^ 2 + q ^ 2) :=
+          le_add_of_nonneg_right (add_nonneg (sq_nonneg C4) (sq_nonneg q))
+        _ = _ := by ring
     calc
       lowJetSq (I := I) (M := M) g 3 S ≤
           (K0 3 + K2 3 * U) * (1 + V) := by
         simpa only [S, U, V, Nat.reduceAdd] using hraw
-      _ ≤ (K0 3 + K2 3 * W ^ 2) * (1 + W ^ 2) :=
+      _ ≤ (K0 3 + K2 3 * (C3 * y) ^ 2) *
+          (1 + (C4 * q) ^ 2) :=
         mul_le_mul hfirst hsecond (add_nonneg (by norm_num) hV0)
-          (add_nonneg (hK0 3) (mul_nonneg (hK2 3) (sq_nonneg W)))
-      _ = Bself := rfl
-  have hAjet : lowJetSq (I := I) (M := M) g 3 A ≤ B ^ 2 := by
-    rw [hBsq]
-    exact (jetAdd (I := I) (M := M) g 3 S C).trans
-      (mul_le_mul_of_nonneg_left (add_le_add hS le_rfl) (by norm_num))
+          (add_nonneg (hK0 3)
+            (mul_nonneg (hK2 3) (sq_nonneg (C3 * y))))
+      _ ≤ A3 * (1 + y ^ 2) * (1 + q ^ 2) := by
+        calc
+          _ ≤ ((K0 3 + K2 3 * C3 ^ 2) * (1 + y ^ 2)) *
+              ((1 + C4 ^ 2) * (1 + q ^ 2)) :=
+            mul_le_mul hfactor1 hfactor2
+              (add_nonneg (by norm_num) (sq_nonneg (C4 * q)))
+              (mul_nonneg
+                (add_nonneg (hK0 3) (mul_nonneg (hK2 3) (sq_nonneg C3)))
+                (add_nonneg (by norm_num) (sq_nonneg y)))
+          _ = A3 * (1 + y ^ 2) * (1 + q ^ 2) := by
+            dsimp only [A3]
+            ring
+  have hS2 : lowJetSq (I := I) (M := M) g 2 S ≤
+      A2 * (1 + y ^ 2) ^ 2 := by
+    have hraw := hself T hTsymm hdelta0 hdelta_le hdelta hdeltaZ 2 s hs
+    let U : ℝ := ∑ j ∈ Finset.range 3,
+      ‖iteratedCovGrad (I := I) g 0 2 (1 + j) T‖ ^ 2
+    let V : ℝ := ∑ j ∈ Finset.range 4,
+      ‖iteratedCovGrad (I := I) g 0 2 j T‖ ^ 2
+    have hU : U ≤ (C3 * y) ^ 2 := by simpa only [U] using hshift
+    have hV : V ≤ (C3 * y) ^ 2 := by simpa only [V] using hsq4
+    have hV0 : 0 ≤ V := Finset.sum_nonneg fun j _ => sq_nonneg _
+    have hfirst : K0 2 + K2 2 * U ≤ K0 2 + K2 2 * (C3 * y) ^ 2 :=
+      add_le_add le_rfl (mul_le_mul_of_nonneg_left hU (hK2 2))
+    have hsecond : 1 + V ≤ 1 + (C3 * y) ^ 2 := add_le_add le_rfl hV
+    have hfactor1 : K0 2 + K2 2 * (C3 * y) ^ 2 ≤
+        (K0 2 + K2 2 * C3 ^ 2) * (1 + y ^ 2) := by
+      calc
+        _ ≤ (K0 2 + K2 2 * (C3 * y) ^ 2) +
+            (K2 2 * C3 ^ 2 + K0 2 * y ^ 2) :=
+          le_add_of_nonneg_right (add_nonneg
+            (mul_nonneg (hK2 2) (sq_nonneg C3))
+            (mul_nonneg (hK0 2) (sq_nonneg y)))
+        _ = _ := by ring
+    have hfactor2 : 1 + (C3 * y) ^ 2 ≤
+        (1 + C3 ^ 2) * (1 + y ^ 2) := by
+      calc
+        _ ≤ (1 + (C3 * y) ^ 2) + (C3 ^ 2 + y ^ 2) :=
+          le_add_of_nonneg_right (add_nonneg (sq_nonneg C3) (sq_nonneg y))
+        _ = _ := by ring
+    calc
+      lowJetSq (I := I) (M := M) g 2 S ≤
+          (K0 2 + K2 2 * U) * (1 + V) := by
+        simpa only [S, U, V, Nat.reduceAdd] using hraw
+      _ ≤ (K0 2 + K2 2 * (C3 * y) ^ 2) *
+          (1 + (C3 * y) ^ 2) :=
+        mul_le_mul hfirst hsecond (add_nonneg (by norm_num) hV0)
+          (add_nonneg (hK0 2)
+            (mul_nonneg (hK2 2) (sq_nonneg (C3 * y))))
+      _ ≤ A2 * (1 + y ^ 2) ^ 2 := by
+        calc
+          _ ≤ ((K0 2 + K2 2 * C3 ^ 2) * (1 + y ^ 2)) *
+              ((1 + C3 ^ 2) * (1 + y ^ 2)) :=
+            mul_le_mul hfactor1 hfactor2
+              (add_nonneg (by norm_num) (sq_nonneg (C3 * y)))
+              (mul_nonneg
+                (add_nonneg (hK0 2) (mul_nonneg (hK2 2) (sq_nonneg C3)))
+                (add_nonneg (by norm_num) (sq_nonneg y)))
+          _ = A2 * (1 + y ^ 2) ^ 2 := by
+            dsimp only [A2]
+            ring
+  have hF3one : 1 ≤ (1 + y ^ 2) * (1 + q ^ 2) := by
+    calc
+      1 = 1 * 1 := by ring
+      _ ≤ (1 + y ^ 2) * (1 + q ^ 2) :=
+        mul_le_mul (le_add_of_nonneg_right (sq_nonneg y))
+          (le_add_of_nonneg_right (sq_nonneg q)) (by norm_num)
+          (add_nonneg (by norm_num) (sq_nonneg y))
+  have hF2one : 1 ≤ (1 + y ^ 2) ^ 2 := by
+    calc
+      1 = 1 * 1 := by ring
+      _ ≤ (1 + y ^ 2) * (1 + y ^ 2) :=
+        mul_le_mul (le_add_of_nonneg_right (sq_nonneg y))
+          (le_add_of_nonneg_right (sq_nonneg y)) (by norm_num)
+          (add_nonneg (by norm_num) (sq_nonneg y))
+      _ = (1 + y ^ 2) ^ 2 := by ring
+  have hAjet3 : lowJetSq (I := I) (M := M) g 3 A ≤
+      B3 * (1 + y ^ 2) * (1 + q ^ 2) := by
+    calc
+      _ ≤ 2 * (lowJetSq (I := I) (M := M) g 3 S + Jc3) :=
+        jetAdd (I := I) (M := M) g 3 S C
+      _ ≤ 2 * (A3 * ((1 + y ^ 2) * (1 + q ^ 2)) +
+          Jc3 * ((1 + y ^ 2) * (1 + q ^ 2))) := by
+        apply mul_le_mul_of_nonneg_left _ (by norm_num)
+        apply add_le_add
+        · simpa only [mul_assoc] using hS3
+        · calc
+            Jc3 = Jc3 * 1 := (mul_one Jc3).symm
+            _ ≤ Jc3 * ((1 + y ^ 2) * (1 + q ^ 2)) :=
+              mul_le_mul_of_nonneg_left hF3one hJc3
+      _ = B3 * (1 + y ^ 2) * (1 + q ^ 2) := by
+        dsimp only [B3]
+        ring
+  have hAjet2 : lowJetSq (I := I) (M := M) g 2 A ≤
+      B2 * (1 + y ^ 2) ^ 2 := by
+    calc
+      _ ≤ 2 * (lowJetSq (I := I) (M := M) g 2 S + Jc2) :=
+        jetAdd (I := I) (M := M) g 2 S C
+      _ ≤ 2 * (A2 * (1 + y ^ 2) ^ 2 + Jc2 * (1 + y ^ 2) ^ 2) := by
+        apply mul_le_mul_of_nonneg_left _ (by norm_num)
+        apply add_le_add hS2
+        calc
+          Jc2 = Jc2 * 1 := (mul_one Jc2).symm
+          _ ≤ Jc2 * (1 + y ^ 2) ^ 2 :=
+            mul_le_mul_of_nonneg_left hF2one hJc2
+      _ = B2 * (1 + y ^ 2) ^ 2 := by
+        dsimp only [B2]
+        ring
+  let Ap : ℝ := Cm2 * Real.sqrt B2 * (1 + y ^ 2)
+  have hAp : 0 ≤ Ap := by dsimp only [Ap]; positivity
   have hApt : ∀ z : M,
       riemannianFiberNormSq (I := I) (M := M) g 2 2 z (A.toSection z) ≤
-        (Cm2 * B) ^ 2 := by
+        Ap ^ 2 := by
     intro z
     have hm := hmor2 g hEq (hjet 1 (by norm_num)) (hjet 2 (by norm_num)) A z
     calc
       _ ≤ Cm2 ^ 2 * ∑ j ∈ Finset.range 3,
           ‖iteratedCovGrad (I := I) g 2 2 j A‖ ^ 2 := hm
-      _ ≤ Cm2 ^ 2 * lowJetSq (I := I) (M := M) g 3 A := by
-        apply mul_le_mul_of_nonneg_left _ (sq_nonneg Cm2)
-        simp only [lowJetSq, Nat.reduceAdd, Finset.sum_range_succ]
-        exact le_add_of_nonneg_right (sq_nonneg _)
-      _ ≤ Cm2 ^ 2 * B ^ 2 :=
-        mul_le_mul_of_nonneg_left hAjet (sq_nonneg Cm2)
-      _ = (Cm2 * B) ^ 2 := by ring
+      _ ≤ Cm2 ^ 2 * (B2 * (1 + y ^ 2) ^ 2) :=
+        mul_le_mul_of_nonneg_left hAjet2 (sq_nonneg Cm2)
+      _ = Ap ^ 2 := by
+        dsimp only [Ap]
+        rw [show (Cm2 * Real.sqrt B2 * (1 + y ^ 2)) ^ 2 =
+            Cm2 ^ 2 * (Real.sqrt B2) ^ 2 * (1 + y ^ 2) ^ 2 by ring,
+          Real.sq_sqrt hB2]
+        ring
   have hmor0' : ∀ (U : SmoothCcTensor g 0 2) (z : M),
       riemannianFiberNormSq (I := I) (M := M) g 0 2 z (U.toSection z) ≤
         Cm0 ^ 2 * ∑ j ∈ Finset.range (Module.finrank ℝ E / 2 + 2),
@@ -282,15 +435,13 @@ theorem edge_carrier_h3_of_h4_cap
     exact hmor0 g hEq (hjet 1 (by norm_num)) (hjet 2 (by norm_num)) U z
   have hTpt : ∀ z : M,
       riemannianFiberNormSq (I := I) (M := M) g 0 2 z (T.toSection z) ≤
-        (Ct * y) ^ 2 := by
+        (Ct * x) ^ 2 := by
     intro z
     calc
       _ ≤ Ct ^ 2 * x ^ 2 := by
         simpa only [Ct, x] using
           hs2_fiber_sq_action (I := I) (M := M) hDim g hact2 hmor0' T z
-      _ ≤ Ct ^ 2 * y ^ 2 :=
-        mul_le_mul_of_nonneg_left (pow_le_pow_left₀ hx hxy 2) (sq_nonneg Ct)
-      _ = (Ct * y) ^ 2 := by ring
+      _ = (Ct * x) ^ 2 := by ring
   have hTjet :
       ∑ j ∈ Finset.range 4,
           ‖iteratedCovGrad (I := I) g 0 2 j T‖ ^ 2 ≤ (Cj * y) ^ 2 := by
@@ -302,31 +453,87 @@ theorem edge_carrier_h3_of_h4_cap
         (Finset.sum_nonneg fun j _ => norm_nonneg _)
         (by simpa only [Cj, y] using
           covsum_hs_three (I := I) (M := M) g 2 hact2 hact3 T) 2
-  have hYjet : lowJetSq (I := I) (M := M) g 3 Y ≤ K * y ^ 2 := by
-    have happRaw := happ g hEq A T (Cm2 * B) (Ct * y)
-      (mul_nonneg hCm2 hB) (mul_nonneg hCt hy) hApt hTpt
+  let P2 : ℝ := y ^ 2 + (x * q) ^ 2 + (x * y * q) ^ 2
+  have hP2 : 0 ≤ P2 := by dsimp only [P2]; positivity
+  have hx2y2 : x ^ 2 ≤ y ^ 2 := pow_le_pow_left₀ hx hxy 2
+  have hx2one : x ^ 2 ≤ 1 := by
+    simpa only [one_pow] using pow_le_pow_left₀ hx hxone 2
+  have hy4 : y ^ 4 ≤ (x * q) ^ 2 := by
+    have h := pow_le_pow_left₀ (sq_nonneg y) hinterp 2
+    convert h using 1
+    all_goals ring
+  have hy6 : y ^ 6 ≤ (x * y * q) ^ 2 := by
+    have h := mul_le_mul_of_nonneg_left hy4 (sq_nonneg y)
+    convert h using 1
+    all_goals ring
+  have hcore3 : x ^ 2 * (1 + y ^ 2) * (1 + q ^ 2) ≤ 2 * P2 := by
+    dsimp only [P2]
+    nlinarith only [hx2y2,
+      mul_nonneg (sq_nonneg y) (sub_nonneg.mpr hx2one),
+      sq_nonneg (x * q), sq_nonneg (x * y * q)]
+  have hcore2 : y ^ 2 * (1 + y ^ 2) ^ 2 ≤ 2 * P2 := by
+    dsimp only [P2]
+    nlinarith only [hy4, hy6, sq_nonneg y, sq_nonneg (x * q),
+      sq_nonneg (x * y * q)]
+  have hYjet : lowJetSq (I := I) (M := M) g 3 Y ≤ K * P2 := by
+    have happRaw := happ g hEq A T Ap (Ct * x)
+      hAp (mul_nonneg hCt hx) hApt hTpt
     change (∑ j ∈ Finset.range 4,
       ‖iteratedCovGrad (I := I) g 0 2 j Y‖ ^ 2) ≤ _
     refine happRaw.trans ?_
     calc
-      Ca * ((Ct * y) ^ 2 * ∑ j ∈ Finset.range 4,
+      Ca * ((Ct * x) ^ 2 * ∑ j ∈ Finset.range 4,
           ‖iteratedCovGrad (I := I) g 2 2 j A‖ ^ 2 +
-          (Cm2 * B) ^ 2 * ∑ j ∈ Finset.range 4,
+          Ap ^ 2 * ∑ j ∈ Finset.range 4,
             ‖iteratedCovGrad (I := I) g 0 2 j T‖ ^ 2) ≤
-          Ca * ((Ct * y) ^ 2 * B ^ 2 +
-            (Cm2 * B) ^ 2 * (Cj * y) ^ 2) := by
+          K3 * (x ^ 2 * (1 + y ^ 2) * (1 + q ^ 2)) +
+            K2a * (y ^ 2 * (1 + y ^ 2) ^ 2) := by
+        rw [show K3 * (x ^ 2 * (1 + y ^ 2) * (1 + q ^ 2)) +
+            K2a * (y ^ 2 * (1 + y ^ 2) ^ 2) =
+          Ca * (Ct ^ 2 * x ^ 2 *
+              (B3 * (1 + y ^ 2) * (1 + q ^ 2)) +
+            (Cm2 ^ 2 * B2 * (1 + y ^ 2) ^ 2) *
+              (Cj ^ 2 * y ^ 2)) by
+          dsimp only [K3, K2a]
+          ring]
         apply mul_le_mul_of_nonneg_left _ hCa
-        exact add_le_add
-          (mul_le_mul_of_nonneg_left hAjet (sq_nonneg (Ct * y)))
-          (mul_le_mul_of_nonneg_left hTjet (sq_nonneg (Cm2 * B)))
-      _ = K * y ^ 2 := by
+        apply add_le_add
+        · calc
+            (Ct * x) ^ 2 * ∑ j ∈ Finset.range 4,
+                ‖iteratedCovGrad (I := I) g 2 2 j A‖ ^ 2 ≤
+                (Ct * x) ^ 2 *
+                  (B3 * (1 + y ^ 2) * (1 + q ^ 2)) :=
+              mul_le_mul_of_nonneg_left hAjet3 (sq_nonneg (Ct * x))
+            _ = Ct ^ 2 * x ^ 2 *
+                (B3 * (1 + y ^ 2) * (1 + q ^ 2)) := by ring
+        · calc
+            Ap ^ 2 * ∑ j ∈ Finset.range 4,
+                ‖iteratedCovGrad (I := I) g 0 2 j T‖ ^ 2 ≤
+                Ap ^ 2 * (Cj * y) ^ 2 :=
+              mul_le_mul_of_nonneg_left hTjet (sq_nonneg Ap)
+            _ = (Cm2 ^ 2 * B2 * (1 + y ^ 2) ^ 2) *
+                (Cj ^ 2 * y ^ 2) := by
+              dsimp only [Ap]
+              rw [show (Cm2 * Real.sqrt B2 * (1 + y ^ 2)) ^ 2 =
+                  Cm2 ^ 2 * (Real.sqrt B2) ^ 2 * (1 + y ^ 2) ^ 2 by ring,
+                Real.sq_sqrt hB2]
+              ring
+      _ ≤ K * P2 := by
+        have h3 := mul_le_mul_of_nonneg_left hcore3 hK3
+        have h2 := mul_le_mul_of_nonneg_left hcore2 hK2a
         dsimp only [K]
-        ring
-  have hKy : 0 ≤ Real.sqrt K * y := mul_nonneg (Real.sqrt_nonneg _) hy
+        nlinarith only [h3, h2]
+  let P : ℝ := y + x * q + x * y * q
+  have hP : 0 ≤ P := by dsimp only [P]; positivity
+  have hP2P : P2 ≤ P ^ 2 := by
+    dsimp only [P2, P]
+    nlinarith only [mul_nonneg hy (mul_nonneg hx hq),
+      mul_nonneg hy (mul_nonneg (mul_nonneg hx hy) hq),
+      mul_nonneg (mul_nonneg hx hq) (mul_nonneg (mul_nonneg hx hy) hq)]
   have hYjet' : lowJetSq (I := I) (M := M) g 3 Y ≤
-      (Real.sqrt K * y) ^ 2 := by
+      (Real.sqrt K * P) ^ 2 := by
     rw [mul_pow, Real.sq_sqrt hK]
-    exact hYjet
+    exact hYjet.trans (mul_le_mul_of_nonneg_left hP2P hK)
   let JY : ℝ := ∑ j ∈ Finset.range 4,
     ‖iteratedCovGrad (I := I) g 0 2 j Y‖
   have hJY0 : 0 ≤ JY := Finset.sum_nonneg fun j _ => norm_nonneg _
@@ -336,15 +543,16 @@ theorem edge_carrier_h3_of_h4_cap
       (f := fun j => ‖iteratedCovGrad (I := I) g 0 2 j Y‖)
     simpa only [JY, Finset.card_range, Nat.cast_ofNat, lowJetSq,
       Nat.reduceAdd] using h
-  have hJY : JY ≤ 2 * (Real.sqrt K * y) := by
-    nlinarith [hJYsq.trans
-      (mul_le_mul_of_nonneg_left hYjet' (by norm_num))]
-  change ‖ccTensorToHs (I := I) (M := M) g 2 (3 : ℝ) Y‖ ≤ D * y
+  have hJY : JY ≤ 2 * (Real.sqrt K * P) := by
+    nlinarith only [hJYsq.trans
+      (mul_le_mul_of_nonneg_left hYjet' (by norm_num)), hJY0,
+      mul_nonneg (Real.sqrt_nonneg K) hP]
+  change ‖ccTensorToHs (I := I) (M := M) g 2 (3 : ℝ) Y‖ ≤ D * P
   calc
     _ ≤ Ch * JY := by simpa only [JY, Nat.reduceAdd] using hhs Y
-    _ ≤ Ch * (2 * (Real.sqrt K * y)) :=
+    _ ≤ Ch * (2 * (Real.sqrt K * P)) :=
       mul_le_mul_of_nonneg_left hJY hCh
-    _ = D * y := by
+    _ = D * P := by
       dsimp only [D]
       ring
 
@@ -352,24 +560,52 @@ theorem carrier_pair_abs_h5_of_h3
     (g : SmoothRiemannianMetric I M)
     (T Y : SmoothCcTensor g 0 2) {eta D : ℝ}
     (heta : 0 < eta)
+    (hT2 : ‖ccTensorToHs (I := I) (M := M) g 2 (2 : ℝ) T‖ ≤ 1)
     (hY : ‖ccTensorToHs (I := I) (M := M) g 2 (3 : ℝ) Y‖ ≤
-      D * ‖ccTensorToHs (I := I) (M := M) g 2 (3 : ℝ) T‖) :
+      D *
+        (‖ccTensorToHs (I := I) (M := M) g 2 (3 : ℝ) T‖ +
+          ‖ccTensorToHs (I := I) (M := M) g 2 (2 : ℝ) T‖ *
+            ‖ccTensorToHs (I := I) (M := M) g 2 (4 : ℝ) T‖ +
+          ‖ccTensorToHs (I := I) (M := M) g 2 (2 : ℝ) T‖ *
+            ‖ccTensorToHs (I := I) (M := M) g 2 (3 : ℝ) T‖ *
+            ‖ccTensorToHs (I := I) (M := M) g 2 (4 : ℝ) T‖)) :
     2 * |tensorL2Inner (I := I) (M := M) g 0 2
         (oneMinusConnLapSmooth (I := I) g 0 2
           (oneMinusConnLapSmooth (I := I) g 0 2
             (oneMinusConnLapSmooth (I := I) g 0 2 T))).toFun
         (oneMinusConnLapSmooth (I := I) g 0 2 Y).toFun| ≤
       eta * ‖ccTensorToHs (I := I) (M := M) g 2 (5 : ℝ) T‖ ^ 2 +
-        eta⁻¹ * D ^ 2 *
-          ‖ccTensorToHs (I := I) (M := M) g 2 (4 : ℝ) T‖ ^ 2 := by
+        8 * eta⁻¹ * D ^ 2 *
+          (‖ccTensorToHs (I := I) (M := M) g 2 (4 : ℝ) T‖ ^ 2 +
+            ‖ccTensorToHs (I := I) (M := M) g 2 (3 : ℝ) T‖ ^ 2 *
+              ‖ccTensorToHs (I := I) (M := M) g 2 (4 : ℝ) T‖ ^ 2) := by
+  let x : ℝ := ‖ccTensorToHs (I := I) (M := M) g 2 (2 : ℝ) T‖
   let y : ℝ := ‖ccTensorToHs (I := I) (M := M) g 2 (3 : ℝ) T‖
   let q : ℝ := ‖ccTensorToHs (I := I) (M := M) g 2 (4 : ℝ) T‖
   let z : ℝ := ‖ccTensorToHs (I := I) (M := M) g 2 (5 : ℝ) T‖
+  let P : ℝ := y + x * q + x * y * q
+  have hx : 0 ≤ x := norm_nonneg _
   have hy : 0 ≤ y := norm_nonneg _
+  have hq : 0 ≤ q := norm_nonneg _
   have hz : 0 ≤ z := norm_nonneg _
+  have hxone : x ≤ 1 := by simpa only [x] using hT2
   have hyq : y ≤ q := by
     dsimp only [y, q]
     exact ccToHs_norm_mono (I := I) (M := M) g 2 (by norm_num) T
+  have hPsmall : P ≤ 2 * q + y * q := by
+    dsimp only [P]
+    have hxq : x * q ≤ q := by
+      simpa only [one_mul] using mul_le_mul_of_nonneg_right hxone hq
+    have hxyq : x * y * q ≤ y * q := by
+      have hxy : x * y ≤ y := by
+        simpa only [one_mul] using mul_le_mul_of_nonneg_right hxone hy
+      exact mul_le_mul_of_nonneg_right hxy hq
+    linarith
+  have hP2 : P ^ 2 ≤ 8 * (q ^ 2 + y ^ 2 * q ^ 2) := by
+    have hP0 : 0 ≤ P := by dsimp only [P]; positivity
+    have hs := pow_le_pow_left₀ hP0 hPsmall 2
+    nlinarith [hs, sq_nonneg (2 * q - y * q),
+      mul_nonneg (sq_nonneg y) (sq_nonneg q)]
   have hpair := iter_three_one_pair_abs_le_h5_h3
     (I := I) (M := M) g T Y
   have hraw :
@@ -378,46 +614,51 @@ theorem carrier_pair_abs_h5_of_h3
             (oneMinusConnLapSmooth (I := I) g 0 2
               (oneMinusConnLapSmooth (I := I) g 0 2 T))).toFun
           (oneMinusConnLapSmooth (I := I) g 0 2 Y).toFun| ≤
-        2 * z * (D * y) := by
+        2 * z * (D * P) := by
     calc
       _ ≤ 2 * (z *
           ‖ccTensorToHs (I := I) (M := M) g 2 (3 : ℝ) Y‖) :=
         mul_le_mul_of_nonneg_left (by simpa only [z] using hpair) (by norm_num)
-      _ ≤ 2 * (z * (D * y)) := by
+      _ ≤ 2 * (z * (D * P)) := by
         exact mul_le_mul_of_nonneg_left
-          (mul_le_mul_of_nonneg_left (by simpa only [y] using hY) hz)
+          (mul_le_mul_of_nonneg_left (by simpa only [P, x, y, q] using hY) hz)
           (by norm_num)
-      _ = 2 * z * (D * y) := by ring
+      _ = 2 * z * (D * P) := by ring
   have hinv : 0 ≤ eta⁻¹ := inv_nonneg.mpr heta.le
-  have hyq2 : (D * y) ^ 2 ≤ D ^ 2 * q ^ 2 := by
+  have hDP2 : (D * P) ^ 2 ≤
+      8 * D ^ 2 * (q ^ 2 + y ^ 2 * q ^ 2) := by
     calc
-      (D * y) ^ 2 = D ^ 2 * y ^ 2 := by ring
-      _ ≤ D ^ 2 * q ^ 2 :=
-        mul_le_mul_of_nonneg_left (pow_le_pow_left₀ hy hyq 2) (sq_nonneg D)
-  have hyoung : 2 * z * (D * y) ≤
-      eta * z ^ 2 + eta⁻¹ * (D * y) ^ 2 := by
-    have hs := mul_nonneg hinv (sq_nonneg (eta * z - D * y))
-    have hexpand : eta⁻¹ * (eta * z - D * y) ^ 2 =
-        eta * z ^ 2 - 2 * z * (D * y) + eta⁻¹ * (D * y) ^ 2 := by
+      (D * P) ^ 2 = D ^ 2 * P ^ 2 := by ring
+      _ ≤ D ^ 2 * (8 * (q ^ 2 + y ^ 2 * q ^ 2)) :=
+        mul_le_mul_of_nonneg_left hP2 (sq_nonneg D)
+      _ = 8 * D ^ 2 * (q ^ 2 + y ^ 2 * q ^ 2) := by ring
+  have hyoung : 2 * z * (D * P) ≤
+      eta * z ^ 2 + eta⁻¹ * (D * P) ^ 2 := by
+    have hs := mul_nonneg hinv (sq_nonneg (eta * z - D * P))
+    have hexpand : eta⁻¹ * (eta * z - D * P) ^ 2 =
+        eta * z ^ 2 - 2 * z * (D * P) + eta⁻¹ * (D * P) ^ 2 := by
       field_simp [ne_of_gt heta]
       ring
     rw [hexpand] at hs
     linarith
   calc
-    _ ≤ 2 * z * (D * y) := hraw
-    _ ≤ eta * z ^ 2 + eta⁻¹ * (D * y) ^ 2 := hyoung
-    _ ≤ eta * z ^ 2 + eta⁻¹ * (D ^ 2 * q ^ 2) :=
-      add_le_add le_rfl (mul_le_mul_of_nonneg_left hyq2 hinv)
+    _ ≤ 2 * z * (D * P) := hraw
+    _ ≤ eta * z ^ 2 + eta⁻¹ * (D * P) ^ 2 := hyoung
+    _ ≤ eta * z ^ 2 +
+        eta⁻¹ * (8 * D ^ 2 * (q ^ 2 + y ^ 2 * q ^ 2)) :=
+      add_le_add le_rfl (mul_le_mul_of_nonneg_left hDP2 hinv)
     _ = eta * ‖ccTensorToHs (I := I) (M := M) g 2 (5 : ℝ) T‖ ^ 2 +
-        eta⁻¹ * D ^ 2 *
-          ‖ccTensorToHs (I := I) (M := M) g 2 (4 : ℝ) T‖ ^ 2 := by
-      dsimp only [z, q]
+        8 * eta⁻¹ * D ^ 2 *
+          (‖ccTensorToHs (I := I) (M := M) g 2 (4 : ℝ) T‖ ^ 2 +
+            ‖ccTensorToHs (I := I) (M := M) g 2 (3 : ℝ) T‖ ^ 2 *
+              ‖ccTensorToHs (I := I) (M := M) g 2 (4 : ℝ) T‖ ^ 2) := by
+      dsimp only [z, y, q]
       ring
 
 theorem edge_center_h5_unif
     (hDim : Module.finrank ℝ E = 3)
-    (gBase : SmoothRiemannianMetric I M) {Lambda Qcap : ℝ}
-    (hLambda : 1 ≤ Lambda) (hQcap : 0 ≤ Qcap) :
+    (gBase : SmoothRiemannianMetric I M) {Lambda : ℝ}
+    (hLambda : 1 ≤ Lambda) :
     ∀ {eta : ℝ}, 0 < eta →
       ∃ delta2 R2 : ℝ,
         0 < delta2 ∧ delta2 ≤ 1 / 3 ∧ 0 < R2 ∧ R2 ≤ 1 ∧
@@ -439,7 +680,6 @@ theorem edge_center_h5_unif
                 {s : ℝ}, s ∈ Set.Icc (0 : ℝ) 1 →
               ∀ {R : ℝ}, 0 ≤ R → R ≤ R2 →
               ‖ccTensorToHs (I := I) (M := M) g 2 (2 : ℝ) T‖ ≤ R →
-              ‖ccTensorToHs (I := I) (M := M) g 2 (4 : ℝ) T‖ ≤ Qcap →
               let gs := realizedFam (I := I) g T 0 hdelta hdeltaZ s
               let R0 := rhsRefold0 (I := I) (M := M) g gBase T
                 hdelta hdeltaZ s
@@ -486,19 +726,19 @@ theorem edge_center_h5_unif
   intro g hEq hjet
   obtain ⟨Gd, hGd, hcenterG⟩ := hcenter g hEq hjet
   obtain ⟨D, hD, hcarrier⟩ :=
-    edge_carrier_h3_of_h4_cap (I := I) (M := M)
-      hDim gBase hLambda hQcap g hEq hjet
+    edge_carrier_h3 (I := I) (M := M) hDim gBase hLambda g hEq hjet
   let e : ℝ := eta / 5
-  let Gc : ℝ := e⁻¹ * D ^ 2
+  let Gc : ℝ := 8 * e⁻¹ * D ^ 2
   let G : ℝ := Gc + Gd
   have he : 0 < e := by dsimp only [e]; positivity
   have hGc : 0 ≤ Gc := by
     dsimp only [Gc]
-    exact mul_nonneg (inv_nonneg.mpr he.le) (sq_nonneg D)
+    exact mul_nonneg (mul_nonneg (by norm_num) (inv_nonneg.mpr he.le))
+      (sq_nonneg D)
   have hG : 0 ≤ G := add_nonneg hGc hGd
   refine ⟨G, hG, ?_⟩
   intro T hTsymm delta hdelta_le hdelta0 hdelta hdeltaZ s hs
-    R hR hRle hT2 hT4
+    R hR hRle hT2
   let A : SmoothCcTensor g 2 2 :=
     LowBaseInternal.rhsSelfLow (I := I) (M := M)
         g gBase T hdelta hdeltaZ s +
@@ -508,10 +748,11 @@ theorem edge_center_h5_unif
   let y : ℝ := ‖ccTensorToHs (I := I) (M := M) g 2 (3 : ℝ) T‖
   let q : ℝ := ‖ccTensorToHs (I := I) (M := M) g 2 (4 : ℝ) T‖
   have hdelta_third : delta ≤ 1 / 3 := hdelta_le.trans hdelta2third
+  have hRone : R ≤ 1 := hRle.trans hR2one
   have hY := hcarrier T hTsymm hdelta_third hdelta0
-    hdelta hdeltaZ hs hT4
+    hdelta hdeltaZ hs hRone hT2
   have hpair := carrier_pair_abs_h5_of_h3
-    (I := I) (M := M) g T Y (eta := e) he (by
+    (I := I) (M := M) g T Y (eta := e) he (hT2.trans hRone) (by
       simpa only [A, Y] using hY)
   have hpair' :
       2 * |tensorL2Inner (I := I) (M := M) g 0 2
@@ -521,23 +762,25 @@ theorem edge_center_h5_unif
           (oneMinusConnLapSmooth (I := I) g 0 2 Y).toFun| ≤
         (eta / 5) *
             ‖ccTensorToHs (I := I) (M := M) g 2 (5 : ℝ) T‖ ^ 2 +
-          Gc * q ^ 2 := by
+          Gc * (q ^ 2 + y ^ 2 * q ^ 2) := by
     simpa only [e, Gc, q] using hpair
   have hassembled := hcenterG T hTsymm hdelta_le hdelta0
-    hdelta hdeltaZ hs hR hRle hT2 (Lc := Gc * q ^ 2) (by
-      simpa only [Y, A, q] using hpair')
+    hdelta hdeltaZ hs hR hRle hT2
+      (Lc := Gc * (q ^ 2 + y ^ 2 * q ^ 2)) (by
+        simpa only [Y, A, q, y] using hpair')
   dsimp only at hassembled ⊢
   have hq2 : 0 ≤ q ^ 2 := sq_nonneg _
   have hyq2 : 0 ≤ y ^ 2 * q ^ 2 := mul_nonneg (sq_nonneg _) (sq_nonneg _)
   have hy4 : 0 ≤ y ^ 4 := by positivity
   calc
     _ ≤ eta * ‖ccTensorToHs (I := I) (M := M) g 2 (5 : ℝ) T‖ ^ 2 +
-        Gc * q ^ 2 + Gd * (q ^ 2 + y ^ 2 * q ^ 2 + y ^ 4) := by
+        Gc * (q ^ 2 + y ^ 2 * q ^ 2) +
+          Gd * (q ^ 2 + y ^ 2 * q ^ 2 + y ^ 4) := by
       simpa only [q, y] using hassembled
     _ ≤ eta * ‖ccTensorToHs (I := I) (M := M) g 2 (5 : ℝ) T‖ ^ 2 +
         G * (q ^ 2 + y ^ 2 * q ^ 2 + y ^ 4) := by
       dsimp only [G]
-      nlinarith [mul_nonneg hGc hyq2, mul_nonneg hGc hy4]
+      nlinarith [mul_nonneg hGc hy4]
 
 
 end DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral
