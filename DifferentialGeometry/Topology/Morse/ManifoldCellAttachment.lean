@@ -15374,6 +15374,132 @@ theorem morseAttachedUnstretchInChart {m k : ℕ} (hk : k ≤ m + 1) (c ε r δ 
     (CellAttachment.modelAttachedUnstretchTime hk ε r δ y) htime
   rw [hflow]
   rw [← CellAttachment.modelAttachedUnstretch_eq_modelFlow hk ε r δ hδ0 hδr y]
+
+private lemma affine_interp_le_of_endpoints_le {a b s η : ℝ} (hs0 : 0 ≤ s) (hs1 : s ≤ 1)
+    (ha : a ≤ -η) (hb : b ≤ -η) : (1 - s) * a + s * b ≤ -η := by
+  have hc0 : 0 ≤ 1 - s := by linarith
+  have h1 : (1 - s) * a ≤ (1 - s) * (-η) := mul_le_mul_of_nonneg_left ha hc0
+  have h2 : s * b ≤ s * (-η) := mul_le_mul_of_nonneg_left hb hs0
+  nlinarith
+
+private lemma abs_gt_of_le_neg {a η ε₀ : ℝ} (hε₀ : 0 ≤ ε₀) (hηε₀ : 2 * ε₀ < η) (ha : a ≤ -η) :
+    2 * ε₀ < |a| := by
+  have hneg : a < 0 := by nlinarith [hηε₀, ha, hε₀]
+  rw [abs_of_neg hneg]
+  nlinarith [hηε₀, ha]
+
+theorem morseSublevelIsotopyFamily_le_neg_eta_of_deep {m k : ℕ} (hk : k ≤ m + 1)
+    (c ε r δ R₀ R₁ R₁' η : ℝ) {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M]
+    [ChartedSpace H M] [T2Space M]
+    {I : ModelWithCorners ℝ (MorseModel (m + 1)) H} [I.Boundaryless]
+    [IsManifold I (⊤ : WithTop ℕ∞) M] {f : M → ℝ}
+    (data : MorseChart (m + 1) k hk c I f)
+    (hε : 0 ≤ ε) (hδ : 0 < δ)
+    (hR₁₂ : R₁ < R₁') (hR₁₂R : R₁' ≤ data.R)
+    (hη : r ^ 2 + δ ≤ 2 * η)
+    {x : M} (hx : f x ≤ c - ε - η) :
+    ∀ s : ℝ, s ∈ Set.Icc 0 1 →
+      morseSublevelIsotopyFamily hk c ε r δ R₀ R₁ data s x ≤ -η := by
+  intro s hs
+  by_cases hb : x ∈ data.χ '' {y : MorseModel (m + 1) | morseNorm (m + 1) y ≤ R₁}
+  · rcases hb with ⟨y, hy, hxy⟩
+    have hsrc : y ∈ data.χ.source := data.hχsrc y (le_trans hy (le_trans (le_of_lt hR₁₂) hR₁₂R))
+    have hsymm : data.χ.symm x = y := by
+      rw [← hxy]
+      exact data.χ.left_inv hsrc
+    have hyRs : morseNorm (m + 1) y < data.R :=
+      lt_of_lt_of_le (lt_of_le_of_lt hy hR₁₂) hR₁₂R
+    have hN : f x = morseNormalForm hk c y := by
+      rw [← hxy]
+      exact data.hnorm y (le_of_lt hyRs)
+    have hNle : morseNormalForm hk c y ≤ c - ε - η := by
+      rwa [hN] at hx
+    have hneg : r ^ 2 + 2 * ε + δ ≤ ‖negPart hk y‖ ^ 2 := by
+      rw [morseNormalForm_split] at hNle
+      have h : ‖posPart hk y‖ ^ 2 ≤ ‖negPart hk y‖ ^ 2 - 2 * ε - 2 * η := by nlinarith
+      nlinarith [h, hη]
+    have hround : morseRoundedFunction hk c ε r δ R₀ R₁ data x = morseNormalForm hk c y + ε := by
+      have hmod := morseRoundedFunction_eq_model_of_mem_closedBall hk c ε r δ R₀ R₁ data ⟨y, hy, hxy⟩
+      have hmod' : CellAttachment.modelRoundedFunction hk c ε r δ R₀ R₁ (data.χ.symm x) =
+          morseNormalForm hk c y + ε := by
+        rw [hsymm]
+        exact CellAttachment.modelRoundedFunction_eq_morse_add_eps_of_negPart_large hk c ε r δ R₀ R₁
+          hδ hneg
+      rw [hmod]
+      exact hmod'
+    have hF0le : morseSublevelIsotopyFamily hk c ε r δ R₀ R₁ data 0 x ≤ -η := by
+      dsimp [morseSublevelIsotopyFamily]
+      rw [hround]
+      nlinarith [hNle]
+    have hF1le : morseSublevelIsotopyFamily hk c ε r δ R₀ R₁ data 1 x ≤ -η := by
+      dsimp [morseSublevelIsotopyFamily]
+      nlinarith [hx, hε]
+    have hFs : morseSublevelIsotopyFamily hk c ε r δ R₀ R₁ data s x =
+        (1 - s) * morseSublevelIsotopyFamily hk c ε r δ R₀ R₁ data 0 x +
+          s * morseSublevelIsotopyFamily hk c ε r δ R₀ R₁ data 1 x := by
+      dsimp [morseSublevelIsotopyFamily]
+      ring
+    have hFsle : morseSublevelIsotopyFamily hk c ε r δ R₀ R₁ data s x ≤ -η := by
+      rw [hFs]
+      exact affine_interp_le_of_endpoints_le hs.1 hs.2 hF0le hF1le
+    exact hFsle
+  · have hround : morseRoundedFunction hk c ε r δ R₀ R₁ data x = f x + ε :=
+      morseRoundedFunction_eq_f_add_eps_of_not_mem_closedBall hk c ε r δ R₀ R₁ data hb
+    have hF0le : morseSublevelIsotopyFamily hk c ε r δ R₀ R₁ data 0 x ≤ -η := by
+      dsimp [morseSublevelIsotopyFamily]
+      rw [hround]
+      nlinarith [hx]
+    have hF1le : morseSublevelIsotopyFamily hk c ε r δ R₀ R₁ data 1 x ≤ -η := by
+      dsimp [morseSublevelIsotopyFamily]
+      nlinarith [hx, hε]
+    have hFs : morseSublevelIsotopyFamily hk c ε r δ R₀ R₁ data s x =
+        (1 - s) * morseSublevelIsotopyFamily hk c ε r δ R₀ R₁ data 0 x +
+          s * morseSublevelIsotopyFamily hk c ε r δ R₀ R₁ data 1 x := by
+      dsimp [morseSublevelIsotopyFamily]
+      ring
+    have hFsle : morseSublevelIsotopyFamily hk c ε r δ R₀ R₁ data s x ≤ -η := by
+      rw [hFs]
+      exact affine_interp_le_of_endpoints_le hs.1 hs.2 hF0le hF1le
+    exact hFsle
+
+theorem morseSublevelIsotopyFamily_strip_of_deep {m k : ℕ} (hk : k ≤ m + 1)
+    (c ε r δ R₀ R₁ R₁' η ε₀ : ℝ) {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M]
+    [ChartedSpace H M] [T2Space M]
+    {I : ModelWithCorners ℝ (MorseModel (m + 1)) H} [I.Boundaryless]
+    [IsManifold I (⊤ : WithTop ℕ∞) M] {f : M → ℝ}
+    (data : MorseChart (m + 1) k hk c I f)
+    (hε : 0 ≤ ε) (hδ : 0 < δ)
+    (hR₁₂ : R₁ < R₁') (hR₁₂R : R₁' ≤ data.R)
+    (hη : r ^ 2 + δ ≤ 2 * η) (hηε₀ : 2 * ε₀ < η) (hε₀ : 0 ≤ ε₀)
+    {x : M} (hx : f x ≤ c - ε - η) :
+    ∀ s : ℝ, s ∈ Set.Icc 0 1 →
+      2 * ε₀ < |morseSublevelIsotopyFamily hk c ε r δ R₀ R₁ data s x| := by
+  intro s hs
+  exact abs_gt_of_le_neg hε₀ hηε₀
+    (morseSublevelIsotopyFamily_le_neg_eta_of_deep hk c ε r δ R₀ R₁ R₁' η data
+      hε hδ hR₁₂ hR₁₂R hη hx s hs)
+
+theorem morseSublevelIsotopyFamily_sign_deep {m k : ℕ} (hk : k ≤ m + 1)
+    (c ε r δ R₀ R₁ R₁' η : ℝ) {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M]
+    [ChartedSpace H M] [T2Space M]
+    {I : ModelWithCorners ℝ (MorseModel (m + 1)) H} [I.Boundaryless]
+    [IsManifold I (⊤ : WithTop ℕ∞) M] {f : M → ℝ}
+    (data : MorseChart (m + 1) k hk c I f)
+    (hε : 0 ≤ ε) (hδ : 0 < δ)
+    (hR₁₂ : R₁ < R₁') (hR₁₂R : R₁' ≤ data.R)
+    (hη : r ^ 2 + δ ≤ 2 * η)
+    {x : M} (hx : f x ≤ c - ε - η) :
+    (morseSublevelIsotopyFamily hk c ε r δ R₀ R₁ data 0 x ≤ 0 ↔
+      morseSublevelIsotopyFamily hk c ε r δ R₀ R₁ data 1 x ≤ 0) := by
+  have hη0 : 0 ≤ η := by
+    have hpos : 0 < r ^ 2 + δ := by positivity
+    nlinarith [hη, hpos]
+  have h0 := morseSublevelIsotopyFamily_le_neg_eta_of_deep hk c ε r δ R₀ R₁ R₁' η data
+    hε hδ hR₁₂ hR₁₂R hη hx 0 (by norm_num)
+  have h1 := morseSublevelIsotopyFamily_le_neg_eta_of_deep hk c ε r δ R₀ R₁ R₁' η data
+    hε hδ hR₁₂ hR₁₂R hη hx 1 (by norm_num)
+  constructor <;> intro _ <;> nlinarith [hη0]
+
 end ManifoldCellAttachment
 
 end

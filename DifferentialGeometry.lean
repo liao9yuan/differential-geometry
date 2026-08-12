@@ -2951,6 +2951,7 @@ import DifferentialGeometry.Topology.Morse.RegularSublevel
 import DifferentialGeometry.Topology.Morse.RegularIsotopy
 import DifferentialGeometry.Topology.Morse.RegularVectorField
 import DifferentialGeometry.Topology.Morse.SmoothHandleAttachment
+import DifferentialGeometry.Topology.Morse.SublevelTransport
 import DifferentialGeometry.Tensor.Alternating.Basis
 import DifferentialGeometry.Tensor.Alternating.Bundle
 import DifferentialGeometry.Tensor.Alternating.Comp
