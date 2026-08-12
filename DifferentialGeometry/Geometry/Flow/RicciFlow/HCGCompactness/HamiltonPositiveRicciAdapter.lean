@@ -859,6 +859,69 @@ structure Ham3SourceLink
 
 
 
+noncomputable def ham3SourceLink
+    {omega : Real} (h0omega : 0 < omega)
+    {g0 : SmoothRiemannianMetric I M}
+    (P : Ham3FlowPackage (I := I) (M := M) g0)
+    (hD : P.D =
+      DifferentialGeometry.Integral.Connection.RealTimeInterval.closedOpen
+        0 omega h0omega)
+    (Q : Ham3BlowupData M)
+    (hsel : Ham3PointSel (I := I) P Q)
+    (hwindow : Ham3Window (I := I) P Q ham3_r0) :
+    Ham3SourceLink (I := I) (M := M) P Q hsel
+      (ham3SourceSeq (I := I) h0omega P hD Q hsel hwindow) := by
+  refine
+    { origIndex := fun i => ham3Start (I := I) P Q hsel hwindow + i
+      strictMono := ?_
+      toOrig := fun _ => _root_.Diffeomorph.refl I M ∞
+      time_mem := ?_
+      basepoint_map := ?_
+      metric_eq := ?_
+      baseScalar := ?_ }
+  · intro i j hij
+    exact Nat.add_lt_add_left hij (ham3Start (I := I) P Q hsel hwindow)
+  · intro i t ht
+    exact ham3_car_subset (I := I) h0omega P hD Q hsel hwindow i ht
+  · intro i
+    rfl
+  · intro i t _ht
+    change
+      (ham3RescaledSol (I := I) P Q hsel
+          (ham3Start (I := I) P Q hsel hwindow + i)).base.metric t =
+        Diffeomorph.pullbackMetricCross
+          ((ham3RescaledSol (I := I) P Q hsel
+            (ham3Start (I := I) P Q hsel hwindow + i)).base.metric t)
+          (_root_.Diffeomorph.refl I M ∞)
+    apply srm_eq_of_inner
+    intro x v w
+    rw [Diffeomorph.pullbackMetricCross_inner]
+    have hmfd :
+        mfderiv I I
+            (_root_.Diffeomorph.refl I M ∞ : M ≃ₘ⟮I, I⟯ M) x =
+          ContinuousLinearMap.id ℝ (TangentSpace I x) := by
+      have h1 :
+          mfderiv I I
+              (fun y : M =>
+                (_root_.Diffeomorph.refl I M ∞ : M ≃ₘ⟮I, I⟯ M) y) x =
+            mfderiv I I (id : M → M) x := rfl
+      rw [h1]
+      exact mfderiv_id
+    rw [hmfd]
+    rfl
+  · intro i
+    change
+      (ham3RescaledSol (I := I) P Q hsel
+        (ham3Start (I := I) P Q hsel hwindow + i)).scalar 0
+          (Q.point (ham3Start (I := I) P Q hsel hwindow + i)) =
+        ham3RescaledScalar (I := I) P Q
+          (ham3Start (I := I) P Q hsel hwindow + i) 0
+          (Q.point (ham3Start (I := I) P Q hsel hwindow + i))
+    simp only [ham3RescaledSol,
+      DifferentialGeometry.PDE.RicciFlow.paraSolution_scalar,
+      DifferentialGeometry.PDE.RicciFlow.paraTime,
+      ham3RescaledScalar, ham3RescaledTime, ham3Scalar, ham3Solution]
+
 omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 theorem Ham3SourceLink.realizes
     {g0 : SmoothRiemannianMetric I M}
