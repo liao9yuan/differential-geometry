@@ -15085,6 +15085,26 @@ theorem no_critical_morseSublevelIsotopyFamily_strip {m k : ℕ} (hk : k ≤ m +
           (f := f) (x := x) (a := -c + (1 - 2 * s) * ε) hf (by
             simpa [sub_eq_add_neg, add_assoc, add_comm, add_left_comm] using hcrit'))
       exact hnc hcritf
+
+theorem morseSublevelIsotopyFamily_sublevel_zero {m k : ℕ} (hk : k ≤ m + 1)
+    (c ε r δ R₀ R₁ : ℝ) {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M]
+    [ChartedSpace H M] [T2Space M] {I : ModelWithCorners ℝ (MorseModel (m + 1)) H}
+    [I.Boundaryless] [IsManifold I (⊤ : WithTop ℕ∞) M] {f : M → ℝ}
+    (data : MorseChart (m + 1) k hk c I f) :
+    {x : M | morseSublevelIsotopyFamily hk c ε r δ R₀ R₁ data 0 x ≤ 0} =
+      {x : M | morseRoundedFunction hk c ε r δ R₀ R₁ data x ≤ c} := by
+  ext x
+  constructor <;> intro h <;> dsimp [morseSublevelIsotopyFamily] at h ⊢ <;> linarith
+
+theorem morseSublevelIsotopyFamily_sublevel_one {m k : ℕ} (hk : k ≤ m + 1)
+    (c ε r δ R₀ R₁ : ℝ) {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M]
+    [ChartedSpace H M] [T2Space M] {I : ModelWithCorners ℝ (MorseModel (m + 1)) H}
+    [I.Boundaryless] [IsManifold I (⊤ : WithTop ℕ∞) M] {f : M → ℝ}
+    (data : MorseChart (m + 1) k hk c I f) :
+    {x : M | morseSublevelIsotopyFamily hk c ε r δ R₀ R₁ data 1 x ≤ 0} =
+      {x : M | f x ≤ c + ε} := by
+  ext x
+  constructor <;> intro h <;> dsimp [morseSublevelIsotopyFamily] at h ⊢ <;> linarith
 @[reducible]
 noncomputable def morseRoundedSublevelChartedSpace {m k : ℕ} (hk : k ≤ m + 1)
     (c ε r δ R₀ R₁ R₁' : ℝ) {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M]
