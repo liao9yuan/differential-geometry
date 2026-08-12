@@ -457,14 +457,48 @@ theorem metric_cont
         (co.φ k) x₀ i j).mono (Set.prod_mono hwin Set.Subset.rfl)
 
 omit [NeZero (Module.finrank ℝ E)] in
-private theorem gSeqJet_contOn
+theorem gSeqJet_of_soln
     {R : letI : TopologicalSpace P.M := P.topology
       letI : ChartedSpace H P.M := P.charted
       letI : IsManifold I ∞ P.M := P.smooth
       SmoothRiemannianMetric I P.M}
     {bf : BumpFamily (I := I) Φ} {hsrc : SrcSigma Φ} {htgt : TgtSigma Φ}
-    {β ψ : Real} (hwin : Set.Icc β ψ ⊆ X.D.regular)
-    (k r : Nat) (x₀ : P.M) (i j : Fin (Module.finrank Real E))
+    {β ψ : Real} (k : Nat)
+    {D : RealTimeInterval}
+    (S : letI : TopologicalSpace (SourceDomain (I := I) Φ k) :=
+          sourceDomTop (I := I) Φ k
+      letI : ChartedSpace H (SourceDomain (I := I) Φ k) :=
+          sourceDomCharted (I := I) Φ k
+      letI : IsManifold I ∞ (SourceDomain (I := I) Φ k) :=
+          sourceDomSmooth (I := I) Φ k
+      SolutionOn (I := I) (M := SourceDomain (I := I) Φ k) D)
+    (hS : letI : TopologicalSpace (SourceDomain (I := I) Φ k) :=
+          sourceDomTop (I := I) Φ k
+      letI : ChartedSpace H (SourceDomain (I := I) Φ k) :=
+          sourceDomCharted (I := I) Φ k
+      letI : T2Space (SourceDomain (I := I) Φ k) :=
+          sourceDomT2 (I := I) Φ k
+      letI : IsManifold I ∞ (SourceDomain (I := I) Φ k) :=
+          sourceDomSmooth (I := I) Φ k
+      letI : SigmaCompactSpace (SourceDomain (I := I) Φ k) :=
+          sourceDomSigmaOf (I := I) Φ k (hsrc k)
+      DifferentialGeometry.PDE.RicciFlow.IsSolutionOn (I := I) S)
+    (hreg : Set.Icc β ψ ⊆ D.regular)
+    (hmetric : letI : TopologicalSpace (SourceDomain (I := I) Φ k) :=
+          sourceDomTop (I := I) Φ k
+      letI : ChartedSpace H (SourceDomain (I := I) Φ k) :=
+          sourceDomCharted (I := I) Φ k
+      letI : T2Space (SourceDomain (I := I) Φ k) :=
+          sourceDomT2 (I := I) Φ k
+      letI : IsManifold I ∞ (SourceDomain (I := I) Φ k) :=
+          sourceDomSmooth (I := I) Φ k
+      letI : SigmaCompactSpace (SourceDomain (I := I) Φ k) :=
+          sourceDomSigmaOf (I := I) Φ k (hsrc k)
+      ∀ (t : Real) (x : SourceDomain (I := I) Φ k)
+        (v w : TangentSpace I x),
+        (srcMetric (I := I) Φ hsrc htgt k t).inner x v w =
+          (S.family.metric t).inner x v w)
+    (r : Nat) (x₀ : P.M) (i j : Fin (Module.finrank Real E))
     {C : Set E}
     (hCtarget : letI : TopologicalSpace P.M := P.topology
       letI : ChartedSpace H P.M := P.charted
@@ -571,18 +605,16 @@ private theorem gSeqJet_contOn
       (𝓘(Real, Real).prod I) (∞ : WithTop ℕ∞)
       (fun p : Real × E => (p.1, core p.2)) q := by
     exact contMDiffAt_fst.prodMk (hcore.comp q contMDiffAt_snd)
-  let S := sourceFlow (I := I) Φ k (hsrc k) (htgt k)
   have hsrcSmooth := solnMetricJointAt (I := I) (x := core y) S
-    (isSolutionOn_sourceFlow (I := I) Φ k (hsrc k) (htgt k))
-    (X.D.regular_isOpen.mem_nhds (hwin hqt)) V
+    hS (D.regular_isOpen.mem_nhds (hreg hqt)) V
   have hlocalMD := hsrcSmooth.comp q hmap
   let G : Real × E → Real := fun p =>
-    (srcMetric (I := I) Φ hsrc htgt k p.1).inner (core p.2)
+    (S.family.metric p.1).inner (core p.2)
       (V 0 (core p.2)) (V 1 (core p.2))
   have hlocal : ContDiffAt Real (∞ : WithTop ℕ∞) G q := by
     rw [← contMDiffAt_iff_contDiffAt, modelWithCornersSelf_prod,
       ← chartedSpaceSelf_prod]
-    simpa only [G, S, srcMetric, solnMetricField,
+    simpa only [G, solnMetricField,
       Tensor0SBundle.metricTensorField_apply] using hlocalMD
   obtain ⟨W, hWopen, hgrowW, hWone⟩ := bf.chi_one k
   have hσi0 : ∀ᶠ z in 𝓝 x,
@@ -637,12 +669,48 @@ private theorem gSeqJet_contOn
       hWone z hpW, hV0, hV1]
     simp only [one_smul, sub_self, zero_smul, add_zero]
     rw [hpi, hpj]
-    rfl
+    exact hmetric p.1 ⟨z, hps⟩ _ _
   have hF : ContDiffAt Real (∞ : WithTop ℕ∞) F q :=
     hlocal.congr_of_eventuallyEq hFG
   have hjet := DifferentialGeometry.Analysis.spaceJet_contAt hF r
     (WithTop.coe_le_coe.2 (le_top : (r : ℕ∞) ≤ (⊤ : ℕ∞)))
   simpa only [F] using hjet.continuousWithinAt
+
+omit [NeZero (Module.finrank ℝ E)] in
+private theorem gSeqJet_contOn
+    {R : letI : TopologicalSpace P.M := P.topology
+      letI : ChartedSpace H P.M := P.charted
+      letI : IsManifold I ∞ P.M := P.smooth
+      SmoothRiemannianMetric I P.M}
+    {bf : BumpFamily (I := I) Φ} {hsrc : SrcSigma Φ} {htgt : TgtSigma Φ}
+    {β ψ : Real} (hwin : Set.Icc β ψ ⊆ X.D.regular)
+    (k r : Nat) (x₀ : P.M) (i j : Fin (Module.finrank Real E))
+    {C : Set E}
+    (hCtarget : letI : TopologicalSpace P.M := P.topology
+      letI : ChartedSpace H P.M := P.charted
+      C ⊆ (extChartAt I x₀).target)
+    (hCgrow : letI : TopologicalSpace P.M := P.topology
+      letI : ChartedSpace H P.M := P.charted
+      (extChartAt I x₀).symm '' C ⊆ bf.grow k) :
+    letI : TopologicalSpace P.M := P.topology
+    letI : ChartedSpace H P.M := P.charted
+    letI : T2Space P.M := P.t2
+    letI : IsManifold I ∞ P.M := P.smooth
+    ContinuousOn
+      (fun p : Real × E =>
+        iteratedFDeriv Real r
+          (chartGramOnE (I := I)
+            (gSeqExt (I := I) Φ R bf hsrc htgt k p.1) x₀ i j) p.2)
+      (Set.Icc β ψ ×ˢ C) := by
+  apply gSeqJet_of_soln (Φ := Φ) (R := R) (bf := bf)
+    (hsrc := hsrc) (htgt := htgt) k
+    (sourceFlow (I := I) Φ k (hsrc k) (htgt k))
+    (isSolutionOn_sourceFlow (I := I) Φ k (hsrc k) (htgt k))
+    hwin
+  · intro t x v w
+    rfl
+  · exact hCtarget
+  · exact hCgrow
 
 omit [NeZero (Module.finrank ℝ E)] in
 /-- Every finite spatial chart jet of the fixed-window limit metric is jointly
