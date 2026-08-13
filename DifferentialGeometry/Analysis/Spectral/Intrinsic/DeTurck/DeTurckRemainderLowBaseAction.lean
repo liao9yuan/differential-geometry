@@ -4855,8 +4855,8 @@ private theorem aa_h2_of
           (connDiffContrInsertionInnerField (I := I) g g₁)) := by
     have hraw := hp_app_of (I := I) (M := M) g Z C233 hC233
       (h233 _ _) hp102 hinner
-    convert hraw using 1 <;>
-      simp only [D102] <;> ring
+    convert hraw using 1;
+      simp only [D102]; ring
   have h120 :
       H2Poly (I := I) (M := M) g Z 0 (D120 * Q)
         (appCcRS (I := I) (M := M) g 2 3 3
@@ -4864,8 +4864,8 @@ private theorem aa_h2_of
           (connDiffContrInsertionInnerField (I := I) g g₁)) := by
     have hraw := hp_app_of (I := I) (M := M) g Z C233 hC233
       (h233 _ _) hp120 hinner
-    convert hraw using 1 <;>
-      simp only [D120] <;> ring
+    convert hraw using 1;
+      simp only [D120]; ring
   have hcore0 :
       H2Poly (I := I) (M := M) g Z 0 (Dcore0 * Q ^ 2)
         (appCcRS (I := I) (M := M) g 2 3 4
@@ -4875,8 +4875,8 @@ private theorem aa_h2_of
             (connDiffContrInsertionInnerField (I := I) g g₁))) := by
     have hraw := hp_app_of (I := I) (M := M) g Z C234 hC234
       (h234 _ _) houter h102
-    convert hraw using 1 <;>
-      simp only [Dcore0, D102] <;> ring
+    convert hraw using 1;
+      simp only [Dcore0, D102]; ring
   have hcore2 :
       H2Poly (I := I) (M := M) g Z 0 (Dcore2 * Q ^ 2)
         (appCcRS (I := I) (M := M) g 2 3 4
@@ -4886,8 +4886,8 @@ private theorem aa_h2_of
             (connDiffContrInsertionInnerField (I := I) g g₁))) := by
     have hraw := hp_app_of (I := I) (M := M) g Z C234 hC234
       (h234 _ _) houter h120
-    convert hraw using 1 <;>
-      simp only [Dcore2, D120] <;> ring
+    convert hraw using 1;
+      simp only [Dcore2, D120]; ring
   have hcore3 :
       H2Poly (I := I) (M := M) g Z 0 (Dcore3 * Q ^ 2)
         (appCcRS (I := I) (M := M) g 2 3 4
@@ -4895,8 +4895,8 @@ private theorem aa_h2_of
           (connDiffContrInsertionInnerField (I := I) g g₁)) := by
     have hraw := hp_app_of (I := I) (M := M) g Z C234 hC234
       (h234 _ _) houter hinner
-    convert hraw using 1 <;>
-      simp only [Dcore3] <;> ring
+    convert hraw using 1;
+      simp only [Dcore3]; ring
   have hp3201 :
       H2Poly (I := I) (M := M) g Z 0 P3201
         (permCoeff (I := I) (M := M) g ricPerm3201) := by
@@ -4926,8 +4926,8 @@ private theorem aa_h2_of
         (aa0 (I := I) (M := M) g g₁) := by
     have hraw := hp_app_of (I := I) (M := M) g Z C244 hC244
       (h244 _ _) hp3201 hcore0
-    convert hraw using 1 <;>
-      simp only [D0] <;> ring
+    convert hraw using 1;
+      simp only [D0]; ring
   have h1r := hp_app_of (I := I) (M := M) g Z C244 hC244
     (h244 _ _) hp2301 hcore0
   have h1 :
@@ -4935,15 +4935,15 @@ private theorem aa_h2_of
         (aa1 (I := I) (M := M) g g₁) := by
     have hr := hp_reindex (I := I) (M := M) g Z
       innerCoreInPerm10 h1r
-    convert hr using 1 <;>
-      simp only [D1] <;> ring
+    convert hr using 1;
+      simp only [D1]; ring
   have h2 :
       H2Poly (I := I) (M := M) g Z 0 (D2 * Q ^ 2)
         (aa2 (I := I) (M := M) g g₁) := by
     have hraw := hp_app_of (I := I) (M := M) g Z C244 hC244
       (h244 _ _) hp3102 hcore2
-    convert hraw using 1 <;>
-      simp only [D2] <;> ring
+    convert hraw using 1;
+      simp only [D2]; ring
   have h3r := hp_app_of (I := I) (M := M) g Z C244 hC244
     (h244 _ _) hp1302 hcore3
   have h3 :
@@ -4951,15 +4951,15 @@ private theorem aa_h2_of
         (aa3 (I := I) (M := M) g g₁) := by
     have hr := hp_reindex (I := I) (M := M) g Z
       innerCoreInPerm10 h3r
-    convert hr using 1 <;>
-      simp only [D3] <;> ring
+    convert hr using 1;
+      simp only [D3]; ring
   have h4 :
       H2Poly (I := I) (M := M) g Z 0 (D4 * Q ^ 2)
         (aa4 (I := I) (M := M) g g₁) := by
     have hraw := hp_app_of (I := I) (M := M) g Z C244 hC244
       (h244 _ _) hp1203 hcore3
-    convert hraw using 1 <;>
-      simp only [D4] <;> ring
+    convert hraw using 1;
+      simp only [D4]; ring
   have h5r := hp_app_of (I := I) (M := M) g Z C244 hC244
     (h244 _ _) hp2103 hcore2
   have h5 :
@@ -4967,23 +4967,23 @@ private theorem aa_h2_of
         (aa5 (I := I) (M := M) g g₁) := by
     have hr := hp_reindex (I := I) (M := M) g Z
       innerCoreInPerm10 h5r
-    convert hr using 1 <;>
-      simp only [D5] <;> ring
+    convert hr using 1;
+      simp only [D5]; ring
   have h01 :
       H2Poly (I := I) (M := M) g Z 0 (D01 * Q ^ 2)
         (aa0 (I := I) (M := M) g g₁ +
           aa1 (I := I) (M := M) g g₁) := by
     have hraw := hp_add (I := I) (M := M) g Z h0 h1
-    convert hraw using 1 <;>
-      simp only [D01] <;> ring
+    convert hraw using 1;
+      simp only [D01]; ring
   have h012 :
       H2Poly (I := I) (M := M) g Z 0 (D012 * Q ^ 2)
         (aa0 (I := I) (M := M) g g₁ +
           aa1 (I := I) (M := M) g g₁ +
           aa2 (I := I) (M := M) g g₁) := by
     have hraw := hp_add (I := I) (M := M) g Z h01 h2
-    convert hraw using 1 <;>
-      simp only [D012] <;> ring
+    convert hraw using 1;
+      simp only [D012]; ring
   have h0123 :
       H2Poly (I := I) (M := M) g Z 0 (D0123 * Q ^ 2)
         (aa0 (I := I) (M := M) g g₁ +
@@ -4991,8 +4991,8 @@ private theorem aa_h2_of
           aa2 (I := I) (M := M) g g₁ +
           aa3 (I := I) (M := M) g g₁) := by
     have hraw := hp_add (I := I) (M := M) g Z h012 h3
-    convert hraw using 1 <;>
-      simp only [D0123] <;> ring
+    convert hraw using 1;
+      simp only [D0123]; ring
   have h01234 :
       H2Poly (I := I) (M := M) g Z 0 (D01234 * Q ^ 2)
         (aa0 (I := I) (M := M) g g₁ +
@@ -5001,15 +5001,15 @@ private theorem aa_h2_of
           aa3 (I := I) (M := M) g g₁ +
           aa4 (I := I) (M := M) g g₁) := by
     have hraw := hp_add (I := I) (M := M) g Z h0123 h4
-    convert hraw using 1 <;>
-      simp only [D01234] <;> ring
+    convert hraw using 1;
+      simp only [D01234]; ring
   have hk :
       H2Poly (I := I) (M := M) g Z 0 (Dker * Q ^ 2)
         (ricciAAKer (I := I) (M := M) g g₁) := by
     have hraw := hp_add (I := I) (M := M) g Z h01234 h5
     rw [← aaKer_eq (I := I) (M := M) g g₁] at hraw
-    convert hraw using 1 <;>
-      simp only [Dker] <;> ring
+    convert hraw using 1;
+      simp only [Dker]; ring
   have ht :
       H2Poly (I := I) (M := M) g Z 0 Qt
         (ricciCometricFourTraceCastG0 (I := I) g g₁) := by
@@ -5019,8 +5019,8 @@ private theorem aa_h2_of
   have hout' :
       H2Poly (I := I) (M := M) g Z 0 (C * Qt * Q ^ 2)
         (ricciAAArm (I := I) (M := M) g g₁) := by
-    convert hout using 1 <;>
-      simp only [C] <;> ring
+    convert hout using 1;
+      simp only [C]; ring
   simpa only [pow_zero, mul_one] using hout'.2
 
 private theorem grad_l2_sq

@@ -805,8 +805,7 @@ theorem a1PerIdxLinBg (hDim : Module.finrank ℝ E = 3)
   refine mul_le_mul_of_nonneg_left ?_ (Real.sqrt_nonneg _)
   refine le_trans (sqrtAdd2 _ _ hA0_nn hA1_nn) ?_
   refine add_le_add ?_ ?_
-  ·
-    refine le_trans (sqrtAdd2 _ _ hSM0_nn htop0) ?_
+  · refine le_trans (sqrtAdd2 _ _ hSM0_nn htop0) ?_
     refine add_le_add (le_trans (sqrtAdd2 _ _ hS0_nn hmid0) ?_) ?_
     · refine add_le_add ?_ ?_
       · refine le_trans (sqrtFinSum (Finset.range (q - 1)) _ hterm0) ?_
@@ -862,8 +861,7 @@ theorem a1PerIdxLinBg (hDim : Module.finrank ℝ E = 3)
           (Real.sqrt_nonneg _)
       · exact mul_nonneg (Real.sqrt_nonneg _)
           (by linarith only [Real.sqrt_nonneg (J 4)])
-  ·
-    refine le_trans (sqrtAdd2 _ _ hS1_nn htop1) ?_
+  · refine le_trans (sqrtAdd2 _ _ hS1_nn htop1) ?_
     refine add_le_add ?_ ?_
     · refine le_trans (sqrtFinSum (Finset.range q) _ hterm1) ?_
       refine Finset.sum_le_sum (fun i _ => ?_)

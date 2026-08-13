@@ -2533,8 +2533,7 @@ private theorem elliptic_engine_const
             ∑ i ∈ Finset.range ((J + 1 + 1) / 2 + 1),
               ‖rawTensorConnLapIter (I := I) g₀ 0 s i S‖ := by
       rcases J with _ | J'
-      ·
-        intro S
+      · intro S
         have hdir :
             ‖iteratedCovGrad (I := I) g₀ 0 s 1 S‖ ^ 2 ≤
               ‖rawTensorConnLapSmooth (I := I) g₀ 0 s S‖ * ‖S‖ := by
@@ -2565,8 +2564,7 @@ private theorem elliptic_engine_const
             mul_nonneg (norm_nonneg S)
               (norm_nonneg (rawTensorConnLapSmooth (I := I) g₀ 0 s S))]
         exact le_of_sq_le_sq hsq (add_nonneg (norm_nonneg _) (norm_nonneg _))
-      ·
-        intro S
+      · intro S
         have hCJ_nn : (0 : ℝ) ≤ ellipticEngC Fc (Module.finrank ℝ E) (J' + 1) :=
           ellipticEngC_nonneg Fc (Module.finrank ℝ E) (J' + 1)
         have hCb_nn : (0 : ℝ) ≤ bochnerStepC Fc (Module.finrank ℝ E) J' :=

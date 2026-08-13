@@ -1016,12 +1016,10 @@ theorem iterCovG1_two
     hEq hjet hx 2 ?_
   intro m hm
   interval_cases m
-  ·
-    simp only [if_neg (by norm_num : (0 : ℕ) ≠ 1), zero_mul]
+  · simp only [if_neg (by norm_num : (0 : ℕ) ≠ 1), zero_mul]
     rw [show telescAccum (I := I) g₁ g₂ r T 0 = 0 from rfl, covStep_zero']
     simp only [ContMDiffSection.coe_zero, Pi.zero_apply, sqrt_normSq0S_zero, le_refl]
-  ·
-    simp only [reduceIte]
+  · simp only [reduceIte]
     rw [telescAccum_one (I := I) g₁ g₂ r T]
     refine le_trans (covStepDiff_of_jets (I := I) g₁ g₂ r T x
       (metricUniformEquivalentOn_symm (I := I) hEq) hJet1 hJet2 hjet hx) ?_

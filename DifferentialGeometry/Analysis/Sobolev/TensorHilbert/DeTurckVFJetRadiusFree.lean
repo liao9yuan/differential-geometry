@@ -170,8 +170,7 @@ theorem cometricCastG0_order0sup_jetL2_radiusFree
       _ = fr ^ 2 * C_base q * K_rf q * (1 + ‖iteratedCovGrad (I := I) g₀ 0 2 q P‖ ^ 2) := by ring
 
   refine ⟨?_, ?_⟩
-  ·
-    intro x
+  · intro x
     rw [Real.sq_sqrt (by
       have := hSΦ_nn 0
       have := mul_nonneg (hSΦ_nn 0) hΛT2_nn
@@ -189,8 +188,7 @@ theorem cometricCastG0_order0sup_jetL2_radiusFree
         (Φ.toSection x) (W.toSection x)) ?_
       exact mul_le_mul hΦ0 (hΛT x) (riemannianFiberNormSq_nonneg _ _ _ _ _) (hSΦ_nn 0)
     linarith
-  ·
-    intro i hi
+  · intro i hi
     set S : ℝ := ∑ j ∈ Finset.range (i + 1),
       ‖iteratedCovGrad (I := I) g₀ 0 2 j P‖ ^ 2 with hS_def
     have hS_nn : 0 ≤ S := Finset.sum_nonneg (fun _ _ => sq_nonneg _)
@@ -475,8 +473,7 @@ theorem sharpFlatEndoCc_lowOrder_jetL2_radiusFree
           mul_le_mul_of_nonneg_left hgb (hC_base_nn q)
       _ = C_base q * K_rf q * (1 + ‖iteratedCovGrad (I := I) g₀ 0 2 q P‖ ^ 2) := by ring
   refine ⟨?_, ?_⟩
-  ·
-    intro x
+  · intro x
     rw [Real.sq_sqrt (by have := hC_base_nn 0; have := hSId_nn 0; linarith :
       (0 : ℝ) ≤ 2 * C_base 0 + 2 * SId 0)]
     rw [hdecomp, SmoothCcTensor.toSection_add, ContMDiffSection.coe_add, Pi.add_apply]
@@ -496,8 +493,7 @@ theorem sharpFlatEndoCc_lowOrder_jetL2_radiusFree
       simp only [iteratedCovGrad_zero] at h
       exact h
     linarith
-  ·
-    intro i hi
+  · intro i hi
     set S : ℝ := ∑ j ∈ Finset.range (i + 1),
       ‖iteratedCovGrad (I := I) g₀ 0 2 j P‖ ^ 2 with hS_def
     have hS_nn : 0 ≤ S := Finset.sum_nonneg (fun _ _ => sq_nonneg _)

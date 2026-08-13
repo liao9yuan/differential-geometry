@@ -176,9 +176,9 @@ theorem zeroRepr_norm_le (hT : 0 < T) (hT1 : T ≤ 1)
       (∫ s in Set.Icc (0 : ℝ) T, ‖u.hiL2 s‖ * ‖u.lo.deriv s‖) ≤
         ‖u.hiL2‖ * ‖u.lo.deriv‖ := by
     have hhiLp : MemLp (fun s => ‖u.hiL2 s‖) (ENNReal.ofReal 2) (timeMeasure T) := by
-      convert (Lp.memLp u.hiL2).norm using 1 <;> norm_num
+      convert (Lp.memLp u.hiL2).norm using 1; norm_num
     have hloLp : MemLp (fun s => ‖u.lo.deriv s‖) (ENNReal.ofReal 2) (timeMeasure T) := by
-      convert (Lp.memLp u.lo.deriv).norm using 1 <;> norm_num
+      convert (Lp.memLp u.lo.deriv).norm using 1; norm_num
     have h := MeasureTheory.integral_mul_norm_le_Lp_mul_Lq
       (μ := timeMeasure T) (f := fun s => ‖u.hiL2 s‖)
       (g := fun s => ‖u.lo.deriv s‖) Real.HolderConjugate.two_two

@@ -275,8 +275,7 @@ theorem exists_integrated_iteratedCovGrad_diagonalProductGrid_twoArm_le
         (f := fun b => ‖PDE.RicciFlow.iteratedCovGrad (I := I) g 0 s₂ b T‖ ^ 2)
         (fun b _ => sq_nonneg _) (Finset.mem_range.mpr (Nat.lt_succ_of_le (by omega)))
     rcases Nat.eq_zero_or_pos i with hi0 | hipos
-    ·
-      subst hi0
+    · subst hi0
       have hbound : ∫ x, Sj 0 x * Tj l x ∂μ ≤ ΛS ^ 2 * ∫ x, Tj l x ∂μ := by
         rw [← integral_const_mul]
         refine integral_mono_of_nonneg (Eventually.of_forall (fun x => ?_)) ?_
@@ -300,8 +299,7 @@ theorem exists_integrated_iteratedCovGrad_diagonalProductGrid_twoArm_le
               apply mul_le_mul_of_nonneg_left _ hCbig_nn
               linarith [hAS_nn]
     · rcases Nat.eq_zero_or_pos l with hl0 | hlpos
-      ·
-        subst hl0
+      · subst hl0
         have hbound : ∫ x, Sj i x * Tj 0 x ∂μ ≤ ΛT ^ 2 * ∫ x, Sj i x ∂μ := by
           rw [← integral_const_mul]
           refine integral_mono_of_nonneg (Eventually.of_forall (fun x => ?_)) ?_
@@ -326,8 +324,7 @@ theorem exists_integrated_iteratedCovGrad_diagonalProductGrid_twoArm_le
                 ‖PDE.RicciFlow.iteratedCovGrad (I := I) g 0 s₂ b T‖ ^ 2)) := by
                 apply mul_le_mul_of_nonneg_left _ hCbig_nn
                 linarith [hAT_nn]
-      ·
-        set m : ℕ := i + l with hm
+      · set m : ℕ := i + l with hm
         have hmk : m ≤ k := by rw [hm]; exact hilk
         have hm1 : 1 ≤ m := by omega
         have hmi : i < m := by omega
@@ -416,14 +413,12 @@ theorem exists_integrated_iteratedCovGrad_diagonalProductGrid_twoArm_le
               + (ΛS ^ 2 * ∑ b ∈ Finset.range (k + 1),
                 ‖PDE.RicciFlow.iteratedCovGrad (I := I) g 0 s₂ b T‖ ^ 2)) := by
               refine le_trans (mul_le_mul_of_nonneg_right (hCSCT_le m hmk) ?_) ?_
-              ·
-                have : 0 ≤ wi * (ΛT ^ 2 *
+              · have : 0 ≤ wi * (ΛT ^ 2 *
                     ‖PDE.RicciFlow.iteratedCovGrad (I := I) g 0 s₁ m S‖ ^ 2)
                   + wl * (ΛS ^ 2 *
                     ‖PDE.RicciFlow.iteratedCovGrad (I := I) g 0 s₂ m T‖ ^ 2) := by positivity
                 exact this
-              ·
-                refine mul_le_mul_of_nonneg_left ?_ hCbig_nn
+              · refine mul_le_mul_of_nonneg_left ?_ hCbig_nn
                 have harm1 : wi * (ΛT ^ 2 *
                     ‖PDE.RicciFlow.iteratedCovGrad (I := I) g 0 s₁ m S‖ ^ 2) ≤
                     ΛT ^ 2 * ∑ a ∈ Finset.range (k + 1),
@@ -454,15 +449,13 @@ theorem exists_integrated_iteratedCovGrad_diagonalProductGrid_twoArm_le
                         mul_le_mul_of_nonneg_left hNT_sum (by positivity)
                 linarith
   constructor
-  ·
-    have hcont : Continuous (fun x => ∑ i ∈ Finset.range (k + 1), Sj i x *
+  · have hcont : Continuous (fun x => ∑ i ∈ Finset.range (k + 1), Sj i x *
         ∑ l ∈ Finset.range (k + 1 - i), Tj l x) := by
       refine continuous_finset_sum _ (fun i _ => (hSj_cont i).mul ?_)
       exact continuous_finset_sum _ (fun l _ => hTj_cont l)
     rw [hμ]
     exact hcont.integrable_of_hasCompactSupport (HasCompactSupport.of_compactSpace _)
-  ·
-    have hrw : (∫ x, ∑ i ∈ Finset.range (k + 1), Sj i x *
+  · have hrw : (∫ x, ∑ i ∈ Finset.range (k + 1), Sj i x *
           ∑ l ∈ Finset.range (k + 1 - i), Tj l x ∂μ)
         = ∑ i ∈ Finset.range (k + 1), ∑ l ∈ Finset.range (k + 1 - i),
             ∫ x, Sj i x * Tj l x ∂μ := by
@@ -863,8 +856,7 @@ theorem exists_integrated_iteratedCovGrad_antiDiagGrid_topArm_scaled_le
     have h1tt : (1 : ℝ) ≤ 1 / tt := by rw [le_div_iff₀ htt0]; linarith
     have h1ttk : (1 : ℝ) ≤ (1 / tt) ^ k := one_le_pow₀ h1tt
     rcases Nat.eq_zero_or_pos i with hi0 | hipos
-    ·
-      subst hi0
+    · subst hi0
       have hbound : ∫ x, Sj 0 x * Tj (k - 0) x ∂μ ≤ ΛS ^ 2 * ∫ x, Tj (k - 0) x ∂μ := by
         rw [← integral_const_mul]
         refine integral_mono_of_nonneg (Eventually.of_forall (fun x => ?_)) ?_
@@ -881,8 +873,7 @@ theorem exists_integrated_iteratedCovGrad_antiDiagGrid_topArm_scaled_le
         nlinarith [mul_nonneg (sq_nonneg ΛS) (sq_nonneg NT)]
       have htop_nn : 0 ≤ Cbig * tt * (ΛT ^ 2 * NS ^ 2) := by positivity
       linarith [hbound, harm]
-    ·
-      have hl_pos : 0 < k - i := by omega
+    · have hl_pos : 0 < k - i := by omega
       set l : ℕ := k - i with hl
       have hil : i + l = k := by omega
       have hmi : i < k := hik

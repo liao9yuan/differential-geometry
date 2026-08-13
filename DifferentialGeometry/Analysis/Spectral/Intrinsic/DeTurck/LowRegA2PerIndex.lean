@@ -239,16 +239,14 @@ theorem a2PerIdxJet (hDim : Module.finrank ℝ E = 3)
   have hnotmem : (0 : ℕ) ∉ Finset.Icc 1 q := by simp
   rw [hsplit, Finset.sum_insert hnotmem]
   refine add_le_add ?_ ?_
-  ·
-    have h0 : Λ 0 ^ 2 = Cδ ^ 2 := by simp only [hΛ]; norm_num [sq_abs]
+  · have h0 : Λ 0 ^ 2 = Cδ ^ 2 := by simp only [hΛ]; norm_num [sq_abs]
     rw [h0]
     refine mul_le_mul_of_nonneg_left ?_ (sq_nonneg _)
     have hd := hdata 0 (Finset.mem_range.mpr (by omega))
     simp only [hJ] at hd
     rw [show q - 0 + 2 + 1 = q + 3 from by omega] at hd
     exact hd
-  ·
-    refine Finset.sum_le_sum (fun i hi => ?_)
+  · refine Finset.sum_le_sum (fun i hi => ?_)
     rw [Finset.mem_Icc] at hi
     have hne : i ≠ 0 := by omega
     have hΛi : Λ i ^ 2 = Ks i * (1 + J (i + 2)) := by

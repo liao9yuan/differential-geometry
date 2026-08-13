@@ -288,15 +288,12 @@ theorem iterCovThree_le
       (r : ℝ) * Real.sqrt ((Module.finrank ℝ E : ℝ) ^ (r + 2)) *
         (3 / 2 * Λ ^ 4 * (Λ'' + Λ * Λ' ^ 2) + (3 / 2 : ℝ) * (Real.sqrt (Λ ^ 3) * Λ'))
     else if m = 2 then C2acc else 0) hRnn hEq hjet hx 3 ?_) ?_
-  ·
-    intro m hm
+  · intro m hm
     interval_cases m
-    ·
-      simp only [if_neg (by norm_num : (0 : ℕ) ≠ 1), if_neg (by norm_num : (0 : ℕ) ≠ 2), zero_mul]
+    · simp only [if_neg (by norm_num : (0 : ℕ) ≠ 1), if_neg (by norm_num : (0 : ℕ) ≠ 2), zero_mul]
       rw [show telescAccum (I := I) g₁ g₂ r T 0 = 0 from rfl, covStep_zero']
       simp only [ContMDiffSection.coe_zero, Pi.zero_apply, sqrt_normSq0S_zero, le_refl]
-    ·
-      simp only [reduceIte]
+    · simp only [reduceIte]
       rw [telescAccum_one (I := I) g₁ g₂ r T]
       refine le_trans (covStepDiff_of_jets (I := I) g₁ g₂ r T x
         (metricUniformEquivalentOn_symm (I := I) hEq) hJet1 hJet2 hjet hx) ?_
@@ -308,13 +305,11 @@ theorem iterCovThree_le
           = Real.sqrt (normSq0S (I := I) g₂ x (r + 1) (iterCov (I := I) g₂ r T 1 x)) := rfl
       rw [hA, hB]
       exact le_add_of_nonneg_right (Real.sqrt_nonneg _)
-    ·
-      simp only [reduceIte]
+    · simp only [reduceIte]
       rw [Finset.sum_range_succ]
       exact le_trans (hC2acc T x hx)
         (mul_le_mul_of_nonneg_left (le_add_of_nonneg_right (Real.sqrt_nonneg _)) hC2accnn)
-  ·
-    exact mul_le_mul_of_nonneg_right (le_max_right _ _)
+  · exact mul_le_mul_of_nonneg_right (le_max_right _ _)
       (Finset.sum_nonneg fun k _ => Real.sqrt_nonneg _)
 
 theorem iterCovG1_three

@@ -203,8 +203,7 @@ theorem gridIntGrad (g₀ : SmoothRiemannianMetric I M) :
   have hKmax : K2 m ≤ max (K2 m) 1 := le_max_left _ _
   have hone_le : (1 : ℝ) ≤ max (K2 m) 1 := le_max_right _ _
   by_cases hm2 : 2 ≤ m
-  ·
-    set Λ : ℝ := max Λ₁ 1 with hΛdef
+  · set Λ : ℝ := max Λ₁ 1 with hΛdef
     have hΛ1 : (1 : ℝ) ≤ Λ := le_max_right _ _
     have hΛ_pos : (0 : ℝ) < Λ := lt_of_lt_of_le zero_lt_one hΛ1
     have hΛ_ne : Λ ≠ 0 := ne_of_gt hΛ_pos
@@ -282,8 +281,7 @@ theorem gridIntGrad (g₀ : SmoothRiemannianMetric I M) :
     have hpos : (0 : ℝ) ≤ (1 + Λ₁ ^ 2) * Rtop ^ 2 :=
       mul_nonneg (by linarith [hΛsq_nn]) hRtop_nn
     nlinarith [mul_le_mul_of_nonneg_right hKmax hpos]
-  ·
-    have hcase : c₁ = 1 ∧ c₂ = 1 + m ∨ c₂ = 1 ∧ c₁ = 1 + m := by omega
+  · have hcase : c₁ = 1 ∧ c₂ = 1 + m ∨ c₂ = 1 ∧ c₁ = 1 + m := by omega
     have hpos : (0 : ℝ) ≤ (1 + Λ₁ ^ 2) * Rtop ^ 2 :=
       mul_nonneg (by linarith [hΛsq_nn]) hRtop_nn
     have hfin : Λ₁ ^ 2 * Rtop ^ 2 ≤ max (K2 m) 1 * (1 + Λ₁ ^ 2) * Rtop ^ 2 := by

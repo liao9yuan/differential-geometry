@@ -524,8 +524,7 @@ theorem markMon (g₀ : SmoothRiemannianMetric I M) :
       (fun j _ => sq_nonneg _) hmem
     simp only [hJS_def]; linarith
   by_cases hlt : c₁ + c₂ + k ≤ m
-  ·
-    set f : Fin (n + 2) → ℕ := Fin.cons c₁ (Fin.cons c₂ e) with hf_def
+  · set f : Fin (n + 2) → ℕ := Fin.cons c₁ (Fin.cons c₂ e) with hf_def
     have hfsum : (∑ q, f q) = c₁ + c₂ + k := by
       rw [hf_def, Fin.sum_univ_succ, Fin.cons_zero]
       simp only [Fin.cons_succ]
@@ -549,12 +548,10 @@ theorem markMon (g₀ : SmoothRiemannianMetric I M) :
     have := hKP_nn m; have := hKG_nn m; have := hKH_nn m
     have hK : KU (c₁ + c₂ + k) ≤ Kmon := by simp only [hKmon_def]; linarith
     nlinarith [hK, hKmon_nn, hL1]
-  ·
-    have htop : c₁ + c₂ + k = m + 1 := by omega
+  · have htop : c₁ + c₂ + k = m + 1 := by omega
     have hm1 : 1 ≤ m := by omega
     by_cases h1 : c₁ = 1
-    ·
-      subst h1
+    · subst h1
       set f : Fin (n + 1) → ℕ := Fin.cons c₂ e with hf_def
       have hfsum : (∑ q, f q) = m := by
         rw [hf_def, Fin.sum_univ_succ, Fin.cons_zero]
@@ -581,8 +578,7 @@ theorem markMon (g₀ : SmoothRiemannianMetric I M) :
         have := hKG_nn m; have := hKH_nn m; simp only [hKmon_def]; linarith
       nlinarith [hKP, hKP_nn m, hKmon_nn, sq_nonneg Λ₁]
     · by_cases h2 : c₂ = 1
-      ·
-        subst h2
+      · subst h2
         set f : Fin (n + 1) → ℕ := Fin.cons c₁ e with hf_def
         have hfsum : (∑ q, f q) = m := by
           rw [hf_def, Fin.sum_univ_succ, Fin.cons_zero]
@@ -609,12 +605,10 @@ theorem markMon (g₀ : SmoothRiemannianMetric I M) :
         have hKP : KP m ≤ Kmon := by
           have := hKG_nn m; have := hKH_nn m; simp only [hKmon_def]; linarith
         nlinarith [hKP, hKP_nn m, hKmon_nn, sq_nonneg Λ₁]
-      ·
-        have hc₁2 : 2 ≤ c₁ := by omega
+      · have hc₁2 : 2 ≤ c₁ := by omega
         have hc₂2 : 2 ≤ c₂ := by omega
         by_cases hk0 : k = 0
-        ·
-          subst hk0
+        · subst hk0
           have hn0 : n = 0 := by omega
           subst hn0
           have hpt : ∀ x : M,
@@ -636,8 +630,7 @@ theorem markMon (g₀ : SmoothRiemannianMetric I M) :
           nlinarith [hKG, hKG_nn m, hKmon_nn, sq_nonneg Λ₁]
         · have hk1 : 1 ≤ k := by omega
           by_cases hone : ∃ q : Fin n, e q = 1
-          ·
-            obtain ⟨q₀, hq₀⟩ := hone
+          · obtain ⟨q₀, hq₀⟩ := hone
             have hnpos : 0 < n := by
               rcases Nat.eq_zero_or_pos n with h | h
               · exact absurd (q₀.isLt) (by omega)
@@ -683,8 +676,7 @@ theorem markMon (g₀ : SmoothRiemannianMetric I M) :
             have hKP : KP m ≤ Kmon := by
               have := hKG_nn m; have := hKH_nn m; simp only [hKmon_def]; linarith
             nlinarith [hKP, hKP_nn m, hKmon_nn, sq_nonneg Λ₁]
-          ·
-            simp only [not_exists] at hone
+          · simp only [not_exists] at hone
             have hres := hHigh P hΛ₀0 hΛ₀1 hΛ₁0 hsup hcap m c₁ c₂ k n e
               hc₁2 hc₂2 hk1 hnk he hone htop
             refine le_trans hres ?_

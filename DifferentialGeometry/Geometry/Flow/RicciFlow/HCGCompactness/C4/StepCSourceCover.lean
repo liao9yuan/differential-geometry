@@ -538,7 +538,7 @@ theorem MetricCompactnessInputs.exists_live_cores
             mul_le_mul_of_nonneg_left (a := (2 : Real)) hlowerMetric
               (show 0 ≤ (2 : Real) by norm_num)
           have hnormMetric : ‖w‖ ^ 2 ≤ 2 * Y.metric.inner c w w := by
-            convert hnormMetricRaw using 1 <;> ring
+            convert hnormMetricRaw using 1; ring
           calc
             ‖w‖ ^ 2 ≤ 2 * Y.metric.inner c w w := hnormMetric
             _ = 2 * dist c y ^ 2 :=

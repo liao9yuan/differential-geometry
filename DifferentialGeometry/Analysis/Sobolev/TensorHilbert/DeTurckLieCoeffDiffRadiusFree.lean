@@ -382,8 +382,7 @@ theorem deTurckLieCoeffField_summed_l2_radiusFree
       _ ≤ (∑ i ∈ Finset.range (a + 1), Atop i) * (∑ j ∈ Finset.range (a + 3), w j) +
             (∑ i ∈ Finset.range (a + 1), Alow i) * (1 + ∑ j ∈ Finset.range (a + 2), w j) := by
           refine add_le_add ?_ ?_
-          ·
-            calc ∑ i ∈ Finset.range (a + 1), Atop i * w (i + 2)
+          · calc ∑ i ∈ Finset.range (a + 1), Atop i * w (i + 2)
                 ≤ ∑ i ∈ Finset.range (a + 1), Atop i * (∑ j ∈ Finset.range (a + 3), w j) := by
                   refine Finset.sum_le_sum (fun i hi => ?_)
                   have hi' : i ≤ a := Nat.lt_succ_iff.mp (Finset.mem_range.mp hi)
@@ -392,8 +391,7 @@ theorem deTurckLieCoeffField_summed_l2_radiusFree
                     (Finset.mem_range.mpr (by omega))
               _ = (∑ i ∈ Finset.range (a + 1), Atop i) * (∑ j ∈ Finset.range (a + 3), w j) := by
                   rw [Finset.sum_mul]
-          ·
-            calc ∑ i ∈ Finset.range (a + 1), Alow i * (1 + ∑ j ∈ Finset.range (i + 2), w j)
+          · calc ∑ i ∈ Finset.range (a + 1), Alow i * (1 + ∑ j ∈ Finset.range (i + 2), w j)
                 ≤ ∑ i ∈ Finset.range (a + 1),
                     Alow i * (1 + ∑ j ∈ Finset.range (a + 2), w j) := by
                   refine Finset.sum_le_sum (fun i hi => ?_)
@@ -406,8 +404,7 @@ theorem deTurckLieCoeffField_summed_l2_radiusFree
               _ = (∑ i ∈ Finset.range (a + 1), Alow i) *
                     (1 + ∑ j ∈ Finset.range (a + 2), w j) := by
                   rw [Finset.sum_mul]
-  ·
-    haveI hM' : IsEmpty M := not_nonempty_iff.mp hM
+  · haveI hM' : IsEmpty M := not_nonempty_iff.mp hM
     have hL0 : ∑ i ∈ Finset.range (a + 1),
         ‖iteratedCovGrad (I := I) g₀ 2 2 i
           (deTurckLieCoeffField (I := I) (M := M) g₀ g₁ g_bg)‖ ^ 2 = 0 := by

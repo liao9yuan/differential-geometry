@@ -421,8 +421,7 @@ private theorem towerCross_le
       Real.sqrt (normSq0S (I := I) g₀ x (s + k) (iterCov (I := I) g₀ s U k x)) :=
     Finset.sum_nonneg (fun k _ => Real.sqrt_nonneg _)
   interval_cases j
-  ·
-    have hterm : Real.sqrt (normSq0S (I := I) g₀ x (s + 0) (iterCov (I := I) gBase s U 0 x)) ≤
+  · have hterm : Real.sqrt (normSq0S (I := I) g₀ x (s + 0) (iterCov (I := I) gBase s U 0 x)) ≤
         ∑ k ∈ Finset.range 3,
           Real.sqrt (normSq0S (I := I) g₀ x (s + k) (iterCov (I := I) g₀ s U k x)) :=
       Finset.single_le_sum
@@ -430,8 +429,7 @@ private theorem towerCross_le
           (iterCov (I := I) g₀ s U k x)))
         (fun k _ => Real.sqrt_nonneg _) (Finset.mem_range.mpr (by norm_num))
     nlinarith
-  ·
-    have hacc : ∀ m, m < 1 →
+  · have hacc : ∀ m, m < 1 →
         Real.sqrt (normSq0S (I := I) g₀ x (s + m + 1)
             (covStep (I := I) g₀ (s + m) (telescAccum (I := I) gBase g₀ s U m) x)) ≤
           (fun _ : ℕ => (0 : ℝ)) m * ∑ k ∈ Finset.range (m + 2),
@@ -454,8 +452,7 @@ private theorem towerCross_le
           Real.sqrt (normSq0S (I := I) g₀ x (s + k) (iterCov (I := I) g₀ s U k x)) :=
       Finset.sum_le_sum_of_subset_of_nonneg hsubset (fun k _ _ => Real.sqrt_nonneg _)
     nlinarith
-  ·
-    have h2 := iterCovG1_two (I := I) gBase g₀ s U x hEq hjet hJet1 hJet2 (Set.mem_univ x)
+  · have h2 := iterCovG1_two (I := I) gBase g₀ s U x hEq hjet hJet1 hJet2 (Set.mem_univ x)
     nlinarith
 
 theorem sqrtRfns_cross_le

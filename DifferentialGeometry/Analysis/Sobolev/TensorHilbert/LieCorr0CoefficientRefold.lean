@@ -1324,8 +1324,7 @@ private theorem vbPass_jetL2
   refine ⟨BS * BT, F, mul_nonneg hBS_nn hBT_nn, hF_nn, ?_⟩
   intro g₁ P δ hδ_le hδ htie hPball
   by_cases hM : Nonempty M
-  ·
-    obtain ⟨x0⟩ := hM
+  · obtain ⟨x0⟩ := hM
     have hδ0 : 0 ≤ δ := by
       haveI : Nontrivial E := Module.nontrivial_of_finrank_pos (R := ℝ) (M := E)
         (Nat.pos_of_ne_zero (NeZero.ne _))
@@ -1361,8 +1360,7 @@ private theorem vbPass_jetL2
       rw [Finset.sum_range_one]
       exact mul_le_mul_of_nonneg_left (hΩ_sup 0 (by omega) x) (hcip_nn 0)
     refine ⟨?_, ?_⟩
-    ·
-      intro x
+    · intro x
       rw [vbSplit (I := I) (M := M) g₀ g₁]
       have h := rfns_iteratedCovGrad_appCcRS_diagonalProductGrid_rankLeft_le
         (I := I) (M := M) g₀ 0 2 1 4 (vbMcdArm (I := I) (M := M) g₀ g₁)
@@ -1377,8 +1375,7 @@ private theorem vbPass_jetL2
       rw [Real.sq_sqrt hBT_nn] at h2
       exact mul_le_mul h1 h2
         (riemannianFiberNormSq_nonneg (I := I) (M := M) g₀ 2 1 x _) hBS_nn
-    ·
-      intro i hi
+    · intro i hi
       rw [vbSplit (I := I) (M := M) g₀ g₁]
       simp only [hF_def]
       refine Finset.sum_le_sum (fun q hq => ?_)
@@ -1423,8 +1420,7 @@ private theorem vbPass_jetL2
           omega
         refine le_trans (hcipL (wOmega (I := I) (M := M) g₀ g₁ g₀) l) ?_
         exact mul_le_mul_of_nonneg_left (hΩ_jets l hl_le) (hcipL_nn l)
-  ·
-    haveI hEmpty : IsEmpty M := not_nonempty_iff.mp hM
+  · haveI hEmpty : IsEmpty M := not_nonempty_iff.mp hM
     refine ⟨fun x => (hEmpty.false x).elim, ?_⟩
     intro i hi
     have hzero : ∀ q : ℕ,
