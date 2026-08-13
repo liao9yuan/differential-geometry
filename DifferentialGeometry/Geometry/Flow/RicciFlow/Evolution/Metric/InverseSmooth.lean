@@ -239,7 +239,7 @@ theorem frameGramCLM_comp_frameGInvCLM
     (S : SolutionOn (I := I) (M := M) D)
     (gInv : Real -> DifferentialGeometry.Integral.Connection.InverseMetricComponents M Idx)
     (frame : Idx -> (x : M) -> TangentSpace I x)
-    (hinv : InverseMetricComponentsInFrameOn (I := I) S gInv frame)
+    (hinv : InvMetricLocal (I := I) S gInv frame Set.univ)
     (p : Real × M) :
     frameGramCLM (I := I) S frame p ∘L frameGInvCLM (Idx := Idx) gInv p =
       ContinuousLinearMap.id Real (Idx -> Real) := by
@@ -249,7 +249,7 @@ theorem frameGramCLM_comp_frameGInvCLM
     metric_mul_inverse_apply
       (metric := fun a b => metricCompInFrame (I := I) S frame p.1 p.2 a b)
       (gInv := fun a b => gInv p.1 p.2 a b)
-      (fun a b => (hinv p.1 p.2 a b).2)
+      (fun a b => (hinv p.1 p.2 (Set.mem_univ p.2) a b).2)
       v i
 
 omit [SigmaCompactSpace M] [T2Space M] in
@@ -259,7 +259,7 @@ theorem frameGInvCLM_comp_frameGramCLM
     (S : SolutionOn (I := I) (M := M) D)
     (gInv : Real -> DifferentialGeometry.Integral.Connection.InverseMetricComponents M Idx)
     (frame : Idx -> (x : M) -> TangentSpace I x)
-    (hinv : InverseMetricComponentsInFrameOn (I := I) S gInv frame)
+    (hinv : InvMetricLocal (I := I) S gInv frame Set.univ)
     (p : Real × M) :
     frameGInvCLM (Idx := Idx) gInv p ∘L frameGramCLM (I := I) S frame p =
       ContinuousLinearMap.id Real (Idx -> Real) := by
@@ -269,7 +269,7 @@ theorem frameGInvCLM_comp_frameGramCLM
     inverse_mul_metric_apply
       (metric := fun a b => metricCompInFrame (I := I) S frame p.1 p.2 a b)
       (gInv := fun a b => gInv p.1 p.2 a b)
-      (fun a b => (hinv p.1 p.2 a b).1)
+      (fun a b => (hinv p.1 p.2 (Set.mem_univ p.2) a b).1)
       v i
 
 omit [SigmaCompactSpace M] [T2Space M] in
@@ -279,7 +279,7 @@ theorem frameGramCLM_isInvertible
     (S : SolutionOn (I := I) (M := M) D)
     (gInv : Real -> DifferentialGeometry.Integral.Connection.InverseMetricComponents M Idx)
     (frame : Idx -> (x : M) -> TangentSpace I x)
-    (hinv : InverseMetricComponentsInFrameOn (I := I) S gInv frame)
+    (hinv : InvMetricLocal (I := I) S gInv frame Set.univ)
     (p : Real × M) :
     (frameGramCLM (I := I) S frame p).IsInvertible := by
   exact ContinuousLinearMap.IsInvertible.of_inverse
@@ -293,7 +293,7 @@ theorem frameGInvCLM_eq_inverse
     (S : SolutionOn (I := I) (M := M) D)
     (gInv : Real -> DifferentialGeometry.Integral.Connection.InverseMetricComponents M Idx)
     (frame : Idx -> (x : M) -> TangentSpace I x)
-    (hinv : InverseMetricComponentsInFrameOn (I := I) S gInv frame)
+    (hinv : InvMetricLocal (I := I) S gInv frame Set.univ)
     (p : Real × M) :
     ContinuousLinearMap.inverse (frameGramCLM (I := I) S frame p) =
       frameGInvCLM (Idx := Idx) gInv p := by
