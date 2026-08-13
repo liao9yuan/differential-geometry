@@ -8787,6 +8787,19 @@ theorem modelHandleRoundMap_mem_lowerRound_iff {n k : ℕ} (hk : k ≤ n)
     refine ⟨modelHandleMap hk ε r p, ?_, rfl⟩
     exact le_of_eq ((modelHandleMap_f_eq_lower_iff hk c ε r hε p).2 hp)
 
+theorem lowerRound_union_handleRound_subset_modelAttachedRegion {n k : ℕ} (hk : k ≤ n)
+    (c ε r δ θ : ℝ) (hε : 0 < ε) (hδ : 0 < δ) (hθ : 0 < θ) (hδr : δ < r ^ 2) :
+    modelLowerRoundMap hk ε r δ θ '' (sublevel (morseNormalForm hk c) (c - ε)) ∪
+        Set.range (modelHandleRoundMap hk ε r δ θ) ⊆ modelAttachedRegion hk ε r δ := by
+  intro y hy
+  rcases hy with hy | hy
+  · rcases hy with ⟨z, hz, hzy⟩
+    rw [← hzy]
+    exact modelLowerRoundMap_mem_attached hk c ε r δ θ hδ hθ hδr z hz
+  · rcases hy with ⟨p, hpy⟩
+    rw [← hpy]
+    exact modelHandleRoundMap_mem_attached hk ε r δ θ hε hδ hθ hδr p
+
 theorem modelHandleRoundMap_posPart_eq_of_scalar {n k : ℕ} (_hk : k ≤ n) (ε r δ θ : ℝ)
     (hε : 0 < ε) (hδ : 0 < δ) (hθ : 0 < θ) (hδr : δ < r ^ 2) (hθr : θ < r ^ 2) (hr : 0 < r)
     (p p' : StandardHandle k (n - k))
