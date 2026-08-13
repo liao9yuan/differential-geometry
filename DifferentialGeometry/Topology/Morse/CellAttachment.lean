@@ -8017,6 +8017,76 @@ theorem modelLowerRoundMapUnround_norm_sq_le_of_negPart_le {n k : ℕ} (hk : k �
   have hle := modelLowerRoundMapUnround_norm_sq_le hk c ε r δ θ hθ hδ hδr hθr hy
   nlinarith [hle, ht]
 
+theorem modelLowerRoundMapUnround_eq_self_of_ge {n k : ℕ} (hk : k ≤ n) (ε r δ θ : ℝ)
+    (hθ : 0 < θ) (hδ : 0 < δ) {y : MorseModel n}
+    (ht : r ^ 2 + 2 * ε + δ ≤ ‖negPart hk y‖ ^ 2) :
+    modelLowerRoundMapUnround hk ε r δ θ y = y := by
+  rw [← recombine_decompose hk y]
+  dsimp [modelLowerRoundMapUnround]
+  rw [negPart_recombine, posPart_recombine]
+  rw [modelRoundScale_eq_one_of_ge hθ hδ ht]
+  simp
+
+theorem modelLowerRoundMap_morseNorm_le_max {n k : ℕ} (hk : k ≤ n) (c ε r δ θ R₀ : ℝ)
+    (hε : 0 ≤ ε) (hδ : 0 < δ) (hθ : 0 < θ) (hδr : δ < r ^ 2) (hR0 : 0 ≤ R₀)
+    (hbig : 2 * (r ^ 2 + 2 * ε + δ) ≤ R₀ ^ 2) {y : MorseModel n}
+    (hy : y ∈ sublevel (morseNormalForm hk c) (c - ε)) :
+    morseNorm n (modelLowerRoundMap hk ε r δ θ y) ≤ max R₀ (morseNorm n y) := by
+  by_cases hle : ‖negPart hk y‖ ^ 2 ≤ r ^ 2 + 2 * ε + δ
+  · have hnormle := modelLowerRoundMap_norm_sq_le_of_negPart_le hk c ε r δ θ hε hδ hθ hδr hy hle
+    have hsq : morseNorm n (modelLowerRoundMap hk ε r δ θ y) ^ 2 ≤ R₀ ^ 2 := by
+      nlinarith [hnormle, hbig]
+    have habs := sq_le_sq.mp hsq
+    have hnonneg : 0 ≤ morseNorm n (modelLowerRoundMap hk ε r δ θ y) := norm_nonneg _
+    rw [abs_of_nonneg hnonneg, abs_of_nonneg hR0] at habs
+    exact le_trans habs (le_max_left _ _)
+  · have hgt : r ^ 2 + 2 * ε + δ ≤ ‖negPart hk y‖ ^ 2 := le_of_not_ge hle
+    have hself := modelLowerRoundMap_eq_self_of_ge hk ε r δ θ hθ hδ y hgt
+    rw [hself]
+    exact le_max_right _ _
+
+theorem modelLowerRoundMapUnround_morseNorm_le_max {n k : ℕ} (hk : k ≤ n) (c ε r δ θ R₀ : ℝ)
+    (hε : 0 ≤ ε) (hθ : 0 < θ) (hδ : 0 < δ) (hδr : δ < r ^ 2) (hθr : θ < r ^ 2)
+    (hR0 : 0 ≤ R₀) (hbig : 2 * (r ^ 2 + 2 * ε + δ) ≤ R₀ ^ 2) {y : MorseModel n}
+    (hy : y ∈ modelLowerRoundMap hk ε r δ θ '' (sublevel (morseNormalForm hk c) (c - ε))) :
+    morseNorm n (modelLowerRoundMapUnround hk ε r δ θ y) ≤ max R₀ (morseNorm n y) := by
+  by_cases hle : ‖negPart hk y‖ ^ 2 ≤ r ^ 2 + 2 * ε + δ
+  · have hnormle := modelLowerRoundMapUnround_norm_sq_le_of_negPart_le hk c ε r δ θ hε hθ hδ hδr hθr hy hle
+    have hsq : morseNorm n (modelLowerRoundMapUnround hk ε r δ θ y) ^ 2 ≤ R₀ ^ 2 := by
+      nlinarith [hnormle, hbig]
+    have habs := sq_le_sq.mp hsq
+    have hnonneg : 0 ≤ morseNorm n (modelLowerRoundMapUnround hk ε r δ θ y) := norm_nonneg _
+    rw [abs_of_nonneg hnonneg, abs_of_nonneg hR0] at habs
+    exact le_trans habs (le_max_left _ _)
+  · have hgt : r ^ 2 + 2 * ε + δ ≤ ‖negPart hk y‖ ^ 2 := le_of_not_ge hle
+    have hself := modelLowerRoundMapUnround_eq_self_of_ge hk ε r δ θ hθ hδ hgt
+    rw [hself]
+    exact le_max_right _ _
+
+theorem modelLowerRoundMap_image_norm_sq_le {n k : ℕ} (hk : k ≤ n) (c ε r δ θ : ℝ)
+    (hδ : 0 < δ) (hθ : 0 < θ) (hδr : δ < r ^ 2) {y : MorseModel n}
+    (hy : y ∈ modelLowerRoundMap hk ε r δ θ '' (sublevel (morseNormalForm hk c) (c - ε))) :
+    morseNorm n y ^ 2 ≤ ‖negPart hk y‖ ^ 2 + smoothCap ε r δ (‖negPart hk y‖ ^ 2) := by
+  rcases hy with ⟨z, hz, hzy⟩
+  have hle := modelLowerRoundMap_norm_sq_le hk c ε r δ θ hδ hθ hδr hz
+  have hneg : negPart hk y = negPart hk z := by
+    rw [← hzy]
+    exact modelLowerRoundMap_negPart hk ε r δ θ z
+  rw [hzy] at hle
+  rw [hneg.symm] at hle
+  exact hle
+
+theorem modelLowerRoundMap_image_norm_sq_le_of_negPart_le {n k : ℕ} (hk : k ≤ n)
+    (c ε r δ θ : ℝ) (hε : 0 ≤ ε) (hδ : 0 < δ) (hθ : 0 < θ) (hδr : δ < r ^ 2) {y : MorseModel n}
+    (hy : y ∈ modelLowerRoundMap hk ε r δ θ '' (sublevel (morseNormalForm hk c) (c - ε)))
+    (ht : ‖negPart hk y‖ ^ 2 ≤ r ^ 2 + 2 * ε + δ) :
+    morseNorm n y ^ 2 ≤ 2 * (r ^ 2 + 2 * ε + δ) := by
+  have hle := modelLowerRoundMap_image_norm_sq_le hk c ε r δ θ hδ hθ hδr hy
+  have hcap : smoothCap ε r δ (‖negPart hk y‖ ^ 2) ≤ r ^ 2 + 2 * ε + δ := by
+    have hr : r ^ 2 ≤ r ^ 2 + 2 * ε + δ := by nlinarith [hε, hδ]
+    exact le_trans (smoothCap_le_max hε hδ (t := ‖negPart hk y‖ ^ 2)) (max_le hr ht)
+  nlinarith [hle, hcap, ht]
+
 theorem modelRoundCapInterp_eq {ε r a b t : ℝ} (hε : 0 < ε) (hr : 0 < r) (ha0 : 0 < a)
     (_ha1 : a ≤ 1) (hb0 : 0 ≤ b) (_hb1 : b ≤ 1) (ht0 : t < r ^ 2 + 2 * ε) (htpos : 0 < t)
     (ht : t = (2 * ε + r ^ 2 * b) * a) :
