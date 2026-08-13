@@ -13843,6 +13843,35 @@ noncomputable def morseHandleRoundAdjunctionHomeoCapRounded {m k : ℕ} (hk : k 
       exact morseCapRoundedLowerRound_attaching_eq hk c ε r δ θ data hε hεr hεr' a)).trans
     (morseHandleRoundAdjunctionHomeoUnion hk c ε r δ θ data hε hδ hθ hδr hθr hr hεr hεr' hcont)
 
+theorem morseHandleRoundAdjunctionHomeoCapRounded_comm {m k : ℕ} (hk : k ≤ m + 1)
+    (c ε r δ θ R₀ : ℝ) {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M] [T2Space M]
+    [ChartedSpace H M] {I : ModelWithCorners ℝ (MorseModel (m + 1)) H} {f : M → ℝ}
+    (data : MorseChart (m + 1) k hk c I f)
+    (hε : 0 < ε) (hδ : 0 < δ) (hθ : 0 < θ) (hδr : δ < r ^ 2) (hθr : θ < r ^ 2) (hr : 0 < r)
+    (hεr : Real.sqrt (2 * ε + 2 * r ^ 2) ≤ data.R)
+    (hεr' : Real.sqrt (2 * ε + 2 * r ^ 2) < data.R / 2)
+    (hR0 : 0 ≤ R₀) (hR0lt : R₀ < data.R)
+    (hbig : 2 * (r ^ 2 + 2 * ε + δ) ≤ R₀ ^ 2)
+    (hRbig : r ^ 2 + 2 * ε + δ ≤ (data.R / 2) ^ 2)
+    (hcont : Continuous f) [NeZero k] [NeZero (m + 1 - k)]
+    (z : Handle.AdjunctionSpace k (m + 1 - k)
+      (morseAttachingEmbedding hk c ε r data hε hεr)) :
+    (morseHandleRoundAdjunctionHomeoUnion hk c ε r δ θ data hε hδ hθ hδr hθr hr hεr hεr' hcont).toFun
+        ((Handle.adjunctionCongr
+          (φ := morseAttachingEmbedding hk c ε r data hε hεr)
+          (φ' := handleRoundAttachingEmbeddingCapSubtype hk c ε r δ θ data hε hδ hθ hδr hθr hεr')
+          (h := morseCapRoundedLowerRoundingHomeo hk c ε r δ θ R₀ data hε hδ hθ hδr hθr hR0 hR0lt hbig hRbig hcont)
+          (hφ := by
+            intro a
+            apply Subtype.ext
+            change morseCapRoundedLowerRound hk c ε r δ θ data
+                (morseAttachingEmbedding hk c ε r data hε hεr a).1 =
+              handleRoundAttachingEmbedding hk c ε r δ θ data a
+            exact morseCapRoundedLowerRound_attaching_eq hk c ε r δ θ data hε hεr hεr' a)).toFun z) =
+      (morseHandleRoundAdjunctionHomeoCapRounded hk c ε r δ θ R₀ data hε hδ hθ hδr hθr hr hεr hεr'
+        hR0 hR0lt hbig hRbig hcont).toFun z := by
+  dsimp [morseHandleRoundAdjunctionHomeoCapRounded]
+
 theorem morseSharpUnionRound_eq_self_of_not_mem_halfBall {m k : ℕ} (hk : k ≤ m + 1) (c ε r δ : ℝ)
     {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M] [ChartedSpace H M]
     {I : ModelWithCorners ℝ (MorseModel (m + 1)) H} {f : M → ℝ}
