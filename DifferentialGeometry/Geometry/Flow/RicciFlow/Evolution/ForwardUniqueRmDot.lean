@@ -166,24 +166,17 @@ private instance instContMDiffMetricCov (g : SmoothRiemannianMetric I M) :
   CovariantDerivative.contMDiffCovariantDerivativeOn_univ_iff.mp
     (metricCov_smooth (I := I) g isOpen_univ)
 
-set_option synthInstance.maxHeartbeats 1000000 in
-
 def rmDiffVec (g₁ g₂ : SmoothRiemannianMetric I M) (x : M) :
     TangentSpace I x →L[Real] TangentSpace I x →L[Real] TangentSpace I x →L[Real]
       TangentSpace I x :=
   DifferentialGeometry.Integral.Connection.riemannOp (metricCov (I := I) g₁) x -
     DifferentialGeometry.Integral.Connection.riemannOp (metricCov (I := I) g₂) x
 
-set_option synthInstance.maxHeartbeats 1000000 in
-set_option maxHeartbeats 1000000 in
-
 @[simp]
 theorem rmDiffVec_self (g : SmoothRiemannianMetric I M) (x : M) :
     rmDiffVec (I := I) g g x = 0 := by
   rw [rmDiffVec]
   exact sub_self (DifferentialGeometry.Integral.Connection.riemannOp (metricCov (I := I) g) x)
-
-set_option synthInstance.maxHeartbeats 1000000 in
 
 theorem rmDiffLowAt_eq_lowerTri (g₁ g₂ : SmoothRiemannianMetric I M) (x : M) :
     rmDiffLowAt (I := I) g₁ g₂ x =
@@ -247,8 +240,6 @@ end RaisedDifference
 
 section Speed
 
-set_option synthInstance.maxHeartbeats 1000000 in
-
 def rmDiffDot (g₁ g₂ : Real → SmoothRiemannianMetric I M)
     (Sdot : (x : M) →
       TangentSpace I x →L[Real] TangentSpace I x →L[Real] TangentSpace I x →L[Real]
@@ -260,7 +251,6 @@ def rmDiffDot (g₁ g₂ : Real → SmoothRiemannianMetric I M)
         (rmDiffVec (I := I) (g₁ t) (g₂ t) x) +
     lowerTri (I := I) (metricTensorField (I := I) (g₁ t) x) (Sdot x)
 
-set_option synthInstance.maxHeartbeats 1000000 in
 theorem rmDiffDot_apply (g₁ g₂ : Real → SmoothRiemannianMetric I M)
     (Sdot : (x : M) →
       TangentSpace I x →L[Real] TangentSpace I x →L[Real] TangentSpace I x →L[Real]
@@ -293,8 +283,6 @@ end Speed
 section Adapter
 
 variable {x : M}
-
-set_option synthInstance.maxHeartbeats 1000000 in
 
 theorem rmDiffLow_hasDerivAt
     (g₁ g₂ : Real → SmoothRiemannianMetric I M)
