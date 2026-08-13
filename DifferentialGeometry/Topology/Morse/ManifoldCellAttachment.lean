@@ -18585,6 +18585,55 @@ theorem contMDiff_handleRoundEmbedding_sublevel {m k : ℕ} (hk : k ≤ m + 1)
       hR₁₂ hR₁₂R'' hR₁₂R''' hf hreg_f)
     (hchart := by intro y; rfl)
 
+theorem contMDiff_handleRoundEmbedding_sublevel_zero {m : ℕ}
+    (c ε r δ θ R₀' R₁' R₁'' : ℝ) {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M]
+    [T2Space M] [ChartedSpace H M] {I : ModelWithCorners ℝ (MorseModel (m + 1)) H}
+    [I.Boundaryless] [IsManifold I (⊤ : WithTop ℕ∞) M] {f : M → ℝ}
+    (data : MorseChart (m + 1) 0 (zero_le (m + 1)) c I f)
+    (hε : 0 < ε) (hδ : 0 < δ) (hθ : 0 < θ) (hδr : δ < r ^ 2) (hθr : θ < r ^ 2)
+    (hr : 0 < r) (hεr : Real.sqrt (2 * ε + 2 * r ^ 2) ≤ data.R)
+    (hεr' : Real.sqrt (2 * ε + 2 * r ^ 2) < data.R / 2)
+    (hR : R₀' < R₁') (hR0' : 0 ≤ R₀') (hbig' : 2 * (r ^ 2 + 2 * ε + δ) ≤ R₀' ^ 2)
+    (hRbig : r ^ 2 + 2 * ε + δ ≤ (data.R / 2) ^ 2)
+    (hR₁big : 2 * (data.R / 2) ^ 2 - 2 * ε ≤ R₁' ^ 2) (hR₁₂R : R₁' ≤ data.R)
+    (hR₁₂ : R₁' < R₁'') (hR₁₂R'' : R₁'' ≤ data.R) (hR₁₂R''' : R₁'' ≤ data.R')
+    (hRR' : data.R < data.R')
+    (hf : ContMDiff I 𝓘(ℝ, ℝ) (↑(⊤ : ℕ∞) : WithTop ℕ∞) f)
+    (hreg_f : ∀ x : M, f x = c - ε → ¬ IsCriticalPointAt I f x)
+    [NeZero (m + 1)] :
+    @ContMDiff ℝ _
+      (EuclideanSpace ℝ (Fin 0) × EuclideanSpace ℝ (Fin (((m + 1 - 1) + 1)))) _ _
+      (ModelProd (EuclideanSpace ℝ (Fin 0)) (EuclideanHalfSpace ((m + 1 - 1) + 1))) _
+      ((𝓘(ℝ, EuclideanSpace ℝ (Fin 0))).prod (modelWithCornersEuclideanHalfSpace ((m + 1 - 1) + 1)))
+      (StandardHandle 0 (m + 1)) _ (standardHandleZeroChartedSpace (m + 1))
+      (MorseModel (m + 1)) _ _ (MorseHalfSpace m) _
+      (morseModelWithCornersHalfSpace m)
+      (SublevelSpace (morseRoundedFunction (zero_le (m + 1)) c ε r δ R₀' R₁' data) c) _
+      (morseRoundedSublevelChartedSpace (zero_le (m + 1)) c ε r δ R₀' R₁' R₁'' data hε hδ hδr hR
+        hR0' hbig' hR₁₂ hR₁₂R'' hR₁₂R''' hf hreg_f)
+      (⊤ : ℕ∞)
+      (fun d : StandardHandle 0 (m + 1) =>
+        (⟨handleRoundEmbedding (zero_le (m + 1)) c ε r δ θ data d,
+          handleRoundEmbedding_mem_roundedSublevel (zero_le (m + 1)) c ε r δ θ R₀' R₁' data hε hδ hθ
+            hδr hεr' hR hR0' hbig' hRbig hR₁big hR₁₂R d⟩ :
+          SublevelSpace (morseRoundedFunction (zero_le (m + 1)) c ε r δ R₀' R₁' data) c)) := by
+  letI : ChartedSpace (ModelProd (EuclideanSpace ℝ (Fin 0))
+      (EuclideanHalfSpace ((m + 1 - 1) + 1))) (StandardHandle 0 (m + 1)) :=
+    standardHandleZeroChartedSpace (m + 1)
+  exact contMDiff_sublevelCorestrict (I := I)
+    (morseRoundedFunction (zero_le (m + 1)) c ε r δ R₀' R₁' data) c
+    (contMDiff_morseRoundedFunction (zero_le (m + 1)) c ε r δ R₀' R₁' R₁'' data hf hR hR0' hR₁₂
+      hR₁₂R'' hR₁₂R''')
+    (fun x hx => morseRoundedFunction_no_critical_at_level (zero_le (m + 1)) c ε r δ R₀' R₁' R₁'' data
+      hε hδ hδr hR hR0' hbig' hR₁₂ hR₁₂R'' hR₁₂R''' hreg_f hx)
+    (handleRoundEmbedding (zero_le (m + 1)) c ε r δ θ data)
+    (contMDiff_handleRoundEmbedding_zero c ε r δ θ data hε hδ hθ hδr hθr hr hεr hRR')
+    (fun d => handleRoundEmbedding_mem_roundedSublevel (zero_le (m + 1)) c ε r δ θ R₀' R₁' data hε hδ
+      hθ hδr hεr' hR hR0' hbig' hRbig hR₁big hR₁₂R d)
+    (hcs := morseRoundedSublevelChartedSpace (zero_le (m + 1)) c ε r δ R₀' R₁' R₁'' data hε hδ hδr hR
+      hR0' hbig' hR₁₂ hR₁₂R'' hR₁₂R''' hf hreg_f)
+    (hchart := by intro y; rfl)
+
 private noncomputable def homeomorphOfSetEq {M : Type*} [TopologicalSpace M] {s t : Set M}
     (h : s = t) : {x : M // x ∈ s} ≃ₜ {x : M // x ∈ t} where
   toEquiv := Equiv.setCongr h
