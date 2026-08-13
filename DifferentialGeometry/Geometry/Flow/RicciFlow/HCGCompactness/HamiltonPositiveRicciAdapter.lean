@@ -1382,6 +1382,488 @@ theorem ham3_src_covlip
     dsimp only [ham3ShiLeft]
     nlinarith [sq_pos_of_pos ham3_r0_pos, hs.1]
 
+theorem ham3_closed_upg
+    {omega : Real} (h0omega : 0 < omega)
+    (hcompact : CompactSpace M)
+    {g0 : SmoothRiemannianMetric I M}
+    (P : Ham3FlowPackage (I := I) (M := M) g0)
+    (hD : P.D =
+      DifferentialGeometry.Integral.Connection.RealTimeInterval.closedOpen
+        0 omega h0omega)
+    (Q : Ham3BlowupData M)
+    (hsel : Ham3PointSel (I := I) P Q)
+    (hrm : Ham3RmBound (I := I) P Q)
+    (hwindow : Ham3Window (I := I) P Q ham3_r0)
+    (canon : StepDCanonData (I := I)
+      ((ham3SourceSeq (I := I) h0omega P hD Q hsel hwindow).atZero
+        (I := I))) :
+    ∃ d : FlowUpgradeData (I := I)
+        (ham3SourceSeq (I := I) h0omega P hD Q hsel hwindow) canon.mc,
+      ∀ t : Real,
+        t ∈ (ham3SourceSeq (I := I) h0omega P hD Q hsel hwindow).D.carrier →
+          MetricComplete (I := I) (d.data.L.atTime (I := I) t) := by
+  classical
+  letI : CompactSpace M := hcompact
+  let X := ham3SourceSeq (I := I) h0omega P hD Q hsel hwindow
+  let mc := canon.mc
+  let Phi := pointedCGHMaps_of_manifold (I := I) X
+    mc.limit mc.subseq mc.maps
+  letI : TopologicalSpace mc.limit.M := mc.limit.topology
+  letI : ChartedSpace H mc.limit.M := mc.limit.charted
+  letI : T2Space mc.limit.M := mc.limit.t2
+  letI : IsManifold I ∞ mc.limit.M := mc.limit.smooth
+  letI : SigmaCompactSpace mc.limit.M := mc.limit.sigmaCompact
+
+  have hsrc : SrcSigma (I := I) Phi := by
+    intro k
+    exact Geometry.isSigmaCompact_of_isOpen I
+      (PointedCGHMaps.source_open (I := I) Phi k)
+  have htgt : TgtSigma (I := I) Phi := by
+    intro k
+    letI : TopologicalSpace (X.term (mc.subseq k)).M :=
+      (X.term (mc.subseq k)).topology
+    letI : ChartedSpace H (X.term (mc.subseq k)).M :=
+      (X.term (mc.subseq k)).charted
+    letI : SigmaCompactSpace (X.term (mc.subseq k)).M :=
+      (X.term (mc.subseq k)).sigmaCompact
+    exact Geometry.isSigmaCompact_of_isOpen I
+      (PointedCGHMaps.target_open (I := I) Phi k)
+  let bf := Classical.choice (nonempty_bumpFamily (I := I) Phi)
+
+  let gRefT : ∀ k : Nat,
+      letI : TopologicalSpace (X.term (mc.subseq k)).M :=
+        (X.term (mc.subseq k)).topology
+      letI : ChartedSpace H (X.term (mc.subseq k)).M :=
+        (X.term (mc.subseq k)).charted
+      letI : IsManifold I ∞ (X.term (mc.subseq k)).M :=
+        (X.term (mc.subseq k)).smooth
+      SmoothRiemannianMetric I (X.term (mc.subseq k)).M :=
+    fun k =>
+      letI : TopologicalSpace (X.term (mc.subseq k)).M :=
+        (X.term (mc.subseq k)).topology
+      letI : ChartedSpace H (X.term (mc.subseq k)).M :=
+        (X.term (mc.subseq k)).charted
+      letI : T2Space (X.term (mc.subseq k)).M :=
+        (X.term (mc.subseq k)).t2
+      letI : IsManifold I ∞ (X.term (mc.subseq k)).M :=
+        (X.term (mc.subseq k)).smooth
+      letI : SigmaCompactSpace (X.term (mc.subseq k)).M :=
+        (X.term (mc.subseq k)).sigmaCompact
+      (X.term (mc.subseq k)).S.family.metric 0
+
+  have hcanonRel := StepDCanonData.canon_rel (I := I) canon hsrc htgt
+  dsimp only at hcanonRel
+  obtain ⟨Crel, hCrel, hrelZero⟩ := hcanonRel
+  have hsrcZero (k : Nat) :
+      tgtRefSrc (I := I) Phi gRefT hsrc htgt k =
+        srcMetric (I := I) Phi hsrc htgt k 0 := by
+    letI : TopologicalSpace (X.term (mc.subseq k)).M :=
+      (X.term (mc.subseq k)).topology
+    letI : ChartedSpace H (X.term (mc.subseq k)).M :=
+      (X.term (mc.subseq k)).charted
+    letI : T2Space (X.term (mc.subseq k)).M :=
+      (X.term (mc.subseq k)).t2
+    letI : IsManifold I ∞ (X.term (mc.subseq k)).M :=
+      (X.term (mc.subseq k)).smooth
+    letI : SigmaCompactSpace (X.term (mc.subseq k)).M :=
+      (X.term (mc.subseq k)).sigmaCompact
+    rfl
+  have hrel : ∀ k : Nat,
+      letI : TopologicalSpace (SourceDomain (I := I) Phi k) :=
+        sourceDomTop (I := I) Phi k
+      letI : ChartedSpace H (SourceDomain (I := I) Phi k) :=
+        sourceDomCharted (I := I) Phi k
+      letI : T2Space (SourceDomain (I := I) Phi k) :=
+        sourceDomT2 (I := I) Phi k
+      letI : IsManifold I ∞ (SourceDomain (I := I) Phi k) :=
+        sourceDomSmooth (I := I) Phi k
+      MetricUniformEquivalentOn (I := I)
+        (Set.univ : Set (SourceDomain (I := I) Phi k))
+        (refRes (I := I) Phi mc.limit.metric hsrc k)
+        (tgtRefSrc (I := I) Phi gRefT hsrc htgt k) Crel := by
+    intro k
+    rw [hsrcZero k]
+    exact hrelZero k
+  have hinit := StepDCanonData.canon_init (I := I) canon hsrc htgt
+  dsimp only at hinit
+  have hcp := StepDCanonData.canon_cp (I := I) canon hsrc htgt
+  dsimp only at hcp
+
+  obtain ⟨A, Bmax, hA, hBmax, hBmajor, hwindowRaw⟩ :=
+    ham3_win_equiv (I := I) h0omega P hD Q hsel hwindow hrm
+  let B : Real → Real := fun t => metricEquivalenceFactor 1 A t 0
+  have hequivT : ∀ k : Nat,
+      letI : TopologicalSpace (X.term (mc.subseq k)).M :=
+        (X.term (mc.subseq k)).topology
+      letI : ChartedSpace H (X.term (mc.subseq k)).M :=
+        (X.term (mc.subseq k)).charted
+      letI : T2Space (X.term (mc.subseq k)).M :=
+        (X.term (mc.subseq k)).t2
+      letI : IsManifold I ∞ (X.term (mc.subseq k)).M :=
+        (X.term (mc.subseq k)).smooth
+      letI : SigmaCompactSpace (X.term (mc.subseq k)).M :=
+        (X.term (mc.subseq k)).sigmaCompact
+      MetricUniformEquivalentOnWindow (I := I) (Phi.target k)
+        (-(ham3_r0 ^ 2)) 0 (gRefT k)
+        (fun _ t => (X.term (mc.subseq k)).S.family.metric t) B := by
+    intro k
+    letI : TopologicalSpace (X.term (mc.subseq k)).M :=
+      (X.term (mc.subseq k)).topology
+    letI : ChartedSpace H (X.term (mc.subseq k)).M :=
+      (X.term (mc.subseq k)).charted
+    letI : T2Space (X.term (mc.subseq k)).M :=
+      (X.term (mc.subseq k)).t2
+    letI : IsManifold I ∞ (X.term (mc.subseq k)).M :=
+      (X.term (mc.subseq k)).smooth
+    letI : SigmaCompactSpace (X.term (mc.subseq k)).M :=
+      (X.term (mc.subseq k)).sigmaCompact
+    have hall := hwindowRaw (mc.subseq k)
+    have hall' : MetricUniformEquivalentOnWindow (I := I) Set.univ
+        (-(ham3_r0 ^ 2)) 0 (gRefT k)
+        (fun _ t => (X.term (mc.subseq k)).S.family.metric t) B := by
+      simpa only [X, ham3SourceSeq,
+        DifferentialGeometry.PDE.RicciFlow.SolutionOn.timeRestrict_metric,
+        gRefT, B] using hall
+    intro i t ht
+    refine ⟨(hall' i t ht).1, ?_⟩
+    intro x _hx v
+    exact (hall' i t ht).2 x (Set.mem_univ x) v
+
+  have hShiT : ∀ N : Nat, ∃ KShi : Real, 0 ≤ KShi ∧
+      ∀ k : Nat,
+        letI : TopologicalSpace (X.term (mc.subseq k)).M :=
+          (X.term (mc.subseq k)).topology
+        letI : ChartedSpace H (X.term (mc.subseq k)).M :=
+          (X.term (mc.subseq k)).charted
+        letI : T2Space (X.term (mc.subseq k)).M :=
+          (X.term (mc.subseq k)).t2
+        letI : IsManifold I ∞ (X.term (mc.subseq k)).M :=
+          (X.term (mc.subseq k)).smooth
+        letI : SigmaCompactSpace (X.term (mc.subseq k)).M :=
+          (X.term (mc.subseq k)).sigmaCompact
+        MovingShiBoundOn (I := I) (Phi.target k)
+          (-(ham3_r0 ^ 2)) 0
+          (fun _ t => (X.term (mc.subseq k)).S.family.metric t) N KShi := by
+    intro N
+    obtain ⟨KShi, hKShi, hShiAll⟩ :=
+      ham3_win_shi (I := I) h0omega hcompact P hD Q hsel hwindow hrm N
+    refine ⟨KShi, hKShi, ?_⟩
+    intro k
+    letI : TopologicalSpace (X.term (mc.subseq k)).M :=
+      (X.term (mc.subseq k)).topology
+    letI : ChartedSpace H (X.term (mc.subseq k)).M :=
+      (X.term (mc.subseq k)).charted
+    letI : T2Space (X.term (mc.subseq k)).M :=
+      (X.term (mc.subseq k)).t2
+    letI : IsManifold I ∞ (X.term (mc.subseq k)).M :=
+      (X.term (mc.subseq k)).smooth
+    letI : SigmaCompactSpace (X.term (mc.subseq k)).M :=
+      (X.term (mc.subseq k)).sigmaCompact
+    intro s hs i t ht x _hx
+    simpa only [X, ham3SourceSeq,
+      DifferentialGeometry.PDE.RicciFlow.SolutionOn.timeRestrict_metric] using
+      hShiAll (mc.subseq k) s hs i t ht x (Set.mem_univ x)
+  have hShiSrc : ∀ N : Nat, ∃ KShi : Real, 0 ≤ KShi ∧
+      ∀ k : Nat,
+        letI : TopologicalSpace (SourceDomain (I := I) Phi k) :=
+          sourceDomTop (I := I) Phi k
+        letI : ChartedSpace H (SourceDomain (I := I) Phi k) :=
+          sourceDomCharted (I := I) Phi k
+        letI : T2Space (SourceDomain (I := I) Phi k) :=
+          sourceDomT2 (I := I) Phi k
+        letI : IsManifold I ∞ (SourceDomain (I := I) Phi k) :=
+          sourceDomSmooth (I := I) Phi k
+        letI : SigmaCompactSpace (SourceDomain (I := I) Phi k) :=
+          sourceDomSigmaOf (I := I) Phi k (hsrc k)
+        MovingShiBoundOn (I := I)
+          (Set.univ : Set (SourceDomain (I := I) Phi k))
+          (-(ham3_r0 ^ 2)) 0
+          (fun _ t => srcMetric (I := I) Phi hsrc htgt k t) N KShi := by
+    intro N
+    obtain ⟨KShi, hKShi, hShi⟩ := hShiT N
+    exact ⟨KShi, hKShi, fun k =>
+      srcShi (I := I) Phi hsrc htgt (-(ham3_r0 ^ 2)) 0
+        N KShi hShi k⟩
+
+  have hBsrc : 1 ≤ Crel * Bmax :=
+    one_le_mul_of_one_le_of_one_le hCrel hBmax
+  have hequivSrc : ∀ k : Nat,
+      letI : TopologicalSpace (SourceDomain (I := I) Phi k) :=
+        sourceDomTop (I := I) Phi k
+      letI : ChartedSpace H (SourceDomain (I := I) Phi k) :=
+        sourceDomCharted (I := I) Phi k
+      letI : T2Space (SourceDomain (I := I) Phi k) :=
+        sourceDomT2 (I := I) Phi k
+      letI : IsManifold I ∞ (SourceDomain (I := I) Phi k) :=
+        sourceDomSmooth (I := I) Phi k
+      letI : SigmaCompactSpace (SourceDomain (I := I) Phi k) :=
+        sourceDomSigmaOf (I := I) Phi k (hsrc k)
+      ∀ t : Real, t ∈ Set.Icc (-(ham3_r0 ^ 2)) 0 →
+        MetricUniformEquivalentOn (I := I)
+          (Set.univ : Set (SourceDomain (I := I) Phi k))
+          (refRes (I := I) Phi mc.limit.metric hsrc k)
+          (srcMetric (I := I) Phi hsrc htgt k t) (Crel * Bmax) := by
+    intro k t ht
+    letI : TopologicalSpace (SourceDomain (I := I) Phi k) :=
+      sourceDomTop (I := I) Phi k
+    letI : ChartedSpace H (SourceDomain (I := I) Phi k) :=
+      sourceDomCharted (I := I) Phi k
+    letI : T2Space (SourceDomain (I := I) Phi k) :=
+      sourceDomT2 (I := I) Phi k
+    letI : IsManifold I ∞ (SourceDomain (I := I) Phi k) :=
+      sourceDomSmooth (I := I) Phi k
+    letI : SigmaCompactSpace (SourceDomain (I := I) Phi k) :=
+      sourceDomSigmaOf (I := I) Phi k (hsrc k)
+    have hEq := srcEquivOn (I := I) Phi mc.limit.metric hsrc htgt
+      (-(ham3_r0 ^ 2)) 0 gRefT B Crel hequivT hrel k t ht
+    exact metricUniformEquivalentOn_of_le (I := I) hEq
+      (mul_le_mul_of_nonneg_left (hBmajor t ht)
+        (zero_le_one.trans hCrel))
+  have srcData : SrcCovLipData (I := I) Phi mc.limit.metric hsrc htgt
+      (-(ham3_r0 ^ 2)) 0 :=
+    ham3_src_covlip (I := I) h0omega P hD Q hsel hwindow
+      Phi mc.limit.metric hsrc htgt (Crel * Bmax) hBsrc
+      hequivSrc hShiSrc hinit
+  let cLow : Real := (Crel * Bmax)⁻¹
+  have hcLow : 0 < cLow :=
+    inv_pos.mpr (zero_lt_one.trans_le hBsrc)
+  have hbound :
+      letI : TopologicalSpace mc.limit.M := mc.limit.topology
+      letI : ChartedSpace H mc.limit.M := mc.limit.charted
+      letI : IsManifold I ∞ mc.limit.M := mc.limit.smooth
+      ∀ (k : Nat) (t : Real), t ∈ Set.Icc (-(ham3_r0 ^ 2)) 0 →
+        ∀ (y : SourceDomain (I := I) Phi k)
+          (v : letI : TopologicalSpace (SourceDomain (I := I) Phi k) :=
+                sourceDomTop (I := I) Phi k
+            letI : ChartedSpace H (SourceDomain (I := I) Phi k) :=
+                sourceDomCharted (I := I) Phi k
+            TangentSpace I y),
+          cLow * mc.limit.metric.inner (y : mc.limit.M) v v ≤
+            letI : TopologicalSpace (SourceDomain (I := I) Phi k) :=
+              sourceDomTop (I := I) Phi k
+            letI : ChartedSpace H (SourceDomain (I := I) Phi k) :=
+              sourceDomCharted (I := I) Phi k
+            letI : IsManifold I ∞ (SourceDomain (I := I) Phi k) :=
+              sourceDomSmooth (I := I) Phi k
+            (srcMetric (I := I) Phi hsrc htgt k t).inner y v v := by
+    intro k t ht y v
+    simpa only [cLow] using
+      ((hequivSrc k t ht).2 y (Set.mem_univ y) v).1
+  have hcovTail :
+      letI : TopologicalSpace mc.limit.M := mc.limit.topology
+      letI : ChartedSpace H mc.limit.M := mc.limit.charted
+      letI : T2Space mc.limit.M := mc.limit.t2
+      letI : IsManifold I ∞ mc.limit.M := mc.limit.smooth
+      letI : SigmaCompactSpace mc.limit.M := mc.limit.sigmaCompact
+      ∀ q : Nat, ∃ C : Real, ∀ (k : Nat) (t : Real),
+        t ∈ Set.Icc (-(ham3_r0 ^ 2)) 0 →
+          ∀ z : mc.limit.M, z ∈ bf.grow k →
+            metricCovDerivNorm (I := I) q
+              (gSeqExt (I := I) Phi mc.limit.metric bf hsrc htgt k t)
+              mc.limit.metric z ≤ C := by
+    have hcovSrc : ∀ q : Nat, ∃ C : Real, 0 ≤ C ∧
+        ∀ (k : Nat) (t : Real), t ∈ Set.Icc (-(ham3_r0 ^ 2)) 0 →
+          ∀ y : SourceDomain (I := I) Phi k,
+            (y : mc.limit.M) ∈ bf.grow k →
+              letI : TopologicalSpace (SourceDomain (I := I) Phi k) :=
+                sourceDomTop (I := I) Phi k
+              letI : ChartedSpace H (SourceDomain (I := I) Phi k) :=
+                sourceDomCharted (I := I) Phi k
+              letI : T2Space (SourceDomain (I := I) Phi k) :=
+                sourceDomT2 (I := I) Phi k
+              letI : IsManifold I ∞ (SourceDomain (I := I) Phi k) :=
+                sourceDomSmooth (I := I) Phi k
+              letI : SigmaCompactSpace (SourceDomain (I := I) Phi k) :=
+                sourceDomSigmaOf (I := I) Phi k (hsrc k)
+              metricCovDerivNorm (I := I) q
+                (srcMetric (I := I) Phi hsrc htgt k t)
+                (refRes (I := I) Phi mc.limit.metric hsrc k) y ≤ C := by
+      intro q
+      obtain ⟨C, hC, hcov⟩ := srcData.cov q
+      exact ⟨C, hC, fun k t ht y _hy => hcov k t ht y⟩
+    exact covTail_of_bounds (I := I) Phi mc.limit.metric bf hsrc htgt
+      (-(ham3_r0 ^ 2)) 0 hcovSrc
+  let co := convOut_of_src (I := I) Phi mc.limit.metric bf hsrc htgt
+    (neg_nonpos.mpr (sq_nonneg ham3_r0)) hBsrc hequivSrc srcData
+  have hcarrier : X.D.carrier ⊆ Set.Icc (-(ham3_r0 ^ 2)) 0 := by
+    intro t ht
+    change t ∈ Set.Icc (-(ham3_r0 ^ 2)) 0 at ht
+    exact ht
+  have hzeroMem : (0 : Real) ∈ Set.Icc (-(ham3_r0 ^ 2)) 0 :=
+    ⟨neg_nonpos.mpr (sq_nonneg ham3_r0), le_rfl⟩
+  have hzero : co.gInf 0 = mc.limit.metric :=
+    gInf_zero_eq (I := I) Phi mc.limit.metric bf hsrc htgt
+      (-(ham3_r0 ^ 2)) 0 co hzeroMem mc.limit.metric
+      (conv0_of_cp (I := I) Phi mc.limit.metric hsrc htgt
+        mc.limit.metric hcp)
+  have hsol :=
+    ham3_limit_soln (I := I) h0omega P hD Q hsel hwindow Phi co
+  let L := flowOfMetric (I := I) X.D mc.limit co.gInf hsol
+  have hL0 : L.atTime (I := I) 0 = mc.limit :=
+    flowOfMetric_atTime (I := I) X.D mc.limit co.gInf hsol 0 hzero
+  have hscalarRaw := ConvOut.scalar_conv (I := I) (Φ := Phi)
+    mc.limit.metric bf hsrc htgt (-(ham3_r0 ^ 2)) 0 cLow hcLow
+    hbound hcovTail co hcarrier
+  have hricRaw := ConvOut.ricNorm_conv (I := I) (Φ := Phi)
+    mc.limit.metric bf hsrc htgt (-(ham3_r0 ^ 2)) 0 cLow hcLow
+    hbound hcovTail co hcarrier
+  have map_cast {P₁ P₂ : PointedRiemannianManifold (I := I)}
+      {s : Nat → Nat} (h : P₁ = P₂)
+      (maps : PointedCGHMaps (I := I) X P₂ s)
+      (k : Nat) (x : P₁.M) :
+      HEq ((h.symm ▸ maps : PointedCGHMaps (I := I) X P₁ s).map k x)
+        (maps.map k (h ▸ x)) := by
+    cases h
+    rfl
+  have hmap (k : Nat) (x : mc.limit.M) :
+      (hL0.symm ▸ (Phi.compSubseq co.φ co.hφ) :
+        PointedCGHMaps (I := I) X
+          (L.atTime (I := I) 0) (mc.subseq ∘ co.φ)).map k x =
+        (Phi.compSubseq co.φ co.hφ).map k x := by
+    have hx : hL0 ▸ x = x :=
+      eq_of_heq ((eqRec_heq
+        (φ := fun Q₀ : PointedRiemannianManifold (I := I) => Q₀.M) hL0) x)
+    exact
+      (eq_of_heq (map_cast hL0 (Phi.compSubseq co.φ co.hφ) k x)).trans
+        (congrArg (fun y => (Phi.compSubseq co.φ co.hφ).map k y) hx)
+  have scalar : ScalarPullbackTendsto (I := I)
+      (hL0.symm ▸ (Phi.compSubseq co.φ co.hφ) :
+        PointedCGHMaps (I := I) X
+          (L.atTime (I := I) 0) (mc.subseq ∘ co.φ)) := by
+    unfold ScalarPullbackTendsto FunctionPullbackTendsto
+    intro t ht x
+    change mc.limit.M at x
+    change Filter.Tendsto _ Filter.atTop
+      (nhds (DifferentialGeometry.Integral.Connection.metricScalarAt
+        (I := I) (co.gInf t) x))
+    refine Filter.Tendsto.congr'
+      (Filter.Eventually.of_forall (fun k => ?_)) (hscalarRaw t ht x)
+    letI : TopologicalSpace (X.term ((mc.subseq ∘ co.φ) k)).M :=
+      (X.term ((mc.subseq ∘ co.φ) k)).topology
+    letI : ChartedSpace H (X.term ((mc.subseq ∘ co.φ) k)).M :=
+      (X.term ((mc.subseq ∘ co.φ) k)).charted
+    letI : IsManifold I ∞ (X.term ((mc.subseq ∘ co.φ) k)).M :=
+      (X.term ((mc.subseq ∘ co.φ) k)).smooth
+    letI : SigmaCompactSpace (X.term ((mc.subseq ∘ co.φ) k)).M :=
+      (X.term ((mc.subseq ∘ co.φ) k)).sigmaCompact
+    letI : T2Space (X.term ((mc.subseq ∘ co.φ) k)).M :=
+      (X.term ((mc.subseq ∘ co.φ) k)).t2
+    letI : IsManifold I 1 (X.term ((mc.subseq ∘ co.φ) k)).M :=
+      IsManifold.of_le (n := ∞)
+        (by decide : (1 : WithTop ℕ∞) ≤ ∞)
+    letI : IsManifold I ((∞ : WithTop ℕ∞) + 1)
+        (X.term ((mc.subseq ∘ co.φ) k)).M := by
+      change IsManifold I ∞ (X.term ((mc.subseq ∘ co.φ) k)).M
+      infer_instance
+    exact congrArg
+      (fun y => (X.term ((mc.subseq ∘ co.φ) k)).S.scalar t y)
+      (hmap k x).symm
+  have ricciNorm : RicNormPullback (I := I)
+      (hL0.symm ▸ (Phi.compSubseq co.φ co.hφ) :
+        PointedCGHMaps (I := I) X
+          (L.atTime (I := I) 0) (mc.subseq ∘ co.φ)) := by
+    unfold RicNormPullback FunctionPullbackTendsto
+    intro t ht x
+    change mc.limit.M at x
+    change Filter.Tendsto _ Filter.atTop
+      (nhds (Tensor0SBundle.normSq0S (I := I) (co.gInf t) x 2
+        (DifferentialGeometry.Integral.Connection.metricRicci
+          (I := I) (co.gInf t) x)))
+    refine Filter.Tendsto.congr'
+      (Filter.Eventually.of_forall (fun k => ?_)) (hricRaw t ht x)
+    letI : TopologicalSpace (X.term ((mc.subseq ∘ co.φ) k)).M :=
+      (X.term ((mc.subseq ∘ co.φ) k)).topology
+    letI : ChartedSpace H (X.term ((mc.subseq ∘ co.φ) k)).M :=
+      (X.term ((mc.subseq ∘ co.φ) k)).charted
+    letI : IsManifold I ∞ (X.term ((mc.subseq ∘ co.φ) k)).M :=
+      (X.term ((mc.subseq ∘ co.φ) k)).smooth
+    letI : SigmaCompactSpace (X.term ((mc.subseq ∘ co.φ) k)).M :=
+      (X.term ((mc.subseq ∘ co.φ) k)).sigmaCompact
+    letI : T2Space (X.term ((mc.subseq ∘ co.φ) k)).M :=
+      (X.term ((mc.subseq ∘ co.φ) k)).t2
+    letI : IsManifold I 1 (X.term ((mc.subseq ∘ co.φ) k)).M :=
+      IsManifold.of_le (n := ∞)
+        (by decide : (1 : WithTop ℕ∞) ≤ ∞)
+    letI : IsManifold I ((∞ : WithTop ℕ∞) + 1)
+        (X.term ((mc.subseq ∘ co.φ) k)).M := by
+      change IsManifold I ∞ (X.term ((mc.subseq ∘ co.φ) k)).M
+      infer_instance
+    exact congrArg
+      (fun y => DifferentialGeometry.PDE.RicciFlow.ricciNorm
+        (I := I) (X.term ((mc.subseq ∘ co.φ) k)).S t y)
+      (hmap k x).symm
+  let d := flowUpgrade_of_maps (I := I) (X := X) mc L mc.limit rfl hL0
+    Phi mc.limit.metric bf hsrc htgt (-(ham3_r0 ^ 2)) 0 hcarrier co
+    (fun _ _ => HEq.rfl) scalar ricciNorm
+  refine ⟨d, ?_⟩
+  intro t ht
+  have htWindow : t ∈ Set.Icc (-(ham3_r0 ^ 2)) 0 := hcarrier ht
+  have hseq : ∀ (k : Nat) (s : Real),
+      s ∈ Set.Icc (-(ham3_r0 ^ 2)) 0 →
+        ∀ (x : mc.limit.M) (v : TangentSpace I x),
+          min cLow 1 * mc.limit.metric.inner x v v ≤
+            (gSeqExt (I := I) Phi mc.limit.metric bf hsrc htgt
+              (co.φ k) s).inner x v v := by
+    intro k s hs x v
+    exact gSeqExt_lower (I := I) Phi mc.limit.metric bf hsrc htgt
+      cLow (-(ham3_r0 ^ 2)) 0 hcLow hbound (co.φ k) s hs x v
+  have hcomplete := ConvOut.complete_at (I := I) Phi mc.limit_complete co
+    (lt_min hcLow one_pos) hseq htWindow
+  have hdL : d.data.L = L :=
+    flowUpgrade_maps_L (I := I) (X := X) mc L mc.limit rfl hL0
+      Phi mc.limit.metric bf hsrc htgt (-(ham3_r0 ^ 2)) 0 hcarrier co
+      (fun _ _ => HEq.rfl) scalar ricciNorm
+  rw [hdL]
+  change MetricComplete (I := I)
+    ({ mc.limit with metric := co.gInf t } :
+      PointedRiemannianManifold (I := I))
+  exact hcomplete
+
+theorem ham3_closed_cgh
+    {omega : Real} (h0omega : 0 < omega)
+    (hcompact : CompactSpace M)
+    {g0 : SmoothRiemannianMetric I M}
+    (P : Ham3FlowPackage (I := I) (M := M) g0)
+    (hD : P.D =
+      DifferentialGeometry.Integral.Connection.RealTimeInterval.closedOpen
+        0 omega h0omega)
+    (Q : Ham3BlowupData M)
+    (hsel : Ham3PointSel (I := I) P Q)
+    (hrm : Ham3RmBound (I := I) P Q)
+    (hwindow : Ham3Window (I := I) P Q ham3_r0)
+    (canon : StepDCanonData (I := I)
+      ((ham3SourceSeq (I := I) h0omega P hD Q hsel hwindow).atZero
+        (I := I))) :
+    ∃ L : PointedFlowData.{u, uE, uH} (I := I)
+        (ham3SourceSeq (I := I) h0omega P hD Q hsel hwindow).D,
+      ∃ subseq : Nat → Nat,
+        StrictMono subseq ∧
+          Nonempty (SmoothCGHConverges (I := I)
+            (ham3SourceSeq (I := I) h0omega P hD Q hsel hwindow)
+            L subseq) ∧
+          ∀ t : Real,
+            t ∈ (ham3SourceSeq (I := I) h0omega P hD Q hsel hwindow).D.carrier →
+              MetricComplete (I := I) (L.atTime (I := I) t) := by
+  obtain ⟨d, hcomplete⟩ :=
+    ham3_closed_upg (I := I) h0omega hcompact P hD Q hsel hrm
+      hwindow canon
+  let X := ham3SourceSeq (I := I) h0omega P hD Q hsel hwindow
+  let mc := canon.mc.compSubseq d.φ d.hφ
+  have hconv : Nonempty (SmoothCGHConverges (I := I) X d.data.L mc.subseq) :=
+    ⟨SmoothCGHConverges.ofRestrictPullback (I := I)
+      d.data.maps d.data.scalar d.data.ricciNorm d.data.hσsrc d.data.hσtgt
+      d.data.refMetric
+      (letI : TopologicalSpace d.data.L.M := d.data.L.topology
+       letI : ChartedSpace H d.data.L.M := d.data.L.charted
+       letI : IsManifold I ∞ d.data.L.M := d.data.L.smooth
+       letI : IsManifold I ((∞ : WithTop ℕ∞) + 1) d.data.L.M := by
+         change IsManifold I ∞ d.data.L.M
+         infer_instance
+       letI : SigmaCompactSpace d.data.L.M := d.data.L.sigmaCompact
+       letI : T2Space d.data.L.M := d.data.L.t2
+       d.data.L.S.family.metric) d.data.conv⟩
+  exact ⟨d.data.L, mc.subseq, mc.strictMono, hconv, hcomplete⟩
+
 def cghToHam3
     (X : PointedFlowSeq.{u, uE, uH} (I := I))
     (origIndex : Nat -> Nat) (horig : StrictMono origIndex)
