@@ -135,20 +135,6 @@ theorem coordMetricContOn
   rw [Tensor0SBundle.metricTensorField_apply]
   simp [metricCompInFrame]
 
-@[deprecated "use InvMetricLocal on the actual local frame domain" (since := "2026-05-22")]
-def InverseMetricComponentsInFrameOn [DecidableEq Idx]
-    {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
-    (S : SolutionOn (I := I) (M := M) D)
-    (gInv : Real -> DifferentialGeometry.Integral.Connection.InverseMetricComponents M Idx)
-    (frame : Idx -> (x : M) -> TangentSpace I x) : Prop :=
-  forall t x i j,
-    (∑ k : Idx,
-        gInv t x i k * metricCompInFrame (I := I) S frame t x k j) =
-        (if i = j then 1 else 0) ∧
-      (∑ k : Idx,
-        metricCompInFrame (I := I) S frame t x i k * gInv t x k j) =
-        (if i = j then 1 else 0)
-
 def InvMetricLocal [DecidableEq Idx]
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -162,13 +148,6 @@ def InvMetricLocal [DecidableEq Idx]
       (∑ k : Idx,
         metricCompInFrame (I := I) S frame t x i k * gInv t x k j) =
         (if i = j then 1 else 0)
-
-@[deprecated "use pointwise inverse symmetry or derive it from MetricInverseInBasis_gen"
-    (since := "2026-05-22")]
-def SymmetricInverseMetricComponentsInFrameOn
-    (gInv : Real -> DifferentialGeometry.Integral.Connection.InverseMetricComponents M Idx) :
-      Prop :=
-  forall t x i j, gInv t x i j = gInv t x j i
 
 omit [SigmaCompactSpace M] [T2Space M] in
 theorem gInv_symm [DecidableEq Idx]
