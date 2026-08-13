@@ -959,7 +959,7 @@ private theorem morseHandleAttachment_real_params (R R' a : ℝ)
     hR₁₂, hR₁₂R, hR₁₂R'', hR₁₂R''', haε, hη, hηε₀, hεr, hεr', hRbig, hR₁big, hηpos, hεa,
     hη', hηθ, hηε, hR0lt1, hR1R, hR1R', h2R0lt1, hR0ltf, hR₁₂R'⟩
 
-theorem exists_morseHandleAdjunction_diffeomorph_upperSublevel_of_morseChart
+theorem morseHandleAdjunction_diffeomorph_upperSublevel_construction
     {m k : ℕ} (hk : k ≤ m + 1)
     (c a : ℝ) {H : Type} [TopologicalSpace H] {M : Type}
     [TopologicalSpace M] [ChartedSpace H M] [T2Space M] [SigmaCompactSpace M]
@@ -971,8 +971,7 @@ theorem exists_morseHandleAdjunction_diffeomorph_upperSublevel_of_morseChart
     (hcompact : IsCompact (f ⁻¹' Set.Icc (c - a) (c + a)))
     (hunique : ∀ x : M, f x ∈ Set.Icc (c - a) (c + a) →
       x = data.p ∨ ¬ IsCriticalPointAt I f x)
-    [NeZero k] [NeZero (m + 1 - k)] [Fact (k = (k - 1) + 1)]
-    [Fact (m + 1 - k = (m + 1 - k - 1) + 1)] :
+    [NeZero k] [NeZero (m + 1 - k)] :
     ∃ ε : ℝ, ∃ hε : 0 < ε,
       ∃ ε₀ : ℝ, ∃ hε₀ : 0 < ε₀, ∃ haε : ε + 2 * ε₀ ≤ a,
       ∃ r : ℝ, ∃ hr : 0 < r, ∃ hεr : Real.sqrt (2 * ε + 2 * r ^ 2) ≤ data.R,
@@ -1174,6 +1173,188 @@ theorem exists_morseHandleAdjunction_diffeomorph_upperSublevel_of_morseChart
     R₀', hR0', R₁', hR₁₂R, hR, R₁'', hR₁₂, hR₁₂R'', hR₁₂R''', hbig, hbig', hδR, hε₀le, η, hη,
     hηε₀, hRbig, hR₁big, hreg_f, e₂, e,
     ⟨hcomm, hmani_src, hmani_tgt, hlower_sm, hcell_sm, hlower, hinj, hcell_formula⟩⟩
+
+theorem exists_morseHandleAdjunction_diffeomorph_upperSublevel_of_morseChart
+    {m k : ℕ} (hk : k ≤ m + 1)
+    (c a : ℝ) {H : Type} [TopologicalSpace H] {M : Type}
+    [TopologicalSpace M] [ChartedSpace H M] [T2Space M] [SigmaCompactSpace M]
+    {I : ModelWithCorners ℝ (MorseModel (m + 1)) H} [I.Boundaryless]
+    [IsManifold I (⊤ : WithTop ℕ∞) M] {f : M → ℝ}
+    (data : MorseChart (m + 1) k hk c I f)
+    (hf : ContMDiff I 𝓘(ℝ, ℝ) (↑(⊤ : ℕ∞) : WithTop ℕ∞) f)
+    (ha : 0 < a) (haR : a ≤ data.R ^ 2 / 16) (hRR' : data.R < data.R')
+    (hcompact : IsCompact (f ⁻¹' Set.Icc (c - a) (c + a)))
+    (hunique : ∀ x : M, f x ∈ Set.Icc (c - a) (c + a) →
+      x = data.p ∨ ¬ IsCriticalPointAt I f x) :
+    ∃ ε : ℝ, ∃ hε : 0 < ε,
+      ∃ r : ℝ, ∃ hr : 0 < r, ∃ hεr : Real.sqrt (2 * ε + 2 * r ^ 2) ≤ data.R,
+        ∃ hεr' : Real.sqrt (2 * ε + 2 * r ^ 2) < data.R / 2,
+      ∃ η : ℝ,
+      ∃ δ : ℝ, ∃ hδ : 0 < δ, ∃ hδr : δ < r ^ 2,
+      ∃ θ : ℝ, ∃ hθ : 0 < θ, ∃ hθr : θ < r ^ 2,
+      ∃ R₀ : ℝ, ∃ hR0 : 0 ≤ R₀, ∃ hR0lt : R₀ < data.R,
+      ∃ R₀' : ℝ, ∃ hR0' : 0 ≤ R₀',
+      ∃ R₁' : ℝ, ∃ hR₁₂R : R₁' ≤ data.R, ∃ hR : R₀' < R₁',
+      ∃ R₁'' : ℝ, ∃ hR₁₂ : R₁' < R₁'', ∃ hR₁₂R'' : R₁'' ≤ data.R, ∃ hR₁₂R''' : R₁'' ≤ data.R',
+      ∃ ε₀ : ℝ, ∃ hε₀ : 0 < ε₀, ∃ haε : ε + 2 * ε₀ ≤ a,
+      ∃ hη : r ^ 2 + δ ≤ 2 * η, ∃ hηε₀ : 2 * ε₀ < η,
+      ∃ hbig : 2 * (r ^ 2 + 2 * ε + δ) ≤ R₀ ^ 2,
+      ∃ hbig' : 2 * (r ^ 2 + 2 * ε + δ) ≤ R₀' ^ 2,
+      ∃ hRbig : r ^ 2 + 2 * ε + δ ≤ (data.R / 2) ^ 2,
+      ∃ hR₁big : 2 * (data.R / 2) ^ 2 - 2 * ε ≤ R₁' ^ 2,
+      ∃ hreg_f : ∀ x : M, f x = c - ε → ¬ IsCriticalPointAt I f x,
+      ∃ e₂ : @Diffeomorph ℝ _ (MorseModel (m + 1)) _ _ (MorseModel (m + 1)) _ _
+        (MorseHalfSpace m) _ (MorseHalfSpace m) _ (morseModelWithCornersHalfSpace m)
+        (morseModelWithCornersHalfSpace m)
+        (SublevelSpace (morseRoundedFunction hk c ε r δ R₀' R₁' data) c) _
+        (morseRoundedSublevelChartedSpace hk c ε r δ R₀' R₁' R₁'' data hε hδ hδr hR hR0' hbig'
+          hR₁₂ hR₁₂R'' hR₁₂R''' hf hreg_f)
+        (SublevelSpace f (c + ε)) _
+        (manifoldSublevelChartedSpace I f (c + ε) hf
+          (fun _x hx => morseFunction_no_critical_at_upper_level_of_morseChart hk c ε a ε₀ data
+            hε hε₀ haε hunique hx))
+        (⊤ : ℕ∞),
+      ∃ e : @Diffeomorph ℝ _ (MorseModel (m + 1)) _ _ (MorseModel (m + 1)) _ _
+        (MorseHalfSpace m) _ (MorseHalfSpace m) _ (morseModelWithCornersHalfSpace m)
+        (morseModelWithCornersHalfSpace m)
+        (Handle.AdjunctionSpace k (m + 1 - k)
+          (morseAttachingEmbedding hk c ε r data hε hεr)) _
+        (morseHandleAdjunctionChartedSpace hk c ε r δ θ R₀ R₀' R₁' R₁'' data hε hδ hθ hδr hθr hr
+          hεr hεr' hR0 hR0lt hbig hRbig hR hR0' hbig' hR₁big hR₁₂R hR₁₂ hR₁₂R'' hR₁₂R''' hf.continuous hf hreg_f)
+        (SublevelSpace f (c + ε)) _
+        (manifoldSublevelChartedSpace I f (c + ε) hf
+          (fun _x hx => morseFunction_no_critical_at_upper_level_of_morseChart hk c ε a ε₀ data
+            hε hε₀ haε hunique hx))
+        (⊤ : ℕ∞),
+        (∀ z : Handle.AdjunctionSpace k (m + 1 - k)
+            (morseAttachingEmbedding hk c ε r data hε hεr),
+          (e z).1 = (e₂ (morseHandleAdjunctionEquivRoundedSublevel hk c ε r δ θ R₀ R₀' R₁' data
+            hε hδ hθ hδr hθr hr hεr hεr' hR0 hR0lt hbig hRbig hR hR0' hbig' hR₁big hR₁₂R
+            hf.continuous z)).1) ∧
+        @IsManifold ℝ _ (MorseModel (m + 1)) _ _ (MorseHalfSpace m) _
+          (morseModelWithCornersHalfSpace m) (⊤ : ℕ∞)
+          (Handle.AdjunctionSpace k (m + 1 - k)
+            (morseAttachingEmbedding hk c ε r data hε hεr)) _
+          (morseHandleAdjunctionChartedSpace hk c ε r δ θ R₀ R₀' R₁' R₁'' data hε hδ hθ hδr hθr hr
+            hεr hεr' hR0 hR0lt hbig hRbig hR hR0' hbig' hR₁big hR₁₂R hR₁₂ hR₁₂R'' hR₁₂R''' hf.continuous hf hreg_f) ∧
+        @IsManifold ℝ _ (MorseModel (m + 1)) _ _ (MorseHalfSpace m) _
+          (morseModelWithCornersHalfSpace m) (⊤ : ℕ∞)
+          (SublevelSpace f (c + ε)) _
+          (manifoldSublevelChartedSpace I f (c + ε) hf
+            (fun _x hx => morseFunction_no_critical_at_upper_level_of_morseChart hk c ε a ε₀ data
+              hε hε₀ haε hunique hx)) ∧
+        @ContMDiff ℝ _ (MorseModel (m + 1)) _ _ (MorseHalfSpace m) _
+          (morseModelWithCornersHalfSpace m)
+          (SublevelSpace f (c - ε)) _ (manifoldSublevelChartedSpace I f (c - ε) hf hreg_f)
+          (MorseModel (m + 1)) _ _ (MorseHalfSpace m) _
+          (morseModelWithCornersHalfSpace m)
+          (Handle.AdjunctionSpace k (m + 1 - k)
+            (morseAttachingEmbedding hk c ε r data hε hεr)) _
+          (morseHandleAdjunctionChartedSpace hk c ε r δ θ R₀ R₀' R₁' R₁'' data hε hδ hθ hδr hθr hr
+            hεr hεr' hR0 hR0lt hbig hRbig hR hR0' hbig' hR₁big hR₁₂R hR₁₂ hR₁₂R'' hR₁₂R''' hf.continuous hf hreg_f)
+          (⊤ : ℕ∞)
+          (Handle.lower (morseAttachingEmbedding hk c ε r data hε hεr)) ∧
+        (∀ x : M, f x ≤ c - ε - η → ∀ hx : f x ≤ c - ε,
+          (e (Handle.lower (morseAttachingEmbedding hk c ε r data hε hεr) ⟨x, hx⟩)).1 = x) ∧
+        (∀ y : M, (hydeep : f y ≤ c - ε - η) → ∀ hy : f y ≤ c + ε,
+          ∀ z : Handle.AdjunctionSpace k (m + 1 - k)
+              (morseAttachingEmbedding hk c ε r data hε hεr),
+            e z = ⟨y, hy⟩ →
+              z = Handle.lower (morseAttachingEmbedding hk c ε r data hε hεr)
+                ⟨y, by
+                  have hsum : 0 ≤ r ^ 2 + δ := by positivity
+                  have hη0 : 0 ≤ η := by nlinarith [hη, hsum]
+                  change f y ≤ c - ε
+                  nlinarith [hydeep, hη0]⟩) ∧
+        (∀ d : Handle.StandardHandle k (m + 1 - k),
+          (e (Handle.cell (morseAttachingEmbedding hk c ε r data hε hεr) d)).1 =
+            (e₂ ⟨handleRoundEmbedding hk c ε r δ θ data d,
+              handleRoundEmbedding_mem_roundedSublevel hk c ε r δ θ R₀' R₁' data hε hδ hθ hδr hεr'
+                hR hR0' hbig' hRbig hR₁big hR₁₂R d⟩).1) := by
+  classical
+  rcases morseHandleAttachment_real_params data.R data.R' a data.hRpos ha haR hRR' with
+    ⟨ε, r, δ, θ, R₀, R₀', R₁', R₁'', η, ε₀, η', R₁,
+      hε, hε₀, hδ, hδr, hr, hθ, hθr, hR, hR0, hR0lt, hR0', hbig, hbig', hδR, hε₀le,
+      hR₁₂, hR₁₂R, hR₁₂R'', hR₁₂R''', haε, hη, hηε₀, hεr, hεr', hRbig, hR₁big, hηpos, hεa,
+      hη', hηθ, hηε, hR0lt1, hR1R, hR1R', h2R0lt1, hR0ltf, hR₁₂R'⟩
+  have hcont : Continuous f := hf.continuous
+  have hreg_f : ∀ x : M, f x = c - ε → ¬ IsCriticalPointAt I f x := by
+    intro x hx
+    have hfp : f data.p = c := morseFunction_value_at_morseChartPoint hk c data
+    have hmem : f x ∈ Set.Icc (c - a) (c + a) := by
+      constructor <;> linarith [hx, hε, hεa, ha]
+    rcases hunique x hmem with hxp | hnc
+    · exfalso
+      have : c = c - ε := by
+        rw [hxp] at hx
+        rw [hfp] at hx
+        exact hx
+      linarith [hε, this]
+    · exact hnc
+  rcases morseHandleAdjunction_diffeomorph_upperSublevel_engine (m := m) (k := k) (hk := hk)
+    (c := c) (ε := ε) (r := r) (δ := δ) (θ := θ) (R₀ := R₀) (R₀' := R₀') (R₁' := R₁')
+    (R₁'' := R₁'') (a := a) (η := η) (ε₀ := ε₀) (data := data)
+    hε hε₀ hδ hδr hr hθ hθr hR hR0 hR0lt hR0' hbig hbig' hδR hε₀le hR₁₂ hR₁₂R hR₁₂R''
+    hR₁₂R''' hf haε hcompact hunique hreg_f hη hηε₀ hεr hεr' hRbig hR₁big hcont with
+    ⟨e₂, e, hcomm, hlower, hinj⟩
+  have hmani_src : @IsManifold ℝ _ (MorseModel (m + 1)) _ _ (MorseHalfSpace m) _
+      (morseModelWithCornersHalfSpace m) (⊤ : ℕ∞)
+      (Handle.AdjunctionSpace k (m + 1 - k)
+        (morseAttachingEmbedding hk c ε r data hε hεr)) _
+      (morseHandleAdjunctionChartedSpace hk c ε r δ θ R₀ R₀' R₁' R₁'' data hε hδ hθ hδr hθr hr
+        hεr hεr' hR0 hR0lt hbig hRbig hR hR0' hbig' hR₁big hR₁₂R hR₁₂ hR₁₂R'' hR₁₂R''' hcont hf hreg_f) :=
+    morseHandleAdjunctionIsManifold hk c ε r δ θ R₀ R₀' R₁' R₁'' data hε hδ hθ hδr hθr hr hεr
+      hεr' hR0 hR0lt hbig hRbig hR hR0' hbig' hR₁big hR₁₂R hR₁₂ hR₁₂R'' hR₁₂R''' hcont hf hreg_f
+  have hmani_tgt : @IsManifold ℝ _ (MorseModel (m + 1)) _ _ (MorseHalfSpace m) _
+      (morseModelWithCornersHalfSpace m) (⊤ : ℕ∞)
+      (SublevelSpace f (c + ε)) _
+      (manifoldSublevelChartedSpace I f (c + ε) hf
+        (fun _x hx => morseFunction_no_critical_at_upper_level_of_morseChart hk c ε a ε₀ data
+          hε hε₀ haε hunique hx)) :=
+    manifoldSublevelIsManifold I f (c + ε) hf
+      (fun _x hx => morseFunction_no_critical_at_upper_level_of_morseChart hk c ε a ε₀ data
+        hε hε₀ haε hunique hx)
+  have hlower_sm : @ContMDiff ℝ _ (MorseModel (m + 1)) _ _ (MorseHalfSpace m) _
+      (morseModelWithCornersHalfSpace m)
+      (SublevelSpace f (c - ε)) _ (manifoldSublevelChartedSpace I f (c - ε) hf hreg_f)
+      (MorseModel (m + 1)) _ _ (MorseHalfSpace m) _
+      (morseModelWithCornersHalfSpace m)
+      (Handle.AdjunctionSpace k (m + 1 - k)
+        (morseAttachingEmbedding hk c ε r data hε hεr)) _
+      (morseHandleAdjunctionChartedSpace hk c ε r δ θ R₀ R₀' R₁' R₁'' data hε hδ hθ hδr hθr hr
+        hεr hεr' hR0 hR0lt hbig hRbig hR hR0' hbig' hR₁big hR₁₂R hR₁₂ hR₁₂R'' hR₁₂R''' hcont hf hreg_f)
+      (⊤ : ℕ∞)
+      (Handle.lower (morseAttachingEmbedding hk c ε r data hε hεr)) :=
+    contMDiff_morseHandleAdjunctionLower hk c ε r δ θ η' R₀ R₁ R₀' R₁' R₁'' data hε hδ hθ hδr hθr hr
+      hη' hηθ hηε hεr hεr' hR0 hR0lt hR0lt1 hR1R hR1R' h2R0lt1 hbig hRbig hR0ltf hR hR0' hbig'
+      hR₁big hR₁₂R hR₁₂R' hR₁₂ hR₁₂R'' hR₁₂R''' hcont hf hreg_f
+  have hcell_formula : ∀ d : Handle.StandardHandle k (m + 1 - k),
+      (e (Handle.cell (morseAttachingEmbedding hk c ε r data hε hεr) d)).1 =
+        (e₂ ⟨handleRoundEmbedding hk c ε r δ θ data d,
+          handleRoundEmbedding_mem_roundedSublevel hk c ε r δ θ R₀' R₁' data hε hδ hθ hδr hεr'
+            hR hR0' hbig' hRbig hR₁big hR₁₂R d⟩).1 := by
+    intro d
+    have hcell : (morseHandleAdjunctionEquivRoundedSublevel hk c ε r δ θ R₀ R₀' R₁' data hε hδ hθ
+        hδr hθr hr hεr hεr' hR0 hR0lt hbig hRbig hR hR0' hbig' hR₁big hR₁₂R hcont
+        (Handle.cell (morseAttachingEmbedding hk c ε r data hε hεr) d)).1 =
+        handleRoundEmbedding hk c ε r δ θ data d :=
+      morseHandleAdjunctionEquivRoundedSublevel_cell hk c ε r δ θ R₀ R₀' R₁' data hε hδ hθ hδr hθr hr
+        hεr hεr' hR0 hR0lt hbig hRbig hR hR0' hbig' hR₁big hR₁₂R hcont d
+    have hround_mem : morseRoundedFunction hk c ε r δ R₀' R₁' data
+        (handleRoundEmbedding hk c ε r δ θ data d) ≤ c :=
+      handleRoundEmbedding_mem_roundedSublevel hk c ε r δ θ R₀' R₁' data hε hδ hθ hδr hεr'
+        hR hR0' hbig' hRbig hR₁big hR₁₂R d
+    have hsub : (morseHandleAdjunctionEquivRoundedSublevel hk c ε r δ θ R₀ R₀' R₁' data hε hδ hθ
+        hδr hθr hr hεr hεr' hR0 hR0lt hbig hRbig hR hR0' hbig' hR₁big hR₁₂R hcont
+        (Handle.cell (morseAttachingEmbedding hk c ε r data hε hεr) d)) =
+        ⟨handleRoundEmbedding hk c ε r δ θ data d, hround_mem⟩ := by
+      apply Subtype.ext
+      exact hcell
+    rw [hcomm (Handle.cell (morseAttachingEmbedding hk c ε r data hε hεr) d)]
+    rw [hsub]
+  refine ⟨ε, hε, r, hr, hεr, hεr', η, δ, hδ, hδr, θ, hθ, hθr, R₀, hR0, hR0lt, R₀', hR0',
+    R₁', hR₁₂R, hR, R₁'', hR₁₂, hR₁₂R'', hR₁₂R''', ε₀, hε₀, haε, hη, hηε₀, hbig, hbig', hRbig, hR₁big, hreg_f, e₂, e,
+    ⟨hcomm, hmani_src, hmani_tgt, hlower_sm, hlower, hinj, hcell_formula⟩⟩
 
 end
 
