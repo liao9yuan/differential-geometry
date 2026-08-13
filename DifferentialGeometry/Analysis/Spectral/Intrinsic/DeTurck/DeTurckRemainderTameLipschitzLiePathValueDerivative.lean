@@ -38,13 +38,13 @@ import DifferentialGeometry.Analysis.Parabolic.RicciLinearization.RiemannCoeffic
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.DeTurckRemainderTameLipschitzArmConnLapJetBounds
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.DeTurckRemainderTameLipschitzRicciArmCoeffBallUniform
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Connection
 
 
 noncomputable section
 
-open MeasureTheory Set Filter Topology Bundle Manifold DifferentialGeometry.Tensor0SBundle ContinuousLinearMap
+open MeasureTheory Set Filter Topology Bundle Manifold DifferentialGeometry.Tensor0SBundle
+    ContinuousLinearMap
 open scoped ENNReal NNReal BigOperators Manifold ContDiff
 
 namespace DifferentialGeometry.Analysis.Spectral

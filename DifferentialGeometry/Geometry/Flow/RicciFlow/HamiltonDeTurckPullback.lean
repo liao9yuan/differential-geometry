@@ -9,7 +9,6 @@ import DifferentialGeometry.Analysis.ODE.TimeDependentFlow.DiffeomorphismFamily.
 import Mathlib.Analysis.Calculus.Deriv.Basic
 open DifferentialGeometry.Analysis.ODE
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
 
 noncomputable section
 

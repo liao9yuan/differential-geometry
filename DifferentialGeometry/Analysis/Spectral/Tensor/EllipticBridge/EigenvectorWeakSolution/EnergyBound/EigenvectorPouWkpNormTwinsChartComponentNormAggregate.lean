@@ -4,7 +4,6 @@ import DifferentialGeometry.Analysis.Sobolev.Euclidean.Multiplication.MultiplyQu
 import DifferentialGeometry.Analysis.Sobolev.Euclidean.IteratedSobolevSpace.IteratedSobolevQuant
 open DifferentialGeometry.Analysis.Spectral
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
 
 noncomputable section
 

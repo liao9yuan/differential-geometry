@@ -184,13 +184,15 @@ private theorem laplacianAt_time_contDiffAt_on
   have hsliceAt : ContDiffAt ℝ ∞
       (fun t : ℝ =>
         (∑ i : Fin (Module.finrank ℝ E),
-          partialDeriv (E := E) i (chartVossWeylIntegrand (I := I) g α (u t) i) ((extChartAt I α) x)) /
+          partialDeriv (E := E) i (chartVossWeylIntegrand (I := I) g α (u t) i)
+            ((extChartAt I α) x)) /
           chartDensityOnE (I := I) g α ((extChartAt I α) x)) t₀ := by
     exact hcd.comp (x := t₀) (contDiffAt_id.prodMk contDiffAt_const)
   have hbridge : ∀ᶠ t in 𝓝 t₀,
       laplacianAt (I := I) G t (u t) x =
         (∑ i : Fin (Module.finrank ℝ E),
-          partialDeriv (E := E) i (chartVossWeylIntegrand (I := I) g α (u t) i) ((extChartAt I α) x)) /
+          partialDeriv (E := E) i (chartVossWeylIntegrand (I := I) g α (u t) i)
+            ((extChartAt I α) x)) /
           chartDensityOnE (I := I) g α ((extChartAt I α) x) := by
     filter_upwards [IsOpen.mem_nhds D.regular_isOpen ht₀] with t ht
     have hconn : G.connection t = LeviCivita (G.metric t) := hGconn t (D.regular_subset ht)
@@ -200,7 +202,8 @@ private theorem laplacianAt_time_contDiffAt_on
       rw [hGmetric t (D.regular_subset ht)]
     have hvw : Δ_g (I := I) g ⟨u t, hslice t (D.regular_subset ht)⟩ x =
         (∑ i : Fin (Module.finrank ℝ E),
-          partialDeriv (E := E) i (chartVossWeylIntegrand (I := I) g α (u t) i) ((extChartAt I α) x)) /
+          partialDeriv (E := E) i (chartVossWeylIntegrand (I := I) g α (u t) i)
+            ((extChartAt I α) x)) /
           chartDensityOnE (I := I) g α ((extChartAt I α) x) := by
       have hvw0 : Δ_g (I := I) g ⟨u t, hslice t (D.regular_subset ht)⟩ x =
           chartVossWeylLaplacian (I := I) g α (u t) x :=
@@ -283,7 +286,8 @@ theorem heat_solution_one_point_harnack_of_nonnegative_ricci_on
       field_simp [htpos.ne']
     rw [hrewrite] at hstep
     simpa using hstep
-  have hu_path_pos : ∀ t ∈ Set.Icc a b, 0 < u t x := fun t ht => hpos t (D.regular_subset (hreg ht)) x
+  have hu_path_pos : ∀ t ∈ Set.Icc a b,
+    0 < u t x := fun t ht => hpos t (D.regular_subset (hreg ht)) x
   have hcdAt : ∀ t : ℝ, t ∈ D.regular → ContDiffAt ℝ ∞ (fun s : ℝ => u s x) t := by
     intro t ht
     have hnh : D.regular ×ˢ univ ∈ 𝓝 (t, x) :=
@@ -369,7 +373,8 @@ theorem heat_solution_one_point_harnack_of_nonnegative_ricci
           Δ_g (I := I) g (smoothScalarSlice (I := I) g u hu τ).toContMDiffMap x := by
         change laplacianAt (I := I) G τ (smoothScalarSlice (I := I) g u hu τ).toFun x =
           Δ_g (I := I) g (smoothScalarSlice (I := I) g u hu τ).toContMDiffMap x
-        rw [laplacianAt_eq_delta (I := I) G τ (smoothScalarSlice (I := I) g u hu τ).smooth (by rfl) x]
+        rw [laplacianAt_eq_delta (I := I) G τ (smoothScalarSlice (I := I) g u hu τ).smooth
+          (by rfl) x]
         rfl
       have hderiv : deriv (fun s => u s x) τ = laplacianAt (I := I) G τ (u τ) x := by
         rw [hpde τ x, ← hlap]
@@ -788,7 +793,8 @@ theorem heat_solution_harnack_of_nonnegative_ricci
           Δ_g (I := I) g (smoothScalarSlice (I := I) g u hu τ).toContMDiffMap x := by
         change laplacianAt (I := I) G τ (smoothScalarSlice (I := I) g u hu τ).toFun x =
           Δ_g (I := I) g (smoothScalarSlice (I := I) g u hu τ).toContMDiffMap x
-        rw [laplacianAt_eq_delta (I := I) G τ (smoothScalarSlice (I := I) g u hu τ).smooth (by rfl) x]
+        rw [laplacianAt_eq_delta (I := I) G τ (smoothScalarSlice (I := I) g u hu τ).smooth
+          (by rfl) x]
         rfl
       have hderiv : deriv (fun s => u s x) τ = laplacianAt (I := I) G τ (u τ) x := by
         rw [hpde τ x, ← hlap]
@@ -871,7 +877,8 @@ theorem heat_solution_harnack_uniform_upper_bound_of_nonnegative_ricci_on
         (b / a) ^ ((Module.finrank ℝ E : ℝ) / 2) *
           Real.exp (Dv ^ 2 / (4 * (b - a))) := by
       exact mul_le_mul_of_nonneg_left hexp_le hA_nonneg
-    have h2 := mul_le_mul_of_nonneg_right h1 (le_of_lt (hpos b (D.regular_subset (hreg ⟨le_of_lt hab, le_rfl⟩)) y₀))
+    have h2 := mul_le_mul_of_nonneg_right h1 (le_of_lt (hpos b (D.regular_subset
+      (hreg ⟨le_of_lt hab, le_rfl⟩)) y₀))
     simpa [C] using h2
   linarith
 

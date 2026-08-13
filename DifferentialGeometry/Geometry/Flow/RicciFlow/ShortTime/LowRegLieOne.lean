@@ -5,18 +5,7 @@ open DifferentialGeometry.Analysis.Spectral
 open DifferentialGeometry.Analysis.Elliptic
 open DifferentialGeometry.PDE.RicciFlow
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Connection
-
-/-!
-# Low-regularity order-one DeTurck Lie coefficient
-
-This file proves the dimension-three `H2` jet estimate for the concrete
-order-one DeTurck Lie coefficient.  The proof first performs the exact
-connection-difference cancellations in the lowered `kappa` arm.  Consequently
-the third metric derivative occurs only once, while all inverse-metric and
-other multiplicative factors are controlled by the lower `H2` radius.
--/
 
 noncomputable section
 
@@ -722,10 +711,6 @@ private theorem piece_h2_const
         (Real.sqrt ((Module.finrank ℝ E : ℝ) ^ 2) * Q)) ^ 2 := by
       rfl
 
-/-- On a closed three-manifold, the concrete order-one DeTurck Lie
-coefficient has a tame intrinsic `H2` bound.  Its lower coefficients depend
-only on the perturbation `H2` radius, and the third metric derivative enters
-affinely after the exact self-background connection cancellation. -/
 theorem lie1_h2_tame
     (hDim : Module.finrank ℝ E = 3)
     (g₀ gB : SmoothRiemannianMetric I M)
@@ -1041,7 +1026,6 @@ theorem lie1_h2_tame
   rw [← hfactor]
   simpa only [Q9] using hAll
 
-/-- One-parameter compatibility wrapper around `lie1_h2_tame`. -/
 theorem lie1_h2
     (hDim : Module.finrank ℝ E = 3)
     (g₀ gB : SmoothRiemannianMetric I M)

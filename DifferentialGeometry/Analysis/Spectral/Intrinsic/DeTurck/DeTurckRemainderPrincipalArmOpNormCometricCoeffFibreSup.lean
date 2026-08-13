@@ -21,10 +21,8 @@ import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.GreenIdentityA
 import DifferentialGeometry.Geometry.Curvature.CovGradRoughLap.PointwiseTensorCurvatureRS
 import DifferentialGeometry.Geometry.Curvature.CovGradRoughLap.HomFieldCurvatureJetDecomposition
 open DifferentialGeometry.Analysis.Sobolev
-open DifferentialGeometry.Analysis.Sobolev
 open DifferentialGeometry.Analysis.Spectral
 open DifferentialGeometry.Analysis.Elliptic
-open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Connection
 
@@ -356,7 +354,6 @@ private lemma kscr_deTurckCoeff_componentSqSum_eq (n : ℕ) (f : Fin n → Fin n
   rw [Finset.sum_congr rfl (fun a _ => hstep a), ← Finset.mul_sum]
 
 set_option backward.isDefEq.respectTransparency false in
-
 omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] [SigmaCompactSpace M] in
 private lemma riemannianFiberNormSq_deTurckPrincipalCometricCoeff_sub_le
     (g₀ ga gb : SmoothRiemannianMetric I M)

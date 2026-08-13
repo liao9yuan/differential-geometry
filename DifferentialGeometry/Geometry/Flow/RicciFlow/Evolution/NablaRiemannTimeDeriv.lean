@@ -1,67 +1,7 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.RmRealizationBridge
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
 
 set_option autoImplicit false
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 noncomputable section
 
@@ -71,14 +11,6 @@ open Bundle
 open DifferentialGeometry
 open scoped Manifold ContDiff BigOperators
 
-
-
-
-
-
-
-
-
 section StepDeriv
 
 variable {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
@@ -87,45 +19,12 @@ variable {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners Real E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
 
-
-
-
-
-
-
-
-
 def covDerivStepDt {r : ℕ}
     (chrDt : Idx → Idx → Idx → Real)
     (A : (Fin r → Idx) → Real) : (Fin (r + 1) → Idx) → Real :=
   fun n =>
     ∑ s : Fin r, ∑ p : Idx,
       chrDt (n 0) (Fin.tail n s) p * A (Function.update (Fin.tail n) s p)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 omit [DecidableEq Idx] in
 theorem covDerivStepComp_hasDerivWithinAt {r : ℕ}
@@ -193,15 +92,6 @@ theorem covDerivStepComp_hasDerivWithinAt {r : ℕ}
 
 end StepDeriv
 
-
-
-
-
-
-
-
-
-
 section Realized
 
 open DifferentialGeometry.Tensor0SBundle
@@ -214,27 +104,6 @@ variable {I : ModelWithCorners Real E H} [I.Boundaryless]
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 variable [IsManifold I 1 M] [IsManifold I 2 M]
 variable [CompleteSpace E] [SigmaCompactSpace M] [T2Space M]
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 omit [I.Boundaryless] [IsManifold I 2 M] in
 omit [SigmaCompactSpace M] in

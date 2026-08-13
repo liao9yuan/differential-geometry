@@ -14,7 +14,6 @@ import DifferentialGeometry.Analysis.Parabolic.RicciLinearization.RealizedFamCur
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurckCoefficients.RealizeMetricChartGramDifference
 open DifferentialGeometry.Geometry.Connection.Realization DifferentialGeometry.Tensor.Multilinear
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Connection
 open DifferentialGeometry.Geometry.Operator
 

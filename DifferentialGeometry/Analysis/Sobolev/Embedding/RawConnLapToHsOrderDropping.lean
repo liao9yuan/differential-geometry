@@ -22,7 +22,6 @@ import DifferentialGeometry.Analysis.Sobolev.Embedding.RawConnLapToHsOrderDroppi
 import DifferentialGeometry.Analysis.Sobolev.Embedding.RawConnLapToHsOrderDroppingComponentL2NormHsZeroBound
 open DifferentialGeometry.Analysis.Elliptic
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Operator
 
 

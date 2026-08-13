@@ -299,7 +299,8 @@ private lemma integral_inner_grad_phi_mul_v_le
       (gradFun (I := I) g v.toFun x)
       (gradFun (I := I) g v.toFun x)) :=
     (TangentBundle.continuous_g_inner_of_smooth_sections (I := I) (M := M) g
-      (grad_g (I := I) g ⟨v.toFun, v.smooth⟩) (grad_g (I := I) g ⟨v.toFun, v.smooth⟩)).congr h_inner_eq_v
+      (grad_g (I := I) g ⟨v.toFun, v.smooth⟩) (grad_g (I := I) g ⟨v.toFun,
+        v.smooth⟩)).congr h_inner_eq_v
   have h_inner_eq_phi : ∀ x : M,
       g.inner x ((grad_g (I := I) g φ :
           Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) x)
@@ -315,9 +316,11 @@ private lemma integral_inner_grad_phi_mul_v_le
       (grad_g (I := I) g φ)
         (grad_g (I := I) g φ)).congr h_inner_eq_phi
   have h_inner_eq_phiv : ∀ x : M,
-      g.inner x ((grad_g (I := I) g ⟨(smoothScalarMulFun (I := I) (M := M) g φ v).toFun, (smoothScalarMulFun (I := I) (M := M) g φ v).smooth⟩ :
+      g.inner x ((grad_g (I := I) g ⟨(smoothScalarMulFun (I := I) (M := M) g φ v).toFun,
+        (smoothScalarMulFun (I := I) (M := M) g φ v).smooth⟩ :
           Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) x)
-        ((grad_g (I := I) g ⟨(smoothScalarMulFun (I := I) (M := M) g φ v).toFun, (smoothScalarMulFun (I := I) (M := M) g φ v).smooth⟩ :
+        ((grad_g (I := I) g ⟨(smoothScalarMulFun (I := I) (M := M) g φ v).toFun,
+          (smoothScalarMulFun (I := I) (M := M) g φ v).smooth⟩ :
           Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) x) =
       g.inner x (gradFun (I := I) g
           (smoothScalarMulFun (I := I) (M := M) g φ v).toFun x)
@@ -330,8 +333,10 @@ private lemma integral_inner_grad_phi_mul_v_le
         (gradFun (I := I) g
           (smoothScalarMulFun (I := I) (M := M) g φ v).toFun x)) :=
     (TangentBundle.continuous_g_inner_of_smooth_sections (I := I) (M := M) g
-      (grad_g (I := I) g ⟨(smoothScalarMulFun (I := I) (M := M) g φ v).toFun, (smoothScalarMulFun (I := I) (M := M) g φ v).smooth⟩)
-        (grad_g (I := I) g ⟨(smoothScalarMulFun (I := I) (M := M) g φ v).toFun, (smoothScalarMulFun (I := I) (M := M) g φ v).smooth⟩)).congr h_inner_eq_phiv
+      (grad_g (I := I) g ⟨(smoothScalarMulFun (I := I) (M := M) g φ v).toFun,
+        (smoothScalarMulFun (I := I) (M := M) g φ v).smooth⟩)
+        (grad_g (I := I) g ⟨(smoothScalarMulFun (I := I) (M := M) g φ v).toFun,
+          (smoothScalarMulFun (I := I) (M := M) g φ v).smooth⟩)).congr h_inner_eq_phiv
   have h_grad_phi2_v_v_cont : Continuous (fun x : M =>
       ((φ : M → ℝ) x) ^ 2 *
         g.inner x (gradFun (I := I) g v.toFun x)
@@ -543,9 +548,11 @@ theorem norm_smoothScalarMulFun_sq_le
     refine integral_congr_ae (Filter.Eventually.of_forall ?_)
     intro x; rfl
   have h_grad_int_phiv : (∫ x, g.inner x
-        ((grad_g (I := I) g ⟨(smoothScalarMulFun (I := I) (M := M) g φ v).toFun, (smoothScalarMulFun (I := I) (M := M) g φ v).smooth⟩ :
+        ((grad_g (I := I) g ⟨(smoothScalarMulFun (I := I) (M := M) g φ v).toFun,
+          (smoothScalarMulFun (I := I) (M := M) g φ v).smooth⟩ :
           Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) x)
-        ((grad_g (I := I) g ⟨(smoothScalarMulFun (I := I) (M := M) g φ v).toFun, (smoothScalarMulFun (I := I) (M := M) g φ v).smooth⟩ :
+        ((grad_g (I := I) g ⟨(smoothScalarMulFun (I := I) (M := M) g φ v).toFun,
+          (smoothScalarMulFun (I := I) (M := M) g φ v).smooth⟩ :
           Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) x)
         ∂(riemannianVolumeMeasure (I := I) (M := M) g)) =
       (∫ x, g.inner x (gradFun (I := I) g
@@ -828,7 +835,8 @@ private lemma smoothMulH1ComplInner_smoothToH1Compl_smooth_eq_integral
         (smoothToH1Compl (I := I) (M := M) g uT),
       smoothToH1Compl (I := I) (M := M) g vT⟫_ℝ =
     ∫ x, ((smoothScalarMulFun (I := I) (M := M) g φ uT).toFun x -
-        Δ_g (I := I) g ⟨(smoothScalarMulFun (I := I) (M := M) g φ uT).toFun, (smoothScalarMulFun (I := I) (M := M) g φ uT).smooth⟩ x) *
+        Δ_g (I := I) g ⟨(smoothScalarMulFun (I := I) (M := M) g φ uT).toFun,
+          (smoothScalarMulFun (I := I) (M := M) g φ uT).smooth⟩ x) *
         vT.toFun x
       ∂(riemannianVolumeMeasure (I := I) (M := M) g) := by
   rw [smoothMulH1ComplInner_smoothToH1Compl_smooth]
@@ -848,7 +856,8 @@ private lemma smoothScalarMulFun_oneSubLapClassical_pointwise_leibniz
           (gradFun (I := I) g uT.toFun x) -
         uT.toFun x * Δ_g (I := I) g φ x := by
   rw [SmoothScalar.oneSubLapClassical_toFun]
-  have h_leibniz : Δ_g (I := I) g ⟨(smoothScalarMulFun (I := I) (M := M) g φ uT).toFun, (smoothScalarMulFun (I := I) (M := M) g φ uT).smooth⟩ x =
+  have h_leibniz : Δ_g (I := I) g ⟨(smoothScalarMulFun (I := I) (M := M) g φ uT).toFun,
+    (smoothScalarMulFun (I := I) (M := M) g φ uT).smooth⟩ x =
     (φ : M → ℝ) x * Δ_g (I := I) g ⟨uT.toFun, uT.smooth⟩ x +
       2 * g.inner x (gradFun (I := I) g (φ : M → ℝ) x)
         (gradFun (I := I) g uT.toFun x) +
@@ -856,7 +865,8 @@ private lemma smoothScalarMulFun_oneSubLapClassical_pointwise_leibniz
     change Δ_g (I := I) g ⟨_, φ.contMDiff.mul uT.smooth⟩ x = _
     exact Δ_g_smul_eq (I := I) (M := M) g φ.contMDiff uT.smooth x
   change (smoothScalarMulFun (I := I) (M := M) g φ uT).toFun x -
-      Δ_g (I := I) g ⟨(smoothScalarMulFun (I := I) (M := M) g φ uT).toFun, (smoothScalarMulFun (I := I) (M := M) g φ uT).smooth⟩ x =
+      Δ_g (I := I) g ⟨(smoothScalarMulFun (I := I) (M := M) g φ uT).toFun,
+        (smoothScalarMulFun (I := I) (M := M) g φ uT).smooth⟩ x =
     (φ : M → ℝ) x * uT.oneSubLapClassical.toFun x -
       2 * g.inner x (gradFun (I := I) g (φ : M → ℝ) x)
         (gradFun (I := I) g uT.toFun x) -

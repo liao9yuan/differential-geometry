@@ -5,7 +5,6 @@ import DifferentialGeometry.Analysis.Parabolic.PrincipalSymbol
 import DifferentialGeometry.Analysis.Parabolic.DeTurckRicci.PrincipalSymbol
 import Mathlib.Geometry.Manifold.MFDeriv.Basic
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
 
 
 open DifferentialGeometry.Geometry.Connection

@@ -6,22 +6,9 @@ import DifferentialGeometry.Geometry.Operator.HessianTraceRealization
 open DifferentialGeometry.Tensor.RSTensor
 open DifferentialGeometry.PDE.RicciFlow
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Operator
 
 set_option autoImplicit false
-
-
-
-
-
-
-
-
-
-
-
-
 
 noncomputable section
 
@@ -106,9 +93,6 @@ private def nabla2RicField
     Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) 4 x :=
   totalNabla0SFun (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
     3 (S.family.connection t) (nablaRicField (I := I) S t) x
-
-
-
 
 omit [I.Boundaryless] in
 theorem coordNab2Ric_eq_nabla2RicField
@@ -317,9 +301,6 @@ theorem coordNab2Ric_eq_nabla2RicField
   unfold DifferentialGeometry.PDE.RicciFlow.ricciSecondCovDerivCompInFrame
   ring
 
-
-
-
 theorem scalarLaplacianTraceInFrame_coord_eq_laplacianAt
     {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -460,9 +441,6 @@ theorem scalarLaplacianTraceInFrame_coord_eq_laplacianAt
   refine Finset.sum_congr rfl fun j _ => ?_
   ring
 
-
-
-
 omit [I.Boundaryless] in
 private theorem coordScalarRmTrace_center
     {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
@@ -550,8 +528,6 @@ private theorem coordScalarRmTrace_center
     ricciCompInFrame, ricciTwoTensorField,
     SolutionOn.ricciAt, SolutionFamily.ricciAt] using hmain
 
-
-
 omit [I.Boundaryless] in
 private theorem coordScalarTraceDerivRHS_center
     {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
@@ -633,9 +609,6 @@ private theorem coordScalarTraceDerivRHS_center
   rw [hsplit, hdt, hrm, hquad]
   ring
 
-
-
-
 private theorem coordScalarTrace_hasDerivWithinAt_center
     {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -711,11 +684,6 @@ private theorem coordScalarTrace_hasDerivWithinAt_center
                     exact hInv.mul hRic))))
   refine hbase.congr_deriv ?_
   exact coordScalarTraceDerivRHS_center (I := I) S hS x₀ t
-
-
-
-
-
 
 theorem scalarEvolution_of_isSolution
     {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}

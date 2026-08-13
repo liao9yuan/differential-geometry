@@ -11,7 +11,6 @@ import DifferentialGeometry.Analysis.Integration.Measure.ChartDensity
 import Mathlib.Geometry.Manifold.ContMDiff.Defs
 import Mathlib.Analysis.Calculus.FDeriv.Symmetric
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Connection
 open DifferentialGeometry.Geometry.Operator
 

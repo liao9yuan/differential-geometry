@@ -2,7 +2,6 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.CovGradParametricCh
 open DifferentialGeometry.Analysis.Sobolev.IntrinsicSobolev.SmoothCcTensorHs
 open DifferentialGeometry.Analysis.Elliptic
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Connection
 
 

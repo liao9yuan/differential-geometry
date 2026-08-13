@@ -2,7 +2,6 @@ import DifferentialGeometry.Analysis.Integration.Measure.RealizedMetricForMeasur
 import DifferentialGeometry.Analysis.Integration.Measure.FamilyDefs
 import DifferentialGeometry.Analysis.Integration.Measure.Family
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
 
 set_option autoImplicit false
 

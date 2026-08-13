@@ -16,7 +16,6 @@ import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.ChartFiberTriv
 import DifferentialGeometry.Analysis.Integration.Measure.ChartDensity
 import Mathlib.MeasureTheory.Integral.IntegrableOn
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Connection
 
 

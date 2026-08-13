@@ -1,7 +1,6 @@
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.OperatorFieldCovariantCalculus
 open DifferentialGeometry.Analysis.Spectral
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Connection
 
 noncomputable section
@@ -36,7 +35,8 @@ private theorem core_curry_reading (g₀ : SmoothRiemannianMetric I M) (r s : �
         ((show Tensor0SBundle.Tensor0SSpace (r + 1) I x →L[ℝ] Tensor0SBundle.Tensor0SSpace (s + 1) I
           x from
           Analysis.Parabolic.TensorSpectral.tensorCovDerivAt (I := I) (M := M) g₀ (r + 1) (s + 1)
-            (DifferentialGeometry.Analysis.Spectral.slotExtend (I := I) (M := M) g₀ r s Φ) x v) D)) v0 =
+            (DifferentialGeometry.Analysis.Spectral.slotExtend (I := I)
+              (M := M) g₀ r s Φ) x v) D)) v0 =
       (show Tensor0SBundle.Tensor0SSpace r I x →L[ℝ] Tensor0SBundle.Tensor0SSpace s I x from
         Analysis.Parabolic.TensorSpectral.tensorCovDerivAt (I := I) (M := M) g₀ r s Φ x v)
         ((Tensor0SBundle.tensor0S_curry (I := I) (M := M) (𝕜 := ℝ) r x) D v0) := by
@@ -73,12 +73,14 @@ private theorem core_curry_reading (g₀ : SmoothRiemannianMetric I M) (r s : �
     (hU_smooth x).mdifferentiableAt (by norm_num)
   have hw_at : TensorSectionMDiffAt (I := I) (r + 1) (fun y : M => w y) x :=
     (w.contMDiff x).mdifferentiableAt (by norm_num)
-  have hCL_U := DifferentialGeometry.Geometry.Connection.tensor0SCovariantDerivative_curriedSection_hom_leibniz (I := I)
+  have hCL_U :=
+    DifferentialGeometry.Geometry.Connection.tensor0SCovariantDerivative_curriedSection_hom_leibniz (I := I)
     (M := M) g₀ s
     (fun y : M => (show Tensor0SSpace (r + 1) I y →L[ℝ] Tensor0SSpace (s + 1) I y from SEΦ.toSection
       y) (w y))
     (x := x) hU_at Y v
-  have hCL_w := DifferentialGeometry.Geometry.Connection.tensor0SCovariantDerivative_curriedSection_hom_leibniz (I := I)
+  have hCL_w :=
+    DifferentialGeometry.Geometry.Connection.tensor0SCovariantDerivative_curriedSection_hom_leibniz (I := I)
     (M := M) g₀ r
     (fun y : M => w y) (x := x) hw_at Y v
   have hHL_Φ := TensorRSNabla.tensorRSCovariantDerivative_apply (I := I) (M := M) r s
@@ -99,7 +101,8 @@ private theorem core_curry_reading (g₀ : SmoothRiemannianMetric I M) (r s : �
           (w y))) (Y y) =
       (show Tensor0SSpace r I y →L[ℝ] Tensor0SSpace s I y from Φ.toSection y)
         ((Tensor0SBundle.tensor0S_curry (I := I) (M := M) (𝕜 := ℝ) r y (w y)) (Y y))
-    rw [hSEΦ, DifferentialGeometry.Analysis.Spectral.slotExtend_toSection, DifferentialGeometry.Analysis.Spectral.slotExtendFib_apply,
+    rw [hSEΦ, DifferentialGeometry.Analysis.Spectral.slotExtend_toSection,
+      DifferentialGeometry.Analysis.Spectral.slotExtendFib_apply,
       ContinuousLinearEquiv.apply_symm_apply, ContinuousLinearMap.comp_apply]
   rw [← hw, ← hY,
     Analysis.Parabolic.TensorSpectral.tensorCovDerivAt_def (I := I) (M := M) g₀ (r + 1) (s + 1) SEΦ
@@ -111,7 +114,8 @@ private theorem core_curry_reading (g₀ : SmoothRiemannianMetric I M) (r s : �
   rw [hHL_SE, map_sub, ContinuousLinearMap.sub_apply]
   rw [eq_sub_of_add_eq hCL_U.symm]
   rw [hfun]
-  rw [hSEΦ, DifferentialGeometry.Analysis.Spectral.slotExtend_toSection, DifferentialGeometry.Analysis.Spectral.slotExtendFib_apply,
+  rw [hSEΦ, DifferentialGeometry.Analysis.Spectral.slotExtend_toSection,
+    DifferentialGeometry.Analysis.Spectral.slotExtendFib_apply,
     ContinuousLinearEquiv.apply_symm_apply, ContinuousLinearMap.comp_apply]
   have hcurU_op : (Tensor0SNabla.curriedSection I M
         (fun y : M => (show Tensor0SSpace (r + 1) I y →L[ℝ] Tensor0SSpace (s + 1) I y from
@@ -125,7 +129,8 @@ private theorem core_curry_reading (g₀ : SmoothRiemannianMetric I M) (r s : �
           (w x))) t =
       (show Tensor0SSpace r I x →L[ℝ] Tensor0SSpace s I x from Φ.toSection x)
         ((Tensor0SBundle.tensor0S_curry (I := I) (M := M) (𝕜 := ℝ) r x (w x)) t)
-    rw [hSEΦ, DifferentialGeometry.Analysis.Spectral.slotExtend_toSection, DifferentialGeometry.Analysis.Spectral.slotExtendFib_apply,
+    rw [hSEΦ, DifferentialGeometry.Analysis.Spectral.slotExtend_toSection,
+      DifferentialGeometry.Analysis.Spectral.slotExtendFib_apply,
       ContinuousLinearEquiv.apply_symm_apply, ContinuousLinearMap.comp_apply]
   rw [show (⇑wcurry) = (fun y : M => (Tensor0SNabla.curriedSection I M (fun z : M => w z) y) (Y y))
     from rfl,
@@ -159,7 +164,8 @@ theorem tensorCovDerivAt_slotExtend_eq (g₀ : SmoothRiemannianMetric I M) (r s 
     (T := (show Tensor0SBundle.Tensor0SSpace (r + 1) I x →L[ℝ] Tensor0SBundle.Tensor0SSpace (s + 1)
       I x from
       Analysis.Parabolic.TensorSpectral.tensorCovDerivAt (I := I) (M := M) g₀ (r + 1) (s + 1)
-        (DifferentialGeometry.Analysis.Spectral.slotExtend (I := I) (M := M) g₀ r s Φ) x v) D) (v0 := m 0)
+        (DifferentialGeometry.Analysis.Spectral.slotExtend (I := I) (M := M) g₀ r s Φ) x v) D)
+          (v0 := m 0)
           (vs := Matrix.vecTail m)]
   congr 1
   exact core_curry_reading (I := I) (M := M) g₀ r s Φ x v D (m 0)
@@ -213,7 +219,8 @@ theorem covGrad_slotExtend_eq_zero_of_covGrad_eq_zero (g₀ : SmoothRiemannianMe
     ContinuousLinearMap.zero_apply, Tensor0SBundle.Tensor0SSpace.toModel_zero,
     ContinuousMultilinearMap.zero_apply,
     Analysis.Parabolic.TensorSpectral.covGrad_toSection_apply_eval
-    (I := I) (M := M) g₀ (r + 1) (s + 1) (DifferentialGeometry.Analysis.Spectral.slotExtend (I := I) (M := M) g₀ r s Φ)
+    (I := I) (M := M) g₀ (r + 1) (s + 1) (DifferentialGeometry.Analysis.Spectral.slotExtend
+      (I := I) (M := M) g₀ r s Φ)
     x D m, tensorCovDerivAt_slotExtend_eq (I := I) (M := M) g₀ r s Φ x (m 0), hdir x (m 0),
     hslotZero x, ContinuousLinearMap.zero_apply, Tensor0SBundle.Tensor0SSpace.toModel_zero,
     ContinuousMultilinearMap.zero_apply]

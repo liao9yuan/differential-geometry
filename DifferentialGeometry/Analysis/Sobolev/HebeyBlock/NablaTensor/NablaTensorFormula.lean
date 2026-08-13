@@ -5,7 +5,6 @@ import DifferentialGeometry.Analysis.Sobolev.TensorHilbert.Inclusion
 import DifferentialGeometry.Tensor.Multilinear.HsBoundOp
 open DifferentialGeometry.Analysis.Sobolev.IntrinsicSobolev.SmoothCcTensorHs
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
 
 open DifferentialGeometry.Geometry.Connection
 namespace DifferentialGeometry.Analysis.Sobolev.HebeyBlock

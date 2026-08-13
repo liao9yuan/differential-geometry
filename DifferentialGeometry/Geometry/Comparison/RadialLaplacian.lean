@@ -9,20 +9,10 @@ import DifferentialGeometry.Geometry.Connection.ChartBridge.Laplacian
 import DifferentialGeometry.Tensor.RSTensor.MetricTrace.LineSplit
 open DifferentialGeometry.Tensor.RSTensor
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Connection
 open DifferentialGeometry.Geometry.Operator
 
 set_option autoImplicit false
-
-/-!
-# Laplacian of a selected branch radius
-
-This file is the comparison-facing assembly for the fixed-first selected
-inverse branch.  The first checked brick records that the branch radius has
-zero second derivative along every positive intrinsic radial ray that remains
-in the selected branch.
--/
 
 noncomputable section
 
@@ -56,8 +46,6 @@ variable [RiemannianBundle (fun x : M ↦ TangentSpace I x)]
 variable [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
   [IsContinuousRiemannianBundle E (fun x : M ↦ TangentSpace I x)]
 
-/-- The selected branch radius restricts to an affine function on a positive
-intrinsic radial ray, so its ordinary second derivative there vanishes. -/
 theorem branchDeriv2_zero
     {g : SmoothRiemannianMetric I M}
     {hEnorm : ∀ (x : M) (w : TangentSpace I x),
@@ -90,8 +78,6 @@ theorem branchDeriv2_zero
           ((hasDerivAt_id s).mul_const a).deriv
       rw [hfirst, deriv_const]
 
-/-- The Hessian of the selected branch radius vanishes on the terminal radial
-velocity of its time-one intrinsic geodesic. -/
 theorem branchHess_radial
     {g : SmoothRiemannianMetric I M}
     {hEnorm : ∀ (x : M) (w : TangentSpace I x),
@@ -139,9 +125,6 @@ theorem branchHess_radial
   rw [htrace] at hzero
   simpa only [curveVelocity] using hzero
 
-/-- The scalar Laplacian of the fixed-first branch radius at a time-one
-intrinsic endpoint is the transverse Jacobi mean curvature divided by the
-launch speed. -/
 theorem branchLap_eq_mean
     {ι : Type*} [Fintype ι] [DecidableEq ι]
     (g : SmoothRiemannianMetric I M)
@@ -406,9 +389,6 @@ private theorem intrJacobi_smul
   rw [hfun]
   rfl
 
-/-- The scalar Laplacian of the selected branch radius along the chart-fixed
-raw radial family is the raw transverse Jacobi mean divided by the unscaled
-launch speed. -/
 theorem radialLap_eq_mean
     {ι : Type*} [Fintype ι] [DecidableEq ι]
     (g : SmoothRiemannianMetric I M)

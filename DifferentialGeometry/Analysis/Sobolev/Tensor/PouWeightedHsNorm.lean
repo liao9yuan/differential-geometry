@@ -1,7 +1,6 @@
 import DifferentialGeometry.Analysis.Sobolev.Tensor.PouWeightedNorm
 import DifferentialGeometry.Analysis.Sobolev.Approximation.SmoothDensity
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Connection
 
 

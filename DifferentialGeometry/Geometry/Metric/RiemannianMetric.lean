@@ -9,8 +9,6 @@ import Mathlib.Analysis.Calculus.ContDiff.FiniteDimension
 
 namespace DifferentialGeometry
 
-
-
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false

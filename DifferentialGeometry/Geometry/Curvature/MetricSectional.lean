@@ -7,13 +7,6 @@ open DifferentialGeometry.Geometry.Connection
 
 set_option autoImplicit false
 
-/-!
-# Sectional curvature determines metric curvature
-
-This file adapts the algebraic polarization theorem to the canonical lowered
-Riemann tensor of a smooth metric.
--/
-
 noncomputable section
 
 namespace DifferentialGeometry.Geometry.Curvature
@@ -148,8 +141,6 @@ private theorem metricModel_isAlg
     ring
 
 omit [SigmaCompactSpace M] in
-/-- A pointwise constant-sectional-curvature identity determines the full
-canonical lowered Riemann tensor. -/
 theorem metricRm_of_sec
     (g : SmoothRiemannianMetric I M) (x : M) (c : Real)
     (hsec : ∀ X Y : TangentSpace I x,
@@ -192,8 +183,6 @@ theorem metricRm_of_sec
 omit [IsManifold I 2 M]
   [IsManifold I 3 M]
   [SigmaCompactSpace M] in
-/-- A full lowered metric-curvature formula determines the corresponding
-curvature operator by nondegeneracy of the metric. -/
 theorem riemannOp_of_rm
     [NeZero (Module.finrank Real E)]
     [I.Boundaryless] [BoundarylessManifold I M]
@@ -216,8 +205,6 @@ theorem riemannOp_of_rm
     ContinuousLinearMap.sub_apply, smul_eq_mul]
 
 omit [SigmaCompactSpace M] in
-/-- Scaling a positive constant-sectional-curvature metric by its curvature
-constant gives the full curvature-one Riemann formula. -/
 theorem metricRm_scale_one
     (g : SmoothRiemannianMetric I M) (x : M) (c : Real) (hc : 0 < c)
     (hsec : ∀ X Y : TangentSpace I x,

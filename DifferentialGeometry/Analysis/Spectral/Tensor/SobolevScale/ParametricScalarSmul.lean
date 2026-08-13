@@ -3,15 +3,6 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.SobolevScale.IteratedCovGra
 open DifferentialGeometry.Analysis.Sobolev
 open DifferentialGeometry.Analysis.Spectral
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
-
-
-
-
-
-
-
-
 
 noncomputable section
 
@@ -24,7 +15,8 @@ namespace Spectral
 
 open DifferentialGeometry.Analysis.Parabolic.TensorSpectral
 open DifferentialGeometry.Integral.L2
-open DifferentialGeometry.PDE.RicciFlow DifferentialGeometry.Analysis.Sobolev DifferentialGeometry.Analysis.Spectral
+open DifferentialGeometry.PDE.RicciFlow DifferentialGeometry.Analysis.Sobolev
+    DifferentialGeometry.Analysis.Spectral
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
@@ -34,8 +26,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
   [T2Space M] [SigmaCompactSpace M]
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
-
-
 
 theorem smul_hs_unif (g : SmoothRiemannianMetric I M)
     (zeta : ℝ → C^∞⟮I, M; ℝ⟯) {S K : Set ℝ}

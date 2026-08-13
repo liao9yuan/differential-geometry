@@ -4,7 +4,6 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.ChartTensor.Components.Defs
 import Mathlib.Analysis.Normed.Operator.Extend
 import Mathlib.Analysis.Normed.Operator.ContinuousLinearMap
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Connection
 
 noncomputable section

@@ -12,16 +12,6 @@ open DifferentialGeometry.Analysis.Elliptic
 open DifferentialGeometry.Analysis.Sobolev
 open DifferentialGeometry.Analysis.Spectral
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
-
-
-
-
-
-
-
-
-
 
 noncomputable section
 
@@ -106,7 +96,8 @@ theorem unit_init_or_empty (g : SmoothRiemannianMetric I M) :
         (∫ x,
             TensorRSField.scalar0 (n := (∞ : WithTop ℕ∞))
               u0.toSection x
-          ∂(DifferentialGeometry.Integral.Measure.riemannianVolumeMeasure (I := I) (M := M) g)) = 1 := by
+          ∂(DifferentialGeometry.Integral.Measure.riemannianVolumeMeasure (I := I)
+            (M := M) g)) = 1 := by
   classical
   rcases isEmpty_or_nonempty M with hM | hM
   · exact Or.inl hM
@@ -238,9 +229,6 @@ theorem scalarCc_joint (g : SmoothRiemannianMetric I M)
     (fun p : M × ℝ => (zeta p.2 : M → ℝ) p.1) hzeta
     (fun p : M × ℝ => A p.1) hA
   exact hsmul.congr fun p _ => rfl
-
-
-
 
 theorem smul_jet_unif (g : SmoothRiemannianMetric I M)
     (zeta : ℝ → C^∞⟮I, M; ℝ⟯) {S K : Set ℝ}

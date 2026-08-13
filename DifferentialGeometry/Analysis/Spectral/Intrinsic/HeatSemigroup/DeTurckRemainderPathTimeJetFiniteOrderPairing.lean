@@ -8,7 +8,6 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.SobolevScale.SpectralPouNor
 import DifferentialGeometry.Analysis.Integration.L2.Hilbert.SimpLemmas
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.HeatSemigroup.DeTurckRemainderPathTimeJetRealizePathJointSmoothness
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Connection
 
 

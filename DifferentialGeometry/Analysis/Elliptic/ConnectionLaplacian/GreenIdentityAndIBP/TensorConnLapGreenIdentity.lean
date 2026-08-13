@@ -8,7 +8,8 @@ noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
 
-open Bundle Manifold MeasureTheory Set Filter DifferentialGeometry.Tensor0SBundle CovariantDerivative
+open Bundle Manifold MeasureTheory Set Filter DifferentialGeometry.Tensor0SBundle
+    CovariantDerivative
 open scoped Manifold Topology ContDiff ENNReal BigOperators Matrix
 
 namespace DifferentialGeometry
@@ -18,7 +19,8 @@ namespace Elliptic
 open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.L2
 open DifferentialGeometry.Analysis.Parabolic.TensorSpectral
-open DifferentialGeometry.Tensor0SNabla DifferentialGeometry.TensorRSNabla DifferentialGeometry.TensorMetricLowering
+open DifferentialGeometry.Tensor0SNabla DifferentialGeometry.TensorRSNabla
+    DifferentialGeometry.TensorMetricLowering
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)]

@@ -19,7 +19,6 @@ import Mathlib.MeasureTheory.Function.L1Space.Integrable
 import Mathlib.MeasureTheory.Function.LocallyIntegrable
 import Mathlib.Topology.ContinuousOn
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
 
 
 noncomputable section
@@ -134,7 +133,6 @@ theorem tensorH1Inner_smul_left (g : SmoothRiemannianMetric I M) (r s : ℕ)
   ring
 
 structure SmoothCcTensorH1 (g : SmoothRiemannianMetric I M) (r s : ℕ) where
-
   toCcTensor : SmoothCcTensor g r s
 
 namespace SmoothCcTensorH1

@@ -6,8 +6,6 @@ Authors: Jack McCarthy
 import Mathlib.GroupTheory.Perm.Option
 import Mathlib.LinearAlgebra.Alternating.DomCoprod
 
-
-
 namespace DifferentialGeometry
 namespace ShuffleSplit
 

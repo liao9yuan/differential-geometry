@@ -7,28 +7,6 @@ import Mathlib.Topology.Subpath
 import Mathlib.AlgebraicTopology.FundamentalGroupoid.FundamentalGroup
 import Mathlib.Topology.MetricSpace.Pseudo.Lemmas
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 open Set Function
 
 noncomputable section
@@ -38,14 +16,6 @@ namespace Geometry
 namespace Riemannian
 namespace Topology
 namespace UniversalCover
-
-
-
-
-
-
-
-
 
 theorem uc_pi1_countable_basis_refinement
     (X : Type*) [TopologicalSpace X] [Nonempty X]
@@ -233,9 +203,6 @@ theorem uc_pi1_countable_basis_refinement
     exact hGood_null (B n) hBnGood x hxBn γ hγ
   · rw [← hBrange]; exact hs_basis
 
-
-
-
 theorem uc_pi1_countable_anchors
     (X : Type*) [TopologicalSpace X] [Nonempty X]
     (B : ℕ → Set X) :
@@ -247,11 +214,6 @@ theorem uc_pi1_countable_anchors
   intro p hp
   simp only [hp, dif_pos]
   exact hp.choose_spec
-
-
-
-
-
 
 theorem uc_pi1_countable_lebesgue_subdivision
     (X : Type*) [TopologicalSpace X]
@@ -345,9 +307,6 @@ theorem uc_pi1_countable_lebesgue_subdivision
     rw [hcast, hsucc]
     apply div_le_div_of_nonneg_right _ hkR.le
     · exact_mod_cast Nat.le_succ _
-
-
-
 
 theorem uc_pi1_countable_piece_homotopy
     (X : Type*) [TopologicalSpace X]
@@ -444,10 +403,6 @@ theorem uc_pi1_countable_piece_homotopy
           (_root_.Path.Homotopic.Quotient.refl a) Bq := by rw [hkey]
     _ = Bq := _root_.Path.Homotopic.Quotient.refl_trans Bq
 
-
-
-
-
 lemma uc_pi1_countable_concat_quot_congr
     {Y : Type*} [TopologicalSpace Y] {n : ℕ} {p : Fin (n + 1) → Y}
     (F G : (i : Fin n) → _root_.Path (p i.castSucc) (p i.succ))
@@ -463,15 +418,6 @@ lemma uc_pi1_countable_concat_quot_congr
     rwa [Quotient.eq] at this
   exact Quotient.sound
     (_root_.Path.Homotopic.concat_hcomp (n := n) p F G hH)
-
-
-
-
-
-
-
-
-
 
 lemma uc_pi1_countable_telescope
     {Y : Type*} [TopologicalSpace Y] :
@@ -590,27 +536,6 @@ lemma uc_pi1_countable_telescope
       (⟦_root_.Path.concat (p ∘ Fin.castSucc) (fun i => F i.castSucc)⟧)
       (⟦F (Fin.last n)⟧) (⟦c (Fin.last n).succ⟧)).symm
 
-/-- Given a countable open basis `B : ℕ → Set X` whose sets are
-path-connected and whose ambient loops are null-homotopic, the fundamental group
-`FundamentalGroup X x`
-of a second-countable connected locally-path-connected
-semi-locally-simply-connected space is the surjective image of a countable
-indexing type: there exist a countable `S` and a surjection
-`f : S → FundamentalGroup X x`.
-
-The good basis is a supplied hypothesis here (`hBopen`, `hBpc`, `hBnull`,
-`hBbasis`); it is produced for an arbitrary such space by
-`uc_pi1_countable_basis_refinement`.
-
-Argument (classical Hatcher §1.3 / Spanier §2.4 polygonal reduction). The
-indexing type records a basis index for each segment and a refinement-basis
-index for each internal vertex. The polygonal loop uses a chosen point of the
-refinement set as its vertex. Surjectivity: an arbitrary loop is
-Lebesgue-subdivided (`uc_pi1_countable_lebesgue_subdivision`) into truncations
-each lying inside a single basis set `B (idx i)`; each truncation is replaced
-by the canonical anchor-to-anchor segment in `B (idx i)` using the homotopy
-uniqueness of `uc_pi1_countable_piece_homotopy` together with
-`Path.trans_truncate_homotopic`. -/
 theorem fundamentalGroup_countable_surjection_of_nullHomotopic_basis
     (X : Type*) [TopologicalSpace X]
     [SecondCountableTopology X] [ConnectedSpace X] [LocPathConnectedSpace X]

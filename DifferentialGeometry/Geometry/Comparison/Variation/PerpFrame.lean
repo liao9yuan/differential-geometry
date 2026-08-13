@@ -5,9 +5,7 @@ import DifferentialGeometry.Geometry.Connection.ParallelTransport.ParallelTransp
 import Mathlib.Geometry.Manifold.PartitionOfUnity
 import Mathlib.Geometry.Manifold.Riemannian.Basic
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Operator
-
 
 noncomputable section
 
@@ -95,7 +93,6 @@ private lemma bGramSchmidt_self_norm
       (s * s)⁻¹ * B (bGramSchmidtRaw B v i) (bGramSchmidtRaw B v i) from by
     rw [mul_inv]; ring]
   rw [hs_sq]; exact inv_mul_cancel₀ (ne_of_gt hpos)
-
 
 private theorem bGramSchmidt_orth_strong_aux
     (B : F →L[ℝ] F →L[ℝ] ℝ)
@@ -289,8 +286,6 @@ private theorem bGramSchmidt_mem
 end PerpFrameAux
 
 omit [NeZero (Module.finrank ℝ E)] in
-/-- A nonzero tangent vector extends pointwise to an orthonormal basis of its
-orthogonal complement. -/
 theorem exists_perp_pos
     (g : SmoothRiemannianMetric I M) (x : M) (u : TangentSpace I x)
     (hu : 0 < g.inner x u u) :
@@ -345,7 +340,6 @@ theorem exists_perp_pos
   exact ⟨e, he_on, he_perp⟩
 
 omit [NeZero (Module.finrank ℝ E)] in
-/-- Unit-vector specialization of `exists_perp_pos`. -/
 theorem exists_ortho_perp
     (g : SmoothRiemannianMetric I M) (x : M) (u : TangentSpace I x)
     (hu : g.inner x u u = 1) :
@@ -357,7 +351,6 @@ theorem exists_ortho_perp
 section PerpFrame
 
 variable [I.Boundaryless] [CompleteSpace E] [T2Space (TangentBundle I M)]
-
 
 omit [CompleteSpace E] [T2Space (TangentBundle I M)] in
 omit [NeZero (Module.finrank ℝ E)] in
@@ -728,7 +721,6 @@ theorem exists_cutoff_one_on_Icc_supported_Ioo {L δ : ℝ} (hδ : 0 < δ) :
     intro x hx
     exact ⟨by linarith [hx.1], by linarith [hx.2]⟩
 
-
 theorem exists_time_window_clip {a b lam : ℝ}
     (hlam_pos : 0 < lam) (ha : -lam < a) (hb : b < lam) :
     ∃ tau : ℝ → ℝ, ContDiff ℝ (∞ : WithTop ℕ∞) tau ∧
@@ -768,7 +760,6 @@ theorem exists_time_window_clip {a b lam : ℝ}
     · have hχ_zero : χ t = 0 := hχ0 htΩ
       simpa [hχ_zero] using hlam_pos.le
 
-
 theorem exists_time_clip {L lam : ℝ} (hL : 0 ≤ L) (hlam : L < lam) :
     ∃ tau : ℝ → ℝ, ContDiff ℝ (∞ : WithTop ℕ∞) tau ∧
       Set.EqOn tau id (Set.Icc 0 L) ∧ ∀ t, |tau t| ≤ lam := by
@@ -805,7 +796,6 @@ theorem exists_time_clip {L lam : ℝ} (hL : 0 ≤ L) (hlam : L < lam) :
           hnot_tsupport (subset_closure h)
         simpa [Function.support] using hnot_support
       simpa [hchi_zero] using hlam_pos.le
-
 
 omit [NeZero (Module.finrank ℝ E)] in
 theorem perp_to_velocity_preserved_on

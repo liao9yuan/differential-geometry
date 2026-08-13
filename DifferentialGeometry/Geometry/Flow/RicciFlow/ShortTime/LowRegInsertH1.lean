@@ -1,22 +1,12 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.LowRegCoeffJets
 import DifferentialGeometry.Analysis.Sobolev.TensorHilbert.MetricArmCoeffJetTower
-open DifferentialGeometry.Analysis.Sobolev DifferentialGeometry.Analysis.Spectral DifferentialGeometry.Analysis.Spectral.MetricRealization
+open DifferentialGeometry.Analysis.Sobolev DifferentialGeometry.Analysis.Spectral
+    DifferentialGeometry.Analysis.Spectral.MetricRealization
 open DifferentialGeometry.Analysis.Sobolev
 open DifferentialGeometry.Analysis.Spectral
 open DifferentialGeometry.Analysis.Elliptic
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Connection
-
-/-!
-# Low-regularity insertion-difference coefficient
-
-This file bounds the cancellation-preserving background difference of the
-two-slot `lieCorr0` insertion coefficient.  The exact refolds in
-the Lie-correction background-difference identities remove the self-background top derivative before any norm
-estimate is taken.  Consequently the complete `H1` bound depends only on the
-metric `H2` radius.
--/
 
 noncomputable section
 
@@ -192,8 +182,6 @@ private theorem grid_h1_low
   exact Finset.sum_le_sum fun k hk =>
     (hgrid k (by have := Finset.mem_range.mp hk; omega)).2
 
-/-- The moving-to-frozen connection-difference section has an `H1` bound
-from only the metric `H2` jet. -/
 theorem connSec_h1
     (hDim : Module.finrank ℝ E = 3)
     (g₀ : SmoothRiemannianMetric I M) {δ₀ : ℝ} (hδ₀ : δ₀ < 1) :
@@ -243,8 +231,6 @@ theorem connSec_h1
     simp only [B, Real.sq_sqrt (hQ R hR)]]
   exact hle
 
-/-- The lowered-connection background difference is `H2`-controlled by only
-the metric `H2` radius. -/
 theorem kappaDiff_h2
     (hDim : Module.finrank ℝ E = 3)
     (g₀ gB : SmoothRiemannianMetric I M) :
@@ -343,8 +329,6 @@ private theorem slotIns_h1
       simpa only [pow_one] using h
     _ = _ := by rw [Finset.mul_sum]
 
-/-- The complete insertion background difference has a uniform intrinsic
-`H1` bound depending only on the perturbation `H2` radius. -/
 theorem insert_h1
     (hDim : Module.finrank ℝ E = 3)
     (g₀ gB : SmoothRiemannianMetric I M) {δ₀ : ℝ} (hδ₀ : δ₀ < 1) :

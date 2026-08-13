@@ -2,15 +2,6 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.SobolevScale.SmoothCcDense
 import DifferentialGeometry.Analysis.Integration.L2.Hilbert.DenseSubset
 open DifferentialGeometry.Analysis.Sobolev.IntrinsicSobolev.SmoothCcTensorHs
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
-
-/-!
-# Injectivity of smooth spectral embeddings
-
-The spectral Sobolev embedding retains every coefficient of the underlying
-`L2` tensor.  Since the smooth-to-`L2` map is injective, the spectral embedding
-of smooth covariant tensors is injective at every real Sobolev order.
--/
 
 noncomputable section
 
@@ -32,8 +23,6 @@ variable
       [IsManifold I ∞ M] [CompactSpace M] [I.Boundaryless]
       [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M]
 
-/-- The generic smooth covariant-tensor spectral embedding is injective at
-every real Sobolev order. -/
 theorem ccToHs_injective (g : SmoothRiemannianMetric I M) (s : ℕ) (σ : ℝ) :
     Function.Injective (ccTensorToHs (I := I) (M := M) g s σ) := by
   intro S T hST

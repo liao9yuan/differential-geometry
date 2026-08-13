@@ -1,15 +1,6 @@
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.SmoothParametricCoeffIntegral
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Connection
-
-
-
-
-
-
-
-
 
 noncomputable section
 
@@ -271,10 +262,6 @@ private theorem timeDeriv_joint
     exact coord_deriv_eq (I := I) (M := M) g b c Φ hS hjoint p₀.1 p hp hpbase
   · exact coord_deriv_eq (I := I) (M := M) g b c Φ hS hjoint p₀.1 p₀ hp₀
       (mem_baseSet_trivializationAt _ _ _)
-
-
-
-
 
 theorem exists_timeDerivCc
     (g : SmoothRiemannianMetric I M) (b c : ℕ)

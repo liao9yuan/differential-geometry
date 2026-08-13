@@ -2,7 +2,6 @@ import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.SlotSplitParse
 import DifferentialGeometry.Geometry.Connection.MetricCompatibility.CovGradParallelNaturality
 open DifferentialGeometry.Analysis.Elliptic
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Connection
 
 

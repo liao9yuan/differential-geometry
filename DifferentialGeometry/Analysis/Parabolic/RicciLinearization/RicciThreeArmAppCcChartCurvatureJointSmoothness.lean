@@ -21,7 +21,6 @@ import DifferentialGeometry.Analysis.Parabolic.RicciLinearization.RicciThreeArmA
 open DifferentialGeometry.Tensor.Multilinear
 open DifferentialGeometry.Analysis.Spectral
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Connection
 open DifferentialGeometry.Geometry.Operator
 

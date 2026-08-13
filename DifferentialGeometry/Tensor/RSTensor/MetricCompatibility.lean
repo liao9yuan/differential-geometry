@@ -10,14 +10,6 @@ open DifferentialGeometry.Tensor.RSTensor
 
 set_option autoImplicit false
 
-
-
-
-
-
-
-
-
 namespace DifferentialGeometry
 namespace Tensor0SBundle
 

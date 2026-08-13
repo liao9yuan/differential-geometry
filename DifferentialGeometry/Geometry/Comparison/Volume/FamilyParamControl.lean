@@ -4,18 +4,8 @@ import DifferentialGeometry.Geometry.Curvature.Realized.MetricFamily
 import DifferentialGeometry.Geometry.Exponential.GaussLemmaPullback
 import DifferentialGeometry.Topology.FiberBundleT2
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
 
 set_option autoImplicit false
-
-/-!
-# Parametrized control for a short metric-family slab
-
-This file gives fixed normal-coordinate control for a smooth metric family near
-the closed initial endpoint.  The result is deliberately local in the chosen
-exponential parametrization: compactness supplies a uniform density lower
-bound and a uniform coordinate-speed upper bound on one fixed model ball.
--/
 
 noncomputable section
 
@@ -23,7 +13,6 @@ open Bundle Manifold Matrix Set
 open scoped Manifold ContDiff Topology
 
 namespace DifferentialGeometry.Geometry.Riemannian.VolumeComparison
-
 
 open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Geometry.Riemannian
@@ -43,8 +32,6 @@ variable [I.Boundaryless]
 private local instance : CompleteSpace E := FiniteDimensional.complete Real E
 
 omit [NeZero (Module.finrank Real E)] [I.Boundaryless] in
-/-- Joint continuity of the parametrized density of a fixed partial
-diffeomorphism against a continuous metric family. -/
 private theorem paramDensity_cont
     {D : RealTimeInterval}
     (g_fam : ℝ → SmoothRiemannianMetric I M)
@@ -101,9 +88,6 @@ private theorem paramDensity_cont
   exact Real.continuous_sqrt.comp
     ((continuous_id.matrix_det).comp hmatrix)
 
-/-- A fixed initial exponential parametrization has uniform density below and
-uniform coordinate speed above on a fixed model ball for all sufficiently
-short carrier times. -/
 theorem exists_param_ctrl
     [T2Space M]
     {omega : Real} (h0omega : 0 < omega)

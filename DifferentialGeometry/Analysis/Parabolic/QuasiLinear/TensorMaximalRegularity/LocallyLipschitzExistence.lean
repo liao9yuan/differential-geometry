@@ -1,7 +1,7 @@
 import DifferentialGeometry.Analysis.Parabolic.QuasiLinear.TensorMaximalRegularity.LocallyLipschitzModulusOfContinuity
 import DifferentialGeometry.Analysis.Parabolic.QuasiLinear.TensorMaximalRegularity.SolutionFieldLink
 import DifferentialGeometry.Analysis.Parabolic.QuasiLinear.CrossScaleParabolicTraceEnergy
-open DifferentialGeometry.Geometry.Curvature
+import DifferentialGeometry.Analysis.Spectral.Intrinsic.CompactSAResolventIntrinsic
 open DifferentialGeometry.Geometry.Curvature
 
 noncomputable section
@@ -630,9 +630,113 @@ theorem quasilinear_strong_existence_locallyLipschitz_smallTime_stayDischarged_o
   have hstay := maxRegDuhamelSolFieldHa1_stay (I := I) (M := M)
     (h_compact := h_compact) hT hT1 u₀ gforce hC_nn hR.le hgforce_small hhoriz
   refine ⟨u, gforce, hu, ?_, htrace, hderiv, hstay⟩
-  conv_lhs => rw [hfix]
-  exact nemytskiiHa1_truncated_eqOn_ball (I := I) (M := M) hR.le hN
+  · conv_lhs => rw [hfix]
+    exact nemytskiiHa1_truncated_eqOn_ball (I := I) (M := M) hR.le hN
+      (maxRegDuhamelSolFieldHa1 (I := I) (M := M) a hT hT1 u₀ gforce) hstay
+
+omit [NeZero (Module.finrank ℝ E)] in
+theorem quasilinear_strong_existence_of_lipschitz_on_closed_ball
+    [Nontrivial E]
+    {N : tensorHs (I := I) (M := M) g r s (a + 1) →
+      tensorHs (I := I) (M := M) g r s a}
+    {L_R : ℝ≥0} {R : ℝ} (hR : 0 < R)
+    (u₀ : tensorHs (I := I) (M := M) g r s (a + 2))
+    (hN : LipschitzOnWith L_R N (Metric.closedBall
+      (tensorHsInclusion (I := I) (M := M) (g := g) (r := r) (s := s)
+        (show (a + 1) ≤ a + 2 by linarith) u₀) R)) :
+    ∃ T₀ : ℝ, 0 < T₀ ∧ ∀ {T : ℝ} (hT : 0 < T) (_hTT₀ : T ≤ T₀) (hT1 : T ≤ 1),
+      ∃ (u : MaxRegSolutionSpace (I := I) (M := M) a T)
+        (gforce : timeL2 (tensorHs (I := I) (M := M) g r s a) T),
+        u = maxRegDuhamelMap (I := I) (M := M) a hT hT1 u₀ gforce ∧
+          gforce =ᵐ[timeMeasure T]
+            (fun t => N (maxRegDuhamelSolFieldHa1 (I := I) (M := M)
+              a hT hT1 u₀ gforce t)) ∧
+          TimeSobolev.timeH1.trace0 _ T u =
+              tensorHsInclusion (I := I) (M := M) (g := g) (r := r) (s := s)
+                (show a ≤ a + 2 by linarith) u₀ ∧
+          TimeSobolev.timeH1.timeDeriv _ T u =
+            timeScaleLaplacian (I := I) (M := M) a
+                (maxRegDuhamelSolField (I := I) (M := M) a hT hT1 u₀ gforce) +
+              gforce ∧
+          ∀ᵐ t ∂(timeMeasure T),
+            maxRegDuhamelSolFieldHa1 (I := I) (M := M) a hT hT1 u₀ gforce t ∈
+              Metric.closedBall
+                (tensorHsInclusion (I := I) (M := M) (g := g) (r := r) (s := s)
+                  (show (a + 1) ≤ a + 2 by linarith) u₀) R := by
+  letI : NeZero (Module.finrank ℝ E) :=
+    ⟨(Module.finrank_pos (R := ℝ) (M := E)).ne'⟩
+  obtain ⟨T₀, hT₀, hsol⟩ :=
+    quasilinear_strong_existence_locallyLipschitz_smallTime_stayDischarged_ofCompact
+      (I := I) (M := M) hR
+      (DifferentialGeometry.Analysis.Spectral.tensorResolventL2_isCompactOperator
+        (I := I) (M := M) g r s) u₀ hN
+  refine ⟨T₀, hT₀, ?_⟩
+  intro T hT hTT₀ hT1
+  obtain ⟨u, gforce, hu, hforce, htrace, hderiv, hstay⟩ :=
+    hsol hT hTT₀ hT1
+  refine ⟨u, gforce, hu, hforce, htrace, ?_, hstay⟩
+  have htrunc := nemytskiiHa1_truncated_eqOn_ball (I := I) (M := M) hR.le hN
     (maxRegDuhamelSolFieldHa1 (I := I) (M := M) a hT hT1 u₀ gforce) hstay
+  have hfix : gforce = nemytskiiHa1 (I := I) (M := M)
+      (truncatedNonlin_lipschitzWith (I := I) (M := M) hR.le hN)
+      (maxRegDuhamelSolFieldHa1 (I := I) (M := M) a hT hT1 u₀ gforce) := by
+    refine Lp.ext ?_
+    exact hforce.trans htrunc.symm
+  calc
+    TimeSobolev.timeH1.timeDeriv _ T u =
+        timeScaleLaplacian (I := I) (M := M) a
+            (maxRegDuhamelSolField (I := I) (M := M) a hT hT1 u₀ gforce) +
+          nemytskiiHa1 (I := I) (M := M)
+            (truncatedNonlin_lipschitzWith (I := I) (M := M) hR.le hN)
+            (maxRegDuhamelSolFieldHa1 (I := I) (M := M) a hT hT1 u₀ gforce) := hderiv
+    _ = timeScaleLaplacian (I := I) (M := M) a
+          (maxRegDuhamelSolField (I := I) (M := M) a hT hT1 u₀ gforce) +
+        gforce := congrArg
+          (fun z => timeScaleLaplacian (I := I) (M := M) a
+            (maxRegDuhamelSolField (I := I) (M := M) a hT hT1 u₀ gforce) + z)
+          hfix.symm
+
+omit [NeZero (Module.finrank ℝ E)] in
+theorem quasilinear_strong_existence_locally_lipschitz
+    [Nontrivial E]
+    {N : tensorHs (I := I) (M := M) g r s (a + 1) →
+      tensorHs (I := I) (M := M) g r s a}
+    (u₀ : tensorHs (I := I) (M := M) g r s (a + 2))
+    (hN : LocallyLipschitz N) :
+    ∃ T₀ : ℝ, 0 < T₀ ∧ ∀ {T : ℝ} (hT : 0 < T) (_hTT₀ : T ≤ T₀) (hT1 : T ≤ 1),
+      ∃ (u : MaxRegSolutionSpace (I := I) (M := M) a T)
+        (gforce : timeL2 (tensorHs (I := I) (M := M) g r s a) T),
+        u = maxRegDuhamelMap (I := I) (M := M) a hT hT1 u₀ gforce ∧
+          gforce =ᵐ[timeMeasure T]
+            (fun t => N (maxRegDuhamelSolFieldHa1 (I := I) (M := M)
+              a hT hT1 u₀ gforce t)) ∧
+          TimeSobolev.timeH1.trace0 _ T u =
+              tensorHsInclusion (I := I) (M := M) (g := g) (r := r) (s := s)
+                (show a ≤ a + 2 by linarith) u₀ ∧
+          TimeSobolev.timeH1.timeDeriv _ T u =
+            timeScaleLaplacian (I := I) (M := M) a
+                (maxRegDuhamelSolField (I := I) (M := M) a hT hT1 u₀ gforce) +
+              gforce := by
+  let u₀' := tensorHsInclusion (I := I) (M := M) (g := g) (r := r) (s := s)
+    (show (a + 1) ≤ a + 2 by linarith) u₀
+  obtain ⟨L, U, hU, hNU⟩ := hN u₀'
+  obtain ⟨ε, hε, hball⟩ := Metric.mem_nhds_iff.mp hU
+  let R := ε / 2
+  have hR : 0 < R := by dsimp [R]; positivity
+  have hclosed : Metric.closedBall u₀' R ⊆ U := by
+    refine (Metric.closedBall_subset_ball ?_).trans hball
+    dsimp [R]
+    linarith
+  have hNL : LipschitzOnWith L N (Metric.closedBall u₀' R) :=
+    hNU.mono hclosed
+  obtain ⟨T₀, hT₀, hsol⟩ :=
+    quasilinear_strong_existence_of_lipschitz_on_closed_ball
+      (I := I) (M := M) hR u₀ hNL
+  refine ⟨T₀, hT₀, ?_⟩
+  intro T hT hTT₀ hT1
+  obtain ⟨u, gforce, hu, hforce, htrace, hderiv, _hstay⟩ :=
+    hsol hT hTT₀ hT1
+  exact ⟨u, gforce, hu, hforce, htrace, hderiv⟩
 
 end QuasiLinear
 end Parabolic

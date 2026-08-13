@@ -1038,9 +1038,6 @@ lemma finBasis_repr_sum
             • (Module.finBasis ℝ E) k :=
   (((Module.finBasis ℝ E).sum_repr (L ((Module.finBasis ℝ E) i)))).symm
 
-
-
-
 def transitionMatrix_gen (x₀ x₁ : M) (x : M) :
     Matrix (Fin (Module.finrank ℝ E)) (Fin (Module.finrank ℝ E)) ℝ :=
   Matrix.of fun k i =>
@@ -1052,8 +1049,6 @@ def transitionMatrix_gen (x₀ x₁ : M) (x : M) :
     transitionMatrix_gen (I := I) x₀ x₁ x k i =
       (Module.finBasis ℝ E).repr
         ((tangentCoordChange I x₁ x₀ x) ((Module.finBasis ℝ E) i)) k := rfl
-
-
 
 lemma tangentCoordChange_finBasis_eq_sum
     (x₀ x₁ : M) (x : M) (i : Fin (Module.finrank ℝ E)) :
@@ -1072,8 +1067,6 @@ lemma transitionMatrix_det_gen (x₀ x₁ : M) (x : M) :
     simp [transitionMatrix_gen, LinearMap.toMatrix_apply]
   rw [hL]
   rw [LinearMap.det_toMatrix]
-
-
 
 end Measure
 end Integral

@@ -2,7 +2,6 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.MaximumPrinciple.TensorWeak.
 import Mathlib.Tactic.Ring
 open DifferentialGeometry.PDE.RicciFlow
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
 
 
 set_option autoImplicit false
@@ -23,13 +22,6 @@ variable {I : ModelWithCorners Real E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 variable [IsManifold I 1 M] [IsManifold I 2 M]
 
-
-
-
-
-
-
-
 structure TensorSpatialDerivs
     (cov : Real -> CovariantDerivative I E (TangentSpace I : M -> Type _))
     (S : TwoTensorSecFamily (I := I) (M := M))
@@ -43,9 +35,6 @@ structure TensorSpatialDerivs
     ∀ t : Real,
       TotalNabla0SRealizes (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
         3 (cov t) (nablaS t) (nabla2S t)
-
-
-
 
 theorem barrierDerivs
     [T2Space M]
@@ -91,14 +80,6 @@ theorem barrierDerivs
 def SmallBarrierEps (epsilon : Real) : Prop :=
   0 < epsilon ∧ epsilon ≤ 1
 
-
-
-
-
-
-
-
-
 def TensorNullEigenvectorCondition
     (G : Real -> SmoothRiemannianMetric I M)
     (N : TwoTensorReaction (I := I) (M := M))
@@ -110,10 +91,6 @@ def TensorNullEigenvectorCondition
     ∀ v : TangentSpace I x,
       A x v v = 0 ->
       0 ≤ N t (G t) A x v v
-
-
-
-
 
 def rawSym2 (A : RawTwoTensorField (I := I) (M := M)) :
     RawTwoTensorField (I := I) (M := M) :=
@@ -171,10 +148,6 @@ theorem rawSym2_bilin
     rw [hA.smul_right c X Z, hA.smul_left c Z X]
     ring
 
-
-
-
-
 def TensorNullEigenvectorConditionSymm
     (G : Real -> SmoothRiemannianMetric I M)
     (N : TwoTensorReaction (I := I) (M := M))
@@ -187,8 +160,6 @@ def TensorNullEigenvectorConditionSymm
       A x v v = 0 ->
       0 ≤ N t (G t) A x v v
 
-
-
 def TensorReactionSymmInputOn
     (G : Real -> SmoothRiemannianMetric I M)
     (N : TwoTensorReaction (I := I) (M := M))
@@ -197,8 +168,6 @@ def TensorReactionSymmInputOn
     ∀ x, ∀ v : TangentSpace I x,
       N t (G t) A x v v =
         N t (G t) (rawSym2 (I := I) (M := M) A) x v v
-
-
 
 omit [FiniteDimensional ℝ E] [IsManifold I 1 M] [IsManifold I 2 M] in
 theorem null_of_symm
@@ -237,8 +206,6 @@ theorem raw_quad_add_smul_eq
             hbilin.smul_left a w (a • w), hbilin.smul_right a w w,
             hsym w v]
           ring
-
-
 
 omit [FiniteDimensional ℝ E] [IsManifold I ∞ M] [IsManifold I 1 M] [IsManifold I 2 M] in
 theorem psd_null_left_raw
@@ -292,14 +259,6 @@ theorem psd_null_right_raw
   intro w
   rw [← hsym v w]
   exact psd_null_left_raw (I := I) (M := M) hsym hbilin hpsd hnull w
-
-
-
-
-
-
-
-
 
 structure TensorBarrierRegularityOn
     (G : Real -> SmoothRiemannianMetric I M)
@@ -359,14 +318,6 @@ structure TensorBarrierRegularityOn
                   x v v| ≤
               K * |epsilon * (delta + t - t0) * (G t).inner x v v|
 
-
-
-
-
-
-
-
-
 def TensorParabolicInequalityWithDriftOn
     (G : Real -> SmoothRiemannianMetric I M)
     (S : TwoTensorFamily (I := I) (M := M))
@@ -411,13 +362,6 @@ def TensorParabolicStrictInequalityWithDriftOn
             (nabla2S t x) (nablaS t x) v +
           N t (G t) (S t) x v v < timeDeriv t x v)
 
-
-
-
-
-
-
-
 def TensorBarrierLocalEst
     (G : Real -> SmoothRiemannianMetric I M)
     (S : TwoTensorFamily (I := I) (M := M))
@@ -451,9 +395,6 @@ def TensorBarrierLocalEst
         N t (G t) (S t) x v v + reactionErr ∧
         (v ≠ 0 -> heatErr + reactionErr < metricGain))
 
-
-
-
 def BarrierLocalCore
     (G : Real -> SmoothRiemannianMetric I M)
     (S : TwoTensorFamily (I := I) (M := M))
@@ -477,9 +418,6 @@ def BarrierLocalCore
             x v v ≤
         N t (G t) (S t) x v v + reactionErr ∧
         (v ≠ 0 -> reactionErr < metricGain))
-
-
-
 
 omit [FiniteDimensional ℝ E] [IsManifold I 1 M] [IsManifold I 2 M] in
 theorem hasDerivWithinAt_barrier_quad
@@ -516,9 +454,6 @@ theorem hasDerivWithinAt_barrier_quad
   have htotal := hS.add hmetric
   simpa [tensorBarrierFamily, add_comm, add_left_comm, add_assoc,
     mul_comm, mul_left_comm, mul_assoc] using htotal
-
-
-
 
 omit [FiniteDimensional ℝ E] [IsManifold I 1 M] [IsManifold I 2 M] in
 theorem barrierCore_deriv
@@ -571,8 +506,6 @@ theorem barrierCore_deriv
     have h := hGain t ht x v
     linarith
 
-
-
 omit [FiniteDimensional ℝ E] [IsManifold I 1 M] [IsManifold I 2 M] in
 theorem barrierCore_of_pt
     {G : Real -> SmoothRiemannianMetric I M}
@@ -612,9 +545,6 @@ theorem barrierCore_of_pt
     exact ⟨reactionErr t x v, metricGain t x v,
       hTime t ht x v, hReaction t ht x v, hMargin t ht x v⟩
 
-
-
-
 omit [IsManifold I 2 M] in
 theorem localEst_of_core
     {G : Real -> SmoothRiemannianMetric I M}
@@ -641,9 +571,6 @@ theorem localEst_of_core
     · intro hv
       have h := hmargin hv
       linarith
-
-
-
 
 omit [IsManifold I 2 M] in
 theorem localEst_deriv

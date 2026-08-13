@@ -1,7 +1,6 @@
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.HeatSemigroup.SpectralPointwiseFlowDeriv
 import DifferentialGeometry.Analysis.Spectral.Tensor.SobolevScale.WeylSummability
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
 
 namespace DifferentialGeometry.PDE.RicciFlow
 

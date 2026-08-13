@@ -1,6 +1,5 @@
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.MetricDifferenceJetNorm
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
 
 noncomputable section
 
@@ -17,7 +16,8 @@ open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.DivergenceTheorem
 open DifferentialGeometry.Tensor
 open DifferentialGeometry.Analysis.Sobolev.HebeyBlock
-open DifferentialGeometry.PDE.RicciFlow DifferentialGeometry.Analysis.Parabolic DifferentialGeometry.Analysis.Spectral
+open DifferentialGeometry.PDE.RicciFlow DifferentialGeometry.Analysis.Parabolic
+    DifferentialGeometry.Analysis.Spectral
 open DifferentialGeometry.Analysis.Spectral.DeTurckCoefficients
 open DifferentialGeometry.Tensor0SBundle
 
@@ -99,11 +99,6 @@ theorem deTurckRHS_diff_frame_component_apply
           (chartFrameVec (I := I) α i x) (chartFrameVec (I := I) α j x) := by
   rw [ContinuousLinearMap.sub_apply, ContinuousLinearMap.sub_apply]
 
-
-
-
-
-
 omit [CompactSpace M] in
 omit [NeZero (Module.finrank ℝ E)] in
 omit [SigmaCompactSpace M] in
@@ -144,15 +139,6 @@ theorem deTurckRHS_diff_gNorm_le_modelNorm_pointwise
       ‖T‖ ≤ D * ‖TensorRSSpace.toModel (𝕜 := ℝ) (I := I) T‖ :=
   gNorm_le_modelNorm_pointwise (I := I) (M := M) g₀ 0 2 x₀
 
-
-
-
-
-
-
-
-
-
 def chartDeTurckRHSComp (g_bg g : SmoothRiemannianMetric I M) (α : M)
     (i j : Fin (Module.finrank ℝ E)) (y : E) : ℝ :=
   (-2 : ℝ) * chartRicciTensor (I := I) g α i j y
@@ -165,32 +151,6 @@ omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space 
     chartDeTurckRHSComp (I := I) g_bg g α i j y =
       (-2 : ℝ) * chartRicciTensor (I := I) g α i j y
         + chartLieDeTurckComp (I := I) g g_bg α i j y := rfl
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 omit [CompactSpace M] in
 omit [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in

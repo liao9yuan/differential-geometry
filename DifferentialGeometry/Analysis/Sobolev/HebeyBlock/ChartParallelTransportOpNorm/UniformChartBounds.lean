@@ -2,7 +2,6 @@ import DifferentialGeometry.Analysis.Sobolev.HebeyBlock.FiberNorm.ChartFrameNorm
 import DifferentialGeometry.Tensor.Multilinear.HsBoundOp
 open DifferentialGeometry.Analysis.Sobolev.IntrinsicSobolev.SmoothCcTensorHs
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
 
 
 namespace DifferentialGeometry.Analysis.Sobolev.HebeyBlock

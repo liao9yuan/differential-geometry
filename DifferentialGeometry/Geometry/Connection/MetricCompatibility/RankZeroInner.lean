@@ -3,15 +3,6 @@ import DifferentialGeometry.Geometry.Metric.PointwiseInner.SlotPermutation
 import DifferentialGeometry.Tensor.RSTensor.RankZero
 open DifferentialGeometry.Geometry.Curvature
 
-
-
-
-
-
-
-
-
-
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
@@ -32,8 +23,6 @@ variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
   [IsManifold I ∞ M]
 
-
-
 lemma inner_nat_cast
     (g : SmoothRiemannianMetric I M) (x : M) {a b : ℕ} (h : a = b)
     (A B : ContinuousMultilinearMap ℝ (fun _ : Fin b => E) ℝ) :
@@ -45,8 +34,6 @@ lemma inner_nat_cast
   simpa only [finCongr_refl] using
     (tensorInnerPointwise_0s_domDomCongr (I := I) (M := M) g x b
       (Equiv.refl (Fin b)) A B)
-
-
 
 lemma lower_toRS0
     (g : SmoothRiemannianMetric I M) (s : ℕ) (x : M)
@@ -86,8 +73,6 @@ lemma lower_toRS0
   congr 1
   exact (Fin.ext (by simp)).symm
 
-
-
 lemma inner_toRS0
     (g : SmoothRiemannianMetric I M) (s : ℕ) (x : M)
     (A B : Tensor0SSpace s I x) :
@@ -109,8 +94,6 @@ lemma inner_toRS0
   exact inner_nat_cast (I := I) (M := M) g x (Nat.zero_add s)
     (Tensor0SSpace.toModel A) (Tensor0SSpace.toModel B)
 
-
-
 lemma inner_toRS0_zero
     (g : SmoothRiemannianMetric I M) (x : M)
     (A B : Tensor0SSpace 0 I x) :
@@ -122,8 +105,6 @@ lemma inner_toRS0_zero
     tensorInnerPointwise_0s_zero_arity,
     Tensor0SSpace.evalScalar_apply, Tensor0SSpace.evalScalar_apply]
   rfl
-
-
 
 lemma inner_toRS0_scalar
     (g : SmoothRiemannianMetric I M) (x : M) (a b : ℝ) :

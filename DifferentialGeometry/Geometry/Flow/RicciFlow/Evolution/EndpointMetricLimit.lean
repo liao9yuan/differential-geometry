@@ -7,18 +7,7 @@ import DifferentialGeometry.Tensor.RSTensor.Tensor0SRiemannian.Comparison
 import Mathlib.Topology.Order.IsLUB
 open DifferentialGeometry.PDE.RicciFlow
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Connection
-
-
-
-
-
-
-
-
-
-
 
 noncomputable section
 
@@ -40,9 +29,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
 variable [IsManifold I ∞ M] [IsManifold I 1 M] [IsManifold I 2 M]
 variable [T2Space M] [CompactSpace M]
     [BoundarylessManifold I M]
-
-
-
 
 theorem exists_endMetric
     {alpha omega : Real} {hAlphaOmega : alpha < omega}

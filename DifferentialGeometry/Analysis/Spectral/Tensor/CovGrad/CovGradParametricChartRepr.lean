@@ -6,7 +6,6 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.SmoothParametricCoe
 import DifferentialGeometry.Analysis.Spectral.Tensor.ChartTensor.ChartGeometry.GoodSetMeasure
 import Mathlib.Analysis.Calculus.ParametricIntegral
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Connection
 
 

@@ -5,7 +5,6 @@ import DifferentialGeometry.Geometry.Connection.ChartFrame.RicciIdentitySmoothFr
 import DifferentialGeometry.Geometry.Metric.PointwiseInner.Algebra
 import DifferentialGeometry.Tensor.Multilinear.BundleSmoothEval
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
 
 
 noncomputable section
@@ -31,7 +30,8 @@ variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
   [T2Space M] [BoundarylessManifold I M]
 
-omit [Module.Finite ℝ E] [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [T2Space M] [BoundarylessManifold I M] in
+omit [Module.Finite ℝ E] [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [T2Space M]
+    [BoundarylessManifold I M] in
 lemma scalarFn_eq_toModel_elim0
     (T : Π x : M, Tensor0SSpace 0 I x) (x : M) :
     scalarFn I M T x = (Tensor0SSpace.toModel (T x)) (fun i => Fin.elim0 i) := by
@@ -147,7 +147,8 @@ theorem tensorInnerPointwise_0s_hasMFDerivAt_metricCompatible_zero
   ring
 
 open DifferentialGeometry.Tensor0SBundle in
-omit [Module.Finite ℝ E] [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [T2Space M] [BoundarylessManifold I M] in
+omit [Module.Finite ℝ E] [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [T2Space M]
+    [BoundarylessManifold I M] in
 lemma toModel_tensor0S_curry_eq_curryLeft {s : ℕ} {x : M}
     (A : Tensor0SSpace (s + 1) I x) (v : TangentSpace I x) :
     Tensor0SSpace.toModel (tensor0S_curry (I := I) (M := M) s x A v) =
@@ -172,7 +173,8 @@ private lemma mixedGramMatrix_apply
     mixedGramMatrix (I := I) (M := M) g x frame i a =
       g.inner x ((chartModelBasis E) i) (frame a) := rfl
 
-omit [Module.Finite ℝ E] [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [T2Space M] [BoundarylessManifold I M] in
+omit [Module.Finite ℝ E] [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [T2Space M]
+    [BoundarylessManifold I M] in
 private lemma orthonormal_expansion
     (g : SmoothRiemannianMetric I M) (x : M)
     (frame : Module.Basis (Fin (Module.finrank ℝ E)) ℝ (TangentSpace I x))
@@ -471,7 +473,8 @@ private lemma tensorInnerPointwise_0s_succ_orthoFrame
   · intro ha
     exact absurd (Finset.mem_univ a) ha
 
-omit [Module.Finite ℝ E] [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [T2Space M] [BoundarylessManifold I M] in
+omit [Module.Finite ℝ E] [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [T2Space M]
+    [BoundarylessManifold I M] in
 private lemma linearIndependent_of_orthonormal
     (g : SmoothRiemannianMetric I M) {y : M}
     (frame : Fin (Module.finrank ℝ E) → TangentSpace I y)

@@ -1,6 +1,5 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Entropy.F.Formula510Core
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Operator
 
 
@@ -20,13 +19,6 @@ open scoped Manifold ContDiff
 
 variable {M : Type*}
 
-
-
-
-
-
-
-
 section GeometryFormula510
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]
@@ -36,12 +28,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
-
-
-
-
-
-
 
 theorem firstVariationIntegral_eq_pre510
     [T2Space M] [SigmaCompactSpace M]
@@ -123,12 +109,6 @@ theorem firstVariationIntegral_eq_pre510
             metricVariationRicciHess weightedDivergenceTrace shiftedTrace)
         hmeas).symm
 
-
-
-
-
-
-
 theorem closedIntegral_eq_pre510
     [T2Space M] [SigmaCompactSpace M]
     (G : DifferentialGeometry.Geometry.Curvature.MetricConnectionFamily (I := I) (M := M) Real)
@@ -195,10 +175,6 @@ theorem closedIntegral_eq_pre510
             metricVariationRicciHess weightedDivergenceTrace shiftedTrace)
         hmeas).symm
 
-
-
-
-
 theorem firstVar_pre510_closed
     [T2Space M] [SigmaCompactSpace M]
     (G : DifferentialGeometry.Geometry.Curvature.MetricConnectionFamily (I := I) (M := M) Real)
@@ -250,8 +226,6 @@ theorem firstVar_pre510_closed
             potential) := by
   rw [hclosed_compare]
   exact closedIntegral_eq_pre510 (I := I) (M := M) G hmeas hclosed_variation
-
-
 
 theorem bracketClosed_eventually
     {muPath : Real -> Measure M}
@@ -323,9 +297,6 @@ theorem bracketClosed_eventually
           (integrand :=
             fFunctionalClosedBracket (scalarCurvaturePath s)
               (lapPotentialPath s)) hmeas_s
-
-
-
 
 theorem closedCompare
     [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
@@ -458,8 +429,6 @@ theorem closedCompare
         ∂(volumeMeasureFamily (I := I) (M := M) G s0) := by
         simp [hpotential0, hscalar0, hlap0]
 
-
-
 theorem firstVar_pre510_weighted
     [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     (G : DifferentialGeometry.Geometry.Curvature.MetricConnectionFamily (I := I) (M := M) Real)
@@ -552,9 +521,6 @@ theorem firstVar_pre510_weighted
       hscalar_deriv hgrad_deriv hlap_deriv hpotential_deriv htrace
       hmetric_reg horig_reg hclosed_reg hpotential0 hscalar0 hlap0
   · exact hclosed_variation
-
-
-
 
 theorem firstVar_pre510_ibp
     [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
@@ -672,9 +638,6 @@ theorem firstVar_pre510_ibp
   · exact hscalar0
   · exact hlap0
   · exact hclosed_variation
-
-
-
 
 theorem formula510_of_connTrace
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]

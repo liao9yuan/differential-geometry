@@ -5,24 +5,10 @@ import DifferentialGeometry.Geometry.Metric.MetricBounds
 import Mathlib.Geometry.Manifold.Riemannian.Basic
 open DifferentialGeometry.PDE.RicciFlow
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Connection
 open DifferentialGeometry.Geometry.Operator
 
 set_option autoImplicit false
-
-/-!
-# Complete noncompact Bernstein estimates
-
-This file owns the noncompact localization interfaces for the Bernstein
-curvature tower.  A valid complete-manifold proof must consume quantitative
-parabolic cutoffs and the curvature-tower Kato estimate before discarding the
-negative next-level terms.
-
-The legacy `estimate_complete` statement below predates that audit and has
-insufficient hypotheses.  It remains temporarily for its current caller, but
-must not be treated as the canonical target.
--/
 
 noncomputable section
 
@@ -46,9 +32,6 @@ variable [VectorBundle Real E (TangentSpace I : M → Type _)]
 omit [NeZero (Module.finrank Real E)] [CompleteSpace E] [SigmaCompactSpace M]
   [T2Space M] [I.Boundaryless]
   [VectorBundle Real E (TangentSpace I : M → Type _)] in
-/-- Local scalar product rule for the parabolic operator.  Unlike
-`parabolic_mul`, scalar differentiability is required only near the evaluation
-point. -/
 private theorem parabolic_mul_nhds
     {G : MetricConnectionFamily (I := I) (M := M) Real}
     (T : Real) (X : Real → (x : M) → TangentSpace I x)
@@ -189,7 +172,6 @@ private theorem parabolic_mul_nhds
 omit [NeZero (Module.finrank Real E)] [CompleteSpace E] [SigmaCompactSpace M]
   [T2Space M] [I.Boundaryless]
   [VectorBundle Real E (TangentSpace I : M → Type _)] in
-/-- Local additivity of the scalar parabolic operator. -/
 private theorem parabolic_add_nhds
     {G : MetricConnectionFamily (I := I) (M := M) Real}
     (T : Real) (X : Real → (x : M) → TangentSpace I x)
@@ -262,7 +244,6 @@ private theorem parabolic_add_nhds
 
 omit [NeZero (Module.finrank Real E)] [CompleteSpace E] [SigmaCompactSpace M]
   [T2Space M] [I.Boundaryless] in
-/-- Local regularity of a finite scalar sum and of its spatial gradient. -/
 private theorem sum_reg_nhds
     {G : MetricConnectionFamily (I := I) (M := M) Real}
     {κ : Type*} (s : Finset κ)
@@ -345,7 +326,6 @@ private theorem sum_reg_nhds
 
 omit [NeZero (Module.finrank Real E)] [CompleteSpace E] [SigmaCompactSpace M]
   [T2Space M] [I.Boundaryless] in
-/-- Local finite-sum rule for the scalar parabolic operator. -/
 private theorem parabolic_sum_nhds
     {G : MetricConnectionFamily (I := I) (M := M) Real}
     {κ : Type*} (s : Finset κ)
@@ -417,7 +397,6 @@ private theorem parabolic_sum_nhds
 
 omit [NeZero (Module.finrank Real E)] [CompleteSpace E] [SigmaCompactSpace M]
   [T2Space M] [I.Boundaryless] in
-/-- The scalar parabolic operator vanishes on a spacetime constant. -/
 private theorem parabolic_const_zero
     {G : MetricConnectionFamily (I := I) (M := M) Real}
     (T : Real) (X : Real → (x : M) → TangentSpace I x)
@@ -443,7 +422,6 @@ private theorem parabolic_const_zero
 omit [NeZero (Module.finrank Real E)] [CompleteSpace E] [SigmaCompactSpace M]
   [T2Space M] [I.Boundaryless]
   [VectorBundle Real E (TangentSpace I : M → Type _)] in
-/-- Local fixed-scalar rule for the scalar parabolic operator. -/
 private theorem parabolic_smul_nhds
     {G : MetricConnectionFamily (I := I) (M := M) Real}
     (T : Real) (X : Real → (x : M) → TangentSpace I x)
@@ -488,7 +466,6 @@ private theorem parabolic_smul_nhds
 omit [NeZero (Module.finrank Real E)] [CompleteSpace E] [SigmaCompactSpace M]
   [T2Space M] [I.Boundaryless]
   [VectorBundle Real E (TangentSpace I : M → Type _)] in
-/-- Local affine-minus-function rule for the scalar parabolic operator. -/
 private theorem parabolic_aff_nhds
     {G : MetricConnectionFamily (I := I) (M := M) Real}
     (T : Real) (X : Real → (x : M) → TangentSpace I x)
@@ -580,9 +557,6 @@ private theorem parabolic_aff_nhds
   rw [hadd, hA, hneg]
   ring
 
-/-- Pointwise Kato control for the gradients of a Bernstein tower.  For the
-curvature tower this is supplied by `towerNorm_grad_le`; it is generated from
-the solution and is not an HCG input. -/
 def TowerNormGradUpTo
     {G : MetricConnectionFamily (I := I) (M := M) Real}
     (B : BernsteinTower (I := I) G) (m : Nat) : Prop :=
@@ -592,7 +566,6 @@ def TowerNormGradUpTo
         (gradientFun (I := I) (G.metric t) (B.w k t) x) ≤
       4 * B.w k t x * B.w (k + 1) t x
 
-/-- Pointwise Kato control at every level of a Bernstein tower. -/
 def TowerNormGradOn
     {G : MetricConnectionFamily (I := I) (M := M) Real}
     (B : BernsteinTower (I := I) G) : Prop :=
@@ -602,8 +575,6 @@ namespace TowerNormGradOn
 
 omit [NeZero (Module.finrank Real E)] [CompleteSpace E] [SigmaCompactSpace M]
   [T2Space M] in
-/-- Restrict all-level Kato control to the levels used by a localized
-Bernstein polynomial. -/
 theorem upTo
     {G : MetricConnectionFamily (I := I) (M := M) Real}
     {B : BernsteinTower (I := I) G}
@@ -617,8 +588,6 @@ namespace ShiCutoffData
 
 omit [NeZero (Module.finrank Real E)] [CompleteSpace E] [SigmaCompactSpace M]
   [T2Space M] in
-/-- The cutoff-gradient cross term is absorbed by half of the next tower
-level, up to the cutoff error times the current level. -/
 theorem cross_le
     {G : MetricConnectionFamily (I := I) (M := M) Real}
     (B : BernsteinTower (I := I) G)
@@ -671,8 +640,6 @@ theorem cross_le
 
 omit [NeZero (Module.finrank Real E)] [CompleteSpace E] [SigmaCompactSpace M]
   [T2Space M] [I.Boundaryless] in
-/-- The parabolic cutoff error of a positive natural power is controlled by
-the same power with one factor removed. -/
 theorem pow_parabolic_le
     {G : MetricConnectionFamily (I := I) (M := M) Real} {T : Real}
     (cut : ShiCutoffData (I := I) G T) (n p : Nat)
@@ -769,8 +736,6 @@ theorem pow_parabolic_le
 
 omit [NeZero (Module.finrank Real E)] [CompleteSpace E] [SigmaCompactSpace M]
   [T2Space M] in
-/-- A cutoff-power gradient term is absorbed by half of the next tower level,
-leaving an error with one fewer cutoff factor. -/
 theorem pow_cross_le
     {G : MetricConnectionFamily (I := I) (M := M) Real}
     (B : BernsteinTower (I := I) G)
@@ -851,17 +816,13 @@ theorem pow_cross_le
 
 end ShiCutoffData
 
-/-- The scalar coefficient of the level-`i` cutoff error in the graded
-Bernstein recurrence. -/
 def cutErrCoeff (i : Nat) : Real :=
   8 * (i + 1 : Real) ^ 2 + (i + 1 : Real)
 
-/-- Graded cutoff-error coefficients are nonnegative. -/
 theorem cutErrCoeff_nonneg (i : Nat) : 0 ≤ cutErrCoeff i := by
   unfold cutErrCoeff
   positivity
 
-/-- The graded cutoff-error coefficient increases with the tower level. -/
 theorem cutErrCoeff_mono : Monotone cutErrCoeff := by
   intro i j hij
   have hij' : (i : Real) ≤ (j : Real) := by exact_mod_cast hij
@@ -879,8 +840,6 @@ namespace ShiCutoffData
 omit [NeZero (Module.finrank Real E)] [CompleteSpace E] [SigmaCompactSpace M]
   [T2Space M] [I.Boundaryless]
   [VectorBundle Real E (TangentSpace I : M → Type _)] in
-/-- For every fixed finite tower, the cutoff errors eventually satisfy the
-smallness inequalities used by the graded Bernstein recurrence. -/
 theorem cutErr_small
     {G : MetricConnectionFamily (I := I) (M := M) Real} {T : Real}
     (cut : ShiCutoffData (I := I) G T) (m : Nat) :
@@ -1054,9 +1013,6 @@ private noncomputable def GfunLocal
     BernsteinTower.Gcoef (I := I) B m i * t ^ i *
       (q t x) ^ (i + 1) * B.w i t x
 
-/-- The graded localized Bernstein polynomial.  Level `i` is multiplied by
-`chi^(i+1)`, so every summand has compact support while cutoff errors can be
-absorbed one level lower in the tower recursion. -/
 noncomputable def GfunCut
     {G : MetricConnectionFamily (I := I) (M := M) Real}
     (B : BernsteinTower (I := I) G)
@@ -1087,7 +1043,6 @@ theorem GfunCut_nonneg
 
 omit [NeZero (Module.finrank Real E)] [CompleteSpace E] [SigmaCompactSpace M]
   [T2Space M] in
-/-- The graded polynomial vanishes wherever the cutoff vanishes. -/
 @[simp] theorem GfunCut_zero
     {G : MetricConnectionFamily (I := I) (M := M) Real}
     (B : BernsteinTower (I := I) G)
@@ -1099,8 +1054,6 @@ omit [NeZero (Module.finrank Real E)] [CompleteSpace E] [SigmaCompactSpace M]
 
 omit [NeZero (Module.finrank Real E)] [CompleteSpace E] [SigmaCompactSpace M]
   [T2Space M] in
-/-- The graded polynomial vanishes outside the spatial support of its cutoff
-on the controlled time slab. -/
 theorem GfunCut_off
     {G : MetricConnectionFamily (I := I) (M := M) Real}
     (B : BernsteinTower (I := I) G)
@@ -1112,8 +1065,6 @@ theorem GfunCut_off
 
 omit [NeZero (Module.finrank Real E)] [CompleteSpace E] [SigmaCompactSpace M]
   [T2Space M] in
-/-- The graded localized Bernstein polynomial is jointly continuous on its
-closed spacetime slab. -/
 theorem GfunCut_cont
     {G : MetricConnectionFamily (I := I) (M := M) Real}
     (B : BernsteinTower (I := I) G)
@@ -1134,8 +1085,6 @@ theorem GfunCut_cont
 
 omit [NeZero (Module.finrank Real E)] [CompleteSpace E] [SigmaCompactSpace M]
   [T2Space M] in
-/-- On the exhausted region, the graded polynomial is the ordinary Bernstein
-polynomial. -/
 theorem GfunCut_one
     {G : MetricConnectionFamily (I := I) (M := M) Real}
     (B : BernsteinTower (I := I) G)
@@ -2090,9 +2039,6 @@ private theorem GfunSupport_parabolic_le
 
 omit [NeZero (Module.finrank Real E)] [CompleteSpace E]
   [SigmaCompactSpace M] [T2Space M] in
-/-- The graded localized Bernstein polynomial satisfies the closed pointwise
-parabolic recurrence.  All positive-level cutoff errors telescope into the
-retained next-level dissipation; only the base curvature error remains. -/
 theorem GfunCut_parabolic_le
     {G : MetricConnectionFamily (I := I) (M := M) Real}
     (B : BernsteinTower (I := I) G)
@@ -2200,13 +2146,6 @@ private theorem GfunCut_space_diff
 namespace BernsteinTower
 
 omit [NeZero (Module.finrank Real E)] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
-/-- **Fixed-order complete-noncompact Bernstein estimate from quantitative cutoffs.**
-
-The cutoff family localizes the graded Bernstein polynomial to one compact
-spatial set, while `TowerNormGradUpTo` through the requested order absorbs the
-cutoff-gradient terms.  The cutoff index is internal: exhaustion recovers the
-ordinary polynomial at the requested point and `err n → 0` removes the
-remaining level-zero error. -/
 theorem estimate_cutoff_at
     {G : MetricConnectionFamily (I := I) (M := M) Real}
     (B : BernsteinTower (I := I) G)
@@ -2569,12 +2508,6 @@ theorem estimate_cutoff_at
       exact hlimit.trans hfinal
 
 omit [NeZero (Module.finrank Real E)] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
-/-- **Point-centered complete Bernstein estimate from barrier cutoffs.**
-
-The cutoff family may depend on the point being estimated.  The family
-hypothesis is essential: the strong induction needs lower-order estimates at
-the a priori unrelated point selected by the compact-support maximum
-principle. -/
 theorem estimate_barrier_at
     {G : MetricConnectionFamily (I := I) (M := M) Real}
     (B : BernsteinTower (I := I) G)
@@ -2899,7 +2832,6 @@ theorem estimate_barrier_at
       exact hlimit.trans hfinal
 
 omit [NeZero (Module.finrank Real E)] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
-/-- All-order compatibility wrapper for `estimate_cutoff_at`. -/
 theorem estimate_of_cutoff
     {G : MetricConnectionFamily (I := I) (M := M) Real}
     (B : BernsteinTower (I := I) G)
@@ -2913,13 +2845,6 @@ theorem estimate_of_cutoff
 omit [NeZero (Module.finrank Real E)] in
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-/-- **Legacy unsupported frontier.**  This statement is too weak for a
-complete-noncompact Bernstein argument: metric equivalence and a Ricci lower
-bound do not produce quantitative evolving-metric cutoffs, and the abstract
-tower does not expose the Kato estimate needed to absorb cutoff-gradient
-terms.  Replace its caller by a localized theorem consuming generated cutoff
-data and `TowerNormGradOn`; do not fill this proof under the present
-interface. -/
 theorem estimate_complete
     [RiemannianBundle (fun x : M ↦ TangentSpace I x)]
     [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]

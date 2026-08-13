@@ -5,7 +5,6 @@ import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.RiemannianFibe
 open DifferentialGeometry.Geometry.Connection.Realization
 open DifferentialGeometry.Analysis.Elliptic
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
 
 
 noncomputable section

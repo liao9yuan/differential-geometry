@@ -5,16 +5,6 @@ open DifferentialGeometry.Analysis.Sobolev DifferentialGeometry.Analysis.Spectra
 open DifferentialGeometry.Analysis.Spectral
 open DifferentialGeometry.Analysis.Elliptic
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
-
-
-
-
-
-
-
-
-
 
 namespace DifferentialGeometry.PDE.RicciFlow
 
@@ -102,13 +92,6 @@ variable
       [IsManifold I ∞ M] [CompactSpace M] [I.Boundaryless]
       [T2Space M]
 
-/-- In dimension three, integral `H1` control of the order-zero coefficient
-and integral `H2` control of the order-one coefficient are sufficient for the
-lower Ricci--DeTurck path arms to act from spectral `H2` to spectral `H1`.
-
-Unlike `lower_coeff_h1`, this statement has no pointwise hypothesis on the
-order-zero coefficient.  The pointwise bound needed by the order-one arm is a
-consequence of its mixed-tensor `H2` jet. -/
 theorem lower_jet_h1
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M) :

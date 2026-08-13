@@ -32,7 +32,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
 set_option backward.isDefEq.respectTransparency false in
-
 omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
     [SigmaCompactSpace M] in
 omit [T2Space M] in
@@ -80,7 +79,6 @@ private theorem tangentBilinFlip_curry_apply_apply_contMDiff (r t : ℕ) :
   rfl
 
 set_option backward.isDefEq.respectTransparency false in
-
 omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
     [SigmaCompactSpace M] in
 private theorem tangentBilinFlip_curry_apply_contMDiff (r t : ℕ)
@@ -132,7 +130,6 @@ private theorem tangentBilinFlip_curry_apply_contMDiff (r t : ℕ)
   exact tangentBilinFlip_curry_apply_apply_contMDiff (I := I) (M := M) r t Z Yv Yu
 
 set_option backward.isDefEq.respectTransparency false in
-
 omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless]
     [BoundarylessManifold I M] [SigmaCompactSpace M] in
 private theorem swapTwoCurryFib_apply_contMDiff (r t : ℕ) :
@@ -199,7 +196,6 @@ private theorem swapTwoCurryFib_apply_contMDiff (r t : ℕ) :
     swapTwoCurryFib_apply (I := I) (M := M) r t x (Z x) (Yv x)]
 
 set_option backward.isDefEq.respectTransparency false in
-
 omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless]
     [BoundarylessManifold I M] [SigmaCompactSpace M] in
 private theorem swapTwoCurryFib_contMDiff (r t : ℕ) :
@@ -247,7 +243,6 @@ private theorem swapTwoCurryFib_contMDiff (r t : ℕ) :
   exact swapTwoCurryFib_apply_contMDiff (I := I) (M := M) r t Z Yv
 
 set_option backward.isDefEq.respectTransparency false in
-
 omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
     [SigmaCompactSpace M] in
 omit [T2Space M] in
@@ -259,7 +254,6 @@ private lemma swapTwoFib_fromCurry (r t : ℕ) (x : M)
   (swapTwoFib_apply (I := I) (M := M) r t x T).symm
 
 set_option backward.isDefEq.respectTransparency false in
-
 omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
     [SigmaCompactSpace M] in
 private theorem swapTwoFib_apply_contMDiff (r t : ℕ) :
@@ -317,7 +311,6 @@ private theorem swapTwoFib_apply_contMDiff (r t : ℕ) :
     (swapTwoFib_fromCurry (I := I) (M := M) r t x (Z x))
 
 set_option backward.isDefEq.respectTransparency false in
-
 omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
     [SigmaCompactSpace M] in
 private theorem swapTwoFib_contMDiff (r t : ℕ) :
@@ -333,14 +326,12 @@ private theorem swapTwoFib_contMDiff (r t : ℕ) :
   exact swapTwoFib_apply_contMDiff (I := I) (M := M) r t Z
 
 set_option backward.isDefEq.respectTransparency false in
-
 noncomputable def swapTwoSec (r t : ℕ) :
     HomTensorRSField (E := E) (M := M) r (t + 2) (t + 2) I where
   toFun := fun x : M => swapTwoFib (I := I) (M := M) r t x
   contMDiff_toFun := swapTwoFib_contMDiff (I := I) (M := M) r t
 
 set_option backward.isDefEq.respectTransparency false in
-
 omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
     [SigmaCompactSpace M] in
 lemma swapTwoSec_apply (r t : ℕ) (x : M) :

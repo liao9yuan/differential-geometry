@@ -6,15 +6,6 @@ open DifferentialGeometry.Geometry.Operator
 
 set_option autoImplicit false
 
-
-
-
-
-
-
-
-
-
 namespace DifferentialGeometry.Geometry.Connection
 
 noncomputable section
@@ -188,8 +179,6 @@ private theorem leviCivitaConnectionCandidateAt_scaleMetric
   apply B.ext
   intro i
   simp [koszulNablaField_scaleMetric (I := I) c hc g]
-
-
 
 omit [SigmaCompactSpace M] [T2Space M] in
 theorem lcConn_scaleMetric

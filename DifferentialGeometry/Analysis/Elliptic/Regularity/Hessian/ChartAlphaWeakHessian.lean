@@ -6,7 +6,6 @@ import DifferentialGeometry.Analysis.Sobolev.Euclidean.IteratedSobolevSpace.Iter
 import DifferentialGeometry.Geometry.Operator.Hessian
 import DifferentialGeometry.Geometry.Connection.ChartFrame.ChartMetric
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Connection
 open DifferentialGeometry.Geometry.Operator
 

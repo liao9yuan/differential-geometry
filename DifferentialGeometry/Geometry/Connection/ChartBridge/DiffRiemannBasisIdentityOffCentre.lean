@@ -2,7 +2,6 @@ import DifferentialGeometry.Geometry.Connection.ChartBridge.RiemannBasisIdentity
 import DifferentialGeometry.Geometry.Curvature.CurvatureOperator.DifferentiatedRicciEndomorphism
 open DifferentialGeometry.Analysis.Elliptic
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Operator
 
 

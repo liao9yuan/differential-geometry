@@ -10,7 +10,6 @@ import DifferentialGeometry.Geometry.Connection.Realization.SmoothSections
 open DifferentialGeometry.Geometry.Connection.Realization DifferentialGeometry.Tensor.Multilinear
 open DifferentialGeometry.Analysis.Spectral
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Connection
 
 
@@ -192,7 +191,6 @@ omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [Boundary
     domDomCongrFib_apply, Tensor0SBundle.Tensor0SSpace.toModel_ofModel]
 
 set_option backward.isDefEq.respectTransparency false in
-
 omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
     [T2Space M] [SigmaCompactSpace M] in
 private theorem domDomCongr_section_contMDiff {d : ℕ} (ρ : Equiv.Perm (Fin d))
@@ -227,7 +225,6 @@ private theorem domDomCongr_section_contMDiff {d : ℕ} (ρ : Equiv.Perm (Fin d)
   rfl
 
 set_option backward.isDefEq.respectTransparency false in
-
 omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] in
 omit [BoundarylessManifold I M] [SigmaCompactSpace M] in
 theorem traceHessianFib_contMDiff (g₁ : SmoothRiemannianMetric I M) :

@@ -6,13 +6,6 @@ open DifferentialGeometry.Geometry.Connection
 
 set_option autoImplicit false
 
-/-!
-# Constant metric scaling and curvature
-
-Positive constant scaling leaves the Levi-Civita connection unchanged and
-multiplies the lowered Riemann tensor by the same constant.
--/
-
 noncomputable section
 
 namespace DifferentialGeometry.Geometry.Curvature
@@ -29,8 +22,6 @@ variable [IsManifold I 1 M]
 variable [SigmaCompactSpace M] [T2Space M]
 
 omit [SigmaCompactSpace M] in
-/-- The canonical lowered Riemann tensor scales linearly under positive
-constant metric scaling. -/
 theorem metricRm_scale
     (c : Real) (hc : 0 < c) (g : SmoothRiemannianMetric I M) (x : M) :
     metricRm04 (I := I) (M := M) (scaleMetric (I := I) c hc g) x =
@@ -45,7 +36,6 @@ theorem metricRm_scale
     smul_eq_mul]
 
 omit [SigmaCompactSpace M] in
-/-- Standard-slot evaluation of the constant-scaling curvature law. -/
 theorem metricRmStd_scale
     (c : Real) (hc : 0 < c) (g : SmoothRiemannianMetric I M) (x : M)
     (X Y Z W : TangentSpace I x) :

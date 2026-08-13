@@ -10,19 +10,8 @@ import DifferentialGeometry.Geometry.Connection.LeviCivita.Smooth.MetricFlatBasi
 import Mathlib.Tactic.Ring
 open DifferentialGeometry.PDE.RicciFlow
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
 
 set_option autoImplicit false
-
-
-
-
-
-
-
-
-
-
 
 noncomputable section
 
@@ -45,8 +34,6 @@ section Components
 variable {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
 variable {u : Set M}
 
-
-
 def RicciTensorRealizesRm04TraceInFrameOn
     {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -57,9 +44,6 @@ def RicciTensorRealizesRm04TraceInFrameOn
     DifferentialGeometry.Geometry.Curvature.RicciTensorRealizesRm04TraceInFrame
       (I := I) (S.ricci t) (Rm04 t) (gInv t) frame
 
-
-
-
 def RicciTensorRealizesRm04FirstTraceInFrameOn
     {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -69,9 +53,6 @@ def RicciTensorRealizesRm04FirstTraceInFrameOn
   forall t : Real,
     DifferentialGeometry.Geometry.Curvature.RicciTensorRealizesRm04FirstTraceInFrame
       (I := I) (S.ricci t) (Rm04 t) (gInv t) frame
-
-
-
 
 def RicciTensorRealizesRm04FirstTraceInFrameOnRegular
     {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
@@ -101,8 +82,6 @@ theorem ricciCompInFrame_eq_rm04_trace
   simpa [ricciCompInFrame] using
     DifferentialGeometry.Geometry.Curvature.ricciComp_eq_trace (I := I)
       (S.ricci t) (Rm04 t) (gInv t) frame (htrace t) x i j
-
-
 
 omit [SigmaCompactSpace M] [T2Space M] in
 private theorem metricInverseInBasis_of_solution_frame
@@ -142,11 +121,6 @@ theorem metricInverseInBasis_of_local
       (hinv t x hx i j).1
   · simpa [metricCompInFrame, IsLocalFrameOn.toBasisAt_coe] using
       (hinv t x hx i j).2
-
-
-
-
-
 
 omit [SigmaCompactSpace M] in
 theorem ricciTensorRealizesRm04FirstTraceInFrameOnRegular_of_rm13Trace
@@ -193,16 +167,12 @@ theorem ricciTensorRealizesRm04FirstTraceInFrameOnRegular_of_rm13Trace
   simpa [DifferentialGeometry.Geometry.Curvature.RicciTensorRealizesRm04FirstTraceInFrame,
     IsLocalFrameOn.toBasisAt_coe] using hAt i j
 
-
-
 def ConnectionLocallySmoothOn
     {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D) : Prop :=
   forall t : DifferentialGeometry.Geometry.Curvature.RealTimeInterval.RegularTime D,
     CovariantDerivative.ContMDiffCovariantDerivativeLocally
       (S.family.connection (t : Real)) (1 : WithTop ℕ∞)
-
-
 
 omit [SigmaCompactSpace M] in
 theorem connSmoothOfSol
@@ -216,8 +186,6 @@ theorem connSmoothOfSol
   simpa [SolutionFamily.connection, metricCov] using
     DifferentialGeometry.Geometry.Connection.leviCivitaConnectionOfMetric_contMDiffCovariantDerivativeLocally_one
       (I := I) (M := M) (S.base.metric s)
-
-
 
 omit [SigmaCompactSpace M] in
 theorem connCurvOfSol
@@ -413,10 +381,6 @@ theorem rm04InputSkew_regular_first_two
     (Rm04 (t : Real))
     (rm04Realizes_regular (I := I) S Rm13 Rm04 hRm13 hLower t)
 
-
-
-
-
 theorem rm04InputSkew_regular
     [IsManifold I (∞ + 1) M]
     {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
@@ -437,8 +401,6 @@ theorem rm04InputSkew_regular
           -Rm04 (t : Real) x (DifferentialGeometry.Geometry.Curvature.vec4 X Y Z W) :=
   rm04InputSkew_regular_first_two
     (I := I) S Rm13 Rm04 hRm13 hLower
-
-
 
 omit [SigmaCompactSpace M] in
 theorem ricciSymm_regular
@@ -491,9 +453,6 @@ theorem ricciSymm_regular
       i j
   simpa [basis, ricciCompInFrame, DifferentialGeometry.Geometry.Curvature.ricciComp,
     DifferentialGeometry.Geometry.Curvature.ricciComp, IsLocalFrameOn.toBasisAt_coe] using hsym
-
-
-
 
 def RiemannEvolutionEquationInFrameOn
     {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}

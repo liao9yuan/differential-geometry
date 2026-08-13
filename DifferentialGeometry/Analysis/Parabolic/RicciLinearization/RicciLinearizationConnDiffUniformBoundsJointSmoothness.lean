@@ -10,7 +10,6 @@ import DifferentialGeometry.Geometry.Metric.MetricBounds
 import DifferentialGeometry.Analysis.Parabolic.RicciLinearization.RicciLinearizationConnDiffUniformBoundsSlotPermutations
 open DifferentialGeometry.Analysis.Spectral
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
 
 
 noncomputable section
@@ -188,7 +187,6 @@ private theorem slotPermField_jointContMDiffOn {d : ℕ} (ρ : Equiv.Perm (Fin d
     (slotPermCLM_apply (I := I) ρ p.1 (Z p))
 
 set_option backward.isDefEq.respectTransparency false in
-
 omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
     [T2Space M] [SigmaCompactSpace M] in
 private theorem tensorProdField_jointContMDiffOn (m k : ℕ) {S : Set ℝ}
@@ -262,7 +260,6 @@ private theorem tensorProdField_jointContMDiffOn (m k : ℕ) {S : Set ℝ}
   · exact hpointwise p₀ (by rw [← hx₀]; exact mem_baseSet_trivializationAt _ _ x₀)
 
 set_option backward.isDefEq.respectTransparency false in
-
 omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
     [SigmaCompactSpace M] in
 private theorem connContrField_jointContMDiffOn (m k : ℕ) {S : Set ℝ}
@@ -334,14 +331,14 @@ private theorem connContrField_jointContMDiffOn (m k : ℕ) {S : Set ℝ}
         (E := fun z : M => Tensor0SBundle.Tensor0SSpace 0 I z) p.1
         (DifferentialGeometry.Geometry.Connection.unitZeroSec (I := I) (M := M) p.1))
       ((Set.univ : Set M) ×ˢ S) :=
-    (DifferentialGeometry.Geometry.Connection.unitZeroSec (I := I) (M := M)).contMDiff.comp_contMDiffOn contMDiffOn_fst
+    (DifferentialGeometry.Geometry.Connection.unitZeroSec (I := I)
+      (M := M)).contMDiff.comp_contMDiffOn contMDiffOn_fst
   have hEval := ContMDiffOn.clm_bundle_apply (b := Prod.fst) hTr hunit
   refine hEval.congr (fun p _ => ?_)
   exact congrArg (fun t => TotalSpace.mk' (Tensor0SBundle.Tensor0SModel (m + 1 + k) ℝ E)
     (E := fun z : M => Tensor0SBundle.Tensor0SSpace (m + 1 + k) I z) p.1 t) rfl
 
 set_option backward.isDefEq.respectTransparency false in
-
 private theorem connDiffSection_realizedFam_jointContMDiffOn
     (g₀ : SmoothRiemannianMetric I M) (T T' : SmoothCcTensor g₀ 0 2)
     {δ : ℝ} (hδ : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
@@ -422,7 +419,6 @@ private theorem covGradConnDiff_realizedFam_jointContMDiffOn
   exact h
 
 set_option backward.isDefEq.respectTransparency false in
-
 private theorem order1CLM_realizedFam_jointContMDiffOn
     (g₀ : SmoothRiemannianMetric I M) (T T' : SmoothCcTensor g₀ 0 2)
     {δ : ℝ} (hδ : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
@@ -475,7 +471,6 @@ private theorem order1CLM_realizedFam_jointContMDiffOn
     (E := fun z : M => Tensor0SBundle.Tensor0SSpace 4 I z) p.1 t) rfl
 
 set_option backward.isDefEq.respectTransparency false in
-
 private theorem order0CLM_realizedFam_jointContMDiffOn
     (g₀ : SmoothRiemannianMetric I M) (T T' : SmoothCcTensor g₀ 0 2)
     {δ : ℝ} (hδ : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
@@ -564,7 +559,6 @@ private theorem order0CLM_realizedFam_jointContMDiffOn
     (E := fun z : M => Tensor0SBundle.Tensor0SSpace 4 I z) p.1 t) rfl
 
 set_option backward.isDefEq.respectTransparency false in
-
 omit [CompactSpace M] in
 private theorem fourTrace_realizedFam_jointContMDiffOn
     (g₀ : SmoothRiemannianMetric I M) (T T' : SmoothCcTensor g₀ 0 2)
@@ -602,7 +596,6 @@ private theorem fourTrace_realizedFam_jointContMDiffOn
     (E := fun z : M => Tensor0SBundle.Tensor0SSpace 2 I z) p.1 t) rfl
 
 set_option backward.isDefEq.respectTransparency false in
-
 theorem linearizedRicciConnDiffOrder1Fib_realizedFam_jointContMDiffOn
     (g₀ : SmoothRiemannianMetric I M) (T T' : SmoothCcTensor g₀ 0 2)
     {δ : ℝ} (hδ : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
@@ -640,8 +633,6 @@ theorem linearizedRicciConnDiffOrder1Fib_realizedFam_jointContMDiffOn
     (E := fun z : M => Tensor0SBundle.Tensor0SSpace 2 I z) p.1 t) rfl
 
 set_option backward.isDefEq.respectTransparency false in
-set_option maxRecDepth 8000 in
-
 theorem linearizedRicciConnDiffOrder0Fib_realizedFam_jointContMDiffOn
     (g₀ : SmoothRiemannianMetric I M) (T T' : SmoothCcTensor g₀ 0 2)
     {δ : ℝ} (hδ : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
@@ -678,8 +669,9 @@ theorem linearizedRicciConnDiffOrder0Fib_realizedFam_jointContMDiffOn
       (Y p.1))
     hE0
   refine hCK.congr (fun p _ => ?_)
-  exact congrArg (fun t => TotalSpace.mk' (Tensor0SBundle.Tensor0SModel 2 ℝ E)
-    (E := fun z : M => Tensor0SBundle.Tensor0SSpace 2 I z) p.1 t) rfl
+  apply TotalSpace.mk_inj.mpr
+  rw [linearizedRicciConnDiffOrder0CometricTracedCLM]
+  rw [ContinuousLinearMap.comp_apply]
 
 
 theorem linearizedRicciConnDiffOrder0Coeff_jointContMDiffOn_smallPerturbationSet

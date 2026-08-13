@@ -19,8 +19,6 @@ import Mathlib.Topology.UniformSpace.Cauchy
 import Mathlib.Topology.EMetricSpace.Lipschitz
 open DifferentialGeometry.Geometry.Connection
 
-
-
 noncomputable section
 
 open Set Function Filter Bundle Manifold

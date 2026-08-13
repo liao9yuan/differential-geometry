@@ -4,7 +4,6 @@ import DifferentialGeometry.Analysis.Sobolev.Euclidean.Multiplication.SmoothCoef
 import DifferentialGeometry.Analysis.Sobolev.Euclidean.IteratedSobolevSpace.IteratedSobolev
 import DifferentialGeometry.Analysis.Sobolev.Euclidean.Density
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
 
 
 noncomputable section

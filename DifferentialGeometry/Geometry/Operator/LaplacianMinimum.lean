@@ -5,20 +5,8 @@ import Mathlib.Geometry.Manifold.VectorBundle.Tangent
 import Mathlib.Geometry.Manifold.IsManifold.InteriorBoundary
 import Mathlib.Analysis.Calculus.DerivativeTest
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
 
 set_option autoImplicit false
-
-
-
-
-
-
-
-
-
-
-
 
 namespace DifferentialGeometry.Geometry.Operator
 
@@ -37,8 +25,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 private instance tangentSpace_finiteDimensional (x : M) :
     FiniteDimensional Real (TangentSpace I x) :=
   inferInstanceAs (FiniteDimensional Real E)
-
-
 
 private noncomputable def tangentConstAt (x : M) (v : TangentSpace I x) (p : M) :
     TangentSpace I p :=
@@ -76,11 +62,6 @@ private theorem extDerivFun_real_eq_mfderiv
       mfderiv I 𝓘(Real, Real) u x v := by
   simp [extDerivFun, NormedSpace.fromTangentSpace]
 
-
-
-
-
-
 private theorem deriv_deriv_nonneg_of_isLocalMin
     {φ : Real -> Real} {t₀ : Real}
     (hmin : IsLocalMin φ t₀)
@@ -102,8 +83,6 @@ private theorem deriv_deriv_nonneg_of_isLocalMin
   have hzero : deriv (deriv φ) t₀ = 0 := by
     simpa using hderiv_const.deriv_eq
   linarith
-
-
 
 omit [FiniteDimensional ℝ E] in
 private theorem fderiv_fderiv_apply_self_nonneg_of_isLocalMin_model
@@ -271,13 +250,6 @@ private theorem extDerivFun_tangentConstAt_eq_fderiv_writtenInExtChartAt
   rw [extDerivFun_real_eq_mfderiv, hfield]
   exact hchain_apply.symm.trans hwithin_to_fderiv
 
-
-
-
-
-
-
-
 omit [FiniteDimensional ℝ E] [IsManifold I ∞ M] in
 theorem mfderiv_eq_zero_at_spatial_min_of_isInteriorPoint
     {f : M -> Real} {x : M}
@@ -341,9 +313,6 @@ theorem gradientFun_eq_zero_at_spatial_min
   exact gradientFun_eq_zero_of_mfderiv_eq_zero (I := I) g f
     (mfderiv_eq_zero_at_spatial_min (I := I) hmin hf)
 
-
-
-
 def LaplacianNonnegativeAtSpatialMin
     [I.Boundaryless]
     [VectorBundle Real E (TangentSpace I : M -> Type _)]
@@ -355,8 +324,6 @@ def LaplacianNonnegativeAtSpatialMin
         (∀ᶠ y in nhds x, MDifferentiableAt I 𝓘(Real, Real) f y) ->
         MDiffAt (T% fun y : M => gradientFun (I := I) g f y) x ->
           0 <= laplacian (I := I) cov g f x
-
-
 
 theorem divergence_eq_of_section_eq_zero
     [VectorBundle Real E (TangentSpace I : M -> Type _)]
@@ -379,8 +346,6 @@ theorem divergence_eq_of_section_eq_zero
     exact sub_eq_zero.mp hsub
   simp [divergence, hcov_eq]
 
-
-
 theorem laplacian_eq_laplacian_of_gradient_eq_zero
     [VectorBundle Real E (TangentSpace I : M -> Type _)]
     [ContMDiffVectorBundle 1 E (TangentSpace I : M -> Type _) I]
@@ -390,13 +355,6 @@ theorem laplacian_eq_laplacian_of_gradient_eq_zero
     (hgrad : gradientFun (I := I) g f x = 0) :
     laplacian (I := I) cov g f x = laplacian (I := I) cov' g f x := by
   exact divergence_eq_of_section_eq_zero (I := I) cov cov' hgradSec hgrad
-
-
-
-
-
-
-
 
 private theorem fderiv_fderiv_self_nonneg_of_isLocalMin
     (g : SmoothRiemannianMetric I M)
@@ -525,8 +483,6 @@ private theorem fderiv_fderiv_self_nonneg_of_isLocalMin
     rw [mfderiv, if_neg hu]
     exact le_rfl
 
-
-
 private theorem cov_gradient_inner_self_nonneg_at_spatial_min
     [VectorBundle Real E (TangentSpace I : M -> Type _)]
     [ContMDiffVectorBundle 1 E (TangentSpace I : M -> Type _) I]
@@ -581,8 +537,6 @@ private theorem cov_gradient_inner_self_nonneg_at_spatial_min
   rw [← hmetric']
   exact fderiv_fderiv_self_nonneg_of_isLocalMin
     (I := I) g hmin hx hf hf_near hgrad v
-
-
 
 theorem laplacian_nonneg_at_spatial_min_of_metricCompatible_of_isInteriorPoint
     [VectorBundle Real E (TangentSpace I : M -> Type _)]

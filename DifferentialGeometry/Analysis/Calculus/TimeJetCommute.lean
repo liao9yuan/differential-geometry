@@ -3,17 +3,6 @@ import Mathlib.Analysis.Calculus.ContDiff.Basic
 import Mathlib.Analysis.Calculus.IteratedDeriv.Lemmas
 import Mathlib.Analysis.Calculus.TangentCone.Prod
 
-
-
-
-
-
-
-
-
-
-
-
 noncomputable section
 
 open scoped ContDiff
@@ -23,8 +12,6 @@ namespace Analysis
 
 variable {E F : Type*}
     [NormedAddCommGroup E] [NormedSpace ℝ E] [NormedAddCommGroup F] [NormedSpace ℝ F]
-
-
 
 theorem fderiv_deriv_time_comm {G : ℝ → E → F} (t : ℝ) (x : E)
     (hG : ContDiff ℝ ∞ (Function.uncurry G)) :
@@ -161,10 +148,6 @@ theorem fderiv_iteratedDeriv_time_comm {G : ℝ → E → F} (a : ℕ) (t₀ : �
     funext t
     exact fderiv_deriv_time_comm t x hG
 
-
-
-
-
 theorem fderiv_derivWithin_time_comm {G : ℝ → E → F} {sₜ : Set ℝ} {V : Set E}
     (hsₜ : UniqueDiffOn ℝ sₜ) (hsacc : sₜ ⊆ closure (interior sₜ)) (hV : IsOpen V)
     {t : ℝ} (ht : t ∈ sₜ) {x : E} (hx : x ∈ V)
@@ -245,10 +228,6 @@ theorem fderiv_derivWithin_time_comm {G : ℝ → E → F} {sₜ : Set ℝ} {V :
     ContinuousLinearMap.inr_apply]
   exact hsymm.eq (0, u) (1, 0)
 
-
-
-
-
 theorem fderiv_iteratedDerivWithin_time_comm {G : ℝ → E → F} {sₜ : Set ℝ} {V : Set E}
     (hsₜ : UniqueDiffOn ℝ sₜ) (hsacc : sₜ ⊆ closure (interior sₜ)) (hV : IsOpen V)
     (a : ℕ) {t₀ : ℝ} (ht₀ : t₀ ∈ sₜ) {x : E} (hx : x ∈ V)
@@ -281,11 +260,6 @@ theorem fderiv_iteratedDerivWithin_time_comm {G : ℝ → E → F} {sₜ : Set �
     rw [hlhs, ih hG', iteratedDerivWithin_succ']
     refine iteratedDerivWithin_congr (fun t ht => ?_) ht₀
     exact fderiv_derivWithin_time_comm hsₜ hsacc hV ht hx hG
-
-
-
-
-
 
 theorem spatialFDeriv_contDiffOn {G : ℝ → E → F} {sₜ : Set ℝ} {V : Set E}
     (hsₜ : UniqueDiffOn ℝ sₜ) (hV : IsOpen V)

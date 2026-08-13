@@ -3,18 +3,8 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.Perelman.NoncollapseOpen
 open DifferentialGeometry.Analysis.Spectral
 open DifferentialGeometry.PDE.RicciFlow
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
 
 set_option autoImplicit false
-
-/-!
-# Initial-time small-ball producer for Perelman noncollapsing
-
-This file supplies the initial-boundary geometric input for no-local-collapsing
-on a half-open short-time Ricci flow.  The positive-time entropy argument is
-already in `NoncollapseOpen`; the compact-uniform volume producer is imported
-from `FamilySmallBall`.
--/
 
 open DifferentialGeometry.Geometry.Connection
 namespace DifferentialGeometry.PDE.RicciFlow.Perelman
@@ -24,7 +14,6 @@ noncomputable section
 open Bundle MeasureTheory Set DifferentialGeometry.Tensor0SBundle
 open scoped Manifold ContDiff ENNReal
 open DifferentialGeometry.Geometry.Riemannian.VolumeComparison
-
 
 universe u uE uH
 
@@ -43,10 +32,6 @@ private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
 omit [ConnectedSpace M] [BoundarylessManifold I M] in
-/-- The raw initial-boundary producer: for a short-time Ricci flow on
-`[0, omega)`, small enough early Riemannian-distance balls have a uniform
-normalized volume lower bound, for every centre and every radius satisfying
-`r^2 <= t`. -/
 theorem early_vol_low
     [T2Space (TangentBundle I M)]
     {omega : Real} (h0omega : 0 < omega)
@@ -67,9 +52,6 @@ theorem early_vol_low
     family_vol_low (I := I) (M := M) h0omega S.family.metric hS.smoothMetric hrho
 
 omit [ConnectedSpace M] [BoundarylessManifold I M] in
-/-- Flow-ball form of `early_vol_low`.  This is only the definitional adapter
-from raw Riemannian-distance balls to `FlowMetricBall.IsKappaNoncollapsed`; the
-geometric content remains entirely in `early_vol_low`. -/
 theorem early_ball_low
     [T2Space (TangentBundle I M)]
     {omega : Real} (h0omega : 0 < omega)
@@ -105,9 +87,6 @@ private theorem kappa_mono
   refine ⟨hkappa, ?_⟩
   exact (mul_le_mul' (ENNReal.ofReal_le_ofReal hle) le_rfl).trans hvol
 
-/-- Assuming the isolated initial small-ball producer, a compact short-time
-Ricci flow on `[0, omega)` satisfies Perelman's no-local-collapsing predicate
-below any fixed positive scale. -/
 theorem no_local_open
     [T2Space (TangentBundle I M)]
     {omega : Real} (h0omega : 0 < omega)

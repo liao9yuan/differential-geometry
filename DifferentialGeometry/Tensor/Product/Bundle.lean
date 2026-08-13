@@ -177,7 +177,6 @@ noncomputable def vectorPrebundle :
     pretrivialization_linear' := by
       rintro _ ⟨e₁, e₂, he₁, he₂, rfl⟩
       apply Pretrivialization.tensorProduct.isLinear
-
     pretrivializationAt := fun x =>
       Pretrivialization.tensorProduct (𝕜 := 𝕜) (trivializationAt F₁ E₁ x) (trivializationAt F₂ E₂ x)
     mem_base_pretrivializationAt := fun x =>
@@ -231,7 +230,6 @@ noncomputable def vectorPrebundle :
               (trivializationAt F₂ E₂ b)
               (mem_baseSet_trivializationAt F₂ E₂ b)).symm
       simp [hL1, hL2]
-
   }
 
 noncomputable instance Bundle.TensorProduct.topologicalSpaceTotalSpace :

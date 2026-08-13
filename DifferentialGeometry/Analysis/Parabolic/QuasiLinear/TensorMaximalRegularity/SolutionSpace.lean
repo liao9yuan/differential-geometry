@@ -1,7 +1,6 @@
 import DifferentialGeometry.Analysis.Parabolic.MaximalRegularity.OperatorEquation
 import DifferentialGeometry.Analysis.Spectral.Tensor.SobolevScale.Inclusion
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
 
 noncomputable section
 

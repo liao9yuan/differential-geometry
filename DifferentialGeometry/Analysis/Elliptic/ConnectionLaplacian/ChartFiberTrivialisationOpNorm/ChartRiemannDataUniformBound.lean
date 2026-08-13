@@ -3,7 +3,6 @@ import DifferentialGeometry.Analysis.Elliptic.TensorRegularity.Defs
 import DifferentialGeometry.Geometry.Curvature.Riemann.Defs
 open DifferentialGeometry.Analysis.Elliptic
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Connection
 open DifferentialGeometry.Geometry.Operator
 

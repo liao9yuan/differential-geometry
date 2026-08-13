@@ -9,18 +9,9 @@ import DifferentialGeometry.Topology.DirectLimitManifold
 import DifferentialGeometry.Topology.SigmaCompactOpen
 open DifferentialGeometry.PDE.RicciFlow
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
 
 set_option autoImplicit false
 set_option backward.isDefEq.respectTransparency false
-
-
-
-
-
-
-
-
 
 noncomputable section
 
@@ -39,11 +30,8 @@ variable {I : ModelWithCorners ℝ E H}
 variable {M : ℕ → Type u} [∀ j, MetricSpace (M j)] [∀ j, ChartedSpace H (M j)]
   [∀ j, IsManifold I ∞ (M j)] [∀ j, SigmaCompactSpace (M j)] [∀ j, T2Space (M j)]
 
-
 def ballOpen (b : ∀ j, M j) (r : ℕ → ℝ) (j : ℕ) : Opens (M j) :=
   ⟨Metric.ball (b j) (r j), Metric.isOpen_ball⟩
-
-
 
 def tailBallOpen (b : ∀ j, M j) (j₀ n : ℕ) : Opens (M (j₀ + n)) :=
   ⟨Metric.ball (b (j₀ + n)) ((2 : ℝ) ^ n), Metric.isOpen_ball⟩
@@ -68,7 +56,6 @@ theorem tailBall_le_large (b : ∀ j, M j) (j₀ n : ℕ) :
   rw [Metric.mem_ball] at hx ⊢
   exact hx.trans_le (pow_le_pow_right₀ (by norm_num : (1 : ℝ) ≤ 2) (by omega))
 
-
 noncomputable def tailMetric
     (b : ∀ j, M j) (j₀ : ℕ)
     (gInf : ∀ n, SmoothRiemannianMetric I
@@ -79,17 +66,13 @@ noncomputable def tailMetric
       (Geometry.isSigmaCompact_of_isOpen I (tailBallOpen b j₀ n).isOpen)
   exact (gInf n).restrictOpenOfSubset (I := I) (tailBall_le_large b j₀ n)
 
-
 def coreRadius (n : ℕ) : ℝ := (2 : ℝ) ^ n / 2
-
 
 def tailCenter (b : ∀ j, M j) (j₀ n : ℕ) : tailBallOpen b j₀ n :=
   ⟨b (j₀ + n), Metric.mem_ball_self (by positivity)⟩
 
-
 def tailCore (b : ∀ j, M j) (j₀ n : ℕ) : Set (tailBallOpen b j₀ n) :=
   {x | dist (b (j₀ + n)) (x : M (j₀ + n)) ≤ coreRadius n}
-
 
 def limitCore (b : ∀ j, M j) (j₀ : ℕ)
     [∀ n, Nonempty (tailBallOpen b j₀ n)]
@@ -194,7 +177,6 @@ theorem frontier_core_radius (b : ∀ j, M j) (j₀ n : ℕ)
   have hint := incl_mem_coreInt b j₀ n S hlt
   exact hnotInt (hxeq ▸ hint)
 
-
 def ballStep
     (b : ∀ j, M j) (r : ℕ → ℝ)
     (Ψ : ∀ j, PartialDiffeomorph I I (M j) (M (j + 1)) (∞ : WithTop ℕ∞))
@@ -207,8 +189,6 @@ def ballStep
 
 variable [I.Boundaryless]
 
-/-- Adjacent partial diffeomorphisms that preserve an increasing family of positive-radius open
-balls assemble into a smooth sequential direct system. -/
 def ballSystem
     (b : ∀ j, M j) (r : ℕ → ℝ) (hr : ∀ j, 0 < r j)
     (Ψ : ∀ j, PartialDiffeomorph I I (M j) (M (j + 1)) (∞ : WithTop ℕ∞))
@@ -226,7 +206,6 @@ def ballSystem
     (fun j => PartialDiffeomorph.opensMap_inv_mdiff (I := I) (M := M j) (N := M (j + 1))
       (Ψ j) (hsrc j) (hmap j))
 
-
 def ballPullbackMetric {j l : ℕ}
     (Φ : PartialDiffeomorph I I (M j) (M l) (∞ : WithTop ℕ∞))
     (U : Opens (M j)) (hU : (U : Set (M j)) ⊆ Φ.source)
@@ -240,7 +219,6 @@ def ballPullbackMetric {j l : ℕ}
   let F : Diffeomorph I I U W (∞ : WithTop ℕ∞) :=
     PartialDiffeomorph.toOpensDiffeo Φ hU
   exact Diffeomorph.pullbackMetric (I := I) (g.restrictOpen (I := I) W) F
-
 
 omit [CompleteSpace E] [I.Boundaryless] in
 theorem ballPullback_inner {j l : ℕ}
@@ -265,8 +243,6 @@ theorem ballPullback_inner {j l : ℕ}
     PartialDiffeomorph.opensDiffeo_mfderiv Φ hU x w]
   rfl
 
-
-
 def ballTransSource {j l m : ℕ}
     (Φ : PartialDiffeomorph I I (M j) (M l) (∞ : WithTop ℕ∞))
     (Θ : PartialDiffeomorph I I (M l) (M m) (∞ : WithTop ℕ∞))
@@ -275,7 +251,6 @@ def ballTransSource {j l m : ℕ}
     (U : Set (M j)) ⊆ (PartialDiffeomorph.trans (I := I) Φ Θ).source := by
   intro x hx
   exact ⟨hU hx, hnext (Set.mem_image_of_mem _ hx)⟩
-
 
 def nestedBallPullback {j l m : ℕ}
     (Φ : PartialDiffeomorph I I (M j) (M l) (∞ : WithTop ℕ∞))
@@ -292,7 +267,6 @@ def nestedBallPullback {j l m : ℕ}
   let F : Diffeomorph I I U W (∞ : WithTop ℕ∞) :=
     PartialDiffeomorph.toOpensDiffeo Φ hU
   exact Diffeomorph.pullbackMetric (I := I) (ballPullbackMetric Θ W hnext g) F
-
 
 omit [CompleteSpace E] [I.Boundaryless] in
 theorem ballPullback_trans {j l m : ℕ}
@@ -344,7 +318,6 @@ theorem ballPullback_trans {j l m : ℕ}
   rw [hcomp]
   rfl
 
-
 omit [CompleteSpace E] [I.Boundaryless] in
 theorem ballPullback_congr {j l : ℕ}
     (Φ Ψ : PartialDiffeomorph I I (M j) (M l) (∞ : WithTop ℕ∞))
@@ -366,8 +339,6 @@ theorem ballPullback_congr {j l : ℕ}
   intro x v w
   rw [ballPullback_inner, ballPullback_inner, hmap]
 
-
-
 omit [CompleteSpace E] [I.Boundaryless] in
 theorem ballPullback_cast {j l m : ℕ} (h : l = m)
     (Φ : PartialDiffeomorph I I (M j) (M l) (∞ : WithTop ℕ∞))
@@ -377,7 +348,6 @@ theorem ballPullback_cast {j l m : ℕ} (h : l = m)
     ballPullbackMetric (h ▸ Φ) U hU' (g m) = ballPullbackMetric Φ U hU (g l) := by
   subst h
   rfl
-
 
 omit [CompleteSpace E] [I.Boundaryless] in
 theorem ballPullback_assoc
@@ -394,7 +364,6 @@ theorem ballPullback_assoc
     ballPullback_cast (I := I) (M := M) (Nat.add_assoc j a b).symm
       (chainComp (I := I) (Mf := M) Ψ j (a + b)) g U hU hA
 
-
 noncomputable def chainPullbackSeq
     (Ψ : ∀ j, PartialDiffeomorph I I (M j) (M (j + 1)) (∞ : WithTop ℕ∞))
     (g : ∀ j, SmoothRiemannianMetric I (M j))
@@ -402,7 +371,6 @@ noncomputable def chainPullbackSeq
     (hU : ∀ k : ℕ, (U : Set (M j)) ⊆ (chainComp (I := I) (Mf := M) Ψ j k).source)
     (k : ℕ) : SmoothRiemannianMetric I U :=
   ballPullbackMetric (chainComp (I := I) (Mf := M) Ψ j k) U (hU k) (g (j + k))
-
 
 omit [CompleteSpace E] [I.Boundaryless] in
 theorem chainPullback_zero
@@ -433,8 +401,6 @@ theorem chainPullback_zero
         ContinuousLinearMap.id ℝ (TangentSpace I (x : M j)) := mfderiv_id
   rw [hmfd]
   rfl
-
-
 
 omit [CompleteSpace E] [I.Boundaryless] in
 theorem chainPullback_step
@@ -502,8 +468,6 @@ theorem chainPullback_step
       rfl
     _ = _ := rfl
 
-
-
 noncomputable def chainBallSystem
     (j₀ : ℕ) (U : ∀ n, Opens (M (j₀ + n))) [∀ n, Nonempty (U n)]
     (Ψ : ∀ j, PartialDiffeomorph I I (M j) (M (j + 1)) (∞ : WithTop ℕ∞))
@@ -523,8 +487,6 @@ noncomputable def chainBallSystem
       (chainComp (I := I) (Mf := M) Ψ (j₀ + n) 1) (hU n 1) (hmap n))
     (fun n => PartialDiffeomorph.opensMap_inv_mdiff
       (chainComp (I := I) (Mf := M) Ψ (j₀ + n) 1) (hU n 1) (hmap n))
-
-
 
 omit [FiniteDimensional ℝ E] [CompleteSpace E] [∀ (j : ℕ), SigmaCompactSpace (M j)]
     [∀ (j : ℕ), T2Space (M j)] [I.Boundaryless] in
@@ -557,8 +519,6 @@ theorem chainMetricCocycle
   rw [hF]
   exact (hstep n x v w).symm
 
-
-
 def chainAmbientSeq
     (j₀ : ℕ) (U : ∀ n, Opens (M (j₀ + n))) [∀ n, Nonempty (U n)]
     (S : SmoothSeqSystem I (fun n => U n)) (O₀ : U 0)
@@ -568,8 +528,6 @@ def chainAmbientSeq
     { M := M (j₀ + n)
       basepoint := (S.toSeqSystem.F (Nat.zero_le n) O₀ : M (j₀ + n))
       metric := g (j₀ + n) }
-
-
 
 noncomputable def chainAmbientMaps
     (j₀ : ℕ) (U : ∀ n, Opens (M (j₀ + n))) [∀ n, Nonempty (U n)]
@@ -1097,8 +1055,6 @@ theorem diffNorm_change_le
   rw [← hleft] at hcor
   simp_rw [hright] at hcor
   exact hcor
-
-
 
 noncomputable def limitRefFactor (p : ℕ) : ℝ :=
   4 + ∑ r ∈ Finset.range (p + 1),

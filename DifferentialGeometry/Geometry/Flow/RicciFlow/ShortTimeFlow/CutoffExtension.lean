@@ -9,7 +9,6 @@ import DifferentialGeometry.Analysis.ODE.TimeDependentFlow.Regularity.BareFlowFr
 import DifferentialGeometry.Analysis.ODE.TimeDependentFlow.SmoothDependence.GlobalClosedManifold
 open DifferentialGeometry.Analysis.Spectral
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
 
 
 namespace DifferentialGeometry.PDE.RicciFlow

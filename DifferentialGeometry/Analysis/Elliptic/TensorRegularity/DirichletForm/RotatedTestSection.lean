@@ -1,6 +1,5 @@
 import DifferentialGeometry.Analysis.Elliptic.TensorRegularity.DirichletForm.CovChartMetricGramInv
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
 
 
 noncomputable section

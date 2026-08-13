@@ -4,17 +4,9 @@ import DifferentialGeometry.Tensor.RSTensor.QuadraticBounds.Unit
 import DifferentialGeometry.Tensor.RSTensor.QuadraticBounds.TimeSlab
 open DifferentialGeometry.PDE.RicciFlow
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Connection
 
 set_option autoImplicit false
-
-
-
-
-
-
-
 
 noncomputable section
 
@@ -29,8 +21,6 @@ variable {H : Type*} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 variable [IsManifold I 1 M] [IsManifold I 2 M]
-
-
 
 private theorem metric_gain_of_quad_bound
     {epsilon delta c C g dg : Real}
@@ -62,8 +52,6 @@ private theorem metric_gain_of_quad_bound
     nlinarith [hCc_g_le, hc_dg_lower]
   have hmul := mul_le_mul_of_nonneg_left hinside (le_of_lt hepsilon)
   nlinarith
-
-
 
 omit [IsManifold I 2 M] in
 omit [FiniteDimensional ℝ E] in
@@ -161,8 +149,6 @@ theorem metricGainAt_of_timeSlabQuadBound
       hepsilon.1 hC hdelta_le_recip htime_nonneg htime_le hmetric_nonneg
       (hbound t ht_raw x v)
 
-
-
 omit [IsManifold I 2 M] in
 theorem metricGainAt_of_totalCont
     [CompactSpace M] [T2Space M]
@@ -213,12 +199,6 @@ theorem metricGainAt_of_totalCont
       G t0 (t0 + deltaRaw) (G t0) hGcont
   · exact timeSlabAbsQuadCont (I := I) (M := M)
       G A (Set.Icc t0 (t0 + deltaRaw)) hAcont
-
-
-
-
-
-
 
 omit [IsManifold I 2 M] in
 theorem metricGainAt_of_metricVariationDerivAt
@@ -278,11 +258,6 @@ theorem metricGainAt_of_metricVariationDerivAt
   · exact hGcont
   · exact hAcont
 
-
-
-
-
-
 omit [IsManifold I 2 M] in
 theorem metricGainControl_of_metricVariation
     [CompactSpace M] [T2Space M]
@@ -338,14 +313,6 @@ theorem metricGainControl_of_metricVariation
   exact metricGainAt_of_metricVariationDerivAt (I := I) (M := M)
     (G := G) (Ric := Ric) (A := A) (T := T) (t0 := t0) (deltaRaw := deltaRaw)
     hdeltaRaw hdeltaRawT hEq hA hGcont hAcont
-
-
-
-
-
-
-
-
 
 omit [IsManifold I 2 M] in
 theorem metricGainControl_of_metricVariationOn
@@ -418,12 +385,6 @@ theorem metricGainControl_of_metricVariationOn
     simpa [τ, hval] using hderiv
   · exact hGcont
   · exact hAcont
-
-
-
-
-
-
 
 omit [IsManifold I 2 M] in
 theorem metricGainControl_of_metricVariationOn_closedOpen

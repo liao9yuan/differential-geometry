@@ -6,30 +6,10 @@ import DifferentialGeometry.Geometry.Operator.GradientRegularity
 open DifferentialGeometry.Tensor.RSTensor
 open DifferentialGeometry.PDE.RicciFlow
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Connection
 open DifferentialGeometry.Geometry.Operator
 
 set_option autoImplicit false
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 noncomputable section
 
@@ -54,22 +34,6 @@ variable {M : Type u} [TopologicalSpace M] [ChartedSpace H M]
 variable [IsManifold I ∞ M] [SigmaCompactSpace M] [T2Space M]
 variable [BoundarylessManifold I M]
 variable [IsManifold I 1 M]
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 omit [NeZero (Module.finrank ℝ E)] in
 omit [SigmaCompactSpace M] in
@@ -146,24 +110,12 @@ end PDE
 
 namespace HCGCompactness
 
-
-
 universe u uE uH
 
 variable {E : Type uE} [NormedAddCommGroup E] [NormedSpace Real E]
 variable [FiniteDimensional Real E] [CompleteSpace E]
 variable {H : Type uH} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H}
-
-
-
-
-
-
-
-
-
-
 
 def flowOfMetric
     (D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval)
@@ -213,8 +165,6 @@ def flowOfMetric
       DifferentialGeometry.PDE.RicciFlow.SolutionOn (I := I) (M := P.M) D)
   isSolution := hsol
 
-
-
 theorem flowOfMetric_metric
     (D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval)
     (P : PointedRiemannianManifold.{u, uE, uH} (I := I))
@@ -256,10 +206,6 @@ theorem flowOfMetric_metric
       infer_instance
     (flowOfMetric (I := I) D P g hsol).S.base.metric = g := by
   rfl
-
-
-
-
 
 theorem flowOfMetric_atTime
     (D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval)

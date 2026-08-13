@@ -166,15 +166,6 @@ theorem green_second_integral_smul_laplacian_sub_eq_zero
   rw [integral_sub h_int_fΔh h_int_hΔf]
   rw [h_eq, sub_self]
 
-
-
-
-
-
-
-
-
-
 theorem expNegWeightedGreen
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     (g : SmoothRiemannianMetric I M)
@@ -227,8 +218,6 @@ theorem expNegWeightedGreen
         ∂(riemannianVolumeMeasure (I := I) (M := M) g) := by
     linarith
   simpa [expNeg] using h_eq
-
-
 
 theorem expNegLap
     [I.Boundaryless] [T2Space M]
@@ -299,8 +288,6 @@ theorem expNegLap
   simp [Δ_g, phi, expNeg]
   ring
 
-
-
 theorem expNegGreen
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     (g : SmoothRiemannianMetric I M)
@@ -333,8 +320,6 @@ theorem expNegGreen
             ((grad_g (I := I) g ⟨_, hf⟩ :
               Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) x)))
   rw [expNegLap (I := I) g hf x]
-
-
 
 theorem expNegLap_eq_gradSq
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
@@ -407,9 +392,6 @@ theorem expNegLap_eq_gradSq
           ∂(riemannianVolumeMeasure (I := I) (M := M) g) := by
     simpa [integral_neg, expNeg] using hleft.symm.trans hgreen
   exact (neg_injective hneg).symm
-
-
-
 
 theorem expNegIBP
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]

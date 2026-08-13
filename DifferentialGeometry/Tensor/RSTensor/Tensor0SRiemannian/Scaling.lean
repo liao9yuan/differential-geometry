@@ -3,14 +3,6 @@ import DifferentialGeometry.Tensor.RSTensor.Tensor0SRiemannian.Coordinate
 
 set_option autoImplicit false
 
-
-
-
-
-
-
-
-
 namespace DifferentialGeometry
 namespace Tensor0SBundle
 

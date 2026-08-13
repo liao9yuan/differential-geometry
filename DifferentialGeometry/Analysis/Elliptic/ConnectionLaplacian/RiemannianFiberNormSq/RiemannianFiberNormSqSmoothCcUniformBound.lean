@@ -3,7 +3,6 @@ import DifferentialGeometry.Analysis.Integration.Measure.Family
 import Mathlib.Topology.Order.Compact
 open DifferentialGeometry.Analysis.Elliptic
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Connection
 
 noncomputable section

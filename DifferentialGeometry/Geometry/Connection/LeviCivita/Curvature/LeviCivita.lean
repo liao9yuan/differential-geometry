@@ -34,7 +34,6 @@ import DifferentialGeometry.Bundle.PartialMfderiv.FixedBase
 open DifferentialGeometry.Tensor.RSTensor
 open DifferentialGeometry.Tensor.RicciIdentity
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
 
 set_option autoImplicit false
 
@@ -54,12 +53,6 @@ variable {I : ModelWithCorners Real E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 variable [IsManifold I 1 M] [IsManifold I 2 M] [IsManifold I 3 M]
 variable [SigmaCompactSpace M] [T2Space M]
-
-
-
-
-
-
 
 omit [CompleteSpace E] [IsManifold I ∞ M] [IsManifold I 1 M] [IsManifold I 2 M] [IsManifold I 3 M]
     [SigmaCompactSpace M] [T2Space M] in
@@ -784,10 +777,6 @@ private theorem rm04_tconst_eval
           (tangentConstAt (I := I) x Z)) x) := by
           rw [hWx, ← hcurv]
 
-
-
-
-
 omit [SigmaCompactSpace M] [T2Space M] in
 theorem directionalDeriv_directionalDeriv_sub_commutator
     (X Y : (p : M) -> TangentSpace I p) (f : M -> Real) (x : M)
@@ -802,13 +791,6 @@ theorem directionalDeriv_directionalDeriv_sub_commutator
   unfold vderiv at h
   rw [h]
   ring
-
-
-
-
-
-
-
 
 omit [SigmaCompactSpace M] [T2Space M] in
 private theorem connectionRiemannCurvatureField_metric_skew_at_of_metricCompatible
@@ -1063,8 +1045,6 @@ private theorem connectionRiemannCurvatureField_metric_skew_at_of_metricCompatib
       Bc,
     hXc_self, hYc_self] using hgoal
 
-
-
 omit [IsManifold I 2 M] [IsManifold I 3 M] in
 omit [SigmaCompactSpace M] in
 theorem rm04InputSkewAt_of_leviCivita_realizes
@@ -1114,8 +1094,6 @@ theorem rm04InputSkewAt_of_leviCivita_realizes
   simpa [hWsec, hXsec, hYsec, hZsec] using
     hleft.trans (hinner.trans (congrArg Neg.neg hright.symm))
 
-
-
 omit [CompleteSpace E] [IsManifold I 2 M] [IsManifold I 3 M] [SigmaCompactSpace M] in
 theorem rm04InputSkew_ofRealizes
     (g : SmoothRiemannianMetric I M)
@@ -1160,8 +1138,6 @@ theorem rm04InputSkew_ofRealizes
       congrArg (fun V : TangentSpace I x => g.inner x (Wsec x) V) hswap
   simpa [hWsec, hXsec, hYsec, hZsec] using
     hleft.trans (hinner.trans (congrArg Neg.neg hright.symm))
-
-
 
 omit [SigmaCompactSpace M] in
 theorem firstBianchi_ofTF
@@ -1247,8 +1223,6 @@ private theorem rm04_pair_symm_of_input_output_first
   have hI4 := hinput X Z Y W
   linarith
 
-
-
 omit [IsManifold I 1 M] in
 omit [SigmaCompactSpace M] in
 theorem rm04OutputSkewAt_of_leviCivita_realizes
@@ -1274,8 +1248,6 @@ theorem rm04OutputSkewAt_of_leviCivita_realizes
       (leviCivitaConnectionOfMetric_isMetricCompatible (I := I) g) W X Y Z
   exact hleft.trans (hskew.trans (congrArg (fun r : Real => -r) hright.symm))
 
-
-
 omit [SigmaCompactSpace M] in
 theorem rm04OutputSkew_ofMC
     (g : SmoothRiemannianMetric I M)
@@ -1294,8 +1266,6 @@ theorem rm04OutputSkew_ofMC
     connectionRiemannCurvatureField_metric_skew_at_of_metricCompatible
       (I := I) g cov hcov hmc W X Y Z
   exact hleft.trans (hskew.trans (congrArg (fun r : Real => -r) hright.symm))
-
-
 
 omit [SigmaCompactSpace M] in
 theorem rm04PairSymm_ofLC
@@ -1330,8 +1300,6 @@ theorem rm04PairSymmAt_of_leviCivita_realizes
     (rm04InputSkewAt_of_leviCivita_realizes (I := I) g Rm04 hRm04)
     (rm04OutputSkewAt_of_leviCivita_realizes (I := I) g Rm04 hRm04)
     (firstBianchiAt_of_leviCivita_realizes (I := I) g Rm04 hRm04)
-
-
 
 omit [IsManifold I 1 M] in
 theorem rm13MetricSkewAt_of_leviCivita_realizes
@@ -1644,8 +1612,6 @@ private theorem oneFormThirdCovDerivCommAt_of_leviCivita_higherOrder
     linarith
   linarith
 
-
-
 omit [SigmaCompactSpace M] in
 theorem oneFormThirdCovDerivCommAt_of_leviCivita
     (g : SmoothRiemannianMetric I M)
@@ -1667,10 +1633,6 @@ theorem oneFormThirdCovDerivCommAt_of_leviCivita
   oneFormThirdCovDerivCommAt_of_leviCivita_higherOrder
     (I := I) g Rm13 alphaSec nablaAlphaSec alpha nabla2Alpha hRm13
     halpha hnabla2
-
-
-
-
 
 omit [IsManifold I 3 M] in
 omit [SigmaCompactSpace M] in

@@ -2,16 +2,6 @@ import DifferentialGeometry.Analysis.Spectral.Intrinsic.Garding.MetricLapDiffPai
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.Garding.MetricLapDiffH0
 import DifferentialGeometry.Analysis.Parabolic.TimeSobolev.BochnerL2
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
-
-
-
-
-
-
-
-
-
 
 noncomputable section
 
@@ -41,9 +31,6 @@ private local instance : MeasurableSpace E := borel E
 private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
-
-
-
 
 theorem lapDiffA2_cont
     {D : RealTimeInterval}
@@ -116,9 +103,6 @@ theorem lapDiffA2_cont
   simpa only [lapDiffA2, q, k, K, rhoK] using
     lt_of_le_of_lt
       (hpair (g_fam ((T : Real) - s)) hqh hqk hkh) hu
-
-
-
 
 theorem lapDiffA20_short
     {D : RealTimeInterval}

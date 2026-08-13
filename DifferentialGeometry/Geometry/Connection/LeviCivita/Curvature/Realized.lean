@@ -4,7 +4,6 @@ import DifferentialGeometry.Geometry.Operator.HessianTraceRealization
 import DifferentialGeometry.Geometry.Operator.RoughLaplacian
 open DifferentialGeometry.Tensor.RSTensor
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
 
 set_option autoImplicit false
 
@@ -25,21 +24,6 @@ variable [I.Boundaryless]
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 variable [IsManifold I 1 M]
 variable [SigmaCompactSpace M] [T2Space M]
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 omit [I.Boundaryless] in
 omit [IsManifold I 1 M] in
@@ -85,7 +69,6 @@ theorem canScalTrace
       (DifferentialGeometry.Geometry.Connection.leviCivitaConnectionOfMetric_isMetricCompatible
         (I := I) g)
       Ric basis gInv hinv X
-
 
 theorem canScalHess
     {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
@@ -342,8 +325,6 @@ private theorem slots5_eq_vec5 {x : M}
   fin_cases q <;> rfl
 
 omit [CompleteSpace E] [I.Boundaryless] [SigmaCompactSpace M] in
-/-- The covariant derivative of an all-point output-skew `(0,4)` tensor field
-is last-pair-skew in its curvature slots. -/
 theorem nabla4OutSkew
     (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
     (X : ContMDiffSection I E (∞ : WithTop ℕ∞)
@@ -369,8 +350,6 @@ theorem nabla4OutSkew
     cov X Rm04 x σ (-1 : Real) hperm (vec4 (I := I) W Y Z U)
   rw [slots4_eq_vec4 (I := I) (fun q : Fin 4 => vec4 (I := I) W Y Z U (σ q))] at h
   simpa [σ, vec4, Equiv.swap_apply_def] using h
-
-
 
 omit [CompleteSpace E] [I.Boundaryless] [SigmaCompactSpace M] in
 theorem nabla4InSkew
@@ -401,8 +380,6 @@ theorem nabla4InSkew
   rw [slots4_eq_vec4 (I := I) (fun q : Fin 4 => vec4 (I := I) Y W Z U (σ q))] at h
   simpa [σ, vec4, Equiv.swap_apply_def] using h
 
-
-
 omit [CompleteSpace E] [I.Boundaryless] [SigmaCompactSpace M] in
 theorem nabla4Pair
     (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
@@ -431,7 +408,6 @@ theorem nabla4Pair
     cov X Rm04 x σ (1 : Real) hperm (vec4 (I := I) W Y Z U)
   rw [slots4_eq_vec4 (I := I) (fun q : Fin 4 => vec4 (I := I) W Y Z U (σ q))] at h
   simpa [σ, vec4, Equiv.swap_apply_def] using h
-
 
 omit [I.Boundaryless] in
 omit [SigmaCompactSpace M] in
@@ -566,8 +542,6 @@ theorem canRmSymm
         rw [finCons_vec4_eq_vec5]]
     rw [hleft, hright]
     exact hsymm
-
-
 
 omit [I.Boundaryless] in
 omit [SigmaCompactSpace M] in
@@ -949,8 +923,6 @@ theorem canRmSecond
   simpa [add_assoc] using hinner
 
 set_option backward.isDefEq.respectTransparency false in
-
-
 omit [I.Boundaryless] in
 theorem canRicField
     (g : SmoothRiemannianMetric I M) :
@@ -1049,8 +1021,6 @@ theorem canRicField
         (vec2 (I := I) (basis (slots 0)) (basis (slots 1))) := by
         simp [metricTraceFirstTwo0STensor_apply, metricTraceFirstTwo0SAt]
 
-
-
 theorem canRicTrace
     {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
     (g : SmoothRiemannianMetric I M)
@@ -1109,8 +1079,6 @@ theorem canRicTrace
     finCons_vec4_eq_vec5] using htrace
 
 set_option backward.isDefEq.respectTransparency false in
-/-- Canonical Levi-Civita `∇²Ric` is the first metric trace of canonical
-`∇²Rm04`. -/
 theorem canNabla2RicTrace
     {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
     (g : SmoothRiemannianMetric I M)
@@ -1125,7 +1093,8 @@ theorem canNabla2RicTrace
     let Rm04 : Tensor04Section (I := I) (M := M) :=
       DifferentialGeometry.Geometry.Curvature.CovariantDerivative.rm04Section (I := I) g cov hcov
     let Ric : Tensor02Section (I := I) (M := M) :=
-      DifferentialGeometry.Geometry.Curvature.CovariantDerivative.ricciSection (I := I) (M := M) cov hcov
+      DifferentialGeometry.Geometry.Curvature.CovariantDerivative.ricciSection (I := I)
+        (M := M) cov hcov
     let nablaRm04 :=
       totalNabla0S (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
         4 cov Rm04 (totalNabla0S_reg (E := E) (H := H) (I := I) (M := M)
@@ -1158,7 +1127,8 @@ theorem canNabla2RicTrace
   let Rm04 : Tensor04Section (I := I) (M := M) :=
     DifferentialGeometry.Geometry.Curvature.CovariantDerivative.rm04Section (I := I) g cov hcov
   let Ric : Tensor02Section (I := I) (M := M) :=
-    DifferentialGeometry.Geometry.Curvature.CovariantDerivative.ricciSection (I := I) (M := M) cov hcov
+    DifferentialGeometry.Geometry.Curvature.CovariantDerivative.ricciSection (I := I)
+      (M := M) cov hcov
   let nablaRm04 :=
     totalNabla0S (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
       4 cov Rm04 (totalNabla0S_reg (E := E) (H := H) (I := I) (M := M)
@@ -1271,8 +1241,6 @@ theorem canNabla2RicTrace
 
 omit [I.Boundaryless] [SigmaCompactSpace M] in
 set_option backward.isDefEq.respectTransparency false in
-/-- Canonical Levi-Civita `∇²Rm04` inherits the three algebraic Riemann
-symmetries in its four curvature slots. -/
 theorem canRm2Symm
     (g : SmoothRiemannianMetric I M)
     {x : M} :
@@ -1406,7 +1374,6 @@ theorem canRm2Symm
     rw [hleft, hright]
     simpa [σ, vec5, Equiv.ofBijective] using h
 
-/-- Remaining canonical lowered-Riemann Bianchi data for one smooth metric. -/
 theorem canBianchiCore
     {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
     (g : SmoothRiemannianMetric I M)
@@ -1457,12 +1424,6 @@ theorem canBianchiCore
     simpa [cov, hcov, Rm04, Ric, nablaRm04, nablaRic] using
       canRicTrace (I := I) (M := M) g basis gInv hinv
   exact ⟨hSecond, hSymm, hTrace⟩
-
-
-
-
-
-
 
 theorem canSecondBianchi
     {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
@@ -1523,8 +1484,6 @@ theorem canSecondBianchi
       canScalTrace (I := I) (M := M) g basis gInv hinv
   exact ⟨hcore.1, hcore.2.1, hcore.2.2, hscalar⟩
 
-
-
 theorem metricBianchiAt
     {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
     (g : SmoothRiemannianMetric I M)
@@ -1568,6 +1527,5 @@ theorem metricBianchiAt
   refine ⟨nablaRm04, ?_⟩
   simpa [cov, hcov, Rm04, Ric, scalar, nablaRm04] using
     canSecondBianchi (I := I) (M := M) g basis gInv hinv
-
 
 end DifferentialGeometry.Geometry.Connection

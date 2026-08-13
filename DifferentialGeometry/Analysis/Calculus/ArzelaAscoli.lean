@@ -10,22 +10,6 @@ import Mathlib.Topology.UniformSpace.Real
 
 set_option autoImplicit false
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 namespace DifferentialGeometry
 namespace HCGCompactness
 
@@ -34,10 +18,6 @@ open scoped Topology
 
 variable {X : Type*} [TopologicalSpace X] [LocallyCompactSpace X]
   [SigmaCompactSpace X] [T2Space X]
-
-
-
-
 
 omit [T2Space X] in
 theorem arzelaAscoli_subseq_tendsto
@@ -118,8 +98,6 @@ theorem arzelaAscoli_subseq_tendsto
     fun n => subset_closure ⟨n, rfl⟩
   rcases hcompact.tendsto_subseq hmem with ⟨g, _hg, phi, hphi, htendsto⟩
   exact ⟨phi, g, hphi, by simpa [Function.comp_def] using htendsto⟩
-
-
 
 omit [T2Space X] in
 theorem arzelaAscoli_subseq_tendstoUniformlyOnCompacts

@@ -2,7 +2,6 @@ import DifferentialGeometry.Analysis.Elliptic.TensorRegularity.SecondCovDerivExp
 import DifferentialGeometry.Analysis.Elliptic.TensorRegularity.SecondCovDerivExpansion.ChartProjectionSecondCovDerivViaSkExt
 import DifferentialGeometry.Analysis.Elliptic.TensorRegularity.CovDeriv.ComponentSecondFormula
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Connection
 
 

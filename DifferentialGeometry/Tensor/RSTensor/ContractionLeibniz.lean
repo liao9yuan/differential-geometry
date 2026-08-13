@@ -3,49 +3,6 @@ import DifferentialGeometry.Tensor.Multilinear.Tensor
 
 set_option autoImplicit false
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 namespace DifferentialGeometry
 namespace Tensor0SBundle
 

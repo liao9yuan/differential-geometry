@@ -7,15 +7,8 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.Ricci
 import Mathlib.Algebra.Order.Chebyshev
 open DifferentialGeometry.PDE.RicciFlow
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
 
 set_option autoImplicit false
-
-
-
-
-
-
 
 noncomputable section
 
@@ -43,8 +36,6 @@ def ScalarPreBianchiEvolutionEquationOn
       D.carrier
       (t : Real)
 
-
-
 def ScalarContractedBianchiReductionOn
     {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
     (scalarLap contractedRicciHessian : Real -> M -> Real) : Prop :=
@@ -53,16 +44,12 @@ def ScalarContractedBianchiReductionOn
         2 * contractedRicciHessian (t : Real) x =
       scalarLap (t : Real) x
 
-
-
 def ScalarSecondDerivativeContractedBianchiOn
     {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
     (scalarLap contractedRicciHessian : Real -> M -> Real) : Prop :=
   ∀ (t : DifferentialGeometry.Geometry.Curvature.RealTimeInterval.RegularTime D) (x : M),
     contractedRicciHessian (t : Real) x =
       (1 / 2 : Real) * scalarLap (t : Real) x
-
-
 
 omit [TopologicalSpace M] [SigmaCompactSpace M] [T2Space M] in
 theorem scalarContractedBianchiReductionOn_of_secondDerivativeContractedBianchi
@@ -76,10 +63,6 @@ theorem scalarContractedBianchiReductionOn_of_secondDerivativeContractedBianchi
   rw [hbianchi t x]
   ring
 
-
-
-
-
 omit [TopologicalSpace M] [SigmaCompactSpace M] [T2Space M] in
 theorem scalarEvolutionEquationOn_of_contractedBianchi
     {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
@@ -92,8 +75,6 @@ theorem scalarEvolutionEquationOn_of_contractedBianchi
   intro t x
   exact (hpre t x).congr_deriv (by
     rw [hbianchi t x])
-
-
 
 omit [TopologicalSpace M] [SigmaCompactSpace M] [T2Space M] in
 theorem scalar_curvature_evolution
@@ -119,13 +100,6 @@ theorem msm110_ch6_1_scalar_curvature_evolution
   scalar_curvature_evolution
     (M := M) scalar scalarLap contractedRicciHessian ricciNormSq hpre hbianchi
 
-
-
-
-
-
-
-
 theorem scalarEvolOfSmooth
     {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -142,10 +116,6 @@ theorem scalarEvolOfSmooth
         normSq0S (I := I) (S.family.metric t) x 2 (S.ricci t x)) := by
   intro t x
   exact hS.scalarEvolution G hmetric hconnection t x
-
-
-
-
 
 def ScalarLaplacianRealizesHeatOperatorOn
     (G : DifferentialGeometry.Geometry.Curvature.MetricConnectionFamily (I := I) (M := M) Real)

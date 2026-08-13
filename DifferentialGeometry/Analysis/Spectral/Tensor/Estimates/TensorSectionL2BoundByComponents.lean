@@ -7,8 +7,6 @@ import DifferentialGeometry.Analysis.Integration.L2.Pairing.Defs
 import Mathlib.MeasureTheory.Function.LpSpace.Basic
 import Mathlib.MeasureTheory.Integral.Bochner.Basic
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
-
 
 noncomputable section
 
@@ -235,9 +233,6 @@ private lemma tensorInner_le_const_mul_sum_scalar_sq
   linarith [h_combined, (show N * (Cmax * sumSS) = N * Cmax * sumSS by ring)]
 
 omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
-/-- **Pointwise finite-component reconstruction.** The intrinsic squared fibre
-norm of a smooth mixed tensor is controlled by the finite sum of squares of
-its partition-of-unity weighted chart-frame scalar components. -/
 theorem fiber_sq_le_comps
     (g : SmoothRiemannianMetric I M) (r s : ℕ) :
     ∃ C : ℝ, 0 ≤ C ∧ ∀ (S : SmoothCcTensor g r s) (b : M),

@@ -1,13 +1,5 @@
 import DifferentialGeometry.Analysis.Integration.Measure.Family
 
-
-
-
-
-
-
-
-
 noncomputable section
 
 open Bundle Manifold Set MeasureTheory Matrix Filter
@@ -25,8 +17,6 @@ private local instance : MeasurableSpace E := borel E
 private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
-
-
 
 private lemma density_cont
     {g : Real → SmoothRiemannianMetric I M} {K : Set Real}
@@ -195,10 +185,6 @@ private theorem chart_int_cont
     (by filter_upwards [self_mem_nhdsWithin] with s hs; exact hbound s hs)
     hb_int hlim
   simpa only [F, ρ, symm, target, μ] using hdct
-
-
-
-
 
 theorem integral_family_cont
     [T2Space M] [CompactSpace M]

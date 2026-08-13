@@ -14,28 +14,9 @@ open DifferentialGeometry.Tensor.Auxiliary
 open DifferentialGeometry.Geometry.Connection
 open DifferentialGeometry.Tensor.RSTensor
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Connection
 
 set_option autoImplicit false
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 noncomputable section
 
@@ -56,12 +37,6 @@ variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H} [I.Boun
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
   [T2Space M] [SigmaCompactSpace M] [BoundarylessManifold I M]
   [IsManifold I 1 M] [IsManifold I 2 M]
-
-
-
-
-
-
 
 omit [IsManifold I 2 M] in
 omit [NeZero (Module.finrank ℝ E)] in
@@ -91,8 +66,6 @@ theorem ricciTensor_restrictOpen
     metricRm04StdAt_eq_inner_riemannOp (I := I) (M := M) g (x : M) (B i) v w (B i),
     g.symm (x : M) (B i) (riemannOp (LeviCivita (I := I) g) (x : M) (B i) v w)]
 
-
-
 omit [I.Boundaryless] [IsManifold I 2 M] in
 omit [NeZero (Module.finrank ℝ E)] in
 theorem metricRicci_restrictOpen_eval
@@ -120,9 +93,6 @@ theorem metricRicci_restrictOpen_eval
     exact metricRicciAt_apply_eq_ricciTensor (I := I) g (x : M) (slots 0) (slots 1)
   rw [hLHS, hRHS]
   exact ricciTensor_restrictOpen (I := I) g U x (slots 0) (slots 1)
-
-
-
 
 omit [I.Boundaryless] [IsManifold I 2 M] in
 omit [NeZero (Module.finrank ℝ E)] in
@@ -169,11 +139,6 @@ theorem metricScalarAt_restrictOpen
     exact ricciTensor_restrictOpen (I := I) g U x (basis i) (basis j)
   exact congrArg (fun r => identityInvMetric i j * r) hric
 
-
-
-
-
-
 omit [I.Boundaryless] [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M]
     [IsManifold I 2 M] in
 omit [SigmaCompactSpace M] in
@@ -206,13 +171,6 @@ theorem metricRm04_restrictOpen_eval
       (slots 0) (slots 1) (slots 2) (slots 3)).symm
   rw [hLHS, hRHS]
   exact metricRm04StdAt_restrictOpen (I := I) g U x (slots 0) (slots 1) (slots 2) (slots 3)
-
-
-
-
-
-
-
 
 variable {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
 
@@ -306,12 +264,6 @@ theorem isLocalFrameOn_restrictOpenPush
     obtain ⟨x, hxu, rfl⟩ := hy
     exact restrictOpenPush_contMDiffWithinAt (I := I) U hframe i x hxu
 
-
-
-
-
-
-
 omit [I.Boundaryless] [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M]
     [IsManifold I 2 M] in
 omit [SigmaCompactSpace M] in
@@ -351,10 +303,6 @@ theorem frameCompSmooth_restrictOpen
   simp only [Function.comp_apply, hval]
   rfl
 
-
-
-
-
 omit [I.Boundaryless] [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M]
     [IsManifold I 2 M] in
 omit [SigmaCompactSpace M] in
@@ -377,9 +325,6 @@ theorem metricFamilySmoothOn_restrictOpen
   frameCompSmooth := by
     intro Idx _ frame u hframe i j
     exact frameCompSmooth_restrictOpen (I := I) S hS U frame hframe i j
-
-
-
 
 omit [I.Boundaryless] [IsManifold I 2 M] in
 omit [NeZero (Module.finrank ℝ E)] in
@@ -415,8 +360,6 @@ theorem scalar_restrictOpen
   simp only [SolutionOn.scalar, SolutionFamily.scalar, solutionOn_restrictOpen]
   exact metricScalarAt_restrictOpen (I := I) (S.base.metric t) U x
 
-
-
 omit [I.Boundaryless] [IsManifold I 2 M] in
 omit [NeZero (Module.finrank ℝ E)] in
 theorem scalarCont_restrictOpen
@@ -435,9 +378,6 @@ theorem scalarCont_restrictOpen
     (continuous_fst.prodMk (continuous_subtype_val.comp continuous_snd)).continuousOn
     (fun q hq => ⟨hq.1, Set.mem_univ _⟩)
 
-
-
-
 omit [I.Boundaryless] [IsManifold I 2 M] in
 omit [NeZero (Module.finrank ℝ E)] in
 theorem scalarTime_restrictOpen
@@ -453,9 +393,6 @@ theorem scalarTime_restrictOpen
     funext s; exact scalar_restrictOpen (I := I) S U s x
   rw [heq]
   exact hS.scalarTime htK hKsub (x : M)
-
-
-
 
 omit [I.Boundaryless] [IsManifold I 2 M] in
 omit [NeZero (Module.finrank ℝ E)] in
@@ -473,9 +410,6 @@ theorem ricciCont_restrictOpen
   ext slots
   exact (metricRicci_restrictOpen_eval (I := I) (S.base.metric t) U x slots).symm
 
-
-
-
 omit [I.Boundaryless] [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M]
     [IsManifold I 2 M] in
 omit [SigmaCompactSpace M] in
@@ -492,8 +426,6 @@ theorem rm04Cont_restrictOpen
   intro t _ht x
   ext slots
   exact (metricRm04_restrictOpen_eval (I := I) (S.base.metric t) U x slots).symm
-
-
 
 omit [I.Boundaryless] [IsManifold I 2 M] in
 omit [NeZero (Module.finrank ℝ E)] in
@@ -513,8 +445,6 @@ theorem ricciNorm_restrictOpen
   simp only [ricciNorm, SolutionOn.ricci, SolutionOn.family, SolutionFamily.ricci_apply,
     SolutionFamily.ricciAt, metricRicci_apply, solutionOn_restrictOpen] at *
   rw [hnorm, hsec]
-
-
 
 omit [NeZero (Module.finrank ℝ E)] [T2Space M] [SigmaCompactSpace M] [I.Boundaryless]
     [BoundarylessManifold I M] [IsManifold I 1 M] [IsManifold I 2 M] in
@@ -536,9 +466,6 @@ theorem ricciNormSpace_restrictOpen
       SolutionFamily.ricci_apply, SolutionFamily.ricciAt, metricRicci_apply]
   exact hsmooth.contMDiffAt.mdifferentiableAt (by simp)
 
-
-
-
 omit [NeZero (Module.finrank ℝ E)] [T2Space M] [SigmaCompactSpace M] [I.Boundaryless]
     [BoundarylessManifold I M] [IsManifold I 1 M] [IsManifold I 2 M] in
 theorem smoothConnection_restrictOpen
@@ -549,11 +476,6 @@ theorem smoothConnection_restrictOpen
   intro t
   exact leviCivitaConnectionOfMetric_contMDiffCovariantDerivative (I := I)
     ((solutionOn_restrictOpen (I := I) S U).base.metric (t : ℝ))
-
-
-
-
-
 
 omit [I.Boundaryless] [IsManifold I 2 M] in
 omit [NeZero (Module.finrank ℝ E)] in

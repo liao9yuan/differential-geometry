@@ -3,7 +3,6 @@ import DifferentialGeometry.Geometry.Operator.RoughLaplacian
 open DifferentialGeometry.Tensor.RSTensor
 open DifferentialGeometry.Tensor.RicciIdentity
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
 
 set_option autoImplicit false
 

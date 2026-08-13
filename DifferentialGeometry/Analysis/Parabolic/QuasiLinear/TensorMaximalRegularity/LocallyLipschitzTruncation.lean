@@ -2,7 +2,6 @@ import DifferentialGeometry.Analysis.Parabolic.QuasiLinear.TensorMaximalRegulari
 import DifferentialGeometry.Analysis.Calculus.BallRetraction
 open DifferentialGeometry.Analysis.Calculus
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
 
 noncomputable section
 
@@ -43,8 +42,6 @@ variable {X : Type*} [NormedAddCommGroup X] [NormedSpace ℝ X]
 noncomputable def recenteredBallRetraction (c : X) (R : ℝ) (v : X) : X :=
   c + ballRetraction R (v - c)
 
-/-- In an arbitrary normed space, recentered radial retraction is
-`2`-Lipschitz. -/
 theorem recenteredBallRetraction_lipschitzWith
     {R : ℝ} (hR : 0 ≤ R) (c : X) :
     LipschitzWith 2 (recenteredBallRetraction c R) := by
@@ -66,8 +63,6 @@ section RecentreHilbert
 
 variable {X : Type*} [NormedAddCommGroup X] [InnerProductSpace ℝ X]
 
-/-- In an inner-product space, recentered radial retraction has the sharp
-Lipschitz constant `1`. -/
 theorem recenteredBallRetraction_lipschitzWith_one
     {R : ℝ} (hR : 0 ≤ R) (c : X) :
     LipschitzWith 1 (recenteredBallRetraction c R) := by

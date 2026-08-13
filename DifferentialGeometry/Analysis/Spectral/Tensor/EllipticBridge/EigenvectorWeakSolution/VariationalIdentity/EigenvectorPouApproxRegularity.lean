@@ -15,7 +15,6 @@ import DifferentialGeometry.Analysis.Elliptic.TensorRegularity.Bootstrap.Bootstr
 import DifferentialGeometry.Analysis.Elliptic.TensorRegularity.DirichletForm.RotatedTestSection
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.CovariantLeibniz
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
 
 
 noncomputable section

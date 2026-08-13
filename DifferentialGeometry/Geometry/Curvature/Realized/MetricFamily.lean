@@ -18,16 +18,6 @@ open DifferentialGeometry.Geometry.Curvature
 set_option autoImplicit false
 set_option backward.isDefEq.respectTransparency false
 
-
-
-
-
-
-
-
-
-
-
 open DifferentialGeometry.Analysis
 namespace DifferentialGeometry.Geometry.Curvature
 
@@ -40,21 +30,12 @@ variable {I : ModelWithCorners Real E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 variable {Time : Type*}
 
-
-
-
-
-
 structure MetricConnectionFamily (Time : Type*) where
   metric : Time -> SmoothRiemannianMetric I M
   connection : Time -> CovariantDerivative I E (TangentSpace I : M -> Type _)
   metricCompatible : forall t : Time,
     DifferentialGeometry.Geometry.Connection.IsMetricCompatible_gen (I := I) (connection t)
       (metric t)
-
-
-
-
 
 structure MetricConnectionFamilyOn (D : RealTimeInterval) where
   metric : Real -> SmoothRiemannianMetric I M
@@ -229,9 +210,6 @@ section TimeSmoothness
 
 variable {A Time : Type*} [CommRing A] [Algebra Real A]
 
-
-
-
 def MetricFamilySmoothInTime
     (td : TimeDerivativeData Real A Time) [TimeRegularFam td]
     (G : MetricConnectionFamily (I := I) (M := M) Time) : Prop :=
@@ -268,12 +246,6 @@ section IntervalSmoothness
 
 variable [FiniteDimensional Real E]
 
-
-
-
-
-
-
 def Tensor0SFamilyContinuousOnSet
     (s : Nat) (K : Set Real)
     (A : (t : Real) -> (x : M) ->
@@ -283,16 +255,9 @@ def Tensor0SFamilyContinuousOnSet
     TotalSpace.mk' (Tensor0SModel s Real E)
       (E := fun x : M => Tensor0SSpace s I x) q.2 (A q.1.1 q.2))
 
-
-
-
 abbrev SmoothTwoTensorFamily : Type _ :=
   Real -> Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
     (n := (∞ : WithTop ℕ∞)) 2
-
-
-
-
 
 structure SmoothTwoTensorFamilyOnSet
     (K : Set Real) (A : SmoothTwoTensorFamily (I := I) (M := M)) : Prop where
@@ -345,10 +310,6 @@ theorem comp_time
     exact htime.prodMk continuous_snd
   exact hA.comp hpull
 
-
-
-
-
 theorem of_union_closedOpen
     {s : Nat} {a c b : Real} (hac : a < c)
     {A : (t : Real) -> (x : M) ->
@@ -390,9 +351,6 @@ theorem of_union_closedOpen
         continuous_subtype_val).subtype_mk _).prodMk
         (continuous_snd.comp continuous_subtype_val)
     exact hcont.continuousAt (hopen.mem_nhds (lt_of_lt_of_le hac hge))
-
-
-
 
 theorem congr
     {s : Nat} {K : Set Real}
@@ -440,8 +398,6 @@ theorem add
   refine ⟨hAq.1, ?_⟩
   simpa [map_add] using hAq.2.add hBq.2
 
-
-
 theorem smul
     {s : Nat} {K : Set Real}
     {f : Real -> M -> Real}
@@ -461,8 +417,6 @@ theorem smul
   refine ⟨hAq.1, ?_⟩
   simpa [map_smul] using hfq.smul hAq.2
 
-
-
 theorem tangentBundle
     {s : Nat} {K : Set Real}
     {A : (t : Real) -> (x : M) ->
@@ -480,12 +434,6 @@ theorem tangentBundle
     exact continuous_fst.prodMk
       ((FiberBundle.continuous_proj E (TangentSpace I)).comp continuous_snd)
   exact hA.comp hpull
-
-
-
-
-
-
 
 theorem eval_continuous
     {s : Nat} {K : Set Real}
@@ -521,8 +469,6 @@ theorem eval_continuous
 
 end Tensor0SFamilyContinuousOnSet
 
-
-
 theorem tensor0SFamily_quadCont
     {K : Set Real}
     {A : (t : Real) -> (x : M) ->
@@ -555,16 +501,6 @@ theorem tensor0SFamily_quadCont
     b hb T hT v hv
   simpa [quad02, P, b, T, v] using hEval
 
-
-
-
-
-
-
-
-
-
-
 structure MetricFamilySmoothOn
     (D : RealTimeInterval)
     (g_fam : ℝ → SmoothRiemannianMetric I M) : Prop where
@@ -577,11 +513,6 @@ structure MetricFamilySmoothOn
   metricTensor_cont :
     Tensor0SFamilyContinuousOnSet (I := I) (M := M) 2 D.carrier
       (fun t x => metricTensorField (I := I) (g_fam t) x)
-
-
-
-
-
   frameCompSmooth :
     forall {Idx : Type} [Fintype Idx]
       (frame : Idx -> (x : M) -> TangentSpace I x) {u : Set M},
@@ -643,8 +574,6 @@ theorem metricTensor_tangentBundle_cont_of_metricFamilySmoothOn
   Tensor0SFamilyContinuousOnSet.tangentBundle (I := I) (M := M)
     (metricTensor_cont_restrict_of_metricFamilySmoothOn (I := I) (M := M)
       g_fam hG hK)
-
-
 
 theorem metricTimeBundleQuad_cont_of_metricFamilySmoothOn
     {D : RealTimeInterval} {K : Set Real}

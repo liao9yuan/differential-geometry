@@ -7,7 +7,6 @@ import DifferentialGeometry.Geometry.Metric.MetricBounds
 open DifferentialGeometry.Analysis.Sobolev.HebeyBlock
 open DifferentialGeometry.Analysis.Elliptic
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Connection
 open DifferentialGeometry.Geometry.Operator
 

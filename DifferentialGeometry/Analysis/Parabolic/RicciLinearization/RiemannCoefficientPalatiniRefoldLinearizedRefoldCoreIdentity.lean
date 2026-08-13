@@ -20,7 +20,6 @@ open DifferentialGeometry.Analysis.Sobolev
 open DifferentialGeometry.Analysis.Spectral
 open DifferentialGeometry.PDE.RicciFlow
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Connection
 open DifferentialGeometry.Geometry.Operator
 
@@ -42,7 +41,8 @@ open DifferentialGeometry.Integral.L2
 
 open DifferentialGeometry.Geometry.Operator
 open DifferentialGeometry.Integral.DivergenceTheorem
-open DifferentialGeometry.PDE.RicciFlow DifferentialGeometry.Analysis.Sobolev DifferentialGeometry.Analysis.Spectral
+open DifferentialGeometry.PDE.RicciFlow DifferentialGeometry.Analysis.Sobolev
+    DifferentialGeometry.Analysis.Spectral
 open DifferentialGeometry.Analysis.Spectral.MetricRealization
 open DifferentialGeometry.Analysis.Spectral.DeTurck
 open DifferentialGeometry.PDE.DeTurck.RicciLinearization
@@ -436,7 +436,8 @@ private theorem lrKernel_inner (g₀ : SmoothRiemannianMetric I M)
   · subst hs0
     rw [lrRealizedFam_zero (I := I) (M := M) g₀ T hδ hδZ]
     have hker0 : connDiffCovDerivOp (I := I) g₀ g₀ x v0 p q = 0 := by
-      rw [DifferentialGeometry.Analysis.Sobolev.dLaCovKernel_backgroundSplit (I := I) (M := M) g₀ g₀ g₀ x v0 p q]
+      rw [DifferentialGeometry.Analysis.Sobolev.dLaCovKernel_backgroundSplit (I := I)
+        (M := M) g₀ g₀ g₀ x v0 p q]
       simp only [bdConnDiff_self_apply (I := I) (M := M) g₀ x, sub_self, add_zero]
     rw [hker0]
     simp only [bdConnDiff_self_apply (I := I) (M := M) g₀ x, map_zero,

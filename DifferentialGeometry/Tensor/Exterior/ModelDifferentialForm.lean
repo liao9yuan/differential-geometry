@@ -156,7 +156,8 @@ noncomputable def pullback {E' : Type*} [NormedAddCommGroup E'] [NormedSpace ℝ
     Ω^n⟮E, F⟯ :=
   ⟨fun x => (ω (f x)).compContinuousLinearMap (fderiv ℝ f x), by
     rw [← contDiffOn_univ]
-    exact DifferentialGeometry.DifferentialForm.contDiffOn_pullback (s := univ) (t := univ) f ω.toFun
+    exact DifferentialGeometry.DifferentialForm.contDiffOn_pullback (s := univ)
+      (t := univ) f ω.toFun
       (by simpa [contDiffOn_univ] using hf)
       (by simpa [contDiffOn_univ] using ω.smooth)
       (by intro x hx; exact hx) isOpen_univ⟩

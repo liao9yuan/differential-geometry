@@ -5,15 +5,7 @@ import DifferentialGeometry.Geometry.Curvature.CovGradRoughLap.GradientField
 import DifferentialGeometry.Geometry.Curvature.CurvatureOperator.SlotFreeCurvatureOperatorField
 open DifferentialGeometry.Analysis.Spectral
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Connection
-
-
-
-
-
-
-
 
 noncomputable section
 
@@ -57,8 +49,6 @@ private theorem unitModel_sub
       rw [hsec]
       rfl]
   rw [Tensor0SSpace.toModel_sub]
-
-
 
 omit [NeZero (Module.finrank ℝ E)] in
 theorem gradSlot_sub_eq_curv

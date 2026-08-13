@@ -3,16 +3,7 @@ import DifferentialGeometry.Analysis.ODE.TimeDependentFlow.SmoothDependence.Comp
 import DifferentialGeometry.Geometry.Exponential.IntrinsicExpContinuity
 import DifferentialGeometry.Topology.FiberBundleT2
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Connection
-
-/-!
-# The intrinsic geodesic velocity lift
-
-This file packages the complete intrinsic geodesic as a trajectory in `TM`.
-Its velocity lift starts at the supplied tangent vector and is an integral
-curve of the globally smooth basepoint-free geodesic spray.
--/
 
 noncomputable section
 
@@ -38,7 +29,6 @@ variable [RiemannianBundle (fun (x : M) => TangentSpace I x)]
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-/-- The tangent-bundle velocity lift of the complete intrinsic geodesic. -/
 def intrinsicVelocityLift
     [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
     [IsContinuousRiemannianBundle E (fun (x : M) => TangentSpace I x)]
@@ -77,8 +67,6 @@ attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-/-- The intrinsic velocity lift is an integral curve of the basepoint-free
-geodesic spray. -/
 theorem lift_isIntegral
     [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
     [IsContinuousRiemannianBundle E (fun (x : M) => TangentSpace I x)]
@@ -135,8 +123,6 @@ theorem lift_isIntegral
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-/-- The time-one intrinsic velocity lift depends smoothly on its initial tangent
-vector. -/
 theorem velocityLift_one
     [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
     [IsContinuousRiemannianBundle E (fun (x : M) => TangentSpace I x)]
@@ -165,8 +151,6 @@ theorem velocityLift_one
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-/-- The complete intrinsic exponential is globally smooth on the tangent
-bundle. -/
 theorem intrinsicExp_smooth
     [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
     [IsContinuousRiemannianBundle E (fun (x : M) => TangentSpace I x)]
@@ -183,8 +167,6 @@ theorem intrinsicExp_smooth
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-/-- For a fixed basepoint, the intrinsic exponential map is globally smooth in
-its tangent-vector argument. -/
 theorem intrinsicFiber_smooth
     [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
     [IsContinuousRiemannianBundle E (fun (x : M) => TangentSpace I x)]
@@ -230,8 +212,6 @@ theorem intrinsicFiber_smooth
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-/-- The intrinsic geodesics launched from one point form a globally smooth
-two-parameter variation under an affine change of initial velocity. -/
 theorem intrinsicVar_smooth
     [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
     [IsContinuousRiemannianBundle E (fun (x : M) => TangentSpace I x)]

@@ -3,14 +3,6 @@ import Mathlib.Data.Real.Basic
 import Mathlib.Tactic.Linarith
 import Mathlib.Tactic.Ring
 
-
-
-
-
-
-
-
-
 noncomputable section
 
 

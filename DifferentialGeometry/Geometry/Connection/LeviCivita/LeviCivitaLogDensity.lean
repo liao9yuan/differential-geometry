@@ -5,27 +5,6 @@ open DifferentialGeometry.Geometry.Operator
 
 set_option autoImplicit false
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 namespace DifferentialGeometry.Geometry.Connection
 
 open Bundle
@@ -43,12 +22,6 @@ variable [SigmaCompactSpace M] [T2Space M]
 open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.DivergenceTheorem
 open DifferentialGeometry.Geometry.Operator
-
-
-
-
-
-
 
 private lemma traceChristoffelAlg
     {Idx : Type*} [Fintype Idx]
@@ -93,12 +66,6 @@ private lemma traceChristoffelAlg
           rw [hS₃]
           ring
     _ = (1 / 2 : ℝ) * ∑ i : Idx, ∑ j : Idx, gInv i j * D p i j := rfl
-
-
-
-
-
-
 
 omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] in
 omit [InnerProductSpace ℝ E] in
@@ -166,12 +133,6 @@ theorem lcTrace_halfTrace
                 (fun y : E =>
                   chartGramMatrix (I := I) g x ((extChartAt I x).symm y) i j)
                 y₀ := rfl
-
-
-
-
-
-
 
 omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] in
 omit [InnerProductSpace ℝ E] in

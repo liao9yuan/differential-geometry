@@ -4,7 +4,6 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.ChartTensor.Components.Defs
 import DifferentialGeometry.Tensor.Multilinear.Fiber
 open DifferentialGeometry.Analysis.Elliptic
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
 
 
 noncomputable section

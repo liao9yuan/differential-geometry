@@ -2,28 +2,9 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.C4.Lemma45Cov
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.C4.Lemma45Intrinsic
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.RicBoundGoodFrame
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Connection
 
 set_option autoImplicit false
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 universe u
 
@@ -45,8 +26,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
 variable [T2Space M] [IsManifold I ∞ M] [SigmaCompactSpace M]
 variable [IsManifold I 1 M] [IsManifold I 2 M]
 
-
-
 noncomputable def lemma45CorConst (q₂ p : ℕ) : Real :=
   lemma45Const
     (fun c => claim1MulConst
@@ -61,8 +40,6 @@ theorem corConst_nonneg (q₂ p : ℕ) : 0 ≤ lemma45CorConst (E := E) q₂ p :
   apply lemma45Const_nonneg
   intro c
   exact claim1MulConst_nonneg (by positivity : (0 : Real) ≤ 4 ^ (2 + p)) c
-
-
 
 omit [I.Boundaryless] in
 omit [SigmaCompactSpace M] in
@@ -165,15 +142,6 @@ theorem lemma45_corII_bound
     (by linarith) (hequiv x hx) eps (lemma45CorConst (E := E) q₂ p) heps0
     (corConst_nonneg (E := E) q₂ p) hF3 r hr0 hrp
 
-
-
-
-
-
-
-
-
-
 omit [I.Boundaryless] in
 omit [SigmaCompactSpace M] in
 theorem lemma45_corII
@@ -199,13 +167,6 @@ theorem lemma45_corII
                 (iterCov (I := I) gRef q₂ T k x))) := by
   refine ⟨lemma45CorConst (E := E) q₂ p, corConst_nonneg (E := E) q₂ p, ?_⟩
   exact lemma45_corII_bound hu g gRef T p eps heps0 heps1 hequiv hgK
-
-
-
-
-
-
-
 
 omit [I.Boundaryless] in
 theorem lemma45_corII_unif (q₂ p : ℕ) :

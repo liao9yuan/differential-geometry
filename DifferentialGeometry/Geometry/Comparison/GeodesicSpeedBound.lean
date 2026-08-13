@@ -18,11 +18,8 @@ import Mathlib.Geometry.Manifold.Riemannian.PathELength
 import Mathlib.Topology.UniformSpace.Cauchy
 import Mathlib.Topology.EMetricSpace.Lipschitz
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Connection
 open DifferentialGeometry.Geometry.Operator
-
-
 
 noncomputable section
 

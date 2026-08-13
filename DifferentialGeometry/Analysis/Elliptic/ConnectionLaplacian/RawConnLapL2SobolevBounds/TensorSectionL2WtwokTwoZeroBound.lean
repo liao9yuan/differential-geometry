@@ -3,7 +3,6 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.TrivProj.ChartTwistIdentity
 import DifferentialGeometry.Analysis.Spectral.Tensor.UniformChartBounds.TensorChartTwistUniformBound
 open DifferentialGeometry.Analysis.Elliptic
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Connection
 
 

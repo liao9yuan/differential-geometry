@@ -7,41 +7,8 @@ import Mathlib.Analysis.Normed.Module.FiniteDimension
 import Mathlib.Topology.MetricSpace.ProperSpace
 import Mathlib.Topology.Order.Compact
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Connection
 open DifferentialGeometry.Geometry.Operator
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 noncomputable section
 
@@ -96,19 +63,6 @@ private lemma sphere_isCompact :
       nlinarith [abs_nonneg (ξ i), sq_nonneg (|ξ i| - 1)]
     exact habs
   exact (isCompact_iff_isClosed_bounded.mpr ⟨hclosed, hbdd⟩)
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 theorem exists_chartInvGramMatrix_quadForm_lower_bound_on_compact
     [T2Space M] [SigmaCompactSpace M] [CompactSpace M] [I.Boundaryless]
@@ -288,8 +242,6 @@ theorem exists_chartInvGramMatrix_quadForm_lower_bound_on_compact
         exact le_of_eq (hsum_empty _).symm
     · exact absurd ⟨b, hb⟩ hKα_ne
 
-
-
 theorem chartInvGram_quad_ub
     [T2Space M] [SigmaCompactSpace M] [CompactSpace M] [I.Boundaryless]
     (g : SmoothRiemannianMetric I M) (α : M)
@@ -404,8 +356,6 @@ theorem chartInvGram_quad_ub
       _ = max 1 B * (∑ i : Fin (Module.finrank ℝ E), ξ i ^ 2) := by
         rw [← hr_sq]
         ring
-
-
 
 theorem chartInvGram_quad_le
     (g h : SmoothRiemannianMetric I M) (α : M) {b : M}
@@ -568,8 +518,6 @@ theorem chartInvGram_ent_le
     rw [abs_of_neg (lt_of_not_ge hentry)]
     nlinarith [hdiag_nonneg i, hdiag_nonneg j]
 
-
-
 theorem chartInvGram_unif_ub
     [T2Space M] [SigmaCompactSpace M] [CompactSpace M] [I.Boundaryless]
     {ι : Type*} (gBase : SmoothRiemannianMetric I M)
@@ -606,8 +554,6 @@ theorem chartInvGram_unif_ub
     _ ≤ Λ * (CBase * (∑ i : Fin (Module.finrank ℝ E), ξ i ^ 2)) :=
       mul_le_mul_of_nonneg_left (hbase b hb ξ) hΛpos.le
     _ = (Λ * CBase) * (∑ i : Fin (Module.finrank ℝ E), ξ i ^ 2) := by ring
-
-
 
 theorem chartInvGram_unif_lb
     [T2Space M] [SigmaCompactSpace M] [CompactSpace M] [I.Boundaryless]
@@ -703,8 +649,6 @@ theorem chartInvGram_unif_lb
     _ ≤ normSq0S (I := I) (gSeq k) b 1 A := hnorm
     _ = _ := hseq_coord
 
-
-
 theorem chartInvGram_pou_lb
     [T2Space M] [SigmaCompactSpace M] [CompactSpace M] [I.Boundaryless]
     {ι : Type*} (gBase : SmoothRiemannianMetric I M)
@@ -774,8 +718,6 @@ theorem chartInvGram_pou_lb
     intro α _hα
     exact (hM ⟨α⟩).elim
 
-
-
 theorem chartInvGram_pou_ub
     [T2Space M] [SigmaCompactSpace M] [CompactSpace M] [I.Boundaryless]
     {ι : Type*} (gBase : SmoothRiemannianMetric I M)
@@ -826,8 +768,6 @@ theorem chartInvGram_pou_ub
     (mul_le_mul_of_nonneg_right hCα_le
       (Finset.sum_nonneg fun i _ => sq_nonneg (ξ i)))
 
-
-
 theorem chartInvGram_pou_bnd
     [T2Space M] [SigmaCompactSpace M] [CompactSpace M] [I.Boundaryless]
     {ι : Type*} (gBase : SmoothRiemannianMetric I M)
@@ -849,8 +789,6 @@ theorem chartInvGram_pou_bnd
   exact chartInvGram_ent_le (I := I) (gSeq k) α
     (pouTsupport_subset_baseSet (I := I) (M := M) α hb)
     (hupper α hα k b hb) i j
-
-
 
 theorem chartInvGram_pou_eqv
     [T2Space M] [SigmaCompactSpace M] [CompactSpace M] [I.Boundaryless]
@@ -880,19 +818,6 @@ theorem chartInvGram_pou_eqv
   refine ⟨c, C, hc, hC, ?_⟩
   intro α hα k b hb ξ
   exact ⟨hlower α hα k b hb ξ, hupper α hα k b hb ξ⟩
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 theorem exists_chartInvGramMatrix_quadForm_lower_bound_on_pouTsupport
     [T2Space M] [SigmaCompactSpace M] [CompactSpace M] [I.Boundaryless]

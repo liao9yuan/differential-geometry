@@ -3,15 +3,6 @@ import DifferentialGeometry.Geometry.Comparison.Volume.BallVolume
 import DifferentialGeometry.Geometry.Comparison.GeodesicConvexity
 import DifferentialGeometry.Geometry.Comparison.InjectivityRadius
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
-
-/-!
-# Local Bishop comparison for intrinsic metric balls
-
-This file identifies sufficiently small framed normal balls with intrinsic
-Riemannian-distance balls and transfers the normal-ball comparison theorem.
-No cut-time or cut-locus measurability is used.
--/
 
 noncomputable section
 
@@ -35,9 +26,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-/-- Below the named realized/intrinsic exponential agreement radius, the
-framed normal image of a center-metric tangent ball is the intrinsic distance
-ball with the same radius. -/
 theorem framedBall_eq_small
     [RiemannianBundle (fun x : M => TangentSpace I x)]
     [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
@@ -99,8 +87,6 @@ theorem framedBall_eq_small
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-/-- Volume of a ball for the canonical Hopf--Rinow realization of the
-Riemannian distance. -/
 def localBallVolume
     [RiemannianBundle (fun x : M => TangentSpace I x)]
     [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
@@ -112,8 +98,6 @@ def localBallVolume
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-/-- Below the realized exponential agreement radius, metric-ball volume and
-framed normal-ball volume agree. -/
 theorem localBall_eq_normal
     [RiemannianBundle (fun x : M => TangentSpace I x)]
     [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
@@ -135,9 +119,6 @@ theorem localBall_eq_normal
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-/-- Local Bishop comparison for intrinsic metric balls.  The returned radius
-lies strictly below the injectivity radius, but also records the smaller local
-analytic radius currently supplied by the radial Jacobi comparison. -/
 theorem localBall_cross
     [RiemannianBundle (fun x : M => TangentSpace I x)]
     [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
@@ -245,8 +226,6 @@ theorem localBall_cross_of_complete_metric
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-/-- The intrinsic metric-ball volume divided by the hyperbolic model volume is
-antitone on one center-dependent interval below the injectivity radius. -/
 theorem localBall_ratio
     [RiemannianBundle (fun x : M => TangentSpace I x)]
     [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]

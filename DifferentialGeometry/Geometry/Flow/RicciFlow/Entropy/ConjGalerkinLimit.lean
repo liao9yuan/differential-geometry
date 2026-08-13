@@ -4,19 +4,9 @@ import DifferentialGeometry.Analysis.Spectral.Intrinsic.TensorHsInterpolationLim
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Entropy.ConjGalerkinEnergy
 open DifferentialGeometry.PDE.RicciFlow DifferentialGeometry.Analysis.Spectral
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Connection
 
 set_option autoImplicit false
-
-
-
-
-
-
-
-
-
 
 noncomputable section
 
@@ -190,9 +180,6 @@ private theorem supp_right_lip
     · simpa only [f', if_pos hi] using hdu N t ht i hi
     · simpa only [f', if_neg hi, norm_zero] using (L i).property
 
-
-
-
 private lemma real_abs_neg_mul_add_le {lam v c A K : ℝ} (hlam : 0 ≤ lam)
     (hv : |v| ≤ A) (hc : |c| ≤ K) : |-lam * v + c| ≤ lam * A + K := by
   calc |-lam * v + c| ≤ |-lam * v| + |c| := abs_add_le _ _
@@ -218,8 +205,6 @@ private lemma scalarGalPert_continuousOn_of_parts
   have hsum := h2.add hPot
   exact hsum
 
-/-- Exact-interval energy bounds and perturbation continuity produce a
-modewise uniformly convergent Galerkin subsequence on that same interval. -/
 theorem gal_subseq_on
     {D : RealTimeInterval} (S : SolutionOn (I := I) (M := M) D)
     (T : D.RegularTime) {tau : Real} (htau : 0 < tau)
@@ -408,11 +393,6 @@ theorem gal_subseq_on
     lim_mass := by simpa only [q] using hlim_mass
   }⟩
 
-
-
-/-- Every smooth scalar initial datum has, on one common time interval, a
-modewise uniformly convergent subsequence of genuine finite Galerkin solutions.
-The limit inherits the all-order weighted spectral mass bounds. -/
 theorem scalar_gal_subseq
     {D : RealTimeInterval} (S : SolutionOn (I := I) (M := M) D)
     (hS : IsSolutionOn (I := I) S) (T : D.RegularTime) :
@@ -478,8 +458,6 @@ theorem scalar_gal_subseq
       exact ⟨Bound, fun N t ht => hBound N t (hIccE ht)⟩
   · exact hpert
 
-/-- The order-`m` Sobolev realization of the limiting Galerkin coefficients at
-one time in the compactness interval. -/
 noncomputable def galLimHs
     {D : RealTimeInterval}
     {S : SolutionOn (I := I) (M := M) D}
@@ -498,7 +476,6 @@ noncomputable def galLimHs
   coeff := ulim t
   weighted_summable := ((hlim.lim_mass m).choose_spec t ht).1
 
-
 noncomputable def galLimPath
     {D : RealTimeInterval}
     {S : SolutionOn (I := I) (M := M) D}
@@ -514,8 +491,6 @@ noncomputable def galLimPath
     Icc (0 : Real) tau → tensorHs (I := I) (M := M)
       (S.family.metric (T : Real)) 0 0 (m : Real) :=
   fun t => galLimHs hlim m t t.2
-
-
 
 theorem galLimPath_cont
     {D : RealTimeInterval}
@@ -558,8 +533,6 @@ theorem galLimPath_cont
     simp only [W, galLimPath, galLimHs, q, tensorHsInclusion_coeff_apply]
   rw [heq] at hcont
   exact hcont
-
-
 
 theorem galLim_tendsto
     {D : RealTimeInterval}

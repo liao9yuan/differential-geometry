@@ -4,7 +4,6 @@ import DifferentialGeometry.Geometry.Connection.ChartBridge.RiemannBasisIdentity
 import DifferentialGeometry.Analysis.Parabolic.DeTurckLinearization.LieDerivativeChartFrameIdentity
 import DifferentialGeometry.Analysis.Elliptic.TensorRegularity.CovDeriv.SlotCorrectionComponent
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Connection
 
 noncomputable section

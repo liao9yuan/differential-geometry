@@ -9,34 +9,10 @@ import DifferentialGeometry.Tensor.RSTensor.Coordinates.Field
 import DifferentialGeometry.Tensor.RSTensor.Tensor0SRiemannian.Comparison
 open DifferentialGeometry.PDE.RicciFlow
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Connection
 
 set_option autoImplicit false
 set_option backward.isDefEq.respectTransparency false
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 noncomputable section
 
@@ -54,10 +30,6 @@ variable {I : ModelWithCorners Real E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
 variable [T2Space M] [IsManifold I ∞ M] [SigmaCompactSpace M] [I.Boundaryless]
 variable [IsManifold I 1 M] [IsManifold I 2 M]
-
-
-
-
 
 omit [Module.Finite ℝ E] [I.Boundaryless] [IsManifold I 2 M] in
 omit [SigmaCompactSpace M] in
@@ -77,12 +49,6 @@ theorem covStep_domDomCongr [FiniteDimensional Real E] {s s' : ℕ}
   change _ = ContinuousMultilinearMap.domDomCongr (frontExtendEquiv e)
     ((covStep (I := I) gRef s Z) x)
   rw [covStep_apply]
-
-
-
-
-
-
 
 omit [Module.Finite ℝ E] [CompleteSpace E] [SigmaCompactSpace M] [I.Boundaryless] in
 theorem totalNabla0SRealizes_unique {s : ℕ}
@@ -109,16 +75,9 @@ theorem totalNabla0SRealizes_unique {s : ℕ}
   rw [hcons] at e1 e2
   rw [e1, e2]
 
-
-
-
 def shiftEquiv (r : ℕ) : (m : ℕ) → Fin ((r + 1) + m) ≃ Fin (r + (m + 1))
   | 0 => Equiv.refl _
   | (m + 1) => frontExtendEquiv (shiftEquiv r m)
-
-
-
-
 
 omit [Module.Finite ℝ E] in
 omit [I.Boundaryless] [IsManifold I 2 M] in
@@ -143,8 +102,6 @@ theorem iterCov_shift [FiniteDimensional Real E]
 def frontExtendIter {s s' : ℕ} (e : Fin s ≃ Fin s') : (m : ℕ) → Fin (s + m) ≃ Fin (s' + m)
   | 0 => e
   | (m + 1) => frontExtendEquiv (frontExtendIter e m)
-
-
 
 omit [Module.Finite ℝ E] in
 omit [I.Boundaryless] [IsManifold I 2 M] in
@@ -189,8 +146,6 @@ theorem normSq0S_iterCov_domDomCongr [FiniteDimensional Real E]
   exact normSq0S_domDomCongr (I := I) gRef x basis hinv (frontExtendIter e m)
     (iterCov (I := I) gRef s Y m x)
 
-
-
 omit [Module.Finite ℝ E] in
 omit [I.Boundaryless] [IsManifold I 2 M] in
 omit [SigmaCompactSpace M] in
@@ -211,11 +166,6 @@ theorem normSq0S_iterCov_shift [FiniteDimensional Real E]
   exact normSq0S_domDomCongr (I := I) gRef x basis hinv (shiftEquiv r m)
     (iterCov (I := I) gRef (r + 1) (covStep (I := I) gRef r T) m x)
 
-
-
-
-
-
 omit [Module.Finite ℝ E] [I.Boundaryless] [IsManifold I 2 M] in
 omit [SigmaCompactSpace M] in
 theorem iterCov_one [FiniteDimensional Real E]
@@ -223,8 +173,6 @@ theorem iterCov_one [FiniteDimensional Real E]
     (T : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
       (n := (∞ : WithTop ℕ∞)) r) :
     iterCov (I := I) gRef r T 1 = covStep (I := I) gRef r T := rfl
-
-
 
 omit [Module.Finite ℝ E] in
 omit [I.Boundaryless] in
@@ -257,9 +205,6 @@ theorem iterCov_product_one [FiniteDimensional Real E] {s q : ℕ}
       (iterCov (I := I) gRef s A 1) (iterCov (I := I) gRef q B 1)
       (iterCov_realizes (I := I) gRef A 0) (iterCov_realizes (I := I) gRef B 0))
 
-
-
-
 omit [Module.Finite ℝ E] [CompleteSpace E] [T2Space M] [SigmaCompactSpace M] [I.Boundaryless]
     [IsManifold I 2 M] in
 theorem sqrt_normSq0S_add_le [FiniteDimensional Real E]
@@ -276,14 +221,6 @@ theorem sqrt_normSq0S_add_le [FiniteDimensional Real E]
   simp only [component0S_add]
   exact DifferentialGeometry.PDE.RicciFlow.compL2_add_le
     (component0S (I := I) basis u) (component0S (I := I) basis v)
-
-
-
-
-
-
-
-
 
 omit [Module.Finite ℝ E] in
 omit [I.Boundaryless] in
@@ -412,10 +349,6 @@ theorem iterCov_product_sqrtNormSq_le [FiniteDimensional Real E]
                 (iterCov (I := I) gRef q B (m + 1 - c) x)) :=
             Finset.sum_congr rfl fun c _ => by ring
 
-
-
-
-
 omit [Module.Finite ℝ E] [CompleteSpace E] [T2Space M] [SigmaCompactSpace M] [I.Boundaryless]
     [IsManifold I 2 M] in
 theorem smulByFun_eq_product [FiniteDimensional Real E] {q : ℕ}
@@ -449,12 +382,6 @@ theorem smulByFun_eq_product [FiniteDimensional Real E] {q : ℕ}
   refine congrArg (B x) (funext fun i => ?_)
   change v i = v (finCongr (Nat.zero_add q) (Fin.natAdd 0 i))
   exact (congrArg v (he i)).symm
-
-
-
-
-
-
 
 omit [Module.Finite ℝ E] in
 omit [I.Boundaryless] in

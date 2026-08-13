@@ -6,7 +6,6 @@ import DifferentialGeometry.Analysis.Elliptic.TensorRegularity.ChartPullbackSmoo
 import DifferentialGeometry.Analysis.Elliptic.TensorRegularity.DirichletForm.FinsetSumSwap
 open DifferentialGeometry.Analysis.Elliptic
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Connection
 open DifferentialGeometry.Geometry.Operator
 

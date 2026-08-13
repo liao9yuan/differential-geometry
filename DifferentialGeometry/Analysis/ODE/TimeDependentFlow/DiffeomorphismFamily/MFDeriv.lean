@@ -2,11 +2,6 @@ import DifferentialGeometry.Analysis.ODE.TimeDependentFlow.SmoothInSpace
 import Mathlib.Geometry.Manifold.MFDeriv.Basic
 import Mathlib.Geometry.Manifold.IsManifold.InteriorBoundary
 
-
-
-
-
-
 namespace DifferentialGeometry.Analysis.ODE
 
 open Bundle
@@ -17,16 +12,6 @@ variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
   [CompactSpace M] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M]
-
-
-
-
-
-
-
-
-
-
 
 omit [FiniteDimensional ℝ E] [IsManifold I ∞ M] [CompactSpace M] [BoundarylessManifold I M]
     [T2Space M] [SigmaCompactSpace M] in

@@ -5,7 +5,6 @@ import DifferentialGeometry.Geometry.Curvature.CurvatureOperator.RicciConnDiffPa
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.CovDerivConnDiffQuadraticBound
 import DifferentialGeometry.Geometry.Metric.MetricBounds
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Connection
 
 

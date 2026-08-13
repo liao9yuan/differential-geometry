@@ -2,7 +2,6 @@ import DifferentialGeometry.Analysis.Elliptic.TensorRegularity.DirichletForm.Rot
 import DifferentialGeometry.Analysis.Elliptic.TensorRegularity.InteriorRegularity.PrincipalForm
 import DifferentialGeometry.Analysis.Elliptic.Operator.ChartMeasureEquiv
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
 
 
 noncomputable section

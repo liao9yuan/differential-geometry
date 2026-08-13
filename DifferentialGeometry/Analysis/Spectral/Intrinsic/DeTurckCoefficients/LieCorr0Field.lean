@@ -1,23 +1,17 @@
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurckCoefficients.LieCorr0Core
-open DifferentialGeometry.Analysis.Sobolev DifferentialGeometry.Analysis.Sobolev.IntrinsicSobolev.SmoothCcTensorHs DifferentialGeometry.PDE.RicciFlow
+open DifferentialGeometry.Analysis.Sobolev
+    DifferentialGeometry.Analysis.Sobolev.IntrinsicSobolev.SmoothCcTensorHs
+    DifferentialGeometry.PDE.RicciFlow
 open DifferentialGeometry.Analysis.Spectral
-open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Connection
 open DifferentialGeometry.Geometry.Operator
 
-
-
-
-
-
-
-
-
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
-open MeasureTheory Set Filter Topology Bundle Manifold DifferentialGeometry.Tensor0SBundle ContinuousLinearMap
+open MeasureTheory Set Filter Topology Bundle Manifold DifferentialGeometry.Tensor0SBundle
+    ContinuousLinearMap
 open scoped ENNReal NNReal BigOperators Manifold ContDiff Matrix
 
 namespace DifferentialGeometry.Analysis.Spectral
@@ -2414,7 +2408,6 @@ private lemma lc0_committed (hδ_lt : δ < 1)
   simp only [DeTurckCoefficients.LieCorr0NF.v0F, DeTurckCoefficients.LieCorr0NF.covAF,
     DeTurckCoefficients.LieCorr0NF.covWF, DeTurckCoefficients.LieCorr0NF.dvfbF,
     DeTurckCoefficients.LieCorr0NF.vfbF, lc0Ig, lc0Cg, lc0Ev, lc0Dig, lc0Ga, lc0DGa,
-      
     ]
   refine congrArg₂ (fun t₁ t₂ : ℝ => t₁ + t₂) (congrArg Neg.neg
     (Finset.sum_congr rfl (fun m _ => Finset.sum_congr rfl (fun ml _ => ?_))))

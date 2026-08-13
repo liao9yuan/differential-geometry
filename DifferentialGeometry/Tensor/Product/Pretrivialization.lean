@@ -96,7 +96,6 @@ def tensorProduct :
         simp only [LinearMap.comp_apply, LinearMap.id_apply]
         apply Trivialization.symmL_continuousLinearMapAt e₂ h₂
       rw [eq1, eq2, TensorProduct.map_id, LinearMap.id_apply]
-
   right_inv' := fun ⟨x, t⟩ ⟨⟨h₁, h₂⟩, _⟩ ↦ by
       simp only [Prod.mk.injEq, true_and]
       rw [← LinearMap.comp_apply, ← TensorProduct.map_comp]

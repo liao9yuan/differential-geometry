@@ -7,33 +7,6 @@ import Mathlib.Topology.Instances.Matrix
 set_option autoImplicit false
 set_option backward.isDefEq.respectTransparency false
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 namespace DifferentialGeometry
 namespace Tensor0SBundle
 

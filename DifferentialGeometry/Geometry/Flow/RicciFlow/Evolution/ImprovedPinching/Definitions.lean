@@ -11,19 +11,9 @@ import DifferentialGeometry.Geometry.Curvature.DimensionThree.PinchingAlgebra
 import DifferentialGeometry.Tensor.RSTensor.Metric
 import DifferentialGeometry.Tensor.RSTensor.MetricCompatibility
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Operator
 
 set_option autoImplicit false
-
-
-
-
-
-
-
-
-
 
 noncomputable section
 
@@ -89,14 +79,8 @@ theorem tfRic_apply
       rw [Tensor0SSpace.smul_apply, metric02_apply]
       simp only [smul_eq_mul]
 
-
-
 abbrev tfRicNormSqAt (scalar ricciNormSq : Real) : Real :=
   tracefreeRicciNormSqAtOf scalar ricciNormSq
-
-
-
-
 
 abbrev tfRicNormSq
     (scalar ricciNormSq : Real -> M -> Real) : Real -> M -> Real :=
@@ -109,14 +93,10 @@ theorem tfRicNormSq_compat
     tfRicNormSq scalar ricciNormSq t x =
       tracefreeRicciNormSqOf scalar ricciNormSq t x := rfl
 
-
-
 def pinchP
     (scalar ricciNormSq : Real -> M -> Real) (epsilon : Real)
     (t : Real) (x : M) : Real :=
   tfRicNormSq scalar ricciNormSq t x / Real.rpow (scalar t x) (2 - epsilon)
-
-
 
 def cubicQAt (scalar ricciNormSq ricciTraceCube : Real) : Real :=
   2 * ricciNormSq ^ 2 + scalar ^ 4 -
@@ -128,8 +108,6 @@ def cubicQ
     (t : Real) (x : M) : Real :=
   cubicQAt (scalar t x) (ricciNormSq t x) (ricciTraceCube t x)
 
-
-
 theorem cubicQ_eigen (l1 l2 l3 : Real) :
     cubicQAt
         (DifferentialGeometry.Geometry.Curvature.ricciEigenScalar3 l1 l2 l3)
@@ -138,8 +116,6 @@ theorem cubicQ_eigen (l1 l2 l3 : Real) :
       DifferentialGeometry.Geometry.Curvature.hamiltonCubicQ3 l1 l2 l3 := by
   unfold cubicQAt DifferentialGeometry.Geometry.Curvature.hamiltonCubicQ3
   ring
-
-
 
 theorem tfRic_eigen (l1 l2 l3 : Real) :
     tfRicNormSqAt
@@ -153,15 +129,9 @@ theorem tfRic_eigen (l1 l2 l3 : Real) :
     DifferentialGeometry.Geometry.Curvature.ricciEigenNormSq3
   ring
 
-
-
-
-
 def EigenPinchCtxOn
     (l1 l2 l3 : Real -> M -> Real) (delta : Real) : Prop :=
   forall t x, DifferentialGeometry.Geometry.Curvature.PinchEigen3 (l1 t x) (l2 t x) (l3 t x) delta
-
-
 
 theorem cubicQ_pinch
     {l1 l2 l3 delta epsilon : Real}
@@ -178,8 +148,6 @@ theorem cubicQ_pinch
             (DifferentialGeometry.Geometry.Curvature.ricciEigenNormSq3 l1 l2 l3) := by
   simpa [cubicQ_eigen, tfRic_eigen] using
     DifferentialGeometry.Geometry.Curvature.PinchEigen3.q_sub_nonneg hctx hepsilon
-
-
 
 omit [TopologicalSpace M] in
 theorem cubicQ_pinchOn
@@ -203,14 +171,10 @@ theorem cubicQ_pinchOn
   intro t x
   exact cubicQ_pinch (hctx t x) hepsilon
 
-
-
 def ricciReact3 (l1 l2 l3 : Real) : Real :=
   l1 * l2 * (l1 + l2 - l3) +
     l1 * l3 * (l1 + l3 - l2) +
       l2 * l3 * (l2 + l3 - l1)
-
-
 
 theorem react3_diag (l1 l2 l3 : Real) :
     (∑ i : Fin 3, ∑ j : Fin 3, ∑ k : Fin 3, ∑ l : Fin 3,
@@ -238,10 +202,6 @@ theorem curv3_diag_eq (l1 l2 l3 : Real) :
       DifferentialGeometry.Geometry.Curvature.delta3
   simp [Fin.sum_univ_three]
   ring
-
-
-
-
 
 theorem curv3_neg_eq (l1 l2 l3 : Real) :
     (∑ i : Fin 3, ∑ j : Fin 3, ∑ k : Fin 3, ∑ l : Fin 3,
@@ -315,9 +275,6 @@ def tfRicReactRel
     4 * reaction t x - ((4 : Real) / 3) * scalar t x * ricciNormSq t x =
       (4 * ricciNormSq t x * tfNormSq t x - 2 * Q t x) / scalar t x
 
-
-
-
 omit [TopologicalSpace M] in
 theorem tfRel_from_eigen
     (scalar ricciNormSq ricciTraceCube reaction : Real -> M -> Real)
@@ -346,8 +303,6 @@ theorem tfRel_from_eigen
     hcube t x]
   exact tfRel_eigen (l1 t x) (l2 t x) (l3 t x) hR'
 
-
-
 omit [TopologicalSpace M] in
 theorem tfRel_from_diag
     (scalar ricciNormSq ricciTraceCube : Real -> M -> Real)
@@ -369,8 +324,6 @@ theorem tfRel_from_diag
     scalar ricciNormSq ricciTraceCube (diagReact3 l1 l2 l3)
     l1 l2 l3 hscalar hnorm hcube
     (by intro t x; exact diagReact3_eq (M := M) l1 l2 l3 t x)
-
-
 
 theorem curvReact3_frame
     {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
@@ -409,9 +362,6 @@ theorem curvReact3_frame
   simp_rw [hRm]
   exact curv3_diag_eq l1 l2 l3
 
-
-
-
 theorem canonReact3_frame
     {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
     [SigmaCompactSpace M] [T2Space M]
@@ -432,9 +382,6 @@ theorem canonReact3_frame
       -ricciReact3 l1 l2 l3 := by
   rw [ricciNormCurvatureReactionInFrame_apply,
     curvReact3_frame (I := I) S Rm04 gInv frame t x l1 l2 l3 hInv hRic hRm]
-
-
-
 
 theorem curv3_frame_neg
     {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
@@ -473,8 +420,6 @@ theorem curv3_frame_neg
   simp_rw [hRm]
   exact curv3_neg_eq l1 l2 l3
 
-
-
 theorem canon3_frame_neg
     {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
     [SigmaCompactSpace M] [T2Space M]
@@ -504,8 +449,6 @@ def ricciNormAt {x : M}
   ∑ i : Fin 3, ∑ j : Fin 3,
     DifferentialGeometry.Geometry.Curvature.ricciCompAt (I := I) basis Ric i j *
       DifferentialGeometry.Geometry.Curvature.ricciCompAt (I := I) basis Ric i j
-
-
 
 def curvRicAt {x : M}
     (Ric : DifferentialGeometry.Geometry.Curvature.Tensor02At (I := I) (M := M) x)
@@ -604,8 +547,6 @@ theorem ricciEnd_diagVec {x : M}
             fin_cases j <;> simp [DifferentialGeometry.Geometry.Curvature.ricciDiag3,
               DifferentialGeometry.Geometry.Curvature.delta3, horth 2 0, horth 2 1, horth 2 2]
   exact ⟨h0, h1, h2⟩
-
-
 
 def ricciCubeInvAt {x : M}
     (g : SmoothRiemannianMetric I M)
@@ -762,8 +703,6 @@ theorem curvRic_inner {x : M}
   rw [inner0S_eq_coord (I := I) g x 4 basis DifferentialGeometry.Geometry.Curvature.delta3 hinv]
   exact (coordPair04 (I := I) Ric Rm04 basis).symm
 
-
-
 theorem reactAt_eq_react
     {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
     [SigmaCompactSpace M] [T2Space M]
@@ -782,8 +721,6 @@ theorem reactAt_eq_react
   unfold reactAt ricciReact
   rw [curvRic_inner (I := I) (S.base.metric t) (S.ricciAt t x)
     (S.base.rm04 t x) basis hinv]
-
-
 
 theorem react_frame {x : M}
     (g : SmoothRiemannianMetric I M)
@@ -950,9 +887,6 @@ theorem reactAt_diag {x : M}
   rw [curv3_neg_eq]
   ring
 
-
-
-
 omit [FiniteDimensional ℝ E] [IsManifold I 1 M] in
 theorem tfRel_basis {x : M}
     {Ric : DifferentialGeometry.Geometry.Curvature.Tensor02At (I := I) (M := M) x}
@@ -982,8 +916,6 @@ theorem tfRel_basis {x : M}
     hscalar, hcube]
   exact tfRel_eigen l1 l2 l3 hR'
 
-
-
 omit [IsManifold I 1 M] in
 omit [FiniteDimensional ℝ E] in
 theorem diag_neg {x : M}
@@ -1004,8 +936,6 @@ theorem diag_neg {x : M}
       simpa [DifferentialGeometry.Geometry.Curvature.ricciCompAt_apply,
         DifferentialGeometry.Geometry.Curvature.ricciDiag3] using
         congrArg Neg.neg hij
-
-
 
 omit [FiniteDimensional ℝ E] [IsManifold I 1 M] in
 theorem tfRel_trace {x : M}
@@ -1039,9 +969,6 @@ theorem tfRel_trace {x : M}
     simpa [DifferentialGeometry.Geometry.Curvature.standardRmCompAt_apply] using h
   exact tfRel_basis (I := I) (Ric := Ric) (Rm04 := Rm04)
     (basis := basis) hdiag hcube hRm hR
-
-
-
 
 theorem tfRel_point {x : M}
     {g : SmoothRiemannianMetric I M}
@@ -1234,9 +1161,6 @@ theorem tfRel_point_sec6
   rw [hnorm]
   exact hpoint
 
-
-
-
 theorem tfRel_pfirst
     {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
     [SigmaCompactSpace M] [T2Space M]
@@ -1318,8 +1242,6 @@ theorem scalar_eq_diag {x : M}
   simp [DifferentialGeometry.Geometry.Curvature.delta3, h00, h11, h22,
     DifferentialGeometry.Geometry.Curvature.ricciEigenScalar3]
 
-
-
 omit [IsManifold I 1 M] in
 theorem scalarTrace_delta {x : M}
     (g : SmoothRiemannianMetric I M)
@@ -1337,8 +1259,6 @@ theorem scalarTrace_delta {x : M}
   unfold DifferentialGeometry.Geometry.Curvature.ScalarRealizesRicciTraceAt
   rw [DifferentialGeometry.Geometry.Operator.metricTracePair0SAt_eq_sum_basis
     (I := I) g basis DifferentialGeometry.Geometry.Curvature.delta3 hinv Ric]
-
-
 
 omit [IsManifold I 1 M] in
 theorem firstTrace_delta
@@ -1413,8 +1333,6 @@ private theorem vec2_update_one {x : M}
       DifferentialGeometry.Geometry.Curvature.vec2 (I := I) X Y' := by
   funext a
   fin_cases a <;> simp [DifferentialGeometry.Geometry.Curvature.vec2, Function.update]
-
-
 
 omit [FiniteDimensional ℝ E] [IsManifold I 1 M] in
 theorem ricciSym_of_basis
@@ -1561,8 +1479,6 @@ theorem ricciSym_of_basis
   rw [hL, hR, hsym j i]
   ring
 
-
-
 omit [FiniteDimensional ℝ E] [IsManifold I 1 M] in
 theorem ricciSym_rm04
     {Idx : Type*} [Fintype Idx]
@@ -1587,10 +1503,6 @@ theorem ricciSym_rm04
     (fun i j =>
       DifferentialGeometry.Geometry.Curvature.ricciSymm_of_rm04 (I := I) basis gInv Ric Rm04 hTrace
         hPair hOutput hInput hInv i j)
-
-
-
-
 
 theorem tfRel_frame
     {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
@@ -1656,11 +1568,6 @@ theorem tfRel_frame
       (l1 t x) (l2 t x) (l3 t x)
       (hInv t x) (hRic t x) (hRm t x)
 
-
-
-
-
-
 theorem tfRel_data
     {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
     [SigmaCompactSpace M] [T2Space M]
@@ -1722,8 +1629,6 @@ theorem tfRel_data
       hbasis t x i, hbasis t x k, hbasis t x j, hbasis t x l] using h
   exact tfRel_frame (I := I) S Rm04 gInv frame scalar ricciTraceCube
     l1 l2 l3 hscalar hcube hInv hRic hRm
-
-
 
 theorem tfRel_first
     {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}

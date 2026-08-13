@@ -5,7 +5,6 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.Pullback.PullbackConnection
 import DifferentialGeometry.Geometry.Connection.LeviCivita.Defs
 import DifferentialGeometry.Geometry.Connection.LeviCivita.Koszul
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Connection
 
 

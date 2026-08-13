@@ -1,15 +1,8 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.ImprovedPinching.TfHeatCore
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Operator
 
 set_option autoImplicit false
-
-
-
-
-
-
 
 noncomputable section
 
@@ -25,12 +18,6 @@ variable {I : ModelWithCorners Real E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
 variable [IsManifold I ∞ M] [IsManifold I 1 M]
 
-
-
-
-
-
-
 def quotField
     (phi psi : Real -> M -> Real) (alpha beta : Real) :
     Real -> M -> Real :=
@@ -44,11 +31,6 @@ def quotLap
   fun t x =>
     DifferentialGeometry.Geometry.Curvature.laplacianAt (I := I) G t
       (quotField (M := M) phi psi alpha beta t) x
-
-
-
-
-
 
 def quotHeatRHS
     (G : DifferentialGeometry.Geometry.Curvature.MetricConnectionFamily (I := I) (M := M) Real)
@@ -75,10 +57,6 @@ def quotHeatRHS
             (DifferentialGeometry.Geometry.Curvature.gradientAt (I := I) G t (phi t) x)
             (DifferentialGeometry.Geometry.Curvature.gradientAt (I := I) G t (psi t) x)
 
-
-
-
-
 def quotHeatRHSDiv
     (G : DifferentialGeometry.Geometry.Curvature.MetricConnectionFamily (I := I) (M := M) Real)
     (phi psi phiHeat psiHeat : Real -> M -> Real)
@@ -103,8 +81,6 @@ def quotHeatRHSDiv
           (G.metric t).inner x
             (DifferentialGeometry.Geometry.Curvature.gradientAt (I := I) G t (phi t) x)
             (DifferentialGeometry.Geometry.Curvature.gradientAt (I := I) G t (psi t) x)
-
-
 
 omit [Module.Finite ℝ E] [IsManifold I 1 M] in
 theorem quotHeatRHSDiv_eq
@@ -146,8 +122,6 @@ def QuotientEvolutionOn
       D.carrier
       (t : Real)
 
-
-
 def QuotEvolDivOn
     {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
     (G : DifferentialGeometry.Geometry.Curvature.MetricConnectionFamily (I := I) (M := M) Real)
@@ -161,12 +135,6 @@ def QuotEvolDivOn
           (t : Real) x)
       D.carrier
       (t : Real)
-
-
-
-
-
-
 
 omit [Module.Finite ℝ E] in
 theorem quotHeat_at
@@ -331,10 +299,6 @@ theorem quotHeat
     (hphiDiff t) (hpsiDiff t) (hphiPos t) (hpsiPos t)
     (hgradPhi t x) (hgradPsi t x) (hgradPhiPow t) (hgradPsiPow t)
 
-
-
-
-
 omit [Module.Finite ℝ E] in
 theorem quotHeat_one
     [FiniteDimensional Real E]
@@ -401,13 +365,6 @@ theorem quotHeat_one
     phi psi phiLap psiLap phiHeat psiHeat (1 : Real) beta
     hphiDt hpsiDt hphiLap hpsiLap hphiDiff hpsiDiff
     hphiPos hpsiPos hgradPhi hgradPsi hgradPhiPow hgradPsiPow
-
-
-
-
-
-
-
 
 omit [Module.Finite ℝ E] in
 theorem quotHeat1_of_nonneg
@@ -504,12 +461,6 @@ theorem quotHeat1_of_nonneg
     simp [B, tt, smul_eq_mul]
     ring_nf
 
-
-
-
-
-
-
 omit [Module.Finite ℝ E] in
 theorem quotHeat_book
     [FiniteDimensional Real E]
@@ -576,10 +527,6 @@ theorem quotHeat_book
     phi psi phiLap psiLap phiHeat psiHeat alpha beta
     hphiDt hpsiDt hphiLap hpsiLap hphiDiff hpsiDiff
     hphiPos hpsiPos hgradPhi hgradPsi hgradPhiPow hgradPsiPow
-
-
-
-
 
 omit [Module.Finite ℝ E] in
 theorem quotHeat1_book

@@ -33,37 +33,12 @@ import Mathlib.LinearAlgebra.Dual.Defs
 import Mathlib.LinearAlgebra.Dual.Lemmas
 import Mathlib.LinearAlgebra.FreeModule.Finite.Matrix
 import Mathlib.LinearAlgebra.FiniteDimensional.Defs
-import Mathlib.LinearAlgebra.FiniteDimensional.Lemmas
 import Mathlib.LinearAlgebra.Dimension.Finrank
-import Mathlib.LinearAlgebra.Dimension.Free
 import Mathlib.LinearAlgebra.Contraction
-import Mathlib.LinearAlgebra.Multilinear.FiniteDimensional
 import Mathlib.RingTheory.TensorProduct.Finite
 import Mathlib.Analysis.Normed.Operator.Banach
 import Mathlib.Topology.Algebra.Module.Equiv
-import Mathlib.Topology.Algebra.Module.FiniteDimension
 import Mathlib.Topology.Algebra.Module.LinearMap
-import DifferentialGeometry.Tensor.RSTensor.Defs
-import DifferentialGeometry.Tensor.Multilinear.Fiber
-import DifferentialGeometry.Tensor.Multilinear.Bundle
-import DifferentialGeometry.Tensor.Alternating.Comp
-import DifferentialGeometry.Tensor.Multilinear.Comp
-import Mathlib.Analysis.Calculus.ContDiff.CPolynomial
-import Mathlib.Analysis.Calculus.ContDiff.Basic
-import Mathlib.Analysis.Calculus.ContDiff.Operations
-import DifferentialGeometry.Tensor.Auxiliary.LinearIsometryContDiff
-import Mathlib.Analysis.Calculus.ContDiff.Comp
-import Mathlib.Analysis.Normed.Module.FiniteDimension
-import Mathlib.Analysis.Normed.Module.Alternating.Basic
-import Mathlib.RingTheory.Finiteness.Defs
-import Mathlib.Geometry.Manifold.ContMDiff.NormedSpace
-import Mathlib.Geometry.Manifold.VectorBundle.Basic
-import Mathlib.Geometry.Manifold.VectorBundle.SmoothSection
-import Mathlib.Geometry.Manifold.VectorBundle.Tangent
-import Mathlib.Data.Bundle
-import DifferentialGeometry.Tensor.Multilinear.Basis
-import DifferentialGeometry.Tensor.Multilinear.Curry
-import Mathlib.Geometry.Manifold.VectorBundle.Hom
 import DifferentialGeometry.Tensor.Alternating.Curry
 import DifferentialGeometry.Tensor.Alternating.Flip
 import DifferentialGeometry.Tensor.Multilinear.Flip
@@ -82,110 +57,17 @@ import Mathlib.Tactic.Group
 import Mathlib.Analysis.Normed.Module.Alternating.Curry
 import Mathlib.LinearAlgebra.Alternating.Uncurry.Fin
 import Mathlib.Tactic.Cases
-import DifferentialGeometry.Tensor.Multilinear.Basis
-import DifferentialGeometry.Tensor.Multilinear.Bundle
-import DifferentialGeometry.Tensor.Alternating.Comp
-import DifferentialGeometry.Tensor.Multilinear.Comp
-import Mathlib.Analysis.Calculus.ContDiff.CPolynomial
-import Mathlib.Analysis.Calculus.ContDiff.Basic
-import Mathlib.Analysis.Calculus.ContDiff.Operations
-import Mathlib.LinearAlgebra.Multilinear.FiniteDimensional
-import DifferentialGeometry.Tensor.Auxiliary.LinearIsometryContDiff
-import Mathlib.Analysis.Calculus.ContDiff.Comp
-import Mathlib.Analysis.Normed.Module.FiniteDimension
-import Mathlib.Analysis.Normed.Module.Alternating.Basic
-import Mathlib.RingTheory.Finiteness.Defs
-import Mathlib.Geometry.Manifold.ContMDiff.NormedSpace
-import Mathlib.Geometry.Manifold.VectorBundle.Basic
-import Mathlib.Geometry.Manifold.VectorBundle.SmoothSection
-import Mathlib.Geometry.Manifold.VectorBundle.Tangent
-import Mathlib.Data.Bundle
-import Mathlib.LinearAlgebra.FiniteDimensional.Lemmas
-import Mathlib.LinearAlgebra.Dimension.Free
-import Mathlib.Topology.Algebra.Module.FiniteDimension
 import DifferentialGeometry.Tensor.Multilinear.Tensor
-import DifferentialGeometry.Tensor.Multilinear.Fiber
-import DifferentialGeometry.Tensor.Multilinear.Bundle
-import DifferentialGeometry.Tensor.Alternating.Comp
-import DifferentialGeometry.Tensor.Multilinear.Comp
-import Mathlib.Analysis.Calculus.ContDiff.CPolynomial
-import Mathlib.Analysis.Calculus.ContDiff.Basic
-import Mathlib.Analysis.Calculus.ContDiff.Operations
-import Mathlib.LinearAlgebra.Multilinear.FiniteDimensional
-import DifferentialGeometry.Tensor.Auxiliary.LinearIsometryContDiff
-import Mathlib.Analysis.Calculus.ContDiff.Comp
-import Mathlib.Analysis.Normed.Module.FiniteDimension
-import Mathlib.Analysis.Normed.Module.Alternating.Basic
-import Mathlib.RingTheory.Finiteness.Defs
-import Mathlib.Geometry.Manifold.ContMDiff.NormedSpace
-import Mathlib.Geometry.Manifold.VectorBundle.Basic
-import Mathlib.Geometry.Manifold.VectorBundle.SmoothSection
-import Mathlib.Geometry.Manifold.VectorBundle.Tangent
-import Mathlib.Data.Bundle
-import DifferentialGeometry.Tensor.Multilinear.Basis
-import Mathlib.LinearAlgebra.FiniteDimensional.Lemmas
-import Mathlib.LinearAlgebra.Dimension.Free
-import Mathlib.Topology.Algebra.Module.FiniteDimension
 import DifferentialGeometry.Tensor.Multilinear.Field
 import DifferentialGeometry.Tensor.Product.Basis
 import DifferentialGeometry.Tensor.Product.Bundle
 import DifferentialGeometry.Tensor.Product.Pretrivialization
-import DifferentialGeometry.Tensor.Product.Defs
-import DifferentialGeometry.Tensor.Product.HomEquiv
-import Mathlib.LinearAlgebra.Dual.Defs
-import Mathlib.LinearAlgebra.Dual.Lemmas
-import Mathlib.LinearAlgebra.FreeModule.Finite.Matrix
-import Mathlib.LinearAlgebra.FiniteDimensional.Defs
-import Mathlib.LinearAlgebra.Dimension.Finrank
-import Mathlib.LinearAlgebra.Contraction
-import Mathlib.RingTheory.TensorProduct.Finite
-import Mathlib.Analysis.Normed.Operator.Banach
-import Mathlib.Topology.Algebra.Module.Equiv
-import Mathlib.Topology.Algebra.Module.LinearMap
-import DifferentialGeometry.Tensor.RSTensor.Defs
-import DifferentialGeometry.Tensor.Multilinear.Curry
-import Mathlib.Geometry.Manifold.VectorBundle.Hom
-import DifferentialGeometry.Tensor.Alternating.Curry
-import DifferentialGeometry.Tensor.Alternating.Flip
-import DifferentialGeometry.Tensor.Multilinear.Flip
-import Mathlib.Analysis.Normed.Module.Multilinear.Basic
-import Mathlib.Analysis.Normed.Operator.BoundedLinearMaps
-import Mathlib.Analysis.Normed.Operator.Mul
-import DifferentialGeometry.Tensor.Alternating.Congr
-import Mathlib.LinearAlgebra.Alternating.Basic
-import DifferentialGeometry.Tensor.Auxiliary.Shuffle.Decomposition
-import DifferentialGeometry.Tensor.Auxiliary.Shuffle.Split
-import Mathlib.GroupTheory.Perm.Option
-import Mathlib.LinearAlgebra.Alternating.DomCoprod
-import Mathlib.GroupTheory.Perm.Finite
-import Mathlib.Logic.Equiv.Fin.Basic
-import Mathlib.Tactic.Group
-import Mathlib.Analysis.Normed.Module.Alternating.Curry
-import Mathlib.LinearAlgebra.Alternating.Uncurry.Fin
-import Mathlib.Tactic.Cases
 import Mathlib.Topology.FiberBundle.Basic
 import DifferentialGeometry.Tensor.Product.Fiber
 import Mathlib.Topology.VectorBundle.Basic
 import Mathlib.LinearAlgebra.TensorProduct.Basis
 import DifferentialGeometry.Bundle.SectionRealized
 import DifferentialGeometry.Tensor.RSTensor.Coordinates.Field
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 namespace DifferentialGeometry
 namespace Tensor0SBundle

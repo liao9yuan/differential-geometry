@@ -531,7 +531,8 @@ private theorem bilinear_identity_of_supp_in_chartTarget
       rw [hu_def]
       change g.inner x
         ((grad_g (I := I) g ⟨f, hf⟩ : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) x)
-        ((grad_g (I := I) g ⟨chartTestPullback α ψ, hψM⟩ : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) x) =
+        ((grad_g (I := I) g ⟨chartTestPullback α ψ, hψM⟩ : Cₛ^∞⟮I; E,
+          (TangentSpace I : M → Type _)⟯) x) =
         mfderiv I 𝓘(ℝ, ℝ) f x
           ((grad_g (I := I) g ⟨chartTestPullback α ψ, hψM⟩ :
             Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) x)

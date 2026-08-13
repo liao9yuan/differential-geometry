@@ -2,7 +2,6 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.Entropy.F.ChartTrace
 open DifferentialGeometry.Tensor.Multilinear
 open DifferentialGeometry.Tensor.RSTensor
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
 
 
 set_option autoImplicit false
@@ -19,23 +18,6 @@ open DifferentialGeometry.Tensor0SBundle
 open scoped Manifold ContDiff
 
 variable {M : Type*}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 section GeometryFormula510
 
@@ -312,8 +294,6 @@ private theorem compFun_mdifferentiableAt
     (fun _ : Fin 1 => p)
     (fun q : Fin 2 => if q = 0 then i else j)).mdifferentiableAt (by norm_num)
 
-
-
 omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M]
     [SigmaCompactSpace M] in
 private theorem compFun_center
@@ -353,8 +333,6 @@ private theorem gInvFun_center
     (x : M) (i j : CoordinateIdx (𝕜 := Real) E) :
     gInvFun (I := I) g x i j x =
       inverseMetricFlatModelInChart_component (I := I) g x i j (extChartAt I x x) := rfl
-
-
 
 omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M]
     [SigmaCompactSpace M] in
@@ -515,9 +493,6 @@ private theorem connTraceRawDiv_eq_productSum
                   gInvFun (I := I) g x i j x * compFun (I := I) A x p i j x)
             hGamma
 
-
-
-
 omit [CompactSpace M] in
 omit [NeZero (Module.finrank ℝ E)] in
 omit [SigmaCompactSpace M] in
@@ -657,10 +632,6 @@ theorem connTraceRaw_eq_gamma
   refine Finset.sum_congr rfl fun i _ => Finset.sum_congr rfl fun j _ => ?_
   rw [hU]
   rfl
-
-
-
-
 
 omit [CompactSpace M] in
 omit [NeZero (Module.finrank ℝ E)] in

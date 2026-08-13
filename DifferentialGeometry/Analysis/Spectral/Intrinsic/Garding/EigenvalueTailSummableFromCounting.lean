@@ -1,34 +1,5 @@
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.MetricRealization.SpectralChartRegularityAnyOrder
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 noncomputable section
 
@@ -38,16 +9,6 @@ open scoped Manifold Topology ContDiff ENNReal BigOperators
 namespace DifferentialGeometry
 namespace Analysis
 namespace Spectral
-
-
-
-
-
-
-
-
-
-
 
 theorem counting_summable_dyadic {ι : Type*} (w : ι → ℝ) (hw : ∀ i, 1 ≤ w i)
     (q : ℕ) (A : ℝ) (hA : 0 ≤ A)
@@ -170,20 +131,6 @@ variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
   [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 omit [NeZero (Module.finrank ℝ E)] in
 theorem eigenvalueTailSummable_of_polynomial_counting_bound

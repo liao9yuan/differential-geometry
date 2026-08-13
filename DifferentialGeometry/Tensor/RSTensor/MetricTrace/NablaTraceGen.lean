@@ -6,7 +6,6 @@ import DifferentialGeometry.Geometry.Operator.RoughLaplacian
 open DifferentialGeometry.Tensor.Multilinear
 open DifferentialGeometry.Tensor.RSTensor
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
 
 set_option autoImplicit false
 
@@ -36,7 +35,6 @@ private def freezeTailSlots {s : ℕ}
     (fun b : Fin s => Y b y) q
 
 set_option backward.isDefEq.respectTransparency false in
-
 noncomputable def freezeTailField {s : ℕ}
     [CompleteSpace E]
     (A : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
@@ -365,7 +363,6 @@ private theorem metricTraceFirstTwoCoeff {s : ℕ}
     (metricTraceFirstTwoEvent (I := I) g A x₀ σ)
 
 set_option backward.isDefEq.respectTransparency false in
-
 def metricTraceFirstTwoField {s : ℕ}
     [IsManifold I 1 M] [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
     (g : SmoothRiemannianMetric I M)
@@ -588,7 +585,6 @@ theorem metricTraceFirstTwoField_eq_sum {s : ℕ}
       (A x) tail]
 
 set_option backward.isDefEq.respectTransparency false in
-
 theorem metricTraceFirstTwoField_add {s : ℕ}
     [IsManifold I 1 M] [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
     (g : SmoothRiemannianMetric I M)
@@ -614,7 +610,6 @@ theorem metricTraceFirstTwoField_add {s : ℕ}
   simp only [Tensor0SSpace.add_apply, mul_add, Finset.sum_add_distrib]
 
 set_option backward.isDefEq.respectTransparency false in
-
 theorem metricTraceFirstTwoField_smul {s : ℕ}
     [IsManifold I 1 M] [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
     (g : SmoothRiemannianMetric I M) (c : Real)
@@ -638,7 +633,6 @@ theorem metricTraceFirstTwoField_smul {s : ℕ}
   ring
 
 set_option backward.isDefEq.respectTransparency false in
-
 theorem metricTraceFirstTwoField_domDomCongr_gen {s s' : ℕ}
     [IsManifold I 1 M] [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
     (g : SmoothRiemannianMetric I M)
@@ -702,7 +696,6 @@ theorem metricTraceFirstTwoField_domDomCongr {s s' : ℕ}
         metricTraceInput, Fin.cases_succ]
 
 set_option backward.isDefEq.respectTransparency false in
-
 theorem metricTraceFirstTwoField_product {k q : ℕ}
     [IsManifold I 1 M] [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
     (g : SmoothRiemannianMetric I M)
@@ -774,7 +767,6 @@ theorem metricTraceFirstTwoField_product {k q : ℕ}
   ring
 
 set_option backward.isDefEq.respectTransparency false in
-
 theorem metricTraceFirstTwoField_zero {s : ℕ}
     [IsManifold I 1 M] [IsManifold I 2 M] [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
     (g : SmoothRiemannianMetric I M) :
@@ -903,7 +895,6 @@ theorem traceNablaShuffle_metricTraceInput {x : M} {s : ℕ}
         simp only [Fin.val_pred, hval]
 
 set_option backward.isDefEq.respectTransparency false in
-
 theorem nablaRealizes_metricTraceFirstTwo {s : ℕ}
     [T2Space M] [CompleteSpace E] [I.Boundaryless] [IsManifold I 1 M]
     [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]

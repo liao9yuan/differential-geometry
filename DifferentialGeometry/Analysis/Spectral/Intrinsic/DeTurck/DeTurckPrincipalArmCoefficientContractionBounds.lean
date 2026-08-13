@@ -14,7 +14,6 @@ import DifferentialGeometry.Analysis.Spectral.Intrinsic.Garding.EigenCombination
 import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.GreenIdentityAndIBP.RoughLaplacianAppCcCommutation
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.SobolevNonlinearityExistence
 open DifferentialGeometry.Analysis.Sobolev
-open DifferentialGeometry.Analysis.Sobolev
 open DifferentialGeometry.Analysis.Spectral
 open DifferentialGeometry.Analysis.Elliptic
 open DifferentialGeometry.Geometry.Curvature
@@ -101,7 +100,8 @@ private lemma jet_fibreNormSq_sup_le (g₀ : SmoothRiemannianMetric I M) (r s : 
           Tensor0SBundle.TensorRSSpace r (s + l) I x)‖ ≤ Ce * Cr * Sum4K := by
       calc ‖((iteratedCovGrad (I := I) g₀ r s l Ψ).toSection x :
               Tensor0SBundle.TensorRSSpace r (s + l) I x)‖
-          ≤ Ce * ‖DifferentialGeometry.Analysis.Sobolev.IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := r) (s := s + l) (2 * K)
+          ≤ Ce * ‖DifferentialGeometry.Analysis.Sobolev.IntrinsicSobolev.SmoothCcTensor.toHs
+            (g := g₀) (r := r) (s := s + l) (2 * K)
               (iteratedCovGrad (I := I) g₀ r s l Ψ)‖ := hemb
         _ ≤ Ce * (Cr * Sum4K) := mul_le_mul_of_nonneg_left hrev hCe_pos.le
         _ = Ce * Cr * Sum4K := by ring

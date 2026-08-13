@@ -34,20 +34,10 @@ open scoped Manifold ContDiff
 
 variable {M : Type*}
 
-
-
-
-
-
-
-
 open DifferentialGeometry.Tensor0SBundle
 open scoped Manifold ContDiff
 
 variable {M : Type*}
-
-
-
 
 def expNegPotentialDensity (potential : M -> Real) : M -> Real :=
   fun x => Real.exp (-(potential x))
@@ -56,9 +46,6 @@ def expNegPotentialDensity (potential : M -> Real) : M -> Real :=
 def expNegPotentialWeightedMeasure [MeasurableSpace M] (mu : Measure M)
     (potential : M -> Real) : Measure M :=
   mu.withDensity fun x => ENNReal.ofReal (expNegPotentialDensity potential x)
-
-
-
 
 theorem expNegPotentialWeightedMeasure_integral_eq_base
     [MeasurableSpace M] (mu : Measure M) (potential integrand : M -> Real)
@@ -81,9 +68,6 @@ theorem expNegPotentialWeightedMeasure_integral_eq_base
   have hnonneg : 0 ≤ expNegPotentialDensity potential x :=
     le_of_lt (Real.exp_pos _)
   simp [ENNReal.toReal_ofReal hnonneg, smul_eq_mul]
-
-
-
 
 theorem expWeightedIBP_of_baseIntegral_zero [MeasurableSpace M]
     (mu : Measure M) (potential lapPotential gradPotentialNormSq : M -> Real)
@@ -108,8 +92,6 @@ theorem expWeightedIBP_of_baseIntegral_zero [MeasurableSpace M]
 def fFunctionalBracket (scalarCurvature gradPotentialNormSq : M -> Real) :
     M -> Real :=
   fun x => scalarCurvature x + gradPotentialNormSq x
-
-
 
 def fFunctionalClosedBracket (scalarCurvature lapPotential : M -> Real) :
     M -> Real :=
@@ -168,8 +150,6 @@ theorem fFunctionalFirstVariation_eq_of_hasFirstVariationAt [MeasurableSpace M]
   unfold fFunctionalFirstVariation FFunctionalHasFirstVariationAt at *
   exact h.deriv
 
-
-
 theorem expNegPotentialDensity_hasDerivAt
     {potentialPath : Real -> M -> Real} {s0 : Real}
     {potentialVariation : M -> Real}
@@ -186,13 +166,9 @@ theorem expNegPotentialDensity_hasDerivAt
   have h := (hpotential_deriv x).neg.exp
   simpa [expNegPotentialDensity, mul_comm, mul_left_comm, mul_assoc] using h
 
-
-
 def expWeightedMeasureVariationFactor
     (potentialVariation metricVariationTrace : M -> Real) : M -> Real :=
   fun x => metricVariationTrace x / 2 - potentialVariation x
-
-
 
 def expWeightedIntegralVariationIntegrand
     (potential potentialVariation metricVariationTrace phi phiVariation :

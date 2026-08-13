@@ -1,16 +1,7 @@
 import DifferentialGeometry.Geometry.Operator.RoughLaplacian
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
 
 set_option autoImplicit false
-
-/-!
-# Splitting a metric trace along a line
-
-This file gives the pointwise linear-algebra decomposition of the metric trace
-of a covariant two-tensor into one distinguished line and its perpendicular
-complement.  The tensor need not be symmetric.
--/
 
 open DifferentialGeometry.Geometry.Operator
 namespace DifferentialGeometry.Tensor.RSTensor
@@ -26,9 +17,6 @@ variable {Hm : Type*} [TopologicalSpace Hm]
 variable {I : ModelWithCorners Real E Hm}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace Hm M] [IsManifold I ∞ M]
 
-/-- The metric trace of a covariant two-tensor splits into its contribution
-along a nonzero line and the inverse-Gram trace on a maximal perpendicular
-family.  No symmetry of the tensor is required. -/
 theorem trace_eq_line_add
     {ι : Type*} [Fintype ι] [DecidableEq ι]
     (g : SmoothRiemannianMetric I M)

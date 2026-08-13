@@ -5,18 +5,8 @@ import DifferentialGeometry.Geometry.Metric.Polarization
 import DifferentialGeometry.Geometry.Metric.Sphere.RadialLog
 import Mathlib.Analysis.Normed.Module.Connected
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
 
 set_option autoImplicit false
-
-/-!
-# Punctured-sphere Cartan maps
-
-The round logarithm based at `p` gives a single model-space coordinate on the
-unit sphere with the antipode removed.  A tangent-space isometry followed by
-the target exponential map produces the corresponding Cartan map into a
-complete curvature-one manifold.
--/
 
 noncomputable section
 
@@ -62,8 +52,6 @@ variable [RiemannianBundle (fun x : N => TangentSpace J x)]
   [IsContinuousRiemannianBundle (EuclideanSpace ℝ (Fin n))
     (fun x : N => TangentSpace J x)]
 
-/-- The Cartan map from the round sphere with one antipode removed, totalized
-on the whole sphere by the total round logarithm. -/
 def punctCartan
     (g : SmoothRiemannianMetric J N)
     (hEnorm : DifferentialGeometry.Geometry.Riemannian.IsMetricNorm (I := J) (M := N) g)
@@ -82,8 +70,6 @@ omit [FiniteDimensional ℝ A]
   [IsContinuousRiemannianBundle (EuclideanSpace ℝ (Fin n))
     (fun x : sphere (0 : A) 1 => TangentSpace (𝓡 n) x)]
   [T2Space (TangentBundle J N)] [ConnectedSpace N] in
-/-- At its source center, the punctured Cartan map takes the prescribed
-target-center value. -/
 @[simp] theorem punctCartan_self
     (g : SmoothRiemannianMetric J N)
     (hEnorm : DifferentialGeometry.Geometry.Riemannian.IsMetricNorm (I := J) (M := N) g)
@@ -95,7 +81,6 @@ target-center value. -/
   exact expMapIntrinsic_zero (I := J) g hEnorm p'
 
 omit [T2Space (TangentBundle J N)] [ConnectedSpace N] in
-/-- The punctured Cartan map is smooth away from the antipode. -/
 theorem punctCartan_smooth
     (hRound : ∀ (x : sphere (0 : A) 1) (w : TangentSpace (𝓡 n) x),
       ‖w‖ₑ = ENNReal.ofReal
@@ -131,8 +116,6 @@ theorem punctCartan_smooth
     hexp.comp_contMDiffOn hmid
 
 omit [T2Space (TangentBundle J N)] [ConnectedSpace N] in
-/-- At its source center, the differential of the punctured Cartan map is the
-prescribed tangent-space equivalence. -/
 theorem punctCartan_mfd
     (hRound : ∀ (x : sphere (0 : A) 1) (w : TangentSpace (𝓡 n) x),
       ‖w‖ₑ = ENNReal.ofReal
@@ -205,8 +188,6 @@ theorem punctCartan_mfd
 
 omit [T2Space (TangentBundle J N)]
   [ConnectedSpace N] in
-/-- The differential of the punctured Cartan map preserves the metric
-quadratic form. -/
 theorem punctCartan_sq
     (hRound : ∀ (x : sphere (0 : A) 1) (w : TangentSpace (𝓡 n) x),
       ‖w‖ₑ = ENNReal.ofReal
@@ -355,8 +336,6 @@ theorem punctCartan_sq
 
 omit [T2Space (TangentBundle J N)]
   [ConnectedSpace N] in
-/-- The differential of the punctured Cartan map preserves the full
-Riemannian inner product away from the antipode. -/
 theorem punctCartan_inner
     (hRound : ∀ (x : sphere (0 : A) 1) (w : TangentSpace (𝓡 n) x),
       ‖w‖ₑ = ENNReal.ofReal
@@ -387,8 +366,6 @@ theorem punctCartan_inner
 
 omit [T2Space (TangentBundle J N)]
   [ConnectedSpace N] in
-/-- The punctured Cartan map is a smooth local diffeomorphism away from the
-antipode. -/
 theorem punctCartan_local
     (hRound : ∀ (x : sphere (0 : A) 1) (w : TangentSpace (𝓡 n) x),
       ‖w‖ₑ = ENNReal.ofReal

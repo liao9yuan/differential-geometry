@@ -2,13 +2,13 @@ import DifferentialGeometry.Geometry.Connection.MetricCompatibility.CovGradCovDe
 import DifferentialGeometry.Geometry.Curvature.CurvatureOperator.SecondBianchi
 import DifferentialGeometry.Geometry.Curvature.Order2Defect.GradientSlotLeibniz
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
 
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
 
-open Bundle Manifold MeasureTheory Set Filter DifferentialGeometry.Tensor0SBundle CovariantDerivative
+open Bundle Manifold MeasureTheory Set Filter DifferentialGeometry.Tensor0SBundle
+    CovariantDerivative
 open scoped Manifold Topology ContDiff BigOperators Matrix
 
 

@@ -3,7 +3,6 @@ import DifferentialGeometry.Analysis.Parabolic.TimeSobolev.BochnerL2
 import Mathlib.MeasureTheory.Function.LpSpace.Basic
 import Mathlib.MeasureTheory.Integral.DominatedConvergence
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
 
 
 noncomputable section

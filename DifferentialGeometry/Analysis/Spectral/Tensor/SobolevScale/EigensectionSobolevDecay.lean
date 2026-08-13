@@ -4,7 +4,6 @@ import DifferentialGeometry.Analysis.Spectral.Intrinsic.Garding.EigenCombination
 import DifferentialGeometry.Analysis.Sobolev.TensorHilbert.HilbertSpace
 open DifferentialGeometry.Analysis.Sobolev DifferentialGeometry.Analysis.Sobolev.IntrinsicSobolev
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
 
 noncomputable section
 

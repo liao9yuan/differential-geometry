@@ -3,10 +3,7 @@ import DifferentialGeometry.Geometry.Exponential.Smoothness.MatchDataReduction
 import DifferentialGeometry.Geometry.Exponential.Smoothness.AtZero
 import DifferentialGeometry.Geometry.Exponential.ChartFlow.ChainedFlowContinuity
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Connection
-
-
 
 noncomputable section
 

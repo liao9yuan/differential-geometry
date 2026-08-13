@@ -10,7 +10,6 @@ import DifferentialGeometry.Bundle.Section
 import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.GreenIdentityAndIBP.TensorDirichletCurrentGreenIdentityRS
 open DifferentialGeometry.Analysis.Elliptic
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
 
 
 noncomputable section
@@ -61,7 +60,8 @@ private theorem memLp_riemannianFiberNormSq_rpow
     MeasureTheory.MemLp
       (fun x => (riemannianFiberNormSq (I := I) (M := M) g r s x (S.toSection x)) ^ a) p
       (DifferentialGeometry.Integral.Measure.riemannianVolumeMeasure I M g) := by
-  haveI : MeasureTheory.IsFiniteMeasure (DifferentialGeometry.Integral.Measure.riemannianVolumeMeasure I M g) :=
+  haveI : MeasureTheory.IsFiniteMeasure
+    (DifferentialGeometry.Integral.Measure.riemannianVolumeMeasure I M g) :=
     DifferentialGeometry.Integral.Measure.riemannianVolumeMeasure_isFiniteMeasure_of_compactSpace
       (I := I) (M := M) g
   have hcont : Continuous
@@ -79,11 +79,15 @@ theorem real_holder_three_nonneg
     {α β γ : ℝ} (hα : 0 < α) (hβ : 0 < β) (hγ : 0 < γ)
     (hABC : α⁻¹ + β⁻¹ + γ⁻¹ = 1) :
     ∫ x, f₁ x * f₂ x * f₃ x ∂(DifferentialGeometry.Integral.Measure.riemannianVolumeMeasure I M g) ≤
-      (∫ x, f₁ x ^ α ∂(DifferentialGeometry.Integral.Measure.riemannianVolumeMeasure I M g)) ^ (1 / α) *
-        ((∫ x, f₂ x ^ β ∂(DifferentialGeometry.Integral.Measure.riemannianVolumeMeasure I M g)) ^ (1 / β) *
-          (∫ x, f₃ x ^ γ ∂(DifferentialGeometry.Integral.Measure.riemannianVolumeMeasure I M g)) ^ (1 / γ)) := by
+      (∫ x, f₁ x ^ α ∂(DifferentialGeometry.Integral.Measure.riemannianVolumeMeasure I M g)) ^
+        (1 / α) *
+        ((∫ x, f₂ x ^ β ∂(DifferentialGeometry.Integral.Measure.riemannianVolumeMeasure I M g))
+          ^ (1 / β) *
+          (∫ x, f₃ x ^ γ ∂(DifferentialGeometry.Integral.Measure.riemannianVolumeMeasure I M g))
+            ^ (1 / γ)) := by
   classical
-  set μ : MeasureTheory.Measure M := DifferentialGeometry.Integral.Measure.riemannianVolumeMeasure I M g with hμ
+  set μ : MeasureTheory.Measure M :=
+    DifferentialGeometry.Integral.Measure.riemannianVolumeMeasure I M g with hμ
   haveI : MeasureTheory.IsFiniteMeasure μ :=
     DifferentialGeometry.Integral.Measure.riemannianVolumeMeasure_isFiniteMeasure_of_compactSpace (I := I) (M := M) g
   set α' : ℝ := (β⁻¹ + γ⁻¹)⁻¹ with hα'def

@@ -9,7 +9,6 @@ import DifferentialGeometry.Analysis.ODE.TimeDependentFlow.ChartLocalExistence.C
 import DifferentialGeometry.Analysis.ODE.TimeDependentFlow.Regularity.BareFlowFromJointC1
 import DifferentialGeometry.Analysis.ODE.TimeDependentFlow.SmoothDependence.GlobalClosedManifold
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
 
 namespace DifferentialGeometry.PDE.RicciFlow
 

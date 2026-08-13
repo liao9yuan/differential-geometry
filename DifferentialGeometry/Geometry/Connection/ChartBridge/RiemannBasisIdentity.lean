@@ -4,7 +4,6 @@ import DifferentialGeometry.Geometry.Curvature.CurvatureOperator.CurvatureBundli
 import DifferentialGeometry.Geometry.Connection.ChartFrame.ChartLieBracket
 import DifferentialGeometry.Geometry.Connection.CovApplyCovRSChartBasisExtension
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Operator
 
 

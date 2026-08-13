@@ -2,20 +2,6 @@ import Mathlib.Analysis.Calculus.MeanValue
 
 namespace DifferentialGeometry.Analysis.Calculus.SmoothExtension
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 noncomputable section
 
 open Filter Topology Set

@@ -1,17 +1,8 @@
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.Garding.ScalarHessBound
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.MetricLapDiff
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Connection
 open DifferentialGeometry.Geometry.Operator
-
-
-
-
-
-
-
-
 
 noncomputable section
 
@@ -45,9 +36,6 @@ private local instance : MeasurableSpace E := borel E
 private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
-
-
-
 
 theorem lapDiff_energy_le
     (g : SmoothRiemannianMetric I M) :

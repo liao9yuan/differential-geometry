@@ -5,7 +5,6 @@ import DifferentialGeometry.Geometry.Curvature.CurvatureOperator.TensorCurvature
 import DifferentialGeometry.Geometry.Connection.TensorNabla.TensorSlotwiseCurvatureRS
 open DifferentialGeometry.Analysis.Elliptic
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
 
 
 noncomputable section

@@ -1,18 +1,8 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.Metric.InverseSmooth
 open DifferentialGeometry.PDE.RicciFlow
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
 
 set_option autoImplicit false
-
-
-
-
-
-
-
-
-
 
 noncomputable section
 
@@ -34,10 +24,6 @@ section Components
 
 variable {Idx : Type*} [Fintype Idx]
 variable {u : Set M}
-
-
-
-
 
 def inverseMetricCovDerivCompInFrame
     (gInv : Real -> DifferentialGeometry.Geometry.Curvature.InverseMetricComponents M Idx)
@@ -359,12 +345,6 @@ theorem inverseMetric_derivative_solve
                           rw [hsymm b j]
                           ring
 
-
-
-
-
-
-
 omit [SigmaCompactSpace M] [T2Space M] in
 theorem inverseMetricCovDerivCompInFrame_eq_zero
     [DecidableEq Idx]
@@ -664,8 +644,6 @@ theorem inverseMetricCovDerivCompInFrame_eq_zero
       (∑ a : Idx, Γ a l * U k a) = 0
   rw [hDU]
   ring
-
-
 
 omit [SigmaCompactSpace M] [T2Space M] in
 theorem invCovZeroLocal

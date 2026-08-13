@@ -11,32 +11,6 @@ import DifferentialGeometry.Bundle.ClmSectionSmooth
 
 set_option autoImplicit false
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 noncomputable section
 
 universe u uE uH
@@ -56,8 +30,6 @@ variable {A : ℕ → Type u} [∀ k, TopologicalSpace (A k)] [∀ k, ChartedSpa
   [∀ k, Nonempty (A k)]
 variable (S : SeqSystem A)
 
-
-
 def inclHomeo (k : ℕ) : OpenPartialHomeomorph (A k) S.Lim :=
   (S.incl_isOpenEmb k).toOpenPartialHomeomorph (S.incl k)
 
@@ -72,10 +44,6 @@ def inclHomeo (k : ℕ) : OpenPartialHomeomorph (A k) S.Lim :=
 theorem inclHomeo_symm_apply (k : ℕ) (x : A k) :
     (S.inclHomeo k).symm (S.incl k x) = x :=
   (S.incl_isOpenEmb k).toOpenPartialHomeomorph_left_inv (S.incl k)
-
-
-
-
 
 def limChart (k : ℕ) (a : A k) : OpenPartialHomeomorph S.Lim H :=
   (S.inclHomeo k).symm.trans (chartAt H a)
@@ -102,10 +70,6 @@ def rep (z : S.Lim) : Σ k, A k := (S.exists_sigma_incl z).choose
 omit [∀ (k : ℕ), Nonempty (A k)] in
 theorem incl_rep (z : S.Lim) : S.incl (S.rep z).1 (S.rep z).2 = z :=
   (S.exists_sigma_incl z).choose_spec
-
-
-
-
 
 instance instChartedSpaceLim : ChartedSpace H S.Lim where
   atlas := ⋃ (k : ℕ), ⋃ (a : A k), {S.limChart k a}
@@ -141,9 +105,6 @@ instance instT2SpaceLim [∀ k, T2Space (A k)] : T2Space S.Lim := S.t2Space
 instance instNonemptyLim : Nonempty S.Lim :=
   ⟨S.incl 0 (Classical.arbitrary (A 0))⟩
 
-
-
-
 instance instPreconnectedLim [∀ k, PreconnectedSpace (A k)] :
     PreconnectedSpace S.Lim := by
   constructor
@@ -160,8 +121,6 @@ instance instConnectedSpaceLim [∀ k, PreconnectedSpace (A k)] :
     ConnectedSpace S.Lim where
   toPreconnectedSpace := S.instPreconnectedLim
   toNonempty := S.instNonemptyLim
-
-
 
 def transitionHomeo (k ℓ : ℕ) : OpenPartialHomeomorph (A k) (A ℓ) :=
   (S.inclHomeo k).trans (S.inclHomeo ℓ).symm
@@ -181,9 +140,6 @@ theorem incl_transitionHomeo {k ℓ : ℕ} {w : A k} (hw : w ∈ (S.transitionHo
     rw [inclHomeo_target]; exact (S.mem_transitionHomeo_source).mp hw
   rw [transitionHomeo_apply, ← inclHomeo_apply, OpenPartialHomeomorph.right_inv _ hmem]
 
-
-
-
 theorem limChart_symm_trans (k ℓ : ℕ) (a : A k) (b : A ℓ) :
     (S.limChart k a).symm.trans (S.limChart ℓ b)
       = ((chartAt H a).symm.trans (S.transitionHomeo k ℓ)).trans (chartAt H b) := by
@@ -194,24 +150,6 @@ end Charted
 
 end SeqSystem
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 structure SmoothSeqSystem
     {E : Type uE} [NormedAddCommGroup E] [NormedSpace ℝ E]
     {H : Type uH} [TopologicalSpace H] (I : ModelWithCorners ℝ E H)
@@ -221,9 +159,6 @@ structure SmoothSeqSystem
   contMDiff_F : ∀ {k ℓ : ℕ} (h : k ≤ ℓ), ContMDiff I I ∞ (toSeqSystem.F h)
   contMDiffOn_invFun_F : ∀ {k ℓ : ℕ} (h : k ≤ ℓ),
     ContMDiffOn I I ∞ (Function.invFun (toSeqSystem.F h)) (Set.range (toSeqSystem.F h))
-
-
-
 
 theorem modelSpace_contDiffOn
     {E : Type uE} [NormedAddCommGroup E] [NormedSpace ℝ E]
@@ -278,8 +213,6 @@ theorem succMap_contMDiff (f : ∀ k, A k → A (k + 1))
       rw [hfun]
       exact (hf ℓ).comp ih
 
-
-
 omit [∀ (k : ℕ), IsManifold I ∞ (A k)] in
 theorem succMap_inv_mdiff (f : ∀ k, A k → A (k + 1))
     (hemb : ∀ k, IsOpenEmbedding (f k))
@@ -333,8 +266,6 @@ theorem succMap_inv_mdiff (f : ∀ k, A k → A (k + 1))
       change Function.invFun (f ℓ ∘ prev) ((f ℓ ∘ prev) x) = x
       exact Function.leftInverse_invFun htotal x
 
-
-
 def ofSucc (f : ∀ k, A k → A (k + 1))
     (hemb : ∀ k, IsOpenEmbedding (f k))
     (hf : ∀ k, ContMDiff I I ∞ (f k))
@@ -356,11 +287,6 @@ def ofSucc (f : ∀ k, A k → A (k + 1))
   unfold SeqSystem.succMap
   rw [show Nat.le_succ k = Nat.le.step (Nat.le_refl k) by rfl,
     Nat.leRecOn_succ (Nat.le_refl k) x, Nat.leRecOn_self]
-
-
-
-
-
 
 theorem transitionHomeo_contMDiffOn (k ℓ : ℕ) :
     ContMDiffOn I I ∞ (S.toSeqSystem.transitionHomeo k ℓ)
@@ -389,11 +315,6 @@ theorem transitionHomeo_contMDiffOn (k ℓ : ℕ) :
   refine ContMDiffOn.congr ?_ (fun w hw => hpt w hw)
   exact (S.contMDiffOn_invFun_F hℓm).comp ((S.contMDiff_F hkm).contMDiffOn) hrange
 
-
-
-
-
-
 instance instIsManifoldLim : IsManifold I ∞ S.toSeqSystem.Lim := by
   haveI : Nonempty H :=
     ⟨chartAt H (Classical.arbitrary (A 0)) (Classical.arbitrary (A 0))⟩
@@ -419,10 +340,6 @@ instance instIsManifoldLim : IsManifold I ∞ S.toSeqSystem.Lim := by
   refine key.congr (fun z _ => ?_)
   rw [hT']
   simp only [OpenPartialHomeomorph.coe_trans, Function.comp_apply]
-
-
-
-
 
 theorem contMDiff_incl (k : ℕ) : ContMDiff I I ∞ (S.toSeqSystem.incl k) := by
   intro a
@@ -457,25 +374,10 @@ theorem contMDiff_incl (k : ℕ) : ContMDiff I I ∞ (S.toSeqSystem.incl k) := b
 
 section MetricTransport
 
-
-
-
-
-
-
-
-
-
-
-
-
-
 variable [FiniteDimensional ℝ E]
 variable [∀ k, SigmaCompactSpace (A k)] [∀ k, T2Space (A k)]
 
 open Bundle
-
-
 
 omit [FiniteDimensional ℝ E] in
 private theorem mfd_comp_id
@@ -501,8 +403,6 @@ private theorem mfd_comp_id_app
   have h := DFunLike.congr_fun (mfd_comp_id (I := I) hfg hg hf) v
   simpa using h
 
-
-
 omit [FiniteDimensional ℝ E] in
 private theorem inner_base_eq
     {M₀ : Type*} [TopologicalSpace M₀] [ChartedSpace H M₀] [IsManifold I ∞ M₀]
@@ -518,9 +418,6 @@ private theorem mfd_base_eq
     (f : M₁ → M₂) {x y : M₁} (hxy : x = y) (v : E) :
     (mfderiv I I f x : E →L[ℝ] E) v = (mfderiv I I f y : E →L[ℝ] E) v := by
   subst hxy; rfl
-
-
-
 
 omit [FiniteDimensional ℝ E] [∀ (k : ℕ), SigmaCompactSpace (A k)] [∀ (k : ℕ), T2Space (A k)] in
 theorem contMDiffAt_invIncl (k : ℕ) {z : S.toSeqSystem.Lim}
@@ -560,11 +457,6 @@ theorem contMDiffAt_invIncl (k : ℕ) {z : S.toSeqSystem.Lim}
     rw [OpenPartialHomeomorph.trans_apply, SeqSystem.inclHomeo_symm_apply]
   simp only [Function.comp_apply, hval, (chartAt H a).left_inv hmem_c]
 
-
-
-
-
-
 noncomputable def inclPartialDiffeo (k : ℕ) :
     PartialDiffeomorph I I S.toSeqSystem.Lim (A k) (∞ : WithTop ℕ∞) where
   toFun := Function.invFun (S.toSeqSystem.incl k)
@@ -588,27 +480,12 @@ omit [FiniteDimensional ℝ E] [∀ (k : ℕ), SigmaCompactSpace (A k)] [∀ (k 
 @[simp] theorem inclPartialDiffeo_apply (k : ℕ) (z : S.toSeqSystem.Lim) :
     S.inclPartialDiffeo k z = Function.invFun (S.toSeqSystem.incl k) z := rfl
 
-
-
 omit [FiniteDimensional ℝ E] [∀ (k : ℕ), SigmaCompactSpace (A k)] [∀ (k : ℕ), T2Space (A k)] in
 theorem invIncl_incl_le {j k : ℕ} (hjk : j ≤ k) (a : A j) :
     Function.invFun (S.toSeqSystem.incl k) (S.toSeqSystem.incl j a)
       = S.toSeqSystem.F hjk a := by
   conv_lhs => rw [← S.toSeqSystem.incl_comp hjk a]
   exact Function.leftInverse_invFun (S.toSeqSystem.incl_injective k) _
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 def MetricCocycle (g : ∀ k, SmoothRiemannianMetric I (A k)) : Prop :=
   ∀ ⦃k ℓ : ℕ⦄ (h : k ≤ ℓ) (a : A k) (v w : TangentSpace I a),
@@ -666,8 +543,6 @@ theorem MetricCocycle.ofSucc (g : ∀ k, SmoothRiemannianMetric I (A k))
             (mfderiv I I (S.toSeqSystem.F hkl) a v)
             (mfderiv I I (S.toSeqSystem.F hkl) a w)
         _ = (g k).inner a v w := ih a v w
-
-
 
 noncomputable def stageInner (g : ∀ k, SmoothRiemannianMetric I (A k)) (k : ℕ)
     (z : S.toSeqSystem.Lim) :
@@ -762,9 +637,6 @@ theorem stageInner_bounded (g : ∀ k, SmoothRiemannianMetric I (A k)) (k : ℕ)
   rw [hset]
   exact ((g k).isVonNBounded _).image _
 
-
-
-
 omit [FiniteDimensional ℝ E] [∀ (k : ℕ), SigmaCompactSpace (A k)] [∀ (k : ℕ), T2Space (A k)] in
 theorem stageInner_mono (g : ∀ k, SmoothRiemannianMetric I (A k)) (hg : S.MetricCocycle g)
     {k m : ℕ} (hkm : k ≤ m) {z : S.toSeqSystem.Lim}
@@ -847,14 +719,6 @@ omit [FiniteDimensional ℝ E] [∀ (k : ℕ), SigmaCompactSpace (A k)] [∀ (k 
 theorem mem_range_rep (z : S.toSeqSystem.Lim) :
     z ∈ Set.range (S.toSeqSystem.incl (S.toSeqSystem.rep z).1) :=
   ⟨(S.toSeqSystem.rep z).2, S.toSeqSystem.incl_rep z⟩
-
-
-
-
-
-
-
-
 
 noncomputable def limitMetric (g : ∀ k, SmoothRiemannianMetric I (A k))
     (hg : S.MetricCocycle g) : SmoothRiemannianMetric I S.toSeqSystem.Lim where
@@ -949,8 +813,6 @@ noncomputable def limitMetric (g : ∀ k, SmoothRiemannianMetric I (A k))
     filter_upwards with y
     rfl
 
-
-
 theorem limitMetric_pullback (g : ∀ k, SmoothRiemannianMetric I (A k))
     (hg : S.MetricCocycle g) (k : ℕ) (a : A k) (v w : TangentSpace I a) :
     (S.limitMetric g hg).inner (S.toSeqSystem.incl k a)
@@ -976,8 +838,6 @@ theorem limitMetric_pullback (g : ∀ k, SmoothRiemannianMetric I (A k))
   rw [happ v, happ w]
   exact inner_base_eq (g k) hφk v w
 
-
-
 theorem limitMetric_of_mem (g : ∀ k, SmoothRiemannianMetric I (A k))
     (hg : S.MetricCocycle g) (k : ℕ) {z : S.toSeqSystem.Lim}
     (hz : z ∈ Set.range (S.toSeqSystem.incl k)) (v w : TangentSpace I z) :
@@ -991,11 +851,6 @@ theorem limitMetric_of_mem (g : ∀ k, SmoothRiemannianMetric I (A k))
   rw [hstage, S.stageInner_apply]
 
 end MetricTransport
-
-
-
-
-
 
 instance instT2SpaceTangentBundleLim [∀ k, T2Space (A k)] :
     T2Space (TangentBundle I S.toSeqSystem.Lim) := by

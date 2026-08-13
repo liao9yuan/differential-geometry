@@ -3,7 +3,6 @@ import DifferentialGeometry.Analysis.Elliptic.Regularity.Hessian.PairingLapDom
 import DifferentialGeometry.Analysis.Elliptic.Regularity.Hessian.PairingChart
 import DifferentialGeometry.Analysis.Elliptic.Regularity.Ricci.PairingCLM
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Operator
 
 

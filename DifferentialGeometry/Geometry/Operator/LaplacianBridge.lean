@@ -7,13 +7,6 @@ open DifferentialGeometry.Geometry.Connection
 
 set_option autoImplicit false
 
-
-
-
-
-
-
-
 noncomputable section
 
 

@@ -1,44 +1,8 @@
 import DifferentialGeometry.Tensor.RSTensor.Tensor0SRiemannian.Smooth
 import DifferentialGeometry.Tensor.RSTensor.FiberMetric.Tensor0SMetricDeriv
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
 
 set_option autoImplicit false
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 namespace DifferentialGeometry
 namespace Tensor0SBundle

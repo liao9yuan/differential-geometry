@@ -2,13 +2,6 @@ import DifferentialGeometry.Geometry.Operator.Gradient
 import DifferentialGeometry.Tensor.RSTensor.CotangentRiemannian
 open DifferentialGeometry.Geometry.Operator
 
-
-
-
-
-
-
-
 noncomputable section
 
 open Bundle Manifold
@@ -26,8 +19,6 @@ variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
   [IsManifold I ∞ M]
-
-
 
 theorem chartInvGram_inverse
     (g : SmoothRiemannianMetric I M) (alpha : M) {x : M}

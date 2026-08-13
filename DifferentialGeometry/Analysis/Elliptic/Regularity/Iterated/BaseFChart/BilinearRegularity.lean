@@ -7,7 +7,6 @@ import DifferentialGeometry.Analysis.Sobolev.Chart.SmoothDensity.StrictCutoffPus
 import DifferentialGeometry.Analysis.Sobolev.Euclidean.Multiplication.MultiplyQuantK
 import DifferentialGeometry.Analysis.Sobolev.Manifold.IteratedSobolevEmbedding
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
 
 
 noncomputable section

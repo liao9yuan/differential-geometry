@@ -9,7 +9,6 @@ open DifferentialGeometry.Analysis.Sobolev
 open DifferentialGeometry.Analysis.Spectral
 open DifferentialGeometry.Analysis.Elliptic
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Connection
 
 
@@ -26,7 +25,8 @@ namespace TensorSpectral
 open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.L2
 
-open DifferentialGeometry.PDE.RicciFlow DifferentialGeometry.Analysis.Sobolev DifferentialGeometry.Analysis.Spectral
+open DifferentialGeometry.PDE.RicciFlow DifferentialGeometry.Analysis.Sobolev
+    DifferentialGeometry.Analysis.Spectral
 open DifferentialGeometry.Analysis.Spectral.MetricRealization
 open DifferentialGeometry.Analysis.Spectral.DeTurck
 open DifferentialGeometry.PDE.DeTurck.RicciLinearization
@@ -846,7 +846,6 @@ theorem
           Combinatorics.boundedFactorGridWindow b (i + 1) (i + 3) := by ring
 
 set_option backward.isDefEq.respectTransparency false in
-
 omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [BoundarylessManifold I M]
     [SigmaCompactSpace M] in
 private theorem appCcRS_smul_left_local (g : SmoothRiemannianMetric I M) (a b c : ℕ)
@@ -865,7 +864,6 @@ private theorem appCcRS_smul_left_local (g : SmoothRiemannianMetric I M) (a b c 
   rw [ContinuousLinearMap.smul_comp]
 
 set_option backward.isDefEq.respectTransparency false in
-
 omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [BoundarylessManifold I M]
     [SigmaCompactSpace M] in
 @[simp] private theorem appCcRS_ccSlotSwapField_involutive (g : SmoothRiemannianMetric I M)

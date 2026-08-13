@@ -131,7 +131,8 @@ lemma iteratedFDeriv_mem_submodule {S : Submodule 𝕜 F} (hS : IsClosed (S : Se
 lemma fpowerSeries_diag_eq_inv_factorial_smul_iteratedFDeriv [CharZero 𝕜]
     {f : X → F} {p : FormalMultilinearSeries 𝕜 X F} {x : X} {r : ℝ≥0∞}
     (hp : HasFPowerSeriesOnBall f p x r) (hfa : AnalyticOn 𝕜 f Set.univ) (n : ℕ) (y : X) :
-    p n (fun _ : Fin n => y) = ((Nat.factorial n : 𝕜)⁻¹) • iteratedFDeriv 𝕜 n f x (fun _ : Fin n => y) := by
+    p n (fun _ : Fin n => y) = ((Nat.factorial n : 𝕜)⁻¹) • iteratedFDeriv 𝕜 n f x
+      (fun _ : Fin n => y) := by
   have h := HasFPowerSeriesOnBall.iteratedFDeriv_eq_sum hp hfa (v := fun _ : Fin n => y)
   have hsum : (∑ σ : Equiv.Perm (Fin n), p n (fun _ : Fin n => y)) =
       ((Fintype.card (Equiv.Perm (Fin n)) : ℕ) : 𝕜) • p n (fun _ : Fin n => y) := by
@@ -240,7 +241,8 @@ lemma analyticOnNhd_codRestrict_real {S : Submodule ℝ F} (hS : IsClosed (S : S
     have hnorm : ‖(Nat.factorial n : ℝ)⁻¹‖ = (Nat.factorial n : ℝ)⁻¹ := by
       exact Real.norm_of_nonneg (inv_nonneg.mpr (by positivity : 0 ≤ (Nat.factorial n : ℝ)))
     calc
-      ‖q n‖ = ‖(S.subtypeₗᵢ : S →ₗᵢ[ℝ] F).toContinuousLinearMap.compContinuousMultilinearMap (q n)‖ := rfl
+      ‖q n‖ = ‖(S.subtypeₗᵢ : S →ₗᵢ[ℝ] F).toContinuousLinearMap.compContinuousMultilinearMap
+        (q n)‖ := rfl
       _ = ‖(Nat.factorial n : ℝ)⁻¹ • (ftaylorSeries ℝ f x n)‖ := by rw [hincl]
       _ ≤ ‖(Nat.factorial n : ℝ)⁻¹‖ * ‖ftaylorSeries ℝ f x n‖ :=
         norm_smul_le (r := (Nat.factorial n : ℝ)⁻¹) (x := ftaylorSeries ℝ f x n)
@@ -288,19 +290,24 @@ theorem contDiff_of_comp_linearIsometry_omega {E : Type*} [NormedAddCommGroup E]
   let S : Submodule ℝ F := e.toLinearMap.range
   have heS : IsClosed (S : Set F) := by
     simpa [S] using he
-  have h₁ : AnalyticOnNhd ℝ (fun x : X => ⟨e (g x), LinearMap.mem_range_self (e : E →ₗ[ℝ] F) (g x)⟩ : X → S)
+  have h₁ : AnalyticOnNhd ℝ (fun x : X => ⟨e (g x),
+    LinearMap.mem_range_self (e : E →ₗ[ℝ] F) (g x)⟩ : X → S)
       Set.univ := by
     exact analyticOnNhd_codRestrict_real heS hg (fun x =>
       LinearMap.mem_range_self (e : E →ₗ[ℝ] F) (g x))
   let e₀ : E ≃ₗᵢ[ℝ] S := linearIsometryEquivRange e
-  have h₂ : AnalyticAt ℝ (e₀.symm ∘ (fun x : X => ⟨e (g x), LinearMap.mem_range_self (e : E →ₗ[ℝ] F) (g x)⟩ : X → S)) x := by
+  have h₂ : AnalyticAt ℝ (e₀.symm ∘ (fun x : X => ⟨e (g x),
+    LinearMap.mem_range_self (e : E →ₗ[ℝ] F) (g x)⟩ : X → S)) x := by
     have hlin : AnalyticOnNhd ℝ (e₀.symm.toContinuousLinearEquiv.toContinuousLinearMap) Set.univ :=
       (e₀.symm.toContinuousLinearEquiv.toContinuousLinearMap).analyticOnNhd Set.univ
-    exact AnalyticAt.comp (hlin (⟨e (g x), LinearMap.mem_range_self (e : E →ₗ[ℝ] F) (g x)⟩ : S) (by simp))
+    exact AnalyticAt.comp (hlin (⟨e (g x),
+      LinearMap.mem_range_self (e : E →ₗ[ℝ] F) (g x)⟩ : S) (by simp))
       (h₁ x hx)
-  have hcongr : (fun x : X => e₀.symm (⟨e (g x), LinearMap.mem_range_self (e : E →ₗ[ℝ] F) (g x)⟩ : S)) = g := by
+  have hcongr : (fun x : X => e₀.symm (⟨e (g x),
+    LinearMap.mem_range_self (e : E →ₗ[ℝ] F) (g x)⟩ : S)) = g := by
     funext x
-    exact (congrArg e₀.symm (by rfl : (⟨e (g x), LinearMap.mem_range_self (e : E →ₗ[ℝ] F) (g x)⟩ : S) = e₀ (g x))).trans
+    exact (congrArg e₀.symm (by rfl : (⟨e (g x),
+      LinearMap.mem_range_self (e : E →ₗ[ℝ] F) (g x)⟩ : S) = e₀ (g x))).trans
       (e₀.symm_apply_apply (g x))
   simpa [Function.comp_def, hcongr] using h₂
 
@@ -309,7 +316,8 @@ lemma isClosed_range_comp {E F G : Type*} [NormedAddCommGroup E] [NormedSpace �
     (ψ : E →ₗᵢ[ℝ] F) (hψ : IsClosed (Set.range ψ)) :
     IsClosed (Set.range (fun T : G →L[ℝ] E => ψ.toContinuousLinearMap.comp T)) := by
   let e₀ : E ≃ₗᵢ[ℝ] ψ.toLinearMap.range := linearIsometryEquivRange ψ
-  have hmem : ∀ T' : G →L[ℝ] F, T' ∈ Set.range (fun T : G →L[ℝ] E => ψ.toContinuousLinearMap.comp T) ↔
+  have hmem : ∀ T' : G →L[ℝ] F,
+    T' ∈ Set.range (fun T : G →L[ℝ] E => ψ.toContinuousLinearMap.comp T) ↔
       ∀ x, T' x ∈ Set.range ψ := by
     intro T'
     constructor

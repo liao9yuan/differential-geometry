@@ -166,8 +166,6 @@ theorem scalarCurv_eq_orthonormal_trace
     (fun i => smoothOrthoFrame (I := I) g x i x) hB
     (fun i j => smoothOrthoFrame_orthonormal_at_center (I := I) g x i j)
 
-
-
 omit [SigmaCompactSpace M] in
 theorem metricScalar_eq_scal
     (g : SmoothRiemannianMetric I M) (x : M) :

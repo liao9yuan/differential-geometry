@@ -3,17 +3,7 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.IteratedRmTowerHea
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.Metric.InverseSmooth
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.RmRealizationBridgeAllK
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Connection
-
-
-
-
-
-
-
-
-
 
 noncomputable section
 

@@ -2,7 +2,6 @@ import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurckCoefficients.Inve
 import DifferentialGeometry.Analysis.Parabolic.RicciLinearization.InvGramPerturbation
 import DifferentialGeometry.Geometry.Curvature.Riemann.Ricci
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Connection
 open DifferentialGeometry.Geometry.Operator
 
@@ -962,8 +961,6 @@ theorem gramBracket_abs_le
           ≤ Q + Q + Q := add_le_add (add_le_add (hQ i l j) (hQ j l i)) (hQ l i j)
       _ = 3 * Q := by ring
 
-
-
 omit [NeZero (Module.finrank ℝ E)] in
 theorem christoffel_abs_le
     (g : SmoothRiemannianMetric I M) (α : M) (y : E)
@@ -1016,9 +1013,6 @@ theorem gramBracketD_abs_le
           (add_le_add (hQ c i l j) (hQ c j l i)) (hQ c l i j)
       _ = 3 * Q := by ring
 
-
-
-
 omit [NeZero (Module.finrank ℝ E)] in
 theorem invGramD_abs_le
     (g : SmoothRiemannianMetric I M) (α : M) {y : E}
@@ -1056,9 +1050,6 @@ theorem invGramD_abs_le
     _ = (Module.finrank ℝ E : ℝ) ^ 2 * M_b ^ 2 * Q := by
       simp only [Finset.sum_const, Finset.card_univ, Fintype.card_fin, nsmul_eq_mul]
       ring
-
-
-
 
 omit [NeZero (Module.finrank ℝ E)] in
 theorem christoffelD_abs_le
@@ -1106,9 +1097,6 @@ theorem christoffelD_abs_le
     _ = (1 / 2 : ℝ) * (Module.finrank ℝ E : ℝ) * (D * P + M_b * R) := by
       simp only [Finset.sum_const, Finset.card_univ, Fintype.card_fin, nsmul_eq_mul]
       ring
-
-
-
 
 omit [NeZero (Module.finrank ℝ E)] in
 theorem invGramD_pou_lip
@@ -1187,10 +1175,6 @@ theorem invGramD_pou_lip
     (chartMetricJet1DiffSup_nonneg (I := I) (M := M)
       (gSeq k₁) (gSeq k₂) α (extChartAt I α b)))
 
-
-
-
-
 omit [NeZero (Module.finrank ℝ E)] in
 theorem christoffel_pou_bnd
     [T2Space M] [SigmaCompactSpace M] [CompactSpace M] [I.Boundaryless]
@@ -1244,9 +1228,6 @@ theorem christoffel_pou_bnd
       (fun m a c => hQ α hα k b hb m a c) i j q
   exact christoffel_abs_le (I := I) (M := M) (gSeq k) α (extChartAt I α b)
     i j l hM_b.le hMbOnE hBracket
-
-
-
 
 omit [NeZero (Module.finrank ℝ E)] in
 theorem christoffelD_pou_bnd
@@ -1329,9 +1310,6 @@ theorem christoffelD_pou_bnd
       (fun r s a c => hQ₂ α hα k b hb r s a c) m i j q
   exact christoffelD_abs_le (I := I) (M := M) (gSeq k) α hy m i j l
     hM_b.le hD_nn hMbOnE hDOnE hP hR
-
-
-
 
 omit [NeZero (Module.finrank ℝ E)] in
 theorem christoffel_pou_lip

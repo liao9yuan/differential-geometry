@@ -1,7 +1,6 @@
 import DifferentialGeometry.Analysis.Elliptic.Regularity.GradInner.Laplacian.Candidate
 import DifferentialGeometry.Geometry.Operator.Gradient
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Connection
 open DifferentialGeometry.Geometry.Operator
 

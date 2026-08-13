@@ -1,7 +1,6 @@
 import DifferentialGeometry.Analysis.ODE.TimeDependentFlow.SmoothInSpace.ChartOperator.ConventionBridge
 import DifferentialGeometry.Analysis.Calculus.SmoothExtension.BorelHalfLineParam
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
 
 
 open DifferentialGeometry.Geometry.Connection

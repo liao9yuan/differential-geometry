@@ -3,7 +3,6 @@ import DifferentialGeometry.Geometry.Operator.RoughLaplacian
 open DifferentialGeometry.Tensor.Multilinear
 open DifferentialGeometry.Tensor.RSTensor
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
 
 set_option autoImplicit false
 
@@ -236,7 +235,6 @@ private theorem trace04Coeff
     (trace04Event (I := I) g A x₀ tail)
 
 set_option backward.isDefEq.respectTransparency false in
-
 def trace04Field
     (g : SmoothRiemannianMetric I M)
     (A : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)

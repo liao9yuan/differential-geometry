@@ -10,17 +10,7 @@ open DifferentialGeometry.Tensor.RSTensor
 open DifferentialGeometry.Tensor.Auxiliary
 open DifferentialGeometry.Geometry.Connection
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Connection
-
-
-
-
-
-
-
-
-
 
 noncomputable section
 
@@ -78,8 +68,6 @@ omit [NeZero (Module.finrank ℝ E)] in
   rw [zero_smul]
   exact expMap_zero (I := I) g p
 
-
-
 omit [T2Space M] in
 omit [SigmaCompactSpace M] in
 theorem exists_radialJacobi_diff
@@ -96,8 +84,6 @@ theorem exists_radialJacobi_diff
               (radialJacobiField (I := I) g p x w) s) t) t) := by
   simpa [radialCurve, radialJacobiField] using
     DifferentialGeometry.Geometry.Riemannian.exists_jacobi_diff (I := I) g p
-
-
 
 omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
     [T2Space (TangentBundle I M)] in
@@ -120,8 +106,6 @@ theorem radial_mem_expBall
       _ = ‖x‖ := one_mul ‖x‖
       _ < ρ := hxρ
   · rfl
-
-
 
 omit [T2Space M] [SigmaCompactSpace M] in
 omit [T2Space (TangentBundle I M)] in
@@ -154,8 +138,6 @@ lemma exists_radialFrame
   simp only [Fintype.card_fin]
   rfl
 
-
-
 omit [T2Space M] [SigmaCompactSpace M] in
 lemma radialCurve_contMDiffAt_Icc
     (g : SmoothRiemannianMetric I M) (p : M) (x : E) {b : ℝ}
@@ -179,8 +161,6 @@ lemma radialCurve_contMDiffAt_Icc
   simpa [radialCurve] using
     (DifferentialGeometry.Geometry.Riemannian.radialCurve_contMDiffAt2
       (I := I) g p x t hnorm)
-
-
 
 omit [T2Space M] [SigmaCompactSpace M] in
 lemma radialCurve_contMDiffOn_Icc
@@ -219,9 +199,6 @@ lemma radialC2OnBallIcc
     (by
       intro t ht
       exact ⟨ht.1, le_trans ht.2 hb⟩)
-
-
-
 
 omit [T2Space M] [SigmaCompactSpace M] in
 lemma exists_radial_clip
@@ -266,9 +243,6 @@ lemma exists_radial_clip
     rw [norm_smul, Real.norm_eq_abs]
     exact lt_of_le_of_lt
       (mul_le_mul_of_nonneg_right (htau_bound t) (norm_nonneg x)) hprod
-
-
-
 
 omit [T2Space M] [SigmaCompactSpace M] in
 lemma exists_rclip_nbhd
@@ -327,9 +301,6 @@ lemma exists_rclip_nbhd
     exact lt_of_le_of_lt
       (mul_le_mul_of_nonneg_right (htau_bound t) (norm_nonneg x)) hprod
 
-
-
-
 omit [T2Space M] [SigmaCompactSpace M] in
 lemma radial_clip_contMDiff
     (g : SmoothRiemannianMetric I M) (p : M) (x : E) (tau : ℝ → ℝ)
@@ -351,9 +322,6 @@ lemma radial_clip_contMDiff
     expMap_contMDiffAt2_of_norm_lt_radius (I := I) g p (hradius t)
   simpa using hexpC2.comp t (hsmul.contMDiffAt.of_le ENat.LEInfty.out)
 
-
-
-
 omit [T2Space M] [SigmaCompactSpace M] in
 lemma exists_radial_ext
     (g : SmoothRiemannianMetric I M) (p : M) (x : E) {b : ℝ}
@@ -371,8 +339,6 @@ lemma exists_radial_ext
       radialCurve (I := I) g p x t
     rw [htau_eq ht]
     rfl
-
-
 
 omit [T2Space M] [SigmaCompactSpace M] in
 lemma exists_rext_nbhd
@@ -393,8 +359,6 @@ lemma exists_rext_nbhd
     rw [htau_eq ht]
     rfl
 
-
-
 omit [T2Space M] [SigmaCompactSpace M] in
 theorem radial_speed_sq_eq
     (g : SmoothRiemannianMetric I M) (p : M) (x : E)
@@ -407,8 +371,6 @@ theorem radial_speed_sq_eq
   simpa [radialCurve, curveVelocity] using
     (DifferentialGeometry.Geometry.Riemannian.radialSpeedSq_eq_inner
       (I := I) g p x hx t ht)
-
-
 
 omit [T2Space M] [SigmaCompactSpace M] in
 theorem radial_speed_le
@@ -424,8 +386,6 @@ theorem radial_speed_le
   rw [radial_speed_sq_eq (I := I) g p x hx ht01]
   exact hVb
 
-
-
 omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
     [T2Space (TangentBundle I M)] in
 private theorem exists_gON_tangentBasis_E
@@ -435,9 +395,6 @@ private theorem exists_gON_tangentBasis_E
   simpa [show Module.finrank ℝ (TangentSpace I y) = Module.finrank ℝ E from rfl]
     using DifferentialGeometry.Geometry.Curvature.exists_gOrthonormalBasis
       (I := I) g y
-
-
-
 
 omit [SigmaCompactSpace M] in
 theorem exists_jacobi_Ioo
@@ -451,8 +408,6 @@ theorem exists_jacobi_Ioo
   intro x w hx hw b hb t ht
   have ht01 : t ∈ Ioo (0 : ℝ) 1 := ⟨ht.1, lt_of_lt_of_le ht.2 hb⟩
   simpa [radialCurve] using hJac x w hx hw t ht01
-
-
 
 omit [T2Space (TangentBundle I M)] in
 omit [NeZero (Module.finrank ℝ E)] in
@@ -494,10 +449,6 @@ theorem radialJacobi_ode_of_curv
   exact ode_bound_of_isJacobiAt (I := I) g (radialCurve (I := I) g p x)
     (radialJacobiField (I := I) g p x w) (K := K) (t := t) (hJac t ht)
     (hcurv t ht)
-
-
-
-
 
 omit [T2Space (TangentBundle I M)] in
 omit [NeZero (Module.finrank ℝ E)] in
@@ -555,8 +506,6 @@ theorem ode_Ico_of_Ioo_zero
       (radialJacobiField (I := I) g p x w) (K := K) (t := t)
       (hJac t ⟨htpos, ht.2⟩) (hcurv t ⟨htpos, ht.2⟩)
 
-
-
 omit [NeZero (Module.finrank ℝ E)] in
 omit [SigmaCompactSpace M] in
 theorem ode_Ico_of_Ioo_d2
@@ -613,8 +562,6 @@ theorem ode_Ico_of_Ioo_d2
   rw [hz]
   rw [mul_zero]
 
-
-
 omit [NeZero (Module.finrank ℝ E)] in
 omit [SigmaCompactSpace M] in
 theorem d2_zero_of_jac0
@@ -644,9 +591,6 @@ theorem d2_zero_of_jac0
     rw [ContinuousLinearMap.zero_apply, ContinuousLinearMap.zero_apply]
   rw [hCzero, add_zero] at hJac0
   exact hJac0
-
-
-
 
 omit [SigmaCompactSpace M] in
 theorem exists_ode_Ico
@@ -749,8 +693,6 @@ private def radialCurvTermFlat
       (radialCurve (I := I) g p x t)
       (radialCurvTerm (I := I) g p x w t))
 
-
-
 omit [T2Space (TangentBundle I M)] in
 omit [NeZero (Module.finrank ℝ E)] in
 omit [SigmaCompactSpace M] in
@@ -768,8 +710,6 @@ private theorem radialCurvTermFlat_inner
       (I := I) g (radialCurve (I := I) g p x t)
       (radialCurvTerm (I := I) g p x w t)
       (radialCurvTerm (I := I) g p x w t))
-
-
 
 omit [T2Space (TangentBundle I M)] in
 omit [NeZero (Module.finrank ℝ E)] in
@@ -797,8 +737,6 @@ private theorem radialCurvTermFlat_apply_eq_metricRm04StdAt
   exact g.symm (radialCurve (I := I) g p x t)
     (radialCurvTerm (I := I) g p x w t) W
 
-
-
 omit [T2Space (TangentBundle I M)] in
 omit [NeZero (Module.finrank ℝ E)] in
 omit [SigmaCompactSpace M] in
@@ -818,8 +756,6 @@ private theorem radialCurvTermFlat_component_eq_metricRm04StdAt
   rw [Tensor0SBundle.component0S_apply]
   exact radialCurvTermFlat_apply_eq_metricRm04StdAt (I := I) g p x w t (basis i)
 
-
-
 omit [T2Space (TangentBundle I M)] in
 omit [NeZero (Module.finrank ℝ E)] in
 omit [SigmaCompactSpace M] in
@@ -834,8 +770,6 @@ private theorem radialCurvTermFlat_normSq_eq_cotangentInner
   rw [Tensor0SBundle.normSq0S_eq_inner,
     Tensor0SBundle.inner0S_one_eq_cotangent]
   rfl
-
-
 
 omit [T2Space (TangentBundle I M)] in
 omit [NeZero (Module.finrank ℝ E)] in
@@ -875,9 +809,6 @@ theorem abs_flat_apply_le_rm04
       W)
   rw [radialCurvTermFlat_apply_eq_metricRm04StdAt (I := I) g p x w t W]
   simpa [DifferentialGeometry.Geometry.Curvature.metricRm04StdAt_apply] using hCS
-
-
-
 
 omit [T2Space (TangentBundle I M)] in
 omit [NeZero (Module.finrank ℝ E)] in
@@ -950,8 +881,6 @@ theorem radialCurvTermFlat_normSq_le_card
             (basis (slots 0))) a)) := happly
     _ ≤ B := hB (slots 0)
 
-
-
 omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M]
     [SigmaCompactSpace M] [T2Space (TangentBundle I M)] in
 private theorem radialSlotProd_basis_le
@@ -974,8 +903,6 @@ private theorem radialSlotProd_basis_le
   simp [DifferentialGeometry.Geometry.Curvature.vec4, hunit, pow_two]
   ring_nf
   exact le_rfl
-
-
 
 omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M]
     [SigmaCompactSpace M] [T2Space (TangentBundle I M)] in
@@ -1028,8 +955,6 @@ private theorem radialSlotBound_basis_le
         ≤ R * (Jb * Vb ^ 2) := mul_le_mul_of_nonneg_left hprod_bound hRnn
     _ = R * Jb * Vb ^ 2 := by ring
 
-
-
 omit [T2Space (TangentBundle I M)] in
 omit [NeZero (Module.finrank ℝ E)] in
 omit [SigmaCompactSpace M] in
@@ -1081,9 +1006,6 @@ private theorem sqrt_le_sqrt_mul_of_sq_le {A C B : Real}
     _ = Real.sqrt C * Real.sqrt (B ^ 2) := Real.sqrt_mul hC _
     _ = Real.sqrt C * B := by rw [Real.sqrt_sq hB]
 
-
-
-
 omit [T2Space (TangentBundle I M)] in
 omit [NeZero (Module.finrank ℝ E)] in
 omit [SigmaCompactSpace M] in
@@ -1128,8 +1050,6 @@ theorem radialCurvTermFlat_sqrt_le_card_of_velocity_bound
     exact Nat.cast_nonneg _
   simpa [R, Jb] using
     sqrt_le_sqrt_mul_of_sq_le hcard hBnn hsq
-
-
 
 omit [T2Space (TangentBundle I M)] in
 omit [NeZero (Module.finrank ℝ E)] in
@@ -1178,8 +1098,6 @@ theorem radialCurvTermFlat_sqrt_le_K
       _ ≤ K * Jn := mul_le_mul_of_nonneg_right hcoef hJn
   exact hbase.trans (by simpa [Cn, Rn, Jn] using hstep)
 
-
-
 omit [NeZero (Module.finrank ℝ E)] [T2Space (TangentBundle I M)] in
 omit [SigmaCompactSpace M] in
 theorem curv_sq_of_flat_Ioo
@@ -1207,8 +1125,6 @@ theorem curv_sq_of_flat_Ioo
       rw [radialCurvTermFlat_inner] at h
       exact h)
 
-
-
 omit [NeZero (Module.finrank ℝ E)] [T2Space (TangentBundle I M)] in
 omit [SigmaCompactSpace M] in
 theorem curv_sq_of_fiber_Ioo
@@ -1232,9 +1148,6 @@ theorem curv_sq_of_fiber_Ioo
   intro t ht
   simpa [radialCurvTermFlat_normSq_eq_cotangentInner]
     using hcurv t ht
-
-
-
 
 omit [T2Space (TangentBundle I M)] in
 omit [NeZero (Module.finrank ℝ E)] in
@@ -1272,8 +1185,6 @@ theorem curv_sq_of_rm04_velocity_Ioo
     (I := I) g p x w t (basis t ht) (hON t ht) K Vb hVb
     (hV t ht) (hRm t ht)
 
-
-
 omit [NeZero (Module.finrank ℝ E)] [T2Space (TangentBundle I M)] in
 omit [SigmaCompactSpace M] in
 theorem curv_sq_of_norm_Ioo
@@ -1295,8 +1206,6 @@ theorem curv_sq_of_norm_Ioo
           (radialJacobiField (I := I) g p x w t) := by
   intro t ht
   exact inner_sq_le_of_sqrt_le (I := I) g hK (hcurv t ht)
-
-
 
 omit [SigmaCompactSpace M] in
 theorem exists_ode_Ico_of_curvNorm
@@ -1336,8 +1245,6 @@ theorem exists_ode_Ico_of_curvNorm
   intro x w hx hw K b hK hb hcurv h0
   exact hODE x w hx hw hb (curv_sq_of_norm_Ioo (I := I) g p x w hK hcurv) h0
 
-
-
 omit [SigmaCompactSpace M] in
 theorem exists_ode_Ico_of_flat
     (g : SmoothRiemannianMetric I M) (p : M) :
@@ -1376,8 +1283,6 @@ theorem exists_ode_Ico_of_flat
   refine ⟨r, hr, ?_⟩
   intro x w hx hw K b hK hb hcurv h0
   exact hODE x w hx hw hb (curv_sq_of_flat_Ioo (I := I) g p x w hK hcurv) h0
-
-
 
 omit [SigmaCompactSpace M] in
 theorem exists_ode_Ico_of_fiber
@@ -1419,9 +1324,6 @@ theorem exists_ode_Ico_of_fiber
   intro t ht
   simpa [radialCurvTermFlat_normSq_eq_cotangentInner]
     using hcurv t ht
-
-
-
 
 omit [SigmaCompactSpace M] in
 theorem exists_ode_Ico_of_rm04_velocity
@@ -1471,9 +1373,6 @@ theorem exists_ode_Ico_of_rm04_velocity
   intro x w hx hw K Vb b hK hVb hb basis hON hV hRm h0
   exact hODE x w hx hw hb
     (curv_sq_of_rm04_velocity_Ioo (I := I) g p x w hK hVb basis hON hV hRm) h0
-
-
-
 
 omit [SigmaCompactSpace M] in
 theorem exists_ode_Ico_of_rm04_launch
@@ -1527,9 +1426,6 @@ theorem exists_ode_Ico_of_rm04_launch
   exact hODE x w hx₀ hw₀ hK hVb hb basis hON
     (radial_speed_le (I := I) g p x hxExp hb hlaunch) hRm h0
 
-
-
-
 omit [SigmaCompactSpace M] in
 theorem exists_ode_Ico_of_rm04
     (g : SmoothRiemannianMetric I M) (p : M) :
@@ -1581,8 +1477,6 @@ theorem exists_ode_Ico_of_rm04
   choose basis hON using hbasis
   exact hODE x w hx hw hK hVb hb hlaunch basis
     (fun t ht i j => hON t ht i j) hRm h0
-
-
 
 omit [SigmaCompactSpace M] in
 theorem exists_ode_Ico_of_rm04_norm
@@ -1636,8 +1530,6 @@ theorem exists_ode_Ico_of_rm04_norm
     exact mul_le_mul_of_nonneg_right (mul_le_mul_of_nonneg_left hA_le_R hCnn) hVsq
   exact le_trans hmul hKbound
 
-
-
 omit [SigmaCompactSpace M] in
 theorem exists_ode_rm04_d2
     (g : SmoothRiemannianMetric I M) (p : M) :
@@ -1684,8 +1576,6 @@ theorem exists_ode_rm04_d2
     rw [map_zero]
   rw [hz]
   rw [mul_zero]
-
-
 
 omit [SigmaCompactSpace M] in
 theorem exists_ode_rm04_jac0
@@ -1930,8 +1820,6 @@ theorem exists_rm04_pack
     have hw₁ : ‖w‖ < r₁ := lt_of_lt_of_le hw (min_le_right _ _)
     exact hderiv x w hx₁ hw₁
 
-
-
 omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space (TangentBundle I M)] in
 omit [T2Space M] [SigmaCompactSpace M] in
 theorem rm04_Ioo_of_region
@@ -1990,8 +1878,6 @@ theorem exists_ode_rm04_on
   exact hODE x w hx hw hK hVb hb hlaunch hKbound
     (rm04_Ioo_of_region (I := I) g p x hcurve hRmU)
 
-
-
 omit [SigmaCompactSpace M] in
 theorem exists_ode_expBall
     (g : SmoothRiemannianMetric I M) (p : M) :
@@ -2026,8 +1912,6 @@ theorem exists_ode_expBall
     (rm04_Ioo_of_region (I := I) g p x
       (radial_mem_expBall (I := I) g p x hxρ hb) hRm) hJac0
 
-
-
 omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space (TangentBundle I M)] in
 omit [T2Space M] [SigmaCompactSpace M] in
 theorem rm04Exp_of_global
@@ -2044,9 +1928,6 @@ theorem rm04Exp_of_global
           (I := I) (M := M) g q)) ≤ R := by
   intro q _hq
   exact hRm q
-
-
-
 
 omit [SigmaCompactSpace M] in
 theorem exists_ode_global

@@ -3,22 +3,8 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.Connection.MetricC
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Basic.RicciNorm
 open DifferentialGeometry.PDE.RicciFlow
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
 
 set_option autoImplicit false
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 noncomputable section
 
@@ -36,14 +22,6 @@ variable {I : ModelWithCorners Real E H} [I.Boundaryless]
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 variable [IsManifold I 1 M]
 variable [CompleteSpace E] [SigmaCompactSpace M] [T2Space M]
-
-
-
-
-
-
-
-
 
 omit [NeZero (Module.finrank ℝ E)] in
 theorem rm13Deriv_of_solution

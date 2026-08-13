@@ -191,15 +191,10 @@ private lemma contDiff_of_contDiffOn_zero_off_closed
 private structure ChartCutoff (α : M) {K : Set EuclN}
     (hK : IsCompact K) (hK_target : K ⊆ chartTargetEuclid (I := I) (M := M) α)
     where
-
   toFun : EuclN → ℝ
-
   smooth : ContDiff ℝ ∞ toFun
-
   one_on : ∀ y ∈ K, toFun y = 1
-
   tsupport_subset : tsupport toFun ⊆ chartTargetEuclid (I := I) (M := M) α
-
   hasCompactSupport : HasCompactSupport toFun
 
 omit [NeZero dimE] [IsManifold I ∞ M] [T2Space M] [CompactSpace M] in

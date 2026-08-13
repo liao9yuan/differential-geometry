@@ -6,21 +6,13 @@ open DifferentialGeometry.Geometry.Connection.Realization DifferentialGeometry.T
 open DifferentialGeometry.PDE.RicciFlow
 open DifferentialGeometry.Analysis.Spectral
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Connection
-
-
-
-
-
-
-
-
 
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
-open MeasureTheory Set Filter Topology Bundle Manifold DifferentialGeometry.Tensor0SBundle ContinuousLinearMap
+open MeasureTheory Set Filter Topology Bundle Manifold DifferentialGeometry.Tensor0SBundle
+    ContinuousLinearMap
 open scoped ENNReal NNReal BigOperators Manifold ContDiff Matrix
 
 namespace DifferentialGeometry.Analysis.Spectral
@@ -203,7 +195,8 @@ theorem lieCorr0RiemQuadlin_apply
     (g₀ : SmoothRiemannianMetric I M) (x : M)
     (v0 v1 u w : TangentSpace I x) :
     lieCorr0RiemQuadlin (I := I) g₀ x v0 v1 u w =
-      g₀.inner x (DifferentialGeometry.Geometry.Curvature.riemannOp (LeviCivita (I := I) g₀) x v0 v1 u) w :=
+      g₀.inner x (DifferentialGeometry.Geometry.Curvature.riemannOp (LeviCivita
+        (I := I) g₀) x v0 v1 u) w :=
   rfl
 
 noncomputable def lieCorr0Quadlin4ToModel
@@ -613,8 +606,6 @@ theorem lieCorr0TotalFib_contMDiff
 end LieCorr0Core
 
 open LieCorr0Core
-
-
 
 def lieCorr0Field (g₀ g₁ g_bg : SmoothRiemannianMetric I M) :
     SmoothCcTensor g₀ 2 2 where

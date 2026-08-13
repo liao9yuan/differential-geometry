@@ -7,10 +7,7 @@ import Mathlib.Analysis.Calculus.DerivativeTest
 import Mathlib.Geometry.Manifold.PartitionOfUnity
 import Mathlib.Geometry.Manifold.MFDeriv.FDeriv
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Connection
-
-
 
 noncomputable section
 

@@ -11,8 +11,6 @@ import Mathlib.Analysis.Convex.Star
 import Mathlib.Analysis.Convex.PathConnected
 open DifferentialGeometry.Geometry.Curvature
 
-
-
 attribute [-instance] DifferentialGeometry.Tensor0SBundle.tangentSpace_normedAddCommGroup
   DifferentialGeometry.Tensor0SBundle.tangentSpace_normedSpace
 

@@ -17,23 +17,10 @@ import DifferentialGeometry.Geometry.Curvature.DimensionThree.UhlReaction3
 open DifferentialGeometry.Tensor.RSTensor
 open DifferentialGeometry.PDE.RicciFlow
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Connection
 open DifferentialGeometry.Geometry.Operator
 
 set_option autoImplicit false
-
-
-
-
-
-
-
-
-
-
-
-
 
 noncomputable section
 
@@ -53,10 +40,6 @@ variable [IsManifold I 1 M]
 variable [CompleteSpace E] [SigmaCompactSpace M] [T2Space M]
 variable {Idx : Type*}
 
-
-
-
-
 omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 omit [SigmaCompactSpace M] in
 theorem metricCompInFrame_timeDeriv
@@ -73,12 +56,6 @@ theorem metricCompInFrame_timeDeriv
       (t : Real) := by
   have h := hS.equation t x (frame i x) (frame j x)
   simpa [metricCompInFrame, ricciCompInFrame, RicciAtFamily.toTensorField_apply] using h
-
-
-
-
-
-
 
 omit [NeZero (Module.finrank ℝ E)] in
 omit [I.Boundaryless] in
@@ -123,11 +100,6 @@ theorem realizedRmBase_eq_curvCoeff_lower
       hRm hcurv (m 0) (m 1) (m 2)]
   refine Finset.sum_congr rfl fun p _ => ?_
   congr 1
-
-
-
-
-
 
 omit [NeZero (Module.finrank ℝ E)] in
 theorem realizedRmBase_timeDeriv
@@ -227,13 +199,6 @@ theorem realizedRmBase_timeDeriv
     (fun y hy => by rw [Finset.sum_apply]; exact hbase y hy)
     (by rw [Finset.sum_apply]; exact hbase (t : Real) (D.regular_subset t.2))
 
-
-
-
-
-
-
-
 omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 theorem solution_rm04_kn_firstTrace_gform_at
     {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
@@ -261,10 +226,6 @@ theorem solution_rm04_kn_firstTrace_gform_at
   rw [h]
   ring
 
-
-
-
-
 omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 theorem solution_rm04_kn_field
     {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
@@ -287,12 +248,6 @@ theorem solution_rm04_kn_field
     DifferentialGeometry.Geometry.Curvature.exists_orthonormalBasisAt (I := I)
       (S.base.metric s) x hdim
   exact solution_rm04_kn_firstTrace_gform_at (I := I) S s x horth X Y Z W
-
-
-
-
-
-
 
 omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 theorem solution_rm04_timeDeriv_kn
@@ -382,10 +337,6 @@ theorem solution_rm04_timeDeriv_kn
   convert hd using 1
   simp only [Pi.neg_apply, Pi.mul_apply, Pi.sub_apply]
   ring
-
-
-
-
 
 omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 omit [SigmaCompactSpace M] [T2Space M] in
@@ -666,11 +617,6 @@ theorem rm04BaseEvolution_at
         = R s i j from fun s i j => (hR s i j).symm]
   linear_combination hmatch
 
-
-
-
-
-
 omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 theorem ricciSymFrame_can
     {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
@@ -678,10 +624,6 @@ theorem ricciSymFrame_can
     {Idx : Type*} (frame : Idx -> (x : M) -> TangentSpace I x) :
     RicciSymmetricInFrameOn (I := I) S frame :=
   fun t x i j => ricciSym_can (I := I) S t x (frame i x) (frame j x)
-
-
-
-
 
 omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 theorem solution_rm04_kn_all
@@ -706,13 +648,6 @@ theorem solution_rm04_kn_all
     fin_cases q <;> rfl
   rw [hv]
   exact solution_rm04_kn_field (I := I) S s x hdim (v 0) (v 1) (v 2) (v 3)
-
-
-
-
-
-
-
 
 omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 omit [SigmaCompactSpace M] in
@@ -784,11 +719,6 @@ theorem metricCompatSol
     DifferentialGeometry.Geometry.Connection.leviCivitaConnectionOfMetric_isMetricCompatible
       (I := I) (S.base.metric t)
 
-
-
-
-
-
 omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 omit [SigmaCompactSpace M] in
 theorem ricNablaRealizes
@@ -804,13 +734,6 @@ theorem ricNablaRealizes
     2 (S.family.connection t) (S.ricci t) _
 
 set_option backward.isDefEq.respectTransparency false in
-
-
-
-
-
-
-
 omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 omit [SigmaCompactSpace M] in
 theorem knTermRealizes
@@ -851,11 +774,6 @@ theorem knTermRealizes
         (S.family.metric t) (metricCompatSol (I := I) S t)))
 
 set_option backward.isDefEq.respectTransparency false in
-
-
-
-
-
 omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 omit [SigmaCompactSpace M] in
 theorem knScalRealizes
@@ -946,9 +864,6 @@ private noncomputable def knScalT
         (metricTensorField (I := I) (S.family.metric t)))
       (metricTensorField (I := I) (S.family.metric t)))
 
-
-
-
 private def knE1 : Fin (2 + 2) ≃ Fin (2 + 2) := Equiv.swap 1 2
 private def knE2 : Fin (2 + 2) ≃ Fin (2 + 2) := (Equiv.swap (1 : Fin (2 + 2)) 2).trans
     (Equiv.swap 0 1)
@@ -956,8 +871,6 @@ private def knE3 : Fin (2 + 2) ≃ Fin (2 + 2) := (Equiv.swap (2 : Fin (2 + 2)) 
     (Equiv.swap 1 3)
 private def knE4 : Fin (2 + 2) ≃ Fin (2 + 2) :=
   ((Equiv.swap (3 : Fin (2 + 2)) 2).trans (Equiv.swap 1 3)).trans (Equiv.swap 0 1)
-
-
 
 private noncomputable def knField
     (S : SolutionOn (I := I) (M := M) D) (t : Real) :
@@ -967,11 +880,6 @@ private noncomputable def knField
     + (knRicT (I := I) S t knE3 + (-1 : Real) • knRicT (I := I) S t knE4)
     + ((1 / 2 : Real) • knScalT (I := I) S t knE1
         + (-(1 / 2) : Real) • knScalT (I := I) S t knE2)
-
-
-
-
-
 
 omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 omit [SigmaCompactSpace M] in
@@ -988,8 +896,6 @@ private theorem knFieldRealizes
           ((knTermRealizes (I := I) S t knE4).smul (-1 : Real)))) |>.add
       (((knScalRealizes (I := I) S t knE1).smul (1 / 2 : Real)).add
         ((knScalRealizes (I := I) S t knE2).smul (-(1 / 2) : Real)))⟩
-
-
 
 omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 omit [SigmaCompactSpace M] in
@@ -1081,8 +987,6 @@ private noncomputable def knScalD
             (metricTensorField (I := I) (S.family.metric t)))
           0))
 
-
-
 private noncomputable def knFieldD
     (S : SolutionOn (I := I) (M := M) D) (t : Real) :
     Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
@@ -1091,9 +995,6 @@ private noncomputable def knFieldD
     + (knRicD (I := I) S t knE3 + (-1 : Real) • knRicD (I := I) S t knE4)
     + ((1 / 2 : Real) • knScalD (I := I) S t knE1
         + (-(1 / 2) : Real) • knScalD (I := I) S t knE2)
-
-
-
 
 omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 omit [SigmaCompactSpace M] in
@@ -1164,10 +1065,6 @@ private theorem knTerm2Realizes
           (S.ricci t) 0 _ 0
           (ricNablaRealizes (I := I) S t)
           (zero_realizes_nabla (I := I) (2 + 1) (S.family.connection t)))))
-
-
-
-
 
 omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 omit [SigmaCompactSpace M] in
@@ -1269,9 +1166,6 @@ private theorem knScal2Realizes
                 DifferentialGeometry.Geometry.Operator.differential1FormFun_apply_eq_extDerivFun
                 (I := I) (S.scalar t) x v))
           (zero_realizes_nabla (I := I) (2 + 1) (S.family.connection t)))))
-
-
-
 
 omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 private theorem knField_eq_rm04
@@ -1379,11 +1273,6 @@ private theorem knField_eq_rm04
   simp [DifferentialGeometry.Geometry.Curvature.vec4]
   ring
 
-
-
-
-
-
 omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 private theorem nablaRm04Kn
     [IsManifold I 2 M]
@@ -1399,11 +1288,6 @@ private theorem nablaRm04Kn
       (((knScalRealizes (I := I) S t knE1).smul (1 / 2 : Real)).add
         ((knScalRealizes (I := I) S t knE2).smul (-(1 / 2) : Real)))
 
-
-
-
-
-
 private noncomputable def rm04DerivsKn
     [IsManifold I 2 M]
     (S : SolutionOn (I := I) (M := M) D) (t : Real)
@@ -1418,8 +1302,6 @@ private noncomputable def rm04DerivsKn
           ((knTerm2Realizes (I := I) S t knE4).smul (-1 : Real)))) |>.add
       (((knScal2Realizes (I := I) S t knE1).smul (1 / 2 : Real)).add
         ((knScal2Realizes (I := I) S t knE2).smul (-(1 / 2) : Real)))⟩
-
-
 
 omit [IsManifold I 1 M] in
 omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
@@ -1437,17 +1319,6 @@ private theorem rm04Nab2Kn_eq
   rw [hfirst] at hsecond
   exact totalNabla0SRealizes_unique hsecond
     (nablaKRm04Field_realizes (I := I) S t 1)
-
-
-
-
-
-
-
-
-
-
-
 
 open DifferentialGeometry.Geometry.Operator
 omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [IsManifold I 1 M]
@@ -1637,8 +1508,6 @@ private noncomputable def knScalLapT
               1 (S.family.connection t) (connSmoothSol (I := I) S t) _)))
         (metricTensorField (I := I) (S.family.metric t)))
       (metricTensorField (I := I) (S.family.metric t)))
-
-
 
 private noncomputable def lapRm04Kn
     [IsManifold I 1 M] [IsManifold I 2 M]
@@ -2025,14 +1894,6 @@ theorem rm04HrmProducer
   exact rmBaseDeriv_basis (I := I) S x₀ t basis _ hD m
 
 section Dim3Bridges
-
-
-
-
-
-
-
-
 
 open DifferentialGeometry.Dim3Reaction
 

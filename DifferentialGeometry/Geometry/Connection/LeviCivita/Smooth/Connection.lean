@@ -21,12 +21,6 @@ variable {I : ModelWithCorners Real E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 variable [SigmaCompactSpace M] [T2Space M]
 
-
-
-
-
-
-
 omit [SigmaCompactSpace M] [T2Space M] in
 theorem leviCivitaConnectionOfMetric_homSection_contMDiffAt
     {ι : Type*} [Finite ι]
@@ -46,8 +40,6 @@ theorem leviCivitaConnectionOfMetric_homSection_contMDiffAt
     (I := I) (leviCivitaConnectionOfMetric (I := I) g) e b hx hσdiff hσ
     (fun i k j => lc_christoffel_contMDiffAt (I := I) e b g hx i j k)
 
-
-
 omit [SigmaCompactSpace M] [T2Space M] in
 theorem leviCivitaConnectionOfMetric_homSection_contMDiffAt_one
     {ι : Type*} [Finite ι]
@@ -66,8 +58,6 @@ theorem leviCivitaConnectionOfMetric_homSection_contMDiffAt_one
   exact covariantDerivative_homSection_contMDiffAt_of_coeff_one
     (I := I) (leviCivitaConnectionOfMetric (I := I) g) e b hx hσdiff hσ
     (fun i k j => lc_christoffel_contMDiffAt (I := I) e b g hx i j k)
-
-
 
 omit [SigmaCompactSpace M] [T2Space M] in
 theorem leviCivitaConnectionOfMetric_contMDiffCovariantDerivativeLocally
@@ -103,9 +93,6 @@ theorem leviCivitaConnectionOfMetric_contMDiffCovariantDerivativeLocally
     (leviCivitaConnectionOfMetric_homSection_contMDiffAt
       (I := I) e b g hxBase hσdiff hσAt).contMDiffWithinAt
 
-
-
-
 omit [SigmaCompactSpace M] [T2Space M] in
 theorem leviCivitaConnectionOfMetric_contMDiffCovariantDerivative
     (g : SmoothRiemannianMetric I M) :
@@ -113,9 +100,6 @@ theorem leviCivitaConnectionOfMetric_contMDiffCovariantDerivative
       (leviCivitaConnectionOfMetric (I := I) g) ∞ :=
   ⟨leviCivitaConnectionOfMetric_contMDiffCovariantDerivativeLocally (I := I) g
     isOpen_univ⟩
-
-
-
 
 omit [SigmaCompactSpace M] [T2Space M] in
 theorem leviCivitaConnectionOfMetric_contMDiffCovariantDerivativeLocally_one

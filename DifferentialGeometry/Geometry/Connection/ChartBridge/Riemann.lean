@@ -3,7 +3,6 @@ import DifferentialGeometry.Geometry.Curvature.CurvatureOperator.CurvatureBundli
 import DifferentialGeometry.Geometry.Connection.LeviCivita.Defs
 import DifferentialGeometry.Geometry.Curvature.Riemann.Defs
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
 
 
 noncomputable section

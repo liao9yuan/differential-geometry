@@ -1,6 +1,5 @@
 import DifferentialGeometry.Analysis.Parabolic.DeTurckLinearization.MetricTrace
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Connection
 open DifferentialGeometry.Geometry.Operator
 

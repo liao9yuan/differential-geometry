@@ -3,13 +3,13 @@ open DifferentialGeometry.Geometry.Connection.Realization
 open DifferentialGeometry.Analysis.Sobolev
 open DifferentialGeometry.Analysis.Spectral
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Connection
 
 
 noncomputable section
 
-open MeasureTheory Set Filter Topology Bundle Manifold DifferentialGeometry.Tensor0SBundle ContinuousLinearMap
+open MeasureTheory Set Filter Topology Bundle Manifold DifferentialGeometry.Tensor0SBundle
+    ContinuousLinearMap
 open scoped ENNReal NNReal BigOperators Manifold ContDiff
 
 namespace DifferentialGeometry.Analysis.Spectral

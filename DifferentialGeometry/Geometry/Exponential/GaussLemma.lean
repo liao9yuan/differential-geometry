@@ -18,10 +18,7 @@ import DifferentialGeometry.Geometry.Exponential.GaussLemmaPullback
 import DifferentialGeometry.Analysis.ODE.RadialSeminormFencing
 import Mathlib.Geometry.Manifold.Riemannian.PathELength
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Connection
-
-
 
 noncomputable section
 

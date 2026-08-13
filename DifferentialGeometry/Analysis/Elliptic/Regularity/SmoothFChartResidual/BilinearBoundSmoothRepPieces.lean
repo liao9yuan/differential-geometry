@@ -6,7 +6,6 @@ import DifferentialGeometry.Analysis.Sobolev.Manifold.MorreyManifoldHigherOrder
 import DifferentialGeometry.Analysis.Sobolev.Manifold.IteratedSobolevEmbedding
 import DifferentialGeometry.Analysis.Sobolev.Euclidean.Multiplication.MultiplyQuantK
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Operator
 
 
@@ -133,7 +132,8 @@ private lemma smoothRep_eq_zero_off_tsupport_chartAtlasPOU
     rw [laplacianOfChartPOU_apply]
     rw [Δ_g_def]
     have h_grad_ev : ∀ᶠ y in 𝓝 x,
-        (DifferentialGeometry.Geometry.Operator.grad_g (I := I) g (chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) :
+        (DifferentialGeometry.Geometry.Operator.grad_g (I := I) g (chartAtlasPOU I M α : C^∞⟮I,
+          M; ℝ⟯) :
             Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) y =
         (0 : TangentSpace I y) := by
       filter_upwards [h_open.mem_nhds hx] with y hy
@@ -218,7 +218,8 @@ private lemma smoothRep_eq_etaTimesV
     have h_lap_zero : (laplacianOfChartPOU (I := I) (M := M) g α : M → ℝ) x = 0 := by
       rw [laplacianOfChartPOU_apply, Δ_g_def]
       have h_grad_ev : ∀ᶠ y in 𝓝 x,
-          (DifferentialGeometry.Geometry.Operator.grad_g (I := I) g (chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) :
+          (DifferentialGeometry.Geometry.Operator.grad_g (I := I) g
+            (chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) :
               Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) y =
           (0 : TangentSpace I y) := by
         filter_upwards [h_open.mem_nhds hx_supp] with y hy
@@ -457,7 +458,8 @@ lemma chartPushedRaw_lapPiece_factor
         exact hw (subset_tsupport _ hne)
       rw [laplacianOfChartPOU_apply, Δ_g_def]
       have h_grad_ev : ∀ᶠ w in 𝓝 z,
-          (DifferentialGeometry.Geometry.Operator.grad_g (I := I) g (chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) :
+          (DifferentialGeometry.Geometry.Operator.grad_g (I := I) g
+            (chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) :
               Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) w =
           (0 : TangentSpace I w) := by
         filter_upwards [h_open.mem_nhds hz_off] with w hw

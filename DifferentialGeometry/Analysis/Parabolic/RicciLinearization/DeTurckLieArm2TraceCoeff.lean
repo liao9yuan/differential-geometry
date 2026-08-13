@@ -6,7 +6,6 @@ import DifferentialGeometry.Geometry.Curvature.FiberNormParseval.SlotSubstitutio
 open DifferentialGeometry.Geometry.Connection.Realization DifferentialGeometry.Tensor.Multilinear
 open DifferentialGeometry.Analysis.Spectral
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Connection
 
 
@@ -83,7 +82,6 @@ noncomputable def deTurckLieTraceFib (g₁ : SmoothRiemannianMetric I M)
   (cometricDoubleTraceFib (I := I) g₁ 2 x).comp (domDomCongrFibPerm (I := I) σ x)
 
 set_option backward.isDefEq.respectTransparency false in
-
 omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
     [T2Space M] [SigmaCompactSpace M] in
 theorem domDomCongr_section_contMDiff_local {d : ℕ} (ρ : Equiv.Perm (Fin d))
@@ -118,7 +116,6 @@ theorem domDomCongr_section_contMDiff_local {d : ℕ} (ρ : Equiv.Perm (Fin d))
   rfl
 
 set_option backward.isDefEq.respectTransparency false in
-
 omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] in
 omit [BoundarylessManifold I M] [SigmaCompactSpace M] in
 theorem deTurckLieTraceFib_contMDiff (g₁ : SmoothRiemannianMetric I M) (σ : Equiv.Perm (Fin 4)) :

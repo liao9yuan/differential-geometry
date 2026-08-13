@@ -1,17 +1,7 @@
 import DifferentialGeometry.Geometry.Coordinates.MetricCompatibility.Covariant
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
 
 set_option autoImplicit false
-
-
-
-
-
-
-
-
-
 
 namespace DifferentialGeometry.Tensor.Coordinates
 

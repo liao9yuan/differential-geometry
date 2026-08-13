@@ -1,33 +1,12 @@
 import Mathlib.Analysis.Normed.Module.FiniteDimension
 import Mathlib.Geometry.Manifold.IsManifold.Basic
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 noncomputable section
 
 open TopologicalSpace
 
 namespace DifferentialGeometry
 namespace Geometry
-
-
 
 theorem isSigmaCompact_of_isOpen
     {E H M : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] [FiniteDimensional ℝ E]

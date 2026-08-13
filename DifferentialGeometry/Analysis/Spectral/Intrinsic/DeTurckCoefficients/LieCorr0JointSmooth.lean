@@ -1,21 +1,13 @@
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurckCoefficients.LieCorr0Core
 open DifferentialGeometry.Analysis.Spectral
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Connection
-
-
-
-
-
-
-
-
 
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
-open MeasureTheory Set Filter Topology Bundle Manifold DifferentialGeometry.Tensor0SBundle ContinuousLinearMap
+open MeasureTheory Set Filter Topology Bundle Manifold DifferentialGeometry.Tensor0SBundle
+    ContinuousLinearMap
 open scoped ENNReal NNReal BigOperators Manifold ContDiff Matrix
 
 namespace DifferentialGeometry.Analysis.Spectral
@@ -702,8 +694,6 @@ private theorem lieCorr0TotalFib_apply_jointContMDiffOn
     (E := fun z : M => Tensor0SSpace 2 I z) pp.1 t) ?_
   rw [lieCorr0TotalFib]
   rfl
-
-
 
 theorem lieCorr0_path_joint
     (hδ : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)

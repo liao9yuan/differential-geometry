@@ -10,7 +10,6 @@ import DifferentialGeometry.Tensor.RSTensor.TensorRSSpaceOperatorNorm
 import Mathlib.Analysis.Normed.Operator.Bilinear
 open DifferentialGeometry.Analysis.Sobolev.HebeyBlock
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Connection
 open DifferentialGeometry.Geometry.Operator
 

@@ -1,17 +1,6 @@
 import DifferentialGeometry.Analysis.ODE.TimeDependentFlow.SmoothInSpace.ChartOperator.ConventionBridge
 import DifferentialGeometry.Analysis.ODE.TimeDependentFlow.SmoothDependence.Manifold
 
-
-
-
-
-
-
-
-
-
-
-
 namespace DifferentialGeometry.Analysis.ODE
 
 open Set Function Bundle
@@ -38,9 +27,6 @@ private lemma chartTrivRepr_eq_tangentCoordChange_of_target
         (X s ((extChartAt I α).symm c)) = _
   rw [TangentBundle.continuousLinearMapAt_trivializationAt_eq_core (I := I) hq_src]
   rfl
-
-
-
 
 omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [CompactSpace M]
     [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in

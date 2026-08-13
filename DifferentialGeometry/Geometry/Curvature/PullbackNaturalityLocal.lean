@@ -5,22 +5,6 @@ open DifferentialGeometry.Geometry.Curvature
 
 set_option autoImplicit false
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 noncomputable section
 
 namespace DifferentialGeometry.Geometry.Curvature
@@ -35,12 +19,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 variable {N : Type*} [TopologicalSpace N] [ChartedSpace H N] [IsManifold I ∞ N]
 variable [IsManifold I 1 N]
 variable [T2Space N] [SigmaCompactSpace N]
-
-
-
-
-
-
 
 omit [NeZero (Module.finrank ℝ E)] in
 omit [SigmaCompactSpace N] in

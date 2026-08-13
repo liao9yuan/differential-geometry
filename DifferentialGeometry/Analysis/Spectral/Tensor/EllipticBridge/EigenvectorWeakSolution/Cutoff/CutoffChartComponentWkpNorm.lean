@@ -3,7 +3,6 @@ import DifferentialGeometry.Analysis.Sobolev.Euclidean.ChainRule.CompChainRuleK
 import DifferentialGeometry.Analysis.Sobolev.Euclidean.IteratedSobolevSpace.IteratedSobolevQuant
 import DifferentialGeometry.Analysis.Sobolev.Euclidean.Multiplication.MultiplyQuantK
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
 
 
 noncomputable section

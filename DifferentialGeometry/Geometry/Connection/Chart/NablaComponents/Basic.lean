@@ -2,9 +2,6 @@ import DifferentialGeometry.Geometry.Connection.Chart.Christoffel
 import DifferentialGeometry.Geometry.Connection.Chart.CoordinateFrame
 import DifferentialGeometry.Tensor.RSTensor.Derivation.NablaOnTensors
 
-
-
-
 noncomputable section
 
 namespace DifferentialGeometry
@@ -207,7 +204,6 @@ private theorem model_component_eq_coord_component_comp_eventually {s : ℕ}
   rfl
 
 set_option backward.isDefEq.respectTransparency false in
-
 theorem modelDeriv_eq_coordDeriv0SAt {s : ℕ}
     (X : ContMDiffSection I E (⊤ : WithTop ℕ∞) (TangentSpace I : M -> Type _))
     (x₀ : M)

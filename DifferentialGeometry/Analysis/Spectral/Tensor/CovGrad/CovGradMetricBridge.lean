@@ -4,7 +4,6 @@ import Mathlib.Data.Fin.Tuple.Basic
 import Mathlib.Algebra.BigOperators.Fin
 import Mathlib.Logic.Equiv.Fin.Basic
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
 
 
 noncomputable section

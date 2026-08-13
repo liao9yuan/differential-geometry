@@ -4,15 +4,6 @@ open DifferentialGeometry.Geometry.Curvature
 
 set_option autoImplicit false
 
-
-
-
-
-
-
-
-
-
 noncomputable section
 
 universe u uE uH
@@ -30,8 +21,6 @@ variable {M : Type u} [TopologicalSpace M] [ChartedSpace H M]
 variable [IsManifold I ∞ M]
 
 namespace MetricFamilySmoothOn
-
-
 
 omit [CompleteSpace E] in
 theorem pairSmoothAt

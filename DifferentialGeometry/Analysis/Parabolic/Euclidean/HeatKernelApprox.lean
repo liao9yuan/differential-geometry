@@ -1,15 +1,6 @@
 import DifferentialGeometry.Analysis.Parabolic.Euclidean.HeatKernelSup
 import Mathlib.Topology.MetricSpace.HolderNorm
 
-/-!
-# Quantitative approximation by the Euclidean heat kernel
-
-The boundary term in the Duhamel identity is genuine only after proving that
-the heat kernel converges to the identity.  For the half-Holder spatial data
-used by the low-regularity parametrix, the first half moment of the Gaussian
-gives the explicit rate `t^(1/4)`.
--/
-
 noncomputable section
 
 open Filter MeasureTheory Real
@@ -27,7 +18,6 @@ variable {V : Type*}
   [MeasurableSpace V] [BorelSpace V]
   [Nontrivial V]
 
-/-- The half spatial moment of the time-one heat kernel. -/
 def baseHeatHalf (x : V) : ℝ :=
   Real.sqrt ‖x‖ * baseHeat x
 
@@ -49,7 +39,6 @@ private theorem baseHeatFirst_int :
   rw [heq]
   exact h
 
-/-- The first half moment of the normalized Gaussian is finite. -/
 theorem baseHeatHalf_int : Integrable (baseHeatHalf : V → ℝ) := by
   have hmajor : Integrable (fun x : V => (1 + ‖x‖) * baseHeat x) := by
     have h := (baseHeat_int (V := V)).add (baseHeatFirst_int (V := V))
@@ -70,7 +59,6 @@ theorem baseHeatHalf_int : Integrable (baseHeatHalf : V → ℝ) := by
     exact ⟨by positivity, by nlinarith [norm_nonneg x]⟩
   exact mul_le_mul_of_nonneg_right hsqrt (baseHeat_nonneg x)
 
-/-- Dimension-dependent half moment of the time-one heat kernel. -/
 def heatC0Half (V : Type*) [NormedAddCommGroup V] [InnerProductSpace ℝ V]
     [FiniteDimensional ℝ V] [MeasurableSpace V] [BorelSpace V] : ℝ :=
   ∫ x : V, baseHeatHalf x
@@ -79,7 +67,6 @@ omit [Nontrivial V] in
 theorem heatC0Half_nonneg : 0 ≤ heatC0Half V :=
   integral_nonneg baseHeatHalf_nonneg
 
-/-- Scaled half-moment density for the positive-time heat kernel. -/
 def heatHalf (t : ℝ) (x : V) : ℝ :=
   ((heatScale t) ^ Module.finrank ℝ V)⁻¹ * Real.sqrt (heatScale t) *
     baseHeatHalf ((heatScale t)⁻¹ • x)
@@ -94,7 +81,6 @@ theorem heatHalf_nonneg {t : ℝ} (ht : 0 < t) (x : V) :
     (baseHeatHalf_nonneg _)
 
 omit [MeasurableSpace V] [BorelSpace V] [Nontrivial V] in
-/-- The scaled density is exactly `sqrt ‖x‖` times the heat kernel. -/
 theorem heatHalf_eq {t : ℝ} (ht : 0 < t) (x : V) :
     heatHalf t x = Real.sqrt ‖x‖ * heatKernel t x := by
   have hr : 0 < heatScale t := heatScale_pos ht
@@ -120,7 +106,6 @@ theorem heatHalf_int {t : ℝ} (ht : 0 < t) :
     (inv_ne_zero (heatScale_pos ht).ne') |>.const_mul _
 
 omit [Nontrivial V] in
-/-- Exact scaling of the first half moment. -/
 theorem integral_heatHalf {t : ℝ} (ht : 0 < t) :
     ∫ x : V, heatHalf t x = Real.sqrt (heatScale t) * heatC0Half V := by
   have hr : 0 < heatScale t := heatScale_pos ht
@@ -167,8 +152,6 @@ private theorem approx_integrand {t : ℝ} (ht : 0 < t) {K : ℝ≥0}
       rw [heatHalf_eq ht]
       ring
 
-/-- Quantitative approximate-identity estimate on global half-Holder data.
-The factor `sqrt (sqrt t)` is `t^(1/4)`. -/
 theorem heatSup_id_norm {t : ℝ} (ht : 0 < t) {K : ℝ≥0}
     {u : BoundedContinuousFunction V F} (hu : HolderWith K (1 / 2 : ℝ≥0) u) (x : V) :
     ‖heatSup t u x - u x‖ ≤

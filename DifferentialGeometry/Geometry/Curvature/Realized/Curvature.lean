@@ -5,13 +5,6 @@ open DifferentialGeometry.Geometry.Curvature
 set_option autoImplicit false
 set_option backward.isDefEq.respectTransparency false
 
-
-
-
-
-
-
-
 noncomputable section
 
 namespace DifferentialGeometry.Geometry.Curvature
@@ -52,16 +45,6 @@ theorem ricci_comp_eq_trace
         gInv x k l * Riemann04 x (frame k x) (frame i x) (frame j x)
           (frame l x) := by
   simpa [ricciFromRiemann04TraceInFrame] using hRic x (frame i x) (frame j x)
-
-
-
-
-
-
-
-
-
-
 
 abbrev scalarCurvatureFromRicciTraceInFrame
     (Ric : RawTwoTensorField (I := I) (M := M))

@@ -6,28 +6,6 @@ import Mathlib.Geometry.Manifold.VectorBundle.Tangent
 import Mathlib.Geometry.Manifold.ContMDiff.Defs
 import Mathlib.Topology.VectorBundle.Basic
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 open Set Function Filter Bundle
 open scoped Topology ContDiff Manifold
 open DifferentialGeometry.Integral.Measure (SmoothRiemannianMetric)
@@ -49,24 +27,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
   [LocPathConnectedSpace M]
   [DifferentialGeometry.Geometry.Riemannian.Topology.SemilocallySimplyConnectedSpace M]
   [Inhabited M]
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 omit [InnerProductSpace ℝ E] [FiniteDimensional ℝ E] [I.Boundaryless] [IsManifold I ∞ M] [T2Space M]
     [SigmaCompactSpace M] [ConnectedSpace M] in
@@ -108,28 +68,6 @@ theorem uc_coverChartAt_extend_conjugacy
           = (chartAt H (proj a)).symm (I.symm y) := by
       rw [OpenPartialHomeomorph.extend_coe_symm]; rfl
     rw [hExtSymm, hSymm, hChartExtSymm]
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 omit [InnerProductSpace ℝ E] [FiniteDimensional ℝ E] [I.Boundaryless] [T2Space M]
     [SigmaCompactSpace M] in
@@ -251,24 +189,6 @@ theorem uc_tangentBundleCore_coordChange_agree
       simp only [Function.comp_apply] at this
       rw [this, hLSb_z]
     exact hBaseB
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 omit [InnerProductSpace ℝ E] [FiniteDimensional ℝ E] [I.Boundaryless] [T2Space M]
     [SigmaCompactSpace M] in
@@ -397,20 +317,6 @@ theorem uc_hom_bundle_inCoordinates_pullback
       congrArg (fun (f : E →L[ℝ] E) => f v) hSymmL
     exact congrArg L hsymm_eq
   · exact congrArg (fun (f : E →L[ℝ] E) => (g.inner (proj x)).comp f) hSymmL
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 omit [InnerProductSpace ℝ E] [FiniteDimensional ℝ E] [I.Boundaryless] [T2Space M]
     [SigmaCompactSpace M] in

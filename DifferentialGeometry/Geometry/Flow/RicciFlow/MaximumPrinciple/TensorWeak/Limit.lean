@@ -13,7 +13,6 @@ open DifferentialGeometry.Tensor.RicciIdentity
 open DifferentialGeometry.Tensor.RSTensor
 open DifferentialGeometry.Tensor.Auxiliary
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
 
 
 set_option autoImplicit false
@@ -33,13 +32,6 @@ variable {I : ModelWithCorners Real E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 variable [IsManifold I 1 M] [IsManifold I 2 M]
 
-
-
-
-
-
-
-
 def TensorBarrierUniformOnSlab
     (G : Real -> SmoothRiemannianMetric I M)
     (S : TwoTensorFamily (I := I) (M := M))
@@ -48,10 +40,6 @@ def TensorBarrierUniformOnSlab
     TwoTensorFamilyNonnegativeOn (I := I) (M := M)
       (tensorBarrierFamily (I := I) (M := M) G S epsilon delta t0)
       (Set.Icc t0 (t0 + delta))
-
-
-
-
 
 omit [FiniteDimensional ℝ E] [IsManifold I 1 M] [IsManifold I 2 M] in
 theorem tensorBarrier_limit_on_fixed_slab
@@ -118,12 +106,6 @@ theorem tensorBarrier_limit_on_fixed_slab
   have hq_nonneg : 0 ≤ q := le_of_forall_pos_le_add hforall
   simpa [q] using hq_nonneg
 
-
-
-
-
-
-
 def TensorBarrierLimitClosureOn
     (G : Real -> SmoothRiemannianMetric I M)
     (S : TwoTensorFamily (I := I) (M := M))
@@ -134,9 +116,6 @@ def TensorBarrierLimitClosureOn
     ∃ delta : Real, 0 < delta ∧ t0 + delta ≤ T ∧
       TensorBarrierUniformOnSlab (I := I) (M := M) G S delta t0) ->
   TwoTensorFamilyNonnegativeOn (I := I) (M := M) S (Set.Icc 0 T)
-
-
-
 
 omit [FiniteDimensional ℝ E] [IsManifold I ∞ M] [IsManifold I 1 M] [IsManifold I 2 M] in
 private theorem nonnegativeTime_isClosed
@@ -168,8 +147,6 @@ private theorem nonnegativeTime_isClosed
     (isClosed_iInter fun x =>
       isClosed_iInter fun v =>
         (hcont x v v).preimage_isClosed_of_isClosed isClosed_Icc isClosed_Ici)
-
-
 
 omit [FiniteDimensional ℝ E] [IsManifold I 1 M] [IsManifold I 2 M] in
 theorem barrierLimitClosure_of_continuous
@@ -231,13 +208,6 @@ structure TensorWMPCore
       Set.Icc t0 (t0 + delta) ⊆ Set.Icc 0 T ->
       TensorFirstNullCompactnessOn (I := I) (M := M) G S epsilon delta t0
 
-
-
-
-
-
-
-
 structure TensorWMPRegularityOn
     (G : Real -> SmoothRiemannianMetric I M)
     (S : TwoTensorFamily (I := I) (M := M))
@@ -288,11 +258,6 @@ def toCore
 
 end TensorWMPRegularityOn
 
-
-
-
-
-
 structure TensorWMPSectionCore
     (G : Real -> SmoothRiemannianMetric I M)
     (S : TwoTensorSecFamily (I := I) (M := M))
@@ -339,17 +304,6 @@ structure TensorWMPSectionCore
               (twoTensorSecToFamily (I := I) (M := M) S)
               epsilon delta t0 t x v v)
           (Set.Icc t0 (t0 + delta))
-
-
-
-
-
-
-
-
-
-
-
 
 structure TensorWMPSectionReg
     (G : Real -> SmoothRiemannianMetric I M)
@@ -623,10 +577,6 @@ def toCore
   tensorQuadCont := h.tensorQuadCont
   barrierFixedContinuous := h.barrierFixedContinuous
 
-
-
-
-
 omit [IsManifold I 2 M] in
 theorem ofCompact
     [CompactSpace M] [T2Space M]
@@ -696,8 +646,6 @@ theorem ofCompact
   tensorQuadCont := hTensor
   barrierFixedContinuous := hFixed
   firstNullScalarSigns := hSigns
-
-
 
 omit [IsManifold I 2 M] in
 theorem ofTotal
@@ -773,9 +721,6 @@ theorem ofTotal
         (hTensor delta t0 hdelta hsub))
     hFixed hSigns
 
-
-
-
 omit [IsManifold I 2 M] in
 theorem ofSmoothMetric
     [CompactSpace M] [T2Space M]
@@ -839,8 +784,6 @@ theorem ofSmoothMetric
         (I := I) (M := M) G.metric hG
         (fun _t ht => hTsub (hsub ht)))
     hTensor hFixed hSigns
-
-
 
 omit [IsManifold I 2 M] in
 theorem toRaw

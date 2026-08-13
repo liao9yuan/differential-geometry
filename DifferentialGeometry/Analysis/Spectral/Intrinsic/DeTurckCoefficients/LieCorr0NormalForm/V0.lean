@@ -2,13 +2,6 @@ import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurckCoefficients.LieC
 import Mathlib.Tactic.LinearCombination
 import Mathlib.Tactic.Ring
 
-
-
-
-
-
-
-
 noncomputable section
 
 

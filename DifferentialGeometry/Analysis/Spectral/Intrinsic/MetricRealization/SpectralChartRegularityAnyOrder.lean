@@ -6,60 +6,7 @@ import DifferentialGeometry.Analysis.Sobolev.Euclidean.IteratedSobolevSpace.Iter
 import DifferentialGeometry.Analysis.Elliptic.TensorRegularity.Bootstrap.BootstrapMixed
 import DifferentialGeometry.Analysis.Parabolic.MaximalRegularity.Plancherel
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Connection
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 noncomputable section
 
@@ -95,9 +42,6 @@ private local instance : BorelSpace M := ⟨rfl⟩
 
 local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
-
-
-
 omit [NeZero (Module.finrank ℝ E)] in
 theorem resolvent_eigenvalue_inv_eq_one_add_lambda
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
@@ -108,9 +52,6 @@ theorem resolvent_eigenvalue_inv_eq_one_add_lambda
   rw [tensorLaplacianEigenvalueOf]
   field_simp
   ring
-
-
-
 
 private def eigenbasisVec (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorSpectral.TensorEigenIdx (I := I) (M := M) g r s) :
@@ -126,8 +67,6 @@ private lemma eigenbasisVec_norm_eq_one (g : SmoothRiemannianMetric I M) (r s : 
     (g := g) (r := r) (s := s)
     (tensorResolventL2_isCompactOperator (I := I) (M := M) g r s)).norm_eq_one i
 
-
-
 private def eigenvectorComp (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorSpectral.TensorEigenIdx (I := I) (M := M) g r s)
     (α : M) (P₀ : TensorCompIdx (E := E) r s) : EuclN → ℝ :=
@@ -136,24 +75,17 @@ private def eigenvectorComp (g : SmoothRiemannianMetric I M) (r s : ℕ)
         (eigenbasisVec (I := I) (M := M) g r s i) α P₀ :
       Lp ℝ 2 (chartL2Measure (I := I) (M := M) α)) : EuclN → ℝ) y
 
-
-
 private lemma eigenvectorComp_eq_ofCompact (g : SmoothRiemannianMetric I M)
     (r s : ℕ) (i : TensorSpectral.TensorEigenIdx (I := I) (M := M) g r s)
     (α : M) (P₀ : TensorCompIdx (E := E) r s) :
     eigenvectorComp (I := I) (M := M) g r s i α P₀ =
       eigenvectorChartComponentFun (I := I) (M := M) g r s i α P₀ := rfl
 
-
-
 private lemma eigenvectorComp_eq_unconditional (g : SmoothRiemannianMetric I M)
     (r s : ℕ) (i : TensorSpectral.TensorEigenIdx (I := I) (M := M) g r s)
     (α : M) (P₀ : TensorCompIdx (E := E) r s) :
     eigenvectorComp (I := I) (M := M) g r s i α P₀ =
       eigenvectorChartComponentFun_unconditional (I := I) (M := M) g r s i α P₀ := rfl
-
-
-
 
 private lemma eigenvectorComp_memWkp (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorSpectral.TensorEigenIdx (I := I) (M := M) g r s)
@@ -164,11 +96,6 @@ private lemma eigenvectorComp_memWkp (g : SmoothRiemannianMetric I M) (r s : ℕ
   rw [eigenvectorComp_eq_ofCompact]
   exact eigenvector_chartComponent_memWkp_arbitrary
     (I := I) (M := M) g r s i (2 * k) α P₀
-
-
-
-
-
 
 private lemma eigenvectorComp_wkpNorm_le_weight (g : SmoothRiemannianMetric I M)
     (r s : ℕ) (k : ℕ) (α : M) (P₀ : TensorCompIdx (E := E) r s) :
@@ -239,9 +166,6 @@ private lemma eigenFinsetSeq_tendsto (g : SmoothRiemannianMetric I M) (r s : ℕ
     (eigenFinsetSeq_monotone (I := I) (M := M) g r s)
     (eigenFinsetSeq_mem (I := I) (M := M) g r s)
 
-
-
-
 private def ellOneCoeff (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (u : TensorL2 r s g) (C : ℝ) (k : ℕ)
     (i : TensorSpectral.TensorEigenIdx (I := I) (M := M) g r s) : ℝ :=
@@ -258,10 +182,6 @@ private lemma ellOneCoeff_nonneg (g : SmoothRiemannianMetric I M) (r s : ℕ)
   have hc : 0 ≤ |spectralCoeff (I := I) (M := M) g r s u i| := abs_nonneg _
   positivity
 
-
-
-
-
 private lemma ellOneCoeff_summable (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (u : TensorL2 r s g) (h_mem : MemAllTensorHs (I := I) (M := M) g r s u)
     (h_tail : EigenvalueTailSummable (I := I) (M := M) g r s)
@@ -277,8 +197,6 @@ private lemma ellOneCoeff_summable (g : SmoothRiemannianMetric I M) (r s : ℕ)
     funext i; unfold ellOneCoeff; ring
   rw [h_eq]
   exact h.mul_left C
-
-
 
 private def partialSumFun (g : SmoothRiemannianMetric I M) (r s' : ℕ)
     (u : TensorL2 r s' g) (α : M) (P₀ : TensorCompIdx (E := E) r s')
@@ -312,9 +230,6 @@ private lemma partialSumFun_memWkp (g : SmoothRiemannianMetric I M) (r s' : ℕ)
   memWkp_finset_sum (d := Module.finrank ℝ E)
     (chartTargetEuclid_isOpen (I := I) (M := M) α) s _
     (fun i _ => scaledEigenvectorComp_memWkp (I := I) (M := M) g r s' u k α P₀ i)
-
-
-
 
 private lemma partialSumFun_wkpNorm_le (g : SmoothRiemannianMetric I M) (r s' : ℕ)
     (u : TensorL2 r s' g) (k : ℕ) (α : M) (P₀ : TensorCompIdx (E := E) r s')
@@ -369,10 +284,6 @@ private lemma partialSumFun_sub_of_subset (g : SmoothRiemannianMetric I M)
   rw [partialSumFun, partialSumFun, partialSumFun,
     Finset.sum_sdiff_eq_sub hst]
 
-
-
-
-
 private lemma partialSumFun_wkpNorm_sub_le (g : SmoothRiemannianMetric I M)
     (r s' : ℕ) (u : TensorL2 r s' g)
     (h_mem : MemAllTensorHs (I := I) (M := M) g r s' u)
@@ -407,8 +318,6 @@ private lemma partialSumFun_wkpNorm_sub_le (g : SmoothRiemannianMetric I M)
     Summable.sum_le_tsum t (fun i _ => h_nn i) h_summ
   linarith
 
-
-
 private def partialSumLp (g : SmoothRiemannianMetric I M) (r s' : ℕ)
     (u : TensorL2 r s' g) (α : M) (P₀ : TensorCompIdx (E := E) r s')
     (s : Finset (TensorSpectral.TensorEigenIdx (I := I) (M := M) g r s')) :
@@ -416,8 +325,6 @@ private def partialSumLp (g : SmoothRiemannianMetric I M) (r s' : ℕ)
   ∑ i ∈ s, spectralCoeff (I := I) (M := M) g r s' u i •
     tensorL2ChartComponent (I := I) (M := M) g r s'
       (eigenbasisVec (I := I) (M := M) g r s' i) α P₀
-
-
 
 private lemma partialSumLp_coeFn (g : SmoothRiemannianMetric I M) (r s' : ℕ)
     (u : TensorL2 r s' g) (α : M) (P₀ : TensorCompIdx (E := E) r s')
@@ -450,9 +357,6 @@ private lemma partialSumLp_coeFn (g : SmoothRiemannianMetric I M) (r s' : ℕ)
   have h_fin := finsetSum_ae_eq (I := I) (M := M) α s h_each
   refine h_fin.trans (Filter.EventuallyEq.of_eq ?_)
   rfl
-
-
-
 
 private lemma partialSumLp_tendsto (g : SmoothRiemannianMetric I M) (r s' : ℕ)
     [Encodable (TensorSpectral.TensorEigenIdx (I := I) (M := M) g r s')]
@@ -520,10 +424,6 @@ private lemma ellOnePartial_tendsto (g : SmoothRiemannianMetric I M) (r s' : ℕ
     rw [h_hasSum.tsum_eq]
     rwa [HasSum, SummationFilter.unconditional_filter] at h
   exact h_tendsto_finset.comp (eigenFinsetSeq_tendsto (I := I) (M := M) g r s')
-
-
-
-
 
 private lemma gateElement_chartComponent_memWkp_of_tail
     (g : SmoothRiemannianMetric I M) (r s' : ℕ)
@@ -669,19 +569,6 @@ private lemma gateElement_chartComponent_memWkp_of_tail
   exact (MemWkp_congr_ae (d := Module.finrank ℝ E) (by norm_num : (1 : ℝ≥0∞) ≤ 2)
     hΩ_open hae).mp hF_lim_mem
 
-
-
-
-
-
-
-
-
-
-
-
-
-
 theorem spectralChartRegularity_of_eigenvalueTailSummable
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (h_tail : EigenvalueTailSummable (I := I) (M := M) g r s) :
@@ -695,16 +582,6 @@ theorem spectralChartRegularity_of_eigenvalueTailSummable
     Encodable.ofCountable _
   exact gateElement_chartComponent_memWkp_of_tail (I := I) (M := M) g r s u h_mem
     h_tail k α P₀
-
-
-
-
-
-
-
-
-
-
 
 theorem spectralSmoothRealizesAsSmooth_of_eigenvalueTailSummable
     (g : SmoothRiemannianMetric I M) (r s : ℕ)

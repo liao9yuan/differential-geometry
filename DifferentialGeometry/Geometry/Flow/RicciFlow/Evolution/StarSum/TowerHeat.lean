@@ -1,21 +1,7 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.StarSum.TimeRecursion
 open DifferentialGeometry.PDE.RicciFlow
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Operator
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 namespace DifferentialGeometry.PDE.RicciFlow
 

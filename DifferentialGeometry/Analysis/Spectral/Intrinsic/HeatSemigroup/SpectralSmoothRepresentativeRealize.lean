@@ -4,9 +4,9 @@ import DifferentialGeometry.Analysis.Spectral.Intrinsic.TensorHsInterpolationLim
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.Garding.EigenComboGardingReduction
 import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.GreenIdentityAndIBP.AllOrderGardingConstant
 import DifferentialGeometry.Analysis.Spectral.Tensor.SmoothSection.SmoothTensorAllOrderCompleteness
-open DifferentialGeometry.Analysis.Sobolev.IntrinsicSobolev DifferentialGeometry.Analysis.Sobolev.IntrinsicSobolev.SmoothCcTensorHs
+open DifferentialGeometry.Analysis.Sobolev.IntrinsicSobolev
+    DifferentialGeometry.Analysis.Sobolev.IntrinsicSobolev.SmoothCcTensorHs
 open DifferentialGeometry.Analysis.Elliptic
-open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Curvature
 
 noncomputable section

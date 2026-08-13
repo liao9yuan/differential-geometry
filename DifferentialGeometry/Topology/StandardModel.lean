@@ -2,14 +2,6 @@ import Mathlib.Geometry.Manifold.Diffeomorph
 import Mathlib.Geometry.Manifold.IsManifold.InteriorBoundary
 import Mathlib.Topology.Compactness.SigmaCompact
 
-/-!
-# Standard-model copies of manifolds
-
-This file packages a same-universe copy of a boundaryless smooth manifold whose
-model with corners is the standard model on a chosen linearly equivalent normed
-space.  The copy is kept type-theoretically distinct by `ULift.{0}`.
--/
-
 open Set
 open scoped ContDiff Manifold Topology
 
@@ -26,7 +18,6 @@ variable {H : Type uH} [TopologicalSpace H]
 variable {I : ModelWithCorners ℝ E H}
 variable {M : Type u} [TopologicalSpace M] [ChartedSpace H M]
 
-/-- A copy of `M` in the same universe, presented over a standard model space. -/
 structure StdModelCopy
     (I : ModelWithCorners ℝ E H) (M : Type u)
     [TopologicalSpace M] [ChartedSpace H M]
@@ -157,8 +148,6 @@ private theorem std_mfld
         simpa [dH, Function.comp_def] using hpost)
   exact IsManifold.mk' 𝓘(ℝ, F) ∞ M
 
-/-- Replace a boundaryless smooth manifold by a distinct same-universe copy
-whose model with corners is standard. -/
 noncomputable def stdModelCopy
     [I.Boundaryless] [IsManifold I ∞ M] [T2Space M] [SigmaCompactSpace M]
     {F : Type uF} [NormedAddCommGroup F] [NormedSpace ℝ F]

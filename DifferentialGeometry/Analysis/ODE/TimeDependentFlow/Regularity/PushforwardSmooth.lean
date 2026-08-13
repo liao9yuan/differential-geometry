@@ -47,7 +47,8 @@ private lemma pushforward_infty_ne_zero : (∞ : WithTop ℕ∞) ≠ 0 := by dec
 omit [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 private lemma flowFamily_pushforward_eq_mpullback_symm
     (Φ : M ≃ₘ⟮I, I⟯ M) (Y : ∀ x : M, TangentSpace I x) :
-    (DifferentialGeometry.PDE.RicciFlow.Pullback.Diffeomorph.pushforward Φ Y : ∀ x : M, TangentSpace I x)
+    (DifferentialGeometry.PDE.RicciFlow.Pullback.Diffeomorph.pushforward Φ Y : ∀ x : M,
+      TangentSpace I x)
       = (VectorField.mpullback I I (⇑Φ.symm) Y : ∀ x : M, TangentSpace I x) := by
   funext z
   have hinv : (mfderiv I I (⇑Φ.symm) z).inverse = mfderiv I I (⇑Φ) (Φ.symm z) := by

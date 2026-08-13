@@ -2,7 +2,6 @@ import DifferentialGeometry.Analysis.Sobolev.TensorHilbert.MetricInverseDifferen
 open DifferentialGeometry.Geometry.Connection.Realization
 open DifferentialGeometry.Analysis.Sobolev
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Connection
 
 

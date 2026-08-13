@@ -4,7 +4,6 @@ import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.ChartCoordinat
 import DifferentialGeometry.Analysis.Spectral.Tensor.ChartTensor.ChartGeometry.GoodSetMeasure
 open DifferentialGeometry.Analysis.Elliptic
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Connection
 
 
@@ -12,7 +11,8 @@ noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
 
-open Bundle Manifold MeasureTheory Set Filter DifferentialGeometry.Tensor0SBundle CovariantDerivative
+open Bundle Manifold MeasureTheory Set Filter DifferentialGeometry.Tensor0SBundle
+    CovariantDerivative
 open scoped Manifold Topology ContDiff BigOperators Matrix
 
 namespace DifferentialGeometry
@@ -24,7 +24,8 @@ open DifferentialGeometry.Integral.L2
 open DifferentialGeometry.Integral.DivergenceTheorem
 open DifferentialGeometry.Analysis.Parabolic.TensorSpectral
 open DifferentialGeometry.Analysis.Sobolev.Chart
-open DifferentialGeometry.Tensor0SNabla DifferentialGeometry.TensorRSNabla DifferentialGeometry.TensorMetricLowering
+open DifferentialGeometry.Tensor0SNabla DifferentialGeometry.TensorRSNabla
+    DifferentialGeometry.TensorMetricLowering
 
 variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]

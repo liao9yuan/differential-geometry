@@ -11,7 +11,6 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.SobolevScale.SeriesContinuo
 import DifferentialGeometry.Analysis.Parabolic.MaximalRegularity.Plancherel
 open DifferentialGeometry.Analysis.Sobolev
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
 
 noncomputable section
 

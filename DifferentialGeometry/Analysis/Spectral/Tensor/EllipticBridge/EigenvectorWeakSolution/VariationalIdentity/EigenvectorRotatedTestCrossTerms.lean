@@ -17,7 +17,6 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.CovariantLeibniz
 import DifferentialGeometry.Analysis.Spectral.Tensor.EllipticBridge.EigenvectorWeakSolution.VariationalIdentity.EigenvectorPouApproxRegularity
 open DifferentialGeometry.Analysis.Spectral
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
 
 noncomputable section
 
@@ -56,8 +55,6 @@ private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
 local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
-
-
 
 def eigenvectorRotatedTestSection
     (g : SmoothRiemannianMetric I M) (r s : ℕ)

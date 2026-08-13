@@ -6,7 +6,6 @@ import Mathlib.Geometry.Manifold.VectorBundle.Riemannian
 import Mathlib.Geometry.Manifold.ContMDiffMFDeriv
 import Mathlib.Analysis.InnerProductSpace.Basic
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
 
 
 open DifferentialGeometry.Geometry.Connection

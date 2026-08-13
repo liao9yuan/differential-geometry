@@ -47,19 +47,20 @@ open DifferentialGeometry.Analysis.Sobolev
 open DifferentialGeometry.Analysis.Spectral
 open DifferentialGeometry.Analysis.Elliptic
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Connection
 
 
 noncomputable section
 
-open MeasureTheory Set Filter Topology Bundle Manifold DifferentialGeometry.Tensor0SBundle ContinuousLinearMap
+open MeasureTheory Set Filter Topology Bundle Manifold DifferentialGeometry.Tensor0SBundle
+    ContinuousLinearMap
 open scoped ENNReal NNReal BigOperators Manifold ContDiff
 
 namespace DifferentialGeometry.Analysis.Spectral
 
 open DifferentialGeometry
-open DifferentialGeometry.PDE.RicciFlow DifferentialGeometry.Analysis.Sobolev DifferentialGeometry.Analysis.Spectral
+open DifferentialGeometry.PDE.RicciFlow DifferentialGeometry.Analysis.Sobolev
+    DifferentialGeometry.Analysis.Spectral
 open DifferentialGeometry.Analysis.Spectral.MetricRealization
 open DifferentialGeometry.Integral.L2
 
@@ -166,7 +167,6 @@ lemma pAO_range_subset {m n : ℕ} (h : m ≤ n) :
   exact Finset.mem_range.mpr (lt_of_lt_of_le (Finset.mem_range.mp hx) h)
 
 set_option backward.isDefEq.respectTransparency false in
-
 private theorem gInvDiffSlotCoeff_jetL2_allOrder_tame (g₀ : SmoothRiemannianMetric I M) (a : ℕ)
     (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) {R : ℝ} (hR : 0 ≤ R)
     {δ₀ : ℝ} (hδ₀ : δ₀ < 1) :
@@ -204,7 +204,6 @@ private theorem gInvDiffSlotCoeff_jetL2_allOrder_tame (g₀ : SmoothRiemannianMe
   exact mul_le_mul_of_nonneg_left (le_trans hbound (le_of_eq rfl)) (hC_nn j)
 
 set_option backward.isDefEq.respectTransparency false in
-
 theorem pAO_traceHessian_jetSum_tame (g₀ : SmoothRiemannianMetric I M) (a : ℕ)
     (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) {R : ℝ} (hR : 0 ≤ R)
     {δ₀ : ℝ} (hδ₀ : δ₀ < 1) :
@@ -366,7 +365,6 @@ theorem pAO_traceHessian_jetSum_tame (g₀ : SmoothRiemannianMetric I M) (a : �
         nlinarith [e1]
 
 set_option backward.isDefEq.respectTransparency false in
-
 theorem pAO_connDiffSection_jetL2_tame (g₀ : SmoothRiemannianMetric I M) (a : ℕ)
     (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) {R : ℝ} (hR : 0 ≤ R)
     {δ₀ : ℝ} (hδ₀ : δ₀ < 1) :
@@ -935,7 +933,6 @@ theorem pAO_kappa_jetSum_tame (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
   linarith [hAsum, hBsum, hCsum, hDsum, hexp]
 
 set_option backward.isDefEq.respectTransparency false in
-
 theorem pAO_lieArm1PsiB_jetL2_tame (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
     (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) {R : ℝ} (hR : 0 ≤ R)
     {δ₀ : ℝ} (hδ₀ : δ₀ < 1) :

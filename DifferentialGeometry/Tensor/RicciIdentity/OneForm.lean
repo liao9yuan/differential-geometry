@@ -8,7 +8,6 @@ import Mathlib.Geometry.Manifold.VectorBundle.CovariantDerivative.Torsion
 open DifferentialGeometry.Tensor.RSTensor
 open DifferentialGeometry.Tensor.RicciIdentity
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Connection
 
 set_option autoImplicit false

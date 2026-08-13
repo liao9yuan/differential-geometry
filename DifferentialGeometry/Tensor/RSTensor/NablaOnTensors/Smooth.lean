@@ -4,13 +4,6 @@ import DifferentialGeometry.Tensor.RSTensor.NablaOnTensors.Regularity.TensorRS
 import DifferentialGeometry.Tensor.RSTensor.Derivation.NablaOnTensors
 import DifferentialGeometry.Tensor.RSTensor.NablaOnTensors.Regularity.TotalNabla0S
 
-
-
-
-
-
-
-
 namespace DifferentialGeometry
 namespace Tensor0SBundle
 

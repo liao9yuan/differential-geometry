@@ -1,10 +1,6 @@
 import DifferentialGeometry.Tensor.RSTensor.NablaOnTensors.Regularity.Tensor0S
 open DifferentialGeometry.Tensor.Multilinear
 
-
-
-
-
 namespace DifferentialGeometry
 namespace Tensor0SBundle
 

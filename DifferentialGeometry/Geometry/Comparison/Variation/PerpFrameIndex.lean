@@ -4,17 +4,8 @@ import DifferentialGeometry.Geometry.Comparison.Variation.PerpFrame
 import DifferentialGeometry.Geometry.Comparison.Variation.SecondVariation
 import DifferentialGeometry.Geometry.Curvature.CurvatureOperator.RicciConnection
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
 
 set_option autoImplicit false
-
-/-!
-# Index forms in a parallel perpendicular frame
-
-This module identifies the geometric index form of a field expanded in a
-parallel orthonormal frame with the abstract Euclidean index form of its
-coefficient field.
--/
 
 open Set Function Manifold Bundle
 open scoped Topology Manifold ContDiff RealInnerProductSpace
@@ -70,14 +61,12 @@ private lemma g_inner_contDiff
   rw [← contMDiff_iff_contDiff]
   exact hcm
 
-/-- Lift Euclidean coefficient functions through a finite frame along a curve. -/
 def perpFrameLift {γ : ℝ → M}
     (F : ι → ∀ t : ℝ, TangentSpace I (γ t))
     (y : ℝ → EuclideanSpace ℝ ι) (t : ℝ) :
     TangentSpace I (γ t) :=
   ∑ i, y t i • F i t
 
-/-- Coefficients of a field in a finite frame along a curve. -/
 def perpCoeff (g : SmoothRiemannianMetric I M) {γ : ℝ → M}
     (F : ι → ∀ t : ℝ, TangentSpace I (γ t))
     (Y : ∀ t : ℝ, TangentSpace I (γ t)) (t : ℝ) :
@@ -102,7 +91,6 @@ omit [FiniteDimensional ℝ E]
   [NeZero (Module.finrank ℝ E)] [I.Boundaryless]
   [Fintype ι] [DecidableEq ι]
   [T2Space M] [SigmaCompactSpace M] in
-/-- A field that vanishes at a time has zero frame coefficients there. -/
 @[simp]
 theorem perpCoeff_zero
     (g : SmoothRiemannianMetric I M) {γ : ℝ → M}
@@ -117,8 +105,6 @@ theorem perpCoeff_zero
 omit [FiniteDimensional ℝ E]
   [NeZero (Module.finrank ℝ E)] [I.Boundaryless]
   [T2Space M] [SigmaCompactSpace M] [DecidableEq ι] in
-/-- Frame coefficients are globally smooth when the frame and field are
-globally smooth bundle sections along the curve. -/
 theorem perpCoeff_smooth
     (g : SmoothRiemannianMetric I M) {γ : ℝ → M}
     (F : ι → ∀ t : ℝ, TangentSpace I (γ t))
@@ -136,7 +122,6 @@ theorem perpCoeff_smooth
   exact (ContinuousLinearEquiv.contDiff
     (EuclideanSpace.equiv ι ℝ).symm).comp hcomponents
 
-/-- The coefficient-space Jacobi curvature operator of a finite frame. -/
 def perpCurvOp (g : SmoothRiemannianMetric I M) (γ : ℝ → M)
     (F : ι → ∀ t : ℝ, TangentSpace I (γ t)) (t : ℝ) :
     EuclideanSpace ℝ ι →L[ℝ] EuclideanSpace ℝ ι :=
@@ -167,13 +152,10 @@ theorem perpCurvOp_apply
         (F i t) * y j := by
   rfl
 
--- Elaborating the geometric instance chain requires the larger synthesis budget.
 set_option backward.isDefEq.respectTransparency false in
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
 omit [NeZero (Module.finrank ℝ E)] in
-/-- The coefficient-space curvature operator is smooth along a smooth curve
-and a smooth finite frame. -/
 theorem perpCurv_smooth
     (g : SmoothRiemannianMetric I M) (γ : ℝ → M)
     (hγ : ContMDiff 𝓘(ℝ, ℝ) I ∞ γ)
@@ -280,7 +262,6 @@ theorem perpCurv_smooth
 omit [FiniteDimensional ℝ E]
   [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [IsManifold I ∞ M]
   [T2Space M] [SigmaCompactSpace M] [DecidableEq ι] in
-/-- A coefficient field that vanishes at a time has zero frame lift there. -/
 @[simp]
 theorem perpLift_zero {γ : ℝ → M}
     (F : ι → ∀ t : ℝ, TangentSpace I (γ t))
@@ -291,7 +272,6 @@ theorem perpLift_zero {γ : ℝ → M}
 omit [FiniteDimensional ℝ E]
   [NeZero (Module.finrank ℝ E)] [I.Boundaryless]
   [T2Space M] [SigmaCompactSpace M] [DecidableEq ι] in
-/-- A lift through a perpendicular frame remains perpendicular. -/
 theorem perpLift_perp
     (g : SmoothRiemannianMetric I M) {γ : ℝ → M}
     (F : ι → ∀ t : ℝ, TangentSpace I (γ t))
@@ -304,7 +284,6 @@ theorem perpLift_perp
 omit [FiniteDimensional ℝ E]
   [NeZero (Module.finrank ℝ E)] [I.Boundaryless]
   [T2Space M] [SigmaCompactSpace M] in
-/-- A lift through a pointwise orthonormal frame preserves inner products. -/
 theorem perpLift_inner
     (g : SmoothRiemannianMetric I M) {γ : ℝ → M}
     (F : ι → ∀ t : ℝ, TangentSpace I (γ t))
@@ -320,8 +299,6 @@ theorem perpLift_inner
 
 omit [NeZero (Module.finrank ℝ E)]
   [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
-/-- A pointwise orthonormal frame of the orthogonal complement expands every
-vector perpendicular to the distinguished nonzero vector. -/
 theorem perpFrame_expand
     (g : SmoothRiemannianMetric I M) {x : M}
     (F : ι → TangentSpace I x) (u Z : TangentSpace I x)
@@ -420,8 +397,6 @@ theorem perpFrame_expand
 
 omit [NeZero (Module.finrank ℝ E)]
   [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
-/-- A perpendicular field is recovered from its coefficients in a complete
-orthonormal perpendicular frame. -/
 theorem perpLift_coeff
     (g : SmoothRiemannianMetric I M) {γ : ℝ → M}
     (F : ι → ∀ t : ℝ, TangentSpace I (γ t))
@@ -443,8 +418,6 @@ theorem perpLift_coeff
 
 omit [NeZero (Module.finrank ℝ E)]
   [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
-/-- A nonzero perpendicular vector has a nonzero coefficient vector in a
-complete orthonormal perpendicular frame. -/
 theorem perpCoeff_ne_zero
     (g : SmoothRiemannianMetric I M) {γ : ℝ → M}
     (F : ι → ∀ t : ℝ, TangentSpace I (γ t))
@@ -466,14 +439,11 @@ theorem perpCoeff_ne_zero
     hFperp hYperp hON]
   exact perpLift_zero (I := I) F (perpCoeff (I := I) g F Y) t hcoeff
 
--- Elaborating the geometric instance chain requires the larger synthesis budget.
 set_option backward.isDefEq.respectTransparency false in
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
 omit [NeZero (Module.finrank ℝ E)]
   [SigmaCompactSpace M] in
-/-- The curvature coordinates of a perpendicular field are obtained by
-applying the frame curvature operator to its frame coefficients. -/
 theorem perpCurv_coeff
     (g : SmoothRiemannianMetric I M) (γ : ℝ → M)
     (F : ι → ∀ t : ℝ, TangentSpace I (γ t))
@@ -536,8 +506,6 @@ theorem perpCurv_coeff
 
 omit [NeZero (Module.finrank ℝ E)]
   [SigmaCompactSpace M] in
-/-- Frame coefficients of a perpendicular Jacobi field satisfy the
-first-order form of the coefficient Jacobi equation. -/
 theorem perpCoeff_ode
     {n : WithTop ℕ∞} (hn : 1 ≤ n)
     (g : SmoothRiemannianMetric I M) (γ : ℝ → M)
@@ -601,8 +569,6 @@ theorem perpCoeff_ode
 omit [Fintype ι] [DecidableEq ι] in
 omit [NeZero (Module.finrank ℝ E)]
   [SigmaCompactSpace M] in
-/-- A Jacobi field along a global geodesic that vanishes at two distinct
-times is everywhere perpendicular to the geodesic velocity. -/
 theorem jacobi_perp_of_ends
     (g : SmoothRiemannianMetric I M) (γ : ℝ → M)
     (J : ∀ t : ℝ, TangentSpace I (γ t)) {c : ℝ}
@@ -736,8 +702,6 @@ theorem jacobi_perp_of_ends
 
 omit [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [DecidableEq ι] in
 omit [NeZero (Module.finrank ℝ E)] in
-/-- Covariant differentiation becomes ordinary coefficient differentiation
-in a parallel frame. -/
 theorem perpLift_covDeriv
     (g : SmoothRiemannianMetric I M) (γ : ℝ → M)
     (F : ι → ∀ t : ℝ, TangentSpace I (γ t))
@@ -769,8 +733,6 @@ theorem perpLift_covDeriv
 omit [FiniteDimensional ℝ E]
   [NeZero (Module.finrank ℝ E)] [I.Boundaryless]
   [T2Space M] [SigmaCompactSpace M] [DecidableEq ι] in
-/-- A finite coefficient lift is a smooth bundle field when both the
-coefficients and frame are smooth. -/
 theorem perpLift_smooth
     {γ : ℝ → M} (hγ : ContMDiff 𝓘(ℝ, ℝ) I ∞ γ)
     (F : ι → ∀ t : ℝ, TangentSpace I (γ t))
@@ -824,11 +786,8 @@ theorem perpLift_smooth
   rw [(trivializationAt E (TangentSpace I) (γ t₀)).apply_eq_prod_continuousLinearEquivAt
     ℝ (γ t) ht]
 
--- Elaborating the geometric instance chain requires the larger synthesis budget.
 omit [NeZero (Module.finrank ℝ E)]
   [SigmaCompactSpace M] in
-/-- The Euclidean curvature pairing is the geometric curvature pairing of
-the lifted fields. -/
 theorem perpCurv_inner
     (g : SmoothRiemannianMetric I M) (γ : ℝ → M)
     (F : ι → ∀ t : ℝ, TangentSpace I (γ t))
@@ -855,7 +814,6 @@ theorem perpCurv_inner
 
 omit [NeZero (Module.finrank ℝ E)]
   [SigmaCompactSpace M] in
-/-- The frame curvature operator is self-adjoint. -/
 theorem perpCurv_symm
     (g : SmoothRiemannianMetric I M) (γ : ℝ → M)
     (F : ι → ∀ t : ℝ, TangentSpace I (γ t))
@@ -879,7 +837,6 @@ theorem perpCurv_symm
 
 omit [NeZero (Module.finrank ℝ E)]
   [SigmaCompactSpace M] in
-/-- Pointwise identification of geometric and coefficient index integrands. -/
 theorem perpLift_integrand
     (g : SmoothRiemannianMetric I M) (γ : ℝ → M)
     (F : ι → ∀ t : ℝ, TangentSpace I (γ t))
@@ -905,8 +862,6 @@ theorem perpLift_integrand
 
 omit [NeZero (Module.finrank ℝ E)]
   [SigmaCompactSpace M] in
-/-- Identification of the geometric index form with the abstract Euclidean
-index form in a parallel orthonormal frame. -/
 theorem perpLift_indexForm
     (g : SmoothRiemannianMetric I M) (γ : ℝ → M)
     (F : ι → ∀ t : ℝ, TangentSpace I (γ t))

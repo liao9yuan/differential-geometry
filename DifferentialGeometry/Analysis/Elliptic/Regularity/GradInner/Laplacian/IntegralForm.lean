@@ -1,7 +1,6 @@
 import DifferentialGeometry.Analysis.Elliptic.Regularity.GradInner.Laplacian.SmoothViaDensity
 import DifferentialGeometry.Analysis.Elliptic.Regularity.GradInner.Laplacian.DensityExtension
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Operator
 
 
@@ -403,7 +402,8 @@ theorem integral_grad_inner_oneSubLap_smooth_pointwise
         ∂(riemannianVolumeMeasure (I := I) (M := M) g) =
       ∫ x, w.toFun x *
             ((gradInnerSmoothBundle (I := I) (M := M) g φ v).toFun x -
-              Δ_g (I := I) g ⟨(gradInnerSmoothBundle (I := I) (M := M) g φ v).toFun, (gradInnerSmoothBundle (I := I) (M := M) g φ v).smooth⟩ x)
+              Δ_g (I := I) g ⟨(gradInnerSmoothBundle (I := I) (M := M) g φ v).toFun,
+                (gradInnerSmoothBundle (I := I) (M := M) g φ v).smooth⟩ x)
         ∂(riemannianVolumeMeasure (I := I) (M := M) g) := by
   classical
   have h_main :=
@@ -424,7 +424,8 @@ theorem integral_grad_inner_oneSubLap_smooth_pointwise
           Lp ℝ 2 (riemannianVolumeMeasure (I := I) (M := M) g)) : M → ℝ) =ᵐ[
         riemannianVolumeMeasure (I := I) (M := M) g]
       (fun x : M => (gradInnerSmoothBundle (I := I) (M := M) g φ v).toFun x -
-            Δ_g (I := I) g ⟨(gradInnerSmoothBundle (I := I) (M := M) g φ v).toFun, (gradInnerSmoothBundle (I := I) (M := M) g φ v).smooth⟩ x) := by
+            Δ_g (I := I) g ⟨(gradInnerSmoothBundle (I := I) (M := M) g φ v).toFun,
+              (gradInnerSmoothBundle (I := I) (M := M) g φ v).smooth⟩ x) := by
     have h := MemLp.coeFn_toLp
       (gradInnerSmoothBundle (I := I) (M := M) g φ v).oneSubLapClassical.memLp_two
     filter_upwards [h] with x hx
@@ -454,7 +455,8 @@ theorem integral_grad_inner_oneSubLap_smooth_pointwise
         riemannianVolumeMeasure (I := I) (M := M) g]
       (fun x : M => w.toFun x *
           ((gradInnerSmoothBundle (I := I) (M := M) g φ v).toFun x -
-            Δ_g (I := I) g ⟨(gradInnerSmoothBundle (I := I) (M := M) g φ v).toFun, (gradInnerSmoothBundle (I := I) (M := M) g φ v).smooth⟩ x)) := by
+            Δ_g (I := I) g ⟨(gradInnerSmoothBundle (I := I) (M := M) g φ v).toFun,
+              (gradInnerSmoothBundle (I := I) (M := M) g φ v).smooth⟩ x)) := by
     filter_upwards [h_RHS_coeFn] with x hx
     rw [hx]
   have h_LHS_eq :=

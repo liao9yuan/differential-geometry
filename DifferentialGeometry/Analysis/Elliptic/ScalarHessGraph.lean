@@ -1,16 +1,7 @@
 import DifferentialGeometry.Analysis.Elliptic.Lichnerowicz
 import DifferentialGeometry.Geometry.Curvature.RicciOperatorNormBound
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Operator
-
-
-
-
-
-
-
-
 
 noncomputable section
 
@@ -38,9 +29,6 @@ private local instance : MeasurableSpace E := borel E
 private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
-
-
-
 
 theorem scalar_hess_graph
     (g : SmoothRiemannianMetric I M) :

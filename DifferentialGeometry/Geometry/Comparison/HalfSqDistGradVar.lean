@@ -3,19 +3,6 @@ import DifferentialGeometry.Geometry.Comparison.Variation.SecondVariationMinimis
 import DifferentialGeometry.Geometry.Exponential.MinimizingGeodesic
 open DifferentialGeometry.Geometry.Curvature
 
-
-
-
-
-
-
-
-
-
-
-
-
-
 noncomputable section
 
 

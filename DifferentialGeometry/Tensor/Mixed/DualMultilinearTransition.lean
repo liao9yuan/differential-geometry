@@ -152,7 +152,8 @@ theorem dualMultilinearTrivTransition {r : ℕ} (x₀ x : B)
               (_root_.Bundle.dual 𝕜 E) x)
             x₀).continuousLinearMapAt 𝕜 x).toLinearMap ∘ₗ
         (_root_.Bundle.continuousMultilinearMap.continuousLinearEquivAt
-          (𝕜 := 𝕜) (F := F →L[𝕜] 𝕜) (E := _root_.Bundle.dual 𝕜 E) r x).symm.toLinearEquiv.toLinearMap) =
+          (𝕜 := 𝕜) (F := F →L[𝕜] 𝕜)
+            (E := _root_.Bundle.dual 𝕜 E) r x).symm.toLinearEquiv.toLinearMap) =
       (ContinuousMultilinearMap.compContinuousLinearMapL
         (𝕜 := 𝕜) (E := fun _ : Fin r => F →L[𝕜] 𝕜)
         (E₁ := fun _ : Fin r => F →L[𝕜] 𝕜) (F := 𝕜)

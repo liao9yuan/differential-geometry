@@ -9,7 +9,6 @@ open DifferentialGeometry.Geometry.Connection.Realization
 open DifferentialGeometry.Analysis.Spectral
 open DifferentialGeometry.Analysis.Elliptic
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Connection
 
 
@@ -165,7 +164,6 @@ theorem diffCurvOp_isOrderZeroCurvFactor :
       curvatureContraction_toSection_apply (I := I) (M := M) g r W₂ hX hY x, hx]
 
 set_option backward.isDefEq.respectTransparency false in
-
 noncomputable def diffCurvPhi0Fib (g : SmoothRiemannianMetric I M)
     (X Y : Π b : M, TangentSpace I b) (r : ℕ) (x : M) : TensorRSSpace r r I x :=
   (show Tensor0SSpace r I x →L[ℝ] Tensor0SSpace r I x from
@@ -174,7 +172,6 @@ noncomputable def diffCurvPhi0Fib (g : SmoothRiemannianMetric I M)
     TensorRSSpace r r I x)
 
 set_option backward.isDefEq.respectTransparency false in
-
 omit [CompactSpace M] [I.Boundaryless] in
 omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] in
 theorem diffCurvPhi0Fib_contMDiff (g : SmoothRiemannianMetric I M)
@@ -213,7 +210,6 @@ theorem diffCurvPhi0Fib_contMDiff (g : SmoothRiemannianMetric I M)
     hX hY Z.contMDiff
 
 set_option backward.isDefEq.respectTransparency false in
-
 noncomputable def diffCurvPhi0 (g : SmoothRiemannianMetric I M)
     {X Y : Π b : M, TangentSpace I b}
     (hX : ContMDiff I (I.prod 𝓘(ℝ, E)) ∞ (T% X))
@@ -224,7 +220,6 @@ noncomputable def diffCurvPhi0 (g : SmoothRiemannianMetric I M)
   hasCompactSupport := HasCompactSupport.of_compactSpace _
 
 set_option backward.isDefEq.respectTransparency false in
-
 omit [NeZero (Module.finrank ℝ E)] in
 theorem diffCurvOp_zero_eq_appCc (g : SmoothRiemannianMetric I M)
     {X Y : Π b : M, TangentSpace I b}

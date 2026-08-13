@@ -17,25 +17,9 @@ import DifferentialGeometry.Geometry.Connection.LeviCivita.Smooth.Christoffel
 import DifferentialGeometry.Geometry.Connection.LeviCivita.Torsion
 open DifferentialGeometry.PDE.RicciFlow
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Operator
 
 set_option autoImplicit false
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 noncomputable section
 
@@ -51,24 +35,13 @@ variable {I : ModelWithCorners Real E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 variable [IsManifold I 1 M]
 
-
-
-
 abbrev RicciSectionFamily : Type _ :=
   Real -> DifferentialGeometry.Geometry.Curvature.Tensor02Section (I := I) (M := M)
-
-
-
-
-
-
 
 abbrev RicciAtFamily : Type _ :=
   Real -> (x : M) -> DifferentialGeometry.Geometry.Curvature.Tensor02At (I := I) (M := M) x
 
 namespace RicciAtFamily
-
-
 
 def toTensorField (Ric : RicciAtFamily (I := I) (M := M)) :
     DifferentialGeometry.PDE.RicciFlow.RicciTensorField (I := I) (M := M) Real :=
@@ -86,8 +59,6 @@ end RicciAtFamily
 
 namespace RicciSectionFamily
 
-
-
 def toTensorField (Ric : RicciSectionFamily (I := I) (M := M)) :
     DifferentialGeometry.PDE.RicciFlow.RicciTensorField (I := I) (M := M) Real :=
   fun t x X Y => Ric t x (DifferentialGeometry.Geometry.Curvature.vec2 X Y)
@@ -104,20 +75,10 @@ end RicciSectionFamily
 
 variable [CompleteSpace E] [SigmaCompactSpace M] [T2Space M]
 
-
-
-
-
-
-
-
 structure SolutionFamily where
   metric : Real -> SmoothRiemannianMetric I M
 
 namespace SolutionFamily
-
-
-
 
 def timeShift
     (G : SolutionFamily (I := I) (M := M)) (τ : Real) :
@@ -162,11 +123,6 @@ noncomputable def scalar
     Real -> M -> Real :=
   fun t x => metricScalarAt (I := I) (M := M) (G.metric t) x
 
-
-
-
-
-
 noncomputable def rm13
     (G : SolutionFamily (I := I) (M := M)) :
     Real -> DifferentialGeometry.Geometry.Curvature.Tensor13Section (I := I) (M := M) :=
@@ -177,11 +133,6 @@ noncomputable def rm04
     (G : SolutionFamily (I := I) (M := M)) :
     Real -> DifferentialGeometry.Geometry.Curvature.Tensor04Section (I := I) (M := M) :=
   fun t => metricRm04 (I := I) (M := M) (G.metric t)
-
-
-
-
-
 
 noncomputable def ricci
     (G : SolutionFamily (I := I) (M := M)) :
@@ -215,18 +166,10 @@ def MetricCompatibleOn
 
 end SolutionFamily
 
-
-
-
-
 structure SolutionOn (D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval) where
   base : SolutionFamily (I := I) (M := M)
 
 namespace SolutionOn
-
-
-
-
 
 def timeShift {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D) (τ : Real) :
@@ -248,8 +191,6 @@ omit [FiniteDimensional ℝ E] [IsManifold I 1 M] [CompleteSpace E] [SigmaCompac
     (S.timeShift τ).base.metric s = S.base.metric (s + τ) := by
   rfl
 
-
-
 omit [SigmaCompactSpace M] [T2Space M] in
 theorem metricCompatible {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D) :
@@ -258,16 +199,12 @@ theorem metricCompatible {D : DifferentialGeometry.Geometry.Curvature.RealTimeIn
   exact DifferentialGeometry.Geometry.Connection.leviCivitaConnectionOfMetric_isMetricCompatible
     (I := I) (S.base.metric (t : Real))
 
-
-
 def family {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D) :
     DifferentialGeometry.Geometry.Curvature.MetricConnectionFamilyOn (I := I) (M := M) D where
   metric := S.base.metric
   connection := S.base.connection
   metricCompatible := S.metricCompatible
-
-
 
 def ricci {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D) :
@@ -351,8 +288,6 @@ omit [SigmaCompactSpace M] [T2Space M] in
     (S.timeShift τ).scalar s = S.scalar (s + τ) := by
   rfl
 
-
-
 omit [SigmaCompactSpace M] [T2Space M] in
 theorem timeShift_initial_metric {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D) (τ : Real) :
@@ -383,8 +318,6 @@ omit [SigmaCompactSpace M] [T2Space M] in
 
 end SolutionOn
 
-
-
 def MetricVariationEquationOn
     {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D) : Prop :=
@@ -407,8 +340,6 @@ def ricciGradSq
     normSq0S (I := I) (S.family.metric t) x 3
       (totalNabla0SFun (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
         2 (S.family.connection t) (S.ricci t) x)
-
-
 
 def flowG
     {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
@@ -433,8 +364,6 @@ def ricciNormLap
     DifferentialGeometry.Geometry.Curvature.laplacianAt (I := I) (flowG (I := I) S) t
       (ricciNorm (I := I) S t) x
 
-
-
 def ricciPair04 {x : M}
     (Ric : DifferentialGeometry.Geometry.Curvature.Tensor02At (I := I) (M := M) x) :
     DifferentialGeometry.Geometry.Curvature.Tensor04At (I := I) (M := M) x :=
@@ -442,9 +371,6 @@ def ricciPair04 {x : M}
       (𝕜 := Real) (B := M) (F := E) (E := TangentSpace I)
       (s := 2) (q := 2) (x := x) Ric Ric).domDomCongr
     (Equiv.swap (1 : Fin 4) (2 : Fin 4))
-
-
-
 
 def ricciReact
     {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
@@ -454,8 +380,6 @@ def ricciReact
     -inner0S (I := I) (S.base.metric t) x 4 (S.base.rm04 t x)
       (ricciPair04 (I := I) (S.ricciAt t x))
 
-
-
 structure IsSolutionOn
     {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D) : Prop where
@@ -464,33 +388,22 @@ structure IsSolutionOn
   smoothConnection : DifferentialGeometry.Geometry.Connection.ConnectionFamilySmoothOn (I := I)
     (M := M) S.family
   equation : MetricVariationEquationOn (I := I) S
-
-
-
-
   scalarCont : ContinuousOn (fun q : Real × M => S.scalar q.1 q.2)
     (D.carrier ×ˢ (Set.univ : Set M))
-
-
-
   scalarTime :
     ∀ {K : Set Real} {t : Real}, t ∈ K -> K ⊆ D.carrier -> ∀ x : M,
       DifferentiableWithinAt Real (fun s : Real => S.scalar s x) K t
-
   ricciCont :
     DifferentialGeometry.Geometry.Curvature.Tensor0SFamilyContinuousOnSet (I := I) (M := M) 2
       D.carrier
       (fun t x => S.ricci t x)
-
   rm04Cont :
     DifferentialGeometry.Geometry.Curvature.Tensor0SFamilyContinuousOnSet (I := I) (M := M) 4
       D.carrier
       (fun t x => S.base.rm04 t x)
-
   ricciNormSpace :
     ∀ t : Real, t ∈ D.carrier -> ∀ x : M,
       MDifferentiableAt I 𝓘(Real, Real) (ricciNorm (I := I) S t) x
-
   ricciNormGrad :
     ∀ t : Real, t ∈ D.carrier -> ∀ x : M,
       MDiffAt (T% fun y : M =>
@@ -515,12 +428,6 @@ theorem leviCivita
 
 end IsSolutionOn
 
-
-
-
-
-
-
 structure ScalarSTContOn
     {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D) : Prop where
@@ -528,8 +435,6 @@ structure ScalarSTContOn
     (D.carrier ×ˢ (Set.univ : Set M))
 
 namespace ScalarSTContOn
-
-
 
 omit [SigmaCompactSpace M] [T2Space M] in
 theorem continuous_subtype
@@ -550,14 +455,6 @@ theorem continuous_subtype
   simpa [Function.comp_def] using hcomp
 
 end ScalarSTContOn
-
-
-
-
-
-
-
-
 
 structure CanonicalScalarRegularOn
     {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
@@ -622,13 +519,6 @@ theorem toScalarSTCont
 
 end CanonicalScalarRegularOn
 
-
-
-
-
-
-
-
 structure CanonicalRicciRegularOn
     {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D) : Prop where
@@ -662,8 +552,6 @@ theorem ricciTensorFamilyContinuousOnSet
       (fun t x => S.ricci t x) :=
   hreg.ricci_cont
 
-
-
 omit [SigmaCompactSpace M] in
 theorem rm04FamilyContinuousOnSet
     {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
@@ -678,8 +566,6 @@ end CanonicalRicciRegularOn
 
 namespace SolutionOn
 
-
-
 omit [SigmaCompactSpace M] in
 theorem scalar_continuousOn
     {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
@@ -693,12 +579,6 @@ theorem scalar_continuousOn
   exact hreg.scalar_continuousOn.mono (Set.prod_mono hT (Set.Subset.rfl))
 
 end SolutionOn
-
-
-
-
-
-
 
 omit [SigmaCompactSpace M] in
 theorem isSolutionOn_timeShift
@@ -864,8 +744,6 @@ theorem isSolutionOn_timeShift
     simpa [ricciNorm, SolutionOn.family, SolutionOn.ricci, SolutionOn.timeShift,
       SolutionFamily.timeShift] using h
 
-
-
 omit [SigmaCompactSpace M] in
 theorem isRealizedRicciFlowSolutionOn_of_isSolutionOn
     {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
@@ -894,9 +772,6 @@ theorem metric_derivWithin_eq_neg_two_ricci
       (t : Real) := by
   simpa [MetricVariationEquationOn, RicciAtFamily.toTensorField] using
     hS.equation t x X Y
-
-
-
 
 omit [SigmaCompactSpace M] in
 theorem metricDerivAt

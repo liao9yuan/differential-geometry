@@ -1,7 +1,6 @@
 import DifferentialGeometry.Analysis.Elliptic.Regularity.Bochner.PolarisedLpSmooth
 import DifferentialGeometry.Analysis.Elliptic.Regularity.GradInner.Laplacian.VariationalIdentity
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Operator
 
 

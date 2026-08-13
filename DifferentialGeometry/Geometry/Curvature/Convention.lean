@@ -10,28 +10,6 @@ open DifferentialGeometry.Geometry.Curvature
 
 set_option autoImplicit false
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 noncomputable section
 
 namespace DifferentialGeometry.Geometry.Curvature
@@ -78,8 +56,6 @@ theorem tensor04StdAt_convention
       Rm04 (vec4 X Y Z W) := by
   rfl
 
-
-
 theorem ricciFromRm13At_rm04_first_trace_convention
     (g : SmoothRiemannianMetric I M)
     (basis : Module.Basis Idx Real (TangentSpace I x))
@@ -121,8 +97,6 @@ theorem rm04RealizesConnection_convention
       g.inner x (W x) ((connectionRiemannCurvatureField (I := I) cov X Y Z) x) :=
   h X Y Z W x
 
-
-
 theorem rm04StdRealizesConnection_convention
     (g : SmoothRiemannianMetric I M)
     (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
@@ -147,8 +121,6 @@ variable {H : Type*} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 variable {x : M}
-
-
 
 omit [FiniteDimensional ℝ E] in
 @[simp]

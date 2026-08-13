@@ -8,7 +8,6 @@ import Mathlib.Analysis.Calculus.FDeriv.Prod
 import Mathlib.Analysis.Calculus.TangentCone.Prod
 import Mathlib.Analysis.Calculus.TangentCone.Real
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
 
 
 noncomputable section

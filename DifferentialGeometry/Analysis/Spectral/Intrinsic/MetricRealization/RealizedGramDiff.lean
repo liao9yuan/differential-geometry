@@ -1,43 +1,6 @@
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.MetricRealization.DeTurckGeometricNonlinearity
 open DifferentialGeometry.Geometry.Operator
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
@@ -65,8 +28,6 @@ variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
   [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
   [T2Space M] [SigmaCompactSpace M]
-
-
 
 omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
     [T2Space M] [SigmaCompactSpace M] in
@@ -98,8 +59,6 @@ theorem ccTensorModel_sub (g : SmoothRiemannianMetric I M)
   unfold ccTensorModel
   rw [ccTensorMultilinear_sub, Tensor0SSpace.toModel_sub]
 
-
-
 omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
     [T2Space M] [SigmaCompactSpace M] in
 theorem ccTensorBilin_sub (g : SmoothRiemannianMetric I M)
@@ -108,8 +67,6 @@ theorem ccTensorBilin_sub (g : SmoothRiemannianMetric I M)
       smoothCcTensorBilinForm (I := I) g S x v w - smoothCcTensorBilinForm (I := I) g T x v w := by
   rw [ccTensorBilin_apply, ccTensorBilin_apply, ccTensorBilin_apply,
     ccTensorModel_sub, ContinuousMultilinearMap.sub_apply]
-
-
 
 omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
     [T2Space M] [SigmaCompactSpace M] in
@@ -121,16 +78,12 @@ theorem ccTensorBilinSymm_sub (g : SmoothRiemannianMetric I M)
   simp only [ccTensorBilinSymm_apply, ccTensorBilin_sub]
   ring
 
-
-
 def realizableRepr (g_bg : SmoothRiemannianMetric I M) {σ : ℝ}
     {u : tensorHs (I := I) (M := M) g_bg 0 2 σ}
     (hu : isRealizableMetricPerturbationAt (I := I) g_bg u) :
     SmoothCcTensor g_bg 0 2 :=
   Analysis.Parabolic.TensorSpectral.tensorHsSmoothRepr
     (I := I) (M := M) u hu.choose
-
-
 
 omit [BoundarylessManifold I M] in
 theorem realizeMetricAt_inner_eq_repr (g_bg : SmoothRiemannianMetric I M) {σ : ℝ}
@@ -143,24 +96,6 @@ theorem realizeMetricAt_inner_eq_repr (g_bg : SmoothRiemannianMetric I M) {σ : 
   obtain ⟨hu_fs, δ', hδ'_lt, hδ'⟩ := id hu
   rw [realizeMetricAt_inner_of_realizable (I := I) g_bg u hu_fs hδ'_lt hδ' x v w]
   rfl
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 omit [BoundarylessManifold I M] in
 theorem chartGramMatrix_realizeMetricAt_sub_eq_reprDiff
@@ -180,9 +115,6 @@ theorem chartGramMatrix_realizeMetricAt_sub_eq_reprDiff
     realizeMetricAt_inner_eq_repr (I := I) g_bg hu₂ x _ _,
     ccTensorBilinSymm_sub]
   ring
-
-
-
 
 omit [BoundarylessManifold I M] in
 theorem chartGramOnE_realizeMetricAt_sub_eq_reprDiff

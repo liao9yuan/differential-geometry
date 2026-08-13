@@ -1,12 +1,5 @@
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurckCoefficients.LieCorr0NormalForm.Basic
 
-
-
-
-
-
-
-
 noncomputable section
 
 

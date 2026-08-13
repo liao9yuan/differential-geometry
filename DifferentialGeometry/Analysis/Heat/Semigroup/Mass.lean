@@ -163,7 +163,8 @@ theorem heatSemigroup_mass_invariant
       have hderiv : ∀ x ∈ Ico ε t,
           HasDerivWithinAt (fun s : ℝ => heatMass (I := I) (M := M) g u₀ s) 0 (Ici x) x := by
         intro x hx
-        exact (heatMass_deriv_zero (I := I) (M := M) g u₀ (lt_of_lt_of_le hε.1 hx.1)).hasDerivWithinAt
+        exact (heatMass_deriv_zero (I := I) (M := M) g u₀
+          (lt_of_lt_of_le hε.1 hx.1)).hasDerivWithinAt
       have hconst_ε := constant_of_has_deriv_right_zero
         (f := fun s : ℝ => heatMass (I := I) (M := M) g u₀ s)
         (hcont.mono (Set.Icc_subset_Icc (le_of_lt hε.1) le_rfl)) hderiv t

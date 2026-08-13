@@ -1,19 +1,9 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.BernsteinShiSolution
 open DifferentialGeometry.PDE.RicciFlow
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Operator
 
 set_option autoImplicit false
-
-
-
-
-
-
-
-
-
 
 noncomputable section
 
@@ -32,9 +22,6 @@ variable [I.Boundaryless] [CompactSpace M]
 variable [VectorBundle Real E (TangentSpace I : M -> Type _)]
 
 namespace BernsteinTower
-
-
-
 
 omit [CompleteSpace E] [T2Space M] in
 theorem estimate_of_heat

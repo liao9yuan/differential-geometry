@@ -3,18 +3,8 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.MetricLapDiff
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.WindowPreconv
 import DifferentialGeometry.Geometry.Operator.HessianTraceRealization
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Connection
 open DifferentialGeometry.Geometry.Operator
-
-
-
-
-
-
-
-
-
 
 noncomputable section
 
@@ -263,10 +253,6 @@ private theorem cross_point_le
         (2 * Ce ^ 2 * (((3 / 2 : Real) *
             (Real.sqrt (Ce ^ 3) * R)) ^ 2) + Ce) *
           normSq0S (I := I) q x 1 (duSec (I := I) f hf x) := by ring
-
-
-
-
 
 theorem cross_energy_le
     (q k : SmoothRiemannianMetric I M) :

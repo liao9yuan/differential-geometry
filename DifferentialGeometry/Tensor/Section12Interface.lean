@@ -79,27 +79,18 @@ open scoped TensorProduct Manifold ContDiff
 
 structure CovariantTensorBundleSupport
     (R : Type*) [CommSemiring R] (Point : Type*) where
-
   Vec : Point -> Type*
-
   Tensor0 : Nat -> Type*
-
   eval0 : {s : Nat} -> Tensor0 s -> (x : Point) -> (Fin s -> Vec x) -> R
-
   tensorProduct0 : {s q : Nat} -> Tensor0 s -> Tensor0 q -> Tensor0 (s + q)
-
   tensorProduct0_eval :
     forall {s q : Nat} (A : Tensor0 s) (B : Tensor0 q)
       (x : Point) (v : Fin (s + q) -> Vec x),
       eval0 (tensorProduct0 A B) x v =
         eval0 A x (v ∘ Fin.castAdd q) * eval0 B x (v ∘ Fin.natAdd s)
-
   trace02 : Tensor0 2 -> Point -> R
-
   inner02 : Tensor0 2 -> Tensor0 2 -> Point -> R
-
   normSq02 : Tensor0 2 -> Point -> R
-
   normSq02_eq_inner02 :
     forall (A : Tensor0 2) (x : Point), normSq02 A x = inner02 A A x
 

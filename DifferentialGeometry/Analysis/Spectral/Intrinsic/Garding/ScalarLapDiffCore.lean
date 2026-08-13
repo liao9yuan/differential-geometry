@@ -1,17 +1,10 @@
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.Garding.MetricLapDiffCore
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.Garding.ScalarNonautTame
-open DifferentialGeometry.Analysis.Sobolev DifferentialGeometry.Analysis.Sobolev.IntrinsicSobolev.SmoothCcTensorHs
-open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Analysis.Sobolev
+    DifferentialGeometry.Analysis.Sobolev.IntrinsicSobolev.SmoothCcTensorHs
 open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Connection
 open DifferentialGeometry.Geometry.Operator
-
-
-
-
-
-
-
 
 noncomputable section
 
@@ -327,8 +320,6 @@ private theorem grad2_cc_diag
           (vec2 (I := I) (B x) (B x)))) = _
   rw [ContinuousLinearEquiv.apply_symm_apply]
 
-
-
 theorem scalarLapDiff_eq
     (q h : SmoothRiemannianMetric I M) (U : SmoothCcTensor q 0 0) (x : M) :
     TensorRSField.scalar0 (n := (∞ : WithTop ℕ∞))
@@ -442,8 +433,6 @@ theorem scalarLapDiff_eq
     laplacian_levi_eq (I := I) q hf x] at hlap
   simpa only [Hs, Corr, f, hf] using hlap.symm
 
-
-
 private theorem lapDiff_unit
     (q h : SmoothRiemannianMetric I M)
     (v : ScalarH2Core (I := I) (M := M) q) (x : M) :
@@ -465,8 +454,6 @@ private theorem lapDiff_unit
   rw [TensorRSField.scalar0, Tensor0SField.toScalarField,
     TensorRSField.rs0_apply, one0_eq_unit (I := I) (M := M)] at hvalue
   exact hvalue.symm
-
-
 
 theorem lapDiffCore_eq_cc
     (q h : SmoothRiemannianMetric I M)

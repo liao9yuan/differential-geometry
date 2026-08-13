@@ -3,7 +3,6 @@ open DifferentialGeometry.Analysis.Sobolev
 open DifferentialGeometry.Analysis.Spectral
 open DifferentialGeometry.Analysis.Elliptic
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Connection
 
 noncomputable section
@@ -20,7 +19,8 @@ open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.DivergenceTheorem
 open DifferentialGeometry.Analysis.Laplacian
 open DifferentialGeometry.Analysis.Parabolic.TensorSpectral
-open DifferentialGeometry.PDE.RicciFlow DifferentialGeometry.Analysis.Sobolev DifferentialGeometry.Analysis.Spectral
+open DifferentialGeometry.PDE.RicciFlow DifferentialGeometry.Analysis.Sobolev
+    DifferentialGeometry.Analysis.Spectral
 open DifferentialGeometry.Analysis.Sobolev.TensorHilbert
 open DifferentialGeometry.TensorRSNabla
 open DifferentialGeometry.TensorMultilinear

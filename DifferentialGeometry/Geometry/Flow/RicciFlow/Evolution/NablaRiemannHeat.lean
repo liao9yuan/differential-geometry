@@ -4,62 +4,8 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.RiemannNormHeatPro
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.BernsteinShi
 import Mathlib.Analysis.SpecialFunctions.Pow.Real
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
 
 set_option autoImplicit false
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 noncomputable section
 
@@ -67,19 +13,9 @@ namespace DifferentialGeometry.PDE.RicciFlow
 
 open scoped BigOperators
 
-
-
-
-
-
-
-
-
 section ComponentAlgebra
 
 variable {Idx : Type*} [Fintype Idx]
-
-
 
 def compNormSq5 (T : Idx → Idx → Idx → Idx → Idx → Real) : Real :=
   ∑ m : Idx, ∑ a : Idx, ∑ b : Idx, ∑ c : Idx, ∑ d : Idx, (T m a b c d) ^ 2
@@ -139,17 +75,6 @@ theorem abs_le_sqrt_compNormSq5
   rw [← Real.sqrt_sq_eq_abs]
   exact Real.sqrt_le_sqrt (sq_le_compNormSq5 T m a b c d)
 
-
-
-
-
-
-
-
-
-
-
-
 def compNormSqMulti {r : ℕ} (A : (Fin r → Idx) → Real) : Real :=
   ∑ m : Fin r → Idx, (A m) ^ 2
 
@@ -174,20 +99,10 @@ theorem abs_le_sqrt_compNormSqMulti {r : ℕ}
   rw [← Real.sqrt_sq_eq_abs]
   exact Real.sqrt_le_sqrt (sq_le_compNormSqMulti A m)
 
-
-
-
-
-
-
-
 def nablaStarRm (R : Idx → Idx → Idx → Idx → Real)
     (T : Idx → Idx → Idx → Idx → Idx → Real)
     (m a b c d : Idx) : Real :=
   ∑ e : Idx, ∑ f : Idx, R a e c f * T m e b f d
-
-
-
 
 theorem abs_nablaStarRm_le
     (R : Idx → Idx → Idx → Idx → Real)
@@ -228,26 +143,10 @@ theorem abs_nablaStarRm_le
           simp [Finset.sum_const, Finset.card_univ, nsmul_eq_mul, sq]
           ring
 
-
-
-
-
-
-
-
 def nablaRmReactionDown (R : Idx → Idx → Idx → Idx → Real)
     (T : Idx → Idx → Idx → Idx → Idx → Real) : Real :=
   2 * ∑ m : Idx, ∑ a : Idx, ∑ b : Idx, ∑ c : Idx, ∑ d : Idx,
     T m a b c d * nablaStarRm R T m a b c d
-
-
-
-
-
-
-
-
-
 
 theorem abs_nablaRmReactionDown_le
     (R : Idx → Idx → Idx → Idx → Real)
@@ -326,38 +225,11 @@ theorem abs_nablaRmReactionDown_le
                 = 2 * c ^ 7 * ((s * s) * r) := by ring
             _ = 2 * c ^ 7 * (compNormSq5 T * r) := by rw [hcollapse]
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 def nablaRmReactionMulti {k : ℕ}
     (Tk : (Fin (4 + k) → Idx) → Real)
     (star : ℕ → (Fin (4 + k) → Idx) → Real) : Real :=
   ∑ j ∈ Finset.range (k + 1),
     2 * ∑ m : Fin (4 + k) → Idx, Tk m * star j m
-
-
-
-
-
-
-
-
-
-
 
 theorem abs_nablaRmReactionMulti_le {k : ℕ}
     (Tk : (Fin (4 + k) → Idx) → Real)
@@ -428,15 +300,6 @@ theorem abs_nablaRmReactionMulti_le {k : ℕ}
 
 end ComponentAlgebra
 
-
-
-
-
-
-
-
-
-
 section Solution
 
 open Bundle
@@ -449,8 +312,6 @@ variable {I : ModelWithCorners Real E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 variable [CompleteSpace E] [SigmaCompactSpace M] [T2Space M]
 variable {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
-
-
 
 omit [TopologicalSpace M] [SigmaCompactSpace M] [T2Space M] in
 theorem nablaRm04NormSqInFrame_eq_compNormSq5
@@ -486,10 +347,6 @@ theorem nablaRm04NormSqInFrame_eq_compNormSq5
     simp [horth, Ne.symm hb]
   · intro h; exact absurd (Finset.mem_univ a) h
 
-
-
-
-
 def nablaRmReactionInFrame
     (Rm04 : Real -> DifferentialGeometry.Geometry.Curvature.Tensor04Section (I := I) (M := M))
     (nablaRm04 : Real -> M -> Idx -> Idx -> Idx -> Idx -> Idx -> Real)
@@ -500,11 +357,6 @@ def nablaRmReactionInFrame
       (fun a b c d : Idx =>
         DifferentialGeometry.Geometry.Curvature.rm04Comp (I := I) (Rm04 t) frame x a b c d)
       (fun m a b c d : Idx => nablaRm04 t x m a b c d)
-
-
-
-
-
 
 omit [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 theorem abs_nablaRmReactionInFrame_le
@@ -523,23 +375,6 @@ theorem abs_nablaRmReactionInFrame_le
   rw [rm04NormSqInFrame_eq_compNormSq4 (I := I) Rm04 gInv frame t x horth]
   exact abs_nablaRmReactionDown_le _ _
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 def NablaRm04NormHeatEquationOn
     {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
     (nablaRmNormSq nablaRmNormLap nabla2RmNormSq reaction : Real -> M -> Real) : Prop :=
@@ -550,18 +385,6 @@ def NablaRm04NormHeatEquationOn
         (-2 * nabla2RmNormSq (t : Real) x + reaction (t : Real) x))
       D.carrier
       (t : Real)
-
-
-
-
-
-
-
-
-
-
-
-
 
 omit [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 theorem nablaRm04NormHeatBoundSharp_of_components
@@ -604,17 +427,6 @@ theorem nablaRm04NormHeatBoundSharp_of_components
         (2 * (Fintype.card Idx : Real) ^ 7) * Real.sqrt v * u := by ring
   rw [hrewrite] at hreact_le
   linarith [hreact_le]
-
-
-
-
-
-
-
-
-
-
-
 
 omit [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 theorem nablaRm04NormHeatBoundOn_of_components

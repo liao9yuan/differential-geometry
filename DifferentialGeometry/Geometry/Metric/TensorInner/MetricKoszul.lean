@@ -3,16 +3,6 @@ import Mathlib.Analysis.Normed.Operator.NormedSpace
 
 set_option autoImplicit false
 
-
-
-
-
-
-
-
-
-
-
 noncomputable section
 
 namespace DifferentialGeometry
@@ -38,8 +28,6 @@ theorem koszulCov_sub
   simp only [koszulCov_apply, ContinuousLinearMap.sub_apply]
   ring
 
-
-
 theorem koszulCov_diag_sub
     (D : E →L[Real] E →L[Real] E →L[Real] Real) (v w : E) :
     koszulCov D v v - koszulCov D w w =
@@ -48,8 +36,6 @@ theorem koszulCov_diag_sub
   simp only [ContinuousLinearMap.sub_apply, ContinuousLinearMap.add_apply,
     koszulCov_apply, map_sub]
   ring
-
-
 
 theorem koszulCov_norm_le
     (D : E →L[Real] E →L[Real] E →L[Real] Real)
@@ -168,8 +154,6 @@ private theorem koszulCovBilin_le
   simpa only [koszulCovBilin_apply, mul_assoc] using
     koszulCov_norm_le D (norm_nonneg D) (tri_norm_apply D) v w
 
-
-
 noncomputable def koszulCovCLM :
     (E →L[Real] E →L[Real] E →L[Real] Real) →L[Real]
       E →L[Real] E →L[Real] E →L[Real] Real :=
@@ -199,9 +183,6 @@ theorem koszulCovCLM_norm_le : ‖koszulCovCLM (E := E)‖ ≤ (3 / 2 : Real) :=
 
 end CovCLM
 
-
-
-
 noncomputable def koszulVec
     [CompleteSpace E] [CoerciveBilinInverse E]
     {B : E →L[Real] E →L[Real] Real} (hco : IsCoercive B)
@@ -215,8 +196,6 @@ noncomputable def koszulVec
     (D : E →L[Real] E →L[Real] E →L[Real] Real) (v w : E) :
     B (koszulVec hco D v w) = koszulCov D v w := by
   exact hco.apply_sharp _
-
-
 
 theorem koszulVec_norm_le
     [CompleteSpace E] [CoerciveBilinInverse E]
@@ -270,8 +249,6 @@ theorem koszulVec_diag_le
         (koszulVec_norm_le hco hc hB D hC hD w (v - w))
     _ = c⁻¹ * ((3 / 2 : Real) * C * (‖v‖ + ‖w‖) * ‖v - w‖) := by
       ring
-
-
 
 theorem koszulVec_sub_le
     [CompleteSpace E] [CoerciveBilinInverse E]

@@ -3,7 +3,6 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.EllipticBridge.AbstractChar
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.CovGradCrossBridge
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.CovGradL2
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Connection
 
 

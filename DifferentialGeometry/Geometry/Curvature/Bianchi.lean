@@ -19,15 +19,6 @@ open DifferentialGeometry.Geometry.Curvature
 
 set_option autoImplicit false
 
-
-
-
-
-
-
-
-
-
 noncomputable section
 
 namespace DifferentialGeometry.Geometry.Curvature
@@ -353,8 +344,6 @@ private theorem mlieBracket_jacobi_cyclic
   rw [h0]
   abel
 
-
-
 def vec5 {x : M} (A B C D F : TangentSpace I x) :
     Fin 5 -> TangentSpace I x :=
   fun i =>
@@ -363,8 +352,6 @@ def vec5 {x : M} (A B C D F : TangentSpace I x) :
     else if i = 2 then C
     else if i = 3 then D
     else F
-
-
 
 def FirstBianchiAt {x : M} (Rm04 : Tensor04At (I := I) (M := M) x) : Prop :=
   ∀ X Y Z W : TangentSpace I x,
@@ -388,12 +375,6 @@ theorem first_bianchi_apply
     Rm04 x (vec4 X Y Z W) + Rm04 x (vec4 Y Z X W) +
       Rm04 x (vec4 Z X Y W) = 0 :=
   h x X Y Z W
-
-
-
-
-
-
 
 theorem connectionRiemannCurvatureField_tangentConst_first_bianchi_of_torsionFree
     (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
@@ -424,11 +405,6 @@ theorem connectionRiemannCurvatureField_tangentConst_first_bianchi_of_torsionFre
   dsimp only at hJac
   abel_nf
   simpa [add_assoc] using hJac
-
-
-
-
-
 
 def curvCovDerivOpAt
     (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
@@ -463,8 +439,6 @@ def curvCommAt
     connectionRiemannCurvatureField (I := I) cov
       (fun p : M => Y p) (fun p : M => Z p)
       (fun p : M => (cov (fun q : M => W q) p) (X p)) x
-
-
 
 omit [FiniteDimensional ℝ E] in
 theorem curvComm_eq_deriv
@@ -824,12 +798,6 @@ private theorem curvJacobiAt
   abel_nf at hJacCovNeg ⊢
   exact hJacCovNeg
 
-
-
-
-
-
-
 theorem curvSecondBianchi
     (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
     (hcov : CovariantDerivative.ContMDiffCovariantDerivativeLocally cov
@@ -897,8 +865,6 @@ theorem curvSecondBianchi
     S = S + T := by rw [hT, add_zero]
     _ = 0 := hsum
 
-
-
 def SecondBianchiAt {x : M}
     (nablaRm04 :
       Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) 5 x) :
@@ -937,9 +903,6 @@ theorem second_bianchi_apply
         nablaRm04 x (vec5 Y A X Z W) = 0 :=
   h x A X Y Z W
 
-
-
-
 def ContractedBianchiAt
     {Idx : Type*} [Fintype Idx]
     {x : M} (basis : Module.Basis Idx Real (TangentSpace I x))
@@ -969,12 +932,6 @@ theorem contracted_bianchi
       gInv i j * nablaRic (vec3 (basis i) (basis j) X)) =
         (1 / 2 : Real) * dScalar (fun _ : Fin 1 => X) :=
   h X
-
-
-
-
-
-
 
 omit [FiniteDimensional ℝ E] in
 theorem dR_zero_nablaEin3
@@ -1051,8 +1008,6 @@ theorem dR_zero_nablaEin3
     rw [← hBianchi X, htrace]
   nlinarith
 
-
-
 def ContrBianchiSec
     {Idx : Type*} [Fintype Idx]
     (basis : (x : M) -> Module.Basis Idx Real (TangentSpace I x))
@@ -1078,9 +1033,6 @@ theorem contrBianchi_apply
     (x : M) :
     ContractedBianchiAt (I := I) (basis x) (gInv x) (nablaRic x) (dScalar x) :=
   h x
-
-
-
 
 def DScalarTraceAt
     {Idx : Type*} [Fintype Idx]
@@ -1122,8 +1074,6 @@ theorem dScalarTrace_apply
     DScalarTraceAt (I := I) (basis x) (gInv x) (nablaRic x) (dScalar x) :=
   h x
 
-
-
 def NablaRicTraceAt
     {Idx : Type*} [Fintype Idx]
     {x : M} (basis : Module.Basis Idx Real (TangentSpace I x))
@@ -1164,8 +1114,6 @@ theorem nablaRicTrace_apply
     NablaRicTraceAt (I := I) (basis x) (gInv x) (nablaRm04 x) (nablaRic x) :=
   h x
 
-
-
 def NablaRicSymmAt
     {x : M}
     (nablaRic :
@@ -1188,10 +1136,6 @@ theorem nablaRicSymm_apply
     (h : NablaRicSymmSec (I := I) nablaRic) (x : M) :
     NablaRicSymmAt (I := I) (nablaRic x) :=
   h x
-
-
-
-
 
 def NablaRmSymmAt
     {x : M}
@@ -1237,8 +1181,6 @@ private theorem trace_swap_symm
           rw [hInv k l]
     _ = ∑ k : Idx, ∑ l : Idx, gInv k l * N k l := by
           rfl
-
-
 
 omit [FiniteDimensional ℝ E] in
 theorem contractTracesAt
@@ -1293,9 +1235,6 @@ theorem contractTracesAt
           (∑ k : Idx, ∑ l : Idx,
             gInv k l * nablaRic (vec3 (basis a) (basis k) (basis l))) := by
             rw [hScalarA]
-
-
-
 
 def ContractedBianchiOfSecondAt
     {Idx : Type*} [Fintype Idx]
@@ -1499,9 +1438,6 @@ private theorem sum4_kjli
   rw [Fintype.sum_prod_type]
   rw [Fintype.sum_prod_type]
 
-
-
-
 omit [FiniteDimensional ℝ E] in
 theorem contractSum
     {Idx : Type*} [Fintype Idx]
@@ -1625,8 +1561,6 @@ theorem contractSum
   have hR : R = 2 * L := by
     linarith
   linarith
-
-
 
 omit [FiniteDimensional ℝ E] in
 theorem contractOfSecond

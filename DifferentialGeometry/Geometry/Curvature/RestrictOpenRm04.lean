@@ -4,23 +4,6 @@ open DifferentialGeometry.Geometry.Curvature
 
 set_option autoImplicit false
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 noncomputable section
 
 namespace DifferentialGeometry.Geometry.Curvature
@@ -35,11 +18,6 @@ variable {I : ModelWithCorners Real E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
 variable [IsManifold I ∞ M] [IsManifold I 1 M]
 variable [T2Space M] [SigmaCompactSpace M]
-
-
-
-
-
 
 omit [SigmaCompactSpace M] in
 theorem connectionRiemannCurvatureField_restrictOpen
@@ -99,9 +77,6 @@ theorem connectionRiemannCurvatureField_restrictOpen
     metricCov_restrictOpen_globalSection (I := I) g U Zs x
       (VectorField.mlieBracket I (fun p : M => Xs p) (fun p : M => Ys p) (x : M))]
   rfl
-
-
-
 
 omit [SigmaCompactSpace M] in
 theorem metricRm04StdAt_restrictOpen

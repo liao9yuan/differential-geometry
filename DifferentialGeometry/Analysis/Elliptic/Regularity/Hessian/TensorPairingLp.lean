@@ -3,7 +3,6 @@ import DifferentialGeometry.Analysis.Elliptic.Regularity.Hessian.PairingLapDom
 import DifferentialGeometry.Analysis.Elliptic.Regularity.Hessian.TensorChartSmooth
 import DifferentialGeometry.Analysis.Sobolev.Chart.ChartTransition.MeasurablePullback
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Connection
 open DifferentialGeometry.Geometry.Operator
 

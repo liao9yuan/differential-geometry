@@ -6,19 +6,9 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.Entropy.ConjPotential
 import Mathlib.Analysis.InnerProductSpace.PiL2
 open DifferentialGeometry.PDE.RicciFlow DifferentialGeometry.Analysis.Spectral
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Connection
 
 set_option autoImplicit false
-
-
-
-
-
-
-
-
-
 
 noncomputable section
 
@@ -157,7 +147,6 @@ private noncomputable def scalarGalEmbedLM
         smul_eq_mul]
     · simp only [if_neg hi, mul_zero]
 
-
 noncomputable def scalarGalEmbed
     (q : SmoothRiemannianMetric I M)
     (F : Finset (TensorEigenIdx (I := I) (M := M) q 0 0)) :
@@ -212,7 +201,6 @@ theorem scalarGalVec_cont
     exact hwt.symm
   · simp only [if_neg hi, dif_neg hi]
 
-
 noncomputable def scalarGalRestrict
     (q : SmoothRiemannianMetric I M)
     (F : Finset (TensorEigenIdx (I := I) (M := M) q 0 0)) :
@@ -250,7 +238,6 @@ private noncomputable def scalarGalDiagLM
     simp only [WithLp.ofLp_smul, Pi.smul_apply, RingHom.id_apply, smul_eq_mul]
     ring
 
-
 noncomputable def scalarGalDiag
     (q : SmoothRiemannianMetric I M)
     (F : Finset (TensorEigenIdx (I := I) (M := M) q 0 0)) :
@@ -268,8 +255,6 @@ omit [NeZero (Module.finrank ℝ E)] in
       -(TensorEigenIdx.lambda (I := I) (M := M) j.1) * w j :=
   rfl
 
-
-
 noncomputable def scalarGalPert
     {D : RealTimeInterval} (S : SolutionOn (I := I) (M := M) D)
     (T : D.RegularTime) (t : Real) :
@@ -280,8 +265,7 @@ noncomputable def scalarGalPert
       (tensorHsInclusion (I := I) (M := M)
         (g := S.family.metric (T : Real)) (r := 0) (s := 0)
         (show (1 : Real) ≤ 2 by norm_num))
-/-- A pointwise finite-core realization of the moving Laplacian induces the
-corresponding coefficient identity for the full Galerkin perturbation. -/
+
 theorem galPert_fin_of
     {D : RealTimeInterval} (S : SolutionOn (I := I) (M := M) D)
     (T : D.RegularTime) (s : Real)
@@ -367,9 +351,6 @@ theorem galPert_fin_of
           (show (1 : Real) ≤ 2 by norm_num)) v2).coeff i = _
   rw [hA2, hA1, map_add, tensorL2Coeff_add]
 
-
-/-- On the finite scalar core, each Galerkin perturbation coordinate is the
-coefficient of the genuine moving-Laplacian plus scalar-potential expression. -/
 theorem scalarGalPert_fin
     {D : RealTimeInterval} (S : SolutionOn (I := I) (M := M) D)
     (hS : IsSolutionOn (I := I) S) (T : D.RegularTime) :
@@ -399,7 +380,6 @@ theorem scalarGalPert_fin
     S.family.metric hS.smoothMetric T] with s hs
   exact galPert_fin_of (I := I) (M := M) S T s hs
 
-/-- The finite-dimensional non-autonomous scalar Galerkin vector field. -/
 noncomputable def scalarGalField
     {D : RealTimeInterval} (S : SolutionOn (I := I) (M := M) D)
     (T : D.RegularTime)
@@ -413,7 +393,6 @@ noncomputable def scalarGalField
       ((scalarGalPert (I := I) (M := M) S T t).comp
         (scalarGalEmbed (I := I) (M := M)
           (S.family.metric (T : Real)) F))
-
 
 @[simp] theorem scalarGalField_app
     {D : RealTimeInterval} (S : SolutionOn (I := I) (M := M) D)
@@ -435,7 +414,6 @@ noncomputable def scalarGalField
           (scalarGalEmbed (I := I) (M := M)
             (S.family.metric (T : Real)) F w)) j = _
   rw [scalarGalDiag_apply, scalarGalRest_apply]
-
 
 noncomputable def scalarGalRhs
     (q : SmoothRiemannianMetric I M)
@@ -493,12 +471,8 @@ structure IsConjGalSol
   init : ∀ i ∈ F, V 0 i = u0.coeff i
   support : ∀ t i, i ∉ F → V t i = 0
 
-
-
 structure ConjGalTime where
   tau : Real
-
-
 
 structure IsConjGalTime
     {D : RealTimeInterval} (S : SolutionOn (I := I) (M := M) D)
@@ -526,7 +500,6 @@ noncomputable def scalarGalFieldBound
     ‖scalarGalRestrict (I := I) (M := M) q F‖ *
       (1 + C * ‖Inc‖) *
         ‖scalarGalEmbed (I := I) (M := M) q F‖
-
 
 theorem scalarGalField_norm_le
     {D : RealTimeInterval} (S : SolutionOn (I := I) (M := M) D)
@@ -611,7 +584,6 @@ theorem scalarGalField_norm_le
     _ = scalarGalFieldBound (I := I) (M := M) S T F C * ‖w‖ := by
       dsimp only [scalarGalFieldBound, q, Inc, Emb, Rst, Diag]
       ring
-
 
 theorem scalarGalCoefficients_isConjGalSol
     {D : RealTimeInterval} (S : SolutionOn (I := I) (M := M) D)
@@ -703,8 +675,7 @@ theorem scalarGalCoefficients_isConjGalSol
     rw [hγ0]
   · intro t i hi
     exact hV_not_mem t i hi
-/-- A continuous Galerkin perturbation is uniformly bounded on a compact
-time interval. -/
+
 theorem galPert_bdd_on
     {D : RealTimeInterval} (S : SolutionOn (I := I) (M := M) D)
     (T : D.RegularTime) {tau : Real}
@@ -729,8 +700,6 @@ theorem galPert_bdd_on
   exact (hC ⟨t, ht, rfl⟩).trans (le_max_left _ _)
 
 set_option backward.isDefEq.respectTransparency false in
-/-- Prescribed-interval scalar Galerkin existence from continuity of the full
-perturbation.  The interval is independent of the finite spectral set. -/
 theorem gal_exists_on
     {D : RealTimeInterval} (S : SolutionOn (I := I) (M := M) D)
     (T : D.RegularTime) {tau : Real} (htau : 0 < tau) (htau_one : tau ≤ 1)
@@ -834,8 +803,6 @@ theorem gal_exists_on
   exact scalarGalCoefficients_isConjGalSol (I := I) (M := M)
     S T tau u0 F γ (by simpa only [w0] using hγ0) hγcont hγderiv
 
-/-- Restrict a common Galerkin existence interval to a shorter positive
-interval. -/
 theorem gal_time_mono
     {D : RealTimeInterval} {S : SolutionOn (I := I) (M := M) D}
     {T : D.RegularTime} {G : ConjGalTime}
@@ -857,8 +824,6 @@ theorem gal_time_mono
     exact hV.deriv t ⟨ht.1, ht.2.trans_le hle⟩ i hi
 
 set_option backward.isDefEq.respectTransparency false in
-/-- On one time interval independent of the finite spectral set, every scalar
-Galerkin truncation of the reversed conjugate-heat equation has a solution. -/
 theorem scalar_gal_exists
     {D : RealTimeInterval} (S : SolutionOn (I := I) (M := M) D)
     (hS : IsSolutionOn (I := I) S) (T : D.RegularTime) :

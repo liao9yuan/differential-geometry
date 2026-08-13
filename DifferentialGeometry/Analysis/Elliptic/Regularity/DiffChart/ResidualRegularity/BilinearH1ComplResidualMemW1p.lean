@@ -4,7 +4,6 @@ import DifferentialGeometry.Analysis.Elliptic.Regularity.DiffChart.ResidualRegul
 import DifferentialGeometry.Analysis.Sobolev.Chart.SmoothDensity.SmoothMul
 import DifferentialGeometry.Analysis.Sobolev.Manifold.RellichManifold
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Connection
 open DifferentialGeometry.Geometry.Operator
 
@@ -387,7 +386,8 @@ lemma fHLeibnizResidualSmoothRep_tsupport_subset
       rw [laplacianOfChartPOU_apply]
       rw [Δ_g_def]
       have h_grad_ev : ∀ᶠ y in 𝓝 x,
-          (DifferentialGeometry.Geometry.Operator.grad_g (I := I) g (chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) :
+          (DifferentialGeometry.Geometry.Operator.grad_g (I := I) g
+            (chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) :
               Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) y =
           (0 : TangentSpace I y) := by
         filter_upwards [h_open.mem_nhds hx_off] with y hy

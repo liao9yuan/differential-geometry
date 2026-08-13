@@ -1,6 +1,5 @@
 import DifferentialGeometry.Geometry.Connection.LeviCivita.Defs
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Connection
 
 noncomputable section

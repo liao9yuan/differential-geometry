@@ -3,7 +3,6 @@ import DifferentialGeometry.Tensor.RSTensor.FiberMetric.Tensor0SMetric
 import DifferentialGeometry.Geometry.Connection.MetricCompatibility.TensorLoweringParallel
 open DifferentialGeometry.Tensor.RSTensor
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
 
 set_option autoImplicit false
 set_option backward.isDefEq.respectTransparency false
@@ -16,7 +15,8 @@ namespace RSTensor
 
 open Bundle Manifold Set DifferentialGeometry.Tensor0SBundle
 open scoped Manifold Topology ContDiff BigOperators
-open DifferentialGeometry.TensorMetricLowering DifferentialGeometry.Tensor0SNabla DifferentialGeometry.TensorRSNabla
+open DifferentialGeometry.TensorMetricLowering DifferentialGeometry.Tensor0SNabla
+    DifferentialGeometry.TensorRSNabla
 open DifferentialGeometry.Integral.L2
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]

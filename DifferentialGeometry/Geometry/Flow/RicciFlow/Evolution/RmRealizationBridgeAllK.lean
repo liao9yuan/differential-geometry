@@ -3,47 +3,9 @@ open DifferentialGeometry.Tensor.RSTensor
 open DifferentialGeometry.Tensor.RicciIdentity
 open DifferentialGeometry.PDE.RicciFlow
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Connection
 
 set_option autoImplicit false
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 noncomputable section
 
@@ -63,26 +25,9 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 variable [IsManifold I 1 M] [IsManifold I 2 M]
 variable [CompleteSpace E] [SigmaCompactSpace M] [T2Space M]
 
-
-
-
-
-
-
-
-
-
 section Field
 
 variable {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
-
-
-
-
-
-
-
-
 
 def nablaKRm04Field
     (S : SolutionOn (I := I) (M := M) D) (t : Real) :
@@ -114,10 +59,6 @@ theorem nablaKRm04Field_succ
           (4 + k) (S.family.connection t) (connSmoothInf (I := I) S t)
           (nablaKRm04Field (I := I) S t k)) := rfl
 
-
-
-
-
 omit [I.Boundaryless] in
 omit [SigmaCompactSpace M] in
 theorem nablaKRm04Field_realizes
@@ -134,29 +75,9 @@ theorem nablaKRm04Field_realizes
 
 end Field
 
-
-
-
-
-
-
-
-
-
-
-
-
 section Bridge
 
 variable {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
-
-
-
-
-
-
-
-
 
 omit [I.Boundaryless] in
 omit [SigmaCompactSpace M] in
@@ -218,8 +139,6 @@ theorem iteratedRmComp_eq_nablaKRm04Field
           (coordinateFrameSet_open (I := I) x₀) hx n
       simpa [realizedChr, hframe_def] using hstep
 
-
-
 omit [I.Boundaryless] in
 omit [SigmaCompactSpace M] in
 theorem iteratedRmComp_one_eq_nablaKRm04Field
@@ -232,17 +151,6 @@ theorem iteratedRmComp_one_eq_nablaKRm04Field
       nablaKRm04Field (I := I) S t 1 x
         (frameTuple (I := I) (coordinateFrameAt (I := I) x₀) x n) :=
   iteratedRmComp_eq_nablaKRm04Field (I := I) S x₀ t 1 hx n
-
-
-
-
-
-
-
-
-
-
-
 
 omit [I.Boundaryless] in
 omit [SigmaCompactSpace M] in
@@ -306,19 +214,9 @@ theorem iterRmLF_eq_nabla
 
 end Bridge
 
-
-
-
-
-
-
-
-
 section RicciIdentity
 
 variable {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
-
-
 
 omit [I.Boundaryless] in
 omit [SigmaCompactSpace M] in
@@ -329,11 +227,6 @@ theorem nablaKRm04_nabla0SSectionRealizes
       (nablaKRm04Field (I := I) S t (k + 1)) := by
   intro y X slots
   exact nablaKRm04Field_realizes (I := I) S t k X y slots
-
-
-
-
-
 
 omit [I.Boundaryless] in
 omit [SigmaCompactSpace M] in
@@ -346,12 +239,6 @@ theorem nablaKRm04_nabla20SRealizesAt
   refine ⟨nablaKRm04_nabla0SSectionRealizes (I := I) S t k, ?_⟩
   intro X slots
   exact nablaKRm04Field_realizes (I := I) S t (k + 1) X x slots
-
-
-
-
-
-
 
 omit [I.Boundaryless] in
 omit [SigmaCompactSpace M] in

@@ -2913,7 +2913,8 @@ theorem scalar_strong_maximum_principle_fixed_metric_with_drift_and_potential
   let z : Real → M → Real := fun t x => Real.exp (-L * t) * u t x
   have hz_cont : ContinuousOn (fun p : Real × M => z p.1 p.2)
       (spacetimeSlab (M := M) T) := by
-    exact (by fun_prop : Continuous (fun p : Real × M => Real.exp (-L * p.1))).continuousOn.mul hu_cont
+    exact (by fun_prop : Continuous (fun p : Real × M => Real.exp
+      (-L * p.1))).continuousOn.mul hu_cont
   have hz_nonneg : ∀ t ∈ Set.Icc 0 T, ∀ x : M, 0 ≤ z t x := by
     intro t ht x
     exact mul_nonneg (Real.exp_pos _).le (hu_nonneg t ht x)
@@ -2970,7 +2971,8 @@ theorem scalar_strong_maximum_principle_fixed_metric_with_drift_and_potential_po
   by_contra hy
   have hy0 : u T y = 0 := le_antisymm (le_of_not_gt hy)
     (hu_nonneg T ⟨hT.le, le_rfl⟩ y)
-  have hpast := scalar_strong_maximum_principle_fixed_metric_with_drift_and_potential (I := I) g hT X hC hX V L u hu_cont
+  have hpast := scalar_strong_maximum_principle_fixed_metric_with_drift_and_potential
+    (I := I) g hT X hC hX V L u hu_cont
     hu_nonneg hu_time hu_space hu_super hV hy0 t ht x
   linarith
 

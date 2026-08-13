@@ -3,17 +3,7 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.CometricDoubleTrace
 import DifferentialGeometry.Geometry.Connection.ParsevalFrameField
 open DifferentialGeometry.Analysis.Spectral
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Connection
-
-
-
-
-
-
-
-
-
 
 noncomputable section
 

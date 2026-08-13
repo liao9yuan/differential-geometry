@@ -42,11 +42,8 @@ private abbrev I_half (n : ℕ) [NeZero n] :
   modelWithCornersEuclideanHalfSpace n
 
 structure InteriorSmoothScalar (g : SmoothRiemannianMetric (I_half n) M) where
-
   toFun : M → ℝ
-
   smooth : ContMDiff (I_half n) 𝓘(ℝ, ℝ) ∞ toFun
-
   interior_support : tsupport toFun ⊆ (I_half n).interior M
 
 namespace InteriorSmoothScalar

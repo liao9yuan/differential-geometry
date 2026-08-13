@@ -1176,16 +1176,6 @@ theorem sobolev_closed
   rw [hD_eq] at h_max_le
   exact h_max_le
 
-
-
-
-
-
-
-
-
-
-
 theorem sobolev_embedding_subcritical_of_closed
     {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E] [FiniteDimensional ℝ E]
     {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}

@@ -6,16 +6,6 @@ open DifferentialGeometry.PDE.RicciFlow DifferentialGeometry.Analysis.Sobolev
 open DifferentialGeometry.Analysis.Sobolev
 open DifferentialGeometry.Analysis.Elliptic
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
-
-/-!
-# Uniform scalar nonautonomous estimates on compact time spans
-
-This file upgrades the local fixed-background metric-difference estimate to a
-single prescribed radius on a compact regular-time interval.  It is the first
-producer needed to replay the scalar Galerkin construction on a finite interior
-time slab without repeatedly choosing unrelated existential lifetimes.
--/
 
 noncomputable section
 
@@ -26,7 +16,6 @@ open scoped Manifold Topology ContDiff BigOperators
   RealInnerProductSpace InnerProductSpace
 
 namespace DifferentialGeometry.Analysis.Spectral
-
 
 open DifferentialGeometry.Integral.L2
 open DifferentialGeometry.Analysis.Parabolic.TensorHeatEquation
@@ -45,9 +34,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
 omit [NeZero (Module.finrank ℝ E)] in
-/-- A compact regular-time interval has one backward radius on which every
-frozen-background metric difference is quarter-small and has a common spatial
-jet envelope at that frozen time. -/
 theorem metricDiff_span
     {D : RealTimeInterval}
     (g_fam : ℝ → SmoothRiemannianMetric I M)
@@ -138,9 +124,6 @@ theorem metricDiff_span
   · intro i x
     simpa only [q, P] using hjet i ((T : ℝ) - s) htK x
 
-/-- The metric-difference span radius also gives an order-dependent uniform
-jet envelope for the exact scalar-flux coefficient on every admissible
-backward interval. -/
 theorem scalarFlux_span
     {D : RealTimeInterval}
     (g_fam : ℝ → SmoothRiemannianMetric I M)
@@ -198,8 +181,6 @@ theorem scalarFlux_span
       (fun m _ ↦ by simpa only [q, P] using hsdata.2.2 (e m) x)
   exact hlocal.trans (mul_le_mul_of_nonneg_left hgrid (hC i))
 
-/-- On every admissible prescribed backward interval, the principal scalar
-commutator pairing has support-independent constants at every order. -/
 theorem cc_comm_span
     {D : RealTimeInterval}
     (g_fam : ℝ → SmoothRiemannianMetric I M)
@@ -311,8 +292,6 @@ theorem cc_comm_span
     _ ≤ Ct * J + Cd * J := add_le_add htrans hder
     _ = (Ct + Cd) * J := by ring
 
-/-- On every admissible prescribed backward interval, the traced
-connection-difference arm has support-independent adjacent-window constants. -/
 theorem cc_conn_span
     {D : RealTimeInterval}
     (g_fam : ℝ → SmoothRiemannianMetric I M)
@@ -382,9 +361,6 @@ theorem cc_conn_span
     intro s hs U
     simpa only [q, A, Φ, Q] using hC s hs U
 
-/-- A compact regular-time slab has one prescribed backward radius on which
-the complete scalar moving-minus-fixed Laplacian pairing has its fixed top
-coefficient and support-independent remainder constants. -/
 theorem cc_lap_span
     {D : RealTimeInterval}
     (g_fam : ℝ → SmoothRiemannianMetric I M)
@@ -517,9 +493,6 @@ theorem cc_lap_span
     P + -Q ≤ (Dtop + Cp * J) + Cc * J := add_le_add hprincipal hconnection
     _ = Dtop + (Cp + Cc) * J := by ring
 
-/-- A compact regular-time slab has one prescribed backward radius supporting
-the finite scalar `A2` closure at every Sobolev order, uniformly in spectral
-support. -/
 theorem cc_a2_span
     {D : RealTimeInterval}
     (g_fam : ℝ → SmoothRiemannianMetric I M)

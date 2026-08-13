@@ -21,9 +21,6 @@ import DifferentialGeometry.Geometry.Comparison.GeodesicSpeedBound
 import DifferentialGeometry.Geometry.Comparison.ChartVelocityConvergence
 import DifferentialGeometry.Geometry.Comparison.LocalGeodesicSeed
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
-
-
 
 noncomputable section
 

@@ -1,24 +1,7 @@
 import DifferentialGeometry.Geometry.Comparison.Variation.CovariantCommutationCurvature
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
 
 set_option autoImplicit false
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 noncomputable section
 
@@ -41,13 +24,8 @@ variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
   [T2Space M] [SigmaCompactSpace M]
 
-
-
 noncomputable def curveVelocity (γ : ℝ → M) (t : ℝ) : TangentSpace I (γ t) :=
   mfderiv (𝓘(ℝ, ℝ)) I γ t (1 : ℝ)
-
-
-
 
 def IsJacobiAt (g : SmoothRiemannianMetric I M) (γ : ℝ → M)
     (J : ∀ t : ℝ, TangentSpace I (γ t)) (t : ℝ) : Prop :=
@@ -58,13 +36,9 @@ def IsJacobiAt (g : SmoothRiemannianMetric I M) (γ : ℝ → M)
         (J t) (curveVelocity (I := I) γ t) (curveVelocity (I := I) γ t)
     = 0
 
-
-
-
 def IsJacobiAlong (g : SmoothRiemannianMetric I M) (γ : ℝ → M)
     (J : ∀ t : ℝ, TangentSpace I (γ t)) : Prop :=
   ∀ t : ℝ, IsJacobiAt (I := I) g γ J t
-
 
 omit [NeZero (Module.finrank ℝ E)] in
 omit [SigmaCompactSpace M] in
@@ -97,8 +71,6 @@ theorem isJacobiAlong_iff (g : SmoothRiemannianMetric I M) (γ : ℝ → M)
     linear_combination (norm := module) h
 
 omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] in
-/-- Read the second covariant derivative directly from the pointwise Jacobi
-equation. -/
 theorem jacobi_d2_eq
     (g : SmoothRiemannianMetric I M) (γ : ℝ → M)
     (J : ∀ t : ℝ, TangentSpace I (γ t)) {t : ℝ}
@@ -116,8 +88,6 @@ theorem jacobi_d2_eq
       = 0 at hJ
   linear_combination (norm := module) hJ
 
-/-- Wronskian pairing of two vector fields along the same curve.  For Jacobi
-fields this quantity is constant. -/
 def jacobiWronskian
     (g : SmoothRiemannianMetric I M) (γ : ℝ → M)
     (J K : ∀ t : ℝ, TangentSpace I (γ t)) (t : ℝ) : ℝ :=
@@ -125,8 +95,6 @@ def jacobiWronskian
     g.inner (γ t) (J t) (covDerivAlong (I := I) g γ K t)
 
 omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] in
-/-- The Wronskian of two pointwise Jacobi fields has zero derivative under
-pointwise curve regularity. -/
 theorem wronskian_deriv_at
     {n : WithTop ℕ∞} (hn : 1 ≤ n)
     (g : SmoothRiemannianMetric I M) (γ : ℝ → M)
@@ -158,7 +126,6 @@ theorem wronskian_deriv_at
   linarith
 
 omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] in
-/-- Smooth-curve wrapper for `wronskian_deriv_at`. -/
 theorem hasDerivAt_wronsk
     {n : WithTop ℕ∞} (hn : 1 ≤ n)
     (g : SmoothRiemannianMetric I M) (γ : ℝ → M)
@@ -179,8 +146,6 @@ theorem hasDerivAt_wronsk
     hJdiff hKdiff hDJdiff hDKdiff hJ hK
 
 omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] in
-/-- Two Jacobi fields that vanish initially have zero Wronskian on an interval
-when the curve is smooth at each point of that interval. -/
 theorem wronskian_zero_on
     {n : WithTop ℕ∞} (hn : 1 ≤ n)
     (g : SmoothRiemannianMetric I M) (γ : ℝ → M)
@@ -219,8 +184,6 @@ theorem wronskian_zero_on
   rw [hconst t ht, hzero]
 
 omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] in
-/-- Two Jacobi fields that vanish at the initial endpoint have zero Wronskian
-throughout the interval. -/
 theorem wronskian_eq_zero
     {n : WithTop ℕ∞} (hn : 1 ≤ n)
     (g : SmoothRiemannianMetric I M) (γ : ℝ → M)
@@ -244,8 +207,6 @@ theorem wronskian_eq_zero
     hJdiff hKdiff hDJdiff hDKdiff hJacJ hJacK hJ0 hK0
 
 omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] in
-/-- A pointwise Jacobi equation plus a curvature-term norm bound gives the
-second-covariant-derivative norm bound used by Gronwall estimates. -/
 theorem ode_bound_of_isJacobiAt
     (g : SmoothRiemannianMetric I M) (γ : ℝ → M)
     (J : ∀ t : ℝ, TangentSpace I (γ t)) {K t : ℝ}

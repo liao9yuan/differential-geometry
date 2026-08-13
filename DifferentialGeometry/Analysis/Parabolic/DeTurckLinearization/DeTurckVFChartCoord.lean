@@ -2,7 +2,6 @@ import DifferentialGeometry.Analysis.Parabolic.DeTurckLinearization.VectorField
 import DifferentialGeometry.Analysis.Parabolic.DeTurckLinearization.ChartVectorField
 import DifferentialGeometry.Geometry.Connection.ChartTensorNabla.Tensor0S.ChartLeviCivitaParallelExtend
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Connection
 open DifferentialGeometry.Geometry.Operator
 

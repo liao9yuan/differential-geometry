@@ -31,9 +31,7 @@ private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
 structure SmoothScalar (g : SmoothRiemannianMetric I M) where
-
   toFun : M → ℝ
-
   smooth : ContMDiff I 𝓘(ℝ, ℝ) ∞ toFun
 
 namespace SmoothScalar

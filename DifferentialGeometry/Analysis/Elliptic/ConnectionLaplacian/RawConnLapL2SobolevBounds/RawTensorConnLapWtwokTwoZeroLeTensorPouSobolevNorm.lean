@@ -6,7 +6,6 @@ import DifferentialGeometry.Analysis.Sobolev.Tensor.PouWeightedNorm
 import DifferentialGeometry.Analysis.Integration.Measure.MeasureBridge
 open DifferentialGeometry.Analysis.Elliptic
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Connection
 
 

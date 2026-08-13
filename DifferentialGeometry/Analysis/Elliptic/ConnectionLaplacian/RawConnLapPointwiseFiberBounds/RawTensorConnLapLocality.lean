@@ -1,6 +1,5 @@
 import DifferentialGeometry.Geometry.Connection.Laplacian.TensorConnLaplacian
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Connection
 
 noncomputable section

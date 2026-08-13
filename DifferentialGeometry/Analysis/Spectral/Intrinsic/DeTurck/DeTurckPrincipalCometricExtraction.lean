@@ -9,7 +9,6 @@ open DifferentialGeometry.Analysis.Sobolev
 open DifferentialGeometry.Analysis.Spectral
 open DifferentialGeometry.Analysis.Elliptic
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Connection
 
 
@@ -29,7 +28,8 @@ open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.L2
 
 open DifferentialGeometry.Integral.DivergenceTheorem
-open DifferentialGeometry.PDE.RicciFlow DifferentialGeometry.Analysis.Sobolev DifferentialGeometry.Analysis.Spectral
+open DifferentialGeometry.PDE.RicciFlow DifferentialGeometry.Analysis.Sobolev
+    DifferentialGeometry.Analysis.Spectral
 open DifferentialGeometry.Analysis.Spectral.MetricRealization
 open DifferentialGeometry.Analysis.Spectral.DeTurck
 open DifferentialGeometry.Analysis.Sobolev.TensorHilbert
@@ -823,7 +823,6 @@ private lemma riemannianFiberNormSq_iteratedCovGrad_ricciArmPrincipalCoeff_sub_l
   linarith [hkey, riemannianFiberNormSq_nonneg (I := I) (M := M) g₀ 4 (2 + i) x PC]
 
 set_option backward.isDefEq.respectTransparency false in
-
 omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [BoundarylessManifold I M]
     [SigmaCompactSpace M] in
 private lemma slotInsertEndoCc_succ_eq_reindex_slotExtend_local
@@ -1162,10 +1161,6 @@ theorem deTurckPrincipalCometricCoeff_perOrder_rfns_le_gInvDiffSlotCoeff
   · intro g₁ i x
     exact rfns_iteratedCovGrad_deTurckPrincipalCometricCoeff_le (I := I) (M := M)
       g₀ g₁ hK_nn hK_bound i x
-
-
-
-
 
 theorem coeff_grad_rfns_le
     (g₀ : SmoothRiemannianMetric I M) :

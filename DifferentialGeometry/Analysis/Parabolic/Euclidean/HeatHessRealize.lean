@@ -8,13 +8,6 @@ import Mathlib.Analysis.Fourier.Convolution
 import Mathlib.Analysis.Distribution.SchwartzSpace.Fourier
 import Mathlib.MeasureTheory.Function.L2Space
 
-/-!
-# Physical realization of the spacetime heat Hessian
-
-This file identifies the causal second-spatial-derivative heat potential of a
-smooth compactly supported source with the spacetime `L²` Fourier multiplier.
--/
-
 noncomputable section
 
 open Complex MeasureTheory Real Set
@@ -542,7 +535,6 @@ private theorem dampConv_fourierLp {δ : ℝ} (hδ : 0 < δ) (v w : V)
         (dampConv_memLp hδ v w f hf hfc) hFconv
     _ = hprod.toLp prod := MemLp.toLp_congr hFconv hprod hEq
 
-/-- The physical causal heat potential with two spatial derivatives. -/
 def heatD2Past (v w : V) (f : ℝ × V → ℝ)
     (z : WithLp 2 (ℝ × V)) : ℂ :=
   ∫ s : ℝ, if s < z.fst then

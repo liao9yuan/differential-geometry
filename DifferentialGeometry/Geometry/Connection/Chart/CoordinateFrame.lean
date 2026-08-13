@@ -2,8 +2,6 @@ import DifferentialGeometry.Geometry.Connection.Chart.Basic
 import DifferentialGeometry.Tensor.RSTensor.Coordinates.Components
 import Mathlib.Geometry.Manifold.VectorField.LieBracket
 
-
-
 noncomputable section
 
 namespace DifferentialGeometry

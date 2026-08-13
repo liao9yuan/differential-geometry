@@ -1,17 +1,6 @@
 import DifferentialGeometry.Analysis.Parabolic.Euclidean.HeatKernelLpPower
 import Mathlib.MeasureTheory.Integral.Bochner.Basic
 
-/-!
-# Spatial Hölder bounds for the Euclidean heat potential
-
-The late Koch--Lamm value estimate pairs a spatial heat-kernel slice with an
-`L^q` source slice.  This file proves that Banach-valued Hölder step and then
-specializes the kernel factor using the exact translated real-power mass from
-`HeatKernelLpPower`.
-
-No cylinder cover or time integration is performed here.
--/
-
 noncomputable section
 
 open MeasureTheory Real
@@ -26,8 +15,6 @@ variable {X F : Type*} [MeasurableSpace X]
   [NormedAddCommGroup F] [NormedSpace ℝ F] [CompleteSpace F]
 
 omit [CompleteSpace F] in
-/-- Banach-valued Hölder inequality for a scalar kernel paired with a vector
-field. -/
 theorem integral_holder {μ : Measure X} {p q : ℝ}
     (hpq : p.HolderConjugate q) (k : X → ℝ) (f : X → F)
     (hk : MemLp k (ENNReal.ofReal p) μ)
@@ -55,8 +42,6 @@ variable {V : Type*}
   [NormedAddCommGroup V] [InnerProductSpace ℝ V] [FiniteDimensional ℝ V]
   [MeasurableSpace V] [BorelSpace V] [Nontrivial V]
 
-/-- A translated-reflected positive-time heat kernel belongs to every
-spatial `L^p`, `p > 0`. -/
 theorem heatShift_memLp {t p : ℝ} (ht : 0 < t) (hp : 0 < p) (x : V) :
     MemLp (fun y : V ↦ heatKernel t (x - y)) (ENNReal.ofReal p)
       (volume : Measure V) := by
@@ -73,8 +58,6 @@ theorem heatShift_memLp {t p : ℝ} (ht : 0 < t) (hp : 0 < p) (x : V) :
     Real.norm_of_nonneg (heatKernel_nonneg ht _)] using hpow
 
 omit [CompleteSpace F] in
-/-- Exact spatial Hölder bound for a positive-time heat convolution.  The
-kernel factor is written with its proved parabolic scaling. -/
 theorem heatConv_holder {t p q : ℝ} (ht : 0 < t)
     (hpq : p.HolderConjugate q) (x : V) (f : V → F)
     (hf : MemLp f (ENNReal.ofReal q) (volume : Measure V)) :

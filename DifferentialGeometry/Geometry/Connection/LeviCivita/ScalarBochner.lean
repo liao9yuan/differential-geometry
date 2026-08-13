@@ -4,17 +4,9 @@ import DifferentialGeometry.Geometry.Connection.LeviCivita.Curvature.Realized
 import DifferentialGeometry.Geometry.Connection.LeviCivita.Hessian
 open DifferentialGeometry.Tensor.RicciIdentity
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Operator
 
 set_option autoImplicit false
-
-
-
-
-
-
-
 
 noncomputable section
 
@@ -31,9 +23,6 @@ variable {H : Type*} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 variable [IsManifold I 1 M] [IsManifold I 2 M]
-
-
-
 
 omit [IsManifold I ∞ M] in
 theorem nabla2OneFormRealizesAt_of_totalNabla_leviCivita
@@ -59,13 +48,6 @@ theorem nabla2OneFormRealizesAt_of_totalNabla_leviCivita
     (leviCivitaConnectionOfMetric (I := I) g) alpha nablaAlpha
     nabla2AlphaSec h1 h2 x
 
-
-
-
-
-
-
-
 omit [IsManifold I ∞ M] in
 theorem traceNablaHessianRealizesDLapAt_of_leviCivita
     [IsManifold I ∞ M]
@@ -88,8 +70,6 @@ theorem traceNablaHessianRealizesDLapAt_of_leviCivita
     (leviCivitaConnectionOfMetric (I := I) g) g
     (leviCivitaConnectionOfMetric_isMetricCompatible (I := I) g)
     u nablaDuSec nabla2DuSec hnabla htrace x
-
-
 
 omit [IsManifold I ∞ M] in
 theorem lc_lapTrace
@@ -114,8 +94,6 @@ theorem lc_lapTrace
   exact hess_of_nabla (I := I)
     (leviCivitaConnectionOfMetric (I := I) g) duSec
     (fun z : M => nablaDuSec z) y (hnabla y)
-
-
 
 omit [IsManifold I ∞ M] in
 theorem fundamental_bochner_of_leviCivita_terms
@@ -193,8 +171,6 @@ theorem fundamental_bochner_of_leviCivita_terms
       nabla2Du hRm13 (by simpa [duField] using hdu x) hnabla2
   · exact rm13MetricSkewAt_of_leviCivita_realizes (I := I)
       g Rm13 Rm04 hRm13 hRm04
-
-
 
 omit [IsManifold I ∞ M] in
 theorem fundamental_bochner_of_leviCivita_terms_of_normSecond_realizes
@@ -282,13 +258,6 @@ theorem fundamental_bochner_of_leviCivita_terms_of_normSecond_realizes
       nabla2Du hRm13 (by simpa [duField] using hdu x) hnabla2
   · exact rm13MetricSkewAt_of_leviCivita_realizes (I := I)
       g Rm13 Rm04 hRm13 hRm04
-
-
-
-
-
-
-
 
 omit [IsManifold I ∞ M] in
 theorem lc_bochner_dlap
@@ -380,8 +349,6 @@ theorem lc_bochner_dlap
     (fun y : M => nablaDuSec y) (fun y : M => nablaDuSec y)
     roughDu basis gInvAt hinv X duSec nablaDuSec (nabla2DuSec x) normSecond
     hfields hHessLocal hdu hnablaLocal hnabla2 hdlap hlapTrace hsecond hrough
-
-
 
 omit [IsManifold I ∞ M] in
 theorem lc_bochner_norm
@@ -482,8 +449,6 @@ theorem lc_bochner_norm
     roughDu basis gInvAt hinv X duSec normDuSec
     nablaDuSec (nabla2DuSec x) normSecond normSecondSec hfields hHessLocal hdu
     hnablaLocal hnabla2 hdlap hnormSecond hnormDu hnormHess hnormGrad hsecond hrough
-
-
 
 omit [IsManifold I ∞ M] in
 theorem lc_bochner_rm04

@@ -3,8 +3,6 @@ import DifferentialGeometry.Geometry.Connection.MetricCompatibility.ChartGramChr
 import Mathlib.Analysis.ODE.Gronwall
 open DifferentialGeometry.Geometry.Operator
 
-
-
 noncomputable section
 
 open Set Function Filter Manifold Bundle
@@ -26,7 +24,6 @@ open DifferentialGeometry.Geometry.Riemannian.Geodesic
 @[ext] structure SectionAlongCurve (I : ModelWithCorners ℝ E H) (M : Type*)
     [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
     (_γ : ℝ → M) where
-
   toFun : ℝ → E
 
 namespace SectionAlongCurve

@@ -54,7 +54,6 @@ private lemma tensor0S_toModel_sum {s : ℕ} {x : M} {ι : Type*} (t : Finset ι
       rw [Finset.sum_insert ha, Finset.sum_insert ha, Tensor0SSpace.toModel_add, ih]
 
 set_option backward.isDefEq.respectTransparency false in
-
 def slotInsertEndoFib (s : ℕ) (k : Fin s) (x : M)
     (Λ : TangentSpace I x →L[ℝ] TangentSpace I x) :
     Tensor0SSpace s I x →L[ℝ] Tensor0SSpace s I x :=
@@ -73,7 +72,6 @@ def slotInsertEndoFib (s : ℕ) (k : Fin s) (x : M)
         simp }
 
 set_option backward.isDefEq.respectTransparency false in
-
 omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
     [T2Space M] in
 @[simp] lemma slotInsertEndoFib_apply (s : ℕ) (k : Fin s) (x : M)
@@ -86,7 +84,6 @@ omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [Boundary
   rfl
 
 set_option backward.isDefEq.respectTransparency false in
-
 omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
     [T2Space M] in
 lemma slotInsertEndoFib_apply_eval (s : ℕ) (k : Fin s) (x : M)
@@ -107,7 +104,6 @@ lemma slotInsertEndoFib_apply_eval (s : ℕ) (k : Fin s) (x : M)
   exact congrArg (fun t => Tensor0SSpace.toModel A t) hfam
 
 set_option backward.isDefEq.respectTransparency false in
-
 omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
     [T2Space M] in
 lemma slotInsertEndoFib_add_left (s : ℕ) (k : Fin s) (x : M)
@@ -126,7 +122,6 @@ lemma slotInsertEndoFib_add_left (s : ℕ) (k : Fin s) (x : M)
     ContinuousMultilinearMap.map_update_add]
 
 set_option backward.isDefEq.respectTransparency false in
-
 omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
     [T2Space M] in
 lemma slotInsertEndoFib_smul_left (s : ℕ) (k : Fin s) (x : M) (c : ℝ)
@@ -143,7 +138,6 @@ lemma slotInsertEndoFib_smul_left (s : ℕ) (k : Fin s) (x : M) (c : ℝ)
     ContinuousLinearMap.smul_apply, ContinuousMultilinearMap.map_update_smul]
 
 set_option backward.isDefEq.respectTransparency false in
-
 omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
     [T2Space M] in
 lemma slotInsertEndoFib_zero (s : ℕ) (x : M)
@@ -165,7 +159,6 @@ lemma slotInsertEndoFib_zero (s : ℕ) (x : M)
   rw [← hcurry, ContinuousLinearEquiv.symm_apply_apply]
 
 set_option backward.isDefEq.respectTransparency false in
-
 omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
     [T2Space M] in
 lemma slotInsertEndoFib_succ (g : SmoothRiemannianMetric I M) (s : ℕ) (j : Fin s) (x : M)
@@ -192,7 +185,6 @@ lemma slotInsertEndoFib_succ (g : SmoothRiemannianMetric I M) (s : ℕ) (j : Fin
     ContinuousLinearEquiv.symm_apply_apply]
 
 set_option backward.isDefEq.respectTransparency false in
-
 omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [BoundarylessManifold I M]
     in
 theorem slotInsertEndoFib_contMDiff (g : SmoothRiemannianMetric I M) :
@@ -275,7 +267,6 @@ theorem slotInsertEndoFib_contMDiff (g : SmoothRiemannianMetric I M) :
           rfl
 
 set_option backward.isDefEq.respectTransparency false in
-
 def curvatureTensorActionFib (g : SmoothRiemannianMetric I M) (s : ℕ) (x : M)
     (u w : TangentSpace I x) :
     Tensor0SSpace s I x →L[ℝ] Tensor0SSpace s I x :=
@@ -283,7 +274,6 @@ def curvatureTensorActionFib (g : SmoothRiemannianMetric I M) (s : ℕ) (x : M)
       (riemannOp (LeviCivita (I := I) g) x u w))
 
 set_option backward.isDefEq.respectTransparency false in
-
 omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] in
 lemma slotCurvSumFib_apply_eval (g : SmoothRiemannianMetric I M) (s : ℕ) (x : M)
     (u w : TangentSpace I x) (A : Tensor0SSpace s I x) (m : Fin s → E) :
@@ -299,7 +289,6 @@ lemma slotCurvSumFib_apply_eval (g : SmoothRiemannianMetric I M) (s : ℕ) (x : 
       (riemannOp (LeviCivita (I := I) g) x u w) A m
 
 set_option backward.isDefEq.respectTransparency false in
-
 omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] in
 lemma slotCurvSumFib_add_left (g : SmoothRiemannianMetric I M) (s : ℕ) (x : M)
     (u u' w : TangentSpace I x) :
@@ -318,7 +307,6 @@ lemma slotCurvSumFib_add_left (g : SmoothRiemannianMetric I M) (s : ℕ) (x : M)
   rw [Finset.sum_add_distrib, neg_add]
 
 set_option backward.isDefEq.respectTransparency false in
-
 omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] in
 lemma slotCurvSumFib_smul_left (g : SmoothRiemannianMetric I M) (s : ℕ) (x : M) (c : ℝ)
     (u w : TangentSpace I x) :
@@ -334,7 +322,6 @@ lemma slotCurvSumFib_smul_left (g : SmoothRiemannianMetric I M) (s : ℕ) (x : M
   rw [← Finset.smul_sum, ← smul_neg]
 
 set_option backward.isDefEq.respectTransparency false in
-
 omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] in
 lemma slotCurvSumFib_add_right (g : SmoothRiemannianMetric I M) (s : ℕ) (x : M)
     (u w w' : TangentSpace I x) :
@@ -353,7 +340,6 @@ lemma slotCurvSumFib_add_right (g : SmoothRiemannianMetric I M) (s : ℕ) (x : M
   rw [Finset.sum_add_distrib, neg_add]
 
 set_option backward.isDefEq.respectTransparency false in
-
 omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] in
 lemma slotCurvSumFib_smul_right (g : SmoothRiemannianMetric I M) (s : ℕ) (x : M) (c : ℝ)
     (u w : TangentSpace I x) :
@@ -369,7 +355,6 @@ lemma slotCurvSumFib_smul_right (g : SmoothRiemannianMetric I M) (s : ℕ) (x : 
   rw [← Finset.smul_sum, ← smul_neg]
 
 set_option backward.isDefEq.respectTransparency false in
-
 def slotFreeCurvWCLM (g : SmoothRiemannianMetric I M) (s : ℕ) (x : M)
     (A : Tensor0SSpace s I x) (u : TangentSpace I x) :
     TangentSpace I x →L[ℝ] Tensor0SSpace s I x :=
@@ -386,7 +371,6 @@ def slotFreeCurvWCLM (g : SmoothRiemannianMetric I M) (s : ℕ) (x : M)
         rfl }
 
 set_option backward.isDefEq.respectTransparency false in
-
 omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] in
 @[simp] lemma slotFreeCurvWCLM_apply (g : SmoothRiemannianMetric I M) (s : ℕ) (x : M)
     (A : Tensor0SSpace s I x) (u w : TangentSpace I x) :
@@ -396,7 +380,6 @@ omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] in
   rfl
 
 set_option backward.isDefEq.respectTransparency false in
-
 def slotFreeCurvUCLM (g : SmoothRiemannianMetric I M) (s : ℕ) (x : M)
     (A : Tensor0SSpace s I x) :
     TangentSpace I x →L[ℝ] Tensor0SSpace (s + 1) I x :=
@@ -427,7 +410,6 @@ def slotFreeCurvUCLM (g : SmoothRiemannianMetric I M) (s : ℕ) (x : M)
         rfl }
 
 set_option backward.isDefEq.respectTransparency false in
-
 omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] in
 @[simp] lemma slotFreeCurvUCLM_apply (g : SmoothRiemannianMetric I M) (s : ℕ) (x : M)
     (A : Tensor0SSpace s I x) (u : TangentSpace I x) :
@@ -438,7 +420,6 @@ omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] in
   rfl
 
 set_option backward.isDefEq.respectTransparency false in
-
 def curvatureOperatorOnTensorFib (g : SmoothRiemannianMetric I M) (s : ℕ) (x : M) :
     Tensor0SSpace s I x →L[ℝ] Tensor0SSpace (s + 2) I x :=
   haveI : FiniteDimensional ℝ (Tensor0SSpace s I x) := inferInstance
@@ -484,7 +465,6 @@ def curvatureOperatorOnTensorFib (g : SmoothRiemannianMetric I M) (s : ℕ) (x :
         rfl }
 
 set_option backward.isDefEq.respectTransparency false in
-
 omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] in
 @[simp] lemma slotFreeCurvOpFib_apply (g : SmoothRiemannianMetric I M) (s : ℕ) (x : M)
     (A : Tensor0SSpace s I x) :
@@ -495,7 +475,6 @@ omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] in
   rfl
 
 set_option backward.isDefEq.respectTransparency false in
-
 omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] in
 lemma slotFreeCurvOpFib_apply_eval (g : SmoothRiemannianMetric I M) (s : ℕ) (x : M)
     (A : Tensor0SSpace s I x) (u w : TangentSpace I x) (m : Fin s → TangentSpace I x) :
@@ -517,7 +496,6 @@ lemma slotFreeCurvOpFib_apply_eval (g : SmoothRiemannianMetric I M) (s : ℕ) (x
   exact slotCurvSumFib_apply_eval (I := I) (M := M) g s x u w A m
 
 set_option backward.isDefEq.respectTransparency false in
-
 omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 theorem slotFreeCurvOpFib_contMDiff (g : SmoothRiemannianMetric I M) (s : ℕ) :
     ContMDiff I (I.prod 𝓘(ℝ, TensorRSModel s (s + 2) ℝ E)) ∞
@@ -613,7 +591,6 @@ theorem slotFreeCurvOpFib_contMDiff (g : SmoothRiemannianMetric I M) (s : ℕ) :
     (fun x : M => slotFreeCurvUCLM (I := I) (M := M) g s x (Y x)) hU
 
 set_option backward.isDefEq.respectTransparency false in
-
 def curvatureOperatorOnTensorHomFib (g : SmoothRiemannianMetric I M) (s : ℕ) (x : M) :
     TensorRSSpace 0 s I x →L[ℝ] TensorRSSpace 0 (s + 2) I x :=
   haveI : FiniteDimensional ℝ (TensorRSSpace 0 s I x) :=
@@ -635,7 +612,6 @@ def curvatureOperatorOnTensorHomFib (g : SmoothRiemannianMetric I M) (s : ℕ) (
         rfl }
 
 set_option backward.isDefEq.respectTransparency false in
-
 omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] in
 @[simp] lemma slotFreeCurvHomFib_apply (g : SmoothRiemannianMetric I M) (s : ℕ) (x : M)
     (T : TensorRSSpace 0 s I x) :
@@ -650,7 +626,6 @@ omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] in
   rfl
 
 set_option backward.isDefEq.respectTransparency false in
-
 omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 theorem slotFreeCurvHomFib_contMDiff (g : SmoothRiemannianMetric I M) (s : ℕ) :
     ContMDiff I (I.prod 𝓘(ℝ, TensorRSModel 0 s ℝ E →L[ℝ] TensorRSModel 0 (s + 2) ℝ E)) ∞
@@ -689,14 +664,12 @@ theorem slotFreeCurvHomFib_contMDiff (g : SmoothRiemannianMetric I M) (s : ℕ) 
     rw [slotFreeCurvHomFib_apply, ContinuousLinearMap.comp_apply]]
 
 set_option backward.isDefEq.respectTransparency false in
-
 def curvatureOperatorOnTensorHomField (g : SmoothRiemannianMetric I M) (s : ℕ) :
     HomTensorRSField (E := E) (M := M) 0 s (s + 2) I where
   toFun := fun x : M => curvatureOperatorOnTensorHomFib (I := I) (M := M) g s x
   contMDiff_toFun := slotFreeCurvHomFib_contMDiff (I := I) (M := M) g s
 
 set_option backward.isDefEq.respectTransparency false in
-
 omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 @[simp] lemma slotFreeCurvHomField_apply (g : SmoothRiemannianMetric I M) (s : ℕ) (x : M) :
     (show TensorRSSpace 0 s I x →L[ℝ] TensorRSSpace 0 (s + 2) I x from
@@ -704,7 +677,6 @@ omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
       curvatureOperatorOnTensorHomFib (I := I) (M := M) g s x := rfl
 
 set_option backward.isDefEq.respectTransparency false in
-
 omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 theorem exists_slotFreeCurvOpField_baseSlot_eval (g : SmoothRiemannianMetric I M) :
     ∃ Θ : ∀ s : ℕ, HomTensorRSField (E := E) (M := M) 0 s (s + 2) I,

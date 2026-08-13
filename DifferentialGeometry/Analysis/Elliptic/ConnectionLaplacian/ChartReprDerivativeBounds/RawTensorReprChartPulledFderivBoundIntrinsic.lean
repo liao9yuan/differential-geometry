@@ -6,7 +6,6 @@ import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.CovApplyAndSlo
 import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.ChartFiberTrivialisationOpNorm.TensorRSChartReprNormBound
 import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.ChartReprDerivativeBounds.ChartPulledRawTensorReprFactorization
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Connection
 
 

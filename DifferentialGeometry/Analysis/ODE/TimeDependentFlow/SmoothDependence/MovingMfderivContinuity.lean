@@ -1,22 +1,6 @@
 import DifferentialGeometry.Analysis.ODE.TimeDependentFlow.SmoothDependence.GlobalClosedManifold
 import Mathlib.Geometry.Manifold.VectorBundle.Hom
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 noncomputable section
 open Set Function Filter Bundle
 open scoped Topology Manifold ContDiff
@@ -27,14 +11,6 @@ variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] [FiniteDimension
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
   [BoundarylessManifold I M] [T2Space M]
-
-
-
-
-
-
-
-
 
 omit [FiniteDimensional ℝ E] [BoundarylessManifold I M] [T2Space M] in
 theorem slice_mfderiv_continuousAt_of_jointFlow

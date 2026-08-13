@@ -85,7 +85,6 @@ lemma inner_ricEndoRaisedFib (g : SmoothRiemannianMetric I M) (x : M)
   exact inner_metricSharp (I := I) g x (ricciTensor (I := I) g x v).toLinearMap w
 
 set_option backward.isDefEq.respectTransparency false in
-
 omit [CompactSpace M] in
 omit [NeZero (Module.finrank ℝ E)] in
 theorem ricEndoRaisedFib_contMDiff (g : SmoothRiemannianMetric I M) :
@@ -137,7 +136,6 @@ theorem ricEndoRaisedFib_contMDiff (g : SmoothRiemannianMetric I M) :
   rw [ricEndoRaisedFib_apply]
 
 set_option backward.isDefEq.respectTransparency false in
-
 def ricSlotOpFib (g : SmoothRiemannianMetric I M) (s : ℕ) (x : M) :
     Tensor0SSpace (s + 1) I x →L[ℝ] Tensor0SSpace (s + 1) I x :=
   haveI : FiniteDimensional ℝ (Tensor0SSpace (s + 1) I x) := inferInstance
@@ -157,7 +155,6 @@ def ricSlotOpFib (g : SmoothRiemannianMetric I M) (s : ℕ) (x : M) :
         rfl }
 
 set_option backward.isDefEq.respectTransparency false in
-
 omit [CompactSpace M] [I.Boundaryless] in
 omit [NeZero (Module.finrank ℝ E)] in
 omit [SigmaCompactSpace M] in
@@ -171,7 +168,6 @@ omit [SigmaCompactSpace M] in
   rfl
 
 set_option backward.isDefEq.respectTransparency false in
-
 omit [CompactSpace M] [I.Boundaryless] in
 omit [NeZero (Module.finrank ℝ E)] in
 omit [SigmaCompactSpace M] in
@@ -192,7 +188,6 @@ lemma ricSlotOpFib_apply_eval (g : SmoothRiemannianMetric I M) (s : ℕ) (x : M)
   rfl
 
 set_option backward.isDefEq.respectTransparency false in
-
 omit [CompactSpace M] in
 omit [NeZero (Module.finrank ℝ E)] in
 theorem ricSlotOpFib_contMDiff (g : SmoothRiemannianMetric I M) (s : ℕ) :
@@ -253,7 +248,6 @@ theorem ricSlotOpFib_contMDiff (g : SmoothRiemannianMetric I M) (s : ℕ) :
       (ricEndoRaisedFib (I := I) g x)) hG
 
 set_option backward.isDefEq.respectTransparency false in
-
 def ricSlotOpField (g : SmoothRiemannianMetric I M) (s : ℕ) :
     SmoothCcTensor g (s + 1) (s + 1) where
   toSection :=
@@ -263,7 +257,6 @@ def ricSlotOpField (g : SmoothRiemannianMetric I M) (s : ℕ) :
   hasCompactSupport := HasCompactSupport.of_compactSpace _
 
 set_option backward.isDefEq.respectTransparency false in
-
 omit [NeZero (Module.finrank ℝ E)] in
 @[simp] lemma ricSlotOpField_toSection (g : SmoothRiemannianMetric I M) (s : ℕ) (x : M) :
     (ricSlotOpField (I := I) (M := M) g s).toSection x =

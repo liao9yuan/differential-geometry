@@ -9,7 +9,6 @@ import DifferentialGeometry.Geometry.Connection.ChartTensorNabla.Tensor0S.ChartT
 import DifferentialGeometry.Geometry.Connection.ChartFrame.ChartMetric
 import DifferentialGeometry.Analysis.Integration.Measure.Properties
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Connection
 open DifferentialGeometry.Geometry.Operator
 

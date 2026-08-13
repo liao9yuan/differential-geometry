@@ -1,14 +1,14 @@
 import DifferentialGeometry.Geometry.Curvature.CovGradRoughLap.GradientField
 import DifferentialGeometry.Geometry.Curvature.CurvatureOperator.TensorThirdOrderWeitzenbock
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
 
 
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
 
-open Bundle Manifold MeasureTheory Set Filter DifferentialGeometry.Tensor0SBundle CovariantDerivative
+open Bundle Manifold MeasureTheory Set Filter DifferentialGeometry.Tensor0SBundle
+    CovariantDerivative
 open scoped Manifold Topology ContDiff BigOperators Matrix
 
 

@@ -1,7 +1,6 @@
 import DifferentialGeometry.Geometry.Connection.TensorNabla.TensorRSNabla
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.Defs
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
 
 noncomputable section
 

@@ -7,10 +7,7 @@ import DifferentialGeometry.Geometry.Geodesic.CrossVFReduction
 import Mathlib.Topology.MetricSpace.Pseudo.Lemmas
 import Mathlib.Topology.Compactness.Compact
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Connection
-
-
 
 noncomputable section
 
@@ -343,12 +340,6 @@ private theorem perChart_jointContinuity_of_flowIdentifiedOn
   intro vt hvt
   exact hident vt.1 hvt.1 vt.2 hvt.2
 
-
-
-
-
-
-
 private theorem dist_le_of_speed_bound_on_Icc
     {F : Type*} [NormedAddCommGroup F] [NormedSpace ℝ F]
     {c : ℝ → F} {c' : ℝ → F} {z₀ : F} {R M T'' : ℝ}
@@ -444,8 +435,6 @@ private theorem dist_le_of_speed_bound_on_Icc
   rw [← ht0_eq] at hs
   exact hbd_on_G t0 ht0_G s hs
 
-
-
 omit [T2Space M] [SigmaCompactSpace M]
     [RiemannianBundle (fun x : M => TangentSpace I x)] in
 omit [I.Boundaryless] in
@@ -461,10 +450,6 @@ private theorem chartPhaseVF_bddOn_closedBall
   obtain ⟨C, hC⟩ :=
     (isCompact_closedBall z₀ R).exists_bound_of_continuousOn hL.continuousOn
   exact ⟨|C| + 1, by positivity, fun x hx => le_trans (hC x hx) (by linarith [le_abs_self C])⟩
-
-
-
-
 
 omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M]
     [SigmaCompactSpace M] [RiemannianBundle (fun x : M => TangentSpace I x)] in

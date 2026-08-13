@@ -1,13 +1,6 @@
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurckCoefficients.RHSAbsoluteBound
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Operator
-
-
-
-
-
-
 
 namespace DifferentialGeometry.Analysis.Spectral
 
@@ -24,9 +17,6 @@ variable
       [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
     {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
     {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
-
-
-
 
 omit [NeZero (Module.finrank ℝ E)] in
 theorem chartRHS_pou_lip
@@ -122,9 +112,6 @@ theorem chartRHS_pou_lip
         · exact hlie
     _ = (2 * Cric + Clie) * chartMetricJet2DiffSup (I := I) (M := M)
           (gSeq k₁) (gSeq k₂) α (extChartAt I α b) := by ring
-
-
-
 
 omit [NeZero (Module.finrank ℝ E)] in
 theorem chartRHS_pou_bnd

@@ -1,6 +1,5 @@
 import DifferentialGeometry.Geometry.Connection.ChartBridge.RiemannBasisIdentity
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Operator
 
 

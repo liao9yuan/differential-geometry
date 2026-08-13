@@ -7,17 +7,6 @@ open DifferentialGeometry.Geometry.Curvature
 
 set_option autoImplicit false
 
-
-
-
-
-
-
-
-
-
-
-
 noncomputable section
 
 namespace DifferentialGeometry.Geometry.Curvature
@@ -30,9 +19,6 @@ variable [FiniteDimensional Real E]
 variable {H : Type*} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H}
 variable {M : Type*} [TopologicalSpace M] [T2Space M] [ChartedSpace H M] [IsManifold I ∞ M]
-
-
-
 
 structure CurvatureSectionProducerData
     (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
@@ -72,17 +58,6 @@ theorem ricci_from_rm13
 
 end CurvatureSectionProducerData
 
-
-
-
-
-
-
-
-
-
-
-
 theorem rm13Section_realizes
     (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
     (hcov : CovariantDerivative.ContMDiffCovariantDerivativeLocally cov ∞) :
@@ -93,8 +68,6 @@ theorem rm13Section_realizes
   exact
     DifferentialGeometry.Geometry.Curvature.CovariantDerivative.rm13Section_apply_smooth
       (I := I) (M := M) cov hcov X Y Z alpha
-
-
 
 theorem rm04Section_realizes
     (g : SmoothRiemannianMetric I M)

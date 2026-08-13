@@ -19,7 +19,6 @@ import DifferentialGeometry.Analysis.Calculus.SpectralEigenSeriesJointGramProjec
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.HeatSemigroup.SpectralEigenSeriesJointGramRawComponentJetBound
 open DifferentialGeometry.Analysis.Calculus
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Connection
 
 

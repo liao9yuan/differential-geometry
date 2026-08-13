@@ -1,7 +1,5 @@
 import DifferentialGeometry.Geometry.Connection.Chart.NablaComponents.Basic
 
-
-
 noncomputable section
 
 namespace DifferentialGeometry

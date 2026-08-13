@@ -1,14 +1,6 @@
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurckCoefficients.ChristoffelPerturbation
 open DifferentialGeometry.Geometry.Operator
 
-
-
-
-
-
-
-
-
 noncomputable section
 
 namespace DifferentialGeometry.Analysis.Spectral.DeTurckCoefficients
@@ -28,8 +20,6 @@ local notation "D3Idx" =>
   Fin (Module.finrank ℝ E) × Fin (Module.finrank ℝ E) ×
     Fin (Module.finrank ℝ E) × Fin (Module.finrank ℝ E) ×
       Fin (Module.finrank ℝ E)
-
-
 
 def gramD3DiffSup (g₁ g₂ : SmoothRiemannianMetric I M) (α : M) (y : E) : ℝ :=
   ∑ p : D3Idx,
@@ -73,8 +63,6 @@ theorem gramD3DiffSup_nonneg
     (g₁ g₂ : SmoothRiemannianMetric I M) (α : M) (y : E) :
     0 ≤ gramD3DiffSup (I := I) (M := M) g₁ g₂ α y := by
   exact Finset.sum_nonneg fun _ _ => abs_nonneg _
-
-
 
 def metricJet3DiffSup (g₁ g₂ : SmoothRiemannianMetric I M) (α : M) (y : E) : ℝ :=
   chartMetricJet2DiffSup (I := I) (M := M) g₁ g₂ α y +

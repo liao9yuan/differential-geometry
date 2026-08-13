@@ -3,14 +3,6 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.SobolevScale.ParametricAppH
 open DifferentialGeometry.Analysis.Sobolev
 open DifferentialGeometry.Analysis.Spectral
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
-
-
-
-
-
-
-
 
 noncomputable section
 
@@ -35,8 +27,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
 
 private local instance : CompleteSpace E := FiniteDimensional.complete Real E
 
-
-
 theorem scalarPot_dyn_fin
     (q : SmoothRiemannianMetric I M)
     (zeta : Real → C^∞⟮I, M; Real⟯) {S : Set Real} (hS : IsOpen S)
@@ -54,8 +44,6 @@ theorem scalarPot_dyn_fin
   refine happ.congr ?_
   intro t ht
   exact scalarPotHs_app (I := I) (M := M) q (zeta t) m (U t)
-
-
 
 theorem scalarPot_dyn_cd
     (q : SmoothRiemannianMetric I M)

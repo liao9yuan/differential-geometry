@@ -6,44 +6,7 @@ import DifferentialGeometry.Geometry.Coordinates.MetricCompatibility.Inverse
 import DifferentialGeometry.Tensor.RSTensor.Derivation.NablaOnTensors
 import Mathlib.Geometry.Manifold.MFDeriv.Tangent
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Operator
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 noncomputable section
 
@@ -70,8 +33,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
-
-
 def nablaCovTensor (g : SmoothRiemannianMetric I M)
     (Z : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) (b : M) :
     Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) 2 b :=
@@ -87,8 +48,6 @@ omit [T2Space M] [SigmaCompactSpace M] in
       g.inner b ((LeviCivita (I := I) g).toFun Z.toFun b (v 0)) (v 1) := by
   simp only [nablaCovTensor]
   rfl
-
-
 
 omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M]
     [SigmaCompactSpace M] in
@@ -112,8 +71,6 @@ private lemma chartInvGram_metricInverse (g : SmoothRiemannianMetric I M) (α : 
     rw [← hentry]
     exact Finset.sum_congr rfl fun k _ => by
       rw [chartGramMatrix_apply, chartBasisFamily_apply, chartBasisFamily_apply]
-
-
 
 omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] in
 omit [T2Space M] [SigmaCompactSpace M] in
@@ -145,9 +102,6 @@ private lemma self_mem_goodSet (x : M) :
     mem_baseSet_trivializationAt E (TangentSpace I) x, ?_⟩
   rw [(isOpen_extChartAt_target (I := I) x).interior_eq]
   exact (extChartAt I x).map_source (mem_extChartAt_source (I := I) x)
-
-
-
 
 omit [CompactSpace M] in
 omit [NeZero (Module.finrank ℝ E)] in
@@ -184,12 +138,6 @@ theorem metricTracePair0SAt_nablaCov_eq_divergence
   refine Finset.sum_congr rfl (fun k _ => ?_)
   rw [chartChristoffel_symm (I := I) g x k i k]
 
-
-
-
-
-
-
 omit [CompactSpace M] in
 omit [NeZero (Module.finrank ℝ E)] in
 omit [SigmaCompactSpace M] in
@@ -219,10 +167,6 @@ theorem divergence_g_eq_finBasis_metricTrace
     DifferentialGeometry.Tensor.Coordinates.coordinateFrameAt_toBasis_apply]
   simp only [vec2]
   norm_num
-
-
-
-
 
 omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M]
     [SigmaCompactSpace M] in
@@ -394,8 +338,6 @@ private lemma coeff_cov_eq_deriv_add_christoffel
     rw [hZc_def]
     ring
 
-
-
 omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M]
     [SigmaCompactSpace M] in
 private lemma inner_cov_frame_eq
@@ -435,11 +377,6 @@ private lemma inner_cov_frame_eq
   refine Finset.sum_congr rfl fun k _ => ?_
   rw [map_smul, ContinuousLinearMap.smul_apply, smul_eq_mul]
   rw [coeff_cov_eq_deriv_add_christoffel cov Z x₀ i k]
-
-
-
-
-
 
 omit [CompactSpace M] in
 omit [NeZero (Module.finrank ℝ E)] in

@@ -2,86 +2,9 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.IteratedRmTowerHea
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.NablaRiemannHeatFrameInvariant
 import DifferentialGeometry.Tensor.RSTensor.Tensor0SRiemannian.Comparison
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Operator
 
 set_option autoImplicit false
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 noncomputable section
 
@@ -101,25 +24,9 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 variable [IsManifold I 1 M] [IsManifold I 2 M]
 variable [CompleteSpace E] [SigmaCompactSpace M] [T2Space M]
 
-
-
-
-
-
-
-
 section OrthonormalCollapse
 
 variable {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
-
-
-
-
-
-
-
-
-
 
 omit [Module.Finite ℝ E] in
 omit [I.Boundaryless] [IsManifold I 2 M] [CompleteSpace E]
@@ -142,31 +49,9 @@ theorem inner0S_orthoBasis_eq_compContract
 
 end OrthonormalCollapse
 
-
-
-
-
-
-
-
-
-
-
-
-
-
 section RicReactionCollapse
 
 variable {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
-
-
-
-
-
-
-
-
-
 
 theorem sum_delta_erase_slot_eq {s : ℕ}
     (I0 : Fin s → Idx) (b : Fin s) (G : (Fin s → Idx) → Real) :
@@ -214,29 +99,10 @@ theorem sum_delta_erase_slot_eq {s : ℕ}
   refine Finset.prod_eq_zero (Finset.mem_erase.mpr ⟨hab, Finset.mem_univ a⟩) ?_
   rw [identityInvMetric, diagonalInvMetric_eq_zero_of_ne hdis]
 
-
-
-
-
-
-
-
-
 def ricStarArray {s : ℕ}
     (ric : Idx → Idx → Real) (cB : (Fin s → Idx) → Real) :
     (Fin s → Idx) → Real :=
   fun I0 => ∑ b : Fin s, ∑ e : Idx, ric (I0 b) e * cB (Function.update I0 b e)
-
-
-
-
-
-
-
-
-
-
-
 
 omit [DecidableEq Idx] in
 theorem abs_ricStarArray_le {s : ℕ}
@@ -270,14 +136,6 @@ theorem abs_ricStarArray_le {s : ℕ}
         ((Fintype.card Idx : Real) * Rbnd * Real.sqrt (compNormSqMulti cB))) =
       (s : Real) * (Fintype.card Idx : Real) * Rbnd *
         Real.sqrt (compNormSqMulti cB) from by ring]
-
-
-
-
-
-
-
-
 
 theorem ricReactionContract_delta_eq_compContract {s : ℕ}
     (ric : Idx → Idx → Real) (cA cB : (Fin s → Idx) → Real) :
@@ -363,57 +221,15 @@ theorem ricReactionContract_delta_eq_compContract {s : ℕ}
 
 end RicReactionCollapse
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 section ReactionBridge
 
 variable {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
-
-
-
-
-
-
-
 
 def combinedStarArray {s : ℕ}
     (ric : Idx → Idx → Real)
     (rmComp residualComp : (Fin s → Idx) → Real) :
     (Fin s → Idx) → Real :=
   fun m => ricStarArray ric rmComp m + residualComp m
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 omit [Module.Finite ℝ E] in
 omit [I.Boundaryless] in
@@ -478,8 +294,6 @@ theorem nablaKRm04Reaction_orthoBasis_eq_compContract
               (∑ m : Fin (4 + k) → Idx, residC m * rmC m)) from by ring]
   rw [hcombine]
 
-
-
 omit [Module.Finite ℝ E] in
 omit [I.Boundaryless] in
 omit [SigmaCompactSpace M] in
@@ -541,80 +355,5 @@ theorem nablaKReactionAt_eq
   rw [hcombine]
 
 end ReactionBridge
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 end DifferentialGeometry.PDE.RicciFlow

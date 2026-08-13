@@ -7,7 +7,6 @@ import Mathlib.Algebra.Order.Chebyshev
 import Mathlib.Topology.Order.Compact
 open DifferentialGeometry.Analysis.Elliptic
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Connection
 
 

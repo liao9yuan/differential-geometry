@@ -3,19 +3,10 @@ import DifferentialGeometry.Geometry.Comparison.CenterOfMass
 import DifferentialGeometry.Geometry.Comparison.HalfSqDistGradMain
 import DifferentialGeometry.Geometry.Connection.ChartBridge.Hessian
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Connection
 open DifferentialGeometry.Geometry.Operator
 
 set_option autoImplicit false
-
-
-
-
-
-
-
-
 
 noncomputable section
 
@@ -41,8 +32,6 @@ variable [NeZero (Module.finrank Real E)]
 variable {H : Type uH} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H} [I.Boundaryless]
 
-
-
 omit [NeZero (Module.finrank ℝ E)] in
 theorem normalTan_metric
     (Y : PointedRiemannianManifold.{u, uE, uH} (I := I)) (x : Y.M)
@@ -61,8 +50,6 @@ theorem normalTan_metric
   letI : T2Space (TangentBundle I Y.M) := Y.t2TangentBundle
   rw [normalCoordMetric_apply]
   rfl
-
-
 
 theorem normalTanHome_target
     (Y : PointedRiemannianManifold.{u, uE, uH} (I := I)) (x : Y.M) :
@@ -85,8 +72,6 @@ theorem normalTanHome_target
     PartialDiffeomorph.tangentHome, preimage_univ, inter_univ]
 
 namespace IsNormalDiag
-
-
 
 theorem tan_mem_of_small
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
@@ -293,8 +278,6 @@ theorem tan_mem_of_small
   rw [← htransport.1]
   exact ⟨z, hzBall, hAz⟩
 
-
-
 theorem inv_is_min
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
     (hb : NormalCoordMetricBoundInput (I := I) X) (k : Nat)
@@ -419,8 +402,6 @@ theorem inv_is_min
     exact hmap
   exact ⟨v, hdom, hinv, hexp, hlen⟩
 
-
-
 theorem halfSq_eq_inv
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
     (hb : NormalCoordMetricBoundInput (I := I) X) (k : Nat)
@@ -507,8 +488,6 @@ theorem halfSq_eq_inv
   rw [HopfRinow.riemMetric_dist_eq (I := I) (M := (X.obj k).M) y pt]
   dsimp only
   rw [hinv, ← hlen, Real.sq_sqrt hinnerNonneg]
-
-
 
 theorem halfSq_inf
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
@@ -644,8 +623,6 @@ theorem halfSq_inf
   exact halfSq_eq_inv (I := I) hb k hcomplete hconn x hq he hf
     hρ hρq hρmetric hρexp hy
 
-
-
 theorem grad_half_inv
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
     (hb : NormalCoordMetricBoundInput (I := I) X) (k : Nat)
@@ -751,9 +728,6 @@ theorem grad_half_inv
       -(show TangentSpace I y from (B.inv (y, pt)).snd)
   rw [hinv]
   exact hgrad
-
-
-
 
 theorem hess_half_inv
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}

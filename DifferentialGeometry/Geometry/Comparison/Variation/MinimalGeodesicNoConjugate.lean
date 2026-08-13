@@ -8,14 +8,6 @@ open DifferentialGeometry.Geometry.Curvature
 
 set_option autoImplicit false
 
-/-!
-# A minimizing geodesic has no interior conjugate vector
-
-The proof realizes a conjugate Jacobi field in a parallel perpendicular frame,
-uses the abstract negative-index smoothing theorem, and contradicts the
-second-variation nonnegativity of a length-minimizing geodesic.
--/
-
 open Set Function Filter Manifold Bundle
 open scoped Topology Manifold ContDiff RealInnerProductSpace Bundle
 
@@ -43,8 +35,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-/-- A unit-speed intrinsic geodesic that minimizes length on `[0,L]`, for
-`L > 0`, has no conjugate vector at any interior radial time. -/
 theorem not_conj_of_min_len
     [PseudoEMetricSpace M]
     [RiemannianBundle (fun x : M => TangentSpace I x)]
@@ -383,8 +373,6 @@ theorem not_conj_of_min_len
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-/-- A unit-speed intrinsic geodesic that minimizes length on `[0,1]` has no
-conjugate vector at any interior radial time. -/
 theorem not_conj_of_min
     [PseudoEMetricSpace M]
     [RiemannianBundle (fun x : M => TangentSpace I x)]

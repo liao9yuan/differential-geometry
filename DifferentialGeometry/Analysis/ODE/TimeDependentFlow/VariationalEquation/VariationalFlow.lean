@@ -2,7 +2,6 @@ import DifferentialGeometry.Analysis.Parabolic.DeTurckRicci.Pullback.Cartan.Canc
 import DifferentialGeometry.Analysis.ODE.TimeDependentFlow.DiffeomorphismFamily.ManifoldIntegralFlow
 import Mathlib.Analysis.Calculus.Deriv.Mul
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Connection
 
 noncomputable section

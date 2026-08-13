@@ -6,13 +6,6 @@ open DifferentialGeometry.Geometry.Operator
 
 set_option autoImplicit false
 
-
-
-
-
-
-
-
 namespace DifferentialGeometry.Analysis.Sobolev
 
 noncomputable section
@@ -22,8 +15,6 @@ open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.DivergenceTheorem
 open DifferentialGeometry.Geometry.Operator
 open scoped Manifold ContDiff
-
-
 
 theorem sobolev_intrinsic
     {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]

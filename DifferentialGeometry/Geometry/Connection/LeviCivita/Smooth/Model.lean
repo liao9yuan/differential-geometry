@@ -22,20 +22,6 @@ variable {I : ModelWithCorners Real E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 variable [SigmaCompactSpace M] [T2Space M]
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 noncomputable def metricFlatContinuousEquiv
     (g : SmoothRiemannianMetric I M) (x₀ : M) :
     E ≃L[Real] (E →L[Real] Real) :=
@@ -49,8 +35,6 @@ theorem metricFlatContinuousEquiv_apply
     ((metricFlatContinuousEquiv (I := I) g x₀) v) w = g.inner x₀ v w := by
   change ((metricFlatEquiv (I := I) g x₀) v) w = g.inner x₀ v w
   rw [metricFlatEquiv_apply]
-
-
 
 noncomputable def metricFlatModelInChart
     (g : SmoothRiemannianMetric I M) (x₀ : M) (y : E) :
@@ -158,8 +142,6 @@ theorem metricFlatModelInChart_contDiffWithinAt
       (x := extChartAt I x₀ x₀) hsymm
   exact hcomp.contDiffWithinAt
 
-
-
 omit [FiniteDimensional ℝ E] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 theorem metricFlatModelInChart_apply_of_target
     (g : SmoothRiemannianMetric I M) (x₀ : M) {y : E}
@@ -208,8 +190,6 @@ theorem inverseMetricFlatModelInChart_contDiffWithinAt
       |>.comp_contDiffWithinAt
         (x := extChartAt I x₀ x₀)
         (metricFlatModelInChart_contDiffWithinAt (I := I) g x₀)
-
-
 
 omit [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 theorem metricFlatModelInChart_contDiffWithinAt_of_mem
@@ -450,9 +430,6 @@ theorem inverseMetricFlatModelInChart_metricInverseInBasis_center
             · have hji : j ≠ i := fun h => hij h.symm
               simp [hij, hji]
   · exact hsecond i j
-
-
-
 
 noncomputable def metricFlatModelInChart_component
     (g : SmoothRiemannianMetric I M) (x₀ : M)

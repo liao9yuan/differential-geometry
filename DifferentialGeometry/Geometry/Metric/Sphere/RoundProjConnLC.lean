@@ -5,24 +5,7 @@ import DifferentialGeometry.Geometry.Curvature.Metric
 import Mathlib.Analysis.InnerProductSpace.Calculus
 open DifferentialGeometry.Geometry.Connection.Realization
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Connection
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 noncomputable section
 
@@ -92,10 +75,6 @@ theorem mfderiv_inner {F G : sphere (0 : E) 1 → E} {x : sphere (0 : E) 1}
   change ⟪F x, mfderiv (𝓡 n) 𝓘(ℝ, E) G x v⟫ + ⟪mfderiv (𝓡 n) 𝓘(ℝ, E) F x v, G x⟫
     = ⟪mfderiv (𝓡 n) 𝓘(ℝ, E) F x v, G x⟫ + ⟪F x, mfderiv (𝓡 n) 𝓘(ℝ, E) G x v⟫
   ring
-
-
-
-
 
 omit [FiniteDimensional ℝ E] in
 theorem dIncl_mlieBracket
@@ -227,10 +206,12 @@ theorem projConn_eq_metricCov
       (fun y => (TotalSpace.mk' (EuclideanSpace ℝ (Fin n)) y (Y y))) x)
     (v : TangentSpace (𝓡 n) x) :
     projConn (n := n) Y x v
-      = DifferentialGeometry.Geometry.Curvature.metricCov (roundMetric (E := E) (n := n)) Y x v := by
+      = DifferentialGeometry.Geometry.Curvature.metricCov (roundMetric (E := E)
+        (n := n)) Y x v := by
   haveI : IsManifold (𝓡 n) ∞ (sphere (0 : E) 1) :=
     EuclideanSpace.instIsManifoldSphere.of_le le_top
-  have htor₂ : (DifferentialGeometry.Geometry.Curvature.metricCov (roundMetric (E := E) (n := n))).torsion = 0 :=
+  have htor₂ : (DifferentialGeometry.Geometry.Curvature.metricCov (roundMetric (E := E)
+    (n := n))).torsion = 0 :=
     funext fun y =>
       DifferentialGeometry.Geometry.Connection.leviCivitaConnectionOfMetric_isTorsionFree
         (roundMetric (E := E) (n := n)) y
@@ -241,12 +222,14 @@ theorem projConn_eq_metricCov
     obtain ⟨W, hWy⟩ : ∃ σ : Cₛ^∞⟮𝓡 n; EuclideanSpace ℝ (Fin n),
         (TangentSpace (𝓡 n) : sphere (0 : E) 1 → Type _)⟯, σ y = vv :=
       ContMDiffSection.exists_eq_at y vv
-    have hgen := DifferentialGeometry.Geometry.Connection.leviCivitaConnectionOfMetric_isMetricCompatible
+    have hgen :=
+      DifferentialGeometry.Geometry.Connection.leviCivitaConnectionOfMetric_isMetricCompatible
       (roundMetric (E := E) (n := n)) y W W₁ W₂ W.mdifferentiableAt hW₁ hW₂
     rw [hWy] at hgen
     exact hgen
   exact DifferentialGeometry.Geometry.Connection.koszul_levi_civita_unique_of_torsionFree_metricCompatible
-    (projConnCD (E := E) (n := n)) (DifferentialGeometry.Geometry.Curvature.metricCov (roundMetric (E := E) (n := n)))
+    (projConnCD (E := E) (n := n)) (DifferentialGeometry.Geometry.Curvature.metricCov
+      (roundMetric (E := E) (n := n)))
     projConn_torsion htor₂ projConn_metricCompat hMC₂ hY v
 
 end Geometry

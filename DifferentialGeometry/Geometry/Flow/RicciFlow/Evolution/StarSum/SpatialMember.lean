@@ -3,28 +3,9 @@ import DifferentialGeometry.Geometry.Curvature.CurvatureActionLower
 open DifferentialGeometry.Tensor.RSTensor
 open DifferentialGeometry.PDE.RicciFlow
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Operator
 
 set_option autoImplicit false
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 noncomputable section
 
@@ -320,12 +301,6 @@ private theorem slotdiffBasisEq
           congr 1
           exact Finset.sum_congr rfl (fun q _ => hq q)
 
-
-
-
-
-
-
 omit [Module.Finite ℝ E] in
 omit [I.Boundaryless] in
 private theorem curvactReduce
@@ -507,21 +482,9 @@ private theorem curvRoute
   · rw [dif_neg hq]
     simpa using (curvactStarPos (I := I) S t k q hq basis horth' I0).symm
 
-
-
-
-
-
-
-
-
-
 def commStarCost (n k : ℕ) : Real :=
   (n : Real) ^ 2 * (13 + 3 * k)
 
-/-- The canonical field representing the spatial commutator
-`[Δ,∇]∇ᵏRm`. Its definition is independent of a solution proof, a component
-index type, a point, and a choice of basis. -/
 def commStarField
     (S : SolutionOn (I := I) (M := M) D)
     (t : RealTimeInterval.RegularTime D) (k : ℕ) :
@@ -543,8 +506,6 @@ def commStarField
   (-1 : Real) • (TA + TB + TC)
 
 set_option backward.isDefEq.respectTransparency false in
-/-- The cost and component specifications of the canonical spatial-commutator
-field, bundled so their shared assembly proof is checked once. -/
 private theorem commStarField_data
     (S : SolutionOn (I := I) (M := M) D) (hS : IsSolutionOn (I := I) S)
     (t : RealTimeInterval.RegularTime D) (k : ℕ)
@@ -766,8 +727,6 @@ private theorem commStarField_data
     simp [T, tensor0SComponent_apply, hTAp, hTBp, hTCp, Finset.sum_add_distrib]
     ring_nf
 
-/-- The canonical spatial-commutator field has the exact constructor-tree
-cost `commStarCost`. -/
 theorem commStarField_cost
     (S : SolutionOn (I := I) (M := M) D) (hS : IsSolutionOn (I := I) S)
     (t : RealTimeInterval.RegularTime D) (k : ℕ)
@@ -777,8 +736,6 @@ theorem commStarField_cost
   classical
   exact (commStarField_data (I := I) S hS t k).1
 
-/-- Components of the canonical spatial-commutator field agree with the
-intrinsic commutator expression in every orthonormal basis. -/
 theorem commStarField_spec
     (S : SolutionOn (I := I) (M := M) D) (hS : IsSolutionOn (I := I) S)
     (t : RealTimeInterval.RegularTime D) (k : ℕ)
@@ -798,8 +755,6 @@ theorem commStarField_spec
   letI : Fintype Idx := Fintype.ofFinite Idx
   exact (commStarField_data (I := I) S hS t k).2 x basis horth I0
 
-/-- **Brick 4, P2 (compatibility form): the spatial commutator
-`[Δ,∇]∇ᵏRm` is a star sum.** -/
 theorem spatialCommStarSum
     (S : SolutionOn (I := I) (M := M) D) (hS : IsSolutionOn (I := I) S)
     (t : RealTimeInterval.RegularTime D) (k : ℕ)

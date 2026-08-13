@@ -89,7 +89,8 @@ lemma iteratedFDeriv_succ_cons_apply
     {u : E → ℝ} (hu_smooth : ContDiff ℝ (⊤ : WithTop ℕ∞) u)
     (j : ℕ) (α : Fin j → Fin d) (i : Fin d) :
     (fun x => (fderiv ℝ
-        (fun y => (iteratedFDeriv ℝ j u y) (fun i' : Fin j => EuclideanSpace.single (α i') (1 : ℝ))) x)
+        (fun y => (iteratedFDeriv ℝ j u y) (fun i' : Fin j => EuclideanSpace.single (α i')
+          (1 : ℝ))) x)
           (EuclideanSpace.single i (1 : ℝ))) =
       fun x => (iteratedFDeriv ℝ (j + 1) u x)
         (Fin.cons (EuclideanSpace.single i (1 : ℝ))
@@ -104,7 +105,8 @@ lemma iteratedFDeriv_succ_cons_apply
         = (fderiv ℝ (iteratedFDeriv ℝ j u) x) (EuclideanSpace.single i (1 : ℝ))
             (fun i' : Fin j => EuclideanSpace.single (α i') (1 : ℝ)) :=
           fderiv_iteratedFDeriv_apply_const hu_inner j
-            (fun i' : Fin j => EuclideanSpace.single (α i') (1 : ℝ)) (EuclideanSpace.single i (1 : ℝ)) x
+            (fun i' : Fin j => EuclideanSpace.single (α i') (1 : ℝ)) (EuclideanSpace.single i
+              (1 : ℝ)) x
     _ = (iteratedFDeriv ℝ (j + 1) u x)
           (Fin.cons (EuclideanSpace.single i (1 : ℝ))
             (fun i' : Fin j => EuclideanSpace.single (α i') (1 : ℝ))) := by
@@ -268,7 +270,8 @@ lemma iterWeakPartial_ae_eq_iteratedFDeriv_of_smooth
     (hu_supp : HasCompactSupport u) (hu_sub : tsupport u ⊆ Ω) :
     ∀ (j : ℕ) (α : Fin j → Fin d),
       iterWeakPartial (d := d) 2 j α u Ω =ᵐ[volume.restrict Ω]
-        (fun x => (iteratedFDeriv ℝ j u x) (fun i : Fin j => EuclideanSpace.single (α i) (1 : ℝ))) := by
+        (fun x => (iteratedFDeriv ℝ j u x) (fun i : Fin j => EuclideanSpace.single (α i)
+          (1 : ℝ))) := by
   intro j
   induction j generalizing u with
   | zero =>
@@ -621,7 +624,8 @@ theorem rellich_kondrachov_Wkp_seq_smooth
         by_contra hfx
         exact hx0 (by simp [Function.support, hfx])
       simp [s, hfx] at hx
-    exact (closure_mono hs).trans ((tsupport_iteratedFDeriv_subset (n := t.1.1)).trans (hu_supp_sub n))
+    exact (closure_mono hs).trans ((tsupport_iteratedFDeriv_subset (n := t.1.1)).trans
+      (hu_supp_sub n))
   have hs_ae : ∀ t n,
       (iterWeakPartial (d := d) 2 t.1.1 t.2 (u n) Ω =ᵐ[volume.restrict Ω] s t n) := by
     intro t n
@@ -652,7 +656,8 @@ theorem rellich_kondrachov_Wkp_seq_smooth
           (fun i' : Fin t.1.1 => EuclideanSpace.single (t.2 i') (1 : ℝ))) x)
             (EuclideanSpace.single i (1 : ℝ))) = _
         exact iteratedFDeriv_succ_cons_apply (hu_smooth n) t.1.1 t.2 i
-      have hae' : iterWeakPartial (d := d) 2 (t.1.1 + 1) (Fin.cons i t.2) (u n) Ω =ᵐ[volume.restrict Ω]
+      have hae' : iterWeakPartial (d := d) 2 (t.1.1 + 1) (Fin.cons i t.2)
+        (u n) Ω =ᵐ[volume.restrict Ω]
           (fun x => (iteratedFDeriv ℝ (t.1.1 + 1) (u n) x)
             (Fin.cons (EuclideanSpace.single i (1 : ℝ))
               (fun i' : Fin t.1.1 => EuclideanSpace.single (t.2 i') (1 : ℝ)))) :=
@@ -669,7 +674,8 @@ theorem rellich_kondrachov_Wkp_seq_smooth
                     =ᵐ[volume.restrict Ω] (fun x => (iteratedFDeriv ℝ (t.1.1 + 1) (u n) x)
                         (Fin.cons (EuclideanSpace.single i (1 : ℝ))
                           (fun i' : Fin t.1.1 => EuclideanSpace.single (t.2 i') (1 : ℝ)))) := hae'
-                _ =ᵐ[volume.restrict Ω] (fun x => (fderiv ℝ (s t n) x) (EuclideanSpace.single i (1 : ℝ))) := by
+                _ =ᵐ[volume.restrict Ω] (fun x => (fderiv ℝ (s t n) x) (EuclideanSpace.single i
+                  (1 : ℝ))) := by
                   rw [hid]
         _ ≤ ENNReal.ofReal R :=
           eLpNorm_iterWeakPartial_le_of_norm_le (hu_bdd n)

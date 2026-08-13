@@ -1,6 +1,5 @@
 import DifferentialGeometry.Analysis.Elliptic.Regularity.Bochner.Polarised
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Operator
 
 
@@ -121,8 +120,10 @@ omit [T2Space M] [CompactSpace M] [SigmaCompactSpace M] in
 omit [NeZero (Module.finrank ℝ E)] in
 lemma Δ_g_gradInnerSmoothBundle_eq_contMDiff_g_inner
     (g : SmoothRiemannianMetric I M) (φ : C^∞⟮I, M; ℝ⟯) (v : SmoothScalar g) (x : M) :
-    Δ_g (I := I) g ⟨(gradInnerSmoothBundle (I := I) (M := M) g φ v).toFun, (gradInnerSmoothBundle (I := I) (M := M) g φ v).smooth⟩ x =
-      Δ_g (I := I) g ⟨_, (contMDiff_g_inner_grad_phi_grad_v (I := I) (M := M) g φ ⟨v.toFun, v.smooth⟩)⟩ x := by
+    Δ_g (I := I) g ⟨(gradInnerSmoothBundle (I := I) (M := M) g φ v).toFun,
+      (gradInnerSmoothBundle (I := I) (M := M) g φ v).smooth⟩ x =
+      Δ_g (I := I) g ⟨_, (contMDiff_g_inner_grad_phi_grad_v (I := I) (M := M) g φ ⟨v.toFun,
+        v.smooth⟩)⟩ x := by
   apply Δ_g_congr_func
 
 end BochnerPolarisedLpSmooth

@@ -9,8 +9,9 @@ import Mathlib.MeasureTheory.Integral.IntervalIntegral.FundThmCalculus
 import DifferentialGeometry.Analysis.Parabolic.RicciLinearization.RicciDifferenceMeanValueJointChartCurvatureSmoothness
 import DifferentialGeometry.Analysis.Parabolic.RicciLinearization.RicciDifferenceMeanValueClmSectionJointSmoothness
 import DifferentialGeometry.Analysis.Parabolic.RicciLinearization.RicciDifferenceMeanValueJointTensorFieldSmoothness
-open DifferentialGeometry.Analysis.Spectral DifferentialGeometry.Analysis.Spectral.DeTurck DifferentialGeometry.Analysis.Spectral.DeTurckCoefficients DifferentialGeometry.Analysis.Spectral.MetricRealization DifferentialGeometry.PDE.RicciFlow
-open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Analysis.Spectral DifferentialGeometry.Analysis.Spectral.DeTurck
+    DifferentialGeometry.Analysis.Spectral.DeTurckCoefficients
+    DifferentialGeometry.Analysis.Spectral.MetricRealization DifferentialGeometry.PDE.RicciFlow
 open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Connection
 open DifferentialGeometry.Geometry.Operator
@@ -1164,7 +1165,8 @@ theorem cometricDoubleTraceFib_realizedFam_jointContMDiffOn [BoundarylessManifol
         (E := fun z : M => Tensor0SBundle.Tensor0SSpace 0 I z) q.1
         (DifferentialGeometry.Geometry.Connection.unitZeroSec (I := I) (M := M) q.1))
       ((Set.univ : Set M) ×ˢ realizedSmallSet (δ := δ) (δ' := δ')) :=
-    ((DifferentialGeometry.Geometry.Connection.unitZeroSec (I := I) (M := M)).contMDiff.comp_contMDiffOn contMDiffOn_fst)
+    ((DifferentialGeometry.Geometry.Connection.unitZeroSec (I := I)
+      (M := M)).contMDiff.comp_contMDiffOn contMDiffOn_fst)
   have htraceUnit := ContMDiffOn.clm_bundle_apply (b := Prod.fst) htrace hunit
   refine htraceUnit.congr (fun q hq => ?_)
   congr 1
@@ -1314,7 +1316,6 @@ theorem realizedFam_chartRicciTensor_jointContMDiffOn
     (fun q _ => rfl) rfl
 
 set_option backward.isDefEq.respectTransparency false in
-
 omit [CompactSpace M] in
 theorem ricciTensorSection_chartComponent_realizedFam_jointContMDiffOn [BoundarylessManifold I M]
     (g₀ : SmoothRiemannianMetric I M) (T T' : SmoothCcTensor g₀ 0 2)
@@ -1412,7 +1413,6 @@ theorem ricEndoRaisedFib_realizedFam_jointContMDiffOn [BoundarylessManifold I M]
   rw [ricEndoRaisedFib_apply, hcvdef]
 
 set_option backward.isDefEq.respectTransparency false in
-
 omit [CompactSpace M] in
 theorem ricciArmOrder0CurvCoeffFibSlot0_realizedFam_jointContMDiffOn [BoundarylessManifold I M]
     (g₀ : SmoothRiemannianMetric I M) (T T' : SmoothCcTensor g₀ 0 2)
@@ -1452,7 +1452,6 @@ theorem ricciArmOrder0CurvCoeffFibSlot0_realizedFam_jointContMDiffOn [Boundaryle
   rw [ricciArmOrder0CurvCoeffFibSlot]
 
 set_option backward.isDefEq.respectTransparency false in
-
 omit [CompactSpace M] in
 theorem ricciArmOrder0CurvCoeffFibSlot1_realizedFam_jointContMDiffOn [BoundarylessManifold I M]
     (g₀ : SmoothRiemannianMetric I M) (T T' : SmoothCcTensor g₀ 0 2)
@@ -1492,7 +1491,6 @@ theorem ricciArmOrder0CurvCoeffFibSlot1_realizedFam_jointContMDiffOn [Boundaryle
   rw [ricciArmOrder0CurvCoeffFibSlot]
 
 set_option backward.isDefEq.respectTransparency false in
-
 omit [CompactSpace M] in
 theorem ricciArmOrder0CurvCoeffFib_realizedFam_jointContMDiffOn [BoundarylessManifold I M]
     (g₀ : SmoothRiemannianMetric I M) (T T' : SmoothCcTensor g₀ 0 2)
@@ -1837,7 +1835,8 @@ theorem comTrace_of_family (p : ℕ)
         (E := fun z : M => Tensor0SBundle.Tensor0SSpace 0 I z) q.1
         (DifferentialGeometry.Geometry.Connection.unitZeroSec (I := I) (M := M) q.1))
       ((Set.univ : Set M) ×ˢ D.regular) :=
-    (DifferentialGeometry.Geometry.Connection.unitZeroSec (I := I) (M := M)).contMDiff.comp_contMDiffOn
+    (DifferentialGeometry.Geometry.Connection.unitZeroSec (I := I)
+      (M := M)).contMDiff.comp_contMDiffOn
       contMDiffOn_fst
   have htraceUnit := ContMDiffOn.clm_bundle_apply (b := Prod.fst) htrace hunit
   refine htraceUnit.congr (fun q _ => ?_)

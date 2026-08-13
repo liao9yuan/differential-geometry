@@ -5,8 +5,6 @@ import Mathlib.LinearAlgebra.Trace
 import Mathlib.Topology.Algebra.Module.FiniteDimension
 import Mathlib.Topology.Algebra.Module.LinearMap
 
-
-
 namespace DifferentialGeometry
 namespace Tensor0SBundle
 
@@ -428,8 +426,6 @@ def normSq0S
     normSq0S (I := I) g x s A = inner0S (I := I) g x s A A := by
   rfl
 
-/-- Cauchy--Schwarz for the metric-induced inner product on covariant tensor
-fibres. -/
 theorem inner0S_sq_le_mul
     (g : SmoothMetric I M) (x : M) (s : Nat)
     (A B : Tensor0SSpace s I x) :
@@ -459,14 +455,12 @@ theorem inner0S_sq_le_mul
   rw [hAB, hBA, hAA, hBB] at hcs
   simpa [Real.norm_eq_abs, pow_two] using hcs
 
-/-- The metric-induced squared norm of a covariant tensor is nonnegative. -/
 theorem normSq0S_nonneg
     (g : SmoothMetric I M) (x : M) (s : Nat)
     (A : Tensor0SSpace s I x) :
     0 <= normSq0S (I := I) g x s A := by
   exact (tensor0SMetricData (I := I) g x s).nonneg A
 
-/-- The `(0,1)` tensor metric agrees with the cotangent metric. -/
 theorem inner0S_one_eq_cotangent
     (g : SmoothMetric I M) (x : M)
     (α β : Tensor0SSpace 1 I x) :

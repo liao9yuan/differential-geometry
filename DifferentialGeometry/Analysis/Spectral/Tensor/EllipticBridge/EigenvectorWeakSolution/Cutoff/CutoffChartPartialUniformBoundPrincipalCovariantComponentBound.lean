@@ -5,7 +5,6 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.Estimates.ChristoffelCorrec
 import DifferentialGeometry.Analysis.Elliptic.TensorRegularity.CovDeriv.ChartFormLowerOrder
 import DifferentialGeometry.Analysis.Elliptic.Regularity.SmoothFChartResidual.BilinearBound
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Connection
 
 

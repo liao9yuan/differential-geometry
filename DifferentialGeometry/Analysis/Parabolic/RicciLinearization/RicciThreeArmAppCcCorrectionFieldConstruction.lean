@@ -23,7 +23,6 @@ open DifferentialGeometry.Analysis.Sobolev
 open DifferentialGeometry.Analysis.Spectral
 open DifferentialGeometry.Analysis.Elliptic
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
 
 
 noncomputable section
@@ -42,7 +41,8 @@ open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.L2
 
 open DifferentialGeometry.Integral.DivergenceTheorem
-open DifferentialGeometry.PDE.RicciFlow DifferentialGeometry.Analysis.Sobolev DifferentialGeometry.Analysis.Spectral
+open DifferentialGeometry.PDE.RicciFlow DifferentialGeometry.Analysis.Sobolev
+    DifferentialGeometry.Analysis.Spectral
 open DifferentialGeometry.Analysis.Spectral.MetricRealization
 open DifferentialGeometry.Analysis.Spectral.DeTurck
 open DifferentialGeometry.PDE.DeTurck.RicciLinearization
@@ -144,7 +144,8 @@ theorem exists_Csob_sub_pointwise_jet3_le
     have := hbudgetT' j hj
     linarith
   have hCol := hCc W x
-  set Mn : ℝ := ‖DifferentialGeometry.Analysis.Sobolev.IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) (2 * k) W‖
+  set Mn : ℝ := ‖DifferentialGeometry.Analysis.Sobolev.IntrinsicSobolev.SmoothCcTensor.toHs
+    (g := g₀) (r := 0) (s := 2) (2 * k) W‖
     with hMn_def
   have hMn_nn : 0 ≤ Mn := norm_nonneg _
   have hHebey : Mn ≤ Ch * ∑ j ∈ Finset.range (2 * (2 * k) + 1),

@@ -3,7 +3,6 @@ import DifferentialGeometry.Geometry.Connection.Laplacian.ConnectionLaplacian
 import DifferentialGeometry.Geometry.Curvature.Bochner.WeitzenbockIdentity
 import DifferentialGeometry.Analysis.Integration.L2.SmoothSections.Defs
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
 
 
 noncomputable section
@@ -252,7 +251,8 @@ theorem rawTensorConnLap_smul [CompleteSpace E]
   rw [h_second_smul, h_smulT]
   simp only [ContinuousLinearMap.smul_apply, smul_sub]
 
-omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [T2Space M] [BoundarylessManifold I M] in
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [T2Space M]
+    [BoundarylessManifold I M] in
 private lemma cov_eq_zero_of_eventually_zero_on_open
     {F : Type*} [NormedAddCommGroup F] [NormedSpace ℝ F]
     {V : M → Type*} [TopologicalSpace (TotalSpace F V)]

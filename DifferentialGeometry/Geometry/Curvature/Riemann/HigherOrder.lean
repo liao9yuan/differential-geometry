@@ -4,15 +4,6 @@ import DifferentialGeometry.Geometry.Curvature.Riemann.Basic.Sections
 import DifferentialGeometry.Geometry.Connection.LeviCivita.Torsion
 open DifferentialGeometry.Geometry.Curvature
 
-
-
-
-
-
-
-
-
-
 suppress_compilation
 
 noncomputable section
@@ -29,9 +20,6 @@ variable [FiniteDimensional Real E] [CompleteSpace E]
 variable {H : Type*} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
-
-
-
 
 def nabla2VectorField
     (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
@@ -51,8 +39,6 @@ theorem nabla2VectorField_apply
         (cov Z x) ((cov Y x) (X x)) :=
   rfl
 
-
-
 theorem nabla2VectorField_skew_eq_curvature_sub_torsion
     (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
     {X Y Z : RawTangentField (I := I) (M := M)} {x : M}
@@ -65,8 +51,6 @@ theorem nabla2VectorField_skew_eq_curvature_sub_torsion
   unfold nabla2VectorField connectionRiemannCurvatureField
   simp [sub_eq_add_neg, map_add, add_assoc, add_left_comm, add_comm]
   abel
-
-
 
 theorem connectionRiemannCurvatureField_eq_nabla2VectorField_skew_of_torsion_zero
     (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
@@ -82,8 +66,6 @@ theorem connectionRiemannCurvatureField_eq_nabla2VectorField_skew_of_torsion_zer
   rw [htor, map_zero, sub_zero] at h
   exact h.symm
 
-
-
 theorem riemannCurvatureAux_eq_nabla2VectorField_skew_of_torsion_zero
     (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
     {X Y Z : RawTangentField (I := I) (M := M)} {x : M}
@@ -95,9 +77,6 @@ theorem riemannCurvatureAux_eq_nabla2VectorField_skew_of_torsion_zero
   rw [CovariantDerivative.riemannCurvatureAux_eq_connectionRiemannCurvatureField]
   exact connectionRiemannCurvatureField_eq_nabla2VectorField_skew_of_torsion_zero
     (I := I) cov hX hY htor
-
-
-
 
 theorem leviCivita_connectionRiemannCurvatureField_eq_nabla2VectorField_skew
     [SigmaCompactSpace M] [T2Space M]

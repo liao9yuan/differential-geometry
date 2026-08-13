@@ -4,7 +4,6 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.NormEstimates.NormCompariso
 open DifferentialGeometry.Analysis.Sobolev
 open DifferentialGeometry.Analysis.Elliptic
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Connection
 
 

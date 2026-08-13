@@ -2,59 +2,6 @@ import DifferentialGeometry.Analysis.Spectral.Intrinsic.MetricRealization.Spectr
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.MetricRealization.SpectralChartRegularityAnyOrder
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.MetricRealization.SpectralWeylCounting
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 noncomputable section
 
@@ -86,8 +33,6 @@ private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
-
-
 omit [NeZero (Module.finrank ℝ E)] in
 private lemma resolvent_pow_eq_weight
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (k : ℕ)
@@ -97,15 +42,6 @@ private lemma resolvent_pow_eq_weight
   rw [resolvent_eigenvalue_inv_eq_one_add_lambda (I := I) (M := M) g r s i]
   unfold tensorSobolevWeight
   rw [Real.rpow_natCast]
-
-
-
-
-
-
-
-
-
 
 omit [NeZero (Module.finrank ℝ E)] in
 private lemma garding_l1_sum_le
@@ -198,23 +134,6 @@ private lemma garding_l1_sum_le
     _ = ‖T‖ * Real.sqrt Stail := hrhs_eq
     _ = Real.sqrt Stail * ‖T‖ := by ring
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 theorem iteratedGardingExtensionBound_of_eigenvalueTailSummable
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (h_tail : EigenvalueTailSummable (I := I) (M := M) g r s) :
@@ -275,22 +194,6 @@ theorem iteratedGardingExtensionBound_of_eigenvalueTailSummable
     _ ≤ C₀ * (Real.sqrt Stail * ‖T‖) :=
         mul_le_mul_of_nonneg_left hl1 hC₀_nn
     _ = C₀ * Real.sqrt Stail * ‖T‖ := by ring
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 theorem iteratedGardingExtensionBound_of_countingBound
     (g : SmoothRiemannianMetric I M) (r s : ℕ)

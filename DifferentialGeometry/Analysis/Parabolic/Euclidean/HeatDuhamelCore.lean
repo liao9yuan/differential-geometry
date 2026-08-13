@@ -2,16 +2,6 @@ import DifferentialGeometry.Analysis.Parabolic.Euclidean.HeatKernelCancel
 import DifferentialGeometry.Analysis.Parabolic.Euclidean.KochLammPotential
 import Mathlib.Analysis.Calculus.ContDiff.Comp
 
-/-!
-# Smooth compactly supported Euclidean heat potentials
-
-This file transfers spatial derivatives of the Euclidean heat kernel onto a
-smooth compactly supported source.  These identities remove the nonintegrable
-terminal-time singularity of the raw second heat derivative and are the
-physical-space input for the zero-initial-data energy proof of the causal
-`L^2` Hessian estimate.
--/
-
 noncomputable section
 
 open MeasureTheory Set
@@ -28,8 +18,6 @@ variable {V : Type*}
 
 omit [InnerProductSpace ℝ V] [FiniteDimensional ℝ V] [MeasurableSpace V]
   [BorelSpace V] [Nontrivial V] in
-/-- A spatial slice of a compactly supported space-time function is compactly
-supported. -/
 theorem slice_compact (f : ℝ × V → ℝ) (hfc : HasCompactSupport f) (s : ℝ) :
     HasCompactSupport (fun y : V ↦ f (s, y)) := by
   let K : Set V := Prod.snd '' tsupport f
@@ -70,8 +58,6 @@ private theorem d1_sub_fderiv {t : ℝ} (v w x y : V) :
   simp
 
 omit [Nontrivial V] in
-/-- Move one spatial derivative of the heat kernel onto a smooth compactly
-supported scalar source. -/
 theorem heatD1_ibp {t : ℝ} (v x : V) (g : V → ℝ)
     (hg : ContDiff ℝ ∞ g) (hgc : HasCompactSupport g) :
     ∫ y : V, heatD1 t v (x - y) * g y =
@@ -108,8 +94,6 @@ theorem heatD1_ibp {t : ℝ} (v x : V) (g : V → ℝ)
   simpa only [mul_comm] using hparts
 
 omit [Nontrivial V] in
-/-- Move the second spatial derivative of the heat kernel onto one derivative
-of a smooth compactly supported scalar source. -/
 theorem heatD2_ibp {t : ℝ} (v w x : V) (g : V → ℝ)
     (hg : ContDiff ℝ ∞ g) (hgc : HasCompactSupport g) :
     ∫ y : V, heatD2 t v w (x - y) * g y =
@@ -152,8 +136,6 @@ private theorem dir_smooth (g : V → ℝ) (hg : ContDiff ℝ ∞ g) (v : V) :
     (contDiff_id.prodMk contDiff_const)
 
 omit [Nontrivial V] in
-/-- Move both spatial derivatives of the heat kernel onto a smooth compactly
-supported scalar source. -/
 theorem heatD2_ibp2 {t : ℝ} (v w x : V) (g : V → ℝ)
     (hg : ContDiff ℝ ∞ g) (hgc : HasCompactSupport g) :
     ∫ y : V, heatD2 t v w (x - y) * g y =
@@ -164,7 +146,6 @@ theorem heatD2_ibp2 {t : ℝ} (v w x : V) (g : V → ℝ)
     (dir_smooth g hg w) (hgc.fderiv_apply (𝕜 := ℝ) w)
 
 omit [Nontrivial V] in
-/-- Slice form of the one-derivative transfer identity. -/
 theorem heatD1_slice_ibp {t : ℝ} (v x : V) (s : ℝ)
     (f : ℝ × V → ℝ) (hf : ContDiff ℝ ∞ f) (hfc : HasCompactSupport f) :
     ∫ y : V, heatD1 t v (x - y) * f (s, y) =
@@ -174,7 +155,6 @@ theorem heatD1_slice_ibp {t : ℝ} (v x : V) (s : ℝ)
     (hf.comp (contDiff_prodMk_right s)) (slice_compact f hfc s)
 
 omit [Nontrivial V] in
-/-- Slice form of the one-step second-derivative transfer identity. -/
 theorem heatD2_slice_ibp {t : ℝ} (v w x : V) (s : ℝ)
     (f : ℝ × V → ℝ) (hf : ContDiff ℝ ∞ f) (hfc : HasCompactSupport f) :
     ∫ y : V, heatD2 t v w (x - y) * f (s, y) =
@@ -184,7 +164,6 @@ theorem heatD2_slice_ibp {t : ℝ} (v w x : V) (s : ℝ)
     (hf.comp (contDiff_prodMk_right s)) (slice_compact f hfc s)
 
 omit [Nontrivial V] in
-/-- Slice form of the two-derivative transfer identity. -/
 theorem heatD2_slice2 {t : ℝ} (v w x : V) (s : ℝ)
     (f : ℝ × V → ℝ) (hf : ContDiff ℝ ∞ f) (hfc : HasCompactSupport f) :
     ∫ y : V, heatD2 t v w (x - y) * f (s, y) =
@@ -194,13 +173,10 @@ theorem heatD2_slice2 {t : ℝ} (v w x : V) (s : ℝ)
   heatD2_ibp2 v w x (fun y : V ↦ f (s, y))
     (hf.comp (contDiff_prodMk_right s)) (slice_compact f hfc s)
 
-/-- Spatial directional derivative of a scalar space-time source. -/
 def spaceDeriv (v : V) (f : ℝ × V → ℝ) (z : ℝ × V) : ℝ :=
   fderiv ℝ (fun y : V ↦ f (z.1, y)) z.2 v
 
 omit [Nontrivial V] in
-/-- A divergence heat potential of a smooth compactly supported source is the
-ordinary heat potential of its spatial derivative. -/
 theorem heatPot1_eq_pot0 {t : ℝ} (ht : 0 < t) (w : V) (f : ℝ × V → ℝ)
     (hf : ContDiff ℝ ∞ f) (hfc : HasCompactSupport f) (x : V) :
     heatPot1 t w f x = heatPot0 t (spaceDeriv w f) x := by
@@ -216,13 +192,11 @@ theorem heatPot1_eq_pot0 {t : ℝ} (ht : 0 < t) (w : V) (f : ℝ × V → ℝ)
     heatD1_slice_ibp w x s f hf hfc
 
 omit [Nontrivial V] in
-/-- The ordinary heat potential has zero initial value. -/
 @[simp] theorem heatPot0_zero (f : ℝ × V → ℝ) (x : V) :
     heatPot0 0 f x = 0 := by
   simp [heatPot0]
 
 omit [Nontrivial V] in
-/-- A divergence heat potential has zero initial value. -/
 @[simp] theorem heatPot1_zero (w : V) (f : ℝ × V → ℝ) (x : V) :
     heatPot1 0 w f x = 0 := by
   simp [heatPot1]

@@ -3,20 +3,9 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.Estimates.H2H3Principal
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.DeTurckPrincipalCometricExtraction
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.CurvatureCoefficientDifferenceJetTowerIntegral
 open DifferentialGeometry.Analysis.Sobolev
-open DifferentialGeometry.Analysis.Sobolev
 open DifferentialGeometry.Analysis.Spectral
 open DifferentialGeometry.Analysis.Elliptic
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
-
-
-
-
-
-
-
-
-
 
 noncomputable section
 
@@ -198,9 +187,6 @@ private theorem h2_grid_two
               ring
             _ = (Real.sqrt K) ^ 2 * N ^ 2 := by rw [Real.sq_sqrt hK]
             _ = (Real.sqrt K * N) ^ 2 := by ring
-
-
-
 
 theorem inv_coeff_h2
     (hDim : Module.finrank ℝ E = 3)
@@ -415,9 +401,6 @@ theorem inv_coeff_h2
     mul_nonneg hK₀ (sq_nonneg N), mul_nonneg hK₁ (sq_nonneg N),
     mul_nonneg hK₂ (sq_nonneg N)]
 
-
-
-
 theorem principal_coeff_h2
     (hDim : Module.finrank ℝ E = 3)
     (g₀ : SmoothRiemannianMetric I M) :
@@ -535,9 +518,6 @@ private theorem convex_hs_le
         (mul_le_mul_of_nonneg_left hT hs0)
     _ = R := by ring
 
-
-
-
 theorem principal_path_h2
     (hDim : Module.finrank ℝ E = 3)
     (g₀ : SmoothRiemannianMetric I M) :
@@ -585,8 +565,6 @@ theorem principal_path_h2
     pow_le_pow_left₀ (mul_nonneg hC (norm_nonneg _))
       (mul_le_mul_of_nonneg_left hP hC) 2
   exact ⟨fun x => (hpt x).trans hscale, hjet.trans hscale⟩
-
-
 
 theorem principal_arm_h2
     (hDim : Module.finrank ℝ E = 3)

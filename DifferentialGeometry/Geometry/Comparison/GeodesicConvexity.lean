@@ -6,10 +6,7 @@ import DifferentialGeometry.Geometry.Metric.Completeness
 import Mathlib.Topology.Connected.PathConnected
 import Mathlib.Topology.UnitInterval
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Connection
-
-
 
 open Set Bundle Manifold
 open scoped Topology Manifold ContDiff ENNReal

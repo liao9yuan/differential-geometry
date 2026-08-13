@@ -1,6 +1,5 @@
 import DifferentialGeometry.Analysis.Sobolev.Tensor.ChartComponents
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
 
 
 noncomputable section

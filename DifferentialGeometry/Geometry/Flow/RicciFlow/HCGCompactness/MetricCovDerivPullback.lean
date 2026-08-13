@@ -6,20 +6,10 @@ import DifferentialGeometry.Geometry.Curvature.MetricLeviCivitaReconcile
 import DifferentialGeometry.Geometry.Curvature.Bochner.OrthonormalFrameTrace
 import DifferentialGeometry.Tensor.RSTensor.Tensor0SRiemannian.Comparison
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Connection
 open DifferentialGeometry.Geometry.Operator
 
 set_option autoImplicit false
-
-
-
-
-
-
-
-
-
 
 noncomputable section
 
@@ -42,8 +32,6 @@ variable {I : ModelWithCorners Real E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 variable {N : Type*} [TopologicalSpace N] [ChartedSpace H N] [IsManifold I ∞ N]
 variable [BoundarylessManifold I M] [BoundarylessManifold I N]
-
-
 
 omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M]
     [BoundarylessManifold I N] in
@@ -106,8 +94,6 @@ theorem metricCovDeriv_one_pullback_sections
       simp [pushFwdSection_apply_at_image]
   rw [hslot 0, hslot 1]
 
-
-
 omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M]
     [BoundarylessManifold I N] in
 theorem metricCovDeriv_one_pullback
@@ -140,9 +126,6 @@ theorem metricCovDeriv_one_pullback
   simpa [hX, hV, pushFwdSection_apply_at_image] using
     metricCovDeriv_one_pullback_sections (I := I) h gRef Phi X V x
 
-
-
-
 omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M]
     [BoundarylessManifold I N] in
 private theorem metricCovDeriv_succ_eval_smooth_slots'
@@ -170,10 +153,6 @@ private theorem metricCovDeriv_succ_eval_smooth_slots'
     (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
     (leviCivitaConnectionOfMetric (I := I) gRef) X V
     (metricCovDeriv (I := I) h gRef a) x
-
-
-
-
 
 omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M]
     [BoundarylessManifold I N] in
@@ -205,8 +184,6 @@ private theorem covDerivOfField_succ_eval_smooth_slots
     (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
     (leviCivitaConnectionOfMetric (I := I) gRef) X V
     (covDerivOfField (I := I) gRef A0 a) x
-
-
 
 omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M]
     [BoundarylessManifold I N] in
@@ -375,12 +352,6 @@ theorem metricCovDeriv_pullback
       rw [hpushSlots, hslots]
       simpa [hX, hV, pushFwdSection_apply_at_image] using hsmooth
 
-
-
-
-
-
-
 omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M]
     [BoundarylessManifold I N] in
 theorem covDerivOfField_pullback
@@ -546,11 +517,6 @@ theorem covDerivOfField_pullback
       rw [hpushSlots, hslots]
       simpa [hX, hV, pushFwdSection_apply_at_image] using hsmooth
 
-
-
-
-
-
 omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M]
     [BoundarylessManifold I N] in
 theorem ricciSection_eq_ricciTensor
@@ -564,9 +530,6 @@ theorem ricciSection_eq_ricciTensor
       = ricciTensor (I := I) g x v w := by
   rw [DifferentialGeometry.Geometry.Curvature.CovariantDerivative.ricciSection_apply]
   exact metricRicciAt_apply_eq_ricciTensor (I := I) g x v w
-
-
-
 
 omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M]
     [BoundarylessManifold I N] in
@@ -585,13 +548,6 @@ theorem metricRm04StdAt_eq_inner_riemannOp
       (metricCov_smooth (I := I) g) x X Y Z,
     show riemannOp (cov := metricCov (I := I) g) x X Y Z
         = riemannOp (cov := LeviCivita (I := I) g) x X Y Z from rfl]
-
-
-
-
-
-
-
 
 omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M]
     [BoundarylessManifold I N] in
@@ -631,8 +587,6 @@ theorem ricciTensor_pullback
           (mfderiv I I (Φ : M → N) x (B i)) (mfderiv I I (Φ : M → N) x v)
           (mfderiv I I (Φ : M → N) x w))]
 
-
-
 omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M]
     [BoundarylessManifold I N] in
 theorem ricciSection_pullback
@@ -659,9 +613,6 @@ theorem ricciSection_pullback
           = (fun q : Fin 2 => mfderiv I I (Φ : M → N) y (slots q)) from by
         funext i; fin_cases i <;> rfl] at hRHS
   rw [hLHS, hpb, ← hRHS]
-
-
-
 
 omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M]
     [BoundarylessManifold I N] in
@@ -702,10 +653,6 @@ theorem metricDiffCovDerivAt_pullback
       (Tensor0SBundle.Tensor0SSpace.sub_apply (a + 2) (Phi x) _ _ _).symm
 
 private lemma infty_ne_zero : (∞ : WithTop ℕ∞) ≠ 0 := by decide
-
-
-
-
 
 omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M]
     [BoundarylessManifold I N] in
@@ -778,11 +725,6 @@ theorem normSq0S_pullback_eval_of_orthonormal
   rw [component0S_apply, component0S_apply, hT]
   exact congrArg T (funext fun q => (hbasis'_apply (slots q)).symm)
 
-
-
-
-
-
 omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M]
     [BoundarylessManifold I N] in
 theorem metricDerivNorm_pullback_of_orthonormal
@@ -816,8 +758,6 @@ theorem metricDerivNorm_pullback_of_orthonormal
   intro slots
   exact metricDiffCovDerivAt_pullback (I := I) gk gInf gRef Phi a x slots
 
-
-
 omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M]
     [BoundarylessManifold I N] in
 theorem metricDerivNorm_pullback
@@ -841,8 +781,6 @@ theorem metricDerivNorm_pullback
   exact
     metricDerivNorm_pullback_of_orthonormal
       (I := I) gk gInf gRef Phi a x basis hON
-
-
 
 omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M]
     [BoundarylessManifold I N] in
@@ -874,8 +812,6 @@ theorem metricDerivNormSupOn_pullback_image
     rw [metricDerivNorm_pullback (I := I) gk gInf gRef Phi a x]
     exact hr
 
-
-
 omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M]
     [BoundarylessManifold I N] in
 theorem metricCInf_pullback
@@ -897,11 +833,6 @@ theorem metricCInf_pullback
   refine ⟨k₀, fun k hk => ?_⟩
   rw [metricDerivNormSupOn_pullback_image (I := I)]
   exact hk₀ k hk
-
-
-
-
-
 
 omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M]
     [BoundarylessManifold I N] in

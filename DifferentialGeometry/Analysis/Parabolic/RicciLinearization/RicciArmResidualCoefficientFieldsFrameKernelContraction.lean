@@ -17,7 +17,6 @@ import DifferentialGeometry.Analysis.Parabolic.RicciLinearization.RicciArmResidu
 open DifferentialGeometry.Geometry.Connection.Realization
 open DifferentialGeometry.Analysis.Spectral
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Connection
 open DifferentialGeometry.Geometry.Operator
 

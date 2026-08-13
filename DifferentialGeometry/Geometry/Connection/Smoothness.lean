@@ -1,17 +1,7 @@
 import DifferentialGeometry.Geometry.Curvature.Realized.MetricFamily
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
 
 set_option autoImplicit false
-
-
-
-
-
-
-
-
-
 
 namespace DifferentialGeometry.Geometry.Connection
 
@@ -28,9 +18,6 @@ variable {Time : Type*}
 section Smoothness
 
 variable [VectorBundle Real E (TangentSpace I : M -> Type _)]
-
-
-
 
 def ConnectionFamilySmooth
     (G : MetricConnectionFamily (I := I) (M := M) Time) : Prop :=

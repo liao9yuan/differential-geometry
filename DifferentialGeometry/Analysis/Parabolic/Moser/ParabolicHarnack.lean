@@ -231,8 +231,10 @@ theorem harnack_on_separated_cylinders_of_global_volume_normalization
     (hB : 0 ≤ B)
     (houter : ∀ x : M, 1 ≤ outer.toFun x)
     (hmass : 0 < cutoffMass (I := I) (M := M) averagingCutoff)
-    (hcyl : 0 < (D - A) * (DifferentialGeometry.Integral.Measure.riemannianVolumeMeasure (I := I) (M := M) g).real Set.univ ∧
-      (D - A) * (DifferentialGeometry.Integral.Measure.riemannianVolumeMeasure (I := I) (M := M) g).real Set.univ ≤ 1)
+    (hcyl : 0 < (D - A) * (DifferentialGeometry.Integral.Measure.riemannianVolumeMeasure
+      (I := I) (M := M) g).real Set.univ ∧
+      (D - A) * (DifferentialGeometry.Integral.Measure.riemannianVolumeMeasure (I := I)
+        (M := M) g).real Set.univ ≤ 1)
     (hpde : ∀ t ∈ Icc A D, ∀ x : M,
       deriv (fun q ↦ u q x) t =
         Δ_g (I := I) g (smoothScalarSlice (I := I) g u hu t).toContMDiffMap x) :
@@ -250,10 +252,12 @@ theorem harnack_on_separated_cylinders_of_global_volume_normalization
   have hτc : τ < c := by
     dsimp [τ]
     linarith
-  have hvol_pos : 0 < (DifferentialGeometry.Integral.Measure.riemannianVolumeMeasure (I := I) (M := M) g).real Set.univ := by
+  have hvol_pos : 0 < (DifferentialGeometry.Integral.Measure.riemannianVolumeMeasure (I := I)
+    (M := M) g).real Set.univ := by
     have hDA : 0 < D - A := by linarith
     exact pos_of_mul_pos_right hcyl.1 (le_of_lt hDA)
-  have hvol_nonneg : 0 ≤ (DifferentialGeometry.Integral.Measure.riemannianVolumeMeasure (I := I) (M := M) g).real Set.univ :=
+  have hvol_nonneg : 0 ≤ (DifferentialGeometry.Integral.Measure.riemannianVolumeMeasure (I := I)
+    (M := M) g).real Set.univ :=
     le_of_lt hvol_pos
   have hcutoff_one : ∀ (k : ℕ) (x : M),
       (bombieriGiustiSpatialCutoff rho lower upper k).toFun x = 1 := by
@@ -268,7 +272,8 @@ theorem harnack_on_separated_cylinders_of_global_volume_normalization
           _ ≤ rho.toFun x := le_trans (le_of_lt hinner) (hrhoLevels x))
   have hcutoffMass : ∀ (k : ℕ),
       cutoffMass (I := I) (M := M) (bombieriGiustiSpatialCutoff rho lower upper k) =
-        (DifferentialGeometry.Integral.Measure.riemannianVolumeMeasure (I := I) (M := M) g).real Set.univ := by
+        (DifferentialGeometry.Integral.Measure.riemannianVolumeMeasure (I := I)
+          (M := M) g).real Set.univ := by
     intro k
     unfold cutoffMass
     have hfun : (fun x : M => (bombieriGiustiSpatialCutoff rho lower upper k).toFun x ^ 2) =
@@ -316,8 +321,10 @@ theorem harnack_on_separated_cylinders_of_global_volume_normalization
     · exact le_of_lt (hA_increasing k)
     · have hinc_le_D : bombieriGiustiIncreasingLevel b τ k ≤ D := le_of_lt (hinc_lt_D k)
       have hmul_le : (bombieriGiustiIncreasingLevel b τ k - A) *
-            (DifferentialGeometry.Integral.Measure.riemannianVolumeMeasure (I := I) (M := M) g).real Set.univ ≤
-          (D - A) * (DifferentialGeometry.Integral.Measure.riemannianVolumeMeasure (I := I) (M := M) g).real Set.univ := by
+            (DifferentialGeometry.Integral.Measure.riemannianVolumeMeasure (I := I)
+              (M := M) g).real Set.univ ≤
+          (D - A) * (DifferentialGeometry.Integral.Measure.riemannianVolumeMeasure (I := I)
+            (M := M) g).real Set.univ := by
         exact mul_le_mul_of_nonneg_right (sub_le_sub_right hinc_le_D A) hvol_nonneg
       rw [hcutoffMass k]
       exact le_trans hmul_le hcyl.2
@@ -353,11 +360,14 @@ theorem harnack_on_separated_cylinders_of_global_volume_normalization
     intro k
     apply localizedSpacetimeMeasure_le_one_of
     · exact le_of_lt (hdesc_lt_inc k)
-    · have hlen : bombieriGiustiIncreasingLevel d D k - bombieriGiustiDescendingLevel τ c k ≤ D - A := by
+    · have hlen : bombieriGiustiIncreasingLevel d D k -
+      bombieriGiustiDescendingLevel τ c k ≤ D - A := by
         linarith [hinc_d_lt_D k, hdesc_gt_A k]
       have hmul_le : (bombieriGiustiIncreasingLevel d D k - bombieriGiustiDescendingLevel τ c k) *
-            (DifferentialGeometry.Integral.Measure.riemannianVolumeMeasure (I := I) (M := M) g).real Set.univ ≤
-          (D - A) * (DifferentialGeometry.Integral.Measure.riemannianVolumeMeasure (I := I) (M := M) g).real Set.univ := by
+            (DifferentialGeometry.Integral.Measure.riemannianVolumeMeasure (I := I)
+              (M := M) g).real Set.univ ≤
+          (D - A) * (DifferentialGeometry.Integral.Measure.riemannianVolumeMeasure (I := I)
+            (M := M) g).real Set.univ := by
         exact mul_le_mul_of_nonneg_right hlen hvol_nonneg
       rw [hcutoffMass k]
       exact le_trans hmul_le hcyl.2
@@ -399,8 +409,10 @@ theorem harnack_on_standard_separated_cylinders_of_global_volume_normalization
           (gradFun (I := I) g rho.toFun x) ≤ B)
     (houter : ∀ x : M, 1 ≤ outer.toFun x)
     (hmass : 0 < cutoffMass (I := I) (M := M) averagingCutoff)
-    (hcyl : 0 < (D - A) * (DifferentialGeometry.Integral.Measure.riemannianVolumeMeasure (I := I) (M := M) g).real Set.univ ∧
-      (D - A) * (DifferentialGeometry.Integral.Measure.riemannianVolumeMeasure (I := I) (M := M) g).real Set.univ ≤ 1)
+    (hcyl : 0 < (D - A) * (DifferentialGeometry.Integral.Measure.riemannianVolumeMeasure
+      (I := I) (M := M) g).real Set.univ ∧
+      (D - A) * (DifferentialGeometry.Integral.Measure.riemannianVolumeMeasure (I := I)
+        (M := M) g).real Set.univ ≤ 1)
     (hpde : ∀ t ∈ Icc A D, ∀ x : M,
       deriv (fun q ↦ u q x) t =
         Δ_g (I := I) g (smoothScalarSlice (I := I) g u hu t).toContMDiffMap x) :
@@ -471,8 +483,10 @@ theorem harnack_on_standard_separated_cylinders_of_poincare_inequality
       (fun z : ℝ × M ↦ u z.1 z.2))
     (hpos : ∀ t x, 0 < u t x)
     {A D : ℝ} (hAD : A < D)
-    (hvol : 0 < (D - A) * (DifferentialGeometry.Integral.Measure.riemannianVolumeMeasure (I := I) (M := M) g).real Set.univ ∧
-      (D - A) * (DifferentialGeometry.Integral.Measure.riemannianVolumeMeasure (I := I) (M := M) g).real Set.univ ≤ 1)
+    (hvol : 0 < (D - A) * (DifferentialGeometry.Integral.Measure.riemannianVolumeMeasure
+      (I := I) (M := M) g).real Set.univ ∧
+      (D - A) * (DifferentialGeometry.Integral.Measure.riemannianVolumeMeasure (I := I)
+        (M := M) g).real Set.univ ≤ 1)
     (hpde : ∀ t ∈ Icc A D, ∀ x : M,
       deriv (fun q ↦ u q x) t =
         Δ_g (I := I) g (smoothScalarSlice (I := I) g u hu t).toContMDiffMap x) :
@@ -501,7 +515,8 @@ theorem harnack_on_standard_separated_cylinders_of_poincare_inequality
     rw [hgrad_one x]
     simp
   have hcutoffMass_one : cutoffMass (I := I) (M := M) (SmoothScalar.one g) =
-      (DifferentialGeometry.Integral.Measure.riemannianVolumeMeasure (I := I) (M := M) g).real Set.univ := by
+      (DifferentialGeometry.Integral.Measure.riemannianVolumeMeasure (I := I)
+        (M := M) g).real Set.univ := by
     simp [cutoffMass, SmoothScalar.one]
   have hmass : 0 < cutoffMass (I := I) (M := M) (SmoothScalar.one g) := by
     rw [hcutoffMass_one]

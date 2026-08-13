@@ -3,17 +3,8 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.C4.GoodCoveri
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.C4.H6IsometryDeriv
 import DifferentialGeometry.Geometry.Comparison.GeodesicConvexity
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
 
 set_option autoImplicit false
-
-
-
-
-
-
-
-
 
 noncomputable section
 

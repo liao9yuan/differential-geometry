@@ -1,6 +1,5 @@
 import DifferentialGeometry.Geometry.Comparison.Volume.BallVolume
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
 
 noncomputable section
 
@@ -1419,11 +1418,6 @@ theorem exists_vol_two_meas
   exact htwo hB hRpos hR hρball hgs hdens hsR hsρ hsdiv
     (metricBall_meas (I := I) (M := M) p s) hJ
 
-
-
-
-
-
 omit [NeZero (Module.finrank ℝ E)] in
 theorem metricBall_vol_ge [PseudoMetricSpace M]
     (g : SmoothRiemannianMetric I M) (p : M)
@@ -1455,8 +1449,6 @@ theorem metricBall_vol_ge_sc [PseudoMetricSpace M]
       riemannianVolumeMeasure (I := I) (M := M) g (Metric.ball p s) := by
   simpa [modelHaar_ball (E := E) hRpos] using
     metricBall_vol_ge (I := I) g p hball_target hcoord_subset hdens
-
-
 
 theorem metricBall_vol_ge_sc_c2 [PseudoMetricSpace M]
     (g : SmoothRiemannianMetric I M) (p : M)

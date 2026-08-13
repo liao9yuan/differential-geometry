@@ -7,22 +7,7 @@ open DifferentialGeometry.Analysis.Spectral
 open DifferentialGeometry.Analysis.Elliptic
 open DifferentialGeometry.PDE.RicciFlow
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Connection
-
-/-!
-# Closed-edge bound for the quadratic Ricci arm
-
-The order-zero Ricci connection-difference coefficient splits into a part
-quadratic in the connection difference and a derivative part.  The latter is
-handled by `EdgeRicciBound`.  This file treats the quadratic part directly.
-
-On the genuine segment `g + s W`, the connection difference is pointwise
-linear in `nabla (s W)`.  Consequently the quadratic coefficient is bounded
-by `|nabla W|^2`; the energy pairing supplies two undifferentiated copies of
-`W`, hence a shrinkable `delta^2 |nabla W|^2` contribution.  The final theorem
-accepts an arbitrary positive energy budget.
--/
 
 noncomputable section
 
@@ -107,8 +92,6 @@ private lemma aa_symm_eq (g : SmoothRiemannianMetric I M)
   have htwo : S + S = (2 : Real) • S := (two_smul Real S).symm
   rw [ccTensor02Symm, hswap, htwo, smul_smul,
     show (1 / 2 : Real) * 2 = 1 by norm_num, one_smul]
-
-/-! ## Local names for the six public-kernel arms -/
 
 private def aaPerm3201 : Equiv.Perm (Fin 4) :=
   ⟨![3, 2, 0, 1], ![2, 3, 1, 0], by decide, by decide⟩
@@ -367,10 +350,6 @@ private theorem aa_quad_le
     (connDiffContrInsertionInnerField (I := I) g gm) y]
   exact aa_inner_le (I := I) (M := M) g gm y
 
-/-! ## Quadratic-kernel and coefficient bounds -/
-
-/-- The six quadratic Ricci arms are bounded by the square of the
-connection-difference fibre norm. -/
 theorem ricciAAKer_rfns
     (g gm : SmoothRiemannianMetric I M) (x : M) :
     riemannianFiberNormSq (I := I) (M := M) g 2 4 x
@@ -484,11 +463,8 @@ theorem ricciAAKer_rfns
       (A0 + A1 + A2 + A3 + A4 + A5) ≤ _
   simpa only [Q, mul_assoc] using hsum
 
--- The pointwise coefficient proof synthesizes the metric-induced tensor norm instance.
 attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
   Tensor0SBundle.tensorRSSpace_normedSpace in
-/-- The quadratic Ricci coefficient is pointwise quadratic in the first
-covariant derivative of the metric perturbation. -/
 theorem ricciAACoeff_rfns (g : SmoothRiemannianMetric I M) :
     ∃ C : Real, 0 ≤ C ∧
       ∀ (gm : SmoothRiemannianMetric I M) (P : SmoothCcTensor g 0 2)
@@ -578,8 +554,6 @@ theorem ricciAACoeff_rfns (g : SmoothRiemannianMetric I M) :
       simp only [K]
       ring
     _ = (Real.sqrt K) ^ 2 * P1 ^ 2 := by rw [Real.sq_sqrt hK0]
-
-/-! ## Arbitrarily small energy pairing on the genuine segment -/
 
 omit [BoundarylessManifold I M] in
 private theorem aa_pair_point
@@ -675,9 +649,6 @@ private lemma aa_bound_mono
     (mul_le_mul_of_nonneg_right hab (Real.sqrt_nonneg _))
     (Real.sqrt_nonneg _))
 
-/-- On the genuine closed-edge segment, the quadratic Ricci term fits into
-any prescribed positive Dirichlet-energy budget after shrinking the carrier
-`C0` radius. -/
 theorem ricciAA_path_le (g : SmoothRiemannianMetric I M)
     {eta : Real} (heta : 0 < eta) :
     ∃ delta0 : Real, 0 < delta0 ∧ delta0 < 1 / 2 ∧

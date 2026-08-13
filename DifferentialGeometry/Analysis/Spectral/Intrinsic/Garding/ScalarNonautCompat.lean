@@ -2,15 +2,6 @@ import DifferentialGeometry.Analysis.Spectral.Intrinsic.Garding.ScalarNonautHs
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.Garding.MetricLapDiffH0
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.Garding.ScalarLapDiffCore
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
-
-
-
-
-
-
-
-
 
 noncomputable section
 
@@ -33,9 +24,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
   [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M]
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
-
-
-
 
 theorem lapDiffHs_eq_A20
     {D : RealTimeInterval}

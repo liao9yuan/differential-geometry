@@ -1,14 +1,6 @@
 import DifferentialGeometry.Geometry.Comparison.Variation.JacobiGram
 import DifferentialGeometry.Geometry.Comparison.Volume.RadialGronwall
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
-
-/-!
-# Radial Gram data for volume comparison
-
-This module connects the local radial-Jacobi producers to the Gram-matrix
-calculus used by Bishop--Gromov comparison.
--/
 
 noncomputable section
 
@@ -40,12 +32,6 @@ variable [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
 
 omit [T2Space M]
   [SigmaCompactSpace M] in
-/-- Before the first selected normal-coordinate boundary, a linearly
-independent family of variation directions gives linearly independent radial
-Jacobi fields at every nonzero time.  Time scaling reduces the claim to the
-time-one differential of `expMapDiffeo`, whose local-diffeomorphism derivative
-is injective on its source.  The Gram/Riccati layer consumes this positivity
-input; no separate no-conjugate-points hypothesis is required. -/
 lemma radialJacobi_li
     {ι : Type*} {v : ι → E}
     (g : SmoothRiemannianMetric I M) (p : M) (x : E) {t : ℝ}
@@ -84,10 +70,6 @@ lemma radialJacobi_li
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-/-- On a common small radial scale, two radial Jacobi fields that vanish at the
-center have zero Wronskian throughout every compact subinterval of `(0, 1)`.
-The direction vectors are kept inside the common local-variation radius; a
-later transverse-frame consumer may enforce this by a fixed positive scaling. -/
 theorem radial_wronsk_zero
     [PseudoEMetricSpace M] [RiemannianBundle (fun x : M => TangentSpace I x)]
     [IsRiemannianManifold I M] [CompleteSpace M]
@@ -474,11 +456,6 @@ private lemma density_det_eq
       rw [hcurve]
 
 omit [T2Space M] [SigmaCompactSpace M] in
-/-- Polar decomposition of the normal-coordinate density.
-
-`B none` is the radial direction and `B (some i)` are transverse at the
-center.  The positive constant records the fixed change from `B` to the model
-basis used by `normalChartDensity`, and is independent of the radius. -/
 theorem normalDensity_curve
     (g : SmoothRiemannianMetric I M) (p : M) (u : E)
     (B : Module.Basis (Option ι) ℝ E)

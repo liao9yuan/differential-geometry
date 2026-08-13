@@ -2,16 +2,8 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.Perelman.Noncollapsing
 import DifferentialGeometry.Geometry.Curvature.ScalarNormBound
 open DifferentialGeometry.PDE.RicciFlow
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
 
 set_option autoImplicit false
-
-/-!
-# Curvature control on Perelman flow balls
-
-This file extracts the scalar-curvature bound needed by the cutoff W-form
-estimate from the invariant Riemann norm control in `FlowMetricBall`.
--/
 
 namespace DifferentialGeometry.PDE.RicciFlow.Perelman
 
@@ -31,8 +23,6 @@ variable {M : Type u} [TopologicalSpace M] [ChartedSpace H M]
   [T2Space M] [SigmaCompactSpace M]
 variable {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
 
-/-- Riemann control on a flow ball gives the corresponding scalar upper bound
-at every point of its backward parabolic cylinder. -/
 theorem scalar_le_of_rm
     {S : SolutionOn (I := I) (M := M) D}
     {time : DifferentialGeometry.Geometry.Curvature.RealTimeInterval.FlowTime D}

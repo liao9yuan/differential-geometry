@@ -5,10 +5,7 @@ import DifferentialGeometry.Geometry.Comparison.Variation.SecondVariation
 import Mathlib.Geometry.Manifold.Riemannian.PathELength
 import Mathlib.MeasureTheory.Integral.IntervalIntegral.Basic
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Connection
-
-
 
 noncomputable section
 

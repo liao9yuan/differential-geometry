@@ -2,62 +2,6 @@ import DifferentialGeometry.Analysis.Spectral.Intrinsic.MetricRealization.Spectr
 import DifferentialGeometry.Analysis.Spectral.Tensor.EllipticBridge.EigenvectorWeakSolution.Smooth.EigenvectorSmoothToL2
 import DifferentialGeometry.Analysis.Integration.Measure.Invariance
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 noncomputable section
 
@@ -88,8 +32,6 @@ private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
-
-
 omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] in
 theorem smoothCcTensor_normSq_eq_integral
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (S : SmoothCcTensor g r s) :
@@ -99,9 +41,6 @@ theorem smoothCcTensor_normSq_eq_integral
   rw [SmoothCcTensor.norm_def, tensorL2Norm_def,
     Real.sq_sqrt (tensorL2Inner_nonneg (I := I) (M := M) g r s S.toFun)]
   rfl
-
-
-
 
 theorem eigenvectorSmooth_norm_eq_one
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
@@ -122,9 +61,6 @@ theorem eigenvectorSmooth_norm_eq_one
   rw [h_class, h_one] at h_coe
   exact h_coe.symm
 
-
-
-
 theorem eigenvectorSmooth_integral_normSq_eq_one
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorSpectral.TensorEigenIdx (I := I) (M := M) g r s) :
@@ -137,18 +73,12 @@ theorem eigenvectorSmooth_integral_normSq_eq_one
   rw [eigenvectorSmooth_norm_eq_one (I := I) (M := M) g r s i] at h
   rw [← h]; norm_num
 
-
-
-
-
 def diagonalKernel (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (F : Finset (TensorSpectral.TensorEigenIdx (I := I) (M := M) g r s)) (x : M) : ℝ :=
   ∑ i ∈ F,
     tensorInnerPointwise (I := I) (M := M) g r s x
       ((eigenvectorSmooth (I := I) (M := M) g r s i).toFun x)
       ((eigenvectorSmooth (I := I) (M := M) g r s i).toFun x)
-
-
 
 private lemma diagonalKernel_summand_integrable
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
@@ -160,11 +90,6 @@ private lemma diagonalKernel_summand_integrable
       (riemannianVolumeMeasure (I := I) (M := M) g) :=
   (SmoothCcTensor.memL2_toFun (I := I) (M := M)
     (eigenvectorSmooth (I := I) (M := M) g r s i)).integrable_inner_self
-
-
-
-
-
 
 theorem finsetCard_eq_integral_diagonalKernel
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
@@ -179,8 +104,6 @@ theorem finsetCard_eq_integral_diagonalKernel
     (fun i _ => eigenvectorSmooth_integral_normSq_eq_one (I := I) (M := M) g r s i)]
   simp
 
-
-
 private lemma diagonalKernel_integrable
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (F : Finset (TensorSpectral.TensorEigenIdx (I := I) (M := M) g r s)) :
@@ -194,28 +117,6 @@ private lemma diagonalKernel_integrable
   rw [h]
   exact MeasureTheory.integrable_finset_sum F
     (fun i _ => diagonalKernel_summand_integrable (I := I) (M := M) g r s i)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 theorem eigenvalueCountingBound_of_pointwiseDiagonalKernelBound
     (g : SmoothRiemannianMetric I M) (r s : ℕ)

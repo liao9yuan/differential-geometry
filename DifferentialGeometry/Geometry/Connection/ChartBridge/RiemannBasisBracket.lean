@@ -6,7 +6,6 @@ import DifferentialGeometry.Bundle.Frame
 import Mathlib.Geometry.Manifold.VectorField.LieBracket
 import Mathlib.Geometry.Manifold.MFDeriv.Atlas
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Operator
 
 
@@ -170,9 +169,11 @@ theorem LeviCivita_chartBasisVec_neighborhood_formula
         ((chartModelBasis E) j) ((chartModelBasis E) k)
         ((chartModelBasis E) i) =
       (LeviCivita (I := I) g).toFun
-          (DifferentialGeometry.Geometry.Curvature.covApply (LeviCivita (I := I) g) (X k) (X i)) x (X j x) -
+          (DifferentialGeometry.Geometry.Curvature.covApply (LeviCivita (I := I) g) (X k)
+            (X i)) x (X j x) -
         (LeviCivita (I := I) g).toFun
-          (DifferentialGeometry.Geometry.Curvature.covApply (LeviCivita (I := I) g) (X j) (X i)) x (X k x) := by
+          (DifferentialGeometry.Geometry.Curvature.covApply (LeviCivita (I := I) g) (X j)
+            (X i)) x (X k x) := by
   classical
   have hXx : ∀ i, X i x = (chartModelBasis E) i := by
     intro i
@@ -324,7 +325,8 @@ private lemma chartE_section_repr_covApply_eventuallyEq
     {X : Fin (Module.finrank ℝ E) → Π b : M, TangentSpace I b}
     (hXnhds : ∀ᶠ b in 𝓝 x, ∀ p, X p b = chartBasisVecFiber (I := I) x p b) :
     (chartE_section_repr (I := I) x
-        (DifferentialGeometry.Geometry.Curvature.covApply (LeviCivita (I := I) g) (X k) (X i)) ∘ (extChartAt I x).symm)
+        (DifferentialGeometry.Geometry.Curvature.covApply (LeviCivita (I := I) g) (X k) (X i)) ∘
+          (extChartAt I x).symm)
       =ᶠ[𝓝 (extChartAt I x x)]
         (fun y : E =>
           ∑ m : Fin (Module.finrank ℝ E),
@@ -452,7 +454,8 @@ private lemma LeviCivita_covApply_secondLayer
     have h : ((∞ : WithTop ℕ∞) + 1) = (∞ : WithTop ℕ∞) := by rw [ENat.coe_top_add_one]
     rw [h]; exact hX i
   have hS_at : MDiffAt (T% S) x :=
-    DifferentialGeometry.Geometry.Curvature.covApply_mdifferentiableAt (cov := LeviCivita (I := I) g) (hX k) hXi1
+    DifferentialGeometry.Geometry.Curvature.covApply_mdifferentiableAt (cov := LeviCivita
+      (I := I) g) (hX k) hXi1
   have hx_good : x ∈ chartLeviCivitaGoodSet (I := I) x :=
     self_mem_chartLeviCivitaGoodSet (I := I) (α := x)
   have hxsrc_ext : x ∈ (extChartAt I x).source := by
@@ -579,9 +582,11 @@ theorem chartRiemannBasisIdentity_LeviCivita [I.Boundaryless]
     rw [hXnhds.self_of_nhds p, chartBasisVecFiber_self_aux (I := I) x p]
   have hvec :
       (LeviCivita (I := I) g).toFun
-          (DifferentialGeometry.Geometry.Curvature.covApply (LeviCivita (I := I) g) (X k) (X i)) x (X j x) -
+          (DifferentialGeometry.Geometry.Curvature.covApply (LeviCivita (I := I) g) (X k)
+            (X i)) x (X j x) -
         (LeviCivita (I := I) g).toFun
-          (DifferentialGeometry.Geometry.Curvature.covApply (LeviCivita (I := I) g) (X j) (X i)) x (X k x) =
+          (DifferentialGeometry.Geometry.Curvature.covApply (LeviCivita (I := I) g) (X j)
+            (X i)) x (X k x) =
       ∑ l' : Fin (Module.finrank ℝ E),
         chartRiemannTensor (I := I) g x i j k l' (extChartAt I x x) •
           (chartModelBasis E) l' := by

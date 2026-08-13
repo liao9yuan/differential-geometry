@@ -5,19 +5,9 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.ConvFieldEndg
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.ExtendedSolutionRegularity
 open DifferentialGeometry.PDE.RicciFlow
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Connection
 
 set_option autoImplicit false
-
-/-!
-# Open-window Ricci-flow endgame
-
-This module packages the joint regularity and Ricci-flow equation of an
-`OpenConvOut`, then feeds its canonical compact windows directly to the smooth
-Cheeger--Gromov upgrade.  No convergence assertion at the endpoints of the
-ambient open interval is used.
--/
 
 noncomputable section
 
@@ -42,8 +32,6 @@ variable (Φ : PointedCGHMaps (I := I) X P subseq)
 
 namespace OpenConvOut
 
-/-- The metric family carried by an open-window convergence output is a
-Ricci-flow solution on the ambient open time interval. -/
 theorem isSolution
     {R : letI : TopologicalSpace P.M := P.topology
       letI : ChartedSpace H P.M := P.charted
@@ -143,10 +131,6 @@ theorem isSolution
 
 end OpenConvOut
 
-/-- Assemble the smooth-flow upgrade from one open-window convergence output.
-Every compact time interval requested by `FlowLimitData` is first placed in a
-canonical closed window; no convergence statement at the open endpoints is
-needed. -/
 noncomputable def flowUpgrade_of_open
     (mc : MetricCompactnessConclusion (I := I) (X.atZero (I := I)))
     (L : PointedFlowData (I := I) X.D)
@@ -258,7 +242,6 @@ noncomputable def flowUpgrade_of_open
 
 omit [NeZero (Module.finrank ℝ E)]
   [I.Boundaryless] in
-/-- The open-window upgrade retains the supplied pointed flow data. -/
 theorem flowUpgrade_open_L
     (mc : MetricCompactnessConclusion (I := I) (X.atZero (I := I)))
     (L : PointedFlowData (I := I) X.D)
@@ -298,8 +281,6 @@ theorem flowUpgrade_open_L
 
 omit [NeZero (Module.finrank ℝ E)]
   [I.Boundaryless] in
-/-- The open-window upgrade data immediately yields the smooth flow-limit
-conclusion. -/
 theorem flowLimit_of_open
     (mc : MetricCompactnessConclusion (I := I) (X.atZero (I := I)))
     (L : PointedFlowData (I := I) X.D)

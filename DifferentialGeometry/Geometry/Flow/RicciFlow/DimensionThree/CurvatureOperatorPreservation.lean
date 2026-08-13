@@ -252,7 +252,8 @@ private theorem ricciUpperBoundReactAt_eq_neg_shift
             Tensor0SSpace.sub_apply 2 x P Q (vec2 (I := I) v v)]
     _ = -(R (vec2 (I := I) v v) - (P (vec2 (I := I) v v) - Q (vec2 (I := I) v v))) := by
           ring
-    _ = -(R (vec2 (I := I) v v) - ((2 : Real) * (1 / 2)) * (P (vec2 (I := I) v v) - Q (vec2 (I := I) v v))) := by
+    _ = -(R (vec2 (I := I) v v) - ((2 : Real) * (1 / 2)) * (P (vec2 (I := I) v v) - Q (vec2
+      (I := I) v v))) := by
           ring_nf
     _ = -((R - ((2 : Real) * (1 / 2)) • Y) (vec2 (I := I) v v)) := by
           congr 1
@@ -566,7 +567,8 @@ private theorem ricciUpperBoundReactAt_block
               (vec2 (I := I) (basis i) (basis j))
       _ = (a + b) * DifferentialGeometry.Geometry.Curvature.delta3 i j -
               shiftBlockS3 a b c i j := by
-            rw [show ((a + b) • metricTensorField (I := I) g x) (vec2 (I := I) (basis i) (basis j)) =
+            rw [show ((a + b) • metricTensorField (I := I) g x) (vec2 (I := I) (basis i)
+              (basis j)) =
                   (a + b) * metricTensorField (I := I) g x (vec2 (I := I) (basis i) (basis j)) from
               Tensor0SSpace.smul_apply 2 x (a + b) (metricTensorField (I := I) g x)
                 (vec2 (I := I) (basis i) (basis j))]
@@ -644,7 +646,8 @@ private theorem ricciUpperBoundReactAt_block
                     (trA • metricTensorField (I := I) g x - A) •
                 metricTensorField (I := I) g x) (vec2 (I := I) (basis 0) (basis 0)) -
                 (metricTracePair0SAt (I := I) g (trA • metricTensorField (I := I) g x - A) •
-                    (trA • metricTensorField (I := I) g x - A)) (vec2 (I := I) (basis 0) (basis 0)) from
+                    (trA • metricTensorField (I := I) g x - A)) (vec2 (I := I) (basis 0)
+                      (basis 0)) from
             Tensor0SSpace.sub_apply 2 x
               (inner0S (I := I) g x 2 (trA • metricTensorField (I := I) g x - A)
                   (trA • metricTensorField (I := I) g x - A) •
@@ -796,7 +799,8 @@ private theorem ricciUpperBoundReactAt_shift_invariant
     ricciUpperBoundReactAt (I := I) g (A + c • metricTensorField (I := I) g x)
         (vec2 (I := I) v v) =
       ricciUpperBoundReactAt (I := I) g A (vec2 (I := I) v v) := by
-  have h1 := ricciUpperBoundReactAt_eq_neg_shift (I := I) g (A + c • metricTensorField (I := I) g x) v
+  have h1 := ricciUpperBoundReactAt_eq_neg_shift (I := I) g (A + c • metricTensorField
+    (I := I) g x) v
   have h2 := ricciUpperBoundReactAt_eq_neg_shift (I := I) g A v
   have hneg :
       -(A + c • metricTensorField (I := I) g x) =
@@ -1012,7 +1016,8 @@ private theorem ricciUpperBoundBarrierReg
           (fun t : Real =>
             twoTensorSecToFamily (I := I) (M := M) (ricciUpperBoundSec S) t x v w)
           (Set.Icc t0 (t0 + d)) := by
-      convert ((pinchEval_contOn (I := I) (M := M) S hS (delta := 1 / 2) hTsub x v w).neg).mono hsub using 1
+      convert ((pinchEval_contOn (I := I) (M := M) S hS
+        (delta := 1 / 2) hTsub x v w).neg).mono hsub using 1
       ext t
       rw [ricciUpperBoundSec_neg_pinch_eval (I := I) S]
     have hGcont :

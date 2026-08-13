@@ -2,7 +2,6 @@ import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurckCoefficients.Real
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurckCoefficients.IteratedInvGramJetLipschitz
 open DifferentialGeometry.Analysis.Calculus.DeTurckCoefficients
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Connection
 open DifferentialGeometry.Geometry.Operator
 

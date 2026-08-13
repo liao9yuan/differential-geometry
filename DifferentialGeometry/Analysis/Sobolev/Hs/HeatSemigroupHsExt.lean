@@ -1,6 +1,5 @@
 import DifferentialGeometry.Analysis.Sobolev.Hs.HeatSemigroupHs
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
 
 noncomputable section
 

@@ -2,7 +2,6 @@ import DifferentialGeometry.Analysis.Parabolic.QuasiLinear.CrossScaleParabolicTr
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.CompactSAResolventIntrinsic
 open DifferentialGeometry.Analysis.Spectral
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Connection
 
 noncomputable section

@@ -7,7 +7,6 @@ import DifferentialGeometry.Tensor.Multilinear.Bundle
 import Mathlib.Topology.VectorBundle.Hom
 import Mathlib.Topology.VectorBundle.Basic
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
 
 
 noncomputable section

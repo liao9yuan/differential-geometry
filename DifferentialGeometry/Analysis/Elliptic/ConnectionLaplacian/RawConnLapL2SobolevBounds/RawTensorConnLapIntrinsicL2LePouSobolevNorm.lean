@@ -6,7 +6,6 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.ChartTensor.ChartGeometry.G
 import DifferentialGeometry.Analysis.Integration.Measure.Rellich
 open DifferentialGeometry.Analysis.Elliptic
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Connection
 
 

@@ -3,7 +3,6 @@ import DifferentialGeometry.Geometry.Connection.LeviCivita.Defs
 import DifferentialGeometry.Analysis.Integration.DivergenceTheorem.ChartInvariance
 open DifferentialGeometry.Analysis.Elliptic
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Operator
 
 

@@ -5,23 +5,6 @@ import Mathlib.Topology.Separation.Hausdorff
 
 set_option autoImplicit false
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 noncomputable section
 
 universe u
@@ -29,12 +12,6 @@ universe u
 namespace DifferentialGeometry
 
 open Set Topology
-
-
-
-
-
-
 
 structure SeqSystem (A : ℕ → Type u) [∀ k, TopologicalSpace (A k)] where
   F : ∀ {k ℓ : ℕ}, k ≤ ℓ → A k → A ℓ
@@ -77,8 +54,6 @@ def ofSucc (f : ∀ k, A k → A (k + 1)) (hf : ∀ k, IsOpenEmbedding (f k)) : 
   map_map h₁ h₂ x := (Nat.leRecOn_trans h₁ h₂ x).symm
   isOpenEmb h := succMap_isOpenEmb f hf h
 
-
-
 theorem F_proof_irrel {k ℓ : ℕ} (h₁ h₂ : k ≤ ℓ) :
     S.F h₁ = S.F h₂ := by
   rw [Subsingleton.elim h₁ h₂]
@@ -113,8 +88,6 @@ theorem rel_trans {p q r : Σ k, A k} (h1 : S.Rel p q) (h2 : S.Rel q r) : S.Rel 
 def setoid : Setoid (Σ k, A k) :=
   ⟨S.Rel, fun p => S.rel_refl p, fun h => S.rel_symm h, fun h1 h2 => S.rel_trans h1 h2⟩
 
-
-
 def Lim : Type u := Quotient S.setoid
 
 instance : TopologicalSpace S.Lim :=
@@ -145,9 +118,6 @@ theorem exists_incl_eq (z : S.Lim) : ∃ (ℓ : ℕ) (x : A ℓ), S.incl ℓ x =
 
 theorem continuous_incl (ℓ : ℕ) : Continuous (S.incl ℓ) :=
   continuous_quot_mk.comp continuous_sigmaMk
-
-
-
 
 theorem incl_isOpenMap (ℓ : ℕ) : IsOpenMap (S.incl ℓ) := by
   intro U hU
@@ -199,8 +169,6 @@ theorem isOpen_iff_incl {U : Set S.Lim} :
     intro k
     simpa [incl] using hU k
 
-
-
 theorem isCompact_exists {K : Set S.Lim} (hK : IsCompact K) :
     ∃ (k : ℕ) (Kk : Set (A k)), IsCompact Kk ∧ K = S.incl k '' Kk := by
   obtain ⟨t, ht⟩ := hK.elim_finite_subcover (fun ℓ : ℕ => Set.range (S.incl ℓ))
@@ -214,8 +182,6 @@ theorem isCompact_exists {K : Set S.Lim} (hK : IsCompact K) :
   have himg : IsCompact (S.incl (t.sup id) '' (S.incl (t.sup id) ⁻¹' K)) := by
     rwa [Set.image_preimage_eq_of_subset hsub]
   exact ((S.incl_isOpenEmb (t.sup id)).isEmbedding.isCompact_iff).mpr himg
-
-
 
 theorem compact_subset_range {K : Set S.Lim} (hK : IsCompact K) :
     ∃ k : ℕ, K ⊆ Set.range (S.incl k) := by
@@ -281,8 +247,6 @@ theorem continuous_lift {X : Type*} [TopologicalSpace X] (ψ : ∀ k, A k → X)
     (hcont : ∀ k, Continuous (ψ k)) : Continuous (S.lift ψ hψ) := by
   apply Continuous.quotient_lift
   exact continuous_sigma fun k => hcont k
-
-
 
 theorem continuous_iff_incl {X : Type*} [TopologicalSpace X] {f : S.Lim → X} :
     Continuous f ↔ ∀ k : ℕ, Continuous (f ∘ S.incl k) := by

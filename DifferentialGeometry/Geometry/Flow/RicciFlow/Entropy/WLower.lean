@@ -3,18 +3,9 @@ import DifferentialGeometry.Geometry.Connection.ChartBridge.Gradient
 import DifferentialGeometry.Geometry.Curvature.Metric
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Entropy.WEstimate
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Operator
 
 set_option autoImplicit false
-
-
-
-
-
-
-
-
 
 open DifferentialGeometry.Geometry.Connection
 namespace DifferentialGeometry.PDE.RicciFlow.Entropy
@@ -33,8 +24,6 @@ private local instance instMeasurableSpaceM
     {M : Type*} [TopologicalSpace M] : MeasurableSpace M := borel M
 private local instance instBorelSpaceM
     {M : Type*} [TopologicalSpace M] : BorelSpace M := ⟨rfl⟩
-
-
 
 theorem w_fixed_lower
     {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]
@@ -212,8 +201,6 @@ theorem w_fixed_lower
       (perelmanPotential 3 tau (fun y => v y * v y))
   rw [hW, hpref]
   nlinarith [mul_nonneg htau0.le hA0]
-
-
 
 theorem w_density_lower
     {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]

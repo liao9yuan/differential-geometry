@@ -1,20 +1,9 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.LowRegCoreTame
 import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.LowRegRealize
 import DifferentialGeometry.Analysis.Parabolic.QuasiLinear.TensorMaximalRegularity.TameForcingFixedPoint
-open DifferentialGeometry.PDE.RicciFlow DifferentialGeometry.Analysis.Parabolic DifferentialGeometry.Analysis.Spectral
+open DifferentialGeometry.PDE.RicciFlow DifferentialGeometry.Analysis.Parabolic
+    DifferentialGeometry.Analysis.Spectral
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
-
-/-!
-# Dense low-regularity Ricci--DeTurck solver
-
-This module extends the genuine smooth Ricci--DeTurck nonlinearity from the
-dense smooth core to the complete lower `H2` state ball.  Coefficients are
-frozen on an outer lower radius `Q`, while the actual solver state radius
-`R <= Q` is chosen afterwards.  This separates the two contraction
-requirements: `Ctop * Q` controls the top arm and `B1 Q * R` controls the
-high-size times lower-difference arm.
--/
 
 noncomputable section
 
@@ -40,8 +29,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
   [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
   [T2Space M]
 
-/-- The `H2` realization radius with its fibre bound fixed at the positive
-DeTurck contraction threshold. -/
 private theorem realize_at_thr
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M) :
@@ -76,8 +63,6 @@ private theorem realize_at_thr
     (mul_le_mul_of_nonneg_right hdelta (Real.sqrt_nonneg _))
     (Real.sqrt_nonneg _)
 
-/-- A realization bound valid on an outer radius restricts to every smaller
-lower-state radius. -/
 def realizeOfLE
     (g₀ : SmoothRiemannianMetric I M) {δ R Q : ℝ} (hRQ : R ≤ Q)
     (hrealQ : ∀ T : SmoothCcTensor g₀ 0 2,
@@ -90,8 +75,6 @@ def realizeOfLE
           (ccTensorBilinSymm (I := I) g₀ T) δ :=
   fun T hT => hrealQ T (hT.trans hRQ)
 
-/-- The genuine lower-state nonlinearity is the dense extension of `coreN`
-from the smooth part of the same state ball. -/
 def lowRegN
     (g₀ g_bg : SmoothRiemannianMetric I M) {R δ : ℝ} (hR : 0 < R)
     (hδ : δ < 1)
@@ -104,8 +87,6 @@ def lowRegN
   Dense.extend (smoothCore_dense (I := I) (M := M) g₀ hR)
     (coreN (I := I) (M := M) g₀ g_bg hδ hreal)
 
-/-- The core estimate may be frozen at an outer coefficient radius `Q` and
-then restricted to a smaller state ball `R`. -/
 theorem coreN_outer
     (hDim : Module.finrank ℝ E = 3)
     (g₀ g_bg : SmoothRiemannianMetric I M)
@@ -176,8 +157,6 @@ theorem coreN_outer
   rw [hxN, hyN] at hbound
   simpa only [xQ, yQ, xQ0, yQ0] using hbound
 
-/-- The dense extension is continuous on the full lower-state ball and keeps
-the outer-radius three-arm estimate. -/
 theorem lowRegN_outer
     (hDim : Module.finrank ℝ E = 3)
     (g₀ g_bg : SmoothRiemannianMetric I M)
@@ -282,8 +261,6 @@ theorem lowRegN_outer
   · intro u v
     simpa only [lowRegN, D, F, e, J, hrealR] using hfull u v
 
-/-- A maximal-regularity solution at one time scale for the dimension-three
-low-regularity Ricci--DeTurck nonlinearity. -/
 structure LowRegTimeSolution
     (g₀ g_bg : SmoothRiemannianMetric I M) (R δ T : ℝ)
     (hR : 0 < R) (hδ : δ < 1)
@@ -319,8 +296,6 @@ structure LowRegTimeSolution
         gforce
   forcing_norm : ‖gforce‖ ≤ R / 4
 
-/-- Positive-radius data and solutions on every sufficiently short time
-interval for the dimension-three low-regularity Ricci--DeTurck equation. -/
 structure LowRegPartialSolution (g₀ g_bg : SmoothRiemannianMetric I M) where
   R : ℝ
   δ : ℝ
@@ -341,16 +316,10 @@ structure LowRegPartialSolution (g₀ g_bg : SmoothRiemannianMetric I M) where
       Nonempty (LowRegTimeSolution (I := I) (M := M) g₀ g_bg R δ T
         hR hδ hrealR hT hT1)
 
-/-- The proposition that positive-radius low-regularity Ricci--DeTurck
-solution data exist. -/
 inductive HasLowRegPartialSolution (g₀ g_bg : SmoothRiemannianMetric I M) : Prop
   | intro : LowRegPartialSolution (I := I) (M := M) g₀ g_bg →
       HasLowRegPartialSolution g₀ g_bg
 
-/-- In dimension three, the genuine lower-regularity Ricci--DeTurck
-nonlinearity has positive-radius fixed-background maximal-regularity solution
-data.  The outer radius controls the top arm, and the smaller state radius
-controls the high-size times lower-difference arm. -/
 theorem lowreg_partial_sol
     (hDim : Module.finrank ℝ E = 3)
     (g₀ g_bg : SmoothRiemannianMetric I M) :

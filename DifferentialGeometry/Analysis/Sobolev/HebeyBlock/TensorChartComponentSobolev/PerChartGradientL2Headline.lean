@@ -3,7 +3,6 @@ import DifferentialGeometry.Analysis.Sobolev.HebeyBlock.ChristoffelCorrectionL2.
 import DifferentialGeometry.Analysis.Sobolev.HebeyBlock.ChristoffelCorrectionL2.IntrinsicSlotOpNormRiem
 import DifferentialGeometry.Analysis.Spectral.Tensor.NormEstimates.TensorComponentGradientEpNormPerAlpha
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Connection
 open DifferentialGeometry.Geometry.Operator
 

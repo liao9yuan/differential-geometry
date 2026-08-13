@@ -13,7 +13,6 @@ import DifferentialGeometry.Geometry.Curvature.Riemann.Defs
 import Mathlib.Geometry.Manifold.ContMDiff.Basic
 open DifferentialGeometry.PDE.RicciFlow
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
 
 open DifferentialGeometry.Geometry.Connection
 namespace DifferentialGeometry.Analysis.Parabolic

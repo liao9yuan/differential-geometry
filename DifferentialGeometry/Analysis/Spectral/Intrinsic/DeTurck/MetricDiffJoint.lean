@@ -8,24 +8,13 @@ import DifferentialGeometry.Tensor.RSTensor.Metric
 open DifferentialGeometry.Tensor.RSTensor
 open DifferentialGeometry.Analysis.Sobolev.IntrinsicSobolev.SmoothCcTensorHs
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Operator
-
-/-!
-# Joint regularity of a metric-difference tensor
-
-This file exports the generic joint-smoothness fact previously used only
-privately by scalar-flux estimates: a smooth realized metric family, measured
-against one fixed background metric, gives a jointly smooth family of
-`metricDifferenceCcTensor`s.
--/
 
 noncomputable section
 set_option backward.isDefEq.respectTransparency false
 open Bundle Manifold DifferentialGeometry.Tensor0SBundle
 open scoped Manifold Topology ContDiff RealInnerProductSpace InnerProductSpace
 namespace DifferentialGeometry.Analysis.Spectral
-
 
 open DifferentialGeometry.Geometry.Operator
 open DifferentialGeometry.Integral.L2
@@ -92,8 +81,6 @@ theorem metricDiff_symm (q h : SmoothRiemannianMetric I M)
 
 omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless]
     [BoundarylessManifold I M] [SigmaCompactSpace M] in
-/-- The symmetrized fixed-background metric difference is exactly the
-pointwise metric bilinear-form difference. -/
 theorem metricDiff_symVal (q h : SmoothRiemannianMetric I M)
     (x : M) (v w : TangentSpace I x) :
     ccTensorBilinSymm (I := I) q
@@ -122,8 +109,6 @@ theorem metric_ext_inner
       rfl
 
 omit [BoundarylessManifold I M] in
-/-- Realizing the fixed-background tensor difference recovers the target
-metric exactly; no separate realization-identification hypothesis is needed. -/
 theorem realize_metricDiff (q h : SmoothRiemannianMetric I M)
     {δ : ℝ} (hδ_lt : δ < 1)
     (hδ : metricCauchySchwarzBound (I := I) (M := M) q
@@ -174,8 +159,6 @@ private theorem metricDiff_eval
 
 omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless]
     [BoundarylessManifold I M] [SigmaCompactSpace M] in
-/-- A `MetricFamilySmoothOn` family gives a jointly smooth path of fixed-base
-metric-difference tensors on its regular time set. -/
 theorem metricDiff_joint
     {D : RealTimeInterval}
     (g_fam : ℝ → SmoothRiemannianMetric I M)
@@ -256,9 +239,6 @@ theorem metricDiff_joint
 
 omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless]
     [BoundarylessManifold I M] [SigmaCompactSpace M] in
-/-- Joint smoothness is stable under translating a regular-time window.  The
-explicit image hypothesis records that this is an interior restart and makes
-no assertion at a merely continuous endpoint of the original family. -/
 theorem metricDiff_shift
     {D : RealTimeInterval}
     (g_fam : ℝ → SmoothRiemannianMetric I M)

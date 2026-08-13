@@ -3,7 +3,6 @@ import DifferentialGeometry.Geometry.Connection.LeviCivita.Smooth.Connection
 import DifferentialGeometry.Geometry.Operator.HessianTraceRealization
 open DifferentialGeometry.Tensor.RicciIdentity
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Operator
 
 
@@ -39,8 +38,6 @@ noncomputable def leviHessSec
     (leviCivitaConnectionOfMetric_contMDiffCovariantDerivativeLocally
       (I := I) (M := M) g)
     f hf
-
-
 
 omit [NeZero (Module.finrank ℝ E)] in
 omit [SigmaCompactSpace M] in
@@ -93,8 +90,6 @@ private theorem hessSec_abs
         extDerivFun (I := I) f x ((cov (fun p : M => Y p) x) (X x)) =
       ((cotangentCov cov).toFun (extDerivFun (I := I) f) x (X x)) (Y x)
   linarith
-
-
 
 omit [NeZero (Module.finrank ℝ E)] in
 omit [SigmaCompactSpace M] in
@@ -272,8 +267,6 @@ theorem chartHessFrobeniusSq_eq_metric_hessian_norm_sq [I.Boundaryless]
     frobeniusSqFun_hessFun_eq_frobeniusSqFun_abstractHessianBilin_of_matrix_identity
       (I := I) g f x hM
   exact h1.trans h2
-
-
 
 omit [NeZero (Module.finrank ℝ E)] in
 omit [SigmaCompactSpace M] in

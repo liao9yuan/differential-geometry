@@ -1,17 +1,8 @@
 import DifferentialGeometry.Tensor.RSTensor.Tensor0SRiemannian.Coordinate
 import DifferentialGeometry.Tensor.RSTensor.FiberMetric.Tensor0SMetric
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
 
 set_option autoImplicit false
-
-
-
-
-
-
-
-
 
 namespace DifferentialGeometry
 namespace Tensor0SBundle

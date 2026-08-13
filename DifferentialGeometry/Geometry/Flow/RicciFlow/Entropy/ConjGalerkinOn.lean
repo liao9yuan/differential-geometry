@@ -6,16 +6,8 @@ open DifferentialGeometry.Analysis.Sobolev
 open DifferentialGeometry.Analysis.Elliptic
 open DifferentialGeometry.PDE.RicciFlow DifferentialGeometry.Analysis.Spectral
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Connection
 open DifferentialGeometry.Geometry.Operator
-
-/-!
-# Exact-interval scalar Galerkin reconstruction
-
-This file upgrades a scalar Galerkin subsequence on a caller-selected regular
-interval without choosing a second, shorter lifespan.
--/
 
 noncomputable section
 
@@ -46,8 +38,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
 
 private local instance : CompleteSpace E := FiniteDimensional.complete Real E
 
-/-- On a prescribed regular Galerkin interval, the limiting conjugate-heat
-velocity has a continuous lift to every natural Sobolev order. -/
 theorem galVel_lift_on
     {D : RealTimeInterval}
     {S : SolutionOn (I := I) (M := M) D}
@@ -392,8 +382,6 @@ theorem galVel_lift_on
   · intro t
     simp only [w, W, galLimVelCan, q]
 
-/-- On a prescribed regular interval, every all-order Galerkin limit has its
-canonical all-scale velocity as a strong derivative. -/
 theorem galExt_deriv_on
     {D : RealTimeInterval}
     {S : SolutionOn (I := I) (M := M) D}
@@ -500,8 +488,6 @@ theorem galExt_deriv_on
   filter_upwards [Icc_mem_nhds ht.1 ht.2] with r hr
   exact hftc r hr
 
-/-- On a prescribed regular interval, the derivative of every all-order
-Galerkin limit is its canonical all-scale velocity. -/
 theorem galExt_ode_on
     {D : RealTimeInterval}
     {S : SolutionOn (I := I) (M := M) D}
@@ -535,8 +521,6 @@ theorem galExt_ode_on
   rw [hwCan t ⟨ht.1.le, ht.2.le⟩] at h
   exact h
 
-/-- On the full positive interior of a prescribed regular interval, the
-Galerkin limit is a smooth time path in every natural Sobolev order. -/
 theorem galExt_smooth_on
     {D : RealTimeInterval}
     {S : SolutionOn (I := I) (M := M) D}
@@ -662,8 +646,6 @@ theorem galExt_smooth_on
   intro k
   exact hfin k m
 
-/-- On every compact subinterval of a prescribed smooth interior, all time
-jets of the Galerkin coefficients have summable spectral majorants. -/
 theorem galJet_mass_on
     {D : RealTimeInterval}
     {S : SolutionOn (I := I) (M := M) D}
@@ -793,8 +775,6 @@ theorem galJet_mass_on
   intro i t ht
   simpa only [jet] using hB_le i t ht
 
-/-- On compact slabs inside a prescribed positive interior, the scalar
-Galerkin series is jointly smooth to every finite order. -/
 theorem galJoint_fin_on
     {D : RealTimeInterval}
     {S : SolutionOn (I := I) (M := M) D}
@@ -856,8 +836,6 @@ theorem galJoint_fin_on
     intro i t ht
     exact hB_le i t (Ioo_subset_Icc_self (hinner ht))
 
-/-- The scalar Galerkin series is jointly smooth on the full positive
-interior of a prescribed regular interval. -/
 theorem galJoint_on
     {D : RealTimeInterval}
     {S : SolutionOn (I := I) (M := M) D}
@@ -912,8 +890,6 @@ theorem galJoint_on
     prod_mem_nhds (Icc_mem_nhds hat htb) univ_mem
   exact ((hfin ha hab hb N) p hpab).contMDiffAt hnhds |>.contMDiffWithinAt
 
-/-- On the full positive interior of a prescribed regular interval, the scalar
-Galerkin series solves the original-time conjugate heat equation pointwise. -/
 theorem galPde_on
     {D : RealTimeInterval}
     {S : SolutionOn (I := I) (M := M) D}
@@ -1184,8 +1160,6 @@ theorem galPde_on
   rw [hscalar', hlap]
   simpa only [zeta] using hWscalar
 
-/-- A scalar Galerkin limit on a prescribed regular interval is a genuine
-classical heat potential on that entire interval. -/
 theorem gallim_on
     {D : RealTimeInterval}
     {S : SolutionOn (I := I) (M := M) D}
@@ -1237,8 +1211,6 @@ theorem gallim_on
     change s ∈ Ioo (0 : Real) tau at hs
     simpa only [reverseFamily] using hpde s hs x
 
-/-- A positive initial scalar Galerkin datum stays positive on a prescribed
-regular interval contained in a compact regular-time slab. -/
 theorem gallim_pos_on
     {D : RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)

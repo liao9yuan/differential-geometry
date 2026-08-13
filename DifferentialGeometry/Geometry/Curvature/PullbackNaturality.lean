@@ -7,13 +7,6 @@ open DifferentialGeometry.Geometry.Curvature
 
 set_option autoImplicit false
 
-
-
-
-
-
-
-
 noncomputable section
 
 namespace DifferentialGeometry.Geometry.Curvature
@@ -82,8 +75,6 @@ theorem mpullback_symm_apply
     IsLocalDiffeomorphAt.mfderivToContinuousLinearEquiv, hlocal.mfderiv_eq]
   rfl
 
-
-
 private abbrev pushFwdField
     (Phi : M ≃ₘ⟮I, I⟯ N) (X : (p : M) -> TangentSpace I p) :
     (q : N) -> TangentSpace I q :=
@@ -125,9 +116,6 @@ omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [IsManifold I ∞
     pushFwdSection (I := I) Phi X (Phi x) =
       mfderiv I I (Phi : M -> N) x (X x) := by
   simp [pushFwdSection]
-
-
-
 
 omit [NeZero (Module.finrank ℝ E)] in
 theorem directionalDeriv_pullback
@@ -178,9 +166,6 @@ theorem directionalDeriv_pullback
           (pushFwdSection (I := I) Phi Q q))
       (f := (Phi : M -> N)) (x := x) hG_diff hPhi_diff (A x)
   simpa [Function.comp_def] using hcomp
-
-
-
 
 omit [NeZero (Module.finrank ℝ E)] in
 private theorem inner_bracket_pullback_pushFwd
@@ -251,11 +236,6 @@ private theorem koszulScalar_pullback_pushFwd
     inner_bracket_pullback_pushFwd (I := I) g Phi A B C x,
     inner_bracket_pullback_pushFwd (I := I) g Phi B C A x,
     inner_bracket_pullback_pushFwd (I := I) g Phi C A B x]
-
-
-
-
-
 
 omit [NeZero (Module.finrank ℝ E)] in
 theorem metricCov_pullback
@@ -329,10 +309,6 @@ theorem metricCov_pullback
       ((pushFwdSection (I := I) Phi Y).contMDiff.contMDiffAt.mdifferentiableAt (by simp))
       ((pushFwdSection (I := I) Phi Zw).contMDiff.contMDiffAt.mdifferentiableAt (by simp))
   rw [hkoszul_h, hkoszul_g, koszulScalar_pullback_pushFwd (I := I) g Phi Xv Y Zw x]
-
-
-
-
 
 omit [NeZero (Module.finrank ℝ E)] in
 private theorem connectionRiemannCurvatureField_pullback_pushFwd

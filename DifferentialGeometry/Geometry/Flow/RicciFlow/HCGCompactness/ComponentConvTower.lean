@@ -1,30 +1,9 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.MetricPreconv
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.MapConvergenceDeriv
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Connection
 
 set_option autoImplicit false
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 noncomputable section
 
@@ -42,8 +21,6 @@ variable {I : ModelWithCorners Real E H} [I.Boundaryless]
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
 variable [T2Space M] [IsManifold I ∞ M] [SigmaCompactSpace M]
 variable [IsManifold I 1 M] [IsManifold I 2 M]
-
-
 
 omit [IsManifold I 2 M] in
 omit [SigmaCompactSpace M] in
@@ -71,10 +48,6 @@ theorem chartRep_towerScalar_contDiffOn
   rw [hzeq] at hcd
   exact hcd.contDiffWithinAt
 
-
-
-
-
 omit [IsManifold I 2 M] in
 omit [SigmaCompactSpace M] in
 theorem bumpTowerScalar_contDiff
@@ -91,12 +64,6 @@ theorem bumpTowerScalar_contDiff
         (fun w : M => (covDerivOfField (I := I) gRef A0 p) w (fun a => V a w)) z) :=
   bumpMul_contDiff (isOpen_extChartAt_target (I := I) x₀) hχ htsupp
     (chartRep_towerScalar_contDiffOn (I := I) gRef A0 p V x₀)
-
-
-
-
-
-
 
 omit [IsManifold I 2 M] in
 omit [SigmaCompactSpace M] in
@@ -140,10 +107,6 @@ theorem bumpFderiv_eq_chartTowerStep
   rw [hval, hχU hz]
   simp
 
-
-
-
-
 omit [IsManifold I 2 M] in
 omit [SigmaCompactSpace M] in
 theorem bumpTowerStep_chartConv
@@ -184,10 +147,6 @@ theorem bumpTowerStep_chartConv
   · exact (bumpFderiv_eq_chartTowerStep (I := I) gRef A0inf p V x₀ v σ hσ hKchart
       hU hχU hUKc hUtarget hz).symm
 
-
-
-
-
 omit [FiniteDimensional ℝ E] [CompleteSpace E] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
     [IsManifold I 1 M] [IsManifold I 2 M] in
 theorem chartRep_contDiffOn (f : M → Real) (x₀ : M)
@@ -209,14 +168,6 @@ theorem chartRep_contDiffOn (f : M → Real) (x₀ : M)
   have hwrite : writtenInExtChartAt I 𝓘(Real, Real) x₀ f
       = f ∘ (extChartAt I x₀).symm := by funext z; simp [writtenInExtChartAt]
   rw [hwrite]; exact hcd
-
-
-
-
-
-
-
-
 
 omit [IsManifold I 2 M] in
 omit [SigmaCompactSpace M] in
@@ -317,12 +268,6 @@ theorem bumpTower_slotExpand_conv
     rw [hmulti A0inf ((extChartAt I x₀).symm z) (hUS z hz)]
     simp only [smul_eq_mul]
 
-
-
-
-
-
-
 omit [I.Boundaryless] [IsManifold I 2 M] in
 omit [SigmaCompactSpace M] in
 theorem bumpTowerStep_split
@@ -364,10 +309,6 @@ theorem bumpTowerStep_split
   simp only [hupd]
   rw [mul_add, Finset.mul_sum]
   ring
-
-
-
-
 
 omit [IsManifold I 2 M] in
 omit [SigmaCompactSpace M] in
@@ -419,13 +360,6 @@ theorem bumpTowerStepScalar_contDiff
         (covSection (I := I) (leviCivitaConnectionOfMetric (I := I) gRef)
           (leviCivitaConnectionOfMetric_contMDiffCovariantDerivative (I := I) gRef)
           σ (V' a))) x₀ hχ htsupp
-
-
-
-
-
-
-
 
 omit [IsManifold I 2 M] in
 omit [SigmaCompactSpace M] in
@@ -503,11 +437,6 @@ theorem bumpTowerCons_conv
     exact bumpTowerStep_split (I := I) gRef A0inf p V' σ x₀ χ z
   rw [hfeq_seq, hfeq_inf]
   exact hsub
-
-
-
-
-
 
 omit [IsManifold I 2 M] in
 omit [SigmaCompactSpace M] in
@@ -588,10 +517,6 @@ theorem bumpTowerCarrier_step
   exact bumpTowerCons_conv (I := I) gRef A0Seq A0inf p x₀ hχ htsupp hU hχU hUtarget
     hKchart hUKc (vbasis i) (frame i) (hframeσ i) (Fin.tail W) IH
 
-
-
-
-
 omit [IsManifold I 2 M] in
 omit [SigmaCompactSpace M] in
 theorem bumpTowerCarrier_all
@@ -640,14 +565,6 @@ theorem bumpTowerCarrier_all
     exact bumpTowerCarrier_step (I := I) gRef A0Seq A0inf p x₀ hχ htsupp hU hχU hUtarget
       hKchart hUKc s frame vbasis hframeσ hspan IH
 
-
-
-
-
-
-
-
-
 omit [CompleteSpace E] [I.Boundaryless] in
 theorem exists_frameData (x₀ : M) {Kc : Set M} (hKc : IsCompact Kc)
     (hKchart : Kc ⊆ (chartAt H x₀).source) :
@@ -689,12 +606,6 @@ theorem exists_frameData (x₀ : M) {Kc : Set M} (hKc : IsCompact Kc)
     change e.localFrame_coeff I b i w (W0 w) • e.localFrame b i w
         = e.localFrame_coeff I b i w (W0 w) • frame i w
     rw [hlf_eq, hframe_eq]
-
-
-
-
-
-
 
 omit [IsManifold I 2 M] in
 omit [SigmaCompactSpace M] in
@@ -774,12 +685,6 @@ theorem hbase_of_framePairs
     funext z; rw [hbridge A0inf]
   rw [hbr_seq, hbr_inf]
   exact hpairs i j
-
-
-
-
-
-
 
 omit [IsManifold I 2 M] in
 omit [SigmaCompactSpace M] in

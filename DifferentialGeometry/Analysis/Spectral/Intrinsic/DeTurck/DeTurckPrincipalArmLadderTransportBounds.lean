@@ -22,10 +22,8 @@ import DifferentialGeometry.Geometry.Curvature.CovGradRoughLap.HomFieldCurvature
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.DeTurckPrincipalArmConnLaplacianSelfAdjoint
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.DeTurckPrincipalArmIteratedCovGradJetBounds
 open DifferentialGeometry.Analysis.Sobolev
-open DifferentialGeometry.Analysis.Sobolev
 open DifferentialGeometry.Analysis.Spectral
 open DifferentialGeometry.Analysis.Elliptic
-open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Connection
 

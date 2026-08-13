@@ -4,7 +4,6 @@ import DifferentialGeometry.Geometry.Curvature.FiberNormParseval.Slot0CurryRecon
 import Mathlib.Algebra.Order.BigOperators.Ring.Finset
 open DifferentialGeometry.Analysis.Elliptic
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Connection
 
 

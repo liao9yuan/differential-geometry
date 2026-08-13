@@ -10,85 +10,8 @@ import DifferentialGeometry.Geometry.Comparison.HalfSqDistGrad
 import DifferentialGeometry.Geometry.Comparison.HalfSqDistGradMain
 import DifferentialGeometry.Geometry.Exponential.Smoothness.IntrinsicMfderivZero
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
 
 set_option autoImplicit false
-
-/-!
-# Polar-measure layer of the segment domain: capped Bishop–Gromov inputs
-
-This file states the two volume-comparison inequalities that brick B5 of the
-A0′ `VolumeComparisonInput` lane (`HCGCompactness/C4/A0PRIME_VOLUME_PLAN.md`)
-composes into the capped relative Bishop–Gromov bound.  For a fixed complete
-member `(M, g)` with `Ric ≥ -(n-1)q²` (`n = finrank ℝ E`):
-
-* `segBall_vol_le` — **absolute** upper bound (deliverable B2(α)(1)):
-  `V(x,R) ≤ σ · v(R)`, where `V(x,R)` is the Riemannian volume of the open
-  `edist`-ball, `v(R) = hypRadVol q (n-1) R` is the *radial* model volume, and
-  `σ = (modelHaar E).toSphere Set.univ` is the **model sphere mass**
-  (`= finrank · vol(unit ball)`, e.g. `2π` in dimension 2).  The `σ` factor is
-  the sphere-integral the polar decomposition contributes on top of the radial
-  `hypRadVol`; **it must NOT be dropped** — without it the bound is false (see
-  the counterexample below).
-* `segBall_vol_fin` — the B6-facing finiteness corollary `V(x,R) < ∞`, derived
-  from `segBall_vol_le` (`σ` is finite: `Measure.toSphere` `IsFiniteMeasure`).
-* `segBall_vol_rel` — **relative** capped bound (deliverable B2(α)(2), the form
-  B5 needs), in multiplicative (division-free) shape:
-  `V(x,R) · v(s) ≤ v(R) · V(x,s)` for `0 < s ≤ R`.  Here `σ` cancels across the
-  ratio, so this form is normalization-independent and carries no `σ`.
-
-## Counterexample fixing the constant (do NOT re-drop `σ`)
-
-`M = E = ℝ²` flat (complete, connected, `RicciBoundedBelow g 0` with `q = 0`):
-`V(x,R) = πR²`, but `hypRadVol 0 1 R = ∫₀ᴿ t dt = R²/2`, and `πR² > R²/2`.
-The corrected bound is an equality here: `σ = 2π`, so `σ · (R²/2) = πR²`.
-Dimension 1 (`ℝ`): `V = 2R`, `hypRadVol 0 0 R = R`, `σ = 2`, `2R ≤ 2·R`.
-
-## Frontier status (honest — updated 2026-07-25, B5c)
-
-Both statements are still `sorry`, but the frontier has MOVED.  The B2-era
-"missing bridge" — the manifold-valued non-injective area inequality — is now
-**in-tree and proved** (`riemVol_exp_image_le`, `SegmentArea.lean`, sorry-free):
-for compact `K`,
-`riemannianVolumeMeasure g (expMapIntrinsic x '' K) ≤ ∫⁻ v in K, ofReal (curveDensity
-g (intrinsicGeodesic x v) (intrinsic Jacobi frame) 1) ∂modelHaar`, past the cut
-locus, no injectivity — via a POU-weighted `Measure.sum` decomposition, the
-weighted Euclidean area inequality `image_lintegral_le`, and the density identity
-`exp_density_curve`.  Off-zero regularity is `intrinsicFiber_smooth` /
-`expChart_contDiffAt` (the previously-cited `expMap_contMDiffAt_of_ne_zero` was
-fictional; the intrinsic exponential is globally `C^∞` in the velocity).
-
-The proof route for these two statements:
-
-1. `ball_sub_image_segDom` (`SegmentDomain.lean`) covers the ball by
-   `expMapIntrinsic '' (SegDom ∩ gBall)` — no injectivity, past the cut locus.
-2. `riemVol_exp_image_le` (SegmentArea.lean, DONE) with the compact launch set
-   `K = SegDom ∩ closedGBall R` bounds `V(x,R)` by `∫⁻ v in K, ofReal (curveDensity
-   full-n-frame v) ∂modelHaar`.
-3. **REMAINING FRONTIER (the absolute Bishop bound `∫⁻_K curveDensity ≤
-   σ·hypRadVol`, brick L6).**  This is NOT assembly — no absolute
-   `V ≤ σ·hypRadVol` template exists in any regime (the diffeo regime has only
-   the polar EQUALITY `normalBall_polar` and RELATIVE ratio bounds
-   `normalBall_cross`/`localBall_cross`).  It needs: (a) a GLOBAL Gauss
-   block-determinant factorization of the full `n`-frame density into
-   radial × transverse (`intrinsic_gauss` gives the global orthogonality; the
-   `endpoint_det_split`/`density_det_eq` block-det machinery in `RadialGram.lean`
-   is chart-scale + `private`, so must be redone past the cut locus); (b) the
-   `√det(gₓ)` E-vs-`gₓ` Haar constant reconciling `modelHaar`/`toSphere`
-   (E-orthonormal sphere) with the `gₓ`-arclength model; (c) a **SHARP** (`N = 1`)
-   transverse bound `curveDensity(orthonormal transverse frame) ≤ hypDensity`
-   — the in-tree `intrDens_le_hyp` has a NON-sharp `N = M₀/c` (from `intrPoleCap`,
-   non-orthonormal frame), so integrating it yields only `σ·N·hypRadVol`; the
-   sharp `N=1` needs a `gₓ`-orthonormal parallel frame (`exists_intrFrame`) with
-   pole ratio `→ 1`; (d) polar integration (`lintegral_polar`) to `σ·hypRadVol`.
-   The relative bound `segBall_vol_rel` further needs the truncated polar Fubini
-   (cut-time `τ(θ)`) + the cross-Chebyshev lemma (`lintegral_cross_le`, B4) +
-   injectivity of `expMapIntrinsic` on the open minimizing interior.
-
-So the remaining blocker is the absolute (and then relative) Bishop–Gromov
-volume comparison built on `riemVol_exp_image_le`.  See `SegmentPolar.md` and
-`SegmentArea.md`.
--/
 
 noncomputable section
 
@@ -1137,7 +1060,8 @@ private lemma radial_model_lintegral_scaled
         (hypDensity_scaled_nonneg hq (mul_pos ht.1 hc) d)
     have hbridge :
         ENNReal.ofReal (∫ x in Ioc (0 : ℝ) (R / c), x ^ d * hypDensity (q * (x * c)) d 1 ∂volume)
-          = ∫⁻ x in Ioc (0 : ℝ) (R / c), ENNReal.ofReal (x ^ d * hypDensity (q * (x * c)) d 1) ∂volume := by
+          = ∫⁻ x in Ioc (0 : ℝ) (R / c),
+            ENNReal.ofReal (x ^ d * hypDensity (q * (x * c)) d 1) ∂volume := by
       exact (ofReal_integral_eq_lintegral_ofReal hfi hnn)
     rw [← hbridge]
     · have hsub : ∫ t in (0 : ℝ)..(R / c), t ^ d * hypDensity (q * (t * c)) d 1
@@ -1171,7 +1095,6 @@ private lemma radial_model_lintegral_scaled
         have hsubst := intervalIntegral.integral_comp_mul_deriv hderiv
           (continuous_const.continuousOn : ContinuousOn (fun _ : ℝ => c)
             (Set.uIcc (0 : ℝ) (R / c))) hgcont
-        -- hsubst : ∫ x in 0..R/c, (g ∘ (c·)) x * c = ∫ x in 0..R, g x
         calc
           ∫ t in (0 : ℝ)..(R / c), t ^ d * hypDensity (q * (t * c)) d 1
               = ∫ t in (0 : ℝ)..(R / c), (g ∘ fun x : ℝ => c * x) t * c := by
@@ -1197,9 +1120,6 @@ private lemma radial_model_lintegral_scaled
         intro s hs
         exact hypDensity_scale_one q s d
       rw [hrad]
-
-
-
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
@@ -1233,7 +1153,6 @@ private lemma radial_model_lintegral_scaled_mul
     _ = ENNReal.ofReal (A * (c ^ (d + 1))⁻¹ * hypRadVol q d R) := by
           rw [← ENNReal.ofReal_mul hA]
           rw [← mul_assoc]
-
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
@@ -1315,7 +1234,8 @@ private lemma gBall_modelIntegral_eq
                         hypDensity (q * (r.1 * Real.sqrt (g.inner x u.1 u.1))) d 1)) r := by
               funext r
               by_cases hr : r.1 * Real.sqrt (g.inner x u.1 u.1) ≤ R
-              · have hmem : r ∈ Iic (⟨R / Real.sqrt (g.inner x u.1 u.1), div_pos hR hc⟩ : Ioi (0 : ℝ)) :=
+              · have hmem : r ∈ Iic (⟨R / Real.sqrt (g.inner x u.1 u.1),
+                div_pos hR hc⟩ : Ioi (0 : ℝ)) :=
                   (le_div_iff₀ hc).mpr hr
                 have hb : r.1 • u.1 ∈ closedGBall g x R := by
                   change Real.sqrt (g.inner x (show TangentSpace I x from (r.1 • u.1))
@@ -1326,7 +1246,8 @@ private lemma gBall_modelIntegral_eq
                   have hsq : g.inner x (show TangentSpace I x from (r.1 • u.1))
                         (show TangentSpace I x from (r.1 • u.1))
                       = (r.1 * Real.sqrt (g.inner x u.1 u.1)) ^ 2 := by
-                    change g.inner x (r.1 • (u.1 : TangentSpace I x)) (r.1 • (u.1 : TangentSpace I x))
+                    change g.inner x (r.1 • (u.1 : TangentSpace I x)) (r.1 •
+                      (u.1 : TangentSpace I x))
                         = (r.1 * Real.sqrt (g.inner x u.1 u.1)) ^ 2
                     calc
                       g.inner x (r.1 • (u.1 : TangentSpace I x)) (r.1 • (u.1 : TangentSpace I x))
@@ -1344,7 +1265,8 @@ private lemma gBall_modelIntegral_eq
                     (r.1 • (u.1 : TangentSpace I x)))
                     = r.1 * Real.sqrt (g.inner x u.1 u.1)
                 exact sqrt_gInner_smul_self (I := I) g x r.2.le u.1
-              · have hmem : r ∉ Iic (⟨R / Real.sqrt (g.inner x u.1 u.1), div_pos hR hc⟩ : Ioi (0 : ℝ)) :=
+              · have hmem : r ∉ Iic (⟨R / Real.sqrt (g.inner x u.1 u.1),
+                div_pos hR hc⟩ : Ioi (0 : ℝ)) :=
                   fun h => hr ((le_div_iff₀ hc).mp h)
                 have hb : r.1 • u.1 ∉ closedGBall g x R := by
                   intro hmem_ball
@@ -1374,7 +1296,8 @@ private lemma gBall_modelIntegral_eq
                 (continuous_sqrt_gInner_self (I := I) g x).comp continuous_subtype_val
               have hc2 : Continuous (fun u : sphere (0 : E) 1 =>
                   (Real.sqrt (g.inner x u.1 u.1) ^ (Module.finrank ℝ E))⁻¹) := by
-                have hne : ∀ u : sphere (0 : E) 1, Real.sqrt (g.inner x u.1 u.1) ^ (Module.finrank ℝ E) ≠ 0 := by
+                have hne : ∀ u : sphere (0 : E) 1,
+                  Real.sqrt (g.inner x u.1 u.1) ^ (Module.finrank ℝ E) ≠ 0 := by
                   intro u
                   have hu : u.1 ≠ 0 := by
                     intro h
@@ -1408,7 +1331,8 @@ private lemma gBall_modelIntegral_eq
                       (Real.sqrt (g.inner x u.1 u.1) ^ (Module.finrank ℝ E))⁻¹)
                     ∂(modelHaar (E := E)).toSphere)
                   * ENNReal.ofReal (hypRadVol q d R) := by
-                  have hsplit : (fun u : sphere (0 : E) 1 => ENNReal.ofReal (normalChartDensity g x 0 *
+                  have hsplit : (fun u : sphere (0 : E) 1 => ENNReal.ofReal
+                    (normalChartDensity g x 0 *
                         (Real.sqrt (g.inner x u.1 u.1) ^ (Module.finrank ℝ E))⁻¹ * hypRadVol q d R))
                       = fun u => ENNReal.ofReal (normalChartDensity g x 0 *
                         (Real.sqrt (g.inner x u.1 u.1) ^ (Module.finrank ℝ E))⁻¹) *
@@ -1468,14 +1392,16 @@ private lemma segBall_vol_le_explicit
   have hcontF : Continuous (fun v : E => ENNReal.ofReal (expJacDensity (I := I) g hEnorm x v)) :=
     ENNReal.continuous_ofReal.comp (expJacDensity_continuous (I := I) g hEnorm x)
   have hKmeas : MeasurableSet K := by
-    have h1 : MeasurableSet {v : E | (show TangentSpace I x from v) ∈ SegDom (I := I) g hEnorm x} := by
+    have h1 : MeasurableSet {v : E | (show TangentSpace I x from v) ∈ SegDom
+      (I := I) g hEnorm x} := by
       exact (isClosed_segDom (I := I) g hEnorm x).measurableSet.preimage
         (by fun_prop : Measurable (fun v : E => (show TangentSpace I x from v)))
     exact h1.inter (isClosed_closedGBall (I := I) g x R).measurableSet
   have hle_meas : MeasurableSet {v : E | ENNReal.ofReal (expJacDensity (I := I) g hEnorm x v) ≤
         ENNReal.ofReal (F v)} :=
     (isClosed_le hcontF hcontG).measurableSet
-  have hmono : (∫⁻ v in K, ENNReal.ofReal (expJacDensity (I := I) g hEnorm x v) ∂(modelHaar (E := E)))
+  have hmono : (∫⁻ v in K,
+    ENNReal.ofReal (expJacDensity (I := I) g hEnorm x v) ∂(modelHaar (E := E)))
       ≤ ∫⁻ v in K, ENNReal.ofReal (F v) ∂(modelHaar (E := E)) := by
     refine lintegral_mono_ae ?_
     rw [ae_restrict_iff hle_meas]
@@ -1510,20 +1436,6 @@ private lemma segBall_vol_le_explicit
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-/-- **Absolute Bishop volume upper bound** (deliverable B2(α)(1)).
-
-For a complete member with `Ric ≥ -(n-1)q²`, the Riemannian volume of the open
-`edist`-ball of radius `R` about `x` is at most `σ · hypRadVol q (n-1) R`, where
-`σ = (modelHaar E).toSphere Set.univ` is the model sphere mass
-(`= finrank · vol(unit ball)`).  The sphere factor `σ` is essential — dropping
-it makes the inequality false (flat `ℝ²`: `V = πR² > R²/2 = hypRadVol 0 1 R`;
-with `σ = 2π` the bound is the equality `πR² ≤ 2π·(R²/2)`).
-
-FRONTIER (`sorry`): the non-injective area inequality is now DONE
-(`riemVol_exp_image_le`, `SegmentArea.lean`); the remaining gap is the absolute
-Bishop bound `∫⁻ v in SegDom ∩ closedGBall R, ofReal (curveDensity v) ∂modelHaar
-≤ σ·hypRadVol` — global Gauss radial/transverse split + sharp (`N=1`) transverse
-density bound + Euclidean polar.  See the file header and `SegmentPolar.md`. -/
 theorem segBall_vol_le [ConnectedSpace M] [PseudoEMetricSpace M]
     [IsRiemannianManifold I M] [CompleteSpace M]
     [IsContinuousRiemannianBundle E (fun (x : M) ↦ TangentSpace I x)]
@@ -1559,7 +1471,8 @@ theorem segBall_vol_fin [ConnectedSpace M] [PseudoEMetricSpace M]
     closedGBall g x R
   have hV := segBall_vol_le_density (I := I) g hEnorm x R
   have hKcomp : IsCompact K := by
-    have hclosed : IsClosed {v : E | (show TangentSpace I x from v) ∈ SegDom (I := I) g hEnorm x} := by
+    have hclosed : IsClosed {v : E | (show TangentSpace I x from v) ∈ SegDom
+      (I := I) g hEnorm x} := by
       simpa using (isClosed_segDom (I := I) g hEnorm x).preimage continuous_id
     exact (isCompact_closedGBall (I := I) g x R).of_isClosed_subset
       (hclosed.inter (isClosed_closedGBall (I := I) g x R))
@@ -1601,21 +1514,6 @@ theorem segBall_vol_fin [ConnectedSpace M] [PseudoEMetricSpace M]
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-/-- **Capped relative Bishop–Gromov volume comparison** (deliverable B2(α)(2)),
-multiplicative (division-free) form — the input brick B5 composes into
-`V(x,R) · v(s) ≤ v(R) · V(x,s)`.
-
-For a complete member with `Ric ≥ -(n-1)q²` and `0 < s ≤ R`, writing
-`V(x,t)` for the Riemannian volume of the open `edist`-ball of radius `t` and
-`v(t) = hypRadVol q (n-1) t` for the model volume,
-`V(x,R) · v(s) ≤ v(R) · V(x,s)`.
-
-FRONTIER (`sorry`): the non-injective area inequality is now DONE
-(`riemVol_exp_image_le`, `SegmentArea.lean`); the remaining gap is the truncated
-polar representation past the cut locus (per-direction cut time `τ(θ)`), the
-cross-Chebyshev lemma `lintegral_cross_le` (brick B4), and injectivity of
-`expMapIntrinsic` on the open minimizing interior.  See the file header and
-`SegmentPolar.md`. -/
 theorem segBall_vol_rel [ConnectedSpace M] [PseudoEMetricSpace M]
     [IsRiemannianManifold I M] [CompleteSpace M]
     [IsContinuousRiemannianBundle E (fun (x : M) ↦ TangentSpace I x)]
@@ -1862,7 +1760,8 @@ private lemma expMapIntrinsic_injective_early
     intro t ht
     have hspe := intrinsicGeodesic_speedSq_eq (I := I) g hEnorm x u (t + ℓ)
     have hσ' : σ t = γv (t + ℓ) := rfl
-    have hmfd : (mfderiv 𝓘(ℝ, ℝ) I σ t (1 : ℝ) : E) = (mfderiv 𝓘(ℝ, ℝ) I γv (t + ℓ) (1 : ℝ) : E) := by
+    have hmfd : (mfderiv 𝓘(ℝ, ℝ) I σ t (1 : ℝ) : E) = (mfderiv 𝓘(ℝ,
+      ℝ) I γv (t + ℓ) (1 : ℝ) : E) := by
       have h := mfderiv_shift_apply (I := I) (γ := γv) hγv_smooth ℓ t
       simpa [σ] using h
     rw [hσ', hmfd]
@@ -2101,11 +2000,15 @@ private lemma curveDensity_smul
   have hpow : 0 ≤ c ^ Fintype.card ι := pow_nonneg hc _
   calc
     Real.sqrt ((c ^ 2) ^ Fintype.card ι • (Matrix.of fun i j => g.inner (γ t) (V i t) (V j t)).det)
-        = Real.sqrt ((c ^ Fintype.card ι) ^ 2 * (Matrix.of fun i j => g.inner (γ t) (V i t) (V j t)).det) := by
+        = Real.sqrt ((c ^ Fintype.card ι) ^ 2 * (Matrix.of fun i j => g.inner (γ t) (V i t)
+          (V j t)).det) := by
           rw [← pow_mul, mul_comm, pow_mul, smul_eq_mul]
-    _ = c ^ Fintype.card ι * Real.sqrt (Matrix.of fun i j => g.inner (γ t) (V i t) (V j t)).det := by
-          have hsq2 : (c ^ Fintype.card ι) ^ 2 * (Matrix.of fun i j => g.inner (γ t) (V i t) (V j t)).det
-              = (c ^ Fintype.card ι * Real.sqrt (Matrix.of fun i j => g.inner (γ t) (V i t) (V j t)).det) ^ 2 := by
+    _ = c ^ Fintype.card ι * Real.sqrt (Matrix.of fun i j => g.inner (γ t) (V i t)
+      (V j t)).det := by
+          have hsq2 : (c ^ Fintype.card ι) ^ 2 * (Matrix.of fun i j => g.inner (γ t) (V i t)
+            (V j t)).det
+              = (c ^ Fintype.card ι * Real.sqrt (Matrix.of fun i j => g.inner (γ t) (V i t)
+                (V j t)).det) ^ 2 := by
             rw [mul_pow, Real.sq_sqrt hdet]
           rw [hsq2]
           rw [Real.sqrt_sq (mul_nonneg hpow (Real.sqrt_nonneg _))]
@@ -2244,7 +2147,8 @@ private lemma expJacDensity_radial_scaled
           calc
             (r⁻¹ ^ d * curveDensity (I := I) g (intrinsicGeodesic (I := I) g hEnorm x u)
               (fun i => intrinsicJacobi (I := I) g hEnorm x u (w i)) r) * r ^ d
-                = (r⁻¹ ^ d * r ^ d) * curveDensity (I := I) g (intrinsicGeodesic (I := I) g hEnorm x u)
+                = (r⁻¹ ^ d * r ^ d) * curveDensity (I := I) g (intrinsicGeodesic
+                  (I := I) g hEnorm x u)
                   (fun i => intrinsicJacobi (I := I) g hEnorm x u (w i)) r := by
                   ring
             _ = curveDensity (I := I) g (intrinsicGeodesic (I := I) g hEnorm x u)

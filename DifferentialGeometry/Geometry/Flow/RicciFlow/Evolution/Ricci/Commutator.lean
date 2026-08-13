@@ -2,16 +2,9 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.Ricci.Bianchi
 open DifferentialGeometry.Tensor.RSTensor
 open DifferentialGeometry.PDE.RicciFlow
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Operator
 
 set_option autoImplicit false
-
-
-
-
-
-
 
 noncomputable section
 
@@ -53,10 +46,6 @@ private theorem curvatureAction0SAt_vec2_eq
   rw [DifferentialGeometry.Tensor.RSTensor.curvatureAction0SAt]
   simp [Fin.sum_univ_two, DifferentialGeometry.Geometry.Curvature.vec2,
     DifferentialGeometry.Geometry.Curvature.vec2]
-
-
-
-
 
 omit [SigmaCompactSpace M] in
 private theorem contractedCurvatureAction_left_eq
@@ -115,8 +104,6 @@ private theorem contractedCurvatureAction_left_eq
     ricciQuadraticCompInFrame, DifferentialGeometry.Geometry.Curvature.rm04Comp,
       DifferentialGeometry.Geometry.Curvature.rm04Comp,
     hgInvAt, hbasis] using hmain
-
-
 
 omit [SigmaCompactSpace M] in
 private theorem contractedCurvatureAction_right_eq
@@ -202,10 +189,6 @@ private theorem contractedCurvatureAction_right_eq
             ricciQuadraticCompInFrame, DifferentialGeometry.Geometry.Curvature.rm04Comp,
               DifferentialGeometry.Geometry.Curvature.rm04Comp,
             hgInvAt, hbasis]
-
-
-
-
 
 omit [SigmaCompactSpace M] in
 theorem ricciSecondDerivativeCommutatorsInFrame_of_tensor0S_ricciIdentity
@@ -489,11 +472,6 @@ theorem ricciSecondDerivativeCommutatorsInFrame_of_tensor0S_ricciIdentity
             rw [hrightAction]
             ring
 
-
-
-
-
-
 omit [SigmaCompactSpace M] in
 theorem ricciSecCommLocId
     {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
@@ -776,10 +754,6 @@ theorem ricciSecCommLocId
             rw [hrightAction]
             ring
 
-
-
-
-
 def RicciContractedCommutatorsInFrame
     {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -875,8 +849,6 @@ theorem ricci_trace_terms_eq_of_differentiatedBianchi
   have hB := (hbianchi t x i j).2
   rw [hA, hB]
 
-
-
 omit [TopologicalSpace M] [SigmaCompactSpace M] [T2Space M] [DecidableEq Idx] in
 theorem traceTermsEqLoc
     {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
@@ -895,8 +867,6 @@ theorem traceTermsEqLoc
   have hA := (hbianchi t x hx i j).1
   have hB := (hbianchi t x hx i j).2
   rw [hA, hB]
-
-
 
 omit [DecidableEq Idx] in
 omit [SigmaCompactSpace M] [T2Space M] in
@@ -943,8 +913,6 @@ theorem RicciContractedCommutatorsInFrame_of_differentiatedBianchi_and_commutato
   exact ⟨(hcurv t x i j).1, (hcurv t x i j).2,
     ricci_trace_terms_eq_of_differentiatedBianchi
       (M := M) gInv nabla2Ric hbianchi t x i j⟩
-
-
 
 omit [SigmaCompactSpace M] in
 theorem RicciContractedCommutatorsInFrame_of_differentiatedBianchi_and_tensor0S_ricciIdentity
@@ -1003,8 +971,6 @@ theorem RicciContractedCommutatorsInFrame_of_differentiatedBianchi_and_tensor0S_
         (I := I) S Rm13 Rm04 gInv frame hframe hcover hinv
         nabla2RicTensor nabla2Ric
         hNabla2 hRicciId hRicTrace13 hLower hPair hOutput hFirst hRic))
-
-
 
 theorem RicciContractedCommutatorsInFrame_of_tensor0S_ricciIdentity_lc
     [IsManifold I (∞ + 1) M]
@@ -1170,8 +1136,6 @@ private theorem ricciVariationExpandedRHSInFrame_eq_decomposed
   dsimp [left, right, rough, hess, traceA, traceB]
   ring
 
-
-
 omit [DecidableEq Idx] in
 omit [SigmaCompactSpace M] [T2Space M] in
 theorem ricciVariationExpandedRHS_eq_evolutionRHS_of_commutators
@@ -1195,8 +1159,6 @@ theorem ricciVariationExpandedRHS_eq_evolutionRHS_of_commutators
   simp [ricciEvolutionRHSInFrame]
   ring
 
-
-
 def contractedBianchiInFrame
     (gInv : Real -> DifferentialGeometry.Geometry.Curvature.InverseMetricComponents M Idx)
     (nablaRic : Real -> M -> Idx -> Idx -> Idx -> Real)
@@ -1205,23 +1167,15 @@ def contractedBianchiInFrame
     (∑ k : Idx, ∑ l : Idx, gInv t x k l * nablaRic t x l i k) =
       (1 / 2 : Real) * gradScalar t x i
 
-
-
 def ricciSecondDerivativeCommute
     (secondDerivRic commutedSecondDerivRic :
       Real -> M -> Idx -> Idx -> Idx -> Idx -> Real) : Prop :=
   forall t x a b i j,
     secondDerivRic t x a b i j = commutedSecondDerivRic t x a b i j
 
-
-
 def ricciVariationGaugeTerms_cancel
     (gaugeTerms : Real -> M -> Idx -> Idx -> Real) : Prop :=
   forall t x i j, gaugeTerms t x i j = 0
-
-
-
-
 
 def ricciCurvatureTerms_eq
     {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
@@ -1234,9 +1188,6 @@ def ricciCurvatureTerms_eq
     curvatureTerms t x i j =
       2 * rmRicciContractionCompInFrame (I := I) S Rm04 gInv frame t x i j -
         2 * ricciQuadraticCompInFrame (I := I) S gInv frame t x i j
-
-
-
 
 omit [DecidableEq Idx] in
 omit [SigmaCompactSpace M] [T2Space M] in
@@ -1258,8 +1209,6 @@ theorem ricciEvolutionEquationInFrame_of_variation_expanded
     ((ricciVariationFromConnectionRHSInFrame_nablaGammaDtFromNabla2Ric
         (M := M) gInv nabla2Ric (t : Real) x i j).trans
       (h_reduce t x i j))
-
-
 
 omit [DecidableEq Idx] in
 omit [SigmaCompactSpace M] [T2Space M] in
@@ -1284,8 +1233,6 @@ theorem ricciEvolutionEquationInFrameOnLocal_of_variation_expanded
         (M := M) gInv nabla2Ric (t : Real) x i j).trans
       (h_reduce t x i j))
 
-
-
 omit [DecidableEq Idx] in
 omit [SigmaCompactSpace M] [T2Space M] in
 theorem ricciEvolution_of_variation_commutators
@@ -1305,8 +1252,6 @@ theorem ricciEvolution_of_variation_commutators
     (I := I) S Rm04 gInv frame nabla2Ric h_var
     (ricciVariationExpandedRHS_eq_evolutionRHS_of_commutators
       (I := I) S Rm04 gInv frame nabla2Ric hcomm)
-
-
 
 omit [DecidableEq Idx] in
 omit [SigmaCompactSpace M] [T2Space M] in
@@ -1329,8 +1274,6 @@ theorem ricciEvolutionEquationInFrameOnLocal_of_variation_commutators
     (I := I) S Rm04 gInv frame u nabla2Ric h_var
     (ricciVariationExpandedRHS_eq_evolutionRHS_of_commutators
       (I := I) S Rm04 gInv frame nabla2Ric hcomm)
-
-
 
 omit [DecidableEq Idx] in
 omit [SigmaCompactSpace M] [T2Space M] in

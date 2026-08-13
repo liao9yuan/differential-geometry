@@ -2,7 +2,6 @@ import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.GreenIdentityA
 import DifferentialGeometry.Analysis.Integration.L2.Tensor0SInnerSectionSmooth
 open DifferentialGeometry.Analysis.Elliptic
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Connection
 
 
@@ -10,7 +9,8 @@ noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
 
-open Bundle Manifold Set Filter DifferentialGeometry.Tensor0SBundle MeasureTheory CovariantDerivative
+open Bundle Manifold Set Filter DifferentialGeometry.Tensor0SBundle MeasureTheory
+    CovariantDerivative
 open scoped Manifold Topology ContDiff BigOperators Matrix
 
 namespace DifferentialGeometry

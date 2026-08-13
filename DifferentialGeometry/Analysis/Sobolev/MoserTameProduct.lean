@@ -4,7 +4,6 @@ import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.GreenIdentityA
 import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.RawConnLapL2SobolevBounds.RoughLaplacianSecondCovGradL2Bound
 open DifferentialGeometry.Analysis.Elliptic
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
 
 noncomputable section
 
@@ -34,18 +33,22 @@ theorem exists_moserTameProduct_iteratedCovGrad_l2Norm_le
         (P : Integral.L2.SmoothCcTensor g 0 (p + q)) (Λ Λ₀ : ℝ), 0 ≤ Λ → 0 ≤ Λ₀ →
         (∀ (x : M) (i : ℕ), i ≤ k →
           riemannianFiberNormSq (I := I) (M := M) g 0 (p + i) x
-              ((DifferentialGeometry.Analysis.Sobolev.iteratedCovGrad (I := I) g 0 p i c).toSection x) ≤ Λ ^ 2) →
+              ((DifferentialGeometry.Analysis.Sobolev.iteratedCovGrad
+                (I := I) g 0 p i c).toSection x) ≤ Λ ^ 2) →
         (∀ x : M,
           riemannianFiberNormSq (I := I) (M := M) g 0 q x (w.toSection x) ≤ Λ₀ ^ 2) →
         (∀ x : M,
           riemannianFiberNormSq (I := I) (M := M) g 0 (p + q + k) x
-              ((DifferentialGeometry.Analysis.Sobolev.iteratedCovGrad (I := I) g 0 (p + q) k P).toSection x) ≤
+              ((DifferentialGeometry.Analysis.Sobolev.iteratedCovGrad (I := I) g 0
+                (p + q) k P).toSection x) ≤
             (∑ i ∈ Finset.range (k + 1),
               (k.choose i : ℝ) ^ 2 *
                 (riemannianFiberNormSq (I := I) (M := M) g 0 (p + i) x
-                    ((DifferentialGeometry.Analysis.Sobolev.iteratedCovGrad (I := I) g 0 p i c).toSection x) *
+                    ((DifferentialGeometry.Analysis.Sobolev.iteratedCovGrad
+                      (I := I) g 0 p i c).toSection x) *
                   riemannianFiberNormSq (I := I) (M := M) g 0 (q + (k - i)) x
-                    ((DifferentialGeometry.Analysis.Sobolev.iteratedCovGrad (I := I) g 0 q (k - i) w).toSection x)))) →
+                    ((DifferentialGeometry.Analysis.Sobolev.iteratedCovGrad (I := I) g 0 q
+                      (k - i) w).toSection x)))) →
         Integral.L2.tensorL2Norm (I := I) g 0 (p + q + k)
             (DifferentialGeometry.Analysis.Sobolev.iteratedCovGrad (I := I) g 0 (p + q) k P).toFun ≤
           C * (Λ * ∑ i ∈ Finset.range (k + 1),
@@ -53,16 +56,19 @@ theorem exists_moserTameProduct_iteratedCovGrad_l2Norm_le
                     (DifferentialGeometry.Analysis.Sobolev.iteratedCovGrad (I := I) g 0 q i w).toFun
               + Λ₀ * ∑ i ∈ Finset.range (k + 1),
                   Integral.L2.tensorL2Norm (I := I) g 0 (p + i)
-                    (DifferentialGeometry.Analysis.Sobolev.iteratedCovGrad (I := I) g 0 p i c).toFun) := by
+                    (DifferentialGeometry.Analysis.Sobolev.iteratedCovGrad
+                      (I := I) g 0 p i c).toFun) := by
   classical
   refine ⟨(2 : ℝ) ^ k, by positivity, ?_⟩
   intro c w P Λ Λ₀ hΛ hΛ₀ hc hw hP
   set Tw : ∀ i, Integral.L2.SmoothCcTensor g 0 (q + (k - i)) :=
-    fun i => DifferentialGeometry.Analysis.Sobolev.iteratedCovGrad (I := I) g 0 q (k - i) w with hTw_def
+    fun i => DifferentialGeometry.Analysis.Sobolev.iteratedCovGrad (I := I) g 0 q
+      (k - i) w with hTw_def
   have hpt :
       ∀ x : M,
         riemannianFiberNormSq (I := I) (M := M) g 0 (p + q + k) x
-            ((DifferentialGeometry.Analysis.Sobolev.iteratedCovGrad (I := I) g 0 (p + q) k P).toSection x) ≤
+            ((DifferentialGeometry.Analysis.Sobolev.iteratedCovGrad (I := I) g 0
+              (p + q) k P).toSection x) ≤
           ((2 : ℝ) ^ k * Λ) ^ 2 * ∑ i ∈ Finset.range (k + 1),
             riemannianFiberNormSq (I := I) (M := M) g 0 (q + (k - i)) x ((Tw i).toSection x) := by
     intro x
@@ -71,7 +77,8 @@ theorem exists_moserTameProduct_iteratedCovGrad_l2Norm_le
     refine Finset.sum_le_sum (fun i hi => ?_)
     have hi_le : i ≤ k := by simpa [Nat.lt_succ_iff] using Finset.mem_range.mp hi
     have hcΛ : riemannianFiberNormSq (I := I) (M := M) g 0 (p + i) x
-        ((DifferentialGeometry.Analysis.Sobolev.iteratedCovGrad (I := I) g 0 p i c).toSection x) ≤ Λ ^ 2 := hc x i hi_le
+        ((DifferentialGeometry.Analysis.Sobolev.iteratedCovGrad
+          (I := I) g 0 p i c).toSection x) ≤ Λ ^ 2 := hc x i hi_le
     have hc_nn : 0 ≤ riemannianFiberNormSq (I := I) (M := M) g 0 (p + i) x
         ((DifferentialGeometry.Analysis.Sobolev.iteratedCovGrad (I := I) g 0 p i c).toSection x) :=
       riemannianFiberNormSq_nonneg (I := I) (M := M) g 0 (p + i) x _
@@ -88,7 +95,8 @@ theorem exists_moserTameProduct_iteratedCovGrad_l2Norm_le
     have hchoose_nn : (0 : ℝ) ≤ ((k.choose i : ℝ)) ^ 2 := by positivity
     calc (k.choose i : ℝ) ^ 2 *
             (riemannianFiberNormSq (I := I) (M := M) g 0 (p + i) x
-                ((DifferentialGeometry.Analysis.Sobolev.iteratedCovGrad (I := I) g 0 p i c).toSection x) *
+                ((DifferentialGeometry.Analysis.Sobolev.iteratedCovGrad
+                  (I := I) g 0 p i c).toSection x) *
               riemannianFiberNormSq (I := I) (M := M) g 0 (q + (k - i)) x ((Tw i).toSection x))
         ≤ ((2 : ℝ) ^ k) ^ 2 * (Λ ^ 2 *
               riemannianFiberNormSq (I := I) (M := M) g 0 (q + (k - i)) x
@@ -123,10 +131,12 @@ theorem exists_moserTameProduct_iteratedCovGrad_l2Norm_le
   rw [hsum_w_eq] at hpack
   set Sw : ℝ := ∑ i ∈ Finset.range (k + 1),
       Integral.L2.tensorL2Norm (I := I) g 0 (q + i)
-        (DifferentialGeometry.Analysis.Sobolev.iteratedCovGrad (I := I) g 0 q i w).toFun with hSw_def
+        (DifferentialGeometry.Analysis.Sobolev.iteratedCovGrad
+          (I := I) g 0 q i w).toFun with hSw_def
   set Sc : ℝ := ∑ i ∈ Finset.range (k + 1),
       Integral.L2.tensorL2Norm (I := I) g 0 (p + i)
-        (DifferentialGeometry.Analysis.Sobolev.iteratedCovGrad (I := I) g 0 p i c).toFun with hSc_def
+        (DifferentialGeometry.Analysis.Sobolev.iteratedCovGrad
+          (I := I) g 0 p i c).toFun with hSc_def
   have hSw_nn : 0 ≤ Sw :=
     Finset.sum_nonneg (fun i _ => Integral.L2.tensorL2Norm_nonneg (I := I) (M := M) g 0 (q + i) _)
   have hSc_nn : 0 ≤ Sc :=
@@ -152,28 +162,36 @@ theorem exists_moserTameProduct_three_iteratedCovGrad_l2Norm_le
         0 ≤ Λa → 0 ≤ Λb → 0 ≤ Λc →
         (∀ (x : M) (i : ℕ), i ≤ k →
           riemannianFiberNormSq (I := I) (M := M) g 0 (p + i) x
-              ((DifferentialGeometry.Analysis.Sobolev.iteratedCovGrad (I := I) g 0 p i a).toSection x) ≤ Λa ^ 2) →
+              ((DifferentialGeometry.Analysis.Sobolev.iteratedCovGrad
+                (I := I) g 0 p i a).toSection x) ≤ Λa ^ 2) →
         (∀ (x : M) (j : ℕ), j ≤ k →
           riemannianFiberNormSq (I := I) (M := M) g 0 (q + j) x
-              ((DifferentialGeometry.Analysis.Sobolev.iteratedCovGrad (I := I) g 0 q j b).toSection x) ≤ Λb ^ 2) →
+              ((DifferentialGeometry.Analysis.Sobolev.iteratedCovGrad
+                (I := I) g 0 q j b).toSection x) ≤ Λb ^ 2) →
         (∀ (x : M) (l : ℕ), l ≤ k →
           riemannianFiberNormSq (I := I) (M := M) g 0 (r + l) x
-              ((DifferentialGeometry.Analysis.Sobolev.iteratedCovGrad (I := I) g 0 r l c).toSection x) ≤ Λc ^ 2) →
+              ((DifferentialGeometry.Analysis.Sobolev.iteratedCovGrad
+                (I := I) g 0 r l c).toSection x) ≤ Λc ^ 2) →
         (∀ x : M,
           riemannianFiberNormSq (I := I) (M := M) g 0 (p + q + r + k) x
-              ((DifferentialGeometry.Analysis.Sobolev.iteratedCovGrad (I := I) g 0 (p + q + r) k P).toSection x) ≤
+              ((DifferentialGeometry.Analysis.Sobolev.iteratedCovGrad (I := I) g 0
+                (p + q + r) k P).toSection x) ≤
             (∑ i ∈ Finset.range (k + 1),
               ((k.choose i : ℝ)) ^ 2 *
                 (riemannianFiberNormSq (I := I) (M := M) g 0 (p + (k - i)) x
-                    ((DifferentialGeometry.Analysis.Sobolev.iteratedCovGrad (I := I) g 0 p (k - i) a).toSection x) *
+                    ((DifferentialGeometry.Analysis.Sobolev.iteratedCovGrad (I := I) g 0 p
+                      (k - i) a).toSection x) *
                   (∑ j ∈ Finset.range (i + 1),
                     ((i.choose j : ℝ)) ^ 2 *
                       (riemannianFiberNormSq (I := I) (M := M) g 0 (q + (i - j)) x
-                          ((DifferentialGeometry.Analysis.Sobolev.iteratedCovGrad (I := I) g 0 q (i - j) b).toSection x) *
+                          ((DifferentialGeometry.Analysis.Sobolev.iteratedCovGrad (I := I) g 0 q
+                            (i - j) b).toSection x) *
                         riemannianFiberNormSq (I := I) (M := M) g 0 (r + j) x
-                          ((DifferentialGeometry.Analysis.Sobolev.iteratedCovGrad (I := I) g 0 r j c).toSection x)))))) →
+                          ((DifferentialGeometry.Analysis.Sobolev.iteratedCovGrad
+                            (I := I) g 0 r j c).toSection x)))))) →
         Integral.L2.tensorL2Norm (I := I) g 0 (p + q + r + k)
-            (DifferentialGeometry.Analysis.Sobolev.iteratedCovGrad (I := I) g 0 (p + q + r) k P).toFun ≤
+            (DifferentialGeometry.Analysis.Sobolev.iteratedCovGrad (I := I) g 0
+              (p + q + r) k P).toFun ≤
           C * (Λb * Λc * ∑ i ∈ Finset.range (k + 1),
                   Integral.L2.tensorL2Norm (I := I) g 0 (p + i)
                     (DifferentialGeometry.Analysis.Sobolev.iteratedCovGrad (I := I) g 0 p i a).toFun
@@ -182,18 +200,21 @@ theorem exists_moserTameProduct_three_iteratedCovGrad_l2Norm_le
                     (DifferentialGeometry.Analysis.Sobolev.iteratedCovGrad (I := I) g 0 q j b).toFun
               + Λa * Λb * ∑ l ∈ Finset.range (k + 1),
                   Integral.L2.tensorL2Norm (I := I) g 0 (r + l)
-                    (DifferentialGeometry.Analysis.Sobolev.iteratedCovGrad (I := I) g 0 r l c).toFun) := by
+                    (DifferentialGeometry.Analysis.Sobolev.iteratedCovGrad
+                      (I := I) g 0 r l c).toFun) := by
   classical
   refine ⟨Real.sqrt (k + 1) * (2 : ℝ) ^ (2 * k), by positivity, ?_⟩
   intro a b c P Λa Λb Λc hΛa hΛb hΛc ha hb hc hP
   set Ta : ∀ i, Integral.L2.SmoothCcTensor g 0 (p + (k - i)) :=
-    fun i => DifferentialGeometry.Analysis.Sobolev.iteratedCovGrad (I := I) g 0 p (k - i) a with hTa_def
+    fun i => DifferentialGeometry.Analysis.Sobolev.iteratedCovGrad (I := I) g 0 p
+      (k - i) a with hTa_def
   set D : ℝ := Real.sqrt (k + 1) * (2 : ℝ) ^ (2 * k) * (Λb * Λc) with hD_def
   have hD_nn : 0 ≤ D := by rw [hD_def]; positivity
   have hpt :
       ∀ x : M,
         riemannianFiberNormSq (I := I) (M := M) g 0 (p + q + r + k) x
-            ((DifferentialGeometry.Analysis.Sobolev.iteratedCovGrad (I := I) g 0 (p + q + r) k P).toSection x) ≤
+            ((DifferentialGeometry.Analysis.Sobolev.iteratedCovGrad (I := I) g 0
+              (p + q + r) k P).toSection x) ≤
           D ^ 2 * ∑ i ∈ Finset.range (k + 1),
             riemannianFiberNormSq (I := I) (M := M) g 0 (p + (k - i)) x ((Ta i).toSection x) := by
     intro x
@@ -202,38 +223,47 @@ theorem exists_moserTameProduct_three_iteratedCovGrad_l2Norm_le
     refine Finset.sum_le_sum (fun i hi => ?_)
     have hi_le : i ≤ k := by simpa [Nat.lt_succ_iff] using Finset.mem_range.mp hi
     have ha_nn : 0 ≤ riemannianFiberNormSq (I := I) (M := M) g 0 (p + (k - i)) x
-        ((DifferentialGeometry.Analysis.Sobolev.iteratedCovGrad (I := I) g 0 p (k - i) a).toSection x) :=
+        ((DifferentialGeometry.Analysis.Sobolev.iteratedCovGrad (I := I) g 0 p
+          (k - i) a).toSection x) :=
       riemannianFiberNormSq_nonneg (I := I) (M := M) g 0 (p + (k - i)) x _
     have hinner :
         (∑ j ∈ Finset.range (i + 1),
             ((i.choose j : ℝ)) ^ 2 *
               (riemannianFiberNormSq (I := I) (M := M) g 0 (q + (i - j)) x
-                  ((DifferentialGeometry.Analysis.Sobolev.iteratedCovGrad (I := I) g 0 q (i - j) b).toSection x) *
+                  ((DifferentialGeometry.Analysis.Sobolev.iteratedCovGrad (I := I) g 0 q
+                    (i - j) b).toSection x) *
                 riemannianFiberNormSq (I := I) (M := M) g 0 (r + j) x
-                  ((DifferentialGeometry.Analysis.Sobolev.iteratedCovGrad (I := I) g 0 r j c).toSection x)))
+                  ((DifferentialGeometry.Analysis.Sobolev.iteratedCovGrad
+                    (I := I) g 0 r j c).toSection x)))
           ≤ ((k : ℝ) + 1) * ((2 : ℝ) ^ k) ^ 2 * (Λb ^ 2 * Λc ^ 2) := by
       have hbound : ∀ j ∈ Finset.range (i + 1),
           ((i.choose j : ℝ)) ^ 2 *
             (riemannianFiberNormSq (I := I) (M := M) g 0 (q + (i - j)) x
-                ((DifferentialGeometry.Analysis.Sobolev.iteratedCovGrad (I := I) g 0 q (i - j) b).toSection x) *
+                ((DifferentialGeometry.Analysis.Sobolev.iteratedCovGrad (I := I) g 0 q
+                  (i - j) b).toSection x) *
               riemannianFiberNormSq (I := I) (M := M) g 0 (r + j) x
-                ((DifferentialGeometry.Analysis.Sobolev.iteratedCovGrad (I := I) g 0 r j c).toSection x))
+                ((DifferentialGeometry.Analysis.Sobolev.iteratedCovGrad
+                  (I := I) g 0 r j c).toSection x))
             ≤ ((2 : ℝ) ^ k) ^ 2 * (Λb ^ 2 * Λc ^ 2) := by
         intro j hj
         have hj_le : j ≤ i := by simpa [Nat.lt_succ_iff] using Finset.mem_range.mp hj
         have hjk : j ≤ k := le_trans hj_le hi_le
         have hij_k : i - j ≤ k := le_trans (Nat.sub_le i j) hi_le
         have hbΛ : riemannianFiberNormSq (I := I) (M := M) g 0 (q + (i - j)) x
-            ((DifferentialGeometry.Analysis.Sobolev.iteratedCovGrad (I := I) g 0 q (i - j) b).toSection x) ≤ Λb ^ 2 :=
+            ((DifferentialGeometry.Analysis.Sobolev.iteratedCovGrad (I := I) g 0 q
+              (i - j) b).toSection x) ≤ Λb ^ 2 :=
           hb x (i - j) hij_k
         have hcΛ : riemannianFiberNormSq (I := I) (M := M) g 0 (r + j) x
-            ((DifferentialGeometry.Analysis.Sobolev.iteratedCovGrad (I := I) g 0 r j c).toSection x) ≤ Λc ^ 2 :=
+            ((DifferentialGeometry.Analysis.Sobolev.iteratedCovGrad
+              (I := I) g 0 r j c).toSection x) ≤ Λc ^ 2 :=
           hc x j hjk
         have hb_nn : 0 ≤ riemannianFiberNormSq (I := I) (M := M) g 0 (q + (i - j)) x
-            ((DifferentialGeometry.Analysis.Sobolev.iteratedCovGrad (I := I) g 0 q (i - j) b).toSection x) :=
+            ((DifferentialGeometry.Analysis.Sobolev.iteratedCovGrad (I := I) g 0 q
+              (i - j) b).toSection x) :=
           riemannianFiberNormSq_nonneg (I := I) (M := M) g 0 (q + (i - j)) x _
         have hc_nn : 0 ≤ riemannianFiberNormSq (I := I) (M := M) g 0 (r + j) x
-            ((DifferentialGeometry.Analysis.Sobolev.iteratedCovGrad (I := I) g 0 r j c).toSection x) :=
+            ((DifferentialGeometry.Analysis.Sobolev.iteratedCovGrad
+              (I := I) g 0 r j c).toSection x) :=
           riemannianFiberNormSq_nonneg (I := I) (M := M) g 0 (r + j) x _
         have hchoose_i : ((i.choose j : ℝ)) ^ 2 ≤ ((2 : ℝ) ^ k) ^ 2 := by
           have h1 : (i.choose j : ℝ) ≤ (2 : ℝ) ^ k := by
@@ -245,15 +275,19 @@ theorem exists_moserTameProduct_three_iteratedCovGrad_l2Norm_le
           have h0 : (0 : ℝ) ≤ (i.choose j : ℝ) := by positivity
           nlinarith [h1, h0]
         have hprod_le : riemannianFiberNormSq (I := I) (M := M) g 0 (q + (i - j)) x
-            ((DifferentialGeometry.Analysis.Sobolev.iteratedCovGrad (I := I) g 0 q (i - j) b).toSection x) *
+            ((DifferentialGeometry.Analysis.Sobolev.iteratedCovGrad (I := I) g 0 q
+              (i - j) b).toSection x) *
               riemannianFiberNormSq (I := I) (M := M) g 0 (r + j) x
-                ((DifferentialGeometry.Analysis.Sobolev.iteratedCovGrad (I := I) g 0 r j c).toSection x)
+                ((DifferentialGeometry.Analysis.Sobolev.iteratedCovGrad
+                  (I := I) g 0 r j c).toSection x)
             ≤ Λb ^ 2 * Λc ^ 2 := by
           apply mul_le_mul hbΛ hcΛ hc_nn (by positivity)
         have hprod_nn : 0 ≤ riemannianFiberNormSq (I := I) (M := M) g 0 (q + (i - j)) x
-            ((DifferentialGeometry.Analysis.Sobolev.iteratedCovGrad (I := I) g 0 q (i - j) b).toSection x) *
+            ((DifferentialGeometry.Analysis.Sobolev.iteratedCovGrad (I := I) g 0 q
+              (i - j) b).toSection x) *
               riemannianFiberNormSq (I := I) (M := M) g 0 (r + j) x
-                ((DifferentialGeometry.Analysis.Sobolev.iteratedCovGrad (I := I) g 0 r j c).toSection x) :=
+                ((DifferentialGeometry.Analysis.Sobolev.iteratedCovGrad
+                  (I := I) g 0 r j c).toSection x) :=
           mul_nonneg hb_nn hc_nn
         exact mul_le_mul hchoose_i hprod_le hprod_nn (by positivity)
       refine le_trans (Finset.sum_le_sum hbound) ?_
@@ -274,9 +308,11 @@ theorem exists_moserTameProduct_three_iteratedCovGrad_l2Norm_le
     have hinner_nn : 0 ≤ (∑ j ∈ Finset.range (i + 1),
         ((i.choose j : ℝ)) ^ 2 *
           (riemannianFiberNormSq (I := I) (M := M) g 0 (q + (i - j)) x
-              ((DifferentialGeometry.Analysis.Sobolev.iteratedCovGrad (I := I) g 0 q (i - j) b).toSection x) *
+              ((DifferentialGeometry.Analysis.Sobolev.iteratedCovGrad (I := I) g 0 q
+                (i - j) b).toSection x) *
             riemannianFiberNormSq (I := I) (M := M) g 0 (r + j) x
-              ((DifferentialGeometry.Analysis.Sobolev.iteratedCovGrad (I := I) g 0 r j c).toSection x))) := by
+              ((DifferentialGeometry.Analysis.Sobolev.iteratedCovGrad
+                (I := I) g 0 r j c).toSection x))) := by
       apply Finset.sum_nonneg
       intro j _
       apply mul_nonneg (by positivity)
@@ -292,16 +328,20 @@ theorem exists_moserTameProduct_three_iteratedCovGrad_l2Norm_le
       rw [mul_pow, mul_pow, hsq, h2]; ring
     calc ((k.choose i : ℝ)) ^ 2 *
             (riemannianFiberNormSq (I := I) (M := M) g 0 (p + (k - i)) x
-                ((DifferentialGeometry.Analysis.Sobolev.iteratedCovGrad (I := I) g 0 p (k - i) a).toSection x) *
+                ((DifferentialGeometry.Analysis.Sobolev.iteratedCovGrad (I := I) g 0 p
+                  (k - i) a).toSection x) *
               (∑ j ∈ Finset.range (i + 1),
                 ((i.choose j : ℝ)) ^ 2 *
                   (riemannianFiberNormSq (I := I) (M := M) g 0 (q + (i - j)) x
-                      ((DifferentialGeometry.Analysis.Sobolev.iteratedCovGrad (I := I) g 0 q (i - j) b).toSection x) *
+                      ((DifferentialGeometry.Analysis.Sobolev.iteratedCovGrad (I := I) g 0 q
+                        (i - j) b).toSection x) *
                     riemannianFiberNormSq (I := I) (M := M) g 0 (r + j) x
-                      ((DifferentialGeometry.Analysis.Sobolev.iteratedCovGrad (I := I) g 0 r j c).toSection x))))
+                      ((DifferentialGeometry.Analysis.Sobolev.iteratedCovGrad
+                        (I := I) g 0 r j c).toSection x))))
         ≤ ((2 : ℝ) ^ k) ^ 2 *
             (riemannianFiberNormSq (I := I) (M := M) g 0 (p + (k - i)) x
-                ((DifferentialGeometry.Analysis.Sobolev.iteratedCovGrad (I := I) g 0 p (k - i) a).toSection x) *
+                ((DifferentialGeometry.Analysis.Sobolev.iteratedCovGrad (I := I) g 0 p
+                  (k - i) a).toSection x) *
               (((k : ℝ) + 1) * ((2 : ℝ) ^ k) ^ 2 * (Λb ^ 2 * Λc ^ 2))) := by
           apply mul_le_mul hchoose_k _ _ (by positivity)
           · apply mul_le_mul_of_nonneg_left hinner ha_nn
@@ -324,7 +364,8 @@ theorem exists_moserTameProduct_three_iteratedCovGrad_l2Norm_le
     simpa [hTa_def, Nat.succ_sub_one] using this
   rw [hreindex] at hpack
   rw [Integral.L2.SmoothCcTensor.norm_def (I := I) (M := M)
-        (DifferentialGeometry.Analysis.Sobolev.iteratedCovGrad (I := I) g 0 (p + q + r) k P)] at hpack
+        (DifferentialGeometry.Analysis.Sobolev.iteratedCovGrad (I := I) g 0
+          (p + q + r) k P)] at hpack
   have hsum_a_eq : (∑ i ∈ Finset.range (k + 1),
       ‖DifferentialGeometry.Analysis.Sobolev.iteratedCovGrad (I := I) g 0 p i a‖) =
       ∑ i ∈ Finset.range (k + 1),
@@ -334,13 +375,16 @@ theorem exists_moserTameProduct_three_iteratedCovGrad_l2Norm_le
   rw [hsum_a_eq] at hpack
   set Sa : ℝ := ∑ i ∈ Finset.range (k + 1),
       Integral.L2.tensorL2Norm (I := I) g 0 (p + i)
-        (DifferentialGeometry.Analysis.Sobolev.iteratedCovGrad (I := I) g 0 p i a).toFun with hSa_def
+        (DifferentialGeometry.Analysis.Sobolev.iteratedCovGrad
+          (I := I) g 0 p i a).toFun with hSa_def
   set Sb : ℝ := ∑ j ∈ Finset.range (k + 1),
       Integral.L2.tensorL2Norm (I := I) g 0 (q + j)
-        (DifferentialGeometry.Analysis.Sobolev.iteratedCovGrad (I := I) g 0 q j b).toFun with hSb_def
+        (DifferentialGeometry.Analysis.Sobolev.iteratedCovGrad
+          (I := I) g 0 q j b).toFun with hSb_def
   set Sc : ℝ := ∑ l ∈ Finset.range (k + 1),
       Integral.L2.tensorL2Norm (I := I) g 0 (r + l)
-        (DifferentialGeometry.Analysis.Sobolev.iteratedCovGrad (I := I) g 0 r l c).toFun with hSc_def
+        (DifferentialGeometry.Analysis.Sobolev.iteratedCovGrad
+          (I := I) g 0 r l c).toFun with hSc_def
   have hSa_nn : 0 ≤ Sa :=
     Finset.sum_nonneg (fun i _ => Integral.L2.tensorL2Norm_nonneg (I := I) (M := M) g 0 (p + i) _)
   have hSb_nn : 0 ≤ Sb :=
@@ -371,24 +415,29 @@ theorem exists_moserTameProduct_pi_iteratedCovGrad_l2Norm_le
         (∀ m, 0 ≤ Λ m) →
         (∀ (m : Fin n) (x : M) (i : ℕ), i ≤ k →
           riemannianFiberNormSq (I := I) (M := M) g 0 (p m + i) x
-              ((DifferentialGeometry.Analysis.Sobolev.iteratedCovGrad (I := I) g 0 (p m) i (c m)).toSection x) ≤
+              ((DifferentialGeometry.Analysis.Sobolev.iteratedCovGrad (I := I) g 0 (p m) i
+                (c m)).toSection x) ≤
             (Λ m) ^ 2) →
         (∀ x : M,
           riemannianFiberNormSq (I := I) (M := M) g 0 ((∑ m, p m) + k) x
-              ((DifferentialGeometry.Analysis.Sobolev.iteratedCovGrad (I := I) g 0 (∑ m, p m) k P).toSection x) ≤
+              ((DifferentialGeometry.Analysis.Sobolev.iteratedCovGrad (I := I) g 0 (∑ m,
+                p m) k P).toSection x) ≤
             K * ∑ k' ∈ Finset.range (k + 1),
                   ∑ e ∈ Finset.Nat.antidiagonalTuple n k',
                     ∏ m : Fin n,
                       riemannianFiberNormSq (I := I) (M := M) g 0 (p m + e m) x
-                          ((DifferentialGeometry.Analysis.Sobolev.iteratedCovGrad (I := I) g 0 (p m) (e m) (c m)).toSection
+                          ((DifferentialGeometry.Analysis.Sobolev.iteratedCovGrad (I := I) g 0
+                            (p m) (e m) (c m)).toSection
                             x)) →
         Integral.L2.tensorL2Norm (I := I) g 0 ((∑ m, p m) + k)
-            (DifferentialGeometry.Analysis.Sobolev.iteratedCovGrad (I := I) g 0 (∑ m, p m) k P).toFun ≤
+            (DifferentialGeometry.Analysis.Sobolev.iteratedCovGrad (I := I) g 0 (∑ m,
+              p m) k P).toFun ≤
           (C * Real.sqrt K) * ∑ m : Fin n,
                 (∏ j ∈ Finset.univ.erase m, Λ j) *
                   ∑ i ∈ Finset.range (k + 1),
                     Integral.L2.tensorL2Norm (I := I) g 0 (p m + i)
-                      (DifferentialGeometry.Analysis.Sobolev.iteratedCovGrad (I := I) g 0 (p m) i (c m)).toFun := by
+                      (DifferentialGeometry.Analysis.Sobolev.iteratedCovGrad (I := I) g 0
+                        (p m) i (c m)).toFun := by
   classical
   refine ⟨Real.sqrt (∑ k' ∈ Finset.range (k + 1),
       ((Finset.Nat.antidiagonalTuple n k').card : ℝ)), Real.sqrt_nonneg _, ?_⟩
@@ -413,21 +462,25 @@ theorem exists_moserTameProduct_pi_iteratedCovGrad_l2Norm_le
     rw [hD, mul_pow, mul_pow, hC2, hsK2]
   have hpt : ∀ x : M,
       riemannianFiberNormSq (I := I) (M := M) g 0 ((∑ m, p m) + k) x
-          ((DifferentialGeometry.Analysis.Sobolev.iteratedCovGrad (I := I) g 0 (∑ m, p m) k P).toSection x) ≤
+          ((DifferentialGeometry.Analysis.Sobolev.iteratedCovGrad (I := I) g 0 (∑ m,
+            p m) k P).toSection x) ≤
         D ^ 2 * ∑ i ∈ Finset.range (k + 1),
           riemannianFiberNormSq (I := I) (M := M) g 0 (p i₀ + i) x
-            ((DifferentialGeometry.Analysis.Sobolev.iteratedCovGrad (I := I) g 0 (p i₀) i (c i₀)).toSection x) := by
+            ((DifferentialGeometry.Analysis.Sobolev.iteratedCovGrad (I := I) g 0 (p i₀) i
+              (c i₀)).toSection x) := by
     intro x
     set Jet0 : ℝ := ∑ i ∈ Finset.range (k + 1),
         riemannianFiberNormSq (I := I) (M := M) g 0 (p i₀ + i) x
-          ((DifferentialGeometry.Analysis.Sobolev.iteratedCovGrad (I := I) g 0 (p i₀) i (c i₀)).toSection x) with hJet0
+          ((DifferentialGeometry.Analysis.Sobolev.iteratedCovGrad (I := I) g 0 (p i₀) i
+            (c i₀)).toSection x) with hJet0
     have hJet0_nn : 0 ≤ Jet0 :=
       Finset.sum_nonneg (fun i _ => riemannianFiberNormSq_nonneg (I := I) (M := M) g 0 _ x _)
     refine le_trans (hP x) ?_
     have hterm : ∀ k' ∈ Finset.range (k + 1), ∀ e ∈ Finset.Nat.antidiagonalTuple n k',
         ∏ m : Fin n,
             riemannianFiberNormSq (I := I) (M := M) g 0 (p m + e m) x
-                ((DifferentialGeometry.Analysis.Sobolev.iteratedCovGrad (I := I) g 0 (p m) (e m) (c m)).toSection x)
+                ((DifferentialGeometry.Analysis.Sobolev.iteratedCovGrad (I := I) g 0 (p m) (e m)
+                  (c m)).toSection x)
           ≤ PΛ ^ 2 * Jet0 := by
       intro k' hk' e he
       have hk'_le : k' ≤ k := by simpa [Nat.lt_succ_iff] using Finset.mem_range.mp hk'
@@ -440,7 +493,8 @@ theorem exists_moserTameProduct_pi_iteratedCovGrad_l2Norm_le
         exact le_trans hsm hk'_le
       set f : Fin n → ℝ := fun m =>
         riemannianFiberNormSq (I := I) (M := M) g 0 (p m + e m) x
-            ((DifferentialGeometry.Analysis.Sobolev.iteratedCovGrad (I := I) g 0 (p m) (e m) (c m)).toSection x) with hf
+            ((DifferentialGeometry.Analysis.Sobolev.iteratedCovGrad (I := I) g 0 (p m) (e m)
+              (c m)).toSection x) with hf
       have hf_nn : ∀ m, 0 ≤ f m := fun m =>
         riemannianFiberNormSq_nonneg (I := I) (M := M) g 0 _ x _
       have herase : ∏ m ∈ Finset.univ.erase i₀, f m ≤
@@ -457,7 +511,8 @@ theorem exists_moserTameProduct_pi_iteratedCovGrad_l2Norm_le
           Finset.mem_range.mpr (by have := he_le i₀; omega)
         have hss := Finset.single_le_sum
           (f := fun i => riemannianFiberNormSq (I := I) (M := M) g 0 (p i₀ + i) x
-            ((DifferentialGeometry.Analysis.Sobolev.iteratedCovGrad (I := I) g 0 (p i₀) i (c i₀)).toSection x))
+            ((DifferentialGeometry.Analysis.Sobolev.iteratedCovGrad (I := I) g 0 (p i₀) i
+              (c i₀)).toSection x))
           (fun i _ => riemannianFiberNormSq_nonneg (I := I) (M := M) g 0 _ x _) hmem
         rw [← hJet0] at hss
         simpa [hf] using hss
@@ -475,7 +530,8 @@ theorem exists_moserTameProduct_pi_iteratedCovGrad_l2Norm_le
               ∑ e ∈ Finset.Nat.antidiagonalTuple n k',
                 ∏ m : Fin n,
                   riemannianFiberNormSq (I := I) (M := M) g 0 (p m + e m) x
-                      ((DifferentialGeometry.Analysis.Sobolev.iteratedCovGrad (I := I) g 0 (p m) (e m) (c m)).toSection x)
+                      ((DifferentialGeometry.Analysis.Sobolev.iteratedCovGrad (I := I) g 0 (p m)
+                        (e m) (c m)).toSection x)
         ≤ K * ∑ k' ∈ Finset.range (k + 1),
               ∑ _e ∈ Finset.Nat.antidiagonalTuple n k', PΛ ^ 2 * Jet0 := by
           apply mul_le_mul_of_nonneg_left _ hK
@@ -493,37 +549,44 @@ theorem exists_moserTameProduct_pi_iteratedCovGrad_l2Norm_le
     tensorL2Norm_le_of_pointwise_fiberNormSq_bound_sum (I := I) (M := M) g (k + 1)
       (fun i => p i₀ + i)
       (fun i => DifferentialGeometry.Analysis.Sobolev.iteratedCovGrad (I := I) g 0 (p i₀) i (c i₀))
-      (DifferentialGeometry.Analysis.Sobolev.iteratedCovGrad (I := I) g 0 (∑ m, p m) k P) D hD_nn hpt
+      (DifferentialGeometry.Analysis.Sobolev.iteratedCovGrad (I := I) g 0 (∑ m,
+        p m) k P) D hD_nn hpt
   rw [Integral.L2.SmoothCcTensor.norm_def (I := I) (M := M)
-        (DifferentialGeometry.Analysis.Sobolev.iteratedCovGrad (I := I) g 0 (∑ m, p m) k P)] at hpack
+        (DifferentialGeometry.Analysis.Sobolev.iteratedCovGrad (I := I) g 0 (∑ m,
+          p m) k P)] at hpack
   have hsum0_eq : (∑ i ∈ Finset.range (k + 1),
       ‖DifferentialGeometry.Analysis.Sobolev.iteratedCovGrad (I := I) g 0 (p i₀) i (c i₀)‖) =
       ∑ i ∈ Finset.range (k + 1),
         Integral.L2.tensorL2Norm (I := I) g 0 (p i₀ + i)
-          (DifferentialGeometry.Analysis.Sobolev.iteratedCovGrad (I := I) g 0 (p i₀) i (c i₀)).toFun :=
+          (DifferentialGeometry.Analysis.Sobolev.iteratedCovGrad (I := I) g 0 (p i₀) i
+            (c i₀)).toFun :=
     Finset.sum_congr rfl (fun i _ => Integral.L2.SmoothCcTensor.norm_def (I := I) (M := M) _)
   rw [hsum0_eq] at hpack
   calc Integral.L2.tensorL2Norm (I := I) g 0 ((∑ m, p m) + k)
           (DifferentialGeometry.Analysis.Sobolev.iteratedCovGrad (I := I) g 0 (∑ m, p m) k P).toFun
       ≤ D * ∑ i ∈ Finset.range (k + 1),
             Integral.L2.tensorL2Norm (I := I) g 0 (p i₀ + i)
-              (DifferentialGeometry.Analysis.Sobolev.iteratedCovGrad (I := I) g 0 (p i₀) i (c i₀)).toFun := hpack
+              (DifferentialGeometry.Analysis.Sobolev.iteratedCovGrad (I := I) g 0 (p i₀) i
+                (c i₀)).toFun := hpack
     _ = (C * sK) * ((∏ j ∈ Finset.univ.erase i₀, Λ j) *
               ∑ i ∈ Finset.range (k + 1),
                 Integral.L2.tensorL2Norm (I := I) g 0 (p i₀ + i)
-                  (DifferentialGeometry.Analysis.Sobolev.iteratedCovGrad (I := I) g 0 (p i₀) i (c i₀)).toFun) := by
+                  (DifferentialGeometry.Analysis.Sobolev.iteratedCovGrad (I := I) g 0 (p i₀) i
+                    (c i₀)).toFun) := by
           rw [hD, hPΛ]; ring
     _ ≤ (C * sK) * ∑ m : Fin n,
             (∏ j ∈ Finset.univ.erase m, Λ j) *
               ∑ i ∈ Finset.range (k + 1),
                 Integral.L2.tensorL2Norm (I := I) g 0 (p m + i)
-                  (DifferentialGeometry.Analysis.Sobolev.iteratedCovGrad (I := I) g 0 (p m) i (c m)).toFun := by
+                  (DifferentialGeometry.Analysis.Sobolev.iteratedCovGrad (I := I) g 0 (p m) i
+                    (c m)).toFun := by
           apply mul_le_mul_of_nonneg_left _ (mul_nonneg hC_nn hsK_nn)
           exact Finset.single_le_sum
             (f := fun m : Fin n => (∏ j ∈ Finset.univ.erase m, Λ j) *
                 ∑ i ∈ Finset.range (k + 1),
                   Integral.L2.tensorL2Norm (I := I) g 0 (p m + i)
-                    (DifferentialGeometry.Analysis.Sobolev.iteratedCovGrad (I := I) g 0 (p m) i (c m)).toFun)
+                    (DifferentialGeometry.Analysis.Sobolev.iteratedCovGrad (I := I) g 0 (p m) i
+                      (c m)).toFun)
             (fun m _ => mul_nonneg (Finset.prod_nonneg (fun j _ => hΛ j))
               (Finset.sum_nonneg (fun i _ =>
                 Integral.L2.tensorL2Norm_nonneg (I := I) (M := M) g 0 _ _)))
@@ -738,18 +801,21 @@ private theorem exists_rawConnLap_l2Norm_le_secondCovGrad_l2Norm
             (DifferentialGeometry.Analysis.Parabolic.TensorSpectral.covGrad (I := I) g 0 (s' + 1)
               (DifferentialGeometry.Analysis.Parabolic.TensorSpectral.covGrad (I := I) g 0 s'
                 S)).toFun :=
-  DifferentialGeometry.Analysis.Elliptic.exists_rawConnLap_l2Norm_le_secondCovGrad_l2Norm_gen (I := I) (M := M) g
+  DifferentialGeometry.Analysis.Elliptic.exists_rawConnLap_l2Norm_le_secondCovGrad_l2Norm_gen
+    (I := I) (M := M) g
 
 private theorem l2jet_logConvex_iteratedCovGrad
     (g : SmoothRiemannianMetric I M) (s : ℕ) :
     ∃ K : ℝ, 1 ≤ K ∧
       ∀ (u : Integral.L2.SmoothCcTensor g 0 s) (i : ℕ),
         (Integral.L2.tensorL2Norm (I := I) g 0 (s + (i + 1))
-            (DifferentialGeometry.Analysis.Sobolev.iteratedCovGrad (I := I) g 0 s (i + 1) u).toFun) ^ 2 ≤
+            (DifferentialGeometry.Analysis.Sobolev.iteratedCovGrad (I := I) g 0 s
+              (i + 1) u).toFun) ^ 2 ≤
           K * Integral.L2.tensorL2Norm (I := I) g 0 (s + i)
                 (DifferentialGeometry.Analysis.Sobolev.iteratedCovGrad (I := I) g 0 s i u).toFun *
             Integral.L2.tensorL2Norm (I := I) g 0 (s + (i + 2))
-              (DifferentialGeometry.Analysis.Sobolev.iteratedCovGrad (I := I) g 0 s (i + 2) u).toFun := by
+              (DifferentialGeometry.Analysis.Sobolev.iteratedCovGrad (I := I) g 0 s
+                (i + 2) u).toFun := by
   classical
   obtain ⟨K, hK1, htrace⟩ := exists_rawConnLap_l2Norm_le_secondCovGrad_l2Norm (I := I) (M := M) g
   refine ⟨K, hK1, ?_⟩
@@ -788,9 +854,12 @@ private theorem l2Norm_le_sup_mul_sqrt_vol
     (u : Integral.L2.SmoothCcTensor g 0 s) (Λ₀ : ℝ) (hΛ₀ : 0 ≤ Λ₀)
     (hsup : ∀ x : M, riemannianFiberNormSq (I := I) (M := M) g 0 s x (u.toSection x) ≤ Λ₀ ^ 2) :
     Integral.L2.tensorL2Norm (I := I) g 0 s u.toFun ≤
-      Λ₀ * Real.sqrt ((DifferentialGeometry.Integral.Measure.riemannianVolumeMeasure I M g) Set.univ).toReal := by
+      Λ₀ * Real.sqrt
+        ((DifferentialGeometry.Integral.Measure.riemannianVolumeMeasure I M g) Set.univ).toReal
+        := by
   classical
-  have hfin : MeasureTheory.IsFiniteMeasure (DifferentialGeometry.Integral.Measure.riemannianVolumeMeasure I M g) :=
+  have hfin : MeasureTheory.IsFiniteMeasure
+    (DifferentialGeometry.Integral.Measure.riemannianVolumeMeasure I M g) :=
     DifferentialGeometry.Integral.Measure.riemannianVolumeMeasure_isFiniteMeasure_of_compactSpace (I := I) (M := M) g
   set μ := DifferentialGeometry.Integral.Measure.riemannianVolumeMeasure I M g with hμ
   set V : ℝ := (μ Set.univ).toReal with hV
@@ -822,13 +891,16 @@ private theorem l2Interp_pow_iteratedCovGrad
         (∀ x : M, riemannianFiberNormSq (I := I) (M := M) g 0 s x (u.toSection x) ≤ Λ₀ ^ 2) →
         ∀ j : ℕ, 0 < j → j < k →
           (Integral.L2.tensorL2Norm (I := I) g 0 (s + j)
-              (DifferentialGeometry.Analysis.Sobolev.iteratedCovGrad (I := I) g 0 s j u).toFun) ^ k ≤
+              (DifferentialGeometry.Analysis.Sobolev.iteratedCovGrad
+                (I := I) g 0 s j u).toFun) ^ k ≤
             C ^ k * Λ₀ ^ (k - j) *
               (Integral.L2.tensorL2Norm (I := I) g 0 (s + k)
-                  (DifferentialGeometry.Analysis.Sobolev.iteratedCovGrad (I := I) g 0 s k u).toFun) ^ j := by
+                  (DifferentialGeometry.Analysis.Sobolev.iteratedCovGrad
+                    (I := I) g 0 s k u).toFun) ^ j := by
   classical
   obtain ⟨K, hK1, hlc⟩ := l2jet_logConvex_iteratedCovGrad (I := I) (M := M) g s
-  set V : ℝ := Real.sqrt ((DifferentialGeometry.Integral.Measure.riemannianVolumeMeasure I M g) Set.univ).toReal with hV
+  set V : ℝ := Real.sqrt
+    ((DifferentialGeometry.Integral.Measure.riemannianVolumeMeasure I M g) Set.univ).toReal with hV
   have hVnn : 0 ≤ V := Real.sqrt_nonneg _
   have hmax1 : (1 : ℝ) ≤ max 1 V := le_max_left _ _
   have hmaxV : V ≤ max 1 V := le_max_right _ _
@@ -888,7 +960,8 @@ theorem exists_gagliardoNirenberg_iteratedCovGrad_l2Norm_le
               (DifferentialGeometry.Analysis.Sobolev.iteratedCovGrad (I := I) g 0 s j u).toFun ≤
             C * Λ₀ ^ (1 - (j : ℝ) / k) *
               (Integral.L2.tensorL2Norm (I := I) g 0 (s + k)
-                  (DifferentialGeometry.Analysis.Sobolev.iteratedCovGrad (I := I) g 0 s k u).toFun) ^ ((j : ℝ) / k) := by
+                  (DifferentialGeometry.Analysis.Sobolev.iteratedCovGrad
+                    (I := I) g 0 s k u).toFun) ^ ((j : ℝ) / k) := by
   obtain ⟨C, hC0, hC⟩ := l2Interp_pow_iteratedCovGrad (I := I) (M := M) g s k hk
   refine ⟨C, hC0, ?_⟩
   intro u Λ₀ hΛ₀ hsup j hj0 hjk

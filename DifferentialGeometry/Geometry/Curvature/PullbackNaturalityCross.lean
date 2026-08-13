@@ -5,23 +5,6 @@ open DifferentialGeometry.Geometry.Curvature
 
 set_option autoImplicit false
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 noncomputable section
 
 namespace DifferentialGeometry.Geometry.Curvature
@@ -92,8 +75,6 @@ theorem mpullback_symm_applyCross
     IsLocalDiffeomorphAt.mfderivToContinuousLinearEquiv, hlocal.mfderiv_eq]
   rfl
 
-
-
 private abbrev pushFwdFieldCross
     (Phi : M ≃ₘ⟮I, J⟯ N) (X : (p : M) -> TangentSpace I p) :
     (q : N) -> TangentSpace J q :=
@@ -136,8 +117,6 @@ omit [FiniteDimensional ℝ E] [CompleteSpace E] [NeZero (Module.finrank ℝ E)]
     pushFwdSectionCross (I := I) (J := J) Phi X (Phi x) =
       mfderiv I J (Phi : M -> N) x (X x) := by
   simp [pushFwdSectionCross]
-
-
 
 omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [FiniteDimensional ℝ F]
     [NeZero (Module.finrank ℝ F)] in
@@ -340,8 +319,6 @@ theorem metricCov_pullbackCross
       ((pushFwdSectionCross (I := I) (J := J) Phi Zw).contMDiff.contMDiffAt.mdifferentiableAt
         (by simp))
   rw [hkoszul_h, hkoszul_g, koszulScalar_pullback_pushFwdCross (I := I) (J := J) g Phi Xv Y Zw x]
-
-
 
 omit [NeZero (Module.finrank ℝ E)] [NeZero (Module.finrank ℝ F)] in
 private theorem connectionRiemannCurvatureField_pullback_pushFwdCross

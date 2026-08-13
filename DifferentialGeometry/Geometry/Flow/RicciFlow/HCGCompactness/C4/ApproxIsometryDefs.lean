@@ -6,28 +6,8 @@ import DifferentialGeometry.Tensor.RSTensor.Tensor0SRiemannian.Comparison
 import DifferentialGeometry.Tensor.RSTensor.NablaOnTensors.ConnectionDifference
 import DifferentialGeometry.Tensor.RSTensor.NablaOnTensors.HigherOrder
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
 
 set_option autoImplicit false
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 noncomputable section
 
@@ -49,18 +29,10 @@ section FixedDomain
 variable {M : Type u} [TopologicalSpace M] [ChartedSpace H M]
 variable [T2Space M] [IsManifold I ∞ M] [SigmaCompactSpace M]
 
-
-
 section MapLevel
 
 variable {N : Type u} [TopologicalSpace N] [ChartedSpace H N]
 variable [T2Space N] [IsManifold I ∞ N] [SigmaCompactSpace N]
-
-
-
-
-
-
 
 structure PullbackMetricTensorData
     (Phi : M -> N) (h : SmoothRiemannianMetric I N) where
@@ -83,10 +55,6 @@ noncomputable def metricTensorErrorNorm
   Real.sqrt
     (Tensor0SBundle.normSq0S (I := I) g x 2
       (A x - Tensor0SBundle.metricTensorField (I := I) g x))
-
-
-
-
 
 noncomputable def tensor02CovDeriv
     (A :
@@ -115,9 +83,6 @@ noncomputable def tensor02CovDerivNormWith
     (Tensor0SBundle.normSq0S (I := I) norm x (a + 2)
       (tensor02CovDeriv (I := I) A cov a x))
 
-
-
-
 structure PreApproxIsometryData
     (K : Set M) (eps : Real) (p : Nat)
     (Phi : M -> N)
@@ -135,17 +100,6 @@ structure PreApproxIsometryData
       forall x : M, x ∈ K ->
         tensor02CovDerivNormWith (I := I) a pullbackData.pullback g g x <= eps
 
-
-
-
-
-
-
-
-
-
-
-
 structure BookApproxIsometryData
     (K : Set M) (L : Set N) (eps : Real) (p : Nat)
     (Phi : M ≃ₘ⟮I, I⟯ N)
@@ -153,12 +107,6 @@ structure BookApproxIsometryData
     (h : SmoothRiemannianMetric I N) where
   forward : PreApproxIsometryData (I := I) K eps p (Phi : M -> N) g h
   reverse : PreApproxIsometryData (I := I) L eps p (Phi.symm : N -> M) h g
-
-
-
-
-
-
 
 structure PreApproxIsoDataOn
     (K : Set M) (eps : Real) (p : Nat)
@@ -185,12 +133,6 @@ structure PreApproxIsoDataOn
       forall x : M, x ∈ K ->
         tensor02CovDerivNormWith (I := I) a pullback g g x <= eps
 
-
-
-
-
-
-
 structure BookApproxIsoPartialData
     (K : Set M) (eps : Real) (p : Nat)
     (Phi : PartialDiffeomorph I I M N (∞ : WithTop ℕ∞))
@@ -199,12 +141,6 @@ structure BookApproxIsoPartialData
   source_sub : K ⊆ Phi.source
   forward : PreApproxIsoDataOn (I := I) K eps p (Phi : M -> N) g h
   reverse : PreApproxIsoDataOn (I := I) ((Phi : M -> N) '' K) eps p (Phi.symm : N -> M) h g
-
-
-
-
-
-
 
 structure PreApproxIsoSep
     (K : Set M) (c0 cov : Real) (p : Nat)
@@ -230,8 +166,6 @@ structure PreApproxIsoSep
     forall a : Nat, 1 <= a -> a <= p ->
       forall x : M, x ∈ K ->
         tensor02CovDerivNormWith (I := I) a pullback g g x <= cov
-
-
 
 def PreApproxIsoSep.toBook
     {K : Set M} {c0 cov eps : Real} {p : Nat} {Phi : M -> N}
@@ -259,8 +193,6 @@ structure BookApproxIsoSep
   forward : PreApproxIsoSep (I := I) K c0 cov p (Phi : M -> N) g h
   reverse : PreApproxIsoSep (I := I) ((Phi : M -> N) '' K) c0 cov p (Phi.symm : N -> M) h g
 
-
-
 def BookApproxIsoSep.toBook
     {K : Set M} {c0 cov eps : Real} {p : Nat}
     {Phi : PartialDiffeomorph I I M N (∞ : WithTop ℕ∞)}
@@ -272,8 +204,6 @@ def BookApproxIsoSep.toBook
   source_sub := D.source_sub
   forward := D.forward.toBook heps0 heps1 hc0 hcov
   reverse := D.reverse.toBook heps0 heps1 hc0 hcov
-
-
 
 def PreApproxIsoDataOn.toSep
     {K : Set M} {eps : Real} {p : Nat} {Phi : M -> N}
@@ -287,8 +217,6 @@ def PreApproxIsoDataOn.toSep
   pullback_apply := D.pullback_apply
   c0_small := D.c0_small
   cov_small := D.cov_deriv_small
-
-
 
 def BookApproxIsoPartialData.toSep
     {K : Set M} {eps : Real} {p : Nat}
@@ -330,14 +258,6 @@ def BookApproxIsoSep.mono
 
 end MapLevel
 
-
-
-
-
-
-
-
-
 structure IsApproxIsometryOn
     (K : Set M) (eps : Real) (p : Nat)
     (g h : SmoothRiemannianMetric I M) : Prop where
@@ -346,8 +266,6 @@ structure IsApproxIsometryOn
     forall a : Nat, 1 <= a -> a <= p ->
       forall x : M, x ∈ K ->
         metricCovDerivNorm (I := I) a h g x <= eps
-
-
 
 structure IsTwoSidedApproxIsometryOn
     (K : Set M) (eps : Real) (p : Nat)
@@ -366,21 +284,11 @@ theorem IsTwoSidedApproxIsometryOn.toApprox
     IsApproxIsometryOn (I := I) K eps p g h :=
   Happrox.forward
 
-
-
 noncomputable def metricCovDerivNormWith
     (a : Nat) (h cov norm : SmoothRiemannianMetric I M) (x : M) : Real :=
   Real.sqrt
     (Tensor0SBundle.normSq0S (I := I) norm x (a + 2)
       (metricCovDeriv (I := I) h cov a x))
-
-
-
-
-
-
-
-
 
 def ConnDiffFieldRealizes
     [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
@@ -395,8 +303,6 @@ def ConnDiffFieldRealizes
         (DifferentialGeometry.Geometry.Connection.leviCivitaConnectionOfMetric (I := I) g)
         (DifferentialGeometry.Geometry.Connection.leviCivitaConnectionOfMetric (I := I) h) x
 
-
-
 noncomputable def connDiffDerivNorm
     [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
     (g : SmoothRiemannianMetric I M) (k : Nat)
@@ -406,8 +312,6 @@ noncomputable def connDiffDerivNorm
     (x : M) : Real :=
   Real.sqrt
     (Tensor0SBundle.normSqRS (I := I) (g := g) (x := x) 1 (k + 2) (Dk x))
-
-
 
 def ConnDiffDerivRealizes
     [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
@@ -423,10 +327,6 @@ def ConnDiffDerivRealizes
         (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
         (DifferentialGeometry.Geometry.Connection.leviCivitaConnectionOfMetric (I := I) h) D k Dk
 
-
-
-
-
 def ConnDiffDerivBoundOn
     [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
     (K : Set M) (g h : SmoothRiemannianMetric I M) (k : Nat) (C : Real) :
@@ -437,8 +337,6 @@ def ConnDiffDerivBoundOn
     ConnDiffDerivRealizes (I := I) g h k Dk ->
       forall x : M, x ∈ K ->
         connDiffDerivNorm (I := I) g k Dk x <= C
-
-
 
 def ConnDiffEpsBoundOn
     [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
@@ -460,16 +358,12 @@ def ConnDiffEpsBoundsBelow
   forall k : Nat, k < m ->
     ConnDiffEpsBoundOn (I := I) K eps g h k (C k)
 
-
-
 def connDiffOneConst (Idx : Type*) [Fintype Idx] : Real :=
   let n : Real := Fintype.card Idx
   let q : Real := n * (((n * (n * 8)) * (3 * 8))) + n * (3 * 16)
   Real.sqrt
     ((Fintype.card (Fin 1 -> Idx) : Real) *
       ((Fintype.card (Fin 3 -> Idx) : Real) * q ^ 2))
-
-
 
 def connDiffTwoConst (Idx : Type*) [Fintype Idx] : Real :=
   let n : Real := Fintype.card Idx
@@ -482,15 +376,11 @@ def connDiffTwoConst (Idx : Type*) [Fintype Idx] : Real :=
     ((Fintype.card (Fin 1 -> Idx) : Real) *
       ((Fintype.card (Fin 4 -> Idx) : Real) * q ^ 2))
 
-
-
 def connDiffEpsConst_two
     (E : Type uE) [NormedAddCommGroup E] [NormedSpace Real E]
     [Module.Finite Real E] : Nat -> Real
   | 0 => 12
   | _ + 1 => connDiffOneConst (Fin (Module.finrank Real E))
-
-
 
 def connDiffEpsConst_three
     (E : Type uE) [NormedAddCommGroup E] [NormedSpace Real E]

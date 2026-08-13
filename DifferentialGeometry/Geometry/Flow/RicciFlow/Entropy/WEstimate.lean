@@ -5,20 +5,11 @@ open DifferentialGeometry.Geometry.Operator
 
 set_option autoImplicit false
 
-
-
-
-
-
-
-
-
 namespace DifferentialGeometry.PDE.RicciFlow.Entropy
 
 noncomputable section
 
 open MeasureTheory
-open DifferentialGeometry.Geometry.Operator
 open DifferentialGeometry.Geometry.Operator
 open scoped Manifold ContDiff
 
@@ -33,9 +24,6 @@ variable [IsManifold I ∞ M]
 
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
-
-
-
 
 theorem w_square_form
     (mu : Measure M) (g : SmoothRiemannianMetric I M) (n : Nat)
@@ -99,8 +87,6 @@ theorem w_square_form
     exact square_pot_energy (I := I) g n hv hpos htau x
   linear_combination tau * henergy
 
-/-- The square-form integrand is controlled by gradient energy, a scalar
-curvature upper bound on the support, and the support volume. -/
 theorem w_form_upper
     {α : Type*} [MeasurableSpace α] (μ : Measure α) [IsFiniteMeasure μ]
     {U : Set α} {v R gradSq : α → Real} {tau K G C : Real}

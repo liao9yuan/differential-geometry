@@ -6,7 +6,6 @@ import DifferentialGeometry.Analysis.Sobolev.Approximation.SmoothDensity
 import Mathlib.Algebra.Order.Chebyshev
 import Mathlib.Topology.MetricSpace.Pseudo.Lemmas
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Connection
 
 

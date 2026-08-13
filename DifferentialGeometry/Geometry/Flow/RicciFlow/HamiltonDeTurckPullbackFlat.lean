@@ -2,7 +2,6 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.HamiltonDeTurckPullback
 import DifferentialGeometry.Analysis.ODE.TimeDependentFlow.VariationalEquation.FlatPairing
 open DifferentialGeometry.Analysis.ODE
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Connection
 
 noncomputable section

@@ -3,15 +3,6 @@ import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.RiemannianFibe
 import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.RiemannianFiberNormSq.PointwiseToL2Packaging
 open DifferentialGeometry.Analysis.Elliptic
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
-
-
-
-
-
-
-
-
 
 noncomputable section
 
@@ -34,8 +25,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
-
-
 
 omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 theorem l2_bdd_of_raw {ι : Type*}
@@ -129,10 +118,6 @@ theorem l2_bdd_of_raw {ι : Type*}
   refine Finset.sum_le_sum fun α hα => ?_
   refine Finset.sum_le_sum fun Idx _ => ?_
   exact Finset.sum_le_sum fun Jdx _ => hcomponent α hα k Idx Jdx
-
-
-
-
 
 theorem l2_le_of_raw_sum [BoundarylessManifold I M]
     (g : SmoothRiemannianMetric I M) (c N : ℕ) (v : ℕ → ℕ)

@@ -6,9 +6,6 @@ import DifferentialGeometry.Geometry.Geodesic.Uniqueness
 import DifferentialGeometry.Geometry.Exponential.Defs
 import Mathlib.Analysis.ODE.Gronwall
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
-
-
 
 noncomputable section
 

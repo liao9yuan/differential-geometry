@@ -5,15 +5,6 @@ import DifferentialGeometry.Analysis.Spectral.Intrinsic.Garding.ScalarNonautTime
 open DifferentialGeometry.Tensor.RSTensor
 open DifferentialGeometry.Analysis.Spectral
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
-
-/-!
-# Exact-interval scalar nonautonomous Sobolev operators
-
-This file packages the all-scale scalar Laplacian-difference estimates on a
-caller-supplied reflected regular interval.  It does not choose or shorten a
-time interval.
--/
 
 noncomputable section
 
@@ -37,8 +28,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
-/-- On any prescribed reflected regular interval, every natural-order
-Laplacian difference has an operator-norm bound uniform in time. -/
 theorem lapHs_norm_on
     {D : RealTimeInterval}
     (g_fam : ℝ → SmoothRiemannianMetric I M)
@@ -115,9 +104,6 @@ theorem lapHs_norm_on
           (mul_le_mul_of_nonneg_right h₁ (norm_nonneg D₁))
     _ = C := rfl
 
-/-- If the genuine `H² → H⁰` perturbation agrees with the invariant finite
-spectral core on an interval, then it is the order-zero all-scale operator
-throughout that interval. -/
 theorem lapHs_A20_on
     {D : RealTimeInterval}
     (g_fam : ℝ → SmoothRiemannianMetric I M)
@@ -205,8 +191,6 @@ theorem lapHs_A20_on
   have hfun := hdense.equalizer L.continuous R.continuous heq
   exact congr_fun hfun u
 
-/-- On any prescribed reflected regular interval, the completed Laplacian
-difference preserves every finite time regularity order on the interior. -/
 theorem lapHs_dyn_on
     {D : RealTimeInterval}
     (g_fam : ℝ → SmoothRiemannianMetric I M)

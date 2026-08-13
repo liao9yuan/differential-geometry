@@ -21,10 +21,8 @@ import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.GreenIdentityA
 import DifferentialGeometry.Analysis.Sobolev.TensorHilbert.SlotSwapPairingCalculus
 import DifferentialGeometry.Geometry.Curvature.CovGradRoughLap.HomFieldCurvatureJetDecomposition
 open DifferentialGeometry.Analysis.Sobolev
-open DifferentialGeometry.Analysis.Sobolev
 open DifferentialGeometry.Analysis.Spectral
 open DifferentialGeometry.Analysis.Elliptic
-open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Connection
 
@@ -883,8 +881,6 @@ def edgeArmCoeff (g₀ g₁ : SmoothRiemannianMetric I M) :
       (endoSlotZeroCcTensor (I := I) (M := M) g₀ 2
         (gInvDiffRaisedEndoField (I := I) g₀ g₁))))
 
--- The integration-by-parts normalization expands several bundled tensor operators.
--- Resolving the tensor-valued scalar operations in the expanded identity is instance-search heavy.
 private theorem deTurckArm_residual_ibp_zero
     (g₀ g₁ : SmoothRiemannianMetric I M) :
     ∀ (u₀ : SmoothCcTensor g₀ 0 2),
@@ -939,7 +935,8 @@ private theorem deTurckArm_residual_ibp_zero
     (DifferentialGeometry.Integral.L2.SmoothCcTensor.integrable_inner_cross
       (I := I) (M := M) u₀ (deTurckPrincipalCometricArm (I := I) (M := M) g₀ g₁ u₀))
     (DifferentialGeometry.Integral.L2.SmoothCcTensor.integrable_inner_cross
-      (I := I) (M := M) u₀ (operatorFieldApply (I := I) (M := M) g₀ (2 + 1) (2 + 0) G₀ Du))] at hgreen
+      (I := I) (M := M) u₀ (operatorFieldApply (I := I) (M := M) g₀ (2 + 1)
+        (2 + 0) G₀ Du))] at hgreen
   have hrhs : (⟪iteratedCovGrad (I := I) g₀ 0 2 0 u₀,
       operatorFieldApply (I := I) (M := M) g₀ (2 + 1) (2 + 0) (-G₀)
         (iteratedCovGrad (I := I) g₀ 0 2 1 u₀)⟫_ℝ : ℝ) =
@@ -1477,7 +1474,8 @@ private theorem arm_g0Term_abs_le_jetProduct (g₀ g₁ : SmoothRiemannianMetric
   · exact mul_nonneg (hCfL_nn 0)
       (mul_nonneg (hCfR_nn 0) (Finset.sum_nonneg (fun q _ => hCfG_nn q)))
   · set GT : SmoothCcTensor g₀ 0 (2 + 0) :=
-      operatorFieldApply (I := I) (M := M) g₀ (2 + 1) (2 + 0) Gf (covGrad (I := I) (M := M) g₀ 0 2 u₀)
+      operatorFieldApply (I := I) (M := M) g₀ (2 + 1) (2 + 0) Gf (covGrad (I := I)
+        (M := M) g₀ 0 2 u₀)
       with hGT_def
     have hsym := oneMinusConnLapSmoothIter_l2Inner_sym_split (I := I) (M := M) g₀ 0 2 a b u₀ GT
     have hab : a + b = n := by omega
@@ -3332,8 +3330,6 @@ private theorem oneMinusConnLapIter_pairing_fold
       (I := I) (M := M) g₀ g₁ n h htie hδ_lt hδ_nn hδ
   exact ⟨Clower, hClower_nn, hbound⟩
 
--- Comparing the integral pairing with the Sobolev norm unfolds a large tensor expression.
--- Resolving scalar multiplication in the unfolded tensor model is instance-search heavy.
 omit [BoundarylessManifold I M] in
 private theorem armPrincipalSlotPairing_le_dirichlet_top
     [Nonempty M] (g₀ g₁ : SmoothRiemannianMetric I M) (n : ℕ)

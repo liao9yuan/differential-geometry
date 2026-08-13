@@ -9,40 +9,6 @@ import DifferentialGeometry.Topology.Covering.Manifold
 import DifferentialGeometry.Topology.Covering.LiftedMetricSmoothness
 import Mathlib.Topology.VectorBundle.Riemannian
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 open Set Function Filter Bundle
 open scoped Topology ContDiff
 open DifferentialGeometry.Integral.Measure (SmoothRiemannianMetric)
@@ -65,19 +31,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
   [DifferentialGeometry.Geometry.Riemannian.Topology.SemilocallySimplyConnectedSpace M]
   [Inhabited M]
 
-
-
-
-
-
-
-
-
-
-
-
-
-
 noncomputable def liftedMetric (g : SmoothRiemannianMetric I M) :
     SmoothRiemannianMetric I
       (DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover M) where
@@ -86,22 +39,6 @@ noncomputable def liftedMetric (g : SmoothRiemannianMetric I M) :
   pos x' v hv := g.pos (proj x') v hv
   isVonNBounded x' := g.isVonNBounded (proj x')
   contMDiff := uc_liftedMetric_contMDiff (I := I) (M := M) g
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 @[reducible] noncomputable def uc_pseudoEMetricSpace
     (g : SmoothRiemannianMetric I
@@ -119,14 +56,6 @@ noncomputable def liftedMetric (g : SmoothRiemannianMetric I M) :
         TangentSpace I x) :=
     ⟨g.inner, g.contMDiff.continuous, fun _ _ _ ↦ rfl⟩
   PseudoEMetricSpace.ofRiemannianMetric I _
-
-
-
-
-
-
-
-
 
 omit [InnerProductSpace ℝ E] [FiniteDimensional ℝ E] [I.Boundaryless] [T2Space M]
     [SigmaCompactSpace M] in
@@ -154,26 +83,6 @@ theorem isRiemannianManifold
     uc_pseudoEMetricSpace (I := I) (M := M) g
   exact ⟨fun _ _ => rfl⟩
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 omit [InnerProductSpace ℝ E] [SigmaCompactSpace M] [ConnectedSpace M] in
 theorem uc_regularSpace (I : ModelWithCorners ℝ E H) [I.Boundaryless] :
     RegularSpace
@@ -181,15 +90,6 @@ theorem uc_regularSpace (I : ModelWithCorners ℝ E H) [I.Boundaryless] :
   haveI : LocallyCompactSpace M :=
     Manifold.locallyCompact_of_finiteDimensional (M := M) I
   infer_instance
-
-
-
-
-
-
-
-
-
 
 omit [InnerProductSpace ℝ E] [FiniteDimensional ℝ E] [I.Boundaryless] [T2Space M]
     [SigmaCompactSpace M] in

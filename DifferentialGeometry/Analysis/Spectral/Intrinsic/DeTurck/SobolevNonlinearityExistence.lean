@@ -19,7 +19,6 @@ import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.SobolevNonlinear
 open DifferentialGeometry.Analysis.Calculus
 open DifferentialGeometry.Analysis.Sobolev
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Connection
 
 
@@ -186,8 +185,6 @@ theorem deTurckSmoothN_sub_eq_smoothCcToTensorHs_remainderSub
     ring
   rw [hsub, deTurckSmoothN_coeff, deTurckSmoothN_coeff, smoothCcToTensorHs_coeff, hcoeff_sub]
 
-
-
 theorem smoothRemainderDiff_ballLipschitz_sobolev
     (g₀ g_bg : SmoothRiemannianMetric I M)
     (a : ℕ) (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a)
@@ -307,8 +304,6 @@ theorem smoothRemainderDiff_ballLipschitz_sobolev
     _ ≤ Ca * (Real.sqrt (((a : ℝ) + 1) * (Ccol * Cb ^ 2)) * Ndist) :=
         mul_le_mul_of_nonneg_left hDsum_le hCa_nn
     _ = Ca * Real.sqrt (((a : ℝ) + 1) * (Ccol * Cb ^ 2)) * Ndist := by ring
-
-
 
 theorem deTurckRemainderDiff_iteratedCovGrad_ballLipschitz_dataWeighted_of_symm
     (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)

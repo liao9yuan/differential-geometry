@@ -2,15 +2,6 @@ import DifferentialGeometry.Geometry.Comparison.Volume.BishopPolarFramed
 import DifferentialGeometry.Geometry.Metric.Completeness
 open DifferentialGeometry.Analysis.Calculus
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
-
-/-!
-# Local Bishop comparison for center-metric normal balls
-
-This file assembles the radial Jacobi comparison uniformly over the unit
-sphere in orthonormally framed normal coordinates.  It keeps every radius
-inside the selected normal source and does not use cut-time data.
--/
 
 noncomputable section
 
@@ -268,18 +259,15 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
   [IsManifold I (⊤ : WithTop ℕ∞) M] [T2Space M] [SigmaCompactSpace M]
   [T2Space (TangentBundle I M)]
 
-/-- Hyperbolic radial model volume, without the sphere-area factor. -/
 def hypRadVol (q : Real) (d : Nat) (R : Real) : Real :=
   ∫ t in (0 : Real)..R, hypDensity q d t
 
-/-- The hyperbolic radial model volume is positive at positive radius. -/
 theorem hypRadVol_pos {q R : Real} {d : Nat} (hq : 0 ≤ q) (hR : 0 < R) :
     0 < hypRadVol q d R := by
   exact intervalIntegral.intervalIntegral_pos_of_pos_on
     ((hypDen_continuous q d).intervalIntegrable (0 : Real) R)
     (fun t ht => hypDensity_pos hq ht.1) hR
 
-/-- Volume of a center-metric tangent ball under the framed normal map. -/
 def normalBallVolume (g : SmoothRiemannianMetric I M) (p : M)
     (R : Real) : ENNReal :=
   riemannianVolumeMeasure (I := I) (M := M) g
@@ -287,8 +275,6 @@ def normalBallVolume (g : SmoothRiemannianMetric I M) (p : M)
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-/-- On one center-dependent radius, every framed unit direction has an
-antitone ratio of its polar density to the hyperbolic model density. -/
 theorem exists_framed_ratio
     [PseudoEMetricSpace M] [RiemannianBundle (fun x : M => TangentSpace I x)]
     [IsRiemannianManifold I M] [CompleteSpace M]
@@ -508,7 +494,6 @@ theorem exists_framed_ratio
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-/-- Local Bishop comparison for framed normal balls, in cross-multiplied form. -/
 theorem normalBall_cross
     [PseudoEMetricSpace M] [RiemannianBundle (fun x : M => TangentSpace I x)]
     [IsRiemannianManifold I M] [CompleteSpace M]
@@ -618,8 +603,6 @@ theorem normalBall_cross
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-/-- The framed normal-ball volume divided by the hyperbolic model volume is
-antitone on one center-dependent interval. -/
 theorem normalBall_ratio
     [PseudoEMetricSpace M] [RiemannianBundle (fun x : M => TangentSpace I x)]
     [IsRiemannianManifold I M] [CompleteSpace M]

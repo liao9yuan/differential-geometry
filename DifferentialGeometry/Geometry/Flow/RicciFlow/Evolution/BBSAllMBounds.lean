@@ -1,7 +1,6 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.MovingShiProducer
 open DifferentialGeometry.PDE.RicciFlow
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Connection
 
 set_option autoImplicit false
@@ -22,9 +21,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
 variable [IsManifold I ∞ M] [IsManifold I 1 M] [IsManifold I 2 M]
 variable [T2Space M] [CompactSpace M]
   [BoundarylessManifold I M]
-
-
-
 
 theorem bbsAllMBounds
     {alpha omega : Real} {hAlphaOmega : alpha < omega}

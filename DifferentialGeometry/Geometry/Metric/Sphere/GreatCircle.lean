@@ -3,16 +3,7 @@ import DifferentialGeometry.Geometry.Connection.ChartBridge.Gradient
 import DifferentialGeometry.Geometry.Comparison.Variation.CovariantChainRule
 import Mathlib.Analysis.InnerProductSpace.LinearMap
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Connection
-
-/-!
-# Great circles on the round sphere
-
-This file constructs the explicit great circle through orthonormal ambient
-vectors and proves intrinsically that it is a unit-speed geodesic for the
-round metric.
--/
 
 noncomputable section
 
@@ -54,7 +45,6 @@ private theorem norm_orth_comb {p v : E}
     rw [norm_sq_orth_comb hp hv hpv, hst]
   nlinarith [norm_nonneg (s • p + t • v)]
 
-/-- The great circle through `p` with ambient initial direction `v`. -/
 noncomputable def greatCircle
     (p : sphere (0 : E) 1) (v : E)
     (hv : ‖v‖ = 1) (hpv : ⟪(p : E), v⟫ = 0) :
@@ -74,7 +64,6 @@ omit [FiniteDimensional ℝ E] in
   rfl
 
 omit [FiniteDimensional ℝ E] in
-/-- The explicit great circle is smooth as a sphere-valued curve. -/
 theorem greatCircle_smooth
     (p : sphere (0 : E) 1) (v : E)
     (hv : ‖v‖ = 1) (hpv : ⟪(p : E), v⟫ = 0) :
@@ -246,7 +235,6 @@ private theorem rot_sq_circle
   module
 
 omit [NeZero n] [FiniteDimensional ℝ E] in
-/-- The inclusion sends the intrinsic velocity to the usual ambient derivative. -/
 theorem greatCircle_vel
     (p : sphere (0 : E) 1) (v : E)
     (hv : ‖v‖ = 1) (hpv : ⟪(p : E), v⟫ = 0) (t : ℝ) :
@@ -300,7 +288,6 @@ private theorem velocity_eq_rot
   rw [greatCircle_vel, dIncl_rotField, rot_on_circle]
 
 omit [NeZero n] [FiniteDimensional ℝ E] in
-/-- The explicit great circle has unit speed for the round metric. -/
 theorem greatCircle_speed
     (p : sphere (0 : E) 1) (v : E)
     (hv : ‖v‖ = 1) (hpv : ⟪(p : E), v⟫ = 0) (t : ℝ) :
@@ -316,7 +303,6 @@ theorem greatCircle_speed
   exact Real.sin_sq_add_cos_sq t
 
 omit [NeZero n] in
-/-- Great circles satisfy the geodesic equation of the round metric. -/
 theorem greatCircle_geodesic
     (p : sphere (0 : E) 1) (v : E)
     (hv : ‖v‖ = 1) (hpv : ⟪(p : E), v⟫ = 0) (t : ℝ) :

@@ -7,7 +7,6 @@ import Mathlib.Analysis.Normed.Group.Completion
 import Mathlib.Analysis.Normed.Module.Completion
 import Mathlib.Analysis.InnerProductSpace.Completion
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Connection
 
 
@@ -42,7 +41,6 @@ private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
 structure SmoothCcTensorHs (g : SmoothRiemannianMetric I M) (r s k : ℕ) where
-
   toCcTensor : SmoothCcTensor g r s
 
 namespace SmoothCcTensorHs

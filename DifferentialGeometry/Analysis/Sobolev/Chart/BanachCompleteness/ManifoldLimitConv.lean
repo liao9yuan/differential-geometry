@@ -1,19 +1,6 @@
 import DifferentialGeometry.Analysis.Sobolev.Chart.BanachCompleteness.ManifoldLimitWkp
 import DifferentialGeometry.Analysis.Sobolev.Approximation.ContMDiffDenseLemmas
 
-/-!
-# Convergence to the assembled manifold Sobolev limit
-
-This file finishes the sequence-level Banach-completeness argument begun in
-`BanachManifold.lean`.  The chosen Euclidean chart limits are assembled by the
-finite canonical partition of unity.  A fixed-support cross-chart estimate
-controls the error contributed by every source/target chart pair, and the
-finite double sum tends to zero.
-
-The final completeness declarations return `CompleteSpace` structures as
-ordinary theorem values.  They deliberately do not register global instances.
--/
-
 noncomputable section
 
 open MeasureTheory Set Filter Topology Bundle Manifold Function
@@ -36,7 +23,6 @@ private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
-/-- The source-chart error between an iterate and its chosen Euclidean limit. -/
 noncomputable def chartErr
     [NeZero (Module.finrank ℝ E)]
     [CompactSpace M] [T2Space M] [SigmaCompactSpace M] [I.Boundaryless]
@@ -55,7 +41,6 @@ noncomputable def chartErr
         (wkpChartFun (f n)) y -
       chartLimit (I := I) (M := M) hp_one hp_top h_cauchy β y
 
-/-- Every source-chart error remains in the Euclidean Sobolev class. -/
 lemma chartErr_mem
     [NeZero (Module.finrank ℝ E)]
     [CompactSpace M] [T2Space M] [SigmaCompactSpace M] [I.Boundaryless]
@@ -79,8 +64,6 @@ lemma chartErr_mem
     (chartLimit_memWkp (I := I) (M := M) (g := g)
       hp_one hp_top h_cauchy β)
 
-/-- The source-chart error is almost everywhere zero off the fixed compact
-POU kernel. -/
 lemma chartErr_ae_zero
     [NeZero (Module.finrank ℝ E)]
     [CompactSpace M] [T2Space M] [SigmaCompactSpace M] [I.Boundaryless]
@@ -144,7 +127,6 @@ lemma chartErr_ae_zero
   simpa only [KβE, Kβ] using h_err
 
 omit [IsManifold I ∞ M] in
-/-- Measurable pullback is additive with respect to subtraction. -/
 lemma pullback_sub (β : M) (v w : EuclN → ℝ) :
     pullbackToManifold (I := I) β (fun y => v y - w y) =
       fun x => pullbackToManifold (I := I) β v x -
@@ -156,7 +138,6 @@ lemma pullback_sub (β : M) (v w : EuclN → ℝ) :
   · simp only [pullbackToManifold_apply_of_notMem (I := I) (α := β) _ hx,
       sub_zero]
 
-/-- The manifold error is the finite sum of pulled-back source-chart errors. -/
 lemma limitFun_decomp
     [NeZero (Module.finrank ℝ E)]
     [CompactSpace M] [T2Space M] [SigmaCompactSpace M] [I.Boundaryless]
@@ -200,8 +181,6 @@ lemma limitFun_decomp
   unfold chartErr
   rw [pullback_sub]
 
-/-- The original Cauchy sequence converges in `wkpNormChart` to the finite POU
-assembly of its chosen Euclidean chart limits. -/
 theorem limitFun_tendsto
     [NeZero (Module.finrank ℝ E)]
     [CompactSpace M] [T2Space M] [SigmaCompactSpace M] [I.Boundaryless]
@@ -358,8 +337,6 @@ theorem limitFun_tendsto
     (Filter.Eventually.of_forall (fun _ => zero_le _))
     (Filter.Eventually.of_forall h_bound)
 
-/-- Sequence-level completeness packaged as an ordinary theorem value, not a
-global typeclass instance. -/
 theorem wkpChart_complete
     [NeZero (Module.finrank ℝ E)]
     [CompactSpace M] [T2Space M] [SigmaCompactSpace M] [I.Boundaryless]
@@ -400,8 +377,6 @@ theorem wkpChart_complete
   rw [hnorm_eq]
   simpa only [uFun] using h_real
 
-/-- Completeness of the separated chart-Sobolev space, again returned as a
-theorem value rather than installed globally. -/
 theorem wkpQuot_complete
     [NeZero (Module.finrank ℝ E)]
     [CompactSpace M] [T2Space M] [SigmaCompactSpace M] [I.Boundaryless]

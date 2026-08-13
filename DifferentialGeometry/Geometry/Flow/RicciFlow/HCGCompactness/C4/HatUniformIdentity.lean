@@ -1,17 +1,7 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.C4.HatPartitionData
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
 
 set_option autoImplicit false
-
-
-
-
-
-
-
-
-
 
 noncomputable section
 
@@ -282,9 +272,6 @@ theorem unifHatIdOn
         (hrho := hrho) a b hy)
     hstrict hpts
 
-
-
-
 omit [Module.Finite ℝ E] in
 omit [CompleteSpace E] in
 theorem unifHatIdSelfOn
@@ -501,11 +488,6 @@ theorem unifHatIdSelfOn
         (P := P) (L := L) (pb := pb) (r := r) (n := n) (rho := rho)
         (hrho := hrho) a b hy)
     hstrict hpts
-
-
-
-
-
 
 end NetLimitData
 

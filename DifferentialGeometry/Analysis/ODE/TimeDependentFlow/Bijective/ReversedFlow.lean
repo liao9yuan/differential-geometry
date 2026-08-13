@@ -1,11 +1,6 @@
 import DifferentialGeometry.Analysis.ODE.TimeDependentFlow.SmoothInSpace
 import Mathlib.Geometry.Manifold.IsManifold.InteriorBoundary
 
-
-
-
-
-
 namespace DifferentialGeometry.Analysis.ODE
 
 open Bundle

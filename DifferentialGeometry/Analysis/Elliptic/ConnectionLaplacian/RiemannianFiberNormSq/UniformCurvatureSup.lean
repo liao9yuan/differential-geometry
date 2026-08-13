@@ -3,7 +3,6 @@ import DifferentialGeometry.Geometry.Curvature.CurvatureOperator.TensorThirdOrde
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.Defs
 open DifferentialGeometry.Analysis.Elliptic
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
 
 
 noncomputable section
@@ -27,7 +26,8 @@ variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
   [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
-  [T2Space M] variable [CompleteSpace E]
+  [T2Space M]
+variable [CompleteSpace E]
 
 def curvatureContraction
     (g : SmoothRiemannianMetric I M) (s : ℕ)

@@ -212,7 +212,7 @@ theorem exists_polynomial_bound_canonicalLateBombieriGiustiReverseCost
     (g : SmoothRiemannianMetric I M)
     (hdim : 2 < (Module.finrank ℝ E : ℝ))
     (rho : SmoothScalar g)
-    { τ c d D lower upper : ℝ }
+    {τ c d D lower upper : ℝ}
     (hτc : τ < c) (hcd : c ≤ d) (hdD : d < D)
     (hlowerUpper : lower < upper) :
     ∃ C : ℝ, 1 ≤ C ∧ ∀ k : ℕ,

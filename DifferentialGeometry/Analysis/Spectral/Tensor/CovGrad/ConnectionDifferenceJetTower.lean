@@ -8,7 +8,6 @@ open DifferentialGeometry.Analysis.Sobolev
 open DifferentialGeometry.Analysis.Spectral
 open DifferentialGeometry.Analysis.Elliptic
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Connection
 
 
@@ -28,7 +27,8 @@ open DifferentialGeometry.Integral.L2
 
 open DifferentialGeometry.Analysis.Laplacian
 open DifferentialGeometry.Analysis.Sobolev.TensorHilbert
-open DifferentialGeometry.PDE.RicciFlow DifferentialGeometry.Analysis.Sobolev DifferentialGeometry.Analysis.Spectral
+open DifferentialGeometry.PDE.RicciFlow DifferentialGeometry.Analysis.Sobolev
+    DifferentialGeometry.Analysis.Spectral
 open DifferentialGeometry.Analysis.Spectral.MetricRealization
 open DifferentialGeometry.TensorMultilinear (contMDiffAt_section_apply contMDiff_section_apply)
 
@@ -1317,7 +1317,8 @@ private lemma tensor0SDeriv_one_D_eq_dualToCotangent_cotangentCov
   rw [cotangentToDualLinear_apply, cotangentToDualLinear_apply, cotangentToDual_dualToCotangent]
   obtain ⟨Y, hYx⟩ := ContMDiffSection.exists_eq_at (I := I) (F := E)
     (V := (TangentSpace I : M → Type _)) (n := (⊤ : ℕ∞)) x u
-  have hDmd : DifferentialGeometry.Geometry.Connection.TensorSectionMDiffAt (I := I) 1 (fun y : M => Dsec y) x :=
+  have hDmd : DifferentialGeometry.Geometry.Connection.TensorSectionMDiffAt (I := I) 1
+    (fun y : M => Dsec y) x :=
     (Dsec.contMDiff x).mdifferentiableAt (by norm_num)
   have hbridge := tensor0SCovariantDerivative_one_cotangentToCLM
     (I := I) g₀ (fun y : M => Dsec y) hDmd Y v0
@@ -1560,12 +1561,14 @@ private lemma raisedKoszulPairing_covariantDerivative02_eval
     tensorSectionMDiffAt_raisedKoszulPairing (I := I) g₀ g₁ om x
   set W₁ : Π b : M, Tensor0SSpace 1 I b :=
     fun b => Tensor0SNabla.curriedSection I M V b (Y b) with hW₁
-  have hW₁_mdiff : DifferentialGeometry.Geometry.Connection.TensorSectionMDiffAt (I := I) 1 W₁ x := by
+  have hW₁_mdiff : DifferentialGeometry.Geometry.Connection.TensorSectionMDiffAt
+    (I := I) 1 W₁ x := by
     have hY' : MDifferentiableAt I (I.prod 𝓘(ℝ, E))
         (fun y => TotalSpace.mk' E (E := TangentSpace I) y (Y y)) x :=
       Y.contMDiff.contMDiffAt.mdifferentiableAt (by simp)
     unfold DifferentialGeometry.Geometry.Connection.TensorSectionMDiffAt
-    have hCurried := DifferentialGeometry.Geometry.Connection.mdifferentiableAt_curriedSection_of_section
+    have hCurried :=
+      DifferentialGeometry.Geometry.Connection.mdifferentiableAt_curriedSection_of_section
       (I := I) (M := M) 1 V hV
     exact MDifferentiableAt.clm_bundle_apply (𝕜 := ℝ)
       (F₁ := E) (F₂ := Tensor0SModel 1 ℝ E)
@@ -1574,9 +1577,11 @@ private lemma raisedKoszulPairing_covariantDerivative02_eval
       (IM := I) (IB := I)
       (b := id) (ϕ := fun y : M => Tensor0SNabla.curriedSection I M V y)
       (v := fun y : M => Y y) hCurried hY'
-  have hpeel1 := DifferentialGeometry.Geometry.Connection.tensor0SCovariantDerivative_succ_consEval_peel
+  have hpeel1 :=
+    DifferentialGeometry.Geometry.Connection.tensor0SCovariantDerivative_succ_consEval_peel
     (I := I) (M := M) g₀ 1 V hV Y (X x) ![Z x]
-  have hpeel2 := DifferentialGeometry.Geometry.Connection.tensor0SCovariantDerivative_succ_consEval_peel
+  have hpeel2 :=
+    DifferentialGeometry.Geometry.Connection.tensor0SCovariantDerivative_succ_consEval_peel
     (I := I) (M := M) g₀ 0 W₁ hW₁_mdiff Z (X x) (fun i => Fin.elim0 i)
   have hbase : Tensor0SSpace.toModel
         (Tensor0SNabla.tensor0SCovariantDerivative I M 0 (LeviCivita (I := I) g₀)
@@ -1585,7 +1590,8 @@ private lemma raisedKoszulPairing_covariantDerivative02_eval
       DifferentialGeometry.Geometry.Connection.directionalDeriv (I := I)
         (fun b : M => om b (fun _ : Fin 1 => raisedKoszulVec (I := I) g₀ g₁ b (Y b) (Z b))) x
           (X x) := by
-    rw [DifferentialGeometry.Geometry.Connection.tensor0SCovariantDerivative_zero_toModel_apply (I := I) (M := M) g₀
+    rw [DifferentialGeometry.Geometry.Connection.tensor0SCovariantDerivative_zero_toModel_apply
+      (I := I) (M := M) g₀
       (fun b : M => Tensor0SNabla.curriedSection I M W₁ b (Z b)) x (X x)]
     rw [DifferentialGeometry.Geometry.Connection.directionalDeriv_eq]
     refine congrArg (fun f => (mfderiv I 𝓘(ℝ, ℝ) f x) (X x)) ?_
@@ -1660,9 +1666,11 @@ private lemma raisedKoszulPairing_covariantDerivative01_eval
   set WYZ : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯ :=
     ContMDiffSection.mk (fun b : M => raisedKoszulVec (I := I) g₀ g₁ b (Y b) (Z b)) hWYZ with
       hWYZdef
-  have hom_mdiff : DifferentialGeometry.Geometry.Connection.TensorSectionMDiffAt (I := I) 1 (fun y : M => om y) x :=
+  have hom_mdiff : DifferentialGeometry.Geometry.Connection.TensorSectionMDiffAt (I := I) 1
+    (fun y : M => om y) x :=
     om.contMDiff.contMDiffAt.mdifferentiableAt (by simp)
-  have hpeel := DifferentialGeometry.Geometry.Connection.tensor0SCovariantDerivative_succ_consEval_peel
+  have hpeel :=
+    DifferentialGeometry.Geometry.Connection.tensor0SCovariantDerivative_succ_consEval_peel
     (I := I) (M := M) g₀ 0 (fun y : M => om y) hom_mdiff WYZ (X x) (fun i => Fin.elim0 i)
   have hLHS : raisedKoszulPairing (I := I) g₀ g₁ x
         (Tensor0SNabla.tensor0SCovariantDerivative I M 1 (LeviCivita (I := I) g₀)
@@ -1687,7 +1695,8 @@ private lemma raisedKoszulPairing_covariantDerivative01_eval
       DifferentialGeometry.Geometry.Connection.directionalDeriv (I := I)
         (fun b : M => om b (fun _ : Fin 1 => raisedKoszulVec (I := I) g₀ g₁ b (Y b) (Z b))) x
           (X x) := by
-    rw [DifferentialGeometry.Geometry.Connection.tensor0SCovariantDerivative_zero_toModel_apply (I := I) (M := M) g₀
+    rw [DifferentialGeometry.Geometry.Connection.tensor0SCovariantDerivative_zero_toModel_apply
+      (I := I) (M := M) g₀
       (fun y : M => Tensor0SNabla.curriedSection I M (fun y : M => om y) y (WYZ y)) x (X x)]
     rw [DifferentialGeometry.Geometry.Connection.directionalDeriv_eq]
     refine congrArg (fun f => (mfderiv I 𝓘(ℝ, ℝ) f x) (X x)) ?_

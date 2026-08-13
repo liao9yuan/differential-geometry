@@ -24,66 +24,6 @@ import Mathlib.LinearAlgebra.Matrix.Adjugate
 import DifferentialGeometry.Geometry.Operator.Gradient
 import DifferentialGeometry.Geometry.Operator.Operators
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 noncomputable section
 
 open Bundle Manifold Set MeasureTheory
@@ -99,15 +39,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 open DifferentialGeometry.Integral.Measure
 
-
-
-
-
-
-
-
-
-
 private instance tangentSpace_finiteDimensional (x : M) :
     FiniteDimensional ℝ (TangentSpace I x) :=
   inferInstanceAs (FiniteDimensional ℝ E)
@@ -118,9 +49,6 @@ private lemma metricFlatLinear_finrank_eq (x : M) :
     Module.finrank ℝ (TangentSpace I x) =
       Module.finrank ℝ (TangentSpace I x →ₗ[ℝ] ℝ) :=
   Subspace.dual_finrank_eq.symm
-
-
-
 
 omit [FiniteDimensional ℝ E] [IsManifold I ∞ M] in
 private lemma hasMFDerivAt_rexp
@@ -160,9 +88,6 @@ lemma gradFun_exp_neg
     (metricFlatMap (I := I) g x).symm
     (-Real.exp (-(f x)))
     (mfderiv I 𝓘(ℝ, ℝ) f x).toLinearMap
-
-
-
 
 private lemma chartGramMatrixOnE_entry_contDiffOn
     (g : SmoothRiemannianMetric I M) (α : M)
@@ -271,8 +196,6 @@ private lemma trace_invGram_mul_partialGram
       intro j _
       rw [chartGramMatrixOnE_partial_symm (I := I) g α p i j y]
     _ = _ := rfl
-
-
 
 theorem chartDensityOnE_partial_div_eq_half_trace_invGram_partialGram
     [I.Boundaryless]
@@ -393,14 +316,6 @@ theorem chartDensityOnE_partial_div_eq_half_trace_invGram_partialGram
                 (extChartAt I x x) := by
       rw [htrace]
 
-
-
-
-
-
-
-
-
 private lemma gradChartCoeff_contMDiffOn
     (g : SmoothRiemannianMetric I M) (α : M)
     {f : M → ℝ} (hf : ContMDiff I 𝓘(ℝ, ℝ) ∞ f)
@@ -454,8 +369,6 @@ private lemma gradChartCoeff_contMDiffOn
       fun _ hx => hx.2
     exact hpartialM.comp hchart' hsubset
 
-
-
 private lemma gradChartLocal_contMDiffOn_total
     (g : SmoothRiemannianMetric I M) (α : M)
     {f : M → ℝ} (hf : ContMDiff I 𝓘(ℝ, ℝ) ∞ f) :
@@ -495,8 +408,6 @@ private lemma gradChartLocal_contMDiffOn_total
     ContMDiffOn.sum_section (fun i _ => hsmul i)
   exact hsum
 
-
-
 private lemma gradChartLocal_contMDiffOn_total_baseSet [I.Boundaryless]
     (g : SmoothRiemannianMetric I M) (α : M)
     {f : M → ℝ} (hf : ContMDiff I 𝓘(ℝ, ℝ) ∞ f) :
@@ -527,8 +438,5 @@ theorem tangentSectionAction_grad_g_eq_inner [I.Boundaryless]
     g.inner x (X x) (gradFun (I := I) g f x)
   rw [inner_gradFun_right (I := I) g f x (X x)]
   rfl
-
-
-
 
 end DifferentialGeometry.Integral.DivergenceTheorem

@@ -1,66 +1,9 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.IteratedNablaRmTower
 open DifferentialGeometry.PDE.RicciFlow
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Operator
 
 set_option autoImplicit false
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 noncomputable section
 
@@ -78,12 +21,6 @@ variable [CompleteSpace E] [T2Space M]
 variable [I.Boundaryless] [CompactSpace M]
 variable [VectorBundle Real E (TangentSpace I : M -> Type _)]
 variable {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
-
-
-
-
-
-
 
 omit [TopologicalSpace M] [T2Space M] [CompactSpace M] in
 theorem towerReactionSum_mono_const
@@ -104,8 +41,6 @@ theorem towerReactionSum_mono_const
         mul_le_mul_of_nonneg_right hcc hprod
     _ = c' * Real.sqrt (w j t x) * Real.sqrt (w (k - j) t x) * Real.sqrt (w k t x) := by ring
 
-
-
 omit [DecidableEq Idx] in
 theorem towerLevelConst_mono {k m : ℕ} (hkm : k <= m) :
     2 * (Fintype.card Idx : Real) ^ (6 + k) <= 2 * (Fintype.card Idx : Real) ^ (6 + m) := by
@@ -120,21 +55,6 @@ theorem towerLevelConst_mono {k m : ℕ} (hkm : k <= m) :
         exact_mod_cast this
       exact pow_le_pow_right₀ h1 (by omega)
   linarith [mul_le_mul_of_nonneg_left hpow (by norm_num : (0 : Real) <= 2)]
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 omit [DecidableEq Idx] in
 omit [CompleteSpace E] [T2Space M] in

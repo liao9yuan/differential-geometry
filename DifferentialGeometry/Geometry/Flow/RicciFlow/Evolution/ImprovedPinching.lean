@@ -6,6 +6,3 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.ImprovedPinching.T
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.ImprovedPinching.BookData
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.ImprovedPinching.Wrappers
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.ImprovedPinching.Estimate
-
-namespace DifferentialGeometry
-end DifferentialGeometry

@@ -5,7 +5,6 @@ import DifferentialGeometry.Geometry.Operator.Gradient
 open DifferentialGeometry.Analysis.Spectral.MetricRealization
 open DifferentialGeometry.Analysis.Elliptic
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Connection
 open DifferentialGeometry.Geometry.Operator
 
@@ -661,8 +660,6 @@ private theorem negDiffEndo_le
         (Real.sqrt (g₀.inner x v v) * Real.sqrt (g₀.inner x v v)) := hbnd
     _ = (δ / (1 - δ)) * g₀.inner x v v := by rw [hsq]
 
-
-
 omit [CompactSpace M] [BoundarylessManifold I M] [I.Boundaryless] [T2Space M]
     [SigmaCompactSpace M] in
 theorem negDiffSlot_point_le
@@ -685,8 +682,6 @@ theorem negDiffSlot_point_le
     W e bse hbse horth
   rw [← negDiffSlot_model (I := I) g₀ g₁ s x W]
   exact hslot
-
-
 
 omit [CompactSpace M] [BoundarylessManifold I M] [I.Boundaryless] in
 theorem neg_gInvDiffSlot_le
@@ -738,8 +733,6 @@ private theorem negSlotAt_model
     slotInsertEndoFib_smul_left (I := I) (M := M) r j x,
     neg_one_smul, ContinuousLinearMap.neg_comp]
   rfl
-
-
 
 omit [CompactSpace M] [BoundarylessManifold I M] [I.Boundaryless] [T2Space M]
     [SigmaCompactSpace M] in

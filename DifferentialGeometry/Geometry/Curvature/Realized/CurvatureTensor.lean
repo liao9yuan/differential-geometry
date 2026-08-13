@@ -4,14 +4,6 @@ open DifferentialGeometry.Geometry.Curvature
 
 set_option autoImplicit false
 
-
-
-
-
-
-
-
-
 noncomputable section
 
 namespace DifferentialGeometry.Geometry.Curvature
@@ -28,13 +20,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 abbrev SmoothTangentSection :=
   ContMDiffSection I E (∞ : WithTop ℕ∞) (TangentSpace I : M -> Type _)
 
-
-
-
-
-
-
-
 def Rm13RealizesConnection
     (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
     (Rm13 : Tensor13Section (I := I) (M := M)) : Prop :=
@@ -44,8 +29,6 @@ def Rm13RealizesConnection
         cotangentToDual_gen (I := I) alpha
           ((connectionRiemannCurvatureField (I := I) cov
             (fun p : M => X p) (fun p : M => Y p) (fun p : M => Z p)) x)
-
-
 
 def Rm04RealizesConnection
     (g : SmoothRiemannianMetric I M)

@@ -5,17 +5,8 @@ import DifferentialGeometry.Geometry.Metric.Sphere.PositiveCover
 import DifferentialGeometry.Topology.Covering.SemilocallySimplyConnected
 import DifferentialGeometry.Topology.StandardModel
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
 
 set_option autoImplicit false
-
-/-!
-# Positive constant curvature gives a spherical space form
-
-This module standardizes the model space of a closed constant-positive-
-curvature manifold, identifies its universal cover with the round sphere, and
-packages the deck action as finite round quotient data.
--/
 
 noncomputable section
 
@@ -38,9 +29,6 @@ private instance sphere4_fact :
     Fact (Module.finrank ℝ (EuclideanSpace ℝ (Fin 4)) = 3 + 1) :=
   ⟨by norm_num [finrank_euclideanSpace_fin]⟩
 
-/-- Construct finite round-quotient data and the identifying diffeomorphism
-from a closed connected three-manifold with a positive constant-curvature
-metric. -/
 noncomputable def constPosQuotient
     (hcompact : CompactSpace M) (hconn : ConnectedSpace M)
     (hbdry : I.Boundaryless) (hdim : Module.finrank ℝ E = 3)

@@ -3,7 +3,6 @@ import DifferentialGeometry.Tensor.Auxiliary.DetOpNormBound
 import DifferentialGeometry.Analysis.Sobolev.Tensor.Defs
 open DifferentialGeometry.Analysis.Elliptic
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Connection
 
 

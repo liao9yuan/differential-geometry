@@ -4,15 +4,6 @@ import DifferentialGeometry.Geometry.Operator.GradientRegularity
 
 set_option autoImplicit false
 
-
-
-
-
-
-
-
-
-
 namespace DifferentialGeometry.Analysis.Parabolic
 
 noncomputable section

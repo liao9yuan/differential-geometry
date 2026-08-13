@@ -14,7 +14,6 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.RicciDeTurckSection
 open DifferentialGeometry.Geometry.Connection.Realization DifferentialGeometry.Tensor.Multilinear
 open DifferentialGeometry.Analysis.Spectral
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Connection
 open DifferentialGeometry.Geometry.Operator
 
@@ -36,7 +35,8 @@ open DifferentialGeometry.Integral.L2
 
 open DifferentialGeometry.Geometry.Operator
 open DifferentialGeometry.Integral.DivergenceTheorem
-open DifferentialGeometry.PDE.RicciFlow DifferentialGeometry.Analysis.Parabolic DifferentialGeometry.Analysis.Sobolev
+open DifferentialGeometry.PDE.RicciFlow DifferentialGeometry.Analysis.Parabolic
+    DifferentialGeometry.Analysis.Sobolev
 open DifferentialGeometry.Analysis.Spectral.MetricRealization
 open DifferentialGeometry.Analysis.Spectral.DeTurck
 

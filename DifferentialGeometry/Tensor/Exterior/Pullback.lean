@@ -34,9 +34,11 @@ private lemma pullback_localRep_eq {f : M → N} (η : DifferentialForm IN N k) 
         (Bundle.continuousAlternatingMap ℝ (Fin k) EN (TangentSpace IN) ℝ
           (Bundle.Trivial N ℝ)) (f x₀) ⟨f x, η (f x)⟩).2).compContinuousLinearMap
           (inTangentCoordinates IM IN id f (fun x : M => mfderiv IM IN f x) x₀ x) := by
-  rw [continuousAlternatingMap_trivializationAt_apply (m := k) (IM := IM) (M := M) (x₀ := x₀) (x := x)
+  rw [continuousAlternatingMap_trivializationAt_apply (m := k) (IM := IM) (M := M) (x₀ := x₀)
+    (x := x)
       (L := (η (f x)).compContinuousLinearMap (mfderiv IM IN f x)),
-    continuousAlternatingMap_trivializationAt_apply (m := k) (IM := IN) (M := N) (x₀ := f x₀) (x := f x)
+    continuousAlternatingMap_trivializationAt_apply (m := k) (IM := IN) (M := N) (x₀ := f x₀)
+      (x := f x)
       (L := η (f x))]
   rw [ContinuousAlternatingMap.compContinuousLinearMap_compContinuousLinearMap,
     ContinuousAlternatingMap.compContinuousLinearMap_compContinuousLinearMap]
@@ -86,7 +88,8 @@ noncomputable def pullback (f : M → N) (hf : ContMDiff IM IN ⊤ f)
             (Bundle.Trivial N ℝ)) (f x₀) ⟨f x, η (f x)⟩).2) x₀ := by
       exact (contMDiffAt_localRep η (f x₀)).comp x₀ hf.contMDiffAt
     have htc : ContMDiffAt IM 𝓘(ℝ, EM →L[ℝ] EN) ⊤
-        (fun x : M => inTangentCoordinates IM IN id f (fun x : M => mfderiv IM IN f x) x₀ x) x₀ := by
+        (fun x : M => inTangentCoordinates IM IN id f
+          (fun x : M => mfderiv IM IN f x) x₀ x) x₀ := by
       exact ContMDiffAt.mfderiv_const (I := IM) (I' := IN) (f := f) (hf := hf.contMDiffAt)
         (m := ⊤) (by simp)
     let g : M → (EN [⋀^Fin k]→L[ℝ] ℝ) →L[ℝ] (EM [⋀^Fin k]→L[ℝ] ℝ) := fun x =>
@@ -357,7 +360,8 @@ private lemma triv_samePoint_fiber_eq_id (m : ℕ) (x : M)
     (trivializationAt (EM [⋀^Fin m]→L[ℝ] ℝ)
         (Bundle.continuousAlternatingMap ℝ (Fin m) EM (TangentSpace IM) ℝ
           (Bundle.Trivial M ℝ)) x ⟨x, L⟩).2 = L := by
-  rw [continuousAlternatingMap_trivializationAt_apply (m := m) (IM := IM) (M := M) (x₀ := x) (x := x) (L := L)]
+  rw [continuousAlternatingMap_trivializationAt_apply (m := m) (IM := IM) (M := M) (x₀ := x)
+    (x := x) (L := L)]
   have hid : (trivializationAt EM (TangentSpace IM) x).symmL ℝ x =
       ContinuousLinearMap.id ℝ EM := by
     apply ContinuousLinearMap.ext
@@ -386,12 +390,14 @@ theorem exteriorDerivative_pullback [BoundarylessManifold IM M] [BoundarylessMan
   let rep_η : EN → EN [⋀^Fin k]→L[ℝ] ℝ := fun y =>
     (trivializationAt (EN [⋀^Fin k]→L[ℝ] ℝ)
       (Bundle.continuousAlternatingMap ℝ (Fin k) EN (TangentSpace IN) ℝ
-        (Bundle.Trivial N ℝ)) (f x) ⟨(extChartAt IN (f x)).symm y, η ((extChartAt IN (f x)).symm y)⟩).2
+        (Bundle.Trivial N ℝ)) (f x) ⟨(extChartAt IN (f x)).symm y,
+          η ((extChartAt IN (f x)).symm y)⟩).2
   let f_local : EM → EN := fun y => (extChartAt IN (f x)) (f ((extChartAt IM x).symm y))
   let rep_pb : EM → EM [⋀^Fin k]→L[ℝ] ℝ := fun y =>
     (trivializationAt (EM [⋀^Fin k]→L[ℝ] ℝ)
       (Bundle.continuousAlternatingMap ℝ (Fin k) EM (TangentSpace IM) ℝ
-        (Bundle.Trivial M ℝ)) x ⟨(extChartAt IM x).symm y, (pullback f hf η) ((extChartAt IM x).symm y)⟩).2
+        (Bundle.Trivial M ℝ)) x ⟨(extChartAt IM x).symm y,
+          (pullback f hf η) ((extChartAt IM x).symm y)⟩).2
   have hx₀ : x ∈ (extChartAt IM x).source := mem_extChartAt_source (H := HM) x
   have hfx : f x ∈ (extChartAt IN (f x)).source := mem_extChartAt_source (H := HN) (f x)
   have hLHS : (e ⟨x, (pullback f hf (exteriorDerivative (IM := IN) (M := N) η)) x⟩).2 =
@@ -434,7 +440,8 @@ theorem exteriorDerivative_pullback [BoundarylessManifold IM M] [BoundarylessMan
     have h₃ : ContMDiffAt 𝓘(ℝ, EN) 𝓘(ℝ, EN [⋀^Fin k]→L[ℝ] ℝ) ⊤
         (fun y : EN => (trivializationAt (EN [⋀^Fin k]→L[ℝ] ℝ)
           (Bundle.continuousAlternatingMap ℝ (Fin k) EN (TangentSpace IN) ℝ
-            (Bundle.Trivial N ℝ)) (f x) ⟨(extChartAt IN (f x)).symm y, η ((extChartAt IN (f x)).symm y)⟩).2)
+            (Bundle.Trivial N ℝ)) (f x) ⟨(extChartAt IN (f x)).symm y,
+              η ((extChartAt IN (f x)).symm y)⟩).2)
         (c₁ (f x)) :=
       h₁.comp_of_eq
         (by
@@ -485,7 +492,8 @@ theorem exteriorDerivative_pullback [BoundarylessManifold IM M] [BoundarylessMan
         (Bundle.continuousAlternatingMap ℝ (Fin k) EN (TangentSpace IN) ℝ
           (Bundle.Trivial N ℝ)) (f x)
         ⟨(extChartAt IN (f x)).symm ((extChartAt IN (f x)) (f ((extChartAt IM x).symm y))),
-          η ((extChartAt IN (f x)).symm ((extChartAt IN (f x)) (f ((extChartAt IM x).symm y))))⟩).2).compContinuousLinearMap
+          η ((extChartAt IN (f x)).symm ((extChartAt IN (f x)) (f
+            ((extChartAt IM x).symm y))))⟩).2).compContinuousLinearMap
           (fderiv ℝ (fun y : EM => (extChartAt IN (f x)) (f ((extChartAt IM x).symm y))) y)
     rw [show (pullback f hf η) ((extChartAt IM x).symm y) =
         (η (f ((extChartAt IM x).symm y))).compContinuousLinearMap

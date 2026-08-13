@@ -10,7 +10,6 @@ import Mathlib.MeasureTheory.Measure.Map
 import Mathlib.MeasureTheory.Integral.Lebesgue.Map
 import Mathlib.Analysis.InnerProductSpace.EuclideanDist
 
-
 noncomputable section
 
 open MeasureTheory Set Filter Topology Bundle Manifold Function
@@ -31,8 +30,6 @@ private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
-/-- On a chart source, the canonical Riemannian volume measure is exactly the
-corresponding chart-local measure. -/
 theorem volume_restrict_eq
     [T2Space M] [CompactSpace M]
     (g : DifferentialGeometry.SmoothRiemannianMetric I M)
@@ -52,8 +49,6 @@ theorem volume_restrict_eq
       exact Set.indicator_of_notMem hx _)
   simpa only [U, MeasureTheory.lintegral_indicator hU] using h
 
-/-- An integrable function supported in one chart has the same chart-local and
-global Riemannian integrals. -/
 theorem chart_int_eq_global
     [T2Space M] [CompactSpace M]
     (g : DifferentialGeometry.SmoothRiemannianMetric I M)
@@ -192,8 +187,6 @@ lemma continuousOn_symm_toEuclideanSymm (α : M) :
   exact (continuousOn_extChartAt_symm (I := I) α).comp
     (toEuclidean (E := E)).symm.continuous.continuousOn hy_target
 
-/-- Differentiability of a raw chart representative at the coordinate of a
-point in the chart source gives manifold differentiability at that point. -/
 theorem mdiff_of_raw (α : M) {f : M → ℝ} {x : M}
     (hx : x ∈ (chartAt H α).source)
     (hf : DifferentiableAt ℝ (chartPushedRaw (I := I) (M := M) α f)
@@ -226,8 +219,6 @@ theorem mdiff_of_raw (α : M) {f : M → ℝ} {x : M}
   simp only [coord, ContinuousLinearEquiv.symm_apply_apply,
     (extChartAt I α).left_inv hy_ext]
 
-/-- The pushforward of `modelHaar` along the continuous linear equivalence
-`toEuclidean : E ≃L[ℝ] EuclN E` is itself an additive Haar measure on `EuclN E`. -/
 private instance modelHaar_map_toEuclidean_isAddHaarMeasure :
     MeasureTheory.Measure.IsAddHaarMeasure
       (Measure.map (toEuclidean : E ≃L[ℝ] EuclN E)
@@ -445,8 +436,6 @@ lemma chartLocalMeasure_lintegral_via_chartTargetEuclid
       exact hy
     rw [Set.indicator_of_notMem hy_target, Set.indicator_of_notMem hy]
 
-/-- A Euclidean-volume almost-everywhere property transfers to the chart-local
-measure after evaluation in the fixed chart coordinates. -/
 lemma ae_chart_of_volume
     (g : DifferentialGeometry.SmoothRiemannianMetric I M) (α : M)
     {P : EuclN E → Prop} (hP : MeasurableSet {y | P y})
@@ -529,7 +518,6 @@ lemma ae_chart_of_volume
   filter_upwards [hchart] with x hx hx_source
   simpa only [coord, if_pos hx_source] using hx
 
-/-- The chart density is strictly positive at points of the chart target. -/
 lemma chartDensity_pos_on_target
     (g : DifferentialGeometry.SmoothRiemannianMetric I M) (α : M)
     {y : E} (hy : y ∈ (extChartAt I α).target) :

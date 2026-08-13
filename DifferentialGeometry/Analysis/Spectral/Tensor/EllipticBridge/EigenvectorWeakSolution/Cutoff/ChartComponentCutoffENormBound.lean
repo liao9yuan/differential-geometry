@@ -2,7 +2,6 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.EllipticBridge.AbstractChar
 import DifferentialGeometry.Analysis.Elliptic.Regularity.ChartBilinear.H1Compl
 import DifferentialGeometry.Analysis.Integration.L2.Hilbert.DenseSubset
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
 
 
 noncomputable section

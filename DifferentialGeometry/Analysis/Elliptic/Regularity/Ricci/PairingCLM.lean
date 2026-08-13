@@ -2,7 +2,6 @@ import DifferentialGeometry.Analysis.Elliptic.Regularity.GradInner.Laplacian.Can
 import DifferentialGeometry.Analysis.Elliptic.Regularity.Ricci.DualNorm
 import Mathlib.Analysis.Normed.Operator.Extend
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Connection
 open DifferentialGeometry.Geometry.Operator
 

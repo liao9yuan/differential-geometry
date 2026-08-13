@@ -2,20 +2,8 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.Metric.Basic
 import DifferentialGeometry.Tensor.RSTensor.Tensor0SRiemannian.Product
 open DifferentialGeometry.PDE.RicciFlow
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
 
 set_option autoImplicit false
-
-
-
-
-
-
-
-
-
-
-
 
 noncomputable section
 
@@ -33,8 +21,6 @@ abbrev MatrixComp (M : Type*) (Idx : Type*) := Real -> M -> Idx -> Idx -> Real
 abbrev FourComp (M : Type*) (Idx : Type*) :=
   Real -> M -> Idx -> Idx -> Idx -> Idx -> Real
 
-
-
 def MetricCompRicciFlowInFrameOn
     {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
     (metricComp Ric : MatrixComp M Idx) : Prop :=
@@ -46,9 +32,6 @@ def MetricCompRicciFlowInFrameOn
       D.carrier
       (t : Real)
 
-
-
-
 def FrameRicciODEInFrameOn
     {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
     (frameComp ricciOneUp : MatrixComp M Idx) : Prop :=
@@ -59,9 +42,6 @@ def FrameRicciODEInFrameOn
       (∑ l : Idx, ricciOneUp (t : Real) x l k * frameComp (t : Real) x a l)
       D.carrier
       (t : Real)
-
-
-
 
 def RicciEndomorphismCompatibleInFrame
     (metricComp Ric ricciOneUp : MatrixComp M Idx) : Prop :=
@@ -80,11 +60,6 @@ def movingFrameGramInFrame
   ∑ i : Idx, ∑ j : Idx,
     frameComp t x a i * frameComp t x b j * metricComp t x i j
 
-
-
-
-
-
 def MovingFrameGramDerivativeZeroOn
     {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
     (metricComp frameComp : MatrixComp M Idx) : Prop :=
@@ -96,17 +71,10 @@ def MovingFrameGramDerivativeZeroOn
       D.carrier
       (t : Real)
 
-
-
-
-
-
 abbrev MovingFrameGramConstantOn
     {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
     (metricComp frameComp : MatrixComp M Idx) : Prop :=
   MovingFrameGramDerivativeZeroOn (D := D) metricComp frameComp
-
-
 
 def MovingFrameGramValueConstantOn
     {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
@@ -291,8 +259,6 @@ def MovingFrameOrthonormalInFrame
     movingFrameGramInFrame metricComp frameComp t x a b =
       if a = b then 1 else 0
 
-
-
 theorem evolvingFrame_orthonormal_of_initial
     {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
     (metricComp frameComp : MatrixComp M Idx)
@@ -304,8 +270,6 @@ theorem evolvingFrame_orthonormal_of_initial
   intro t x a b
   rw [hconst t x a b]
   exact _hinit x a b
-
-
 
 def BundleIsomorphismODEInFrameOn
     {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
@@ -325,8 +289,6 @@ def UhlenbeckPullbackMetricComponents
     hComp t x a b =
       uhlenbeckPullbackMetricCompInFrame metricComp iota t x a b
 
-
-
 omit [DecidableEq Idx] in
 theorem uhlenbeck_pullbackMetric_constant_of_ricciFlow
     {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
@@ -339,8 +301,6 @@ theorem uhlenbeck_pullbackMetric_constant_of_ricciFlow
     MovingFrameGramConstantOn (D := D) metricComp iota :=
   evolvingFrameGram_constant_of_ricciFlow
     (D := D) metricComp Ric iota ricciOneUp hmetric hiota hcompat
-
-
 
 def uhlenbeckPullbackRmInFrame
     (iota : MatrixComp M Idx)
@@ -374,18 +334,12 @@ def UhlenbeckBTensorComponents
   forall (t : Real) (x : M) (a b c d : Idx),
     B t x a b c d = uhlenbeckBTensorInFrame hInv pulledRm t x a b c d
 
-
-
-
-
 def UhlenbeckPullbackBComponents
     (iota : MatrixComp M Idx)
     (Borig Bpull : FourComp M Idx) : Prop :=
   forall (t : Real) (x : M) (a b c d : Idx),
     Bpull t x a b c d =
       uhlenbeckPullbackRmInFrame iota Borig t x a b c d
-
-
 
 def UhlenbeckLaplacianPullbackComponents
     (iota : MatrixComp M Idx)
@@ -411,8 +365,6 @@ private def iotaDotInFrame
     (iota ricciOneUp : MatrixComp M Idx)
     (t : Real) (x : M) (a i : Idx) : Real :=
   ∑ p : Idx, ricciOneUp t x p i * iota t x a p
-
-
 
 private def derivProduct5RHS
     (u v w y z du dv dw dy dz : Real) : Real :=
@@ -468,8 +420,6 @@ private def uhlenbeckPullbackRmDerivRHSInFrame
           B t x i k j l - B t x i l j k) -
         riemann04RicciDriftInFrame Rup Rm04 t x i j k l)
 
-
-
 private def uhlenbeckIotaDriftInFrame
     (iota : MatrixComp M Idx)
     (Rm04 : FourComp M Idx)
@@ -485,8 +435,6 @@ private def uhlenbeckIotaDriftInFrame
           Rm04 t x i j k l +
       iota t x a i * iota t x b j * iota t x c k *
         iotaDotInFrame iota Rup t x d l * Rm04 t x i j k l)
-
-
 
 private def uhlenbeckPullbackDriftInFrame
     (iota : MatrixComp M Idx)
@@ -764,8 +712,6 @@ def uhlenbeckCurvatureEvolutionRHSInFrame
   roughLapD t x a b c d -
     2 * (B t x a b c d - B t x a b d c +
       B t x a c b d - B t x a d b c)
-
-
 
 def UhlenbeckCurvatureEvolutionInFrameOn
     {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
@@ -1069,8 +1015,6 @@ abbrev solutionRicciCompInFrame
     MatrixComp M Idx :=
   ricciCompInFrame (I := I) S frame
 
-
-
 abbrev solutionRicciOneUpInFrame
     {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -1086,10 +1030,6 @@ def solutionRm04CompInFrame
     FourComp M Idx :=
   fun t x i j k l => DifferentialGeometry.Geometry.Curvature.rm04Comp (I := I) (Rm04 t) frame x i j
                        k l
-
-
-
-
 
 omit [DecidableEq Idx] in
 omit [Fintype Idx] in
@@ -1115,8 +1055,6 @@ abbrev BundleIsomorphismODEInSolutionFrameOn
   BundleIsomorphismODEInFrameOn (D := D) iota
     (solutionRicciOneUpInFrame (I := I) S gInv frame)
 
-
-
 abbrev UhlenbeckPullbackRmComponentsOfSolution
     {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
     (_S : SolutionOn (I := I) (M := M) D)
@@ -1126,8 +1064,6 @@ abbrev UhlenbeckPullbackRmComponentsOfSolution
     (pulledRm : FourComp M Idx) : Prop :=
   UhlenbeckPullbackRmComponents iota
     (solutionRm04CompInFrame (I := I) Rm04 frame) pulledRm
-
-
 
 abbrev Riemann04BTensorWithRicciDriftEvolutionInSolutionFrameOn
     {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
@@ -1139,10 +1075,6 @@ abbrev Riemann04BTensorWithRicciDriftEvolutionInSolutionFrameOn
   Riemann04BTensorWithRicciDriftEvolutionInFrameOn (D := D)
     (solutionRm04CompInFrame (I := I) Rm04 frame) roughLapRm04 B
     (solutionRicciOneUpInFrame (I := I) S gInv frame)
-
-
-
-
 
 omit [DecidableEq Idx] in
 omit [SigmaCompactSpace M] [T2Space M] in

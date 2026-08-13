@@ -6,8 +6,9 @@ import DifferentialGeometry.Analysis.Parabolic.MaximalRegularity.Plancherel
 import DifferentialGeometry.Analysis.Parabolic.MaximalRegularity.PerModeL2
 import DifferentialGeometry.Analysis.Calculus.ContDiffExtendInterval
 import DifferentialGeometry.Analysis.Integration.L2.ForcingFiniteOrderTimeRegularityParametricIntegral
-open DifferentialGeometry.Analysis.Integration DifferentialGeometry.Analysis.Sobolev.CSupTensor DifferentialGeometry.Analysis.Sobolev.IntrinsicSobolev.SmoothCcTensorHs DifferentialGeometry.PDE.RicciFlow
-open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Analysis.Integration DifferentialGeometry.Analysis.Sobolev.CSupTensor
+    DifferentialGeometry.Analysis.Sobolev.IntrinsicSobolev.SmoothCcTensorHs
+    DifferentialGeometry.PDE.RicciFlow
 open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Connection
 

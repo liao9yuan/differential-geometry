@@ -4,7 +4,6 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.CurvatureContractio
 open DifferentialGeometry.Analysis.Spectral
 open DifferentialGeometry.Analysis.Elliptic
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
 
 noncomputable section
 

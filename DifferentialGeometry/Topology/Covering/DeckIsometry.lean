@@ -3,15 +3,6 @@ import DifferentialGeometry.Topology.Covering.Riemannian
 
 set_option autoImplicit false
 
-/-!
-# Deck transformations preserve the lifted metric
-
-In the preferred universal-cover charts, every deck transformation is the
-identity on model-space coordinates.  Its manifold derivative is therefore the
-identity, and the defining pullback formula for `liftedMetric` gives metric
-preservation.
--/
-
 open Set Function Manifold
 open scoped Topology ContDiff Manifold
 
@@ -38,8 +29,6 @@ omit [FiniteDimensional ℝ E] [I.Boundaryless]
   [T2Space M]
   [SigmaCompactSpace M]
   [ConnectedSpace M] in
-/-- A deck transformation has identity differential in the preferred
-universal-cover tangent coordinates. -/
 theorem hasMFDerivAt_deck
     (a : FundamentalGroup M (default : M))
     (p : UniversalCover M) :
@@ -79,7 +68,6 @@ omit [FiniteDimensional ℝ E]
   [T2Space M]
   [SigmaCompactSpace M]
   [ConnectedSpace M] in
-/-- Deck transformations preserve the lifted pointwise metric. -/
 theorem deck_inner
     (g : SmoothRiemannianMetric I M)
     (a : FundamentalGroup M (default : M))

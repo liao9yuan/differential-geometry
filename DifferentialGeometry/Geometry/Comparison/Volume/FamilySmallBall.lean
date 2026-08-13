@@ -2,26 +2,14 @@ import DifferentialGeometry.Geometry.Comparison.Volume.FamilyParamControl
 import DifferentialGeometry.Geometry.Comparison.RiemannianDistContinuity
 import DifferentialGeometry.Geometry.Comparison.Volume.SmallBall
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
 
 set_option autoImplicit false
-
-/-!
-# Uniform small-ball lower bounds for metric families
-
-This file isolates the metric-family version of the compact-uniform small-ball
-volume theorem needed by Perelman's initial-time noncollapsing argument.  The
-pointwise fixed-centre theorem lives in `SmallBall`; the missing content here is
-the compact-uniform all-centre/all-radius strengthening for a continuous
-time-dependent metric family.
--/
 
 noncomputable section
 
 open scoped Manifold ContDiff ENNReal
 
 namespace DifferentialGeometry.Geometry.Riemannian.VolumeComparison
-
 
 open DifferentialGeometry.Integral.Measure
 open Bundle MeasureTheory Metric Set
@@ -45,11 +33,6 @@ private local instance : BorelSpace M := ⟨rfl⟩
 omit [ConnectedSpace M] [BoundarylessManifold I M] in
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-/-- Compact-uniform raw small-ball volume lower bound for a smooth metric
-family near the initial endpoint of `[0, omega)`.
-
-This is the geometric producer behind the initial-time part of Perelman's
-no-local-collapsing theorem. -/
 theorem family_vol_low
     [T2Space (TangentBundle I M)]
     {omega : Real} (h0omega : 0 < omega)

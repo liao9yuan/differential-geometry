@@ -4,16 +4,7 @@ import DifferentialGeometry.Analysis.Calculus.PartialDerivIteratedFDerivOrderBri
 import DifferentialGeometry.Analysis.Integration.DivergenceTheorem.WithBoundary.Divergence.PartialDerivWithin
 open DifferentialGeometry.Analysis.Calculus.DeTurckCoefficients
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Operator
-
-
-
-
-
-
-
-
 
 open DifferentialGeometry.Geometry.Connection
 namespace DifferentialGeometry.Analysis.Spectral.DeTurckCoefficients
@@ -209,8 +200,6 @@ lemma partial_gramBracketD
       (partialDeriv (E := E) m
         (partialDeriv (E := E) j (chartGramOnE (I := I) g α l i))) h1 h2]
 
-
-
 omit [NeZero (Module.finrank ℝ E)] in
 theorem partial2_christ_eq
     (g : SmoothRiemannianMetric I M) (α : M)
@@ -283,8 +272,6 @@ theorem partial2_christ_eq
     partialDeriv_gramBracket_eq (I := I) g α d i j l hy,
     partial_gramBracketD (I := I) g α d m i j l hy]
   ring
-
-
 
 omit [NeZero (Module.finrank ℝ E)] in
 theorem christD2_sub_le
@@ -496,8 +483,6 @@ theorem christD2_sub_le
       simp only [Finset.sum_const, Finset.card_univ, Fintype.card_fin, nsmul_eq_mul]
     _ = (Module.finrank ℝ E : ℝ) * K * J₃ := by ring
 
-
-
 omit [NeZero (Module.finrank ℝ E)] in
 theorem christD2_abs_le
     (g : SmoothRiemannianMetric I M) (α : M) {y : E}
@@ -564,8 +549,6 @@ theorem christD2_abs_le
           (T * P + 2 * D * R + M_b * U) := by
       simp only [Finset.sum_const, Finset.card_univ, Fintype.card_fin, nsmul_eq_mul]
       ring
-
-
 
 omit [NeZero (Module.finrank ℝ E)] in
 theorem christD2_pou_bnd
@@ -671,8 +654,6 @@ theorem christD2_pou_bnd
   exact christD2_abs_le (I := I) (M := M) (gSeq k) α hy d m i j l hM_b.le hD_nn hT_nn
     (fun a => hMbOnE l a) (fun e a => hDOnE e l a) (fun e r a => hTOnE e r l a)
     hPOnE hROnE hUOnE
-
-
 
 omit [NeZero (Module.finrank ℝ E)] in
 theorem christD2_pou_lip

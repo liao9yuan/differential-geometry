@@ -4,15 +4,6 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.SobolevScale.FiniteSpectral
 open DifferentialGeometry.Analysis.Sobolev
 open DifferentialGeometry.Analysis.Spectral
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
-
-
-
-
-
-
-
-
 
 noncomputable section
 
@@ -36,10 +27,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
   [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M]
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
-
-
-
-
 
 theorem cc_finite_diss
     (q h : SmoothRiemannianMetric I M)
@@ -192,10 +179,6 @@ theorem cc_finite_diss
   have hpair := finite_cc_pair (I := I) (M := M) q 0 n T hT A
   rw [hpair]
   simpa only [U, A] using hmain'
-
-
-
-
 
 theorem cc_a2_closure
     (q h : SmoothRiemannianMetric I M)

@@ -17,7 +17,6 @@ import Mathlib.Analysis.Calculus.TangentCone.Prod
 import Mathlib.Analysis.Calculus.TangentCone.Real
 import Mathlib.Analysis.Calculus.ContDiff.Comp
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Operator
 
 
@@ -359,7 +358,8 @@ private lemma gramOnE_partialDeriv_joint_contDiffOn
   have hGV : ContDiffOn ℝ ∞ G S := jointGramEntry_euclidean_contDiffOn T g_DT hJ α l j
   have hVopen : IsOpen V := isOpen_interior
   have hfun : ∀ t : ℝ, DifferentialGeometry.Geometry.Operator.chartGramOnE (I := I) (g_DT t) α l j =
-      fun y' => G (t, y') := fun t => by funext y'; simp [DifferentialGeometry.Geometry.Operator.chartGramOnE,
+      fun y' => G (t,
+        y') := fun t => by funext y'; simp [DifferentialGeometry.Geometry.Operator.chartGramOnE,
         G]
   suffices h : ContDiffOn ℝ ∞
       (fun q : ℝ × E => fderiv ℝ (fun y' => G (q.1, y')) q.2 (chartModelBasis E m)) S from
@@ -434,7 +434,8 @@ private lemma jointChristoffel_contDiffOn
            Integral.DivergenceTheorem.partialDeriv (E := E) j
               (DifferentialGeometry.Geometry.Operator.chartGramOnE (I := I) (g_DT q.1) α l i) q.2 -
            Integral.DivergenceTheorem.partialDeriv (E := E) l
-              (DifferentialGeometry.Geometry.Operator.chartGramOnE (I := I) (g_DT q.1) α i j) q.2) := by
+              (DifferentialGeometry.Geometry.Operator.chartGramOnE (I := I)
+                (g_DT q.1) α i j) q.2) := by
     funext q
     rw [chartChristoffel_def]
     simp only [DifferentialGeometry.Geometry.Operator.chartInvGramOnE_def]
@@ -812,7 +813,8 @@ private lemma jointChartLieDeTurckComp_contDiffOn
     (i j : Fin (Module.finrank ℝ E)) :
     ContDiffOn ℝ ∞
       (fun q : ℝ × E =>
-        DifferentialGeometry.Analysis.Spectral.DeTurckCoefficients.chartLieDeTurckComp (I := I) (g_DT q.1) g_bg α i j
+        DifferentialGeometry.Analysis.Spectral.DeTurckCoefficients.chartLieDeTurckComp (I := I)
+          (g_DT q.1) g_bg α i j
           q.2)
       (Set.Icc 0 T ×ˢ interior (extChartAt I α).target) := by
   classical
@@ -879,12 +881,14 @@ theorem jointChartDeTurckRicciRHS_alongChart_contMDiffOn
     (i k : Fin (Module.finrank ℝ E)) :
     ContMDiffOn (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ) ∞
       (fun q : ℝ × M =>
-        DifferentialGeometry.Analysis.Spectral.DeTurckCoefficients.chartDeTurckRicciRHS (I := I) (g_DT q.1) g_bg α i k
+        DifferentialGeometry.Analysis.Spectral.DeTurckCoefficients.chartDeTurckRicciRHS (I := I)
+          (g_DT q.1) g_bg α i k
           (extChartAt I α q.2))
       (Set.Icc 0 T ×ˢ chartLeviCivitaGoodSet (I := I) α) := by
   set G : ℝ × E → ℝ :=
     fun q : ℝ × E =>
-      DifferentialGeometry.Analysis.Spectral.DeTurckCoefficients.chartDeTurckRicciRHS (I := I) (g_DT q.1) g_bg α i k q.2
+      DifferentialGeometry.Analysis.Spectral.DeTurckCoefficients.chartDeTurckRicciRHS (I := I)
+        (g_DT q.1) g_bg α i k q.2
     with hG_def
   have hGEuclid : ContDiffOn ℝ ∞ G (Set.Icc 0 T ×ˢ interior (extChartAt I α).target) :=
     jointChartDeTurckRicciRHS_contDiffOn g_bg T g_DT hJ α i k

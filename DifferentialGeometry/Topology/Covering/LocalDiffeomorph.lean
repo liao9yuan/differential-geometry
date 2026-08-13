@@ -1,16 +1,6 @@
 import DifferentialGeometry.Geometry.Coordinates.LocalDiffeoIFT
 import DifferentialGeometry.Topology.Covering.Manifold
 
-/-!
-# The universal-cover projection as a local diffeomorphism
-
-The pulled-back smooth structure on `UniversalCover M` makes the covering
-projection locally equal to the identity in preferred extended coordinates.
-Consequently its coordinate derivative is invertible everywhere, and the
-smooth manifold inverse-function theorem upgrades the projection to a smooth
-local diffeomorphism.
--/
-
 open Set Function Filter
 open scoped Topology ContDiff Manifold
 
@@ -73,7 +63,6 @@ private theorem proj_deriv_id
   exact hId.congr_of_eventuallyEq hEq hx0
 
 omit [T2Space M] [SigmaCompactSpace M] [ConnectedSpace M] in
-/-- The universal-cover projection is a smooth local diffeomorphism. -/
 theorem proj_localDiffeo :
     IsLocalDiffeomorph I I ∞
       (proj : DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover M → M) := by

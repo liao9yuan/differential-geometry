@@ -6,14 +6,6 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.Entropy.ConjPotentialSpan
 open DifferentialGeometry.Analysis.Sobolev
 open DifferentialGeometry.PDE.RicciFlow DifferentialGeometry.Analysis.Spectral
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
-
-/-!
-# Compact-span scalar Galerkin compactness
-
-This file assembles the prescribed-interval moving-operator, finite-dimensional
-ODE, energy, and compactness producers on a compact regular-time slab.
--/
 
 noncomputable section
 
@@ -39,8 +31,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
 
 private local instance : CompleteSpace E := FiniteDimensional.complete Real E
 
-/-- A compact regular-time slab has one backward radius such that every
-requested shorter interval supports a full scalar Galerkin subsequence. -/
 theorem gal_span
     {D : RealTimeInterval} (S : SolutionOn (I := I) (M := M) D)
     (hS : IsSolutionOn (I := I) S)
@@ -93,9 +83,6 @@ theorem gal_span
   have hsub := gal_subseq_on (I := I) (M := M) S T hh hbound hpert
   exact ⟨hreg, hsub⟩
 
-/-- A compact regular-time slab has one backward radius such that every
-requested shorter interval carries a Galerkin subsequence and its classical
-heat-potential reconstruction on exactly that interval. -/
 theorem gallim_span
     {D : RealTimeInterval} (S : SolutionOn (I := I) (M := M) D)
     (hS : IsSolutionOn (I := I) S)
@@ -142,9 +129,6 @@ theorem gallim_span
   refine ⟨V, phi, ulim, hlim, ?_⟩
   exact gallim_on (I := I) (M := M) hS hh hlim hreg hcore
 
-/-- Unless the manifold is empty, a compact regular-time slab has one
-backward radius on which every requested shorter interval carries a positive
-unit-mass classical conjugate heat potential. -/
 theorem gallim_unit_span
     {D : RealTimeInterval} (S : SolutionOn (I := I) (M := M) D)
     (hS : IsSolutionOn (I := I) S)

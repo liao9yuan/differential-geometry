@@ -2,17 +2,8 @@ import DifferentialGeometry.Analysis.Spectral.Intrinsic.Garding.BalancedPairing
 import DifferentialGeometry.Analysis.Sobolev.TensorHilbert.ParametricAppCcJetBound
 import DifferentialGeometry.Analysis.Sobolev.TensorHilbert.ParametricScalarSmulJet
 open DifferentialGeometry.Analysis.Sobolev
-open DifferentialGeometry.Analysis.Sobolev
 open DifferentialGeometry.Analysis.Spectral
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
-
-
-
-
-
-
-
 
 noncomputable section
 
@@ -39,8 +30,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
-
-
 theorem iterL_pair_unif (g : SmoothRiemannianMetric I M) (s n : ℕ)
     (Φ : ℝ → SmoothCcTensor g (s + 1) s) {S K : Set ℝ}
     (hK : IsCompact K) (hKS : K ⊆ S)
@@ -62,9 +51,6 @@ theorem iterL_pair_unif (g : SmoothRiemannianMetric I M) (s n : ℕ)
   obtain ⟨CG, hCG_nn, hCG⟩ :=
     param_app_jet (I := I) (M := M) g (s + 1) s Φ hK hKS hjoint
   exact iterL_pair_jet_of (I := I) (M := M) g s n Φ K CG hCG_nn hCG
-
-
-
 
 theorem iterL_smul_unif (g : SmoothRiemannianMetric I M) (n : ℕ)
     (zeta : ℝ → C^∞⟮I, M; ℝ⟯) {S K : Set ℝ}

@@ -4,7 +4,6 @@ import DifferentialGeometry.Analysis.Parabolic.MaximalRegularity.TimeL2Interpola
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.CompactSAResolventIntrinsic
 open DifferentialGeometry.Analysis.Spectral
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
 
 noncomputable section
 

@@ -5,18 +5,8 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.BoundedGeomet
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.C4.PointedEmetric
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.C4.StepAInputs
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
 
 set_option autoImplicit false
-
-
-
-
-
-
-
-
-
 
 noncomputable section
 
@@ -33,12 +23,6 @@ variable [NormedSpace Real E] [FiniteDimensional Real E]
 variable [NeZero (Module.finrank Real E)] [CompleteSpace E]
 variable {H : Type uH} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H} [I.Boundaryless]
-
-
-
-
-
-
 
 theorem exists_pairR_of_boundedGeometry
     (Y : PointedRiemannianManifold.{u, uE, uH} (I := I))
@@ -120,12 +104,6 @@ theorem exists_pairR_of_boundedGeometry
     hvol (Rm := hgeom.C 0) (hgeom.nonneg 0)
       (rm04Bound_of_geom (I := I) hgeom)
   exact ⟨C, D, Blo, A, δ, hC, hD, hBlo, hδ, hsmall⟩
-
-
-
-
-
-
 
 theorem exists_pairR_of_seqBoundedGeometry
     (X : PointedRiemannianSeq.{u, uE, uH} (I := I))
@@ -212,8 +190,6 @@ theorem exists_pairR_of_seqBoundedGeometry
   simpa [Y, hgeom_k] using hsmall (s := s) hs hsd
 
 omit [NeZero (Module.finrank Real E)] in
-/-- Uniform bounded geometry gives the common lower Ricci bound used by the
-Bishop--Gromov stage of the volume-comparison route. -/
 theorem ricciLower_of_seq
     (X : PointedRiemannianSeq.{u, uE, uH} (I := I))
     (hgeom : SeqBoundedGeometry (I := I) X) (k : Nat) :
@@ -237,26 +213,18 @@ theorem ricciLower_of_seq
   simpa [Geometry.Riemannian.VolumeComparison.Rm04GlobalBound] using
     (rm04Bound_of_seq (I := I) hgeom k)
 
-/-- Uniform local-volume packing input for the Step A volume-comparison field. -/
 structure UniformBallPack
     (X : PointedRiemannianSeq.{u, uE, uH} (I := I)) where
-
   dist : PointedSeqDistance (I := I) X
-
   ms : ∀ k : Nat, MetricSpace (X.obj k).M
-
   dist_eq : ∀ k : Nat, ∀ x y : (X.obj k).M,
     dist k x y =
       (letI : MetricSpace (X.obj k).M := ms k
        @Dist.dist (X.obj k).M _ x y)
-
   r0 : Real
   r0_pos : 0 < r0
-
   Imult : Real → Nat
-
   L : Real → Real → Real
-
   U : Real → Real → Real
   L_pos : ∀ m r : Real, 0 < r → m * r ≤ r0 → 0 < L m r
   U_nonneg : ∀ m r : Real, 0 < r → m * r ≤ r0 → 0 ≤ U m r
@@ -302,12 +270,6 @@ structure UniformBallPack
 
 namespace UniformBallPack
 
-
-
-
-
-
-
 def toVCInput {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
     (h : UniformBallPack (I := I) X) :
     VolumeComparisonInput (I := I) X where
@@ -325,7 +287,8 @@ def toVCInput {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
     letI : SigmaCompactSpace Y.M := Y.sigmaCompact
     letI : MetricSpace Y.M := h.ms k
     letI : MeasurableSpace Y.M := borel Y.M
-    let μ := DifferentialGeometry.Integral.Measure.riemannianVolumeMeasure (I := I) (M := Y.M) Y.metric
+    let μ := DifferentialGeometry.Integral.Measure.riemannianVolumeMeasure (I := I)
+      (M := Y.M) Y.metric
     have hsep_metric :
         ∀ i ∈ J, ∀ j ∈ J, i ≠ j →
           r ≤ @Dist.dist Y.M _ (centers i) (centers j) := by

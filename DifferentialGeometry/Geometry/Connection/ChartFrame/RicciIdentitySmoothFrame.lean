@@ -3,7 +3,6 @@ import DifferentialGeometry.Geometry.Connection.ChartFrame.ChartMetric
 import Mathlib.Analysis.SpecialFunctions.Sqrt
 import Mathlib.Geometry.Manifold.BumpFunction
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Operator
 
 

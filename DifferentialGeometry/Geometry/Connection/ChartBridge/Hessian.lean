@@ -3,7 +3,6 @@ import DifferentialGeometry.Geometry.Connection.ChartBridge.Gradient
 import DifferentialGeometry.Bundle.SmoothScalarGerm
 import Mathlib.Analysis.Calculus.FDeriv.Congr
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Operator
 
 

@@ -8,19 +8,10 @@ import DifferentialGeometry.Geometry.Exponential.IntrinsicVelocity
 import DifferentialGeometry.Geometry.Exponential.MinimizingGeodesic
 import DifferentialGeometry.Geometry.Metric.DistanceScaling
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Connection
 open DifferentialGeometry.Geometry.Operator
 
 set_option autoImplicit false
-
-/-!
-# Explicit-metric distance bounds for Calabi broken paths
-
-This file exposes the standard distance-bounded-by-length inequality with the
-smooth Riemannian metric supplied explicitly.  It also packages the two-arc
-broken-path estimate used by point-centered Calabi upper supports.
--/
 
 noncomputable section
 
@@ -44,11 +35,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-/-- The deterministic fixed-first data selected from a finite-distance
-minimizing geodesic at the Calabi split time `1 / 4`.
-
-The selected branch contains the nonzero terminal launch vector and remains
-nonconjugate on an open interval extending beyond time one. -/
 structure CalabiTailData
     [RiemannianBundle (fun y : M => TangentSpace I y)]
     [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
@@ -79,7 +65,6 @@ structure CalabiTailData
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-/-- The selected tail vector exponentiates to the terminal point. -/
 theorem CalabiTailData.exp_eq
     [RiemannianBundle (fun y : M => TangentSpace I y)]
     [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
@@ -94,7 +79,6 @@ theorem CalabiTailData.exp_eq
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-/-- The terminal point lies in the target of the selected fixed-first branch. -/
 theorem CalabiTailData.target_mem
     [RiemannianBundle (fun y : M => TangentSpace I y)]
     [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
@@ -112,9 +96,6 @@ theorem CalabiTailData.target_mem
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-/-- A finite-distance minimizing geodesic supplies the deterministic
-quarter-split Calabi tail, together with a fixed-first inverse branch and a
-nonconjugate radial interval extending past its endpoint. -/
 theorem exists_calabiTail
     [RiemannianBundle (fun y : M => TangentSpace I y)]
     [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
@@ -272,9 +253,6 @@ theorem exists_calabiTail
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-/-- A finite nonbase point has selected Calabi-tail data whose explicit
-fixed-first branch radius is a smooth upper support with the standard
-Ricci-lower-bound Laplacian estimate. -/
 theorem exists_calabiData
     [RiemannianBundle (fun y : M => TangentSpace I y)]
     [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
@@ -589,8 +567,6 @@ theorem exists_calabiData_of_complete_metric
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-/-- The distance from `O` admits a smooth Calabi upper support at every finite
-nonbase point, with the standard Ricci-lower-bound Laplacian estimate. -/
 theorem calabiDist_support
     [RiemannianBundle (fun y : M => TangentSpace I y)]
     [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
@@ -708,8 +684,6 @@ omit [FiniteDimensional ℝ E]
   [I.Boundaryless]
   [T2Space M]
   [SigmaCompactSpace M] in
-/-- The extended distance of an explicitly supplied Riemannian metric is at
-most the arc length of any `C¹` curve joining the endpoints. -/
 theorem edistOf_le_arcLength
     (g : SmoothRiemannianMetric I M) {γ : Real → M} {a b : Real}
     (hab : a ≤ b)
@@ -733,8 +707,6 @@ omit [FiniteDimensional ℝ E]
   [I.Boundaryless]
   [T2Space M]
   [SigmaCompactSpace M] in
-/-- A broken path made of two `C¹` arcs bounds the explicit Riemannian
-extended distance by the sum of their arc lengths. -/
 theorem edistOf_le_two_arcs
     (g : SmoothRiemannianMetric I M)
     {γ δ : Real → M} {a b c d : Real}
@@ -767,9 +739,6 @@ theorem edistOf_le_two_arcs
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-/-- A minimizing intrinsic geodesic from `O` to `x` admits a terminal point
-strictly before `x` whose remaining velocity lies in a prescribed inverse
-branch centered at `x`. -/
 theorem calabi_tail_of
     [RiemannianBundle (fun y : M => TangentSpace I y)]
     [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
@@ -895,8 +864,6 @@ theorem calabi_tail_of
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-/-- The generic diagonal-exponential branch supplies the terminal inverse
-segment needed in the Calabi broken-path construction. -/
 theorem exists_calabi_tail
     [RiemannianBundle (fun y : M => TangentSpace I y)]
     [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]

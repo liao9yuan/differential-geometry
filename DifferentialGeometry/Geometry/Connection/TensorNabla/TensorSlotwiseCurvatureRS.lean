@@ -1,6 +1,5 @@
 import DifferentialGeometry.Geometry.Connection.TensorNabla.TensorSlotwiseCurvature
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
 
 
 noncomputable section

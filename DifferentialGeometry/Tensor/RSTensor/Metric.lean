@@ -68,12 +68,10 @@ import DifferentialGeometry.Tensor.Product.Fiber
 import Mathlib.Topology.VectorBundle.Basic
 import Mathlib.LinearAlgebra.TensorProduct.Basis
 import DifferentialGeometry.Bundle.SectionRealized
-import DifferentialGeometry.Tensor.RSTensor.Field
 import DifferentialGeometry.Tensor.Auxiliary.PredualBasis
 import Mathlib.LinearAlgebra.Dual.Basis
 import Mathlib.LinearAlgebra.Trace
 import Mathlib.Geometry.Manifold.VectorBundle.Riemannian
-import Mathlib.Geometry.Manifold.VectorBundle.Tangent
 import Mathlib.Analysis.Calculus.ContDiff.FiniteDimension
 
 namespace DifferentialGeometry.Tensor.RSTensor
@@ -92,7 +90,8 @@ variable {H : Type*} [TopologicalSpace H] (I : ModelWithCorners ℝ E H)
 variable (n : WithTop ℕ∞)
 variable (M : Type*) [TopologicalSpace M] [ChartedSpace H M] [IsManifold I 1 M]
 
-abbrev RiemannianMetric_gen := _root_.Bundle.ContMDiffRiemannianMetric I n E (TangentSpace I : M → Type _)
+abbrev RiemannianMetric_gen := _root_.Bundle.ContMDiffRiemannianMetric I n E
+    (TangentSpace I : M → Type _)
 
 private noncomputable def to02Tensor_eCLM :
     (E →L[ℝ] ℝ) →L[ℝ] ContinuousMultilinearMap ℝ (fun _ : Fin 1 => E) ℝ :=

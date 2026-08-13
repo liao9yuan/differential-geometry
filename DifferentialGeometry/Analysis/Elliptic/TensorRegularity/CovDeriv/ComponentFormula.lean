@@ -1,7 +1,6 @@
 import DifferentialGeometry.Analysis.Elliptic.TensorRegularity.CovDeriv.IntrinsicComponent
 import DifferentialGeometry.Analysis.Elliptic.TensorRegularity.CovDeriv.SlotCorrectionComponent
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Connection
 
 

@@ -5,7 +5,6 @@ import DifferentialGeometry.Tensor.Multilinear.ModelProductContinuousBilinear
 import DifferentialGeometry.Tensor.RSTensor.Derivation.NablaOnTensors
 open DifferentialGeometry.Tensor.Multilinear
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Connection
 
 

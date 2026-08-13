@@ -1,7 +1,6 @@
 import DifferentialGeometry.Geometry.Connection.Laplacian.TensorConnLaplacian
 import DifferentialGeometry.Geometry.Connection.ChartTensorNabla.TensorRS.ChartTensorRSSecondCovariantDerivative
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
 
 
 noncomputable section

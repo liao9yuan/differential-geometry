@@ -41,11 +41,11 @@ theorem scalarQuasilinearMildSolution_eq_mildSolution
     {T : ℝ}
     {u : ℝ → scalarHs (I := I) (M := M) g 0}
     (hu_cont : ContinuousOn u (Set.Icc 0 T))
-    (hu_eq : ∀ t ∈ Set.Icc (0:ℝ) T,
+    (hu_eq : ∀ t ∈ Set.Icc (0 : ℝ) T,
       u t = heatSemigroupHsExt (I := I) (M := M) g 0 t u₀ +
-        ∫ τ in (0:ℝ)..t,
+        ∫ τ in (0 : ℝ)..t,
           heatSemigroupHsExt (I := I) (M := M) g 0 (t - τ) (N (u τ))) :
-    ∀ t ∈ Set.Icc (0:ℝ) T,
+    ∀ t ∈ Set.Icc (0 : ℝ) T,
       scalarHsZeroEquivL2 (I := I) (M := M) g (u t) =
         mildSolution (I := I) (M := M) g
           (scalarHsZeroEquivL2 (I := I) (M := M) g u₀)
@@ -108,17 +108,17 @@ theorem scalarQuasilinearMildSolution_eq_mildSolution
       (fun τ : ℝ => heatSemigroupHsExt (I := I) (M := M) g 0 (t - τ) (N (u τ)))
       MeasureTheory.volume 0 t :=
     hcont.intervalIntegrable_of_Icc ht.1
-  have hint_comm : e (∫ τ in (0:ℝ)..t,
+  have hint_comm : e (∫ τ in (0 : ℝ)..t,
         heatSemigroupHsExt (I := I) (M := M) g 0 (t - τ) (N (u τ))) =
-      ∫ τ in (0:ℝ)..t,
+      ∫ τ in (0 : ℝ)..t,
         e (heatSemigroupHsExt (I := I) (M := M) g 0 (t - τ) (N (u τ))) :=
     (ContinuousLinearMap.intervalIntegral_comp_comm e hf).symm
   unfold mildSolution
   change e (u t) = heatSemigroup (I := I) (M := M) g t (e u₀) +
-    ∫ s in (0:ℝ)..t, heatSemigroup (I := I) (M := M) g (t - s) (e (N (u s)))
+    ∫ s in (0 : ℝ)..t, heatSemigroup (I := I) (M := M) g (t - s) (e (N (u s)))
   have hu' := hu_eq t ht
   have heval : e (u t) = e (heatSemigroupHsExt (I := I) (M := M) g 0 t u₀) +
-      e (∫ τ in (0:ℝ)..t,
+      e (∫ τ in (0 : ℝ)..t,
         heatSemigroupHsExt (I := I) (M := M) g 0 (t - τ) (N (u τ))) := by
     rw [hu', map_add]
   rw [heval, hint_comm]
@@ -137,9 +137,9 @@ theorem scalarQuasilinear_smooth_representative_of_forcingSpectralMass
     {L : NNReal} (hN : LipschitzWith L N)
     {T : ℝ} {u : ℝ → scalarHs (I := I) (M := M) g 0}
     (hu_cont : ContinuousOn u (Set.Icc 0 T))
-    (hu_eq : ∀ t ∈ Set.Icc (0:ℝ) T,
+    (hu_eq : ∀ t ∈ Set.Icc (0 : ℝ) T,
       u t = heatSemigroupHsExt (I := I) (M := M) g 0 t u₀ +
-        ∫ τ in (0:ℝ)..t,
+        ∫ τ in (0 : ℝ)..t,
           heatSemigroupHsExt (I := I) (M := M) g 0 (t - τ) (N (u τ)))
     (hf_cont : Continuous (fun s : ℝ =>
       scalarHsZeroEquivL2 (I := I) (M := M) g (N (u s))))
@@ -170,9 +170,9 @@ theorem scalarQuasilinear_satisfies_heat_equation_of_forcingSpectralMass
     {L : NNReal} (hN : LipschitzWith L N)
     {T : ℝ} {u : ℝ → scalarHs (I := I) (M := M) g 0}
     (hu_cont : ContinuousOn u (Set.Icc 0 T))
-    (hu_eq : ∀ t ∈ Set.Icc (0:ℝ) T,
+    (hu_eq : ∀ t ∈ Set.Icc (0 : ℝ) T,
       u t = heatSemigroupHsExt (I := I) (M := M) g 0 t u₀ +
-        ∫ τ in (0:ℝ)..t,
+        ∫ τ in (0 : ℝ)..t,
           heatSemigroupHsExt (I := I) (M := M) g 0 (t - τ) (N (u τ)))
     (hf : ContDiff ℝ 1 (fun s : ℝ =>
       scalarHsZeroEquivL2 (I := I) (M := M) g (N (u s))))
@@ -220,9 +220,9 @@ theorem scalar_quasilinear_classical_solution_of_smooth_forcing
     {L : NNReal} (hN : LipschitzWith L N)
     {T : ℝ} {u : ℝ → scalarHs (I := I) (M := M) g 0}
     (hu_cont : ContinuousOn u (Set.Icc 0 T))
-    (hu_eq : ∀ t ∈ Set.Icc (0:ℝ) T,
+    (hu_eq : ∀ t ∈ Set.Icc (0 : ℝ) T,
       u t = heatSemigroupHsExt (I := I) (M := M) g 0 t u₀ +
-        ∫ τ in (0:ℝ)..t,
+        ∫ τ in (0 : ℝ)..t,
           heatSemigroupHsExt (I := I) (M := M) g 0 (t - τ) (N (u τ)))
     (hN_smooth : ∀ s : ℝ, ∃ f_smooth : SmoothScalar g,
       smoothToLp (I := I) (M := M) g f_smooth =

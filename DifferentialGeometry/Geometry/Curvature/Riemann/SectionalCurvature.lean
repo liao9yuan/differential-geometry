@@ -1,8 +1,6 @@
 import DifferentialGeometry.Geometry.Curvature.Riemann.Defs
 open DifferentialGeometry.Geometry.Operator
 
-
-
 noncomputable section
 
 open Bundle Manifold Set Finset

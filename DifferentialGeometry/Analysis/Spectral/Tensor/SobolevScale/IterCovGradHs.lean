@@ -3,14 +3,6 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.SobolevScale.SmoothCcDense
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.IteratedCovGradLinear
 open DifferentialGeometry.Analysis.Spectral
 
-
-
-
-
-
-
-
-
 noncomputable section
 
 open Bundle Manifold MeasureTheory Set Filter DifferentialGeometry.Tensor0SBundle
@@ -23,7 +15,8 @@ namespace Spectral
 open DifferentialGeometry.Analysis.Parabolic.TensorSpectral
 open DifferentialGeometry.Analysis.Parabolic.TensorHeatEquation
 open DifferentialGeometry.Integral.L2
-open DifferentialGeometry.PDE.RicciFlow DifferentialGeometry.Analysis.Sobolev DifferentialGeometry.Analysis.Spectral
+open DifferentialGeometry.PDE.RicciFlow DifferentialGeometry.Analysis.Sobolev
+    DifferentialGeometry.Analysis.Spectral
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
@@ -41,8 +34,6 @@ private noncomputable def iterCovGradCcLin
   map_add' := iteratedCovGrad_add (I := I) (M := M) g 0 s j
   map_smul' := iteratedCovGrad_smul (I := I) (M := M) g 0 s j
 
-
-
 noncomputable def iterCovGradHs
     (g : SmoothRiemannianMetric I M) (s j k : ℕ) :
     tensorHs (I := I) (M := M) g 0 s ((k : ℝ) + (j : ℝ)) →L[ℝ]
@@ -50,8 +41,6 @@ noncomputable def iterCovGradHs
   ((ccToHsLin (I := I) (M := M) g (s + j) (k : ℝ)).comp
       (iterCovGradCcLin (I := I) (M := M) g s j)).extendOfNorm
     (ccToHsLin (I := I) (M := M) g s ((k : ℝ) + (j : ℝ)))
-
-
 
 theorem iterCovGradHs_core
     (g : SmoothRiemannianMetric I M) (s j k : ℕ)

@@ -3,18 +3,19 @@ open DifferentialGeometry.Analysis.Sobolev
 open DifferentialGeometry.Analysis.Spectral
 open DifferentialGeometry.Analysis.Elliptic
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Connection
 
 noncomputable section
 
-open MeasureTheory Set Filter Topology Bundle Manifold DifferentialGeometry.Tensor0SBundle ContinuousLinearMap
+open MeasureTheory Set Filter Topology Bundle Manifold DifferentialGeometry.Tensor0SBundle
+    ContinuousLinearMap
 open scoped ENNReal NNReal BigOperators Manifold ContDiff
 
 namespace DifferentialGeometry.Analysis.Spectral
 
 open DifferentialGeometry
-open DifferentialGeometry.PDE.RicciFlow DifferentialGeometry.Analysis.Sobolev DifferentialGeometry.Analysis.Spectral
+open DifferentialGeometry.PDE.RicciFlow DifferentialGeometry.Analysis.Sobolev
+    DifferentialGeometry.Analysis.Spectral
 open DifferentialGeometry.Analysis.Spectral.MetricRealization
 open DifferentialGeometry.Integral.L2
 
@@ -73,7 +74,6 @@ open Analysis.Parabolic.TensorSpectral
 set_option backward.isDefEq.respectTransparency false
 
 set_option backward.isDefEq.respectTransparency false in
-
 private theorem rfns_iteratedCovGrad_linRicciOrder0RiemannHalfComb_topSeparated_budgetDualCap_le
     (g₀ : SmoothRiemannianMetric I M) {δ₀ : ℝ} (hδ₀ : δ₀ < 1) (hδ₀half : δ₀ ≤ 1 / 2) :
     ∃ ε : ℝ, 0 ≤ ε ∧
@@ -375,7 +375,6 @@ private theorem rfns_iteratedCovGrad_linRicciOrder0RiemannHalfComb_topSeparated_
     exact hfin
 
 set_option backward.isDefEq.respectTransparency false in
-
 private theorem
     linearizedRicciConnDiffOrder0RiemannHalfComb_perOrder_l2_topArm_tameEnvelope_highOrder
     (g₀ : SmoothRiemannianMetric I M) (a : ℕ)
@@ -510,7 +509,6 @@ private theorem
     nlinarith
 
 set_option backward.isDefEq.respectTransparency false in
-
 theorem exists_linearizedRicciArm0CorrField_realizedFam_jetL2_topArm_tameEnvelope_highOrder
     (g₀ : SmoothRiemannianMetric I M) (a : ℕ)
     (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) {R : ℝ} (hR : 0 ≤ R)
@@ -639,7 +637,6 @@ theorem exists_linearizedRicciArm0CorrField_realizedFam_jetL2_topArm_tameEnvelop
   linarith
 
 set_option backward.isDefEq.respectTransparency false in
-
 theorem linearizedRicciArm0CorrField_allOrder_tameEnvelope_interface
     (g₀ : SmoothRiemannianMetric I M) (a : ℕ)
     (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) {R : ℝ} (hR : 0 ≤ R)
@@ -778,7 +775,6 @@ private theorem threeArmHjoint_const_smul_fw (g₀ : SmoothRiemannianMetric I M)
   rw [SmoothCcTensor.toSection_smul, ContMDiffSection.coe_smul, Pi.smul_apply]
 
 set_option backward.isDefEq.respectTransparency false in
-
 theorem exists_riemannPalatini_curvatureRefold_data
     (g₀ : SmoothRiemannianMetric I M) (a : ℕ)
     (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) {R : ℝ} (hR : 0 ≤ R)

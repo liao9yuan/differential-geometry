@@ -1,16 +1,7 @@
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.Garding.MetricLapDiffTime
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.CompactSAResolventIntrinsic
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Operator
-
-
-
-
-
-
-
-
 
 noncomputable section
 
@@ -52,8 +43,6 @@ private noncomputable def scalarL2ToH0
     (tensorResolventL2_isCompactOperator
       (I := I) (M := M) g 0 0)).symm.toLinearIsometry
 
-
-
 noncomputable def lapDiffA20
     {D : RealTimeInterval}
     (g_fam : ℝ → SmoothRiemannianMetric I M)
@@ -77,8 +66,6 @@ noncomputable def lapDiffA20
         (lapDiffA2 (I := I) (M := M) g_fam T s v) :=
   rfl
 
-
-
 theorem lapDiffA20_norm
     {D : RealTimeInterval}
     (g_fam : ℝ → SmoothRiemannianMetric I M)
@@ -88,8 +75,6 @@ theorem lapDiffA20_norm
   unfold lapDiffA20
   exact (scalarL2ToH0 (I := I) (M := M)
     (g_fam (T : Real))).norm_toContinuousLinearMap_comp
-
-
 
 theorem lapDiffA20_cont_of
     {D : RealTimeInterval}
@@ -117,8 +102,6 @@ theorem lapDiffA20_cont_of
         (g_fam (T : Real))).toContinuousLinearMap
   exact post.continuous.comp_continuousOn hcont
 
-
-
 theorem lapDiffA20_core
     {D : RealTimeInterval}
     (g_fam : ℝ → SmoothRiemannianMetric I M)
@@ -135,8 +118,6 @@ theorem lapDiffA20_core
   filter_upwards [lapDiffA2_core (I := I) (M := M) g_fam hG T] with s hs
   intro v
   rw [lapDiffA20_apply, LinearIsometryEquiv.apply_symm_apply, hs v]
-
-
 
 theorem lapDiffA20_graph
     {D : RealTimeInterval}
@@ -195,8 +176,6 @@ theorem lapDiffA20_graph
     ⟨x.1, x.2⟩
   refine ⟨v, Prod.ext rfl ?_⟩
   exact (hs v).symm
-
-
 
 theorem lapDiffA20_test
     {D : RealTimeInterval}
@@ -280,8 +259,6 @@ theorem lapDiffA20_test
     (lapDiffCore_pair (I := I) (M := M)
       (g_fam (T : Real)) (g_fam ((T : Real) - s)) v w).symm
 
-
-
 theorem lapDiffA20_bound
     {D : RealTimeInterval}
     (g_fam : ℝ → SmoothRiemannianMetric I M)
@@ -302,8 +279,6 @@ theorem lapDiffA20_bound
   intro v hv
   simpa only [lapDiffA20_apply,
     LinearIsometryEquiv.norm_map] using hs v hv
-
-
 
 theorem lapDiffA20_zero
     {D : RealTimeInterval}

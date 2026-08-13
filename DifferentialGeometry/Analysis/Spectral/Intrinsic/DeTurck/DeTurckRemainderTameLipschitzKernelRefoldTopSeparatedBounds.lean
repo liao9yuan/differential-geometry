@@ -49,19 +49,20 @@ open DifferentialGeometry.Analysis.Sobolev
 open DifferentialGeometry.Analysis.Spectral
 open DifferentialGeometry.Analysis.Elliptic
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Connection
 
 
 noncomputable section
 
-open MeasureTheory Set Filter Topology Bundle Manifold DifferentialGeometry.Tensor0SBundle ContinuousLinearMap
+open MeasureTheory Set Filter Topology Bundle Manifold DifferentialGeometry.Tensor0SBundle
+    ContinuousLinearMap
 open scoped ENNReal NNReal BigOperators Manifold ContDiff
 
 namespace DifferentialGeometry.Analysis.Spectral
 
 open DifferentialGeometry
-open DifferentialGeometry.PDE.RicciFlow DifferentialGeometry.Analysis.Sobolev DifferentialGeometry.Analysis.Spectral
+open DifferentialGeometry.PDE.RicciFlow DifferentialGeometry.Analysis.Sobolev
+    DifferentialGeometry.Analysis.Spectral
 open DifferentialGeometry.Analysis.Spectral.MetricRealization
 open DifferentialGeometry.Integral.L2
 
@@ -3673,7 +3674,6 @@ private theorem b4_refold_topSeparated_proof (g₀ : SmoothRiemannianMetric I M)
       (mul_le_mul hfr2 hfr2 (by norm_num) (by linarith)) hd4]
 
 set_option backward.isDefEq.respectTransparency false in
-
 theorem riemannianFiberNormSq_iteratedCovGrad_refoldKernelContr_symmSecondCovGrad_topAmplitude_le
     (g₀ : SmoothRiemannianMetric I M) {δ₀ : ℝ}
     (hδ₀ : δ₀ < 1) (hδ₀half : δ₀ ≤ 1 / 2) :
@@ -3701,7 +3701,6 @@ theorem riemannianFiberNormSq_iteratedCovGrad_refoldKernelContr_symmSecondCovGra
   b4_refold_topSeparated_proof (I := I) (M := M) g₀ hδ₀ hδ₀half
 
 set_option backward.isDefEq.respectTransparency false in
-
 theorem
     riemannianFiberNormSq_iteratedCovGrad_linearizedRicciConnDiffOrder0CoeffField_topAmplitude_le
     (g₀ : SmoothRiemannianMetric I M) {δ₀ : ℝ}

@@ -3,8 +3,6 @@ import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.RiemannianFibe
 open DifferentialGeometry.Analysis.Elliptic
 open DifferentialGeometry.Geometry.Curvature
 
-
-
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false

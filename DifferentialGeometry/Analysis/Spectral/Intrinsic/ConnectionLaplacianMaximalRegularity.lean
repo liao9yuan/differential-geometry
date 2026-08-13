@@ -9,7 +9,6 @@ import DifferentialGeometry.Analysis.Parabolic.TimeSobolev.TimeH1
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.CompactSAResolventIntrinsic
 import DifferentialGeometry.Analysis.Spectral.Tensor.SobolevScale.Defs
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
 
 namespace DifferentialGeometry.Analysis.Spectral
 
@@ -80,9 +79,6 @@ variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
   [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
 
-/-- Maximal regularity for the connection Laplacian on tensor-valued `L²`
-paths, including the transported operator identity through the Sobolev
-equivalences. -/
 theorem connection_laplacian_l2_maximal_regularity
     (g : SmoothRiemannianMetric I M) (r s : ℕ) {T : ℝ}
     (_hT : 0 < T) (_hT1 : T ≤ 1) :

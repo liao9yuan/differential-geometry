@@ -8,7 +8,6 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.Estimates.TensorSectionL2Bo
 import DifferentialGeometry.Analysis.Sobolev.Embedding.SobolevEmbeddingManifoldC0
 import Mathlib.Geometry.Manifold.ContMDiff.Basic
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
 
 
 namespace DifferentialGeometry.Analysis.Sobolev

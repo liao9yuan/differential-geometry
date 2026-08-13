@@ -4,16 +4,6 @@ import Mathlib.Topology.Path
 import Mathlib.Topology.Homotopy.Path
 import Mathlib.Topology.Homotopy.Lifting
 
-
-
-
-
-
-
-
-
-
-
 noncomputable section
 
 namespace DifferentialGeometry
@@ -23,12 +13,6 @@ namespace Topology
 namespace UniversalCover
 
 open Set unitInterval
-
-
-
-
-
-
 
 lemma uc_trans_truncate_class
     {X : Type*} [TopologicalSpace X] {a b : X} (γ : _root_.Path a b)
@@ -170,15 +154,11 @@ lemma uc_trans_truncate_class
       change γ.extend s = p 1
       rw [p.target]
 
-
-
 lemma uc_truncLift_continuous
     {X : Type*} [TopologicalSpace X] [Inhabited X]
     {a b : X} (_γ : _root_.Path a b)
     (q : UniversalCover X) (_hq : q.1 = a) :
     True := trivial
-
-
 
 lemma uc_liftPath_one_eq
     {X : Type*} [TopologicalSpace X] [Inhabited X]

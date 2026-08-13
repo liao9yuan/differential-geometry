@@ -5,7 +5,6 @@ import DifferentialGeometry.Analysis.Elliptic.Regularity.LaplacianDomain.ChartDa
 import DifferentialGeometry.Analysis.Elliptic.Regularity.GradInner.CLM.Leibniz
 import DifferentialGeometry.Analysis.Sobolev.Manifold.RellichManifold
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
 
 noncomputable section
 

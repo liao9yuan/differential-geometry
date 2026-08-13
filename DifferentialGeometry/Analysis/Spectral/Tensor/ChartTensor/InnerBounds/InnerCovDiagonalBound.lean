@@ -1,7 +1,6 @@
 import DifferentialGeometry.Analysis.Spectral.Tensor.UniformChartBounds.GramInvUniformEigenvalueLowerBound
 import DifferentialGeometry.Analysis.Spectral.Tensor.Variational.PreHilbert
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Operator
 
 

@@ -2,7 +2,6 @@ import DifferentialGeometry.Analysis.Parabolic.QuasiLinear.TensorMaximalRegulari
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.CompactSAResolventIntrinsic
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.NonlinearitySpectral
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Connection
 
 noncomputable section

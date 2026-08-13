@@ -14,7 +14,6 @@ import DifferentialGeometry.Analysis.Integration.Measure.ChartDensity
 import DifferentialGeometry.Geometry.Comparison.Variation.SecondVariation
 import Mathlib.Geometry.Manifold.Riemannian.PathELength
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
 
 
 noncomputable section

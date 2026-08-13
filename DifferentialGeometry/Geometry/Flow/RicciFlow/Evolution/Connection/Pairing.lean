@@ -1,15 +1,8 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.Connection.Components
 open DifferentialGeometry.PDE.RicciFlow
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
 
 set_option autoImplicit false
-
-
-
-
-
-
 
 noncomputable section
 
@@ -31,18 +24,11 @@ section Components
 variable {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
 variable {u : Set M}
 
-
-
-
 def KoszulConnectionVariationInFrame
     (pairDt nablaRic : Real -> M -> Idx -> Idx -> Idx -> Real) : Prop :=
   forall t x i j l,
     pairDt t x i j l =
       christoffelVariationLoweredRHSInFrame nablaRic t x i j l
-
-
-
-
 
 def ConnectionVariationPairingEquationInFrameOn
     {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
@@ -76,8 +62,6 @@ def ConnectionVariationPairingEquationInFrameOnLocal
         (christoffelVariationLoweredRHSInFrame nablaRic (t : Real) x i j l)
         D.carrier
         (t : Real)
-
-
 
 omit [Fintype Idx] [DecidableEq Idx] in
 omit [SigmaCompactSpace M] in
@@ -149,8 +133,6 @@ theorem connectionPairDt_eq_metricVariationRHS
   unfold connectionVariationLoweredRHSFromMetricVariationInFrame
   linarith
 
-
-
 omit [Fintype Idx] [DecidableEq Idx] in
 omit [SigmaCompactSpace M] in
 theorem connectionVariationPairing_of_metricVariation
@@ -188,8 +170,6 @@ theorem connectionVariationPairing_of_metricVariation
     (connectionPairDt_eq_metricVariationRHS
       (I := I) S hS frame hframe hu pairDt metricCovDerivDt
       hvarDiff hmetric hunique t x hx i j l)
-
-
 
 omit [Fintype Idx] [DecidableEq Idx] in
 omit [SigmaCompactSpace M] in
@@ -229,8 +209,6 @@ theorem connectionVariationPairing_of_ricciFlow
     hmetricRicci (t : Real) x j i l,
     hmetricRicci (t : Real) x l i j]
   ring
-
-
 
 omit [Fintype Idx] [DecidableEq Idx] in
 omit [SigmaCompactSpace M] [T2Space M] in

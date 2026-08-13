@@ -3,7 +3,6 @@ import DifferentialGeometry.Analysis.Integration.Measure.Rellich
 import DifferentialGeometry.Analysis.Sobolev.Chart.BanachCompleteness.CompletenessLp
 open DifferentialGeometry.Analysis.Elliptic
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Connection
 
 

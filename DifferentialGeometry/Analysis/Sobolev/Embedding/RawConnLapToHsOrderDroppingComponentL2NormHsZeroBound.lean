@@ -19,7 +19,6 @@ import DifferentialGeometry.Analysis.Elliptic.TensorRegularity.CovDeriv.Componen
 import DifferentialGeometry.Geometry.Connection.ChartTensorNabla.TensorRS.ChartTensorRSCovariantDerivativeAgreement
 import DifferentialGeometry.Tensor.RSTensor.Defs
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
 
 
 namespace DifferentialGeometry.Analysis.Sobolev

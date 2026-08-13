@@ -195,14 +195,16 @@ theorem pouScalar_oneSubLapClassical_pointwise_leibniz
       (pouScalar (I := I) (M := M) α v).toFun =
         fun y : M => ρα y * V y := rfl
   change (pouScalar (I := I) (M := M) α v).toFun x -
-      Δ_g (I := I) g ⟨(pouScalar (I := I) (M := M) α v).toFun, (pouScalar (I := I) (M := M) α v).smooth⟩ x =
+      Δ_g (I := I) g ⟨(pouScalar (I := I) (M := M) α v).toFun,
+        (pouScalar (I := I) (M := M) α v).smooth⟩ x =
     ρα x * v.oneSubLapClassical.toFun x -
       2 * g.inner x (gradFun (I := I) g
         ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ) x)
         (gradFun (I := I) g v.toFun x) -
       v.toFun x *
         Δ_g (I := I) g (chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) x
-  have h_lap_eq : Δ_g (I := I) g ⟨(pouScalar (I := I) (M := M) α v).toFun, (pouScalar (I := I) (M := M) α v).smooth⟩ x =
+  have h_lap_eq : Δ_g (I := I) g ⟨(pouScalar (I := I) (M := M) α v).toFun,
+    (pouScalar (I := I) (M := M) α v).smooth⟩ x =
         Δ_g (I := I) g ⟨ρα * V, hρα_smooth.mul hV_smooth⟩ x := rfl
   rw [h_lap_eq]
   rw [Δ_g_smul_eq (I := I) (M := M) g hρα_smooth hV_smooth x]

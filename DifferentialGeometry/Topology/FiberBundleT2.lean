@@ -3,20 +3,6 @@ import Mathlib.Topology.Separation.Hausdorff
 
 set_option autoImplicit false
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 namespace DifferentialGeometry
 
 open Bundle Set Topology

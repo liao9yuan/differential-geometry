@@ -1,22 +1,8 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.C4.PartialDataComposition
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Connection
 
 set_option autoImplicit false
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 noncomputable section
 
@@ -48,13 +34,6 @@ section PartialDataComp
 open TopologicalSpace
 
 set_option backward.isDefEq.respectTransparency false in
-
-
-
-
-
-
-
 noncomputable def compSepFwd [I.Boundaryless] [NeZero (Module.finrank Real E)]
     {P : Type u} [TopologicalSpace P] [ChartedSpace H P] [IsManifold I ∞ P]
     [T2Space N] [SigmaCompactSpace N] [T2Space P] [SigmaCompactSpace P]

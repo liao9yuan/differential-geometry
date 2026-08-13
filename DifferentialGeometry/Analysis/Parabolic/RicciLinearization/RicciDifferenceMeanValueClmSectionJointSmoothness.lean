@@ -8,7 +8,6 @@ import DifferentialGeometry.Analysis.Integration.DivergenceTheorem.LocalFormula
 import Mathlib.MeasureTheory.Integral.IntervalIntegral.FundThmCalculus
 open DifferentialGeometry.Analysis.Sobolev.IntrinsicSobolev.SmoothCcTensorHs
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
 
 
 noncomputable section

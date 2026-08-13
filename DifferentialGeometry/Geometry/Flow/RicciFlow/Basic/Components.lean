@@ -1,16 +1,8 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Basic.Core
 open DifferentialGeometry.PDE.RicciFlow
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
 
 set_option autoImplicit false
-
-
-
-
-
-
-
 
 noncomputable section
 
@@ -26,8 +18,6 @@ variable {I : ModelWithCorners Real E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 variable [IsManifold I 1 M]
 variable [CompleteSpace E] [SigmaCompactSpace M] [T2Space M]
-
-
 
 section Components
 
@@ -444,8 +434,6 @@ private theorem ricciNormDerivativeSimplifies_pure
               (Q := quadraticBy G A)
               (R := raise2By G A)
 
-
-
 def ricciTwoTensorField
     {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D) :
@@ -480,9 +468,6 @@ omit [SigmaCompactSpace M] [T2Space M] in
       S.ricciAt t x (DifferentialGeometry.Geometry.Curvature.vec2 (frame i x) (frame j x)) := by
   rfl
 
-
-
-
 abbrev raisedRicciCompInFrame
     {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -505,8 +490,6 @@ omit [SigmaCompactSpace M] [T2Space M] in
         gInv t x i a * gInv t x j b *
           ricciCompInFrame (I := I) S frame t x a b := by
   rfl
-
-
 
 def ricciOneUpCompInFrame
     {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
@@ -577,10 +560,6 @@ omit [SigmaCompactSpace M] [T2Space M] in
           raisedRicciCompInFrame (I := I) S gInv frame t x k l := by
   rfl
 
-
-
-
-
 def ricciEvolutionRHSInFrame
     {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -608,8 +587,6 @@ omit [SigmaCompactSpace M] [T2Space M] in
           2 * ricciQuadraticCompInFrame (I := I) S gInv frame t x i j := by
   rfl
 
-
-
 abbrev ricciNormSqInFrame
     {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -631,9 +608,6 @@ omit [SigmaCompactSpace M] [T2Space M] in
         ricciCompInFrame (I := I) S frame t x i j *
           raisedRicciCompInFrame (I := I) S gInv frame t x i j := by
   rfl
-
-
-
 
 omit [SigmaCompactSpace M] in
 theorem ricciNormSq_basis
@@ -676,9 +650,6 @@ theorem ricciNormSq_basis
     funext a
     fin_cases a <;> simp [DifferentialGeometry.Geometry.Curvature.vec2]
   rw [hij, hkl]
-
-
-
 
 abbrev roughLapRicciInnerInFrame
     {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
@@ -729,8 +700,6 @@ omit [SigmaCompactSpace M] in
           (DifferentialGeometry.Geometry.Curvature.vec3 (I := I) (frame a x) (frame i x)
             (frame j x)) := by
   rfl
-
-
 
 abbrev nablaRicciNormSqInFrame
     (nablaRic : Real -> M -> Idx -> Idx -> Idx -> Real)
@@ -848,8 +817,6 @@ private theorem coordInner3_eq
       fin_cases q <;> simp
     simp [fin3PairEquiv, h1, h2]
 
-
-
 omit [SigmaCompactSpace M] in
 private theorem nablaRicciNorm_basis
     {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
@@ -893,8 +860,6 @@ private theorem nablaRicciNorm_basis
     intro a i j
     simpa [SolutionOn.family, SolutionOn.ricci] using hnabla a i j
   simp [nablaRicciNormSqInFrame, hbasis, hnabla', mul_left_comm, mul_comm]
-
-
 
 omit [SigmaCompactSpace M] in
 theorem nablaRicciNorm_can
@@ -943,10 +908,6 @@ omit [SigmaCompactSpace M] [T2Space M] in
             raisedRicciCompInFrame (I := I) S gInv frame t x k l := by
   rfl
 
-
-
-
-
 def ricciNormCurvatureReactionInFrame
     {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -967,9 +928,6 @@ omit [SigmaCompactSpace M] [T2Space M] in
     ricciNormCurvatureReactionInFrame (I := I) S Rm04 gInv frame t x =
       -curvRicciRicciInFrame (I := I) S Rm04 gInv frame t x := by
   rfl
-
-
-
 
 def inverseMetricEvolutionRHSInFrame
     {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
@@ -1028,11 +986,6 @@ def ricciNormDerivRHSInFrame
       ricciCompInFrame (I := I) S frame t x i j *
         raisedRicciDerivRHSInFrame (I := I) S Rm04 gInv frame roughLapRic t x i j)
 
-
-
-
-
-
 def RicciNormDerivativeSimplifiesInFrame
     {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -1045,11 +998,6 @@ def RicciNormDerivativeSimplifiesInFrame
     ricciNormDerivRHSInFrame (I := I) S Rm04 gInv frame roughLapRic
         (t : Real) x =
       2 * roughLapInner (t : Real) x + 4 * reaction (t : Real) x
-
-
-
-
-
 
 omit [SigmaCompactSpace M] [T2Space M] in
 theorem ricciDerivSimpAt
@@ -1135,13 +1083,6 @@ theorem ricciDerivSimpAt
             (t : Real) x := by
           rw [hrough, hreaction]
 
-
-
-
-
-
-
-
 omit [SigmaCompactSpace M] [T2Space M] in
 theorem ricciNormDerivativeSimplifiesInFrame_canonical
     {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
@@ -1224,8 +1165,6 @@ theorem ricciNormDerivativeSimplifiesInFrame_canonical
             (t : Real) x := by
           rw [hrough, hreaction]
 
-
-
 def RicciEvolutionEquationInFrame
     {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -1260,8 +1199,6 @@ theorem inverseMetricEvolutionEquationInFrame_apply
       D.carrier
       (t : Real) :=
   h t x hx i j
-
-
 
 omit [SigmaCompactSpace M] [T2Space M] in
 theorem inverseMetricEvolutionEquationInFrame_of_components
@@ -1301,8 +1238,6 @@ theorem ricciEvolutionEquationInFrame_apply
       D.carrier
       (t : Real) :=
   h t x i j
-
-
 
 omit [SigmaCompactSpace M] [T2Space M] in
 theorem ricciEvolutionEquationInFrame_of_components
@@ -1392,9 +1327,6 @@ theorem raisedRicciCompInFrame_hasDerivWithinAt
                   have hrab := h_ricci t x a b
                   have hprod := (hia.mul hjb).mul hrab
                   simpa [Pi.mul_apply, mul_assoc, add_mul] using hprod))))
-
-
-
 
 omit [SigmaCompactSpace M] [T2Space M] in
 theorem raisedRicciDerivAt
@@ -1532,9 +1464,6 @@ theorem ricciNormSqInFrame_hasDerivWithinAt
                       (I := I) S Rm04 gInv frame roughLapRic h_inv h_ricci t x hx i j
                   have hprod := hRic.mul hRaised
                   simpa [Pi.mul_apply] using hprod))))
-
-
-
 
 omit [SigmaCompactSpace M] [T2Space M] in
 theorem ricciNormSqDerivAt

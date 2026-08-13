@@ -3,14 +3,6 @@ import DifferentialGeometry.Analysis.Spectral.Intrinsic.MetricRealization.PosDef
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.AllTimesBoundsFlow
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.MetricC1Continuity
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
-
-
-
-
-
-
-
 
 noncomputable section
 
@@ -228,8 +220,6 @@ theorem lapDiffA2_core
   exact lapDiffOp_core (I := I) (M := M)
     (g_fam (T : Real)) (g_fam ((T : Real) - s)) v hs.le
 
-
-
 theorem lapDiffA2_bound
     {D : RealTimeInterval}
     (g_fam : ℝ → SmoothRiemannianMetric I M)
@@ -271,8 +261,6 @@ theorem lapDiffA2_bound
       apply mul_le_mul_of_nonneg_right _ (norm_nonneg v)
       simpa only [lapDiffA2, omega, rho] using
         hop (g_fam ((T : Real) - s)) hs.le
-
-
 
 theorem lapDiffA2_zero
     {D : RealTimeInterval}

@@ -4,7 +4,6 @@ import DifferentialGeometry.Analysis.Integration.Measure.ChartDensity
 import DifferentialGeometry.Analysis.Integration.Measure.RiemannianMeasure
 import Mathlib.Algebra.Order.Chebyshev
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Connection
 
 

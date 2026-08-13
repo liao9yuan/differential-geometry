@@ -1,15 +1,6 @@
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurckCoefficients.ChristoffelPerturbation
 open DifferentialGeometry.Geometry.Operator
 
-
-
-
-
-
-
-
-
-
 namespace DifferentialGeometry.Analysis.Spectral.DeTurckCoefficients
 
 open scoped ContDiff Manifold Topology BigOperators
@@ -144,8 +135,6 @@ private lemma abs_prod3_lip
       gcongr
     _ = (2 * C * M_b * Q + M_b ^ 2) * J := by ring
 
-
-
 omit [NeZero (Module.finrank ℝ E)] in
 theorem invGramD2_abs_le
     (g : SmoothRiemannianMetric I M) (α : M) {y : E}
@@ -230,8 +219,6 @@ theorem invGramD2_abs_le
       add_le_add (add_le_add hA hB) hC
     _ = 2 * (Module.finrank ℝ E : ℝ) ^ 4 * (M_b ^ 3 * Q₁ ^ 2) +
           (Module.finrank ℝ E : ℝ) ^ 2 * (M_b ^ 2 * Q₂) := by ring
-
-
 
 omit [NeZero (Module.finrank ℝ E)] in
 theorem invGramD2_sub_le
@@ -388,8 +375,6 @@ theorem invGramD2_sub_le
       dsimp [K₅, K₃]
       ring
 
-
-
 omit [NeZero (Module.finrank ℝ E)] in
 theorem invGramD2_pou_bnd
     [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
@@ -449,9 +434,6 @@ theorem invGramD2_pou_bnd
     exact hMb α hα k b hb a c
   exact invGramD2_abs_le (I := I) (M := M) (gSeq k) α hy hM_b.le hQ₁_nn
     hMbOnE (hQ₁ α hα k b hb) (hQ₂ α hα k b hb) d m p q
-
-
-
 
 omit [NeZero (Module.finrank ℝ E)] in
 theorem invGramD2_pou_lip

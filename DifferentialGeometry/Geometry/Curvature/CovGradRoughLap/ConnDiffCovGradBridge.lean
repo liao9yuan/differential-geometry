@@ -10,7 +10,6 @@ open DifferentialGeometry.Geometry.Curvature
 
 open DifferentialGeometry.Geometry.Connection
 
-
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
@@ -241,8 +240,6 @@ def connDiffSection (g₁ g₀ : SmoothRiemannianMetric I M) : SmoothCcTensor g�
       contMDiff_toFun := connDiffFib_contMDiff (I := I) g₁ g₀ }
   hasCompactSupport := HasCompactSupport.of_compactSpace _
 
-/-- The connection-difference tensor between `g₁` and `g₀`, realized using an
-independent background metric `gBase` for the tensor bundle. -/
 def connDiffSectionWith (gBase g₁ g₀ : SmoothRiemannianMetric I M) :
     SmoothCcTensor gBase 1 2 where
   toSection :=
@@ -261,7 +258,6 @@ omit [NeZero (Module.finrank ℝ E)] in
     (gBase g₁ g₀ : SmoothRiemannianMetric I M) (x : M) :
     (connDiffSectionWith (I := I) gBase g₁ g₀).toSection x =
       connDiffFib (I := I) g₁ g₀ x := rfl
-
 
 omit [NeZero (Module.finrank ℝ E)] in
 private lemma connDiffSection_tensorCovDerivAt_homSplit
@@ -303,7 +299,6 @@ private lemma connDiffSection_tensorCovDerivAt_homSplit
   rw [hsplit, hval]
   rfl
 
-
 omit [I.Boundaryless] in
 omit [NeZero (Module.finrank ℝ E)] in
 private lemma tensorSectionMDiffAt_connDiffPairing
@@ -338,7 +333,6 @@ private lemma tensorSectionMDiffAt_connDiffPairing
     (ϕ := fun y : M => (show Tensor0SSpace 1 I y →L[ℝ] Tensor0SSpace 2 I y from
       (connDiffSection (I := I) g₁ g₀).toSection y))
     (v := fun y : M => om y) hτ hw
-
 
 omit [I.Boundaryless] in
 omit [NeZero (Module.finrank ℝ E)] in
@@ -436,7 +430,6 @@ private lemma connDiffPairing_covariantDerivative02_eval
   rw [hpeel2, hbase, hcorr2, hcorr1]
   ring
 
-
 omit [CompactSpace M] [I.Boundaryless] in
 omit [NeZero (Module.finrank ℝ E)] in
 private lemma connDiffPairing_covariantDerivative01_eval
@@ -516,7 +509,6 @@ private lemma connDiffPairing_covariantDerivative01_eval
     rw [hWYZdef]
     rfl
   rw [hbase, hcorr]
-
 
 omit [NeZero (Module.finrank ℝ E)] in
 theorem connDiffSection_covGrad_eq_covDerivConnDiff

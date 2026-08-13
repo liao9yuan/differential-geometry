@@ -7,6 +7,10 @@ import DifferentialGeometry.Tensor.Exterior.Cochain
 import DifferentialGeometry.Tensor.Exterior.Leibniz
 import DifferentialGeometry.Tensor.Exterior.ModelDifferentialForm
 import DifferentialGeometry.Tensor.Exterior.ZeroForm
+import DifferentialGeometry.Analysis.Schauder.VariableCoefficient
+import DifferentialGeometry.Analysis.Parabolic.Euclidean.BallInteriorSchauder
+import DifferentialGeometry.Analysis.Parabolic.Euclidean.NondivergenceSchauder
+import DifferentialGeometry.Analysis.Parabolic.QuasiLinear.TensorMaximalRegularity.LocallyLipschitzExistence
 
 open Lean Elab Command
 
@@ -38,7 +42,11 @@ run_cmd do
     "DifferentialGeometry.DifferentialForm.pullbackMapCochainMap_comp",
     "DifferentialGeometry.DifferentialForm.pullbackMapCohomologyMap_id",
     "DifferentialGeometry.DifferentialForm.pullbackMapCohomologyMap_comp",
-    "DifferentialGeometry.DifferentialForm.zeroFormLinearEquiv"
+    "DifferentialGeometry.DifferentialForm.zeroFormLinearEquiv",
+    "DifferentialGeometry.Analysis.Schauder.variable_coefficient_schauder_estimate_of_small_oscillation",
+    "DifferentialGeometry.Analysis.Parabolic.Euclidean.parabolic_variable_coefficient_ball_interior_schauder_estimate",
+    "DifferentialGeometry.Analysis.Parabolic.Euclidean.exists_parabolic_nondivergence_schauder_estimate",
+    "DifferentialGeometry.Analysis.Parabolic.QuasiLinear.quasilinear_strong_existence_locally_lipschitz"
   ]
   let mut failed := false
   for s in heads do

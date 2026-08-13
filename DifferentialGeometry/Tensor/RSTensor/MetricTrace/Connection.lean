@@ -13,7 +13,6 @@ import DifferentialGeometry.Geometry.Operator.HessianTraceRealization
 open DifferentialGeometry.Tensor.Multilinear
 open DifferentialGeometry.Tensor.RSTensor
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
 
 set_option autoImplicit false
 

@@ -20,18 +20,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 variable {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
 variable {x : M}
 
-
-
-
-
-
-
-
-
-
-
-
-
 def curvatureTraceOneFormAt
     (Rm13 : Tensor13Section (I := I) (M := M))
     {x : M}
@@ -42,9 +30,6 @@ def curvatureTraceOneFormAt
     (Y : TangentSpace I x) : Real :=
   -∑ i : Idx, ∑ j : Idx,
     gInv i j * Rm13 x alpha (vec3 (basis i) Y (basis j))
-
-
-
 
 def CurvatureTraceOneFormEqRicVectorAt
     (Ric : Tensor02Section (I := I) (M := M))
@@ -82,8 +67,6 @@ theorem curvatureActionTraceEqualsRicVectorCoord_of_tensor
           unfold curvatureTraceOneFormAt
           simp_rw [mul_neg, Finset.sum_neg_distrib]
     _ = Ric x (vec2 (basis k) curvatureVector) := hcurv (basis k)
-
-
 
 omit [FiniteDimensional ℝ E] in
 theorem basis_coord_eq_sum_inv_inner

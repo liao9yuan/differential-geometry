@@ -4,20 +4,8 @@ import DifferentialGeometry.Geometry.Curvature.RicciOperatorNormBound
 import DifferentialGeometry.Geometry.Metric.CompactMetricLowerBound
 open DifferentialGeometry.PDE.RicciFlow
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
 
 set_option autoImplicit false
-
-
-
-
-
-
-
-
-
-
-
 
 noncomputable section
 
@@ -35,10 +23,6 @@ variable {I : ModelWithCorners Real E H}
 variable {M : Type u} [TopologicalSpace M] [ChartedSpace H M]
 variable [T2Space M] [IsManifold I ∞ M] [SigmaCompactSpace M]
 
-
-
-
-
 omit [SigmaCompactSpace M] in
 theorem ricciFlow_metric_hasDerivAt
     {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
@@ -52,11 +36,6 @@ theorem ricciFlow_metric_hasDerivAt
       t := by
   have hwithin := hS.equation ⟨t, ht⟩ x v v
   exact hwithin.hasDerivAt (D.regular_mem_nhds ht)
-
-
-
-
-
 
 omit [CompleteSpace E] [T2Space M] [SigmaCompactSpace M] in
 omit [FiniteDimensional ℝ E] in
@@ -75,12 +54,6 @@ theorem twoTensorQuadBound_of_unit_bound
   ⟨hA, fun i t ht x hx v =>
     DifferentialGeometry.Geometry.Curvature.tensor02_quadForm_abs_le_of_unit_bound
       (gSeq i t) (T i t x) (fun u hu => hunit i t ht x hx u hu) v⟩
-
-
-
-
-
-
 
 omit [FiniteDimensional ℝ E] [CompleteSpace E] [T2Space M] [SigmaCompactSpace M] in
 theorem metricUniformEquivalentOn_of_quadFormDiff
@@ -106,12 +79,6 @@ theorem metricUniformEquivalentOn_of_quadFormDiff
         rw [inv_eq_one_div, le_div_iff₀ h1δ]; nlinarith
       calc h.inner x v v <= (1 + δ) * g.inner x v v := hub
         _ <= (1 - δ)⁻¹ * g.inner x v v := mul_le_mul_of_nonneg_right hfac hg0
-
-
-
-
-
-
 
 omit [SigmaCompactSpace M] in
 theorem metricQuadFormDiff_le_metricDerivNorm
@@ -157,7 +124,6 @@ theorem metricQuadFormDiff_le_metricDerivNorm
   rw [metricDerivNorm]
   exact hbound
 
-
 omit [FiniteDimensional ℝ E] [CompleteSpace E] [T2Space M] [SigmaCompactSpace M] in
 theorem metric_add_self (g : SmoothRiemannianMetric I M) (x : M)
     (a b : TangentSpace I x) :
@@ -171,8 +137,6 @@ theorem metric_add_self (g : SmoothRiemannianMetric I M) (x : M)
   have hs2b : g.inner x b (a + b) = g.inner x b a + g.inner x b b := by
     rw [(g.inner x b).map_add]
   rw [hs1, hs2a, hs2b, g.symm x b a]; ring
-
-
 
 omit [SigmaCompactSpace M] in
 theorem metricDiffCovDerivAt_zero_apply
@@ -208,8 +172,6 @@ theorem metricDiffCovDerivAt_zero_apply
       Tensor0SBundle.Tensor0SSpace.sub_apply 2 x _ _ _
     _ = gk.inner x a b - gInf.inner x a b := by rw [hk, hI]
 
-
-
 omit [SigmaCompactSpace M] in
 theorem metricDiff_abs_le
     (gk gInf gRef : SmoothRiemannianMetric I M) (x : M)
@@ -229,9 +191,6 @@ theorem metricDiff_abs_le
   refine hbound.trans_eq ?_
   rw [Fin.prod_univ_two]
   simp [DifferentialGeometry.Geometry.Curvature.vec2, mul_assoc]
-
-
-
 
 omit [FiniteDimensional ℝ E] [CompleteSpace E] [T2Space M] [SigmaCompactSpace M] in
 theorem metricDiff_comp_le
@@ -275,8 +234,6 @@ theorem metricDiff_comp_le
     nlinarith [hqij.1, hqij.2, hqi.1, hqi.2, hqj.1, hqj.2, hprod, hC1]
   · rw [div_le_iff₀ (by norm_num : (0:Real) < 2)]
     nlinarith [hqij.1, hqij.2, hqi.1, hqi.2, hqj.1, hqj.2, hprod, hC1]
-
-
 
 omit [SigmaCompactSpace M] in
 theorem metricDerivNorm_le_of_equiv
@@ -352,11 +309,6 @@ theorem metricDerivNorm_le_of_equiv
         rw [show (nE : Real) ^ 2 * (4 * (C - 1)) ^ 2 = (4 * (nE : Real) * (C - 1)) ^ 2 from by ring,
           Real.sqrt_sq hbnn]
 
-
-
-
-
-
 omit [SigmaCompactSpace M] in
 theorem metricUniformEquivalentOn_of_metricDerivNorm
     {K : Set M} (gk gInf : SmoothRiemannianMetric I M) {δ : Real}
@@ -379,7 +331,6 @@ theorem metricUniformEquivalentOn_of_metricDerivNorm
         mul_le_mul_of_nonneg_right (hsmall x hx) hgnn
 
 omit [CompleteSpace E] in
-/-- Two smooth Riemannian metrics are uniformly equivalent on a compact set. -/
 theorem equivOn_compact
     {K : Set M} (hK : IsCompact K)
     (gRef h : SmoothRiemannianMetric I M) :
@@ -416,15 +367,11 @@ theorem equivOn_compact
       _ <= C * gRef.inner x v v := mul_le_mul_of_nonneg_right hc'_inv_le_C hgnn
 
 omit [CompleteSpace E] in
-/-- **(A): two metrics on a closed manifold are uniformly equivalent.** -/
 theorem metricUniformEquivalentOn_of_compact [CompactSpace M]
     (gRef h : SmoothRiemannianMetric I M) :
     ∃ C : Real, MetricUniformEquivalentOn (I := I) Set.univ gRef h C := by
   simpa using equivOn_compact (I := I) isCompact_univ gRef h
 
-/-- **`hle`.** Each per-point metric-difference norm is bounded by the window
-supremum (the `BddAbove` content for the `②`-bookkeeping, via the per-point
-bound `metricDerivNorm_le_of_equiv` plus closed-manifold compactness). -/
 theorem metricDerivNorm_le_metricDerivNormSupOn [CompactSpace M]
     (gk gInf : SmoothRiemannianMetric I M) (x : M) :
     metricDerivNorm (I := I) 0 gk gInf gInf x
@@ -440,13 +387,6 @@ theorem metricDerivNorm_le_metricDerivNormSupOn [CompactSpace M]
     obtain rfl : a = 0 := Nat.le_zero.mp ha
     exact hper z
   exact le_csSup hbdd ⟨0, le_refl 0, x, Set.mem_univ x, rfl⟩
-
-
-
-
-
-
-
 
 theorem exists_uniform_equiv_of_metricCPConv [CompactSpace M]
     (gSeq : Nat -> SmoothRiemannianMetric I M) (gInf : SmoothRiemannianMetric I M)
@@ -492,8 +432,6 @@ theorem exists_uniform_equiv_of_metricCPConv [CompactSpace M]
     have hsum : Cfun k <= ∑ j ∈ Finset.range k0, Cfun j :=
       Finset.single_le_sum (fun j _ => hCfun_nonneg j) (Finset.mem_range.mpr hk)
     linarith
-
-
 
 omit [SigmaCompactSpace M] in
 theorem log_integrable_of_sol
@@ -548,12 +486,6 @@ section FixedDomain
 
 variable [SigmaCompactSpace M]
 
-
-
-
-
-
-
 omit [SigmaCompactSpace M] in
 theorem metricLogDerivativeInput_of_solutions
     [SigmaCompactSpace M]
@@ -584,9 +516,6 @@ theorem metricLogDerivativeInput_of_solutions
   metric_deriv := fun i x _hx v _hv _t ht =>
     ricciFlow_metric_hasDerivAt (S i) (hS i) (hwin ht) x v
   log_integrable := fun i x hx v hv t ht => hint i x hx v hv t ht
-
-
-
 
 omit [SigmaCompactSpace M] in
 theorem metricUniformEquivalentOnWindow_of_solutions
@@ -624,11 +553,6 @@ theorem metricUniformEquivalentOnWindow_of_solutions
     (fun i s => (S i).family.metric s) (fun i t x => (S i).ricciAt t x)
     ht0 hC hequiv0
     (metricLogDerivativeInput_of_solutions (I := I) S hS K β ψ t0 A hwin hA hquad hint)
-
-
-
-
-
 
 omit [SigmaCompactSpace M] in
 theorem metricUniformEquivalentOnWindow_of_solutions'

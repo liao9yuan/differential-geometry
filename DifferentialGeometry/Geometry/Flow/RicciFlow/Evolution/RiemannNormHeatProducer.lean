@@ -2,45 +2,14 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.RiemannNorm
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.Uhlenbeck
 import Mathlib.Analysis.SpecialFunctions.Pow.Real
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
 
 set_option autoImplicit false
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 noncomputable section
 
 namespace DifferentialGeometry.PDE.RicciFlow
 
 open scoped BigOperators
-
-
-
-
-
-
-
-
 
 section ComponentAlgebra
 
@@ -95,14 +64,9 @@ theorem abs_le_sqrt_compNormSq4
   rw [← Real.sqrt_sq_eq_abs]
   exact Real.sqrt_le_sqrt (sq_le_compNormSq4 R a b c d)
 
-
-
-
 def bTensorDown (R : Idx → Idx → Idx → Idx → Real)
     (a b c d : Idx) : Real :=
   ∑ e : Idx, ∑ f : Idx, R a e b f * R c e d f
-
-
 
 theorem abs_bTensorDown_le
     (R : Idx → Idx → Idx → Idx → Real) (a b c d : Idx) :
@@ -142,9 +106,6 @@ theorem abs_bTensorDown_le
     _ = (Fintype.card Idx : Real) ^ 2 * compNormSq4 R := by
           simp [Finset.sum_const, Finset.card_univ, nsmul_eq_mul, sq]
           ring
-
-
-
 
 def rmReactionDown (R : Idx → Idx → Idx → Idx → Real) : Real :=
   4 * ∑ a : Idx, ∑ b : Idx, ∑ c : Idx, ∑ d : Idx,
@@ -196,13 +157,6 @@ theorem rpow_three_halves_eq_mul_sqrt {x : Real} (hx : 0 ≤ x) :
   have hsplit : (3 / 2 : Real) = 1 + 1 / 2 := by norm_num
   rw [hsplit, Real.rpow_add_of_nonneg hx (by norm_num) (by norm_num),
     Real.rpow_one, ← Real.sqrt_eq_rpow]
-
-
-
-
-
-
-
 
 theorem abs_rmReactionDown_le
     (R : Idx → Idx → Idx → Idx → Real) :
@@ -269,13 +223,6 @@ theorem abs_rmReactionDown_le
 
 end ComponentAlgebra
 
-
-
-
-
-
-
-
 section Solution
 
 open Bundle
@@ -289,17 +236,10 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 variable [CompleteSpace E] [SigmaCompactSpace M] [T2Space M]
 variable {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
 
-
-
 def InverseMetricOrthonormalAt
     (gInv : Real -> DifferentialGeometry.Geometry.Curvature.InverseMetricComponents M Idx)
     (t : Real) (x : M) : Prop :=
   ∀ i j : Idx, gInv t x i j = (if i = j then 1 else 0)
-
-
-
-
-
 
 def rmReactionInFrame
     (Rm04 : Real -> DifferentialGeometry.Geometry.Curvature.Tensor04Section (I := I) (M := M))
@@ -433,11 +373,6 @@ theorem rmReactionInFrame_eq_rmReactionDown
     uhlenbeckBTensorInFrame_orthonormal (I := I) Rm04 gInv frame t x horth a d b c]
   rfl
 
-
-
-
-
-
 omit [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 theorem abs_rmReactionInFrame_le
     (Rm04 : Real -> DifferentialGeometry.Geometry.Curvature.Tensor04Section (I := I) (M := M))
@@ -456,13 +391,6 @@ theorem abs_rmReactionInFrame_le
   rw [rm04NormSqInFrame_eq_compNormSq4 (I := I) Rm04 gInv frame t x horth]
   rw [rpow_three_halves_eq_mul_sqrt (compNormSq4_nonneg R)]
   exact abs_rmReactionDown_le R
-
-
-
-
-
-
-
 
 omit [DecidableEq Idx] in
 omit [SigmaCompactSpace M] [T2Space M] in

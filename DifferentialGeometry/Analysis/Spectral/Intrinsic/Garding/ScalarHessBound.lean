@@ -5,18 +5,8 @@ import DifferentialGeometry.Geometry.Connection.ChartBridge.HessFrobenius
 import DifferentialGeometry.Geometry.Operator.LaplacianBridge
 open DifferentialGeometry.Analysis.Elliptic
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Connection
 open DifferentialGeometry.Geometry.Operator
-
-
-
-
-
-
-
-
-
 
 noncomputable section
 
@@ -50,8 +40,6 @@ private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
-
-
 private theorem rawLap_repr_delta
     (g : SmoothRiemannianMetric I M)
     (v : tensorHs (I := I) (M := M) g 0 0 2)
@@ -64,8 +52,6 @@ private theorem rawLap_repr_delta
   rw [rawLap_repr_scalar (I := I) (M := M) g v hv x]
   rw [laplacian_levi_eq (I := I) g
     (reprScalar0_smooth (I := I) (M := M) v hv) x]
-
-
 
 theorem lap_energy_eq
     (g : SmoothRiemannianMetric I M)
@@ -94,8 +80,6 @@ theorem lap_energy_eq
       simpa only [S] using rawLap_repr_delta (I := I) (M := M) g v hv x]
   rw [inner_toRS0_scalar (I := I) (M := M) g x]
   ring
-
-
 
 private theorem repr_lap_inner
     (g : SmoothRiemannianMetric I M)
@@ -144,8 +128,6 @@ private theorem repr_lap_inner
       (reprScalar0 (I := I) (M := M) v hv)
       (reprScalar0_smooth (I := I) (M := M) v hv) x Fin.elim0
   rw [hlap, hrepr]
-
-
 
 theorem grad_energy_eq
     (g : SmoothRiemannianMetric I M)
@@ -199,8 +181,6 @@ theorem grad_energy_eq
       rw [← repr_lap_inner (I := I) (M := M) g v hv]
     _ = ‖covGrad (I := I) (M := M) g 0 0 S‖ ^ 2 := htensor.symm
 
-
-
 theorem lap_energy_le
     (g : SmoothRiemannianMetric I M)
     (v : tensorHs (I := I) (M := M) g 0 0 2)
@@ -213,8 +193,6 @@ theorem lap_energy_le
   nlinarith [norm_nonneg
     (rawTensorConnLapSmooth (I := I) g 0 0
       (tensorHsSmoothRepr (I := I) (M := M) v hv)), norm_nonneg v]
-
-
 
 theorem grad_energy_le
     (g : SmoothRiemannianMetric I M)
@@ -241,8 +219,6 @@ private theorem du_normSq
     inner0S_differential1FormFun_pair_eq_grad_inner]
   rfl
 
-
-
 theorem du_energy_le
     (g : SmoothRiemannianMetric I M)
     (v : tensorHs (I := I) (M := M) g 0 0 2)
@@ -253,9 +229,6 @@ theorem du_energy_le
           (reprScalar0_smooth (I := I) (M := M) v hv) x)
         ∂(riemannianVolumeMeasure (I := I) (M := M) g) ≤ ‖v‖ ^ 2 := by
   simpa only [du_normSq] using grad_energy_le (I := I) (M := M) g v hv
-
-
-
 
 theorem hess_energy_le
     (g : SmoothRiemannianMetric I M) :
@@ -288,8 +261,6 @@ theorem hess_energy_le
     _ ≤ ‖v‖ ^ 2 + C * ‖v‖ ^ 2 :=
       add_le_add hlap (mul_le_mul_of_nonneg_left hgrad hC)
     _ = (1 + C) * ‖v‖ ^ 2 := by ring
-
-
 
 theorem hessSec_energy_le
     (g : SmoothRiemannianMetric I M) :

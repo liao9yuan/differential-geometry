@@ -2,18 +2,10 @@ import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.RHSUniformFamily
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.RHSFirstDerivativeUniform
 import DifferentialGeometry.Analysis.Spectral.Tensor.UniformChartBounds.GramInvUniformEigenvalueLowerBound
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.MetricPreconv
-open DifferentialGeometry.Analysis.Spectral DifferentialGeometry.Analysis.Spectral.DeTurckCoefficients
-open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Analysis.Spectral
+    DifferentialGeometry.Analysis.Spectral.DeTurckCoefficients
 open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Operator
-
-
-
-
-
-
-
-
 
 namespace DifferentialGeometry.PDE.RicciFlow
 
@@ -35,8 +27,6 @@ variable
       [IsManifold I ∞ M] [CompactSpace M] [I.Boundaryless]
       [T2Space M]
 
-
-
 structure LowRegCoeff where
   ellMin : ℝ
   ellMax : ℝ
@@ -48,10 +38,6 @@ structure LowRegCoeff where
   rhsD1Bound : ℝ
   rhsLip : ℝ
   rhsD1Lip : ℝ
-
-
-
-
 
 structure IsLowRegCoeff {ι : Type*}
     (gBase : SmoothRiemannianMetric I M)
@@ -146,9 +132,6 @@ structure IsLowRegCoeff {ι : Type*}
                 (extChartAt I α b)| ≤
               D.rhsD1Lip * metricJet3DiffSup (I := I) (M := M)
                 (gSeq k₁) (gSeq k₂) α (extChartAt I α b)
-
-
-
 
 theorem exists_low_reg_coeff {ι : Type*}
     (gBase : SmoothRiemannianMetric I M)

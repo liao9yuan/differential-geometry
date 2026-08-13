@@ -18,10 +18,7 @@ import Mathlib.Geometry.Manifold.VectorBundle.Riemannian
 import Mathlib.Topology.VectorBundle.Riemannian
 import Mathlib.Topology.Compactness.Compact
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Operator
-
-
 
 noncomputable section
 

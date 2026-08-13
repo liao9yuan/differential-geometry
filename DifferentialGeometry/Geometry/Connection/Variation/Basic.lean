@@ -2,22 +2,8 @@ import DifferentialGeometry.Geometry.Connection.LeviCivita.Basic
 import DifferentialGeometry.Geometry.Curvature.Realized.MetricFamily
 import DifferentialGeometry.Tensor.RSTensor.Components
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
 
 set_option autoImplicit false
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 noncomputable section
 
@@ -32,18 +18,11 @@ variable {H : Type*} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 
-
-
-
 def metricVariationComponent
     (v : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
       (n := (∞ : WithTop ℕ∞)) 2)
     (x : M) (X Y : TangentSpace I x) : Real :=
   v x (fun q : Fin 2 => if q = 0 then X else Y)
-
-
-
-
 
 structure MetricPotentialVariationPath
     (g : SmoothRiemannianMetric I M) (potential : M -> Real) where
@@ -70,11 +49,6 @@ omit [FiniteDimensional ℝ E] in
   path.potentialBase
 
 end MetricPotentialVariationPath
-
-
-
-
-
 
 structure IsMetricPotentialVariationPath
     {g : SmoothRiemannianMetric I M} {potential : M -> Real}

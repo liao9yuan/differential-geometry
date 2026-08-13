@@ -1,6 +1,5 @@
 import DifferentialGeometry.Analysis.Spectral.Tensor.Variational.PreHilbert
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Connection
 
 

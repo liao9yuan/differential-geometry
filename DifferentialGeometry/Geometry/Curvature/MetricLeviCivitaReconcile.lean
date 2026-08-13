@@ -8,17 +8,6 @@ import DifferentialGeometry.Geometry.Curvature.Riemann.Basic.Sections
 import DifferentialGeometry.Geometry.Curvature.Metric
 open DifferentialGeometry.Geometry.Curvature
 
-
-
-
-
-
-
-
-
-
-
-
 open DifferentialGeometry.Geometry.Connection
 namespace DifferentialGeometry
 
@@ -116,12 +105,6 @@ theorem riemannCurvatureAux_tangentConst_eq_riemannOp
   rw [hsec, ← riemannOp_apply_smooth (cov := cov) Xc.contMDiff Yc.contMDiff Zc.contMDiff,
     hXcx, hYcx, hZcx]
 
-
-
-
-
-
-
 omit [NeZero (Module.finrank ℝ E)] in
 omit [SigmaCompactSpace M] in
 theorem ricciCurvatureAt_leviCivita_apply_eq_ricciTensor
@@ -141,12 +124,6 @@ theorem ricciCurvatureAt_leviCivita_apply_eq_ricciTensor
     riemannCurvatureAux_tangentConst_eq_riemannOp (cov := LeviCivita (I := I) g) (hcov := hcov₂),
     cotangentToDual_dualToCotangent_gen, Module.Basis.coord_apply]
   rfl
-
-
-
-
-
-
 
 omit [NeZero (Module.finrank ℝ E)] in
 omit [SigmaCompactSpace M] in

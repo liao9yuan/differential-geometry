@@ -2,51 +2,6 @@ import DifferentialGeometry.Geometry.Metric.SmoothMetricFromCoeff
 import DifferentialGeometry.Geometry.Metric.OpenSubtype
 import DifferentialGeometry.Geometry.Curvature.Riemann.Basic.Field
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 noncomputable section
 
@@ -60,9 +15,6 @@ variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 
 namespace Geometry
-
-
-
 
 open scoped Classical in
 def extZeroForm (U : Opens M)
@@ -147,9 +99,6 @@ lemma bumpForm_pos (R : SmoothRiemannianMetric I M) (U : Opens M)
     simp only [zero_smul, zero_add, sub_zero, one_smul]
     exact hR
 
-
-
-
 lemma frameVec_cmdiffAt' (x₀ : M) (i : Fin (Module.finrank ℝ E)) {x : M}
     (hx : x ∈ (trivializationAt E (TangentSpace I) x₀).baseSet) :
     ContMDiffAt I (I.prod 𝓘(ℝ, E)) ∞
@@ -165,10 +114,6 @@ lemma frameVec_cmdiffAt' (x₀ : M) (i : Fin (Module.finrank ℝ E)) {x : M}
   refine (contMDiffAt_localFrame_of_mem (I := I) (n := (∞ : WithTop ℕ∞)) (e := e) (b := b)
     (i := i) hx).congr_of_eventuallyEq ?_
   exact hfr.mono (fun y hy => congrArg (TotalSpace.mk' E y) hy)
-
-
-
-
 
 lemma frameVec_sub_cmdiffAt (U : Opens M)
     [SigmaCompactSpace U] [T2Space U]
@@ -211,9 +156,6 @@ lemma frameVec_sub_cmdiffAt (U : Opens M)
   rw [mfderiv_subtype_val (I := I) U z]
   rfl
 
-
-
-
 lemma chiGU_coeff_cmdiffAt (U : Opens M)
     [SigmaCompactSpace U] [T2Space U]
     (gU : SmoothRiemannianMetric I U) (χ : M → ℝ)
@@ -244,8 +186,6 @@ lemma chiGU_coeff_cmdiffAt (U : Opens M)
       (frameVec_sub_cmdiffAt (I := I) U x₀ j hxb hxU) le_rfl
   exact hχsub.smul hgUinner
 
-
-
 lemma chiGU_coeff_cmdiffOn (U : Opens M)
     [SigmaCompactSpace U] [T2Space U]
     (gU : SmoothRiemannianMetric I U) (χ : M → ℝ)
@@ -268,9 +208,6 @@ lemma chiGU_coeff_cmdiffOn (U : Opens M)
     refine ContMDiffWithinAt.congr_of_eventuallyEq ?_ (hχ0.filter_mono nhdsWithin_le_nhds)
       (by rw [hχ0.eq_of_nhds])
     exact contMDiffWithinAt_const
-
-
-
 
 lemma bumpForm_coeff_contMDiffOn (R : SmoothRiemannianMetric I M) (U : Opens M)
     [SigmaCompactSpace U] [T2Space U]
@@ -311,10 +248,6 @@ end Geometry
 
 open Geometry
 
-
-
-
-
 noncomputable def SmoothRiemannianMetric.bumpExtendOpen
     (R : SmoothRiemannianMetric I M) (U : Opens M)
     [SigmaCompactSpace U] [T2Space U]
@@ -346,10 +279,6 @@ theorem bumpExtendOpen_inner_of_mem
           (I := I) R U gU χ hχ hχsupp x₀ i j)).choose_spec x v w]
   rw [bumpForm_apply, extZeroForm_of_mem (I := I) U gU hx v w]
 
-
-
-
-
 theorem bumpExtendOpen_inner
     (R : SmoothRiemannianMetric I M) (U : Opens M)
     [SigmaCompactSpace U] [T2Space U]
@@ -368,8 +297,6 @@ theorem bumpExtendOpen_inner
           (I := I) R U gU χ hχ hχsupp x₀ i j)).choose_spec x v w]
   rw [Geometry.bumpForm_apply]
 
-
-
 theorem bumpExtendOpen_inner_of_notMem_tsupport
     (R : SmoothRiemannianMetric I M) (U : Opens M)
     [SigmaCompactSpace U] [T2Space U]
@@ -381,8 +308,6 @@ theorem bumpExtendOpen_inner_of_notMem_tsupport
   have hχ0 : χ x = 0 := image_eq_zero_of_notMem_tsupport hx
   rw [bumpExtendOpen_inner (I := I) R U gU χ hχ hχ01 hχsupp x v w, hχ0]
   simp
-
-
 
 theorem bumpExtendOpen_eq_gU_on
     (R : SmoothRiemannianMetric I M) (U : Opens M)

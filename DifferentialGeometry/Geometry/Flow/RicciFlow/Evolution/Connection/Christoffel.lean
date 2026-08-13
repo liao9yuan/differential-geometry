@@ -1,15 +1,8 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.Connection.Pairing
 open DifferentialGeometry.PDE.RicciFlow
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
 
 set_option autoImplicit false
-
-
-
-
-
-
 
 noncomputable section
 
@@ -49,13 +42,6 @@ def ChristoffelVariationEquationInFrameOn
         D.carrier
         (t : Real)
 
-
-
-
-
-
-
-
 def ChristoffelVariationMixedDerivativeInFrameOn
     {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -68,11 +54,6 @@ def ChristoffelVariationMixedDerivativeInFrameOn
         DifferentialGeometry.Tensor.Coordinates.christoffelSymbolInFrame
           (S.family.connection s) frame hframe x i j k)
       (fun s x => rhs s x i j k)
-
-
-
-
-
 
 def ChristoffelVariationMixedDerivativeInFrameOnRegular
     {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
@@ -87,8 +68,6 @@ def ChristoffelVariationMixedDerivativeInFrameOnRegular
         DifferentialGeometry.Tensor.Coordinates.christoffelSymbolInFrame
           (S.family.connection s) frame hframe x i j k)
       (fun s x => rhs s x i j k)
-
-
 
 omit [Fintype Idx] [DecidableEq Idx] in
 omit [SigmaCompactSpace M] [T2Space M] in
@@ -192,8 +171,6 @@ theorem frameCoeff_eq_sum_inv_metricPairing
             (I := I) (M := M) (S.family.metric t) (hframe.toBasisAt hx)
             (fun i j : Idx => gInv t x i j) hinvAt k V
 
-
-
 omit [SigmaCompactSpace M] [T2Space M] in
 theorem frameCoeffLocal
     {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
@@ -224,8 +201,6 @@ theorem frameCoeffLocal
           DifferentialGeometry.Geometry.Curvature.basis_coord_eq_sum_inv_inner
             (I := I) (M := M) (S.family.metric t) (hframe.toBasisAt hx)
             (fun i j : Idx => gInv t x i j) hinvAt k V
-
-
 
 omit [SigmaCompactSpace M] [T2Space M] in
 theorem christoffelVariationEquationInFrameOn_of_pairing_local
@@ -283,8 +258,6 @@ theorem christoffelVariationEquationInFrameOn_of_pairing_local
     exact (frameCoeffLocal
       (I := I) S gInv frame hframe hinv (t : Real) hx k
       ((S.family.connection (t : Real) (frame j) x) (frame i x))).symm
-
-
 
 omit [SigmaCompactSpace M] [T2Space M] in
 theorem christoffelSymbol_sub_eq_sum_inv_connectionDiff
@@ -454,8 +427,6 @@ theorem christoffelEvolutionEquationInFrameOn_of_pairing
     exact (frameCoeffLocal
       (I := I) S gInv frame hframe hinv (t : Real) hx k
       ((S.family.connection (t : Real) (frame j) x) (frame i x))).symm
-
-
 
 omit [SigmaCompactSpace M] [T2Space M] in
 theorem christoffelEvolutionEquationInFrameOn_of_pairing_local

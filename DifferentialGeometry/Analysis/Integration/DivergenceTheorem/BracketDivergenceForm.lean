@@ -2,7 +2,6 @@ import DifferentialGeometry.Geometry.Curvature.CovGradRoughLap.MovingFrameIntegr
 import DifferentialGeometry.Geometry.Curvature.CurvatureOperator.TensorThirdOrderWeitzenbock
 open DifferentialGeometry.Analysis.Elliptic
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Connection
 
 

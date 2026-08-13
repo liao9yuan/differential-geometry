@@ -4,25 +4,6 @@ import Mathlib.Topology.Connected.PathConnected
 import Mathlib.Topology.Homotopy.Path
 import DifferentialGeometry.Topology.Covering.SemilocallySimplyConnected
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 open Set Function Filter
 open scoped Topology ContDiff
 
@@ -36,22 +17,13 @@ namespace UniversalCover
 
 variable {X : Type*} [TopologicalSpace X] [Inhabited X]
 
-
-
-
 def _root_.DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover
     (X : Type*) [TopologicalSpace X] [Inhabited X] : Type _ :=
   (x : X) × _root_.Path.Homotopic.Quotient (default : X) x
 
-
-
 def proj :
     DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover X → X :=
   Sigma.fst
-
-
-
-
 
 def basicOpen
     (p : DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover X)
@@ -64,8 +36,6 @@ def basicOpen
                 ((_root_.Path.Homotopic.Quotient.mk η :
                     _root_.Path.Homotopic.Quotient p.1 q.1))) }
 
-
-
 instance topology :
     TopologicalSpace
       (DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover X) :=
@@ -73,11 +43,6 @@ instance topology :
     { S | ∃ (p : DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover X)
             (U : Set X) (hU : IsOpen U) (hp : p.1 ∈ U),
               S = basicOpen p U hU hp }
-
-
-
-
-
 
 theorem basis_trans_shift
     {p q r : DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover X}
@@ -111,11 +76,6 @@ theorem basis_trans_shift
     exact (_root_.Path.Homotopic.Quotient.trans_assoc p.2
       (_root_.Path.Homotopic.Quotient.mk η)
       (_root_.Path.Homotopic.Quotient.mk η'))
-
-
-
-
-
 
 theorem basis_intersection
     [LocPathConnectedSpace X]
@@ -183,9 +143,6 @@ theorem basis_intersection
         (_root_.Path.Homotopic.Quotient.mk η₂)
         (_root_.Path.Homotopic.Quotient.mk ζ))
 
-
-
-
 theorem basis_covers
     (q : DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover X) :
     ∃ (p : DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover X)
@@ -200,10 +157,6 @@ theorem basis_covers
     _root_.Path.Homotopic.Quotient.mk_refl q.1
   rw [hmkrefl]
   exact (_root_.Path.Homotopic.Quotient.trans_refl q.2).symm
-
-
-
-
 
 theorem basis_assemble
     [LocPathConnectedSpace X] :
@@ -233,9 +186,6 @@ theorem basis_assemble
     intro q
     obtain ⟨p, U, hU, hp, hmem⟩ := basis_covers q
     exact ⟨basicOpen p U hU hp, ⟨p, U, hU, hp, rfl⟩, hmem⟩
-
-
-
 
 theorem proj_continuous [LocPathConnectedSpace X] :
     Continuous

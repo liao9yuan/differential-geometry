@@ -3,26 +3,6 @@ import DifferentialGeometry.Geometry.Connection.LeviCivita.Basic
 
 set_option autoImplicit false
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 namespace DifferentialGeometry
 namespace Tensor0SBundle
 

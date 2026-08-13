@@ -5,10 +5,7 @@ import DifferentialGeometry.Geometry.Exponential.Smoothness.MatchDataReduction
 import DifferentialGeometry.Geometry.Exponential.ChartFlow.UniformExistence
 import DifferentialGeometry.Geometry.Geodesic.SmoothFlow
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Connection
-
-
 
 noncomputable section
 

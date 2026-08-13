@@ -6,19 +6,7 @@ import DifferentialGeometry.Geometry.Metric.ChartGram
 import Mathlib.Order.Filter.AtTopBot.CountablyGenerated
 open DifferentialGeometry.Analysis.Sobolev.IntrinsicSobolev.SmoothCcTensorHs
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Connection
-
-
-
-
-
-
-
-
-
-
-
 
 noncomputable section
 
@@ -40,9 +28,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
 variable [IsManifold I ∞ M] [IsManifold I 1 M] [IsManifold I 2 M]
 variable [T2Space M] [CompactSpace M]
     [BoundarylessManifold I M]
-
-
-
 
 theorem ricci_tendsto_left
     {alpha omega : Real} {hAlphaOmega : alpha < omega}

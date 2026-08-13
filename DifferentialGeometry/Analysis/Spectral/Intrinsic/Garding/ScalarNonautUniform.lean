@@ -9,14 +9,6 @@ open DifferentialGeometry.PDE.RicciFlow DifferentialGeometry.Analysis.Sobolev
 open DifferentialGeometry.Analysis.Sobolev
 open DifferentialGeometry.Analysis.Elliptic
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
-
-
-
-
-
-
-
 
 noncomputable section
 
@@ -155,8 +147,6 @@ private theorem flux_jet_of_bdd
       (fun j => hP j t ht x) i
   exact hlocal.trans (mul_le_mul_of_nonneg_left hgrid (hC_nn i))
 
-/-- Pointwise jet envelopes for a family of scalar-flux coefficients induce
-pointwise jet envelopes for their traced covariant derivatives. -/
 theorem fluxDiv_jet_bdd
     (q : SmoothRiemannianMetric I M) {α : Type*}
     (C : α → SmoothCcTensor q 1 1) (A : Set α)
@@ -269,8 +259,6 @@ private theorem traceCast_jet_bdd
     (add_le_add (mul_le_mul_of_nonneg_left (hscalar i t ht x) (by norm_num))
       (mul_le_mul_of_nonneg_left (hF i x) (by norm_num)))
 
-
-
 theorem cc_comm_unif
     {D : RealTimeInterval}
     (g_fam : ℝ → SmoothRiemannianMetric I M)
@@ -375,8 +363,6 @@ theorem cc_comm_unif
     _ = |G₀ - Htop| + |R| := by rw [abs_neg, abs_neg]
     _ ≤ Ct * J + Cd * J := add_le_add htrans hder
     _ = (Ct + Cd) * J := by ring
-
-
 
 theorem lapCoeff_slab
     {D : RealTimeInterval}
@@ -484,8 +470,6 @@ theorem lapCoeff_slab
   · intro i x
     simpa only [q, gm, Phi] using hPhi i s hs x
 
-
-
 theorem cc_conn_unif
     {D : RealTimeInterval}
     (g_fam : ℝ → SmoothRiemannianMetric I M)
@@ -531,9 +515,6 @@ theorem cc_conn_unif
     refine ⟨C, hC_nn, ?_⟩
     intro s hs U
     simpa only [q, A, Phi, gm] using hC s hs U
-
-
-
 
 theorem cc_lap_unif
     {D : RealTimeInterval}
@@ -669,8 +650,6 @@ theorem cc_lap_unif
     P + -Q ≤ (Dtop + Cp * J) + Cc * J := add_le_add hprincipal hconnection
     _ = Dtop + (Cp + Cc) * J := by ring
 
-/-- A uniform smooth scalar Laplacian pairing estimate transfers to the finite
-spectral-core energy inequality, independently of the chosen support. -/
 theorem finite_lap_unif
     (q : SmoothRiemannianMetric I M) {alpha : Type*}
     (h : alpha → SmoothRiemannianMetric I M) (A : Set alpha)
@@ -819,8 +798,6 @@ theorem finite_lap_unif
   have hpair := finite_cc_pair (I := I) (M := M) q 0 n v hv L
   rw [hpair]
   simpa only [U, L] using hmain'
-
-
 
 theorem cc_a2_unif
     {D : RealTimeInterval}

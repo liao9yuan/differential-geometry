@@ -3,15 +3,7 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.EllipticBridge.EigenvectorW
 import DifferentialGeometry.Analysis.Spectral.Tensor.SobolevScale.Inclusion
 open DifferentialGeometry.Analysis.Sobolev.IntrinsicSobolev.SmoothCcTensorHs
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Connection
-
-
-
-
-
-
-
 
 noncomputable section
 
@@ -52,8 +44,6 @@ noncomputable def ccToHsLin
       ccTensorToHs (I := I) (M := M) g s σ S :=
   rfl
 
-
-
 theorem ccToHsLin_repr
     (g : SmoothRiemannianMetric I M) (s : ℕ) {σ : ℝ} (hσ : 0 ≤ σ)
     (v : tensorHs (I := I) (M := M) g 0 s σ)
@@ -66,8 +56,6 @@ theorem ccToHsLin_repr
   rw [SmoothCcTensor.toL2_apply,
     tensorHsSmoothRepr_toL2 (I := I) (M := M) hσ v hv,
     tensorHsToL2_tensorL2Coeff (I := I) (M := M) hσ]
-
-
 
 theorem ccToHs_eigen
     (g : SmoothRiemannianMetric I M) (s : ℕ) {σ : ℝ} (hσ : 0 ≤ σ)
@@ -97,8 +85,6 @@ theorem ccToHs_eigen
     simp [v]
   rw [← hre, ← ccToHsLin_apply]
   exact ccToHsLin_repr (I := I) (M := M) g s hσ v hv
-
-
 
 theorem ccToHsLin_dense
     (g : SmoothRiemannianMetric I M) (s : ℕ) {σ : ℝ} (hσ : 0 ≤ σ) :

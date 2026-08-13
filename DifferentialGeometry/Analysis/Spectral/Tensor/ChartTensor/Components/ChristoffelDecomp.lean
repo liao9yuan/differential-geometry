@@ -2,7 +2,6 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.ChartTensor.Components.Defs
 import DifferentialGeometry.Geometry.Connection.ChartFrame.ChartSection
 import Mathlib.Analysis.Calculus.FDeriv.Comp
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
 
 
 noncomputable section

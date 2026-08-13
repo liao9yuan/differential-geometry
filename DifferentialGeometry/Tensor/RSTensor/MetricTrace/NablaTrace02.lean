@@ -4,7 +4,6 @@ import DifferentialGeometry.Geometry.Operator.RoughLaplacian
 open DifferentialGeometry.Tensor.Multilinear
 open DifferentialGeometry.Tensor.RSTensor
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
 
 set_option autoImplicit false
 
@@ -52,7 +51,6 @@ private theorem freezeHead03Slots_vec3
   fin_cases q <;> rfl
 
 set_option backward.isDefEq.respectTransparency false in
-
 noncomputable def freezeHead03Field
     [CompleteSpace E]
     (A : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
@@ -180,7 +178,6 @@ private theorem freezeTail04Slots_vec4
   fin_cases q <;> rfl
 
 set_option backward.isDefEq.respectTransparency false in
-
 noncomputable def freezeTail04Field
     [CompleteSpace E]
     (A : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
@@ -310,7 +307,6 @@ private theorem freezeMiddle04Slots_vec4
   fin_cases q <;> rfl
 
 set_option backward.isDefEq.respectTransparency false in
-
 noncomputable def freezeMiddle04Field
     [CompleteSpace E]
     (A : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)

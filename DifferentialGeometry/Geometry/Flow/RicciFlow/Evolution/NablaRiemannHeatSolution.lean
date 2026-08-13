@@ -1,83 +1,8 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.NablaRiemannHeat
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.MultiNormHeat
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
 
 set_option autoImplicit false
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 noncomputable section
 
@@ -85,28 +10,12 @@ namespace DifferentialGeometry.PDE.RicciFlow
 
 open scoped BigOperators
 
-
-
-
-
-
-
-
 section ScalarProducer
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]
 variable {H : Type*} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
-
-
-
-
-
-
-
-
-
 
 omit [TopologicalSpace M] in
 theorem nablaRm04NormHeatBoundSharp_scalar
@@ -125,22 +34,6 @@ theorem nablaRm04NormHeatBoundSharp_scalar
   refine ⟨_, h_heat t x, ?_⟩
   have hr := hreact_bound t x
   linarith [hr]
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 omit [TopologicalSpace M] in
 theorem nablaRm04NormHeatBoundOn_scalar
@@ -164,20 +57,6 @@ theorem nablaRm04NormHeatBoundOn_scalar
 
 end ScalarProducer
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 section BochnerBridge
 
 open Bundle
@@ -190,23 +69,6 @@ variable {I : ModelWithCorners Real E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 variable [CompleteSpace E] [SigmaCompactSpace M] [T2Space M]
 variable {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 omit [TopologicalSpace M] [SigmaCompactSpace M] [T2Space M] [DecidableEq Idx] in
 theorem nablaRm04NormHeatEquationOn_of_multiBochner
@@ -223,24 +85,6 @@ theorem nablaRm04NormHeatEquationOn_of_multiBochner
   intro t x
   exact multiNormHeatEquationOn_of_components (D := D) level levelDt levelLap
     nextLevel normSq normLap nextNormSq h_dt h_normSq h_lap t x
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 omit [TopologicalSpace M] [SigmaCompactSpace M] [T2Space M] [DecidableEq Idx] in
 theorem nablaRm04NormHeatBoundOn_of_multiBochner_residual
@@ -276,47 +120,5 @@ theorem nablaRm04NormHeatBoundOn_of_multiBochner_residual
   exact hstar_bound t x
 
 end BochnerBridge
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 end DifferentialGeometry.PDE.RicciFlow

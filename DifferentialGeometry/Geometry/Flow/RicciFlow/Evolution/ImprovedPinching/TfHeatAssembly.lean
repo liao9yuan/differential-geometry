@@ -1,15 +1,8 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.ImprovedPinching.HamiltonRHS
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Operator
 
 set_option autoImplicit false
-
-
-
-
-
-
 
 noncomputable section
 
@@ -24,9 +17,6 @@ variable {H : Type*} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
 variable [IsManifold I ∞ M] [IsManifold I 1 M]
-
-
-
 
 omit [TopologicalSpace M] in
 theorem tfHeat_eigen
@@ -65,8 +55,6 @@ theorem tfHeat_eigen
       scalar ricciNormSq ricciTraceCube reaction
       l1 l2 l3 hscalar hnorm hcube hreaction)
 
-
-
 omit [TopologicalSpace M] in
 theorem tfHeat_diag
     {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
@@ -103,9 +91,6 @@ theorem tfHeat_diag
     (tfRel_from_diag
       (M := M)
       scalar ricciNormSq ricciTraceCube l1 l2 l3 hscalar hnorm hcube)
-
-
-
 
 omit [Module.Finite ℝ E] in
 theorem tfHeat_sec6
@@ -158,8 +143,6 @@ theorem tfHeat_sec6
       (I := I) S Rm04 gInv frame roughLapRic ricciNormLap nablaRic
       h_inv h_ricci hInvSym hRicSym h_lap)
     hRel
-
-
 
 omit [Module.Finite ℝ E] in
 theorem tfHeat_point
@@ -233,8 +216,6 @@ theorem tfHeat_point
       ricciTraceCube)
     hscalarHeat h_inv h_ricci hInvSym hRicSym h_lap hRel
 
-
-
 omit [Module.Finite ℝ E] in
 theorem tfHeat_pfirst
     [FiniteDimensional Real E]
@@ -306,11 +287,6 @@ theorem tfHeat_pfirst
   intro t x
   exact DifferentialGeometry.Geometry.Curvature.traceDataOfFirst (I := I) (M := M) (heig t x)
     (hcurv t x) (hRicFirst t x) (hScalarTrace t x)
-
-
-
-
-
 
 omit [Module.Finite ℝ E] in
 theorem tfHeat_eig
@@ -444,8 +420,6 @@ theorem tfHeat_eig
     (fun t x => hScalarTrace t x (eigBasis t x) (heigOn t x))
     hdiag hcube hInv hRicSym
 
-
-
 omit [Module.Finite ℝ E] in
 theorem tfHeat_can
     [FiniteDimensional Real E]
@@ -540,10 +514,6 @@ theorem tfHeat_can
                 (heig t x) (hdiag t x)).symm
   refine ⟨eigBasis, l1, l2, l3, heig, hdiag, ?_⟩
   simpa [hcubeEq] using hheatEq
-
-
-
-
 
 omit [Module.Finite ℝ E] in
 theorem tfHeat_canR
@@ -685,9 +655,6 @@ theorem tfHeat_canR
     (ricciNormCurvatureReactionInFrame (I := I) S Rm04 gInv frame)
     hscalarHeat hRicHeat hRel
 
-
-
-
 omit [Module.Finite ℝ E] in
 theorem tfHeat_scalar
     [FiniteDimensional Real E]
@@ -766,8 +733,6 @@ theorem tfHeat_scalar
     (S.ricciAt t x) horth
   simpa [SolutionOn.scalar_eq_metricTrace] using htr
 
-
-
 omit [Module.Finite ℝ E] in
 theorem tfHeat_trace
     [FiniteDimensional Real E]
@@ -843,8 +808,6 @@ theorem tfHeat_trace
   · intro t x i j
     simpa [ricciCompInFrame] using
       hRicSymAt t x (frame i x) (frame j x)
-
-
 
 omit [Module.Finite ℝ E] in
 theorem tfHeat_lc
@@ -956,8 +919,6 @@ theorem tfHeat_lc
       (Rm13 := Rm13 t) (Rm04 := Rm04 t)
       (hRm13 t) (hRm04 t) x
 
-
-
 omit [Module.Finite ℝ E] in
 theorem tfHeat_metric
     [FiniteDimensional Real E]
@@ -1022,8 +983,6 @@ theorem tfHeat_metric
     simpa [SolutionOn.ricciAt, SolutionFamily.ricciAt, SolutionFamily.rm13]
       using (metricCurvData (I := I) (M := M) (S.base.metric t)).h_ricci13 x
 
-
-
 omit [Module.Finite ℝ E] in
 theorem tfHeat_metric_smooth
     [FiniteDimensional Real E]
@@ -1078,9 +1037,6 @@ theorem tfHeat_metric_smooth
   refine tfHeat_metric (I := I) S gInv frame heatBasis roughLapRic
     ricciNormLap nablaRic scalarLap gradScalarNormSq hscalarHeat h_inv
     h_ricci h_lap hheatBasis hheat hdim hInv
-
-
-
 
 omit [Module.Finite ℝ E] in
 theorem tfHeat_ricci
@@ -1219,9 +1175,6 @@ theorem tfHeat_ricci
     have htr := scalarTrace_delta (I := I) (S.base.metric t)
       (S.ricciAt t x) horth
     simpa [SolutionOn.scalar_eq_metricTrace] using htr
-
-
-
 
 omit [Module.Finite ℝ E] in
 theorem tfHeat_mc

@@ -9,7 +9,6 @@ open DifferentialGeometry.Analysis.Sobolev
 open DifferentialGeometry.Analysis.Spectral
 open DifferentialGeometry.Analysis.Elliptic
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Connection
 
 noncomputable section
@@ -26,7 +25,8 @@ namespace TensorSpectral
 open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.L2
 
-open DifferentialGeometry.PDE.RicciFlow DifferentialGeometry.Analysis.Sobolev DifferentialGeometry.Analysis.Spectral
+open DifferentialGeometry.PDE.RicciFlow DifferentialGeometry.Analysis.Sobolev
+    DifferentialGeometry.Analysis.Spectral
 open DifferentialGeometry.Analysis.Spectral.MetricRealization
 open DifferentialGeometry.Analysis.Spectral.DeTurck
 open DifferentialGeometry.PDE.DeTurck.RicciLinearization
@@ -304,7 +304,6 @@ def secondMetricPairTraceOp : SmoothCcTensor g₀ 6 2 :=
     (secondMetricCometricDoubleTraceField (I := I) (M := M) g₀ g₁ 4)
 
 set_option backward.isDefEq.respectTransparency false in
-
 omit [BoundarylessManifold I M] [SigmaCompactSpace M] in
 lemma mvPairTraceOp_apply_toModel (X : SmoothCcTensor g₀ 0 4) (x : M)
     (D : Tensor0SSpace 2 I x) (v : Fin 2 → E) :

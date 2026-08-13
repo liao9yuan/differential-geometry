@@ -10,19 +10,6 @@ open DifferentialGeometry.Geometry.Curvature
 
 set_option autoImplicit false
 
-
-
-
-
-
-
-
-
-
-
-
-
-
 noncomputable section
 
 universe u uE uH
@@ -39,14 +26,6 @@ variable {H : Type uH} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type u} [TopologicalSpace M] [ChartedSpace H M]
   [IsManifold I ∞ M] [SigmaCompactSpace M] [T2Space M]
 variable {N : Type u} [TopologicalSpace N] [ChartedSpace H N] [IsManifold I ∞ N]
-
-
-
-
-
-
-
-
 
 omit [CompleteSpace E] in
 theorem exists_pullbackField

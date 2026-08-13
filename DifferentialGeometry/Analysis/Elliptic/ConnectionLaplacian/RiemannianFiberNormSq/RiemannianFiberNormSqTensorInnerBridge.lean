@@ -9,7 +9,6 @@ import Mathlib.Logic.Equiv.Fin.Basic
 import Mathlib.Data.Fin.Tuple.Basic
 open DifferentialGeometry.Analysis.Elliptic
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
 
 
 noncomputable section

@@ -5,17 +5,7 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.ParametricJetIntegr
 open DifferentialGeometry.Analysis.Spectral
 open DifferentialGeometry.Analysis.Elliptic
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Connection
-
-
-
-
-
-
-
-
-
 
 noncomputable section
 
@@ -43,8 +33,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
   [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M]
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
-
-
 
 omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [BoundarylessManifold I M]
     [SigmaCompactSpace M] in
@@ -162,8 +150,6 @@ private theorem joint_affine_sub
   simpa only [SmoothCcTensor.toSection_sub, ContMDiffSection.coe_sub,
     Pi.sub_apply] using hsub
 
-
-
 private noncomputable def coeffRem
     (g : SmoothRiemannianMetric I M) (b c : ℕ)
     (dΦ : ℝ → SmoothCcTensor g b c) (S : Set ℝ) (hS : IsOpen S)
@@ -180,8 +166,6 @@ private noncomputable def coeffRem
     (affineSet_open hS a h) (affine_uIcc hseg)
     (joint_affine_sub (I := I) (M := M) g b c dΦ hdjoint a h)
 
-
-
 private noncomputable def coeffRem0
     (g : SmoothRiemannianMetric I M) (b c : ℕ)
     (dΦ : ℝ → SmoothCcTensor g b c) (S : Set ℝ) (hS : IsOpen S)
@@ -196,8 +180,6 @@ private noncomputable def coeffRem0
   exact if hseg : Set.uIcc a (a + h) ⊆ S then
     coeffRem (I := I) (M := M) g b c dΦ S hS hdjoint a h hseg
   else 0
-
-
 
 private theorem segment_eventually {S : Set ℝ} {a : ℝ}
     (ha : S ∈ 𝓝 a) :
@@ -216,8 +198,6 @@ private theorem segment_eventually {S : Set ℝ} {a : ℝ}
       _ < δ := by simpa only [Metric.mem_ball] using hh
   exact (Real.dist_left_le_of_mem_uIcc ht).trans_lt hh'
 
-
-
 private theorem affine_eventually {P : ℝ → Prop} {a : ℝ}
     (hP : ∀ᶠ t in 𝓝 a, P t) :
     ∀ᶠ h in 𝓝 (0 : ℝ), ∀ θ ∈ Set.Icc (0 : ℝ) 1, P (a + h * θ) := by
@@ -235,8 +215,6 @@ private theorem affine_eventually {P : ℝ → Prop} {a : ℝ}
         rw [abs_of_nonneg hθ.1]
         exact hθ.2) (abs_nonneg h)
     _ < δ := by simpa only [mul_one] using hh'
-
-
 
 omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private theorem coeff_secant
@@ -374,8 +352,6 @@ private theorem coeff_secant
     ContinuousMultilinearMap.sub_apply, ContinuousMultilinearMap.smul_apply,
     smul_eq_mul, eval_eq, f, f'] using hscalar
 
-
-
 omit [NeZero (Module.finrank ℝ E)] in
 private theorem coeffRem_jet
     (g : SmoothRiemannianMetric I M) (b c n : ℕ)
@@ -477,8 +453,6 @@ private theorem coeffRem_jet
     _ ≤ (Real.sqrt η) ^ 2 := hpath
     _ = η := Real.sq_sqrt hη.le
 
-
-
 private theorem coeffRemHs_small
     (g : SmoothRiemannianMetric I M) (b c n : ℕ)
     (dΦ : ℝ → SmoothCcTensor g b c) {S : Set ℝ} (hS : IsOpen S)
@@ -517,8 +491,6 @@ private theorem coeffRemHs_small
   intro hseg
   exact (happ _ (fun _ => η) (fun _ _ => hη.le)
     (fun i hi x => hh hseg i hi x)).trans_lt hηsmall
-
-
 
 private theorem coeffRem0_apply
     (g : SmoothRiemannianMetric I M) (b c n : ℕ)
@@ -562,8 +534,6 @@ private theorem coeffRem0_apply
     refine (ContinuousLinearMap.le_opNorm _ U).trans_lt ?_
     exact (mul_le_mul_of_nonneg_right (hh hseg).le (norm_nonneg U)).trans_lt hprod
   simpa only [heq, Real.dist_eq, sub_zero, abs_norm] using happ
-
-
 
 private theorem coeffRem0_move
     (g : SmoothRiemannianMetric I M) (b c n : ℕ)
@@ -625,8 +595,6 @@ private theorem coeffRem0_move
         simp only [δ]
         field_simp
   simpa only [heq, Real.dist_eq, sub_zero, abs_norm] using happ
-
-
 
 theorem exists_appHsDeriv
     (g : SmoothRiemannianMetric I M) (b c : ℕ)
@@ -717,10 +685,6 @@ theorem exists_appHsDeriv
         inv_smul_smul₀ hh0 _
   exact htarget.congr' (hslope.mono fun _ hh => hh.symm)
 
-/-- The full time-derivative package behind `exists_appHsDeriv`: the same
-jointly smooth tensor derivative is simultaneously the pointwise derivative
-of every fully evaluated fibre component and the strong derivative of every
-completed integer-order Sobolev action. -/
 theorem exists_appHsFull
     (g : SmoothRiemannianMetric I M) (b c : ℕ)
     (Φ : ℝ → SmoothCcTensor g b c) {S : Set ℝ} (hS : IsOpen S)
@@ -815,9 +779,6 @@ theorem exists_appHsFull
         inv_smul_smul₀ hh0 _
   exact htarget.congr' (hslope.mono fun _ hh => hh.symm)
 
-/-- A jointly smooth tensor coefficient has one jointly smooth time derivative
-which gives the product rule after application to every differentiable
-completed Sobolev path. -/
 theorem exists_appHsDyn
     (g : SmoothRiemannianMetric I M) (b c : ℕ)
     (Φ : ℝ → SmoothCcTensor g b c) {S : Set ℝ} (hS : IsOpen S)
@@ -973,8 +934,6 @@ theorem exists_appHsDyn
         module
   exact htarget.congr' (hslope.mono fun _ hh => hh.symm)
 
-
-
 theorem appHs_dyn_cont
     (g : SmoothRiemannianMetric I M) (b c n : ℕ)
     (Φ : ℝ → SmoothCcTensor g b c) {S : Set ℝ} (hS : IsOpen S)
@@ -1124,8 +1083,6 @@ theorem appHs_dyn_cont
   have hAt : ContinuousAt (fun τ => appHs g b c n (Φ τ) (U τ)) t := hcomp
   exact hAt.continuousWithinAt
 
-
-
 theorem appHs_dyn_fin
     (g : SmoothRiemannianMetric I M) (b c n k : ℕ)
     (Φ : ℝ → SmoothCcTensor g b c) {S : Set ℝ} (hS : IsOpen S)
@@ -1175,8 +1132,6 @@ theorem appHs_dyn_fin
       intro hk
       norm_num at hk
 
-
-
 theorem appHs_dyn_cd
     (g : SmoothRiemannianMetric I M) (b c n : ℕ)
     (Φ : ℝ → SmoothCcTensor g b c) {S : Set ℝ} (hS : IsOpen S)
@@ -1192,8 +1147,6 @@ theorem appHs_dyn_cd
   rw [contDiffOn_infty] at hU ⊢
   intro k
   exact appHs_dyn_fin (I := I) (M := M) g b c n k Φ hS hjoint U (hU k)
-
-
 
 theorem appHs_path_cd
     (g : SmoothRiemannianMetric I M) (b c n : ℕ)

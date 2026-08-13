@@ -144,7 +144,8 @@ theorem measurable_evolvingLocalizedSuperlevelIntegral
       intro n
       exact ((hcutoff.pow 2).mul
         ((continuous_strictSuperlevelRamp n).comp
-          ((hu.comp (continuous_const.prodMk continuous_id)).sub continuous_const))).aestronglyMeasurable
+          ((hu.comp (continuous_const.prodMk continuous_id)).sub
+            continuous_const))).aestronglyMeasurable
     have hbound : ∀ n, ∀ᵐ x ∂μ, ‖F n x‖ ≤ weight x := by
       intro n
       filter_upwards with x

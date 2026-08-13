@@ -6,7 +6,6 @@ import DifferentialGeometry.Analysis.Elliptic.TensorRegularity.CovDeriv.Componen
 import DifferentialGeometry.Analysis.Elliptic.TensorRegularity.Defs
 open DifferentialGeometry.Analysis.Elliptic
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Connection
 
 

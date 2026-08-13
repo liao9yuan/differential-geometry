@@ -4,12 +4,6 @@ open DifferentialGeometry.Geometry.Curvature
 
 set_option autoImplicit false
 
-
-
-
-
-
-
 namespace DifferentialGeometry.Geometry.Operator
 
 noncomputable section
@@ -66,8 +60,6 @@ theorem gradientFun_scale
     metricSharp_scaleMetric (I := I) c hc g x
       (mfderiv I 𝓘(Real, Real) f x).toLinearMap
 
-
-
 theorem laplacian_scaleMetric
     [VectorBundle Real E (TangentSpace I : M -> Type _)]
     (c : Real) (hc : 0 < c)
@@ -89,8 +81,6 @@ theorem laplacian_scaleMetric
     _ = c⁻¹ * laplacian (I := I) cov g f x := by
           simpa [laplacian] using
             divergence_const_smul (I := I) cov inferInstance c⁻¹ hgrad
-
-
 
 theorem laplacian_scaleMetric_const_smul
     [VectorBundle Real E (TangentSpace I : M -> Type _)]

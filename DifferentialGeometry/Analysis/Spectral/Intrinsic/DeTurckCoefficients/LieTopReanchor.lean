@@ -3,22 +3,13 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.DeTurckLieCoeffAppC
 import DifferentialGeometry.Analysis.Parabolic.DeTurckLinearization.LieDeTurckRemainderOrderSplit
 open DifferentialGeometry.Analysis.Spectral
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Connection
 open DifferentialGeometry.Geometry.Operator
 
-
-
-
-
-
-
-
-
-
 noncomputable section
 
-open MeasureTheory Set Filter Topology Bundle Manifold DifferentialGeometry.Tensor0SBundle ContinuousLinearMap
+open MeasureTheory Set Filter Topology Bundle Manifold DifferentialGeometry.Tensor0SBundle
+    ContinuousLinearMap
 open scoped ENNReal NNReal BigOperators Manifold ContDiff
 
 namespace DifferentialGeometry.Analysis.Spectral.DeTurckCoefficients
@@ -754,8 +745,6 @@ open DifferentialGeometry.Analysis.Parabolic.TensorSpectral
   cometricFinBasisTrace_eq_chartInvGram_bilin quadrilinearMapSlotBilinearAt
   unitModel4SlotBilin_apply)
 
-
-
 def lieTopTail
     (g₀ : SmoothRiemannianMetric I M) (T T' : SmoothCcTensor g₀ 0 2)
     (g₁ : SmoothRiemannianMetric I M) (x : M)
@@ -768,8 +757,6 @@ def lieTopTail
           (ccTensor02Symm (I := I) (M := M) g₀ (T - T')) x ![j, l, i, k₁]
         - arm2ReadoutCovDerivPair (I := I) (M := M) g₀
           (ccTensor02Symm (I := I) (M := M) g₀ (T - T')) x ![i, j, l, k₁])
-
-
 
 omit [BoundarylessManifold I M] in
 theorem lieTop_cov_eq_raw

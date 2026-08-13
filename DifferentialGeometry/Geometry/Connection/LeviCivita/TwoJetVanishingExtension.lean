@@ -3,7 +3,6 @@ import DifferentialGeometry.Geometry.Curvature.CurvatureOperator.TensorRicciComm
 import DifferentialGeometry.Geometry.Operator.HessianTrace
 import DifferentialGeometry.Geometry.Connection.TensorNabla.HomBundleNabla
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Operator
 
 
@@ -150,7 +149,8 @@ private lemma chartE_section_repr_covApply_linExt_eventuallyEq
     chartLeviCivitaGoodSet_mem_baseSet (I := I) hy_good
   have hb1 : (linExtBump (I := I) x₀ : M → ℝ) =ᶠ[𝓝 b] (fun _ => (1 : ℝ)) := by
     filter_upwards [hW₀_open.mem_nhds hy_W₀] with c hc using hW₀_sub hc
-  simp only [Function.comp_apply, chartE_section_repr_eq_trivToE, DifferentialGeometry.Geometry.Curvature.covApply_apply]
+  simp only [Function.comp_apply, chartE_section_repr_eq_trivToE,
+    DifferentialGeometry.Geometry.Curvature.covApply_apply]
   rw [show (LeviCivita (I := I) g).toFun (linearExtensionTangent (I := I) x₀ w) b
         (linearExtensionTangent (I := I) x₀ v b) =
       trivFromE (I := I) x₀ b
@@ -367,14 +367,16 @@ theorem covApply_covApply_linearExtensionTangent_basepoint_eq
   set V : E := tangentCoord (I := I) x₀ v with hV_def
   set W : E := tangentCoord (I := I) x₀ w with hW_def
   set S : Π b : M, TangentSpace I b :=
-    DifferentialGeometry.Geometry.Curvature.covApply (LeviCivita (I := I) g) (linearExtensionTangent (I := I) x₀ v)
+    DifferentialGeometry.Geometry.Curvature.covApply (LeviCivita (I := I) g)
+      (linearExtensionTangent (I := I) x₀ v)
       (linearExtensionTangent (I := I) x₀ w) with hS_def
   have hLv1 : ContMDiff I (I.prod 𝓘(ℝ, E)) ((∞ : WithTop ℕ∞) + 1)
       (T% (linearExtensionTangent (I := I) x₀ w)) := by
     have h : ((∞ : WithTop ℕ∞) + 1) = (∞ : WithTop ℕ∞) := by rw [ENat.coe_top_add_one]
     rw [h]; exact linearExtensionTangent_smooth (I := I) x₀ w
   have hS_at : MDiffAt (T% S) x₀ :=
-    DifferentialGeometry.Geometry.Curvature.covApply_mdifferentiableAt (cov := LeviCivita (I := I) g)
+    DifferentialGeometry.Geometry.Curvature.covApply_mdifferentiableAt (cov := LeviCivita
+      (I := I) g)
       (linearExtensionTangent_smooth (I := I) x₀ v) hLv1
   have hx₀_good : x₀ ∈ chartLeviCivitaGoodSet (I := I) x₀ :=
     self_mem_chartLeviCivitaGoodSet (I := I) (α := x₀)
@@ -807,7 +809,8 @@ private lemma chartE_section_repr_covApply_polyCoordExt_eventuallyEq
   have hb1 : (linExtBump (I := I) x₀ : M → ℝ) =ᶠ[𝓝 b] (fun _ => (1 : ℝ)) := by
     filter_upwards [hW₀_open.mem_nhds hy_W₀] with d hd using hW₀_sub hd
   have hφb : φ b = y := by rw [hb_def, φ.right_inv hy_tgt]
-  simp only [Function.comp_apply, chartE_section_repr_eq_trivToE, DifferentialGeometry.Geometry.Curvature.covApply_apply]
+  simp only [Function.comp_apply, chartE_section_repr_eq_trivToE,
+    DifferentialGeometry.Geometry.Curvature.covApply_apply]
   rw [show (LeviCivita (I := I) g).toFun (polyCoordExtensionTangent (I := I) x₀ P) b
         (linearExtensionTangent (I := I) x₀ u b) =
       trivFromE (I := I) x₀ b
@@ -859,14 +862,16 @@ private lemma covApply_covApply_polyCoordExt_basepoint_reduce
   set φ := extChartAt I x₀ with hφ_def
   set c := extChartAt I x₀ x₀ with hc_def
   set S : Π b : M, TangentSpace I b :=
-    DifferentialGeometry.Geometry.Curvature.covApply (LeviCivita (I := I) g) (linearExtensionTangent (I := I) x₀ u)
+    DifferentialGeometry.Geometry.Curvature.covApply (LeviCivita (I := I) g)
+      (linearExtensionTangent (I := I) x₀ u)
       (polyCoordExtensionTangent (I := I) x₀ P) with hS_def
   have hC1 : ContMDiff I (I.prod 𝓘(ℝ, E)) ((∞ : WithTop ℕ∞) + 1)
       (T% (polyCoordExtensionTangent (I := I) x₀ P)) := by
     have h : ((∞ : WithTop ℕ∞) + 1) = (∞ : WithTop ℕ∞) := by rw [ENat.coe_top_add_one]
     rw [h]; exact polyCoordExtensionTangent_smooth (I := I) x₀ hP
   have hS_at : MDiffAt (T% S) x₀ :=
-    DifferentialGeometry.Geometry.Curvature.covApply_mdifferentiableAt (cov := LeviCivita (I := I) g)
+    DifferentialGeometry.Geometry.Curvature.covApply_mdifferentiableAt (cov := LeviCivita
+      (I := I) g)
       (linearExtensionTangent_smooth (I := I) x₀ u) hC1
   have hx₀_good : x₀ ∈ chartLeviCivitaGoodSet (I := I) x₀ :=
     self_mem_chartLeviCivitaGoodSet (I := I) (α := x₀)
@@ -1563,11 +1568,13 @@ theorem exists_linExtTwoJetVanishing_tangentExtension
       exact hC_sm
     have hBLv : MDiffAt (T% (covApply (LeviCivita (I := I) g)
         (linearExtensionTangent (I := I) x₀ u) (linearExtensionTangent (I := I) x₀ v))) x₀ :=
-      DifferentialGeometry.Geometry.Curvature.covApply_mdifferentiableAt (cov := LeviCivita (I := I) g)
+      DifferentialGeometry.Geometry.Curvature.covApply_mdifferentiableAt (cov := LeviCivita
+        (I := I) g)
         (linearExtensionTangent_smooth (I := I) x₀ u) hLu1
     have hBC : MDiffAt (T% (covApply (LeviCivita (I := I) g)
         (linearExtensionTangent (I := I) x₀ u) C)) x₀ :=
-      DifferentialGeometry.Geometry.Curvature.covApply_mdifferentiableAt (cov := LeviCivita (I := I) g)
+      DifferentialGeometry.Geometry.Curvature.covApply_mdifferentiableAt (cov := LeviCivita
+        (I := I) g)
         (linearExtensionTangent_smooth (I := I) x₀ u) hC1
     have hadd := (LeviCivita (I := I) g).isCovariantDerivativeOnUniv.add hBLv hBC
       (Set.mem_univ x₀)
@@ -1607,9 +1614,11 @@ theorem covApply_covApply_eq_linExt_of_covApply_zero
     have h : ((∞ : WithTop ℕ∞) + 1) = (∞ : WithTop ℕ∞) := by rw [ENat.coe_top_add_one]
     rw [h]; exact hW
   have hBZ : MDiffAt (T% (covApply (LeviCivita (I := I) g) Z W)) x₀ :=
-    DifferentialGeometry.Geometry.Curvature.covApply_mdifferentiableAt (cov := LeviCivita (I := I) g) hZ_sm hW1
+    DifferentialGeometry.Geometry.Curvature.covApply_mdifferentiableAt (cov := LeviCivita
+      (I := I) g) hZ_sm hW1
   have hBD : MDiffAt (T% (covApply (LeviCivita (I := I) g) D W)) x₀ :=
-    DifferentialGeometry.Geometry.Curvature.covApply_mdifferentiableAt (cov := LeviCivita (I := I) g) hD_sm hW1
+    DifferentialGeometry.Geometry.Curvature.covApply_mdifferentiableAt (cov := LeviCivita
+      (I := I) g) hD_sm hW1
   have hadd := (LeviCivita (I := I) g).isCovariantDerivativeOnUniv.add hBZ hBD (Set.mem_univ x₀)
   rw [hsplit]
   rw [hadd]

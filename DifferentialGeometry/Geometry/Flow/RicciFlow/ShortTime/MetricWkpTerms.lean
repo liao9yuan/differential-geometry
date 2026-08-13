@@ -4,22 +4,11 @@ import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurckCoefficients.Metr
 import DifferentialGeometry.Analysis.Spectral.Tensor.EllipticBridge.EigenvectorWeakSolution.CovGrad.EigenvectorCovGradLeibniz
 import DifferentialGeometry.Analysis.Spectral.Tensor.EllipticBridge.EigenvectorWeakSolution.LowerOrder.ChartL2BoundedConvergence
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.MetricPreconv
-open DifferentialGeometry.PDE.RicciFlow DifferentialGeometry.Analysis.Sobolev DifferentialGeometry.Analysis.Spectral
-open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.PDE.RicciFlow DifferentialGeometry.Analysis.Sobolev
+    DifferentialGeometry.Analysis.Spectral
 open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Connection
 open DifferentialGeometry.Geometry.Operator
-
-/-!
-# Uniform fixed-atlas metric-difference terms
-
-This file isolates the part of the fixed-background `W^{3,p}` data argument
-that does not require the tensor-space quotient or completeness layer.
-Intrinsic covariant-derivative bounds through order three first give one
-pointwise Frechet-jet bound for all POU-weighted metric-difference components.
-The compact-jet Euclidean theorem then gives one finite `W^{3,p}` bound on
-each fixed chart, uniform over the whole metric family and all components.
--/
 
 noncomputable section
 
@@ -53,9 +42,6 @@ private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
 omit [BoundarylessManifold I M] in
-/-- Uniform intrinsic metric bounds through order three give one uniform
-Frechet-jet bound for every POU-weighted scalar component of the
-fixed-background metric difference. -/
 theorem metricDiff_fam_jet
     {ι : Type*}
     (gBase : SmoothRiemannianMetric I M)
@@ -346,9 +332,6 @@ theorem metricDiff_fam_jet
     simpa using hC_nn
 
 omit [BoundarylessManifold I M] in
-/-- On every fixed atlas chart, the metric-difference components of the whole
-family have one common finite `W^{3,p}` bound.  The chart may affect the bound;
-the metric-family index and tensor component do not. -/
 theorem metricDiff_wkp_terms
     {ι : Type*}
     (gBase : SmoothRiemannianMetric I M)

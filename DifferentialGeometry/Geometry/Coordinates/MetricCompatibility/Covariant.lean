@@ -1,17 +1,7 @@
 import DifferentialGeometry.Geometry.Coordinates.MetricCompatibility.Inverse
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
 
 set_option autoImplicit false
-
-
-
-
-
-
-
-
-
 
 namespace DifferentialGeometry.Tensor.Coordinates
 
@@ -121,9 +111,6 @@ theorem metricComp_mdiffAt
   rw [mdifferentiableAt_totalSpace] at htotal
   simpa [metricCompForMetricInFrame] using htotal.2
 
-
-
-
 omit [FiniteDimensional ℝ E] in
 theorem metricCompForMetricInFrame_extDerivFun_eq_christoffel
     (g : SmoothRiemannianMetric I M)
@@ -160,8 +147,6 @@ theorem metricCompForMetricInFrame_extDerivFun_eq_christoffel
   rw [covariantDerivative_eq_sum_christoffel (I := I) cov frame hframe hx d a]
   rw [covariantDerivative_eq_sum_christoffel (I := I) cov frame hframe hx d b]
   simp [metricCompForMetricInFrame, map_sum]
-
-
 
 omit [FiniteDimensional ℝ E] in
 theorem metricComp_extDeriv_tangent
@@ -513,8 +498,6 @@ theorem inverseMetric_derivative_solve
                           refine Finset.sum_congr rfl fun b _hb => ?_
                           rw [hsymm b j]
                           ring
-
-
 
 omit [FiniteDimensional ℝ E] in
 theorem inverseMetricCovDerivForMetricCompInFrame_eq_zero

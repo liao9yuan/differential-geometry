@@ -15,15 +15,6 @@ open DifferentialGeometry.Geometry.Operator
 set_option autoImplicit false
 set_option backward.isDefEq.respectTransparency false
 
-
-
-
-
-
-
-
-
-
 noncomputable section
 
 namespace DifferentialGeometry.Geometry.Curvature
@@ -290,8 +281,6 @@ private theorem div_ricGrad [I.Boundaryless] [SigmaCompactSpace M]
       rw [hRicPart, hHessPart]
     _ = _ := by rfl
 
-
-
 theorem ricDriftDiv [I.Boundaryless] [CompactSpace M]
     (g : SmoothRiemannianMetric I M) {f : M -> Real}
     (hf : ContMDiff I 𝓘(Real, Real) (∞ : WithTop ℕ∞) f) (x : M) :
@@ -360,8 +349,6 @@ theorem ricDriftDiv [I.Boundaryless] [CompactSpace M]
       rw [hdivRG, hdivaG, hLap, hda]
       dsimp only [a]
       ring
-
-
 
 theorem ricDriftAct [I.Boundaryless]
     (g : SmoothRiemannianMetric I M) {f : M -> Real}

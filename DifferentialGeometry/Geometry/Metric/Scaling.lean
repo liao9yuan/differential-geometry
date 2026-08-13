@@ -4,13 +4,6 @@ open DifferentialGeometry.Geometry.Curvature
 
 set_option autoImplicit false
 
-
-
-
-
-
-
-
 noncomputable section
 
 namespace DifferentialGeometry
@@ -129,8 +122,6 @@ theorem scaleMetric_mul
   ext v w
   simp [scaleMetric_inner, mul_assoc]
 
-
-
 theorem scaleMetric_inv_mul
     (c : Real) (hc : 0 < c) (g : SmoothRiemannianMetric I M) :
     (scaleMetric (I := I) c⁻¹ (inv_pos.mpr hc)
@@ -139,8 +130,6 @@ theorem scaleMetric_inv_mul
   ext v w
   simp only [scaleMetric_inner]
   rw [← mul_assoc, inv_mul_cancel₀ (ne_of_gt hc), one_mul]
-
-
 
 theorem mc_scaleMetric
     {cov : CovariantDerivative I E (TangentSpace I : M -> Type _)}
@@ -176,8 +165,6 @@ theorem mc_scaleMetric
   rw [hderivMap', ContinuousLinearMap.smul_apply, hcompat']
   rw [smul_eq_mul]
   ring
-
-
 
 theorem lc_scaleMetric
     [FiniteDimensional Real E] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M]

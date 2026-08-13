@@ -2,19 +2,9 @@ import DifferentialGeometry.Analysis.Spectral.Intrinsic.Garding.ConnLapPairing
 import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.GreenIdentityAndIBP.AllOrderGardingConstant
 import DifferentialGeometry.Analysis.Sobolev.TensorHilbert.HomFieldActionL2JetBound
 open DifferentialGeometry.Analysis.Sobolev
-open DifferentialGeometry.Analysis.Sobolev
 open DifferentialGeometry.Analysis.Spectral
 open DifferentialGeometry.Analysis.Elliptic
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
-
-
-
-
-
-
-
-
 
 noncomputable section
 
@@ -54,8 +44,6 @@ private local instance balancedTensorRSTotalSpaceTopology (r s : ℕ) :
 private local instance balancedTensorRSFiberBundle (r s : ℕ) :
     FiberBundle (TensorRSModel r s ℝ E) (fun x : M => TensorRSSpace r s I x) :=
   Tensor0SBundle.tensorRSBundle_fiber r s
-
-
 
 theorem iterL_jet_le (g : SmoothRiemannianMetric I M) (s a : ℕ) :
     ∃ C : ℕ → ℝ, (∀ p, 0 ≤ C p) ∧ ∀ (p : ℕ) (v : SmoothCcTensor g 0 s),
@@ -172,8 +160,6 @@ private theorem inner_abs_le (g : SmoothRiemannianMetric I M) (s : ℕ)
   rw [← SmoothCcTensor.inner_def (I := I) (M := M) A B]
   exact abs_real_inner_le_norm A B
 
-
-
 theorem iterL_pair_le (g : SmoothRiemannianMetric I M)
     (s a r : ℕ) (hr : r ≤ a) (A B : SmoothCcTensor g 0 s) :
     |tensorL2Inner (I := I) (M := M) g 0 s
@@ -189,9 +175,6 @@ theorem iterL_pair_le (g : SmoothRiemannianMetric I M)
   rw [hsplit, oneMinusConnLapSmoothIter_l2Inner_selfAdjoint
     (I := I) (M := M) g 0 s r]
   exact inner_abs_le (I := I) (M := M) g s _ _
-
-
-
 
 theorem iterL_window_pair (g : SmoothRiemannianMetric I M)
     (s₀ σ a r dX dY NA NB : ℕ) (hr : r ≤ a)
@@ -373,8 +356,6 @@ private theorem jetProduct_le (g : SmoothRiemannianMetric I M) (s n p q : ℕ)
           (jetSum_mono (I := I) (M := M) g s hp S)
           (hnonneg p) (hnonneg (n + 1))
 
-
-
 theorem iterL_pair_jet_of (g : SmoothRiemannianMetric I M) (s n : ℕ)
     {α : Type*} (Φ : α → SmoothCcTensor g (s + 1) s) (K : Set α)
     (CG : ℕ → ℝ) (hCG_nn : ∀ q, 0 ≤ CG q)
@@ -464,8 +445,6 @@ theorem iterL_pair_jet_of (g : SmoothRiemannianMetric I M) (s n : ℕ)
       exact jetProduct_le (I := I) (M := M) g s n (2 * b + 1) (2 * a + 2)
         (by omega) (by omega) (by omega) S
 
-
-
 theorem iterL_pair_jet_le (g : SmoothRiemannianMetric I M) (s n : ℕ)
     (Φ : SmoothCcTensor g (s + 1) s) :
     ∃ C : ℝ, 0 ≤ C ∧ ∀ S : SmoothCcTensor g 0 s,
@@ -485,9 +464,6 @@ theorem iterL_pair_jet_le (g : SmoothRiemannianMetric I M) (s n : ℕ)
       (fun _ : Unit => Φ) Set.univ CG hCG_nn
       (fun _ _ W q => hCG W q)
   exact ⟨C, hC_nn, fun S => hC () (Set.mem_univ ()) S⟩
-
-
-
 
 theorem curv_iterL_pair_le (g : SmoothRiemannianMetric I M)
     (s₀ σ i q dS dZ NA NB : ℕ) (hNA : i + q + 2 + dS ≤ NA)

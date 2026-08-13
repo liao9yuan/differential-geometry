@@ -1,7 +1,6 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Entropy.F.ConnectionTrace
 open DifferentialGeometry.Tensor.RSTensor
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Operator
 
 
@@ -22,19 +21,6 @@ open scoped Manifold ContDiff
 
 variable {M : Type*}
 
-
-
-
-
-
-
-
-
-
-
-
-
-
 section GeometryFormula510
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]
@@ -45,9 +31,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 private local instance : CompleteSpace E := FiniteDimensional.complete Real E
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
-
-
-
 
 omit [NeZero (Module.finrank ℝ E)] in
 theorem formula510_of_connTraceField
@@ -142,10 +125,6 @@ theorem formula510_of_connTraceField
     hmeas hfirst hfinal_int hdiv_int hshift_int hcorr_int
     hdivTrace hactionTrace hweighted hlap hgradSq hshift hqeq
 
-
-
-
-
 omit [NeZero (Module.finrank ℝ E)] in
 theorem formula510_of_trace
     [I.Boundaryless] [T2Space M] [CompactSpace M]
@@ -233,13 +212,6 @@ theorem formula510_of_trace
     (fun x => rfl)
     (connTraceAction_eq (I := I) g A potential)
     hweighted hlap hgradSq hshift hqeq
-
-
-
-
-
-
-
 
 omit [NeZero (Module.finrank ℝ E)] in
 theorem formula510_of_components
@@ -411,13 +383,6 @@ theorem formula510_of_components
         nablaChristoffelVariation christoffelVariation gradPotential)
     hpotential hq hmeas hfirst hfinal_int hdiv_int hshift_int hcorr_int
     hweighted hlap hgradSq hshift hqeq
-
-
-
-
-
-
-
 
 omit [NeZero (Module.finrank ℝ E)] in
 theorem formula510_producer

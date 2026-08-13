@@ -1,16 +1,7 @@
 import DifferentialGeometry.Tensor.RSTensor.Tensor0SRiemannian.Product
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
 
 set_option autoImplicit false
-
-
-
-
-
-
-
-
 
 namespace DifferentialGeometry
 namespace Tensor0SBundle

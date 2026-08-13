@@ -4,7 +4,8 @@ import DifferentialGeometry.Analysis.Spectral.Intrinsic.CompactSAResolventIntrin
 import DifferentialGeometry.Analysis.Sobolev.HebeyBlock.NablaTensor.IteratedNabla
 import Mathlib.Analysis.Normed.Operator.Extend
 
-open DifferentialGeometry.Analysis.Sobolev.HebeyBlock DifferentialGeometry.Analysis.Sobolev.IntrinsicSobolev
+open DifferentialGeometry.Analysis.Sobolev.HebeyBlock
+    DifferentialGeometry.Analysis.Sobolev.IntrinsicSobolev
 noncomputable section
 
 

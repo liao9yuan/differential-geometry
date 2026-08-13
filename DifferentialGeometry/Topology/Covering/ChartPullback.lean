@@ -9,26 +9,6 @@ import DifferentialGeometry.Geometry.Geodesic.Equation
 import Mathlib.Geometry.Manifold.VectorBundle.Tangent
 import Mathlib.Topology.VectorBundle.Basic
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 open Set Function Filter
 open scoped Topology ContDiff Manifold
 open DifferentialGeometry.Integral.Measure
@@ -56,29 +36,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
   [LocPathConnectedSpace M]
   [DifferentialGeometry.Geometry.Riemannian.Topology.SemilocallySimplyConnectedSpace M]
   [Inhabited M]
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 omit [NeZero (Module.finrank ℝ E)] in
 omit [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
@@ -153,21 +110,6 @@ theorem chartBasisVecFiber_lifted
   have hAt := congrArg (fun L : E →L[ℝ] E => L (chartModelBasis E i)) hSymmL
   exact hAt
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 omit [NeZero (Module.finrank ℝ E)] in
 omit [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 omit [ConnectedSpace M] in
@@ -195,7 +137,6 @@ theorem chartGramMatrix_lifted
 omit [NeZero (Module.finrank ℝ E)] in
 omit [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 omit [ConnectedSpace M] in
-/-- `chartChristoffel` is natural under universal-cover projection. -/
 theorem chartChristoffel_lifted
     (g : SmoothRiemannianMetric I M)
     (α' : DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover M)
@@ -398,24 +339,6 @@ theorem chartChristoffel_lifted
     rw [Filter.EventuallyEq.fderiv_eq (hGramOnE_eventuallyEq i j)]
   rw [hP_ij_lj, hP_ji_li, hP_lij]
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 omit [NeZero (Module.finrank ℝ E)] in
 omit [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 omit [ConnectedSpace M] in
@@ -446,21 +369,6 @@ theorem chartChristoffelContraction_lifted
   refine Finset.sum_congr rfl ?_
   intro j _
   rw [chartChristoffel_lifted (I := I) (M := M) g α' x' hx' i j k]
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 omit [NeZero (Module.finrank ℝ E)] in
 omit [T2Space M] [SigmaCompactSpace M] in
@@ -514,20 +422,6 @@ lemma chartChristoffel_lifted_eventuallyEq
     (extChartAt_proj_eq (I := I) (M := M) α' x'_y).symm
   rw [hExt_x'_y, hExt_proj_x'_y, hExt_x'_y] at hLifted
   exact hLifted
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 omit [NeZero (Module.finrank ℝ E)] in
 omit [T2Space M] [SigmaCompactSpace M] in
@@ -595,17 +489,6 @@ theorem chartRiemannTensor_lifted
   refine Finset.sum_congr rfl ?_
   intro m _
   rw [hChristAt j m l, hChristAt i k m, hChristAt k m l, hChristAt i j m]
-
-
-
-
-
-
-
-
-
-
-
 
 omit [NeZero (Module.finrank ℝ E)] in
 omit [T2Space M] [SigmaCompactSpace M] in

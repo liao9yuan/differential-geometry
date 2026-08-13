@@ -3,7 +3,6 @@ import DifferentialGeometry.Analysis.Elliptic.Regularity.SmoothFChartResidual.Bi
 import DifferentialGeometry.Analysis.Sobolev.Euclidean.Density
 import DifferentialGeometry.Analysis.Sobolev.Euclidean.Multiplication.MultiplyQuantK
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
 
 
 noncomputable section

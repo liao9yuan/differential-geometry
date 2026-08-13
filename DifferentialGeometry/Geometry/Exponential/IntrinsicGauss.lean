@@ -5,17 +5,8 @@ import DifferentialGeometry.Geometry.Exponential.MinimizingGeodesic
 import DifferentialGeometry.Geometry.Comparison.Variation.FirstVariation
 import DifferentialGeometry.Geometry.Comparison.Variation.SpeedDerivative
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
 
 set_option autoImplicit false
-
-/-!
-# Intrinsic Gauss lemma
-
-This file proves Gauss's lemma directly for the complete intrinsic exponential.
-Unlike the chart-fixed compatibility theorem, the result has no radius,
-coordinate-source, or connectedness hypothesis.
--/
 
 noncomputable section
 
@@ -87,10 +78,6 @@ private theorem launch_inner_deriv
     ring
   exact hval ▸ hd
 
-/-- **Gauss's lemma for the complete intrinsic exponential.**  Pairing the
-terminal velocity of the intrinsic geodesic launched by `u` with the
-vector-slot differential of the time-one intrinsic exponential in direction
-`w` recovers the base metric pairing `gₚ(u,w)`. -/
 theorem intrinsic_gauss
     (g : SmoothRiemannianMetric I M)
     (hEnorm : IsMetricNorm (I := I) (M := M) g)

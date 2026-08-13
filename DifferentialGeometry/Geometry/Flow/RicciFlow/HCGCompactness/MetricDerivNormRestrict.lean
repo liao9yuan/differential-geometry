@@ -5,18 +5,9 @@ import DifferentialGeometry.Geometry.Curvature.OpenSubtypeNaturality
 import DifferentialGeometry.Geometry.Curvature.RicciOperatorNormBound
 import DifferentialGeometry.Bundle.PartialMfderiv.FixedBase
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Connection
 
 set_option autoImplicit false
-
-
-
-
-
-
-
-
 
 noncomputable section
 
@@ -24,7 +15,6 @@ namespace DifferentialGeometry
 namespace HCGCompactness
 
 open scoped Manifold ContDiff Topology
-
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]
 variable [FiniteDimensional Real E] [CompleteSpace E]
@@ -36,8 +26,6 @@ section FixedManifold
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
 variable [T2Space M] [IsManifold I ∞ M] [SigmaCompactSpace M]
 
-
-
 omit [SigmaCompactSpace M] in
 theorem metricCovDeriv_zero_restrictOpen_apply
     (g gRef : SmoothRiemannianMetric I M) (U : TopologicalSpace.Opens M)
@@ -47,8 +35,6 @@ theorem metricCovDeriv_zero_restrictOpen_apply
         (gRef.restrictOpen (I := I) U) 0 x slots =
       metricCovDeriv (I := I) g gRef 0 (x : M) slots := by
   simp [metricCovDeriv, Tensor0SBundle.metricTensorField]
-
-
 
 omit [SigmaCompactSpace M] in
 theorem metricCovDeriv_restrictOpen_apply
@@ -228,7 +214,6 @@ theorem metricCovDeriv_restrictOpen_apply
             (Fin.cons (slots 0) (fun q : Fin (a + 2) => slots q.succ)) := by
             rw [hrightSlots]
 
-
 omit [SigmaCompactSpace M] in
 theorem metricDiffCovDerivAt_restrictOpen_apply
     (gk gInf gRef : SmoothRiemannianMetric I M) (U : TopologicalSpace.Opens M)
@@ -254,8 +239,6 @@ theorem metricDiffCovDerivAt_restrictOpen_apply
     _ = (metricCovDeriv (I := I) gk gRef a (x : M) -
           metricCovDeriv (I := I) gInf gRef a (x : M)) slots :=
       (Tensor0SBundle.Tensor0SSpace.sub_apply (a + 2) (x : M) _ _ slots).symm
-
-
 
 omit [CompleteSpace E] [T2Space M] [SigmaCompactSpace M] in
 theorem normSq0S_restrictOpen_apply
@@ -298,8 +281,6 @@ theorem normSq0S_restrictOpen_apply
       (I := I) (M := M) g (x : M) s basis hinvM A]
   rfl
 
-
-
 omit [SigmaCompactSpace M] in
 theorem metricDerivNorm_restrictOpen
     (gk gInf gRef : SmoothRiemannianMetric I M) (U : TopologicalSpace.Opens M)
@@ -311,11 +292,6 @@ theorem metricDerivNorm_restrictOpen
   rw [metricDerivNorm]
   rw [metricDiffCovDerivAt_restrictOpen_apply]
   rw [normSq0S_restrictOpen_apply]
-
-
-
-
-
 
 omit [SigmaCompactSpace M] in
 theorem metricDerivNormSupOn_restrictOpen
@@ -343,7 +319,6 @@ end DifferentialGeometry
 
 namespace DifferentialGeometry.PDE.RicciFlow
 
-
 open scoped Manifold ContDiff Topology
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]
@@ -351,9 +326,6 @@ variable [FiniteDimensional Real E] [CompleteSpace E]
 variable {Idx : Type*} [Fintype Idx]
 
 omit [FiniteDimensional ℝ E] [CompleteSpace E] in
-/-- A constant-frame component tower commutes with restriction to an open
-subtype of its model space.  The differentiability premise is exactly what is
-needed to restrict the scalar directional derivative at each recursive level. -/
 theorem iterCovComp_restrict {r : Nat} (U : TopologicalSpace.Opens E)
     [SigmaCompactSpace U] [T2Space U]
     (e : Idx → E) (chr : E → Idx → Idx → Idx → Real)

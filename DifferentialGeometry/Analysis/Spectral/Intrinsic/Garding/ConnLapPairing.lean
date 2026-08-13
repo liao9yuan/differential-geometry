@@ -3,15 +3,6 @@ import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.GreenIdentityA
 open DifferentialGeometry.Analysis.Sobolev
 open DifferentialGeometry.Analysis.Elliptic
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
-
-
-
-
-
-
-
-
 
 open Bundle Manifold MeasureTheory Set Filter DifferentialGeometry.Tensor0SBundle
 open scoped Manifold Topology ContDiff ENNReal BigOperators
@@ -103,8 +94,6 @@ theorem oneMinusConnLapSmooth_l2Inner_selfAdjoint
       (rawTensorConnLapSmooth (I := I) g r s v)]
   rw [rawTensorConnLapSmooth_l2Inner_selfAdjoint (I := I) (M := M) g r s T v]
 
-
-
 theorem oneMinusConnLapSmooth_l2Inner_eq_add_covGrad
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (A B : SmoothCcTensor g r s) :
     tensorL2Inner (I := I) (M := M) g r s
@@ -182,8 +171,6 @@ theorem oneMinusConnLapSmoothIter_l2Inner_sym_split
   rw [oneMinusConnLapSmoothIter_l2Inner_selfAdjoint (I := I) (M := M) g r s a
     (oneMinusConnLapSmoothIter (I := I) g r s b A) B]
 
-
-
 theorem oneMinusConnLapSmoothIter_l2Inner_eq_add_sum_covGrad
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (n : ℕ)
     (A B : SmoothCcTensor g r s) :
@@ -245,8 +232,6 @@ theorem connLapIter_map_add (g : SmoothRiemannianMetric I M) (r s j : ℕ)
     rw [oneMinusConnLapSmoothIter_succ, oneMinusConnLapSmoothIter_succ,
       oneMinusConnLapSmoothIter_succ, ih, oneMinusConn_add (I := I) (M := M) g r s]
 
-
-
 theorem covGrad_oneMinus (g : SmoothRiemannianMetric I M) (s : ℕ)
     (S : SmoothCcTensor g 0 s) :
     covGrad (I := I) (M := M) g 0 s
@@ -268,8 +253,6 @@ theorem connLapIter_one (g : SmoothRiemannianMetric I M) (r s : ℕ)
     oneMinusConnLapSmoothIter (I := I) g r s 1 S =
       oneMinusConnLapSmooth (I := I) g r s S := by
   rw [oneMinusConnLapSmoothIter_succ, oneMinusConnLapSmoothIter_zero]
-
-
 
 theorem covGrad_iterL (g : SmoothRiemannianMetric I M) (s j : ℕ) :
     ∀ S : SmoothCcTensor g 0 s,

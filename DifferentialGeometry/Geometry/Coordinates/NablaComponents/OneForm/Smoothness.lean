@@ -1,12 +1,6 @@
 import DifferentialGeometry.Geometry.Coordinates.NablaComponents.OneForm.Moving
 open DifferentialGeometry.Tensor.Multilinear
 
-
-
-
-
-
-
 set_option autoImplicit false
 
 noncomputable section
@@ -150,12 +144,6 @@ private theorem coordinateFrame_covariantDeriv_apply_contMDiffAt
   exact (hW_on x₀ hx₀).contMDiffAt (hu.mem_nhds hx₀)
 
 set_option backward.isDefEq.respectTransparency false in
-
-
-
-
-
-
 theorem nabla0SFun_one_eval_contMDiff
     (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
     (hcov : CovariantDerivative.ContMDiffCovariantDerivative cov (∞ : WithTop ℕ∞))
@@ -227,12 +215,6 @@ theorem nabla0SFun_one_eval_contMDiff
         (by simp))]
 
 set_option backward.isDefEq.respectTransparency false in
-
-
-
-
-
-
 theorem nabla0SFun_one_eval_coordinateFrame_contMDiffAt
     (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
     (hcov : CovariantDerivative.ContMDiffCovariantDerivativeLocally cov
@@ -310,12 +292,6 @@ theorem nabla0SFun_one_eval_coordinateFrame_contMDiffAt
     (hZ_at.mdifferentiableAt (by simp))]
 
 set_option backward.isDefEq.respectTransparency false in
-
-
-
-
-
-
 theorem nabla0SFun_one_contMDiff
     (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
     (hcov : CovariantDerivative.ContMDiffCovariantDerivativeLocally cov

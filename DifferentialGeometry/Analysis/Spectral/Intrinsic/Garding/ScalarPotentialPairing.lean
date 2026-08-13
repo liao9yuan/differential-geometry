@@ -2,14 +2,6 @@ import DifferentialGeometry.Analysis.Spectral.Intrinsic.Garding.ParametricPairin
 import DifferentialGeometry.Analysis.Spectral.Tensor.SobolevScale.FiniteSpectralPairing
 open DifferentialGeometry.Analysis.Sobolev
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
-
-
-
-
-
-
-
 
 noncomputable section
 
@@ -33,9 +25,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
   [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M]
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
-
-
-
 
 theorem cc_a1_unif
     (q : SmoothRiemannianMetric I M)

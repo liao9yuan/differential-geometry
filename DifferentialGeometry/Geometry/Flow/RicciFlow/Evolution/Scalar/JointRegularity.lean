@@ -2,18 +2,8 @@ import DifferentialGeometry.Bundle.PartialMfderiv.Basic
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.Scalar.TraceAlgebra
 open DifferentialGeometry.PDE.RicciFlow
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
 
 set_option autoImplicit false
-
-
-
-
-
-
-
-
-
 
 noncomputable section
 
@@ -33,8 +23,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
   [IsManifold I ∞ M] [SigmaCompactSpace M] [T2Space M]
 
 private local instance : CompleteSpace E := FiniteDimensional.complete Real E
-
-
 
 theorem scalar_joint
     {D : RealTimeInterval} (S : SolutionOn (I := I) (M := M) D)

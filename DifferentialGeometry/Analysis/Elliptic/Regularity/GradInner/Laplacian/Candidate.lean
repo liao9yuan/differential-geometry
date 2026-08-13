@@ -2,7 +2,6 @@ import DifferentialGeometry.Analysis.Elliptic.Regularity.GradInner.Laplacian.LpI
 import DifferentialGeometry.Analysis.Elliptic.Regularity.Hessian.LpClass
 import DifferentialGeometry.Geometry.Curvature.Bochner.BochnerConcrete
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Connection
 open DifferentialGeometry.Geometry.Operator
 

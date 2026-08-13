@@ -9,8 +9,8 @@ import DifferentialGeometry.Analysis.Spectral.Intrinsic.TensorHsInterpolationLim
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.HeatSemigroup.TimeL2EigenProjection
 import DifferentialGeometry.Analysis.ProjectedContractionFixedPoint
 import Mathlib.Analysis.ODE.Gronwall
-open DifferentialGeometry.Analysis.Sobolev.CSupTensor DifferentialGeometry.Analysis.Sobolev.IntrinsicSobolev.SmoothCcTensorHs
-open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Analysis.Sobolev.CSupTensor
+    DifferentialGeometry.Analysis.Sobolev.IntrinsicSobolev.SmoothCcTensorHs
 open DifferentialGeometry.Geometry.Curvature
 
 

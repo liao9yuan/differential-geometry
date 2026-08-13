@@ -15,18 +15,7 @@ import Mathlib.LinearAlgebra.Trace
 import Mathlib.Logic.Equiv.Basic
 import Mathlib.Data.Finite.Defs
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Connection
-
-
-
-
-
-
-
-
-
-
 
 open Set Function Filter Bundle
 open scoped Topology ContDiff
@@ -53,15 +42,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
   [LocPathConnectedSpace M]
   [DifferentialGeometry.Geometry.Riemannian.Topology.SemilocallySimplyConnectedSpace M]
   [Inhabited M] [PseudoEMetricSpace M] [SecondCountableTopology M]
-
-
-
-
-
-
-
-
-
 
 omit [PseudoEMetricSpace M] [SecondCountableTopology M] in
 omit [NeZero (Module.finrank ℝ E)] in
@@ -468,12 +448,6 @@ theorem tail_in_single_sheet [Nonempty M] [CompleteSpace M]
       rw [hfst]; exact hmemU
     · show (t (x' n)).2 ∈ ({pt} : Set (p ⁻¹' {y}))
       rw [hsnd]; exact Set.mem_singleton _
-
-
-
-
-
-
 
 omit [T2Space M] [SigmaCompactSpace M] [PseudoEMetricSpace M] [SecondCountableTopology M] in
 theorem sheet_homeomorph [Nonempty M] (y : M) :

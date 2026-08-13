@@ -8,18 +8,8 @@ import DifferentialGeometry.Tensor.RSTensor.Tensor0SRiemannian.Comparison
 import DifferentialGeometry.Tensor.RSTensor.Tensor0SRiemannian.Product
 import DifferentialGeometry.Tensor.RSTensor.Tensor0SRiemannian.Smooth
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
 
 set_option autoImplicit false
-
-
-
-
-
-
-
-
-
 
 namespace DifferentialGeometry.Geometry.Operator
 
@@ -34,8 +24,6 @@ variable [FiniteDimensional Real E]
 variable {H : Type*} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
-
-
 
 def metricTraceInput {x : M} {s : ℕ}
     (X Y : TangentSpace I x) (tail : Fin s -> TangentSpace I x) :
@@ -64,11 +52,6 @@ theorem metricTensor0S_apply
     rfl
   rw [htail]
   rfl
-
-
-
-
-
 
 def metricTracePair0SAt (g : SmoothRiemannianMetric I M)
     {x : M}
@@ -151,10 +134,6 @@ private theorem metricTraceInput_update_second {x : M} {s : ℕ}
         have hv := congrArg Fin.val h
         simp at hv
       simp [metricTraceInput, Function.update, hne]
-
-
-
-
 
 omit [FiniteDimensional ℝ E] in
 theorem exists_freezeFirstTwo0S {x : M} {s : ℕ}
@@ -253,8 +232,6 @@ theorem freezeFirstTwo0S_apply {x : M} {s : ℕ}
       T (metricTraceInput (I := I) X Y tail) := by
   exact Classical.choose_spec (exists_freezeFirstTwo0S (I := I) T tail) X Y
 
-
-
 def freezeFirstTwoArgs0S {x : M} {s : ℕ}
     (T : Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
       (s + 2) x)
@@ -274,8 +251,6 @@ theorem freezeFirstTwoArgs0S_apply {x : M} {s : ℕ}
   unfold freezeFirstTwoArgs0S
   rw [tensor0S_curry_apply_cons_local, tensor0S_curry_apply_cons_local]
   rfl
-
-
 
 omit [FiniteDimensional ℝ E] in
 theorem exists_freezeLastTwo0S3 {x : M}
@@ -321,8 +296,6 @@ def metricTraceFirstTwo0SAt (g : SmoothRiemannianMetric I M)
     (tail : Fin s -> TangentSpace I x) : Real :=
   metricTracePair0SAt (I := I) g (freezeFirstTwo0S (I := I) T tail)
 
-
-
 theorem freezeFirstTwo0S_neg {x : M} {s : ℕ}
     (T : Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
       (s + 2) x)
@@ -350,10 +323,12 @@ theorem freezeFirstTwo0S_neg {x : M} {s : ℕ}
   calc
     (-T) (metricTraceInput (I := I) (basis (slots 0)) (basis (slots 1)) tail)
         = -(T (metricTraceInput (I := I) (basis (slots 0)) (basis (slots 1)) tail)) := by rfl
-    _ = -((freezeFirstTwo0S (I := I) T tail) (vec2 (I := I) (basis (slots 0)) (basis (slots 1)))) := by
+    _ = -((freezeFirstTwo0S (I := I) T tail) (vec2 (I := I) (basis (slots 0)) (basis
+      (slots 1)))) := by
           congr 1
           exact h2.symm
-    _ = (-freezeFirstTwo0S (I := I) T tail) (vec2 (I := I) (basis (slots 0)) (basis (slots 1))) := by rfl
+    _ = (-freezeFirstTwo0S (I := I) T tail) (vec2 (I := I) (basis (slots 0)) (basis
+      (slots 1))) := by rfl
 
 
 theorem freezeFirstTwo0S_add {x : M} {s : ℕ}
@@ -391,7 +366,8 @@ theorem freezeFirstTwo0S_add {x : M} {s : ℕ}
         = A (metricTraceInput (I := I) (basis (slots 0)) (basis (slots 1)) tail) +
             B (metricTraceInput (I := I) (basis (slots 0)) (basis (slots 1)) tail) := by rfl
     _ = (freezeFirstTwo0S (I := I) A tail) (vec2 (I := I) (basis (slots 0)) (basis (slots 1))) +
-          (freezeFirstTwo0S (I := I) B tail) (vec2 (I := I) (basis (slots 0)) (basis (slots 1))) := by
+          (freezeFirstTwo0S (I := I) B tail) (vec2 (I := I) (basis (slots 0)) (basis
+            (slots 1))) := by
           rw [hA, hB]
 
 
@@ -422,7 +398,8 @@ theorem freezeFirstTwo0S_smul {x : M} {s : ℕ} (c : Real)
   calc
     (c • T) (metricTraceInput (I := I) (basis (slots 0)) (basis (slots 1)) tail)
         = c • T (metricTraceInput (I := I) (basis (slots 0)) (basis (slots 1)) tail) := by rfl
-    _ = c • (freezeFirstTwo0S (I := I) T tail) (vec2 (I := I) (basis (slots 0)) (basis (slots 1))) := by
+    _ = c • (freezeFirstTwo0S (I := I) T tail) (vec2 (I := I) (basis (slots 0)) (basis
+      (slots 1))) := by
           rw [hT]
 
 
@@ -497,7 +474,8 @@ theorem metricTraceFirstTwo0SAt_smul (g : SmoothRiemannianMetric I M)
     (T : Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
       (s + 2) x)
     (tail : Fin s -> TangentSpace I x) :
-    metricTraceFirstTwo0SAt (I := I) g (c • T) tail = c * metricTraceFirstTwo0SAt (I := I) g T tail := by
+    metricTraceFirstTwo0SAt (I := I) g (c • T) tail = c * metricTraceFirstTwo0SAt
+      (I := I) g T tail := by
   unfold metricTraceFirstTwo0SAt
   rw [freezeFirstTwo0S_smul (I := I) c T tail]
   exact metricTracePair0SAt_smul (I := I) g c (freezeFirstTwo0S (I := I) T tail)
@@ -520,16 +498,11 @@ theorem metricTraceFirstTwo0SAt_sub (g : SmoothRiemannianMetric I M)
           rw [metricTraceFirstTwo0SAt_neg (I := I) g B tail]
           rfl
 
-
-
 def metricTraceLastTwo0SAt3 (g : SmoothRiemannianMetric I M)
     {x : M}
     (T : Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) 3 x)
     (Y : TangentSpace I x) : Real :=
   metricTracePair0SAt (I := I) g (freezeLastTwo0S3 (I := I) T Y)
-
-
-
 
 def metricTrace0S2InBasis
     {Idx : Type*} [Fintype Idx]
@@ -703,8 +676,6 @@ theorem metricTracePair0SAt_eq_sum_basis
           intro l _
           congr 1
 
-
-
 theorem normSq0S_metricTensor0S_eq_card
     (g : SmoothRiemannianMetric I M)
     {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
@@ -736,8 +707,6 @@ theorem normSq0S_metricTensor0S_eq_card
           exact (hinv i i).1
     _ = (Fintype.card Idx : Real) := by
           simp
-
-
 
 theorem metricTracePair0SAt_sq_le_card_mul_normSq0S
     (g : SmoothRiemannianMetric I M)
@@ -792,8 +761,6 @@ theorem metricTracePair0SAt_sq_le_card_mul_normSq0S
     simp [Real.norm_eq_abs, pow_two]
   rw [habs, hmetric, hA] at hcs
   exact hcs
-
-
 
 theorem trace_sub_le_c0
     (g h : SmoothRiemannianMetric I M) (x : M)
@@ -987,8 +954,6 @@ theorem metricTraceFirstTwo0SAt_eq_sum_basis
   intro j _
   simp
 
-
-
 theorem metricTraceLastTwo0SAt3_eq_sum_basis
     (g : SmoothRiemannianMetric I M)
     {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
@@ -1099,12 +1064,6 @@ theorem roughLap0STensor_apply
       metricTraceFirstTwo0SAt (I := I) g nabla2A tail := by
   exact metricTraceFirstTwo0STensor_apply (I := I) g nabla2A tail
 
-
-
-
-
-
-
 theorem trace_smul_leibniz
     (g : SmoothRiemannianMetric I M)
     {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
@@ -1153,9 +1112,6 @@ theorem trace_smul_leibniz
   rw [Finset.mul_sum]
   simp_rw [Finset.mul_sum]
   ring_nf
-
-
-
 
 theorem trace_smul_parallel
     (g : SmoothRiemannianMetric I M)
@@ -1233,8 +1189,6 @@ theorem roughLap_smul_leib
   exact trace_smul_leibniz (I := I) g basis gInv hinv
     f df hessF A nablaA nabla2A nabla2fA tail hleib
 
-
-
 theorem roughLap_smul_par
     (g : SmoothRiemannianMetric I M)
     {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
@@ -1269,8 +1223,6 @@ theorem roughLap_smul_par
   exact trace_smul_parallel (I := I) g basis gInv hinv
     f df hessF A nablaA nabla2A nabla2fA tail hfirst hsecond hleib
 
-
-
 def roughLap0SAt
     {Idx : Type*} [Fintype Idx]
     {x : M} (basis : Module.Basis Idx Real (TangentSpace I x))
@@ -1289,10 +1241,6 @@ def roughLap1FormAt
       3 x)
     (Y : TangentSpace I x) : Real :=
   roughLap0SAt (I := I) basis gInv (s := 1) nabla2α (fun _ : Fin 1 => Y)
-
-
-
-
 
 def RoughLap0SRealizesMetricTraceInBasis
     {Idx : Type*} [Fintype Idx]
@@ -1329,16 +1277,6 @@ theorem roughLap1FormAt_eq_of_realizes
     roughα (fun _ : Fin 1 => Y) =
       roughLap1FormAt (I := I) basis gInv nabla2α Y :=
   h (fun _ : Fin 1 => Y)
-
-
-
-
-
-
-
-
-
-
 
 def metric_trace_0s
     (g : SmoothRiemannianMetric I M)
@@ -1407,32 +1345,6 @@ theorem roughLap0STensor_realizes
       (roughLap0STensor (I := I) g nabla2A) := by
   rw [rough_lap_0s_iff_eq_tensor]
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 def rough_lap_one_form
     (g : SmoothRiemannianMetric I M)
     {x : M}
@@ -1497,8 +1409,6 @@ theorem rough_lap_one_form_apply_basis
     simpa [rough_lap_one_form, rough_lap_0s, roughLap1FormAt, roughLap0SAt] using
       rough_lap_0s_apply_basis (I := I) g basis gInv nabla2α roughα hrough hinv
         (fun _ : Fin 1 => Y)
-
-
 
 theorem rough_lap_one_form_realizes_metric_trace
     (g : SmoothRiemannianMetric I M)

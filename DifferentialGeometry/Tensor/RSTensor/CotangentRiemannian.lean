@@ -5,13 +5,6 @@ import DifferentialGeometry.Geometry.Metric.TensorInner.CotangentRiemannian
 
 set_option autoImplicit false
 
-
-
-
-
-
-
-
 namespace DifferentialGeometry
 namespace Tensor0SBundle
 

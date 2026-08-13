@@ -13,7 +13,6 @@ import DifferentialGeometry.Analysis.ODE.TimeDependentFlow.BoundaryExtension.See
 import DifferentialGeometry.Analysis.ODE.TimeDependentFlow.BoundaryExtension.FullIntervalFlow
 import DifferentialGeometry.Analysis.ODE.TimeDependentFlow.DiffeomorphismFamily.ChartBridge
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
 
 
 open DifferentialGeometry.Geometry.Connection

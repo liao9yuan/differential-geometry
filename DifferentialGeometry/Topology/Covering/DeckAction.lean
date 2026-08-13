@@ -2,18 +2,6 @@ import Mathlib.AlgebraicTopology.FundamentalGroupoid.FundamentalGroup
 import Mathlib.Geometry.Manifold.Diffeomorph
 import DifferentialGeometry.Topology.Covering.Manifold
 
-/-!
-# Deck transformations of the path-space universal cover
-
-The fundamental group acts on the path-space model of the universal cover by
-prefixing the represented path with a loop.  The inverse in `deckAct` accounts
-for Mathlib's composition-order convention for multiplication in an endomorphism
-group, so this is a left action.
-
-The action preserves the projection, and its orbits are exactly the fibres of
-the projection.  On a smooth manifold every action map is a diffeomorphism.
--/
-
 open Set Function
 open scoped Topology ContDiff Manifold
 
@@ -27,15 +15,11 @@ namespace UniversalCover
 
 variable {X : Type*} [TopologicalSpace X] [Inhabited X]
 
-/-- Prefix the path represented by a universal-cover point with a loop at the
-chosen base point. -/
 def loopShift
     (g : Path.Homotopic.Quotient (default : X) default)
     (p : UniversalCover X) : UniversalCover X :=
   ⟨p.1, g.trans p.2⟩
 
-/-- The inverse image of a slice-topology basic open under a loop shift is the
-basic open based at the oppositely shifted point. -/
 theorem loopShift_preim
     (g : Path.Homotopic.Quotient (default : X) default)
     (p : UniversalCover X)
@@ -83,7 +67,6 @@ theorem loopShift_preim
         rw [Path.Homotopic.Quotient.trans_symm,
           Path.Homotopic.Quotient.refl_trans]
 
-/-- Prefixing by a fixed loop is continuous for the slice topology. -/
 theorem loopShift_cont
     [LocPathConnectedSpace X]
     (g : Path.Homotopic.Quotient (default : X) default) :
@@ -94,13 +77,11 @@ theorem loopShift_cont
   exact TopologicalSpace.GenerateOpen.basic _
     ⟨loopShift g.symm p, U, hU, hp, rfl⟩
 
-/-- The fundamental-group action on the path-space universal cover. -/
 def deckAct
     (g : FundamentalGroup X (default : X))
     (p : UniversalCover X) : UniversalCover X :=
   loopShift (FundamentalGroup.toPath g⁻¹) p
 
-/-- The left action of the fundamental group by deck transformations. -/
 instance deckMulAction :
     MulAction (FundamentalGroup X (default : X)) (UniversalCover X) where
   smul := deckAct
@@ -120,15 +101,12 @@ instance deckMulAction :
         (FundamentalGroup.toPath g⁻¹)
         (FundamentalGroup.toPath h⁻¹) p.2)
 
-/-- A deck transformation preserves the universal-cover projection. -/
 @[simp]
 theorem proj_deckAct
     (g : FundamentalGroup X (default : X)) (p : UniversalCover X) :
     proj (g • p) = proj p :=
   rfl
 
-/-- Two universal-cover points have the same projection exactly when one is a
-fundamental-group translate of the other. -/
 theorem proj_eq_iff_smul
     (p q : UniversalCover X) :
     proj p = proj q ↔
@@ -169,8 +147,6 @@ omit [FiniteDimensional ℝ E] [I.Boundaryless]
 omit [T2Space M]
   [SigmaCompactSpace M]
   [ConnectedSpace M] in
-/-- A continuous self-map of the universal cover that preserves the projection
-is smooth. -/
 theorem contMDiff_of_proj_eq
     {f : UniversalCover M → UniversalCover M}
     (hf : Continuous f)
@@ -194,15 +170,12 @@ omit [FiniteDimensional ℝ E] [I.Boundaryless]
   [T2Space M]
   [SigmaCompactSpace M]
   [ConnectedSpace M] in
-/-- Every fundamental-group deck transformation is smooth. -/
 theorem deckAct_contMDiff
     (g : FundamentalGroup M (default : M)) :
     ContMDiff I I ∞ (fun p : UniversalCover M => g • p) :=
   contMDiff_of_proj_eq (loopShift_cont (FundamentalGroup.toPath g⁻¹))
     (proj_deckAct g)
 
-/-- The diffeomorphism of the universal cover induced by a fundamental-group
-element. -/
 noncomputable def deckDiffeo
     (g : FundamentalGroup M (default : M)) :
     Diffeomorph I I (UniversalCover M) (UniversalCover M) ∞ where

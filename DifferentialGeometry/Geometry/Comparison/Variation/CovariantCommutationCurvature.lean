@@ -21,10 +21,7 @@ import DifferentialGeometry.Geometry.Comparison.Variation.ArcLength
 import DifferentialGeometry.Geometry.Comparison.Variation.SpeedDerivative
 import DifferentialGeometry.Geometry.Comparison.Variation.FirstVariation
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Operator
-
-
 
 noncomputable section
 

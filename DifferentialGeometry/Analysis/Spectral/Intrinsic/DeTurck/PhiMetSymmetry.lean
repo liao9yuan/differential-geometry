@@ -5,22 +5,17 @@ open DifferentialGeometry.Analysis.Spectral
 open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Connection
 
-
-
-
-
-
-
-
 noncomputable section
 
-open MeasureTheory Set Filter Topology Bundle Manifold DifferentialGeometry.Tensor0SBundle ContinuousLinearMap
+open MeasureTheory Set Filter Topology Bundle Manifold DifferentialGeometry.Tensor0SBundle
+    ContinuousLinearMap
 open scoped ENNReal NNReal BigOperators Manifold ContDiff
 
 namespace DifferentialGeometry.Analysis.Spectral
 
 open DifferentialGeometry
-open DifferentialGeometry.PDE.RicciFlow DifferentialGeometry.Analysis.Sobolev DifferentialGeometry.Analysis.Spectral
+open DifferentialGeometry.PDE.RicciFlow DifferentialGeometry.Analysis.Sobolev
+    DifferentialGeometry.Analysis.Spectral
 open DifferentialGeometry.Integral.L2
 
 open DifferentialGeometry.Analysis.Parabolic.TensorSpectral
@@ -83,8 +78,6 @@ variable [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless]
   [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M]
 
 set_option backward.isDefEq.respectTransparency false in
-
-
 omit [NeZero (Module.finrank ℝ E)] in
 omit [BoundarylessManifold I M] in
 theorem phiMet_symm_zero
@@ -204,15 +197,11 @@ theorem phiMet_symm_zero
   rw [hswapA, hswapB]
   ring
 
-
-
 noncomputable def gradSwapCurvCoeff (g₀ : SmoothRiemannianMetric I M) :
     SmoothCcTensor g₀ 2 4 :=
   Classical.choose
     (DifferentialGeometry.Analysis.Parabolic.TensorSpectral.gradSlot_sub_eq_curv
       (I := I) (M := M) g₀)
-
-
 
 omit [NeZero (Module.finrank ℝ E)] in
 theorem gradSwapCurv_spec (g₀ : SmoothRiemannianMetric I M)
@@ -225,8 +214,6 @@ theorem gradSwapCurv_spec (g₀ : SmoothRiemannianMetric I M)
     (DifferentialGeometry.Analysis.Parabolic.TensorSpectral.gradSlot_sub_eq_curv
       (I := I) (M := M) g₀) S
 
-
-
 noncomputable def phiMetCurvCoeff
     (g₀ g_bg g : SmoothRiemannianMetric I M) : SmoothCcTensor g₀ 2 2 :=
   (1 / 2 : ℝ) • ccOperatorFieldComp (I := I) (M := M) g₀ 2 4 2
@@ -236,9 +223,6 @@ noncomputable def phiMetCurvCoeff
     (gradSwapCurvCoeff (I := I) g₀)
 
 set_option backward.isDefEq.respectTransparency false in
-
-
-
 omit [NeZero (Module.finrank ℝ E)] in
 theorem phiMet_curv_fold
     (g₀ g_bg g : SmoothRiemannianMetric I M) (S : SmoothCcTensor g₀ 0 2) :

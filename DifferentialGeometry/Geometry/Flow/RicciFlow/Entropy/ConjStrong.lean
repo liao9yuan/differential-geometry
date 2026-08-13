@@ -5,16 +5,8 @@ import DifferentialGeometry.Analysis.Parabolic.QuasiLinear.TensorMaximalRegulari
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.CompactSAResolventIntrinsic
 open DifferentialGeometry.PDE.RicciFlow DifferentialGeometry.Analysis.Spectral
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Connection
 open DifferentialGeometry.Geometry.Operator
-
-
-
-
-
-
-
 
 noncomputable section
 
@@ -50,8 +42,6 @@ private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
-
-
 noncomputable def conjA2MR
     {D : RealTimeInterval} (S : SolutionOn (I := I) (M := M) D)
     (T : D.RegularTime) (t : Real) :
@@ -63,8 +53,6 @@ noncomputable def conjA2MR
       (g := S.family.metric (T : Real)) (r := 0) (s := 0)
       (show (2 : Real) ≤ 0 + 2 by norm_num))
 
-
-
 noncomputable def conjA1MR
     {D : RealTimeInterval} (S : SolutionOn (I := I) (M := M) D)
     (T : D.RegularTime) (t : Real) :
@@ -75,9 +63,6 @@ noncomputable def conjA1MR
     (tensorHsInclusion (I := I) (M := M)
       (g := S.family.metric (T : Real)) (r := 0) (s := 0)
       (show (1 : Real) ≤ 0 + 1 by norm_num))
-
-
-
 
 theorem conj_inputs
     {D : RealTimeInterval} (S : SolutionOn (I := I) (M := M) D)
@@ -263,10 +248,6 @@ theorem conj_inputs
   exact ⟨tau, C2, C1, htau, htauone, hmeas2', hbound2', hmeas1',
     hbound1', hf_tau, hgraphAE⟩
 
-
-
-
-
 theorem conj_strong_exists
     {D : RealTimeInterval} (S : SolutionOn (I := I) (M := M) D)
     (hS : IsSolutionOn (I := I) S) (T : D.RegularTime)
@@ -395,9 +376,6 @@ theorem conj_strong_exists
     simpa only [hu] using hfield1
   exact ⟨tau, htau, htau1, C2, C1, hA2', hC2', hA1', hC1', u,
     force, hu, hforce, htrace, hderiv, hgraph, hfield2', hfield1'⟩
-
-
-
 
 theorem conj_weak_ae
     {D : RealTimeInterval} (S : SolutionOn (I := I) (M := M) D)

@@ -16,7 +16,6 @@ import DifferentialGeometry.Analysis.Elliptic.TensorRegularity.DirichletForm.Rot
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.CovariantLeibniz
 import DifferentialGeometry.Analysis.Spectral.Tensor.EllipticBridge.EigenvectorWeakSolution.VariationalIdentity.EigenvectorPouApproxRegularity
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
 
 noncomputable section
 

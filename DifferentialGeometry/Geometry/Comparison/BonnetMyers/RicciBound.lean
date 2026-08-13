@@ -2,16 +2,6 @@ import DifferentialGeometry.Geometry.Curvature.CurvatureOperator.RicciConnection
 import DifferentialGeometry.Geometry.Curvature.RicciOperatorNormBound
 import DifferentialGeometry.Analysis.Integration.Measure.ChartDensity
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
-
-
-
-
-
-
-
-
-
 
 noncomputable section
 
@@ -19,13 +9,10 @@ open Bundle Manifold
 open scoped Manifold Topology ContDiff
 open DifferentialGeometry.Integral.Measure
 
-
 namespace DifferentialGeometry
 namespace Geometry
 namespace Riemannian
 namespace BonnetMyers
-
-
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E]
@@ -35,17 +22,10 @@ variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
   [T2Space M] [SigmaCompactSpace M]
 
-
-
-
-
 def RicciBoundedBelow (g : SmoothRiemannianMetric I M) (κ : ℝ) : Prop :=
   ∀ (x : M) (v : TangentSpace I x), κ * (g.inner x v v : ℝ) ≤ ricciTensor (I := I) g x v v
 
 omit [NeZero (Module.finrank ℝ E)] in
-/-- A global bound on the norm of the lowered Riemann tensor gives a uniform
-lower Ricci bound. The dimension-squared constant is deliberately coarse; it
-matches the existing general-dimensional Ricci trace estimate. -/
 theorem ricciLower_of_rm
     (g : SmoothRiemannianMetric I M) {Rm : ℝ}
     (hRm : ∀ x : M,

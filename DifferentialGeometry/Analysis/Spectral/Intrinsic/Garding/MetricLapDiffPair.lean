@@ -2,16 +2,8 @@ import DifferentialGeometry.Analysis.Spectral.Intrinsic.Garding.CrossMetricEnerg
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.Garding.MetricLapDiffCore
 open DifferentialGeometry.Analysis.Elliptic
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Connection
 open DifferentialGeometry.Geometry.Operator
-
-
-
-
-
-
-
 
 noncomputable section
 
@@ -73,8 +65,6 @@ private theorem normSq0S_nonneg
   rw [normSq0S_identity_eq_sum_sq (I := I) g x s basis hinv A]
   exact Finset.sum_nonneg fun _ _ => sq_nonneg _
 
-
-
 theorem lapDiffCore_pair_sq
     (q h k : SmoothRiemannianMetric I M)
     (v : ScalarH2Core (I := I) (M := M) q) :
@@ -102,9 +92,6 @@ theorem lapDiffCore_pair_sq
   rw [← map_sub]
   rw [inner_toRS0_scalar (I := I) (M := M) q x]
   ring
-
-
-
 
 theorem lapDiff_pair_energy
     (q k : SmoothRiemannianMetric I M) :
@@ -232,8 +219,6 @@ theorem lapDiff_pair_energy
           (I := I) Set.univ 1 h k k) ^ 2 * ‖v‖ ^ 2 := by
       rfl
 
-
-
 theorem lapDiff_pair_core
     (q k : SmoothRiemannianMetric I M) :
     ∃ C : Real, 0 <= C ∧
@@ -267,9 +252,6 @@ theorem lapDiff_pair_core
   nlinarith [norm_nonneg
     (lapDiffCore (I := I) (M := M) q h v -
       lapDiffCore (I := I) (M := M) q k v)]
-
-
-
 
 theorem lapDiff_pair_norm
     (q k : SmoothRiemannianMetric I M) :

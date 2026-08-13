@@ -19,17 +19,8 @@ open DifferentialGeometry.Analysis.Sobolev
 open DifferentialGeometry.Analysis.Elliptic
 open DifferentialGeometry.PDE.RicciFlow DifferentialGeometry.Analysis.Spectral
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Connection
 open DifferentialGeometry.Geometry.Operator
-
-
-
-
-
-
-
-
 
 noncomputable section
 
@@ -171,7 +162,6 @@ private theorem rev_trace_eq
   ring
 
 omit [BoundarylessManifold I M] [NeZero (Module.finrank Real E)] in
-/-- A genuine reversed heat potential preserves its moving Riemannian mass at interior times. -/
 theorem heatpot_mass_deriv
     {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -251,7 +241,6 @@ theorem heatpot_mass_deriv
   exact hvariation.congr_deriv hmass
 
 omit [BoundarylessManifold I M] [NeZero (Module.finrank Real E)] in
-/-- On a shorter interval, a genuine reversed heat potential has constant moving mass. -/
 theorem heatpot_mass_eq
     {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -342,8 +331,6 @@ theorem heatpot_mass_eq
   exact (hclosed hs).trans (hclosed ⟨le_rfl, htau'.le⟩).symm
 
 omit [BoundarylessManifold I M] [NeZero (Module.finrank Real E)] in
-/-- On a prescribed reflected regular interval, a genuine heat potential has
-constant moving mass on the entire closed interval. -/
 theorem heatpot_mass_on
     {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -408,8 +395,6 @@ theorem heatpot_mass_on
   change mass s = mass 0
   exact (hclosed hs).trans (hclosed ⟨le_rfl, htau.le⟩).symm
 
-/-- Every Sobolev realization of the Galerkin limit has the original limiting
-coefficient on the compact Galerkin interval. -/
 @[simp] theorem galLimExt_coeff
     {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
     {S : SolutionOn (I := I) (M := M) D}
@@ -430,8 +415,6 @@ coefficient on the compact Galerkin interval. -/
   rw [galLimExt_mem hτ hlim m ht]
   rfl
 
-/-- At reverse time zero, every Sobolev realization of the Galerkin limit is
-the prescribed smooth initial tensor in that same Sobolev scale. -/
 @[simp] theorem galLimExt_zero
     {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
     {S : SolutionOn (I := I) (M := M) D}
@@ -455,8 +438,6 @@ the prescribed smooth initial tensor in that same Sobolev scale. -/
     ccTensorToHs_coeff, hlim.lim_init i]
 
 omit [NeZero (Module.finrank ℝ E)] in
-/-- The first covariant derivative of a smooth rank-zero tensor, after full
-evaluation, is the differential of its scalar readout. -/
 private theorem covGrad0_apply
     (g : SmoothRiemannianMetric I M) (U : SmoothCcTensor g 0 0)
     (x : M) (X : TangentSpace I x) :
@@ -505,9 +486,6 @@ private theorem covGrad0_apply
         (extDerivFun (I := I) f x X)) = _
   rw [ContinuousLinearEquiv.apply_symm_apply]
 
-/-- On every compact subinterval of the smooth backward-time interior, all
-time jets of the scalar Galerkin coefficients admit a single summable spectral
-majorant at every natural Sobolev order. -/
 theorem galLim_jet_mass
     {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
     {S : SolutionOn (I := I) (M := M) D}
@@ -632,9 +610,6 @@ theorem galLim_jet_mass
   intro i t ht
   simpa only [jet] using hB_le i t ht
 
-
-
-
 theorem galLim_mass0
     {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
     {S : SolutionOn (I := I) (M := M) D}
@@ -686,8 +661,6 @@ theorem galLim_mass0
   exact mass_le_of_compact (I := I) (M := M) q hneg isCompact_Icc
     W hW.continuousOn (fun i t => ulim t i) hcoeff
 
-/-- Every Galerkin limit slice has one smooth representative realizing all
-natural Sobolev orders and its scalar spectral series. -/
 theorem galLim_slice_cc
     {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
     {S : SolutionOn (I := I) (M := M) D}
@@ -791,8 +764,6 @@ theorem galLim_slice_cc
         simpa only [hc] using scalarSpec_cc (I := I) (M := M)
           (S.family.metric (T : Real)) U
 
-
-
 theorem galLim_initial
     {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
     {S : SolutionOn (I := I) (M := M) D}
@@ -829,8 +800,6 @@ theorem galLim_initial
     _ = TensorRSField.scalar0 (n := (∞ : WithTop ℕ∞)) u0.toSection :=
       scalarSpec_cc (I := I) (M := M) (S.family.metric (T : Real)) u0
 
-/-- At reverse time zero, every fixed directional derivative of the scalar
-Galerkin limit converges to the corresponding derivative of the initial data. -/
 theorem galLim_d_zero
     {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
     {S : SolutionOn (I := I) (M := M) D}
@@ -943,8 +912,6 @@ theorem galLim_d_zero
     (tendsto_zero_iff_abs_tendsto_zero _).2 habs
   simpa only [f, q, f0, sub_add_cancel, zero_add] using hzero.add_const f0
 
-/-- In a genuine chart frame, the spatial derivatives of the scalar Galerkin
-limit are jointly continuous at the reverse-time endpoint. -/
 theorem galLim_d_joint
     {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
     {S : SolutionOn (I := I) (M := M) D}
@@ -1119,8 +1086,6 @@ theorem galLim_d_joint
   change Tendsto _ (𝓝[_] ((0 : Real), a)) (𝓝 _)
   simpa only [q, e, Xf, f, f0, base, K, hfzero] using hmain
 
-/-- The moving squared gradient of the scalar Galerkin limit is jointly
-continuous at the reverse-time endpoint. -/
 theorem galLim_grad_zero
     {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
     {S : SolutionOn (I := I) (M := M) D}
@@ -1283,8 +1248,6 @@ theorem galLim_grad_zero
   have hglobal := (continuousWithinAt_inter hO).mp hlocal
   simpa only [G, f, L, reverse_metric] using hglobal
 
-/-- The scalar eigen-series of the Galerkin limit is jointly continuous on
-the full compact Galerkin interval, including both endpoints. -/
 theorem galLim_joint_cont
     {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
     {S : SolutionOn (I := I) (M := M) D}
@@ -1327,9 +1290,6 @@ theorem galLim_joint_cont
     simpa only [iteratedDeriv_zero] using hB_le i t ht
   exact (scalar_path_recon (I := I) (M := M) q htail hτ 0
     (fun i t => ulim t i) isOpen_univ (Set.subset_univ _) hc hmass).continuousOn
-
-
-
 
 theorem galLim_joint_smooth
     {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
@@ -1385,8 +1345,6 @@ theorem galLim_joint_smooth
     intro i t ht
     exact hB_le i t (Ioo_subset_Icc_self (hinner ht))
 
-
-
 theorem galLim_joint_top
     {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
     {S : SolutionOn (I := I) (M := M) D}
@@ -1434,8 +1392,6 @@ theorem galLim_joint_top
     prod_mem_nhds (Icc_mem_nhds hat htb) univ_mem
   exact ((hfin ha hab hb N) p hpab).contMDiffAt hnhds |>.contMDiffWithinAt
 
-/-- On a shorter nontrivial Galerkin interval, the moving squared gradient of
-the scalar limit is jointly continuous through reverse time zero. -/
 theorem galLim_grad_cont
     {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
     {S : SolutionOn (I := I) (M := M) D}
@@ -1529,8 +1485,6 @@ theorem galLim_grad_cont
       (isOpen_Ioo.prod isOpen_univ).mem_nhds hopen
     exact ((hpos (t, x) hopen).contMDiffAt hnhds).continuousAt.continuousWithinAt
 
-/-- Every positive-time slice of the jointly smooth Galerkin scalar series is
-a smooth scalar function on the manifold. -/
 theorem galLim_slice_pos
     {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
     {S : SolutionOn (I := I) (M := M) D}
@@ -1561,8 +1515,6 @@ theorem galLim_slice_pos
     intro x _hx
     exact ⟨ht, Set.mem_univ x⟩
   exact contMDiffOn_univ.mp (htop.comp harg hmaps)
-
-
 
 theorem galLim_pde
     {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
@@ -1852,8 +1804,6 @@ theorem galLim_pde
   rw [hlap]
   simpa only [zeta] using hWscalar
 
-
-
 theorem heatpot_of_gallim
     {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
     {S : SolutionOn (I := I) (M := M) D}
@@ -1938,9 +1888,6 @@ theorem heatpot_of_gallim
       ⟨hs.1, hs.2.trans htau'P⟩
     simpa only [reverseFamily] using hpde s hsP x
 
-
-
-
 theorem heatpot_exists
     {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -1966,9 +1913,6 @@ theorem heatpot_exists
   refine ⟨tau', htau', htau'_tau.trans htau_one, u, ?_, ?_⟩
   · simpa only [u] using hpot
   · simpa only [u] using galLim_initial (I := I) (M := M) hlim
-
-
-
 
 theorem conj_heat_exists
     {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
@@ -1999,8 +1943,6 @@ theorem conj_heat_exists
   · change v ((T : Real) - (T : Real)) =
       TensorRSField.scalar0 (n := (∞ : WithTop ℕ∞)) u0.toSection
     simpa only [sub_self] using hv0
-
-
 
 theorem gallim_nonneg
     {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
@@ -2061,8 +2003,6 @@ theorem gallim_nonneg
       u hu' C hV huinit
   exact ⟨tau', htau', htau'_one, u, hu', hu0, hnonneg⟩
 
-
-
 theorem gallim_pos
     {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -2120,7 +2060,6 @@ theorem gallim_pos
         (conjCoeff (I := I) (M := M) S ((T : Real) - s) : M → Real) x)
       u hu' C hV huinit
   exact ⟨tau', htau', htau'_one, u, hu', hu0, hpos⟩
-
 
 theorem gallim_unit_pos
     {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}

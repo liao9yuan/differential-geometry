@@ -12,7 +12,6 @@ import DifferentialGeometry.Analysis.ODE.TimeDependentFlow.SmoothDependence.Glob
 import DifferentialGeometry.Analysis.ODE.TimeDependentFlow.VariationalEquation.FlatPairing
 import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTimeAssembly.BasepointMotion
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
 
 
 open DifferentialGeometry.Geometry.Connection

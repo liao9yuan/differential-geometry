@@ -3,8 +3,8 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.SobolevScale.WeylSummabilit
 import DifferentialGeometry.Analysis.Parabolic.MaximalRegularity.PerMode
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.SobolevNonlinearityExistence
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.DeTurckRemainderDefs
-open DifferentialGeometry.Analysis.Sobolev.CSupTensor DifferentialGeometry.Analysis.Sobolev.IntrinsicSobolev.SmoothCcTensorHs
-open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Analysis.Sobolev.CSupTensor
+    DifferentialGeometry.Analysis.Sobolev.IntrinsicSobolev.SmoothCcTensorHs
 open DifferentialGeometry.Geometry.Curvature
 
 

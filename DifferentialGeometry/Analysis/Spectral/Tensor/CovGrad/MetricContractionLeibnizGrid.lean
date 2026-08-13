@@ -2,7 +2,6 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.IteratedCovGradLine
 import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.RiemannianFiberNormSq.FiberNormSubadditivity
 open DifferentialGeometry.Analysis.Elliptic
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
 
 
 noncomputable section
@@ -138,18 +137,13 @@ theorem gridWindowSum_shift_le {κ : ℕ → ℕ → ℝ} (hκ : ∀ p r, 0 ≤ 
 end RankCast
 
 structure DiffBilinOp (g : SmoothRiemannianMetric I M) where
-
   op : ∀ (p r : ℕ), SmoothCcTensor g 0 r → SmoothCcTensor g 0 (r + p)
-
   covGrad_op : ∀ (p r : ℕ) (W : SmoothCcTensor g 0 r),
     covGrad g 0 (r + p) (op p r W) =
       op (p + 1) r W +
         castCcTensorRank g 0 (by omega : (r + 1) + p = r + (p + 1)) (op p (r + 1) (covGrad g 0 r W))
-
   kappa : ℕ → ℕ → ℝ
-
   kappa_nonneg : ∀ p r, 0 ≤ kappa p r
-
   rfns_op_le : ∀ (p r : ℕ) (W : SmoothCcTensor g 0 r) (x : M),
     riemannianFiberNormSq (I := I) (M := M) g 0 (r + p) x ((op p r W).toSection x) ≤
       kappa p r * ∑ q ∈ Finset.range (p + 1),

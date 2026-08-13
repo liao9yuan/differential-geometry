@@ -5,18 +5,8 @@ import DifferentialGeometry.Topology.Covering.SemilocallySimplyConnected
 import DifferentialGeometry.Topology.Covering.CompletenessPullback
 import DifferentialGeometry.Topology.Covering.CurvaturePullback
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
 
 set_option autoImplicit false
-
-/-!
-# Positive-curvature universal covers
-
-This module applies the positive Killing--Hopf theorem to the normalized
-lifted metric on a universal cover.  It packages the metric-instance and
-completeness setup while retaining the differential isometry equation needed
-for the deck-action quotient.
--/
 
 noncomputable section
 
@@ -42,8 +32,6 @@ variable {Q : Type u} [TopologicalSpace Q]
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-/-- The normalized universal cover of a compact connected positive
-constant-curvature manifold is globally isometric to the round sphere. -/
 theorem sphereCover_one
     (hn : 1 < n)
     (g : SmoothRiemannianMetric (𝓡 n) Q)

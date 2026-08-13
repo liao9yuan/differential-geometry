@@ -11,15 +11,6 @@ open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Connection
 open DifferentialGeometry.Geometry.Operator
 
-
-
-
-
-
-
-
-
-
 noncomputable section
 
 namespace DifferentialGeometry.Geometry.Curvature
@@ -40,8 +31,6 @@ def ricciDiag3 (l1 l2 l3 : Real) (i j : Fin 3) : Real :=
   if i = j then
     if i = 0 then l1 else if i = 1 then l2 else l3
   else 0
-
-
 
 def stdRmDiag3 (l1 l2 l3 : Real)
     (i j k l : Fin 3) : Real :=
@@ -119,9 +108,6 @@ private theorem sum_delta3_slots4_contract
   intro I0 _
   simp [prod_delta3_slots4_eq_ite, pow_two]
 
-
-
-
 def RicciDiagAt
     (Ric : Tensor02At (I := I) (M := M) x)
     (scalar l1 l2 l3 : Real)
@@ -129,8 +115,6 @@ def RicciDiagAt
   scalar = ricciEigenScalar3 l1 l2 l3 /\
     forall i j : Fin 3,
       ricciCompAt (I := I) basis Ric i j = ricciDiag3 l1 l2 l3 i j
-
-
 
 theorem ricciEigen3
     (g : SmoothRiemannianMetric I M)
@@ -213,8 +197,6 @@ theorem ricciEigen3
                 simp [horth]
       fin_cases i <;> fin_cases j <;>
         simpa [ricciCompAt_apply, ricciDiag3, l1, l2, l3, delta3] using hcomp
-
-
 
 theorem ricciEigenBasis3
     (g : SmoothRiemannianMetric I M)
@@ -417,9 +399,6 @@ theorem ricciEigenBasis3
     rw [h22] at hnon
     simpa [ricciDiag3, l3] using hnon
 
-
-
-
 theorem exists_orthonormalBasisAt
     (g : SmoothRiemannianMetric I M) (x : M)
     (hdim : Module.finrank Real (TangentSpace I x) = 3) :
@@ -429,8 +408,6 @@ theorem exists_orthonormalBasisAt
     ricciEigenBasis3 (I := I) g (0 : Tensor02At (I := I) (M := M) x) hdim
       (fun _ _ => rfl) (fun _ => by simp)
   exact ⟨basis, horth⟩
-
-
 
 theorem metricTrace_eq_ricciEnd
     (g : SmoothRiemannianMetric I M)
@@ -459,9 +436,6 @@ theorem metricTrace_eq_ricciEnd
   refine Finset.sum_congr rfl fun i _ => ?_
   refine Finset.sum_congr rfl fun j _ => ?_
   rw [ricciEnd_inner (I := I) g Ric (basis i) (basis j)]
-
-
-
 
 theorem metricTrace_pos_of_posDef
     (g : SmoothRiemannianMetric I M)
@@ -587,13 +561,8 @@ def sec13Ric3 (l1 l2 l3 : Real) : Real :=
 def sec23Ric3 (l1 l2 l3 : Real) : Real :=
   (l2 + l3 - l1) / 2
 
-
-
-
 def rmSecNormSq3 (K12 K13 K23 : Real) : Real :=
   4 * (K12 ^ 2 + K13 ^ 2 + K23 ^ 2)
-
-
 
 theorem stdRmNormSq3_diag
     (l1 l2 l3 : Real) :
@@ -604,8 +573,6 @@ theorem stdRmNormSq3_diag
     ricciDiag3 ricciEigenScalar3 delta3
   simp [Fin.sum_univ_three]
   ring
-
-
 
 omit [FiniteDimensional ℝ E] in
 theorem stdRmComp_eq_diag
@@ -648,8 +615,6 @@ theorem stdRmComp_eq_diag
     simp [stdRmDiag3, ricciDiag3, ricciEigenScalar3, delta3, hscalar,
       r00, r01, r02, r10, r11, r12, r20, r21, r22] <;> ring_nf
 
-
-
 omit [FiniteDimensional ℝ E] in
 theorem stdRmNormSq3_at
     {g : SmoothRiemannianMetric I M}
@@ -668,9 +633,6 @@ theorem stdRmNormSq3_at
   simp_rw [hcomp]
   exact stdRmNormSq3_diag l1 l2 l3
 
-
-
-
 omit [FiniteDimensional ℝ E] in
 theorem coordInner0S_four_delta3_eq_stdRmNormSq3
     {Rm04 : Tensor04At (I := I) (M := M) x}
@@ -684,8 +646,6 @@ theorem coordInner0S_four_delta3_eq_stdRmNormSq3
   unfold stdRmNormSq3 standardRmCompAt rm04CompAt component0S
     tensor0SComponent DifferentialGeometry.Geometry.Curvature.slots4
   simp [Fin.sum_univ_three]
-
-
 
 theorem normSq0S_four_eq_stdRmNormSq3
     {g : SmoothRiemannianMetric I M}
@@ -707,8 +667,6 @@ private theorem sq_le_of_abs_le {a b : Real} (h : |a| <= b) :
   have hprod : 0 <= (b + a) * (b - a) := mul_nonneg hleft hright
   nlinarith
 
-
-
 theorem secAbsLe3
     (l1 l2 l3 : Real) (h1 : 0 <= l1) (h2 : 0 <= l2) (h3 : 0 <= l3) :
     |sec12Ric3 l1 l2 l3| <= ricciEigenScalar3 l1 l2 l3 / 2 ∧
@@ -721,11 +679,6 @@ theorem secAbsLe3
     constructor <;> unfold sec13Ric3 ricciEigenScalar3 <;> nlinarith
   · apply abs_le.mpr
     constructor <;> unfold sec23Ric3 ricciEigenScalar3 <;> nlinarith
-
-
-
-
-
 
 theorem rmSqLe100ScalSq3
     (l1 l2 l3 : Real) (h1 : 0 <= l1) (h2 : 0 <= l2) (h3 : 0 <= l3) :
@@ -749,9 +702,6 @@ theorem rmSqLe100ScalSq3
     nlinarith [sq_nonneg R]
   exact le_trans hsum hcoarse
 
-
-
-
 omit [FiniteDimensional ℝ E] in
 theorem stdRmNormSq3_at_le
     {g : SmoothRiemannianMetric I M}
@@ -769,8 +719,6 @@ theorem stdRmNormSq3_at_le
   rw [hnorm, hscalar]
   exact rmSqLe100ScalSq3 l1 l2 l3 h1 h2 h3
 
-
-
 theorem normSq0S_four_at_le
     {g : SmoothRiemannianMetric I M}
     {Ric : Tensor02At (I := I) (M := M) x}
@@ -784,10 +732,6 @@ theorem normSq0S_four_at_le
     normSq0S (I := I) g x 4 Rm04 <= 100 ^ 2 * scalar ^ 2 := by
   rw [normSq0S_four_eq_stdRmNormSq3 (I := I) htrace.orthonormal]
   exact stdRmNormSq3_at_le (I := I) htrace hdiag h1 h2 h3
-
-
-
-
 
 theorem normSqLeOfRicNonneg
     {g : SmoothRiemannianMetric I M}
@@ -859,11 +803,6 @@ private theorem rmSecNormSq3_neg
   unfold rmSecNormSq3 sec12Ric3 sec13Ric3 sec23Ric3
   ring
 
-
-
-
-
-
 theorem normSqLeOfFirstTrace
     {g : SmoothRiemannianMetric I M}
     {Ric : Tensor02At (I := I) (M := M) x}
@@ -895,12 +834,6 @@ theorem normSqLeOfFirstTrace
   have hnorm := stdRmNormSq3_at (I := I) htrace_basis hnegdiag
   rw [hnorm, rmSecNormSq3_neg, hscalar]
   exact rmSqLe100ScalSq3 l1 l2 l3 h1 h2 h3
-
-
-
-
-
-
 
 theorem normSqLeOfFirstData
     {g : SmoothRiemannianMetric I M}

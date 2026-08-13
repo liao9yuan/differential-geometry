@@ -1,7 +1,6 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.FixedDomainMetricBounds
 open DifferentialGeometry.PDE.RicciFlow
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
 
 set_option autoImplicit false
 
@@ -35,8 +34,6 @@ def CurvDerivBoundOn
     (C : Real) : Prop :=
   forall x : M, x ∈ K -> curvDerivNorm (I := I) p h x <= C
 
-
-
 def CurvDerivBoundOnWindow
     (K : Set M) (β ψ : Real)
     (gSeq : Nat -> Real -> SmoothRiemannianMetric I M)
@@ -50,9 +47,6 @@ def CurvDerivBoundsOnWindow
     (gSeq : Nat -> Real -> SmoothRiemannianMetric I M)
     (C : Nat -> Real) : Prop :=
   forall p : Nat, CurvDerivBoundOnWindow (I := I) K β ψ gSeq p (C p)
-
-
-
 
 def TwoTensorQuadBoundOnWindow
     (K : Set M) (β ψ : Real)
@@ -68,14 +62,6 @@ def TwoTensorQuadBoundOnWindow
         forall v : TangentSpace I x,
           |T i t x (DifferentialGeometry.Geometry.Curvature.vec2 (I := I) v v)| <=
             A * (gSeq i t).inner x v v
-
-
-
-
-
-
-
-
 
 structure MetricLogDerivativeInput
     (K : Set M) (β ψ t0 : Real)
@@ -134,9 +120,6 @@ private theorem metric_factor_mul
       metricEquivalenceFactor C A t t0 * g := by
   rw [metricEquivalenceFactor]
   ring
-
-
-
 
 omit [FiniteDimensional ℝ E] [CompleteSpace E] [T2Space M] [SigmaCompactSpace M] in
 theorem metricUniformEquivalentOnWindow_of_logDerivativeInput
@@ -230,11 +213,6 @@ theorem metricUniformEquivalentOnWindow_of_logDerivativeInput
       _ = metricEquivalenceFactor C A t t0 * gRef.inner x v v :=
           metric_factor_mul
 
-
-
-
-
-
 structure MetricAllTimesBoundsInput
     (K : Set M) (β ψ t0 : Real)
     (gSeq : Nat -> Real -> SmoothRiemannianMetric I M)
@@ -254,10 +232,6 @@ structure MetricAllTimesBoundsInput
   curv_on_window :
     CurvDerivBoundsOnWindow (I := I) K β ψ gSeq curvC
 
-
-
-
-
 structure MetricAllTimesSpatialConclusion
     (K : Set M) (β ψ : Real)
     (gSeq : Nat -> Real -> SmoothRiemannianMetric I M)
@@ -268,11 +242,6 @@ structure MetricAllTimesSpatialConclusion
   metricC : Nat -> Real
   metric_on_window :
     MetricCovDerivBoundsOnWindow (I := I) K β ψ gSeq gRef metricC
-
-
-
-
-
 
 structure MetricAllTimesSpatialInput
     (K : Set M) (β ψ : Real)
@@ -288,8 +257,6 @@ structure MetricAllTimesSpatialInput
       MetricCovDerivOrderBoundOnWindow (I := I) K β ψ gSeq gRef a
         (orderC a)
 
-
-
 noncomputable def metricAllTimes_spatial
     {K : Set M} {β ψ : Real}
     {gSeq : Nat -> Real -> SmoothRiemannianMetric I M}
@@ -302,12 +269,6 @@ noncomputable def metricAllTimes_spatial
   metric_on_window :=
     metricCovBoundsWindow_of_orderBounds (I := I) K β ψ gSeq gRef
       H.orderC H.orderC_nonneg H.order_on_window
-
-
-
-
-
-
 
 noncomputable def metricMixedDeriv
     (p q : Nat) (h : Real -> SmoothRiemannianMetric I M)
@@ -431,12 +392,6 @@ theorem sqrt_normSq0S_smul
   rw [Real.sqrt_mul (sq_nonneg c)]
   rw [Real.sqrt_sq_eq_abs]
 
-
-
-
-
-
-
 def MetricMixedDerivOneEvolutionOn
     (K : Set M) (β ψ : Real)
     (gSeq : Nat -> Real -> SmoothRiemannianMetric I M)
@@ -470,12 +425,6 @@ theorem metricMixedDeriv_one_eq_of_evolution
 
 def metricMixedOneConstant (Cpp Csp0 Cppp : Real) : Real :=
   2 * (Cpp * Csp0 + Cppp)
-
-
-
-
-
-
 
 omit [SigmaCompactSpace M] in
 theorem metricMixedOneWindow_of_ric_bound
@@ -562,24 +511,12 @@ structure MetricAllTimesConclusion
   mixed_on_window :
     MetricMixedDerivBoundsOnWindow (I := I) K β ψ gSeq gRef metricC
 
-
-
-
-
-
 def metricFirstOrderConstant
     (Ca Cb R timeRadius M0 : Real) : Real :=
   Real.sqrt (Cb ^ 3) *
     (2 *
       (3 * R * timeRadius +
         (3 / 2 : Real) * (Real.sqrt (Ca ^ 3) * M0)))
-
-
-
-
-
-
-
 
 structure MetricAllTimesFirstOrderInput
     {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
@@ -640,11 +577,6 @@ structure MetricAllTimesFirstOrderInput
   time_abs_le :
     forall t : Real, t ∈ Set.Icc β ψ -> |t - t0| <= timeRadius
 
-
-
-
-
-
 structure MetricAllTimesFirstOrderConclusion
     {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
     (K : Set M) (β ψ : Real)
@@ -658,8 +590,6 @@ structure MetricAllTimesFirstOrderConclusion
   order_one_bound :
     MetricCovDerivOrderBoundOnWindow (I := I) K β ψ
       (fun i t => (SSeq i).family.metric t) gRef 1 C1
-
-
 
 omit [SigmaCompactSpace M] in
 theorem metricCovOrderOneWindow_of_christoffel
@@ -753,9 +683,6 @@ theorem metricCovOrderOneWindow_of_christoffel
         (Real.sqrt_nonneg _)
   exact le_trans hraw hconst
 
-
-
-
 def metricAllTimes_firstOrder
     {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
     {K u : Set M} {β ψ t0 : Real} {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
@@ -784,20 +711,11 @@ def metricAllTimes_firstOrder
   order_one_bound :=
     metricCovOrderOneWindow_of_christoffel (I := I) (Idx := Idx) H
 
-
-
 def metricCovOrderEvolutionAlpha (Cpp : Real) : Real :=
   1 + 8 * Cpp ^ 2
 
-
-
-
-
-
 def metricCovOrderEvolutionBeta (Cppp : Real) : Real :=
   8 * Cppp ^ 2 + 1
-
-
 
 def metricCovOrderEvolutionConstant
     (Cpp Cppp timeRadius initC : Real) : Real :=
@@ -806,12 +724,6 @@ def metricCovOrderEvolutionConstant
       (initC ^ 2 +
         metricCovOrderEvolutionBeta Cppp /
           metricCovOrderEvolutionAlpha Cpp))
-
-
-
-
-
-
 
 def MetricCovOrderEvolutionOn
     (K : Set M) (β ψ : Real)
@@ -826,13 +738,6 @@ def MetricCovOrderEvolutionOn
       HasDerivAt
         (fun r : Real => metricCovDeriv (I := I) (gSeq i r) gRef p x)
         ((-2 : Real) • nablaRic i s x) s
-
-
-
-
-
-
-
 
 def MetricCovOrderNormSqEvolutionOn
     (K : Set M) (β ψ : Real)
@@ -854,14 +759,6 @@ def MetricCovOrderNormSqEvolutionOn
               Real.sqrt
                 (Tensor0SBundle.normSq0S (I := I) gRef x (p + 2)
                   (nablaRic i s x))) ^ 2
-
-
-
-
-
-
-
-
 
 structure MetricCovOrderEvolutionInput
     (K : Set M) (β ψ t0 : Real)
@@ -893,9 +790,6 @@ structure MetricCovOrderEvolutionInput
   timeRadius : Real
   time_abs_le :
     forall t : Real, t ∈ Set.Icc β ψ -> |t - t0| <= timeRadius
-
-
-
 
 omit [SigmaCompactSpace M] in
 theorem metricCovOrderWindow_of_evolution
@@ -1087,11 +981,6 @@ theorem metricCovOrderWindow_of_evolution
     simpa [U] using hfinal_sq
   exact hnorm_le
 
-
-
-
-
-
 omit [SigmaCompactSpace M] in
 theorem metricMixedOneWindow_of_evolution
     {K : Set M} {β ψ t0 : Real}
@@ -1111,11 +1000,6 @@ theorem metricMixedOneWindow_of_evolution
       (p := p) (Csp0 := Csp0) (nablaRic := Hin.nablaRic)
       Hin.Cpp Hin.Cppp Hin.Cpp_nonneg Hin.ric_bound hmixed hspatial
 
-
-
-
-
-
 def MetricMixedDerivLayerEvolutionOn
     (K : Set M) (β ψ : Real)
     (gSeq : Nat -> Real -> SmoothRiemannianMetric I M)
@@ -1132,10 +1016,6 @@ def MetricMixedDerivLayerEvolutionOn
 
 def metricMixedQConstant (Cpq : Real) : Real :=
   2 * Cpq
-
-
-
-
 
 omit [SigmaCompactSpace M] in
 theorem metricMixedQWindow_of_evolution
@@ -1236,12 +1116,6 @@ theorem metricMixedBoundsWindow_of_layerBounds
   have _hcum_nonneg : 0 <= metricMixedCumulativeConstant D p q :=
     le_trans (hD a b) hsup
   exact le_trans (hlayer a b i t ht x hx) hsup
-
-
-
-
-
-
 
 structure MetricAllTimesInput
     (K : Set M) (β ψ : Real)

@@ -4,7 +4,6 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.Defs
 import Mathlib.Topology.Order.Compact
 open DifferentialGeometry.Analysis.Elliptic
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
 
 
 noncomputable section

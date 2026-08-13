@@ -1,15 +1,8 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.Scalar.RmTrace
 open DifferentialGeometry.PDE.RicciFlow
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
 
 set_option autoImplicit false
-
-
-
-
-
-
 
 noncomputable section
 
@@ -142,8 +135,6 @@ theorem scalarEvolutionEquationOn_of_ricciEvolution
       (scalarLaplacianTraceInFrame_realizes (M := M) gInv roughLapRic)
       hInvSym hRicSym hRmTrace t x)
 
-
-
 omit [SigmaCompactSpace M] in
 theorem scalarEvolutionEquationOn_of_ricciEvolution_regular
     [DecidableEq Idx]
@@ -200,8 +191,6 @@ theorem scalarEvolutionEquationOn_of_ricciEvolution_regular
       (scalarLaplacianTraceInFrame (M := M) gInv roughLapRic)
       (scalarLaplacianTraceInFrame_realizes (M := M) gInv roughLapRic)
       hInvSym hRicSym hRmTrace t x)
-
-
 
 theorem scalarEvolutionEquationOn_of_ricciEvolution_lc
     [DecidableEq Idx]

@@ -1,17 +1,9 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.Ricci
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.Scalar
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Operator
 
 set_option autoImplicit false
-
-
-
-
-
-
-
 
 noncomputable section
 
@@ -53,8 +45,6 @@ private theorem sum_swap_four
             _ = ∑ l : Idx, ∑ i : Idx, ∑ j : Idx, F i j k l := by
                   rw [Finset.sum_comm]
 
-
-
 omit [TopologicalSpace M] [SigmaCompactSpace M] [T2Space M] in
 theorem scalarHessianFromNabla2Ric_trace_eq_roughLapRic_trace
     (gInv : Real -> DifferentialGeometry.Geometry.Curvature.InverseMetricComponents M Idx)
@@ -89,12 +79,6 @@ theorem scalarHessianFromNabla2Ric_trace_eq_roughLapRic_trace
             (∑ k : Idx, ∑ l : Idx,
               gInv t x k l * nabla2Ric t x k l i j) := by
           simp [Finset.mul_sum]
-
-
-
-
-
-
 
 omit [SigmaCompactSpace M] [T2Space M] in
 theorem scalarLaplacianTraceInFrame_realizes_heatOperator_of_nabla2RicTrace

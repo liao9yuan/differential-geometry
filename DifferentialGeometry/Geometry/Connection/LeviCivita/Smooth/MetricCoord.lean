@@ -19,14 +19,6 @@ variable {I : ModelWithCorners Real E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 variable [SigmaCompactSpace M] [T2Space M]
 
-
-
-
-
-
-
-
-
 omit [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 theorem metric_coordinateFrame_component_contMDiffAt_of_mem
     (g : SmoothRiemannianMetric I M) (x₀ : M) {x : M}
@@ -84,8 +76,6 @@ theorem metric_coordinateFrame_component_contMDiffAt
           (coordinateFrameAt (I := I) x₀ j p)) x₀ :=
   metric_coordinateFrame_component_contMDiffAt_of_mem
     (I := I) g x₀ (coordinateFrameAt_mem (I := I) x₀) i j
-
-
 
 omit [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 theorem metric_coordinateFrame_component_directional_contMDiffAt

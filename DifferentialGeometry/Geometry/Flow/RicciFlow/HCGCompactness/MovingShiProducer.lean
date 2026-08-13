@@ -7,7 +7,6 @@ open DifferentialGeometry.PDE.RicciFlow
 open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Connection
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Connection
 open DifferentialGeometry.Geometry.Operator
 
@@ -61,9 +60,6 @@ theorem rm04_bound_can
     (hRm t ⟨htAlpha, htOmega⟩) x
   rw [heq]
   exact hK t x htAlpha htOmega
-
-
-
 
 theorem movingRmBoundSol
     {alpha omega : Real} {hAlphaOmega : alpha < omega}
@@ -244,9 +240,6 @@ theorem movingRmBoundSol
     omega
   exact hUniformS.trans (Finset.le_sup' B hkMem)
 
-
-
-
 theorem movingShiBoundN
     {alpha omega : Real} {hAlphaOmega : alpha < omega}
     {S : SolutionOn (I := I) (M := M)
@@ -292,8 +285,6 @@ theorem movingShiBoundN
   have hTerm : Real.sqrt (A k) <= KShi := by
     exact (Real.sqrt_le_sqrt (Finset.le_sup' A hkMem))
   exact (Real.sqrt_le_sqrt hRicA).trans hTerm
-
-
 
 theorem movingShiBoundSol
     {alpha omega : Real} {hAlphaOmega : alpha < omega}

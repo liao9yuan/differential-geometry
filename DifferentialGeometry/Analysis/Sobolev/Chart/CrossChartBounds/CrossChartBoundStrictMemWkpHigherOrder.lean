@@ -24,12 +24,6 @@ private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
-/-- **Joint cross-chart theorem (`MemWkp k p` inputs, arbitrary `k`).** For two chart
-points `γ α : M` on a closed Riemannian manifold and a fixed compact set
-`K_α ⊆ (chartAt H α).source`, there exists a positive constant `K` such that
-for every `v ∈ MemWkp k p` on the chart-α Euclidean target whose closed support
-sits inside the chart-α Euclidean image of `K_α`, the chart-γ pushed
-cross-pullback remains in `MemWkp k p` and satisfies the `W^{k,p}` bound. -/
 theorem crossChartJointK
     [I.Boundaryless] [NeZero (Module.finrank ℝ E)]
     [CompactSpace M] [T2Space M] [SigmaCompactSpace M]
@@ -590,7 +584,6 @@ theorem crossChartJointK
     ring
   exact h_K_eq ▸ le_refl _
 
-/-- Compatibility wrapper retaining the original norm-only cross-chart API. -/
 theorem cross_chart_bound_strict_strong_memWkp_k
     [I.Boundaryless] [NeZero (Module.finrank ℝ E)]
     [CompactSpace M] [T2Space M] [SigmaCompactSpace M]

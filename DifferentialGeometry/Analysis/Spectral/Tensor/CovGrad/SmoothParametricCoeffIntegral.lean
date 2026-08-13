@@ -4,7 +4,6 @@ import Mathlib.MeasureTheory.Integral.DominatedConvergence
 import Mathlib.Analysis.Calculus.ContDiff.Comp
 open DifferentialGeometry.Analysis.Spectral
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Connection
 
 

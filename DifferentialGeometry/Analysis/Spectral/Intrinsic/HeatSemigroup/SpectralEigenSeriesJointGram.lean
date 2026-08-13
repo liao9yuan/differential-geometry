@@ -19,8 +19,9 @@ import DifferentialGeometry.Analysis.Calculus.SpectralEigenSeriesJointGramProjec
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.HeatSemigroup.SpectralEigenSeriesJointGramSobolevWeightSummability
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.HeatSemigroup.SpectralEigenSeriesJointGramRawComponentJetBound
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.HeatSemigroup.SpectralEigenSeriesJointGramEigenChartIncrementMajorant
-open DifferentialGeometry.Analysis.Calculus DifferentialGeometry.Analysis.Sobolev.CSupTensor DifferentialGeometry.Analysis.Sobolev.IntrinsicSobolev.SmoothCcTensorHs DifferentialGeometry.PDE.RicciFlow
-open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Analysis.Calculus DifferentialGeometry.Analysis.Sobolev.CSupTensor
+    DifferentialGeometry.Analysis.Sobolev.IntrinsicSobolev.SmoothCcTensorHs
+    DifferentialGeometry.PDE.RicciFlow
 open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Connection
 open DifferentialGeometry.Geometry.Operator
@@ -1297,7 +1298,8 @@ lemma chartGramOnE_realize_eq_add_half_rawCompOnE
   have hp_src : (extChartAt I α).symm y ∈ (chartAt H α).source := by
     have := (extChartAt I α).map_target hy_t
     rwa [extChartAt_source] at this
-  rw [DifferentialGeometry.Geometry.Operator.chartGramOnE_def, DifferentialGeometry.Geometry.Operator.chartGramOnE_def,
+  rw [DifferentialGeometry.Geometry.Operator.chartGramOnE_def,
+    DifferentialGeometry.Geometry.Operator.chartGramOnE_def,
     chartGramMatrix_apply, chartGramMatrix_apply, tensorSectionRealizeMetric_inner]
   have hhalf := ccTensorBilinSymm_eq_half_rawComponent (I := I) (M := M) g S α a b hp_src
   rw [hhalf]

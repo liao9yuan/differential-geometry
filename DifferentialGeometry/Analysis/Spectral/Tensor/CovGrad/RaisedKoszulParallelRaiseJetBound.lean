@@ -17,7 +17,8 @@ namespace TensorSpectral
 
 open DifferentialGeometry.Integral.L2
 
-open DifferentialGeometry.PDE.RicciFlow DifferentialGeometry.Analysis.Sobolev DifferentialGeometry.Analysis.Spectral
+open DifferentialGeometry.PDE.RicciFlow DifferentialGeometry.Analysis.Sobolev
+    DifferentialGeometry.Analysis.Spectral
 open DifferentialGeometry.Analysis.Spectral.DeTurck
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]

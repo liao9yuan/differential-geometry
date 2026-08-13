@@ -21,21 +21,12 @@ variable {I : ModelWithCorners Real E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 variable [IsManifold I 1 M] [IsManifold I 2 M]
 
-
-
-
-
-
-
-
 private theorem reaction_bound_of_abs {a b R : Real}
     (h : |a - b| ≤ R) : b ≤ a + R := by
   have hnegR : -R ≤ -|a - b| := neg_le_neg h
   have hnegabs : -|a - b| ≤ a - b := neg_abs_le (a - b)
   have hle : -R ≤ a - b := le_trans hnegR hnegabs
   linarith
-
-
 
 private theorem reactionErr_lt_gain
     {K epsilon delta c g : Real}
@@ -58,9 +49,6 @@ private theorem reactionErr_lt_gain
   have hepsg_pos : 0 < epsilon * g := mul_pos hepsilon hg
   have hmul := mul_lt_mul_of_pos_right hkc_lt hepsg_pos
   nlinarith
-
-
-
 
 omit [IsManifold I 2 M] in
 theorem strictBarrierBounds
@@ -146,15 +134,6 @@ theorem strictBarrierBounds
       (c := delta + t - t0) (g := (G t).inner x v v)
       hK hepsilon.1 hdelta htime_nonneg htime_le hsmall ((G t).pos x v hv)
 
-
-
-
-
-
-
-
-
-
 structure TensorParabolicSupersolutionWithDriftOn
     (G : Real -> SmoothRiemannianMetric I M)
     (S : TwoTensorFamily (I := I) (M := M))
@@ -166,13 +145,6 @@ structure TensorParabolicSupersolutionWithDriftOn
   evaluatedInequality :
     TensorParabolicInequalityWithDriftOn (I := I) (M := M) G S X N
       nabla2S nablaS T
-
-
-
-
-
-
-
 
 omit [FiniteDimensional ℝ E] [IsManifold I 1 M] [IsManifold I 2 M] in
 theorem tensorBarrier_initial_positive
@@ -236,10 +208,6 @@ private theorem exists_small_delta
     (And.intro hdelta_pos
       (And.intro hdelta_le_delta0 (And.intro htime hstrict)))
 
-
-
-
-
 omit [IsManifold I 2 M] in
 theorem tensorBarrier_strict_supersolution
     {G : Real -> SmoothRiemannianMetric I M}
@@ -279,14 +247,6 @@ theorem tensorBarrier_strict_supersolution
     hsubInterior hparabolic.evaluatedInequality
     metricDeriv reactionErr metricGain hmetric_deriv hgain hreaction hmargin
 
-
-
-
-
-
-
-
-
 omit [IsManifold I 2 M] in
 theorem certSlab_of_reg
     {G : Real -> SmoothRiemannianMetric I M}
@@ -324,8 +284,6 @@ theorem certSlab_of_reg
   exact
     hreg.firstNullScalarSigns epsilon delta t0 hepsilon.1 hdelta hsub
       nabla2Barrier nablaBarrier hstrict hnull d
-
-
 
 theorem strictCert_sec
     [I.Boundaryless] [T2Space M]
@@ -406,9 +364,6 @@ theorem strictCert_sec
     (laplacianNonnegativeAtSpatialMin_of_metricCompatible
       (I := I) (cov d.t1) (G d.t1) (hmc d.t1))
     hXsec.symm
-
-
-
 
 omit [IsManifold I 2 M] in
 theorem certSlab_of_sectionReg

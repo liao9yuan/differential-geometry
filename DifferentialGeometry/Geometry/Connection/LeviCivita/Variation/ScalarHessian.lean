@@ -1,6 +1,5 @@
 import DifferentialGeometry.Geometry.Connection.LeviCivita.Variation.RicciCoord
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
 
 set_option autoImplicit false
 
@@ -21,12 +20,6 @@ variable [CompleteSpace E] [SigmaCompactSpace M] [T2Space M]
 variable {Idx : Type*} [Fintype Idx]
 variable {u : Set M}
 
-
-
-
-
-
-
 section RicciCoordVariation
 
 open DifferentialGeometry.Tensor.Coordinates
@@ -41,11 +34,6 @@ def scalarHessCoordAt
     ∑ p : CoordinateIdx (𝕜 := Real) E,
       DifferentialGeometry.Geometry.Curvature.christoffelCoordAt (I := I) cov x0 i j p *
         scalarCoordDerivAt (I := I) f x0 p
-
-
-
-
-
 
 omit [CompleteSpace E] [SigmaCompactSpace M] [T2Space M]
     [DecidableEq (CoordinateIdx (𝕜 := Real) E)] in
@@ -163,8 +151,6 @@ def scalarSecondVarCoordAt
       timeSet
       base
 
-
-
 omit [CompleteSpace E] [SigmaCompactSpace M] [T2Space M]
     [DecidableEq (CoordinateIdx (𝕜 := Real) E)] in
 theorem scalarFirst_of_fixedBase
@@ -180,8 +166,6 @@ theorem scalarFirst_of_fixedBase
     fixedBaseExtDerivTimeDerivativeOn_apply (I := I) (h := hmix)
       (t := base) (x := x0) hx (coordinateFrameAt (I := I) x0 p x0)
   simpa [scalarCoordDerivAt] using hderiv
-
-
 
 omit [CompleteSpace E] [SigmaCompactSpace M] [T2Space M]
     [DecidableEq (CoordinateIdx (𝕜 := Real) E)] in
@@ -200,8 +184,6 @@ theorem scalarFirst_of_fixedBaseRegular
       (t := base) ht (x := x0) hx (coordinateFrameAt (I := I) x0 p x0)
   simpa [scalarCoordDerivAt] using hderiv
 
-
-
 omit [CompleteSpace E] [SigmaCompactSpace M] [T2Space M]
     [DecidableEq (CoordinateIdx (𝕜 := Real) E)] in
 theorem scalarSecond_of_fixedBase
@@ -218,8 +200,6 @@ theorem scalarSecond_of_fixedBase
     fixedBaseExtDerivTimeDerivativeOn_apply (I := I) (h := hmix j)
       (t := base) (x := x0) hx (coordinateFrameAt (I := I) x0 i x0)
   simpa [scalarCoordSecondAt] using hderiv
-
-
 
 omit [CompleteSpace E] [SigmaCompactSpace M] [T2Space M]
     [DecidableEq (CoordinateIdx (𝕜 := Real) E)] in
@@ -239,8 +219,6 @@ theorem scalarSecond_of_fixedBaseRegular
     fixedBaseExtDerivTimeDerivativeOnRegular_apply (I := I) (h := hmix j)
       (t := base) ht (x := x0) hx (coordinateFrameAt (I := I) x0 i x0)
   simpa [scalarCoordSecondAt] using hderiv
-
-
 
 omit [CompleteSpace E] [SigmaCompactSpace M] [T2Space M]
     [DecidableEq (CoordinateIdx (𝕜 := Real) E)] in
@@ -298,9 +276,6 @@ theorem lcHessVarCoord
   simp [scalarHessCoordAt, Finset.sum_add_distrib, sub_eq_add_neg, add_comm,
     add_left_comm]
 
-
-
-
 def gammaWeightedDivCoordAt
     (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
     (gammaDot :
@@ -313,8 +288,6 @@ def gammaWeightedDivCoordAt
     ∑ p : CoordinateIdx (𝕜 := Real) E,
       gammaDot x0 p i j * scalarCoordDerivAt (I := I) f x0 p
 
-
-
 def ricciHessVarCoordRHS
     (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
     (gammaDot :
@@ -325,8 +298,6 @@ def ricciHessVarCoordRHS
   gammaWeightedDivCoordAt (I := I) cov gammaDot f x0 i j +
     scalarHessCoordAt (I := I) cov h x0 i j -
       gammaTraceCovAt (I := I) cov gammaDot x0 i j
-
-
 
 omit [SigmaCompactSpace M] [T2Space M] [DecidableEq (CoordinateIdx (𝕜 := Real) E)] in
 theorem lcRicciHessVarCoord
@@ -363,17 +334,12 @@ theorem lcRicciHessVarCoord
     gammaTraceCovAt, scalarHessCoordAt, sub_eq_add_neg]
   ring
 
-
-
-
 def shiftedScalarHessCoordAt
     (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
     (h metricTrace : M -> Real) (x0 : M)
     (i j : CoordinateIdx (𝕜 := Real) E) : Real :=
   scalarHessCoordAt (I := I) cov h x0 i j -
     (1 / 2 : Real) * scalarHessCoordAt (I := I) cov metricTrace x0 i j
-
-
 
 omit [SigmaCompactSpace M] [T2Space M] [DecidableEq (CoordinateIdx (𝕜 := Real) E)] in
 theorem lcRicciHessVarShifted
@@ -411,9 +377,6 @@ theorem lcRicciHessVarShifted
   unfold ricciHessVarCoordRHS shiftedScalarHessCoordAt
   rw [htrace]
   ring_nf
-
-
-
 
 omit [SigmaCompactSpace M] [T2Space M] [DecidableEq (CoordinateIdx (𝕜 := Real) E)] in
 theorem lcTraceVar
@@ -470,8 +433,6 @@ theorem lcTraceVar
     exact lcRicciHessVarShifted (I := I) G hLC timeSet base x0 f h
       metricTrace gammaDot hgamma hmix hfirst hsecond i j (htrace i j)
 
-
-
 omit [SigmaCompactSpace M] [T2Space M] [DecidableEq (CoordinateIdx (𝕜 := Real) E)] in
 theorem lcRicciHessShifted_of_trace
     (G : DifferentialGeometry.Geometry.Curvature.MetricConnectionFamily (I := I) (M := M) Real)
@@ -524,8 +485,6 @@ theorem lcRicciHessShifted_of_trace
     htrace_deriv htrace_point htrace_ext
   exact lcRicciHessVarShifted (I := I) G hLC timeSet base x0 f h
     metricTrace gammaDot hgamma hmix hfirst hsecond i j htrace_cov
-
-
 
 omit [SigmaCompactSpace M] [T2Space M] [DecidableEq (CoordinateIdx (𝕜 := Real) E)] in
 theorem lcTraceVar_of_trace
@@ -597,10 +556,6 @@ theorem lcTraceVar_of_trace
       (I := I) G hLC timeSet base x0 f h metricTrace gammaDot
       hgamma hmix hfirst hsecond i j (htrace_eventual j) htrace_point
       (hgamma_mdiff j) (hscalar_mdiff j)
-
-
-
-
 
 omit [SigmaCompactSpace M] [T2Space M] [DecidableEq (CoordinateIdx (𝕜 := Real) E)] in
 theorem lcTraceVar_inv
@@ -687,9 +642,6 @@ theorem lcTraceVar_inv
           shiftedScalarHessCoordAt (I := I) (G.connection base) h
             metricTrace x0 i j))
     hcontra
-
-
-
 
 omit [SigmaCompactSpace M] [T2Space M] in
 theorem lcTraceShifted

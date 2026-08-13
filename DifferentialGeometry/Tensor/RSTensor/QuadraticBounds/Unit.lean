@@ -27,7 +27,6 @@ import DifferentialGeometry.Tensor.Multilinear.Curry
 import Mathlib.Geometry.Manifold.VectorBundle.Hom
 import DifferentialGeometry.Tensor.RSTensor.Field
 import DifferentialGeometry.Tensor.Multilinear.BundleSmoothEvalRealized
-import Mathlib.Analysis.Normed.Module.FiniteDimension
 
 set_option autoImplicit false
 set_option backward.isDefEq.respectTransparency false
@@ -736,7 +735,6 @@ private theorem unitRest_compact
   haveI : CompactSpace D := isCompact_iff_compactSpace.mp hDcompact
   exact isCompact_range hmkCont
 
-/-- Metric-unit tangent vectors based in a compact set form a compact set. -/
 theorem metricUnitOn_compact
     [SigmaCompactSpace M] [T2Space M]
     (g : SmoothRiemannianMetric I M) {K : Set M} (hK : IsCompact K) :
@@ -784,15 +782,12 @@ theorem metricUnitOn_compact
   rw [hunion]
   exact t.isCompact_biUnion hlocal_compact
 
-/-- Compactness of the unit tangent bundle over a compact manifold. -/
 theorem metricUnit_compact
     [CompactSpace M] [SigmaCompactSpace M] [T2Space M]
     (g : SmoothRiemannianMetric I M) :
     IsCompact (Set.univ : Set (MetricUnitTangent (I := I) (M := M) g)) := by
   simpa using metricUnitOn_compact (I := I) (M := M) g isCompact_univ
 
-/-- Continuity of evaluating a smooth `(0,2)` tensor field on the repeated
-unit-tangent vector. -/
 theorem metricUnit_quadCont
     (g : SmoothRiemannianMetric I M)
     (A : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)

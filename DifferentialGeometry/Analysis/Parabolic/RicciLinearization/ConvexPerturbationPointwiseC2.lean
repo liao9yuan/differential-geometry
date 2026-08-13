@@ -4,7 +4,6 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.IteratedCovGradLine
 import DifferentialGeometry.Analysis.Parabolic.RicciLinearization.RicciDifferenceMeanValue
 open DifferentialGeometry.Analysis.Sobolev DifferentialGeometry.Analysis.Spectral
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
 
 noncomputable section
 

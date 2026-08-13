@@ -9,9 +9,11 @@ import DifferentialGeometry.Analysis.Spectral.Intrinsic.HeatSemigroup.ForcingFin
 import DifferentialGeometry.Analysis.Integration.L2.ForcingFiniteOrderTimeRegularityParametricIntegral
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.HeatSemigroup.ForcingFiniteOrderTimeRegularitySpectralPath
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.HeatSemigroup.ForcingFiniteOrderTimeRegularityEigenPairingBound
-open DifferentialGeometry.Analysis.Integration DifferentialGeometry.Analysis.Sobolev DifferentialGeometry.Analysis.Sobolev.CSupTensor DifferentialGeometry.Analysis.Sobolev.IntrinsicSobolev.SmoothCcTensorHs DifferentialGeometry.PDE.RicciFlow
+open DifferentialGeometry.Analysis.Integration DifferentialGeometry.Analysis.Sobolev
+    DifferentialGeometry.Analysis.Sobolev.CSupTensor
+    DifferentialGeometry.Analysis.Sobolev.IntrinsicSobolev.SmoothCcTensorHs
+    DifferentialGeometry.PDE.RicciFlow
 open DifferentialGeometry.Analysis.Elliptic
-open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Connection
 open DifferentialGeometry.Geometry.Operator
@@ -874,7 +876,8 @@ private theorem anisoOn_realizeGram_inv
   have hinv := hdet.inv hV hdet_ne
   have hadj := anisoOn_realizeGram_adjugate hT hδ_lt hδ hφ_smooth hcoeff hmodemass α a b
   refine (hinv.mul hV hadj).congr hV _ (fun t ht y hy => ?_)
-  rw [DifferentialGeometry.Geometry.Operator.chartInvGramMatrix, Matrix.inv_def, Matrix.smul_apply, smul_eq_mul,
+  rw [DifferentialGeometry.Geometry.Operator.chartInvGramMatrix, Matrix.inv_def,
+    Matrix.smul_apply, smul_eq_mul,
     Ring.inverse_eq_inv]
 
 private theorem anisoOn_realize_chartChristoffel
@@ -963,7 +966,8 @@ private theorem anisoOn_realize_chartDeTurckVFComp
     refine (anisoOn_realize_chartChristoffel hT hδ_lt hδ hφ_smooth hcoeff hmodemass
       α a b c).sub hV ?_
     exact DifferentialGeometry.Analysis.anisoOn_timeIndep hV
-      (DifferentialGeometry.Geometry.Operator.chartChristoffel_contDiffOn_interior (I := I) g_bg α a b c)
+      (DifferentialGeometry.Geometry.Operator.chartChristoffel_contDiffOn_interior
+        (I := I) g_bg α a b c)
   have hsum := DifferentialGeometry.Analysis.anisoOn_finsetSum hV Finset.univ
     (fun a (_ : a ∈ Finset.univ) =>
       DifferentialGeometry.Analysis.anisoOn_finsetSum hV Finset.univ

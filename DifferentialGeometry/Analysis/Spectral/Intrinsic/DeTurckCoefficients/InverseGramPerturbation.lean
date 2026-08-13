@@ -4,7 +4,6 @@ import Mathlib.LinearAlgebra.Matrix.NonsingularInverse
 import Mathlib.Algebra.Order.BigOperators.Group.Finset
 import Mathlib.Topology.Order.Compact
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Connection
 open DifferentialGeometry.Geometry.Operator
 
@@ -230,8 +229,6 @@ theorem exists_chartInvGramMatrix_lipschitz_on_compact
           chartGramDiffSup (I := I) (M := M) g₁ g₂ α x := by
         refine mul_le_mul_of_nonneg_right ?_ h_gram_nn
         linarith
-
-
 
 theorem chartInvGram_pou_lip
     [T2Space M] [SigmaCompactSpace M] [CompactSpace M] [I.Boundaryless]

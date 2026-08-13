@@ -1,6 +1,5 @@
 import DifferentialGeometry.Analysis.Elliptic.Regularity.Hessian.ChartAlphaFrobenius
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
 
 noncomputable section
 

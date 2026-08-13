@@ -1,23 +1,9 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.RicBoundClaims
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.Claim1Wiring
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Connection
 
 set_option autoImplicit false
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 noncomputable section
 
@@ -39,11 +25,6 @@ variable [CompleteSpace E] [SigmaCompactSpace M] [T2Space M]
 variable [VectorBundle Real E (TangentSpace I : M → Type _)]
 variable [ContMDiffVectorBundle 1 E (TangentSpace I : M → Type _) I]
 variable {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
-
-
-
-
-
 
 omit [VectorBundle ℝ E (TangentSpace I : M → Type _)]
     [ContMDiffVectorBundle 1 E (TangentSpace I : M → Type _) I] in
@@ -75,18 +56,6 @@ theorem tower_bound_to_intrinsic
   rw [← compL2_tower_eq (I := I) gRef T frame hframe hu hy hinv N,
     ← compL2_tower_eq (I := I) gRef T' frame hframe hu hy hinv N]
   exact hbound
-
-
-
-
-
-
-
-
-
-
-
-
 
 omit [VectorBundle ℝ E (TangentSpace I : M → Type _)]
     [ContMDiffVectorBundle 1 E (TangentSpace I : M → Type _) I] in

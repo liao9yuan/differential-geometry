@@ -11,7 +11,6 @@ import DifferentialGeometry.Analysis.ODE.TimeDependentFlow.ChartLocalExistence.C
 import DifferentialGeometry.Analysis.ODE.TimeDependentFlow.Regularity.BareFlowFromJointC1
 import DifferentialGeometry.Analysis.ODE.TimeDependentFlow.SmoothDependence.GlobalClosedManifold
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
 
 open DifferentialGeometry.Geometry.Connection
 namespace DifferentialGeometry.PDE.RicciFlow
@@ -39,23 +38,6 @@ variable
     {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
       [IsManifold I ∞ M] [CompactSpace M] [BoundarylessManifold I M]
       [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 omit [BoundarylessManifold I M] in
 omit [NeZero (Module.finrank ℝ E)] in
@@ -377,18 +359,6 @@ private theorem norm_singleModeCLM_eq
       = Real.sqrt (tensorSobolevWeight (I := I) (M := M) i σ) * |c| := by
   rw [singleModeCLM_apply, norm_smul, norm_tensorHsBasisVec (I := I) (M := M) i,
     Real.norm_eq_abs, mul_comm]
-
-
-
-
-
-
-
-
-
-
-
-
 
 omit [BoundarylessManifold I M] in
 theorem interior_allscale_time_continuity

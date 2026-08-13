@@ -163,7 +163,8 @@ theorem pullbackCohomologyMap_comp [BoundarylessManifold IM M] [BoundarylessMani
     [BoundarylessManifold IP P] (f : M → N) (hf : ContMDiff IM IN ⊤ f) (g : N → P)
     (hg : ContMDiff IN IP ⊤ g) (k : ℕ) :
     pullbackCohomologyMap (g ∘ f) (hg.comp hf) k =
-      CategoryTheory.CategoryStruct.comp (pullbackCohomologyMap g hg k) (pullbackCohomologyMap f hf k) := by
+      CategoryTheory.CategoryStruct.comp (pullbackCohomologyMap g hg k)
+        (pullbackCohomologyMap f hf k) := by
   have hc : pullbackCochainMap (g ∘ f) (hg.comp hf) =
       CategoryTheory.CategoryStruct.comp (pullbackCochainMap g hg) (pullbackCochainMap f hf) :=
     pullbackCochainMap_comp f hf g hg
@@ -192,7 +193,8 @@ theorem pullbackMapCohomologyMap_id [BoundarylessManifold IM M] (k : ℕ) :
 theorem pullbackMapCohomologyMap_comp [BoundarylessManifold IM M] [BoundarylessManifold IN N]
     [BoundarylessManifold IP P] (f : C^⊤⟮IM, M; IN, N⟯) (g : C^⊤⟮IN, N; IP, P⟯) (k : ℕ) :
     pullbackMapCohomologyMap (ContMDiffMap.comp g f) k =
-      CategoryTheory.CategoryStruct.comp (pullbackMapCohomologyMap g k) (pullbackMapCohomologyMap f k) := by
+      CategoryTheory.CategoryStruct.comp (pullbackMapCohomologyMap g k)
+        (pullbackMapCohomologyMap f k) := by
   simpa [pullbackMapCohomologyMap] using pullbackCohomologyMap_comp f.1 f.2 g.1 g.2 (k := k)
 
 end DifferentialForm

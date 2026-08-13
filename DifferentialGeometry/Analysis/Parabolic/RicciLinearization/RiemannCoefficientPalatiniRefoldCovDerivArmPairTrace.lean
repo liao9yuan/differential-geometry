@@ -20,7 +20,6 @@ open DifferentialGeometry.Analysis.Sobolev
 open DifferentialGeometry.Analysis.Spectral
 open DifferentialGeometry.Analysis.Elliptic
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Connection
 open DifferentialGeometry.Geometry.Operator
 
@@ -42,7 +41,8 @@ open DifferentialGeometry.Integral.L2
 
 open DifferentialGeometry.Geometry.Operator
 open DifferentialGeometry.Integral.DivergenceTheorem
-open DifferentialGeometry.PDE.RicciFlow DifferentialGeometry.Analysis.Sobolev DifferentialGeometry.Analysis.Spectral
+open DifferentialGeometry.PDE.RicciFlow DifferentialGeometry.Analysis.Sobolev
+    DifferentialGeometry.Analysis.Spectral
 open DifferentialGeometry.Analysis.Spectral.MetricRealization
 open DifferentialGeometry.Analysis.Spectral.DeTurck
 open DifferentialGeometry.PDE.DeTurck.RicciLinearization
@@ -1899,7 +1899,8 @@ private lemma dLaCovKernel_diff_eq_dLaCovKernel_connDiff_expansion
         PDE.DeTurck.connDiff (I := I) g₁ g₀ x u v -
           PDE.DeTurck.connDiff (I := I) g_bg g₀ x u v := by
     intro u v
-    have h := DifferentialGeometry.Analysis.Sobolev.connDiff_cocycle (I := I) (M := M) g₁ g_bg g₀ x u v
+    have h := DifferentialGeometry.Analysis.Sobolev.connDiff_cocycle (I := I)
+      (M := M) g₁ g_bg g₀ x u v
     exact eq_sub_of_add_eq h
   have hS1 := DifferentialGeometry.Analysis.Sobolev.dLaCovKernel_backgroundSplit (I := I) (M := M)
     g₀ g₁ g_bg x v0 p q

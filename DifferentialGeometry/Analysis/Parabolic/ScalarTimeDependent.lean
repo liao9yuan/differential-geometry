@@ -6,18 +6,6 @@ open DifferentialGeometry.Geometry.Curvature
 
 set_option autoImplicit false
 
-
-
-
-
-
-
-
-
-
-
-
-
 open DifferentialGeometry.Geometry.Connection
 namespace DifferentialGeometry.Analysis.Parabolic
 
@@ -36,30 +24,19 @@ variable {I : ModelWithCorners Real E H}
 variable {M : Type u} [TopologicalSpace M] [ChartedSpace H M]
 variable [IsManifold I ∞ M]
 
-
-
-
-
-
-
-
 structure IsHeatPotOn
     (D : RealTimeInterval)
     (G : MetricConnectionFamily (I := I) (M := M) Real)
     (V u : Real → M → Real) : Prop where
-
   jointSmooth :
     ContMDiffOn (𝓘(Real, Real).prod I) 𝓘(Real, Real) ∞
       (fun q : Real × M => u q.1 q.2) (D.regular ×ˢ univ)
-
   jointCont :
     ContinuousOn (fun q : Real × M => u q.1 q.2)
       (D.carrier ×ˢ univ)
-
   sliceSmooth :
     ∀ t : Real, t ∈ D.carrier →
       ContMDiff I 𝓘(Real, Real) ∞ (u t)
-
   equation :
     ∀ t : Real, t ∈ D.regular → ∀ x : M,
       HasDerivAt (fun s : Real => u s x)
@@ -81,19 +58,15 @@ structure IsHeatForcedOn
     (D : RealTimeInterval)
     (G : MetricConnectionFamily (I := I) (M := M) Real)
     (f u : Real → M → Real) : Prop where
-
   jointSmooth :
     ContMDiffOn (𝓘(Real, Real).prod I) 𝓘(Real, Real) ∞
       (fun q : Real × M => u q.1 q.2) (D.regular ×ˢ univ)
-
   jointCont :
     ContinuousOn (fun q : Real × M => u q.1 q.2)
       (D.carrier ×ˢ univ)
-
   sliceSmooth :
     ∀ t : Real, t ∈ D.carrier →
       ContMDiff I 𝓘(Real, Real) ∞ (u t)
-
   equation :
     ∀ t : Real, t ∈ D.regular → ∀ x : M,
       HasDerivAt (fun s : Real => u s x)
@@ -179,8 +152,6 @@ abbrev IsHeatSupersolutionOn
   IsHeatPotSupersolutionOn D G (fun _ _ ↦ 0) u
 
 namespace IsHeatPotOn
-
-
 
 theorem mono
     {D D' : RealTimeInterval}

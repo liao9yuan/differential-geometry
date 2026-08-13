@@ -6,76 +6,11 @@ import DifferentialGeometry.Tensor.RSTensor.MetricTrace.Connection
 open DifferentialGeometry.Tensor.RSTensor
 open DifferentialGeometry.PDE.RicciFlow
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Connection
 open DifferentialGeometry.Geometry.Operator
 
 set_option autoImplicit false
 set_option backward.isDefEq.respectTransparency false
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 noncomputable section
 
@@ -95,8 +30,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 variable [IsManifold I 1 M] [IsManifold I 2 M]
 variable [CompleteSpace E] [SigmaCompactSpace M] [T2Space M]
 
-
-
 private local instance tensor0SModelNormedSpace_local {s : ℕ} :
     NormedSpace ℝ (Tensor0SModel s ℝ E) :=
   Tensor0SBundle.tensor0SModel_normedSpace (𝕜 := Real) (E := E) s
@@ -104,30 +37,15 @@ private local instance tensor0SModelNormedSpace_local {s : ℕ} :
 private local instance tensor0SModelNormedAddCommGroup_local {s : ℕ} :
     NormedAddCommGroup (Tensor0SModel s ℝ E) := inferInstance
 
-
-
-
-
-
 section Fields
 
 variable {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
-
-
 
 def nablaKRm04NormSqIntrinsic
     {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D) (k : ℕ) : Real -> M -> Real :=
   fun t x => normSq0S (I := I) (S.base.metric t) x (4 + k)
     (nablaKRm04Field (I := I) S t k x)
-
-
-
-
-
-
-
-
 
 def nablaKRm04ReactionIntrinsic
     {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
@@ -151,8 +69,6 @@ def nablaKRm04ReactionIntrinsic
                 (nablaKRm04Field (I := I) S t (k + 2) x))
             (nablaKRm04Field (I := I) S t k x)
 
-
-
 def nablaKReactionAt
     {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D) (k : ℕ) (t : Real) (x : M)
@@ -175,10 +91,6 @@ def nablaKReactionAt
 
 end Fields
 
-
-
-
-
 omit [I.Boundaryless] in
 omit [SigmaCompactSpace M] in
 theorem nablaKNorm_smooth
@@ -190,7 +102,6 @@ theorem nablaKNorm_smooth
     (normSq0S_smooth (I := I) (S.base.metric t)
       (nablaKRm04Field (I := I) S t k))
 
-
 noncomputable def nablaKNormDu
     {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D) (t : Real) (k : ℕ) :
@@ -201,8 +112,6 @@ noncomputable def nablaKNormDu
 
 omit [I.Boundaryless]
   [SigmaCompactSpace M] in
-/-- The differential of `|∇^k Rm|²` satisfies the curvature-tower Kato bound
-`|d|∇^k Rm|²|² ≤ 4 |∇^k Rm|² |∇^(k+1) Rm|²`. -/
 theorem towerNorm_grad_le
     {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D) (k : Nat) (t : Real) (x : M) :
@@ -231,7 +140,6 @@ theorem towerNorm_grad_le
     normSq0S_eq_inner, Nat.add_assoc,
     inner0S_differential1FormFun_pair_eq_grad_inner] using hK
 
-/-- Canonical Hessian of the fixed-time scalar field `|∇ᵏRm|²`. -/
 noncomputable def nablaKNormHess
     {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D) (t : Real) (k : ℕ) :
@@ -241,25 +149,15 @@ noncomputable def nablaKNormHess
     (nablaKRm04NormSqIntrinsic (I := I) S k t)
     (nablaKNorm_smooth (I := I) S t k)
 
-
 noncomputable def nablaKNormLap
     {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D) (k : ℕ) : Real → M → Real :=
   fun t x => laplacian (I := I) (S.family.connection t) (S.base.metric t)
     (nablaKRm04NormSqIntrinsic (I := I) S k t) x
 
-
-
-
-
-
 section HeatEquation
 
 variable {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
-
-
-
-
 
 omit [Module.Finite ℝ E] in
 omit [I.Boundaryless] in
@@ -405,28 +303,6 @@ theorem nablaKNormHeatAt
   rw [hsplit']
   ring
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 omit [Module.Finite ℝ E] in
 omit [I.Boundaryless] in
 omit [SigmaCompactSpace M] in
@@ -552,41 +428,9 @@ theorem nablaKRm04NormHeatEquationOn_intrinsic
 
 end HeatEquation
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 section IteratedTimeDeriv
 
 variable {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
-
-
-
-
-
-
-
-
-
-
 
 def iteratedRmCompDt
     {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]
@@ -633,32 +477,6 @@ theorem iteratedRmCompDt_succ
         (iteratedRmCompDt (I := I) frame chr chrDt base baseDt k t x) -
       covDerivStepDt (chrDt t x)
         (iteratedRmComp (I := I) frame chr base k t x) := rfl
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 omit [DecidableEq Idx] in
 theorem iteratedRmComp_hasDerivWithinAt
@@ -716,11 +534,7 @@ theorem iteratedRmComp_hasDerivWithinAt
 
 end IteratedTimeDeriv
 
-
-
 section Nonneg
-
-
 
 omit [I.Boundaryless] in
 omit [SigmaCompactSpace M] in

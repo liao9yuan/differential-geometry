@@ -1,6 +1,1 @@
 import DifferentialGeometry.Geometry.Operator.RoughLaplacian
-
-namespace DifferentialGeometry
-
-set_option autoImplicit false
-end DifferentialGeometry

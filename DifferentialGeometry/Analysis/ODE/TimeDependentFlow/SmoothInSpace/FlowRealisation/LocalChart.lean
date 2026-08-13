@@ -4,7 +4,6 @@ import DifferentialGeometry.Analysis.ODE.TimeDependentFlow.SmoothDependence.Mani
 import DifferentialGeometry.Analysis.ODE.TimeDependentFlow.Regularity.BareFlowFromJointC1
 import DifferentialGeometry.Analysis.ODE.Flow.Defs
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Connection
 
 

@@ -4,7 +4,6 @@ import DifferentialGeometry.Geometry.Operator.RoughLaplacian
 open DifferentialGeometry.Tensor.RicciIdentity
 open DifferentialGeometry.PDE.RicciFlow
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
 
 
 set_option autoImplicit false
@@ -26,13 +25,6 @@ variable {I : ModelWithCorners Real E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 variable [IsManifold I 1 M] [IsManifold I 2 M]
 
-
-
-
-
-
-
-
 structure TensorFirstNullData
     (G : Real -> SmoothRiemannianMetric I M)
     (S : TwoTensorFamily (I := I) (M := M))
@@ -49,8 +41,6 @@ structure TensorFirstNullData
         (tensorBarrierFamily (I := I) (M := M) G S epsilon delta t0 t) x
   null :
     tensorBarrierFamily (I := I) (M := M) G S epsilon delta t0 t1 x1 v v = 0
-
-
 
 omit [IsManifold I 2 M] in
 theorem firstNullKernel_left
@@ -180,8 +170,6 @@ theorem firstNullKernel_right
   rw [hBsym w d.v]
   exact firstNullKernel_left (I := I) (M := M) hsym d w
 
-
-
 omit [IsManifold I 2 M] in
 theorem firstNullFieldKerL
     {G : Real -> SmoothRiemannianMetric I M}
@@ -207,8 +195,6 @@ theorem firstNullFieldKerL
   rw [hB w]
   exact firstNullKernel_left (I := I) (M := M) hsym d w
 
-
-
 omit [IsManifold I 2 M] in
 theorem firstNullFieldKerR
     {G : Real -> SmoothRiemannianMetric I M}
@@ -233,10 +219,6 @@ theorem firstNullFieldKerR
   intro w
   rw [hB w]
   exact firstNullKernel_right (I := I) (M := M) hsym d w
-
-
-
-
 
 private theorem deriv_nonpos_of_nonneg_left
     {phi : Real -> Real} {a b t d : Real}
@@ -310,10 +292,6 @@ theorem firstNullTime_nonpos
     d.null
     (hderiv d.t1 d.t1_mem d.x1 d.v)
 
-
-
-
-
 theorem nablaEval_extDeriv
     {cov : CovariantDerivative I E (TangentSpace I : M -> Type _)}
     {B : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
@@ -353,14 +331,6 @@ theorem nablaEval_extDeriv
     exact (B x).map_update_zero (vec2 (I := I) v v) a
   rw [hsum]
   simp
-
-
-
-
-
-
-
-
 
 private theorem nablaEval_ker
     {cov : CovariantDerivative I E (TangentSpace I : M -> Type _)}
@@ -427,12 +397,6 @@ private theorem nablaEval_ker
   rw [hsum]
   simp
 
-
-
-
-
-
-
 private theorem nablaEval_ker_tangent
     [T2Space M]
     [VectorBundle Real E (TangentSpace I : M -> Type _)]
@@ -466,8 +430,6 @@ private theorem nablaEval_ker_tangent
   have hcalc :=
     nablaEval_ker (I := I) (M := M) hreal Ysec V hV' hkerL hkerR
   simpa [V, hYsec, vec2_self_eq_const] using hcalc
-
-
 
 private theorem deriv_eval_zero_left
     {cov : CovariantDerivative I E (TangentSpace I : M -> Type _)}
@@ -550,8 +512,6 @@ private theorem deriv_eval_zero_left
   rw [hlhs, hsum] at h
   simpa using h.symm
 
-
-
 private theorem deriv_eval_zero_right
     {cov : CovariantDerivative I E (TangentSpace I : M -> Type _)}
     {B : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
@@ -632,8 +592,6 @@ private theorem deriv_eval_zero_right
     simp
   rw [hlhs, hsum] at h
   simpa using h.symm
-
-
 
 private theorem deriv_eval_zero_left_C1
     {cov : CovariantDerivative I E (TangentSpace I : M -> Type _)}
@@ -737,8 +695,6 @@ private theorem deriv_eval_zero_left_C1
   rw [hlhs, hsum] at h
   simpa using h.symm
 
-
-
 private theorem deriv_eval_zero_right_C1
     {cov : CovariantDerivative I E (TangentSpace I : M -> Type _)}
     {B : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
@@ -841,8 +797,6 @@ private theorem deriv_eval_zero_right_C1
   rw [hlhs, hsum] at h
   simpa using h.symm
 
-
-
 theorem nabla2Eval_extDeriv
     {cov : CovariantDerivative I E (TangentSpace I : M -> Type _)}
     {nablaB : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
@@ -915,13 +869,6 @@ theorem nabla2Eval_extDeriv
         simp [W, Fin.cons_succ]
   rw [hfun, hsum]
   simp
-
-
-
-
-
-
-
 
 private theorem nabla2Eval_extDeriv_oneSec_corr
     {cov : CovariantDerivative I E (TangentSpace I : M -> Type _)}
@@ -1026,14 +973,6 @@ private theorem nabla2Eval_extDeriv_oneSec_corr
         simp [W, vec2_self_eq_const, Fin.cons_succ]
   rw [hfun, hsum]
 
-
-
-
-
-
-
-
-
 private theorem nabla2Eval_extDeriv_oneSec_corr_phi
     [T2Space M]
     [VectorBundle Real E (TangentSpace I : M -> Type _)]
@@ -1095,16 +1034,6 @@ private theorem nabla2Eval_extDeriv_oneSec_corr_phi
                   nablaB p (Fin.cons (Y p) (vec2 (I := I) (Vsec p) (Vsec p))))
                 x (X x) - z)
             hA
-
-
-
-
-
-
-
-
-
-
 
 private theorem nabla2Eval_extDeriv_oneSec_hess
     [T2Space M]
@@ -1298,8 +1227,6 @@ private theorem nabla2Eval_extDeriv_oneSec_hess
   rw [hleft_deriv] at hcorr_phi
   simpa [phi, dphiY] using hcorr_phi
 
-
-
 private theorem nabla2Eval_hess
     [T2Space M]
     [VectorBundle Real E (TangentSpace I : M -> Type _)]
@@ -1492,11 +1419,6 @@ theorem nabla2Eval_hess_slots
     _ = Hess x (vec2 (I := I) U W) := by
         rw [hXsec, hYsec]
 
-
-
-
-
-
 theorem nablaEval_zero
     {cov : CovariantDerivative I E (TangentSpace I : M -> Type _)}
     {B : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
@@ -1519,9 +1441,6 @@ theorem nablaEval_zero
     nablaB x (Fin.cons (X x) (vec2 (I := I) v v)) = 0 := by
   rw [nablaEval_extDeriv (I := I) (M := M) hreal X V hV hcovV]
   exact hphi
-
-
-
 
 omit [IsManifold I 2 M] in
 theorem firstNullLocalMin

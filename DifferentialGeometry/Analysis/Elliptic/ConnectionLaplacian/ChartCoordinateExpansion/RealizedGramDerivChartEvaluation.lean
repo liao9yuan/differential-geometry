@@ -1,7 +1,6 @@
 import DifferentialGeometry.Analysis.Parabolic.RicciLinearization.RicciThreeArmAppCc
 import DifferentialGeometry.Analysis.Parabolic.RicciLinearization.RealizedFamChartRicciDeriv
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Connection
 open DifferentialGeometry.Geometry.Operator
 

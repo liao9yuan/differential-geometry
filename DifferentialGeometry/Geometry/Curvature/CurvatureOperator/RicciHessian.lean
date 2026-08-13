@@ -9,14 +9,6 @@ open DifferentialGeometry.Geometry.Connection
 set_option autoImplicit false
 set_option backward.isDefEq.respectTransparency false
 
-
-
-
-
-
-
-
-
 noncomputable section
 
 open DifferentialGeometry.Geometry.Operator
@@ -34,8 +26,6 @@ variable [IsManifold I (∞ : WithTop ℕ∞) M]
 variable [SigmaCompactSpace M] [T2Space M]
 
 private local instance : CompleteSpace E := FiniteDimensional.complete Real E
-
-
 
 theorem ricHess_eq_inner
     (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))

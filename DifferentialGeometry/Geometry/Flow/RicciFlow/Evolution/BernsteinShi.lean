@@ -2,44 +2,10 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.RiemannNorm
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.ScalarLowerBound
 open DifferentialGeometry.PDE.RicciFlow
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Connection
 open DifferentialGeometry.Geometry.Operator
 
 set_option autoImplicit false
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 noncomputable section
 
@@ -54,14 +20,6 @@ variable {H : Type*} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 variable [CompleteSpace E] [T2Space M]
-
-
-
-
-
-
-
-
 
 omit [CompleteSpace E] [T2Space M] in
 theorem parabolicOperatorWithDrift_affine_sub
@@ -173,8 +131,6 @@ theorem parabolicOperatorWithDrift_affine_sub
   rw [htime, hheat]
   ring
 
-
-
 omit [CompleteSpace E] [T2Space M] in
 theorem laplacianAt_linear_combo
     [VectorBundle Real E (TangentSpace I : M -> Type _)]
@@ -264,17 +220,6 @@ theorem heatOperator_linear_combo
     DifferentialGeometry.Geometry.Curvature.heatOperator_eq_laplacianAt,
     DifferentialGeometry.Geometry.Curvature.heatOperator_eq_laplacianAt]
   exact laplacianAt_linear_combo (I := I) G t f g c1 c2 x hf hg hgradf hgradg
-
-
-
-
-
-
-
-
-
-
-
 
 omit [CompleteSpace E] [T2Space M] in
 theorem scalar_subsolution_affine_bound
@@ -392,16 +337,6 @@ theorem scalar_subsolution_affine_bound
   simp only [w] at this
   linarith
 
-
-
-
-
-
-
-
-
-
-
 def NablaRm04NormHeatBoundOn
     {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
     (nablaRmNormSq nablaRmNormLap rmNormSq : Real -> M -> Real) (cReact : Real) : Prop :=
@@ -415,24 +350,8 @@ def NablaRm04NormHeatBoundOn
       d <= nablaRmNormLap (t : Real) x +
         cReact * Real.sqrt (rmNormSq (t : Real) x) * nablaRmNormSq (t : Real) x
 
-
-
-
 def bernsteinConstant (cReact alpha : Real) : Real :=
   (1 + cReact * alpha) * (1 + 16 * alpha)
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 omit [CompleteSpace E] [T2Space M] in
 theorem bernstein_first_derivative_estimate

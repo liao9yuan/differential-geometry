@@ -5,31 +5,7 @@ import DifferentialGeometry.Geometry.Comparison.HopfRinowProper
 import DifferentialGeometry.Geometry.Comparison.NormalCoordinates
 import DifferentialGeometry.Geometry.Exponential.DiagExpDerivative
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Connection
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 noncomputable section
 
@@ -43,10 +19,6 @@ namespace Riemannian
 open DifferentialGeometry.Geometry.Riemannian.Exponential
 open DifferentialGeometry.Geometry.Riemannian.Variation
 open DifferentialGeometry.Geometry.Riemannian.Geodesic
-
-
-
-
 
 theorem hasDerivAt_eq_of_le {f h : ℝ → ℝ} {f' h' c : ℝ}
     (hle : ∀ᶠ s in nhds c, f s ≤ h s) (heq : f c = h c)

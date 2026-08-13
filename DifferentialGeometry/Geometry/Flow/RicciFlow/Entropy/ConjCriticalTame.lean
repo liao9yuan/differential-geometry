@@ -3,14 +3,6 @@ import DifferentialGeometry.Analysis.Spectral.Intrinsic.Garding.ScalarPotentialP
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Entropy.ConjPotential
 open DifferentialGeometry.PDE.RicciFlow DifferentialGeometry.Analysis.Spectral
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
-
-
-
-
-
-
-
 
 noncomputable section
 
@@ -34,10 +26,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
   [BoundarylessManifold I M] [T2Space M]
 
 private local instance : CompleteSpace E := FiniteDimensional.complete Real E
-
-
-
-
 
 theorem scalar_crit_tame
     {D : RealTimeInterval} (S : SolutionOn (I := I) (M := M) D)

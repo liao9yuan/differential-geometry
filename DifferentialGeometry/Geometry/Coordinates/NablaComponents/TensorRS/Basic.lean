@@ -8,13 +8,6 @@ import DifferentialGeometry.Geometry.Operator.Operators
 open DifferentialGeometry.Tensor.Multilinear
 open DifferentialGeometry.Geometry.Operator
 
-
-
-
-
-
-
-
 set_option autoImplicit false
 
 noncomputable section
@@ -31,11 +24,6 @@ variable {H : Type*} [TopologicalSpace H]
 variable {I : ModelWithCorners 𝕜 E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
 variable [IsManifold I 1 M] [IsManifold I 2 M] [IsManifold I ∞ M]
-
-
-
-
-
 
 def coordDerivRSAt {r s : ℕ}
     (X : (x : M) -> TangentSpace I x) (x₀ : M)
@@ -73,8 +61,6 @@ def modelDerivRSAt {r s : ℕ}
       (X' (extChartAt I x₀ x₀))
     β₀)
     (fun b : Fin s => (Module.finBasis 𝕜 E) (lower b))
-
-
 
 def ModelDerivEqCoordDerivRSAt {r s : ℕ}
     (X : ContMDiffSection I E (∞ : WithTop ℕ∞) (TangentSpace I : M -> Type _))

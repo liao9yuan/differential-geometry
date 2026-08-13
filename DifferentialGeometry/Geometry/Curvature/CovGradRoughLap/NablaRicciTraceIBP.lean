@@ -2,6 +2,3 @@ import DifferentialGeometry.Geometry.Curvature.CovGradRoughLap.NablaRicciTraceCa
 import DifferentialGeometry.Geometry.Curvature.CovGradRoughLap.MovingFrameIntegratedNullity
 import DifferentialGeometry.Geometry.Curvature.CurvatureOperator.DifferentiatedSlotwiseCurvature
 import DifferentialGeometry.Geometry.Curvature.CurvatureOperator.ContractedBianchi
-
-namespace DifferentialGeometry
-end DifferentialGeometry

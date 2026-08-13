@@ -150,7 +150,8 @@ theorem cutoffGradientError_le_localizedL2Mass
       (gradFun (I := I) g cutoff.toFun x)
   have hgrad_smooth : ContMDiff I 𝓘(ℝ, ℝ) ∞ gradNormSq := by
     have h := contMDiff_g_inner_of_smooth_sections (I := I) (M := M) g
-      (grad_g (I := I) g ⟨cutoff.toFun, cutoff.smooth⟩) (grad_g (I := I) g ⟨cutoff.toFun, cutoff.smooth⟩)
+      (grad_g (I := I) g ⟨cutoff.toFun, cutoff.smooth⟩) (grad_g (I := I) g ⟨cutoff.toFun,
+        cutoff.smooth⟩)
     simpa only [gradNormSq, grad_g_apply] using h
   have hleft_int : Integrable (fun x : M => u.toFun x ^ 2 * gradNormSq x) μ :=
     ((u.smooth.continuous.pow 2).mul hgrad_smooth.continuous)
@@ -299,7 +300,8 @@ theorem contDiff_cutoffGradientError
         (gradFun (I := I) g cutoff.toFun x)
         (gradFun (I := I) g cutoff.toFun x)) := by
     have h := contMDiff_g_inner_of_smooth_sections (I := I) (M := M) g
-      (grad_g (I := I) g ⟨cutoff.toFun, cutoff.smooth⟩) (grad_g (I := I) g ⟨cutoff.toFun, cutoff.smooth⟩)
+      (grad_g (I := I) g ⟨cutoff.toFun, cutoff.smooth⟩) (grad_g (I := I) g ⟨cutoff.toFun,
+        cutoff.smooth⟩)
     simpa only [grad_g_apply] using h
   have hcutoff_grad_joint : ContMDiff (I.prod 𝓘(ℝ, ℝ)) 𝓘(ℝ, ℝ) ∞
       (fun p : M × ℝ =>
@@ -717,7 +719,8 @@ theorem caccioppoli_differential
     (t : ℝ)
     (hpde : ∀ x : M,
       deriv (fun s => u s x) t =
-        Δ_g (I := I) g ⟨(smoothScalarSlice (I := I) g u hu t).toFun, (smoothScalarSlice (I := I) g u hu t).smooth⟩ x + source t x) :
+        Δ_g (I := I) g ⟨(smoothScalarSlice (I := I) g u hu t).toFun,
+          (smoothScalarSlice (I := I) g u hu t).smooth⟩ x + source t x) :
     deriv
         (fun s => localizedL2Mass (I := I) (M := M) cutoff
           (smoothScalarSlice (I := I) g u hu s)) t +
@@ -798,7 +801,8 @@ theorem caccioppoli_differential_of_subsolution
     (hu_nonneg : ∀ x : M, 0 ≤ u t x)
     (hpde : ∀ x : M,
       deriv (fun s => u s x) t ≤
-        Δ_g (I := I) g ⟨(smoothScalarSlice (I := I) g u hu t).toFun, (smoothScalarSlice (I := I) g u hu t).smooth⟩ x + source t x) :
+        Δ_g (I := I) g ⟨(smoothScalarSlice (I := I) g u hu t).toFun,
+          (smoothScalarSlice (I := I) g u hu t).smooth⟩ x + source t x) :
     deriv
         (fun s => localizedL2Mass (I := I) (M := M) cutoff
           (smoothScalarSlice (I := I) g u hu s)) t +
@@ -959,7 +963,8 @@ private theorem caccioppoli_of_differential
         (gradFun (I := I) g cutoff.toFun x)
         (gradFun (I := I) g cutoff.toFun x)) := by
     have h := contMDiff_g_inner_of_smooth_sections (I := I) (M := M) g
-      (grad_g (I := I) g ⟨cutoff.toFun, cutoff.smooth⟩) (grad_g (I := I) g ⟨cutoff.toFun, cutoff.smooth⟩)
+      (grad_g (I := I) g ⟨cutoff.toFun, cutoff.smooth⟩) (grad_g (I := I) g ⟨cutoff.toFun,
+        cutoff.smooth⟩)
     simpa only [grad_g_apply] using h
   have hcutoff_grad_joint : ContMDiff (I.prod 𝓘(ℝ, ℝ)) 𝓘(ℝ, ℝ) ∞
       (fun p : M × ℝ =>
@@ -1033,7 +1038,8 @@ theorem caccioppoli
     (hweight_nonneg : ∀ t ∈ Icc a b, 0 ≤ weight t)
     (hpde : ∀ t ∈ Icc a b, ∀ x : M,
       deriv (fun s => u s x) t =
-        Δ_g (I := I) g ⟨(smoothScalarSlice (I := I) g u hu t).toFun, (smoothScalarSlice (I := I) g u hu t).smooth⟩ x + source t x) :
+        Δ_g (I := I) g ⟨(smoothScalarSlice (I := I) g u hu t).toFun,
+          (smoothScalarSlice (I := I) g u hu t).smooth⟩ x + source t x) :
     weight b * localizedL2Mass (I := I) (M := M) cutoff
           (smoothScalarSlice (I := I) g u hu b) -
         weight a * localizedL2Mass (I := I) (M := M) cutoff
@@ -1076,7 +1082,8 @@ theorem caccioppoli_of_subsolution
     (hu_nonneg : ∀ t ∈ Icc a b, ∀ x : M, 0 ≤ u t x)
     (hpde : ∀ t ∈ Icc a b, ∀ x : M,
       deriv (fun s => u s x) t ≤
-        Δ_g (I := I) g ⟨(smoothScalarSlice (I := I) g u hu t).toFun, (smoothScalarSlice (I := I) g u hu t).smooth⟩ x + source t x) :
+        Δ_g (I := I) g ⟨(smoothScalarSlice (I := I) g u hu t).toFun,
+          (smoothScalarSlice (I := I) g u hu t).smooth⟩ x + source t x) :
     weight b * localizedL2Mass (I := I) (M := M) cutoff
           (smoothScalarSlice (I := I) g u hu b) -
         weight a * localizedL2Mass (I := I) (M := M) cutoff
@@ -1121,7 +1128,8 @@ theorem caccioppoli_inner_energy_of_subsolution
     (hu_nonneg : ∀ t ∈ Icc a t₁, ∀ x : M, 0 ≤ u t x)
     (hpde : ∀ t ∈ Icc a t₁, ∀ x : M,
       deriv (fun s => u s x) t ≤
-        Δ_g (I := I) g ⟨(smoothScalarSlice (I := I) g u hu t).toFun, (smoothScalarSlice (I := I) g u hu t).smooth⟩ x + source t x)
+        Δ_g (I := I) g ⟨(smoothScalarSlice (I := I) g u hu t).toFun,
+          (smoothScalarSlice (I := I) g u hu t).smooth⟩ x + source t x)
     (hrhs_le : ∀ t ∈ Icc t₀ t₁,
       (∫ s in a..t,
         dweight s * localizedL2Mass (I := I) (M := M) cutoff

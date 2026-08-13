@@ -3,7 +3,6 @@ import DifferentialGeometry.Analysis.Parabolic.TensorHeatEquation.SmoothingHs
 import DifferentialGeometry.Analysis.Sobolev.Embedding.SobolevEmbeddingCm
 open DifferentialGeometry.Analysis.Sobolev.IntrinsicSobolev.SmoothCcTensorHs
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
 
 noncomputable section
 

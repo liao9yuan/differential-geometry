@@ -28,12 +28,9 @@ open DifferentialGeometry.Analysis.Sobolev
 open DifferentialGeometry.Analysis.Spectral
 open DifferentialGeometry.Analysis.Elliptic
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Connection
 
-
 noncomputable section
-
 
 open Bundle Manifold MeasureTheory Set Filter DifferentialGeometry.Tensor0SBundle
 open scoped Manifold Topology ContDiff ENNReal BigOperators
@@ -45,7 +42,8 @@ namespace Spectral
 open DifferentialGeometry.Integral.L2
 open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Analysis.Parabolic.TensorSpectral
-open DifferentialGeometry.PDE.RicciFlow DifferentialGeometry.Analysis.Sobolev DifferentialGeometry.Analysis.Spectral
+open DifferentialGeometry.PDE.RicciFlow DifferentialGeometry.Analysis.Sobolev
+    DifferentialGeometry.Analysis.Spectral
 open DifferentialGeometry.Analysis.Spectral.MetricRealization
   (metricCauchySchwarzBound ccTensorBilinSymm smoothCcTensorBilinForm ccTensorBilin_apply
   ccTensorModel ccTensorMultilinear ccTensorBilinSymm_contMDiff ccTensorBilinSymm_apply
@@ -875,14 +873,12 @@ private lemma pureDoubleTraceField_cross_split (g₀ g₁ : SmoothRiemannianMetr
   rw [appCcRS_slotInsert_id_eq (I := I) (M := M) g₀ (s + 1) s
     (cometricDoubleTraceField (I := I) g₀ s)]
 
-/-- The moving cometric double-trace field, retagged to the frozen metric. -/
 noncomputable def pureTrace (g₀ g₁ : SmoothRiemannianMetric I M) (s : ℕ) :
     SmoothCcTensor g₀ (s + 2) s :=
   pureDoubleTraceField (I := I) (M := M) g₀ g₁ s
 
 omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M]
   [SigmaCompactSpace M] in
-/-- Fibre readout of the moving cometric double trace. -/
 @[simp] theorem pureTrace_toSection
     (g₀ g₁ : SmoothRiemannianMetric I M) (s : ℕ) (x : M) :
     (pureTrace (I := I) (M := M) g₀ g₁ s).toSection x =
@@ -890,8 +886,6 @@ omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M]
         cometricDoubleTraceFib (I := I) g₁ s x) := rfl
 
 omit [BoundarylessManifold I M] [SigmaCompactSpace M] in
-/-- The moving double trace is the fixed parallel trace plus its exact
-inverse-metric-difference correction. -/
 theorem pureTrace_split (g₀ g₁ : SmoothRiemannianMetric I M) (s : ℕ) :
     pureTrace (I := I) (M := M) g₀ g₁ s =
       ccOperatorFieldComp (I := I) (M := M) g₀ (s + 2) (s + 2) s

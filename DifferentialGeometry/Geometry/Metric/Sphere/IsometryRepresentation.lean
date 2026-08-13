@@ -3,14 +3,6 @@ import DifferentialGeometry.Geometry.Metric.Sphere.IsometryExtension
 import DifferentialGeometry.Topology.FiberBundleT2
 import Mathlib.Analysis.Normed.Module.Connected
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
-
-/-!
-# Orthogonal representations of round-sphere actions
-
-A group action by round-metric-preserving diffeomorphisms of a positive-dimensional
-unit sphere is induced by a representation into the ambient orthogonal group.
--/
 
 noncomputable section
 
@@ -40,9 +32,6 @@ private theorem sphereDiffeo_mul (e f : E ≃ₗᵢ[ℝ] E) :
   apply Subtype.ext
   rfl
 
-/-- A group-indexed family of round-metric-preserving sphere diffeomorphisms
-which obeys the action laws is induced by a representation into the ambient
-orthogonal group. -/
 theorem orth_rep_of_iso
     {Γ : Type*} [Monoid Γ]
     (p : sphere (0 : E) 1)

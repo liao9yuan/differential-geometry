@@ -7,14 +7,6 @@ open DifferentialGeometry.Geometry.Operator
 
 set_option autoImplicit false
 
-/-!
-# Positive approximation of square-form amplitudes
-
-A smooth unit-mass amplitude may vanish.  This file mixes its squared density
-with a small uniform density, takes the positive square root, and controls the
-resulting square-form energy without differentiating through a limiting tensor.
--/
-
 namespace DifferentialGeometry.PDE.RicciFlow.Entropy
 
 noncomputable section
@@ -152,9 +144,6 @@ variable [Nonempty M]
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-/-- A smooth unit-mass amplitude, allowed to vanish, admits strictly positive
-smooth unit-mass approximants whose square-form value is arbitrarily close
-from above. -/
 theorem exists_pos_wform
     (g : SmoothRiemannianMetric I M) {v : M → ℝ}
     (hv : ContMDiff I 𝓘(ℝ, ℝ) ∞ v)

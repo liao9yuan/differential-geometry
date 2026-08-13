@@ -19,19 +19,9 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 variable {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
 variable {x : M}
 
-
-
-
-
-
-
 section CoordinateChristoffelCurvature
 
 open DifferentialGeometry.Tensor.Coordinates
-
-
-
-
 
 def christoffelCoordAt
     (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
@@ -53,12 +43,6 @@ def christoffelCoordDerivAt
   extDerivFun (I := I) (christoffelCoordFun (I := I) cov x₀ i j k) x₀
     (coordinateFrameAt (I := I) x₀ dir x₀)
 
-
-
-
-
-
-
 def christoffelCurvCoeffAt
     (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
     (x₀ : M) (i k j m : CoordinateIdx (𝕜 := Real) E) : Real :=
@@ -71,24 +55,11 @@ def christoffelCurvCoeffAt
       christoffelCoordAt (I := I) cov x₀ i j a *
         christoffelCoordAt (I := I) cov x₀ k a m)
 
-
-
-
-
-
-
-
 def christoffelRicciCoeffAt
     (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
     (x₀ : M) (i j : CoordinateIdx (𝕜 := Real) E) : Real :=
   ∑ k : CoordinateIdx (𝕜 := Real) E,
     christoffelCurvCoeffAt (I := I) cov x₀ k i j k
-
-
-
-
-
-
 
 theorem christoffelRicciCoeffAt_eq
     (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
@@ -109,12 +80,6 @@ theorem christoffelRicciCoeffAt_eq
   classical
   simp [christoffelRicciCoeffAt, christoffelCurvCoeffAt,
     Finset.sum_add_distrib, Finset.sum_sub_distrib]
-
-
-
-
-
-
 
 def ConnectionCurvatureCoordAt
     (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
@@ -156,11 +121,6 @@ private theorem covariantDerivative_finset_sum
         _ = (insert i t).sum (fun j => (cov (σ j) x) v) := by
               rw [ih]
               simp [Finset.sum_insert, hit]
-
-
-
-
-
 
 private theorem covariantDerivative_coordFrame_coeff
     (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
@@ -357,8 +317,6 @@ private theorem coordinateFrame_covariantDeriv_mdiffAt_one
   exact ((hW_on x₀ hx₀).contMDiffAt (hu.mem_nhds hx₀)).mdifferentiableAt
     (by norm_num)
 
-
-
 theorem christoffelCoordFun_mdiffAt_one
     (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
     (hcov : CovariantDerivative.ContMDiffCovariantDerivativeLocally cov
@@ -383,8 +341,6 @@ theorem christoffelCoordFun_mdiffAt_one
     coordinateFrameAt, coordinateFrameAt_isLocalFrame_one,
     coordinateTrivializationAt] using hcoeff
 
-
-
 private theorem coordinateFrame_coeff_contMDiffAt_of_contMDiffAt
     (Z : (x : M) -> TangentSpace I x) {x₀ : M}
     (hZ : ContMDiffAt I (I.prod 𝓘(Real, E)) (∞ : WithTop ℕ∞)
@@ -404,12 +360,6 @@ private theorem coordinateFrame_coeff_contMDiffAt_of_contMDiffAt
       (k := (∞ : WithTop ℕ∞)) hx hZ j
   simpa [e, coordinateTrivializationAt, coordinateFrameAt_isLocalFrame_one,
     coordinateFrameAt] using hcoeff
-
-
-
-
-
-
 
 theorem connection_curvature_coord_of_christoffel
     (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
@@ -614,9 +564,6 @@ private theorem connectionRiemannCurvatureField_eq_smooth_of_coordFrame
   rw [hcovZY, hcovZX, hZ_at, hbr]
   rw [hXval, hYval]
 
-
-
-
 theorem rm13_eval_eq_christoffelCurvCoord
     [T2Space M]
     (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
@@ -681,12 +628,6 @@ theorem rm13_eval_eq_christoffelCurvCoord
           alpha (fun _ : Fin 1 => frame m x₀) := by
           rw [hcurv_raw]
           simp [cotangentToDual_apply_gen, map_sum, frame]
-
-
-
-
-
-
 
 theorem rm13_coord_expand
     [T2Space M]
@@ -753,8 +694,6 @@ theorem rm13_coord_expand
               rm13_eval_eq_christoffelCurvCoord
                 (I := I) cov hcov Rm13 x₀ alpha hRm hcurv (r 0) (r 1) (r 2)
           rw [hsmul, hbasisEval]
-
-
 
 theorem ricciFromRm13At_coordFrame_eq_christoffelRicciCoeffAt
     [T2Space M]

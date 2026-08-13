@@ -2,7 +2,6 @@ import DifferentialGeometry.Geometry.Curvature.CurvatureOperator.RicciConnection
 import DifferentialGeometry.Geometry.Connection.ChartBridge.Riemann
 import DifferentialGeometry.Geometry.Curvature.Riemann.Ricci
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
 
 noncomputable section
 

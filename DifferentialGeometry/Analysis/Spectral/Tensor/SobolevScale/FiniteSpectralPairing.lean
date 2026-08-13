@@ -1,15 +1,6 @@
 import DifferentialGeometry.Analysis.Spectral.Tensor.SobolevScale.IteratedCovGradHsJetBound
 import DifferentialGeometry.Analysis.Spectral.Tensor.EllipticBridge.EigenvectorWeakSolution.Regularity.EigenvectorTensorHsToWtwokTwo
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
-
-
-
-
-
-
-
-
 
 noncomputable section
 
@@ -32,8 +23,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
   [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M]
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
-
-
 
 theorem cc_iter_coeff
     (g : SmoothRiemannianMetric I M) (s n : ℕ)
@@ -90,8 +79,6 @@ theorem cc_l2_pair_tsum
   rw [show (⟪SmoothCcTensor.toL2 A, b i⟫_ℝ : ℝ) =
       ⟪b i, SmoothCcTensor.toL2 A⟫_ℝ from real_inner_comm _ _]
 
-
-
 theorem cc_pair_tsum
     (g : SmoothRiemannianMetric I M) (s n : ℕ)
     (U A : SmoothCcTensor g 0 s) :
@@ -119,8 +106,6 @@ theorem cc_pair_tsum
     rw [Real.rpow_natCast]
   rw [hweight]
   ring
-
-
 
 theorem finite_repr_norm
     (g : SmoothRiemannianMetric I M) (s m : ℕ)
@@ -162,9 +147,6 @@ theorem finite_repr_norm
         by_contra hne
         exact hi (hT.mem_toFinset.mpr (Function.mem_support.mpr hne))
       norm_num [hcoeff]
-
-
-
 
 theorem finite_cc_pair
     (g : SmoothRiemannianMetric I M) (s n : ℕ)

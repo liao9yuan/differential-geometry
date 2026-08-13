@@ -2,18 +2,9 @@ import DifferentialGeometry.Geometry.Comparison.HessianAlongGeodesic
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.C4.NormalBranchHessian
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.C4.StepCInputs
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Operator
 
 set_option autoImplicit false
-
-
-
-
-
-
-
-
 
 noncomputable section
 
@@ -42,9 +33,6 @@ variable {H : Type uH} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H} [I.Boundaryless]
 
 namespace HasNormalBrFull
-
-
-
 
 theorem strict_dist
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}

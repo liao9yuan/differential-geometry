@@ -3,51 +3,6 @@ import DifferentialGeometry.Tensor.RSTensor.CotangentRiemannian
 
 set_option autoImplicit false
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 noncomputable section
 
 open DifferentialGeometry.Integral.DivergenceTheorem
@@ -66,17 +21,6 @@ variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] [InnerProductSpa
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 
-
-
-
-
-
-
-
-
-
-
-
 omit [InnerProductSpace ℝ E] in
 theorem cotangentSharp_gen_eq_metricSharp
     (g : SmoothRiemannianMetric I M) (x : M)
@@ -90,8 +34,6 @@ theorem cotangentSharp_gen_eq_metricSharp
   rw [cotangentSharp_inner_gen (I := I) g x β w,
     inner_metricSharp (I := I) g x (cotangentToDual_gen (I := I) β) w]
 
-
-
 omit [InnerProductSpace ℝ E] in
 theorem cotangentToDual_gen_chartBasis_eval
     (α : M) (j : Fin (Module.finrank ℝ E))
@@ -99,16 +41,6 @@ theorem cotangentToDual_gen_chartBasis_eval
     cotangentToDual_gen (I := I) (β b) (chartBasisVecFiber (I := I) α j b) =
       β b (fun _ : Fin 1 => chartBasisVecFiber (I := I) α j b) :=
   cotangentToDual_apply_gen (I := I) (β b) (chartBasisVecFiber (I := I) α j b)
-
-
-
-
-
-
-
-
-
-
 
 omit [InnerProductSpace ℝ E] in
 theorem cotangentSharp_gen_contMDiff_total [I.Boundaryless]
@@ -148,11 +80,6 @@ theorem cotangentSharp_gen_contMDiff_total [I.Boundaryless]
     rw [cotangentSharp_gen_eq_metricSharp (I := I) g b (β b)]
   rw [hsection_eq]
   exact hmetric
-
-
-
-
-
 
 omit [InnerProductSpace ℝ E] in
 theorem cotangentSharp_gen_mdiffAt [I.Boundaryless]

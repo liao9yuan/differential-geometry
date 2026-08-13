@@ -20,14 +20,6 @@ variable {I : ModelWithCorners Real E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 variable [SigmaCompactSpace M] [T2Space M]
 
-
-
-
-
-
-
-
-
 omit [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 theorem metricFlatModelInChart_component_center
     (g : SmoothRiemannianMetric I M) (x₀ : M)
@@ -183,9 +175,6 @@ theorem metricFlatModelInChart_component_contDiffWithinAt
     simpa using h.clm_apply contDiffWithinAt_const
   simpa [metricFlatModelInChart_component] using hi.clm_apply contDiffWithinAt_const
 
-
-
-
 omit [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 theorem metricFlatModelInChart_component_deriv_center
     (g : SmoothRiemannianMetric I M) (x₀ : M)
@@ -235,8 +224,6 @@ theorem metricFlatModelInChart_component_deriv_center
   rw [hframe_center, hf_md.mfderiv, hfd]
   rfl
 
-
-
 omit [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 theorem metricFlatModelInChart_component_deriv_contDiffWithinAt
     (g : SmoothRiemannianMetric I M) (x₀ : M)
@@ -278,8 +265,6 @@ noncomputable def leviCivitaChristoffelModelRHS
             (metricFlatModelInChart_component (I := I) g x₀ i j)
             (Set.range I) y ((Module.finBasis Real E) l))
 
-
-
 omit [SigmaCompactSpace M] [T2Space M] in
 theorem leviCivitaChristoffelModelRHS_contDiffWithinAt
     (g : SmoothRiemannianMetric I M) (x₀ : M)
@@ -300,8 +285,6 @@ theorem leviCivitaChristoffelModelRHS_contDiffWithinAt
   have h₃ :=
     metricFlatModelInChart_component_deriv_contDiffWithinAt (I := I) g x₀ l i j
   exact hinv.mul ((h₁.add h₂).sub h₃)
-
-
 
 omit [SigmaCompactSpace M] [T2Space M] in
 theorem leviCivitaChristoffelModelRHS_center_eq_christoffel
@@ -423,8 +406,6 @@ theorem metricFlatModelInChart_component_of_mem
   unfold metricFlatModelInChart_component
   rw [metricFlatModelInChart_apply_of_mem (I := I) g x₀ hx]
   rw [hi, hj]
-
-
 
 omit [SigmaCompactSpace M] [T2Space M] in
 omit [CompleteSpace E] in
@@ -583,10 +564,6 @@ private theorem inverseMetricFlatModelInChart_metricInverseInBasis_of_mem
               simp [hij, hji]
   · exact hsecond i j
 
-
-
-
-
 omit [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 private theorem fderivWithin_writtenInExtChartAt_eq_directionalDeriv_of_mem
     [I.Boundaryless]
@@ -711,12 +688,6 @@ theorem metricFlatModelInChart_component_deriv_of_mem
             exact fderivWithin_writtenInExtChartAt_eq_directionalDeriv_of_mem
               (I := I) hx hf_md a
 
-
-
-
-
-
-
 omit [SigmaCompactSpace M] [T2Space M] in
 theorem leviCivitaChristoffelModelRHS_eq_christoffel_of_mem
     [I.Boundaryless]
@@ -796,10 +767,6 @@ theorem leviCivitaChristoffelModelRHS_eq_christoffel_of_mem
                 (coordinateFrameAt (I := I) x₀ j y)) x by
       rw [h₁, h₂, h₃]
 
-
-
-
-
 omit [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 theorem metricFlatModelInChart_component_contDiffWithinAt_of_mem
     (g : SmoothRiemannianMetric I M) (x₀ : M) {y : E}
@@ -816,8 +783,6 @@ theorem metricFlatModelInChart_component_contDiffWithinAt_of_mem
         (Set.range I) y := by
     simpa using h.clm_apply contDiffWithinAt_const
   simpa [metricFlatModelInChart_component] using hi.clm_apply contDiffWithinAt_const
-
-
 
 omit [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 theorem metricFlatModelInChart_component_deriv_contDiffWithinAt_of_mem
@@ -840,8 +805,6 @@ theorem metricFlatModelInChart_component_deriv_contDiffWithinAt_of_mem
     contDiffWithinAt_const
   exact hf.fderivWithin_right_apply hconst I.uniqueDiffOn (by simp)
     (extChartAt_target_subset_range x₀ hy)
-
-
 
 omit [SigmaCompactSpace M] [T2Space M] in
 omit [CompleteSpace E] in
@@ -888,8 +851,6 @@ theorem metricFlatModelInChart_isInvertible_of_mem
     (e := trivializationAt E (TangentSpace I : M -> Type _) x₀)
     (b := Module.finBasis Real E) g hpT
 
-
-
 omit [SigmaCompactSpace M] [T2Space M] in
 theorem inverseMetricFlatModelInChart_component_contDiffWithinAt_of_mem
     (g : SmoothRiemannianMetric I M) (x₀ : M) {y : E}
@@ -926,8 +887,6 @@ theorem inverseMetricFlatModelInChart_component_contDiffWithinAt_of_mem
         (Set.range I) y := by
     simpa [εl] using hinv.clm_apply contDiffWithinAt_const
   simpa [εk, εl] using (contDiffWithinAt_const (c := εk)).clm_apply happ
-
-
 
 omit [SigmaCompactSpace M] [T2Space M] in
 theorem leviCivitaChristoffelModelRHS_contDiffWithinAt_of_mem

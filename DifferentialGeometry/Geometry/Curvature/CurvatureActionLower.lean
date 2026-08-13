@@ -6,22 +6,6 @@ open DifferentialGeometry.Geometry.Curvature
 
 set_option autoImplicit false
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 noncomputable section
 
 namespace DifferentialGeometry.Geometry.Curvature
@@ -36,16 +20,6 @@ variable {I : ModelWithCorners Real E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 variable {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
 variable {x : M}
-
-
-
-
-
-
-
-
-
-
 
 theorem curvatureAction0SAt_eq_rm04 {s : ℕ}
     (g : SmoothRiemannianMetric I M)

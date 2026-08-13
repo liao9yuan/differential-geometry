@@ -47,20 +47,17 @@ lemma riemannianMeasureFamily_def
 
 structure MetricFamilyRegularAt
     (g_fam : ℝ → SmoothRiemannianMetric I M) (t₀ : ℝ) : Prop where
-
   hasDerivAt_chartGramMatrix :
     ∀ (x₀ : M) (i j : Fin (Module.finrank ℝ E)) {x : M},
       x ∈ (trivializationAt E (TangentSpace I) x₀).baseSet →
       ∀ t : ℝ,
         HasDerivAt (fun s : ℝ => chartGramMatrix (I := I) (g_fam s) x₀ x i j)
           (deriv (fun s : ℝ => chartGramMatrix (I := I) (g_fam s) x₀ x i j) t) t
-
   continuousOn_chartGramMatrix :
     ∀ (x₀ : M) (i j : Fin (Module.finrank ℝ E)),
       ContinuousOn
         (fun p : ℝ × M => chartGramMatrix (I := I) (g_fam p.1) x₀ p.2 i j)
         (Set.univ ×ˢ (trivializationAt E (TangentSpace I) x₀).baseSet)
-
   continuousOn_deriv_chartGramMatrix :
     ∀ (x₀ : M) (i j : Fin (Module.finrank ℝ E)),
       ContinuousOn
@@ -77,12 +74,9 @@ lemma MetricFamilyRegularAt.at_any
     continuousOn_deriv_chartGramMatrix := hreg.continuousOn_deriv_chartGramMatrix }
 
 structure FunctionRegularAt (f : ℝ → M → ℝ) (t₀ : ℝ) : Prop where
-
   hasDerivAt_time :
     ∀ (x : M) (t : ℝ), HasDerivAt (fun s : ℝ => f s x) (deriv (fun s : ℝ => f s x) t) t
-
   continuous_joint : Continuous (fun p : ℝ × M => f p.1 p.2)
-
   continuous_deriv_joint :
     Continuous (fun p : ℝ × M => deriv (fun s : ℝ => f s p.2) p.1)
 
@@ -191,8 +185,6 @@ theorem continuousOn_deriv_of_hasDerivAt_eq_continuousOn
     exact (hderiv p hp).deriv
   exact hD.congr h_eq
 
-
-
 theorem MetricFamilyRegularAt.of_chartGram_timeDeriv
     {g_fam : ℝ → SmoothRiemannianMetric I M} {t₀ : ℝ}
     (h :
@@ -247,8 +239,6 @@ theorem FunctionRegularAt_const (c : ℝ) (t₀ : ℝ) :
       funext p
       exact (hasDerivAt_const (x := p.1) (c := c)).deriv
     simpa [hfun] using (continuous_const : Continuous (fun _ : ℝ × M => (0 : ℝ)))
-
-
 
 theorem FunctionRegularAt_one (t₀ : ℝ) :
     FunctionRegularAt (fun _ : ℝ => fun _ : M => (1 : ℝ)) t₀ :=

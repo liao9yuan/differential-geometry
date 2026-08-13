@@ -4,22 +4,9 @@ namespace DifferentialGeometry
 
 set_option autoImplicit false
 
-
-
-
-
-
-
-
-
-
-
-
 noncomputable section
 
 open Bornology Metric
-
-
 
 theorem posDef_bilin_quadratic_lower_bound
     {F : Type*} [NormedAddCommGroup F] [NormedSpace ℝ F] [FiniteDimensional ℝ F]

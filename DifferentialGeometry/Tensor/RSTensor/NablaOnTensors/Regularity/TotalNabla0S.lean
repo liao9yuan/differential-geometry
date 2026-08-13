@@ -5,16 +5,6 @@ import Mathlib.Geometry.Manifold.VectorBundle.LocalFrame
 import Mathlib.Geometry.Manifold.BumpFunction
 open DifferentialGeometry.Tensor.Multilinear
 
-
-
-
-
-
-
-
-
-
-
 namespace DifferentialGeometry
 namespace Tensor0SBundle
 
@@ -31,7 +21,6 @@ variable [T2Space M]
 variable [IsManifold I 1 M] [IsManifold I 2 M] [IsManifold I ∞ M]
 
 set_option backward.isDefEq.respectTransparency false in
-
 theorem totalNabla0S_eval_tangentConstInChart_contMDiffAt
     {s : ℕ}
     (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
@@ -105,7 +94,6 @@ theorem totalNabla0S_eval_tangentConstInChart_contMDiffAt
         (b (slots a.succ)) p)
 
 set_option backward.isDefEq.respectTransparency false in
-
 theorem totalNabla0S_reg (s : ℕ)
     (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
     (hcov : CovariantDerivative.ContMDiffCovariantDerivativeLocally cov

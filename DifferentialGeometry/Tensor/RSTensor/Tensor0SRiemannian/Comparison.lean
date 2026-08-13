@@ -2,17 +2,8 @@ import Mathlib.Analysis.InnerProductSpace.Spectrum
 import DifferentialGeometry.Tensor.RSTensor.Tensor0SRiemannian.Coordinate
 import DifferentialGeometry.Tensor.RSTensor.Tensor0SRiemannian.KroneckerQuadForm
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
 
 set_option autoImplicit false
-
-
-
-
-
-
-
-
 
 namespace DifferentialGeometry
 namespace Tensor0SBundle
@@ -227,8 +218,6 @@ theorem normSq0S_identity_eq_sum_sq
   intro slots _
   rfl
 
-/-- In an orthonormal basis, the squared norm of a rank-`s + 1` covariant
-tensor is the sum of the squared norms of its first-slot curries. -/
 theorem normSq0S_curry_sum
     (g : SmoothMetric_gen I M) (x : M) (s : Nat)
     (basis : Module.Basis Idx Real (TangentSpace I x))
@@ -254,9 +243,6 @@ theorem normSq0S_curry_sum
   funext a
   exact Fin.cases rfl (fun _ => rfl) a
 
-/-- If every component of a covariant tensor in an orthonormal basis is bounded
-by `B`, then its squared fibre norm is bounded by the number of components
-times `B ^ 2`. -/
 theorem normSq0S_le_card_of_component_bound
     (g : SmoothMetric_gen I M) (x : M) (s : Nat)
     (basis : Module.Basis Idx Real (TangentSpace I x))

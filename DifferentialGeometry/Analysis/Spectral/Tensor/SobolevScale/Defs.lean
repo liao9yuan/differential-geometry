@@ -1,7 +1,6 @@
 import DifferentialGeometry.Analysis.Parabolic.TensorHeatEquation.Semigroup
 import Mathlib.Analysis.SpecialFunctions.Pow.Real
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
 
 noncomputable section
 
@@ -142,9 +141,7 @@ lemma tensorL2Coeff_smul {g : SmoothRiemannianMetric I M} {r s : ℕ}
   rfl
 
 structure tensorHs (g : SmoothRiemannianMetric I M) (r s : ℕ) (σ : ℝ) where
-
   coeff : TensorEigenIdx (I := I) (M := M) g r s → ℝ
-
   weighted_summable :
     Summable (fun i => tensorSobolevWeight (I := I) (M := M) i σ *
       (coeff i) ^ 2)

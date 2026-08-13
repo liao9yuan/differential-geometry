@@ -6,18 +6,6 @@ import DifferentialGeometry.Analysis.Parabolic.DeTurckRicci.DeTurckRHSSection
 import DifferentialGeometry.Analysis.Integration.L2.SmoothSections.Integrability
 import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.ChartFiberTrivialisationOpNorm.SmoothBilinearSectionBddAbove
 
-
-
-
-
-
-
-
-
-
-
-
-
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
@@ -37,28 +25,6 @@ variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
   [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 private def retag (g₀ : SmoothRiemannianMetric I M)
     {g : SmoothRiemannianMetric I M} (S : SmoothCcTensor g 0 2) :
     SmoothCcTensor g₀ 0 2 where
@@ -71,14 +37,10 @@ omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space 
     {g : SmoothRiemannianMetric I M} (S : SmoothCcTensor g 0 2) :
     (retag (I := I) g₀ S).toFun = S.toFun := rfl
 
-
-
 private def rhsDiffSection (g_bg g g' g₀ : SmoothRiemannianMetric I M) :
     SmoothCcTensor g₀ 0 2 :=
   retag (I := I) g₀ (deTurckRHSSection (I := I) g_bg g) -
     retag (I := I) g₀ (deTurckRHSSection (I := I) g_bg g')
-
-
 
 private def rhsDiffGNorm (g_bg g g' g₀ : SmoothRiemannianMetric I M) (y : M) : ℝ :=
   tensorPointwiseNorm (I := I) (M := M) g₀ 0 2 y
@@ -91,9 +53,6 @@ private theorem rhsDiffGNorm_nonneg
     0 ≤ rhsDiffGNorm (I := I) g_bg g g' g₀ y :=
   Real.sqrt_nonneg _
 
-
-
-
 omit [NeZero (Module.finrank ℝ E)] in
 omit [SigmaCompactSpace M] in
 private theorem continuous_rhsDiffGNorm_sq
@@ -105,30 +64,12 @@ private theorem continuous_rhsDiffGNorm_sq
   SmoothCcTensor.continuous_inner_self (I := I) (M := M)
     (rhsDiffSection (I := I) g_bg g g' g₀)
 
-
-
 omit [NeZero (Module.finrank ℝ E)] in
 omit [SigmaCompactSpace M] in
 private theorem continuous_rhsDiffGNorm
     (g_bg g g' g₀ : SmoothRiemannianMetric I M) :
     Continuous (rhsDiffGNorm (I := I) g_bg g g' g₀) :=
   Real.continuous_sqrt.comp (continuous_rhsDiffGNorm_sq (I := I) g_bg g g' g₀)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 omit [NeZero (Module.finrank ℝ E)] in
 omit [SigmaCompactSpace M] in
@@ -156,31 +97,6 @@ private theorem rhsDiffSection_toModel_apply
     ContinuousMultilinearMap.sub_apply]
   rw [deTurckRHSSection_toModel_apply (I := I) g_bg g y v,
     deTurckRHSSection_toModel_apply (I := I) g_bg g' y v]
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] in
 theorem deturck_ricci_rhs_nonlinearity_locally_lipschitz

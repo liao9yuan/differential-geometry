@@ -7,15 +7,6 @@ open DifferentialGeometry.Analysis.Spectral
 open DifferentialGeometry.Analysis.Elliptic
 open DifferentialGeometry.PDE.RicciFlow DifferentialGeometry.Analysis.Sobolev
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
-
-
-
-
-
-
-
-
 
 noncomputable section
 
@@ -38,9 +29,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
   [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M]
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
-
-
-
 
 theorem lapDiff_hs_unif
     {D : RealTimeInterval}
@@ -166,8 +154,6 @@ private noncomputable def lapDiffCcLin
   map_add' := scalarLapDiff_add (I := I) (M := M) q h
   map_smul' := scalarLapDiff_smul (I := I) (M := M) q h
 
-
-
 noncomputable def lapDiffHs
     (q h : SmoothRiemannianMetric I M) (m : ℕ) :
     tensorHs (I := I) (M := M) q 0 0 ((m : ℝ) + 2) →L[ℝ]
@@ -176,8 +162,6 @@ noncomputable def lapDiffHs
       (lapDiffCcLin (I := I) (M := M) q h)).extendOfNorm
     (ccToHsLin (I := I) (M := M) q 0 ((m : ℝ) + 2))
 
-/-- For arbitrary smooth metrics, the completed scalar Laplacian difference
-agrees with its invariant action on every smooth spectral embedding. -/
 theorem lapHs_core
     (q h : SmoothRiemannianMetric I M) (m : ℕ)
     (U : SmoothCcTensor q 0 0) :
@@ -250,8 +234,6 @@ theorem lapHs_core
   rw [← hstruct W]
   exact R.le_opNorm _
 
-/-- The completed scalar Laplacian difference is the structural sum of its
-second-order metric coefficient arm and first-order connection arm. -/
 theorem lapHs_eq
     (q h : SmoothRiemannianMetric I M) (m : ℕ) :
     lapDiffHs (I := I) (M := M) q h m =
@@ -320,8 +302,6 @@ theorem lapHs_eq
   rw [← hsub]
   rfl
 
-/-- On one common backward-time slab, `lapDiffHs` agrees on every smooth
-spectral embedding with the invariant scalar Laplacian-difference action. -/
 theorem lapDiffHs_core
     {D : RealTimeInterval}
     (g_fam : ℝ → SmoothRiemannianMetric I M)
@@ -344,8 +324,6 @@ theorem lapDiffHs_core
   intro m s _hs U
   exact lapHs_core (I := I) (M := M)
     (g_fam (T : ℝ)) (g_fam ((T : ℝ) - s)) m U
-
-
 
 theorem lapDiffHs_norm
     {D : RealTimeInterval}
@@ -379,8 +357,6 @@ theorem lapDiffHs_norm
       C * ‖ccTensorToHs (I := I) (M := M) q 0 ((m : ℝ) + 2) W‖
   rw [show ((m : ℝ) + 2) = ((m + 2 : ℕ) : ℝ) by norm_num]
   simpa only [q, h] using hC s hs W
-
-
 
 theorem lapDiffHs_small
     {D : RealTimeInterval}
@@ -543,8 +519,6 @@ theorem lapDiffHs_small
     exact hcore U
   exact lt_of_le_of_lt hop hsmall
 
-
-
 theorem lapDiffHs_tendsto
     {D : RealTimeInterval}
     (g_fam : ℝ → SmoothRiemannianMetric I M)
@@ -560,8 +534,6 @@ theorem lapDiffHs_tendsto
   intro ε hε
   exact lapDiffHs_small (I := I) (M := M) g_fam hG T m hε
 
-/-- For arbitrary smooth metrics, the completed Laplacian-difference operators
-commute with the canonical inclusions between natural Sobolev orders. -/
 theorem lapHs_inc
     (q h : SmoothRiemannianMetric I M) {n m : ℕ} (hnm : n ≤ m) :
     (tensorHsInclusion (I := I) (M := M)
@@ -620,9 +592,6 @@ theorem lapHs_inc
   have hfun := hdense.equalizer L.continuous R.continuous heq
   exact congr_fun hfun v
 
-/-- On one common backward-time slab, the completed Laplacian-difference
-operators commute with the canonical inclusions between natural Sobolev
-orders. -/
 theorem lapDiffHs_inc
     {D : RealTimeInterval}
     (g_fam : ℝ → SmoothRiemannianMetric I M)

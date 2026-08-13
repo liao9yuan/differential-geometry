@@ -3,27 +3,9 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.ProductMFoldN
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.C4.ApproxIsometryComp
 import DifferentialGeometry.Geometry.Curvature.RicciOperatorNormBound
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
 
 set_option autoImplicit false
 set_option backward.isDefEq.respectTransparency false
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 universe u
 
@@ -42,16 +24,6 @@ variable {I : ModelWithCorners Real E H} [I.Boundaryless]
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
 variable [T2Space M] [IsManifold I ∞ M] [SigmaCompactSpace M]
 variable [IsManifold I 1 M] [IsManifold I 2 M]
-
-
-
-
-
-
-
-
-
-
 
 omit [Module.Finite ℝ E] in
 omit [I.Boundaryless] in
@@ -145,21 +117,11 @@ theorem comp_cov_le
         add_le_add ht0 ht1'
     _ = eps0 + eps1 * (Real.sqrt ((2 : Real) ^ (2 + p)) * (1 + Cc * (p : Real))) := by ring
 
-
-
-
-
 theorem comp_cov_accum {C : Real} {e δ : Nat → Real}
     (h0 : e 0 ≤ C * δ 0)
     (hstep : ∀ k : Nat, e (k + 1) ≤ e k + C * δ (k + 1)) (n : Nat) :
     e n ≤ C * Finset.sum (Finset.range (n + 1)) (fun i => δ i) :=
   compEpsAccum h0 hstep n
-
-
-
-
-
-
 
 omit [Module.Finite ℝ E] in
 omit [I.Boundaryless] in

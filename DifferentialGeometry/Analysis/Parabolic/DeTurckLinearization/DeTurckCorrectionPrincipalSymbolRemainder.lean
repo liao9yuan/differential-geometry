@@ -1,6 +1,5 @@
 import DifferentialGeometry.Analysis.Parabolic.DeTurckLinearization.DeTurckCorrectionSecondOrder
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Operator
 
 

@@ -2,20 +2,12 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.LowRegForcingH1
 import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.LowRegPathLower
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.LowRegPathSplit
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.DeTurckRemainderPrincipalArmOpNorm
-open DifferentialGeometry.Analysis.Sobolev DifferentialGeometry.Analysis.Spectral DifferentialGeometry.Analysis.Spectral.DeTurckCoefficients DifferentialGeometry.Analysis.Spectral.MetricRealization
+open DifferentialGeometry.Analysis.Sobolev DifferentialGeometry.Analysis.Spectral
+    DifferentialGeometry.Analysis.Spectral.DeTurckCoefficients
+    DifferentialGeometry.Analysis.Spectral.MetricRealization
 open DifferentialGeometry.Analysis.Spectral
 open DifferentialGeometry.Analysis.Elliptic
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
-
-
-/-!
-This file subtracts the fixed background connection Laplacian from the
-low-regularity Ricci
-closed at `H2 -> H0`, and `rem_h1_of_bounds` gives the conditional mixed
-`H3 -> H1` assembly.  The remaining frontier is unconditional integral-product
-control of the concrete lower path coefficients.
--/
 
 noncomputable section
 
@@ -39,9 +31,6 @@ variable
     {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
       [IsManifold I ∞ M] [CompactSpace M] [I.Boundaryless]
       [BoundarylessManifold I M] [T2Space M]
-
-
-
 
 theorem rem_h0_lip {ι : Type*}
     (gBase : SmoothRiemannianMetric I M)
@@ -112,13 +101,6 @@ theorem rem_h0_lip {ι : Type*}
     _ = (Crhs + 1) *
           ‖ccTensorToHs (I := I) (M := M) gBase 2 (2 : ℝ) U‖ := by ring
 
--- `unusedVariables` only inspects syntactic dependency in the conclusion and
--- therefore flags the sufficient bound hypotheses below, although the proof
--- consumes each of them to establish that conclusion.
-/-- In dimension three, the exact Ricci--DeTurck path decomposition gives the
-mixed `H3 -> H1` remainder estimate once the concrete zero- and one-order path
-coefficients have uniform low-regularity bounds.  The only `H3` coefficient is
-the spectral `H2` ball radius. -/
 theorem rem_h1_of_bounds
     (hDim : Module.finrank ℝ E = 3)
     (g₀ g_bg : SmoothRiemannianMetric I M) :
@@ -250,13 +232,6 @@ theorem rem_h1_of_bounds
           (Clow + Ccoef * (B₀ + B₀' + B₁)) *
             ‖ccTensorToHs (I := I) (M := M) g₀ 2 (2 : ℝ) U‖ := by ring
 
--- The hypotheses below are sufficient bounds used only in the proof, so the
--- syntactic unused-variable linter cannot see their dependency in the result.
-/-- The viable conditional mixed `H3 -> H1` remainder estimate.  The concrete
-lower path coefficients are controlled only by their intrinsic `L2` jets:
-`H1` for the order-zero arm and `H2` for the order-one arm.  Thus the sole
-coefficient multiplying the `H3` metric difference is the small `H2` ball
-radius. -/
 theorem rem_h1_of_jets
     (hDim : Module.finrank ℝ E = 3)
     (g₀ g_bg : SmoothRiemannianMetric I M) :

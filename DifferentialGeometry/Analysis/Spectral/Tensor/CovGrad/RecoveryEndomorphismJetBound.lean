@@ -2,7 +2,6 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.RaisedKoszulCovaria
 open DifferentialGeometry.Analysis.Spectral
 open DifferentialGeometry.Analysis.Elliptic
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Connection
 
 
@@ -20,7 +19,8 @@ namespace TensorSpectral
 
 open DifferentialGeometry.Integral.L2
 
-open DifferentialGeometry.PDE.RicciFlow DifferentialGeometry.Analysis.Sobolev DifferentialGeometry.Analysis.Spectral
+open DifferentialGeometry.PDE.RicciFlow DifferentialGeometry.Analysis.Sobolev
+    DifferentialGeometry.Analysis.Spectral
 open DifferentialGeometry.Analysis.Spectral.DeTurck
 open DifferentialGeometry.Analysis.Sobolev.TensorHilbert
 open DifferentialGeometry.Analysis.Spectral.MetricRealization

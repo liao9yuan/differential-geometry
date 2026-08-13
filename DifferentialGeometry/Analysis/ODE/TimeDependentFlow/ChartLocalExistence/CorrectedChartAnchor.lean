@@ -4,21 +4,6 @@ import DifferentialGeometry.Analysis.ODE.TimeDependentFlow.SmoothDependence.Corr
 import DifferentialGeometry.Analysis.ODE.TimeDependentFlow.Bijective.UniformBijective
 import Mathlib.MeasureTheory.Integral.IntervalIntegral.FundThmCalculus
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 open DifferentialGeometry.Geometry.Connection
 namespace DifferentialGeometry.Analysis.ODE
@@ -66,11 +51,6 @@ private lemma intervalIntegrable_chartTrivRepr_along_orbit
   refine hII_deriv.congr_ae ?_
   rw [Set.uIoc_of_le hs0, hrestrict]
   exact ae_restrict_of_forall_mem measurableSet_Ioo (fun u hu => hφ_eq u hu)
-
-
-
-
-
 
 omit [NeZero (Module.finrank ℝ E)] [T2Space M] [SigmaCompactSpace M] in
 theorem corrected_chart_anchor_flow_build

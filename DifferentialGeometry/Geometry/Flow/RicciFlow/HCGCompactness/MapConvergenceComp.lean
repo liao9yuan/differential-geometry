@@ -1,4 +1,1 @@
 import DifferentialGeometry.Analysis.Calculus.MapConvergenceComp
-
-namespace DifferentialGeometry
-end DifferentialGeometry

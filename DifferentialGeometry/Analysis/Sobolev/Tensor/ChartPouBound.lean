@@ -169,7 +169,8 @@ lemma tensorChartComponentRaw_eq_zero_of_notMem_chart_source
     simp
   exact hzero
 
-omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M]
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless]
+    [T2Space M]
     [SigmaCompactSpace M] in
 lemma norm_iteratedFDerivWithin_mul_le_of_bounded
     {Ω : Set EuclN} (hΩ_open : IsOpen Ω)
@@ -251,7 +252,8 @@ lemma norm_iteratedFDerivWithin_mul_le_of_bounded
               ‖iteratedFDerivWithin ℝ l u Ω x‖ := by
             rw [hK_def]
 
-omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M]
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless]
+    [T2Space M]
     [SigmaCompactSpace M] in
 private lemma norm_iteratedFDeriv_sum_mul_le_of_bounded
     {Ω : Set EuclN} (hΩ_open : IsOpen Ω)
@@ -333,7 +335,8 @@ private lemma norm_iteratedFDeriv_sum_mul_le_of_bounded
             rw [hu_within j (i - l)]
   have hKi_le : Ki i ≤ K' := by
     dsimp [K']
-    exact Finset.single_le_sum (f := Ki) (fun i' _ => hKi_nn i') (Finset.mem_range.mpr (Nat.lt_succ_of_le hi))
+    exact Finset.single_le_sum (f := Ki) (fun i' _ => hKi_nn i') (Finset.mem_range.mpr
+      (Nat.lt_succ_of_le hi))
   have hstep_inner : ∀ l ≤ i, (i.choose l : ℝ) * C ≤ Ki i := by
     intro l hl
     dsimp [Ki]
@@ -380,7 +383,8 @@ private lemma norm_iteratedFDeriv_sum_mul_le_of_bounded
     _ = K' * (∑ j, ∑ l ∈ Finset.range (i + 1), ‖iteratedFDeriv ℝ l (u j) x‖) := by
           rw [← Finset.mul_sum]
 
-omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M]
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless]
+    [T2Space M]
     [SigmaCompactSpace M] in
 private lemma norm_iteratedFDerivWithin_comp_contDiffOn_le
     {d kmax : ℕ} {Ω Ω' : Set (EuclideanSpace ℝ (Fin d))}
@@ -422,7 +426,8 @@ private lemma norm_iteratedFDerivWithin_comp_contDiffOn_le
     hu hf_cd hn_le hΩ'_open.uniqueDiffOn hΩ_open.uniqueDiffOn hst hx
     (C := C) (D := D) hC hΦ_iter
 
-omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M]
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless]
+    [T2Space M]
     [SigmaCompactSpace M] in
 private lemma uniform_iteratedFDeriv_bound_on_compact_of_contDiffOn
     {Ω : Set EuclN} (hΩ_open : IsOpen Ω)
@@ -532,7 +537,8 @@ private lemma transitionCoeffOnEuclid_contDiffOn_overlap
     h_tc.comp (h_chart_symm.mono h_sub) h_maps
   simpa [transitionCoeffOnEuclid_def] using (contMDiffOn_iff_contDiffOn).mp h_comp
 
-omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M]
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless]
+    [T2Space M]
     [SigmaCompactSpace M] in
 private lemma lintegral_comp_toFun_le_const
     {d kmax : ℕ} {Ω Ω' : Set (EuclideanSpace ℝ (Fin d))}
@@ -586,7 +592,8 @@ private lemma lintegral_comp_toFun_le_const
     _ ≤ ENNReal.ofReal (1 / Φ.jacobian_lower_bound) *
           (∫⁻ z in Ω', F z ∂(volume : Measure (EuclideanSpace ℝ (Fin d)))) := hstep
 
-omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M]
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless]
+    [T2Space M]
     [SigmaCompactSpace M] in
 private lemma finset_sum_le_finset_sum_mul_of_forall
     {ι : Type*} [Fintype ι] (m : ℕ) (c : ℝ≥0∞)
@@ -612,8 +619,8 @@ private lemma finset_sum_le_finset_sum_mul_of_forall
             exact Finset.mul_sum (Finset.range (m + 1)) (fun j => y Q j) c
           exact h2.symm.trans h1.symm
 
-omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M]
-    [SigmaCompactSpace M] in
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless]
+    [T2Space M] [SigmaCompactSpace M] in
 private lemma mul_le_mul_sum_trans
     {a b c : ℝ≥0∞} {T S1 S2 : ℝ≥0∞}
     (hab : a * b = c) (hT : T ≤ b * S1) (hS : S1 ≤ S2) :
@@ -624,7 +631,8 @@ private lemma mul_le_mul_sum_trans
     _ = c * S1 := by rw [hab]
     _ ≤ c * S2 := mul_le_mul_of_nonneg_left hS (zero_le _)
 
-omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M]
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless]
+    [T2Space M]
     [SigmaCompactSpace M] in
 private lemma lintegral_le_const_mul_lintegral_of_ae_le
     {α : Type*} [MeasurableSpace α] (μ : Measure α) (s t : Set α)
@@ -640,7 +648,28 @@ private lemma lintegral_le_const_mul_lintegral_of_ae_le
     _ ≤ ∫⁻ x in t, a * g x ∂μ := lintegral_mono_set hst
     _ = a * (∫⁻ x in t, g x ∂μ) := lintegral_const_mul' a g ha
 
-omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M]
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless]
+    [T2Space M]
+    [SigmaCompactSpace M] in
+private lemma lintegral_inter_eq_of_eq_zero_outside
+    {α : Type*} [MeasurableSpace α] (μ : Measure α)
+    {A C : Set α} (hA : MeasurableSet A) (hC : MeasurableSet C)
+    (f : α → ℝ≥0∞) (hf : ∀ x ∈ A, x ∉ C → f x = 0) :
+    (∫⁻ x in A, f x ∂μ) = ∫⁻ x in A ∩ C, f x ∂μ := by
+  rw [← lintegral_indicator hA, ← lintegral_indicator (hA.inter hC)]
+  apply lintegral_congr
+  intro x
+  by_cases hxA : x ∈ A
+  · rw [Set.indicator_of_mem hxA]
+    by_cases hxC : x ∈ C
+    · have hxAC : x ∈ A ∩ C := ⟨hxA, hxC⟩
+      rw [Set.indicator_of_mem hxAC]
+    · rw [Set.indicator_of_notMem (fun hx => hxC hx.2), hf x hxA hxC]
+  · rw [Set.indicator_of_notMem hxA,
+      Set.indicator_of_notMem (fun hx => hxA hx.1)]
+
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless]
+    [T2Space M]
     [SigmaCompactSpace M] in
 private irreducible_def pouCoordValue (γ : M) (z : EuclN) : ℝ :=
   ((chartAtlasPOU I M γ : C^∞⟮I, M; ℝ⟯) : M → ℝ)
@@ -693,6 +722,144 @@ private irreducible_def pouSqrtIntegrand
   Real.sqrt (pouCoordValue (I := I) (M := M) γ z) *
     rawChartFderivNorm (I := I) (M := M) g r s T γ Q j z
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] in
+private lemma pouWeightedIntegrand_comp_aemeasurable
+    (g : SmoothRiemannianMetric I M) (r s : ℕ) (T : SmoothCcTensor g r s)
+    (γ : M) (m : ℕ) {Ω Ω' : Set EuclN}
+    (hΩ : MeasurableSet Ω) (hΩ'_open : IsOpen Ω')
+    (hΩ'_target : Ω' ⊆ chartTargetEuclid (I := I) (M := M) γ)
+    (Φ : SmoothDiffeoBoundedAtOrder (Module.finrank ℝ E) Ω Ω' m)
+    (hv : ∀ Q : TensorCompIdx (E := E) r s,
+      ContDiffOn ℝ (⊤ : ℕ∞)
+        (chartPushedRaw (I := I) (M := M) γ
+          (tensorChartComponentRaw (I := I) (M := M) g r s T γ Q.1 Q.2)) Ω') :
+    ∀ Q : TensorCompIdx (E := E) r s, ∀ j : ℕ,
+      AEMeasurable
+        (fun y => pouWeightedIntegrand (I := I) (M := M) g r s T γ Q j (Φ.toFun y))
+        ((volume : Measure EuclN).restrict Ω) := by
+  have h_norm_cont : ∀ Q : TensorCompIdx (E := E) r s, ∀ j : ℕ,
+      ContinuousOn (fun y : EuclN =>
+        rawChartFderivNorm (I := I) (M := M) g r s T γ Q j y) Ω' := by
+    intro Q j
+    have hwithin : ContinuousOn (fun y : EuclN => iteratedFDerivWithin ℝ j
+        (chartPushedRaw (I := I) (M := M) γ
+          (tensorChartComponentRaw (I := I) (M := M) g r s T γ Q.1 Q.2)) Ω' y) Ω' :=
+      (hv Q).continuousOn_iteratedFDerivWithin
+        (by exact_mod_cast (le_top : (j : ℕ∞) ≤ (⊤ : ℕ∞))) hΩ'_open.uniqueDiffOn
+    have hglobal : ContinuousOn (fun y : EuclN => ‖iteratedFDeriv ℝ j
+        (chartPushedRaw (I := I) (M := M) γ
+          (tensorChartComponentRaw (I := I) (M := M) g r s T γ Q.1 Q.2)) y‖) Ω' :=
+      hwithin.norm.congr (fun y hy => by
+        rw [iteratedFDerivWithin_of_isOpen j hΩ'_open hy])
+    simpa only [rawChartFderivNorm] using hglobal
+  have h_pou_cont : ContinuousOn (fun y : EuclN =>
+      pouCoordValue (I := I) (M := M) γ y) Ω' := by
+    have h_toE : ContinuousOn (fun y : EuclN => (toEuclidean (E := E)).symm y)
+        (chartTargetEuclid (I := I) (M := M) γ) :=
+      (toEuclidean (E := E)).symm.continuous.continuousOn
+    have h_symm : ContinuousOn (extChartAt I γ).symm ((extChartAt I γ).target) :=
+      continuousOn_extChartAt_symm (I := I) γ
+    have h_symm_cont : ContinuousOn (fun y : EuclN =>
+        (extChartAt I γ).symm ((toEuclidean (E := E)).symm y))
+        (chartTargetEuclid (I := I) (M := M) γ) := by
+      refine h_symm.comp h_toE ?_
+      intro y hy
+      simpa [chartTargetEuclid_eq_preimage_symm (I := I) (M := M)] using hy
+    have h_pou : Continuous ((chartAtlasPOU I M γ : C^∞⟮I, M; ℝ⟯) : M → ℝ) :=
+      (chartAtlasPOU I M γ : C^∞⟮I, M; ℝ⟯).contMDiff.continuous
+    simpa only [pouCoordValue] using
+      h_pou.comp_continuousOn (h_symm_cont.mono hΩ'_target)
+  intro Q j
+  have h1 : ContinuousOn (fun y : EuclN =>
+      pouCoordValue (I := I) (M := M) γ (Φ.toFun y)) Ω :=
+    h_pou_cont.comp Φ.continuous_toFun.continuousOn (fun y hy => Φ.bijOn.mapsTo hy)
+  have h2 : ContinuousOn (fun y : EuclN =>
+      rawChartFderivNorm (I := I) (M := M) g r s T γ Q j (Φ.toFun y)) Ω :=
+    (h_norm_cont Q j).comp Φ.continuous_toFun.continuousOn
+      (fun y hy => Φ.bijOn.mapsTo hy)
+  have hcont : ContinuousOn (fun y : EuclN =>
+      ENNReal.ofReal (pouCoordValue (I := I) (M := M) γ (Φ.toFun y) *
+        (rawChartFderivNorm (I := I) (M := M) g r s T γ Q j (Φ.toFun y)) ^ 2)) Ω :=
+    ENNReal.continuous_ofReal.comp_continuousOn (h1.mul (h2.pow 2))
+  simpa only [pouWeightedIntegrand] using hcont.aemeasurable hΩ
+
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] in
+private lemma lintegral_pouWeightedF0_le
+    (g : SmoothRiemannianMetric I M) (r s : ℕ) (T : SmoothCcTensor g r s)
+    (γ α : M) (P₀ : TensorCompIdx (E := E) r s) (m : ℕ)
+    {Ω Ω' C : Set EuclN} (hΩ_open : IsOpen Ω) (hC : MeasurableSet C)
+    (hΩ'_target : Ω' ⊆ chartTargetEuclid (I := I) (M := M) γ)
+    (Φ : SmoothDiffeoBoundedAtOrder (Module.finrank ℝ E) Ω Ω' m)
+    (a : ℝ≥0∞) (ha : a ≠ ⊤)
+    (hpt : ∀ y ∈ Ω ∩ C,
+      pouWeightedF0 (I := I) (M := M) g r s T γ α P₀ m y ≤
+        a * pouWeightedG (I := I) (M := M) g r s T γ m (Φ.toFun y))
+    (hmeas : ∀ Q : TensorCompIdx (E := E) r s, ∀ j : ℕ,
+      AEMeasurable
+        (fun y => pouWeightedIntegrand (I := I) (M := M) g r s T γ Q j (Φ.toFun y))
+        ((volume : Measure EuclN).restrict Ω)) :
+    (∫⁻ y in Ω ∩ C,
+      pouWeightedF0 (I := I) (M := M) g r s T γ α P₀ m y ∂volume) ≤
+      (a * ENNReal.ofReal (1 / Φ.jacobian_lower_bound)) *
+        pouWeightedSum (I := I) (M := M) g r s T γ m
+          (chartTargetEuclid (I := I) (M := M) γ) := by
+  have hsum_integral :
+      (∫⁻ y in Ω, pouWeightedG (I := I) (M := M) g r s T γ m (Φ.toFun y)
+          ∂volume) =
+        pouWeightedSumComp (I := I) (M := M) g r s T γ m Ω Φ.toFun := by
+    simp only [pouWeightedG, pouWeightedSumComp]
+    rw [lintegral_finset_sum' Finset.univ (fun Q _ =>
+      Finset.aemeasurable_fun_sum (Finset.range (m + 1)) (fun j _ => hmeas Q j))]
+    refine Finset.sum_congr rfl ?_
+    intro Q _
+    rw [lintegral_finset_sum' (Finset.range (m + 1)) (fun j _ => hmeas Q j)]
+  have hchange : pouWeightedSumComp (I := I) (M := M) g r s T γ m Ω Φ.toFun ≤
+      ENNReal.ofReal (1 / Φ.jacobian_lower_bound) *
+        pouWeightedSum (I := I) (M := M) g r s T γ m Ω' := by
+    simp only [pouWeightedSumComp, pouWeightedSum]
+    exact finset_sum_le_finset_sum_mul_of_forall m
+      (ENNReal.ofReal (1 / Φ.jacobian_lower_bound))
+      (fun Q j => ∫⁻ y in Ω,
+        pouWeightedIntegrand (I := I) (M := M) g r s T γ Q j (Φ.toFun y) ∂volume)
+      (fun Q j => ∫⁻ z in Ω',
+        pouWeightedIntegrand (I := I) (M := M) g r s T γ Q j z ∂volume)
+      (fun Q j _ => lintegral_comp_toFun_le_const Φ hΩ_open
+        (pouWeightedIntegrand (I := I) (M := M) g r s T γ Q j))
+  have hmono : pouWeightedSum (I := I) (M := M) g r s T γ m Ω' ≤
+      pouWeightedSum (I := I) (M := M) g r s T γ m
+        (chartTargetEuclid (I := I) (M := M) γ) := by
+    simp only [pouWeightedSum]
+    refine Finset.sum_le_sum ?_
+    intro Q _
+    refine Finset.sum_le_sum ?_
+    intro j _
+    exact lintegral_mono_set hΩ'_target
+  have hpointwise := lintegral_le_const_mul_lintegral_of_ae_le
+    (volume : Measure EuclN) (Ω ∩ C) Ω
+    (hΩ_open.measurableSet.inter hC) (fun _ hy => hy.1) a ha
+    (f := pouWeightedF0 (I := I) (M := M) g r s T γ α P₀ m)
+    (g := fun y => pouWeightedG (I := I) (M := M) g r s T γ m (Φ.toFun y))
+    (Filter.Eventually.of_forall (fun y hy => hpt y hy))
+  calc
+    (∫⁻ y in Ω ∩ C,
+        pouWeightedF0 (I := I) (M := M) g r s T γ α P₀ m y ∂volume)
+        ≤ a * (∫⁻ y in Ω,
+          pouWeightedG (I := I) (M := M) g r s T γ m (Φ.toFun y) ∂volume) :=
+      hpointwise
+    _ = a * pouWeightedSumComp (I := I) (M := M) g r s T γ m Ω Φ.toFun := by
+      rw [hsum_integral]
+    _ ≤ a * (ENNReal.ofReal (1 / Φ.jacobian_lower_bound) *
+        pouWeightedSum (I := I) (M := M) g r s T γ m Ω') :=
+      mul_le_mul_of_nonneg_left hchange (zero_le _)
+    _ ≤ a * (ENNReal.ofReal (1 / Φ.jacobian_lower_bound) *
+        pouWeightedSum (I := I) (M := M) g r s T γ m
+          (chartTargetEuclid (I := I) (M := M) γ)) := by
+      exact mul_le_mul_of_nonneg_left
+        (mul_le_mul_of_nonneg_left hmono (zero_le _)) (zero_le _)
+    _ = (a * ENNReal.ofReal (1 / Φ.jacobian_lower_bound)) *
+        pouWeightedSum (I := I) (M := M) g r s T γ m
+          (chartTargetEuclid (I := I) (M := M) γ) := by rw [mul_assoc]
+
 omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 lemma chartAtlasPOU_sum_eq_one_on_chartTarget
     (α : M) (y : EuclN) :
@@ -716,7 +883,8 @@ lemma chartAtlasPOU_sum_eq_one_on_chartTarget
         chartAtlasPOU_weight_zero_of_notMem (I := I) (M := M) hγ x
       exact hγ_supp (by simpa [Function.support] using hzero))).symm
 
-omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M]
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless]
+    [T2Space M]
     [SigmaCompactSpace M] in
 lemma eLpNorm_iterWeakPartial_le_basis
     {Ω : Set EuclN} (hΩ_open : IsOpen Ω)
@@ -1212,7 +1380,8 @@ lemma iteratedWeakSobolevNorm_tensorChartComp_le_rawClassical
                       (volume.restrict K)) := by
                   have hmul : (∑ x ∈ (Finset.range (k + 1)).attach,
                         (Fintype.card (Fin x.1 → Fin (Module.finrank ℝ E)) : ℝ≥0∞) *
-                          ENNReal.ofReal (Real.sqrt (x.1 + 1 : ℝ) * Kmfun x.1 (hm_of_mem x.1 x.2))) *
+                          ENNReal.ofReal (Real.sqrt (x.1 + 1 : ℝ) * Kmfun x.1
+                            (hm_of_mem x.1 x.2))) *
                       (∑ l ∈ Finset.range (k + 1),
                         eLpNorm (fun y => ‖iteratedFDeriv ℝ l v y‖) 2
                           (volume.restrict K)) =
@@ -1420,11 +1589,6 @@ lemma tsupport_chartSmoothExt_pou_subset_chartImage
   rw [← Set.image_image]
   exact hKP_closed.closure_subset_iff.mpr hη_supp_KP
 
-set_option maxHeartbeats 500000 in
--- The transition-bound proof performs isDefEq checks against `lintegral` terms with
--- irreducible helper integrands; the default 200k heartbeat budget is exceeded by the
--- elaborator during statement checking.  This is a performance override, not a proof
--- device; flagged for owner approval per AGENTS.md.
 lemma eLpNorm_pou_weighted_raw_transition_le
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (T : SmoothCcTensor g r s)
     (γ α : M) (P₀ : TensorCompIdx (E := E) r s) (m : ℕ) :
@@ -1528,101 +1692,6 @@ lemma eLpNorm_pou_weighted_raw_transition_le
       rw [hx_def, (extChartAt I α).right_inv hy_target']
       exact ((toEuclidean (E := E)).apply_symm_apply y).symm
     exact ⟨x, ⟨hx_tsuppγ, hx_tsuppα⟩, hy_eq.symm⟩
-  have hLHS_le : (∫⁻ y in chartTargetEuclid (I := I) (M := M) α ∩ K_α,
-        ENNReal.ofReal (
-          ((chartAtlasPOU I M γ : C^∞⟮I, M; ℝ⟯) : M → ℝ)
-            ((extChartAt I α).symm ((toEuclidean (E := E)).symm y)) *
-          ‖iteratedFDeriv ℝ m v_α y‖ ^ 2)
-        ∂(volume : Measure EuclN)) ≤
-      (∫⁻ y in Ω_αγ ∩ (fun x : M => (toEuclidean (E := E)) (extChartAt I α x)) '' K_M,
-        ENNReal.ofReal (
-          ((chartAtlasPOU I M γ : C^∞⟮I, M; ℝ⟯) : M → ℝ)
-            ((extChartAt I α).symm ((toEuclidean (E := E)).symm y)) *
-          ‖iteratedFDeriv ℝ m v_α y‖ ^ 2)
-        ∂(volume : Measure EuclN)) := by
-    set F : EuclN → ℝ≥0∞ := fun y =>
-      ENNReal.ofReal (
-        ((chartAtlasPOU I M γ : C^∞⟮I, M; ℝ⟯) : M → ℝ)
-          ((extChartAt I α).symm ((toEuclidean (E := E)).symm y)) *
-        ‖iteratedFDeriv ℝ m v_α y‖ ^ 2) with hF_def
-    set A : Set EuclN := chartTargetEuclid (I := I) (M := M) α ∩ K_α with hA_def
-    set C : Set EuclN := (fun x : M => (toEuclidean (E := E)) (extChartAt I α x)) '' K_M
-      with hC_def
-    have hA_meas : MeasurableSet A := hΩα_meas.inter hKα_meas
-    have hC_meas : MeasurableSet C := by
-      have hC_compact : IsCompact C := by
-        have hcont : ContinuousOn (fun x : M =>
-            (toEuclidean (E := E)) (extChartAt I α x)) K_M :=
-          (toEuclidean (E := E)).continuous.comp_continuousOn
-            ((continuousOn_extChartAt (I := I) α).mono (by
-              intro x hx
-              have hxsrc : x ∈ (chartAt H α).source := hKM_in_α hx
-              rw [← extChartAt_source_eq_chartAt_source (I := I) (M := M)] at hxsrc
-              exact hxsrc))
-        simpa [C] using hKM_compact.image_of_continuousOn hcont
-      exact hC_compact.isClosed.measurableSet
-    have h_ae : F =ᵐ[volume.restrict A] (C.indicator F) := by
-      rw [Filter.EventuallyEq]
-      rw [ae_restrict_iff' hA_meas]
-      refine Filter.Eventually.of_forall ?_
-      intro y hy
-      by_cases hF : F y = 0
-      · by_cases hyC : y ∈ C
-        · rw [Set.indicator_of_mem hyC, hF]
-        · rw [Set.indicator_of_notMem hyC]
-          exact hF
-      · have hsupp := hF_supp y hy (by
-          have hF' : ((chartAtlasPOU I M γ : C^∞⟮I, M; ℝ⟯) : M → ℝ)
-                ((extChartAt I α).symm ((toEuclidean (E := E)).symm y)) *
-                ‖iteratedFDeriv ℝ m v_α y‖ ^ 2 ≠ 0 := by
-            intro hz
-            exact hF (by
-              rw [hF_def]
-              exact ENNReal.ofReal_eq_zero.mpr (le_of_eq hz))
-          exact hF')
-        rw [Set.indicator_of_mem hsupp]
-    have h_ae2 : A.indicator F =ᵐ[volume] A.indicator (C.indicator F) := by
-      rw [Filter.EventuallyEq]
-      have h_ae' : ∀ᵐ y ∂(volume : Measure EuclN), y ∈ A → F y = C.indicator F y :=
-        (ae_restrict_iff' hA_meas).mp h_ae
-      filter_upwards [h_ae'] with y hy
-      by_cases hyA : y ∈ A
-      · rw [Set.indicator_of_mem hyA, Set.indicator_of_mem hyA, hy hyA]
-      · rw [Set.indicator_of_notMem hyA, Set.indicator_of_notMem hyA]
-    have h_step1 : (∫⁻ y in A, F y ∂volume) =
-        (∫⁻ y in A ∩ C, F y ∂volume) := by
-      calc
-        (∫⁻ y in A, F y ∂volume)
-            = ∫⁻ y, A.indicator F y ∂volume := by rw [lintegral_indicator hA_meas]
-        _ = ∫⁻ y, A.indicator (C.indicator F) y ∂volume := by
-              apply lintegral_congr_ae
-              exact h_ae2
-        _ = (∫⁻ y in A, C.indicator F y ∂volume) := by rw [lintegral_indicator hA_meas]
-        _ = (∫⁻ y in A ∩ C, F y ∂volume) := by
-              rw [← lintegral_indicator hA_meas]
-              have h_ind : A.indicator (C.indicator F) = (A ∩ C).indicator F := by
-                funext y
-                classical
-                by_cases hyA : y ∈ A <;> by_cases hyC : y ∈ C <;>
-                  simp [Set.indicator, hyA, hyC]
-              rw [h_ind]
-              rw [lintegral_indicator (hA_meas.inter hC_meas)]
-    have h_step2 : (∫⁻ y in A ∩ C, F y ∂volume) ≤
-        (∫⁻ y in Ω_αγ ∩ C, F y ∂volume) := by
-      have hsubset : A ∩ C ⊆ Ω_αγ ∩ C := by
-        intro y hy
-        exact ⟨hKα_image_in_Ωαγ (by simpa [C, hKM_def] using hy.2), hy.2⟩
-      exact lintegral_mono_set hsubset
-    calc
-      (∫⁻ y in chartTargetEuclid (I := I) (M := M) α ∩ K_α,
-          ENNReal.ofReal (
-            ((chartAtlasPOU I M γ : C^∞⟮I, M; ℝ⟯) : M → ℝ)
-              ((extChartAt I α).symm ((toEuclidean (E := E)).symm y)) *
-            ‖iteratedFDeriv ℝ m v_α y‖ ^ 2)
-          ∂(volume : Measure EuclN)) = ∫⁻ y in A, F y ∂volume := by
-        simp [A, F]
-      _ = ∫⁻ y in A ∩ C, F y ∂volume := h_step1
-      _ ≤ ∫⁻ y in Ω_αγ ∩ C, F y ∂volume := h_step2
   set C : Set EuclN := (fun x : M => (toEuclidean (E := E)) (extChartAt I α x)) '' K_M
     with hC_def
   have hC_meas_top : MeasurableSet C := by
@@ -1635,6 +1704,54 @@ lemma eLpNorm_pou_weighted_raw_transition_le
           rw [← extChartAt_source_eq_chartAt_source (I := I) (M := M)] at hxsrc
           exact hxsrc))
     exact (hKM_compact.image_of_continuousOn hcont).isClosed.measurableSet
+  have hC_sub_Ωαγ : C ⊆ Ω_αγ := by
+    intro y hy
+    exact hKα_image_in_Ωαγ (by simpa [C, hKM_def] using hy)
+  have hLHS_le : (∫⁻ y in chartTargetEuclid (I := I) (M := M) α ∩ K_α,
+        ENNReal.ofReal (
+          ((chartAtlasPOU I M γ : C^∞⟮I, M; ℝ⟯) : M → ℝ)
+            ((extChartAt I α).symm ((toEuclidean (E := E)).symm y)) *
+          ‖iteratedFDeriv ℝ m v_α y‖ ^ 2)
+        ∂(volume : Measure EuclN)) ≤
+      (∫⁻ y in Ω_αγ ∩ C,
+        ENNReal.ofReal (
+          ((chartAtlasPOU I M γ : C^∞⟮I, M; ℝ⟯) : M → ℝ)
+            ((extChartAt I α).symm ((toEuclidean (E := E)).symm y)) *
+          ‖iteratedFDeriv ℝ m v_α y‖ ^ 2)
+        ∂(volume : Measure EuclN)) := by
+    set F : EuclN → ℝ≥0∞ := fun y =>
+      ENNReal.ofReal (
+        ((chartAtlasPOU I M γ : C^∞⟮I, M; ℝ⟯) : M → ℝ)
+          ((extChartAt I α).symm ((toEuclidean (E := E)).symm y)) *
+        ‖iteratedFDeriv ℝ m v_α y‖ ^ 2) with hF_def
+    set A : Set EuclN := chartTargetEuclid (I := I) (M := M) α ∩ K_α with hA_def
+    have hA_meas : MeasurableSet A := hΩα_meas.inter hKα_meas
+    have hF_zero : ∀ y ∈ A, y ∉ C → F y = 0 := by
+      intro y hyA hyC
+      have hprod :
+          ((chartAtlasPOU I M γ : C^∞⟮I, M; ℝ⟯) : M → ℝ)
+              ((extChartAt I α).symm ((toEuclidean (E := E)).symm y)) *
+              ‖iteratedFDeriv ℝ m v_α y‖ ^ 2 = 0 := by
+        by_contra hne
+        exact hyC (by simpa [C, A] using hF_supp y (by simpa [A] using hyA) hne)
+      change ENNReal.ofReal (
+        ((chartAtlasPOU I M γ : C^∞⟮I, M; ℝ⟯) : M → ℝ)
+            ((extChartAt I α).symm ((toEuclidean (E := E)).symm y)) *
+          ‖iteratedFDeriv ℝ m v_α y‖ ^ 2) = 0
+      rw [hprod, ENNReal.ofReal_zero]
+    have h_step1 := lintegral_inter_eq_of_eq_zero_outside
+      (volume : Measure EuclN) hA_meas hC_meas_top F hF_zero
+    have hsubset : A ∩ C ⊆ Ω_αγ ∩ C := fun _ hy => ⟨hC_sub_Ωαγ hy.2, hy.2⟩
+    calc
+      (∫⁻ y in chartTargetEuclid (I := I) (M := M) α ∩ K_α,
+          ENNReal.ofReal (
+            ((chartAtlasPOU I M γ : C^∞⟮I, M; ℝ⟯) : M → ℝ)
+              ((extChartAt I α).symm ((toEuclidean (E := E)).symm y)) *
+            ‖iteratedFDeriv ℝ m v_α y‖ ^ 2)
+          ∂(volume : Measure EuclN)) = ∫⁻ y in A, F y ∂volume := by
+        simp [A, F]
+      _ = ∫⁻ y in A ∩ C, F y ∂volume := h_step1
+      _ ≤ ∫⁻ y in Ω_αγ ∩ C, F y ∂volume := lintegral_mono_set hsubset
   set U : EuclN → ℝ := fun z =>
     ∑ Q : TensorCompIdx (E := E) r s,
       transitionCoeffOnEuclid (E := E) (I := I) (M := M) r s γ α P₀ Q z * v_γ Q z
@@ -1642,9 +1759,6 @@ lemma eLpNorm_pou_weighted_raw_transition_le
   set K_E_γ : Set EuclN := (fun x : M => (toEuclidean (E := E)) (extChartAt I γ x)) '' K_M
     with hKEγ_def
   set Kchg : ℝ := (1 / Φ.jacobian_lower_bound) ^ (1 / (2 : ℝ≥0∞).toReal) with hKchg_def
-  have hC_sub_Ωαγ : C ⊆ Ω_αγ := by
-    intro y hy
-    exact hKα_image_in_Ωαγ (by simpa [C, hKM_def] using hy)
   have hK_Eγ_compact : IsCompact K_E_γ := by
     have hcont : ContinuousOn (fun x : M =>
         (toEuclidean (E := E)) (extChartAt I γ x)) K_M :=
@@ -1716,7 +1830,8 @@ lemma eLpNorm_pou_weighted_raw_transition_le
       (E := E) (I := I) (M := M) r s γ α P₀ Q).mono hΩγα_overlap
   have h_vγ_cd : ∀ Q, ContDiffOn ℝ (⊤ : ℕ∞) (v_γ Q) Ω_γα := fun Q => by
     rw [hvγ_def]
-    exact (chartPushedRaw_tensorChartComponentRaw_contDiffOn (I := I) (M := M) g r s T γ Q.1 Q.2).mono
+    exact (chartPushedRaw_tensorChartComponentRaw_contDiffOn (I := I)
+      (M := M) g r s T γ Q.1 Q.2).mono
       hΩγα_subset_target
   have hU_cd : ContDiffOn ℝ (⊤ : ℕ∞) U Ω_γα := by
     rw [hU_def]
@@ -1724,10 +1839,12 @@ lemma eLpNorm_pou_weighted_raw_transition_le
       (h_coeff_cd Q).mul (h_vγ_cd Q))
   have h_vα_cd : ContDiffOn ℝ (⊤ : ℕ∞) v_α Ω_αγ := by
     rw [hvα_def]
-    exact (chartPushedRaw_tensorChartComponentRaw_contDiffOn (I := I) (M := M) g r s T α P₀.1 P₀.2).mono
+    exact (chartPushedRaw_tensorChartComponentRaw_contDiffOn (I := I)
+      (M := M) g r s T α P₀.1 P₀.2).mono
       hΩαγ_subset_target
   have h_coeff_bdd : ∀ Q, ∀ j ≤ m, ∀ z ∈ K_E_γ,
-      ‖iteratedFDeriv ℝ j (transitionCoeffOnEuclid (E := E) (I := I) (M := M) r s γ α P₀ Q) z‖ ≤ C_tr := by
+      ‖iteratedFDeriv ℝ j (transitionCoeffOnEuclid (E := E) (I := I)
+        (M := M) r s γ α P₀ Q) z‖ ≤ C_tr := by
     intro Q j hj z hz
     have hj' : j ≤ m + 1 := by omega
     exact hC_tr_bound Q j hj' z hz
@@ -1990,7 +2107,8 @@ lemma eLpNorm_pou_weighted_raw_transition_le
     rw [hΦy, (toEuclidean (E := E)).symm_apply_apply]
     exact ((extChartAt I γ).left_inv hx_ext_γ).symm
   have h_pt : ∀ y ∈ Ω_αγ ∩ C, pouWeightedF0 (I := I) (M := M) g r s T γ α P₀ m y ≤
-      ENNReal.ofReal (K_pw ^ 2 * N_terms) * pouWeightedG (I := I) (M := M) g r s T γ m (Φ.toFun y) := by
+      ENNReal.ofReal (K_pw ^ 2 * N_terms) * pouWeightedG (I := I) (M := M) g r s T γ m
+        (Φ.toFun y) := by
     intro y hy
     rcases hy with ⟨hyΩ, hyC⟩
     have hsqy := h_sq y ⟨hyΩ, hyC⟩
@@ -2094,131 +2212,31 @@ lemma eLpNorm_pou_weighted_raw_transition_le
                   ((extChartAt I γ).symm ((toEuclidean (E := E)).symm (Φ.toFun y))) *
                 ‖iteratedFDeriv ℝ j (v_γ Q) (Φ.toFun y)‖ ^ 2)) := by
             rw [h_ofReal_sum]
-      _ = ENNReal.ofReal (K_pw ^ 2 * N_terms) * pouWeightedG (I := I) (M := M) g r s T γ m (Φ.toFun y) := by
+      _ = ENNReal.ofReal (K_pw ^ 2 * N_terms) * pouWeightedG (I := I) (M := M) g r s T γ m
+        (Φ.toFun y) := by
             simp only [pouWeightedG, hvγ_def, pouWeightedIntegrand, pouCoordValue,
               rawChartFderivNorm]
   have h_main : (∫⁻ y in Ω_αγ ∩ C, pouWeightedF0 (I := I) (M := M) g r s T γ α P₀ m y ∂volume) ≤
       ENNReal.ofReal (K_pw ^ 2 * N_terms * Kchg ^ 2) *
         pouWeightedSum (I := I) (M := M) g r s T γ m
           (chartTargetEuclid (I := I) (M := M) γ) := by
-    have hKchg_nn : 0 ≤ Kchg := by
-      dsimp [Kchg]
-      exact Real.rpow_nonneg (div_nonneg (by norm_num) Φ.jacobian_lower_bound_pos.le) _
-    have h_norm_cont : ∀ Q, ∀ j, ContinuousOn (fun y : EuclN =>
-        rawChartFderivNorm (I := I) (M := M) g r s T γ Q j y) Ω_γα := by
-      intro Q j
-      have hwithin : ContinuousOn (fun y : EuclN => iteratedFDerivWithin ℝ j (v_γ Q) Ω_γα y) Ω_γα :=
-        (h_vγ_cd Q).continuousOn_iteratedFDerivWithin (by
-          exact_mod_cast (le_top : (j : ℕ∞) ≤ (⊤ : ℕ∞))) hΩγα_open.uniqueDiffOn
-      have hwithin_norm : ContinuousOn (fun y : EuclN => ‖iteratedFDerivWithin ℝ j (v_γ Q) Ω_γα y‖) Ω_γα :=
-        hwithin.norm.congr (fun y hy => by
-          rw [iteratedFDerivWithin_of_isOpen j hΩγα_open hy])
-      have hglobal : ContinuousOn (fun y : EuclN => ‖iteratedFDeriv ℝ j (v_γ Q) y‖) Ω_γα :=
-        hwithin_norm.congr (fun y hy => by
-          rw [iteratedFDerivWithin_of_isOpen j hΩγα_open hy])
-      simpa [rawChartFderivNorm, hvγ_def] using hglobal
-    have h_pou_γ_cont : ContinuousOn (fun y : EuclN =>
-        ((chartAtlasPOU I M γ : C^∞⟮I, M; ℝ⟯) : M → ℝ)
-          ((extChartAt I γ).symm ((toEuclidean (E := E)).symm y))) Ω_γα := by
-      have h_toE : ContinuousOn (fun y : EuclN => (toEuclidean (E := E)).symm y)
-          (chartTargetEuclid (I := I) (M := M) γ) :=
-        (toEuclidean (E := E)).symm.continuous.continuousOn
-      have h_symm : ContinuousOn (extChartAt I γ).symm ((extChartAt I γ).target) :=
-        continuousOn_extChartAt_symm (I := I) γ
-      have h_symm_contOn : ContinuousOn (fun y : EuclN =>
-          (extChartAt I γ).symm ((toEuclidean (E := E)).symm y))
-          (chartTargetEuclid (I := I) (M := M) γ) := by
-        refine h_symm.comp h_toE ?_
-        intro y hy
-        simpa [chartTargetEuclid_eq_preimage_symm (I := I) (M := M)] using hy
-      have h_pou : Continuous ((chartAtlasPOU I M γ : C^∞⟮I, M; ℝ⟯) : M → ℝ) :=
-        (chartAtlasPOU I M γ : C^∞⟮I, M; ℝ⟯).contMDiff.continuous
-      exact h_pou.comp_continuousOn (h_symm_contOn.mono hΩγα_subset_target)
-    have h_h_cont : ∀ Q, ∀ j, ContinuousOn (fun y : EuclN => pouWeightedIntegrand (I := I) (M := M) g r s T γ Q j (Φ.toFun y)) Ω_αγ := by
-      intro Q j
-      have h1 : ContinuousOn (fun y : EuclN => pouCoordValue (I := I) (M := M) γ (Φ.toFun y)) Ω_αγ := by
-        simpa [pouCoordValue] using
-          (h_pou_γ_cont.comp Φ.continuous_toFun.continuousOn (fun y hy => Φ.bijOn.mapsTo hy))
-      have h2 : ContinuousOn (fun y : EuclN =>
-          rawChartFderivNorm (I := I) (M := M) g r s T γ Q j (Φ.toFun y)) Ω_αγ :=
-        (h_norm_cont Q j).comp Φ.continuous_toFun.continuousOn (fun y hy => Φ.bijOn.mapsTo hy)
-      simpa [pouWeightedIntegrand] using
-        (ENNReal.continuous_ofReal.comp_continuousOn (h1.mul (h2.pow 2)) : ContinuousOn (fun y : EuclN =>
-          ENNReal.ofReal (pouCoordValue (I := I) (M := M) γ (Φ.toFun y) *
-            (rawChartFderivNorm (I := I) (M := M) g r s T γ Q j (Φ.toFun y)) ^ 2)) Ω_αγ)
-    have h_meas : ∀ Q, ∀ j, AEMeasurable (fun y => pouWeightedIntegrand (I := I) (M := M) g r s T γ Q j (Φ.toFun y))
-        ((volume : Measure EuclN).restrict Ω_αγ) := fun Q j =>
-      (h_h_cont Q j).aemeasurable hΩαγ_meas
-    have h_step2 : (∫⁻ y in Ω_αγ, pouWeightedG (I := I) (M := M) g r s T γ m (Φ.toFun y) ∂volume) =
-        pouWeightedSumComp (I := I) (M := M) g r s T γ m Ω_αγ Φ.toFun := by
-      simp only [pouWeightedG, pouWeightedSumComp]
-      rw [lintegral_finset_sum' (Finset.univ) (fun Q _ =>
-        Finset.aemeasurable_fun_sum (Finset.range (m + 1)) (fun j _ => h_meas Q j))]
-      refine Finset.sum_congr rfl ?_
-      intro Q _
-      rw [lintegral_finset_sum' (Finset.range (m + 1)) (fun j _ => h_meas Q j)]
+    have h_meas := pouWeightedIntegrand_comp_aemeasurable
+      (I := I) (M := M) g r s T γ m hΩαγ_meas hΩγα_open
+        hΩγα_subset_target Φ (by simpa only [v_γ] using h_vγ_cd)
+    have hraw := lintegral_pouWeightedF0_le
+      (I := I) (M := M) g r s T γ α P₀ m hΩαγ_open hC_meas_top
+        hΩγα_subset_target Φ (ENNReal.ofReal (K_pw ^ 2 * N_terms))
+        ENNReal.ofReal_ne_top h_pt h_meas
     have h_jac_inv : Kchg ^ 2 = 1 / Φ.jacobian_lower_bound := by
       dsimp [Kchg]
       rw [← Real.rpow_natCast, ← Real.rpow_mul
         (div_nonneg (by norm_num) Φ.jacobian_lower_bound_pos.le)]
       norm_num
-    have h_chg : ∀ Q : TensorCompIdx (E := E) r s, ∀ j : ℕ,
-        (∫⁻ y in Ω_αγ, pouWeightedIntegrand (I := I) (M := M) g r s T γ Q j (Φ.toFun y)
-          ∂(volume : Measure EuclN)) ≤
-          ENNReal.ofReal (Kchg ^ 2) *
-            (∫⁻ z in Ω_γα, pouWeightedIntegrand (I := I) (M := M) g r s T γ Q j z
-              ∂(volume : Measure EuclN)) := by
-      intro Q j
-      have hb := lintegral_comp_toFun_le_const Φ hΩαγ_open
-        (pouWeightedIntegrand (I := I) (M := M) g r s T γ Q j)
-      rw [← h_jac_inv] at hb
-      exact hb
-    have h_step3 : pouWeightedSumComp (I := I) (M := M) g r s T γ m Ω_αγ Φ.toFun ≤
-        ENNReal.ofReal (Kchg ^ 2) *
-          pouWeightedSum (I := I) (M := M) g r s T γ m Ω_γα := by
-      simp only [pouWeightedSumComp, pouWeightedSum]
-      exact finset_sum_le_finset_sum_mul_of_forall m (ENNReal.ofReal (Kchg ^ 2))
-        (fun Q j => ∫⁻ y in Ω_αγ, pouWeightedIntegrand (I := I) (M := M) g r s T γ Q j (Φ.toFun y) ∂volume)
-        (fun Q j => ∫⁻ z in Ω_γα, pouWeightedIntegrand (I := I) (M := M) g r s T γ Q j z ∂volume)
-        (fun Q j _ => h_chg Q j)
-    have h_step4 : pouWeightedSum (I := I) (M := M) g r s T γ m Ω_γα ≤
-        pouWeightedSum (I := I) (M := M) g r s T γ m
-          (chartTargetEuclid (I := I) (M := M) γ) := by
-      simp only [pouWeightedSum]
-      refine Finset.sum_le_sum ?_
-      intro Q _
-      refine Finset.sum_le_sum ?_
-      intro j _
-      exact lintegral_mono_set hΩγα_subset_target
-    have hA : (∫⁻ y in Ω_αγ ∩ C, pouWeightedF0 (I := I) (M := M) g r s T γ α P₀ m y ∂volume) ≤
-        ENNReal.ofReal (K_pw ^ 2 * N_terms) *
-          (∫⁻ y in Ω_αγ, pouWeightedG (I := I) (M := M) g r s T γ m (Φ.toFun y) ∂volume) := by
-      exact lintegral_le_const_mul_lintegral_of_ae_le
-        (volume : Measure EuclN) (Ω_αγ ∩ C) Ω_αγ
-        (hΩαγ_meas.inter hC_meas_top) (by intro y hy; exact hy.1)
-        (ENNReal.ofReal (K_pw ^ 2 * N_terms)) (ENNReal.ofReal_ne_top)
-        (f := pouWeightedF0 (I := I) (M := M) g r s T γ α P₀ m) (g := fun y => pouWeightedG (I := I) (M := M) g r s T γ m (Φ.toFun y))
-        (by
-          refine Filter.Eventually.of_forall ?_
-          intro y hy
-          exact h_pt y hy)
     have hK_prod : ENNReal.ofReal (K_pw ^ 2 * N_terms) * ENNReal.ofReal (Kchg ^ 2) =
         ENNReal.ofReal (K_pw ^ 2 * N_terms * Kchg ^ 2) := by
       rw [ENNReal.ofReal_mul (mul_nonneg (sq_nonneg _) hN_nn)]
-    have hB : ENNReal.ofReal (K_pw ^ 2 * N_terms) * (∫⁻ y in Ω_αγ, pouWeightedG (I := I) (M := M) g r s T γ m (Φ.toFun y) ∂volume) ≤
-        ENNReal.ofReal (K_pw ^ 2 * N_terms * Kchg ^ 2) *
-          pouWeightedSum (I := I) (M := M) g r s T γ m
-            (chartTargetEuclid (I := I) (M := M) γ) := by
-      exact mul_le_mul_sum_trans
-        (a := ENNReal.ofReal (K_pw ^ 2 * N_terms))
-        (b := ENNReal.ofReal (Kchg ^ 2))
-        (c := ENNReal.ofReal (K_pw ^ 2 * N_terms * Kchg ^ 2))
-        (T := ∫⁻ y in Ω_αγ, pouWeightedG (I := I) (M := M) g r s T γ m (Φ.toFun y) ∂volume)
-        (S1 := pouWeightedSum (I := I) (M := M) g r s T γ m Ω_γα)
-        (S2 := pouWeightedSum (I := I) (M := M) g r s T γ m
-          (chartTargetEuclid (I := I) (M := M) γ))
-        hK_prod (h_step2.trans_le h_step3) h_step4
-    exact hA.trans hB
+    rw [← h_jac_inv, hK_prod] at hraw
+    exact hraw
   refine ⟨K_pw ^ 2 * N_terms * Kchg ^ 2, ?_, ?_⟩
   · positivity
   · calc
@@ -2227,7 +2245,8 @@ lemma eLpNorm_pou_weighted_raw_transition_le
             ((chartAtlasPOU I M γ : C^∞⟮I, M; ℝ⟯) : M → ℝ)
               ((extChartAt I α).symm ((toEuclidean (E := E)).symm y)) *
             ‖iteratedFDeriv ℝ m v_α y‖ ^ 2)
-          ∂(volume : Measure EuclN)) ≤ ∫⁻ y in Ω_αγ ∩ C, pouWeightedF0 (I := I) (M := M) g r s T γ α P₀ m y ∂volume := by
+          ∂(volume : Measure EuclN)) ≤ ∫⁻ y in Ω_αγ ∩ C,
+            pouWeightedF0 (I := I) (M := M) g r s T γ α P₀ m y ∂volume := by
             simpa [pouWeightedF0] using hLHS_le
       _ ≤ ENNReal.ofReal (K_pw ^ 2 * N_terms * Kchg ^ 2) *
             pouWeightedSum (I := I) (M := M) g r s T γ m

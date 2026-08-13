@@ -28,7 +28,6 @@ open DifferentialGeometry.Analysis.Sobolev
 open DifferentialGeometry.Analysis.Spectral
 open DifferentialGeometry.Analysis.Elliptic
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Connection
 open DifferentialGeometry.Geometry.Operator
 
@@ -305,7 +304,8 @@ private theorem tsMetricCovec_section_contMDiff (g₀ : SmoothRiemannianMetric I
         (E := fun z : M => Tensor0SSpace 2 I z) x (tsMetricCovec (I := I) g₀ x)) := by
   classical
   letI := Tensor0SBundle.tensor0SBundle_topology (𝕜 := ℝ) (E := E) (H := H) (I := I) (M := M) 2
-  refine (DifferentialGeometry.Tensor.Multilinear.contMDiff_multilinearSection_iff_coord (𝕜 := ℝ) (F := E)
+  refine (DifferentialGeometry.Tensor.Multilinear.contMDiff_multilinearSection_iff_coord
+    (𝕜 := ℝ) (F := E)
       (E := (TangentSpace I : M → Type _)) (IB := I) (n := (∞ : WithTop ℕ∞)) (Module.finBasis ℝ E)
       (fun x : M => (tsMetricCovec (I := I) g₀ x :
         Bundle.continuousMultilinearMap ℝ 2 E (TangentSpace I) x))).mpr ?_

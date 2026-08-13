@@ -6,34 +6,6 @@ import Mathlib.Topology.Connected.PathConnected
 import Mathlib.Topology.Connected.LocPathConnected
 import DifferentialGeometry.Topology.Covering.Basic
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 open Set Function Filter
 open scoped Topology ContDiff
 
@@ -48,18 +20,6 @@ namespace UniversalCover
 variable {X : Type*} [TopologicalSpace X] [Inhabited X]
   [ConnectedSpace X] [LocPathConnectedSpace X]
   [DifferentialGeometry.Geometry.Riemannian.Topology.SemilocallySimplyConnectedSpace X]
-
-
-
-
-
-
-
-
-
-
-
-
 
 omit [ConnectedSpace X] [LocPathConnectedSpace X] [SemilocallySimplyConnectedSpace X] in
 theorem uc_sheet_bijection_on_good_U
@@ -136,10 +96,6 @@ theorem uc_sheet_bijection_on_good_U
     refine ⟨⟨y, p.2.trans (Path.Homotopic.Quotient.mk hjoined.somePath)⟩, ?_, rfl⟩
     refine ⟨hjoined.somePath, ?_, rfl⟩
     exact fun t => hjoined.somePath_mem t
-
-
-
-
 
 omit [Inhabited X] [ConnectedSpace X] in
 private theorem uc_good_nhd_exists (x : X) :
@@ -277,21 +233,6 @@ private theorem uc_sheet_proj_isOpenMap
   refine ⟨⟨z, q.2.trans (_root_.Path.Homotopic.Quotient.mk hjoined.somePath)⟩, ?_, rfl⟩
   apply hsub
   refine ⟨hjoined.somePath, hjoined.somePath_mem, rfl⟩
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 omit [ConnectedSpace X] in
 theorem proj_isCoveringMap :
@@ -499,27 +440,16 @@ theorem proj_isCoveringMap :
   intro q
   rfl
 
-
-
 def basePoint :
     DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover X :=
   ⟨(default : X),
     _root_.Path.Homotopic.Quotient.mk (_root_.Path.refl (default : X))⟩
-
-
 
 def uc_subpathLift {x : X} (γ : _root_.Path (default : X) x)
     (s : unitInterval) :
     DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover X :=
   ⟨γ s,
     (_root_.Path.Homotopic.Quotient.mk (γ.subpath 0 s)).cast γ.source.symm rfl⟩
-
-
-
-
-
-
-
 
 omit [ConnectedSpace X] [SemilocallySimplyConnectedSpace X] in
 theorem uc_subpathLift_continuous {x : X} (γ : _root_.Path (default : X) x) :
@@ -629,10 +559,6 @@ omit [ConnectedSpace X] [LocPathConnectedSpace X] [SemilocallySimplyConnectedSpa
 theorem uc_subpathLift_proj {x : X} (γ : _root_.Path (default : X) x)
     (s : unitInterval) : proj (uc_subpathLift γ s) = γ s := rfl
 
-
-
-
-
 omit [ConnectedSpace X] [SemilocallySimplyConnectedSpace X] in
 theorem uc_joined_basePoint
     (q : DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover X) :
@@ -645,22 +571,11 @@ theorem uc_joined_basePoint
     source' := uc_subpathLift_zero γ
     target' := uc_subpathLift_one γ }⟩
 
-
-
-
-
 instance pathConnectedSpace :
     PathConnectedSpace
       (DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover X) where
   nonempty := ⟨basePoint⟩
   joined x y := (uc_joined_basePoint x).symm.trans (uc_joined_basePoint y)
-
-
-
-
-
-
-
 
 omit [ConnectedSpace X] in
 theorem uc_basePoint_loops_nullhomotopic
@@ -729,11 +644,6 @@ theorem uc_basePoint_loops_nullhomotopic
     refine _root_.Path.Homotopic.Quotient.eq.mpr ?_
     exact ⟨Path.Homotopy.refl _⟩
   rw [hδmap, hreflmap, hclass]
-
-
-
-
-
 
 instance simplyConnectedSpace :
     SimplyConnectedSpace

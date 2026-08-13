@@ -7,19 +7,9 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.Entropy.WeightedHessian
 import Mathlib.Analysis.Calculus.Deriv.MeanValue
 open DifferentialGeometry.PDE.RicciFlow DifferentialGeometry.Analysis.Spectral
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Operator
 
 set_option autoImplicit false
-
-
-
-
-
-
-
-
-
 
 open DifferentialGeometry.Geometry.Connection
 namespace DifferentialGeometry.PDE.RicciFlow.Entropy
@@ -50,9 +40,6 @@ variable [T2Space M]
 private local instance : CompleteSpace E := FiniteDimensional.complete Real E
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
-
-
-
 
 theorem w_rev_hasDerivAt
     [I.Boundaryless] [CompactSpace M]
@@ -293,8 +280,6 @@ theorem w_rev_hasDerivAt
     hbaseEq hbase
   simpa only [G, f, R, q, ft, Rt, qt] using hout
 
-
-
 theorem w_rev_square
     [I.Boundaryless] [CompactSpace M]
     {D Dr : RealTimeInterval}
@@ -496,7 +481,6 @@ theorem w_rev_square
       rw [hperel Sq]
       ring
 
-
 theorem w_rev_deriv_nonpos
     [I.Boundaryless] [CompactSpace M]
     {D Dr : RealTimeInterval}
@@ -554,8 +538,6 @@ private theorem le_zero_of_right
   filter_upwards [Ioc_mem_nhdsGT hspos] with r hr
   exact hanti ⟨hr.1, hr.2.trans hs.2⟩ ⟨hspos, hs.2⟩ hr.2
 
-/-- The Galerkin W path is continuous through its smooth initial density after
-shrinking to a nontrivial regular reverse-time interval. -/
 theorem gallim_w_cont
     [NeZero (Module.finrank Real E)] [I.Boundaryless]
     [BoundarylessManifold I M] [CompactSpace M]
@@ -742,8 +724,6 @@ theorem gallim_w_cont
   simpa only [Wpath, n, G, u, f, R, Q] using
     hIntegral.congr hWbase
 
-/-- Perelman's `W` functional is antitone on every positive closed reverse-time
-interval contained in the two regular-time domains. -/
 theorem w_rev_antitone
     [I.Boundaryless] [CompactSpace M]
     {D Dr : RealTimeInterval}
@@ -812,8 +792,6 @@ theorem w_rev_antitone
   exact w_rev_deriv_nonpos (I := I) S hS T u hu hpos
     (s := r) (hDr hrI) (hrpos r hrI) (hD r hrI)
 
-/-- On a nontrivial short Galerkin interval, every positive-time W value is at
-most the value of the prescribed smooth density at reverse time zero. -/
 theorem gallim_w_le
     [NeZero (Module.finrank Real E)] [I.Boundaryless]
     [BoundarylessManifold I M] [CompactSpace M]

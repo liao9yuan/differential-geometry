@@ -1,7 +1,6 @@
 import DifferentialGeometry.Geometry.Curvature.Order2Defect.PartialMetricTrace
 open DifferentialGeometry.Analysis.Elliptic
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Connection
 
 
@@ -9,7 +8,8 @@ noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
 
-open Bundle Manifold MeasureTheory Set Filter DifferentialGeometry.Tensor0SBundle CovariantDerivative
+open Bundle Manifold MeasureTheory Set Filter DifferentialGeometry.Tensor0SBundle
+    CovariantDerivative
 open scoped Manifold Topology ContDiff ENNReal BigOperators
 
 namespace DifferentialGeometry

@@ -13,14 +13,6 @@ import DifferentialGeometry.Analysis.ODE.TimeDependentFlow.SmoothDependence.Glob
 import DifferentialGeometry.Analysis.Integration.Measure.ChartDensity
 open DifferentialGeometry.Analysis.Elliptic
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
-
-
-
-
-
-
-
 
 open DifferentialGeometry.Geometry.Connection
 namespace DifferentialGeometry.PDE.RicciFlow
@@ -48,36 +40,6 @@ variable
     {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
       [IsManifold I ∞ M] [CompactSpace M] [BoundarylessManifold I M]
       [I.Boundaryless] [T2Space M]
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 theorem deturck_metric_pde_interior
     (g_bg : SmoothRiemannianMetric I M) {T : ℝ} (a : ℕ)

@@ -4,18 +4,10 @@ import DifferentialGeometry.Geometry.Operator.Scaling
 import DifferentialGeometry.Tensor.RSTensor.Tensor0SRiemannian.Scaling
 open DifferentialGeometry.PDE.RicciFlow
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Connection
 open DifferentialGeometry.Geometry.Operator
 
 set_option autoImplicit false
-
-
-
-
-
-
-
 
 noncomputable section
 
@@ -32,12 +24,8 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 variable [IsManifold I 1 M]
 variable [SigmaCompactSpace M] [T2Space M]
 
-
-
 def paraTime (τ R s : Real) : Real :=
   τ + s / R
-
-
 
 def paraBack (τ R t : Real) : Real :=
   R * (t - τ)
@@ -179,8 +167,6 @@ theorem paraInterval_closedOpen_regular
       rwa [mul_div_cancel_left₀ (paraTime τ R s) (ne_of_gt hR),
         mul_div_cancel_left₀ T (ne_of_gt hR)] at hdiv
 
-
-
 def paraFamily
     (G : SolutionFamily (I := I) (M := M)) (τ R : Real) (hR : 0 < R) :
     SolutionFamily (I := I) (M := M) where
@@ -261,8 +247,6 @@ omit [SigmaCompactSpace M] in
       R • S.base.rm04 (paraTime τ R s) x := by
   simpa [paraSolution, paraFamily, SolutionFamily.rm04] using
     metricRm04_scaleMetric (I := I) R hR (S.base.metric (paraTime τ R s)) x
-
-
 
 omit [SigmaCompactSpace M] in
 theorem paraRmNormSq
@@ -442,9 +426,6 @@ private theorem lcConnectionSmooth
   exact
     ⟨DifferentialGeometry.Geometry.Connection.leviCivitaConnectionOfMetric_contMDiffCovariantDerivativeLocally
       (I := I) g (u := Set.univ) isOpen_univ⟩
-
-
-
 
 omit [SigmaCompactSpace M] in
 theorem metricFamilySmooth_para
@@ -870,8 +851,6 @@ def ParaScalarDisplay
 def ParaTracefreeNormSqDisplay
     (q qR : Real -> M -> Real) (τ R : Real) : Prop :=
   forall s x, qR s x = (R⁻¹) ^ 2 * q (paraTime τ R s) x
-
-
 
 omit [TopologicalSpace M] [SigmaCompactSpace M] [T2Space M] in
 theorem para_tracefree_ratio_invariant

@@ -1,15 +1,6 @@
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurckCoefficients.RHSFirstDerivativeLipschitz
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Operator
-
-
-
-
-
-
-
-
 
 namespace DifferentialGeometry.Analysis.Spectral
 
@@ -26,9 +17,6 @@ variable
       [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
     {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
     {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
-
-
-
 
 omit [NeZero (Module.finrank ℝ E)] in
 theorem chartRHSD_pou_lip
@@ -613,9 +601,6 @@ theorem chartRHSD_pou_lip
       exact mul_le_mul_of_nonneg_right (by dsimp [C]; linarith)
         (metricJet3_nonneg (I := I) (M := M)
           (gSeq k₁) (gSeq k₂) α (extChartAt I α b))
-
-
-
 
 omit [NeZero (Module.finrank ℝ E)] in
 theorem chartRHSD_pou_bnd

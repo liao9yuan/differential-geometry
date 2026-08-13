@@ -4,7 +4,6 @@ import DifferentialGeometry.Geometry.Curvature.CurvatureOperator.Defs
 import DifferentialGeometry.Analysis.Integration.L2.SmoothSections.Defs
 open DifferentialGeometry.Analysis.Elliptic
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Connection
 
 

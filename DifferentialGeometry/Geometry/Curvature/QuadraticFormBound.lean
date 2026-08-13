@@ -3,22 +3,6 @@ open DifferentialGeometry.Geometry.Curvature
 
 set_option autoImplicit false
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 noncomputable section
 
 namespace DifferentialGeometry.Geometry.Curvature
@@ -55,10 +39,6 @@ private theorem metric_inner_smul_self
   rw [h1 (c • v), g.symm x v (c • v), h1 v]
   ring
 
-
-
-
-
 omit [FiniteDimensional ℝ E] in
 theorem tensor02_quadForm_le_of_unit_bound
     (g : SmoothRiemannianMetric I M) (Q : Tensor02At (I := I) (M := M) x) {Λ : Real}
@@ -89,10 +69,6 @@ theorem tensor02_quadForm_le_of_unit_bound
       rw [hQsmul, ← mul_assoc, mul_comm (g.inner x v v) (c ^ 2), hc2r, one_mul]
     rw [hQv, mul_comm Λ (g.inner x v v)]
     exact mul_le_mul_of_nonneg_left hQunit hpos.le
-
-
-
-
 
 omit [FiniteDimensional ℝ E] in
 theorem tensor02_quadForm_abs_le_of_unit_bound

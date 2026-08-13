@@ -6,14 +6,6 @@ open DifferentialGeometry.Geometry.Operator
 
 set_option autoImplicit false
 
-
-
-
-
-
-
-
-
 noncomputable section
 
 
@@ -34,8 +26,6 @@ variable {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners Real E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
   [IsManifold I ∞ M]
-
-
 
 omit [NeZero (Module.finrank ℝ E)] in
 theorem correction_eq_contr
@@ -90,8 +80,6 @@ theorem correction_eq_contr
     refine Finset.sum_congr rfl (fun i _ ↦ ?_)
     rw [Finset.sum_comm]
   rw [hLHS, hRHS]
-
-
 
 omit [NeZero (Module.finrank ℝ E)] in
 theorem const_cov_eq_contr

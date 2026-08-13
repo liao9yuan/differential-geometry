@@ -1,13 +1,6 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Pullback.LeviCivita
 import DifferentialGeometry.Analysis.Parabolic.DeTurckRicci.Pullback.PushforwardVF
 
-
-
-
-
-
-
-
 open DifferentialGeometry.Geometry.Connection
 namespace DifferentialGeometry.PDE.RicciFlow.Pullback
 
@@ -21,18 +14,6 @@ variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 variable [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M]
-
-
-
-
-
-
-
-
-
-
-
-
 
 omit [NeZero (Module.finrank ℝ E)] in
 theorem covariant_derivative_of_pullback_vf_naturality

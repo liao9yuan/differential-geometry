@@ -3,32 +3,10 @@ import DifferentialGeometry.Tensor.RSTensor.MetricTrace.NablaTraceGen
 open DifferentialGeometry.Tensor.RSTensor
 open DifferentialGeometry.PDE.RicciFlow
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Connection
 open DifferentialGeometry.Geometry.Operator
 
 set_option autoImplicit false
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 noncomputable section
 
@@ -46,10 +24,6 @@ variable {I : ModelWithCorners Real E H} [I.Boundaryless]
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 variable [IsManifold I 1 M] [IsManifold I 2 M]
 variable [CompleteSpace E] [SigmaCompactSpace M] [T2Space M]
-
-
-
-
 
 omit [Module.Finite ℝ E] in
 omit [SigmaCompactSpace M] in
@@ -86,20 +60,6 @@ theorem nabla_roughLap0S_nablaKRm
   refine Finset.sum_congr rfl fun j _ => ?_
   congr 1
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 omit [Module.Finite ℝ E] in
 omit [SigmaCompactSpace M] in
 theorem spatialComm_nablaKRm_traceDiff
@@ -135,18 +95,6 @@ theorem spatialComm_nablaKRm_traceDiff
   rw [← Finset.sum_sub_distrib]
   refine Finset.sum_congr rfl fun j _ => ?_
   rw [mul_sub]
-
-
-
-
-
-
-
-
-
-
-
-
 
 omit [Module.Finite ℝ E] in
 omit [SigmaCompactSpace M] in

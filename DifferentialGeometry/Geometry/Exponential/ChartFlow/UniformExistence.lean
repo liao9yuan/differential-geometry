@@ -6,9 +6,6 @@ import DifferentialGeometry.Geometry.Geodesic.GeodesicEquationFromIntegralCurve
 import DifferentialGeometry.Geometry.Geodesic.MaximalInterval
 import DifferentialGeometry.Geometry.Geodesic.SmoothFlow
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
-
-
 
 noncomputable section
 

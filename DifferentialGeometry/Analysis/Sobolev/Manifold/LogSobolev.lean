@@ -4,14 +4,6 @@ open DifferentialGeometry.Geometry.Operator
 
 set_option autoImplicit false
 
-
-
-
-
-
-
-
-
 namespace DifferentialGeometry.Analysis.Sobolev
 
 noncomputable section

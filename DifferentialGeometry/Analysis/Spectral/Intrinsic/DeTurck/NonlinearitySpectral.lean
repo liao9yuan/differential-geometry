@@ -4,7 +4,6 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.Spectrum.CompactResolvent
 import DifferentialGeometry.Analysis.Parabolic.DeTurckRicci.DeTurckRHS
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.PrincipalPartMatch
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
 
 
 noncomputable section

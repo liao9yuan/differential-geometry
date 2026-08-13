@@ -3,18 +3,8 @@ import DifferentialGeometry.Bundle.PartialMfderiv.Basic
 import DifferentialGeometry.Geometry.Curvature.Realized.MetricFamily
 import DifferentialGeometry.Geometry.Operator.HessianTraceRealization
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
 
 set_option autoImplicit false
-
-
-
-
-
-
-
-
-
 
 noncomputable section
 
@@ -30,8 +20,6 @@ variable [FiniteDimensional Real E]
 variable {H : Type*} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
-
-
 
 theorem gradSq_joint
     (g_fam : ℝ → SmoothRiemannianMetric I M)
@@ -199,9 +187,6 @@ theorem gradSq_joint
           differential1FormFun_apply_eq_extDerivFun,
           hframe.toBasisAt_coe]
   exact (hrhs.congr_of_eventuallyEq heq).contMDiffWithinAt
-
-
-
 
 theorem normGradSq_time {x : M} {t : Real}
     (g : Real -> SmoothRiemannianMetric I M)

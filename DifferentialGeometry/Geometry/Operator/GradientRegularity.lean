@@ -4,21 +4,12 @@ import DifferentialGeometry.Geometry.Coordinates.MetricCompatibility.Coordinate
 import DifferentialGeometry.Tensor.RSTensor.CotangentRiemannian
 import DifferentialGeometry.Bundle.LocalFrameRegularity
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
 
 set_option autoImplicit false
-
-
-
-
-
-
-
 
 noncomputable section
 
 namespace DifferentialGeometry.Geometry.Operator
-
 
 open Bundle DifferentialGeometry.Tensor0SBundle
 open DifferentialGeometry.Tensor.Coordinates
@@ -124,8 +115,6 @@ theorem gradientFun_contMDiffAt
       (coordinateFrameAt_mem (I := I) x₀)] with y hy
   exact gradientFun_coeff_eq_sum (I := I) g f hy k
 
-
-
 theorem gradientFun_smooth
     (g : SmoothRiemannianMetric I M)
     {f : M -> Real} (hf : ContMDiff I 𝓘(Real, Real) ∞ f) :
@@ -134,8 +123,6 @@ theorem gradientFun_smooth
   intro x₀
   exact gradientFun_contMDiffAt (I := I) g hf.contMDiffAt
 
-/-- On an open set, a smooth scalar has a differentiable realized-gradient
-section at every point of that set. -/
 theorem gradientFun_mdiffOn
     (g : SmoothRiemannianMetric I M)
     {f : M -> Real} {U : Set M} (hU : IsOpen U)
@@ -147,7 +134,6 @@ theorem gradientFun_mdiffOn
   exact
     (gradientFun_contMDiffAt (I := I) g hfx).mdifferentiableAt
       (by simp)
-
 
 theorem gradientFun_mdiffAt
     (g : SmoothRiemannianMetric I M)
@@ -182,8 +168,6 @@ theorem laplacian_congr_of_eventuallyEq
   unfold laplacian divergence
   rw [hcov]
 
-/-- The gradient section of a scalar composition is differentiable at a point
-when the inner scalar is differentiable nearby. -/
 theorem grad_comp_mdiffAt
     [VectorBundle Real E (TangentSpace I : M → Type _)]
     (g : SmoothRiemannianMetric I M)
@@ -210,8 +194,6 @@ theorem grad_comp_mdiffAt
     (fun v => (⟨y, v⟩ : TotalSpace E (TangentSpace I : M → Type _)))
     (gradientFun_comp (I := I) g (hφ (f y)) hy)
 
-/-- If a scalar and its realized gradient are differentiable, then the
-scalar-multiple tangent field `f ∇f` is differentiable. -/
 theorem scalar_mul_grad_mdiffAt
     [VectorBundle Real E (TangentSpace I : M -> Type _)]
     (g : SmoothRiemannianMetric I M)
@@ -222,7 +204,6 @@ theorem scalar_mul_grad_mdiffAt
     MDiffAt (T% (f • fun y : M => gradientFun (I := I) g f y)) x := by
   simpa using (hf x).smul_section (hgrad x)
 
-
 theorem mdiffAt_smul_gradientFun
     [VectorBundle Real E (TangentSpace I : M -> Type _)]
     (g : SmoothRiemannianMetric I M)
@@ -232,8 +213,6 @@ theorem mdiffAt_smul_gradientFun
       MDiffAt (T% fun z : M => gradientFun (I := I) g f z) y) :
     MDiffAt (T% (f • fun y : M => gradientFun (I := I) g f y)) x :=
   scalar_mul_grad_mdiffAt (I := I) g hf hgrad
-
-
 
 theorem mdiffAt_const_mul_sub_const_smul_gradientFun
     [VectorBundle Real E (TangentSpace I : M -> Type _)]

@@ -3,14 +3,6 @@ import DifferentialGeometry.Analysis.Spectral.Intrinsic.Garding.ScalarPotentialP
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Entropy.ConjPotential
 open DifferentialGeometry.PDE.RicciFlow DifferentialGeometry.Analysis.Spectral
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
-
-/-!
-# Compact-span scalar critical estimate
-
-This file combines the prescribed-length moving-Laplacian estimate with the
-fixed-background scalar-potential estimate on a compact regular-time slab.
--/
 
 noncomputable section
 
@@ -37,9 +29,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
 
 private local instance : CompleteSpace E := FiniteDimensional.complete Real E
 
-/-- On every sufficiently short prescribed backward interval in a compact
-regular-time slab, the scalar conjugate-heat perturbation has one
-support-independent finite-core energy bound at every Sobolev order. -/
 theorem scalar_crit_span
     {D : RealTimeInterval} (S : SolutionOn (I := I) (M := M) D)
     (hS : IsSolutionOn (I := I) S)

@@ -3,19 +3,10 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.LowRegRicciOne
 import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.LowRegLieOne
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurckCoefficients.RHSPathIntegral
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.ParametricJetIntegral
-open DifferentialGeometry.Analysis.Sobolev DifferentialGeometry.Analysis.Spectral DifferentialGeometry.Analysis.Spectral.DeTurckCoefficients DifferentialGeometry.Analysis.Spectral.MetricRealization
+open DifferentialGeometry.Analysis.Sobolev DifferentialGeometry.Analysis.Spectral
+    DifferentialGeometry.Analysis.Spectral.DeTurckCoefficients
+    DifferentialGeometry.Analysis.Spectral.MetricRealization
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
-
-/-!
-# Affine low-regularity bounds for the order-one Ricci--DeTurck coefficient
-
-This file assembles the dimension-three `H2` jet bounds for the order-one
-Ricci and DeTurck Lie arms.  The lower metric radius and the single top metric
-derivative are kept separate along the convex realized path.  The resulting
-affine estimate is then transferred unchanged to the path-integrated
-coefficient field.
--/
 
 noncomputable section
 
@@ -45,8 +36,6 @@ variable
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
-/-- Independent endpoint spectral `H2` and `H3` radii give the complete
-affine `H2` jet bound for `rhsLow1Coeff` along the realized convex path. -/
 theorem rhs1_h2_tame
     (hDim : Module.finrank ℝ E = 3)
     (g₀ g_bg : SmoothRiemannianMetric I M)
@@ -154,8 +143,6 @@ theorem rhs1_h2_tame
     ring
   exact hraw.trans (hbound.trans_eq (by rw [hfactor]))
 
-/-- The affine order-one coefficient bound passes unchanged to the `H2` jet
-of its interval-integrated coefficient field. -/
 theorem rhs1_path_tame
     (hDim : Module.finrank ℝ E = 3)
     (g₀ g_bg : SmoothRiemannianMetric I M)

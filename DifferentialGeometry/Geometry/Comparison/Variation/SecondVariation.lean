@@ -23,10 +23,7 @@ import DifferentialGeometry.Geometry.Comparison.Variation.FirstVariation
 import DifferentialGeometry.Geometry.Comparison.Variation.CovariantCommutationCurvature
 import DifferentialGeometry.Geometry.Comparison.Variation.RegularParameterFirstVariation
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Connection
-
-
 
 noncomputable section
 

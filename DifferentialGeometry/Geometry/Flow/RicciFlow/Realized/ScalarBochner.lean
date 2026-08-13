@@ -1,6 +1,1 @@
 import DifferentialGeometry.Geometry.Curvature.Bochner.ScalarBochner
-
-namespace DifferentialGeometry
-
-set_option autoImplicit false
-end DifferentialGeometry

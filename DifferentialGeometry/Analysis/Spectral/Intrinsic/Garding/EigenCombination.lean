@@ -3,7 +3,6 @@ import DifferentialGeometry.Analysis.Spectral.Intrinsic.CompactSAResolventIntrin
 import DifferentialGeometry.Analysis.Elliptic.TensorRegularity.InteriorRegularity.TensorAllOrdersRegularity
 open DifferentialGeometry.Analysis.Elliptic
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
 
 
 noncomputable section

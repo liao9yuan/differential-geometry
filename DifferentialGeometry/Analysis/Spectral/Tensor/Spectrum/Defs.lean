@@ -3,7 +3,6 @@ import DifferentialGeometry.Analysis.Integration.L2.Hilbert.DenseSubset
 import Mathlib.Analysis.InnerProductSpace.Spectrum
 import Mathlib.Analysis.Normed.Operator.FredholmAlternative
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Connection
 
 noncomputable section

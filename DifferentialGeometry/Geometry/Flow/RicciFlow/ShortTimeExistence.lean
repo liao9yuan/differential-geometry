@@ -20,7 +20,6 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTimeAssembly.RicciFlowP
 import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTimeFlow.ConjugatingFlowProperties
 import DifferentialGeometry.Analysis.Integration.Measure.ChartDensity
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Operator
 
 open DifferentialGeometry.Geometry.Connection

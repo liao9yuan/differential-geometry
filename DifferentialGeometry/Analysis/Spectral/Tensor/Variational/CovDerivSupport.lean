@@ -16,7 +16,6 @@ import Mathlib.MeasureTheory.Function.L1Space.Integrable
 import Mathlib.MeasureTheory.Function.LocallyIntegrable
 import Mathlib.Topology.ContinuousOn
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Connection
 
 

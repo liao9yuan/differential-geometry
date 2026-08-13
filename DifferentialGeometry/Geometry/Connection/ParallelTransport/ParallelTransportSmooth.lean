@@ -1,6 +1,5 @@
 import DifferentialGeometry.Geometry.Connection.ParallelTransport.ParallelTransport
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Operator
 
 

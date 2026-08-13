@@ -1,15 +1,8 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.Scalar.TraceAlgebra
 open DifferentialGeometry.PDE.RicciFlow
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
 
 set_option autoImplicit false
-
-
-
-
-
-
 
 noncomputable section
 
@@ -29,8 +22,6 @@ section TraceRoute
 
 variable {Idx : Type*} [Fintype Idx]
 
-
-
 def ScalarRmRicciTraceInFrame
     {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -43,8 +34,6 @@ def ScalarRmRicciTraceInFrame
         rmRicciContractionCompInFrame (I := I) S Rm04 gInv frame
           (t : Real) x i j) =
       -ricciNormSqInFrame (I := I) S gInv frame (t : Real) x
-
-
 
 omit [SigmaCompactSpace M] in
 theorem scalarRmRicciTraceInFrame_of_rm04_first_trace
@@ -108,9 +97,6 @@ theorem scalarRmRicciTraceInFrame_of_rm04_first_trace
       DifferentialGeometry.Geometry.Curvature.ricciComp,
     IsLocalFrameOn.toBasisAt_coe] using hmain
 
-
-
-
 omit [SigmaCompactSpace M] in
 theorem scalarRmRicciTraceInFrame_of_rm04_first_trace_regular
     [DecidableEq Idx]
@@ -171,8 +157,6 @@ theorem scalarRmRicciTraceInFrame_of_rm04_first_trace_regular
       DifferentialGeometry.Geometry.Curvature.ricciComp,
     IsLocalFrameOn.toBasisAt_coe] using hmain
 
-
-
 omit [SigmaCompactSpace M] [T2Space M] in
 theorem scalarTrace_inverseMetricEvolutionTerm_eq_two_ricciNormSq
     {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
@@ -201,8 +185,6 @@ theorem scalarTrace_inverseMetricEvolutionTerm_eq_two_ricciNormSq
         ricciCompInFrame (I := I) S frame t x i j *
           raisedRicciCompInFrame (I := I) S gInv frame t x i j) := by
           simp [Finset.mul_sum]
-
-
 
 omit [SigmaCompactSpace M] [T2Space M] in
 theorem scalarTrace_ricciQuadraticTerm_eq_ricciNormSq_of_symm
@@ -281,9 +263,6 @@ theorem scalarTrace_ricciQuadraticTerm_eq_ricciNormSq_of_symm
           refine Finset.sum_congr rfl fun a _ => ?_
           simp [Finset.mul_sum, mul_assoc, mul_left_comm, mul_comm]
 
-
-
-
 omit [SigmaCompactSpace M] [T2Space M] in
 theorem scalarTrace_ricciQuadraticTerm_eq_ricciNormSq_at
     {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
@@ -361,8 +340,6 @@ theorem scalarTrace_ricciQuadraticTerm_eq_ricciNormSq_at
           refine Finset.sum_congr rfl fun a _ => ?_
           simp [Finset.mul_sum, mul_assoc, mul_left_comm, mul_comm]
 
-
-
 omit [SigmaCompactSpace M] [T2Space M] in
 theorem scalarTraceDerivRHSInFrame_eq_scalarEvolutionRHS
     {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
@@ -417,8 +394,6 @@ theorem scalarTraceDerivRHSInFrame_eq_scalarEvolutionRHS
     ring_nf
   rw [hsplit, hdt, hrm, hquad]
   ring
-
-
 
 omit [SigmaCompactSpace M] [T2Space M] in
 theorem scalarTraceDerivRHSInFrame_eq_scalarEvolutionRHS_regular

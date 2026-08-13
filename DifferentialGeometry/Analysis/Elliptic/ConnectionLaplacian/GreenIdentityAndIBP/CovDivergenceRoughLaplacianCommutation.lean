@@ -13,7 +13,6 @@ open DifferentialGeometry.Analysis.Sobolev
 open DifferentialGeometry.Analysis.Spectral
 open DifferentialGeometry.Analysis.Elliptic
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Connection
 
 
@@ -655,7 +654,6 @@ theorem exists_iteratedCovGrad_rawConnLap_covDivergence_commutator_l2_le
 end CurvatureCommutatorL2
 
 set_option backward.isDefEq.respectTransparency false in
-
 theorem covDiv_appCc (g₀ : SmoothRiemannianMetric I M)
     (Φ : SmoothCcTensor g₀ 1 1) (W : SmoothCcTensor g₀ 0 1) :
     covDivergence (I := I) (M := M) g₀ 0

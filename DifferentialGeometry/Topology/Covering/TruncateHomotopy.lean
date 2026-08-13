@@ -3,23 +3,6 @@ import Mathlib.Topology.Homotopy.Path
 import Mathlib.Topology.Subpath
 import Mathlib.AlgebraicTopology.FundamentalGroupoid.Basic
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 noncomputable section
 
 namespace DifferentialGeometry
@@ -29,13 +12,6 @@ namespace Topology
 namespace UniversalCover
 
 open Set unitInterval
-
-
-
-
-
-
-
 
 def concatTrans {X : Type*} [TopologicalSpace X]
     {k : ℕ} {p : Fin (k + 1) → X}
@@ -159,8 +135,6 @@ lemma truncateOfLE_homotopic_subpath
       change γ.extend t₁ = (γ.truncateOfLE h) 1
       rw [_root_.Path.target]
 
-
-
 lemma Path_concat_cast_eq {X : Type*} [TopologicalSpace X] :
     ∀ {k : ℕ} {p p' : Fin (k + 1) → X} (heq : ∀ i, p i = p' i)
       (F : (i : Fin k) → _root_.Path (p i.castSucc) (p i.succ)),
@@ -191,9 +165,6 @@ lemma Path_concat_cast_eq {X : Type*} [TopologicalSpace X] :
         rw [_root_.Path.cast_coe] at key
         exact key
       · rfl
-
-
-
 
 lemma Path.trans_truncate_homotopic
     {X : Type*} [TopologicalSpace X] {a b : X} (γ : _root_.Path a b)

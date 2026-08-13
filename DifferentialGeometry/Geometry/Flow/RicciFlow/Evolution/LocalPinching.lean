@@ -1,22 +1,8 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.ImprovedPinching
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Operator
 
 set_option autoImplicit false
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 noncomputable section
 
@@ -31,8 +17,6 @@ def CurvatureEigenvaluesOrdered
     (lambda mu nu : Real -> M -> Real) : Prop :=
   ∀ (t : Real) (x : M), nu t x ≤ mu t x ∧ mu t x ≤ lambda t x
 
-
-
 def RicciPinchingPreservedOn
     (lambda mu nu : Real -> M -> Real) (C : Real) : Prop :=
   ∀ (t : Real) (x : M), lambda t x ≤ C * (nu t x + mu t x)
@@ -42,8 +26,6 @@ def RicciPinchingPreservedInequalityOn
     (lambda mu nu : Real -> M -> Real) (C : Real) : Prop :=
   RicciPinchingPreservedOn lambda mu nu C
 
-
-
 def LogPinchingDerivativeNonpositiveOn
     (lambda mu nu : Real -> M -> Real) : Prop :=
   ∀ (t : Real) (x : M),
@@ -52,19 +34,13 @@ def LogPinchingDerivativeNonpositiveOn
         nu t x ^ 2 * (mu t x - lambda t x)) /
           (lambda t x * (nu t x + mu t x)) ≤ 0
 
-
-
 def LogLambdaOverMuPlusNuDerivativeFormulaOn
     (lambda mu nu : Real -> M -> Real) : Prop :=
   LogPinchingDerivativeNonpositiveOn lambda mu nu
 
-
-
 def RicciLowerBoundFromPinchingOn
     (ricciLower scalar : Real -> M -> Real) (beta : Real) : Prop :=
   ∀ (t : Real) (x : M), 2 * beta ^ 2 * scalar t x ≤ ricciLower t x
-
-
 
 def PinchingDecayWeightOn
     (_lambda _mu _nu weight : Real -> M -> Real) (delta : Real) : Prop :=
@@ -76,8 +52,6 @@ def RicciPinchingImprovesOn
   ∀ (t : Real) (x : M),
     (lambda t x - nu t x) / (nu t x + mu t x) ≤
       C * weight t x
-
-
 
 def PinchingImprovesFunctionEvolutionOn
     (f rhs : Real -> M -> Real) : Prop :=
@@ -101,18 +75,12 @@ def PinchingPFormulaOn
   ∀ (t : Real) (x : M),
     P t x = pinchingP (lambda t x) (mu t x) (nu t x)
 
-
-
 theorem pinchingP_formula
     (lambda mu nu : Real -> M -> Real) :
     PinchingPFormulaOn lambda mu nu
       (fun t x => pinchingP (lambda t x) (mu t x) (nu t x)) := by
   intro t x
   rfl
-
-
-
-
 
 abbrev PAlphaOverQBetaFormulaOn
     {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]
@@ -128,14 +96,10 @@ abbrev PAlphaOverQBetaFormulaOn
   QuotientEvolutionOn (I := I) (D := D) G
     phi psi phiHeat psiHeat alpha beta
 
-
-
 def TracefreeRmPinchingEvolutionInequalityOn
     (f scalar Q : Real -> M -> Real) (epsilon : Real) : Prop :=
   ∀ (t : Real) (x : M),
     0 < scalar t x -> f t x ≤ Q t x + epsilon * scalar t x
-
-
 
 def ScalarEvolutionEigenvalueFormulaOn
     (scalar lambda mu nu rhs : Real -> M -> Real) : Prop :=

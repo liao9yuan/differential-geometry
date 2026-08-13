@@ -180,7 +180,6 @@ theorem tensorRS_eval_contMDiffAt {r s : ℕ}
   simpa [Tensor0SSpace.toModel, tensor0SSpace_continuousLinearEquiv_apply] using hEval
 
 set_option backward.isDefEq.respectTransparency false in
-
 theorem tensor0S_eval_tangentConstInChart_contMDiffAt
     {s : ℕ}
     (α : Tensor0SField (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M)

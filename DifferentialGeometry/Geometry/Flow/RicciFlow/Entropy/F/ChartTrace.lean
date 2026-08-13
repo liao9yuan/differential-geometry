@@ -3,7 +3,6 @@ import DifferentialGeometry.Geometry.Connection.LeviCivita.DivergenceFrameInvari
 open DifferentialGeometry.Tensor.Multilinear
 open DifferentialGeometry.Tensor.RSTensor
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
 
 
 set_option autoImplicit false
@@ -21,21 +20,6 @@ open scoped Manifold ContDiff
 
 variable {M : Type*}
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 section GeometryFormula510
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]
@@ -45,9 +29,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
   [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
 
 private local instance : CompleteSpace E := FiniteDimensional.complete Real E
-
-
-
 
 omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M]
     [SigmaCompactSpace M] in
@@ -72,8 +53,6 @@ def gInvFun
   fun y : M =>
     inverseMetricFlatModelInChart_component (I := I) g x i j (extChartAt I x y)
 
-
-
 def compFun
     (A : Tensor0SBundle.TensorRSField (𝕜 := Real) (E := E) (H := H)
       (I := I) (M := M) (n := (∞ : WithTop ℕ∞)) 1 2)
@@ -87,10 +66,6 @@ def compFun
           (fun _ : Fin 1 => p)) y))
       (fun q : Fin 2 =>
         coordinateFrameAt (I := I) x (if q = 0 then i else j) y)
-
-
-
-
 
 omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M]
     [SigmaCompactSpace M] in

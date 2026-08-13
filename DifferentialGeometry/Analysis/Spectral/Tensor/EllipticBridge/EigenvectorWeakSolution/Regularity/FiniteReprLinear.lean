@@ -1,14 +1,6 @@
 import DifferentialGeometry.Analysis.Spectral.Tensor.EllipticBridge.EigenvectorWeakSolution.Regularity.EigenvectorTensorHsToWtwokTwo
 import DifferentialGeometry.Analysis.Spectral.Tensor.SobolevScale.Inclusion
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
-
-
-
-
-
-
-
 
 noncomputable section
 
@@ -35,8 +27,6 @@ private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
-
-
 private noncomputable def finiteCoeffLin
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (σ : ℝ) :
     tensorHs.finiteSupportSubmodule
@@ -49,8 +39,6 @@ private noncomputable def finiteCoeffLin
   map_smul' c v := by
     ext i
     rfl
-
-
 
 noncomputable def finiteReprLin
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (σ : ℝ) :

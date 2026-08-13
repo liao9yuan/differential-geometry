@@ -2,7 +2,6 @@ import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurckCoefficients.LieS
 import DifferentialGeometry.Analysis.Parabolic.DeTurckLinearization.DeTurckVFChartCoord
 import DifferentialGeometry.Analysis.Parabolic.DeTurckLinearization.LieDerivativeMetric
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Connection
 open DifferentialGeometry.Geometry.Operator
 

@@ -72,7 +72,6 @@ private lemma foldMetricCcTensor_unitModel_apply (g₀ g : SmoothRiemannianMetri
   rfl
 
 set_option backward.isDefEq.respectTransparency false in
-
 omit [I.Boundaryless] in
 omit [NeZero (Module.finrank ℝ E)] in
 omit [BoundarylessManifold I M] [SigmaCompactSpace M] in

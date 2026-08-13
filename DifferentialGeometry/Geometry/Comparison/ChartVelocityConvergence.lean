@@ -19,11 +19,8 @@ import Mathlib.Topology.UniformSpace.Cauchy
 import Mathlib.Topology.EMetricSpace.Lipschitz
 import DifferentialGeometry.Geometry.Comparison.GeodesicSpeedBound
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Connection
 open DifferentialGeometry.Geometry.Operator
-
-
 
 noncomputable section
 

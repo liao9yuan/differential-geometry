@@ -48,7 +48,6 @@ def covGradBundleEquiv (r s : ℕ) (x : M) :
       (tensorRSSpace_continuousLinearEquiv (I := I) r (s + 1) x).symm)
 
 set_option backward.isDefEq.respectTransparency true in
-
 theorem covGradBundleEquiv_apply (r s : ℕ) (x : M)
     (Φ : TangentSpace I x →L[ℝ] TensorRSSpace r s I x) :
     covGradBundleEquiv (I := I) (M := M) r s x Φ =
@@ -59,7 +58,6 @@ theorem covGradBundleEquiv_apply (r s : ℕ) (x : M)
   rfl
 
 set_option backward.isDefEq.respectTransparency true in
-
 theorem covGradBundleEquiv_symm_apply (r s : ℕ) (x : M)
     (T : TensorRSSpace r (s + 1) I x) :
     (covGradBundleEquiv (I := I) (M := M) r s x).symm T =
@@ -70,7 +68,6 @@ theorem covGradBundleEquiv_symm_apply (r s : ℕ) (x : M)
   rfl
 
 set_option backward.isDefEq.respectTransparency true in
-
 theorem covGradBundleEquiv_apply_eval (r s : ℕ) (x : M)
     (Φ : TangentSpace I x →L[ℝ] TensorRSSpace r s I x)
     (D : Tensor0SSpace r I x) (v : Fin (s + 1) → TangentSpace I x) :
@@ -84,7 +81,6 @@ theorem covGradBundleEquiv_apply_eval (r s : ℕ) (x : M)
   rfl
 
 set_option backward.isDefEq.respectTransparency true in
-
 theorem covGradBundleEquiv_symm_apply_eval (r s : ℕ) (x : M)
     (T : TensorRSSpace r (s + 1) I x) (w : TangentSpace I x)
     (D : Tensor0SSpace r I x) (v : Fin s → TangentSpace I x) :

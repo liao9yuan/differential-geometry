@@ -1,6 +1,5 @@
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.MetricDifferenceFields
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
 
 noncomputable section
 
@@ -100,10 +99,6 @@ private theorem continuous_riemannian_fiber_norm_of_continuous_section
     rw [real_inner_self_eq_norm_sq, Real.sqrt_sq (norm_nonneg _)]
   rw [h_eq]
   exact Real.continuous_sqrt.comp h_inner
-
-
-
-
 
 attribute [-instance] Bundle.continuousMultilinearMap.instNormedAddCommGroup
   Bundle.continuousMultilinearMap.instNormedSpace

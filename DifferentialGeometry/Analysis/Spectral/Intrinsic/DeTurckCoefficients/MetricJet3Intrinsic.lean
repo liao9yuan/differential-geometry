@@ -5,17 +5,8 @@ import DifferentialGeometry.Analysis.Parabolic.RicciLinearization.RicciArmResidu
 open DifferentialGeometry.Analysis.Calculus.DeTurckCoefficients
 open DifferentialGeometry.Analysis.Elliptic
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Connection
 open DifferentialGeometry.Geometry.Operator
-
-
-
-
-
-
-
-
 
 noncomputable section
 
@@ -33,7 +24,8 @@ open DifferentialGeometry.Geometry.Operator
 open DifferentialGeometry.Integral.L2
 open DifferentialGeometry.Analysis.Parabolic.TensorSpectral
 open DifferentialGeometry.Analysis.Sobolev.Chart
-open DifferentialGeometry.PDE.RicciFlow DifferentialGeometry.Analysis.Sobolev DifferentialGeometry.Analysis.Spectral
+open DifferentialGeometry.PDE.RicciFlow DifferentialGeometry.Analysis.Sobolev
+    DifferentialGeometry.Analysis.Spectral
 open DifferentialGeometry.Analysis.Spectral.MetricRealization
 
 variable
@@ -45,8 +37,6 @@ variable
       [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M]
 
 local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
-
-
 
 omit [I.Boundaryless] [BoundarylessManifold I M] [SigmaCompactSpace M] in
 theorem metricComp_sub
@@ -71,8 +61,6 @@ theorem metricComp_sub
   rw [ccTensorBilin_sub,
     metricCcTensor_apply, metricCcTensor_apply,
     g_inner_eq_chartGramMatrix_basis, g_inner_eq_chartGramMatrix_basis]
-
-
 
 omit [I.Boundaryless] [BoundarylessManifold I M] [SigmaCompactSpace M] in
 theorem gramDiff_eqOn
@@ -573,8 +561,6 @@ theorem metricJet3_le_gram (α : M) :
     _ = C * chartGramJetDiffSeminormSum (I := I) (M := M) 3 g₁ g₂ α
           (interior (extChartAt I α).target) y := by rw [hJ_def]
 
-
-
 omit [I.Boundaryless] [BoundarylessManifold I M] [SigmaCompactSpace M] in
 theorem gramJet_le_bare
     (gBase g₁ g₂ : SmoothRiemannianMetric I M) (α : M) (N : ℕ)
@@ -647,9 +633,6 @@ theorem gramJet_le_bare
           (metricCcTensor (I := I) (M := M) gBase g₁ -
             metricCcTensor (I := I) (M := M) gBase g₂) α N y := by
       rw [hB_def]
-
-
-
 
 omit [BoundarylessManifold I M] in
 theorem metricJet2_intrinsic
@@ -733,9 +716,6 @@ theorem metricJet2_intrinsic
                   metricCcTensor (I := I) (M := M) gBase g₂)).toSection b)) := by
       dsimp [D]
       ring
-
-
-
 
 omit [BoundarylessManifold I M] in
 theorem metricJet3_intrinsic

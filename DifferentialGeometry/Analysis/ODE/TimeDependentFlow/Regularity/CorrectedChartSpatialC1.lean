@@ -3,29 +3,6 @@ import DifferentialGeometry.Geometry.Connection.ChartFrame.ChartSection
 import Mathlib.Analysis.Calculus.MeanValue
 import Mathlib.Topology.MetricSpace.Lipschitz
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 open DifferentialGeometry.Geometry.Connection
 namespace DifferentialGeometry.Analysis.ODE

@@ -1,6 +1,5 @@
 import DifferentialGeometry.Analysis.Parabolic.RicciLinearization.InvGramPerturbation
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Operator
 
 

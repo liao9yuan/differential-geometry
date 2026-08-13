@@ -48,20 +48,21 @@ open DifferentialGeometry.Analysis.Sobolev
 open DifferentialGeometry.Analysis.Spectral
 open DifferentialGeometry.Analysis.Elliptic
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Connection
 
 
 noncomputable section
 
-open MeasureTheory Set Filter Topology Bundle Manifold DifferentialGeometry.Tensor0SBundle ContinuousLinearMap
+open MeasureTheory Set Filter Topology Bundle Manifold DifferentialGeometry.Tensor0SBundle
+    ContinuousLinearMap
 open scoped ENNReal NNReal BigOperators Manifold ContDiff
 
 namespace DifferentialGeometry.Analysis.Spectral
 
 open DifferentialGeometry
 open LieCorr0Core
-open DifferentialGeometry.PDE.RicciFlow DifferentialGeometry.Analysis.Sobolev DifferentialGeometry.Analysis.Spectral
+open DifferentialGeometry.PDE.RicciFlow DifferentialGeometry.Analysis.Sobolev
+    DifferentialGeometry.Analysis.Spectral
 open DifferentialGeometry.Analysis.Spectral.MetricRealization
 open DifferentialGeometry.Integral.L2
 
@@ -1990,7 +1991,6 @@ private theorem exists_lieDerivativeCorrection_curvatureRefold_armSplit_data
       mul_nonneg (hKrs_nn i) hW]
 
 set_option backward.isDefEq.respectTransparency false in
-
 private theorem exists_lieDerivativeCorrection_curvatureRefold_data
     (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
     (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) {R : ℝ} (hR : 0 ≤ R)
@@ -2223,7 +2223,6 @@ private theorem exists_riemannLieDerivativeCorrection_curvatureRefold_data
     linarith
 
 set_option backward.isDefEq.respectTransparency false in
-
 omit [BoundarylessManifold I M] in
 omit [NeZero (Module.finrank ℝ E)] in
 private theorem sum_range_shift_two_sq_le (g₀ : SmoothRiemannianMetric I M) (i : ℕ)
@@ -2287,7 +2286,6 @@ private lemma lc0_jet_sum_bound (i : ℕ) (f Kc Kr X : ℕ → ℝ) (ε : ℝ)
   exact lc0_path_sum_arithmetic (le_trans hsum (le_of_eq hsum_eq)) hmul hX
 
 set_option backward.isDefEq.respectTransparency false in
-
 private theorem deTurckPhiZeroPathIntegral_zero_curvatureRefold_coeffSup_jetEnvelope
     (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
     (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) {R₀ : ℝ} (hR₀ : 0 ≤ R₀)

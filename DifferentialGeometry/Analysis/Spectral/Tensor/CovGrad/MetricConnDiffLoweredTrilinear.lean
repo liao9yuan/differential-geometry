@@ -247,7 +247,6 @@ theorem ccBilinConnDiffLoweredFib_toModel (g₀ : SmoothRiemannianMetric I M)
   rw [trilinFormToModel_apply, ccBilinConnDiffLoweredTrilin_apply]
 
 set_option backward.isDefEq.respectTransparency false in
-
 omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
     [SigmaCompactSpace M] in
 private theorem trilinKernel_section_contMDiff

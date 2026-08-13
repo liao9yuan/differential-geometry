@@ -4,7 +4,6 @@ import DifferentialGeometry.Analysis.Parabolic.DeTurckLinearization.VectorFieldS
 import DifferentialGeometry.Analysis.Parabolic.DeTurckRicci.DeTurckVectorFieldContinuousInMetric
 import DifferentialGeometry.Analysis.Parabolic.DeTurckLinearization.DeTurckVFChartCoord
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Operator
 
 

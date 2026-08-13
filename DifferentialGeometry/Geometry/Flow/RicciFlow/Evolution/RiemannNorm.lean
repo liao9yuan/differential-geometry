@@ -1,19 +1,8 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.Ricci
 import Mathlib.Tactic.Ring
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
 
 set_option autoImplicit false
-
-
-
-
-
-
-
-
-
-
 
 noncomputable section
 
@@ -36,8 +25,6 @@ section Components
 
 variable {Idx : Type*} [Fintype Idx]
 
-
-
 def raisedRm04CompInFrame
     (Rm04 : Real -> DifferentialGeometry.Geometry.Curvature.Tensor04Section (I := I) (M := M))
     (gInv : Real -> DifferentialGeometry.Geometry.Curvature.InverseMetricComponents M Idx)
@@ -58,8 +45,6 @@ omit [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
         gInv t x a p * gInv t x b q * gInv t x c r * gInv t x d s *
           DifferentialGeometry.Geometry.Curvature.rm04Comp (I := I) (Rm04 t) frame x p q r s := by
   rfl
-
-
 
 def rm04NormSqInFrame
     (Rm04 : Real -> DifferentialGeometry.Geometry.Curvature.Tensor04Section (I := I) (M := M))
@@ -83,14 +68,10 @@ omit [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
           raisedRm04CompInFrame (I := I) Rm04 gInv frame t x a b c d := by
   rfl
 
-
-
 private def derivProduct5RHS
     (u v w y z du dv dw dy dz : Real) : Real :=
   ((((du * v + u * dv) * w + (u * v) * dw) * y + ((u * v) * w) * dy) * z +
     (((u * v) * w) * y) * dz)
-
-
 
 def raisedRm04DerivRHSInFrame
     {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
@@ -128,9 +109,6 @@ def rm04NormDerivRHSInFrame
       DifferentialGeometry.Geometry.Curvature.rm04Comp (I := I) (Rm04 t) frame x a b c d *
         raisedRm04DerivRHSInFrame (I := I) S Rm04 gInv frame rm04Dt
           t x a b c d)
-
-
-
 
 def Rm04NormRawDerivativeEquationOn
     {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
@@ -172,10 +150,6 @@ def nablaRm04NormSqInFrame
         gInv t x i p * gInv t x j q * gInv t x k r * gInv t x l s *
           nablaRm04 t x a i j k l * nablaRm04 t x b p q r s
 
-
-
-
-
 def Rm04NormDerivativeSimplifiesInFrame
     {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -200,8 +174,6 @@ def Rm04NormTimeDerivativeComponentsOn
       D.carrier
       (t : Real)
 
-
-
 omit [SigmaCompactSpace M] [T2Space M] in
 theorem rm04NormTimeDerivativeComponentsOn_of_rawDerivative
     {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
@@ -221,14 +193,10 @@ theorem rm04NormTimeDerivativeComponentsOn_of_rawDerivative
   intro t x
   simpa [h_simplify t x] using h_raw t x
 
-
-
 def Rm04NormLaplacianComponentsOn
     (rmNormLap roughLapInner nablaRmNormSq : Real -> M -> Real) : Prop :=
   ∀ (t : Real) (x : M),
     rmNormLap t x = 2 * roughLapInner t x + 2 * nablaRmNormSq t x
-
-
 
 def Rm04NormHeatEquationOn
     {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
@@ -240,8 +208,6 @@ def Rm04NormHeatEquationOn
         (-2 * nablaRmNormSq (t : Real) x + reaction (t : Real) x))
       D.carrier
       (t : Real)
-
-
 
 omit [TopologicalSpace M] [SigmaCompactSpace M] [T2Space M] in
 theorem rm04NormHeatEquationOn_of_components
@@ -262,8 +228,6 @@ theorem rm04NormHeatEquationOn_of_components
     ring
   rw [hvalue]
   exact h_dt t x
-
-
 
 omit [SigmaCompactSpace M] [T2Space M] in
 theorem rm04NormHeatEquationOn_of_rawDerivative

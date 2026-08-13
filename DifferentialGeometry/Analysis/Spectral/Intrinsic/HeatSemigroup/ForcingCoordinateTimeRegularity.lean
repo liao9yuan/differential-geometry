@@ -14,8 +14,8 @@ import DifferentialGeometry.Analysis.Spectral.Intrinsic.HeatSemigroup.SmoothCoor
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.HeatSemigroup.SpectralMassUniformSup
 import DifferentialGeometry.Analysis.Calculus.SmoothExtension.BorelHalfLineParam
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.HeatSemigroup.ForcingFiniteOrderTimeRegularity
-open DifferentialGeometry.Analysis.Sobolev.CSupTensor DifferentialGeometry.Analysis.Sobolev.IntrinsicSobolev.SmoothCcTensorHs
-open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Analysis.Sobolev.CSupTensor
+    DifferentialGeometry.Analysis.Sobolev.IntrinsicSobolev.SmoothCcTensorHs
 open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Connection
 

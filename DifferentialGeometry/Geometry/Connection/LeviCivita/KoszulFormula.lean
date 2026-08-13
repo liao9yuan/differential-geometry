@@ -11,25 +11,6 @@ open DifferentialGeometry.Geometry.Operator
 
 set_option autoImplicit false
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 namespace DifferentialGeometry.Geometry.Connection
 
 noncomputable section
@@ -48,14 +29,6 @@ variable [SigmaCompactSpace M] [T2Space M]
 private instance tangentSpace_finiteDimensional (x : M) :
     FiniteDimensional Real (TangentSpace I x) :=
   inferInstanceAs (FiniteDimensional Real E)
-
-
-
-
-
-
-
-
 
 def tangentConstAt (x : M) (v : TangentSpace I x) (p : M) :
     TangentSpace I p :=
@@ -106,8 +79,6 @@ theorem mdifferentiableAt_tangentConstAt_self
   exact TensorLieDeriv.mdifferentiableAt_tangentConstInChart_of_mem
     (𝕜 := Real) (I := I) (x₀ := x) (p := x) v
     (mem_baseSet_trivializationAt E (TangentSpace I) x)
-
-
 
 omit [FiniteDimensional ℝ E] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 private theorem mdifferentiableAt_metric_inner
@@ -171,11 +142,6 @@ private theorem directionalDerivAlong_add_fun
   unfold directionalDerivAlong
   rw [extDerivFun_add hf hh]
   rw [ContinuousLinearMap.add_apply]
-
-
-
-
-
 
 def koszulScalar
     (g : SmoothRiemannianMetric I M)
@@ -479,13 +445,6 @@ private theorem koszulScalar_tensorial_third
     intro Z Z' hZ hZ'
     exact koszulScalar_add_third (I := I) g X Y Z Z' x hX hY hZ hZ'
 
-
-
-
-
-
-
-
 def koszulCovectorField
     (g : SmoothRiemannianMetric I M)
     (X Y : (p : M) -> TangentSpace I p) (x : M) :
@@ -737,21 +696,11 @@ private theorem koszulNablaField_tensorial_first
     intro X X' hX hX'
     exact koszulNablaField_add_first (I := I) g X X' Y x hX hX' hY
 
-
-
-
-
-
 def koszulNablaAt
     (g : SmoothRiemannianMetric I M)
     (Y : (p : M) -> TangentSpace I p) (x : M)
     (v : TangentSpace I x) : TangentSpace I x :=
   koszulNablaField (I := I) g (tangentConstAt (I := I) x v) Y x
-
-
-
-
-
 
 def KoszulCovectorCorrectAt
     (g : SmoothRiemannianMetric I M)
@@ -864,8 +813,6 @@ theorem koszulScalar_pair_sum
   simp only [map_neg]
   ring
 
-
-
 omit [FiniteDimensional ℝ E] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 theorem koszulScalar_swap_sub
     (g : SmoothRiemannianMetric I M)
@@ -892,12 +839,6 @@ theorem koszulScalar_swap_sub
   simp only [map_neg]
   rw [g.symm x (VectorField.mlieBracket I X Y x) (Z x)]
   ring
-
-
-
-
-
-
 
 omit [SigmaCompactSpace M] [T2Space M] in
 theorem koszulNablaField_eq_of_first_eq_at
@@ -933,10 +874,6 @@ theorem koszulNablaField_eq_of_first_eq_at
       hX hX' hxx
   rw [hK]
 
-
-
-
-
 omit [SigmaCompactSpace M] [T2Space M] in
 theorem koszulNablaAt_eq_of_extension
     (g : SmoothRiemannianMetric I M)
@@ -954,13 +891,6 @@ theorem koszulNablaAt_eq_of_extension
   exact koszulNablaField_eq_of_first_eq_at (I := I) g
     (tangentConstAt (I := I) x v) X Y x
     (mdifferentiableAt_tangentConstAt_self (I := I) x v) hX hY hconst
-
-
-
-
-
-
-
 
 def leviCivitaConnectionCandidateAt
     (g : SmoothRiemannianMetric I M)
@@ -1003,11 +933,6 @@ omit [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
   rw [leviCivitaConnectionCandidateAt_apply_basis]
   rfl
 
-
-
-
-
-
 omit [SigmaCompactSpace M] [T2Space M] in
 theorem leviCivitaConnectionCandidateAt_agreesWithField
     (g : SmoothRiemannianMetric I M)
@@ -1046,8 +971,6 @@ theorem leviCivitaConnectionCandidateAt_agreesWithField
     simpa [Φ, L] using hmk
   exact hLi.symm
 
-
-
 omit [SigmaCompactSpace M] [T2Space M] in
 theorem leviCivitaConnectionCandidateAt_agreesWithDescended
     (g : SmoothRiemannianMetric I M)
@@ -1062,11 +985,6 @@ theorem leviCivitaConnectionCandidateAt_agreesWithDescended
   convert hfield using 1
   exact congrArg (leviCivitaConnectionCandidateAt (I := I) g Y x)
     (tangentConstAt_self (I := I) x v).symm
-
-
-
-
-
 
 def leviCivitaConnectionOfMetric
     (g : SmoothRiemannianMetric I M) :
@@ -1134,12 +1052,6 @@ theorem leviCivitaConnectionOfMetric_inner_eq_koszulScalar
   rw [leviCivitaConnectionOfMetric_apply_descended (I := I) g Y x hY (X x)]
   rw [koszulNablaAt_eq_of_extension (I := I) g X Y x hX hY (X x) rfl]
   exact koszulNablaField_inner_eq_koszulScalar (I := I) g X Y Z x hX hY hZ
-
-
-
-
-
-
 
 omit [SigmaCompactSpace M] [T2Space M] in
 theorem leviCivitaConnectionOfMetric_inner_eq_koszulScalar_tangent

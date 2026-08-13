@@ -4,10 +4,7 @@ import DifferentialGeometry.Geometry.Exponential.IntrinsicExp
 import DifferentialGeometry.Geometry.Exponential.IntrinsicVelocity
 import DifferentialGeometry.Geometry.Geodesic.AffineReparam
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Connection
-
-
 
 noncomputable section
 

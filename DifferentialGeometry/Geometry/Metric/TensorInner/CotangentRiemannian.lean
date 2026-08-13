@@ -1,8 +1,6 @@
 import DifferentialGeometry.Geometry.Metric.TensorInner.TangentRiemannian
 import Mathlib.LinearAlgebra.Dual.Basis
 
-
-
 namespace DifferentialGeometry
 namespace Tensor0SBundle
 

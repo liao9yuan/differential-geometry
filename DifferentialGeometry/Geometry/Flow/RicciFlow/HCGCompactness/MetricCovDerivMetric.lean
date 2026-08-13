@@ -2,17 +2,8 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.MetricCovDeri
 import DifferentialGeometry.Geometry.Metric.TensorInner.MetricGeodesicSpray
 open DifferentialGeometry.PDE.RicciFlow
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
 
 set_option autoImplicit false
-
-/-!
-# Metric-coefficient convergence and component covariant derivatives
-
-This file connects smooth convergence of metric coefficients to the metric-free
-component recurrence in `MetricCovDerivConv`.  The Christoffel coefficients are
-read from the proof-independent raised Koszul operator in one fixed basis.
--/
 
 noncomputable section
 
@@ -64,10 +55,6 @@ private noncomputable def christoffelComp
             (ContinuousLinearMap.apply Real (E →L[Real] E) (e i)))
 
 omit [CompleteSpace E] in
-/-- If two smooth bilinear-form families converge to the same coercive metric,
-then every finite component covariant-derivative tower of their difference,
-formed with the first family's Levi--Civita Christoffel coefficients, converges
-smoothly to zero on compact subsets. -/
 theorem metric_tower_conv
     {U : Set E} (hU : IsOpen U) (e : Module.Basis Idx Real E)
     (g q : Nat → E → E →L[Real] E →L[Real] Real)

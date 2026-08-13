@@ -4,16 +4,7 @@ import DifferentialGeometry.Analysis.Integration.Measure.FamilyDecomposition
 import DifferentialGeometry.Geometry.Comparison.RiemannianDistContinuity
 import DifferentialGeometry.Geometry.Metric.DistanceScaling
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Connection
-
-/-!
-# Intrinsically Lipschitz functions in chart Sobolev spaces
-
-This file gives the qualitative first-order Sobolev entrance for bounded
-functions that are Lipschitz with respect to an explicitly supplied smooth
-Riemannian metric.
--/
 
 noncomputable section
 
@@ -69,9 +60,6 @@ private lemma lip_mul_bdd
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-/-- The partition-of-unity localization of a bounded function that is
-Lipschitz for an explicit Riemannian distance is globally Lipschitz in the
-Euclidean chart model. -/
 theorem chart_pou_lip
     [T2Space M] [SigmaCompactSpace M] [CompactSpace M] [I.Boundaryless]
     (g : DifferentialGeometry.SmoothRiemannianMetric I M)
@@ -301,8 +289,6 @@ private lemma pou_ae_mdiff
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-/-- A bounded function that is Lipschitz for an explicit Riemannian distance
-is manifold-differentiable almost everywhere for the Riemannian volume. -/
 theorem ae_mdiff_of_lip
     [T2Space M] [SigmaCompactSpace M] [CompactSpace M] [I.Boundaryless]
     (g : DifferentialGeometry.SmoothRiemannianMetric I M)
@@ -350,8 +336,6 @@ theorem ae_mdiff_of_lip
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-/-- A bounded function that is Lipschitz for the extended distance of a
-smooth Riemannian metric belongs to every first-order chart Sobolev space. -/
 theorem mem_chart_one_of_lip
     [T2Space M] [SigmaCompactSpace M] [CompactSpace M] [I.Boundaryless]
     (g : DifferentialGeometry.SmoothRiemannianMetric I M)

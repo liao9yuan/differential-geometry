@@ -1,34 +1,8 @@
 import DifferentialGeometry.Geometry.Comparison.Volume.IntrinsicRatio
 import DifferentialGeometry.Geometry.Comparison.NormalCoordinates
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
 
 set_option autoImplicit false
-
-/-!
-# Sharp pole limit of the intrinsic transverse Jacobi density
-
-The Bishop--Gromov absolute volume bound needs the transverse Jacobi density to
-be compared to the hyperbolic model with the *sharp* constant `1` (equality on
-flat `ℝⁿ`).  Along `γ = intrinsicGeodesic g hEnorm p u` with speed
-`ell = √(g.inner p u u)`, for a `gₓ`-orthonormal transverse frame `v` the density
-ratio `curveDensity g γ V t / hypDensity (q·ell) (n-1) t` tends to `1` at the pole
-`t → 0⁺`, sharpening the non-sharp `intrPoleCap` (constant `N = M₀/c`).
-
-Route (all metric-contracted, avoiding the discontinuous raw exponential
-differential): near the pole the intrinsic Jacobi density equals the chart-radial
-one (`intrJacobi_raw`); the radial Gram of the frame `v` is
-`t² · Vᵀ · (normalGramMatrix) · V` with `V` the change of basis to
-`chartModelBasis`, whose limit at the centre is the `gₓ`-Gram of `v`, i.e. the
-identity for a `gₓ`-orthonormal frame; and the model density satisfies
-`hypSn q t / t → 1`.
-
-* `curveDensity_pole` — geodesic side: `curveDensity g γ V t / t^(n-1) → 1`.
-* `poleLimit` — the sharp ratio limit (part 2).
-* `transDens_le_hyp` — step-(c) corollary consumed by the L6 assembly: on the
-  conjugate-free window the transverse density is `≤` the model density with
-  constant exactly `1` (antitone ratio + pole limit `1`).
--/
 
 noncomputable section
 
@@ -64,8 +38,6 @@ variable [RiemannianBundle (fun x : M ↦ TangentSpace I x)]
 variable [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
   [IsContinuousRiemannianBundle E (fun x : M ↦ TangentSpace I x)]
 
-/-- The hyperbolic warping ratio tends to `1` at the pole: `hypSn q t / t → 1`.
-The leading term of `sinh(q t)/q` is `t`, independent of the frequency `q`. -/
 private lemma hypSn_div_tendsto (q : Real) :
     Tendsto (fun t => hypSn q t / t) (𝓝[>] (0 : Real)) (𝓝 1) := by
   have hzero : hypSn q 0 = 0 := by
@@ -81,7 +53,6 @@ private lemma hypSn_div_tendsto (q : Real) :
   rw [hfun] at hslope
   exact hslope.mono_left (nhdsWithin_mono 0 (fun x hx => ne_of_gt hx))
 
-/-- Model side of the pole limit: `hypDensity q d t / t^d → 1`. -/
 private lemma hypDensity_div_tendsto (q : Real) (d : ℕ) :
     Tendsto (fun t => hypDensity q d t / t ^ d) (𝓝[>] (0 : Real)) (𝓝 1) := by
   have hpow := (hypSn_div_tendsto q).pow d
@@ -140,9 +111,6 @@ lemma linIndep_of_ortho
   · intro hj
     exact (hj (Finset.mem_univ j)).elim
 
-/-- **Geodesic side of the sharp pole limit.**  For a `gₓ`-orthonormal transverse
-frame `v`, the transverse intrinsic-Jacobi density along `γ = intrinsicGeodesic p u`
-normalized by `t^(n-1)` tends to `1` at the pole. -/
 theorem curveDensity_pole
     (g : SmoothRiemannianMetric I M)
     (hEnorm : IsMetricNorm (I := I) (M := M) g)
@@ -258,10 +226,6 @@ theorem curveDensity_pole
     exact hlim
   exact Filter.Tendsto.congr' hratio.symm hlim_one
 
-/-- **The sharp pole limit (deliverable 2).**  For a `gₓ`-orthonormal transverse
-frame `v` perpendicular to `u`, the transverse Jacobi density ratio to the
-speed-scaled hyperbolic model tends to `1` at the pole.  Sharpens `intrPoleCap`
-(constant `N = M₀/c`) to the exact constant `1`. -/
 theorem poleLimit
     (g : SmoothRiemannianMetric I M)
     (hEnorm : IsMetricNorm (I := I) (M := M) g)
@@ -290,12 +254,6 @@ theorem poleLimit
   simp only [Pi.div_apply]
   field_simp [hpow.ne', hmdpos.ne']
 
-/-- **Step-(c) corollary consumed by the L6 assembly (deliverable 3).**  On the
-conjugate-free window `Ioo 0 b`, under a Ricci lower bound `Ric ≥ -(n-1)q²`, the
-transverse intrinsic-Jacobi density along `γ` is bounded by the speed-scaled
-hyperbolic model density with constant EXACTLY `1`.  Obtained from the antitone
-ratio (`intrRatioOfFrame`) and the sharp pole limit `1` (`poleLimit`): an antitone
-function whose limit at the pole is `1` is `≤ 1` throughout the window. -/
 theorem transDens_le_hyp
     (g : SmoothRiemannianMetric I M)
     (hEnorm : IsMetricNorm (I := I) (M := M) g)

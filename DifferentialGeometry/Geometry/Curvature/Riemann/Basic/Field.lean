@@ -9,16 +9,6 @@ import Mathlib.Geometry.Manifold.VectorBundle.Tangent
 import Mathlib.Geometry.Manifold.VectorBundle.CovariantDerivative.Torsion
 open DifferentialGeometry.Geometry.Curvature
 
-
-
-
-
-
-
-
-
-
-
 noncomputable section
 
 set_option autoImplicit false
@@ -403,11 +393,6 @@ theorem cov_tangentConst_smul_apply_eventuallyEq
   rw [cov.isCovariantDerivativeOnUniv.smul_const a hv]
   simp [Pi.smul_apply]
 
-
-
-
-
-
 def riemannCurvatureAux
     (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
     (X Y Z : (p : M) → TangentSpace I p) (x : M) : TangentSpace I x :=
@@ -422,8 +407,6 @@ theorem riemannCurvatureAux_eq_connectionRiemannCurvatureField
     (X Y Z : (p : M) → TangentSpace I p) (x : M) :
     riemannCurvatureAux cov X Y Z x =
       connectionRiemannCurvatureField cov X Y Z x := rfl
-
-
 
 omit [FiniteDimensional ℝ E] [CompleteSpace E] in
 theorem connectionRiemannCurvatureField_congr_of_eventuallyEq
@@ -595,9 +578,6 @@ theorem connectionRiemannCurvatureField_tensorial_middle
     rw [hleft]
     module
 
-
-
-
 theorem connectionRiemannCurvatureField_congr_first_two_point
     (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
     (hcov : CovariantDerivative.ContMDiffCovariantDerivativeLocally cov
@@ -633,12 +613,6 @@ theorem connectionRiemannCurvatureField_congr_first_two_point
         exact
           (connectionRiemannCurvatureField_tensorial_middle
             (I := I) cov hcov X' Z x).pointwise hYmd hY'md hY
-
-
-
-
-
-
 
 private theorem connectionRiemannCurvatureField_smul_right_smooth
     (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
@@ -969,13 +943,6 @@ private theorem smooth_linear_tangentSection_pointwise
     exact Finset.sum_eq_zero fun i _ => by rw [hu'_zero i, zero_smul]
   rw [hsum_zero, sub_zero] at hloc
   exact hloc
-
-
-
-
-
-
-
 
 theorem connectionRiemannCurvatureField_congr_point
     (cov : CovariantDerivative I E (TangentSpace I : M → Type _))

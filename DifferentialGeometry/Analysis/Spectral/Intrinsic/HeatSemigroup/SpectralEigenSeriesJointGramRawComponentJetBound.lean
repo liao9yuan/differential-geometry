@@ -17,7 +17,6 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.EllipticBridge.Representati
 import DifferentialGeometry.Analysis.Calculus.AnisotropicJointContDiff
 open DifferentialGeometry.Analysis.Sobolev
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Connection
 
 

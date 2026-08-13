@@ -17,7 +17,6 @@ open DifferentialGeometry.Analysis.Sobolev DifferentialGeometry.Analysis.Sobolev
 open DifferentialGeometry.Analysis.Spectral
 open DifferentialGeometry.Analysis.Elliptic
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
 
 
 noncomputable section
@@ -115,10 +114,12 @@ private theorem exists_oneMinusConnLapSmoothIter_toHs_le_toHs
           ≤ Ck * ‖DifferentialGeometry.Analysis.Sobolev.IntrinsicSobolev.SmoothCcTensor.toHs
               (g := g₀) (r := 0) (s := 2) k (oneMinusConnLapSmooth (I := I) g₀ 0 2 S)‖ :=
             hCk (oneMinusConnLapSmooth (I := I) g₀ 0 2 S)
-        _ ≤ Ck * (Cstep * ‖DifferentialGeometry.Analysis.Sobolev.IntrinsicSobolev.SmoothCcTensor.toHs
+        _ ≤ Ck * (Cstep *
+          ‖DifferentialGeometry.Analysis.Sobolev.IntrinsicSobolev.SmoothCcTensor.toHs
               (g := g₀) (r := 0) (s := 2) (k + 1) S‖) :=
             mul_le_mul_of_nonneg_left (hCstep S) hCk_nn
-        _ = (Ck * Cstep) * ‖DifferentialGeometry.Analysis.Sobolev.IntrinsicSobolev.SmoothCcTensor.toHs
+        _ = (Ck * Cstep) *
+          ‖DifferentialGeometry.Analysis.Sobolev.IntrinsicSobolev.SmoothCcTensor.toHs
               (g := g₀) (r := 0) (s := 2) (k + 1) S‖ := by ring
 
 theorem exists_smoothCcToTensorHs_even_le_iteratedCovGrad_sum

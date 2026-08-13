@@ -4,28 +4,6 @@ import Mathlib.Geometry.Manifold.BumpFunction
 
 namespace DifferentialGeometry.Geometry.Connection.Realization
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
@@ -41,8 +19,6 @@ variable
   {I : ModelWithCorners ℝ E H}
   {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
   [SigmaCompactSpace M] [T2Space M]
-
-
 
 omit [FiniteDimensional ℝ E] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 theorem contMDiffOn_dual_apply
@@ -61,8 +37,6 @@ theorem contMDiffOn_dual_apply
   intro y hy
   exact (contMDiffWithinAt_section (F := ℝ) (E := _root_.Bundle.Trivial M ℝ)).mp (hap y hy)
 
-
-
 omit [FiniteDimensional ℝ E] [CompleteSpace E] [IsManifold I ∞ M] [SigmaCompactSpace M]
     [T2Space M] in
 private theorem extDerivFun_congr_nhds
@@ -72,12 +46,6 @@ private theorem extDerivFun_congr_nhds
     DifferentialGeometry.extDerivFun_real_eq_mfderiv I g x V,
     Filter.EventuallyEq.mfderiv_eq (I := I) (I' := 𝓘(ℝ, ℝ)) h]
   rfl
-
-
-
-
-
-
 
 omit [CompleteSpace E] [SigmaCompactSpace M] in
 theorem contMDiffAt_extDerivFun_apply

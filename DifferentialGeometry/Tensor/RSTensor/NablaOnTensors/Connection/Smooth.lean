@@ -3,7 +3,6 @@ import DifferentialGeometry.Tensor.RSTensor.NablaOnTensors.Model.TensorRS
 import DifferentialGeometry.Tensor.RSTensor.Derivation.NablaOnTensors
 import DifferentialGeometry.Tensor.RSTensor.NablaOnTensors.Model.Smoothness
 import DifferentialGeometry.Bundle.SectionRealized
-import DifferentialGeometry.Tensor.RSTensor.Derivation.NablaOnTensors
 import Mathlib.Geometry.Manifold.VectorBundle.MDifferentiable
 import Mathlib.Geometry.Manifold.VectorBundle.Tangent
 import Mathlib.Geometry.Manifold.VectorBundle.CovariantDerivative.Basic

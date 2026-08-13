@@ -2,19 +2,10 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.Rm04Variation
 import DifferentialGeometry.Geometry.Connection.LeviCivita.Curvature.Hamilton
 open DifferentialGeometry.PDE.RicciFlow
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Connection
 open DifferentialGeometry.Geometry.Operator
 
 set_option autoImplicit false
-
-/-!
-# Arbitrary-dimensional Hamilton base producer
-
-This module transports the coordinate-frame time variation of lowered Riemann
-to fixed tangent vectors and then combines it with the static Hamilton
-curvature identity.  It stays below the `StarSum` consumer layer.
--/
 
 noncomputable section
 
@@ -70,7 +61,6 @@ private def reindex4 {x : M}
     Tensor04At (I := I) (M := M) x :=
   N.domDomCongr e
 
-/-- The metric-raised Ricci endomorphism associated to a pointwise two-tensor. -/
 private def ricciSharpCLM
     (g : SmoothRiemannianMetric I M) {x : M}
     (Ric : Tensor02At (I := I) (M := M) x) :
@@ -90,7 +80,6 @@ omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [CompleteSpace E] [SigmaCo
         (tensor0S_curry (I := I) (𝕜 := Real) (M := M) 1 x Ric X) := by
   rfl
 
-/-- The invariant contraction `Rm04(A, B, C, Ric♯ D)`. -/
 private def rawTensor
     (g : SmoothRiemannianMetric I M) {x : M}
     (Ric : Tensor02At (I := I) (M := M) x)
@@ -100,14 +89,12 @@ private def rawTensor
     if i = 3 then ricciSharpCLM (I := I) g Ric
     else ContinuousLinearMap.id Real (TangentSpace I x)
 
-/-- The six second-Ricci-derivative terms in the lowered-Riemann variation. -/
 private def hessVarTensor {x : M}
     (N : Tensor04At (I := I) (M := M) x) :
     Tensor04At (I := I) (M := M) x :=
   -N - reindex4 N permAC + reindex4 N permADBC +
     reindex4 N permBA + reindex4 N permBCA - reindex4 N permBDAC
 
-/-- The canonical pointwise tensor represented by `rm04VarRHS`. -/
 private def varTensor
     (g : SmoothRiemannianMetric I M) {x : M}
     (N : Tensor04At (I := I) (M := M) x)
@@ -116,7 +103,6 @@ private def varTensor
     Tensor04At (I := I) (M := M) x :=
   hessVarTensor N - (2 : Real) • rawTensor (I := I) g Ric Rm04
 
-/-- The canonical first covariant derivative of the solution Ricci tensor. -/
 private def solNablaRic
     {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D) (t : Real) :
@@ -127,7 +113,6 @@ private def solNablaRic
     (totalNabla0S_reg (E := E) (H := H) (I := I) (M := M)
       2 (S.family.connection t) (connSmoothInf (I := I) S t) (S.ricci t))
 
-/-- The canonical second covariant derivative of the solution Ricci tensor. -/
 private def solNabla2Ric
     {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D) (t : Real) (x : M) :
@@ -557,9 +542,6 @@ private theorem varTensor_eq_ham
 omit [NeZero (Module.finrank ℝ E)]
   [I.Boundaryless]
   [SigmaCompactSpace M] in
-/-- Coordinate derivatives of the lowered-Riemann components determine the
-time derivative on any four fixed tangent vectors.  The coefficients are the
-time-independent coordinates of those vectors in the centered chart basis. -/
 theorem rm04Deriv_of_coord
     {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -761,8 +743,6 @@ private theorem rm04Var_of_solution
   simpa only [component0S_apply, coordinateFrameAt_toBasis_apply] using hexp.symm
 
 omit [NeZero (Module.finrank ℝ E)] in
-/-- The arbitrary-dimensional Hamilton evolution of lowered Riemann in a
-fixed orthonormal basis, produced directly from a Ricci-flow solution. -/
 theorem rm04Base_of_solution_any
     {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)

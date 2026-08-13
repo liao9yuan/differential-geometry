@@ -3,28 +3,6 @@ import DifferentialGeometry.Tensor.RSTensor.Tensor0SRiemannian.Comparison
 
 set_option autoImplicit false
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 noncomputable section
 
 namespace DifferentialGeometry
@@ -40,14 +18,6 @@ variable {I : ModelWithCorners Real E H} [I.Boundaryless]
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
 variable [T2Space M] [IsManifold I ∞ M] [SigmaCompactSpace M]
 variable [IsManifold I 1 M] [IsManifold I 2 M]
-
-
-
-
-
-
-
-
 
 omit [I.Boundaryless] [IsManifold I 2 M] in
 omit [SigmaCompactSpace M] in

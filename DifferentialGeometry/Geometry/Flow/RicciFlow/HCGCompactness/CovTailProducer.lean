@@ -1,18 +1,9 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.CovOrderTail
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.MovingShiProducer
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Connection
 
 set_option autoImplicit false
-
-
-
-
-
-
-
-
 
 noncomputable section
 
@@ -31,9 +22,6 @@ variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners Real E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
     [IsManifold I ∞ M] [CompactSpace M] [BoundarylessManifold I M]
     [I.Boundaryless] [T2Space M]
-
-
-
 
 theorem covTailBoundSol
     {alpha omega : Real} {hAlphaOmega : alpha < omega}

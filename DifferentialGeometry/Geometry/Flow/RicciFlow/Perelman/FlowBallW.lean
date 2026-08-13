@@ -5,17 +5,9 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.Perelman.CollapseScale
 import DifferentialGeometry.Geometry.Comparison.Volume.SmallBall
 open DifferentialGeometry.PDE.RicciFlow
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Operator
 
 set_option autoImplicit false
-
-/-!
-# Cutoff W-form on curvature-controlled flow balls
-
-This file assembles the intrinsic cutoff and curvature trace bounds at the
-distinguished time of a genuine `FlowMetricBall`.
--/
 
 open DifferentialGeometry.Geometry.Connection
 namespace DifferentialGeometry.PDE.RicciFlow.Perelman
@@ -43,7 +35,6 @@ variable {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
-/-- The cutoff gradient term is controlled by a real outer/half-volume ratio. -/
 private theorem cutoff_grad_le
     {r C : ℝ} {V H : ℝ≥0∞} (hr : 0 < r)
     (hHr : 0 < H.toReal)
@@ -94,9 +85,6 @@ private theorem log_scale_eq (n : ℕ) {r v : ℝ} (hr : 0 < r) (hv : 0 < v) :
   push_cast
   ring
 
-/-- A curvature-controlled flow ball admits the normalized cutoff square-form
-estimate at its distinguished time, with the scalar term controlled directly
-by the invariant Riemann norm hypothesis. -/
 theorem flowball_wform
     {S : SolutionOn (I := I) (M := M) D}
     {time : DifferentialGeometry.Geometry.Curvature.RealTimeInterval.FlowTime D}
@@ -163,9 +151,6 @@ theorem flowball_wform
     FlowMetricBall.volume,
     DifferentialGeometry.Integral.Measure.volumeMeasureOn] using hw
 
-/-- A curvature-controlled flow ball admits a strictly positive unit-mass
-amplitude whose actual Perelman W-functional is bounded by the cutoff estimate,
-up to an arbitrarily small error. -/
 theorem flowball_w_upper
     {S : SolutionOn (I := I) (M := M) D}
     {time : DifferentialGeometry.Geometry.Curvature.RealTimeInterval.FlowTime D}
@@ -273,15 +258,10 @@ theorem flowball_w_upper
         by linarith
       _ = _ := by rfl
 
-/-- The dimension-only constant left after the dyadic cutoff and parabolic
-scale cancellations. -/
 def collapseWConst (n : ℕ) : ℝ :=
   400 * (2 : ℝ) ^ (n + 1) + (n : ℝ) ^ 2 +
     (-(n : ℝ) / 2) * Real.log (4 * Real.pi) - (n : ℝ)
 
-/-- A curvature-controlled ball admits a selected dyadic subball and a
-positive unit-mass test amplitude whose W value is bounded only by the original
-normalized volume, a dimension constant, and the chosen approximation error. -/
 theorem exists_sel_w_bound
     [CompleteSpace E] [T2Space (TangentBundle I M)] [T3Space M]
     [ConnectedSpace M]

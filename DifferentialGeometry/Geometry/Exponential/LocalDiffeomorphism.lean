@@ -3,10 +3,7 @@ import Mathlib.Geometry.Manifold.LocalDiffeomorph
 import Mathlib.Analysis.Calculus.InverseFunctionTheorem.ContDiff
 import Mathlib.Geometry.Manifold.ContMDiff.NormedSpace
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Connection
-
-
 
 noncomputable section
 
@@ -491,8 +488,6 @@ theorem exists_open_nhds_expMap_diffeoOn
   ⟨expMapPartialDiffeomorph (I := I) g p,
     zero_mem_expMapPartialDiffeomorph_source (I := I) g p,
     fun _ _ => rfl⟩
-
-
 
 theorem exists_exp_pd_chart
     (g : SmoothRiemannianMetric I M) (p : M) :

@@ -1,7 +1,6 @@
 import DifferentialGeometry.Geometry.Operator.RoughLaplacian
 import DifferentialGeometry.Geometry.Curvature.Realized.CurvatureTensor
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
 
 set_option autoImplicit false
 

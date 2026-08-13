@@ -1,23 +1,6 @@
 import DifferentialGeometry.Analysis.Parabolic.QuasiLinear.TensorMaximalRegularity.SubcriticalSmallTime
 import DifferentialGeometry.Analysis.Parabolic.TimeSobolev.TimeOperator
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 noncomputable section
 
 open Bundle Manifold MeasureTheory Set Filter
@@ -49,9 +32,6 @@ private local instance : BorelSpace M := ⟨rfl⟩
 
 variable {g : SmoothRiemannianMetric I M} {r s : Nat}
 variable {a T : Real}
-
-
-
 
 def nonautMap (a : Real) {T : Real} (hT : 0 < T) (hT1 : T ≤ 1)
     (u0 : tensorHs (I := I) (M := M) g r s (a + 2))
@@ -91,8 +71,6 @@ theorem nonautMap_apply (hT : 0 < T) (hT1 : T ≤ 1)
         timeOp A1 hA1 C1 hC1
           (maxRegDuhamelSolFieldHa1 (I := I) (M := M) a hT hT1 u0 force) :=
   rfl
-
-
 
 omit [NeZero (Module.finrank ℝ E)] in
 theorem nonautMap_dist_le
@@ -210,8 +188,6 @@ theorem nonautMap_dist_le
     _ = ((C2 : Real) * (1 + T) + (C1 : Real) * (2 * Real.sqrt T)) *
           ‖force - force'‖ := by ring
 
-
-
 omit [NeZero (Module.finrank ℝ E)] in
 theorem nonautMap_contract
     (h_compact : IsCompactOperator (tensorResolventL2
@@ -243,9 +219,6 @@ theorem nonautMap_contract
       (h_compact := h_compact) (a := a) hT hT1 u0
       A2 hA2 C2 hC2 A1 hA1 C1 hC1 force force'
     simpa only [NNReal.coe_mk] using h
-
-
-
 
 omit [NeZero (Module.finrank ℝ E)] in
 theorem nonaut_strong_exists

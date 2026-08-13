@@ -28,19 +28,6 @@ open DifferentialGeometry.Geometry.Curvature
 
 set_option autoImplicit false
 
-
-
-
-
-
-
-
-
-
-
-
-
-
 noncomputable section
 
 open DifferentialGeometry.Geometry.Operator
@@ -75,10 +62,6 @@ def ricciGradGrad
     (g : SmoothRiemannianMetric I M) (u : M -> Real) : M -> Real :=
   fun x => Ric x (vec2 (gradientFun (I := I) g u x) (gradientFun (I := I) g u x))
 
-
-
-
-
 private theorem cotangentInner_eq_gen
     (g : SmoothRiemannianMetric I M) (x : M)
     (α β : Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) 1 x) :
@@ -110,8 +93,6 @@ theorem inner0S_differential1FormFun_pair_eq_grad_inner
   rw [cotangentSharp_differential1FormFun_eq_gradientFun,
     cotangentSharp_differential1FormFun_eq_gradientFun]
 
-
-
 theorem inner0S_one_eq_eval_sharp_right
     (g : SmoothRiemannianMetric I M) (x : M)
     (α β : Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) 1 x) :
@@ -130,14 +111,6 @@ theorem inner0S_differential1FormFun_eq_gradNormSq
   rw [inner0S_differential1FormFun_pair_eq_grad_inner]
   rfl
 
-
-
-
-
-
-
-
-
 def OneFormNormBochnerAt
     (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
     (g : SmoothRiemannianMetric I M)
@@ -151,11 +124,6 @@ def OneFormNormBochnerAt
         (fun y : M => inner0S (I := I) g y 1 (α y) (α y)) x =
     inner0S (I := I) g x 1 (roughAlpha x) (α x) +
       normSq0S (I := I) g x 2 (nablaAlpha x)
-
-
-
-
-
 
 def DifferentialOneFormCommutatorAt
     (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
@@ -171,8 +139,6 @@ def DifferentialOneFormCommutatorAt
         (differential1FormFun (I := I) u x) +
       ricciGradGrad (I := I) Ric g u x
 
-
-
 def OneFormCommutatorEvalAt
     (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
     (g : SmoothRiemannianMetric I M)
@@ -186,8 +152,6 @@ def OneFormCommutatorEvalAt
       differential1FormFun (I := I) (laplacian (I := I) cov g u) x
           (fun _ : Fin 1 => Y) +
         Ric x (vec2 Y (gradientFun (I := I) g u x))
-
-
 
 def traceNablaHessianForDLap
     (g : SmoothRiemannianMetric I M)
@@ -221,8 +185,6 @@ def TraceNablaHessianRealizesDLapAt
       differential1FormFun (I := I) (laplacian (I := I) cov g u) x
         (fun _ : Fin 1 => Y)
 
-
-
 def TraceNablaHessianRealizesDLapAtInBasis
     {Idx : Type*} [Fintype Idx]
     (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
@@ -237,8 +199,6 @@ def TraceNablaHessianRealizesDLapAtInBasis
     traceNablaHessianForDLapInBasis (I := I) basis gInv nabla2Du Y =
       differential1FormFun (I := I) (laplacian (I := I) cov g u) x
         (fun _ : Fin 1 => Y)
-
-
 
 theorem TraceNablaHessianRealizesDLapAt.toInBasis
     {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
@@ -314,12 +274,6 @@ private theorem freezeLastTwo0S3_eq_curry {x : M}
     fin_cases a <;> rfl
   simp only [component0S_apply]
   rw [hslots, freezeLastTwo0S3_apply, curry_three_apply_vec2]
-
-
-
-
-
-
 
 theorem extDeriv_metricTrace_eq_traceNabla
     [T2Space M]
@@ -401,13 +355,6 @@ theorem extDeriv_metricTrace_eq_traceNabla
   rw [hzeroInner, zero_add] at hinner
   simpa using hinner
 
-
-
-
-
-
-
-
 theorem traceNablaHessianRealizesDLapAt_of_lapTrace
     [T2Space M]
     (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
@@ -442,8 +389,6 @@ theorem traceNablaHessianRealizesDLapAt_of_lapTrace
   rw [hfun]
   simpa [hX] using htrace.symm
 
-
-
 theorem lapTrace_eq_direct
     (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
     (g : SmoothRiemannianMetric I M)
@@ -458,8 +403,6 @@ theorem lapTrace_eq_direct
   intro y
   exact ScalarLaplacianRealizesTraceAt.eq_trace (I := I) cov g u (Hess y) (htrace y)
 
-
-
 theorem lapTrace_eq_pair_of_traceAt
     (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
     (g : SmoothRiemannianMetric I M)
@@ -473,8 +416,6 @@ theorem lapTrace_eq_pair_of_traceAt
         metricTracePair0SAt (I := I) g (Hess y) := by
   intro y
   rw [lapTrace_eq_direct (I := I) cov g u Hess htrace y, scalarLapTraceAt]
-
-
 
 theorem traceNablaHessianRealizesDLapAt_of_traceAt
     [T2Space M]
@@ -496,8 +437,6 @@ theorem traceNablaHessianRealizesDLapAt_of_traceAt
     nablaDuSec nabla2DuSec hnabla
     (lapTrace_eq_direct (I := I) cov g u nablaDuSec htrace) x
 
-
-
 def OneFormRicciTraceCommAt
     {Idx : Type*} [Fintype Idx]
     (g : SmoothRiemannianMetric I M)
@@ -510,10 +449,6 @@ def OneFormRicciTraceCommAt
     Prop :=
   OneFormRicciTraceCommWithVectorAt (I := I) Ric basis gInv
     (gradientFun (I := I) g u x) nabla2Du
-
-
-
-
 
 def oneFormRicciTraceComm_coordAt
     (g : SmoothRiemannianMetric I M)
@@ -543,12 +478,6 @@ theorem oneFormRicciTraceComm_coordAt_iff
           nabla2Du :=
   Iff.rfl
 
-
-
-
-
-
-
 def curvatureTraceDuAt
     {Idx : Type*} [Fintype Idx]
     (Rm13 : Tensor13Section (I := I) (M := M))
@@ -558,8 +487,6 @@ def curvatureTraceDuAt
     (Y : TangentSpace I x) : Real :=
   curvatureTraceOneFormAt (I := I) Rm13
     (differential1FormFun (I := I) u x) basis gInv Y
-
-
 
 def CurvatureTraceDuEqRicciGradAt
     {Idx : Type*} [Fintype Idx]
@@ -586,9 +513,6 @@ theorem differential1FormFun_eq_metric_dual_gradientFun
     cotangentToDual_dualToCotangent_gen, tangentFlatLinear_apply_gen]
   exact (inner_gradientFun (I := I) g u x V).symm
 
-
-
-
 theorem curvatureTraceDuEqRicciGradAt_of_metric_dual
     {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
     (g : SmoothRiemannianMetric I M)
@@ -606,8 +530,6 @@ theorem curvatureTraceDuEqRicciGradAt_of_metric_dual
     (gradientFun (I := I) g u x) hinv hRic hSkew
     (differential1FormFun_eq_metric_dual_gradientFun (I := I) g u x)
 
-
-
 def nabla2DuCoord
     {Idx : Type*}
     {x : M} (basis : Module.Basis Idx Real (TangentSpace I x))
@@ -615,9 +537,6 @@ def nabla2DuCoord
       Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) 3 x)
     (i j k : Idx) : Real :=
   nabla2OneFormCoord (I := I) basis nabla2Du i j k
-
-
-
 
 def curvatureActionOnDuCoord
     {Idx : Type*}
@@ -666,11 +585,6 @@ theorem curvatureActionTraceEqualsRicGradCoord_of_tensor
       (differential1FormFun (I := I) u x) basis gInv
       (gradientFun (I := I) g u x) hcurv
 
-
-
-
-
-
 theorem oneFormRicciTraceComm_coordAt_of_third_comm
     (g : SmoothRiemannianMetric I M)
     (Ric : Tensor02Section (I := I) (M := M))
@@ -698,8 +612,6 @@ theorem oneFormRicciTraceComm_coordAt_of_third_comm
         simpa [CurvatureTraceDuEqRicciGradAt, curvatureTraceDuAt,
           curvatureTraceOneFormAt] using hcurv Y)
 
-
-
 theorem oneForm_commutator_pair_of_eval
     (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
     (g : SmoothRiemannianMetric I M)
@@ -719,8 +631,6 @@ theorem oneForm_commutator_pair_of_eval
   rw [cotangentSharp_differential1FormFun_eq_gradientFun]
   simpa [OneFormCommutatorEvalAt, ricciGradGrad, cotangentToDual_apply_gen] using
     hcomm (gradientFun (I := I) g u x)
-
-
 
 def HessianNormRealizesNablaDifferentialAt
     (g : SmoothRiemannianMetric I M)
@@ -755,9 +665,6 @@ def oneFormNablaNormCoord
       nablaAlphaX (vec2 (basis i) (basis j)) *
         nablaAlphaX (vec2 (basis k) (basis l))
 
-
-
-
 def OneFormNormSecondProductInBasis
     {Idx : Type*} [Fintype Idx]
     {x : M} (basis : Module.Basis Idx Real (TangentSpace I x))
@@ -780,11 +687,6 @@ def OneFormNormSecondProductInBasis
             gInv i k * gInv j l *
               nablaAlphaX (vec2 (basis i) (basis j)) *
                 nablaAlphaX (vec2 (basis k) (basis l)))
-
-
-
-
-
 
 def MetricTraceInnerProductRuleAt
     {Idx : Type*} [Fintype Idx]
@@ -822,8 +724,6 @@ theorem metricTrace_inner_product_rule
         (oneFormRoughInnerCoord (I := I) basis gInv alphaX nabla2Alpha +
           oneFormNablaNormCoord (I := I) basis gInv nablaAlphaX) :=
   h
-
-
 
 omit [FiniteDimensional ℝ E] in
 theorem metricTrace_inner_product_rule_of_second_product
@@ -874,9 +774,6 @@ theorem metricTrace_inner_product_rule_of_second_product
           simp_rw [mul_add, Finset.sum_add_distrib]
           simp_rw [Finset.mul_sum]
 
-
-
-
 def OneFormNormProductRuleInBasis
     {Idx : Type*} [Fintype Idx]
     (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
@@ -894,8 +791,6 @@ def OneFormNormProductRuleInBasis
         (fun y : M => inner0S (I := I) g y 1 (α y) (α y)) x =
     oneFormRoughInnerCoord (I := I) basis gInv (α x) nabla2Alpha +
       oneFormNablaNormCoord (I := I) basis gInv (nablaAlpha x)
-
-
 
 theorem rough_inner_eq_coord_of_trace
     {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
@@ -927,8 +822,6 @@ theorem rough_inner_eq_coord_of_trace
   rw [hrough_i]
   simp [cotangentToDual_apply_gen, mul_assoc]
 
-
-
 theorem nabla_norm_eq_coord
     {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
     (g : SmoothRiemannianMetric I M)
@@ -942,8 +835,6 @@ theorem nabla_norm_eq_coord
   simpa [oneFormNablaNormCoord, vec2] using
     Tensor0SBundle.normSq0S_two_eq_coord (I := I) (M := M) g x
       basis gInv hinv nablaAlphaX
-
-
 
 theorem oneForm_norm_product_rule_of_trace
     {Idx : Type*} [Fintype Idx]
@@ -968,11 +859,6 @@ theorem oneForm_norm_product_rule_of_trace
   unfold OneFormNormProductRuleInBasis ScalarLaplacianRealizesTraceAtInBasis at *
   rw [hlap, htrace]
   ring
-
-
-
-
-
 
 theorem oneForm_norm_product_rule_of_metric_compatible
     {Idx : Type*} [Fintype Idx]
@@ -999,8 +885,6 @@ theorem oneForm_norm_product_rule_of_metric_compatible
   oneForm_norm_product_rule_of_trace (I := I) cov g basis gInv
     alphaRaw nablaAlpha nabla2Alpha normSecond hlap htrace
 
-
-
 theorem oneForm_norm_second_product_of_metric_compatible
     {Idx : Type*} [Fintype Idx]
     (_cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
@@ -1023,10 +907,6 @@ theorem oneForm_norm_second_product_of_metric_compatible
       (alphaRaw x) (nablaAlpha x) nabla2Alpha normSecond :=
   metricTrace_inner_product_rule_of_second_product (I := I) basis gInv
     (alphaRaw x) (nablaAlpha x) nabla2Alpha normSecond hprod
-
-
-
-
 
 theorem oneForm_norm_bochner_coord
     {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
@@ -1074,8 +954,6 @@ theorem oneForm_norm_bochner_at
   oneForm_norm_bochner_coord (I := I) cov g basis gInv hinv
     α roughAlpha nablaAlpha nabla2Alpha hprod hrough
 
-
-
 theorem hessian_realizes_nabla_du
     (g : SmoothRiemannianMetric I M)
     (Hess nablaDu : (x : M) ->
@@ -1084,8 +962,6 @@ theorem hessian_realizes_nabla_du
     HessianNormRealizesNablaDifferentialAt (I := I) g Hess nablaDu x := by
   unfold HessianNormRealizesNablaDifferentialAt hessianNormSq
   rw [h]
-
-
 
 theorem hessian_norm_realizes_of_nabla_du
     {Idx : Type*} [Finite Idx]
@@ -1099,8 +975,6 @@ theorem hessian_norm_realizes_of_nabla_du
     HessianNormRealizesNablaDifferentialAt (I := I) g Hess nablaDu x :=
   hessian_realizes_nabla_du (I := I) g Hess nablaDu x
     (ext0S_basis (I := I) basis hcomp)
-
-
 
 theorem hessian_components_of_nabla_du
     {Idx : Type*} [Fintype Idx]
@@ -1149,11 +1023,6 @@ theorem roughLap_du_eq_d_lap_add_ric_of_comm
           (differential1FormFun (I := I) u x) +
         ricciGradGrad (I := I) Ric g u x :=
   hcomm
-
-
-
-
-
 
 theorem oneForm_ricci_identity_components
     {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
@@ -1206,12 +1075,6 @@ theorem oneForm_ricci_identity_components
           Ric x (vec2 Y (gradientFun (I := I) g u x)) := by
           rw [hdlapBasis Y]
 
-
-
-
-
-
-
 theorem one_form_ricci_trace_comm_of_lc
     {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
     (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
@@ -1248,8 +1111,6 @@ theorem one_form_ricci_trace_comm_of_lc
       simpa [CurvatureTraceDuEqRicciGradAt, curvatureTraceDuAt,
         curvatureTraceOneFormAt] using hcurv Y)
 
-
-
 theorem oneForm_commutator_eval_of_components
     {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
     (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
@@ -1280,8 +1141,6 @@ theorem oneForm_commutator_eval_of_components
   oneForm_ricci_identity_components (I := I) cov g Ric Rm13 u roughDu
     basis gInv duSec nablaDu nablaDuSec nabla2Du
     hinv hRm hRic hdu hnabla hnabla2 hrough hdlap hcomm
-
-
 
 theorem oneForm_commutator_eval_of_lc
     {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
@@ -1320,8 +1179,6 @@ theorem oneForm_commutator_eval_of_lc
       duSec nablaDu nablaDuSec nabla2Du
       hinv hRm hRic hdu hnabla hnabla2 hsymm hthird hSkew)
 
-
-
 theorem roughLap_du_eq_d_lap_add_ric
     (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
     (g : SmoothRiemannianMetric I M)
@@ -1337,8 +1194,6 @@ theorem roughLap_du_eq_d_lap_add_ric
           (differential1FormFun (I := I) u x) +
         ricciGradGrad (I := I) Ric g u x :=
   oneForm_commutator_pair_of_eval (I := I) cov g Ric u roughDu x hcomm
-
-
 
 theorem half_laplacian_gradNormSq_eq
     {Idx : Type*} [Fintype Idx]
@@ -1377,11 +1232,6 @@ theorem half_laplacian_gradNormSq_eq
   rw [h_norm, h_comm, h_hess]
   rw [inner0S_differential1FormFun_pair_eq_grad_inner]
   ring
-
-
-
-
-
 
 theorem fundamental_bochner
     {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
@@ -1454,9 +1304,6 @@ theorem fundamental_bochner
   · exact oneForm_commutator_pair_of_eval (I := I) cov g Ric u roughDu x hcomm
   · exact hessian_norm_realizes_of_nabla_du (I := I) g basis Hess nablaDu hHessComp
 
-
-
-
 theorem fundamental_bochner_of_terms
     {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
     (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
@@ -1515,12 +1362,6 @@ theorem fundamental_bochner_of_terms
       nablaDuSec nabla2Du normSecond hsecond
   · exact hessian_components_of_nabla_du (I := I) cov basis X duSec Hess
       nablaDu hfields hHess hnabla
-
-
-
-
-
-
 
 theorem fundamental_bochner_of_terms_of_normSecond_realizes
     {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
@@ -1601,8 +1442,6 @@ theorem fundamental_bochner_of_terms_of_normSecond_realizes
   · exact hessian_components_of_nabla_du (I := I) cov basis X duSec Hess
       nablaDu hfields hHess hnabla
 
-
-
 theorem fundamental_bochner_of_components
     {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
     (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
@@ -1659,12 +1498,6 @@ theorem fundamental_bochner_of_components
   exact oneForm_commutator_eval_of_components (I := I) cov g Ric Rm13 u roughDu
     basis gInvAt duSec nablaDu nablaDuSec nabla2Du
     hinv hRm13 hRic13 hdu hnabla hnabla2 hrough hdlap hricciComm
-
-
-
-
-
-
 
 theorem fundamental_bochner_of_lc
     {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
@@ -1743,9 +1576,6 @@ theorem fundamental_bochner_of_lc
       basis
     gInvAt duSec nablaDu nablaDuSec nabla2Du
     hinv hRm13 hRic13 hdu hnabla hnabla2 hsymm hthird hSkew
-
-
-
 
 theorem fundamental_bochner_of_lc_terms
     {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
@@ -1832,9 +1662,6 @@ theorem fundamental_bochner_of_lc_terms
       (DifferentialGeometry.Geometry.Connection.leviCivitaConnectionOfMetric (I := I) g) basis X
         duSec Hess
       nablaDu hfields hHess hnabla
-
-
-
 
 theorem fundamental_bochner_of_lc_terms_of_normSecond_realizes
     {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
@@ -1945,8 +1772,6 @@ theorem fundamental_bochner_of_lc_terms_of_normSecond_realizes
       (DifferentialGeometry.Geometry.Connection.leviCivitaConnectionOfMetric (I := I) g) basis X
         duSec Hess
       nablaDu hfields hHess hnabla
-
-
 
 theorem fundamental_bochner_of_lc_terms_of_rm04_skew
     {Idx : Type*} [Fintype Idx] [DecidableEq Idx]

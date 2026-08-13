@@ -110,7 +110,6 @@ example :
         CategoryTheory.CategoryStruct.id (deRhamCohomology (IM := IM) (M := M) k)) :=
   @DifferentialGeometry.DifferentialForm.pullbackCohomologyMap_id
 
--- comp laws: assert the declaration types via a silent definitional-equality check
 run_cmd do
   let env ← getEnv
   let names := ["DifferentialGeometry.DifferentialForm.pullbackCochainMap_comp",

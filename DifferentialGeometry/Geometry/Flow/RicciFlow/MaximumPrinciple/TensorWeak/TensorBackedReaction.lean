@@ -2,19 +2,9 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.MaximumPrinciple.TensorWeak.
 import Mathlib.Analysis.Normed.Module.Multilinear.Curry
 open DifferentialGeometry.PDE.RicciFlow
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
 
 set_option autoImplicit false
 set_option backward.isDefEq.respectTransparency false
-
-
-
-
-
-
-
-
-
 
 namespace DifferentialGeometry.PDE.RicciFlow
 
@@ -29,8 +19,6 @@ variable {H : Type*} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 variable [IsManifold I 1 M] [IsManifold I 2 M]
-
-
 
 def Tensor02RealizesRawAt
     (A : RawTwoTensorField (I := I) (M := M)) (x : M)
@@ -50,8 +38,6 @@ def rawRightLM
   map_smul' := by
     intro c y
     simpa [smul_eq_mul] using hA.smul_right c v y
-
-
 
 def rawRightCLM
     (A : RawTwoTensorField (I := I) (M := M)) {x : M}
@@ -107,15 +93,11 @@ def rawCurriedCLM
   ⟨rawCurriedLM (I := I) (M := M) A hA,
     LinearMap.continuous_of_finiteDimensional _⟩
 
-
-
 def tensor02OfRawAt
     (A : RawTwoTensorField (I := I) (M := M)) (x : M)
     (hA : TwoTensorBilinearAt (I := I) (M := M) A x) :
     Tensor02At (I := I) (M := M) x :=
   (rawCurriedCLM (I := I) (M := M) A hA).uncurryLeft
-
-
 
 omit [IsManifold I 1 M] [IsManifold I 2 M] in
 theorem tensor02OfRawAt_realizes
@@ -168,9 +150,6 @@ abbrev Tensor02ReactionAt : Type _ :=
   Real -> SmoothRiemannianMetric I M -> (x : M) ->
     Tensor02At (I := I) (M := M) x -> Tensor02At (I := I) (M := M) x
 
-
-
-
 def Tensor02ReactionAt.toRawSymm
     (N : Tensor02ReactionAt (I := I) (M := M)) :
     TwoTensorReaction (I := I) (M := M) :=
@@ -200,8 +179,6 @@ theorem Tensor02ReactionAt.toRawSymm_eval_of_bilin
         (vec2 (I := I) v w) := by
   unfold Tensor02ReactionAt.toRawSymm
   rw [dif_pos (rawSym2_bilin (I := I) (M := M) hA)]
-
-
 
 omit [IsManifold I 1 M] [IsManifold I 2 M] in
 theorem Tensor02ReactionAt.toRawSymm_symmInputOn

@@ -1,17 +1,7 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Basic.Core
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
 
 set_option autoImplicit false
-
-
-
-
-
-
-
-
-
 
 noncomputable section
 
@@ -69,8 +59,6 @@ private theorem time_patch
   intro t ht y hy
   have hty : (t, y) ∈ V ×ˢ W := ⟨ht, hy⟩
   exact hVW hty
-
-
 
 omit [SigmaCompactSpace M] in
 theorem scalar_unif

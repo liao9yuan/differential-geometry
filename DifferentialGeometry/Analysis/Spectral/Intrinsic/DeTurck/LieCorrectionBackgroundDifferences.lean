@@ -3,16 +3,7 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.AppCcDropIteratedGr
 open DifferentialGeometry.Analysis.Sobolev
 open DifferentialGeometry.Analysis.Spectral
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Connection
-
-/-!
-# Background differences of the zeroth-order DeTurck correction
-
-The vector, insertion, and connection pieces share the same moving trace and
-connection passengers.  Their background differences therefore refold into
-linear operator-field expressions with the cancellation exposed.
--/
 
 noncomputable section
 
@@ -135,8 +126,6 @@ private lemma reindexCoeffGen_sub (g₀ : SmoothRiemannianMetric I M)
   rw [ContinuousLinearMap.sub_apply, reindexCoeffFibGen_apply, reindexCoeffFibGen_apply,
     reindexCoeffFibGen_apply, ContinuousLinearMap.sub_apply]
 
-/-- Inserting the difference of the correction endomorphisms is exactly the
-difference of the two connection-after-vector-field operators. -/
 theorem lc0NEndoSec_sub_insert_eq_lc0CdVField_sub
     (g₀ g₁ gB : SmoothRiemannianMetric I M) :
     endoSlotZeroCcTensor (I := I) (M := M) g₀ 0
@@ -150,8 +139,6 @@ theorem lc0NEndoSec_sub_insert_eq_lc0CdVField_sub
   abel
 
 omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
-/-- The insertion-field background difference is the symmetrized insertion
-of the single endomorphism-section difference. -/
 theorem lc0InsertField_sub_eq_nEndoInsert
     (g₀ g₁ gB : SmoothRiemannianMetric I M) :
     lc0InsertField (I := I) (M := M) g₀ g₁ gB -
@@ -173,8 +160,6 @@ theorem lc0InsertField_sub_eq_nEndoInsert
   abel
 
 omit [NeZero (Module.finrank ℝ E)] in
-/-- The DeTurck covector background difference is the common moving trace
-applied to the lowered-connection background difference. -/
 theorem lc0VFlat_sub_eq_trace_comp_kappa_sub
     (g₀ g₁ gB : SmoothRiemannianMetric I M) :
     lc0VFlat (I := I) (M := M) g₀ g₁ g₀ -
@@ -187,8 +172,6 @@ theorem lc0VFlat_sub_eq_trace_comp_kappa_sub
   rfl
 
 omit [NeZero (Module.finrank ℝ E)] in
-/-- The vector-insertion background difference is the common moving trace
-applied to the slot extension of the DeTurck-covector difference. -/
 theorem lc0IVField_sub_eq_trace_comp_slotExtend_vflat_sub
     (g₀ g₁ gB : SmoothRiemannianMetric I M) :
     lc0IVField (I := I) (M := M) g₀ g₁ g₀ -
@@ -202,8 +185,6 @@ theorem lc0IVField_sub_eq_trace_comp_slotExtend_vflat_sub
   rfl
 
 omit [NeZero (Module.finrank ℝ E)] in
-/-- The connection-after-vector-field background difference is the common
-connection-difference passenger acted on by the vector-insertion difference. -/
 theorem lc0CdVField_sub_eq_comp_connDiff
     (g₀ g₁ gB : SmoothRiemannianMetric I M) :
     lc0CdVField (I := I) (M := M) g₀ g₁ g₀ -

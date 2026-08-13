@@ -4,14 +4,6 @@ import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurckCoefficients.LieO
 open DifferentialGeometry.Analysis.Sobolev
 open DifferentialGeometry.Analysis.Spectral
 
-
-
-
-
-
-
-
-
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
@@ -59,8 +51,6 @@ private theorem unitModel_add_local
     rw [hsec]
     rfl]
   rw [Tensor0SSpace.toModel_add]
-
-
 
 theorem lieSlope_eq_arms
     (g₀ g_bg : SmoothRiemannianMetric I M) (T T' : SmoothCcTensor g₀ 0 2)

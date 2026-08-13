@@ -2,9 +2,6 @@ import DifferentialGeometry.Tensor.RSTensor.NablaOnTensors.RawDefs.MCovariant
 import DifferentialGeometry.Tensor.Multilinear.BundleSmoothEvalRealized
 import DifferentialGeometry.Tensor.RSTensor.Derivation.NablaOnTensors
 
-
-
-
 namespace DifferentialGeometry
 namespace Tensor0SBundle
 
@@ -12,7 +9,8 @@ noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
 
-open Bundle Set IsManifold ContinuousLinearMap VectorField Filter Function DifferentialGeometry.TensorLieDeriv
+open Bundle Set IsManifold ContinuousLinearMap VectorField Filter Function
+    DifferentialGeometry.TensorLieDeriv
 open scoped Manifold Topology Bundle ContDiff
 
 variable {𝕜 : Type*} [NontriviallyNormedField 𝕜]

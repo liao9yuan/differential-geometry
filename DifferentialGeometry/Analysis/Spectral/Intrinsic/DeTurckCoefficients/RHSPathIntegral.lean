@@ -3,24 +3,14 @@ import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurckCoefficients.RHST
 open DifferentialGeometry.Analysis.Sobolev DifferentialGeometry.PDE.RicciFlow
 open DifferentialGeometry.Analysis.Spectral
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Connection
-
-
-
-
-
-
-
-
-
-
 
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
 
-open Set Bundle Manifold DifferentialGeometry.Tensor0SBundle ContinuousLinearMap MeasureTheory intervalIntegral
+open Set Bundle Manifold DifferentialGeometry.Tensor0SBundle ContinuousLinearMap MeasureTheory
+    intervalIntegral
 open scoped Topology Manifold BigOperators ContDiff
 
 namespace DifferentialGeometry.Analysis.Spectral.DeTurckCoefficients
@@ -77,8 +67,6 @@ private theorem unitModel_sub_app
       ContinuousLinearMap.sub_apply, Tensor0SBundle.Tensor0SSpace.toModel_sub]
   rw [hfun, ContinuousMultilinearMap.sub_apply]
 
-
-
 def realizedRHSArm
     (g₀ g_bg : SmoothRiemannianMetric I M) (T : SmoothCcTensor g₀ 0 2)
     {δ : ℝ} (hδ_lt : δ < 1)
@@ -128,8 +116,6 @@ theorem rhsTop_path_joint
     SmoothCcTensor.toSection_sub, ContMDiffSection.coe_sub, Pi.sub_apply,
     SmoothCcTensor.toSection_add, ContMDiffSection.coe_add, Pi.add_apply]
 
-
-
 def rhsTopPathIntegral
     (g₀ g_bg : SmoothRiemannianMetric I M) (T T' : SmoothCcTensor g₀ 0 2)
     {δ : ℝ} (hδ_lt : δ < 1)
@@ -146,8 +132,6 @@ def rhsTopPathIntegral
       exact Icc_subset_realizedSmallSet hδ_lt hδ'_lt)
     (rhsTop_path_joint (I := I) (M := M) g₀ g_bg T T' hδ hδ')
 
-
-
 def rhsLow0PathIntegral
     (g₀ g_bg : SmoothRiemannianMetric I M) (T T' : SmoothCcTensor g₀ 0 2)
     {δ : ℝ} (hδ_lt : δ < 1)
@@ -163,8 +147,6 @@ def rhsLow0PathIntegral
       exact Icc_subset_realizedSmallSet hδ_lt hδ'_lt)
     (rhsLow0_path_joint (I := I) (M := M) g₀ g_bg T T' hδ hδ')
 
-
-
 def rhsLow1PathIntegral
     (g₀ g_bg : SmoothRiemannianMetric I M) (T T' : SmoothCcTensor g₀ 0 2)
     {δ : ℝ} (hδ_lt : δ < 1)
@@ -179,8 +161,6 @@ def rhsLow1PathIntegral
       rw [Set.uIcc_of_le zero_le_one]
       exact Icc_subset_realizedSmallSet hδ_lt hδ'_lt)
     (rhsLow1_path_joint (I := I) (M := M) g₀ g_bg T T' hδ hδ')
-
-
 
 theorem rhsChartSum_one
     (g₀ g_bg : SmoothRiemannianMetric I M) (T T' : SmoothCcTensor g₀ 0 2)
@@ -225,8 +205,6 @@ theorem rhsChartSum_one
       simp only [Matrix.cons_val_zero, Matrix.cons_val_one, chartBasisVecFiber_self]
     _ = _ := unitModel_basis_expand_two (I := I) (M := M) g₀
       (realizedRHSArm (I := I) g₀ g_bg T hδ_lt hδ) x ![v, w]
-
-
 
 theorem rhsChartSum_zero
     (g₀ g_bg : SmoothRiemannianMetric I M) (T T' : SmoothCcTensor g₀ 0 2)

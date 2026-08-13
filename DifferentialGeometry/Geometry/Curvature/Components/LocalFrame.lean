@@ -19,12 +19,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 variable {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
 variable {x : M}
 
-
-
-
-
-
-
 section LocalFrame
 
 variable {u : Set M}
@@ -70,8 +64,6 @@ theorem ricciTraceAt_of_frame
   simpa [RicciTensorRealizesRm04TraceInFrame, tensor02ToField, tensor04ToField,
     IsLocalFrameOn.toBasisAt_coe] using hRic x X Y
 
-
-
 def RicciTensorRealizesRm04FirstTraceInFrame
     (Ric : Tensor02Section (I := I) (M := M))
     (Rm04 : Tensor04Section (I := I) (M := M))
@@ -81,8 +73,6 @@ def RicciTensorRealizesRm04FirstTraceInFrame
     Ric x (vec2 (frame i x) (frame j x)) =
       ∑ k : Idx, ∑ l : Idx,
         gInv x k l * Rm04 x (vec4 (frame k x) (frame i x) (frame j x) (frame l x))
-
-
 
 omit [DecidableEq Idx] in
 theorem ricciFirstTraceAt_of_frame

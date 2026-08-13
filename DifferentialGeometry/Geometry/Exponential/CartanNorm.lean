@@ -7,17 +7,8 @@ import DifferentialGeometry.Geometry.Exponential.JacobiVariation
 import DifferentialGeometry.Geometry.Exponential.MinimizingGeodesic
 import DifferentialGeometry.Geometry.Metric.InnerExpansion
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
 
 set_option autoImplicit false
-
-/-!
-# Constant-curvature exponential differential norm transfer
-
-The scalar Cartan transfer theorem is applied to the intrinsic Jacobi
-variations of two curvature-one manifolds.  A metric-preserving linear
-equivalence at the launch points seeds matching parallel orthonormal frames.
--/
 
 noncomputable section
 
@@ -64,9 +55,6 @@ variable
 
 omit [T2Space (TangentBundle I M)]
     [T2Space (TangentBundle I' M')] [ConnectedSpace M] [ConnectedSpace M'] in
-/-- A linear isometry between the launch tangent metrics transfers the squared
-norm of the intrinsic exponential differential between curvature-one
-manifolds. -/
 theorem expDiff_sq_xfer
     (g : SmoothRiemannianMetric I M)
     (hEnorm : IsMetricNorm (I := I) (M := M) g)

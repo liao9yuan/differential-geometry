@@ -1,18 +1,8 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.Metric.Covariant
 open DifferentialGeometry.PDE.RicciFlow
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
 
 set_option autoImplicit false
-
-
-
-
-
-
-
-
-
 
 noncomputable section
 
@@ -34,12 +24,6 @@ section Components
 
 variable {Idx : Type*} [Fintype Idx]
 variable {u : Set M}
-
-
-
-
-
-
 
 omit [SigmaCompactSpace M] in
 theorem inverseMetricEvolutionEquationInFrame_of_inverse_components
@@ -86,11 +70,6 @@ theorem inverseMetricEvolutionEquationInFrame_of_inverse_components
       j
   exact (hdt t x i j).congr_deriv hsolve
 
-
-
-
-
-
 omit [SigmaCompactSpace M] in
 theorem inverseMetricEvolution_of_metricFrameTimeRegularity
     [DecidableEq Idx]
@@ -111,8 +90,6 @@ theorem inverseMetricEvolution_of_metricFrameTimeRegularity
     hreg.nondegenerateGram
     hreg.uniqueTimeDerivatives
 
-
-
 theorem coordInvLocal
     {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -128,11 +105,6 @@ theorem coordInvLocal
       DifferentialGeometry.Tensor.Coordinates.coordinateFrameAt_basis_apply] using (hbasis i j).1
   · simpa [coordInv, metricCompInFrame,
       DifferentialGeometry.Tensor.Coordinates.coordinateFrameAt_basis_apply] using (hbasis i j).2
-
-
-
-
-
 
 theorem coordInvEvol
     {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
@@ -277,8 +249,6 @@ theorem coordInvEvol
           (A (Pi.single (M := fun _ : DifferentialGeometry.Tensor.Coordinates.CoordinateIdx E =>
             Real) j (1 : Real))))
       hEq |>.symm
-
-
 
 omit [SigmaCompactSpace M] in
 theorem evol_inverse_metric_inFrame

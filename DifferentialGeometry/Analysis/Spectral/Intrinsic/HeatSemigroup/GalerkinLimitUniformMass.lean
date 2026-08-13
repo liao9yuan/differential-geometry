@@ -3,8 +3,8 @@ import DifferentialGeometry.Analysis.Spectral.Intrinsic.HeatSemigroup.GalerkinFo
 import DifferentialGeometry.Analysis.Parabolic.QuasiLinear.TensorMaximalRegularity.SolutionSpace
 import DifferentialGeometry.Analysis.Parabolic.MaximalRegularity.Operator
 import Mathlib.Topology.Algebra.InfiniteSum.Real
-open DifferentialGeometry.Analysis.Sobolev.CSupTensor DifferentialGeometry.Analysis.Sobolev.IntrinsicSobolev.SmoothCcTensorHs
-open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Analysis.Sobolev.CSupTensor
+    DifferentialGeometry.Analysis.Sobolev.IntrinsicSobolev.SmoothCcTensorHs
 open DifferentialGeometry.Geometry.Curvature
 
 noncomputable section

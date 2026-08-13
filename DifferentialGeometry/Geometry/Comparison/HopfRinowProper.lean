@@ -3,16 +3,8 @@ import DifferentialGeometry.Geometry.Metric.TensorInner.TangentNormDiamond
 import DifferentialGeometry.Geometry.Exponential.MinimizingGeodesic
 import DifferentialGeometry.Geometry.Metric.Completeness
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
 
 set_option autoImplicit false
-
-
-
-
-
-
-
 
 noncomputable section
 
@@ -35,8 +27,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-/-- A finite-radius closed ball for the extended distance of a complete
-Riemannian metric is compact, without a connectedness assumption. -/
 theorem closedEBall_isCompact
     {g : SmoothRiemannianMetric I M}
     (hg : RiemannianMetricComplete (I := I) g)

@@ -1,7 +1,6 @@
 import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.RiemannianFiberNormSq.RiemannianFiberNormSqRiemannOpDualFrameParseval
 open DifferentialGeometry.Analysis.Elliptic
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
 
 
 noncomputable section
@@ -66,7 +65,8 @@ noncomputable def coframeS
   (ContinuousMultilinearMap.mkPiAlgebra ℝ (Fin s) ℝ).compContinuousLinearMap
     (fun k : Fin s => g.inner x (e (J k)))
 
-omit [FiniteDimensional ℝ E] [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [T2Space M] [BoundarylessManifold I M] in
+omit [FiniteDimensional ℝ E] [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [T2Space M]
+    [BoundarylessManifold I M] in
 lemma coframeS_apply
     (g : SmoothRiemannianMetric I M) (x : M) (s : ℕ)
     {n : ℕ} (e : Fin n → TangentSpace I x) (J : Fin s → Fin n)
@@ -129,7 +129,8 @@ lemma fiberNormSqComponent_dualTensorFrameS
   refine Finset.prod_congr rfl (fun k _ => ?_)
   rw [horth (J k) (J' k)]
 
-omit [FiniteDimensional ℝ E] [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [T2Space M] [BoundarylessManifold I M] in
+omit [FiniteDimensional ℝ E] [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [T2Space M]
+    [BoundarylessManifold I M] in
 lemma tensorS_coframe_expansion
     (g : SmoothRiemannianMetric I M) (x : M) (s : ℕ)
     {n : ℕ} (e : Fin n → TangentSpace I x)

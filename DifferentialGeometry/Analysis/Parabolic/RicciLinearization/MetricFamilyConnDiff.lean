@@ -3,16 +3,8 @@ import DifferentialGeometry.Geometry.Curvature.CovGradRoughLap.ConnDiffCovGradBr
 import DifferentialGeometry.Analysis.Parabolic.DeTurckLinearization.DeTurckVFChartCoord
 open DifferentialGeometry.Tensor.Multilinear
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Connection
 open DifferentialGeometry.Geometry.Operator
-
-
-
-
-
-
-
 
 noncomputable section
 
@@ -288,8 +280,6 @@ private theorem connDiff_app_joint
       exact (Bcmm.equivFun.symm_apply_apply _).symm
     · exact (Bcmm.equivFun.symm_apply_apply _).symm
   exact hfinal
-
-
 
 omit [NeZero (Module.finrank ℝ E)] in
 omit [SigmaCompactSpace M] in

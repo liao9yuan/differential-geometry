@@ -2,8 +2,6 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.RecoveryEndomorphis
 open DifferentialGeometry.Tensor.Multilinear
 open DifferentialGeometry.Analysis.Elliptic
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
-
 
 noncomputable section
 
@@ -19,7 +17,8 @@ namespace TensorSpectral
 
 open DifferentialGeometry.Integral.L2
 
-open DifferentialGeometry.PDE.RicciFlow DifferentialGeometry.Analysis.Sobolev DifferentialGeometry.Analysis.Spectral
+open DifferentialGeometry.PDE.RicciFlow DifferentialGeometry.Analysis.Sobolev
+    DifferentialGeometry.Analysis.Spectral
 open DifferentialGeometry.Analysis.Spectral.DeTurck
 open DifferentialGeometry.Analysis.Sobolev.TensorHilbert
 
@@ -281,12 +280,6 @@ private lemma connDiffSection_eq_cometricRaiseSlot0Field (g₀ g₁ : SmoothRiem
     Matrix.cons_val_two, Matrix.tail_cons]
   rw [g₀.symm x u (PDE.DeTurck.connDiff (I := I) g₁ g₀ x (YZ 0) (YZ 1))]
 
-/-!
-The lowered connection-difference tensor is the covariant realization of the
-usual `(1,2)` connection-difference section.  Exporting the pointwise norm
-identity here avoids rebuilding this realization inside every low-regularity
-coefficient estimate.
--/
 omit [NeZero (Module.finrank ℝ E)] in
 theorem connLow_rfns
     (g₀ g₁ : SmoothRiemannianMetric I M) (n : ℕ) (x : M) :

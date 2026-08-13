@@ -16,7 +16,6 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.SmoothSection.SmoothTensorA
 import DifferentialGeometry.Analysis.Spectral.Tensor.EllipticBridge.Representation.TensorReprFromFrame
 import DifferentialGeometry.Analysis.Calculus.AnisotropicJointContDiff
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
 
 noncomputable section
 

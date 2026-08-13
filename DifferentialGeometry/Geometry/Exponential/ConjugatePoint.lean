@@ -1,34 +1,8 @@
 import DifferentialGeometry.Geometry.Metric.TensorInner.TangentNormDiamond
 import DifferentialGeometry.Geometry.Exponential.JacobiVariation
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
 
 set_option autoImplicit false
-
-/-!
-# Conjugate vectors of the intrinsic exponential
-
-The conjugate-point interface of the option-1 route (brick N of
-`Geometry/Comparison/VOLUME_COMPARISON_PLAN.md`), in the form ruled on
-2026-07-19: the **definition** is differential-singularity of the intrinsic
-exponential in its vector slot, and the **Jacobi characterization** is a
-bridge theorem through `intrinsic_jacobi_one`.
-
-* `IsConjVec g hEnorm p x` — the vector-slot differential of
-  `expMapIntrinsic g hEnorm p` at `x` is not injective (singular, since the
-  fibers are finite-dimensional of equal dimension).
-* `isConjVec_iff` — singularity ⟺ a nonzero kernel vector.
-* `isConjVec_iff_jacobi` — singularity ⟺ some variation Jacobi field
-  `∂ₛ|₀ intrinsicGeodesic p (x + s•w) t` with `w ≠ 0` vanishes at `t = 1`.
-  This is the hinge to the variational theory: by `intrinsic_jacobi` the
-  variation field is Jacobi along the whole geodesic, and by `jacobi_unique`
-  (`Variation/JacobiCoord.lean`) it is the *only* Jacobi field with its
-  initial data.
-
-No smallness or injectivity-radius hypothesis appears anywhere: the intrinsic
-exponential is globally smooth (`intrinsicExp_smooth`), so the interface is
-meaningful at every scale.
--/
 
 noncomputable section
 
@@ -532,9 +506,6 @@ private theorem exp_pair_reverse
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-/-- **Conjugate vector.**  `x` is conjugate for the exponential at `p` when
-the vector-slot differential of the intrinsic exponential at `x` is not
-injective. -/
 def IsConjVec
     [PseudoEMetricSpace M] [RiemannianBundle (fun (x : M) ↦ TangentSpace I x)]
     [IsRiemannianManifold I M] [CompleteSpace M]
@@ -550,7 +521,6 @@ def IsConjVec
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
 omit [T2Space (TangentBundle I M)] [CompleteSpace E] in
-/-- **Singularity ⟺ nonzero kernel vector.** -/
 theorem isConjVec_iff
     [PseudoEMetricSpace M] [RiemannianBundle (fun (x : M) ↦ TangentSpace I x)]
     [IsRiemannianManifold I M] [CompleteSpace M]
@@ -591,8 +561,6 @@ theorem isConjVec_iff
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
 omit [T2Space (TangentBundle I M)] in
-/-- Conjugacy of an intrinsic exponential vector is invariant under reversing
-the corresponding unit-time geodesic segment. -/
 theorem conjVec_reverse
     [PseudoEMetricSpace M] [RiemannianBundle (fun (x : M) ↦ TangentSpace I x)]
     [IsRiemannianManifold I M] [CompleteSpace M]
@@ -671,10 +639,6 @@ theorem conjVec_reverse
 omit [T2Space (TangentBundle I M)] [CompleteSpace E] in
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-/-- **Jacobi characterization of conjugate vectors.**  `x` is conjugate iff
-some variation Jacobi field with nonzero direction `w` vanishes at time one:
-`∂ₛ|₀ intrinsicGeodesic p (x + s•w) 1 = 0`.  Bridge through
-`intrinsic_jacobi_one`. -/
 theorem isConjVec_iff_jacobi
     [PseudoEMetricSpace M] [RiemannianBundle (fun (x : M) ↦ TangentSpace I x)]
     [IsRiemannianManifold I M] [CompleteSpace M]
@@ -695,10 +659,6 @@ theorem isConjVec_iff_jacobi
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
 omit [T2Space (TangentBundle I M)] [CompleteSpace E] in
-/-- **The variation Jacobi field vanishes at time zero.**  Every geodesic of
-the variation starts at `p`, so the `s`-derivative at `t = 0` is zero.  With
-`isConjVec_iff_jacobi` this gives the classical phrasing: a conjugate vector
-carries a nontrivial Jacobi field vanishing at both ends of the segment. -/
 theorem jacobiVar_zero
     [PseudoEMetricSpace M] [RiemannianBundle (fun (x : M) ↦ TangentSpace I x)]
     [IsRiemannianManifold I M] [CompleteSpace M]
@@ -719,9 +679,6 @@ theorem jacobiVar_zero
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
 omit [T2Space (TangentBundle I M)] [CompleteSpace E] in
-/-- Rescaling the launch vector and evaluating at time one agrees, after
-differentiation, with evaluating the rescaled variation at the original
-time. -/
 theorem jacobiVar_smul
     [PseudoEMetricSpace M] [RiemannianBundle (fun (x : M) ↦ TangentSpace I x)]
     [IsRiemannianManifold I M] [CompleteSpace M]
@@ -764,8 +721,6 @@ theorem jacobiVar_smul
 omit [T2Space (TangentBundle I M)] [CompleteSpace E] in
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-/-- A conjugate vector at `c • u` produces a nontrivial intrinsic Jacobi
-variation along the geodesic launched by `u` that vanishes at time `c`. -/
 theorem conjVec_jacobi_at
     [PseudoEMetricSpace M] [RiemannianBundle (fun (x : M) ↦ TangentSpace I x)]
     [IsRiemannianManifold I M] [CompleteSpace M]

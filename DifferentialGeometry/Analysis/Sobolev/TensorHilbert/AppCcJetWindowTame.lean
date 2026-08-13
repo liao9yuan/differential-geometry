@@ -5,18 +5,19 @@ open DifferentialGeometry.Analysis.Sobolev
 open DifferentialGeometry.Analysis.Spectral
 open DifferentialGeometry.Analysis.Elliptic
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
 
 noncomputable section
 
 
-open MeasureTheory Set Filter Topology Bundle Manifold DifferentialGeometry.Tensor0SBundle ContinuousLinearMap
+open MeasureTheory Set Filter Topology Bundle Manifold DifferentialGeometry.Tensor0SBundle
+    ContinuousLinearMap
 open scoped ENNReal NNReal BigOperators Manifold ContDiff
 
 namespace DifferentialGeometry.Analysis.Sobolev
 
 open DifferentialGeometry
-open DifferentialGeometry.PDE.RicciFlow DifferentialGeometry.Analysis.Sobolev DifferentialGeometry.Analysis.Spectral
+open DifferentialGeometry.PDE.RicciFlow DifferentialGeometry.Analysis.Sobolev
+    DifferentialGeometry.Analysis.Spectral
 open DifferentialGeometry.Analysis.Sobolev.IntrinsicSobolev
 open DifferentialGeometry.Analysis.Spectral.MetricRealization
 open DifferentialGeometry.Integral.L2
@@ -182,24 +183,30 @@ theorem exists_iteratedCovGrad_fiberNormSq_le_smoothCcToTensorHs_sq
     rw [hN_def]
     exact Finset.sum_congr rfl
       (fun j _ => (SmoothCcTensor.norm_def (iteratedCovGrad (I := I) g₀ 0 2 j T₀)).symm)
-  have hrev : ‖DifferentialGeometry.Analysis.Sobolev.IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2)
+  have hrev : ‖DifferentialGeometry.Analysis.Sobolev.IntrinsicSobolev.SmoothCcTensor.toHs
+    (g := g₀) (r := 0) (s := 2)
         (2 * K + q) T₀‖ ≤
       Crev * (Cspec * Nm) := by
     refine le_trans (hCrev T₀) ?_
     rw [hsumcongr]
     refine mul_le_mul_of_nonneg_left
       (le_trans (hCspec T₀) (mul_le_mul_of_nonneg_left hspecmono hCspec_nn)) hCrev_nn
-  have hit : ‖DifferentialGeometry.Analysis.Sobolev.IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2 + q)
+  have hit : ‖DifferentialGeometry.Analysis.Sobolev.IntrinsicSobolev.SmoothCcTensor.toHs
+    (g := g₀) (r := 0) (s := 2 + q)
         (2 * K) (iteratedCovGrad (I := I) g₀ 0 2 q T₀)‖ ≤
-      Cit * ‖DifferentialGeometry.Analysis.Sobolev.IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2)
+      Cit * ‖DifferentialGeometry.Analysis.Sobolev.IntrinsicSobolev.SmoothCcTensor.toHs
+        (g := g₀) (r := 0) (s := 2)
         (2 * K + q) T₀‖ := hCit T₀
   have hemb := hCemb (iteratedCovGrad (I := I) g₀ 0 2 q T₀) x
   have hnorm : ‖(iteratedCovGrad (I := I) g₀ 0 2 q T₀).toSection x‖ ≤
       (Cemb * Cit * Crev * Cspec) * Nm := by
     calc ‖(iteratedCovGrad (I := I) g₀ 0 2 q T₀).toSection x‖
-        ≤ Cemb * ‖DifferentialGeometry.Analysis.Sobolev.IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2 + q)
+        ≤ Cemb * ‖DifferentialGeometry.Analysis.Sobolev.IntrinsicSobolev.SmoothCcTensor.toHs
+          (g := g₀) (r := 0) (s := 2 + q)
             (2 * K) (iteratedCovGrad (I := I) g₀ 0 2 q T₀)‖ := hemb
-      _ ≤ Cemb * (Cit * ‖DifferentialGeometry.Analysis.Sobolev.IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2)
+      _ ≤ Cemb * (Cit *
+        ‖DifferentialGeometry.Analysis.Sobolev.IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀)
+        (r := 0) (s := 2)
             (2 * K + q) T₀‖) := mul_le_mul_of_nonneg_left hit hCemb_pos.le
       _ ≤ Cemb * (Cit * (Crev * (Cspec * Nm))) :=
           mul_le_mul_of_nonneg_left

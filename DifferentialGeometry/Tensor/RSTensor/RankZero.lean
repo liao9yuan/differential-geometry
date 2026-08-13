@@ -1,14 +1,5 @@
 import DifferentialGeometry.Tensor.RSTensor.Field
 
-
-
-
-
-
-
-
-
-
 namespace DifferentialGeometry
 namespace Tensor0SBundle
 

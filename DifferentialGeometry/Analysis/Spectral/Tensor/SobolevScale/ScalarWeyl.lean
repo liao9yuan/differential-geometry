@@ -4,16 +4,6 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.Estimates.H2Pointwise
 import DifferentialGeometry.Analysis.Spectral.Tensor.SobolevScale.SmoothCcDense
 open DifferentialGeometry.Analysis.Elliptic
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
-
-/-!
-# Scalar spectral tail summability
-
-This file proves the polynomial counting estimate needed for the rank-zero
-tensor connection-Laplacian.  The proof uses the scalar point-evaluation
-Sobolev bound on a finite reproducing-kernel combination, rather than the
-strong local Weyl-law input used for arbitrary tensor valence.
--/
 
 noncomputable section
 
@@ -126,9 +116,6 @@ private lemma combo_norm_sq
     rw [basis_sum_coeff (I := I) (M := M), if_neg hi]
     ring
 
-/-- The rank-zero connection-Laplacian has a polynomial pointwise diagonal
-kernel bound.  Unlike the arbitrary-valence local Weyl statement, this follows
-from the already proved scalar Sobolev point-evaluation estimate. -/
 theorem scalar_diag_le
     (g : SmoothRiemannianMetric I M) :
     ∃ (q : ℕ) (B : ℝ), 0 ≤ B ∧
@@ -249,8 +236,6 @@ theorem scalar_diag_le
       simpa only [diagonalKernel, Finset.sum_empty] using
         (mul_nonneg (sq_nonneg C) hpow)
 
-/-- A negative power of the rank-zero tensor eigenvalues is summable.  This is
-the scalar spectral input used by the conjugate-heat Galerkin construction. -/
 theorem scalar_eigen_tail
     (g : SmoothRiemannianMetric I M) :
     EigenvalueTailSummable (I := I) (M := M) g 0 0 := by

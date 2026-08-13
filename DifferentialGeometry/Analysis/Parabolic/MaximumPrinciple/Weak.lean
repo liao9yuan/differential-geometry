@@ -9,17 +9,6 @@ import Mathlib.Tactic
 
 set_option autoImplicit false
 
-
-
-
-
-
-
-
-
-
-
-
 namespace DifferentialGeometry.Analysis.Parabolic
 
 open Bundle Filter Set
@@ -581,8 +570,6 @@ theorem reaction_difference_lower_bound_on_negative_region
       ring
     _ <= Fu - Fc := hlow_abs
 
-
-
 theorem negative_region_parabolic_lower_bound
     {uval cval Pu Pv cderiv Fu Fc L : Real}
     (hsuper : Fu <= Pu)
@@ -600,16 +587,6 @@ theorem negative_region_parabolic_lower_bound
         exact sub_le_sub_right hsuper Fc
       _ = Pv := hsub.symm
   exact le_trans hlow hupper
-
-
-
-
-
-
-
-
-
-
 
 theorem parabolic_sub_time_curve_identity
     (G : MetricConnectionFamily (I := I) (M := M) Real)
@@ -635,11 +612,6 @@ theorem parabolic_sub_time_curve_identity
     exact heatOperatorWithDrift_sub_const (I := I) G t (X t) (c t) hu_space x
   rw [htime, hheat]
   ring
-
-
-
-
-
 
 theorem parabolic_exp_rescale_identity
     [VectorBundle Real E (TangentSpace I : M -> Type _)]
@@ -752,8 +724,6 @@ private theorem spacetimeSlab_isCompact
     IsCompact (spacetimeSlab (M := M) T) := by
   unfold spacetimeSlab
   exact isCompact_Icc.prod isCompact_univ
-
-
 
 private theorem derivWithin_nonpos_at_Icc_min_of_pos
     {φ : Real -> Real} {T t : Real}
@@ -914,12 +884,6 @@ theorem strict_barrier_nonnegative_of_positive_time
       rw [hε_mul]
       linarith
     exact not_lt_of_ge hbarrier hbarrier_neg
-
-
-
-
-
-
 
 theorem strict_barrier_positive_region
     [I.Boundaryless]
@@ -1341,12 +1305,6 @@ theorem strict_barrier_nonnegative
     (fun t ht _htpos x => hw_grad t ht x)
     (fun t ht _htpos x hwneg => hnegative t ht x hwneg)
 
-
-
-
-
-
-
 theorem scalar_weak_maximum_principle_sub_const_of_parabolic_nonpos
     [I.Boundaryless]
     [CompactSpace M]
@@ -1397,8 +1355,6 @@ theorem scalar_weak_maximum_principle_sub_const_of_parabolic_nonpos
       hnegative
   intro t ht x
   exact sub_nonneg.mp (by simpa [w] using hw_nonneg t ht x)
-
-
 
 theorem scalar_sub_const_positive_region
     [I.Boundaryless]
@@ -1451,13 +1407,6 @@ theorem scalar_sub_const_positive_region
       hnegative
   intro t ht x
   exact sub_nonneg.mp (by simpa [w] using hw_nonneg t ht x)
-
-
-
-
-
-
-
 
 theorem scalar_weak_maximum_principle_supersolutions_of_lipschitz_on_values
     [I.Boundaryless]
@@ -1551,9 +1500,6 @@ theorem scalar_weak_maximum_principle_supersolutions_of_lipschitz_on_values
       exact mul_neg_of_pos_of_neg (Real.exp_pos _) hvneg
     exact not_lt_of_ge (hw_nonneg t ht x) hprodneg
   exact sub_nonneg.mp (by simpa [v] using hvnonneg)
-
-
-
 
 theorem scalar_weak_maximum_principle_supersolutions_of_lipschitz_on_values_of_positive_time
     [I.Boundaryless]
@@ -1649,14 +1595,6 @@ theorem scalar_weak_maximum_principle_supersolutions_of_lipschitz_on_values_of_p
     exact not_lt_of_ge (hw_nonneg t ht x) hprodneg
   exact sub_nonneg.mp (by simpa [v] using hvnonneg)
 
-
-
-
-
-
-
-
-
 theorem scalar_weak_maximum_principle_supersolution_lower_bound
     [I.Boundaryless]
     [CompactSpace M]
@@ -1700,10 +1638,6 @@ theorem scalar_weak_maximum_principle_supersolution_lower_bound
       hneg
   intro t ht x
   exact sub_nonneg.mp (by simpa [w] using hw_nonneg t ht x)
-
-
-
-
 
 theorem scalar_weak_maximum_principle_pointwise_bounds
     [I.Boundaryless]
@@ -1766,11 +1700,6 @@ theorem scalar_weak_maximum_principle_pointwise_bounds
   intro t ht x
   exact ⟨hlower t ht x, sub_nonneg.mp (hupper_nonneg t ht x)⟩
 
-
-
-
-
-
 theorem scalar_weak_maximum_principle_linear_reaction_nonneg
     [I.Boundaryless]
     [CompactSpace M]
@@ -1813,11 +1742,6 @@ theorem scalar_weak_maximum_principle_linear_reaction_nonneg
   have hprod : 0 <= Real.exp (-C * t) * u t x := by
     simpa [J] using hJ_nonneg t ht x
   exact (mul_nonneg_iff_of_pos_left (Real.exp_pos (-C * t))).mp hprod
-
-
-
-
-
 
 theorem linear_reaction_nonneg
     [I.Boundaryless]
@@ -1890,15 +1814,6 @@ theorem linear_reaction_nonneg
       exact lt_of_mul_lt_mul_left (by simpa using hJneg)
         (Real.exp_pos (-C * 0)).le
     exact False.elim (not_lt_of_ge (hinit x) hu_neg)
-
-
-
-
-
-
-
-
-
 
 theorem scalar_weak_maximum_principle_supersolutions_of_weighted_lipschitz_on_values
     [I.Boundaryless]
@@ -2009,13 +1924,6 @@ theorem scalar_weak_maximum_principle_supersolutions_of_weighted_lipschitz_on_va
     exact not_lt_of_ge (hw_nonneg t ht x) hprodneg
   exact sub_nonneg.mp (by simpa [v] using hvnonneg)
 
-
-
-
-
-
-
-
 theorem scalar_weak_maximum_principle_supersolutions_of_lipschitz_on_values_of_regular
     [I.Boundaryless]
     [CompactSpace M]
@@ -2102,8 +2010,6 @@ theorem scalar_weak_maximum_principle_supersolutions_of_lipschitz_on_values_of_r
         simpa [hT0] using ht.2
       exact le_antisymm htle ht.1
     simpa [ht0] using hinit x
-
-
 
 theorem scalar_weak_maximum_principle_supersolutions_of_lipschitz_on_values_of_regular_positive_time
     [I.Boundaryless]
@@ -2192,9 +2098,6 @@ theorem scalar_weak_maximum_principle_supersolutions_of_lipschitz_on_values_of_r
       exact le_antisymm htle ht.1
     simpa [ht0] using hinit x
 
-
-
-
 def scalarValueSet (u : Real -> M -> Real) (c : Real -> Real) (t : Real) : Set Real :=
   Set.range (fun x : M => u t x) ∪ {c t}
 
@@ -2208,8 +2111,6 @@ theorem scalarValueSet_isCompact_of_continuous
     simpa using (isCompact_univ.image hu)
   exact hrange.union isCompact_singleton
 
-
-
 theorem exists_abs_lipschitzOnWith_of_locallyLipschitzOn_isCompact
     {f : Real -> Real} {s : Set Real}
     (hs : IsCompact s)
@@ -2220,8 +2121,6 @@ theorem exists_abs_lipschitzOnWith_of_locallyLipschitzOn_isCompact
   refine ⟨K, ?_⟩
   intro a ha b hb
   simpa [Real.dist_eq] using hK.dist_le_mul a ha b hb
-
-
 
 omit [TopologicalSpace M] in
 theorem exists_time_dependent_lipschitz_bound_on_values
@@ -2283,7 +2182,8 @@ theorem exists_time_dependent_lipschitz_bound_on_values_of_locallyLipschitz
     (fun t ht => (hF t ht).locallyLipschitzOn) hcompact
 
 
-def scalarWeakMaximumPrincipleValueSet (T : Real) (u : Real -> M -> Real) (c : Real -> Real) : Set Real :=
+def scalarWeakMaximumPrincipleValueSet (T : Real) (u : Real -> M -> Real)
+    (c : Real -> Real) : Set Real :=
   (fun p : Real × M => u p.1 p.2) '' spacetimeSlab (M := M) T ∪ c '' Set.Icc 0 T
 
 
@@ -2304,8 +2204,6 @@ theorem scalarWeakMaximumPrincipleValueSet_c_mem
     c t ∈ scalarWeakMaximumPrincipleValueSet (M := M) T u c := by
   right
   exact ⟨t, ht, rfl⟩
-
-
 
 theorem scalarWeakMaximumPrincipleValueSet_isCompact
     [CompactSpace M]
@@ -2350,8 +2248,6 @@ theorem scalarWeakMaximumPrincipleValueSet_neg_mem
     rw [← hneg]
     ring
 
-
-
 omit [TopologicalSpace M] in
 theorem scalarWeakMaximumPrincipleLipschitzOnValueSetBound
     (T : Real) (u : Real -> M -> Real) (c : Real -> Real)
@@ -2367,13 +2263,6 @@ theorem scalarWeakMaximumPrincipleLipschitzOnValueSetBound
   have hc_mem : c t ∈ scalarWeakMaximumPrincipleValueSet (M := M) T u c :=
     scalarWeakMaximumPrincipleValueSet_c_mem (M := M) T u c ht
   simpa [Real.dist_eq] using (hF_lip t ht).dist_le_mul (u t x) hu_mem (c t) hc_mem
-
-
-
-
-
-
-
 
 theorem scalar_weak_maximum_principle_supersolutions_of_lipschitz_on_value_set_of_regular
     [I.Boundaryless]
@@ -2421,8 +2310,6 @@ theorem scalar_weak_maximum_principle_supersolutions_of_lipschitz_on_value_set_o
     hsuper hode hinit
     (scalarWeakMaximumPrincipleLipschitzOnValueSetBound (M := M) T u c F K hF_lip)
 
-
-
 theorem scalar_weak_maximum_principle_supersolutions_of_lipschitz_on_value_set_of_regular_positive_time
     [I.Boundaryless]
     [CompactSpace M]
@@ -2468,14 +2355,6 @@ theorem scalar_weak_maximum_principle_supersolutions_of_lipschitz_on_value_set_o
     hw_cont hw_mdiff hw_grad hu_time hc_time hu_space hv_space hv_grad
     hsuper hode hinit
     (scalarWeakMaximumPrincipleLipschitzOnValueSetBound (M := M) T u c F K hF_lip)
-
-
-
-
-
-
-
-
 
 end
 
@@ -2628,7 +2507,8 @@ theorem scalar_weak_maximum_principle_ode_compare_supersolution_autonomous
     hw_cont hw_mdiff hw_grad hu_time hc_time hu_space hv_space hv_grad
     hsuper hode hinit (fun t ht => by simpa using hF_lip t ht)
 
-private theorem scalar_weak_maximum_principle_ode_compare_supersolution_of_heat_pot_on_strict_subinterval
+private theorem
+    scalar_weak_maximum_principle_ode_compare_supersolution_of_heat_pot_on_strict_subinterval
     [I.Boundaryless]
     [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] [CompactSpace M]
     [VectorBundle Real E (TangentSpace I : M -> Type _)]

@@ -262,7 +262,6 @@ theorem fromTensor_map_ofModel {s q : ℕ} {x : B}
     exact product_fun_ofModel f g
 
 set_option backward.isDefEq.respectTransparency false in
-
 noncomputable def equiv (s q : ℕ) (x : B) :
     Bundle.continuousMultilinearMap 𝕜 (s + q) F E x ≃ₗ[𝕜]
     TensorProduct 𝕜 (Bundle.continuousMultilinearMap 𝕜 s F E x)

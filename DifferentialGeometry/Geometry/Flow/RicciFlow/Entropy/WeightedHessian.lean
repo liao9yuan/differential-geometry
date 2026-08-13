@@ -5,19 +5,9 @@ import DifferentialGeometry.Geometry.Connection.ChartBridge.HessFrobenius
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Entropy.F.Geometry
 open DifferentialGeometry.Tensor.RSTensor
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Operator
 
 set_option autoImplicit false
-
-
-
-
-
-
-
-
-
 
 open DifferentialGeometry.Geometry.Connection
 namespace DifferentialGeometry.PDE.RicciFlow.Entropy
@@ -220,8 +210,6 @@ private theorem norm_sq_shift
   rw [← normSq0S_eq_inner, ← normSq0S_eq_inner, ← normSq0S_eq_inner, hmetric]
   ring
 
-
-
 theorem weighted_hess_split [I.Boundaryless] [CompactSpace M]
     (g : SmoothRiemannianMetric I M) {f : M -> Real}
     (hf : ContMDiff I 𝓘(Real, Real) (∞ : WithTop ℕ∞) f) :
@@ -249,8 +237,6 @@ theorem weighted_hess_split [I.Boundaryless] [CompactSpace M]
     (fun x => ricDriftDiv (I := I) g hf x)
     (fun x => ricDriftAct (I := I) g hf x)
     (fun x => by ring)
-
-
 
 theorem weighted_bochner [I.Boundaryless] [CompactSpace M]
     (g : SmoothRiemannianMetric I M) {f : M -> Real}
@@ -510,8 +496,6 @@ theorem weighted_bochner [I.Boundaryless] [CompactSpace M]
           integral_add hA0I hA1I
         exact congrArg (fun r : Real => r - ∫ x, A2 x ∂μw) hadd
       _ = 0 := by rw [hA0zero, hA1zero, hA2zero]; ring
-
-
 
 theorem weighted_w_square [I.Boundaryless] [CompactSpace M]
     (g : SmoothRiemannianMetric I M) {f : M -> Real}

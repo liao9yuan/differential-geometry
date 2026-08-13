@@ -10,10 +10,7 @@ import DifferentialGeometry.Analysis.ODE.Flow.C1Regularity.ContDiffOnOne
 import Mathlib.Topology.MetricSpace.Pseudo.Lemmas
 import Mathlib.Topology.Compactness.Compact
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Connection
-
-
 
 noncomputable section
 

@@ -1,23 +1,8 @@
 import DifferentialGeometry.Geometry.Connection.LeviCivita.Curvature.LeviCivita
 import DifferentialGeometry.Geometry.Connection.LeviCivita.Curvature.Realized
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
 
 set_option autoImplicit false
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 noncomputable section
 
@@ -35,11 +20,6 @@ variable {I : ModelWithCorners Real E H} [I.Boundaryless]
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 variable [IsManifold I 1 M]
 variable [SigmaCompactSpace M] [T2Space M]
-
-
-
-
-
 
 def scalHessFrame
     (g : SmoothRiemannianMetric I M)
@@ -68,12 +48,6 @@ def scalHessFrame
         nabla2Ric (vec4 (I := I) (F.basisAt hx i) (F.basisAt hx j)
           (F.basisAt hx k) (F.basisAt hx l))
 
-
-
-
-
-
-
 omit [FiniteDimensional ℝ E] in
 theorem scalHessFrameSymm
     [FiniteDimensional Real E]
@@ -91,19 +65,12 @@ theorem scalHessFrameSymm
     DifferentialGeometry.Geometry.Connection.canScalHess (I := I) (M := M) (g := g)
       (basis := F.basisAt hx) gInv hinv i j
 
-
-
-
-
-
 def frameInvMetric
     (g : SmoothRiemannianMetric I M)
     {x₀ : M} {C : LocalChartAt (I := I) x₀} (F : C.Frame)
     {x : M} (hx : x ∈ F.domain)
     (i j : CoordinateIdx (𝕜 := Real) E) : Real :=
   basisInvMetric (I := I) (M := M) g x (F.basisAt hx) i j
-
-
 
 omit [FiniteDimensional ℝ E] [CompleteSpace E] [I.Boundaryless] [IsManifold I 1 M]
     [SigmaCompactSpace M] [T2Space M] in
@@ -126,8 +93,6 @@ def frameScalHess
     (i j : CoordinateIdx (𝕜 := Real) E) : Real :=
   scalHessFrame (I := I) (M := M) g F hx
     (frameInvMetric (I := I) (M := M) g F hx) i j
-
-
 
 omit [FiniteDimensional ℝ E] in
 theorem frameScalHess_symm

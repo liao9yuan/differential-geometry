@@ -5,38 +5,7 @@ import DifferentialGeometry.Analysis.Elliptic.TensorRegularity.CovDeriv.Componen
 open DifferentialGeometry.Analysis.Sobolev
 open DifferentialGeometry.Analysis.Elliptic
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Connection
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 noncomputable section
 
@@ -129,10 +98,6 @@ theorem tensorChartComponentRaw_abs_le_riemannianFibreNorm
         mul_le_mul_of_nonneg_left h_v_le hCproj_nn
     _ = Cproj * Cop * ‖T.toSection b‖ := by ring
 
-
-
-
-
 omit [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M]
     [SigmaCompactSpace M] in
 lemma chartFrameBasisModel_zero_eq_constOfIsEmpty (α x : M) :
@@ -143,11 +108,6 @@ lemma chartFrameBasisModel_zero_eq_constOfIsEmpty (α x : M) :
   intro v
   rw [chartFrameBasisModel_apply]
   simp
-
-
-
-
-
 
 omit [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M]
     [SigmaCompactSpace M] in
@@ -177,11 +137,6 @@ theorem ccTensorBilin_chartBasisVecFiber_eq_tensorChartComponentRaw
   funext j
   fin_cases j <;> rfl
 
-
-
-
-
-
 omit [BoundarylessManifold I M] in
 theorem reprDiffChartCompOnE_eq_symm_tensorChartComponentRaw
     (g_bg : SmoothRiemannianMetric I M) {σ : ℝ}
@@ -207,9 +162,6 @@ theorem reprDiffChartCompOnE_eq_symm_tensorChartComponentRaw
   rw [ccTensorBilin_chartBasisVecFiber_eq_tensorChartComponentRaw (I := I) g_bg S α hy l b,
     ccTensorBilin_chartBasisVecFiber_eq_tensorChartComponentRaw (I := I) g_bg S α hy b l]
 
-
-
-
 omit [NeZero (Module.finrank ℝ E)] in
 theorem partialDeriv_eq_euclidPartial_comp_toEuclidean
     (a : Fin (Module.finrank ℝ E)) (f : E → ℝ) (y : E) :
@@ -224,9 +176,6 @@ theorem partialDeriv_eq_euclidPartial_comp_toEuclidean
     rw [chartModelBasis_apply]; rfl]
   rw [show (toEuclidean (E := E)).symm (toEuclidean (E := E) y) = y from by simp]
 
-
-
-
 omit [NeZero (Module.finrank ℝ E)] in
 theorem partialDeriv_comp_toEuclidean_symm_eq_euclidPartial
     (a : Fin (Module.finrank ℝ E)) (f : E → ℝ) :
@@ -238,10 +187,6 @@ theorem partialDeriv_comp_toEuclidean_symm_eq_euclidPartial
       ((toEuclidean (E := E)).symm z)]
   rw [show toEuclidean (E := E) ((toEuclidean (E := E)).symm z) = z from by simp]
 
-
-
-
-
 omit [NeZero (Module.finrank ℝ E)] in
 theorem partialDeriv2_eq_euclidPartial2_comp_toEuclidean
     (c a : Fin (Module.finrank ℝ E)) (f : E → ℝ) (y : E) :
@@ -251,10 +196,6 @@ theorem partialDeriv2_eq_euclidPartial2_comp_toEuclidean
         (toEuclidean (E := E) y) := by
   rw [partialDeriv_eq_euclidPartial_comp_toEuclidean (E := E) c (partialDeriv (E := E) a f) y]
   rw [partialDeriv_comp_toEuclidean_symm_eq_euclidPartial (E := E) a f]
-
-
-
-
 
 omit [BoundarylessManifold I M] in
 theorem reprDiffChartCompOnE_comp_toEuclidean_symm_eqOn
@@ -288,11 +229,6 @@ theorem reprDiffChartCompOnE_comp_toEuclidean_symm_eqOn
   rw [chartPushedRaw_apply_of_mem (I := I) (M := M) α _ hy',
     chartPushedRaw_apply_of_mem (I := I) (M := M) α _ hy']
 
-
-
-
-
-
 omit [BoundarylessManifold I M] in
 theorem euclidPartial_chartPushedRaw_eq_covGrad_sub_lowerOrder
     (g_bg : SmoothRiemannianMetric I M) (S : SmoothCcTensor g_bg 0 2) (α : M)
@@ -317,8 +253,6 @@ theorem euclidPartial_chartPushedRaw_eq_covGrad_sub_lowerOrder
   rw [hJ0, hJtail] at hform
   rw [hform]
   ring
-
-
 
 omit [BoundarylessManifold I M] in
 omit [CompactSpace M] [T2Space M] [SigmaCompactSpace M] in
@@ -345,12 +279,6 @@ theorem toEuclidean_mem_chartTargetEuclid_of_mem_interior
     (α : M) {y : E} (hy : y ∈ interior ((extChartAt I α).target : Set E)) :
     toEuclidean (E := E) y ∈ chartTargetEuclid (I := I) (M := M) α :=
   ⟨y, interior_subset hy, rfl⟩
-
-
-
-
-
-
 
 omit [BoundarylessManifold I M] in
 theorem partialDeriv_reprDiffChartCompOnE_eq_covGrad_sub_lowerOrder
@@ -426,8 +354,6 @@ theorem partialDeriv_reprDiffChartCompOnE_eq_covGrad_sub_lowerOrder
     euclidPartial_chartPushedRaw_eq_covGrad_sub_lowerOrder (I := I) g_bg S α a b l
       (by rw [← hys_def]; exact hys_mem)]
   rw [show (toEuclidean (E := E)).symm ys = y from by rw [hys_def]; simp]
-
-
 
 omit [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [CompactSpace M] [I.Boundaryless]
     [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
@@ -540,8 +466,6 @@ theorem covDerivLowerOrderTerm_abs_le_riemannianFibreNorm
   ring_nf
   rfl
 
-
-
 omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [CompactSpace M]
     [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 theorem extChartAt_symm_image_isCompact_subset_chartSource
@@ -574,10 +498,6 @@ theorem euclidPartial_congr_of_eqOn_isOpen
   rw [euclidPartial_def, euclidPartial_def]
   rw [(heq.eventuallyEq_of_mem (hU.mem_nhds hz)).fderiv_eq]
 
-
-
-
-
 omit [BoundarylessManifold I M] in
 theorem euclidPartial_chartPushedRaw_general_eq_covGrad_sub_lowerOrder
     (g_bg : SmoothRiemannianMetric I M) (s : ℕ)
@@ -606,9 +526,6 @@ theorem euclidPartial_chartPushedRaw_general_eq_covGrad_sub_lowerOrder
   rw [hJ0, hJtail] at hform
   rw [hform]
   ring
-
-
-
 
 omit [BoundarylessManifold I M] in
 theorem covDerivComponentEuclid_eqOn_rawComponent_covGrad
@@ -1428,14 +1345,6 @@ theorem hcovgrad_jet_bound_holds
         ≤ C2 * R := hC2_bd y hy l b c a
       _ ≤ max C0 (max C1 C2) * R :=
           mul_le_mul_of_nonneg_right ((le_max_right _ _).trans (le_max_right _ _)) hR_nn
-
-
-
-
-
-
-
-
 
 omit [BoundarylessManifold I M] in
 theorem chartMetricJet2DiffSup_realizeMetricAt_le_toHs_unconditional

@@ -25,19 +25,9 @@ import DifferentialGeometry.Tensor.Multilinear.Curry
 import Mathlib.Geometry.Manifold.VectorBundle.Hom
 import Mathlib.Analysis.InnerProductSpace.Defs
 import Mathlib.Geometry.Manifold.VectorBundle.Riemannian
-import Mathlib.LinearAlgebra.FiniteDimensional.Lemmas
 import DifferentialGeometry.Geometry.Metric.TensorInner.MetricFiberData
 
 set_option autoImplicit false
-
-
-
-
-
-
-
-
-
 
 namespace DifferentialGeometry
 namespace Tensor0SBundle

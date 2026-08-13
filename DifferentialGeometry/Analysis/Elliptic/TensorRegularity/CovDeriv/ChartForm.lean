@@ -4,7 +4,6 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.TrivProj.ChartTwistIdentity
 import DifferentialGeometry.Analysis.Spectral.Tensor.ChartTensor.Inner.InnerBridge
 import DifferentialGeometry.Analysis.Spectral.Tensor.Variational.PreHilbert
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Connection
 open DifferentialGeometry.Geometry.Operator
 

@@ -8,19 +8,9 @@ open DifferentialGeometry.Tensor.Auxiliary
 open DifferentialGeometry.Geometry.Connection
 open DifferentialGeometry.Analysis.Elliptic
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Connection
 
 set_option autoImplicit false
-
-
-
-
-
-
-
-
-
 
 noncomputable section
 
@@ -473,8 +463,6 @@ private theorem covAlong_mapCross_zero
     ← trivFromE_trivToE (I := J) b hbBase
       (covDerivAlong (I := J) g delta W t), hleftCoord, hrightCoord]
 
-
-
 omit [NeZero (Module.finrank ℝ E)] [NeZero (Module.finrank ℝ F)] in
 theorem covAlong_mapCrossAt
     [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M]
@@ -538,8 +526,6 @@ theorem covAlong_mapCrossAt
         (fun s => mfderiv I J (Phi : M → N) (gamma s) (Y (gamma s))) t := by
       simp [delta, Ypush]
 
-
-
 omit [NeZero (Module.finrank ℝ E)] [NeZero (Module.finrank ℝ F)] in
 theorem covAlong_mapCross
     [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M]
@@ -558,8 +544,6 @@ theorem covAlong_mapCross
       covDerivAlong (I := J) g (fun s => Phi (gamma s))
         (fun s => mfderiv I J (Phi : M → N) (gamma s) (Y (gamma s))) t :=
   covAlong_mapCrossAt (I := I) (J := J) g Phi gamma Y t hgamma.contMDiffAt
-
-
 
 omit [NeZero (Module.finrank ℝ E)] [NeZero (Module.finrank ℝ F)] in
 theorem covAlong_natCrossAt
@@ -671,8 +655,6 @@ theorem covAlong_natCrossAt
     _ = covDerivAlong (I := J) g delta
         (fun s => Ymap s + Rmap s) t := htargetAdd.symm
     _ = covDerivAlong (I := J) g delta Vmap t := by rw [htarget]
-
-
 
 omit [NeZero (Module.finrank ℝ E)] [NeZero (Module.finrank ℝ F)] in
 theorem covAlong_natCross

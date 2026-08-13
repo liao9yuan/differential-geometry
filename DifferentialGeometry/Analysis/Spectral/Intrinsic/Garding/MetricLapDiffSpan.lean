@@ -1,14 +1,6 @@
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.Garding.MetricLapDiffMeas
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.MetricC1Continuity
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
-
-/-!
-# Compact-span moving scalar Laplacian
-
-This file packages the fixed-scale moving scalar Laplacian on every requested
-short backward interval in a compact regular-time slab.
--/
 
 noncomputable section
 
@@ -37,9 +29,6 @@ private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
-/-- A compact regular-time slab has one backward radius on which the genuine
-`H² → H⁰` scalar Laplacian perturbation is continuous, uniformly bounded,
-and agrees with its finite spectral core on every requested interval. -/
 theorem lapA20_span
     {D : RealTimeInterval}
     (g_fam : ℝ → SmoothRiemannianMetric I M)

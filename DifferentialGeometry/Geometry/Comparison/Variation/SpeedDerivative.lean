@@ -19,11 +19,8 @@ import Mathlib.Topology.VectorBundle.Riemannian
 import Mathlib.Topology.Compactness.Compact
 import DifferentialGeometry.Geometry.Comparison.Variation.ArcLength
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Connection
 open DifferentialGeometry.Geometry.Operator
-
-
 
 noncomputable section
 

@@ -28,7 +28,8 @@ def toEquiv (S : TwoShuffle k n) : Fin k ⊕ Fin n ≃ Fin (k + n) where
   toFun := fun x =>
     match x with
     | Sum.inl i => ↑(S.1.orderIsoOfFin S.2 ⟨i.val, by omega⟩)
-    | Sum.inr j => ↑((S.1ᶜ : Finset (Fin (k + n))).orderIsoOfFin (card_compl S.1 S.2) ⟨j.val, by omega⟩)
+    | Sum.inr j => ↑((S.1ᶜ : Finset (Fin (k + n))).orderIsoOfFin (card_compl S.1 S.2) ⟨j.val,
+      by omega⟩)
   invFun := by
     intro x
     by_cases hx : x ∈ S.1
@@ -164,7 +165,8 @@ private theorem leftIndex_bijective {σ : Perm (Fin k ⊕ Fin n)} (S : TwoShuffl
     (h : TwoShuffle.ofPerm σ = S) : Function.Bijective (leftIndex S h) := by
   refine ⟨?_, ?_⟩
   · intro a b hab
-    have h1 : S.1.orderEmbOfFin S.2 (leftIndex S h a) = S.1.orderEmbOfFin S.2 (leftIndex S h b) := by
+    have h1 : S.1.orderEmbOfFin S.2 (leftIndex S h a) = S.1.orderEmbOfFin S.2
+      (leftIndex S h b) := by
       rw [hab]
     have h2 : finSumFinEquiv (σ (Sum.inl a)) = finSumFinEquiv (σ (Sum.inl b)) := by
       rw [← leftIndex_val S h a, ← leftIndex_val S h b, h1]
@@ -443,7 +445,8 @@ def rightOuter (P : ThreeShuffle m n p) : TwoShuffle (m + n) p :=
   ⟨P.mnBlock.1, P.mnBlock.2⟩
 
 def rightInner (P : ThreeShuffle m n p) : TwoShuffle m n :=
-  ⟨Finset.univ.filter (fun r : Fin (m + n) => P.mnBlock.1.orderEmbOfFin P.mnBlock.2 r ∈ P.mBlock.1), by
+  ⟨Finset.univ.filter (fun r : Fin
+    (m + n) => P.mnBlock.1.orderEmbOfFin P.mnBlock.2 r ∈ P.mBlock.1), by
     let e : Fin (m + n) ↪o Fin (m + n + p) := P.mnBlock.1.orderEmbOfFin P.mnBlock.2
     have hsub : ↑(P.mBlock.1 : Finset (Fin (m + n + p))) ⊆ Set.range e := by
       intro x hx
@@ -459,7 +462,8 @@ def mergeRight {m n p : ℕ} (σ : Perm (Fin (m + n) ⊕ Fin p)) (τ : Perm (Fin
 
 def mergeLeft {m n p : ℕ} (σ : Perm (Fin m ⊕ Fin (n + p))) (τ : Perm (Fin n ⊕ Fin p)) :
     Perm (Fin m ⊕ (Fin n ⊕ Fin p)) :=
-  (Equiv.sumCongr (Equiv.refl (Fin m)) (finSumFinEquiv : Fin n ⊕ Fin p ≃ Fin (n + p))).symm.permCongr
+  (Equiv.sumCongr (Equiv.refl (Fin m)) (finSumFinEquiv : Fin n ⊕ Fin p ≃ Fin
+    (n + p))).symm.permCongr
       σ * Equiv.sumCongr (Equiv.refl (Fin m)) τ
 
 @[simp]
@@ -528,7 +532,8 @@ def canonicalRight (P : ThreeShuffle m n p) : Perm ((Fin m ⊕ Fin n) ⊕ Fin p)
 
 private theorem orderEmbOfFin_map {α β : Type*} [LinearOrder α] [LinearOrder β]
     (s : Finset α) {k : ℕ} (h : s.card = k) (e : α ↪o β) (i : Fin k) :
-    (s.map e.toEmbedding).orderEmbOfFin (by rw [Finset.card_map]; exact h) i = e (s.orderEmbOfFin h i) := by
+    (s.map e.toEmbedding).orderEmbOfFin (by rw [Finset.card_map]; exact h) i = e
+      (s.orderEmbOfFin h i) := by
   rw [Finset.orderEmbOfFin_apply, Finset.orderEmbOfFin_apply]
   have hs : (s.sort (· ≤ ·)).map e.toEmbedding = (s.map e.toEmbedding).sort (· ≤ ·) :=
     Finset.map_sort (s := s) (r := (· ≤ ·)) (r' := (· ≤ ·)) (f := e.toEmbedding) (by
@@ -577,7 +582,8 @@ theorem leftOuter_emb (P : ThreeShuffle m n p) (i : Fin m) :
     (finAssocOrder m n p).symm ((leftOuter P).1.orderEmbOfFin (leftOuter P).2 i) =
       P.mBlock.1.orderEmbOfFin P.mBlock.2 i := by
   have hmap := orderEmbOfFin_map P.mBlock.1 P.mBlock.2 (finAssocOrder m n p).toOrderEmbedding i
-  change (finAssocOrder m n p).symm ((P.mBlock.1.map (finAssocOrder m n p).toOrderEmbedding.toEmbedding).orderEmbOfFin
+  change (finAssocOrder m n p).symm ((P.mBlock.1.map
+    (finAssocOrder m n p).toOrderEmbedding.toEmbedding).orderEmbOfFin
     (by rw [Finset.card_map]; exact P.mBlock.2) i) = P.mBlock.1.orderEmbOfFin P.mBlock.2 i
   rw [hmap]
   simp
@@ -619,7 +625,8 @@ theorem leftOuter_compl_emb (P : ThreeShuffle m n p) (t : Fin (n + p)) :
       rw [Finset.card_compl, Finset.card_map, P.mBlock.2, Fintype.card_fin]
       omega)
     (finAssocOrder m n p).symm.toOrderEmbedding t
-  change (finAssocOrder m n p).symm.toOrderEmbedding (((leftOuter P).1ᶜ : Finset (Fin (m + (n + p)))).orderEmbOfFin
+  change (finAssocOrder m n p).symm.toOrderEmbedding (((leftOuter P).1ᶜ : Finset (Fin (m +
+    (n + p)))).orderEmbOfFin
     (by
       rw [show (leftOuter P).1 = P.mBlock.1.map (finAssocOrder m n p).toEmbedding from rfl]
       rw [Finset.card_compl, Finset.card_map, P.mBlock.2, Fintype.card_fin]
@@ -795,7 +802,8 @@ private theorem rightPosEquiv_sumCongr_symm (m n p : ℕ) (y : Fin (m + n) ⊕ F
   simp [rightPosEquiv, Equiv.sumCongr_apply]
 
 private theorem leftPosEquiv_sumCongr_symm (m n p : ℕ) (y : Fin m ⊕ Fin (n + p)) :
-    leftPosEquiv m n p (Equiv.sumCongr (Equiv.refl (Fin m)) (finSumFinEquiv.symm : Fin (n + p) ≃ Fin n ⊕ Fin p) y) =
+    leftPosEquiv m n p (Equiv.sumCongr (Equiv.refl (Fin m)) (finSumFinEquiv.symm : Fin
+      (n + p) ≃ Fin n ⊕ Fin p) y) =
       (finAssocOrder m n p).symm (finSumFinEquiv y) := by
   simp [leftPosEquiv, Equiv.sumCongr_apply]
 
@@ -868,8 +876,10 @@ private theorem leftPosEquiv_assocSum (m n p : ℕ) (x : (Fin m ⊕ Fin n) ⊕ F
     simp only [leftPosEquiv, rightPosEquiv, assocSum]
     exact (Nat.add_assoc m n ↑k).symm
 
-private theorem canonicalLeft_canonicalRight_pos (P : ThreeShuffle m n p) (x : (Fin m ⊕ Fin n) ⊕ Fin p) :
-    leftPosEquiv m n p (canonicalLeft P (assocSum m n p x)) = rightPosEquiv m n p (canonicalRight P x) := by
+private theorem canonicalLeft_canonicalRight_pos (P : ThreeShuffle m n p) (x :
+    (Fin m ⊕ Fin n) ⊕ Fin p) :
+    leftPosEquiv m n p (canonicalLeft P (assocSum m n p x)) = rightPosEquiv m n p
+      (canonicalRight P x) := by
   cases x with
   | inl x => cases x with
     | inl i =>
@@ -1137,7 +1147,8 @@ def rightAssocShuffle (m n p : ℕ) :
         exact hx
     apply ThreeShuffle.ext
     · apply Subtype.ext
-      change M' ∪ (Finset.univ.filter (fun r : Fin (n + p) => e r ∈ S.1 \ T.1)).map e'.toEmbedding = S.1
+      change M' ∪ (Finset.univ.filter (fun r : Fin
+        (n + p) => e r ∈ S.1 \ T.1)).map e'.toEmbedding = S.1
       rw [hM', hN', Finset.union_sdiff_of_subset hT]
     · apply Subtype.ext
       change M' = T.1
@@ -1166,12 +1177,14 @@ theorem rightAssocShuffle_leftInner (m n p : ℕ)
 
 noncomputable def leftShuffle (m n p : ℕ) :
     (ModSumCongr (Fin (m + n)) (Fin p) × ModSumCongr (Fin m) (Fin n)) ≃ ThreeShuffle m n p :=
-  (TwoShuffle.modSumCongrTwoShuffle (m + n) p).prodCongr (TwoShuffle.modSumCongrTwoShuffle m n) |>.trans
+  (TwoShuffle.modSumCongrTwoShuffle (m + n) p).prodCongr
+    (TwoShuffle.modSumCongrTwoShuffle m n) |>.trans
     (leftAssocShuffle m n p)
 
 noncomputable def rightShuffle (m n p : ℕ) :
     (ModSumCongr (Fin m) (Fin (n + p)) × ModSumCongr (Fin n) (Fin p)) ≃ ThreeShuffle m n p :=
-  (TwoShuffle.modSumCongrTwoShuffle m (n + p)).prodCongr (TwoShuffle.modSumCongrTwoShuffle n p) |>.trans
+  (TwoShuffle.modSumCongrTwoShuffle m (n + p)).prodCongr
+    (TwoShuffle.modSumCongrTwoShuffle n p) |>.trans
     (rightAssocShuffle m n p)
 
 noncomputable instance (m n p : ℕ) : Fintype (ThreeShuffle m n p) :=

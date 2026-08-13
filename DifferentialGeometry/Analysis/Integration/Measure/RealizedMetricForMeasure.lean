@@ -16,7 +16,6 @@ import Mathlib.MeasureTheory.Measure.Regular
 import Mathlib.Geometry.Manifold.Metrizable
 import Mathlib.Geometry.Manifold.IsManifold.InteriorBoundary
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
 
 set_option autoImplicit false
 
@@ -38,8 +37,6 @@ private local instance : MeasurableSpace E := borel E
 private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
-
-
 
 abbrev metricForMeasure (g : SmoothRiemannianMetric I M) :
     SmoothRiemannianMetric I M :=

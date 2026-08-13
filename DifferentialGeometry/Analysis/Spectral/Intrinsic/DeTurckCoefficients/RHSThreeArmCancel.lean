@@ -4,18 +4,8 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.ParametricJetIntegr
 open DifferentialGeometry.Analysis.Sobolev
 open DifferentialGeometry.Analysis.Spectral
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Connection
 open DifferentialGeometry.Geometry.Operator
-
-
-
-
-
-
-
-
-
 
 noncomputable section
 
@@ -301,8 +291,6 @@ theorem lieSum_eq_arms
         hδ_lt hδ hδ'_lt hδ' s x k i]
     _ = _ := unitModel_basis_expand_two (I := I) (M := M) g₀ W x ![v, w]
 
-
-
 def rhsLow0Coeff
     (g₀ g_bg : SmoothRiemannianMetric I M) (T T' : SmoothCcTensor g₀ 0 2)
     {δ : ℝ}
@@ -316,8 +304,6 @@ def rhsLow0Coeff
       lieCorr0Field (I := I) (M := M) g₀
         (realizedFam (I := I) g₀ T T' hδ hδ' s) g_bg)
 
-
-
 def rhsLow1Coeff
     (g₀ g_bg : SmoothRiemannianMetric I M) (T T' : SmoothCcTensor g₀ 0 2)
     {δ : ℝ}
@@ -328,8 +314,6 @@ def rhsLow1Coeff
   (-2 : ℝ) • linearizedRicciConnDiffOrder1Coeff (I := I) g₀ T T' hδ hδ' s +
     deTurckLieArm1Coeff (I := I) (M := M) g₀
       (realizedFam (I := I) g₀ T T' hδ hδ' s) g_bg
-
-
 
 theorem rhsLow0_path_joint
     (g₀ g_bg : SmoothRiemannianMetric I M) (T T' : SmoothCcTensor g₀ 0 2)
@@ -348,8 +332,6 @@ theorem rhsLow0_path_joint
   have hLC := hjoint_add (I := I) (M := M) g₀ 2 _ _ hL hC
   have hR' := hjoint_smul (I := I) (M := M) g₀ 2 _ (-2 : ℝ) hR
   simpa only [rhsLow0Coeff] using hjoint_add (I := I) (M := M) g₀ 2 _ _ hR' hLC
-
-
 
 theorem rhsLow1_path_joint
     (g₀ g_bg : SmoothRiemannianMetric I M) (T T' : SmoothCcTensor g₀ 0 2)

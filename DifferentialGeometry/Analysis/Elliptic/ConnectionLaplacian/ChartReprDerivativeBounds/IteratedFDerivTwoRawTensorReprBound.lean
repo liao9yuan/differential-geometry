@@ -14,7 +14,6 @@ import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.ChartFiberTriv
 import DifferentialGeometry.Analysis.Spectral.Tensor.ChartTensor.Components.Defs
 open DifferentialGeometry.Analysis.Elliptic
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Connection
 
 

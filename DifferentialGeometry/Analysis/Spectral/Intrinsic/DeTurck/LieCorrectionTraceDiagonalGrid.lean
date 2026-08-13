@@ -6,19 +6,10 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.RecoveryEndomorphis
 import DifferentialGeometry.Analysis.Sobolev.TensorHilbert.MetricArmCoeffJetTowerAppCcRSProductGridRankLeftBound
 import DifferentialGeometry.Geometry.Connection.TensorNabla.SlotInsertCovariantNaturality
 open DifferentialGeometry.Analysis.Sobolev
-open DifferentialGeometry.Analysis.Sobolev
 open DifferentialGeometry.Analysis.Spectral
 open DifferentialGeometry.Analysis.Elliptic
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Connection
-
-/-!
-# Pointwise diagonal-grid bounds for moving trace operators
-
-This file controls the covariant jets of the moving cometric double trace,
-with arbitrary passenger rank, by the antidiagonal metric-jet grid.
--/
 
 noncomputable section
 
@@ -45,7 +36,6 @@ variable
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
-/-- Pointwise product-grid control of a moving rank-`(p + 2, p)` trace. -/
 theorem lc0Tr_pointwise_antidiagonalGrid_le
     (p : ℕ) (g₀ : SmoothRiemannianMetric I M) {δ₀ : ℝ} (hδ₀ : δ₀ < 1) :
     ∃ C : ℕ → ℝ, (∀ i, 0 ≤ C i) ∧
@@ -216,7 +206,6 @@ theorem lc0Tr_pointwise_antidiagonalGrid_le
     _ ≤ 2 * (CQ i * G) + 2 * (S i * G) := add_le_add hQ' hfixed'
     _ = (2 * CQ i + 2 * S i) * G := by ring
 
-/-- Rank-two specialization of `lc0Tr_pointwise_antidiagonalGrid_le`. -/
 theorem lc0Tr_two_pointwise_antidiagonalGrid_le
     (g₀ : SmoothRiemannianMetric I M) {δ₀ : ℝ} (hδ₀ : δ₀ < 1) :
     ∃ C : ℕ → ℝ, (∀ i, 0 ≤ C i) ∧

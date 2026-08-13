@@ -14,15 +14,8 @@ import DifferentialGeometry.Bundle.PartialMfderiv.ModelMixed
 import DifferentialGeometry.Bundle.PartialMfderiv.FixedBase
 open DifferentialGeometry.PDE.RicciFlow
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
 
 set_option autoImplicit false
-
-
-
-
-
-
 
 noncomputable section
 
@@ -44,8 +37,6 @@ section Components
 variable {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
 variable {u : Set M}
 
-
-
 def christoffelVariationLoweredRHSInFrame
     (nablaRic : Real -> M -> Idx -> Idx -> Idx -> Real)
     (t : Real) (x : M) (i j l : Idx) : Real :=
@@ -65,17 +56,12 @@ def nablaRicDirectionRaisedInFrame
     (t : Real) (x : M) (i j k : Idx) : Real :=
   ∑ l : Idx, gInv t x k l * nablaRic t x l i j
 
-
-
 def christoffelEvolutionRHSInFrame
     (gInv : Real -> DifferentialGeometry.Geometry.Curvature.InverseMetricComponents M Idx)
     (nablaRic : Real -> M -> Idx -> Idx -> Idx -> Real)
     (t : Real) (x : M) (i j k : Idx) : Real :=
   ∑ l : Idx,
     gInv t x k l * christoffelVariationLoweredRHSInFrame nablaRic t x i j l
-
-
-
 
 omit [TopologicalSpace M] [SigmaCompactSpace M] [T2Space M] in
 theorem christoffelRHS_id
@@ -98,8 +84,6 @@ theorem christoffelRHS_id
     _ = -nablaRic t x i j k - nablaRic t x j i k +
           nablaRic t x k i j := by
           rfl
-
-
 
 def christoffelVariationRHSFromLoweredInFrame
     (gInv : Real -> DifferentialGeometry.Geometry.Curvature.InverseMetricComponents M Idx)
@@ -133,10 +117,6 @@ theorem christoffelEvolutionRHSInFrame_eq_coordinates_rhs
     _ = - (∑ l : Idx, A l) - (∑ l : Idx, B l) + ∑ l : Idx, C l := by
             simp [sub_eq_add_neg, Finset.sum_add_distrib, Finset.sum_neg_distrib]
 
-
-
-
-
 def NablaRicciTensorComponentsInFrameOn
     (frame : Idx -> (x : M) -> TangentSpace I x)
     (nablaRicTensor : Real ->
@@ -148,8 +128,6 @@ def NablaRicciTensorComponentsInFrameOn
       nablaRicTensor t x
         (DifferentialGeometry.Geometry.Curvature.vec3 (frame i x) (frame j x) (frame l x))
 
-
-
 def connectionDiffVectorInFrame
     {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -157,9 +135,6 @@ def connectionDiffVectorInFrame
     (base var : Real) (x : M) (i j : Idx) : TangentSpace I x :=
   (S.family.connection var (frame j) x) (frame i x) -
     (S.family.connection base (frame j) x) (frame i x)
-
-
-
 
 def connectionDiffLoweredInFrame
     {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
@@ -190,9 +165,6 @@ omit [SigmaCompactSpace M] [T2Space M] in
     connectionDiffLoweredInFrame (I := I) S frame metricTime base base x i j l = 0 := by
   simp [connectionDiffLoweredInFrame]
 
-
-
-
 def metricCovDerivCompInFrameAtBase
     {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -205,9 +177,6 @@ def metricCovDerivCompInFrameAtBase
       ((S.family.connection base (frame a) x) (frame d x)) (frame b x) -
     (S.family.metric var).inner x (frame a x)
       ((S.family.connection base (frame b) x) (frame d x))
-
-
-
 
 def finiteDifferenceKoszulRHSInFrame
     {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
@@ -289,9 +258,6 @@ private theorem connectionDiffLoweredInFrame_symm
   rw [connectionDiffVectorInFrame_symm
     (I := I) S hS frame hframe hu hx hbase hvar i j]
 
-
-
-
 omit [Fintype Idx] [DecidableEq Idx] in
 omit [SigmaCompactSpace M] in
 theorem metricCovDerivCompInFrameAtBase_eq_connectionDiff
@@ -332,8 +298,6 @@ theorem metricCovDerivCompInFrameAtBase_eq_connectionDiff
   simp
   ring
 
-
-
 omit [Fintype Idx] [DecidableEq Idx] in
 omit [SigmaCompactSpace M] in
 theorem finiteDifferenceKoszulInFrame
@@ -370,11 +334,6 @@ theorem finiteDifferenceKoszulInFrame
   rw [hji, hli, hlj, hsym1]
   ring
 
-
-
-
-
-
 def ConnectionPairingDerivativeInFrameOn
     {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -389,8 +348,6 @@ def ConnectionPairingDerivativeInFrameOn
       (pairDt (t : Real) x i j l)
       D.carrier
       (t : Real)
-
-
 
 def ConnectionPairingDerivativeInFrameOnLocal
     {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
@@ -409,10 +366,6 @@ def ConnectionPairingDerivativeInFrameOnLocal
         D.carrier
         (t : Real)
 
-
-
-
-
 def VariableMetricConnectionDiffDerivativeInFrameOnLocal
     {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -428,8 +381,6 @@ def VariableMetricConnectionDiffDerivativeInFrameOnLocal
         (pairDt (t : Real) x i j l)
         D.carrier
         (t : Real)
-
-
 
 def MetricCovDerivDerivativeComponentsInFrameOnLocal
     {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
@@ -447,16 +398,12 @@ def MetricCovDerivDerivativeComponentsInFrameOnLocal
         D.carrier
         (t : Real)
 
-
-
 def connectionVariationLoweredRHSFromMetricVariationInFrame
     (metricCovDerivDt : Real -> M -> Idx -> Idx -> Idx -> Real)
     (t : Real) (x : M) (i j l : Idx) : Real :=
   (1 / 2 : Real) *
     (metricCovDerivDt t x i j l + metricCovDerivDt t x j i l -
       metricCovDerivDt t x l i j)
-
-
 
 def christoffelVariationRHSFromMetricVariationInFrame
     (gInv : Real -> DifferentialGeometry.Geometry.Curvature.InverseMetricComponents M Idx)
@@ -466,16 +413,11 @@ def christoffelVariationRHSFromMetricVariationInFrame
     (connectionVariationLoweredRHSFromMetricVariationInFrame metricCovDerivDt)
     t x i j k
 
-
-
 def MetricCovDerivDerivativeIsRicciFlowInFrame
     (metricCovDerivDt nablaRic : Real -> M -> Idx -> Idx -> Idx -> Real) :
     Prop :=
   forall t x i j l,
     metricCovDerivDt t x i j l = (-2 : Real) * nablaRic t x i j l
-
-
-
 
 def ricciCovDerivCompInFrame
     {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
@@ -494,8 +436,6 @@ def ricciCovDerivCompInFrame
         (frame a x)
         ((S.family.connection t (frame b) x) (frame d x)))
 
-
-
 def NablaRicciComponentsByConnectionInFrameOn
     {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -506,11 +446,6 @@ def NablaRicciComponentsByConnectionInFrameOn
     forall d a b : Idx,
       nablaRic t x d a b =
         ricciCovDerivCompInFrame (I := I) S frame t x d a b
-
-
-
-
-
 
 structure NablaRicciComponentsRegularInFrameOnLocal
     {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
@@ -526,10 +461,6 @@ structure NablaRicciComponentsRegularInFrameOnLocal
       forall d i j : Idx,
         MDifferentiableAt I 𝓘(Real, Real)
           (fun y : M => nablaRic t y d i j) x
-
-
-
-
 
 def ricciSecondCovDerivCompInFrame
     {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
@@ -553,8 +484,6 @@ def ricciSecondCovDerivCompInFrame
           (S.family.connection t) frame hframe x d j p *
         nablaRic t x a i p)
 
-
-
 def Nabla2RicciComponentsByConnectionInFrameOn
     {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -568,10 +497,6 @@ def Nabla2RicciComponentsByConnectionInFrameOn
       nabla2Ric t x d a i j =
         ricciSecondCovDerivCompInFrame
           (I := I) S frame hframe nablaRic t x d a i j
-
-
-
-
 
 structure Nabla2RicciComponentsRegularInFrameOnLocal
     {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
@@ -596,8 +521,6 @@ theorem metricCovDerivDerivativeIsRicciFlowInFrame_neg_two
       nablaRic := by
   intro t x i j l
   rfl
-
-
 
 omit [DecidableEq Idx] in
 omit [Fintype Idx] in
@@ -730,12 +653,6 @@ theorem metricCovDerivOfMix
     simp [Ca, Cb]
     ring
 
-
-
-
-
-
-
 omit [SigmaCompactSpace M] in
 theorem metricCovDerivDerivativeComponents_of_ricciFlow
     {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
@@ -830,10 +747,6 @@ theorem metricCovDerivDerivativeComponents_of_ricciFlow
     rw [hn]
     simp [Ca, Cb]
     ring
-
-
-
-
 
 omit [Fintype Idx] [DecidableEq Idx] in
 omit [SigmaCompactSpace M] in

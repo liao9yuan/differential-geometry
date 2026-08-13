@@ -437,7 +437,8 @@ attribute [local instance] normedSpaceTangentSpace
 lemma continuousAlternatingMap_trivializationAt_apply (m : ℕ) (x₀ x : M)
     (L : Bundle.continuousAlternatingMap ℝ (Fin m) EM (TangentSpace IM) ℝ (Bundle.Trivial M ℝ) x) :
     (trivializationAt (EM [⋀^Fin m]→L[ℝ] ℝ)
-      (Bundle.continuousAlternatingMap ℝ (Fin m) EM (TangentSpace IM) ℝ (Bundle.Trivial M ℝ)) x₀ ⟨x, L⟩).2 =
+      (Bundle.continuousAlternatingMap ℝ (Fin m) EM (TangentSpace IM) ℝ
+        (Bundle.Trivial M ℝ)) x₀ ⟨x, L⟩).2 =
       L.compContinuousLinearMap ((trivializationAt EM (TangentSpace IM) x₀).symmL ℝ x) := by
   change (Pretrivialization.continuousAlternatingMap ℝ (Fin m)
       (trivializationAt EM (TangentSpace IM) x₀) (trivializationAt ℝ (Bundle.Trivial M ℝ) x₀)

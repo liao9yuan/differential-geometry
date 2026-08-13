@@ -23,14 +23,6 @@ open DifferentialGeometry.Geometry.Connection
 
 set_option autoImplicit false
 
-
-
-
-
-
-
-
-
 noncomputable section
 
 open DifferentialGeometry.Geometry.Operator
@@ -60,8 +52,6 @@ theorem metricCov_smooth (g : SmoothRiemannianMetric I M) :
   simpa [metricCov] using
     leviCivitaConnectionOfMetric_contMDiffCovariantDerivativeLocally
       (I := I) (M := M) g
-
-
 
 omit [SigmaCompactSpace M] [T2Space M] in
 theorem metricCov_congr_nhds
@@ -104,19 +94,11 @@ noncomputable def metricScalarAt (g : SmoothRiemannianMetric I M) (x : M) :
   DifferentialGeometry.Geometry.Operator.metricTracePair0SAt (I := I) g
     (metricRicciAt (I := I) (M := M) g x)
 
-
-
-
-
-
 omit [SigmaCompactSpace M] [T2Space M] in
 theorem metricRicciAt_eq_trace (g : SmoothRiemannianMetric I M) (x : M) :
     metricRicciAt (I := I) g x
       = DifferentialGeometry.Geometry.Curvature.ricciFromRm13At
           (metricRm13At (I := I) (M := M) g x) := rfl
-
-
-
 
 omit [SigmaCompactSpace M] [T2Space M] in
 theorem metricScalarAt_def (g : SmoothRiemannianMetric I M) (x : M) :
@@ -137,11 +119,6 @@ noncomputable def metricRm13 (g : SmoothRiemannianMetric I M) :
   DifferentialGeometry.Geometry.Curvature.CovariantDerivative.rm13Section
     (I := I) (M := M) (metricCov (I := I) (M := M) g)
     (metricCov_smooth (I := I) (M := M) g)
-
-
-
-
-
 
 noncomputable def metricRm04StdAt
     (g : SmoothRiemannianMetric I M) (x : M)
@@ -170,8 +147,6 @@ omit [SigmaCompactSpace M] [T2Space M] in
     metricRm04StdAt (I := I) (M := M) g x X Y Z W =
       metricRm04At (I := I) (M := M) g x (vec4 X Y Z W) := by
   rfl
-
-
 
 noncomputable def metricRm04LastDualAt
     (g : SmoothRiemannianMetric I M) (x : M)
@@ -245,10 +220,6 @@ noncomputable def metricCurvData
     intro x
     simp [metricRicci, metricRm13]
 
-
-
-
-
 omit [SigmaCompactSpace M] in
 theorem metricScalar_smooth
     (g : SmoothRiemannianMetric I M) :
@@ -257,9 +228,6 @@ theorem metricScalar_smooth
   simpa [metricScalarAt] using
     DifferentialGeometry.Tensor.RSTensor.trace02_smooth (I := I) (M := M) g
       (metricRicci (I := I) (M := M) g)
-
-
-
 
 omit [SigmaCompactSpace M] in
 theorem metricScalar_const_of_dScalar_zero
@@ -293,12 +261,6 @@ theorem metricScalar_const_of_dScalar_zero
   · refine ⟨0, ?_⟩
     intro x
     exact False.elim (hne ⟨x⟩)
-
-
-
-
-
-
 
 omit [SigmaCompactSpace M] in
 theorem nablaRic_ein3
@@ -479,10 +441,6 @@ theorem nablaRic_ein3
         DifferentialGeometry.Geometry.Operator.differential1FormFun (I := I) scalar x
           (fun _ : Fin 1 => A) * g.inner x B C := hprodEval
 
-
-
-
-
 theorem dScalar_zero_ein3_at
     [I.Boundaryless]
     (g : SmoothRiemannianMetric I M)
@@ -618,8 +576,6 @@ theorem metricRicciSymm
       hTrace hPair hOutput hInput
       (invMetric_symm (I := I) (M := M) g x basis gInv hinv) i j
 
-
-
 theorem metricNablaSymm
     (g : SmoothRiemannianMetric I M) (x : M) :
     NablaRicSymmAt (I := I)
@@ -685,11 +641,6 @@ theorem metricNablaSymm
     fin_cases q <;> rfl]
   rw [hleft, hright]
   exact hsymm
-
-
-
-
-
 
 theorem metricRicci_velocity_eq_sum_rm04_frame
     (g : SmoothRiemannianMetric I M) {m : Nat} {x : M}
@@ -766,8 +717,6 @@ theorem metricRicci_velocity_eq_sum_rm04_frame
   simpa [h0, hSucc, metricRm04_apply, metricRm04StdAt_apply,
     vec2, vec4, DifferentialGeometry.Geometry.Curvature.vec2,
       DifferentialGeometry.Geometry.Curvature.vec4] using hTail
-
-
 
 theorem metricRicci_velocity_eq_sum_inner_curv_frame
     (g : SmoothRiemannianMetric I M) {m : Nat} {x : M}

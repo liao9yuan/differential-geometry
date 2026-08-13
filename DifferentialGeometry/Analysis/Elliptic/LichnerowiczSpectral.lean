@@ -3,7 +3,6 @@ import DifferentialGeometry.Analysis.Spectral.Scalar.EigenBasis
 import DifferentialGeometry.Analysis.Heat.Semigroup.Defs
 import DifferentialGeometry.Analysis.Heat.Smoothing.SmoothingOfClosed
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Operator
 
 noncomputable section

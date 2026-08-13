@@ -6,15 +6,6 @@ open DifferentialGeometry.Analysis.Sobolev
 open DifferentialGeometry.Tensor.RSTensor
 open DifferentialGeometry.Analysis.Spectral
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
-
-
-
-
-
-
-
-
 
 noncomputable section
 
@@ -37,9 +28,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
   [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M]
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
-
-
-
 
 theorem lapDiffHs_decomp
     {D : RealTimeInterval}
@@ -143,8 +131,6 @@ theorem lapDiffHs_decomp
   simpa only [L, R, D₂, D₁, J, q, h,
     ContinuousLinearMap.sub_apply, ContinuousLinearMap.comp_apply] using congrFun hLR U
 
-
-
 theorem lapDiffHs_path_cd
     {D : RealTimeInterval}
     (g_fam : ℝ → SmoothRiemannianMetric I M)
@@ -193,8 +179,6 @@ theorem lapDiffHs_path_cd
   refine (h₂b.sub h₁b).congr ?_
   intro s hs
   simpa only [q, J, V₂, V₁] using hdec m s hs U
-
-
 
 theorem lapDiffHs_dyn_fin
     {D : RealTimeInterval}
@@ -247,8 +231,6 @@ theorem lapDiffHs_dyn_fin
   simpa only [q, J, D₂, D₁, V₂, V₁,
     ContinuousLinearMap.comp_apply] using
       hdec m s ⟨hs.1.le, hs.2.le.trans hat⟩ (U s)
-
-
 
 theorem lapDiffHs_dyn_cd
     {D : RealTimeInterval}

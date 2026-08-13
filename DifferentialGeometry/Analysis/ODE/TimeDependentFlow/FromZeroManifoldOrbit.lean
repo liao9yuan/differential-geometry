@@ -3,7 +3,6 @@ import DifferentialGeometry.Analysis.ODE.TimeDependentFlow.SmoothInSpace.ChartOp
 import DifferentialGeometry.Analysis.ODE.ForwardVariationalFromZero
 import Mathlib.Geometry.Manifold.IntegralCurve.Basic
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
 
 
 open Set Function Filter Metric Bundle

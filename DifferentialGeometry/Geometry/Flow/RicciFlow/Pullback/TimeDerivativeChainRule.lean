@@ -2,7 +2,6 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.Pullback.Metric
 import Mathlib.Analysis.Calculus.Deriv.Basic
 import Mathlib.Geometry.Manifold.MFDeriv.Basic
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
 
 namespace DifferentialGeometry.PDE.RicciFlow.Pullback
 

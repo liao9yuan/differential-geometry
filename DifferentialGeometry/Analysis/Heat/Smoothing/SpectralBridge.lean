@@ -77,7 +77,8 @@ omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M]
   [SigmaCompactSpace M] [CompactSpace M] in
 private lemma tensorEval_zero_zero_scalar0
     (g : SmoothRiemannianMetric I M) (S : SmoothCcTensor g 0 0) (x : M) :
-    ((S.toFun x) (ContinuousMultilinearMap.constOfIsEmpty ℝ (fun _ : Fin 0 => E) (1 : ℝ))) Fin.elim0 =
+    ((S.toFun x) (ContinuousMultilinearMap.constOfIsEmpty ℝ (fun _ : Fin 0 => E)
+      (1 : ℝ))) Fin.elim0 =
       TensorRSField.scalar0 (n := (∞ : WithTop ℕ∞)) S.toSection x := by
   unfold TensorRSField.scalar0 TensorRSField.rs0
   simp only [SmoothCcTensor.toFun_apply, Tensor0SField.toScalarField]
@@ -110,8 +111,10 @@ private lemma tensorInnerPointwise_smooth_zero_zero
     exact separableForm_zero_apply (I := I) (M := M) g x
       (fun i : Fin 0 => (Fin.elim0 : Fin 0 → E) (Fin.castAdd 0 i)) w
   rw [hS]
-  change ((S.toFun x) (ContinuousMultilinearMap.constOfIsEmpty ℝ (fun _ : Fin 0 => E) (1 : ℝ))) Fin.elim0 *
-      ((T.toFun x) (ContinuousMultilinearMap.constOfIsEmpty ℝ (fun _ : Fin 0 => E) (1 : ℝ))) Fin.elim0 =
+  change ((S.toFun x) (ContinuousMultilinearMap.constOfIsEmpty ℝ (fun _ : Fin 0 => E)
+    (1 : ℝ))) Fin.elim0 *
+      ((T.toFun x) (ContinuousMultilinearMap.constOfIsEmpty ℝ (fun _ : Fin 0 => E)
+        (1 : ℝ))) Fin.elim0 =
     TensorRSField.scalar0 S.toSection x * TensorRSField.scalar0 T.toSection x
   rw [tensorEval_zero_zero_scalar0 (I := I) (M := M) g S x]
   rw [tensorEval_zero_zero_scalar0 (I := I) (M := M) g T x]

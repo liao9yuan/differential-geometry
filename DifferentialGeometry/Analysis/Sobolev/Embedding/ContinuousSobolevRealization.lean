@@ -3,8 +3,9 @@ import DifferentialGeometry.Analysis.Sobolev.Embedding.SobolevEmbeddingCmOrderDr
 import DifferentialGeometry.Analysis.Sobolev.TensorHilbert.SmoothCcDense
 import Mathlib.Analysis.Normed.Operator.Extend
 import Mathlib.Analysis.Normed.Module.Completion
-open DifferentialGeometry.Analysis.Sobolev DifferentialGeometry.Analysis.Sobolev.IntrinsicSobolev DifferentialGeometry.Analysis.Sobolev.IntrinsicSobolev.SmoothCcTensorHs
-open DifferentialGeometry.Geometry.Curvature
+open DifferentialGeometry.Analysis.Sobolev
+    DifferentialGeometry.Analysis.Sobolev.IntrinsicSobolev
+    DifferentialGeometry.Analysis.Sobolev.IntrinsicSobolev.SmoothCcTensorHs
 open DifferentialGeometry.Geometry.Curvature
 
 
@@ -212,7 +213,6 @@ lemma gSupVal_smul (g : SmoothRiemannianMetric I M) (r s k : ℕ)
     rwa [← mul_assoc, mul_inv_cancel₀ (ne_of_gt hcpos), one_mul] at h2
 
 structure CSupTensor (g : SmoothRiemannianMetric I M) (r s k : ℕ) where
-
   toHsTensor : DifferentialGeometry.Analysis.Sobolev.IntrinsicSobolev.SmoothCcTensorHs g r s (2 * k)
 
 namespace CSupTensor
@@ -301,7 +301,8 @@ instance : AddCommGroup (CSupTensor g r s k) :=
     toHsTensor_zsmul
 
 def toHsTensorAddHom :
-    CSupTensor g r s k →+ DifferentialGeometry.Analysis.Sobolev.IntrinsicSobolev.SmoothCcTensorHs g r s (2 * k) where
+    CSupTensor g r s k →+
+      DifferentialGeometry.Analysis.Sobolev.IntrinsicSobolev.SmoothCcTensorHs g r s (2 * k) where
   toFun := fun S => S.toHsTensor
   map_zero' := toHsTensor_zero
   map_add' := toHsTensor_add
@@ -310,7 +311,8 @@ instance : Module ℝ (CSupTensor g r s k) :=
   toHsTensor_injective.module ℝ toHsTensorAddHom toHsTensor_smul
 
 def ofHs :
-    DifferentialGeometry.Analysis.Sobolev.IntrinsicSobolev.SmoothCcTensorHs g r s (2 * k) →ₗ[ℝ] CSupTensor g r s k where
+    DifferentialGeometry.Analysis.Sobolev.IntrinsicSobolev.SmoothCcTensorHs g r s
+      (2 * k) →ₗ[ℝ] CSupTensor g r s k where
   toFun := fun S => ⟨S⟩
   map_add' := fun _ _ => rfl
   map_smul' := fun _ _ => rfl
@@ -469,9 +471,11 @@ lemma norm_coe_toCompl_eq_toHs
     ‖(S : TensorPouSobolevHilbert g r s (2 * k))‖ =
       ‖SmoothCcTensor.toHs (g := g) (r := r) (s := s) (2 * k) S.toCcTensor‖ := by
   have hrhs : SmoothCcTensor.toHs (g := g) (r := r) (s := s) (2 * k) S.toCcTensor =
-      ((⟨S.toCcTensor⟩ : DifferentialGeometry.Analysis.Sobolev.IntrinsicSobolev.SmoothCcTensorHs g r s (2 * k)) :
+      ((⟨S.toCcTensor⟩ : DifferentialGeometry.Analysis.Sobolev.IntrinsicSobolev.SmoothCcTensorHs
+        g r s (2 * k)) :
         TensorPouSobolevHilbert g r s (2 * k)) := rfl
-  have hS : (⟨S.toCcTensor⟩ : DifferentialGeometry.Analysis.Sobolev.IntrinsicSobolev.SmoothCcTensorHs g r s (2 * k)) = S := by
+  have hS : (⟨S.toCcTensor⟩ :
+    DifferentialGeometry.Analysis.Sobolev.IntrinsicSobolev.SmoothCcTensorHs g r s (2 * k)) = S := by
     cases S; rfl
   rw [hrhs, hS]
 
@@ -525,7 +529,9 @@ lemma denseRange_toComplL_toLinearMap
         DifferentialGeometry.Analysis.Sobolev.IntrinsicSobolev.SmoothCcTensorHs g r s (2 * k) →L[ℝ]
           TensorPouSobolevHilbert g r s (2 * k)).toLinearMap =
       ((↑) : DifferentialGeometry.Analysis.Sobolev.IntrinsicSobolev.SmoothCcTensorHs g r s (2 * k) →
-        UniformSpace.Completion (DifferentialGeometry.Analysis.Sobolev.IntrinsicSobolev.SmoothCcTensorHs g r s (2 * k))) := by
+        UniformSpace.Completion
+          (DifferentialGeometry.Analysis.Sobolev.IntrinsicSobolev.SmoothCcTensorHs g r s
+          (2 * k))) := by
     funext S; rfl
   rw [hcoe]
   exact UniformSpace.Completion.denseRange_coe

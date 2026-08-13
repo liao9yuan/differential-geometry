@@ -1,15 +1,8 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.Ricci.Trace
 open DifferentialGeometry.PDE.RicciFlow
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
 
 set_option autoImplicit false
-
-
-
-
-
-
 
 noncomputable section
 
@@ -32,25 +25,11 @@ section Components
 variable {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
 variable {u : Set M}
 
-
-
-
-
-
-
-
-
 def ricciVariationFromConnectionRHSInFrame
     (nablaGammaDt : Real -> M -> Idx -> Idx -> Idx -> Idx -> Real)
     (t : Real) (x : M) (i j : Idx) : Real :=
   (∑ k : Idx, nablaGammaDt t x k k i j) -
     (∑ k : Idx, nablaGammaDt t x i k k j)
-
-
-
-
-
-
 
 def RicciVariationFormulaInFrameOn
     {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
@@ -82,8 +61,6 @@ def RicciVariationFormulaInFrameOnLocal
           (t : Real) x i j)
         D.carrier
         (t : Real)
-
-
 
 def RicciEvolutionEquationInFrameOnLocal
     {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
@@ -117,14 +94,6 @@ theorem ricciVariationFormulaInFrameOn_of_local_cover
     RicciVariationFormulaInFrameOn (I := I) S frame nablaGammaDt := by
   intro t x i j
   exact hlocal t x (hcover x) i j
-
-
-
-
-
-
-
-
 
 def nablaGammaDtFromNabla2RicInFrame
     (gInv : Real -> DifferentialGeometry.Geometry.Curvature.InverseMetricComponents M Idx)

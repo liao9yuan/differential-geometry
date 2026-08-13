@@ -7,15 +7,6 @@ open DifferentialGeometry.Geometry.Operator
 
 set_option autoImplicit false
 
-/-!
-# Pointwise gradient bound for intrinsically Lipschitz functions
-
-This file proves the differentiability-point estimate used to identify the
-intrinsic weak gradient of a Riemannian-distance Lipschitz function.  The proof
-tests the function only on radial exponential curves based at the point, so the
-Lipschitz constant is not enlarged by a coordinate-comparison constant.
--/
-
 noncomputable section
 
 open Bundle Filter Manifold Set
@@ -38,8 +29,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-/-- At every differentiability point, the Riemannian norm of the gradient of
-an intrinsically `L`-Lipschitz real function is at most `L`. -/
 private theorem grad_norm_le_lip_ne
     [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M]
     (g : SmoothRiemannianMetric I M) {u : M → ℝ} {L : ℝ≥0} {x : M}
@@ -173,8 +162,6 @@ private theorem grad_norm_le_lip_ne
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-/-- At every differentiability point, the Riemannian norm of the gradient of
-an intrinsically `L`-Lipschitz real function is at most `L`. -/
 theorem grad_norm_le_lip
     [I.Boundaryless] [T2Space M]
     (g : SmoothRiemannianMetric I M) {u : M → ℝ} {L : ℝ≥0} {x : M}
@@ -193,8 +180,6 @@ theorem grad_norm_le_lip
   · letI : NeZero (Module.finrank ℝ E) := ⟨hdim⟩
     exact grad_norm_le_lip_ne (I := I) g hu hux
 
-/-- The Riemannian norm of the everywhere-defined gradient representative of
-an intrinsically `L`-Lipschitz real function is at most `L` at every point. -/
 theorem grad_norm_le_lip_all
     [I.Boundaryless] [T2Space M]
     (g : SmoothRiemannianMetric I M) {u : M → ℝ} {L : ℝ≥0} {x : M}

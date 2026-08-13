@@ -2,28 +2,9 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.StarSum.StarSum2
 open DifferentialGeometry.Tensor.RSTensor
 open DifferentialGeometry.PDE.RicciFlow
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Operator
 
 set_option autoImplicit false
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 noncomputable section
 
@@ -43,14 +24,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 variable [IsManifold I 1 M] [IsManifold I 2 M]
 variable [CompleteSpace E] [SigmaCompactSpace M] [T2Space M]
 variable {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
-
-
-
-
-
-
-
-
 
 def tfPos (k : ℕ) (q : Fin (4 + (k + 1))) :
     Fin (((4 + (k + 1)) + (4 + 0)) + 2 * 0) → Fin ((4 + (k + 1)) + 2 * (2 + 0)) := fun a =>
@@ -73,8 +46,6 @@ def sigmaCurvPos (k : ℕ) (q : Fin (4 + (k + 1))) (hq : q.val ≠ 0) :
     simp only [tfPos] at hab
     split_ifs at hab <;> (try simp only [Fin.mk.injEq] at hab) <;> omega)
 
-
-
 theorem sigmaCurvPos_cast_val (k : ℕ) (q : Fin (4 + (k + 1))) (hq : q.val ≠ 0)
     (p : Fin (4 + (k + 1))) :
     ((sigmaCurvPos k q hq) (Fin.castAdd (4 + 0) p)).val
@@ -84,8 +55,6 @@ theorem sigmaCurvPos_cast_val (k : ℕ) (q : Fin (4 + (k + 1))) (hq : q.val ≠ 
   simp only [sigmaCurvPos, Equiv.ofBijective_apply, tfPos, Fin.val_castAdd]
   split_ifs <;> first | rfl | omega
 
-
-
 theorem sigmaCurvPos_nat_val (k : ℕ) (q : Fin (4 + (k + 1))) (hq : q.val ≠ 0)
     (p : Fin (4 + 0)) :
     ((sigmaCurvPos k q hq) (Fin.natAdd (4 + (k + 1)) p)).val
@@ -94,8 +63,6 @@ theorem sigmaCurvPos_nat_val (k : ℕ) (q : Fin (4 + (k + 1))) (hq : q.val ≠ 0
   have hqlt := q.isLt
   simp only [sigmaCurvPos, Equiv.ofBijective_apply, tfPos, Fin.val_natAdd]
   split_ifs <;> first | rfl | omega
-
-
 
 omit [FiniteDimensional ℝ E] [I.Boundaryless] [IsManifold I ∞ M]
     [IsManifold I 1 M] [IsManifold I 2 M] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
@@ -121,9 +88,6 @@ theorem wRoute_val {Idx : Type*} [Finite Idx] {x : M}
         · rw [dif_pos (by simpa using h3), if_pos (by omega)]
         · rw [dif_neg (by simpa using h3), if_neg (by omega)]
           congr 2
-
-
-
 
 omit [Module.Finite ℝ E] in
 omit [I.Boundaryless] in
@@ -221,12 +185,6 @@ theorem curvactStarPos
             if_neg (Fin.ne_of_val_ne h0), if_neg (Fin.ne_of_val_ne h1),
             if_neg (Fin.ne_of_val_ne h2)]
   rw [hL, hR]
-
-
-
-
-
-
 
 def tf0 (k : ℕ) :
     Fin (((4 + (k + 1)) + (4 + 0)) + 2 * 0) → Fin ((4 + (k + 1)) + 2 * (2 + 0)) := fun a =>
@@ -340,8 +298,6 @@ theorem curvactStar0
             if_neg (Fin.ne_of_val_ne h0), if_neg (Fin.ne_of_val_ne h1),
             if_neg (Fin.ne_of_val_ne h2)]
   rw [hL, hR]
-
-
 
 def tfDiffA (k : ℕ) (q : Fin (4 + k)) :
     Fin (((4 + 1) + (4 + k)) + 2 * 0) →
@@ -490,8 +446,6 @@ theorem slotdiffStarA
         omega
       exact Fin.ext hidx
   rw [hL, hR]
-
-
 
 def tfDiffB (k : ℕ) (q : Fin (4 + k)) :
     Fin (((4 + 0) + (4 + (k + 1))) + 2 * 0) →
@@ -658,17 +612,6 @@ theorem slotdiffStarB
           omega
         exact Fin.ext hidx
   rw [hL, hR]
-
-
-
-
-
-
-
-
-
-
-
 
 def tfRic1 (k : ℕ) (q : Fin (4 + k)) :
     Fin (((4 + 1) + (4 + k)) + 2 * 0) →

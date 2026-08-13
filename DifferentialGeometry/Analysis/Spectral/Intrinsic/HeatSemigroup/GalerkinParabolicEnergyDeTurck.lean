@@ -9,7 +9,6 @@ import DifferentialGeometry.Analysis.ODE.GlobalLipschitzAffineExistence
 import DifferentialGeometry.Analysis.Parabolic.MaximalRegularity.Plancherel
 import Mathlib.Analysis.InnerProductSpace.PiL2
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
 
 
 noncomputable section
@@ -824,7 +823,6 @@ private lemma gscr_finiteEigenComboHs_eq_smoothCcToTensorHs
     ← SmoothCcTensor.toL2_apply]
 
 set_option backward.isDefEq.respectTransparency false in
-
 theorem deTurckSmoothRemainder_spectralCoercive_split'
     (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
     (ha_super : 4 * Module.finrank ℝ E + 10 ≤ a) {R₀ : ℝ} (hR₀ : 0 ≤ R₀)
@@ -967,7 +965,6 @@ theorem deTurckSmoothRemainder_spectralCoercive_split'
   exact le_trans hLHS_le (hker k T₀ hTsymm hball)
 
 set_option backward.isDefEq.respectTransparency false in
-
 theorem deTurckSobolevNHa2_diff_sobolevSplit_perScale'
     (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
     (ha_super : 4 * Module.finrank ℝ E + 10 ≤ a)
@@ -1277,7 +1274,6 @@ private lemma deTurckSobolevNHa2Symm_zero_eq
     hsymmS_zero, ← hzero_embed]
 
 set_option backward.isDefEq.respectTransparency false in
-
 private theorem deTurckGalerkinForcingSymm_tame_diff_mass_perScale
     (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
     (ha_super : 4 * Module.finrank ℝ E + 10 ≤ a) {T : ℝ}
@@ -1371,7 +1367,6 @@ private theorem deTurckGalerkinForcingSymm_tame_diff_mass_perScale
   exact hfinal
 
 set_option backward.isDefEq.respectTransparency false in
-
 private theorem deTurckGalerkinForcingSymm_seed_mass
     (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
     (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) :
@@ -1398,7 +1393,6 @@ private theorem deTurckGalerkinForcingSymm_seed_mass
     _ ≤ Cseed k ^ 2 := hb N k
 
 set_option backward.isDefEq.respectTransparency false in
-
 private theorem deTurckGalerkin_forcing_dissipation_perScaleSymm
     (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
     (ha_super : 4 * Module.finrank ℝ E + 10 ≤ a) {T : ℝ}
@@ -1518,7 +1512,6 @@ private theorem deTurckGalerkin_forcing_dissipation_perScaleSymm
   exact hfinal
 
 set_option backward.isDefEq.respectTransparency false in
-
 theorem deTurckGalerkin_forcing_closure_perScaleSymm
     (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
     (ha_super : 4 * Module.finrank ℝ E + 10 ≤ a) {T : ℝ}

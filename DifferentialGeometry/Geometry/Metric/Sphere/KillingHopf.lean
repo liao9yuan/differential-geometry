@@ -5,19 +5,9 @@ import DifferentialGeometry.Geometry.Metric.Sphere.PuncturedOverlap
 import DifferentialGeometry.Geometry.Metric.TensorInner.MetricFiberData
 import DifferentialGeometry.Topology.Covering.SimplyConnected
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Connection
 
 set_option autoImplicit false
-
-/-!
-# Positive Killing--Hopf theorem
-
-Two one-pole Cartan maps on the round sphere are aligned at one center,
-identified on their connected overlap by local-isometry rigidity, and glued.
-Compactness then upgrades the resulting local diffeomorphism to a covering;
-a simply connected target makes that covering a global diffeomorphism.
--/
 
 noncomputable section
 
@@ -113,8 +103,6 @@ private theorem hlocAt_congr_open
 
 omit [SimplyConnectedSpace N] [LocPathConnectedSpace N]
   [ConnectedSpace N] in
-/-- Two Cartan maps whose second initial jet is taken from the first agree on
-the connected overlap of their one-pole domains. -/
 theorem punctCartan_match
     (hn : 1 < n)
     (hRound : ∀ (x : sphere (0 : A) 1) (w : TangentSpace (𝓡 n) x),
@@ -280,9 +268,6 @@ theorem punctCartan_match
     simpa only [Fp, Fq, q'] using hx'
 
 omit [ConnectedSpace N] in
-/-- A complete simply connected curvature-one manifold is globally isometric
-to the round sphere, in a form retaining the differential isometry needed by
-the later deck-action construction. -/
 theorem sphere_diffeo_one
     (hn : 1 < n)
     (hRound : ∀ (x : sphere (0 : A) 1) (w : TangentSpace (𝓡 n) x),

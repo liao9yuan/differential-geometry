@@ -1,16 +1,6 @@
 import Mathlib.Analysis.Calculus.ParametricIntegral
 import Mathlib.Topology.MetricSpace.ProperSpace
 
-/-!
-# Finite-dimensional differentiation under a compact integral
-
-For a finite measure on a compact space, joint continuity of a pointwise
-Fréchet derivative gives the uniform local domination needed by Mathlib's
-parametric-integral theorem.  This file packages that compactness argument for
-finite-dimensional parameter spaces.  It is used for the coefficient
-derivatives of finite Galerkin energies.
--/
-
 noncomputable section
 
 open Filter MeasureTheory Set
@@ -18,9 +8,6 @@ open scoped Topology
 
 namespace DifferentialGeometry.Integral.Measure
 
-/-- Differentiate a compact integral with respect to a finite-dimensional
-parameter.  Joint continuity of the integrand and its pointwise derivative
-supplies all measurability, integrability, and domination hypotheses. -/
 theorem hasFDerivAt_integral_compact
     {X V W : Type*} [TopologicalSpace X] [CompactSpace X]
     [MeasurableSpace X] [BorelSpace X]
@@ -133,8 +120,6 @@ theorem hasFDerivAt_integral_compactOn
   exact hasFDerivAt_integral_of_dominated_of_fderiv_le
     hs hmeas hint hmeas' hbound hCint hdiff'
 
-/-- The Fréchet derivative of a compact integral is the integral of the
-pointwise derivatives under the same joint-continuity assumptions. -/
 theorem fderiv_integral_compact
     {X V W : Type*} [TopologicalSpace X] [CompactSpace X]
     [MeasurableSpace X] [BorelSpace X]
@@ -151,10 +136,6 @@ theorem fderiv_integral_compact
     fderiv ℝ (fun v : V => ∫ x, F v x ∂μ) u = ∫ x, F' u x ∂μ :=
   (hasFDerivAt_integral_compact μ F F' hF hF' hdiff u).fderiv
 
-/-- If the pointwise first derivative is itself continuously differentiable,
-then the derivative of the compact integral varies continuously.  The second
-derivative is used only to obtain continuity; no explicit formula for it is
-baked into the conclusion. -/
 theorem continuous_fderiv_integral_compact
     {X V W : Type*} [TopologicalSpace X] [CompactSpace X]
     [MeasurableSpace X] [BorelSpace X]

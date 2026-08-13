@@ -2,29 +2,6 @@ import DifferentialGeometry.Geometry.Exponential.IntrinsicSmooth
 import DifferentialGeometry.Geometry.Comparison.Variation.PerpFrame
 import DifferentialGeometry.Geometry.Curvature.RicciOperatorNormBound
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
-
-
-/-!
-# Parallel frame along the intrinsic radial geodesic, at every scale
-
-`exists_radialFrame` (`RadialGronwall.lean`) produces a parallel orthonormal
-frame along the chart-based `radialCurve`, but its `C²` input is only
-satisfiable below `expMapC2Radius` — the analytic cap of the Route B frontier.
-This file provides the un-capped replacement along the *intrinsic* geodesic:
-`intrinsicGeodesic` is globally `C^∞` in time
-(`intrinsicGeodesic_contMDiff`, `Exponential/IntrinsicSmooth.lean`), so the
-generic parallel-transport engine `exists_parallel_frame` (`PerpFrame.lean`)
-applies on `[0, b]` for **every** `b > 0` and **every** launch vector — no
-smallness hypothesis.
-
-## Main result
-
-* `exists_intrFrame` — a full parallel `g`-orthonormal frame along
-  `intrinsicGeodesic g hEnorm p v` on `[0, b]`, in the same four-clause shape
-  as `exists_radialFrame` (card bridge, chart-representation
-  differentiability, parallelism, orthonormality).
--/
 
 noncomputable section
 
@@ -54,9 +31,6 @@ attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
 omit [T2Space (TangentBundle I M)]
   [ConnectedSpace M] in
-/-- **Parallel orthonormal frame along the intrinsic radial geodesic, at every
-scale.**  Un-capped analogue of `exists_radialFrame`: the interval `[0, b]` and
-the launch vector `v` are arbitrary. -/
 lemma exists_intrFrame
     [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
     [IsContinuousRiemannianBundle E (fun (x : M) ↦ TangentSpace I x)]

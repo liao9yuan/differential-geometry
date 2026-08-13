@@ -1,11 +1,5 @@
 import DifferentialGeometry.Geometry.Coordinates.NablaComponents.OneForm.Pairing
 
-
-
-
-
-
-
 set_option autoImplicit false
 
 noncomputable section

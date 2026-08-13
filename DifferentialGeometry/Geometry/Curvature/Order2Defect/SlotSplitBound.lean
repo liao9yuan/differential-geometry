@@ -4,8 +4,6 @@ import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.SlotSplitParse
 open DifferentialGeometry.Analysis.Elliptic
 open DifferentialGeometry.Geometry.Curvature
 
-
-
 noncomputable section
 
 

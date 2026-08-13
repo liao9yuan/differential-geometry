@@ -5,15 +5,6 @@ import DifferentialGeometry.Tensor.RSTensor.Field
 import DifferentialGeometry.Geometry.Operator.Operators
 import DifferentialGeometry.Geometry.Operator.RoughLaplacian
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
-
-
-
-
-
-
-
-
 
 noncomputable section
 
@@ -250,8 +241,6 @@ theorem rawLap_toRS0
   simp only [smul_sub]
   rfl
 
-
-
 omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] in
 private theorem cov0_diag_hess
     (g : SmoothRiemannianMetric I M)
@@ -316,8 +305,6 @@ private theorem cov0_diag_hess
     exact differential1FormFun_apply_eq_extDerivFun (I := I) f y (B y)
   rw [hpairing, duSec_apply,
     differential1FormFun_apply_eq_extDerivFun]
-
-
 
 omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] in
 theorem secondRS_scalar

@@ -3,7 +3,6 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.SobolevScale.WeylSummabilit
 import DifferentialGeometry.Analysis.Parabolic.MaximalRegularity.Synthesis
 import Mathlib.Analysis.Normed.Group.FunctionSeries
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
 
 namespace DifferentialGeometry
 

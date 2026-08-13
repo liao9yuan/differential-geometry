@@ -5,16 +5,8 @@ import DifferentialGeometry.Analysis.Integration.L2.SmoothSections.Retag
 import Mathlib.Analysis.Normed.Operator.Extend
 open DifferentialGeometry.Analysis.Elliptic
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Connection
 open DifferentialGeometry.Geometry.Operator
-
-
-
-
-
-
-
 
 noncomputable section
 
@@ -75,8 +67,6 @@ noncomputable def lapDiffSec
     (rawConnLapLin (I := I) g 0 0).comp
       (finiteReprLin (I := I) (M := M) g 0 0 2)
 
-
-
 theorem lapDiffSec_apply
     (g h : SmoothRiemannianMetric I M)
     (v : ScalarH2Core (I := I) (M := M) g) (x : M) :
@@ -104,15 +94,11 @@ theorem lapDiffSec_apply
   rw [← toRS0_sub]
   rw [map_sub]
 
-
-
 noncomputable def lapDiffCore
     (g h : SmoothRiemannianMetric I M) :
     ScalarH2Core (I := I) (M := M) g →ₗ[Real] TensorL2 0 0 g :=
   (SmoothCcTensor.toL2 (g := g) (r := 0) (s := 0)).toLinearMap.comp
     (lapDiffSec (I := I) (M := M) g h)
-
-
 
 theorem lapDiffCore_pair
     (q h : SmoothRiemannianMetric I M)
@@ -168,8 +154,6 @@ theorem lapDiffCore_pair
       (reprScalar0_smooth (I := I) (M := M) w.1 w.2) x Fin.elim0
   rw [hlap, hrepr]
 
-
-
 theorem lapDiffCore_sq
     (g h : SmoothRiemannianMetric I M)
     (v : ScalarH2Core (I := I) (M := M) g) :
@@ -188,8 +172,6 @@ theorem lapDiffCore_sq
   rw [lapDiffSec_apply (I := I) (M := M) g h v x]
   rw [inner_toRS0_scalar (I := I) (M := M) g x]
   ring
-
-
 
 theorem lapDiffCore_norm
     (g : SmoothRiemannianMetric I M) :
@@ -223,15 +205,11 @@ theorem lapDiffCore_norm
   nlinarith [norm_nonneg
     (lapDiffCore (I := I) (M := M) g h v)]
 
-
-
 noncomputable def lapDiffOp
     (g h : SmoothRiemannianMetric I M) :
     tensorHs (I := I) (M := M) g 0 0 2 →L[Real] TensorL2 0 0 g :=
   (lapDiffCore (I := I) (M := M) g h).extendOfNorm
     (ScalarH2Core (I := I) (M := M) g).subtype
-
-
 
 theorem lapDiffOp_core
     (g h : SmoothRiemannianMetric I M)
@@ -253,8 +231,6 @@ theorem lapDiffOp_core
   refine ⟨B, ?_⟩
   intro w
   simpa only [B, Submodule.coe_subtype] using hbound h w hsmall
-
-
 
 theorem lapDiffOp_norm
     (g : SmoothRiemannianMetric I M) :

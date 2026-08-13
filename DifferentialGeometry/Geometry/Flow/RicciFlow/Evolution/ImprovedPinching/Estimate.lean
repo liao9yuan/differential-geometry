@@ -4,20 +4,10 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.RicciPreservation
 import DifferentialGeometry.Geometry.Flow.RicciFlow.MaximumPrinciple.ScalarWeak
 open DifferentialGeometry.PDE.RicciFlow
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Connection
 open DifferentialGeometry.Geometry.Operator
 
 set_option autoImplicit false
-
-
-
-
-
-
-
-
-
 
 noncomputable section
 
@@ -44,9 +34,6 @@ def PinchEstimateOn
     (C : Real) (U : Set Real) : Prop :=
   ∀ t : Real, t ∈ U -> ∀ x : M,
     tracefreeRicciNormSq t x / scalar t x ^ 2 ≤ C * weight t x
-
-
-
 
 def pinchQuotient
     {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
@@ -80,8 +67,6 @@ theorem pinchDriftTerm_eq_inner_drift
           (quotField (M := M) (tfRicNormSq scalar ricciNormSq)
             scalar (1 : Real) (2 - epsilon) t) x) := by
   simp [pinchDriftTerm, pinchDriftVector]
-
-
 
 omit [TopologicalSpace M] in
 theorem pinchEstimateOn_of_pinchQuotient_bound
@@ -131,8 +116,6 @@ theorem pinchSquareTerm_nonpos
   simpa [pinchSquareTerm] using
     mul_nonpos_of_nonpos_of_nonneg hcoef hcouple
 
-
-
 omit [TopologicalSpace M] in
 theorem pinchGradTerm_nonpos
     (scalar ricciNormSq gradScalarNormSq : Real -> M -> Real)
@@ -165,8 +148,6 @@ theorem pinchGradTerm_nonpos
   rw [hterm]
   exact hmain
 
-
-
 omit [TopologicalSpace M] in
 theorem pinchReactTerm_nonpos
     (scalar ricciNormSq Q : Real -> M -> Real)
@@ -182,8 +163,6 @@ theorem pinchReactTerm_nonpos
     div_nonpos_of_nonpos_of_nonneg (by norm_num) hden
   simpa [pinchReactTerm] using
     mul_nonpos_of_nonpos_of_nonneg hcoef hreact
-
-
 
 omit [Module.Finite ℝ E] in
 theorem cubicQ_sub_nonneg_of_section9
@@ -246,8 +225,6 @@ theorem pinchCoupleSol_nonneg
         (ricciNablaSec (I := I) S t x)
         (DifferentialGeometry.Geometry.Operator.differential1FormFun (I := I) (S.scalar t) x))
 
-
-
 omit [Module.Finite ℝ E] [IsManifold I 1 M] in
 theorem pinchBookRHS_le_drift
     [Module.Finite ℝ E]
@@ -273,9 +250,6 @@ theorem pinchBookRHS_le_drift
     pinchReactTerm_nonpos (M := M) scalar ricciNormSq Q epsilon t x hR hreact
   unfold pinchBookRHS
   nlinarith
-
-
-
 
 omit [Module.Finite ℝ E] in
 theorem pinchBookRHS_le_drift_sol
@@ -317,8 +291,6 @@ theorem pinchBookRHS_le_drift_sol
     (tfNonneg_sol (I := I) S (fun tt y => hdim y) t x)
     (cubicQ_sub_nonneg_of_section9 (I := I) S hdim hR hdelta0
       hepsilon ht hric hpinch)
-
-
 
 omit [Module.Finite ℝ E] in
 theorem pinchQuotient_parabolic_nonpos
@@ -632,8 +604,6 @@ private theorem ricciNorm_slabCont
       exact ⟨hslab'.1.1, lt_of_le_of_lt hslab'.1.2 hTω⟩
     · exact hu_space
 
-
-
 omit [Module.Finite ℝ E] in
 theorem pinchQuotient_slab_continuous_of_ricciNorm
     [Module.Finite ℝ E]
@@ -800,13 +770,6 @@ theorem pinchQuotient_grad_pos
         (hfDiff y) (hhDiff y)
   rw [hgrad_eq]
   exact hsum
-
-
-
-
-
-
-
 
 omit [Module.Finite ℝ E] in
 theorem pinchQuot_slab_bound
@@ -1005,8 +968,6 @@ def carrierZeroExt
   classical
   exact fun t x => if t ∈ D.carrier then f t x else 0
 
-
-
 def carrierScalarExt
     (D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval) (scalar : Real -> M -> Real) :
     Real -> M -> Real := by
@@ -1020,8 +981,6 @@ def carrierWeightExt
   classical
   exact fun t x =>
     if t ∈ D.carrier then pinchWeight (M := M) scalar epsilon t x else 0
-
-
 
 omit [TopologicalSpace M] in
 theorem pinchEstimate_ext
@@ -1039,13 +998,6 @@ theorem pinchEstimate_ext
   · simpa [carrierZeroExt, carrierScalarExt, carrierWeightExt, htD] using
       h t htD x
   · simp [carrierZeroExt, carrierScalarExt, carrierWeightExt, htD]
-
-
-
-
-
-
-
 
 omit [Module.Finite ℝ E] in
 theorem pinchEstimate_sol
@@ -1137,8 +1089,6 @@ theorem pinchEstimate_sol
     have ht_eq : t = 0 := le_antisymm ht_le0 ht0
     subst t
     simpa [pinchQuotient] using hCinit x
-
-
 
 omit [Module.Finite ℝ E] in
 theorem pinchEstimate_display_sol

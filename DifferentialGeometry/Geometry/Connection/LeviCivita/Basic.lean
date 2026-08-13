@@ -3,17 +3,8 @@ import DifferentialGeometry.Geometry.Curvature.Realized.MetricFamily
 import Mathlib.Geometry.Manifold.VectorBundle.CovariantDerivative.Torsion
 import DifferentialGeometry.Geometry.Connection.LeviCivita.MetricCompatible
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
 
 set_option autoImplicit false
-
-
-
-
-
-
-
-
 
 namespace DifferentialGeometry.Geometry.Connection
 

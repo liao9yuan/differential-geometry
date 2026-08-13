@@ -3,7 +3,6 @@ import DifferentialGeometry.Geometry.Connection.MetricCompatibility.CovGradCovDe
 import DifferentialGeometry.Geometry.Connection.LeviCivita.ChristoffelDifferenceKoszul
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.MetricRealization.TensorHsRealize
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Connection
 open DifferentialGeometry.Geometry.Operator
 

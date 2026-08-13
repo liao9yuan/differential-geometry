@@ -5,18 +5,8 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.StarSum.SolutionRe
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.StarSum.TowerProducer
 open DifferentialGeometry.Analysis.Sobolev.IntrinsicSobolev.SmoothCcTensorHs
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Connection
 open DifferentialGeometry.Geometry.Operator
-
-
-
-
-
-
-
-
-
 
 noncomputable section
 
@@ -58,14 +48,9 @@ variable [I.Boundaryless]
 variable [IsManifold I ∞ M] [IsManifold I 2 M]
 variable [T2Space M] [CompactSpace M] [BoundarylessManifold I M]
 
-
-
 def towerSolConst (k : Nat) : Real :=
   2 * Real.sqrt (Fintype.card (Fin (4 + k) -> Fin 3) : Real) *
     (((4 + k : Nat) : Real) * (3 : Real) ^ 2 + resStarCost k)
-
-
-
 
 theorem towerHeatSol
     {alpha t0 omega : Real} {hAlphaOmega : alpha < omega}

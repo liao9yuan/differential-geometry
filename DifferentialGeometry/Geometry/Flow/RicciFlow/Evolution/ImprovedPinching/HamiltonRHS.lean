@@ -1,16 +1,9 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.ImprovedPinching.Quotient
 open DifferentialGeometry.PDE.RicciFlow
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Operator
 
 set_option autoImplicit false
-
-
-
-
-
-
 
 noncomputable section
 
@@ -26,9 +19,6 @@ variable {I : ModelWithCorners Real E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
 variable [IsManifold I ∞ M] [IsManifold I 1 M]
 
-
-
-
 def tfHeatTerm
     (scalar ricciNormSq nablaRicNormSq gradScalarNormSq Q :
       Real -> M -> Real) : Real -> M -> Real :=
@@ -39,13 +29,9 @@ def tfHeatTerm
           tfRicNormSq scalar ricciNormSq t x - 2 * Q t x) /
         scalar t x
 
-
-
 def scalarHeatTerm
     (ricciNormSq : Real -> M -> Real) : Real -> M -> Real :=
   fun t x => 2 * ricciNormSq t x
-
-
 
 abbrev PinchEvolOn
     {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
@@ -57,10 +43,6 @@ abbrev PinchEvolOn
     (tfRicNormSq scalar ricciNormSq) scalar
     (tfHeatTerm scalar ricciNormSq nablaRicNormSq gradScalarNormSq Q)
     (scalarHeatTerm ricciNormSq) (1 : Real) (2 - epsilon)
-
-
-
-
 
 omit [Module.Finite ℝ E] in
 theorem pinchEvol_setup
@@ -128,10 +110,6 @@ theorem pinchEvol_setup
   · intro t x
     simpa [scalarHeatTerm] using hscalar t x
 
-
-
-
-
 def ricciGradCoupleAt {x : M}
     (scalar : Real)
     (Ric : Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) 2 x)
@@ -143,8 +121,6 @@ def ricciGradCoupleAt {x : M}
       Bundle.continuousMultilinearMap.product_fun
         (𝕜 := Real) (F := E) (E := TangentSpace I)
         (s := 1) (q := 2) dScalar Ric)
-
-
 
 def ricciGradCoupleSq
     (g : Real -> SmoothMetric_gen I M)
@@ -159,8 +135,6 @@ def ricciGradCoupleSq
       (ricciGradCoupleAt (I := I)
         (scalar t x) (Ric t x) (nablaRic t x)
         (DifferentialGeometry.Geometry.Operator.differential1FormFun (I := I) (scalar t) x))
-
-
 
 omit [Module.Finite ℝ E] in
 theorem ricciGradCoupleSq_exp_inner
@@ -221,8 +195,6 @@ theorem ricciGradCoupleSq_exp_inner
     (DifferentialGeometry.Geometry.Operator.differential1FormFun (I := I) (scalar t) x)
     (Ric t x)]
   rw [← hnabla, ← hric, hgradOne]
-
-
 
 omit [Module.Finite ℝ E] in
 theorem ricciMixed_eq_gradNorm
@@ -340,12 +312,6 @@ theorem ricciMixed_eq_gradNorm
           (fun y : M =>
             DifferentialGeometry.Geometry.Curvature.normSq02 (I := I) (G.metric t) y (RicSec y)) x)
         (DifferentialGeometry.Geometry.Curvature.gradientAt (I := I) G t (scalar t) x) := rfl
-
-
-
-
-
-
 
 omit [Module.Finite ℝ E] in
 theorem ricciMixed_eq_tfGrad
@@ -494,8 +460,6 @@ theorem ricciMixed_eq_tfGrad
           simp [R, DifferentialGeometry.Geometry.Curvature.gradientAt, hgradScalarSq, smul_eq_mul,
             mul_assoc, mul_comm]
 
-
-
 omit [Module.Finite ℝ E] in
 theorem ricciGradCoupleSq_exp_mixed
     [FiniteDimensional Real E]
@@ -550,8 +514,6 @@ theorem ricciGradCoupleSq_exp_mixed
     hnabla hric hgradScalarSq]
   rw [hmixed]
 
-
-
 def pinchDriftTerm
     (G : DifferentialGeometry.Geometry.Curvature.MetricConnectionFamily (I := I) (M := M) Real)
     (scalar ricciNormSq : Real -> M -> Real)
@@ -586,9 +548,6 @@ def pinchReactTerm
     -2 / scalar t x ^ (3 - epsilon) *
       (Q t x -
         epsilon * ricciNormSq t x * tfRicNormSq scalar ricciNormSq t x)
-
-
-
 
 def pinchBookRHS
     (G : DifferentialGeometry.Geometry.Curvature.MetricConnectionFamily (I := I) (M := M) Real)
@@ -688,8 +647,10 @@ theorem pinchDrift_exp
   rw [hgradScalarSq]
   rw [hnegpow, hnegpow1]
   rw [hpow3, hpow4]
-  simp only [div_eq_mul_inv, DifferentialGeometry.Geometry.Curvature.gradientAt_eq, DifferentialGeometry.Geometry.Operator.gradientFun_eq,
-    DifferentialGeometry.Geometry.Operator.metricSharp_def, neg_sub, mul_inv_rev, map_add, map_smul, smul_eq_mul,
+  simp only [div_eq_mul_inv, DifferentialGeometry.Geometry.Curvature.gradientAt_eq,
+    DifferentialGeometry.Geometry.Operator.gradientFun_eq,
+    DifferentialGeometry.Geometry.Operator.metricSharp_def, neg_sub, mul_inv_rev, map_add,
+      map_smul, smul_eq_mul,
     phi, R]
   unfold DifferentialGeometry.Geometry.Curvature.gradientAt
     DifferentialGeometry.Geometry.Operator.gradientFun
@@ -698,9 +659,6 @@ theorem pinchDrift_exp
   field_simp [hscalar.ne']
   rw [hpow3]
   ring_nf
-
-
-
 
 omit [Module.Finite ℝ E] in
 omit [IsManifold I 1 M] in
@@ -789,8 +747,6 @@ theorem pinchRHS_eq_book_of_parts
   field_simp [hscalar.ne']
   ring_nf
 
-
-
 omit [Module.Finite ℝ E] in
 theorem pinchRHS_eq_book
     [FiniteDimensional Real E]
@@ -829,11 +785,6 @@ theorem pinchRHS_eq_book
     hscalar hgradScalarSq ?_ hcouple
   exact pinchDrift_exp (I := I) G scalar ricciNormSq gradScalarNormSq
     epsilon t x hscalar htfDiff hscalarDiff hgradScalarSq
-
-
-
-
-
 
 omit [Module.Finite ℝ E] in
 theorem pinchEvol_book_of_couple
@@ -897,12 +848,6 @@ theorem pinchEvol_book_of_couple
       (hscalarDiff t x) (hcouple t x)
   rw [hrhs] at h
   exact h
-
-
-
-
-
-
 
 omit [Module.Finite ℝ E] in
 theorem pinchEvol_book_of_mixed
@@ -999,11 +944,6 @@ theorem pinchEvol_book_of_mixed
     nablaRicNormSq gradScalarNormSq Ric nablaRic (t : Real) x
     (basis t x) (gInv t x) (hinv t x) (hnabla t x) (hric t x)
     (hgradScalarSq t x) (hmixed t x)
-
-
-
-
-
 
 omit [Module.Finite ℝ E] in
 theorem pinchEvol_sec

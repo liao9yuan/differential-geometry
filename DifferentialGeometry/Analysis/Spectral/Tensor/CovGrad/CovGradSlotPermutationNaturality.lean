@@ -6,7 +6,6 @@ import DifferentialGeometry.Geometry.Connection.ChartTensorNabla.Agreement.Tenso
 import Mathlib.GroupTheory.Perm.Fin
 open DifferentialGeometry.Analysis.Elliptic
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Connection
 
 

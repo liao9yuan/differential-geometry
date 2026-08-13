@@ -5,7 +5,6 @@ import DifferentialGeometry.Analysis.Integration.Measure.Invariance
 import Mathlib.Topology.Order.Compact
 import Mathlib.Topology.Separation.Basic
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Connection
 open DifferentialGeometry.Geometry.Operator
 

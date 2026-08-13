@@ -2,16 +2,7 @@ import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurckCoefficients.Chri
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurckCoefficients.RHSAbsoluteBound
 open DifferentialGeometry.Analysis.Calculus.DeTurckCoefficients
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Operator
-
-
-
-
-
-
-
-
 
 open DifferentialGeometry.Geometry.Connection
 namespace DifferentialGeometry.Analysis.Spectral.DeTurckCoefficients
@@ -127,8 +118,6 @@ private lemma riemann_diffAt
         funext z; rw [chartRiemannTensor_def]]
   exact (h1.sub h2).add (DifferentiableAt.fun_sum fun m _ => hquad m)
 
-
-
 omit [NeZero (Module.finrank ℝ E)] in
 theorem partial_chartRiemann
     (g : SmoothRiemannianMetric I M) (α : M)
@@ -211,8 +200,6 @@ theorem partial_chartRiemann
       (christ_diffAt (I := I) g α k m l hy)
       (christ_diffAt (I := I) g α i j m hy)]
 
-
-
 omit [NeZero (Module.finrank ℝ E)] in
 theorem partial_chartRicci
     (g : SmoothRiemannianMetric I M) (α : M)
@@ -227,8 +214,6 @@ theorem partial_chartRicci
         funext z; rw [chartRicciTensor_def],
     partialDeriv_sum (i := d) Finset.univ _
       (fun j _ => riemann_diffAt (I := I) g α i j k j hy)]
-
-
 
 omit [NeZero (Module.finrank ℝ E)] in
 theorem chartRiemannD_le
@@ -281,8 +266,6 @@ theorem chartRiemannD_le
       add_le_add (add_le_add (hd2Γ d j i k l) (hd2Γ d k i j l)) hquad
     _ = 2 * Cd2Γ + 4 * (Module.finrank ℝ E : ℝ) * (CΓ * CdΓ) := by ring
 
-
-
 omit [NeZero (Module.finrank ℝ E)] in
 theorem chartRicciD_abs_le
     (g : SmoothRiemannianMetric I M) (α : M) {y : E}
@@ -312,8 +295,6 @@ theorem chartRicciD_abs_le
     _ = (Module.finrank ℝ E : ℝ) *
         (2 * Cd2Γ + 4 * (Module.finrank ℝ E : ℝ) * (CΓ * CdΓ)) := by
       simp only [Finset.sum_const, Finset.card_univ, Fintype.card_fin, nsmul_eq_mul]
-
-
 
 omit [NeZero (Module.finrank ℝ E)] in
 theorem partial2_deTurckVF
@@ -408,8 +389,6 @@ theorem partial2_deTurckVF
       (christD_diffAt (I := I) g α m a b k hy)
       (christD_diffAt (I := I) g_bg α m a b k hy)]
   ring
-
-
 
 omit [NeZero (Module.finrank ℝ E)] in
 theorem deTurckVFD2_le
@@ -588,8 +567,6 @@ private lemma lie_diffAt
     (DifferentiableAt.fun_sum fun k _ => hB k)).add
       (DifferentiableAt.fun_sum fun k _ => hC k)
 
-
-
 omit [NeZero (Module.finrank ℝ E)] in
 theorem partial_chartLie
     (g g_bg : SmoothRiemannianMetric I M) (α : M)
@@ -693,8 +670,6 @@ theorem partial_chartLie
       (gram_diffAt (I := I) g α i k hy)
       (vfD_diffAt (I := I) g g_bg α j k hy)]
 
-
-
 omit [NeZero (Module.finrank ℝ E)] in
 theorem chartLieD_abs_le
     (g g_bg : SmoothRiemannianMetric I M) (α : M) {y : E}
@@ -756,8 +731,6 @@ theorem chartLieD_abs_le
     _ = (Module.finrank ℝ E : ℝ) *
         (3 * DV * Q₁ + V * Q₂ + 2 * Q₀ * D2V) := by ring
 
-
-
 omit [NeZero (Module.finrank ℝ E)] in
 theorem partial_chartRHS
     (g_bg g : SmoothRiemannianMetric I M) (α : M)
@@ -777,8 +750,6 @@ theorem partial_chartRHS
       (hRic.const_mul (-2 : ℝ)) hLie,
     partialDeriv_const_mul (i := d) (-2 : ℝ)
       (chartRicciTensor (I := I) g α i j) hRic]
-
-
 
 omit [NeZero (Module.finrank ℝ E)] in
 theorem chartRHSD_abs_le

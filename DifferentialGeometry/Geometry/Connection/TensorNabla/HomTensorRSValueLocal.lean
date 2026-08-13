@@ -39,7 +39,6 @@ omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] 
   exact ContinuousLinearMap.instT2Space
 
 set_option backward.isDefEq.respectTransparency false in
-
 private noncomputable def chooseSecAtFull
     (g : SmoothRiemannianMetric I M) (r a : ℕ) (x : M) (v : TensorRSSpace r a I x) :
     SmoothCcTensor g r a where
@@ -52,7 +51,6 @@ private noncomputable def chooseSecAtFull
   hasCompactSupport := HasCompactSupport.of_compactSpace _
 
 set_option backward.isDefEq.respectTransparency false in
-
 omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [BoundarylessManifold I M]
     [SigmaCompactSpace M] in
 private lemma chooseSecAtFull_eq
@@ -144,7 +142,6 @@ private lemma valueLocalLinearHomFib_apply
   exact hloc _ W x (chooseSecAtFull_eq (I := I) (M := M) g r a x (W.toSection x))
 
 set_option backward.isDefEq.respectTransparency false in
-
 omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [BoundarylessManifold I M]
     [SigmaCompactSpace M] in
 private theorem valueLocalLinearHomFib_contMDiff
@@ -175,7 +172,6 @@ private theorem valueLocalLinearHomFib_contMDiff
     (E := fun z : M => TensorRSSpace r c I z) x) (hpt x)).symm ▸ rfl
 
 set_option backward.isDefEq.respectTransparency false in
-
 omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [BoundarylessManifold I M]
     [SigmaCompactSpace M] in
 theorem exists_value_local_appFullSec (g : SmoothRiemannianMetric I M) (r a c : ℕ)

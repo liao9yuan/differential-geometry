@@ -5,10 +5,7 @@ import DifferentialGeometry.Geometry.Exponential.ChartFlow.ChartFlowData
 import DifferentialGeometry.Geometry.Geodesic.MaximalInterval
 import DifferentialGeometry.Geometry.Geodesic.MaximalRescaling
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Connection
-
-
 
 noncomputable section
 

@@ -4,16 +4,6 @@ import Mathlib.Topology.Compactness.Compact
 import Mathlib.Logic.Equiv.Basic
 import Mathlib.Data.Finite.Defs
 
-
-
-
-
-
-
-
-
-
-
 open Set Function
 open scoped Topology
 
@@ -25,12 +15,6 @@ namespace Riemannian
 namespace Topology
 namespace UniversalCover
 
-/-- **The fibre of a covering map over a compact total space is finite.**
-For any covering map `p : E → X` with `E` compact and `X` a `T1Space`, the
-fibre `p⁻¹{x}` is closed in `E` (preimage of a point under a continuous map
-into a `T1Space`), hence compact (`IsClosed.isCompact` in the compact space
-`E`), and discrete (`IsCoveringMap` implies discrete fibres). A compact and
-discrete topological space is finite. -/
 theorem isCoveringMap_fibre_finite_of_compact
     {X E : Type*} [TopologicalSpace X] [T1Space X]
     [TopologicalSpace E] [CompactSpace E]
@@ -43,13 +27,6 @@ theorem isCoveringMap_fibre_finite_of_compact
   haveI hcomp : CompactSpace (p ⁻¹' {x} : Set E) :=
     isCompact_iff_compactSpace.mp hclosed.isCompact
   exact finite_of_compact_of_discrete
-
-
-
-
-
-
-
 
 theorem action_eval_surjective
     {X E : Type*} [TopologicalSpace X] [TopologicalSpace E]
@@ -81,14 +58,6 @@ theorem action_eval_surjective
     have := congrArg (fun f : C(unitInterval, E) => f 1) hlift_eq
     simpa using this.trans δ.target
   exact hval
-
-
-
-
-
-
-
-
 
 theorem action_eval_injective
     {X E : Type*} [TopologicalSpace X] [TopologicalSpace E]
@@ -136,11 +105,6 @@ theorem action_eval_injective
   rw [hp_eq₁, hp_eq₂] at hp_comp
   exact hp_comp
 
-
-
-
-
-
 noncomputable def fibreEquivLoopQuotient
     {X E : Type*} [TopologicalSpace X] [TopologicalSpace E]
     [PathConnectedSpace E] [SimplyConnectedSpace E]
@@ -149,13 +113,6 @@ noncomputable def fibreEquivLoopQuotient
   (Equiv.ofBijective
       (fun γ : Path.Homotopic.Quotient x x => hp.monodromy γ e')
       ⟨action_eval_injective hp x e', action_eval_surjective hp x e'⟩).symm
-
-
-
-
-
-
-
 
 noncomputable def fibreEquivFundamentalGroup
     {X E : Type*} [TopologicalSpace X] [TopologicalSpace E]
@@ -169,8 +126,6 @@ noncomputable def fibreEquivFundamentalGroup
       left_inv := fun _ => rfl
       right_inv := fun _ => rfl }
 
-/-- Compactness of the path-space universal cover makes the fundamental group
-at the chosen base point finite. -/
 theorem finite_pi1_of_uc
     {X : Type*} [TopologicalSpace X] [T1Space X] [Inhabited X]
     [ConnectedSpace X] [LocPathConnectedSpace X]

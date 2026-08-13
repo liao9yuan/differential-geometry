@@ -7,16 +7,6 @@ open DifferentialGeometry.Geometry.Curvature
 
 set_option autoImplicit false
 
-
-
-
-
-
-
-
-
-
-
 noncomputable section
 
 
@@ -74,8 +64,6 @@ private theorem tangentConst_model (z v : E) :
   simp
   rfl
 
-
-
 theorem const_flat_eq_koszul
     (g : SmoothRiemannianMetric 𝓘(Real, E) E)
     (B : E → E →L[Real] E →L[Real] Real)
@@ -121,8 +109,6 @@ theorem const_flat_eq_koszul
     dir_const_eval2 hBdiff w u v] at hKos
   rw [MetricKoszul.koszulCov_apply]
   exact hKos
-
-
 
 theorem const_flat_eq_nhds
     (g : SmoothRiemannianMetric 𝓘(Real, E) E)
@@ -190,8 +176,6 @@ theorem const_flat_eq_nhds
   rw [MetricKoszul.koszulCov_apply]
   exact hKos
 
-
-
 theorem const_cov_eq_koszul
     (g : SmoothRiemannianMetric 𝓘(Real, E) E)
     (B : E → E →L[Real] E →L[Real] Real)
@@ -212,8 +196,6 @@ theorem const_cov_eq_koszul
       rw [const_flat_eq_koszul g B hB hBdiff v w]
     _ = MetricKoszul.koszulVec hco (fderiv Real B z) v w := rfl
 
-
-
 theorem const_cov_eq_nhds
     (g : SmoothRiemannianMetric 𝓘(Real, E) E)
     (B : E → E →L[Real] E →L[Real] Real) {z : E}
@@ -233,9 +215,6 @@ theorem const_cov_eq_nhds
     _ = hco.sharp (MetricKoszul.koszulCov (fderiv Real B z) v w) := by
       rw [const_flat_eq_nhds g B hB hBdiff v w]
     _ = MetricKoszul.koszulVec hco (fderiv Real B z) v w := rfl
-
-
-
 
 theorem cov_eq_fderiv_add
     [NeZero (Module.finrank Real E)]

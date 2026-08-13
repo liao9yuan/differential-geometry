@@ -9,19 +9,9 @@ import DifferentialGeometry.Geometry.Coordinates.NablaComponents.OneForm.Smoothn
 import DifferentialGeometry.Geometry.Coordinates.NablaComponents.TwoTensor
 open DifferentialGeometry.Tensor.RicciIdentity
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Operator
 
 set_option autoImplicit false
-
-
-
-
-
-
-
-
-
 
 noncomputable section
 
@@ -198,13 +188,6 @@ private theorem leviCivita_nablaDuSec_pointwise_symm_direct
   rw [hleft, hright, hleft_eval, hright_eval]
   linarith
 
-
-
-
-
-
-
-
 private theorem leviCivita_nablaDuSec_coordFrame_symm
     [SigmaCompactSpace M] [T2Space M]
     (g : SmoothRiemannianMetric I M) (u : M -> Real)
@@ -226,8 +209,6 @@ private theorem leviCivita_nablaDuSec_coordFrame_symm
     (coordinateFrameAt_toBasis (I := I) x i)
     (coordinateFrameAt_toBasis (I := I) x j)
 
-
-
 private theorem leviCivita_nablaDuSec_pointwise_symm
     [SigmaCompactSpace M] [T2Space M]
     (g : SmoothRiemannianMetric I M) (u : M -> Real)
@@ -248,8 +229,6 @@ private theorem leviCivita_nablaDuSec_pointwise_symm
   simpa [vec2] using
     leviCivita_nablaDuSec_coordFrame_symm
       (I := I) g u hu duSec nablaDuSec hnabla hdu x i j
-
-
 
 theorem hessSymm
     [SigmaCompactSpace M] [T2Space M]
@@ -278,8 +257,6 @@ theorem hessSymm
   simpa [cov, hcov, du, Hess] using
     leviCivita_nablaDuSec_pointwise_symm
       (I := I) g u hu du Hess hnabla hdu x U V
-
-
 
 theorem oneFormLastTwoSymmAt_of_leviCivita_du
     [SigmaCompactSpace M] [T2Space M]

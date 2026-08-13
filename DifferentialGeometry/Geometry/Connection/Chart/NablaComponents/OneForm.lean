@@ -2,8 +2,6 @@ import DifferentialGeometry.Geometry.Connection.Chart.NablaComponents.Basic
 import DifferentialGeometry.Geometry.Operator.Operators
 open DifferentialGeometry.Geometry.Operator
 
-
-
 noncomputable section
 
 namespace DifferentialGeometry

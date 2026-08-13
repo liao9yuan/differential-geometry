@@ -9,15 +9,6 @@ open DifferentialGeometry.Geometry.Connection
 
 set_option autoImplicit false
 
-
-
-
-
-
-
-
-
-
 noncomputable section
 
 namespace DifferentialGeometry.Geometry.Curvature
@@ -31,9 +22,6 @@ variable {H : Type*} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H} [I.Boundaryless]
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [T2Space M]
 variable [IsManifold I ∞ M] [SigmaCompactSpace M]
-
-
-
 
 omit [I.Boundaryless] in
 theorem ricciAt_unitQuad_le_of_sol
@@ -68,10 +56,6 @@ theorem ricciAt_unitQuad_le_of_sol
     exact h
   exact ricci_unitQuad_le_of_trace (I := I) (S.base.metric t) basis hON hinv
     (S.ricciAt t x) (S.base.rm04 t x) htrace u hu
-
-
-
-
 
 omit [I.Boundaryless] in
 theorem twoTensorQuadBound_of_solutions

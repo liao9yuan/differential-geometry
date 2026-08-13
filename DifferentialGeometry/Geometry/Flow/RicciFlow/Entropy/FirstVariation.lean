@@ -2,26 +2,8 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.Entropy.Defs
 import DifferentialGeometry.Analysis.Integration.Measure.VolumeVariation
 import Mathlib.Analysis.SpecialFunctions.Pow.Deriv
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
 
 set_option autoImplicit false
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 namespace DifferentialGeometry.PDE.RicciFlow.Entropy
 
@@ -32,8 +14,6 @@ open DifferentialGeometry.Integral.Measure
 open scoped Manifold ContDiff
 
 variable {M : Type*}
-
-
 
 theorem perelmanDensityPrefactor_hasDerivAt {n : Nat}
     {tauPath : Real -> Real} {s0 tau tauVariation : Real}
@@ -68,8 +48,6 @@ theorem perelmanDensityPrefactor_hasDerivAt {n : Nat}
   ring_nf
   rfl
 
-
-
 theorem perelmanDensity_hasDerivAt {n : Nat}
     {tauPath : Real -> Real} {potentialPath : Real -> M -> Real}
     {s0 tau tauVariation : Real}
@@ -102,8 +80,6 @@ theorem perelmanDensity_hasDerivAt {n : Nat}
   unfold perelmanDensity
   rw [htau]
   ring_nf
-
-
 
 def wEntropyBracketVariation (tau tauVariation : Real)
     (scalarCurvature scalarCurvatureVariation gradPotentialNormSq
@@ -152,21 +128,11 @@ theorem wEntropyBracket_hasDerivAt {n : Nat}
   rw [htau]
   simp only [Pi.add_apply]
 
-
-
-
-
-
-
-
 def wEntropyWeightedMeasureVariationFactor (n : Nat) (tau tauVariation : Real)
     (potentialVariation metricVariationTrace : M -> Real) : M -> Real :=
   fun x =>
     -((n : Real) / (2 * tau)) * tauVariation - potentialVariation x +
       metricVariationTrace x / 2
-
-
-
 
 def wEntropyWeightedIntegralVariationIntegrand (n : Nat)
     (tau tauVariation : Real)
@@ -189,12 +155,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
-
-
-
-
-
-
 
 theorem weightedMeasureIntegral_hasDerivAt_at
     [T2Space M] [CompactSpace M]
@@ -280,9 +240,6 @@ theorem weightedMeasureIntegral_hasDerivAt_at
     wEntropyWeightedMeasureVariationFactor
   ring
 
-
-
-
 theorem wEntropyBaseIntegral_hasDerivAt_at
     [T2Space M] [CompactSpace M]
     (G : DifferentialGeometry.Geometry.Curvature.MetricConnectionFamily
@@ -364,9 +321,6 @@ theorem wEntropyBaseIntegral_hasDerivAt_at
         htau htau_deriv hscalar_deriv hgrad_deriv hpotential_deriv)
       htrace hmetric_reg hintegrand_reg)
 
-
-
-
 omit [TopologicalSpace M] in
 theorem WEntropyHasFirstVariationAt_of_baseIntegral_hasDerivAt
     [MeasurableSpace M]
@@ -398,9 +352,6 @@ theorem WEntropyHasFirstVariationAt_of_baseIntegral_hasDerivAt
       gradPotentialNormSqPath potentialPath s0 firstVariation := by
   unfold WEntropyHasFirstVariationAt wFunctionalAlong
   exact hbase.congr_of_eventuallyEq hbase_eq
-
-
-
 
 theorem WEntropyHasFirstVariationAt_of_volumeVariation
     [T2Space M] [CompactSpace M]

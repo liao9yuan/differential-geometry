@@ -1,14 +1,7 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.ImprovedPinching.BookData
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
 
 set_option autoImplicit false
-
-
-
-
-
-
 
 noncomputable section
 
@@ -23,11 +16,6 @@ variable {H : Type*} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
 variable [IsManifold I ∞ M] [IsManifold I 1 M]
-
-
-
-
-
 
 omit [Module.Finite ℝ E] in
 theorem pinchEvol_book
@@ -65,8 +53,6 @@ theorem pinchEvol_book
         D.carrier
         (t : Real) := by
   exact pinchEvol_sol (I := I) S hS hdim epsilon hscalar
-
-
 
 omit [Module.Finite ℝ E] in
 theorem tfHeat_frame
@@ -134,8 +120,6 @@ theorem tfHeat_frame
     hscalarHeat h_inv h_ricci hInvSym hRicSym h_lap
     (tfRel_frame (I := I) S Rm04 gInv frame scalar ricciTraceCube
       l1 l2 l3 hscalar hcube hInv hRic hRm)
-
-
 
 omit [Module.Finite ℝ E] in
 theorem tfHeat_data
@@ -206,8 +190,6 @@ theorem tfHeat_data
       rw [hRic t x i j, hRic t x j i]
       fin_cases i <;> fin_cases j <;> simp [DifferentialGeometry.Geometry.Curvature.ricciDiag3])
     h_lap hRel
-
-
 
 omit [Module.Finite ℝ E] in
 theorem tfHeat_first

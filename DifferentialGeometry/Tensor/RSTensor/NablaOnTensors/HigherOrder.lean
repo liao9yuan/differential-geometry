@@ -7,14 +7,6 @@ import DifferentialGeometry.Bundle.PartialMfderiv.Basic
 import DifferentialGeometry.Bundle.PartialMfderiv.ModelMixed
 import DifferentialGeometry.Bundle.PartialMfderiv.FixedBase
 
-
-
-
-
-
-
-
-
 namespace DifferentialGeometry
 namespace TensorLieDeriv
 

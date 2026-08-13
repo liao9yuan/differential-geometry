@@ -6,39 +6,7 @@ import DifferentialGeometry.Geometry.Exponential.MinimizingGeodesic
 import DifferentialGeometry.Analysis.ODE.PhaseFlowPerturbation
 import Mathlib.Analysis.Calculus.InverseFunctionTheorem.ContDiff
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Connection
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 noncomputable section
 
@@ -230,9 +198,6 @@ private lemma exists_chartDiagInf
     hdiag, diagExp_zero_eq (I := I) g hEnorm p, extChartAt_prod]
   simp only [PartialEquiv.prod_coe]
   rw [(extChartAt I p).right_inv hz1_target, (extChartAt I p).right_inv hG_target]
-
-
-
 
 omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M]
     [SigmaCompactSpace M] [RiemannianBundle (fun x : M => TangentSpace I x)] in
@@ -466,8 +431,6 @@ theorem diagExp_hasFDerivAt_zero
     simp
   rw [← hDL]; exact hD
 
-
-
 def unipotentCLE : (E × E) ≃L[ℝ] (E × E) :=
   DifferentialGeometry.PhaseFlow.freeDiagCLE
 
@@ -483,16 +446,6 @@ theorem diagExp_hasFDerivAt_zero_unipotent
     HasFDerivAt (chartedDiagExp (I := I) g hEnorm p)
       (unipotentCLE (E := E) : (E × E) →L[ℝ] (E × E)) (diagExpZeroPt (I := I) p) :=
   diagExp_hasFDerivAt_zero (I := I) g hEnorm p n hn
-
-
-
-
-
-
-
-
-
-
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in

@@ -1,14 +1,6 @@
 import DifferentialGeometry.Analysis.Spectral.Tensor.SmoothSection.CompactChartJetBound
 import DifferentialGeometry.Analysis.Spectral.Tensor.SobolevScale.EigensectionSobolevDecay
 
-
-
-
-
-
-
-
-
 noncomputable section
 
 open DifferentialGeometry.Analysis.Sobolev
@@ -32,9 +24,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
   [T2Space M] [SigmaCompactSpace M]
 
 local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
-
-
-
 
 theorem scalarEig_jet_le
     (g : SmoothRiemannianMetric I M) (α : M) (m k : ℕ)

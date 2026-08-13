@@ -2,7 +2,6 @@ import DifferentialGeometry.Geometry.Connection.ChartTensorNabla.Tensor0S.Tensor
 import DifferentialGeometry.Geometry.Connection.ChartTensorNabla.Tensor0S.ChartTensor0SCovariantDerivative
 import DifferentialGeometry.Geometry.Connection.ChartTensorNabla.Agreement.TensorSectionMDifferentiability
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
 
 
 noncomputable section

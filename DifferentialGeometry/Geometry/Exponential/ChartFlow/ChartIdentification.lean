@@ -8,9 +8,6 @@ import DifferentialGeometry.Geometry.Exponential.ChartFlow.ChartFlowGeodesicLink
 import DifferentialGeometry.Geometry.Exponential.Defs
 import Mathlib.Geometry.Manifold.VectorBundle.Basic
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
-
-
 
 noncomputable section
 

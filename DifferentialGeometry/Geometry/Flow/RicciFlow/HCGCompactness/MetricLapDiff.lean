@@ -4,20 +4,10 @@ import DifferentialGeometry.Geometry.Connection.ChartBridge.HessFrobenius
 import DifferentialGeometry.Geometry.Operator.LaplacianBridge
 import DifferentialGeometry.Tensor.RSTensor.FiberMetric.ConnectionDifferenceNorm
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Connection
 open DifferentialGeometry.Geometry.Operator
 
 set_option autoImplicit false
-
-
-
-
-
-
-
-
-
 
 noncomputable section
 
@@ -184,9 +174,6 @@ private theorem trace_sq_le
     (Tensor0SBundle.identityInvMetric
       (Idx := Fin (Module.finrank Real (TangentSpace I x))))
     hinv A
-
-
-
 
 omit [I.Boundaryless] [CompactSpace M] [NeZero (Module.finrank ℝ E)] in
 omit [SigmaCompactSpace M] in
@@ -440,10 +427,6 @@ private theorem lapDiff_sq_core
             (duSec (I := I) f hf x) := by
       simp only [Hess, du]
       ring
-
-
-
-
 
 omit [NeZero (Module.finrank ℝ E)] in
 omit [SigmaCompactSpace M] in

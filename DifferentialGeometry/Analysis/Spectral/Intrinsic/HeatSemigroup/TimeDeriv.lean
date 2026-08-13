@@ -6,7 +6,6 @@ import Mathlib.Analysis.Calculus.MeanValue
 import Mathlib.Analysis.Normed.Group.Tannery
 import Mathlib.Analysis.Calculus.Deriv.Slope
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Connection
 
 

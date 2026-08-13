@@ -1,18 +1,8 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.Metric.Basic
 open DifferentialGeometry.PDE.RicciFlow
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
 
 set_option autoImplicit false
-
-
-
-
-
-
-
-
-
 
 noncomputable section
 
@@ -580,8 +570,6 @@ theorem coordFrameGInvCLM_spacetimeSmooth
   exact
     (coordInvCLM_eq (I := I) S x0 (x := q.2) hq.2 q.1).symm
 
-
-
 theorem coordInvSmooth
     {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -625,8 +613,6 @@ theorem coordInvSmooth
     (sum_mul_pi_single (Idx := DifferentialGeometry.Tensor.Coordinates.CoordinateIdx (𝕜 := Real) E)
       (fun k => coordInv (I := I) S x0 p.1 p.2 i k) j).symm
 
-
-
 omit [SigmaCompactSpace M] in
 theorem coordFrameGramCLM_contOn
     {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
@@ -645,10 +631,6 @@ theorem coordFrameGramCLM_contOn
   apply continuousOn_finset_sum
   intro j _hj
   exact (coordMetricContOn (I := I) S hS x0 i j).smul continuousOn_const
-
-
-
-
 
 theorem coordFrameGInvCLM_contOn
     {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
@@ -704,15 +686,6 @@ theorem coordFrameGInvCLM_contOn
   · exact (coordInvCLM_eq (I := I) S x0 (x := q.2) hq.2 q.1).symm
   · exact (coordInvCLM_eq (I := I) S x0 (x := p.2) hp.2 p.1).symm
 
-
-
-
-
-
-
-
-
-
 theorem coordInvContOn
     {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -748,8 +721,6 @@ theorem coordInvContOn
   simpa using
     (sum_mul_pi_single (Idx := DifferentialGeometry.Tensor.Coordinates.CoordinateIdx (𝕜 := Real) E)
       (fun k => coordInv (I := I) S x0 p.1 p.2 i k) j).symm
-
-
 
 theorem coordInvSmoothAt
     {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
@@ -832,15 +803,6 @@ theorem frameGInvCLM_spacetimeSmooth
   exact (frameGInvCLM_eq_inverse_at (I := I) S gInv frame q
     hleftq hrightq).symm
 
-
-
-
-
-
-
-
-
-
 omit [SigmaCompactSpace M] [T2Space M] in
 theorem gInv_spacetimeSmooth
     [DecidableEq Idx]
@@ -882,8 +844,6 @@ theorem gInv_spacetimeSmooth
   simpa using
     (sum_mul_pi_single (Idx := Idx) (fun k => gInv p.1 p.2 i k) j).symm
 
-
-
 omit [SigmaCompactSpace M] [T2Space M] in
 theorem MetricFrameSpacetimeRegularityInFrameOnLocal.gInv_mdiffAt
     [DecidableEq Idx]
@@ -915,8 +875,6 @@ theorem MetricFrameSpacetimeRegularityInFrameOnLocal.gInv_mdiffAt
       intro y hy
       exact ⟨ht, hy⟩)
   exact (hcomp.contMDiffAt (hu.mem_nhds hx)).mdifferentiableAt (by simp)
-
-
 
 omit [SigmaCompactSpace M] [T2Space M] in
 theorem MetricFrameSpacetimeRegularityInFrameOnLocal.metricComp_mdiffAt

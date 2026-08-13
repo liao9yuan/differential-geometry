@@ -4,7 +4,6 @@ import DifferentialGeometry.Analysis.Elliptic.Regularity.DiffChart.Differentiate
 import DifferentialGeometry.Analysis.Sobolev.Euclidean.Multiplication.SmoothCoefWeakPartialIBP
 import Mathlib.Analysis.Calculus.FDeriv.Symmetric
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
 
 
 noncomputable section

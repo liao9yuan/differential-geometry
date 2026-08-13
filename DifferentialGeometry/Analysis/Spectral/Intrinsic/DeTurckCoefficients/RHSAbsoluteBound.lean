@@ -2,14 +2,6 @@ import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurckCoefficients.LieS
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.RHSPointwiseLipschitz
 open DifferentialGeometry.Geometry.Operator
 
-
-
-
-
-
-
-
-
 namespace DifferentialGeometry.Analysis.Spectral.DeTurckCoefficients
 
 open scoped ContDiff Manifold Topology BigOperators

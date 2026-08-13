@@ -9,7 +9,8 @@ import DifferentialGeometry.Tensor.Product.Section
 import DifferentialGeometry.Tensor.Product.HomEquiv
 
 namespace DifferentialGeometry
-open DifferentialGeometry.Tensor.Mixed DifferentialGeometry.Tensor.Multilinear DifferentialGeometry.Tensor.Product
+open DifferentialGeometry.Tensor.Mixed DifferentialGeometry.Tensor.Multilinear
+    DifferentialGeometry.Tensor.Product
 
 
 noncomputable section

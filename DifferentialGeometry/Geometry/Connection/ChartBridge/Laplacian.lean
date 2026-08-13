@@ -3,15 +3,12 @@ import DifferentialGeometry.Geometry.Connection.ChartBridge.Hessian
 import DifferentialGeometry.Geometry.Operator.RoughLaplacian
 import Mathlib.Topology.Algebra.Module.FiniteDimensionBilinear
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Operator
-
 
 noncomputable section
 
 open Bundle Manifold Set FiberBundle
 open scoped Manifold Topology ContDiff
-
 
 namespace DifferentialGeometry
 namespace Geometry
@@ -30,10 +27,6 @@ open DifferentialGeometry.Geometry.Operator
 open DifferentialGeometry.Tensor.Coordinates
 open DifferentialGeometry.Tensor0SBundle
 
-/-- The chart Hessian at `x`, packaged as an intrinsic covariant two-tensor.
-
-This is the object-level adapter from the bilinear `hessFun` API to the
-`Tensor0SSpace` API consumed by intrinsic metric traces. -/
 noncomputable def hessTensorAt
     (g : SmoothRiemannianMetric I M) (f : M → ℝ) (x : M) :
     Tensor0SSpace (E := E) (H := H) (I := I) (M := M) 2 x :=
@@ -50,8 +43,6 @@ theorem hessTensorAt_apply
   rfl
 
 omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] in
-/-- On a scalar-smooth open set, the realized Levi-Civita Laplacian is the
-intrinsic metric trace of the chart Hessian tensor at each point of the set. -/
 theorem lap_eq_hess_on [I.Boundaryless]
     (g : SmoothRiemannianMetric I M)
     {f : M → ℝ} {U : Set M} {x : M}

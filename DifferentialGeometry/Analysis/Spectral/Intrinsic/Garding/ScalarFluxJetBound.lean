@@ -15,16 +15,7 @@ open DifferentialGeometry.Analysis.Sobolev
 open DifferentialGeometry.Analysis.Spectral
 open DifferentialGeometry.Analysis.Elliptic
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Connection
-
-
-
-
-
-
-
-
 
 noncomputable section
 
@@ -136,9 +127,6 @@ private theorem joint0S_sub {d : ℕ} {S : Set ℝ}
       exact mem_baseSet_trivializationAt _ _ x₀)).map_sub
         (A p₀) (B p₀)).symm
 
-
-
-
 omit [NeZero (Module.finrank ℝ E)] in
 theorem metricDiff_small
     {D : RealTimeInterval}
@@ -165,8 +153,6 @@ theorem metricDiff_small
   simpa only [P, q] using
     joint_jet_small (I := I) (M := M) q 0 2 p P
       (D.regular_isOpen.mem_nhds T.2) hPzero hPjoint hε
-
-
 
 omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] [SigmaCompactSpace M] in
 theorem scalarTrace_joint
@@ -213,8 +199,6 @@ theorem scalarTrace_joint
   refine hsub.congr (fun p _ => ?_)
   congr 1
 
-
-
 omit [NeZero (Module.finrank ℝ E)] in
 omit [SigmaCompactSpace M] in
 theorem connTrace_joint
@@ -251,8 +235,6 @@ theorem connTrace_joint
   refine htrace.congr (fun p _ => ?_)
   congr 1
 
-
-
 omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] [SigmaCompactSpace M] in
 theorem scalarTrace_rev
     {D : RealTimeInterval}
@@ -274,8 +256,6 @@ theorem scalarTrace_rev
   simpa only [Function.comp_apply] using
     (scalarTrace_joint (I := I) (M := M) g_fam hG q).comp hmove
       (fun p hp => ⟨Set.mem_univ p.1, hp.2⟩)
-
-
 
 omit [NeZero (Module.finrank ℝ E)] in
 omit [SigmaCompactSpace M] in
@@ -300,8 +280,6 @@ theorem connTrace_rev
     (connTrace_joint (I := I) (M := M) g_fam hG q).comp hmove
       (fun p hp => ⟨Set.mem_univ p.1, hp.2⟩)
 
-
-
 omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] [SigmaCompactSpace M] in
 theorem scalarTrace_rev_on
     {D : RealTimeInterval}
@@ -318,8 +296,6 @@ theorem scalarTrace_rev_on
       ((Set.univ : Set M) ×ˢ S) :=
   (scalarTrace_rev (I := I) (M := M) g_fam hG q T).mono
     (Set.prod_mono (Set.Subset.rfl) hS)
-
-
 
 omit [NeZero (Module.finrank ℝ E)] in
 omit [SigmaCompactSpace M] in
@@ -338,8 +314,6 @@ theorem connTrace_rev_on
       ((Set.univ : Set M) ×ˢ S) :=
   (connTrace_rev (I := I) (M := M) g_fam hG q T).mono
     (Set.prod_mono (Set.Subset.rfl) hS)
-
-
 
 omit [NeZero (Module.finrank ℝ E)] in
 theorem scalarTrace_small
@@ -380,9 +354,6 @@ private theorem connFib_self (q : SmoothRiemannianMetric I M) (x : M) :
   change om (0 : Fin 1 → TangentSpace I x) = 0
   exact ContinuousMultilinearMap.map_zero om
 
-
-
-
 omit [NeZero (Module.finrank ℝ E)] in
 theorem connTrace_small
     {D : RealTimeInterval}
@@ -418,8 +389,6 @@ theorem connTrace_small
     joint_jet_small (I := I) (M := M) q 1 0 p P
       (D.regular_isOpen.mem_nhds T.2) hPzero hPjoint hε
 
-
-
 omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] [SigmaCompactSpace M] in
 theorem scalarFlux_eq_slot (q h : SmoothRiemannianMetric I M) :
     scalarFluxCoeff (I := I) (M := M) q h =
@@ -437,8 +406,6 @@ theorem scalarFlux_eq_slot (q h : SmoothRiemannianMetric I M) :
   rw [scalarFlux_eval (I := I) (M := M), slotInsertEndoCc_toSection,
     cotangent_slot_apply (I := I) (M := M)]
   rfl
-
-
 
 theorem scalarFlux_jet_grid
     (q : SmoothRiemannianMetric I M) {δ₀ : ℝ} (hδ₀ : δ₀ < 1) :
@@ -464,8 +431,6 @@ theorem scalarFlux_jet_grid
   rw [scalarFlux_eq_slot (I := I) (M := M)]
   simpa only [DifferentialGeometry.Combinatorics.antidiagonalTupleGrid] using
     hjet h T htie hδ_le hδ0 hbound i x
-
-
 
 omit [NeZero (Module.finrank ℝ E)] in
 theorem metricDiff_slab
@@ -525,8 +490,6 @@ theorem metricDiff_slab
   · simpa only [q, P] using hbound
   · intro i x
     simpa only [q, P] using hjet i ((T : ℝ) - s) htK x
-
-
 
 theorem scalarFlux_slab
     {D : RealTimeInterval}

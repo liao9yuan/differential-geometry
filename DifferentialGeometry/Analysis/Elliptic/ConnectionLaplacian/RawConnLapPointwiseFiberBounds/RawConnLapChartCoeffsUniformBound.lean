@@ -3,7 +3,6 @@ import DifferentialGeometry.Geometry.Connection.LeviCivita.LeviCivitaChartSmooth
 import DifferentialGeometry.Analysis.Sobolev.Chart.SmoothDensity.Defs
 open DifferentialGeometry.Analysis.Elliptic
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Connection
 
 

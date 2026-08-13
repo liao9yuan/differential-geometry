@@ -5,53 +5,10 @@ import DifferentialGeometry.Geometry.Connection.TensorNabla.Tensor0SPartialEval
 import DifferentialGeometry.Geometry.Operator.HessianTraceRealization
 open DifferentialGeometry.Tensor.RicciIdentity
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Operator
 
 set_option autoImplicit false
 set_option backward.isDefEq.respectTransparency false
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 open DifferentialGeometry.Geometry.Connection
 namespace DifferentialGeometry
@@ -471,7 +428,6 @@ theorem du_norm0S {s : ℕ}
           rw [hAderiv, hWsec]
 
 omit [CompleteSpace E] [SigmaCompactSpace M] in
-/-- Kato bound for the differential of the squared norm of a covariant tensor. -/
 theorem normSq0S_du_le {s : ℕ}
     (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
     (g : DifferentialGeometry.SmoothRiemannianMetric I M)
@@ -544,11 +500,6 @@ theorem normSq0S_du_le {s : ℕ}
           rw [normSq0S_curry_sum (I := I) g x s basis hinv]
 
 omit [CompleteSpace E] [SigmaCompactSpace M] in
-/-- **The pointwise Hessian product rule of a covariant-tensor norm**, in basis
-component form — the genuine geometric input of the general Bochner Laplacian
-split, here **derived** (not assumed) from metric compatibility.  This is the
-rank-`s` generalisation of `BochnerTensor.hess_norm02`, and it discharges the
-`TensorNormHessianProductInBasis` hypothesis of `tensorNormBochnerSplit`. -/
 theorem hess_norm0S {s : ℕ}
     {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
     (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))

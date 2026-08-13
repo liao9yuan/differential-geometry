@@ -1,15 +1,6 @@
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurckCoefficients.RHSFirstDerivativeBound
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Operator
-
-
-
-
-
-
-
-
 
 namespace DifferentialGeometry.Analysis.Spectral.DeTurckCoefficients
 
@@ -97,9 +88,6 @@ private lemma sum_pair_sub_bnd
       (prod_sub_bnd hC_nn hCc_nn hJ_nn (hC₂ k) (hD₁ k) (hC k) (hD k))).trans_eq ?_
     ring
   · ring
-
-
-
 
 omit [NeZero (Module.finrank ℝ E)] in
 theorem deTurckVFD2_sub
@@ -305,8 +293,6 @@ theorem deTurckVFD2_sub
       _ = K * J := by dsimp [K]; ring
   · ring
 
-
-
 omit [NeZero (Module.finrank ℝ E)] in
 theorem chartRiemannD_sub
     (g₁ g₂ : SmoothRiemannianMetric I M) (α : M) {y : E}
@@ -510,8 +496,6 @@ theorem chartRicciD_sub
     exact chartRiemannD_sub (I := I) (M := M) g₁ g₂ α hy d i j k j
       hCdΓ_nn hG₁_nn hΓ₁ hΓD₂ hΓ hΓD hΓD2
   · ring
-
-
 
 omit [NeZero (Module.finrank ℝ E)] in
 theorem chartLieD_sub

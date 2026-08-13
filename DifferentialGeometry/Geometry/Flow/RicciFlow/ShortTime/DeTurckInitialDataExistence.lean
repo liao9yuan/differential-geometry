@@ -10,7 +10,6 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.QuasilinearAbstrac
 import DifferentialGeometry.Analysis.Spectral.Tensor.Spectrum.SlotSwapEquivariance
 open DifferentialGeometry.Analysis.Elliptic
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Operator
 
 open DifferentialGeometry.Geometry.Connection
@@ -20,7 +19,8 @@ open Bundle
 open scoped Manifold ContDiff NNReal ENNReal Topology BigOperators
 open DifferentialGeometry
 open DifferentialGeometry.PDE
-open DifferentialGeometry.PDE.RicciFlow DifferentialGeometry.Analysis.Parabolic DifferentialGeometry.Analysis.Sobolev DifferentialGeometry.Analysis.Spectral
+open DifferentialGeometry.PDE.RicciFlow DifferentialGeometry.Analysis.Parabolic
+    DifferentialGeometry.Analysis.Sobolev DifferentialGeometry.Analysis.Spectral
 open DifferentialGeometry.PDE.DeTurck
 open DifferentialGeometry.Analysis.Spectral.MetricRealization
 

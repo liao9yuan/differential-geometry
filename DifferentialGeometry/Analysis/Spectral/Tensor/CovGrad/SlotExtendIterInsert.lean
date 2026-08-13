@@ -2,15 +2,7 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.AppCcDropIteratedGr
 import DifferentialGeometry.Geometry.Connection.TensorNabla.SlotInsertCovariantNaturality
 open DifferentialGeometry.Analysis.Spectral
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Connection
-
-
-
-
-
-
-
 
 noncomputable section
 

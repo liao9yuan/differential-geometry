@@ -23,7 +23,6 @@ import DifferentialGeometry.Analysis.Parabolic.RicciLinearization.RicciThreeArmA
 import DifferentialGeometry.Analysis.Parabolic.RicciLinearization.RicciThreeArmAppCcCorrectionFieldConstruction
 open DifferentialGeometry.Analysis.Spectral
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
 
 noncomputable section
 

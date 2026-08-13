@@ -20,7 +20,6 @@ import DifferentialGeometry.Geometry.Connection.ChartTensorNabla.TensorRS.ChartT
 import DifferentialGeometry.Tensor.RSTensor.Defs
 open DifferentialGeometry.Analysis.Elliptic
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Operator
 
 

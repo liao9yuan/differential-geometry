@@ -2,7 +2,6 @@ import DifferentialGeometry.Analysis.Elliptic.TensorRegularity.DirichletForm.Cha
 import DifferentialGeometry.Analysis.Elliptic.TensorRegularity.DirichletForm.SourcePairing
 import DifferentialGeometry.Analysis.Elliptic.TensorRegularity.DirichletForm.ChartIntegrationByParts
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Connection
 
 

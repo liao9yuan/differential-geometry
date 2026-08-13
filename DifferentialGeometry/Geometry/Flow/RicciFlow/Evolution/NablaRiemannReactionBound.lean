@@ -7,22 +7,10 @@ open DifferentialGeometry.Tensor.RSTensor
 open DifferentialGeometry.Tensor.RicciIdentity
 open DifferentialGeometry.PDE.RicciFlow
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Connection
 open DifferentialGeometry.Geometry.Operator
 
 set_option autoImplicit false
-
-
-
-
-
-
-
-
-
-
-
 
 noncomputable section
 
@@ -52,14 +40,6 @@ theorem solution_isMetricCompatible
       (S.family.connection t) (S.base.metric t) := by
   simpa [SolutionFamily.connection, metricCov] using
     leviCivitaConnectionOfMetric_isMetricCompatible (I := I) (S.base.metric t)
-
-
-
-
-
-
-
-
 
 open DifferentialGeometry.Integral.DivergenceTheorem
   DifferentialGeometry.Integral.Measure in
@@ -152,19 +132,6 @@ omit [SigmaCompactSpace M] in
         (rmFrozenSlotField (I := I) S t q Y y) :=
   rfl
 
-
-
-
-
-
-
-
-
-
-
-
-
-
 def rmRaiseSlotSections
     {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D) (t : Real) (q : Fin 4)
@@ -173,18 +140,6 @@ def rmRaiseSlotSections
       (TangentSpace I : M → Type _)) :
     Fin 4 → ContMDiffSection I E (∞ : WithTop ℕ∞) (TangentSpace I : M → Type _) :=
   ![Vb, Vc, Vm q, rmFrozenSlotSharpSection (I := I) S t q Vm]
-
-
-
-
-
-
-
-
-
-
-
-
 
 omit [Module.Finite ℝ E] in
 omit [SigmaCompactSpace M] in
@@ -307,25 +262,12 @@ theorem rmRaise_summand_covDeriv
   rw [hcorr] at heval
   linarith [heval]
 
-
-
-
-
-
-
-
-
-
-
-
 def nabla2SlotSections
     (Vb Vc : ContMDiffSection I E (∞ : WithTop ℕ∞) (TangentSpace I : M → Type _))
     (Vm : Fin 4 → ContMDiffSection I E (∞ : WithTop ℕ∞)
       (TangentSpace I : M → Type _)) :
     Fin 6 → ContMDiffSection I E (∞ : WithTop ℕ∞) (TangentSpace I : M → Type _) :=
   Fin.cons Vb (Fin.cons Vc Vm)
-
-
 
 omit [FiniteDimensional ℝ E] [I.Boundaryless] [IsManifold I ∞ M]
     [IsManifold I 2 M] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
@@ -342,17 +284,6 @@ theorem nabla2SlotSections_apply
   · refine Fin.cases ?_ (fun k => ?_) j
     · rfl
     · rfl
-
-
-
-
-
-
-
-
-
-
-
 
 omit [Module.Finite ℝ E] in
 omit [I.Boundaryless] in
@@ -461,30 +392,6 @@ theorem nabla3_antisym_eq_covDeriv_curvatureAction_covConst
       (Vb y) (Vc y) (fun i : Fin 4 => Vm i y)
   rw [hfield]
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 omit [Module.Finite ℝ E] in
 theorem nablaLapComm_T1_eq_rm04_raise_leibniz
     [FiniteDimensional Real E]
@@ -581,20 +488,9 @@ theorem nablaLapComm_T1_eq_rm04_raise_leibniz
   rw [hg_def]
   exact rmRaise_summand_covDeriv (I := I) S t x₀ q X Vb Vc Vm hVb hVc (fun i => hVm i)
 
-
-
-
-
-
-
-
-
 section T1Bound
 
 variable {n : ℕ}
-
-
-
 
 omit [I.Boundaryless] [IsManifold I 2 M] [CompleteSpace E]
     [SigmaCompactSpace M] [T2Space M] in
@@ -690,13 +586,6 @@ theorem tensor04_vec4_sum_last'
   rw [T.map_update_smul, ← hupd]
   simp [smul_eq_mul]
 
-
-
-
-
-
-
-
 omit [Module.Finite ℝ E] in
 omit [I.Boundaryless] [IsManifold I 2 M] [CompleteSpace E]
     [SigmaCompactSpace M] [T2Space M] in
@@ -739,8 +628,6 @@ theorem abs_tensor05_sharp_last_le
           (fun i _ => sq_nonneg _) (Finset.mem_univ e))
     exact mul_le_mul hTbnd hβbnd (abs_nonneg _) hNTnn
   · rw [Finset.sum_const, Finset.card_univ, Fintype.card_fin, nsmul_eq_mul]
-
-
 
 omit [Module.Finite ℝ E] in
 omit [I.Boundaryless] [IsManifold I 2 M] [CompleteSpace E]
@@ -785,10 +672,6 @@ theorem abs_tensor04_sharp_last_le
     exact mul_le_mul hTbnd hβbnd (abs_nonneg _) hNTnn
   · rw [Finset.sum_const, Finset.card_univ, Fintype.card_fin, nsmul_eq_mul]
 
-
-
-
-
 omit [FiniteDimensional ℝ E] [I.Boundaryless] [IsManifold I ∞ M]
     [IsManifold I 2 M] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 theorem sum_sq_update_le_compNormSqMulti {r : ℕ}
@@ -818,17 +701,9 @@ theorem sum_sq_update_le_compNormSqMulti {r : ℕ}
 
 end T1Bound
 
-
-
-
-
-
-
 section SolutionT1Bound
 
 variable {n : ℕ}
-
-
 
 omit [I.Boundaryless] [IsManifold I 2 M] in
 omit [SigmaCompactSpace M] in
@@ -1103,18 +978,9 @@ theorem abs_nablaLapComm_T1_orthoBasis_le
 
 end SolutionT1Bound
 
-
-
-
-
-
-
-
 section ReactionBound
 
 variable {n : ℕ}
-
-
 
 private theorem sum_pi_fin_succ {Idx : Type*} [Fintype Idx] {k : ℕ}
     (f : (Fin (k + 1) → Idx) → Real) :
@@ -1124,8 +990,6 @@ private theorem sum_pi_fin_succ {Idx : Type*} [Fintype Idx] {k : ℕ}
   rw [← (Fin.consEquiv (fun _ : Fin (k + 1) => Idx)).sum_comp f]
   rw [Fintype.sum_prod_type]
   rfl
-
-
 
 omit [FiniteDimensional ℝ E] [I.Boundaryless] [IsManifold I ∞ M]
     [IsManifold I 2 M] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
@@ -1163,16 +1027,6 @@ theorem compNormSqMulti_eq_compNormSq4_basis
   · intro y _ hy; exact absurd (Subsingleton.elim y default) hy
   · intro h; exact absurd (Finset.mem_univ _) h
 
-
-
-
-
-
-
-
-
-
-
 omit [Module.Finite ℝ E] in
 theorem abs_nablaLapCommReactionTermF_orthoBasis_le
     [FiniteDimensional Real E]
@@ -1208,17 +1062,6 @@ theorem abs_nablaLapCommReactionTermF_orthoBasis_le
   have hsum := add_le_add hT1 hT2
   refine le_trans hsum (le_of_eq ?_)
   ring
-
-
-
-
-
-
-
-
-
-
-
 
 omit [Module.Finite ℝ E] in
 theorem abs_nablaLapCommReactionTerm_diag_orthoBasis_le
@@ -1260,29 +1103,6 @@ theorem abs_nablaLapCommReactionTerm_diag_orthoBasis_le
   rw [Finset.sum_const, Finset.card_univ, Fintype.card_fin, nsmul_eq_mul]
   apply le_of_eq
   ring
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 omit [Module.Finite ℝ E] in
 theorem abs_spatialCommNablaRm_orthoFrame_le

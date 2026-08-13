@@ -5,20 +5,10 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.C4.NormalBran
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.C4.NormalMetricLocal
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.C4.StepCSmoothness
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Connection
 open DifferentialGeometry.Geometry.Operator
 
 set_option autoImplicit false
-
-
-
-
-
-
-
-
-
 
 noncomputable section
 
@@ -45,8 +35,6 @@ variable [NeZero (Module.finrank Real E)]
 variable {H : Type uH} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H} [I.Boundaryless]
 
-
-
 noncomputable def normalPhaseRead
     (Y : PointedRiemannianManifold.{u, uE, uH} (I := I)) (x : Y.M)
     (z : E × E) :
@@ -66,8 +54,6 @@ noncomputable def normalPhaseRead
   exact (trivializationAt E (TangentSpace I) x
     (normalTanHome (I := I) Y x z)).2
 
-
-
 noncomputable def normalReadCLM
     (Y : PointedRiemannianManifold.{u, uE, uH} (I := I)) (x : Y.M)
     (u : E) :
@@ -84,8 +70,6 @@ noncomputable def normalReadCLM
     (expMapDiffeo (I := I) Y.metric x u) |>.comp
       (mfderiv 𝓘(Real, E) I
         (fun v : E ↦ expMapDiffeo (I := I) Y.metric x v) u)
-
-
 
 theorem normalPhaseRead_eq
     (Y : PointedRiemannianManifold.{u, uE, uH} (I := I)) (x : Y.M)
@@ -120,8 +104,6 @@ theorem normalPhaseRead_eq
     (trivializationAt E (TangentSpace I) x).coe_linearMapAt_of_mem hbase]
   rfl
 
-
-
 noncomputable def normalReadCLE
     (Y : PointedRiemannianManifold.{u, uE, uH} (I := I)) (x : Y.M)
     {u : E} (hu : u ∈ normalBall (I := I) Y x) :
@@ -148,8 +130,6 @@ noncomputable def normalReadCLE
         (by simp)).trans
     ((trivializationAt E (TangentSpace I) x).continuousLinearEquivAt
       Real (expMapDiffeo (I := I) Y.metric x u) hbase)
-
-
 
 theorem normalReadCLE_coe
     (Y : PointedRiemannianManifold.{u, uE, uH} (I := I)) (x : Y.M)
@@ -194,8 +174,6 @@ theorem normalReadCLE_coe
       (expMapDiffeo (I := I) Y.metric x u) => A v)
     (hloc.mfderivToContinuousLinearEquiv_coe (by simp))
 
-
-
 theorem normalPhaseRead_cd
     (Y : PointedRiemannianManifold.{u, uE, uH} (I := I)) (x : Y.M)
     {u v : E} (hu : u ∈ normalBall (I := I) Y x) :
@@ -230,8 +208,6 @@ theorem normalPhaseRead_cd
   have hread :=
     (((trivializationAt E (TangentSpace I) x).contMDiffAt_iff hzTriv).mp htan).2
   exact contMDiffAt_iff_contDiffAt.mp hread
-
-
 
 theorem normalReadCLM_cd
     (Y : PointedRiemannianManifold.{u, uE, uH} (I := I)) (x : Y.M)
@@ -369,8 +345,6 @@ theorem invVelSum_inv {ι : Type*} [Fintype ι]
   rw [hL]
   exact hderiv
 
-
-
 theorem normalComp_inv {ι : Type*} [Fintype ι]
     (Y : PointedRiemannianManifold.{u, uE, uH} (I := I)) (x : Y.M)
     (e : OpenPartialHomeomorph (E × E) (E × E))
@@ -425,8 +399,6 @@ theorem normalComp_inv {ι : Type*} [Fintype ι]
   exact happ
 
 namespace IsNormalDiag
-
-
 
 theorem readout_factor
     (Y : PointedRiemannianManifold.{u, uE, uH} (I := I))
@@ -520,9 +492,6 @@ theorem readout_factor
   change normalPhaseRead (I := I) Y x (e.symm w) = _
   rw [normalPhaseRead_eq (I := I) Y x hzNormal hbase,
     symm_fst_eq (I := I) Y hcomplete hconn x he hf hw]
-
-
-
 
 theorem inv_cov_coord
     (Y : PointedRiemannianManifold.{u, uE, uH} (I := I))
@@ -727,9 +696,6 @@ theorem inv_cov_coord
   rw [hsrc, htgt] at hmap
   simpa only [Vloc, VTan, Zloc, y0, pt, zQ] using hmap
 
-
-
-
 theorem hess_inv_coord
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
     (hb : NormalCoordMetricBoundInput (I := I) X) (k : Nat)
@@ -891,8 +857,6 @@ theorem hess_inv_coord
           (fun u : E => (e.symm (u, xi)).2) z) v) w := by
             rw [normalCoordMetric_apply (I := I)]
 
-
-
 theorem inv_cov_expand
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
     (hb : NormalCoordMetricBoundInput (I := I) X) (k : Nat)
@@ -968,9 +932,6 @@ theorem inv_cov_expand
   have hcov := normal_cov_eq_fderiv (I := I) (X.obj k) x z hzQuarter
     ((hb.metric_equiv k x).coercive hzMetric) V hVmd v
   simpa only [V, VTan, DifferentialGeometry.Geometry.Curvature.metricCov] using hcov
-
-
-
 
 theorem hess_inv_lower
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
@@ -1184,8 +1145,6 @@ theorem hess_inv_lower
     (le_abs_self _).trans hKabs
   nlinarith
 
-
-
 theorem hess_inv_sixth
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
     (hb : NormalCoordMetricBoundInput (I := I) X) (k : Nat)
@@ -1296,8 +1255,6 @@ theorem hess_inv_sixth
     (mul_nonneg (by norm_num) (sq_nonneg ‖v‖)).trans hquad.1
   exact (mul_le_mul_of_nonneg_right hcoef hg0).trans hlower
 
-
-
 theorem chartCmEqnB_factor
     (Y : PointedRiemannianManifold.{u, uE, uH} (I := I))
     (hcomplete : MetricComplete (I := I) Y)
@@ -1361,8 +1318,6 @@ theorem chartCmEqnB_factor
       (normalPair (I := I) Y x (z, xi i)) =
     normalReadCLM (I := I) Y x z (e.symm (z, xi i)).2
   exact readout_factor (I := I) Y hcomplete hconn x hq he hf (htgt i)
-
-
 
 theorem chartCm_zero_iff
     (Y : PointedRiemannianManifold.{u, uE, uH} (I := I))
@@ -1433,8 +1388,6 @@ theorem chartCm_zero_iff
   rw [chartCmEqnB_factor (I := I) Y hcomplete hconn x hq he hf z mu xi htgt,
     ← normalReadCLE_coe (I := I) Y x hz hbase]
   exact (normalReadCLE (I := I) Y x hz hbase).map_eq_zero_iff
-
-
 
 theorem cm_deriv_inv
     (Y : PointedRiemannianManifold.{u, uE, uH} (I := I))
@@ -1575,9 +1528,6 @@ theorem cm_deriv_inv
     exact chartCmEqnB_factor (I := I) Y hcomplete hconn x
       hq he hf u mu xi hu
   exact ⟨L, hL.congr_of_eventuallyEq heq⟩
-
-
-
 
 theorem cm_sol_strict
     (Y : PointedRiemannianManifold.{u, uE, uH} (I := I))
@@ -1761,8 +1711,6 @@ theorem cm_sol_strict
   exact readoutSolB_strict (I := I) Y.metric (normal_enorm (I := I) Y) x B
     z (mu, xi) hchz hchxi hread ⟨L, hL⟩ hzero
 
-
-
 theorem cm_sol_cd
     (Y : PointedRiemannianManifold.{u, uE, uH} (I := I))
     (hcomplete : MetricComplete (I := I) Y)
@@ -1941,8 +1889,6 @@ theorem cm_sol_cd
 end IsNormalDiag
 
 namespace HasNormalBrFull
-
-
 
 theorem hess_pos
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}

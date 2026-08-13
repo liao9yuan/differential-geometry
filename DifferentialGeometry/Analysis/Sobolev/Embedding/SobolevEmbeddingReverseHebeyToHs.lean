@@ -23,7 +23,8 @@ theorem exists_toHs_norm_le_iteratedCovGrad_tensorL2Norm_sum
     (g : SmoothRiemannianMetric I M) (r s k : ℕ) :
     ∃ C : ℝ, 0 ≤ C ∧
       ∀ T : SmoothCcTensor g r s,
-        ‖DifferentialGeometry.Analysis.Sobolev.IntrinsicSobolev.SmoothCcTensor.toHs (g := g) (r := r) (s := s) k T‖ ≤
+        ‖DifferentialGeometry.Analysis.Sobolev.IntrinsicSobolev.SmoothCcTensor.toHs (g := g)
+          (r := r) (s := s) k T‖ ≤
           C * ∑ j ∈ Finset.range (2 * k + 1),
             tensorL2Norm (I := I) (M := M) g r (s + j)
               (iteratedCovGrad g r s j T).toFun := by

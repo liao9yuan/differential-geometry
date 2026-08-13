@@ -8,22 +8,6 @@ open DifferentialGeometry.Geometry.Curvature
 set_option autoImplicit false
 set_option backward.isDefEq.respectTransparency false
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 open DifferentialGeometry.Geometry.Connection
 namespace DifferentialGeometry.Geometry.Curvature
 
@@ -38,20 +22,6 @@ variable {H : Type*} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
 variable [IsManifold I ∞ M] [IsManifold I 1 M]
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 theorem tensor0SFamilyContinuousOnSet_of_chartComp
     {s : Nat} {K : Set Real}
@@ -123,13 +93,6 @@ theorem tensor0SFamilyContinuousOnSet_of_chartComp
   rw [hcongr]
   exact hsymm.continuousAt.comp key
 
-
-
-
-
-
-
-
 theorem tensor0SFamilyContinuousOnSet_of_chartBasisComp
     {s : Nat} {K : Set Real}
     (A : (t : Real) → (x : M) →
@@ -161,16 +124,6 @@ theorem tensor0SFamilyContinuousOnSet_of_chartBasisComp
     congr 1
   rw [heq]
   exact hcomp x₀ idx
-
-
-
-
-
-
-
-
-
-
 
 theorem metricTensorCont_of_chartGram
     {K : Set Real} (g : Real → SmoothRiemannianMetric I M)
@@ -208,12 +161,6 @@ section MetricCLMSection
 variable [NeZero (Module.finrank ℝ E)]
 
 namespace MetricCLMSectionAux
-
-
-
-
-
-
 
 omit [NeZero (Module.finrank ℝ E)] in
 private lemma inCoordinates_metric_eq_chartGram_sum
@@ -262,20 +209,6 @@ private lemma inCoordinates_metric_eq_chartGram_sum
   ring
 
 end MetricCLMSectionAux
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 omit [NeZero (Module.finrank ℝ E)] in
 theorem metricCLMSection_jointContMDiffOn_of_chartGram
@@ -341,14 +274,6 @@ end MetricCLMSection
 
 namespace Tensor0SFamilyContinuousOnSet
 
-
-
-
-
-
-
-
-
 theorem pullback
     {s : Nat} {K : Set Real}
     {N : Type*} [TopologicalSpace N] [ChartedSpace H N]
@@ -400,18 +325,6 @@ theorem pullback
   refine hev.congr ?_
   intro p
   rfl
-
-
-
-
-
-
-
-
-
-
-
-
 
 theorem restrictOpen
     {s : Nat} {K : Set Real}

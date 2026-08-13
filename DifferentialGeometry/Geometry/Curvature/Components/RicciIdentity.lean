@@ -23,12 +23,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 variable {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
 variable {x : M}
 
-
-
-
-
-
-
 section CoordinateChristoffelCurvature
 
 open DifferentialGeometry.Tensor.Coordinates
@@ -38,10 +32,6 @@ def tensor0SRicciIdentityCoordInput {s : ℕ}
     (ks : Fin s -> CoordinateIdx (𝕜 := Real) E) :
     Fin (s + 2) -> CoordinateIdx (𝕜 := Real) E :=
   Fin.cases i (Fin.cases j ks)
-
-
-
-
 
 omit [FiniteDimensional ℝ E] in
 theorem curvatureAction0SAt_coordFrame_of_christoffelCurv
@@ -97,11 +87,6 @@ theorem curvatureAction0SAt_coordFrame_of_christoffelCurv
     hRm hcurv i j (ks q)]
   refine Finset.sum_congr rfl fun m _ => ?_
   rw [hslot q m]
-
-
-
-
-
 
 omit [FiniteDimensional ℝ E] in
 theorem tensor0S_ricciIdentity_coordFrame_of_christoffelCurv
@@ -188,11 +173,6 @@ theorem tensor0S_ricciIdentity_coordFrame_of_christoffelCurv
             curvatureAction0SAt_coordFrame_of_christoffelCurv
               (I := I) inferInstance cov hcov Rm13 x0 alpha hRm hcurv i j ks
 
-
-
-
-
-
 def OneFormThirdCommChristoffelCoordAt
     (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
     (x₀ : M)
@@ -213,9 +193,6 @@ def OneFormThirdCommChristoffelCoordAt
         -∑ m : CoordinateIdx (𝕜 := Real) E,
           christoffelCurvCoeffAt (I := I) cov x₀ i k j m *
             alpha (fun _ : Fin 1 => coordinateFrameAt (I := I) x₀ m x₀)
-
-
-
 
 omit [FiniteDimensional ℝ E] in
 theorem one_form_third_comm_coord_of_christoffelCurv

@@ -4,9 +4,6 @@ import DifferentialGeometry.Geometry.Geodesic.MaximalInterval
 import DifferentialGeometry.Geometry.Geodesic.Uniqueness
 import Mathlib.Topology.Connected.Clopen
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
-
-
 
 noncomputable section
 

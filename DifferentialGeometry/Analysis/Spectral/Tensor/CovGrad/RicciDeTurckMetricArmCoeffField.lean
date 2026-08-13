@@ -3,7 +3,6 @@ import DifferentialGeometry.Analysis.Sobolev.TensorHilbert.CometricInverseDiffer
 open DifferentialGeometry.Analysis.Spectral
 open DifferentialGeometry.Analysis.Elliptic
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Connection
 
 
@@ -36,7 +35,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 variable [CompleteSpace E]
 
 set_option backward.isDefEq.respectTransparency false in
-
 def gInvDiffSlotCoeff (g₀ g₁ : SmoothRiemannianMetric I M) : SmoothCcTensor g₀ 2 2 where
   toSection :=
     { toFun := fun x : M => TensorRSSpace.ofCLM (metricComparisonDiffSlotEndo (I := I) g₀ g₁ x)
@@ -44,7 +42,6 @@ def gInvDiffSlotCoeff (g₀ g₁ : SmoothRiemannianMetric I M) : SmoothCcTensor 
   hasCompactSupport := HasCompactSupport.of_compactSpace _
 
 set_option backward.isDefEq.respectTransparency false in
-
 def gInvDiffMetricArmCoeffField (g₀ g₁ : SmoothRiemannianMetric I M) :
     ∀ r : ℕ, SmoothCcTensor g₀ (r + 0) (r + 0) :=
   fun r => match r with
@@ -64,7 +61,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 variable [CompleteSpace E]
 
 set_option backward.isDefEq.respectTransparency false in
-
 omit [CompleteSpace E] in
 theorem gInvDiffMetricArm_iteratedCovGrad_singleSum_le
     (g₀ g₁ : SmoothRiemannianMetric I M) (x₀ : M) (W : SmoothCcTensor g₀ 0 2) (a : ℕ) :
@@ -100,7 +96,6 @@ theorem exists_gInvDiffMetricArm_neumannFibreBound (g₀ : SmoothRiemannianMetri
   exists_gInvDiffFibreEndo_neumannFibreBound (I := I) g₀
 
 set_option backward.isDefEq.respectTransparency false in
-
 omit [CompleteSpace E] in
 omit [NeZero (Module.finrank ℝ E)] in
 theorem covGrad_gInvDiffSlotCoeff_toSection_eq
@@ -112,7 +107,6 @@ theorem covGrad_gInvDiffSlotCoeff_toSection_eq
   covGrad_toSection_apply (I := I) (M := M) g₀ 2 2 (gInvDiffSlotCoeff (I := I) g₀ g₁) x
 
 set_option backward.isDefEq.respectTransparency false in
-
 omit [CompleteSpace E] in
 omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] in
 theorem covGrad_gInvDiffSlotCoeff_leibniz
@@ -131,7 +125,6 @@ theorem covGrad_gInvDiffSlotCoeff_leibniz
     (gInvDiffSlotCoeff (I := I) g₀ g₁).toSection w x v
 
 set_option backward.isDefEq.respectTransparency false in
-
 omit [CompleteSpace E] in
 omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] in
 theorem covGrad_gInvDiffSlotCoeff_leibniz_value

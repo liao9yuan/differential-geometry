@@ -1,21 +1,8 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.ComponentConvAssembly
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.MetricPreconvWindow
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
 
 set_option autoImplicit false
-
-
-
-
-
-
-
-
-
-
-
-
 
 noncomputable section
 
@@ -39,8 +26,6 @@ variable [T2Space M] [IsManifold I ∞ M] [SigmaCompactSpace M]
 variable [IsManifold I 1 M] [IsManifold I 2 M]
 variable [VectorBundle Real E (TangentSpace I : M -> Type _)]
 variable [ContMDiffVectorBundle 1 E (TangentSpace I : M -> Type _) I]
-
-
 
 omit [Module.Finite ℝ E] in
 theorem metricPreconvFull
@@ -113,9 +98,6 @@ theorem metricPreconvFull
       hk0fn n hn k (le_trans (Finset.le_sup (f := fun n => k0fn n.1 n.2)
         (Finset.mem_attach F ⟨n, hn⟩)) hk) a ha z (hWC (e n) hzw)
 
-
-
-
 omit [Module.Finite ℝ E] in
 theorem metricPreconvNorm
     [Module.Finite ℝ E]
@@ -183,9 +165,6 @@ theorem metricPreconvNorm
     hk0fn n hn k (le_trans (Finset.le_sup (f := fun n => k0fn n.1 n.2)
       (Finset.mem_attach F ⟨n, hn⟩)) hk) a ha z (hWC (e n) hzw)
 
-
-
-
 omit [Module.Finite ℝ E] in
 theorem netNormDiag
     [Module.Finite ℝ E]
@@ -237,9 +216,6 @@ theorem netNormDiag
       exact hval)
   choose gNet hgNet using hPphi
   exact ⟨phi, hphi, gNet, hgNet⟩
-
-
-
 
 omit [Module.Finite ℝ E] in
 theorem netFullDiag
@@ -345,9 +321,6 @@ theorem metricDerivNorm_symm
     abel
   rw [metricDerivNorm, metricDerivNorm, hneg, normSq0S_neg]
 
-
-
-
 omit [Module.Finite ℝ E] in
 omit [VectorBundle ℝ E (TangentSpace I : M → Type _)]
     [ContMDiffVectorBundle 1 E (TangentSpace I : M → Type _) I] in
@@ -416,8 +389,6 @@ theorem netCauchyAt
     linarith
   nlinarith [htri, h1, h2, h3, h4, hdbound, hsmall]
 
-
-
 omit [Module.Finite ℝ E] in
 omit [I.Boundaryless] [IsManifold I 2 M] [VectorBundle ℝ E (TangentSpace I : M → Type _)]
     [ContMDiffVectorBundle 1 E (TangentSpace I : M → Type _) I] in
@@ -450,8 +421,6 @@ theorem fullOfSubseq
     hkS j hjS a ha x hxK
   have htri := metricDerivNorm_triangle (I := I) a (gSeq k) (gSeq (psi j)) gLim gRef x
   linarith
-
-
 
 omit [Module.Finite ℝ E] in
 omit [VectorBundle ℝ E (TangentSpace I : M → Type _)]
@@ -501,9 +470,6 @@ theorem infLipOfConv
     linarith
   linarith
 
-
-
-
 omit [Module.Finite ℝ E] in
 omit [I.Boundaryless] [IsManifold I 2 M] [VectorBundle ℝ E (TangentSpace I : M → Type _)]
     [ContMDiffVectorBundle 1 E (TangentSpace I : M → Type _) I] in
@@ -540,9 +506,6 @@ theorem windowOfNet
   · rintro tau ⟨n, rfl⟩ _ eps heps
     exact hnet n eps heps
 
-
-
-
 structure WindowGInfOut
     (K : Set M) (beta psiT : Real) (p : Nat)
     (gSeq : Nat -> Real -> SmoothRiemannianMetric I M)
@@ -553,9 +516,6 @@ structure WindowGInfOut
         forall eps : Real, 0 < eps -> exists k0 : Nat, forall k : Nat, k0 <= k ->
           forall t, t ∈ Set.Icc beta psiT ->
             metricDerivNormSupOn (I := I) K p (gSeq (phi k) t) (gInf t) gRef < eps
-
-
-
 
 omit [Module.Finite ℝ E] in
 theorem windowGInf

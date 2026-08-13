@@ -25,7 +25,8 @@ import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.DeTurckRemainder
 open DifferentialGeometry.Tensor.RicciIdentity
 open DifferentialGeometry.Tensor.RSTensor
 open DifferentialGeometry.Tensor.Auxiliary
-open DifferentialGeometry.PDE.RicciFlow DifferentialGeometry.Analysis.Sobolev DifferentialGeometry.Analysis.Spectral
+open DifferentialGeometry.PDE.RicciFlow DifferentialGeometry.Analysis.Sobolev
+    DifferentialGeometry.Analysis.Spectral
 open DifferentialGeometry.Integral.L2
 open DifferentialGeometry.Integral.DivergenceTheorem
 open DifferentialGeometry.Geometry.Curvature
@@ -82,7 +83,6 @@ open DifferentialGeometry.Analysis.Sobolev
 open DifferentialGeometry.Integral.L2
 open DifferentialGeometry.Analysis.Spectral
 open DifferentialGeometry.Analysis.Elliptic
-open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Curvature
 
 

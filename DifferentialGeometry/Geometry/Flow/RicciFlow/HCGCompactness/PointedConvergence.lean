@@ -8,17 +8,8 @@ import Mathlib.Geometry.Manifold.LocalDiffeomorph
 import Mathlib.Geometry.Manifold.MFDeriv.Basic
 open DifferentialGeometry.PDE.RicciFlow
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
 
 set_option autoImplicit false
-
-
-
-
-
-
-
-
 
 noncomputable section
 
@@ -41,9 +32,6 @@ section FixedManifoldMetricConvergence
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
 variable [T2Space M] [IsManifold I ∞ M]
 variable [SigmaCompactSpace M]
-
-
-
 
 noncomputable def metricCovDerivStep
     (gRef : SmoothRiemannianMetric I M) (a : Nat)
@@ -77,9 +65,6 @@ noncomputable def metricCovDerivStep
       Tensor0SBundle.totalNabla0S (𝕜 := Real) (E := E) (H := H)
         (I := I) (M := M) (a + 2) cov A hreg
 
-
-
-
 noncomputable def metricCovDeriv
     (h gRef : SmoothRiemannianMetric I M) :
     (a : Nat) ->
@@ -101,9 +86,6 @@ noncomputable def metricCovDeriv
       by
         simpa [Nat.add_assoc, Nat.add_comm, Nat.add_left_comm] using
           metricCovDerivStep (I := I) gRef a A)
-
-
-
 
 omit [SigmaCompactSpace M] in
 theorem metricCovDeriv_one_apply_section
@@ -147,9 +129,6 @@ theorem metricCovDeriv_one_apply_section
         (I := I) (M := M) 2 cov X A x slots
   exact Tensor0SBundle.totalNabla0SFun_apply_section
     (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) 2 cov X A x slots
-
-
-
 
 omit [SigmaCompactSpace M] in
 theorem metricCovDeriv_one_eval_smooth_slots
@@ -211,13 +190,6 @@ private theorem extDerivFun_congr_eventually_real
   have hx : f x = g x := h.eq_of_nhds
   unfold extDerivFun
   rw [hmf, hx]
-
-
-
-
-
-
-
 
 omit [SigmaCompactSpace M] in
 theorem metricCovDeriv_one_eval_localFrame
@@ -359,7 +331,6 @@ theorem metricCovDeriv_one_eval_localFrame
           rw [hmain, hderiv, Fin.sum_univ_two]
           simp [V, hsec_x a, hsec_x b, hcov_a_candidate, hcov_b_candidate]
 
-
 omit [SigmaCompactSpace M] in
 theorem metricCovDeriv_one_component_localFrame
     {Idx : Type*} [Finite Idx] {u : Set M}
@@ -400,8 +371,6 @@ theorem metricCovDeriv_one_component_localFrame
       (metricCovDeriv_one_eval_localFrame (I := I) h gRef frame hframe hu hx
         d a b)
 
-
-
 noncomputable def metricDiffCovDerivAt
     (a : Nat) (gk gInf gRef : SmoothRiemannianMetric I M) (x : M) :
     Tensor0SBundle.Tensor0SSpace (𝕜 := Real) (E := E) (H := H)
@@ -409,18 +378,11 @@ noncomputable def metricDiffCovDerivAt
   metricCovDeriv (I := I) gk gRef a x -
     metricCovDeriv (I := I) gInf gRef a x
 
-
-
-
 noncomputable def metricDerivNorm
     (a : Nat) (gk gInf gRef : SmoothRiemannianMetric I M) (x : M) : Real :=
   Real.sqrt
     (Tensor0SBundle.normSq0S (I := I) gRef x (a + 2)
       (metricDiffCovDerivAt (I := I) a gk gInf gRef x))
-
-
-
-
 
 noncomputable def metricDerivNormSupOn
     (K : Set M) (p : Nat)
@@ -430,10 +392,6 @@ noncomputable def metricDerivNormSupOn
       exists x : M, x ∈ K ∧
         metricDerivNorm (I := I) a gk gInf gRef x = r}
 
-
-
-
-
 def MetricCPConvOn
     (K : Set M) (_hK : IsCompact K) (p : Nat)
     (gSeq : Nat -> SmoothRiemannianMetric I M)
@@ -442,23 +400,17 @@ def MetricCPConvOn
     exists k0 : Nat, forall k : Nat, k0 <= k ->
       metricDerivNormSupOn (I := I) K p (gSeq k) gInf gRef < ε
 
-
-
 def MetricCInfConvOn
     (K : Set M) (hK : IsCompact K)
     (gSeq : Nat -> SmoothRiemannianMetric I M)
     (gInf gRef : SmoothRiemannianMetric I M) : Prop :=
   forall p : Nat, MetricCPConvOn (I := I) K hK p gSeq gInf gRef
 
-
-
 def MetricCInfConvOnCompacts
     (gSeq : Nat -> SmoothRiemannianMetric I M)
     (gInf gRef : SmoothRiemannianMetric I M) : Prop :=
   forall K : Set M, forall hK : IsCompact K,
     MetricCInfConvOn (I := I) K hK gSeq gInf gRef
-
-
 
 structure MetricCInfConvData
     (I : ModelWithCorners Real E H) (M : Type*)
@@ -471,8 +423,6 @@ structure MetricCInfConvData
   converges : MetricCInfConvOnCompacts (I := I) gSeq gInf gRef
 
 end FixedManifoldMetricConvergence
-
-
 
 structure ExhaustsByOpen {M : Type*} [TopologicalSpace M]
     (U : Nat -> Set M) : Prop where
@@ -498,8 +448,6 @@ theorem subset_of_le {M : Type*} [TopologicalSpace M] {U : Nat -> Set M}
     U i ⊆ U j :=
   hU.monotone hij
 
-/-- An exhaustion by open sets remains an exhaustion after a strictly
-increasing reindexing. -/
 theorem comp_subseq {M : Type*} [TopologicalSpace M]
     {U : Nat -> Set M} (hU : ExhaustsByOpen U)
     {φ : Nat -> Nat} (hφ : StrictMono φ) :
@@ -511,12 +459,6 @@ theorem comp_subseq {M : Type*} [TopologicalSpace M]
   exact ⟨k0, fun k hk => hk0 (φ k) (le_trans hk (hφ.id_le k))⟩
 
 end ExhaustsByOpen
-
-
-
-
-
-
 
 structure PointedCGHMaps
     (X : PointedFlowSeq (I := I))
@@ -561,8 +503,6 @@ structure PointedCGHMaps
 
 namespace PointedCGHMaps
 
-/-- Reindex spacetime comparison maps along a further strictly increasing
-subsequence. -/
 def compSubseq
     {X : PointedFlowSeq (I := I)}
     {P : PointedRiemannianManifold (I := I)}
@@ -619,7 +559,6 @@ def map
     (X.term (subseq k)).charted
   exact fun x => (Φ.partialDiffeomorph k) x
 
-/-- Reindexing comparison maps only reindexes their source sets. -/
 @[simp] theorem compSubseq_source
     {X : PointedFlowSeq (I := I)}
     {P : PointedRiemannianManifold (I := I)}
@@ -629,7 +568,6 @@ def map
     (Φ.compSubseq φ hφ).source k = Φ.source (φ k) :=
   rfl
 
-/-- Reindexing comparison maps only reindexes their target sets. -/
 @[simp] theorem compSubseq_target
     {X : PointedFlowSeq (I := I)}
     {P : PointedRiemannianManifold (I := I)}
@@ -639,7 +577,6 @@ def map
     (Φ.compSubseq φ hφ).target k = Φ.target (φ k) :=
   rfl
 
-/-- Reindexing comparison maps only reindexes their underlying maps. -/
 @[simp] theorem compSubseq_map
     {X : PointedFlowSeq (I := I)}
     {P : PointedRiemannianManifold (I := I)}
@@ -705,8 +642,6 @@ theorem source_subset
 
 end PointedCGHMaps
 
-
-
 def sourceOpen
     {X : PointedFlowSeq (I := I)}
     {P : PointedRiemannianManifold (I := I)}
@@ -716,8 +651,6 @@ def sourceOpen
     TopologicalSpace.Opens P.M := by
   letI : TopologicalSpace P.M := P.topology
   exact ⟨Φ.source k, Φ.source_open k⟩
-
-
 
 def targetOpen
     {X : PointedFlowSeq (I := I)}
@@ -731,10 +664,6 @@ def targetOpen
     (X.term (subseq k)).topology
   exact ⟨Φ.target k, Φ.target_open k⟩
 
-
-
-
-
 abbrev SourceDomain
     {X : PointedFlowSeq (I := I)}
     {P : PointedRiemannianManifold (I := I)}
@@ -742,7 +671,6 @@ abbrev SourceDomain
     (Φ : PointedCGHMaps (I := I) X P subseq) (k : Nat) :=
   letI : TopologicalSpace P.M := P.topology
   (sourceOpen (I := I) Φ k : Type _)
-
 
 abbrev TargetDomain
     {X : PointedFlowSeq (I := I)}
@@ -752,7 +680,6 @@ abbrev TargetDomain
   letI : TopologicalSpace (X.term (subseq k)).M :=
     (X.term (subseq k)).topology
   (targetOpen (I := I) Φ k : Type _)
-
 
 @[implicit_reducible]
 noncomputable def sourceDomTop
@@ -764,7 +691,6 @@ noncomputable def sourceDomTop
   letI : TopologicalSpace P.M := P.topology
   change TopologicalSpace (sourceOpen (I := I) Φ k)
   infer_instance
-
 
 @[implicit_reducible]
 noncomputable def sourceDomCharted
@@ -781,7 +707,6 @@ noncomputable def sourceDomCharted
   exact TopologicalSpace.Opens.instChartedSpace (H := H) (M := P.M)
     (s := sourceOpen (I := I) Φ k)
 
-
 @[implicit_reducible]
 noncomputable def sourceDomT2
     {X : PointedFlowSeq (I := I)}
@@ -795,7 +720,6 @@ noncomputable def sourceDomT2
   letI : TopologicalSpace (SourceDomain (I := I) Φ k) := sourceDomTop (I := I) Φ k
   change T2Space {x : P.M // x ∈ Φ.source k}
   infer_instance
-
 
 @[implicit_reducible]
 noncomputable def sourceDomSmooth
@@ -814,9 +738,6 @@ noncomputable def sourceDomSmooth
   change IsManifold I ∞ (sourceOpen (I := I) Φ k)
   exact { (sourceOpen (I := I) Φ k).instHasGroupoid (contDiffGroupoid ∞ I) with }
 
-
-
-
 theorem sourceDomSigmaOf
     {X : PointedFlowSeq (I := I)}
     {P : PointedRiemannianManifold (I := I)}
@@ -830,7 +751,6 @@ theorem sourceDomSigmaOf
   change SigmaCompactSpace {x : P.M // x ∈ Φ.source k}
   exact isSigmaCompact_iff_sigmaCompactSpace.mp hσ
 
-
 @[implicit_reducible]
 noncomputable def targetDomTop
     {X : PointedFlowSeq (I := I)}
@@ -842,7 +762,6 @@ noncomputable def targetDomTop
     (X.term (subseq k)).topology
   change TopologicalSpace (targetOpen (I := I) Φ k)
   infer_instance
-
 
 @[implicit_reducible]
 noncomputable def targetDomCharted
@@ -861,7 +780,6 @@ noncomputable def targetDomCharted
   exact TopologicalSpace.Opens.instChartedSpace (H := H)
     (M := (X.term (subseq k)).M) (s := targetOpen (I := I) Φ k)
 
-
 @[implicit_reducible]
 noncomputable def targetDomT2
     {X : PointedFlowSeq (I := I)}
@@ -877,7 +795,6 @@ noncomputable def targetDomT2
   letI : TopologicalSpace (TargetDomain (I := I) Φ k) := targetDomTop (I := I) Φ k
   change T2Space {x : (X.term (subseq k)).M // x ∈ Φ.target k}
   infer_instance
-
 
 @[implicit_reducible]
 noncomputable def targetDomSmooth
@@ -898,8 +815,6 @@ noncomputable def targetDomSmooth
   letI : ChartedSpace H (TargetDomain (I := I) Φ k) := targetDomCharted (I := I) Φ k
   change IsManifold I ∞ (targetOpen (I := I) Φ k)
   exact { (targetOpen (I := I) Φ k).instHasGroupoid (contDiffGroupoid ∞ I) with }
-
-
 
 theorem targetDomSigmaOf
     {X : PointedFlowSeq (I := I)}
@@ -935,8 +850,6 @@ private theorem contMDiff_openCod
   · intro y
     have hy := hf.2 (y : N)
     simpa [Function.comp_def, extChartAt, TopologicalSpace.Opens.chartAt_eq] using hy
-
-
 
 noncomputable def sourceTargetDiff
     {X : PointedFlowSeq (I := I)}
@@ -1042,8 +955,6 @@ def sourceCompactSet
     (K : Set P.M) : Set (SourceDomain (I := I) Φ k) :=
   {x | (x : P.M) ∈ K}
 
-
-
 def targetCompactSet
     {X : PointedFlowSeq (I := I)}
     {P : PointedRiemannianManifold (I := I)}
@@ -1051,9 +962,6 @@ def targetCompactSet
     (Φ : PointedCGHMaps (I := I) X P subseq) (k : Nat)
     (K : Set (X.term (subseq k)).M) : Set (TargetDomain (I := I) Φ k) :=
   {x | (x : (X.term (subseq k)).M) ∈ K}
-
-
-
 
 theorem sourceCompactSet_isCompact
     {X : PointedFlowSeq (I := I)}
@@ -1078,8 +986,6 @@ theorem sourceCompactSet_isCompact
       exact ⟨⟨x, hKsrc hxK⟩, hxK, rfl⟩
   rw [hImage]
   exact hK
-
-
 
 theorem targetCompactSet_isCompact
     {X : PointedFlowSeq (I := I)}
@@ -1114,9 +1020,6 @@ theorem targetCompactSet_isCompact
       exact ⟨⟨x, hKtgt hxK⟩, hxK, rfl⟩
   rw [hImage]
   exact hK
-
-
-
 
 structure SourceDomainMetricData
     {X : PointedFlowSeq (I := I)}
@@ -1204,9 +1107,6 @@ structure SourceDomainMetricData
               (fun y : SourceDomain (I := I) Φ k => Φ.map k (y : P.M)) x) w)
 
 namespace SourceDomainMetricData
-
-
-
 
 noncomputable def ofCanonical
     {X : PointedFlowSeq (I := I)}
@@ -1305,11 +1205,6 @@ noncomputable def ofCanonical
     exact sourceCompactSet_isCompact (I := I) Φ k hK hKsrc
   limit_inner := limit_inner
   pullback_inner := pullback_inner
-
-
-
-
-
 
 noncomputable def ofRestrictPullback
     {X : PointedFlowSeq (I := I)}
@@ -1562,11 +1457,6 @@ def SourceMetricCPConvOnWindow
         forall t : Real, t ∈ Set.Icc a b ->
           (D k).derivNormSupOn (I := I) K p t < ε
 
-
-
-
-
-
 theorem SourceMetricCPConvOnWindow.of_derivNormSupOn
     {X : PointedFlowSeq (I := I)}
     {P : PointedRiemannianManifold (I := I)}
@@ -1588,10 +1478,6 @@ theorem SourceMetricCPConvOnWindow.of_derivNormSupOn
   refine ⟨hSrc k (le_trans (Nat.le_max_left kSrc kConv) hk), ?_⟩
   exact hConv k (le_trans (Nat.le_max_right kSrc kConv) hk)
 
-
-
-
-
 structure SourceMetricConvergenceData
     {X : PointedFlowSeq (I := I)}
     {P : PointedRiemannianManifold (I := I)}
@@ -1606,10 +1492,6 @@ structure SourceMetricConvergenceData
         SourceMetricCPConvOn (I := I) Φ domain K hK p t
 
 namespace SourceMetricConvergenceData
-
-
-
-
 
 noncomputable def of_derivNormSupOn
     {X : PointedFlowSeq (I := I)}
@@ -1633,8 +1515,6 @@ noncomputable def of_derivNormSupOn
     refine ⟨max kSrc kConv, fun k hk => ?_⟩
     refine ⟨hSrc k (le_trans (Nat.le_max_left kSrc kConv) hk), ?_⟩
     exact hConv k (le_trans (Nat.le_max_right kSrc kConv) hk)
-
-
 
 noncomputable def ofRestrictPullback
     {X : PointedFlowSeq (I := I)}
@@ -1675,7 +1555,6 @@ noncomputable def ofRestrictPullback
 
 end SourceMetricConvergenceData
 
-
 structure SourceSpacetimeConvergenceData
     {X : PointedFlowSeq (I := I)}
     {P : PointedRiemannianManifold (I := I)}
@@ -1690,8 +1569,6 @@ structure SourceSpacetimeConvergenceData
         SourceMetricCPConvOnWindow (I := I) Φ D K hK p a b
 
 namespace SourceSpacetimeConvergenceData
-
-
 
 noncomputable def toSpatial
     {X : PointedFlowSeq (I := I)}
@@ -1713,11 +1590,6 @@ noncomputable def toSpatial
     obtain ⟨hsrc, hbound⟩ := hk0 k hk
     exact ⟨hsrc, hbound t ⟨le_rfl, le_rfl⟩⟩
 
-
-
-
-
-
 theorem of_derivNormSupOn
     {X : PointedFlowSeq (I := I)}
     {P : PointedRiemannianManifold (I := I)}
@@ -1737,9 +1609,6 @@ theorem of_derivNormSupOn
     intro K hK p a b hwin
     exact SourceMetricCPConvOnWindow.of_derivNormSupOn (I := I) hK
       (hconv K hK p a b hwin)
-
-
-
 
 theorem ofRestrictPullback
     {X : PointedFlowSeq (I := I)}
@@ -1780,15 +1649,6 @@ theorem ofRestrictPullback
 
 end SourceSpacetimeConvergenceData
 
-
-
-
-
-
-
-
-
-
 def FunctionPullbackTendsto
     {X : PointedFlowSeq (I := I)}
     {P : PointedRiemannianManifold (I := I)}
@@ -1799,13 +1659,6 @@ def FunctionPullbackTendsto
   ∀ t ∈ X.D.carrier, forall x : P.M,
     Filter.Tendsto (fun k : Nat => uSeq k t (Phi.map k x))
       Filter.atTop (nhds (uInf t x))
-
-
-
-
-
-
-
 
 theorem FunctionPullbackTendsto.le_of_bound0
     {X : PointedFlowSeq (I := I)}
@@ -1827,8 +1680,6 @@ theorem FunctionPullbackTendsto.le_of_bound0
   have hle0 : uInf t x <= 0 := by
     exact le_of_tendsto_of_tendsto (hconv t ht x) (hbound t x).1 (hbound t x).2
   exact le_trans hle0 (le_of_lt hη)
-
-
 
 def ScalarPullbackTendsto
     {X : PointedFlowSeq (I := I)}
@@ -1863,8 +1714,6 @@ def ScalarPullbackTendsto
       letI : T2Space L.M := L.t2
       L.S.scalar t x)
 
-/-- Pointwise pullback convergence of the intrinsic squared Ricci norm along
-the comparison maps of a smooth Cheeger--Gromov--Hamilton limit. -/
 def RicNormPullback
     {X : PointedFlowSeq (I := I)}
     {L : PointedFlowData (I := I) X.D}
@@ -1898,16 +1747,12 @@ def RicNormPullback
       letI : T2Space L.M := L.t2
       PDE.RicciFlow.ricciNorm (I := I) L.S t x)
 
-/-- Smooth pointed Cheeger--Gromov convergence of the spatial metrics at one
-time, packaged around the comparison maps. -/
 structure PointedCGConverges
     (X : PointedFlowSeq (I := I))
     (L : PointedFlowData (I := I) X.D)
     (subseq : Nat -> Nat) where
   maps : PointedCGHMaps (I := I) X (L.atTime 0) subseq
   metrics : SourceMetricConvergenceData (I := I) maps
-
-
 
 structure SmoothCGHConverges
     (X : PointedFlowSeq (I := I))
@@ -1922,9 +1767,6 @@ structure SmoothCGHConverges
 
 namespace SmoothCGHConverges
 
-/-- Build smooth CGH convergence from comparison maps, scalar and squared
-Ricci-norm pullback convergence, and source-domain spacetime metric convergence.
-The spatial metric convergence is extracted from the singleton-window case. -/
 noncomputable def ofSpacetime
     {X : PointedFlowSeq (I := I)}
     {L : PointedFlowData (I := I) X.D}
@@ -1942,10 +1784,6 @@ noncomputable def ofSpacetime
   ricciNorm_converges := hric
   spacetime := Hst
 
-/-- Build smooth CGH convergence from the canonical source-domain
-restrict/pullback metrics.  The curvature pullback convergence inputs are
-retained explicitly; the remaining metric input is uniform window convergence
-of the seminorms of those constructed metrics. -/
 noncomputable def ofRestrictPullback
     {X : PointedFlowSeq (I := I)}
     {L : PointedFlowData (I := I) X.D}

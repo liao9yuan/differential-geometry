@@ -43,7 +43,6 @@ local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 structure ChartH2NonSmoothPOUWitness
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
     (g : SmoothRiemannianMetric I M) (u : M → ℝ) (α : M) : Prop where
-
   memWkp_two : DifferentialGeometry.Analysis.Sobolev.Euclidean.MemWkp
     (d := Module.finrank ℝ E) 2 2
     (DifferentialGeometry.Analysis.Sobolev.Chart.chartPushed (I := I) (M := M)
@@ -161,20 +160,16 @@ theorem wkpNormChart_two_le_tsum_chart_norms
 structure ChartH2NonSmoothBridgeData
     [I.Boundaryless] [T2Space M] [CompactSpace M]
     (g : SmoothRiemannianMetric I M) (u : M → ℝ) (α : M) where
-
   D : ChartBilinearH1ComplData (I := I) (M := M) g α
-
   Omega'' : Set EuclN
   Omega''_open : IsOpen Omega''
   Omega''_compact_closure : IsCompact (closure Omega'')
-
   h0 : ℝ
   h0_pos : 0 < h0
   room :
     Metric.cthickening h0 (closure Omega'') ⊆
       DifferentialGeometry.Analysis.Sobolev.Chart.chartTargetEuclid
         (I := I) (M := M) α
-
   M_bound : Fin (Module.finrank ℝ E) → Fin (Module.finrank ℝ E) → ℝ
   M_bound_nn : ∀ i k, 0 ≤ M_bound i k
   uniform_diffQuot_bound :
@@ -185,7 +180,6 @@ structure ChartH2NonSmoothBridgeData
               (d := Module.finrank ℝ E) k h (D.weak_partial i)) 2
             ((volume : Measure EuclN).restrict Omega'')
           ≤ ENNReal.ofReal (M_bound i k)
-
   memWkp_two_chartPushed :
     DifferentialGeometry.Analysis.Sobolev.Euclidean.MemWkp
       (d := Module.finrank ℝ E) 2 2

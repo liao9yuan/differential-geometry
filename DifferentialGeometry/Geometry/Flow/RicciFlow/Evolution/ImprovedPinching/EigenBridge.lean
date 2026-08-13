@@ -2,17 +2,9 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.ImprovedPinching.B
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.RicciPreservation
 open DifferentialGeometry.PDE.RicciFlow
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Operator
 
 set_option autoImplicit false
-
-
-
-
-
-
-
 
 noncomputable section
 
@@ -28,8 +20,6 @@ variable {I : ModelWithCorners Real E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
 variable [IsManifold I ∞ M] [IsManifold I 1 M]
 variable [SigmaCompactSpace M] [T2Space M]
-
-
 
 omit [Module.Finite ℝ E] [IsManifold I 1 M] [SigmaCompactSpace M] [T2Space M] in
 theorem pinchEigen3Unordered_of_ricci_nonneg_and_shifted_pinch
@@ -101,8 +91,6 @@ theorem pinchEigen3Unordered_of_ricci_nonneg_and_shifted_pinch
       lower2 := hlower2
       lower3 := hlower3 }
 
-
-
 omit [Module.Finite ℝ E] in
 omit [SigmaCompactSpace M] in
 theorem pinchEigen3Unordered_of_pinchTensor_nonneg
@@ -137,8 +125,6 @@ theorem pinchEigen3Unordered_of_pinchTensor_nonneg
     simpa [pinchTensor, DifferentialGeometry.PDE.RicciFlow.twoTensorSecToFamily,
       SolutionOn.ricciAt]
       using hpinch v
-
-
 
 omit [Module.Finite ℝ E] in
 theorem cubicQ_sub_nonneg_of_section9_point

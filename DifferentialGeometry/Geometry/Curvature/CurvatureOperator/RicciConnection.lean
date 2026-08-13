@@ -8,8 +8,6 @@ open DifferentialGeometry.Geometry.Curvature
 
 open DifferentialGeometry.Geometry.Connection
 
-
-
 noncomputable section
 
 open Bundle Manifold Set FiberBundle NormedSpace Filter
@@ -1321,8 +1319,6 @@ theorem riemannOp_inner_pair_symm
   exact riemann4_pair_symm (I := I) g x v w Z W
 
 omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] in
-/-- The Jacobi curvature endomorphism `X ↦ R(X, v)v` is self-adjoint for the
-Riemannian metric. -/
 theorem riemannOp_diag_symm
     (g : SmoothRiemannianMetric I M) (x : M)
     (v X Y : TangentSpace I x) :

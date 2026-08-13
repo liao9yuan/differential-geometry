@@ -1,17 +1,7 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.C4.HatUniformSource
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
 
 set_option autoImplicit false
-
-
-
-
-
-
-
-
-
 
 noncomputable section
 
@@ -273,10 +263,6 @@ theorem unifHatCageComp
       (by simpa [sourceK] using hKU)
       (by simpa [sourceK] using hKV)
 
-
-
-
-
 omit [Module.Finite ℝ E] in
 theorem unifHatCageSrc
     [FiniteDimensional Real E]
@@ -496,8 +482,6 @@ theorem unifHatCageSrc
           (by simpa [sourceK] using hKU)
           (by simpa [sourceK] using hKV))
 
-
-
 omit [Module.Finite ℝ E] in
 theorem unifHatCageSelfComp
     [FiniteDimensional Real E]
@@ -705,9 +689,6 @@ theorem unifHatCageSelfComp
       hVopen hB hA hBcont hAcont hid
       (by simpa [sourceK] using hKU)
       (by simpa [sourceK] using hKV)
-
-
-
 
 end NetLimitData
 

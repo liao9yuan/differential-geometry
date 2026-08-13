@@ -1,7 +1,6 @@
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurckCoefficients.IteratedInvGramJetLipschitz
 open DifferentialGeometry.Analysis.Calculus.DeTurckCoefficients
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Operator
 
 
@@ -28,14 +27,11 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 structure HasChartJetLip
     (g₁ g₂ : SmoothRiemannianMetric I M) (α : M) (K : Set E)
     (F : SmoothRiemannianMetric I M → E → ℝ) (d : ℕ) : Prop where
-
   contDiff : ∀ g : SmoothRiemannianMetric I M,
     ContDiffOn ℝ ∞ (F g) (interior (extChartAt I α).target)
-
   bound : ∀ N : ℕ, ∃ B : ℝ, 0 ≤ B ∧ ∀ y ∈ K, ∀ m : ℕ, m ≤ N →
     ‖iteratedFDerivWithin ℝ m (F g₁) (interior (extChartAt I α).target) y‖ ≤ B ∧
       ‖iteratedFDerivWithin ℝ m (F g₂) (interior (extChartAt I α).target) y‖ ≤ B
-
   lip : ∀ N : ℕ, ∃ C : ℝ, 0 < C ∧ ∀ y ∈ K,
     ‖iteratedFDerivWithin ℝ N (fun z => F g₁ z - F g₂ z)
         (interior (extChartAt I α).target) y‖ ≤

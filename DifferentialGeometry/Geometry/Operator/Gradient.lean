@@ -11,7 +11,6 @@ import Mathlib.LinearAlgebra.FiniteDimensional.Lemmas
 import Mathlib.LinearAlgebra.Matrix.NonsingularInverse
 import Mathlib.LinearAlgebra.Matrix.Adjugate
 
-
 noncomputable section
 
 open Bundle Manifold Set MeasureTheory
@@ -541,8 +540,6 @@ lemma gradChartLocal_eq_gradFun
   congr 1
   rw [inner_gradChartLocal_chartBasis (I := I) g α f hx k, hmfderiv_basis k]
 
-/-- At a differentiability point in a boundaryless chart, the squared metric
-norm of `gradFun` is the inverse Gram quadratic form in the chart partials. -/
 theorem grad_norm_sq_chart
     (g : SmoothRiemannianMetric I M) [I.Boundaryless]
     (α : M) {f : M → ℝ} {x : M}
@@ -576,11 +573,6 @@ theorem grad_norm_sq_chart
   unfold gradChartCoeff
   rw [Finset.sum_mul]
 
-/-- The pointwise `g`-norm bound on the gradient: for `f` differentiable at `x`
-and `x` in the chart-`α` source on a boundaryless model,
-`‖gradFun g f x‖_g² ≤ chartInvGramMatrix_l1Sum α x · (∑ k, |∂_k f̃(φ x)|²)`,
-where `f̃ = f ∘ (extChartAt I α).symm` is the chart pullback of `f` and `φ` is
-the extended chart. -/
 theorem g_inner_gradFun_le_chartInvGramMatrix_l1Sum_mul_sum_sq_partials
     (g : SmoothRiemannianMetric I M) [I.Boundaryless]
     (α : M) {f : M → ℝ} {x : M}

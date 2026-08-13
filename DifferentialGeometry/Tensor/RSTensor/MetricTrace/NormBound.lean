@@ -1,7 +1,6 @@
 import DifferentialGeometry.Tensor.RSTensor.MetricTrace.Trace04
 import DifferentialGeometry.Tensor.RSTensor.NormSqProduct
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Operator
 
 set_option autoImplicit false

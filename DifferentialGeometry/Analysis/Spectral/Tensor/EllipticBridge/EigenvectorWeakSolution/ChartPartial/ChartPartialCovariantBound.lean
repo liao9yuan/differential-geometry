@@ -5,7 +5,6 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.ChartTensor.ChartGeometry.G
 import DifferentialGeometry.Analysis.Sobolev.Manifold.MeasureBridgeUniform
 import Mathlib.MeasureTheory.Function.LpSeminorm.SMul
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Connection
 
 

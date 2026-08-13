@@ -2,7 +2,6 @@ import DifferentialGeometry.Analysis.Parabolic.DeTurckRicci.RHSSmoothQuasilinear
 import DifferentialGeometry.Analysis.Parabolic.DeTurckLinearization.LieDerivativeChartFrameIdentity
 open DifferentialGeometry.Analysis.Parabolic
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Connection
 
 

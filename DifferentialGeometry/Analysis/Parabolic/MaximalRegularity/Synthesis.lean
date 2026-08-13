@@ -1,6 +1,5 @@
 import DifferentialGeometry.Analysis.Parabolic.MaximalRegularity.Plancherel
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
 
 noncomputable section
 

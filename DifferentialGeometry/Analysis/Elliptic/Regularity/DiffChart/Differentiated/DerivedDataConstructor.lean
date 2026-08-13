@@ -7,7 +7,6 @@ import DifferentialGeometry.Analysis.Elliptic.Regularity.FChartResidual.Residual
 import DifferentialGeometry.Analysis.Sobolev.Approximation.SmoothDensity
 import Mathlib.Analysis.Distribution.AEEqOfIntegralContDiff
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Connection
 
 

@@ -3,23 +3,10 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.ChartRicciJetIdent
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.ExtendedSolutionRegularity
 open DifferentialGeometry.PDE.RicciFlow
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Connection
 open DifferentialGeometry.Geometry.Operator
 
 set_option autoImplicit false
-
-/-!
-# Initial-edge bounds for a smooth Ricci-flow family
-
-This file starts the regularizing-edge package needed by forward uniqueness.
-The first producer below extracts the purely topological part: joint chart-Gram
-continuity up to the initial time gives uniform two-sided metric equivalence on
-every compact initial time slab.  The later producers expose the exact weak
-chart equation and the interior/improper time-integral identities supplied by
-the Ricci PDE.  Spatial derivative bounds remain a separate parabolic-regularity
-frontier.
--/
 
 noncomputable section
 
@@ -45,10 +32,6 @@ omit [NeZero (Module.finrank ℝ E)]
   [BoundarylessManifold I M]
   [I.Boundaryless] in
 omit [SigmaCompactSpace M] in
-/-- Joint chart-Gram regularity up to the initial time gives one metric
-equivalence constant on every compact initial subinterval.  This is the
-zeroth-order component of the regularizing-edge estimates used in smooth
-forward uniqueness. -/
 theorem ricciEdgeMetric
     (g : Real → SmoothRiemannianMetric I M) {a b c : Real}
     (hab : a < b) (hcb : c < b)
@@ -159,10 +142,6 @@ theorem ricciEdgeMetric
 
 omit [NeZero (Module.finrank ℝ E)]
   [CompactSpace M] in
-/-- On the regular interior, the geometric Ricci-flow equation is exactly the
-weakly parabolic chart-Gram `2`-jet equation.  This is the coordinate PDE that
-an initial-edge gauge or boundary-regularity argument must improve to a
-strictly parabolic system; no such improvement is asserted here. -/
 theorem ricciEdgeChartPDE
     (g : ℝ → SmoothRiemannianMetric I M) {a b t : ℝ}
     (hpde : ∀ r ∈ Set.Ico a b, ∀ x : M, ∀ v w : TangentSpace I x,
@@ -199,10 +178,6 @@ theorem ricciEdgeChartPDE
 omit [CompactSpace M]
   [NeZero (Module.finrank ℝ E)]
   [SigmaCompactSpace M] in
-/-- On every compact time interval strictly inside the regular slab, the
-metric variation is the time integral of `-2 Ric`.  Joint interior
-chart-Gram smoothness supplies continuity (hence integrability) of the Ricci
-integrand; the raw metric PDE supplies the derivative. -/
 theorem ricciEdgeIntegral
     (g : ℝ → SmoothRiemannianMetric I M) {a b s t : ℝ}
     (hsmooth : ∀ (x₀ : M) (i j : Fin (Module.finrank ℝ E)),
@@ -248,10 +223,6 @@ theorem ricciEdgeIntegral
 omit [CompactSpace M]
   [NeZero (Module.finrank ℝ E)]
   [SigmaCompactSpace M] in
-/-- The interior Ricci integrals have the correct improper limit at the
-initial edge.  This is deliberately an improper-limit statement: the exact
-endpoint hypotheses do not yet imply Lebesgue integrability of `Ric` on the
-closed interval starting at `a`. -/
 theorem ricciEdgeImproper
     (g : ℝ → SmoothRiemannianMetric I M) {a b t : ℝ}
     (hsmooth : ∀ (x₀ : M) (i j : Fin (Module.finrank ℝ E)),

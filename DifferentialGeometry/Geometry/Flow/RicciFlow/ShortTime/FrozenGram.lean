@@ -1,18 +1,7 @@
 import DifferentialGeometry.Analysis.Parabolic.Euclidean.HeatKernelSPD
 import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.LowRegCoefficients
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Operator
-
-/-!
-# Frozen inverse-Gram coordinate equivalences
-
-At every active partition-of-unity chart point, the low-regularity coefficient
-package supplies one uniformly positive inverse-Gram matrix.  This file turns
-that concrete matrix into the positive-square-root coordinate equivalence used
-by the Euclidean frozen heat operator, with constants depending only on the
-two ellipticity numbers in `LowRegCoeff`.
--/
 
 noncomputable section
 
@@ -52,8 +41,6 @@ private lemma frozenGram_quad
 
 omit [NeZero (Module.finrank ℝ E)]
   [I.Boundaryless] in
-/-- The frozen inverse-Gram matrix at every active low-regularity chart point
-is positive definite. -/
 theorem frozenGram_posDef {index : Type*}
     (gBase : SmoothRiemannianMetric I M)
     (gSeq : index → SmoothRiemannianMetric I M) (D : LowRegCoeff)
@@ -94,8 +81,6 @@ theorem frozenGram_posDef {index : Type*}
         ring
 
 omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
-/-- Intrinsic low-regularity ellipticity rewritten as the Euclidean quadratic
-form bounds consumed by `spdSqrtEquiv`. -/
 theorem frozenGram_bounds {index : Type*}
     (gBase : SmoothRiemannianMetric I M)
     (gSeq : index → SmoothRiemannianMetric I M) (D : LowRegCoeff)
@@ -120,9 +105,6 @@ theorem frozenGram_bounds {index : Type*}
       frozenGram_quad (I := I) (gSeq k) alpha b x]
     exact hEll.2
 
-/-- Positive-square-root coordinates for one frozen active inverse-Gram
-matrix.  The global unknown remains a metric path; this is only a local
-coordinate equivalence used inside its canonical chart gauge. -/
 def frozenGramEquiv {index : Type*}
     (gBase : SmoothRiemannianMetric I M)
     (gSeq : index → SmoothRiemannianMetric I M) (D : LowRegCoeff)
@@ -138,7 +120,6 @@ def frozenGramEquiv {index : Type*}
 
 omit [NeZero (Module.finrank ℝ E)]
   [I.Boundaryless] in
-/-- Exact frozen-principal factorization. -/
 theorem frozenGram_comp {index : Type*}
     (gBase : SmoothRiemannianMetric I M)
     (gSeq : index → SmoothRiemannianMetric I M) (D : LowRegCoeff)
@@ -155,7 +136,6 @@ theorem frozenGram_comp {index : Type*}
   exact spdSqrt_comp _ _ x
 
 omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
-/-- Uniform operator-norm bound for all active frozen coordinate maps. -/
 theorem frozenGram_norm_le {index : Type*}
     (gBase : SmoothRiemannianMetric I M)
     (gSeq : index → SmoothRiemannianMetric I M) (D : LowRegCoeff)
@@ -172,8 +152,6 @@ theorem frozenGram_norm_le {index : Type*}
   exact (frozenGram_bounds (I := I) gBase gSeq D hD alpha hAlpha k b hb x).2
 
 omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
-/-- Uniform inverse operator-norm bound for all active frozen coordinate
-maps. -/
 theorem frozenGram_inv_le {index : Type*}
     (gBase : SmoothRiemannianMetric I M)
     (gSeq : index → SmoothRiemannianMetric I M) (D : LowRegCoeff)

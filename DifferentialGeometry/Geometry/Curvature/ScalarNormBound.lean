@@ -2,15 +2,7 @@ import DifferentialGeometry.Geometry.Curvature.RicciOperatorNormBound
 import DifferentialGeometry.Geometry.Operator.RoughLaplacian
 open DifferentialGeometry.Geometry.Curvature
 
-
 set_option autoImplicit false
-
-/-!
-# Scalar curvature bound from the Riemann norm
-
-This file closes the trace estimate needed to turn a pointwise Riemann norm
-bound into a scalar-curvature upper bound.
--/
 
 noncomputable section
 
@@ -26,8 +18,6 @@ variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
   [IsManifold I ∞ M] [SigmaCompactSpace M] [T2Space M]
 
-/-- The absolute scalar curvature is at most the square of the tangent
-dimension times the fibre norm of the lowered Riemann tensor. -/
 theorem scalar_abs_le_rm (g : SmoothRiemannianMetric I M) (x : M) :
     |metricScalarAt (I := I) (M := M) g x| ≤
       (Module.finrank ℝ (TangentSpace I x) : ℝ) ^ 2 *

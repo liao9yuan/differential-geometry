@@ -154,7 +154,8 @@ private theorem Psi_tensorialAt_right
 omit [FiniteDimensional ℝ E] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 private theorem dual_section_mdiff
     (α : Cₛ^∞⟮I; E →L[ℝ] ℝ, (_root_.Bundle.dual ℝ (TangentSpace I : M → Type _))⟯)
-    (x : M) : MDiffAtDual I M (α : Π x : M, (_root_.Bundle.dual ℝ (TangentSpace I : M → Type _)) x) x :=
+    (x : M) : MDiffAtDual I M (α : Π x : M,
+      (_root_.Bundle.dual ℝ (TangentSpace I : M → Type _)) x) x :=
   α.contMDiff.contMDiffAt.mdifferentiableAt (by simp)
 
 omit [FiniteDimensional ℝ E] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
@@ -357,7 +358,8 @@ noncomputable instance dualCovariantDerivative_contMDiff
       intro α hα
       have hα_smooth : ContMDiff I (I.prod 𝓘(ℝ, E →L[ℝ] ℝ)) ∞
           (fun x => TotalSpace.mk' (E →L[ℝ] ℝ)
-            (E := fun x : M => (TangentSpace I x →L[ℝ] (_root_.Bundle.Trivial M ℝ) x)) x (α x)) := by
+            (E := fun x : M => (TangentSpace I x →L[ℝ] (_root_.Bundle.Trivial M ℝ) x)) x
+              (α x)) := by
         rw [show (∞ : WithTop ℕ∞) = ∞ + 1 from by simp] at hα
         rwa [← contMDiffOn_univ]
       let α_section : Cₛ^∞⟮I; E →L[ℝ] ℝ, (_root_.Bundle.dual ℝ (TangentSpace I : M → Type _))⟯ :=

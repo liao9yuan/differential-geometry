@@ -5,26 +5,10 @@ import Mathlib.MeasureTheory.Integral.IntervalIntegral.FundThmCalculus
 
 set_option autoImplicit false
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 namespace DifferentialGeometry
 
 open Set MeasureTheory intervalIntegral
 open scoped ContDiff
-
-
 
 private theorem exists_smooth_clamp_aux (a b : ℝ) (ha : a < 0) (hb : 0 < b) :
     ∃ ψ : ℝ → ℝ, ContDiff ℝ ∞ ψ ∧

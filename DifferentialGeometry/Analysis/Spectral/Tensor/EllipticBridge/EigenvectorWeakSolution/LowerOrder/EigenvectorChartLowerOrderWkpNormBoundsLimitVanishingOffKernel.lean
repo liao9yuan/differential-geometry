@@ -5,7 +5,6 @@ import DifferentialGeometry.Analysis.Sobolev.Euclidean.IteratedSobolevSpace.Iter
 import DifferentialGeometry.Analysis.Spectral.Tensor.EllipticBridge.EigenvectorWeakSolution.LowerOrder.EigenvectorChartLowerOrderWkpNormBoundsProductSumEstimates
 open DifferentialGeometry.Analysis.Spectral
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
 
 noncomputable section
 

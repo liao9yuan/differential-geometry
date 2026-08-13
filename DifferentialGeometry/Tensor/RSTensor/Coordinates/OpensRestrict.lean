@@ -78,7 +78,6 @@ namespace DifferentialGeometry
 open Bundle Set Topology TopologicalSpace
 open scoped Manifold ContDiff
 set_option backward.isDefEq.respectTransparency false in
-
 noncomputable def restrictOpen0S {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
     [FiniteDimensional ℝ E] [CompleteSpace E]
     {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}

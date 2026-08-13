@@ -4,18 +4,8 @@ import Mathlib.MeasureTheory.Integral.IntervalIntegral.FundThmCalculus
 
 namespace DifferentialGeometry.Analysis.Calculus
 
-/-!
-# Monotonicity of a quotient from a cross-derivative inequality
-
-This file records the scalar calculus step used by relative comparison
-arguments.  Geometric applications prove the cross-multiplied logarithmic
-derivative inequality and use this result without introducing logarithms.
--/
-
 open MeasureTheory Set
 
-/-- If `f' * g <= f * g'` and `g` is positive on an open interval, then
-`f / g` is antitone there. -/
 theorem ratio_anti_of_cross
     {f g f' g' : ℝ → ℝ} {a b : ℝ}
     (hf : ∀ x ∈ Ioo a b, HasDerivAt f (f' x) x)
@@ -35,8 +25,6 @@ theorem ratio_anti_of_cross
     exact div_nonpos_of_nonpos_of_nonneg
       (sub_nonpos.mpr (hcross x hx')) (sq_nonneg (g x))
 
-/-- If the pointwise ratio `f / g` is antitone and `g` is positive, then the
-ratio of the integrals from zero is antitone as well. -/
 theorem integralRatio_anti
     {f g : ℝ → ℝ} {b : ℝ}
     (hf : Continuous f) (hg : Continuous g)

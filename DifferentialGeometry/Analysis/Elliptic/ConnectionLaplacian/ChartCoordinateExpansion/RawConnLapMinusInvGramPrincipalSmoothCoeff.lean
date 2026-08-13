@@ -6,7 +6,6 @@ import DifferentialGeometry.Geometry.Curvature.Order2Defect.MetricTraceFrame
 import DifferentialGeometry.Geometry.Curvature.CurvatureOperator.TensorRicciCommutator
 open DifferentialGeometry.Analysis.Elliptic
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Connection
 open DifferentialGeometry.Geometry.Operator
 

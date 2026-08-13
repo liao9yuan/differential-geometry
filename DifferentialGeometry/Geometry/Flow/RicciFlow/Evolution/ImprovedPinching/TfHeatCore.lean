@@ -1,15 +1,8 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.ImprovedPinching.Definitions
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Operator
 
 set_option autoImplicit false
-
-
-
-
-
-
 
 noncomputable section
 
@@ -24,8 +17,6 @@ variable {H : Type*} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
 variable [IsManifold I ∞ M] [IsManifold I 1 M]
-
-
 
 def scalarSqLap
     (scalar scalarLap gradScalarNormSq : Real -> M -> Real) :
@@ -72,8 +63,6 @@ theorem sqLap_at
     linarith
   rw [hmain]
   ring
-
-
 
 omit [Module.Finite ℝ E] in
 theorem sqLap_realizes
@@ -144,8 +133,6 @@ def scalarSqHeatOn
       D.carrier
       (t : Real)
 
-
-
 omit [TopologicalSpace M] in
 theorem sqHeat_of_scalar
     {D : DifferentialGeometry.Geometry.Curvature.RealTimeInterval}
@@ -180,8 +167,6 @@ def tfRicHeatOn
             2 * Q (t : Real) x) / scalar (t : Real) x))
       D.carrier
       (t : Real)
-
-
 
 omit [TopologicalSpace M] in
 theorem tfRicHeat_alg
@@ -246,9 +231,6 @@ theorem tfRicHeat_alg
     ring
   rw [hValue] at hDeriv
   exact hDeriv
-
-
-
 
 omit [TopologicalSpace M] in
 theorem tfHeat_base

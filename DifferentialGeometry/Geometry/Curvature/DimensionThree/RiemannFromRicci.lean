@@ -13,18 +13,6 @@ open DifferentialGeometry.Geometry.Curvature
 
 set_option autoImplicit false
 
-
-
-
-
-
-
-
-
-
-
-
-
 noncomputable section
 
 namespace DifferentialGeometry.Geometry.Curvature
@@ -44,8 +32,6 @@ def OrthonormalBasisAt
     (g : SmoothRiemannianMetric I M) (x : M)
     (basis : Module.Basis (Fin 3) Real (TangentSpace I x)) : Prop :=
   forall i j : Fin 3, g.inner x (basis i) (basis j) = delta3 i j
-
-
 
 def standardRmCompAt
     (basis : Module.Basis (Fin 3) Real (TangentSpace I x))
@@ -435,13 +421,6 @@ theorem standardRmCompAt_apply
     standardRmCompAt basis Rm04 i j k l =
       rm04CompAt (I := I) basis Rm04 i j k l := rfl
 
-
-
-
-
-
-
-
 omit [FiniteDimensional ℝ E] in
 theorem rm04Comp_displayedRiemannFromRicci3D_at_of_curvature_symmetries
     {basis : Module.Basis (Fin 3) Real (TangentSpace I x)}
@@ -460,8 +439,6 @@ theorem rm04Comp_displayedRiemannFromRicci3D_at_of_curvature_symmetries
     displayedRiemannFromRicci3D_of_algebraic_curvature_symmetries
       h i j k l
   simpa [displayedRiemannFromRicciRhs3, standardRmCompAt_apply] using hformula
-
-
 
 theorem rm04Comp_displayedRiemannFromRicci3D_frame_of_curvature_symmetries
     {Rm04 : Tensor04Section (I := I) (M := M)}
@@ -486,8 +463,6 @@ theorem rm04Comp_displayedRiemannFromRicci3D_frame_of_curvature_symmetries
               (delta3 i l * delta3 j k - delta3 j l * delta3 i k) :=
   rm04Comp_displayedRiemannFromRicci3D_at_of_curvature_symmetries
     (I := I) h
-
-
 
 theorem algebraicCurvatureSymmetries3_standardRmCompAt_of_leviCivita_realizes
     [CompleteSpace E] [IsManifold I 1 M] [IsManifold I 2 M] [IsManifold I 3 M]
@@ -517,8 +492,6 @@ theorem algebraicCurvatureSymmetries3_standardRmCompAt_of_leviCivita_realizes
       (DifferentialGeometry.Geometry.Connection.rm04PairSymmAt_of_leviCivita_realizes
         (I := I) g Rm04 hRm04 (basis i) (basis j) (basis k) (basis l)).symm
 
-
-
 theorem rm04Comp_displayedRiemannFromRicci3D_at_of_leviCivita_realizes
     [CompleteSpace E] [IsManifold I 1 M] [IsManifold I 2 M] [IsManifold I 3 M]
     [IsManifold I ((∞ : WithTop ℕ∞) + 1) M] [SigmaCompactSpace M] [T2Space M]
@@ -539,11 +512,6 @@ theorem rm04Comp_displayedRiemannFromRicci3D_at_of_leviCivita_realizes
     (algebraicCurvatureSymmetries3_standardRmCompAt_of_leviCivita_realizes
       (I := I) g Rm04 hRm04 basis)
 
-
-
-
-
-
 structure RiemannFromRicci3DTraceDataAt
     (g : SmoothRiemannianMetric I M)
     (Ric : Tensor02At (I := I) (M := M) x)
@@ -558,12 +526,6 @@ structure RiemannFromRicci3DTraceDataAt
       stdRicci3 (standardRmCompAt basis Rm04) i j
   scalar_trace :
     scalar = stdScalar3 (standardRmCompAt basis Rm04)
-
-
-
-
-
-
 
 omit [FiniteDimensional ℝ E] in
 theorem firstTrace_delta3_eq_neg_stdRicci3
@@ -608,12 +570,6 @@ theorem firstTrace_delta3_eq_neg_stdRicci3
   unfold stdRicci3
   simp [standardRmCompAt_apply, rm04CompAt_apply]
   ring
-
-
-
-
-
-
 
 omit [FiniteDimensional ℝ E] in
 theorem traceDataOfFirst
@@ -664,12 +620,6 @@ theorem traceDataOfFirst
     simp [stdScalar3, Fin.sum_univ_three, delta3, hdiag0, hdiag1, hdiag2]
     ring
 
-
-
-
-
-
-
 omit [FiniteDimensional ℝ E] in
 theorem rm04Comp_displayedRiemannFromRicci3D_at
     {g : SmoothRiemannianMetric I M}
@@ -696,9 +646,6 @@ theorem rm04Comp_displayedRiemannFromRicci3D_at
   rw [← h.ricci_trace i l, ← h.ricci_trace j l, ← h.ricci_trace i k,
     ← h.ricci_trace j k, ← h.scalar_trace]
 
-
-
-
 omit [FiniteDimensional ℝ E] in
 theorem rm04Comp_einstein3_at
     {g : SmoothRiemannianMetric I M}
@@ -719,9 +666,6 @@ theorem rm04Comp_einstein3_at
   rw [hEin i l, hEin j l, hEin i k, hEin j k]
   fin_cases i <;> fin_cases j <;> fin_cases k <;> fin_cases l <;>
     simp [delta3] <;> ring
-
-
-
 
 theorem rm04_einstein3_at
     {g : SmoothRiemannianMetric I M}
@@ -765,12 +709,6 @@ theorem rm04_einstein3_at
   simp [slots4, DifferentialGeometry.Geometry.Curvature.vec4, delta3, Fin.sum_univ_three,
     Fin.prod_univ_four]
   ring
-
-
-
-
-
-
 
 theorem rm04_firstTrace_einstein3_at
     {g : SmoothRiemannianMetric I M}
@@ -851,11 +789,6 @@ theorem rm04Comp_displayedRiemannFromRicci3D_frame
           - (1 / 2 : Real) * scalar x *
               (delta3 i l * delta3 j k - delta3 j l * delta3 i k) :=
   rm04Comp_displayedRiemannFromRicci3D_at (I := I) h
-
-
-
-
-
 
 theorem rm04_kn_gform
     {g : SmoothRiemannianMetric I M}

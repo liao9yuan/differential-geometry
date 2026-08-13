@@ -10,20 +10,12 @@ import DifferentialGeometry.Geometry.Connection.ChartTensorNabla.Agreement.Tenso
 import DifferentialGeometry.Geometry.Curvature.CovGradRoughLap.GradientField
 import DifferentialGeometry.Analysis.Sobolev.Embedding.SobolevEmbeddingCm
 import DifferentialGeometry.Tensor.RSTensor.RankZero
-open DifferentialGeometry.Analysis.Sobolev DifferentialGeometry.Analysis.Sobolev.IntrinsicSobolev.SmoothCcTensorHs
+open DifferentialGeometry.Analysis.Sobolev
+    DifferentialGeometry.Analysis.Sobolev.IntrinsicSobolev.SmoothCcTensorHs
 open DifferentialGeometry.Analysis.Elliptic
-open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Geometry.Connection
 open DifferentialGeometry.Geometry.Operator
-
-
-
-
-
-
-
-
 
 noncomputable section
 
@@ -52,8 +44,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
-
-
 noncomputable def scalarScaleLap (g : SmoothRiemannianMetric I M) :
     tensorHs (I := I) (M := M) g 0 0 2 →L[ℝ]
       tensorHs (I := I) (M := M) g 0 0 0 :=
@@ -80,9 +70,6 @@ omit [NeZero (Module.finrank ℝ E)] in
     -TensorEigenIdx.lambda (I := I) (M := M) i * v.coeff i
   rw [tensorHs.castEquiv_coeff]
 
-
-
-
 theorem scalarLapHs_core
     (g : SmoothRiemannianMetric I M)
     (m : ℝ) (S : SmoothCcTensor g 0 0) :
@@ -97,8 +84,6 @@ theorem scalarLapHs_core
     ccTensorToHs_coeff,
     rawLap_coeff (I := I) (M := M) g 0
       (tensorResolventL2_isCompactOperator (I := I) (M := M) g 0 0) S i]
-
-
 
 omit [CompactSpace M] [SigmaCompactSpace M] in
 theorem rawLap_cc_scalar
@@ -154,8 +139,6 @@ theorem norm_scalarLap_le
     _ = ‖v‖ := (tensorHs.castEquiv (I := I) (M := M)
       (g := g) (r := 0) (s := 0) _).norm_map v
 
-
-
 noncomputable def reprScalar0
     {g : SmoothRiemannianMetric I M}
     (v : tensorHs (I := I) (M := M) g 0 0 2)
@@ -184,8 +167,6 @@ theorem repr_eq_lift
   simpa [reprScalar0] using
     (TensorRSField.lift_scalar0 (n := (∞ : WithTop ℕ∞))
       (tensorHsSmoothRepr (I := I) (M := M) v hv).toSection)
-
-
 
 theorem grad_repr_apply
     (g : SmoothRiemannianMetric I M)
@@ -243,8 +224,6 @@ theorem grad_repr_apply
         (extDerivFun (I := I)
           (reprScalar0 (I := I) (M := M) v hv) x X)) = _
   rw [ContinuousLinearEquiv.apply_symm_apply]
-
-
 
 theorem grad2_repr_diag
     (g : SmoothRiemannianMetric I M)
@@ -321,8 +300,6 @@ theorem grad2_repr_diag
           (vec2 (I := I) (B x) (B x)))) = _
   rw [ContinuousLinearEquiv.apply_symm_apply]
 
-
-
 theorem rawLap_repr_scalar
     (g : SmoothRiemannianMetric I M)
     (v : tensorHs (I := I) (M := M) g 0 0 2)
@@ -336,8 +313,6 @@ theorem rawLap_repr_scalar
   rw [← repr_eq_lift (I := I) (M := M) v hv]
   exact rawLap_scalar (I := I) (M := M) g
     (reprScalar0_smooth (I := I) (M := M) v hv) x
-
-
 
 theorem rawLap_repr_toL2
     (g : SmoothRiemannianMetric I M)
@@ -368,8 +343,6 @@ theorem rawLap_repr_toL2
   rw [SmoothCcTensor.toL2_apply, hrepr, tensorHsToL2_tensorL2Coeff,
     tensorHsToL2_tensorL2Coeff, scalarScaleLap_coeff]
 
-
-
 theorem rawLap_repr_norm
     (g : SmoothRiemannianMetric I M)
     (v : tensorHs (I := I) (M := M) g 0 0 2)
@@ -384,9 +357,6 @@ theorem rawLap_repr_norm
     (show (0 : ℝ) ≤ 0 by norm_num)
     (scalarScaleLap (I := I) (M := M) g v)).trans
       (norm_scalarLap_le (I := I) (M := M) g v)
-
-
-
 
 theorem grad_repr_norm
     (g : SmoothRiemannianMetric I M)

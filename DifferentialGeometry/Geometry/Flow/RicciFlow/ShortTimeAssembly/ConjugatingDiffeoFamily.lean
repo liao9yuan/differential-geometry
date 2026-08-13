@@ -11,7 +11,6 @@ import DifferentialGeometry.Analysis.ODE.TimeDependentFlow.SmoothDependence.Glob
 import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTimeFlow.ForwardFlow
 open DifferentialGeometry.Analysis.Spectral
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
 
 open DifferentialGeometry.Geometry.Connection
 namespace DifferentialGeometry.PDE.RicciFlow

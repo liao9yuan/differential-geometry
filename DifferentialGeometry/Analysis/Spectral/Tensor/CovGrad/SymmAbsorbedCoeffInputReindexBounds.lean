@@ -3,7 +3,6 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.OperatorFieldFibreN
 open DifferentialGeometry.Tensor.Multilinear
 open DifferentialGeometry.Analysis.Elliptic
 open DifferentialGeometry.Geometry.Curvature
-open DifferentialGeometry.Geometry.Curvature
 
 
 noncomputable section
@@ -20,7 +19,8 @@ namespace TensorSpectral
 open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.L2
 
-open DifferentialGeometry.PDE.RicciFlow DifferentialGeometry.Analysis.Sobolev DifferentialGeometry.Analysis.Spectral
+open DifferentialGeometry.PDE.RicciFlow DifferentialGeometry.Analysis.Sobolev
+    DifferentialGeometry.Analysis.Spectral
 open DifferentialGeometry.TensorRSNabla
 
 section NormedReindexing
