@@ -531,7 +531,7 @@ theorem seqAtom_dead_conv
   refine hzero.congr_eventually hU ?_ fun _ _ => rfl
   filter_upwards [seqCenter_dead hd P L (gamma : Nat) hgamma] with k hk
   intro z _hz
-  simp [seqAtomChart, seqAtomOn, legacyChart_apply,
+  simp [seqAtomChart, seqAtomOn,
     seqAtom_none hd hD P L pb r k gamma hk]
 
 theorem atom_disjoint_conv

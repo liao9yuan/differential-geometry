@@ -1163,7 +1163,7 @@ theorem quad_op
   rw [hqb, hqa]
   have hqbPerm := perm_app (I := I) (M := M) g (Equiv.swap (0 : Fin 4) 1)
     (lrQB (I := I) (M := M) g gm)
-  simp only [appCcRS_zero_eq_appCc, appCc] at hqbPerm
+  simp only [appCcRS_zero_eq_appCc] at hqbPerm
   have hqaA := perm_app (I := I) (M := M) g lrPermA
     (lrQA (I := I) (M := M) g gm)
   have hqa02 := perm_app (I := I) (M := M) g (Equiv.swap (0 : Fin 4) 2)
@@ -1172,7 +1172,7 @@ theorem quad_op
     (lrQA (I := I) (M := M) g gm)
   have hqaC := perm_app (I := I) (M := M) g lrPermC
     (lrQA (I := I) (M := M) g gm)
-  simp only [appCcRS_zero_eq_appCc, appCc] at hqaA hqa02 hqaB hqaC
+  simp only [appCcRS_zero_eq_appCc] at hqaA hqa02 hqaB hqaC
   rw [hqbPerm, hqaA, hqa02, hqaB, hqaC]
   rfl
 
