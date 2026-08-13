@@ -63,8 +63,6 @@ def fuAvec (g₁ g₂ : Real → SmoothRiemannianMetric I M) (t : Real) (x : M) 
   christoffelDiffSpeed (I := I) (chartFrameInv (I := I) g₁) (chartFrameInv (I := I) g₂)
     (chartNablaRic (I := I) g₁) (chartNablaRic (I := I) g₂) t x
 
-set_option synthInstance.maxHeartbeats 1000000 in
-set_option maxHeartbeats 1000000 in
 
 def fuSvec (g₁ g₂ : Real → SmoothRiemannianMetric I M) (t : Real) (y : M) :
     TangentSpace I y →L[Real] TangentSpace I y →L[Real] TangentSpace I y →L[Real]
@@ -77,8 +75,6 @@ def fuUflux (g₁ g₂ : Real → SmoothRiemannianMetric I M) (t : Real) :
     Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) (n := (∞ : WithTop ℕ∞)) 5 :=
   sdecUflux (I := I) g₁ g₂ (fuTf (I := I) g₁) (fuTf (I := I) g₂) (fuSfield (I := I) g₁ g₂) t
 
-set_option synthInstance.maxHeartbeats 1000000 in
-set_option maxHeartbeats 1000000 in
 
 def fuRem (g₁ g₂ : Real → SmoothRiemannianMetric I M) (t : Real) (x : M) :
     Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) 4 x :=
@@ -132,7 +128,6 @@ private theorem fuInv_real (g : Real → SmoothRiemannianMetric I M)
   simpa only [solOfMetric_metric, hbasis] using
     coordInvReal (I := I) (solOfMetric (I := I) (D := refD) g) x t
 
-set_option maxHeartbeats 1000000 in
 
 theorem fuB_low (gN g : Real → SmoothRiemannianMetric I M)
     (t : Real) (x : M) :
@@ -186,7 +181,6 @@ theorem fuB_low (gN g : Real → SmoothRiemannianMetric I M)
   rw [hslots] at hcomp
   rw [hcomp, hB i j k l, hB i j l k, hB i k j l, hB i l j k]
 
-set_option maxHeartbeats 1000000 in
 
 theorem fuDrift_low (gN g : Real → SmoothRiemannianMetric I M)
     (t : Real) (x : M) :
@@ -218,7 +212,6 @@ theorem fuDrift_low (gN g : Real → SmoothRiemannianMetric I M)
   rw [ricciDrift_comp (I := I) (g t) basis gInv hinv]
   simp only [riemann04RicciDriftInFrame, hUp, fuRm04_real, basis]
 
-set_option maxHeartbeats 1000000 in
 
 theorem fuSpeed_low (g : Real → SmoothRiemannianMetric I M)
     (t : Real) (x : M) :
@@ -250,7 +243,6 @@ theorem fuSpeed_low (g : Real → SmoothRiemannianMetric I M)
   rw [lowOfComp_eval]
   simp only [frameVec4]
 
-set_option maxHeartbeats 1000000 in
 private theorem fuB_diff_low (g₁ g₂ : Real → SmoothRiemannianMetric I M)
     (t : Real) (x : M) :
     lowOfComp (I := I) (g₁ t) (coordBasisAt (I := I) x)
@@ -274,7 +266,6 @@ private theorem fuB_diff_low (g₁ g₂ : Real → SmoothRiemannianMetric I M)
   rw [lowOfComp_eval, lowOfComp_eval]
   ring
 
-set_option maxHeartbeats 1000000 in
 private theorem fuDrift_diff_low (g₁ g₂ : Real → SmoothRiemannianMetric I M)
     (t : Real) (x : M) :
     lowOfComp (I := I) (g₁ t) (coordBasisAt (I := I) x)
@@ -365,7 +356,6 @@ private theorem cwaSum {ι : Type*} {N : Type*} [AddCommMonoid N] [TopologicalSp
       exact (h i (Finset.mem_insert_self i s)).add
         (ih fun j hj => h j (Finset.mem_insert_of_mem hj))
 
-set_option maxHeartbeats 1000000 in
 
 theorem fuRmContAt (g : Real → SmoothRiemannianMetric I M) {a b t₀ : Real} {hab : a < b}
     {hb : t₀ < b}
@@ -486,8 +476,6 @@ theorem fuGamma (g₁ g₂ : Real → SmoothRiemannianMetric I M) {a b : Real} (
           ((fuAvec (I := I) g₁ g₂ t x (chartFrame I x j x)) (chartFrame I x i x))) t :=
   gamma_of_gram (I := I) g₁ g₂ hab hjoint₁ hjoint₂ hpde₁ hpde₂
 
-set_option synthInstance.maxHeartbeats 1000000 in
-set_option maxHeartbeats 1000000 in
 
 theorem fuRm (g₁ g₂ : Real → SmoothRiemannianMetric I M) {a b : Real} {hab : a < b}
     (hS₁ : IsSolutionOn (I := I)
@@ -523,8 +511,6 @@ theorem fuRm (g₁ g₂ : Real → SmoothRiemannianMetric I M) {a b : Real} {hab
     (fun s hs y U W => (pde_hasDerivAt (I := I) g₂ hpde₂ (hsub' hs) y U W).hasDerivWithinAt)
     t ⟨ht0, ht.2⟩ x X Y Z
 
-set_option synthInstance.maxHeartbeats 1000000 in
-set_option maxHeartbeats 1000000 in
 
 theorem fuSdec (g₁ g₂ : Real → SmoothRiemannianMetric I M) {a b : Real} {hab : a < b}
     (hS₁ : IsSolutionOn (I := I)
@@ -731,8 +717,6 @@ private theorem fuMetricSqD (g₁ g₂ : Real → SmoothRiemannianMetric I M) {a
       (pde_hasDerivAt (I := I) g₂ hpde₂ ht x))
   simpa only [metricDiffSq_def] using hbase.deriv
 
-set_option synthInstance.maxHeartbeats 1000000 in
-set_option maxHeartbeats 1000000 in
 
 private theorem fuConnSqD (g₁ g₂ : Real → SmoothRiemannianMetric I M) {a b : Real} (hab : a < b)
     (hjoint₁ : ∀ (x₀ : M) (i j : Fin (Module.finrank Real E)),
@@ -765,8 +749,6 @@ private theorem fuConnSqD (g₁ g₂ : Real → SmoothRiemannianMetric I M) {a b
       (fuGamma (I := I) g₁ g₂ hab hjoint₁ hjoint₂ hpde₁ hpde₂ t ht x))
   simpa only [connDiffSq_def] using hbase.deriv
 
-set_option synthInstance.maxHeartbeats 1000000 in
-set_option maxHeartbeats 1000000 in
 
 private theorem fuRmSqD (g₁ g₂ : Real → SmoothRiemannianMetric I M) {a b : Real} {hab : a < b}
     (hS₁ : IsSolutionOn (I := I)
@@ -795,8 +777,6 @@ private theorem fuRmSqD (g₁ g₂ : Real → SmoothRiemannianMetric I M) {a b :
       (fuRm (I := I) g₁ g₂ hS₁ hS₂ hpde₁ hpde₂ t ht x))
   simpa only [rmDiffSq_def] using hbase.deriv
 
-set_option synthInstance.maxHeartbeats 1000000 in
-set_option maxHeartbeats 1000000 in
 
 theorem fuPairInt (g₁ g₂ : Real → SmoothRiemannianMetric I M) {a b : Real} (hab : a < b)
     (hjoint₁ : ∀ (x₀ : M) (i j : Fin (Module.finrank Real E)),
@@ -838,8 +818,6 @@ theorem fuPairInt (g₁ g₂ : Real → SmoothRiemannianMetric I M) {a b : Real}
       (rmDiffSq_jointContMDiffOn (I := I) g₁ g₂ hgram₁ (fuGramIoo (I := I) g₂ hjoint₂))).sub
     (fuReactCont (I := I) g₁ g₂ hgram₁ hpde₁ ht)
 
-set_option synthInstance.maxHeartbeats 1000000 in
-set_option maxHeartbeats 1000000 in
 
 theorem fuRemInt (g₁ g₂ : Real → SmoothRiemannianMetric I M) {a b : Real} (hab : a < b)
     (hjoint₁ : ∀ (x₀ : M) (i j : Fin (Module.finrank Real E)),
@@ -1015,8 +993,6 @@ private theorem fuTraceCont (g₁ : Real → SmoothRiemannianMetric I M) {a b : 
     (CovariantDerivative.ricciSection (I := I) (metricCov (I := I) (g₁ t))
       (metricCov_smooth (I := I) (g₁ t))))
 
-set_option synthInstance.maxHeartbeats 1000000 in
-set_option maxHeartbeats 1000000 in
 
 theorem fuRestInt (g₁ g₂ : Real → SmoothRiemannianMetric I M) {a b : Real} (hab : a < b)
     (hjoint₁ : ∀ (x₀ : M) (i j : Fin (Module.finrank Real E)),
@@ -1063,8 +1039,6 @@ theorem fuRestInt (g₁ g₂ : Real → SmoothRiemannianMetric I M) {a b : Real}
   exact (continuous_const.mul (fuTraceCont (I := I) g₁ hpde₁ ht)).mul
     (dens_continuous (I := I) g₁ g₂ t)
 
-set_option synthInstance.maxHeartbeats 1000000 in
-set_option maxHeartbeats 1000000 in
 
 theorem fuEnergyDeriv (g₁ g₂ : Real → SmoothRiemannianMetric I M) {a b : Real} (hab : a < b)
     (hjoint₁ : ∀ (x₀ : M) (i j : Fin (Module.finrank Real E)),
@@ -1103,8 +1077,6 @@ theorem fuEnergyDeriv (g₁ g₂ : Real → SmoothRiemannianMetric I M) {a b : R
       (pde_hasDerivAt (I := I) g₁ hpde₁ ht x)
       (fuRm (I := I) g₁ g₂ hS₁ hS₂ hpde₁ hpde₂ t ht x))
 
-set_option synthInstance.maxHeartbeats 1000000 in
-set_option maxHeartbeats 1000000 in
 
 theorem fuEnergyCont (g₁ g₂ : Real → SmoothRiemannianMetric I M) {a b : Real} (hab : a < b)
     (hjoint₁ : ∀ (x₀ : M) (i j : Fin (Module.finrank Real E)),
@@ -1231,9 +1203,8 @@ theorem fuReactSlab (g₁ g₂ : Real → SmoothRiemannianMetric I M) {a b : Rea
     (fun t ht x X Y => pde_hasDerivAt (I := I) g₁ h1pde ⟨ht.1, lt_trans ht.2 hc.2⟩ x X Y)
     (fun t ht x => hΛ t (Ioo_subset_Icc_self ht) x)
 
-set_option synthInstance.maxHeartbeats 1000000 in
-set_option maxHeartbeats 2000000 in
 
+set_option maxHeartbeats 2000000 in
 theorem fuRemSlab (g₁ g₂ : Real → SmoothRiemannianMetric I M) {a b : Real}
     (h1smooth : ∀ (x₀ : M) (i j : Fin (Module.finrank Real E)),
       ContMDiffOn (𝓘(Real, Real).prod I) 𝓘(Real) ∞
@@ -2062,8 +2033,6 @@ theorem fuAdotSlab (g₁ g₂ : Real → SmoothRiemannianMetric I M) {a b : Real
           normSq0S (I := I) (g₁ t) x 5
             (metricNabla0S (I := I) (g₁ t) (fuSfield (I := I) g₁ g₂ t) x)) := by ring
 
-set_option synthInstance.maxHeartbeats 1000000 in
-set_option maxHeartbeats 1000000 in
 
 theorem fuSlab_of_gram (g₁ g₂ : Real → SmoothRiemannianMetric I M) {a b : Real}
     (h1smooth : ∀ (x₀ : M) (i j : Fin (Module.finrank Real E)),
@@ -2102,8 +2071,6 @@ theorem fuSlab_of_gram (g₁ g₂ : Real → SmoothRiemannianMetric I M) {a b : 
 
 end SlabFields
 
-set_option synthInstance.maxHeartbeats 1000000 in
-set_option maxHeartbeats 1000000 in
 
 theorem fuInputs_of_gram (g₁ g₂ : Real → SmoothRiemannianMetric I M) {a b : Real} (hab : a < b)
     (hjoint₁ : ∀ (x₀ : M) (i j : Fin (Module.finrank Real E)),
@@ -2150,8 +2117,6 @@ theorem fuInputs_of_gram (g₁ g₂ : Real → SmoothRiemannianMetric I M) {a b 
         inab_integrable (I := I) g₁ t (fuSfield (I := I) g₁ g₂ t) (fuUflux (I := I) g₁ g₂ t)
       disInt := fun t _ => idis_integrable (I := I) g₁ t (fuSfield (I := I) g₁ g₂ t) }
 
-set_option synthInstance.maxHeartbeats 1000000 in
-set_option maxHeartbeats 1000000 in
 
 theorem forward_unique_of_gram (g₁ g₂ : Real → SmoothRiemannianMetric I M) {a b : Real}
     (hab : a < b)
