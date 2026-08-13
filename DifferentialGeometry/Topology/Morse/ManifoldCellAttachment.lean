@@ -12476,6 +12476,70 @@ theorem isClosed_morseChartClosedBallImage {m k : ℕ} (hk : k ≤ m + 1) (c : �
     exact data.hχsrc y hy
   exact (hK.image_of_continuousOn (data.χ.continuousOn.mono hsrc)).isClosed
 
+theorem negPart_ge_of_mem_closedBall_not_core_ball_lower {m k : ℕ} (hk : k ≤ m + 1)
+    (c ε r δ : ℝ) {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M] [ChartedSpace H M]
+    {I : ModelWithCorners ℝ (MorseModel (m + 1)) H} {f : M → ℝ}
+    (data : MorseChart (m + 1) k hk c I f)
+    (hε : 0 < ε) (hδ : 0 < δ) (hbig : 2 * (r ^ 2 + 2 * ε + δ) ≤ (data.R / 2) ^ 2)
+    {x : M} (hmem : x ∈ data.χ '' {y : MorseModel (m + 1) | morseNorm (m + 1) y ≤ data.R})
+    (hflow : f x ≤ c - ε)
+    (hcomp : x ∈ (morseChartCoreBallImage hk c data ∩ morseChartBallImage hk c data)ᶜ) :
+    r ^ 2 + 2 * ε + δ ≤ ‖negPart hk (data.χ.symm x)‖ ^ 2 := by
+  rcases hmem with ⟨y, hy, hxy⟩
+  have hsrc : y ∈ data.χ.source := data.hχsrc y hy
+  have hsymm : data.χ.symm x = y := by
+    rw [← hxy]
+    exact data.χ.left_inv hsrc
+  have hlow : morseNormalForm hk c y ≤ c - ε := by
+    rw [← hxy] at hflow
+    rw [data.hnorm y hy] at hflow
+    exact hflow
+  by_cases hball : x ∈ morseChartBallImage hk c data
+  · have hnotcore : x ∉ morseChartCoreBallImage hk c data := by
+      intro hc
+      exact hcomp ⟨hc, hball⟩
+    rcases hball with ⟨z, hz, hxz⟩
+    have hzsrc : z ∈ data.χ.source := data.hχsrc z (le_of_lt hz)
+    have hzeq : z = y := data.χ.injOn hzsrc hsrc (hxz.trans hxy.symm)
+    have hsymm_x : data.χ.symm x = y := hsymm
+    have hnotlt : ¬ ‖negPart hk (data.χ.symm x)‖ < data.R / 2 := by
+      intro hlt
+      exact hnotcore ⟨by rw [← hxy]; exact data.χ.map_source hsrc, hlt⟩
+    have hnegge : data.R / 2 ≤ ‖negPart hk y‖ := by
+      rw [hsymm_x] at hnotlt
+      exact le_of_not_gt hnotlt
+    have hsq : (data.R / 2) ^ 2 ≤ ‖negPart hk y‖ ^ 2 := by
+      have hnon : 0 ≤ ‖negPart hk y‖ := norm_nonneg _
+      have hR2 : 0 ≤ data.R / 2 := by nlinarith [data.hRpos]
+      exact sq_le_sq.mpr (by
+        rw [abs_of_nonneg hR2, abs_of_nonneg hnon]
+        exact hnegge)
+    rw [hsymm]
+    nlinarith [hbig, hsq]
+  · have hnotball := hball
+    rw [hsymm]
+    have hnormR : morseNorm (m + 1) y = data.R := by
+      by_contra hne
+      have hlt : morseNorm (m + 1) y < data.R := lt_of_le_of_ne hy hne
+      exact hnotball ⟨y, hlt, hxy⟩
+    by_contra hnot
+    have hlt : ‖negPart hk y‖ ^ 2 < r ^ 2 + 2 * ε + δ := lt_of_not_ge hnot
+    have hnormle : morseNorm (m + 1) y ^ 2 < (data.R / 2) ^ 2 := by
+      have h1 := CellAttachment.modelLowerSublevel_norm_sq_lt_of_negPart_lt hk c ε r δ hlow hlt
+      have h2 : 2 * (r ^ 2 + 2 * ε + δ) - 2 * ε < (data.R / 2) ^ 2 := by nlinarith [hbig]
+      nlinarith [h1, h2]
+    have hle : morseNorm (m + 1) y ≤ data.R / 2 := by
+      have habs := sq_lt_sq.mp hnormle
+      have hnon : 0 ≤ morseNorm (m + 1) y := by
+        dsimp [morseNorm]
+        exact norm_nonneg _
+      have hR2 : 0 ≤ data.R / 2 := by nlinarith [data.hRpos]
+      rw [abs_of_nonneg hnon, abs_of_nonneg hR2] at habs
+      exact le_of_lt habs
+    have hcontra : morseNorm (m + 1) y < data.R := lt_of_le_of_lt hle (by nlinarith [data.hRpos] : data.R / 2 < data.R)
+    rw [hnormR] at hcontra
+    linarith
+
 theorem handleRoundAttachingEmbedding_mem_rounded {m k : ℕ} (hk : k ≤ m + 1) (c ε r δ θ : ℝ)
     {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M] [T2Space M] [ChartedSpace H M]
     {I : ModelWithCorners ℝ (MorseModel (m + 1)) H} {f : M → ℝ}
