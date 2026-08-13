@@ -19,7 +19,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 variable [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
 variable [SigmaCompactSpace M] [T2Space M]
 
-omit [NeZero (Module.finrank ℝ E)] [IsManifold I (∞ + 1) M] [SigmaCompactSpace M] [T2Space M] in
 theorem scalar_pos_of_ricci
     (g0 : SmoothRiemannianMetric I M)
     (hdim : Module.finrank Real E = 3)
@@ -35,7 +34,6 @@ theorem scalar_pos_of_ricci
       (I := I) (M := M) g0 (metricRicciAt (I := I) (M := M) g0 x)
       hdimx (hpos x))
 
-omit [NeZero (Module.finrank ℝ E)] [IsManifold I (∞ + 1) M] [SigmaCompactSpace M] [T2Space M] in
 private theorem initMin_of_start
     {T c0 : Real} {hT : 0 < T}
     (g0 : SmoothRiemannianMetric I M)
@@ -53,7 +51,6 @@ private theorem initMin_of_start
   · intro x
     simpa [SolutionOn.scalar, SolutionFamily.scalar, hstart_base] using hlower x
 
-omit [NeZero (Module.finrank ℝ E)] [IsManifold I (∞ + 1) M] [SigmaCompactSpace M] in
 private theorem scalar_sq_le_ric
     (hdim : Module.finrank Real E = 3)
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
