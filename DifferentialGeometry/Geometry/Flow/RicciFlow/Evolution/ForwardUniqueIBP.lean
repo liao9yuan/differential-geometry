@@ -54,7 +54,6 @@ def ccLift0S (g : SmoothRiemannianMetric I M)
         (unitZeroSec (I := I) (M := M) x) = T x :=
   unitScalarRSLiftSection_apply_unit (I := I) (M := M) (fun y : M => T y) x
 
-omit [Module.Finite ℝ E] in
 @[simp] theorem ccLift0S_unitModel (g : SmoothRiemannianMetric I M)
     (T : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
       (n := (∞ : WithTop ℕ∞)) s) (x : M) :
@@ -72,7 +71,6 @@ section Identification
 
 variable {s : ℕ}
 
-omit [Module.Finite ℝ E] in
 theorem covDerivLift_unit (g : SmoothRiemannianMetric I M)
     (T : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
       (n := (∞ : WithTop ℕ∞)) s)
@@ -193,7 +191,6 @@ private theorem traceFirstTwo_eq_frame_sum (g : SmoothRiemannianMetric I M) {x :
         A (metricTraceInput (I := I) (frame i) (frame j) slots) = 0
     rw [if_neg (fun h => hji h.symm), zero_mul]
 
-omit [Module.Finite ℝ E] in
 theorem covDivLift_unit (g : SmoothRiemannianMetric I M)
     (V : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
       (n := (∞ : WithTop ℕ∞)) (s + 1)) (x : M) :
@@ -250,7 +247,6 @@ theorem covDivLift_unit (g : SmoothRiemannianMetric I M)
   exact (traceFirstTwo_eq_frame_sum (I := I) g frame hON
     (metricNabla0S (I := I) g V x) slots).symm
 
-omit [Module.Finite ℝ E] in
 theorem covDivLift_eq (g : SmoothRiemannianMetric I M)
     (V : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
       (n := (∞ : WithTop ℕ∞)) (s + 1)) :
@@ -265,7 +261,6 @@ theorem covDivLift_eq (g : SmoothRiemannianMetric I M)
     Tensor0SSpace.toModel (covDiv0SField (I := I) g V x)
   rw [covDivLift_unit]
 
-omit [Module.Finite ℝ E] in
 theorem covGradLift_eq (g : SmoothRiemannianMetric I M)
     (T : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
       (n := (∞ : WithTop ℕ∞)) s) :
@@ -298,7 +293,6 @@ section Payoff
 
 variable {s : ℕ}
 
-omit [Module.Finite ℝ E] in
 theorem l2Inner_nabla_eq_neg_div (g : SmoothRiemannianMetric I M)
     (T : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
       (n := (∞ : WithTop ℕ∞)) s)
@@ -314,7 +308,6 @@ theorem l2Inner_nabla_eq_neg_div (g : SmoothRiemannianMetric I M)
   exact tensorL2Inner_covGrad_eq_neg_tensorL2Inner_covDivergence (I := I) (M := M) g s
     (ccLift0S (I := I) g T) (ccLift0S (I := I) g V)
 
-omit [Module.Finite ℝ E] in
 theorem l2Inner_nabla_self_eq_neg_lap (g : SmoothRiemannianMetric I M)
     (T : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
       (n := (∞ : WithTop ℕ∞)) s) :

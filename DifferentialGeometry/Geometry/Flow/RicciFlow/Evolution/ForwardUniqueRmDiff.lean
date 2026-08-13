@@ -44,7 +44,6 @@ def metricNabla0S (g : SmoothRiemannianMetric I M)
     (totalNabla0S_reg (E := E) (H := H) (I := I) (M := M) s
       (metricCov (I := I) g) (metricCov_smooth (I := I) g) T)
 
-omit [IsManifold I (∞ + 1) M] [SigmaCompactSpace M] in
 @[simp] theorem metricNabla0S_apply (g : SmoothRiemannianMetric I M)
     (T : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
       (n := (∞ : WithTop ℕ∞)) s) (x : M) :
@@ -52,7 +51,6 @@ omit [IsManifold I (∞ + 1) M] [SigmaCompactSpace M] in
       totalNabla0SFun (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) s
         (metricCov (I := I) g) T x := rfl
 
-omit [IsManifold I (∞ + 1) M] [SigmaCompactSpace M] in
 theorem metricNabla0S_add (g : SmoothRiemannianMetric I M)
     (T U : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
       (n := (∞ : WithTop ℕ∞)) s) :
@@ -65,7 +63,6 @@ theorem metricNabla0S_add (g : SmoothRiemannianMetric I M)
   rw [hsplit]
   exact totalNabla0SFun_add (I := I) (M := M) (metricCov (I := I) g) T U x
 
-omit [IsManifold I (∞ + 1) M] [SigmaCompactSpace M] in
 theorem metricNabla0S_smul (g : SmoothRiemannianMetric I M) (c : Real)
     (T : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
       (n := (∞ : WithTop ℕ∞)) s) :
@@ -84,7 +81,6 @@ theorem metricNabla0S_sub (g : SmoothRiemannianMetric I M)
   sub_of_add_smul (metricNabla0S (I := I) g) (metricNabla0S_add (I := I) g)
     (fun c a => metricNabla0S_smul (I := I) g c a) T U
 
-omit [IsManifold I 2 M] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 theorem traceFirstTwo_sub (g : SmoothRiemannianMetric I M)
     (A B : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
       (n := (∞ : WithTop ℕ∞)) (s + 2)) :
@@ -115,7 +111,6 @@ def roughLap0SField (g : SmoothRiemannianMetric I M)
       (n := (∞ : WithTop ℕ∞)) s :=
   covDiv0SField (I := I) g (metricNabla0S (I := I) g T)
 
-omit [SigmaCompactSpace M] in
 theorem roughLap0SField_apply (g : SmoothRiemannianMetric I M)
     (T : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
       (n := (∞ : WithTop ℕ∞)) s) (x : M) :
@@ -144,7 +139,6 @@ def lapDiffFlux (g₁ g₂ : SmoothRiemannianMetric I M)
       (n := (∞ : WithTop ℕ∞)) (s + 1) :=
   metricNabla0S (I := I) g₁ T - metricNabla0S (I := I) g₂ T
 
-omit [IsManifold I (∞ + 1) M] [SigmaCompactSpace M] in
 theorem lapDiffFlux_apply (g₁ g₂ : SmoothRiemannianMetric I M)
     (T : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
       (n := (∞ : WithTop ℕ∞)) s) (x : M) :
@@ -154,7 +148,6 @@ theorem lapDiffFlux_apply (g₁ g₂ : SmoothRiemannianMetric I M)
         totalNabla0SFun (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) s
           (metricCov (I := I) g₂) T x := rfl
 
-omit [IsManifold I (∞ + 1) M] [SigmaCompactSpace M] in
 @[simp] theorem lapDiffFlux_self (g : SmoothRiemannianMetric I M)
     (T : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
       (n := (∞ : WithTop ℕ∞)) s) :
@@ -213,7 +206,6 @@ def rmDiffFlux (g₁ g₂ : SmoothRiemannianMetric I M)
     Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) 5 x :=
   lapDiffFlux (I := I) g₁ g₂ Rm2 x
 
-omit [IsManifold I (∞ + 1) M] [SigmaCompactSpace M] in
 theorem rmDiffFlux_apply (g₁ g₂ : SmoothRiemannianMetric I M)
     (Rm2 : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
       (n := (∞ : WithTop ℕ∞)) 4) (x : M) :
@@ -223,7 +215,6 @@ theorem rmDiffFlux_apply (g₁ g₂ : SmoothRiemannianMetric I M)
         totalNabla0SFun (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) 4
           (metricCov (I := I) g₂) Rm2 x := rfl
 
-omit [IsManifold I 2 M] [IsManifold I (∞ + 1) M] [SigmaCompactSpace M] [T2Space M] in
 theorem rm2Low_eq_sub (g₁ g₂ : SmoothRiemannianMetric I M) (x : M) :
     DifferentialGeometry.Integral.Connection.CovariantDerivative.riemannCurvature04At
         (I := I) g₁ (metricCov (I := I) g₂) (metricCov_smooth (I := I) g₂) x =

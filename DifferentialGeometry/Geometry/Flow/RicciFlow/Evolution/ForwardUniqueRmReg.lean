@@ -137,7 +137,6 @@ private lemma local_chr_eq_chart
   simp only [map_smul, hcoeff]
   simp
 
-omit [Module.Finite ℝ E] in
 theorem nablaChartJoint
     {s : ℕ}
     (g : Real → SmoothRiemannianMetric I M)
@@ -305,7 +304,6 @@ theorem nablaChartJoint
   exact hintrinsic.mono_of_mem_nhdsWithin
     (prod_open_nhds e.open_baseSet hxbase (Set.subset_univ e.baseSet) J t)
 
-omit [Module.Finite ℝ E] in
 theorem crossRm1ChartJoint
     (gL gC gD : Real → SmoothRiemannianMetric I M) {J : Set Real}
     (x₀ : M)
@@ -341,7 +339,6 @@ theorem crossRm1ChartJoint
       (rm04ChartJoint (I := I) gL gC x₀ hgramL hgramC L hr)
   · exact ht
 
-omit [Module.Finite ℝ E] in
 theorem crossRm2ChartJoint
     (gL gC gD : Real → SmoothRiemannianMetric I M) {J : Set Real}
     (x₀ : M)
@@ -379,7 +376,6 @@ theorem crossRm2ChartJoint
       hgramL hgramC hgramD L hr
   · exact ht
 
-omit [Module.Finite ℝ E] in
 theorem nablaKRmChartJoint
     (g : Real → SmoothRiemannianMetric I M) {J : Set Real}
     (x₀ : M)

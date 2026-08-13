@@ -94,7 +94,6 @@ theorem chartGramAdj_jointContMDiffOn {J : Set ℝ} (x₀ : M)
     rw [heq]
     exact hgram (σ k) k
 
-omit [Module.Finite ℝ E] in
 theorem chartInvGram_jointContMDiffOn {J : Set ℝ} (x₀ : M)
     (hgram : ∀ i j : Fin (Module.finrank ℝ E),
       ContMDiffOn (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ, ℝ) ∞
@@ -142,7 +141,6 @@ private theorem prodOpen_nhdsWithin {S : Set M} (hS : IsOpen S) {x₀ : M} (hx�
 
 variable (g : ℝ → SmoothRiemannianMetric I M)
 
-omit [Module.Finite ℝ E] in
 theorem normSq0S_jointContMDiffOn {J : Set ℝ} {s : ℕ}
     (A : ℝ → (x : M) → Tensor0SSpace s I x)
     (hgram : ∀ (x₀ : M) (i j : Fin (Module.finrank ℝ E)),
@@ -287,7 +285,6 @@ private theorem inner_sum_right (g : SmoothRiemannianMetric I M) (x : M)
   refine Finset.sum_congr rfl fun m _ => ?_
   rw [map_smul, smul_eq_mul]
 
-omit [Module.Finite ℝ E] in
 theorem connChartComp (g₁ g₂ : SmoothRiemannianMetric I M) (α : M)
     (K : Fin 3 → Fin (Module.finrank ℝ E)) {x : M}
     (hx : x ∈ chartLeviCivitaGoodSet (I := I) α) :
@@ -335,7 +332,6 @@ theorem connChartComp (g₁ g₂ : SmoothRiemannianMetric I M) (α : M)
   rw [inner_sum_left]
   exact Finset.sum_congr rfl fun m _ => by rw [chartGramMatrix_apply]
 
-omit [Module.Finite ℝ E] in
 theorem rm04ChartComp (g₁ g₂ : SmoothRiemannianMetric I M) (α : M)
     (i j k n : Fin (Module.finrank ℝ E)) {x : M}
     (hx : x ∈ chartLeviCivitaGoodSet (I := I) α) :
@@ -361,7 +357,6 @@ theorem rm04ChartComp (g₁ g₂ : SmoothRiemannianMetric I M) (α : M)
     riemannOp_chartBasisVec_alpha_eq (I := I) g₂ α i j k hx, inner_sum_right]
   exact Finset.sum_congr rfl fun l _ => by rw [chartGramMatrix_apply]
 
-omit [Module.Finite ℝ E] in
 theorem rm04ChartMap (g₁ g₂ : SmoothRiemannianMetric I M) (α : M)
     (K : Fin 4 → Fin (Module.finrank ℝ E)) {x : M}
     (hx : x ∈ chartLeviCivitaGoodSet (I := I) α) :
@@ -380,7 +375,6 @@ theorem rm04ChartMap (g₁ g₂ : SmoothRiemannianMetric I M) (α : M)
   rw [hvec]
   exact rm04ChartComp (I := I) g₁ g₂ α (K 2) (K 0) (K 1) (K 3) hx
 
-omit [Module.Finite ℝ E] in
 theorem rmChartComp (g₁ g₂ : SmoothRiemannianMetric I M) (α : M)
     (K : Fin 4 → Fin (Module.finrank ℝ E)) {x : M}
     (hx : x ∈ chartLeviCivitaGoodSet (I := I) α) :
@@ -416,7 +410,6 @@ private theorem good_nhdsWithin (x₀ : M) (J : Set ℝ) (t : ℝ) :
   prodOpen_nhdsWithin (chartLeviCivitaGoodSet_isOpen (I := I) x₀)
     (self_mem_chartLeviCivitaGoodSet (I := I) x₀) J t
 
-omit [Module.Finite ℝ E] in
 theorem connChartJoint (g₁ g₂ : ℝ → SmoothRiemannianMetric I M) {J : Set ℝ}
     (x₀ : M)
     (hgram₁ : ∀ i j : Fin (Module.finrank ℝ E),
@@ -467,7 +460,6 @@ theorem connChartJoint (g₁ g₂ : ℝ → SmoothRiemannianMetric I M) {J : Set
     exact connChartComp (I := I) (g₁ p.1) (g₂ p.1) x₀ K hp.2
   exact hΦ.congr_of_eventuallyEq heq (heq.self_of_nhdsWithin ⟨ht, Set.mem_univ x₀⟩)
 
-omit [Module.Finite ℝ E] in
 theorem rmChartJoint (g₁ g₂ : ℝ → SmoothRiemannianMetric I M) {J : Set ℝ}
     (x₀ : M)
     (hgram₁ : ∀ i j : Fin (Module.finrank ℝ E),
@@ -520,7 +512,6 @@ theorem rmChartJoint (g₁ g₂ : ℝ → SmoothRiemannianMetric I M) {J : Set �
     exact rmChartComp (I := I) (g₁ p.1) (g₂ p.1) x₀ K hp.2
   exact hΦ.congr_of_eventuallyEq heq (heq.self_of_nhdsWithin ⟨ht, Set.mem_univ x₀⟩)
 
-omit [Module.Finite ℝ E] in
 theorem nablaRicChartJoint (g : ℝ → SmoothRiemannianMetric I M) {J : Set ℝ}
     (x₀ : M)
     (hgram : ∀ i j : Fin (Module.finrank ℝ E),
@@ -603,7 +594,6 @@ theorem nablaRicChartJoint (g : ℝ → SmoothRiemannianMetric I M) {J : Set ℝ
   exact hΦ.congr_of_eventuallyEq heq
     (heq.self_of_nhdsWithin ⟨ht, Set.mem_univ x₀⟩)
 
-omit [Module.Finite ℝ E] in
 theorem metricChartJoint (g : ℝ → SmoothRiemannianMetric I M) {J : Set ℝ} (x₀ : M)
     (hgram : ∀ i j : Fin (Module.finrank ℝ E),
       ContMDiffOn (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ, ℝ) ∞
@@ -679,7 +669,6 @@ section Density
 
 variable (g₁ g₂ : ℝ → SmoothRiemannianMetric I M)
 
-omit [Module.Finite ℝ E] in
 theorem connDiffSq_jointContMDiffOn {J : Set ℝ}
     (hgram₁ : ∀ (x₀ : M) (i j : Fin (Module.finrank ℝ E)),
       ContMDiffOn (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ, ℝ) ∞
@@ -698,7 +687,6 @@ theorem connDiffSq_jointContMDiffOn {J : Set ℝ}
   intro x₀ K t ht
   exact connChartJoint (I := I) g₁ g₂ x₀ (hgram₁ x₀) (hgram₂ x₀) K ht
 
-omit [Module.Finite ℝ E] in
 theorem rmDiffSq_jointContMDiffOn {J : Set ℝ}
     (hgram₁ : ∀ (x₀ : M) (i j : Fin (Module.finrank ℝ E)),
       ContMDiffOn (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ, ℝ) ∞
@@ -717,7 +705,6 @@ theorem rmDiffSq_jointContMDiffOn {J : Set ℝ}
   intro x₀ K t ht
   exact rmChartJoint (I := I) g₁ g₂ x₀ (hgram₁ x₀) (hgram₂ x₀) K ht
 
-omit [Module.Finite ℝ E] in
 theorem dens_jointContMDiffOn {J : Set ℝ}
     (hgram₁ : ∀ (x₀ : M) (i j : Fin (Module.finrank ℝ E)),
       ContMDiffOn (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ, ℝ) ∞
@@ -785,7 +772,6 @@ section Slots
 
 variable (g₁ : ℝ → SmoothRiemannianMetric I M)
 
-omit [Module.Finite ℝ E] in
 theorem ilap_integrable (t : ℝ)
     (Sfield : Tensor0SField (𝕜 := ℝ) (E := E) (H := H) (I := I) (M := M)
       (n := (∞ : WithTop ℕ∞)) 4) :
@@ -795,7 +781,6 @@ theorem ilap_integrable (t : ℝ)
   integrable_of_continuous (I := I) g₁ t
     (inner0S_continuous (I := I) (g₁ t) (roughLap0SField (I := I) (g₁ t) Sfield) Sfield)
 
-omit [Module.Finite ℝ E] in
 theorem idiv_integrable (t : ℝ)
     (Sfield : Tensor0SField (𝕜 := ℝ) (E := E) (H := H) (I := I) (M := M)
       (n := (∞ : WithTop ℕ∞)) 4)
@@ -807,7 +792,6 @@ theorem idiv_integrable (t : ℝ)
   integrable_of_continuous (I := I) g₁ t
     (inner0S_continuous (I := I) (g₁ t) (covDiv0SField (I := I) (g₁ t) Uflux) Sfield)
 
-omit [Module.Finite ℝ E] in
 theorem inab_integrable (t : ℝ)
     (Sfield : Tensor0SField (𝕜 := ℝ) (E := E) (H := H) (I := I) (M := M)
       (n := (∞ : WithTop ℕ∞)) 4)
@@ -819,7 +803,6 @@ theorem inab_integrable (t : ℝ)
   integrable_of_continuous (I := I) g₁ t
     (inner0S_continuous (I := I) (g₁ t) (metricNabla0S (I := I) (g₁ t) Sfield) Uflux)
 
-omit [Module.Finite ℝ E] in
 theorem idis_integrable (t : ℝ)
     (Sfield : Tensor0SField (𝕜 := ℝ) (E := E) (H := H) (I := I) (M := M)
       (n := (∞ : WithTop ℕ∞)) 4) :
@@ -831,14 +814,12 @@ theorem idis_integrable (t : ℝ)
 
 end Slots
 
-omit [Module.Finite ℝ E] in
 theorem dens_integrable (g₁ g₂ : ℝ → SmoothRiemannianMetric I M) (t : ℝ)
     (hdcont : Continuous (fun x : M => forwardUniqueDensity (I := I) g₁ g₂ t x)) :
     Integrable (fun x : M => forwardUniqueDensity (I := I) g₁ g₂ t x)
       (riemannianMeasureFamily (I := I) (M := M) g₁ t) :=
   integrable_of_continuous (I := I) g₁ t hdcont
 
-omit [Module.Finite ℝ E] in
 theorem dens_continuous_of_joint (g₁ g₂ : ℝ → SmoothRiemannianMetric I M) {a b t : ℝ}
     (ht : t ∈ Set.Ioo a b)
     (hdens : ContMDiffOn (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ, ℝ) ∞
@@ -874,7 +855,6 @@ theorem dens_continuous (g₁ g₂ : ℝ → SmoothRiemannianMetric I M) (t : �
         fun x : M => forwardUniqueDensity (I := I) g₁ g₂ t x := rfl
   rwa [hfun] at hcont
 
-omit [Module.Finite ℝ E] in
 theorem dcont_idens (g₁ g₂ : ℝ → SmoothRiemannianMetric I M) (t : ℝ) :
     Continuous (fun x : M => forwardUniqueDensity (I := I) g₁ g₂ t x) ∧
       Integrable (fun x : M => forwardUniqueDensity (I := I) g₁ g₂ t x)
