@@ -8549,7 +8549,7 @@ theorem modelHandleRoundMap_f_sub {n k : ℕ} (hk : k ≤ n) (c ε r δ θ : ℝ
 theorem modelRoundCapQ_eq_r2b_of_t_lt {ε r δ θ a b t : ℝ} (hε : 0 < ε) (hδ : 0 < δ)
     (hθ : 0 < θ) (hδr : δ < r ^ 2) (hθr : θ < r ^ 2) (hr : 0 < r) (hapos : 0 < a) (ha1 : a ≤ 1)
     (hb0 : 0 ≤ b) (hb1 : b ≤ 1) (ht0 : t < r ^ 2 + 2 * ε) (htpos : 0 < t)
-    (ht : t < 2 * ε) (hteq : t = (2 * ε + r ^ 2 * b) * a) :
+    (ht : t ≤ 2 * ε) (hteq : t = (2 * ε + r ^ 2 * b) * a) :
     modelRoundCapQ ε r δ θ a b = r ^ 2 * b := by
   have hφ := modelRoundCapInterp_eq hε hr hapos ha1 hb0 hb1 ht0 htpos hteq
   have hbound : modelLowerRoundBound ε r δ θ t = t - 2 * ε := by
@@ -8746,7 +8746,7 @@ theorem modelRoundCapQ_pos_of_b_pos {ε r δ θ a b : ℝ} (hε : 0 < ε) (hδ :
         dsimp [t]
         exact mul_pos h1 ha_pos
       have hq := modelRoundCapQ_eq_r2b_of_t_lt hε hδ hθ hδr hθr hr ha_pos ha1 hb0 hb1 ht0 htpos
-        ht_lt (by dsimp [t])
+        (le_of_lt ht_lt) (by dsimp [t])
       rw [hq]
       exact mul_pos (sq_pos_of_pos hr) hb
 
@@ -9537,10 +9537,10 @@ theorem modelHandleRoundMap_injective {n k : ℕ} (hk : k ≤ n) (ε r δ θ : �
       by_cases hlow : t < 2 * ε
       · have hq1 : modelRoundCapQ ε r δ θ a b = r ^ 2 * b := by
           exact modelRoundCapQ_eq_r2b_of_t_lt hε hδ hθ hδr hθr hr ha_pos ha1 hb0 hb1 ht_lt htpos
-            hlow (by dsimp [t])
+            (le_of_lt hlow) (by dsimp [t])
         have hq1' : modelRoundCapQ ε r δ θ a' b' = r ^ 2 * b' := by
           exact modelRoundCapQ_eq_r2b_of_t_lt hε hδ hθ hδr hθr hr ha'_pos ha1' hb0' hb1' ht_lt htpos
-            hlow (by simpa [t'] using ht)
+            (le_of_lt hlow) (by simpa [t'] using ht)
         have hrb : r ^ 2 * b = r ^ 2 * b' := by
           rw [← hq1, ← hq1']
           exact hq
