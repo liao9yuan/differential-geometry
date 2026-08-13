@@ -89,12 +89,10 @@ private theorem eq_zero_of_normSq0S (g : SmoothRiemannianMetric I M) (x : M) (s 
     {A : Tensor0SSpace s I x} (h : normSq0S (I := I) g x s A = 0) : A = 0 :=
   ((tensor0SMetricData (I := I) g x s).inner_self_eq_zero_iff A).1 h
 
-omit [Module.Finite ℝ E] in
 theorem energy_nonneg (g₁ g₂ : ℝ → SmoothRiemannianMetric I M) (t : ℝ) :
     0 ≤ forwardUniqueEnergy (I := I) (M := M) g₁ g₂ t :=
   integral_nonneg fun x => density_nonneg (I := I) g₁ g₂ t x
 
-omit [Module.Finite ℝ E] in
 theorem density_eq_zero_of_eq (g₁ g₂ : ℝ → SmoothRiemannianMetric I M) {t : ℝ}
     (h : g₁ t = g₂ t) (x : M) :
     forwardUniqueDensity (I := I) g₁ g₂ t x = 0 := by
@@ -103,7 +101,6 @@ theorem density_eq_zero_of_eq (g₁ g₂ : ℝ → SmoothRiemannianMetric I M) {
     normSq0S_zero, normSq0S_zero, normSq0S_zero]
   ring
 
-omit [Module.Finite ℝ E] in
 theorem energy_eq_zero_of_eq (g₁ g₂ : ℝ → SmoothRiemannianMetric I M) {t : ℝ}
     (h : g₁ t = g₂ t) :
     forwardUniqueEnergy (I := I) (M := M) g₁ g₂ t = 0 := by
@@ -113,7 +110,6 @@ end EdgeValue
 
 section EnergyZero
 
-omit [Module.Finite ℝ E] in
 theorem energy_zero_on
     (g₁ g₂ : ℝ → SmoothRiemannianMetric I M)
     (Adot : ℝ → (x : M) → Tensor0SSpace 3 I x)
@@ -223,7 +219,6 @@ private theorem metricExtInner {g g' : SmoothRiemannianMetric I M}
   subst hi
   rfl
 
-omit [Module.Finite ℝ E] in
 theorem metric_eq_of_energy_zero (g₁ g₂ : ℝ → SmoothRiemannianMetric I M) {t : ℝ}
     (hdcont : Continuous (fun x => forwardUniqueDensity (I := I) g₁ g₂ t x))
     (hidens : Integrable (fun x => forwardUniqueDensity (I := I) g₁ g₂ t x)
@@ -260,7 +255,6 @@ end IntegralZero
 
 section Capstone
 
-omit [Module.Finite ℝ E] in
 theorem metrics_eq_on
     (g₁ g₂ : ℝ → SmoothRiemannianMetric I M)
     (Adot : ℝ → (x : M) → Tensor0SSpace 3 I x)

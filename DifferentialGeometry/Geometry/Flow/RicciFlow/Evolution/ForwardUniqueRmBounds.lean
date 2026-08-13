@@ -113,7 +113,6 @@ private theorem absBasis_le {Idx : Type*} [Finite Idx] [DecidableEq Idx]
   rw [hprod, mul_one] at h
   exact h
 
-omit [IsManifold I 2 M] [IsManifold I (∞ + 1) M] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 private theorem normSqAdd_le {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
     (g : SmoothRiemannianMetric I M) {x : M} {k : ℕ}
     (basis : Module.Basis Idx Real (TangentSpace I x))

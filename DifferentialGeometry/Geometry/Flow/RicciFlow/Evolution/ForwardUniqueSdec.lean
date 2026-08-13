@@ -43,7 +43,6 @@ private theorem fieldAdd_eval
   rw [h]
   exact Tensor0SSpace.add_apply (I := I) s x _ _ v
 
-omit [I.Boundaryless] in
 private theorem metField0 (g : SmoothRiemannianMetric I M) (x : M)
     (u Z : TangentSpace I x) :
     metricTensorField (I := I) g x (fun a : Fin 2 => if a = 0 then u else Z) =

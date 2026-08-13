@@ -135,7 +135,6 @@ theorem metricRicci_eq_trace_cross (g₁ g₂ : SmoothRiemannianMetric I M) (x :
       CovariantDerivative.riemannCurvature04At_eq_lower_riemannCurvatureAt
         (I := I) g₁ (metricCov (I := I) g₂) (metricCov_smooth (I := I) g₂) X Y Z W)
 
-omit [IsManifold I 2 M] [IsManifold I (∞ + 1) M] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 private theorem trace_sub (g : SmoothRiemannianMetric I M) {x : M} {s : Nat}
     (A B : Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) (s + 2) x) :
     metricTraceFirstTwo0STensor (I := I) g A -

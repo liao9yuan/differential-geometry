@@ -56,7 +56,6 @@ def rmSpeed (g₁ g₂ : Real → SmoothRiemannianMetric I M)
     Real → (x : M) → Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) 4 x :=
   fun t x => rmDiffDot (I := I) g₁ g₂ (Svec t) t x
 
-omit [Module.Finite ℝ E] in
 theorem connSpeed_hasDerivAt (g₁ g₂ : Real → SmoothRiemannianMetric I M)
     (Avec : Real → (y : M) →
       TangentSpace I y →L[Real] TangentSpace I y →L[Real] TangentSpace I y)
@@ -236,7 +235,6 @@ end Inputs
 section Assembly
 
 
-omit [Module.Finite ℝ E] in
 theorem forward_unique_of_inputs
     (g₁ g₂ : Real → SmoothRiemannianMetric I M) {a b : Real} (hab : a < b)
     (Avec : Real → (y : M) →

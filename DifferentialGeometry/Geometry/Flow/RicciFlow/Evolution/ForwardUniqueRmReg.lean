@@ -29,7 +29,6 @@ variable [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
 variable [CompleteSpace E] [SigmaCompactSpace M] [T2Space M]
 variable [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
 
-omit [SigmaCompactSpace M] [T2Space M] [CompactSpace M] in
 private theorem prod_open_nhds {S U : Set M} (hS : IsOpen S) {x₀ : M} (hx₀ : x₀ ∈ S)
     (hSU : S ⊆ U) (J : Set Real) (t : Real) :
     J ×ˢ S ∈ 𝓝[J ×ˢ U] ((t, x₀) : Real × M) := by
@@ -57,7 +56,6 @@ private lemma local_frame_eq_chart
     (chartModelBasis E) hx]
   rfl
 
-omit [Module.Finite ℝ E] in
 private lemma local_chr_eq_chart
     (g : SmoothRiemannianMetric I M) (α : M)
     {x : M} (hx : x ∈ chartLeviCivitaGoodSet (I := I) α)
@@ -139,7 +137,6 @@ private lemma local_chr_eq_chart
   simp only [map_smul, hcoeff]
   simp
 
-omit [Module.Finite ℝ E] in
 theorem nablaChartJoint
     {s : ℕ}
     (g : Real → SmoothRiemannianMetric I M)
@@ -307,7 +304,6 @@ theorem nablaChartJoint
   exact hintrinsic.mono_of_mem_nhdsWithin
     (prod_open_nhds e.open_baseSet hxbase (Set.subset_univ e.baseSet) J t)
 
-omit [Module.Finite ℝ E] in
 theorem crossRm1ChartJoint
     (gL gC gD : Real → SmoothRiemannianMetric I M) {J : Set Real}
     (x₀ : M)
@@ -343,7 +339,6 @@ theorem crossRm1ChartJoint
       (rm04ChartJoint (I := I) gL gC x₀ hgramL hgramC L hr)
   · exact ht
 
-omit [Module.Finite ℝ E] in
 theorem crossRm2ChartJoint
     (gL gC gD : Real → SmoothRiemannianMetric I M) {J : Set Real}
     (x₀ : M)
@@ -381,7 +376,6 @@ theorem crossRm2ChartJoint
       hgramL hgramC hgramD L hr
   · exact ht
 
-omit [Module.Finite ℝ E] in
 theorem nablaKRmChartJoint
     (g : Real → SmoothRiemannianMetric I M) {J : Set Real}
     (x₀ : M)
