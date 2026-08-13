@@ -7964,6 +7964,59 @@ theorem modelLowerRoundMapUnround_mem_sublevel {n k : ℕ} (hk : k ≤ n) (c ε 
     nlinarith [hinner']
   simpa [hpos', t] using hz
 
+theorem modelLowerRoundMap_norm_sq_le {n k : ℕ} (hk : k ≤ n) (c ε r δ θ : ℝ)
+    (hδ : 0 < δ) (hθ : 0 < θ) (hδr : δ < r ^ 2)
+    {y : MorseModel n} (hy : y ∈ sublevel (morseNormalForm hk c) (c - ε)) :
+    morseNorm n (modelLowerRoundMap hk ε r δ θ y) ^ 2 ≤
+      ‖negPart hk y‖ ^ 2 + smoothCap ε r δ (‖negPart hk y‖ ^ 2) := by
+  have hatt : ‖posPart hk (modelLowerRoundMap hk ε r δ θ y)‖ ^ 2 ≤
+      smoothCap ε r δ (‖negPart hk (modelLowerRoundMap hk ε r δ θ y)‖ ^ 2) := by
+    simpa [modelAttachedRegion] using
+      (modelLowerRoundMap_mem_attached hk c ε r δ θ hδ hθ hδr y hy)
+  rw [modelLowerRoundMap_negPart] at hatt
+  rw [morseNorm_sq_eq_negPart_add_posPart hk (modelLowerRoundMap hk ε r δ θ y)]
+  rw [modelLowerRoundMap_negPart]
+  nlinarith [hatt]
+
+theorem modelLowerRoundMapUnround_norm_sq_le {n k : ℕ} (hk : k ≤ n) (c ε r δ θ : ℝ)
+    (hθ : 0 < θ) (hδ : 0 < δ) (hδr : δ < r ^ 2) (hθr : θ < r ^ 2) {y : MorseModel n}
+    (hy : y ∈ modelLowerRoundMap hk ε r δ θ '' (sublevel (morseNormalForm hk c) (c - ε))) :
+    morseNorm n (modelLowerRoundMapUnround hk ε r δ θ y) ^ 2 ≤
+      2 * ‖negPart hk y‖ ^ 2 - 2 * ε := by
+  have hsub := modelLowerRoundMapUnround_mem_sublevel hk c ε r δ θ hθ hδ hδr hθr hy
+  have hneg : negPart hk (modelLowerRoundMapUnround hk ε r δ θ y) = negPart hk y := by
+    dsimp [modelLowerRoundMapUnround]
+    rw [negPart_recombine]
+  rw [morseNorm_sq_eq_negPart_add_posPart hk (modelLowerRoundMapUnround hk ε r δ θ y)]
+  rw [hneg]
+  have hle : ‖posPart hk (modelLowerRoundMapUnround hk ε r δ θ y)‖ ^ 2 ≤
+      ‖negPart hk y‖ ^ 2 - 2 * ε := by
+    have hsplit := morseNormalForm_split hk c (modelLowerRoundMapUnround hk ε r δ θ y)
+    rw [hneg] at hsplit
+    change morseNormalForm hk c (modelLowerRoundMapUnround hk ε r δ θ y) ≤ c - ε at hsub
+    nlinarith [hsplit, hsub]
+  nlinarith [hle]
+
+theorem modelLowerRoundMap_norm_sq_le_of_negPart_le {n k : ℕ} (hk : k ≤ n) (c ε r δ θ : ℝ)
+    (hε : 0 ≤ ε) (hδ : 0 < δ) (hθ : 0 < θ) (hδr : δ < r ^ 2) {y : MorseModel n}
+    (hy : y ∈ sublevel (morseNormalForm hk c) (c - ε))
+    (ht : ‖negPart hk y‖ ^ 2 ≤ r ^ 2 + 2 * ε + δ) :
+    morseNorm n (modelLowerRoundMap hk ε r δ θ y) ^ 2 ≤ 2 * (r ^ 2 + 2 * ε + δ) := by
+  have hle := modelLowerRoundMap_norm_sq_le hk c ε r δ θ hδ hθ hδr hy
+  have hcap : smoothCap ε r δ (‖negPart hk y‖ ^ 2) ≤ r ^ 2 + 2 * ε + δ := by
+    have hr : r ^ 2 ≤ r ^ 2 + 2 * ε + δ := by nlinarith [hε, hδ]
+    exact le_trans (smoothCap_le_max hε hδ (t := ‖negPart hk y‖ ^ 2)) (max_le hr ht)
+  nlinarith [hle, hcap, ht]
+
+theorem modelLowerRoundMapUnround_norm_sq_le_of_negPart_le {n k : ℕ} (hk : k ≤ n)
+    (c ε r δ θ : ℝ) (hε : 0 ≤ ε) (hθ : 0 < θ) (hδ : 0 < δ) (hδr : δ < r ^ 2)
+    (hθr : θ < r ^ 2) {y : MorseModel n}
+    (hy : y ∈ modelLowerRoundMap hk ε r δ θ '' (sublevel (morseNormalForm hk c) (c - ε)))
+    (ht : ‖negPart hk y‖ ^ 2 ≤ r ^ 2 + 2 * ε + δ) :
+    morseNorm n (modelLowerRoundMapUnround hk ε r δ θ y) ^ 2 ≤ 2 * (r ^ 2 + 2 * ε + δ) := by
+  have hle := modelLowerRoundMapUnround_norm_sq_le hk c ε r δ θ hθ hδ hδr hθr hy
+  nlinarith [hle, ht]
+
 theorem modelRoundCapInterp_eq {ε r a b t : ℝ} (hε : 0 < ε) (hr : 0 < r) (ha0 : 0 < a)
     (_ha1 : a ≤ 1) (hb0 : 0 ≤ b) (_hb1 : b ≤ 1) (ht0 : t < r ^ 2 + 2 * ε) (htpos : 0 < t)
     (ht : t = (2 * ε + r ^ 2 * b) * a) :
