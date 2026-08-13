@@ -50,6 +50,7 @@ theorem domH2
       (I := I) (M := M) g σ S q x
 
 omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [BoundarylessManifold I M] [SigmaCompactSpace M] in
+omit [T2Space M] in
 theorem domSub
     (g : SmoothRiemannianMetric I M) {s : ℕ}
     (σ : Equiv.Perm (Fin s)) (A B : SmoothCcTensor g 0 s) :
@@ -76,6 +77,7 @@ theorem domSub
   simp only [ContinuousMultilinearMap.sub_apply,
     ContinuousMultilinearMap.domDomCongr_apply]
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [BoundarylessManifold I M] [SigmaCompactSpace M] in
 theorem armSuccEq
     (g : SmoothRiemannianMetric I M) (s : ℕ)
     (A : ContMDiffSection I (E →L[ℝ] (E →L[ℝ] E)) ∞
@@ -156,6 +158,7 @@ theorem armSuccEq
 
 set_option synthInstance.maxHeartbeats 1000000 in
 set_option maxHeartbeats 1600000 in
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [BoundarylessManifold I M] [SigmaCompactSpace M] in
 theorem armSub
     (g : SmoothRiemannianMetric I M) (s : ℕ)
     (A B : ContMDiffSection I (E →L[ℝ] (E →L[ℝ] E)) ∞
@@ -318,6 +321,7 @@ theorem hatPairH2
         R A D2 D3 hR hA hD2 hD3 hT2 hU2 hT3 hTU2 hTU3⟩
 
 omit [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem jetSix
     (g : SmoothRiemannianMetric I M) {r s : ℕ} (m : ℕ)
     (t1 t2 t3 t4 t5 t6 : SmoothCcTensor g r s) {K : ℝ}
@@ -632,6 +636,7 @@ theorem quadTelB
   rw [appCcRS_sub_right, appCcRS_sub_left]
   module
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem quadTelA
     (g gT gU : SmoothRiemannianMetric I M) :
     lrQA (I := I) (M := M) g gT - lrQA (I := I) (M := M) g gU =

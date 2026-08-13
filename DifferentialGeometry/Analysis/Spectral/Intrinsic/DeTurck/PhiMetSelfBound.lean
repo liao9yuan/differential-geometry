@@ -44,10 +44,12 @@ theorem phiSelfC_nonneg (i : ℕ) : 0 ≤ phiSelfC (E := E) i := by
 private def selfTraceC (i : ℕ) : ℝ :=
   if i = 0 then (Module.finrank ℝ E : ℝ) ^ 6 else 0
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] in
 private theorem phiSelfC_eq (i : ℕ) :
     phiSelfC (E := E) i = 34 * selfTraceC (E := E) i := by
   by_cases hi : i = 0 <;> simp [phiSelfC, selfTraceC, hi]
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] in
 private theorem selfTraceC_nonneg (i : ℕ) :
     0 ≤ selfTraceC (E := E) i := by
   by_cases hi : i = 0
@@ -122,6 +124,7 @@ private theorem pureSelf_grid
   rw [pureSelf_eq (I := I) (M := M) g]
   exact doubleTrace_grid (I := I) (M := M) g i x
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private theorem rfns_smul
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (x : M)
     (c : ℝ) (v : TensorRSSpace r s I x) :

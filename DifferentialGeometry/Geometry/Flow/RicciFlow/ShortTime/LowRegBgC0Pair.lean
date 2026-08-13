@@ -32,6 +32,7 @@ variable
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
 omit [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] in
 private theorem jetSub
     (g : SmoothRiemannianMetric I M) {r s : ℕ} (m : ℕ)
     (A B : SmoothCcTensor g r s) :
@@ -45,6 +46,7 @@ private theorem jetSub
   rw [hneg]
 
 omit [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] in
 private theorem jetMonoLocal
     (g : SmoothRiemannianMetric I M) {r s m n : ℕ}
     (hmn : m ≤ n) (S : SmoothCcTensor g r s) :
@@ -56,6 +58,7 @@ private theorem jetMonoLocal
     (fun _ _ _ => sq_nonneg _)
 
 omit [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] in
 private theorem icgZeroLocal
     (g : SmoothRiemannianMetric I M) (r s m : ℕ) :
     iteratedCovGrad (I := I) g r s m
@@ -112,6 +115,7 @@ private theorem domH2Local
     riemannianFiberNormSq_iteratedCovGrad_domDomCongrSection
       (I := I) (M := M) g σ S q x
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private theorem domSubLocal
     (g : SmoothRiemannianMetric I M) {s : ℕ}
     (σ : Equiv.Perm (Fin s)) (A B : SmoothCcTensor g 0 s) :
@@ -358,6 +362,7 @@ private theorem endoSlotH2
             (slotInsertEndoCc (I := I) (M := M) g 0 Λ)‖ ^ 2 := by
       rw [Finset.mul_sum]
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private theorem symmSelf
     (g : SmoothRiemannianMetric I M) (S : SmoothCcTensor g 0 2)
     (hS : ∀ (x : M) (u v : TangentSpace I x),
@@ -1234,6 +1239,7 @@ private theorem rspermH1Local
   intro i _
   exact rspermL2 (I := I) (M := M) g σ S i
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [BoundarylessManifold I M] [SigmaCompactSpace M] in
 private theorem bgPassSub
     (g : SmoothRiemannianMetric I M) (A B : SmoothCcTensor g 0 4) :
     bgPass (I := I) (M := M) g (A - B) =
@@ -1610,6 +1616,7 @@ private theorem gradL2Sq
   exact rfns_iteratedCovGrad_covGrad_comm_rs
     (I := I) (M := M) g r s i S x
 
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] in
 private theorem gradH1H2
     (g : SmoothRiemannianMetric I M) {r s : ℕ}
     (S : SmoothCcTensor g r s) :
@@ -1703,6 +1710,7 @@ private theorem endoPairH1
         lowJetSq (I := I) (M := M) g 1
           (slotInsertEndoCc (I := I) (M := M) g 0 Λ) := by ring
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [BoundarylessManifold I M] [SigmaCompactSpace M] in
 private theorem endoPairSub
     (g : SmoothRiemannianMetric I M)
     (Λ Γ : ContMDiffSection I (E →L[ℝ] E) ∞
@@ -1743,6 +1751,7 @@ private lemma insEndoApply
   rw [hdiff]
   simp only [deTurckLieWEndoSection_apply]
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 private theorem dlbIns_eq_pair
     (g gm g_bg : SmoothRiemannianMetric I M) :
     (deTurckLieDLbCoeffField (I := I) (M := M) g gm g_bg -
@@ -2069,6 +2078,7 @@ private theorem alphaBgPairH1
         wOmega (I := I) (M := M) g gU g))).trans
     (hω T U gT gU hTtie hUtie hTHs hUHs)
 
+omit [NeZero (Module.finrank ℝ E)] in
 private theorem raiseH1
     (g : SmoothRiemannianMetric I M) (W : SmoothCcTensor g 0 2) :
     lowJetSq (I := I) (M := M) g 1
@@ -2519,6 +2529,7 @@ private theorem slotIterSub
       rw [ih, slotExtend_sub]
       rfl
 
+omit [NeZero (Module.finrank ℝ E)] in
 private theorem amixHalf_bg
     (g gm g_bg : SmoothRiemannianMetric I M)
     (σ : Equiv.Perm (Fin 4)) :

@@ -65,6 +65,7 @@ def stateField
         (1 : ℝ) hT hT1 0 f)
 
 omit [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] in
 private theorem stateField_ae
     (g : SmoothRiemannianMetric I M) {T : ℝ}
     (hT : 0 < T) (hT1 : T ≤ 1)
@@ -93,6 +94,7 @@ def duhH3
         (0 : tensorHs (I := I) (M := M) g 0 2 ((1 : ℝ) + 2)) f)
 
 omit [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] in
 private theorem duhH3_ae
     (g : SmoothRiemannianMetric I M) {T : ℝ}
     (hT : 0 < T) (hT1 : T ≤ 1)
@@ -108,6 +110,7 @@ private theorem duhH3_ae
 
 omit [BoundarylessManifold I M] in
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] in
 theorem norm_congrLp (g : SmoothRiemannianMetric I M) {a b T : ℝ} (h : a = b)
     (u : timeL2 (tensorHs (I := I) (M := M) g 0 2 a) T) :
     ‖(tensorHsCongrL (I := I) (M := M) g 0 2 h).compLpL 2 (timeMeasure T) u‖ =
@@ -130,6 +133,7 @@ theorem norm_duhH3_le
     (norm_maxRegDuhamelSolField_zero_le (I := I) (M := M) (g₀ := g) hT hT1 f)
 
 omit [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] in
 private theorem affState_aemeas
     (g : SmoothRiemannianMetric I M) {T : ℝ}
     (hT : 0 < T) (hT1 : T ≤ 1)
@@ -148,6 +152,7 @@ private theorem affState_aemeas
       |>.comp_aestronglyMeasurable hfield
 
 omit [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] in
 private theorem hsCongr_trans
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     {a b c : ℝ} (hab : a = b) (hbc : b = c) (hac : a = c)

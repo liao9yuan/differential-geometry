@@ -28,6 +28,7 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 variable (g : SmoothRiemannianMetric I M)
 
 open scoped Classical in
+omit [BoundarylessManifold I M] in
 theorem spatialProj_coeff (σ : ℝ) (N : ℕ)
     (W : tensorHs (I := I) (M := M) g 0 2 σ)
     (i : TensorEigenIdx (I := I) (M := M) g 0 2) :
@@ -108,6 +109,7 @@ theorem proj_derivModeCoeff {a T : ℝ} (hT : 0 ≤ T) (N : ℕ)
   · rw [if_neg hi, if_neg hi, map_zero]
 
 omit [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] in
 private lemma homModeCoeFn {a T : ℝ}
     (u₀ : tensorHs (I := I) (M := M) g 0 2 (a + 2))
     (i : TensorEigenIdx (I := I) (M := M) g 0 2) :

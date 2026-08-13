@@ -71,6 +71,7 @@ private noncomputable def fullH2
     (fullCoeff4 (I := I) (M := M) g a b)
 
 set_option backward.isDefEq.respectTransparency false in
+omit [BoundarylessManifold I M] in
 private lemma raise_eq_diff
     (g₀ g₁ : SmoothRiemannianMetric I M) (T : SmoothCcTensor g₀ 0 2)
     (htie : ∀ (y : M) (v w : TangentSpace I y),
@@ -206,6 +207,7 @@ private lemma fullH2_sub_one
   abel
 
 omit [NeZero (Module.finrank ℝ E)] in
+omit [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private lemma raised_cancel
     (g₀ g₁ : SmoothRiemannianMetric I M) (x : M) :
     (gInvRaisedEndo (I := I) g₁ g₀ x).comp

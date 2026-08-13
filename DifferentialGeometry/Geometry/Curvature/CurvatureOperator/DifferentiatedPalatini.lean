@@ -49,6 +49,7 @@ noncomputable def covDerivConnDiff2 (gB g₀ : SmoothRiemannianMetric I M)
     covDerivConnDiff (I := I) gB g₀ X Y
       (covApply (LeviCivita (I := I) gB) D Z) x
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 theorem covDerivConnDiff2_eq (gB g₀ : SmoothRiemannianMetric I M)
     (D X Y Z : Π b : M, TangentSpace I b) (x : M) :
     covDerivConnDiff2 (I := I) gB g₀ D X Y Z x =
@@ -80,6 +81,7 @@ private noncomputable def palRhs (gB g₀ : SmoothRiemannianMetric I M)
         covDerivConnDiff (I := I) gB g₀ Y X Z p +
       (palQuad (I := I) gB g₀ X Y Z p - palQuad (I := I) gB g₀ Y X Z p)
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [SigmaCompactSpace M] in
 private theorem palSec_eq_rhs
     (gB g₀ : SmoothRiemannianMetric I M)
     {X Y Z : Π p : M, TangentSpace I p}
@@ -103,6 +105,7 @@ private theorem palSec_eq_rhs
   simp only [palRhs, palQuad, covDerivConnDiff_eq]
   abel
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [SigmaCompactSpace M] in
 private theorem palQuad_smooth
     (gB g₀ : SmoothRiemannianMetric I M)
     (X Y Z : ContMDiffSection I E (∞ : WithTop ℕ∞)
@@ -122,6 +125,7 @@ private theorem palQuad_smooth
   · exact X.contMDiff
   · simpa [htop] using hinner
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private theorem covDConnDiff_smooth
     (gB g₀ : SmoothRiemannianMetric I M)
     (D X Y : ContMDiffSection I E (∞ : WithTop ℕ∞)
@@ -189,6 +193,7 @@ private theorem covDConnDiff_smooth
     (fun p _hp => ?_)
   rfl
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private theorem cov_sub_apply
     (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
     {S T : Π b : M, TangentSpace I b} {x : M}
@@ -213,6 +218,7 @@ private theorem cov_sub_apply
   rw [hsmul, neg_one_smul]
   simp only [sub_eq_add_neg]
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private theorem cov_add_apply
     (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
     {S T : Π b : M, TangentSpace I b} {x : M}
@@ -226,6 +232,7 @@ private theorem cov_add_apply
   simpa using congrArg (fun L => L v)
     (cov.isCovariantDerivativeOnUniv.add hSx hTx)
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private theorem diffSec_sub
     (cov₀ cov₁ : CovariantDerivative I E (TangentSpace I : M → Type _))
     {X S T : Π b : M, TangentSpace I b} (x : M) :

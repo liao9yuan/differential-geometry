@@ -164,6 +164,7 @@ private theorem gradSq
   exact rfns_iteratedCovGrad_covGrad_comm_rs
     (I := I) (M := M) g r s i S x
 
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] in
 private theorem gradH2
     (g : SmoothRiemannianMetric I M) {r s : ℕ}
     (S : SmoothCcTensor g r s) :
@@ -179,6 +180,7 @@ private theorem gradH2
   rw [h0, h1, h2]
   nlinarith [sq_nonneg ‖S‖]
 
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] in
 private theorem jet3Grad
     (g : SmoothRiemannianMetric I M) {r s : ℕ}
     (S : SmoothCcTensor g r s) :
@@ -498,6 +500,7 @@ private theorem endoSlotJet
       rw [Finset.mul_sum]
 
 set_option backward.isDefEq.respectTransparency false in
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [BoundarylessManifold I M] [SigmaCompactSpace M] in
 private theorem insertSuccEq
     (g : SmoothRiemannianMetric I M) (s : ℕ)
     (Λ : ContMDiffSection I (E →L[ℝ] E) ∞
@@ -856,6 +859,7 @@ private theorem perturbJet
   simpa only [pow_one] using hslot
 
 omit [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] in
 private theorem jetNeg
     (g : SmoothRiemannianMetric I M) {r s : ℕ} (m : ℕ)
     (S : SmoothCcTensor g r s) :
@@ -864,6 +868,7 @@ private theorem jetNeg
   simpa only [neg_one_smul, neg_one_sq, one_mul] using
     jetSmul (I := I) (M := M) g m (-1 : ℝ) S
 
+omit [BoundarylessManifold I M] in
 private theorem jetSub
     (g : SmoothRiemannianMetric I M) {r s : ℕ} (m : ℕ)
     (A B : SmoothCcTensor g r s) :
@@ -1627,6 +1632,7 @@ private theorem reindexSubH2
     ContinuousLinearMap.sub_apply]
 
 set_option maxHeartbeats 4000000 in
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [SigmaCompactSpace M] in
 private theorem connSecZeroH2
     (g : SmoothRiemannianMetric I M) :
     connDiffSection (I := I) g g = 0 := by
@@ -2096,6 +2102,7 @@ private noncomputable def aaBlkH2
       (connDiffContrInsertionField (I := I) g gm) Z)
 
 set_option maxHeartbeats 1600000 in
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [SigmaCompactSpace M] in
 private theorem aaKerEqH2 (g gm : SmoothRiemannianMetric I M) :
     ricciAAKer (I := I) (M := M) g gm =
       aaBlkH2 (I := I) (M := M) g gm aaP3201H2
@@ -2319,6 +2326,7 @@ private theorem aaBlkPairH2
   exact (mul_le_mul_of_nonneg_left hxy (mul_nonneg hC₄ hp0)).trans_eq
     (by simp only [OT, OU]; ring)
 
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] in
 private theorem jetSum6H2
     (g : SmoothRiemannianMetric I M)
     (Y0 Y1 Y2 Y3 Y4 Y5 : SmoothCcTensor g 2 4)
@@ -2958,6 +2966,7 @@ private theorem aaKerPairH2
   rw [mul_pow, mul_pow, hBsq]
   ring
 
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] [SigmaCompactSpace M] in
 private theorem pureCoeffEqH2
     (g gm : SmoothRiemannianMetric I M) :
     ricciArmPrincipalCoeffPure (I := I) (M := M) g gm =
@@ -3118,6 +3127,7 @@ private theorem domJetH2
     riemannianFiberNormSq_iteratedCovGrad_domDomCongrSection
       (I := I) (M := M) g σ S q x
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private theorem domSubH2
     (g : SmoothRiemannianMetric I M) {s : ℕ}
     (σ : Equiv.Perm (Fin s)) (A B : SmoothCcTensor g 0 s) :
@@ -3144,6 +3154,7 @@ private theorem domSubH2
   simp only [ContinuousMultilinearMap.sub_apply,
     ContinuousMultilinearMap.domDomCongr_apply]
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [BoundarylessManifold I M] [SigmaCompactSpace M] in
 private theorem rspermSubH2
     (g : SmoothRiemannianMetric I M) {r s : ℕ}
     (σ : Equiv.Perm (Fin s)) (A B : SmoothCcTensor g r s) :

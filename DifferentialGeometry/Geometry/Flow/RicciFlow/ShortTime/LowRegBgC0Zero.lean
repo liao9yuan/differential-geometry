@@ -1382,6 +1382,7 @@ theorem lowZeroAInt_h2
   simpa only [lowZeroAInt, lowJetSq, Nat.reduceAdd] using hpath
 
 set_option maxHeartbeats 4000000 in
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [SigmaCompactSpace M] in
 theorem connSec_zero
     (g : SmoothRiemannianMetric I M) :
     connDiffSection (I := I) g g = 0 := by
@@ -2196,6 +2197,7 @@ theorem aaKerOne_h2
     _ ≤ (B R * (1 + A)) ^ 2 := le_rfl
 
 omit [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem jetSub
     (g : SmoothRiemannianMetric I M) {r s : ℕ} (m : ℕ)
     (A B : SmoothCcTensor g r s) :
@@ -2208,6 +2210,7 @@ theorem jetSub
   rw [neg_one_smul, neg_one_sq, one_mul] at hneg
   rw [hneg]
 
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] [SigmaCompactSpace M] in
 theorem pureCoeff_eq
     (g gm : SmoothRiemannianMetric I M) :
     ricciArmPrincipalCoeffPure (I := I) (M := M) g gm =
@@ -2423,6 +2426,7 @@ theorem ricciOne_h2
       simpa only [mul_pow] using
         congrArg (fun x : ℝ => x * (1 + A) ^ 2) hBR.symm
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem raise_jet
     (g : SmoothRiemannianMetric I M) (s m : ℕ)
     (W : SmoothCcTensor g 0 (s + 2)) :

@@ -207,6 +207,7 @@ theorem intrJacobi_ode
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
+omit [InnerProductSpace ℝ E] in
 theorem intrJacobi_bounds
     [PseudoEMetricSpace M]
     [RiemannianBundle (fun x : M => TangentSpace I x)]
@@ -304,6 +305,7 @@ theorem intrJacobi_bounds
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
+omit [InnerProductSpace ℝ E] in
 theorem intrForce_pair
     [PseudoEMetricSpace M]
     [RiemannianBundle (fun x : M => TangentSpace I x)]
@@ -415,6 +417,7 @@ theorem intrForce_pair
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
+omit [InnerProductSpace ℝ E] in
 theorem intrJacobi_pair
     [PseudoEMetricSpace M]
     [RiemannianBundle (fun x : M => TangentSpace I x)]

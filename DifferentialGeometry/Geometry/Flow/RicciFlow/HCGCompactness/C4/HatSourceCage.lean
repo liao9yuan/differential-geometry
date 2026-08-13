@@ -38,6 +38,7 @@ noncomputable def hatSourceBall (hd : InjRadiusDecayInput (I := I) X) {D : Real}
   Metric.closedBall (X.obj (L.φ n)).basepoint r
 
 omit [Module.Finite ℝ E] in
+omit [CompleteSpace E] in
 @[simp] theorem hatSourceBall_subseq
     [FiniteDimensional Real E]
     (hd : InjRadiusDecayInput (I := I) X) {D : Real}
@@ -48,6 +49,7 @@ omit [Module.Finite ℝ E] in
       NetLimitData.hatSourceBall (I := I) (X := X) hd P L r (ψ n) := rfl
 
 omit [Module.Finite ℝ E] in
+omit [CompleteSpace E] in
 theorem hatSource_nhds
     [FiniteDimensional Real E]
     (hd : InjRadiusDecayInput (I := I) X) {D : Real}
@@ -86,6 +88,7 @@ theorem hatSource_nhds
   simpa only [hatSourceBall] using (Metric.ball_subset_closedBall hy)
 
 omit [Module.Finite ℝ E] in
+omit [CompleteSpace E] in
 theorem hatSourceCompact
     [FiniteDimensional Real E]
     (hd : InjRadiusDecayInput (I := I) X) {D : Real}
@@ -107,6 +110,7 @@ theorem hatSourceCompact
   exact hcompact
 
 omit [Module.Finite ℝ E] in
+omit [CompleteSpace E] in
 theorem sourceComplete
     [FiniteDimensional Real E]
     (hd : InjRadiusDecayInput (I := I) X) {D : Real}
@@ -141,6 +145,7 @@ theorem sourceComplete
   simpa using h
 
 omit [Module.Finite ℝ E] in
+omit [CompleteSpace E] in
 theorem hatBallInCompact
     [FiniteDimensional Real E]
     (hd : InjRadiusDecayInput (I := I) X) {D : Real}
@@ -266,6 +271,7 @@ theorem hatCageSub
   exact (NetLimitData.hatCageData (I := I) (X := X) hd P L pb r n gamma).2
 
 omit [Module.Finite ℝ E] in
+omit [CompleteSpace E] in
 theorem hatCageInClosed
     [FiniteDimensional Real E]
     (hd : InjRadiusDecayInput (I := I) X) {D : Real}

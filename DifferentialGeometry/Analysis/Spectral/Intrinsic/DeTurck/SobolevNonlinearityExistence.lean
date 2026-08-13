@@ -2026,6 +2026,7 @@ theorem deTurckSobolevNonlinearitySymm_mixed_lipschitz_pointwise
   rw [Set.mem_setOf_eq, hlhs_def, hrhs_def] at this
   simpa only [hJ_def] using this
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 theorem ccTensorBilinSymm_symmS_apply (g₀ : SmoothRiemannianMetric I M)
     (T : SmoothCcTensor g₀ 0 2) (x : M) (v w : TangentSpace I x) :
     ccTensorBilinSymm (I := I) g₀ (symmS (I := I) (M := M) g₀ T) x v w =

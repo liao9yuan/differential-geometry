@@ -187,6 +187,7 @@ private def edgeEvalCLM (s : Nat) (x : M) (v : Fin s → E) :
         rw [Tensor0SSpace.toModel_smul]
         rfl }
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private lemma edgeEvalCLM_apply (s : Nat) (x : M) (v : Fin s → E)
     (D : Tensor0SSpace s I x) :
     edgeEvalCLM (I := I) (M := M) s x v D = Tensor0SSpace.toModel D v := rfl
@@ -268,6 +269,7 @@ private lemma edge_sum4 {A : Type*} [Fintype A] (F : (Fin 4 → A) → Real) :
     exact absurd (Finset.mem_univ _) h
 
 set_option backward.isDefEq.respectTransparency false in
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] [SigmaCompactSpace M] in
 theorem edgePartnerBi_eval (g gm : SmoothRiemannianMetric I M)
     (P V : SmoothCcTensor g 0 2) (σ : Equiv.Perm (Fin 4))
     (x : M) (v : Fin 4 → E) :
@@ -287,6 +289,7 @@ theorem edgePartnerBi_eval (g gm : SmoothRiemannianMetric I M)
     fin_cases k <;> rfl
 
 set_option backward.isDefEq.respectTransparency false in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private lemma edge_inner0 (g : SmoothRiemannianMetric I M) (s : Nat)
     (A B : SmoothCcTensor g 0 s) (x : M)
     (e : Fin (Module.finrank Real E) → TangentSpace I x)

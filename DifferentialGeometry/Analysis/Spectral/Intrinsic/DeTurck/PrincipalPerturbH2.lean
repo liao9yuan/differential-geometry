@@ -66,6 +66,7 @@ private lemma perturbCoeff4_smul
       a • perturbCoeff4 (I := I) (M := M) g T := by
   simp only [perturbCoeff4, symmRaiseEndo_smul, slotInsertEndoCc_smul]
 
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma perm_icg_norm
     (g : SmoothRiemannianMetric I M) (σ : Equiv.Perm (Fin 2))
     (T : SmoothCcTensor g 0 2) (k : ℕ) :

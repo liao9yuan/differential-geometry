@@ -21,6 +21,7 @@ variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 variable [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M]
 
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 theorem orthoFrame_expand (g : SmoothRiemannianMetric I M) (x : M)
     (B : Fin (Module.finrank ℝ E) → TangentSpace I x)
     (hB : ∀ i j : Fin (Module.finrank ℝ E),
@@ -182,6 +183,7 @@ theorem frameCorr_vanish (g g_bg : SmoothRiemannianMetric I M) (x : M)
     (connDiff (I := I) g g_bg x)
     (fun u w => connDiff_symm (I := I) g g_bg x u w)
 
+omit [InnerProductSpace ℝ E] [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 private theorem cov_sum (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
     {ι : Type*} (σ : ι → Π b : M, TangentSpace I b)
     (hσ : ∀ i, ContMDiff I (I.prod 𝓘(ℝ, E)) ∞ (T% (σ i))) (s : Finset ι) (x : M) :

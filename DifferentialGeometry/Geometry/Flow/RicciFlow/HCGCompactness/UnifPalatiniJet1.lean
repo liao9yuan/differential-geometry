@@ -42,6 +42,7 @@ private noncomputable def extSec (x : M) (v : TangentSpace I x) :
   ContMDiffSection.mk (smoothExtensionTangent (I := I) x v)
     (smoothExtensionTangent_contMDiff (I := I) x v)
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [SigmaCompactSpace M] in
 @[simp] private theorem extSec_apply (x : M) (v : TangentSpace I x) :
     extSec (I := I) x v x = v :=
   smoothExtensionTangent_eq (I := I) x v
@@ -104,6 +105,7 @@ private theorem covD_eq_ext
     (extSec (I := I) x (Y x))
   all_goals simp
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private theorem covD2_eq_hcg
     (gB g₀ : SmoothRiemannianMetric I M)
     (D X Y Z : Π b : M, TangentSpace I b) (x : M) :

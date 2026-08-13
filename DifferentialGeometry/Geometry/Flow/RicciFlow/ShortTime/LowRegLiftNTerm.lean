@@ -58,6 +58,7 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 omit [BoundarylessManifold I M] in
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] in
 theorem timeL2Inclusion_const {g : SmoothRiemannianMetric I M} {τ σ : ℝ}
     (hτσ : τ ≤ σ) (T : ℝ) (x : tensorHs (I := I) (M := M) g 0 2 σ) :
     timeL2Inclusion (I := I) (M := M) (g := g) (r := 0) (s := 2) hτσ

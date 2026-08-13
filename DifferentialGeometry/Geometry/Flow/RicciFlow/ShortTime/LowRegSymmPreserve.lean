@@ -91,6 +91,7 @@ def eigenBlock (i : Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx (I := I
   Finset.map ⟨Sigma.mk i.1, sigma_mk_injective⟩ Finset.univ
 
 omit [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] in
 @[simp] theorem mem_eigenBlock
     {i j : Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx (I := I) (M := M) g 0 2} :
     j ∈ eigenBlock (I := I) (M := M) g i ↔ j.1 = i.1 := by
@@ -332,6 +333,7 @@ theorem timeModeCoeff_symmTimeL2 {σ T : ℝ} (hσ : 0 ≤ σ)
   exact Finset.sum_congr rfl (fun j hj => by rw [ht4 j hj])
 
 omit [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] in
 private lemma homModeCoeff_coeFn {a T : ℝ}
     (u₀ : tensorHs (I := I) (M := M) g 0 2 (a + 2))
     (j : Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx

@@ -80,6 +80,7 @@ lemma le_intrInjRadius
   le_sSup hr
 
 omit [ConnectedSpace M] in
+omit [CompleteSpace E] [T2Space (TangentBundle I M)] in
 theorem intrInjOn_eball
     (g : SmoothRiemannianMetric I M)
     (hEnorm : ∀ x : M, ∀ v : TangentSpace I x,

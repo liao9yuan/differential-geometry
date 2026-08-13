@@ -223,6 +223,7 @@ theorem sqrt_normSq0S_comp
         rw [Real.sqrt_mul (pow_nonneg (le_trans zero_le_one hEq.1) s)]
 
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [SigmaCompactSpace M] in
 private theorem lcDiff_covOne_le
     {K : Set M} (g h : SmoothRiemannianMetric I M) {C : ℝ}
     (hEq : MetricUniformEquivalentOn (I := I) K g h C)
@@ -340,6 +341,7 @@ theorem connDiff_gJet_le
 set_option maxHeartbeats 1600000 in
 set_option backward.isDefEq.respectTransparency false in
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [SigmaCompactSpace M] in
 theorem covDerivConnDiff_g1_le
     (g₂ g₁ : SmoothRiemannianMetric I M) (x : M) (v w u : TangentSpace I x) :
     Real.sqrt (g₁.inner x

@@ -28,6 +28,7 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
+omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] in
 theorem wXi_self_eq (g₀ g₁ : SmoothRiemannianMetric I M) :
     wXi (I := I) (M := M) g₀ g₁ g₀ =
       connDiffLoweredCc (I := I) g₀ g₁ := by
@@ -37,6 +38,7 @@ theorem wXi_self_eq (g₀ g₁ : SmoothRiemannianMetric I M) :
   intro m
   rw [wXi_unitModel_apply, connDiffLoweredCc_unitModel_apply']
 
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] [SigmaCompactSpace M] in
 theorem trace_app_refold (g₀ g₁ : SmoothRiemannianMetric I M)
     (W : SmoothCcTensor g₀ 0 3) :
     appCcRS (I := I) (M := M) g₀ 0 3 1

@@ -27,6 +27,7 @@ private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
 set_option synthInstance.maxHeartbeats 1600000 in
 set_option maxHeartbeats 3200000 in
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] in
 theorem grid_prod_int_le
     (g₀ : SmoothRiemannianMetric I M) {r s : ℕ}
     (P : SmoothCcTensor g₀ r s)

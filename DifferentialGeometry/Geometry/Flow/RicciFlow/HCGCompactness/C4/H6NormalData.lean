@@ -35,6 +35,7 @@ def h6Radius {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
     (k : Nat) (x : (X.obj k).M) : Real :=
   hd.h6Ratio r₀ * hd.mu (hd.dist k x (X.obj k).basepoint)
 
+omit [CompleteSpace E] in
 theorem h6Ratio_pos {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
     (hd : InjRadiusDecayInput (I := I) X) {r₀ : Real} (hr₀ : 0 < r₀) :
     0 < hd.h6Ratio r₀ := by
@@ -42,11 +43,13 @@ theorem h6Ratio_pos {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
   exact lt_min (by norm_num)
     (div_pos hr₀ (mul_pos (by norm_num) (hd.mu_pos 0)))
 
+omit [CompleteSpace E] in
 theorem h6Ratio_lt_one {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
     (hd : InjRadiusDecayInput (I := I) X) (r₀ : Real) :
     hd.h6Ratio r₀ < 1 :=
   lt_of_le_of_lt (min_le_left _ _) (by norm_num)
 
+omit [CompleteSpace E] in
 theorem h6Ratio_mu0_le_half
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
     (hd : InjRadiusDecayInput (I := I) X) {r₀ : Real} (hr₀ : r₀ ≤ 1) :
@@ -262,6 +265,7 @@ noncomputable def H6BallData.normalChart
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
+omit [CompleteSpace E] in
 @[simp] theorem H6BallData.normalChart_radius
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
     {hd : InjRadiusDecayInput (I := I) X}
@@ -364,6 +368,7 @@ namespace H6ChartData
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
+omit [CompleteSpace E] in
 theorem radius_le_global
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
     {hd : InjRadiusDecayInput (I := I) X}
@@ -477,6 +482,7 @@ theorem metric_eq_intr
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
+omit [CompleteSpace E] in
 theorem readout_mem
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
     {hd : InjRadiusDecayInput (I := I) X}

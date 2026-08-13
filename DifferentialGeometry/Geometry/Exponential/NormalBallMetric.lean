@@ -61,12 +61,14 @@ noncomputable def ballDiffeo {p : M}
   rw [← hrange]
   exact isSigmaCompact_range c.ballDiffeo.continuous
 
+omit [NeZero (Module.finrank ℝ E)] [T2Space M] [SigmaCompactSpace M] in
 private theorem ballDiffeo_apply {p : M}
     (c : NormalBallChart (I := I) p) (z : c.ball) :
     ((c.ballDiffeo z : c.image) : M) = c.hom (z : E) := by
   change c.restrictBall (z : E) = c.hom (z : E)
   exact c.restrictBall_apply (z : E)
 
+omit [FiniteDimensional ℝ E] [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [IsManifold I ∞ M] [T2Space M] [SigmaCompactSpace M] [T2Space (TangentBundle I M)] in
 private theorem ballDiffeo_mfd {p : M}
     (c : NormalBallChart (I := I) p) (z : c.ball) (v : E) :
     mfderiv (modelWithCornersSelf Real E) I
@@ -103,15 +105,18 @@ noncomputable def cut {p : M}
     div_pos c.radius_pos (by norm_num),
     by linarith [c.radius_pos]⟩
 
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [IsManifold I ∞ M] [T2Space M] [SigmaCompactSpace M] [T2Space (TangentBundle I M)] in
 theorem cut_smooth {p : M} (c : NormalBallChart (I := I) p) :
     ContMDiff (modelWithCornersSelf Real E)
       (modelWithCornersSelf Real Real) ∞ (c.cut : E → Real) :=
   c.cut.contDiff.contMDiff
 
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [IsManifold I ∞ M] [T2Space M] [SigmaCompactSpace M] [T2Space (TangentBundle I M)] in
 theorem cut_range {p : M} (c : NormalBallChart (I := I) p) (z : E) :
     c.cut z ∈ Set.Icc (0 : Real) 1 :=
   ⟨c.cut.nonneg, c.cut.le_one⟩
 
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [IsManifold I ∞ M] [T2Space M] [SigmaCompactSpace M] [T2Space (TangentBundle I M)] in
 theorem cut_support {p : M} (c : NormalBallChart (I := I) p) :
     tsupport (c.cut : E → Real) ⊆ (c.ball : Set E) := by
   rw [c.cut.tsupport_eq]
@@ -119,11 +124,13 @@ theorem cut_support {p : M} (c : NormalBallChart (I := I) p) :
     Metric.ball (0 : E) c.radius
   exact Metric.closedBall_subset_ball (by linarith [c.radius_pos])
 
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [IsManifold I ∞ M] [T2Space M] [SigmaCompactSpace M] [T2Space (TangentBundle I M)] in
 theorem cut_one {p : M} (c : NormalBallChart (I := I) p)
     {z : E} (hz : z ∈ Metric.ball (0 : E) (c.radius / 4)) :
     c.cut z = 1 :=
   c.cut.one_of_mem_closedBall (Metric.ball_subset_closedBall hz)
 
+omit [FiniteDimensional ℝ E] [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [IsManifold I ∞ M] [T2Space M] [SigmaCompactSpace M] [T2Space (TangentBundle I M)] in
 theorem inner_subset {p : M} (c : NormalBallChart (I := I) p) :
     Metric.ball (0 : E) (c.radius / 4) ⊆ (c.ball : Set E) :=
   Metric.ball_subset_ball (by linarith [c.radius_pos])

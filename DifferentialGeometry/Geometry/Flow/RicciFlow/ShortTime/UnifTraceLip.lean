@@ -37,6 +37,7 @@ private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [BoundarylessManifold I M] [SigmaCompactSpace M] in
 private theorem endoSlotZero_sub_traceLip
     (g : SmoothRiemannianMetric I M) (s : ℕ)
     (A B : ContMDiffSection I (E →L[ℝ] E) ∞
@@ -60,6 +61,7 @@ private theorem gInvDiffSlotCoeff_eq_endoSlotZero
       (gInvDiffRaisedEndoField (I := I) g₀ g₁)
   exact gInvDiffSlotCoeff_eq_slotInsertEndoCc (I := I) g₀ g₁
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [BoundarylessManifold I M] [SigmaCompactSpace M] in
 private theorem endoSlotZero_succ_eq_reindex_slotExtend
     (g : SmoothRiemannianMetric I M) (q : ℕ)
     (P : ContMDiffSection I (E →L[ℝ] E) ∞
@@ -537,6 +539,7 @@ private theorem jetAdd (g : SmoothRiemannianMetric I M) {r s : ℕ}
           ‖iteratedCovGrad (I := I) g r s j B‖ ^ 2) := by
       simp only [mul_add, Finset.sum_add_distrib, Finset.mul_sum]
 
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] in
 private theorem jetAbs (g : SmoothRiemannianMetric I M) {r s : ℕ}
     (A B : SmoothCcTensor g r s) {d b : ℝ}
     (hd : (∑ j ∈ Finset.range 3,
@@ -578,6 +581,7 @@ private theorem pairSplit (g gT gU : SmoothRiemannianMetric I M) :
 
 omit [BoundarylessManifold I M] in
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 private theorem zeroTie (g : SmoothRiemannianMetric I M)
     (y : M) (v w : TangentSpace I y) :
     g.inner y v w =

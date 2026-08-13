@@ -27,6 +27,7 @@ noncomputable def seqCenter (hd : InjRadiusDecayInput (I := I) X) (D : Real)
   haveI : ProperSpace (X.obj k).M := (P k).proper
   OrderedNet.netCenter (X.obj k).basepoint (hd.lambda D) (hd.lambda_continuous D) α
 
+omit [CompleteSpace E] in
 @[simp] theorem seqCenter_zero (hd : InjRadiusDecayInput (I := I) X) (D : Real)
     (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k)) (k : Nat) :
     seqCenter hd D P k 0 = some (X.obj k).basepoint := by
@@ -125,6 +126,7 @@ def subseq {hd : InjRadiusDecayInput (I := I) X} {D : Real}
     intro α
     simpa [Function.comp_apply] using (L.tendsto α).comp hψ.tendsto_atTop
 
+omit [CompleteSpace E] in
 @[simp] theorem subseq_phi {hd : InjRadiusDecayInput (I := I) X} {D : Real}
     {P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k)}
     (L : NetLimitData hd D P) {ψ : Nat -> Nat} (hψ : StrictMono ψ) :
@@ -168,6 +170,7 @@ noncomputable def NetLimitData.lamInf {hd : InjRadiusDecayInput (I := I) X} {D :
     (α : Nat) : Real :=
   hd.lambda D (L.rInf α)
 
+omit [CompleteSpace E] in
 @[simp] theorem NetLimitData.subseq_lamInf {hd : InjRadiusDecayInput (I := I) X}
     {D : Real} {P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k)}
     (L : NetLimitData hd D P) {ψ : Nat -> Nat} (hψ : StrictMono ψ) :
@@ -308,6 +311,7 @@ def BInter (hd : InjRadiusDecayInput (I := I) X) (D : Real)
     (letI : MetricSpace (X.obj k).M := (P k).ms
      ¬ Disjoint (Metric.ball x (5 * lamInf α)) (Metric.ball y (5 * lamInf β)))
 
+omit [CompleteSpace E] in
 theorem BInter.symm (hd : InjRadiusDecayInput (I := I) X) (D : Real)
     (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k)) (lamInf : Nat → Real)
     {a b k : Nat} (h : BInter hd D P lamInf a b k) :
@@ -317,6 +321,7 @@ theorem BInter.symm (hd : InjRadiusDecayInput (I := I) X) (D : Real)
   intro hdisj
   exact hinter hdisj.symm
 
+omit [CompleteSpace E] in
 theorem NetLimitData.binter_stable_tail
     (hd : InjRadiusDecayInput (I := I) X) {D : Real}
     (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k))
@@ -337,6 +342,7 @@ theorem NetLimitData.binter_stable_tail
   · filter_upwards [hdisjoint] with k hk
     exact fun hmeet => (hk hmeet).elim
 
+omit [CompleteSpace E] in
 theorem exists_stableNet (hd : InjRadiusDecayInput (I := I) X) {D : Real}
     (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k))
     (L : NetLimitData hd D P) :
@@ -358,6 +364,7 @@ theorem exists_stableNet (hd : InjRadiusDecayInput (I := I) X) {D : Real}
     | true => exact Or.inl (hv.mono fun k hk => of_decide_eq_true hk)
     | false => exact Or.inr (hv.mono fun k hk => of_decide_eq_false hk)
 
+omit [CompleteSpace E] in
 theorem NetLimitData.stable_subseq (hd : InjRadiusDecayInput (I := I) X) {D : Real}
     (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k))
     (L : NetLimitData hd D P) {ψ : Nat -> Nat} (hψ : StrictMono ψ)
@@ -379,6 +386,7 @@ theorem NetLimitData.stable_subseq (hd : InjRadiusDecayInput (I := I) X) {D : Re
       simpa [NetLimitData.subseq, Function.comp_apply] using
         hψ.tendsto_atTop.eventually h)
 
+omit [CompleteSpace E] in
 theorem NetLimitData.rInf_close (hd : InjRadiusDecayInput (I := I) X) {D : Real}
     (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k)) (L : NetLimitData hd D P)
     {α β : Nat}

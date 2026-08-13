@@ -46,6 +46,7 @@ theorem zeroReprNN_coe (hT : 0 < T)
       2 * Real.sqrt (1 + T) * ‖f‖ :=
   rfl
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] in
 theorem zeroRepr_ae_le (hT : 0 < T) (hT1 : T ≤ 1)
     (h_compact : IsCompactOperator (tensorResolventL2
       (I := I) (M := M) g r s))

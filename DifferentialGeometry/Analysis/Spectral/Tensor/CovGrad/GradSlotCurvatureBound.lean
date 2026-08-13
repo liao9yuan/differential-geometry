@@ -24,6 +24,7 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
 omit [CompactSpace M] [I.Boundaryless] in
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private lemma coframe_update_le
     (g : SmoothRiemannianMetric I M) (x : M)
     {n : ℕ} (e : Fin n → TangentSpace I x)
@@ -79,6 +80,7 @@ private lemma coframe_update_le
     exact (mul_le_mul (hdelta (K 0) (J 0)) (hinner (K 1))
       (abs_nonneg _) zero_le_one).trans_eq (one_mul C)
 
+omit [I.Boundaryless] in
 private lemma gradSlot_comp0_le
     (g : SmoothRiemannianMetric I M) (x : M)
     {n : ℕ} (e : Fin n → TangentSpace I x)

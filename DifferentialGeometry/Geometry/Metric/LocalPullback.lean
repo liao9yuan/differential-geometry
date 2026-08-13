@@ -41,6 +41,7 @@ theorem localPullInner_apply
   simp only [localPullInner, ContinuousLinearMap.comp_apply,
     ContinuousLinearMap.precomp_apply]
 
+omit [FiniteDimensional ℝ E] [FiniteDimensional ℝ F] [IsManifold I ∞ M] in
 private theorem localPullInner_symm
     (g : SmoothRiemannianMetric J N) (f : M → N)
     (x : M) (v w : TangentSpace I x) :
@@ -49,6 +50,7 @@ private theorem localPullInner_symm
   rw [localPullInner_apply, localPullInner_apply]
   exact g.symm (f x) _ _
 
+omit [FiniteDimensional ℝ E] [FiniteDimensional ℝ F] [IsManifold I ∞ M] in
 private theorem localPullInner_pos
     (g : SmoothRiemannianMetric J N) {f : M → N}
     (hf : IsLocalDiffeomorph I J ∞ f)
@@ -64,6 +66,7 @@ private theorem localPullInner_pos
       IsLocalDiffeomorph.mfderivToContinuousLinearEquiv_coe] using hv'
   exact g.pos (f x) _ hD
 
+omit [FiniteDimensional ℝ E] [FiniteDimensional ℝ F] [IsManifold I ∞ M] in
 private theorem localPullInner_bdd
     (g : SmoothRiemannianMetric J N) {f : M → N}
     (hf : IsLocalDiffeomorph I J ∞ f) :
@@ -102,6 +105,7 @@ private theorem localPullInner_bdd
   rw [hset]
   exact himg
 
+omit [FiniteDimensional ℝ E] [FiniteDimensional ℝ F] in
 private theorem push_smooth
     {f : M → N} (hf : ContMDiff I J ∞ f)
     (Y : ∀ x : M, TangentSpace I x)

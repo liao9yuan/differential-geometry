@@ -808,6 +808,7 @@ theorem ricciOne_joint
       (symmS (I := I) (M := M) g W) hδ hδZ
   simpa only [ricciOne] using c0j_add (I := I) (M := M) g hA hD
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [SigmaCompactSpace M] in
 theorem arm2_eq_ins
     (g gm : SmoothRiemannianMetric I M) :
     lieCovArm2 (I := I) (M := M) g gm =
@@ -1446,6 +1447,7 @@ noncomputable def quadAct
       (quadMid (I := I) (M := M) g gm T))
 
 set_option backward.isDefEq.respectTransparency false in
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [BoundarylessManifold I M] [SigmaCompactSpace M] in
 theorem appRSSmulLeft
     (g : SmoothRiemannianMetric I M) (a b c : ℕ)
     (s : ℝ) (Φ : SmoothCcTensor g b c) (W : SmoothCcTensor g a b) :
@@ -1466,6 +1468,7 @@ theorem appRSSmulLeft
   rw [ContinuousLinearMap.smul_comp]
 
 set_option backward.isDefEq.respectTransparency false in
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [BoundarylessManifold I M] [SigmaCompactSpace M] in
 theorem slotExtendSmul
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (a : ℝ) (X : SmoothCcTensor g r s) :
@@ -1598,6 +1601,7 @@ theorem ricciOneSmul
   module
 
 set_option backward.isDefEq.respectTransparency false in
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] [SigmaCompactSpace M] in
 theorem raise0Smul
     (g : SmoothRiemannianMetric I M) (s : ℕ) (a : ℝ)
     (W : SmoothCcTensor g 0 (s + 2)) :

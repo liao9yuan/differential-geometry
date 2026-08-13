@@ -33,6 +33,7 @@ def gridBase (g₀ : SmoothRiemannianMetric I M) {rb sb : ℕ}
     ((iteratedCovGrad (I := I) g₀ rb sb j P).toSection x)
 
 omit [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] in
 lemma gridBase_nn (g₀ : SmoothRiemannianMetric I M) {rb sb : ℕ}
     (P : SmoothCcTensor g₀ rb sb)
     (x : M) (j : ℕ) : 0 ≤ gridBase (I := I) (M := M) g₀ P x j :=

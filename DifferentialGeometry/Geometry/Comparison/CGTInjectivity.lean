@@ -542,6 +542,7 @@ theorem intrLoop_ge_cgt
     flatLoop_ge_cgt (I := I) g hEnorm p hK hR hRpi hRm hloc
       hr₀ hs hfit hquarter c hc hell hcLen A hA
 
+omit [T2Space (TangentBundle I M)] in
 theorem intrInj_ge_cgt
     (g : SmoothRiemannianMetric I M)
     (hEnorm : ∀ (y : M) (w : TangentSpace I y),

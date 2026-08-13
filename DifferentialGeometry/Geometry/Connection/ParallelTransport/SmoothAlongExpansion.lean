@@ -28,6 +28,7 @@ variable {I : ModelWithCorners Real E H} [I.Boundaryless]
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
   [IsManifold I ∞ M] [T2Space M] [SigmaCompactSpace M]
 
+omit [InnerProductSpace ℝ E] [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 theorem contMDiff_sum_along
     {ι : Type*} (s : Finset ι) (gamma : Real -> M)
     (V : ι -> forall t, TangentSpace I (gamma t))
@@ -74,6 +75,7 @@ theorem contMDiff_sum_along
     Real (gamma t) ht]
   rw [map_sum]
 
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 theorem exists_frame_exp
     (gamma : Real -> M) (V : forall s, TangentSpace I (gamma s)) (t : Real)
     (hgamma : ContMDiff 𝓘(Real, Real) I ∞ gamma)

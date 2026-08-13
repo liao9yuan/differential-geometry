@@ -63,6 +63,7 @@ private theorem permICG (g : SmoothRiemannianMetric I M) {s : ℕ}
           (I := I) (M := M) g σ T k x))
   exact (sq_eq_sq₀ (norm_nonneg _) (norm_nonneg _)).mp hsq
 
+omit [NeZero (Module.finrank ℝ E)] in
 private theorem symmICG (g : SmoothRiemannianMetric I M)
     (T : SmoothCcTensor g 0 2) (k : ℕ) :
     ‖iteratedCovGrad (I := I) g 0 2 k

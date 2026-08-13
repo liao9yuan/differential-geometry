@@ -205,6 +205,7 @@ theorem hs2_fiber_sq_action
 omit [BoundarylessManifold I M] in
 attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
   Tensor0SBundle.tensorRSSpace_normedSpace in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 theorem gFibreOp_of_fiberSq
     (g : SmoothRiemannianMetric I M) (T : SmoothCcTensor g 0 2) {K : ℝ}
     (hK : 0 ≤ K)

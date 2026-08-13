@@ -39,6 +39,7 @@ private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
 set_option backward.isDefEq.respectTransparency false in
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem covDerivConnDiff_tens (g₂ g₁ : SmoothRiemannianMetric I M) (x : M)
     (X Y Z X' Y' Z' : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯)
     (hX : X x = X' x) (hY : Y x = Y' x) (hZ : Z x = Z' x) :
@@ -72,6 +73,7 @@ theorem covDerivConnDiff_tens (g₂ g₁ : SmoothRiemannianMetric I M) (x : M)
   exact absurd hz (ne_of_gt (g₂.pos x _ (sub_ne_zero.mpr hne)))
 
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [SigmaCompactSpace M] in
 private theorem rhsTermBound (gBase g₀ : SmoothRiemannianMetric I M) {Λ C₀ C₁ : ℝ}
     (hΛ : 1 ≤ Λ) (hC₀0 : 0 ≤ C₀) (hC₁0 : 0 ≤ C₁)
     (hcomp : ∀ (y : M) (u : TangentSpace I y),
@@ -427,6 +429,7 @@ theorem unifRHSBilin
   linarith
 
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] in
 theorem rhsZeroC_nonneg {Kb Λ : ℝ} (hΛ : 1 ≤ Λ) :
     0 ≤ rhsZeroC (E := E) Λ Kb := by
   have hCd0 : 0 ≤ riemannDiffC Λ Λ Λ := by

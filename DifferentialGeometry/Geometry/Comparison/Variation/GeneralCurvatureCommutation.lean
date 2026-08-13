@@ -330,6 +330,7 @@ theorem jacCurv_smooth
       (v := T) hR2 hT
   simpa only [F, T, jacCurv, curvAlong] using hR3
 
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
 theorem curvDeriv_smul_left
     (g : SmoothRiemannianMetric I M) (γ : Real -> M)
     (f : Real -> Real) (X Y Z : ∀ s, TangentSpace I (γ s)) (t : Real)
@@ -373,6 +374,7 @@ theorem curvDeriv_smul_left
     ContinuousLinearMap.add_apply, ContinuousLinearMap.smul_apply]
   module
 
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
 theorem curvDeriv_smul_mid
     (g : SmoothRiemannianMetric I M) (γ : Real -> M)
     (f : Real -> Real) (X Y Z : ∀ s, TangentSpace I (γ s)) (t : Real)
@@ -416,6 +418,7 @@ theorem curvDeriv_smul_mid
     ContinuousLinearMap.add_apply, ContinuousLinearMap.smul_apply]
   module
 
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
 theorem curvDeriv_smul_right
     (g : SmoothRiemannianMetric I M) (γ : Real -> M)
     (f : Real -> Real) (X Y Z : ∀ s, TangentSpace I (γ s)) (t : Real)
@@ -458,6 +461,7 @@ theorem curvDeriv_smul_right
   simp only [map_add, map_smul]
   module
 
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
 theorem curvDeriv_add_left
     (g : SmoothRiemannianMetric I M) (γ : Real -> M)
     (X X' Y Z : ∀ s, TangentSpace I (γ s)) (t : Real)
@@ -510,6 +514,7 @@ theorem curvDeriv_add_left
   simp only [map_add, ContinuousLinearMap.add_apply]
   abel
 
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
 theorem curvDeriv_add_mid
     (g : SmoothRiemannianMetric I M) (γ : Real -> M)
     (X Y Y' Z : ∀ s, TangentSpace I (γ s)) (t : Real)
@@ -562,6 +567,7 @@ theorem curvDeriv_add_mid
   simp only [map_add, ContinuousLinearMap.add_apply]
   abel
 
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
 theorem curvDeriv_add_right
     (g : SmoothRiemannianMetric I M) (γ : Real -> M)
     (X Y Z Z' : ∀ s, TangentSpace I (γ s)) (t : Real)
@@ -642,6 +648,7 @@ theorem curvDeriv_congr
   simp only
   rw [hDX, hDY, hDZ, hXt, hYt, hZt]
 
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
 theorem curvDeriv_sum_left
     {ι : Type*} (g : SmoothRiemannianMetric I M) (γ : Real -> M)
     (s : Finset ι) (X : ι -> ∀ u, TangentSpace I (γ u))
@@ -703,6 +710,7 @@ theorem curvDeriv_sum_left
   simp only [map_sum, ContinuousLinearMap.sum_apply,
     Finset.sum_sub_distrib]
 
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
 theorem curvDeriv_sum_mid
     {ι : Type*} (g : SmoothRiemannianMetric I M) (γ : Real -> M)
     (s : Finset ι) (X : ∀ u, TangentSpace I (γ u))
@@ -757,6 +765,7 @@ theorem curvDeriv_sum_mid
   simp only [map_sum, ContinuousLinearMap.sum_apply,
     Finset.sum_sub_distrib]
 
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
 theorem curvDeriv_sum_right
     {ι : Type*} (g : SmoothRiemannianMetric I M) (γ : Real -> M)
     (s : Finset ι) (X Y : ∀ u, TangentSpace I (γ u))
@@ -803,6 +812,7 @@ theorem curvDeriv_sum_right
   rw [covDerivAlong_sum (I := I) g γ s Z t hZdiff]
   simp only [map_sum, Finset.sum_sub_distrib]
 
+omit [InnerProductSpace ℝ E] [T2Space M] [SigmaCompactSpace M] in
 private lemma covDeriv_coord
     {n : WithTop ℕ∞} [ENat.LEInfty n] (hn : n ≠ 0)
     (g : SmoothRiemannianMetric I M) (γ : Real → M)
@@ -826,6 +836,7 @@ private lemma covDeriv_coord
     (trivializationAt E (TangentSpace I) β).continuousLinearMapAt_symmL
       (R := Real) hmem _
 
+omit [InnerProductSpace ℝ E] [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 private lemma fieldCoord_contDiffAt
     (f : Real × Real → M)
     (V : ∀ q : Real × Real, TangentSpace I (f q))
@@ -900,6 +911,7 @@ lemma chartRep_snd_diff
   have hs := hcoord.comp t hincl
   simpa only [chartRepAt] using hs.differentiableAt (by simp)
 
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 private lemma gammaContr_contDiffAt
     {n : Nat}
     (g : SmoothRiemannianMetric I M) (α : M)
@@ -1753,6 +1765,7 @@ theorem cov_snd2_commute
           (fun s v => covSnd (I := I) g f V s v) 0 t
   linear_combination (norm := module) hcomm2
 
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] in
 theorem cov_varCurv
     (g : SmoothRiemannianMetric I M) (f : Real → Real → M)
     (V : ∀ s t : Real, TangentSpace I (f s t)) (s t : Real) :
@@ -1784,6 +1797,7 @@ theorem cov_varCurv
       (fun v : Real => varSnd (I := I) f s v)
       (fun v : Real => V s v) t
 
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] in
 theorem cov_jacCurv
     (g : SmoothRiemannianMetric I M) (f : Real → Real → M)
     (V : ∀ s t : Real, TangentSpace I (f s t)) (s t : Real) :

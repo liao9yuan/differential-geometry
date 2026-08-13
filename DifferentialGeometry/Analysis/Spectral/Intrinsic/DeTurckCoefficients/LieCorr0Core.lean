@@ -485,6 +485,7 @@ theorem lieCorr0AMixFib_contMDiff
   rw [lieCorr0AMixFib]
   rfl
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [SigmaCompactSpace M] in
 theorem lieCorr0RiemLoweredFib_section_contMDiff
     (g₀ : SmoothRiemannianMetric I M) :
     ContMDiff I (I.prod 𝓘(ℝ, Tensor0SModel 4 ℝ E)) ∞

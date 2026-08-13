@@ -95,6 +95,7 @@ private theorem homMode_zero (hT : 0 < T)
     (homModeCoeff (I := I) (M := M) (a := a) (T := T)
       (0 : tensorHs (I := I) (M := M) g r s (a + 2)) i)]
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] in
 private theorem homField_zero (hT : 0 < T)
     (h_compact : IsCompactOperator (tensorResolventL2
       (I := I) (M := M) g r s)) :

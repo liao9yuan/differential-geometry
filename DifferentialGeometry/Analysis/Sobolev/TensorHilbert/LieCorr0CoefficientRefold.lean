@@ -318,6 +318,7 @@ theorem lc0RiemPass_eval
       rw [← hrep]
 
 omit [NeZero (Module.finrank ℝ E)] in
+omit [I.Boundaryless] in
 private lemma lc0RiemRF_eval
     (g : SmoothRiemannianMetric I M) (x : M)
     (D : Tensor0SSpace 2 I x) (v : Fin 4 → TangentSpace I x) :
@@ -700,6 +701,7 @@ private theorem sq_le_two_add (t u v c1 c2 : ℝ) (ht : 0 ≤ t) (hu : 0 ≤ u) 
   have huv : 0 ≤ u + v := by linarith
   nlinarith [mul_le_mul htri htri ht huv, sq_nonneg (u - v), h1, h2, hu, hv]
 
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] in
 private theorem normSq_iCG_le_scaled (g₀ : SmoothRiemannianMetric I M)
     (X : SmoothCcTensor g₀ 2 2) (Y : SmoothCcTensor g₀ 1 1) (i : ℕ) (c : ℝ)
     (hpt : ∀ x : M,
@@ -1060,6 +1062,7 @@ noncomputable def lc0VBPass (g₀ g₁ : SmoothRiemannianMetric I M) :
       contMDiff_toFun := lc0VBPassFib_contMDiff (I := I) g₀ g₁ }
   hasCompactSupport := HasCompactSupport.of_compactSpace _
 
+omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] in
 private theorem lc0VBFib_eq (g₀ g₁ : SmoothRiemannianMetric I M) (x : M) :
     lieCorr0VBFib (I := I) g₀ g₁ x =
       (2 : ℝ) • ((show Tensor0SSpace 4 I x →L[ℝ] Tensor0SSpace 2 I x from
@@ -1134,6 +1137,7 @@ private lemma vbMcd_unitModel (g₀ g₁ : SmoothRiemannianMetric I M) (x : M)
     ContinuousMultilinearMap.constOfIsEmpty_apply, one_smul]
   exact metricConnDiffLoweredFib_toModel (I := I) g₁ g₁ g₀ x m
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private lemma vb_rank0_smul_unit (x : M) (c : Tensor0SSpace 0 I x) :
     c = Tensor0SSpace.toModel c (fun i : Fin 0 => i.elim0) •
       unitTensor (I := I) (M := M) x := by

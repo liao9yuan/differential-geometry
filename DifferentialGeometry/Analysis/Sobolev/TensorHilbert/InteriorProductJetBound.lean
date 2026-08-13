@@ -44,6 +44,7 @@ noncomputable def ipLowCc (g : SmoothRiemannianMetric I M) (om : SmoothCcTensor 
 
 section Eval
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private lemma ipjb_rank0_smul_unit (x : M) (c : Tensor0SSpace 0 I x) :
     c = Tensor0SSpace.toModel c (fun i : Fin 0 => i.elim0) •
       unitTensor (I := I) (M := M) x := by
@@ -58,6 +59,7 @@ private lemma ipjb_rank0_smul_unit (x : M) (c : Tensor0SSpace 0 I x) :
   funext i
   exact i.elim0
 
+omit [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private theorem ipjb_orthoFrame_basis (g : SmoothRiemannianMetric I M) (x : M) :
     ∃ bse : Module.Basis (Fin (Module.finrank ℝ E)) ℝ (TangentSpace I x),
       ∀ i, bse i = smoothOrthoFrame (I := I) g x i x := by
@@ -185,6 +187,7 @@ private lemma ipjb_slotExt2_toModel (g : SmoothRiemannianMetric I M)
     ContinuousMultilinearMap.smul_apply, smul_eq_mul]
   rw [unitModel]
 
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma ipjb_cons_sum_smul {n : ℕ}
     (Zm : Tensor0SModel (n + 1) ℝ E) (d : ℕ) (t : Fin d → ℝ)
     (u : Fin d → E) (rest : Fin n → E) :

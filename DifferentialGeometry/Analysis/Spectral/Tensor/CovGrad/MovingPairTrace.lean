@@ -29,6 +29,7 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private lemma rank0_eq_smul_unit (x : M) (t : Tensor0SSpace 0 I x) :
     t = (Tensor0SSpace.toModel t (fun i : Fin 0 => i.elim0)) •
       unitZeroSec (I := I) (M := M) x := by
@@ -50,6 +51,7 @@ def slotExtendTwo (g : SmoothRiemannianMetric I M)
   slotExtend (I := I) (M := M) g 1 5
     (slotExtend (I := I) (M := M) g 0 4 X)
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [BoundarylessManifold I M] [SigmaCompactSpace M] in
 private lemma slotExtend_toModel_cons
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (Phi : SmoothCcTensor g r s) (x : M)

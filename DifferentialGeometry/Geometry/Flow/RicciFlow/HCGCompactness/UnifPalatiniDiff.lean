@@ -29,6 +29,7 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
   [T2Space M] [SigmaCompactSpace M]
 
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] in
 theorem curvJet1_eval (g : SmoothRiemannianMetric I M) (x : M)
     (D X Y Z W : TangentSpace I x) :
     iterCov (I := I) g 4 (metricRm04 (I := I) (M := M) g) 1 x
@@ -105,6 +106,7 @@ theorem curvJet1_normSq_le_of_op
         rw [Real.sqrt_mul (by positivity), Real.sqrt_sq hK]
 
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [SigmaCompactSpace M] in
 theorem covDerivConnDiff_congr
     (g₂ g₁ : SmoothRiemannianMetric I M)
     (W X Y W' X' Y' : ContMDiffSection I E (∞ : WithTop ℕ∞)
@@ -170,6 +172,7 @@ theorem covDerivConnDiff_eq_ext
     ?_ ?_ ?_ <;>
   · exact (smoothExtensionTangent_eq (I := I) _ _).symm
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private theorem cov_apply_sub
     (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
     {S T : Π b : M, TangentSpace I b} {x : M}
@@ -198,6 +201,7 @@ noncomputable def curvCovDerivOpAtOf
       (fun p : M => (covD (fun q : M => Z q) p) (D p)) x
 
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 theorem curvCovDerivOpAtOf_self
     (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
     (D X Y Z : ContMDiffSection I E (∞ : WithTop ℕ∞)

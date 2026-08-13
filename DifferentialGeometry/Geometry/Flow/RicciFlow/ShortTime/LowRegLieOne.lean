@@ -294,6 +294,7 @@ private theorem perm_norm_eq
           (I := I) (M := M) g (s := 2) σ T j x)
   exact (sq_eq_sq₀ (norm_nonneg _) (norm_nonneg _)).mp hsq
 
+omit [NeZero (Module.finrank ℝ E)] in
 private theorem symm_norm_le
     (g : SmoothRiemannianMetric I M) (T : SmoothCcTensor g 0 2) (j : ℕ) :
     ‖iteratedCovGrad (I := I) g 0 2 j (symmS (I := I) (M := M) g T)‖ ≤

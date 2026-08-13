@@ -53,6 +53,7 @@ theorem lc0TraceRF_fiber (g₀ g₁ : SmoothRiemannianMetric I M) (p : ℕ)
     lieCorr0TraceStep, ContinuousLinearMap.comp_apply]
   congr 1
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private lemma unitTensor_model (x : M) (m : Fin 0 → E) :
     Tensor0SSpace.toModel (unitTensor (I := I) (M := M) x) m = 1 := by
   rw [unitTensor, Tensor0SSpace.toModel_ofModel]
@@ -78,6 +79,7 @@ private lemma curry_zero (x : M) (D : Tensor0SSpace 1 I x) (v₀ : E) :
   refine Fin.cases ?_ (fun j => j.elim0) k
   rfl
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private lemma clm_unit_smul (x : M) (s : ℕ)
     (A : Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace s I x) (c : ℝ) :
     A (c • unitTensor (I := I) (M := M) x) =
@@ -242,6 +244,7 @@ def lc0AMixHalfRF (g₀ g₁ gB : SmoothRiemannianMetric I M)
 def lc0SwapPermRF : Equiv.Perm (Fin 4) :=
   ⟨![0, 1, 3, 2], ![0, 1, 3, 2], by decide, by decide⟩
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private lemma swap_trace (g₁ : SmoothRiemannianMetric I M)
     (σ : Equiv.Perm (Fin 4)) (x : M) (Z : Tensor0SSpace 4 I x) :
     domDomCongrFibRank (I := I) 2 (Equiv.swap (0 : Fin 2) 1) x
@@ -397,6 +400,7 @@ def lc0AMixBgHalfRF (g₀ g₁ gB : SmoothRiemannianMetric I M)
           (slotExtendIter (I := I) (M := M) g₀ 0 3 2
             (metricConnDiffLoweredCc (I := I) (M := M) g₀ g₁ g₀)))))
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem amix_half_bg_rf
     (g₀ g₁ gB : SmoothRiemannianMetric I M)
     (σ : Equiv.Perm (Fin 4)) :

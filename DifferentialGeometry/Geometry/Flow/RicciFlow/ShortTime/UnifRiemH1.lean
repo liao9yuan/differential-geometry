@@ -36,6 +36,7 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
 omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] in
+omit [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 private lemma riemRfns_neg
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (x : M)
     (v : TensorRSSpace r s I x) :
@@ -45,6 +46,7 @@ private lemma riemRfns_neg
   rw [riemannianFiberNormSq_smul]
   norm_num
 
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] in
 private lemma riemRfns_iCG_neg
     (g : SmoothRiemannianMetric I M) (r s i : ℕ)
     (Φ : SmoothCcTensor g r s) (x : M) :

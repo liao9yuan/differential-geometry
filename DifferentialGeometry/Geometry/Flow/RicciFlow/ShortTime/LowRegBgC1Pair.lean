@@ -32,6 +32,7 @@ variable
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private theorem dom_sub
     (g : SmoothRiemannianMetric I M) {s : ℕ}
     (σ : Equiv.Perm (Fin s)) (A B : SmoothCcTensor g 0 s) :
@@ -58,6 +59,7 @@ private theorem dom_sub
   simp only [ContinuousMultilinearMap.sub_apply,
     ContinuousMultilinearMap.domDomCongr_apply]
 
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] [SigmaCompactSpace M] in
 private theorem raise_sub
     (g : SmoothRiemannianMetric I M) (s : ℕ)
     (A B : SmoothCcTensor g 0 (s + 2)) :
@@ -176,6 +178,7 @@ private theorem psiBgLeft_pair
   rw [pbLow_sub (I := I) (M := M) g T U g gB]
   module
 
+omit [NeZero (Module.finrank ℝ E)] in
 private theorem psiBgCorr_pair
     (g gT gU gB : SmoothRiemannianMetric I M) :
     psiBgCorr (I := I) (M := M) g gT gB -
@@ -265,6 +268,7 @@ private theorem jet_smul1
   rw [iteratedCovGrad_smul, norm_smul, Real.norm_eq_abs,
     mul_pow, sq_abs]
 
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] in
 private theorem jet_neg1
     (g : SmoothRiemannianMetric I M) {r s : ℕ} (m : ℕ)
     (S : SmoothCcTensor g r s) :
@@ -292,6 +296,7 @@ private theorem dom_h2
     riemannianFiberNormSq_iteratedCovGrad_domDomCongrSection
       (I := I) (M := M) g σ S q x
 
+omit [NeZero (Module.finrank ℝ E)] in
 private theorem raiseDom_h2
     (g : SmoothRiemannianMetric I M)
     (ρ : Equiv.Perm (Fin 3)) (S : SmoothCcTensor g 0 3) :
@@ -314,6 +319,7 @@ private theorem raiseDom_h2
     _ = lowJetSq (I := I) (M := M) g 2 S :=
       dom_h2 (I := I) (M := M) g ρ S
 
+omit [NeZero (Module.finrank ℝ E)] in
 private theorem kappa_fix_h2
     (g gB : SmoothRiemannianMetric I M) :
     lowJetSq (I := I) (M := M) g 2
@@ -616,6 +622,7 @@ private theorem reidx_sub
   intro D
   rfl
 
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] [SigmaCompactSpace M] in
 private theorem liePiece_add
     (g gm : SmoothRiemannianMetric I M)
     (σ : Equiv.Perm (Fin 4)) (ρ : Equiv.Perm (Fin 3))
@@ -627,6 +634,7 @@ private theorem liePiece_add
   rw [slotExt_add (I := I) (M := M), slotExt_add (I := I) (M := M),
     appCcRS_add_right, reidx_add (I := I) (M := M)]
 
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] in
 private theorem liePiece_sub
     (g gm : SmoothRiemannianMetric I M)
     (σ : Equiv.Perm (Fin 4)) (ρ : Equiv.Perm (Fin 3))
@@ -694,6 +702,7 @@ private theorem reidx_h2
   rw [iteratedCovGrad_reindexCoeffGen (I := I) (M := M),
     norm_reindexCoeffGen_eq (I := I) (M := M)]
 
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] [SigmaCompactSpace M] in
 private theorem lieTrace_eq1
     (g gm : SmoothRiemannianMetric I M)
     (σ : Equiv.Perm (Fin 4)) :

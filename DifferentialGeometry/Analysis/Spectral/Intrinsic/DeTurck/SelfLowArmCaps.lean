@@ -144,6 +144,7 @@ private theorem endoAtgw (g₀ : SmoothRiemannianMetric I M) {δ₀ : ℝ} (hδ�
     le_trans (hSid i x) (le_mul_of_one_le_right (hSid_nn i) hone)
   nlinarith [hA, hB, hWnn]
 
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] [SigmaCompactSpace M] in
 private lemma clSplit (g₀ : SmoothRiemannianMetric I M) :
     ∃ Z : SmoothCcTensor g₀ 3 3, ∀ g₁ : SmoothRiemannianMetric I M,
       connLowOp (I := I) (M := M) g₀ g₁ =
@@ -1331,6 +1332,7 @@ private lemma sieZero (g₀ : SmoothRiemannianMetric I M) (s : ℕ) :
       slotInsertEndoFib_smul_left, zero_smul]]
   simp [SmoothCcTensor.toSection_zero]
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [BoundarylessManifold I M] [SigmaCompactSpace M] in
 private lemma permRe (g₀ : SmoothRiemannianMetric I M) {d : ℕ}
     (Φ : SmoothCcTensor g₀ d d) (ρ : Equiv.Perm (Fin d)) :
     ccOperatorFieldComp (I := I) (M := M) g₀ d d d Φ
@@ -1347,6 +1349,7 @@ private lemma permRe (g₀ : SmoothRiemannianMetric I M) {d : ℕ}
       (slotPermCLM (I := I) ρ x D) = _
   rw [slotPermCLM_apply]
 
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] [SigmaCompactSpace M] in
 private lemma clZ (g₀ g₁ : SmoothRiemannianMetric I M) :
     connLowOp (I := I) (M := M) g₀ g₁ =
       ccOperatorFieldComp (I := I) (M := M) g₀ 3 3 3 (permCoeff (I := I) (M := M) g₀ lowPerm)
@@ -1358,6 +1361,7 @@ private lemma clZ (g₀ g₁ : SmoothRiemannianMetric I M) :
               permCoeff (I := I) (M := M) g₀ (finRotate 3) -
               permCoeff (I := I) (M := M) g₀ (Equiv.swap (1 : Fin 3) 2)))) := rfl
 
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] in
 private lemma icgSm (g₀ : SmoothRiemannianMetric I M) (r c j : ℕ) (k : ℝ)
     (X : SmoothCcTensor g₀ r c) :
     iteratedCovGrad (I := I) g₀ r c j (k • X) =

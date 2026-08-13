@@ -214,6 +214,7 @@ def metricConnDiffLoweredCc (g₀ g₁ g_bg : SmoothRiemannianMetric I M) :
       (E := (TangentSpace I : M → Type _)) ∞ (metricConnDiffLoweredField (I := I) g₁ g_bg)
   hasCompactSupport := HasCompactSupport.of_compactSpace _
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [SigmaCompactSpace M] in
 private lemma metricConnDiffLoweredCc_unitModel_apply
     (g₀ g₁ g_bg : SmoothRiemannianMetric I M) (x : M)
     (m : Fin 3 → TangentSpace I x) :

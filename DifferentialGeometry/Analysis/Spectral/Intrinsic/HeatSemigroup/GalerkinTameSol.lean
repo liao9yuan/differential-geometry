@@ -31,6 +31,7 @@ abbrev galLowView (g₀ : SmoothRiemannianMetric I M) (a : ℕ) :
     (show (a : ℝ) + 1 ≤ (a : ℝ) + 2 by linarith)
 
 open scoped Classical in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [BoundarylessManifold I M] in
 theorem galEmbedCombo (g₀ : SmoothRiemannianMetric I M) (a : ℕ)
     (S : Finset (TensorEigenIdx (I := I) (M := M) g₀ 0 2))
     (w : EuclideanSpace ℝ {i // i ∈ S}) :
@@ -206,6 +207,7 @@ theorem galTameStateC_emb (g₀ : SmoothRiemannianMetric I M) (a : ℕ) (R : ℝ
   exact key _ (fun i hi => dif_pos hi)
 
 omit [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] in
 theorem galTameRetr_view (g₀ : SmoothRiemannianMetric I M) (a : ℕ) (R : ℝ)
     (S : Finset (TensorEigenIdx (I := I) (M := M) g₀ 0 2))
     (w : EuclideanSpace ℝ {i // i ∈ S}) :
@@ -230,6 +232,7 @@ theorem galTameRetr_mem (g₀ : SmoothRiemannianMetric I M) (a : ℕ) {R : ℝ}
   exact ballRetraction_mem_closedBall hR _
 
 omit [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] in
 theorem galTameStateC_mem (g₀ : SmoothRiemannianMetric I M) (a : ℕ) {R : ℝ}
     (hR : 0 ≤ R) (S : Finset (TensorEigenIdx (I := I) (M := M) g₀ 0 2))
     (c : TensorEigenIdx (I := I) (M := M) g₀ 0 2 → ℝ) :
@@ -483,6 +486,7 @@ def galTameForce (g₀ : SmoothRiemannianMetric I M) (a : ℕ) {R : ℝ} (hR : 0
   else 0
 
 omit [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] in
 theorem galTameStateC_eq (g₀ : SmoothRiemannianMetric I M) (a : ℕ) {R : ℝ}
     (S : Finset (TensorEigenIdx (I := I) (M := M) g₀ 0 2))
     {c : TensorEigenIdx (I := I) (M := M) g₀ 0 2 → ℝ}

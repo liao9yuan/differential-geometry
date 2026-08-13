@@ -47,6 +47,7 @@ def ccUnitField (g : SmoothRiemannianMetric I M) (s : ℕ) (W : SmoothCcTensor g
   MixedSection.toMultilinearSection (𝕜 := ℝ) (F := E) (IB := I)
     (E := (TangentSpace I : M → Type _)) ∞ W.toSection
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 @[simp] lemma ccUnitField_apply (g : SmoothRiemannianMetric I M) (s : ℕ)
     (W : SmoothCcTensor g 0 s) (x : M) :
     ccUnitField (I := I) g s W x =
@@ -54,6 +55,7 @@ def ccUnitField (g : SmoothRiemannianMetric I M) (s : ℕ) (W : SmoothCcTensor g
         (unitZeroSec (I := I) (M := M) x) := rfl
 
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 @[simp] lemma ccUnitField_recast (g g' : SmoothRiemannianMetric I M) (s : ℕ)
     (W : SmoothCcTensor g 0 s) :
     ccUnitField (I := I) g' s (W.recast (g' := g')) = ccUnitField (I := I) g s W := rfl
@@ -108,6 +110,7 @@ theorem iterCovGrad_unit_eq (g : SmoothRiemannianMetric I M) (s : ℕ)
     rfl
 
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private lemma lowerAllUpper0_unit (g : SmoothRiemannianMetric I M) (s : ℕ) (x : M)
     (W : SmoothCcTensor g 0 s) (w : Fin (0 + s) → TangentSpace I x) :
     lowerAllUpperIndices (I := I) (M := M) g 0 s x
@@ -238,6 +241,7 @@ lemma jetTowerPt_nonneg {Λ Λ' Λ'' : ℝ} (hΛ : 0 ≤ Λ) (hΛ' : 0 ≤ Λ') 
   nlinarith
 
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [SigmaCompactSpace M] in
 private theorem covStepZero (gRef : SmoothRiemannianMetric I M) (s : ℕ) :
     covStep (I := I) gRef s 0 = 0 := by
   have h := covStep_add (I := I) gRef s 0 0
@@ -247,6 +251,7 @@ private theorem covStepZero (gRef : SmoothRiemannianMetric I M) (s : ℕ) :
   exact add_left_cancel hc
 
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private theorem sqrtNormSq0SZero (g : SmoothRiemannianMetric I M) (x : M) (s : ℕ) :
     Real.sqrt (normSq0S (I := I) g x s (0 : Tensor0SSpace s I x)) = 0 := by
   classical

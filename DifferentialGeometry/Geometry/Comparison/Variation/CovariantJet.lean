@@ -24,6 +24,7 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
   [IsManifold I ∞ M] [T2Space M] [SigmaCompactSpace M]
 
 omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
+omit [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 private theorem covFst_shift
     (g : SmoothRiemannianMetric I M) (f : Real -> Real -> M)
     (V : forall s t : Real, TangentSpace I (f s t))
@@ -571,6 +572,7 @@ theorem covFstIter_succ
   rfl
 
 omit [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
 theorem covFstIter_zero_of
     (g : SmoothRiemannianMetric I M) (f : Real -> Real -> M)
     (V : forall s t : Real, TangentSpace I (f s t))

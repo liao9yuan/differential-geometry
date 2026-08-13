@@ -116,6 +116,7 @@ def rhsRefold2
     lieRefold2 (I := I) (M := M) g T hδ hδZ s
 
 omit [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 private lemma bilin_smul
     (g : SmoothRiemannianMetric I M) (c : ℝ) (S : SmoothCcTensor g 0 2)
     (x : M) (v w : TangentSpace I x) :
@@ -124,6 +125,7 @@ private lemma bilin_smul
   rw [ccTensorBilin_apply, ccTensorBilin_apply, ccTensorModel_smul,
     ContinuousMultilinearMap.smul_apply, smul_eq_mul]
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private lemma symmS_eq_self
     (g : SmoothRiemannianMetric I M) (S : SmoothCcTensor g 0 2)
     (hS : ∀ (x : M) (v w : TangentSpace I x),

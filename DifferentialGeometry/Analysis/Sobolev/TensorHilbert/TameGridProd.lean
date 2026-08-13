@@ -29,6 +29,7 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private theorem contRfns (g₀ : SmoothRiemannianMetric I M) {r s : ℕ}
     (S : SmoothCcTensor g₀ r s) :
     Continuous (fun x : M => riemannianFiberNormSq (I := I) (M := M) g₀ r s x
@@ -359,6 +360,7 @@ theorem gridIntPull (g₀ : SmoothRiemannianMetric I M) :
   refine hmono.trans ?_
   exact mul_le_mul_of_nonneg_left (hK P hΛ₀0 hΛ₀1 hsup k hk1 n hn e he) (sq_nonneg Λ₁)
 
+omit [BoundarylessManifold I M] in
 theorem gradCapLin (hDim : Module.finrank ℝ E = 3)
     (g₀ : SmoothRiemannianMetric I M) :
     ∃ c : ℝ, 0 ≤ c ∧

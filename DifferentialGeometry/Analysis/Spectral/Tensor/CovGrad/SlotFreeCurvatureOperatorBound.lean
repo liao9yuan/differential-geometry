@@ -24,6 +24,7 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
 omit [CompactSpace M] [I.Boundaryless] in
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private lemma coframe_one_le
     (g : SmoothRiemannianMetric I M) (x : M)
     {n : ℕ} (e : Fin n → TangentSpace I x)
@@ -55,6 +56,7 @@ private lemma coframe_one_le
     _ = C := mul_one C
 
 omit [NeZero (Module.finrank ℝ E)] in
+omit [I.Boundaryless] in
 private lemma sfOne_eval
     (g : SmoothRiemannianMetric I M) (x : M)
     (A : Tensor0SSpace 1 I x) (u w : TangentSpace I x)

@@ -30,6 +30,7 @@ variable
       [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M]
 
 omit [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 private theorem bilin_smul
     (g : SmoothRiemannianMetric I M) (a : Real)
     (A : SmoothCcTensor g 0 2) (x : M)

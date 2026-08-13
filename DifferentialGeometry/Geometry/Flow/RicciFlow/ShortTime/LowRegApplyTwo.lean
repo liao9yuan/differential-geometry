@@ -405,6 +405,7 @@ theorem lowreg_apply_two
 
 omit [BoundarylessManifold I M] in
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] in
 private theorem congrLp_self (g : SmoothRiemannianMetric I M) {a T : ℝ}
     (h : a = a) (u : timeL2 (tensorHs (I := I) (M := M) g 0 2 a) T) :
     (tensorHsCongrL (I := I) (M := M) g 0 2 h).compLpL 2 (timeMeasure T) u =

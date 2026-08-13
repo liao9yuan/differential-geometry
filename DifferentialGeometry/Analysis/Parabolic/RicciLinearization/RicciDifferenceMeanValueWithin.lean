@@ -203,6 +203,7 @@ theorem christoffelWithin {S : Set ℝ} (hG : GenJointGramOn (I := I) gfam α S)
   exact (invGramWithin (I := I) gfam α hG k l hs hy).mul
     (bracketWithin (I := I) gfam α hG i j l hs hy)
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem partChristWithin {S : Set ℝ} (hG : GenJointGramOn (I := I) gfam α S)
     (m i j k : Fin (Module.finrank ℝ E)) {s₀ : ℝ} {y₀ : E} (hs : s₀ ∈ S)
     (hy : y₀ ∈ interior (extChartAt I α).target) :
@@ -272,6 +273,7 @@ theorem partRicciWithin {S : Set ℝ} (hG : GenJointGramOn (I := I) gfam α S)
   partialDerivWithin (fun s y => chartRicciTensor (I := I) (gfam s) α i k y) m
     isOpen_interior hs hy (ricciWithin (I := I) gfam α hG i k hs hy)
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem christWithin_of_open {S : Set ℝ} (hS : IsOpen S) (hG : GenJointGramOn (I := I) gfam α S)
     (i j k : Fin (Module.finrank ℝ E)) {s₀ : ℝ} {y₀ : E} (hs : s₀ ∈ S)
     (hy : y₀ ∈ interior (extChartAt I α).target) :
@@ -342,6 +344,7 @@ theorem genGramOn_of_field (g : ℝ → SmoothRiemannianMetric I M) {J : Set ℝ
     exact chartGramMatrix_det_pos (I := I) (g s₀) α hx
 
 omit [NeZero (Module.finrank ℝ E)] in
+omit [FiniteDimensional ℝ E] in
 theorem jointOnMWithin (α : M) (F : ℝ → E → ℝ) {J : Set ℝ} {t : ℝ} {x : M}
     (hF : ContDiffWithinAt ℝ ∞ (fun r : ℝ × E => F r.1 r.2)
       (J ×ˢ interior (extChartAt I α).target) (t, extChartAt I α x))
@@ -377,6 +380,7 @@ theorem jointOnMWithin (α : M) (F : ℝ → E → ℝ) {J : Set ℝ} {t : ℝ} 
     hF.contMDiffWithinAt.comp ((t, x) : ℝ × M) hΦ hmapsΦ
 
 omit [NeZero (Module.finrank ℝ E)] in
+omit [FiniteDimensional ℝ E] [IsManifold I ∞ M] in
 private theorem chart_mem_interior (α : M) {x : M} (hx : x ∈ (chartAt H α).source) :
     extChartAt I α x ∈ interior (extChartAt I α).target := by
   have hsrc : x ∈ (extChartAt I α).source := by
@@ -384,6 +388,7 @@ private theorem chart_mem_interior (α : M) {x : M} (hx : x ∈ (chartAt H α).s
   exact extChartAt_target_subset_interior_of_boundaryless (I := I) α
     ((extChartAt I α).map_source hsrc)
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem christWithinM (g : ℝ → SmoothRiemannianMetric I M) {J : Set ℝ} (α : M)
     (hG : GenJointGramOn (I := I) g α J) (i j k : Fin (Module.finrank ℝ E))
     {t : ℝ} (ht : t ∈ J) {x : M} (hx : x ∈ (chartAt H α).source) :

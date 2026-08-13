@@ -44,6 +44,7 @@ private noncomputable def extSec1 (x : M) (v : TangentSpace I x) :
   ContMDiffSection.mk (smoothExtensionTangent (I := I) x v)
     (smoothExtensionTangent_contMDiff (I := I) x v)
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [SigmaCompactSpace M] in
 @[simp] private theorem extSec1_apply (x : M) (v : TangentSpace I x) :
     extSec1 (I := I) x v x = v :=
   smoothExtensionTangent_eq (I := I) x v
@@ -239,6 +240,7 @@ theorem nablaRm_split
           nablaRiemannOp (I := I) gBase x (Ds x) (Xs x) (Ys x) (Zs x) := by
             rw [hconn, hpal, hB']
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] in
 private theorem jet1_eval (g : SmoothRiemannianMetric I M) (x : M)
     (D X Y Z W : TangentSpace I x) :
     iterCov (I := I) g 4 (metricRm04 (I := I) (M := M) g) 1 x
@@ -254,6 +256,7 @@ private theorem sqrt_cancel {q A : ℝ}
     exact hA
   · exact le_of_mul_le_mul_right (by simpa [pow_two] using h) hqpos
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private theorem base_le_scaled
     (gBase g₀ : SmoothRiemannianMetric I M) {Λ : ℝ} (hΛ : 1 ≤ Λ)
     (hcomp : ∀ (x : M) (v : TangentSpace I x),

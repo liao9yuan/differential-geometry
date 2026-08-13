@@ -45,12 +45,14 @@ def IsMoserWin (g : SmoothRiemannianMetric I M) {r c : ℕ}
     A n * (1 + lowJetSq (I := I) (M := M) g n T))
 
 omit [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem jetNn (g : SmoothRiemannianMetric I M) {r c m : ℕ}
     (X : SmoothCcTensor g r c) :
     0 ≤ lowJetSq (I := I) (M := M) g m X :=
   Finset.sum_nonneg fun _ _ => sq_nonneg _
 
 omit [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem jetSub (g : SmoothRiemannianMetric I M) {r c : ℕ} (m : ℕ)
     (X Y : SmoothCcTensor g r c) :
     lowJetSq (I := I) (M := M) g m (X - Y) ≤
@@ -84,6 +86,7 @@ theorem jetSub (g : SmoothRiemannianMetric I M) {r c : ℕ} (m : ℕ)
       simp only [mul_add, Finset.sum_add_distrib, Finset.mul_sum]
 
 omit [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem jetNeg (g : SmoothRiemannianMetric I M) {r c : ℕ} (m : ℕ)
     (Y : SmoothCcTensor g r c) :
     lowJetSq (I := I) (M := M) g m (-Y) =
@@ -143,6 +146,7 @@ theorem moserWin_const (g : SmoothRiemannianMetric I M) {r c : ℕ}
     nlinarith [jetNn (I := I) (M := M) (m := n) g X]
 
 omit [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem jetMono (g : SmoothRiemannianMetric I M) {r c m n : ℕ} (hmn : m ≤ n)
     (X : SmoothCcTensor g r c) :
     lowJetSq (I := I) (M := M) g m X ≤ lowJetSq (I := I) (M := M) g n X := by
@@ -192,6 +196,7 @@ theorem moserWin_sub {g : SmoothRiemannianMetric I M} {r c : ℕ}
       (by nlinarith [hX.2.2 n, hY.2.2 n])
 
 omit [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem opJetSmul (g : SmoothRiemannianMetric I M) {r c : ℕ} (m : ℕ) (a : ℝ)
     (X : SmoothCcTensor g r c) :
     lowJetSq (I := I) (M := M) g m (a • X) =
@@ -225,6 +230,7 @@ end Window
 section Transfer
 
 omit [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 private theorem l2OfPt (g : SmoothRiemannianMetric I M) {a b a' b' : ℕ}
     (X : SmoothCcTensor g a b) (Y : SmoothCcTensor g a' b') {K : ℝ}
     (h : ∀ x : M, riemannianFiberNormSq (I := I) (M := M) g a b x (X.toSection x) ≤
@@ -648,6 +654,7 @@ theorem moserWin_fullSlot (g : SmoothRiemannianMetric I M)
   exact hwin T g₁ P hpert
 
 omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [BoundarylessManifold I M] [SigmaCompactSpace M] in
+omit [CompactSpace M] [T2Space M] in
 private lemma raisedSelf (g : SmoothRiemannianMetric I M) (x : M) :
     metricComparisonEndo (I := I) g g x =
       ContinuousLinearMap.id ℝ (TangentSpace I x) := by
@@ -656,6 +663,7 @@ private lemma raisedSelf (g : SmoothRiemannianMetric I M) (x : M) :
   rw [gInvRaisedEndo_apply, inverseMetricSharpFib_g0FlatCLM,
     ContinuousLinearMap.id_apply]
 
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] [SigmaCompactSpace M] in
 private lemma raisedDecomp (g g₁ : SmoothRiemannianMetric I M) :
     fullRaisedEndoField (I := I) (M := M) g g₁ =
       gInvDiffRaisedEndoField (I := I) g g₁ +
@@ -675,6 +683,7 @@ private lemma raisedDecomp (g g₁ : SmoothRiemannianMetric I M) :
   rw [fullRaisedEndoField_apply, raisedSelf, ContinuousLinearMap.id_apply]
   rw [gInvRaisedEndo_eq_diff_add_id]
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [BoundarylessManifold I M] [SigmaCompactSpace M] in
 private lemma insAdd (g : SmoothRiemannianMetric I M) (s : ℕ)
     (A B : ContMDiffSection I (E →L[ℝ] E) ∞
       (fun x : M => TangentSpace I x →L[ℝ] TangentSpace I x)) :

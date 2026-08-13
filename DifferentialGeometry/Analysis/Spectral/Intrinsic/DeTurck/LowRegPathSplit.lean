@@ -125,6 +125,7 @@ theorem reindex_sub
   exact ContinuousLinearMap.sub_comp _ _ _
 
 set_option maxHeartbeats 3200000 in
+omit [BoundarylessManifold I M] in
 theorem lieRefold2_cap
     (g : SmoothRiemannianMetric I M) (T : SmoothCcTensor g 0 2)
     {δ : ℝ} (hδ_lt : δ < 1) (hδ0 : 0 ≤ δ)

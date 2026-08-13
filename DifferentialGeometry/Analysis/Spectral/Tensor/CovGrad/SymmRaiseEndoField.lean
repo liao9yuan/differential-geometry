@@ -65,6 +65,7 @@ noncomputable def symmRaiseEndoFib (g : SmoothRiemannianMetric I M)
         rfl }
 
 omit [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 @[simp] lemma symmRaiseEndoFib_apply (g : SmoothRiemannianMetric I M)
     (T : SmoothCcTensor g 0 2) (x : M) (v : TangentSpace I x) :
     symmRaiseEndoFib (I := I) (M := M) g T x v =
@@ -151,6 +152,7 @@ omit [BoundarylessManifold I M] in
     symmRaiseEndo (I := I) (M := M) g T x =
     symmRaiseEndoFib (I := I) (M := M) g T x := rfl
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private lemma ccMultilinear_add (g : SmoothRiemannianMetric I M)
     (T U : SmoothCcTensor g 0 2) (x : M) :
     (ccTensorMultilinear (I := I) g (T + U) x : Tensor0SSpace 2 I x) =
@@ -223,6 +225,7 @@ lemma symmRaiseEndo_smul (g : SmoothRiemannianMetric I M) (a : ℝ)
   rw [inner_symmRaiseEndo, smul_eq_mul]
 
 omit [NeZero (Module.finrank ℝ E)] in
+omit [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private lemma unitModel_eq_bilin (g : SmoothRiemannianMetric I M)
     (S : SmoothCcTensor g 0 2) (x : M) (u w : TangentSpace I x) :
     unitModel (I := I) (M := M) g 2 S x ![u, w] =
@@ -236,6 +239,7 @@ private lemma unitModel_eq_bilin (g : SmoothRiemannianMetric I M)
   funext k
   fin_cases k <;> rfl
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private lemma interior_product_toModel_eval (s : ℕ) (x : M)
     (v : TangentSpace I x) (D : Tensor0SSpace (s + 1) I x)
     (w : Fin s → TangentSpace I x) :
@@ -245,6 +249,7 @@ private lemma interior_product_toModel_eval (s : ℕ) (x : M)
         (Fin.cons (show E from v) (fun k => (show E from w k))) := by
   rfl
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private lemma toModel_om_single (x : M) (om : Tensor0SSpace 1 I x)
     (m : Fin 1 → TangentSpace I x) :
     Tensor0SSpace.toModel om (fun k => (m k : E)) =

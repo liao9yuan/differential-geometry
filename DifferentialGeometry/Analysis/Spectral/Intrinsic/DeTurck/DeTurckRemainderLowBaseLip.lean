@@ -423,6 +423,7 @@ theorem wXi_sub
   abel
 
 omit [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] in
 private theorem jet_nonneg_lip
     (g : SmoothRiemannianMetric I M) {r s m : ℕ}
     (S : SmoothCcTensor g r s) :
@@ -711,6 +712,7 @@ theorem c1Diff_tame
   simpa only [lowJetSq, lowC1Diff, Φ, S, N, B, Nat.reduceAdd,
     hδ_lt] using hpath
 
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] [SigmaCompactSpace M] in
 private theorem riemLive_eq
     (g gm : SmoothRiemannianMetric I M) :
     lc0RiemLive (I := I) (M := M) g gm =
@@ -1188,6 +1190,7 @@ theorem metricCorr_pair
       ring
 
 omit [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] in
 private theorem jet_mono_lip
     (g : SmoothRiemannianMetric I M) {r s m n : ℕ}
     (hmn : m ≤ n) (S : SmoothCcTensor g r s) :
@@ -1208,6 +1211,7 @@ private theorem icg_zero_lip
   | succ m ih => rw [iteratedCovGrad_succ, ih, covGrad_zero]
 
 omit [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] in
 private theorem jet_zero_lip
     (g : SmoothRiemannianMetric I M) {r s m : ℕ} :
     lowJetSq (I := I) (M := M) g m
@@ -1217,6 +1221,7 @@ private theorem jet_zero_lip
   intro q hq
   rw [icg_zero_lip, norm_zero, zero_pow (by norm_num)]
 
+omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] in
 private theorem wXi_zero_lip
     (g : SmoothRiemannianMetric I M) :
     wXi (I := I) (M := M) g g g = 0 := by
@@ -1778,6 +1783,7 @@ private theorem dom_h2_lip
     riemannianFiberNormSq_iteratedCovGrad_domDomCongrSection
       (I := I) (M := M) g σ S q x
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private theorem dom_sub_lip
     (g : SmoothRiemannianMetric I M) {s : ℕ}
     (σ : Equiv.Perm (Fin s)) (A B : SmoothCcTensor g 0 s) :
@@ -2028,6 +2034,7 @@ private theorem app_h12_mul_lip
         lowJetSq (I := I) (M := M) g 2 W := by
       rw [mul_pow, mul_pow, hAsq, hBsq]
 
+omit [NeZero (Module.finrank ℝ E)] in
 private theorem dom_h1_lip
     (g : SmoothRiemannianMetric I M) {s : ℕ}
     (σ : Equiv.Perm (Fin s)) (S : SmoothCcTensor g 0 s) :
@@ -3140,6 +3147,7 @@ private theorem rsperm_h1_lip
 
 set_option synthInstance.maxHeartbeats 1000000 in
 set_option maxHeartbeats 1600000 in
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [BoundarylessManifold I M] [SigmaCompactSpace M] in
 private theorem armSlot_succ_lip
     (g : SmoothRiemannianMetric I M) (s : ℕ)
     (A : ContMDiffSection I (E →L[ℝ] (E →L[ℝ] E)) ∞
@@ -3371,6 +3379,7 @@ private theorem arm_h2_lip
 
 set_option synthInstance.maxHeartbeats 1000000 in
 set_option maxHeartbeats 1600000 in
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [BoundarylessManifold I M] [SigmaCompactSpace M] in
 private theorem armSlot_sub_lip
     (g : SmoothRiemannianMetric I M) (s : ℕ)
     (A B : ContMDiffSection I (E →L[ℝ] (E →L[ℝ] E)) ∞
@@ -5261,6 +5270,7 @@ private theorem reindex_sub_lip
     reindexCoeffFibGen_apply, reindexCoeffFibGen_apply,
     ContinuousLinearMap.sub_apply]
 
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] [SigmaCompactSpace M] in
 private theorem trPair_sub_lip
     (g gT gU : SmoothRiemannianMetric I M) (p : ℕ)
     (σ : Equiv.Perm (Fin (p + 2))) :
@@ -5271,6 +5281,7 @@ private theorem trPair_sub_lip
           pureTrace (I := I) (M := M) g gU p) σ := by
   rw [lc0TraceRF, lc0TraceRF, ← reindex_sub_lip]
 
+omit [NeZero (Module.finrank ℝ E)] in
 private theorem trPair_jet_lip
     (g gm : SmoothRiemannianMetric I M) (p m : ℕ)
     (σ : Equiv.Perm (Fin (p + 2))) :
@@ -5304,6 +5315,7 @@ private theorem ip_form_lip
         (slotExtend (I := I) (M := M) g 1 2
           (slotExtend (I := I) (M := M) g 0 1 om)) := rfl
 
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] in
 private theorem ip_sub_lip
     (g : SmoothRiemannianMetric I M) (a b : SmoothCcTensor g 0 1) :
     ipLowCc (I := I) (M := M) g (a - b) =
@@ -5311,6 +5323,7 @@ private theorem ip_sub_lip
   rw [ip_form_lip, ip_form_lip, ip_form_lip, slotExtend_sub, slotExtend_sub,
     appCcRS_sub_right]
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private lemma vb_rank0_smul_lip (x : M) (c : Tensor0SSpace 0 I x) :
     c = Tensor0SSpace.toModel c (fun i : Fin 0 => i.elim0) •
       unitTensor (I := I) (M := M) x := by
@@ -5327,6 +5340,7 @@ private lemma vb_rank0_smul_lip (x : M) (c : Tensor0SSpace 0 I x) :
   funext i
   exact i.elim0
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [SigmaCompactSpace M] in
 private lemma vbMcd_unit_lip (g₀ g₁ : SmoothRiemannianMetric I M) (x : M)
     (m : Fin 3 → TangentSpace I x) :
     unitModel (I := I) (M := M) g₀ 3
@@ -7167,6 +7181,7 @@ private theorem amix_pair_h1
     _ = 16 * Bh R * ((1 + A + A ^ 2) ^ 4 * (D2 ^ 2 + N ^ 2)) := by
       ring
 
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] in
 private theorem jet_sub_lip
     (g : SmoothRiemannianMetric I M) {r s : ℕ} (m : ℕ)
     (S V : SmoothCcTensor g r s) :
@@ -7200,6 +7215,7 @@ private theorem grad_l2_sq_lip
   exact rfns_iteratedCovGrad_covGrad_comm_rs
     (I := I) (M := M) g r s i S x
 
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] in
 private theorem grad_h1_le_h2_lip
     (g : SmoothRiemannianMetric I M) {r s : ℕ}
     (S : SmoothCcTensor g r s) :
@@ -7215,6 +7231,7 @@ private theorem grad_h1_le_h2_lip
   nlinarith [sq_nonneg ‖iteratedCovGrad (I := I) g r s 0 S‖,
     sq_nonneg ‖S‖]
 
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] in
 private theorem grad_h2_le_h3_lip
     (g : SmoothRiemannianMetric I M) {r s : ℕ}
     (S : SmoothCcTensor g r s) :
@@ -7568,6 +7585,7 @@ private theorem connInn_pair_h1
   exact (slot_h1_lip (I := I) (M := M) g 1 2 _).trans
     (mul_le_mul_of_nonneg_left hp hfr)
 
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] [SigmaCompactSpace M] in
 private theorem pureCoeff_eq_lip
     (g gm : SmoothRiemannianMetric I M) :
     ricciArmPrincipalCoeffPure (I := I) (M := M) g gm =
@@ -8010,6 +8028,7 @@ private noncomputable def aaBlk
       (connDiffContrInsertionField (I := I) g gm) Z)
 
 set_option maxHeartbeats 1600000 in
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [SigmaCompactSpace M] in
 private theorem aaKer_eq_lip (g gm : SmoothRiemannianMetric I M) :
     ricciAAKer (I := I) (M := M) g gm =
       aaBlk (I := I) (M := M) g gm aaP3201
@@ -10025,6 +10044,7 @@ theorem c0Diff_tame
     _ = Bs R * ((1 + A + A ^ 2) ^ 4 * (D2 ^ 2 + N ^ 2)) := by
       rw [hBsq, hXdef]
 
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] in
 private theorem grad_shift_lip
     (g : SmoothRiemannianMetric I M) (W : SmoothCcTensor g 0 2) :
     lowJetSq (I := I) (M := M) g 1

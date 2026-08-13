@@ -41,6 +41,7 @@ theorem appCcPerIdxL2 (g₀ : SmoothRiemannianMetric I M) (b₀ s₀ q : ℕ) :
   exact app_jet_sq_le (I := I) (M := M) g₀ b₀ s₀ q Φ W (fun i => Λ i ^ 2)
     (fun i _ => sq_nonneg (Λ i)) (fun i _ x => hsup i x)
 
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] in
 theorem icgWinShift (g : SmoothRiemannianMetric I M) (r s m p : ℕ)
     (Ψ : SmoothCcTensor g r s) :
     (∑ l ∈ Finset.range (p + 1),

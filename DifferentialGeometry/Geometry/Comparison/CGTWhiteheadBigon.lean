@@ -177,6 +177,7 @@ theorem intrCore_min_regular
   exact hnot
 
 
+omit [NeZero (Module.finrank ℝ E)] in
 private theorem pinned_inj_nhds
     (F : E × E → E) (hF : ContDiff Real ∞ F)
     {x u : E}
@@ -232,6 +233,7 @@ private def shortBigons
     z.2.1 ≠ z.2.2}
 
 
+omit [NeZero (Module.finrank ℝ E)] in
 private theorem shortBigons_compact
     (F : E × E → E) (ell : E × E → Real) (a L B : Real)
     (hF : Continuous F) (hell : Continuous ell)

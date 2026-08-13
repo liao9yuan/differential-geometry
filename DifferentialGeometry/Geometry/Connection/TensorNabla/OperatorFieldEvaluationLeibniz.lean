@@ -109,6 +109,7 @@ abbrev IsPointwiseLinearLocalOperator
     (op : ∀ (p r : ℕ), SmoothCcTensor g 0 r → SmoothCcTensor g 0 (r + p)) : Prop :=
   IsOrderZeroCurvFactor g op
 
+omit [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] in
 theorem order_zero_apply_smul_of_pointwise_smul
     (g : SmoothRiemannianMetric I M) (r : ℕ)
     (op : ∀ (p r : ℕ), SmoothCcTensor g 0 r → SmoothCcTensor g 0 (r + p))

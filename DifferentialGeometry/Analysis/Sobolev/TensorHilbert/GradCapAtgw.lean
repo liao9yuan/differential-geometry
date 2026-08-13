@@ -59,6 +59,7 @@ theorem gradBase_eq (g₀ : SmoothRiemannianMetric I M) {rb sb : ℕ}
       gridBase (I := I) (M := M) g₀ P x (1 + j) :=
   rfns_iteratedCovGrad_comp (I := I) (M := M) g₀ rb sb 1 j P x
 
+omit [BoundarylessManifold I M] in
 theorem gradCapOfJets (hDim : Module.finrank ℝ E = 3)
     (g₀ : SmoothRiemannianMetric I M) (a : ℕ) (ha : 1 ≤ a) {R₀ : ℝ} (hR₀ : 0 ≤ R₀) :
     ∃ Λ₁ : ℝ, 0 ≤ Λ₁ ∧
@@ -325,6 +326,7 @@ theorem atgwCapToJet (g₀ : SmoothRiemannianMetric I M) {Λ₁ : ℝ} (hΛ₁0 
       (fun j _ _ => sq_nonneg _)
   linarith only [hstep]
 
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] in
 theorem gradBase_fun (g₀ : SmoothRiemannianMetric I M) {rb sb : ℕ}
     (P : SmoothCcTensor g₀ rb sb) (x : M) :
     (fun j => gridBase (I := I) (M := M) g₀ P x (j + 1)) =

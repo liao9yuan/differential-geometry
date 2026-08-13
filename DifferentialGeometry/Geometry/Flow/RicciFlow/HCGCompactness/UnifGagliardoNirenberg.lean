@@ -415,6 +415,7 @@ noncomputable def h2GridC
   else
     rankTwoGridC (E := E) (I := I) (M := M) gBase Λ k R * R ^ 2
 
+omit [BoundarylessManifold I M] in
 theorem h2_grid_nonneg
     (gBase : SmoothRiemannianMetric I M) (Λ R : ℝ) (k : ℕ) :
     0 ≤ h2GridC (E := E) (I := I) (M := M) gBase Λ R k := by

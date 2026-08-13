@@ -93,6 +93,7 @@ private theorem slotIter_sub
       rw [ih, slotExtend_sub]
       rfl
 
+omit [NeZero (Module.finrank ℝ E)] in
 private theorem amixHalf_bg
     (g gm gB : SmoothRiemannianMetric I M)
     (σ : Equiv.Perm (Fin 4)) :
@@ -1385,6 +1386,7 @@ private noncomputable def dLaBgPass
   rsDomDomCongrSection (I := I) (M := M) g 2 6 lieCovSigma
     (slotExtendIter (I := I) (M := M) g 0 4 2 S)
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [BoundarylessManifold I M] [SigmaCompactSpace M] in
 private theorem dLaBgPass_sub
     (g : SmoothRiemannianMetric I M) (A B : SmoothCcTensor g 0 4) :
     dLaBgPass (I := I) (M := M) g (A - B) =

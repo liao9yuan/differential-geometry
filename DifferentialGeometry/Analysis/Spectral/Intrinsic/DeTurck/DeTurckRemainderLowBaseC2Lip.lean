@@ -34,6 +34,7 @@ variable
 private local instance : CompleteSpace E :=
   FiniteDimensional.complete ℝ E
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private theorem cc_toFun_ext
     (g : SmoothRiemannianMetric I M) {r s : ℕ}
     (A B : SmoothCcTensor g r s)
@@ -60,6 +61,7 @@ private noncomputable def perturbSlot2
     (symmRaiseEndo (I := I) (M := M) g T)
 
 set_option backward.isDefEq.respectTransparency false in
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [BoundarylessManifold I M] [SigmaCompactSpace M] in
 private theorem insertSucc_eq_c2
     (g : SmoothRiemannianMetric I M) (s : ℕ)
     (Λ : ContMDiffSection I (E →L[ℝ] E) ∞
@@ -452,6 +454,7 @@ private theorem rsperm_jet_c2
   exact rsperm_sq_c2 (I := I) (M := M) g σ A i
 
 set_option backward.isDefEq.respectTransparency false in
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [BoundarylessManifold I M] [SigmaCompactSpace M] in
 private theorem rsperm_sub_c2
     (g : SmoothRiemannianMetric I M) {r s : ℕ}
     (σ : Equiv.Perm (Fin s)) (A B : SmoothCcTensor g r s) :
@@ -557,6 +560,7 @@ private theorem monoExt_jet_c2
   rw [monoExtC2, rsperm_jet_c2]
   exact slot4_jet_c2 (I := I) (M := M) g S
 
+omit [BoundarylessManifold I M] in
 private theorem raise_eq_rev
     (g gm : SmoothRiemannianMetric I M) (T : SmoothCcTensor g 0 2)
     (htie : ∀ (y : M) (v w : TangentSpace I y),
@@ -579,6 +583,7 @@ private theorem raise_eq_rev
   ring
 
 omit [NeZero (Module.finrank ℝ E)] in
+omit [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private theorem raised_cancel_lr
     (a b : SmoothRiemannianMetric I M) (x : M) :
     (gInvRaisedEndo (I := I) a b x).comp
@@ -684,6 +689,7 @@ private theorem endoSlotZero_add_c2
       slotInsertEndoCc (I := I) (M := M) g s B
   exact slotInsertEndoCc_add (I := I) (M := M) g s A B
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [BoundarylessManifold I M] [SigmaCompactSpace M] in
 private theorem endoSlotZero_sub_c2
     (g : SmoothRiemannianMetric I M) (s : ℕ)
     (A B : ContMDiffSection I (E →L[ℝ] E) ∞
@@ -773,6 +779,7 @@ theorem invSlot_sub_factor
   simpa only [fullSlot2, perturbSlot2] using
     invSlot_factor (I := I) (M := M) g gT gU T U hTtie hUtie
 
+omit [NeZero (Module.finrank ℝ E)] in
 private theorem perm_icg_norm_c2
     (g : SmoothRiemannianMetric I M) (σ : Equiv.Perm (Fin 2))
     (T : SmoothCcTensor g 0 2) (k : ℕ) :
@@ -849,6 +856,7 @@ private theorem symm_jet_c2
     pow_le_pow_left₀ (norm_nonneg _)
       (symm_icg_norm_c2 (I := I) (M := M) g T i) 2
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private theorem unitModel_sub_c2
     (g : SmoothRiemannianMetric I M)
     (A B : SmoothCcTensor g 0 2) (x : M) :
@@ -1083,6 +1091,7 @@ private theorem jet3_add_c2
           ‖iteratedCovGrad (I := I) g r s j B‖ ^ 2) := by
       simp only [mul_add, Finset.sum_add_distrib, Finset.mul_sum]
 
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] in
 private theorem jet3_sub_c2
     (g : SmoothRiemannianMetric I M) {r s : ℕ}
     (A B : SmoothCcTensor g r s) :
@@ -1093,6 +1102,7 @@ private theorem jet3_sub_c2
   simpa only [c2JetSq, sub_eq_add_neg, iteratedCovGrad_neg, norm_neg] using h
 
 omit [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] in
 private theorem jet3_nonneg_c2
     (g : SmoothRiemannianMetric I M) {r s : ℕ}
     (A : SmoothCcTensor g r s) :
@@ -3355,6 +3365,7 @@ private theorem daTrans_smul
   module
 
 set_option backward.isDefEq.respectTransparency false in
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [BoundarylessManifold I M] [SigmaCompactSpace M] in
 private theorem appCcRS_smul_left_c2
     (g : SmoothRiemannianMetric I M) (a b c : ℕ)
     (s : ℝ) (Φ : SmoothCcTensor g b c) (W : SmoothCcTensor g a b) :
@@ -3738,6 +3749,7 @@ private theorem reindex_jet_c2
     norm_reindexCoeffGen_eq (I := I) (M := M) g r (s + i)]
 
 set_option backward.isDefEq.respectTransparency false in
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [BoundarylessManifold I M] [SigmaCompactSpace M] in
 private theorem reindex_sub_c2
     (g : SmoothRiemannianMetric I M)
     (A B : SmoothCcTensor g 4 2) (ρ : Equiv.Perm (Fin 4)) :
@@ -3758,6 +3770,7 @@ private theorem reindex_sub_c2
     ContinuousLinearMap.sub_apply]
 
 set_option backward.isDefEq.respectTransparency false in
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] [SigmaCompactSpace M] in
 private theorem pure_eq_trace_c2
     (g gm : SmoothRiemannianMetric I M) :
     ricciArmPrincipalCoeffPure (I := I) (M := M) g gm =
@@ -3782,6 +3795,7 @@ private theorem pcc_pair_eq
 set_option backward.isDefEq.respectTransparency false in
 set_option synthInstance.maxHeartbeats 1600000 in
 set_option maxHeartbeats 1600000 in
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] [SigmaCompactSpace M] in
 private lemma trace_base_eq
     (g gm : SmoothRiemannianMetric I M) :
     traceHessianCoeff (I := I) (M := M) g gm -

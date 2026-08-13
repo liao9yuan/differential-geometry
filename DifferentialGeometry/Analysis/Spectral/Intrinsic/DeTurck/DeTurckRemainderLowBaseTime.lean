@@ -34,6 +34,7 @@ private abbrev metricH2 (g : SmoothRiemannianMetric I M) :=
   tensorHs (I := I) (M := M) g 0 2 (2 : ℝ)
 
 omit [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 private theorem ccBilin_smul
     (g : SmoothRiemannianMetric I M) (c : ℝ)
     (T : SmoothCcTensor g 0 2) (x : M)

@@ -102,6 +102,7 @@ theorem rhsRefoldTop_joint
   simpa only [rhsRefoldTop, rhsRefold2, ricciRefold2, lieRefold2] using hAll
 
 omit [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 private theorem zero_symm (g : SmoothRiemannianMetric I M) :
     ∀ (x : M) (v w : TangentSpace I x),
       ccTensorBilin (I := I) g (0 : SmoothCcTensor g 0 2) x v w =

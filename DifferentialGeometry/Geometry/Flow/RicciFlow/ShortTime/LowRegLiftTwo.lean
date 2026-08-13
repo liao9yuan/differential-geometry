@@ -86,6 +86,7 @@ theorem lowRadial_eq_self_along_sol
 
 omit [BoundarylessManifold I M] in
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] in
 theorem liftCompat_congr {g : SmoothRiemannianMetric I M}
     {aLo aHi pLo pHi qLo qHi : ℝ}
     (hLo : pLo = qLo) (hHi : pHi = qHi)

@@ -41,6 +41,7 @@ def ccOfField (g : SmoothRiemannianMetric I M) (s : ℕ)
   hasCompactSupport := HasCompactSupport.of_compactSpace _
 
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 @[simp] theorem ccOfField_unit (g : SmoothRiemannianMetric I M) (s : ℕ)
     (A : Tensor0SBundle.Tensor0SField (𝕜 := ℝ) (E := E) (H := H) (I := I) (M := M) ∞ s) :
     ccUnitField (I := I) g s (ccOfField (I := I) g s A) = A :=
@@ -57,6 +58,7 @@ theorem rfns_ccOfField_eq (g : SmoothRiemannianMetric I M) (s j : ℕ)
 
 omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] in
 
+omit [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private theorem zeroS_eq_unit (x : M) (D : Tensor0SSpace 0 I x) :
     D = (Tensor0SNabla.tensor0Iso I M x D) • (unitZeroSec (I := I) (M := M) x) := by
   classical

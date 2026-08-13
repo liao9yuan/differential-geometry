@@ -3588,6 +3588,7 @@ def lieBgLow (g₀ g₁ g_bg : SmoothRiemannianMetric I M) : SmoothCcTensor g₀
           (lieCovArm2 (I := I) (M := M) g₀ g₁)
           (connDiffLoweredCc (I := I) g₀ g_bg))
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private theorem lieBg_dom_sub
     (g : SmoothRiemannianMetric I M) {s : ℕ}
     (σ : Equiv.Perm (Fin s)) (A B : SmoothCcTensor g 0 s) :
@@ -3644,6 +3645,7 @@ def lieBgCore (g₀ g₁ g_bg : SmoothRiemannianMetric I M) : SmoothCcTensor g�
     (lieBgLow (I := I) (M := M) g₀ g₁ g_bg)
   domDomCongrSection (I := I) g₀ (Equiv.swap (0 : Fin 4) 1) half + half
 
+omit [NeZero (Module.finrank ℝ E)] in
 private theorem lieBgCore_eq_canonical
     (g₀ g₁ g_bg : SmoothRiemannianMetric I M) :
     lieBgCore (I := I) (M := M) g₀ g₁ g_bg =

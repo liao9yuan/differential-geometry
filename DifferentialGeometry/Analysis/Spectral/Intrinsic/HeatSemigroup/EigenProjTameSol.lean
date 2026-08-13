@@ -71,6 +71,7 @@ theorem projN_tame (g₀ : SmoothRiemannianMetric I M) (a : ℕ) {R : ℝ} (N : 
         norm_spatialEigenProj_apply_le (I := I) (M := M) g₀ (a : ℝ) N _
     _ ≤ _ := hsingle u u'
 
+omit [BoundarylessManifold I M] in
 theorem proj_partial_sol_tame
     (g₀ : SmoothRiemannianMetric I M) (a : ℕ) {R : ℝ} (hR : 0 < R) (N : ℕ)
     (Nfun : lowerState (I := I) (M := M) g₀ a R →
@@ -117,6 +118,7 @@ theorem proj_partial_sol_tame
     (projN_zero (I := I) (M := M) g₀ a hR.le N hzero) hsmallA hsmallC
     (projN_tame (I := I) (M := M) g₀ a N hsingle)
 
+omit [BoundarylessManifold I M] in
 theorem projN_nemytskiiTame (g₀ : SmoothRiemannianMetric I M) (a : ℕ) {R : ℝ}
     (hR : 0 ≤ R) (N : ℕ) {A B C : ℝ≥0} {T : ℝ}
     {Nfun : lowerState (I := I) (M := M) g₀ a R →

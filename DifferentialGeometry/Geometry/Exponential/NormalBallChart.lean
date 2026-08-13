@@ -61,6 +61,7 @@ def ofHigher {p : M} {r : Real} (hr : 0 < r)
     obtain ⟨z, hz, rfl⟩ := hy
     exact Φ.map_source (hsub hz)
 
+omit [FiniteDimensional ℝ E] [CompleteSpace E] [I.Boundaryless] [IsManifold I ∞ M] [T2Space (TangentBundle I M)] in
 @[simp] theorem ofHigher_radius {p : M} {r : Real} (hr : 0 < r)
     (Φ : PartialDiffeomorph (modelWithCornersSelf Real E) I E M ∞)
     (hsub : Metric.ball (0 : E) r ⊆ Φ.source)
@@ -68,6 +69,7 @@ def ofHigher {p : M} {r : Real} (hr : 0 < r)
     (ofHigher (I := I) hr Φ hsub hzero).radius = r :=
   rfl
 
+omit [FiniteDimensional ℝ E] [CompleteSpace E] [I.Boundaryless] [IsManifold I ∞ M] [T2Space (TangentBundle I M)] in
 @[simp] theorem ofHigher_apply {p : M} {r : Real} (hr : 0 < r)
     (Φ : PartialDiffeomorph (modelWithCornersSelf Real E) I E M ∞)
     (hsub : Metric.ball (0 : E) r ⊆ Φ.source)
@@ -105,6 +107,7 @@ noncomputable def restrictBall {p : M}
       contMDiffOn_invFun := by
         simpa only [Φ, U] using c.smooth_inv }
 
+omit [FiniteDimensional ℝ E] [CompleteSpace E] [I.Boundaryless] [IsManifold I ∞ M] [T2Space (TangentBundle I M)] in
 @[simp] theorem restrictBall_source {p : M}
     (c : NormalBallChart (I := I) p) :
     (c.restrictBall : PartialDiffeomorph
@@ -112,6 +115,7 @@ noncomputable def restrictBall {p : M}
         Metric.ball (0 : E) c.radius :=
   rfl
 
+omit [FiniteDimensional ℝ E] [CompleteSpace E] [I.Boundaryless] [IsManifold I ∞ M] [T2Space (TangentBundle I M)] in
 @[simp] theorem restrictBall_apply {p : M}
     (c : NormalBallChart (I := I) p) (z : E) :
     c.restrictBall z = c.hom z :=
@@ -133,6 +137,7 @@ def OverlapOn {p q : M}
 
 namespace OverlapOn
 
+omit [FiniteDimensional ℝ E] [CompleteSpace E] [I.Boundaryless] [IsManifold I ∞ M] [T2Space (TangentBundle I M)] in
 theorem source {p q : M}
     {c : NormalBallChart (I := I) p}
     {d : NormalBallChart (I := I) q} {U : Set E}
@@ -140,6 +145,7 @@ theorem source {p q : M}
     z ∈ c.hom.source :=
   c.ball_subset (h z hz).1
 
+omit [FiniteDimensional ℝ E] [CompleteSpace E] [I.Boundaryless] [IsManifold I ∞ M] [T2Space (TangentBundle I M)] in
 theorem target {p q : M}
     {c : NormalBallChart (I := I) p}
     {d : NormalBallChart (I := I) q} {U : Set E}
@@ -149,6 +155,7 @@ theorem target {p q : M}
   rw [← heq]
   exact d.hom.map_source (d.ball_subset hw)
 
+omit [FiniteDimensional ℝ E] [CompleteSpace E] [I.Boundaryless] [IsManifold I ∞ M] [T2Space (TangentBundle I M)] in
 theorem coord_mem {p q : M}
     {c : NormalBallChart (I := I) p}
     {d : NormalBallChart (I := I) q} {U : Set E}
@@ -172,6 +179,7 @@ theorem map_eq {p q : M}
 
 end OverlapOn
 
+omit [FiniteDimensional ℝ E] [CompleteSpace E] [I.Boundaryless] [IsManifold I ∞ M] [T2Space (TangentBundle I M)] in
 theorem transition_smooth {p q : M}
     (c : NormalBallChart (I := I) p)
     (d : NormalBallChart (I := I) q) {U : Set E}
@@ -203,6 +211,7 @@ noncomputable def tangent {p : M}
       (fun u : E => c.hom u) z.1 z.2⟩
 
 omit [FiniteDimensional ℝ E] [CompleteSpace E] [I.Boundaryless] [T2Space (TangentBundle I M)] in
+omit [IsManifold I ∞ M] in
 @[simp] theorem tangent_zero {p : M}
     (c : NormalBallChart (I := I) p) :
     c.tangent 0 = (⟨p, (0 : E)⟩ : TangentBundle I M) := by
@@ -226,6 +235,7 @@ def metric (g : SmoothRiemannianMetric I M) {p : M}
     (ContinuousLinearMap.precomp Real D).comp
       ((g.inner (c.hom z)).comp D)
 
+omit [FiniteDimensional ℝ E] [CompleteSpace E] [I.Boundaryless] [T2Space (TangentBundle I M)] in
 theorem metric_apply (g : SmoothRiemannianMetric I M) {p : M}
     (c : NormalBallChart (I := I) p) (z v w : E) :
     c.metric g z v w =
@@ -297,6 +307,7 @@ theorem transition_isom (g : SmoothRiemannianMetric I M) {p q : M}
   exact congrArg₂
     (fun a b => g.inner (c.hom z) a b) hu hv
 
+omit [FiniteDimensional ℝ E] [CompleteSpace E] [I.Boundaryless] [T2Space (TangentBundle I M)] in
 private theorem push_smooth {p : M}
     (c : NormalBallChart (I := I) p) {U : Set E}
     (hU : IsOpen U)
@@ -404,6 +415,7 @@ def MetricDerivBound (g : SmoothRiemannianMetric I M) {p₀ : M}
 namespace MetricDerivBound
 
 set_option synthInstance.maxHeartbeats 800000 in
+omit [FiniteDimensional ℝ E] [CompleteSpace E] [I.Boundaryless] [T2Space (TangentBundle I M)] in
 theorem of_eqOn (g : SmoothRiemannianMetric I M) {p₀ : M}
     {c : NormalBallChart (I := I) p₀} {U : Set E} (hU : IsOpen U)
     {f : E → E →L[Real] E →L[Real] Real} {p : Nat} {C : Real}
@@ -439,6 +451,7 @@ theorem coercive (g : SmoothRiemannianMetric I M) {p : M}
   intro v
   simpa [pow_two, mul_assoc] using (h z hz v).1
 
+omit [I.Boundaryless] [T2Space (TangentBundle I M)] in
 theorem sharp_norm_le (g : SmoothRiemannianMetric I M) {p : M}
     {c : NormalBallChart (I := I) p} {U : Set E}
     (h : c.MetricEquivOn g U) {z : E} (hz : z ∈ U)
@@ -492,6 +505,7 @@ end MetricEquivOn
 namespace MetricBounds
 
 set_option synthInstance.maxHeartbeats 800000 in
+omit [FiniteDimensional ℝ E] [CompleteSpace E] [I.Boundaryless] [T2Space (TangentBundle I M)] in
 theorem fderiv_apply_le (g : SmoothRiemannianMetric I M) {p : M}
     {c : NormalBallChart (I := I) p} (h : c.MetricBounds g)
     {z : E} (hz : z ∈ Metric.ball (0 : E) h.radius) (u v w : E) :
@@ -580,6 +594,7 @@ theorem koszulVec_pair_le (g : SmoothRiemannianMetric I M) {p : M}
           ‖z - y‖ * ‖v‖ * ‖w‖ := by ring
 
 set_option synthInstance.maxHeartbeats 800000 in
+omit [FiniteDimensional ℝ E] [CompleteSpace E] in
 private theorem fderiv_eval3
     {G : E → E →L[Real] E →L[Real] Real} {q : E}
     (hG : DifferentiableAt Real (fderiv Real G) q)

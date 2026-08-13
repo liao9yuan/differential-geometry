@@ -32,6 +32,7 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [SigmaCompactSpace M] in
 private theorem covStep_zero
     (g : SmoothRiemannianMetric I M) (s : ℕ) :
     covStep (I := I) g s 0 = 0 := by
@@ -83,6 +84,7 @@ private theorem iterCov_one_eq
   rw [covStep_zero, zero_add]
   rfl
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private theorem metric_self_norm
     (g : SmoothRiemannianMetric I M) (x : M) :
     normSq0S (I := I) g x 2 (metricTensorField (I := I) g x) =
@@ -95,6 +97,7 @@ private theorem metric_self_norm
   simpa using normSq0S_metricTensor0S_eq_card (I := I) g basis
     (identityInvMetric (Idx := Fin (Module.finrank ℝ (TangentSpace I x)))) hinv
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private theorem sqrt_normSq_zero
     (g : SmoothRiemannianMetric I M) (x : M) (s : ℕ) :
     Real.sqrt (normSq0S (I := I) g x s

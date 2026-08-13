@@ -186,6 +186,7 @@ private theorem contractedCurvatureAction_right_eq
               DifferentialGeometry.Integral.Connection.rm04Comp,
             hgInvAt, hbasis]
 
+omit [SigmaCompactSpace M] in
 theorem ricciSecCommLocId
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     {u : Set M}

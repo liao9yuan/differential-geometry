@@ -37,6 +37,7 @@ def principalBall (g : SmoothRiemannianMetric I M) (ρ : ℝ) :
   {T | ‖T‖ ≤ ρ}
 
 omit [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] in
 theorem principalBall_zero (g : SmoothRiemannianMetric I M)
     {ρ : ℝ} (hρ : 0 ≤ ρ) :
     (0 : metricH2 (I := I) (M := M) g) ∈

@@ -77,6 +77,7 @@ private theorem symm_self
   rw [hswap, htwo, smul_smul,
     show (1 / 2 : ℝ) * 2 = 1 by norm_num, one_smul]
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [BoundarylessManifold I M] [SigmaCompactSpace M] in
 private theorem endo_slot_succ_eq
     (g : SmoothRiemannianMetric I M) (q : ℕ)
     (P : ContMDiffSection I (E →L[ℝ] E) ∞

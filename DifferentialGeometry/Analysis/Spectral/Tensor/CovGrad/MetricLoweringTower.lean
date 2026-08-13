@@ -52,6 +52,7 @@ def lowerCc (g : SmoothRiemannianMetric I M) (r s : ℕ)
   hasCompactSupport := HasCompactSupport.of_compactSpace _
 
 omit [I.Boundaryless] in
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 @[simp] theorem lowerCc_apply (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (T : SmoothCcTensor g r s) (x : M) :
     (lowerCc (I := I) (M := M) g r s T).toSection x =

@@ -837,6 +837,7 @@ private theorem exists_g_onbasis (g : SmoothRiemannianMetric I M) (x : M) :
     constructor <;> simp [identityInvMetric, diagonalInvMetric, hON]
   exact ⟨basis, hON, hinv⟩
 
+omit [T2Space M] [SigmaCompactSpace M] [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] in
 private theorem sqrt_normSq0S_zero (g : SmoothRiemannianMetric I M) (x : M) (s : ℕ) :
     Real.sqrt (normSq0S (I := I) g x s (0 : Tensor0SBundle.Tensor0SSpace s I x)) = 0 := by
   classical
@@ -868,6 +869,7 @@ private theorem Dtower_nonneg (n : ℕ) {q : ℝ} (hq : 0 ≤ q) (r : ℕ) {Racc
 set_option maxHeartbeats 1600000 in
 set_option synthInstance.maxHeartbeats 400000 in
 
+omit [SigmaCompactSpace M] [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] in
 theorem iterCovG1_le
     [I.Boundaryless] [CompactSpace M]
     {K : Set M} (g₁ g₂ : SmoothRiemannianMetric I M) (r : ℕ)

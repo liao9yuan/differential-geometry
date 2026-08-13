@@ -1938,6 +1938,7 @@ private lemma covDeriv_dir_le
 
 omit [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M]
     [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma rfns_finSum_le
     (g : SmoothRiemannianMetric I M) (s : ℕ) (x : M) {n : ℕ}
     (F : Fin n → TensorRSSpace 0 s I x) {K : ℝ}
@@ -1976,6 +1977,7 @@ private lemma covDeriv_sum_le
     (fun i => covDeriv_dir_le (I := I) (M := M) g s S x (w i) (hw i))
 
 omit [CompactSpace M] [I.Boundaryless] in
+omit [SigmaCompactSpace M] in
 private lemma frameCurvVec_le
     (g : SmoothRiemannianMetric I M) {Kbase : ℝ}
     (hKbase : ∀ (x : M) (v w u : TangentSpace I x),

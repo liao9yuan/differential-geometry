@@ -34,6 +34,7 @@ def lowregProjMode (g₀ : SmoothRiemannianMetric I M) {T : ℝ}
 
 omit [BoundarylessManifold I M] in
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] in
 @[simp] theorem lowregProjMode_zero (g₀ : SmoothRiemannianMetric I M) {T : ℝ}
     (fseq : ℕ → timeL2 (tensorHs (I := I) (M := M) g₀ 0 2 ((1 : ℕ) : ℝ)) T)
     (N : ℕ) (i : TensorEigenIdx (I := I) (M := M) g₀ 0 2) :
@@ -42,6 +43,7 @@ omit [BoundarylessManifold I M] in
 
 omit [BoundarylessManifold I M] in
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] in
 theorem lowregProjMode_cont (g₀ : SmoothRiemannianMetric I M) {T : ℝ}
     (hT : 0 ≤ T)
     (fseq : ℕ → timeL2 (tensorHs (I := I) (M := M) g₀ 0 2 ((1 : ℕ) : ℝ)) T)

@@ -69,6 +69,7 @@ private theorem rawConnLap_symmS
   rw [hgoal, smul_add, hhalf]
 
 omit [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 private theorem bilinSymm_add
     (g : SmoothRiemannianMetric I M)
     (S T : SmoothCcTensor g 0 2) (x : M) (v w : TangentSpace I x) :
@@ -104,6 +105,7 @@ private theorem bilinSymm_add
   ring
 
 omit [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 private theorem bilinSymm_sec_congr
     {g₁ g₂ : SmoothRiemannianMetric I M}
     (S₁ : SmoothCcTensor g₁ 0 2) (S₂ : SmoothCcTensor g₂ 0 2)

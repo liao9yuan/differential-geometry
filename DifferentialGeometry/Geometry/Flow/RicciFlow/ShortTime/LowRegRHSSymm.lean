@@ -37,6 +37,7 @@ private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 theorem ccTensor_ext_bilin (g : SmoothRiemannianMetric I M)
     {S S' : SmoothCcTensor g 0 2}
     (h : ∀ (x : M) (u w : TangentSpace I x),
@@ -55,6 +56,7 @@ theorem ccTensor_ext_bilin (g : SmoothRiemannianMetric I M)
   rw [key S, key S']
   exact h x (v 0) (v 1)
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 theorem bilin_ddc_swap (g : SmoothRiemannianMetric I M)
     (T : SmoothCcTensor g 0 2) (b : M) (u w : TangentSpace I b) :
     ccTensorBilin (I := I) g
@@ -84,6 +86,7 @@ theorem ddc_swap_sub (g : SmoothRiemannianMetric I M)
   simp only [bilin_ddc_swap (I := I) (M := M) g,
     ccTensorBilin_sub (I := I) (M := M) g]
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 theorem symmS_of_swap (g₀ : SmoothRiemannianMetric I M) {X : SmoothCcTensor g₀ 0 2}
     (h : domDomCongrSection (I := I) g₀ (Equiv.swap (0 : Fin 2) 1) X = X) :
     symmS (I := I) (M := M) g₀ X = X := by
@@ -110,6 +113,7 @@ theorem swap_of_symmS (g₀ : SmoothRiemannianMetric I M) {X : SmoothCcTensor g�
   conv_lhs => rw [← h]
   rw [swap_symmS (I := I) (M := M) g₀, h]
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 theorem bilin_symm_of_symmS (g₀ : SmoothRiemannianMetric I M)
     {X : SmoothCcTensor g₀ 0 2} (h : symmS (I := I) (M := M) g₀ X = X)
     (x : M) (v w : TangentSpace I x) :

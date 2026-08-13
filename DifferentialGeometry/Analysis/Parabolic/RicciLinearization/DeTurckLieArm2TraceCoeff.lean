@@ -322,6 +322,7 @@ theorem deTurckLieArm2PrincipalCoeff_realizedFam_jointSmooth (g₀ : SmoothRiema
         (realizedFam (I := I) g₀ T T' hδ hδ' s) g_bg) (δ := δ) (δ' := δ') :=
   deTurckLieArm2PrincipalCoeff_realizedFam_jointContMDiff (I := I) g₀ T T' hδ hδ' g_bg
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [BoundarylessManifold I M] [SigmaCompactSpace M] in
 private lemma appCc_sub_left_local (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (Φ₁ Φ₂ : SmoothCcTensor g r s) (W : SmoothCcTensor g 0 r) :
     appCc (I := I) (M := M) g r s (Φ₁ - Φ₂) W =
@@ -338,6 +339,7 @@ private lemma appCc_sub_left_local (g : SmoothRiemannianMetric I M) (r s : ℕ)
   rw [ContinuousLinearMap.sub_comp]
 
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [BoundarylessManifold I M] [SigmaCompactSpace M] in
 private lemma appCc_add_left_local (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (Φ₁ Φ₂ : SmoothCcTensor g r s) (W : SmoothCcTensor g 0 r) :
     appCc (I := I) (M := M) g r s (Φ₁ + Φ₂) W =
@@ -356,6 +358,7 @@ private lemma appCc_add_left_local (g : SmoothRiemannianMetric I M) (r s : ℕ)
   rw [ContinuousLinearMap.add_comp]
 
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private lemma unitModel_add2_apply_local (g₀ : SmoothRiemannianMetric I M)
     (S S' : SmoothCcTensor g₀ 0 2) (x : M) (v : Fin 2 → TangentSpace I x) :
     unitModel (I := I) (M := M) g₀ 2 (S + S') x v =
@@ -366,6 +369,7 @@ private lemma unitModel_add2_apply_local (g₀ : SmoothRiemannianMetric I M)
     ContinuousMultilinearMap.add_apply]
 
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private lemma unitModel_sub2_apply_local (g₀ : SmoothRiemannianMetric I M)
     (S S' : SmoothCcTensor g₀ 0 2) (x : M) (v : Fin 2 → TangentSpace I x) :
     unitModel (I := I) (M := M) g₀ 2 (S - S') x v =
@@ -411,6 +415,7 @@ theorem deTurckLieTraceCoeff_appCc_eq (g₀ g₁ : SmoothRiemannianMetric I M)
   simp only [unitModel]
 
 
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] [SigmaCompactSpace M] in
 private theorem traceHessianCoeff_appCc_eq_local
     (g₀ g₁ : SmoothRiemannianMetric I M) (W : SmoothCcTensor g₀ 0 4)
     (x : M) (v : Fin 2 → TangentSpace I x) :

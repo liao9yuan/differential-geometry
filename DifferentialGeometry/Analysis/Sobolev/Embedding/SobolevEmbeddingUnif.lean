@@ -53,6 +53,7 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
   [T2Space M] [SigmaCompactSpace M]
 
 omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] in
+omit [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private lemma lowerAllUpper_zero_unit
     (g : SmoothRiemannianMetric I M) (s : ℕ) (x : M)
     (W : SmoothCcTensor g 0 s) (w : Fin (0 + s) → TangentSpace I x) :

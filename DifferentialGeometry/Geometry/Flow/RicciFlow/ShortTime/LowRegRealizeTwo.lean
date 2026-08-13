@@ -30,6 +30,7 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 omit [BoundarylessManifold I M] in
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] in
 theorem congrOp_aemeas {g : SmoothRiemannianMetric I M} {p q b T : ℝ}
     (hpq : p = q)
     (A : ℝ → tensorHs (I := I) (M := M) g 0 2 q →L[ℝ]
@@ -43,6 +44,7 @@ theorem congrOp_aemeas {g : SmoothRiemannianMetric I M} {p q b T : ℝ}
 
 omit [BoundarylessManifold I M] in
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] in
 theorem congrOp_memLp {g : SmoothRiemannianMetric I M} {p q b T : ℝ}
     (hpq : p = q)
     (A : ℝ → tensorHs (I := I) (M := M) g 0 2 q →L[ℝ]
@@ -54,6 +56,7 @@ theorem congrOp_memLp {g : SmoothRiemannianMetric I M} {p q b T : ℝ}
   simpa only [tensorHsCongrL_refl, ContinuousLinearMap.comp_id] using hA
 
 omit [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] in
 theorem congrOp_norm_le {g : SmoothRiemannianMetric I M} {p q b T C : ℝ}
     (hpq : p = q)
     (A : ℝ → tensorHs (I := I) (M := M) g 0 2 q →L[ℝ]
@@ -260,6 +263,7 @@ theorem lowreg_realize_two
 
 omit [BoundarylessManifold I M] in
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] in
 theorem norm_incl_congr (g : SmoothRiemannianMetric I M)
     {a b c d : ℝ} (hac : a = c) (hbd : b = d) (hab : a ≤ b) (hcd : c ≤ d)
     (u : tensorHs (I := I) (M := M) g 0 2 b) :

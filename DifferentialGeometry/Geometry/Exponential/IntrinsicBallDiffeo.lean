@@ -114,6 +114,7 @@ namespace NormalCoordinates
 
 open Exponential
 
+omit [CompleteSpace E] [T2Space (TangentBundle I M)] in
 theorem intrFrame_localAt
     (g : SmoothRiemannianMetric I M)
     (hEnorm : ∀ (x : M) (w : TangentSpace I x),

@@ -198,6 +198,7 @@ noncomputable def gradSwapCurvCoeff (g₀ : SmoothRiemannianMetric I M) :
     (I := I) (M := M) g₀
 
 omit [NeZero (Module.finrank ℝ E)] in
+omit [I.Boundaryless] in
 @[simp] theorem gradSwapCurv_apply (g₀ : SmoothRiemannianMetric I M) (x : M) :
     (gradSwapCurvCoeff (I := I) (M := M) g₀).toSection x =
       (show TensorRSSpace 2 4 I x from

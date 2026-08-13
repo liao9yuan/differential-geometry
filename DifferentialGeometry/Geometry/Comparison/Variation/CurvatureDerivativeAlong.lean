@@ -31,6 +31,7 @@ variable {I : ModelWithCorners Real E H} [I.Boundaryless]
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
   [IsManifold I ∞ M] [T2Space M] [SigmaCompactSpace M]
 
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 private theorem exists_smooth_exp
     (γ : Real -> M) (V : ∀ s, TangentSpace I (γ s)) (t : Real)
     (hγ : ContMDiff 𝓘(Real, Real) I ∞ γ)

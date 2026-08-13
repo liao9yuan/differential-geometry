@@ -446,6 +446,7 @@ private lemma dlb_endoSlotZeroCcTensor_sub (g₀ : SmoothRiemannianMetric I M) (
   rw [slotInsertEndoFib_sub_left, ContinuousLinearMap.sub_apply]
 
 set_option backward.isDefEq.respectTransparency false in
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [BoundarylessManifold I M] [SigmaCompactSpace M] in
 private lemma dlb_reindex_sub (g₀ : SmoothRiemannianMetric I M)
     (A B : SmoothCcTensor g₀ 2 2) (ρ : Equiv.Perm (Fin 2)) :
     reindexCoeffGen (I := I) (M := M) g₀ 2 2 (A - B) ρ =

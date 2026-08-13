@@ -74,6 +74,7 @@ theorem ipLow_swap
   rw [cometricRaiseSlot0Field_toSection,
     cometricRaiseSlot0Fib_clm_apply]
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 lemma unitModel0 (x : M) (m : Fin 0 → E) :
     Tensor0SSpace.toModel (unitTensor (I := I) (M := M) x) m = 1 := by
   rw [unitTensor, Tensor0SSpace.toModel_ofModel]
@@ -113,6 +114,7 @@ lemma curry0 (x : M) (D : Tensor0SSpace 1 I x) (v₀ : E) :
   refine Fin.cases ?_ (fun j => j.elim0) k
   rfl
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 lemma clm_smul (x : M) (s : ℕ)
     (A : Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace s I x) (c : ℝ) :
     A (c • unitTensor (I := I) (M := M) x) =
@@ -499,6 +501,7 @@ theorem slot_comp
   rw [ContinuousLinearEquiv.apply_symm_apply]
   rw [ContinuousLinearMap.comp_assoc]
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [BoundarylessManifold I M] [SigmaCompactSpace M] in
 theorem slot_comp2
     (g : SmoothRiemannianMetric I M) (a b c : ℕ)
     (A : SmoothCcTensor g b c) (B : SmoothCcTensor g a b) :
@@ -525,6 +528,7 @@ noncomputable def koszulOne
       permCoeff (I := I) (M := M) g (finRotate 3) -
       permCoeff (I := I) (M := M) g (Equiv.swap (1 : Fin 3) 2))
 
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] in
 theorem koszul_one_app
     (g : SmoothRiemannianMetric I M) (T : SmoothCcTensor g 0 2)
     (hT : ∀ (x : M) (u v : TangentSpace I x),
@@ -1300,6 +1304,7 @@ theorem cc_swap_app
     ContinuousMultilinearMap.domDomCongr_apply]
   rfl
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [BoundarylessManifold I M] [SigmaCompactSpace M] in
 theorem symm_input
     (g : SmoothRiemannianMetric I M) (C : SmoothCcTensor g 2 2)
     (W : SmoothCcTensor g 0 2) :

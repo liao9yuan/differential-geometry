@@ -40,6 +40,7 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
+omit [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private theorem centeredBasis
     (g : SmoothRiemannianMetric I M) (x : M) :
     ∃ basis : Module.Basis (Fin (Module.finrank ℝ E)) ℝ (TangentSpace I x),
@@ -123,6 +124,7 @@ private theorem cometricTrace_eq
   rfl
 
 set_option backward.isDefEq.respectTransparency false in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [BoundarylessManifold I M] [SigmaCompactSpace M] in
 private theorem exists_trace31
     (g : SmoothRiemannianMetric I M)
     (A : Tensor0SField (𝕜 := ℝ) (E := E) (H := H) (I := I) (M := M)
@@ -245,6 +247,7 @@ private theorem reverseJetThree
   simpa [revJetThreeC, C₁, L₁, D] using
     (mul_le_mul_of_nonneg_left hthree' (Real.sqrt_nonneg (Λ ^ 5)))
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [SigmaCompactSpace M] in
 private theorem connLowOne_eval
     (gBase g₀ : SmoothRiemannianMetric I M)
     (X Y Z W : ContMDiffSection I E (∞ : WithTop ℕ∞)
@@ -957,6 +960,7 @@ private theorem connLow_self_zero
   rw [PDE.DeTurck.connDiff_self]
   simp
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 private theorem wXi_base_eq
     (gBase g₀ : SmoothRiemannianMetric I M) :
     wXi (I := I) (M := M) g₀ g₀ gBase =
@@ -1028,6 +1032,7 @@ private theorem wAlphaA_shift
       rfns_iteratedCovGrad_covGrad_comm_rs (I := I) (M := M) g₀ 0 1 i
         (wOmega (I := I) (M := M) g₀ g₁ g_bg) x
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private theorem rfns_neg
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (x : M)
     (v : TensorRSSpace r s I x) :
@@ -1280,6 +1285,7 @@ private def ricciCc
     (g : SmoothRiemannianMetric I M) : SmoothCcTensor g 0 2 :=
   ccOfField (I := I) g 2 (metricRicci (I := I) (M := M) g)
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private lemma unit_add2
     (g : SmoothRiemannianMetric I M)
     (S T : SmoothCcTensor g 0 2) (x : M) :
@@ -1310,6 +1316,7 @@ private lemma unit_add2_apply
         unitModel (I := I) (M := M) g 2 T x v := by
   rw [unit_add2, ContinuousMultilinearMap.add_apply]
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private lemma unit_smul2
     (g : SmoothRiemannianMetric I M)
     (c : ℝ) (T : SmoothCcTensor g 0 2) (x : M) :
@@ -1336,6 +1343,7 @@ private lemma unit_smul2_apply
       c * unitModel (I := I) (M := M) g 2 T x v := by
   rw [unit_smul2, ContinuousMultilinearMap.smul_apply, smul_eq_mul]
 
+omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] in
 private theorem rhs_unit
     (gBase g : SmoothRiemannianMetric I M) (x : M)
     (v : Fin 2 → TangentSpace I x) :

@@ -70,6 +70,7 @@ section FixedMetric
 variable {M : Type u} [TopologicalSpace M] [ChartedSpace H M]
   [IsManifold I ∞ M] [SigmaCompactSpace M] [T2Space M]
 
+omit [InnerProductSpace ℝ E] [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [SigmaCompactSpace M] [T2Space M] in
 private theorem snoc_section_apply
     {n : Nat}
     (Y : Fin n ->
@@ -88,6 +89,7 @@ private theorem snoc_section_apply
   · simp
 
 set_option backward.isDefEq.respectTransparency false in
+omit [InnerProductSpace ℝ E] [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [SigmaCompactSpace M] [T2Space M] in
 private theorem oneForm_comp_smooth
     (beta : Tensor0SField (𝕜 := Real) (E := E) (H := H)
       (I := I) (M := M) (n := (∞ : WithTop ℕ∞)) 1)
@@ -229,6 +231,7 @@ private noncomputable def curvOpNMap
     rw [hlast]
     exact map_smul _ _ _
 
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [SigmaCompactSpace M] in
 @[simp] private theorem curvOpNMap_apply
     (g : SmoothRiemannianMetric I M) (k : Nat) (x : M)
     (v : Fin (k + 3) -> TangentSpace I x) :
@@ -279,6 +282,7 @@ theorem curvOpN_zero_at
     curvOpN_update_smul (I := I) g k x v i (0 : Real)
       (0 : TangentSpace I x)
 
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [SigmaCompactSpace M] in
 theorem curvOpN_eq_sharp
     (g : SmoothRiemannianMetric I M) (k : Nat) (x : M)
     (v : Fin (k + 3) -> TangentSpace I x) :
@@ -447,6 +451,7 @@ theorem curvOpN_smoothAlong
       (fun i a => c i a s) (fun i a => B a (gamma s))
   exact (hsum t).congr_of_eventuallyEq heq
 
+omit [InnerProductSpace ℝ E] [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [SigmaCompactSpace M] [T2Space M] in
 private theorem smooth_update_along
     (k : Nat) (gamma : Real -> M)
     (Y : Fin (k + 3) -> forall s : Real, TangentSpace I (gamma s))
@@ -490,6 +495,7 @@ private noncomputable def curvOpNablaForm
         (I := I) (M := M) g)
       (curvOpNForm (I := I) g k Y))
 
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [SigmaCompactSpace M] in
 private theorem curvOpNabla_real
     (g : SmoothRiemannianMetric I M) (k : Nat)
     (Y : Fin (k + 3) ->
@@ -947,6 +953,7 @@ noncomputable def curvOpNDerivAlong
         (Function.update (fun j : Fin (k + 3) => Y j t) i
           (covDerivAlong (I := I) g γ (Y i) t))
 
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [SigmaCompactSpace M] in
 private theorem curvOpNDeriv_congr
     (g : SmoothRiemannianMetric I M) (k : Nat)
     (gamma : Real -> M)
@@ -1779,6 +1786,7 @@ theorem curvOpN_cov
       rw [DifferentialGeometry.Integral.Connection.oneFormAtSlot0S_apply]
       rw [update_snoc_last]
 
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [SigmaCompactSpace M] in
 theorem curvOpN_inner
     (g : SmoothRiemannianMetric I M) (k : Nat) (x : M)
     (v : Fin (k + 3) -> TangentSpace I x) (w : TangentSpace I x) :
@@ -1789,6 +1797,7 @@ theorem curvOpN_inner
       (I := I) g x
       (curvLastCov (I := I) g k x v) w)
 
+omit [InnerProductSpace ℝ E] [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [IsManifold I ∞ M] [SigmaCompactSpace M] [T2Space M] in
 private theorem snoc_vec3
     {x : M} (X Y Z W : TangentSpace I x) :
     Fin.snoc
@@ -1819,6 +1828,7 @@ private theorem snoc_vec3
         (3 : Fin 4) = W
     rw [show (3 : Fin 4) = Fin.last 3 by rfl, Fin.snoc_last]
 
+omit [InnerProductSpace ℝ E] [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [IsManifold I ∞ M] [SigmaCompactSpace M] [T2Space M] in
 private theorem snoc_vec4
     {x : M} (D X Y Z W : TangentSpace I x) :
     Fin.snoc
@@ -1978,6 +1988,7 @@ private theorem sqrt_le_of_sq_le_mul {q A : Real}
     exact hA
   · exact le_of_mul_le_mul_right (by simpa only [pow_two] using h) hqpos
 
+omit [InnerProductSpace ℝ E] [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 private theorem inner_self_nonneg
     {M : Type u} [TopologicalSpace M] [ChartedSpace H M]
     [IsManifold I ∞ M] (g : SmoothRiemannianMetric I M)

@@ -29,6 +29,7 @@ variable
       [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M]
 
 omit [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem jetNn
     (g : SmoothRiemannianMetric I M) {r s m : ℕ}
     (S : SmoothCcTensor g r s) :
@@ -125,6 +126,7 @@ theorem prodOfParam {X a b : ℝ} (ha : 0 ≤ a) (hb : 0 ≤ b)
   linarith [hX, hsum, hfin]
 
 omit [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] in
 theorem wgtAmgm
     (g : SmoothRiemannianMetric I M) {s : ℕ}
     (i : DifferentialGeometry.Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx (I := I) (M := M) g 0 s) {t : ℝ} (ht : 0 < t) :
@@ -211,6 +213,7 @@ theorem specInterp3
   exact hle
 
 omit [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem jetSumSq
     (g : SmoothRiemannianMetric I M) {s : ℕ} (n : ℕ)
     (S : SmoothCcTensor g 0 s) :
@@ -221,6 +224,7 @@ theorem jetSumSq
   exact Finset.sum_sq_le_sq_sum_of_nonneg (fun _ _ => norm_nonneg _)
 
 omit [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem jetSumLe
     (g : SmoothRiemannianMetric I M) {s : ℕ} (n : ℕ)
     (S : SmoothCcTensor g 0 s) :
@@ -420,6 +424,7 @@ theorem amixScalar
   linarith [hX2, hY2, hstep2, hsum]
 
 omit [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem jetMono
     (g : SmoothRiemannianMetric I M) {r s m n : ℕ}
     (hmn : m ≤ n) (S : SmoothCcTensor g r s) :
@@ -637,6 +642,7 @@ theorem icgZero
   | succ m ih => rw [iteratedCovGrad_succ, ih, covGrad_zero]
 
 omit [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem jetZero
     (g : SmoothRiemannianMetric I M) {r s m : ℕ} :
     lowJetSq (I := I) (M := M) g m
@@ -646,6 +652,7 @@ theorem jetZero
   intro q hq
   rw [icgZero, norm_zero, zero_pow (by norm_num)]
 
+omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] in
 theorem wXiZero
     (g : SmoothRiemannianMetric I M) :
     wXi (I := I) (M := M) g g g = 0 := by
@@ -926,6 +933,7 @@ lemma vbPKSlot (g₀ g₁ : SmoothRiemannianMetric I M) (x : M)
   rw [metricConnDiffLoweredFib_toModel (I := I) g₁ g₁ g₀ x
     (fun j => Fin.tail u j)]
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [SigmaCompactSpace M] in
 lemma vbmcdRel (g₀ g₁ : SmoothRiemannianMetric I M) :
     ∀ (y : M) (d : Tensor0SSpace 1 I y),
       Tensor0SSpace.toModel
