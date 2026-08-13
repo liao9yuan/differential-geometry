@@ -422,7 +422,7 @@ theorem sublevelTransport_diffeomorph_of_setImage {m : ℕ} {H : Type} [Topologi
   exact manifoldSublevelDiffeomorphOfDiffeomorph (I := I) g f a b hg hf hreg_g hreg_f Φ
     hmap hbnd hstrict hmap' hbnd' hstrict'
 
-theorem morse_smooth_handle_attachment_relative {m : ℕ} {H : Type} [TopologicalSpace H]
+private theorem morse_smooth_handle_attachment_relative {m : ℕ} {H : Type} [TopologicalSpace H]
     {M : Type} [TopologicalSpace M] [ChartedSpace H M] [T2Space M] [SigmaCompactSpace M]
     (I : ModelWithCorners ℝ (MorseModel (m + 1)) H) [I.Boundaryless]
     [IsManifold I (⊤ : WithTop ℕ∞) M] (f : M → ℝ)
@@ -844,7 +844,7 @@ theorem morse_smooth_handle_attachment_relative {m : ℕ} {H : Type} [Topologica
       exact curveAt_eq_self_of_not_mem_tsupport v hv hcomplete hx _
     exact (htie x).trans hflow
 
-theorem morse_smooth_handle_attachment_relative_natural {m : ℕ} {H : Type} [TopologicalSpace H]
+private theorem morse_smooth_handle_attachment_relative_natural {m : ℕ} {H : Type} [TopologicalSpace H]
     {M : Type} [TopologicalSpace M] [ChartedSpace H M] [T2Space M] [SigmaCompactSpace M]
     (I : ModelWithCorners ℝ (MorseModel (m + 1)) H) [I.Boundaryless]
     [IsManifold I (⊤ : WithTop ℕ∞) M] (f : M → ℝ)
@@ -960,7 +960,6 @@ theorem one_critical_point_cell_attachment {m : ℕ} {H : Type} [TopologicalSpac
       hrsq, δ₁, hδ₁₀, hδ₁r, φ, hφb, hφinj, hφcl, hsmooth, hmani, Ψ, hrel, ⟨φc, hcelladj⟩⟩
   exact ⟨ε, hε, hεa, φc, hcelladj⟩
 
-set_option linter.unusedVariables false in
 theorem morse_smooth_attaching_embedding {m : ℕ} {H : Type} [TopologicalSpace H]
     {M : Type} [TopologicalSpace M] [ChartedSpace H M] [T2Space M] [SigmaCompactSpace M]
     (I : ModelWithCorners ℝ (MorseModel (m + 1)) H) [I.Boundaryless]
@@ -973,34 +972,34 @@ theorem morse_smooth_attaching_embedding {m : ℕ} {H : Type} [TopologicalSpace 
     (a : ℝ) (ha : 0 < a)
     (hcompact : IsCompact (f ⁻¹' Set.Icc (c - a) (c + a)))
     (hunique : ∀ x : M, f x ∈ Set.Icc (c - a) (c + a) →
-      x = p ∨ ¬ IsCriticalPointAt I f x) :
+      x = p ∨ ¬ IsCriticalPointAt I f x) [NeZero k] [NeZero (m + 1 - k)] :
     ∃ ε : ℝ, 0 < ε ∧ ε ≤ a ∧
     ∃ φ : AttachingRegion k (m + 1 - k) → SublevelSpace f (c - ε),
       (∀ p : AttachingRegion k (m + 1 - k), f (φ p).1 = c - ε) ∧
       Function.Injective φ ∧
       Topology.IsClosedEmbedding φ ∧
-      (∀ hk0 : NeZero k, ∀ hl0 : NeZero (m + 1 - k),
-        ∃ hreg_f : ∀ x : M, f x = c - ε → ¬ IsCriticalPointAt I f x,
-          ∃ φ₀ : AttachingRegion k (m + 1 - k) → LevelSetSpace f (c - ε),
-            @ContMDiff ℝ _
-              (EuclideanSpace ℝ (Fin (k - 1)) ×
-                EuclideanSpace ℝ (Fin ((m + 1 - k - 1) + 1))) _ _
-              (ModelProd (EuclideanSpace ℝ (Fin (k - 1)))
-                (EuclideanHalfSpace ((m + 1 - k - 1) + 1))) _
-              ((𝓡 (k - 1)).prod (modelWithCornersEuclideanHalfSpace ((m + 1 - k - 1) + 1)))
-              (AttachingRegion k (m + 1 - k)) _ (attachingRegionChartedSpace k (m + 1 - k))
-              (MorseModel m) _ _ (MorseModel m) _
-              (𝓘(ℝ, MorseModel m)) (LevelSetSpace f (c - ε)) _
-              (manifoldLevelSetChartedSpace I f (c - ε) (hf.of_le le_top) hreg_f)
-              (⊤ : ℕ∞)
-              φ₀ ∧
-            Topology.IsClosedEmbedding φ₀ ∧
-            ∀ p : AttachingRegion k (m + 1 - k), (φ₀ p).1 = (φ p).1) := by
+      (∃ hreg_f : ∀ x : M, f x = c - ε → ¬ IsCriticalPointAt I f x,
+        ∃ φ₀ : AttachingRegion k (m + 1 - k) → LevelSetSpace f (c - ε),
+          @ContMDiff ℝ _
+            (EuclideanSpace ℝ (Fin (k - 1)) ×
+              EuclideanSpace ℝ (Fin ((m + 1 - k - 1) + 1))) _ _
+            (ModelProd (EuclideanSpace ℝ (Fin (k - 1)))
+              (EuclideanHalfSpace ((m + 1 - k - 1) + 1))) _
+            ((𝓡 (k - 1)).prod (modelWithCornersEuclideanHalfSpace ((m + 1 - k - 1) + 1)))
+            (AttachingRegion k (m + 1 - k)) _ (attachingRegionChartedSpace k (m + 1 - k))
+            (MorseModel m) _ _ (MorseModel m) _
+            (𝓘(ℝ, MorseModel m)) (LevelSetSpace f (c - ε)) _
+            (manifoldLevelSetChartedSpace I f (c - ε) (hf.of_le le_top) hreg_f)
+            (⊤ : ℕ∞)
+            φ₀ ∧
+          Topology.IsClosedEmbedding φ₀ ∧
+          ∀ p : AttachingRegion k (m + 1 - k), (φ₀ p).1 = (φ p).1) := by
   rcases morse_smooth_handle_attachment_relative (m := m) (H := H) (M := M) I f hf p c k hk hnd hindex
     hfp a ha hcompact hunique with
     ⟨ε, hε, hεa, g, hg, hg_le, hgup, hglow, v, hv, hsupp, hdf, hrate, Φ, htransport, htie, ⟨η, hη, hηmain⟩, r, hr,
       hrsq, δ₁, hδ₁₀, hδ₁r, φ, hφb, hφinj, hφcl, hsmooth, hmani, Ψ, hrel, ⟨φc, hcelladj⟩⟩
-  exact ⟨ε, hε, hεa, φ, hφb, hφinj, hφcl, hsmooth⟩
+  exact ⟨ε, hε, hεa, φ, hφb, hφinj, hφcl,
+    hsmooth (inferInstance : NeZero k) (inferInstance : NeZero (m + 1 - k))⟩
 
 end ManifoldCellAttachment
 

@@ -202,7 +202,7 @@ theorem exists_globalIntegralCurve_of_compactSupport [FiniteDimensional ℝ E] [
     hv.of_le (by norm_num : (1 : WithTop ℕ∞) ≤ ∞)
   exact fun x => exists_isMIntegralCurve_of_isMIntegralCurveOn hv1 hε hlocal x
 
-lemma contMDiffAt_globalFlow_step [FiniteDimensional ℝ E] [CompleteSpace E] [I.Boundaryless]
+private lemma contMDiffAt_globalFlow_step [FiniteDimensional ℝ E] [CompleteSpace E] [I.Boundaryless]
     [IsManifold I (⊤ : WithTop ℕ∞) M] [T2Space M]
     (v : (x : M) → TangentSpace I x)
     (hv1 : CMDiff 1 (fun x : M => (⟨x, v x⟩ : TangentBundle I M)))

@@ -5249,9 +5249,7 @@ private lemma continuousOn_quotient_lift_open {X Y Z : Type} [TopologicalSpace X
         exact Filter.inter_mem hpreV' (IsOpen.mem_nhds hAopen hxA)
       exact hpreV
     exact (hq.isOpen_preimage).mp hqpre
-  -- the preimage under B.restrict g is open in the subspace B
   have hsub : IsOpen {z : {y : Y // y ∈ B} | g z.1 ∈ V} := by
-    -- {z : B | g z ∈ V} = (inclusion)⁻¹ (g ⁻¹' V ∩ B) — open in B since g ⁻¹' V ∩ B open
     have heq : {z : {y : Y // y ∈ B} | g z.1 ∈ V} = (Subtype.val : {y : Y // y ∈ B} → Y) ⁻¹' (g ⁻¹' V ∩ B) := by
       ext z
       constructor

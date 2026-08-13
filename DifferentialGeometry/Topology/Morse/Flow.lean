@@ -295,7 +295,6 @@ theorem sublevel_transport_of_unitSpeedVectorField [T2Space M] (I : ModelWithCor
   UnitSpeedFlow.image_sublevels (a := a) (b := b)
     (unitSpeedFlow_of_vectorField I a b f hf v hv hdf hcomplete) hab
 
-set_option backward.isDefEq.respectTransparency false in
 theorem sublevel_transport_of_stripUnitSpeedVectorField [I.Boundaryless]
     [IsManifold I (⊤ : WithTop ℕ∞) M] [T2Space M]
     (f : M → ℝ) (hf : ContMDiff I 𝓘(ℝ, ℝ) (↑(⊤ : ℕ∞) : WithTop ℕ∞) f) {a b : ℝ} (hab : a ≤ b)

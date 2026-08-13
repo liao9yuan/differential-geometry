@@ -49,7 +49,6 @@ private theorem chartRep_contDiffOn (I : ModelWithCorners ℝ (MorseModel n) H)
   rw [show (fun y : MorseModel n => f ((extChartAt I x₀).symm y)) = f ∘ (extChartAt I x₀).symm by rfl]
   rwa [← hrange]
 
-set_option backward.isDefEq.respectTransparency false in
 theorem tangentTrivializationAt_apply (I : ModelWithCorners ℝ (MorseModel n) H)
     [I.Boundaryless] [IsManifold I (⊤ : WithTop ℕ∞) M] (x₀ x : M)
     (hx : x ∈ (extChartAt I x₀).source) (v : TangentSpace I x) :
@@ -66,7 +65,6 @@ theorem tangentTrivializationAt_apply (I : ModelWithCorners ℝ (MorseModel n) H
       fderivWithin ℝ (extChartAt I x₀ ∘ (extChartAt I x).symm) (range I) (extChartAt I x x) v
   rfl
 
-set_option backward.isDefEq.respectTransparency false in
 theorem localUnitSpeedVectorField_at_noncritical (I : ModelWithCorners ℝ (MorseModel n) H)
     [I.Boundaryless] [IsManifold I (⊤ : WithTop ℕ∞) M] (f : M → ℝ)
     (hf : ContMDiff I 𝓘(ℝ, ℝ) (↑(⊤ : ℕ∞) : WithTop ℕ∞) f)
@@ -310,7 +308,6 @@ theorem exists_open_unitSpeedVectorField_at_noncritical (I : ModelWithCorners �
       · simpa [U] using hx.2
     exact hmd'.contMDiffWithinAt (s := U)
 
-set_option backward.isDefEq.respectTransparency false in
 theorem exists_unitSpeedVectorField_on_compact (I : ModelWithCorners ℝ (MorseModel n) H)
     [I.Boundaryless] [IsManifold I (⊤ : WithTop ℕ∞) M] [T2Space M] [SigmaCompactSpace M]
     (f : M → ℝ) (hf : ContMDiff I 𝓘(ℝ, ℝ) (↑(⊤ : ℕ∞) : WithTop ℕ∞) f) (K : Set M)
