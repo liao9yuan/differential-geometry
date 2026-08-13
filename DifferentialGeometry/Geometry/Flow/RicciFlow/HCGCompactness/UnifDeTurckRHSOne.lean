@@ -40,7 +40,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
-omit [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private theorem centeredBasis
     (g : SmoothRiemannianMetric I M) (x : M) :
     ∃ basis : Module.Basis (Fin (Module.finrank ℝ E)) ℝ (TangentSpace I x),
@@ -246,7 +245,6 @@ private theorem reverseJetThree
   simpa [revJetThreeC, C₁, L₁, D] using
     (mul_le_mul_of_nonneg_left hthree' (Real.sqrt_nonneg (Λ ^ 5)))
 
-omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [SigmaCompactSpace M] in
 private theorem connLowOne_eval
     (gBase g₀ : SmoothRiemannianMetric I M)
     (X Y Z W : ContMDiffSection I E (∞ : WithTop ℕ∞)
@@ -959,7 +957,6 @@ private theorem connLow_self_zero
   rw [PDE.DeTurck.connDiff_self]
   simp
 
-omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 private theorem wXi_base_eq
     (gBase g₀ : SmoothRiemannianMetric I M) :
     wXi (I := I) (M := M) g₀ g₀ gBase =
@@ -1313,7 +1310,6 @@ private lemma unit_add2_apply
         unitModel (I := I) (M := M) g 2 T x v := by
   rw [unit_add2, ContinuousMultilinearMap.add_apply]
 
-omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] in
 private lemma unit_smul2
     (g : SmoothRiemannianMetric I M)
     (c : ℝ) (T : SmoothCcTensor g 0 2) (x : M) :

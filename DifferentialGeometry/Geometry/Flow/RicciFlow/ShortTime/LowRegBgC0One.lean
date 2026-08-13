@@ -276,7 +276,6 @@ theorem slotIterSub
       rw [ih, slotExtend_sub]
       rfl
 
-omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [BoundarylessManifold I M] in
 theorem prod23Sub
     (g : SmoothRiemannianMetric I M)
     (A B : SmoothCcTensor g 0 2) :
@@ -1143,7 +1142,6 @@ theorem qbaOnePairH2
       qbaScaleSq P (Ld R) (Bo R) (Bl R) (Bod R) (1 + A) D
   exact ⟨hq, ha⟩
 
-omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] in
 theorem jetAddSix
     (g : SmoothRiemannianMetric I M) {r s : ℕ}
     (A B C D E' F : SmoothCcTensor g r s) (X : ℝ)

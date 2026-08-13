@@ -44,7 +44,6 @@ private noncomputable def extSec1 (x : M) (v : TangentSpace I x) :
   ContMDiffSection.mk (smoothExtensionTangent (I := I) x v)
     (smoothExtensionTangent_contMDiff (I := I) x v)
 
-omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] in
 @[simp] private theorem extSec1_apply (x : M) (v : TangentSpace I x) :
     extSec1 (I := I) x v x = v :=
   smoothExtensionTangent_eq (I := I) x v

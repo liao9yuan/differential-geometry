@@ -23,7 +23,6 @@ structure Rm04Symm (Rm : ι → ι → ι → ι → Real) : Prop where
 
   bianchi : ∀ a b c d : ι, Rm a b c d + Rm b c a d + Rm c a b d = 0
 
-omit [DecidableEq ι] in
 private theorem sum4Swap (F : ι → ι → ι → ι → Real) :
     (∑ a : ι, ∑ b : ι, ∑ c : ι, ∑ d : ι, F a b c d)
       = ∑ c : ι, ∑ d : ι, ∑ a : ι, ∑ b : ι, F a b c d := by
@@ -39,35 +38,30 @@ private theorem sum4Swap (F : ι → ι → ι → ι → Real) :
 def quadSum (gInv : ι → ι → Real) (X : ι → ι → ι → ι → Real) : Real :=
   ∑ p : ι, ∑ q : ι, ∑ r : ι, ∑ s : ι, gInv p q * gInv r s * X p q r s
 
-omit [DecidableEq ι] in
 theorem quadSum_congr (gInv : ι → ι → Real) {X Y : ι → ι → ι → ι → Real}
     (h : ∀ p q r s : ι, X p q r s = Y p q r s) :
     quadSum gInv X = quadSum gInv Y :=
   Finset.sum_congr rfl fun _ _ => Finset.sum_congr rfl fun _ _ =>
     Finset.sum_congr rfl fun _ _ => Finset.sum_congr rfl fun _ _ => by rw [h]
 
-omit [DecidableEq ι] in
 private theorem quadSum4 (gInv : ι → ι → Real) (X₁ X₂ X₃ X₄ : ι → ι → ι → ι → Real) :
     quadSum gInv (fun p q r s => X₁ p q r s - X₂ p q r s - X₃ p q r s + X₄ p q r s)
       = quadSum gInv X₁ - quadSum gInv X₂ - quadSum gInv X₃ + quadSum gInv X₄ := by
   unfold quadSum
   simp only [mul_sub, mul_add, Finset.sum_sub_distrib, Finset.sum_add_distrib]
 
-omit [DecidableEq ι] in
 private theorem quadSumAdd (gInv : ι → ι → Real) (X Y : ι → ι → ι → ι → Real) :
     quadSum gInv (fun p q r s => X p q r s + Y p q r s)
       = quadSum gInv X + quadSum gInv Y := by
   unfold quadSum
   simp only [mul_add, Finset.sum_add_distrib]
 
-omit [DecidableEq ι] in
 private theorem quadSumA4 (gInv : ι → ι → Real) (X₁ X₂ X₃ X₄ : ι → ι → ι → ι → Real) :
     quadSum gInv (fun p q r s => X₁ p q r s + X₂ p q r s + X₃ p q r s + X₄ p q r s)
       = quadSum gInv X₁ + quadSum gInv X₂ + quadSum gInv X₃ + quadSum gInv X₄ := by
   unfold quadSum
   simp only [mul_add, Finset.sum_add_distrib]
 
-omit [DecidableEq ι] in
 private theorem quadSumNeg (gInv : ι → ι → Real) (X : ι → ι → ι → ι → Real) :
     quadSum gInv (fun p q r s => -X p q r s) = -quadSum gInv X := by
   unfold quadSum
@@ -83,7 +77,6 @@ private theorem quadSwapPR (gInv : ι → ι → Real) (X : ι → ι → ι →
         Finset.sum_congr rfl fun _ _ => Finset.sum_congr rfl fun _ _ =>
           Finset.sum_congr rfl fun _ _ => Finset.sum_congr rfl fun _ _ => by ring
 
-omit [DecidableEq ι] in
 private theorem quadSwapRS (gInv : ι → ι → Real)
     (hgi : ∀ a b : ι, gInv a b = gInv b a) (X : ι → ι → ι → ι → Real) :
     quadSum gInv X = quadSum gInv (fun p q r s => X p q s r) := by
@@ -94,7 +87,6 @@ private theorem quadSwapRS (gInv : ι → ι → Real)
     _ = ∑ r : ι, ∑ s : ι, gInv p q * gInv r s * X p q s r :=
         Finset.sum_congr rfl fun a _ => Finset.sum_congr rfl fun b _ => by rw [hgi b a]
 
-omit [DecidableEq ι] in
 private theorem quadSwapPQ (gInv : ι → ι → Real)
     (hgi : ∀ a b : ι, gInv a b = gInv b a) (X : ι → ι → ι → ι → Real) :
     quadSum gInv X = quadSum gInv (fun p q r s => X q p r s) := by
@@ -110,7 +102,6 @@ def bComp (gInv : ι → ι → Real) (Rm : ι → ι → ι → ι → Real) (a
   ∑ e : ι, ∑ g : ι, ∑ f : ι, ∑ r : ι,
     gInv e g * gInv f r * Rm a e b f * Rm c g d r
 
-omit [DecidableEq ι] in
 private theorem bComp_quad (gInv : ι → ι → Real) (Rm : ι → ι → ι → ι → Real)
     (a b c d : ι) :
     bComp gInv Rm a b c d = quadSum gInv (fun p q r s => Rm a p b r * Rm c q d s) :=
@@ -283,7 +274,6 @@ def RicCommAt (Rm13 : ι → ι → ι → ι → Real) (Ric : ι → ι → Rea
     n2Ric j i k l - n2Ric i j k l
       = (∑ p : ι, Rm13 i j k p * Ric p l) + (∑ p : ι, Rm13 i j l p * Ric k p)
 
-omit [DecidableEq ι] in
 private theorem contractRm13 (gInv : ι → ι → Real) (Ric Rup : ι → ι → Real)
     (Rm13 Rm : ι → ι → ι → ι → Real)
     (hraise : ∀ a b c d : ι, Rm13 a b c d = ∑ q : ι, gInv d q * Rm a b c q)
@@ -346,7 +336,6 @@ structure Rm04LapIn (gInv : ι → ι → Real) (Rm : ι → ι → ι → ι �
 
   n2RicSym : ∀ a b c d : ι, n2Ric a b c d = n2Ric a b d c
 
-omit [DecidableEq ι] in
 private theorem traceMid (gInv : ι → ι → Real) {Ric : ι → ι → Real}
     {Rm : ι → ι → ι → ι → Real} (hsym : Rm04Symm Rm)
     (hric : ∀ a b : ι, Ric a b = ∑ p : ι, ∑ q : ι, gInv p q * Rm p a b q) (a b : ι) :
@@ -385,7 +374,6 @@ private theorem quadTrDrift (gInv : ι → ι → Real) {Ric Rup : ι → ι →
   rw [hRup a u, Finset.sum_mul]
   exact Finset.sum_congr rfl fun v _ => by rw [hFG u]; ring
 
-omit [DecidableEq ι] in
 private theorem tracedBi (gInv : ι → ι → Real) {Ric : ι → ι → Real}
     {Rm : ι → ι → ι → ι → Real} {n2Ric : ι → ι → ι → ι → Real}
     {n2Rm : ι → ι → ι → ι → ι → ι → Real}
@@ -577,7 +565,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 variable [IsManifold I 1 M]
 variable [CompleteSpace E] [SigmaCompactSpace M] [T2Space M]
 
-omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 theorem rm04Var_eq_uhl
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)

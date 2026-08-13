@@ -56,7 +56,6 @@ private theorem permJetNorm
           (I := I) (M := M) g (s := 2) σ T j x)
   exact (sq_eq_sq₀ (norm_nonneg _) (norm_nonneg _)).mp hsq
 
-omit [NeZero (Module.finrank ℝ E)] in
 theorem symmS_jet_le
     (g : SmoothRiemannianMetric I M) (T : SmoothCcTensor g 0 2) (j : ℕ) :
     ‖iteratedCovGrad (I := I) g 0 2 j (symmS (I := I) (M := M) g T)‖ ≤
@@ -156,7 +155,6 @@ theorem galRepJet_rad (g₀ : SmoothRiemannianMetric I M) :
   exact mul_le_mul_of_nonneg_left hball hC
 
 
-omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] in
 theorem jetSqrtLe (g : SmoothRiemannianMetric I M) (m : ℕ)
     (T : SmoothCcTensor g 0 2) :
     Real.sqrt (∑ j ∈ Finset.range m,
@@ -168,7 +166,6 @@ theorem jetSqrtLe (g : SmoothRiemannianMetric I M) (m : ℕ)
   exact Finset.sum_congr rfl (fun _ _ => Real.sqrt_sq (norm_nonneg _))
 
 
-omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] in
 theorem jetWinMono (g : SmoothRiemannianMetric I M) {m n : ℕ} (hmn : m ≤ n)
     (T : SmoothCcTensor g 0 2) :
     Real.sqrt (∑ j ∈ Finset.range m,

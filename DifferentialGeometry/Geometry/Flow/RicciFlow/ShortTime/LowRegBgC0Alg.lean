@@ -499,7 +499,6 @@ theorem slot_comp
   rw [ContinuousLinearEquiv.apply_symm_apply]
   rw [ContinuousLinearMap.comp_assoc]
 
-omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [BoundarylessManifold I M] [SigmaCompactSpace M] in
 theorem slot_comp2
     (g : SmoothRiemannianMetric I M) (a b c : ℕ)
     (A : SmoothCcTensor g b c) (B : SmoothCcTensor g a b) :
@@ -526,7 +525,6 @@ noncomputable def koszulOne
       permCoeff (I := I) (M := M) g (finRotate 3) -
       permCoeff (I := I) (M := M) g (Equiv.swap (1 : Fin 3) 2))
 
-omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] in
 theorem koszul_one_app
     (g : SmoothRiemannianMetric I M) (T : SmoothCcTensor g 0 2)
     (hT : ∀ (x : M) (u v : TangentSpace I x),
@@ -1302,7 +1300,6 @@ theorem cc_swap_app
     ContinuousMultilinearMap.domDomCongr_apply]
   rfl
 
-omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [BoundarylessManifold I M] [SigmaCompactSpace M] in
 theorem symm_input
     (g : SmoothRiemannianMetric I M) (C : SmoothCcTensor g 2 2)
     (W : SmoothCcTensor g 0 2) :

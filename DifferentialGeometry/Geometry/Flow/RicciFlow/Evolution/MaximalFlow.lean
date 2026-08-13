@@ -41,7 +41,6 @@ private structure FlowCover
   flow : FlowTo (I := I) (M := M) g0 T
   lt_end : t < T
 
-omit [IsManifold I (∞ + 1) M] in
 theorem flow_to_seed (g0 : SmoothRiemannianMetric I M) :
     ∃ T : Real, Nonempty (FlowTo (I := I) (M := M) g0 T) := by
   rcases short_time_joint (I := I) (M := M) g0 with
@@ -55,7 +54,6 @@ theorem flow_to_seed (g0 : SmoothRiemannianMetric I M) :
   · simpa [S] using hjoint
   · simpa [S] using hpde
 
-omit [IsManifold I (∞ + 1) M] in
 theorem flow_to_agree
     {g0 : SmoothRiemannianMetric I M} {T U : Real}
     (P : FlowTo (I := I) (M := M) g0 T)

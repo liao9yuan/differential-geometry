@@ -24,7 +24,6 @@ variable [NeZero (Module.finrank Real E)]
 variable {H : Type uH} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H} [I.Boundaryless]
 
-omit [CompleteSpace E] in
 theorem aliveSlots_tail
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
     (hd : InjRadiusDecayInput (I := I) X) {D : Real}
@@ -35,7 +34,6 @@ theorem aliveSlots_tail
         L.alive (gamma : Nat) :=
   Filter.eventually_all.mpr fun gamma => L.alive_eventually (gamma : Nat)
 
-omit [CompleteSpace E] in
 theorem hat_mem_live
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
     (hd : InjRadiusDecayInput (I := I) X) {D : Real}
@@ -50,7 +48,6 @@ theorem hat_mem_live
   | none => simp [NetLimitData.hatBall, hc] at hx
   | some c => simpa [hc] using hstable.symm
 
-omit [CompleteSpace E] in
 theorem hat_dist_centerD
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
     (hd : InjRadiusDecayInput (I := I) X) {D : Real}

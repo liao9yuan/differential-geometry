@@ -525,7 +525,6 @@ theorem reindexSub
     reindexCoeffFibGen_apply, reindexCoeffFibGen_apply,
     ContinuousLinearMap.sub_apply]
 
-omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] [SigmaCompactSpace M] in
 theorem trSub
     (g gT gU : SmoothRiemannianMetric I M) (p : ℕ)
     (σ : Equiv.Perm (Fin (p + 2))) :
@@ -536,7 +535,6 @@ theorem trSub
           pureTrace (I := I) (M := M) g gU p) σ := by
   rw [lc0TraceRF, lc0TraceRF, ← reindexSub]
 
-omit [NeZero (Module.finrank ℝ E)] in
 theorem trJet
     (g gm : SmoothRiemannianMetric I M) (p m : ℕ)
     (σ : Equiv.Perm (Fin (p + 2))) :
@@ -816,7 +814,6 @@ theorem ipForm
         (slotExtend (I := I) (M := M) g 1 2
           (slotExtend (I := I) (M := M) g 0 1 om)) := rfl
 
-omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] in
 theorem ipSub
     (g : SmoothRiemannianMetric I M) (a b : SmoothCcTensor g 0 1) :
     ipLowCc (I := I) (M := M) g (a - b) =
@@ -864,7 +861,6 @@ lemma vbMcdUnit (g₀ g₁ : SmoothRiemannianMetric I M) (x : M)
     ContinuousMultilinearMap.constOfIsEmpty_apply, one_smul]
   exact metricConnDiffLoweredFib_toModel (I := I) g₁ g₁ g₀ x m
 
-omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [SigmaCompactSpace M] in
 lemma vbPKSlot (g₀ g₁ : SmoothRiemannianMetric I M) (x : M)
     (B : Tensor0SSpace 1 I x) :
     Tensor0SSpace.toModel
@@ -986,7 +982,6 @@ theorem vbmcdSub
   rw [vbmcdPerm, vbmcdPerm, ← rspermSub, ← slotExtend_sub, rspermH2]
   exact slotH2 (I := I) (M := M) g 0 3 _
 
-omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] [SigmaCompactSpace M] in
 theorem riemLiveEq
     (g gm : SmoothRiemannianMetric I M) :
     lc0RiemLive (I := I) (M := M) g gm =

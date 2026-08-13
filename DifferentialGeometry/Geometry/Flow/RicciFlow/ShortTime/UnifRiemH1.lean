@@ -45,7 +45,6 @@ private lemma riemRfns_neg
   rw [riemannianFiberNormSq_smul]
   norm_num
 
-omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] in
 private lemma riemRfns_iCG_neg
     (g : SmoothRiemannianMetric I M) (r s i : ℕ)
     (Φ : SmoothCcTensor g r s) (x : M) :

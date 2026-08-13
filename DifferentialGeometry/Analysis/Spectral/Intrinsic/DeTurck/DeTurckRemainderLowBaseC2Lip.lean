@@ -34,7 +34,6 @@ variable
 private local instance : CompleteSpace E :=
   FiniteDimensional.complete ℝ E
 
-omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [BoundarylessManifold I M] [SigmaCompactSpace M] in
 private theorem cc_toFun_ext
     (g : SmoothRiemannianMetric I M) {r s : ℕ}
     (A B : SmoothCcTensor g r s)
@@ -685,7 +684,6 @@ private theorem endoSlotZero_add_c2
       slotInsertEndoCc (I := I) (M := M) g s B
   exact slotInsertEndoCc_add (I := I) (M := M) g s A B
 
-omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [BoundarylessManifold I M] [SigmaCompactSpace M] in
 private theorem endoSlotZero_sub_c2
     (g : SmoothRiemannianMetric I M) (s : ℕ)
     (A B : ContMDiffSection I (E →L[ℝ] E) ∞
@@ -775,7 +773,6 @@ theorem invSlot_sub_factor
   simpa only [fullSlot2, perturbSlot2] using
     invSlot_factor (I := I) (M := M) g gT gU T U hTtie hUtie
 
-omit [NeZero (Module.finrank ℝ E)] in
 private theorem perm_icg_norm_c2
     (g : SmoothRiemannianMetric I M) (σ : Equiv.Perm (Fin 2))
     (T : SmoothCcTensor g 0 2) (k : ℕ) :
@@ -852,7 +849,6 @@ private theorem symm_jet_c2
     pow_le_pow_left₀ (norm_nonneg _)
       (symm_icg_norm_c2 (I := I) (M := M) g T i) 2
 
-omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] in
 private theorem unitModel_sub_c2
     (g : SmoothRiemannianMetric I M)
     (A B : SmoothCcTensor g 0 2) (x : M) :

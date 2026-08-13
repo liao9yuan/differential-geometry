@@ -72,7 +72,6 @@ theorem covDerivConnDiff_tens (g₂ g₁ : SmoothRiemannianMetric I M) (x : M)
   exact absurd hz (ne_of_gt (g₂.pos x _ (sub_ne_zero.mpr hne)))
 
 
-omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] in
 private theorem rhsTermBound (gBase g₀ : SmoothRiemannianMetric I M) {Λ C₀ C₁ : ℝ}
     (hΛ : 1 ≤ Λ) (hC₀0 : 0 ≤ C₀) (hC₁0 : 0 ≤ C₁)
     (hcomp : ∀ (y : M) (u : TangentSpace I y),
