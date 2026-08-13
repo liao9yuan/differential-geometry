@@ -7931,6 +7931,39 @@ theorem modelLowerRoundMap_unround {n k : ℕ} (hk : k ≤ n) (c ε r δ θ : �
   rw [← hzr]
   rw [modelLowerRoundMapUnround_round hk ε r δ θ hθ hδ hδr hθr z]
 
+theorem modelLowerRoundMapUnround_mem_sublevel {n k : ℕ} (hk : k ≤ n) (c ε r δ θ : ℝ)
+    (hθ : 0 < θ) (hδ : 0 < δ) (hδr : δ < r ^ 2) (hθr : θ < r ^ 2) {y : MorseModel n}
+    (hy : y ∈ modelLowerRoundMap hk ε r δ θ '' (sublevel (morseNormalForm hk c) (c - ε))) :
+    modelLowerRoundMapUnround hk ε r δ θ y ∈ sublevel (morseNormalForm hk c) (c - ε) := by
+  let t : ℝ := ‖negPart hk y‖ ^ 2
+  have hscale_pos : 0 < modelRoundScale ε r δ θ t := modelRoundScale_pos hδ hθ hδr hθr
+  have hscale_ne : modelRoundScale ε r δ θ t ≠ 0 := ne_of_gt hscale_pos
+  have hinner : modelCapRoundedLowerFunctionInner hk c ε r δ θ y ≤ c :=
+    (modelCapRoundedLowerFunctionInner_le_c_iff hk c ε r δ θ hθ hδ hδr hθr y).mpr hy
+  change morseNormalForm hk c (modelLowerRoundMapUnround hk ε r δ θ y) ≤ c - ε
+  dsimp [modelLowerRoundMapUnround]
+  rw [morseNormalForm_split]
+  rw [negPart_recombine, posPart_recombine]
+  have hpos' : ‖(modelRoundScale ε r δ θ t)⁻¹ • posPart hk y‖ ^ 2 =
+      ((modelRoundScale ε r δ θ t)⁻¹) ^ 2 * ‖posPart hk y‖ ^ 2 := by
+    rw [norm_smul]
+    rw [Real.norm_eq_abs]
+    rw [mul_pow]
+    rw [sq_abs]
+  have hinner_ineq : ‖posPart hk y‖ ^ 2 ≤ modelLowerRoundBound ε r δ θ t := by
+    change c + (1 / 2) * (‖posPart hk y‖ ^ 2 - modelLowerRoundBound ε r δ θ (‖negPart hk y‖ ^ 2)) ≤ c at hinner
+    nlinarith
+  have hinner' : ((modelRoundScale ε r δ θ t)⁻¹) ^ 2 * ‖posPart hk y‖ ^ 2 ≤
+      t - 2 * ε := by
+    have hsq : ((modelRoundScale ε r δ θ t)⁻¹) ^ 2 * modelLowerRoundBound ε r δ θ t = t - 2 * ε := by
+      dsimp [modelLowerRoundBound]
+      have hden : modelRoundScale ε r δ θ t ^ 2 ≠ 0 := pow_ne_zero 2 hscale_ne
+      field_simp [hden]
+    nlinarith [hinner_ineq, hsq]
+  have hz : c + (1 / 2) * (((modelRoundScale ε r δ θ t)⁻¹) ^ 2 * ‖posPart hk y‖ ^ 2 - t) ≤ c - ε := by
+    nlinarith [hinner']
+  simpa [hpos', t] using hz
+
 theorem modelRoundCapInterp_eq {ε r a b t : ℝ} (hε : 0 < ε) (hr : 0 < r) (ha0 : 0 < a)
     (_ha1 : a ≤ 1) (hb0 : 0 ≤ b) (_hb1 : b ≤ 1) (ht0 : t < r ^ 2 + 2 * ε) (htpos : 0 < t)
     (ht : t = (2 * ε + r ^ 2 * b) * a) :
