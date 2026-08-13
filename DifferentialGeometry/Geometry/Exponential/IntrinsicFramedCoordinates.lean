@@ -193,9 +193,7 @@ theorem intrFrame_deriv_zero
   simpa only [intrinsicFramedExp, F, L, Function.comp_apply] using hchain'
 
 omit [CompleteSpace E]
-  [ConnectedSpace M] in
-/-- The differential of the intrinsic framed exponential is the endpoint
-variation Jacobi field with normal-frame initial direction. -/
+  [ConnectedSpace M] [T2Space (TangentBundle I M)] in
 theorem intrFrame_mfderiv
     [PseudoEMetricSpace M]
     [RiemannianBundle (fun x : M => TangentSpace I x)]

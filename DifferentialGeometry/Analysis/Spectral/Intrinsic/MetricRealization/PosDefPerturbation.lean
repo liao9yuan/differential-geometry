@@ -107,7 +107,7 @@ theorem perturbedInner_pos_of_metricCauchySchwarzBound
   have : 0 < (1 - δ) * g.inner x v v := mul_pos hcoeff hg_pos
   linarith
 
-/-- Compatibility form of `perturbedInner_pos_of_metricCauchySchwarzBound`. -/
+omit [Module.Finite ℝ E] in
 theorem perturbedInner_pos_of_gOpBound
     (g : SmoothRiemannianMetric I M)
     (h : ∀ x : M, TangentSpace I x →L[ℝ] TangentSpace I x →L[ℝ] ℝ)
