@@ -18399,6 +18399,76 @@ noncomputable def morseRoundedSublevelIsManifold {m k : ℕ} (hk : k ≤ m + 1)
     (fun x hx => morseRoundedFunction_no_critical_at_level hk c ε r δ R₀ R₁ R₁' data hε hδ hδr hR hR0
       hbig hR₁₂ hR₁₂R hR₁₂R' hreg_f hx)
 
+theorem handleRoundEmbedding_mem_roundedSublevel {m k : ℕ} (hk : k ≤ m + 1)
+    (c ε r δ θ R₀' R₁' : ℝ) {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M]
+    [T2Space M] [ChartedSpace H M] {I : ModelWithCorners ℝ (MorseModel (m + 1)) H} {f : M → ℝ}
+    (data : MorseChart (m + 1) k hk c I f)
+    (hε : 0 < ε) (hδ : 0 < δ) (hθ : 0 < θ) (hδr : δ < r ^ 2)
+    (hεr' : Real.sqrt (2 * ε + 2 * r ^ 2) < data.R / 2)
+    (hR : R₀' < R₁') (hR0' : 0 ≤ R₀') (hbig' : 2 * (r ^ 2 + 2 * ε + δ) ≤ R₀' ^ 2)
+    (hRbig : r ^ 2 + 2 * ε + δ ≤ (data.R / 2) ^ 2)
+    (hR₁big : 2 * (data.R / 2) ^ 2 - 2 * ε ≤ R₁' ^ 2) (hR₁₂R : R₁' ≤ data.R)
+    (d : StandardHandle k (m + 1 - k)) :
+    morseRoundedFunction hk c ε r δ R₀' R₁' data
+        (handleRoundEmbedding hk c ε r δ θ data d) ≤ c := by
+  have hm : (handleRoundEmbedding hk c ε r δ θ data d ∈ morseRoundedAttachment hk c ε r δ data) =
+      (handleRoundEmbedding hk c ε r δ θ data d ∈
+        {y : M | morseRoundedFunction hk c ε r δ R₀' R₁' data y ≤ c}) :=
+    congrArg (fun s : Set M => handleRoundEmbedding hk c ε r δ θ data d ∈ s)
+      (sublevel_morseRoundedFunction_eq_roundedAttachment hk c ε r δ R₀' R₁' data hε hδ hR hR0'
+        hbig' hRbig hR₁big hR₁₂R).symm
+  simpa using Eq.mp hm (handleRoundEmbedding_mem_rounded hk c ε r δ θ data hε hδ hθ hδr hεr' d)
+
+theorem contMDiff_handleRoundEmbedding_sublevel {m k : ℕ} (hk : k ≤ m + 1)
+    (c ε r δ θ R₀' R₁' R₁'' : ℝ) {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M]
+    [T2Space M] [ChartedSpace H M] {I : ModelWithCorners ℝ (MorseModel (m + 1)) H}
+    [I.Boundaryless] [IsManifold I (⊤ : WithTop ℕ∞) M] {f : M → ℝ}
+    (data : MorseChart (m + 1) k hk c I f)
+    (hε : 0 < ε) (hδ : 0 < δ) (hθ : 0 < θ) (hδr : δ < r ^ 2) (hθr : θ < r ^ 2)
+    (hr : 0 < r) (hεr : Real.sqrt (2 * ε + 2 * r ^ 2) ≤ data.R)
+    (hεr' : Real.sqrt (2 * ε + 2 * r ^ 2) < data.R / 2)
+    (hR : R₀' < R₁') (hR0' : 0 ≤ R₀') (hbig' : 2 * (r ^ 2 + 2 * ε + δ) ≤ R₀' ^ 2)
+    (hRbig : r ^ 2 + 2 * ε + δ ≤ (data.R / 2) ^ 2)
+    (hR₁big : 2 * (data.R / 2) ^ 2 - 2 * ε ≤ R₁' ^ 2) (hR₁₂R : R₁' ≤ data.R)
+    (hR₁₂ : R₁' < R₁'') (hR₁₂R'' : R₁'' ≤ data.R) (hR₁₂R''' : R₁'' ≤ data.R')
+    (hRR' : data.R < data.R')
+    (hf : ContMDiff I 𝓘(ℝ, ℝ) (↑(⊤ : ℕ∞) : WithTop ℕ∞) f)
+    (hreg_f : ∀ x : M, f x = c - ε → ¬ IsCriticalPointAt I f x)
+    [NeZero k] [NeZero (m + 1 - k)]
+    [Fact (k = (k - 1) + 1)] [Fact (m + 1 - k = (m + 1 - k - 1) + 1)] :
+    @ContMDiff ℝ _
+      (EuclideanSpace ℝ (Fin ((k - 1) + 1)) × EuclideanSpace ℝ (Fin (((m + 1 - k - 1) + 1)))) _ _
+      (ModelProd (EuclideanHalfSpace ((k - 1) + 1)) (EuclideanHalfSpace ((m + 1 - k - 1) + 1))) _
+      ((modelWithCornersEuclideanHalfSpace ((k - 1) + 1)).prod
+        (modelWithCornersEuclideanHalfSpace ((m + 1 - k - 1) + 1)))
+      (StandardHandle k (m + 1 - k)) _ (standardHandleChartedSpace k (m + 1 - k))
+      (MorseModel (m + 1)) _ _ (MorseHalfSpace m) _
+      (morseModelWithCornersHalfSpace m)
+      (SublevelSpace (morseRoundedFunction hk c ε r δ R₀' R₁' data) c) _
+      (morseRoundedSublevelChartedSpace hk c ε r δ R₀' R₁' R₁'' data hε hδ hδr hR hR0' hbig'
+        hR₁₂ hR₁₂R'' hR₁₂R''' hf hreg_f)
+      (⊤ : ℕ∞)
+      (fun d : StandardHandle k (m + 1 - k) =>
+        (⟨handleRoundEmbedding hk c ε r δ θ data d,
+          handleRoundEmbedding_mem_roundedSublevel hk c ε r δ θ R₀' R₁' data hε hδ hθ hδr hεr'
+            hR hR0' hbig' hRbig hR₁big hR₁₂R d⟩ :
+          SublevelSpace (morseRoundedFunction hk c ε r δ R₀' R₁' data) c)) := by
+  letI : ChartedSpace (ModelProd (EuclideanHalfSpace ((k - 1) + 1))
+      (EuclideanHalfSpace ((m + 1 - k - 1) + 1))) (StandardHandle k (m + 1 - k)) :=
+    standardHandleChartedSpace k (m + 1 - k)
+  exact contMDiff_sublevelCorestrict (I := I)
+    (morseRoundedFunction hk c ε r δ R₀' R₁' data) c
+    (contMDiff_morseRoundedFunction hk c ε r δ R₀' R₁' R₁'' data hf hR hR0' hR₁₂ hR₁₂R'' hR₁₂R''')
+    (fun x hx => morseRoundedFunction_no_critical_at_level hk c ε r δ R₀' R₁' R₁'' data hε hδ hδr hR
+      hR0' hbig' hR₁₂ hR₁₂R'' hR₁₂R''' hreg_f hx)
+    (handleRoundEmbedding hk c ε r δ θ data)
+    (contMDiff_handleRoundEmbedding hk c ε r δ θ data hε hδ hθ hδr hθr hr hεr hRR')
+    (fun d => handleRoundEmbedding_mem_roundedSublevel hk c ε r δ θ R₀' R₁' data hε hδ hθ hδr hεr'
+      hR hR0' hbig' hRbig hR₁big hR₁₂R d)
+    (hcs := morseRoundedSublevelChartedSpace hk c ε r δ R₀' R₁' R₁'' data hε hδ hδr hR hR0' hbig'
+      hR₁₂ hR₁₂R'' hR₁₂R''' hf hreg_f)
+    (hchart := by intro y; rfl)
+
 private noncomputable def homeomorphOfSetEq {M : Type*} [TopologicalSpace M] {s t : Set M}
     (h : s = t) : {x : M // x ∈ s} ≃ₜ {x : M // x ∈ t} where
   toEquiv := Equiv.setCongr h
