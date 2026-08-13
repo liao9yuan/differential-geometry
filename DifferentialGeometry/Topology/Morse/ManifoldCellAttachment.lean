@@ -12602,6 +12602,24 @@ noncomputable def morseCapRoundedLowerSublevel {m k : ℕ} (hk : k ≤ m + 1) (c
     (sublevel f (c - ε) ∩
       (morseChartCoreBallImage hk c data ∩ morseChartBallImage hk c data)ᶜ)
 
+noncomputable def morseCapRoundedLowerRound {m k : ℕ} (hk : k ≤ m + 1) (c ε r δ θ : ℝ)
+    {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M] [ChartedSpace H M]
+    {I : ModelWithCorners ℝ (MorseModel (m + 1)) H} {f : M → ℝ}
+    (data : MorseChart (m + 1) k hk c I f) (x : M) : M := by
+  classical
+  exact if hx : x ∈ morseChartBallImage hk c data then
+    data.χ (modelLowerRoundMap hk ε r δ θ (data.χ.symm x))
+  else x
+
+noncomputable def morseCapRoundedLowerUnround {m k : ℕ} (hk : k ≤ m + 1) (c ε r δ θ : ℝ)
+    {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M] [ChartedSpace H M]
+    {I : ModelWithCorners ℝ (MorseModel (m + 1)) H} {f : M → ℝ}
+    (data : MorseChart (m + 1) k hk c I f) (x : M) : M := by
+  classical
+  exact if hx : x ∈ morseChartBallImage hk c data then
+    data.χ (modelLowerRoundMapUnround hk ε r δ θ (data.χ.symm x))
+  else x
+
 theorem handleRoundAttachingEmbedding_mem_capRoundedLowerSublevel {m k : ℕ}
     (hk : k ≤ m + 1) (c ε r δ θ : ℝ)
     {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M] [T2Space M] [ChartedSpace H M]
