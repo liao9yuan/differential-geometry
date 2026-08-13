@@ -20,7 +20,7 @@ open DifferentialGeometry.Integral.Connection
 open DifferentialGeometry.Tensor.Coordinates
 
 variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace Real E]
-variable [Module.Finite Real E] [FiniteDimensional Real E]
+variable [FiniteDimensional Real E]
 variable [NeZero (Module.finrank Real E)]
 variable {H : Type*} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H}
