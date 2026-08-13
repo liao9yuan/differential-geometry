@@ -7369,6 +7369,39 @@ theorem modelLowerRoundBound_le_smoothCap {ε r δ θ t : ℝ} (hδ : 0 < δ) (h
     rw [div_mul_cancel₀ _ hne]
   nlinarith [hsc, hratio]
 
+theorem modelLowerRoundMap_mem_attached_strict {n k : ℕ} (hk : k ≤ n) (c ε r δ θ : ℝ)
+    (hδ : 0 < δ) (hθ : 0 < θ) (hδr : δ < r ^ 2) (hθr : θ < r ^ 2)
+    (y : MorseModel n) (hy : morseNormalForm hk c y < c - ε) :
+    modelAttachedFunction hk c ε r δ (modelLowerRoundMap hk ε r δ θ y) < c := by
+  dsimp [modelAttachedFunction]
+  rw [modelLowerRoundMap_posPart, modelLowerRoundMap_negPart]
+  rw [norm_smul, Real.norm_eq_abs, mul_pow, sq_abs]
+  have hstrict : ‖posPart hk y‖ ^ 2 < ‖negPart hk y‖ ^ 2 - 2 * ε := by
+    have hsplit := morseNormalForm_split hk c y
+    nlinarith [hsplit, hy]
+  have ht : 2 * ε < ‖negPart hk y‖ ^ 2 := by
+    have hpos0 : 0 ≤ ‖posPart hk y‖ ^ 2 := sq_nonneg _
+    nlinarith [hstrict, hpos0]
+  have hscale_pos : 0 < modelRoundScale ε r δ θ (‖negPart hk y‖ ^ 2) :=
+    modelRoundScale_pos hδ hθ hδr hθr
+  have hscale2_pos : 0 < modelRoundScale ε r δ θ (‖negPart hk y‖ ^ 2) ^ 2 :=
+    sq_pos_of_pos hscale_pos
+  have hlt : modelRoundScale ε r δ θ (‖negPart hk y‖ ^ 2) ^ 2 * ‖posPart hk y‖ ^ 2 <
+      modelRoundScale ε r δ θ (‖negPart hk y‖ ^ 2) ^ 2 *
+        (‖negPart hk y‖ ^ 2 - 2 * ε) := by
+    exact mul_lt_mul_of_pos_left hstrict hscale2_pos
+  have hbnd : modelLowerRoundBound ε r δ θ (‖negPart hk y‖ ^ 2) ≤
+      smoothCap ε r δ (‖negPart hk y‖ ^ 2) :=
+    modelLowerRoundBound_le_smoothCap hδ hθ hδr ht
+  have hmain : modelRoundScale ε r δ θ (‖negPart hk y‖ ^ 2) ^ 2 * ‖posPart hk y‖ ^ 2 <
+      smoothCap ε r δ (‖negPart hk y‖ ^ 2) := by
+    have hle' : modelRoundScale ε r δ θ (‖negPart hk y‖ ^ 2) ^ 2 *
+        (‖negPart hk y‖ ^ 2 - 2 * ε) ≤
+        smoothCap ε r δ (‖negPart hk y‖ ^ 2) := by
+      simpa [modelLowerRoundBound] using hbnd
+    exact lt_of_lt_of_le hlt hle'
+  nlinarith
+
 theorem modelLowerRoundBound_eq_smoothCap_of_ge {ε r δ θ t : ℝ} (hδ : 0 < δ) (hθ : 0 < θ)
     (hδr : δ < r ^ 2) (ht : r ^ 2 + 2 * ε ≤ t) :
     modelLowerRoundBound ε r δ θ t = smoothCap ε r δ t := by
