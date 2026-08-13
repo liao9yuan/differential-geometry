@@ -8876,6 +8876,38 @@ theorem modelHandleRoundMap_f_sub {n k : ℕ} (hk : k ≤ n) (c ε r δ θ : ℝ
   rw [modelHandleRoundMap_negPart_norm_sq hk ε r δ θ (le_of_lt hε) p]
   ring
 
+theorem modelHandleRoundMap_attachedFunction_eq_c_of_cocore_eq_one {n k : ℕ} (hk : k ≤ n)
+    (c ε r δ θ : ℝ) (hε : 0 < ε) (hδ : 0 < δ) (hθ : 0 < θ) (hδr : δ < r ^ 2)
+    (hθr : θ < r ^ 2) (hr : 0 < r) (p : StandardHandle k (n - k))
+    (hp : ‖(p.2 : EuclideanSpace ℝ (Fin (n - k)))‖ = 1) :
+    modelAttachedFunction hk c ε r δ (modelHandleRoundMap hk ε r δ θ p) = c := by
+  dsimp [modelAttachedFunction]
+  rw [modelHandleRoundMap_posPart_norm_sq hk ε r δ θ hε hδ hθ hδr hθr hr p]
+  rw [modelHandleRoundMap_negPart_norm_sq hk ε r δ θ (le_of_lt hε) p]
+  let a : ℝ := ‖(p.1 : EuclideanSpace ℝ (Fin k))‖ ^ 2
+  let b : ℝ := ‖(p.2 : EuclideanSpace ℝ (Fin (n - k)))‖ ^ 2
+  have hb : b = 1 := by
+    dsimp [b]
+    rw [hp]
+    simp
+  have hq : modelRoundCapQ ε r δ θ a b = smoothCap ε r δ ((2 * ε + r ^ 2 * b) * a) := by
+    by_cases ha : a = 1
+    · rw [modelRoundCapQ_eq_lowerBound_of_eq_one (ε := ε) (r := r) (δ := δ) (θ := θ) (a := a) (b := b) ha]
+      rw [ha]
+      have hlb : modelLowerRoundBound ε r δ θ (2 * ε + r ^ 2) = r ^ 2 := by
+        simpa [add_comm] using (modelLowerRoundBound_eq_rSq_of_vertex (ε := ε) (r := r) (δ := δ)
+          (θ := θ) hθ (ne_of_gt hr) : modelLowerRoundBound ε r δ θ (r ^ 2 + 2 * ε) = r ^ 2)
+      have hsm : smoothCap ε r δ (2 * ε + r ^ 2) = r ^ 2 := by
+        simpa [add_comm] using (smoothCap_eq_rSq_of_vertex (ε := ε) (r := r) (δ := δ) :
+          smoothCap ε r δ (r ^ 2 + 2 * ε) = r ^ 2)
+      simpa [hb, mul_one] using (hlb.trans hsm.symm)
+    · have hq' : modelRoundCapQ ε r δ θ a b = smoothCap ε r δ ((2 * ε + r ^ 2) * a) :=
+        modelRoundCapQ_eq_smoothCap_of_eq_one (ε := ε) (r := r) (δ := δ) (θ := θ) (a := a) (b := b)
+          hb ha
+      simpa [hb] using hq'
+  rw [hq]
+  ring
+
 theorem modelRoundCapQ_eq_r2b_of_t_lt {ε r δ θ a b t : ℝ} (hε : 0 < ε) (hδ : 0 < δ)
     (hθ : 0 < θ) (hδr : δ < r ^ 2) (hθr : θ < r ^ 2) (hr : 0 < r) (hapos : 0 < a) (ha1 : a ≤ 1)
     (hb0 : 0 ≤ b) (hb1 : b ≤ 1) (ht0 : t < r ^ 2 + 2 * ε) (htpos : 0 < t)
