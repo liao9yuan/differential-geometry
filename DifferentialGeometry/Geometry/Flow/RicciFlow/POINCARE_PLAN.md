@@ -221,3 +221,140 @@ far along — P0 itself is ≈ 15–20% of the program.
   VOLUME_COMPARISON_PLAN.md` (asset audit + stages V1–V3; V1 needs no new
   foundations — the integration layer and the Jacobi/Grönwall/Bonnet–Myers
   engines are all in-tree and 0-sorry).
+
+## 2026-08-12 post-HCG rebaseline
+
+This section supersedes the July execution order, but not the scope ruling in
+§0.  The current planning assumption is that the provider-native main HCG
+compactness route is complete.  The initial-data Hamilton endpoint is accounted
+for separately: it becomes axiom-clean only after the collaborator's uniform
+existence proof is merged through `lowreg_dt_unif` and the downstream maximal
+flow artifacts are refreshed.
+
+### A. Morgan--Tian chapters: retain, reuse, or omit
+
+| Morgan--Tian source | Program decision after HCG | Main remaining Lean product |
+|---|---|---|
+| `intro` | Exposition only; do not formalize line by line. | Final dependency narrative and endpoint theorem only. |
+| `prelim`, Riemannian part | Reuse the existing connection, curvature, geodesic, Jacobi, volume, Hopf--Rinow, Bishop--Gromov, and CGT layers. | Only the later-consumed nonnegative-curvature package: Busemann rays, splitting, the soul theorem, and the precise Toponogov consequences used in `temp2kappa`, `bddcurvbdddist`, and `singlimit2`. |
+| `flowbasics` | Mostly existing project infrastructure. | Merge/audit uniform short-time existence; retain extension, distance distortion, Shi estimates, rescaling, and the generalized-flow vocabulary required below. |
+| `maxprin` | Weak scalar/tensor maximum principles and the three-dimensional pinching route are already project assets. | Hamilton's strong curvature maximum principle (including parallel kernel/splitting consequences) and the differential plus integrated matrix Harnack inequalities. |
+| `converge2` | Main smooth HCG chapter is complete; do not re-formalize it. | Later add only the localized/generalized-flow variants genuinely required by `singlimit2`. |
+| `newcompar` | New mandatory layer. | L-length, L-geodesics, L-Jacobi/index form, L-exponential, cut/minimizing domain, reduced length, and reduced-volume first/second variation. |
+| `newcomp2` | New mandatory layer. | Global minimizing L-geodesics on complete bounded-curvature flows, estimates for the minimum of reduced length, weak differential inequalities, and reduced-volume monotonicity. |
+| `noncoll` | The existing W/Galerkin route is sufficient for smooth compact-flow HCG but does not replace this chapter. | The L-length generalized-flow noncollapsing theorem, in a form stable under surgery and usable in the surgery induction. |
+| `temp2kappa` | New mandatory layer. | Kappa-solution structure: asymptotic shrinker, 2D/3D shrinker classification, splitting at infinity, universal kappa, asymptotic volume, compactness, neck/cap structure. |
+| `bddcurvbdddist` | New mandatory layer. | Bounded curvature at bounded distance for pinched generalized flows with canonical neighborhoods. |
+| `singlimit2` | Reuse smooth HCG as the base compactness engine, but this chapter is not already proved by HCG. | Local/partial generalized-flow limits, ancient extension, singular-time limits, epsilon-horns, and deep delta-neck production. |
+| `stdsoln` | New mandatory layer. | Standard initial metric on R3; noncompact existence, completeness, positivity, rotational symmetry, asymptotics, uniqueness, noncollapse, and canonical neighborhoods. |
+| `surgery`, first chapter | New mandatory layer; reuse generic smooth jet gluing where possible. | Delta-neck recognition, the surgery cap metric, curvature/pinching estimates, and post-surgery metric control. |
+| `surgery`, remaining chapters | New mandatory layer and the largest data-modeling task. | Surgery spacetime, generalized Ricci-flow equation, controlled RFWS, parameter functions, surgery process, surgery-stable noncollapse, canonical-neighborhood induction, nonaccumulation, and global existence. |
+| `energy1` | New mandatory analytic layer for extinction. | Width/min-max data, harmonic-map and curve-shortening/ramp estimates, forward-difference inequalities through surgery, and finite-time extinction. |
+| `canonnbhd` | Formalize on demand, not as an isolated chapter. | Exact epsilon-neck/cap overlap, chain, frontier, and topology readouts consumed by `stdsoln`, `singlimit2`, and surgery. Pure 3-manifold topology remains in the explicit topology-input bundle. |
+
+### B. Ordered critical path
+
+The post-HCG critical path is:
+
+```text
+Baseline closure
+  -> strong maximum principle + Hamilton Harnack
+  -> selected nonnegative-curvature geometry
+  -> L-geometry and reduced volume
+  -> generalized-flow L-noncollapse
+  -> kappa-solutions
+  -> bounded curvature at bounded distance
+  -> generalized singular limits
+  -> standard-solution canonical neighborhoods
+  -> surgery metric and surgery spacetime
+  -> surgery noncollapse/canonical-neighborhood induction
+  -> finite extinction
+  -> topology-input assembly
+```
+
+Execute it in the following order.
+
+1. **B0 -- freeze the smooth-flow baseline.** Merge the uniform-existence
+   producer at `lowreg_dt_unif`; refresh and audit
+   `ricci_flow_unif_existence`, `extends_of_rmBounded`, `exists_max_flow`,
+   `ham3_flow_exists_normalized`, and `ham3_main_hcg`.  Freeze the HCG public
+   interface after this audit.  This is integration work, not a new Poincare
+   chapter.
+2. **B1 -- build the two kappa-solution prerequisites in parallel.**
+   (a) strong scalar/tensor maximum principles plus Hamilton Harnack;
+   (b) Busemann/splitting/soul and only the Toponogov consequences actually
+   cited later.  Avoid a general-purpose Alexandrov-geometry campaign.  The
+   running plan for (b) is
+   `Geometry/Comparison/Nonnegative/PLAN.md`; its metric Busemann layer is now
+   focused-green, while weak Laplacian comparison is the first genuine API
+   frontier.
+3. **B2 -- formalize `newcompar` and `newcomp2` as one reduced-geometry API.**
+   First fix the time-reversed flow convention and the L-energy type.  Then
+   proceed through first variation, L-Jacobi/index form, minimizing L-geodesics,
+   reduced length, and reduced volume.  The phase endpoint is monotonicity on
+   complete bounded-curvature flows, not merely definitions.
+4. **B3 -- prove the generalized-flow L-noncollapse theorem from `noncoll`.**
+   Keep the existing W-based smooth theorem as a separate route.  The required
+   endpoint must survive surgery regions and is therefore an L-geometry
+   theorem.
+5. **B4 -- formalize the kappa-solution chapter.**  Recommended internal order:
+   ancient-flow package -> Harnack consequences -> reduced-volume blow-down ->
+   asymptotic shrinker -> splitting and soul consequences -> shrinker
+   classification -> universal kappa and compactness -> neck/cap description.
+6. **B5 -- formalize `bddcurvbdddist`.**  This should consume B4 as a black-box
+   kappa-solution package and the precise Toponogov lemmas from B1.  Its public
+   endpoint should already be stated for the generalized-flow data model needed
+   by surgery.
+7. **B6 -- extend HCG to `singlimit2`.**  Do not rebuild compactness.  Add local
+   exhaustions, incomplete/singular time slices, generalized-flow bookkeeping,
+   and the curvature-at-bounded-distance input around the existing smooth HCG
+   engine.  The endpoint is the deep-neck theorem in epsilon-horns.
+8. **B7 -- finish the standard solution in two subphases.**  Its
+   existence/uniqueness/asymptotic analysis may run earlier in parallel with
+   B2--B4.  Its canonical-neighborhood conclusion closes only after B4/B6.
+9. **B8 -- construct surgery.**  First prove the local surgery metric theorem;
+   then freeze the surgery-spacetime/RFWS structure; only then implement the
+   controlled-flow parameter induction.  Do not encode changing manifolds as a
+   family on one fixed manifold merely to simplify dependent types.  The
+   running event-first design and implementation plan is `Surgery/PLAN.md`.
+10. **B9 -- close the surgery induction.**  Combine B3, B4, B6, B7, and B8 to
+    obtain surgery-stable noncollapse, strong canonical neighborhoods,
+    nonaccumulation of surgery times, and existence for all forward times.
+11. **B10 -- prove finite-time extinction.**  Stabilize the RFWS interface
+    before starting the full `energy1` proof.  The analytic width/curve-flow
+    lane can then run mostly independently; the topology and reconstruction
+    statements remain explicit inputs.
+12. **B11 -- assemble Poincare.**  Derive extinction of the surgery flow and
+    pass through `PoincareTopologyInputs`.  A fully self-contained topology
+    formalization is a separate program expansion, not part of this analytic
+    critical path.
+
+### C. Useful parallel lanes
+
+After B0, the following work does not need to wait for the entire critical
+path:
+
+1. Hamilton Harnack and the strong maximum principle.
+2. Busemann/splitting/soul and the selected Toponogov package.
+3. The standard initial metric and noncompact parabolic existence/uniqueness
+   needed for the standard solution.
+4. A design-only prototype of surgery spacetime/RFWS, with no theorem claims
+   until the data model is stable.
+5. The low-level width, harmonic-map, and curve-shortening infrastructure from
+   `energy1`; connect it to RFWS only after B8 freezes the interface.
+
+The reduced-geometry lane should remain one coherent lane because its
+definitions and sign conventions are global.  The kappa-solution, bounded-
+distance, and singular-limit endpoints should be developed sequentially rather
+than as independent wrapper fronts.
+
+### D. Honest post-HCG accounting
+
+The Poincare endpoint theorem remains unstated and is therefore **0%**.  Its
+dedicated post-HCG machinery is approximately **15--20%** complete when existing
+Ricci-flow calculus, weak maximum principles, pinching, Bishop--Gromov, CGT,
+smooth noncollapse, and main HCG are counted.  The remaining **80--85%** contains
+most of the genuinely Perelman-specific mathematics: reduced geometry,
+kappa-solutions, generalized singular limits, the standard solution, surgery,
+and extinction.  Completion of B0 changes trust and integration status but does
+not materially reduce that denominator.
