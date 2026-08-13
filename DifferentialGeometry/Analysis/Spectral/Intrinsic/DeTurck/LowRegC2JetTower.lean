@@ -125,6 +125,7 @@ theorem path_add_sub_eq
     intervalIntegral.integral_add hIΦ hIΨ, intervalIntegral.integral_const]
   norm_num
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem path_add_sub_jet
     (g : SmoothRiemannianMetric I M) (r n : ℕ)
     {δ δ' : ℝ}

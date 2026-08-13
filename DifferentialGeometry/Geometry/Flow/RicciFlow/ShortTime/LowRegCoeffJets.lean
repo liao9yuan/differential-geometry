@@ -1227,6 +1227,7 @@ private theorem coeffJets_domDomCongr_sub
   simp only [ContinuousMultilinearMap.sub_apply,
     ContinuousMultilinearMap.domDomCongr_apply]
 
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] in
 theorem symm_grad3_sub
     (g : SmoothRiemannianMetric I M) (T U : SmoothCcTensor g 0 2) :
     symmSCovGrad3 (I := I) (M := M) g (T - U) =

@@ -92,6 +92,7 @@ def riemannLoweredCovec (gm gc : SmoothRiemannianMetric I M) (x : M) :
         exact ((gm.inner x).continuous.comp hR).clm_apply (continuous_apply 1) }
     : Tensor0SSpace 4 I x)
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [SigmaCompactSpace M] in
 @[simp] lemma riemannLoweredCovec_apply (gm gc : SmoothRiemannianMetric I M) (x : M)
     (m : Fin 4 → TangentSpace I x) :
     riemannLoweredCovec (I := I) gm gc x m =
@@ -99,6 +100,7 @@ def riemannLoweredCovec (gm gc : SmoothRiemannianMetric I M) (x : M) :
 
 namespace CurvatureCoefficientDifferenceJetTower
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [SigmaCompactSpace M] in
 lemma riemannLoweredScalar_global (gm gc : SmoothRiemannianMetric I M)
     {Y W p q : Π b : M, TangentSpace I b}
     (hY : ContMDiff I (I.prod 𝓘(ℝ, E)) ∞ (T% Y))
@@ -256,6 +258,7 @@ lemma toModel_om_single_eq_cotangentToDual (x : M) (om : Tensor0SSpace 1 I x)
   rw [cotangentToDual_apply]
   rfl
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [BoundarylessManifold I M] [SigmaCompactSpace M] in
 lemma g1_inner_gInvRaisedEndo_left (g₀ g₁ : SmoothRiemannianMetric I M) (x : M)
     (v w : TangentSpace I x) :
     g₁.inner x (gInvRaisedEndo (I := I) g₀ g₁ x v) w = g₀.inner x v w := by
@@ -426,6 +429,7 @@ lemma iteratedCovGrad_slotInsert_fullRaised_id_succ_eq_zero
   | succ m' ih =>
       rw [iteratedCovGrad_succ, ih, covGrad_zero]
 
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] in
 lemma iteratedCovGrad_smul_pt (g : SmoothRiemannianMetric I M) (r s j : ℕ)
     (c : ℝ) (w : SmoothCcTensor g r s) :
     iteratedCovGrad (I := I) g r s j (c • w) = c • iteratedCovGrad (I := I) g r s j w := by
@@ -434,6 +438,7 @@ lemma iteratedCovGrad_smul_pt (g : SmoothRiemannianMetric I M) (r s j : ℕ)
   | succ j ih =>
     rw [iteratedCovGrad_succ, iteratedCovGrad_succ, ih, covGrad_smul]
 
+omit [NeZero (Module.finrank ℝ E)] in
 lemma rfns_smul_pt (g : SmoothRiemannianMetric I M) (r s : ℕ) (x : M)
     (c : ℝ) (v : TensorRSSpace r s I x) :
     riemannianFiberNormSq (I := I) (M := M) g r s x (c • v) =
@@ -905,6 +910,7 @@ def connDiffArmFieldPt (g₀ g₁ : SmoothRiemannianMetric I M) :
       (fun x : M => PDE.DeTurck.connDiff (I := I) g₁ g₀ x)
       (fun V0 W => PDE.DeTurck.connDiff_contMDiff (I := I) g₁ g₀ V0.contMDiff W.contMDiff)⟩
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [SigmaCompactSpace M] in
 lemma connDiffArmFieldPt_apply (g₀ g₁ : SmoothRiemannianMetric I M) (x : M) :
     connDiffArmFieldPt (I := I) (M := M) g₀ g₁ x = PDE.DeTurck.connDiff (I := I) g₁ g₀ x := rfl
 

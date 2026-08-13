@@ -53,6 +53,7 @@ end Algebra
 
 section KeyIdentity
 
+omit [I.Boundaryless] in
 theorem nabla1_metric2 (g₁ g₂ : SmoothRiemannianMetric I M) :
     metricNabla0S (I := I) g₁ (metricTensorField (I := I) g₂) =
       lapDiffFlux (I := I) g₁ g₂ (metricTensorField (I := I) g₂) := by

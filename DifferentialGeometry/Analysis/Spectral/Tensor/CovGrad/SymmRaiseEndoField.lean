@@ -145,6 +145,7 @@ noncomputable def symmRaiseEndo (g : SmoothRiemannianMetric I M)
   toFun := fun x : M => symmRaiseEndoFib (I := I) (M := M) g T x
   contMDiff_toFun := symmRaiseEndo_smooth (I := I) (M := M) g T
 
+omit [BoundarylessManifold I M] in
 @[simp] lemma symmRaiseEndo_apply (g : SmoothRiemannianMetric I M)
     (T : SmoothCcTensor g 0 2) (x : M) :
     symmRaiseEndo (I := I) (M := M) g T x =
@@ -200,6 +201,7 @@ lemma symmRaiseEndo_add (g : SmoothRiemannianMetric I M)
   rw [ContinuousLinearMap.add_apply, ccBilinSymm_add]
   rw [inner_symmRaiseEndo, inner_symmRaiseEndo]
 
+omit [BoundarylessManifold I M] in
 lemma symmRaiseEndo_smul (g : SmoothRiemannianMetric I M) (a : ℝ)
     (T : SmoothCcTensor g 0 2) :
     symmRaiseEndo (I := I) (M := M) g (a • T) =

@@ -186,6 +186,7 @@ theorem bracketWithin {S : Set ℝ} (hG : GenJointGramOn (I := I) gfam α S)
     (partialDerivWithin (fun s y => chartGramOnE (I := I) (gfam s) α i j y) l
       isOpen_interior hs hy (hG.1 i j hs hy))
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem christoffelWithin {S : Set ℝ} (hG : GenJointGramOn (I := I) gfam α S)
     (i j k : Fin (Module.finrank ℝ E)) {s₀ : ℝ} {y₀ : E} (hs : s₀ ∈ S)
     (hy : y₀ ∈ interior (extChartAt I α).target) :

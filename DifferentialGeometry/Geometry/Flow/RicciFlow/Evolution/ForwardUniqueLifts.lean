@@ -387,6 +387,7 @@ def chartNablaRic (g : Real -> SmoothRiemannianMetric I M) (x₀ : M) :
     ricciCovDerivCompInFrame (I := I) (D := refInterval) (solOfMetric (I := I) g)
       (chartFrame I x₀) t x d p q
 
+omit [Module.Finite ℝ E] in
 theorem chrEvo_of_gram (g : Real -> SmoothRiemannianMetric I M) {a b : Real} (hab : a < b)
     (hjoint : ∀ (x₀ : M) (i j : Fin (Module.finrank Real E)),
       ContMDiffOn (𝓘(Real, Real).prod I) 𝓘(Real) ∞
@@ -411,6 +412,7 @@ theorem chrEvo_of_gram (g : Real -> SmoothRiemannianMetric I M) {a b : Real} (ha
     (trivializationAt E (TangentSpace I) x₀).open_baseSet
   exact h
 
+omit [Module.Finite ℝ E] in
 theorem gamma_of_gram (g₁ g₂ : Real -> SmoothRiemannianMetric I M) {a b : Real} (hab : a < b)
     (hjoint₁ : ∀ (x₀ : M) (i j : Fin (Module.finrank Real E)),
       ContMDiffOn (𝓘(Real, Real).prod I) 𝓘(Real) ∞

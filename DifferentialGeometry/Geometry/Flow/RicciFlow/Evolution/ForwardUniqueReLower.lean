@@ -418,6 +418,7 @@ end Pair
 
 section Defect
 
+omit [IsManifold I 2 M] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] [I.Boundaryless] in
 theorem reLower_eq_trace (g₁ g₂ : SmoothRiemannianMetric I M) {s : ℕ}
     (T : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
       (n := (∞ : WithTop ℕ∞)) (s + 1)) :
@@ -436,6 +437,7 @@ private theorem metricCov_one (g : SmoothRiemannianMetric I M) :
     (DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric_contMDiffCovariantDerivativeLocally_one
       (I := I) (M := M) g)
 
+omit [CompleteSpace E] [SigmaCompactSpace M] [I.Boundaryless] in
 theorem nablaProd_eval {s q : ℕ}
     (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
     (A : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
@@ -678,6 +680,7 @@ def reLowerOp (g₁ g₂ : SmoothRiemannianMetric I M) :
   | 0 => id
   | (_ + 1) => fun T => reLower (I := I) g₁ g₂ T
 
+omit [IsManifold I 2 M] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] [I.Boundaryless] in
 @[simp] theorem reLowerOp_succ (g₁ g₂ : SmoothRiemannianMetric I M) {k : ℕ}
     (T : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
       (n := (∞ : WithTop ℕ∞)) (k + 1)) :

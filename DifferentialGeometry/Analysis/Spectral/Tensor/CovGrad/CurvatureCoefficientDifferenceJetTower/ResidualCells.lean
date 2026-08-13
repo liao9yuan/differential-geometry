@@ -467,6 +467,7 @@ theorem productTerm_integral_tame_le_ordS
             _ = Mbar ^ (7 * i) * R ^ 2 := by rw [← mul_assoc, e3]
             _ ≤ (i : ℝ) * Mbar ^ (7 * i) * R ^ 2 := e5
 
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] in
 theorem cappedTopLayerCell_integral_le
     (g₀ : SmoothRiemannianMetric I M)
     (P : SmoothCcTensor g₀ 0 2)

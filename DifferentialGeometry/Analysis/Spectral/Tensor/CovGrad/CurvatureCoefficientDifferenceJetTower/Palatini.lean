@@ -783,6 +783,7 @@ lemma rfns_eq_sum_componentSq_of_horth_pt
     intro i; rw [hbse_def, coe_basisOfLinearIndependentOfCardEqFinrank]
   exact rfns_rs_eq_sum_componentSq_of_basis (I := I) (M := M) g₀ r s x S e bse hn hbse horth
 
+omit [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 lemma fiberNormSqComponent_zero_toModel_pt
     (g₀ : SmoothRiemannianMetric I M) (s : ℕ) (x : M) (S : SmoothCcTensor g₀ 0 s)
     {n : ℕ} (e : Fin n → TangentSpace I x) (K : Fin 0 → Fin n) (L : Fin s → Fin n) :
@@ -1879,6 +1880,7 @@ def riemannMixedKernelBilin (g₀ g₁ : SmoothRiemannianMetric I M) (x : M)
           ContinuousLinearMap.smul_apply, ContinuousLinearMap.smul_apply, map_smul,
           RingHom.id_apply] }
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [SigmaCompactSpace M] in
 @[simp] theorem riemannMixedKernelBilin_apply (g₀ g₁ : SmoothRiemannianMetric I M) (x : M)
     (p q v0 v1 : TangentSpace I x) :
     riemannMixedKernelBilin (I := I) g₀ g₁ x p q v0 v1 =
@@ -1901,6 +1903,7 @@ def riemannMixedSummandFib (g₀ g₁ : SmoothRiemannianMetric I M) (x : M)
         rw [Tensor0SSpace.toModel_smul, ContinuousMultilinearMap.smul_apply, smul_eq_mul,
           RingHom.id_apply, mul_smul] }
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [SigmaCompactSpace M] in
 @[simp] theorem riemannMixedSummandFib_toModel (g₀ g₁ : SmoothRiemannianMetric I M) (x : M)
     (p q : TangentSpace I x) (D : Tensor0SSpace 2 I x) (v : Fin 2 → E) :
     Tensor0SSpace.toModel (riemannMixedSummandFib (I := I) g₀ g₁ x p q D) v =
@@ -1937,6 +1940,7 @@ theorem riemannMixedBiContrFibFixedFrame_toModel (g₀ g₁ : SmoothRiemannianMe
   rw [Tensor0SSpace.toModelL_apply, riemannMixedSummandFib_toModel]
   ring
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [SigmaCompactSpace M] in
 theorem mixedKernelScalar_global (g₀ g₁ : SmoothRiemannianMetric I M)
     {Y W p q : Π b : M, TangentSpace I b}
     (hY : ContMDiff I (I.prod 𝓘(ℝ, E)) ∞ (T% Y))
@@ -2105,6 +2109,7 @@ def frameRiemannMixedKernel (g₀ g₁ : SmoothRiemannianMetric I M) (x : M)
         simp only [ContinuousLinearMap.comp_apply, ContinuousLinearMap.smul_apply,
           RingHom.id_apply, (riemannOp (LeviCivita (I := I) g₁) x v0).map_smul c p, map_smul] }
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [SigmaCompactSpace M] in
 theorem frameRiemannMixedKernel_apply (g₀ g₁ : SmoothRiemannianMetric I M) (x : M)
     (v0 v1 p q : TangentSpace I x) :
     frameRiemannMixedKernel (I := I) g₀ g₁ x v0 v1 p q =

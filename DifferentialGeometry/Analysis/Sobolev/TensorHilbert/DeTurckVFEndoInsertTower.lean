@@ -80,6 +80,7 @@ private theorem appCc_sub_right (g : SmoothRiemannianMetric I M) (r s : ℕ)
     rw [SmoothCcTensor.toSection_sub]; rfl]
   rw [ContinuousLinearMap.comp_sub]
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem wOmegaDiff_eq (g₀ g₁ g_bg : SmoothRiemannianMetric I M) :
     wOmega (I := I) (M := M) g₀ g₁ g₀ - wOmega (I := I) (M := M) g₀ g₁ g_bg =
       appCc (I := I) (M := M) g₀ 3 1 (cometricCastG0 (I := I) g₀ g₁)
@@ -113,6 +114,7 @@ private lemma unitModel_sub (g₀ : SmoothRiemannianMetric I M) (s : ℕ)
   rw [SmoothCcTensor.toSection_sub, ContMDiffSection.coe_sub, Pi.sub_apply,
     ContinuousLinearMap.sub_apply, Tensor0SSpace.toModel_sub]
 
+omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] in
 lemma wXi_unitModel_apply (g₀ g₁ g_bg : SmoothRiemannianMetric I M) (x : M)
     (m : Fin 3 → TangentSpace I x) :
     unitModel (I := I) (M := M) g₀ 3 (wXi (I := I) (M := M) g₀ g₁ g_bg) x m =

@@ -48,6 +48,7 @@ def bilin12At
         rw [connectionDifferenceOutput_apply]
         rfl }
 
+omit [IsManifold I ∞ M] [IsManifold I (∞ + 1) M] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 @[simp]
 theorem bilin12At_apply
     (A : TangentSpace I x →L[Real] TangentSpace I x →L[Real] TangentSpace I x)
@@ -470,6 +471,7 @@ def bilinOfComp (b : Module.Basis Idx Real (TangentSpace I x))
     (b.constr Real fun j =>
       LinearMap.toContinuousLinearMap (b.constr Real fun i => ∑ k, c i j k • b k))
 
+omit [IsManifold I (∞ + 1) M] [SigmaCompactSpace M] [T2Space M] in
 @[simp]
 theorem bilinOfComp_basis (b : Module.Basis Idx Real (TangentSpace I x))
     (c : Idx -> Idx -> Idx -> Real) (i j : Idx) :

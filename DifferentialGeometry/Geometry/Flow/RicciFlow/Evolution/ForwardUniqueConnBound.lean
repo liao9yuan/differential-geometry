@@ -234,6 +234,7 @@ def nablaRmDiffSq (g₁ : SmoothRiemannianMetric I M)
       (n := (∞ : WithTop ℕ∞)) 4) (x : M) : Real :=
   normSq0S (I := I) g₁ x 5 (nablaRmDiff (I := I) g₁ S x)
 
+omit [IsManifold I (∞ + 1) M] [SigmaCompactSpace M] in
 theorem nablaRmDiffSq_nonneg (g₁ : SmoothRiemannianMetric I M)
     (S : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
       (n := (∞ : WithTop ℕ∞)) 4) (x : M) :
@@ -417,6 +418,7 @@ section Hamilton
 
 variable {Idx : Type*} [Fintype Idx] {u : Set M} {x : M}
 
+omit [IsManifold I (∞ + 1) M] [SigmaCompactSpace M] [T2Space M] [Fintype Idx] in
 theorem coeff_adot_eq
     (g₁ g₂ : Real → SmoothRiemannianMetric I M)
     (frame : Idx -> (y : M) -> TangentSpace I y)
@@ -492,6 +494,7 @@ theorem coeff_adot_eq
   rw [hcoeff k, ← hbcoe i, ← hbcoe j]
   exact huniq
 
+omit [IsManifold I 2 M] in
 theorem lower_raise_cancel [DecidableEq Idx]
     (g : SmoothRiemannianMetric I M)
     (b : Module.Basis Idx Real (TangentSpace I x))

@@ -58,6 +58,7 @@ noncomputable def stepCAtom
   letI : T2Space (TangentBundle I Y.M) := Y.t2TangentBundle
   quadNormal Y.metric p (stepCBump lam hlam)
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem stepCAtom_Icc
     (Y : PointedRiemannianManifold.{u, uE, uH} (I := I)) (p : Y.M)
     (lam : Real) (hlam : 0 < lam) (q : Y.M) :

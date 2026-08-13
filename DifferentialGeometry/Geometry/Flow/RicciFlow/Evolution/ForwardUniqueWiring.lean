@@ -105,6 +105,7 @@ theorem fuBRm_eq {D : RealTimeInterval} (g : Real → SmoothRiemannianMetric I M
 theorem fuRicUp_eq {D : RealTimeInterval} (g : Real → SmoothRiemannianMetric I M) :
     ricUpFam (I := I) (D := D) (solOfMetric (I := I) g) = fuRicUp (I := I) g := rfl
 
+omit [Module.Finite ℝ E] [CompactSpace M] [BoundarylessManifold I M] in
 theorem fuRm04_real (g : Real → SmoothRiemannianMetric I M)
     (r : Real) (y : M) (i j k l : CoordinateIdx (𝕜 := Real) E) :
     fuRm04 (I := I) g r y i j k l =
@@ -328,6 +329,7 @@ private theorem lowerRm_cross
           (vec4 (I := I) (v 0) (v 1) (v 2) (v 3)) :=
       (rm04mix_inner (I := I) g₁ g₂ x (v 0) (v 1) (v 2) (v 3)).symm
 
+omit [Module.Finite ℝ E] in
 theorem fuIsSol (g : Real → SmoothRiemannianMetric I M) {a b : Real} (hab : a < b)
     (hjoint : ∀ (x₀ : M) (i j : Fin (Module.finrank Real E)),
       ContMDiffOn (𝓘(Real, Real).prod I) 𝓘(Real) ∞
@@ -460,6 +462,7 @@ theorem fuRmContAt (g : Real → SmoothRiemannianMetric I M) {a b t₀ : Real} {
   exact cwaSum _ fun p _ =>
     (cwaSum _ fun l _ => (hBcont p l).mul (hc l)).smul continuousWithinAt_const
 
+omit [Module.Finite ℝ E] in
 theorem fuGamma (g₁ g₂ : Real → SmoothRiemannianMetric I M) {a b : Real} (hab : a < b)
     (hjoint₁ : ∀ (x₀ : M) (i j : Fin (Module.finrank Real E)),
       ContMDiffOn (𝓘(Real, Real).prod I) 𝓘(Real) ∞
@@ -1134,6 +1137,7 @@ end SpeedContinuity
 
 section SlabFields
 
+omit [Module.Finite ℝ E] in
 theorem fuP_eq (g₁ g₂ : Real → SmoothRiemannianMetric I M) (t : Real) (x : M) :
     (fuTf (I := I) g₁ t - fuSfield (I := I) g₁ g₂ t) x =
       CovariantDerivative.riemannCurvature04At (I := I) (g₁ t) (metricCov (I := I) (g₂ t))
@@ -1143,6 +1147,7 @@ theorem fuP_eq (g₁ g₂ : Real → SmoothRiemannianMetric I M) (t : Real) (x :
   rw [hpt, fuTf_apply, fuSfield_apply]
   exact sub_sub_cancel _ _
 
+omit [Module.Finite ℝ E] in
 theorem fuFluxSlab (g₁ g₂ : Real → SmoothRiemannianMetric I M) {a b : Real}
     (h1smooth : ∀ (x₀ : M) (i j : Fin (Module.finrank Real E)),
       ContMDiffOn (𝓘(Real, Real).prod I) 𝓘(Real) ∞
@@ -1181,6 +1186,7 @@ theorem fuFluxSlab (g₁ g₂ : Real → SmoothRiemannianMetric I M) {a b : Real
     (fun r => fuTf (I := I) g₁ r - fuSfield (I := I) g₁ g₂ r) t x hB₂0 hBP0 hBg0
     (hB₂ t hIcc x) hBPx (hBg t hIcc x)
 
+omit [Module.Finite ℝ E] in
 theorem fuVolSlab (g₁ : Real → SmoothRiemannianMetric I M) {a b : Real}
     (h1smooth : ∀ (x₀ : M) (i j : Fin (Module.finrank Real E)),
       ContMDiffOn (𝓘(Real, Real).prod I) 𝓘(Real) ∞
@@ -1203,6 +1209,7 @@ theorem fuVolSlab (g₁ : Real → SmoothRiemannianMetric I M) {a b : Real}
   exact fuTraceRd (I := I) g₁ (metricRicciAt (I := I) (g₁ t) x)
     (pde_hasDerivAt (I := I) g₁ h1pde ⟨ht.1, lt_trans ht.2 hc.2⟩ x)
 
+omit [Module.Finite ℝ E] in
 theorem fuReactSlab (g₁ g₂ : Real → SmoothRiemannianMetric I M) {a b : Real}
     (h1smooth : ∀ (x₀ : M) (i j : Fin (Module.finrank Real E)),
       ContMDiffOn (𝓘(Real, Real).prod I) 𝓘(Real) ∞
@@ -1836,6 +1843,7 @@ theorem fuRemSlab (g₁ g₂ : Real → SmoothRiemannianMetric I M) {a b : Real}
       dsimp only [C_rem]
       ring
 
+omit [Module.Finite ℝ E] in
 theorem fuAdotSlab (g₁ g₂ : Real → SmoothRiemannianMetric I M) {a b : Real} (hab : a < b)
     (h1smooth : ∀ (x₀ : M) (i j : Fin (Module.finrank Real E)),
       ContMDiffOn (𝓘(Real, Real).prod I) 𝓘(Real) ∞

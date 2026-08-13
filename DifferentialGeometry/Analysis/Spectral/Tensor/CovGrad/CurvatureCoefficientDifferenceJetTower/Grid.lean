@@ -198,6 +198,7 @@ theorem ricciArmOrder0CurvCoeff_backgroundDifference_decomp
 
 namespace CurvatureCoefficientDifferenceJetTower
 
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] in
 theorem curvDiffGrid_productTerm_integral_le
     (g₀ : SmoothRiemannianMetric I M)
     (P : SmoothCcTensor g₀ 0 2)
@@ -906,6 +907,7 @@ lemma tWindow_mul_antidiagonalTupleGrid_le (b : ℕ → ℝ) (hb : ∀ j, 0 ≤ 
     _ = tWindowMulConst j l * tWindow b (j + l) := by
         rw [tWindowMulConst, ← Finset.sum_mul]
 
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] in
 lemma tWindow_eq_tripleSum (g₀ : SmoothRiemannianMetric I M)
     (T : SmoothCcTensor g₀ 0 2) (x : M) (i : ℕ) :
     tWindow (fun j => riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + j) x
@@ -917,6 +919,7 @@ lemma tWindow_eq_tripleSum (g₀ : SmoothRiemannianMetric I M)
               riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + e m) x
                 ((iteratedCovGrad (I := I) g₀ 0 2 (e m) T).toSection x) := rfl
 
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] in
 lemma antidiagonalTupleGrid_eq_doubleSum (g₀ : SmoothRiemannianMetric I M)
     (T : SmoothCcTensor g₀ 0 2) (x : M) (l : ℕ) :
     Combinatorics.antidiagonalTupleGrid
@@ -928,6 +931,7 @@ lemma antidiagonalTupleGrid_eq_doubleSum (g₀ : SmoothRiemannianMetric I M)
             riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + e m) x
               ((iteratedCovGrad (I := I) g₀ 0 2 (e m) T).toSection x) := rfl
 
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] in
 theorem exists_backgroundJet_rfns_bound (g₀ : SmoothRiemannianMetric I M)
     (r s : ℕ) (S : SmoothCcTensor g₀ r s) :
     ∃ c : ℕ → ℝ, (∀ i, 0 ≤ c i) ∧ ∀ (i : ℕ) (x : M),
@@ -975,6 +979,7 @@ def ricMixedSharpEndoFib (g₀ g₁ : SmoothRiemannianMetric I M) (x : M) :
           h, map_smul]
         rfl }
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [SigmaCompactSpace M] in
 @[simp] lemma ricMixedSharpEndoFib_apply (g₀ g₁ : SmoothRiemannianMetric I M) (x : M)
     (v : TangentSpace I x) :
     ricMixedSharpEndoFib (I := I) (M := M) g₀ g₁ x v =

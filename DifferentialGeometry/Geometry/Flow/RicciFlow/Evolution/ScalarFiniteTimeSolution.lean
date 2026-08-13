@@ -19,6 +19,7 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 variable [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
 variable [SigmaCompactSpace M] [T2Space M]
 
+omit [NeZero (Module.finrank ℝ E)] [IsManifold I (∞ + 1) M] [SigmaCompactSpace M] [T2Space M] in
 theorem scalar_pos_of_ricci
     (g0 : SmoothRiemannianMetric I M)
     (hdim : Module.finrank Real E = 3)

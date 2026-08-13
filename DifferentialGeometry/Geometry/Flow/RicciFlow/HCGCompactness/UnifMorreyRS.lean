@@ -44,6 +44,7 @@ def morreyRSC (gBase : SmoothRiemannianMetric I M) (Λ : ℝ) (r s : ℕ) : ℝ 
     (kjetConst (Module.finrank ℝ E) Λ L₁ L₂ (r + s))
     (Module.finrank ℝ E) (r + s)
 
+omit [BoundarylessManifold I M] in
 lemma morreyRSC_nonneg (gBase : SmoothRiemannianMetric I M) {Λ : ℝ}
     (hΛ : 1 ≤ Λ) (r s : ℕ) :
     0 ≤ morreyRSC (I := I) (M := M) gBase Λ r s := by

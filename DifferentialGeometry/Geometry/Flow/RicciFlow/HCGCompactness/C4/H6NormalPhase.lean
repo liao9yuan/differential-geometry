@@ -65,6 +65,7 @@ theorem phaseRadius_metric
     (by norm_num)).trans
       (mul_le_mul_of_nonneg_left (hd.mu_antitone hx) d.ratio_pos.le)
 
+omit [CompleteSpace E] in
 theorem phaseRadius_chart
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
     {hd : InjRadiusDecayInput (I := I) X}
@@ -143,6 +144,7 @@ theorem phaseErr_lt_ev
   simpa only [b₀, d.chartPhaseK_eq] using
     chartPhaseErr_lt_ev (I := I) Y.metric b₀ heps
 
+omit [CompleteSpace E] in
 theorem exists_phase_scale
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
     {hd : InjRadiusDecayInput (I := I) X}

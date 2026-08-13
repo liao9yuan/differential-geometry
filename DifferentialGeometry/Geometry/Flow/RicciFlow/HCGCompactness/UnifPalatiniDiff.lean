@@ -29,6 +29,7 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
   [T2Space M] [SigmaCompactSpace M]
 
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] in
 theorem curvJet1_eval (g : SmoothRiemannianMetric I M) (x : M)
     (D X Y Z W : TangentSpace I x) :
     iterCov (I := I) g 4 (metricRm04 (I := I) (M := M) g) 1 x
@@ -105,6 +106,7 @@ theorem curvJet1_normSq_le_of_op
         rw [Real.sqrt_mul (by positivity), Real.sqrt_sq hK]
 
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [SigmaCompactSpace M] in
 theorem covDerivConnDiff_congr
     (g₂ g₁ : SmoothRiemannianMetric I M)
     (W X Y W' X' Y' : ContMDiffSection I E (∞ : WithTop ℕ∞)

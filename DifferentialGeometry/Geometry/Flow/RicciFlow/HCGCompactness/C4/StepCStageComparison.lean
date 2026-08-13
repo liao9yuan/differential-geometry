@@ -861,6 +861,7 @@ theorem HasSuppConvData.actual_cm_tail
 
 namespace H6NormalData
 
+omit [CompleteSpace E] in
 theorem ratio_gt_48
     {hd : InjRadiusDecayInput (I := I) X}
     (d : H6NormalData (I := I) X hd) {aMin R : Real} {q : NNReal}
@@ -1037,6 +1038,7 @@ theorem stage_radius_gt
   rw [d.radius_eq]
   nlinarith [lamInf_lt_halfMin inp.decay inp.hD hphys P L gamma]
 
+omit [CompleteSpace E] in
 theorem stage_rho_le
     (inp : MetricCompactCore (I := I) X)
     (d : H6NormalData (I := I) X inp.decay)

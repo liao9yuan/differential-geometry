@@ -31,6 +31,7 @@ def InterSlot
     BInter hd D P L.lamInf
       (alpha.1 : Nat) (beta.1 : Nat) (L.φ k) }
 
+omit [CompleteSpace E] in
 theorem inter_slot_of_binter
     (hd : InjRadiusDecayInput (I := I) X) {D : Real}
     (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k))

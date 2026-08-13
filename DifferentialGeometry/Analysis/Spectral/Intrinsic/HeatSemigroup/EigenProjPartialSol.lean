@@ -30,6 +30,7 @@ def projNfun (g₀ : SmoothRiemannianMetric I M) (a : ℕ) {R : ℝ} (N : ℕ)
       tensorHs (I := I) (M := M) g₀ 0 2 (a : ℝ) :=
   fun u => spatialEigenProj (I := I) (M := M) g₀ (a : ℝ) N (Nfun u)
 
+omit [BoundarylessManifold I M] in
 theorem projN_lip (g₀ : SmoothRiemannianMetric I M) (a : ℕ) {R : ℝ} (N : ℕ)
     {L : ℝ≥0}
     {Nfun : lowerState (I := I) (M := M) g₀ a R →

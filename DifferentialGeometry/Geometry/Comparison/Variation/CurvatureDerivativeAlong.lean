@@ -446,6 +446,7 @@ theorem curvDeriv_congr_at
       curvDeriv_right_at (I := I) g γ X' Y' Z Z' t
         hγ hX' hY' hZ hZ' hZt
 
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
 theorem curvDeriv_restrict
     (g : SmoothRiemannianMetric I M) (γ : Real -> M)
     (X Y Z : ContMDiffSection I E (∞ : WithTop ℕ∞)

@@ -188,6 +188,7 @@ theorem mkOfP (g₀ : SmoothRiemannianMetric I M) (P : SmoothCcTensor g₀ 0 2)
   rw [one_mul]
   exact hgoal
 
+omit [BoundarylessManifold I M] in
 theorem mkOfDP (g₀ : SmoothRiemannianMetric I M) (P : SmoothCcTensor g₀ 0 2) :
     HasMarkWin (I := I) (M := M) g₀ P (covGrad (I := I) (M := M) g₀ 0 2 P) 1
       (fun _ => 1) := by
@@ -281,12 +282,14 @@ theorem mkMono (g₀ : SmoothRiemannianMetric I M) (P : SmoothCcTensor g₀ 0 2)
   exact le_trans (hX i x)
     (mul_le_mul_of_nonneg_right (hKK i) (mkWnn (I := I) (M := M) g₀ P x u i))
 
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] in
 theorem mkCongr (g₀ : SmoothRiemannianMetric I M) (P : SmoothCcTensor g₀ 0 2)
     {r c u : ℕ} {X Y : SmoothCcTensor g₀ r c} {K : ℕ → ℝ} (hXY : Y = X)
     (hX : HasMarkWin (I := I) (M := M) g₀ P X u K) :
     HasMarkWin (I := I) (M := M) g₀ P Y u K := by
   rw [hXY]; exact hX
 
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] in
 theorem mkAdd (g₀ : SmoothRiemannianMetric I M) (P : SmoothCcTensor g₀ 0 2)
     {r c u : ℕ} {X Y : SmoothCcTensor g₀ r c} {KX KY : ℕ → ℝ}
     (hX : HasMarkWin (I := I) (M := M) g₀ P X u KX)
@@ -307,6 +310,7 @@ theorem mkAdd (g₀ : SmoothRiemannianMetric I M) (P : SmoothCcTensor g₀ 0 2)
   have h2 := hY i x
   nlinarith [h1, h2, mkWnn (I := I) (M := M) g₀ P x u i]
 
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] in
 theorem mkSmul (g₀ : SmoothRiemannianMetric I M) (P : SmoothCcTensor g₀ 0 2)
     {r c u : ℕ} {X : SmoothCcTensor g₀ r c} {K : ℕ → ℝ} (t : ℝ)
     (hX : HasMarkWin (I := I) (M := M) g₀ P X u K) :
@@ -340,6 +344,7 @@ theorem mkSub (g₀ : SmoothRiemannianMetric I M) (P : SmoothCcTensor g₀ 0 2)
   have h := mkAdd (I := I) (M := M) g₀ P hX (mkNeg (I := I) (M := M) g₀ P hY)
   rwa [← sub_eq_add_neg] at h
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem mkReindex (g₀ : SmoothRiemannianMetric I M) (P : SmoothCcTensor g₀ 0 2)
     {r c u : ℕ} {X : SmoothCcTensor g₀ r c} {K : ℕ → ℝ} (ρ : Equiv.Perm (Fin r))
     (hX : HasMarkWin (I := I) (M := M) g₀ P X u K) :
@@ -360,6 +365,7 @@ theorem mkDdc (g₀ : SmoothRiemannianMetric I M) (P : SmoothCcTensor g₀ 0 2)
     (fun y d => by rw [rsDomDomCongrSection_toSection, toModel_rsDomDomCongr_apply]) i x]
   exact hX i x
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem mkDdc0 (g₀ : SmoothRiemannianMetric I M) (P : SmoothCcTensor g₀ 0 2)
     {c u : ℕ} {X : SmoothCcTensor g₀ 0 c} {K : ℕ → ℝ} (σ : Equiv.Perm (Fin c))
     (hX : HasMarkWin (I := I) (M := M) g₀ P X u K) :

@@ -47,6 +47,7 @@ def intrInjRadius
     (p : M) : ℝ≥0∞ :=
   sSup (intrInjRadiusSet (I := I) g hEnorm p)
 
+omit [CompleteSpace E] [T2Space (TangentBundle I M)] [ConnectedSpace M] in
 lemma intrInj_down
     (g : SmoothRiemannianMetric I M)
     (hEnorm : ∀ x : M, ∀ v : TangentSpace I x,
@@ -56,6 +57,7 @@ lemma intrInj_down
     r' ∈ intrInjRadiusSet (I := I) g hEnorm p :=
   hr.mono (Metric.eball_subset_eball h)
 
+omit [CompleteSpace E] [T2Space (TangentBundle I M)] [ConnectedSpace M] in
 lemma zero_mem_intrInj
     (g : SmoothRiemannianMetric I M)
     (hEnorm : ∀ x : M, ∀ v : TangentSpace I x,
@@ -67,6 +69,7 @@ lemma zero_mem_intrInj
   rw [Metric.eball_zero]
   exact Set.injOn_empty _
 
+omit [CompleteSpace E] [T2Space (TangentBundle I M)] [ConnectedSpace M] in
 lemma le_intrInjRadius
     (g : SmoothRiemannianMetric I M)
     (hEnorm : ∀ x : M, ∀ v : TangentSpace I x,

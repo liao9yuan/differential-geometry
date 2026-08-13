@@ -28,6 +28,7 @@ variable {N : Type*} [TopologicalSpace N] [ChartedSpace G N]
   [IsManifold J ((∞ : WithTop ℕ∞) + 1) N]
   [T2Space N] [SigmaCompactSpace N] [J.Boundaryless]
 
+omit [InnerProductSpace ℝ E] in
 theorem rm04_localPull
     (g : SmoothRiemannianMetric J N) (f : M → N)
     (hf : IsLocalDiffeomorph I J ∞ f)

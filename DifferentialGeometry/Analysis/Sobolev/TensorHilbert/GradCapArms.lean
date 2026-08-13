@@ -151,12 +151,14 @@ theorem capMono (g₀ : SmoothRiemannianMetric I M) (P : SmoothCcTensor g₀ 0 2
   exact le_trans (hX i x)
     (mul_le_mul_of_nonneg_right (hKK i) (nnCapW (I := I) (M := M) g₀ P x i))
 
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] in
 theorem capCongr (g₀ : SmoothRiemannianMetric I M) (P : SmoothCcTensor g₀ 0 2)
     {r c : ℕ} {X Y : SmoothCcTensor g₀ r c} {K : ℕ → ℝ} (hXY : Y = X)
     (hX : HasCapWin (I := I) (M := M) g₀ P X K) :
     HasCapWin (I := I) (M := M) g₀ P Y K := by
   rw [hXY]; exact hX
 
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] in
 theorem capAdd (g₀ : SmoothRiemannianMetric I M) (P : SmoothCcTensor g₀ 0 2)
     {r c : ℕ} {X Y : SmoothCcTensor g₀ r c} {KX KY : ℕ → ℝ}
     (hX : HasCapWin (I := I) (M := M) g₀ P X KX)
@@ -177,6 +179,7 @@ theorem capAdd (g₀ : SmoothRiemannianMetric I M) (P : SmoothCcTensor g₀ 0 2)
   have h2 := hY i x
   nlinarith [h1, h2, nnCapW (I := I) (M := M) g₀ P x i]
 
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] in
 theorem capSmul (g₀ : SmoothRiemannianMetric I M) (P : SmoothCcTensor g₀ 0 2)
     {r c : ℕ} {X : SmoothCcTensor g₀ r c} {K : ℕ → ℝ} (t : ℝ)
     (hX : HasCapWin (I := I) (M := M) g₀ P X K) :
@@ -210,6 +213,7 @@ theorem capSub (g₀ : SmoothRiemannianMetric I M) (P : SmoothCcTensor g₀ 0 2)
   have h := capAdd (I := I) (M := M) g₀ P hX (capNeg (I := I) (M := M) g₀ P hY)
   rwa [← sub_eq_add_neg] at h
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem capReindex (g₀ : SmoothRiemannianMetric I M) (P : SmoothCcTensor g₀ 0 2)
     {r c : ℕ} {X : SmoothCcTensor g₀ r c} {K : ℕ → ℝ} (ρ : Equiv.Perm (Fin r))
     (hX : HasCapWin (I := I) (M := M) g₀ P X K) :
@@ -230,6 +234,7 @@ theorem capDdc (g₀ : SmoothRiemannianMetric I M) (P : SmoothCcTensor g₀ 0 2)
     (fun y d => by rw [rsDomDomCongrSection_toSection, toModel_rsDomDomCongr_apply]) i x]
   exact hX i x
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem capDdc0 (g₀ : SmoothRiemannianMetric I M) (P : SmoothCcTensor g₀ 0 2)
     {c : ℕ} {X : SmoothCcTensor g₀ 0 c} {K : ℕ → ℝ} (σ : Equiv.Perm (Fin c))
     (hX : HasCapWin (I := I) (M := M) g₀ P X K) :

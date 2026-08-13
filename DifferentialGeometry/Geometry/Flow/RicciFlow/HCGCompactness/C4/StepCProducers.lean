@@ -276,6 +276,7 @@ theorem hatCageImg' (hd : InjRadiusDecayInput (I := I) X) {D : Real}
   exact properBallImgOfRad' (I := I) (X.obj (L.φ n)) (P (L.φ n))
     (c := center gamma) (R := 4 * L.lamInf (gamma : Nat)) (σ := sigma gamma) hR hσ
 
+omit [Module.Finite ℝ E] in
 theorem hUx_of_sigma (hd : InjRadiusDecayInput (I := I) X) {D : Real}
     (P : forall k : Nat, ProperMetricOn (I := I) (X.obj k))
     (L : DifferentialGeometry.HCGCompactness.NetLimitData (X := X) hd D P)
@@ -878,6 +879,7 @@ noncomputable def totalPts
   | some target => pairPts alpha target a b x
   | none => x
 
+omit [Module.Finite ℝ E] [CompleteSpace E] in
 @[simp] theorem activeFill_totalPts_zero
     {M : Type u}
     {hd : InjRadiusDecayInput (I := I) X} {D : Real}
@@ -892,6 +894,7 @@ noncomputable def totalPts
         (fun y => y) x gamma = x := by
   simp [centerAverage.activeFill, hzero]
 
+omit [Module.Finite ℝ E] [CompleteSpace E] in
 theorem activeFill_totalPts_of_ne
     {M : Type u}
     {hd : InjRadiusDecayInput (I := I) X} {D : Real}

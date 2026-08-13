@@ -808,6 +808,7 @@ theorem ricciOne_joint
       (symmS (I := I) (M := M) g W) hδ hδZ
   simpa only [ricciOne] using c0j_add (I := I) (M := M) g hA hD
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [SigmaCompactSpace M] in
 theorem arm2_eq_ins
     (g gm : SmoothRiemannianMetric I M) :
     lieCovArm2 (I := I) (M := M) g gm =

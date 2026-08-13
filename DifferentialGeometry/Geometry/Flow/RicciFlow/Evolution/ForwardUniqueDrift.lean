@@ -200,6 +200,7 @@ theorem lowerTri_split
   rw [hA, drift02_sub_left]
   ring
 
+omit [I.Boundaryless] in
 theorem lowerRm_eq_rm04 (g : SmoothRiemannianMetric I M) (x : M) :
     lowerTri (I := I) (metricTensorField (I := I) g x)
         (riemannOp (metricCov (I := I) g) x) =

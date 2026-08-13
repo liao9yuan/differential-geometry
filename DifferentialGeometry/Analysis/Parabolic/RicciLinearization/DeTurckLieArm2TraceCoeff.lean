@@ -376,6 +376,7 @@ private lemma unitModel_sub2_apply_local (g₀ : SmoothRiemannianMetric I M)
     ContinuousMultilinearMap.sub_apply]
 
 
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] [SigmaCompactSpace M] in
 theorem deTurckLieTraceCoeff_appCc_eq (g₀ g₁ : SmoothRiemannianMetric I M)
     (σ : Equiv.Perm (Fin 4)) (D : SmoothCcTensor g₀ 0 4) (x : M)
     (v : Fin 2 → TangentSpace I x) :

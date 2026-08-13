@@ -37,6 +37,7 @@ omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] in
 theorem pccJetC_nonneg (i : ℕ) : 0 ≤ pccJetC (E := E) i := by
   exact mul_nonneg (appCcGdiag_nonneg (E := E) i) (by positivity)
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] in
 theorem ricciJetC_nonneg (i : ℕ) : 0 ≤ ricciJetC (E := E) i := by
   exact mul_nonneg (by norm_num) (pccJetC_nonneg (E := E) i)
 

@@ -25,6 +25,7 @@ noncomputable def seqCenterD
     (L : NetLimitData hd D P) (k gamma : Nat) : (X.obj (L.φ k)).M :=
   (seqCenter hd D P (L.φ k) gamma).getD (X.obj (L.φ k)).basepoint
 
+omit [CompleteSpace E] in
 theorem seqCenterD_dist_eq
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
     (hd : InjRadiusDecayInput (I := I) X) {D : Real}
@@ -39,6 +40,7 @@ theorem seqCenterD_dist_eq
   cases OrderedNet.netCenter (X.obj (L.φ k)).basepoint (hd.lambda D)
       (hd.lambda_continuous D) gamma <;> simp
 
+omit [CompleteSpace E] in
 @[simp] theorem seqCenterD_subseq
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
     (hd : InjRadiusDecayInput (I := I) X) {D : Real}
@@ -65,6 +67,7 @@ noncomputable instance liveSlotFintype
       Subtype.val_injective
   exact Fintype.ofFinite (LiveSlot L pb r)
 
+omit [CompleteSpace E] in
 theorem seqCenterD_some
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
     (hd : InjRadiusDecayInput (I := I) X) {D : Real}
@@ -86,6 +89,7 @@ theorem seqCenterD_live
   (L.alive_eventually gamma).mono fun k hk =>
     seqCenterD_some hd P L k gamma (hk.trans hgamma)
 
+omit [CompleteSpace E] in
 theorem seqCenter_dead
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
     (hd : InjRadiusDecayInput (I := I) X) {D : Real}

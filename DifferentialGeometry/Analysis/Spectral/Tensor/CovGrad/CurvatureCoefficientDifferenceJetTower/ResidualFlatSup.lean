@@ -66,6 +66,7 @@ theorem rfnsIterCont (g₀ : SmoothRiemannianMetric I M) (P : SmoothCcTensor g�
     ← Integral.L2.SmoothCcTensor.toFun_apply (I := I) (M := M)
       (iteratedCovGrad (I := I) g₀ 0 2 l P) x]
 
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] in
 theorem jetSupLow (g₀ : SmoothRiemannianMetric I M) {a : ℕ} {R Cemb Lam : ℝ}
     (hR : 0 ≤ R)
     (hCemb : ∀ (W : SmoothCcTensor g₀ 0 2) (x : M),

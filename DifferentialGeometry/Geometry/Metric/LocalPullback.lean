@@ -32,6 +32,7 @@ noncomputable def localPullInner
     mfderiv I J f x
   (ContinuousLinearMap.precomp Real D).comp ((g.inner (f x)).comp D)
 
+omit [FiniteDimensional ℝ E] [FiniteDimensional ℝ F] [IsManifold I ∞ M] in
 theorem localPullInner_apply
     (g : SmoothRiemannianMetric J N) (f : M → N)
     (x : M) (v w : TangentSpace I x) :

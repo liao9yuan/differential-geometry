@@ -427,6 +427,7 @@ theorem unifRHSBilin
   linarith
 
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] in
 theorem rhsZeroC_nonneg {Kb Λ : ℝ} (hΛ : 1 ≤ Λ) :
     0 ≤ rhsZeroC (E := E) Λ Kb := by
   have hCd0 : 0 ≤ riemannDiffC Λ Λ Λ := by

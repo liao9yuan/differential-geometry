@@ -400,6 +400,7 @@ theorem metricCorr_sub_h2
   rw [← metricCorr_sub (I := I) (M := M) g g₁ g_bg P Q]
   simpa only [lowJetSq, Nat.reduceAdd] using hmul g₁ g_bg (P - Q)
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem metricCorr_tel
     (g gT gU g_bg : SmoothRiemannianMetric I M)
     (T U : SmoothCcTensor g 0 2) :
@@ -10674,6 +10675,7 @@ theorem a1_sub_comm
     ContinuousLinearMap.sub_apply, map_sub]
   rw [hAW, hBW]
 
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] in
 theorem a1_sub
     (g : SmoothRiemannianMetric I M)
     (A B : LowBaseActionData g) (T U : SmoothCcTensor g 0 2) :

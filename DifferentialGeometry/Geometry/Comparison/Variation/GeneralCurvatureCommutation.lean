@@ -141,6 +141,7 @@ noncomputable def jacVarForce
           covSnd (I := I) g f
             (fun s w => varFst (I := I) f s w) 0 v) t)
 
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] in
 theorem cov_curvAlong
     (g : SmoothRiemannianMetric I M) (γ : Real → M)
     (X Y Z : ∀ s : Real, TangentSpace I (γ s)) (t : Real) :
@@ -156,6 +157,7 @@ theorem cov_curvAlong
   unfold curvDerivAlong
   abel
 
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
 theorem curvAlong_smooth
     (g : SmoothRiemannianMetric I M) (γ : Real -> M)
     (X Y Z : ∀ s, TangentSpace I (γ s))
@@ -233,6 +235,7 @@ theorem curvAlong_smooth
       (v := Z) hR2 hZ
   simpa only [curvAlong] using hR3
 
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
 theorem jacCurv_smooth
     (g : SmoothRiemannianMetric I M) (f : Real -> Real -> M)
     (V : ∀ s t : Real, TangentSpace I (f s t))
@@ -611,6 +614,7 @@ theorem curvDeriv_add_right
   simp only [map_add]
   abel
 
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] in
 theorem curvDeriv_congr
     (g : SmoothRiemannianMetric I M) (γ : Real -> M)
     {X X' Y Y' Z Z' : ∀ s, TangentSpace I (γ s)} {t : Real}
