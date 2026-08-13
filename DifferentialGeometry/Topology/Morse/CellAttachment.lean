@@ -7896,6 +7896,41 @@ theorem modelLowerRoundMap_injective {n k : ℕ} (hk : k ≤ n) (c ε r δ θ : 
   exact congrArg (fun q : EuclideanSpace ℝ (Fin k) × EuclideanSpace ℝ (Fin (n - k)) =>
     recombine hk q.1 q.2) hpairs
 
+noncomputable def modelLowerRoundMapUnround {n k : ℕ} (hk : k ≤ n) (ε r δ θ : ℝ)
+    (y : MorseModel n) : MorseModel n :=
+  recombine hk (negPart hk y)
+    ((modelRoundScale ε r δ θ (‖negPart hk y‖ ^ 2))⁻¹ • posPart hk y)
+
+theorem modelLowerRoundMapUnround_round {n k : ℕ} (hk : k ≤ n) (ε r δ θ : ℝ)
+    (hθ : 0 < θ) (hδ : 0 < δ) (hδr : δ < r ^ 2) (hθr : θ < r ^ 2) (z : MorseModel n) :
+    modelLowerRoundMapUnround hk ε r δ θ (modelLowerRoundMap hk ε r δ θ z) = z := by
+  let t : ℝ := ‖negPart hk z‖ ^ 2
+  have hscale_pos : 0 < modelRoundScale ε r δ θ t := modelRoundScale_pos hδ hθ hδr hθr
+  have hscale_ne : modelRoundScale ε r δ θ t ≠ 0 := ne_of_gt hscale_pos
+  have hneg : negPart hk (modelLowerRoundMapUnround hk ε r δ θ (modelLowerRoundMap hk ε r δ θ z)) =
+      negPart hk z := by
+    dsimp [modelLowerRoundMapUnround, modelLowerRoundMap]
+    rw [negPart_recombine, negPart_recombine]
+  have hpos : posPart hk (modelLowerRoundMapUnround hk ε r δ θ (modelLowerRoundMap hk ε r δ θ z)) =
+      posPart hk z := by
+    dsimp [modelLowerRoundMapUnround, modelLowerRoundMap]
+    rw [posPart_recombine, negPart_recombine, posPart_recombine]
+    change (modelRoundScale ε r δ θ t)⁻¹ • (modelRoundScale ε r δ θ t • posPart hk z) = posPart hk z
+    rw [smul_smul]
+    rw [inv_mul_cancel₀ hscale_ne]
+    simp
+  rw [← recombine_decompose hk (modelLowerRoundMapUnround hk ε r δ θ (modelLowerRoundMap hk ε r δ θ z))]
+  rw [hneg, hpos]
+  exact recombine_decompose hk z
+
+theorem modelLowerRoundMap_unround {n k : ℕ} (hk : k ≤ n) (c ε r δ θ : ℝ)
+    (hθ : 0 < θ) (hδ : 0 < δ) (hδr : δ < r ^ 2) (hθr : θ < r ^ 2) {y : MorseModel n}
+    (hy : y ∈ modelLowerRoundMap hk ε r δ θ '' (sublevel (morseNormalForm hk c) (c - ε))) :
+    modelLowerRoundMap hk ε r δ θ (modelLowerRoundMapUnround hk ε r δ θ y) = y := by
+  rcases hy with ⟨z, hz, hzr⟩
+  rw [← hzr]
+  rw [modelLowerRoundMapUnround_round hk ε r δ θ hθ hδ hδr hθr z]
+
 theorem modelRoundCapInterp_eq {ε r a b t : ℝ} (hε : 0 < ε) (hr : 0 < r) (ha0 : 0 < a)
     (_ha1 : a ≤ 1) (hb0 : 0 ≤ b) (_hb1 : b ≤ 1) (ht0 : t < r ^ 2 + 2 * ε) (htpos : 0 < t)
     (ht : t = (2 * ε + r ^ 2 * b) * a) :
