@@ -119,52 +119,6 @@ theorem metricInverseInBasis_of_local
   · simpa [metricCompInFrame, IsLocalFrameOn.toBasisAt_coe] using
       (hinv t x hx i j).2
 
-omit [SigmaCompactSpace M] in
-@[deprecated "use a local or pointwise frame statement instead" (since := "2026-05-22")]
-theorem ricciTensorRealizesRm04FirstTraceInFrameOnRegular_of_rm13Trace
-    {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
-    {u : Set M}
-    (S : SolutionOn (I := I) (M := M) D)
-    (Rm13 : Real -> DifferentialGeometry.Integral.Connection.Tensor13Section (I := I) (M := M))
-    (Rm04 : Real -> DifferentialGeometry.Integral.Connection.Tensor04Section (I := I) (M := M))
-    (gInv : Real -> DifferentialGeometry.Integral.Connection.InverseMetricComponents M Idx)
-    (frame : Idx -> (x : M) -> TangentSpace I x)
-    (hframe : IsLocalFrameOn I E 1 frame u)
-    (hcover : forall x : M, x ∈ u)
-    (hinv : InvMetricLocal (I := I) S gInv frame u)
-    (hRicTrace13 : forall t : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime
-      D,
-      DifferentialGeometry.Integral.Connection.RicciTensorRealizesRm13Trace (I := I)
-        (S.ricci (t : Real)) (Rm13 (t : Real)))
-    (hLower : forall (t : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime D)
-      (x : M),
-      DifferentialGeometry.Integral.Connection.Rm04LowersRm13At (I := I)
-        (S.family.metric (t : Real)) x
-        (Rm13 (t : Real) x) (Rm04 (t : Real) x))
-    :
-    RicciTensorRealizesRm04FirstTraceInFrameOnRegular
-      (I := I) S Rm04 gInv frame := by
-  intro t x i j
-  have hx : x ∈ u := hcover x
-  have hinvAt :
-      Tensor0SBundle.MetricInverseInBasis_gen
-        (I := I) (M := M) (S.family.metric (t : Real)) x
-        (hframe.toBasisAt hx)
-        (fun a b : Idx => gInv (t : Real) x a b) :=
-    metricInverseInBasis_of_local
-      (I := I) S gInv frame hframe hinv (t : Real) hx
-  have hAt :=
-    DifferentialGeometry.Integral.Connection.ricciFirstTraceAt_of_rm13_section
-      (I := I) (S.family.metric (t : Real)) (hframe.toBasisAt hx)
-      (fun a b : Idx => gInv (t : Real) x a b) hinvAt
-      (S.ricci (t : Real)) (Rm13 (t : Real)) (Rm04 (t : Real))
-      (hRicTrace13 t) (hLower t x)
-      (Tensor0SBundle.invMetric_symm
-        (I := I) (M := M) (S.family.metric (t : Real)) x
-        (hframe.toBasisAt hx) (fun a b : Idx => gInv (t : Real) x a b) hinvAt)
-  simpa [DifferentialGeometry.Integral.Connection.RicciTensorRealizesRm04FirstTraceInFrame,
-    IsLocalFrameOn.toBasisAt_coe] using hAt i j
-
 def ConnectionLocallySmoothOn
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D) : Prop :=
@@ -392,59 +346,6 @@ theorem rm04InputSkew_regular
           -Rm04 (t : Real) x (DifferentialGeometry.Integral.Connection.vec4 X Y Z W) :=
   rm04InputSkew_regular_first_two
     (I := I) S Rm13 Rm04 hRm13 hLower
-
-omit [SigmaCompactSpace M] in
-@[deprecated "use a local or pointwise frame statement instead" (since := "2026-05-22")]
-theorem ricciSymm_regular
-    {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
-    {u : Set M}
-    (S : SolutionOn (I := I) (M := M) D)
-    (Rm04 : Real -> DifferentialGeometry.Integral.Connection.Tensor04Section (I := I) (M := M))
-    (gInv : Real -> DifferentialGeometry.Integral.Connection.InverseMetricComponents M Idx)
-    (frame : Idx -> (x : M) -> TangentSpace I x)
-    (hframe : IsLocalFrameOn I E 1 frame u)
-    (hcover : forall x : M, x ∈ u)
-    (hinv : InvMetricLocal (I := I) S gInv frame u)
-    (hTrace : forall (t : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime D)
-      (x : M),
-      DifferentialGeometry.Integral.Connection.RicciRealizesRm04FirstTraceAt (I := I)
-        (S.ricci (t : Real) x) (Rm04 (t : Real) x)
-        (gInv (t : Real) x)
-        (hframe.toBasisAt (hcover x)))
-    (hPair : forall (t : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime D)
-      (x : M),
-      forall W X Y Z : TangentSpace I x,
-        Rm04 (t : Real) x (DifferentialGeometry.Integral.Connection.vec4 W X Y Z) =
-          Rm04 (t : Real) x (DifferentialGeometry.Integral.Connection.vec4 Y Z W X))
-    (hOutput : forall (t : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime D)
-      (x : M),
-      DifferentialGeometry.Integral.Connection.Rm04OutputSkewAt (I := I) (Rm04 (t : Real) x))
-    (hInput : forall (t : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime D)
-      (x : M),
-      forall X Y Z W : TangentSpace I x,
-        Rm04 (t : Real) x (DifferentialGeometry.Integral.Connection.vec4 Y X Z W) =
-          -Rm04 (t : Real) x (DifferentialGeometry.Integral.Connection.vec4 X Y Z W)) :
-    RicciSymmetricInFrameOnRegular (I := I) S frame := by
-  intro t x i j
-  let basis := hframe.toBasisAt (hcover x)
-  have hinvAt :
-      Tensor0SBundle.MetricInverseInBasis_gen
-        (I := I) (M := M) (S.family.metric (t : Real)) x
-        basis (fun a b : Idx => gInv (t : Real) x a b) :=
-    metricInverseInBasis_of_local
-      (I := I) S gInv frame hframe hinv (t : Real)
-      (hcover x)
-  have hsym :=
-    DifferentialGeometry.Integral.Connection.ricciSymm_of_rm04 (I := I) basis
-      (fun a b : Idx => gInv (t : Real) x a b)
-      (S.ricci (t : Real) x) (Rm04 (t : Real) x)
-      (hTrace t x) (hPair t x) (hOutput t x) (hInput t x)
-      (Tensor0SBundle.invMetric_symm
-        (I := I) (M := M) (S.family.metric (t : Real)) x basis
-        (fun a b : Idx => gInv (t : Real) x a b) hinvAt)
-      i j
-  simpa [basis, ricciCompInFrame, DifferentialGeometry.Integral.Connection.ricciComp,
-    DifferentialGeometry.Integral.Connection.ricciComp, IsLocalFrameOn.toBasisAt_coe] using hsym
 
 def RiemannEvolutionEquationInFrameOn
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}

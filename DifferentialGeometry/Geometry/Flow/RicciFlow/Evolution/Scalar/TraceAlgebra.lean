@@ -145,75 +145,6 @@ theorem scalarLaplacianTraceInFrame_realizes_heatOperator_of_laplacianAt
     (scalar := scalarTraceInFrame (I := I) S gInv frame)
     (scalarLap := scalarLaplacianTraceInFrame (M := M) gInv roughLapRic) h
 
-omit [SigmaCompactSpace M] [T2Space M] in
-@[deprecated "use a local or pointwise scalar trace statement instead" (since := "2026-05-22")]
-theorem scalarLaplacianTraceInFrame_realizes_heatOperator_of_hessianTrace
-    {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
-    {u : Set M}
-    (S : SolutionOn (I := I) (M := M) D)
-    (G : DifferentialGeometry.Integral.Connection.RealizedMetricFamily (I := I) (M := M) Real)
-    (T : Real)
-    (gInv : Real -> DifferentialGeometry.Integral.Connection.InverseMetricComponents M Idx)
-    (frame : Idx -> (x : M) -> TangentSpace I x)
-    (hframe : IsLocalFrameOn I E 1 frame u)
-    (hcover : forall x : M, x ∈ u)
-    (roughLapRic : Real -> M -> Idx -> Idx -> Real)
-    (scalarHess : Real -> (x : M) ->
-      Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) 2 x)
-    (htrace : forall t : Real, t ∈ Set.Icc 0 T -> forall x : M,
-      DifferentialGeometry.Integral.Connection.ScalarLaplacianRealizesTraceAtInBasis (I := I)
-        (G.connection t) (G.metric t)
-        (hframe.toBasisAt (hcover x))
-        (gInv t x) (scalarTraceInFrame (I := I) S gInv frame t)
-        (scalarHess t x))
-    (hcomp : forall t : Real, t ∈ Set.Icc 0 T -> forall x : M,
-      forall i j : Idx,
-        scalarHess t x (DifferentialGeometry.Integral.Connection.vec2 (I := I) (frame i x)
-          (frame j x)) =
-          roughLapRic t x i j) :
-    ScalarLaplacianRealizesHeatOperatorOn (I := I) G T
-      (scalarTraceInFrame (I := I) S gInv frame)
-      (scalarLaplacianTraceInFrame (M := M) gInv roughLapRic) := by
-  refine scalarLaplacianTraceInFrame_realizes_heatOperator_of_laplacianAt
-    (I := I) S G T gInv frame roughLapRic ?_
-  intro t ht x
-  let basis := hframe.toBasisAt (hcover x)
-  have hmetric :
-      DifferentialGeometry.Integral.Connection.metricTrace0S2InBasis (I := I) basis (gInv t x)
-          (scalarHess t x) Fin.elim0 =
-        scalarLaplacianTraceInFrame (M := M) gInv roughLapRic t x := by
-    unfold DifferentialGeometry.Integral.Connection.metricTrace0S2InBasis
-      scalarLaplacianTraceInFrame
-    refine Finset.sum_congr rfl fun i _hi => ?_
-    refine Finset.sum_congr rfl fun j _hj => ?_
-    congr 1
-    have hinput :
-        DifferentialGeometry.Integral.Connection.metricTraceInput (I := I) (basis i) (basis j)
-          Fin.elim0 =
-          DifferentialGeometry.Integral.Connection.vec2 (I := I) (frame i x) (frame j x) := by
-      have hbi : basis i = frame i x := by
-        simp [basis, IsLocalFrameOn.toBasisAt_coe]
-      have hbj : basis j = frame j x := by
-        simp [basis, IsLocalFrameOn.toBasisAt_coe]
-      rw [hbi, hbj]
-      funext q
-      fin_cases q
-      · simp [DifferentialGeometry.Integral.Connection.metricTraceInput,
-        DifferentialGeometry.Integral.Connection.vec2,
-        DifferentialGeometry.Integral.Connection.vec2]
-      · rfl
-    rw [hinput, hcomp t ht x i j]
-  have htrace_tx := htrace t ht x
-  unfold DifferentialGeometry.Integral.Connection.ScalarLaplacianRealizesTraceAtInBasis at htrace_tx
-  calc
-    scalarLaplacianTraceInFrame (M := M) gInv roughLapRic t x =
-        DifferentialGeometry.Integral.Connection.metricTrace0S2InBasis (I := I) basis (gInv t x)
-          (scalarHess t x) Fin.elim0 := hmetric.symm
-    _ = DifferentialGeometry.Integral.Connection.laplacianAt (I := I) G t
-          (scalarTraceInFrame (I := I) S gInv frame t) x := by
-        unfold DifferentialGeometry.Integral.Connection.laplacianAt
-        exact htrace_tx.symm
-
 def RicciTraceNormCauchySchwarzInFrame
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -394,39 +325,6 @@ theorem of_orthonormal_inv
   intro t x
   exact ricciNormSqInFrame_ge_scalarTrace_sq_div_rank_of_orthonormal_inv
     (I := I) S gInv frame hInvDelta t x
-
-omit [SigmaCompactSpace M] in
-@[deprecated "use a local or pointwise frame statement instead" (since := "2026-05-22")]
-theorem of_metric_inverse_frame
-    {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
-    {u : Set M}
-    [DecidableEq Idx] [Nonempty Idx]
-    (S : SolutionOn (I := I) (M := M) D)
-    (gInv : Real -> DifferentialGeometry.Integral.Connection.InverseMetricComponents M Idx)
-    (frame : Idx -> (x : M) -> TangentSpace I x)
-    (hframe : IsLocalFrameOn I E 1 frame u)
-    (hcover : forall x : M, x ∈ u)
-    (hinv : InvMetricLocal (I := I) S gInv frame u)
-    (n : Real)
-    (hn : n = (Fintype.card Idx : Real)) :
-    RicciTraceNormCauchySchwarzInFrame (I := I) S gInv frame n := by
-  subst n
-  intro t x
-  have hx : x ∈ u := hcover x
-  let basis := hframe.toBasisAt hx
-  have hinvAt :
-      MetricInverseInBasis_gen
-        (I := I) (M := M) (S.family.metric t) x
-        basis (fun i j : Idx => gInv t x i j) :=
-    scalar_metricInverseInBasis_of_solution_frame
-      (I := I) S gInv frame hframe hinv t hx
-  rw [scalarTraceInFrame_eq_metricTracePair
-      (I := I) S gInv frame hframe hinv t hx,
-    ricciNormSqInFrame_eq_normSq0S
-      (I := I) S gInv frame hframe hinv t hx]
-  exact DifferentialGeometry.Integral.Connection.metricTracePair0SAt_sq_div_rank_le_normSq0S
-    (I := I) (S.family.metric t) basis (fun i j : Idx => gInv t x i j)
-    hinvAt (S.ricci t x)
 
 end RicciTraceNormCauchySchwarzInFrame
 

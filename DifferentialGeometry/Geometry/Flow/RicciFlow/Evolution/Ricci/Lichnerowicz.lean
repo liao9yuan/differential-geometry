@@ -495,61 +495,6 @@ theorem ricciLichnerowiczSpecializesInFrame_regular
       (I := I) S gInv frame (t : Real) x i j
       (fun a b => hInv (t : Real) x a b) (hRic t x)
 
-@[deprecated "use a local or pointwise Lichnerowicz specialization instead" (since := "2026-05-22")]
-theorem ricciLichnerowiczSpecializesInFrame_lc
-    [IsManifold I (∞ + 1) M]
-    {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
-    {u : Set M}
-    (S : SolutionOn (I := I) (M := M) D)
-    (hS : IsSolutionOn (I := I) S)
-    (Rm13 : Real -> DifferentialGeometry.Integral.Connection.Tensor13Section (I := I) (M := M))
-    (Rm04 : Real -> DifferentialGeometry.Integral.Connection.Tensor04Section (I := I) (M := M))
-    (gInv : Real -> DifferentialGeometry.Integral.Connection.InverseMetricComponents M Idx)
-    (frame : Idx -> (x : M) -> TangentSpace I x)
-    (roughLapRic : Real -> M -> Idx -> Idx -> Real)
-    (hframe : IsLocalFrameOn I E 1 frame u)
-    (hcover : forall x : M, x ∈ u)
-    (hTrace : forall (t : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime D)
-      (x : M),
-      DifferentialGeometry.Integral.Connection.RicciRealizesRm04FirstTraceAt (I := I)
-        (S.ricci (t : Real) x) (Rm04 (t : Real) x)
-        (gInv (t : Real) x)
-        (hframe.toBasisAt (hcover x)))
-    (hRm13 : forall t : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime D,
-      DifferentialGeometry.Integral.Connection.Rm13RealizesConnection (I := I)
-        (S.family.connection (t : Real)) (Rm13 (t : Real)))
-    (hLower : forall (t : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime D)
-      (x : M),
-      DifferentialGeometry.Integral.Connection.Rm04LowersRm13At (I := I)
-        (S.family.metric (t : Real)) x
-        (Rm13 (t : Real) x) (Rm04 (t : Real) x))
-    (hinv : InvMetricLocal (I := I) S gInv frame u) :
-    RicciLichnerowiczSpecializesInFrame
-      (I := I) S Rm04 gInv frame roughLapRic := by
-  have hOutput :=
-    rm04OutputSkew_regular (I := I) S hS Rm13 Rm04 hRm13 hLower
-  have hPair :=
-    rm04PairSymm_regular (I := I) S hS Rm13 Rm04 hRm13 hLower
-  have hInput :=
-    rm04InputSkew_regular (I := I) S Rm13 Rm04 hRm13 hLower
-  have hRic : RicciSymmetricInFrameOnRegular (I := I) S frame :=
-    ricciSymm_regular (I := I) S Rm04 gInv frame hframe
-      hcover hinv
-      hTrace hPair hOutput hInput
-  have hInv : ∀ t x i j, gInv t x i j = gInv t x j i := by
-    intro t x i j
-    have hinvAt :
-        Tensor0SBundle.MetricInverseInBasis_gen
-          (I := I) (M := M) (S.family.metric t) x
-          (hframe.toBasisAt (hcover x)) (fun a b : Idx => gInv t x a b) :=
-      metricInverseInBasis_of_local (I := I) S gInv frame hframe hinv t (hcover x)
-    exact Tensor0SBundle.invMetric_symm
-      (I := I) (M := M) (S.family.metric t) x
-      (hframe.toBasisAt (hcover x)) (fun a b : Idx => gInv t x a b)
-      hinvAt i j
-  exact ricciLichnerowiczSpecializesInFrame_regular
-    (I := I) S Rm04 gInv frame roughLapRic hRic hInv
-
 omit [DecidableEq Idx] in
 omit [SigmaCompactSpace M] [T2Space M] in
 theorem ricciLichnerowiczEquationInFrame_of_ricciEvolution
@@ -587,45 +532,6 @@ theorem ricciLichnerowiczEquationInFrame_of_ricciEvolution_and_symm
     (I := I) S Rm04 gInv frame roughLapRic h_ricci
     (ricciLichnerowiczSpecializesInFrame_of_symm
       (I := I) S Rm04 gInv frame roughLapRic hRic hInv)
-
-@[deprecated "use a local or pointwise Lichnerowicz equation route instead" (since := "2026-05-22")]
-theorem ricciLichnerowiczEquationInFrame_of_ricciEvolution_lc
-    [IsManifold I (∞ + 1) M]
-    {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
-    {u : Set M}
-    (S : SolutionOn (I := I) (M := M) D)
-    (hS : IsSolutionOn (I := I) S)
-    (Rm13 : Real -> DifferentialGeometry.Integral.Connection.Tensor13Section (I := I) (M := M))
-    (Rm04 : Real -> DifferentialGeometry.Integral.Connection.Tensor04Section (I := I) (M := M))
-    (gInv : Real -> DifferentialGeometry.Integral.Connection.InverseMetricComponents M Idx)
-    (frame : Idx -> (x : M) -> TangentSpace I x)
-    (roughLapRic : Real -> M -> Idx -> Idx -> Real)
-    (hframe : IsLocalFrameOn I E 1 frame u)
-    (hcover : forall x : M, x ∈ u)
-    (hTrace : forall (t : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime D)
-      (x : M),
-      DifferentialGeometry.Integral.Connection.RicciRealizesRm04FirstTraceAt (I := I)
-        (S.ricci (t : Real) x) (Rm04 (t : Real) x)
-        (gInv (t : Real) x)
-        (hframe.toBasisAt (hcover x)))
-    (hRm13 : forall t : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime D,
-      DifferentialGeometry.Integral.Connection.Rm13RealizesConnection (I := I)
-        (S.family.connection (t : Real)) (Rm13 (t : Real)))
-    (hLower : forall (t : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime D)
-      (x : M),
-      DifferentialGeometry.Integral.Connection.Rm04LowersRm13At (I := I)
-        (S.family.metric (t : Real)) x
-        (Rm13 (t : Real) x) (Rm04 (t : Real) x))
-    (h_ricci : RicciEvolutionEquationInFrame
-      (I := I) S Rm04 gInv frame roughLapRic)
-    (hinv : InvMetricLocal (I := I) S gInv frame u) :
-    RicciLichnerowiczEquationInFrame
-      (I := I) S Rm04 gInv frame roughLapRic :=
-  ricciLichnerowiczEquationInFrame_of_ricciEvolution
-    (I := I) S Rm04 gInv frame roughLapRic h_ricci
-    (ricciLichnerowiczSpecializesInFrame_lc
-      (I := I) S hS Rm13 Rm04 gInv frame roughLapRic hframe hcover
-      hTrace hRm13 hLower hinv)
 
 omit [SigmaCompactSpace M] in
 theorem evol_ricci_lichnerowicz_coordFrameAt_of_christoffelEvolution_nabla2_commutators

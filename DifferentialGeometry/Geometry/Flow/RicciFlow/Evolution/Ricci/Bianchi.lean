@@ -275,23 +275,6 @@ theorem traceRightNatLoc
     _ = contractedNabla2RicTraceBInFrame (M := M) gInv nabla2Ric
           (t : Real) x i j := hB.symm
 
-omit [TopologicalSpace M] [SigmaCompactSpace M] [T2Space M] [DecidableEq Idx] in
-@[deprecated "use DifferentiatedContractedBianchiInFrameOnLocal or a pointwise producer"
-    (since := "2026-05-22")]
-theorem DifferentiatedContractedBianchiInFrame.of_local_cover
-    {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
-    {u : Set M}
-    (gInv : Real -> DifferentialGeometry.Integral.Connection.InverseMetricComponents M Idx)
-    (nabla2Ric : Real -> M -> Idx -> Idx -> Idx -> Idx -> Real)
-    (hcover : forall x : M, x ∈ u)
-    (h :
-      DifferentiatedContractedBianchiInFrameOnLocal
-        (D := D) (M := M) gInv nabla2Ric u) :
-    DifferentiatedContractedBianchiInFrame
-      (D := D) (M := M) gInv nabla2Ric := by
-  intro t x i j
-  exact h t x (hcover x) i j
-
 omit [DecidableEq Idx] in
 omit [SigmaCompactSpace M] [T2Space M] in
 theorem differentiatedContractedBianchiInFrameOnLocal_of_regular
