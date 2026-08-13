@@ -5,6 +5,7 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.MetricPreconv
 import DifferentialGeometry.Geometry.Curvature.RicciOperatorNormBound
 import DifferentialGeometry.Geometry.Curvature.Realized.MetricFamilyContinuity
 import DifferentialGeometry.Geometry.Curvature.OpenSubtypeNaturality
+import DifferentialGeometry.Geometry.Connection.ChartBridge.DiffRiemannBasisIdentityOffCentre
 import DifferentialGeometry.Geometry.Metric.ChartGram
 import DifferentialGeometry.Analysis.Calculus.SpaceJet
 import DifferentialGeometry.Analysis.Calculus.TimeSliceSwap
@@ -1935,7 +1936,6 @@ theorem gramSmooth
     rfl
   exact gramModel_to_mfld (I := I) (g := co.gInf) x₀ i j hmodel
 
-set_option maxHeartbeats 350000 in
 theorem gramSmoothIcc
     {R : letI : TopologicalSpace P.M := P.topology
       letI : ChartedSpace H P.M := P.charted
@@ -2077,13 +2077,23 @@ theorem gramSmoothIcc
         (I := I) (co.gInf t) x₀ hxbase).ne'
   have hRhsSlices : ∀ t ∈ J, ContDiffOn Real ∞ (RHS t) V := by
     intro t ht
-    have hmaps : Set.MapsTo
-        (fun y => Analysis.jet2 (G t) y) V Ω := by
-      intro y hy
-      have hty : (t, y) ∈ U := ⟨ht, hy⟩
-      exact hJetMaps hty
-    simpa only [RHS, Function.comp_apply] using
-      hΦ.comp (hJetSlices t ht) hmaps
+    have hric : ContDiffOn Real ∞
+        (fun y => fun i k => -2 * chartRicciTensor (I := I) (co.gInf t) x₀ i k y) V := by
+      refine contDiffOn_pi.mpr (fun i => contDiffOn_pi.mpr (fun k => ?_))
+      exact (contDiffOn_const : ContDiffOn Real ∞ (fun _ : E => (-2 : Real)) V).mul
+        (chartRicciTensor_contDiffOn_interior (I := I) (co.gInf t) x₀ i k)
+    refine hric.congr (fun y hy => ?_)
+    funext i k
+    have hAt : ContDiffAt Real ∞ (G t) y :=
+      (hGs t ht y hy).contDiffAt (isOpen_interior.mem_nhds hy)
+    have hG : DifferentiableAt Real (G t) y := hAt.differentiableAt (by simp)
+    have hG1 : ∀ᶠ z in nhds y, DifferentiableAt Real (G t) z := by
+      filter_upwards [isOpen_interior.mem_nhds hy] with z hz
+      exact ((hGs t ht z hz).contDiffAt (isOpen_interior.mem_nhds hz)).differentiableAt (by simp)
+    have hG2 : DifferentiableAt Real (fun z => fderiv Real (G t) z) y :=
+      (hAt.fderiv_right (m := ∞) le_rfl).differentiableAt (by simp)
+    have hjet := jetRicciFlow_chartGram (I := I) (co.gInf t) x₀ hy hG hG1 hG2 i k
+    simpa only [RHS, G] using hjet
   have hbase : Analysis.SpaceJetDiff 0 G J V := by
     intro r
     apply contDiffOn_zero.2
