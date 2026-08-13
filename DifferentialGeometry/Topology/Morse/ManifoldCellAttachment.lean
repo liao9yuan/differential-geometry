@@ -17063,6 +17063,116 @@ theorem morseCapRoundedLowerRoundGlobal_mem_roundedSublevel {m k : ℕ} (hk : k 
     (morseCapRoundedLowerRound_mem_roundedAttachment hk c ε r δ θ R₀ data hε hδ hθ hδr hθr hr hR0
       hR0lt hbig hRbig hxlow)
 
+theorem morseCapRoundedLowerRoundGlobal_lt_roundedSublevel {m k : ℕ} (hk : k ≤ m + 1)
+    (c ε r δ θ η R₀ R₀' R₁' : ℝ) {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M]
+    [ChartedSpace H M] {I : ModelWithCorners ℝ (MorseModel (m + 1)) H} {f : M → ℝ}
+    (data : MorseChart (m + 1) k hk c I f)
+    (hε : 0 < ε) (hδ : 0 < δ) (hθ : 0 < θ) (hδr : δ < r ^ 2) (hθr : θ < r ^ 2)
+    (hη : 0 < η)
+    (hR0 : 0 ≤ R₀) (hR0lt : R₀ < data.R) (hbig : 2 * (r ^ 2 + 2 * ε + δ) ≤ R₀ ^ 2)
+    (hR : R₀' < R₁') (hR0' : 0 ≤ R₀') (hbig' : 2 * (r ^ 2 + 2 * ε + δ) ≤ R₀' ^ 2)
+    (hR₁₂R' : R₁' < data.R) (hR0lt1 : R₀ < R₁')
+    {x : M} (hxlt : f x < c - ε) :
+    morseRoundedFunction hk c ε r δ R₀' R₁' data
+        (morseCapRoundedLowerRoundGlobal hk c ε r δ θ η data x) < c := by
+  rw [morseCapRoundedLowerRoundGlobal_eq_round_of_sublevel hk c ε r δ θ η data hη (le_of_lt hxlt)]
+  by_cases hb : x ∈ morseChartBallImage hk c data
+  · have hround : morseCapRoundedLowerRound hk c ε r δ θ data x =
+        data.χ (modelLowerRoundMap hk ε r δ θ (data.χ.symm x)) := by
+      dsimp [morseCapRoundedLowerRound]
+      rw [if_pos hb]
+    rw [hround]
+    have hylt : morseNorm (m + 1) (data.χ.symm x) < data.R :=
+      chartSymm_norm_lt_of_mem_ballImage hk c data hb
+    have hnorm_round := modelLowerRoundMap_morseNorm_le_max hk c ε r δ θ R₀
+      (le_of_lt hε) hδ hθ hδr hR0 hbig
+      (chartSymm_mem_lowerSublevel_model hk c ε data hb (le_of_lt hxlt))
+    have hnorm_round_lt : morseNorm (m + 1) (modelLowerRoundMap hk ε r δ θ (data.χ.symm x)) < data.R :=
+      lt_of_le_of_lt hnorm_round (max_lt hR0lt hylt)
+    have hsrc_round : modelLowerRoundMap hk ε r δ θ (data.χ.symm x) ∈ data.χ.source :=
+      data.hχsrc (modelLowerRoundMap hk ε r δ θ (data.χ.symm x)) (le_of_lt hnorm_round_lt)
+    have hsymm : data.χ.symm (data.χ (modelLowerRoundMap hk ε r δ θ (data.χ.symm x))) =
+        modelLowerRoundMap hk ε r δ θ (data.χ.symm x) :=
+      data.χ.left_inv hsrc_round
+    have hNlt : morseNormalForm hk c (data.χ.symm x) < c - ε := by
+      rcases hb with ⟨y, hy, hxy⟩
+      have hsrc : y ∈ data.χ.source := data.hχsrc y (le_of_lt hy)
+      have hsymm0 : data.χ.symm x = y := by
+        rw [← hxy]
+        exact data.χ.left_inv hsrc
+      have hf : f x = morseNormalForm hk c y := by
+        rw [← hxy]
+        exact data.hnorm y (le_of_lt hy)
+      rw [hsymm0]
+      simpa [hf] using hxlt
+    by_cases hR₁' : data.χ (modelLowerRoundMap hk ε r δ θ (data.χ.symm x)) ∈
+        data.χ '' {y : MorseModel (m + 1) | morseNorm (m + 1) y ≤ R₁'}
+    · have heq := morseRoundedFunction_eq_model_of_mem_closedBall hk c ε r δ R₀' R₁' data hR₁'
+      rw [heq]
+      rw [hsymm]
+      exact modelRoundedFunction_lowerRound_lt_c hk c ε r δ θ R₀' R₁' hε hδ hθ hδr hθr hR hR0'
+        hbig' (data.χ.symm x) hNlt
+    · have heq := morseRoundedFunction_eq_f_add_eps_of_not_mem_closedBall hk c ε r δ R₀' R₁' data hR₁'
+      rw [heq]
+      have hround_mem_ball : data.χ (modelLowerRoundMap hk ε r δ θ (data.χ.symm x)) ∈
+          morseChartBallImage hk c data := by
+        have h := morseCapRoundedLowerRound_mem_ballImage hk c ε r δ θ R₀ data hε hδ hθ hδr hR0 hR0lt hbig
+          (le_of_lt hxlt) hb
+        rwa [hround] at h
+      rcases hround_mem_ball with ⟨z, hz, hzx⟩
+      have hsrc_z : z ∈ data.χ.source := data.hχsrc z (le_of_lt hz)
+      have hsymm_round : data.χ.symm (data.χ (modelLowerRoundMap hk ε r δ θ (data.χ.symm x))) = z := by
+        rw [← hzx]
+        exact data.χ.left_inv hsrc_z
+      have hnorm_round_gt : R₁' < morseNorm (m + 1)
+          (data.χ.symm (data.χ (modelLowerRoundMap hk ε r δ θ (data.χ.symm x)))) := by
+        rw [hsymm_round]
+        have hnot : ¬ morseNorm (m + 1) z ≤ R₁' := by
+          intro hle
+          exact hR₁' ⟨z, hle, hzx⟩
+        exact lt_of_not_ge hnot
+      have hneg_large : r ^ 2 + 2 * ε + δ <
+          ‖negPart hk (data.χ.symm x)‖ ^ 2 := by
+        by_contra hnot
+        have hneg_le : ‖negPart hk (data.χ.symm x)‖ ^ 2 ≤ r ^ 2 + 2 * ε + δ := le_of_not_gt hnot
+        have hy_norm : morseNorm (m + 1) (data.χ.symm x) ≤ R₀ :=
+          morseNorm_le_of_negPart_le_lower hk c ε r δ R₀ (le_of_lt hε) hR0 hbig hneg_le
+            (chartSymm_mem_lowerSublevel_model hk c ε data hb (le_of_lt hxlt))
+        have hround_norm_le : morseNorm (m + 1) (modelLowerRoundMap hk ε r δ θ (data.χ.symm x)) ≤ R₀ :=
+          by
+            rw [← max_eq_left hy_norm]
+            exact hnorm_round
+        have hnorm_round_le : morseNorm (m + 1)
+            (data.χ.symm (data.χ (modelLowerRoundMap hk ε r δ θ (data.χ.symm x)))) ≤ R₀ := by
+          rw [hsymm_round]
+          have hz : z = modelLowerRoundMap hk ε r δ θ (data.χ.symm x) := by
+            exact data.χ.injOn hsrc_z hsrc_round hzx
+          rw [hz]
+          exact hround_norm_le
+        exact (not_lt_of_ge (le_trans hnorm_round_le (le_of_lt hR0lt1))) hnorm_round_gt
+      have hself : morseCapRoundedLowerRound hk c ε r δ θ data x = x := by
+        rcases hb with ⟨y, hy, hxy⟩
+        have hsrc : y ∈ data.χ.source := data.hχsrc y (le_of_lt hy)
+        have hxtgt : x ∈ data.χ.target := by
+          rw [← hxy]
+          exact data.χ.map_source hsrc
+        exact morseCapRoundedLowerRound_eq_self_of_negPart_gt hk c ε r δ θ data hθ hδ hxtgt hneg_large
+      have hχ_eq : data.χ (modelLowerRoundMap hk ε r δ θ (data.χ.symm x)) = x := by
+        rw [← hround, hself]
+      rw [hχ_eq]
+      nlinarith [hxlt, hε]
+  · have hround : morseCapRoundedLowerRound hk c ε r δ θ data x = x := by
+      dsimp [morseCapRoundedLowerRound]
+      rw [if_neg hb]
+    rw [hround]
+    have hnotR₁' : x ∉ data.χ '' {y : MorseModel (m + 1) | morseNorm (m + 1) y ≤ R₁'} := by
+      intro h
+      rcases h with ⟨y, hy, hxy⟩
+      exact hb ⟨y, lt_of_le_of_lt hy hR₁₂R', hxy⟩
+    have heq := morseRoundedFunction_eq_f_add_eps_of_not_mem_closedBall hk c ε r δ R₀' R₁' data hnotR₁'
+    rw [heq]
+    nlinarith [hxlt, hε]
+
 theorem morseRoundedFunction_no_critical_at_level {m k : ℕ} (hk : k ≤ m + 1) (c ε r δ R₀ R₁ R₁' : ℝ)
     {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M] [ChartedSpace H M] [T2Space M]
     {I : ModelWithCorners ℝ (MorseModel (m + 1)) H} [I.Boundaryless]

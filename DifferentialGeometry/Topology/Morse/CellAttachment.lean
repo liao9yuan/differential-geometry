@@ -7402,6 +7402,26 @@ theorem modelLowerRoundMap_mem_attached_strict {n k : ℕ} (hk : k ≤ n) (c ε 
     exact lt_of_lt_of_le hlt hle'
   nlinarith
 
+theorem morseNorm_le_of_negPart_le_lower {n k : ℕ} (hk : k ≤ n) (c ε r δ R₀ : ℝ)
+    (hε : 0 ≤ ε) (hR0 : 0 ≤ R₀) (hbig : 2 * (r ^ 2 + 2 * ε + δ) ≤ R₀ ^ 2)
+    {y : MorseModel n} (hneg : ‖negPart hk y‖ ^ 2 ≤ r ^ 2 + 2 * ε + δ)
+    (hlow : morseNormalForm hk c y ≤ c - ε) :
+    morseNorm n y ≤ R₀ := by
+  have hsplit := morseNormalForm_split hk c y
+  have hpos : ‖posPart hk y‖ ^ 2 ≤ ‖negPart hk y‖ ^ 2 - 2 * ε := by
+    nlinarith [hsplit, hlow]
+  have hpos_le : ‖posPart hk y‖ ^ 2 ≤ r ^ 2 + δ := by nlinarith [hpos, hneg]
+  have hsum : ‖negPart hk y‖ ^ 2 + ‖posPart hk y‖ ^ 2 ≤ R₀ ^ 2 := by
+    nlinarith [hneg, hpos_le, hbig, hε]
+  have hsq : morseNorm n y ^ 2 ≤ R₀ ^ 2 := by
+    rw [morseNorm_sq_eq_negPart_add_posPart hk y]
+    exact hsum
+  have hnonneg : 0 ≤ morseNorm n y := by
+    dsimp [morseNorm]
+    exact norm_nonneg _
+  have habs : |morseNorm n y| ≤ |R₀| := sq_le_sq.mp hsq
+  rwa [abs_of_nonneg hnonneg, abs_of_nonneg hR0] at habs
+
 theorem modelLowerRoundBound_eq_smoothCap_of_ge {ε r δ θ t : ℝ} (hδ : 0 < δ) (hθ : 0 < θ)
     (hδr : δ < r ^ 2) (ht : r ^ 2 + 2 * ε ≤ t) :
     modelLowerRoundBound ε r δ θ t = smoothCap ε r δ t := by
