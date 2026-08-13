@@ -12701,6 +12701,29 @@ theorem morseRoundedAttachment_subset_capRoundedLowerUnion {m k : ℕ} (hk : k �
     right
     exact hx
 
+theorem morseCapRoundedLowerUnion_eq_roundedAttachment {m k : ℕ} (hk : k ≤ m + 1)
+    (c ε r δ θ : ℝ) {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M]
+    [T2Space M] [ChartedSpace H M] {I : ModelWithCorners ℝ (MorseModel (m + 1)) H} {f : M → ℝ}
+    (data : MorseChart (m + 1) k hk c I f)
+    (hε : 0 < ε) (hδ : 0 < δ) (hθ : 0 < θ) (hδr : δ < r ^ 2) (hθr : θ < r ^ 2)
+    (hr : 0 < r) (hεr' : Real.sqrt (2 * ε + 2 * r ^ 2) < data.R / 2)
+    (hRbig : r ^ 2 + 2 * ε + δ ≤ (data.R / 2) ^ 2) :
+    morseCapRoundedLowerSublevel hk c ε r δ θ data ∪
+        Set.range (handleRoundEmbedding hk c ε r δ θ data) =
+      morseRoundedAttachment hk c ε r δ data := by
+  ext x
+  constructor
+  · intro hx
+    rcases hx with hx | hx
+    · exact morseCapRoundedLowerSublevel_subset_roundedAttachment hk c ε r δ θ data hε hδ hθ hδr hθr
+        hr hRbig hx
+    · rcases hx with ⟨d, hd⟩
+      rw [← hd]
+      exact handleRoundEmbedding_mem_rounded hk c ε r δ θ data hε hδ hθ hδr hεr' d
+  · intro hx
+    exact morseRoundedAttachment_subset_capRoundedLowerUnion hk c ε r δ θ data hε hδ hθ hδr hθr hr
+      hεr' hx
+
 noncomputable def morseCapRoundedLowerRound {m k : ℕ} (hk : k ≤ m + 1) (c ε r δ θ : ℝ)
     {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M] [ChartedSpace H M]
     {I : ModelWithCorners ℝ (MorseModel (m + 1)) H} {f : M → ℝ}
