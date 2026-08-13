@@ -1341,7 +1341,6 @@ theorem claim1_abstract_bound {u : Set M} (hu : IsOpen u)
             mul_le_mul_of_nonneg_left hgmc
               (mul_nonneg (Nat.cast_nonneg _)
                 (mul_nonneg (claim1Const_nonneg C0 KR K c) (by linarith)))
-
     have hbr : max KR 0 * compL2 (iterCovComp (I := I) frame chr g (m + 1) x) +
           (∑ c ∈ Finset.range m, (m.choose c : Real) *
             compL2 (iterCovCompU (I := I) frame chr A c x) *

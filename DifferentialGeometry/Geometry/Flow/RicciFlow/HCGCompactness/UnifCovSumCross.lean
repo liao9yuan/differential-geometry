@@ -66,12 +66,10 @@ private lemma det_le_of_posSemidef_le
     (hAB : ∀ x : ι → ℝ, x ⬝ᵥ (A *ᵥ x) ≤ x ⬝ᵥ (B *ᵥ x)) :
     A.det ≤ B.det := by
   classical
-
   have quad_symm : ∀ (S : Matrix ι ι ℝ), Sᵀ = S → ∀ x z : ι → ℝ,
       x ⬝ᵥ (S *ᵥ z) = (S *ᵥ x) ⬝ᵥ z := by
     intro S hS x z
     rw [Matrix.dotProduct_mulVec, ← Matrix.mulVec_transpose, hS]
-
   set M := CFC.sqrt B with hM_def
   have hM_nonneg : (0 : Matrix ι ι ℝ) ≤ M := by rw [hM_def]; exact CFC.sqrt_nonneg B
   have hM_psd : M.PosSemidef := Matrix.nonneg_iff_posSemidef.mp hM_nonneg
@@ -81,7 +79,6 @@ private lemma det_le_of_posSemidef_le
     simpa [Matrix.transpose_apply, star_trivial] using hM_psd.isHermitian.apply i j
   have hMM : M * M = B := by
     rw [hM_def]; exact CFC.sqrt_mul_sqrt_self B (Matrix.nonneg_iff_posSemidef.mpr hB.posSemidef)
-
   have hdetB_pos : 0 < B.det := hB.det_pos
   have hdetMM : M.det * M.det = B.det := by rw [← Matrix.det_mul, hMM]
   have hdetM_ne : M.det ≠ 0 := fun h0 => hdetB_pos.ne' (by rw [← hdetMM, h0, zero_mul])
@@ -89,7 +86,6 @@ private lemma det_le_of_posSemidef_le
   have hMinv_r : M * M⁻¹ = 1 := Matrix.mul_nonsing_inv M hdetM_unit
   have hMinv_l : M⁻¹ * M = 1 := Matrix.nonsing_inv_mul M hdetM_unit
   have hMinvsymm : (M⁻¹)ᵀ = M⁻¹ := by rw [Matrix.transpose_nonsing_inv, hMsymm]
-
   have hC_psd : (M⁻¹ * A * M⁻¹).PosSemidef := by
     have h := hA.conjTranspose_mul_mul_same M⁻¹
     rwa [Matrix.conjTranspose_nonsing_inv, hM_herm] at h
@@ -108,7 +104,6 @@ private lemma det_le_of_posSemidef_le
       _ ≤ (M⁻¹ *ᵥ x) ⬝ᵥ (B *ᵥ (M⁻¹ *ᵥ x)) := hAB (M⁻¹ *ᵥ x)
       _ = x ⬝ᵥ x := e3
   have hdetC : (M⁻¹ * A * M⁻¹).det ≤ 1 := det_le_one_of_dotProduct hC_psd hC_ray
-
   have hACM : M * (M⁻¹ * A * M⁻¹) * M = A := by
     rw [show M * (M⁻¹ * A * M⁻¹) * M = (M * M⁻¹) * A * (M⁻¹ * M) by simp only [mul_assoc]]
     rw [hMinv_r, hMinv_l, one_mul, mul_one]
@@ -219,7 +214,6 @@ theorem diffStep_norm_le
       (by decide : ((1 : WithTop ℕ∞) + 1) ≤ ∞)
   haveI : ContMDiffVectorBundle 1 E (TangentSpace I : M -> Type _) I :=
     TangentBundle.contMDiffVectorBundle (I := I) (M := M) (n := 1)
-
   let D := (tangentMetricData_gen (I := I) g₂ x).metric
   letI : InnerProductSpace.Core Real (TangentSpace I x) := D.toCore
   letI : NormedAddCommGroup (TangentSpace I x) :=
@@ -253,7 +247,6 @@ theorem diffStep_norm_le
   have hNSnn : 0 ≤ NS := Real.sqrt_nonneg _
   set B : ℝ := (s : ℝ) * NA * NS with hB
   have hBnn : 0 ≤ B := by rw [hB]; positivity
-
   have hcomp : ∀ φ : Fin (s + 1) → Fin (Module.finrank Real (TangentSpace I x)),
       |component0S (I := I) basis (diffStep (I := I) g₁ g₂ s S x) φ| ≤ B := by
     intro φ
@@ -347,7 +340,6 @@ theorem diffStep_norm_le
       _ = B := by
           rw [Finset.sum_const, Finset.card_univ, Fintype.card_fin, hB]
           simp [nsmul_eq_mul]; ring
-
   have hcard : normSq0S (I := I) g₂ x (s + 1) (diffStep (I := I) g₁ g₂ s S x) ≤
       (Fintype.card (Fin (s + 1) → Fin (Module.finrank Real (TangentSpace I x))) : ℝ) * B ^ 2 :=
     normSq0S_le_card_of_component_bound (I := I) g₂ x (s + 1) basis hinv
@@ -484,7 +476,6 @@ theorem diffStep_jet_one_le
   haveI : IsManifold I ((∞ : WithTop ℕ∞) + 1) M := by change IsManifold I ∞ M; infer_instance
   haveI : ContMDiffVectorBundle 1 E (TangentSpace I : M → Type _) I :=
     TangentBundle.contMDiffVectorBundle (I := I) (M := M) (n := 1)
-
   have hconn :
       Real.sqrt (normSqRS (I := I) (g := g₂) (x := x) 1 2
           (connectionDifferenceTensorAt (I := I)
@@ -505,7 +496,6 @@ theorem diffStep_jet_one_le
       _ ≤ (3 / 2 : Real) * (Real.sqrt (Λ ^ 3) * Λ') :=
             mul_le_mul_of_nonneg_left
               (mul_le_mul_of_nonneg_left (hjet x hx) (Real.sqrt_nonneg _)) (by norm_num)
-
   refine le_trans (diffStep_norm_le (I := I) g₁ g₂ s S x) ?_
   refine mul_le_mul_of_nonneg_right ?_ (Real.sqrt_nonneg _)
   exact mul_le_mul_of_nonneg_left hconn (by positivity)
@@ -548,7 +538,6 @@ theorem covStepDiff_norm_le
       (by decide : ((1 : WithTop ℕ∞) + 1) ≤ ∞)
   haveI : ContMDiffVectorBundle 1 E (TangentSpace I : M -> Type _) I :=
     TangentBundle.contMDiffVectorBundle (I := I) (M := M) (n := 1)
-
   let D := (tangentMetricData_gen (I := I) g₂ x).metric
   letI : InnerProductSpace.Core Real (TangentSpace I x) := D.toCore
   letI : NormedAddCommGroup (TangentSpace I x) :=
@@ -611,7 +600,6 @@ theorem covStepDiff_norm_le
         · exact hVval.symm
         · exact (hZval k).symm
     rw [htuple, diffStep_leibniz_eval (I := I) g₁ g₂ s S Wsec Vsec Zsec x]
-
     have hX : ∀ a : Fin s,
         |(S x) (Function.update (fun b : Fin s => Zsec b x) a
             (covDerivConnDiff (I := I) g₂ g₁ (fun y : M => Wsec y) (fun y : M => Vsec y)
@@ -643,7 +631,6 @@ theorem covStepDiff_norm_le
       rw [hbnorm (φ 0), hbnorm (φ (Fin.succ 0)), hbnorm (φ a.succ.succ),
         mul_one, mul_one, mul_one] at h
       exact h
-
     have hY : ∀ a : Fin s,
         |(covStep (I := I) g₂ s S x)
             (Fin.cons (Wsec x) (Function.update (fun b : Fin s => Zsec b x) a
@@ -682,7 +669,6 @@ theorem covStepDiff_norm_le
       rw [hbnorm (φ (Fin.succ 0)), hbnorm (φ a.succ.succ), mul_one, mul_one, ← hNA] at h
       rw [hZval a, hVval]
       exact h
-
     rw [sub_eq_add_neg]
     refine le_trans (abs_add_le _ _) ?_
     rw [abs_neg, abs_neg]
@@ -692,7 +678,6 @@ theorem covStepDiff_norm_le
       (Finset.sum_le_sum (fun a _ => hY a))) ?_
     simp only [Finset.sum_const, Finset.card_univ, Fintype.card_fin, nsmul_eq_mul]
     rw [hB]; apply le_of_eq; ring
-
   have hcard : normSq0S (I := I) g₂ x (s + 2)
       (covStep (I := I) g₂ (s + 1) (diffStep (I := I) g₁ g₂ s S) x) ≤
       (Fintype.card (Fin (s + 2) → Fin (Module.finrank Real (TangentSpace I x))) : ℝ) * B ^ 2 :=
@@ -749,7 +734,6 @@ theorem covStepDiff_jet_le
   haveI : IsManifold I ((∞ : WithTop ℕ∞) + 1) M := by change IsManifold I ∞ M; infer_instance
   haveI : ContMDiffVectorBundle 1 E (TangentSpace I : M → Type _) I :=
     TangentBundle.contMDiffVectorBundle (I := I) (M := M) (n := 1)
-
   have hconn :
       Real.sqrt (normSqRS (I := I) (g := g₂) (x := x) 1 2
           (connectionDifferenceTensorAt (I := I)
@@ -1120,7 +1104,6 @@ theorem volumeMeasure_cross_le
         ENNReal.ofReal (Real.sqrt (Λ ^ Module.finrank ℝ E)) •
           riemannianVolumeMeasure (I := I) (M := M) g₀ := by
   classical
-
   have vsum : ∀ (g : SmoothRiemannianMetric I M) (F : M → ℝ≥0∞), Measurable F →
       ∫⁻ x, F x ∂(riemannianVolumeMeasure (I := I) (M := M) g) =
         ∑ α ∈ chartAtlasPOU_finset (I := I) (M := M), ∫⁻ x,
@@ -1133,13 +1116,11 @@ theorem volumeMeasure_cross_le
     have hz : ∀ x : M, (chartAtlasPOU I M α : M → ℝ) x = 0 :=
       fun x => chartAtlasPOU_weight_zero_of_notMem (I := I) (M := M) hα x
     simp only [hz, ENNReal.ofReal_zero, zero_mul, lintegral_zero]
-
   have hbase : ∀ (α : M), ∀ x ∈ tsupport (fun y : M => (chartAtlasPOU I M α : M → ℝ) y),
       x ∈ (trivializationAt E (TangentSpace I) α).baseSet := by
     intro α x hx
     rw [trivializationAt_baseSet_eq_chartAt_source]
     exact (chartAtlasPOU_isSubordinate I M) α hx
-
   have lintComp : ∀ (q h : SmoothRiemannianMetric I M),
       (∀ (α : M), ∀ x ∈ tsupport (fun y : M => (chartAtlasPOU I M α : M → ℝ) y),
         chartDensity (I := I) h α x ≤
@@ -1153,7 +1134,6 @@ theorem volumeMeasure_cross_le
     refine Finset.sum_le_sum (fun α _ => ?_)
     exact chart_lintegral_le (I := I) (M := M) q h α
       (Real.sqrt (Λ ^ Module.finrank ℝ E)) (Real.sqrt_nonneg _) (hdens α) hF
-
   have hdens_fwd : ∀ (α : M), ∀ x ∈ tsupport (fun y : M => (chartAtlasPOU I M α : M → ℝ) y),
       chartDensity (I := I) g₀ α x ≤
         Real.sqrt (Λ ^ Module.finrank ℝ E) * chartDensity (I := I) gBase α x :=

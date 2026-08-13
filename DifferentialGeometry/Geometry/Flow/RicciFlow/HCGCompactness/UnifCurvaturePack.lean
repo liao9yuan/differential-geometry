@@ -186,7 +186,6 @@ theorem unifRmSecSup
   obtain ⟨C, hC0, hC⟩ :=
     unifRm04Sup (I := I) (M := M) gBase g₀ hΛ hΛ2 hcomp hjet1 hjet2
   refine ⟨C, hC0, fun x => ?_⟩
-
   have hkey : riemannianFiberNormSq (I := I) (M := M) g₀ 0 4 x
         ((rmSection (I := I) (M := M) g₀).toSection x) =
       normSq0S (I := I) g₀ x 4 (metricRm04 (I := I) (M := M) g₀ x) :=

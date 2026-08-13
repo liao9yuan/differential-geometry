@@ -406,7 +406,6 @@ theorem sPart_le
   classical
   rw [forwardUniqueDissipation, forwardUniqueEnergy, riemannianMeasureFamily_def]
   set μ := riemannianVolumeMeasure (I := I) (M := M) (g₁ t) with hμ
-
   have hsplitPt : ∀ x, 2 * inner0S (I := I) (g₁ t) x 4 (Sdot t x)
         (rmDiffLowAt (I := I) (g₁ t) (g₂ t) x) =
       2 * inner0S (I := I) (g₁ t) x 4
@@ -440,7 +439,6 @@ theorem sPart_le
       integral_congr_ae (Filter.Eventually.of_forall hsplitPt)
     rw [h1, integral_add (hilap.const_mul 2) hIBC,
       integral_add (hidiv.const_mul 2) (hirem.const_mul 2)]
-
   have hprin :
       (∫ x, 2 * inner0S (I := I) (g₁ t) x 4
           (roughLap0SField (I := I) (g₁ t) Sfield x) (Sfield x) ∂μ) =
@@ -448,7 +446,6 @@ theorem sPart_le
             (metricNabla0S (I := I) (g₁ t) Sfield x) ∂μ := by
     rw [integral_const_mul, intInner_lap_eq_neg (I := I) (g₁ t) Sfield]
     ring
-
   have hflux :
       (∫ x, 2 * inner0S (I := I) (g₁ t) x 4
           (covDiv0SField (I := I) (g₁ t) U x) (Sfield x) ∂μ) ≤
@@ -499,7 +496,6 @@ theorem sPart_le
         integral_const_mul, integral_const_mul]
     rw [hrewrite]
     exact le_trans (integral_mono hIlhs hIrhs hptwise) (le_of_eq hval)
-
   have hremInt :
       (∫ x, 2 * inner0S (I := I) (g₁ t) x 4 (rem x) (Sfield x) ∂μ) ≤
         (C_rem + 1) * ∫ x, forwardUniqueDensity (I := I) g₁ g₂ t x ∂μ := by
@@ -520,7 +516,6 @@ theorem sPart_le
     exact le_trans (integral_mono (hirem.const_mul 2)
       (hidens.const_mul (C_rem + 1)) hptwise)
       (le_of_eq (integral_const_mul (C_rem + 1) _))
-
   set D := ∫ x, normSq0S (I := I) (g₁ t) x 5
     (metricNabla0S (I := I) (g₁ t) Sfield x) ∂μ with hDdef
   set En := ∫ x, forwardUniqueDensity (I := I) g₁ g₂ t x ∂μ with hEndef
@@ -562,7 +557,6 @@ theorem rateRest_le (g₁ g₂ : Real → SmoothRiemannianMetric I M)
         δ * C_A * normSq0S (I := I) (g₁ t) x 5
           (metricNabla0S (I := I) (g₁ t) Sfield x) := by
   have hdens := density_nonneg (I := I) g₁ g₂ t x
-
   have hhdot : normSq0S (I := I) (g₁ t) x 2 (metricDiffDot (I := I) g₁ g₂ t x) =
       4 * normSq0S (I := I) (g₁ t) x 2
         (metricRicciAt (I := I) (g₁ t) x - metricRicciAt (I := I) (g₂ t) x) := by
@@ -581,7 +575,6 @@ theorem rateRest_le (g₁ g₂ : Real → SmoothRiemannianMetric I M)
           forwardUniqueDensity (I := I) g₁ g₂ t x := by ring
     rw [hhdot, hm]
     linarith
-
   have hA : 2 * inner0S (I := I) (g₁ t) x 3 (Adot t x)
         (connDiffLowAt (I := I) (g₁ t) (g₂ t) x) ≤
       (δ * C_A + δ⁻¹) * forwardUniqueDensity (I := I) g₁ g₂ t x +
@@ -610,7 +603,6 @@ theorem rateRest_le (g₁ g₂ : Real → SmoothRiemannianMetric I M)
           δ⁻¹ * forwardUniqueDensity (I := I) g₁ g₂ t x := by ring
     rw [hc]
     linarith
-
   have hv : (1 / 2 : Real) * traceTimeDerivMetric (I := I) g₁ t x *
         forwardUniqueDensity (I := I) g₁ g₂ t x ≤
       C_V * forwardUniqueDensity (I := I) g₁ g₂ t x :=

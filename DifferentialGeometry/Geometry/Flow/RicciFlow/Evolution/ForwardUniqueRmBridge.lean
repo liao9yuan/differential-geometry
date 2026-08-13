@@ -117,13 +117,11 @@ theorem vecCurve_deriv
         (fun l : Idx => a l +
           2 * Ric (fun i : Fin 2 => if i = 0 then V t else basis l))) s t := by
   classical
-
   have hc : ∀ p : Idx, ContinuousWithinAt (fun r : Real => basis.repr (V r) p) s t := by
     intro p
     have h := (LinearMap.toContinuousLinearMap
       (basis.coord p)).continuous.continuousAt.comp_continuousWithinAt hcont
     simpa [Function.comp_def, Module.Basis.coord_apply] using h
-
   have hfroz : ∀ l : Idx,
       HasDerivWithinAt (fun r : Real => (g t).inner x (V r) (basis l))
         (a l + 2 * Ric (fun i : Fin 2 => if i = 0 then V t else basis l)) s t := by
@@ -169,7 +167,6 @@ theorem vecCurve_deriv
       funext hsplit
     rw [hfun, ← hval]
     exact (hlow l).add hsum
-
   have hV : ∀ r : Real,
       V r = ∑ p : Idx, (∑ l : Idx, basisInvMetric (I := I) (g t) x basis p l *
         ((g t).inner x (V r) (basis l))) • basis p := by

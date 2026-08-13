@@ -481,7 +481,6 @@ theorem sqrtRfns_cross_le
             ((iteratedCovGrad (I := I) g₀ 0 s k T).toSection x)) := by
   classical
   have hΛ0 : (0 : ℝ) ≤ Λ := le_trans zero_le_one hEq.1
-
   have hL : riemannianFiberNormSq (I := I) (M := M) gBase 0 (s + j) x
         ((iteratedCovGrad (I := I) gBase 0 s j (T.recast (g' := gBase))).toSection x) =
       normSq0S (I := I) gBase x (s + j)
@@ -501,7 +500,6 @@ theorem sqrtRfns_cross_le
         Real.sqrt (normSq0S (I := I) g₀ x (s + k)
           (iterCov (I := I) g₀ s (ccUnitField (I := I) g₀ s T) k x)) from
     Finset.sum_congr rfl (fun k _ => by rw [hR k])]
-
   have hfib := covsumCross_fibNorm (I := I) g₀ gBase
     (metricUniformEquivalentOn_symm (I := I) hEq) x (s + j)
     (iterCov (I := I) gBase s (ccUnitField (I := I) g₀ s T) j x)
@@ -739,7 +737,6 @@ theorem jetCross_l2
       Finset.sum_nonneg (fun k _ => hRnn k x)
     have h2 : (0 : ℝ) ≤ 3 * P ^ 2 := by positivity
     exact mul_nonneg h2 this
-
   have hpt : ∀ x : M,
       riemannianFiberNormSq (I := I) (M := M) gBase 0 (s + j) x (A.toSection x) ≤ F x := by
     intro x
@@ -767,7 +764,6 @@ theorem jetCross_l2
         _ ≤ P ^ 2 * (3 * ∑ k ∈ Finset.range 3, R k x) := hmul
         _ = F x := by rw [hF]; ring
     exact le_trans hsq2 hstep
-
   have hIntA : Integrable
       (fun x => riemannianFiberNormSq (I := I) (M := M) gBase 0 (s + j) x (A.toSection x)) μB :=
     integrable_riemannianFiberNormSq_toSection (I := I) (M := M) gBase 0 (s + j) A
@@ -780,7 +776,6 @@ theorem jetCross_l2
   have hIntFs : Integrable F (ENNReal.ofReal c • μ0) :=
     hIntF0.smul_measure ENNReal.ofReal_ne_top
   have hIntFB : Integrable F μB := hIntFs.mono_measure hmeasle
-
   have hnormA : ‖A‖ ^ 2 =
       ∫ x, riemannianFiberNormSq (I := I) (M := M) gBase 0 (s + j) x (A.toSection x) ∂μB := by
     rw [SmoothCcTensor.norm_def (I := I) (M := M) A, hμB]
@@ -809,7 +804,6 @@ theorem jetCross_l2
       _ = c * ∫ x, F x ∂μ0 := by
           rw [MeasureTheory.integral_smul_measure, ENNReal.toReal_ofReal hcnn, smul_eq_mul]
       _ = c * (3 * P ^ 2 * ∑ k ∈ Finset.range 3, b k ^ 2) := by rw [hIF0]
-
   have hsumsq : ∑ k ∈ Finset.range 3, b k ^ 2 ≤ (∑ k ∈ Finset.range 3, b k) ^ 2 :=
     Finset.sum_sq_le_sq_sum_of_nonneg (fun k _ => hbnn k)
   have hSnn : (0 : ℝ) ≤ ∑ k ∈ Finset.range 3, b k := Finset.sum_nonneg (fun k _ => hbnn k)

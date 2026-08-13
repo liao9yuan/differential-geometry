@@ -58,17 +58,14 @@ theorem lift_small_arith {c M T C N : ℝ}
   have hM1 : (0 : ℝ) < M + 1 := by linarith
   have hT1 : T ≤ 1 := hTle.trans lowregLiftHorizon_le_one
   have hs0 : (0 : ℝ) ≤ Real.sqrt T := Real.sqrt_nonneg _
-
   have hTa : T ≤ (1 - c) / (2 * (c + 1)) := hTle.trans lowregLiftHorizon_le_c2
   have hcT : c * T ≤ (1 - c) / 2 := by
     have hden : (0 : ℝ) < 2 * (c + 1) := by linarith
     rw [le_div_iff₀ hden] at hTa
     nlinarith
-
   have hq : Real.sqrt (1 + T) ≤ 3 / 2 := by
     have h := Real.sqrt_le_sqrt (show 1 + T ≤ (3 / 2 : ℝ) ^ 2 by nlinarith)
     rwa [Real.sqrt_sq (by norm_num : (0 : ℝ) ≤ 3 / 2)] at h
-
   have hTb : T ≤ (1 - c) ^ 2 / (64 * (M + 1) ^ 2) :=
     hTle.trans lowregLiftHorizon_le_a1
   have hsq : ((1 - c) / (8 * (M + 1))) ^ 2 = (1 - c) ^ 2 / (64 * (M + 1) ^ 2) := by
@@ -80,7 +77,6 @@ theorem lift_small_arith {c M T C N : ℝ}
   have hs' : Real.sqrt T * (8 * (M + 1)) ≤ 1 - c := by
     rw [← le_div_iff₀ (by linarith : (0 : ℝ) < 8 * (M + 1))]
     exact hs
-
   have hfirst : Real.sqrt (1 + T) * N ≤ 3 / 2 * (M * Real.sqrt T) :=
     mul_le_mul hq hN hN0 (by norm_num)
   have hthird : 3 * (M * Real.sqrt T) ≤ 3 * (1 - c) / 8 := by nlinarith
@@ -180,18 +176,15 @@ theorem lift_aff_arith {c A Z T C V : ℝ}
   have hZ1 : (0 : ℝ) < Z + 1 := by linarith
   have hT1 : T ≤ 1 := hTle.trans lowregLiftHorizon'_le_one
   have hs0 : (0 : ℝ) ≤ Real.sqrt T := Real.sqrt_nonneg _
-
   have hTa : T ≤ (1 - c) / (4 * (c + 1)) :=
     hTle.trans (le_trans (min_le_right _ _) (min_le_left _ _))
   have hcT : c * T ≤ (1 - c) / 4 := by
     have hden : (0 : ℝ) < 4 * (c + 1) := by linarith
     rw [le_div_iff₀ hden] at hTa
     nlinarith
-
   have hq : Real.sqrt (1 + T) ≤ 3 / 2 := by
     have h := Real.sqrt_le_sqrt (show 1 + T ≤ (3 / 2 : ℝ) ^ 2 by nlinarith)
     rwa [Real.sqrt_sq (by norm_num : (0 : ℝ) ≤ 3 / 2)] at h
-
   have hTb : T ≤ (1 - c) ^ 2 / (144 * (Z + 1) ^ 2) :=
     hTle.trans (le_trans (min_le_right _ _) (min_le_right _ _))
   have hsq : ((1 - c) / (12 * (Z + 1))) ^ 2 =

@@ -158,7 +158,6 @@ theorem lowerBilin_normSq_le (g : SmoothRiemannianMetric I M) (x : M)
   classical
   obtain ⟨b, hON⟩ := exists_onFrame (I := I) g x
   have hinv := onFrame_inv (I := I) g b hON
-
   have hq : normSq0S (I := I) g x 2 q =
       ∑ l : Fin (Module.finrank Real (TangentSpace I x)),
         ∑ k : Fin (Module.finrank Real (TangentSpace I x)),
@@ -170,7 +169,6 @@ theorem lowerBilin_normSq_le (g : SmoothRiemannianMetric I M) (x : M)
     congr 1
     funext a
     by_cases ha : a = 0 <;> simp [ha]
-
   have href : normSq0S (I := I) g x 3
       (lowerBilin (I := I) (metricTensorField (I := I) g x) A) =
       ∑ i : Fin (Module.finrank Real (TangentSpace I x)),
@@ -184,7 +182,6 @@ theorem lowerBilin_normSq_le (g : SmoothRiemannianMetric I M) (x : M)
     rw [comp_lowerBilin (I := I) b _ A i j l, metricTensorField_apply,
       repr_inner (I := I) g b hON]
     simp
-
   have hlow : normSq0S (I := I) g x 3 (lowerBilin (I := I) q A) =
       ∑ i : Fin (Module.finrank Real (TangentSpace I x)),
         ∑ j : Fin (Module.finrank Real (TangentSpace I x)),
@@ -198,7 +195,6 @@ theorem lowerBilin_normSq_le (g : SmoothRiemannianMetric I M) (x : M)
     congr 1
     rw [comp_lowerBilin (I := I) b q A i j k,
       tensor02_expand (I := I) q b ((A (b j)) (b i)) (b k)]
-
   rw [hlow, hq, href, Finset.mul_sum]
   refine Finset.sum_le_sum fun i _ => ?_
   rw [Finset.mul_sum]
@@ -457,7 +453,6 @@ theorem coeff_adot_eq
     simp [IsLocalFrameOn.coeff, hx, hbdef, Module.Basis.coord_apply]
   have hfr : ∀ l : Idx, MDifferentiableAt I I.tangent (T% (frame l)) x := fun l =>
     (hframe.contMDiffAt hu hx l).mdifferentiableAt (by simp)
-
   have hdiff : ∀ r : Real,
       CovariantDerivative.difference (metricCov (I := I) (g₁ r))
           (metricCov (I := I) (g₂ r)) x (b j) (b i) =
@@ -487,7 +482,6 @@ theorem coeff_adot_eq
     rw [hdiff r, ← hcoeff k]
     simp only [DifferentialGeometry.Tensor.Coordinates.christoffelSymbolInFrame_eval]
     exact map_sub (hframe.coeff k x) _ _
-
   have hL : HasDerivAt
       (fun r : Real =>
         b.repr (CovariantDerivative.difference (metricCov (I := I) (g₁ r))
@@ -579,7 +573,6 @@ theorem connSpeedLow_eq
       hframe.coeff l x w = b.repr w l := by
     intro l w
     simp [IsLocalFrameOn.coeff, hx, hbdef, Module.Basis.coord_apply]
-
   have hrepr : ∀ i j m : Idx,
       b.repr ((Adot x (b j)) (b i)) m = c₁ i j m - c₂ i j m := by
     intro i j m
@@ -796,7 +789,6 @@ private theorem inner_le_sum_sq {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
   classical
   have hrepr : ∀ k : Idx, b.repr v k = g₁.inner x v (b k) :=
     fun k => repr_inner (I := I) g₁ b hON v k
-
   have hpar : ∀ g : SmoothRiemannianMetric I M,
       g.inner x v v = ∑ k : Idx, g₁.inner x v (b k) * g.inner x v (b k) := by
     intro g
@@ -883,10 +875,8 @@ private theorem connSpeed_arith
   have hWnn : (0 : Real) ≤ Hm + Ac := by linarith
   have hQ1 : (1 : Real) ≤ (1 + Λ) ^ 2 := by nlinarith [sq_nonneg Λ]
   have hQnn : (0 : Real) ≤ (1 + Λ) ^ 2 := sq_nonneg _
-
   have hQ'nn : (0 : Real) ≤ (1 + Λ) ^ 2 * (B₁ + B₃) * (Hm + Ac) :=
     mul_nonneg (mul_nonneg hQnn hSBnn) hWnn
-
   have hprod1 : Ac * B₃ ≤ (1 + Λ) ^ 2 * (B₁ + B₃) * (Hm + Ac) := by
     have h1 : Ac * B₃ ≤ (Hm + Ac) * (B₁ + B₃) :=
       mul_le_mul (by linarith) (by linarith) hB₃ hWnn
@@ -908,17 +898,14 @@ private theorem connSpeed_arith
     have h4 : (1 + Λ) ^ 2 * ((B₁ + B₃) * (Hm + Ac)) =
         (1 + Λ) ^ 2 * (B₁ + B₃) * (Hm + Ac) := by ring
     linarith [h4 ▸ h3]
-
   have hfl : 8 * n ^ 3 * Ac * R2 ≤ 8 * n ^ 3 * Ac * B₃ :=
     mul_le_mul_of_nonneg_left hR2B (by positivity)
   have hb1 : E1 ≤ 20 * (n ^ 5 * P) + 80 * (n ^ 3 * (Ac * B₃)) := by linarith
-
   have hb2 : E2 ≤ 10 * (Λ ^ 2 * (B₁ * Hm)) := by
     have hc1 : Λ ^ 2 * L2 ≤ Λ ^ 2 * (10 * B₁) := mul_le_mul_of_nonneg_left hL2B (sq_nonneg Λ)
     have hc2 : Hm * L1 ≤ Hm * (Λ ^ 2 * (10 * B₁)) :=
       mul_le_mul_of_nonneg_left (le_trans hL1 hc1) hHm
     linarith
-
   have hac : (0 : Real) ≤ Ac * B₃ := mul_nonneg hAc hB₃
   have hs1 : 40 * (n ^ 5 * P) ≤ 200 * ((n ^ 6 + 1) * P) := by
     have h1 : n ^ 5 * P ≤ (n ^ 6 + 1) * P := mul_le_mul_of_nonneg_right hp5 hP
@@ -1072,12 +1059,10 @@ theorem connSpeedLow_normSq_le [I.Boundaryless]
             (metricDiffSq (I := I) (g₁ t) (g₂ t) x +
               connDiffSq (I := I) (g₁ t) (g₂ t) x)) := by
   classical
-
   rw [connSpeedLow_eq (I := I) g₁ g₂ frame hframe hu hx Adot hA
     (fun i j k => christoffelEvolutionRHSInFrame (M := M) gInv₁ nablaRic₁ t x i j k)
     (fun i j k => christoffelEvolutionRHSInFrame (M := M) gInv₂ nablaRic₂ t x i j k) hΓ]
   refine le_trans (normSq0S_sub_le (I := I) (g₁ t) x 3 _ _) ?_
-
   have hT₁ : lowerBilin (I := I) (metricTensorField (I := I) (g₁ t) x)
       (bilinOfComp (I := I) (hframe.toBasisAt hx)
         (fun i j k => christoffelEvolutionRHSInFrame (M := M) gInv₁ nablaRic₁ t x i j k)) =
@@ -1091,14 +1076,12 @@ theorem connSpeedLow_normSq_le [I.Boundaryless]
     lowerHam_eq_perm (I := I) (g₂ t) (hframe.toBasisAt hx) (fun i j => gInv₂ t x i j) hgInv₂
       (metricNabla0S (I := I) (g₂ t) Ric₂ x) (fun d a c => nablaRic₂ t x d a c) hNR₂
   rw [hT₁, hT₂, hamSum_sub]
-
   have hham := hamSum_normSq_le (I := I) (g₁ t)
     (metricNabla0S (I := I) (g₁ t) Ric₁ x - metricNabla0S (I := I) (g₂ t) Ric₂ x)
   have hpt : metricNabla0S (I := I) (g₁ t) Ric₁ x - metricNabla0S (I := I) (g₂ t) Ric₂ x =
       (metricNabla0S (I := I) (g₁ t) Ric₁ - metricNabla0S (I := I) (g₂ t) Ric₂) x := rfl
   rw [hpt] at hham
   have hsplit := nablaRicDiff_le (I := I) (g₁ t) (g₂ t) Ric₁ Ric₂ x
-
   have hd1 := lowerBilin_normSq_le (I := I) (g₁ t) x
     (metricDiffAt (I := I) (g₁ t) (g₂ t) x)
     (bilinOfComp (I := I) (hframe.toBasisAt hx)
@@ -1114,9 +1097,7 @@ theorem connSpeedLow_normSq_le [I.Boundaryless]
     rw [hT₂]
     exact le_trans (hamSum_normSq_le (I := I) (g₁ t) _) (by linarith)
   rw [← metricDiffSq_def (I := I) (g₁ t) (g₂ t) x] at hd1
-
   have htrace := nablaRicDiff_trace_le (I := I) (g₁ t) (g₂ t) S hS Ric₁ Ric₂ hRic₁ hRic₂ x
-
   have hnnn : (0 : Real) ≤ (Module.finrank Real E : Real) := by positivity
   have hpow : ∀ a : ℕ, a ≤ 6 →
       (Module.finrank Real E : Real) ^ a ≤ (Module.finrank Real E : Real) ^ 6 + 1 := by

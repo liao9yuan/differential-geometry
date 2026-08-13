@@ -81,7 +81,6 @@ theorem unifRm04Sup
     have h := metricInverseInBasis_of_orthonormal (I := I) g₀ basis hON
     intro i j
     simpa [identityInvMetric, diagonalInvMetric] using h i j
-
   have hcompB : ∀ slots : Fin 4 → Fin (Module.finrank Real (TangentSpace I x)),
       |component0S (I := I) basis (metricRm04 (I := I) (M := M) g₀ x) slots| ≤ F := by
     intro slots
@@ -99,7 +98,6 @@ theorem unifRm04Sup
       rw [← metricRm04StdAt_apply (I := I) (M := M) g₀ x]
       exact metricRm04StdAt_eq_inner_riemannOp (I := I) (M := M) g₀ x _ _ _ _
     rw [hval]
-
     have hunit : ∀ i, g₀.inner x (basis i) (basis i) = 1 := by
       intro i; rw [hON i i]; simp
     set R : TangentSpace I x :=
@@ -155,7 +153,6 @@ theorem unifCurvJet1Conn
     ⟨hΛ, fun x _ v => hcomp x v⟩
   refine ⟨(4 : ℝ) * Real.sqrt ((Module.finrank ℝ E : ℝ) ^ 5) *
     ((3 / 2 : ℝ) * (Real.sqrt (Λ ^ 3) * Λ)) * C0, by positivity, fun x => ?_⟩
-
   have hneg : diffStep (I := I) g₀ gBase 4 (metricRm04 (I := I) (M := M) g₀) x =
       -(diffStep (I := I) gBase g₀ 4 (metricRm04 (I := I) (M := M) g₀) x) := by
     simp only [diffStep, ContMDiffSection.coe_sub, Pi.sub_apply]

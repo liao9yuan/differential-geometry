@@ -2376,7 +2376,6 @@ theorem ricNormSub_le_dn (lam B : Real) (hlam : 0 < lam) (hB : 0 ≤ B) :
   exact mul_le_mul_of_nonneg_right (by linarith) hS0
 
   omit [IsManifold I 2 M] in
-
 theorem ricNormConv_of_dn
     (gSeq : ℕ → Real → SmoothRiemannianMetric I M)
     (gInf : Real → SmoothRiemannianMetric I M)

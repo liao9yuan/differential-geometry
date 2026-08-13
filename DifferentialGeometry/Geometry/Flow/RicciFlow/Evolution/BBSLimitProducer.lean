@@ -41,7 +41,6 @@ def cinftyLimitData_of_allMBounds
                 Lambda * (S.base.metric alpha).inner x v v) :
     CinftyLimitData (I := I) S.base.metric alpha omega hαω := by
   classical
-
   have hex := exists_endMetric (I := I) S hdim hS hbound hEquiv
   refine
     { limitMetric := hex.choose

@@ -70,14 +70,12 @@ theorem implicitDeriv_succ_le
   have hD0 : (0 : ℝ) ≤ max DA 1 := le_trans zero_le_one (le_max_right _ _)
   have hΛ1 : (1 : ℝ) ≤ max Lambda 1 := le_max_right _ _
   have hDA1 : (1 : ℝ) ≤ max DA 1 := le_max_right _ _
-
   obtain ⟨w, hw⟩ := hunit.self_of_nhds
   have hXc : ContDiffAt ℝ (m : WithTop ℕ∞) (fun p => Ring.inverse (A p)) x := by
     have hinv : ContDiffAt ℝ (m : WithTop ℕ∞) Ring.inverse
         ((w : E →L[ℝ] E) : E →L[ℝ] E) := contDiffAt_ringInverse ℝ w
     rw [hw] at hinv
     exact hinv.comp x hA
-
   have hfd : ‖iteratedFDeriv ℝ (m + 1) f x‖
       = ‖iteratedFDeriv ℝ m (fderiv ℝ f) x‖ :=
     (norm_iteratedFDeriv_fderiv (𝕜 := ℝ)).symm
@@ -92,13 +90,11 @@ theorem implicitDeriv_succ_le
     rw [show (fun p => -((Ring.inverse (A p)).comp (B p)))
         = -(fun p => (Ring.inverse (A p)).comp (B p)) from rfl]
     rw [iteratedFDeriv_neg_apply, norm_neg]
-
   have hcollect := norm_iteratedFDeriv_clmComp_le
     (fun p => Ring.inverse (A p)) B x m hXc hB
   set K : ℝ := (m.factorial : ℝ) *
     ((m.factorial : ℝ) * max Lambda 1 ^ (m + 1)) * max DA 1 ^ m with hK_def
   have hK0 : 0 ≤ K := by rw [hK_def]; positivity
-
   have hterm : ∀ i ∈ Finset.range (m + 1),
       (m.choose i : ℝ) * ‖iteratedFDeriv ℝ i (fun p => Ring.inverse (A p)) x‖ *
         ‖iteratedFDeriv ℝ (m - i) B x‖ ≤ (m.choose i : ℝ) * (K * CB) := by
@@ -134,7 +130,6 @@ theorem implicitDeriv_succ_le
           · exact mul_le_mul_of_nonneg_left (hinv_i.trans hKi) hchoose0
           · positivity
       _ = (m.choose i : ℝ) * (K * CB) := by ring
-
   have hsum : ∑ i ∈ Finset.range (m + 1),
       (m.choose i : ℝ) * ‖iteratedFDeriv ℝ i (fun p => Ring.inverse (A p)) x‖ *
         ‖iteratedFDeriv ℝ (m - i) B x‖

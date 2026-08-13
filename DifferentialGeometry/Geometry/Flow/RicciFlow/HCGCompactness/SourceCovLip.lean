@@ -327,7 +327,6 @@ theorem srcCovLip_of_flow
           (refRes (I := I) Φ R hsrc k) (i := 0) (t := t)
           (B := Bmax) (K := K0) hBmax (hequiv k t ht) y
           (hShi0 k 0 le_rfl 0 t ht y (Set.mem_univ y))).2
-
   have hcore : ∀ q : Nat, ∃ Cq Lq : ℝ, 0 ≤ Cq ∧ 0 ≤ Lq ∧
       (∀ k : Nat,
         letI : TopologicalSpace (SourceDomain (I := I) Φ k) :=
@@ -820,7 +819,6 @@ theorem srcCovLip_of_soln
           (refRes (I := I) Φ R hsrc k) (i := 0) (t := t)
           (B := Bmax) (K := K0) hBmax (hequiv k t ht) y
           (hShi0 k 0 le_rfl 0 t ht y (Set.mem_univ y))).2
-
   have hcore : ∀ q : Nat, ∃ Cq Lq : ℝ, 0 ≤ Cq ∧ 0 ≤ Lq ∧
       (∀ k : Nat,
         letI : TopologicalSpace (SourceDomain (I := I) Φ k) :=

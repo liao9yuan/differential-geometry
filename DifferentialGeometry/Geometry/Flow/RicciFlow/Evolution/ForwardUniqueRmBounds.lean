@@ -168,10 +168,8 @@ theorem lapDiffFlux_eval (g₁ g₂ : SmoothRiemannianMetric I M)
   have hVx : ∀ a, V a x = slots a := by
     intro a; rw [hV]; simpa using hVv a
   have hslots : (fun a : Fin s => V a x) = slots := by funext a; exact hVx a
-
   have key := nabla0SFun_sub_cov (I := I) (metricCov (I := I) g₁) (metricCov (I := I) g₂)
     X V T x
-
   have hsplit :
       ((nabla0SFun (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) s
             (metricCov (I := I) g₁) X T x) -
@@ -184,7 +182,6 @@ theorem lapDiffFlux_eval (g₁ g₂ : SmoothRiemannianMetric I M)
     Tensor0SSpace.sub_apply (I := I) s x _ _ _
   rw [hsplit] at key
   simp only [hXx, hVx] at key
-
   have hflux :
       lapDiffFlux (I := I) g₁ g₂ T x (Fin.cons (X x) (fun a : Fin s => V a x)) =
         totalNabla0SFun (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) s
@@ -706,7 +703,6 @@ theorem remNormSq_le (g₁ g₂ : SmoothRiemannianMetric I M) {s : ℕ}
   rw [hsplit]
   refine le_trans (normSqAdd_le (I := I) g₁ basis hinv _ _) ?_
   have hnn : (0 : Real) ≤ (Module.finrank Real E : Real) := by positivity
-
   have hfirst : normSq0S (I := I) g₁ x s
       (metricTraceFirstTwo0STensor (I := I) g₁ (U x)) ≤
         ((s : Real) + 1) ^ 2 * (Module.finrank Real E : Real) ^ (2 * s + 4) *
@@ -729,7 +725,6 @@ theorem remNormSq_le (g₁ g₂ : SmoothRiemannianMetric I M) {s : ℕ}
     refine le_trans (mul_le_mul_of_nonneg_left hchain (by positivity)) (le_of_eq ?_)
     rw [show 2 * s + 4 = (s + 2) + (s + 2) by ring, pow_add]
     ring
-
   have hsecond : normSq0S (I := I) g₁ x s
       (metricTraceFirstTwo0STensor (I := I) g₁ (W x) -
         metricTraceFirstTwo0STensor (I := I) g₂ (W x)) ≤

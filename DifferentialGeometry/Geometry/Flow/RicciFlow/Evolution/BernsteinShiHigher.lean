@@ -96,7 +96,6 @@ theorem mdiffAt_gradientFun_finset_sum_smul
               y) := by
     funext y
     exact gradientFun_sum (I := I) s G t f c y (fun i hi => hf i hi y)
-
   have hsection_eq :
       (T% fun y : M =>
           DifferentialGeometry.Integral.Connection.gradientFun (I := I) (G.metric t)
@@ -1113,7 +1112,6 @@ theorem estimate [CompactSpace M] (B : BernsteinTower (I := I) G) :
             (B.hw_nonneg (m + 1) s hsmem y)
         rw [hbBar]
         linarith
-
       have hGspace : ∀ s : Real, s ∈ Set.Icc 0 B.T -> 0 < s -> ∀ y : M,
           MDifferentiableAt I 𝓘(Real, Real) (Gfun (I := I) B m s) y := by
         intro s hsmem hspos y

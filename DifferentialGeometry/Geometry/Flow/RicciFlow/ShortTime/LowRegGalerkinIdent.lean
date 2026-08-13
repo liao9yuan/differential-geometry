@@ -68,7 +68,6 @@ theorem lowreg_proj_at (g₀ : SmoothRiemannianMetric I M)
   have hQnn : 0 ≤ lowregOuterRad Ctop ρ P := (lowregOuterRad_pos hCtop hρ hP).le
   set Nfun := lowregNfun (I := I) (M := M) g₀ g₀ hδ hCtop hB1 hρ hP hreal
     with hNfundef
-
   set A : ℝ≥0 := Real.toNNReal (Ctop * lowregOuterRad Ctop ρ P / R) with hAdef
   set B : ℝ≥0 := Real.toNNReal B0 with hBdef
   set C : ℝ≥0 := Real.toNNReal B1 with hCdef
@@ -105,11 +104,9 @@ theorem lowreg_proj_at (g₀ : SmoothRiemannianMetric I M)
     rw [hAR, hBcoe, hCcoe]
     exact htame u u'
   have hDnn : 0 ≤ D := le_trans (norm_nonneg _) hzero
-
   have hTB : T ≤ 1 / (64 * ((B : ℝ) + 1) ^ 2) := by
     rw [hBcoe]
     exact le_trans hTτ (le_trans (min_le_right _ _) (min_le_left _ _))
-
   have hex : ∀ N : ℕ,
       ∃ gforce : timeL2 (tensorHs (I := I) (M := M) g₀ 0 2 ((1 : ℕ) : ℝ)) T,
         (timeL2EigenProj (I := I) (M := M) g₀ ((1 : ℕ) : ℝ) T N gforce =

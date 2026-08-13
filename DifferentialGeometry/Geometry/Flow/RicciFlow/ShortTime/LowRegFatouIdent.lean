@@ -68,7 +68,6 @@ theorem lowregFieldCombo (g₀ : SmoothRiemannianMetric I M) {R T : ℝ}
   have h_compact := tensorResolventL2_isCompactOperator (I := I) (M := M) g₀ 0 2
   set fld := maxRegDuhamelSolField (I := I) (M := M) ((1 : ℕ) : ℝ) hT hT1
     (0 : tensorHs (I := I) (M := M) g₀ 0 2 (((1 : ℕ) : ℝ) + 2)) (fseq N) with hfld
-
   have hfix : timeL2EigenProj (I := I) (M := M) g₀ (((1 : ℕ) : ℝ) + 2) T N fld
       = fld := projField_fixed (I := I) (M := M) g₀ 1 hT hT1 N (fseq N) u hnem
   have hproj : ⇑(timeL2EigenProj (I := I) (M := M) g₀ (((1 : ℕ) : ℝ) + 2) T N fld)
@@ -79,7 +78,6 @@ theorem lowregFieldCombo (g₀ : SmoothRiemannianMetric I M) {R T : ℝ}
       spatialEigenProj (I := I) (M := M) g₀ (((1 : ℕ) : ℝ) + 2) N (fld t) := by
     rw [hfix] at hproj
     exact hproj
-
   have hmodes : ∀ᵐ t ∂(timeMeasure T),
       ∀ i ∈ eigenIdxFinset (I := I) (M := M) g₀ N,
         (fld t).coeff i = lowregProjMode (I := I) (M := M) g₀ fseq N t i := by
@@ -124,7 +122,6 @@ theorem lowregForceMode (g₀ : SmoothRiemannianMetric I M) {R T : ℝ}
     fld hball
   filter_upwards [timeModeCoeff_coeFn (I := I) (M := M) (fseq N) i, hnem, hball,
     hcombo, hcoe] with t h1 h2 h3 h4 h5
-
   have hstate : ‖galLowView (I := I) (M := M) g₀ 1
       (finiteEigenComboHs (I := I) (M := M) g₀
         (eigenIdxFinset (I := I) (M := M) g₀ N)
@@ -231,13 +228,11 @@ theorem lowregModeDeriv (g₀ : SmoothRiemannianMetric I M) {R T : ℝ}
   have hFc : Continuous F := Continuous.Icc_extend' hFcont.restrict
   have hFeq : ∀ s ∈ Set.Icc (0 : ℝ) T, F s = G s := fun s hs =>
     Set.IccExtend_of_mem hT.le _ hs
-
   have hae : (fun s => (timeModeCoeff (I := I) (M := M) (fseq N) i) s)
       =ᵐ[volume.restrict (Set.Icc (0 : ℝ) T)] F := by
     filter_upwards [hFmode, ae_restrict_mem (μ := volume) measurableSet_Icc]
       with s hs hsmem
     rw [hs, hFeq s hsmem]
-
   have hconv : ∀ s ∈ Set.Icc (0 : ℝ) T,
       lowregProjMode (I := I) (M := M) g₀ fseq N s i = perModeConv lam F s :=
     fun s hs => perModeConv_timeL2_congr lam hae hs
@@ -247,7 +242,6 @@ theorem lowregModeDeriv (g₀ : SmoothRiemannianMetric I M) {R T : ℝ}
   have hval : G t - lam * lowregProjMode (I := I) (M := M) g₀ fseq N t i =
       -lam * lowregProjMode (I := I) (M := M) g₀ fseq N t i + G t := by ring
   rw [hval] at hderiv
-
   have hmem : Set.Icc (0 : ℝ) T ∈ 𝓝[Set.Ici t] t := by
     have h1 : Set.Iio T ∈ 𝓝[Set.Ici t] t :=
       nhdsWithin_le_nhds (Iio_mem_nhds ht.2)
@@ -318,7 +312,6 @@ theorem lowregFatouE3At
   classical
   set U : ℕ → ℝ → TensorEigenIdx (I := I) (M := M) g₀ 0 2 → ℝ :=
     lowregProjMode (I := I) (M := M) g₀ fseq with hU
-
   have hUcont : ∀ N, ∀ i ∈ eigenIdxFinset (I := I) (M := M) g₀ N,
       ContinuousOn (fun t => U N t i) (Set.Icc (0 : ℝ) T) :=
     fun N i _ => lowregProjMode_cont (I := I) (M := M) g₀ hT.le fseq N i
@@ -340,7 +333,6 @@ theorem lowregFatouE3At
         htame N (U N) (fun j _ => hUcont N j (by assumption)) i
     · exact lowregForceMode (I := I) (M := M) g₀
         (lowregStateRad_pos hCtop hB1 hρ hP).le hT hT1 N fseq (hball N) (hnem N) i
-
   set EE : ℕ → ℝ → ℝ := fun N => Set.IccExtend hT.le
     (fun p : Set.Icc (0 : ℝ) T => galerkinEnergy (I := I) (M := M)
       (eigenIdxFinset (I := I) (M := M) g₀ N) (U N) 3 p.1) with hEE
@@ -481,7 +473,6 @@ theorem lowregL2H3 (g₀ : SmoothRiemannianMetric I M) {R T b : ℝ}
   set fld := maxRegDuhamelSolField (I := I) (M := M) ((1 : ℕ) : ℝ) hT hT1
     (0 : tensorHs (I := I) (M := M) g₀ 0 2 (((1 : ℕ) : ℝ) + 2)) (fseq N) with hfld
   have hexp : ((1 : ℕ) : ℝ) + 2 = (3 : ℝ) := by norm_num
-
   have hae : (fun t => galerkinEnergy (I := I) (M := M)
       (eigenIdxFinset (I := I) (M := M) g₀ N)
       (lowregProjMode (I := I) (M := M) g₀ fseq N) 3 t)
@@ -491,7 +482,6 @@ theorem lowregL2H3 (g₀ : SmoothRiemannianMetric I M) {R T b : ℝ}
     rw [ht, finiteEigenCombo_spectral_normSq, hexp]
     simp only [galerkinEnergy, tensorSobolevWeight]
   rw [MeasureTheory.integral_congr_ae hae]
-
   have hint : ∫ t, ‖fld t‖ ^ 2 ∂(timeMeasure T) = ‖fld‖ ^ 2 :=
     (norm_sq_eq_integral fld).symm
   rw [hint]

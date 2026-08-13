@@ -105,14 +105,12 @@ theorem unifCurvatureSup_singleLink_of_diff
   intro x v w u
   set R0 : TangentSpace I x := riemannOp (cov := LeviCivita (I := I) g₀) x v w u with hR0
   set Rb : TangentSpace I x := riemannOp (cov := LeviCivita (I := I) gBase) x v w u with hRb
-
   have hbvv0 : 0 ≤ gBase.inner x v v := metric_inner_self_nonneg (I := I) (M := M) gBase x v
   have hbww0 : 0 ≤ gBase.inner x w w := metric_inner_self_nonneg (I := I) (M := M) gBase x w
   have hbuu0 : 0 ≤ gBase.inner x u u := metric_inner_self_nonneg (I := I) (M := M) gBase x u
   set P3 : ℝ := gBase.inner x v v * gBase.inner x w w * gBase.inner x u u with hP3
   have hP30 : 0 ≤ P3 := by
     rw [hP3]; exact mul_nonneg (mul_nonneg hbvv0 hbww0) hbuu0
-
   have h := hdiff x v w u
   rw [← hR0, ← hRb] at h
   have hk := hKb x v w u
@@ -127,7 +125,6 @@ theorem unifCurvatureSup_singleLink_of_diff
     calc gBase.inner x Rb Rb
         ≤ Kb * gBase.inner x v v * gBase.inner x w w * gBase.inner x u u := hk
       _ = Kb * (gBase.inner x v v * gBase.inner x w w * gBase.inner x u u) := by ring
-
   have hnDiff : Real.sqrt (gBase.inner x (R0 - Rb) (R0 - Rb)) ≤ Cd * Real.sqrt P3 := by
     calc Real.sqrt (gBase.inner x (R0 - Rb) (R0 - Rb))
         ≤ Real.sqrt (Cd ^ 2 * P3) := Real.sqrt_le_sqrt hd3
@@ -136,7 +133,6 @@ theorem unifCurvatureSup_singleLink_of_diff
     calc Real.sqrt (gBase.inner x Rb Rb)
         ≤ Real.sqrt (Kb * P3) := Real.sqrt_le_sqrt hb3
       _ = Real.sqrt Kb * Real.sqrt P3 := by rw [Real.sqrt_mul hKb0]
-
   have hcancel : (R0 - Rb) + Rb = R0 := by abel
   have htri : Real.sqrt (gBase.inner x R0 R0) ≤
       (Cd + Real.sqrt Kb) * Real.sqrt P3 := by
@@ -147,7 +143,6 @@ theorem unifCurvatureSup_singleLink_of_diff
             Real.sqrt (gBase.inner x Rb Rb) := htr
       _ ≤ Cd * Real.sqrt P3 + Real.sqrt Kb * Real.sqrt P3 := add_le_add hnDiff hnRb
       _ = (Cd + Real.sqrt Kb) * Real.sqrt P3 := by ring
-
   have hR0nn : 0 ≤ gBase.inner x R0 R0 :=
     metric_inner_self_nonneg (I := I) (M := M) gBase x R0
   have hbaseSq : gBase.inner x R0 R0 ≤ (Cd + Real.sqrt Kb) ^ 2 * P3 := by
@@ -158,10 +153,8 @@ theorem unifCurvatureSup_singleLink_of_diff
             ((Cd + Real.sqrt Kb) * Real.sqrt P3) := hmm
       _ = (Cd + Real.sqrt Kb) ^ 2 * (Real.sqrt P3 * Real.sqrt P3) := by ring
       _ = (Cd + Real.sqrt Kb) ^ 2 * P3 := by rw [Real.mul_self_sqrt hP30]
-
   have hout : g₀.inner x R0 R0 ≤ Λ * gBase.inner x R0 R0 := (hcomp x R0).2
   have hcoeff_nn : 0 ≤ (Cd + Real.sqrt Kb) ^ 2 := sq_nonneg _
-
   have hinConv : ∀ z : TangentSpace I x, gBase.inner x z z ≤ Λ * g₀.inner x z z := by
     intro z
     have hz := (hcomp x z).1
@@ -179,7 +172,6 @@ theorem unifCurvatureSup_singleLink_of_diff
     exact mul_le_mul hstep1 (hinConv u) hbuu0 (mul_nonneg hΛg0vv hΛg0ww)
   have hP3_conv : P3 ≤ Λ ^ 3 * (g₀.inner x v v * g₀.inner x w w * g₀.inner x u u) := by
     refine le_trans hstep2 (le_of_eq ?_); ring
-
   calc g₀.inner x R0 R0
       ≤ Λ * gBase.inner x R0 R0 := hout
     _ ≤ Λ * ((Cd + Real.sqrt Kb) ^ 2 * P3) :=
@@ -453,12 +445,10 @@ theorem metricDiff_order0_bound (gBase g₀ : SmoothRiemannianMetric I M) {Λ : 
     Tensor0SBundle.tensorRS_riemannianBundle (I := I) (M := M) gBase 0 2
   obtain ⟨basis, hON⟩ := exists_gOrthonormalBasis (I := I) gBase x
   have hΛ1 : (0 : ℝ) ≤ Λ - 1 := by linarith
-
   rw [norm_toSection_eq_sqrt_riemannianFiberNormSq (I := I) (M := M) gBase 0 2 x
     (metricDifferenceCcTensor (I := I) (M := M) gBase g₀)]
   rw [rfns_eq_normSq0S_unit' (I := I) gBase 2 x
     (metricDifferenceCcTensor (I := I) (M := M) gBase g₀)]
-
   have hcompbound : ∀ slots : Fin 2 → Fin (Module.finrank ℝ (TangentSpace I x)),
       |Tensor0SBundle.component0S (I := I) basis
           ((show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace 2 I x from
@@ -488,7 +478,6 @@ theorem metricDiff_order0_bound (gBase g₀ : SmoothRiemannianMetric I M) {Λ : 
     ((show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace 2 I x from
         (metricDifferenceCcTensor (I := I) (M := M) gBase g₀).toSection x)
       (unitZeroSec (I := I) (M := M) x)) (Λ - 1) hΛ1 hcompbound
-
   have hcard : (Fintype.card (Fin 2 → Fin (Module.finrank ℝ (TangentSpace I x))) : ℝ) =
       (Module.finrank ℝ E : ℝ) ^ 2 := by
     have hc : Fintype.card (Fin 2 → Fin (Module.finrank ℝ (TangentSpace I x))) =
@@ -497,7 +486,6 @@ theorem metricDiff_order0_bound (gBase g₀ : SmoothRiemannianMetric I M) {Λ : 
       rw [Fintype.card_fun, Fintype.card_fin, Fintype.card_fin]
     rw [hc]; push_cast; ring
   rw [hcard] at hnormsq
-
   calc Real.sqrt (Tensor0SBundle.normSq0S (I := I) gBase x 2
           ((show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace 2 I x from
               (metricDifferenceCcTensor (I := I) (M := M) gBase g₀).toSection x)
@@ -518,7 +506,6 @@ theorem metricDiff_orderPos_bound (gBase g₀ : SmoothRiemannianMetric I M) {Λ 
         TensorRSSpace 0 (2 + (a + 1)) I x)‖ ≤ Λ := by
   letI : Bundle.RiemannianBundle (fun b : M => TensorRSSpace 0 (2 + (a + 1)) I b) :=
     Tensor0SBundle.tensorRS_riemannianBundle (I := I) (M := M) gBase 0 (2 + (a + 1))
-
   have hBzero : ‖((iteratedCovGrad gBase 0 2 (a + 1)
         (metricCcTensor (I := I) (M := M) gBase gBase)).toSection x :
         TensorRSSpace 0 (2 + (a + 1)) I x)‖ = 0 := by
@@ -527,7 +514,6 @@ theorem metricDiff_orderPos_bound (gBase g₀ : SmoothRiemannianMetric I M) {Λ 
   have hBsec : (iteratedCovGrad gBase 0 2 (a + 1)
       (metricCcTensor (I := I) (M := M) gBase gBase)).toSection x = 0 :=
     norm_eq_zero.mp hBzero
-
   have hsplit : (iteratedCovGrad gBase 0 2 (a + 1)
         (metricDifferenceCcTensor (I := I) (M := M) gBase g₀)).toSection x =
       (iteratedCovGrad gBase 0 2 (a + 1)
@@ -647,11 +633,9 @@ theorem convexCombPath_comparable
   have hb0 : 0 ≤ b := metric_inner_self_nonneg (I := I) (M := M) gBase x v
   have ha0 : 0 ≤ a := metric_inner_self_nonneg (I := I) (M := M) g₀ x v
   obtain ⟨hlo, hhi⟩ := hcomp x v
-
   have hlo' : b ≤ Λ * a := by
     have h := mul_le_mul_of_nonneg_left hlo hΛ0.le
     rwa [← mul_assoc, mul_inv_cancel₀ hΛ0.ne', one_mul] at h
-
   have hab : |a - b| ≤ (Λ - 1) * b := by
     rw [abs_le]
     refine ⟨?_, ?_⟩
@@ -661,7 +645,6 @@ theorem convexCombPath_comparable
         nlinarith [mul_nonneg (sq_nonneg (Λ - 1)) ha0, hp2]
       · nlinarith [ha0, mul_nonneg (by linarith : (0 : ℝ) ≤ Λ - 2) hb0]
     · nlinarith [hhi, hb0]
-
   obtain ⟨hs0, hs1⟩ := hs
   have hgs : b ≤ Λ * (s * a + (1 - s) * b) := by
     have hsb : s * b ≤ s * (Λ * a) := mul_le_mul_of_nonneg_left hlo' hs0
@@ -669,7 +652,6 @@ theorem convexCombPath_comparable
     have h1sb : (1 - s) * b ≤ (1 - s) * (Λ * b) :=
       mul_le_mul_of_nonneg_left hbb (by linarith)
     nlinarith [hsb, h1sb]
-
   have hts : 0 ≤ |t - s| := abs_nonneg _
   have hΛ1 : (0 : ℝ) ≤ Λ - 1 := by linarith
   have hGdiff : t * a + (1 - t) * b - (s * a + (1 - s) * b) = (t - s) * (a - b) := by ring

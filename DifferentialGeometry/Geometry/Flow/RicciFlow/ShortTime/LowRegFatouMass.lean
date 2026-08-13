@@ -134,7 +134,6 @@ theorem lowregMassLow (hDim : Module.finrank ℝ E = 3)
   intro ε hε habs σ hσ
   obtain ⟨Φ, hΦ⟩ := hgate hε habs
   refine ⟨Φ, fun t ht => ?_⟩
-
   have hdom : ∀ i : TensorEigenIdx (I := I) (M := M) g₀ 0 2,
       tensorSobolevWeight (I := I) (M := M) i σ ≤
         tensorSobolevWeight (I := I) (M := M) i 3 := fun i =>

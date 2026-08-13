@@ -277,13 +277,10 @@ theorem forward_unique_of_inputs
     ∀ t ∈ Ico a b, g₁ t = g₂ t := by
   refine metrics_eq_ico (I := I) g₁ g₂ ?_
   intro c hc t ht
-
   have hsub : Ioo a c ⊆ Ioo a b := fun s hs => ⟨hs.1, lt_trans hs.2 hc.2⟩
   have hsubIcc : Icc a c ⊆ Ico a b := fun s hs => ⟨hs.1, lt_of_le_of_lt hs.2 hc.2⟩
-
   obtain ⟨C_A, C_R, C_Ric, C_V, C_U, C_rem, hb⟩ := hin.bounds c hc
   have hCA : (0 : Real) ≤ max C_A 0 := le_max_right _ _
-
   have hyoung : (1 / (2 * (max C_A 0 + 1))) * max C_A 0 + (1 / 2 : Real) ≤ 1 := by
     have he : (1 / (2 * (max C_A 0 + 1))) * max C_A 0
         = max C_A 0 / (2 * (max C_A 0 + 1)) := by ring
@@ -291,14 +288,12 @@ theorem forward_unique_of_inputs
       rw [div_le_div_iff₀ (by positivity) (by norm_num)]
       linarith
     rw [he]; linarith
-
   have hgram : ∀ (x₀ : M) (i j : Fin (Module.finrank Real E)),
       ContMDiffOn (𝓘(Real, Real).prod I) 𝓘(Real, Real) ∞
         (fun p : Real × M => chartGramMatrix (I := I) (g₁ p.1) x₀ p.2 i j)
         (Ioo a c ×ˢ (trivializationAt E (TangentSpace I) x₀).baseSet) := fun x₀ i j =>
     (h1smooth x₀ i j).mono
       (Set.prod_mono (fun s hs => ⟨hs.1.le, lt_trans hs.2 hc.2⟩) (subset_refl _))
-
   have hPDE₁ : ∀ t ∈ Ioo a c, ∀ (x : M) (X Y : TangentSpace I x),
       HasDerivAt (fun r : Real => (g₁ r).inner x X Y)
         ((-2 : Real) * metricRicciAt (I := I) (g₁ t) x
@@ -309,7 +304,6 @@ theorem forward_unique_of_inputs
         ((-2 : Real) * metricRicciAt (I := I) (g₂ t) x
           (fun i : Fin 2 => if i = 0 then X else Y)) t :=
     fun s hs x X Y => pde_hasDerivAt (I := I) g₂ h2pde (hsub hs) x X Y
-
   have hA : ∀ t ∈ Ioo a c, ∀ (x : M) (v : Fin 3 → TangentSpace I x),
       HasDerivAt (fun r : Real => connDiffLowAt (I := I) (g₁ r) (g₂ r) x v)
         (connSpeed (I := I) g₁ g₂ Avec t x v) t := fun s hs x v =>
@@ -320,7 +314,6 @@ theorem forward_unique_of_inputs
         (rmSpeed (I := I) g₁ g₂ Svec t x v) t := fun s hs x v =>
     rmSpeed_hasDerivAt (I := I) g₁ g₂ Svec (fun X Y => hPDE₁ s hs x X Y)
       (fun X Y Z => hin.rm s (hsub hs) x X Y Z) v
-
   have hAdot : ∀ t ∈ Ioo a c, ∀ x, normSq0S (I := I) (g₁ t) x 3
       (connSpeed (I := I) g₁ g₂ Avec t x) ≤
       max C_A 0 * (forwardUniqueDensity (I := I) g₁ g₂ t x +

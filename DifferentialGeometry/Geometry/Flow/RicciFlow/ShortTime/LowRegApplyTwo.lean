@@ -229,7 +229,6 @@ theorem lowreg_apply_two
     lowreg_hfLo_data (I := I) (M := M) hDim g hR hρ hRρ hδ0 hδ_le hδ
       hreal hreal' hNcont hcoreN hA2cont hA2core hB2 hA2bd hZ hL
       FHi FLo hFHi hFLo hFLoCore hFHiBd hFLoBd hFComm hT hT1 f hball hforce
-
   have hduh : L * ‖duhH3 (I := I) (M := M) g hT hT1 f‖ ≤ 2 * L * ‖f‖ := by
     have h1 := mul_le_mul_of_nonneg_left
       (norm_duhH3_le (I := I) (M := M) g hT hT1 f) hL
@@ -245,7 +244,6 @@ theorem lowreg_apply_two
   have hnormLo : ‖hA1.toLp
       (refoldAffA1 (I := I) (M := M) g ρ FLo hT hT1 f)‖ ≤
       2 * L * ‖f‖ + Real.sqrt T * Z := by linarith
-
   have hmarginHi :
       (C2Hi : ℝ) * (1 + T) + 2 * Real.sqrt (1 + T) *
           ‖hA1Hi.toLp (refoldAffA1Hi (I := I) (M := M) g ρ FHi hT hT1 f)‖ ≤
@@ -290,7 +288,6 @@ theorem lowreg_apply_two
       hA1compat (lift_force_incl (I := I) (M := M) g g T) f heq
   obtain ⟨hlo, hhi, hfHieq, htr, hpde, hL2incl, hincl, hlopin, hrepr0,
     hreprcont, hreprpin, hreprae⟩ := hpacket
-
   have hctrans : ∀ {a b c : ℝ} (hab : a = b) (hbc : b = c)
       (x : tensorHs (I := I) (M := M) g 0 2 a),
       tensorHsCongr (I := I) (M := M) g 0 2 hbc
@@ -314,7 +311,6 @@ theorem lowreg_apply_two
       (maxRegDuhamelSolField (I := I) (M := M) (1 : ℝ) hT hT1
         (0 : tensorHs (I := I) (M := M) g 0 2 ((1 : ℝ) + 2)) f)] with t ht
     simpa only [tensorHsCongrL_apply] using ht
-
   have hballU : ∀ᵐ t ∂timeMeasure T, ‖u.lo.toFun t‖ ≤ R := by
     filter_upwards [hreprae, hsf, hball,
       ae_restrict_mem (measurableSet_Icc (a := (0 : ℝ)) (b := T))]
@@ -356,7 +352,6 @@ theorem lowreg_apply_two
     hlo, hhi, hfHieq, htr, hpde, hL2incl, hincl, hlopin, hrepr0, hreprcont,
     hreprpin, hreprae, ?_, hRρ, hNcont, hcoreN, hA2cont, hA2core, hA2Hicont,
     hFHi, hFLo, hFLoCore, hA2sq, hFComm, hballU, hRcap⟩
-
   have hpin : ∀ᵐ t ∂timeMeasure T,
       tensorHsInclusion (I := I) (M := M) (g := g) (r := 0) (s := 2)
           (show (3 : ℝ) ≤ (4 : ℝ) by norm_num)
@@ -369,7 +364,6 @@ theorem lowreg_apply_two
     filter_upwards [u.link, hreprae, hstate, hsf,
       ae_restrict_mem (measurableSet_Icc (a := (0 : ℝ)) (b := T))]
       with t hlink hrae hst hsfa htmem
-
     have h3 : tensorHsInclusion (I := I) (M := M) (g := g) (r := 0) (s := 2)
         (show (2 : ℝ) + 1 ≤ (2 : ℝ) + 2 by norm_num) (u.hiL2 t) =
         u.repr t := by
@@ -521,7 +515,6 @@ theorem lowreg_solve_open
     intro S
     refine (hcoreLo S).trans (a2Lo_congr (I := I) (M := M) hDim g ?_)
     rfl
-
   obtain ⟨Z, L, hZ, hL, FHi, FLo, hFHi, hFLo, -, hFLoCore,
       hFHiBd, hFLoBd, hFComm⟩ :=
     hpack hρ (hρ_le.trans (hρL_le.trans (min_le_left _ _)))
@@ -531,7 +524,6 @@ theorem lowreg_solve_open
   have hc0 : 0 ≤ c := (mul_nonneg hC hρ.le).trans hB2c
   have h1c : (0 : ℝ) < 1 - c := by linarith
   have hL1 : (0 : ℝ) < 6 * (L + 1) := by linarith
-
   set P : ℝ :=
     min (min (min ρ ρN) ((1 - c) / (6 * (L + 1)))) Rcap with hPdef
   have hPle0 : P ≤ min (min ρ ρN) ((1 - c) / (6 * (L + 1))) := min_le_left _ _
@@ -598,7 +590,6 @@ theorem lowreg_solve_open
     filter_upwards [hfae, hforce] with t h1 h2
     rw [h1, h2]
     rfl
-
   have hfnorm : ‖f‖ = ‖gforce‖ := by
     rw [hfdef]
     exact norm_congrLp (I := I) (M := M) g

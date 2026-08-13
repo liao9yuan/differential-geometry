@@ -593,7 +593,6 @@ private theorem tderivCont {J : Set Real} (hJ : IsOpen J) {t : Real} (ht : t ∈
   have hy₀ : (extChartAt I x₀) x₀ ∈ U :=
     mem_interior_iff_mem_nhds.2 (extChartAt_target_mem_nhds (I := I) x₀)
   have hprod : IsOpen (J ×ˢ U) := hJ.prod hUopen
-
   have hsymm : ContMDiffOn 𝓘(Real, E) I ∞ (extChartAt I x₀).symm (extChartAt I x₀).target :=
     contMDiffOn_extChartAt_symm (I := I) x₀
   have hfst : ContMDiffOn 𝓘(Real, Real × E) 𝓘(Real, Real) ∞
@@ -619,7 +618,6 @@ private theorem tderivCont {J : Set Real} (hJ : IsOpen J) {t : Real} (ht : t ∈
   have hfdCont : ContinuousOn
       (fderiv Real fun p : Real × E => F p.1 ((extChartAt I x₀).symm p.2)) (J ×ˢ U) :=
     hGd.continuousOn_fderiv_of_isOpen hprod hone
-
   have hslice : ∀ y ∈ U, HasDerivAt
       (fun r : Real => F r ((extChartAt I x₀).symm y))
       ((fderiv Real (fun p : Real × E => F p.1 ((extChartAt I x₀).symm p.2)) (t, y))
@@ -632,7 +630,6 @@ private theorem tderivCont {J : Set Real} (hJ : IsOpen J) {t : Real} (ht : t ∈
     have hline : HasDerivAt (fun r : Real => ((r, y) : Real × E)) ((1 : Real), (0 : E)) t :=
       (hasDerivAt_id t).prodMk (hasDerivAt_const t y)
     simpa [Function.comp_def] using hdiff.comp_hasDerivAt t hline
-
   have heq : (fun x : M => deriv (fun r : Real => F r x) t) =ᶠ[nhds x₀]
       fun x : M =>
         (fderiv Real (fun p : Real × E => F p.1 ((extChartAt I x₀).symm p.2))

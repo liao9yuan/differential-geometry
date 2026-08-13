@@ -1053,10 +1053,8 @@ theorem aN_component_bound {r₀ rg : ℕ} {u : Set M} (hu : IsOpen u)
   let Cdesc := mixedDescentConst r₀ N B C₂ KShi
   have hCdesc0 : 0 ≤ Cdesc := mixedDescentConst_nonneg hB0 hC₂0 hKShi0
   intro chrG hchrG T hT hDlow gComp hDtop hShi x hx
-
   have hmixU := claim2_component_bound (r₀ := r₀) hu frame chrH hframe hchrH
     B hB0 (N - 1) KShi hKShi0
-
   have hdescU := mixed_descent_bound (r₀ := r₀) hu frame chrH hframe hchrH
     B hB0 N hN C₂ hC₂0 KShi hKShi0
   have hmix := hmixU chrG hchrG T hT (fun c hc z hz => hDlow c hc z hz)

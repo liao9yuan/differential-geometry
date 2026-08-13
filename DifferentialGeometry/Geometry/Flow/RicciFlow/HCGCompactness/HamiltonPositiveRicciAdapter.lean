@@ -2254,7 +2254,6 @@ theorem round0_of_cgh
         h0 hsubseq hconv hcomplete)
   have hbaseOne : LimitBaseScalarOne (I := I) (M := M) Lh :=
     limit_base_scalar_one (I := I) (M := M) P Q hsel hbaseConv
-
   letI : TopologicalSpace Lh.N := Lh.topology
   letI : ChartedSpace H Lh.N := Lh.charted
   letI : IsManifold I ∞ Lh.N := Lh.smooth

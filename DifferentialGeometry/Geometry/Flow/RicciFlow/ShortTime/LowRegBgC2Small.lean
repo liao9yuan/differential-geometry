@@ -239,7 +239,6 @@ theorem c2Bg_h2_small
   have hδ_lt : δ < 1 := lt_of_le_of_lt hδ_le (by norm_num)
   have hRρ0 : R ≤ ρ0 := hRρ.trans (min_le_left _ _)
   have hRρd : R ≤ ρd := hRρ.trans (min_le_right _ _)
-
   have hSI : Set.uIcc (0 : ℝ) 1 ⊆
       realizedSmallSet (δ := δ) (δ' := δ) := by
     rw [Set.uIcc_of_le zero_le_one]
@@ -256,7 +255,6 @@ theorem c2Bg_h2_small
     (armConst (I := I) (M := M) g (δ := δ) (δ' := δ)
       (deTurckPhiMetTotal (I := I) (M := M) g g g))
   have hjD := threeArmJoint_sub (I := I) (M := M) g _ _ hjKerB hjKerG
-
   have hcB := c2BgPath (I := I) (M := M) g gB T hδ_lt hδ hδZ hSI hjKerB
   have hcG := c2BgPath (I := I) (M := M) g g T hδ_lt hδ hδZ hSI hjKerG
   have hdiff :
@@ -274,7 +272,6 @@ theorem c2Bg_h2_small
           realizedSmallSet_isOpen hSI hjD := by
     rw [hcB, hcG]
     exact path_sub_eq (I := I) (M := M) g 4 hSI _ _ hjKerB hjKerG hjD
-
   have hcapPt : ∀ s ∈ Set.Icc (0 : ℝ) 1, ∀ x : M,
       riemannianFiberNormSq (I := I) (M := M) g 4 2 x
           (((rhsRefoldTop (I := I) (M := M) g gB T hδ hδZ s +
@@ -300,11 +297,9 @@ theorem c2Bg_h2_small
     rw [kerBgDiff (I := I) (M := M) g gB T hδ hδZ s]
     exact (hdev T hδ_lt hδ hδZ hR0 hRρd hTHs s hs).2
   have hCdR0 : 0 ≤ Cd * R := mul_nonneg hCd hR0
-
   obtain ⟨hdPt, hdJet⟩ := pathBoth (I := I) (M := M) g hSI _ hjD hCdR0
     hcapPt hcapJet
   rw [← hdiff] at hdPt hdJet
-
   have hdg :
       (∀ x : M, riemannianFiberNormSq (I := I) (M := M) g 4 2 x
           ((lowBaseData (I := I) (M := M) g g T hδ_lt hδ hδZ).C2.toSection x) ≤

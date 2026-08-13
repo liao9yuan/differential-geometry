@@ -43,7 +43,6 @@ theorem riemannOp_dim1_zero (h1 : Module.finrank ℝ E = 1)
   have hspan := (finrank_eq_one_iff_of_nonzero' e he).mp hfr
   obtain ⟨a, ha⟩ := hspan u
   obtain ⟨b, hb⟩ := hspan v
-
   have hee : riemannOp (LeviCivita (I := I) g) x e e w = 0 := by
     have hsw := riemannOp_swap (LeviCivita (I := I) g) x e e w
     have h2 : (2 : ℝ) • riemannOp (LeviCivita (I := I) g) x e e w = 0 := by
@@ -92,7 +91,6 @@ def volInput_of_bg
             Imult := fun m => segImult (Module.finrank ℝ E) q r0 m,
             ballMult := ?_ }, rfl⟩
   intro m k α _ _ centers r hr hcap hsep z J hJz
-
   letI : TopologicalSpace (X.obj k).M := (X.obj k).topology
   letI : ChartedSpace H (X.obj k).M := (X.obj k).charted
   letI : IsManifold I ∞ (X.obj k).M := (X.obj k).smooth
@@ -114,7 +112,6 @@ def volInput_of_bg
   letI : ConnectedSpace (X.obj k).M := hconn k
   haveI : CompleteSpace (X.obj k).M :=
     MetricComplete.complete (X.obj k) (hcpl.complete k)
-
   have hRic : RicciBoundedBelow (I := I) (X.obj k).metric
       (-(((Module.finrank ℝ E - 1 : ℕ) : ℝ) * q ^ 2)) := by
     by_cases hn1 : Module.finrank ℝ E = 1
@@ -151,13 +148,11 @@ def volInput_of_bg
               * (X.obj k).metric.inner x v v :=
             mul_le_mul_of_nonneg_right hkappa hinner
         _ ≤ ricciTensor (I := I) (X.obj k).metric x v v := hsrc x v
-
   have hEnorm : ∀ (y : (X.obj k).M) (w : TangentSpace I y),
       ‖w‖ₑ = ENNReal.ofReal (Real.sqrt ((X.obj k).metric.inner y w w)) := by
     intro y w
     simpa using
       tensor0SBundle_enorm_eq_riemannianBundle_enorm (I := I) (X.obj k).metric y w
-
   have hbridge : ∀ x y : (X.obj k).M,
       riemannianEDist I x y = ENNReal.ofReal (hd.dist k x y) := by
     intro x y

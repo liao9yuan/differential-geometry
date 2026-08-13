@@ -123,7 +123,6 @@ theorem energy_zero_on
     (rem : ℝ → (x : M) → Tensor0SSpace 4 I x)
     {a c ε δ C_A C_R C_Ric C_V C_U C_rem : ℝ}
     (hac : a < c)
-
     (hgram : ∀ (x₀ : M) (i j : Fin (Module.finrank ℝ E)),
       ContMDiffOn (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ, ℝ) ∞
         (fun p : ℝ × M => chartGramMatrix (I := I) (g₁ p.1) x₀ p.2 i j)
@@ -143,7 +142,6 @@ theorem energy_zero_on
       HasDerivAt (fun r : ℝ => connDiffLowAt (I := I) (g₁ r) (g₂ r) x v) (Adot t x v) t)
     (hS : ∀ t ∈ Ioo a c, ∀ (x : M) (v : Fin 4 → TangentSpace I x),
       HasDerivAt (fun r : ℝ => rmDiffLowAt (I := I) (g₁ r) (g₂ r) x v) (Sdot t x v) t)
-
     (hε : 0 < ε) (hδ : 0 < δ) (habs : δ * C_A + ε ≤ 1)
     (hcar : ∀ t ∈ Ioo a c, ∀ x, Sfield t x = rmDiffLowAt (I := I) (g₁ t) (g₂ t) x)
     (hSdec : ∀ t ∈ Ioo a c, ∀ x, Sdot t x =
@@ -191,7 +189,6 @@ theorem energy_zero_on
       (riemannianMeasureFamily (I := I) (M := M) g₁ t))
     (hidens : ∀ t ∈ Ioo a c, Integrable (fun x => forwardUniqueDensity (I := I) g₁ g₂ t x)
       (riemannianMeasureFamily (I := I) (M := M) g₁ t))
-
     (hinit : g₁ a = g₂ a)
     (hcont : ContinuousOn (forwardUniqueEnergy (I := I) (M := M) g₁ g₂) (Icc a c)) :
     ∀ t ∈ Icc a c, forwardUniqueEnergy (I := I) (M := M) g₁ g₂ t = 0 := by

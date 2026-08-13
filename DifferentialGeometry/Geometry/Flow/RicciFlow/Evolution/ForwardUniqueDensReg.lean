@@ -165,7 +165,6 @@ theorem normSq0S_jointContMDiffOn {J : Set ℝ} {s : ℕ}
     exact FiberBundle.mem_baseSet_trivializationAt' x₀
   have hnhd : J ×ˢ e.baseSet ∈ 𝓝[J ×ˢ (Set.univ : Set M)] ((t, x₀) : ℝ × M) :=
     prodOpen_nhdsWithin e.open_baseSet hqbase J t
-
   have hsum : ContMDiffWithinAt (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ, ℝ) ∞
       (fun p : ℝ × M =>
         ∑ K : Fin s → Fin (Module.finrank ℝ E),
@@ -188,7 +187,6 @@ theorem normSq0S_jointContMDiffOn {J : Set ℝ} {s : ℕ}
           (J ×ˢ (Set.univ : Set M)) ((t, x₀) : ℝ × M) :=
       fun N => hA x₀ N htJ
     exact ((ContMDiffWithinAt.prod fun a _ => hinvAt (K a) (L a)).mul (hAAt K)).mul (hAAt L)
-
   have heq : (fun p : ℝ × M => normSq0S (I := I) (g p.1) p.2 s (A p.1 p.2))
       =ᶠ[𝓝[J ×ˢ (Set.univ : Set M)] ((t, x₀) : ℝ × M)]
       fun p : ℝ × M =>

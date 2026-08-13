@@ -619,7 +619,6 @@ theorem gSeqExt_lower
   have hc0 : 0 <= c := (lt_min hcLow one_pos).le
   have hc1 : c <= 1 := min_le_right _ _
   have hccLow : c <= cLow := min_le_left _ _
-
   have hRnn : 0 <= R.inner x v v := by
     by_cases hv : v = 0
     · subst hv; simp
@@ -633,13 +632,10 @@ theorem gSeqExt_lower
     have hχ01 := bf.chi01 k x
     have hχ0 : 0 <= χ := hχ01.1
     have hχ1 : χ <= 1 := hχ01.2
-
     have hsrc_low := hbound k t ht ⟨x, hx⟩ v
     set S := (srcMetric (I := I) Φ hsrc htgt k t).inner ⟨x, hx⟩ v v with hSdef
     set r := R.inner x v v with hrdef
-
     have hsrc_low' : cLow * r <= S := hsrc_low
-
     rw [smul_eq_mul, smul_eq_mul]
     have h1 : χ * (cLow * r) <= χ * S := mul_le_mul_of_nonneg_left hsrc_low' hχ0
     have hterm2 : c * ((1 - χ) * r) <= (1 - χ) * r := by

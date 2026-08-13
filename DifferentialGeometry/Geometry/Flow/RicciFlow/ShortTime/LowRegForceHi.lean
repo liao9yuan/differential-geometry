@@ -146,14 +146,12 @@ theorem hiN_incl
   set w : tensorHs (I := I) (M := M) g 0 2 (2 : ℝ) :=
     tensorHsInclusion (I := I) (M := M) (g := g) (r := 0) (s := 2)
       (show (2 : ℝ) ≤ (4 : ℝ) by norm_num) v with hwdef
-
   have hwu : tensorHsInclusion (I := I) (M := M) (g := g) (r := 0) (s := 2)
       (show (2 : ℝ) ≤ (3 : ℝ) by norm_num) u = w := by
     rw [hudef, hwdef]
     exact (tensorHsInclusion_trans_apply (I := I) (M := M) (g := g)
       (r := 0) (s := 2) (show (2 : ℝ) ≤ (3 : ℝ) by norm_num)
       (show (3 : ℝ) ≤ (4 : ℝ) by norm_num) v).symm
-
   have hstat : tensorHsInclusion (I := I) (M := M) (g := g) (r := 0) (s := 2)
       (show (1 : ℝ) ≤ (2 : ℝ) by norm_num)
       (staticForce (I := I) (M := M) g g (2 : ℝ)) =
@@ -161,7 +159,6 @@ theorem hiN_incl
     rw [staticForce_incl (I := I) (M := M) g g
       (show (1 : ℝ) ≤ (2 : ℝ) by norm_num),
       lowBaseForce_eq_static (I := I) (M := M) g]
-
   have hrad4 : tensorHsInclusion (I := I) (M := M) (g := g) (r := 0) (s := 2)
       (show (3 : ℝ) ≤ (4 : ℝ) by norm_num)
       (radialCLM (I := I) (M := M) g (show (0 : ℝ) ≤ (4 : ℝ) by norm_num) ρ
@@ -179,7 +176,6 @@ theorem hiN_incl
       lowRadialH3 (I := I) (M := M) g ρ u := by
     rw [← hwu]
     exact radialCLM_h3 (I := I) (M := M) g hρ u
-
   have hradlo : tensorHsInclusion (I := I) (M := M) (g := g) (r := 0) (s := 2)
       (show (2 : ℝ) ≤ (3 : ℝ) by norm_num)
       (lowRadialH3 (I := I) (M := M) g ρ u) =
@@ -187,7 +183,6 @@ theorem hiN_incl
         (tensorHsInclusion (I := I) (M := M) (g := g) (r := 0) (s := 2)
           (show (2 : ℝ) ≤ (3 : ℝ) by norm_num) u) :=
     lowRadialH3_incl (I := I) (M := M) g hρ u
-
   have hA2 : tensorHsInclusion (I := I) (M := M) (g := g) (r := 0) (s := 2)
       (show (1 : ℝ) ≤ (2 : ℝ) by norm_num)
       (lowA2Hi (I := I) (M := M) g hρ.le hδ0 hδ_le hreal w
@@ -202,7 +197,6 @@ theorem hiN_incl
         (show (0 : ℝ) ≤ (4 : ℝ) by norm_num) ρ w v)
     simp only [ContinuousLinearMap.comp_apply] at h
     rw [h, hrad4, hrad3, hwu]
-
   have hA1 : tensorHsInclusion (I := I) (M := M) (g := g) (r := 0) (s := 2)
       (show (1 : ℝ) ≤ (2 : ℝ) by norm_num)
       (FHi u (lowRadialH3 (I := I) (M := M) g ρ u)) =
@@ -365,7 +359,6 @@ theorem force_hi_id
   filter_upwards [lowreg_force_lo (I := I) (M := M) g₀ g₀ hR hδ hreal
     (show ((1 : ℕ) : ℝ) ≤ (2 : ℝ) by norm_num) state fHi fLo hincl hforce,
     hpin] with t ht hp
-
   have hcongr := congrArg
     (fun z => tensorHsCongr (I := I) (M := M) g₀ 0 2
       (show ((1 : ℕ) : ℝ) = (1 : ℝ) by norm_num) z) ht

@@ -550,9 +550,7 @@ theorem covDerivConnDiff_gJet_le
     rw [show Λ ^ 3 = Λ ^ 2 * Λ by ring, Real.sqrt_mul (by positivity), Real.sqrt_sq hLnn]
   have hcoefnn : (0 : ℝ) ≤ Λ * Real.sqrt Λ * Λ' :=
     mul_nonneg (mul_nonneg hLnn (Real.sqrt_nonneg _)) hL'nn
-
   have hcore := covDerivConnDiff_g1_le (I := I) g₂ g₁ x v w u
-
   have hM2 : Real.sqrt (Tensor0SBundle.normSq0S (I := I) g₁ x 4
       (metricCovDeriv (I := I) g₁ g₂ 2 x)) ≤ Λ ^ 2 * Λ'' := by
     have hcomp := sqrt_normSq0S_comp (I := I) hEq hx 4 (metricCovDeriv (I := I) g₁ g₂ 2 x)
@@ -587,7 +585,6 @@ theorem covDerivConnDiff_gJet_le
     (Tensor0SBundle.connectionDifferenceTensorAt (I := I)
       (leviCivitaConnectionOfMetric (I := I) g₁)
       (leviCivitaConnectionOfMetric (I := I) g₂) x)) := Real.sqrt_nonneg _
-
   set M2 := Real.sqrt (Tensor0SBundle.normSq0S (I := I) g₁ x 4
     (metricCovDeriv (I := I) g₁ g₂ 2 x)) with hM2def
   set M1 := Real.sqrt (Tensor0SBundle.normSq0S (I := I) g₁ x 3
@@ -601,7 +598,6 @@ theorem covDerivConnDiff_gJet_le
       (smoothExtensionTangent (I := I) x v)
       (smoothExtensionTangent (I := I) x w)
       (smoothExtensionTangent (I := I) x u) x with hBdef
-
   have hbr : 3 / 2 * M2 + M1 * NA ≤ 3 / 2 * Λ ^ 2 * (Λ'' + Λ * Λ' ^ 2) := by
     have hprod : M1 * NA ≤ (Λ * Real.sqrt Λ * Λ') * (3 / 2 * (Λ * Real.sqrt Λ * Λ')) :=
       mul_le_mul hM1 hNA hNAnn hcoefnn
@@ -612,7 +608,6 @@ theorem covDerivConnDiff_gJet_le
     nlinarith [hM2, hprod]
   have hbrnn : (0 : ℝ) ≤ 3 / 2 * M2 + M1 * NA :=
     add_nonneg (by linarith) (mul_nonneg hM1nn hNAnn)
-
   have hvec : ∀ z : TangentSpace I x,
       Real.sqrt (g₁.inner x z z) ≤ Real.sqrt Λ * Real.sqrt (g₂.inner x z z) := by
     intro z

@@ -116,7 +116,6 @@ private theorem rhsTermBound (gBase g₀ : SmoothRiemannianMetric I M) {Λ C₀ 
       rw [show (1 : ℝ) = Real.sqrt 1 from Real.sqrt_one.symm]
       exact Real.sqrt_le_sqrt hΛ
     nlinarith [Real.sq_sqrt hΛ0.le, Real.sqrt_nonneg Λ]
-
   have hcross : ∀ u : TangentSpace I x,
       Real.sqrt (gBase.inner x u u) ≤ Λ * Real.sqrt (g₀.inner x u u) := by
     intro u
@@ -142,7 +141,6 @@ private theorem rhsTermBound (gBase g₀ : SmoothRiemannianMetric I M) {Λ C₀ 
   have hvB : Real.sqrt (gBase.inner x v v) ≤ Λ * Real.sqrt (g₀.inner x v v) := hcross v
   have hSv0 : (0 : ℝ) ≤ Real.sqrt (g₀.inner x v v) := Real.sqrt_nonneg _
   have hSw0 : (0 : ℝ) ≤ Real.sqrt (g₀.inner x w w) := Real.sqrt_nonneg _
-
   have hpair : ∀ (Y : TangentSpace I x) (c : ℝ),
       Real.sqrt (gBase.inner x Y Y) ≤ c →
       |g₀.inner x Y w| ≤ Λ * c * Real.sqrt (g₀.inner x w w) := by
@@ -150,7 +148,6 @@ private theorem rhsTermBound (gBase g₀ : SmoothRiemannianMetric I M) {Λ C₀ 
     refine le_trans (abs_metric_inner_le_sqrt_metric_quadratic (I := I) (M := M) g₀ x Y w) ?_
     exact mul_le_mul_of_nonneg_right
       (le_trans (hcross' Y) (mul_le_mul_of_nonneg_left hc hΛ0.le)) (Real.sqrt_nonneg _)
-
   have hAle : ∀ (p q : TangentSpace I x) (cp cq : ℝ), 0 ≤ cp →
       Real.sqrt (gBase.inner x p p) ≤ cp → Real.sqrt (gBase.inner x q q) ≤ cq →
       Real.sqrt (gBase.inner x
@@ -163,7 +160,6 @@ private theorem rhsTermBound (gBase g₀ : SmoothRiemannianMetric I M) {Λ C₀ 
         ≤ C₀ * cp * Real.sqrt (gBase.inner x q q) :=
           mul_le_mul_of_nonneg_right (mul_le_mul_of_nonneg_left hp hC₀0) (Real.sqrt_nonneg _)
       _ ≤ C₀ * cp * cq := mul_le_mul_of_nonneg_left hq (mul_nonneg hC₀0 hcp)
-
   have hCbound : Real.sqrt (gBase.inner x
       (covDerivConnDiff (I := I) gBase g₀ (smoothExtensionTangent (I := I) x v)
         (smoothExtensionTangent (I := I) x b) (smoothExtensionTangent (I := I) x b) x)
@@ -226,7 +222,6 @@ private theorem rhsTermBound (gBase g₀ : SmoothRiemannianMetric I M) {Λ C₀ 
       (by positivity) hRbound hbB
     calc _ ≤ C₀ * (C₀ * Λ * (Λ * Real.sqrt (g₀.inner x v v))) * Λ := h
       _ = C₀ ^ 2 * Λ ^ 3 * Real.sqrt (g₀.inner x v v) := by ring
-
   have hadd1 : ∀ p q : TangentSpace I x,
       g₀.inner x (p + q) w = g₀.inner x p w + g₀.inner x q w := by
     intro p q; rw [map_add, ContinuousLinearMap.add_apply]

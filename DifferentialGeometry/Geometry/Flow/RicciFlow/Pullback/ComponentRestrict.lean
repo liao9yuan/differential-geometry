@@ -131,7 +131,6 @@ theorem compRestrict_pde
         (Set.Ici a) t := by
   letI : CompactSpace (connCompOpen (I := I) p) := connCompCompact (I := I) p
   intro t ht x v w
-
   simpa only [compRestrict, SmoothRiemannianMetric.restrictOpen_inner,
     ricciTensor_restrictOpen] using hpde t ht (x : M) v w
 

@@ -316,14 +316,12 @@ theorem srcEquivOn
   letI : IsManifold I ∞ (TargetDomain (I := I) Φ k) := targetDomSmooth (I := I) Φ k
   letI : SigmaCompactSpace (TargetDomain (I := I) Φ k) := targetDomSigmaOf (I := I) Φ k (htgt k)
   letI : T2Space (TargetDomain (I := I) Φ k) := targetDomT2 (I := I) Φ k
-
   have h1 := metricUniformEquivalentOnWindow_restrictOpen (I := I)
     (K := Φ.target k) (β := β) (ψ := ψ) (gRef := gRefT k)
     (gSeq := fun _ t => (X.term (subseq k)).S.family.metric t) (B := B)
     (hequivT k) (targetOpen (I := I) Φ k)
     (V := (Set.univ : Set ↥(targetOpen (I := I) Φ k)))
     (fun x _ => x.2)
-
   have h2 := metricUniformEquivalentOnWindow_pullback (I := I)
     (K := (Set.univ : Set ↥(targetOpen (I := I) Φ k)))
     (β := β) (ψ := ψ)
@@ -472,7 +470,6 @@ theorem hbound_of_equiv
   have hEq := srcEquivOn (I := I) Φ R hsrc htgt β ψ gRefT B Crel hequivT hrel k t ht
   have hBt1 : (1 : Real) <= B t := (hequivT k 0 t ht).1
   have hlow := (hEq.2 y (Set.mem_univ y) v).1
-
   have hRef : (refRes (I := I) Φ R hsrc k).inner y v v = R.inner (y : P.M) v v := rfl
   rw [hRef] at hlow
   have hRnn : 0 <= R.inner (y : P.M) v v := by
@@ -529,7 +526,6 @@ theorem conv0_of_cp
   letI : IsManifold I ∞ P.M := P.smooth
   letI : SigmaCompactSpace P.M := P.sigmaCompact
   intro x v w ε hε
-
   have hRnn : forall u : TangentSpace I x, 0 <= R.inner x u u := by
     intro u
     by_cases hu : u = 0
@@ -558,7 +554,6 @@ theorem conv0_of_cp
   letI : IsManifold I ((∞ : WithTop ℕ∞) + 1) (SourceDomain (I := I) Φ k) := by
     change IsManifold I ∞ (SourceDomain (I := I) Φ k)
     infer_instance
-
   have hsing : sourceCompactSet (I := I) Φ k ({x} : Set P.M)
       = ({(⟨x, hx⟩ : SourceDomain (I := I) Φ k)} : Set (SourceDomain (I := I) Φ k)) := by
     ext z
@@ -572,7 +567,6 @@ theorem conv0_of_cp
       rw [hzx]
       rfl
   rw [hsing] at hsup
-
   have hpt := derivNorm_le_sup_sing (I := I) 0
     (srcMetric (I := I) Φ hsrc htgt k 0)
     (resSrc (I := I) Φ hsrc k g0)
@@ -584,7 +578,6 @@ theorem conv0_of_cp
       (refRes (I := I) Φ R hsrc k)
       (⟨x, hx⟩ : SourceDomain (I := I) Φ k) < ε / (n * Cx + 1) :=
     lt_of_le_of_lt hpt hsup
-
   have hbound := metricInnerApply_diff_le (I := I)
     (srcMetric (I := I) Φ hsrc htgt k 0)
     (resSrc (I := I) Φ hsrc k g0)
@@ -667,7 +660,6 @@ theorem lipTail_of_src
   obtain ⟨Lt, hLt0, hLt⟩ := hlipG p
   refine ⟨Lt, hLt0, fun k s t hs ht a ha z hzgrow => ?_⟩
   have hzsrc : z ∈ Φ.source k := bf.grow_subset k hzgrow
-
   letI : TopologicalSpace (SourceDomain (I := I) Φ k) := sourceDomTop (I := I) Φ k
   letI : ChartedSpace H (SourceDomain (I := I) Φ k) := sourceDomCharted (I := I) Φ k
   letI : T2Space (SourceDomain (I := I) Φ k) := sourceDomT2 (I := I) Φ k
@@ -681,7 +673,6 @@ theorem lipTail_of_src
   letI : SigmaCompactSpace ↥(sourceOpen (I := I) Φ k) := sourceDomSigmaOf (I := I) Φ k (hsrc k)
   letI : T2Space ↥(sourceOpen (I := I) Φ k) := sourceDomT2 (I := I) Φ k
   set y : SourceDomain (I := I) Φ k := ⟨z, hzsrc⟩ with hydef
-
   obtain ⟨W, hWopen, hgrowW, hW1⟩ := bf.chi_one k
   set O : TopologicalSpace.Opens (SourceDomain (I := I) Φ k) :=
     ⟨Subtype.val ⁻¹' W, hWopen.preimage continuous_subtype_val⟩ with hOdef
@@ -696,7 +687,6 @@ theorem lipTail_of_src
   letI : IsManifold I ((∞ : WithTop ℕ∞) + 1) ↥O := by
     change IsManifold I ∞ ↥O; infer_instance
   have hyO : y ∈ O := hgrowW hzgrow
-
   have hdiffO : Tensor0SBundle.metricTensorField (I := I)
         (((gSeqExt (I := I) Φ R bf hsrc htgt k s).restrictOpen (I := I)
           (sourceOpen (I := I) Φ k)).restrictOpen (I := I) O)
@@ -738,7 +728,6 @@ theorem lipTail_of_src
         (((w : SourceDomain (I := I) Φ k)) : P.M) hwsrc (vs 0) (vs 1),
       hW1 _ hwW]
     simp
-
   calc metricDerivNorm (I := I) a (gSeqExt (I := I) Φ R bf hsrc htgt k s)
         (gSeqExt (I := I) Φ R bf hsrc htgt k t) R z
       = metricDerivNorm (I := I) a
@@ -943,7 +932,6 @@ theorem lipSrc_of_soln
   letI : SigmaCompactSpace P.M := P.sigmaCompact
   choose KShiF hKShiF0 hKShiF using hShiT
   intro k
-
   letI : TopologicalSpace (SourceDomain (I := I) Φ k) := sourceDomTop (I := I) Φ k
   letI : ChartedSpace H (SourceDomain (I := I) Φ k) := sourceDomCharted (I := I) Φ k
   letI : T2Space (SourceDomain (I := I) Φ k) := sourceDomT2 (I := I) Φ k
@@ -964,7 +952,6 @@ theorem lipSrc_of_soln
   haveI : LocallyCompactSpace (SourceDomain (I := I) Φ k) :=
     ChartedSpace.locallyCompactSpace H (SourceDomain (I := I) Φ k)
   intro C hC p
-
   have hequivU : MetricUniformEquivalentOnWindow (I := I)
       (Set.univ : Set (SourceDomain (I := I) Φ k)) β ψ
       (refRes (I := I) Φ R hsrc k)
@@ -977,7 +964,6 @@ theorem lipSrc_of_soln
       (Set.univ : Set (SourceDomain (I := I) Φ k)) β ψ
       (fun _ t => srcMetric (I := I) Φ hsrc htgt k t) N (KShiF N) :=
     fun N => srcShi (I := I) Φ hsrc htgt β ψ N (KShiF N) (hKShiF N) k
-
   have hS : forall _i : Nat, IsSolutionOn (I := I)
       (sourceFlow (I := I) Φ k (hsrc k) (htgt k)) :=
     fun _ => isSolutionOn_sourceFlow (I := I) Φ k (hsrc k) (htgt k)
@@ -987,7 +973,6 @@ theorem lipSrc_of_soln
   have hreg : forall _i : Nat, Set.Icc β ψ ⊆ X.D.regular := fun _ => hwin
   have hDreg : forall {t : Real}, t ∈ X.D.regular -> X.D.regular ∈ nhds t :=
     fun {t} ht => X.D.regular_isOpen.mem_nhds ht
-
   have h0 := hgLip0Sol (I := I)
     (K := C) (U := (Set.univ : Set (SourceDomain (I := I) Φ k)))
     (gSeq := fun _ t => srcMetric (I := I) Φ hsrc htgt k t)
@@ -998,7 +983,6 @@ theorem lipSrc_of_soln
     (fun i t ht x hx => hShiU 0 0 le_rfl i t ht x hx)
     (fun _ => X.D) (fun _ => sourceFlow (I := I) Φ k (hsrc k) (htgt k))
     hS hmet hreg
-
   have hswap : SolSwapData (I := I) (refRes (I := I) Φ R hsrc k)
       (fun _ => X.D) (fun _ => sourceFlow (I := I) Φ k (hsrc k) (htgt k)) :=
     fun _i N p' hp V x0 =>
@@ -1006,7 +990,6 @@ theorem lipSrc_of_soln
         (sourceFlow (I := I) Φ k (hsrc k) (htgt k))
         (isSolutionOn_sourceFlow (I := I) Φ k (hsrc k) (htgt k))
         N hDreg p' hp V x0
-
   have hpack : forall a : Nat, 1 <= a -> a <= p ->
       exists U : Set (SourceDomain (I := I) Φ k), IsOpen U /\ C ⊆ U /\
         exists B' : Real -> Real, exists Bmax' : Real, exists Cg : Nat -> Real,
@@ -1033,12 +1016,10 @@ theorem lipSrc_of_soln
             (fun _ t => srcMetric (I := I) Φ hsrc htgt k t)
             (refRes (I := I) Φ R hsrc k) a CN := by
     intro a ha1 hap
-
     obtain ⟨U₁, hU₁o, hCU₁, hU₁c⟩ :=
       exists_isOpen_superset_and_isCompact_closure hC
     obtain ⟨U₂, hU₂o, hclU₂, hU₂c⟩ :=
       exists_isOpen_superset_and_isCompact_closure hU₁c
-
     have hbd : forall r : Nat, exists c : Real,
         forall z : SourceDomain (I := I) Φ k, z ∈ closure U₂ ->
           metricCovDerivNorm (I := I) r (srcMetric (I := I) Φ hsrc htgt k β)
@@ -1046,7 +1027,6 @@ theorem lipSrc_of_soln
       fun r => metricCovDerivNorm_bddOn (I := I) hU₂c r
         (srcMetric (I := I) Φ hsrc htgt k β) (refRes (I := I) Φ R hsrc k)
     choose cInit hcInit using hbd
-
     have horders := covOrderBound_of_soln (I := I)
       (K := closure U₁) (U := U₂) (β := β) (ψ := ψ) (t0 := β)
       (gSeq := fun _ t => srcMetric (I := I) Φ hsrc htgt k t)
@@ -1087,7 +1067,6 @@ theorem lipSrc_of_soln
     · intro i t ht x hx
       exact le_trans (hCg a ha1 le_rfl i t ht x (subset_closure (hCU₁ hx)))
         (le_max_left _ _)
-
   obtain ⟨Ls, hLs0, hLs⟩ := hgLipFinSol (I := I)
     (K := C) (β := β) (ψ := ψ) (p := p)
     (gSeq := fun _ t => srcMetric (I := I) Φ hsrc htgt k t)

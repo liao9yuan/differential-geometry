@@ -318,7 +318,6 @@ theorem lowreg_N_affine
               (show ((1 : ℕ) : ℝ) + 2 = (3 : ℝ) by norm_num) v.1)} := by
     intro v hv
     obtain ⟨S, hS⟩ := hv
-
     have hball : ‖tensorHsInclusion (I := I) (M := M) (g := g₀)
         (r := 0) (s := 2)
         (show ((1 : ℕ) : ℝ) + 1 ≤ ((1 : ℕ) : ℝ) + 2 by linarith)
@@ -344,10 +343,8 @@ theorem lowreg_N_affine
       lowRadial_eq_self (I := I) (M := M) g₀ S hsymm2
     have hveq : v = ⟨smoothCcToTensorHs (I := I) (M := M) g₀
         (((1 : ℕ) : ℝ) + 2) S, hball⟩ := Subtype.ext hS.symm
-
     set F := refoldCore (I := I) (M := M) g₀ hρ.le hδ0 hδ_le hreal' S with hF
     set S' := lowRadial (I := I) (M := M) g₀ ρ S with hS'
-
     have hsmoothN :
         deTurckSmoothRemainderTensorHs (I := I) (M := M) g₀ g₀ 1
             (symmS (I := I) (M := M) g₀ S) hδ
@@ -370,14 +367,12 @@ theorem lowreg_N_affine
         lowRegN_on_smooth (I := I) (M := M) g₀ g₀ hR hδ hreal hcore S hball,
         hsmoothN, tensorHsCongr_smoothCc,
         smoothCcToTensorHs_eq_ccToHs]
-
     have hu : tensorHsCongr (I := I) (M := M) g₀ 0 2
           (show ((1 : ℕ) : ℝ) + 2 = (3 : ℝ) by norm_num)
           (v.1 : tensorHs (I := I) (M := M) g₀ 0 2 (((1 : ℕ) : ℝ) + 2)) =
         ccToHsLin (I := I) (M := M) g₀ 2 (3 : ℝ) S := by
       rw [hveq, tensorHsCongr_smoothCc, ccToHsLin_apply,
         smoothCcToTensorHs_eq_ccToHs]
-
     have hsplit :
         deTurckSmoothRemainder (I := I) g₀ g₀ S' hδ
               (hreal' _ (lowRadial_norm (I := I) (M := M) g₀ hρ.le S)) -
@@ -385,7 +380,6 @@ theorem lowreg_N_affine
               (0 : SmoothCcTensor g₀ 0 2) hδ (hreal' _ hzeroNorm) =
           F.a2 (I := I) (M := M) S' + F.a1 (I := I) (M := M) S' :=
       refold_split (I := I) (M := M) g₀ hρ.le hδ0 hδ_le hreal' S
-
     have e1 : tensorHsInclusion (I := I) (M := M) (g := g₀) (r := 0) (s := 2)
           (show (2 : ℝ) ≤ (3 : ℝ) by norm_num)
           (ccToHsLin (I := I) (M := M) g₀ 2 (3 : ℝ) S) =

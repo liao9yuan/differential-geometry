@@ -263,13 +263,11 @@ theorem koszul2_clean
   haveI hcov2 : CovariantDerivative.ContMDiffCovariantDerivative
       (LeviCivita (I := I) g₂) (∞ : WithTop ℕ∞) :=
     leviCivitaConnectionOfMetric_contMDiffCovariantDerivative (I := I) g₂
-
   have hZcast : ∀ (S : ContMDiffSection I E (∞ : WithTop ℕ∞) (TangentSpace I : M → Type _)),
       ContMDiff I (I.prod 𝓘(ℝ, E)) ((∞ : WithTop ℕ∞) + 1) (T% (fun b => S b)) := by
     intro S
     rw [show ((∞ : WithTop ℕ∞) + 1) = (∞ : WithTop ℕ∞) from by rw [ENat.coe_top_add_one]]
     exact S.contMDiff
-
   have hsmW : ContMDiff I (I.prod 𝓘(ℝ, E)) (∞ : WithTop ℕ∞)
       (T% (covApply (LeviCivita (I := I) g₂) (fun b => V b) (fun b => W b))) :=
     contMDiffOn_univ.mp (covApply_contMDiffOn (cov := LeviCivita (I := I) g₂) V.contMDiff (hZcast W))
@@ -298,13 +296,11 @@ theorem koszul2_clean
     ContMDiffSection.mk
       (fun p => covDerivConnDiff (I := I) g₂ g₁ (fun b => W b) (fun b => X b) (fun b => Y b) p)
       (covDerivConnDiff_contMDiff (I := I) g₂ g₁ W X Y) with hQdef
-
   have hDVWval : DVW x = ((LeviCivita (I := I) g₂) (fun p => W p) x) (V x) := rfl
   have hDVXval : DVX x = ((LeviCivita (I := I) g₂) (fun p => X p) x) (V x) := rfl
   have hDVYval : DVY x = ((LeviCivita (I := I) g₂) (fun p => Y p) x) (V x) := rfl
   have hDVZval : DVZ x = ((LeviCivita (I := I) g₂) (fun p => Z p) x) (V x) := rfl
   have hQxval : Qsec x = covDerivConnDiff (I := I) g₂ g₁ W X Y x := rfl
-
   have hAvec : ((LeviCivita (I := I) g₂)
         (fun p => CovariantDerivative.difference (LeviCivita (I := I) g₁)
           (LeviCivita (I := I) g₂) p (Y p) (X p)) x) (V x)
@@ -322,7 +318,6 @@ theorem koszul2_clean
           - CovariantDerivative.difference (LeviCivita (I := I) g₁) (LeviCivita (I := I) g₂) x
               (((LeviCivita (I := I) g₂) (fun p => Y p) x) (V x)) (X x) := rfl
     rw [hcd]; abel
-
   have hmcd1_add3 : ∀ (a b c d e : TangentSpace I x),
       metricCovDeriv (I := I) g₁ g₂ 1 x ![a, b + c + d, e]
         = metricCovDeriv (I := I) g₁ g₂ 1 x ![a, b, e]
@@ -337,11 +332,9 @@ theorem koszul2_clean
         (b + c) d,
       Tensor0SBundle.Tensor0SSpace.map_update_add (metricCovDeriv (I := I) g₁ g₂ 1 x) ![a, b, e] 1
         b c, ← e1 b, ← e1 c, ← e1 d]
-
   have g_sub : ∀ (a b : TangentSpace I x),
       g₁.inner x (a - b) (Z x) = g₁.inner x a (Z x) - g₁.inner x b (Z x) := by
     intro a b; rw [map_sub (g₁.inner x), ContinuousLinearMap.sub_apply]
-
   have hcons3 : ∀ (a b c : TangentSpace I x),
       Fin.cons a (![b, c] : Fin 2 → TangentSpace I x) = (![a, b, c] : Fin 3 → TangentSpace I x) := by
     intro a b c; funext i; fin_cases i <;> rfl
@@ -353,7 +346,6 @@ theorem koszul2_clean
       Fin.cons a (![b, c, d, e] : Fin 4 → TangentSpace I x)
         = (![a, b, c, d, e] : Fin 5 → TangentSpace I x) := by
     intro a b c d e; funext i; fin_cases i <;> rfl
-
   have hup4_0 : ∀ (v a b c d : TangentSpace I x),
       Function.update (![a, b, c, d] : Fin 4 → TangentSpace I x) 0 v = ![v, b, c, d] := by
     intro v a b c d; funext i; fin_cases i <;> simp
@@ -372,7 +364,6 @@ theorem koszul2_clean
   have hup2_1 : ∀ (v a b : TangentSpace I x),
       Function.update (![a, b] : Fin 2 → TangentSpace I x) 1 v = ![a, v] := by
     intro v a b; funext i; fin_cases i <;> simp
-
   have e4x : ∀ (a b c d : ContMDiffSection I E (∞ : WithTop ℕ∞) (TangentSpace I : M → Type _)),
       (fun i : Fin 4 => ((![a, b, c, d] : Fin 4 → ContMDiffSection I E (∞ : WithTop ℕ∞)
         (TangentSpace I : M → Type _)) i) x) = ![a x, b x, c x, d x] := by
@@ -381,13 +372,11 @@ theorem koszul2_clean
       (fun i : Fin 2 => ((![a, b] : Fin 2 → ContMDiffSection I E (∞ : WithTop ℕ∞)
         (TangentSpace I : M → Type _)) i) x) = ![a x, b x] := by
     intro a b; funext i; fin_cases i <;> rfl
-
   have hmaster := connDiff_koszul_deriv2 (I := I) g₁ g₂ V W X Y Z x
   have hkW := connDiff_koszul_deriv (I := I) g₁ g₂ DVW X Y Z x
   have hkX := connDiff_koszul_deriv (I := I) g₁ g₂ W DVX Y Z x
   have hkY := connDiff_koszul_deriv (I := I) g₁ g₂ W X DVY Z x
   have hkZ := connDiff_koszul_deriv (I := I) g₁ g₂ W X Y DVZ x
-
   have hLHSfun : (fun p => g₁.inner p (Qsec p) (Z p))
       = (fun p => Tensor0SBundle.metricTensorField (I := I) g₁ p
           (fun c : Fin 2 => (![Qsec, Z] c) p)) := by
@@ -407,18 +396,14 @@ theorem koszul2_clean
     extDerivFun_const_mul I (2 : ℝ) hQZdiff] at hmaster
   simp only [ContinuousLinearMap.smul_apply, smul_eq_mul] at hmaster
   rw [hLeib] at hmaster
-
   simp only [nabla4_eq_mcd3, nabla3_eq_mcd2, nabla2_eq_mcd1] at hmaster hkW hkX hkY hkZ
   simp only [field2_eq_mcd2] at hmaster
   simp only [field1_eq_mcd1] at hmaster
-
   simp only [Fin.sum_univ_four, Fin.sum_univ_two, e4x, e2x, Matrix.cons_val_zero, Matrix.cons_val_one,
     Matrix.head_cons, Matrix.cons_val_two, Matrix.tail_cons, Matrix.cons_val_three, hup4_0, hup4_1,
     hup4_2, hup4_3, hup2_0, hup2_1, hcons3, hcons4, hcons5, Tensor0SBundle.metricTensorField_apply,
     hDVWval, hDVXval, hDVYval, hDVZval, hQxval] at hmaster hkW hkX hkY hkZ
-
   rw [hAvec, hmcd1_add3] at hmaster
-
   have hcdc2 : covDerivConnDiff2 (I := I) g₂ g₁
         (fun b => V b) (fun b => W b) (fun b => X b) (fun b => Y b) x
       = ((LeviCivita (I := I) g₂) (fun p => Qsec p) x) (V x)
@@ -2758,11 +2743,9 @@ theorem covStepDiff2_le
     dsimp [Cbr, mixedCommC]
     exact le_max_left _ _
   have hCbr := mixedComm_le (I := I) g₁ g₂ s hEq hJet1 hJet2 hJet3
-
   set K1 : ℝ := ((s + 1 : ℕ) : ℝ) * Real.sqrt ((Module.finrank ℝ E : ℝ) ^ (s + 3)) *
     (3 / 2 * Λ ^ 4 * (Λ'' + Λ * Λ' ^ 2) + 3 / 2 * (Real.sqrt (Λ ^ 3) * Λ')) with hK1def
   intro S x hx
-
   have hLnn : (0 : ℝ) ≤ Λ := le_trans zero_le_one hEq.1
   have hL'nn : (0 : ℝ) ≤ Λ' := le_trans (Real.sqrt_nonneg _) (hJet1 x hx)
   have hL''nn : (0 : ℝ) ≤ Λ'' := le_trans (Real.sqrt_nonneg _) (hJet2 x hx)
@@ -2773,7 +2756,6 @@ theorem covStepDiff2_le
         mul_nonneg (Real.sqrt_nonneg (Λ ^ 3)) hL'nn]
     rw [hK1def]
     exact mul_nonneg (mul_nonneg (Nat.cast_nonneg _) (Real.sqrt_nonneg _)) hP
-
   have hop : covStep (I := I) g₂ (s + 2)
         (covStep (I := I) g₂ (s + 1) (diffStep (I := I) g₁ g₂ s S))
       = covStep (I := I) g₂ (s + 2)
@@ -2790,19 +2772,15 @@ theorem covStepDiff2_le
           (covStep (I := I) g₂ (s + 1) (covStep (I := I) g₁ s S)
             - covStep (I := I) g₁ (s + 1) (covStep (I := I) g₂ s S))) x := by
     rw [hop]; rfl
-
   obtain ⟨basis, hON⟩ :=
     DifferentialGeometry.Integral.Connection.exists_gOrthonormalBasis (I := I) g₂ x
   have hinv : MetricInverseInBasis_gen (I := I) g₂ x basis
       (identityInvMetric (Idx := Fin (Module.finrank Real (TangentSpace I x)))) := by
     intro i j; constructor <;> simp [identityInvMetric, diagonalInvMetric, hON]
-
   have hp1 := DifferentialGeometry.PDE.RicciFlow.covStepDiff_of_jets (I := I) g₁ g₂ (s + 1)
     (covStep (I := I) g₂ s S) x hEq hJet1 hJet2 hJet1' hx
   simp only [show s + 1 + 2 = s + 3 from rfl, ← hK1def] at hp1
-
   have hp2 := hCbr S x hx
-
   set a : ℝ := Real.sqrt (normSq0S (I := I) g₂ x s (S x)) with hadef
   set b : ℝ := Real.sqrt (normSq0S (I := I) g₂ x (s + 1) (covStep (I := I) g₂ s S x)) with hbdef
   set c : ℝ := Real.sqrt (normSq0S (I := I) g₂ x (s + 2)

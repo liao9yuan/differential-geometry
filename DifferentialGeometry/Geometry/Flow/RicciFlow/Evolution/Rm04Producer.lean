@@ -184,7 +184,6 @@ private theorem nabCyc
   have e1 := nabPerm (I := I) cov X V al x rotA
   have e2 := nabPerm (I := I) cov X V al x rotB
   rw [e0, e1, e2]
-
   have hd0 : MDifferentiableAt I 𝓘(Real, Real)
       (fun p : M => al p (fun a : Fin 5 => V a p)) x :=
     (tensor0SField_eval_smooth_slots_contMDiffAt (I := I) al V x).mdifferentiableAt (by simp)
@@ -209,7 +208,6 @@ private theorem nabCyc
   rw [hzero, extDerivFun_zero, extDerivFun_add (I := I) hd0 hd1] at estep
   have hD := congrArg (fun L : TangentSpace I x →L[Real] Real => L (X x)) estep
   simp only [ContinuousLinearMap.zero_apply, ContinuousLinearMap.add_apply] at hD
-
   have hS :
       (∑ c : Fin 5,
           al x (fun b : Fin 5 =>

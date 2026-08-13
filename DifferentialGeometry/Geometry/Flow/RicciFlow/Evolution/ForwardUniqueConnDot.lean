@@ -257,7 +257,6 @@ theorem connDiffLow_hasDerivAt
       (metricCov (I := I) (g₂ r)) x (v 1) (v 0) with hF
   set Fdot : TangentSpace I x := (Adot x (v 1)) (v 0) with hFdot
   have hFderiv : HasDerivAt F Fdot t := hA (v 0) (v 1)
-
   have hcomp : ∀ k, HasDerivAt (fun r : Real => b.repr (F r) k) (b.repr Fdot k) t := by
     intro k
     have hL : HasDerivAt (fun r : Real =>
@@ -265,12 +264,10 @@ theorem connDiffLow_hasDerivAt
         ((LinearMap.toContinuousLinearMap (b.coord k)) Fdot) t :=
       (LinearMap.toContinuousLinearMap (b.coord k)).hasFDerivAt.comp_hasDerivAt t hFderiv
     simpa using hL
-
   have hmet : ∀ k, HasDerivAt
       (fun r : Real => (g₁ r).inner x (b k) (v 2))
       ((-2 : Real) * metricRicciAt (I := I) (g₁ t) x
         (fun a : Fin 2 => if a = 0 then b k else v 2)) t := fun k => hPDE₁ (b k) (v 2)
-
   have hsum : ∀ r : Real,
       connDiffLowAt (I := I) (g₁ r) (g₂ r) x v =
         ∑ k, b.repr (F r) k * (g₁ r).inner x (b k) (v 2) := by
@@ -364,7 +361,6 @@ theorem connDiffVec_hasDerivAt
     simp [IsLocalFrameOn.coeff, hx, hbdef, Module.Basis.coord_apply]
   have hfr : ∀ j : Idx, MDifferentiableAt I I.tangent (T% (frame j)) x := fun j =>
     (hframe.contMDiffAt hu hx j).mdifferentiableAt (by simp)
-
   have hbasis : ∀ i j k : Idx,
       HasDerivAt
         (fun r : Real =>
@@ -406,7 +402,6 @@ theorem connDiffVec_hasDerivAt
       rw [hcoeff k, hbcoe i, hbcoe j]
     rw [hfun, hval]
     exact hΓ i j k
-
   have hvec : ∀ i j : Idx,
       HasDerivAt
         (fun r : Real =>
@@ -426,7 +421,6 @@ theorem connDiffVec_hasDerivAt
     have := HasDerivAt.fun_sum (u := (Finset.univ : Finset Idx))
       (fun k (_ : k ∈ (Finset.univ : Finset Idx)) => (hbasis i j k).smul_const (b k))
     simpa only [← hsum] using this
-
   have hexp : ∀ r : Real,
       CovariantDerivative.difference (metricCov (I := I) (g₁ r))
           (metricCov (I := I) (g₂ r)) x Y X =

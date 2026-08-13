@@ -572,7 +572,6 @@ theorem nabla_reLower_eval (g₁ g₂ : SmoothRiemannianMetric I M) {s : ℕ}
   refine Finset.sum_congr rfl fun j _ => ?_
   rw [← mul_add]
   congr 1
-
   rw [totalNabla0SFun_domDomCongr (I := I) (metricCov (I := I) g₂) (reLowerPerm s)
       (MultilinearSection.product (𝕜 := Real) (F := E) (IB := I)
         (E := TangentSpace I) (n := (∞ : WithTop ℕ∞)) (s := s + 1) (q := 2)

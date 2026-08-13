@@ -161,14 +161,12 @@ theorem sdecFluxSq_le (g₁ g₂ : SmoothRiemannianMetric I M)
   have hcd : 0 ≤ connDiffSq (I := I) g₁ g₂ x := by
     rw [connDiffSq_def]; exact normSq0S_nonneg (I := I) g₁ x 3 _
   have hn : (0 : Real) ≤ (Module.finrank Real E : Real) := by positivity
-
   have hsplit : sdecFlux (I := I) g₁ g₂ Rm2 P x =
       lapDiffFlux (I := I) g₁ g₂ Rm2 x -
         reLowerPair (I := I) g₁ P
           (lapDiffFlux (I := I) g₁ g₂ (metricTensorField (I := I) g₂)) x := rfl
   rw [hsplit]
   refine (normSq0S_sub_le (I := I) g₁ x 5 _ _).trans ?_
-
   have hfirst : normSq0S (I := I) g₁ x 5 (lapDiffFlux (I := I) g₁ g₂ Rm2 x) ≤
       16 * (Module.finrank Real E : Real) ^ 5 * connDiffSq (I := I) g₁ g₂ x * B₂ := by
     refine (fluxNormSq_le (I := I) g₁ g₂ (s := 4) Rm2 x).trans ?_
@@ -180,7 +178,6 @@ theorem sdecFluxSq_le (g₁ g₂ : SmoothRiemannianMetric I M)
         ≤ (4 : Real) ^ 2 * (Module.finrank Real E : Real) ^ 5 *
             connDiffSq (I := I) g₁ g₂ x * B₂ := h
       _ = _ := by norm_num
-
   have hK : normSq0S (I := I) g₁ x 3
       (lapDiffFlux (I := I) g₁ g₂ (metricTensorField (I := I) g₂) x) ≤
       4 * (Module.finrank Real E : Real) ^ 3 * connDiffSq (I := I) g₁ g₂ x * Bg := by
@@ -194,7 +191,6 @@ theorem sdecFluxSq_le (g₁ g₂ : SmoothRiemannianMetric I M)
         ≤ (2 : Real) ^ 2 * (Module.finrank Real E : Real) ^ 3 *
             connDiffSq (I := I) g₁ g₂ x * Bg := h
       _ = _ := by norm_num
-
   have hPnn : 0 ≤ normSq0S (I := I) g₁ x 4 (P x) := normSq0S_nonneg (I := I) g₁ x 4 _
   have hKnn : 0 ≤ normSq0S (I := I) g₁ x 3
       (lapDiffFlux (I := I) g₁ g₂ (metricTensorField (I := I) g₂) x) :=
@@ -616,7 +612,6 @@ private theorem reactOrtho {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
   have hz : inner0S (I := I) (g t) x s
       (0 : Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) s x) W = 0 := by
     simpa using inner0S_smul_left (I := I) (g t) x s (0 : Real) W W
-
   have hL : HasDerivAt (fun r : Real => normSq0S (I := I) (g r) x s W)
       (movingReact0S (I := I) (g t) x s Q W) t := by
     have hT : ∀ v : Fin s → TangentSpace I x,
@@ -628,7 +623,6 @@ private theorem reactOrtho {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
     have h := normSq0S_moving_deriv (I := I) g Q (fun _ => W) 0 hg hT
     rw [hz, mul_zero, add_zero] at h
     exact h
-
   set ric : Idx → Idx → Real := fun i j =>
     Q (fun d : Fin 2 => if d = 0 then basis i else basis j) with hricdef
   set gI : Real → Idx → Idx → Real := fun r => basisInvMetric (I := I) (g r) x basis with hgIdef
@@ -675,7 +669,6 @@ private theorem reactOrtho {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
     g gI gIDt ric (fun _ : Real => W) (fun _ : Fin s → Idx => (0 : Real)) 0 basis
     hinvAll hgI hTcomp hTdot hflow
   rw [hz, mul_zero, add_zero] at hR
-
   have hid : gI t = identityInvMetric (Idx := Idx) := by
     funext i j
     have h := (hinvAll t i j).1
@@ -700,7 +693,6 @@ private theorem ricReactAbs_le {Idx : Type*} [Fintype Idx] [DecidableEq Idx] {s 
     · simp [identityInvMetric, diagonalInvMetric, h]
   have hδ0 : ∀ i j : Idx, (0 : Real) ≤ |identityInvMetric (Idx := Idx) i j| := fun i j =>
     abs_nonneg _
-
   have hinner : ∀ i j : Idx,
       |∑ p : Idx, ∑ q : Idx, identityInvMetric (Idx := Idx) i p *
         identityInvMetric (Idx := Idx) j q * ric p q| ≤
@@ -728,7 +720,6 @@ private theorem ricReactAbs_le {Idx : Type*} [Fintype Idx] [DecidableEq Idx] {s 
     rw [sq]
     ring_nf
     exact le_refl _
-
   have hslot : ∀ I0 J0 : Fin s → Idx,
       |∑ b : Fin s, (∏ α ∈ (Finset.univ : Finset (Fin s)).erase b,
           identityInvMetric (Idx := Idx) (I0 α) (J0 α)) *
@@ -758,7 +749,6 @@ private theorem ricReactAbs_le {Idx : Type*} [Fintype Idx] [DecidableEq Idx] {s 
         _ = (Fintype.card Idx : Real) ^ 2 * Bq := by ring
     refine (Finset.sum_le_sum fun b _ => hterm b).trans ?_
     rw [Finset.sum_const, Finset.card_univ, Fintype.card_fin, nsmul_eq_mul]
-
   unfold ricReactionContract
   rw [abs_mul, abs_two]
   refine mul_le_mul_of_nonneg_left ?_ (by norm_num)
@@ -877,7 +867,6 @@ theorem reactSlabLe (g₁ g₂ : Real → SmoothRiemannianMetric I M) {Λric : R
   have hSΛ0 : (0 : Real) ≤ Real.sqrt Λric := Real.sqrt_nonneg _
   have hS : Real.sqrt (normSq0S (I := I) (g₁ t) x 2 (metricRicciAt (I := I) (g₁ t) x)) ≤
       Real.sqrt Λric := Real.sqrt_le_sqrt (hric t ht x)
-
   have hstep : ∀ (s : Nat)
       (W : Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) s x),
       normSq0S (I := I) (g₁ t) x s W ≤ forwardUniqueDensity (I := I) g₁ g₂ t x →

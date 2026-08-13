@@ -316,14 +316,12 @@ private theorem curvSup_of_diff
   intro x v w u
   set R0 : TangentSpace I x := riemannOp (cov := LeviCivita (I := I) g₀) x v w u with hR0
   set Rb : TangentSpace I x := riemannOp (cov := LeviCivita (I := I) gBase) x v w u with hRb
-
   have hbvv0 : 0 ≤ gBase.inner x v v := metric_inner_self_nonneg (I := I) (M := M) gBase x v
   have hbww0 : 0 ≤ gBase.inner x w w := metric_inner_self_nonneg (I := I) (M := M) gBase x w
   have hbuu0 : 0 ≤ gBase.inner x u u := metric_inner_self_nonneg (I := I) (M := M) gBase x u
   set P3 : ℝ := gBase.inner x v v * gBase.inner x w w * gBase.inner x u u with hP3
   have hP30 : 0 ≤ P3 := by
     rw [hP3]; exact mul_nonneg (mul_nonneg hbvv0 hbww0) hbuu0
-
   have h := hdiff x v w u
   rw [← hR0, ← hRb] at h
   have hk := hKb x v w u
@@ -338,7 +336,6 @@ private theorem curvSup_of_diff
     calc gBase.inner x Rb Rb
         ≤ Kb * gBase.inner x v v * gBase.inner x w w * gBase.inner x u u := hk
       _ = Kb * (gBase.inner x v v * gBase.inner x w w * gBase.inner x u u) := by ring
-
   have hnDiff : Real.sqrt (gBase.inner x (R0 - Rb) (R0 - Rb)) ≤ Cd * Real.sqrt P3 := by
     calc Real.sqrt (gBase.inner x (R0 - Rb) (R0 - Rb))
         ≤ Real.sqrt (Cd ^ 2 * P3) := Real.sqrt_le_sqrt hd3
@@ -347,7 +344,6 @@ private theorem curvSup_of_diff
     calc Real.sqrt (gBase.inner x Rb Rb)
         ≤ Real.sqrt (Kb * P3) := Real.sqrt_le_sqrt hb3
       _ = Real.sqrt Kb * Real.sqrt P3 := by rw [Real.sqrt_mul hKb0]
-
   have hcancel : (R0 - Rb) + Rb = R0 := by abel
   have htri : Real.sqrt (gBase.inner x R0 R0) ≤
       (Cd + Real.sqrt Kb) * Real.sqrt P3 := by
@@ -358,7 +354,6 @@ private theorem curvSup_of_diff
             Real.sqrt (gBase.inner x Rb Rb) := htr
       _ ≤ Cd * Real.sqrt P3 + Real.sqrt Kb * Real.sqrt P3 := add_le_add hnDiff hnRb
       _ = (Cd + Real.sqrt Kb) * Real.sqrt P3 := by ring
-
   have hR0nn : 0 ≤ gBase.inner x R0 R0 :=
     metric_inner_self_nonneg (I := I) (M := M) gBase x R0
   have hbaseSq : gBase.inner x R0 R0 ≤ (Cd + Real.sqrt Kb) ^ 2 * P3 := by
@@ -369,10 +364,8 @@ private theorem curvSup_of_diff
             ((Cd + Real.sqrt Kb) * Real.sqrt P3) := hmm
       _ = (Cd + Real.sqrt Kb) ^ 2 * (Real.sqrt P3 * Real.sqrt P3) := by ring
       _ = (Cd + Real.sqrt Kb) ^ 2 * P3 := by rw [Real.mul_self_sqrt hP30]
-
   have hout : g₀.inner x R0 R0 ≤ Λ * gBase.inner x R0 R0 := (hcomp x R0).2
   have hcoeff_nn : 0 ≤ (Cd + Real.sqrt Kb) ^ 2 := sq_nonneg _
-
   have hinConv : ∀ z : TangentSpace I x, gBase.inner x z z ≤ Λ * g₀.inner x z z := by
     intro z
     have hz := (hcomp x z).1
@@ -390,7 +383,6 @@ private theorem curvSup_of_diff
     exact mul_le_mul hstep1 (hinConv u) hbuu0 (mul_nonneg hΛg0vv hΛg0ww)
   have hP3_conv : P3 ≤ Λ ^ 3 * (g₀.inner x v v * g₀.inner x w w * g₀.inner x u u) := by
     refine le_trans hstep2 (le_of_eq ?_); ring
-
   calc g₀.inner x R0 R0
       ≤ Λ * gBase.inner x R0 R0 := hout
     _ ≤ Λ * ((Cd + Real.sqrt Kb) ^ 2 * P3) :=

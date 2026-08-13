@@ -469,7 +469,6 @@ private theorem wEq (gInv : ι → ι → Real) {Ric Rup : ι → ι → Real}
     rmW gInv Rm i j k l
       = (∑ p : ι, Rup i p * Rm p j k l) + (∑ p : ι, Rup j p * Rm i p k l)
         - rmQuad gInv Rm i j k l := by
-
   have h16 : quadSum gInv (fun p q u v => Rm p i j v * Rm u q k l)
         + quadSum gInv (fun p q u v => Rm p j i v * Rm q u k l)
       = -rmQ1 gInv Rm i j k l := by
@@ -482,30 +481,24 @@ private theorem wEq (gInv : ι → ι → Real) {Ric Rup : ι → ι → Real}
     have hx : Rm p i j v = -Rm i j p v + Rm p j i v := by linarith
     rw [hq, hx]
     ring
-
   have h2 : quadSum gInv (fun p q u v => Rm p i q v * Rm j u k l)
       = ∑ u : ι, Rup i u * Rm u j k l :=
     quadTrDrift gInv hsym hric hRup (fun u => Rm j u k l) (fun u => Rm u j k l)
       (fun u => hsym.swap12 j u k l) i
-
   have h5 : quadSum gInv (fun p q u v => Rm p j q v * Rm u i k l)
       = ∑ u : ι, Rup j u * Rm i u k l :=
     quadTrDrift gInv hsym hric hRup (fun u => Rm u i k l) (fun u => Rm i u k l)
       (fun u => hsym.swap12 u i k l) j
-
   have h3 : quadSum gInv (fun p q u v => Rm p i k v * Rm j q u l)
       = rmQ2 gInv Rm i j k l := rfl
-
   have h4 : quadSum gInv (fun p q u v => Rm p i l v * Rm j q k u)
       = -rmQ4 gInv Rm i j k l := by
     rw [quadSwapRS gInv hgi (fun p q u v => Rm p i l v * Rm j q k u), rmQ4, ← quadSumNeg]
     exact quadSum_congr gInv fun p q r s => by rw [hsym.swap34 p i l r]; ring
-
   have h7 : quadSum gInv (fun p q u v => Rm p j k v * Rm q i u l)
       = -rmQ4 gInv Rm i j k l := by
     rw [quadSwapPQ gInv hgi (fun p q u v => Rm p j k v * Rm q i u l), rmQ4, ← quadSumNeg]
     exact quadSum_congr gInv fun p q r s => by rw [hsym.swap12 q j k s]; ring
-
   have h8 : quadSum gInv (fun p q u v => Rm p j l v * Rm q i k u)
       = rmQ2 gInv Rm i j k l := by
     rw [quadSwapPQ gInv hgi (fun p q u v => Rm p j l v * Rm q i k u)]

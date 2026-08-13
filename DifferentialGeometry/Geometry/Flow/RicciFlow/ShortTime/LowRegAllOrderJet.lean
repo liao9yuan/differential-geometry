@@ -140,14 +140,12 @@ private theorem coord_eq_smoothN
   haveI : Countable (TensorEigenIdx (I := I) (M := M) g 0 2) :=
     countable_tensorEigenIdx (I := I) (M := M) (g := g) (r := 0) (s := 2)
       (tensorResolventL2_isCompactOperator (I := I) (M := M) g 0 2)
-
   have hsm2 : ∀ t ∈ Set.Icc (0 : ℝ) T,
       smoothCcToTensorHs (I := I) (M := M) g (2 : ℝ) (F t) =
         timeH1.toFun u t := by
     intro t ht
     refine tensorHs.ext (funext fun j => ?_)
     rw [smoothCcToTensorHs_coeff, h_pin t ht, tensorHsToL2_tensorL2Coeff]
-
   have hφ_smooth : ∀ i, ContDiff ℝ ∞
       (perModeConv (TensorEigenIdx.lambda (I := I) (M := M) i) (fc i)) :=
     fun i => perModeConv_contDiff_of_contDiff ⊤ _ (fc i) (hf_smooth i)
@@ -179,7 +177,6 @@ private theorem coord_eq_smoothN
       (Set.Icc (0 : ℝ) T) :=
     (refoldBaseN_cont (I := I) (M := M) g hρ hδ0 hδ_le hreal' FLo
       hA2cont hFLo).comp_continuousOn hfield_cont
-
   have hae : ∀ i, ∀ᵐ t ∂(MeasureTheory.volume.restrict (Set.Icc (0 : ℝ) T)),
       fc i t =
         (refoldBaseN (I := I) (M := M) g hρ.le hδ0 hδ_le hreal' FLo
@@ -199,7 +196,6 @@ private theorem coord_eq_smoothN
       hA2sq hFComm (smoothCcToTensorHs (I := I) (M := M) g (4 : ℝ) (F t))
     rw [tensorHsInclusion_smoothCcToTensorHs] at hsplit
     rw [← hcp, hfo, hv, ← hsplit, tensorHsInclusion_coeff_apply]
-
   have heqOn : ∀ i, Set.EqOn (fc i)
       (fun t => (refoldBaseN (I := I) (M := M) g hρ.le hδ0 hδ_le hreal' FLo
         (smoothCcToTensorHs (I := I) (M := M) g (3 : ℝ) (F t))).coeff i)
@@ -213,7 +209,6 @@ private theorem coord_eq_smoothN
     · exact (coeffCLM (I := I) (M := M) (g := g) (r := 0) (s := 2)
         (σ := (1 : ℝ)) i).continuous.comp_continuousOn
         (hΨ_cont.mono Set.Ico_subset_Icc_self)
-
   have hnorm_cont : ContinuousOn (fun t => ‖timeH1.toFun u t‖)
       (Set.Icc (0 : ℝ) T) :=
     continuous_norm.comp_continuousOn (timeH1.continuousOn_toFun u)
@@ -232,7 +227,6 @@ private theorem coord_eq_smoothN
       (hmin_cont.mono Set.Ico_subset_Icc_self)
       (hnorm_cont.mono Set.Ico_subset_Icc_self) ht
     exact min_eq_left_iff.mp h
-
   intro t ht i
   have htIcc : t ∈ Set.Icc (0 : ℝ) T := Set.Ico_subset_Icc_self ht
   have hS : ‖tensorHsInclusion (I := I) (M := M) (g := g) (r := 0) (s := 2)
@@ -334,7 +328,6 @@ private theorem liftN_smoothN_coeff
       (deTurckSmoothN (I := I) (M := M) g g 2
         (symmS (I := I) (M := M) g S) hδ_lt
         (gFibreOpBound_symmS (I := I) (M := M) g S hδ')).coeff i := by
-
   have h1 : (liftHiN (I := I) (M := M) g hρ.le hδ0 hδ_le hreal' FHi
         (smoothCcToTensorHs (I := I) (M := M) g (4 : ℝ) S)).coeff i =
       (refoldBaseN (I := I) (M := M) g hρ.le hδ0 hδ_le hreal' FLo
@@ -343,7 +336,6 @@ private theorem liftN_smoothN_coeff
       hA2sq hFComm (smoothCcToTensorHs (I := I) (M := M) g (4 : ℝ) S)
     rw [tensorHsInclusion_smoothCcToTensorHs] at hsplit
     rw [← hsplit, tensorHsInclusion_coeff_apply]
-
   have hS : ‖tensorHsInclusion (I := I) (M := M) (g := g) (r := 0) (s := 2)
       (show ((1 : ℕ) : ℝ) + 1 ≤ ((1 : ℕ) : ℝ) + 2 by norm_num)
       (smoothCcToTensorHs (I := I) (M := M) g
@@ -370,7 +362,6 @@ private theorem liftN_smoothN_coeff
       hreal hreal' hNcont hcoreN hA2cont hA2core FLo hFLo hFLoCore
       ⟨smoothCcToTensorHs (I := I) (M := M) g
         (((1 : ℕ) : ℝ) + 2) S, hS⟩
-
   rw [h1, ← hAff, tensorHsCongr_coeff,
     lowRegN_on_smooth (I := I) (M := M) g g hR hδlt hreal hcoreN S hS,
     smoothN_wd (I := I) (M := M) g g 1
@@ -435,7 +426,6 @@ private theorem lowreg_forceJetStep
   haveI : Countable (TensorEigenIdx (I := I) (M := M) g 0 2) :=
     countable_tensorEigenIdx (I := I) (M := M) (g := g) (r := 0) (s := 2) hc
   have hδlt : δ < 1 := lt_of_le_of_lt hδ_le (by norm_num : (1 : ℝ) / 3 < 1)
-
   have hmass0 : ∀ σ : ℝ, 0 ≤ σ →
       ∃ B : TensorEigenIdx (I := I) (M := M) g 0 2 → ℝ, Summable B ∧
         ∀ i, ∀ t ∈ Set.Icc (0 : ℝ) T,
@@ -445,7 +435,6 @@ private theorem lowreg_forceJetStep
     refine ⟨B, hBs, fun i t ht => ?_⟩
     have h := hBle i t ht
     rwa [iteratedDeriv_zero] at h
-
   obtain ⟨F₀, hF₀_coeff⟩ :=
     exists_smoothCcPath_realizing_coeff (I := I) (M := M) g φ hmass0
   set F : ℝ → SmoothCcTensor g 0 2 :=
@@ -461,7 +450,6 @@ private theorem lowreg_forceJetStep
     intro t ht i
     rw [smoothCcToTensorHs_coeff]
     exact hF_coeff t ht i
-
   have hfield_cont : ContinuousOn
       (fun t => smoothCcToTensorHs (I := I) (M := M) g (2 : ℝ) (F t))
       (Set.Icc (0 : ℝ) T) := by
@@ -513,7 +501,6 @@ private theorem lowreg_forceJetStep
         ‖smoothCcToTensorHs (I := I) (M := M) g (2 : ℝ) (F t)‖ ⊓ R := heq ht
     rw [hmin]
     exact inf_le_right
-
   have hδF : ∀ t : ℝ, gFibreOpBound (I := I) (M := M) g
       (ccTensorBilinSymm (I := I) g (F t)) δ := by
     intro t
@@ -537,7 +524,6 @@ private theorem lowreg_forceJetStep
   have hδS : ∀ t : ℝ, gFibreOpBound (I := I) (M := M) g
       (ccTensorBilinSymm (I := I) g (symmS (I := I) (M := M) g (F t))) δ :=
     fun t => gFibreOpBound_symmS (I := I) (M := M) g (F t) (hδF t)
-
   have hφ'_smooth : ∀ i, ContDiff ℝ (k : ℕ)
       (symmCoeffPath (I := I) (M := M) g φ i) :=
     symmCoeffPath_contDiff (I := I) (M := M) g hφ_smooth
@@ -559,13 +545,11 @@ private theorem lowreg_forceJetStep
             (symmS (I := I) (M := M) g (F t))) i =
         symmCoeffPath (I := I) (M := M) g φ i t := fun t ht i =>
     symmCoeffPath_realizes (I := I) (M := M) g φ (F t) (fun j => hF_coeff t ht j) i
-
   obtain ⟨ψ, hψ_smooth, hψ_mass, hψ_coeff⟩ :=
     deTurckSmoothN_path_coeff_finiteOrder_jetSpectralMass (I := I) (M := M)
       g g 2 hT k (fun t => symmS (I := I) (M := M) g (F t)) hδlt hδS
       (symmCoeffPath (I := I) (M := M) g φ) hφ'_smooth hcoeff' hφ'_mass
   refine ⟨ψ, hψ_smooth, hψ_mass, fun i => ?_⟩
-
   have hall : ∀ᵐ t ∂(MeasureTheory.volume.restrict (Set.Icc (0 : ℝ) T)),
       ∀ j, (w t).coeff j = φ j t := (MeasureTheory.ae_all_iff).2 hw
   filter_upwards [hfix, hall, MeasureTheory.ae_restrict_mem
@@ -648,7 +632,6 @@ private theorem lowreg_forceDriver
       (0 : tensorHs (I := I) (M := M) g 0 2 ((2 : ℝ) + 2)) fHi t with hw_def
   set ρw : ℝ := ((weylSobolevExp (E := E) : ℕ) : ℝ) + 1 with hρw_def
   have hρw_gt : ((weylSobolevExp (E := E) : ℕ) : ℝ) < ρw := by rw [hρw_def]; linarith
-
   have hpmc_contOn : ∀ i : TensorEigenIdx (I := I) (M := M) g 0 2,
       ContinuousOn (perModeConv (TensorEigenIdx.lambda (I := I) (M := M) i)
         (fun u => (timeModeCoeff (I := I) (M := M) fHi i) u)) (Set.Icc (0 : ℝ) T) :=
@@ -665,7 +648,6 @@ private theorem lowreg_forceDriver
         (fun u => (timeModeCoeff (I := I) (M := M) fHi i) u)) (Set.Icc (0 : ℝ) T) := by
     intro i t ht
     exact Set.IccExtend_of_mem hT.le _ ht
-
   have hs_mass : ∀ τ : ℝ, 0 ≤ τ →
       ∃ B : TensorEigenIdx (I := I) (M := M) g 0 2 → ℝ, Summable B ∧
         ∀ i, ∀ t ∈ Set.Icc (0 : ℝ) T,
@@ -701,7 +683,6 @@ private theorem lowreg_forceDriver
           mul_le_mul_of_nonneg_left hterm
             (tensorSobolevWeight_nonneg (I := I) (M := M) i (-ρw))
       _ = Cτ * tensorSobolevWeight (I := I) (M := M) i (-ρw) := by ring
-
   have hcoeff_id : ∀ i, (fun t => (w t).coeff i)
       =ᵐ[MeasureTheory.volume.restrict (Set.Icc (0 : ℝ) T)]
         (perModeConv (TensorEigenIdx.lambda (I := I) (M := M) i)
@@ -886,7 +867,6 @@ theorem lowreg_spatialMass (hDim : Module.finrank ℝ E = 3)
         ∑' i, tensorSobolevWeight (I := I) (M := M) i σ *
             (perModeConv (TensorEigenIdx.lambda (I := I) (M := M) i)
               (fun u => (timeModeCoeff (I := I) (M := M) fHi i) u) t) ^ 2 ≤ Cσ := by
-
   have hfeq : timeL2Inclusion (I := I) (M := M) (g := g) (r := 0) (s := 2)
       (show ((1 : ℕ) : ℝ) ≤ (2 : ℝ) by norm_num) fHi = fLo := by
     refine MeasureTheory.Lp.ext ?_
@@ -895,7 +875,6 @@ theorem lowreg_spatialMass (hDim : Module.finrank ℝ E = 3)
         (p := 2) (μ := timeMeasure T) fHi
     filter_upwards [hcoe, hincl] with t h1 h2
     exact h1.trans h2
-
   have hmode : ∀ i : TensorEigenIdx (I := I) (M := M) g 0 2,
       timeModeCoeff (I := I) (M := M) fLo i =
         timeModeCoeff (I := I) (M := M) fHi i := by
@@ -992,7 +971,6 @@ theorem lowreg_forceJetMass (hDim : Module.finrank ℝ E = 3)
   set hc := tensorResolventL2_isCompactOperator (I := I) (M := M) g 0 2 with hhc
   haveI : Countable (TensorEigenIdx (I := I) (M := M) g 0 2) :=
     countable_tensorEigenIdx (I := I) (M := M) (g := g) (r := 0) (s := 2) hc
-
   have hbridge : ∀ S : SmoothCcTensor g 0 2,
       ‖smoothCcToTensorHs (I := I) (M := M) g (2 : ℝ) S‖ ≤ R →
         ∀ (δ' : ℝ) (hδ_lt : δ' < 1)
@@ -1008,13 +986,11 @@ theorem lowreg_forceJetMass (hDim : Module.finrank ℝ E = 3)
       liftN_smoothN_coeff (I := I) (M := M) hDim g hR hρ hRρ hδ0 hδ_le hδlt
         hreal hreal' hNcont hcoreN hA2cont hA2core FHi FLo hFLo hFLoCore
         hA2sq hFComm S hS2 δ' hδ_lt hδ' i
-
   have hdrv := lowreg_forceDriver (I := I) (M := M) g hρ hRρ hδ0 hδ_le hreal'
     FHi hbridge hT hT1 fHi hfix hballU
     (fun σ => lowreg_spatialMass (I := I) (M := M) hDim g hρ hRρ hδ0 hδ_le
       hreal' FHi hT hT1 fHi hfix hbridge hballU fLo hincl hlo σ)
   choose Fk hFk_smooth hFk_mass hFk_ae using hdrv
-
   set f0 : TensorEigenIdx (I := I) (M := M) g 0 2 → ℝ → ℝ := Fk 0 with hf0_def
   have hsub_clo : Set.Icc (0 : ℝ) T ⊆ closure (interior (Set.Icc (0 : ℝ) T)) := by
     rw [interior_Icc, closure_Ioo (ne_of_lt hT)]
@@ -1061,7 +1037,6 @@ theorem lowreg_forceJetMass (hDim : Module.finrank ℝ E = 3)
     filter_upwards [MeasureTheory.ae_restrict_mem (μ := MeasureTheory.volume)
       (measurableSet_Icc (a := (0 : ℝ)) (b := T))] with t ht
     exact hfc_eqOn i ht
-
   obtain ⟨Cmaj, hCmaj_sum, hCmaj_le⟩ :=
     perModeConv_allOrder_timeDeriv_spectralMass_le (I := I) (M := M)
       (g := g) (r := 0) (s := 2) (T := T) hT.le fc hfc_smooth hfc_mass 0
@@ -1176,7 +1151,6 @@ theorem lowreg_allOrderJet (hDim : Module.finrank ℝ E = 3)
     -, hhiL2, -, htr, hder, -, hfInc, -, -, -, -, -, hforceId,
     hRρ, hNcont, hcoreN, hA2cont, hA2core, -, -, hFLo, hFLoCore, hA2sq,
     hFComm, hballU, hRcapLe⟩ := hre
-
   have hincl : ∀ᵐ t ∂timeMeasure T,
       tensorHsInclusion (I := I) (M := M) (g := g) (r := 0) (s := 2)
         (show ((1 : ℕ) : ℝ) ≤ (2 : ℝ) by norm_num) (fHi t) = fLo t := by
@@ -1190,13 +1164,11 @@ theorem lowreg_allOrderJet (hDim : Module.finrank ℝ E = 3)
         (show (1 : ℝ) ≤ (2 : ℝ) by norm_num) (fHi t),
       tensorHsCongr_refl]
     exact h1.trans h2
-
   have hstateU : ∀ t ∈ Set.Icc (0 : ℝ) T, ‖timeH1.toFun ucs.lo t‖ ≤ Rcap :=
     ucs.lo.norm_le_of_ae_le hT
       (by filter_upwards [hballU] with t ht using ht.trans hRcapLe)
   have hδlt : δ < 1 := lt_of_le_of_lt hδ_le (by norm_num : (1 : ℝ) / 3 < 1)
   have hfid0 := hforceId
-
   have hinit : ucs.lo.init = (0 : tensorHs (I := I) (M := M) g 0 2 (2 : ℝ)) := by
     have h := htr
     rwa [timeH1.trace0_apply] at h
@@ -1218,7 +1190,6 @@ theorem lowreg_allOrderJet (hDim : Module.finrank ℝ E = 3)
         exact maxRegDuhamelMap_timeDeriv_eq (I := I) (M := M) (h_compact := hc)
           hT hT1 _ fHi
       rw [e1, e2, hhiL2]
-
   rw [hhiL2] at hforceId
   have hballD : ∀ᵐ t ∂(MeasureTheory.volume.restrict (Set.Icc (0 : ℝ) T)),
       ‖tensorHsInclusion (I := I) (M := M) (g := g) (r := 0) (s := 2)
@@ -1239,7 +1210,6 @@ theorem lowreg_allOrderJet (hDim : Module.finrank ℝ E = 3)
     lowreg_forceJetMass (I := I) (M := M) hDim g hR hρ hRρ hδ0 hδ_le hδlt
       hreal hreal' hNcont hcoreN hA2cont hA2core FHi FLo hFLo hFLoCore
       hA2sq hFComm hT hT1 fHi hforceId hballD fLo hincl hlo
-
   have hf_mass0 : ∃ B : TensorEigenIdx (I := I) (M := M) g 0 2 → ℝ, Summable B ∧
       ∀ i, ∀ s ∈ Set.Icc (0 : ℝ) T,
         tensorSobolevWeight (I := I) (M := M) i (2 : ℝ) * (fc i s) ^ 2 ≤ B i := by
@@ -1402,7 +1372,6 @@ theorem lowreg_joint_of_re (hDim : Module.finrank ℝ E = 3)
     hR₀_pos, hball_full, hForce, hstateU⟩ :=
     lowreg_allOrderJet (I := I) (M := M) hDim g hρ hδ0 hδ_le hreal' hT hT1 f hre
       fLo hfLo hlo
-
   have hstate : ∀ t ∈ Set.Icc (0 : ℝ) T, ‖timeH1.toFun u t‖ ≤
       1 / (2 * (hs2_opBound_at_two (I := I) (M := M) hDim g).choose) :=
     fun t ht => (hstateU t ht).trans hRcapC

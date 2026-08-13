@@ -727,7 +727,6 @@ theorem pairTrace_h2_lip_unif
   have hjet2 := hjet 2 (by norm_num)
   let N : ℝ := ‖ccTensorToHs (I := I) (M := M) g 2 (2 : ℝ) (T - U)‖
   have hN : 0 ≤ N := norm_nonneg _
-
   have hmov : ∀ (P : SmoothCcTensor g 0 2)
       (gm : SmoothRiemannianMetric I M),
       (∀ (y : M) (v w : TangentSpace I y),
