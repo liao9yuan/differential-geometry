@@ -1122,6 +1122,7 @@ theorem ham3_limit_soln
   · simpa only [hcarrier] using hricciCont
   · simpa only [hcarrier] using hrm04Cont
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [SigmaCompactSpace M] in
 private theorem nablaK_restrict
     {D D' : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : DifferentialGeometry.PDE.RicciFlow.SolutionOn (I := I) (M := M) D)
@@ -1150,7 +1151,7 @@ private theorem nablaK_restrict
 noncomputable def source_deriv
     {omega : Real} (h0omega : 0 < omega)
     (hcompact : CompactSpace M)
-    (hdim : Module.finrank Real E = 3)
+    (_hdim : Module.finrank Real E = 3)
     {g0 : SmoothRiemannianMetric I M}
     (P : Ham3FlowPackage (I := I) (M := M) g0)
     (hD : P.D =
@@ -1413,7 +1414,6 @@ theorem ham3_closed_upg
   letI : T2Space mc.limit.M := mc.limit.t2
   letI : IsManifold I ∞ mc.limit.M := mc.limit.smooth
   letI : SigmaCompactSpace mc.limit.M := mc.limit.sigmaCompact
-
   have hsrc : SrcSigma (I := I) Phi := by
     intro k
     exact Geometry.isSigmaCompact_of_isOpen I
@@ -1429,7 +1429,6 @@ theorem ham3_closed_upg
     exact Geometry.isSigmaCompact_of_isOpen I
       (PointedCGHMaps.target_open (I := I) Phi k)
   let bf := Classical.choice (nonempty_bumpFamily (I := I) Phi)
-
   let gRefT : ∀ k : Nat,
       letI : TopologicalSpace (X.term (mc.subseq k)).M :=
         (X.term (mc.subseq k)).topology
@@ -1450,7 +1449,6 @@ theorem ham3_closed_upg
       letI : SigmaCompactSpace (X.term (mc.subseq k)).M :=
         (X.term (mc.subseq k)).sigmaCompact
       (X.term (mc.subseq k)).S.family.metric 0
-
   have hcanonRel := StepDCanonData.canon_rel (I := I) canon hsrc htgt
   dsimp only at hcanonRel
   obtain ⟨Crel, hCrel, hrelZero⟩ := hcanonRel
@@ -1488,7 +1486,6 @@ theorem ham3_closed_upg
   dsimp only at hinit
   have hcp := StepDCanonData.canon_cp (I := I) canon hsrc htgt
   dsimp only at hcp
-
   obtain ⟨A, Bmax, hA, hBmax, hBmajor, hwindowRaw⟩ :=
     ham3_win_equiv (I := I) h0omega P hD Q hsel hwindow hrm
   let B : Real → Real := fun t => metricEquivalenceFactor 1 A t 0
@@ -1528,7 +1525,6 @@ theorem ham3_closed_upg
     refine ⟨(hall' i t ht).1, ?_⟩
     intro x _hx v
     exact (hall' i t ht).2 x (Set.mem_univ x) v
-
   have hShiT : ∀ N : Nat, ∃ KShi : Real, 0 ≤ KShi ∧
       ∀ k : Nat,
         letI : TopologicalSpace (X.term (mc.subseq k)).M :=
@@ -1584,7 +1580,6 @@ theorem ham3_closed_upg
     exact ⟨KShi, hKShi, fun k =>
       srcShi (I := I) Phi hsrc htgt (-(ham3_r0 ^ 2)) 0
         N KShi hShi k⟩
-
   have hBsrc : 1 ≤ Crel * Bmax :=
     one_le_mul_of_one_le_of_one_le hCrel hBmax
   have hequivSrc : ∀ k : Nat,
@@ -2327,7 +2322,7 @@ theorem flowUpgradeData_conn
     exact hconn
   simpa only [PointedFlowData.atTime] using hAt0
 
-omit [NeZero (Module.finrank ℝ E)] in
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 theorem flowUpgradeData_converges
     {X : PointedFlowSeq (I := I)}
     {mc : MetricCompactnessConclusion (I := I) (X.atZero (I := I))}
@@ -2458,9 +2453,7 @@ theorem ham3_const_of_inj
     hzero d.data.L mc.subseq mc.strictMono
     (Classical.choice (flowUpgradeData_converges (I := I) d)) hlimCpl hlimitConn
 
-/-- Perelman's no-local-collapsing theorem supplies one fixed radius and one
-fixed positive volume ratio for every member of the canonical Hamilton
-source. -/
+omit [I.Boundaryless] in
 theorem exists_ham3_vol
     {omega : Real} (h0omega : 0 < omega)
     (hM : Closed3Manifold (I := I) (M := M))

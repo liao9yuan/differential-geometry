@@ -315,6 +315,7 @@ noncomputable def flowUpgrade_of_maps
 
 
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 theorem flowUpgrade_maps_L
     {X : PointedFlowSeq (I := I)}
     (mc : MetricCompactnessConclusion (I := I) (X.atZero (I := I)))
