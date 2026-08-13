@@ -1935,8 +1935,7 @@ theorem gramSmooth
     rfl
   exact gramModel_to_mfld (I := I) (g := co.gInf) x₀ i j hmodel
 
-set_option maxHeartbeats 400000 in
-set_option synthInstance.maxHeartbeats 100000 in
+set_option maxHeartbeats 350000 in
 theorem gramSmoothIcc
     {R : letI : TopologicalSpace P.M := P.topology
       letI : ChartedSpace H P.M := P.charted
