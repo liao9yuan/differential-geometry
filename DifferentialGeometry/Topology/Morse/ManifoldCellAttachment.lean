@@ -17039,6 +17039,30 @@ lemma morseRoundedFunction_notCritical_of_chartComp {m k : ℕ} (hk : k ≤ m + 
     simpa using hv
   exact hFder hcontr
 
+theorem morseCapRoundedLowerRoundGlobal_mem_roundedSublevel {m k : ℕ} (hk : k ≤ m + 1)
+    (c ε r δ θ η R₀ R₀' R₁' : ℝ) {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M]
+    [ChartedSpace H M] {I : ModelWithCorners ℝ (MorseModel (m + 1)) H} {f : M → ℝ}
+    (data : MorseChart (m + 1) k hk c I f)
+    (hε : 0 < ε) (hδ : 0 < δ) (hθ : 0 < θ) (hδr : δ < r ^ 2) (hθr : θ < r ^ 2)
+    (hr : 0 < r) (hη : 0 < η)
+    (hR0 : 0 ≤ R₀) (hR0lt : R₀ < data.R) (hbig : 2 * (r ^ 2 + 2 * ε + δ) ≤ R₀ ^ 2)
+    (hRbig : r ^ 2 + 2 * ε + δ ≤ (data.R / 2) ^ 2)
+    (hR : R₀' < R₁') (hR0' : 0 ≤ R₀') (hbig' : 2 * (r ^ 2 + 2 * ε + δ) ≤ R₀' ^ 2)
+    (hR₁big : 2 * (data.R / 2) ^ 2 - 2 * ε ≤ R₁' ^ 2) (hR₁₂R : R₁' ≤ data.R)
+    {x : M} (hxlow : x ∈ sublevel f (c - ε)) :
+    morseRoundedFunction hk c ε r δ R₀' R₁' data
+        (morseCapRoundedLowerRoundGlobal hk c ε r δ θ η data x) ≤ c := by
+  rw [morseCapRoundedLowerRoundGlobal_eq_round_of_sublevel hk c ε r δ θ η data hη hxlow]
+  have hm : (morseCapRoundedLowerRound hk c ε r δ θ data x ∈ morseRoundedAttachment hk c ε r δ data) =
+      (morseCapRoundedLowerRound hk c ε r δ θ data x ∈
+        {y : M | morseRoundedFunction hk c ε r δ R₀' R₁' data y ≤ c}) :=
+    congrArg (fun s : Set M => morseCapRoundedLowerRound hk c ε r δ θ data x ∈ s)
+      (sublevel_morseRoundedFunction_eq_roundedAttachment hk c ε r δ R₀' R₁' data hε hδ hR hR0'
+        hbig' hRbig hR₁big hR₁₂R).symm
+  simpa using Eq.mp hm
+    (morseCapRoundedLowerRound_mem_roundedAttachment hk c ε r δ θ R₀ data hε hδ hθ hδr hθr hr hR0
+      hR0lt hbig hRbig hxlow)
+
 theorem morseRoundedFunction_no_critical_at_level {m k : ℕ} (hk : k ≤ m + 1) (c ε r δ R₀ R₁ R₁' : ℝ)
     {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M] [ChartedSpace H M] [T2Space M]
     {I : ModelWithCorners ℝ (MorseModel (m + 1)) H} [I.Boundaryless]
