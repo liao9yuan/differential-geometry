@@ -13411,6 +13411,36 @@ theorem continuousOn_morseCapRoundedLowerRound {m k : ℕ} (hk : k ≤ m + 1) (c
         change morseNorm (m + 1) y < data.R at hy
         exact h ⟨y, le_of_lt hy, hxy⟩⟩)
 
+theorem morseCapRoundedLowerRound_eq_self_of_negPart_gt {m k : ℕ} (hk : k ≤ m + 1) (c ε r δ θ : ℝ)
+    {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M] [ChartedSpace H M]
+    {I : ModelWithCorners ℝ (MorseModel (m + 1)) H} {f : M → ℝ}
+    (data : MorseChart (m + 1) k hk c I f)
+    (hθ : 0 < θ) (hδ : 0 < δ) {x : M} (hx : x ∈ data.χ.target)
+    (hneg : r ^ 2 + 2 * ε + δ < ‖negPart hk (data.χ.symm x)‖ ^ 2) :
+    morseCapRoundedLowerRound hk c ε r δ θ data x = x := by
+  by_cases hball : x ∈ morseChartBallImage hk c data
+  · dsimp [morseCapRoundedLowerRound]
+    rw [if_pos hball]
+    have hself : modelLowerRoundMap hk ε r δ θ (data.χ.symm x) = data.χ.symm x :=
+      modelLowerRoundMap_eq_self_of_ge hk ε r δ θ hθ hδ (data.χ.symm x) (le_of_lt hneg)
+    rw [hself]
+    exact data.χ.right_inv hx
+  · dsimp [morseCapRoundedLowerRound]
+    rw [if_neg hball]
+
+theorem morseCapRoundedLowerRound_eq_self_of_not_mem_CB {m k : ℕ} (hk : k ≤ m + 1) (c ε r δ θ : ℝ)
+    {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M] [ChartedSpace H M]
+    {I : ModelWithCorners ℝ (MorseModel (m + 1)) H} {f : M → ℝ}
+    (data : MorseChart (m + 1) k hk c I f)
+    {x : M} (hx : x ∉ data.χ '' {y : MorseModel (m + 1) | morseNorm (m + 1) y ≤ data.R}) :
+    morseCapRoundedLowerRound hk c ε r δ θ data x = x := by
+  dsimp [morseCapRoundedLowerRound]
+  rw [if_neg (by
+    intro hball
+    rcases hball with ⟨y, hy, hxy⟩
+    change morseNorm (m + 1) y < data.R at hy
+    exact hx ⟨y, le_of_lt hy, hxy⟩)]
+
 theorem chartSymm_mem_lowerRound_image_of_mem_capRounded_closedBall {m k : ℕ} (hk : k ≤ m + 1)
     (c ε r δ θ R₀ : ℝ) {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M]
     [ChartedSpace H M] {I : ModelWithCorners ℝ (MorseModel (m + 1)) H} {f : M → ℝ}
