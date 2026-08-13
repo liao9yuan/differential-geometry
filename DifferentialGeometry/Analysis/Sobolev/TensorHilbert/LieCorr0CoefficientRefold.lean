@@ -56,6 +56,7 @@ theorem endoArm_eq_dlb (g₀ g₁ g_bg : SmoothRiemannianMetric I M) :
   intro x
   rw [deTurckLieEndoArmField_toSection, deTurckLieDLbCoeffField_toSection]
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 theorem lc0Insert_base_eq_neg_dlb (g₀ g₁ : SmoothRiemannianMetric I M) :
     lc0Insert (I := I) (M := M) g₀ g₁ g₀ =
       -deTurckLieDLbCoeffField (I := I) (M := M) g₀ g₁ g₀ := by
@@ -699,6 +700,7 @@ private theorem sq_le_two_add (t u v c1 c2 : ℝ) (ht : 0 ≤ t) (hu : 0 ≤ u) 
   have huv : 0 ≤ u + v := by linarith
   nlinarith [mul_le_mul htri htri ht huv, sq_nonneg (u - v), h1, h2, hu, hv]
 
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] in
 private theorem normSq_iCG_le_scaled (g₀ : SmoothRiemannianMetric I M)
     (X : SmoothCcTensor g₀ 2 2) (Y : SmoothCcTensor g₀ 1 1) (i : ℕ) (c : ℝ)
     (hpt : ∀ x : M,
@@ -738,6 +740,7 @@ private lemma endoDiffSection_apply (g₀ g₁ g_bg : SmoothRiemannianMetric I M
   simp only [endoDiffSection, ContMDiffSection.coe_sub, Pi.sub_apply]
   exact (nEndo_diff (I := I) (M := M) g₀ g₁ g_bg x).symm
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 theorem lc0InsDiff_eq (g₀ g₁ g_bg : SmoothRiemannianMetric I M) :
     lc0Insert (I := I) (M := M) g₀ g₁ g_bg - lc0Insert (I := I) (M := M) g₀ g₁ g₀ =
       slotInsertEndoCc (I := I) (M := M) g₀ 1 (endoDiffSection (I := I) (M := M) g₀ g₁ g_bg)
@@ -1058,6 +1061,7 @@ noncomputable def lc0VBPass (g₀ g₁ : SmoothRiemannianMetric I M) :
       contMDiff_toFun := lc0VBPassFib_contMDiff (I := I) g₀ g₁ }
   hasCompactSupport := HasCompactSupport.of_compactSpace _
 
+omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] in
 private theorem lc0VBFib_eq (g₀ g₁ : SmoothRiemannianMetric I M) (x : M) :
     lieCorr0VBFib (I := I) g₀ g₁ x =
       (2 : ℝ) • ((show Tensor0SSpace 4 I x →L[ℝ] Tensor0SSpace 2 I x from

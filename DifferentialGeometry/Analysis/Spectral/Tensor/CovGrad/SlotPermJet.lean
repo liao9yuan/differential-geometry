@@ -126,6 +126,7 @@ theorem slotIterJet (g : SmoothRiemannianMetric I M) (r s m w : ℕ)
             ∑ j ∈ Finset.range (m + 1),
               ‖iteratedCovGrad (I := I) g r s j A‖ ^ 2 := by ring
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [BoundarylessManifold I M] [SigmaCompactSpace M] in
 theorem slotIterSub (g : SmoothRiemannianMetric I M) (r s w : ℕ)
     (A B : SmoothCcTensor g r s) :
     slotExtendIter (I := I) (M := M) g r s w (A - B) =

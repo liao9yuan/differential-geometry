@@ -429,6 +429,7 @@ theorem reLower_eq_trace (g₁ g₂ : SmoothRiemannianMetric I M) {s : ℕ}
             (E := TangentSpace I) (n := (∞ : WithTop ℕ∞)) (s := s + 1) (q := 2)
             T (metricTensorField (I := I) g₁))) := rfl
 
+omit [IsManifold I 2 M] [IsManifold I (∞ + 1) M] [SigmaCompactSpace M] [T2Space M] [I.Boundaryless] in
 private theorem metricCov_one (g : SmoothRiemannianMetric I M) :
     CovariantDerivative.ContMDiffCovariantDerivativeLocally
       (I := I) (E := E) (M := M) (metricCov (I := I) g) (1 : WithTop ℕ∞) := by
@@ -436,6 +437,7 @@ private theorem metricCov_one (g : SmoothRiemannianMetric I M) :
     (DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric_contMDiffCovariantDerivativeLocally_one
       (I := I) (M := M) g)
 
+omit [CompleteSpace E] [SigmaCompactSpace M] [I.Boundaryless] in
 theorem nablaProd_eval {s q : ℕ}
     (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
     (A : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)

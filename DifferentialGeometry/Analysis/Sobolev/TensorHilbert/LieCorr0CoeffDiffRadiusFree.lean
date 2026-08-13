@@ -347,6 +347,7 @@ private theorem b4_iCG_smul (g : SmoothRiemannianMetric I M) (r s j : ℕ) (c : 
   | succ j ih => rw [iteratedCovGrad_succ, iteratedCovGrad_succ, ih,
       DifferentialGeometry.Analysis.Parabolic.TensorSpectral.covGrad_smul]
 
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma b4_rfns_smul (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (x : M) (c : ℝ) (v : TensorRSSpace r s I x) :
     riemannianFiberNormSq (I := I) (M := M) g r s x (c • v) =
@@ -813,6 +814,7 @@ private lemma b4_trace_center (g : SmoothRiemannianMetric I M) (x : M)
     (mem_smoothOrthoFrameNbhd_self (I := I) (M := M) x)
     (Tensor0SSpace.toModel D) m
 
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma b4_rank0_unit (x : M) (c : Tensor0SSpace 0 I x) :
     c = Tensor0SSpace.toModel c (fun i : Fin 0 => i.elim0) •
       unitTensor (I := I) (M := M) x := by
@@ -927,6 +929,7 @@ private lemma b4_cons_sum_smul {n : ℕ}
   refine Finset.sum_congr rfl fun c _ => ?_
   rw [← h1 (u c)]
 
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma b4_cons1_sum_smul {n : ℕ}
     (Zm : Tensor0SModel (n + 2) ℝ E) (aa : E) (d : ℕ) (t : Fin d → ℝ)
     (u : Fin d → E) (rest : Fin n → E) :
@@ -961,6 +964,7 @@ private lemma b4_cons1_sum_smul {n : ℕ}
   refine Finset.sum_congr rfl fun c _ => ?_
   rw [← h1 (u c)]
 
+omit [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private theorem b4_frame_expand (g : SmoothRiemannianMetric I M) (x : M)
     (u : TangentSpace I x) :
     u = ∑ i : Fin (Module.finrank ℝ E),

@@ -75,6 +75,7 @@ noncomputable def framed
         L.symm.toContinuousLinearMap.contMDiff.comp_contMDiffOn
           B.hom.contMDiffOn_invFun }
 
+omit [CompleteSpace E] [T2Space (TangentBundle I M)] in
 @[simp] theorem framed_source
     {g : SmoothRiemannianMetric I M}
     {hEnorm : ∀ (x : M) (w : TangentSpace I x),
@@ -84,6 +85,7 @@ noncomputable def framed
       intrFrameCLE (I := I) g p ⁻¹' B.hom.source :=
   rfl
 
+omit [CompleteSpace E] [T2Space (TangentBundle I M)] in
 @[simp] theorem framed_apply
     {g : SmoothRiemannianMetric I M}
     {hEnorm : ∀ (x : M) (w : TangentSpace I x),
@@ -92,6 +94,7 @@ noncomputable def framed
     B.framed z = B.hom (intrFrameCLE (I := I) g p z) :=
   rfl
 
+omit [CompleteSpace E] [T2Space (TangentBundle I M)] in
 theorem framed_eq_intr
     {g : SmoothRiemannianMetric I M}
     {hEnorm : ∀ (x : M) (w : TangentSpace I x),
@@ -164,6 +167,7 @@ def IntrinsicBallChart.toNormalBallChart
     exact intrFrame_zero (I := I) g hEnorm p
   exact NormalBallChart.ofHigher (I := I) hr c.hom hsub hzero
 
+omit [CompleteSpace E] [T2Space (TangentBundle I M)] in
 theorem exists_intrBallChart
     (g : SmoothRiemannianMetric I M)
     (hEnorm : ∀ (x : M) (w : TangentSpace I x),

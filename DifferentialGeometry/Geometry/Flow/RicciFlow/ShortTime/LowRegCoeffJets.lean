@@ -1201,6 +1201,7 @@ theorem kappaSelf_h2
     sq_nonneg ‖iteratedCovGrad (I := I) g₀ 0 2 2 P‖,
     sq_nonneg ‖iteratedCovGrad (I := I) g₀ 0 2 3 P‖]
 
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] in
 private theorem coeffJets_domDomCongr_sub
     (g : SmoothRiemannianMetric I M) {s : ℕ}
     (σ : Equiv.Perm (Fin s)) (A B : SmoothCcTensor g 0 s) :

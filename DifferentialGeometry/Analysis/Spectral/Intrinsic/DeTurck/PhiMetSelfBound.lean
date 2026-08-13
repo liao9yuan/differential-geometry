@@ -34,6 +34,7 @@ private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 def phiSelfC (i : ℕ) : ℝ :=
   if i = 0 then 34 * (Module.finrank ℝ E : ℝ) ^ 6 else 0
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] in
 theorem phiSelfC_nonneg (i : ℕ) : 0 ≤ phiSelfC (E := E) i := by
   by_cases hi : i = 0
   · simp only [phiSelfC, hi, if_pos]
@@ -43,10 +44,12 @@ theorem phiSelfC_nonneg (i : ℕ) : 0 ≤ phiSelfC (E := E) i := by
 private def selfTraceC (i : ℕ) : ℝ :=
   if i = 0 then (Module.finrank ℝ E : ℝ) ^ 6 else 0
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] in
 private theorem phiSelfC_eq (i : ℕ) :
     phiSelfC (E := E) i = 34 * selfTraceC (E := E) i := by
   by_cases hi : i = 0 <;> simp [phiSelfC, selfTraceC, hi]
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] in
 private theorem selfTraceC_nonneg (i : ℕ) :
     0 ≤ selfTraceC (E := E) i := by
   by_cases hi : i = 0

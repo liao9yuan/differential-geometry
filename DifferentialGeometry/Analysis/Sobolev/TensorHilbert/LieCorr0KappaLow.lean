@@ -90,6 +90,7 @@ theorem pbLow_unit (g₀ : SmoothRiemannianMetric I M)
     ContinuousMultilinearMap.constOfIsEmpty_apply, one_smul]
   exact ccBilinConnDiffLoweredFib_toModel (I := I) g₀ P gA gB x m
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 theorem pbLow_sub (g₀ : SmoothRiemannianMetric I M)
     (P Q : SmoothCcTensor g₀ 0 2) (gA gB : SmoothRiemannianMetric I M) :
     lc0PbLow (I := I) (M := M) g₀ (P - Q) gA gB =
@@ -115,6 +116,7 @@ theorem pbLow_sub (g₀ : SmoothRiemannianMetric I M)
     pbLow_unit (I := I) (M := M) g₀ Q gA gB x m,
     ccTensorBilinSymm_sub]
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [SigmaCompactSpace M] in
 private theorem unit_add0 (g₀ : SmoothRiemannianMetric I M) (s : ℕ)
     (A B : SmoothCcTensor g₀ 0 s) (x : M) (m : Fin s → TangentSpace I x) :
     unitModel (I := I) (M := M) g₀ s (A + B) x m =

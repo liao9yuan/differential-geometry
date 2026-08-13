@@ -58,6 +58,7 @@ noncomputable def stepCAtom
   letI : T2Space (TangentBundle I Y.M) := Y.t2TangentBundle
   quadNormal Y.metric p (stepCBump lam hlam)
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem stepCAtom_Icc
     (Y : PointedRiemannianManifold.{u, uE, uH} (I := I)) (p : Y.M)
     (lam : Real) (hlam : 0 < lam) (q : Y.M) :
@@ -419,6 +420,7 @@ theorem seqWeights_ev (hd : InjRadiusDecayInput (I := I) X) {D : Real}
   filter_upwards [L.innerBall_cover hd hD P hre pb r, hgp] with k hcover hgpAt
   exact seqWeights_data hd hD P L pb r k hgpAt i0 hcover
 
+omit [CompleteSpace E] in
 private theorem packA_pos (hd : InjRadiusDecayInput (I := I) X) {D : Real}
     (hre : hd.RealizesEdist) (pb : hd.PackingBound D) {r : Real} (hr : 0 ≤ r) :
     0 < pb.A r := by

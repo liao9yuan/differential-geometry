@@ -2208,6 +2208,7 @@ theorem jetSub
   rw [neg_one_smul, neg_one_sq, one_mul] at hneg
   rw [hneg]
 
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] [SigmaCompactSpace M] in
 theorem pureCoeff_eq
     (g gm : SmoothRiemannianMetric I M) :
     ricciArmPrincipalCoeffPure (I := I) (M := M) g gm =
@@ -2423,6 +2424,7 @@ theorem ricciOne_h2
       simpa only [mul_pow] using
         congrArg (fun x : ℝ => x * (1 + A) ^ 2) hBR.symm
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem raise_jet
     (g : SmoothRiemannianMetric I M) (s m : ℕ)
     (W : SmoothCcTensor g 0 (s + 2)) :

@@ -30,6 +30,7 @@ private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] [I.Boundaryless] in
 private theorem real_holder_two_nonneg
     (g : SmoothRiemannianMetric I M) (φ ψ : M → ℝ)
     (hφc : Continuous φ) (hψc : Continuous ψ)

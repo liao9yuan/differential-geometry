@@ -60,6 +60,7 @@ theorem field1_eq_mcd1
   exact (metricCovDerivStep_apply (I := I) g₂ 0
     (Tensor0SBundle.metricTensorField (I := I) g₁) x).symm
 
+omit [Module.Finite ℝ E] in
 theorem field2_eq_mcd2
     [VectorBundle ℝ E (TangentSpace I : M → Type _)]
     [ContMDiffVectorBundle 1 E (TangentSpace I : M → Type _) I]
@@ -80,6 +81,7 @@ theorem field2_eq_mcd2
   rw [Tensor0SBundle.totalNabla0S_apply, field1_eq_mcd1 (I := I) g₁ g₂]
   exact (metricCovDerivStep_apply (I := I) g₂ 1 (metricCovDeriv (I := I) g₁ g₂ 1) x).symm
 
+omit [Module.Finite ℝ E] in
 theorem nabla3_eq_mcd2
     [VectorBundle ℝ E (TangentSpace I : M → Type _)]
     [ContMDiffVectorBundle 1 E (TangentSpace I : M → Type _) I]
@@ -101,6 +103,7 @@ theorem nabla3_eq_mcd2
     3 (DifferentialGeometry.Integral.Connection.LeviCivita (I := I) g₂) W
     (metricCovDeriv (I := I) g₁ g₂ 1) x slots).symm
 
+omit [Module.Finite ℝ E] in
 theorem nabla4_eq_mcd3
     [VectorBundle ℝ E (TangentSpace I : M → Type _)]
     [ContMDiffVectorBundle 1 E (TangentSpace I : M → Type _) I]
@@ -2711,6 +2714,7 @@ noncomputable def covStepDiff2C (s : ℕ) (Λ Λ' Λ'' Λ''' : ℝ) : ℝ :=
         3 / 2 * (Real.sqrt (Λ ^ 3) * Λ'))) +
     mixedCommC (E := E) s Λ Λ' Λ'' Λ''')
 
+omit [Module.Finite ℝ E] in
 theorem covStepDiff2_le
     {K : Set M} (g₁ g₂ : SmoothRiemannianMetric I M) (s : ℕ)
     {Λ Λ' Λ'' Λ''' : ℝ}
@@ -2793,6 +2797,7 @@ theorem covStepDiff2_le
     mul_nonneg (sub_nonneg.mpr (le_max_right 0 (K1 + Cbr)))
       (add_nonneg (add_nonneg ha hb) hc), ha, hb, hc, hK1nn, hCbr_nn]
 
+omit [Module.Finite ℝ E] in
 theorem covStepDiff2_exists_const
     {K : Set M} (g₁ g₂ : SmoothRiemannianMetric I M) (s : ℕ)
     {Λ Λ' Λ'' Λ''' : ℝ}

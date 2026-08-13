@@ -141,6 +141,7 @@ noncomputable def stageTotal
   | some target => pairPts target a b z
   | none => z
 
+omit [CompleteSpace E] in
 theorem stageTotal_smooth
     {hd : InjRadiusDecayInput (I := I) X} {D : Real}
     {P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k)}
@@ -159,6 +160,7 @@ theorem stageTotal_smooth
   | none => exact contDiffOn_id
   | some target => exact hpair target
 
+omit [CompleteSpace E] in
 theorem stageTotal_conv
     {hd : InjRadiusDecayInput (I := I) X} {D : Real}
     {P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k)}

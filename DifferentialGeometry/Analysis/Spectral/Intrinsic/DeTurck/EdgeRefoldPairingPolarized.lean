@@ -187,6 +187,7 @@ private def edgeEvalCLM (s : Nat) (x : M) (v : Fin s → E) :
         rw [Tensor0SSpace.toModel_smul]
         rfl }
 
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] [SigmaCompactSpace M] in
 private lemma edgeEvalCLM_apply (s : Nat) (x : M) (v : Fin s → E)
     (D : Tensor0SSpace s I x) :
     edgeEvalCLM (I := I) (M := M) s x v D = Tensor0SSpace.toModel D v := rfl

@@ -87,6 +87,7 @@ private theorem iter_zero
     (0 : ℝ) (0 : SmoothCcTensor g r s)
   simpa only [zero_smul] using h
 
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] in
 private theorem lowJet_zero
     (g : SmoothRiemannianMetric I M) (r s m : ℕ) :
     lowJetSq (I := I) (M := M) g m

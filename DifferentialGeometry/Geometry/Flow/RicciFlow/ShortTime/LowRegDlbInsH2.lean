@@ -85,6 +85,7 @@ private theorem endoPairH2_jet
         lowJetSq (I := I) (M := M) g 2
           (slotInsertEndoCc (I := I) (M := M) g 0 Λ) := by ring
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [BoundarylessManifold I M] [SigmaCompactSpace M] in
 private theorem endoPairH2_sub
     (g : SmoothRiemannianMetric I M)
     (Λ Γ : ContMDiffSection I (E →L[ℝ] E) ∞
@@ -124,6 +125,7 @@ private lemma insEndoH2_apply
   rw [hdiff]
   simp only [deTurckLieWEndoSection_apply]
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 private theorem dlbIns_eq_pair_h2
     (g gm g_bg : SmoothRiemannianMetric I M) :
     (deTurckLieDLbCoeffField (I := I) (M := M) g gm g_bg -
@@ -530,6 +532,7 @@ private theorem alpha_pair_h2
       hδT_le hδT0 hδT hδU_le hδU0 hδU
       R A D2 D3 hR hA hD2 hD3 hT2 hU2 hT3 hU3 hTU2 hTU3)
 
+omit [NeZero (Module.finrank ℝ E)] in
 private theorem raise_h2
     (g : SmoothRiemannianMetric I M) (W : SmoothCcTensor g 0 2) :
     lowJetSq (I := I) (M := M) g 2

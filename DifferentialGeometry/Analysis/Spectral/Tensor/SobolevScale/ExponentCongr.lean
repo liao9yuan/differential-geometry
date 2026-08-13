@@ -85,6 +85,7 @@ theorem tensorHsCongrL_incl {a b c d : ℝ}
   cases hbd
   rfl
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] in
 theorem norm_congr_comp {X : Type*} [NormedAddCommGroup X] [NormedSpace ℝ X]
     {a b : ℝ} (h : a = b)
     (L : X →L[ℝ] tensorHs (I := I) (M := M) g r s a) :
@@ -92,6 +93,7 @@ theorem norm_congr_comp {X : Type*} [NormedAddCommGroup X] [NormedSpace ℝ X]
   cases h
   rw [tensorHsCongrL_refl, ContinuousLinearMap.id_comp]
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] in
 theorem opNorm_comp_congr_le {X : Type*} [NormedAddCommGroup X]
     [NormedSpace ℝ X] {a b : ℝ} (h : a = b)
     (L : tensorHs (I := I) (M := M) g r s b →L[ℝ] X) :

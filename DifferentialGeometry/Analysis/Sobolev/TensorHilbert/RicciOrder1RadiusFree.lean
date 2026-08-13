@@ -28,6 +28,7 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [BoundarylessManifold I M] [SigmaCompactSpace M] in
 theorem permAppEqRs (g : SmoothRiemannianMetric I M) {r s : ℕ}
     (σ : Equiv.Perm (Fin s)) (S : SmoothCcTensor g r s) :
     appCcRS (I := I) (M := M) g r s s

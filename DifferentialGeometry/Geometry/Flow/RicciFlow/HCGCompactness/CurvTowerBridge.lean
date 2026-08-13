@@ -27,6 +27,7 @@ variable [IsManifold I ∞ M] [IsManifold I 1 M] [IsManifold I 2 M]
 variable [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
 variable [SigmaCompactSpace M] [T2Space M]
 
+omit [I.Boundaryless] [IsManifold I 2 M] [IsManifold I (∞ + 1) M] [SigmaCompactSpace M] in
 theorem curvStep_eq_covStep
     (g : SmoothRiemannianMetric I M) (a : Nat)
     (A : Tensor0SField (𝕜 := Real) (E := E) (H := H)

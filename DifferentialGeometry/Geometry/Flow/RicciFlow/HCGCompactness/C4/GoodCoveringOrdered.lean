@@ -809,6 +809,7 @@ theorem ProperMetricOn.dist_eq (hd : InjRadiusDecayInput (I := I) X)
     (letI : MetricSpace (X.obj k).M := (P k).ms
      dist_nonneg) (hre.dist_nonneg k x y)).mp h2
 
+omit [CompleteSpace E] in
 theorem packingBound_pack (hd : InjRadiusDecayInput (I := I) X)
     (hre : hd.RealizesEdist) {D : Real} (pb : hd.PackingBound D)
     (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k)) (k : Nat) :

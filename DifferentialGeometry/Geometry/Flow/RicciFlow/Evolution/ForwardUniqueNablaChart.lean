@@ -29,6 +29,7 @@ variable [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
 variable [CompleteSpace E] [SigmaCompactSpace M] [T2Space M]
 variable [I.Boundaryless] [BoundarylessManifold I M]
 
+omit [InnerProductSpace ℝ E] [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)] in
 theorem nablaRicChartComp
     (g : SmoothRiemannianMetric I M)
     (Ric : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)

@@ -76,6 +76,7 @@ theorem edge_q_six
   simp [lieRefoldEps]
   module
 
+omit [BoundarylessManifold I M] in
 theorem edgeTopG_rhs
     (g : SmoothRiemannianMetric I M) (T : SmoothCcTensor g 0 2)
     (G : SmoothCcTensor g 0 4) {delta : Real}

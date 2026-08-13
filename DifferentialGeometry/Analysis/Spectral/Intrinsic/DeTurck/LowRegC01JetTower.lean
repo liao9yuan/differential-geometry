@@ -470,6 +470,7 @@ private theorem ricciGoodMark (g₀ : SmoothRiemannianMetric I M) {δ₀ : ℝ} 
   exact mkSmul (I := I) (M := M) g₀ P (1 / 2 : ℝ)
     (mkAdd (I := I) (M := M) g₀ P hLow happ)
 
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] in
 private lemma jetFold (g : SmoothRiemannianMetric I M) {r c : ℕ}
     (X : SmoothCcTensor g r c) (i : ℕ) (A B : ℕ → ℝ) {u v : ℝ}
     (hstep : ∀ q ∈ Finset.range (i + 1),

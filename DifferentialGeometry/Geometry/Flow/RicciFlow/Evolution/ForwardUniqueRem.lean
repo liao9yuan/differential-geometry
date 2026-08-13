@@ -357,6 +357,7 @@ end ReLowerRemainder
 
 section LowerTriBound
 
+omit [IsManifold I 2 M] [I.Boundaryless] [BoundarylessManifold I M] in
 theorem metricDiffSwap_le (g₁ g₂ : SmoothRiemannianMetric I M) (x : M)
     {C : Real} (hC : 1 ≤ C)
     (hequiv : ∀ v : TangentSpace I x,
@@ -373,6 +374,7 @@ theorem metricDiffSwap_le (g₁ g₂ : SmoothRiemannianMetric I M) (x : M)
 
 variable [NeZero (Module.finrank Real E)]
 
+omit [I.Boundaryless] [BoundarylessManifold I M] [NeZero (Module.finrank ℝ E)] in
 theorem roughLapSq_le (g : SmoothRiemannianMetric I M) {s : ℕ}
     (T : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
       (n := (∞ : WithTop ℕ∞)) s)

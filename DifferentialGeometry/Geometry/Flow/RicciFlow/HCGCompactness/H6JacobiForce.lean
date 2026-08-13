@@ -97,6 +97,7 @@ theorem curvDerivAlong_le
       Real →L[Real] TangentSpace I (γ t)) (1 : Real))
     (X t) (Y t) (Z t)
 
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 private theorem sqrt_six_add_le
     {M : Type u} [TopologicalSpace M] [ChartedSpace H M]
     [IsManifold I ∞ M]

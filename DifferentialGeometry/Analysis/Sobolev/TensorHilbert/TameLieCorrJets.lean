@@ -48,6 +48,7 @@ theorem wXiMark (g₀ : SmoothRiemannianMetric I M) {δ₀ : ℝ} (hδ₀ : δ�
   rw [connLow_rfns (I := I) (M := M) g₀ g₁ i x]
   exact hcd g₁ P htie hδ_le hδ0 hδ i x
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [BoundarylessManifold I M] in
 private theorem mcd_corr_sub (g₀ : SmoothRiemannianMetric I M)
     (ΦA ΦB : SmoothCcTensor g₀ 3 3) (W₁ W₂ : SmoothCcTensor g₀ 0 3) :
     (W₁ +

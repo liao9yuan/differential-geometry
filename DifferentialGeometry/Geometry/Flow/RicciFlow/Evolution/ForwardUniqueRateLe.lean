@@ -161,6 +161,7 @@ private theorem lowerZero_unit (g : SmoothRiemannianMetric I M) (s : Nat) (x : M
   rw [← toModel_tensorRS_apply (I := I) (M := M) 0 s x W (unitZeroSec (I := I) (M := M) x)]
   rfl
 
+omit [Module.Finite ℝ E] in
 private theorem innerPtDiag (g : SmoothRiemannianMetric I M) (s : Nat) (x : M)
     (W : TensorRSSpace 0 s I x) :
     tensorInnerPointwise (I := I) (M := M) g 0 s x
@@ -193,6 +194,7 @@ private theorem innerPtDiag (g : SmoothRiemannianMetric I M) (s : Nat) (x : M)
      apply Fin.ext;
      simp)
 
+omit [Module.Finite ℝ E] in
 theorem innerPt_eq_inner0S (g : SmoothRiemannianMetric I M) (s : Nat) (x : M)
     (W₁ W₂ : TensorRSSpace 0 s I x) :
     tensorInnerPointwise (I := I) (M := M) g 0 s x
@@ -218,6 +220,7 @@ theorem innerPt_eq_inner0S (g : SmoothRiemannianMetric I M) (s : Nat) (x : M)
       (TensorRSSpace.toModel W₂) (TensorRSSpace.toModel W₁)] at h
   linarith
 
+omit [Module.Finite ℝ E] in
 theorem l2Inner_eq_integral (g : SmoothRiemannianMetric I M)
     (T T' : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
       (n := (∞ : WithTop ℕ∞)) s) :
@@ -287,6 +290,7 @@ theorem rateIntegrand_eq (g₁ g₂ : Real → SmoothRiemannianMetric I M)
   rw [forwardUniqueDensityDot, rateRest]
   ring
 
+omit [Module.Finite ℝ E] [CompactSpace M] in
 theorem rate_eq_add (g₁ g₂ : Real → SmoothRiemannianMetric I M)
     (Adot : Real → (x : M) → Tensor0SSpace 3 I x)
     (Sdot : Real → (x : M) → Tensor0SSpace 4 I x) (t : Real)
@@ -313,6 +317,7 @@ section IBPCurrency
 
 variable [CompactSpace M] {s : Nat}
 
+omit [Module.Finite ℝ E] [CompactSpace M] in
 theorem intInner_lap_eq_neg (g : SmoothRiemannianMetric I M)
     (T : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
       (n := (∞ : WithTop ℕ∞)) s) :
@@ -337,6 +342,7 @@ theorem intInner_lap_eq_neg (g : SmoothRiemannianMetric I M)
         ∂(riemannianVolumeMeasure (I := I) (M := M) g) from rfl]
   linarith [h]
 
+omit [Module.Finite ℝ E] [CompactSpace M] in
 theorem intInner_div_eq_neg (g : SmoothRiemannianMetric I M)
     (T : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
       (n := (∞ : WithTop ℕ∞)) s)
@@ -363,6 +369,7 @@ section SPart
 
 variable [CompactSpace M]
 
+omit [Module.Finite ℝ E] [CompactSpace M] in
 theorem sPart_le
     (g₁ g₂ : Real → SmoothRiemannianMetric I M)
     (Sdot : Real → (x : M) → Tensor0SSpace 4 I x)
@@ -528,6 +535,7 @@ section RestPart
 
 variable [CompactSpace M]
 
+omit [Module.Finite ℝ E] [CompactSpace M] in
 theorem rateRest_le (g₁ g₂ : Real → SmoothRiemannianMetric I M)
     (Adot : Real → (x : M) → Tensor0SSpace 3 I x)
     (Sfield : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
@@ -615,6 +623,7 @@ theorem rateRest_le (g₁ g₂ : Real → SmoothRiemannianMetric I M)
   rw [rateRest]
   linarith
 
+omit [Module.Finite ℝ E] [CompactSpace M] in
 theorem intRateRest_le (g₁ g₂ : Real → SmoothRiemannianMetric I M)
     (Adot : Real → (x : M) → Tensor0SSpace 3 I x)
     (Sfield : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
@@ -666,6 +675,7 @@ section Capstone
 
 variable [CompactSpace M]
 
+omit [Module.Finite ℝ E] [CompactSpace M] in
 theorem forwardUniqueRate_le
     (g₁ g₂ : Real → SmoothRiemannianMetric I M)
     (Adot : Real → (x : M) → Tensor0SSpace 3 I x)

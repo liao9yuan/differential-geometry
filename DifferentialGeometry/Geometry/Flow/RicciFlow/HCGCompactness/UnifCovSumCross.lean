@@ -837,6 +837,7 @@ private theorem exists_g_onbasis (g : SmoothRiemannianMetric I M) (x : M) :
     constructor <;> simp [identityInvMetric, diagonalInvMetric, hON]
   exact ⟨basis, hON, hinv⟩
 
+omit [T2Space M] [SigmaCompactSpace M] [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] in
 private theorem sqrt_normSq0S_zero (g : SmoothRiemannianMetric I M) (x : M) (s : ℕ) :
     Real.sqrt (normSq0S (I := I) g x s (0 : Tensor0SBundle.Tensor0SSpace s I x)) = 0 := by
   classical

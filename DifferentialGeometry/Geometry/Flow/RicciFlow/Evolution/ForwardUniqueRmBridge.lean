@@ -22,6 +22,7 @@ section Raise
 
 variable {Idx : Type*} [Fintype Idx] {x : M}
 
+omit [IsManifold I 2 M] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 private theorem metField0 (g : SmoothRiemannianMetric I M) (x : M)
     (u Z : TangentSpace I x) :
     metricTensorField (I := I) g x (fun i : Fin 2 => if i = 0 then u else Z) =
@@ -351,6 +352,7 @@ end Curvature
 
 section Parallel
 
+omit [BoundarylessManifold I M] in
 theorem metricNabla0S_self (g : SmoothRiemannianMetric I M) :
     metricNabla0S (I := I) g (metricTensorField (I := I) g) =
       (0 : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
@@ -461,6 +463,7 @@ def lapCommRem (g : SmoothRiemannianMetric I M)
   covDiv0SField (I := I) g (L (s + 1) (metricNabla0S (I := I) g T)) -
     L s (covDiv0SField (I := I) g (metricNabla0S (I := I) g T))
 
+omit [BoundarylessManifold I M] in
 theorem lapComm_eq_div_flux (g : SmoothRiemannianMetric I M)
     (L : ∀ k : ℕ, Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
         (n := (∞ : WithTop ℕ∞)) k ->

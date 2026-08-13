@@ -32,6 +32,7 @@ def rmComp
         (coordinateFrameAt (I := I) x₀ i x) (coordinateFrameAt (I := I) x₀ j x)
         (coordinateFrameAt (I := I) x₀ k x) (coordinateFrameAt (I := I) x₀ l x))
 
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 theorem rm04SymmOfSol
     [IsManifold I (∞ + 1) M]
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
@@ -83,6 +84,7 @@ theorem rm04SymmOfSol
     exact hbi (coordinateFrameAt (I := I) x₀ a x) (coordinateFrameAt (I := I) x₀ b x)
       (coordinateFrameAt (I := I) x₀ c x) (coordinateFrameAt (I := I) x₀ d x)
 
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [SigmaCompactSpace M] in
 theorem rmSecondAt
     [IsManifold I (∞ + 1) M]
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
@@ -269,6 +271,7 @@ theorem rm2Bianchi
   exact nabCyc (I := I) (S.family.connection t) X V (nablaRm04Field (I := I) S t)
     (fun y u => secondCyc (I := I) (rmSecondAt (I := I) S t y) u) x
 
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [SigmaCompactSpace M] in
 theorem rm2SymmAt
     [IsManifold I (∞ + 1) M]
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
@@ -326,6 +329,7 @@ private def solNab2Ric
   totalNabla0SFun (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
     3 (S.family.connection t) (solNabRic (I := I) S t) x
 
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 private theorem coordNab2Eq
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D) (x₀ : M) (t : Real)
@@ -338,6 +342,7 @@ private theorem coordNab2Eq
   simpa only [solNab2Ric, solNabRic] using
     coordNab2Ric_eq_nabla2RicField (I := I) S x₀ t d a i j
 
+omit [I.Boundaryless] in
 theorem n2RicTr
     [I.Boundaryless] [IsManifold I (∞ + 1) M]
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
@@ -374,6 +379,7 @@ theorem n2RicTr
     DifferentialGeometry.Integral.Connection.metricRicci,
     DifferentialGeometry.Integral.Connection.metricRm04, gInvAt, hb] using h
 
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 theorem ricTr
     [I.Boundaryless] [IsManifold I (∞ + 1) M]
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
@@ -419,6 +425,7 @@ private theorem sumMulPair
   rw [Finset.sum_mul]
   exact Finset.sum_congr rfl fun r _ => by ring
 
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 theorem rmRicciId
     [I.Boundaryless] [IsManifold I (∞ + 1) M]
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
@@ -536,6 +543,7 @@ theorem rmRicciId
   rw [coordInvSymmOn (I := I) S x₀ (t : Real) hx₀ r p]
   ring
 
+omit [I.Boundaryless] in
 theorem rm04LapInOfSol
     [I.Boundaryless] [IsManifold I (∞ + 1) M]
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
@@ -605,6 +613,7 @@ theorem rm04LapInOfSol
           congrArg Neg.neg (hswap34 a b q d p c)
       _ = nab2RmComp (I := I) S x₀ (t : Real) x₀ a b q d c p := neg_neg _
 
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [SigmaCompactSpace M] in
 private theorem rmCompBase
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D) (x₀ : M) (t : Real)
@@ -685,6 +694,7 @@ private def solNab2RicF
     (totalNabla0S_reg (E := E) (H := H) (I := I) (M := M)
       3 (S.family.connection t) (connSmoothInf (I := I) S t) (solNabRic (I := I) S t))
 
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [SigmaCompactSpace M] in
 private theorem solNabRicReal
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D) (t : Real) :
@@ -695,6 +705,7 @@ private theorem solNabRicReal
     (totalNabla0S_reg (E := E) (H := H) (I := I) (M := M)
       2 (S.family.connection t) (connSmoothInf (I := I) S t) (S.ricci t))
 
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [SigmaCompactSpace M] in
 private theorem solNab2RicReal
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D) (t : Real) :
@@ -740,6 +751,7 @@ theorem ricRicciIdAt
     (solNab2Ric (I := I) S (t : Real) x)
     (rm13OfSol (I := I) S (t : Real) (D.regular_subset t.2)) rfl rfl h20 htor
 
+omit [I.Boundaryless] in
 theorem ricCommOfSol
     [I.Boundaryless] [IsManifold I (∞ + 1) M]
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
@@ -866,6 +878,7 @@ theorem ricCommOfSol
         (t : Real) x₀ k p)]
   linarith [hri]
 
+omit [I.Boundaryless] in
 theorem rm04StaticOfSol
     [I.Boundaryless] [IsManifold I (∞ + 1) M]
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
@@ -904,6 +917,7 @@ theorem rm04StaticOfSol
     (ricCommOfSol (I := I) S hS x₀ t)
     (rm04LapInOfSol (I := I) S hS x₀ t) m
 
+omit [I.Boundaryless] in
 theorem rm04Evol_at
     [I.Boundaryless] [IsManifold I (∞ + 1) M]
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
@@ -951,6 +965,7 @@ def coordBasisAt (y : M) :
   (coordinateFrameAt_isLocalFrame_one (I := I) y).toBasisAt
     (coordinateFrameAt_mem (I := I) y)
 
+omit [I.Boundaryless] in
 @[simp] theorem coordBasisAt_coe (y : M) (i : CoordinateIdx (𝕜 := Real) E) :
     (coordBasisAt (I := I) y i : TangentSpace I y) = coordinateFrameAt (I := I) y i y := by
   simp [coordBasisAt, IsLocalFrameOn.toBasisAt_coe]
@@ -1023,6 +1038,7 @@ theorem rm04EvolFam
         if q = 0 then i else if q = 1 then j else if q = 2 then k else l) 3) = l from rfl]
     using h
 
+omit [I.Boundaryless] in
 theorem rm04LapFam_real
     [I.Boundaryless] [IsManifold I (∞ + 1) M]
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}

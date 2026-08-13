@@ -39,6 +39,7 @@ private theorem ccTensorBilinSymm_symmS_app_rf
     ccTensorBilinSymm_symm (I := I) g₀ T x w v, ccTensorBilinSymm_apply]
   ring
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [BoundarylessManifold I M] [SigmaCompactSpace M] in
 private theorem gFibreOpBound_symmS_rf
     (g₀ : SmoothRiemannianMetric I M) (T : SmoothCcTensor g₀ 0 2)
     {δ : ℝ} (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ) :

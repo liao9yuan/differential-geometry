@@ -34,6 +34,7 @@ structure IsOrderZeroCurvFactor (g : SmoothRiemannianMetric I M)
   local' : ∀ (r : ℕ) (W₁ W₂ : SmoothCcTensor g 0 r) (x : M),
     W₁.toSection x = W₂.toSection x → (op 0 r W₁).toSection x = (op 0 r W₂).toSection x
 
+omit [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] in
 theorem op_zero_value_homogeneous
     (g : SmoothRiemannianMetric I M) (r : ℕ)
     (op : ∀ (p r : ℕ), SmoothCcTensor g 0 r → SmoothCcTensor g 0 (r + p))

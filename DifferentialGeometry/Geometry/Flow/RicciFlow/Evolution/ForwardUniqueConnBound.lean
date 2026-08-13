@@ -55,6 +55,7 @@ private theorem onFrame_inv {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
   intro i j
   constructor <;> simp [identityInvMetric, diagonalInvMetric, hON]
 
+omit [IsManifold I 2 M] in
 private theorem repr_inner {Idx : Type*} [Finite Idx] [DecidableEq Idx]
     (g : SmoothRiemannianMetric I M) {x : M}
     (b : Module.Basis Idx Real (TangentSpace I x))
@@ -133,6 +134,7 @@ theorem connDiffLow_eq_lower (g₁ g₂ : SmoothRiemannianMetric I M) (x : M) :
   rw [connDiffLowAt_apply, lowerBilin_apply, metricTensorField_apply]
   simp
 
+omit [IsManifold I 2 M] in
 private theorem comp_lowerBilin {Idx : Type*} [Fintype Idx] {x : M}
     (b : Module.Basis Idx Real (TangentSpace I x))
     (q : Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) 2 x)
@@ -234,6 +236,7 @@ def nablaRmDiffSq (g₁ : SmoothRiemannianMetric I M)
       (n := (∞ : WithTop ℕ∞)) 4) (x : M) : Real :=
   normSq0S (I := I) g₁ x 5 (nablaRmDiff (I := I) g₁ S x)
 
+omit [IsManifold I (∞ + 1) M] [SigmaCompactSpace M] in
 theorem nablaRmDiffSq_nonneg (g₁ : SmoothRiemannianMetric I M)
     (S : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
       (n := (∞ : WithTop ℕ∞)) 4) (x : M) :
@@ -294,6 +297,7 @@ end NablaRicci
 
 section TraceCommute
 
+omit [SigmaCompactSpace M] in
 private theorem nabla_trace_field [I.Boundaryless] {s : ℕ}
     (g : SmoothRiemannianMetric I M)
     (A : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
@@ -417,6 +421,7 @@ section Hamilton
 
 variable {Idx : Type*} [Fintype Idx] {u : Set M} {x : M}
 
+omit [IsManifold I (∞ + 1) M] [SigmaCompactSpace M] [T2Space M] [Fintype Idx] in
 theorem coeff_adot_eq
     (g₁ g₂ : Real → SmoothRiemannianMetric I M)
     (frame : Idx -> (y : M) -> TangentSpace I y)
@@ -492,6 +497,7 @@ theorem coeff_adot_eq
   rw [hcoeff k, ← hbcoe i, ← hbcoe j]
   exact huniq
 
+omit [IsManifold I 2 M] in
 theorem lower_raise_cancel [DecidableEq Idx]
     (g : SmoothRiemannianMetric I M)
     (b : Module.Basis Idx Real (TangentSpace I x))
@@ -526,6 +532,7 @@ private theorem lowerBilin_basis
         q (fun a : Fin 2 => if a = 0 then b m else b (v 2)) := by
   rw [lowerBilin_apply, tensor02_expand (I := I) q b _ (b (v 2))]
 
+omit [IsManifold I 2 M] in
 private theorem repr_bilinOfComp
     (b : Module.Basis Idx Real (TangentSpace I x))
     (c : Idx -> Idx -> Idx -> Real) (i j m : Idx) :

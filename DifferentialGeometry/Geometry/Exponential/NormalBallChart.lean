@@ -202,6 +202,7 @@ noncomputable def tangent {p : M}
     mfderiv (modelWithCornersSelf Real E) I
       (fun u : E => c.hom u) z.1 z.2⟩
 
+omit [FiniteDimensional ℝ E] [CompleteSpace E] [I.Boundaryless] [T2Space (TangentBundle I M)] in
 @[simp] theorem tangent_zero {p : M}
     (c : NormalBallChart (I := I) p) :
     c.tangent 0 = (⟨p, (0 : E)⟩ : TangentBundle I M) := by
@@ -296,6 +297,7 @@ theorem transition_isom (g : SmoothRiemannianMetric I M) {p q : M}
   exact congrArg₂
     (fun a b => g.inner (c.hom z) a b) hu hv
 
+omit [FiniteDimensional ℝ E] [CompleteSpace E] [I.Boundaryless] [T2Space (TangentBundle I M)] in
 private theorem push_smooth {p : M}
     (c : NormalBallChart (I := I) p) {U : Set E}
     (hU : IsOpen U)
@@ -429,6 +431,7 @@ structure MetricBounds (g : SmoothRiemannianMetric I M) {p : M}
 
 namespace MetricEquivOn
 
+omit [FiniteDimensional ℝ E] [CompleteSpace E] [I.Boundaryless] [T2Space (TangentBundle I M)] in
 theorem coercive (g : SmoothRiemannianMetric I M) {p : M}
     {c : NormalBallChart (I := I) p} {U : Set E}
     (h : c.MetricEquivOn g U) {z : E} (hz : z ∈ U) :

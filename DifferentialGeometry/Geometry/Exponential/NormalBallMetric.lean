@@ -61,6 +61,7 @@ noncomputable def ballDiffeo {p : M}
   rw [← hrange]
   exact isSigmaCompact_range c.ballDiffeo.continuous
 
+omit [NeZero (Module.finrank ℝ E)] [T2Space M] [SigmaCompactSpace M] in
 private theorem ballDiffeo_apply {p : M}
     (c : NormalBallChart (I := I) p) (z : c.ball) :
     ((c.ballDiffeo z : c.image) : M) = c.hom (z : E) := by

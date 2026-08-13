@@ -110,6 +110,7 @@ private theorem raised_inner
           (g0FlatCLM (I := I) g x v) w from rfl]
   rw [cotangentToDual_g0FlatCLM]
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 private theorem kappa_split
     (g gm : SmoothRiemannianMetric I M)
     (P : SmoothCcTensor g 0 2)
@@ -217,6 +218,7 @@ private theorem symm_eq_self
   rw [ccTensor02Symm, hswap, htwo, smul_smul,
     show (1 / 2 : ℝ) * 2 = 1 by norm_num, one_smul]
 
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] in
 private theorem koszulOp_app
     (g : SmoothRiemannianMetric I M) (T : SmoothCcTensor g 0 2)
     (hT : ∀ (x : M) (u v : TangentSpace I x),
@@ -283,6 +285,7 @@ private theorem kappa_pair
     ← kappaOp_app (I := I) (M := M) g gU U hU hUtie]
   rw [← appCcRS_sub_right, ← covGrad_sub]
 
+omit [NeZero (Module.finrank ℝ E)] in
 private theorem moving_pair
     (g gT gU : SmoothRiemannianMetric I M)
     (T U : SmoothCcTensor g 0 2)
@@ -397,6 +400,7 @@ private theorem moving_pair
     connDiffLoweredCc_unitModel_apply',
     connDiffLoweredCc_unitModel_apply']
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [BoundarylessManifold I M] in
 private theorem app_sub_right
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (Φ : SmoothCcTensor g r s) (W V : SmoothCcTensor g 0 r) :
@@ -514,6 +518,7 @@ private theorem corr_cross
       module
     _ = _ := by rw [hA', hB']; module
 
+omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] in
 private theorem raise_cross
     (g gT gU : SmoothRiemannianMetric I M) :
     raiseLast (I := I) (M := M) g gU
@@ -818,6 +823,7 @@ private theorem grad_l2_sq
   exact rfns_iteratedCovGrad_covGrad_comm_rs
     (I := I) (M := M) g r s i S x
 
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] in
 private theorem grad_h2_le_h3
     (g : SmoothRiemannianMetric I M) {r s : ℕ}
     (S : SmoothCcTensor g r s) :
@@ -833,6 +839,7 @@ private theorem grad_h2_le_h3
   rw [h0, h1, h2]
   nlinarith [sq_nonneg ‖S‖]
 
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] in
 private theorem grad_h1_le_h2
     (g : SmoothRiemannianMetric I M) {r s : ℕ}
     (S : SmoothCcTensor g r s) :
@@ -885,6 +892,7 @@ private theorem dom_h1
     riemannianFiberNormSq_iteratedCovGrad_domDomCongrSection
       (I := I) (M := M) g σ S q x
 
+omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] in
 private theorem connSec_eq_raise
     (g gm : SmoothRiemannianMetric I M) :
     connDiffSection (I := I) gm g =
@@ -956,6 +964,7 @@ private theorem connSec_eq_raise
   exact g.symm x u
     (PDE.DeTurck.connDiff (I := I) gm g x (YZ 0) (YZ 1))
 
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] [SigmaCompactSpace M] in
 private theorem dom_sub
     (g : SmoothRiemannianMetric I M) {s : ℕ}
     (σ : Equiv.Perm (Fin s)) (A B : SmoothCcTensor g 0 s) :
@@ -1025,6 +1034,7 @@ private theorem connSec_sub_eq
     ← raise_sub (I := I) (M := M) g,
     ← dom_sub (I := I) (M := M) g]
 
+omit [NeZero (Module.finrank ℝ E)] in
 private theorem raisePerm_h2
     (g : SmoothRiemannianMetric I M)
     (S : SmoothCcTensor g 0 3) :
@@ -1058,6 +1068,7 @@ private theorem connSec_h2_eq
   rw [connSec_sub_eq (I := I) (M := M) g gT gU]
   exact raisePerm_h2 (I := I) (M := M) g _
 
+omit [NeZero (Module.finrank ℝ E)] in
 private theorem raisePerm_h1
     (g : SmoothRiemannianMetric I M)
     (S : SmoothCcTensor g 0 3) :
@@ -1131,6 +1142,7 @@ private theorem slotExt_norm_le
     (0 : ℝ) ≤ (Module.finrank ℝ E : ℝ))]
   exact hsq
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [BoundarylessManifold I M] [SigmaCompactSpace M] in
 private theorem reindex_sub_c1
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (A B : SmoothCcTensor g r s) (ρ : Equiv.Perm (Fin r)) :
@@ -2985,6 +2997,7 @@ private theorem sharp_pair
     slotInsertEndoFib_smul_left, neg_one_smul]
   rw [ContinuousLinearMap.comp_assoc]
 
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] in
 private theorem jet_add1
     (g : SmoothRiemannianMetric I M) {r s : ℕ} (m : ℕ)
     (S V : SmoothCcTensor g r s) :
@@ -3185,6 +3198,7 @@ private noncomputable def fourOf
       reindexCoeffGen (I := I) (M := M) g 4 2 P
         fourTraceArgPerm2301)
 
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] [SigmaCompactSpace M] in
 private theorem pure_eq_trace1
     (g gm : SmoothRiemannianMetric I M) :
     ricciArmPrincipalCoeffPure (I := I) (M := M) g gm =
@@ -3662,6 +3676,7 @@ theorem ricci1_pair_h2
     _ ≤ (B0 * D3 + B1 * N + B1 * A * N) ^ 2 :=
       pow_le_pow_left₀ hlin0 hlin 2
 
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] [SigmaCompactSpace M] in
 private theorem lieTrace_eq
     (g gm : SmoothRiemannianMetric I M)
     (σ : Equiv.Perm (Fin 4)) :
@@ -3865,6 +3880,7 @@ private theorem psi_eq
         (sharpFlatEndoCc (I := I) g gm) := by
   rfl
 
+omit [NeZero (Module.finrank ℝ E)] in
 private theorem psi_sub_eq
     (g gT gU : SmoothRiemannianMetric I M) :
     lieArm1PsiB (I := I) (M := M) g gT g -
@@ -3920,6 +3936,7 @@ private theorem perturb_h2_eq
         (ccTensor02Symm (I := I) (M := M) g D)
     _ = lowJetSq (I := I) (M := M) g 2 D := by rw [hD]
 
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] in
 private theorem jet_neg1
     (g : SmoothRiemannianMetric I M) {r s : ℕ} (m : ℕ)
     (S : SmoothCcTensor g r s) :
@@ -4087,6 +4104,7 @@ theorem sharp_pair_h2
     jet_neg1 (I := I) (M := M) g 2]
   exact hY
 
+omit [NeZero (Module.finrank ℝ E)] in
 private theorem corr_tel
     (g gT gU : SmoothRiemannianMetric I M)
     (T U : SmoothCcTensor g 0 2) :
@@ -5281,6 +5299,7 @@ theorem fullSlot_pair_h1
 
 end LowBaseInternal
 
+omit [NeZero (Module.finrank ℝ E)] in
 private theorem raiseDom_h2
     (g : SmoothRiemannianMetric I M)
     (ρ : Equiv.Perm (Fin 3)) (S : SmoothCcTensor g 0 3) :

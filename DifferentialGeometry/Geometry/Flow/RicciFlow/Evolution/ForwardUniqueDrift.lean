@@ -303,6 +303,7 @@ section Components
 variable [InnerProductSpace Real E] [NeZero (Module.finrank Real E)]
 variable {Idx : Type*} [Fintype Idx] [DecidableEq Idx] {x : M}
 
+omit [I.Boundaryless] [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
 private theorem ricciAt_symm' (g : SmoothRiemannianMetric I M) (x : M)
     (X Y : TangentSpace I x) :
     metricRicciAt (I := I) g x (vec2 (I := I) X Y) =
@@ -318,6 +319,7 @@ private theorem rm04_swap12 (g : SmoothRiemannianMetric I M) (x : M)
     riemannOp_swap (metricCov (I := I) g) x A B C]
   simp
 
+omit [I.Boundaryless] [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
 private theorem rm04_swap34 (g : SmoothRiemannianMetric I M) (x : M)
     (A B C D : TangentSpace I x) :
     metricRm04At (I := I) g x (vec4 (I := I) A B C D) =
@@ -334,6 +336,7 @@ private theorem rm04_swap34 (g : SmoothRiemannianMetric I M) (x : M)
     _ = -g.inner x (riemannOp (LeviCivita (I := I) g) x A B D) C := by
       rw [g.symm x C]
 
+omit [I.Boundaryless] [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
 private theorem rm04_pair (g : SmoothRiemannianMetric I M) (x : M)
     (A B C D : TangentSpace I x) :
     metricRm04At (I := I) g x (vec4 (I := I) A B C D) =

@@ -47,6 +47,7 @@ private theorem grad_sq
   exact rfns_iteratedCovGrad_covGrad_comm_rs
     (I := I) (M := M) g r s i S x
 
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] in
 private theorem grad_h2
     (g : SmoothRiemannianMetric I M) {r s : ℕ}
     (S : SmoothCcTensor g r s) :
@@ -62,6 +63,7 @@ private theorem grad_h2
   rw [h0, h1, h2]
   nlinarith [sq_nonneg ‖S‖]
 
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] in
 private theorem jet3_grad
     (g : SmoothRiemannianMetric I M) {r s : ℕ}
     (S : SmoothCcTensor g r s) :

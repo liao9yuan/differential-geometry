@@ -37,6 +37,7 @@ private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [BoundarylessManifold I M] [SigmaCompactSpace M] in
 private theorem endoSlotZero_sub_traceLip
     (g : SmoothRiemannianMetric I M) (s : ℕ)
     (A B : ContMDiffSection I (E →L[ℝ] E) ∞
@@ -537,6 +538,7 @@ private theorem jetAdd (g : SmoothRiemannianMetric I M) {r s : ℕ}
           ‖iteratedCovGrad (I := I) g r s j B‖ ^ 2) := by
       simp only [mul_add, Finset.sum_add_distrib, Finset.mul_sum]
 
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] in
 private theorem jetAbs (g : SmoothRiemannianMetric I M) {r s : ℕ}
     (A B : SmoothCcTensor g r s) {d b : ℝ}
     (hd : (∑ j ∈ Finset.range 3,

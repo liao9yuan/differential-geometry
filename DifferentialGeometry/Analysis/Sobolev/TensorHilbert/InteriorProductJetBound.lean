@@ -185,6 +185,7 @@ private lemma ipjb_slotExt2_toModel (g : SmoothRiemannianMetric I M)
     ContinuousMultilinearMap.smul_apply, smul_eq_mul]
   rw [unitModel]
 
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma ipjb_cons_sum_smul {n : ℕ}
     (Zm : Tensor0SModel (n + 1) ℝ E) (d : ℕ) (t : Fin d → ℝ)
     (u : Fin d → E) (rest : Fin n → E) :

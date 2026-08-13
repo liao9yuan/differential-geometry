@@ -189,6 +189,7 @@ private theorem traceSucc_fib
           ((Module.finBasis ℝ E).cDualBasis k)))
       ((Module.finBasis ℝ E) k) (Fin.cons (m 0) (Fin.tail m)))
 
+omit [BoundarylessManifold I M] [SigmaCompactSpace M] in
 private theorem traceSucc_rfns
     (g : SmoothRiemannianMetric I M) (p : ℕ) (x : M) :
     riemannianFiberNormSq (I := I) (M := M) g ((p + 1) + 2) (p + 1) x
@@ -246,6 +247,7 @@ theorem cometricTrace_rfns_p
         _ = d ^ ((p + 6) + 1) := (pow_succ d (p + 6)).symm
         _ = d ^ ((p + 1) + 6) := by congr 1
 
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma combinedTrace42Model_apply_symbolic
     (L : Tensor0SBundle.Tensor0SModel 1 ℝ E →L[ℝ] E)
     (D : Tensor0SBundle.Tensor0SModel 4 ℝ E) (m : Fin 2 → E) :
@@ -291,6 +293,7 @@ private lemma combinedTrace42Model_apply_symbolic
   rw [← Finset.sum_add_distrib, ← Finset.sum_sub_distrib]
   congr 1
 
+omit [BoundarylessManifold I M] [SigmaCompactSpace M] in
 private theorem ricciSelf_twice_eq
     (g : SmoothRiemannianMetric I M) :
     ricciArmPrincipalCoeff (I := I) (M := M) g g +

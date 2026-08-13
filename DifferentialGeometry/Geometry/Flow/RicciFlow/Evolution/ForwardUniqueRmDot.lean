@@ -155,6 +155,7 @@ private theorem tensor02_sub_left
   rw [sub_add_cancel] at h
   exact eq_sub_of_add_eq h.symm
 
+omit [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 private theorem metricField_slot0 (g : SmoothRiemannianMetric I M) (x : M)
     (u Z : TangentSpace I x) :
     metricTensorField (I := I) g x (fun a : Fin 2 => if a = 0 then u else Z) =
@@ -382,6 +383,7 @@ def frameVec4 (frame : Idx -> (y : M) -> TangentSpace I y) (x : M) (i j k l : Id
   DifferentialGeometry.Integral.Connection.vec4 (I := I)
     (frame i x) (frame j x) (frame k x) (frame l x)
 
+omit [TopologicalSpace M] [SigmaCompactSpace M] [T2Space M] in
 theorem driftDiff_split (Ric₁ Ric₂ : MatrixComp M Idx) (Rm₁ Rm₂ : FourComp M Idx)
     (t : Real) (x : M) (i j k l : Idx) :
     riemann04RicciDriftInFrame Ric₁ Rm₁ t x i j k l -
@@ -411,6 +413,7 @@ section LaplacianAlgebra
 
 variable {s : ℕ}
 
+omit [BoundarylessManifold I M] in
 theorem roughLap0SField_sub (g : SmoothRiemannianMetric I M)
     (T U : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
       (n := (∞ : WithTop ℕ∞)) s) :
@@ -430,6 +433,7 @@ theorem roughLapSub_apply (g : SmoothRiemannianMetric I M)
   rw [hfield]
   exact Tensor0SSpace.sub_apply (I := I) s x _ _ v
 
+omit [BoundarylessManifold I M] in
 theorem lapDiffFlux_apply_vec (g₁ g₂ : SmoothRiemannianMetric I M)
     (T : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
       (n := (∞ : WithTop ℕ∞)) s) (x : M) (v : Fin s -> TangentSpace I x) :

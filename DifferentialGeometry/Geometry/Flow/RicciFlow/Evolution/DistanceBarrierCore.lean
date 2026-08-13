@@ -31,6 +31,7 @@ variable {M : Type u} [TopologicalSpace M] [ChartedSpace H M]
   [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
   [SigmaCompactSpace M] [T2Space M]
 
+omit [Module.Finite ℝ E] in
 private theorem pathLength_timeDeriv_of_ricciFlow
     {D : RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -912,6 +913,7 @@ private theorem calabi_core_of_sol
     exact hvSupport_t y
   · exact hrho0_x.trans hr.symm
 
+omit [Module.Finite ℝ E] in
 private theorem CalabiFlowCore.scale
     [RiemannianBundle (fun y : M => TangentSpace I y)]
     [VectorBundle Real E (TangentSpace I : M → Type _)]

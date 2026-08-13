@@ -143,6 +143,7 @@ private theorem traceH1_core
   exact appHs_core (I := I) (M := M) g 4 2 1
     (cometricDoubleTraceField (I := I) g 2) V
 
+omit [NeZero (Module.finrank ℝ E)] in
 private theorem perm_icg_norm
     (g : SmoothRiemannianMetric I M) (σ : Equiv.Perm (Fin 2))
     (T : SmoothCcTensor g 0 2) (k : ℕ) :
