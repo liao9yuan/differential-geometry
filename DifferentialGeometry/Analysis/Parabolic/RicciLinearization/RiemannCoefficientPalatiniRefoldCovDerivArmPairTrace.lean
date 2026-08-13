@@ -3588,7 +3588,6 @@ def lieBgLow (g₀ g₁ g_bg : SmoothRiemannianMetric I M) : SmoothCcTensor g₀
           (lieCovArm2 (I := I) (M := M) g₀ g₁)
           (connDiffLoweredCc (I := I) g₀ g_bg))
 
-omit [NeZero (Module.finrank ℝ E)] in
 private theorem lieBg_dom_sub
     (g : SmoothRiemannianMetric I M) {s : ℕ}
     (σ : Equiv.Perm (Fin s)) (A B : SmoothCcTensor g 0 s) :

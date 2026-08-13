@@ -23,7 +23,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
   [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
   [T2Space M] [SigmaCompactSpace M]
 
-omit [BoundarylessManifold I M] in
 theorem projN_cont (g₀ : SmoothRiemannianMetric I M) (a : ℕ) {R : ℝ} (N : ℕ)
     {Nfun : lowerState (I := I) (M := M) g₀ a R →
       tensorHs (I := I) (M := M) g₀ 0 2 (a : ℝ)}

@@ -34,7 +34,6 @@ def lc0TraceRF (g₀ g₁ : SmoothRiemannianMetric I M) (p : ℕ)
   reindexCoeffGen (I := I) (M := M) g₀ (p + 2) p
     (pureTrace (I := I) (M := M) g₀ g₁ p) σ
 
-omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] [SigmaCompactSpace M] in
 theorem lc0TraceRF_fiber (g₀ g₁ : SmoothRiemannianMetric I M) (p : ℕ)
     (σ : Equiv.Perm (Fin (p + 2))) (x : M) :
     (show Tensor0SSpace (p + 2) I x →L[ℝ] Tensor0SSpace p I x from

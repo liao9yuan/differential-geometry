@@ -656,7 +656,6 @@ private lemma raisedSelf (g : SmoothRiemannianMetric I M) (x : M) :
   rw [gInvRaisedEndo_apply, inverseMetricSharpFib_g0FlatCLM,
     ContinuousLinearMap.id_apply]
 
-omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] [SigmaCompactSpace M] in
 private lemma raisedDecomp (g g₁ : SmoothRiemannianMetric I M) :
     fullRaisedEndoField (I := I) (M := M) g g₁ =
       gInvDiffRaisedEndoField (I := I) g g₁ +
@@ -676,7 +675,6 @@ private lemma raisedDecomp (g g₁ : SmoothRiemannianMetric I M) :
   rw [fullRaisedEndoField_apply, raisedSelf, ContinuousLinearMap.id_apply]
   rw [gInvRaisedEndo_eq_diff_add_id]
 
-omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [BoundarylessManifold I M] [SigmaCompactSpace M] in
 private lemma insAdd (g : SmoothRiemannianMetric I M) (s : ℕ)
     (A B : ContMDiffSection I (E →L[ℝ] E) ∞
       (fun x : M => TangentSpace I x →L[ℝ] TangentSpace I x)) :

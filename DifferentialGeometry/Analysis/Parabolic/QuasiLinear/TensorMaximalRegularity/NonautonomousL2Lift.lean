@@ -65,7 +65,6 @@ private theorem homMode_zero (hT : 0 < T)
     (homModeCoeff (I := I) (M := M) (a := a) (T := T)
       (0 : tensorHs (I := I) (M := M) g r s (a + 2)) i)]
 
-omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] in
 private theorem ha1_down
     (hT : 0 < T) (hT1 : T ≤ 1)
     (hcompact : IsCompactOperator (tensorResolventL2
@@ -144,7 +143,6 @@ private theorem duhamel_down
             (show a - 1 ≤ a by linarith) f) :=
       ha1_down (I := I) (M := M) hT hT1 hcompact f
 
-omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] in
 private theorem duhamel_mid_down
     (hT : 0 < T) (hT1 : T ≤ 1)
     (hcompact : IsCompactOperator (tensorResolventL2

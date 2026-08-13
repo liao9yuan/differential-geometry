@@ -138,7 +138,6 @@ theorem freezeAllBut0SField_apply_vec {s : ℕ}
   rw [freezeAllBut0SField_apply]
   exact oneFormAtSlot0S_apply (I := I) (A x) (fun i : Fin s => Y i x) q W
 
-omit [FiniteDimensional ℝ E] in
 private theorem updateSlots_apply {s : ℕ}
     (Y : Fin s → ContMDiffSection I E (∞ : WithTop ℕ∞) (TangentSpace I : M → Type _))
     (q : Fin s)

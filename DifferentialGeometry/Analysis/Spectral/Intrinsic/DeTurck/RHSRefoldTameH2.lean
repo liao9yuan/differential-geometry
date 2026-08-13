@@ -122,7 +122,6 @@ private theorem refoldMono_smul
         ((G.toSection x) (unitZeroSec (I := I) (M := M) x)) w) := by
       ring
 
-omit [BoundarylessManifold I M] [SigmaCompactSpace M] in
 private theorem edgePair_smul
     (g g1 : SmoothRiemannianMetric I M) (a : Real)
     (G : SmoothCcTensor g 0 4) (sigma : Equiv.Perm (Fin 4)) :
@@ -225,7 +224,6 @@ private theorem h2_smul_eq
         norm (iteratedCovGrad (I := I) g r s i A) ^ 2) := by
       rw [Finset.mul_sum]
 
-omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] in
 private theorem h2_six_le
     (g : SmoothRiemannianMetric I M) {r s : Nat}
     (A B C D F G : SmoothCcTensor g r s) :

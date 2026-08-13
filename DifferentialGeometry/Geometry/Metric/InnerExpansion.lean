@@ -63,7 +63,6 @@ theorem sqrt_inner_smul
       real_inner_self_eq_norm_sq, Real.sqrt_sq_eq_abs, abs_norm]
   rw [hnorm, hnorm, norm_smul, Real.norm_eq_abs]
 
-omit [FiniteDimensional ℝ E] in
 theorem inner_sum_orthonormal (g : SmoothRiemannianMetric I M) (x : M)
     {ι : Type*} [Fintype ι] [DecidableEq ι] (v : ι → TangentSpace I x)
     (hON : ∀ i j, g.inner x (v i) (v j) = if i = j then (1 : ℝ) else 0)

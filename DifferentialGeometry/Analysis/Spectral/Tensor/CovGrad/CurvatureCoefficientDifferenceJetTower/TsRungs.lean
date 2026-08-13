@@ -131,7 +131,6 @@ lemma tsCometricRaise_sub (g₀ : SmoothRiemannianMetric I M) (s : ℕ)
         rw [Tensor0SSpace.toModel_sub]
         simp only [ContinuousMultilinearMap.sub_apply]
 
-omit [NeZero (Module.finrank ℝ E)] in
 lemma tsRfns_cometricRaise_eq (g₀ : SmoothRiemannianMetric I M) (s : ℕ)
     (W : SmoothCcTensor g₀ 0 (s + 2)) (x : M) :
     riemannianFiberNormSq (I := I) (M := M) g₀ 1 (s + 1) x
@@ -141,7 +140,6 @@ lemma tsRfns_cometricRaise_eq (g₀ : SmoothRiemannianMetric I M) (s : ℕ)
   rw [iteratedCovGrad_zero, iteratedCovGrad_zero] at h
   exact h
 
-omit [NeZero (Module.finrank ℝ E)] in
 lemma tsAppCcRS_coeffCorner_split (g₀ : SmoothRiemannianMetric I M) (a b c : ℕ)
     (Φ : SmoothCcTensor g₀ b c) (W : SmoothCcTensor g₀ a b) (j : ℕ) :
     iteratedCovGrad (I := I) g₀ a c j (appCcRS (I := I) (M := M) g₀ a b c Φ W) =
@@ -167,7 +165,6 @@ lemma tsAppCcRS_coeffCorner_split (g₀ : SmoothRiemannianMetric I M) (a b c : �
   rw [hf0]
   exact add_comm _ _
 
-omit [BoundarylessManifold I M] in
 lemma tsParallel_argCorner_head_le (g₀ : SmoothRiemannianMetric I M) (p a b : ℕ)
     (Φ : SmoothCcTensor g₀ a b) (i : ℕ) (HX : SmoothCcTensor g₀ p (a + i)) (x : M) :
     riemannianFiberNormSq (I := I) (M := M) g₀ p (b + i) x
@@ -1153,7 +1150,6 @@ set_option backward.isDefEq.respectTransparency false
 
 namespace CurvatureCoefficientDifferenceJetTower
 
-omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [BoundarylessManifold I M] [SigmaCompactSpace M] in
 lemma tsSlotInsertEndoCc_succ_eq_reindex_slotExtend
     (g₀ : SmoothRiemannianMetric I M) (s : ℕ)
     (Λ : ContMDiffSection I (E →L[ℝ] E) ∞
@@ -1224,7 +1220,6 @@ lemma tsSlotInsertEndoCc_succ_eq_reindex_slotExtend
         m ((Equiv.swap (0 : Fin (s + 1 + 1)) 1) (Fin.succ (Fin.succ k₂)))
       rw [Equiv.swap_apply_of_ne_of_ne hne0 hne1]
 
-omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [BoundarylessManifold I M] [SigmaCompactSpace M] in
 lemma tsReindexCoeffGen_sub (g₀ : SmoothRiemannianMetric I M) (r s : ℕ)
     (R₁ R₂ : SmoothCcTensor g₀ r s) (σ' : Equiv.Perm (Fin r)) :
     reindexCoeffGen (I := I) (M := M) g₀ r s (R₁ - R₂) σ' =
@@ -1244,7 +1239,6 @@ lemma tsReindexCoeffGen_sub (g₀ : SmoothRiemannianMetric I M) (r s : ℕ)
   rw [reindexCoeffFibGen, reindexCoeffFibGen, reindexCoeffFibGen]
   exact ContinuousLinearMap.sub_comp _ _ _
 
-omit [NeZero (Module.finrank ℝ E)] in
 lemma tsRfns_reindexCoeffGen_zero (g₀ : SmoothRiemannianMetric I M) (r s : ℕ)
     (R : SmoothCcTensor g₀ r s) (σ' : Equiv.Perm (Fin r)) (x : M) :
     riemannianFiberNormSq (I := I) (M := M) g₀ r s x

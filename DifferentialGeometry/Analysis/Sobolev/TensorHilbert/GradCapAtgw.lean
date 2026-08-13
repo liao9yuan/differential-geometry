@@ -30,7 +30,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
-omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] in
 theorem icgNormComp (g₀ : SmoothRiemannianMetric I M) (r s l m : ℕ)
     (Ψ : SmoothCcTensor g₀ r s) :
     ‖iteratedCovGrad (I := I) g₀ r (s + l) m (iteratedCovGrad (I := I) g₀ r s l Ψ)‖ =
@@ -52,7 +51,6 @@ theorem icgNormComp (g₀ : SmoothRiemannianMetric I M) (r s l m : ℕ)
     sq_nonneg (‖iteratedCovGrad (I := I) g₀ r (s + l) m (iteratedCovGrad (I := I) g₀ r s l Ψ)‖ -
       ‖iteratedCovGrad (I := I) g₀ r s (l + m) Ψ‖)]
 
-omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] in
 theorem gradBase_eq (g₀ : SmoothRiemannianMetric I M) {rb sb : ℕ}
     (P : SmoothCcTensor g₀ rb sb) (x : M) (j : ℕ) :
     gridBase (I := I) (M := M) g₀ (iteratedCovGrad (I := I) g₀ rb sb 1 P) x j =

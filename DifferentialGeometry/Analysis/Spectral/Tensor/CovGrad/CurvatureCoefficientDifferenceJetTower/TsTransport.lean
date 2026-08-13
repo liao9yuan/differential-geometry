@@ -41,7 +41,6 @@ set_option backward.isDefEq.respectTransparency false
 
 namespace CurvatureCoefficientDifferenceJetTower
 
-omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] in
 lemma tsCastRankCc_db_refl (g₀ : SmoothRiemannianMetric I M) (r : ℕ) {a : ℕ} (h : a = a)
     (W : SmoothCcTensor g₀ r a) : castRankCc_db g₀ r h W = W := rfl
 
@@ -63,7 +62,6 @@ lemma tsCastRankCc_db_sub (g₀ : SmoothRiemannianMetric I M) (r : ℕ) {a b : �
     castRankCc_db g₀ r h (W - W') = castRankCc_db g₀ r h W - castRankCc_db g₀ r h W' := by
   subst h; rfl
 
-omit [NeZero (Module.finrank ℝ E)] in
 lemma tsCastRankCc_db_add (g₀ : SmoothRiemannianMetric I M) (r : ℕ) {a b : ℕ}
     (h : a = b) (W W' : SmoothCcTensor g₀ r a) :
     castRankCc_db g₀ r h (W + W') = castRankCc_db g₀ r h W + castRankCc_db g₀ r h W' := by
@@ -177,7 +175,6 @@ lemma tsIteratedCovGrad_covGrad_eq_cast (g₀ : SmoothRiemannianMetric I M) (r s
             (iteratedCovGrad (I := I) g₀ r s (i + 1) W) from by
         rw [iteratedCovGrad_succ]]
 
-omit [NeZero (Module.finrank ℝ E)] in
 lemma tsExists_iteratedCovGrad_rsDomDomCongrSection (g₀ : SmoothRiemannianMetric I M)
     (r s : ℕ) (σ : Equiv.Perm (Fin s)) (Z : SmoothCcTensor g₀ r s) (i : ℕ) :
     ∃ σ' : Equiv.Perm (Fin (s + i)),
@@ -481,7 +478,6 @@ set_option backward.isDefEq.respectTransparency false
 
 namespace CurvatureCoefficientDifferenceJetTower
 
-omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] in
 lemma tsRfns_order_congr (g : SmoothRiemannianMetric I M)
     (r s : ℕ) {n n' : ℕ} (h : n = n') (S : SmoothCcTensor g r s) (x : M) :
     riemannianFiberNormSq (I := I) (M := M) g r (s + n) x
@@ -490,7 +486,6 @@ lemma tsRfns_order_congr (g : SmoothRiemannianMetric I M)
         ((iteratedCovGrad (I := I) g r s n' S).toSection x) := by
   subst h; rfl
 
-omit [NeZero (Module.finrank ℝ E)] in
 lemma tsRfns_domDomCongrSection_zero (g₀ : SmoothRiemannianMetric I M) {s : ℕ}
     (σ : Equiv.Perm (Fin s)) (S : SmoothCcTensor g₀ 0 s) (x : M) :
     riemannianFiberNormSq (I := I) (M := M) g₀ 0 s x
@@ -501,7 +496,6 @@ lemma tsRfns_domDomCongrSection_zero (g₀ : SmoothRiemannianMetric I M) {s : �
   rw [iteratedCovGrad_zero, iteratedCovGrad_zero] at h
   exact h
 
-omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [BoundarylessManifold I M] [SigmaCompactSpace M] in
 lemma tsRfns_castRankCc_db_zero (g₀ : SmoothRiemannianMetric I M) (r : ℕ) {a b : ℕ}
     (h : a = b) (W : SmoothCcTensor g₀ r a) (x : M) :
     riemannianFiberNormSq (I := I) (M := M) g₀ r b x
@@ -550,7 +544,6 @@ lemma tsSlotExtend_sub (g₀ : SmoothRiemannianMetric I M) (r s : ℕ)
   rw [e0, ContinuousLinearMap.sub_comp, map_sub]
   rfl
 
-omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [BoundarylessManifold I M] [SigmaCompactSpace M] in
 lemma tsAppCc_sub_left (g₀ : SmoothRiemannianMetric I M) (r s : ℕ)
     (Φ Φ' : SmoothCcTensor g₀ r s) (W : SmoothCcTensor g₀ 0 r) :
     appCc (I := I) (M := M) g₀ r s (Φ - Φ') W =
@@ -570,7 +563,6 @@ lemma tsAppCc_sub_left (g₀ : SmoothRiemannianMetric I M) (r s : ℕ)
     rw [SmoothCcTensor.toSection_sub]; rfl]
   rw [ContinuousLinearMap.sub_comp]
 
-omit [NeZero (Module.finrank ℝ E)] in
 lemma tsRsDomDomCongr_sub {r s : ℕ} {x : M} (σ : Equiv.Perm (Fin s))
     (T T' : TensorRSSpace r s I x) :
     rsDomDomCongr (I := I) (M := M) σ (T - T') =
@@ -944,7 +936,6 @@ lemma tsConnDiff_carrier_split (g₀ g₁ : SmoothRiemannianMetric I M) (j : ℕ
   rw [hf0]
   exact add_comm _ _
 
-omit [I.Boundaryless] [BoundarylessManifold I M] [SigmaCompactSpace M] in
 lemma tsRfns_rsDomDomCongrSection_zero (g₀ : SmoothRiemannianMetric I M)
     (r s : ℕ) (σ : Equiv.Perm (Fin s)) (Z : SmoothCcTensor g₀ r s) (x : M) :
     riemannianFiberNormSq (I := I) (M := M) g₀ r s x

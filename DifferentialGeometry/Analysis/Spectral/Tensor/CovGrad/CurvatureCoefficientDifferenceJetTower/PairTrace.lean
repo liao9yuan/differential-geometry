@@ -542,7 +542,6 @@ theorem mixedCoeff_backgroundDifference_eq_pairTrace
   refine Finset.sum_congr rfl fun b _ => ?_
   ring
 
-omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] in
 lemma iteratedCovGrad_smul_b (g : SmoothRiemannianMetric I M) (r s j : ℕ)
     (c : ℝ) (w : SmoothCcTensor g r s) :
     iteratedCovGrad (I := I) g r s j (c • w) = c • iteratedCovGrad (I := I) g r s j w := by
@@ -1173,7 +1172,6 @@ lemma slotInsertEndoCc_add_endo_c (g₀ : SmoothRiemannianMetric I M) (s : ℕ)
   rw [show ((A + B) x) = A x + B x from by rw [ContMDiffSection.coe_add]; rfl]
   rw [slotInsertEndoFib_add_left, ContinuousLinearMap.add_apply]
 
-omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [BoundarylessManifold I M] [SigmaCompactSpace M] in
 lemma fullRaisedEndoField_diff_split_c (g₀ g₁ : SmoothRiemannianMetric I M) :
     fullRaisedEndoField (I := I) (M := M) g₀ g₁ =
       gInvDiffRaisedEndoField (I := I) g₀ g₁ +
@@ -1195,7 +1193,6 @@ lemma fullRaisedEndoField_diff_split_c (g₀ g₁ : SmoothRiemannianMetric I M) 
   rw [show gInvRaisedEndo (I := I) g₀ g₀ x v = v from by
     rw [gInvRaisedEndo_apply, inverseMetricSharpFib_g0FlatCLM]]
 
-omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [BoundarylessManifold I M] [SigmaCompactSpace M] in
 lemma g1_inner_gInvRaisedEndo_left_c (g₀ g₁ : SmoothRiemannianMetric I M) (x : M)
     (v w : TangentSpace I x) :
     g₁.inner x (gInvRaisedEndo (I := I) g₀ g₁ x v) w = g₀.inner x v w := by
@@ -1386,7 +1383,6 @@ lemma toModel_cons_cons_sum_smul (x : M) {n : ℕ}
   refine Finset.sum_congr rfl fun c _ => ?_
   rw [← h1 (u c)]
 
-omit [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 lemma orthoFrame_center_repr (g : SmoothRiemannianMetric I M) (x : M)
     (v : TangentSpace I x) :
     v = ∑ i : Fin (Module.finrank ℝ E),
@@ -1900,7 +1896,6 @@ theorem riemannMixedCoeff_eq_pairTrace_L01 (g₀ g₁ : SmoothRiemannianMetric I
     smoothOrthoFrame (I := I) g₀ x a x from rfl]
   ring
 
-omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] in
 lemma iteratedCovGrad_zero_of_covGrad_zero (g₀ : SmoothRiemannianMetric I M)
     (r s : ℕ) (Φ : SmoothCcTensor g₀ r s)
     (hΦ : covGrad (I := I) (M := M) g₀ r s Φ = 0) (m : ℕ) :

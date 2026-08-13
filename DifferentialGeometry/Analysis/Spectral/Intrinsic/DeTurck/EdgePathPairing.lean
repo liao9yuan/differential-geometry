@@ -197,7 +197,6 @@ private theorem perm_app
   rw [slotPermCLM_apply, Tensor0SSpace.toModel_ofModel]
   rfl
 
-omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [BoundarylessManifold I M] [SigmaCompactSpace M] in
 private theorem joint_perm
     (g : SmoothRiemannianMetric I M) {d : ℕ} {S : Set Real}
     (rho : Equiv.Perm (Fin d)) (A : Real → SmoothCcTensor g 0 d)
@@ -336,7 +335,6 @@ private theorem edgeRaise_joint
     g T hdelta hdeltaZ 1 _ h0
   simpa only [edgeRaise2] using h1
 
-omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [BoundarylessManifold I M] [SigmaCompactSpace M] in
 private theorem edgeProd_joint
     (g : SmoothRiemannianMetric I M) {S : Set Real}
     (A : Real → SmoothCcTensor g 0 2) (V : SmoothCcTensor g 0 2)

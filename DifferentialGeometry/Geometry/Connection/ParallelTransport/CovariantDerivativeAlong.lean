@@ -709,7 +709,6 @@ theorem chartRepAtBase_differentiableAt [I.Boundaryless]
     hAcomp_diff.clm_apply hrepα_hd.differentiableAt
   exact hdiff.congr_of_eventuallyEq hrepβ_eq
 
-omit [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)] in
 theorem chartRep_diff
     (γ : ℝ → M) (V : ∀ s, TangentSpace I (γ s))
     (hV : ContMDiff 𝓘(ℝ, ℝ) I.tangent ∞

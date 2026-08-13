@@ -67,7 +67,6 @@ theorem zeroRepr_ae (hT : 0 < T) (hT1 : T ≤ 1)
       (h_compact := h_compact) hT hT1
       (0 : tensorHs (I := I) (M := M) g r s (a + 2)) f
 
-omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] in
 theorem zeroRepr_meas (hT : 0 < T) (hT1 : T ≤ 1)
     (h_compact : IsCompactOperator (tensorResolventL2
       (I := I) (M := M) g r s))
@@ -95,7 +94,6 @@ private theorem homMode_zero (hT : 0 < T)
     (homModeCoeff (I := I) (M := M) (a := a) (T := T)
       (0 : tensorHs (I := I) (M := M) g r s (a + 2)) i)]
 
-omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] in
 private theorem homField_zero (hT : 0 < T)
     (h_compact : IsCompactOperator (tensorResolventL2
       (I := I) (M := M) g r s)) :
@@ -141,7 +139,6 @@ theorem zeroRepr_sub_ae (hT : 0 < T) (hT1 : T ≤ 1)
   rw [hft, hf't, hdt]
   exact hst.symm
 
-omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] in
 theorem zeroRepr_norm_le (hT : 0 < T) (hT1 : T ≤ 1)
     (h_compact : IsCompactOperator (tensorResolventL2
       (I := I) (M := M) g r s))

@@ -80,7 +80,6 @@ private theorem appCc_sub_right (g : SmoothRiemannianMetric I M) (r s : ℕ)
     rw [SmoothCcTensor.toSection_sub]; rfl]
   rw [ContinuousLinearMap.comp_sub]
 
-omit [NeZero (Module.finrank ℝ E)] in
 theorem wOmegaDiff_eq (g₀ g₁ g_bg : SmoothRiemannianMetric I M) :
     wOmega (I := I) (M := M) g₀ g₁ g₀ - wOmega (I := I) (M := M) g₀ g₁ g_bg =
       appCc (I := I) (M := M) g₀ 3 1 (cometricCastG0 (I := I) g₀ g₁)
@@ -114,7 +113,6 @@ private lemma unitModel_sub (g₀ : SmoothRiemannianMetric I M) (s : ℕ)
   rw [SmoothCcTensor.toSection_sub, ContMDiffSection.coe_sub, Pi.sub_apply,
     ContinuousLinearMap.sub_apply, Tensor0SSpace.toModel_sub]
 
-omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] in
 lemma wXi_unitModel_apply (g₀ g₁ g_bg : SmoothRiemannianMetric I M) (x : M)
     (m : Fin 3 → TangentSpace I x) :
     unitModel (I := I) (M := M) g₀ 3 (wXi (I := I) (M := M) g₀ g₁ g_bg) x m =
@@ -128,7 +126,6 @@ lemma wXi_unitModel_apply (g₀ g₁ g_bg : SmoothRiemannianMetric I M) (x : M)
     rw [map_sub, ContinuousLinearMap.sub_apply]]
   rw [connDiff_endpoint_cocycle (I := I) g₀ g₁ g_bg x (m 0) (m 1)]
 
-omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] in
 private lemma wOmega_toSection_unit (g₀ g₁ g_bg : SmoothRiemannianMetric I M) (x : M) :
     (show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace 1 I x from
         (wOmega (I := I) (M := M) g₀ g₁ g_bg).toSection x)
@@ -246,7 +243,6 @@ private lemma unitModel_add (g₀ : SmoothRiemannianMetric I M) (s : ℕ)
   rw [SmoothCcTensor.toSection_add, ContMDiffSection.coe_add, Pi.add_apply,
     ContinuousLinearMap.add_apply, Tensor0SSpace.toModel_add]
 
-omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] in
 private lemma tensor0SCovariantDerivative01_consEval_leibnizDefect
     (g₀ : SmoothRiemannianMetric I M) (V : Π b : M, Tensor0SSpace 1 I b) {x : M}
     (hV : TensorSectionMDiffAt (I := I) 1 V x)
@@ -423,7 +419,6 @@ lemma wAlphaB_unitModel_apply (g₀ g₁ g_bg : SmoothRiemannianMetric I M) (x :
   simp only [Matrix.cons_val_zero, Matrix.cons_val_one, Matrix.head_cons,
     Matrix.cons_val_two, Matrix.tail_cons]
 
-omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [SigmaCompactSpace M] in
 private lemma wEndo_eq_covDeriv_add_connDiff (g₀ g₁ g_bg : SmoothRiemannianMetric I M)
     (x : M) (w : TangentSpace I x) :
     deTurckLieWEndo (I := I) g₁ g_bg x w =
@@ -477,7 +472,6 @@ lemma cotangentToDual_cometricRaiseSlot0_gen
   · refine Fin.cases ?_ (fun j' => j'.elim0) j
     rfl
 
-omit [NeZero (Module.finrank ℝ E)] in
 private lemma cotangentToDual_cometricRaise_wAlpha
     (g₀ g₁ g_bg : SmoothRiemannianMetric I M) (x : M) (om : Tensor0SSpace 1 I x)
     (w : TangentSpace I x) :

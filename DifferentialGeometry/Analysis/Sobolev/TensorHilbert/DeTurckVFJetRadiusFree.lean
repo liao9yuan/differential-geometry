@@ -305,7 +305,6 @@ private lemma gInvRaisedEndo_self_rf (g₀ : SmoothRiemannianMetric I M) (x : M)
   intro v
   rw [gInvRaisedEndo_apply, inverseMetricSharpFib_g0FlatCLM, ContinuousLinearMap.id_apply]
 
-omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] [SigmaCompactSpace M] in
 private lemma fullRaisedEndoField_decomp_rf (g₀ g₁ : SmoothRiemannianMetric I M) :
     fullRaisedEndoField (I := I) (M := M) g₀ g₁ =
       gInvDiffRaisedEndoField (I := I) g₀ g₁ +
@@ -325,7 +324,6 @@ private lemma fullRaisedEndoField_decomp_rf (g₀ g₁ : SmoothRiemannianMetric 
   rw [fullRaisedEndoField_apply, gInvRaisedEndo_self_rf, ContinuousLinearMap.id_apply]
   rw [gInvRaisedEndo_eq_diff_add_id]
 
-omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [BoundarylessManifold I M] [SigmaCompactSpace M] in
 private lemma slotInsertEndoCc_add_rf (g₀ : SmoothRiemannianMetric I M) (s : ℕ)
     (A B : ContMDiffSection I (E →L[ℝ] E) ∞
       (fun x : M => TangentSpace I x →L[ℝ] TangentSpace I x)) :

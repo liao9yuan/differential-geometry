@@ -38,7 +38,6 @@ private lemma l1IcgSmul (g : SmoothRiemannianMetric I M) (r s j : ℕ)
   | zero => simp only [iteratedCovGrad_zero]
   | succ j ih => rw [iteratedCovGrad_succ, iteratedCovGrad_succ, ih, covGrad_smul]
 
-omit [BoundarylessManifold I M] in
 private lemma l1RfnsNeg (g : SmoothRiemannianMetric I M) {r s : ℕ} (l : ℕ) (x : M)
     (X : SmoothCcTensor g r s) :
     riemannianFiberNormSq (I := I) (M := M) g r (s + l) x
@@ -193,7 +192,6 @@ theorem fourTrAtgw (g₀ : SmoothRiemannianMetric I M) {δ₀ : ℝ} (hδ₀ : �
         (gridBase (I := I) (M := M) g₀ P x) (n + 1) := rfl
   rwa [hwin] at h
 
-omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] [SigmaCompactSpace M] in
 theorem dltcEqPure (g₀ g₁ : SmoothRiemannianMetric I M) (σ : Equiv.Perm (Fin 4)) :
     deTurckLieTraceCoeff (I := I) (M := M) g₀ g₁ σ =
       reindexCoeffGen (I := I) (M := M) g₀ 4 2
@@ -482,7 +480,6 @@ theorem bgCcAtgw (g₀ g_bg : SmoothRiemannianMetric I M)
         ≤ 2 * (Kcd n * W) + 2 * (Kfx n * W) := by linarith
     _ = (2 * Kcd n + 2 * Kfx n) * W := by ring
 
-omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [SigmaCompactSpace M] in
 theorem bgCcEqConn (g₀ g₁ : SmoothRiemannianMetric I M) :
     lieArm1ConnDiffBgCc (I := I) (M := M) g₀ g₁ g₀ = connDiffSection (I := I) g₁ g₀ := by
   apply SmoothCcTensor.ext

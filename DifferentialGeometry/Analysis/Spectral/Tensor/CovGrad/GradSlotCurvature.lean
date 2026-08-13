@@ -67,7 +67,6 @@ omit [I.Boundaryless] in
         TensorRSSpace.ofCLM
           (slotFreeCurvOpFib (I := I) (M := M) g₀ 2 x)) := rfl
 
-omit [I.Boundaryless] in
 theorem gradSlotCurv_eval
     (g₀ : SmoothRiemannianMetric I M) (x : M)
     (A : Tensor0SSpace 2 I x) (u w : TangentSpace I x)

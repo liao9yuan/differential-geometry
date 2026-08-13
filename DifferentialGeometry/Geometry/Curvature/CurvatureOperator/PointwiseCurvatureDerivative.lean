@@ -34,7 +34,6 @@ noncomputable def nablaRiemannOp
     (tangentExt (I := I) x X)
     (tangentExt (I := I) x Y) x Z
 
-omit [CompleteSpace E] [I.Boundaryless] [BoundarylessManifold I M] [SigmaCompactSpace M] in
 private theorem nablaRiemannOp_eq_curvCov
     (g : SmoothRiemannianMetric I M) (x : M)
     (D X Y Z : TangentSpace I x) :
@@ -46,7 +45,6 @@ private theorem nablaRiemannOp_eq_curvCov
         (tangentExt (I := I) x Z) x := by
   rfl
 
-omit [I.Boundaryless] [BoundarylessManifold I M] [SigmaCompactSpace M] in
 theorem canNablaRm_apply
     (g : SmoothRiemannianMetric I M)
     (D X Y Z W : ContMDiffSection I E (∞ : WithTop ℕ∞)
