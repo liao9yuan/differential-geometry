@@ -95,7 +95,6 @@ theorem rmDotRem_low
 
 variable [NeZero (Module.finrank Real E)]
 
-set_option maxHeartbeats 1000000 in
 
 theorem rmDotRemSq_le
     (g₁ g₂ : SmoothRiemannianMetric I M)
@@ -228,7 +227,6 @@ private theorem rem_repr_inner {Idx : Type*} [Finite Idx] [DecidableEq Idx]
   simp only [hbb, mul_ite, mul_one, mul_zero, Finset.sum_ite_eq',
     Finset.mem_univ, if_true]
 
-set_option maxHeartbeats 1000000 in
 
 theorem reLowerDefSq_le (g₁ g₂ : SmoothRiemannianMetric I M) {s : ℕ}
     (T : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
@@ -388,7 +386,6 @@ theorem roughLapSq_le (g : SmoothRiemannianMetric I M) {s : ℕ}
 private def lowerTriPerm : Equiv.Perm (Fin 6) :=
   Equiv.ofBijective ![2, 3, 4, 0, 1, 5] (by decide)
 
-set_option maxHeartbeats 1000000 in
 
 theorem lowerTriSq_le (g : SmoothRiemannianMetric I M)
     {x : M}
@@ -470,7 +467,6 @@ theorem lowerTriSq_le (g : SmoothRiemannianMetric I M)
   rw [hcongr, hprod] at htr
   simpa [P, mul_comm] using htr
 
-set_option maxHeartbeats 1000000 in
 
 theorem lowerTriDiffSq_le (g₁ g₂ : SmoothRiemannianMetric I M)
     {x : M}
@@ -485,7 +481,6 @@ theorem lowerTriDiffSq_le (g₁ g₂ : SmoothRiemannianMetric I M)
   simpa only [metricDiffSq_def, mul_comm] using
     (lowerTriSq_le (I := I) g₁ (metricDiffAt (I := I) g₁ g₂ x) A)
 
-set_option maxHeartbeats 1000000 in
 
 theorem lowerTriSwapSq_le (g₁ g₂ : SmoothRiemannianMetric I M)
     {x : M}
@@ -545,7 +540,6 @@ theorem lowerTriSwapSq_le (g₁ g₂ : SmoothRiemannianMetric I M)
               (lowerTri (I := I) (metricTensorField (I := I) g₂ x) A) *
             metricDiffSq (I := I) g₁ g₂ x) := by ring
 
-set_option maxHeartbeats 1000000 in
 
 theorem ownRmDiffSq_le (g₁ g₂ : SmoothRiemannianMetric I M) (x : M)
     {BP : Real}
@@ -643,7 +637,6 @@ theorem ownRmDiffSq_le (g₁ g₂ : SmoothRiemannianMetric I M) (x : M)
           2 * (Module.finrank Real E : Real) ^ 6 * BP *
             metricDiffSq (I := I) g₁ g₂ x := by ring
 
-set_option maxHeartbeats 1000000 in
 
 theorem traceProdSq_le (g : SmoothRiemannianMetric I M) {a b r : ℕ}
     (A : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
