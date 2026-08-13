@@ -18976,6 +18976,94 @@ theorem contMDiff_morseHandleAdjunctionCell_zero {m : ℕ}
   intro d
   exact (H.left_inv (Handle.cell φ d)).symm
 
+theorem contMDiff_morseHandleAdjunctionCell_top {m : ℕ}
+    (c ε r δ θ R₀ R₀' R₁' R₁'' : ℝ) {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M]
+    [ChartedSpace H M] [T2Space M]
+    {I : ModelWithCorners ℝ (MorseModel (m + 1)) H} [I.Boundaryless]
+    [IsManifold I (⊤ : WithTop ℕ∞) M] {f : M → ℝ}
+    (data : MorseChart (m + 1) (m + 1) (le_rfl : m + 1 ≤ m + 1) c I f)
+    (hε : 0 < ε) (hδ : 0 < δ) (hθ : 0 < θ) (hδr : δ < r ^ 2) (hθr : θ < r ^ 2)
+    (hr : 0 < r) (hεr : Real.sqrt (2 * ε + 2 * r ^ 2) ≤ data.R)
+    (hεr' : Real.sqrt (2 * ε + 2 * r ^ 2) < data.R / 2)
+    (hR0 : 0 ≤ R₀) (hR0lt : R₀ < data.R) (hbig : 2 * (r ^ 2 + 2 * ε + δ) ≤ R₀ ^ 2)
+    (hRbig : r ^ 2 + 2 * ε + δ ≤ (data.R / 2) ^ 2)
+    (hR : R₀' < R₁') (hR0' : 0 ≤ R₀') (hbig' : 2 * (r ^ 2 + 2 * ε + δ) ≤ R₀' ^ 2)
+    (hR₁big : 2 * (data.R / 2) ^ 2 - 2 * ε ≤ R₁' ^ 2) (hR₁₂R : R₁' ≤ data.R)
+    (hR₁₂ : R₁' < R₁'') (hR₁₂R'' : R₁'' ≤ data.R) (hR₁₂R''' : R₁'' ≤ data.R')
+    (hRR' : data.R < data.R') (hcont : Continuous f)
+    (hf : ContMDiff I 𝓘(ℝ, ℝ) (↑(⊤ : ℕ∞) : WithTop ℕ∞) f)
+    (hreg_f : ∀ x : M, f x = c - ε → ¬ IsCriticalPointAt I f x)
+    [NeZero (m + 1)] :
+    @ContMDiff ℝ _
+      (EuclideanSpace ℝ (Fin (((m + 1 - 1) + 1))) × EuclideanSpace ℝ (Fin 0)) _ _
+      (ModelProd (EuclideanHalfSpace (((m + 1 - 1) + 1))) (EuclideanSpace ℝ (Fin 0))) _
+      ((modelWithCornersEuclideanHalfSpace (((m + 1 - 1) + 1))).prod (𝓘(ℝ, EuclideanSpace ℝ (Fin 0))))
+      (StandardHandle (m + 1) (m + 1 - (m + 1))) _ (standardHandleTopSubChartedSpace (m + 1))
+      (MorseModel (m + 1)) _ _ (MorseHalfSpace m) _
+      (morseModelWithCornersHalfSpace m)
+      (Handle.AdjunctionSpace (m + 1) (m + 1 - (m + 1))
+        (morseAttachingEmbedding (le_rfl : m + 1 ≤ m + 1) c ε r data hε
+          (le_trans (le_of_lt hεr') (by nlinarith [data.hRpos] : data.R / 2 ≤ data.R)))) _
+      (morseHandleAdjunctionChartedSpaceCapRounded (le_rfl : m + 1 ≤ m + 1) c ε r δ θ R₀ R₀' R₁' R₁''
+        data hε hδ hθ hδr hθr hr hεr hεr' hR0 hR0lt hbig hRbig hR hR0' hbig' hR₁big hR₁₂R hR₁₂
+        hR₁₂R'' hR₁₂R''' hcont hf hreg_f)
+      (⊤ : ℕ∞)
+      (Handle.cell (morseAttachingEmbedding (le_rfl : m + 1 ≤ m + 1) c ε r data hε
+        (le_trans (le_of_lt hεr') (by nlinarith [data.hRpos] : data.R / 2 ≤ data.R)))) := by
+  classical
+  let φ : AttachingRegion (m + 1) (m + 1 - (m + 1)) → SublevelSpace f (c - ε) :=
+    morseAttachingEmbedding (le_rfl : m + 1 ≤ m + 1) c ε r data hε
+      (le_trans (le_of_lt hεr') (by nlinarith [data.hRpos] : data.R / 2 ≤ data.R))
+  let H : Handle.AdjunctionSpace (m + 1) (m + 1 - (m + 1)) φ ≃ₜ
+      SublevelSpace (morseRoundedFunction (le_rfl : m + 1 ≤ m + 1) c ε r δ R₀' R₁' data) c :=
+    morseHandleAdjunctionEquivRoundedSublevelCapRounded (le_rfl : m + 1 ≤ m + 1) c ε r δ θ R₀ R₀' R₁'
+      data hε hδ hθ hδr hθr hr hεr hεr' hR0 hR0lt hbig hRbig hR hR0' hbig' hR₁big hR₁₂R hcont
+  letI : ChartedSpace (MorseHalfSpace m)
+      (SublevelSpace (morseRoundedFunction (le_rfl : m + 1 ≤ m + 1) c ε r δ R₀' R₁' data) c) :=
+    morseRoundedSublevelChartedSpace (le_rfl : m + 1 ≤ m + 1) c ε r δ R₀' R₁' R₁'' data hε hδ hδr hR
+      hR0' hbig' hR₁₂ hR₁₂R'' hR₁₂R''' hf hreg_f
+  letI : IsManifold (morseModelWithCornersHalfSpace m) (⊤ : ℕ∞)
+      (SublevelSpace (morseRoundedFunction (le_rfl : m + 1 ≤ m + 1) c ε r δ R₀' R₁' data) c) :=
+    morseRoundedSublevelIsManifold (le_rfl : m + 1 ≤ m + 1) c ε r δ R₀' R₁' R₁'' data hε hδ hδr hR
+      hR0' hbig' hR₁₂ hR₁₂R'' hR₁₂R''' hf hreg_f
+  letI : ChartedSpace (ModelProd (EuclideanHalfSpace (((m + 1 - 1) + 1)))
+      (EuclideanSpace ℝ (Fin 0))) (StandardHandle (m + 1) (m + 1 - (m + 1))) :=
+    standardHandleTopSubChartedSpace (m + 1)
+  have hf_lower : @ContMDiff ℝ _
+      (EuclideanSpace ℝ (Fin (((m + 1 - 1) + 1))) × EuclideanSpace ℝ (Fin 0)) _ _
+      (ModelProd (EuclideanHalfSpace (((m + 1 - 1) + 1))) (EuclideanSpace ℝ (Fin 0))) _
+      ((modelWithCornersEuclideanHalfSpace (((m + 1 - 1) + 1))).prod (𝓘(ℝ, EuclideanSpace ℝ (Fin 0))))
+      (StandardHandle (m + 1) (m + 1 - (m + 1))) _ (standardHandleTopSubChartedSpace (m + 1))
+      (MorseModel (m + 1)) _ _ (MorseHalfSpace m) _
+      (morseModelWithCornersHalfSpace m)
+      (SublevelSpace (morseRoundedFunction (le_rfl : m + 1 ≤ m + 1) c ε r δ R₀' R₁' data) c) _
+      (morseRoundedSublevelChartedSpace (le_rfl : m + 1 ≤ m + 1) c ε r δ R₀' R₁' R₁'' data hε hδ hδr
+        hR hR0' hbig' hR₁₂ hR₁₂R'' hR₁₂R''' hf hreg_f)
+      (⊤ : ℕ∞)
+      (fun d : StandardHandle (m + 1) (m + 1 - (m + 1)) => H.toFun (Handle.cell φ d)) := by
+    refine (contMDiff_handleRoundEmbedding_sublevel_top c ε r δ θ R₀' R₁' R₁'' data hε hδ hθ hδr hθr
+      hr hεr hεr' hR hR0' hbig' hRbig hR₁big hR₁₂R hR₁₂ hR₁₂R'' hR₁₂R''' hRR' hf hreg_f).congr ?_
+    intro d
+    apply Subtype.ext
+    exact morseHandleAdjunctionEquivRoundedSublevelCapRounded_cell (le_rfl : m + 1 ≤ m + 1) c ε r δ θ R₀
+      R₀' R₁' data hε hδ hθ hδr hθr hr hεr hεr' hR0 hR0lt hbig hRbig hR hR0' hbig' hR₁big hR₁₂R hcont d
+  letI : ChartedSpace (MorseHalfSpace m) (Handle.AdjunctionSpace (m + 1) (m + 1 - (m + 1)) φ) :=
+    adjunctionChartedSpace φ H
+  letI : IsManifold (morseModelWithCornersHalfSpace m) (⊤ : ℕ∞)
+      (Handle.AdjunctionSpace (m + 1) (m + 1 - (m + 1)) φ) :=
+    adjunctionIsManifold (morseModelWithCornersHalfSpace m) φ H
+  have hsymm : ContMDiff (morseModelWithCornersHalfSpace m) (morseModelWithCornersHalfSpace m) (⊤ : ℕ∞)
+      H.symm :=
+    contMDiff_adjunctionHomeomorph_symm (morseModelWithCornersHalfSpace m) φ H
+  have hcomp : ContMDiff ((modelWithCornersEuclideanHalfSpace (((m + 1 - 1) + 1))).prod
+        (𝓘(ℝ, EuclideanSpace ℝ (Fin 0))))
+      (morseModelWithCornersHalfSpace m) (⊤ : ℕ∞)
+      (fun d : StandardHandle (m + 1) (m + 1 - (m + 1)) => H.symm.toFun (H.toFun (Handle.cell φ d))) :=
+    hsymm.comp hf_lower
+  refine hcomp.congr ?_
+  intro d
+  exact (H.left_inv (Handle.cell φ d)).symm
+
 theorem contMDiff_morseHandleAdjunctionLower {m k : ℕ} (hk : k ≤ m + 1)
     (c ε r δ θ η R₀ R₁ R₀' R₁' R₁'' : ℝ) {H : Type} [TopologicalSpace H] {M : Type}
     [TopologicalSpace M] [ChartedSpace H M] [T2Space M]
