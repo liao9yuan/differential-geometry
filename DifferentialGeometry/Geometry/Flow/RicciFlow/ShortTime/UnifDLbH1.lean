@@ -38,6 +38,7 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [SigmaCompactSpace M] in
 private theorem connLow_self_zero
     (g : SmoothRiemannianMetric I M) :
     connDiffLoweredCc (I := I) g g = 0 := by
@@ -59,6 +60,7 @@ private theorem norm_add_sq_le
     pow_le_pow_left₀ (norm_nonneg _) htri 2
   nlinarith [hsq, sq_nonneg (‖u‖ - ‖v‖)]
 
+omit [NeZero (Module.finrank ℝ E)] in
 private theorem dom_h1_eq
     (g : SmoothRiemannianMetric I M) {s : ℕ}
     (σ : Equiv.Perm (Fin s)) (S : SmoothCcTensor g 0 s) :
@@ -78,6 +80,7 @@ private theorem dom_h1_eq
     riemannianFiberNormSq_iteratedCovGrad_domDomCongrSection
       (I := I) (M := M) g σ S q x
 
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] [SigmaCompactSpace M] in
 private theorem raise_sub
     (g : SmoothRiemannianMetric I M) (W W' : SmoothCcTensor g 0 2) :
     cometricRaiseSlot0Field (I := I) (M := M) g 0 (W - W') =

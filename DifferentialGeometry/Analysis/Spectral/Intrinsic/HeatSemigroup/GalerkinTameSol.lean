@@ -97,6 +97,7 @@ theorem galEmbedCombo (g₀ : SmoothRiemannianMetric I M) (a : ℕ)
   · rw [if_pos hi]
   · rw [if_neg hi, dif_neg hi]
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [BoundarylessManifold I M] in
 /-- The lower view of a spectral combination is the spectral combination at the
 exponent `a + 1`. -/
 theorem galViewComboC (g₀ : SmoothRiemannianMetric I M) (a : ℕ)
@@ -162,6 +163,7 @@ theorem galCoordNormLe (g₀ : SmoothRiemannianMetric I M) (a : ℕ)
   have hfin := Real.sqrt_le_sqrt hle
   rwa [Real.sqrt_sq (norm_nonneg _), Real.sqrt_sq (norm_nonneg _)] at hfin
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [BoundarylessManifold I M] in
 /-- **The truncated Sobolev comparison.**  If every eigenvalue of the
 truncation satisfies `1 + λᵢ ≤ κ`, the `H^{a+2}` norm of a spectral
 combination supported there is at most `√κ` times its `H^{a+1}` norm.  This is

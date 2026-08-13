@@ -92,6 +92,7 @@ private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] in
 /-- Including the full Duhamel field down by one Sobolev order gives its
 canonical intermediate-order realization. -/
 theorem duhamel_incl

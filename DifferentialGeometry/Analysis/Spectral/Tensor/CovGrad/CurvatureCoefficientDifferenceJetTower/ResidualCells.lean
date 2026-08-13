@@ -77,6 +77,7 @@ set_option backward.isDefEq.respectTransparency false
 
 namespace CurvatureCoefficientDifferenceJetTower
 
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] in
 theorem productTerm_integral_tame_le_ordS
     (g₀ : SmoothRiemannianMetric I M) (s : ℕ)
     (u : SmoothCcTensor g₀ 0 s)

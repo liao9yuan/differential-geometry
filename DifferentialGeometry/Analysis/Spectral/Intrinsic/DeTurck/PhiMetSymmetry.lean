@@ -208,6 +208,7 @@ noncomputable def gradSwapCurvCoeff (g₀ : SmoothRiemannianMetric I M) :
   DifferentialGeometry.Analysis.Parabolic.TensorSpectral.gradSlotCurvCoeff
     (I := I) (M := M) g₀
 
+omit [NeZero (Module.finrank ℝ E)] in
 /-- The gradient-swap curvature coefficient is the canonical explicit
 slot-curvature operator field. -/
 @[simp] theorem gradSwapCurv_apply (g₀ : SmoothRiemannianMetric I M) (x : M) :

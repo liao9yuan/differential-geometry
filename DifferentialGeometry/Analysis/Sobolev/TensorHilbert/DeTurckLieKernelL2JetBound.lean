@@ -463,6 +463,7 @@ theorem quad_tower
   dLaQuad_tower_of_factors (I := I) (M := M) g₀ ga gb j x b hb
     Ba Bb hBa_nn hBb_nn harm hin
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem lower_raise (g₀ g₁ g_bg : SmoothRiemannianMetric I M) :
     cometricRaiseSlot0Field (I := I) (M := M) g₀ 2
         (dlaLowered (I := I) (M := M) g₀ g₁ g_bg) =
@@ -486,6 +487,7 @@ theorem insert_rfns (g₀ : SmoothRiemannianMetric I M)
 abbrev iter_smul := @iteratedCovGrad_smul_dla
 abbrev rfns_smul := @rfns_smul_dla
 
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] [SigmaCompactSpace M] in
 theorem pair_trace_def (g₀ g₁ : SmoothRiemannianMetric I M) :
     dlaPairTrace (I := I) (M := M) g₀ g₁ =
       appCcRS (I := I) (M := M) g₀ 6 4 2

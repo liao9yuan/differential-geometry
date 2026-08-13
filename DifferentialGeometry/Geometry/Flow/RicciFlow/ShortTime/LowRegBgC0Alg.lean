@@ -444,6 +444,7 @@ lemma slotLift33 (g : SmoothRiemannianMetric I M)
       | rfl
       | (congr 1; funext k; fin_cases k <;> rfl)
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [BoundarylessManifold I M] [SigmaCompactSpace M] in
 theorem perm_app
     (g : SmoothRiemannianMetric I M) {d : ℕ}
     (ρ : Equiv.Perm (Fin d)) (S : SmoothCcTensor g 0 d) :
@@ -460,6 +461,7 @@ theorem perm_app
   rw [slotPermCLM_apply, Tensor0SSpace.toModel_ofModel]
   rfl
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [BoundarylessManifold I M] [SigmaCompactSpace M] in
 theorem perm_rs
     (g : SmoothRiemannianMetric I M) {a d : ℕ}
     (ρ : Equiv.Perm (Fin d)) (S : SmoothCcTensor g a d) :
@@ -484,6 +486,7 @@ theorem perm_rs
   rw [toModel_rsDomDomCongr_apply, slotPermCLM_apply,
     Tensor0SSpace.toModel_ofModel]
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [BoundarylessManifold I M] [SigmaCompactSpace M] in
 theorem slot_comp
     (g : SmoothRiemannianMetric I M) (a b c : ℕ)
     (A : SmoothCcTensor g b c) (B : SmoothCcTensor g a b) :
@@ -899,6 +902,7 @@ theorem inner_act
   rw [innerAct, ← appCc_assoc]
   rw [appCcRS_zero_eq_appCc]
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [BoundarylessManifold I M] [SigmaCompactSpace M] in
 theorem reindex_symm
     (g : SmoothRiemannianMetric I M) {s : ℕ}
     (R : SmoothCcTensor g 2 s) (W : SmoothCcTensor g 0 2) :
@@ -1102,6 +1106,7 @@ noncomputable def aa5
           (connDiffContrInsertionInnerField (I := I) g gm))))
     innerCoreInPerm10
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [SigmaCompactSpace M] in
 theorem aaKer_eq
     (g gm : SmoothRiemannianMetric I M) :
     ricciAAKer (I := I) (M := M) g gm =
@@ -1279,6 +1284,7 @@ theorem aa_one
   rw [aaOne, ← appCc_assoc, aaKerOne]
   simp only [appCc_add_left]
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [BoundarylessManifold I M] [SigmaCompactSpace M] in
 theorem cc_swap_app
     (g : SmoothRiemannianMetric I M) (W : SmoothCcTensor g 0 2) :
     appCc (I := I) (M := M) g 2 2

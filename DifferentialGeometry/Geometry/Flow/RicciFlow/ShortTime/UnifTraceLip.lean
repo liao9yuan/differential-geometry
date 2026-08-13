@@ -73,6 +73,7 @@ private theorem endoSlotZero_sub_traceLip
       slotInsertEndoCc (I := I) (M := M) g s B
   exact slotInsertEndoCc_sub (I := I) (M := M) g s A B
 
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] [SigmaCompactSpace M] in
 private theorem gInvDiffSlotCoeff_eq_endoSlotZero
     (g₀ g₁ : SmoothRiemannianMetric I M) :
     gInvDiffSlotCoeff (I := I) g₀ g₁ =
@@ -540,6 +541,7 @@ Besides the range-three jet-window algebra, the only extra input is the
 DIAGONAL window `pureTrace g g p`, and that field is the fixed parallel one the
 previous section already bounds. -/
 
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] [SigmaCompactSpace M] in
 /-- The frozen-metric double trace IS the fixed self-cometric double-trace
 field: both sections are the fibre `cometricDoubleTraceFib g p`. -/
 private theorem ptSelf (g : SmoothRiemannianMetric I M) (p : ℕ) :
@@ -562,6 +564,7 @@ private theorem ptDiag (gBase g : SmoothRiemannianMetric I M) {Λ : ℝ}
     (volumeReal_cross (I := I) (M := M) gBase g hEq).1
     (pow_nonneg (Nat.cast_nonneg _) (p + 6))
 
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] in
 /-- Range-three subadditivity of the squared covariant jet window. -/
 private theorem jetAdd (g : SmoothRiemannianMetric I M) {r s : ℕ}
     (A B : SmoothCcTensor g r s) :

@@ -110,6 +110,7 @@ private lemma perturbCoeff_eq_diff
   rw [perturbCoeff4, diffCoeff4,
     raise_eq_diff (I := I) (M := M) g₀ g₁ T htie]
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [BoundarylessManifold I M] [SigmaCompactSpace M] in
 private lemma fullField_decomp
     (g a b : SmoothRiemannianMetric I M) :
     fullRaisedEndoField (I := I) (M := M) a b =
@@ -211,6 +212,7 @@ private lemma fullH2_sub_one
     fullH2_self (I := I) (M := M) g]
   abel
 
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma raised_cancel
     (g₀ g₁ : SmoothRiemannianMetric I M) (x : M) :
     (gInvRaisedEndo (I := I) g₁ g₀ x).comp

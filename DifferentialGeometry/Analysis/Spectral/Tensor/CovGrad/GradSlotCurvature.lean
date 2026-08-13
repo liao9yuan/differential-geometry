@@ -68,6 +68,7 @@ noncomputable def gradSlotCurvCoeff
         slotFreeCurvOpFib_contMDiff (I := I) (M := M) g₀ 2 }
   hasCompactSupport := HasCompactSupport.of_compactSpace _
 
+omit [I.Boundaryless] in
 /-- The fibre value of `gradSlotCurvCoeff` is the canonical two-slot
 curvature operator. -/
 @[simp] theorem gradSlotCurv_apply

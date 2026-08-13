@@ -58,6 +58,7 @@ private theorem neg_tangent_cmdwa
   · simpa using
       (e.linear ℝ (FiberBundle.mem_baseSet_trivializationAt' q₀.2)).map_neg (X q₀.1 q₀.2)
 
+omit [NeZero (Module.finrank ℝ E)] in
 /-- The full-horizon conjugating gauge carried by a jointly smooth DeTurck
 vector field.  This is kept private; the public interface below returns the
 gauge together with the Ricci-flow family it produces. -/

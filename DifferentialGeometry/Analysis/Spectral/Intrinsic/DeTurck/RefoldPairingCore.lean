@@ -36,6 +36,7 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
   [IsManifold I ∞ M] [CompactSpace M] [I.Boundaryless]
   [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M]
 
+omit [BoundarylessManifold I M] in
 /-- A frame-paired Ricci C2 family is the corresponding Palatini kernel
 weighted by the symmetric part of the metric deviation. -/
 theorem riemannC2_eq_kernel

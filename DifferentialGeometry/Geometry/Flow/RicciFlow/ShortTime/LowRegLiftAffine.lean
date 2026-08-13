@@ -91,6 +91,7 @@ theorem tensorHsInclusion_ccToHs (g : SmoothRiemannianMetric I M) {τ σ : ℝ}
   funext i
   rw [tensorHsInclusion_coeff_apply, ccTensorToHs_coeff, ccTensorToHs_coeff]
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [BoundarylessManifold I M] in
 /-- Exponent transport is involutive. -/
 theorem tensorHsCongr_symm_self (g : SmoothRiemannianMetric I M) {a b : ℝ}
     (hab : a = b) (u : tensorHs (I := I) (M := M) g 0 2 a) :

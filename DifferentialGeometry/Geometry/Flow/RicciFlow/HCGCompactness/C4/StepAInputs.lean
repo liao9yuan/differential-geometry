@@ -91,6 +91,7 @@ noncomputable def mu {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
     (hd : InjRadiusDecayInput (I := I) X) (r : Real) : Real :=
   hd.a * (min hd.baseInj.ρ 1) ^ (Module.finrank Real E) * Real.exp (-hd.C * r)
 
+omit [CompleteSpace E] in
 /-- The injectivity-radius profile is positive at every real radius. -/
 theorem mu_pos {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
     (hd : InjRadiusDecayInput (I := I) X) (r : Real) : 0 < hd.mu r :=
@@ -101,6 +102,7 @@ theorem mu_nonneg {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
     (hd : InjRadiusDecayInput (I := I) X) (r : Real) : 0 ≤ hd.mu r :=
   (hd.mu_pos r).le
 
+omit [CompleteSpace E] in
 /-- The injectivity-radius profile decreases with the basepoint distance. -/
 theorem mu_antitone {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
     (hd : InjRadiusDecayInput (I := I) X) : Antitone hd.mu := by
@@ -122,6 +124,7 @@ structure RealizesEdist {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
 
 namespace RealizesEdist
 
+omit [CompleteSpace E] in
 /-- Reindex the realized-distance proof along a subsequence. -/
 theorem subseq {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
     {hd : InjRadiusDecayInput (I := I) X}

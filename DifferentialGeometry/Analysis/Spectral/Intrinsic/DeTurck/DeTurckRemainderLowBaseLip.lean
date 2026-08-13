@@ -48,6 +48,7 @@ noncomputable def LowBaseActionData.a1Sub
   C1 := A.C1 - B.C1
   C2 := 0
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [BoundarylessManifold I M] in
 private theorem app_sub_right
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (Φ : SmoothCcTensor g r s) (W V : SmoothCcTensor g 0 r) :
@@ -445,6 +446,7 @@ theorem metricCorr_tel
   rw [metricCorr_sub (I := I) (M := M) g gT g_bg T U]
   abel
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 /-- The fixed DeTurck background cancels from the pairwise difference of the
 background-lowered connection arm. -/
 theorem wXi_sub
@@ -463,6 +465,7 @@ private theorem jet_nonneg_lip
     0 ≤ lowJetSq (I := I) (M := M) g m S :=
   Finset.sum_nonneg fun _ _ => sq_nonneg _
 
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] in
 private theorem jet_smul_lip
     (g : SmoothRiemannianMetric I M) {r s : ℕ} (m : ℕ)
     (c : ℝ) (S : SmoothCcTensor g r s) :
@@ -475,6 +478,7 @@ private theorem jet_smul_lip
   rw [iteratedCovGrad_smul, norm_smul, Real.norm_eq_abs,
     mul_pow, sq_abs]
 
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] in
 private theorem jet_add_lip
     (g : SmoothRiemannianMetric I M) {r s : ℕ} (m : ℕ)
     (S V : SmoothCcTensor g r s) :
@@ -1244,6 +1248,7 @@ private theorem jet_mono_lip
     (Finset.range_subset_range.mpr (Nat.add_le_add_right hmn 1))
     (fun _ _ _ => sq_nonneg _)
 
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] in
 private theorem icg_zero_lip
     (g : SmoothRiemannianMetric I M) (r s m : ℕ) :
     iteratedCovGrad (I := I) g r s m
@@ -1544,6 +1549,7 @@ private theorem wXi_self_tame
       (mul_nonneg (mul_nonneg hB10 hA) hD2)
   exact hraw'.trans (pow_le_pow_left₀ hlin0 hlin 2)
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [SigmaCompactSpace M] in
 private theorem connSec_zero_lip
     (g : SmoothRiemannianMetric I M) :
     connDiffSection (I := I) g g = 0 := by
@@ -1812,6 +1818,7 @@ private theorem app_h2_mul_lip
         lowJetSq (I := I) (M := M) g 2 W := by
       rw [mul_pow, mul_pow, hsΦ, hsW]
 
+omit [NeZero (Module.finrank ℝ E)] in
 private theorem dom_h2_lip
     (g : SmoothRiemannianMetric I M) {s : ℕ}
     (σ : Equiv.Perm (Fin s)) (S : SmoothCcTensor g 0 s) :
@@ -2401,6 +2408,7 @@ theorem lieOmega_pair_h1
     _ ≤ L ^ 2 := hToL
     _ = (B0 R * D2 + B1 R * A * D2) ^ 2 := by rw [hLeq]
 
+omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] in
 private theorem hat_eq_lip
     (g gm : SmoothRiemannianMetric I M) :
     lrOmegaHat (I := I) (M := M) g gm =
@@ -2478,6 +2486,7 @@ private theorem curvF_pair_h1
     _ = 2 * (C₀ * J1w + C₀ * J2w) *
         lowJetSq (I := I) (M := M) g 2 (T - U) := by ring
 
+omit [NeZero (Module.finrank ℝ E)] in
 private theorem quadB_tel
     (g gT gU : SmoothRiemannianMetric I M) :
     lrQB (I := I) (M := M) g gT -
@@ -2912,6 +2921,7 @@ private theorem r4_pair_h1
       linarith
     _ ≤ (2 * Cc + 2 * Cq) * (a + b) := by nlinarith [hCc, hCq, ha0, hb0]
 
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] [SigmaCompactSpace M] in
 private theorem lcvPair_eq_lip
     (g gm : SmoothRiemannianMetric I M) :
     lieCovPair (I := I) (M := M) g gm =
@@ -3149,6 +3159,7 @@ private theorem slot_h2_lip
           ‖iteratedCovGrad (I := I) g r s i Φ‖ ^ 2 := by
       rw [Finset.mul_sum]
 
+omit [NeZero (Module.finrank ℝ E)] in
 private theorem reindex_jet_lip
     (g : SmoothRiemannianMetric I M) {r s m : ℕ}
     (R : SmoothCcTensor g r s) (σ : Equiv.Perm (Fin r)) :
@@ -4419,6 +4430,7 @@ private theorem r4_bdd_h1
           (Bq R) ^ 2 * (A + A ^ 2) ^ 2 := by ring
       nlinarith [hCcA, hA2, sq_nonneg (Bq R), sq_nonneg (A + A ^ 2)]
 
+omit [BoundarylessManifold I M] in
 private theorem edgePair_eq_lip
     (g : SmoothRiemannianMetric I M) (T : SmoothCcTensor g 0 2)
     {δ : ℝ}
@@ -4438,6 +4450,7 @@ private theorem edgePair_eq_lip
             Equiv.swap (0 : Fin 4) 2 * Equiv.swap (1 : Fin 4) 3]
           ![(-1 : ℝ), -1, 1] s := rfl
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [BoundarylessManifold I M] [SigmaCompactSpace M] in
 private theorem rsperm_sub_lip
     (g : SmoothRiemannianMetric I M) {r s : ℕ}
     (σ : Equiv.Perm (Fin s)) (A B : SmoothCcTensor g r s) :
@@ -5314,6 +5327,7 @@ private theorem lieCov_pair_h1
       simp only [B]
       ring
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [BoundarylessManifold I M] [SigmaCompactSpace M] in
 private theorem reindex_sub_lip
     (g : SmoothRiemannianMetric I M) {r s : ℕ}
     (A B : SmoothCcTensor g r s) (σ : Equiv.Perm (Fin r)) :
@@ -5368,6 +5382,7 @@ private noncomputable def ipHead (g : SmoothRiemannianMetric I M) :
   reindexCoeffGen (I := I) (M := M) g 3 1
     (cometricDoubleTraceField (I := I) g 1) ipTracePerm
 
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] [SigmaCompactSpace M] in
 private theorem ip_form_lip
     (g : SmoothRiemannianMetric I M) (om : SmoothCcTensor g 0 1) :
     ipLowCc (I := I) (M := M) g om =
@@ -7295,6 +7310,7 @@ private theorem jet_sub_lip
         lowJetSq (I := I) (M := M) g m V) := by
       rw [jet_smul_lip]; ring
 
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] in
 private theorem grad_l2_sq_lip
     (g : SmoothRiemannianMetric I M) (r s i : ℕ)
     (S : SmoothCcTensor g r s) :
@@ -7345,6 +7361,7 @@ private theorem grad_h2_le_h3_lip
 
 /-! ### Layer A — the input symmetrizer at `H¹` -/
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [BoundarylessManifold I M] in
 /-- `ccInputSymm` is linear, so it commutes with the two-state difference. -/
 private theorem ccSymm_sub_lip
     (g : SmoothRiemannianMetric I M) (C D : SmoothCcTensor g 2 2) :
@@ -8199,6 +8216,7 @@ private noncomputable def aaPK (g : SmoothRiemannianMetric I M) : ℝ :=
     lowJetSq (I := I) (M := M) g 2 (permCoeff (I := I) (M := M) g aaP102) +
     lowJetSq (I := I) (M := M) g 2 (permCoeff (I := I) (M := M) g aaP120)
 
+omit [BoundarylessManifold I M] in
 private theorem aaPK_nonneg (g : SmoothRiemannianMetric I M) :
     0 ≤ aaPK (I := I) (M := M) g := by
   unfold aaPK
@@ -8228,6 +8246,7 @@ private theorem aaPK_nonneg (g : SmoothRiemannianMetric I M) :
     jet_nonneg_lip (I := I) (M := M) (m := 2) g _
   linarith
 
+omit [BoundarylessManifold I M] in
 private theorem aaPK_ge4 (g : SmoothRiemannianMetric I M)
     (pm : Equiv.Perm (Fin 4))
     (hpm : pm = aaP3201 ∨ pm = aaP2301 ∨ pm = aaP3102 ∨ pm = aaP1302 ∨
@@ -8261,6 +8280,7 @@ private theorem aaPK_ge4 (g : SmoothRiemannianMetric I M)
   unfold aaPK
   rcases hpm with rfl | rfl | rfl | rfl | rfl | rfl <;> linarith
 
+omit [BoundarylessManifold I M] in
 private theorem aaPK_ge3 (g : SmoothRiemannianMetric I M)
     (ρ : Equiv.Perm (Fin 3)) (hρ : ρ = aaP102 ∨ ρ = aaP120) :
     lowJetSq (I := I) (M := M) g 2 (permCoeff (I := I) (M := M) g ρ) ≤

@@ -221,6 +221,7 @@ theorem finite_pair_split
     _ = _ := cc_pair_tsum_split (I := I) (M := M) g 2 a b
       (finiteEigenCombo (I := I) (M := M) g F c) A
 
+omit [CompactSpace M] [I.Boundaryless] in
 private theorem connIter_smul
     (g : SmoothRiemannianMetric I M) (r s k : ℕ) (theta : ℝ)
     (T : SmoothCcTensor g r s) :

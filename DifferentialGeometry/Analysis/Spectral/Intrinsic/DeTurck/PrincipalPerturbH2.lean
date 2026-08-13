@@ -143,6 +143,7 @@ private lemma symm_icg_norm
   have hnn : 0 ≤ ‖iteratedCovGrad (I := I) g 0 2 k T‖ := norm_nonneg _
   linarith
 
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma raise_icg_norm
     (g : SmoothRiemannianMetric I M) (s i : ℕ)
     (W : SmoothCcTensor g 0 (s + 2)) :

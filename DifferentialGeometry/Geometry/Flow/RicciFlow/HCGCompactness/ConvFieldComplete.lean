@@ -33,6 +33,7 @@ variable (Φ : PointedCGHMaps (I := I) X P subseq)
 
 namespace ConvOut
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 /-- A fixed-window limit slice is complete when the reference metric is
 complete and the selected sequence uniformly dominates a positive multiple of
 that metric. -/

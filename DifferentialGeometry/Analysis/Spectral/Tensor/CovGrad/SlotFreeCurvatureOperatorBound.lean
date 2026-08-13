@@ -63,6 +63,7 @@ private lemma coframe_one_le
     _ ≤ C * 1 := mul_le_mul hQ le_rfl zero_le_one hC
     _ = C := mul_one C
 
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma sfOne_eval
     (g : SmoothRiemannianMetric I M) (x : M)
     (A : Tensor0SSpace 1 I x) (u w : TangentSpace I x)
@@ -78,6 +79,7 @@ private lemma sfOne_eval
   simpa only [Fin.sum_univ_one] using
     slotFreeCurvOpFib_apply_eval (I := I) (M := M) g 1 x A u w m
 
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma sfOne_cov_eval
     (g : SmoothRiemannianMetric I M) (x : M)
     (A : Tensor0SSpace 1 I x) (d u w : TangentSpace I x)

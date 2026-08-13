@@ -1056,6 +1056,7 @@ produces `G_{N+1} ≤ P_{N+1} + R_N + cstep(r+N)·G_N` (`P_k` the `∇₂`-jets,
 `N ≤ 2` is unconditional; `R_m` for `m ≥ 2` needs `∇₂^a A` (`a ≥ 2`), the schematic frontier, factored
 as the single hypothesis `hAcc`. -/
 
+omit [T2Space M] [SigmaCompactSpace M] [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] in
 /-- Internal `g`-orthonormal basis at `x` with identity inverse-metric matrix, packaged for the
 telescoping fibre-norm triangle inequalities. -/
 private theorem exists_g_onbasis (g : SmoothRiemannianMetric I M) (x : M) :
@@ -1240,6 +1241,7 @@ theorem iterCovG1_le
         mul_nonneg (mul_nonneg hcstep_nn hDN_nn) hSN_nn,
         mul_nonneg hRN_nn hSN_nn, mul_nonneg hRN_nn hAterm_nn]
 
+omit [SigmaCompactSpace M] [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] in
 /-- The telescoping accumulator at level `1` is the single-step connection difference of `T`. -/
 private theorem telescAccum_one (g₁ g₂ : SmoothRiemannianMetric I M) (r : ℕ)
     (T : Tensor0SBundle.Tensor0SField (𝕜 := Real) (E := E) (H := H)

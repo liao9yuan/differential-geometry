@@ -43,6 +43,7 @@ def pccJetC (i : ℕ) : ℝ :=
 /-- Dimension-only coefficient for the Ricci principal-difference jet of order `i`. -/
 def ricciJetC (i : ℕ) : ℝ := (10 / 4 : ℝ) * pccJetC (E := E) i
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] in
 /-- The DeTurck dimension-only jet coefficient is nonnegative. -/
 theorem pccJetC_nonneg (i : ℕ) : 0 ≤ pccJetC (E := E) i := by
   exact mul_nonneg (appCcGdiag_nonneg (E := E) i) (by positivity)
@@ -140,6 +141,7 @@ theorem trace_rfns_le
       traceHessianSlotPerm i x]
   exact pcc_rfns_le (I := I) (M := M) g₀ g₁ i x
 
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] in
 private theorem jetL2_of_rfns
     (g : SmoothRiemannianMetric I M) (A : SmoothCcTensor g 4 2)
     (B : SmoothCcTensor g 2 2) (C : ℝ) (i : ℕ)

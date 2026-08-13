@@ -59,6 +59,7 @@ The metricwise Lipschitz proof uses four slot-algebra helpers that are private
 to `DeTurckRemainderLowBaseC2Lip`.  Each is re-derived here from the public
 producer it is built on, so that this file never re-elaborates the monolith. -/
 
+omit [NeZero (Module.finrank ℝ E)] in
 private theorem permICG (g : SmoothRiemannianMetric I M) {s : ℕ}
     (σ : Equiv.Perm (Fin s)) (T : SmoothCcTensor g 0 s) (k : ℕ) :
     ‖iteratedCovGrad (I := I) g 0 s k
@@ -301,6 +302,7 @@ private theorem fullSlotSplit (g gm : SmoothRiemannianMetric I M) :
     slotInsertEndoCc_add,
     gInvDiffSlotCoeff_eq_slotInsertEndoCc (I := I) g gm]
 
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] in
 private theorem jetAdd (g : SmoothRiemannianMetric I M) {r s : ℕ}
     (A B : SmoothCcTensor g r s) :
     (∑ j ∈ Finset.range 3,

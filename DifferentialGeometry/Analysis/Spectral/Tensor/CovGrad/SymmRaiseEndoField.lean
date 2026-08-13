@@ -95,6 +95,7 @@ lemma inner_symmRaiseEndo (g : SmoothRiemannianMetric I M)
   exact DifferentialGeometry.Integral.DivergenceTheorem.inner_metricSharp (I := I) g x
     (ccTensorBilinSymm (I := I) g T x v).toLinearMap w
 
+omit [BoundarylessManifold I M] in
 private theorem symmRaiseEndo_smooth (g : SmoothRiemannianMetric I M)
     (T : SmoothCcTensor g 0 2) :
     ContMDiff I (I.prod 𝓘(ℝ, E →L[ℝ] E)) ∞
@@ -238,6 +239,7 @@ lemma symmRaiseEndo_smul (g : SmoothRiemannianMetric I M) (a : ℝ)
   rw [ContinuousLinearMap.smul_apply, ccTensorBilinSymm_smul]
   rw [inner_symmRaiseEndo, smul_eq_mul]
 
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma unitModel_eq_bilin (g : SmoothRiemannianMetric I M)
     (S : SmoothCcTensor g 0 2) (x : M) (u w : TangentSpace I x) :
     unitModel (I := I) (M := M) g 2 S x ![u, w] =

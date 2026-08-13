@@ -43,6 +43,7 @@ noncomputable def slotFreeOpCc (g : SmoothRiemannianMetric I M) (s : ℕ) :
       contMDiff_toFun := slotFreeCurvOpFib_contMDiff (I := I) (M := M) g s }
   hasCompactSupport := HasCompactSupport.of_compactSpace _
 
+omit [I.Boundaryless] in
 /-- The fibre value of `slotFreeOpCc` is the canonical two-free-slot
 curvature operator. -/
 @[simp] theorem slotFreeOpCc_apply
@@ -51,6 +52,7 @@ curvature operator. -/
       TensorRSSpace.ofCLM
         (slotFreeCurvOpFib (I := I) (M := M) g s x) := rfl
 
+omit [CompactSpace M] in
 /-- Pointwise, the canonical free-slot operator is the induced tensor
 curvature written through smooth direction fields. -/
 private lemma slotFree_riem_eval

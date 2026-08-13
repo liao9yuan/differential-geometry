@@ -49,6 +49,7 @@ private noncomputable def bgKappa
   lc0Kappa (I := I) (M := M) g gm gB -
     lc0Kappa (I := I) (M := M) g gm g
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [SigmaCompactSpace M] in
 private theorem lc0Kappa_eq_metricConnDiffLoweredCc
     (g gm gB : SmoothRiemannianMetric I M) :
     lc0Kappa (I := I) (M := M) g gm gB =
@@ -89,6 +90,7 @@ private noncomputable def bgAmixHalf
           (slotExtendIter (I := I) (M := M) g 0 3 2
             (lc0Kappa (I := I) (M := M) g gm g)))))
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [BoundarylessManifold I M] [SigmaCompactSpace M] in
 private theorem slotIter_sub
     (g : SmoothRiemannianMetric I M) (r s w : ℕ)
     (A B : SmoothCcTensor g r s) :

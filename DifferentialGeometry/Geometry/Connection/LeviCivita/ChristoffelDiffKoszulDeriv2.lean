@@ -119,6 +119,7 @@ theorem nablaMetric_combo_extDeriv2
     (LeviCivita (I := I) g₂) W V α x, hbridge]
   abel
 
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
 /-- **The a=2 differentiated Christoffel-difference Koszul identity (master form).**  Differentiate the
 a=1 lowered-eval identity `connDiff_koszul_deriv` once more along a new base direction `V` under
 `∇₂ = LeviCivita g₂`.  The left-hand side is `∂_V` of the a=1 pairing `2 g₁(∇₂A(W,X,Y), Z)` (the second

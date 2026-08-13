@@ -769,6 +769,7 @@ theorem riemVol_exp_image_eq
             (show TangentSpace I x from v))
       rw [h1, one_mul]
 
+omit [NeZero (Module.finrank ℝ E)] [CompleteSpace E] [T2Space M] [SigmaCompactSpace M] in
 private theorem exists_inj_parts
     {F : E → M} {U : Set E} (hU : MeasurableSet U)
     (hloc : IsLocalHomeomorphOn F U) :

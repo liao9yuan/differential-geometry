@@ -53,6 +53,7 @@ noncomputable def decodedCompPts (g : SmoothRiemannianMetric I M)
 
 
 
+omit [FiniteDimensional ℝ E] in
 theorem hatPOUDataTwo
     [FiniteDimensional Real E]
     (hd : InjRadiusDecayInput (I := I) X) {D : Real}
@@ -107,6 +108,7 @@ theorem hatPOUDataTwo
 
 
 
+omit [FiniteDimensional ℝ E] in
 theorem exists_hat_radius
     [FiniteDimensional Real E]
     (hd : InjRadiusDecayInput (I := I) X) {D : Real}

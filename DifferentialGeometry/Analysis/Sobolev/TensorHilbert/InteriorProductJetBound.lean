@@ -155,6 +155,7 @@ private theorem ipjb_orthoFrame_expansion (g : SmoothRiemannianMetric I M) (x : 
       refine Finset.sum_congr rfl fun i _ => ?_
       rw [hcoeff i, hbse i]
 
+omit [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 /-- Center evaluation of the rank-`1` cometric double trace: the `g`-orthonormal diagonal sum. -/
 private lemma ipjb_trace_center (g : SmoothRiemannianMetric I M) (x : M)
     (D : Tensor0SSpace 3 I x) (m : Fin 1 → E) :
@@ -373,6 +374,7 @@ theorem ipLowCc_toSec_ip (g : SmoothRiemannianMetric I M) (om : SmoothCcTensor g
 
 /-! ## Jets -/
 
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] in
 private lemma ipjb_icg_zero (g : SmoothRiemannianMetric I M) (r s j : ℕ) :
     iteratedCovGrad (I := I) g r s j (0 : SmoothCcTensor g r s) = 0 := by
   induction j with

@@ -42,6 +42,7 @@ variable
 
 /-! ### A tame three-dimensional `H³` application estimate -/
 
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] in
 private theorem grad_sq
     (g : SmoothRiemannianMetric I M) (r s i : ℕ)
     (S : SmoothCcTensor g r s) :

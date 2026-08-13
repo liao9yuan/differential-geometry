@@ -423,6 +423,7 @@ private noncomputable def a1Delta
   C1 := A.C1 - B.C1
   C2 := 0
 
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] in
 private theorem a1Delta_apply
     {g : SmoothRiemannianMetric I M}
     (A B : LowBaseActionData g) (W : SmoothCcTensor g 0 2) :
@@ -553,6 +554,7 @@ theorem a1Lo_core_any
   apply LinearMap.extendOfNorm_eq hdense2
   exact ⟨Cs * Real.sqrt Q, hspec A Q hQ hact⟩
 
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] in
 private theorem grad_jet1_pair
     (g : SmoothRiemannianMetric I M) {s : ℕ}
     (W : SmoothCcTensor g 0 s) :

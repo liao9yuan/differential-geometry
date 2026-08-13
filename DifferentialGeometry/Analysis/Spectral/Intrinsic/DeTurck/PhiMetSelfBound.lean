@@ -91,6 +91,7 @@ private theorem doubleTrace_grid
       rw [riemannianFiberNormSq_zero]
       simp [selfTraceC]
 
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] [SigmaCompactSpace M] in
 private theorem traceSelf_eq (g : SmoothRiemannianMetric I M) :
     traceHessianCoeff (I := I) (M := M) g g =
       reindexCoeffGen (I := I) (M := M) g 4 2
@@ -104,6 +105,7 @@ private theorem traceSelf_eq (g : SmoothRiemannianMetric I M) :
   rw [reindexCoeffFibGen_apply, cometricDoubleTraceField_toSection,
     traceHessianFib, ContinuousLinearMap.comp_apply, domDomCongrFib_apply]
 
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] [SigmaCompactSpace M] in
 private theorem pureSelf_eq (g : SmoothRiemannianMetric I M) :
     ricciArmPrincipalCoeffPure (I := I) (M := M) g g =
       cometricDoubleTraceField (I := I) g 2 := by

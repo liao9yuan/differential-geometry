@@ -226,6 +226,7 @@ lemma morreyUnifConst_sq {Λ Cb Kjet : ℝ} (hΛ : 0 ≤ Λ) (n s : ℕ) :
   rw [mul_pow, Real.sq_sqrt (pow_nonneg hΛ s)]
   ring
 
+omit [NeZero (Module.finrank ℝ E)] in
 /-- **The uniform fibre-Morrey / Sobolev-embedding bound (brick E4).**
 
 Fix a background metric `gBase` with fibre-Morrey constant `Cb` in the
@@ -324,11 +325,13 @@ def baseMorreyConst (gBase : SmoothRiemannianMetric I M) (r s : ℕ) : ℝ :=
   (exists_riemannianFiberNorm_le_iteratedCovGrad_l2_jetSum_supercritical
     (I := I) (M := M) gBase r s).choose
 
+omit [BoundarylessManifold I M] in
 lemma baseMorreyConst_nonneg (gBase : SmoothRiemannianMetric I M) (r s : ℕ) :
     0 ≤ baseMorreyConst (I := I) (M := M) gBase r s :=
   (exists_riemannianFiberNorm_le_iteratedCovGrad_l2_jetSum_supercritical
     (I := I) (M := M) gBase r s).choose_spec.1
 
+omit [BoundarylessManifold I M] in
 lemma fibreNormSq_le_baseMorreyConst
     (gBase : SmoothRiemannianMetric I M) (r s : ℕ)
     (W : SmoothCcTensor gBase r s) (x : M) :

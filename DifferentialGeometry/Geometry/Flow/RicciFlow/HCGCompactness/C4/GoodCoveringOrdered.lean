@@ -895,6 +895,7 @@ noncomputable def orderedNet (hd : InjRadiusDecayInput (I := I) X) (D : Real)
 
 
 
+omit [CompleteSpace E] in
 theorem ProperMetricOn.dist_eq (hd : InjRadiusDecayInput (I := I) X)
     (hre : hd.RealizesEdist) (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k))
     (k : Nat) (x y : (X.obj k).M) :

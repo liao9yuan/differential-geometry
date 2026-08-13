@@ -107,6 +107,7 @@ theorem jetCap_step_le
   rw [jetCap]
   exact le_max_right _ _
 
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 /-- The affine launch speed stays below the prescribed tube speed. -/
 private theorem launch_speed_le
     (P : PointedRiemannianManifold.{u, uE, uH} (I := I))

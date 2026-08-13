@@ -273,6 +273,7 @@ noncomputable def rankTwoGridC
         (max (gnClassC (E := E) (I := I) (M := M) gBase Λ k) 1)) ^
           (7 * k))
 
+omit [BoundarylessManifold I M] in
 /-- The positive-order rank-two grid coefficient is nonnegative. -/
 theorem rank_two_grid_nonneg
     (gBase : SmoothRiemannianMetric I M) (Λ : ℝ) (k : ℕ) (R : ℝ) :

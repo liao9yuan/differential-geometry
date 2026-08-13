@@ -696,6 +696,7 @@ theorem stepCAtom_conv {ι : Type*} [Fintype ι]
     (stepCAtom_readout (I := I) (X.obj k) (beta k) (center i k)
       (lam i) (hlam i) (hsrc i k z hz))
 
+omit [NeZero (Module.finrank ℝ E)] in
 /-- Extract a `C^infty` limit of the metric coefficients at a moving sequence
 of normal-chart centres.  The maps are made constant in the auxiliary model
 variable, so only the already uniform order-zero bound at the chart origin is
@@ -740,6 +741,7 @@ theorem existsOriginMetric
   simpa only [g0, Set.mem_univ, forall_const] using
     (exists_metricLimit_on (E := E) isOpen_univ g0 hsmooth hbdd hequiv)
 
+omit [NeZero (Module.finrank ℝ E)] in
 /-- Extract one shared subsequence for the origin metric coefficients of a
 finite family of moving normal-chart centres.  Bundling all slots in a finite
 Pi-space lets Arzela--Ascoli perform the finite diagonal in one step. -/

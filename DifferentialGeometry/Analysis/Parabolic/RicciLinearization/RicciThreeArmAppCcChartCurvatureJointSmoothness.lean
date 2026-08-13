@@ -161,6 +161,7 @@ lemma continuousBilinearMap_basis_expand
     rw [Fin.prod_univ_two]; rfl
   rw [hbasis, hprod]
 
+omit [NeZero (Module.finrank ℝ E)] in
 /-- Compatibility name for the two-input basis expansion. -/
 lemma cmm_two_basis_expand
     (f : ContinuousMultilinearMap ℝ (fun _ : Fin 2 => E) ℝ)

@@ -129,6 +129,7 @@ private theorem intCapMul (g₀ : SmoothRiemannianMetric I M) {r s t : ℕ}
     exact tensorL2Norm_sq_toFun_eq_integral_riemannianFiberNormSq_rs (I := I) (M := M) g₀ r t B
   rw [hnorm]
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] in
 /-- **Scaling of the `L²` norm of a smooth compactly supported tensor.**
 
 `SmoothCcTensor` carries a seminorm but no `NormedSpace` instance, so the

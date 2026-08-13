@@ -50,6 +50,7 @@ private abbrev JointRS
       ((Φ p.2).toSection p.1))
     ((Set.univ : Set M) ×ˢ S)
 
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 /-- A pointwise fibre cap transfers unchanged through a unit-length smooth
 coefficient path integral. -/
 private theorem fiber_path_le

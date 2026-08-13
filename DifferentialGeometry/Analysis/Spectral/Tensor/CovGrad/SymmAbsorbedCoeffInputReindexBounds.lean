@@ -405,6 +405,7 @@ theorem symmAbsorbedCoeff_riemannianFiberNormSq_le (g₀ : SmoothRiemannianMetri
   rw [tensorInnerPointwise_symm (I := I) (M := M) g₀ (2 + i) 2 x Pm Rm]
   exact real_half_average_le hCA hBA
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [BoundarylessManifold I M] [SigmaCompactSpace M] in
 /-- Compatibility name for the fibre-norm contraction bound. -/
 theorem symmAbsorbedCoeff_rfns_le (g₀ : SmoothRiemannianMetric I M) (i : ℕ)
     (R : SmoothCcTensor g₀ (2 + i) 2) (σ' : Equiv.Perm (Fin (2 + i))) (x : M) :

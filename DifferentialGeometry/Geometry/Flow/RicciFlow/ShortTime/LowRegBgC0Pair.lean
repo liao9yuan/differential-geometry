@@ -83,6 +83,7 @@ private theorem jetZeroLocal
   intro q hq
   rw [icgZeroLocal, norm_zero, zero_pow (by norm_num)]
 
+omit [NeZero (Module.finrank ℝ E)] in
 private theorem domH1
     (g : SmoothRiemannianMetric I M) {s : ℕ}
     (σ : Equiv.Perm (Fin s)) (S : SmoothCcTensor g 0 s) :
@@ -101,6 +102,7 @@ private theorem domH1
     riemannianFiberNormSq_iteratedCovGrad_domDomCongrSection
       (I := I) (M := M) g σ S q x
 
+omit [NeZero (Module.finrank ℝ E)] in
 private theorem domH2Local
     (g : SmoothRiemannianMetric I M) {s : ℕ}
     (σ : Equiv.Perm (Fin s)) (S : SmoothCcTensor g 0 s) :
@@ -1223,6 +1225,7 @@ private theorem slot2H1
     _ = (Module.finrank ℝ E : ℝ) ^ 2 *
         lowJetSq (I := I) (M := M) g 1 S := by ring
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [BoundarylessManifold I M] [SigmaCompactSpace M] in
 private theorem slot2Sub
     (g : SmoothRiemannianMetric I M) (A B : SmoothCcTensor g 0 4) :
     slotExtendIter (I := I) (M := M) g 0 4 2 (A - B) =
@@ -1611,6 +1614,7 @@ theorem dlaBg_pair_h1
     _ ≤ (B0 R A * D2 + B1 A * N) ^ 2 := by
       nlinarith [mul_nonneg hZ0 hZ1]
 
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] in
 private theorem gradL2Sq
     (g : SmoothRiemannianMetric I M) (r s i : ℕ)
     (S : SmoothCcTensor g r s) :
@@ -1740,6 +1744,7 @@ private noncomputable def insEndo
       deTurckLieWEndoSection (I := I) (M := M) gm g) +
     endoDiffSection (I := I) (M := M) g gm g_bg
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] in
 private lemma insEndoApply
     (g gm g_bg : SmoothRiemannianMetric I M) (x : M) :
     insEndo (I := I) (M := M) g gm g_bg x =
@@ -1885,6 +1890,7 @@ private theorem dlbIns_eq_pair
   simp only [sub_eq_add_neg, neg_add_rev]
   ac_rfl
 
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] [SigmaCompactSpace M] in
 private theorem raiseSub0
     (g : SmoothRiemannianMetric I M)
     (W W' : SmoothCcTensor g 0 2) :
@@ -1898,6 +1904,7 @@ private theorem raiseSub0
     cometricRaiseSlot0Field_toSection]
   rfl
 
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] [SigmaCompactSpace M] in
 private theorem raiseAdd0
     (g : SmoothRiemannianMetric I M)
     (W W' : SmoothCcTensor g 0 2) :
@@ -2309,6 +2316,7 @@ private theorem appPairH1S
       simp only [mul_pow, hCsq]
       dsimp only [Q]
 
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] in
 private theorem symmGradSub
     (g : SmoothRiemannianMetric I M) (T U : SmoothCcTensor g 0 2) :
     symmSCovGrad3 (I := I) (M := M) g (T - U) =
@@ -2520,6 +2528,7 @@ private noncomputable def amixBgHalf
           (slotExtendIter (I := I) (M := M) g 0 3 2
             (metricConnDiffLoweredCc (I := I) (M := M) g gm g)))))
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [BoundarylessManifold I M] [SigmaCompactSpace M] in
 private theorem slotIterSub
     (g : SmoothRiemannianMetric I M) (r s w : ℕ)
     (A B : SmoothCcTensor g r s) :

@@ -51,6 +51,7 @@ def edgePairPartnerBi (g gm : SmoothRiemannianMetric I M)
     (edgeProd4 (I := I) (M := M) g
       (edgeRaise2 (I := I) (M := M) g gm P) V)
 
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] [SigmaCompactSpace M] in
 /-- The diagonal polarized partner is the original formal partner. -/
 theorem edgePartnerBi_self (g gm : SmoothRiemannianMetric I M)
     (S : SmoothCcTensor g 0 2) (sigma : Equiv.Perm (Fin 4)) :
@@ -72,6 +73,7 @@ private lemma edge_sum4_comm
     _ = ∑ c, ∑ d, ∑ a, ∑ b, F a b c d := by
           simp only [Fintype.sum_prod_type]
 
+omit [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private lemma edge_bitrace_move
     (g gm : SmoothRiemannianMetric I M) (x : M)
     (S Z : TangentSpace I x →L[Real] TangentSpace I x →L[Real] Real)
@@ -657,6 +659,7 @@ def edgeTopPairBi (g : SmoothRiemannianMetric I M)
   edgeTopPairG (I := I) (M := M) g T
     (iteratedCovGrad (I := I) g 0 2 2 U) hdelta hdeltaZ qA qB q epsilon s
 
+omit [BoundarylessManifold I M] in
 /-- The Hessian-parameterized complete top pair is the arbitrary-rank-four
 coefficient API evaluated on the Hessian of its second tensor argument. -/
 theorem edgeTopPairBi_eq_G (g : SmoothRiemannianMetric I M)
@@ -673,6 +676,7 @@ theorem edgeTopPairBi_eq_G (g : SmoothRiemannianMetric I M)
         (iteratedCovGrad (I := I) g 0 2 2 U)
         hdelta hdeltaZ qA qB q epsilon s := rfl
 
+omit [BoundarylessManifold I M] in
 /-- Applying the complete top pair with an arbitrary rank-four argument to
 the path state reproduces the corresponding raw refold coefficient acting on
 that argument. -/

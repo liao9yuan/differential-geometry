@@ -160,6 +160,7 @@ theorem cometricDoubleTrace_appCc_slotExtend_two_comm (g₀ : SmoothRiemannianMe
   rw [← ContinuousLinearMap.comp_assoc, ← ContinuousLinearMap.comp_assoc,
     cometricDoubleTraceFib_comp_slotExtend_two_eq (I := I) g₀ b s Φ x]
 
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] [SigmaCompactSpace M] in
 /-- Double trace commutes with two slot extensions in an `appCcRS` action,
 at arbitrary contravariant valence. -/
 theorem cometricTrace_appCcRS (g₀ : SmoothRiemannianMetric I M) (r b s : ℕ)

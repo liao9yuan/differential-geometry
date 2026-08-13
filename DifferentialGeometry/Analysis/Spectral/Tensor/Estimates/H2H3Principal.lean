@@ -59,6 +59,7 @@ private theorem grad_icg2_norm
       (iteratedCovGrad (I := I) g 0 s 2 U)),
     norm_nonneg (iteratedCovGrad (I := I) g 0 s 3 U)]
 
+omit [NeZero (Module.finrank ℝ E)] in
 /-- A supplied order-two two-arm grid controls the differentiated-coefficient
 cross term.  This separates the universal contraction estimate from the
 choice of a metricwise or class-uniform grid coefficient. -/

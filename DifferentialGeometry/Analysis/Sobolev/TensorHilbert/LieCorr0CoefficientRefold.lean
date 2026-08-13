@@ -65,6 +65,7 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 /-- The reanchoring endomorphism arm field and the DLb coefficient field are the
 same object (both are `ofCLM (deTurckLieDLbFib g₁ g_bg)`). -/
 theorem endoArm_eq_dlb (g₀ g₁ g_bg : SmoothRiemannianMetric I M) :
@@ -152,6 +153,7 @@ noncomputable def lc0RiemLive (g₀ g₁ : SmoothRiemannianMetric I M) :
   reindexCoeffGen (I := I) (M := M) g₀ 4 2
     (slotExtend (I := I) (M := M) g₀ 3 1 (cometricCastG0 (I := I) g₀ g₁)) lc0RiemSrc
 
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] [SigmaCompactSpace M] in
 /-- The live arm's fibre is exactly the rank-`2` `g₁`-cometric double trace. -/
 theorem lc0RiemLive_fiber (g₀ g₁ : SmoothRiemannianMetric I M) (x : M) :
     (show Tensor0SSpace 4 I x →L[ℝ] Tensor0SSpace 2 I x from
@@ -363,6 +365,7 @@ theorem lc0RiemPass_eval
     _ = _ := by
       rw [← hrep]
 
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma lc0RiemRF_eval
     (g : SmoothRiemannianMetric I M) (x : M)
     (D : Tensor0SSpace 2 I x) (v : Fin 4 → TangentSpace I x) :
@@ -817,6 +820,7 @@ def endoDiffSection (g₀ g₁ g_bg : SmoothRiemannianMetric I M) :
   connDiffDVFSection (I := I) (M := M) g₀ g₁ g₀ -
     connDiffDVFSection (I := I) (M := M) g₀ g₁ g_bg
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] in
 /-- Pointwise: the endo-difference section is the `lieCorr0NEndo` difference (`nEndo_diff`). -/
 private lemma endoDiffSection_apply (g₀ g₁ g_bg : SmoothRiemannianMetric I M) (x : M) :
     endoDiffSection (I := I) (M := M) g₀ g₁ g_bg x =
@@ -1152,6 +1156,7 @@ private noncomputable def lc0VBPassFib (g₀ g₁ : SmoothRiemannianMetric I M) 
       (Tensor0SBundle.interior_product (𝕜 := ℝ) (I := I) 1 x
         ((PDE.DeTurck.deTurckVF (I := I) g₁ g₀ : Π b : M, TangentSpace I b) x)))
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [SigmaCompactSpace M] in
 private theorem lc0VBPassFib_contMDiff (g₀ g₁ : SmoothRiemannianMetric I M) :
     ContMDiff I (I.prod 𝓘(ℝ, TensorRSModel 2 4 ℝ E)) ∞
       (fun x : M => TotalSpace.mk' (TensorRSModel 2 4 ℝ E)
@@ -1241,6 +1246,7 @@ private noncomputable def vbMcdArmFib (g₀ g₁ : SmoothRiemannianMetric I M) (
     (tensor0SProdKappaFib (I := I) (p := 1) (q := 3) x
       (metricConnDiffLoweredFib (I := I) g₁ g₁ g₀ x))
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [SigmaCompactSpace M] in
 private theorem vbMcdArmFib_contMDiff (g₀ g₁ : SmoothRiemannianMetric I M) :
     ContMDiff I (I.prod 𝓘(ℝ, TensorRSModel 1 4 ℝ E)) ∞
       (fun x : M => TotalSpace.mk' (TensorRSModel 1 4 ℝ E)
@@ -1276,6 +1282,7 @@ noncomputable def vbMcdArm (g₀ g₁ : SmoothRiemannianMetric I M) :
       contMDiff_toFun := vbMcdArmFib_contMDiff (I := I) g₀ g₁ }
   hasCompactSupport := HasCompactSupport.of_compactSpace _
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [SigmaCompactSpace M] in
 /-- Leaf-local unit-model read of the `metricConnDiffLowered` arm (clone of the Arm1-private
 `metricConnDiffLoweredCc_unitModel_apply` at `g_bg := g₀`). -/
 private lemma vbMcd_unitModel (g₀ g₁ : SmoothRiemannianMetric I M) (x : M)

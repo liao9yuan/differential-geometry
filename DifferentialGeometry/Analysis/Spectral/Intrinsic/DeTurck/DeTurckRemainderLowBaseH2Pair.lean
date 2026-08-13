@@ -194,6 +194,7 @@ quadratic high-state factor.  At the fixed three-dimensional rung we instead
 differentiate the application once and use the already proved `H²` algebra
 estimate on the two Leibniz terms. -/
 
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] in
 private theorem gradSq
     (g : SmoothRiemannianMetric I M) (r s i : ℕ)
     (S : SmoothCcTensor g r s) :
@@ -724,6 +725,7 @@ private theorem insertSuccJet
             (slotInsertEndoCc (I := I) (M := M) g s Λ)‖ ^ 2 := by
       rw [Finset.mul_sum]
 
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] [SigmaCompactSpace M] in
 private theorem sharpSlot0
     (g gm : SmoothRiemannianMetric I M) :
     sharpFlatEndoCc (I := I) g gm =
@@ -1663,6 +1665,7 @@ theorem dag_pair_h2
       rw [mul_pow, ← hCsq]
       ring
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [BoundarylessManifold I M] [SigmaCompactSpace M] in
 private theorem reindexSubH2
     (g : SmoothRiemannianMetric I M) {r s : ℕ}
     (A B : SmoothCcTensor g r s) (σ : Equiv.Perm (Fin r)) :
@@ -2202,6 +2205,7 @@ private noncomputable def aaCapH2
     lowJetSq (I := I) (M := M) g 2
       (permCoeff (I := I) (M := M) g aaP120H2)
 
+omit [BoundarylessManifold I M] in
 private theorem aaCapNnH2 (g : SmoothRiemannianMetric I M) :
     0 ≤ aaCapH2 (I := I) (M := M) g := by
   unfold aaCapH2
@@ -2223,6 +2227,7 @@ private theorem aaCapNnH2 (g : SmoothRiemannianMetric I M) :
     (permCoeff (I := I) (M := M) g aaP120H2)
   linarith
 
+omit [BoundarylessManifold I M] in
 private theorem aaCap4H2
     (g : SmoothRiemannianMetric I M) (pm : Equiv.Perm (Fin 4))
     (hpm : pm = aaP3201H2 ∨ pm = aaP2301H2 ∨ pm = aaP3102H2 ∨
@@ -2249,6 +2254,7 @@ private theorem aaCap4H2
   unfold aaCapH2
   rcases hpm with rfl | rfl | rfl | rfl | rfl | rfl <;> linarith
 
+omit [BoundarylessManifold I M] in
 private theorem aaCap3H2
     (g : SmoothRiemannianMetric I M) (ρ : Equiv.Perm (Fin 3))
     (hρ : ρ = aaP102H2 ∨ ρ = aaP120H2) :
@@ -3167,6 +3173,7 @@ private theorem fourTracePairH2
       simp only [L]
       ring
 
+omit [NeZero (Module.finrank ℝ E)] in
 private theorem domJetH2
     (g : SmoothRiemannianMetric I M) {s : ℕ}
     (σ : Equiv.Perm (Fin s)) (S : SmoothCcTensor g 0 s) :
@@ -4253,6 +4260,7 @@ private theorem ricciDAPairH2
       (mul_nonneg (by norm_num : (0 : ℝ) ≤ 2) (add_nonneg hu0 hv0))
       hscale 2)
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [BoundarylessManifold I M] in
 private theorem ccSymmSubH2
     (g : SmoothRiemannianMetric I M) (C D : SmoothCcTensor g 2 2) :
     ccInputSymm (I := I) (M := M) g C -

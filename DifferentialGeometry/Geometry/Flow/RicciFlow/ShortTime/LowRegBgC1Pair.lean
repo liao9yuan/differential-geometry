@@ -153,6 +153,7 @@ private noncomputable def psiBgCorr
   lieArm1PsiB (I := I) (M := M) g gT gB -
     lieArm1PsiB (I := I) (M := M) g gT g
 
+omit [NeZero (Module.finrank ℝ E)] in
 private theorem psiBgCorr_eq
     (g gT gB : SmoothRiemannianMetric I M) :
     psiBgCorr (I := I) (M := M) g gT gB =
@@ -226,6 +227,7 @@ private theorem psiBgCorr_pair
   rw [hR, hL]
   module
 
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] in
 private theorem jet_add1
     (g : SmoothRiemannianMetric I M) {r s : ℕ} (m : ℕ)
     (S V : SmoothCcTensor g r s) :
@@ -261,6 +263,7 @@ private theorem jet_add1
           ‖iteratedCovGrad (I := I) g r s q V‖ ^ 2) := by
       simp only [mul_add, Finset.sum_add_distrib, Finset.mul_sum]
 
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] in
 private theorem jet_smul1
     (g : SmoothRiemannianMetric I M) {r s : ℕ} (m : ℕ)
     (c : ℝ) (S : SmoothCcTensor g r s) :
@@ -281,6 +284,7 @@ private theorem jet_neg1
   simpa only [neg_one_smul, neg_one_sq, one_mul] using
     jet_smul1 (I := I) (M := M) g m (-1 : ℝ) S
 
+omit [NeZero (Module.finrank ℝ E)] in
 private theorem dom_h2
     (g : SmoothRiemannianMetric I M) {s : ℕ}
     (σ : Equiv.Perm (Fin s)) (S : SmoothCcTensor g 0 s) :
@@ -582,6 +586,7 @@ theorem psiBg_pair_h2
       simp only [Z1, Z2, B]
       ring
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [BoundarylessManifold I M] [SigmaCompactSpace M] in
 private theorem slotExt_add
     (g : SmoothRiemannianMetric I M) {r s : ℕ}
     (P Q : SmoothCcTensor g r s) :
@@ -595,6 +600,7 @@ private theorem slotExt_add
   intro D
   rfl
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [BoundarylessManifold I M] [SigmaCompactSpace M] in
 private theorem reidx_add
     (g : SmoothRiemannianMetric I M) {r s : ℕ}
     (P Q : SmoothCcTensor g r s) (σ : Equiv.Perm (Fin r)) :
@@ -608,6 +614,7 @@ private theorem reidx_add
   intro D
   rfl
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [BoundarylessManifold I M] [SigmaCompactSpace M] in
 private theorem reidx_sub
     (g : SmoothRiemannianMetric I M) {r s : ℕ}
     (P Q : SmoothCcTensor g r s) (σ : Equiv.Perm (Fin r)) :
@@ -643,6 +650,7 @@ private theorem liePiece_sub
   rw [slotExtend_sub, slotExtend_sub, appCcRS_sub_right,
     reidx_sub (I := I) (M := M)]
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [SigmaCompactSpace M] in
 private theorem connBg_self
     (g gm : SmoothRiemannianMetric I M) :
     lieArm1ConnDiffBgCc (I := I) (M := M) g gm g =
@@ -685,6 +693,7 @@ private theorem lieBgCorr_eq
     liePiece_sub (I := I) (M := M)]
   module
 
+omit [NeZero (Module.finrank ℝ E)] in
 private theorem reidx_h2
     (g : SmoothRiemannianMetric I M) {r s : ℕ}
     (S : SmoothCcTensor g r s) (ρ : Equiv.Perm (Fin r)) :

@@ -48,6 +48,7 @@ def zeroReprNN (hT : 0 < T)
     (f : timeL2 (tensorHs (I := I) (M := M) g r s a) T) : NNReal :=
   ⟨2 * Real.sqrt (1 + T) * ‖f‖, by positivity⟩
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] in
 @[simp]
 theorem zeroReprNN_coe (hT : 0 < T)
     (f : timeL2 (tensorHs (I := I) (M := M) g r s a) T) :

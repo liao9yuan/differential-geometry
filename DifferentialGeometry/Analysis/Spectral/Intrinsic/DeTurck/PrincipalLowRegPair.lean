@@ -217,6 +217,7 @@ private theorem symm_icg_norm
   rw [hperm]
   linarith [norm_nonneg (iteratedCovGrad (I := I) g 0 2 k T)]
 
+omit [NeZero (Module.finrank ℝ E)] in
 private theorem raise_icg_norm
     (g : SmoothRiemannianMetric I M) (s i : ℕ)
     (W : SmoothCcTensor g 0 (s + 2)) :

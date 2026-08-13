@@ -126,6 +126,7 @@ private theorem threeArm_param_smul
       exact mem_baseSet_trivializationAt _ _ x)).map_smul
         p.2 ((A p.2).toSection p.1)
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [BoundarylessManifold I M] [SigmaCompactSpace M] in
 private theorem threeArm_comp
     (g : SmoothRiemannianMetric I M) (a b : Nat)
     (A : Real -> SmoothCcTensor g b 2) (B : SmoothCcTensor g a b)

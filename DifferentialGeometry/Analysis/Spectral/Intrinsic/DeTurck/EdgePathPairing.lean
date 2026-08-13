@@ -160,6 +160,7 @@ private theorem joint_param_smul
       exact mem_baseSet_trivializationAt _ _ x)).map_smul
         p.2 ((A p.2).toSection p.1)
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [BoundarylessManifold I M] [SigmaCompactSpace M] in
 private theorem joint_app
     (g : SmoothRiemannianMetric I M) {a b c : ℕ} {S : Set Real}
     (A : Real → SmoothCcTensor g b c) (B : Real → SmoothCcTensor g a b)
@@ -189,6 +190,7 @@ private theorem joint_app
   rw [appCcRS_toSection]
   rfl
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [BoundarylessManifold I M] [SigmaCompactSpace M] in
 private theorem perm_app
     (g : SmoothRiemannianMetric I M) {d : ℕ}
     (rho : Equiv.Perm (Fin d)) (A : SmoothCcTensor g 0 d) :
@@ -218,6 +220,7 @@ private theorem joint_perm
     (fun _ => permCoeff (I := I) (M := M) g rho) A hP hA
   simpa only [perm_app (I := I) (M := M)] using h
 
+omit [CompactSpace M] in
 private theorem fullRaised_joint
     (g : SmoothRiemannianMetric I M) (T : SmoothCcTensor g 0 2)
     {delta : Real}
@@ -581,6 +584,7 @@ def edgeTopPartnerInt
     (edgeTopPartner_joint (I := I) (M := M)
       g T P V hdelta hdeltaZ qA qB q epsilon)
 
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] [SigmaCompactSpace M] in
 private theorem path_app_zero
     (g : SmoothRiemannianMetric I M) {b c : ℕ}
     (A : Real → SmoothCcTensor g b c) (W : SmoothCcTensor g 0 b)
@@ -695,6 +699,7 @@ theorem edgeTopPairInt_apply
     g A P S hS hSI hA hAP
   simpa only [S, A, AP, edgeTopPairInt] using happ.symm
 
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] in
 private theorem path_inner_point
     (g : SmoothRiemannianMetric I M)
     (V : SmoothCcTensor g 0 2) (G : SmoothCcTensor g 0 4)

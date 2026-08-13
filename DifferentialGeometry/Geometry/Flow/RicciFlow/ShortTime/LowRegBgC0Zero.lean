@@ -1722,6 +1722,7 @@ theorem perturb_jet
   rw [h0] at hslot
   exact hslot
 
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] [SigmaCompactSpace M] in
 theorem sharp_slot0
     (g gm : SmoothRiemannianMetric I M) :
     sharpFlatEndoCc (I := I) g gm =
@@ -1972,6 +1973,7 @@ noncomputable def aaCapOne
     lowJetSq (I := I) (M := M) g 2
       (permCoeff (I := I) (M := M) g ricPerm120)
 
+omit [BoundarylessManifold I M] in
 theorem aaCap_nneg (g : SmoothRiemannianMetric I M) :
     0 ≤ aaCapOne (I := I) (M := M) g := by
   unfold aaCapOne
@@ -1993,6 +1995,7 @@ theorem aaCap_nneg (g : SmoothRiemannianMetric I M) :
     (permCoeff (I := I) (M := M) g ricPerm120)
   linarith
 
+omit [BoundarylessManifold I M] in
 theorem aaCap4
     (g : SmoothRiemannianMetric I M) (pm : Equiv.Perm (Fin 4))
     (hpm : pm = ricPerm3201 ∨ pm = ricPerm2301 ∨ pm = ricPerm3102 ∨
@@ -2019,6 +2022,7 @@ theorem aaCap4
   unfold aaCapOne
   rcases hpm with rfl | rfl | rfl | rfl | rfl | rfl <;> linarith
 
+omit [BoundarylessManifold I M] in
 theorem aaCap3
     (g : SmoothRiemannianMetric I M) (pm : Equiv.Perm (Fin 3))
     (hpm : pm = ricPerm102 ∨ pm = ricPerm120) :
@@ -2458,6 +2462,7 @@ theorem raise_jet
   rw [norm_iCG_cometricRaiseSlot0Field_eq
     (I := I) (M := M) g s W q]
 
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] [SigmaCompactSpace M] in
 theorem raiseSub0
     (g : SmoothRiemannianMetric I M)
     (W W' : SmoothCcTensor g 0 2) :

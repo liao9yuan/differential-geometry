@@ -51,6 +51,7 @@ private lemma trace42_apply
     ContinuousMultilinearMap.smul_apply, smul_eq_mul]
   congr 1
 
+omit [BoundarylessManifold I M] [SigmaCompactSpace M] in
 /--
 The doubled Ricci principal-coefficient deviation is the canonical sum of the
 two Koszul reindexings of the DeTurck cometric coefficient minus that

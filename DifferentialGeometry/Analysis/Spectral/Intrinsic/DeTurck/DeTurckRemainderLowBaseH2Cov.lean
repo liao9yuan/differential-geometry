@@ -86,6 +86,7 @@ curvature head and a product `arm ⊗ hat` in its quadratic head.
 The `H¹` siblings of the transfer helpers below are `private` to
 `DeTurckRemainderLowBaseLip`; they are re-established here at `H²`. -/
 
+omit [NeZero (Module.finrank ℝ E)] in
 /-- Input-slot permutation is an `H²` jet isometry on `(0,s)` tensors. -/
 theorem domH2
     (g : SmoothRiemannianMetric I M) {s : ℕ}
@@ -702,6 +703,7 @@ theorem quadBddH2
   refine (quadSixH2 (I := I) (M := M) g _ _ hQB hQA).trans (le_of_eq ?_)
   ring
 
+omit [NeZero (Module.finrank ℝ E)] in
 /-- Telescoping of the `lrQB` block. -/
 theorem quadTelB
     (g gT gU : SmoothRiemannianMetric I M) :
@@ -1504,6 +1506,7 @@ theorem covXPairH2
         (mul_le_mul_of_nonneg_left hbase hfr) hfr
     _ = fr ^ 2 * Cr R * ((1 + A) ^ 4 * D3 ^ 2) := by ring
 
+omit [BoundarylessManifold I M] in
 /-- The refolded pair-trace partner of the Lie covariant-derivative edge, in the
 fixed-permutation normal form consumed by `lieCov_residual`. -/
 theorem edgeEq

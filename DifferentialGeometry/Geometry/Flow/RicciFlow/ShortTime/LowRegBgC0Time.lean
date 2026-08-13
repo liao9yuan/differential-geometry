@@ -64,12 +64,14 @@ private noncomputable def zeroData
   C1 := 0
   C2 := 0
 
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] in
 private theorem zeroData_a1
     (g : SmoothRiemannianMetric I M) (W : SmoothCcTensor g 0 2) :
     (zeroData (I := I) (M := M) g).a1 (I := I) (M := M) W = 0 := by
   simp only [zeroData, LowBaseActionData.a1, ← appCcRS_zero_eq_appCc,
     appCcRS_zero_left, zero_add]
 
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] in
 private theorem iter_zero
     (g : SmoothRiemannianMetric I M) (r s j : ℕ) :
     iteratedCovGrad (I := I) g r s j

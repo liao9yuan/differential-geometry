@@ -116,6 +116,7 @@ private noncomputable def insEndoH2
       deTurckLieWEndoSection (I := I) (M := M) gm g) +
     endoDiffSection (I := I) (M := M) g gm g_bg
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] in
 private lemma insEndoH2_apply
     (g gm g_bg : SmoothRiemannianMetric I M) (x : M) :
     insEndoH2 (I := I) (M := M) g gm g_bg x =
@@ -261,6 +262,7 @@ private theorem dlbIns_eq_pair_h2
   simp only [sub_eq_add_neg, neg_add_rev]
   ac_rfl
 
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] [SigmaCompactSpace M] in
 private theorem raise_sub0_h2
     (g : SmoothRiemannianMetric I M)
     (W W' : SmoothCcTensor g 0 2) :
@@ -274,6 +276,7 @@ private theorem raise_sub0_h2
     cometricRaiseSlot0Field_toSection]
   rfl
 
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] [SigmaCompactSpace M] in
 private theorem raise_add0_h2
     (g : SmoothRiemannianMetric I M)
     (W W' : SmoothCcTensor g 0 2) :
@@ -455,6 +458,7 @@ private theorem alpha_bg_sub_h2
     alpha_bg_eq_h2 (I := I) (M := M) g g_bg gU,
     ← domSub, ← covGrad_sub]
 
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] in
 private theorem grad_h2_local
     (g : SmoothRiemannianMetric I M) {r s : ℕ}
     (S : SmoothCcTensor g r s) :

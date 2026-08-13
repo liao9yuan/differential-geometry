@@ -82,6 +82,7 @@ theorem projN_lip (g₀ : SmoothRiemannianMetric I M) (a : ℕ) {R : ℝ} (N : �
   have h := (spatialProj_lip (I := I) (M := M) g₀ (a : ℝ) N).comp hLip
   simpa [projNfun, Function.comp_def] using h
 
+omit [BoundarylessManifold I M] in
 /-- The truncated nonlinearity keeps the static bound of `Nfun`. -/
 theorem projN_zero (g₀ : SmoothRiemannianMetric I M) (a : ℕ) {R D : ℝ}
     (hR : 0 ≤ R) (N : ℕ)
@@ -93,6 +94,7 @@ theorem projN_zero (g₀ : SmoothRiemannianMetric I M) (a : ℕ) {R D : ℝ}
   le_trans (norm_spatialEigenProj_apply_le (I := I) (M := M) g₀ (a : ℝ) N _)
     hzero
 
+omit [BoundarylessManifold I M] in
 /-- The truncated nonlinearity keeps the two-arm difference bound of `Nfun`,
 with the same constants `C₁, C₂`. -/
 theorem projN_single (g₀ : SmoothRiemannianMetric I M) (a : ℕ) {R : ℝ} (N : ℕ)
@@ -248,6 +250,7 @@ private lemma lamHalf {C₁ C₂ : ℝ≥0} {R T : ℝ} (hR : 0 ≤ R)
           div_nonneg C₂.coe_nonneg (by positivity : (0 : ℝ) ≤ (C₂ : ℝ) + 1)]
   linarith
 
+omit [BoundarylessManifold I M] in
 /-- **The forcing map is a `Λ`-contraction on the state ball**, with
 `Λ = C₁R(1+T) + C₂·2√T`.  This is the estimate `partial_sol_const` runs
 internally on its retracted map; the factor is a local `set` there and is not
@@ -488,6 +491,7 @@ theorem projFix_le_two
   rw [inv_le_comm₀ hpos (by norm_num)]
   linarith
 
+omit [BoundarylessManifold I M] in
 /-- **The projected forcings converge.**  Any sequence whose distance to a
 limit point is controlled by the truncation defect of that limit converges to
 it, since `timeL2EigenProj_tendsto` sends the defect to zero.  Combined with

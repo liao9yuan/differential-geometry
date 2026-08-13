@@ -42,6 +42,7 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] in
 private theorem amix_jet_two
     (g : SmoothRiemannianMetric I M) (r s n : ℕ)
     (W : SmoothCcTensor g r s) :
@@ -57,6 +58,7 @@ private theorem amix_jet_two
   norm_num
   ring
 
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] in
 private theorem amix_jet_sum2
     (g : SmoothRiemannianMetric I M) (r s n : ℕ)
     (W Z : SmoothCcTensor g r s) (A B : ℝ)

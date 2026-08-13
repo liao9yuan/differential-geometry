@@ -70,6 +70,7 @@ theorem jetNn
     0 ≤ lowJetSq (I := I) (M := M) g m S :=
   Finset.sum_nonneg fun _ _ => sq_nonneg _
 
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] in
 theorem jetSmul
     (g : SmoothRiemannianMetric I M) {r s : ℕ} (m : ℕ)
     (c : ℝ) (S : SmoothCcTensor g r s) :
@@ -82,6 +83,7 @@ theorem jetSmul
   rw [iteratedCovGrad_smul, norm_smul, Real.norm_eq_abs,
     mul_pow, sq_abs]
 
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] in
 theorem jetAdd
     (g : SmoothRiemannianMetric I M) {r s : ℕ} (m : ℕ)
     (S V : SmoothCcTensor g r s) :
@@ -565,6 +567,7 @@ theorem slotH2
           ‖iteratedCovGrad (I := I) g r s i Φ‖ ^ 2 := by
       rw [Finset.mul_sum]
 
+omit [NeZero (Module.finrank ℝ E)] in
 /-- Coefficient-slot reindexing is a jet isometry. -/
 theorem reindexJet
     (g : SmoothRiemannianMetric I M) {r s m : ℕ}
@@ -584,6 +587,7 @@ theorem reindexJet
     rfns_iteratedCovGrad_reindexCoeffGen_eq
       (I := I) (M := M) g r s R σ q x
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [BoundarylessManifold I M] [SigmaCompactSpace M] in
 /-- Coefficient-slot reindexing is additive. -/
 theorem reindexSub
     (g : SmoothRiemannianMetric I M) {r s : ℕ}
@@ -719,6 +723,7 @@ finite-dimensional completeness instance is turned on. -/
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] in
 theorem icgZero
     (g : SmoothRiemannianMetric I M) (r s m : ℕ) :
     iteratedCovGrad (I := I) g r s m
@@ -879,6 +884,7 @@ theorem rspermH2
   intro i _
   exact rspermL2 (I := I) (M := M) g σ S i
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [BoundarylessManifold I M] [SigmaCompactSpace M] in
 theorem rspermSub
     (g : SmoothRiemannianMetric I M) {r s : ℕ}
     (σ : Equiv.Perm (Fin s)) (A B : SmoothCcTensor g r s) :
@@ -899,6 +905,7 @@ noncomputable def ipHead (g : SmoothRiemannianMetric I M) :
   reindexCoeffGen (I := I) (M := M) g 3 1
     (cometricDoubleTraceField (I := I) g 1) ipTracePerm
 
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] [SigmaCompactSpace M] in
 theorem ipForm
     (g : SmoothRiemannianMetric I M) (om : SmoothCcTensor g 0 1) :
     ipLowCc (I := I) (M := M) g om =
@@ -934,6 +941,7 @@ lemma vbRank0Smul (x : M) (c : Tensor0SSpace 0 I x) :
   funext i
   exact i.elim0
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [SigmaCompactSpace M] in
 lemma vbMcdUnit (g₀ g₁ : SmoothRiemannianMetric I M) (x : M)
     (m : Fin 3 → TangentSpace I x) :
     unitModel (I := I) (M := M) g₀ 3

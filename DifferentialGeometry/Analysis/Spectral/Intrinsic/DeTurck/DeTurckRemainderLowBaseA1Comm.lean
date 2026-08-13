@@ -202,6 +202,7 @@ theorem a1Lo_app
   obtain ⟨Q, hQ, hHi, hLo⟩ := a1_jetQ (I := I) (M := M) hDim g A
   exact (hpair A Q hQ hHi hLo).2.2.2.1 W
 
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] in
 /-- The smooth-core first-order action is additive in the coefficient data. -/
 private theorem a1_add_core
     (g : SmoothRiemannianMetric I M) (A B F : LowBaseActionData g)

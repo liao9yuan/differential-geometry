@@ -90,6 +90,7 @@ private lemma edge_extend2_one (g : SmoothRiemannianMetric I M)
   rw [rfns_covGrad_slotExtend_scale (I := I) (M := M) g 0 2 T x]
   ring
 
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma edgeRaise_zero_mul (g gm : SmoothRiemannianMetric I M)
     (W P : SmoothCcTensor g 0 2)
     (htie : ∀ (y : M) (v w : TangentSpace I y),

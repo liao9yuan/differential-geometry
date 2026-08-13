@@ -38,6 +38,7 @@ variable {M : Type u} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ 
 
 namespace NetLimitData
 
+omit [FiniteDimensional ℝ E] in
 theorem hatSrcPtsOfComp
     [FiniteDimensional Real E]
     (hd : InjRadiusDecayInput (I := I) X) {D : Real}
@@ -171,6 +172,7 @@ theorem hatSrcPtsOfComp
 
 
 
+omit [FiniteDimensional ℝ E] in
 theorem hatSuppPtsOfComp
     [FiniteDimensional Real E]
     (hd : InjRadiusDecayInput (I := I) X) {D : Real}
@@ -526,6 +528,7 @@ theorem hatPtsCasesComp
 
 
 
+omit [FiniteDimensional ℝ E] in
 theorem hatChartPtsOfComp
     [FiniteDimensional Real E]
     (hd : InjRadiusDecayInput (I := I) X) {D : Real}

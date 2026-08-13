@@ -219,6 +219,7 @@ private lemma slotLift_33 (g₀ : SmoothRiemannianMetric I M)
       | rfl
       | (congr 1; funext k; fin_cases k <;> rfl)
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [SigmaCompactSpace M] in
 private lemma mcd_fiber (g₀ g₁ gB : SmoothRiemannianMetric I M) (x : M) :
     (show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace 3 I x from
       (metricConnDiffLoweredCc (I := I) (M := M) g₀ g₁ gB).toSection x)

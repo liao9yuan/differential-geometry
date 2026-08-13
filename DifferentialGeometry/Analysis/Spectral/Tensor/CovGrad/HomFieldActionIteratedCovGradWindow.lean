@@ -237,6 +237,7 @@ theorem riemannianFiberNormSq_iteratedCovGrad_comp (g : SmoothRiemannianMetric I
     (by omega : (s + j) + i = s + (j + i))
     (iteratedCovGrad_comp_heq (I := I) (M := M) g r s j S i) x
 
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] in
 /-- Compatibility name for the fibre-norm identity for a composite iterated covariant gradient. -/
 theorem rfns_iteratedCovGrad_comp (g : SmoothRiemannianMetric I M) (r s j i : ℕ)
     (S : SmoothCcTensor g r s) (x : M) :

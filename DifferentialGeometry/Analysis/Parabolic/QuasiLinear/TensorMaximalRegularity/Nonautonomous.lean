@@ -313,6 +313,7 @@ theorem nonaut_strong_exists
       (h_compact := h_compact) (a := a) (T := T) hT hT1 u0 forceStar]
     exact congrArg₂ (fun x y => x + y) rfl hforceStar_eq
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] in
 /-- Strong existence for the fixed reference tensor heat equation with two
 bounded non-autonomous perturbations and a prescribed affine forcing term. -/
 theorem nonaut_forced_exists

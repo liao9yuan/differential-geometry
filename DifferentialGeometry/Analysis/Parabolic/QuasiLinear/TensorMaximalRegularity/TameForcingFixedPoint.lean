@@ -295,6 +295,7 @@ def nemytskiiTame (g₀ : SmoothRiemannianMetric I M) (a : ℕ) {R : ℝ} (hR : 
     (fun u => by simpa only [lowerState, lowerBall] using u.property)
     hcont hsingle f hf
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] in
 /-- `nemytskiiTame` is represented by the nonlinearity evaluated on the
 canonical state-set lift. -/
 theorem nemytskiiTame_coeFn (g₀ : SmoothRiemannianMetric I M) (a : ℕ) {R : ℝ}

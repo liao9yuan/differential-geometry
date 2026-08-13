@@ -163,6 +163,7 @@ theorem tailFrameSpaceReg
     rfl
   exact hderiv.congr_deriv heq
 
+omit [NeZero (Module.finrank ℝ E)] in
 /-- On a strictly positive-time tail, the canonical chart inverse metric carries
 the full spacetime metric regularity package in the coordinate frame centred at
 `x₀`.

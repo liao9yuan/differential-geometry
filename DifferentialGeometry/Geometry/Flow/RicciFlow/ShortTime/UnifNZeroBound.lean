@@ -182,6 +182,7 @@ theorem zero_mem_smoothCore (g₀ : SmoothRiemannianMetric I M) {R : ℝ} (hR : 
     Set.range (smoothCcToTensorHs (I := I) (M := M) g₀ (((1 : ℕ) : ℝ) + 2))
   exact ⟨0, smoothCcToTensorHs_zero (I := I) (M := M) g₀ _⟩
 
+omit [CompactSpace M] [BoundarylessManifold I M] in
 /-- The realized metric of the zero perturbation is the base metric itself. -/
 theorem realizeMetric_zero (g₀ : SmoothRiemannianMetric I M) {δ : ℝ} (hδ : δ < 1)
     (hb : gFibreOpBound (I := I) (M := M) g₀
@@ -192,6 +193,7 @@ theorem realizeMetric_zero (g₀ : SmoothRiemannianMetric I M) {δ : ℝ} (hδ :
     ccTensorBilin_zero_weight, ccTensorBilin_zero_weight]
   ring
 
+omit [CompactSpace M] [I.Boundaryless] in
 /-- The bundled connection Laplacian kills the zero tensor. -/
 theorem rawTensorConnLapSmooth_zero (g : SmoothRiemannianMetric I M) (r s : ℕ) :
     rawTensorConnLapSmooth (I := I) g r s (0 : SmoothCcTensor g r s) = 0 := by

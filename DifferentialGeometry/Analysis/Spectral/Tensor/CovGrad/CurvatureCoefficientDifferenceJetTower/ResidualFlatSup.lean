@@ -72,6 +72,7 @@ private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
 namespace CurvatureCoefficientDifferenceJetTower
 
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] in
 /-- Continuity of `x ↦ rfns(g₀, 0, 2 + l)(x)((∇ˡP).toSection x)`, the factor
 family of the capped-top-layer grid. -/
 theorem rfnsIterCont (g₀ : SmoothRiemannianMetric I M) (P : SmoothCcTensor g₀ 0 2)

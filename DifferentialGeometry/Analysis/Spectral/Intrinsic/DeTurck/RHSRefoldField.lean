@@ -47,6 +47,7 @@ private theorem bilin_smul
   rw [ccTensorBilin_apply, ccTensorBilin_apply, ccTensorModel_smul,
     ContinuousMultilinearMap.smul_apply, smul_eq_mul]
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [BoundarylessManifold I M] [SigmaCompactSpace M] in
 private theorem perturb_eq_diff
     (g g1 : SmoothRiemannianMetric I M) (P : SmoothCcTensor g 0 2)
     (htie : ∀ (x : M) (v w : TangentSpace I x),
@@ -69,6 +70,7 @@ private theorem perturb_eq_diff
     hPsymm x (slots 0) (slots 1)]
   ring
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [BoundarylessManifold I M] [SigmaCompactSpace M] in
 private theorem cc22_ext_app
     (g : SmoothRiemannianMetric I M) (C D : SmoothCcTensor g 2 2)
     (h : ∀ W : SmoothCcTensor g 0 2,

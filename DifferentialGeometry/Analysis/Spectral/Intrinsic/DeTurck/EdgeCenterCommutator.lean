@@ -38,6 +38,7 @@ variable
 
 private local instance : CompleteSpace E := FiniteDimensional.complete Real E
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [BoundarylessManifold I M] in
 private theorem appCc_sub_right_ec
     (g : SmoothRiemannianMetric I M) (r s : Nat)
     (Phi : SmoothCcTensor g r s) (W1 W2 : SmoothCcTensor g 0 r) :

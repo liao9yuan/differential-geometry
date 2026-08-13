@@ -64,6 +64,7 @@ private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 /-! ### Local re-derivations of the `symmS` transfer lemmas (private in
 `DeTurckRemainderTameLipschitz`). -/
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [BoundarylessManifold I M] [SigmaCompactSpace M] in
 /-- Symmetrizing an already-symmetrized bilinear form is a no-op:
 `ccTensorBilinSymm g₀ (symmS g₀ T) = ccTensorBilinSymm g₀ T` pointwise. -/
 private theorem ccTensorBilinSymm_symmS_app_rf

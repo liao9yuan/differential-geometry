@@ -283,6 +283,7 @@ theorem opJetSmul (g : SmoothRiemannianMetric I M) {r c : ℕ} (m : ℕ) (a : �
   refine Finset.sum_congr rfl fun q _ => ?_
   rw [iteratedCovGrad_smul, norm_smul, mul_pow, Real.norm_eq_abs, sq_abs]
 
+omit [BoundarylessManifold I M] in
 /-- A scalar multiple of a window is a window. -/
 theorem moserWin_smul {g : SmoothRiemannianMetric I M} {r c : ℕ}
     {T : SmoothCcTensor g 0 2} {A : ℕ → ℝ} {S : ℝ} {X : SmoothCcTensor g r c}
@@ -570,6 +571,7 @@ theorem moserWin_self {g : SmoothRiemannianMetric I M}
   have := jetNn (I := I) (M := M) (m := n) g T
   linarith
 
+omit [NeZero (Module.finrank ℝ E)] in
 /-- The slot symmetrization is dominated, pointwise and at every jet order, by
 the state itself: `symmS` is a half-sum of `T` and a covariant slot
 permutation of `T`, and the permutation is a fibre isometry. -/
@@ -631,6 +633,7 @@ theorem moserWin_symmS (g : SmoothRiemannianMetric I M) {δ₀ : ℝ}
     have := jetNn (I := I) (M := M) (m := n) g T
     linarith
 
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] [SigmaCompactSpace M] in
 /-- Slot-zero insertion of the full raised endomorphism is the sharp-flat
 endomorphism field. -/
 private theorem sharpSlot0 (g g₁ : SmoothRiemannianMetric I M) :
@@ -775,6 +778,7 @@ theorem moserWin_fullSlot (g : SmoothRiemannianMetric I M)
   rw [← sharpSlot0 (I := I) (M := M) g g₁]
   exact hwin T g₁ P hpert
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [BoundarylessManifold I M] [SigmaCompactSpace M] in
 /-- The full raised endomorphism at the background metric is the identity. -/
 private lemma raisedSelf (g : SmoothRiemannianMetric I M) (x : M) :
     metricComparisonEndo (I := I) g g x =
@@ -1090,6 +1094,7 @@ theorem moserWin_ricciTop (g : SmoothRiemannianMetric I M)
   rw [ricciTop]
   exact happ T AT AD ST SD _ _ (hT T hTsup g₁ P hpert) (hD T g₁ P hpert)
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [BoundarylessManifold I M] [SigmaCompactSpace M] in
 /-- Reindexing distributes over a difference of coefficients. -/
 private lemma reindexSub (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (X Y : SmoothCcTensor g r s) (ρ : Equiv.Perm (Fin r)) :
@@ -1304,6 +1309,7 @@ private lemma cvxRad (g : SmoothRiemannianMetric I M)
     convexPerturbation (I := I) g T (0 : SmoothCcTensor g 0 2) s = s • T := by
   simp [convexPerturbation]
 
+omit [BoundarylessManifold I M] in
 /-- **The radial path is path-perturbation data, uniformly on `[0, 1]`.**
 
 At every parameter `s ∈ [0, 1]` the realized family `realizedFam g T 0 s` is

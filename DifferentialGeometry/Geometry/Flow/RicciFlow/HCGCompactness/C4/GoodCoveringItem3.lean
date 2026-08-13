@@ -81,6 +81,7 @@ def item3RadiusFactor (hd : InjRadiusDecayInput (I := I) X) (D : Real) : Real :=
   205 * Real.exp (hd.C * (20 * hd.lambda D 0))
 
 
+omit [CompleteSpace E] in
 theorem item3Factor_pos (hd : InjRadiusDecayInput (I := I) X) (D : Real) :
     0 < item3RadiusFactor hd D := by
   exact mul_pos (by norm_num) (Real.exp_pos _)

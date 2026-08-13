@@ -127,6 +127,7 @@ theorem threeArmJoint_smul
       (by rw [he, ← hx₀]; exact mem_baseSet_trivializationAt _ _ x₀)).map_smul
         c ((A p₀.2).toSection p₀.1)
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [BoundarylessManifold I M] [SigmaCompactSpace M] in
 /-- Postcomposition by a fixed smooth coefficient preserves joint smoothness
 of a three-arm coefficient family. -/
 theorem threeArmJoint_comp

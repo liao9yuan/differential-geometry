@@ -249,6 +249,7 @@ private theorem conn_antisymm
   rw [conn_self_zero (I := I) (M := M) gA x u v] at h
   exact eq_neg_of_add_eq_zero_left h.symm
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [SigmaCompactSpace M] in
 private theorem fix_eq_neg
     (g₀ gB : SmoothRiemannianMetric I M) :
     lieArm1FixCd (I := I) (M := M) g₀ gB =
@@ -275,6 +276,7 @@ private theorem fix_eq_neg
       (PDE.DeTurck.connDiff (I := I) gB g₀ x (YZ 0) (YZ 1)),
     map_neg]
 
+omit [NeZero (Module.finrank ℝ E)] in
 private theorem perm_norm_eq
     (g : SmoothRiemannianMetric I M) (σ : Equiv.Perm (Fin 2))
     (T : SmoothCcTensor g 0 2) (j : ℕ) :

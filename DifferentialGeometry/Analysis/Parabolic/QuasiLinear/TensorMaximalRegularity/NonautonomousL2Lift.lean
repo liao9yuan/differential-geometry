@@ -44,6 +44,7 @@ private local instance : BorelSpace M := ⟨rfl⟩
 variable {g : SmoothRiemannianMetric I M} {r s : ℕ}
 variable {a T : ℝ}
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] in
 private theorem timeIncl_trans
     {ρ τ σ : ℝ} (hρτ : ρ ≤ τ) (hτσ : τ ≤ σ)
     (hcompact : IsCompactOperator (tensorResolventL2
@@ -60,6 +61,7 @@ private theorem timeIncl_trans
     timeModeCoeff_timeL2Inclusion (I := I) (M := M),
     timeModeCoeff_timeL2Inclusion (I := I) (M := M)]
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] in
 private theorem homMode_zero (hT : 0 < T)
     (i : TensorEigenIdx (I := I) (M := M) g r s) :
     homModeCoeff (I := I) (M := M) (a := a) (T := T)
@@ -238,6 +240,7 @@ private theorem zeroRepr_down_ae
   rw [hhit, hlot]
   exact hpointt
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] in
 private theorem timeOp_down
     (AHi : ℝ → tensorHs (I := I) (M := M) g r s (a + 2) →L[ℝ]
       tensorHs (I := I) (M := M) g r s a)

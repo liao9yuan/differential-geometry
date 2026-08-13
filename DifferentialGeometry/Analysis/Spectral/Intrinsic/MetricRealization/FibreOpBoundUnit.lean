@@ -29,6 +29,7 @@ variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
   [IsManifold I ∞ M]
 
+omit [FiniteDimensional ℝ E] in
 /-- A uniform unit-vector bound for a symmetric bilinear field implies the
 intrinsic fibre operator bound with the same constant. -/
 theorem gOpBound_unitQuad

@@ -1706,6 +1706,7 @@ theorem ricciArmOrder1KoszulCoeff_eq_raisedKoszul_contract_cometricDoubleTraceCa
   intro x
   rfl
 
+omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] in
 /-- Compatibility form using the former application notation. -/
 theorem ricciArmOrder1KoszulCoeff_eq_appCcRS
     (g₀ g₁ : SmoothRiemannianMetric I M) :

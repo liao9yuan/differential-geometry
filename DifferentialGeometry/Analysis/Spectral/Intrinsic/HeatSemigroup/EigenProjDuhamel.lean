@@ -89,6 +89,7 @@ theorem spatialProj_idem (σ : ℝ) (N : ℕ)
   simp only [spatialProj_coeff]
   by_cases hi : i ∈ eigenIdxFinset (I := I) (M := M) g N <;> simp [hi]
 
+omit [BoundarylessManifold I M] in
 /-- The spectral truncation is a `1`-Lipschitz map of `Hˢ`. -/
 theorem spatialProj_lip (σ : ℝ) (N : ℕ) :
     LipschitzWith 1 (spatialEigenProj (I := I) (M := M) g σ N) := by

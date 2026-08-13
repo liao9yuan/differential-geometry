@@ -144,6 +144,7 @@ theorem norm_congrLp (g : SmoothRiemannianMetric I M) {a b T : ℝ} (h : a = b)
     (p := 2) (μ := timeMeasure T) u] with t ht
   rw [ht, tensorHsCongrL_apply, norm_tensorHsCongr]
 
+omit [BoundarylessManifold I M] in
 /-- **The core maximal-regularity size of the order-one Duhamel trajectory.**
 With zero initial datum, the `L²_t H³` size of the trajectory is controlled by
 the `L²_t H¹` size of its forcing with the `T`-benign constant `1 + T ≤ 2`.

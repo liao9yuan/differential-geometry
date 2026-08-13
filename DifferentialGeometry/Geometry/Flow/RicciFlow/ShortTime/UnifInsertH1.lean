@@ -44,6 +44,7 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [SigmaCompactSpace M] in
 private theorem connLow_self_zero
     (g : SmoothRiemannianMetric I M) :
     connDiffLoweredCc (I := I) g g = 0 := by

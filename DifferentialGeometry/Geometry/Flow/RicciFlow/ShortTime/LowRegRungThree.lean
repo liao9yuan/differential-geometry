@@ -70,6 +70,7 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 /-! ### Symmetrization contracts covariant jets -/
 
+omit [NeZero (Module.finrank ℝ E)] in
 private theorem permJetNorm
     (g : SmoothRiemannianMetric I M) (σ : Equiv.Perm (Fin 2))
     (T : SmoothCcTensor g 0 2) (j : ℕ) :

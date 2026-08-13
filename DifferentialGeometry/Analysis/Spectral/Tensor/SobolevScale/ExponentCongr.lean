@@ -67,30 +67,35 @@ def tensorHsCongrL (g : SmoothRiemannianMetric I M) (r s : ℕ) {a b : ℝ}
       tensorHs (I := I) (M := M) g r s b :=
   (tensorHsCongr (I := I) (M := M) g r s h).toLinearIsometry.toContinuousLinearMap
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] in
 @[simp] theorem tensorHsCongr_refl (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (a : ℝ) :
     tensorHsCongr (I := I) (M := M) g r s (rfl : a = a) =
       LinearIsometryEquiv.refl ℝ _ :=
   rfl
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] in
 @[simp] theorem tensorHsCongrL_refl (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (a : ℝ) :
     tensorHsCongrL (I := I) (M := M) g r s (rfl : a = a) =
       ContinuousLinearMap.id ℝ (tensorHs (I := I) (M := M) g r s a) :=
   rfl
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] in
 theorem tensorHsCongrL_apply {a b : ℝ} (h : a = b)
     (u : tensorHs (I := I) (M := M) g r s a) :
     tensorHsCongrL (I := I) (M := M) g r s h u =
       tensorHsCongr (I := I) (M := M) g r s h u :=
   rfl
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] in
 /-- The transport is norm preserving. -/
 @[simp] theorem norm_tensorHsCongr {a b : ℝ} (h : a = b)
     (u : tensorHs (I := I) (M := M) g r s a) :
     ‖tensorHsCongr (I := I) (M := M) g r s h u‖ = ‖u‖ :=
   (tensorHsCongr (I := I) (M := M) g r s h).norm_map u
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] in
 /-- The transport commutes with the scale inclusions. -/
 theorem tensorHsCongr_incl {a b c d : ℝ}
     (hac : a = c) (hbd : b = d) (hab : a ≤ b) (hcd : c ≤ d)
@@ -104,6 +109,7 @@ theorem tensorHsCongr_incl {a b c d : ℝ}
   cases hbd
   rfl
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] in
 /-- Composed form of `tensorHsCongr_incl`: this is the shape in which a
 commuting inclusion square stated at literal exponents is moved to one stated
 at arithmetic exponents. -/

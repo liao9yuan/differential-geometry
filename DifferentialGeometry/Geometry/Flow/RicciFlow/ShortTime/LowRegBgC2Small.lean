@@ -202,6 +202,7 @@ private theorem devBgCap
         deTurckPhiMetTotal (I := I) (M := M) g g g)
     linarith [hsub, hBj, hGj, hkey]
 
+omit [NeZero (Module.finrank ℝ E)] in
 /-- Both smallness clauses pass from a radial integrand to its path integral,
 with the same constant. -/
 private theorem pathBoth

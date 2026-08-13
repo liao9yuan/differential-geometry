@@ -91,6 +91,7 @@ private lemma eigenbasis_toL2
     SmoothCcTensor.toL2_apply (eigenSmooth (I := I) (M := M) g i)]
   exact (eigenvectorSmooth_toL2 (I := I) (M := M) g 0 2 i).symm
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [BoundarylessManifold I M] in
 private lemma toL2_symmS (X : SmoothCcTensor g 0 2) :
     SmoothCcTensor.toL2 (symmS (I := I) (M := M) g X) =
       (1 / 2 : ℝ) • (SmoothCcTensor.toL2 X +
@@ -99,6 +100,7 @@ private lemma toL2_symmS (X : SmoothCcTensor g 0 2) :
   simp only [symmS, ccTensor02Symm]
   rw [map_smul, map_add]
 
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma inner_toL2_swap (A B : SmoothCcTensor g 0 2) :
     ⟪SmoothCcTensor.toL2
         (domDomCongrSection (I := I) g (Equiv.swap (0 : Fin 2) 1) A),

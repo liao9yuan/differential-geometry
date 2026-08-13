@@ -172,6 +172,7 @@ private theorem fullSlotSplit (g gm : SmoothRiemannianMetric I M) :
     slotInsertEndoCc_add,
     gInvDiffSlotCoeff_eq_slotInsertEndoCc (I := I) g gm]
 
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] in
 private theorem jetAdd (g : SmoothRiemannianMetric I M) {r s : ℕ}
     (A B : SmoothCcTensor g r s) :
     (∑ j ∈ Finset.range 4,

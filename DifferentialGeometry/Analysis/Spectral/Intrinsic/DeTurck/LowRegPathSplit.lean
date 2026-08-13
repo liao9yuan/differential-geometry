@@ -365,6 +365,7 @@ theorem phiMet_cap
   rw [htarget]
   exact hscaled
 
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 /-- A uniform pointwise cap for a cancellation-preserving path integrand
 controls the sum of its two integrated pieces minus the fixed coefficient. -/
 theorem path_add_sub_cap

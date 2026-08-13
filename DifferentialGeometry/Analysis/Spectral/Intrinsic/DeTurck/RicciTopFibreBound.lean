@@ -40,6 +40,7 @@ variable
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [BoundarylessManifold I M] [SigmaCompactSpace M] in
 private theorem perm_re
     (g : SmoothRiemannianMetric I M) {d : ℕ}
     (Φ : SmoothCcTensor g d d) (ρ : Equiv.Perm (Fin d)) :
@@ -78,6 +79,7 @@ private theorem perm_left_rfns
       rw [slotPermCLM_apply, Tensor0SSpace.toModel_ofModel]) 0 x
   simpa only [iteratedCovGrad_zero, Nat.add_zero] using h
 
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] [SigmaCompactSpace M] in
 private theorem conn_nf
     (g gm : SmoothRiemannianMetric I M) :
     connLowOp (I := I) (M := M) g gm =

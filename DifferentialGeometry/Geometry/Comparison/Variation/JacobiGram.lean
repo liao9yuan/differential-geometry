@@ -220,6 +220,7 @@ theorem hasDerivAt_gram
     inner_deriv_at (I := I) hn g γ (V i) (V j) t hγ
       (hVdiff i) (hVdiff j)
 
+omit [NeZero (Module.finrank ℝ E)] [T2Space M] [SigmaCompactSpace M] in
 /-- The Gram density is continuous wherever the curve and every field have the
 first-order regularity needed by metric compatibility. -/
 theorem curveDensity_cont

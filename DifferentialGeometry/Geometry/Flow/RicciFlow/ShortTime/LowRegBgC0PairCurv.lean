@@ -409,6 +409,7 @@ theorem aaKerOnePairH2
       simp only [B, Q, S, D]
       ring
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [BoundarylessManifold I M] [SigmaCompactSpace M] in
 theorem reindexSubC0
     (g : SmoothRiemannianMetric I M) {r s : ℕ}
     (A B : SmoothCcTensor g r s) (σ : Equiv.Perm (Fin r)) :

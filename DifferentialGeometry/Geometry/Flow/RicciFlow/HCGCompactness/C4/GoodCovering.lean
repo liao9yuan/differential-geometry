@@ -67,6 +67,7 @@ theorem lambda_le_mu (hd : InjRadiusDecayInput (I := I) X) {D : Real} (hD : 1 �
 
 
 
+omit [CompleteSpace E] in
 theorem lambda_continuous (hd : InjRadiusDecayInput (I := I) X) (D : Real) :
     Continuous (hd.lambda D) := by
   unfold InjRadiusDecayInput.lambda InjRadiusDecayInput.mu
@@ -74,6 +75,7 @@ theorem lambda_continuous (hd : InjRadiusDecayInput (I := I) X) (D : Real) :
 
 
 
+omit [CompleteSpace E] in
 theorem lambda_le_one_at_zero (hd : InjRadiusDecayInput (I := I) X) {D : Real}
     (hD : hd.a * (min hd.baseInj.ρ 1) ^ (Module.finrank Real E) ≤ D) :
     hd.lambda D 0 ≤ 1 := by
@@ -161,6 +163,7 @@ def lambdaBall (hd : InjRadiusDecayInput (I := I) X) (D : Real) (k : Nat)
 
 
 
+omit [CompleteSpace E] in
 theorem exists_lambdaNet (hd : InjRadiusDecayInput (I := I) X) (D : Real) (k : Nat) :
     ∃ S : Set ((X.obj k).M),
       S.PairwiseDisjoint (hd.lambdaBall D k) ∧
@@ -222,6 +225,7 @@ theorem lambdaNet_separated (hd : InjRadiusDecayInput (I := I) X) (D : Real) (k 
   have hyy : y ∈ hd.lambdaBall D k y :=
     lt_of_eq_of_lt (edist_self y) (ENNReal.ofReal_pos.mpr (hd.lambda_pos hD _))
   exact hdisj hyx hyy
+omit [CompleteSpace E] in
 theorem RealizesEdist.dist_comm {hd : InjRadiusDecayInput (I := I) X}
     (hre : hd.RealizesEdist) (k : Nat) (x y : (X.obj k).M) :
     hd.dist k x y = hd.dist k y x := by
@@ -233,6 +237,7 @@ theorem RealizesEdist.dist_comm {hd : InjRadiusDecayInput (I := I) X}
 
 
 
+omit [CompleteSpace E] in
 theorem RealizesEdist.dist_triangle {hd : InjRadiusDecayInput (I := I) X}
     (hre : hd.RealizesEdist) (k : Nat) (x y z : (X.obj k).M) :
     hd.dist k x z ≤ hd.dist k x y + hd.dist k y z := by
@@ -254,6 +259,7 @@ theorem RealizesEdist.distO_sub_le {hd : InjRadiusDecayInput (I := I) X}
   linarith
 
 
+omit [CompleteSpace E] in
 theorem lambda_eq (hd : InjRadiusDecayInput (I := I) X) (D r : Real) :
     hd.lambda D r =
       (hd.a * (min hd.baseInj.ρ 1) ^ (Module.finrank Real E) / D) * Real.exp (-hd.C * r) := by
@@ -503,6 +509,7 @@ theorem lambdaBallC_pairwiseDisjoint (hd : InjRadiusDecayInput (I := I) X) (D : 
 
 
 
+omit [CompleteSpace E] in
 theorem mem_lambdaBallC_dist (hd : InjRadiusDecayInput (I := I) X) (hre : hd.RealizesEdist)
     (D : Real) (k : Nat) (c : Real) (x z : (X.obj k).M) :
     z ∈ hd.lambdaBallC D k c x ↔

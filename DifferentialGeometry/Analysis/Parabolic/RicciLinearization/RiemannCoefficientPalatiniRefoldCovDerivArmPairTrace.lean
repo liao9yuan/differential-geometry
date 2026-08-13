@@ -805,6 +805,7 @@ lemma bdSlotInsertZero_fullRaisedRev_eq_omRecover
   rw [cotangentToDual_g0FlatCLM]
   rw [g₁.symm x w (inverseMetricSharpFib (I := I) g₀ x om)]
 
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] [SigmaCompactSpace M] in
 /-- The reverse raised endomorphism in the leading slot is the metric-recovery endomorphism. -/
 theorem fullRev0_eq (g₀ g₁ : SmoothRiemannianMetric I M) :
     slotInsertEndoCc (I := I) (M := M) g₀ 0
@@ -939,6 +940,7 @@ private lemma bdOmRecover_eq_idEndo_add_raise
     rw [ccTensorBilinSymm_apply, ccTensorBilinSymm_apply]
     ring]
 
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] [SigmaCompactSpace M] in
 /-- Under an additive metric perturbation, recovery is identity plus the raised perturbation. -/
 theorem omRecover_add
     (g₀ g₁ : SmoothRiemannianMetric I M) (T : SmoothCcTensor g₀ 0 2)
@@ -1610,6 +1612,7 @@ lemma bdArmSlot2_rfns_le (g₀ g₁ : SmoothRiemannianMetric I M) (j : ℕ) (x :
   refine mul_le_mul_of_nonneg_left (le_of_eq ?_) (Nat.cast_nonneg _)
   rw [← bdConnDiffSection_eq_armSlotEndoCc_zero (I := I) (M := M) g₀ g₁]
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [BoundarylessManifold I M] [SigmaCompactSpace M] in
 private lemma bdArmSlot_sub (g₀ : SmoothRiemannianMetric I M) (s : ℕ)
     (A B : ContMDiffSection I (E →L[ℝ] (E →L[ℝ] E)) ∞
       (fun x : M =>

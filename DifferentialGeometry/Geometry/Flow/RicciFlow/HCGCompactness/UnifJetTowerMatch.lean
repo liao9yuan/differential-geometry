@@ -131,6 +131,7 @@ leaves its unit-value field unchanged. -/
 
 /-! ### The tower match -/
 
+omit [NeZero (Module.finrank ℝ E)] in
 /-- **Tower match at generic rank (no arity cast).**
 
 For a smooth compactly-supported `(0, s)`-tensor `W` and every order `j`, the

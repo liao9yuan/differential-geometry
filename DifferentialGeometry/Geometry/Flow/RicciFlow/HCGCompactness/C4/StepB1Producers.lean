@@ -931,6 +931,7 @@ theorem hlocOn_of_chartNeumann_infty {F : M → N} {U : Set M} (hU : IsOpen U)
 
 
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [MetricSpace M] [PseudoMetricSpace N] in
 theorem hlocHinj_of_chartNeumann {F : M → N} {U : Set M} (x₀ : M) {ε : ℝ} (hε : ε < 1)
     (hU : IsOpen U) (hUsub : U ⊆ (extChartAt I x₀).source)
     (hconv : Convex ℝ ((extChartAt I x₀) '' U))
@@ -1589,6 +1590,7 @@ theorem stepB1_of_bounds
 
 
 
+omit [FiniteDimensional ℝ E] in
 theorem stepB1_zero
     [Module.Finite ℝ E]
     (g : SmoothRiemannianMetric I M'') (h : SmoothRiemannianMetric I N'')

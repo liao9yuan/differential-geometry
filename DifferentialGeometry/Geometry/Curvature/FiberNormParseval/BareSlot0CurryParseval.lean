@@ -24,6 +24,7 @@ abbrev tensor0SAsRS {s : ℕ} (x : M) (C : Tensor0SSpace s I x) :
     TensorRSSpace 0 s I x :=
   tensor0SToTensorRS (I := I) (M := M) x C
 
+omit [CompleteSpace E] in
 /-- Compatibility form of the bare slot-zero curry identity. -/
 lemma slot0Curry_eq_tensor0SAsRS_curry_unitZeroSec
     (g : SmoothRiemannianMetric I M) (x : M) (s : ℕ)

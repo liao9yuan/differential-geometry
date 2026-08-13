@@ -70,6 +70,7 @@ theorem projN_cont (g₀ : SmoothRiemannianMetric I M) (a : ℕ) {R : ℝ} (N : 
   have h := (spatialProj_lip (I := I) (M := M) g₀ (a : ℝ) N).continuous.comp hcont
   simpa [projNfun, Function.comp_def] using h
 
+omit [BoundarylessManifold I M] in
 /-- The truncated nonlinearity keeps the three-arm tame estimate of `Nfun`,
 with the same constants `A, B, C`. -/
 theorem projN_tame (g₀ : SmoothRiemannianMetric I M) (a : ℕ) {R : ℝ} (N : ℕ)

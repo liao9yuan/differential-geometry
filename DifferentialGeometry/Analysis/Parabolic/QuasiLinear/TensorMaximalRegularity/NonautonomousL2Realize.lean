@@ -45,6 +45,7 @@ private local instance : BorelSpace M := ⟨rfl⟩
 variable {g : SmoothRiemannianMetric I M} {r s : ℕ}
 variable {a T : ℝ}
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] in
 private theorem crossRepr_lo
     (u : CrossScaleField (I := I) (M := M) g r s a T)
     (hT : 0 < T) {t : ℝ} (ht : t ∈ Icc (0 : ℝ) T) :
@@ -55,6 +56,7 @@ private theorem crossRepr_lo
   rw [tensorHsInclusion_coeff_apply, u.repr_coeff hT ht]
   rfl
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] in
 private theorem crossRepr_hi_ae
     (u : CrossScaleField (I := I) (M := M) g r s a T)
     (hT : 0 < T) :

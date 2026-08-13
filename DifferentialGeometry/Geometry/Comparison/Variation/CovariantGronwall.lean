@@ -51,6 +51,7 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 
 
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [T2Space M] [SigmaCompactSpace M] in
 /-- **Inhomogeneous covariant Gronwall pair transfer.** A parallel orthonormal
 frame transports a covariant second-order estimate with a uniform forcing term
 to simultaneous metric-norm bounds for the field and its covariant velocity. -/

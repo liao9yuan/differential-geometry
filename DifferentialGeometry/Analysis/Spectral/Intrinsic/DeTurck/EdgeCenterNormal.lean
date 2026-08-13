@@ -40,6 +40,7 @@ variable
 
 private local instance : CompleteSpace E := FiniteDimensional.complete Real E
 
+omit [BoundarylessManifold I M] in
 /-- For the canonical Ricci--DeTurck permutations, the raw top coefficient
 reduces to the six monomials with output codes `0321`, `1320`, `0123`,
 `1023`, `3012`, and `3102`, with signs `++----`. -/

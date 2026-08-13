@@ -122,6 +122,7 @@ def phaseK
       (mul_nonneg (mul_nonneg (by norm_num) (d.metricC_nonneg 1))
         R.coe_nonneg)
 
+omit [CompleteSpace E] in
 /-- Every H6 chart presents the same phase coefficient because its metric
 bounds use the common constants `metricC`. -/
 theorem chartPhaseK_eq
@@ -143,6 +144,7 @@ theorem chartPhaseK_eq
   apply NNReal.eq
   rfl
 
+omit [CompleteSpace E] in
 /-- The H6 phase error tends to zero with the velocity radius. -/
 theorem phaseErr_lt_ev
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}

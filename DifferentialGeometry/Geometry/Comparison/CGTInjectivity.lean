@@ -180,6 +180,7 @@ private theorem ratio_le_half
     _ = (V + P) * ENNReal.ofReal (L / 2) := by
       rw [add_comm P V, mul_comm]
 
+omit [T2Space (TangentBundle I M)] in
 /-- **Cheeger--Gromov--Taylor flat-loop estimate.**
 
 Suppose the radius-`R` intrinsic framed exponential ball is nonsingular, the

@@ -268,6 +268,7 @@ theorem prod23_h2
   simp only [J, fr, C]
   ring
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [BoundarylessManifold I M] [SigmaCompactSpace M] in
 theorem slotIterSub
     (g : SmoothRiemannianMetric I M) (r s w : ℕ)
     (A B : SmoothCcTensor g r s) :
@@ -728,6 +729,7 @@ theorem appPairH2
       simp only [C, x, y]
       ring
 
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] [SigmaCompactSpace M] in
 theorem omegaOne_eq
     (g gm : SmoothRiemannianMetric I M) :
     omegaOne (I := I) (M := M) g gm =
@@ -1522,6 +1524,7 @@ noncomputable def quadCap
     lowJetSq (I := I) (M := M) g 2
       (permCoeff (I := I) (M := M) g lrPermC)
 
+omit [BoundarylessManifold I M] in
 theorem quadCap_nneg (g : SmoothRiemannianMetric I M) :
     0 ≤ quadCap (I := I) (M := M) g := by
   unfold quadCap
@@ -1537,6 +1540,7 @@ theorem quadCap_nneg (g : SmoothRiemannianMetric I M) :
     (permCoeff (I := I) (M := M) g lrPermC)
   linarith
 
+omit [BoundarylessManifold I M] in
 theorem quadCap_le
     (g : SmoothRiemannianMetric I M) (pm : Equiv.Perm (Fin 4))
     (hpm : pm = Equiv.swap (0 : Fin 4) 1 ∨ pm = lrPermA ∨

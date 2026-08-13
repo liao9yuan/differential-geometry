@@ -38,6 +38,7 @@ variable
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [SigmaCompactSpace M] in
 /-- Fibre evaluation of the moving lowered connection difference. -/
 theorem kappa_unit (g₀ g₁ gB : SmoothRiemannianMetric I M) (x : M)
     (m : Fin 3 → TangentSpace I x) :
@@ -62,6 +63,7 @@ private theorem koszul_g1 (g₀ g₁ : SmoothRiemannianMetric I M)
     (I := I) (M := M) g₀ g₁ P htie x a b c]
   rfl
 
+omit [NeZero (Module.finrank ℝ E)] in
 /-- The self-background lowered connection difference is exactly the cyclic
 Koszul covector of the metric perturbation. -/
 theorem kappa_self (g₀ g₁ : SmoothRiemannianMetric I M)
@@ -82,6 +84,7 @@ private def pbLowCompatField (g₀ : SmoothRiemannianMetric I M)
   ⟨fun x => ccBilinConnDiffLoweredFib (I := I) g₀ P gA gB x,
     ccBilinConnDiffLoweredFib_contMDiff (I := I) g₀ P gA gB⟩
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 /-- Fibre evaluation of the perturbative lowered connection difference. -/
 theorem pbLow_unit (g₀ : SmoothRiemannianMetric I M)
     (P : SmoothCcTensor g₀ 0 2) (gA gB : SmoothRiemannianMetric I M)

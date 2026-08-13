@@ -82,6 +82,7 @@ def foldConst (u v : ℕ) (KΦ KW : ℕ → ℝ) (n : ℕ) : ℝ :=
     ∑ i' ∈ Finset.range (n + 1), ∑ l ∈ Finset.range (n + 1),
       KΦ i' * KW l * Combinatorics.antidiagonalTupleGridWindowMulConst (i' + u) (l + v)
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] in
 /-- The fold constant is nonnegative. -/
 lemma foldConst_nn {u v : ℕ} {KΦ KW : ℕ → ℝ}
     (hKΦ : ∀ i, 0 ≤ KΦ i) (hKW : ∀ l, 0 ≤ KW l) (n : ℕ) :

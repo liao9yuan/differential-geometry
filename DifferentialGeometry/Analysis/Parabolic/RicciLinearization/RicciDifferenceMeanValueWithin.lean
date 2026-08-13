@@ -152,6 +152,7 @@ theorem genJointGramOn_of_gen {S : Set ℝ}
 
 /-! ### The chain -/
 
+omit [NeZero (Module.finrank ℝ E)] in
 /-- **Inverse Gram, within.**  Cramer's rule `G⁻¹ = (det G)⁻¹ · adj G` is a rational expression
 in the Gram entries with nonvanishing denominator, hence re-threads verbatim.  Mirrors
 `gen_joint_invGram`. -/

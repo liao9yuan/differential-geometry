@@ -31,6 +31,7 @@ variable
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] in
 private theorem grad_shift_norm
     (g : SmoothRiemannianMetric I M) (s j : Nat) (T : SmoothCcTensor g 0 s) :
     norm (iteratedCovGrad (I := I) g 0 (s + 1) j

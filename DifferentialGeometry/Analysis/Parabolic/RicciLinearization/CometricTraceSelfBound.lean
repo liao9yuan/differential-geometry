@@ -39,6 +39,7 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
+omit [BoundarylessManifold I M] [SigmaCompactSpace M] in
 /-- The self-cometric double trace at rank two has squared fibre norm at most
 the sixth power of the dimension, independently of the metric. -/
 theorem cometricTrace_rfns
@@ -175,6 +176,7 @@ private theorem traceSucc_tuple
     rw [Function.comp_apply, traceSucc_ge p _ hge]
     rfl
 
+omit [BoundarylessManifold I M] [SigmaCompactSpace M] in
 /-- Adding one passenger slot to the cometric trace is slot extension followed
 by the fixed source-slot three-cycle. -/
 private theorem traceSucc_fib

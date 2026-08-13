@@ -64,6 +64,7 @@ theorem armConst
       (fun _ => A) (δ := δ) (δ' := δ') :=
   (A.toSection.contMDiff.comp_contMDiffOn contMDiffOn_fst).mono (Set.subset_univ _)
 
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 /-- **Integrand linearity of the radial coefficient path integral, on a
 difference.**
 
@@ -112,6 +113,7 @@ theorem path_sub_eq
     ContMDiffSection.coe_sub, Pi.sub_apply, TensorRSSpace.toModel_sub]
   rw [intervalIntegral.integral_sub hIΦ hIΨ]
 
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 /-- **Integrand linearity of the radial coefficient path integral, on the
 cancellation-preserving combination.**
 

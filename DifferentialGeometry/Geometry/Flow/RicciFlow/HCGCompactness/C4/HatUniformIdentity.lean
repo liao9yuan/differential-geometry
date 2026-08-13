@@ -38,6 +38,7 @@ variable {M : Type u} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ 
 
 namespace NetLimitData
 
+omit [FiniteDimensional ℝ E] in
 theorem unifHatIdOn
     [FiniteDimensional Real E]
     (hd : InjRadiusDecayInput (I := I) X) {D : Real}
@@ -281,6 +282,7 @@ theorem unifHatIdOn
 
 
 
+omit [FiniteDimensional ℝ E] in
 theorem unifHatIdSelfOn
     [FiniteDimensional Real E]
     (hd : InjRadiusDecayInput (I := I) X) {D : Real}

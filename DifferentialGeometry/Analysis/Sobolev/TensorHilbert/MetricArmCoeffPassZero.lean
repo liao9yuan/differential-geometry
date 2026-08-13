@@ -113,6 +113,7 @@ omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [BoundarylessManifold I M]
     (rsDomDomCongrSection (I := I) (M := M) g r s σ R).toSection x =
       tensorRS_domDomCongr σ (R.toSection x) := rfl
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [BoundarylessManifold I M] [SigmaCompactSpace M] in
 lemma rsDomDomCongr_sub (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (σ : Equiv.Perm (Fin s)) (X Y : SmoothCcTensor g r s) :
     rsDomDomCongrSection (I := I) (M := M) g r s σ (X - Y) =

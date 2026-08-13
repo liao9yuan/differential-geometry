@@ -312,6 +312,7 @@ def aaCore (g₀ g₁ : SmoothRiemannianMetric I M) (ρ : Equiv.Perm (Fin 4)) :
       (connDiffContrInsertionField (I := I) g₀ g₁)
       (connDiffContrInsertionInnerField (I := I) g₀ g₁))
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [SigmaCompactSpace M] in
 /-- **Public two-arm split of the quadratic Ricci kernel.**
 
 `ricciAAKer` is the sum of six slot-reindexed two-arm cores, each an insertion

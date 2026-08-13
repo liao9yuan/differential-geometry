@@ -105,6 +105,7 @@ private noncomputable def raiseLast
       (fullSlot3 (I := I) (M := M) g gm)
       (domDomCongrSection (I := I) g (finRotate 3) S))
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [BoundarylessManifold I M] [SigmaCompactSpace M] in
 private theorem raised_inner
     (g gm : SmoothRiemannianMetric I M) (x : M)
     (v w : TangentSpace I x) :
@@ -150,6 +151,7 @@ private theorem pb_eq_corr
   rw [wXi_self_eq (I := I) (M := M) g gm] at hm
   exact add_left_cancel (hk.symm.trans hm)
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [BoundarylessManifold I M] [SigmaCompactSpace M] in
 private theorem permCoeff_app
     (g : SmoothRiemannianMetric I M) {d : ℕ}
     (ρ : Equiv.Perm (Fin d)) (S : SmoothCcTensor g 0 d) :
@@ -166,6 +168,7 @@ private theorem permCoeff_app
   rw [slotPermCLM_apply, Tensor0SSpace.toModel_ofModel]
   rfl
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [BoundarylessManifold I M] [SigmaCompactSpace M] in
 private theorem app_smul_left
     (g : SmoothRiemannianMetric I M) (a b c : ℕ) (k : ℝ)
     (Φ : SmoothCcTensor g b c) (W : SmoothCcTensor g a b) :
@@ -190,6 +193,7 @@ private noncomputable def koszulOp
       permCoeff (I := I) (M := M) g (finRotate 3) -
       permCoeff (I := I) (M := M) g (Equiv.swap (1 : Fin 3) 2))
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [BoundarylessManifold I M] in
 private theorem symm_eq_self
     (g : SmoothRiemannianMetric I M) (S : SmoothCcTensor g 0 2)
     (hS : ∀ (x : M) (u v : TangentSpace I x),
@@ -437,6 +441,7 @@ private noncomputable def corrPhi
       (cometricDoubleTraceField (I := I) g 3) σ)
     (corrPk3 (I := I) (M := M) g P)
 
+omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] in
 private theorem corr_formula
     (g gm g_bg : SmoothRiemannianMetric I M)
     (P : SmoothCcTensor g 0 2) :
@@ -671,6 +676,7 @@ private theorem jet_mono
     (Finset.range_subset_range.mpr (Nat.add_le_add_right hmn 1))
     (fun _ _ _ => sq_nonneg _)
 
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] in
 private theorem jet_sub
     (g : SmoothRiemannianMetric I M) {r s : ℕ} (m : ℕ)
     (S V : SmoothCcTensor g r s) :
@@ -808,6 +814,7 @@ private theorem app_h21_mul
         lowJetSq (I := I) (M := M) g 1 W := by
       rw [mul_pow, mul_pow, hAsq, hBsq]
 
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] in
 private theorem grad_l2_sq
     (g : SmoothRiemannianMetric I M) (r s i : ℕ)
     (S : SmoothCcTensor g r s) :
@@ -852,6 +859,7 @@ private theorem grad_h1_le_h2
   rw [h0, h1]
   nlinarith [sq_nonneg ‖S‖]
 
+omit [NeZero (Module.finrank ℝ E)] in
 private theorem dom_h2
     (g : SmoothRiemannianMetric I M) {s : ℕ}
     (σ : Equiv.Perm (Fin s)) (S : SmoothCcTensor g 0 s) :
@@ -870,6 +878,7 @@ private theorem dom_h2
     riemannianFiberNormSq_iteratedCovGrad_domDomCongrSection
       (I := I) (M := M) g σ S q x
 
+omit [NeZero (Module.finrank ℝ E)] in
 private theorem dom_h1
     (g : SmoothRiemannianMetric I M) {s : ℕ}
     (σ : Equiv.Perm (Fin s)) (S : SmoothCcTensor g 0 s) :
@@ -1282,6 +1291,7 @@ private noncomputable def kerOfIns
         (ccOperatorFieldComp (I := I) (M := M) g 3 4 4
           (permCoeff (I := I) (M := M) g kO1203) Q) kI120)
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [SigmaCompactSpace M] in
 private theorem ricciKer_eq
     (g gm : SmoothRiemannianMetric I M) :
     linearizedRicciConnDiffOrder1KernelField (I := I) g gm =
@@ -1421,6 +1431,7 @@ private theorem ricciKer_sub_eq
     ricciKer_eq (I := I) (M := M) g gU,
     ← kerOfIns_sub (I := I) (M := M) g]
 
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] [SigmaCompactSpace M] in
 private theorem sharp_eq_slot0
     (g gm : SmoothRiemannianMetric I M) :
     sharpFlatEndoCc (I := I) g gm =
@@ -2866,6 +2877,7 @@ private theorem raise_rev
   rw [htie x v w]
   ring
 
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] in
 private theorem raise_cancel
     (a b : SmoothRiemannianMetric I M) (x : M) :
     (gInvRaisedEndo (I := I) a b x).comp
@@ -3060,6 +3072,7 @@ private theorem jet_add1
           ‖iteratedCovGrad (I := I) g r s q V‖ ^ 2) := by
       simp only [mul_add, Finset.sum_add_distrib, Finset.mul_sum]
 
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] in
 private theorem jet_smul1
     (g : SmoothRiemannianMetric I M) {r s : ℕ} (m : ℕ)
     (c : ℝ) (S : SmoothCcTensor g r s) :
@@ -3072,6 +3085,7 @@ private theorem jet_smul1
   rw [iteratedCovGrad_smul, norm_smul, Real.norm_eq_abs,
     mul_pow, sq_abs]
 
+omit [NeZero (Module.finrank ℝ E)] in
 private theorem reindex_h2_eq
     (g : SmoothRiemannianMetric I M) {r s : ℕ}
     (S : SmoothCcTensor g r s) (ρ : Equiv.Perm (Fin r)) :
@@ -3304,6 +3318,7 @@ private theorem four_h2
           (R₁ + R₂ - P - R₃)]
     _ ≤ 22 * lowJetSq (I := I) (M := M) g 2 P := h1234
 
+omit [NeZero (Module.finrank ℝ E)] in
 private theorem ricci1_sub_eq
     (g gT gU : SmoothRiemannianMetric I M) :
     linearizedRicciConnDiffOrder1CoeffField (I := I) (M := M) g gT -
@@ -3323,6 +3338,7 @@ private theorem ricci1_sub_eq
     appCcRS_sub_right, appCcRS_sub_left]
   module
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [SigmaCompactSpace M] in
 private theorem connSec_zero
     (g : SmoothRiemannianMetric I M) :
     connDiffSection (I := I) g g = 0 := by
@@ -3881,6 +3897,7 @@ theorem liePiece_pair
       simp only [C, Z1, Z2]
       ring
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [SigmaCompactSpace M] in
 private theorem connBg_eq
     (g gm : SmoothRiemannianMetric I M) :
     lieArm1ConnDiffBgCc (I := I) (M := M) g gm g =
@@ -3896,6 +3913,7 @@ private noncomputable def psiLeft
     (domDomCongrSection (I := I) g lieArm1RhoSlot0
       (lieArm1LoweredBgKappa (I := I) (M := M) g gm g))
 
+omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] in
 private theorem psi_eq
     (g gm : SmoothRiemannianMetric I M) :
     lieArm1PsiB (I := I) (M := M) g gm g =

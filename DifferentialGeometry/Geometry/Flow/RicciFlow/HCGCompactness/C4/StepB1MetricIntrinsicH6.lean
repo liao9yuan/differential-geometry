@@ -539,6 +539,7 @@ theorem H6NormalData.cov_comp_tail
   simpa only [chiK, Yk, Lphi, afin] using
     hNaa alpha afin k hkAfin l hlAfin z hzbuffer hzSource slots
 
+omit [NeZero (Module.finrank ℝ E)] in
 private theorem chart_norm_eq
     {M : Type u} [TopologicalSpace M] [ChartedSpace H M]
     [IsManifold I ∞ M] [T2Space M] [SigmaCompactSpace M]

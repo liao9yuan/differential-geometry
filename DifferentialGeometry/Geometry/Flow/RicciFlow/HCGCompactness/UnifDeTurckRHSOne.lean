@@ -545,6 +545,7 @@ private theorem connLowTwo_eval
   simp only [map_sub, ContinuousLinearMap.sub_apply]
   ring
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [SigmaCompactSpace M] in
 private theorem connLow_unit
     (g₀ gBase : SmoothRiemannianMetric I M) :
     ccUnitField (I := I) g₀ 3 (connDiffLoweredCc (I := I) g₀ gBase) =
@@ -971,6 +972,7 @@ theorem unifConnDiffTwo
       simpa [d] using hcard
     _ = connDiffTwoC (E := E) Λ := rfl
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [SigmaCompactSpace M] in
 private theorem connLow_self_zero
     (g : SmoothRiemannianMetric I M) :
     connDiffLoweredCc (I := I) g g = 0 := by
@@ -991,6 +993,7 @@ private theorem wXi_base_eq
   unfold wXi
   rw [connLow_self_zero (I := I) g₀, zero_sub]
 
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] [SigmaCompactSpace M] in
 private theorem cometricCast_self
     (g : SmoothRiemannianMetric I M) :
     cometricCastG0 (I := I) g g =
@@ -1024,6 +1027,7 @@ private theorem wOmega_trace
       (-connDiffLoweredCc (I := I) g₀ gBase).toSection x)
       (unitZeroSec (I := I) (M := M) x))
 
+omit [NeZero (Module.finrank ℝ E)] in
 private theorem wAlphaA_shift
     (g₀ g₁ g_bg : SmoothRiemannianMetric I M) (i : ℕ) (x : M) :
     riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + i) x

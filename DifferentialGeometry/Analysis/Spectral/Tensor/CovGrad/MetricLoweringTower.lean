@@ -84,6 +84,7 @@ the pointwise metric-lowered tensor. -/
   exact Tensor0SField.toRS0_eq (n := (∞ : WithTop ℕ∞))
     (lowerRSField (I := I) (M := M) g r s T) x
 
+omit [I.Boundaryless] in
 /-- Unit evaluation removes the canonical upper-rank-zero lift in `lowerCc`. -/
 @[simp] theorem lowerCc_unit (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (T : SmoothCcTensor g r s) (x : M) :

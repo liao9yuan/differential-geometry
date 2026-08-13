@@ -1421,6 +1421,7 @@ theorem exists_pointwiseTensorCurv_fiberNormSq_bound
     pointwiseTensorCurv_fiberNormSq_le_first_order (I := I) (M := M) g
   exact ⟨K_R s, K_dR s, hK_R_nn s, hK_dR_nn s, fun S x => hbound s S x⟩
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] in
 /-- A supplied tangent curvature-operator cap induces the corresponding rank-`s` covariant-tensor
 curvature cap, with the structural slot factor `s²`. -/
 private theorem tensorCurv_le_of
@@ -1563,6 +1564,7 @@ private theorem tensorCurv_le_of
       rw [hKw]
       ring
 
+omit [CompactSpace M] in
 /-- A supplied bound on the frame-contracted first derivative of the base curvature operator
 controls the differentiated-curvature arm on rank-`s` covariant tensors. -/
 private theorem frameNablaR_le_of
@@ -1818,6 +1820,7 @@ private theorem frameNablaCap_of
   rw [hsum_eq]
   exact frameSum_sq_le (I := I) (M := M) g x C1 hC1 u F hF_len
 
+omit [NeZero (Module.finrank ℝ E)] in
 /-- **Per-frame-direction slot-`0` slice domination.** For a `g_x`-orthonormal frame `e` (with the
 rank-`s` and rank-`(s + 1)` fibre-norm frame representations `hreprS`, `hreprSucc` it induces), the
 directional covariant derivative `∇_{e j} S (x) = (tensorCov g 0 s).toFun S x (e j)` of a smooth

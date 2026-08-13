@@ -38,6 +38,7 @@ variable
       [IsManifold I ∞ M] [CompactSpace M] [I.Boundaryless]
       [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M]
 
+omit [BoundarylessManifold I M] [SigmaCompactSpace M] in
 private theorem edgePair_eq_mono
     (g g1 : SmoothRiemannianMetric I M) (G : SmoothCcTensor g 0 4)
     (sigma : Equiv.Perm (Fin 4)) :
@@ -48,6 +49,7 @@ private theorem edgePair_eq_mono
     refoldKernelContractionMonomialField_eq_mvPairTraceRefold]
   rfl
 
+omit [I.Boundaryless] [BoundarylessManifold I M] [SigmaCompactSpace M] in
 private theorem refoldMono_smul
     (g g1 : SmoothRiemannianMetric I M) (a : Real)
     (G : SmoothCcTensor g 0 4) (sigma : Equiv.Perm (Fin 4)) :
@@ -145,6 +147,7 @@ private theorem bilin_smul
   rw [ccTensorBilin_apply, ccTensorBilin_apply, ccTensorModel_smul,
     ContinuousMultilinearMap.smul_apply, smul_eq_mul]
 
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] in
 private theorem h2_add_le
     (g : SmoothRiemannianMetric I M) {r s : Nat}
     (A B : SmoothCcTensor g r s) :
@@ -187,6 +190,7 @@ private theorem h2_add_le
           norm (iteratedCovGrad (I := I) g r s i B) ^ 2) := by
       rw [Finset.sum_add_distrib, ← Finset.mul_sum, ← Finset.mul_sum]
 
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] in
 private theorem h2_smul_le
     (g : SmoothRiemannianMetric I M) {r s : Nat}
     (a : Real) (A : SmoothCcTensor g r s) (ha : |a| <= 1) :
@@ -207,6 +211,7 @@ private theorem h2_smul_le
       mul_le_mul_of_nonneg_right ha_sq (sq_nonneg _)
     _ = norm (iteratedCovGrad (I := I) g r s i A) ^ 2 := one_mul _
 
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] in
 private theorem h2_smul_eq
     (g : SmoothRiemannianMetric I M) {r s : Nat}
     (a : Real) (A : SmoothCcTensor g r s) :

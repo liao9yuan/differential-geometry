@@ -411,6 +411,7 @@ trace `½·appCc(ΦA)(wXi) + ½·appCc(ΦB)(wXi)`, where `ΦA/ΦB` are `(3,3)`-o
 pattern one rank up).  Everything is pointwise in the workhorse `atgw` currency; the single
 integration at the end (`antidiagonalTupleGrid_integral_radiusFree`) produces the low window. -/
 
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] in
 private theorem b4_icg_zero (g : SmoothRiemannianMetric I M) (r s j : ℕ) :
     iteratedCovGrad (I := I) g r s j (0 : SmoothCcTensor g r s) = 0 := by
   induction j with
@@ -419,6 +420,7 @@ private theorem b4_icg_zero (g : SmoothRiemannianMetric I M) (r s j : ℕ) :
       rw [iteratedCovGrad_succ, ih]
       exact covGrad_zero (I := I) (M := M) (g := g) (r := r) (s := s + j)
 
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] in
 private theorem b4_iCG_smul (g : SmoothRiemannianMetric I M) (r s j : ℕ) (c : ℝ)
     (w : SmoothCcTensor g r s) :
     iteratedCovGrad (I := I) g r s j (c • w) = c • iteratedCovGrad (I := I) g r s j w := by
@@ -522,6 +524,7 @@ private noncomputable def b4JoinK (u v : ℕ) (A B : ℕ → ℝ) (n : ℕ) : �
     ∑ i ∈ Finset.range (n + 1), ∑ j ∈ Finset.range (n + 1),
       A i * B j * Combinatorics.antidiagonalTupleGridWindowMulConst (i + u) (j + v)
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] in
 private lemma b4JoinK_nonneg (u v : ℕ) (A B : ℕ → ℝ)
     (hA : ∀ i, 0 ≤ A i) (hB : ∀ i, 0 ≤ B i) (n : ℕ) :
     0 ≤ b4JoinK (E := E) u v A B n := by
@@ -655,6 +658,7 @@ private theorem b4_jet2_nonneg
     0 ≤ b4Jet2 (I := I) (M := M) g r s S :=
   Finset.sum_nonneg fun _ _ => sq_nonneg _
 
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] in
 private theorem b4_jet2_add
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S T : SmoothCcTensor g r s) :
@@ -690,6 +694,7 @@ private theorem b4_jet2_add
           ‖iteratedCovGrad (I := I) g r s q T‖ ^ 2) := by
       simp only [mul_add, Finset.sum_add_distrib, Finset.mul_sum]
 
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] in
 private theorem b4_jet2_smul
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (c : ℝ) (S : SmoothCcTensor g r s) :
@@ -758,6 +763,7 @@ private theorem b4_slot_h2
           ‖iteratedCovGrad (I := I) g r s i Φ‖ ^ 2 := by
       rw [Finset.mul_sum]
 
+omit [NeZero (Module.finrank ℝ E)] in
 private theorem b4_reindex_h2
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (Φ : SmoothCcTensor g r s) (ρ : Equiv.Perm (Fin r)) :
@@ -888,6 +894,7 @@ private theorem b4_phi_h2
     _ = (Ca * Jtr * (Module.finrank ℝ E : ℝ) ^ 3) *
         b4Jet2 (I := I) (M := M) g 0 2 P := by ring
 
+omit [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 /-- Center evaluation of the rank-`3` cometric double trace (orthoframe diagonal). -/
 private lemma b4_trace_center (g : SmoothRiemannianMetric I M) (x : M)
     (D : Tensor0SSpace 5 I x) (m : Fin 3 → E) :
@@ -1135,6 +1142,7 @@ private lemma b4_unitModel_smul (g₀ : SmoothRiemannianMetric I M) (s : ℕ) (c
   rw [SmoothCcTensor.toSection_smul, ContMDiffSection.coe_smul, Pi.smul_apply,
     ContinuousLinearMap.smul_apply, Tensor0SSpace.toModel_smul]
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [SigmaCompactSpace M] in
 /-- `unitModel` of the local `metricConnDiffLoweredCc` (clone of the Arm1-private lemma,
 `g_bg`-generic). -/
 private lemma b4_mcd_unitModel (g₀ g₁ g_bg : SmoothRiemannianMetric I M) (x : M)
@@ -1152,6 +1160,7 @@ private lemma b4_mcd_unitModel (g₀ g₁ g_bg : SmoothRiemannianMetric I M) (x 
     ContinuousMultilinearMap.constOfIsEmpty_apply, one_smul]
   exact metricConnDiffLoweredFib_toModel (I := I) g₁ g₁ g_bg x m
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [BoundarylessManifold I M] [SigmaCompactSpace M] in
 /-- `unitModel` of an `appCc` application, as the fibre action on the unit value. -/
 private lemma b4_appCc_unitModel (g₀ : SmoothRiemannianMetric I M) (r s : ℕ)
     (Φ : SmoothCcTensor g₀ r s) (W : SmoothCcTensor g₀ 0 r) (x : M) :
@@ -1407,6 +1416,7 @@ noncomputable def metricLowerCorr
       (b4Phi (I := I) (M := M) g₀ P b4PermB)
       (wXi (I := I) (M := M) g₀ g₁ g_bg)
 
+omit [NeZero (Module.finrank ℝ E)] in
 /-- The moving-lowering correction is linear in the metric-perturbation
 slot. -/
 theorem metricCorr_sub
@@ -1634,6 +1644,7 @@ theorem metricCorr_h2_mul
         nlinarith
   simpa only [b4Jet2, W] using hcorr
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [BoundarylessManifold I M] in
 private theorem b4App_sub
     (g₀ : SmoothRiemannianMetric I M)
     (Φ : SmoothCcTensor g₀ 3 3)

@@ -56,6 +56,7 @@ theorem c0j_const
   exact (A.toSection.contMDiff.comp_contMDiffOn contMDiffOn_fst).mono
     (Set.subset_univ _)
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [BoundarylessManifold I M] [SigmaCompactSpace M] in
 theorem c0j_app
     (g : SmoothRiemannianMetric I M) {a b c : ℕ} {S : Set ℝ}
     {A : ℝ → SmoothCcTensor g b c} {B : ℝ → SmoothCcTensor g a b}
@@ -624,6 +625,7 @@ theorem vbOne_joint
       (realizedFam (I := I) g T 0 hδ hδZ t) W) hcore'
   simpa only [linearizedRicciThreeArmHjoint, vbOne] using hs
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [SigmaCompactSpace M] in
 theorem metricLower_val
     (g gm gB : SmoothRiemannianMetric I M) (x : M) :
     ((show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace 3 I x from
@@ -1574,6 +1576,7 @@ theorem aaOneSmul
   rw [appCcRS_smul_right]
   rfl
 
+omit [BoundarylessManifold I M] [SigmaCompactSpace M] in
 theorem daTransSmul
     (g gm : SmoothRiemannianMetric I M) (a : ℝ)
     (W : SmoothCcTensor g 0 2) :
