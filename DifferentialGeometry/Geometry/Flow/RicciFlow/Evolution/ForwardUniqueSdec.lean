@@ -118,7 +118,6 @@ theorem inner_sharpFlat (g₁ g₂ : SmoothRiemannianMetric I M) (x : M)
     _ = g₂.inner x W V := tangentFlatEquiv_apply_gen (I := I) g₂ x W V
     _ = g₂.inner x V W := g₂.symm x W V
 
-set_option synthInstance.maxHeartbeats 1000000 in
 
 theorem rm04mix_inner (g₁ g₂ : SmoothRiemannianMetric I M) (x : M)
     (X Y Z W : TangentSpace I x) :
@@ -132,7 +131,6 @@ theorem rm04mix_inner (g₁ g₂ : SmoothRiemannianMetric I M) (x : M)
   rw [h]
   exact g₁.symm x W _
 
-set_option synthInstance.maxHeartbeats 1000000 in
 
 def lowOfComp (g : SmoothRiemannianMetric I M) {x : M}
     (b : Module.Basis Idx Real (TangentSpace I x))
@@ -142,7 +140,6 @@ def lowOfComp (g : SmoothRiemannianMetric I M) {x : M}
     (quadOfComp (I := I) b
       (fun i j k l => b.repr (raiseAt (I := I) g x b (fun m : Idx => c i j k m)) l))
 
-set_option synthInstance.maxHeartbeats 1000000 in
 
 theorem lowOfComp_eval (g : SmoothRiemannianMetric I M) {x : M}
     (b : Module.Basis Idx Real (TangentSpace I x))
@@ -163,7 +160,6 @@ section Gap
 
 variable {x : M}
 
-set_option synthInstance.maxHeartbeats 1000000 in
 
 def gapAt (g₁ g₂ : SmoothRiemannianMetric I M) (x : M) :
     Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) 4 x :=
@@ -171,7 +167,6 @@ def gapAt (g₁ g₂ : SmoothRiemannianMetric I M) (x : M) :
     CovariantDerivative.riemannCurvature04At (I := I) g₁ (metricCov (I := I) g₂)
       (metricCov_smooth (I := I) g₂) x
 
-set_option synthInstance.maxHeartbeats 1000000 in
 
 theorem rmDiffLow_split (g₁ g₂ : SmoothRiemannianMetric I M) (x : M)
     (v : Fin 4 -> TangentSpace I x) :
@@ -184,7 +179,6 @@ theorem rmDiffLow_split (g₁ g₂ : SmoothRiemannianMetric I M) (x : M)
     Tensor0SSpace.sub_apply (I := I) 4 x (metricRm04At (I := I) g₂ x) _ v]
   ring
 
-set_option synthInstance.maxHeartbeats 1000000 in
 
 def gapDot (g₁ g₂ : SmoothRiemannianMetric I M) {x : M}
     (Rm2dot : TangentSpace I x →L[Real] TangentSpace I x →L[Real] TangentSpace I x →L[Real]
@@ -201,7 +195,6 @@ section Deriv
 
 variable {x : M}
 
-set_option synthInstance.maxHeartbeats 1000000 in
 
 theorem vec3_deriv_basis {Idx : Type*} [Fintype Idx]
     (F : Real -> (TangentSpace I x →L[Real] TangentSpace I x →L[Real] TangentSpace I x →L[Real]
@@ -231,7 +224,6 @@ theorem vec3_deriv_basis {Idx : Type*} [Fintype Idx]
         HasDerivAt.fun_sum fun k _ => (hbasis i j k).const_smul _
   simpa only [← hexp] using hstep
 
-set_option synthInstance.maxHeartbeats 1000000 in
 
 theorem innerCurve_deriv (g : Real -> SmoothRiemannianMetric I M)
     (V : Real -> TangentSpace I x) (Vdot Z : TangentSpace I x) {t : Real}
@@ -288,8 +280,6 @@ theorem innerCurve_deriv (g : Real -> SmoothRiemannianMetric I M)
   have hfin := hderiv.congr_deriv hval
   simpa only [hsum] using hfin
 
-set_option synthInstance.maxHeartbeats 1000000 in
-set_option maxHeartbeats 1000000 in
 
 theorem gap_deriv (g₁ g₂ : Real -> SmoothRiemannianMetric I M)
     (Rm2dot : TangentSpace I x →L[Real] TangentSpace I x →L[Real] TangentSpace I x →L[Real]
@@ -366,7 +356,6 @@ end Deriv
 
 section LapGap
 
-set_option synthInstance.maxHeartbeats 1000000 in
 
 theorem reLower_rm2Low (g₁ g₂ : SmoothRiemannianMetric I M)
     (P : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
@@ -390,7 +379,6 @@ theorem reLower_rm2Low (g₁ g₂ : SmoothRiemannianMetric I M)
   conv_rhs => rw [htail]
   rw [metricRm04At_inner]
 
-set_option synthInstance.maxHeartbeats 1000000 in
 
 theorem lapGap_eq (g₁ g₂ : SmoothRiemannianMetric I M)
     (P : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
@@ -424,7 +412,6 @@ section Rm2Speed
 
 variable {Idx : Type*} [Fintype Idx]
 
-set_option synthInstance.maxHeartbeats 1000000 in
 
 def uhlRm2Vec (g : Real -> SmoothRiemannianMetric I M)
     (basisAt : (y : M) -> Module.Basis Idx Real (TangentSpace I y))
@@ -436,8 +423,6 @@ def uhlRm2Vec (g : Real -> SmoothRiemannianMetric I M)
     (fun i j k l => (basisAt y).repr
       (uhlRaisedDeriv (I := I) g basisAt Rm04 roughLapRm04 B ricciOneUp t y i j k) l)
 
-set_option synthInstance.maxHeartbeats 1000000 in
-set_option maxHeartbeats 1000000 in
 
 theorem uhlRm2_deriv
     {D : RealTimeInterval}
@@ -507,8 +492,6 @@ def sdecRem (g₁ g₂ : SmoothRiemannianMetric I M) {x : M}
       (reLowerPair (I := I) g₁ (metricNabla0S (I := I) g₁ P)
         (lapDiffFlux (I := I) g₁ g₂ (metricTensorField (I := I) g₂))) x
 
-set_option synthInstance.maxHeartbeats 1000000 in
-set_option maxHeartbeats 2000000 in
 
 theorem sdec_core
     {D : RealTimeInterval}
@@ -736,8 +719,6 @@ variable [CompleteSpace E] [SigmaCompactSpace M] [T2Space M]
 variable [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
 variable {Idx : Type*} [Fintype Idx]
 
-set_option synthInstance.maxHeartbeats 1000000 in
-set_option maxHeartbeats 1000000 in
 
 theorem sdec_of_uhlenbeck
     {D : RealTimeInterval}

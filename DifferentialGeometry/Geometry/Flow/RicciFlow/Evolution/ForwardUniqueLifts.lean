@@ -27,7 +27,6 @@ section Quad
 
 variable {Idx : Type*} [Fintype Idx] {u : Set M} {x : M}
 
-set_option synthInstance.maxHeartbeats 1000000 in
 
 theorem tri_expand {ι : Type*} [Fintype ι]
     (A : TangentSpace I x →L[Real] TangentSpace I x →L[Real] TangentSpace I x →L[Real]
@@ -61,7 +60,6 @@ theorem tri_expand {ι : Type*} [Fintype ι]
   refine Finset.sum_congr rfl fun k _ => ?_
   rw [smul_smul, smul_smul]
 
-set_option synthInstance.maxHeartbeats 1000000 in
 
 def quadOfComp (b : Module.Basis Idx Real (TangentSpace I x))
     (c : Idx -> Idx -> Idx -> Idx -> Real) :
@@ -73,7 +71,6 @@ def quadOfComp (b : Module.Basis Idx Real (TangentSpace I x))
         (b.constr Real fun j =>
           LinearMap.toContinuousLinearMap (b.constr Real fun k => ∑ l, c i j k l • b l)))
 
-set_option synthInstance.maxHeartbeats 1000000 in
 @[simp]
 theorem quadOfComp_basis (b : Module.Basis Idx Real (TangentSpace I x))
     (c : Idx -> Idx -> Idx -> Idx -> Real) (i j k : Idx) :
@@ -102,7 +99,6 @@ theorem quadOfComp_basis (b : Module.Basis Idx Real (TangentSpace I x))
   change (b.constr Real fun k' => ∑ l, c i j k' l • b l) (b k) = _
   rw [Module.Basis.constr_basis]
 
-set_option synthInstance.maxHeartbeats 1000000 in
 
 theorem quadOfComp_vec (b : Module.Basis Idx Real (TangentSpace I x))
     (V : Idx -> Idx -> Idx -> TangentSpace I x) (i j k : Idx) :
@@ -111,7 +107,6 @@ theorem quadOfComp_vec (b : Module.Basis Idx Real (TangentSpace I x))
   rw [quadOfComp_basis]
   exact b.sum_repr (V i j k)
 
-set_option synthInstance.maxHeartbeats 1000000 in
 
 theorem coeff_quadOfComp (frame : Idx -> (y : M) -> TangentSpace I y)
     (hframe : IsLocalFrameOn I E 1 frame u) (hx : x ∈ u)
@@ -131,7 +126,6 @@ theorem coeff_quadOfComp (frame : Idx -> (y : M) -> TangentSpace I y)
   rw [← hbcoe i, ← hbcoe j, ← hbcoe k, hcoeff l, quadOfComp_basis]
   simp [Finsupp.single_apply]
 
-set_option synthInstance.maxHeartbeats 1000000 in
 
 theorem rmDiffVec_hasDerivAt_of_basis
     (g₁ g₂ : Real -> SmoothRiemannianMetric I M)
@@ -172,7 +166,6 @@ section Collapse
 
 variable {Idx : Type*} [Fintype Idx]
 
-set_option synthInstance.maxHeartbeats 1000000 in
 
 def uhlRaisedDeriv (g : Real -> SmoothRiemannianMetric I M)
     (basisAt : (y : M) -> Module.Basis Idx Real (TangentSpace I y))
@@ -189,7 +182,6 @@ def uhlRaisedDeriv (g : Real -> SmoothRiemannianMetric I M)
               (basisAt y i) (basisAt y j) (basisAt y k)
             else basisAt y l))
 
-set_option synthInstance.maxHeartbeats 1000000 in
 
 def uhlRmDiffSpeed (g₁ g₂ : Real -> SmoothRiemannianMetric I M)
     (basisAt : (y : M) -> Module.Basis Idx Real (TangentSpace I y))
@@ -204,8 +196,6 @@ def uhlRmDiffSpeed (g₁ g₂ : Real -> SmoothRiemannianMetric I M)
         (uhlRaisedDeriv (I := I) g₁ basisAt Rm04₁ roughLapRm04₁ B₁ ricciOneUp₁ t y i j k -
           uhlRaisedDeriv (I := I) g₂ basisAt Rm04₂ roughLapRm04₂ B₂ ricciOneUp₂ t y i j k) l)
 
-set_option synthInstance.maxHeartbeats 1000000 in
-set_option maxHeartbeats 1000000 in
 
 theorem rm_of_uhlenbeck
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}

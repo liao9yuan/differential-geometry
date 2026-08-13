@@ -116,7 +116,6 @@ theorem driftSlots_sub
 
 variable [NeZero (Module.finrank Real E)]
 
-set_option maxHeartbeats 1000000 in
 
 theorem driftSlotsSq_le (g : SmoothRiemannianMetric I M)
     (T : Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) 4 x) :
@@ -232,7 +231,6 @@ theorem ricciDrift_sub (g₁ g₂ : SmoothRiemannianMetric I M) (x : M) :
 
 variable [NeZero (Module.finrank Real E)]
 
-set_option maxHeartbeats 1000000 in
 
 theorem ricciDriftSq_le (g₁ g₂ : SmoothRiemannianMetric I M) (x : M) :
     normSq0S (I := I) g₁ x 4

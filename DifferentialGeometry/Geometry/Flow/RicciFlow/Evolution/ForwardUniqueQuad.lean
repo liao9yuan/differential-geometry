@@ -46,7 +46,6 @@ def bPerm3 : Equiv.Perm (Fin 8) :=
 def bPerm4 : Equiv.Perm (Fin 8) :=
   Equiv.ofBijective ![4, 0, 7, 2, 5, 1, 6, 3] (by decide)
 
-set_option maxHeartbeats 1000000 in
 
 theorem bPair_comp {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
     (g : SmoothRiemannianMetric I M) {x : M}
@@ -105,7 +104,6 @@ theorem bPair_comp {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
   rw [hA, hB]
   ring
 
-set_option maxHeartbeats 1000000 in
 
 theorem bPair2_comp {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
     (g : SmoothRiemannianMetric I M) {x : M}
@@ -164,7 +162,6 @@ theorem bPair2_comp {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
   rw [hA, hB]
   ring
 
-set_option maxHeartbeats 1000000 in
 
 theorem bPair3_comp {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
     (g : SmoothRiemannianMetric I M) {x : M}
@@ -223,7 +220,6 @@ theorem bPair3_comp {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
   rw [hA, hB]
   ring
 
-set_option maxHeartbeats 1000000 in
 
 theorem bPair4_comp {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
     (g : SmoothRiemannianMetric I M) {x : M}
@@ -290,7 +286,6 @@ def bComb (g : SmoothRiemannianMetric I M)
   (bPair (I := I) g bPerm A A - bPair (I := I) g bPerm2 A A) +
     (bPair (I := I) g bPerm3 A A - bPair (I := I) g bPerm4 A A)
 
-set_option maxHeartbeats 1000000 in
 
 theorem bComb_comp {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
     (g : SmoothRiemannianMetric I M) {x : M}
@@ -426,7 +421,6 @@ theorem bPairSq_le (g : SmoothRiemannianMetric I M) (σ : Fin 8 ≃ Fin 8)
           (normSq0S (I := I) g x 4 (A x) *
             normSq0S (I := I) g x 4 (B x)) := by ring
 
-set_option maxHeartbeats 1000000 in
 
 theorem bCombSq_le (g : SmoothRiemannianMetric I M)
     (A : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
@@ -494,7 +488,6 @@ theorem bCombSq_le (g : SmoothRiemannianMetric I M)
       dsimp only [K]
       ring
 
-set_option maxHeartbeats 1000000 in
 
 theorem bPair_sub (g : SmoothRiemannianMetric I M) (σ : Fin 8 ≃ Fin 8)
     (A B : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
@@ -557,7 +550,6 @@ theorem bPair_sub (g : SmoothRiemannianMetric I M) (σ : Fin 8 ≃ Fin 8)
   rw [metricTraceFirstTwoField_add (I := I) (M := M) (s := 6) g]
   rw [metricTraceFirstTwoField_add (I := I) (M := M) (s := 4) g]
 
-set_option maxHeartbeats 1000000 in
 
 theorem bMetSq_le (g₁ g₂ : SmoothRiemannianMetric I M) (σ : Fin 8 ≃ Fin 8)
     (A B : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
@@ -733,7 +725,6 @@ theorem bMetSq_le (g₁ g₂ : SmoothRiemannianMetric I M) (σ : Fin 8 ≃ Fin 8
           H0 * (NA * NB) := by ring
     _ = _ := by rw [hnR, hH0, hNA, hNB]
 
-set_option maxHeartbeats 1000000 in
 
 theorem bDiffSq_le (g₁ g₂ : SmoothRiemannianMetric I M) (σ : Fin 8 ≃ Fin 8)
     (A B : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
@@ -819,7 +810,6 @@ theorem bDiffSq_le (g₁ g₂ : SmoothRiemannianMetric I M) (σ : Fin 8 ≃ Fin 
       dsimp only [C, D, NA, NB]
       ring
 
-set_option maxHeartbeats 1000000 in
 
 theorem bCombDiffSq_le (g₁ g₂ : SmoothRiemannianMetric I M)
     (A B : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
