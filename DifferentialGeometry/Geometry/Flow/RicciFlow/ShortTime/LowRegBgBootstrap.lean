@@ -75,12 +75,12 @@ structure BgSmoothPacket (g g_bg : SmoothRiemannianMetric I M)
       (hδ_lt : δ < 1)
       (hδ : ∀ t : ℝ, gFibreOpBound (I := I) (M := M) g
         (ccTensorBilinSymm (I := I) g (F t)) δ)
-      (h_pin : ∀ t ∈ Set.Icc (0 : ℝ) T,
+      (_h_pin : ∀ t ∈ Set.Icc (0 : ℝ) T,
         SmoothCcTensor.toL2 (g := g) (r := 0) (s := 2) (F t) =
           tensorHsToL2 (I := I) (M := M) (g := g) (r := 0) (s := 2)
             (tensorResolventL2_isCompactOperator (I := I) (M := M) g 0 2)
             (show (0 : ℝ) ≤ (2 : ℝ) by norm_num) (timeH1.toFun carrier t))
-      (hball : ∀ t ∈ Set.Ico (0 : ℝ) T,
+      (_hball : ∀ t ∈ Set.Ico (0 : ℝ) T,
         ‖smoothCcToTensorHs (I := I) (M := M) g ((2 : ℝ) + 2) (F t)‖ ≤ radius),
     ∀ t ∈ Set.Ico (0 : ℝ) T, ∀ i,
       modePath i t = tensorL2Coeff (I := I) (M := M)

@@ -476,10 +476,10 @@ private theorem rev3Bdd
     ∃ C : ℝ, 0 ≤ C ∧
       ∀ (gm : SmoothRiemannianMetric I M)
         (P : SmoothCcTensor g 0 2)
-        (hP : ∀ (x : M) (u v : TangentSpace I x),
+        (_hP : ∀ (x : M) (u v : TangentSpace I x),
           ccTensorBilin (I := I) g P x u v =
             ccTensorBilin (I := I) g P x v u)
-        (htie : ∀ (x : M) (u v : TangentSpace I x),
+        (_htie : ∀ (x : M) (u v : TangentSpace I x),
           gm.inner x u v =
             g.inner x u v + ccTensorBilinSymm (I := I) g P x u v)
         (R : ℝ), 0 ≤ R →
@@ -835,15 +835,15 @@ private theorem lowBddH1
       (∀ R : ℝ, 0 ≤ R → 0 ≤ B1 R) ∧
       ∀ (gT : SmoothRiemannianMetric I M)
         (T : SmoothCcTensor g 0 2)
-        (hT : ∀ (x : M) (u v : TangentSpace I x),
+        (_hT : ∀ (x : M) (u v : TangentSpace I x),
           ccTensorBilin (I := I) g T x u v =
             ccTensorBilin (I := I) g T x v u)
-        (hTtie : ∀ (x : M) (u v : TangentSpace I x),
+        (_hTtie : ∀ (x : M) (u v : TangentSpace I x),
           gT.inner x u v =
             g.inner x u v + ccTensorBilinSymm (I := I) g T x u v)
         {δT : ℝ}
-        (hδT_le : δT ≤ δ₀) (hδT0 : 0 ≤ δT)
-        (hδT : gFibreOpBound (I := I) (M := M) g
+        (_hδT_le : δT ≤ δ₀) (_hδT0 : 0 ≤ δT)
+        (_hδT : gFibreOpBound (I := I) (M := M) g
           (ccTensorBilinSymm (I := I) g T) δT)
         (A : ℝ), 0 ≤ A →
         lowJetSq (I := I) (M := M) g 3 T ≤ A ^ 2 →
@@ -1009,24 +1009,24 @@ private theorem corePairH1
       (∀ R A : ℝ, 0 ≤ B R A) ∧
       ∀ (gT gU : SmoothRiemannianMetric I M)
         (T U : SmoothCcTensor g 0 2)
-        (hT : ∀ (x : M) (u v : TangentSpace I x),
+        (_hT : ∀ (x : M) (u v : TangentSpace I x),
           ccTensorBilin (I := I) g T x u v =
             ccTensorBilin (I := I) g T x v u)
-        (hU : ∀ (x : M) (u v : TangentSpace I x),
+        (_hU : ∀ (x : M) (u v : TangentSpace I x),
           ccTensorBilin (I := I) g U x u v =
             ccTensorBilin (I := I) g U x v u)
-        (hTtie : ∀ (x : M) (u v : TangentSpace I x),
+        (_hTtie : ∀ (x : M) (u v : TangentSpace I x),
           gT.inner x u v =
             g.inner x u v + ccTensorBilinSymm (I := I) g T x u v)
-        (hUtie : ∀ (x : M) (u v : TangentSpace I x),
+        (_hUtie : ∀ (x : M) (u v : TangentSpace I x),
           gU.inner x u v =
             g.inner x u v + ccTensorBilinSymm (I := I) g U x u v)
         {δT δU : ℝ}
-        (hδT_le : δT ≤ δ₀) (hδT0 : 0 ≤ δT)
-        (hδT : gFibreOpBound (I := I) (M := M) g
+        (_hδT_le : δT ≤ δ₀) (_hδT0 : 0 ≤ δT)
+        (_hδT : gFibreOpBound (I := I) (M := M) g
           (ccTensorBilinSymm (I := I) g T) δT)
-        (hδU_le : δU ≤ δ₀) (hδU0 : 0 ≤ δU)
-        (hδU : gFibreOpBound (I := I) (M := M) g
+        (_hδU_le : δU ≤ δ₀) (_hδU0 : 0 ≤ δU)
+        (_hδU : gFibreOpBound (I := I) (M := M) g
           (ccTensorBilinSymm (I := I) g U) δU)
         (R A D2 : ℝ),
         0 ≤ R → 0 ≤ A → 0 ≤ D2 →
@@ -1260,15 +1260,15 @@ private theorem coreBddH1
       (∀ A : ℝ, 0 ≤ A → 0 ≤ B A) ∧
       ∀ (gT : SmoothRiemannianMetric I M)
         (T : SmoothCcTensor g 0 2)
-        (hT : ∀ (x : M) (u v : TangentSpace I x),
+        (_hT : ∀ (x : M) (u v : TangentSpace I x),
           ccTensorBilin (I := I) g T x u v =
             ccTensorBilin (I := I) g T x v u)
-        (hTtie : ∀ (x : M) (u v : TangentSpace I x),
+        (_hTtie : ∀ (x : M) (u v : TangentSpace I x),
           gT.inner x u v =
             g.inner x u v + ccTensorBilinSymm (I := I) g T x u v)
         {δT : ℝ}
-        (hδT_le : δT ≤ δ₀) (hδT0 : 0 ≤ δT)
-        (hδT : gFibreOpBound (I := I) (M := M) g
+        (_hδT_le : δT ≤ δ₀) (_hδT0 : 0 ≤ δT)
+        (_hδT : gFibreOpBound (I := I) (M := M) g
           (ccTensorBilinSymm (I := I) g T) δT)
         (A : ℝ), 0 ≤ A →
         lowJetSq (I := I) (M := M) g 3 T ≤ A ^ 2 →

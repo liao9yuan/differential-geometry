@@ -218,7 +218,7 @@ theorem c2JetTowerQ
 
 theorem c2_jet_tower
     (hDim : Module.finrank ℝ E = 3)
-    (g g_bg : SmoothRiemannianMetric I M) (a : ℕ) {R₀ : ℝ} (hR₀ : 0 ≤ R₀) :
+    (g g_bg : SmoothRiemannianMetric I M) (a : ℕ) {R₀ : ℝ} (_hR₀ : 0 ≤ R₀) :
     ∃ Kc : ℕ → ℝ, (∀ i, 0 ≤ Kc i) ∧
       ∀ (T : SmoothCcTensor g 0 2)
         (hT : ∀ (x : M) (u v : TangentSpace I x),
@@ -402,7 +402,7 @@ theorem a2LadderQ
 theorem a2_ladder
     (hDim : Module.finrank ℝ E = 3)
     (g₀ : SmoothRiemannianMetric I M) (a : ℕ)
-    (ha : 3 ≤ a) {R₀ : ℝ} (hR₀ : 0 ≤ R₀) :
+    (ha : 3 ≤ a) {R₀ : ℝ} (_hR₀ : 0 ≤ R₀) :
     ∃ κ : ℝ, 0 ≤ κ ∧
       ∀ {δ : ℝ} (hδ0 : 0 ≤ δ) (hδ_le : δ ≤ 1 / 3),
       ∃ Clower : ℕ → ℝ, (∀ m, 0 ≤ Clower m) ∧
@@ -513,9 +513,9 @@ theorem a1_ladder_bg
     (g g_bg : SmoothRiemannianMetric I M) (a : ℕ)
     (ha : 2 ≤ a) {R₀ : ℝ} (hR₀ : 0 ≤ R₀) :
     ∃ Clower : ℕ → ℝ, (∀ m, 0 ≤ Clower m) ∧
-      ∀ {δ : ℝ} (hδ0 : 0 ≤ δ) (hδ_le : δ ≤ 1 / 3)
+      ∀ {δ : ℝ} (_hδ0 : 0 ≤ δ) (hδ_le : δ ≤ 1 / 3)
         (T : SmoothCcTensor g 0 2)
-        (hT : ∀ (x : M) (u v : TangentSpace I x),
+        (_hT : ∀ (x : M) (u v : TangentSpace I x),
           ccTensorBilin (I := I) g T x u v =
             ccTensorBilin (I := I) g T x v u)
         (hδg : gFibreOpBound (I := I) (M := M) g
@@ -623,9 +623,9 @@ theorem a1_ladder
     (g : SmoothRiemannianMetric I M) (a : ℕ)
     (ha : 2 ≤ a) {R₀ : ℝ} (hR₀ : 0 ≤ R₀) :
     ∃ Clower : ℕ → ℝ, (∀ m, 0 ≤ Clower m) ∧
-      ∀ {δ : ℝ} (hδ0 : 0 ≤ δ) (hδ_le : δ ≤ 1 / 3)
+      ∀ {δ : ℝ} (_hδ0 : 0 ≤ δ) (hδ_le : δ ≤ 1 / 3)
         (T : SmoothCcTensor g 0 2)
-        (hT : ∀ (x : M) (u v : TangentSpace I x),
+        (_hT : ∀ (x : M) (u v : TangentSpace I x),
           ccTensorBilin (I := I) g T x u v =
             ccTensorBilin (I := I) g T x v u)
         (hδg : gFibreOpBound (I := I) (M := M) g
@@ -647,9 +647,9 @@ theorem a1LadderQBg
     (hDim : Module.finrank ℝ E = 3)
     (g g_bg : SmoothRiemannianMetric I M) :
     ∃ Clower : ℝ → ℕ → ℝ, (∀ R m, 0 ≤ Clower R m) ∧
-      ∀ {δ : ℝ} (hδ0 : 0 ≤ δ) (hδ_le : δ ≤ 1 / 3)
+      ∀ {δ : ℝ} (_hδ0 : 0 ≤ δ) (hδ_le : δ ≤ 1 / 3)
         (T : SmoothCcTensor g 0 2)
-        (hT : ∀ (x : M) (u v : TangentSpace I x),
+        (_hT : ∀ (x : M) (u v : TangentSpace I x),
           ccTensorBilin (I := I) g T x u v =
             ccTensorBilin (I := I) g T x v u)
         (hδg : gFibreOpBound (I := I) (M := M) g
@@ -658,7 +658,7 @@ theorem a1LadderQBg
           (ccTensorBilinSymm (I := I) g
             (0 : SmoothCcTensor g 0 2)) δ)
         {R : ℝ}
-        (hR : ‖smoothCcToTensorHs (I := I) (M := M) g (4 : ℝ) T‖ ≤ R)
+        (_hR : ‖smoothCcToTensorHs (I := I) (M := M) g (4 : ℝ) T‖ ≤ R)
         (m : ℕ),
           ‖smoothCcToTensorHs (I := I) (M := M) g (m : ℝ)
               ((lowBaseData (I := I) (M := M) g g_bg T
@@ -681,9 +681,9 @@ theorem a1LadderQ
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M) :
     ∃ Clower : ℝ → ℕ → ℝ, (∀ R m, 0 ≤ Clower R m) ∧
-      ∀ {δ : ℝ} (hδ0 : 0 ≤ δ) (hδ_le : δ ≤ 1 / 3)
+      ∀ {δ : ℝ} (_hδ0 : 0 ≤ δ) (hδ_le : δ ≤ 1 / 3)
         (T : SmoothCcTensor g 0 2)
-        (hT : ∀ (x : M) (u v : TangentSpace I x),
+        (_hT : ∀ (x : M) (u v : TangentSpace I x),
           ccTensorBilin (I := I) g T x u v =
             ccTensorBilin (I := I) g T x v u)
         (hδg : gFibreOpBound (I := I) (M := M) g
@@ -692,7 +692,7 @@ theorem a1LadderQ
           (ccTensorBilinSymm (I := I) g
             (0 : SmoothCcTensor g 0 2)) δ)
         {R : ℝ}
-        (hR : ‖smoothCcToTensorHs (I := I) (M := M) g (4 : ℝ) T‖ ≤ R)
+        (_hR : ‖smoothCcToTensorHs (I := I) (M := M) g (4 : ℝ) T‖ ≤ R)
         (m : ℕ),
           ‖smoothCcToTensorHs (I := I) (M := M) g (m : ℝ)
               ((lowBaseData (I := I) (M := M) g g T

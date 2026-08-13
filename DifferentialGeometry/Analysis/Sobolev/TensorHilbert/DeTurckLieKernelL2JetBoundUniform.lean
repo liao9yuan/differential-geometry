@@ -39,10 +39,10 @@ private theorem kernel_grid_of_conn
               ((iteratedCovGrad (I := I) g₀ 1 2 j
                 (connDiffSection (I := I) g_bg g₀)).toSection x) ≤ F j) →
         ∀ (g₁ : SmoothRiemannianMetric I M) (T : SmoothCcTensor g₀ 0 2)
-          (htie : ∀ (y : M) (v w : TangentSpace I y),
+          (_htie : ∀ (y : M) (v w : TangentSpace I y),
             g₁.inner y v w = g₀.inner y v w + ccTensorBilinSymm (I := I) g₀ T y v w)
-          {δ : ℝ} (hδ_le : δ ≤ δ₀) (hδ_nonneg : 0 ≤ δ)
-          (hbound : gFibreOpBound (I := I) (M := M) g₀
+          {δ : ℝ} (_hδ_le : δ ≤ δ₀) (_hδ_nonneg : 0 ≤ δ)
+          (_hbound : gFibreOpBound (I := I) (M := M) g₀
             (ccTensorBilinSymm (I := I) g₀ T) δ)
           (i : ℕ), i < 2 → ∀ x : M,
           riemannianFiberNormSq (I := I) (M := M) g₀ 1 (3 + i) x
@@ -202,10 +202,10 @@ private theorem lowered_grid_of_conn
               ((iteratedCovGrad (I := I) g₀ 1 2 j
                 (connDiffSection (I := I) g_bg g₀)).toSection x) ≤ F j) →
         ∀ (g₁ : SmoothRiemannianMetric I M) (T : SmoothCcTensor g₀ 0 2)
-          (htie : ∀ (y : M) (v w : TangentSpace I y),
+          (_htie : ∀ (y : M) (v w : TangentSpace I y),
             g₁.inner y v w = g₀.inner y v w + ccTensorBilinSymm (I := I) g₀ T y v w)
-          {δ : ℝ} (hδ_le : δ ≤ δ₀) (hδ_nonneg : 0 ≤ δ)
-          (hbound : gFibreOpBound (I := I) (M := M) g₀
+          {δ : ℝ} (_hδ_le : δ ≤ δ₀) (_hδ_nonneg : 0 ≤ δ)
+          (_hbound : gFibreOpBound (I := I) (M := M) g₀
             (ccTensorBilinSymm (I := I) g₀ T) δ)
           (i : ℕ), i < 2 → ∀ x : M,
           riemannianFiberNormSq (I := I) (M := M) g₀ 0 (4 + i) x
@@ -240,10 +240,10 @@ private theorem sym_grid_of_conn
               ((iteratedCovGrad (I := I) g₀ 1 2 j
                 (connDiffSection (I := I) g_bg g₀)).toSection x) ≤ F j) →
         ∀ (g₁ : SmoothRiemannianMetric I M) (T : SmoothCcTensor g₀ 0 2)
-          (htie : ∀ (y : M) (v w : TangentSpace I y),
+          (_htie : ∀ (y : M) (v w : TangentSpace I y),
             g₁.inner y v w = g₀.inner y v w + ccTensorBilinSymm (I := I) g₀ T y v w)
-          {δ : ℝ} (hδ_le : δ ≤ δ₀) (hδ_nonneg : 0 ≤ δ)
-          (hbound : gFibreOpBound (I := I) (M := M) g₀
+          {δ : ℝ} (_hδ_le : δ ≤ δ₀) (_hδ_nonneg : 0 ≤ δ)
+          (_hbound : gFibreOpBound (I := I) (M := M) g₀
             (ccTensorBilinSymm (I := I) g₀ T) δ)
           (i : ℕ), i < 2 → ∀ x : M,
           riemannianFiberNormSq (I := I) (M := M) g₀ 0 (4 + i) x
@@ -454,10 +454,10 @@ private theorem pair_trace_grid_unif
     {δ₀ : ℝ} (hδ₀ : δ₀ < 1) :
     ∃ C : ℕ → ℝ, (∀ j, 0 ≤ C j) ∧
       ∀ (g₀ g₁ : SmoothRiemannianMetric I M) (T : SmoothCcTensor g₀ 0 2)
-        (htie : ∀ (y : M) (v w : TangentSpace I y),
+        (_htie : ∀ (y : M) (v w : TangentSpace I y),
           g₁.inner y v w = g₀.inner y v w + ccTensorBilinSymm (I := I) g₀ T y v w)
-        {δ : ℝ} (hδ_le : δ ≤ δ₀) (hδ_nonneg : 0 ≤ δ)
-        (hbound : gFibreOpBound (I := I) (M := M) g₀
+        {δ : ℝ} (_hδ_le : δ ≤ δ₀) (_hδ_nonneg : 0 ≤ δ)
+        (_hbound : gFibreOpBound (I := I) (M := M) g₀
           (ccTensorBilinSymm (I := I) g₀ T) δ)
         (j : ℕ), j < 2 → ∀ x : M,
         riemannianFiberNormSq (I := I) (M := M) g₀ 6 (2 + j) x
@@ -585,10 +585,10 @@ theorem dla_grid_of_conn
               ((iteratedCovGrad (I := I) g₀ 1 2 j
                 (connDiffSection (I := I) g_bg g₀)).toSection x) ≤ F j) →
         ∀ (g₁ : SmoothRiemannianMetric I M) (T : SmoothCcTensor g₀ 0 2)
-          (htie : ∀ (y : M) (v w : TangentSpace I y),
+          (_htie : ∀ (y : M) (v w : TangentSpace I y),
             g₁.inner y v w = g₀.inner y v w + ccTensorBilinSymm (I := I) g₀ T y v w)
-          {δ : ℝ} (hδ_le : δ ≤ δ₀) (hδ_nonneg : 0 ≤ δ)
-          (hbound : gFibreOpBound (I := I) (M := M) g₀
+          {δ : ℝ} (_hδ_le : δ ≤ δ₀) (_hδ_nonneg : 0 ≤ δ)
+          (_hbound : gFibreOpBound (I := I) (M := M) g₀
             (ccTensorBilinSymm (I := I) g₀ T) δ)
           (i : ℕ), i < 2 → ∀ x : M,
           riemannianFiberNormSq (I := I) (M := M) g₀ 2 (2 + i) x

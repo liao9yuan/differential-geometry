@@ -168,14 +168,14 @@ theorem path_add_sub_jet
   exact le_of_le_of_eq hmain hsq
 
 theorem topKerJetSharp
-    (hDim : Module.finrank ℝ E = 3)
+    (_hDim : Module.finrank ℝ E = 3)
     (g g_bg : SmoothRiemannianMetric I M) :
     ∃ Kk : ℕ → ℝ, (∀ i, 0 ≤ Kk i) ∧
       ∀ (T : SmoothCcTensor g 0 2)
-        (hT : ∀ (x : M) (u v : TangentSpace I x),
+        (_hT : ∀ (x : M) (u v : TangentSpace I x),
           ccTensorBilin (I := I) g T x u v =
             ccTensorBilin (I := I) g T x v u)
-        {δ : ℝ} (hδ0 : 0 ≤ δ) (hδ_le : δ ≤ 1 / 3)
+        {δ : ℝ} (_hδ0 : 0 ≤ δ) (_hδ_le : δ ≤ 1 / 3)
         (hδg : gFibreOpBound (I := I) (M := M) g
           (ccTensorBilinSymm (I := I) g T) δ)
         (hδZ : gFibreOpBound (I := I) (M := M) g
@@ -244,10 +244,10 @@ theorem topKer_jet
     (g : SmoothRiemannianMetric I M) :
     ∃ Kk : ℕ → ℝ, (∀ i, 0 ≤ Kk i) ∧
       ∀ (T : SmoothCcTensor g 0 2)
-        (hT : ∀ (x : M) (u v : TangentSpace I x),
+        (_hT : ∀ (x : M) (u v : TangentSpace I x),
           ccTensorBilin (I := I) g T x u v =
             ccTensorBilin (I := I) g T x v u)
-        {δ : ℝ} (hδ0 : 0 ≤ δ) (hδ_le : δ ≤ 1 / 3)
+        {δ : ℝ} (_hδ0 : 0 ≤ δ) (_hδ_le : δ ≤ 1 / 3)
         (hδg : gFibreOpBound (I := I) (M := M) g
           (ccTensorBilinSymm (I := I) g T) δ)
         (hδZ : gFibreOpBound (I := I) (M := M) g

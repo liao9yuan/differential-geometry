@@ -661,16 +661,16 @@ theorem wXiSelfTame
       (∀ R : ℝ, 0 ≤ R → 0 ≤ B R) ∧
       ∀ (gT : SmoothRiemannianMetric I M)
         (T : SmoothCcTensor g 0 2)
-        (hT : ∀ (x : M) (u v : TangentSpace I x),
+        (_hT : ∀ (x : M) (u v : TangentSpace I x),
           ccTensorBilin (I := I) g T x u v =
             ccTensorBilin (I := I) g T x v u)
-        (hTtie : ∀ (x : M) (u v : TangentSpace I x),
+        (_hTtie : ∀ (x : M) (u v : TangentSpace I x),
           gT.inner x u v =
             g.inner x u v + ccTensorBilinSymm (I := I) g T x u v)
-        {δ : ℝ} (hδ_le : δ ≤ 1 / 3) (hδ0 : 0 ≤ δ)
-        (hδT : gFibreOpBound (I := I) (M := M) g
+        {δ : ℝ} (_hδ_le : δ ≤ 1 / 3) (_hδ0 : 0 ≤ δ)
+        (_hδT : gFibreOpBound (I := I) (M := M) g
           (ccTensorBilinSymm (I := I) g T) δ)
-        (hδZ : gFibreOpBound (I := I) (M := M) g
+        (_hδZ : gFibreOpBound (I := I) (M := M) g
           (ccTensorBilinSymm (I := I) g
             (0 : SmoothCcTensor g 0 2)) δ)
         (R A : ℝ), 0 ≤ R → 0 ≤ A →
@@ -1008,13 +1008,13 @@ theorem vbH2Pair
       0 < ρ ∧ (∀ R : ℝ, 0 ≤ R → 0 ≤ B0 R) ∧
       (∀ R : ℝ, 0 ≤ R → 0 ≤ B1 R) ∧
       ∀ (T U : SmoothCcTensor g 0 2)
-        (hT : ∀ (x : M) (u v : TangentSpace I x),
+        (_hT : ∀ (x : M) (u v : TangentSpace I x),
           ccTensorBilin (I := I) g T x u v =
             ccTensorBilin (I := I) g T x v u)
-        (hU : ∀ (x : M) (u v : TangentSpace I x),
+        (_hU : ∀ (x : M) (u v : TangentSpace I x),
           ccTensorBilin (I := I) g U x u v =
             ccTensorBilin (I := I) g U x v u)
-        {δ : ℝ} (hδ_le : δ ≤ 1 / 3) (hδ0 : 0 ≤ δ)
+        {δ : ℝ} (_hδ_le : δ ≤ 1 / 3) (_hδ0 : 0 ≤ δ)
         (hδT : gFibreOpBound (I := I) (M := M) g
           (ccTensorBilinSymm (I := I) g T) δ)
         (hδU : gFibreOpBound (I := I) (M := M) g

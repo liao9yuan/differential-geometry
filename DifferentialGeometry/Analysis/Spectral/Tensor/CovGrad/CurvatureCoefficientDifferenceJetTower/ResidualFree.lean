@@ -45,7 +45,7 @@ theorem atgGridIntRs
     (g₀ : SmoothRiemannianMetric I M) (r s : ℕ) {Λ₀ : ℝ} (hΛ₀0 : 0 ≤ Λ₀) :
     ∃ K : ℕ → ℝ, (∀ i, 0 ≤ K i) ∧
       ∀ (P : SmoothCcTensor g₀ r s)
-        (hsup : ∀ x : M, riemannianFiberNormSq (I := I) (M := M) g₀ r s x (P.toSection x) ≤ Λ₀ ^ 2)
+        (_hsup : ∀ x : M, riemannianFiberNormSq (I := I) (M := M) g₀ r s x (P.toSection x) ≤ Λ₀ ^ 2)
         (i : ℕ),
           MeasureTheory.Integrable
               (fun x => ∑ n ∈ Finset.range (i + 1),
@@ -221,7 +221,7 @@ theorem antidiagonalTupleGrid_integral_radiusFree
     (g₀ : SmoothRiemannianMetric I M) {Λ₀ : ℝ} (hΛ₀0 : 0 ≤ Λ₀) :
     ∃ K : ℕ → ℝ, (∀ i, 0 ≤ K i) ∧
       ∀ (P : SmoothCcTensor g₀ 0 2)
-        (hsup : ∀ x : M, riemannianFiberNormSq (I := I) (M := M) g₀ 0 2 x (P.toSection x) ≤ Λ₀ ^ 2)
+        (_hsup : ∀ x : M, riemannianFiberNormSq (I := I) (M := M) g₀ 0 2 x (P.toSection x) ≤ Λ₀ ^ 2)
         (i : ℕ),
           MeasureTheory.Integrable
               (fun x => ∑ n ∈ Finset.range (i + 1),
@@ -243,7 +243,7 @@ theorem bfGridWinIntRs
     (g₀ : SmoothRiemannianMetric I M) (r s : ℕ) {Λ₀ : ℝ} (hΛ₀0 : 0 ≤ Λ₀) :
     ∃ Klow : ℕ → ℝ, (∀ i, 0 ≤ Klow i) ∧ ∃ Ktop : ℕ → ℝ, (∀ i, 0 ≤ Ktop i) ∧
       ∀ (P : SmoothCcTensor g₀ r s)
-        (hsup : ∀ x : M, riemannianFiberNormSq (I := I) (M := M) g₀ r s x (P.toSection x) ≤ Λ₀ ^ 2)
+        (_hsup : ∀ x : M, riemannianFiberNormSq (I := I) (M := M) g₀ r s x (P.toSection x) ≤ Λ₀ ^ 2)
         (i : ℕ),
           MeasureTheory.Integrable
               (fun x => Combinatorics.boundedFactorGridWindow
@@ -386,7 +386,7 @@ theorem boundedFactorGridWindow_integral_radiusFree_topSeparated
     (g₀ : SmoothRiemannianMetric I M) {Λ₀ : ℝ} (hΛ₀0 : 0 ≤ Λ₀) :
     ∃ Klow : ℕ → ℝ, (∀ i, 0 ≤ Klow i) ∧ ∃ Ktop : ℕ → ℝ, (∀ i, 0 ≤ Ktop i) ∧
       ∀ (P : SmoothCcTensor g₀ 0 2)
-        (hsup : ∀ x : M, riemannianFiberNormSq (I := I) (M := M) g₀ 0 2 x (P.toSection x) ≤ Λ₀ ^ 2)
+        (_hsup : ∀ x : M, riemannianFiberNormSq (I := I) (M := M) g₀ 0 2 x (P.toSection x) ≤ Λ₀ ^ 2)
         (i : ℕ),
           MeasureTheory.Integrable
               (fun x => Combinatorics.boundedFactorGridWindow

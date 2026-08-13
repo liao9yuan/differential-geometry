@@ -928,7 +928,7 @@ theorem deTurckRicci_forcingBootstrap_symm
 
 theorem maxreg_solution_jointly_smooth_representative_of_nemytskii
     (g₀ : SmoothRiemannianMetric I M) (a : ℕ)
-    (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a)
+    (_ha_super : 2 * Module.finrank ℝ E + 10 ≤ a)
     (ha_eq : a = 4 * Module.finrank ℝ E + 10)
     (_Nfun : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2) →
       tensorHs (I := I) (M := M) g₀ 0 2 (a : ℝ))

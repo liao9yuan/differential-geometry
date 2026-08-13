@@ -322,24 +322,24 @@ private theorem omega_pair_h3
       (∀ R : ℝ, 0 ≤ R → 0 ≤ B R) ∧
       ∀ (gT gU : SmoothRiemannianMetric I M)
         (T U : SmoothCcTensor g 0 2)
-        (hT : ∀ (x : M) (u v : TangentSpace I x),
+        (_hT : ∀ (x : M) (u v : TangentSpace I x),
           ccTensorBilin (I := I) g T x u v =
             ccTensorBilin (I := I) g T x v u)
-        (hU : ∀ (x : M) (u v : TangentSpace I x),
+        (_hU : ∀ (x : M) (u v : TangentSpace I x),
           ccTensorBilin (I := I) g U x u v =
             ccTensorBilin (I := I) g U x v u)
-        (hTtie : ∀ (x : M) (u v : TangentSpace I x),
+        (_hTtie : ∀ (x : M) (u v : TangentSpace I x),
           gT.inner x u v =
             g.inner x u v + ccTensorBilinSymm (I := I) g T x u v)
-        (hUtie : ∀ (x : M) (u v : TangentSpace I x),
+        (_hUtie : ∀ (x : M) (u v : TangentSpace I x),
           gU.inner x u v =
             g.inner x u v + ccTensorBilinSymm (I := I) g U x u v)
         {δT δU : ℝ}
-        (hδT_le : δT ≤ (1 / 3 : ℝ)) (hδT0 : 0 ≤ δT)
-        (hδT : gFibreOpBound (I := I) (M := M) g
+        (_hδT_le : δT ≤ (1 / 3 : ℝ)) (_hδT0 : 0 ≤ δT)
+        (_hδT : gFibreOpBound (I := I) (M := M) g
           (ccTensorBilinSymm (I := I) g T) δT)
-        (hδU_le : δU ≤ (1 / 3 : ℝ)) (hδU0 : 0 ≤ δU)
-        (hδU : gFibreOpBound (I := I) (M := M) g
+        (_hδU_le : δU ≤ (1 / 3 : ℝ)) (_hδU0 : 0 ≤ δU)
+        (_hδU : gFibreOpBound (I := I) (M := M) g
           (ccTensorBilinSymm (I := I) g U) δU)
         (R A D2 D3 : ℝ),
         0 ≤ R → 0 ≤ A → 0 ≤ D2 → 0 ≤ D3 →
@@ -482,24 +482,24 @@ private theorem alpha_pair_h2
       (∀ R : ℝ, 0 ≤ R → 0 ≤ B R) ∧
       ∀ (gT gU : SmoothRiemannianMetric I M)
         (T U : SmoothCcTensor g 0 2)
-        (hT : ∀ (x : M) (u v : TangentSpace I x),
+        (_hT : ∀ (x : M) (u v : TangentSpace I x),
           ccTensorBilin (I := I) g T x u v =
             ccTensorBilin (I := I) g T x v u)
-        (hU : ∀ (x : M) (u v : TangentSpace I x),
+        (_hU : ∀ (x : M) (u v : TangentSpace I x),
           ccTensorBilin (I := I) g U x u v =
             ccTensorBilin (I := I) g U x v u)
-        (hTtie : ∀ (x : M) (u v : TangentSpace I x),
+        (_hTtie : ∀ (x : M) (u v : TangentSpace I x),
           gT.inner x u v =
             g.inner x u v + ccTensorBilinSymm (I := I) g T x u v)
-        (hUtie : ∀ (x : M) (u v : TangentSpace I x),
+        (_hUtie : ∀ (x : M) (u v : TangentSpace I x),
           gU.inner x u v =
             g.inner x u v + ccTensorBilinSymm (I := I) g U x u v)
         {δT δU : ℝ}
-        (hδT_le : δT ≤ (1 / 3 : ℝ)) (hδT0 : 0 ≤ δT)
-        (hδT : gFibreOpBound (I := I) (M := M) g
+        (_hδT_le : δT ≤ (1 / 3 : ℝ)) (_hδT0 : 0 ≤ δT)
+        (_hδT : gFibreOpBound (I := I) (M := M) g
           (ccTensorBilinSymm (I := I) g T) δT)
-        (hδU_le : δU ≤ (1 / 3 : ℝ)) (hδU0 : 0 ≤ δU)
-        (hδU : gFibreOpBound (I := I) (M := M) g
+        (_hδU_le : δU ≤ (1 / 3 : ℝ)) (_hδU0 : 0 ≤ δU)
+        (_hδU : gFibreOpBound (I := I) (M := M) g
           (ccTensorBilinSymm (I := I) g U) δU)
         (R A D2 D3 : ℝ),
         0 ≤ R → 0 ≤ A → 0 ≤ D2 → 0 ≤ D3 →
@@ -548,24 +548,24 @@ theorem dlbIns_pair_h2
       (∀ R : ℝ, 0 ≤ R → 0 ≤ B R) ∧
       ∀ (gT gU : SmoothRiemannianMetric I M)
         (T U : SmoothCcTensor g 0 2)
-        (hT : ∀ (x : M) (u v : TangentSpace I x),
+        (_hT : ∀ (x : M) (u v : TangentSpace I x),
           ccTensorBilin (I := I) g T x u v =
             ccTensorBilin (I := I) g T x v u)
-        (hU : ∀ (x : M) (u v : TangentSpace I x),
+        (_hU : ∀ (x : M) (u v : TangentSpace I x),
           ccTensorBilin (I := I) g U x u v =
             ccTensorBilin (I := I) g U x v u)
-        (hTtie : ∀ (x : M) (u v : TangentSpace I x),
+        (_hTtie : ∀ (x : M) (u v : TangentSpace I x),
           gT.inner x u v =
             g.inner x u v + ccTensorBilinSymm (I := I) g T x u v)
-        (hUtie : ∀ (x : M) (u v : TangentSpace I x),
+        (_hUtie : ∀ (x : M) (u v : TangentSpace I x),
           gU.inner x u v =
             g.inner x u v + ccTensorBilinSymm (I := I) g U x u v)
         {δT δU : ℝ}
-        (hδT_le : δT ≤ (1 / 3 : ℝ)) (hδT0 : 0 ≤ δT)
-        (hδT : gFibreOpBound (I := I) (M := M) g
+        (_hδT_le : δT ≤ (1 / 3 : ℝ)) (_hδT0 : 0 ≤ δT)
+        (_hδT : gFibreOpBound (I := I) (M := M) g
           (ccTensorBilinSymm (I := I) g T) δT)
-        (hδU_le : δU ≤ (1 / 3 : ℝ)) (hδU0 : 0 ≤ δU)
-        (hδU : gFibreOpBound (I := I) (M := M) g
+        (_hδU_le : δU ≤ (1 / 3 : ℝ)) (_hδU0 : 0 ≤ δU)
+        (_hδU : gFibreOpBound (I := I) (M := M) g
           (ccTensorBilinSymm (I := I) g U) δU)
         (R A D2 D3 : ℝ),
         0 ≤ R → 0 ≤ A → 0 ≤ D2 → 0 ≤ D3 →

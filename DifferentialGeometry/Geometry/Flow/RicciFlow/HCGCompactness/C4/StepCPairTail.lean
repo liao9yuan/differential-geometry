@@ -203,7 +203,7 @@ theorem MetricCompactnessInputs.weight_trans_small
 
 theorem MetricCompactnessInputs.pair_exp_maps_tail
     (inp : MetricCompactnessInputs (I := I) X)
-    (hradD : 2 * item3RadiusFactor inp.decay inp.D < inp.D)
+    (_hradD : 2 * item3RadiusFactor inp.decay inp.D < inp.D)
     (hradRatio : 2 * item3RadiusFactor inp.decay inp.D <
       inp.normalRadius.ratio * inp.D)
     (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k))

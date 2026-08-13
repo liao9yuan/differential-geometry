@@ -814,7 +814,7 @@ theorem lowreg_loMass (hDim : Module.finrank ℝ E = 3)
 open DifferentialGeometry.Analysis.Parabolic.TensorSpectral (symmS) in
 theorem lowreg_spatialMass (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M)
-    {R ρ δ : ℝ} (hρ : 0 < ρ) (hRρ : R ≤ ρ) (hδ0 : 0 ≤ δ) (hδ_le : δ ≤ 1 / 3)
+    {R ρ δ : ℝ} (hρ : 0 < ρ) (_hRρ : R ≤ ρ) (hδ0 : 0 ≤ δ) (hδ_le : δ ≤ 1 / 3)
     (hreal' : ∀ S : SmoothCcTensor g 0 2,
       ‖ccTensorToHs (I := I) (M := M) g 2 (2 : ℝ) S‖ ≤ ρ →
         gFibreOpBound (I := I) (M := M) g
@@ -824,13 +824,13 @@ theorem lowreg_spatialMass (hDim : Module.finrank ℝ E = 3)
         tensorHs (I := I) (M := M) g 0 2 (2 : ℝ)))
     {T : ℝ} (hT : 0 < T) (hT1 : T ≤ 1)
     (fHi : timeL2 (tensorHs (I := I) (M := M) g 0 2 (2 : ℝ)) T)
-    (hfix : (fun t => fHi t) =ᵐ[timeMeasure T]
+    (_hfix : (fun t => fHi t) =ᵐ[timeMeasure T]
       fun t => liftHiN (I := I) (M := M) g hρ.le hδ0 hδ_le hreal' FHi
         (tensorHsCongr (I := I) (M := M) g 0 2
           (show (2 : ℝ) + 2 = (4 : ℝ) by norm_num)
           (maxRegDuhamelSolField (I := I) (M := M) (2 : ℝ) hT hT1
             (0 : tensorHs (I := I) (M := M) g 0 2 ((2 : ℝ) + 2)) fHi t)))
-    (hbridge : ∀ S : SmoothCcTensor g 0 2,
+    (_hbridge : ∀ S : SmoothCcTensor g 0 2,
       ‖smoothCcToTensorHs (I := I) (M := M) g (2 : ℝ) S‖ ≤ R →
         ∀ (δ' : ℝ) (hδ_lt : δ' < 1)
           (hδ' : gFibreOpBound (I := I) (M := M) g
@@ -841,7 +841,7 @@ theorem lowreg_spatialMass (hDim : Module.finrank ℝ E = 3)
             (deTurckSmoothN (I := I) (M := M) g g 2
               (symmS (I := I) (M := M) g S) hδ_lt
               (gFibreOpBound_symmS (I := I) (M := M) g S hδ')).coeff i)
-    (hballU : ∀ᵐ t ∂(MeasureTheory.volume.restrict (Set.Icc (0 : ℝ) T)),
+    (_hballU : ∀ᵐ t ∂(MeasureTheory.volume.restrict (Set.Icc (0 : ℝ) T)),
       ‖tensorHsInclusion (I := I) (M := M) (g := g) (r := 0) (s := 2)
         (show (2 : ℝ) ≤ (2 : ℝ) + 2 by norm_num)
         (maxRegDuhamelSolField (I := I) (M := M) (2 : ℝ) hT hT1
@@ -1236,8 +1236,8 @@ theorem lowreg_joint_smooth (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M)
     (F_RHS : SmoothRiemannianMetric I M →
       (∀ x : M, TangentSpace I x →L[ℝ] TangentSpace I x →L[ℝ] ℝ))
-    (Nsec : ∀ (S : SmoothCcTensor g 0 2) {δ : ℝ} (hδ_lt : δ < 1)
-        (hδ : gFibreOpBound (I := I) (M := M) g
+    (Nsec : ∀ (S : SmoothCcTensor g 0 2) {δ : ℝ} (_hδ_lt : δ < 1)
+        (_hδ : gFibreOpBound (I := I) (M := M) g
           (ccTensorBilinSymm (I := I) g S) δ),
       SmoothCcTensor g 0 2)
     (hRepr : ∀ (S : SmoothCcTensor g 0 2) {δ : ℝ} (hδ_lt : δ < 1)
@@ -1276,12 +1276,12 @@ theorem lowreg_joint_smooth (hDim : Module.finrank ℝ E = 3)
     (hForce : ∀ (F : ℝ → SmoothCcTensor g 0 2) {δ : ℝ} (hδ_lt : δ < 1)
         (hδ : ∀ t : ℝ, gFibreOpBound (I := I) (M := M) g
           (ccTensorBilinSymm (I := I) g (F t)) δ)
-        (h_pin : ∀ t ∈ Set.Icc (0 : ℝ) T,
+        (_h_pin : ∀ t ∈ Set.Icc (0 : ℝ) T,
           SmoothCcTensor.toL2 (g := g) (r := 0) (s := 2) (F t) =
             tensorHsToL2 (I := I) (M := M) (g := g) (r := 0) (s := 2)
               (tensorResolventL2_isCompactOperator (I := I) (M := M) g 0 2)
               (show (0 : ℝ) ≤ (2 : ℝ) by norm_num) (timeH1.toFun u t))
-        (hball : ∀ t ∈ Set.Ico (0 : ℝ) T,
+        (_hball : ∀ t ∈ Set.Ico (0 : ℝ) T,
           ‖smoothCcToTensorHs (I := I) (M := M) g ((2 : ℝ) + 2) (F t)‖ ≤ R₀),
       ∀ t ∈ Set.Ico (0 : ℝ) T, ∀ i,
         fc i t = tensorL2Coeff (I := I) (M := M)

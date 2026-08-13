@@ -236,7 +236,7 @@ section Assembly
 
 
 theorem forward_unique_of_inputs
-    (g₁ g₂ : Real → SmoothRiemannianMetric I M) {a b : Real} (hab : a < b)
+    (g₁ g₂ : Real → SmoothRiemannianMetric I M) {a b : Real} (_hab : a < b)
     (Avec : Real → (y : M) →
       TangentSpace I y →L[Real] TangentSpace I y →L[Real] TangentSpace I y)
     (Svec : Real → (y : M) →
@@ -251,15 +251,15 @@ theorem forward_unique_of_inputs
       ContMDiffOn (𝓘(Real, Real).prod I) 𝓘(Real) ∞
         (fun p : Real × M => chartGramMatrix (I := I) (g₁ p.1) x₀ p.2 i j)
         (Ico a b ×ˢ (trivializationAt E (TangentSpace I) x₀).baseSet))
-    (h1cont : ∀ (x₀ : M) (i j : Fin (Module.finrank Real E)),
+    (_h1cont : ∀ (x₀ : M) (i j : Fin (Module.finrank Real E)),
       ContinuousOn
         (fun p : Real × M => chartGramMatrix (I := I) (g₁ p.1) x₀ p.2 i j)
         (Ico a b ×ˢ (trivializationAt E (TangentSpace I) x₀).baseSet))
-    (h2smooth : ∀ (x₀ : M) (i j : Fin (Module.finrank Real E)),
+    (_h2smooth : ∀ (x₀ : M) (i j : Fin (Module.finrank Real E)),
       ContMDiffOn (𝓘(Real, Real).prod I) 𝓘(Real) ∞
         (fun p : Real × M => chartGramMatrix (I := I) (g₂ p.1) x₀ p.2 i j)
         (Ico a b ×ˢ (trivializationAt E (TangentSpace I) x₀).baseSet))
-    (h2cont : ∀ (x₀ : M) (i j : Fin (Module.finrank Real E)),
+    (_h2cont : ∀ (x₀ : M) (i j : Fin (Module.finrank Real E)),
       ContinuousOn
         (fun p : Real × M => chartGramMatrix (I := I) (g₂ p.1) x₀ p.2 i j)
         (Ico a b ×ˢ (trivializationAt E (TangentSpace I) x₀).baseSet))

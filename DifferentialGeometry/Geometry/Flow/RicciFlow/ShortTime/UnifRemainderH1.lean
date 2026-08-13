@@ -43,9 +43,9 @@ theorem rem_h1_unif
         (∀ a : ℕ, a ≤ 3 →
           MetricCovDerivOrderBoundOn (I := I) Set.univ a g gBase Λ) →
         ∀ (T T' : SmoothCcTensor g 0 2)
-          (hTsymm : ∀ (x : M) (v w : TangentSpace I x),
+          (_hTsymm : ∀ (x : M) (v w : TangentSpace I x),
             ccTensorBilin (I := I) g T x v w = ccTensorBilin (I := I) g T x w v)
-          (hT'symm : ∀ (x : M) (v w : TangentSpace I x),
+          (_hT'symm : ∀ (x : M) (v w : TangentSpace I x),
             ccTensorBilin (I := I) g T' x v w = ccTensorBilin (I := I) g T' x w v)
           (hδ : gFibreOpBound (I := I) (M := M) g
             (ccTensorBilinSymm (I := I) g T) δ₀)

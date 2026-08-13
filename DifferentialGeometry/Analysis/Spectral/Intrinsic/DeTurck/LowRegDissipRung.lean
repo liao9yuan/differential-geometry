@@ -40,10 +40,10 @@ theorem n_diff_h1_rung
     (g₀ : SmoothRiemannianMetric I M) (R₀ : ℝ) :
     ∃ ρ Cδ₀ C₀ : ℝ, 0 < ρ ∧ 0 ≤ Cδ₀ ∧ Cδ₀ < 1 ∧ 0 ≤ C₀ ∧
       ∀ (T : SmoothCcTensor g₀ 0 2)
-        (hT : ∀ (x : M) (u v : TangentSpace I x),
+        (_hT : ∀ (x : M) (u v : TangentSpace I x),
           ccTensorBilin (I := I) g₀ T x u v =
             ccTensorBilin (I := I) g₀ T x v u)
-        {δ : ℝ} (hδ_le : δ ≤ 1 / 3) (hδ0 : 0 ≤ δ)
+        {δ : ℝ} (hδ_le : δ ≤ 1 / 3) (_hδ0 : 0 ≤ δ)
         (hδ : gFibreOpBound (I := I) (M := M) g₀
           (ccTensorBilinSymm (I := I) g₀ T) δ)
         (hδZ : gFibreOpBound (I := I) (M := M) g₀
