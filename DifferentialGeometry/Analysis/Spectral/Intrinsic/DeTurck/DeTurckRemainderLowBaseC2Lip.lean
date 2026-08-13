@@ -3862,7 +3862,6 @@ private theorem kernel_pair_alg
         (LU + (PU - K) + RU) := by rw [hT, hU]
     _ = (LT - LU) + (PT - PU) + (RT - RU) := by abel
 
-set_option maxHeartbeats 200000 in
 private theorem phiMet_diff_eq
     (g g_bg gT gU : SmoothRiemannianMetric I M) :
     deTurckPhiMetTotal (I := I) (M := M) g g_bg gT -
@@ -3943,7 +3942,6 @@ private theorem phiMet_diff_eq
       rw [hH, hR]
       rfl
 
-set_option maxHeartbeats 400000 in
 private theorem phiMet_pair_lip
     (hDim : Module.finrank ℝ E = 3)
     (g g_bg : SmoothRiemannianMetric I M) :
@@ -4152,7 +4150,6 @@ noncomputable def c2Diff
       (c2Kernel_joint (I := I) (M := M)
         g g_bg U hδlt hUδ hZδ))
 
-set_option maxHeartbeats 600000 in
 set_option synthInstance.maxHeartbeats 1200000 in
 theorem lowC2_sub
     (g g_bg : SmoothRiemannianMetric I M)
