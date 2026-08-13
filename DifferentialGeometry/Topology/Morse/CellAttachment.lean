@@ -6882,139 +6882,108 @@ theorem contMDiff_modelLowerRoundMap {n k : ℕ} (hk : k ≤ n) (ε r δ θ : �
       (modelLowerRoundMap hk ε r δ θ) :=
   contMDiff_iff_contDiff.mpr (contDiff_modelLowerRoundMap hk ε r δ θ hθ hδ hδr hθr)
 
-noncomputable def modelLowerRoundScaleGlobal {n k : ℕ} (hk : k ≤ n) (ε r δ θ R₀ R₁ : ℝ)
+noncomputable def modelLowerRoundScaleGlobal {n k : ℕ} (hk : k ≤ n) (c ε r δ θ η : ℝ)
     (y : MorseModel n) : ℝ :=
   modelRoundScale ε r δ θ (‖negPart hk y‖ ^ 2) +
-    Real.smoothTransition ((morseNorm n y ^ 2 - R₀ ^ 2) / (R₁ ^ 2 - R₀ ^ 2)) *
+    Real.smoothTransition ((morseNormalForm hk c y - (c - ε)) / η) *
       (1 - modelRoundScale ε r δ θ (‖negPart hk y‖ ^ 2))
 
-noncomputable def modelLowerRoundMapGlobal {n k : ℕ} (hk : k ≤ n) (ε r δ θ R₀ R₁ : ℝ)
+noncomputable def modelLowerRoundMapGlobal {n k : ℕ} (hk : k ≤ n) (c ε r δ θ η : ℝ)
     (y : MorseModel n) : MorseModel n :=
-  recombine hk (negPart hk y) (modelLowerRoundScaleGlobal hk ε r δ θ R₀ R₁ y • posPart hk y)
+  recombine hk (negPart hk y) (modelLowerRoundScaleGlobal hk c ε r δ θ η y • posPart hk y)
 
-theorem modelLowerRoundMapGlobal_negPart {n k : ℕ} (hk : k ≤ n) (ε r δ θ R₀ R₁ : ℝ)
+theorem modelLowerRoundMapGlobal_negPart {n k : ℕ} (hk : k ≤ n) (c ε r δ θ η : ℝ)
     (y : MorseModel n) :
-    negPart hk (modelLowerRoundMapGlobal hk ε r δ θ R₀ R₁ y) = negPart hk y := by
+    negPart hk (modelLowerRoundMapGlobal hk c ε r δ θ η y) = negPart hk y := by
   dsimp [modelLowerRoundMapGlobal]
   rw [negPart_recombine]
 
-theorem modelLowerRoundMapGlobal_posPart {n k : ℕ} (hk : k ≤ n) (ε r δ θ R₀ R₁ : ℝ)
+theorem modelLowerRoundMapGlobal_posPart {n k : ℕ} (hk : k ≤ n) (c ε r δ θ η : ℝ)
     (y : MorseModel n) :
-    posPart hk (modelLowerRoundMapGlobal hk ε r δ θ R₀ R₁ y) =
-      modelLowerRoundScaleGlobal hk ε r δ θ R₀ R₁ y • posPart hk y := by
+    posPart hk (modelLowerRoundMapGlobal hk c ε r δ θ η y) =
+      modelLowerRoundScaleGlobal hk c ε r δ θ η y • posPart hk y := by
   dsimp [modelLowerRoundMapGlobal]
   rw [posPart_recombine]
 
-theorem contDiff_modelLowerRoundMapGlobal {n k : ℕ} (hk : k ≤ n) (ε r δ θ R₀ R₁ : ℝ)
-    (hθ : 0 < θ) (hδ : 0 < δ) (hδr : δ < r ^ 2) (hθr : θ < r ^ 2)
-    (hR : R₀ < R₁) (hR0 : 0 ≤ R₀) :
-    ContDiff ℝ (⊤ : ℕ∞) (modelLowerRoundMapGlobal hk ε r δ θ R₀ R₁) := by
+theorem contDiff_modelLowerRoundMapGlobal {n k : ℕ} (hk : k ≤ n) (c ε r δ θ η : ℝ)
+    (hθ : 0 < θ) (hδ : 0 < δ) (hδr : δ < r ^ 2) (hθr : θ < r ^ 2) :
+    ContDiff ℝ (⊤ : ℕ∞) (modelLowerRoundMapGlobal hk c ε r δ θ η) := by
   have hsc : ContDiff ℝ (⊤ : ℕ∞)
       (fun y : MorseModel n => modelRoundScale ε r δ θ (‖negPart hk y‖ ^ 2)) :=
     (contDiff_modelRoundScale hθ hδ hδr hθr).comp (contDiff_negPart_normSq hk)
-  have hnormNeg : ContDiff ℝ (⊤ : ℕ∞) (fun y : MorseModel n => ‖negPart hk y‖ ^ 2) :=
-    contDiff_negPart_normSq hk
-  have hnormPosSq : ContDiff ℝ (⊤ : ℕ∞) (fun y : MorseModel n => ‖posPart hk y‖ ^ 2) :=
-    contDiff_posPart_normSq hk
-  have hnormSq : ContDiff ℝ (⊤ : ℕ∞) (fun y : MorseModel n => morseNorm n y ^ 2) := by
-    rw [show (fun y : MorseModel n => morseNorm n y ^ 2) =
-        fun y : MorseModel n => ‖negPart hk y‖ ^ 2 + ‖posPart hk y‖ ^ 2 by
+  have hnf : ContDiff ℝ (⊤ : ℕ∞) (fun y : MorseModel n => morseNormalForm hk c y) := by
+    rw [show (fun y : MorseModel n => morseNormalForm hk c y) =
+        fun y : MorseModel n => c + (1 / 2) * (‖posPart hk y‖ ^ 2 - ‖negPart hk y‖ ^ 2) by
       funext y
-      exact morseNorm_sq_eq_negPart_add_posPart hk y]
-    exact hnormNeg.add hnormPosSq
+      exact morseNormalForm_split hk c y]
+    exact (contDiff_const : ContDiff ℝ (⊤ : ℕ∞) (fun _ : MorseModel n => c)).add
+      (((contDiff_const : ContDiff ℝ (⊤ : ℕ∞) (fun _ : MorseModel n => (1 / 2 : ℝ))).mul
+        ((contDiff_posPart_normSq hk).sub (contDiff_negPart_normSq hk))))
   have harg : ContDiff ℝ (⊤ : ℕ∞) (fun y : MorseModel n =>
-      (morseNorm n y ^ 2 - R₀ ^ 2) / (R₁ ^ 2 - R₀ ^ 2)) := by
-    have hden : R₁ ^ 2 - R₀ ^ 2 ≠ 0 := by
-      have h01 : R₀ ^ 2 < R₁ ^ 2 := by
-        have h0 : 0 ≤ R₁ := by nlinarith [hR0, hR]
-        exact sq_lt_sq.mpr (by
-          rw [abs_of_nonneg hR0, abs_of_nonneg h0]
-          exact hR)
-      nlinarith
-    exact (hnormSq.sub (contDiff_const : ContDiff ℝ (⊤ : ℕ∞)
-      (fun _ : MorseModel n => R₀ ^ 2))).div_const (R₁ ^ 2 - R₀ ^ 2)
-  have hg : ContDiff ℝ (⊤ : ℕ∞) (modelLowerRoundScaleGlobal hk ε r δ θ R₀ R₁) := by
+      (morseNormalForm hk c y - (c - ε)) / η) := by
+    exact (hnf.sub contDiff_const).div_const η
+  have hg : ContDiff ℝ (⊤ : ℕ∞) (modelLowerRoundScaleGlobal hk c ε r δ θ η) := by
     dsimp [modelLowerRoundScaleGlobal]
     have ht : ContDiff ℝ (⊤ : ℕ∞) (fun y : MorseModel n =>
-        Real.smoothTransition ((morseNorm n y ^ 2 - R₀ ^ 2) / (R₁ ^ 2 - R₀ ^ 2))) :=
+        Real.smoothTransition ((morseNormalForm hk c y - (c - ε)) / η)) :=
       (Real.smoothTransition.contDiff (n := (⊤ : ℕ∞))).comp harg
     exact hsc.add (ht.mul ((contDiff_const : ContDiff ℝ (⊤ : ℕ∞)
       (fun _ : MorseModel n => (1 : ℝ))).sub hsc))
   rw [contDiff_pi]
   intro i
   by_cases hi : i.val < k
-  · have hcoord : (fun y : MorseModel n => modelLowerRoundMapGlobal hk ε r δ θ R₀ R₁ y i) =
+  · have hcoord : (fun y : MorseModel n => modelLowerRoundMapGlobal hk c ε r δ θ η y i) =
         fun y : MorseModel n => (negPart hk y) ⟨i.val, hi⟩ := by
       funext y
-      change (modelLowerRoundMapGlobal hk ε r δ θ R₀ R₁ y) i = (negPart hk y) ⟨i.val, hi⟩
+      change (modelLowerRoundMapGlobal hk c ε r δ θ η y) i = (negPart hk y) ⟨i.val, hi⟩
       have hneq : i = negIdx hk ⟨i.val, hi⟩ := by
         apply Fin.ext
         rfl
       conv_lhs => rw [hneq]
-      rw [← recombine_decompose hk (modelLowerRoundMapGlobal hk ε r δ θ R₀ R₁ y)]
-      rw [recombine_negPart hk (negPart hk (modelLowerRoundMapGlobal hk ε r δ θ R₀ R₁ y))
-        (posPart hk (modelLowerRoundMapGlobal hk ε r δ θ R₀ R₁ y)) ⟨i.val, hi⟩]
+      rw [← recombine_decompose hk (modelLowerRoundMapGlobal hk c ε r δ θ η y)]
+      rw [recombine_negPart hk (negPart hk (modelLowerRoundMapGlobal hk c ε r δ θ η y))
+        (posPart hk (modelLowerRoundMapGlobal hk c ε r δ θ η y)) ⟨i.val, hi⟩]
       rw [modelLowerRoundMapGlobal_negPart]
     rw [hcoord]
     fun_prop
   · have hi' : i.val - k < n - k := by
       omega
-    have hcoord : (fun y : MorseModel n => modelLowerRoundMapGlobal hk ε r δ θ R₀ R₁ y i) =
+    have hcoord : (fun y : MorseModel n => modelLowerRoundMapGlobal hk c ε r δ θ η y i) =
         fun y : MorseModel n =>
-          modelLowerRoundScaleGlobal hk ε r δ θ R₀ R₁ y * (posPart hk y) ⟨i.val - k, hi'⟩ := by
+          modelLowerRoundScaleGlobal hk c ε r δ θ η y * (posPart hk y) ⟨i.val - k, hi'⟩ := by
       funext y
-      change (modelLowerRoundMapGlobal hk ε r δ θ R₀ R₁ y) i =
-          modelLowerRoundScaleGlobal hk ε r δ θ R₀ R₁ y * (posPart hk y) ⟨i.val - k, hi'⟩
+      change (modelLowerRoundMapGlobal hk c ε r δ θ η y) i =
+          modelLowerRoundScaleGlobal hk c ε r δ θ η y * (posPart hk y) ⟨i.val - k, hi'⟩
       have hneq : i = posIdx hk ⟨i.val - k, hi'⟩ := by
         apply Fin.ext
         dsimp [posIdx]
         omega
       conv_lhs => rw [hneq]
-      rw [← recombine_decompose hk (modelLowerRoundMapGlobal hk ε r δ θ R₀ R₁ y)]
-      rw [recombine_posPart hk (negPart hk (modelLowerRoundMapGlobal hk ε r δ θ R₀ R₁ y))
-        (posPart hk (modelLowerRoundMapGlobal hk ε r δ θ R₀ R₁ y)) ⟨i.val - k, hi'⟩]
+      rw [← recombine_decompose hk (modelLowerRoundMapGlobal hk c ε r δ θ η y)]
+      rw [recombine_posPart hk (negPart hk (modelLowerRoundMapGlobal hk c ε r δ θ η y))
+        (posPart hk (modelLowerRoundMapGlobal hk c ε r δ θ η y)) ⟨i.val - k, hi'⟩]
       rw [modelLowerRoundMapGlobal_posPart]
       simp
     rw [hcoord]
     fun_prop
 
-theorem modelLowerRoundMapGlobal_eq_modelLowerRoundMap_of_norm_le {n k : ℕ} (hk : k ≤ n)
-    (ε r δ θ R₀ R₁ : ℝ) (hR : R₀ < R₁) (hR0 : 0 ≤ R₀) {y : MorseModel n}
-    (hy : morseNorm n y ≤ R₀) :
-    modelLowerRoundMapGlobal hk ε r δ θ R₀ R₁ y = modelLowerRoundMap hk ε r δ θ y := by
+theorem modelLowerRoundMapGlobal_eq_modelLowerRoundMap_of_sublevel {n k : ℕ} (hk : k ≤ n)
+    (c ε r δ θ η : ℝ) (hη : 0 < η) {y : MorseModel n}
+    (hy : morseNormalForm hk c y ≤ c - ε) :
+    modelLowerRoundMapGlobal hk c ε r δ θ η y = modelLowerRoundMap hk ε r δ θ y := by
   dsimp [modelLowerRoundMapGlobal, modelLowerRoundMap, modelLowerRoundScaleGlobal]
-  have hden : 0 < R₁ ^ 2 - R₀ ^ 2 := by
-    have h01 : R₀ ^ 2 < R₁ ^ 2 := by
-      have h0 : 0 ≤ R₁ := by nlinarith [hR0, hR]
-      exact sq_lt_sq.mpr (by
-        rw [abs_of_nonneg hR0, abs_of_nonneg h0]
-        exact hR)
-    nlinarith
-  have harg : (morseNorm n y ^ 2 - R₀ ^ 2) / (R₁ ^ 2 - R₀ ^ 2) ≤ 0 := by
-    have hsq : morseNorm n y ^ 2 ≤ R₀ ^ 2 := by
-      have hnon : 0 ≤ morseNorm n y := norm_nonneg _
-      exact sq_le_sq' (by nlinarith [hnon, hR0]) hy
-    exact div_nonpos_of_nonpos_of_nonneg (sub_nonpos.mpr hsq) (le_of_lt hden)
+  have harg : (morseNormalForm hk c y - (c - ε)) / η ≤ 0 := by
+    exact div_nonpos_of_nonpos_of_nonneg (by nlinarith [hy]) (le_of_lt hη)
   rw [Real.smoothTransition.zero_of_nonpos harg]
   simp only [zero_mul, add_zero]
 
-theorem modelLowerRoundMapGlobal_eq_self_of_norm_ge {n k : ℕ} (hk : k ≤ n)
-    (ε r δ θ R₀ R₁ : ℝ) (hR : R₀ < R₁) (hR0 : 0 ≤ R₀) {y : MorseModel n}
-    (hy : R₁ ≤ morseNorm n y) :
-    modelLowerRoundMapGlobal hk ε r δ θ R₀ R₁ y = y := by
+theorem modelLowerRoundMapGlobal_eq_self_of_above {n k : ℕ} (hk : k ≤ n)
+    (c ε r δ θ η : ℝ) (hη : 0 < η) {y : MorseModel n}
+    (hy : c - ε + η ≤ morseNormalForm hk c y) :
+    modelLowerRoundMapGlobal hk c ε r δ θ η y = y := by
   dsimp [modelLowerRoundMapGlobal, modelLowerRoundScaleGlobal]
-  have hden : 0 < R₁ ^ 2 - R₀ ^ 2 := by
-    have h01 : R₀ ^ 2 < R₁ ^ 2 := by
-      have h0 : 0 ≤ R₁ := by nlinarith [hR0, hR]
-      exact sq_lt_sq.mpr (by
-        rw [abs_of_nonneg hR0, abs_of_nonneg h0]
-        exact hR)
-    nlinarith
-  have harg : 1 ≤ (morseNorm n y ^ 2 - R₀ ^ 2) / (R₁ ^ 2 - R₀ ^ 2) := by
-    have hsq : R₁ ^ 2 ≤ morseNorm n y ^ 2 := by
-      have hnon : 0 ≤ morseNorm n y := norm_nonneg _
-      exact sq_le_sq' (by nlinarith [hR0, hR]) hy
-    exact (one_le_div hden).mpr (by nlinarith [hsq])
+  have harg : 1 ≤ (morseNormalForm hk c y - (c - ε)) / η := by
+    exact (one_le_div hη).mpr (by nlinarith [hy])
   rw [Real.smoothTransition.one_of_one_le harg]
   simp only [one_mul, add_sub_cancel, one_smul]
   exact recombine_decompose hk y
@@ -8331,99 +8300,13 @@ theorem modelLowerRoundMap_morseNorm_le_max {n k : ℕ} (hk : k ≤ n) (c ε r �
     rw [hself]
     exact le_max_right _ _
 
-theorem modelLowerRoundMapGlobal_morseNorm_le_max {n k : ℕ} (hk : k ≤ n) (c ε r δ θ R₀ R₁ : ℝ)
-    (hε : 0 ≤ ε) (hδ : 0 < δ) (hθ : 0 < θ) (hδr : δ < r ^ 2) (hR0 : 0 ≤ R₀)
+theorem modelLowerRoundMapGlobal_morseNorm_le_max {n k : ℕ} (hk : k ≤ n) (c ε r δ θ η R₀ : ℝ)
+    (hε : 0 ≤ ε) (hδ : 0 < δ) (hθ : 0 < θ) (hδr : δ < r ^ 2) (hη : 0 < η) (hR0 : 0 ≤ R₀)
     (hbig : 2 * (r ^ 2 + 2 * ε + δ) ≤ R₀ ^ 2) {y : MorseModel n}
     (hy : y ∈ sublevel (morseNormalForm hk c) (c - ε)) :
-    morseNorm n (modelLowerRoundMapGlobal hk ε r δ θ R₀ R₁ y) ≤ max R₀ (morseNorm n y) := by
-  have hround := modelLowerRoundMap_morseNorm_le_max hk c ε r δ θ R₀ hε hδ hθ hδr hR0 hbig hy
-  have hσ : 0 ≤ Real.smoothTransition ((morseNorm n y ^ 2 - R₀ ^ 2) / (R₁ ^ 2 - R₀ ^ 2)) :=
-    Real.smoothTransition.nonneg _
-  have hσ1 : Real.smoothTransition ((morseNorm n y ^ 2 - R₀ ^ 2) / (R₁ ^ 2 - R₀ ^ 2)) ≤ 1 :=
-    Real.smoothTransition.le_one _
-  have hscale_le : modelLowerRoundScaleGlobal hk ε r δ θ R₀ R₁ y ^ 2 ≤
-      max (modelRoundScale ε r δ θ (‖negPart hk y‖ ^ 2) ^ 2) (1 : ℝ) := by
-    let a : ℝ := modelRoundScale ε r δ θ (‖negPart hk y‖ ^ 2)
-    let s : ℝ := Real.smoothTransition ((morseNorm n y ^ 2 - R₀ ^ 2) / (R₁ ^ 2 - R₀ ^ 2))
-    dsimp [modelLowerRoundScaleGlobal, a, s]
-    have hs0 : 0 ≤ s := hσ
-    have hs1 : s ≤ 1 := hσ1
-    have hgeom : (a + s * (1 - a)) ^ 2 ≤ max (a ^ 2) (1 : ℝ) := by
-      have hs10 : 0 ≤ 1 - s := by nlinarith [hs1]
-      have hjensen : (a + s * (1 - a)) ^ 2 ≤ (1 - s) * a ^ 2 + s * (1 : ℝ) ^ 2 := by
-        have h : 0 ≤ s * (1 - s) * (a - 1) ^ 2 := by positivity
-        nlinarith [h]
-      have hweighted : (1 - s) * a ^ 2 + s * (1 : ℝ) ^ 2 ≤ max (a ^ 2) (1 : ℝ) := by
-        rw [one_pow, mul_one]
-        have h1 : (1 - s) * a ^ 2 ≤ (1 - s) * max (a ^ 2) (1 : ℝ) :=
-          mul_le_mul_of_nonneg_left (le_max_left (a ^ 2) (1 : ℝ)) hs10
-        have h2 : s * 1 ≤ s * max (a ^ 2) (1 : ℝ) :=
-          mul_le_mul_of_nonneg_left (le_max_right (a ^ 2) (1 : ℝ)) hs0
-        nlinarith [h1, h2]
-      exact le_trans hjensen hweighted
-    simpa [a, s] using hgeom
-  have hnorm : morseNorm n (modelLowerRoundMapGlobal hk ε r δ θ R₀ R₁ y) ^ 2 ≤
-      max (morseNorm n (modelLowerRoundMap hk ε r δ θ y) ^ 2) (morseNorm n y ^ 2) := by
-    have hsmul_global : ‖modelLowerRoundScaleGlobal hk ε r δ θ R₀ R₁ y • posPart hk y‖ ^ 2 =
-        modelLowerRoundScaleGlobal hk ε r δ θ R₀ R₁ y ^ 2 * ‖posPart hk y‖ ^ 2 := by
-      rw [norm_smul, mul_pow, Real.norm_eq_abs, sq_abs]
-    have hsmul_round : ‖modelRoundScale ε r δ θ (‖negPart hk y‖ ^ 2) • posPart hk y‖ ^ 2 =
-        modelRoundScale ε r δ θ (‖negPart hk y‖ ^ 2) ^ 2 * ‖posPart hk y‖ ^ 2 := by
-      rw [norm_smul, mul_pow, Real.norm_eq_abs, sq_abs]
-    rw [morseNorm_sq_eq_negPart_add_posPart hk (modelLowerRoundMapGlobal hk ε r δ θ R₀ R₁ y)]
-    rw [modelLowerRoundMapGlobal_negPart, modelLowerRoundMapGlobal_posPart]
-    rw [morseNorm_sq_eq_negPart_add_posPart hk (modelLowerRoundMap hk ε r δ θ y)]
-    rw [modelLowerRoundMap_negPart, modelLowerRoundMap_posPart]
-    rw [morseNorm_sq_eq_negPart_add_posPart hk y]
-    rw [hsmul_global, hsmul_round]
-    have hpos : 0 ≤ ‖posPart hk y‖ ^ 2 := sq_nonneg _
-    by_cases hle : modelRoundScale ε r δ θ (‖negPart hk y‖ ^ 2) ^ 2 ≤ 1
-    · have hσ_le : modelLowerRoundScaleGlobal hk ε r δ θ R₀ R₁ y ^ 2 ≤ 1 := by
-        simpa [hle] using hscale_le
-      have hmul : modelLowerRoundScaleGlobal hk ε r δ θ R₀ R₁ y ^ 2 * ‖posPart hk y‖ ^ 2 ≤
-          ‖posPart hk y‖ ^ 2 := by
-        nlinarith [mul_le_mul_of_nonneg_left hσ_le hpos]
-      have hmax : ‖negPart hk y‖ ^ 2 + ‖posPart hk y‖ ^ 2 ≤
-          max (‖negPart hk y‖ ^ 2 + modelRoundScale ε r δ θ (‖negPart hk y‖ ^ 2) ^ 2 * ‖posPart hk y‖ ^ 2)
-            (‖negPart hk y‖ ^ 2 + ‖posPart hk y‖ ^ 2) := by
-        exact le_max_right (‖negPart hk y‖ ^ 2 + modelRoundScale ε r δ θ (‖negPart hk y‖ ^ 2) ^ 2 * ‖posPart hk y‖ ^ 2)
-          (‖negPart hk y‖ ^ 2 + ‖posPart hk y‖ ^ 2)
-      nlinarith [hmul, hmax]
-    · have hge : 1 ≤ modelRoundScale ε r δ θ (‖negPart hk y‖ ^ 2) ^ 2 := le_of_not_ge hle
-      have hσ_le : modelLowerRoundScaleGlobal hk ε r δ θ R₀ R₁ y ^ 2 ≤
-          modelRoundScale ε r δ θ (‖negPart hk y‖ ^ 2) ^ 2 := by
-        simpa [hge] using hscale_le
-      have hmul : modelLowerRoundScaleGlobal hk ε r δ θ R₀ R₁ y ^ 2 * ‖posPart hk y‖ ^ 2 ≤
-          modelRoundScale ε r δ θ (‖negPart hk y‖ ^ 2) ^ 2 * ‖posPart hk y‖ ^ 2 := by
-        nlinarith [mul_le_mul_of_nonneg_left hσ_le hpos]
-      have hmax : ‖negPart hk y‖ ^ 2 + modelRoundScale ε r δ θ (‖negPart hk y‖ ^ 2) ^ 2 * ‖posPart hk y‖ ^ 2 ≤
-          max (‖negPart hk y‖ ^ 2 + modelRoundScale ε r δ θ (‖negPart hk y‖ ^ 2) ^ 2 * ‖posPart hk y‖ ^ 2)
-            (‖negPart hk y‖ ^ 2 + ‖posPart hk y‖ ^ 2) := by
-        exact le_max_left (‖negPart hk y‖ ^ 2 + modelRoundScale ε r δ θ (‖negPart hk y‖ ^ 2) ^ 2 * ‖posPart hk y‖ ^ 2)
-          (‖negPart hk y‖ ^ 2 + ‖posPart hk y‖ ^ 2)
-      nlinarith [hmul, hmax]
-  have hle := modelLowerRoundMap_morseNorm_le_max hk c ε r δ θ R₀ hε hδ hθ hδr hR0 hbig hy
-  have hsq_max : max (morseNorm n (modelLowerRoundMap hk ε r δ θ y) ^ 2) (morseNorm n y ^ 2) ≤
-      max R₀ (morseNorm n y) ^ 2 := by
-    have h1 : morseNorm n (modelLowerRoundMap hk ε r δ θ y) ^ 2 ≤ max R₀ (morseNorm n y) ^ 2 := by
-      have hnon : 0 ≤ morseNorm n (modelLowerRoundMap hk ε r δ θ y) := norm_nonneg _
-      have hmaxnon : 0 ≤ max R₀ (morseNorm n y) := le_trans hR0 (le_max_left _ _)
-      exact sq_le_sq.mpr (by
-        rw [abs_of_nonneg hnon, abs_of_nonneg hmaxnon]
-        exact hle)
-    have h2 : morseNorm n y ^ 2 ≤ max R₀ (morseNorm n y) ^ 2 := by
-      have hnon : 0 ≤ morseNorm n y := norm_nonneg _
-      have hmaxnon : 0 ≤ max R₀ (morseNorm n y) := le_trans hR0 (le_max_left _ _)
-      exact sq_le_sq.mpr (by
-        rw [abs_of_nonneg hnon, abs_of_nonneg hmaxnon]
-        exact le_max_right _ _)
-    exact max_le h1 h2
-  have hsq := le_trans hnorm hsq_max
-  have habs := sq_le_sq.mp hsq
-  have hnon : 0 ≤ morseNorm n (modelLowerRoundMapGlobal hk ε r δ θ R₀ R₁ y) := norm_nonneg _
-  have hmaxnon : 0 ≤ max R₀ (morseNorm n y) := le_trans hR0 (le_max_left _ _)
-  rw [abs_of_nonneg hnon, abs_of_nonneg hmaxnon] at habs
-  exact habs
+    morseNorm n (modelLowerRoundMapGlobal hk c ε r δ θ η y) ≤ max R₀ (morseNorm n y) := by
+  rw [modelLowerRoundMapGlobal_eq_modelLowerRoundMap_of_sublevel hk c ε r δ θ η hη hy]
+  exact modelLowerRoundMap_morseNorm_le_max hk c ε r δ θ R₀ hε hδ hθ hδr hR0 hbig hy
 
 theorem modelLowerRoundMapUnround_morseNorm_le_max {n k : ℕ} (hk : k ≤ n) (c ε r δ θ R₀ : ℝ)
     (hε : 0 ≤ ε) (hθ : 0 < θ) (hδ : 0 < δ) (hδr : δ < r ^ 2) (hθr : θ < r ^ 2)
