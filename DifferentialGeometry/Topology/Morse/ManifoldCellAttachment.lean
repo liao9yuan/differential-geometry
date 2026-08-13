@@ -1,6 +1,7 @@
 import DifferentialGeometry.Topology.Morse.CellAttachment
 import DifferentialGeometry.Topology.Morse.HandleAttachment
 import DifferentialGeometry.Topology.Handle.Attachment
+import DifferentialGeometry.Topology.Handle.Gluing
 import DifferentialGeometry.Topology.Handle.Manifold
 import DifferentialGeometry.Topology.Handle.Retraction
 import DifferentialGeometry.Topology.Homotopy.DeformationRetract
@@ -13606,6 +13607,58 @@ noncomputable def morseCapRoundedLowerRoundingHomeo {m k : ℕ} (hk : k ≤ m + 
         (continuousOn_morseCapRoundedLowerUnround hk c ε r δ θ R₀ data hε hδ hθ hδr hθr hR0 hR0lt hbig hRbig hcont)
     exact Continuous.subtype_mk hrest (fun x =>
       morseCapRoundedLowerUnround_mem_lowerSublevel hk c ε r δ θ R₀ data hε hδ hθ hδr hθr hR0 hR0lt hbig hRbig x.2)
+
+theorem morseCapRoundedLowerRound_attaching_eq {m k : ℕ} (hk : k ≤ m + 1) (c ε r δ θ : ℝ)
+    {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M] [ChartedSpace H M]
+    {I : ModelWithCorners ℝ (MorseModel (m + 1)) H} {f : M → ℝ}
+    (data : MorseChart (m + 1) k hk c I f)
+    (hε : 0 < ε) (hεr : Real.sqrt (2 * ε + 2 * r ^ 2) ≤ data.R)
+    (hεr' : Real.sqrt (2 * ε + 2 * r ^ 2) < data.R / 2)
+    (a : AttachingRegion k (m + 1 - k)) :
+    morseCapRoundedLowerRound hk c ε r δ θ data
+        (morseAttachingEmbedding hk c ε r data hε hεr a).1 =
+      handleRoundAttachingEmbedding hk c ε r δ θ data a := by
+  have hnorm : morseNorm (m + 1) (cocoreModelPoint hk ε r a) ≤ Real.sqrt (2 * ε + 2 * r ^ 2) :=
+    cocoreModelPoint_norm_le hk ε r (le_of_lt hε) a
+  have hball : data.χ (cocoreModelPoint hk ε r a) ∈ morseChartBallImage hk c data := by
+    dsimp [morseChartBallImage]
+    refine ⟨cocoreModelPoint hk ε r a, ?_, rfl⟩
+    exact lt_of_le_of_lt hnorm (lt_trans hεr' (by nlinarith [data.hRpos] : data.R / 2 < data.R))
+  dsimp [morseAttachingEmbedding, cocoreAttachingEmbedding]
+  dsimp [morseCapRoundedLowerRound, handleRoundAttachingEmbedding]
+  rw [if_pos hball]
+  congr 1
+  have hsrc : cocoreModelPoint hk ε r a ∈ data.χ.source :=
+    data.hχsrc (cocoreModelPoint hk ε r a) (le_trans hnorm hεr)
+  rw [data.χ.left_inv hsrc]
+
+noncomputable def morseHandleRoundAdjunctionHomeoCapRounded {m k : ℕ} (hk : k ≤ m + 1)
+    (c ε r δ θ R₀ : ℝ) {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M] [T2Space M]
+    [ChartedSpace H M] {I : ModelWithCorners ℝ (MorseModel (m + 1)) H} {f : M → ℝ}
+    (data : MorseChart (m + 1) k hk c I f)
+    (hε : 0 < ε) (hδ : 0 < δ) (hθ : 0 < θ) (hδr : δ < r ^ 2) (hθr : θ < r ^ 2) (hr : 0 < r)
+    (hεr : Real.sqrt (2 * ε + 2 * r ^ 2) ≤ data.R)
+    (hεr' : Real.sqrt (2 * ε + 2 * r ^ 2) < data.R / 2)
+    (hR0 : 0 ≤ R₀) (hR0lt : R₀ < data.R)
+    (hbig : 2 * (r ^ 2 + 2 * ε + δ) ≤ R₀ ^ 2)
+    (hRbig : r ^ 2 + 2 * ε + δ ≤ (data.R / 2) ^ 2)
+    (hcont : Continuous f) [NeZero k] [NeZero (m + 1 - k)] :
+    Handle.AdjunctionSpace k (m + 1 - k)
+        (morseAttachingEmbedding hk c ε r data hε hεr) ≃ₜ
+      {x : M // x ∈ morseCapRoundedLowerSublevel hk c ε r δ θ data ∪
+        Set.range (handleRoundEmbedding hk c ε r δ θ data)} :=
+  (Handle.adjunctionCongr
+    (φ := morseAttachingEmbedding hk c ε r data hε hεr)
+    (φ' := handleRoundAttachingEmbeddingCapSubtype hk c ε r δ θ data hε hδ hθ hδr hθr hεr')
+    (h := morseCapRoundedLowerRoundingHomeo hk c ε r δ θ R₀ data hε hδ hθ hδr hθr hR0 hR0lt hbig hRbig hcont)
+    (hφ := by
+      intro a
+      apply Subtype.ext
+      change morseCapRoundedLowerRound hk c ε r δ θ data
+          (morseAttachingEmbedding hk c ε r data hε hεr a).1 =
+        handleRoundAttachingEmbedding hk c ε r δ θ data a
+      exact morseCapRoundedLowerRound_attaching_eq hk c ε r δ θ data hε hεr hεr' a)).trans
+    (morseHandleRoundAdjunctionHomeoUnion hk c ε r δ θ data hε hδ hθ hδr hθr hr hεr hεr' hcont)
 
 theorem morseSharpUnionRound_eq_self_of_not_mem_halfBall {m k : ℕ} (hk : k ≤ m + 1) (c ε r δ : ℝ)
     {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M] [ChartedSpace H M]
