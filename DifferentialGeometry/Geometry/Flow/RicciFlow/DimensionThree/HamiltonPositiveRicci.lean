@@ -2788,19 +2788,6 @@ theorem ham3_noncollapse
 
 
 
-theorem ham3_cgh_limit
-    {omega : Real} (h0omega : 0 < omega)
-    (hM : Closed3Manifold (I := I) (M := M))
-    (g0 : SmoothRiemannianMetric I M)
-    (hpos : PosRicciMetric (I := I) (M := M) g0)
-    (P : Ham3FlowPackage (I := I) (M := M) g0)
-    (hD : P.D = DifferentialGeometry.Integral.Connection.RealTimeInterval.closedOpen
-      0 omega h0omega)
-    (Q : Ham3BlowupData M)
-    (hsel : Ham3PointSel (I := I) P Q)
-    (_hin : Ham3CompactInput (I := I) P Q hsel) :
-    Ham3CGHLimitExists (I := I) P Q hsel := by
-  sorry
 
 
 
@@ -3485,104 +3472,8 @@ theorem limit_to_orig
 
 
 
-theorem ham3_limit_const_metric
-    (hM : Closed3Manifold (I := I) (M := M))
-    (g0 : SmoothRiemannianMetric I M)
-    (hpos : PosRicciMetric (I := I) (M := M) g0)
-    (P : Ham3FlowPackage (I := I) (M := M) g0)
-    (Q : Ham3BlowupData M)
-    (hsel : Ham3PointSel (I := I) P Q)
-    (hric : Ham3RescaledRicNonneg (I := I) P Q)
-    (hpinch : Ham3PinchEstimate (I := I) P)
-    (hcgh : Ham3CGHLimitExists (I := I) P Q hsel) :
-    exists gInf : SmoothRiemannianMetric I M,
-      ConstPosSecMetric (I := I) (M := M) gInf := by
-  have hdim : Module.finrank Real E = 3 := hM.2.2.2
-  rcases limit_inherit (I := I) (M := M) hM g0 hpos P Q hsel hric hcgh with
-    ⟨L, hreal, hsubseq, hwindow, hregwin, hconn, hbdry, hflow,
-      _hricTransfer, hpinchTransfer, hnonneg, hbase, hscalarPos⟩
-  have hlimit :
-      Ham3LimitSubseq (I := I) L /\
-        Ham3LimitWindow (I := I) L /\
-        Ham3LimitRegWin (I := I) L /\
-        Ham3LimitConnected (I := I) L /\
-        Ham3LimitBoundaryless (I := I) L /\
-        Ham3LimitFlow (I := I) L :=
-    ⟨hsubseq, hwindow, hregwin, hconn, hbdry, hflow⟩
-  have htf : LimitTfZero (I := I) L :=
-    limit_tf_zero (I := I) (M := M) hdim P Q hsel hreal hpinchTransfer hpinch
-      hlimit hscalarPos
-  let t0 : Real := -(ham3_r0 ^ 2) / 2
-  have ht0 : t0 ∈ L.D.regular := by
-    simpa [t0] using limit_mid_regular (I := I) (M := M) hregwin
-  have heinstein : LimitEinsteinAt (I := I) L t0 :=
-    limitEinstein_of_tf0 (I := I) (M := M) hdim (htf t0 ht0)
-  have hround : LimitRoundAt (I := I) L t0 :=
-    limit_round_of_ein (I := I) (M := M) hdim hconn hbdry
-      (hscalarPos t0 ht0) heinstein
-  exact limit_to_orig (I := I) (M := M) hM (L.D.regular_subset ht0)
-    hconn hround
 
 
-
-omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] in
-theorem ham3_const_of_limit
-    (hlim : exists gInf : SmoothRiemannianMetric I M,
-      ConstPosSecMetric (I := I) (M := M) gInf) :
-    AdmitsConstPosSec (I := I) (M := M) := by
-  exact hlim
-
-
-
-theorem ham3_const_metric
-    (hM : Closed3Manifold (I := I) (M := M))
-    (hpos : AdmitsPosRicci (I := I) (M := M)) :
-  AdmitsConstPosSec (I := I) (M := M) := by
-  rcases hpos with ⟨g0, hg0⟩
-  rcases ham3_flow_exists_normalized (I := I) (M := M) hM g0 hg0 with
-    ⟨omega, h0ω, P, hD⟩
-  have hfinite_core : exists c0 : Real, 0 < c0 /\ omega <= 3 / (2 * c0) :=
-    ham3_finite_time (I := I) (M := M) h0ω hM g0 hg0 P hD
-  have hfinite :
-      exists omega c0 : Real, exists h0ω : 0 < omega,
-        P.D = DifferentialGeometry.Integral.Connection.RealTimeInterval.closedOpen 0 omega h0ω /\
-          0 < c0 /\ omega <= 3 / (2 * c0) := by
-    rcases hfinite_core with ⟨c0, hc0, hbound⟩
-    exact ⟨omega, c0, h0ω, hD, hc0, hbound⟩
-  have hnonneg9 : Ham3Section9RicNonneg (I := I) P omega :=
-    ham3_ric_nonneg9 (I := I) (M := M) h0ω hM hg0 P hD
-  have hscalarBlow : Ham3ScalarBlowup (I := I) P :=
-    ham3_scalar_blowup (I := I) (M := M) h0ω hM P hD hnonneg9
-  rcases ham3_point_select (I := I) (M := M) hM g0 hg0 P hfinite
-      hscalarBlow with
-    ⟨Q, hsel⟩
-  have hric : Ham3RescaledRicNonneg (I := I) P Q :=
-    ham3_rescaled_ric_nonneg (I := I) (M := M) h0ω hM g0 hg0 P hD Q hsel
-  have hsec9 : Ham3Section9Pinch (I := I) P omega :=
-    ham3_pinch9 (I := I) (M := M) h0ω hM hg0 P hD
-  have hpinch : Ham3PinchEstimate (I := I) P :=
-    ham3_pinch_imp_can (I := I) (M := M) h0ω hM g0 hg0 P hD Q hsel hric hsec9
-  have hrm : Ham3RmBound (I := I) P Q :=
-    ham3_rm_bound (I := I) (M := M) hM g0 hg0 P Q hsel hric
-  have hwindow : Ham3Window (I := I) P Q ham3_r0 :=
-    ham3_r0_window (I := I) P Q hsel
-  have hrmControl : Ham3RmControl (I := I) P Q hsel ham3_r0 :=
-    ham3_rm_control (I := I) (M := M) h0ω P hD Q hsel hrm hwindow
-  rcases ham3_noncollapse (I := I) (M := M) h0ω hM g0 hg0 P hD Q hsel
-      hrmControl with
-    ⟨kappa, hnoncollapse⟩
-  let hcompact : Ham3CompactInput (I := I) P Q hsel :=
-    { rmBound := hrm
-      window := hwindow
-      kappa := kappa
-      noncollapse := hnoncollapse }
-  have hcgh : Ham3CGHLimitExists (I := I) P Q hsel :=
-    ham3_cgh_limit (I := I) (M := M) h0ω hM g0 hg0 P hD Q hsel hcompact
-  have hlim :
-      exists gInf : SmoothRiemannianMetric I M,
-        ConstPosSecMetric (I := I) (M := M) gInf :=
-    ham3_limit_const_metric (I := I) (M := M) hM g0 hg0 P Q hsel hric hpinch hcgh
-  exact ham3_const_of_limit (I := I) (M := M) hlim
 
 
 
@@ -3647,20 +3538,8 @@ theorem ham3_equiv
 
 
 
-theorem ham3_main
-    (hM : Closed3Manifold (I := I) (M := M))
-    (hpos : AdmitsPosRicci (I := I) (M := M)) :
-    AdmitsConstPosSec (I := I) (M := M) /\ SphericalSpaceForm (I := I) (M := M) := by
-  have hconst : AdmitsConstPosSec (I := I) (M := M) :=
-    ham3_const_metric (I := I) (M := M) hM hpos
-  exact ⟨hconst, (ham3_equiv (I := I) (M := M) hM).1 hconst⟩
 
 
-theorem thm_2_1
-    (hM : Closed3Manifold (I := I) (M := M))
-    (hpos : AdmitsPosRicci (I := I) (M := M)) :
-    AdmitsConstPosSec (I := I) (M := M) /\ SphericalSpaceForm (I := I) (M := M) :=
-  ham3_main (I := I) (M := M) hM hpos
 
 end HamiltonPositiveRicci
 end DifferentialGeometry.PDE.RicciFlow
