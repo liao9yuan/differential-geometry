@@ -73,7 +73,6 @@ noncomputable def lowOneADiff
       (lowOneA_joint (I := I) (M := M) g T hδT hδZ)
       (lowOneA_joint (I := I) (M := M) g U hδU hδZ))
 
-set_option maxHeartbeats 1600000 in
 theorem lowOneIntSub
     (g : SmoothRiemannianMetric I M) (T U : SmoothCcTensor g 0 2)
     {δ : ℝ} (hδ_lt : δ < 1)
@@ -124,7 +123,6 @@ theorem lowOneIntSub
     TensorRSSpace.toModel_sub]
   rw [intervalIntegral.integral_sub hTint hUint]
 
-set_option maxHeartbeats 2400000 in
 theorem innerOnePairH2
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M) :
@@ -216,7 +214,6 @@ theorem innerOnePairH2
     _ = L * D2 ^ 2 := by simp only [L]; ring
     _ = (C * D2) ^ 2 := by rw [mul_pow, hCsq]
 
-set_option maxHeartbeats 2400000 in
 theorem innerOneBddH2
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M) :
@@ -268,7 +265,6 @@ theorem innerOneBddH2
     _ = L * R ^ 2 := by simp only [L]; ring
     _ = (C * R) ^ 2 := by rw [mul_pow, hCsq]
 
-set_option maxHeartbeats 2400000 in
 theorem innerActPairH2
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M) :
@@ -390,7 +386,6 @@ theorem innerActPairH2
       pow_le_pow_left₀
         (mul_nonneg (by norm_num) (add_nonneg hx0 hy0)) hlead 2
 
-set_option maxHeartbeats 2400000 in
 noncomputable def aaBlkOne
     (g gm : SmoothRiemannianMetric I M) (pm : Equiv.Perm (Fin 4))
     (Z : SmoothCcTensor g 3 3) : SmoothCcTensor g 3 4 :=
@@ -399,7 +394,6 @@ noncomputable def aaBlkOne
     (appCcRS (I := I) (M := M) g 3 3 4
       (connDiffContrInsertionField (I := I) g gm) Z)
 
-set_option maxHeartbeats 2400000 in
 theorem aaBlkOnePairH2
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M) :

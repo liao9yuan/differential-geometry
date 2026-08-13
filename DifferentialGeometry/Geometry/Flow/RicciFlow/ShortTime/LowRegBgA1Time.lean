@@ -47,8 +47,6 @@ private noncomputable abbrev incl12
   tensorHsInclusion (I := I) (M := M) (g := g)
     (r := 0) (s := 2) (by norm_num)
 
-set_option maxHeartbeats 1000000 in
-set_option synthInstance.maxHeartbeats 1000000 in
 
 theorem lowA1HiBg_ball
     (g : SmoothRiemannianMetric I M) {ρ δ : ℝ}
@@ -137,8 +135,6 @@ theorem lowA1HiBg_ball
     simpa only [C] using
       add_le_add (mul_le_mul_of_nonneg_left hv hK₀) (le_refl ‖F 0‖)
 
-set_option maxHeartbeats 1000000 in
-set_option synthInstance.maxHeartbeats 1000000 in
 
 theorem lowA1LoBg_ball
     (g : SmoothRiemannianMetric I M) {ρ δ : ℝ}

@@ -64,8 +64,6 @@ private noncomputable abbrev incl34
   tensorHsInclusion (I := I) (M := M) (g := g)
     (r := 0) (s := 2) (by norm_num)
 
-set_option maxHeartbeats 1000000 in
-set_option synthInstance.maxHeartbeats 1000000 in
 private theorem a2HiBg_total_le
     (g gB : SmoothRiemannianMetric I M) {ρ δ c : ℝ}
     (hρ : 0 ≤ ρ) (hδ0 : 0 ≤ δ) (hδ_le : δ ≤ 1 / 3)
@@ -103,8 +101,6 @@ private theorem a2HiBg_total_le
   rw [← hcore S] at h
   exact h
 
-set_option maxHeartbeats 1000000 in
-set_option synthInstance.maxHeartbeats 1000000 in
 private theorem a2LoBg_total_le
     (g gB : SmoothRiemannianMetric I M) {ρ δ c : ℝ}
     (hρ : 0 ≤ ρ) (hδ0 : 0 ≤ δ) (hδ_le : δ ≤ 1 / 3)
@@ -211,8 +207,6 @@ theorem radialA2Bg_pair
       simpa only [A, lowCoreDataBg, S] using hjet)
   exact ⟨hHi.trans_eq (by ring), hLo.trans_eq (by ring), hcompat⟩
 
-set_option maxHeartbeats 1000000 in
-set_option synthInstance.maxHeartbeats 1000000 in
 
 theorem lowA2Bg_small
     (hDim : Module.finrank ℝ E = 3)
@@ -412,8 +406,6 @@ theorem affA2Bg_comm
   rw [show J34 (R4 x) = R3 (J34 x) by
       exact DFunLike.congr_fun hrad x]
 
-set_option maxHeartbeats 1000000 in
-set_option synthInstance.maxHeartbeats 1000000 in
 
 theorem affA2Bg_data
     (g : SmoothRiemannianMetric I M) {ρ δ c : ℝ}

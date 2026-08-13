@@ -1021,7 +1021,6 @@ theorem radialA1HiBg_pair
         ccToHsLin (I := I) (M := M) g 2 (3 : ℝ) U‖ := by
       simp only [D]
 
-set_option synthInstance.maxHeartbeats 1000000 in
 
 theorem lowA1LoBg_core
     (g gB : SmoothRiemannianMetric I M)
@@ -1048,7 +1047,6 @@ theorem lowA1LoBg_core
         (fun A => A.a1Lo (I := I) (M := M)))
     (by simpa only [BgA1CorePair] using hpair) T
 
-set_option synthInstance.maxHeartbeats 1000000 in
 
 theorem lowA1LoBg_cont
     (g gB : SmoothRiemannianMetric I M)
@@ -1089,7 +1087,6 @@ theorem lowA1LoBg_aesm
         g gB hρ hδ0 hδ_le hreal (u t)) μ :=
   (lowA1LoBg_cont (I := I) (M := M) g gB hpair).comp_aestronglyMeasurable hu
 
-set_option synthInstance.maxHeartbeats 1000000 in
 
 theorem lowA1HiBg_core
     (g gB : SmoothRiemannianMetric I M)
@@ -1116,7 +1113,6 @@ theorem lowA1HiBg_core
         (fun A => A.a1Hi (I := I) (M := M)))
     (by simpa only [BgA1HiCorePair] using hpair) T
 
-set_option synthInstance.maxHeartbeats 1000000 in
 
 theorem lowA1HiBg_cont
     (g gB : SmoothRiemannianMetric I M)
