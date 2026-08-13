@@ -53,7 +53,6 @@ noncomputable def refoldData
   C2 := (lowBaseData (I := I) (M := M)
     g g T hδ_lt hδ hδZ).C2
 
-set_option maxHeartbeats 800000 in
 theorem refoldC0_h2
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M) :
@@ -206,7 +205,6 @@ theorem refoldC1_h2
       rw [mul_pow, hBR]
       ring
 
-set_option maxHeartbeats 800000 in
 theorem refoldCoeff_h2
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M) :
@@ -278,7 +276,6 @@ theorem refoldCoeff_h2
       rw [mul_pow, hBR]
       ring
 
-set_option maxHeartbeats 800000 in
 theorem refoldA1_hl
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M) :

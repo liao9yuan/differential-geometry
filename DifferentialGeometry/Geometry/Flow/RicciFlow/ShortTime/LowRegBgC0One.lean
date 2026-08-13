@@ -637,7 +637,6 @@ theorem omegaFull_h2
     simpa only [B] using Real.sq_sqrt (hL R)]
   exact mul_le_mul_of_nonneg_left (add_le_add le_rfl hpert) (by norm_num)
 
-set_option maxHeartbeats 800000 in
 theorem appRoot_h2
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M) (p r c : ℕ) :
@@ -666,7 +665,6 @@ theorem appRoot_h2
           (mul_nonneg hK (sq_nonneg X))
     _ = (C * X * Y) ^ 2 := by rw [← hCsq]; ring
 
-set_option maxHeartbeats 800000 in
 theorem appPairH2
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M) (p r c : ℕ) :
@@ -731,7 +729,6 @@ theorem omegaOne_eq
           (LowBaseInternal.connLowOp (I := I) (M := M) g gm)) := by
   rfl
 
-set_option maxHeartbeats 800000 in
 theorem omegaMul_h2
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M) :

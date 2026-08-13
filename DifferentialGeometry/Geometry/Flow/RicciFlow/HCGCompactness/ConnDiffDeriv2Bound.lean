@@ -1877,7 +1877,6 @@ theorem covStep2_pieceB_eval
   rw [hVVx] at key
   exact key
 
-set_option maxHeartbeats 800000 in
 open DifferentialGeometry.Integral.Connection in
 
 theorem covStep2_diffStep_eval

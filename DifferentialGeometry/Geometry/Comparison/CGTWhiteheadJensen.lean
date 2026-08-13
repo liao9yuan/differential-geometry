@@ -155,7 +155,6 @@ private theorem branch_hess_zero
   rw [hγ 1, hJ Y 1, one_smul, hcov] at hh
   exact hh
 
-set_option maxHeartbeats 800000 in
 theorem intrBranch_hess_pos
     (g : SmoothRiemannianMetric I M)
     (hEnorm : ∀ (x : M) (v : TangentSpace I x),

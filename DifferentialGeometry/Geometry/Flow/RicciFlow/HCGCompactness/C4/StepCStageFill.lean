@@ -977,7 +977,6 @@ theorem stagePtsSub_eq_raw
           (chart (Lphi.φ l)
             (seqCenterD inp.decay P Lphi l (alpha.1 : Nat)))) hsmall)
 
-set_option maxHeartbeats 800000 in
 
 theorem stagePtsSub_eq_ne
     (inp : MetricCompactnessInputs (I := I) X)
@@ -1510,7 +1509,6 @@ theorem HasSuppConvDataOn.pts_coord_tail
     simpa only [dist_eq_norm, norm_sub_rev] using hcomp
   exact hcoord.trans_lt (by linarith)
 
-set_option maxHeartbeats 800000 in
 
 theorem HasSuppConvData.cfgSub_conv
     (inp : MetricCompactnessInputs (I := I) X)
@@ -1669,7 +1667,6 @@ theorem HasSuppConvDataOn.cfgSub_data
   simpa only [stageCfgSub] using
     (hweightc (kn m)).prodMk (hptsc m)
 
-set_option maxHeartbeats 800000 in
 
 theorem HasSuppConvData.cfgSub_data
     (inp : MetricCompactnessInputs (I := I) X)

@@ -3713,7 +3713,6 @@ private theorem liePiece_sub
   congr 1
   module
 
-set_option maxHeartbeats 800000 in
 theorem liePiece_pair
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M) :

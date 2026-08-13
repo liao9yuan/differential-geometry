@@ -320,7 +320,6 @@ theorem c0CorePair
         simp only [K]
         ring
 
-set_option maxHeartbeats 800000 in
 
 theorem c0Coeff_aff
     (hDim : Module.finrank ℝ E = 3)

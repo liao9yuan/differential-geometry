@@ -1434,7 +1434,6 @@ private theorem joint_param_smul
 
 omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless]
     [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
-set_option maxHeartbeats 800000 in
 set_option backward.isDefEq.respectTransparency false in
 open DifferentialGeometry.Integral.DivergenceTheorem in
 private theorem joint_curry {d : ℕ} {S : Set ℝ}
@@ -1506,7 +1505,6 @@ private theorem joint_curry {d : ℕ} {S : Set ℝ}
 
 omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless]
     [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
-set_option maxHeartbeats 800000 in
 set_option backward.isDefEq.respectTransparency false in
 open DifferentialGeometry.Integral.DivergenceTheorem in
 private theorem joint_uncurry {d : ℕ} {S : Set ℝ}
@@ -4377,7 +4375,6 @@ private def aa5
           (connDiffContrInsertionInnerField (I := I) g g₁))))
     innerCoreInPerm10
 
-set_option maxHeartbeats 800000 in
 private theorem aaKer_eq
     (g g₁ : SmoothRiemannianMetric I M) :
     ricciAAKer (I := I) (M := M) g g₁ =

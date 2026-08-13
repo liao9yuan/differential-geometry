@@ -128,7 +128,6 @@ private theorem wAlphaB_sub_eq_appCcRS
         (wOmega (I := I) (M := M) g₀ g₁ gA)
         (wOmega (I := I) (M := M) g₀ g₁ gB)).symm
 
-set_option maxHeartbeats 800000 in
 
 theorem dlbDiff_h1_unif
     (hDim : Module.finrank ℝ E = 3)

@@ -1522,7 +1522,6 @@ theorem lie1_h2_tame
   rw [← hfactor]
   simpa only [Q9] using hAll
 
-set_option maxHeartbeats 800000 in
 
 theorem lie1_h2_unif
     (hDim : Module.finrank ℝ E = 3)
