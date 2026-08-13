@@ -49,7 +49,6 @@ private theorem pure_eq
       pureTrace (I := I) (M := M) g₀ g₁ 2 := by
   rfl
 
-set_option linter.unusedVariables false in
 
 theorem ricci0_h1_unif
     (hDim : Module.finrank ℝ E = 3)

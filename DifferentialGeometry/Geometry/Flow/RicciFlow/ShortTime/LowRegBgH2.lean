@@ -247,7 +247,6 @@ private theorem topNorm_le
       (fun j _ => sq_nonneg _) hmem).trans hP
   nlinarith [norm_nonneg (iteratedCovGrad (I := I) g 0 2 3 P)]
 
-set_option linter.unusedVariables false in
 
 theorem dlaDiff_tame
     (hDim : Module.finrank ℝ E = 3)
@@ -287,7 +286,6 @@ theorem dlaDiff_tame
     Combinatorics.antidiagonalTupleGrid] using
       hpt g₁ P htie hδ_le hδ_nonneg hbound i x
 
-set_option linter.unusedVariables false in
 
 theorem dlbDiff_tame
     (hDim : Module.finrank ℝ E = 3)
@@ -327,7 +325,6 @@ theorem dlbDiff_tame
     Combinatorics.antidiagonalTupleGrid] using
       hpt g₁ P htie hδ_le hδ_nonneg hbound i x
 
-set_option linter.unusedVariables false in
 
 theorem insert_tame
     (hDim : Module.finrank ℝ E = 3)
@@ -602,7 +599,6 @@ private theorem bgAmix_eq
                 (lc0SwapPermRF * lieCorr0AMixPerm2))) by module,
     h0, h1]
 
-set_option linter.unusedVariables false in
 
 private theorem amixHalf_tame
     (hDim : Module.finrank ℝ E = 3)
@@ -742,7 +738,6 @@ private theorem amixHalf_tame
       simp only [Ob, Mb, Nb, Qb, B]
       ring
 
-set_option linter.unusedVariables false in
 
 theorem amixDiff_tame
     (hDim : Module.finrank ℝ E = 3)
@@ -831,7 +826,6 @@ private theorem bgCorr_eq
     lc0_decomp, lc0_decomp]
   abel
 
-set_option linter.unusedVariables false in
 
 private theorem bgCorrFam_tame
     (hDim : Module.finrank ℝ E = 3)
@@ -1020,7 +1014,6 @@ theorem rhs_self_bg_corr_h2
   simpa only [bgCorrFam] using
     hcorr T hδ_le hδ_nonneg hδ hδZ R A hR hA hT2 hT3 s hs
 
-set_option linter.unusedVariables false in
 
 private theorem bgCorrFam_h2
     (hDim : Module.finrank ℝ E = 3)
@@ -1187,7 +1180,6 @@ private theorem bgCorrInt_h2
     hB hcoeff
   simpa only [bgCorrInt] using hpath
 
-set_option linter.unusedVariables false in
 
 theorem bgCorr_h2
     (hDim : Module.finrank ℝ E = 3)
@@ -1235,7 +1227,6 @@ private theorem fixedBg_h2
   refine ⟨Real.sqrt Q, Real.sqrt_nonneg _, ?_⟩
   rw [Real.sq_sqrt hQ]
 
-set_option linter.unusedVariables false in
 
 private theorem bgCorr_tame
     (hDim : Module.finrank ℝ E = 3)
@@ -1271,7 +1262,6 @@ private theorem bgCorr_tame
   intro s hs
   exact hfam T hδ_le hδ_nonneg hδ hδZ R A hR hA hT2 hT3 s hs
 
-set_option linter.unusedVariables false in
 
 theorem c0Bg_diff_tame
     (hDim : Module.finrank ℝ E = 3)

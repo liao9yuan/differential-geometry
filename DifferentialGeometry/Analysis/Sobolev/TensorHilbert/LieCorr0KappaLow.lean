@@ -37,7 +37,6 @@ theorem kappa_unit (g₀ g₁ gB : SmoothRiemannianMetric I M) (x : M)
       g₁.inner x (PDE.DeTurck.connDiff (I := I) g₁ gB x (m 0) (m 1)) (m 2) :=
   lc0Kappa_unitModel_apply (I := I) (M := M) g₀ g₁ gB x m
 
-set_option linter.unusedSectionVars false in
 open DifferentialGeometry.Integral.DivergenceTheorem in
 private theorem koszul_g1 (g₀ g₁ : SmoothRiemannianMetric I M)
     (P : SmoothCcTensor g₀ 0 2)
@@ -116,7 +115,6 @@ theorem pbLow_sub (g₀ : SmoothRiemannianMetric I M)
     pbLow_unit (I := I) (M := M) g₀ Q gA gB x m,
     ccTensorBilinSymm_sub]
 
-set_option linter.unusedSectionVars false in
 private theorem unit_add0 (g₀ : SmoothRiemannianMetric I M) (s : ℕ)
     (A B : SmoothCcTensor g₀ 0 s) (x : M) (m : Fin s → TangentSpace I x) :
     unitModel (I := I) (M := M) g₀ s (A + B) x m =
@@ -185,7 +183,6 @@ theorem kappa_base_neg (g₀ gB : SmoothRiemannianMetric I M) :
     eq_neg_of_add_eq_zero_left hcycle.symm
   rw [hneg, map_neg, ContinuousLinearMap.neg_apply]
 
-set_option linter.unusedSectionVars false in
 private theorem ip_toModel (s : ℕ) (x : M) (v : TangentSpace I x)
     (D : Tensor0SSpace (s + 1) I x) (w : Fin s → TangentSpace I x) :
     Tensor0SSpace.toModel

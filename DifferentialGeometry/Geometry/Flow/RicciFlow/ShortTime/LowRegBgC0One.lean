@@ -32,7 +32,6 @@ variable
 namespace LowRegBgC0Core
 
 set_option maxHeartbeats 3200000 in
-set_option linter.unusedVariables false in
 theorem vbOne_h2
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M) :
@@ -287,7 +286,6 @@ theorem prod23Sub
     ← slotIterSub]
 
 set_option maxHeartbeats 4000000 in
-set_option linter.unusedVariables false in
 theorem amixOne_h2
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M) :
@@ -519,7 +517,6 @@ theorem amixOne_h2
     _ ≤ (B R * (1 + A)) ^ 2 := le_rfl
 
 set_option maxHeartbeats 1200000 in
-set_option linter.unusedVariables false in
 theorem omegaInner_h2
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M) :
@@ -591,7 +588,6 @@ theorem revSlot_eq
       _ = _ := add_comm _ _
   rw [hfull, slotInsertEndoCc_add]
 
-set_option linter.unusedVariables false in
 theorem omegaFull_h2
     (g : SmoothRiemannianMetric I M) :
     ∃ B : ℝ → ℝ, (∀ R : ℝ, 0 ≤ R → 0 ≤ B R) ∧
@@ -757,7 +753,6 @@ theorem omegaMul_h2
   rw [omegaOne_eq (I := I) (M := M) g gm]
   exact happ _ _ X Y hX hY hf hi
 
-set_option linter.unusedVariables false in
 def OmegaOneH2
     (g : SmoothRiemannianMetric I M) (ρ : ℝ) (B : ℝ → ℝ) : Prop :=
   ∀ (gm : SmoothRiemannianMetric I M)
@@ -775,7 +770,6 @@ def OmegaOneH2
       (omegaOne (I := I) (M := M) g gm) ≤ B R ^ 2
 
 set_option maxHeartbeats 1200000 in
-set_option linter.unusedVariables false in
 theorem omegaOne_h2
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M) :
@@ -798,7 +792,6 @@ theorem omegaOne_h2
   exact hmul gm (Bf R) Bi (hBf R hR) hBi hf hi
 
 set_option maxHeartbeats 1600000 in
-set_option linter.unusedVariables false in
 theorem omegaOnePairH2
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M) :
@@ -949,7 +942,6 @@ theorem qbaScaleSq (p l o b d a q : ℝ) :
   ring
 
 set_option maxHeartbeats 3200000 in
-set_option linter.unusedVariables false in
 theorem qbaOnePairH2
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M) :
@@ -1182,7 +1174,6 @@ theorem jetAddSix
   nlinarith [sq_nonneg X]
 
 set_option maxHeartbeats 2400000 in
-set_option linter.unusedVariables false in
 theorem quadOpPairH2
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M) :
@@ -1335,7 +1326,6 @@ theorem quadOpPairH2
   simp only [B, S]
   ring
 
-set_option linter.unusedVariables false in
 theorem lieArm_h2
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M) :
@@ -1390,7 +1380,6 @@ theorem lieArm_h2
   simp only [B]
   ring
 
-set_option linter.unusedVariables false in
 def QbaH2
     (g : SmoothRiemannianMetric I M) (ρ : ℝ)
     (Bq Ba : ℝ → ℝ) : Prop :=
@@ -1420,7 +1409,6 @@ def QbaH2
       (Ba R * (1 + A)) ^ 2
 
 set_option maxHeartbeats 1200000 in
-set_option linter.unusedVariables false in
 theorem qba_h2
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M) :
@@ -1555,7 +1543,6 @@ theorem quadCap_le
   unfold quadCap
   rcases hpm with rfl | rfl | rfl | rfl | rfl <;> linarith
 
-set_option linter.unusedVariables false in
 def QuadOpH2
     (g : SmoothRiemannianMetric I M) (ρ : ℝ) (B : ℝ → ℝ) : Prop :=
   ∀ (gm : SmoothRiemannianMetric I M)
@@ -1581,7 +1568,6 @@ def QuadOpH2
     (B R * (1 + A)) ^ 2
 
 set_option maxHeartbeats 1600000 in
-set_option linter.unusedVariables false in
 theorem quadOp_h2
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M) :
@@ -1715,7 +1701,6 @@ theorem slotIter2_h2
         (slotH2 (I := I) (M := M) g r s F) hfr
     _ = fr ^ 2 * lowJetSq (I := I) (M := M) g 2 F := by ring
 
-set_option linter.unusedVariables false in
 def QuadMidH2
     (g : SmoothRiemannianMetric I M) (ρ : ℝ) (B : ℝ → ℝ) : Prop :=
   ∀ (gm : SmoothRiemannianMetric I M)
@@ -1742,7 +1727,6 @@ def QuadMidH2
     (B R * (1 + A)) ^ 2
 
 set_option maxHeartbeats 1200000 in
-set_option linter.unusedVariables false in
 theorem quadMid_h2
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M) :
@@ -1798,7 +1782,6 @@ theorem quadMid_h2
   simp only [B]
   ring
 
-set_option linter.unusedVariables false in
 def QuadActH2
     (g : SmoothRiemannianMetric I M) (ρ : ℝ) (B : ℝ → ℝ) : Prop :=
   ∀ (gm : SmoothRiemannianMetric I M)
@@ -1825,7 +1808,6 @@ def QuadActH2
     (B R * (1 + A)) ^ 2
 
 set_option maxHeartbeats 1200000 in
-set_option linter.unusedVariables false in
 theorem quadAct_h2
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M) :
@@ -1880,7 +1862,6 @@ theorem midScaleSq (p f c d b r a q : ℝ) :
   ring
 
 set_option maxHeartbeats 3200000 in
-set_option linter.unusedVariables false in
 theorem quadMidPairH2
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M) :
@@ -2050,7 +2031,6 @@ theorem actScaleSq (p c m b d a q : ℝ) :
   ring
 
 set_option maxHeartbeats 3200000 in
-set_option linter.unusedVariables false in
 theorem quadActPairH2
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M) :
@@ -2205,7 +2185,6 @@ theorem quadActPairH2
     actScaleSq P Cp (Bmb R) Bp (Bmd R) (1 + A) D
 
 set_option maxHeartbeats 1600000 in
-set_option linter.unusedVariables false in
 theorem lowOne_h2
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M) :
@@ -2370,7 +2349,6 @@ theorem lowOne_h2
         congrArg (fun x : ℝ => x * (1 + A) ^ 2) hBR.symm
 
 set_option maxHeartbeats 1200000 in
-set_option linter.unusedVariables false in
 theorem lowOneA_h2
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M) :

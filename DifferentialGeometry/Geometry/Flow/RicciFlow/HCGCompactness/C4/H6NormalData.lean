@@ -2,8 +2,6 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.C4.H6NormalCo
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.H6MetricJet
 
 set_option autoImplicit false
-set_option linter.style.longLine false
-set_option linter.unusedSectionVars false
 
 noncomputable section
 

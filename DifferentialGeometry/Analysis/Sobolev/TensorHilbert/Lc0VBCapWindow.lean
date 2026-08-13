@@ -4,7 +4,6 @@ import DifferentialGeometry.Analysis.Sobolev.TensorHilbert.LieCorr0CoeffDiffRadi
 noncomputable section
 
 set_option autoImplicit false
-set_option linter.style.setOption false
 set_option backward.isDefEq.respectTransparency false
 set_option synthInstance.maxHeartbeats 1600000
 set_option maxHeartbeats 1600000
@@ -31,7 +30,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
-set_option linter.unusedVariables false in
 theorem lc0VBCapAtgw (g₀ : SmoothRiemannianMetric I M)
     {δ₀ : ℝ} (hδ₀ : δ₀ < 1) {Λ : ℝ} (hΛ1 : 1 ≤ Λ) :
     ∃ Kvb : ℕ → ℝ, (∀ i, 0 ≤ Kvb i) ∧
@@ -177,7 +175,6 @@ theorem lc0VBCapAtgw (g₀ : SmoothRiemannianMetric I M)
   rw [h4, mul_assoc]
   exact mul_le_mul_of_nonneg_left houter (by norm_num)
 
-set_option linter.unusedVariables false in
 theorem lc0VBCapJet (g₀ : SmoothRiemannianMetric I M)
     {δ₀ : ℝ} (hδ₀ : δ₀ < 1) {Λ : ℝ} (hΛ1 : 1 ≤ Λ) :
     ∃ K : ℕ → ℝ, (∀ i, 0 ≤ K i) ∧

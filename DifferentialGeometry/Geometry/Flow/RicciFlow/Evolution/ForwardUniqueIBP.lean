@@ -10,8 +10,6 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.Variational.CovDerivPointwi
 noncomputable section
 
 set_option autoImplicit false
-set_option linter.style.longLine false
-set_option linter.unusedSectionVars false
 
 open Bundle Tensor0SBundle
 open DifferentialGeometry.Integral.Connection

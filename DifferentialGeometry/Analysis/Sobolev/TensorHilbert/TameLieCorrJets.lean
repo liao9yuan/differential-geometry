@@ -4,7 +4,6 @@ import DifferentialGeometry.Analysis.Sobolev.TensorHilbert.LieCorr0VBRefold
 noncomputable section
 
 set_option autoImplicit false
-set_option linter.style.setOption false
 set_option backward.isDefEq.respectTransparency false
 set_option synthInstance.maxHeartbeats 1600000
 set_option maxHeartbeats 1600000
@@ -32,7 +31,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
-set_option linter.unusedVariables false in
 theorem wXiMark (g₀ : SmoothRiemannianMetric I M) {δ₀ : ℝ} (hδ₀ : δ₀ < 1) :
     ∃ K : ℕ → ℝ, (∀ j, 0 ≤ K j) ∧
       ∀ (g₁ : SmoothRiemannianMetric I M) (P : SmoothCcTensor g₀ 0 2)
@@ -50,7 +48,6 @@ theorem wXiMark (g₀ : SmoothRiemannianMetric I M) {δ₀ : ℝ} (hδ₀ : δ�
   rw [connLow_rfns (I := I) (M := M) g₀ g₁ i x]
   exact hcd g₁ P htie hδ_le hδ0 hδ i x
 
-set_option linter.unusedVariables false in
 private theorem mcd_corr_sub (g₀ : SmoothRiemannianMetric I M)
     (ΦA ΦB : SmoothCcTensor g₀ 3 3) (W₁ W₂ : SmoothCcTensor g₀ 0 3) :
     (W₁ +
@@ -75,7 +72,6 @@ private theorem mcd_corr_sub (g₀ : SmoothRiemannianMetric I M)
   rw [hA, hB]
   module
 
-set_option linter.unusedVariables false in
 theorem mcdBgAtgw (g₀ gB : SmoothRiemannianMetric I M) :
     ∃ K : ℕ → ℝ, (∀ j, 0 ≤ K j) ∧
       ∀ (g₁ : SmoothRiemannianMetric I M) (P : SmoothCcTensor g₀ 0 2)
@@ -168,7 +164,6 @@ theorem mcdBgAtgw (g₀ gB : SmoothRiemannianMetric I M) :
   intro n x
   simpa only [Combinatorics.markGrid_zero] using hmark n x
 
-set_option linter.unusedVariables false in
 theorem mcdMark (g₀ : SmoothRiemannianMetric I M) {δ₀ : ℝ} (hδ₀ : δ₀ < 1) :
     ∃ K : ℕ → ℝ, (∀ j, 0 ≤ K j) ∧
       ∀ (g₁ : SmoothRiemannianMetric I M) (P : SmoothCcTensor g₀ 0 2)
@@ -233,7 +228,6 @@ theorem mcdMark (g₀ : SmoothRiemannianMetric I M) {δ₀ : ℝ} (hδ₀ : δ�
           (mul_le_mul_of_nonneg_right (hsingle _ n)
             (Combinatorics.antidiagonalTupleGridWindow_nonneg _ (hbnn y) _))))))
 
-set_option linter.unusedVariables false in
 theorem wOmegaMark (g₀ : SmoothRiemannianMetric I M) {δ₀ : ℝ} (hδ₀ : δ₀ < 1) :
     ∃ K : ℕ → ℝ, (∀ j, 0 ≤ K j) ∧
       ∀ (g₁ : SmoothRiemannianMetric I M) (P : SmoothCcTensor g₀ 0 2)
@@ -260,7 +254,6 @@ theorem wOmegaMark (g₀ : SmoothRiemannianMetric I M) {δ₀ : ℝ} (hδ₀ : �
   simpa using mkApp (I := I) (M := M) g₀ P _ _ hKcg_nn hKwx_nn hCast
     (hwx g₁ P htie hδ_le hδ0 hδ)
 
-set_option linter.unusedVariables false in
 theorem ipLowMark (g₀ : SmoothRiemannianMetric I M) :
     ∃ c : ℕ → ℝ, (∀ l, 0 ≤ c l) ∧
       ∀ (P : SmoothCcTensor g₀ 0 2) {u : ℕ} (om : SmoothCcTensor g₀ 0 1)
@@ -291,7 +284,6 @@ theorem ipLowMark (g₀ : SmoothRiemannianMetric I M) :
           Combinatorics.markGrid (gridBase (I := I) (M := M) g₀ P x) u l := by
         rw [Finset.sum_mul]
 
-set_option linter.unusedVariables false in
 theorem lc0VBMark (g₀ : SmoothRiemannianMetric I M) {δ₀ : ℝ} (hδ₀ : δ₀ < 1) :
     ∃ K : ℕ → ℝ, (∀ i, 0 ≤ K i) ∧
       ∀ (g₁ : SmoothRiemannianMetric I M) (P : SmoothCcTensor g₀ 0 2)
@@ -345,7 +337,6 @@ theorem lc0VBMark (g₀ : SmoothRiemannianMetric I M) {δ₀ : ℝ} (hδ₀ : δ
   refine mkSmul (I := I) (M := M) g₀ P (2 : ℝ) ?_
   simpa using mkApp (I := I) (M := M) g₀ P _ _ hKC_nn hKPass_nn hC hPass
 
-set_option linter.unusedVariables false in
 theorem lc0VBJet (hDim : Module.finrank ℝ E = 3)
     (g₀ : SmoothRiemannianMetric I M) {δ₀ : ℝ} (hδ₀ : δ₀ < 1) :
     ∃ K0 K2 : ℕ → ℝ, (∀ i, 0 ≤ K0 i) ∧ (∀ i, 0 ≤ K2 i) ∧
@@ -443,7 +434,6 @@ private lemma mark_one_atgw (b : ℕ → ℝ) (hb : ∀ j, 0 ≤ b j) (n : ℕ) 
     _ = markOneConst n * Combinatorics.antidiagonalTupleGridWindow b (n + 2) := by
       rw [markOneConst, Finset.sum_mul]
 
-set_option linter.unusedVariables false in
 theorem lc0AMixMark (g₀ : SmoothRiemannianMetric I M) {δ₀ : ℝ} (hδ₀ : δ₀ < 1) :
     ∃ K : ℕ → ℝ, (∀ i, 0 ≤ K i) ∧
       ∀ (g₁ : SmoothRiemannianMetric I M) (P : SmoothCcTensor g₀ 0 2)
@@ -542,7 +532,6 @@ theorem lc0AMixMark (g₀ : SmoothRiemannianMetric I M) {δ₀ : ℝ} (hδ₀ : 
     (mkAdd (I := I) (M := M) g₀ P (hhalf lieCorr0AMixPerm2)
       (hhalf (lc0SwapPermRF * lieCorr0AMixPerm2)))
 
-set_option linter.unusedVariables false in
 theorem amixBgAtgw (g₀ gB : SmoothRiemannianMetric I M)
     {δ₀ : ℝ} (hδ₀ : δ₀ < 1) :
     ∃ K : ℕ → ℝ, (∀ i, 0 ≤ K i) ∧
@@ -678,7 +667,6 @@ theorem amixBgAtgw (g₀ gB : SmoothRiemannianMetric I M)
     _ = (Kmark n * markOneConst n) * Combinatorics.antidiagonalTupleGridWindow
           (gridBase (I := I) (M := M) g₀ P x) (n + 2) := by ring
 
-set_option linter.unusedVariables false in
 theorem lc0AMixJet (hDim : Module.finrank ℝ E = 3)
     (g₀ : SmoothRiemannianMetric I M) {δ₀ : ℝ} (hδ₀ : δ₀ < 1) :
     ∃ K0 K2 : ℕ → ℝ, (∀ i, 0 ≤ K0 i) ∧ (∀ i, 0 ≤ K2 i) ∧
@@ -724,7 +712,6 @@ theorem lc0AMixJet (hDim : Module.finrank ℝ E = 3)
   rw [hΛ₁sq]
   ring
 
-set_option linter.unusedVariables false in
 theorem lc0AMixJetBg (hDim : Module.finrank ℝ E = 3)
     (g₀ gB : SmoothRiemannianMetric I M) {δ₀ : ℝ} (hδ₀ : δ₀ < 1) :
     ∃ K0 K2 : ℕ → ℝ, (∀ i, 0 ≤ K0 i) ∧ (∀ i, 0 ≤ K2 i) ∧
@@ -800,7 +787,6 @@ theorem lc0AMixJetBg (hDim : Module.finrank ℝ E = 3)
           ‖iteratedCovGrad (I := I) g₀ 0 2 j P‖ ^ 2) := by
       rw [← hH3_def, ← hJS_def]
 
-set_option linter.unusedVariables false in
 theorem lc0RiemMark (g₀ : SmoothRiemannianMetric I M) {δ₀ : ℝ} (hδ₀ : δ₀ < 1) :
     ∃ K : ℕ → ℝ, (∀ i, 0 ≤ K i) ∧
       ∀ (g₁ : SmoothRiemannianMetric I M) (P : SmoothCcTensor g₀ 0 2)
@@ -833,7 +819,6 @@ theorem lc0RiemMark (g₀ : SmoothRiemannianMetric I M) {δ₀ : ℝ} (hδ₀ : 
   refine mkNeg (I := I) (M := M) g₀ P ?_
   simpa using mkApp (I := I) (M := M) g₀ P _ _ hKC_nn hSPass_nn hLive hPass
 
-set_option linter.unusedVariables false in
 theorem lc0RiemJet (g₀ : SmoothRiemannianMetric I M) {δ₀ : ℝ} (hδ₀ : δ₀ < 1) :
     ∃ K0 : ℕ → ℝ, (∀ i, 0 ≤ K0 i) ∧
       ∀ (g₁ : SmoothRiemannianMetric I M) (P : SmoothCcTensor g₀ 0 2)

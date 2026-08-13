@@ -4,7 +4,6 @@ import DifferentialGeometry.Analysis.Integration.L2.FiniteProductHolderFiberNorm
 
 noncomputable section
 
-set_option linter.style.setOption false
 set_option synthInstance.maxHeartbeats 1600000
 set_option maxHeartbeats 1600000
 
@@ -139,7 +138,6 @@ private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
-set_option linter.unusedSectionVars false in
 private theorem gnFam (g₀ : SmoothRiemannianMetric I M) (r s : ℕ) :
     ∃ A : ℕ → ℝ, (∀ k, 0 ≤ A k) ∧
       ∀ (u : SmoothCcTensor g₀ r s) (Λ : ℝ), 0 ≤ Λ →
@@ -170,7 +168,6 @@ private theorem gnFam (g₀ : SmoothRiemannianMetric I M) (r s : ℕ) :
   choose A hA0 hA using h
   exact ⟨A, hA0, fun u Λ hΛ hsup k j hj0 hjk => hA k u Λ hΛ hsup j hj0 hjk⟩
 
-set_option linter.unusedSectionVars false in
 theorem gnTwoAnchor (g₀ : SmoothRiemannianMetric I M) (r s : ℕ) :
     ∃ C : ℕ → ℝ, (∀ m, 0 ≤ C m) ∧
       ∀ (Ψ : SmoothCcTensor g₀ r s) {Λ₀ Λ₁ : ℝ}, 0 ≤ Λ₀ → Λ₀ ≤ 1 → 0 ≤ Λ₁ →
@@ -379,7 +376,6 @@ private lemma gnFreeWt {ι : Type*} (s : Finset ι) (cf : ι → ℝ) (mR : ℝ)
     refine ⟨by nlinarith [mul_nonneg htt0 (sub_nonneg.mpr hab)], ?_⟩
     nlinarith [mul_nonneg (by linarith : (0 : ℝ) ≤ 1 - tt) (sub_nonneg.mpr hab)]
 
-set_option linter.unusedSectionVars false in
 theorem gnProdJet (g₀ : SmoothRiemannianMetric I M) (r s : ℕ) :
     ∃ K : ℕ → ℝ, (∀ m, 0 ≤ K m) ∧
       ∀ (Ψ : SmoothCcTensor g₀ r s) {Λ₀ Λ₁ : ℝ}, 0 ≤ Λ₀ → Λ₀ ≤ 1 → 0 ≤ Λ₁ →

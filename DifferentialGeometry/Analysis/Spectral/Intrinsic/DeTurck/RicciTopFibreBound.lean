@@ -4,7 +4,6 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.IteratedCovGradFibr
 
 noncomputable section
 
-set_option linter.style.setOption false
 set_option backward.isDefEq.respectTransparency false
 
 open Bundle Manifold Set Tensor0SBundle

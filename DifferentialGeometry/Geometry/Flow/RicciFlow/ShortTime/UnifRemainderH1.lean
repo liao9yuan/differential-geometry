@@ -29,7 +29,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
   [IsManifold I ∞ M] [CompactSpace M] [I.Boundaryless]
   [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M]
 
-set_option linter.unusedVariables false in
 
 theorem rem_h1_unif
     (hDim : Module.finrank ℝ E = 3)

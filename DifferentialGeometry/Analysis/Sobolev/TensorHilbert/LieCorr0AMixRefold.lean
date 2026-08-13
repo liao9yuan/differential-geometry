@@ -52,7 +52,6 @@ theorem lc0TraceRF_fiber (g₀ g₁ : SmoothRiemannianMetric I M) (p : ℕ)
     lieCorr0TraceStep, ContinuousLinearMap.comp_apply]
   congr 1
 
-set_option linter.unusedSectionVars false in
 private lemma unitTensor_model (x : M) (m : Fin 0 → E) :
     Tensor0SSpace.toModel (unitTensor (I := I) (M := M) x) m = 1 := by
   rw [unitTensor, Tensor0SSpace.toModel_ofModel]
@@ -78,7 +77,6 @@ private lemma curry_zero (x : M) (D : Tensor0SSpace 1 I x) (v₀ : E) :
   refine Fin.cases ?_ (fun j => j.elim0) k
   rfl
 
-set_option linter.unusedSectionVars false in
 private lemma clm_unit_smul (x : M) (s : ℕ)
     (A : Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace s I x) (c : ℝ) :
     A (c • unitTensor (I := I) (M := M) x) =

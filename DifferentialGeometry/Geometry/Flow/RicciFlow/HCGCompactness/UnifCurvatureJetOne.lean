@@ -7,7 +7,6 @@ set_option autoImplicit false
 
 noncomputable section
 
-set_option linter.style.setOption false
 set_option synthInstance.maxHeartbeats 1600000
 set_option maxHeartbeats 1600000
 
@@ -45,7 +44,6 @@ private noncomputable def extSec1 (x : M) (v : TangentSpace I x) :
   ContMDiffSection.mk (smoothExtensionTangent (I := I) x v)
     (smoothExtensionTangent_contMDiff (I := I) x v)
 
-set_option linter.unusedSectionVars false in
 @[simp] private theorem extSec1_apply (x : M) (v : TangentSpace I x) :
     extSec1 (I := I) x v x = v :=
   smoothExtensionTangent_eq (I := I) x v
@@ -60,7 +58,6 @@ noncomputable def curvConnAt
     R X (A Y D) Z -
   R X Y (A Z D)
 
-set_option linter.unusedSectionVars false in
 
 theorem nablaRm_split
     (gBase g₀ : SmoothRiemannianMetric I M) (x : M)
@@ -242,7 +239,6 @@ theorem nablaRm_split
           nablaRiemannOp (I := I) gBase x (Ds x) (Xs x) (Ys x) (Zs x) := by
             rw [hconn, hpal, hB']
 
-set_option linter.unusedSectionVars false in
 private theorem jet1_eval (g : SmoothRiemannianMetric I M) (x : M)
     (D X Y Z W : TangentSpace I x) :
     iterCov (I := I) g 4 (metricRm04 (I := I) (M := M) g) 1 x
@@ -258,7 +254,6 @@ private theorem sqrt_cancel {q A : ℝ}
     exact hA
   · exact le_of_mul_le_mul_right (by simpa [pow_two] using h) hqpos
 
-set_option linter.unusedSectionVars false in
 private theorem base_le_scaled
     (gBase g₀ : SmoothRiemannianMetric I M) {Λ : ℝ} (hΛ : 1 ≤ Λ)
     (hcomp : ∀ (x : M) (v : TangentSpace I x),
@@ -303,7 +298,6 @@ theorem rmOneOpC_nonneg {Λ Kb₀ Kb₁ : ℝ}
 noncomputable def rmOneC (Λ Kb₀ Kb₁ : ℝ) : ℝ :=
   Real.sqrt ((Module.finrank ℝ E : ℝ) ^ 5) * rmOneOpC Λ Kb₀ Kb₁
 
-set_option linter.unusedSectionVars false in
 private theorem curvConn_le_of
     (gBase g₀ : SmoothRiemannianMetric I M) {Λ : ℝ}
     (hΛ : 1 ≤ Λ)
@@ -490,7 +484,6 @@ private theorem curvConn_le_of
         Real.sqrt (g₀.inner x Z Z) := by
       dsimp [curvConnC, S, C₀, F]
 
-set_option linter.unusedSectionVars false in
 private theorem curvConn_le
     (gBase g₀ : SmoothRiemannianMetric I M) {Λ : ℝ}
     (hΛ : 1 ≤ Λ)
@@ -517,7 +510,6 @@ private theorem curvConn_le
   · exact curvConn_le_of (I := I) (M := M) gBase g₀ hΛ
       hKb0 hKb hcomp hjet1 hjet2
 
-set_option linter.unusedSectionVars false in
 private theorem fixedRmOpOne_of (g : SmoothRiemannianMetric I M)
     {K : ℝ} (hK0 : 0 ≤ K)
     (hK : ∀ x : M,
@@ -573,7 +565,6 @@ private theorem fixedRmOpOne_of (g : SmoothRiemannianMetric I M)
   have hq := sqrt_cancel (Real.sqrt_nonneg _) hA0 hquad
   simpa [q, A, R] using hq
 
-set_option linter.unusedSectionVars false in
 private theorem fixedRmOpOne (g : SmoothRiemannianMetric I M) :
     ∃ K : ℝ, 0 ≤ K ∧
       ∀ (x : M) (D X Y Z : TangentSpace I x),
@@ -587,7 +578,6 @@ private theorem fixedRmOpOne (g : SmoothRiemannianMetric I M) :
   obtain ⟨K, hK0, hK⟩ := exists_curvJet_sup (I := I) (M := M) g 1
   exact ⟨K, hK0, fixedRmOpOne_of (I := I) (M := M) g hK0 hK⟩
 
-set_option linter.unusedSectionVars false in
 private theorem jet1_norm_le
     (g : SmoothRiemannianMetric I M) {K : ℝ} (hK : 0 ≤ K)
     (hop : ∀ (x : M) (D X Y Z : TangentSpace I x),
@@ -662,7 +652,6 @@ private theorem jet1_norm_le
     _ = Real.sqrt ((Module.finrank ℝ E : ℝ) ^ 5) * K := by
       rw [Real.sqrt_mul (by positivity), Real.sqrt_sq hK]
 
-set_option linter.unusedSectionVars false in
 
 theorem unifRmOpOne_of
     (gBase g₀ : SmoothRiemannianMetric I M) {Λ : ℝ}
@@ -795,7 +784,6 @@ theorem unifRmOpOne_of
           Real.sqrt (g₀.inner x Z Z) := by
       dsimp [rmOneOpC, Cc, Cp, Cb, S]
 
-set_option linter.unusedSectionVars false in
 private theorem unifRmOpOne
     (gBase g₀ : SmoothRiemannianMetric I M) {Λ : ℝ}
     (hΛ : 1 ≤ Λ)
@@ -825,7 +813,6 @@ private theorem unifRmOpOne
   · exact unifRmOpOne_of (I := I) (M := M) gBase g₀ hΛ
       hKb₀0 hKb₀ hKb₁0 hKb₁ hcomp hjet1 hjet2 hjet3
 
-set_option linter.unusedSectionVars false in
 
 theorem unifRmJetOne_of
     (gBase g₀ : SmoothRiemannianMetric I M) {Λ Kb₀ Kb₁ : ℝ}
@@ -861,7 +848,6 @@ theorem unifRmJetOne_of
   simpa [rmOneC] using
     jet1_norm_le (I := I) (M := M) g₀ hOp0 hOp x
 
-set_option linter.unusedSectionVars false in
 
 theorem unifRmJetOne
     (gBase g₀ : SmoothRiemannianMetric I M) {Λ : ℝ}
@@ -889,7 +875,6 @@ private theorem sq_le_of_sqrt_le {a K : ℝ}
     a ≤ K ^ 2 := by
   nlinarith [Real.sq_sqrt ha, Real.sqrt_nonneg a]
 
-set_option linter.unusedSectionVars false in
 
 theorem unifRmSecOne_of
     (gBase g₀ : SmoothRiemannianMetric I M) {Λ Kb₀ Kb₁ : ℝ}
@@ -922,7 +907,6 @@ theorem unifRmSecOne_of
   exact unifRmJetOne_of (I := I) (M := M) gBase g₀ hΛ
     hKb₀0 hKb₀ hKb₁0 hKb₁ hcomp hjet1 hjet2 hjet3 x
 
-set_option linter.unusedSectionVars false in
 
 theorem unifRmSecOne
     (gBase g₀ : SmoothRiemannianMetric I M) {Λ : ℝ}

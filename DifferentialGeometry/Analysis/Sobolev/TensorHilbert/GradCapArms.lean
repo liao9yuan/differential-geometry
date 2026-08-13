@@ -2,7 +2,6 @@ import DifferentialGeometry.Analysis.Sobolev.TensorHilbert.GradCapAtgw
 
 noncomputable section
 
-set_option linter.style.setOption false
 set_option backward.isDefEq.respectTransparency false
 set_option synthInstance.maxHeartbeats 1600000
 set_option maxHeartbeats 1600000
@@ -35,7 +34,6 @@ def HasCapWin (g₀ : SmoothRiemannianMetric I M) (P : SmoothCcTensor g₀ 0 2)
       K i * Combinatorics.antidiagonalTupleGridWindow
         (gridBase (I := I) (M := M) g₀ (iteratedCovGrad (I := I) g₀ 0 2 1 P) x) (i + 1)
 
-set_option linter.unusedSectionVars false in
 private lemma oneLeCapW (g₀ : SmoothRiemannianMetric I M) (P : SmoothCcTensor g₀ 0 2)
     (x : M) (i : ℕ) :
     (1 : ℝ) ≤ Combinatorics.antidiagonalTupleGridWindow
@@ -43,14 +41,12 @@ private lemma oneLeCapW (g₀ : SmoothRiemannianMetric I M) (P : SmoothCcTensor 
   Combinatorics.one_le_antidiagonalTupleGridWindow _
     (gridBase_nn (I := I) (M := M) g₀ _ x) (by omega)
 
-set_option linter.unusedSectionVars false in
 private lemma nnCapW (g₀ : SmoothRiemannianMetric I M) (P : SmoothCcTensor g₀ 0 2)
     (x : M) (i : ℕ) :
     (0 : ℝ) ≤ Combinatorics.antidiagonalTupleGridWindow
       (gridBase (I := I) (M := M) g₀ (iteratedCovGrad (I := I) g₀ 0 2 1 P) x) (i + 1) :=
   le_trans zero_le_one (oneLeCapW (I := I) (M := M) g₀ P x i)
 
-set_option linter.unusedVariables false in
 theorem capOfArm (g₀ : SmoothRiemannianMetric I M) (P : SmoothCcTensor g₀ 0 2)
     {Λ : ℝ} (hΛ1 : 1 ≤ Λ)
     (hP0 : ∀ x : M, gridBase (I := I) (M := M) g₀ P x 0 ≤ Λ)
@@ -66,7 +62,6 @@ theorem capOfArm (g₀ : SmoothRiemannianMetric I M) (P : SmoothCcTensor g₀ 0 
   simpa using armShift (I := I) (M := M) g₀ P hΛ1 hP0 hP1 X hK 0
     (fun j y => by simpa using hX j y) i x
 
-set_option linter.unusedVariables false in
 theorem capOfBnd (g₀ : SmoothRiemannianMetric I M) (P : SmoothCcTensor g₀ 0 2)
     {r c : ℕ} (X : SmoothCcTensor g₀ r c) {S : ℕ → ℝ} (hS : ∀ i, 0 ≤ S i)
     (hX : ∀ (i : ℕ) (x : M),
@@ -77,7 +72,6 @@ theorem capOfBnd (g₀ : SmoothRiemannianMetric I M) (P : SmoothCcTensor g₀ 0 
   exact le_trans (hX i x)
     (le_mul_of_one_le_right (hS i) (oneLeCapW (I := I) (M := M) g₀ P x i))
 
-set_option linter.unusedSectionVars false in
 private lemma capBaseLe (g₀ : SmoothRiemannianMetric I M) (P : SmoothCcTensor g₀ 0 2)
     (x : M) {i j : ℕ} (hj : 1 ≤ j) (hji : j ≤ i) :
     gridBase (I := I) (M := M) g₀ P x (j + 1) ≤
@@ -94,7 +88,6 @@ private lemma capBaseLe (g₀ : SmoothRiemannianMetric I M) (P : SmoothCcTensor 
   rw [← gradBase_fun (I := I) (M := M) g₀ P x]
   exact Combinatorics.antidiagonalTupleGrid_le_window _ hb' (by omega)
 
-set_option linter.unusedSectionVars false in
 theorem capOfP (g₀ : SmoothRiemannianMetric I M) (P : SmoothCcTensor g₀ 0 2)
     {Λ : ℝ} (hΛ1 : 1 ≤ Λ)
     (hP0 : ∀ x : M, gridBase (I := I) (M := M) g₀ P x 0 ≤ Λ)
@@ -117,7 +110,6 @@ theorem capOfP (g₀ : SmoothRiemannianMetric I M) (P : SmoothCcTensor g₀ 0 2)
         nlinarith [h, hnn]
   exact hgoal
 
-set_option linter.unusedSectionVars false in
 theorem capOfDP (g₀ : SmoothRiemannianMetric I M) (P : SmoothCcTensor g₀ 0 2)
     {Λ : ℝ} (hΛ1 : 1 ≤ Λ)
     (hP1 : ∀ x : M, gridBase (I := I) (M := M) g₀ P x 1 ≤ Λ) :
@@ -139,7 +131,6 @@ theorem capOfDP (g₀ : SmoothRiemannianMetric I M) (P : SmoothCcTensor g₀ 0 2
         nlinarith [h, hnn]
   exact hgoal
 
-set_option linter.unusedVariables false in
 theorem capApp (g₀ : SmoothRiemannianMetric I M) (P : SmoothCcTensor g₀ 0 2)
     {p a b : ℕ} (Φ : SmoothCcTensor g₀ a b) (W : SmoothCcTensor g₀ p a)
     {KΦ KW : ℕ → ℝ} (hKΦ : ∀ i, 0 ≤ KΦ i) (hKW : ∀ l, 0 ≤ KW l)
@@ -152,7 +143,6 @@ theorem capApp (g₀ : SmoothRiemannianMetric I M) (P : SmoothCcTensor g₀ 0 2)
     (iteratedCovGrad (I := I) g₀ 0 2 1 P) hKΦ hKW
     (fun i' y => by simpa using hΦ i' y) (fun l y => by simpa using hW l y) n x
 
-set_option linter.unusedSectionVars false in
 theorem capMono (g₀ : SmoothRiemannianMetric I M) (P : SmoothCcTensor g₀ 0 2)
     {r c : ℕ} {X : SmoothCcTensor g₀ r c} {K K' : ℕ → ℝ}
     (hKK : ∀ i, K i ≤ K' i) (hX : HasCapWin (I := I) (M := M) g₀ P X K) :
@@ -161,14 +151,12 @@ theorem capMono (g₀ : SmoothRiemannianMetric I M) (P : SmoothCcTensor g₀ 0 2
   exact le_trans (hX i x)
     (mul_le_mul_of_nonneg_right (hKK i) (nnCapW (I := I) (M := M) g₀ P x i))
 
-set_option linter.unusedSectionVars false in
 theorem capCongr (g₀ : SmoothRiemannianMetric I M) (P : SmoothCcTensor g₀ 0 2)
     {r c : ℕ} {X Y : SmoothCcTensor g₀ r c} {K : ℕ → ℝ} (hXY : Y = X)
     (hX : HasCapWin (I := I) (M := M) g₀ P X K) :
     HasCapWin (I := I) (M := M) g₀ P Y K := by
   rw [hXY]; exact hX
 
-set_option linter.unusedSectionVars false in
 theorem capAdd (g₀ : SmoothRiemannianMetric I M) (P : SmoothCcTensor g₀ 0 2)
     {r c : ℕ} {X Y : SmoothCcTensor g₀ r c} {KX KY : ℕ → ℝ}
     (hX : HasCapWin (I := I) (M := M) g₀ P X KX)
@@ -189,7 +177,6 @@ theorem capAdd (g₀ : SmoothRiemannianMetric I M) (P : SmoothCcTensor g₀ 0 2)
   have h2 := hY i x
   nlinarith [h1, h2, nnCapW (I := I) (M := M) g₀ P x i]
 
-set_option linter.unusedSectionVars false in
 theorem capSmul (g₀ : SmoothRiemannianMetric I M) (P : SmoothCcTensor g₀ 0 2)
     {r c : ℕ} {X : SmoothCcTensor g₀ r c} {K : ℕ → ℝ} (t : ℝ)
     (hX : HasCapWin (I := I) (M := M) g₀ P X K) :
@@ -205,7 +192,6 @@ theorem capSmul (g₀ : SmoothRiemannianMetric I M) (P : SmoothCcTensor g₀ 0 2
   rw [heq, mul_assoc]
   exact mul_le_mul_of_nonneg_left (hX i x) (sq_nonneg t)
 
-set_option linter.unusedSectionVars false in
 theorem capNeg (g₀ : SmoothRiemannianMetric I M) (P : SmoothCcTensor g₀ 0 2)
     {r c : ℕ} {X : SmoothCcTensor g₀ r c} {K : ℕ → ℝ}
     (hX : HasCapWin (I := I) (M := M) g₀ P X K) :
@@ -216,7 +202,6 @@ theorem capNeg (g₀ : SmoothRiemannianMetric I M) (P : SmoothCcTensor g₀ 0 2)
     (capSmul (I := I) (M := M) g₀ P (-1 : ℝ) hX)
   norm_num
 
-set_option linter.unusedSectionVars false in
 theorem capSub (g₀ : SmoothRiemannianMetric I M) (P : SmoothCcTensor g₀ 0 2)
     {r c : ℕ} {X Y : SmoothCcTensor g₀ r c} {KX KY : ℕ → ℝ}
     (hX : HasCapWin (I := I) (M := M) g₀ P X KX)
@@ -225,7 +210,6 @@ theorem capSub (g₀ : SmoothRiemannianMetric I M) (P : SmoothCcTensor g₀ 0 2)
   have h := capAdd (I := I) (M := M) g₀ P hX (capNeg (I := I) (M := M) g₀ P hY)
   rwa [← sub_eq_add_neg] at h
 
-set_option linter.unusedSectionVars false in
 theorem capReindex (g₀ : SmoothRiemannianMetric I M) (P : SmoothCcTensor g₀ 0 2)
     {r c : ℕ} {X : SmoothCcTensor g₀ r c} {K : ℕ → ℝ} (ρ : Equiv.Perm (Fin r))
     (hX : HasCapWin (I := I) (M := M) g₀ P X K) :
@@ -235,7 +219,6 @@ theorem capReindex (g₀ : SmoothRiemannianMetric I M) (P : SmoothCcTensor g₀ 
   rw [rfns_iteratedCovGrad_reindexCoeffGen_eq (I := I) (M := M) g₀ r c X ρ i x]
   exact hX i x
 
-set_option linter.unusedSectionVars false in
 theorem capDdc (g₀ : SmoothRiemannianMetric I M) (P : SmoothCcTensor g₀ 0 2)
     {r c : ℕ} {X : SmoothCcTensor g₀ r c} {K : ℕ → ℝ} (σ : Equiv.Perm (Fin c))
     (hX : HasCapWin (I := I) (M := M) g₀ P X K) :
@@ -247,7 +230,6 @@ theorem capDdc (g₀ : SmoothRiemannianMetric I M) (P : SmoothCcTensor g₀ 0 2)
     (fun y d => by rw [rsDomDomCongrSection_toSection, toModel_rsDomDomCongr_apply]) i x]
   exact hX i x
 
-set_option linter.unusedSectionVars false in
 theorem capDdc0 (g₀ : SmoothRiemannianMetric I M) (P : SmoothCcTensor g₀ 0 2)
     {c : ℕ} {X : SmoothCcTensor g₀ 0 c} {K : ℕ → ℝ} (σ : Equiv.Perm (Fin c))
     (hX : HasCapWin (I := I) (M := M) g₀ P X K) :
@@ -256,7 +238,6 @@ theorem capDdc0 (g₀ : SmoothRiemannianMetric I M) (P : SmoothCcTensor g₀ 0 2
   rw [riemannianFiberNormSq_iteratedCovGrad_domDomCongrSection (I := I) (M := M) g₀ σ X i x]
   exact hX i x
 
-set_option linter.unusedSectionVars false in
 theorem capSlotExt (g₀ : SmoothRiemannianMetric I M) (P : SmoothCcTensor g₀ 0 2)
     {r c : ℕ} {X : SmoothCcTensor g₀ r c} {K : ℕ → ℝ}
     (hX : HasCapWin (I := I) (M := M) g₀ P X K) :
@@ -268,7 +249,6 @@ theorem capSlotExt (g₀ : SmoothRiemannianMetric I M) (P : SmoothCcTensor g₀ 
   rw [mul_assoc]
   exact mul_le_mul_of_nonneg_left (hX i x) hfr
 
-set_option linter.unusedSectionVars false in
 theorem capIter (g₀ : SmoothRiemannianMetric I M) (P : SmoothCcTensor g₀ 0 2)
     {r c : ℕ} {X : SmoothCcTensor g₀ r c} {K : ℕ → ℝ} (w : ℕ)
     (hX : HasCapWin (I := I) (M := M) g₀ P X K) :
@@ -287,7 +267,6 @@ theorem capIter (g₀ : SmoothRiemannianMetric I M) (P : SmoothCcTensor g₀ 0 2
       ring_nf
       exact le_of_eq rfl
 
-set_option linter.unusedVariables false in
 theorem capJet (g₀ : SmoothRiemannianMetric I M) {Λ : ℝ} (hΛ0 : 0 ≤ Λ) :
     ∃ Kint : ℕ → ℝ, (∀ k, 0 ≤ Kint k) ∧
       ∀ (P : SmoothCcTensor g₀ 0 2),

@@ -181,7 +181,6 @@ theorem c2JetTowerSharp
     (fun q _ => sq_nonneg ‖iteratedCovGrad (I := I) g 4 2 q X‖)
     (Finset.mem_range.mpr (Nat.lt_succ_self i))
 
-set_option linter.unusedVariables false in
 theorem c2JetTowerQ
     (hDim : Module.finrank ℝ E = 3)
     (g g_bg : SmoothRiemannianMetric I M) :
@@ -217,7 +216,6 @@ theorem c2JetTowerQ
     Finset.sum_le_sum_of_subset_of_nonneg hsub (fun _ _ _ => sq_nonneg _)
   exact mul_le_mul_of_nonneg_left (by linarith only [hmono]) (hKc_nn i)
 
-set_option linter.unusedVariables false in
 theorem c2_jet_tower
     (hDim : Module.finrank ℝ E = 3)
     (g g_bg : SmoothRiemannianMetric I M) (a : ℕ) {R₀ : ℝ} (hR₀ : 0 ≤ R₀) :
@@ -308,7 +306,6 @@ theorem a2LadderQBgAffine
   rw [hshape]
   exact le_trans (hop (norm_nonneg _) A.C2 T hball hc2pt hc2jet m) (le_of_eq (by ring))
 
-set_option linter.unusedVariables false in
 theorem a2LadderQBg
     (hDim : Module.finrank ℝ E = 3)
     (g g_bg : SmoothRiemannianMetric I M) :
@@ -402,7 +399,6 @@ theorem a2LadderQ
                 ‖smoothCcToTensorHs (I := I) (M := M) g ((m : ℝ) + 1) T‖ :=
   a2LadderQBg (I := I) (M := M) hDim g g
 
-set_option linter.unusedVariables false in
 theorem a2_ladder
     (hDim : Module.finrank ℝ E = 3)
     (g₀ : SmoothRiemannianMetric I M) (a : ℕ)
@@ -512,7 +508,6 @@ private theorem coeffCap
       (le_trans hjets (mul_le_mul_of_nonneg_left hball hC2_nn)) 2
   linarith only [hwin, hball_sq]
 
-set_option linter.unusedVariables false in
 theorem a1_ladder_bg
     (hDim : Module.finrank ℝ E = 3)
     (g g_bg : SmoothRiemannianMetric I M) (a : ℕ)
@@ -623,7 +618,6 @@ theorem a1_ladder_bg
   rw [← hcast]
   refine le_trans (mul_le_mul_of_nonneg_left hsum (hChs_nn m)) (le_of_eq (by ring))
 
-set_option linter.unusedVariables false in
 theorem a1_ladder
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M) (a : ℕ)
@@ -649,7 +643,6 @@ theorem a1_ladder
               ‖smoothCcToTensorHs (I := I) (M := M) g ((m : ℝ) + 1) T‖ :=
   a1_ladder_bg (I := I) (M := M) hDim g g a ha hR₀
 
-set_option linter.unusedVariables false in
 theorem a1LadderQBg
     (hDim : Module.finrank ℝ E = 3)
     (g g_bg : SmoothRiemannianMetric I M) :
@@ -684,7 +677,6 @@ theorem a1LadderQBg
   exact smoothCcToTensorHs_norm_order_congr (I := I) (M := M) g
     (by push_cast; norm_num) T
 
-set_option linter.unusedVariables false in
 theorem a1LadderQ
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M) :
@@ -710,7 +702,6 @@ theorem a1LadderQ
               ‖smoothCcToTensorHs (I := I) (M := M) g ((m : ℝ) + 1) T‖ :=
   a1LadderQBg (I := I) (M := M) hDim g g
 
-set_option linter.unusedVariables false in
 theorem n_diff_hm_rung
     (hDim : Module.finrank ℝ E = 3)
     (g₀ : SmoothRiemannianMetric I M) (a : ℕ)
@@ -757,7 +748,6 @@ theorem n_diff_hm_rung
       (h1 hδ0 hδ_le T hT hδg hδZ hball m))
     (le_of_eq (by ring))
 
-set_option linter.unusedVariables false in
 theorem nDiffHmQBg
     (hDim : Module.finrank ℝ E = 3)
     (g g_bg : SmoothRiemannianMetric I M) :

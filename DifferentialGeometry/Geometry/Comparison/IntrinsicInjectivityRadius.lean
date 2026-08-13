@@ -2,7 +2,6 @@ import DifferentialGeometry.Geometry.Exponential.IntrinsicFramedCoordinates
 import Mathlib.Data.ENNReal.Real
 
 set_option autoImplicit false
-set_option linter.unusedSectionVars false
 
 noncomputable section
 

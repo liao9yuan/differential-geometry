@@ -5,7 +5,6 @@ import DifferentialGeometry.Analysis.Sobolev.TensorHilbert.GNTwoAnchor
 noncomputable section
 
 set_option autoImplicit false
-set_option linter.style.setOption false
 set_option backward.isDefEq.respectTransparency false
 set_option synthInstance.maxHeartbeats 1600000
 set_option maxHeartbeats 1600000
@@ -37,19 +36,16 @@ def HasMarkWin (g₀ : SmoothRiemannianMetric I M) (P : SmoothCcTensor g₀ 0 2)
         ((iteratedCovGrad (I := I) g₀ r c i X).toSection x) ≤
       K i * Combinatorics.markGrid (gridBase (I := I) (M := M) g₀ P x) u i
 
-set_option linter.unusedSectionVars false in
 private lemma mkWnn (g₀ : SmoothRiemannianMetric I M) (P : SmoothCcTensor g₀ 0 2)
     (x : M) (u i : ℕ) :
     (0 : ℝ) ≤ Combinatorics.markGrid (gridBase (I := I) (M := M) g₀ P x) u i :=
   Combinatorics.markGrid_nn _ (gridBase_nn (I := I) (M := M) g₀ P x) u i
 
-set_option linter.unusedSectionVars false in
 private lemma mkW1 (g₀ : SmoothRiemannianMetric I M) (P : SmoothCcTensor g₀ 0 2)
     (x : M) (i : ℕ) :
     (1 : ℝ) ≤ Combinatorics.markGrid (gridBase (I := I) (M := M) g₀ P x) 0 i :=
   Combinatorics.one_le_markGrid0 _ (gridBase_nn (I := I) (M := M) g₀ P x) i
 
-set_option linter.unusedVariables false in
 theorem markFold (g₀ : SmoothRiemannianMetric I M) {p a b : ℕ} (u v : ℕ)
     (Φ : SmoothCcTensor g₀ a b) (W : SmoothCcTensor g₀ p a)
     (P : SmoothCcTensor g₀ 0 2) {KΦ KW : ℕ → ℝ}
@@ -150,7 +146,6 @@ theorem markFold (g₀ : SmoothRiemannianMetric I M) {p a b : ℕ} (u v : ℕ)
         rw [Finset.sum_mul]
         exact Finset.sum_congr rfl (fun i' _ => by rw [Finset.sum_mul])
 
-set_option linter.unusedVariables false in
 theorem mkOfBnd (g₀ : SmoothRiemannianMetric I M) (P : SmoothCcTensor g₀ 0 2)
     {r c : ℕ} (X : SmoothCcTensor g₀ r c) {S : ℕ → ℝ} (hS : ∀ i, 0 ≤ S i)
     (hX : ∀ (i : ℕ) (x : M),
@@ -162,7 +157,6 @@ theorem mkOfBnd (g₀ : SmoothRiemannianMetric I M) (P : SmoothCcTensor g₀ 0 2
     (le_mul_of_one_le_right (hS i) (mkW1 (I := I) (M := M) g₀ P x i))
 
 omit [BoundarylessManifold I M] in
-set_option linter.unusedVariables false in
 theorem mkOfWin (g₀ : SmoothRiemannianMetric I M) (P : SmoothCcTensor g₀ 0 2)
     {r c : ℕ} (X : SmoothCcTensor g₀ r c) {K : ℕ → ℝ}
     (hX : ∀ (i : ℕ) (x : M),
@@ -173,7 +167,6 @@ theorem mkOfWin (g₀ : SmoothRiemannianMetric I M) (P : SmoothCcTensor g₀ 0 2
     HasMarkWin (I := I) (M := M) g₀ P X 0 K := hX
 
 omit [BoundarylessManifold I M] in
-set_option linter.unusedSectionVars false in
 theorem mkOfP (g₀ : SmoothRiemannianMetric I M) (P : SmoothCcTensor g₀ 0 2)
     (hP0 : ∀ x : M, gridBase (I := I) (M := M) g₀ P x 0 ≤ 1) :
     HasMarkWin (I := I) (M := M) g₀ P P 0 (fun _ => 1) := by
@@ -195,7 +188,6 @@ theorem mkOfP (g₀ : SmoothRiemannianMetric I M) (P : SmoothCcTensor g₀ 0 2)
   rw [one_mul]
   exact hgoal
 
-set_option linter.unusedSectionVars false in
 theorem mkOfDP (g₀ : SmoothRiemannianMetric I M) (P : SmoothCcTensor g₀ 0 2) :
     HasMarkWin (I := I) (M := M) g₀ P (covGrad (I := I) (M := M) g₀ 0 2 P) 1
       (fun _ => 1) := by
@@ -207,7 +199,6 @@ theorem mkOfDP (g₀ : SmoothRiemannianMetric I M) (P : SmoothCcTensor g₀ 0 2)
   rwa [Combinatorics.antidiagonalTupleGrid_zero, mul_one] at h
 
 omit [BoundarylessManifold I M] in
-set_option linter.unusedVariables false in
 theorem mkOfTop (g₀ : SmoothRiemannianMetric I M) (P : SmoothCcTensor g₀ 0 2)
     {r c : ℕ} (X : SmoothCcTensor g₀ r c) {Ktop : ℝ} (hKtop : 0 ≤ Ktop)
     {Kc : ℕ → ℝ} (hKc : ∀ i, 0 ≤ Kc i)
@@ -251,7 +242,6 @@ theorem mkOfTop (g₀ : SmoothRiemannianMetric I M) (P : SmoothCcTensor g₀ 0 2
   linarith only [h1, h2, hgoal.le, hgoal.ge]
 
 omit [BoundarylessManifold I M] in
-set_option linter.unusedVariables false in
 theorem mkOfAtg (g₀ : SmoothRiemannianMetric I M) (P : SmoothCcTensor g₀ 0 2)
     (hP0 : ∀ x : M, gridBase (I := I) (M := M) g₀ P x 0 ≤ 1)
     {r c : ℕ} (X : SmoothCcTensor g₀ r c) {K : ℕ → ℝ} (hK : ∀ i, 0 ≤ K i)
@@ -273,7 +263,6 @@ theorem mkOfAtg (g₀ : SmoothRiemannianMetric I M) (P : SmoothCcTensor g₀ 0 2
     _ = (K i * Combinatorics.antidiagonalTupleGridCount (i + 1)) *
           Combinatorics.markGrid b 1 i := by ring
 
-set_option linter.unusedVariables false in
 theorem mkApp (g₀ : SmoothRiemannianMetric I M) (P : SmoothCcTensor g₀ 0 2)
     {p a b : ℕ} (Φ : SmoothCcTensor g₀ a b) (W : SmoothCcTensor g₀ p a)
     {u v : ℕ} {KΦ KW : ℕ → ℝ} (hKΦ : ∀ i, 0 ≤ KΦ i) (hKW : ∀ l, 0 ≤ KW l)
@@ -284,7 +273,6 @@ theorem mkApp (g₀ : SmoothRiemannianMetric I M) (P : SmoothCcTensor g₀ 0 2)
   intro n x
   exact markFold (I := I) (M := M) g₀ u v Φ W P hKΦ hKW hΦ hW n x
 
-set_option linter.unusedSectionVars false in
 theorem mkMono (g₀ : SmoothRiemannianMetric I M) (P : SmoothCcTensor g₀ 0 2)
     {r c u : ℕ} {X : SmoothCcTensor g₀ r c} {K K' : ℕ → ℝ}
     (hKK : ∀ i, K i ≤ K' i) (hX : HasMarkWin (I := I) (M := M) g₀ P X u K) :
@@ -293,14 +281,12 @@ theorem mkMono (g₀ : SmoothRiemannianMetric I M) (P : SmoothCcTensor g₀ 0 2)
   exact le_trans (hX i x)
     (mul_le_mul_of_nonneg_right (hKK i) (mkWnn (I := I) (M := M) g₀ P x u i))
 
-set_option linter.unusedSectionVars false in
 theorem mkCongr (g₀ : SmoothRiemannianMetric I M) (P : SmoothCcTensor g₀ 0 2)
     {r c u : ℕ} {X Y : SmoothCcTensor g₀ r c} {K : ℕ → ℝ} (hXY : Y = X)
     (hX : HasMarkWin (I := I) (M := M) g₀ P X u K) :
     HasMarkWin (I := I) (M := M) g₀ P Y u K := by
   rw [hXY]; exact hX
 
-set_option linter.unusedSectionVars false in
 theorem mkAdd (g₀ : SmoothRiemannianMetric I M) (P : SmoothCcTensor g₀ 0 2)
     {r c u : ℕ} {X Y : SmoothCcTensor g₀ r c} {KX KY : ℕ → ℝ}
     (hX : HasMarkWin (I := I) (M := M) g₀ P X u KX)
@@ -321,7 +307,6 @@ theorem mkAdd (g₀ : SmoothRiemannianMetric I M) (P : SmoothCcTensor g₀ 0 2)
   have h2 := hY i x
   nlinarith [h1, h2, mkWnn (I := I) (M := M) g₀ P x u i]
 
-set_option linter.unusedSectionVars false in
 theorem mkSmul (g₀ : SmoothRiemannianMetric I M) (P : SmoothCcTensor g₀ 0 2)
     {r c u : ℕ} {X : SmoothCcTensor g₀ r c} {K : ℕ → ℝ} (t : ℝ)
     (hX : HasMarkWin (I := I) (M := M) g₀ P X u K) :
@@ -337,7 +322,6 @@ theorem mkSmul (g₀ : SmoothRiemannianMetric I M) (P : SmoothCcTensor g₀ 0 2)
   rw [heq, mul_assoc]
   exact mul_le_mul_of_nonneg_left (hX i x) (sq_nonneg t)
 
-set_option linter.unusedSectionVars false in
 theorem mkNeg (g₀ : SmoothRiemannianMetric I M) (P : SmoothCcTensor g₀ 0 2)
     {r c u : ℕ} {X : SmoothCcTensor g₀ r c} {K : ℕ → ℝ}
     (hX : HasMarkWin (I := I) (M := M) g₀ P X u K) :
@@ -348,7 +332,6 @@ theorem mkNeg (g₀ : SmoothRiemannianMetric I M) (P : SmoothCcTensor g₀ 0 2)
     (mkSmul (I := I) (M := M) g₀ P (-1 : ℝ) hX)
   norm_num
 
-set_option linter.unusedSectionVars false in
 theorem mkSub (g₀ : SmoothRiemannianMetric I M) (P : SmoothCcTensor g₀ 0 2)
     {r c u : ℕ} {X Y : SmoothCcTensor g₀ r c} {KX KY : ℕ → ℝ}
     (hX : HasMarkWin (I := I) (M := M) g₀ P X u KX)
@@ -357,7 +340,6 @@ theorem mkSub (g₀ : SmoothRiemannianMetric I M) (P : SmoothCcTensor g₀ 0 2)
   have h := mkAdd (I := I) (M := M) g₀ P hX (mkNeg (I := I) (M := M) g₀ P hY)
   rwa [← sub_eq_add_neg] at h
 
-set_option linter.unusedSectionVars false in
 theorem mkReindex (g₀ : SmoothRiemannianMetric I M) (P : SmoothCcTensor g₀ 0 2)
     {r c u : ℕ} {X : SmoothCcTensor g₀ r c} {K : ℕ → ℝ} (ρ : Equiv.Perm (Fin r))
     (hX : HasMarkWin (I := I) (M := M) g₀ P X u K) :
@@ -367,7 +349,6 @@ theorem mkReindex (g₀ : SmoothRiemannianMetric I M) (P : SmoothCcTensor g₀ 0
   rw [rfns_iteratedCovGrad_reindexCoeffGen_eq (I := I) (M := M) g₀ r c X ρ i x]
   exact hX i x
 
-set_option linter.unusedSectionVars false in
 theorem mkDdc (g₀ : SmoothRiemannianMetric I M) (P : SmoothCcTensor g₀ 0 2)
     {r c u : ℕ} {X : SmoothCcTensor g₀ r c} {K : ℕ → ℝ} (σ : Equiv.Perm (Fin c))
     (hX : HasMarkWin (I := I) (M := M) g₀ P X u K) :
@@ -379,7 +360,6 @@ theorem mkDdc (g₀ : SmoothRiemannianMetric I M) (P : SmoothCcTensor g₀ 0 2)
     (fun y d => by rw [rsDomDomCongrSection_toSection, toModel_rsDomDomCongr_apply]) i x]
   exact hX i x
 
-set_option linter.unusedSectionVars false in
 theorem mkDdc0 (g₀ : SmoothRiemannianMetric I M) (P : SmoothCcTensor g₀ 0 2)
     {c u : ℕ} {X : SmoothCcTensor g₀ 0 c} {K : ℕ → ℝ} (σ : Equiv.Perm (Fin c))
     (hX : HasMarkWin (I := I) (M := M) g₀ P X u K) :
@@ -388,7 +368,6 @@ theorem mkDdc0 (g₀ : SmoothRiemannianMetric I M) (P : SmoothCcTensor g₀ 0 2)
   rw [riemannianFiberNormSq_iteratedCovGrad_domDomCongrSection (I := I) (M := M) g₀ σ X i x]
   exact hX i x
 
-set_option linter.unusedSectionVars false in
 theorem mkSlotExt (g₀ : SmoothRiemannianMetric I M) (P : SmoothCcTensor g₀ 0 2)
     {r c u : ℕ} {X : SmoothCcTensor g₀ r c} {K : ℕ → ℝ}
     (hX : HasMarkWin (I := I) (M := M) g₀ P X u K) :
@@ -400,7 +379,6 @@ theorem mkSlotExt (g₀ : SmoothRiemannianMetric I M) (P : SmoothCcTensor g₀ 0
   rw [mul_assoc]
   exact mul_le_mul_of_nonneg_left (hX i x) hfr
 
-set_option linter.unusedSectionVars false in
 theorem mkIter (g₀ : SmoothRiemannianMetric I M) (P : SmoothCcTensor g₀ 0 2)
     {r c u : ℕ} {X : SmoothCcTensor g₀ r c} {K : ℕ → ℝ} (w : ℕ)
     (hX : HasMarkWin (I := I) (M := M) g₀ P X u K) :
@@ -419,7 +397,6 @@ theorem mkIter (g₀ : SmoothRiemannianMetric I M) (P : SmoothCcTensor g₀ 0 2)
       ring_nf
       exact le_of_eq rfl
 
-set_option linter.unusedVariables false in
 theorem gridIntHigh (g₀ : SmoothRiemannianMetric I M) :
     ∃ K : ℕ → ℝ, (∀ m, 0 ≤ K m) ∧
       ∀ (P : SmoothCcTensor g₀ 0 2) {Λ₀ Λ₁ : ℝ}, 0 ≤ Λ₀ → Λ₀ ≤ 1 → 0 ≤ Λ₁ →
@@ -496,13 +473,11 @@ theorem gridIntHigh (g₀ : SmoothRiemannianMetric I M) :
   have h1 : Λ₁ ^ 2 ≤ 1 + Λ₁ ^ 2 := by nlinarith [sq_nonneg Λ₁]
   exact mul_le_mul_of_nonneg_right (mul_le_mul_of_nonneg_left h1 (hK0 m)) (sq_nonneg _)
 
-set_option linter.unusedSectionVars false in
 private lemma leTame {c R K L J : ℝ} (hcKL : c ≤ K * L) (hKL0 : 0 ≤ K * L)
     (hR0 : 0 ≤ R) (hRJ : R ≤ J) : c * R ≤ K * L * J := by
   calc c * R ≤ K * L * R := mul_le_mul_of_nonneg_right hcKL hR0
     _ ≤ K * L * J := mul_le_mul_of_nonneg_left hRJ hKL0
 
-set_option linter.unusedVariables false in
 theorem markMon (g₀ : SmoothRiemannianMetric I M) :
     ∃ K : ℕ → ℝ, (∀ m, 0 ≤ K m) ∧
       ∀ (P : SmoothCcTensor g₀ 0 2) {Λ₀ Λ₁ : ℝ}, 0 ≤ Λ₀ → Λ₀ ≤ 1 → 0 ≤ Λ₁ →
@@ -718,7 +693,6 @@ theorem markMon (g₀ : SmoothRiemannianMetric I M) :
               have := hKP_nn m; have := hKG_nn m; simp only [hKmon_def]; linarith
             nlinarith [hKH, hKH_nn m, hKmon_nn, sq_nonneg Λ₁]
 
-set_option linter.unusedSectionVars false in
 private lemma contGB (g₀ : SmoothRiemannianMetric I M) (P : SmoothCcTensor g₀ 0 2)
     (j : ℕ) : Continuous (fun x : M => gridBase (I := I) (M := M) g₀ P x j) := by
   have hc : Continuous (fun x : M =>
@@ -733,7 +707,6 @@ private lemma contGB (g₀ : SmoothRiemannianMetric I M) (P : SmoothCcTensor g�
         (iteratedCovGrad (I := I) g₀ 0 2 j P) x]
   exact hc
 
-set_option linter.unusedSectionVars false in
 private lemma contGrid (g₀ : SmoothRiemannianMetric I M) (P : SmoothCcTensor g₀ 0 2)
     (k : ℕ) : Continuous (fun x : M =>
       Combinatorics.antidiagonalTupleGrid (gridBase (I := I) (M := M) g₀ P x) k) := by
@@ -747,7 +720,6 @@ private lemma contGrid (g₀ : SmoothRiemannianMetric I M) (P : SmoothCcTensor g
   exact continuous_finset_sum _ (fun n' _ => continuous_finset_sum _ (fun e _ =>
     continuous_finset_prod _ (fun q _ => contGB (I := I) (M := M) g₀ P (e q))))
 
-set_option linter.unusedSectionVars false in
 private lemma contMk (g₀ : SmoothRiemannianMetric I M) (P : SmoothCcTensor g₀ 0 2)
     (u w : ℕ) : Continuous (fun x : M =>
       Combinatorics.markGrid (gridBase (I := I) (M := M) g₀ P x) u w) := by
@@ -771,7 +743,6 @@ private lemma contMk (g₀ : SmoothRiemannianMetric I M) (P : SmoothCcTensor g�
       exact continuous_finset_sum _ (fun c _ =>
         (contGB (I := I) (M := M) g₀ P (c + 1)).mul (ih (w - c)))
 
-set_option linter.unusedVariables false in
 theorem markJet0 (g₀ : SmoothRiemannianMetric I M) :
     ∃ K0 : ℕ → ℝ, (∀ n, 0 ≤ K0 n) ∧
       ∀ (P : SmoothCcTensor g₀ 0 2),
@@ -807,7 +778,6 @@ theorem markJet0 (g₀ : SmoothRiemannianMetric I M) :
       (fun j _ _ => sq_nonneg _)
   linarith
 
-set_option linter.unusedVariables false in
 theorem markJet (g₀ : SmoothRiemannianMetric I M) :
     ∃ K0 : ℕ → ℝ, (∀ n, 0 ≤ K0 n) ∧
       ∀ (P : SmoothCcTensor g₀ 0 2) {Λ₀ Λ₁ : ℝ}, 0 ≤ Λ₀ → Λ₀ ≤ 1 → 0 ≤ Λ₁ →

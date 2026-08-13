@@ -32,7 +32,6 @@ variable
 namespace LowRegBgC0Core
 
 set_option maxHeartbeats 4800000 in
-set_option linter.unusedVariables false in
 theorem vbOnePairH2
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M) :

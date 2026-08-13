@@ -41,7 +41,6 @@ theorem appCcPerIdxL2 (g₀ : SmoothRiemannianMetric I M) (b₀ s₀ q : ℕ) :
   exact app_jet_sq_le (I := I) (M := M) g₀ b₀ s₀ q Φ W (fun i => Λ i ^ 2)
     (fun i _ => sq_nonneg (Λ i)) (fun i _ x => hsup i x)
 
-set_option linter.unusedSectionVars false in
 theorem icgWinShift (g : SmoothRiemannianMetric I M) (r s m p : ℕ)
     (Ψ : SmoothCcTensor g r s) :
     (∑ l ∈ Finset.range (p + 1),
@@ -73,7 +72,6 @@ theorem icgWinShift (g : SmoothRiemannianMetric I M) (r s m p : ℕ)
     _ ≤ ∑ j ∈ Finset.range (p + m + 1), f j :=
         Finset.sum_le_sum_of_subset_of_nonneg himg (fun _ _ _ => sq_nonneg _)
 
-set_option linter.unusedSectionVars false in
 theorem sqrtAdd2 (x y : ℝ) (hx : 0 ≤ x) (hy : 0 ≤ y) :
     Real.sqrt (x + y) ≤ Real.sqrt x + Real.sqrt y := by
   have hsq : x + y ≤ (Real.sqrt x + Real.sqrt y) ^ 2 := by
@@ -84,7 +82,6 @@ theorem sqrtAdd2 (x y : ℝ) (hx : 0 ≤ x) (hy : 0 ≤ y) :
         Real.sqrt_le_sqrt hsq
     _ = Real.sqrt x + Real.sqrt y := Real.sqrt_sq (by positivity)
 
-set_option linter.unusedSectionVars false in
 theorem sqrtFinSum {ι : Type*} (s : Finset ι) (f : ι → ℝ)
     (hf : ∀ i, 0 ≤ f i) :
     Real.sqrt (∑ i ∈ s, f i) ≤ ∑ i ∈ s, Real.sqrt (f i) := by
@@ -97,7 +94,6 @@ theorem sqrtFinSum {ι : Type*} (s : Finset ι) (f : ι → ℝ)
         (Finset.sum_nonneg (fun i _ => hf i))) ?_
       exact add_le_add le_rfl ih
 
-set_option linter.unusedSectionVars false in
 private theorem c2SupJet (hDim : Module.finrank ℝ E = 3)
     (g g_bg : SmoothRiemannianMetric I M) :
     ∃ Ks : ℕ → ℝ, (∀ i, 0 ≤ Ks i) ∧
@@ -162,7 +158,6 @@ private theorem c2SupJet (hDim : Module.finrank ℝ E = 3)
     _ = Csh i ^ 2 * (∑ j ∈ Finset.range 3, Kc (i + j)) * (1 + J (i + 2)) := by
         rw [← Finset.sum_mul]; ring
 
-set_option linter.unusedSectionVars false in
 theorem a2PerIdxJet (hDim : Module.finrank ℝ E = 3)
     (g g_bg : SmoothRiemannianMetric I M) :
     ∃ Cq K : ℕ → ℝ, (∀ q, 0 ≤ Cq q) ∧ (∀ i, 0 ≤ K i) ∧
@@ -271,7 +266,6 @@ theorem a2PerIdxJet (hDim : Module.finrank ℝ E = 3)
       Finset.sum_nonneg (fun _ _ => sq_nonneg _)
     linarith only [this]
 
-set_option linter.unusedSectionVars false in
 theorem a2PerIdxLin (hDim : Module.finrank ℝ E = 3)
     (g g_bg : SmoothRiemannianMetric I M) :
     ∃ Cq K : ℕ → ℝ, (∀ q, 0 ≤ Cq q) ∧ (∀ i, 0 ≤ K i) ∧

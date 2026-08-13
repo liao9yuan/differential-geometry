@@ -4,8 +4,6 @@ import DifferentialGeometry.Tensor.RSTensor.NablaOnTensors.Regularity.TotalNabla
 import DifferentialGeometry.Tensor.RSTensor.MetricTrace.NablaTraceGen
 
 set_option autoImplicit false
-set_option linter.style.longLine false
-set_option linter.unusedSectionVars false
 
 noncomputable section
 

@@ -2,7 +2,6 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.CurvatureCoefficien
 
 noncomputable section
 
-set_option linter.style.setOption false
 set_option synthInstance.maxHeartbeats 1600000
 set_option maxHeartbeats 3200000
 
@@ -36,7 +35,6 @@ end CurvatureCoefficientDifferenceJetTower
 
 open CurvatureCoefficientDifferenceJetTower
 
-set_option linter.unusedVariables false in
 theorem rfns_iteratedCovGrad_riemannCoeff_metricFactorTelescope_diagonalProductGrid_le
     (g₀ : SmoothRiemannianMetric I M) {δ₀ : ℝ} (hδ₀ : δ₀ < 1) :
     ∃ C : ℕ → ℝ, (∀ i, 0 ≤ C i) ∧
@@ -235,7 +233,6 @@ theorem rfns_iteratedCovGrad_riemannCoeff_metricFactorTelescope_diagonalProductG
         rw [← Finset.sum_mul]
         ring
 
-set_option linter.unusedVariables false in
 theorem rfns_iteratedCovGrad_ricciArmOrder0RiemannCoeff_backgroundDifference_diagonalProductGrid_le
     (g₀ : SmoothRiemannianMetric I M) {δ₀ : ℝ} (hδ₀ : δ₀ < 1) :
     ∃ C : ℕ → ℝ, (∀ i, 0 ≤ C i) ∧
@@ -314,7 +311,6 @@ theorem rfns_iteratedCovGrad_ricciArmOrder0RiemannCoeff_backgroundDifference_dia
           ((iteratedCovGrad (I := I) g₀ 0 2 j T).toSection x)) i) from by ring]
   linarith
 
-set_option linter.unusedVariables false in
 theorem slotInsertEndoCc_ricEndoBackgroundDifferenceField_perOrder_l2_ballUniform
     (g₀ : SmoothRiemannianMetric I M) (a : ℕ)
     (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) {R : ℝ} (hR : 0 ≤ R)
@@ -398,7 +394,6 @@ theorem slotInsertEndoCc_ricEndoBackgroundDifferenceField_perOrder_l2_ballUnifor
     rw [hz]
     simpa using mul_nonneg (hC_nn i) (Finset.sum_nonneg (fun k _ => hKg_nn k))
 
-set_option linter.unusedVariables false in
 theorem ricciArmOrder0RiemannCoeff_backgroundDifference_perOrder_l2_ballUniform
     (g₀ : SmoothRiemannianMetric I M) (a : ℕ)
     (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) {R : ℝ} (hR : 0 ≤ R)
@@ -482,7 +477,6 @@ theorem ricciArmOrder0RiemannCoeff_backgroundDifference_perOrder_l2_ballUniform
     rw [hz]
     simpa using mul_nonneg (hC_nn i) (Finset.sum_nonneg (fun k _ => hKg_nn k))
 
-set_option linter.unusedVariables false in
 theorem ricciArmOrder0CurvCoeff_backgroundDifference_perOrder_l2_ballUniform
     (g₀ : SmoothRiemannianMetric I M) (a : ℕ)
     (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) {R : ℝ} (hR : 0 ≤ R)
@@ -602,7 +596,6 @@ theorem ricciArmOrder0CurvCoeff_backgroundDifference_perOrder_l2_ballUniform
   exact mul_le_mul_of_nonneg_left hKi (by positivity)
 
 set_option maxHeartbeats 12800000 in
-set_option linter.unusedVariables false in
 theorem antidiagonalTupleGrid_integral_ballUniform_tameWindow
     (g₀ : SmoothRiemannianMetric I M) (a : ℕ)
     (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) {R : ℝ} (hR : 0 ≤ R) :
@@ -842,7 +835,6 @@ lemma tame_sq_le_two_add (t u v c1 c2 : ℝ) (ht : 0 ≤ t) (hu : 0 ≤ u) (hv :
 
 end CurvatureCoefficientDifferenceJetTower
 
-set_option linter.unusedSectionVars false in
 theorem raisedKoszul_perOrder_l2_le_iteratedCovGrad_succ
     (g₀ g₁ : SmoothRiemannianMetric I M) (T : SmoothCcTensor g₀ 0 2)
     (htie : ∀ (y : M) (v w : TangentSpace I y),
@@ -874,7 +866,6 @@ theorem raisedKoszul_perOrder_l2_le_iteratedCovGrad_succ
     (2 + (n + 1)) (iteratedCovGrad (I := I) g₀ 0 2 (n + 1) T)]
   rw [← SmoothCcTensor.norm_def]
 
-set_option linter.unusedVariables false in
 theorem slotInsertEndoCc_ricEndoBackgroundDifferenceField_perOrder_l2_tameEnvelope
     (g₀ : SmoothRiemannianMetric I M) (a : ℕ)
     (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) {R : ℝ} (hR : 0 ≤ R)
@@ -992,7 +983,6 @@ theorem slotInsertEndoCc_ricEndoBackgroundDifferenceField_perOrder_l2_tameEnvelo
       mul_nonneg (hC_nn i) (Finset.sum_nonneg (fun k _ => hKg_nn k))
     nlinarith [hwin_nn, hK_nn]
 
-set_option linter.unusedVariables false in
 theorem ricciArmOrder0RiemannCoeff_backgroundDifference_perOrder_l2_tameEnvelope
     (g₀ : SmoothRiemannianMetric I M) (a : ℕ)
     (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) {R : ℝ} (hR : 0 ≤ R)
@@ -1110,7 +1100,6 @@ theorem ricciArmOrder0RiemannCoeff_backgroundDifference_perOrder_l2_tameEnvelope
       mul_nonneg (hC_nn i) (Finset.sum_nonneg (fun k _ => hKg_nn k))
     nlinarith [hwin_nn, hK_nn]
 
-set_option linter.unusedVariables false in
 theorem ricciArmOrder0CurvCoeff_backgroundDifference_perOrder_l2_tameEnvelope
     (g₀ : SmoothRiemannianMetric I M) (a : ℕ)
     (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) {R : ℝ} (hR : 0 ≤ R)
@@ -1242,7 +1231,6 @@ theorem ricciArmOrder0CurvCoeff_backgroundDifference_perOrder_l2_tameEnvelope
           (1 + ∑ j ∈ Finset.range (i + 3),
             ‖iteratedCovGrad (I := I) g₀ 0 2 j P‖ ^ 2) := by ring
 
-set_option linter.unusedVariables false in
 theorem ricciArmOrder0BaseCoeff_backgroundDifference_perOrder_l2_tameEnvelope
     (g₀ : SmoothRiemannianMetric I M) (a : ℕ)
     (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) {R : ℝ} (hR : 0 ≤ R)
@@ -1309,7 +1297,6 @@ theorem ricciArmOrder0BaseCoeff_backgroundDifference_perOrder_l2_tameEnvelope
   refine le_trans hkey (le_of_eq ?_)
   ring
 
-set_option linter.unusedVariables false in
 theorem ricciArmOrder0BaseCoeff_perOrder_l2_tameEnvelope_generic
     (g₀ : SmoothRiemannianMetric I M) (a : ℕ)
     (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) {R : ℝ} (hR : 0 ≤ R)

@@ -6,7 +6,6 @@ import DifferentialGeometry.Geometry.Connection.ParallelTransport.CovariantDeriv
 noncomputable section
 
 set_option autoImplicit false
-set_option linter.unusedSectionVars false
 
 open Bundle Filter Function Manifold Set
 open scoped ContDiff Manifold Topology

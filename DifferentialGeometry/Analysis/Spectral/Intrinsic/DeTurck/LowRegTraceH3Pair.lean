@@ -317,7 +317,6 @@ private theorem perturb_jet
   rw [h0] at hslot
   simpa only [pow_one] using hslot
 
-set_option linter.unusedVariables false in
 private theorem full_slot_h3
     (g : SmoothRiemannianMetric I M)
     {δ₀ : ℝ} (hδ₀0 : 0 ≤ δ₀) (hδ₀ : δ₀ < 1) :
@@ -361,7 +360,6 @@ private theorem full_slot_h3
     hfac)
 
 set_option maxHeartbeats 2400000 in
-set_option linter.unusedVariables false in
 theorem inv_slot_pair_h3
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M)
@@ -677,7 +675,6 @@ private theorem insert_succ_jet
 namespace LowBaseInternal
 
 set_option maxHeartbeats 2400000 in
-set_option linter.unusedVariables false in
 theorem trace1_pair_h3
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M)

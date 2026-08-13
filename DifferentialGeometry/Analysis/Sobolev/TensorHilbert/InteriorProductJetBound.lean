@@ -5,7 +5,6 @@ import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.RiemannianFibe
 noncomputable section
 
 set_option autoImplicit false
-set_option linter.style.setOption false
 set_option backward.isDefEq.respectTransparency false
 set_option synthInstance.maxHeartbeats 1600000
 set_option maxHeartbeats 1600000
@@ -45,7 +44,6 @@ noncomputable def ipLowCc (g : SmoothRiemannianMetric I M) (om : SmoothCcTensor 
 
 section Eval
 
-set_option linter.unusedSectionVars false in
 private lemma ipjb_rank0_smul_unit (x : M) (c : Tensor0SSpace 0 I x) :
     c = Tensor0SSpace.toModel c (fun i : Fin 0 => i.elim0) •
       unitTensor (I := I) (M := M) x := by
@@ -60,7 +58,6 @@ private lemma ipjb_rank0_smul_unit (x : M) (c : Tensor0SSpace 0 I x) :
   funext i
   exact i.elim0
 
-set_option linter.unusedSectionVars false in
 private theorem ipjb_orthoFrame_basis (g : SmoothRiemannianMetric I M) (x : M) :
     ∃ bse : Module.Basis (Fin (Module.finrank ℝ E)) ℝ (TangentSpace I x),
       ∀ i, bse i = smoothOrthoFrame (I := I) g x i x := by
@@ -188,7 +185,6 @@ private lemma ipjb_slotExt2_toModel (g : SmoothRiemannianMetric I M)
     ContinuousMultilinearMap.smul_apply, smul_eq_mul]
   rw [unitModel]
 
-set_option linter.unusedSectionVars false in
 private lemma ipjb_cons_sum_smul {n : ℕ}
     (Zm : Tensor0SModel (n + 1) ℝ E) (d : ℕ) (t : Fin d → ℝ)
     (u : Fin d → E) (rest : Fin n → E) :
@@ -223,7 +219,6 @@ private lemma ipjb_cons_sum_smul {n : ℕ}
 
 end Eval
 
-set_option linter.unusedSectionVars false in
 theorem ipLowCc_toSec_ip (g : SmoothRiemannianMetric I M) (om : SmoothCcTensor g 0 1)
     (x : M) (V : TangentSpace I x)
     (hflat : ∀ z : TangentSpace I x,
@@ -343,7 +338,6 @@ private lemma ipjb_icg_zero (g : SmoothRiemannianMetric I M) (r s j : ℕ) :
       rw [iteratedCovGrad_succ, ih]
       exact covGrad_zero (I := I) (M := M) (g := g) (r := r) (s := s + j)
 
-set_option linter.unusedSectionVars false in
 private lemma ipjb_rfns_trace_succ (g : SmoothRiemannianMetric I M) (i : ℕ) (x : M) :
     riemannianFiberNormSq (I := I) (M := M) g 3 (1 + (i + 1)) x
         ((iteratedCovGrad (I := I) g 3 1 (i + 1)
@@ -358,7 +352,6 @@ private lemma ipjb_rfns_trace_succ (g : SmoothRiemannianMetric I M) (i : ℕ) (x
       (0 : TensorRSSpace 3 (2 + i) I x) from rfl]
   exact riemannianFiberNormSq_zero (I := I) (M := M) g 3 (1 + 1 + i) x
 
-set_option linter.unusedSectionVars false in
 theorem rfns_icg_ipLow_le (g : SmoothRiemannianMetric I M) :
     ∃ c : ℕ → ℝ, (∀ l, 0 ≤ c l) ∧
       ∀ (om : SmoothCcTensor g 0 1) (l : ℕ) (x : M),
@@ -453,7 +446,6 @@ theorem rfns_icg_ipLow_le (g : SmoothRiemannianMetric I M) :
     _ = appCcGdiag (E := E) l * NC * (n * n) * ∑ m ∈ Finset.range (l + 1), Wj m := by
         ring
 
-set_option linter.unusedSectionVars false in
 theorem norm_icg_ipLow_le (g : SmoothRiemannianMetric I M) :
     ∃ c : ℕ → ℝ, (∀ l, 0 ≤ c l) ∧
       ∀ (om : SmoothCcTensor g 0 1) (l : ℕ),

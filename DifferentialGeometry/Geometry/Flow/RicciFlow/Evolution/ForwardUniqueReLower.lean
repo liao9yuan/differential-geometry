@@ -3,9 +3,6 @@ import DifferentialGeometry.Tensor.RSTensor.NablaDomDomCongr
 import DifferentialGeometry.Tensor.RSTensor.ContractionLeibniz
 
 set_option autoImplicit false
-set_option linter.style.longLine false
-set_option linter.unusedSectionVars false
-set_option linter.unusedFintypeInType false
 set_option backward.isDefEq.respectTransparency false
 
 noncomputable section

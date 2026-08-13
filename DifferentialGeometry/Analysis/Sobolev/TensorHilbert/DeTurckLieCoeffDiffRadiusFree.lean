@@ -29,7 +29,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
-set_option linter.unusedVariables false in
 theorem dLaField_perOrder_rf
     (g₀ g_bg : SmoothRiemannianMetric I M) {δ₀ : ℝ} (hδ₀ : δ₀ < 1)
     {Λ₀ : ℝ} (hΛ₀0 : 0 ≤ Λ₀) :
@@ -174,7 +173,6 @@ theorem dLaField_perOrder_rf
           ‖iteratedCovGrad (I := I) g₀ 0 2 (i + 2) P‖ ^ 2
         + (Kc_a i * ∑ k ∈ Finset.range (i + 3), K_rf k) * (1 + S') := by ring
 
-set_option linter.unusedVariables false in
 theorem dLbField_perOrder_rf
     (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
     (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) {δ₀ : ℝ} (hδ₀ : δ₀ < 1)
@@ -215,7 +213,6 @@ theorem dLbField_perOrder_rf
           4 * (Module.finrank ℝ E : ℝ) * Kb_flow i * (1 + ∑ j ∈ Finset.range (i + 3),
             ‖iteratedCovGrad (I := I) g₀ 0 2 j P‖ ^ 2) := by ring
 
-set_option linter.unusedVariables false in
 theorem deTurckLieCoeffField_perOrder_l2_radiusFree
     (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
     (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) {δ₀ : ℝ} (hδ₀ : δ₀ < 1)
@@ -306,7 +303,6 @@ theorem deTurckLieCoeffField_perOrder_l2_radiusFree
         (2 * Ka_low i + 2 * Kb_low i) * (1 + ∑ j ∈ Finset.range (i + 2),
           ‖iteratedCovGrad (I := I) g₀ 0 2 j P‖ ^ 2) := by ring
 
-set_option linter.unusedVariables false in
 theorem deTurckLieCoeffField_summed_l2_radiusFree
     (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
     (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) {δ₀ : ℝ} (hδ₀ : δ₀ < 1) :

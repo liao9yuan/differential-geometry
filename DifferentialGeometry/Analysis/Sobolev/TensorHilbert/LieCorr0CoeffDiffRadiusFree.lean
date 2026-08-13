@@ -10,7 +10,6 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.Estimates.H1H2AppCcRS
 noncomputable section
 
 set_option autoImplicit false
-set_option linter.style.setOption false
 set_option backward.isDefEq.respectTransparency false
 set_option synthInstance.maxHeartbeats 1600000
 set_option maxHeartbeats 1600000
@@ -60,7 +59,6 @@ private theorem sq_le_five_add (t a b c d e : ℝ) (ht : 0 ≤ t)
     sq_nonneg (a - d), sq_nonneg (a - e), sq_nonneg (b - c), sq_nonneg (b - d),
     sq_nonneg (b - e), sq_nonneg (c - d), sq_nonneg (c - e), sq_nonneg (d - e)]
 
-set_option linter.unusedVariables false in
 private lemma lc0Base_perOrder_rf
     (g₀ : SmoothRiemannianMetric I M) (a : ℕ)
     (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) {δ₀ : ℝ} (hδ₀ : δ₀ < 1)
@@ -106,7 +104,6 @@ private lemma lc0Base_perOrder_rf
           4 * (Module.finrank ℝ E : ℝ) * Kb_flow i * (1 + ∑ j ∈ Finset.range (i + 3),
             ‖iteratedCovGrad (I := I) g₀ 0 2 j P‖ ^ 2) := by ring
 
-set_option linter.unusedVariables false in
 private lemma lc0Diff_perOrder_rf
     (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
     (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) {δ₀ : ℝ} (hδ₀ : δ₀ < 1)
@@ -192,7 +189,6 @@ private lemma lc0Diff_perOrder_rf
           (1 + ∑ j ∈ Finset.range (i + 3),
             ‖iteratedCovGrad (I := I) g₀ 0 2 j P‖ ^ 2) := by ring
 
-set_option linter.unusedVariables false in
 private lemma lc0Riem_perOrder_rf
     (g₀ : SmoothRiemannianMetric I M) (a : ℕ)
     (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) {δ₀ : ℝ} (hδ₀ : δ₀ < 1)
@@ -351,7 +347,6 @@ private theorem b4_iCG_smul (g : SmoothRiemannianMetric I M) (r s j : ℕ) (c : 
   | succ j ih => rw [iteratedCovGrad_succ, iteratedCovGrad_succ, ih,
       DifferentialGeometry.Analysis.Parabolic.TensorSpectral.covGrad_smul]
 
-set_option linter.unusedSectionVars false in
 private lemma b4_rfns_smul (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (x : M) (c : ℝ) (v : TensorRSSpace r s I x) :
     riemannianFiberNormSq (I := I) (M := M) g r s x (c • v) =
@@ -376,7 +371,6 @@ private lemma b4_trace_succ (g : SmoothRiemannianMetric I M) (i : ℕ) (x : M) :
       (0 : TensorRSSpace 5 (4 + i) I x) from rfl]
   exact riemannianFiberNormSq_zero (I := I) (M := M) g 5 (3 + 1 + i) x
 
-set_option linter.unusedSectionVars false in
 private lemma b4_bP_le_grid (b : ℕ → ℝ) (hb : ∀ j, 0 ≤ b j) (m : ℕ) :
     b (m + 1) ≤ Combinatorics.antidiagonalTupleGrid b (m + 1) := by
   classical
@@ -684,7 +678,6 @@ private theorem b4_reindex_h2
   rw [iteratedCovGrad_reindexCoeffGen,
     norm_reindexCoeffGen_eq]
 
-set_option linter.unusedVariables false in
 private theorem b4_app_h2_mul
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M) (p r c : ℕ) :
@@ -820,7 +813,6 @@ private lemma b4_trace_center (g : SmoothRiemannianMetric I M) (x : M)
     (mem_smoothOrthoFrameNbhd_self (I := I) (M := M) x)
     (Tensor0SSpace.toModel D) m
 
-set_option linter.unusedSectionVars false in
 private lemma b4_rank0_unit (x : M) (c : Tensor0SSpace 0 I x) :
     c = Tensor0SSpace.toModel c (fun i : Fin 0 => i.elim0) •
       unitTensor (I := I) (M := M) x := by
@@ -903,7 +895,6 @@ private lemma b4_pk3_toModel (g₀ : SmoothRiemannianMetric I M)
     ContinuousMultilinearMap.smul_apply, smul_eq_mul]
   rw [unitModel]
 
-set_option linter.unusedSectionVars false in
 private lemma b4_cons_sum_smul {n : ℕ}
     (Zm : Tensor0SModel (n + 1) ℝ E) (d : ℕ) (t : Fin d → ℝ)
     (u : Fin d → E) (rest : Fin n → E) :
@@ -936,7 +927,6 @@ private lemma b4_cons_sum_smul {n : ℕ}
   refine Finset.sum_congr rfl fun c _ => ?_
   rw [← h1 (u c)]
 
-set_option linter.unusedSectionVars false in
 private lemma b4_cons1_sum_smul {n : ℕ}
     (Zm : Tensor0SModel (n + 2) ℝ E) (aa : E) (d : ℕ) (t : Fin d → ℝ)
     (u : Fin d → E) (rest : Fin n → E) :
@@ -971,7 +961,6 @@ private lemma b4_cons1_sum_smul {n : ℕ}
   refine Finset.sum_congr rfl fun c _ => ?_
   rw [← h1 (u c)]
 
-set_option linter.unusedSectionVars false in
 private theorem b4_frame_expand (g : SmoothRiemannianMetric I M) (x : M)
     (u : TangentSpace I x) :
     u = ∑ i : Fin (Module.finrank ℝ E),
@@ -1024,7 +1013,6 @@ private theorem b4_frame_expand (g : SmoothRiemannianMetric I M) (x : M)
       refine Finset.sum_congr rfl fun i _ => ?_
       rw [hcoeff i, hbse i]
 
-set_option linter.unusedSectionVars false in
 private lemma b4_unitModel_add (g₀ : SmoothRiemannianMetric I M) (s : ℕ)
     (A B : SmoothCcTensor g₀ 0 s) (x : M) :
     unitModel (I := I) (M := M) g₀ s (A + B) x =
@@ -1033,7 +1021,6 @@ private lemma b4_unitModel_add (g₀ : SmoothRiemannianMetric I M) (s : ℕ)
   rw [SmoothCcTensor.toSection_add, ContMDiffSection.coe_add, Pi.add_apply,
     ContinuousLinearMap.add_apply, Tensor0SSpace.toModel_add]
 
-set_option linter.unusedSectionVars false in
 private lemma b4_unitModel_smul (g₀ : SmoothRiemannianMetric I M) (s : ℕ) (c : ℝ)
     (A : SmoothCcTensor g₀ 0 s) (x : M) :
     unitModel (I := I) (M := M) g₀ s (c • A) x =
@@ -1069,7 +1056,6 @@ private lemma b4_appCc_unitModel (g₀ : SmoothRiemannianMetric I M) (r s : ℕ)
   rw [unitModel, appCc_toSection]
   rfl
 
-set_option linter.unusedSectionVars false in
 private lemma b4_unit_read (g₀ : SmoothRiemannianMetric I M)
     (W : SmoothCcTensor g₀ 0 3) (x : M) (v : Fin 3 → E) :
     Tensor0SSpace.toModel
@@ -1627,7 +1613,6 @@ theorem metricCorr_move
   rw [heq]
   simpa only [b4Jet2, W, W₁, W₂] using hraw
 
-set_option linter.unusedSectionVars false in
 private lemma b4_pk3_rfns_le (g₀ : SmoothRiemannianMetric I M)
     (P : SmoothCcTensor g₀ 0 2) (q : ℕ) (x : M) :
     riemannianFiberNormSq (I := I) (M := M) g₀ 3 (5 + q) x
@@ -1661,7 +1646,6 @@ private lemma b4_pk3_rfns_le (g₀ : SmoothRiemannianMetric I M)
           riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + q) x
             ((iteratedCovGrad (I := I) g₀ 0 2 q P).toSection x) := by ring
 
-set_option linter.unusedVariables false in
 lemma b4_phi_atgw (g₀ : SmoothRiemannianMetric I M) (σ : Equiv.Perm (Fin 5))
     {Λ₀ : ℝ} (hΛ₀0 : 0 ≤ Λ₀) :
     ∃ Kphi : ℕ → ℝ, (∀ l, 0 ≤ Kphi l) ∧
@@ -1776,7 +1760,6 @@ lemma b4_phi_atgw (g₀ : SmoothRiemannianMetric I M) (σ : Equiv.Perm (Fin 5))
     _ = (∑ i' ∈ Finset.range (l + 1), SΦ i') *
           (fr ^ 3 * (((l : ℝ) + 1) * (1 + Λ₀ ^ 2)) * atgw) := by rw [Finset.sum_mul]
 
-set_option linter.unusedVariables false in
 private lemma b4_app_atgw (g₀ gb : SmoothRiemannianMetric I M) (σ : Equiv.Perm (Fin 5))
     {δ₀ : ℝ} (hδ₀ : δ₀ < 1) {Λ₀ : ℝ} (hΛ₀0 : 0 ≤ Λ₀) :
     ∃ Kap : ℕ → ℝ, (∀ n, 0 ≤ Kap n) ∧
@@ -1889,7 +1872,6 @@ private lemma b4_app_atgw (g₀ gb : SmoothRiemannianMetric I M) (σ : Equiv.Per
         rw [Finset.sum_mul]
         exact Finset.sum_congr rfl (fun i' _ => by rw [Finset.sum_mul])
 
-set_option linter.unusedVariables false in
 theorem b4_mcd_atgw (g₀ gb : SmoothRiemannianMetric I M)
     {δ₀ : ℝ} (hδ₀ : δ₀ < 1) {Λ₀ : ℝ} (hΛ₀0 : 0 ≤ Λ₀) :
     ∃ Kmcd : ℕ → ℝ, (∀ n, 0 ≤ Kmcd n) ∧
@@ -1975,7 +1957,6 @@ theorem b4_mcd_atgw (g₀ gb : SmoothRiemannianMetric I M)
           (fun j => riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + j) x
             ((iteratedCovGrad (I := I) g₀ 0 2 j P).toSection x)) (n + 2) := by ring
 
-set_option linter.unusedVariables false in
 theorem mcd_l2_radiusFree
     (g₀ gb : SmoothRiemannianMetric I M)
     {δ₀ : ℝ} (hδ₀ : δ₀ < 1) {Λ₀ : ℝ} (hΛ₀0 : 0 ≤ Λ₀) :
@@ -2087,7 +2068,6 @@ theorem mcd_l2_radiusFree
       simp only [S]
       ring
 
-set_option linter.unusedVariables false in
 theorem b4_wOmega_atgw (g₀ gb : SmoothRiemannianMetric I M)
     {δ₀ : ℝ} (hδ₀ : δ₀ < 1) :
     ∃ KΩ : ℕ → ℝ, (∀ n, 0 ≤ KΩ n) ∧
@@ -2194,7 +2174,6 @@ theorem b4_wOmega_atgw (g₀ gb : SmoothRiemannianMetric I M)
         rw [Finset.sum_mul]
         exact Finset.sum_congr rfl (fun i' _ => by rw [Finset.sum_mul])
 
-set_option linter.unusedVariables false in
 private lemma b4_vbPass_atgw (g₀ : SmoothRiemannianMetric I M)
     {δ₀ : ℝ} (hδ₀ : δ₀ < 1) {Λ₀ : ℝ} (hΛ₀0 : 0 ≤ Λ₀) :
     ∃ Kvp : ℕ → ℝ, (∀ n, 0 ≤ Kvp n) ∧
@@ -2351,7 +2330,6 @@ private lemma b4_vbPass_atgw (g₀ : SmoothRiemannianMetric I M)
         rw [Finset.sum_mul]
         exact Finset.sum_congr rfl (fun i' _ => by rw [Finset.sum_mul])
 
-set_option linter.unusedVariables false in
 private lemma b4_vb_atgw (g₀ : SmoothRiemannianMetric I M)
     {δ₀ : ℝ} (hδ₀ : δ₀ < 1) {Λ₀ : ℝ} (hΛ₀0 : 0 ≤ Λ₀) :
     ∃ Kvb : ℕ → ℝ, (∀ i, 0 ≤ Kvb i) ∧
@@ -2504,7 +2482,6 @@ private lemma b4_vb_atgw (g₀ : SmoothRiemannianMetric I M)
               Combinatorics.antidiagonalTupleGridWindowMulConst i' (q + 2)) *
           Combinatorics.antidiagonalTupleGridWindow bP (i + 3) := by ring
 
-set_option linter.unusedVariables false in
 private lemma lc0VB_perOrder_rf (g₀ : SmoothRiemannianMetric I M)
     {δ₀ : ℝ} (hδ₀ : δ₀ < 1) {Λ₀ : ℝ} (hΛ₀0 : 0 ≤ Λ₀) :
     ∃ Flow : ℕ → ℝ, (∀ i, 0 ≤ Flow i) ∧
@@ -2598,7 +2575,6 @@ private lemma lc0VB_perOrder_rf (g₀ : SmoothRiemannianMetric I M)
          mul_le_mul_of_nonneg_left hinner (hKvb_nn i)
     _ = (Kvb i * ∑ k ∈ Finset.range (i + 3), K_rf k) * (1 + S') := by ring
 
-set_option linter.unusedVariables false in
 private lemma b4_amix_atgw (g₀ g_bg : SmoothRiemannianMetric I M)
     {δ₀ : ℝ} (hδ₀ : δ₀ < 1) {Λ₀ : ℝ} (hΛ₀0 : 0 ≤ Λ₀) :
     ∃ Kam : ℕ → ℝ, (∀ n, 0 ≤ Kam n) ∧
@@ -2802,7 +2778,6 @@ private lemma b4_amix_atgw (g₀ g_bg : SmoothRiemannianMetric I M)
         · exact mul_le_mul_of_nonneg_left hB (by norm_num)
     _ = (16 * Khalf n) * Combinatorics.antidiagonalTupleGridWindow bP (n + 3) := by ring
 
-set_option linter.unusedVariables false in
 private lemma lc0AMix_perOrder_rf
     (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
     (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) {δ₀ : ℝ} (hδ₀ : δ₀ < 1)
@@ -2903,7 +2878,6 @@ private lemma lc0AMix_perOrder_rf
         mul_le_mul_of_nonneg_left hinner (hKam_nn i)
     _ = (Kam i * ∑ k ∈ Finset.range (i + 3), K_rf k) * (1 + S') := by ring
 
-set_option linter.unusedVariables false in
 private lemma lc0VBAMix_perOrder_rf
     (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
     (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) {δ₀ : ℝ} (hδ₀ : δ₀ < 1)
@@ -2937,7 +2911,6 @@ private lemma lc0VBAMix_perOrder_rf
     _ = (Fvb i + Fam i) * (1 + ∑ j ∈ Finset.range (i + 3),
           ‖iteratedCovGrad (I := I) g₀ 0 2 j P‖ ^ 2) := by ring
 
-set_option linter.unusedVariables false in
 theorem lieCorr0Field_perOrder_l2_radiusFree
     (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
     (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) {δ₀ : ℝ} (hδ₀ : δ₀ < 1)
@@ -3083,7 +3056,6 @@ theorem lieCorr0Field_perOrder_l2_radiusFree
         (5 * (Fb i + Fd i + Fvm i + Fr i)) * (1 + ∑ j ∈ Finset.range (i + 2),
           ‖iteratedCovGrad (I := I) g₀ 0 2 j P‖ ^ 2) := by ring
 
-set_option linter.unusedVariables false in
 theorem lieCorr0Field_summed_l2_radiusFree
     (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
     (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) {δ₀ : ℝ} (hδ₀ : δ₀ < 1) :

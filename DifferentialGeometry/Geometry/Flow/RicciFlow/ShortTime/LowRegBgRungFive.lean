@@ -30,7 +30,6 @@ private theorem mul3Le5 {a b c A B C : ℝ}
     a * b * c ≤ A * B * C :=
   mul_le_mul (mul_le_mul ha hb hb0 hA0) hc hc0 (mul_nonneg hA0 hB0)
 
-set_option linter.unusedSectionVars false in
 
 theorem armOrder4Bg (hDim : Module.finrank ℝ E = 3)
     (g g_bg : SmoothRiemannianMetric I M) :

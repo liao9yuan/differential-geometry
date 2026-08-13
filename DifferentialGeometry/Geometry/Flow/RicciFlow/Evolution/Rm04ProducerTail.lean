@@ -2,8 +2,6 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.Rm04Producer
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.Metric.TailFrameRegularity
 
 set_option autoImplicit false
-set_option linter.style.longLine false
-set_option linter.unusedSectionVars false
 
 noncomputable section
 

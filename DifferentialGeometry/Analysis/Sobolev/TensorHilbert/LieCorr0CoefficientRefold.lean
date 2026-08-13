@@ -11,7 +11,6 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.CurvatureCoefficien
 noncomputable section
 
 set_option autoImplicit false
-set_option linter.style.setOption false
 set_option backward.isDefEq.respectTransparency false
 set_option synthInstance.maxHeartbeats 1600000
 set_option maxHeartbeats 1600000
@@ -64,7 +63,6 @@ theorem lc0Insert_base_eq_neg_dlb (g₀ g₁ : SmoothRiemannianMetric I M) :
   rw [sub_self] at h
   rw [eq_neg_of_add_eq_zero_left h, endoArm_eq_dlb]
 
-set_option linter.unusedVariables false in
 private theorem lc0InsertBase_realizedFam_perOrder_topSeparated
     (g₀ : SmoothRiemannianMetric I M) (a : ℕ)
     (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) {R : ℝ} (hR : 0 ≤ R)
@@ -519,7 +517,6 @@ theorem lc0RiemLive_l2_le (g₀ g₁ : SmoothRiemannianMetric I M) (m : ℕ) :
       (iteratedCovGrad (I := I) g₀ 3 1 m (cometricCastG0 (I := I) g₀ g₁)),
     ← SmoothCcTensor.norm_def]
 
-set_option linter.unusedVariables false in
 private theorem lc0Riem_realizedFam_perOrder_topSep
     (g₀ : SmoothRiemannianMetric I M) (a : ℕ)
     (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) {R : ℝ} (hR : 0 ≤ R)
@@ -702,7 +699,6 @@ private theorem sq_le_two_add (t u v c1 c2 : ℝ) (ht : 0 ≤ t) (hu : 0 ≤ u) 
   have huv : 0 ≤ u + v := by linarith
   nlinarith [mul_le_mul htri htri ht huv, sq_nonneg (u - v), h1, h2, hu, hv]
 
-set_option linter.unusedSectionVars false in
 private theorem normSq_iCG_le_scaled (g₀ : SmoothRiemannianMetric I M)
     (X : SmoothCcTensor g₀ 2 2) (Y : SmoothCcTensor g₀ 1 1) (i : ℕ) (c : ℝ)
     (hpt : ∀ x : M,
@@ -742,7 +738,6 @@ private lemma endoDiffSection_apply (g₀ g₁ g_bg : SmoothRiemannianMetric I M
   simp only [endoDiffSection, ContMDiffSection.coe_sub, Pi.sub_apply]
   exact (nEndo_diff (I := I) (M := M) g₀ g₁ g_bg x).symm
 
-set_option linter.unusedSectionVars false in
 theorem lc0InsDiff_eq (g₀ g₁ g_bg : SmoothRiemannianMetric I M) :
     lc0Insert (I := I) (M := M) g₀ g₁ g_bg - lc0Insert (I := I) (M := M) g₀ g₁ g₀ =
       slotInsertEndoCc (I := I) (M := M) g₀ 1 (endoDiffSection (I := I) (M := M) g₀ g₁ g_bg)
@@ -882,7 +877,6 @@ theorem lc0InsDiff_eq (g₀ g₁ g_bg : SmoothRiemannianMetric I M) :
   rw [ContinuousMultilinearMap.map_update_sub, ContinuousMultilinearMap.map_update_sub]
   ring
 
-set_option linter.unusedSectionVars false in
 theorem normSq_iCG_lc0InsertDiff_le (g₀ g₁ g_bg : SmoothRiemannianMetric I M) (i : ℕ) :
     ‖iteratedCovGrad (I := I) g₀ 2 2 i
         (lc0Insert (I := I) (M := M) g₀ g₁ g_bg -
@@ -949,7 +943,6 @@ theorem normSq_iCG_lc0InsertDiff_le (g₀ g₁ g_bg : SmoothRiemannianMetric I M
   refine le_trans (sq_le_two_add _ _ _ _ _ (norm_nonneg _) (norm_nonneg _) (norm_nonneg _)
     (norm_add_le _ _) hL2A hL2B) (le_of_eq (by ring))
 
-set_option linter.unusedVariables false in
 private theorem lc0InsertDiff_ballUniform
     (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
     (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) {R : ℝ} (hR : 0 ≤ R)
@@ -981,7 +974,6 @@ private theorem lc0InsertDiff_ballUniform
   refine le_trans hred ?_
   exact mul_le_mul_of_nonneg_left hprod hfr_nn
 
-set_option linter.unusedVariables false in
 private theorem lc0InsertDiff_realizedFam_perOrder_topSep
     (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
     (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) {R : ℝ} (hR : 0 ≤ R)
@@ -1140,7 +1132,6 @@ private lemma vbMcd_unitModel (g₀ g₁ : SmoothRiemannianMetric I M) (x : M)
     ContinuousMultilinearMap.constOfIsEmpty_apply, one_smul]
   exact metricConnDiffLoweredFib_toModel (I := I) g₁ g₁ g₀ x m
 
-set_option linter.unusedSectionVars false in
 private lemma vb_rank0_smul_unit (x : M) (c : Tensor0SSpace 0 I x) :
     c = Tensor0SSpace.toModel c (fun i : Fin 0 => i.elim0) •
       unitTensor (I := I) (M := M) x := by
@@ -1288,8 +1279,6 @@ theorem vbSplit (g₀ g₁ : SmoothRiemannianMetric I M) :
     ((PDE.DeTurck.deTurckVF (I := I) g₁ g₀ : Π b : M, TangentSpace I b) x) hflat]
   rfl
 
-set_option linter.unusedSectionVars false in
-set_option linter.unusedVariables false in
 private theorem vbPass_jetL2
     (g₀ : SmoothRiemannianMetric I M) (a : ℕ)
     (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) {R : ℝ} (hR : 0 ≤ R)
@@ -1445,7 +1434,6 @@ private theorem vbPass_jetL2
     rw [Finset.sum_congr rfl (fun q _ => hzero q), Finset.sum_const, smul_zero]
     exact hF_nn i
 
-set_option linter.unusedVariables false in
 private theorem lc0VB_ballUniform
     (g₀ : SmoothRiemannianMetric I M) (a : ℕ)
     (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) {R : ℝ} (hR : 0 ≤ R)
@@ -1623,7 +1611,6 @@ private theorem lc0VB_ballUniform
   refine le_trans (mul_le_mul_of_nonneg_left (le_trans hnorm hmid) (by norm_num : (0:ℝ) ≤ 4)) ?_
   exact le_of_eq (by ring)
 
-set_option linter.unusedVariables false in
 private theorem lc0VB_realizedFam_perOrder_topSep
     (g₀ : SmoothRiemannianMetric I M) (a : ℕ)
     (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) {R : ℝ} (hR : 0 ≤ R)

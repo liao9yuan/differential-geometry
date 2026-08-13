@@ -11,7 +11,6 @@ set_option autoImplicit false
 
 noncomputable section
 
-set_option linter.style.setOption false
 set_option synthInstance.maxHeartbeats 1600000
 set_option maxHeartbeats 1600000
 
@@ -42,21 +41,18 @@ private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
-set_option linter.unusedSectionVars false in
 
 def ccUnitField (g : SmoothRiemannianMetric I M) (s : ℕ) (W : SmoothCcTensor g 0 s) :
     Tensor0SBundle.Tensor0SField (𝕜 := ℝ) (E := E) (H := H) (I := I) (M := M) ∞ s :=
   MixedSection.toMultilinearSection (𝕜 := ℝ) (F := E) (IB := I)
     (E := (TangentSpace I : M → Type _)) ∞ W.toSection
 
-set_option linter.unusedSectionVars false in
 @[simp] lemma ccUnitField_apply (g : SmoothRiemannianMetric I M) (s : ℕ)
     (W : SmoothCcTensor g 0 s) (x : M) :
     ccUnitField (I := I) g s W x =
       (show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace s I x from W.toSection x)
         (unitZeroSec (I := I) (M := M) x) := rfl
 
-set_option linter.unusedSectionVars false in
 
 @[simp] lemma ccUnitField_recast (g g' : SmoothRiemannianMetric I M) (s : ℕ)
     (W : SmoothCcTensor g 0 s) :
@@ -111,7 +107,6 @@ theorem iterCovGrad_unit_eq (g : SmoothRiemannianMetric I M) (s : ℕ)
       (iterCov (I := I) g s (ccUnitField (I := I) g s W) j) x (Matrix.vecTail v)]
     rfl
 
-set_option linter.unusedSectionVars false in
 
 private lemma lowerAllUpper0_unit (g : SmoothRiemannianMetric I M) (s : ℕ) (x : M)
     (W : SmoothCcTensor g 0 s) (w : Fin (0 + s) → TangentSpace I x) :
@@ -127,7 +122,6 @@ private lemma lowerAllUpper0_unit (g : SmoothRiemannianMetric I M) (s : ℕ) (x 
     (unitZeroSec (I := I) (M := M) x)]
   rfl
 
-set_option linter.unusedSectionVars false in
 
 theorem rfns0_unit_eq (g : SmoothRiemannianMetric I M) (s : ℕ) (x : M)
     (W : SmoothCcTensor g 0 s) :
@@ -243,7 +237,6 @@ lemma jetTowerPt_nonneg {Λ Λ' Λ'' : ℝ} (hΛ : 0 ≤ Λ) (hΛ' : 0 ≤ Λ') 
   have := Real.sqrt_nonneg (Λ ^ (r + 2))
   nlinarith
 
-set_option linter.unusedSectionVars false in
 
 private theorem covStepZero (gRef : SmoothRiemannianMetric I M) (s : ℕ) :
     covStep (I := I) gRef s 0 = 0 := by
@@ -253,7 +246,6 @@ private theorem covStepZero (gRef : SmoothRiemannianMetric I M) (s : ℕ) :
       covStep (I := I) gRef s 0 + 0 := by rw [add_zero]; exact h.symm
   exact add_left_cancel hc
 
-set_option linter.unusedSectionVars false in
 
 private theorem sqrtNormSq0SZero (g : SmoothRiemannianMetric I M) (x : M) (s : ℕ) :
     Real.sqrt (normSq0S (I := I) g x s (0 : Tensor0SSpace s I x)) = 0 := by

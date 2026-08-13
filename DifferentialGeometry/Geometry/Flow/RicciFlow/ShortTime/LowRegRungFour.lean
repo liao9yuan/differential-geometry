@@ -33,7 +33,6 @@ private theorem mul4Le {a b c d A B C D : ℝ}
     (mul_le_mul (mul_le_mul ha hb hb0 hA0) hc hc0 (mul_nonneg hA0 hB0))
     hd hd0 (mul_nonneg (mul_nonneg hA0 hB0) hC0)
 
-set_option linter.unusedSectionVars false in
 
 theorem armOrder3 (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M) :

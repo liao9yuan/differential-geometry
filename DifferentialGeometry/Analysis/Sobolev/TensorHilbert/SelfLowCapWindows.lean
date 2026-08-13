@@ -6,7 +6,6 @@ import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.EdgeRicciPairing
 noncomputable section
 
 set_option autoImplicit false
-set_option linter.style.setOption false
 set_option backward.isDefEq.respectTransparency false
 set_option synthInstance.maxHeartbeats 1600000
 set_option maxHeartbeats 1600000
@@ -34,7 +33,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
-set_option linter.unusedVariables false in
 theorem lc0RiemCap (g₀ : SmoothRiemannianMetric I M)
     {δ₀ : ℝ} (hδ₀ : δ₀ < 1) {Λ : ℝ} (hΛ1 : 1 ≤ Λ) :
     ∃ K : ℕ → ℝ, (∀ i, 0 ≤ K i) ∧
@@ -78,7 +76,6 @@ theorem lc0RiemCap (g₀ : SmoothRiemannianMetric I M)
   exact capNeg (I := I) (M := M) g₀ P
     (capApp (I := I) (M := M) g₀ P _ _ hKLive_nn hSPass_nn hLive hPass)
 
-set_option linter.unusedVariables false in
 theorem lc0AMixCap (g₀ g_bg : SmoothRiemannianMetric I M)
     {δ₀ : ℝ} (hδ₀ : δ₀ < 1) {Λ : ℝ} (hΛ1 : 1 ≤ Λ) :
     ∃ K : ℕ → ℝ, (∀ i, 0 ≤ K i) ∧
@@ -257,7 +254,6 @@ theorem aaKerSplit (g₀ g₁ : SmoothRiemannianMetric I M) :
         reindexCoeffGen (I := I) (M := M) g₀ 2 4
           (aaCoreP (I := I) (M := M) g₀ g₁ aaP2103 aaP120) innerCoreInPerm10 := rfl
 
-set_option linter.unusedVariables false in
 theorem ricciAACap (g₀ : SmoothRiemannianMetric I M)
     {δ₀ : ℝ} (hδ₀ : δ₀ < 1) {Λ : ℝ} (hΛ1 : 1 ≤ Λ) :
     ∃ K : ℕ → ℝ, (∀ i, 0 ≤ K i) ∧

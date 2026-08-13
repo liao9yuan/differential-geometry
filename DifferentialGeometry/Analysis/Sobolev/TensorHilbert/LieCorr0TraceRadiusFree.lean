@@ -29,7 +29,6 @@ variable
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
-set_option linter.unusedVariables false in
 private theorem trace_grid_of
     (p : ℕ) (g₀ : SmoothRiemannianMetric I M) {δ₀ : ℝ}
     (CD S : ℕ → ℝ) (hCD_nn : ∀ i, 0 ≤ CD i)
@@ -200,7 +199,6 @@ private theorem trace_grid_of
   have hfixed' := mul_le_mul_of_nonneg_left hfixed (by norm_num : (0 : ℝ) ≤ 2)
   linarith
 
-set_option linter.unusedVariables false in
 theorem trace_grid_unif
     (p : ℕ) {δ₀ : ℝ} (hδ₀ : δ₀ < 1) :
     ∃ C : ℕ → ℝ, (∀ i, 0 ≤ C i) ∧
@@ -267,7 +265,6 @@ theorem trace_grid_unif
     trace_grid_of (I := I) (M := M) p g₀ CD S hCD_nn (hCD g₀) hS_nn hS
       g₁ P htie hδ_le hδ_nonneg hbound σ i x
 
-set_option linter.unusedVariables false in
 theorem trace2_grid_unif
     {δ₀ : ℝ} (hδ₀ : δ₀ < 1) :
     ∃ C : ℕ → ℝ, (∀ i, 0 ≤ C i) ∧
@@ -287,7 +284,6 @@ theorem trace2_grid_unif
                 ((iteratedCovGrad (I := I) g₀ 0 2 j P).toSection x)) k := by
   simpa only [Nat.reduceAdd] using trace_grid_unif (I := I) (M := M) 2 hδ₀
 
-set_option linter.unusedVariables false in
 theorem trace_grid_rf
     (p : ℕ) (g₀ : SmoothRiemannianMetric I M) {δ₀ : ℝ} (hδ₀ : δ₀ < 1) :
     ∃ C : ℕ → ℝ, (∀ i, 0 ≤ C i) ∧

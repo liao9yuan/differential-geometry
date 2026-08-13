@@ -4,7 +4,6 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.DeTurckRHSSection
 import DifferentialGeometry.Tensor.RSTensor.QuadraticBounds.Unit
 
 set_option autoImplicit false
-set_option linter.style.longLine false
 
 noncomputable section
 

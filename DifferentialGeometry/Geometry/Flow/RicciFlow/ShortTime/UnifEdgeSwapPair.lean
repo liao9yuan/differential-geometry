@@ -41,7 +41,6 @@ private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
-set_option linter.unusedSectionVars false in
 private theorem fiber_cont
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) : Continuous (fiberLpFun g r s S) := by
@@ -52,7 +51,6 @@ private theorem fiber_cont
     (I := I) (M := M) g r s x (S.toSection x),
     ← SmoothCcTensor.toFun_apply (I := I) (M := M) S x]
 
-set_option linter.unusedSectionVars false in
 private theorem fiber_nonneg
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) (x : M) :

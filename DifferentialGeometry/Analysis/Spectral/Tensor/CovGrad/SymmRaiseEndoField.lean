@@ -4,7 +4,6 @@ import DifferentialGeometry.Geometry.Operator.MetricSharpSmooth
 
 noncomputable section
 
-set_option linter.style.setOption false
 set_option backward.isDefEq.respectTransparency false
 set_option synthInstance.maxHeartbeats 1600000
 set_option maxHeartbeats 3200000
@@ -151,7 +150,6 @@ noncomputable def symmRaiseEndo (g : SmoothRiemannianMetric I M)
     symmRaiseEndo (I := I) (M := M) g T x =
     symmRaiseEndoFib (I := I) (M := M) g T x := rfl
 
-set_option linter.unusedSectionVars false in
 private lemma ccMultilinear_add (g : SmoothRiemannianMetric I M)
     (T U : SmoothCcTensor g 0 2) (x : M) :
     (ccTensorMultilinear (I := I) g (T + U) x : Tensor0SSpace 2 I x) =
@@ -161,7 +159,6 @@ private lemma ccMultilinear_add (g : SmoothRiemannianMetric I M)
   rw [SmoothCcTensor.toSection_add]
   rfl
 
-set_option linter.unusedSectionVars false in
 private lemma ccModel_add (g : SmoothRiemannianMetric I M)
     (T U : SmoothCcTensor g 0 2) (x : M) :
     ccTensorModel (I := I) g (T + U) x =
@@ -170,7 +167,6 @@ private lemma ccModel_add (g : SmoothRiemannianMetric I M)
   unfold ccTensorModel
   rw [ccMultilinear_add, Tensor0SSpace.toModel_add]
 
-set_option linter.unusedSectionVars false in
 private lemma ccBilinSymm_add (g : SmoothRiemannianMetric I M)
     (T U : SmoothCcTensor g 0 2) (x : M)
     (v w : TangentSpace I x) :
@@ -238,7 +234,6 @@ private lemma unitModel_eq_bilin (g : SmoothRiemannianMetric I M)
   funext k
   fin_cases k <;> rfl
 
-set_option linter.unusedSectionVars false in
 private lemma interior_product_toModel_eval (s : ℕ) (x : M)
     (v : TangentSpace I x) (D : Tensor0SSpace (s + 1) I x)
     (w : Fin s → TangentSpace I x) :
@@ -248,7 +243,6 @@ private lemma interior_product_toModel_eval (s : ℕ) (x : M)
         (Fin.cons (show E from v) (fun k => (show E from w k))) := by
   rfl
 
-set_option linter.unusedSectionVars false in
 private lemma toModel_om_single (x : M) (om : Tensor0SSpace 1 I x)
     (m : Fin 1 → TangentSpace I x) :
     Tensor0SSpace.toModel om (fun k => (m k : E)) =

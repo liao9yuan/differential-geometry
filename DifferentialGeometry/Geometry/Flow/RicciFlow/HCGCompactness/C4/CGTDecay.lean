@@ -5,7 +5,6 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.C4.H6NormalCo
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.C4.VolumeOverlap
 
 set_option autoImplicit false
-set_option linter.style.longLine false
 
 noncomputable section
 
@@ -122,7 +121,6 @@ noncomputable def riemSeqDist
     letI : EMetricSpace (X.obj k).M := (X.obj k).emetricSpace (I := I)
     (edist x y).toReal
 
-set_option linter.style.setOption false in
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
 set_option maxHeartbeats 800000 in

@@ -7,7 +7,6 @@ set_option autoImplicit false
 
 noncomputable section
 
-set_option linter.style.setOption false
 set_option synthInstance.maxHeartbeats 1600000
 set_option maxHeartbeats 1600000
 
@@ -29,7 +28,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
   [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
   [T2Space M] [SigmaCompactSpace M]
 
-set_option linter.unusedSectionVars false in
 
 theorem curvJet1_eval (g : SmoothRiemannianMetric I M) (x : M)
     (D X Y Z W : TangentSpace I x) :
@@ -38,7 +36,6 @@ theorem curvJet1_eval (g : SmoothRiemannianMetric I M) (x : M)
       g.inner x W (nablaRiemannOp (I := I) g x D X Y Z) :=
   nablaRm04_apply (I := I) (M := M) g x D X Y Z W
 
-set_option linter.unusedSectionVars false in
 
 theorem curvJet1_normSq_le_of_op
     (g : SmoothRiemannianMetric I M) {K : ℝ} (hK : 0 ≤ K)
@@ -107,7 +104,6 @@ theorem curvJet1_normSq_le_of_op
     _ = Real.sqrt ((Module.finrank ℝ E : ℝ) ^ 5) * K := by
         rw [Real.sqrt_mul (by positivity), Real.sqrt_sq hK]
 
-set_option linter.unusedSectionVars false in
 
 theorem covDerivConnDiff_congr
     (g₂ g₁ : SmoothRiemannianMetric I M)
@@ -154,7 +150,6 @@ theorem covDerivConnDiff_congr
     exact (ne_of_gt (g₁.pos x (a - b) hne)) hzero
   exact sub_eq_zero.mp hsub
 
-set_option linter.unusedSectionVars false in
 
 theorem covDerivConnDiff_eq_ext
     (g₂ g₁ : SmoothRiemannianMetric I M)
@@ -175,7 +170,6 @@ theorem covDerivConnDiff_eq_ext
     ?_ ?_ ?_ <;>
   · exact (smoothExtensionTangent_eq (I := I) _ _).symm
 
-set_option linter.unusedSectionVars false in
 private theorem cov_apply_sub
     (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
     {S T : Π b : M, TangentSpace I b} {x : M}
@@ -203,7 +197,6 @@ noncomputable def curvCovDerivOpAtOf
       (fun p : M => X p) (fun p : M => Y p)
       (fun p : M => (covD (fun q : M => Z q) p) (D p)) x
 
-set_option linter.unusedSectionVars false in
 
 theorem curvCovDerivOpAtOf_self
     (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
@@ -232,7 +225,6 @@ noncomputable def covDerivPal (gB g₀ : SmoothRiemannianMetric I M)
     palSec (I := I) gB g₀ (fun p : M => X p) (fun p : M => Y p)
       (fun p : M => ((LeviCivita (I := I) gB) (fun q : M => Z q) p) (D p)) x
 
-set_option linter.unusedSectionVars false in
 
 theorem curvCovDerivOf_sub_base (gB g₀ : SmoothRiemannianMetric I M)
     (D X Y Z : ContMDiffSection I E (∞ : WithTop ℕ∞)

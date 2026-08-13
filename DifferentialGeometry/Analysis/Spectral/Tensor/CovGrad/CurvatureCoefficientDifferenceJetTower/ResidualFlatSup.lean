@@ -23,7 +23,6 @@ import Mathlib.Data.Fin.Tuple.NatAntidiagonal
 
 noncomputable section
 
-set_option linter.style.setOption false
 set_option synthInstance.maxHeartbeats 1600000
 set_option maxHeartbeats 3200000
 
@@ -67,7 +66,6 @@ theorem rfnsIterCont (g₀ : SmoothRiemannianMetric I M) (P : SmoothCcTensor g�
     ← Integral.L2.SmoothCcTensor.toFun_apply (I := I) (M := M)
       (iteratedCovGrad (I := I) g₀ 0 2 l P) x]
 
-set_option linter.unusedVariables false in
 theorem jetSupLow (g₀ : SmoothRiemannianMetric I M) {a : ℕ} {R Cemb Lam : ℝ}
     (hR : 0 ≤ R)
     (hCemb : ∀ (W : SmoothCcTensor g₀ 0 2) (x : M),

@@ -222,7 +222,6 @@ theorem sqrt_normSq0S_comp
     _ = Real.sqrt (Λ ^ s) * Real.sqrt (Tensor0SBundle.normSq0S (I := I) g₂ x s A) := by
         rw [Real.sqrt_mul (pow_nonneg (le_trans zero_le_one hEq.1) s)]
 
-set_option linter.unusedSectionVars false in
 
 private theorem lcDiff_covOne_le
     {K : Set M} (g h : SmoothRiemannianMetric I M) {C : ℝ}
@@ -240,7 +239,6 @@ private theorem lcDiff_covOne_le
       (metricUniformEquivalentOn_symm (I := I) hEq) hx
   exact diff_le_covOne_basis_ref_lc (I := I) h g hx C hEq basis hhinv
 
-set_option linter.unusedSectionVars false in
 
 theorem connDiff_gJet_le
     {K : Set M} {g₂ g₁ : SmoothRiemannianMetric I M} {Λ Λ' : ℝ}
@@ -340,7 +338,6 @@ theorem connDiff_gJet_le
           (Real.sqrt (g₂.inner x w w) * Real.sqrt (g₂.inner x u u)) * Λ) * hs2
 
 set_option maxHeartbeats 1600000 in
-set_option linter.unusedSectionVars false in
 set_option backward.isDefEq.respectTransparency false in
 
 theorem covDerivConnDiff_g1_le
@@ -513,7 +510,6 @@ theorem covDerivConnDiff_g1_le
     have hdiv := le_of_mul_le_mul_left hmul hSBpos
     nlinarith [hdiv]
 
-set_option linter.unusedSectionVars false in
 
 theorem covDerivConnDiff_gJet_le
     {K : Set M} {g₂ g₁ : SmoothRiemannianMetric I M} {Λ Λ' Λ'' : ℝ}

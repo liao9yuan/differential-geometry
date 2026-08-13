@@ -3,7 +3,6 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.CurvatureCoefficien
 
 noncomputable section
 
-set_option linter.style.setOption false
 set_option synthInstance.maxHeartbeats 1600000
 set_option maxHeartbeats 3200000
 
@@ -43,7 +42,6 @@ open DifferentialGeometry.Integral.DivergenceTheorem
 
 set_option backward.isDefEq.respectTransparency false
 
-set_option linter.unusedVariables false in
 theorem rfns_symmS_zero_le_fibreSmall
     (g₀ : SmoothRiemannianMetric I M) {δ₀ : ℝ} (hδ₀0 : 0 ≤ δ₀)
     (T : SmoothCcTensor g₀ 0 2) {δ : ℝ} (hδ_le : δ ≤ δ₀) (hδ0 : 0 ≤ δ)
@@ -58,7 +56,6 @@ theorem rfns_symmS_zero_le_fibreSmall
   have hδsq : δ ^ 2 ≤ δ₀ ^ 2 := by nlinarith [hδ0, hδ_le, hδ₀0]
   exact mul_le_mul_of_nonneg_left hδsq (by positivity)
 
-set_option linter.unusedVariables false in
 theorem ricciArmOrder0BaseCoeff_perOrder_l2_topSeparated_generic
     (g₀ : SmoothRiemannianMetric I M) (a : ℕ)
     (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) {R : ℝ} (hR : 0 ≤ R)

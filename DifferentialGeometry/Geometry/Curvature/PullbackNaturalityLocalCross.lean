@@ -5,7 +5,6 @@ import DifferentialGeometry.Geometry.Metric.LocalPullback
 import DifferentialGeometry.Geometry.Topology.SigmaCompactOpen
 
 set_option autoImplicit false
-set_option linter.unusedSectionVars false
 
 noncomputable section
 

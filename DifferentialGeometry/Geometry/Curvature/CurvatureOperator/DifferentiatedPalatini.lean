@@ -6,7 +6,6 @@ set_option autoImplicit false
 
 noncomputable section
 
-set_option linter.style.setOption false
 set_option synthInstance.maxHeartbeats 1600000
 set_option maxHeartbeats 1600000
 
@@ -50,7 +49,6 @@ noncomputable def covDerivConnDiff2 (gB g₀ : SmoothRiemannianMetric I M)
     covDerivConnDiff (I := I) gB g₀ X Y
       (covApply (LeviCivita (I := I) gB) D Z) x
 
-set_option linter.unusedSectionVars false in
 theorem covDerivConnDiff2_eq (gB g₀ : SmoothRiemannianMetric I M)
     (D X Y Z : Π b : M, TangentSpace I b) (x : M) :
     covDerivConnDiff2 (I := I) gB g₀ D X Y Z x =
@@ -82,7 +80,6 @@ private noncomputable def palRhs (gB g₀ : SmoothRiemannianMetric I M)
         covDerivConnDiff (I := I) gB g₀ Y X Z p +
       (palQuad (I := I) gB g₀ X Y Z p - palQuad (I := I) gB g₀ Y X Z p)
 
-set_option linter.unusedSectionVars false in
 private theorem palSec_eq_rhs
     (gB g₀ : SmoothRiemannianMetric I M)
     {X Y Z : Π p : M, TangentSpace I p}
@@ -106,7 +103,6 @@ private theorem palSec_eq_rhs
   simp only [palRhs, palQuad, covDerivConnDiff_eq]
   abel
 
-set_option linter.unusedSectionVars false in
 private theorem palQuad_smooth
     (gB g₀ : SmoothRiemannianMetric I M)
     (X Y Z : ContMDiffSection I E (∞ : WithTop ℕ∞)
@@ -126,7 +122,6 @@ private theorem palQuad_smooth
   · exact X.contMDiff
   · simpa [htop] using hinner
 
-set_option linter.unusedSectionVars false in
 private theorem covDConnDiff_smooth
     (gB g₀ : SmoothRiemannianMetric I M)
     (D X Y : ContMDiffSection I E (∞ : WithTop ℕ∞)
@@ -194,7 +189,6 @@ private theorem covDConnDiff_smooth
     (fun p _hp => ?_)
   rfl
 
-set_option linter.unusedSectionVars false in
 private theorem cov_sub_apply
     (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
     {S T : Π b : M, TangentSpace I b} {x : M}
@@ -219,7 +213,6 @@ private theorem cov_sub_apply
   rw [hsmul, neg_one_smul]
   simp only [sub_eq_add_neg]
 
-set_option linter.unusedSectionVars false in
 private theorem cov_add_apply
     (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
     {S T : Π b : M, TangentSpace I b} {x : M}
@@ -233,7 +226,6 @@ private theorem cov_add_apply
   simpa using congrArg (fun L => L v)
     (cov.isCovariantDerivativeOnUniv.add hSx hTx)
 
-set_option linter.unusedSectionVars false in
 private theorem diffSec_sub
     (cov₀ cov₁ : CovariantDerivative I E (TangentSpace I : M → Type _))
     {X S T : Π b : M, TangentSpace I b} (x : M) :
@@ -275,7 +267,6 @@ private theorem cov_palQuad
   simp only [diffSec]
   abel
 
-set_option linter.unusedSectionVars false in
 noncomputable def covDerivPalatini (gB g₀ : SmoothRiemannianMetric I M)
     (D X Y Z : ContMDiffSection I E (∞ : WithTop ℕ∞)
       (TangentSpace I : M → Type _)) (x : M) : TangentSpace I x :=
@@ -310,7 +301,6 @@ noncomputable def mixedCurvDeriv (gD gR : SmoothRiemannianMetric I M)
       (fun p : M => X p) (fun p : M => Y p)
       (fun p : M => ((LeviCivita (I := I) gD) (fun q => Z q) p) (D p)) x
 
-set_option linter.unusedSectionVars false in
 theorem mixed_sub_eq_pal
     (gB g₀ : SmoothRiemannianMetric I M)
     (D X Y Z : ContMDiffSection I E (∞ : WithTop ℕ∞)

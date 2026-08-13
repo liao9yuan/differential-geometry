@@ -6,7 +6,6 @@ import DifferentialGeometry.Analysis.Sobolev.TensorHilbert.TameLieCorrJets
 noncomputable section
 
 set_option autoImplicit false
-set_option linter.style.setOption false
 set_option backward.isDefEq.respectTransparency false
 set_option synthInstance.maxHeartbeats 1600000
 set_option maxHeartbeats 1600000
@@ -36,7 +35,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
-set_option linter.unusedSectionVars false in
 private lemma sieSplit (g₀ g₁ : SmoothRiemannianMetric I M) (s : ℕ) :
     slotInsertEndoCc (I := I) (M := M) g₀ s
         (fullRaisedEndoField (I := I) (M := M) g₀ g₁) =
@@ -52,7 +50,6 @@ private lemma sieSplit (g₀ g₁ : SmoothRiemannianMetric I M) (s : ℕ) :
   rw [hsub, slotInsertEndoCc_sub]
   abel
 
-set_option linter.unusedVariables false in
 private theorem endoAtgw (g₀ : SmoothRiemannianMetric I M) {δ₀ : ℝ} (hδ₀ : δ₀ < 1) (s : ℕ) :
     ∃ C : ℕ → ℝ, (∀ i, 0 ≤ C i) ∧
       ∀ (g₁ : SmoothRiemannianMetric I M) (P : SmoothCcTensor g₀ 0 2)
@@ -147,7 +144,6 @@ private theorem endoAtgw (g₀ : SmoothRiemannianMetric I M) {δ₀ : ℝ} (hδ�
     le_trans (hSid i x) (le_mul_of_one_le_right (hSid_nn i) hone)
   nlinarith [hA, hB, hWnn]
 
-set_option linter.unusedSectionVars false in
 private lemma clSplit (g₀ : SmoothRiemannianMetric I M) :
     ∃ Z : SmoothCcTensor g₀ 3 3, ∀ g₁ : SmoothRiemannianMetric I M,
       connLowOp (I := I) (M := M) g₀ g₁ =
@@ -157,7 +153,6 @@ private lemma clSplit (g₀ : SmoothRiemannianMetric I M) :
               (fullRaisedEndoField (I := I) (M := M) g₀ g₁)) Z) :=
   ⟨_, fun _ => rfl⟩
 
-set_option linter.unusedVariables false in
 private theorem clAtgw (g₀ : SmoothRiemannianMetric I M) {δ₀ : ℝ} (hδ₀ : δ₀ < 1) :
     ∃ C : ℕ → ℝ, (∀ i, 0 ≤ C i) ∧
       ∀ (g₁ : SmoothRiemannianMetric I M) (P : SmoothCcTensor g₀ 0 2)
@@ -242,7 +237,6 @@ private theorem clAtgw (g₀ : SmoothRiemannianMetric I M) {δ₀ : ℝ} (hδ₀
   rw [hidx] at houter
   exact houter
 
-set_option linter.unusedVariables false in
 theorem ricciDACap (g₀ : SmoothRiemannianMetric I M)
     {δ₀ : ℝ} (hδ₀ : δ₀ < 1) {Λ : ℝ} (hΛ1 : 1 ≤ Λ) :
     ∃ K : ℕ → ℝ, (∀ i, 0 ≤ K i) ∧
@@ -348,7 +342,6 @@ theorem ricciDACap (g₀ : SmoothRiemannianMetric I M)
     exact capApp (I := I) (M := M) g₀ P _ _ hKRK_nn hKE1_nn hRK hE1
   exact capSub (I := I) (M := M) g₀ P (hMono daPermA) (hMono daPermB)
 
-set_option linter.unusedVariables false in
 private theorem ptAtgw (g₀ : SmoothRiemannianMetric I M) {δ₀ : ℝ} (hδ₀ : δ₀ < 1) (s : ℕ) :
     ∃ C : ℕ → ℝ, (∀ i, 0 ≤ C i) ∧
       ∀ (g₁ : SmoothRiemannianMetric I M) (P : SmoothCcTensor g₀ 0 2)
@@ -466,7 +459,6 @@ private theorem ptAtgw (g₀ : SmoothRiemannianMetric I M) {δ₀ : ℝ} (hδ₀
     le_mul_of_one_le_right (hSΦ_nn i) hone
   nlinarith [hA, hAw, hB, hWnn]
 
-set_option linter.unusedVariables false in
 private theorem pairCap (g₀ : SmoothRiemannianMetric I M)
     {δ₀ : ℝ} (hδ₀ : δ₀ < 1) {Λ : ℝ} (hΛ1 : 1 ≤ Λ) :
     ∃ K : ℕ → ℝ, (∀ i, 0 ≤ K i) ∧
@@ -512,7 +504,6 @@ private theorem pairCap (g₀ : SmoothRiemannianMetric I M)
   exact capCongr (I := I) (M := M) g₀ P hpair
     (capApp (I := I) (M := M) g₀ P _ _ hK2_nn hK4_nn hP2 hP4)
 
-set_option linter.unusedSectionVars false in
 private lemma curvSmul (g₀ : SmoothRiemannianMetric I M)
     (T : SmoothCcTensor g₀ 0 2) (t : ℝ) :
     lrCurvF (I := I) (M := M) g₀ (t • T) = t • lrCurvF (I := I) (M := M) g₀ T := by
@@ -528,7 +519,6 @@ private lemma curvSmul (g₀ : SmoothRiemannianMetric I M)
             (riemannLoweredContractionB (I := I) (M := M) g₀) T)
   rw [appCcRS_smul_right, appCcRS_smul_right, smul_add]
 
-set_option linter.unusedVariables false in
 private theorem curvCap (g₀ : SmoothRiemannianMetric I M) {Λ : ℝ} (hΛ1 : 1 ≤ Λ) :
     ∃ K : ℕ → ℝ, (∀ i, 0 ≤ K i) ∧
       ∀ (P : SmoothCcTensor g₀ 0 2)
@@ -566,7 +556,6 @@ private theorem curvCap (g₀ : SmoothRiemannianMetric I M) {Λ : ℝ} (hΛ1 : 1
     (capAdd (I := I) (M := M) g₀ P h1 h2)
 
 open CurvatureCoefficientDifferenceJetTower in
-set_option linter.unusedVariables false in
 private theorem revEndoAtgw (g₀ : SmoothRiemannianMetric I M) {δ₀ : ℝ} (hδ₀ : δ₀ < 1) (s : ℕ) :
     ∃ C : ℕ → ℝ, (∀ i, 0 ≤ C i) ∧
       ∀ (g₁ : SmoothRiemannianMetric I M) (P : SmoothCcTensor g₀ 0 2)
@@ -694,7 +683,6 @@ private theorem revEndoAtgw (g₀ : SmoothRiemannianMetric I M) {δ₀ : ℝ} (h
   refine le_trans h1 (le_trans ?_ hstep)
   exact mul_le_mul_of_nonneg_left h2 (pow_nonneg hfr_nn s)
 
-set_option linter.unusedVariables false in
 private theorem omegaCap (g₀ : SmoothRiemannianMetric I M)
     {δ₀ : ℝ} (hδ₀ : δ₀ < 1) {Λ : ℝ} (hΛ1 : 1 ≤ Λ) :
     ∃ K : ℕ → ℝ, (∀ i, 0 ≤ K i) ∧
@@ -735,7 +723,6 @@ private theorem omegaCap (g₀ : SmoothRiemannianMetric I M)
     (capApp (I := I) (M := M) g₀ P _ _ hKE_nn hKC_nn hEndo
       (capDdc0 (I := I) (M := M) g₀ P (finRotate 3) hCL))
 
-set_option linter.unusedVariables false in
 private theorem lrQuadCap (g₀ : SmoothRiemannianMetric I M)
     {δ₀ : ℝ} (hδ₀ : δ₀ < 1) {Λ : ℝ} (hΛ1 : 1 ≤ Λ) :
     ∃ K : ℕ → ℝ, (∀ i, 0 ≤ K i) ∧
@@ -790,7 +777,6 @@ private theorem lrQuadCap (g₀ : SmoothRiemannianMetric I M)
   refine capMono (I := I) (M := M) g₀ P (fun i => ?_) hsum
   exact le_of_eq (by ring)
 
-set_option linter.unusedVariables false in
 theorem lieCovCap (g₀ : SmoothRiemannianMetric I M)
     {δ₀ : ℝ} (hδ₀ : δ₀ < 1) {Λ : ℝ} (hΛ1 : 1 ≤ Λ) :
     ∃ K : ℕ → ℝ, (∀ i, 0 ≤ K i) ∧
@@ -885,7 +871,6 @@ theorem lieCovCap (g₀ : SmoothRiemannianMetric I M)
   exact capSmul (I := I) (M := M) g₀ P (-1 : ℝ)
     (capApp (I := I) (M := M) g₀ P _ _ hKP_nn hKE_nn hPw hExt)
 
-set_option linter.unusedVariables false in
 theorem pairMark (g₀ : SmoothRiemannianMetric I M) {δ₀ : ℝ} (hδ₀ : δ₀ < 1) :
     ∃ K : ℕ → ℝ, (∀ i, 0 ≤ K i) ∧
       ∀ (g₁ : SmoothRiemannianMetric I M) (P : SmoothCcTensor g₀ 0 2)
@@ -910,7 +895,6 @@ theorem pairMark (g₀ : SmoothRiemannianMetric I M) {δ₀ : ℝ} (hδ₀ : δ�
     (rfl : lieCovPair (I := I) (M := M) g₀ g₁ = _) ?_
   simpa using mkApp (I := I) (M := M) g₀ P _ _ hC2_nn hC4_nn hP2 hP4
 
-set_option linter.unusedVariables false in
 theorem curvMark (g₀ : SmoothRiemannianMetric I M) :
     ∃ K : ℕ → ℝ, (∀ i, 0 ≤ K i) ∧
       ∀ (P : SmoothCcTensor g₀ 0 2),
@@ -946,7 +930,6 @@ theorem curvMark (g₀ : SmoothRiemannianMetric I M) :
     (rfl : lrCurvF (I := I) (M := M) g₀ P = _) ?_
   simpa using mkAdd (I := I) (M := M) g₀ P h1 h2
 
-set_option linter.unusedVariables false in
 theorem omegaMark (g₀ : SmoothRiemannianMetric I M) {δ₀ : ℝ} (hδ₀ : δ₀ < 1) :
     ∃ K : ℕ → ℝ, (∀ i, 0 ≤ K i) ∧
       ∀ (g₁ : SmoothRiemannianMetric I M) (P : SmoothCcTensor g₀ 0 2)
@@ -975,7 +958,6 @@ theorem omegaMark (g₀ : SmoothRiemannianMetric I M) {δ₀ : ℝ} (hδ₀ : δ
   simpa using mkApp (I := I) (M := M) g₀ P _ _ hCe_nn hKcd_nn hEndo
     (mkDdc0 (I := I) (M := M) g₀ P (finRotate 3) hCL)
 
-set_option linter.unusedVariables false in
 theorem lrQuadMark (g₀ : SmoothRiemannianMetric I M) {δ₀ : ℝ} (hδ₀ : δ₀ < 1) :
     ∃ K : ℕ → ℝ, (∀ i, 0 ≤ K i) ∧
       ∀ (g₁ : SmoothRiemannianMetric I M) (P : SmoothCcTensor g₀ 0 2)
@@ -1026,7 +1008,6 @@ theorem lrQuadMark (g₀ : SmoothRiemannianMetric I M) {δ₀ : ℝ} (hδ₀ : �
   exact le_of_eq (by ring)
 
 open CurvatureCoefficientDifferenceJetTower in
-set_option linter.unusedSectionVars false in
 private lemma extSub (g₀ : SmoothRiemannianMetric I M) (X Y : SmoothCcTensor g₀ 0 4) :
     slotExtendIter (I := I) (M := M) g₀ 0 4 2 (X - Y) =
       slotExtendIter (I := I) (M := M) g₀ 0 4 2 X -
@@ -1038,7 +1019,6 @@ private lemma extSub (g₀ : SmoothRiemannianMetric I M) (X Y : SmoothCcTensor g
   rw [hrec, hrec, hrec, slotExtend_sub_cc, slotExtend_sub_cc]
 
 open CurvatureCoefficientDifferenceJetTower in
-set_option linter.unusedVariables false in
 theorem lieCovJet (hDim : Module.finrank ℝ E = 3)
     (g₀ : SmoothRiemannianMetric I M) {δ₀ : ℝ} (hδ₀ : δ₀ < 1) :
     ∃ K0 K2 : ℕ → ℝ, (∀ i, 0 ≤ K0 i) ∧ (∀ i, 0 ≤ K2 i) ∧
@@ -1318,7 +1298,6 @@ theorem lieCovJet (hDim : Module.finrank ℝ E = 3)
 
 set_option backward.isDefEq.respectTransparency false in
 open CurvatureCoefficientDifferenceJetTower in
-set_option linter.unusedSectionVars false in
 private lemma sieZero (g₀ : SmoothRiemannianMetric I M) (s : ℕ) :
     covGrad (I := I) (M := M) g₀ (s + 1) (s + 1)
         (slotInsertEndoCc (I := I) (M := M) g₀ s
@@ -1352,7 +1331,6 @@ private lemma sieZero (g₀ : SmoothRiemannianMetric I M) (s : ℕ) :
       slotInsertEndoFib_smul_left, zero_smul]]
   simp [SmoothCcTensor.toSection_zero]
 
-set_option linter.unusedSectionVars false in
 private lemma permRe (g₀ : SmoothRiemannianMetric I M) {d : ℕ}
     (Φ : SmoothCcTensor g₀ d d) (ρ : Equiv.Perm (Fin d)) :
     ccOperatorFieldComp (I := I) (M := M) g₀ d d d Φ
@@ -1369,7 +1347,6 @@ private lemma permRe (g₀ : SmoothRiemannianMetric I M) {d : ℕ}
       (slotPermCLM (I := I) ρ x D) = _
   rw [slotPermCLM_apply]
 
-set_option linter.unusedSectionVars false in
 private lemma clZ (g₀ g₁ : SmoothRiemannianMetric I M) :
     connLowOp (I := I) (M := M) g₀ g₁ =
       ccOperatorFieldComp (I := I) (M := M) g₀ 3 3 3 (permCoeff (I := I) (M := M) g₀ lowPerm)
@@ -1381,7 +1358,6 @@ private lemma clZ (g₀ g₁ : SmoothRiemannianMetric I M) :
               permCoeff (I := I) (M := M) g₀ (finRotate 3) -
               permCoeff (I := I) (M := M) g₀ (Equiv.swap (1 : Fin 3) 2)))) := rfl
 
-set_option linter.unusedSectionVars false in
 private lemma icgSm (g₀ : SmoothRiemannianMetric I M) (r c j : ℕ) (k : ℝ)
     (X : SmoothCcTensor g₀ r c) :
     iteratedCovGrad (I := I) g₀ r c j (k • X) =
@@ -1391,7 +1367,6 @@ private lemma icgSm (g₀ : SmoothRiemannianMetric I M) (r c j : ℕ) (k : ℝ)
   | succ j ih => rw [iteratedCovGrad_succ, iteratedCovGrad_succ, ih, covGrad_smul]
 
 open CurvatureCoefficientDifferenceJetTower in
-set_option linter.unusedVariables false in
 private theorem clExact (g₀ : SmoothRiemannianMetric I M) {δ₀ : ℝ} (hδ₀ : δ₀ < 1) :
     ∃ C : ℕ → ℝ, (∀ i, 0 ≤ C i) ∧
       ∀ (g₁ : SmoothRiemannianMetric I M) (P : SmoothCcTensor g₀ 0 2)
@@ -1514,7 +1489,6 @@ private theorem clExact (g₀ : SmoothRiemannianMetric I M) {δ₀ : ℝ} (hδ�
     Combinatorics.antidiagonalTupleGrid_nonneg _ (gridBase_nn (I := I) (M := M) g₀ P x) _
   nlinarith [hYq, hE, hgnn]
 
-set_option linter.unusedVariables false in
 private theorem clCovMk (g₀ : SmoothRiemannianMetric I M) {δ₀ : ℝ} (hδ₀ : δ₀ < 1) :
     ∃ K : ℕ → ℝ, (∀ i, 0 ≤ K i) ∧
       ∀ (g₁ : SmoothRiemannianMetric I M) (P : SmoothCcTensor g₀ 0 2)
@@ -1535,7 +1509,6 @@ private theorem clCovMk (g₀ : SmoothRiemannianMetric I M) {δ₀ : ℝ} (hδ�
     (connLowOp (I := I) (M := M) g₀ g₁) x]
   exact hC g₁ P htie hδ_le hδ0 hδ i x
 
-set_option linter.unusedVariables false in
 theorem ricciDAMark (g₀ : SmoothRiemannianMetric I M) {δ₀ : ℝ} (hδ₀ : δ₀ < 1) :
     ∃ K : ℕ → ℝ, (∀ i, 0 ≤ K i) ∧
       ∀ (g₁ : SmoothRiemannianMetric I M) (P : SmoothCcTensor g₀ 0 2)
@@ -1621,7 +1594,6 @@ theorem ricciDAMark (g₀ : SmoothRiemannianMetric I M) {δ₀ : ℝ} (hδ₀ : 
     exact mkApp (I := I) (M := M) g₀ P _ _ hKRK_nn hCe1_nn hRK hE1
   exact mkSub (I := I) (M := M) g₀ P (hMono daPermA) (hMono daPermB)
 
-set_option linter.unusedVariables false in
 theorem ricciDAJet (hDim : Module.finrank ℝ E = 3)
     (g₀ : SmoothRiemannianMetric I M) {δ₀ : ℝ} (hδ₀ : δ₀ < 1) :
     ∃ K0 K2 : ℕ → ℝ, (∀ i, 0 ≤ K0 i) ∧ (∀ i, 0 ≤ K2 i) ∧

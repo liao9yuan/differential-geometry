@@ -52,7 +52,6 @@ theorem pairScaleSq (p a b c d e f : ℝ) :
   ring
 
 set_option maxHeartbeats 6400000 in
-set_option linter.unusedVariables false in
 theorem amixHalfPairH2
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M) :
@@ -587,7 +586,6 @@ theorem amixHalfPairH2
   simpa only [hhalfT, hhalfU, B, D] using hZ4D
 
 set_option maxHeartbeats 1600000 in
-set_option linter.unusedVariables false in
 theorem amixOnePairH2
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M) :

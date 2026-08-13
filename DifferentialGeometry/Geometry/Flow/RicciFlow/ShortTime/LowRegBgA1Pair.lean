@@ -260,7 +260,6 @@ private theorem c0_bg_sub
 
 set_option maxHeartbeats 2400000 in
 set_option synthInstance.maxHeartbeats 2400000 in
-set_option linter.unusedVariables false in
 
 theorem bg0_pair_h1
     (hDim : Module.finrank ℝ E = 3)
@@ -447,7 +446,6 @@ theorem bg0_pair_h1
 
 set_option maxHeartbeats 3200000 in
 set_option synthInstance.maxHeartbeats 3200000 in
-set_option linter.unusedVariables false in
 
 theorem bg0_pair_h2
     (hDim : Module.finrank ℝ E = 3)
@@ -678,7 +676,6 @@ theorem bg0_pair_h2
 
 set_option maxHeartbeats 2400000 in
 set_option synthInstance.maxHeartbeats 2400000 in
-set_option linter.unusedVariables false in
 
 theorem c0_bg_pair_h1
     (hDim : Module.finrank ℝ E = 3)
@@ -742,7 +739,6 @@ theorem c0_bg_pair_h1
 
 set_option maxHeartbeats 3200000 in
 set_option synthInstance.maxHeartbeats 3200000 in
-set_option linter.unusedVariables false in
 
 theorem c0_bg_pair_h2
     (hDim : Module.finrank ℝ E = 3)
@@ -887,7 +883,6 @@ private theorem c1_bg_sub
 
 set_option maxHeartbeats 2400000 in
 set_option synthInstance.maxHeartbeats 2400000 in
-set_option linter.unusedVariables false in
 
 theorem rhs1_bg_pair_h2
     (hDim : Module.finrank ℝ E = 3)
@@ -1034,7 +1029,6 @@ private theorem rhs1_bg_sub
 
 set_option maxHeartbeats 3200000 in
 set_option synthInstance.maxHeartbeats 3200000 in
-set_option linter.unusedVariables false in
 
 theorem c1_bg_pair_h2
     (hDim : Module.finrank ℝ E = 3)
@@ -1236,7 +1230,6 @@ theorem c1_bg_pair_h2
 
 set_option maxHeartbeats 3200000 in
 set_option synthInstance.maxHeartbeats 3200000 in
-set_option linter.unusedVariables false in
 
 theorem a1Lo_bg_pair
     (hDim : Module.finrank ℝ E = 3)
@@ -1372,7 +1365,6 @@ theorem a1Lo_bg_pair
 
 set_option maxHeartbeats 3200000 in
 set_option synthInstance.maxHeartbeats 3200000 in
-set_option linter.unusedVariables false in
 
 theorem a1Hi_self_pair
     (hDim : Module.finrank ℝ E = 3)
@@ -1509,7 +1501,6 @@ theorem a1Hi_self_pair
 
 set_option maxHeartbeats 3200000 in
 set_option synthInstance.maxHeartbeats 3200000 in
-set_option linter.unusedVariables false in
 
 theorem a1Hi_bg_pair
     (hDim : Module.finrank ℝ E = 3)

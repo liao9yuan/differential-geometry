@@ -4,7 +4,6 @@ import DifferentialGeometry.Analysis.Sobolev.TensorHilbert.SelfLowCapWindows
 noncomputable section
 
 set_option autoImplicit false
-set_option linter.style.setOption false
 set_option backward.isDefEq.respectTransparency false
 set_option synthInstance.maxHeartbeats 1600000
 set_option maxHeartbeats 1600000
@@ -31,7 +30,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
-set_option linter.unusedVariables false in
 theorem connDiffMark (g₀ : SmoothRiemannianMetric I M) {δ₀ : ℝ} (hδ₀ : δ₀ < 1) :
     ∃ Kcd : ℕ → ℝ, (∀ j, 0 ≤ Kcd j) ∧
       ∀ (g₁ : SmoothRiemannianMetric I M) (P : SmoothCcTensor g₀ 0 2)
@@ -75,7 +73,6 @@ theorem connDiffMark (g₀ : SmoothRiemannianMetric I M) {δ₀ : ℝ} (hδ₀ :
             (gridBase (I := I) (M := M) g₀ P x) (k + 1) := h2
   linarith [h1', h2']
 
-set_option linter.unusedVariables false in
 theorem ricciAAMark (g₀ : SmoothRiemannianMetric I M) {δ₀ : ℝ} (hδ₀ : δ₀ < 1) :
     ∃ K : ℕ → ℝ, (∀ i, 0 ≤ K i) ∧
       ∀ (g₁ : SmoothRiemannianMetric I M) (P : SmoothCcTensor g₀ 0 2)
@@ -210,7 +207,6 @@ theorem ricciAAMark (g₀ : SmoothRiemannianMetric I M) {δ₀ : ℝ} (hδ₀ : 
     mkOfWin (I := I) (M := M) g₀ P _ (fun n y => hft g₁ P htie hδ_le hδ0 hδ n y)
   simpa using mkApp (I := I) (M := M) g₀ P _ _ hKft_nn hK94_nn hFT hKer
 
-set_option linter.unusedVariables false in
 theorem ricciAAJet (hDim : Module.finrank ℝ E = 3)
     (g₀ : SmoothRiemannianMetric I M) {δ₀ : ℝ} (hδ₀ : δ₀ < 1) :
     ∃ K0 K2 : ℕ → ℝ, (∀ i, 0 ≤ K0 i) ∧ (∀ i, 0 ≤ K2 i) ∧

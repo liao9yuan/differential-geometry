@@ -154,7 +154,6 @@ theorem galRepJet_rad (g₀ : SmoothRiemannianMetric I M) :
   refine le_trans (by simpa using hbase) ?_
   exact mul_le_mul_of_nonneg_left hball hC
 
-set_option linter.unusedSectionVars false in
 
 theorem jetSqrtLe (g : SmoothRiemannianMetric I M) (m : ℕ)
     (T : SmoothCcTensor g 0 2) :
@@ -166,7 +165,6 @@ theorem jetSqrtLe (g : SmoothRiemannianMetric I M) (m : ℕ)
     (fun _ => sq_nonneg _)) (le_of_eq ?_)
   exact Finset.sum_congr rfl (fun _ _ => Real.sqrt_sq (norm_nonneg _))
 
-set_option linter.unusedSectionVars false in
 
 theorem jetWinMono (g : SmoothRiemannianMetric I M) {m n : ℕ} (hmn : m ≤ n)
     (T : SmoothCcTensor g 0 2) :
@@ -177,14 +175,12 @@ theorem jetWinMono (g : SmoothRiemannianMetric I M) {m n : ℕ} (hmn : m ≤ n)
   Real.sqrt_le_sqrt (Finset.sum_le_sum_of_subset_of_nonneg
     (Finset.range_mono hmn) (fun _ _ _ => sq_nonneg _))
 
-set_option linter.unusedSectionVars false in
 
 private theorem mul3Le {a b c A B C : ℝ} (hb0 : 0 ≤ b) (hc0 : 0 ≤ c)
     (hA : 0 ≤ A) (hB : 0 ≤ B) (ha : a ≤ A) (hb : b ≤ B) (hc : c ≤ C) :
     a * b * c ≤ A * B * C :=
   mul_le_mul (mul_le_mul ha hb hb0 hA) hc hc0 (mul_nonneg hA hB)
 
-set_option linter.unusedSectionVars false in
 
 theorem armLadder3 (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M) :

@@ -214,7 +214,6 @@ def metricConnDiffLoweredCc (g₀ g₁ g_bg : SmoothRiemannianMetric I M) :
       (E := (TangentSpace I : M → Type _)) ∞ (metricConnDiffLoweredField (I := I) g₁ g_bg)
   hasCompactSupport := HasCompactSupport.of_compactSpace _
 
-set_option linter.unusedSectionVars false in
 private lemma metricConnDiffLoweredCc_unitModel_apply
     (g₀ g₁ g_bg : SmoothRiemannianMetric I M) (x : M)
     (m : Fin 3 → TangentSpace I x) :
@@ -232,7 +231,6 @@ private lemma metricConnDiffLoweredCc_unitModel_apply
     ContinuousMultilinearMap.constOfIsEmpty_apply, one_smul]
   exact metricConnDiffLoweredFib_toModel (I := I) g₁ g₁ g_bg x m
 
-set_option linter.unusedSectionVars false in
 theorem metricConnDiffLoweredCc_eq_neg_kappa
     (g₀ g₁ g_bg : SmoothRiemannianMetric I M) :
     metricConnDiffLoweredCc (I := I) (M := M) g₀ g₁ g_bg =

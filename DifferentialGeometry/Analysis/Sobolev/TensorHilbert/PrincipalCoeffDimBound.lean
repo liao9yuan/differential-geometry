@@ -81,7 +81,6 @@ theorem ricci_rfns_le
       simp only [ricciJetC]
       ring
 
-set_option linter.style.setOption false in
 set_option backward.isDefEq.respectTransparency false in
 set_option synthInstance.maxHeartbeats 1600000 in
 theorem traceCoeff_sub_eq

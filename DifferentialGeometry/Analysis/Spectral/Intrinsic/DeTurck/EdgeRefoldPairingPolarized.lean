@@ -6,7 +6,6 @@ import DifferentialGeometry.Analysis.Sobolev.TensorHilbert.CometricInverseDiffer
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
-set_option linter.style.setOption false
 set_option synthInstance.maxHeartbeats 800000
 set_option maxHeartbeats 1600000
 
@@ -188,7 +187,6 @@ private def edgeEvalCLM (s : Nat) (x : M) (v : Fin s → E) :
         rw [Tensor0SSpace.toModel_smul]
         rfl }
 
-set_option linter.unusedSectionVars false in
 private lemma edgeEvalCLM_apply (s : Nat) (x : M) (v : Fin s → E)
     (D : Tensor0SSpace s I x) :
     edgeEvalCLM (I := I) (M := M) s x v D = Tensor0SSpace.toModel D v := rfl
@@ -270,7 +268,6 @@ private lemma edge_sum4 {A : Type*} [Fintype A] (F : (Fin 4 → A) → Real) :
     exact absurd (Finset.mem_univ _) h
 
 set_option backward.isDefEq.respectTransparency false in
-set_option linter.unusedSectionVars false in
 theorem edgePartnerBi_eval (g gm : SmoothRiemannianMetric I M)
     (P V : SmoothCcTensor g 0 2) (σ : Equiv.Perm (Fin 4))
     (x : M) (v : Fin 4 → E) :
@@ -290,7 +287,6 @@ theorem edgePartnerBi_eval (g gm : SmoothRiemannianMetric I M)
     fin_cases k <;> rfl
 
 set_option backward.isDefEq.respectTransparency false in
-set_option linter.unusedSectionVars false in
 private lemma edge_inner0 (g : SmoothRiemannianMetric I M) (s : Nat)
     (A B : SmoothCcTensor g 0 s) (x : M)
     (e : Fin (Module.finrank Real E) → TangentSpace I x)
@@ -335,7 +331,6 @@ private lemma edge_inner0 (g : SmoothRiemannianMetric I M) (s : Nat)
   rw [hcomp A Fin.elim0 J, hcomp B Fin.elim0 J]
 
 set_option backward.isDefEq.respectTransparency false in
-set_option linter.unusedSectionVars false in
 set_option maxHeartbeats 12800000 in
 theorem edgePair_point_bi (g gm : SmoothRiemannianMetric I M)
     (P V : SmoothCcTensor g 0 2) (G : SmoothCcTensor g 0 4)
@@ -534,7 +529,6 @@ theorem edgePair_point_bi (g gm : SmoothRiemannianMetric I M)
         simp only [edgePartnerBi_eval, fullRaisedEndoField_apply,
           Equiv.apply_symm_apply]
 
-set_option linter.unusedSectionVars false in
 theorem edgePair_l2_bi (g gm : SmoothRiemannianMetric I M)
     (P V : SmoothCcTensor g 0 2) (G : SmoothCcTensor g 0 4)
     (σ : Equiv.Perm (Fin 4)) :

@@ -4,8 +4,6 @@ import DifferentialGeometry.Tensor.RSTensor.FiberMetric.Tensor0SMetricCongr
 import DifferentialGeometry.Tensor.RSTensor.NormSqProduct
 
 set_option autoImplicit false
-set_option linter.style.longLine false
-set_option linter.unusedSectionVars false
 
 noncomputable section
 

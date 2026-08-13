@@ -5,7 +5,6 @@ import DifferentialGeometry.Analysis.Sobolev.BoundedFactorGridIntegral
 
 noncomputable section
 
-set_option linter.style.setOption false
 set_option synthInstance.maxHeartbeats 1600000
 set_option maxHeartbeats 3200000
 
@@ -43,7 +42,6 @@ section TopSeparatedResidualIntegrator
 
 open DifferentialGeometry.Integral.DivergenceTheorem
 
-set_option linter.unusedVariables false in
 theorem boundedFactorGrid_cappedTopLayer_integral_flat
     (g₀ : SmoothRiemannianMetric I M) (a : ℕ)
     (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) {R : ℝ} (hR : 0 ≤ R) :

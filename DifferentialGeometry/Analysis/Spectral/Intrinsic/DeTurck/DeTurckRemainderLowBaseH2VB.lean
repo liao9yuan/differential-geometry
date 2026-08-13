@@ -654,7 +654,6 @@ theorem wXiZero
   simp only [PDE.DeTurck.connDiff_self, Pi.zero_apply,
     ContinuousLinearMap.zero_apply, map_zero]
   rfl
-set_option linter.unusedVariables false in
 theorem wXiSelfTame
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M) :
@@ -1002,7 +1001,6 @@ theorem riemLiveEq
       (I := I) (M := M) g gm 2 x).symm
 
 set_option maxHeartbeats 6400000 in
-set_option linter.unusedVariables false in
 theorem vbH2Pair
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M) :

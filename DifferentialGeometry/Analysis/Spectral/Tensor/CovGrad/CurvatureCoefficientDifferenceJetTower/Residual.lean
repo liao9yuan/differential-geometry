@@ -2,7 +2,6 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.CurvatureCoefficien
 
 noncomputable section
 
-set_option linter.style.setOption false
 set_option synthInstance.maxHeartbeats 1600000
 set_option maxHeartbeats 3200000
 
@@ -42,7 +41,6 @@ open DifferentialGeometry.Integral.DivergenceTheorem
 
 set_option backward.isDefEq.respectTransparency false
 
-set_option linter.unusedVariables false in
 theorem boundedFactorGridWindow_integral_ballUniform_tameWindow
     (g₀ : SmoothRiemannianMetric I M) (a : ℕ)
     (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) {R : ℝ} (hR : 0 ≤ R) :

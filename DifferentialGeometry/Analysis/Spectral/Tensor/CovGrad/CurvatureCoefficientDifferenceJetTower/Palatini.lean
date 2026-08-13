@@ -2,7 +2,6 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.CurvatureCoefficien
 
 noncomputable section
 
-set_option linter.style.setOption false
 set_option synthInstance.maxHeartbeats 1600000
 set_option maxHeartbeats 3200000
 
@@ -52,7 +51,6 @@ def quadraticConnDiffCc (g₀ g₁ : SmoothRiemannianMetric I M) :
     (connDiffSection (I := I) g₁ g₀)
 
 set_option backward.isDefEq.respectTransparency false in
-set_option linter.unusedSectionVars false in
 lemma quadraticConnDiffCc_toModel (g₀ g₁ : SmoothRiemannianMetric I M) (x : M)
     (om : Tensor0SSpace 1 I x) (w : Fin 3 → TangentSpace I x) :
     Tensor0SSpace.toModel
@@ -109,7 +107,6 @@ def covectorExtensionSection (g₀ : SmoothRiemannianMetric I M) (x : M)
        smoothExtensionTangent_contMDiff (I := I) x (inverseMetricSharpFib (I := I) g₀ x om)
      exact ContMDiff.clm_bundle_apply (b := id) (g0FlatField_contMDiff (I := I) g₀) hU⟩
 
-set_option linter.unusedSectionVars false in
 lemma covectorExtensionSection_self (g₀ : SmoothRiemannianMetric I M) (x : M)
     (om : Tensor0SSpace 1 I x) :
     covectorExtensionSection (I := I) (M := M) g₀ x om x = om := by
@@ -119,7 +116,6 @@ lemma covectorExtensionSection_self (g₀ : SmoothRiemannianMetric I M) (x : M)
   exact g0FlatCLM_inverseMetricSharpFib (I := I) g₀ x om
 
 set_option backward.isDefEq.respectTransparency false in
-set_option linter.unusedSectionVars false in
 set_option maxHeartbeats 12800000 in
 theorem riemannLoweredBackgroundDifference_palatini_repr
     (g₀ g₁ : SmoothRiemannianMetric I M) :
@@ -458,7 +454,6 @@ def perturbationSharpEndoFib (g₀ : SmoothRiemannianMetric I M)
           h, map_smul]
         rfl }
 
-set_option linter.unusedSectionVars false in
 lemma perturbationSharpEndoFib_apply (g₀ : SmoothRiemannianMetric I M)
     (T : SmoothCcTensor g₀ 0 2) (x : M) (v : TangentSpace I x) :
     perturbationSharpEndoFib (I := I) (M := M) g₀ T x v =
@@ -466,7 +461,6 @@ lemma perturbationSharpEndoFib_apply (g₀ : SmoothRiemannianMetric I M)
   rw [perturbationSharpEndoFib, LinearMap.coe_toContinuousLinearMap']
   rfl
 
-set_option linter.unusedSectionVars false in
 lemma inner_perturbationSharpEndoFib (g₀ : SmoothRiemannianMetric I M)
     (T : SmoothCcTensor g₀ 0 2) (x : M) (v w : TangentSpace I x) :
     g₀.inner x (perturbationSharpEndoFib (I := I) (M := M) g₀ T x v) w =
@@ -532,7 +526,6 @@ def perturbationSharpEndoField (g₀ : SmoothRiemannianMetric I M)
   toFun := fun x : M => perturbationSharpEndoFib (I := I) (M := M) g₀ T x
   contMDiff_toFun := perturbationSharpEndoFib_contMDiff (I := I) (M := M) g₀ T
 
-set_option linter.unusedSectionVars false in
 lemma unitModel_eq_ccTensorBilin_pt (g₀ : SmoothRiemannianMetric I M)
     (S : SmoothCcTensor g₀ 0 2) (b : M) (u w : TangentSpace I b) :
     unitModel (I := I) (M := M) g₀ 2 S b ![u, w] = ccTensorBilin (I := I) g₀ S b u w := by
@@ -546,7 +539,6 @@ lemma unitModel_eq_ccTensorBilin_pt (g₀ : SmoothRiemannianMetric I M)
   fin_cases k <;> rfl
 
 set_option backward.isDefEq.respectTransparency false in
-set_option linter.unusedSectionVars false in
 lemma slotInsert_perturbationSharp_eq_raise_symmS (g₀ : SmoothRiemannianMetric I M)
     (T : SmoothCcTensor g₀ 0 2) :
     endoSlotZeroCcTensor (I := I) (M := M) g₀ 0
@@ -619,7 +611,6 @@ lemma slotInsert_perturbationSharp_eq_raise_symmS (g₀ : SmoothRiemannianMetric
   rw [ccTensorBilin_symmS (I := I) (M := M) g₀ T x]
 
 set_option backward.isDefEq.respectTransparency false in
-set_option linter.unusedSectionVars false in
 set_option maxHeartbeats 12800000 in
 lemma riemannG1LoweringDifference_slotInsert_repr (g₀ g₁ : SmoothRiemannianMetric I M)
     (T : SmoothCcTensor g₀ 0 2)
@@ -760,7 +751,6 @@ lemma riemannG1LoweringDifference_slotInsert_repr (g₀ g₁ : SmoothRiemannianM
   rw [ccTensorBilinSymm_symm (I := I) g₀ T x (m 1)
     (riemannOp (LeviCivita (I := I) g₁) x (m 0) (m 2) (m 3))]
 
-set_option linter.unusedSectionVars false in
 lemma rfns_eq_sum_componentSq_of_horth_pt
     (g₀ : SmoothRiemannianMetric I M) (r s : ℕ) (x : M) (S : TensorRSSpace r s I x)
     {n : ℕ} (e : Fin n → TangentSpace I x) (hn : n = Module.finrank ℝ E)
@@ -793,7 +783,6 @@ lemma rfns_eq_sum_componentSq_of_horth_pt
     intro i; rw [hbse_def, coe_basisOfLinearIndependentOfCardEqFinrank]
   exact rfns_rs_eq_sum_componentSq_of_basis (I := I) (M := M) g₀ r s x S e bse hn hbse horth
 
-set_option linter.unusedSectionVars false in
 lemma fiberNormSqComponent_zero_toModel_pt
     (g₀ : SmoothRiemannianMetric I M) (s : ℕ) (x : M) (S : SmoothCcTensor g₀ 0 s)
     {n : ℕ} (e : Fin n → TangentSpace I x) (K : Fin 0 → Fin n) (L : Fin s → Fin n) :
@@ -808,7 +797,6 @@ lemma fiberNormSqComponent_zero_toModel_pt
   rw [coframeS_zero_eq_unitZeroSec (I := I) (M := M) g₀ x e K]
   rfl
 
-set_option linter.unusedSectionVars false in
 lemma rfns_symmS_zero_le_of_ball (g₀ : SmoothRiemannianMetric I M)
     (T : SmoothCcTensor g₀ 0 2) {δ : ℝ} (hδ0 : 0 ≤ δ)
     (hbound : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
@@ -871,7 +859,6 @@ lemma rfns_symmS_zero_le_of_ball (g₀ : SmoothRiemannianMetric I M)
           ring
         rw [hc0, hc2, one_mul, hnE]
 
-set_option linter.unusedSectionVars false in
 lemma rfns_iteratedCovGrad_slotInsert3_perturbationSharp_le
     (g₀ : SmoothRiemannianMetric I M) (T : SmoothCcTensor g₀ 0 2) (j : ℕ) (x : M) :
     riemannianFiberNormSq (I := I) (M := M) g₀ 4 (4 + j) x
@@ -893,7 +880,6 @@ lemma rfns_iteratedCovGrad_slotInsert3_perturbationSharp_le
 
 end CurvatureCoefficientDifferenceJetTower
 
-set_option linter.unusedVariables false in
 theorem rfns_iteratedCovGrad_riemannLoweredBackgroundDifference_diagonalProductGrid_le
     (g₀ : SmoothRiemannianMetric I M) {δ₀ : ℝ} (hδ₀ : δ₀ < 1) :
     ∃ C : ℕ → ℝ, (∀ i, 0 ≤ C i) ∧
@@ -1257,7 +1243,6 @@ lemma interiorProduct_toModel_eval_lc (s : ℕ) (x : M) (v : TangentSpace I x)
   rw [h1]
   rfl
 
-set_option linter.unusedSectionVars false in
 lemma toModel_om_eval_lc (x : M) (om : Tensor0SSpace 1 I x) (V : TangentSpace I x) :
     Tensor0SSpace.toModel om (fun _ : Fin 1 => (V : E)) =
       cotangentToDual (I := I) om V := by
@@ -1267,7 +1252,6 @@ lemma toModel_om_eval_lc (x : M) (om : Tensor0SSpace 1 I x) (V : TangentSpace I 
 end CurvatureCoefficientDifferenceJetTower
 
 set_option backward.isDefEq.respectTransparency false in
-set_option linter.unusedSectionVars false in
 set_option maxHeartbeats 6400000 in
 theorem slotInsert_ricMixedSharp_sub_ricEndoRaised_eq_raise_doubleTrace
     (g₀ g₁ : SmoothRiemannianMetric I M) :
@@ -1442,7 +1426,6 @@ theorem slotInsert_ricMixedSharp_sub_ricEndoRaised_eq_raise_doubleTrace
 
 end RiemannLoweredDifference
 
-set_option linter.unusedVariables false in
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.DeTurck in
 theorem rfns_iteratedCovGrad_ricciMixedSharpBackgroundDifference_diagonalProductGrid_le
     (g₀ : SmoothRiemannianMetric I M) {δ₀ : ℝ} (hδ₀ : δ₀ < 1) :
@@ -1605,7 +1588,6 @@ theorem rfns_iteratedCovGrad_ricciMixedSharpBackgroundDifference_diagonalProduct
 
 namespace CurvatureCoefficientDifferenceJetTower
 
-set_option linter.unusedSectionVars false in
 lemma diagonalGrid_assembly_arith (b : ℕ → ℝ) (hb : ∀ j, 0 ≤ b j)
     (i : ℕ) (G : ℝ) (hG : 0 ≤ G)
     (CL CD cbg : ℕ → ℝ) (hCL_nn : ∀ k, 0 ≤ CL k) (hCD_nn : ∀ k, 0 ≤ CD k)
@@ -1683,7 +1665,6 @@ lemma diagonalGrid_assembly_arith (b : ℕ → ℝ) (hb : ∀ j, 0 ≤ b j)
 
 end CurvatureCoefficientDifferenceJetTower
 
-set_option linter.unusedVariables false in
 theorem rfns_iteratedCovGrad_slotInsertEndoCc_zero_ricEndoBackgroundDifferenceField_diagonalProductGrid_le
     (g₀ : SmoothRiemannianMetric I M) {δ₀ : ℝ} (hδ₀ : δ₀ < 1) :
     ∃ C : ℕ → ℝ, (∀ i, 0 ≤ C i) ∧
@@ -1898,7 +1879,6 @@ def riemannMixedKernelBilin (g₀ g₁ : SmoothRiemannianMetric I M) (x : M)
           ContinuousLinearMap.smul_apply, ContinuousLinearMap.smul_apply, map_smul,
           RingHom.id_apply] }
 
-set_option linter.unusedSectionVars false in
 @[simp] theorem riemannMixedKernelBilin_apply (g₀ g₁ : SmoothRiemannianMetric I M) (x : M)
     (p q v0 v1 : TangentSpace I x) :
     riemannMixedKernelBilin (I := I) g₀ g₁ x p q v0 v1 =
@@ -1921,7 +1901,6 @@ def riemannMixedSummandFib (g₀ g₁ : SmoothRiemannianMetric I M) (x : M)
         rw [Tensor0SSpace.toModel_smul, ContinuousMultilinearMap.smul_apply, smul_eq_mul,
           RingHom.id_apply, mul_smul] }
 
-set_option linter.unusedSectionVars false in
 @[simp] theorem riemannMixedSummandFib_toModel (g₀ g₁ : SmoothRiemannianMetric I M) (x : M)
     (p q : TangentSpace I x) (D : Tensor0SSpace 2 I x) (v : Fin 2 → E) :
     Tensor0SSpace.toModel (riemannMixedSummandFib (I := I) g₀ g₁ x p q D) v =
@@ -1938,7 +1917,6 @@ def riemannMixedBiContrFibFixedFrame (g₀ g₁ : SmoothRiemannianMetric I M)
   (2 : ℝ) • ∑ a : Fin (Module.finrank ℝ E), ∑ b : Fin (Module.finrank ℝ E),
     riemannMixedSummandFib (I := I) g₀ g₁ x (B a x) (B b x)
 
-set_option linter.unusedSectionVars false in
 theorem riemannMixedBiContrFibFixedFrame_toModel (g₀ g₁ : SmoothRiemannianMetric I M)
     (B : Fin (Module.finrank ℝ E) → Π b : M, TangentSpace I b) (x : M)
     (D : Tensor0SSpace 2 I x) (v : Fin 2 → E) :
@@ -1959,7 +1937,6 @@ theorem riemannMixedBiContrFibFixedFrame_toModel (g₀ g₁ : SmoothRiemannianMe
   rw [Tensor0SSpace.toModelL_apply, riemannMixedSummandFib_toModel]
   ring
 
-set_option linter.unusedSectionVars false in
 theorem mixedKernelScalar_global (g₀ g₁ : SmoothRiemannianMetric I M)
     {Y W p q : Π b : M, TangentSpace I b}
     (hY : ContMDiff I (I.prod 𝓘(ℝ, E)) ∞ (T% Y))
@@ -1982,7 +1959,6 @@ theorem mixedKernelScalar_global (g₀ g₁ : SmoothRiemannianMetric I M)
   exact contMDiff_g_inner_of_smooth_sections (I := I) g₀
     ⟨fun b => riemannSec (LeviCivita (I := I) g₁) Y p q b, hRsec⟩ ⟨fun b => W b, hW⟩
 
-set_option linter.unusedSectionVars false in
 theorem riemannMixedKernelBilin_homSection_contMDiff (g₀ g₁ : SmoothRiemannianMetric I M)
     {p q : Π b : M, TangentSpace I b}
     (hp : ContMDiff I (I.prod 𝓘(ℝ, E)) ∞ (T% p))
@@ -2010,7 +1986,6 @@ theorem riemannMixedKernelBilin_homSection_contMDiff (g₀ g₁ : SmoothRiemanni
   rw [riemannMixedKernelBilin_apply]
   rfl
 
-set_option linter.unusedSectionVars false in
 theorem riemannMixedBiContrFibFixedFrame_apply_section_contMDiff
     (g₀ g₁ : SmoothRiemannianMetric I M)
     (B : Fin (Module.finrank ℝ E) → Π b : M, TangentSpace I b)
@@ -2099,7 +2074,6 @@ theorem riemannMixedBiContrFibFixedFrame_apply_section_contMDiff
   rw [ContinuousLinearMap.sum_apply]
   rfl
 
-set_option linter.unusedSectionVars false in
 theorem riemannMixedBiContrFibFixedFrame_contMDiff (g₀ g₁ : SmoothRiemannianMetric I M)
     (B : Fin (Module.finrank ℝ E) → Π b : M, TangentSpace I b)
     (hB : ∀ i, ContMDiff I (I.prod 𝓘(ℝ, E)) ∞ (T% (B i))) :
@@ -2131,7 +2105,6 @@ def frameRiemannMixedKernel (g₀ g₁ : SmoothRiemannianMetric I M) (x : M)
         simp only [ContinuousLinearMap.comp_apply, ContinuousLinearMap.smul_apply,
           RingHom.id_apply, (riemannOp (LeviCivita (I := I) g₁) x v0).map_smul c p, map_smul] }
 
-set_option linter.unusedSectionVars false in
 theorem frameRiemannMixedKernel_apply (g₀ g₁ : SmoothRiemannianMetric I M) (x : M)
     (v0 v1 p q : TangentSpace I x) :
     frameRiemannMixedKernel (I := I) g₀ g₁ x v0 v1 p q =
@@ -2143,7 +2116,6 @@ def riemannMixedBiContrFib (g₀ g₁ : SmoothRiemannianMetric I M) (x : M) :
     Tensor0SSpace 2 I x →L[ℝ] Tensor0SSpace 2 I x :=
   riemannMixedBiContrFibFixedFrame (I := I) g₀ g₁ (smoothOrthoFrame (I := I) g₀ x) x
 
-set_option linter.unusedSectionVars false in
 theorem riemannMixedBiContrFib_eq_fixedFrame_on_nbhd (g₀ g₁ : SmoothRiemannianMetric I M)
     (x₀ : M) {y : M} (hy : y ∈ smoothOrthoFrameNbhd (I := I) (M := M) x₀) :
     riemannMixedBiContrFib (I := I) (M := M) g₀ g₁ y =
@@ -2180,7 +2152,6 @@ theorem riemannMixedBiContrFib_eq_fixedFrame_on_nbhd (g₀ g₁ : SmoothRiemanni
     (fun i j => smoothOrthoFrame_orthonormal_at_center (I := I) g₀ y i j)
     (fun i j => smoothOrthoFrame_orthonormal (I := I) g₀ x₀ hy i j)
 
-set_option linter.unusedSectionVars false in
 theorem riemannMixedBiContrFib_contMDiff (g₀ g₁ : SmoothRiemannianMetric I M) :
     ContMDiff I (I.prod 𝓘(ℝ, TensorRSModel 2 2 ℝ E)) ∞
       (fun x : M => TotalSpace.mk' (TensorRSModel 2 2 ℝ E)
@@ -2211,14 +2182,12 @@ def ricciArmOrder0RiemannMixedCoeff (g₀ g₁ : SmoothRiemannianMetric I M) :
       contMDiff_toFun := riemannMixedBiContrFib_contMDiff (I := I) (M := M) g₀ g₁ }
   hasCompactSupport := HasCompactSupport.of_compactSpace _
 
-set_option linter.unusedSectionVars false in
 theorem ricciArmOrder0RiemannMixedCoeff_toSection (g₀ g₁ : SmoothRiemannianMetric I M) (x : M) :
     (ricciArmOrder0RiemannMixedCoeff (I := I) (M := M) g₀ g₁).toSection x =
       (show TensorRSSpace 2 2 I x from
         TensorRSSpace.ofCLM (riemannMixedBiContrFib (I := I) (M := M) g₀ g₁ x)) := rfl
 
 set_option backward.isDefEq.respectTransparency false in
-set_option linter.unusedSectionVars false in
 theorem ricciArmOrder0RiemannMixedCoeff_self (g₀ : SmoothRiemannianMetric I M) :
     ricciArmOrder0RiemannMixedCoeff (I := I) (M := M) g₀ g₀ =
       ricciArmOrder0RiemannCoeff (I := I) (M := M) g₀ g₀ := by

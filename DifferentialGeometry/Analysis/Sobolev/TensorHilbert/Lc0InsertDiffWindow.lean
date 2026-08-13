@@ -5,7 +5,6 @@ import DifferentialGeometry.Analysis.Sobolev.TensorHilbert.TameArmJets
 noncomputable section
 
 set_option autoImplicit false
-set_option linter.style.setOption false
 set_option backward.isDefEq.respectTransparency false
 
 open MeasureTheory Set Filter Topology Bundle Manifold Tensor0SBundle ContinuousLinearMap
@@ -43,7 +42,6 @@ private def insAlphaDiff
   wAlphaB (I := I) (M := M) g₀ g₁ g₀ -
     wAlphaB (I := I) (M := M) g₀ g₁ g_bg
 
-set_option linter.unusedVariables false in
 private theorem omegaDiffAtgw
     (g₀ g_bg : SmoothRiemannianMetric I M)
     {δ₀ : ℝ} (hδ₀ : δ₀ < 1) :
@@ -94,7 +92,6 @@ private theorem omegaDiffAtgw
     ← appCcRS_zero_eq_appCc (I := I) (M := M) g₀ 3 1]
   simpa only [Wfix, Nat.add_zero] using hfold
 
-set_option linter.unusedVariables false in
 private theorem alphaDiffAtgw
     (g₀ g_bg : SmoothRiemannianMetric I M)
     {δ₀ : ℝ} (hδ₀ : δ₀ < 1) :
@@ -154,7 +151,6 @@ private theorem alphaDiffAtgw
   rw [hform]
   exact hfold
 
-set_option linter.unusedVariables false in
 theorem lc0InsDiffAtgw
     (g₀ g_bg : SmoothRiemannianMetric I M)
     {δ₀ : ℝ} (hδ₀ : δ₀ < 1) :

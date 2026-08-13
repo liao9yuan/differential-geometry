@@ -5,8 +5,6 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.UnifCovSumCro
 import DifferentialGeometry.Geometry.Connection.LeviCivita.ChristoffelDiffKoszulDeriv2
 
 set_option autoImplicit false
-set_option linter.style.longLine false
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -424,7 +422,6 @@ open DifferentialGeometry.Integral.Connection
 open DifferentialGeometry.Analysis.Laplacian (metric_inner_self_nonneg) in
 set_option maxHeartbeats 1600000 in
 set_option backward.isDefEq.respectTransparency false in
-set_option linter.unusedSectionVars false in
 
 theorem covDConnDiff2_g1_le
     [VectorBundle ℝ E (TangentSpace I : M → Type _)]
@@ -655,7 +652,6 @@ noncomputable def mixedCommC (s : ℕ) (Λ Λ' Λ'' Λ''' : ℝ) : ℝ :=
 
 open DifferentialGeometry.Integral.Connection in
 set_option maxHeartbeats 1600000 in
-set_option linter.unusedSectionVars false in
 
 theorem covDConnDiff2_gJet_le
     [VectorBundle ℝ E (TangentSpace I : M → Type _)]

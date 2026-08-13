@@ -21,7 +21,6 @@ variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 variable [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M]
 
-set_option linter.unusedSectionVars false in
 theorem orthoFrame_expand (g : SmoothRiemannianMetric I M) (x : M)
     (B : Fin (Module.finrank ℝ E) → TangentSpace I x)
     (hB : ∀ i j : Fin (Module.finrank ℝ E),
@@ -73,7 +72,6 @@ theorem orthoFrame_expand (g : SmoothRiemannianMetric I M) (x : M)
   rw [hzero] at this
   exact lt_irrefl 0 this
 
-set_option linter.unusedSectionVars false in
 theorem frameDiag_indep (g : SmoothRiemannianMetric I M) (x : M)
     (B B' : Fin (Module.finrank ℝ E) → TangentSpace I x)
     (hB : ∀ i j : Fin (Module.finrank ℝ E),
@@ -115,7 +113,6 @@ theorem frameDiag_indep (g : SmoothRiemannianMetric I M) (x : M)
   rw [Finset.sum_congr rfl (fun j _ => hinner j)]
   simp
 
-set_option linter.unusedSectionVars false in
 theorem deTurckVF_frame_trace (g g_bg : SmoothRiemannianMetric I M) (x : M)
     (B : Fin (Module.finrank ℝ E) → TangentSpace I x)
     (hB : ∀ i j : Fin (Module.finrank ℝ E),
@@ -129,7 +126,6 @@ theorem deTurckVF_frame_trace (g g_bg : SmoothRiemannianMetric I M) (x : M)
     (fun i j => smoothOrthoFrame_orthonormal_at_center (I := I) g x i j) hB
     (connDiff (I := I) g g_bg x)
 
-set_option linter.unusedSectionVars false in
 private theorem skewDiag_zero (g : SmoothRiemannianMetric I M) (x : M)
     (B D : Fin (Module.finrank ℝ E) → TangentSpace I x)
     (hB : ∀ i j : Fin (Module.finrank ℝ E),
@@ -170,7 +166,6 @@ private theorem skewDiag_zero (g : SmoothRiemannianMetric I M) (x : M)
   · exact absurd h (by norm_num)
   · exact h
 
-set_option linter.unusedSectionVars false in
 theorem frameCorr_vanish (g g_bg : SmoothRiemannianMetric I M) (x : M)
     (v : TangentSpace I x) :
     ∑ i : Fin (Module.finrank ℝ E),
@@ -187,7 +182,6 @@ theorem frameCorr_vanish (g g_bg : SmoothRiemannianMetric I M) (x : M)
     (connDiff (I := I) g g_bg x)
     (fun u w => connDiff_symm (I := I) g g_bg x u w)
 
-set_option linter.unusedSectionVars false in
 private theorem cov_sum (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
     {ι : Type*} (σ : ι → Π b : M, TangentSpace I b)
     (hσ : ∀ i, ContMDiff I (I.prod 𝓘(ℝ, E)) ∞ (T% (σ i))) (s : Finset ι) (x : M) :
@@ -207,7 +201,6 @@ private theorem cov_sum (cov : CovariantDerivative I E (TangentSpace I : M → T
     rw [hstep, cov.isCovariantDerivativeOnUniv.add ((hσ a x).mdifferentiableAt (by simp))
       ((hsm x).mdifferentiableAt (by simp)) (Set.mem_univ x), ih, Finset.sum_insert ha]
 
-set_option linter.unusedSectionVars false in
 theorem deTurckVF_covDeriv_eq (g g_bg : SmoothRiemannianMetric I M) (x : M)
     (v : TangentSpace I x) :
     (LeviCivita (I := I) g).toFun

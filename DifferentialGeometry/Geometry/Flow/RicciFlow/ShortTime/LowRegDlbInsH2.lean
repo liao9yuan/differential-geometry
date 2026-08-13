@@ -315,7 +315,6 @@ private theorem omega_bg_sub_h2
   simp only [appCcRS]
   rw [appCcRS_sub_left]
 
-set_option linter.unusedVariables false in
 private theorem omega_pair_h3
     (hDim : Module.finrank ℝ E = 3)
     (g g_bg : SmoothRiemannianMetric I M) :
@@ -476,7 +475,6 @@ private theorem grad_h2_local
   rw [h0, h1, h2]
   nlinarith [sq_nonneg ‖S‖]
 
-set_option linter.unusedVariables false in
 private theorem alpha_pair_h2
     (hDim : Module.finrank ℝ E = 3)
     (g g_bg : SmoothRiemannianMetric I M) :
@@ -542,7 +540,6 @@ private theorem raise_h2
   intro q _
   rw [norm_iCG_cometricRaiseSlot0Field_eq]
 
-set_option linter.unusedVariables false in
 
 theorem dlbIns_pair_h2
     (hDim : Module.finrank ℝ E = 3)

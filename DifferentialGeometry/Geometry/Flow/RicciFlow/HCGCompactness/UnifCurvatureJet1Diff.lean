@@ -6,7 +6,6 @@ set_option autoImplicit false
 
 noncomputable section
 
-set_option linter.style.setOption false
 set_option synthInstance.maxHeartbeats 1600000
 set_option maxHeartbeats 1600000
 
@@ -57,8 +56,6 @@ theorem curvJet1_diff_eq (g₀ gBase : SmoothRiemannianMetric I M) :
   simp only [diffStep]
   abel
 
-set_option linter.unusedVariables false in
-set_option linter.unusedSectionVars false in
 
 theorem unifRm04Sup
     (gBase g₀ : SmoothRiemannianMetric I M) {Λ : ℝ} (hΛ : 1 ≤ Λ) (hΛ2 : Λ < 2)
@@ -131,7 +128,6 @@ theorem unifRm04Sup
       ≤ Real.sqrt (((Module.finrank ℝ E : ℝ) ^ 2 * F) ^ 2) := Real.sqrt_le_sqrt hcard
     _ = (Module.finrank ℝ E : ℝ) ^ 2 * F := Real.sqrt_sq (by positivity)
 
-set_option linter.unusedSectionVars false in
 
 theorem unifCurvJet1Conn
     (gBase g₀ : SmoothRiemannianMetric I M) {Λ : ℝ} (hΛ : 1 ≤ Λ) (hΛ2 : Λ < 2)

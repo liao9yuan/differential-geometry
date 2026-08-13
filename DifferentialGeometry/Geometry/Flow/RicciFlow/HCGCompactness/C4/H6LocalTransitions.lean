@@ -24,7 +24,6 @@ variable {I : ModelWithCorners Real E H} [I.Boundaryless]
 
 namespace H6NormalData
 
-set_option linter.style.setOption false in
 set_option maxHeartbeats 1200000 in
 set_option synthInstance.maxHeartbeats 1200000 in
 

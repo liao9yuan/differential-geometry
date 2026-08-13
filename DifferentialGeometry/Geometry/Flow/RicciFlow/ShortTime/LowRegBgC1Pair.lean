@@ -32,7 +32,6 @@ variable
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
-set_option linter.unusedVariables false in
 private theorem dom_sub
     (g : SmoothRiemannianMetric I M) {s : ℕ}
     (σ : Equiv.Perm (Fin s)) (A B : SmoothCcTensor g 0 s) :
@@ -59,7 +58,6 @@ private theorem dom_sub
   simp only [ContinuousMultilinearMap.sub_apply,
     ContinuousMultilinearMap.domDomCongr_apply]
 
-set_option linter.unusedVariables false in
 private theorem raise_sub
     (g : SmoothRiemannianMetric I M) (s : ℕ)
     (A B : SmoothCcTensor g 0 (s + 2)) :

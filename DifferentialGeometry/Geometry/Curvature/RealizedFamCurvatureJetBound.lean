@@ -7,7 +7,6 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.PerturbedRiemannTen
 
 noncomputable section
 
-set_option linter.style.setOption false
 set_option synthInstance.maxHeartbeats 1600000
 set_option maxHeartbeats 1600000
 
@@ -35,8 +34,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
-set_option linter.unusedSectionVars false in
-set_option linter.unusedVariables false in
 attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
   Tensor0SBundle.tensorRSSpace_normedSpace in
 theorem exists_perMetric_curvCoeff_le_of_jetEnvelope
@@ -78,8 +75,6 @@ theorem exists_perMetric_curvCoeff_le_of_jetEnvelope
     rw [hcoeff, ricciArmOrder0CurvCoeff_toSection]
     exact h
 
-set_option linter.unusedSectionVars false in
-set_option linter.unusedVariables false in
 attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
   Tensor0SBundle.tensorRSSpace_normedSpace in
 theorem exists_rfns_curvCoeff_realizedFam_le_of_jetEnvelope
@@ -145,8 +140,6 @@ theorem exists_rfns_curvCoeff_realizedFam_le_of_jetEnvelope
     nlinarith [hle', hprod]
   exact hΛ g₁ (convexPerturbation (I := I) g₀ T T' s) (le_of_eq hδ₁_def) hδs htie x henv
 
-set_option linter.unusedSectionVars false in
-set_option linter.unusedVariables false in
 attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
   Tensor0SBundle.tensorRSSpace_normedSpace in
 theorem exists_rfns_riemannBiContrFib_realizedFam_le_of_jetEnvelope
@@ -177,8 +170,6 @@ theorem exists_rfns_riemannBiContrFib_realizedFam_le_of_jetEnvelope
   have h := hΛ T T' hδ_le hδ hδ'_le hδ' s hs x henv
   rwa [ricciArmOrder0RiemannCoeff_toSection] at h
 
-set_option linter.unusedSectionVars false in
-set_option linter.unusedVariables false in
 attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
   Tensor0SBundle.tensorRSSpace_normedSpace in
 theorem exists_rfns_ricciArmOrder0CurvCoeffFib_realizedFam_le_of_jetEnvelope

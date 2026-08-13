@@ -464,7 +464,6 @@ private lemma dlb_reindex_sub (g₀ : SmoothRiemannianMetric I M)
     reindexCoeffFibGen_apply, reindexCoeffFibGen_apply,
     ContinuousLinearMap.sub_apply]
 
-set_option linter.unusedSectionVars false in
 theorem dlbDiff_jet_le
     (g₀ g₁ g_bg g_ref : SmoothRiemannianMetric I M) (i : ℕ) :
     ‖iteratedCovGrad (I := I) g₀ 2 2 i

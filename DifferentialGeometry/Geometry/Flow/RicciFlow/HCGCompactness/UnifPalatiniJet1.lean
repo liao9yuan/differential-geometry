@@ -6,7 +6,6 @@ set_option autoImplicit false
 
 noncomputable section
 
-set_option linter.style.setOption false
 set_option synthInstance.maxHeartbeats 1600000
 set_option maxHeartbeats 1600000
 
@@ -43,12 +42,10 @@ private noncomputable def extSec (x : M) (v : TangentSpace I x) :
   ContMDiffSection.mk (smoothExtensionTangent (I := I) x v)
     (smoothExtensionTangent_contMDiff (I := I) x v)
 
-set_option linter.unusedSectionVars false in
 @[simp] private theorem extSec_apply (x : M) (v : TangentSpace I x) :
     extSec (I := I) x v x = v :=
   smoothExtensionTangent_eq (I := I) x v
 
-set_option linter.unusedSectionVars false in
 private theorem covD_congr
     (g₂ g₁ : SmoothRiemannianMetric I M)
     (W X Y W' X' Y' : ContMDiffSection I E (∞ : WithTop ℕ∞)
@@ -92,7 +89,6 @@ private theorem covD_congr
     exact (ne_of_gt (g₁.pos x (a - b) hne)) hzero
   exact sub_eq_zero.mp hsub
 
-set_option linter.unusedSectionVars false in
 private theorem covD_eq_ext
     (g₂ g₁ : SmoothRiemannianMetric I M)
     (W X Y : ContMDiffSection I E (∞ : WithTop ℕ∞)
@@ -108,7 +104,6 @@ private theorem covD_eq_ext
     (extSec (I := I) x (Y x))
   all_goals simp
 
-set_option linter.unusedSectionVars false in
 private theorem covD2_eq_hcg
     (gB g₀ : SmoothRiemannianMetric I M)
     (D X Y Z : Π b : M, TangentSpace I b) (x : M) :
@@ -127,7 +122,6 @@ def palatiniOneC (Λ : ℝ) : ℝ :=
   2 * (3 / 2 * Λ ^ 5 * Λ + 9 / 2 * Λ ^ 6 * Λ * Λ + 3 * Λ ^ 7 * Λ ^ 3) +
     4 * (3 / 2 * Λ ^ 3 * Λ) * (3 / 2 * Λ ^ 4 * (Λ + Λ * Λ ^ 2))
 
-set_option linter.unusedSectionVars false in
 
 theorem unifPalatini1_le
     (gBase g₀ : SmoothRiemannianMetric I M) {Λ : ℝ}
@@ -384,7 +378,6 @@ theorem unifPalatini1_le
         Real.sqrt (gBase.inner x Z Z) := by
       dsimp [palatiniOneC, C₀, C₁, C₂]
 
-set_option linter.unusedSectionVars false in
 
 theorem unifPalatini1
     (gBase g₀ : SmoothRiemannianMetric I M) {Λ : ℝ}

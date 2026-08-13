@@ -33,7 +33,6 @@ private theorem sumPairLe (f : ℕ → ℝ) (hf : ∀ i, 0 ≤ f i) (a b : ℕ) 
     linarith only [hf a]
   · exact le_of_eq (Finset.sum_pair hab)
 
-set_option linter.unusedSectionVars false in
 private theorem a1Arm0Bg (hDim : Module.finrank ℝ E = 3)
     (g g_bg : SmoothRiemannianMetric I M) :
     ∃ C K : ℕ → ℝ, (∀ q, 0 ≤ C q) ∧ (∀ i, 0 ≤ K i) ∧
@@ -341,7 +340,6 @@ private theorem a1Arm0Bg (hDim : Module.finrank ℝ E = 3)
     (appCcGdiag_nonneg (E := E) q)) (le_of_eq ?_)
   ring
 
-set_option linter.unusedSectionVars false in
 private theorem a1Arm1Bg (hDim : Module.finrank ℝ E = 3)
     (g g_bg : SmoothRiemannianMetric I M) :
     ∃ C K : ℕ → ℝ, (∀ q, 0 ≤ C q) ∧ (∀ i, 0 ≤ K i) ∧
@@ -539,13 +537,11 @@ private theorem sqAddLe {a b s : ℝ} (h0 : 0 ≤ s) (h : s ≤ a + b) :
     s ^ 2 ≤ 2 * a ^ 2 + 2 * b ^ 2 := by
   nlinarith [mul_self_le_mul_self h0 h, sq_nonneg (a - b)]
 
-set_option linter.unusedSectionVars false in
 private theorem combine2 {a b c d u v : ℝ} (hu : 0 ≤ u) (hv : 0 ≤ v)
     (hc : 0 ≤ c) (hd : 0 ≤ d) (h1 : a ≤ c * u) (h2 : b ≤ d * v) :
     2 * a + 2 * b ≤ 2 * (c + d) * (u + v) := by
   nlinarith [mul_nonneg hc hv, mul_nonneg hd hu]
 
-set_option linter.unusedSectionVars false in
 theorem a1PerIdxJetBg (hDim : Module.finrank ℝ E = 3)
     (g g_bg : SmoothRiemannianMetric I M) :
     ∃ Cq K0 K1 : ℕ → ℝ, (∀ q, 0 ≤ Cq q) ∧ (∀ i, 0 ≤ K0 i) ∧ (∀ i, 0 ≤ K1 i) ∧
@@ -683,7 +679,6 @@ theorem a1PerIdxJet (hDim : Module.finrank ℝ E = 3)
                     ‖iteratedCovGrad (I := I) g 0 2 j T‖ ^ 2))) :=
   a1PerIdxJetBg (I := I) (M := M) hDim g g
 
-set_option linter.unusedSectionVars false in
 private theorem sqrtOnePlus (x : ℝ) (hx : 0 ≤ x) :
     Real.sqrt (1 + x) ≤ 1 + Real.sqrt x := by
   have hle : (1 : ℝ) + x ≤ (1 + Real.sqrt x) ^ 2 := by
@@ -693,7 +688,6 @@ private theorem sqrtOnePlus (x : ℝ) (hx : 0 ≤ x) :
         Real.sqrt_le_sqrt hle
     _ = 1 + Real.sqrt x := Real.sqrt_sq (by positivity)
 
-set_option linter.unusedSectionVars false in
 theorem a1PerIdxLinBg (hDim : Module.finrank ℝ E = 3)
     (g g_bg : SmoothRiemannianMetric I M) :
     ∃ Cq K0 K1 : ℕ → ℝ, (∀ q, 0 ≤ Cq q) ∧ (∀ i, 0 ≤ K0 i) ∧ (∀ i, 0 ≤ K1 i) ∧

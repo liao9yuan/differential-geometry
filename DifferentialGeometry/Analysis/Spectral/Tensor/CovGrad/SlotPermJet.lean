@@ -24,7 +24,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
-set_option linter.unusedSectionVars false in
 theorem slotIcgSq (g : SmoothRiemannianMetric I M) (r s i : ℕ)
     (A : SmoothCcTensor g r s) :
     ‖iteratedCovGrad (I := I) g (r + 1) (s + 1) i
@@ -69,7 +68,6 @@ theorem slotIcgSq (g : SmoothRiemannianMetric I M) (r s i : ℕ)
   rw [MeasureTheory.integral_const_mul, hint] at hsq
   exact hsq
 
-set_option linter.unusedSectionVars false in
 theorem slotJet (g : SmoothRiemannianMetric I M) (r s m : ℕ)
     (A : SmoothCcTensor g r s) :
     (∑ j ∈ Finset.range (m + 1),
@@ -91,7 +89,6 @@ theorem slotJet (g : SmoothRiemannianMetric I M) (r s m : ℕ)
           ‖iteratedCovGrad (I := I) g r s j A‖ ^ 2 := by
       rw [Finset.mul_sum]
 
-set_option linter.unusedSectionVars false in
 theorem slotIterJet (g : SmoothRiemannianMetric I M) (r s m w : ℕ)
     (A : SmoothCcTensor g r s) :
     (∑ j ∈ Finset.range (m + 1),
@@ -129,7 +126,6 @@ theorem slotIterJet (g : SmoothRiemannianMetric I M) (r s m w : ℕ)
             ∑ j ∈ Finset.range (m + 1),
               ‖iteratedCovGrad (I := I) g r s j A‖ ^ 2 := by ring
 
-set_option linter.unusedSectionVars false in
 theorem slotIterSub (g : SmoothRiemannianMetric I M) (r s w : ℕ)
     (A B : SmoothCcTensor g r s) :
     slotExtendIter (I := I) (M := M) g r s w (A - B) =
@@ -146,7 +142,6 @@ theorem slotIterSub (g : SmoothRiemannianMetric I M) (r s w : ℕ)
           (slotExtendIter (I := I) (M := M) g r s w B)
     rw [ih, slotExtend_sub]
 
-set_option linter.unusedSectionVars false in
 theorem rspermSq (g : SmoothRiemannianMetric I M) {r s : ℕ}
     (σ : Equiv.Perm (Fin s)) (A : SmoothCcTensor g r s) (i : ℕ) :
     ‖iteratedCovGrad (I := I) g r s i
@@ -165,7 +160,6 @@ theorem rspermSq (g : SmoothRiemannianMetric I M) {r s : ℕ}
         rw [rsDomDomCongrSection_toSection,
           toModel_rsDomDomCongr_apply]) i x
 
-set_option linter.unusedSectionVars false in
 theorem rspermJet (g : SmoothRiemannianMetric I M) {r s : ℕ} (m : ℕ)
     (σ : Equiv.Perm (Fin s)) (A : SmoothCcTensor g r s) :
     (∑ j ∈ Finset.range (m + 1),
@@ -176,14 +170,12 @@ theorem rspermJet (g : SmoothRiemannianMetric I M) {r s : ℕ} (m : ℕ)
   Finset.sum_congr rfl fun i _ =>
     rspermSq (I := I) (M := M) g σ A i
 
-set_option linter.unusedSectionVars false in
 def monoExt (g : SmoothRiemannianMetric I M) (r s w : ℕ)
     (τ : Equiv.Perm (Fin (s + w))) (A : SmoothCcTensor g r s) :
     SmoothCcTensor g (r + w) (s + w) :=
   rsDomDomCongrSection (I := I) (M := M) g (r + w) (s + w) τ
     (slotExtendIter (I := I) (M := M) g r s w A)
 
-set_option linter.unusedSectionVars false in
 theorem monoExtSub (g : SmoothRiemannianMetric I M) (r s w : ℕ)
     (τ : Equiv.Perm (Fin (s + w))) (A B : SmoothCcTensor g r s) :
     monoExt (I := I) (M := M) g r s w τ (A - B) =
@@ -193,7 +185,6 @@ theorem monoExtSub (g : SmoothRiemannianMetric I M) (r s w : ℕ)
     CurvatureCoefficientDifferenceJetTower.rsDomDomCongrSection_sub_cc]
   rfl
 
-set_option linter.unusedSectionVars false in
 theorem monoExtJet (g : SmoothRiemannianMetric I M) (r s w m : ℕ)
     (τ : Equiv.Perm (Fin (s + w))) (A : SmoothCcTensor g r s) :
     (∑ j ∈ Finset.range (m + 1),

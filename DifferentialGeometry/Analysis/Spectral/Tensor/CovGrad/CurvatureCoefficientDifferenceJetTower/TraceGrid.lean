@@ -2,7 +2,6 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.CurvatureCoefficien
 
 noncomputable section
 
-set_option linter.style.setOption false
 set_option synthInstance.maxHeartbeats 1600000
 set_option maxHeartbeats 3200000
 
@@ -38,7 +37,6 @@ open CurvatureCoefficientDifferenceJetTower
 
 namespace CurvatureCoefficientDifferenceJetTower
 
-set_option linter.unusedVariables false in
 theorem exists_rfns_iteratedCovGrad_pairTraceOp_diff_grid
     (g₀ : SmoothRiemannianMetric I M) {δ₀ : ℝ} (hδ₀ : δ₀ < 1) :
     ∃ CΔ : ℕ → ℝ, (∀ j, 0 ≤ CΔ j) ∧
@@ -647,7 +645,6 @@ theorem exists_rfns_iteratedCovGrad_pairTraceOp_diff_grid
             c2 * K4 l * gridSumPairCount (m + 1) (l + 1))) * Ggrid j := by
         ring
 
-set_option linter.unusedSectionVars false in
 lemma rfns_iteratedCovGrad_WBform_le (g₀ : SmoothRiemannianMetric I M)
     (X : SmoothCcTensor g₀ 0 4) (l : ℕ) (x : M) :
     riemannianFiberNormSq (I := I) (M := M) g₀ 2 (6 + l) x
@@ -692,9 +689,7 @@ lemma rfns_iteratedCovGrad_WBform_le (g₀ : SmoothRiemannianMetric I M)
 
 end CurvatureCoefficientDifferenceJetTower
 
-set_option linter.unusedVariables false in
 set_option maxHeartbeats 12800000 in
-set_option linter.unusedVariables false in
 set_option maxHeartbeats 12800000 in
 theorem rfns_iteratedCovGrad_riemannCoeff_metricFactorTelescope_traceConversion_le
     (g₀ : SmoothRiemannianMetric I M) {δ₀ : ℝ} (hδ₀ : δ₀ < 1) :
@@ -1107,7 +1102,6 @@ theorem rfns_iteratedCovGrad_riemannCoeff_metricFactorTelescope_traceConversion_
             (dim * dim) * 2)) * RHS := by
         nlinarith [hRHS_nn]
 
-set_option linter.unusedVariables false in
 theorem rfns_iteratedCovGrad_riemannMixedCoeff_backgroundDifference_diagonalProductGrid_le
     (g₀ : SmoothRiemannianMetric I M) {δ₀ : ℝ} (hδ₀ : δ₀ < 1) :
     ∃ C : ℕ → ℝ, (∀ i, 0 ≤ C i) ∧

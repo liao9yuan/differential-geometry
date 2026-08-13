@@ -6,7 +6,6 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.SobolevScale.ExponentCongr
 
 noncomputable section
 
-set_option linter.unusedSectionVars false
 
 open Bundle Manifold MeasureTheory Set Filter Tensor0SBundle
 open scoped Manifold Topology ContDiff ENNReal NNReal BigOperators

@@ -41,7 +41,6 @@ noncomputable def lowregNsecBg (g g_bg : SmoothRiemannianMetric I M)
     (symmS (I := I) (M := M) g S) hδ_lt
     (gFibreOpBound_symmS (I := I) (M := M) g S hδ)
 
-set_option linter.unusedVariables false in
 
 structure BgSmoothPacket (g g_bg : SmoothRiemannianMetric I M)
     (K : LowRegBoundData) (T : ℝ) where

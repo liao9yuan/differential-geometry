@@ -27,7 +27,6 @@ variable
       [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M]
 
 open DifferentialGeometry.Analysis.Parabolic.TensorSpectral (symmS) in
-set_option linter.unusedVariables false in
 private theorem force_step_one
     (g g_bg : SmoothRiemannianMetric I M) {R δ : ℝ}
     (hR : 0 < R) (hδ : δ < 1)

@@ -32,7 +32,6 @@ variable
 namespace LowRegBgC0Core
 
 set_option maxHeartbeats 5000000 in
-set_option linter.unusedVariables false in
 theorem aaKerOnePairH2
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M) :
@@ -424,7 +423,6 @@ theorem reindexSubC0
     ContinuousLinearMap.sub_apply]
 
 set_option maxHeartbeats 2400000 in
-set_option linter.unusedVariables false in
 theorem fourTracePair
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M) :
@@ -499,7 +497,6 @@ theorem fourTracePair
       ring
 
 set_option maxHeartbeats 4000000 in
-set_option linter.unusedVariables false in
 theorem aaOnePairH2
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M) :

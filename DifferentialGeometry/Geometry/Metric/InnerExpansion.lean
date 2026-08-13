@@ -3,7 +3,6 @@ import DifferentialGeometry.Tensor.RSTensor.TangentRiemannianRealized
 import Mathlib.Analysis.InnerProductSpace.PiL2
 
 set_option autoImplicit false
-set_option linter.unusedSectionVars false
 
 noncomputable section
 

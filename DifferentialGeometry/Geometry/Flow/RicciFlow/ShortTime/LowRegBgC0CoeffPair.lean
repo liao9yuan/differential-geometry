@@ -34,7 +34,6 @@ variable
 namespace LowRegBgC0Core
 
 set_option maxHeartbeats 2400000 in
-set_option linter.unusedVariables false in
 theorem lowOneAPairH2
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M) :
@@ -316,7 +315,6 @@ theorem lowOneAPairH2
   simpa only [B, X, mul_assoc] using hsum
 
 set_option maxHeartbeats 1600000 in
-set_option linter.unusedVariables false in
 theorem lowOneIntPairH2
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M) :

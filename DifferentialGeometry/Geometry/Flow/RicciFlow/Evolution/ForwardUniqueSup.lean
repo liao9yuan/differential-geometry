@@ -6,8 +6,6 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.ForwardUniqueRmReg
 import DifferentialGeometry.Analysis.Integration.Measure.FamilyContinuity
 
 set_option autoImplicit false
-set_option linter.style.longLine false
-set_option linter.unusedSectionVars false
 
 noncomputable section
 

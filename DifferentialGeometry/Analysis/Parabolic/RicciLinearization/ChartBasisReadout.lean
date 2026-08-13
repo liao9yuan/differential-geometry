@@ -8,7 +8,6 @@ import DifferentialGeometry.Tensor.RSTensor.BundleTrivialization.TensorRSBundleL
 
 noncomputable section
 
-set_option linter.style.setOption false
 set_option backward.isDefEq.respectTransparency false
 set_option synthInstance.maxHeartbeats 1600000
 set_option maxHeartbeats 1600000
@@ -37,7 +36,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 omit [NeZero (Module.finrank ℝ E)] in
-set_option linter.unusedSectionVars false in
 theorem unitModel_basisChart_eq_tensorChartComponentRaw (g : SmoothRiemannianMetric I M)
     (s : ℕ) (W : SmoothCcTensor g 0 s) (x : M)
     (Jdx : Fin s → Fin (Module.finrank ℝ E)) :
@@ -52,7 +50,6 @@ theorem unitModel_basisChart_eq_tensorChartComponentRaw (g : SmoothRiemannianMet
   congr 2
 
 omit [NeZero (Module.finrank ℝ E)] in
-set_option linter.unusedSectionVars false in
 theorem unitModel_basisChart_eq_tensorChartComponent (g : SmoothRiemannianMetric I M)
     (W : SmoothCcTensor g 0 2) (x : M) (k i : Fin (Module.finrank ℝ E)) :
     unitModel (I := I) (M := M) g 2 W x ![chartModelBasis E k, chartModelBasis E i] =
@@ -64,7 +61,6 @@ theorem unitModel_basisChart_eq_tensorChartComponent (g : SmoothRiemannianMetric
   rwa [hfun] at h
 
 omit [NeZero (Module.finrank ℝ E)] in
-set_option linter.unusedSectionVars false in
 theorem cometricLmodel_covectorOfCLM_cDualBasis_eq_chartBasis_sum
     (g₁ : SmoothRiemannianMetric I M) (x : M) (k : Fin (Module.finrank ℝ E)) :
     cometricLmodel (I := I) g₁ x (Tensor0SBundle.model_covectorOfCLM (𝕜 := ℝ) (E := E)

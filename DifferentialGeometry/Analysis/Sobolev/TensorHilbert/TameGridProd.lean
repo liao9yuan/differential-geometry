@@ -4,7 +4,6 @@ import DifferentialGeometry.Analysis.Parabolic.RicciLinearization.CurvatureRefol
 
 noncomputable section
 
-set_option linter.style.setOption false
 set_option backward.isDefEq.respectTransparency false
 set_option synthInstance.maxHeartbeats 1600000
 set_option maxHeartbeats 1600000
@@ -30,7 +29,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
-set_option linter.unusedSectionVars false in
 private theorem contRfns (g₀ : SmoothRiemannianMetric I M) {r s : ℕ}
     (S : SmoothCcTensor g₀ r s) :
     Continuous (fun x : M => riemannianFiberNormSq (I := I) (M := M) g₀ r s x

@@ -3,8 +3,6 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.Regularity
 import DifferentialGeometry.Geometry.Curvature.DimensionThree.RicciControlsRm
 
 set_option autoImplicit false
-set_option linter.style.longLine false
-set_option linter.unusedSectionVars false
 
 noncomputable section
 

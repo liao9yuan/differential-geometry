@@ -4,7 +4,6 @@ import DifferentialGeometry.Analysis.Sobolev.TensorHilbert.DeTurckLieArm1CoeffL2
 
 noncomputable section
 
-set_option linter.style.setOption false
 set_option backward.isDefEq.respectTransparency false
 set_option synthInstance.maxHeartbeats 1600000
 set_option maxHeartbeats 1600000
@@ -39,7 +38,6 @@ private lemma l1IcgSmul (g : SmoothRiemannianMetric I M) (r s j : ℕ)
   | zero => simp only [iteratedCovGrad_zero]
   | succ j ih => rw [iteratedCovGrad_succ, iteratedCovGrad_succ, ih, covGrad_smul]
 
-set_option linter.unusedSectionVars false in
 private lemma l1RfnsNeg (g : SmoothRiemannianMetric I M) {r s : ℕ} (l : ℕ) (x : M)
     (X : SmoothCcTensor g r s) :
     riemannianFiberNormSq (I := I) (M := M) g r (s + l) x
@@ -51,7 +49,6 @@ private lemma l1RfnsNeg (g : SmoothRiemannianMetric I M) {r s : ℕ} (l : ℕ) (
     Pi.smul_apply, riemannianFiberNormSq_smul]
   norm_num
 
-set_option linter.unusedVariables false in
 theorem pureAtgw (g₀ : SmoothRiemannianMetric I M) {δ₀ : ℝ} (hδ₀ : δ₀ < 1) :
     ∃ Kp : ℕ → ℝ, (∀ l, 0 ≤ Kp l) ∧
       ∀ (g₁ : SmoothRiemannianMetric I M) (P : SmoothCcTensor g₀ 0 2)
@@ -167,7 +164,6 @@ theorem pureAtgw (g₀ : SmoothRiemannianMetric I M) {δ₀ : ℝ} (hδ₀ : δ�
     exact hB
   nlinarith [hA, hAw, hBw]
 
-set_option linter.unusedVariables false in
 theorem fourTrAtgw (g₀ : SmoothRiemannianMetric I M) {δ₀ : ℝ} (hδ₀ : δ₀ < 1) :
     ∃ Kft : ℕ → ℝ, (∀ n, 0 ≤ Kft n) ∧
       ∀ (g₁ : SmoothRiemannianMetric I M) (P : SmoothCcTensor g₀ 0 2)
@@ -196,7 +192,6 @@ theorem fourTrAtgw (g₀ : SmoothRiemannianMetric I M) {δ₀ : ℝ} (hδ₀ : �
         (gridBase (I := I) (M := M) g₀ P x) (n + 1) := rfl
   rwa [hwin] at h
 
-set_option linter.unusedSectionVars false in
 theorem dltcEqPure (g₀ g₁ : SmoothRiemannianMetric I M) (σ : Equiv.Perm (Fin 4)) :
     deTurckLieTraceCoeff (I := I) (M := M) g₀ g₁ σ =
       reindexCoeffGen (I := I) (M := M) g₀ 4 2
@@ -209,7 +204,6 @@ theorem dltcEqPure (g₀ g₁ : SmoothRiemannianMetric I M) (σ : Equiv.Perm (Fi
   rw [reindexCoeffGen_toSection, reindexCoeffFibGen_apply]
   rfl
 
-set_option linter.unusedVariables false in
 theorem dltcAtgw (g₀ : SmoothRiemannianMetric I M) {δ₀ : ℝ} (hδ₀ : δ₀ < 1) :
     ∃ Kp : ℕ → ℝ, (∀ l, 0 ≤ Kp l) ∧
       ∀ (g₁ : SmoothRiemannianMetric I M) (P : SmoothCcTensor g₀ 0 2)
@@ -232,7 +226,6 @@ theorem dltcAtgw (g₀ : SmoothRiemannianMetric I M) {δ₀ : ℝ} (hδ₀ : δ�
       (ricciArmPrincipalCoeffPure (I := I) (M := M) g₀ g₁) σ l x]
   exact hp g₁ P htie hδ_le hδ0 hδ l x
 
-set_option linter.unusedVariables false in
 theorem ricci1Atgw (g₀ : SmoothRiemannianMetric I M) {δ₀ : ℝ} (hδ₀ : δ₀ < 1) :
     ∃ Kr : ℕ → ℝ, (∀ n, 0 ≤ Kr n) ∧
       ∀ (g₁ : SmoothRiemannianMetric I M) (P : SmoothCcTensor g₀ 0 2)
@@ -283,7 +276,6 @@ theorem ricci1Atgw (g₀ : SmoothRiemannianMetric I M) {δ₀ : ℝ} (hδ₀ : �
   rw [hidx] at hfold
   exact hfold
 
-set_option linter.unusedVariables false in
 theorem sfEndoAtgw (g₀ : SmoothRiemannianMetric I M) {δ₀ : ℝ} (hδ₀ : δ₀ < 1) :
     ∃ Ksf : ℕ → ℝ, (∀ l, 0 ≤ Ksf l) ∧
       ∀ (g₁ : SmoothRiemannianMetric I M) (P : SmoothCcTensor g₀ 0 2)
@@ -308,7 +300,6 @@ theorem sfEndoAtgw (g₀ : SmoothRiemannianMetric I M) {δ₀ : ℝ} (hδ₀ : �
   exact Combinatorics.antidiagonalTupleGrid_le_window _
     (gridBase_nn (I := I) (M := M) g₀ P x) (by omega)
 
-set_option linter.unusedVariables false in
 theorem kappaAtgw (g₀ g_bg : SmoothRiemannianMetric I M) {δ₀ : ℝ} (hδ₀ : δ₀ < 1)
     {Λ₀ : ℝ} (hΛ₀0 : 0 ≤ Λ₀) :
     ∃ Kκ : ℕ → ℝ, (∀ l, 0 ≤ Kκ l) ∧
@@ -355,7 +346,6 @@ theorem kappaAtgw (g₀ g_bg : SmoothRiemannianMetric I M) {δ₀ : ℝ} (hδ₀
       gridBase (I := I) (M := M) g₀ P x := rfl
   rwa [hbase] at h
 
-set_option linter.unusedVariables false in
 theorem psiBAtgw (g₀ g_bg : SmoothRiemannianMetric I M) {δ₀ : ℝ} (hδ₀ : δ₀ < 1)
     {Λ₀ : ℝ} (hΛ₀0 : 0 ≤ Λ₀) :
     ∃ Kψ : ℕ → ℝ, (∀ n, 0 ≤ Kψ n) ∧
@@ -418,7 +408,6 @@ theorem psiBAtgw (g₀ g_bg : SmoothRiemannianMetric I M) {δ₀ : ℝ} (hδ₀ 
   rw [hdef]
   exact hfold
 
-set_option linter.unusedSectionVars false in
 theorem fixCdAtgw (g₀ g_bg : SmoothRiemannianMetric I M) :
     ∃ Kfx : ℕ → ℝ, (∀ n, 0 ≤ Kfx n) ∧
       ∀ (P : SmoothCcTensor g₀ 0 2) (n : ℕ) (x : M),
@@ -444,7 +433,6 @@ theorem fixCdAtgw (g₀ g_bg : SmoothRiemannianMetric I M) :
     have := hKfx_nn n
     nlinarith)
 
-set_option linter.unusedVariables false in
 theorem bgCcAtgw (g₀ g_bg : SmoothRiemannianMetric I M)
     {δ₀ : ℝ} (hδ₀ : δ₀ < 1) :
     ∃ Kbg : ℕ → ℝ, (∀ n, 0 ≤ Kbg n) ∧
@@ -492,7 +480,6 @@ theorem bgCcAtgw (g₀ g_bg : SmoothRiemannianMetric I M)
         ≤ 2 * (Kcd n * W) + 2 * (Kfx n * W) := by linarith
     _ = (2 * Kcd n + 2 * Kfx n) * W := by ring
 
-set_option linter.unusedSectionVars false in
 theorem bgCcEqConn (g₀ g₁ : SmoothRiemannianMetric I M) :
     lieArm1ConnDiffBgCc (I := I) (M := M) g₀ g₁ g₀ = connDiffSection (I := I) g₁ g₀ := by
   apply SmoothCcTensor.ext
@@ -500,7 +487,6 @@ theorem bgCcEqConn (g₀ g₁ : SmoothRiemannianMetric I M) :
   intro x
   rfl
 
-set_option linter.unusedVariables false in
 theorem pieceAtgw (g₀ : SmoothRiemannianMetric I M) {δ₀ : ℝ} (hδ₀ : δ₀ < 1)
     (Kψ : ℕ → ℝ) (hKψ_nn : ∀ l, 0 ≤ Kψ l) :
     ∃ Kpc : ℕ → ℝ, (∀ n, 0 ≤ Kpc n) ∧
@@ -575,7 +561,6 @@ theorem pieceAtgw (g₀ : SmoothRiemannianMetric I M) {δ₀ : ℝ} (hδ₀ : δ
   rw [hdef, rfns_iteratedCovGrad_reindexCoeffGen_eq (I := I) (M := M) g₀ 3 2 _ ρ n x]
   exact hfold
 
-set_option linter.unusedVariables false in
 theorem lieA1AtgwBg (g₀ g_bg : SmoothRiemannianMetric I M)
     {δ₀ : ℝ} (hδ₀ : δ₀ < 1)
     {Λ₀ : ℝ} (hΛ₀0 : 0 ≤ Λ₀) :
@@ -773,7 +758,6 @@ theorem lieA1AtgwBg (g₀ g_bg : SmoothRiemannianMetric I M)
   rw [hbW_def]
   exact le_of_eq (by ring)
 
-set_option linter.unusedVariables false in
 theorem lieA1Atgw (g₀ : SmoothRiemannianMetric I M)
     {δ₀ : ℝ} (hδ₀ : δ₀ < 1) {Λ₀ : ℝ} (hΛ₀0 : 0 ≤ Λ₀) :
     ∃ Kl : ℕ → ℝ, (∀ n, 0 ≤ Kl n) ∧
@@ -792,7 +776,6 @@ theorem lieA1Atgw (g₀ : SmoothRiemannianMetric I M)
             (gridBase (I := I) (M := M) g₀ P x) (n + 2) :=
   lieA1AtgwBg (I := I) (M := M) g₀ g₀ hδ₀ hΛ₀0
 
-set_option linter.unusedVariables false in
 theorem low1AtgwBg (g₀ g_bg : SmoothRiemannianMetric I M)
     {δ₀ : ℝ} (hδ₀ : δ₀ < 1)
     {Λ₀ : ℝ} (hΛ₀0 : 0 ≤ Λ₀) :
@@ -847,7 +830,6 @@ theorem low1AtgwBg (g₀ g_bg : SmoothRiemannianMetric I M)
       ≤ 2 * (4 * (Kr n * W)) + 2 * (Kl n * W) := by linarith [hRb, hLb]
     _ = (8 * Kr n + 2 * Kl n) * W := by ring
 
-set_option linter.unusedVariables false in
 theorem low1Atgw (g₀ : SmoothRiemannianMetric I M)
     {δ₀ : ℝ} (hδ₀ : δ₀ < 1) {Λ₀ : ℝ} (hΛ₀0 : 0 ≤ Λ₀) :
     ∃ K : ℕ → ℝ, (∀ n, 0 ≤ K n) ∧

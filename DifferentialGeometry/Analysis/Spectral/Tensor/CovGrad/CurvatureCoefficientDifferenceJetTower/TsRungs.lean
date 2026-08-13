@@ -2,7 +2,6 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.CurvatureCoefficien
 
 noncomputable section
 
-set_option linter.style.setOption false
 set_option synthInstance.maxHeartbeats 1600000
 set_option maxHeartbeats 3200000
 
@@ -44,7 +43,6 @@ set_option backward.isDefEq.respectTransparency false
 
 namespace CurvatureCoefficientDifferenceJetTower
 
-set_option linter.unusedSectionVars false in
 lemma tsCometricRaise_sub (g₀ : SmoothRiemannianMetric I M) (s : ℕ)
     (W W' : SmoothCcTensor g₀ 0 (s + 2)) :
     cometricRaiseSlot0Field (I := I) (M := M) g₀ s (W - W') =
@@ -133,7 +131,6 @@ lemma tsCometricRaise_sub (g₀ : SmoothRiemannianMetric I M) (s : ℕ)
         rw [Tensor0SSpace.toModel_sub]
         simp only [ContinuousMultilinearMap.sub_apply]
 
-set_option linter.unusedSectionVars false in
 lemma tsRfns_cometricRaise_eq (g₀ : SmoothRiemannianMetric I M) (s : ℕ)
     (W : SmoothCcTensor g₀ 0 (s + 2)) (x : M) :
     riemannianFiberNormSq (I := I) (M := M) g₀ 1 (s + 1) x
@@ -143,7 +140,6 @@ lemma tsRfns_cometricRaise_eq (g₀ : SmoothRiemannianMetric I M) (s : ℕ)
   rw [iteratedCovGrad_zero, iteratedCovGrad_zero] at h
   exact h
 
-set_option linter.unusedSectionVars false in
 lemma tsAppCcRS_coeffCorner_split (g₀ : SmoothRiemannianMetric I M) (a b c : ℕ)
     (Φ : SmoothCcTensor g₀ b c) (W : SmoothCcTensor g₀ a b) (j : ℕ) :
     iteratedCovGrad (I := I) g₀ a c j (appCcRS (I := I) (M := M) g₀ a b c Φ W) =
@@ -169,7 +165,6 @@ lemma tsAppCcRS_coeffCorner_split (g₀ : SmoothRiemannianMetric I M) (a b c : �
   rw [hf0]
   exact add_comm _ _
 
-set_option linter.unusedSectionVars false in
 lemma tsParallel_argCorner_head_le (g₀ : SmoothRiemannianMetric I M) (p a b : ℕ)
     (Φ : SmoothCcTensor g₀ a b) (i : ℕ) (HX : SmoothCcTensor g₀ p (a + i)) (x : M) :
     riemannianFiberNormSq (I := I) (M := M) g₀ p (b + i) x
@@ -179,7 +174,6 @@ lemma tsParallel_argCorner_head_le (g₀ : SmoothRiemannianMetric I M) (p a b : 
         riemannianFiberNormSq (I := I) (M := M) g₀ p (a + i) x (HX.toSection x) :=
   rfns_appCcRS_appCcLeibnizPsi_diag_le (I := I) (M := M) g₀ p a b Φ i HX x
 
-set_option linter.unusedSectionVars false in
 lemma tsParallel_argCorner_residual_le (g₀ : SmoothRiemannianMetric I M) (p a b : ℕ)
     (Φ : SmoothCcTensor g₀ a b)
     (hΦ : covGrad (I := I) (M := M) g₀ a b Φ = 0)
@@ -251,7 +245,6 @@ lemma tsParallel_argCorner_residual_le (g₀ : SmoothRiemannianMetric I M) (p a 
 
 end CurvatureCoefficientDifferenceJetTower
 
-set_option linter.unusedVariables false in
 theorem rfns_iteratedCovGrad_slotInsertEndoCc_zero_ricEndoBackgroundDifferenceField_topSeparated_le
     (g₀ : SmoothRiemannianMetric I M) {δ₀ : ℝ} (hδ₀ : δ₀ < 1) :
     ∃ Ktop : ℝ, 0 ≤ Ktop ∧ ∃ Kc : ℕ → ℝ, (∀ i, 0 ≤ Kc i) ∧
@@ -806,7 +799,6 @@ open DifferentialGeometry.Integral.DivergenceTheorem
 
 set_option backward.isDefEq.respectTransparency false
 
-set_option linter.unusedVariables false in
 theorem rfns_iteratedCovGrad_riemannG1LoweringDifference_topSeparated_le
     (g₀ : SmoothRiemannianMetric I M) {δ₀ : ℝ} (hδ₀ : δ₀ < 1) :
     ∃ Ktop : ℝ, 0 ≤ Ktop ∧ ∃ Kc : ℕ → ℝ, (∀ i, 0 ≤ Kc i) ∧
@@ -1158,7 +1150,6 @@ set_option backward.isDefEq.respectTransparency false
 
 namespace CurvatureCoefficientDifferenceJetTower
 
-set_option linter.unusedSectionVars false in
 lemma tsSlotInsertEndoCc_succ_eq_reindex_slotExtend
     (g₀ : SmoothRiemannianMetric I M) (s : ℕ)
     (Λ : ContMDiffSection I (E →L[ℝ] E) ∞
@@ -1229,7 +1220,6 @@ lemma tsSlotInsertEndoCc_succ_eq_reindex_slotExtend
         m ((Equiv.swap (0 : Fin (s + 1 + 1)) 1) (Fin.succ (Fin.succ k₂)))
       rw [Equiv.swap_apply_of_ne_of_ne hne0 hne1]
 
-set_option linter.unusedSectionVars false in
 lemma tsReindexCoeffGen_sub (g₀ : SmoothRiemannianMetric I M) (r s : ℕ)
     (R₁ R₂ : SmoothCcTensor g₀ r s) (σ' : Equiv.Perm (Fin r)) :
     reindexCoeffGen (I := I) (M := M) g₀ r s (R₁ - R₂) σ' =
@@ -1249,7 +1239,6 @@ lemma tsReindexCoeffGen_sub (g₀ : SmoothRiemannianMetric I M) (r s : ℕ)
   rw [reindexCoeffFibGen, reindexCoeffFibGen, reindexCoeffFibGen]
   exact ContinuousLinearMap.sub_comp _ _ _
 
-set_option linter.unusedSectionVars false in
 lemma tsRfns_reindexCoeffGen_zero (g₀ : SmoothRiemannianMetric I M) (r s : ℕ)
     (R : SmoothCcTensor g₀ r s) (σ' : Equiv.Perm (Fin r)) (x : M) :
     riemannianFiberNormSq (I := I) (M := M) g₀ r s x
@@ -1259,7 +1248,6 @@ lemma tsRfns_reindexCoeffGen_zero (g₀ : SmoothRiemannianMetric I M) (r s : ℕ
   rw [iteratedCovGrad_zero, iteratedCovGrad_zero] at h
   exact h
 
-set_option linter.unusedSectionVars false in
 lemma tsExists_slotExtend_headTransport (g₀ : SmoothRiemannianMetric I M) (r s : ℕ)
     (V : SmoothCcTensor g₀ r s) (i : ℕ) (HV : SmoothCcTensor g₀ r (s + i)) :
     ∃ HW : SmoothCcTensor g₀ (r + 1) ((s + 1) + i),
@@ -1326,7 +1314,6 @@ lemma tsExists_slotExtend_headTransport (g₀ : SmoothRiemannianMetric I M) (r s
       (by omega : (s + i) + 1 = (s + 1) + i) _ x]
     rw [rfns_slotExtend_eq (I := I) (M := M) g₀ r (s + i) _ x]
 
-set_option linter.unusedSectionVars false in
 lemma tsExists_rsDDC_headTransport (g₀ : SmoothRiemannianMetric I M) (r s : ℕ)
     (σ : Equiv.Perm (Fin s)) (V : SmoothCcTensor g₀ r s) (i : ℕ)
     (HV : SmoothCcTensor g₀ r (s + i)) :
@@ -1368,7 +1355,6 @@ lemma tsExists_rsDDC_headTransport (g₀ : SmoothRiemannianMetric I M) (r s : �
 
 end CurvatureCoefficientDifferenceJetTower
 
-set_option linter.unusedVariables false in
 theorem rfns_iteratedCovGrad_ricciArmOrder0CurvCoeff_backgroundDifference_topSeparated_le
     (g₀ : SmoothRiemannianMetric I M) {δ₀ : ℝ} (hδ₀ : δ₀ < 1) :
     ∃ Ktop : ℝ, 0 ≤ Ktop ∧ ∃ Kc : ℕ → ℝ, (∀ i, 0 ≤ Kc i) ∧
@@ -1543,7 +1529,6 @@ open DifferentialGeometry.Integral.DivergenceTheorem
 
 set_option backward.isDefEq.respectTransparency false
 
-set_option linter.unusedVariables false in
 theorem rfns_iteratedCovGrad_ricciArmOrder0RiemannCoeff_backgroundDifference_topSeparated_le
     (g₀ : SmoothRiemannianMetric I M) {δ₀ : ℝ} (hδ₀ : δ₀ < 1) :
     ∃ Ktop : ℝ, 0 ≤ Ktop ∧ ∃ Kc : ℕ → ℝ, (∀ i, 0 ≤ Kc i) ∧

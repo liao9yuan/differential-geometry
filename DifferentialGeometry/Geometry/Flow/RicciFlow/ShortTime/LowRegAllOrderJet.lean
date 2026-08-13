@@ -46,7 +46,6 @@ noncomputable def lowregNsec (g : SmoothRiemannianMetric I M)
     (gFibreOpBound_symmS (I := I) (M := M) g S hδ)
 
 open DifferentialGeometry.Analysis.Parabolic.TensorSpectral (symmS) in
-set_option linter.unusedVariables false in
 private theorem coord_eq_smoothN
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M) {R ρ δ : ℝ}
@@ -268,7 +267,6 @@ private theorem coord_eq_smoothN
   rfl
 
 open DifferentialGeometry.Analysis.Parabolic.TensorSpectral (symmS) in
-set_option linter.unusedVariables false in
 private theorem liftN_smoothN_coeff
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M) {R ρ δ : ℝ}
@@ -371,7 +369,6 @@ private theorem liftN_smoothN_coeff
   rfl
 
 open DifferentialGeometry.Analysis.Parabolic.TensorSpectral (symmS) in
-set_option linter.unusedVariables false in
 private theorem lowreg_forceJetStep
     (g : SmoothRiemannianMetric I M) {R ρ δ : ℝ}
     (hρ : 0 < ρ) (hRρ : R ≤ ρ) (hδ0 : 0 ≤ δ) (hδ_le : δ ≤ 1 / 3)
@@ -572,7 +569,6 @@ private theorem lowreg_forceJetStep
     _ = ψ i t := hψ_coeff t htmem i
 
 open DifferentialGeometry.Analysis.Parabolic.TensorSpectral (symmS) in
-set_option linter.unusedVariables false in
 private theorem lowreg_forceDriver
     (g : SmoothRiemannianMetric I M) {R ρ δ : ℝ}
     (hρ : 0 < ρ) (hRρ : R ≤ ρ) (hδ0 : 0 ≤ δ) (hδ_le : δ ≤ 1 / 3)
@@ -816,7 +812,6 @@ theorem lowreg_loMass (hDim : Module.finrank ℝ E = 3)
     lowregAllMassAt (I := I) (M := M) g hT hT1 fLo hlo σ) hDim
 
 open DifferentialGeometry.Analysis.Parabolic.TensorSpectral (symmS) in
-set_option linter.unusedVariables false in
 theorem lowreg_spatialMass (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M)
     {R ρ δ : ℝ} (hρ : 0 < ρ) (hRρ : R ≤ ρ) (hδ0 : 0 ≤ δ) (hδ_le : δ ≤ 1 / 3)
@@ -886,7 +881,6 @@ theorem lowreg_spatialMass (hDim : Module.finrank ℝ E = 3)
   exact ⟨Cσ, fun t ht => by simpa only [hmode] using hCσ t ht⟩
 
 open DifferentialGeometry.Analysis.Parabolic.TensorSpectral (symmS) in
-set_option linter.unusedVariables false in
 theorem lowreg_forceJetMass (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M) {R ρ δ : ℝ}
     (hR : 0 < R) (hρ : 0 < ρ) (hRρ : R ≤ ρ)
@@ -1237,7 +1231,6 @@ theorem lowreg_allOrderJet (hDim : Module.finrank ℝ E = 3)
       hA2sq hFComm hT ucs.lo hballU ucs.hiL2 ucs.link fHi hfid0 fc hf_smooth
       hf_mass hpin hf_id F hδ_lt hδ' h_pin
 
-set_option linter.unusedVariables false in
 
 theorem lowreg_joint_smooth (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M)
@@ -1317,7 +1310,6 @@ theorem lowreg_joint_smooth (hDim : Module.finrank ℝ E = 3)
     (I := I) (M := M) g 2 F_RHS Nsec hRepr hT hT1 u htrace fc hf_smooth hf_mass
     hf_id _ hC_pos hC hstate hR₀_pos hball_full hForce
 
-set_option linter.unusedVariables false in
 
 theorem lowreg_joint_of_re (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M)

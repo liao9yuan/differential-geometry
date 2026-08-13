@@ -9,7 +9,6 @@ import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.GreenIdentityA
 import DifferentialGeometry.Tensor.RSTensor.MetricTrace.NormBound
 
 set_option autoImplicit false
-set_option linter.style.setOption false
 set_option maxHeartbeats 1600000
 set_option synthInstance.maxHeartbeats 1600000
 
@@ -41,7 +40,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
-set_option linter.unusedSectionVars false in
 private theorem centeredBasis
     (g : SmoothRiemannianMetric I M) (x : M) :
     ∃ basis : Module.Basis (Fin (Module.finrank ℝ E)) ℝ (TangentSpace I x),
@@ -100,7 +98,6 @@ private theorem centeredBasis
         rw [coe_basisOfLinearIndependentOfCardEqFinrank]]
     exact horth i j
 
-set_option linter.unusedSectionVars false in
 private theorem cometricTrace_eq
     (g : SmoothRiemannianMetric I M) (p : ℕ) (x : M)
     (D : Tensor0SSpace (p + 2) I x) :
@@ -125,7 +122,6 @@ private theorem cometricTrace_eq
   refine Finset.sum_congr rfl (fun i _ => ?_)
   rfl
 
-set_option linter.unusedSectionVars false in
 set_option backward.isDefEq.respectTransparency false in
 private theorem exists_trace31
     (g : SmoothRiemannianMetric I M)
@@ -249,7 +245,6 @@ private theorem reverseJetThree
   simpa [revJetThreeC, C₁, L₁, D] using
     (mul_le_mul_of_nonneg_left hthree' (Real.sqrt_nonneg (Λ ^ 5)))
 
-set_option linter.unusedSectionVars false in
 private theorem connLowOne_eval
     (gBase g₀ : SmoothRiemannianMetric I M)
     (X Y Z W : ContMDiffSection I E (∞ : WithTop ℕ∞)
@@ -354,7 +349,6 @@ private theorem connLowOne_eval
   simp only [map_sub, ContinuousLinearMap.sub_apply]
   ring
 
-set_option linter.unusedSectionVars false in
 private theorem connLowTwo_eval
     (gBase g₀ : SmoothRiemannianMetric I M)
     (D X Y Z W : ContMDiffSection I E (∞ : WithTop ℕ∞)
@@ -549,7 +543,6 @@ noncomputable def connDiffZeroSqC (Λ : ℝ) : ℝ :=
   let C := 3 / 2 * Λ ^ 3 * C₁
   (Module.finrank ℝ E : ℝ) ^ 3 * C ^ 2
 
-set_option linter.unusedSectionVars false in
 
 theorem unifConnDiffZero
     (gBase g₀ : SmoothRiemannianMetric I M) {Λ : ℝ}
@@ -650,7 +643,6 @@ noncomputable def connDiffOneSqC (Λ : ℝ) : ℝ :=
   let C := 3 / 2 * Λ ^ 4 * (C₂ + Λ * C₁ ^ 2)
   (Module.finrank ℝ E : ℝ) ^ 4 * C ^ 2
 
-set_option linter.unusedSectionVars false in
 
 theorem unifConnDiffOne
     (gBase g₀ : SmoothRiemannianMetric I M) {Λ : ℝ}
@@ -796,7 +788,6 @@ noncomputable def connDiffTwoC (Λ : ℝ) : ℝ :=
       3 * Λ ^ 7 * C₁ ^ 3
   (Module.finrank ℝ E : ℝ) ^ 5 * C ^ 2
 
-set_option linter.unusedSectionVars false in
 
 theorem unifConnDiffTwo
     (gBase g₀ : SmoothRiemannianMetric I M) {Λ : ℝ}
@@ -1037,7 +1028,6 @@ private theorem wAlphaA_shift
       rfns_iteratedCovGrad_covGrad_comm_rs (I := I) (M := M) g₀ 0 1 i
         (wOmega (I := I) (M := M) g₀ g₁ g_bg) x
 
-set_option linter.unusedSectionVars false in
 private theorem rfns_neg
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (x : M)
     (v : TensorRSSpace r s I x) :
@@ -1054,7 +1044,6 @@ private theorem rfns_neg
     tensorInnerPointwise_smul_left, tensorInnerPointwise_smul_right]
   ring
 
-set_option linter.unusedSectionVars false in
 private theorem rfns_iter_neg
     (g : SmoothRiemannianMetric I M) (r s j : ℕ)
     (W : SmoothCcTensor g r s) (x : M) :
@@ -1070,12 +1059,10 @@ private theorem rfns_iter_neg
       rfl]
   exact rfns_neg (I := I) g r (s + j) x _
 
-set_option linter.unusedSectionVars false in
 
 noncomputable def alphaOneC (Λ : ℝ) : ℝ :=
   Real.sqrt ((Module.finrank ℝ E : ℝ) ^ 5 * connDiffTwoC (E := E) Λ)
 
-set_option linter.unusedSectionVars false in
 private theorem unifOmegaTwo_of
     (gBase g₀ : SmoothRiemannianMetric I M) {Λ : ℝ}
     (hΛ : 1 ≤ Λ)
@@ -1143,7 +1130,6 @@ private theorem unifOmegaTwo_of
       change d ^ 5 * KC = (Real.sqrt (d ^ 5 * KC)) ^ 2
       rw [Real.sq_sqrt (mul_nonneg (pow_nonneg hd0 5) hKC0)]
 
-set_option linter.unusedSectionVars false in
 private theorem unifOmegaTwo
     (gBase g₀ : SmoothRiemannianMetric I M) {Λ : ℝ}
     (hΛ : 1 ≤ Λ)
@@ -1160,7 +1146,6 @@ private theorem unifOmegaTwo
   exact ⟨alphaOneC (E := E) Λ, Real.sqrt_nonneg _,
     unifOmegaTwo_of (I := I) gBase g₀ hΛ hcomp hjet1 hjet2 hjet3⟩
 
-set_option linter.unusedSectionVars false in
 private theorem unifAlphaOne_of
     (gBase g₀ : SmoothRiemannianMetric I M) {Λ : ℝ}
     (hΛ : 1 ≤ Λ)
@@ -1181,7 +1166,6 @@ private theorem unifAlphaOne_of
   rw [wAlphaA_shift (I := I) g₀ g₀ gBase 1 x]
   simpa using hK x
 
-set_option linter.unusedSectionVars false in
 private theorem unifAlphaOne
     (gBase g₀ : SmoothRiemannianMetric I M) {Λ : ℝ}
     (hΛ : 1 ≤ Λ)
@@ -1198,13 +1182,11 @@ private theorem unifAlphaOne
   exact ⟨alphaOneC (E := E) Λ, Real.sqrt_nonneg _,
     unifAlphaOne_of (I := I) gBase g₀ hΛ hcomp hjet1 hjet2 hjet3⟩
 
-set_option linter.unusedSectionVars false in
 
 noncomputable def ricciOneC (Λ Kb₀ Kb₁ : ℝ) : ℝ :=
   Real.sqrt ((Module.finrank ℝ E : ℝ) ^ 5 *
     rmOneC (E := E) Λ Kb₀ Kb₁ ^ 2)
 
-set_option linter.unusedSectionVars false in
 private theorem unifRicOne_of
     (gBase g₀ : SmoothRiemannianMetric I M) {Λ : ℝ}
     (hΛ : 1 ≤ Λ)
@@ -1272,7 +1254,6 @@ private theorem unifRicOne_of
       dsimp [K, ricciOneC, KR, d]
       rw [Real.sq_sqrt (mul_nonneg (pow_nonneg hd0 5) (sq_nonneg KR))]
 
-set_option linter.unusedSectionVars false in
 private theorem unifRicOne
     (gBase g₀ : SmoothRiemannianMetric I M) {Λ : ℝ}
     (hΛ : 1 ≤ Λ)
@@ -1299,7 +1280,6 @@ private def ricciCc
     (g : SmoothRiemannianMetric I M) : SmoothCcTensor g 0 2 :=
   ccOfField (I := I) g 2 (metricRicci (I := I) (M := M) g)
 
-set_option linter.unusedSectionVars false in
 private lemma unit_add2
     (g : SmoothRiemannianMetric I M)
     (S T : SmoothCcTensor g 0 2) (x : M) :
@@ -1321,7 +1301,6 @@ private lemma unit_add2
       rfl]
   rw [Tensor0SSpace.toModel_add]
 
-set_option linter.unusedSectionVars false in
 private lemma unit_add2_apply
     (g : SmoothRiemannianMetric I M)
     (S T : SmoothCcTensor g 0 2) (x : M)
@@ -1331,7 +1310,6 @@ private lemma unit_add2_apply
         unitModel (I := I) (M := M) g 2 T x v := by
   rw [unit_add2, ContinuousMultilinearMap.add_apply]
 
-set_option linter.unusedSectionVars false in
 private lemma unit_smul2
     (g : SmoothRiemannianMetric I M)
     (c : ℝ) (T : SmoothCcTensor g 0 2) (x : M) :
@@ -1350,7 +1328,6 @@ private lemma unit_smul2
       rfl]
   rw [Tensor0SSpace.toModel_smul]
 
-set_option linter.unusedSectionVars false in
 private lemma unit_smul2_apply
     (g : SmoothRiemannianMetric I M)
     (c : ℝ) (T : SmoothCcTensor g 0 2) (x : M)
@@ -1359,7 +1336,6 @@ private lemma unit_smul2_apply
       c * unitModel (I := I) (M := M) g 2 T x v := by
   rw [unit_smul2, ContinuousMultilinearMap.smul_apply, smul_eq_mul]
 
-set_option linter.unusedSectionVars false in
 private theorem rhs_unit
     (gBase g : SmoothRiemannianMetric I M) (x : M)
     (v : Fin 2 → TangentSpace I x) :
@@ -1369,7 +1345,6 @@ private theorem rhs_unit
   rw [unitModel]
   exact deTurckRHSSection_toModel_apply (I := I) gBase g x v
 
-set_option linter.unusedSectionVars false in
 private theorem ricci_unit
     (g : SmoothRiemannianMetric I M) (x : M)
     (v : Fin 2 → TangentSpace I x) :
@@ -1389,7 +1364,6 @@ private theorem ricci_unit
   rw [metricRicci_apply, hcmm]
   exact metricRicciAt_apply_eq_ricciTensor (I := I) g x (v 0) (v 1)
 
-set_option linter.unusedSectionVars false in
 private theorem rhs_split
     (gBase g : SmoothRiemannianMetric I M) :
     deTurckRHSSection (I := I) gBase g =
@@ -1419,7 +1393,6 @@ private theorem rhs_split
   unfold wVF
   ring
 
-set_option linter.unusedSectionVars false in
 private theorem rhs_one_split
     (gBase g : SmoothRiemannianMetric I M) :
     iteratedCovGrad (I := I) g 0 2 1
@@ -1434,12 +1407,10 @@ private theorem rhs_one_split
   rw [rhs_split, iteratedCovGrad_add, iteratedCovGrad_add,
     iteratedCovGrad_smul]
 
-set_option linter.unusedSectionVars false in
 
 noncomputable def ksupOneC (Λ Kb₀ Kb₁ : ℝ) : ℝ :=
   4 * (ricciOneC (E := E) Λ Kb₀ Kb₁ + alphaOneC (E := E) Λ)
 
-set_option linter.unusedSectionVars false in
 
 theorem unifKsupOne_of
     (gBase g₀ : SmoothRiemannianMetric I M) {Λ : ℝ}
@@ -1535,7 +1506,6 @@ theorem unifKsupOne_of
     dsimp [ksupOneC, KR, KA]
     nlinarith [mul_nonneg hKR0 hKA0, sq_nonneg KA])
 
-set_option linter.unusedSectionVars false in
 
 theorem unifKsupOne
     (gBase g₀ : SmoothRiemannianMetric I M) {Λ : ℝ}
@@ -1561,7 +1531,6 @@ theorem unifKsupOne
   · exact unifKsupOne_of (I := I) gBase g₀ hΛ
       hKb₀0 hKb₀ hKb₁0 hKb₁ hcomp hjet1 hjet2 hjet3
 
-set_option linter.unusedSectionVars false in
 
 theorem unifKsupLeOne
     (gBase : SmoothRiemannianMetric I M) {Λ : ℝ}
@@ -1603,7 +1572,6 @@ theorem unifKsupLeOne
   · exact (h1 x).trans (by
       nlinarith [mul_nonneg hK₀0 hK₁0, sq_nonneg K₀])
 
-set_option linter.unusedSectionVars false in
 
 theorem unifKsupLow
     (gBase g₀ : SmoothRiemannianMetric I M) {Λ : ℝ}

@@ -3,7 +3,6 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.ChartTensor.Inner.TensorRSC
 
 noncomputable section
 
-set_option linter.style.setOption false
 set_option synthInstance.maxHeartbeats 1600000
 set_option maxHeartbeats 3200000
 
@@ -35,7 +34,6 @@ structure IsOrderZeroCurvFactor (g : SmoothRiemannianMetric I M)
   local' : ∀ (r : ℕ) (W₁ W₂ : SmoothCcTensor g 0 r) (x : M),
     W₁.toSection x = W₂.toSection x → (op 0 r W₁).toSection x = (op 0 r W₂).toSection x
 
-set_option linter.unusedSectionVars false in
 theorem op_zero_value_homogeneous
     (g : SmoothRiemannianMetric I M) (r : ℕ)
     (op : ∀ (p r : ℕ), SmoothCcTensor g 0 r → SmoothCcTensor g 0 (r + p))
@@ -51,7 +49,6 @@ theorem op_zero_value_homogeneous
   rw [hlin]
   simp only [zero_smul, add_zero]
 
-set_option linter.unusedSectionVars false in
 set_option maxHeartbeats 1600000 in
 set_option synthInstance.maxHeartbeats 1600000 in
 attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup

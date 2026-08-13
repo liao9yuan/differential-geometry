@@ -8,8 +8,6 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.StarSum.TimeRecurs
 import DifferentialGeometry.Tensor.Auxiliary.SlotAlgebra
 
 set_option autoImplicit false
-set_option linter.style.longLine false
-set_option linter.unusedSectionVars false
 
 noncomputable section
 

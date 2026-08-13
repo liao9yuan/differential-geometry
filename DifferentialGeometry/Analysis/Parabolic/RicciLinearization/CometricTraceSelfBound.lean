@@ -246,7 +246,6 @@ theorem cometricTrace_rfns_p
         _ = d ^ ((p + 6) + 1) := (pow_succ d (p + 6)).symm
         _ = d ^ ((p + 1) + 6) := by congr 1
 
-set_option linter.unusedSectionVars false in
 private lemma combinedTrace42Model_apply_symbolic
     (L : Tensor0SBundle.Tensor0SModel 1 ℝ E →L[ℝ] E)
     (D : Tensor0SBundle.Tensor0SModel 4 ℝ E) (m : Fin 2 → E) :

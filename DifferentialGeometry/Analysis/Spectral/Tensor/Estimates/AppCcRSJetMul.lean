@@ -4,7 +4,6 @@ noncomputable section
 
 namespace DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral
 
-set_option linter.unusedSectionVars false
 
 open scoped ContDiff Manifold Topology BigOperators ENNReal
 open MeasureTheory

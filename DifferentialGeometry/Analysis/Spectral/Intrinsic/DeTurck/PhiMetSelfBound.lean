@@ -34,7 +34,6 @@ private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 def phiSelfC (i : ℕ) : ℝ :=
   if i = 0 then 34 * (Module.finrank ℝ E : ℝ) ^ 6 else 0
 
-set_option linter.unusedSectionVars false in
 theorem phiSelfC_nonneg (i : ℕ) : 0 ≤ phiSelfC (E := E) i := by
   by_cases hi : i = 0
   · simp only [phiSelfC, hi, if_pos]
@@ -44,12 +43,10 @@ theorem phiSelfC_nonneg (i : ℕ) : 0 ≤ phiSelfC (E := E) i := by
 private def selfTraceC (i : ℕ) : ℝ :=
   if i = 0 then (Module.finrank ℝ E : ℝ) ^ 6 else 0
 
-set_option linter.unusedSectionVars false in
 private theorem phiSelfC_eq (i : ℕ) :
     phiSelfC (E := E) i = 34 * selfTraceC (E := E) i := by
   by_cases hi : i = 0 <;> simp [phiSelfC, selfTraceC, hi]
 
-set_option linter.unusedSectionVars false in
 private theorem selfTraceC_nonneg (i : ℕ) :
     0 ≤ selfTraceC (E := E) i := by
   by_cases hi : i = 0
@@ -124,7 +121,6 @@ private theorem pureSelf_grid
   rw [pureSelf_eq (I := I) (M := M) g]
   exact doubleTrace_grid (I := I) (M := M) g i x
 
-set_option linter.unusedSectionVars false in
 private theorem rfns_smul
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (x : M)
     (c : ℝ) (v : TensorRSSpace r s I x) :

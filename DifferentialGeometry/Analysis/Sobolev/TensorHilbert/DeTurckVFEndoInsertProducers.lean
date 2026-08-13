@@ -3,7 +3,6 @@ import DifferentialGeometry.Analysis.Sobolev.TensorHilbert.DeTurckVectorFieldL2J
 
 noncomputable section
 
-set_option linter.style.setOption false
 set_option backward.isDefEq.respectTransparency false
 set_option synthInstance.maxHeartbeats 1600000
 set_option maxHeartbeats 1600000
@@ -31,7 +30,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
-set_option linter.unusedVariables false in
 private theorem diagonalProductTerm_integral_le
     (g₀ : SmoothRiemannianMetric I M)
     (P : SmoothCcTensor g₀ 0 2)
@@ -425,7 +423,6 @@ private theorem diagonalProductTerm_integral_le
             _ = Mbar ^ (7 * i) := e3
             _ ≤ (i : ℝ) * Mbar ^ (7 * i) := e5
 
-set_option linter.unusedVariables false in
 private theorem diagonalProductGrid_rfns_integral_ballUniform_succ
     (g₀ : SmoothRiemannianMetric I M) (a : ℕ)
     (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) {R : ℝ} (hR : 0 ≤ R)
@@ -614,7 +611,6 @@ private theorem diagonalProductGrid_rfns_integral_ballUniform_succ
 
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.DeTurck in
 open DifferentialGeometry.Analysis.Sobolev.TensorHilbert in
-set_option linter.unusedVariables false in
 set_option backward.isDefEq.respectTransparency false in
 set_option maxHeartbeats 1600000 in
 theorem cometricCastG0_order0sup_jetL2_succ_generic
@@ -920,7 +916,6 @@ private theorem exists_window_pointwise_jet_le (g₀ : SmoothRiemannianMetric I 
         mul_le_mul_of_nonneg_left hsum_le (by positivity)
     _ = Cemb ^ 2 * ((a + 1 + 1 : ℕ) : ℝ) * R ^ 2 := by ring
 
-set_option linter.unusedVariables false in
 private theorem raisedKoszul_rfns_lowOrder_le (g₀ : SmoothRiemannianMetric I M) (a : ℕ)
     (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) {R : ℝ} (hR : 0 ≤ R) :
     ∃ Λ : ℝ, 0 ≤ Λ ∧
@@ -1101,7 +1096,6 @@ private lemma window_grid_le (g₀ : SmoothRiemannianMetric I M)
         intro m _
         rw [Finset.sum_const, nsmul_eq_mul]
 
-set_option linter.unusedVariables false in
 private theorem sharpFlatEndoCc_lowOrder_jetL2_succ_generic
     (g₀ : SmoothRiemannianMetric I M) (a : ℕ)
     (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) {R : ℝ} (hR : 0 ≤ R)
@@ -1232,7 +1226,6 @@ private theorem sharpFlatEndoCc_lowOrder_jetL2_succ_generic
           ‖iteratedCovGrad (I := I) g₀ 1 1 q IdIns‖)]
     exact Finset.sum_le_sum hterm
 
-set_option linter.unusedVariables false in
 theorem connDiffSection_lowOrder_jetL2_succ_generic
     (g₀ : SmoothRiemannianMetric I M) (a : ℕ)
     (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) {R : ℝ} (hR : 0 ≤ R)
@@ -1515,7 +1508,6 @@ private lemma riemannianFiberNormSq_neg_local'
     tensorInnerPointwise_smul_left, tensorInnerPointwise_smul_right]
   ring
 
-set_option linter.unusedVariables false in
 theorem wXi_lowOrder_jetL2_succ_generic
     (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
     (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) {R : ℝ} (hR : 0 ≤ R)
@@ -1611,7 +1603,6 @@ theorem wXi_lowOrder_jetL2_succ_generic
           ‖iteratedCovGrad (I := I) g₀ 0 3 q (connDiffLoweredCc (I := I) g₀ g_bg)‖)]
     exact Finset.sum_le_sum hterm
 
-set_option linter.unusedVariables false in
 theorem cometricCastG0_rfns_lowOrder_le (g₀ : SmoothRiemannianMetric I M) (a : ℕ)
     (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) {R : ℝ} (hR : 0 ≤ R)
     {δ₀ : ℝ} (hδ₀ : δ₀ < 1) :
@@ -1752,7 +1743,6 @@ theorem cometricCastG0_rfns_lowOrder_le (g₀ : SmoothRiemannianMetric I M) (a :
   have hΦn := hSΦ n x
   linarith [hsplit, happ, hΦn]
 
-set_option linter.unusedVariables false in
 theorem wOmega_lowOrder_jetL2_succ_generic
     (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
     (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) {R : ℝ} (hR : 0 ≤ R)
@@ -1976,7 +1966,6 @@ lemma norm_iCG_wAlphaA_eq_succ_wOmega (g₀ g₁ g_bg : SmoothRiemannianMetric I
   refine MeasureTheory.integral_congr_ae (Filter.Eventually.of_forall fun x => ?_)
   exact rfns_iCG_wAlphaA_eq_succ_wOmega (I := I) (M := M) g₀ g₁ g_bg i x
 
-set_option linter.unusedVariables false in
 theorem wAlpha_order0_jetL2_generic
     (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
     (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) {R : ℝ} (hR : 0 ≤ R)

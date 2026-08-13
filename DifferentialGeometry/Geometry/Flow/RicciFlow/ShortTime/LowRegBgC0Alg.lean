@@ -74,7 +74,6 @@ theorem ipLow_swap
   rw [cometricRaiseSlot0Field_toSection,
     cometricRaiseSlot0Fib_clm_apply]
 
-set_option linter.unusedSectionVars false in
 lemma unitModel0 (x : M) (m : Fin 0 → E) :
     Tensor0SSpace.toModel (unitTensor (I := I) (M := M) x) m = 1 := by
   rw [unitTensor, Tensor0SSpace.toModel_ofModel]
@@ -114,7 +113,6 @@ lemma curry0 (x : M) (D : Tensor0SSpace 1 I x) (v₀ : E) :
   refine Fin.cases ?_ (fun j => j.elim0) k
   rfl
 
-set_option linter.unusedSectionVars false in
 lemma clm_smul (x : M) (s : ℕ)
     (A : Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace s I x) (c : ℝ) :
     A (c • unitTensor (I := I) (M := M) x) =

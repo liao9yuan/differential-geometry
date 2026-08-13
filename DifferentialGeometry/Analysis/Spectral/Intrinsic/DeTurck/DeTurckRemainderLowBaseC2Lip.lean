@@ -34,7 +34,6 @@ variable
 private local instance : CompleteSpace E :=
   FiniteDimensional.complete ℝ E
 
-set_option linter.unusedSectionVars false in
 private theorem cc_toFun_ext
     (g : SmoothRiemannianMetric I M) {r s : ℕ}
     (A B : SmoothCcTensor g r s)
@@ -61,7 +60,6 @@ private noncomputable def perturbSlot2
     (symmRaiseEndo (I := I) (M := M) g T)
 
 set_option backward.isDefEq.respectTransparency false in
-set_option linter.unusedSectionVars false in
 private theorem insertSucc_eq_c2
     (g : SmoothRiemannianMetric I M) (s : ℕ)
     (Λ : ContMDiffSection I (E →L[ℝ] E) ∞
@@ -142,7 +140,6 @@ private theorem insertSucc_eq_c2
           (Fin.succ (Fin.succ k₂)))
       rw [Equiv.swap_apply_of_ne_of_ne hne0 hne1]
 
-set_option linter.unusedSectionVars false in
 private theorem insertSucc_icg_sq
     (g : SmoothRiemannianMetric I M) (s i : ℕ)
     (Λ : ContMDiffSection I (E →L[ℝ] E) ∞
@@ -311,7 +308,6 @@ private theorem insert5_jet_c2
         c2JetSq (I := I) (M := M) g
           (endoSlotZeroCcTensor (I := I) (M := M) g 1 Λ) := by ring
 
-set_option linter.unusedSectionVars false in
 private theorem slot_icg_sq_c2
     (g : SmoothRiemannianMetric I M) (r s i : ℕ)
     (A : SmoothCcTensor g r s) :
@@ -456,7 +452,6 @@ private theorem rsperm_jet_c2
   exact rsperm_sq_c2 (I := I) (M := M) g σ A i
 
 set_option backward.isDefEq.respectTransparency false in
-set_option linter.unusedSectionVars false in
 private theorem rsperm_sub_c2
     (g : SmoothRiemannianMetric I M) {r s : ℕ}
     (σ : Equiv.Perm (Fin s)) (A B : SmoothCcTensor g r s) :
@@ -854,7 +849,6 @@ private theorem symm_jet_c2
     pow_le_pow_left₀ (norm_nonneg _)
       (symm_icg_norm_c2 (I := I) (M := M) g T i) 2
 
-set_option linter.unusedSectionVars false in
 private theorem unitModel_sub_c2
     (g : SmoothRiemannianMetric I M)
     (A B : SmoothCcTensor g 0 2) (x : M) :
@@ -3360,7 +3354,6 @@ private theorem daTrans_smul
     curvatureRefoldMonomialCoeffField_unitValue_smul]
   module
 
-set_option linter.unusedSectionVars false in
 set_option backward.isDefEq.respectTransparency false in
 private theorem appCcRS_smul_left_c2
     (g : SmoothRiemannianMetric I M) (a b c : ℕ)
@@ -3745,7 +3738,6 @@ private theorem reindex_jet_c2
     norm_reindexCoeffGen_eq (I := I) (M := M) g r (s + i)]
 
 set_option backward.isDefEq.respectTransparency false in
-set_option linter.unusedSectionVars false in
 private theorem reindex_sub_c2
     (g : SmoothRiemannianMetric I M)
     (A B : SmoothCcTensor g 4 2) (ρ : Equiv.Perm (Fin 4)) :
@@ -3765,7 +3757,6 @@ private theorem reindex_sub_c2
     reindexCoeffFibGen_apply, reindexCoeffFibGen_apply,
     ContinuousLinearMap.sub_apply]
 
-set_option linter.unusedSectionVars false in
 set_option backward.isDefEq.respectTransparency false in
 private theorem pure_eq_trace_c2
     (g gm : SmoothRiemannianMetric I M) :
@@ -3840,27 +3831,23 @@ private noncomputable def phiDiff
       (traceHessianSlotPerm⁻¹ * deTurckLieArm2DivSlotPermAT) -
     ricci2Diff (I := I) (M := M) g gT gU
 
-set_option linter.unusedSectionVars false in
 private theorem sub_base_alg
     {V : Type*} [AddCommGroup V] (A B Z : V) :
     A - B = (A - Z) - (B - Z) := by
   abel
 
-set_option linter.unusedSectionVars false in
 private theorem pair_base_alg
     {V : Type*} [AddCommGroup V] (A B Z : V) :
     (A + A) - (B + B) =
       ((A - Z) + (A - Z)) - ((B - Z) + (B - Z)) := by
   abel
 
-set_option linter.unusedSectionVars false in
 private theorem tri_sub_alg
     {V : Type*} [AddCommGroup V] (A B C D E F : V) :
     (A + B - C) - (D + E - F) =
       (A - D) + (B - E) - (C - F) := by
   abel
 
-set_option linter.unusedSectionVars false in
 private theorem kernel_pair_alg
     {V : Type*} [AddCommGroup V]
     (AT BT AU BU K LT PT RT LU PU RU : V)

@@ -30,7 +30,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
-set_option linter.unusedSectionVars false in
 
 private lemma gBase_le_scaled (gBase g₀ : SmoothRiemannianMetric I M) {Λ : ℝ} (hΛ : 1 ≤ Λ)
     (hcomp : ∀ (x : M) (v : TangentSpace I x),
@@ -81,13 +80,11 @@ theorem unifRicSup
         mul_le_mul_of_nonneg_left (mul_le_mul_of_nonneg_left hin (sq_nonneg C)) hΛ0.le
     _ = (Λ * C) ^ 2 * g₀.inner x v v := by ring
 
-set_option linter.unusedSectionVars false in
 attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
   Tensor0SBundle.tensorRSSpace_normedSpace in
 noncomputable def connDiffZeroC (Λ : ℝ) : ℝ :=
   3 / 2 * Λ ^ 3 * Λ
 
-set_option linter.unusedSectionVars false in
 attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
   Tensor0SBundle.tensorRSSpace_normedSpace in
 theorem connDiffSup_le
@@ -109,7 +106,6 @@ theorem connDiffSup_le
   simpa [connDiffZeroC, DifferentialGeometry.PDE.DeTurck.connDiff,
     mul_assoc, mul_left_comm, mul_comm] using h
 
-set_option linter.unusedSectionVars false in
 attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
   Tensor0SBundle.tensorRSSpace_normedSpace in
 theorem unifConnDiffSup
@@ -129,13 +125,11 @@ theorem unifConnDiffSup
     positivity
   · exact connDiffSup_le (I := I) (M := M) gBase g₀ hΛ hcomp hjet1
 
-set_option linter.unusedSectionVars false in
 attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
   Tensor0SBundle.tensorRSSpace_normedSpace in
 noncomputable def connDiffOneC (Λ : ℝ) : ℝ :=
   3 / 2 * Λ ^ 4 * (Λ + Λ * Λ ^ 2)
 
-set_option linter.unusedSectionVars false in
 attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
   Tensor0SBundle.tensorRSSpace_normedSpace in
 theorem covConnDiff_le
@@ -164,7 +158,6 @@ theorem covConnDiff_le
     covDerivConnDiff_gJet_le (I := I) hEq hjet1 hjet2
       (Set.mem_univ x) v w u
 
-set_option linter.unusedSectionVars false in
 attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
   Tensor0SBundle.tensorRSSpace_normedSpace in
 theorem unifCovConnDiffSup
@@ -193,13 +186,11 @@ theorem unifCovConnDiffSup
   · exact covConnDiff_le (I := I) (M := M) gBase g₀
       hΛ hcomp hjet1 hjet2
 
-set_option linter.unusedSectionVars false in
 
 noncomputable def ricciZeroC (Λ Kb : ℝ) : ℝ :=
   (Module.finrank ℝ E : ℝ) *
     (Λ ^ 2 * (riemannDiffC Λ Λ Λ + Real.sqrt Kb))
 
-set_option linter.unusedSectionVars false in
 
 theorem ricciBilin_of
     (gBase g₀ : SmoothRiemannianMetric I M) {Λ : ℝ} (hΛ : 1 ≤ Λ)
@@ -292,7 +283,6 @@ theorem ricciBilin_of
       dsimp [ricciZeroC, F]
       ring
 
-set_option linter.unusedSectionVars false in
 
 theorem unifRicBilin
     (gBase g₀ : SmoothRiemannianMetric I M) {Λ : ℝ} (hΛ : 1 ≤ Λ)

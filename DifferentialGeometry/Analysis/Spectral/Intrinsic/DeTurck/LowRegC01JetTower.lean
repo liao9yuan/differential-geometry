@@ -33,8 +33,6 @@ variable
 
 section Integrand
 
-set_option linter.unusedVariables false in
-set_option linter.unusedSectionVars false in
 theorem low1Ker_jet_bg
     (hDim : Module.finrank ℝ E = 3)
     (g g_bg : SmoothRiemannianMetric I M) :
@@ -134,8 +132,6 @@ theorem low1Ker_jet_bg
             ‖iteratedCovGrad (I := I) g 0 2 j T‖ ^ 2) := by
         rw [Finset.sum_mul]
 
-set_option linter.unusedVariables false in
-set_option linter.unusedSectionVars false in
 theorem low1Ker_jet
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M) :
@@ -245,7 +241,6 @@ theorem selfLow_split
   simp only [deTurckLieCoeffField_eq_covDerivArm_add_endoArm, h']
   abel
 
-set_option linter.unusedVariables false in
 private theorem ricciGoodCap (g₀ : SmoothRiemannianMetric I M)
     {δ₀ : ℝ} (hδ₀ : δ₀ < 1) {Λ : ℝ} (hΛ1 : 1 ≤ Λ) :
     ∃ K : ℕ → ℝ, (∀ i, 0 ≤ K i) ∧
@@ -288,8 +283,6 @@ private theorem ricciGoodCap (g₀ : SmoothRiemannianMetric I M)
   exact capSmul (I := I) (M := M) g₀ P (1 / 2 : ℝ)
     (capAdd (I := I) (M := M) g₀ P hLow happ)
 
-set_option linter.unusedVariables false in
-set_option linter.unusedSectionVars false in
 theorem selfLow_jet
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M) (a : ℕ) (ha : 1 ≤ a)
@@ -437,7 +430,6 @@ theorem selfLow_jet
             ‖iteratedCovGrad (I := I) g 0 2 j T‖ ^ 2) := by
         rw [Finset.sum_mul]
 
-set_option linter.unusedVariables false in
 private theorem ricciGoodMark (g₀ : SmoothRiemannianMetric I M) {δ₀ : ℝ} (hδ₀ : δ₀ < 1) :
     ∃ K : ℕ → ℝ, (∀ i, 0 ≤ K i) ∧
       ∀ (g₁ : SmoothRiemannianMetric I M) (P : SmoothCcTensor g₀ 0 2)
@@ -478,7 +470,6 @@ private theorem ricciGoodMark (g₀ : SmoothRiemannianMetric I M) {δ₀ : ℝ} 
   exact mkSmul (I := I) (M := M) g₀ P (1 / 2 : ℝ)
     (mkAdd (I := I) (M := M) g₀ P hLow happ)
 
-set_option linter.unusedSectionVars false in
 private lemma jetFold (g : SmoothRiemannianMetric I M) {r c : ℕ}
     (X : SmoothCcTensor g r c) (i : ℕ) (A B : ℕ → ℝ) {u v : ℝ}
     (hstep : ∀ q ∈ Finset.range (i + 1),
@@ -494,7 +485,6 @@ private lemma jetFold (g : SmoothRiemannianMetric I M) {r c : ℕ}
   rw [Finset.sum_add_distrib, ← Finset.sum_mul, ← Finset.sum_mul]
   ring
 
-set_option linter.unusedSectionVars false in
 private lemma jetTrans (g : SmoothRiemannianMetric I M) {r c : ℕ}
     (X : SmoothCcTensor g r c) (i : ℕ) (A B : ℕ → ℝ)
     (hA : ∀ q, 0 ≤ A q) (hB : ∀ q, 0 ≤ B q)
@@ -546,8 +536,6 @@ private lemma jetTrans (g : SmoothRiemannianMetric I M) {r c : ℕ}
   refine mul_le_mul (by nlinarith [hB q]) hbud hbud_nn ?_
   nlinarith [hA q, hB q, hHT_nn]
 
-set_option linter.unusedVariables false in
-set_option linter.unusedSectionVars false in
 theorem lieBgJet
     (hDim : Module.finrank ℝ E = 3)
     (g g_bg : SmoothRiemannianMetric I M) {δ₀ : ℝ} (hδ₀ : δ₀ < 1) :
@@ -751,8 +739,6 @@ theorem lieBgJet
   rw [hfin]
   linarith [j1, j2, hcovL, haL, hbL]
 
-set_option linter.unusedVariables false in
-set_option linter.unusedSectionVars false in
 theorem insBgJet
     (g g_bg : SmoothRiemannianMetric I M) {δ₀ : ℝ} (hδ₀ : δ₀ < 1) :
     ∃ K0 : ℕ → ℝ, (∀ i, 0 ≤ K0 i) ∧
@@ -840,8 +826,6 @@ theorem insBgJet
     (jetTrans (I := I) (M := M) g X i A (fun _ => 0) hA_nn
       (fun _ => le_rfl) P T hPk hstep)
 
-set_option linter.unusedVariables false in
-set_option linter.unusedSectionVars false in
 private theorem ricciGoodJet (hDim : Module.finrank ℝ E = 3)
     (g₀ : SmoothRiemannianMetric I M) {δ₀ : ℝ} (hδ₀ : δ₀ < 1) :
     ∃ K0 K2 : ℕ → ℝ, (∀ i, 0 ≤ K0 i) ∧ (∀ i, 0 ≤ K2 i) ∧
@@ -890,8 +874,6 @@ private theorem ricciGoodJet (hDim : Module.finrank ℝ E = 3)
   rw [hΛ₁sq]
   ring
 
-set_option linter.unusedVariables false in
-set_option linter.unusedSectionVars false in
 theorem selfLowJetQBg
     (hDim : Module.finrank ℝ E = 3)
     (g g_bg : SmoothRiemannianMetric I M) :
@@ -1089,7 +1071,6 @@ theorem selfLowJetQBg
   rw [hfin]
   linarith [j1, j2, j3, j4, j5, e1, e2, e3, e4, e5, e6]
 
-set_option linter.unusedVariables false in
 theorem selfLow_jet_quad
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M) :
@@ -1176,7 +1157,6 @@ theorem c1JetTowerQBg
       (lowBaseData (I := I) (M := M) g g_bg T hδ_lt hδg hδZ).C1‖)
     (Finset.mem_range.mpr (Nat.lt_succ_self i))
 
-set_option linter.unusedVariables false in
 theorem c1JetTowerQ
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M) :
@@ -1199,7 +1179,6 @@ theorem c1JetTowerQ
               ‖iteratedCovGrad (I := I) g 0 2 j T‖ ^ 2) :=
   c1JetTowerQBg (I := I) (M := M) hDim g g
 
-set_option linter.unusedVariables false in
 theorem c1_jet_tower_bg
     (hDim : Module.finrank ℝ E = 3)
     (g g_bg : SmoothRiemannianMetric I M)
@@ -1227,7 +1206,6 @@ theorem c1_jet_tower_bg
   intro T hT δ hδ0 hδ_le hδg hδZ _ i
   exact h T hT hδ0 hδ_le hδg hδZ i
 
-set_option linter.unusedVariables false in
 theorem c1_jet_tower
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M) (a : ℕ) {R₀ : ℝ} (hR₀ : 0 ≤ R₀) :
@@ -1251,7 +1229,6 @@ theorem c1_jet_tower
               ‖iteratedCovGrad (I := I) g 0 2 j T‖ ^ 2) :=
   c1_jet_tower_bg (I := I) (M := M) hDim g g a hR₀
 
-set_option linter.unusedVariables false in
 theorem c0_jet_tower
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M) (a : ℕ) (ha : 1 ≤ a)
@@ -1340,7 +1317,6 @@ theorem c0_jet_tower
       (lowBaseData (I := I) (M := M) g g T hδ_lt hδg hδZ).C0‖)
     (Finset.mem_range.mpr (Nat.lt_succ_self i))
 
-set_option linter.unusedVariables false in
 theorem c0JetTowerQBg
     (hDim : Module.finrank ℝ E = 3)
     (g g_bg : SmoothRiemannianMetric I M) :
@@ -1445,7 +1421,6 @@ theorem c0JetTowerQBg
       (lowBaseData (I := I) (M := M) g g_bg T hδ_lt hδg hδZ).C0‖)
     (Finset.mem_range.mpr (Nat.lt_succ_self i))
 
-set_option linter.unusedVariables false in
 theorem c0_jet_tower_bg
     (hDim : Module.finrank ℝ E = 3)
     (g g_bg : SmoothRiemannianMetric I M) (a : ℕ) (ha : 1 ≤ a)

@@ -54,7 +54,6 @@ noncomputable def refoldData
     g g T hδ_lt hδ hδZ).C2
 
 set_option maxHeartbeats 800000 in
-set_option linter.unusedVariables false in
 theorem refoldC0_h2
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M) :
@@ -105,7 +104,6 @@ theorem refoldC0_h2
       simpa only [B] using (Real.sq_sqrt (hL R hR)).symm
 
 set_option maxHeartbeats 1200000 in
-set_option linter.unusedVariables false in
 theorem refoldC1_h2
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M) :
@@ -209,7 +207,6 @@ theorem refoldC1_h2
       ring
 
 set_option maxHeartbeats 800000 in
-set_option linter.unusedVariables false in
 theorem refoldCoeff_h2
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M) :
@@ -282,7 +279,6 @@ theorem refoldCoeff_h2
       ring
 
 set_option maxHeartbeats 800000 in
-set_option linter.unusedVariables false in
 theorem refoldA1_hl
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M) :
@@ -420,7 +416,6 @@ theorem c0Data_self
   abel
 
 set_option maxHeartbeats 1600000 in
-set_option linter.unusedVariables false in
 theorem c0DataPairH2
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M) :

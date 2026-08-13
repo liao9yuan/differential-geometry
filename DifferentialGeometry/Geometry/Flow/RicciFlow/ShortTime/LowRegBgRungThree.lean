@@ -25,14 +25,12 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
   [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
   [T2Space M] [SigmaCompactSpace M]
 
-set_option linter.unusedSectionVars false in
 
 private theorem mul3Le {a b c A B C : ℝ} (hb0 : 0 ≤ b) (hc0 : 0 ≤ c)
     (hA : 0 ≤ A) (hB : 0 ≤ B) (ha : a ≤ A) (hb : b ≤ B) (hc : c ≤ C) :
     a * b * c ≤ A * B * C :=
   mul_le_mul (mul_le_mul ha hb hb0 hA) hc hc0 (mul_nonneg hA hB)
 
-set_option linter.unusedSectionVars false in
 
 theorem armLadder3Bg (hDim : Module.finrank ℝ E = 3)
     (g g_bg : SmoothRiemannianMetric I M) :

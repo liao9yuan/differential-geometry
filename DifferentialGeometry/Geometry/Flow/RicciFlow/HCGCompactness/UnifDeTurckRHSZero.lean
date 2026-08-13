@@ -6,7 +6,6 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.UnifJetTowerM
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.ConnDiffDerivBound
 
 set_option autoImplicit false
-set_option linter.style.setOption false
 
 set_option maxHeartbeats 1000000
 set_option synthInstance.maxHeartbeats 1600000
@@ -38,7 +37,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
-set_option linter.unusedSectionVars false in
 set_option backward.isDefEq.respectTransparency false in
 
 theorem covDerivConnDiff_tens (g₂ g₁ : SmoothRiemannianMetric I M) (x : M)
@@ -73,7 +71,6 @@ theorem covDerivConnDiff_tens (g₂ g₁ : SmoothRiemannianMetric I M) (x : M)
   by_contra hne
   exact absurd hz (ne_of_gt (g₂.pos x _ (sub_ne_zero.mpr hne)))
 
-set_option linter.unusedSectionVars false in
 
 private theorem rhsTermBound (gBase g₀ : SmoothRiemannianMetric I M) {Λ C₀ C₁ : ℝ}
     (hΛ : 1 ≤ Λ) (hC₀0 : 0 ≤ C₀) (hC₁0 : 0 ≤ C₁)
@@ -235,13 +232,11 @@ private theorem rhsTermBound (gBase g₀ : SmoothRiemannianMetric I M) {Λ C₀ 
   rcases abs_le.mp (hpair _ _ hQ3) with ⟨h4l, h4r⟩
   refine abs_le.mpr ⟨by nlinarith, by nlinarith⟩
 
-set_option linter.unusedSectionVars false in
 
 noncomputable def vfZeroC (Λ : ℝ) : ℝ :=
   (Module.finrank ℝ E : ℝ) *
     ((connDiffOneC Λ + 3 * connDiffZeroC Λ ^ 2) * Λ ^ 4)
 
-set_option linter.unusedSectionVars false in
 
 theorem unifCovDerivVF_of
     (gBase g₀ : SmoothRiemannianMetric I M) {Λ : ℝ} (hΛ : 1 ≤ Λ)
@@ -333,7 +328,6 @@ theorem unifCovDerivVF_of
   dsimp [vfZeroC, C₀, C₁]
   ring
 
-set_option linter.unusedSectionVars false in
 
 theorem unifCovDerivVF
     (gBase g₀ : SmoothRiemannianMetric I M) {Λ : ℝ} (hΛ : 1 ≤ Λ)
@@ -353,12 +347,10 @@ theorem unifCovDerivVF
   dsimp [vfZeroC, connDiffZeroC, connDiffOneC]
   positivity
 
-set_option linter.unusedSectionVars false in
 
 noncomputable def rhsZeroC (Λ Kb : ℝ) : ℝ :=
   2 * ricciZeroC (E := E) Λ Kb + 2 * vfZeroC (E := E) Λ
 
-set_option linter.unusedSectionVars false in
 
 theorem unifRHSBilin_of
     (gBase g₀ : SmoothRiemannianMetric I M) {Λ : ℝ} (hΛ : 1 ≤ Λ)
@@ -404,7 +396,6 @@ theorem unifRHSBilin_of
   rcases abs_le.mp h3 with ⟨h3l, h3r⟩
   refine abs_le.mpr ⟨by nlinarith, by nlinarith⟩
 
-set_option linter.unusedSectionVars false in
 
 theorem unifRHSBilin
     (gBase g₀ : SmoothRiemannianMetric I M) {Λ : ℝ} (hΛ : 1 ≤ Λ)
@@ -435,7 +426,6 @@ theorem unifRHSBilin
   dsimp [rhsZeroC]
   linarith
 
-set_option linter.unusedSectionVars false in
 
 theorem rhsZeroC_nonneg {Kb Λ : ℝ} (hΛ : 1 ≤ Λ) :
     0 ≤ rhsZeroC (E := E) Λ Kb := by
@@ -459,7 +449,6 @@ theorem ksupZeroC_nonneg {Kb Λ : ℝ} (hΛ : 1 ≤ Λ) :
     0 ≤ ksupZeroC (E := E) Λ Kb := by
   exact mul_nonneg (Nat.cast_nonneg _) (rhsZeroC_nonneg (E := E) hΛ)
 
-set_option linter.unusedSectionVars false in
 
 theorem unifRHSFib_of
     (gBase g₀ : SmoothRiemannianMetric I M) {Λ : ℝ} (hΛ : 1 ≤ Λ)
@@ -520,7 +509,6 @@ theorem unifRHSFib_of
       dsimp [ksupZeroC, K₀]
       ring
 
-set_option linter.unusedSectionVars false in
 
 theorem unifRHSFib
     (gBase g₀ : SmoothRiemannianMetric I M) {Λ : ℝ} (hΛ : 1 ≤ Λ)
@@ -539,7 +527,6 @@ theorem unifRHSFib
     unifRHSFib_of (I := I) (M := M) gBase g₀ hΛ
       hKb0 hKb hcomp hjet1 hjet2⟩
 
-set_option linter.unusedSectionVars false in
 
 theorem unifKsupZero_of
     (gBase g₀ : SmoothRiemannianMetric I M) {Λ Kb : ℝ} (hΛ : 1 ≤ Λ)
@@ -561,7 +548,6 @@ theorem unifKsupZero_of
   exact unifRHSFib_of (I := I) (M := M) gBase g₀ hΛ
     hKb0 hKb hcomp hjet1 hjet2
 
-set_option linter.unusedSectionVars false in
 
 theorem unifKsupZero
     (gBase g₀ : SmoothRiemannianMetric I M) {Λ : ℝ} (hΛ : 1 ≤ Λ)

@@ -80,7 +80,6 @@ variable
       [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M]
 
 set_option maxHeartbeats 1600000 in
-set_option linter.unusedVariables false in
 theorem c1_pair_lip
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M) :
@@ -195,7 +194,6 @@ theorem c1_pair_lip
     exact hM1'
 
 set_option maxHeartbeats 1600000 in
-set_option linter.unusedVariables false in
 theorem a1_pair_lip
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M) :
@@ -352,7 +350,6 @@ private theorem loPairArith
       ring
 
 set_option maxHeartbeats 1600000 in
-set_option linter.unusedVariables false in
 theorem a1Lo_pair_lip
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M) :

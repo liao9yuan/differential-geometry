@@ -122,7 +122,6 @@ lemma abs_metric_inner_le_sqrt_metric_quadratic
   rw [hsqrt_mul] at h_le_sqrt
   exact h_le_sqrt
 
-set_option linter.unusedSectionVars false in
 lemma gNorm_add_le
     (g : SmoothRiemannianMetric I M) (x : M) (v w : TangentSpace I x) :
     Real.sqrt (g.inner x (v + w) (v + w)) ≤

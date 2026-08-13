@@ -73,7 +73,6 @@ theorem c0Core_self
       (zero_fb_c0 (I := I) (M := M) g hδ0)
 
 set_option maxHeartbeats 2400000 in
-set_option linter.unusedVariables false in
 
 theorem c0CorePair
     (hDim : Module.finrank ℝ E = 3)
@@ -322,7 +321,6 @@ theorem c0CorePair
         ring
 
 set_option maxHeartbeats 800000 in
-set_option linter.unusedVariables false in
 
 theorem c0Coeff_aff
     (hDim : Module.finrank ℝ E = 3)

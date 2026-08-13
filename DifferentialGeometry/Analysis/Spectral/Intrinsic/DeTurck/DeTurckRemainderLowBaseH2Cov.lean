@@ -49,7 +49,6 @@ theorem domH2
     riemannianFiberNormSq_iteratedCovGrad_domDomCongrSection
       (I := I) (M := M) g σ S q x
 
-set_option linter.unusedVariables false in
 theorem domSub
     (g : SmoothRiemannianMetric I M) {s : ℕ}
     (σ : Equiv.Perm (Fin s)) (A B : SmoothCcTensor g 0 s) :
@@ -243,7 +242,6 @@ theorem arm2H2
         lowJetSq (I := I) (M := M) g 2
           (armSlotEndoCc (I := I) (M := M) g 0 A) := by ring
 
-set_option linter.unusedVariables false in
 theorem hatBddH2
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M) :
@@ -273,7 +271,6 @@ theorem hatBddH2
   exact ⟨B, hB, fun gT T hT hTtie δ hδ_le hδ0 hδT hδZ R A hR hA hT2 hT3 =>
     hbdd gT T hT hTtie hδ_le hδ0 hδT hδZ R A hR hA hT2 hT3⟩
 
-set_option linter.unusedVariables false in
 theorem hatPairH2
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M) :
@@ -352,7 +349,6 @@ omit [BoundarylessManifold I M] in
 theorem envQuart {A : ℝ} (hA : 0 ≤ A) : A ^ 4 ≤ (1 + A) ^ 4 :=
   pow_le_pow_left₀ hA (by linarith) 4
 
-set_option linter.unusedVariables false in
 theorem armBddH2
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M) :
@@ -408,7 +404,6 @@ theorem armBddH2
 
 set_option synthInstance.maxHeartbeats 1000000 in
 set_option maxHeartbeats 1600000 in
-set_option linter.unusedVariables false in
 theorem armPairH2
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M) :
@@ -772,7 +767,6 @@ theorem envOne {A : ℝ} (hA : 0 ≤ A) : (1 : ℝ) ≤ (1 + A) ^ 4 := by
     _ = (1 + A) ^ 4 := by ring
 
 set_option maxHeartbeats 1600000 in
-set_option linter.unusedVariables false in
 theorem r4BddH2
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M) :
@@ -936,7 +930,6 @@ theorem r4BddH2
     _ ≤ D R * (1 + A) ^ 4 := hfin
 
 set_option maxHeartbeats 3200000 in
-set_option linter.unusedVariables false in
 theorem r4PairH2
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M) :
@@ -1263,7 +1256,6 @@ theorem r4PairH2
       rw [heq]
       linarith
 
-set_option linter.unusedVariables false in
 theorem covXBddH2
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M) :
@@ -1323,7 +1315,6 @@ theorem covXBddH2
     _ = fr ^ 2 * Dr R * (1 + A) ^ 4 := by ring
 
 set_option maxHeartbeats 1600000 in
-set_option linter.unusedVariables false in
 theorem covXPairH2
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M) :
@@ -1425,7 +1416,6 @@ theorem edgeEq
 
 set_option maxHeartbeats 6400000 in
 set_option synthInstance.maxHeartbeats 1000000 in
-set_option linter.unusedVariables false in
 theorem lieCovH2Pair
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M) :

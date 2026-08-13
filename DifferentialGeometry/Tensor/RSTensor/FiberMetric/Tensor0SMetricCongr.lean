@@ -1,8 +1,6 @@
 import DifferentialGeometry.Tensor.RSTensor.Tensor0SRiemannian.Comparison
 
 set_option autoImplicit false
-set_option linter.style.longLine false
-set_option linter.unusedSectionVars false
 
 noncomputable section
 

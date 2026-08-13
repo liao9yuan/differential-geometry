@@ -1636,7 +1636,6 @@ private lemma bdArmSlot_sub (g₀ : SmoothRiemannianMetric I M) (s : ℕ)
     ContinuousLinearMap.sub_apply, Tensor0SSpace.toModel_sub,
     ContinuousMultilinearMap.sub_apply]
 
-set_option linter.unusedSectionVars false in
 private lemma bdArmSlot2_sub_le
     (g₀ : SmoothRiemannianMetric I M)
     (A : ContMDiffSection I (E →L[ℝ] (E →L[ℝ] E)) ∞
@@ -3589,7 +3588,6 @@ def lieBgLow (g₀ g₁ g_bg : SmoothRiemannianMetric I M) : SmoothCcTensor g₀
           (lieCovArm2 (I := I) (M := M) g₀ g₁)
           (connDiffLoweredCc (I := I) g₀ g_bg))
 
-set_option linter.unusedVariables false in
 private theorem lieBg_dom_sub
     (g : SmoothRiemannianMetric I M) {s : ℕ}
     (σ : Equiv.Perm (Fin s)) (A B : SmoothCcTensor g 0 s) :

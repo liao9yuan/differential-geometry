@@ -176,7 +176,6 @@ theorem intrCore_min_regular
       (I := 𝓘(Real, E)) gExt hExt (pt : E) (u : E) at hnot
   exact hnot
 
-set_option linter.unusedSectionVars false
 
 private theorem pinned_inj_nhds
     (F : E × E → E) (hF : ContDiff Real ∞ F)
@@ -232,7 +231,6 @@ private def shortBigons
     ell (z.1, z.2.2) ≤ L ∧
     z.2.1 ≠ z.2.2}
 
-set_option linter.unusedSectionVars false
 
 private theorem shortBigons_compact
     (F : E × E → E) (ell : E × E → Real) (a L B : Real)

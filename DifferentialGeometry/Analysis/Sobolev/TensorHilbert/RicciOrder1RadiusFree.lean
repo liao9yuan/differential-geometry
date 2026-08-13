@@ -2,7 +2,6 @@ import DifferentialGeometry.Analysis.Sobolev.TensorHilbert.AtgwArmFold
 
 noncomputable section
 
-set_option linter.style.setOption false
 set_option backward.isDefEq.respectTransparency false
 set_option synthInstance.maxHeartbeats 1600000
 set_option maxHeartbeats 1600000
@@ -29,7 +28,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
-set_option linter.unusedSectionVars false in
 theorem permAppEqRs (g : SmoothRiemannianMetric I M) {r s : ℕ}
     (σ : Equiv.Perm (Fin s)) (S : SmoothCcTensor g r s) :
     appCcRS (I := I) (M := M) g r s s
@@ -53,7 +51,6 @@ theorem permAppEqRs (g : SmoothRiemannianMetric I M) {r s : ℕ}
   rw [slotPermCLM_apply, Tensor0SSpace.toModel_ofModel,
     toModel_rsDomDomCongr_apply]
 
-set_option linter.unusedSectionVars false in
 theorem ricci1Split (g₀ g₁ : SmoothRiemannianMetric I M) :
     linearizedRicciConnDiffOrder1KernelField (I := I) g₀ g₁ =
       -(reindexCoeffGen (I := I) (M := M) g₀ 3 4
@@ -81,7 +78,6 @@ private lemma icgSmul (g : SmoothRiemannianMetric I M) (r s j : ℕ)
   | zero => simp only [iteratedCovGrad_zero]
   | succ j ih => rw [iteratedCovGrad_succ, iteratedCovGrad_succ, ih, covGrad_smul]
 
-set_option linter.unusedSectionVars false in
 private lemma rfnsSmul (g : SmoothRiemannianMetric I M) (r s : ℕ) (x : M)
     (c : ℝ) (v : TensorRSSpace r s I x) :
     riemannianFiberNormSq (I := I) (M := M) g r s x (c • v) =
@@ -92,7 +88,6 @@ private lemma rfnsSmul (g : SmoothRiemannianMetric I M) (r s : ℕ) (x : M)
     tensorInnerPointwise_smul_right]
   ring
 
-set_option linter.unusedSectionVars false in
 private lemma rfnsNegIcg (g : SmoothRiemannianMetric I M) {r s : ℕ} (l : ℕ) (x : M)
     (X : SmoothCcTensor g r s) :
     riemannianFiberNormSq (I := I) (M := M) g r (s + l) x
@@ -105,7 +100,6 @@ private lemma rfnsNegIcg (g : SmoothRiemannianMetric I M) {r s : ℕ} (l : ℕ) 
     Pi.smul_apply, rfnsSmul]
   norm_num
 
-set_option linter.unusedSectionVars false in
 private lemma rfnsArmEq (g₀ g₁ : SmoothRiemannianMetric I M)
     (σ : Equiv.Perm (Fin 4)) (l : ℕ) (x : M) :
     riemannianFiberNormSq (I := I) (M := M) g₀ 3 (4 + l) x
@@ -122,7 +116,6 @@ private lemma rfnsArmEq (g₀ g₁ : SmoothRiemannianMetric I M)
     (fun y d => by
       rw [rsDomDomCongrSection_toSection, toModel_rsDomDomCongr_apply]) l x
 
-set_option linter.unusedVariables false in
 theorem insertAtgw (g₀ : SmoothRiemannianMetric I M) {δ₀ : ℝ} (hδ₀ : δ₀ < 1) :
     ∃ Cins : ℕ → ℝ, (∀ l, 0 ≤ Cins l) ∧
       ∀ (g₁ : SmoothRiemannianMetric I M) (P : SmoothCcTensor g₀ 0 2)
@@ -170,7 +163,6 @@ theorem insertAtgw (g₀ : SmoothRiemannianMetric I M) {δ₀ : ℝ} (hδ₀ : �
           (hcd g₁ P htie hδ_le hδ0 hδ l x) hfr_nn) hfr_nn
     _ = (Module.finrank ℝ E : ℝ) * ((Module.finrank ℝ E : ℝ) * Ccd l) * W := by ring
 
-set_option linter.unusedVariables false in
 theorem ricciKerAtgw (g₀ : SmoothRiemannianMetric I M) {δ₀ : ℝ} (hδ₀ : δ₀ < 1) :
     ∃ Kk : ℕ → ℝ, (∀ l, 0 ≤ Kk l) ∧
       ∀ (g₁ : SmoothRiemannianMetric I M) (P : SmoothCcTensor g₀ 0 2)

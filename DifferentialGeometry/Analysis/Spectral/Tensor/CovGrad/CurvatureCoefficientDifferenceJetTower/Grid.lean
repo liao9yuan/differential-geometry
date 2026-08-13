@@ -23,7 +23,6 @@ import Mathlib.Data.Fin.Tuple.NatAntidiagonal
 
 noncomputable section
 
-set_option linter.style.setOption false
 set_option synthInstance.maxHeartbeats 1600000
 set_option maxHeartbeats 3200000
 
@@ -71,7 +70,6 @@ def ricEndoBackgroundDifferenceField (g₀ g₁ : SmoothRiemannianMetric I M) :
   ricEndoRaisedField (I := I) (M := M) g₁ - ricEndoRaisedField (I := I) (M := M) g₀
 
 set_option backward.isDefEq.respectTransparency false in
-set_option linter.unusedSectionVars false in
 lemma ricEndoBackgroundDifferenceField_apply (g₀ g₁ : SmoothRiemannianMetric I M) (x : M) :
     ricEndoBackgroundDifferenceField (I := I) (M := M) g₀ g₁ x =
       ricEndoRaisedFib (I := I) g₁ x - ricEndoRaisedFib (I := I) g₀ x := by
@@ -86,7 +84,6 @@ lemma ricEndoBackgroundDifferenceField_apply (g₀ g₁ : SmoothRiemannianMetric
 namespace CurvatureCoefficientDifferenceJetTower
 
 set_option backward.isDefEq.respectTransparency false in
-set_option linter.unusedSectionVars false in
 lemma curvCoeffSlot_zero_backgroundDifference_eq
     (g₀ g₁ : SmoothRiemannianMetric I M) :
     ricciArmOrder0CurvCoeffSlot (I := I) (M := M) g₀ g₁ 0 -
@@ -122,7 +119,6 @@ lemma curvCoeffSlot_zero_backgroundDifference_eq
   rw [ContinuousLinearMap.sub_apply, ContinuousMultilinearMap.map_update_sub]
 
 set_option backward.isDefEq.respectTransparency false in
-set_option linter.unusedSectionVars false in
 lemma curvCoeffSlot_one_backgroundDifference_eq
     (g₀ g₁ : SmoothRiemannianMetric I M) :
     ricciArmOrder0CurvCoeffSlot (I := I) (M := M) g₀ g₁ 1 -
@@ -184,7 +180,6 @@ lemma curvCoeffSlot_one_backgroundDifference_eq
 end CurvatureCoefficientDifferenceJetTower
 
 set_option backward.isDefEq.respectTransparency false in
-set_option linter.unusedSectionVars false in
 theorem ricciArmOrder0CurvCoeff_backgroundDifference_decomp
     (g₀ g₁ : SmoothRiemannianMetric I M) :
     ricciArmOrder0CurvCoeff (I := I) (M := M) g₀ g₁ -
@@ -203,7 +198,6 @@ theorem ricciArmOrder0CurvCoeff_backgroundDifference_decomp
 
 namespace CurvatureCoefficientDifferenceJetTower
 
-set_option linter.unusedVariables false in
 theorem curvDiffGrid_productTerm_integral_le
     (g₀ : SmoothRiemannianMetric I M)
     (P : SmoothCcTensor g₀ 0 2)
@@ -597,7 +591,6 @@ theorem curvDiffGrid_productTerm_integral_le
             _ = Mbar ^ (7 * i) := e3
             _ ≤ (i : ℝ) * Mbar ^ (7 * i) := e5
 
-set_option linter.unusedVariables false in
 theorem curvDiffGrid_integral_ballUniform_window
     (g₀ : SmoothRiemannianMetric I M) (a : ℕ)
     (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) {R : ℝ} (hR : 0 ≤ R) :
@@ -913,7 +906,6 @@ lemma tWindow_mul_antidiagonalTupleGrid_le (b : ℕ → ℝ) (hb : ∀ j, 0 ≤ 
     _ = tWindowMulConst j l * tWindow b (j + l) := by
         rw [tWindowMulConst, ← Finset.sum_mul]
 
-set_option linter.unusedSectionVars false in
 lemma tWindow_eq_tripleSum (g₀ : SmoothRiemannianMetric I M)
     (T : SmoothCcTensor g₀ 0 2) (x : M) (i : ℕ) :
     tWindow (fun j => riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + j) x
@@ -925,7 +917,6 @@ lemma tWindow_eq_tripleSum (g₀ : SmoothRiemannianMetric I M)
               riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + e m) x
                 ((iteratedCovGrad (I := I) g₀ 0 2 (e m) T).toSection x) := rfl
 
-set_option linter.unusedSectionVars false in
 lemma antidiagonalTupleGrid_eq_doubleSum (g₀ : SmoothRiemannianMetric I M)
     (T : SmoothCcTensor g₀ 0 2) (x : M) (l : ℕ) :
     Combinatorics.antidiagonalTupleGrid
@@ -937,7 +928,6 @@ lemma antidiagonalTupleGrid_eq_doubleSum (g₀ : SmoothRiemannianMetric I M)
             riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + e m) x
               ((iteratedCovGrad (I := I) g₀ 0 2 (e m) T).toSection x) := rfl
 
-set_option linter.unusedSectionVars false in
 theorem exists_backgroundJet_rfns_bound (g₀ : SmoothRiemannianMetric I M)
     (r s : ℕ) (S : SmoothCcTensor g₀ r s) :
     ∃ c : ℕ → ℝ, (∀ i, 0 ≤ c i) ∧ ∀ (i : ℕ) (x : M),
@@ -985,7 +975,6 @@ def ricMixedSharpEndoFib (g₀ g₁ : SmoothRiemannianMetric I M) (x : M) :
           h, map_smul]
         rfl }
 
-set_option linter.unusedSectionVars false in
 @[simp] lemma ricMixedSharpEndoFib_apply (g₀ g₁ : SmoothRiemannianMetric I M) (x : M)
     (v : TangentSpace I x) :
     ricMixedSharpEndoFib (I := I) (M := M) g₀ g₁ x v =
@@ -1049,14 +1038,12 @@ def ricMixedSharpEndoField (g₀ g₁ : SmoothRiemannianMetric I M) :
   toFun := fun x : M => ricMixedSharpEndoFib (I := I) (M := M) g₀ g₁ x
   contMDiff_toFun := ricMixedSharpEndoFib_contMDiff (I := I) (M := M) g₀ g₁
 
-set_option linter.unusedSectionVars false in
 lemma ricMixedSharpEndoField_apply (g₀ g₁ : SmoothRiemannianMetric I M) (x : M) :
     ricMixedSharpEndoField (I := I) (M := M) g₀ g₁ x =
       ricMixedSharpEndoFib (I := I) (M := M) g₀ g₁ x := rfl
 
 namespace CurvatureCoefficientDifferenceJetTower
 
-set_option linter.unusedSectionVars false in
 lemma ricEndoRaisedFib_eq_mixed_add_gInvDiffRaised
     (g₀ g₁ : SmoothRiemannianMetric I M) (x : M) (v : TangentSpace I x) :
     ricEndoRaisedFib (I := I) g₁ x v =
@@ -1088,7 +1075,6 @@ lemma ricEndoRaisedFib_eq_mixed_add_gInvDiffRaised
 end CurvatureCoefficientDifferenceJetTower
 
 set_option backward.isDefEq.respectTransparency false in
-set_option linter.unusedSectionVars false in
 theorem slotInsertEndoCc_zero_ricEndoBackgroundDifference_telescope
     (g₀ g₁ : SmoothRiemannianMetric I M) :
     slotInsertEndoCc (I := I) (M := M) g₀ 0

@@ -3,7 +3,6 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.CurvOpTower
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.C4.PointedEmetric
 
 set_option autoImplicit false
-set_option linter.unusedSectionVars false
 
 noncomputable section
 

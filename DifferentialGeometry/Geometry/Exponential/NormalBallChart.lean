@@ -6,7 +6,6 @@ import DifferentialGeometry.Geometry.Exponential.FramedNormalCoordinates
 import DifferentialGeometry.Geometry.Metric.TensorInner.MetricKoszul
 
 set_option autoImplicit false
-set_option linter.unusedSectionVars false
 
 noncomputable section
 

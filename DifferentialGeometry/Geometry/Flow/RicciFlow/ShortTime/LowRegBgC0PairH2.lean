@@ -773,7 +773,6 @@ private theorem lieBgLow_raw_h2
       ring
 
 set_option maxHeartbeats 3200000 in
-set_option linter.unusedVariables false in
 
 private theorem lieBgLow_pair_h2
     (hDim : Module.finrank ℝ E = 3)
@@ -872,7 +871,6 @@ private theorem lieBgLow_pair_h2
         ring
 
 set_option maxHeartbeats 2400000 in
-set_option linter.unusedVariables false in
 
 private theorem lieBgLow_bdd_h2
     (hDim : Module.finrank ℝ E = 3)
@@ -1018,7 +1016,6 @@ private theorem rev3_pair_h2
       g gT gU T U hTtie hUtie]
   exact perturb_jet (I := I) (M := M) g 3 2 (T - U) hsymm
 
-set_option linter.unusedVariables false in
 
 private theorem rev3_bdd_h2
     (g : SmoothRiemannianMetric I M) :
@@ -1093,7 +1090,6 @@ private theorem rev3_bdd_h2
     _ = (B R) ^ 2 := hBsq.symm
 
 set_option maxHeartbeats 3200000 in
-set_option linter.unusedVariables false in
 
 private theorem lieBgCore_pair_h2
     (hDim : Module.finrank ℝ E = 3)
@@ -1271,7 +1267,6 @@ private theorem lieBgCore_pair_h2
         rfl
 
 set_option maxHeartbeats 2400000 in
-set_option linter.unusedVariables false in
 
 private theorem lieBgCore_bdd_h2
     (hDim : Module.finrank ℝ E = 3)
@@ -1411,7 +1406,6 @@ private theorem dLaBgPass_h2
 
 set_option maxHeartbeats 3200000 in
 set_option synthInstance.maxHeartbeats 3200000 in
-set_option linter.unusedVariables false in
 
 theorem dlaBg_pair_h2
     (hDim : Module.finrank ℝ E = 3)
@@ -1696,7 +1690,6 @@ private theorem lie0_bg_split_h2
     lc0_decomp (I := I) (M := M) g gU g]
   module
 
-set_option linter.unusedVariables false in
 set_option maxHeartbeats 3200000 in
 set_option synthInstance.maxHeartbeats 3200000 in
 

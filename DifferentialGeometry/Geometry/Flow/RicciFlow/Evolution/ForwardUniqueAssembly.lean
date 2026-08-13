@@ -2,8 +2,6 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.ForwardUniqueClosu
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.ForwardUniqueRmDot
 
 set_option autoImplicit false
-set_option linter.style.longLine false
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -236,7 +234,6 @@ end Inputs
 
 section Assembly
 
-set_option linter.unusedVariables false in
 
 theorem forward_unique_of_inputs
     (g₁ g₂ : Real → SmoothRiemannianMetric I M) {a b : Real} (hab : a < b)

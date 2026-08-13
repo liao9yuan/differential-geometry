@@ -74,7 +74,6 @@ noncomputable def lowOneADiff
       (lowOneA_joint (I := I) (M := M) g U hδU hδZ))
 
 set_option maxHeartbeats 1600000 in
-set_option linter.unusedVariables false in
 theorem lowOneIntSub
     (g : SmoothRiemannianMetric I M) (T U : SmoothCcTensor g 0 2)
     {δ : ℝ} (hδ_lt : δ < 1)
@@ -126,7 +125,6 @@ theorem lowOneIntSub
   rw [intervalIntegral.integral_sub hTint hUint]
 
 set_option maxHeartbeats 2400000 in
-set_option linter.unusedVariables false in
 theorem innerOnePairH2
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M) :
@@ -219,7 +217,6 @@ theorem innerOnePairH2
     _ = (C * D2) ^ 2 := by rw [mul_pow, hCsq]
 
 set_option maxHeartbeats 2400000 in
-set_option linter.unusedVariables false in
 theorem innerOneBddH2
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M) :
@@ -272,7 +269,6 @@ theorem innerOneBddH2
     _ = (C * R) ^ 2 := by rw [mul_pow, hCsq]
 
 set_option maxHeartbeats 2400000 in
-set_option linter.unusedVariables false in
 theorem innerActPairH2
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M) :
@@ -395,7 +391,6 @@ theorem innerActPairH2
         (mul_nonneg (by norm_num) (add_nonneg hx0 hy0)) hlead 2
 
 set_option maxHeartbeats 2400000 in
-set_option linter.unusedVariables false in
 noncomputable def aaBlkOne
     (g gm : SmoothRiemannianMetric I M) (pm : Equiv.Perm (Fin 4))
     (Z : SmoothCcTensor g 3 3) : SmoothCcTensor g 3 4 :=

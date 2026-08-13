@@ -2,7 +2,6 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.CurvatureCoefficien
 
 noncomputable section
 
-set_option linter.style.setOption false
 set_option synthInstance.maxHeartbeats 1600000
 set_option maxHeartbeats 3200000
 
@@ -42,7 +41,6 @@ open DifferentialGeometry.Integral.DivergenceTheorem
 
 set_option backward.isDefEq.respectTransparency false
 
-set_option linter.unusedVariables false in
 theorem atgGridIntRs
     (g₀ : SmoothRiemannianMetric I M) (r s : ℕ) {Λ₀ : ℝ} (hΛ₀0 : 0 ≤ Λ₀) :
     ∃ K : ℕ → ℝ, (∀ i, 0 ≤ K i) ∧
@@ -219,7 +217,6 @@ theorem atgGridIntRs
             (by linarith [sq_nonneg (‖iteratedCovGrad (I := I) g₀ r s i P‖)])
           linarith
 
-set_option linter.unusedVariables false in
 theorem antidiagonalTupleGrid_integral_radiusFree
     (g₀ : SmoothRiemannianMetric I M) {Λ₀ : ℝ} (hΛ₀0 : 0 ≤ Λ₀) :
     ∃ K : ℕ → ℝ, (∀ i, 0 ≤ K i) ∧
@@ -242,7 +239,6 @@ theorem antidiagonalTupleGrid_integral_radiusFree
               K i * (1 + ‖iteratedCovGrad (I := I) g₀ 0 2 i P‖ ^ 2) :=
   atgGridIntRs (I := I) (M := M) g₀ 0 2 hΛ₀0
 
-set_option linter.unusedVariables false in
 theorem bfGridWinIntRs
     (g₀ : SmoothRiemannianMetric I M) (r s : ℕ) {Λ₀ : ℝ} (hΛ₀0 : 0 ≤ Λ₀) :
     ∃ Klow : ℕ → ℝ, (∀ i, 0 ≤ Klow i) ∧ ∃ Ktop : ℕ → ℝ, (∀ i, 0 ≤ Ktop i) ∧
@@ -386,7 +382,6 @@ theorem bfGridWinIntRs
     ring
   linarith [hlow, hexp]
 
-set_option linter.unusedVariables false in
 theorem boundedFactorGridWindow_integral_radiusFree_topSeparated
     (g₀ : SmoothRiemannianMetric I M) {Λ₀ : ℝ} (hΛ₀0 : 0 ≤ Λ₀) :
     ∃ Klow : ℕ → ℝ, (∀ i, 0 ≤ Klow i) ∧ ∃ Ktop : ℕ → ℝ, (∀ i, 0 ≤ Ktop i) ∧

@@ -31,7 +31,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
-set_option linter.unusedSectionVars false in
 
 private lemma gAddNorm_le
     (g : SmoothRiemannianMetric I M) (x : M) (a b : TangentSpace I x) :
@@ -67,7 +66,6 @@ private lemma gAddNorm_le
   rw [hsq]
   linarith [hcs]
 
-set_option linter.unusedSectionVars false in
 
 private lemma gSubNorm_le
     (g : SmoothRiemannianMetric I M) (x : M) (a b : TangentSpace I x) :
@@ -84,7 +82,6 @@ def riemannDiffC (Λ Λ' Λ'' : ℝ) : ℝ :=
   2 * (3 / 2 * Λ ^ 4 * (Λ'' + Λ * Λ' ^ 2)) +
     2 * (3 / 2 * Λ ^ 3 * Λ') ^ 2
 
-set_option linter.unusedSectionVars false in
 set_option maxHeartbeats 1600000 in
 
 theorem riemannDiff_gJet_le

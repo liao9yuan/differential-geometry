@@ -6,7 +6,6 @@ set_option autoImplicit false
 
 noncomputable section
 
-set_option linter.style.setOption false
 set_option synthInstance.maxHeartbeats 1600000
 set_option maxHeartbeats 1600000
 
@@ -32,7 +31,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
-set_option linter.unusedSectionVars false in
 
 def ccOfField (g : SmoothRiemannianMetric I M) (s : ℕ)
     (A : Tensor0SBundle.Tensor0SField (𝕜 := ℝ) (E := E) (H := H) (I := I) (M := M) ∞ s) :
@@ -42,7 +40,6 @@ def ccOfField (g : SmoothRiemannianMetric I M) (s : ℕ)
       (E := (TangentSpace I : M → Type _)) ∞ A
   hasCompactSupport := HasCompactSupport.of_compactSpace _
 
-set_option linter.unusedSectionVars false in
 
 @[simp] theorem ccOfField_unit (g : SmoothRiemannianMetric I M) (s : ℕ)
     (A : Tensor0SBundle.Tensor0SField (𝕜 := ℝ) (E := E) (H := H) (I := I) (M := M) ∞ s) :
@@ -110,12 +107,10 @@ theorem iterCovGrad_ccOfField (g : SmoothRiemannianMetric I M) (s j : ℕ)
   rw [hR]
   exact hL
 
-set_option linter.unusedSectionVars false in
 
 def rmSection (g : SmoothRiemannianMetric I M) : SmoothCcTensor g 0 4 :=
   ccOfField (I := I) g 4 (metricRm04 (I := I) (M := M) g)
 
-set_option linter.unusedSectionVars false in
 
 @[simp] theorem rmSection_unit (g : SmoothRiemannianMetric I M) :
     ccUnitField (I := I) g 4 (rmSection (I := I) (M := M) g) =
@@ -171,7 +166,6 @@ theorem exists_rmJetSups (g : SmoothRiemannianMetric I M) (a : ℕ) :
       · have hmono : K ^ 2 ≤ max K K' ^ 2 := by nlinarith [le_max_left K K']
         exact le_trans (hK j (Nat.lt_succ_iff.mp hlt) x) hmono
 
-set_option linter.unusedSectionVars false in
 
 theorem unifRmSecSup
     (gBase g₀ : SmoothRiemannianMetric I M) {Λ : ℝ} (hΛ : 1 ≤ Λ) (hΛ2 : Λ < 2)

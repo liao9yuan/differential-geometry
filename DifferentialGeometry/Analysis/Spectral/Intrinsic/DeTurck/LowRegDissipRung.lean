@@ -35,7 +35,6 @@ private theorem jetSq_le_hs
   exact pow_le_pow_left₀
     (Finset.sum_nonneg (fun _ _ => norm_nonneg _)) (hjet T) 2
 
-set_option linter.unusedVariables false in
 theorem n_diff_h1_rung
     (hDim : Module.finrank ℝ E = 3)
     (g₀ : SmoothRiemannianMetric I M) (R₀ : ℝ) :

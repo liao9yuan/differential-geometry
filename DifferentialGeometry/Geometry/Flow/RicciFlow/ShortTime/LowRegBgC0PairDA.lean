@@ -32,7 +32,6 @@ variable
 namespace LowRegBgC0Core
 
 set_option maxHeartbeats 2400000 in
-set_option linter.unusedVariables false in
 theorem daWeightPairH2
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M) :
@@ -154,7 +153,6 @@ theorem daWeightPairH2
       ring
 
 set_option maxHeartbeats 1600000 in
-set_option linter.unusedVariables false in
 theorem daTransPairH2
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M) :
@@ -249,7 +247,6 @@ theorem daTransPairH2
       ring
 
 set_option maxHeartbeats 3200000 in
-set_option linter.unusedVariables false in
 theorem daOnePairH2
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M) :

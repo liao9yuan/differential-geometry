@@ -4,7 +4,6 @@ import DifferentialGeometry.Geometry.Curvature.CurvatureOperator.ParsevalFrameDi
 noncomputable section
 
 set_option autoImplicit false
-set_option linter.unusedSectionVars false
 
 open Bundle Manifold Tensor0SBundle
 open scoped Manifold Topology ContDiff

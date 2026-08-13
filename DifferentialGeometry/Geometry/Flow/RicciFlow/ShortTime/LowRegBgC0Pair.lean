@@ -112,7 +112,6 @@ private theorem domH2Local
     riemannianFiberNormSq_iteratedCovGrad_domDomCongrSection
       (I := I) (M := M) g σ S q x
 
-set_option linter.unusedVariables false in
 private theorem domSubLocal
     (g : SmoothRiemannianMetric I M) {s : ℕ}
     (σ : Equiv.Perm (Fin s)) (A B : SmoothCcTensor g 0 s) :
@@ -139,7 +138,6 @@ private theorem domSubLocal
   simp only [ContinuousMultilinearMap.sub_apply,
     ContinuousMultilinearMap.domDomCongr_apply]
 
-set_option linter.unusedVariables false in
 private theorem appH21
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M) (p r c : ℕ) :
@@ -182,7 +180,6 @@ private theorem appH21
         lowJetSq (I := I) (M := M) g 1 W := by
       rw [mul_pow, mul_pow, hAsq, hBsq]
 
-set_option linter.unusedVariables false in
 private theorem appH12
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M) (p r c : ℕ) :
@@ -474,7 +471,6 @@ private theorem rev3Pair
         lowJetSq (I := I) (M := M) g 2 (T - U) := by
       rw [perturbSlotH2 (I := I) (M := M) g (T - U) hsymm]
 
-set_option linter.unusedVariables false in
 private theorem rev3Bdd
     (g : SmoothRiemannianMetric I M) :
     ∃ C : ℝ, 0 ≤ C ∧
@@ -656,7 +652,6 @@ private theorem lowPairRaw
   nlinarith [hsum, hX1, hX2, hX3]
 
 set_option maxHeartbeats 1600000 in
-set_option linter.unusedVariables false in
 private theorem lowPairH1
     (hDim : Module.finrank ℝ E = 3)
     (g g_bg : SmoothRiemannianMetric I M)
@@ -831,7 +826,6 @@ private theorem lowPairH1
         congr 1
         ring
 
-set_option linter.unusedVariables false in
 private theorem lowBddH1
     (hDim : Module.finrank ℝ E = 3)
     (g g_bg : SmoothRiemannianMetric I M)
@@ -1007,7 +1001,6 @@ private theorem corePairRaw
           lowJetSq (I := I) (M := M) g 2 (ST - SU) *
             lowJetSq (I := I) (M := M) g 1 LT) := by ring
 
-set_option linter.unusedVariables false in
 private theorem corePairH1
     (hDim : Module.finrank ℝ E = 3)
     (g g_bg : SmoothRiemannianMetric I M)
@@ -1259,7 +1252,6 @@ private theorem bgPassH1
   rw [rspermH1Local]
   exact slot2H1 (I := I) (M := M) g S
 
-set_option linter.unusedVariables false in
 private theorem coreBddH1
     (hDim : Module.finrank ℝ E = 3)
     (g g_bg : SmoothRiemannianMetric I M)

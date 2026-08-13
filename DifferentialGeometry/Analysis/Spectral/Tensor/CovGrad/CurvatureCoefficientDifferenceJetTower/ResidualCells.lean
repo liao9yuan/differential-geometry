@@ -24,7 +24,6 @@ import Mathlib.Data.Fin.Tuple.NatAntidiagonal
 
 noncomputable section
 
-set_option linter.style.setOption false
 set_option synthInstance.maxHeartbeats 1600000
 set_option maxHeartbeats 3200000
 
@@ -468,7 +467,6 @@ theorem productTerm_integral_tame_le_ordS
             _ = Mbar ^ (7 * i) * R ^ 2 := by rw [← mul_assoc, e3]
             _ ≤ (i : ℝ) * Mbar ^ (7 * i) * R ^ 2 := e5
 
-set_option linter.unusedVariables false in
 theorem cappedTopLayerCell_integral_le
     (g₀ : SmoothRiemannianMetric I M)
     (P : SmoothCcTensor g₀ 0 2)

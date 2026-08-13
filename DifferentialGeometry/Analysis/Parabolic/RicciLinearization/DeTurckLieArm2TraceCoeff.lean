@@ -337,7 +337,6 @@ private lemma appCc_sub_left_local (g : SmoothRiemannianMetric I M) (r s : ℕ)
     rw [SmoothCcTensor.toSection_sub]; rfl]
   rw [ContinuousLinearMap.sub_comp]
 
-set_option linter.unusedSectionVars false in
 
 private lemma appCc_add_left_local (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (Φ₁ Φ₂ : SmoothCcTensor g r s) (W : SmoothCcTensor g 0 r) :
@@ -356,7 +355,6 @@ private lemma appCc_add_left_local (g : SmoothRiemannianMetric I M) (r s : ℕ)
     rw [SmoothCcTensor.toSection_add]; rfl]
   rw [ContinuousLinearMap.add_comp]
 
-set_option linter.unusedSectionVars false in
 
 private lemma unitModel_add2_apply_local (g₀ : SmoothRiemannianMetric I M)
     (S S' : SmoothCcTensor g₀ 0 2) (x : M) (v : Fin 2 → TangentSpace I x) :
@@ -367,7 +365,6 @@ private lemma unitModel_add2_apply_local (g₀ : SmoothRiemannianMetric I M)
     ContinuousLinearMap.add_apply, Tensor0SSpace.toModel_add,
     ContinuousMultilinearMap.add_apply]
 
-set_option linter.unusedSectionVars false in
 
 private lemma unitModel_sub2_apply_local (g₀ : SmoothRiemannianMetric I M)
     (S S' : SmoothCcTensor g₀ 0 2) (x : M) (v : Fin 2 → TangentSpace I x) :
@@ -378,7 +375,6 @@ private lemma unitModel_sub2_apply_local (g₀ : SmoothRiemannianMetric I M)
     ContinuousLinearMap.sub_apply, Tensor0SSpace.toModel_sub,
     ContinuousMultilinearMap.sub_apply]
 
-set_option linter.unusedSectionVars false in
 
 theorem deTurckLieTraceCoeff_appCc_eq (g₀ g₁ : SmoothRiemannianMetric I M)
     (σ : Equiv.Perm (Fin 4)) (D : SmoothCcTensor g₀ 0 4) (x : M)
@@ -413,7 +409,6 @@ theorem deTurckLieTraceCoeff_appCc_eq (g₀ g₁ : SmoothRiemannianMetric I M)
     cometricDoubleTraceFib_toModel, Tensor0SSpace.toModel_ofModel, modelDoubleTrace_apply]
   simp only [unitModel]
 
-set_option linter.unusedSectionVars false in
 
 private theorem traceHessianCoeff_appCc_eq_local
     (g₀ g₁ : SmoothRiemannianMetric I M) (W : SmoothCcTensor g₀ 0 4)
@@ -436,7 +431,6 @@ private theorem traceHessianCoeff_appCc_eq_local
         (traceHessianCoeff (I := I) (M := M) g₀ g₁) W) x v = _
   exact traceHessianCoeff_apply_eq (I := I) (M := M) g₀ g₁ W x v
 
-set_option linter.unusedSectionVars false in
 
 theorem deTurckLieArm2PrincipalCoeff_appCc_eq (g₀ g₁ g_bg : SmoothRiemannianMetric I M)
     (D : SmoothCcTensor g₀ 0 4) (x : M) (v : Fin 2 → TangentSpace I x) :

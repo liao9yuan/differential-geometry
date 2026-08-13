@@ -1,8 +1,6 @@
 import DifferentialGeometry.Tensor.RSTensor.FiberMetric.Tensor0SMetric
 
 set_option autoImplicit false
-set_option linter.style.longLine false
-set_option linter.unusedSectionVars false
 
 namespace Tensor0SBundle
 

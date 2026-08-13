@@ -498,7 +498,6 @@ private theorem endoSlotJet
       rw [Finset.mul_sum]
 
 set_option backward.isDefEq.respectTransparency false in
-set_option linter.unusedSectionVars false in
 private theorem insertSuccEq
     (g : SmoothRiemannianMetric I M) (s : ℕ)
     (Λ : ContMDiffSection I (E →L[ℝ] E) ∞
@@ -579,7 +578,6 @@ private theorem insertSuccEq
           (Fin.succ (Fin.succ k₂)))
       rw [Equiv.swap_apply_of_ne_of_ne hne0 hne1]
 
-set_option linter.unusedSectionVars false in
 private theorem insertSuccL2
     (g : SmoothRiemannianMetric I M) (s i : ℕ)
     (Λ : ContMDiffSection I (E →L[ℝ] E) ∞
@@ -721,7 +719,6 @@ private theorem sharpSlot0
   rw [cotangentToDualLinear_apply, cotangentToDual_g0FlatCLM]
   rw [g.symm x w (inverseMetricSharpFib (I := I) gm x om)]
 
-set_option linter.unusedVariables false in
 private theorem sharpH3
     (g : SmoothRiemannianMetric I M)
     {δ₀ : ℝ} (hδ₀0 : 0 ≤ δ₀) (hδ₀ : δ₀ < 1) :
@@ -763,7 +760,6 @@ private theorem sharpH3
   simpa only [lowJetSq, Nat.reduceAdd] using
     (hFlow gm P htie hδ_le hδ0 hδ hsup).2 3 (by omega)
 
-set_option linter.unusedVariables false in
 private theorem fullSlotH3
     (g : SmoothRiemannianMetric I M)
     {δ₀ : ℝ} (hδ₀0 : 0 ≤ δ₀) (hδ₀ : δ₀ < 1) :
@@ -879,7 +875,6 @@ private theorem jetSub
   rw [jetNeg (I := I) (M := M) g m B]
 
 set_option maxHeartbeats 2400000 in
-set_option linter.unusedVariables false in
 private theorem fullPairH3
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M)
@@ -1179,7 +1174,6 @@ private theorem fullPairH3
       rw [mul_pow, hBsq]
 
 set_option maxHeartbeats 1600000 in
-set_option linter.unusedVariables false in
 theorem full_pair_h2
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M)
@@ -1371,7 +1365,6 @@ private def koszulH2
       permCoeff (I := I) (M := M) g (Equiv.swap (1 : Fin 3) 2))
 
 set_option maxHeartbeats 3200000 in
-set_option linter.unusedVariables false in
 private theorem connPairH3
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M)
@@ -1509,7 +1502,6 @@ private theorem connPairH3
       ring
 
 set_option maxHeartbeats 2200000 in
-set_option linter.unusedVariables false in
 theorem dag_pair_h2
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M)
@@ -1635,7 +1627,6 @@ private theorem reindexSubH2
     ContinuousLinearMap.sub_apply]
 
 set_option maxHeartbeats 4000000 in
-set_option linter.unusedVariables false in
 private theorem connSecZeroH2
     (g : SmoothRiemannianMetric I M) :
     connDiffSection (I := I) g g = 0 := by
@@ -1652,7 +1643,6 @@ private theorem connSecZeroH2
   exact ContinuousMultilinearMap.map_zero om
 
 set_option maxHeartbeats 4000000 in
-set_option linter.unusedVariables false in
 private theorem connSecBddH2
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M) :
@@ -1732,7 +1722,6 @@ private theorem connSecBddH2
       mul_nonneg hc1 hR]
   exact hraw.trans (pow_le_pow_left₀ hold hlin 2)
 
-set_option linter.unusedVariables false in
 private theorem connSecPairH2
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M)
@@ -1795,7 +1784,6 @@ private theorem connSecPairH2
   exact hraw.trans (pow_le_pow_left₀ hold hlin 2)
 
 set_option maxHeartbeats 1600000 in
-set_option linter.unusedVariables false in
 private theorem connInnBddH2
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M) :
@@ -1848,7 +1836,6 @@ private theorem connInnBddH2
       nlinarith [sq_nonneg (C R * (1 + A))]
 
 set_option maxHeartbeats 1600000 in
-set_option linter.unusedVariables false in
 private theorem connOutBddH2
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M) :
@@ -1910,7 +1897,6 @@ private theorem connOutBddH2
     _ = (B R * (1 + A)) ^ 2 := by simp only [B]; ring
 
 set_option maxHeartbeats 1600000 in
-set_option linter.unusedVariables false in
 private theorem connInnPairH2
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M)
@@ -1985,7 +1971,6 @@ private theorem connInnPairH2
       nlinarith [sq_nonneg (C R * (D3 + D2 + A * D2))]
 
 set_option maxHeartbeats 1600000 in
-set_option linter.unusedVariables false in
 private theorem connOutPairH2
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M)
@@ -2367,7 +2352,6 @@ private theorem jetSum6H2
       (Y0 + Y1 + Y2 + Y3 + Y4) Y5).trans (by linarith)
 
 set_option maxHeartbeats 3200000 in
-set_option linter.unusedVariables false in
 private theorem aaKerBddH2
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M) :
@@ -2580,7 +2564,6 @@ private theorem aaKerBddH2
   ring
 
 set_option maxHeartbeats 4800000 in
-set_option linter.unusedVariables false in
 private theorem aaKerPairH2
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M) :
@@ -3013,7 +2996,6 @@ private theorem fourTraceJetH2
   norm_num at h1 h2 h3 ⊢
   linarith
 
-set_option linter.unusedVariables false in
 private theorem fourTraceBddH2
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M) :
@@ -3044,7 +3026,6 @@ private theorem fourTraceBddH2
   simp only [L]
   exact mul_le_mul_of_nonneg_left hF (by norm_num)
 
-set_option linter.unusedVariables false in
 private theorem fourTracePairH2
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M) :
@@ -3137,7 +3118,6 @@ private theorem domJetH2
     riemannianFiberNormSq_iteratedCovGrad_domDomCongrSection
       (I := I) (M := M) g σ S q x
 
-set_option linter.unusedVariables false in
 private theorem domSubH2
     (g : SmoothRiemannianMetric I M) {s : ℕ}
     (σ : Equiv.Perm (Fin s)) (A B : SmoothCcTensor g 0 s) :
@@ -3164,7 +3144,6 @@ private theorem domSubH2
   simp only [ContinuousMultilinearMap.sub_apply,
     ContinuousMultilinearMap.domDomCongr_apply]
 
-set_option linter.unusedVariables false in
 private theorem rspermSubH2
     (g : SmoothRiemannianMetric I M) {r s : ℕ}
     (σ : Equiv.Perm (Fin s)) (A B : SmoothCcTensor g r s) :
@@ -3180,7 +3159,6 @@ private theorem rspermSubH2
   simp only [rsDomDomCongr]
   rfl
 
-set_option linter.unusedVariables false in
 private theorem refoldSubH2
     (g : SmoothRiemannianMetric I M)
     (G H : SmoothCcTensor g 0 4) (σ : Equiv.Perm (Fin 4)) :
@@ -3313,7 +3291,6 @@ private theorem inputSymmH2
   nlinarith
 
 set_option maxHeartbeats 4800000 in
-set_option linter.unusedVariables false in
 private theorem ricciAAPairH2
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M) :
@@ -3639,7 +3616,6 @@ private theorem ricciAAPairH2
   exact pow_le_pow_left₀ (add_nonneg hx0 hy0) hlin 2
 
 set_option maxHeartbeats 6400000 in
-set_option linter.unusedVariables false in
 private theorem ricciDAPairH2
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M) :
@@ -4228,7 +4204,6 @@ private theorem ccSymmSubH2
   rw [appCcRS_sub_left]
   module
 
-set_option linter.unusedVariables false in
 private theorem goodH2Pair
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M) :
@@ -4578,7 +4553,6 @@ by
       ring
 
 set_option maxHeartbeats 6400000 in
-set_option linter.unusedVariables false in
 private theorem amixHalfH2Pair
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M) :
@@ -5512,7 +5486,6 @@ private theorem amixHalfH2Pair
   exact amixScalar (hBhnn R hR) hCip hR hA hA4 hD2 hD3 hD4 hN hasq
 
 set_option maxHeartbeats 3200000 in
-set_option linter.unusedVariables false in
 private theorem amixH2Pair
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M) :
@@ -5632,7 +5605,6 @@ private theorem amixH2Pair
       ring
 
 set_option maxHeartbeats 1600000 in
-set_option linter.unusedVariables false in
 private theorem riemH2Pair
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M) :
@@ -5734,7 +5706,6 @@ private theorem riemH2Pair
 
 set_option maxHeartbeats 6400000 in
 set_option synthInstance.maxHeartbeats 1000000 in
-set_option linter.unusedVariables false in
 theorem selfLow_pair_h2
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M) :
@@ -5991,7 +5962,6 @@ theorem selfLow_pair_h2
   ring
 
 set_option maxHeartbeats 3200000 in
-set_option linter.unusedVariables false in
 theorem c0Diff_h2_tame
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M) :
@@ -6092,7 +6062,6 @@ theorem c0Diff_h2_tame
   exact hfin
 
 set_option maxHeartbeats 3200000 in
-set_option linter.unusedVariables false in
 private theorem ricciAA_h3_pair
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M) :
@@ -6277,7 +6246,6 @@ private theorem ricciAA_h3_pair
     pow_le_pow_left₀ (add_nonneg hx0 hy0) hxy 2
 
 set_option maxHeartbeats 6400000 in
-set_option linter.unusedVariables false in
 private theorem ricciDA_h3_pair
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M) :
@@ -6747,7 +6715,6 @@ private theorem ricciDA_h3_pair
       hscale 2)
 
 set_option maxHeartbeats 3200000 in
-set_option linter.unusedVariables false in
 private theorem good_h3_pair
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M) :
@@ -7053,7 +7020,6 @@ private theorem localPairSq
       rw [mul_pow, mul_pow, hsqrt]
       ring
 
-set_option linter.unusedVariables false in
 private theorem lieCov_h3_pair
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M) :
@@ -7336,7 +7302,6 @@ private theorem lieCov_h3_pair
   simp only [pl2, u, B]
   exact localPairSq (hBhnn R hR) hD3 hN
 
-set_option linter.unusedVariables false in
 private theorem riem_h3_pair
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M) :
@@ -7420,7 +7385,6 @@ private theorem riem_h3_pair
 
 set_option maxHeartbeats 6400000 in
 set_option synthInstance.maxHeartbeats 1000000 in
-set_option linter.unusedVariables false in
 private theorem vb_h3_pair
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M) :
@@ -8141,7 +8105,6 @@ private theorem vb_h3_pair
 
 set_option maxHeartbeats 6400000 in
 set_option synthInstance.maxHeartbeats 1000000 in
-set_option linter.unusedVariables false in
 private theorem amixHalf_h3_pair
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M) :
@@ -9062,7 +9025,6 @@ private theorem amixHalf_h3_pair
   exact localPairSq (hBhnn R hR) hD3 hN
 
 set_option maxHeartbeats 3200000 in
-set_option linter.unusedVariables false in
 private theorem amix_h3_pair
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M) :
@@ -9169,7 +9131,6 @@ private theorem amix_h3_pair
 
 set_option maxHeartbeats 6400000 in
 set_option synthInstance.maxHeartbeats 1000000 in
-set_option linter.unusedVariables false in
 private theorem selfLow_h3_pair
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M) :
@@ -9421,7 +9382,6 @@ private theorem selfLow_h3_pair
   ring
 
 set_option maxHeartbeats 3200000 in
-set_option linter.unusedVariables false in
 theorem c0_pair_h3
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M) :

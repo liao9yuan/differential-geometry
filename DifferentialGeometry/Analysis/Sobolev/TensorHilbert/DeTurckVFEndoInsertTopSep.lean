@@ -3,7 +3,6 @@ import DifferentialGeometry.Analysis.Sobolev.TensorHilbert.DeTurckVectorFieldL2J
 
 noncomputable section
 
-set_option linter.style.setOption false
 set_option backward.isDefEq.respectTransparency false
 set_option synthInstance.maxHeartbeats 1600000
 set_option maxHeartbeats 1600000
@@ -120,7 +119,6 @@ lemma norm_iCG_cometricRaiseSlot0Field_eq (g₀ : SmoothRiemannianMetric I M) (s
   refine MeasureTheory.integral_congr_ae (Filter.Eventually.of_forall fun x => ?_)
   exact rfns_iteratedCovGrad_cometricRaiseSlot0Field_eq (I := I) (M := M) g₀ s W i x
 
-set_option linter.unusedVariables false in
 private theorem wAlphaB_jetL2_perOrder_generic
     (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
     (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) {R : ℝ} (hR : 0 ≤ R)
@@ -239,7 +237,6 @@ private theorem wAlphaB_jetL2_perOrder_generic
       ΛCd 0 * FO i := mul_le_mul_of_nonneg_left (hOsum i (by omega)) (hΛCd_nn 0)
   linarith [e1, e2]
 
-set_option linter.unusedVariables false in
 open DifferentialGeometry.PDE.DeTurck.RicciLinearization
   (convexPerturbation convexPerturbation_gFibreOpBound realizedFam_inner_of_mem
     Icc_subset_realizedSmallSet) in
@@ -354,7 +351,6 @@ private theorem sq_le_two_add (t u v c1 c2 : ℝ) (ht : 0 ≤ t) (hu : 0 ≤ u) 
   have huv : 0 ≤ u + v := by linarith
   nlinarith [mul_le_mul htri htri ht huv, sq_nonneg (u - v), h1, h2, hu, hv]
 
-set_option linter.unusedVariables false in
 open DifferentialGeometry.PDE.DeTurck.RicciLinearization
   (convexPerturbation convexPerturbation_gFibreOpBound realizedFam_inner_of_mem
     Icc_subset_realizedSmallSet) in
@@ -585,8 +581,6 @@ private lemma engineRem_le_grid (b : ℕ → ℝ) (hb : ∀ j, 0 ≤ b j) (j : �
           (mul_nonneg (Combinatorics.antidiagonalTupleGridCount_nonneg _)
             (Combinatorics.antidiagonalTupleGridCount_nonneg _))
 
-set_option linter.unusedVariables false in
-set_option linter.unusedSectionVars false in
 private theorem exists_rfns_connDiff_topsep
     (g₀ : SmoothRiemannianMetric I M) {δ₀ : ℝ} (hδ₀ : δ₀ < 1) :
     ∃ Ktop : ℝ, 0 ≤ Ktop ∧ ∃ Kc : ℕ → ℝ, (∀ j, 0 ≤ Kc j) ∧
@@ -673,8 +667,6 @@ private theorem exists_rfns_connDiff_topsep
             Combinatorics.antidiagonalTupleGridCount (k + 1))) *
           Combinatorics.antidiagonalTupleGridWindow b (j + 2) := by ring
 
-set_option linter.unusedVariables false in
-set_option linter.unusedSectionVars false in
 private theorem connDiff_L2_topsep
     (g₀ : SmoothRiemannianMetric I M) (a : ℕ)
     (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) {R : ℝ} (hR : 0 ≤ R)
@@ -791,8 +783,6 @@ private theorem connDiff_L2_topsep
         have hmul := mul_le_mul_of_nonneg_left hwin_bd (hKc_pt_nn n)
         linarith [hmul]
 
-set_option linter.unusedVariables false in
-set_option linter.unusedSectionVars false in
 private theorem wXi_L2_topsep
     (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
     (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) {R : ℝ} (hR : 0 ≤ R)
@@ -832,8 +822,6 @@ private theorem wXi_L2_topsep
     sq_nonneg (‖iteratedCovGrad (I := I) g₀ 0 3 n (connDiffLoweredCc (I := I) g₀ g₁)‖ -
       ‖iteratedCovGrad (I := I) g₀ 0 3 n (connDiffLoweredCc (I := I) g₀ g_bg)‖)]
 
-set_option linter.unusedVariables false in
-set_option linter.unusedSectionVars false in
 private theorem wOmega_L2_topsep
     (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
     (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) {R : ℝ} (hR : 0 ≤ R)
@@ -1113,8 +1101,6 @@ private theorem wOmega_L2_topsep
       (mul_nonneg (by norm_num) (mul_nonneg (Nat.cast_nonneg n) (appCcGdiag_nonneg (E := E) n)))
   linarith [hbridge, hc1, hc2]
 
-set_option linter.unusedVariables false in
-set_option linter.unusedSectionVars false in
 private theorem wAlpha_L2_topsep
     (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
     (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) {R : ℝ} (hR : 0 ≤ R)

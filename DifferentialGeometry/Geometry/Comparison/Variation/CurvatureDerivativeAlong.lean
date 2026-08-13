@@ -9,7 +9,6 @@ import DifferentialGeometry.Geometry.Comparison.Variation.PerpFrame
 noncomputable section
 
 set_option autoImplicit false
-set_option linter.unusedSectionVars false
 
 open Set Function Filter Manifold Bundle
 open scoped Topology Manifold ContDiff

@@ -5,7 +5,6 @@ noncomputable section
 open Bundle Manifold MeasureTheory Set Filter Tensor0SBundle
 open scoped Manifold Topology ContDiff ENNReal BigOperators
 
-set_option linter.style.setOption false
 set_option maxHeartbeats 1600000
 
 namespace DifferentialGeometry
@@ -73,7 +72,6 @@ private lemma sum_shift_le_rf (g : ℕ → ℝ) (hg : ∀ j, 0 ≤ g j) (m c : �
     _ ≤ ∑ j ∈ Finset.range (m + c), g j :=
         Finset.sum_le_sum_of_subset_of_nonneg hsub (fun j _ _ => hg j)
 
-set_option linter.unusedVariables false in
 theorem ricciArmOrder0BaseCoeff_perOrder_l2_radiusFree
     (g₀ : SmoothRiemannianMetric I M) {δ₀ : ℝ} (hδ₀ : δ₀ < 1)
     {Λ₀ : ℝ} (hΛ₀0 : 0 ≤ Λ₀) :
@@ -249,7 +247,6 @@ theorem ricciArmOrder0BaseCoeff_perOrder_l2_radiusFree
     ring
   linarith [hbal, hslack]
 
-set_option linter.unusedVariables false in
 theorem ricciArmOrder0BaseCoeff_summed_l2_radiusFree
     (g₀ : SmoothRiemannianMetric I M) (a : ℕ) {δ₀ : ℝ} (hδ₀ : δ₀ < 1) :
     ∃ Ktop : ℝ, 0 ≤ Ktop ∧ ∃ Klow : ℝ, 0 ≤ Klow ∧

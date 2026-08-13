@@ -29,7 +29,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
-set_option linter.unusedVariables false in
 
 theorem dla_h1_unif
     (hDim : Module.finrank ℝ E = 3)

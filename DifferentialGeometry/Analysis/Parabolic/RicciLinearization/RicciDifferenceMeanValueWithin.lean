@@ -3,7 +3,6 @@ import DifferentialGeometry.Analysis.Parabolic.RicciLinearization.RicciDifferenc
 noncomputable section
 
 set_option autoImplicit false
-set_option linter.style.setOption false
 set_option maxHeartbeats 1600000
 set_option synthInstance.maxHeartbeats 800000
 

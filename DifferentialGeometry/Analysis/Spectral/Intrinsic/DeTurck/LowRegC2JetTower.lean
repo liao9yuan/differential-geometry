@@ -167,7 +167,6 @@ theorem path_add_sub_jet
   rw [heq]
   exact le_of_le_of_eq hmain hsq
 
-set_option linter.unusedVariables false in
 theorem topKerJetSharp
     (hDim : Module.finrank ℝ E = 3)
     (g g_bg : SmoothRiemannianMetric I M) :
@@ -240,7 +239,6 @@ theorem topKerJetSharp
   rw [← hwin]
   exact mul_le_mul_of_nonneg_right (le_abs_self _) (by linarith only [hjetT])
 
-set_option linter.unusedVariables false in
 theorem topKer_jet
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M) :

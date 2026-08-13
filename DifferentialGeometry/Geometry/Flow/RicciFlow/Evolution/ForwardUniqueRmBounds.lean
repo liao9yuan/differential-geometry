@@ -4,8 +4,6 @@ import DifferentialGeometry.Geometry.Metric.SmoothVectorFieldExtGlobal
 import DifferentialGeometry.Tensor.RSTensor.TangentRiemannianRealized
 
 set_option autoImplicit false
-set_option linter.style.longLine false
-set_option linter.unusedSectionVars false
 set_option backward.isDefEq.respectTransparency false
 
 noncomputable section

@@ -5,7 +5,6 @@ import DifferentialGeometry.Geometry.Connection.TensorNabla.OperatorFieldOutputS
 
 noncomputable section
 
-set_option linter.style.setOption false
 set_option synthInstance.maxHeartbeats 800000
 set_option maxHeartbeats 1600000
 
@@ -51,7 +50,6 @@ def slotExtendTwo (g : SmoothRiemannianMetric I M)
   slotExtend (I := I) (M := M) g 1 5
     (slotExtend (I := I) (M := M) g 0 4 X)
 
-set_option linter.unusedSectionVars false in
 private lemma slotExtend_toModel_cons
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (Phi : SmoothCcTensor g r s) (x : M)
@@ -75,7 +73,6 @@ private lemma slotExtend_toModel_cons
       Phi.toSection x) D (show E from v0) vs
 
 set_option backward.isDefEq.respectTransparency false in
-set_option linter.unusedSectionVars false in
 private lemma slotExtendTwo_toModel
     (g : SmoothRiemannianMetric I M) (X : SmoothCcTensor g 0 4)
     (x : M) (D : Tensor0SSpace 2 I x) (u : Fin 6 → TangentSpace I x) :
@@ -161,7 +158,6 @@ def mvPairTraceOp (g gm : SmoothRiemannianMetric I M) :
     (mvDoubleTraceField (I := I) (M := M) g gm 4)
 
 set_option backward.isDefEq.respectTransparency false in
-set_option linter.unusedSectionVars false in
 set_option maxHeartbeats 12800000 in
 theorem mvPairTrace_apply
     (g gm : SmoothRiemannianMetric I M) (X : SmoothCcTensor g 0 4)
