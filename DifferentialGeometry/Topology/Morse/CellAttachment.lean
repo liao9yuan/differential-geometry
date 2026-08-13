@@ -7901,6 +7901,72 @@ noncomputable def modelLowerRoundMapUnround {n k : ℕ} (hk : k ≤ n) (ε r δ 
   recombine hk (negPart hk y)
     ((modelRoundScale ε r δ θ (‖negPart hk y‖ ^ 2))⁻¹ • posPart hk y)
 
+theorem modelLowerRoundMapUnround_negPart {n k : ℕ} (hk : k ≤ n) (ε r δ θ : ℝ)
+    (y : MorseModel n) :
+    negPart hk (modelLowerRoundMapUnround hk ε r δ θ y) = negPart hk y := by
+  dsimp [modelLowerRoundMapUnround]
+  rw [negPart_recombine]
+
+theorem modelLowerRoundMapUnround_posPart {n k : ℕ} (hk : k ≤ n) (ε r δ θ : ℝ)
+    (y : MorseModel n) :
+    posPart hk (modelLowerRoundMapUnround hk ε r δ θ y) =
+      (modelRoundScale ε r δ θ (‖negPart hk y‖ ^ 2))⁻¹ • posPart hk y := by
+  dsimp [modelLowerRoundMapUnround]
+  rw [posPart_recombine]
+
+theorem contDiff_modelLowerRoundMapUnround {n k : ℕ} (hk : k ≤ n) (ε r δ θ : ℝ)
+    (hθ : 0 < θ) (hδ : 0 < δ) (hδr : δ < r ^ 2) (hθr : θ < r ^ 2) :
+    ContDiff ℝ (⊤ : ℕ∞) (modelLowerRoundMapUnround hk ε r δ θ) := by
+  have hsc : ContDiff ℝ (⊤ : ℕ∞)
+      (fun y : MorseModel n => modelRoundScale ε r δ θ (‖negPart hk y‖ ^ 2)) :=
+    (contDiff_modelRoundScale hθ hδ hδr hθr).comp (contDiff_negPart_normSq hk)
+  have hsc_inv : ContDiff ℝ (⊤ : ℕ∞)
+      (fun y : MorseModel n => (modelRoundScale ε r δ θ (‖negPart hk y‖ ^ 2))⁻¹) :=
+    hsc.inv (fun y => ne_of_gt (modelRoundScale_pos hδ hθ hδr hθr))
+  rw [contDiff_pi]
+  intro i
+  by_cases hi : i.val < k
+  · have hcoord : (fun y : MorseModel n => modelLowerRoundMapUnround hk ε r δ θ y i) =
+        fun y : MorseModel n => (negPart hk y) ⟨i.val, hi⟩ := by
+      funext y
+      change (modelLowerRoundMapUnround hk ε r δ θ y) i = (negPart hk y) ⟨i.val, hi⟩
+      have hneq : i = negIdx hk ⟨i.val, hi⟩ := by
+        apply Fin.ext
+        rfl
+      conv_lhs => rw [hneq]
+      rw [← recombine_decompose hk (modelLowerRoundMapUnround hk ε r δ θ y)]
+      rw [recombine_negPart hk (negPart hk (modelLowerRoundMapUnround hk ε r δ θ y))
+        (posPart hk (modelLowerRoundMapUnround hk ε r δ θ y)) ⟨i.val, hi⟩]
+      rw [modelLowerRoundMapUnround_negPart]
+    rw [hcoord]
+    fun_prop
+  · have hi' : i.val - k < n - k := by
+      omega
+    have hcoord : (fun y : MorseModel n => modelLowerRoundMapUnround hk ε r δ θ y i) =
+        fun y : MorseModel n =>
+          (modelRoundScale ε r δ θ (‖negPart hk y‖ ^ 2))⁻¹ * (posPart hk y) ⟨i.val - k, hi'⟩ := by
+      funext y
+      change (modelLowerRoundMapUnround hk ε r δ θ y) i =
+          (modelRoundScale ε r δ θ (‖negPart hk y‖ ^ 2))⁻¹ * (posPart hk y) ⟨i.val - k, hi'⟩
+      have hneq : i = posIdx hk ⟨i.val - k, hi'⟩ := by
+        apply Fin.ext
+        dsimp [posIdx]
+        omega
+      conv_lhs => rw [hneq]
+      rw [← recombine_decompose hk (modelLowerRoundMapUnround hk ε r δ θ y)]
+      rw [recombine_posPart hk (negPart hk (modelLowerRoundMapUnround hk ε r δ θ y))
+        (posPart hk (modelLowerRoundMapUnround hk ε r δ θ y)) ⟨i.val - k, hi'⟩]
+      rw [modelLowerRoundMapUnround_posPart]
+      simp
+    rw [hcoord]
+    fun_prop
+
+theorem contMDiff_modelLowerRoundMapUnround {n k : ℕ} (hk : k ≤ n) (ε r δ θ : ℝ)
+    (hθ : 0 < θ) (hδ : 0 < δ) (hδr : δ < r ^ 2) (hθr : θ < r ^ 2) :
+    ContMDiff (modelWithCornersSelf ℝ (MorseModel n)) (modelWithCornersSelf ℝ (MorseModel n)) (⊤ : ℕ∞)
+      (modelLowerRoundMapUnround hk ε r δ θ) :=
+  contMDiff_iff_contDiff.mpr (contDiff_modelLowerRoundMapUnround hk ε r δ θ hθ hδ hδr hθr)
+
 theorem modelLowerRoundMapUnround_round {n k : ℕ} (hk : k ≤ n) (ε r δ θ : ℝ)
     (hθ : 0 < θ) (hδ : 0 < δ) (hδr : δ < r ^ 2) (hθr : θ < r ^ 2) (z : MorseModel n) :
     modelLowerRoundMapUnround hk ε r δ θ (modelLowerRoundMap hk ε r δ θ z) = z := by
