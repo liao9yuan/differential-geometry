@@ -1258,6 +1258,130 @@ noncomputable def source_deriv
     { spacetime := hsp
       at_zero_geom := hsp.at_time hzero }
 
+omit [NeZero (Module.finrank Real E)] in
+theorem ham3_src_covlip
+    {omega : Real} (h0omega : 0 < omega)
+    {g0 : SmoothRiemannianMetric I M}
+    (P : Ham3FlowPackage (I := I) (M := M) g0)
+    (hD : P.D =
+      DifferentialGeometry.Integral.Connection.RealTimeInterval.closedOpen
+        0 omega h0omega)
+    (Q : Ham3BlowupData M)
+    (hsel : Ham3PointSel (I := I) P Q)
+    (hwindow : Ham3Window (I := I) P Q ham3_r0)
+    {P₀ : PointedRiemannianManifold.{u, uE, uH} (I := I)}
+    {subseq : Nat → Nat}
+    (Φ : PointedCGHMaps (I := I)
+      (ham3SourceSeq (I := I) h0omega P hD Q hsel hwindow) P₀ subseq)
+    (R : letI : TopologicalSpace P₀.M := P₀.topology
+      letI : ChartedSpace H P₀.M := P₀.charted
+      letI : IsManifold I ∞ P₀.M := P₀.smooth
+      SmoothRiemannianMetric I P₀.M)
+    (hsrc : SrcSigma Φ) (htgt : TgtSigma Φ)
+    (Bmax : Real) (hBmax : 1 ≤ Bmax)
+    (hequiv :
+      letI : TopologicalSpace P₀.M := P₀.topology
+      letI : ChartedSpace H P₀.M := P₀.charted
+      letI : T2Space P₀.M := P₀.t2
+      letI : IsManifold I ∞ P₀.M := P₀.smooth
+      letI : SigmaCompactSpace P₀.M := P₀.sigmaCompact
+      ∀ k : Nat,
+        letI : TopologicalSpace (SourceDomain (I := I) Φ k) :=
+          sourceDomTop (I := I) Φ k
+        letI : ChartedSpace H (SourceDomain (I := I) Φ k) :=
+          sourceDomCharted (I := I) Φ k
+        letI : T2Space (SourceDomain (I := I) Φ k) :=
+          sourceDomT2 (I := I) Φ k
+        letI : IsManifold I ∞ (SourceDomain (I := I) Φ k) :=
+          sourceDomSmooth (I := I) Φ k
+        letI : SigmaCompactSpace (SourceDomain (I := I) Φ k) :=
+          sourceDomSigmaOf (I := I) Φ k (hsrc k)
+        ∀ t : Real, t ∈ Set.Icc (-(ham3_r0 ^ 2)) 0 →
+          MetricUniformEquivalentOn (I := I)
+            (Set.univ : Set (SourceDomain (I := I) Φ k))
+            (refRes (I := I) Φ R hsrc k)
+            (srcMetric (I := I) Φ hsrc htgt k t) Bmax)
+    (hShi :
+      letI : TopologicalSpace P₀.M := P₀.topology
+      letI : ChartedSpace H P₀.M := P₀.charted
+      letI : T2Space P₀.M := P₀.t2
+      letI : IsManifold I ∞ P₀.M := P₀.smooth
+      letI : SigmaCompactSpace P₀.M := P₀.sigmaCompact
+      ∀ N : Nat, ∃ KShi : Real, 0 ≤ KShi ∧
+        ∀ k : Nat,
+          letI : TopologicalSpace (SourceDomain (I := I) Φ k) :=
+            sourceDomTop (I := I) Φ k
+          letI : ChartedSpace H (SourceDomain (I := I) Φ k) :=
+            sourceDomCharted (I := I) Φ k
+          letI : T2Space (SourceDomain (I := I) Φ k) :=
+            sourceDomT2 (I := I) Φ k
+          letI : IsManifold I ∞ (SourceDomain (I := I) Φ k) :=
+            sourceDomSmooth (I := I) Φ k
+          letI : SigmaCompactSpace (SourceDomain (I := I) Φ k) :=
+            sourceDomSigmaOf (I := I) Φ k (hsrc k)
+          MovingShiBoundOn (I := I)
+            (Set.univ : Set (SourceDomain (I := I) Φ k))
+            (-(ham3_r0 ^ 2)) 0
+            (fun _ t ↦ srcMetric (I := I) Φ hsrc htgt k t) N KShi)
+    (hinit :
+      letI : TopologicalSpace P₀.M := P₀.topology
+      letI : ChartedSpace H P₀.M := P₀.charted
+      letI : T2Space P₀.M := P₀.t2
+      letI : IsManifold I ∞ P₀.M := P₀.smooth
+      letI : SigmaCompactSpace P₀.M := P₀.sigmaCompact
+      ∀ q : Nat, ∃ Cq : Real, 0 ≤ Cq ∧
+        ∀ k : Nat,
+          letI : TopologicalSpace (SourceDomain (I := I) Φ k) :=
+            sourceDomTop (I := I) Φ k
+          letI : ChartedSpace H (SourceDomain (I := I) Φ k) :=
+            sourceDomCharted (I := I) Φ k
+          letI : T2Space (SourceDomain (I := I) Φ k) :=
+            sourceDomT2 (I := I) Φ k
+          letI : IsManifold I ∞ (SourceDomain (I := I) Φ k) :=
+            sourceDomSmooth (I := I) Φ k
+          letI : SigmaCompactSpace (SourceDomain (I := I) Φ k) :=
+            sourceDomSigmaOf (I := I) Φ k (hsrc k)
+          ∀ y : SourceDomain (I := I) Φ k,
+            metricCovDerivNorm (I := I) q
+                (srcMetric (I := I) Φ hsrc htgt k 0)
+                (refRes (I := I) Φ R hsrc k) y ≤ Cq) :
+    SrcCovLipData (I := I) Φ R hsrc htgt (-(ham3_r0 ^ 2)) 0 := by
+  refine srcCovLip_of_flow (I := I)
+    (β := -(ham3_r0 ^ 2)) (ψ := 0) (t₀ := 0)
+    Φ R hsrc htgt
+    (fun k ↦
+      DifferentialGeometry.PDE.RicciFlow.paraInterval P.D
+        (Q.time (ham3Start (I := I) P Q hsel hwindow + subseq k))
+        (ham3BlowupScale (I := I) P Q
+          (ham3Start (I := I) P Q hsel hwindow + subseq k))
+        (hsel.1 (ham3Start (I := I) P Q hsel hwindow + subseq k))
+        (hsel.2.2.1
+          (ham3Start (I := I) P Q hsel hwindow + subseq k)))
+    (fun k ↦ sourceFlowOf (I := I) Φ k (hsrc k) (htgt k)
+      (ham3RescaledSol (I := I) P Q hsel
+        (ham3Start (I := I) P Q hsel hwindow + subseq k)))
+    (fun k ↦ isSoln_sourceFlowOf (I := I) Φ k (hsrc k) (htgt k)
+      (ham3RescaledSol (I := I) P Q hsel
+        (ham3Start (I := I) P Q hsel hwindow + subseq k))
+      (DifferentialGeometry.PDE.RicciFlow.paraSol (I := I) P.S
+        P.isSmooth.isSolution
+        (Q.time (ham3Start (I := I) P Q hsel hwindow + subseq k))
+        (ham3BlowupScale (I := I) P Q
+          (ham3Start (I := I) P Q hsel hwindow + subseq k))
+        (hsel.1 (ham3Start (I := I) P Q hsel hwindow + subseq k))
+        (hsel.2.2.1
+          (ham3Start (I := I) P Q hsel hwindow + subseq k))))
+    ?_ ?_ ?_ ?_ Bmax hBmax hequiv hShi hinit
+  · intro k r
+    rfl
+  · exact neg_nonpos.mpr (sq_nonneg ham3_r0)
+  · exact ⟨neg_nonpos.mpr (sq_nonneg ham3_r0), le_rfl⟩
+  · intro k s hs
+    apply ham3_shi_reg (I := I) h0omega P hD Q hsel hwindow (subseq k)
+    refine ⟨?_, hs.2⟩
+    dsimp only [ham3ShiLeft]
+    nlinarith [sq_pos_of_pos ham3_r0_pos, hs.1]
+
 def cghToHam3
     (X : PointedFlowSeq.{u, uE, uH} (I := I))
     (origIndex : Nat -> Nat) (horig : StrictMono origIndex)
