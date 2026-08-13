@@ -13388,6 +13388,20 @@ theorem morseCapRoundedLowerRound_mem_capRounded {m k : ℕ} (hk : k ≤ m + 1) 
     · intro hcb
       exact hb hcb.2
 
+theorem morseCapRoundedLowerRound_mem_roundedAttachment {m k : ℕ} (hk : k ≤ m + 1)
+    (c ε r δ θ R₀ : ℝ) {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M]
+    [ChartedSpace H M] {I : ModelWithCorners ℝ (MorseModel (m + 1)) H} {f : M → ℝ}
+    (data : MorseChart (m + 1) k hk c I f)
+    (hε : 0 < ε) (hδ : 0 < δ) (hθ : 0 < θ) (hδr : δ < r ^ 2) (hθr : θ < r ^ 2)
+    (hr : 0 < r) (hR0 : 0 ≤ R₀) (hR0lt : R₀ < data.R)
+    (hbig : 2 * (r ^ 2 + 2 * ε + δ) ≤ R₀ ^ 2)
+    (hRbig : r ^ 2 + 2 * ε + δ ≤ (data.R / 2) ^ 2)
+    {x : M} (hxlow : x ∈ sublevel f (c - ε)) :
+    morseCapRoundedLowerRound hk c ε r δ θ data x ∈ morseRoundedAttachment hk c ε r δ data := by
+  exact morseCapRoundedLowerSublevel_subset_roundedAttachment hk c ε r δ θ data hε hδ hθ hδr hθr hr
+    hRbig
+    (morseCapRoundedLowerRound_mem_capRounded hk c ε r δ θ R₀ data hε hδ hθ hδr hθr hR0 hR0lt hbig hxlow)
+
 theorem morseCapRoundedLowerUnround_round {m k : ℕ} (hk : k ≤ m + 1) (c ε r δ θ R₀ : ℝ)
     {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M] [ChartedSpace H M]
     {I : ModelWithCorners ℝ (MorseModel (m + 1)) H} {f : M → ℝ}
