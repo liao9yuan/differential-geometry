@@ -8908,6 +8908,63 @@ theorem modelHandleRoundMap_attachedFunction_eq_c_of_cocore_eq_one {n k : ℕ} (
   rw [hq]
   ring
 
+theorem modelHandleRoundMap_attachedFunction_lt_c_of_cocore_lt_one {n k : ℕ} (hk : k ≤ n)
+    (c ε r δ θ : ℝ) (hε : 0 < ε) (hδ : 0 < δ) (hθ : 0 < θ) (hδr : δ < r ^ 2)
+    (hθr : θ < r ^ 2) (hr : 0 < r) (p : StandardHandle k (n - k))
+    (hp : ‖(p.2 : EuclideanSpace ℝ (Fin (n - k)))‖ < 1) :
+    modelAttachedFunction hk c ε r δ (modelHandleRoundMap hk ε r δ θ p) < c := by
+  let a : ℝ := ‖(p.1 : EuclideanSpace ℝ (Fin k))‖ ^ 2
+  let b : ℝ := ‖(p.2 : EuclideanSpace ℝ (Fin (n - k)))‖ ^ 2
+  let t : ℝ := (2 * ε + r ^ 2 * b) * a
+  have ha0 : 0 ≤ a := by dsimp [a]; exact sq_nonneg _
+  have ha1 : a ≤ 1 := by
+    dsimp [a]
+    have hnon : 0 ≤ ‖(p.1 : EuclideanSpace ℝ (Fin k))‖ := norm_nonneg _
+    have hle := sq_le_sq' (by linarith [hnon]) p.1.2
+    simpa using hle
+  have hb0 : 0 ≤ b := by dsimp [b]; exact sq_nonneg _
+  have hb_lt : b < 1 := by
+    dsimp [b]
+    have hnon : 0 ≤ ‖(p.2 : EuclideanSpace ℝ (Fin (n - k)))‖ := norm_nonneg _
+    have hsq := sq_lt_sq' (by linarith [hnon]) hp
+    simpa using hsq
+  have ht_le : t ≤ 2 * ε + r ^ 2 * b := by
+    dsimp [t]
+    have hnonneg : 0 ≤ 2 * ε + r ^ 2 * b := by nlinarith [hε, hb0, sq_nonneg r]
+    nlinarith [ha1, hnonneg]
+  have ht_lt : t < r ^ 2 + 2 * ε := by
+    have hr2b : r ^ 2 * b < r ^ 2 := by
+      simpa [mul_one] using mul_lt_mul_of_pos_left hb_lt (sq_pos_of_pos hr)
+    nlinarith [ht_le, hr2b]
+  have hφ_lt : modelRoundCapInterp ε r a b < 1 := by
+    by_cases ha : a = 1
+    · rw [modelRoundCapInterp_eq_zero_of_eq_one ha]
+      norm_num
+    · have ha_lt : a < 1 := lt_of_le_of_ne ha1 ha
+      have h1a : 0 < 1 - a := by linarith
+      have h1b : 0 < 1 - b := by linarith [hb_lt]
+      have hc : 0 < r ^ 2 / (r ^ 2 * b + 2 * ε) :=
+        div_pos (sq_pos_of_pos hr) (by nlinarith [hε, hb0, sq_nonneg r])
+      dsimp [modelRoundCapInterp]
+      have hden : 0 < (1 - a) + (1 - b) * (r ^ 2 / (r ^ 2 * b + 2 * ε)) :=
+        add_pos h1a (mul_pos h1b hc)
+      rw [div_lt_one hden]
+      nlinarith [h1b, hc]
+  have hgap : modelLowerRoundBound ε r δ θ t < smoothCap ε r δ t :=
+    modelLowerRoundBound_lt_smoothCap_of_lt hδ hθ hδr ht_lt
+  have hq : modelRoundCapQ ε r δ θ a b < smoothCap ε r δ t := by
+    dsimp [modelRoundCapQ]
+    have h1φ : 0 < 1 - modelRoundCapInterp ε r a b := by linarith [hφ_lt]
+    have hgap' : 0 < smoothCap ε r δ t - modelLowerRoundBound ε r δ θ t := by linarith [hgap]
+    have hprod : 0 < (1 - modelRoundCapInterp ε r a b) *
+        (smoothCap ε r δ t - modelLowerRoundBound ε r δ θ t) := mul_pos h1φ hgap'
+    nlinarith
+  dsimp [modelAttachedFunction]
+  rw [modelHandleRoundMap_posPart_norm_sq hk ε r δ θ hε hδ hθ hδr hθr hr p]
+  rw [modelHandleRoundMap_negPart_norm_sq hk ε r δ θ (le_of_lt hε) p]
+  change c + (1 / 2) * (modelRoundCapQ ε r δ θ a b - smoothCap ε r δ t) < c
+  nlinarith [hq]
+
 theorem modelRoundCapQ_eq_r2b_of_t_lt {ε r δ θ a b t : ℝ} (hε : 0 < ε) (hδ : 0 < δ)
     (hθ : 0 < θ) (hδr : δ < r ^ 2) (hθr : θ < r ^ 2) (hr : 0 < r) (hapos : 0 < a) (ha1 : a ≤ 1)
     (hb0 : 0 ≤ b) (hb1 : b ≤ 1) (ht0 : t < r ^ 2 + 2 * ε) (htpos : 0 < t)
