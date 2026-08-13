@@ -7295,6 +7295,66 @@ theorem modelRoundCapInterp_le_one {ε r a b : ℝ} (hε : 0 < ε) (ha1 : a ≤ 
     rw [div_le_iff₀ hden]
     nlinarith [ha', h2]
 
+theorem modelRoundCapInverse_params {ε r t φ a b : ℝ} (hε : 0 < ε) (hr : 0 < r)
+    (ht2 : 2 * ε < t) (htr : t < r ^ 2 + 2 * ε) (hφ0 : 0 ≤ φ) (hφ1 : φ ≤ 1)
+    (ha : a = t / (t + φ * (r ^ 2 + 2 * ε - t)))
+    (hb : b = (t / a - 2 * ε) / r ^ 2) :
+    (2 * ε + r ^ 2 * b) * a = t ∧
+      t * (1 - a) / (a * (r ^ 2 + 2 * ε - t)) = φ ∧
+      0 < a ∧ a ≤ 1 ∧ 0 ≤ b ∧ b ≤ 1 := by
+  let D : ℝ := r ^ 2 + 2 * ε - t
+  have hDpos : 0 < D := by
+    dsimp [D]
+    nlinarith [htr]
+  have htpos : 0 < t := by nlinarith [ht2, hε]
+  have hden_pos : 0 < t + φ * D := by nlinarith [htpos, hφ0, hDpos]
+  have hden_ne : t + φ * D ≠ 0 := ne_of_gt hden_pos
+  have hane_aux : 0 < a := by
+    have ha' : a = t / (t + φ * D) := by
+      simpa [D] using ha
+    rw [ha']
+    exact div_pos htpos hden_pos
+  have hane : a ≠ 0 := ne_of_gt hane_aux
+  have hrec : t / a = t + φ * D := by
+    have ha' : a = t / (t + φ * D) := by
+      simpa [D] using ha
+    rw [ha']
+    field_simp [hden_ne]
+  have ha1 : a ≤ 1 := by
+    have ha' : a = t / (t + φ * D) := by
+      simpa [D] using ha
+    rw [ha']
+    rw [div_le_iff₀ hden_pos]
+    nlinarith [hφ0, hDpos]
+  have hr2pos : 0 < r ^ 2 := sq_pos_of_pos hr
+  have hmain : (2 * ε + r ^ 2 * b) * a = t := by
+    rw [hb]
+    have hr2ne : r ^ 2 ≠ 0 := ne_of_gt hr2pos
+    field_simp [hr2ne, hane]
+    nlinarith [hrec]
+  have hphi : t * (1 - a) / (a * D) = φ := by
+    have ha' : a = t / (t + φ * D) := by
+      simpa [D] using ha
+    have hDne : D ≠ 0 := ne_of_gt hDpos
+    rw [ha']
+    field_simp [hden_ne, hane_aux, hDne]
+    nlinarith [hDpos]
+  have hbnonneg : 0 ≤ b := by
+    rw [hb]
+    rw [div_nonneg_iff]
+    left
+    constructor
+    · nlinarith [hrec, ht2, hε]
+    · exact le_of_lt hr2pos
+  have hb1 : b ≤ 1 := by
+    rw [hb]
+    rw [div_le_iff₀ hr2pos]
+    have hrec' : t / a - 2 * ε = φ * D + t - 2 * ε := by nlinarith [hrec]
+    rw [hrec']
+    dsimp [D]
+    nlinarith [hφ1, htr, hε, hr]
+  exact ⟨hmain, hphi, hane_aux, ha1, hbnonneg, hb1⟩
+
 theorem modelRoundCapQ_le_smoothCap {ε r δ θ a b t : ℝ} (hδ : 0 < δ) (hθ : 0 < θ)
     (hδr : δ < r ^ 2) (hφ1 : modelRoundCapInterp ε r a b ≤ 1)
     (ht : t = (2 * ε + r ^ 2 * b) * a) :
