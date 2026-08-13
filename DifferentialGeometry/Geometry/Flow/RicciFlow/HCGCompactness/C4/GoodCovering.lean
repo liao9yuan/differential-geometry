@@ -27,7 +27,6 @@ variable {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
 noncomputable def lambda (hd : InjRadiusDecayInput (I := I) X) (D r : Real) : Real :=
   hd.mu r / D
 
-omit [CompleteSpace E] in
 theorem mu_hasInj_of_le (hd : InjRadiusDecayInput (I := I) X)
     {k : Nat} {x : (X.obj k).M} {R : Real}
     (hx : hd.dist k x (X.obj k).basepoint <= R) :
@@ -37,12 +36,10 @@ theorem mu_hasInj_of_le (hd : InjRadiusDecayInput (I := I) X)
     simpa [mu] using hd.decay k x
   exact HasInjRadiusAt.mono (I := I) hdecay (hd.mu_pos R) (hd.mu_antitone hx)
 
-omit [CompleteSpace E] in
 theorem lambda_pos (hd : InjRadiusDecayInput (I := I) X) {D : Real} (hD : 0 < D)
     (r : Real) : 0 < hd.lambda D r :=
   div_pos (hd.mu_pos r) hD
 
-omit [CompleteSpace E] in
 theorem lambda_antitone (hd : InjRadiusDecayInput (I := I) X) {D : Real} (hD : 0 < D) :
     Antitone (hd.lambda D) := by
   intro r₁ r₂ h
@@ -211,7 +208,6 @@ theorem lambda_eq (hd : InjRadiusDecayInput (I := I) X) (D r : Real) :
   unfold InjRadiusDecayInput.lambda InjRadiusDecayInput.mu
   ring
 
-omit [CompleteSpace E] in
 theorem lambda_exp_le (hd : InjRadiusDecayInput (I := I) X) {D : Real} (hD : 0 < D)
     {s t d : Real} (h : s - t ≤ d) :
     hd.lambda D t ≤ Real.exp (hd.C * d) * hd.lambda D s := by
@@ -419,7 +415,6 @@ theorem mem_lambdaBallC_dist (hd : InjRadiusDecayInput (I := I) X) (hre : hd.Rea
   rw [hre.edist_eq k z x]
   exact ENNReal.ofReal_lt_ofReal_iff_of_nonneg (hre.dist_nonneg k z x)
 
-omit [CompleteSpace E] in
 theorem lambdaBallC_subset_of_inter (hd : InjRadiusDecayInput (I := I) X)
     (hre : hd.RealizesEdist) (D : Real) (k : Nat) {c₁ c₂ : Real} (x y : (X.obj k).M)
     (hinter : (hd.lambdaBallC D k c₁ x ∩ hd.lambdaBallC D k c₁ y).Nonempty)

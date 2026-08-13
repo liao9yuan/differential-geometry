@@ -62,7 +62,6 @@ theorem mu_pos {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
     (hd : InjRadiusDecayInput (I := I) X) (r : Real) : 0 < hd.mu r :=
   mul_pos (mul_pos hd.a_pos (pow_pos (lt_min hd.baseInj.pos one_pos) _)) (Real.exp_pos _)
 
-omit [CompleteSpace E] in
 theorem mu_nonneg {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
     (hd : InjRadiusDecayInput (I := I) X) (r : Real) : 0 ≤ hd.mu r :=
   (hd.mu_pos r).le

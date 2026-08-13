@@ -38,7 +38,6 @@ private theorem sum4Swap (F : ι → ι → ι → ι → Real) :
 def quadSum (gInv : ι → ι → Real) (X : ι → ι → ι → ι → Real) : Real :=
   ∑ p : ι, ∑ q : ι, ∑ r : ι, ∑ s : ι, gInv p q * gInv r s * X p q r s
 
-omit [DecidableEq ι] in
 theorem quadSum_congr (gInv : ι → ι → Real) {X Y : ι → ι → ι → ι → Real}
     (h : ∀ p q r s : ι, X p q r s = Y p q r s) :
     quadSum gInv X = quadSum gInv Y :=
@@ -566,7 +565,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 variable [IsManifold I 1 M]
 variable [CompleteSpace E] [SigmaCompactSpace M] [T2Space M]
 
-omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 theorem rm04Var_eq_uhl
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)

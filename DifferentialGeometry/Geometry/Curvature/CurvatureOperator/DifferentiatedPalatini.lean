@@ -49,7 +49,6 @@ noncomputable def covDerivConnDiff2 (gB g₀ : SmoothRiemannianMetric I M)
     covDerivConnDiff (I := I) gB g₀ X Y
       (covApply (LeviCivita (I := I) gB) D Z) x
 
-omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [SigmaCompactSpace M] in
 theorem covDerivConnDiff2_eq (gB g₀ : SmoothRiemannianMetric I M)
     (D X Y Z : Π b : M, TangentSpace I b) (x : M) :
     covDerivConnDiff2 (I := I) gB g₀ D X Y Z x =

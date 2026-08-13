@@ -73,7 +73,6 @@ noncomputable def curvCovDeriv
         simpa [Nat.add_assoc, Nat.add_comm, Nat.add_left_comm] using
           curvCovDerivStep (I := I) g k A)
 
-omit [SigmaCompactSpace M] in
 theorem curvCovDeriv_succ
     (g : SmoothRiemannianMetric I M) (k : Nat) :
     curvCovDeriv (I := I) (M := M) g (k + 1) =
@@ -86,7 +85,6 @@ section PointwiseCurvature
 variable [InnerProductSpace Real E] [NeZero (Module.finrank Real E)]
   [I.Boundaryless]
 
-omit [SigmaCompactSpace M] [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
 theorem curvZero_apply
     (g : SmoothRiemannianMetric I M) (x : M)
     (X Y Z W : TangentSpace I x) :
@@ -120,7 +118,6 @@ theorem curvZero_apply
       (I := I) (M := M) g) x X Y Z]
   rfl
 
-omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
 theorem curvOne_apply
     (g : SmoothRiemannianMetric I M) (x : M)
     (D X Y Z W : TangentSpace I x) :
@@ -146,7 +143,6 @@ noncomputable def curvDerivNorm
     (k : Nat) (g : SmoothRiemannianMetric I M) (x : M) : Real :=
   Real.sqrt (curvDerivNormSq (I := I) (M := M) k g x)
 
-omit [SigmaCompactSpace M] in
 theorem curv_apply_le
     (g : SmoothRiemannianMetric I M) (k : Nat) (x : M)
     (v : Fin (k + 4) -> TangentSpace I x) :

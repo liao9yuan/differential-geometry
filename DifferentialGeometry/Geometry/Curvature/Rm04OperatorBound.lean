@@ -60,7 +60,6 @@ private theorem rm04_slot_prod_le
   ring_nf
   exact le_rfl
 
-omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] in
 theorem riemann_quad_le
     {Idx : Type*} [Finite Idx] [DecidableEq Idx]
     (g : SmoothRiemannianMetric I M) {q : M}
@@ -131,7 +130,6 @@ theorem riemann_quad_le
       mul_le_mul_of_nonneg_right hRm (mul_nonneg hJJ hVV)
     _ = K * g.inner q J J * g.inner q V V := by ring
 
-omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] in
 theorem riemannOp_sq_le
     {Idx : Type*} [Fintype Idx] [DecidableEq Idx] [Nonempty Idx]
     (g : SmoothRiemannianMetric I M) (q : M)

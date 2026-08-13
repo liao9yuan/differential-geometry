@@ -683,7 +683,6 @@ theorem amixOnePairH2
       simp only [B, S]
       ring
 
-omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] in
 theorem jetAddFour
     (g : SmoothRiemannianMetric I M) {r s : ℕ}
     (A B C D : SmoothCcTensor g r s) (X : ℝ)

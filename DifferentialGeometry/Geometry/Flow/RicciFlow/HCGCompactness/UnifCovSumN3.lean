@@ -213,7 +213,6 @@ theorem covStepAcc2_bound
     _ ≤ (C₂ + CA1 * (cs0 + CA0 + 1)) * (p0 + p1 + p2) := hSle
     _ ≤ max 0 (C₂ + CA1 * (cs0 + CA0 + 1)) * (p0 + p1 + p2) := hfin
 
-omit [Module.Finite ℝ E] in
 theorem covStepAcc2_le
     {K : Set M} (g₁ g₂ : SmoothRiemannianMetric I M) (r : ℕ)
     {Λ Λ' Λ'' Λ''' : ℝ}
@@ -318,7 +317,6 @@ theorem iterCovThree_le
     exact mul_le_mul_of_nonneg_right (le_max_right _ _)
       (Finset.sum_nonneg fun k _ => Real.sqrt_nonneg _)
 
-omit [Module.Finite ℝ E] in
 theorem iterCovG1_three
     {K : Set M} (g₁ g₂ : SmoothRiemannianMetric I M) (r : ℕ)
     {Λ Λ' Λ'' Λ''' : ℝ}

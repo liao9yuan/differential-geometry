@@ -27,7 +27,6 @@ noncomputable def seqCenter (hd : InjRadiusDecayInput (I := I) X) (D : Real)
   haveI : ProperSpace (X.obj k).M := (P k).proper
   OrderedNet.netCenter (X.obj k).basepoint (hd.lambda D) (hd.lambda_continuous D) α
 
-omit [CompleteSpace E] in
 @[simp] theorem seqCenter_zero (hd : InjRadiusDecayInput (I := I) X) (D : Real)
     (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k)) (k : Nat) :
     seqCenter hd D P k 0 = some (X.obj k).basepoint := by
@@ -126,7 +125,6 @@ def subseq {hd : InjRadiusDecayInput (I := I) X} {D : Real}
     intro α
     simpa [Function.comp_apply] using (L.tendsto α).comp hψ.tendsto_atTop
 
-omit [CompleteSpace E] in
 @[simp] theorem subseq_phi {hd : InjRadiusDecayInput (I := I) X} {D : Real}
     {P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k)}
     (L : NetLimitData hd D P) {ψ : Nat -> Nat} (hψ : StrictMono ψ) :
@@ -339,7 +337,6 @@ theorem NetLimitData.binter_stable_tail
   · filter_upwards [hdisjoint] with k hk
     exact fun hmeet => (hk hmeet).elim
 
-omit [CompleteSpace E] in
 theorem exists_stableNet (hd : InjRadiusDecayInput (I := I) X) {D : Real}
     (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k))
     (L : NetLimitData hd D P) :

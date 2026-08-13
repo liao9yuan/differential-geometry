@@ -563,7 +563,6 @@ private theorem exists_calabi_coeff
       nlinarith
   exact ⟨q, hq, hRicLower, hnq⟩
 
-omit [Module.Finite ℝ E] [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [IsManifold I (∞ + 1) M] in
 theorem ricci_quad_of_curv
     {D : RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
