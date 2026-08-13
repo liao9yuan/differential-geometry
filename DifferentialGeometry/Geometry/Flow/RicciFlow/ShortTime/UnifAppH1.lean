@@ -5,14 +5,6 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.UnifAppH12
 import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.UnifConvexJets
 import DifferentialGeometry.Analysis.Sobolev.TensorHilbert.AppCcJetWindowTame
 
-/-!
-# Class-first H2-to-H1 application estimates
-
-This module packages the dimension-three application estimate used by the
-low-regularity lower path.  Its coefficient is fixed before the class metric
-varies; the theorem is specialized to the tensor ranks used by that consumer.
--/
-
 set_option autoImplicit false
 
 noncomputable section
@@ -37,10 +29,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
-/-- **Dimension-three class-first order-zero lower-path application estimate.**
-
-For a fixed background and order-three metric class, one coefficient controls
-the rank-`(2,2)` action from spectral `H²` to spectral `H¹`. -/
 theorem appCc_h1_unif
     (hDim : Module.finrank ℝ E = 3)
     (gBase : SmoothRiemannianMetric I M)
@@ -113,13 +101,6 @@ theorem appCc_h1_unif
     _ ≤ Crs * A * (Ch * N) := hmix'
     _ = C * A * N := by dsimp [C]; ring
 
-/-- **Dimension-three class-first lower-path application estimate.**
-
-For a fixed background and order-three metric class, one coefficient controls
-the actual rank-`(3,2)` coefficient acting on the first covariant derivative of
-a rank-two field from spectral `H²` to spectral `H¹`.  The pointwise
-coefficient bound is produced internally from its order-two mixed Morrey
-estimate, so it is not exposed as an extra hypothesis. -/
 theorem appCc_h2cov_unif
     (hDim : Module.finrank ℝ E = 3)
     (gBase : SmoothRiemannianMetric I M)
@@ -307,12 +288,6 @@ theorem appCc_h2cov_unif
           (Cg * Ch + sd * Cm * Ch) * A * N := add_le_add hY0 hY1
     _ = C * A * N := by dsimp [C]; ring
 
-/-- **Dimension-three class-first top-path application estimate.**
-
-For a fixed background and order-three metric class, one coefficient controls
-the rank-`(4,2)` coefficient acting on the second covariant derivative of a
-rank-two field from spectral `H³` to spectral `H¹`.  As in
-`appCc_h2cov_unif`, the pointwise coefficient bound is produced internally. -/
 theorem appCc_h23_unif
     (hDim : Module.finrank ℝ E = 3)
     (gBase : SmoothRiemannianMetric I M)

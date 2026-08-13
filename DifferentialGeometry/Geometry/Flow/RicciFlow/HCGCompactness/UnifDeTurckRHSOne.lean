@@ -8,16 +8,6 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.RicciTowerTra
 import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.GreenIdentityAndIBP.RoughLaplacianAppCcCommutation
 import DifferentialGeometry.Tensor.RSTensor.MetricTrace.NormBound
 
-/-!
-# The class-uniform static Ricci--DeTurck field bound at order one
-
-This module closes the `j = 1` fibre bound needed by the static forcing
-estimate.  The Ricci term is controlled by the first curvature jet.  For the
-Lie term, the forward metric-jet hypotheses first give the reverse metric
-jets through order three; the intrinsic connection-difference jet tower then
-controls the second covariant derivative of the DeTurck covector.
--/
-
 set_option autoImplicit false
 set_option linter.style.setOption false
 set_option maxHeartbeats 1600000
@@ -214,7 +204,6 @@ private theorem trace31_norm_le
     (congrArg
       (fun z => (Module.finrank ℝ E : ℝ) ^ ((1 + k) + 2) * z) hperm)
 
-/-- Explicit reverse third metric-jet coefficient. -/
 noncomputable def revJetThreeC (Λ : ℝ) : ℝ :=
   let L₁ := max (revJetOneC (E := E) Λ) Λ
   let D := iterCovThreeC (E := E) 2 Λ L₁ Λ Λ
@@ -555,16 +544,13 @@ private theorem connLow_unit
     (E := (TangentSpace I : M → Type _)) ∞
       (connDiffLoweredField (I := I) g₀ gBase)
 
-/-- Explicit squared fibre-norm coefficient for the undifferentiated
-connection difference, read in the class metric. -/
 noncomputable def connDiffZeroSqC (Λ : ℝ) : ℝ :=
   let C₁ := revJetOneC (E := E) Λ
   let C := 3 / 2 * Λ ^ 3 * C₁
   (Module.finrank ℝ E : ℝ) ^ 3 * C ^ 2
 
 set_option linter.unusedSectionVars false in
-/-- The class-first pointwise square-norm bound for the undifferentiated
-fixed-background connection difference. -/
+
 theorem unifConnDiffZero
     (gBase g₀ : SmoothRiemannianMetric I M) {Λ : ℝ}
     (hΛ : 1 ≤ Λ)
@@ -658,8 +644,6 @@ theorem unifConnDiffZero
       simpa [d] using hcard
     _ = connDiffZeroSqC (E := E) Λ := rfl
 
-/-- Explicit squared fibre-norm coefficient for the first class-metric
-covariant derivative of the fixed-background connection difference. -/
 noncomputable def connDiffOneSqC (Λ : ℝ) : ℝ :=
   let C₁ := revJetOneC (E := E) Λ
   let C₂ := revJetTwoC (E := E) Λ
@@ -667,8 +651,7 @@ noncomputable def connDiffOneSqC (Λ : ℝ) : ℝ :=
   (Module.finrank ℝ E : ℝ) ^ 4 * C ^ 2
 
 set_option linter.unusedSectionVars false in
-/-- The class-first pointwise square-norm bound for the first class-metric
-covariant derivative of the fixed-background connection difference. -/
+
 theorem unifConnDiffOne
     (gBase g₀ : SmoothRiemannianMetric I M) {Λ : ℝ}
     (hΛ : 1 ≤ Λ)
@@ -803,8 +786,6 @@ theorem unifConnDiffOne
       simpa [d] using hcard
     _ = connDiffOneSqC (E := E) Λ := rfl
 
-/-- Explicit coefficient for the second covariant derivative of the connection
-difference under the class metric-jet bounds. -/
 noncomputable def connDiffTwoC (Λ : ℝ) : ℝ :=
   let C₁ := revJetOneC (E := E) Λ
   let C₂ := revJetTwoC (E := E) Λ
@@ -816,8 +797,7 @@ noncomputable def connDiffTwoC (Λ : ℝ) : ℝ :=
   (Module.finrank ℝ E : ℝ) ^ 5 * C ^ 2
 
 set_option linter.unusedSectionVars false in
-/-- The class-first pointwise square-norm bound for the second class-metric
-covariant derivative of the fixed-background connection difference. -/
+
 theorem unifConnDiffTwo
     (gBase g₀ : SmoothRiemannianMetric I M) {Λ : ℝ}
     (hΛ : 1 ≤ Λ)
@@ -1091,7 +1071,7 @@ private theorem rfns_iter_neg
   exact rfns_neg (I := I) g r (s + j) x _
 
 set_option linter.unusedSectionVars false in
-/-- Explicit coefficient for the first covariant jet of the DeTurck Lie arm. -/
+
 noncomputable def alphaOneC (Λ : ℝ) : ℝ :=
   Real.sqrt ((Module.finrank ℝ E : ℝ) ^ 5 * connDiffTwoC (E := E) Λ)
 
@@ -1219,7 +1199,7 @@ private theorem unifAlphaOne
     unifAlphaOne_of (I := I) gBase g₀ hΛ hcomp hjet1 hjet2 hjet3⟩
 
 set_option linter.unusedSectionVars false in
-/-- Explicit coefficient for the first Ricci jet after tracing the Riemann jet. -/
+
 noncomputable def ricciOneC (Λ Kb₀ Kb₁ : ℝ) : ℝ :=
   Real.sqrt ((Module.finrank ℝ E : ℝ) ^ 5 *
     rmOneC (E := E) Λ Kb₀ Kb₁ ^ 2)
@@ -1455,14 +1435,12 @@ private theorem rhs_one_split
     iteratedCovGrad_smul]
 
 set_option linter.unusedSectionVars false in
-/-- Explicit coefficient for the first covariant jet of the static
-Ricci--DeTurck field. -/
+
 noncomputable def ksupOneC (Λ Kb₀ Kb₁ : ℝ) : ℝ :=
   4 * (ricciOneC (E := E) Λ Kb₀ Kb₁ + alphaOneC (E := E) Λ)
 
 set_option linter.unusedSectionVars false in
-/-- The `j = 1` static Ricci--DeTurck bound with fixed background curvature
-coefficients supplied before the varying metric. -/
+
 theorem unifKsupOne_of
     (gBase g₀ : SmoothRiemannianMetric I M) {Λ : ℝ}
     (hΛ : 1 ≤ Λ)
@@ -1558,7 +1536,7 @@ theorem unifKsupOne_of
     nlinarith [mul_nonneg hKR0 hKA0, sq_nonneg KA])
 
 set_option linter.unusedSectionVars false in
-/-- The `j = 1` slot of the class-uniform static Ricci--DeTurck fibre bound. -/
+
 theorem unifKsupOne
     (gBase g₀ : SmoothRiemannianMetric I M) {Λ : ℝ}
     (hΛ : 1 ≤ Λ)
@@ -1584,8 +1562,7 @@ theorem unifKsupOne
       hKb₀0 hKb₀ hKb₁0 hKb₁ hcomp hjet1 hjet2 hjet3
 
 set_option linter.unusedSectionVars false in
-/-- A single background-dependent coefficient controls the static
-Ricci--DeTurck field through covariant order one for every metric in the class. -/
+
 theorem unifKsupLeOne
     (gBase : SmoothRiemannianMetric I M) {Λ : ℝ}
     (hΛ : 1 ≤ Λ) :
@@ -1627,8 +1604,7 @@ theorem unifKsupLeOne
       nlinarith [mul_nonneg hK₀0 hK₁0, sq_nonneg K₀])
 
 set_option linter.unusedSectionVars false in
-/-- The complete class-uniform covariant one-jet packet for the static
-Ricci--DeTurck field. -/
+
 theorem unifKsupLow
     (gBase g₀ : SmoothRiemannianMetric I M) {Λ : ℝ}
     (hΛ : 1 ≤ Λ)

@@ -1,26 +1,5 @@
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.LowRegC2JetTower
 
-/-!
-# Fixed-background smallness of the complete second-order coefficient
-
-`c2_h2_small` shows that the complete canonical second-order coefficient of the
-zero-based low-base split is pointwise and two-jet small on a small spectral
-`H2` ball, but only at the *diagonal* background `g_bg = g`.  The adjacent-scale
-lift needs the same statement at an arbitrary fixed background `gB`.
-
-The background enters the top path integrand only through the metric-deviation
-arm: by `topKernel_eq` the integrand splits as
-
-`lieRefold2 g T s + (Φmet(g, gB, gm) - Φmet(g, gB, g)) + (-2s) • ricciTop g gm T`,
-
-and the outer two summands are background-*blind*.  So the difference of the two
-integrands (at `gB` and at `g`) is exactly the difference of the two metric
-deviations, each of which is controlled by the two-metric `phi_dev_h2`.  The
-difference of the two coefficients is therefore a single path integral of a
-small integrand, and the fixed-background bound follows by the triangle
-inequality against the diagonal `c2_h2_small`.
--/
-
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
@@ -47,10 +26,6 @@ variable
       [IsManifold I ∞ M] [CompactSpace M] [I.Boundaryless]
       [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M]
 
-/-- **The background-blind arms cancel.**  Changing the fixed DeTurck
-background from `g` to `gB` changes the complete top path integrand by exactly
-the difference of the two metric deviations: the Lie refold and the Ricci top
-arm produced by `topKernel_eq` carry no background at all. -/
 theorem kerBgDiff
     (g gB : SmoothRiemannianMetric I M) (T : SmoothCcTensor g 0 2)
     {δ : ℝ}
@@ -82,9 +57,6 @@ theorem kerBgDiff
       LowBaseInternal.topKernel_eq (I := I) (M := M) g g T hδ hδZ s]
   abel
 
-/-- The canonical `C2` projection at an arbitrary fixed background is the
-single path integral of the complete top integrand.  This is `c2_eq` with the
-two integrated arms and the fixed coefficient merged by `path_add_sub_eq`. -/
 private theorem c2BgPath
     (g gB : SmoothRiemannianMetric I M) (T : SmoothCcTensor g 0 2)
     {δ : ℝ} (hδ_lt : δ < 1)
@@ -111,10 +83,6 @@ private theorem c2BgPath
     (rhsRefoldTop_joint (I := I) (M := M) g gB T hδ_lt hδ hδZ)
     (LowBaseInternal.selfTop_joint (I := I) (M := M) g T hδ hδZ) hK
 
-/-- **The background difference of the two metric deviations is small.**
-Along the whole realized segment the deviation at `gB` and the deviation at
-`g` are each linear in the `H2` radius by `phi_dev_h2`, so their difference is
-too, in both the fibre and the two-jet clause. -/
 private theorem devBgCap
     (hDim : Module.finrank ℝ E = 3)
     (g gB : SmoothRiemannianMetric I M) :
@@ -203,8 +171,6 @@ private theorem devBgCap
     linarith [hsub, hBj, hGj, hkey]
 
 omit [NeZero (Module.finrank ℝ E)] in
-/-- Both smallness clauses pass from a radial integrand to its path integral,
-with the same constant. -/
 private theorem pathBoth
     (g : SmoothRiemannianMetric I M) {δ : ℝ}
     (hSI : Set.uIcc (0 : ℝ) 1 ⊆ realizedSmallSet (δ := δ) (δ' := δ))
@@ -241,14 +207,6 @@ private theorem pathBoth
       (realizedSmallSet (δ := δ) (δ' := δ))
       realizedSmallSet_isOpen hSI hD hΛ (fun s hs => hjet s hs)
 
-/-- **In dimension three, the complete canonical second-order coefficient is
-pointwise and two-jet small on a small spectral `H2` ball, at an arbitrary
-fixed DeTurck background.**
-
-This is the fixed-background sibling of `c2_h2_small`; the diagonal statement
-is consumed as a black box and only the background *difference* is estimated
-here.  The `δ`-certificates are unchanged: `lowBaseData g gB T` measures the
-state against the carrier `g` alone, so `gB` is a bare parameter. -/
 theorem c2Bg_h2_small
     (hDim : Module.finrank ℝ E = 3)
     (g gB : SmoothRiemannianMetric I M) :
@@ -281,7 +239,7 @@ theorem c2Bg_h2_small
   have hδ_lt : δ < 1 := lt_of_le_of_lt hδ_le (by norm_num)
   have hRρ0 : R ≤ ρ0 := hRρ.trans (min_le_left _ _)
   have hRρd : R ≤ ρd := hRρ.trans (min_le_right _ _)
-  -- the shared radial data
+
   have hSI : Set.uIcc (0 : ℝ) 1 ⊆
       realizedSmallSet (δ := δ) (δ' := δ) := by
     rw [Set.uIcc_of_le zero_le_one]
@@ -298,7 +256,7 @@ theorem c2Bg_h2_small
     (armConst (I := I) (M := M) g (δ := δ) (δ' := δ)
       (deTurckPhiMetTotal (I := I) (M := M) g g g))
   have hjD := threeArmJoint_sub (I := I) (M := M) g _ _ hjKerB hjKerG
-  -- the two coefficients differ by a single path integral
+
   have hcB := c2BgPath (I := I) (M := M) g gB T hδ_lt hδ hδZ hSI hjKerB
   have hcG := c2BgPath (I := I) (M := M) g g T hδ_lt hδ hδZ hSI hjKerG
   have hdiff :
@@ -316,7 +274,7 @@ theorem c2Bg_h2_small
           realizedSmallSet_isOpen hSI hjD := by
     rw [hcB, hcG]
     exact path_sub_eq (I := I) (M := M) g 4 hSI _ _ hjKerB hjKerG hjD
-  -- the integrand difference is small, in both clauses
+
   have hcapPt : ∀ s ∈ Set.Icc (0 : ℝ) 1, ∀ x : M,
       riemannianFiberNormSq (I := I) (M := M) g 4 2 x
           (((rhsRefoldTop (I := I) (M := M) g gB T hδ hδZ s +
@@ -342,11 +300,11 @@ theorem c2Bg_h2_small
     rw [kerBgDiff (I := I) (M := M) g gB T hδ hδZ s]
     exact (hdev T hδ_lt hδ hδZ hR0 hRρd hTHs s hs).2
   have hCdR0 : 0 ≤ Cd * R := mul_nonneg hCd hR0
-  -- integrate the difference
+
   obtain ⟨hdPt, hdJet⟩ := pathBoth (I := I) (M := M) g hSI _ hjD hCdR0
     hcapPt hcapJet
   rw [← hdiff] at hdPt hdJet
-  -- the diagonal black box
+
   have hdg :
       (∀ x : M, riemannianFiberNormSq (I := I) (M := M) g 4 2 x
           ((lowBaseData (I := I) (M := M) g g T hδ_lt hδ hδZ).C2.toSection x) ≤

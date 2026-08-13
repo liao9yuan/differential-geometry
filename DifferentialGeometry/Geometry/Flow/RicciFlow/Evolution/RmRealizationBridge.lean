@@ -2,46 +2,6 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.IteratedNablaRmTow
 
 set_option autoImplicit false
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 noncomputable section
 
 namespace DifferentialGeometry.PDE.RicciFlow
@@ -58,20 +18,14 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 variable [IsManifold I 1 M] [IsManifold I 2 M]
 variable [CompleteSpace E] [SigmaCompactSpace M] [T2Space M]
 
-
-
 section FrameTuple
 
 variable {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
-
-
 
 def frameTuple {r : ℕ}
     (frame : Idx → (x : M) → TangentSpace I x) (x : M) (m : Fin r → Idx) :
     Fin r → TangentSpace I x :=
   fun q => frame (m q) x
-
-
 
 def frameComp0S {r : ℕ}
     (A : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
@@ -88,8 +42,6 @@ omit [I.Boundaryless] [IsManifold I ∞ M] [IsManifold I 2 M] [CompleteSpace E] 
     (frame : Idx → (x : M) → TangentSpace I x) (x : M) (m : Fin r → Idx) :
     frameComp0S (I := I) A frame x m = A x (fun q => frame (m q) x) := rfl
 
-
-
 omit [FiniteDimensional ℝ E] [I.Boundaryless] [IsManifold I ∞ M] [IsManifold I 1 M]
     [IsManifold I 2 M] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] [Fintype Idx]
     [DecidableEq Idx] in
@@ -105,28 +57,9 @@ theorem frameTuple_eq_cons {r : ℕ}
 
 end FrameTuple
 
-
-
-
-
-
-
-
-
-
-
-
 section StepBridge
 
 variable {Idx : Type*} [Fintype Idx] [DecidableEq Idx] {u : Set M}
-
-
-
-
-
-
-
-
 
 omit [I.Boundaryless] [CompleteSpace E] [SigmaCompactSpace M] [DecidableEq Idx] in
 theorem covDerivStepComp_frameComp_eq {s : ℕ}
@@ -232,11 +165,7 @@ theorem covDerivStepComp_frameComp_eq {s : ℕ}
 
 end StepBridge
 
-
-
 section Solution
-
-
 
 omit [I.Boundaryless] [IsManifold I 2 M] in
 omit [SigmaCompactSpace M] [T2Space M] in
@@ -247,8 +176,6 @@ theorem connSmoothInf
       (S.family.connection t) (∞ : WithTop ℕ∞) := by
   simpa [SolutionFamily.connection, metricCov] using
     metricCov_smooth (I := I) (M := M) (S.base.metric t)
-
-
 
 omit [FiniteDimensional ℝ E] [I.Boundaryless] [IsManifold I ∞ M] [IsManifold I 1 M]
     [IsManifold I 2 M] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
@@ -261,14 +188,6 @@ theorem extDerivFun_eventuallyEq_congr
   rw [Filter.EventuallyEq.mfderiv_eq (I := I) (I' := 𝓘(Real, Real)) h]
   rfl
 
-
-
-
-
-
-
-
-
 def nablaRm04Field
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D) (t : Real) :
@@ -278,8 +197,6 @@ def nablaRm04Field
     4 (S.family.connection t) (S.base.rm04 t)
     (totalNabla0S_reg (E := E) (H := H) (I := I) (M := M)
       4 (S.family.connection t) (connSmoothInf (I := I) S t) (S.base.rm04 t))
-
-
 
 def nabla2Rm04Field
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
@@ -291,9 +208,6 @@ def nabla2Rm04Field
     (totalNabla0S_reg (E := E) (H := H) (I := I) (M := M)
       5 (S.family.connection t) (connSmoothInf (I := I) S t)
       (nablaRm04Field (I := I) S t))
-
-
-
 
 def nabla3Rm04Field
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
@@ -346,14 +260,6 @@ theorem nabla3Rm04Field_realizes
       6 (S.family.connection t) (connSmoothInf (I := I) S t)
       (nabla2Rm04Field (I := I) S t))
 
-
-
-
-
-
-
-
-
 def realizedChr
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D) (x₀ : M) :
@@ -363,8 +269,6 @@ def realizedChr
     christoffelSymbolInFrame (S.family.connection t)
       (coordinateFrameAt (I := I) x₀)
       (coordinateFrameAt_isLocalFrame_one (I := I) x₀) x
-
-
 
 def realizedRmBase
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
@@ -380,16 +284,6 @@ omit [SigmaCompactSpace M] in
     (t : Real) (x : M) (m : Fin 4 → CoordinateIdx (𝕜 := Real) E) :
     realizedRmBase (I := I) S x₀ t x m =
       S.base.rm04 t x (fun q => coordinateFrameAt (I := I) x₀ (m q) x) := rfl
-
-
-
-
-
-
-
-
-
-
 
 omit [I.Boundaryless] in
 omit [SigmaCompactSpace M] in
@@ -411,16 +305,6 @@ theorem iteratedRmComp_one_eq_nablaRm04Field
     (coordinateFrameAt (I := I) x₀)
     (coordinateFrameAt_isLocalFrame_one (I := I) x₀)
     (coordinateFrameSet_open (I := I) x₀) hx n
-
-
-
-
-
-
-
-
-
-
 
 omit [I.Boundaryless] in
 omit [SigmaCompactSpace M] in
@@ -476,16 +360,7 @@ theorem iteratedRmComp_two_eq_nabla2Rm04Field
 
 end Solution
 
-
-
-
-
-
-
-
 section RicciIdentity
-
-
 
 omit [I.Boundaryless] in
 omit [SigmaCompactSpace M] in
@@ -497,8 +372,6 @@ theorem rm04_nabla0SSectionRealizes
   intro y X slots
   exact nablaRm04Field_realizes (I := I) S t X y slots
 
-
-
 omit [I.Boundaryless] in
 omit [SigmaCompactSpace M] in
 theorem nablaRm04_nabla0SSectionRealizes
@@ -509,9 +382,6 @@ theorem nablaRm04_nabla0SSectionRealizes
       (nabla2Rm04Field (I := I) S t) := by
   intro y X slots
   exact nabla2Rm04Field_realizes (I := I) S t X y slots
-
-
-
 
 omit [I.Boundaryless] in
 omit [SigmaCompactSpace M] in
@@ -525,9 +395,6 @@ theorem rm04_nabla20SRealizesAt
   intro X slots
   exact nabla2Rm04Field_realizes (I := I) S t X x slots
 
-
-
-
 omit [I.Boundaryless] in
 omit [SigmaCompactSpace M] in
 theorem nablaRm04_nabla20SRealizesAt
@@ -540,9 +407,6 @@ theorem nablaRm04_nabla20SRealizesAt
   refine ⟨nablaRm04_nabla0SSectionRealizes (I := I) S t, ?_⟩
   intro X slots
   exact nabla3Rm04Field_realizes (I := I) S t X x slots
-
-
-
 
 omit [I.Boundaryless] in
 omit [SigmaCompactSpace M] in
@@ -571,9 +435,6 @@ theorem rm04_ricciIdentityAt
     (nabla2Rm04Field (I := I) S (t : Real) x)
     (rm13OfSol (I := I) S (t : Real) (D.regular_subset t.2)) rfl rfl
     (rm04_nabla20SRealizesAt (I := I) S (t : Real) x) htor
-
-
-
 
 omit [I.Boundaryless] in
 omit [SigmaCompactSpace M] in

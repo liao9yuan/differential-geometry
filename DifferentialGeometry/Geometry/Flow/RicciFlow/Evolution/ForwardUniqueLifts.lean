@@ -9,67 +9,12 @@ set_option linter.unusedSectionVars false
 set_option linter.unusedFintypeInType false
 set_option backward.isDefEq.respectTransparency false
 
-/-!
-# Frame → invariant lifts for the forward-uniqueness endgame (Route-K brick K6b)
-
-`Evolution/ForwardUniqueAssembly.lean` (K6a) reduced black box (B) to one standing bundle
-`ForwardUniqueInputs`.  Two of its members were flagged **missing-API**, not missing
-mathematics: the producers exist, but their conclusions are stated *componentwise in a frame*
-while the bundle wants an *invariant bundled speed*.  This file supplies the rank-3 lift and
-uses it to collapse the `rm` member.
-
-## The lift
-
-`ForwardUniqueConnDot.lean` already has the rank-2 template: `bilinOfComp` packages a
-component family `c i j k` into a continuous bilinear vector-valued map, and
-`coeff_bilinOfComp` reads the components back.  Here the same construction is done one rank
-up (`quadOfComp`, four indices: three inputs and one output), together with the trilinear
-basis expansion `tri_expand` that turns basis-triple derivative facts into derivative facts
-at *arbitrary* tangent vectors.
-
-## Main definitions
-
-* `quadOfComp b c` — the continuous trilinear vector-valued map with prescribed basis
-  components, `quadOfComp b c (b i) (b j) (b k) = ∑ l, c i j k l • b l`.
-* `uhlRaisedDeriv g basisAt Rm04 roughLapRm04 B ricciOneUp t y i j k` — the raised time
-  derivative of one flow's `(1,3)` curvature at a basis triple, i.e. the right-hand side that
-  `rmVecComp_deriv` (`ForwardUniqueRmBridge.lean`) produces from that flow's own-lowered
-  Uhlenbeck interface.
-* `uhlRmDiffSpeed` — the bundled trilinear speed `Svec` of the curvature difference: the
-  `quadOfComp` package of the difference of the two `uhlRaisedDeriv` families.
-
-## Main results
-
-* `tri_expand` — trilinear expansion of a `TangentSpace →L →L →L TangentSpace` map in a basis.
-* `quadOfComp_basis`, `coeff_quadOfComp`, `quadOfComp_vec` — the component/coefficient
-  read-back lemmas, mirroring `bilinOfComp_basis` / `coeff_bilinOfComp`.
-* `rmDiffVec_hasDerivAt_of_basis` — **the lift**: basis-triple derivatives of the raised
-  curvature difference give the derivative at every `(X, Y, Z)`, with the invariant speed.
-* `rm_of_uhlenbeck` — **the collapse**: the `rm` member of
-  `ForwardUniqueAssembly.ForwardUniqueInputs`, verbatim, from the two per-flow own-lowered
-  Uhlenbeck interfaces, the two per-flow Ricci-flow equations, and the two (benign)
-  realization/continuity inputs that `rmVecComp_deriv` already requires.
-
-## Relocation TODO
-
-`tri_expand`, `quadOfComp` and its read-back lemmas are generic fiber algebra whose canonical
-home is next to `bilin_expand` / `bilinOfComp`; they live here only because the brick protocol
-forbids editing existing files.  Move them when `ForwardUniqueConnDot.lean` is next touched.
--/
-
 noncomputable section
 
 namespace DifferentialGeometry.PDE.RicciFlow
 
 open Bundle Tensor0SBundle
 open scoped Manifold ContDiff BigOperators Topology
-
-/-! ## Part 1: the rank-3 lift and the `rm` collapse
-
-This part is `NormedSpace`-only, matching `ForwardUniqueRmDot.lean` /
-`ForwardUniqueRmBridge.lean`; the `gamma` part below needs the `InnerProductSpace` context of
-`ForwardUniqueAssembly.lean` and therefore opens its own section rather than mixing the two
-`NormedSpace ℝ E` instance paths. -/
 
 section NormedBase
 
@@ -86,8 +31,7 @@ section Quad
 variable {Idx : Type*} [Fintype Idx] {u : Set M} {x : M}
 
 set_option synthInstance.maxHeartbeats 1000000 in
-/-- **Trilinear basis expansion.**  The rank-3 analogue of `bilin_expand`: a continuous
-trilinear vector-valued map is determined by its values on basis triples. -/
+
 theorem tri_expand {ι : Type*} [Fintype ι]
     (A : TangentSpace I x →L[Real] TangentSpace I x →L[Real] TangentSpace I x →L[Real]
       TangentSpace I x)
@@ -121,10 +65,7 @@ theorem tri_expand {ι : Type*} [Fintype ι]
   rw [smul_smul, smul_smul]
 
 set_option synthInstance.maxHeartbeats 1000000 in
-/-- The continuous trilinear vector-valued map with prescribed basis components:
-`quadOfComp b c (b i) (b j) (b k) = ∑ l, c i j k l • b l`.  This is the rank-3 analogue of
-`bilinOfComp`; it turns a *componentwise* curvature-difference speed into the invariant
-trilinear speed `Svec` that the forward-uniqueness bundle consumes. -/
+
 def quadOfComp (b : Module.Basis Idx Real (TangentSpace I x))
     (c : Idx -> Idx -> Idx -> Idx -> Real) :
     TangentSpace I x →L[Real] TangentSpace I x →L[Real] TangentSpace I x →L[Real]
@@ -165,9 +106,7 @@ theorem quadOfComp_basis (b : Module.Basis Idx Real (TangentSpace I x))
   rw [Module.Basis.constr_basis]
 
 set_option synthInstance.maxHeartbeats 1000000 in
-/-- **Prescribed vector values.**  Feeding `quadOfComp` the basis coordinates of a vector
-family reproduces that family at basis triples.  This is the form the collapse lemma uses:
-the producer supplies vectors, not components. -/
+
 theorem quadOfComp_vec (b : Module.Basis Idx Real (TangentSpace I x))
     (V : Idx -> Idx -> Idx -> TangentSpace I x) (i j k : Idx) :
     ((quadOfComp (I := I) b (fun i j k l => b.repr (V i j k) l) (b i)) (b j)) (b k) =
@@ -176,8 +115,7 @@ theorem quadOfComp_vec (b : Module.Basis Idx Real (TangentSpace I x))
   exact b.sum_repr (V i j k)
 
 set_option synthInstance.maxHeartbeats 1000000 in
-/-- The frame coefficients of `quadOfComp` are the prescribed components: the rank-3
-analogue of `coeff_bilinOfComp`. -/
+
 theorem coeff_quadOfComp (frame : Idx -> (y : M) -> TangentSpace I y)
     (hframe : IsLocalFrameOn I E 1 frame u) (hx : x ∈ u)
     (c : Idx -> Idx -> Idx -> Idx -> Real) (i j k l : Idx) :
@@ -197,15 +135,7 @@ theorem coeff_quadOfComp (frame : Idx -> (y : M) -> TangentSpace I y)
   simp [Finsupp.single_apply]
 
 set_option synthInstance.maxHeartbeats 1000000 in
-/-- **The frame → invariant lift for the curvature-difference speed.**
 
-If the raised curvature difference `Rm¹ − Rm²` has, at every basis triple, the time
-derivative prescribed by the trilinear map `Sdot`, then it has that derivative at *every*
-triple of tangent vectors.  This is exactly the `hRm` hypothesis of `rmDiffLow_hasDerivAt`
-(hence, through `rmSpeed_hasDerivAt`, K3's `hS`).
-
-The rank-2 analogue is `connDiffVec_hasDerivAt`; here the producer already supplies
-vector-valued facts, so no coefficient bookkeeping is needed. -/
 theorem rmDiffVec_hasDerivAt_of_basis
     (g₁ g₂ : Real -> SmoothRiemannianMetric I M)
     (b : Module.Basis Idx Real (TangentSpace I x))
@@ -246,12 +176,7 @@ section Collapse
 variable {Idx : Type*} [Fintype Idx]
 
 set_option synthInstance.maxHeartbeats 1000000 in
-/-- **The raised curvature speed of one flow at a basis triple.**
 
-This is the right-hand side that `rmVecComp_deriv` produces from that flow's own-lowered
-Uhlenbeck interface `Riemann04BTensorWithRicciDriftEvolutionInFrameOn`: the own-metric raise
-of `roughLap − 2·(B-combination) − Ricci drift`, plus the reaction created by the moving
-lowering metric `∂ₜg = −2Ric`. -/
 def uhlRaisedDeriv (g : Real -> SmoothRiemannianMetric I M)
     (basisAt : (y : M) -> Module.Basis Idx Real (TangentSpace I y))
     (Rm04 roughLapRm04 B : FourComp M Idx) (ricciOneUp : MatrixComp M Idx)
@@ -268,11 +193,7 @@ def uhlRaisedDeriv (g : Real -> SmoothRiemannianMetric I M)
             else basisAt y l))
 
 set_option synthInstance.maxHeartbeats 1000000 in
-/-- **The bundled trilinear speed `Svec` of the curvature difference.**
 
-The `quadOfComp` package of the difference of the two per-flow raised speeds.  This is the
-data carrier that `ForwardUniqueAssembly.ForwardUniqueInputs` takes as `Svec`, and
-`rm_of_uhlenbeck` proves it satisfies the bundle's `rm` member. -/
 def uhlRmDiffSpeed (g₁ g₂ : Real -> SmoothRiemannianMetric I M)
     (basisAt : (y : M) -> Module.Basis Idx Real (TangentSpace I y))
     (Rm04₁ roughLapRm04₁ B₁ : FourComp M Idx) (ricciOneUp₁ : MatrixComp M Idx)
@@ -288,22 +209,7 @@ def uhlRmDiffSpeed (g₁ g₂ : Real -> SmoothRiemannianMetric I M)
 
 set_option synthInstance.maxHeartbeats 1000000 in
 set_option maxHeartbeats 1000000 in
-/-- **K6b collapse of the bundle's `rm` member.**
 
-The `rm` field of `ForwardUniqueAssembly.ForwardUniqueInputs`, verbatim, produced from:
-
-* the two per-flow **own-lowered** Uhlenbeck interfaces `hev₁`, `hev₂`
-  (`Riemann04BTensorWithRicciDriftEvolutionInFrameOn`, `Evolution/Uhlenbeck.lean`) — the
-  standing inputs of planner ruling R1;
-* the two per-flow Ricci-flow equations `hPDE₁`, `hPDE₂` in the lane's `metricRicciAt`
-  currency, one-sided within the interval carrier;
-* the two realization inputs `hreal₁`, `hreal₂` saying which curvature the supplied
-  component families are (each flow's **own** lowering — no cross-metric lowering appears);
-* the two continuity inputs `hcont₁`, `hcont₂`, strictly weaker than the differentiability
-  concluded.
-
-The speed is not assumed: it is the constructed `uhlRmDiffSpeed`.  Every hypothesis is
-per-flow, matching ruling R4. -/
 theorem rm_of_uhlenbeck
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (g₁ g₂ : Real -> SmoothRiemannianMetric I M)
@@ -385,18 +291,6 @@ variable [IsManifold I 1 M] [IsManifold I 2 M] [IsManifold I ((∞ : WithTop ℕ
 variable [CompleteSpace E] [SigmaCompactSpace M] [T2Space M]
 variable [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
 
-/-! ## Part 2: the `SolutionOn`-package bridge and the `gamma` collapse
-
-`ForwardUniqueConnectionDiff.lean` (K1) states the Christoffel-difference evolution for a pair
-of `SolutionOn` packages, while the forward-uniqueness lane works with bare metric families.
-The bridge is trivial by construction: `SolutionFamily` has a single field `metric`, and
-`SolutionOn` a single field `base`, so a metric family *is* a solution candidate, and its
-connection is definitionally the Levi-Civita connection of its metric.  Nothing analytic is
-hidden here — this is the whole content of the "K1 solution-package bridge" recorded as
-missing in `ForwardUniqueAssembly.md`. -/
-
-/-- **The `SolutionOn` package of a metric family.**  `SolutionFamily`'s only field is the
-metric, so this is a pure repackaging; the Ricci-flow equation is *not* part of it. -/
 def solOfMetric {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (g : Real -> SmoothRiemannianMetric I M) : SolutionOn (I := I) (M := M) D :=
   ⟨⟨g⟩⟩
@@ -406,7 +300,6 @@ theorem solOfMetric_metric {D : DifferentialGeometry.Integral.Connection.RealTim
     (g : Real -> SmoothRiemannianMetric I M) (s : Real) :
     (solOfMetric (I := I) (D := D) g).base.metric s = g s := rfl
 
-/-- The Christoffel symbols of `solOfMetric g` in a frame are those of `metricCov (g s)`. -/
 theorem christoffelInFrame_solOfMetric
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     {Idx : Type*} {u : Set M}
@@ -419,12 +312,6 @@ theorem christoffelInFrame_solOfMetric
       DifferentialGeometry.Tensor.Coordinates.christoffelSymbolInFrame
         (metricCov (I := I) (g s)) frame hframe x i j k := rfl
 
-/-- **The bundled bilinear speed `Avec` of the connection difference.**
-
-The `bilinOfComp` package, in the chart frame centred at each point, of the difference of the
-two per-flow Christoffel evolution right-hand sides.  This is the data carrier that
-`ForwardUniqueAssembly.ForwardUniqueInputs` takes as `Avec`, and `gamma_of_fields` proves it
-satisfies the bundle's `gamma` member. -/
 def christoffelDiffSpeed
     (gInv₁ gInv₂ : M -> Real ->
       DifferentialGeometry.Integral.Connection.InverseMetricComponents M
@@ -438,17 +325,6 @@ def christoffelDiffSpeed
       christoffelEvolutionRHSInFrame (M := M) (gInv₁ x) (nablaRic₁ x) t x i j k -
         christoffelEvolutionRHSInFrame (M := M) (gInv₂ x) (nablaRic₂ x) t x i j k)
 
-/-- **K6b collapse of the bundle's `gamma` member.**
-
-The `gamma` field of `ForwardUniqueAssembly.ForwardUniqueInputs`, verbatim, produced from the
-two per-flow Christoffel evolution interfaces `ChristoffelEvolutionEquationInFrameOn` — one
-per flow, in the chart frame centred at each point — through
-`christoffelEvolutionDiffInFrameOn` (K1) and `coeff_bilinOfComp`.
-
-The `SolutionOn` packages are built here by `solOfMetric`, so the caller supplies only metric
-families: the residual input is exactly the two per-flow Christoffel evolution equations,
-which is the K2-B standing input of planner ruling R1, at the same level as `rm`'s Uhlenbeck
-interfaces.  No smoothness, inverse-metric or pairing hypothesis leaks out. -/
 theorem gamma_of_fields
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (g₁ g₂ : Real -> SmoothRiemannianMetric I M)
@@ -491,40 +367,22 @@ theorem gamma_of_fields
     (nablaRic₁ x) (nablaRic₂ x) (hΓ₁ x) (hΓ₂ x) ⟨t, hreg ht⟩ x (chartFrame_mem I x) i j k
   exact hdiff.hasDerivAt hnhds
 
-/-! ### The `gamma` member from (B)'s own fields
-
-The two per-flow Christoffel evolution equations consumed by `gamma_of_fields` are *not* a
-standing input: the repo already produces them from a metric family together with its
-Ricci-flow PDE and joint chart-Gram smoothness, via `solutionOn_of_joint`
-(`Evolution/ExtendedSolutionRegularity.lean`) followed by `tailChristoffel`
-(`Evolution/Connection/TailChristoffel.lean`).  The only cost is a *strictly positive-time
-tail*: `tailChristoffel` is stated on `Ico t₀ b` with `a < t₀`, which is harmless here because
-the `gamma` member is only ever needed at interior times, and `t₀ := (a+t)/2` works for each. -/
-
 variable (I) in
-/-- The chart frame is a `C^∞` local frame on the base set of its trivialization. -/
 theorem chartFrame_isFrameTop (x₀ : M) :
     IsLocalFrameOn I E (∞ : WithTop ℕ∞) (chartFrame I x₀)
       (trivializationAt E (TangentSpace I) x₀).baseSet :=
   (trivializationAt E (TangentSpace I) x₀).isLocalFrameOn_localFrame_baseSet I ∞
     (DifferentialGeometry.Integral.Measure.chartModelBasis E)
 
-/-- Reference interval used only to *name* the frame-inverse and `∇Ric` component families
-below.  Both depend on the solution package solely through its metric family, so the choice of
-interval is immaterial (the uses in `gamma_of_gram` are definitionally the restricted ones). -/
 private def refInterval : DifferentialGeometry.Integral.Connection.RealTimeInterval :=
   DifferentialGeometry.Integral.Connection.RealTimeInterval.univ 0
 
-/-- The inverse chart-frame Gram components of a metric family: the `gInv` that
-`tailChristoffel` constructs. -/
 def chartFrameInv (g : Real -> SmoothRiemannianMetric I M) (x₀ : M) :
     Real -> DifferentialGeometry.Integral.Connection.InverseMetricComponents M
       (Fin (Module.finrank Real E)) :=
   localFrameInv (E := E) (I := I) (D := refInterval) (solOfMetric (I := I) g)
     (chartFrame I x₀) (chartFrame_isFrameTop I x₀)
 
-/-- The chart-frame components of `∇Ric` of a metric family: the `nablaRic` that
-`tailChristoffel` constructs. -/
 def chartNablaRic (g : Real -> SmoothRiemannianMetric I M) (x₀ : M) :
     Real -> M -> Fin (Module.finrank Real E) -> Fin (Module.finrank Real E) ->
       Fin (Module.finrank Real E) -> Real :=
@@ -532,9 +390,6 @@ def chartNablaRic (g : Real -> SmoothRiemannianMetric I M) (x₀ : M) :
     ricciCovDerivCompInFrame (I := I) (D := refInterval) (solOfMetric (I := I) g)
       (chartFrame I x₀) t x d p q
 
-/-- **The per-flow Christoffel evolution equation from (B)'s fields.**  Joint chart-Gram
-`C^∞` regularity plus the Ricci-flow equation give, on every strictly positive-time tail, the
-Christoffel evolution equation in the chart frame centred at any point. -/
 theorem chrEvo_of_gram (g : Real -> SmoothRiemannianMetric I M) {a b : Real} (hab : a < b)
     (hjoint : ∀ (x₀ : M) (i j : Fin (Module.finrank Real E)),
       ContMDiffOn (𝓘(Real, Real).prod I) 𝓘(Real) ∞
@@ -559,15 +414,6 @@ theorem chrEvo_of_gram (g : Real -> SmoothRiemannianMetric I M) {a b : Real} (ha
     (trivializationAt E (TangentSpace I) x₀).open_baseSet
   exact h
 
-/-- **K6b, full discharge of the bundle's `gamma` member.**
-
-The `gamma` field of `ForwardUniqueAssembly.ForwardUniqueInputs`, verbatim, from black box
-(B)'s own fields only: the two flows' joint chart-Gram `C^∞` regularity on `Ico a b` and their
-two Ricci-flow equations.  No standing input remains, and the bundled speed `Avec` is the
-constructed `christoffelDiffSpeed`.
-
-At an interior time `t` the tail parameter is `t₀ = (a+t)/2`, so the tail restriction of
-`tailChristoffel` costs nothing. -/
 theorem gamma_of_gram (g₁ g₂ : Real -> SmoothRiemannianMetric I M) {a b : Real} (hab : a < b)
     (hjoint₁ : ∀ (x₀ : M) (i j : Fin (Module.finrank Real E)),
       ContMDiffOn (𝓘(Real, Real).prod I) 𝓘(Real) ∞

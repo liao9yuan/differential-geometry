@@ -3,16 +3,6 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTimeAssembly.Conjugatin
 import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTimeAssembly.RicciFlowPdeAtZero
 import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTimeFlow.ConjugatingFlowProperties
 
-/-!
-# Gauge removal after low-regularity DeTurck realization
-
-This file isolates the consumer that comes after a low-regularity fixed-point
-solution has been upgraded to a smooth metric family.  A realized
-Ricci--DeTurck strong solution with joint chart-Gram smoothness produces, on
-the same horizon, its conjugating diffeomorphism family and the corresponding
-Ricci-flow family.
--/
-
 namespace DifferentialGeometry.PDE.RicciFlow
 
 open Bundle
@@ -59,9 +49,6 @@ private theorem neg_tangent_cmdwa
       (e.linear ℝ (FiberBundle.mem_baseSet_trivializationAt' q₀.2)).map_neg (X q₀.1 q₀.2)
 
 omit [NeZero (Module.finrank ℝ E)] in
-/-- The full-horizon conjugating gauge carried by a jointly smooth DeTurck
-vector field.  This is kept private; the public interface below returns the
-gauge together with the Ricci-flow family it produces. -/
 private theorem full_gauge
     (g_DT : ℝ → SmoothRiemannianMetric I M) (g_bg : SmoothRiemannianMetric I M)
     (T : ℝ) (hT : 0 < T)
@@ -151,9 +138,6 @@ private theorem full_gauge
     change (Φ_fam s : M → M) x = Φ s x
     rw [hfun_eqOn s hs]
 
-/-- A realized Ricci--DeTurck strong solution with joint chart-Gram
-smoothness yields, on the same horizon, a conjugating gauge and a genuine
-Ricci-flow family.  The background metric need not equal the initial metric. -/
 theorem ricci_gauge_of_dt
     (g₀ g_bg : SmoothRiemannianMetric I M) {T : ℝ}
     (g_DT : ℝ → SmoothRiemannianMetric I M)

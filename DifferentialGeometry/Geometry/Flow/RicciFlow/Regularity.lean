@@ -3,15 +3,6 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.Scalar.IntrinsicDe
 
 set_option autoImplicit false
 
-
-
-
-
-
-
-
-
-
 noncomputable section
 
 namespace DifferentialGeometry.PDE.RicciFlow
@@ -27,11 +18,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 variable [IsManifold I 1 M]
 variable [CompleteSpace E] [SigmaCompactSpace M] [T2Space M]
 
-
-
-
-
-
 omit [SigmaCompactSpace M] in
 theorem scalarSmoothOfSol
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
@@ -40,8 +26,6 @@ theorem scalarSmoothOfSol
     ContMDiff I 𝓘(Real, Real) (∞ : WithTop ℕ∞) (S.scalar t) := by
   simpa [SolutionOn.scalar, SolutionFamily.scalar] using
     metricScalar_smooth (I := I) (M := M) (S.family.metric t)
-
-
 
 omit [SigmaCompactSpace M] in
 theorem scalarContOfSol
@@ -52,8 +36,6 @@ theorem scalarContOfSol
       (D.carrier ×ˢ (Set.univ : Set M)) := by
   exact hS.scalarCont
 
-
-
 omit [SigmaCompactSpace M] in
 theorem scalarTimeOfSol
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
@@ -63,7 +45,6 @@ theorem scalarTimeOfSol
     (x : M) :
     DifferentiableWithinAt Real (fun s : Real => S.scalar s x) K t := by
   exact hS.scalarTime ht hK x
-
 
 omit [SigmaCompactSpace M] in
 theorem scalarRegOfSol
@@ -171,12 +152,6 @@ theorem scalarRegOfSol
     exact DifferentialGeometry.Integral.Connection.gradientFun_mdiffAt (I := I) (S.family.metric t)
       hscaled x
 
-
-
-
-
-
-
 omit [SigmaCompactSpace M] in
 theorem scalarSTContOfSol
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
@@ -185,8 +160,6 @@ theorem scalarSTContOfSol
     ScalarSTContOn (I := I) (M := M) S := by
   exact CanonicalScalarRegularOn.toScalarSTCont (I := I) (M := M)
     (scalarRegOfSol (I := I) S hS)
-
-
 
 omit [SigmaCompactSpace M] in
 theorem ricciRegOfSol
@@ -199,7 +172,6 @@ theorem ricciRegOfSol
       rm04_cont := hS.rm04Cont
       ricci_norm_space := hS.ricciNormSpace
       ricci_norm_grad := hS.ricciNormGrad }
-
 
 theorem scalarEvolOfSol
     [I.Boundaryless]
@@ -222,8 +194,6 @@ theorem scalarEvolOfSol
           (t : Real) := by
   exact scalarEvolution_of_isSolution (I := I) S hS
 
-
-
 theorem invEvolOfSol
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -234,7 +204,6 @@ theorem invEvolOfSol
       (DifferentialGeometry.Tensor.Coordinates.coordinateFrameAt (I := I) x0)
       (DifferentialGeometry.Tensor.Coordinates.coordinateFrameSet (I := I) x0) := by
   exact coordInvEvol (I := I) S hS x0
-
 
 theorem ricciEvolOfSol
     [I.Boundaryless]
@@ -256,8 +225,6 @@ theorem ricciEvolOfSol
       (t : Real) := by
   exact coordRicciEvol (I := I) S hS x0 t i j
 
-
-
 theorem invSymmOfSol
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -270,7 +237,6 @@ theorem invSymmOfSol
   simpa [coordInv] using
     DifferentialGeometry.Tensor.Coordinates.gInvChart_symm (I := I) (S.family.metric t) x0
       (DifferentialGeometry.Tensor.Coordinates.coordinateFrameAt_mem (I := I) x0) i j
-
 
 theorem ricciSymmOfSol
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
@@ -289,13 +255,6 @@ theorem ricciSymmOfSol
       (DifferentialGeometry.Tensor.Coordinates.coordinateFrameAt_toBasis (I := I) x0)
       (fun a b => coordInv (I := I) S x0 t x0 a b) hinv i j
   simpa [ricciCompInFrame, SolutionOn.ricciAt, SolutionFamily.ricciAt] using hsym
-
-
-
-
-
-
-
 
 theorem coordNab2_can
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
@@ -575,8 +534,6 @@ theorem coordNab2_can
           rw [hcorr]
           ring
 
-
-
 theorem coordRough_can
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -652,8 +609,6 @@ theorem coordRough_can
             funext q
             fin_cases q <;> rfl
           rw [hinput, hnab2 a b i j]
-
-
 
 theorem ricciLapOfSol
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
@@ -850,12 +805,6 @@ theorem ricciLapOfSol
   have hval := hcomp t x
   rw [hnabla] at hval
   simpa [roughLapRic, gInv, frame] using hval
-
-
-
-
-
-
 
 theorem smoothOfSol
     [I.Boundaryless]

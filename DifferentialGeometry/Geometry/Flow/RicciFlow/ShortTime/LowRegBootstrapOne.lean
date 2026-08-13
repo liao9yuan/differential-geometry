@@ -2,18 +2,6 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.LowRegSmoothBridge
 import DifferentialGeometry.Analysis.Parabolic.QuasiLinear.CrossScaleParabolicTraceEnergy
 import DifferentialGeometry.Analysis.Parabolic.QuasiLinear.TensorMaximalRegularity.SolutionFieldLink
 
-/-!
-# First same-horizon low-regularity bootstrap
-
-The order-one maximal-regularity solution has an `L²_t H3` companion field and
-an `H¹_t H1` carrier.  The cross-scale Lions--Magenes construction therefore
-produces an `H2` representative at every time of the original interval.  This
-file records the exact links needed by the low-regularity Ricci--DeTurck lane:
-the representative realizes the carrier everywhere, realizes the `H3` field
-almost everywhere, and inherits an almost-everywhere `H2` ball bound at every
-time without shrinking the horizon.
--/
-
 noncomputable section
 
 open Bundle Manifold MeasureTheory Set
@@ -38,8 +26,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 variable {g : SmoothRiemannianMetric I M} {r s : ℕ} {a T : ℝ}
 
-/-- The affine maximal-regularity Duhamel solution, packaged with its top
-spatial companion as a cross-scale field on the same time interval. -/
 def duhamelCross (g : SmoothRiemannianMetric I M) (r s : ℕ) (a : ℝ)
     {T : ℝ} (hT : 0 < T) (hT1 : T ≤ 1)
     (u₀ : tensorHs (I := I) (M := M) g r s (a + 2))
@@ -53,8 +39,6 @@ def duhamelCross (g : SmoothRiemannianMetric I M) (r s : ℕ) (a : ℝ)
 omit [NeZero (Module.finrank ℝ E)]
   [CompactSpace M]
   [BoundarylessManifold I M] in
-/-- The intermediate representative realizes the continuous lower carrier at
-every time of the original interval. -/
 theorem crossRepr_toFun
     (u : CrossScaleField (I := I) (M := M) g r s a T)
     (hT : 0 < T) {t : ℝ} (ht : t ∈ Set.Icc (0 : ℝ) T) :
@@ -68,8 +52,6 @@ theorem crossRepr_toFun
 omit [NeZero (Module.finrank ℝ E)]
   [CompactSpace M]
   [BoundarylessManifold I M] in
-/-- The intermediate representative is the intermediate inclusion of the top
-companion field almost everywhere on the original interval. -/
 theorem crossRepr_hi_ae
     (u : CrossScaleField (I := I) (M := M) g r s a T)
     (hT : 0 < T) :
@@ -84,8 +66,6 @@ theorem crossRepr_hi_ae
   exact hcoeff i
 
 omit [BoundarylessManifold I M] in
-/-- The same-horizon Duhamel cross representative realizes the affine carrier
-at every time. -/
 theorem duhRepr_toFun
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (a : ℝ)
     {T : ℝ} (hT : 0 < T) (hT1 : T ≤ 1)
@@ -101,8 +81,6 @@ theorem duhRepr_toFun
       (duhamelCross (I := I) (M := M) g r s a hT hT1 u₀ f) hT ht
 
 omit [BoundarylessManifold I M] in
-/-- The same-horizon Duhamel cross representative realizes the intermediate
-inclusion of the top Duhamel field almost everywhere. -/
 theorem duhRepr_field_ae
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (a : ℝ)
     {T : ℝ} (hT : 0 < T) (hT1 : T ≤ 1)
@@ -118,8 +96,6 @@ theorem duhRepr_field_ae
       (duhamelCross (I := I) (M := M) g r s a hT hT1 u₀ f) hT
 
 omit [BoundarylessManifold I M] in
-/-- The same-horizon Duhamel cross representative is strongly measurable at
-the intermediate Sobolev order. -/
 theorem duhRepr_meas
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (a : ℝ)
     {T : ℝ} (hT : 0 < T) (hT1 : T ≤ 1)
@@ -149,10 +125,6 @@ theorem duhRepr_meas
 omit [NeZero (Module.finrank ℝ E)]
   [CompactSpace M]
   [BoundarylessManifold I M] in
-/-- An almost-everywhere intermediate-order ball bound for the top companion
-holds for the cross-scale representative at every time.  The proof uses the
-already established continuity of its squared norm, so it does not require a
-later time shrink. -/
 theorem crossRepr_ball
     (u : CrossScaleField (I := I) (M := M) g r s a T)
     (hT : 0 < T) {R : ℝ} (hR : 0 ≤ R)
@@ -188,9 +160,6 @@ theorem crossRepr_ball
   exact (sq_le_sq₀ (norm_nonneg _) hR).1 (sub_nonpos.mp hsub)
 
 omit [BoundarylessManifold I M] in
-/-- For the order-one Ricci--DeTurck solver, its almost-everywhere lower-state
-condition becomes an every-time `H2` bound for the same-horizon cross-scale
-representative. -/
 theorem duhRepr_ball
     (g₀ : SmoothRiemannianMetric I M) {T R : ℝ}
     (hT : 0 < T) (hT1 : T ≤ 1)
@@ -212,8 +181,6 @@ theorem duhRepr_ball
   exact ht
 
 omit [BoundarylessManifold I M] in
-/-- A uniformly bounded Duhamel cross representative defines an honest
-time-`L2` field at the intermediate Sobolev order. -/
 theorem duhRepr_memLp
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (a : ℝ)
     {T : ℝ} (hT : 0 < T) (hT1 : T ≤ 1)
@@ -239,7 +206,6 @@ theorem duhRepr_memLp
   filter_upwards [ae_restrict_mem (μ := volume) measurableSet_Icc] with t ht
   exact hrepr t ht
 
-/-- The intermediate Duhamel representative as a time-`L2` field. -/
 def duhReprL2
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (a : ℝ)
     {T : ℝ} (hT : 0 < T) (hT1 : T ≤ 1)
@@ -259,8 +225,6 @@ def duhReprL2
         g r s a hT hT1 u₀ f).repr t)
 
 omit [BoundarylessManifold I M] in
-/-- The time-`L2` intermediate field is represented by the Duhamel cross
-representative almost everywhere. -/
 theorem duhReprL2_ae
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (a : ℝ)
     {T : ℝ} (hT : 0 < T) (hT1 : T ≤ 1)
@@ -281,8 +245,6 @@ theorem duhReprL2_ae
     g r s a hT hT1 u₀ f hR hball).coeFn_toLp
 
 omit [BoundarylessManifold I M] in
-/-- The intermediate time-`L2` field inherits the prescribed state-ball bound
-almost everywhere. -/
 theorem duhReprL2_ae_le
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (a : ℝ)
     {T : ℝ} (hT : 0 < T) (hT1 : T ≤ 1)

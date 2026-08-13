@@ -4,50 +4,6 @@ import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.DeTurckRemainder
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.DeTurckRHSSectionRealizeUnitModel
 import DifferentialGeometry.Analysis.Spectral.Tensor.SobolevScale.ExponentCongr
 
-/-!
-# The Ricci–DeTurck smooth remainder is slot-symmetric
-
-The forcing-side symmetry brick of the low-regularity Ricci–DeTurck lane, and
-the missing input of `lowreg_sol_symm` (`LowRegSymmPreserve.lean`).
-
-`deTurckSmoothRemainder g₀ g_bg T = deTurckRHSArmG0 g₀ g_bg T − Δ_∇ T` has two
-summands with *different* symmetry mechanisms:
-
-* the Ricci–DeTurck arm is symmetric for **every** `T`: its unit-model value is
-  the bilinear form `deTurckRicciRHS g_bg (g₀ + T)`, which is symmetric because
-  the Ricci tensor and the metric Lie derivative are
-  (`deTurckRicciRHS_symm`, in `DeTurckRicciRHSSymmetric.lean`);
-* the rough connection Laplacian is only symmetric on symmetric `T`, and there
-  the mechanism is slot-swap **equivariance**,
-  `rawTensorConnLapSmooth_domDomCongrSection` (`SlotSwapEquivariance.lean`).
-
-So the bridge from the known *bilinear-form* symmetry to the *tensor*-level
-statement `symmS g₀ R = R` is exactly: transport the bilinear symmetry through
-`unitModel`-extensionality on the arm, and use equivariance on the Laplacian.
-
-Main results:
-
-* `swap_deTurckRHSArm` — the slot swap fixes the Ricci–DeTurck arm, for every
-  smooth fibre-small `T`.
-* `swap_smoothRem`, `symmS_smoothRem` — the smooth Ricci–DeTurck remainder of a
-  slot-symmetric `T` is slot-symmetric, in swap form and in `symmS`-fixed-point
-  form.
-* `symmS_remSymmS` — the shape the low-regularity nonlinearity uses:
-  `symmS g₀ (deTurckSmoothRemainder g₀ g_bg (symmS g₀ T) …) =
-   deTurckSmoothRemainder g₀ g_bg (symmS g₀ T) …`.
-* `symmHs_smoothN`, `symmHs_coreN`, `symmHs_lowRegN` — the spectral lifts:
-  the smooth nonlinearity, the core nonlinearity and its dense extension all
-  land in the fixed-point set of `symmHs`.
-* `lowreg_force_symm`, `lowreg_sol_symm_rhs` — the `hf` hypothesis of
-  `lowreg_sol_symm` discharged for the genuine Ricci–DeTurck forcing.
-* `symmHs_congr`, `lowreg_sol_symm_h3` — the same statement transported to the
-  literal exponent `(3 : ℝ)` that `lowRadial_eq_self_along_sol` consumes.
-
-Two reusable rank-two bridges fall out on the way: `ccTensor_ext_bilin` (a
-smooth `(0, 2)`-tensor is determined by its extracted bilinear form) and
-`bilin_ddc_swap` (the slot swap transposes that form).
--/
-
 noncomputable section
 
 set_option linter.unusedSectionVars false
@@ -82,15 +38,6 @@ private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
-/-! ## Bilinear-form extensionality and the slot swap
-
-A smooth `(0, 2)`-tensor is determined by its extracted bilinear form, and the
-slot swap transposes that form.  Together these turn every rank-two slot-swap
-identity into a bilinear-form computation. -/
-
-/-- **A smooth `(0, 2)`-tensor is determined by its extracted bilinear form.**
-`unitModel`-extensionality (`smoothCcTensor_ext_of_unitModel`) composed with the
-`unitModel` ↔ `ccTensorBilin` dictionary. -/
 theorem ccTensor_ext_bilin (g : SmoothRiemannianMetric I M)
     {S S' : SmoothCcTensor g 0 2}
     (h : ∀ (x : M) (u w : TangentSpace I x),
@@ -109,7 +56,6 @@ theorem ccTensor_ext_bilin (g : SmoothRiemannianMetric I M)
   rw [key S, key S']
   exact h x (v 0) (v 1)
 
-/-- **The slot swap transposes the extracted bilinear form.** -/
 theorem bilin_ddc_swap (g : SmoothRiemannianMetric I M)
     (T : SmoothCcTensor g 0 2) (b : M) (u w : TangentSpace I b) :
     ccTensorBilin (I := I) g
@@ -124,14 +70,12 @@ theorem bilin_ddc_swap (g : SmoothRiemannianMetric I M)
   funext k
   fin_cases k <;> simp [Equiv.swap_apply_left, Equiv.swap_apply_right]
 
-/-- The slot swap of a `(0, 2)`-tensor is an involution. -/
 theorem ddc_swap_swap (g : SmoothRiemannianMetric I M) (T : SmoothCcTensor g 0 2) :
     domDomCongrSection (I := I) g (Equiv.swap (0 : Fin 2) 1)
         (domDomCongrSection (I := I) g (Equiv.swap (0 : Fin 2) 1) T) = T := by
   refine ccTensor_ext_bilin (I := I) (M := M) g (fun x u w => ?_)
   rw [bilin_ddc_swap (I := I) (M := M) g, bilin_ddc_swap (I := I) (M := M) g]
 
-/-- The slot swap commutes with subtraction of `(0, 2)`-tensors. -/
 theorem ddc_swap_sub (g : SmoothRiemannianMetric I M)
     (A B : SmoothCcTensor g 0 2) :
     domDomCongrSection (I := I) g (Equiv.swap (0 : Fin 2) 1) (A - B) =
@@ -141,16 +85,12 @@ theorem ddc_swap_sub (g : SmoothRiemannianMetric I M)
   simp only [bilin_ddc_swap (I := I) (M := M) g,
     ccTensorBilin_sub (I := I) (M := M) g]
 
-/-! ## `symmS` as the slot-swap fixed-point projection -/
-
-/-- A swap-invariant smooth `(0, 2)`-tensor is a fixed point of `symmS`. -/
 theorem symmS_of_swap (g₀ : SmoothRiemannianMetric I M) {X : SmoothCcTensor g₀ 0 2}
     (h : domDomCongrSection (I := I) g₀ (Equiv.swap (0 : Fin 2) 1) X = X) :
     symmS (I := I) (M := M) g₀ X = X := by
   simp only [symmS, ccTensor02Symm, h, ← two_smul ℝ X, smul_smul,
     show (1 / 2 : ℝ) * 2 = 1 by norm_num, one_smul]
 
-/-- The slot swap fixes every symmetrized tensor. -/
 theorem swap_symmS (g₀ : SmoothRiemannianMetric I M) (T : SmoothCcTensor g₀ 0 2) :
     domDomCongrSection (I := I) g₀ (Equiv.swap (0 : Fin 2) 1)
         (symmS (I := I) (M := M) g₀ T) =
@@ -160,22 +100,17 @@ theorem swap_symmS (g₀ : SmoothRiemannianMetric I M) (T : SmoothCcTensor g₀ 
   simp only [ccTensorBilin_symmS (I := I) (M := M) g₀]
   exact ccTensorBilinSymm_symm (I := I) g₀ T x w u
 
-/-- **Slot symmetrization is idempotent.** -/
 theorem symmS_idem (g₀ : SmoothRiemannianMetric I M) (T : SmoothCcTensor g₀ 0 2) :
     symmS (I := I) (M := M) g₀ (symmS (I := I) (M := M) g₀ T) =
       symmS (I := I) (M := M) g₀ T :=
   symmS_of_swap (I := I) (M := M) g₀ (swap_symmS (I := I) (M := M) g₀ T)
 
-/-- A `symmS`-fixed smooth `(0, 2)`-tensor is swap-invariant. -/
 theorem swap_of_symmS (g₀ : SmoothRiemannianMetric I M) {X : SmoothCcTensor g₀ 0 2}
     (h : symmS (I := I) (M := M) g₀ X = X) :
     domDomCongrSection (I := I) g₀ (Equiv.swap (0 : Fin 2) 1) X = X := by
   conv_lhs => rw [← h]
   rw [swap_symmS (I := I) (M := M) g₀, h]
 
-/-- **A `symmS`-fixed smooth `(0, 2)`-tensor has a symmetric extracted bilinear
-form.**  This is the tensor-level ⟹ bilinear-form direction of the dictionary
-used throughout the DeTurck layer. -/
 theorem bilin_symm_of_symmS (g₀ : SmoothRiemannianMetric I M)
     {X : SmoothCcTensor g₀ 0 2} (h : symmS (I := I) (M := M) g₀ X = X)
     (x : M) (v w : TangentSpace I x) :
@@ -186,17 +121,6 @@ theorem bilin_symm_of_symmS (g₀ : SmoothRiemannianMetric I M)
     ccTensorBilin_symmS (I := I) (M := M) g₀ X x w v,
     ccTensorBilinSymm_symm (I := I) g₀ X x v w]
 
-/-! ## The Ricci–DeTurck arm is slot-symmetric -/
-
-/-- **The Ricci–DeTurck right-hand-side arm is slot-symmetric.**
-
-For every smooth fibre-small `T`, the arm
-`deTurckRHSArmG0 g₀ g_bg T = deTurckRHSSection g_bg (g₀ + T)` (re-tagged to `g₀`)
-is fixed by the slot swap.  This is the tensor-level form of the bilinear
-symmetry `deTurckRicciRHS_symm`: the unit-model value of the arm at `x` on a
-tangent pair is `deTurckRicciRHS g_bg (g₀ + T) x (v 0) (v 1)`
-(`unitModel_of_deTurckRHSSection_realize`), and that bilinear form is symmetric,
-so `unitModel`-extensionality upgrades it to a `SmoothCcTensor` identity. -/
 theorem swap_deTurckRHSArm (g₀ g_bg : SmoothRiemannianMetric I M)
     (T : SmoothCcTensor g₀ 0 2) {δ : ℝ} (hδ_lt : δ < 1)
     (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ) :
@@ -218,8 +142,6 @@ theorem swap_deTurckRHSArm (g₀ g_bg : SmoothRiemannianMetric I M)
   exact deTurckRicciRHS_symm (I := I) g_bg
     (tensorSectionRealizeMetric (I := I) g₀ T hδ_lt hδ) x (v 1) (v 0)
 
-/-! ## The smooth Ricci–DeTurck remainder is slot-symmetric -/
-
 private theorem smoothRem_eq_arm_sub (g₀ g_bg : SmoothRiemannianMetric I M)
     (T : SmoothCcTensor g₀ 0 2) {δ : ℝ} (hδ_lt : δ < 1)
     (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ) :
@@ -228,11 +150,6 @@ private theorem smoothRem_eq_arm_sub (g₀ g_bg : SmoothRiemannianMetric I M)
         rawTensorConnLapSmooth (I := I) g₀ 0 2 T :=
   rfl
 
-/-- **The smooth Ricci–DeTurck remainder of a swap-invariant tensor is
-swap-invariant.**  The Ricci–DeTurck arm is symmetric unconditionally
-(`swap_deTurckRHSArm`); the rough connection Laplacian is slot-swap equivariant
-(`rawTensorConnLapSmooth_domDomCongrSection`), so it preserves the symmetry of
-`T`. -/
 theorem swap_smoothRem (g₀ g_bg : SmoothRiemannianMetric I M)
     (T : SmoothCcTensor g₀ 0 2) {δ : ℝ} (hδ_lt : δ < 1)
     (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
@@ -247,9 +164,6 @@ theorem swap_smoothRem (g₀ g_bg : SmoothRiemannianMetric I M)
       (Equiv.swap (0 : Fin 2) 1) T,
     hT]
 
-/-- **The smooth Ricci–DeTurck remainder of a slot-symmetric tensor is
-slot-symmetric**, in `symmS`-fixed-point form.  This is the smooth-tensor
-statement consumed by `symmHs_smoothCc_eq_self`. -/
 theorem symmS_smoothRem (g₀ g_bg : SmoothRiemannianMetric I M)
     (T : SmoothCcTensor g₀ 0 2) {δ : ℝ} (hδ_lt : δ < 1)
     (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
@@ -261,10 +175,6 @@ theorem symmS_smoothRem (g₀ g_bg : SmoothRiemannianMetric I M)
     (swap_smoothRem (I := I) (M := M) g₀ g_bg T hδ_lt hδ
       (swap_of_symmS (I := I) (M := M) g₀ hT))
 
-/-- **The shape the low-regularity nonlinearity uses.**  `coreN` and
-`lowRegN` always feed the *symmetrized* representative `symmS g₀ T` to
-`deTurckSmoothRemainder`, and `symmS` is idempotent, so the remainder is
-slot-symmetric with no hypothesis on `T`. -/
 theorem symmS_remSymmS (g₀ g_bg : SmoothRiemannianMetric I M)
     (T : SmoothCcTensor g₀ 0 2) {δ : ℝ} (hδ_lt : δ < 1)
     (hδ : gFibreOpBound (I := I) (M := M) g₀
@@ -277,8 +187,6 @@ theorem symmS_remSymmS (g₀ g_bg : SmoothRiemannianMetric I M)
   symmS_smoothRem (I := I) (M := M) g₀ g_bg _ hδ_lt hδ
     (symmS_idem (I := I) (M := M) g₀ T)
 
-/-- **The extracted bilinear form of the smooth Ricci–DeTurck remainder of a
-slot-symmetric tensor is symmetric.** -/
 theorem bilin_smoothRem_symm (g₀ g_bg : SmoothRiemannianMetric I M)
     (T : SmoothCcTensor g₀ 0 2) {δ : ℝ} (hδ_lt : δ < 1)
     (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
@@ -291,10 +199,6 @@ theorem bilin_smoothRem_symm (g₀ g_bg : SmoothRiemannianMetric I M)
   bilin_symm_of_symmS (I := I) (M := M) g₀
     (symmS_smoothRem (I := I) (M := M) g₀ g_bg T hδ_lt hδ hT) x v w
 
-/-! ## The spectral lift -/
-
-/-- The smooth Ricci–DeTurck nonlinearity is the spectral embedding of the
-smooth Ricci–DeTurck remainder. -/
 theorem smoothN_eq_embed (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
     (T : SmoothCcTensor g₀ 0 2) {δ : ℝ} (hδ_lt : δ < 1)
     (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ) :
@@ -304,8 +208,6 @@ theorem smoothN_eq_embed (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
   ext i
   rfl
 
-/-- **The smooth Ricci–DeTurck nonlinearity of a slot-symmetric tensor is
-spectrally symmetric.** -/
 theorem symmHs_smoothN (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
     (hσ : (0 : ℝ) ≤ (a : ℝ)) (T : SmoothCcTensor g₀ 0 2) {δ : ℝ} (hδ_lt : δ < 1)
     (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
@@ -317,7 +219,6 @@ theorem symmHs_smoothN (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
   exact symmHs_smoothCc_eq_self (I := I) (M := M) g₀ hσ _
     (symmS_smoothRem (I := I) (M := M) g₀ g_bg T hδ_lt hδ hT)
 
-/-- **The genuine core Ricci–DeTurck nonlinearity is spectrally symmetric.** -/
 theorem symmHs_coreN (g₀ g_bg : SmoothRiemannianMetric I M) {R δ : ℝ}
     (hδ : δ < 1)
     (hreal : ∀ S : SmoothCcTensor g₀ 0 2,
@@ -334,11 +235,6 @@ theorem symmHs_coreN (g₀ g_bg : SmoothRiemannianMetric I M) {R δ : ℝ}
     (hreal _ (coreSymm_h2 (I := I) (M := M) g₀ x))
     (symmS_idem (I := I) (M := M) g₀ (coreRep g₀ x))
 
-/-- **The genuine low-regularity Ricci–DeTurck nonlinearity is spectrally
-symmetric.**  Spectral symmetry holds on the dense smooth core
-(`symmHs_coreN` together with `lowRegN_on_core`), the symmetric states are
-closed (`isClosed_symmFixed`), and `lowRegN` is continuous, so symmetry
-propagates to the whole lower-state ball. -/
 theorem symmHs_lowRegN (g₀ g_bg : SmoothRiemannianMetric I M) {R δ : ℝ}
     (hR : 0 < R) (hδ : δ < 1)
     (hreal : ∀ S : SmoothCcTensor g₀ 0 2,
@@ -373,12 +269,6 @@ theorem symmHs_lowRegN (g₀ g_bg : SmoothRiemannianMetric I M) {R δ : ℝ}
   have hu : u ∈ C := by rw [hCuniv]; trivial
   exact hu
 
-/-! ## The symmetry input of `lowreg_sol_symm`, discharged -/
-
-/-- **The genuine Ricci–DeTurck forcing is spectrally symmetric almost
-everywhere.**  This is the `hf` hypothesis of `lowreg_sol_symm`, discharged for
-the concrete forcing `lowRegN ∘ (state path)` produced by
-`lowreg_partial_sol`. -/
 theorem lowreg_force_symm (g₀ g_bg : SmoothRiemannianMetric I M) {R δ T : ℝ}
     (hR : 0 < R) (hδ : δ < 1)
     (hreal : ∀ S : SmoothCcTensor g₀ 0 2,
@@ -398,11 +288,6 @@ theorem lowreg_force_symm (g₀ g_bg : SmoothRiemannianMetric I M) {R δ T : ℝ
   rw [ht]
   exact symmHs_lowRegN (I := I) (M := M) g₀ g_bg hR hδ hreal hcont hcore hσ (u t)
 
-/-- **The rough low-regularity Ricci–DeTurck solution field is spectrally
-symmetric almost everywhere.**  `lowreg_sol_symm` with its forcing-symmetry
-hypothesis discharged: the only remaining inputs are the two continuity facts
-exported by `lowreg_partial_sol` and the identification of the forcing with the
-genuine nonlinearity along the state path. -/
 theorem lowreg_sol_symm_rhs (g₀ g_bg : SmoothRiemannianMetric I M) {R δ T : ℝ}
     (hR : 0 < R) (hδ : δ < 1)
     (hreal : ∀ S : SmoothCcTensor g₀ 0 2,
@@ -427,17 +312,6 @@ theorem lowreg_sol_symm_rhs (g₀ g_bg : SmoothRiemannianMetric I M) {R δ T : �
     (lowreg_force_symm (I := I) (M := M) g₀ g_bg hR hδ hreal hcont hcore ha u
       gforce hforce)
 
-/-! ## Exponent normalization
-
-`lowRadial_eq_self_along_sol` states its symmetry input at the *literal*
-exponent `(3 : ℝ)`, while the solver's field lives at `((1 : ℕ) : ℝ) + 2`.  The
-two are equal but not definitionally equal, so an explicit transport
-(`tensorHsCongr`) is needed; spectral symmetrization is natural for it. -/
-
-/-- **Spectral symmetrization is natural for the exponent transport.**  Both
-sides reduce to the same term once the exponent equality is destructed:
-`tensorHsCongr` becomes the identity and the two nonnegativity proofs are
-propositionally irrelevant. -/
 theorem symmHs_congr (g : SmoothRiemannianMetric I M) {a b : ℝ} (hab : a = b)
     (ha : (0 : ℝ) ≤ a) (hb : (0 : ℝ) ≤ b)
     (u : tensorHs (I := I) (M := M) g 0 2 a) :
@@ -448,10 +322,6 @@ theorem symmHs_congr (g : SmoothRiemannianMetric I M) {a b : ℝ} (hab : a = b)
   cases hab
   rfl
 
-/-- **The rough low-regularity solution field is spectrally symmetric at the
-literal exponent `3`.**  This is exactly the `hsymm` input of
-`lowRadial_eq_self_along_sol`, for the transported solver path
-`t ↦ tensorHsCongr g₀ 0 2 h₃ (maxRegDuhamelSolField … t)`. -/
 theorem lowreg_sol_symm_h3 (g₀ g_bg : SmoothRiemannianMetric I M) {R δ T : ℝ}
     (hR : 0 < R) (hδ : δ < 1)
     (hreal : ∀ S : SmoothCcTensor g₀ 0 2,

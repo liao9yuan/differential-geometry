@@ -1,14 +1,5 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.LowRegRungFour
 
-/-!
-# The fifth low-regularity Galerkin energy rung
-
-The new `q = 4` forcing slot is triangular after the already-proved third and
-fourth energy rungs: only three terms reach the seventh jet, while every lower
-term is affine in the sixth-jet window.  This module records that split and
-lifts it to the ordered `H⁵` Galerkin endpoint.
--/
-
 noncomputable section
 
 open Bundle Manifold MeasureTheory Set Filter
@@ -40,9 +31,7 @@ private theorem mul3Le5 {a b c A B C : ℝ}
   mul_le_mul (mul_le_mul ha hb hb0 hA0) hc hc0 (mul_nonneg hA0 hB0)
 
 set_option linter.unusedSectionVars false in
-/-- The `q = 4` tower-direct arm slot.  Its lower bucket is affine in the
-sixth-jet handle `W`; the fifth-jet handle `V` also controls the fourth jet by
-window monotonicity. -/
+
 theorem armOrder4 (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M) :
     ∃ Atop Ar2 Ar1 Krem : ℝ,
@@ -360,11 +349,6 @@ theorem armOrder4 (hDim : Module.finrank ℝ E = 3)
       dsimp only [Q, A, B, D]
       ring
 
-/-- **The ordered rung-five spectral-arm certificate.**
-
-The two previously established caps control the fourth and fifth jet windows.
-After those caps are fixed, all lower terms are affine in `√E₅`; the four gate
-constants selected before the caps are exactly the coefficient of `√E₆`. -/
 theorem galArmMass5Ord (hDim : Module.finrank ℝ E = 3)
     (g₀ : SmoothRiemannianMetric I M) :
     ∃ Ctop Kr2 Kr1 Kcap : ℝ,
@@ -606,12 +590,6 @@ theorem galArmMass5Ord (hDim : Module.finrank ℝ E = 3)
   ring_nf
   exact le_rfl
 
-/-! ### The rung-five endpoint and its explicit package -/
-
-/-- **Rung 5: the `N`-uniform `H⁵` energy bound on the same Galerkin
-trajectory.**  The only prior-rung inputs are pointwise common `H³` and `H⁴`
-caps; the four absorption constants remain ordered before all solve data and
-before both caps. -/
 theorem lowregRung5Ord (hDim : Module.finrank ℝ E = 3)
     (g₀ : SmoothRiemannianMetric I M) :
     ∃ Ctop₄ Kr2 Kr1 Kcap : ℝ,
@@ -766,8 +744,6 @@ theorem lowregRung5Ord (hDim : Module.finrank ℝ E = 3)
     ring
   rw [hz]
 
-/-- One explicit ordered rung-five certificate.  Its two lower-rung caps are
-kept inside the continuation, after the four coherent gate witnesses. -/
 def IsRung5Ord (g₀ : SmoothRiemannianMetric I M)
     (Ctop₄ Kr2 Kr1 Kcap : ℝ) : Prop :=
   0 ≤ Ctop₄ ∧ 0 ≤ Kr2 ∧ 0 ≤ Kr1 ∧ 0 ≤ Kcap ∧
@@ -810,7 +786,6 @@ def IsRung5Ord (g₀ : SmoothRiemannianMetric I M)
           galerkinEnergy (I := I) (M := M)
             (eigenIdxFinset (I := I) (M := M) g₀ N) (U N) 5 t ≤ Φ
 
-/-- Package the ordered rung-five witnesses without erasing their coherence. -/
 theorem lowregRung5Pack (hDim : Module.finrank ℝ E = 3)
     (g₀ : SmoothRiemannianMetric I M) :
     ∃ Ctop₄ Kr2 Kr1 Kcap : ℝ,

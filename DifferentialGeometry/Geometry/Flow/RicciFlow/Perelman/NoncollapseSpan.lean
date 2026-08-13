@@ -3,15 +3,6 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.Perelman.FlowBallW
 
 set_option autoImplicit false
 
-/-!
-# No local collapsing on a positive regular slab
-
-This file combines the compact-slab W lower bound with the selected cutoff
-test function on a curvature-controlled flow ball.  The result deliberately
-starts at a strictly positive regular time; extending it uniformly to the
-initial time is a separate geometric frontier.
--/
-
 namespace DifferentialGeometry.PDE.RicciFlow.Perelman
 
 noncomputable section
@@ -39,8 +30,6 @@ private local instance : CompleteSpace E := FiniteDimensional.complete Real E
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
-/-- A Ricci flow is uniformly noncollapsed on curvature-controlled balls of
-bounded radius whose times lie in a fixed positive regular slab. -/
 theorem noncollapse_span
     [T2Space (TangentBundle I M)]
     {D : RealTimeInterval} (S : SolutionOn (I := I) (M := M) D)

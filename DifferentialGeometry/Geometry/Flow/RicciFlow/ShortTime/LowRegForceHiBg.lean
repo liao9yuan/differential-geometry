@@ -1,15 +1,6 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.LowRegForceHi
 import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.LowRegBgAffine
 
-/-!
-# High-scale fixed-background Ricci--DeTurck forcing
-
-This module is the arbitrary-background analogue of the frozen high forcing in
-`LowRegForceHi`.  It only assembles the three completed coefficient arms and
-proves their compatibility with the lower frozen split; construction of those
-completed maps remains a separate producer.
--/
-
 noncomputable section
 
 open Bundle Manifold MeasureTheory Set Filter
@@ -31,8 +22,6 @@ variable
       [IsManifold I ∞ M] [CompactSpace M] [I.Boundaryless]
       [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M]
 
-/-- The fixed-background zero-state force is the scale inclusion of the
-canonical order-two static force. -/
 theorem lowBaseForceBg_eq
     (g gB : SmoothRiemannianMetric I M) :
     lowBaseForceBg (I := I) (M := M) g gB =
@@ -45,8 +34,6 @@ theorem lowBaseForceBg_eq
         (baseForceH2 (I := I) (M := M) g gB) = _
   rw [baseForceH2_eq_static]
 
-/-- The frozen high-scale Ricci--DeTurck split with an independent fixed
-background. -/
 noncomputable def liftHiNBg
     (g gB : SmoothRiemannianMetric I M)
     {ρ δ : ℝ} (hρ : 0 ≤ ρ) (hδ0 : 0 ≤ δ) (hδ_le : δ ≤ 1 / 3)
@@ -72,8 +59,6 @@ noncomputable def liftHiNBg
           (tensorHsInclusion (I := I) (M := M) (g := g) (r := 0) (s := 2)
             (show (3 : ℝ) ≤ (4 : ℝ) by norm_num) v))
 
-/-- The lower frozen split formed from an explicitly supplied completed
-first-order map. -/
 noncomputable def lowBaseNBgWith
     (g gB : SmoothRiemannianMetric I M)
     {ρ δ : ℝ} (hρ : 0 ≤ ρ) (hδ0 : 0 ≤ δ) (hδ_le : δ ≤ 1 / 3)
@@ -96,8 +81,6 @@ noncomputable def lowBaseNBgWith
         (tensorHsInclusion (I := I) (M := M) (g := g) (r := 0) (s := 2)
           (show (2 : ℝ) ≤ (3 : ℝ) by norm_num) u))
 
-/-- The fixed-background frozen high split agrees after inclusion with the
-completed lower split formed from the same first-order maps. -/
 theorem hiNBg_incl
     (g gB : SmoothRiemannianMetric I M)
     {ρ δ : ℝ} (hρ : 0 < ρ) (hδ0 : 0 ≤ δ) (hδ_le : δ ≤ 1 / 3)

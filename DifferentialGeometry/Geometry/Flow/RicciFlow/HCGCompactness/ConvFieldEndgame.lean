@@ -7,27 +7,6 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.MetricCompact
 set_option autoImplicit false
 set_option backward.isDefEq.respectTransparency false
 
-
-/-!
-# Convergent-field endgame
-
-Assembles Bricks 4–7a into the theorem-facing upgrade
-`CompactnessConclusion X`, modulo the THREE tracked inputs (Thm 3.9's `mc`, the
-moving-Shi bound `hShiT`, and the joint regularity `hsmooth` of the limit) plus
-the mc-comparison data the plan sanctions (`hequivT`/`hrel`/`hcp`/`hcovSrc`/
-`hlipG`/`hkcont`).
--/
-
-
-
-
-
-
-
-
-
-
-
 noncomputable section
 
 open Set Function Filter Bundle Manifold Tensor0SBundle
@@ -43,8 +22,6 @@ variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H} [I.Boundaryless]
 
-/-- Compatibility wrapper promoting the pointwise closed-window scalar
-producer to all carrier times when the carrier lies in that one window. -/
 theorem ConvOut.scalar_conv
     {X : PointedFlowSeq (I := I)}
     {P : PointedRiemannianManifold (I := I)}
@@ -117,8 +94,6 @@ theorem ConvOut.scalar_conv
     ConvOut.scalar_conv_at (I := I) Φ R bf hsrc htgt β ψ cLow hcLow hbound
       hcovTail co (hcarrier ht) x
 
-/-- Compatibility wrapper promoting the pointwise closed-window squared
-Ricci-norm producer to all carrier times. -/
 theorem ConvOut.ricNorm_conv
     {X : PointedFlowSeq (I := I)}
     {P : PointedRiemannianManifold (I := I)}
@@ -198,36 +173,12 @@ section Endgame
 
 variable {X : PointedFlowSeq (I := I)}
 
-
-
-
-
-
-
-
-
-
-
-
 noncomputable def endgamePhi
     (mc : MetricCompactnessConclusion (I := I) (X.atZero (I := I)))
     (L : PointedFlowData (I := I) X.D)
     (hL0 : L.atTime (I := I) 0 = mc.limit) :
     PointedCGHMaps (I := I) X (L.atTime 0) mc.subseq :=
   pointedCGHMaps_of_atZero (I := I) X L mc.subseq (hL0.symm ▸ mc.maps)
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 noncomputable def flowUpgrade_of_maps
     (mc : MetricCompactnessConclusion (I := I) (X.atZero (I := I)))
@@ -278,7 +229,7 @@ noncomputable def flowUpgrade_of_maps
     fun t ht => eq_of_heq (hLmetric t ht)
   have hscalar : ScalarPullbackTendsto (I := I) (Φ.compSubseq co.φ co.hφ) := scalar
   have hricciNorm : RicNormPullback (I := I) (Φ.compSubseq co.φ co.hφ) := ricciNorm
-  -- the re-indexed Theorem 3.9 conclusion and the re-indexed spacetime maps
+
   set mc' := mc.compSubseq co.φ co.hφ with hmc'
   set Φ' := (Φ).compSubseq co.φ co.hφ with hΦ'
   refine ⟨co.φ, co.hφ, ?_⟩
@@ -312,8 +263,6 @@ noncomputable def flowUpgrade_of_maps
     refine ⟨k0, fun k hk t ht => ?_⟩
     have htβψ : t ∈ Set.Icc β ψ := hcarrier (hab ht)
     exact hk0 k hk t htβψ
-
-
 
 omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 theorem flowUpgrade_maps_L
@@ -391,8 +340,6 @@ theorem flowLimit_of_maps
   (flowUpgrade_of_maps (I := I) (X := X) mc L P hPlim hPL Φ R bf hsrc htgt
     β ψ hcarrier co hLmetric scalar ricciNorm).toConclusion
 
-
-
 omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 theorem flowLimit_of_co
     (mc : MetricCompactnessConclusion (I := I) (X.atZero (I := I)))
@@ -423,22 +370,6 @@ theorem flowLimit_of_co
     CompactnessConclusion (I := I) X :=
   flowLimit_of_maps (I := I) mc L (L.atTime 0) hL0 rfl (endgamePhi (I := I) mc L hL0) R bf hsrc htgt β ψ
     hcarrier co (fun t ht => heq_of_eq (hLmetric t ht)) scalar ricciNorm
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 noncomputable def flowUpgrade_of_mc
     (mc : MetricCompactnessConclusion (I := I) (X.atZero (I := I)))
@@ -494,8 +425,6 @@ noncomputable def flowUpgrade_of_mc
     (flowOfMetric (I := I) X.D mc.limit co.gInf hsol) mc.limit rfl hL0 Φ₀
     R bf hsrc htgt β ψ hcarrier co (fun t _ => HEq.rfl) scalar ricciNorm
 
-
-
 omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 theorem flowLimit_of_mc
     (mc : MetricCompactnessConclusion (I := I) (X.atZero (I := I)))
@@ -546,13 +475,6 @@ theorem flowLimit_of_mc
     CompactnessConclusion (I := I) X :=
   (flowUpgrade_of_mc (I := I) (X := X) mc Φ₀ R bf hsrc htgt β ψ
     hcarrier co hzero hsol scalar ricciNorm).toConclusion
-
-
-
-
-
-
-
 
 noncomputable def endgameCo
     {P : PointedRiemannianManifold (I := I)} {subseq : Nat -> Nat}
@@ -634,9 +556,6 @@ noncomputable def endgameCo
     (lipTail_of_src (I := I) (Φ := Φ) R bf hsrc htgt β ψ hlipG)
     (lipSrc_of_soln (I := I) (Φ := Φ) R hsrc htgt β ψ hβψ hwin gRefT B Crel Bmax hBmax hCrel1
       hBmax1 hequivT hrel hShiT)
-
-
-
 
 omit [NeZero (Module.finrank ℝ E)] in
 theorem endgameCo_zero
@@ -738,13 +657,6 @@ theorem endgameCo_zero
     (endgameCo Φ R bf hsrc htgt β ψ hβψ hwin gRefT B Crel Bmax hBmax hCrel1 hBmax1 hequivT hrel hShiT hcovSrc hlipG) h0 g0
     (conv0_of_cp (I := I) Φ R hsrc htgt g0 hcp)
 
-/-- **The book-facing P4 endgame theorem — MSM135 Thm 3.10 ⇐ 3.9.**  Hypotheses:
-`mc` (Thm 3.9); the book-cited sequence-flow inputs (`hequivT`/`hrel`/`hShiT`/`hcovSrc`/
-`hlipG` + the reference/window data + the time-0 `hcp`); and the tracked
-limit-regularity/scalar inputs `hsol`/`scalar` (stated against the `endgameCo` def per
-ruling 5a).  `Φ₀ = pointedCGHMaps_of_manifold X mc.limit mc.subseq mc.maps`; `bf`/`hsrc`/
-`htgt` are `nonempty_bumpFamily`/`isSigmaCompact_of_isOpen`.  The AA output and time-0
-identification are executed by `endgameCo`/`endgameCo_zero`; the conclusion is `flowLimit_of_mc`. -/
 theorem flowLimit_endgame
     (mc : MetricCompactnessConclusion (I := I) (X.atZero (I := I)))
     (Φ₀ : PointedCGHMaps (I := I) X mc.limit mc.subseq)
@@ -938,13 +850,6 @@ theorem flowLimit_endgame
   exact flowLimit_of_mc (I := I) mc Φ₀ R bf hsrc htgt β ψ hcarrier co hzero
     hsol scalar ricciNorm
 
-/-- Compatibility refinement of `flowLimit_endgame` with the limit-flow equation
-produced internally.  It replaces the whole `IsSolutionOn` input by the five
-regularity and curvature-continuity inputs of
-`PDE.RicciFlow.isSolutionOn_of_reg`; the metric Ricci-flow equation is supplied
-by `ConvOut.gInf_pde`, and scalar pullback convergence by
-`ConvOut.scalar_conv`.  It deliberately preserves the older endgame's closed
-window assumptions and is not the unconditional P4 endpoint. -/
 theorem flowLimit_of_reg
     (mc : MetricCompactnessConclusion (I := I) (X.atZero (I := I)))
     (Φ₀ : PointedCGHMaps (I := I) X mc.limit mc.subseq)

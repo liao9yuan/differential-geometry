@@ -2,14 +2,6 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.UnifDeTurckRH
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.UnifGagliardoNirenberg
 import DifferentialGeometry.Analysis.Sobolev.TensorHilbert.MetricArmCoeffJetTower
 
-/-!
-# Class-first fixed-background connection bound
-
-This module packages the first three class-metric covariant jets of the fixed
-background connection difference into a single dimension-three `H2` bound.
-The coefficient is selected before the class metric varies.
--/
-
 set_option autoImplicit false
 
 noncomputable section
@@ -35,8 +27,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
-/-- The explicit class-first `H2` coefficient for the fixed-background
-connection difference. -/
 noncomputable def connFixH2C
     (gBase : SmoothRiemannianMetric I M) (Λ : ℝ) : ℝ :=
   let R₁ := revJetOneC (E := E) Λ
@@ -54,15 +44,12 @@ noncomputable def connFixH2C
       (volCompareC (E := E) Λ *
         ((riemannianVolumeMeasure (I := I) (M := M) gBase) Set.univ).toReal))
 
-/-- The pointwise fixed-connection coefficient for the first three derivative
-orders used by class-first coefficient factories. -/
 noncomputable def connFixGridC (Λ : ℝ) (j : ℕ) : ℝ :=
   if j = 0 then connDiffZeroSqC (E := E) Λ
   else if j = 1 then connDiffOneSqC (E := E) Λ
   else connDiffTwoC (E := E) Λ
 
 omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] in
-/-- The fixed-connection pointwise grid coefficient is nonnegative. -/
 lemma connFixGridC_nonneg (Λ : ℝ) (j : ℕ) :
     0 ≤ connFixGridC (E := E) Λ j := by
   unfold connFixGridC
@@ -75,8 +62,6 @@ lemma connFixGridC_nonneg (Λ : ℝ) (j : ℕ) :
     · unfold connDiffTwoC
       positivity
 
-/-- The first three fixed-background connection-difference jets admit one
-pointwise coefficient family chosen before the class metric varies. -/
 theorem connFix_grid_unif
     (gBase : SmoothRiemannianMetric I M) {Λ : ℝ} (hΛ : 1 ≤ Λ) :
     ∃ F : ℕ → ℝ, (∀ j, 0 ≤ F j) ∧
@@ -109,12 +94,6 @@ theorem connFix_grid_unif
   simpa [connFixGridC] using
     (unifConnDiffTwo (I := I) (M := M) gBase g₀ hΛ hcomp hjet1 hjet2 hjet3 x)
 
-/-- **Dimension-three class-first fixed-background connection bound.**
-
-For every class metric uniformly equivalent to `gBase` whose first three
-`gBase`-covariant metric jets are bounded by `Λ`, the `g₀`-Sobolev sum of
-`connDiffSection gBase g₀` through order two is bounded by one coefficient
-chosen solely from `(gBase, Λ)` before `g₀` varies. -/
 theorem connFix_h2_unif
     (hDim : Module.finrank ℝ E = 3)
     (gBase : SmoothRiemannianMetric I M) {Λ : ℝ} (hΛ : 1 ≤ Λ) :

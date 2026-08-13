@@ -6,7 +6,6 @@ import Mathlib.Analysis.Calculus.Deriv.Add
 import Mathlib.Analysis.Calculus.Deriv.Mul
 import Mathlib.Geometry.Manifold.MFDeriv.Basic
 
-
 noncomputable section
 
 namespace DifferentialGeometry.PDE.RicciFlow.Pullback

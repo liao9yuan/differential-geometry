@@ -4,7 +4,6 @@ import DifferentialGeometry.Analysis.Parabolic.RicciLinearization.RicciSecondOrd
 import DifferentialGeometry.Analysis.Parabolic.DeTurckLinearization.DeTurckCorrectionPrincipalSymbolRemainder
 import DifferentialGeometry.Analysis.Integration.DivergenceTheorem.LocalFormula
 
-
 noncomputable section
 
 open Bundle

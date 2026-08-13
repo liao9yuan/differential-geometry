@@ -4,20 +4,6 @@ set_option autoImplicit false
 set_option linter.style.longLine false
 set_option linter.unusedSectionVars false
 
-/-!
-# Christoffel-difference time derivative (forward-uniqueness brick K1)
-
-First Route-(K) brick of the `ricci_flow_forward_unique` campaign
-(`ShortTime/FORWARD_UNIQUE_PRO_RULING.md` §5, K1): for two Ricci-flow solutions
-carrying the same local frame, the frame components of `Γ(S₁) − Γ(S₂)` evolve
-with derivative `RHS(S₁) − RHS(S₂)` — the exact component subtraction of the
-two existing `ChristoffelEvolutionEquationInFrameOn` facts, with no star-sum
-estimate.  A pointwise evaluation lemma identifies the component difference
-with the frame coefficient of the connection-difference vector, so later
-bricks can pass to the intrinsic connection-difference tensor without
-re-expanding Christoffel symbols.
--/
-
 noncomputable section
 
 namespace DifferentialGeometry.PDE.RicciFlow
@@ -39,11 +25,6 @@ variable {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
 variable {u : Set M}
 
 omit [DecidableEq Idx] in
-/-- **K1: Christoffel-difference evolution in a common local frame.**  Two
-Ricci-flow solutions on the same interval, each satisfying its raised
-Christoffel evolution equation in the SAME local frame, have their
-component-difference `Γ(S₁)^k_{ij} − Γ(S₂)^k_{ij}` differentiable in time with
-derivative the difference of the two evolution right-hand sides. -/
 theorem christoffelEvolutionDiffInFrameOn
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S₁ S₂ : SolutionOn (I := I) (M := M) D)
@@ -71,11 +52,6 @@ theorem christoffelEvolutionDiffInFrameOn
   exact (h₁ t x hx i j k).sub (h₂ t x hx i j k)
 
 omit [Fintype Idx] [DecidableEq Idx] in
-/-- Pointwise evaluation: the Christoffel component difference of two
-solutions at one time is the frame coefficient of the connection-difference
-vector `(∇¹_{e_i} e_j − ∇²_{e_i} e_j)(x)`.  This is the bridge later bricks use
-to pass from component differences to the intrinsic connection-difference
-object. -/
 theorem christoffelDiff_coeff
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S₁ S₂ : SolutionOn (I := I) (M := M) D)

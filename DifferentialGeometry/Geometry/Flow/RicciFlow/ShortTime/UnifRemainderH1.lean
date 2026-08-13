@@ -4,15 +4,6 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.UnifTopPathH1
 import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.UnifPathLower
 import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.UnifRhsConvex
 
-/-!
-# Class-first low-regularity Ricci--DeTurck remainder estimate
-
-The top-path action, the lower application estimate, and both integrated lower
-coefficient jets are assembled with all constants selected before the metric in
-the order-three class varies.  The public theorem is restricted to dimension
-three, matching the low-regularity existence interface.
--/
-
 set_option autoImplicit false
 
 noncomputable section
@@ -38,15 +29,8 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
   [IsManifold I ∞ M] [CompactSpace M] [I.Boundaryless]
   [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M]
 
--- The symmetry hypotheses are used to obtain the path identity in the proof,
--- although their dependency is not visible in the conclusion's syntax.
 set_option linter.unusedVariables false in
-/-- **Dimension-three class-first mixed `H3 -> H1` remainder estimate.**
 
-The radius, top coefficient, and affine lower coefficients are chosen before
-the class metric varies.  The DeTurck background is the fixed class background
-`gBase`; endpoint `H3` size occurs only in the coefficient of the `H2`
-difference. -/
 theorem rem_h1_unif
     (hDim : Module.finrank ℝ E = 3)
     (gBase : SmoothRiemannianMetric I M) {Λ : ℝ} (hΛ : 1 ≤ Λ)

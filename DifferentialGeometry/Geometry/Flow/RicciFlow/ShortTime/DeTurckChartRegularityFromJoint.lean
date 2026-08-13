@@ -17,7 +17,6 @@ import Mathlib.Analysis.Calculus.TangentCone.Prod
 import Mathlib.Analysis.Calculus.TangentCone.Real
 import Mathlib.Analysis.Calculus.ContDiff.Comp
 
-
 namespace DifferentialGeometry.PDE.RicciFlow
 
 open Bundle

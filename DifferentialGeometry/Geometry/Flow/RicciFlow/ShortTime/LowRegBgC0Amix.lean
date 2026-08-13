@@ -1,11 +1,5 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.LowRegBgC0One
 
-/-!
-# Order-zero mixed-arm pair estimates
-
-Internal assembly layer for the low-regularity order-zero refold.
--/
-
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
@@ -710,7 +704,6 @@ theorem jetAddFour
     nlinarith [sq_nonneg X]
   refine (jetAdd (I := I) (M := M) g 2 (A + B + C) D).trans ?_
   nlinarith [sq_nonneg X]
-
 
 end LowRegBgC0Core
 end DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral

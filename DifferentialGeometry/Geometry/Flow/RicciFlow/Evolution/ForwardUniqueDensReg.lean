@@ -9,57 +9,6 @@ set_option autoImplicit false
 set_option linter.style.longLine false
 set_option linter.unusedSectionVars false
 
-/-!
-# Joint `(t, x)`-regularity of the forward-uniqueness energy density (brick TOWER)
-
-`Evolution/ForwardUniqueClosure.lean` (K5) closes the Kotschwar forward-uniqueness argument
-modulo one regularity package: the density
-`forwardUniqueDensity g₁ g₂ t x = |h₀₂|² + |A₀₃|² + |S₀₄|²` must be jointly `C∞` in `(t, x)`
-on `Ioo a c ×ˢ univ` (`hdens`), continuous in `x` at each fixed time (`hdcont`), and
-integrable against the moving Riemannian volume (`hidens`, and the six companion slots).
-
-This file supplies that layer.  The mathematical content is a **single structural brick**:
-
-> the intrinsic fibre squared norm `normSq0S (g t) x s (A t x)` of a moving metric and a
-> moving `(0,s)` tensor is jointly `C∞` as soon as (i) the chart inverse-Gram entries of the
-> carrier are jointly `C∞` and (ii) the chart-frame components of `A` are jointly `C∞`.
-
-Everything else is instantiation.  The brick is the joint-in-time upgrade of the spatial
-`normSq0S_smooth` (`Tensor/RSTensor/MetricTrace/Connection.lean`): the same coordinate
-expansion `normSq0S_eq_coord` against the chart basis `chartBasisFamily`, but with the
-inverse metric supplied by `chartInvGramMatrix` (whose joint smoothness is proved here by
-Cramer) rather than by the flat-model chart inverse.
-
-The two carrier thirds `|A₀₃|²` and `|S₀₄|²` need one more layer: the *chart-frame scalar
-components* of the connection- and curvature-difference carriers.  Those are supplied here by
-composing the intrinsic chart bridges `LeviCivita_chartBasisVec_alpha_basis_apply` and
-`riemannOp_chartBasisVec_alpha_eq` (valid on `chartLeviCivitaGoodSet α`) with the generic joint
-Christoffel/Riemann tower `gen_joint_christoffel` / `gen_joint_riemann`
-(`Analysis/Parabolic/RicciLinearization/RicciDifferenceMeanValue.lean`), transported from
-`ℝ × E` back to `ℝ × M`.
-
-## Main results
-
-* `chartInvGram_jointContMDiffOn` — joint `C∞` of the chart inverse-Gram entries of a metric
-  family, from the chart-Gram joint smoothness `hgram` (Cramer: `det⁻¹ · adjugate`).
-* `normSq0S_jointContMDiffOn` — **the brick**.
-* `connChartComp` / `rm04ChartComp` / `rmChartComp` — the chart-frame readings of `A₀₃`, of the
-  *mixed* lowered curvature `riemannCurvature04At g₁ (metricCov g₂)`, and of `S₀₄`, all valid
-  on `chartLeviCivitaGoodSet α`.
-* `connChartJoint` / `rmChartJoint` — joint `(t, x)`-`C∞` of those chart-frame components,
-  from the chart-Gram packages of the two flows alone.
-* `nablaRicChartJoint` — joint `(t, x)`-`C∞` of the chart-frame components of `∇Ric`,
-  including at a one-sided initial edge.
-* `metricDiffSq_jointContMDiffOn`, `connDiffSq_jointContMDiffOn`, `rmDiffSq_jointContMDiffOn`,
-  `dens_jointContMDiffOn` — the three thirds and K5's `hdens`, each consuming **only** the two
-  chart-Gram packages.
-* `integrable_of_continuous` / `dens_continuous` / `dcont_idens` — K5's `hdcont` and `hidens`
-  at *every* time (closed edges included), unconditionally, plus the companion `Integrable`
-  slots.
-
-See `ForwardUniqueDensReg.md`.
--/
-
 noncomputable section
 
 namespace DifferentialGeometry.PDE.RicciFlow
@@ -83,18 +32,10 @@ variable [IsManifold I 1 M] [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
 variable [CompleteSpace E] [SigmaCompactSpace M] [T2Space M]
 variable [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
 
-/-! ## The joint chart inverse-Gram
-
-Cramer's rule, transcribed from the spatial `chartInvGramMatrix_entry_contMDiffOn`
-(`Geometry/Operator/Gradient.lean`) to the product source `ℝ × M`.  Only the entry
-smoothness input changes: the spatial `chartGramMatrix_entry_contMDiffOn` is replaced by the
-hypothesis `hgram`, which is exactly K5's chart-Gram package. -/
-
 section JointInvGram
 
 variable (g : ℝ → SmoothRiemannianMetric I M)
 
-/-- **Joint `C∞` of the chart-Gram determinant** of a metric family. -/
 theorem chartGramDet_jointContMDiffOn {J : Set ℝ} (x₀ : M)
     (hgram : ∀ i j : Fin (Module.finrank ℝ E),
       ContMDiffOn (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ, ℝ) ∞
@@ -116,8 +57,6 @@ theorem chartGramDet_jointContMDiffOn {J : Set ℝ} (x₀ : M)
   refine ContMDiffOn.mul (contMDiffOn_const (c := ((Equiv.Perm.sign σ : ℤ) : ℝ))) ?_
   exact contMDiffOn_finset_prod (fun k _ => hgram (σ k) k)
 
-/-- **Joint `C∞` of the chart-Gram adjugate entries** of a metric family: an adjugate entry is
-the determinant of a row-updated matrix, hence a polynomial in the Gram entries. -/
 theorem chartGramAdj_jointContMDiffOn {J : Set ℝ} (x₀ : M)
     (hgram : ∀ i j : Fin (Module.finrank ℝ E),
       ContMDiffOn (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ, ℝ) ∞
@@ -157,9 +96,6 @@ theorem chartGramAdj_jointContMDiffOn {J : Set ℝ} (x₀ : M)
     rw [heq]
     exact hgram (σ k) k
 
-/-- **Joint `C∞` of the chart inverse-Gram entries** of a metric family, from the chart-Gram
-package.  Cramer's rule `G⁻¹ = (det G)⁻¹ · adj G`; the determinant is positive on the
-trivialization base set because each `g t` is Riemannian. -/
 theorem chartInvGram_jointContMDiffOn {J : Set ℝ} (x₀ : M)
     (hgram : ∀ i j : Fin (Module.finrank ℝ E),
       ContMDiffOn (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ, ℝ) ∞
@@ -192,13 +128,8 @@ theorem chartInvGram_jointContMDiffOn {J : Set ℝ} (x₀ : M)
 
 end JointInvGram
 
-/-! ## The structural brick: joint smoothness of a moving fibre norm -/
-
 section JointNormSq
 
-/-- An open spatial set through the base point cuts the product slab down to a
-neighbourhood **within** the slab over `univ`, for an *arbitrary* time set `J`.  This is the
-one place where the closed initial edge of `J` would otherwise force `IsOpen J`. -/
 private theorem prodOpen_nhdsWithin {S : Set M} (hS : IsOpen S) {x₀ : M} (hx₀ : x₀ ∈ S)
     (J : Set ℝ) (t : ℝ) :
     J ×ˢ S ∈ 𝓝[J ×ˢ (Set.univ : Set M)] ((t, x₀) : ℝ × M) := by
@@ -212,29 +143,6 @@ private theorem prodOpen_nhdsWithin {S : Set M} (hS : IsOpen S) {x₀ : M} (hx�
 
 variable (g : ℝ → SmoothRiemannianMetric I M)
 
-/-- **Joint `(t, x)`-smoothness of an intrinsic moving fibre squared norm.**
-
-For a metric family `g` with jointly `C∞` chart-Gram entries and a `(0,s)`-tensor family `A`
-whose chart-frame components are jointly `C∞`-within, the scalar `(t, x) ↦ |A t x|²_{g t}` is
-jointly `C∞` on `J ×ˢ univ`, for an **arbitrary** time set `J` — in particular for a closed or
-half-open one, which is what a slab-uniform sup up to the initial edge needs.
-
-The proof is local: around any `(t, x₀)` the intrinsic norm agrees with the coordinate
-contraction of `normSq0S_eq_coord` against the chart basis at `x₀`, whose inverse-metric
-coefficients are the chart inverse-Gram entries (`chartInvGram_inverse`).  Both factors of
-that finite sum are jointly `C∞`-within by hypothesis, so the sum is, and the eventual equality
-transports smoothness back to the intrinsic norm.  This is the joint-in-time analogue of the
-spatial `normSq0S_smooth`.
-
-Openness of `J` is never used: the base set of the trivialization at `x₀` is a *spatial*
-neighbourhood of the chart centre, so `J ×ˢ baseSet` is already a neighbourhood of `(t, x₀)`
-**within** `J ×ˢ univ` (`prodOpen_nhdsWithin`), whatever `J` is.
-
-The component hypothesis `hA` is only ever used *at the diagonal point* `(t, x₀)` with the
-chart centred at `x₀`, so it is stated in that (weakest) pointwise form: producers whose chart
-identity is valid only on a neighbourhood of the chart centre — such as the connection- and
-curvature-difference carriers, valid on `chartLeviCivitaGoodSet x₀` rather than on the whole
-trivialization base set — feed it without any restriction juggling. -/
 theorem normSq0S_jointContMDiffOn {J : Set ℝ} {s : ℕ}
     (A : ℝ → (x : M) → Tensor0SSpace s I x)
     (hgram : ∀ (x₀ : M) (i j : Fin (Module.finrank ℝ E)),
@@ -257,7 +165,7 @@ theorem normSq0S_jointContMDiffOn {J : Set ℝ} {s : ℕ}
     exact FiberBundle.mem_baseSet_trivializationAt' x₀
   have hnhd : J ×ˢ e.baseSet ∈ 𝓝[J ×ˢ (Set.univ : Set M)] ((t, x₀) : ℝ × M) :=
     prodOpen_nhdsWithin e.open_baseSet hqbase J t
-  -- the coordinate contraction is jointly smooth-within at `(t, x₀)`
+
   have hsum : ContMDiffWithinAt (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ, ℝ) ∞
       (fun p : ℝ × M =>
         ∑ K : Fin s → Fin (Module.finrank ℝ E),
@@ -280,7 +188,7 @@ theorem normSq0S_jointContMDiffOn {J : Set ℝ} {s : ℕ}
           (J ×ˢ (Set.univ : Set M)) ((t, x₀) : ℝ × M) :=
       fun N => hA x₀ N htJ
     exact ((ContMDiffWithinAt.prod fun a _ => hinvAt (K a) (L a)).mul (hAAt K)).mul (hAAt L)
-  -- and it agrees with the intrinsic norm near `(t, x₀)` within the slab
+
   have heq : (fun p : ℝ × M => normSq0S (I := I) (g p.1) p.2 s (A p.1 p.2))
       =ᶠ[𝓝[J ×ˢ (Set.univ : Set M)] ((t, x₀) : ℝ × M)]
       fun p : ℝ × M =>
@@ -308,19 +216,10 @@ theorem normSq0S_jointContMDiffOn {J : Set ℝ} {s : ℕ}
 
 end JointNormSq
 
-/-! ## The metric third of the density
-
-The chart-frame components of `h₀₂ = g₁ − g₂` are literally differences of chart-frame metric
-components, so `metricFrameComp_jointContMDiffOn_of_chartGram` (`ExtendedSolutionRegularity`)
-discharges the brick's second hypothesis outright. -/
-
 section MetricDiff
 
 variable (g₁ g₂ : ℝ → SmoothRiemannianMetric I M)
 
-/-- Chart-frame components of a metric family are jointly `C∞` on **any** time set: the
-chart-frame component *is* the chart-Gram entry (`chartGramMatrix_apply` is `rfl`), so this is
-the chart-Gram package itself. -/
 theorem metricChartComp_jointContMDiffOn (g : ℝ → SmoothRiemannianMetric I M) {J : Set ℝ}
     (hgram : ∀ (x₀ : M) (i j : Fin (Module.finrank ℝ E)),
       ContMDiffOn (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ, ℝ) ∞
@@ -333,10 +232,6 @@ theorem metricChartComp_jointContMDiffOn (g : ℝ → SmoothRiemannianMetric I M
       (J ×ˢ (trivializationAt E (TangentSpace I) x₀).baseSet) :=
   hgram x₀ i j
 
-/-- **The metric third of `hdens`.**  `(t, x) ↦ |h₀₂|²_{g₁(t)}` is jointly `C∞` on
-`J ×ˢ univ` under the chart-Gram packages of the two flows, for an **arbitrary** time set `J`.
-Unconditional: the brick's component hypothesis is discharged by
-`metricChartComp_jointContMDiffOn` on both metrics. -/
 theorem metricDiffSq_jointContMDiffOn {J : Set ℝ}
     (hgram₁ : ∀ (x₀ : M) (i j : Fin (Module.finrank ℝ E)),
       ContMDiffOn (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ, ℝ) ∞
@@ -374,16 +269,8 @@ theorem metricDiffSq_jointContMDiffOn {J : Set ℝ}
 
 end MetricDiff
 
-/-! ## Chart-frame components of the connection- and curvature-difference carriers
-
-The two carrier thirds are read on the chart-`α` frame `e^α_· x` through the intrinsic chart
-bridges, which are valid on `chartLeviCivitaGoodSet α` (an open neighbourhood of `α`, contained
-in the trivialization base set).  All three identities below are generic: an arbitrary point,
-an arbitrary pair of metrics. -/
-
 section ChartComponents
 
-/-- Linearity of the fibre metric in its first slot, over a finite `smul`-sum. -/
 private theorem inner_sum_left (g : SmoothRiemannianMetric I M) (x : M)
     (c : Fin (Module.finrank ℝ E) → ℝ) (w : Fin (Module.finrank ℝ E) → TangentSpace I x)
     (u : TangentSpace I x) :
@@ -393,7 +280,6 @@ private theorem inner_sum_left (g : SmoothRiemannianMetric I M) (x : M)
   refine Finset.sum_congr rfl fun m _ => ?_
   rw [map_smul, ContinuousLinearMap.smul_apply, smul_eq_mul]
 
-/-- Linearity of the fibre metric in its second slot, over a finite `smul`-sum. -/
 private theorem inner_sum_right (g : SmoothRiemannianMetric I M) (x : M)
     (u : TangentSpace I x)
     (c : Fin (Module.finrank ℝ E) → ℝ) (w : Fin (Module.finrank ℝ E) → TangentSpace I x) :
@@ -403,10 +289,6 @@ private theorem inner_sum_right (g : SmoothRiemannianMetric I M) (x : M)
   refine Finset.sum_congr rfl fun m _ => ?_
   rw [map_smul, smul_eq_mul]
 
-/-- **Chart-frame components of `A₀₃`.**  On `chartLeviCivitaGoodSet α`, the `g₁`-lowered
-connection difference read on the chart-`α` frame is the Christoffel difference contracted with
-the chart Gram of the lowering metric:
-`A₀₃(e_{K0}, e_{K1}, e_{K2}) = ∑_m (Γ¹ − Γ²)^m_{K0 K1}(ϕ_α x) · G¹_{m, K2}(x)`. -/
 theorem connChartComp (g₁ g₂ : SmoothRiemannianMetric I M) (α : M)
     (K : Fin 3 → Fin (Module.finrank ℝ E)) {x : M}
     (hx : x ∈ chartLeviCivitaGoodSet (I := I) α) :
@@ -454,12 +336,6 @@ theorem connChartComp (g₁ g₂ : SmoothRiemannianMetric I M) (α : M)
   rw [inner_sum_left]
   exact Finset.sum_congr rfl fun m _ => by rw [chartGramMatrix_apply]
 
-/-- **Chart-frame components of the mixed lowered curvature.**  The Riemann tensor of the
-*second* metric's Levi-Civita connection, lowered by the *first* metric, read on the chart-`α`
-frame:
-`⟨Rm(∇²)(e_j, e_k) e_i, e_n⟩_{g₁} = ∑_l R²^l{}_{ijk}(ϕ_α x) · G¹_{n, l}(x)`.
-This is the one carrier reading with no pre-existing chart lemma; taking `g₂ := g₁` also gives
-the diagonal case `metricRm04At g₁`. -/
 theorem rm04ChartComp (g₁ g₂ : SmoothRiemannianMetric I M) (α : M)
     (i j k n : Fin (Module.finrank ℝ E)) {x : M}
     (hx : x ∈ chartLeviCivitaGoodSet (I := I) α) :
@@ -485,10 +361,6 @@ theorem rm04ChartComp (g₁ g₂ : SmoothRiemannianMetric I M) (α : M)
     riemannOp_chartBasisVec_alpha_eq (I := I) g₂ α i j k hx, inner_sum_right]
   exact Finset.sum_congr rfl fun l _ => by rw [chartGramMatrix_apply]
 
-/-- **Chart-frame components of the mixed lowered curvature, in slot-map form.**  The same
-identity as `rm04ChartComp`, with the four slots supplied by an index map `K : Fin 4 → …`
-instead of `vec4` — the shape the joint-regularity brick `normSq0S_jointContMDiffOn` consumes.
-Taking `g₂ := g₁` reads the diagonal curvature `metricRm04At g₁`. -/
 theorem rm04ChartMap (g₁ g₂ : SmoothRiemannianMetric I M) (α : M)
     (K : Fin 4 → Fin (Module.finrank ℝ E)) {x : M}
     (hx : x ∈ chartLeviCivitaGoodSet (I := I) α) :
@@ -507,8 +379,6 @@ theorem rm04ChartMap (g₁ g₂ : SmoothRiemannianMetric I M) (α : M)
   rw [hvec]
   exact rm04ChartComp (I := I) g₁ g₂ α (K 2) (K 0) (K 1) (K 3) hx
 
-/-- **Chart-frame components of `S₀₄`.**  Both terms of the curvature difference are read by
-`rm04ChartComp`, the first with `g₂ := g₁`. -/
 theorem rmChartComp (g₁ g₂ : SmoothRiemannianMetric I M) (α : M)
     (K : Fin 4 → Fin (Module.finrank ℝ E)) {x : M}
     (hx : x ∈ chartLeviCivitaGoodSet (I := I) α) :
@@ -536,30 +406,14 @@ theorem rmChartComp (g₁ g₂ : SmoothRiemannianMetric I M) (α : M)
 
 end ChartComponents
 
-/-! ## Joint smoothness of the carrier components
-
-The chart-frame components are finite polynomials in the chart Christoffel/Riemann symbols of
-the two flows and in the chart Gram of the lowering metric.  The joint `(t, x)`-smoothness of
-the former is the generic tower `gen_joint_christoffel` / `gen_joint_riemann`, living on
-`ℝ × E`; it is fed by repackaging the chart-Gram hypothesis as `GenJointGram` and transported
-back to `ℝ × M` along `extChartAt`. -/
-
 section JointChart
 
-/-- The chart-`α` good set is a spatial neighbourhood of the chart centre, so the product slab
-over it is a neighbourhood of `(t, x₀)` within the slab over `univ`, for an arbitrary `J`. -/
 private theorem good_nhdsWithin (x₀ : M) (J : Set ℝ) (t : ℝ) :
     J ×ˢ chartLeviCivitaGoodSet (I := I) x₀ ∈
       𝓝[J ×ˢ (Set.univ : Set M)] ((t, x₀) : ℝ × M) :=
   prodOpen_nhdsWithin (chartLeviCivitaGoodSet_isOpen (I := I) x₀)
     (self_mem_chartLeviCivitaGoodSet (I := I) x₀) J t
 
-/-- **The `A₀₃` component input of the brick**, discharged: the chart-frame components of the
-connection-difference carrier are jointly `C∞`-within `J ×ˢ univ` at `(t, x₀)`, from the two
-chart-Gram packages at `x₀`.  The time set `J` is **arbitrary** — in particular it may be
-half-open or closed at the initial edge, which is what the slab-uniform sups need.  The joint
-Christoffel input is the `ContDiffWithinAt` tower `christWithinM`
-(`Analysis/Parabolic/RicciLinearization/RicciDifferenceMeanValueWithin.lean`). -/
 theorem connChartJoint (g₁ g₂ : ℝ → SmoothRiemannianMetric I M) {J : Set ℝ}
     (x₀ : M)
     (hgram₁ : ∀ i j : Fin (Module.finrank ℝ E),
@@ -610,10 +464,6 @@ theorem connChartJoint (g₁ g₂ : ℝ → SmoothRiemannianMetric I M) {J : Set
     exact connChartComp (I := I) (g₁ p.1) (g₂ p.1) x₀ K hp.2
   exact hΦ.congr_of_eventuallyEq heq (heq.self_of_nhdsWithin ⟨ht, Set.mem_univ x₀⟩)
 
-/-- **The `S₀₄` component input of the brick**, discharged: the chart-frame components of the
-curvature-difference carrier are jointly `C∞`-within `J ×ˢ univ` at `(t, x₀)`, from the two
-chart-Gram packages at `x₀`, for an **arbitrary** time set `J`.  The joint Riemann input is the
-`ContDiffWithinAt` tower `riemWithinM`. -/
 theorem rmChartJoint (g₁ g₂ : ℝ → SmoothRiemannianMetric I M) {J : Set ℝ}
     (x₀ : M)
     (hgram₁ : ∀ i j : Fin (Module.finrank ℝ E),
@@ -666,9 +516,6 @@ theorem rmChartJoint (g₁ g₂ : ℝ → SmoothRiemannianMetric I M) {J : Set �
     exact rmChartComp (I := I) (g₁ p.1) (g₂ p.1) x₀ K hp.2
   exact hΦ.congr_of_eventuallyEq heq (heq.self_of_nhdsWithin ⟨ht, Set.mem_univ x₀⟩)
 
-/-- The chart-frame components of `∇Ric` are jointly `C∞` within an arbitrary time
-set `J`.  This is the closed-edge derivative input used to take a uniform slab
-bound for `|∇Ric|²`. -/
 theorem nablaRicChartJoint (g : ℝ → SmoothRiemannianMetric I M) {J : Set ℝ}
     (x₀ : M)
     (hgram : ∀ i j : Fin (Module.finrank ℝ E),
@@ -751,10 +598,6 @@ theorem nablaRicChartJoint (g : ℝ → SmoothRiemannianMetric I M) {J : Set ℝ
   exact hΦ.congr_of_eventuallyEq heq
     (heq.self_of_nhdsWithin ⟨ht, Set.mem_univ x₀⟩)
 
-/-- **The chart-frame components of a moving metric, jointly.**  For the `(0,2)` carrier
-`metricTensorField (g t)` the chart-frame component *is* the chart-Gram entry, so the joint
-regularity is the chart-Gram package read through `metricTensorField_apply`.  This is the
-`|g₂|²_{g₁}` input of the flux constant. -/
 theorem metricChartJoint (g : ℝ → SmoothRiemannianMetric I M) {J : Set ℝ} (x₀ : M)
     (hgram : ∀ i j : Fin (Module.finrank ℝ E),
       ContMDiffOn (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ, ℝ) ∞
@@ -776,14 +619,6 @@ theorem metricChartJoint (g : ℝ → SmoothRiemannianMetric I M) {J : Set ℝ} 
     (prodOpen_nhdsWithin (trivializationAt E (TangentSpace I) x₀).open_baseSet
       (FiberBundle.mem_baseSet_trivializationAt' x₀) J t)
 
-/-- **The background-curvature component input of the brick.**  The chart-frame components of
-the mixed lowered curvature `riemannCurvature04At g₁ (metricCov g₂)` are jointly `C∞`-within
-`J ×ˢ univ` at `(t, x₀)`, from the chart-Gram package of the *lowering* metric `g₁` and the
-chart-Gram package of the *connection* metric `g₂`, for an arbitrary time set `J`.
-
-Two instances carry all the background curvature norms of the (B) endgame: `g₂ := g₁` gives
-`Rm₁` lowered by `g₁`, and the pair `(g₂, g₂)` gives `Rm₂` lowered by `g₂`, whose `g₁`-norms are
-the constants `B₂` and `B_P` of `sdecFluxSq_le`. -/
 theorem rm04ChartJoint (g₁ g₂ : ℝ → SmoothRiemannianMetric I M) {J : Set ℝ}
     (x₀ : M)
     (hgram₁ : ∀ i j : Fin (Module.finrank ℝ E),
@@ -834,16 +669,10 @@ theorem rm04ChartJoint (g₁ g₂ : ℝ → SmoothRiemannianMetric I M) {J : Set
 
 end JointChart
 
-/-! ## The full density
-
-All three thirds now consume exactly the two chart-Gram packages. -/
-
 section Density
 
 variable (g₁ g₂ : ℝ → SmoothRiemannianMetric I M)
 
-/-- **The connection third of `hdens`.**  Joint `C∞` of `|A₀₃|²_{g₁(t)}` on `J ×ˢ univ`
-under the chart-Gram packages of the two flows, for an **arbitrary** time set `J`. -/
 theorem connDiffSq_jointContMDiffOn {J : Set ℝ}
     (hgram₁ : ∀ (x₀ : M) (i j : Fin (Module.finrank ℝ E)),
       ContMDiffOn (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ, ℝ) ∞
@@ -862,8 +691,6 @@ theorem connDiffSq_jointContMDiffOn {J : Set ℝ}
   intro x₀ K t ht
   exact connChartJoint (I := I) g₁ g₂ x₀ (hgram₁ x₀) (hgram₂ x₀) K ht
 
-/-- **The curvature third of `hdens`.**  Joint `C∞` of `|S₀₄|²_{g₁(t)}` on `J ×ˢ univ`
-under the chart-Gram packages of the two flows, for an **arbitrary** time set `J`. -/
 theorem rmDiffSq_jointContMDiffOn {J : Set ℝ}
     (hgram₁ : ∀ (x₀ : M) (i j : Fin (Module.finrank ℝ E)),
       ContMDiffOn (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ, ℝ) ∞
@@ -882,10 +709,6 @@ theorem rmDiffSq_jointContMDiffOn {J : Set ℝ}
   intro x₀ K t ht
   exact rmChartJoint (I := I) g₁ g₂ x₀ (hgram₁ x₀) (hgram₂ x₀) K ht
 
-/-- **K5's `hdens`.**  Joint `C∞` of the Kotschwar energy density on `J ×ˢ univ`, from
-the chart-Gram packages of the two flows and nothing else.  The time set `J` is **arbitrary**:
-taking `J := Icc a c` gives the density up to the closed initial edge, which is what the
-slab-uniform extreme-value bounds and the edge continuity of the energy consume. -/
 theorem dens_jointContMDiffOn {J : Set ℝ}
     (hgram₁ : ∀ (x₀ : M) (i j : Fin (Module.finrank ℝ E)),
       ContMDiffOn (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ, ℝ) ∞
@@ -905,12 +728,6 @@ theorem dens_jointContMDiffOn {J : Set ℝ}
 
 end Density
 
-/-! ## Spatial continuity and integrability
-
-`M` is compact, so a continuous scalar is integrable against every Riemannian volume measure.
-The density is a sum of three intrinsic fibre norms of *smooth* tensor fields, so the
-`normSq0S_smooth` layer gives its spatial smoothness — hence continuity — directly. -/
-
 section Integrability
 
 private local instance : MeasurableSpace E := borel E
@@ -918,10 +735,6 @@ private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
-/-- **The integrability producer.**  On a compact manifold every continuous scalar is
-integrable against the moving Riemannian volume measure: the measure is finite on compacts
-and the support is automatically compact.  This discharges every `Integrable …
-(riemannianMeasureFamily g₁ t)` slot of K4/K5 from spatial continuity of the integrand. -/
 theorem integrable_of_continuous (g : ℝ → SmoothRiemannianMetric I M) (t : ℝ)
     {f : M → ℝ} (hf : Continuous f) :
     Integrable f (riemannianMeasureFamily (I := I) (M := M) g t) := by
@@ -931,17 +744,12 @@ theorem integrable_of_continuous (g : ℝ → SmoothRiemannianMetric I M) (t : �
   rw [riemannianMeasureFamily_def]
   exact hf.integrable_of_hasCompactSupport (HasCompactSupport.of_compactSpace f)
 
-/-- Spatial smoothness of a fibre squared norm of a smooth `(0,s)` field, restated at the
-`Continuous` level for the integrability slots. -/
 theorem normSq0S_continuous {s : ℕ} (g : SmoothRiemannianMetric I M)
     (A : Tensor0SField (𝕜 := ℝ) (E := E) (H := H) (I := I) (M := M)
       (n := (∞ : WithTop ℕ∞)) s) :
     Continuous (fun x : M => normSq0S (I := I) g x s (A x)) :=
   (normSq0S_smooth (I := I) g A).continuous
 
-/-- **Spatial smoothness of the fibre pairing of two smooth `(0,s)` fields.**  Polarization
-off `normSq0S_smooth`: `2⟨A, B⟩ = |A + B|² − |A|² − |B|²`.  This is the companion the
-integrability slots need, since every one of them pairs two smooth carriers. -/
 theorem inner0S_smooth {s : ℕ} (g : SmoothRiemannianMetric I M)
     (A B : Tensor0SField (𝕜 := ℝ) (E := E) (H := H) (I := I) (M := M)
       (n := (∞ : WithTop ℕ∞)) s) :
@@ -958,27 +766,16 @@ theorem inner0S_smooth {s : ℕ} (g : SmoothRiemannianMetric I M)
   exact (((normSq0S_smooth (I := I) g (A + B)).sub (normSq0S_smooth (I := I) g A)).sub
     (normSq0S_smooth (I := I) g B)).mul contMDiff_const
 
-/-- Fibre pairing of two smooth `(0,s)` fields, at the `Continuous` level. -/
 theorem inner0S_continuous {s : ℕ} (g : SmoothRiemannianMetric I M)
     (A B : Tensor0SField (𝕜 := ℝ) (E := E) (H := H) (I := I) (M := M)
       (n := (∞ : WithTop ℕ∞)) s) :
     Continuous (fun x : M => inner0S (I := I) g x s (A x) (B x)) :=
   (inner0S_smooth (I := I) g A B).continuous
 
-/-! ### The unconditional `Integrable` slots of K4/K5
-
-Four of K5's eight integrability side conditions pair carriers that are `Tensor0SField`s —
-smooth *by type* — so they need no extra hypothesis at all: `roughLap0SField`,
-`covDiv0SField` and `metricNabla0S` all land back in `Tensor0SField … ∞`
-(`Evolution/ForwardUniqueRmDiff.lean`).  The remaining four (`hipair`, `hirem`, `hirest`,
-`hidens`) pair a bare pointwise family (`Sdot`, `rem`, `Adot`) or the density carriers, and
-still need a continuity input. -/
-
 section Slots
 
 variable (g₁ : ℝ → SmoothRiemannianMetric I M)
 
-/-- **K5's `hilap` slot**, unconditional. -/
 theorem ilap_integrable (t : ℝ)
     (Sfield : Tensor0SField (𝕜 := ℝ) (E := E) (H := H) (I := I) (M := M)
       (n := (∞ : WithTop ℕ∞)) 4) :
@@ -988,7 +785,6 @@ theorem ilap_integrable (t : ℝ)
   integrable_of_continuous (I := I) g₁ t
     (inner0S_continuous (I := I) (g₁ t) (roughLap0SField (I := I) (g₁ t) Sfield) Sfield)
 
-/-- **K5's `hidiv` slot**, unconditional. -/
 theorem idiv_integrable (t : ℝ)
     (Sfield : Tensor0SField (𝕜 := ℝ) (E := E) (H := H) (I := I) (M := M)
       (n := (∞ : WithTop ℕ∞)) 4)
@@ -1000,7 +796,6 @@ theorem idiv_integrable (t : ℝ)
   integrable_of_continuous (I := I) g₁ t
     (inner0S_continuous (I := I) (g₁ t) (covDiv0SField (I := I) (g₁ t) Uflux) Sfield)
 
-/-- **K5's `hinab` slot**, unconditional. -/
 theorem inab_integrable (t : ℝ)
     (Sfield : Tensor0SField (𝕜 := ℝ) (E := E) (H := H) (I := I) (M := M)
       (n := (∞ : WithTop ℕ∞)) 4)
@@ -1012,7 +807,6 @@ theorem inab_integrable (t : ℝ)
   integrable_of_continuous (I := I) g₁ t
     (inner0S_continuous (I := I) (g₁ t) (metricNabla0S (I := I) (g₁ t) Sfield) Uflux)
 
-/-- **K5's `hidis` slot** (the dissipation integrand), unconditional. -/
 theorem idis_integrable (t : ℝ)
     (Sfield : Tensor0SField (𝕜 := ℝ) (E := E) (H := H) (I := I) (M := M)
       (n := (∞ : WithTop ℕ∞)) 4) :
@@ -1024,16 +818,12 @@ theorem idis_integrable (t : ℝ)
 
 end Slots
 
-/-- **K5's `hidens` from `hdcont`.**  Spatial continuity of the density at a fixed time makes
-it integrable against the moving volume, on a compact manifold. -/
 theorem dens_integrable (g₁ g₂ : ℝ → SmoothRiemannianMetric I M) (t : ℝ)
     (hdcont : Continuous (fun x : M => forwardUniqueDensity (I := I) g₁ g₂ t x)) :
     Integrable (fun x : M => forwardUniqueDensity (I := I) g₁ g₂ t x)
       (riemannianMeasureFamily (I := I) (M := M) g₁ t) :=
   integrable_of_continuous (I := I) g₁ t hdcont
 
-/-- **K5's `hdcont` from the joint package.**  A jointly `C∞` density on `Ioo a b ×ˢ univ` is
-continuous in `x` at each interior time: restrict along the smooth slice `x ↦ (t, x)`. -/
 theorem dens_continuous_of_joint (g₁ g₂ : ℝ → SmoothRiemannianMetric I M) {a b t : ℝ}
     (ht : t ∈ Set.Ioo a b)
     (hdens : ContMDiffOn (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ, ℝ) ∞
@@ -1049,11 +839,6 @@ theorem dens_continuous_of_joint (g₁ g₂ : ℝ → SmoothRiemannianMetric I M
   rw [contMDiffOn_univ] at hcomp
   exact hcomp.continuous
 
-/-- **K5's `hdcont` at every time, unconditionally.**  At a *fixed* time the density depends
-only on the two static metrics `g₁ t`, `g₂ t`, so the joint package applied to the two constant
-families needs no time-regularity input at all: the chart-Gram hypothesis degenerates to the
-spatial `chartGramMatrix_entry_contMDiffOn`.  This covers the closed edges that the joint
-statement on `Ioo a b` misses. -/
 theorem dens_continuous (g₁ g₂ : ℝ → SmoothRiemannianMetric I M) (t : ℝ) :
     Continuous (fun x : M => forwardUniqueDensity (I := I) g₁ g₂ t x) := by
   have hconst : ∀ (g : SmoothRiemannianMetric I M) (x₀ : M) (i j : Fin (Module.finrank ℝ E)),
@@ -1074,8 +859,6 @@ theorem dens_continuous (g₁ g₂ : ℝ → SmoothRiemannianMetric I M) (t : �
         fun x : M => forwardUniqueDensity (I := I) g₁ g₂ t x := rfl
   rwa [hfun] at hcont
 
-/-- **K5's `hdcont` and `hidens` at every time, unconditionally.**  Both edge inputs of
-`metrics_eq_on` — including the closed-edge times that the `Ioo` joint statement misses. -/
 theorem dcont_idens (g₁ g₂ : ℝ → SmoothRiemannianMetric I M) (t : ℝ) :
     Continuous (fun x : M => forwardUniqueDensity (I := I) g₁ g₂ t x) ∧
       Integrable (fun x : M => forwardUniqueDensity (I := I) g₁ g₂ t x)

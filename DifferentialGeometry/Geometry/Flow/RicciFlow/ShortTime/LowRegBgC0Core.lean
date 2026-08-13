@@ -1,13 +1,6 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.LowRegBgC0Assemble
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.DeTurckRemainderLowBaseTime
 
-/-!
-# Smooth-core control for the refolded order-zero arm
-
-This public endpoint bundles the internal coefficient construction into the
-radial same-background low-regularity action split.
--/
-
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
@@ -39,8 +32,6 @@ variable
 
 open LowRegBgC0Core
 
-/-- The radial same-background order-zero refold, bundled as one first-order
-smooth-core action on the two adjacent Sobolev scales. -/
 noncomputable def c0CoreData
     (g : SmoothRiemannianMetric I M)
     {ρ δ : ℝ} (hρ : 0 ≤ ρ) (hδ0 : 0 ≤ δ) (hδ_le : δ ≤ 1 / 3)
@@ -56,8 +47,6 @@ noncomputable def c0CoreData
     (hreal S (lowRadial_norm (I := I) (M := M) g hρ T))
     (zero_fb_c0 (I := I) (M := M) g hδ0)
 
-/-- On a smooth core state, the radial order-zero coefficient self-action is
-exactly the first-order action represented by `c0CoreData`. -/
 theorem c0Core_self
     (g : SmoothRiemannianMetric I M)
     {ρ δ : ℝ} (hρ : 0 ≤ ρ) (hδ0 : 0 ≤ δ) (hδ_le : δ ≤ 1 / 3)
@@ -85,8 +74,7 @@ theorem c0Core_self
 
 set_option maxHeartbeats 2400000 in
 set_option linter.unusedVariables false in
-/-- On every bounded spectral `H3` core ball, the two completed realizations
-of the radial order-zero refold are jointly Lipschitz in the state. -/
+
 theorem c0CorePair
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M) :
@@ -335,8 +323,7 @@ theorem c0CorePair
 
 set_option maxHeartbeats 800000 in
 set_option linter.unusedVariables false in
-/-- The radial order-zero refold has a two-jet coefficient bound affine in the
-independent `H3` state size on each fixed `H2` ball. -/
+
 theorem c0Coeff_aff
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M) :
@@ -448,9 +435,6 @@ private theorem refold_eq
     (lt_of_le_of_lt hδ_le (by norm_num)) hδ hδZ]
   rfl
 
-/-- In dimension three, the zero-based same-background remainder admits the
-refolded smooth-core action split with a fibre-small second-order coefficient
-and one common pair of low-regularity first-order estimates. -/
 theorem refold_low_split
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M) :

@@ -2,19 +2,6 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.C4.PullbackCo
 
 set_option autoImplicit false
 
-
-
-
-
-
-
-
-
-
-
-
-
-
 noncomputable section
 
 universe u uE uH
@@ -33,9 +20,6 @@ variable {M : Type u} [TopologicalSpace M] [ChartedSpace H M]
 variable {N : Type u} [TopologicalSpace N] [ChartedSpace H N] [IsManifold I ∞ N]
 
 section PartialTrans
-
-
-
 
 noncomputable def PartialDiffeomorph.trans {P : Type u} [TopologicalSpace P]
     [ChartedSpace H P] [IsManifold I ∞ P]
@@ -95,10 +79,6 @@ theorem covStep_zero (gRef : SmoothRiemannianMetric I M) (s : Nat)
 
 set_option backward.isDefEq.respectTransparency false in
 
-
-
-
-
 theorem iterCov_metric_zero (g : SmoothRiemannianMetric I M) (a : Nat) :
     iterCov (I := I) g 2 (Tensor0SBundle.metricTensorField (I := I) g) (a + 1) = 0 := by
   induction a with
@@ -153,9 +133,6 @@ theorem covDOF_zero (gRef : SmoothRiemannianMetric I M) (a : Nat) :
 
 set_option backward.isDefEq.respectTransparency false in
 
-
-
-
 omit [SigmaCompactSpace M] in
 theorem t02Norm_eq_iterCov [I.Boundaryless] {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
     (A : Tensor0SBundle.Tensor0SField (𝕜 := Real) (E := E) (H := H)
@@ -180,11 +157,6 @@ theorem t02Norm_eq_iterCov [I.Boundaryless] {Idx : Type*} [Fintype Idx] [Decidab
 end TowerZero
 
 section C0Equiv
-
-
-
-
-
 
 omit [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 theorem inner_le_of_c0
@@ -238,8 +210,6 @@ theorem inner_le_of_c0
   · nlinarith [abs_le.mp habs]
 
 set_option backward.isDefEq.respectTransparency false in
-
-
 
 omit [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 theorem sqrt_normSq_two_le

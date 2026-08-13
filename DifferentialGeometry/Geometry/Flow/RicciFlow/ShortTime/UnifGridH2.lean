@@ -1,14 +1,6 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.LowRegCoeffJets
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.UnifGagliardoNirenberg
 
-/-!
-# Class-first uniform H2 grid summation
-
-This module combines the class-uniform lower `H2` metric grid with the tame
-order-three top grid.  The resulting affine `H2` coefficients are fixed before
-the metric and tensor fields vary.
--/
-
 set_option autoImplicit false
 
 noncomputable section
@@ -34,12 +26,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
-/-- **Dimension-three class-first affine `H2` grid estimate.**
-
-For a fixed background metric, class parameter, tensor valences, and
-nonnegative pointwise coefficient family, two affine coefficient functions are
-chosen before the class metric varies.  The lower function consumes only the
-metric `H2` radius, while the slope multiplies the top third-derivative bound. -/
 theorem h2_tame_unif
     (hDim : Module.finrank ℝ E = 3)
     (gBase : SmoothRiemannianMetric I M) {Λ : ℝ} (hΛ : 0 ≤ Λ)
@@ -189,11 +175,6 @@ theorem h2_tame_unif
       nlinarith [mul_nonneg (Real.sqrt_nonneg (Q0 R))
         (mul_nonneg (Real.sqrt_nonneg (Q1 R)) hA)]
 
-/-- **Dimension-three class-first low-window `H2` estimate.**
-
-For a pointwise coefficient grid whose order-`i` window stops at total order
-`i`, one nonnegative `H2` coefficient is chosen before the class metric varies.
-Thus only the class metric's first two jets enter the estimate. -/
 theorem h2_low_unif
     (hDim : Module.finrank ℝ E = 3)
     (gBase : SmoothRiemannianMetric I M) {Λ : ℝ} (hΛ : 0 ≤ Λ)

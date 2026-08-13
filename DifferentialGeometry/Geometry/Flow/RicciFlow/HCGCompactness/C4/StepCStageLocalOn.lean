@@ -2,13 +2,6 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.C4.StepCStage
 
 set_option autoImplicit false
 
-/-!
-# Provider-native local diffeomorphism tail
-
-This file transfers the actual stage-map jet tail to a local-diffeomorphism
-statement while keeping the normal-chart provider fixed throughout.
--/
-
 noncomputable section
 
 universe u uE uH
@@ -31,8 +24,6 @@ variable {H : Type uH} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H} [I.Boundaryless]
 variable {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
 
-/-- Provider-native stage maps are eventually local diffeomorphisms on every
-strictly smaller retained source ball. -/
 theorem HasStageJetDataOn.hloc_tail
     (inp : MetricCompactCore (I := I) X)
     (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k))

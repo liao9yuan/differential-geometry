@@ -1,14 +1,6 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.UnifInvCoeffH3
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.CurvatureCoefficientDifferenceJetTower.Lowered
 
-/-!
-# Class-first full raised coefficient H3 bound
-
-This module adds the identity part to the class-first inverse-metric difference
-estimate.  The resulting rank-two algebraic coefficient has one `H2` radius
-and one affine `H3` bound chosen before the class metric varies.
--/
-
 set_option autoImplicit false
 
 noncomputable section
@@ -210,11 +202,6 @@ private theorem affineSq (a b n : ℝ) (hb : 0 ≤ b) (hn : 0 ≤ n) :
   have hb' := mul_le_mul_of_nonneg_left hone_sq hb
   nlinarith
 
-/-- **Dimension-three class-first full raised algebraic coefficient estimate.**
-
-One positive `H2` radius and one affine coefficient work for every metric in
-the order-three class.  The endomorphism field is represented by its rank-two
-slot insertion, the coefficient consumed by the top-kernel estimates. -/
 theorem fullRaised_h3_unif
     (hDim : Module.finrank ℝ E = 3)
     (gBase : SmoothRiemannianMetric I M)

@@ -5,7 +5,6 @@ import DifferentialGeometry.Analysis.Parabolic.QuasiLinear.TensorMaximalRegulari
 import DifferentialGeometry.Analysis.Parabolic.TimeSobolev.TimeH1
 import Mathlib.Geometry.Manifold.ContMDiff.Basic
 
-
 namespace DifferentialGeometry.PDE.RicciFlow
 
 open Bundle
@@ -77,6 +76,5 @@ theorem deturck_vf_continuous_in_c1_input
           (deTurckVF (I := I) (g_DT t) g_bg :
             Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) x)
         (Set.Ico (0 : ℝ) T) := h_pointwise_vf
-
 
 end DifferentialGeometry.PDE.RicciFlow

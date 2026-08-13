@@ -1,36 +1,5 @@
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.DeTurckRemainderLowBaseTime
 
-/-!
-# Spectral symmetrization is eigenblock diagonal, and the rough solution stays symmetric
-
-The solver-side symmetry brick of the low-regularity Ricci--DeTurck lane.
-
-`symmHs` is the continuous extension of smooth slot symmetrization to the
-spectral Sobolev scale, and the maximal-regularity Duhamel machinery acts
-*diagonally* on the rough-Laplacian eigenbasis (`homModeCoeff` multiplies the
-`i`-th coordinate by `e^{-λᵢ t}`, `solModeCoeff` convolves it against the same
-kernel).  The two therefore commute as soon as `symmHs` does not mix different
-eigenvalues.  That is exactly what slot-swap equivariance of the rough
-Laplacian gives (`tensorL2Coeff_toL2_swap_eigenSmooth_eq_zero_of_fst_ne`), and
-eigenvalue blocks are *finite* (`TensorEigenIdx` is a sigma type with
-`Fin`-fibres), so the commutation becomes a finite coefficient computation.
-
-Main results:
-
-* `symmHs_coeff` — the eigenbasis matrix of `symmHs` is block diagonal:
-  `(symmHs u).coeff i = ∑ j ∈ eigenBlock i, symmMat i j * u.coeff j`, where the
-  block sum runs only over indices carrying the same eigenvalue as `i`.
-* `symmTimeL2` / `timeModeCoeff_symmTimeL2` — the pointwise action of `symmHs`
-  on `L²([0,T]; Hˢ)` and its per-mode block expansion.
-* `symmHs_solField_comm`, `symmHs_duhamel_comm` — spectral symmetrization
-  commutes with the maximal-regularity solution field and with the affine
-  Duhamel field.
-* `duhamel_symm_ae` / `lowreg_sol_symm` — the Duhamel field of a spectrally
-  symmetric forcing (and symmetric initial datum, in particular the zero datum
-  used by `lowreg_partial_sol`) is spectrally symmetric almost everywhere.
-  This is the `hsymm` input of `lowRadial_eq_self_along_sol`.
--/
-
 noncomputable section
 
 open Bundle Manifold MeasureTheory Set Filter Tensor0SBundle
@@ -62,12 +31,6 @@ private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
 variable (g : SmoothRiemannianMetric I M)
-
-/-! ## Eigenbasis helpers
-
-The four lemmas of this section are local copies of `private` helpers of
-`Analysis/Spectral/Tensor/Spectrum/SlotSwapEquivariance.lean`; they are
-reproved here rather than imported because the originals are file-private. -/
 
 omit [BoundarylessManifold I M] in
 private lemma l2_ext_coeff {U V : TensorL2 0 2 g}
@@ -123,10 +86,6 @@ private lemma coeff_toL2_swap (X : SmoothCcTensor g 0 2)
   exact (inner_toL2_swap (I := I) (M := M) g
     (eigenSmooth (I := I) (M := M) g i) X).symm
 
-/-! ## The eigenvalue block and the symmetrization matrix -/
-
-/-- The eigenvalue block of the eigen-index `i`: the (finite) set of eigen-indices
-carrying the same eigenvalue label `i.1`. -/
 def eigenBlock (i : Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx (I := I) (M := M) g 0 2) :
     Finset (Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx (I := I) (M := M) g 0 2) :=
   Finset.map ⟨Sigma.mk i.1, sigma_mk_injective⟩ Finset.univ
@@ -148,7 +107,6 @@ omit [BoundarylessManifold I M] in
     exact ⟨c, rfl⟩
 
 omit [BoundarylessManifold I M] in
-/-- The eigenvalue is constant along an eigenvalue block. -/
 theorem lambda_of_mem_eigenBlock
     {i j : Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx (I := I) (M := M) g 0 2}
     (hj : j ∈ eigenBlock (I := I) (M := M) g i) :
@@ -157,17 +115,12 @@ theorem lambda_of_mem_eigenBlock
   congrArg (fun μ : TensorNonzeroResolventEigenvalue (I := I) (M := M) g 0 2 =>
     tensorLaplacianEigenvalueOf μ.val) ((mem_eigenBlock (I := I) (M := M) g).mp hj)
 
-/-- The `(i, j)` entry of spectral symmetrization against the rough-Laplacian
-eigenbasis: the `j`-th `L²` coordinate of the symmetrized `i`-th eigensection. -/
 def symmMat (i j : Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx
     (I := I) (M := M) g 0 2) : ℝ :=
   tensorL2Coeff (I := I) (M := M) (hCompact (I := I) (M := M) g)
     (SmoothCcTensor.toL2 (symmS (I := I) (M := M) g
       (eigenSmooth (I := I) (M := M) g i))) j
 
-/-- **Slot symmetrization does not mix eigenvalues.**  The symmetrization matrix
-vanishes off the eigenvalue block: this is slot-swap equivariance of the rough
-Laplacian. -/
 theorem symmMat_eq_zero
     {i j : Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx
       (I := I) (M := M) g 0 2}
@@ -221,8 +174,6 @@ private lemma coeff_block_sum
     intro j hj
     rw [if_neg (fun h => hkS (by rw [h]; exact hj))]
 
-/-- The symmetrized eigensection is the finite combination of the eigenbasis
-vectors of its own eigenvalue block. -/
 theorem toL2_symmS_eigen_eq_sum
     (i : Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx
       (I := I) (M := M) g 0 2) :
@@ -243,7 +194,6 @@ theorem toL2_symmS_eigen_eq_sum
     exact symmMat_eq_zero (I := I) (M := M) g
       (fun h => hk ((mem_eigenBlock (I := I) (M := M) g).mpr h))
 
-/-- **Block expansion of smooth slot symmetrization in the eigenbasis.** -/
 theorem symmS_toL2_coeff (X : SmoothCcTensor g 0 2)
     (i : Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx (I := I) (M := M) g 0 2) :
     tensorL2Coeff (I := I) (M := M) (hCompact (I := I) (M := M) g)
@@ -279,9 +229,6 @@ theorem symmS_toL2_coeff (X : SmoothCcTensor g 0 2)
   refine Finset.sum_congr rfl (fun j _ => ?_)
   rw [real_inner_smul_left, ← tensorL2Coeff_eq_inner]
 
-/-- **Spectral symmetrization is block diagonal.**  For every nonnegative Sobolev
-order, the `i`-th eigen-coordinate of `symmHs u` is a finite combination of the
-coordinates of `u` inside the eigenvalue block of `i`. -/
 theorem symmHs_coeff {σ : ℝ} (hσ : 0 ≤ σ)
     (u : tensorHs (I := I) (M := M) g 0 2 σ)
     (i : Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx
@@ -302,17 +249,11 @@ theorem symmHs_coeff {σ : ℝ} (hσ : 0 ≤ σ)
     simp only [ccToHsLin_apply, ccTensorToHs_coeff]
     exact symmS_toL2_coeff (I := I) (M := M) g X i
 
-/-- The spectrally symmetric states form a closed set, so spectral symmetry
-passes to limits.  This is what lets a nonlinearity that is symmetric on a
-dense smooth core stay symmetric after continuous extension. -/
 theorem isClosed_symmFixed {σ : ℝ} (hσ : 0 ≤ σ) :
     IsClosed {u : tensorHs (I := I) (M := M) g 0 2 σ |
       symmHs (I := I) (M := M) g hσ u = u} :=
   isClosed_eq (symmHs (I := I) (M := M) g hσ).continuous continuous_id
 
-/-- **Smooth symmetry implies spectral symmetry.**  The spectral image of a
-slot-symmetric smooth tensor is a fixed point of `symmHs` at every nonnegative
-order. -/
 theorem symmHs_smoothCc_eq_self {σ : ℝ} (hσ : 0 ≤ σ) (X : SmoothCcTensor g 0 2)
     (hX : symmS (I := I) (M := M) g X = X) :
     symmHs (I := I) (M := M) g hσ
@@ -325,24 +266,17 @@ theorem symmHs_smoothCc_eq_self {σ : ℝ} (hσ : 0 ≤ σ) (X : SmoothCcTensor 
     rfl
   rw [hEq, symmHs_core (I := I) (M := M) g hσ X, hX]
 
-/-! ## Pointwise symmetrization on the time-`L²` scale -/
-
-/-- Spectral symmetrization acting pointwise in time on `L²([0,T]; Hˢ)`. -/
 def symmTimeL2 {σ : ℝ} (hσ : 0 ≤ σ) (T : ℝ) :
     timeL2 (tensorHs (I := I) (M := M) g 0 2 σ) T →L[ℝ]
       timeL2 (tensorHs (I := I) (M := M) g 0 2 σ) T :=
   (symmHs (I := I) (M := M) g hσ).compLpL 2 (timeMeasure T)
 
-/-- The pointwise-in-time symmetrization is represented a.e. by
-`t ↦ symmHs (F t)`. -/
 theorem symmTimeL2_coeFn {σ T : ℝ} (hσ : 0 ≤ σ)
     (F : timeL2 (tensorHs (I := I) (M := M) g 0 2 σ) T) :
     symmTimeL2 (I := I) (M := M) g hσ T F =ᵐ[timeMeasure T]
       fun t => symmHs (I := I) (M := M) g hσ (F t) :=
   (symmHs (I := I) (M := M) g hσ).coeFn_compLpL (p := 2) (μ := timeMeasure T) F
 
-/-- A time-`L²` field is a fixed point of the pointwise symmetrization exactly
-when it is spectrally symmetric almost everywhere. -/
 theorem symmTimeL2_eq_self_iff {σ T : ℝ} (hσ : 0 ≤ σ)
     (F : timeL2 (tensorHs (I := I) (M := M) g 0 2 σ) T) :
     symmTimeL2 (I := I) (M := M) g hσ T F = F ↔
@@ -373,7 +307,6 @@ private lemma coeFn_smul_sum {ι : Type*} {T : ℝ} (s : Finset ι) (c : ι → 
       rw [ht1, Pi.add_apply, ht2, Pi.smul_apply, ht3, Finset.sum_insert ha,
         smul_eq_mul]
 
-/-- **Per-mode block expansion of the pointwise symmetrization.** -/
 theorem timeModeCoeff_symmTimeL2 {σ T : ℝ} (hσ : 0 ≤ σ)
     (F : timeL2 (tensorHs (I := I) (M := M) g 0 2 σ) T)
     (i : Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx
@@ -398,8 +331,6 @@ theorem timeModeCoeff_symmTimeL2 {σ T : ℝ} (hσ : 0 ≤ σ)
   rw [ht1, ht2, ht3, symmHs_coeff (I := I) (M := M) g hσ (F t) i]
   exact Finset.sum_congr rfl (fun j hj => by rw [ht4 j hj])
 
-/-! ## Commutation with the diagonal Duhamel machinery -/
-
 omit [BoundarylessManifold I M] in
 private lemma homModeCoeff_coeFn {a T : ℝ}
     (u₀ : tensorHs (I := I) (M := M) g 0 2 (a + 2))
@@ -416,7 +347,6 @@ private lemma perModeConv_congr {lam lam' T : ℝ} (h : lam = lam')
   subst h
   rfl
 
-/-- **Symmetrization commutes with the homogeneous heat-flow coordinate.** -/
 theorem symmHs_homModeCoeff {a T : ℝ} (h2 : (0 : ℝ) ≤ a + 2)
     (u₀ : tensorHs (I := I) (M := M) g 0 2 (a + 2))
     (i : Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx
@@ -445,7 +375,6 @@ theorem symmHs_homModeCoeff {a T : ℝ} (h2 : (0 : ℝ) ≤ a + 2)
   rw [ht3 j hj, lambda_of_mem_eigenBlock (I := I) (M := M) g hj]
   ring
 
-/-- **Symmetrization commutes with the per-mode Duhamel coordinate.** -/
 theorem symmHs_solModeCoeff {a T : ℝ} (ha : (0 : ℝ) ≤ a) (hT : 0 ≤ T)
     (f : timeL2 (tensorHs (I := I) (M := M) g 0 2 a) T)
     (i : Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx
@@ -465,7 +394,6 @@ theorem symmHs_solModeCoeff {a T : ℝ} (ha : (0 : ℝ) ≤ a) (hT : 0 ≤ T)
     (tensor_lambda_nonneg (I := I) (M := M) i) hT
     (timeModeCoeff (I := I) (M := M) f j)).symm
 
-/-- **Symmetrization commutes with the homogeneous heat-flow field.** -/
 theorem symmHs_homField_comm {a T : ℝ} (h2 : (0 : ℝ) ≤ a + 2) (hT : 0 ≤ T)
     (u₀ : tensorHs (I := I) (M := M) g 0 2 (a + 2)) :
     symmTimeL2 (I := I) (M := M) g h2 T
@@ -482,7 +410,6 @@ theorem symmHs_homField_comm {a T : ℝ} (h2 : (0 : ℝ) ≤ a + 2) (hT : 0 ≤ 
   rw [maxRegHomogeneousSolField_timeModeCoeff (I := I) (M := M) (a := a) (T := T)
     hT u₀ j]
 
-/-- **Symmetrization commutes with the maximal-regularity solution field.** -/
 theorem symmHs_solField_comm {a T : ℝ} (ha : (0 : ℝ) ≤ a)
     (h2 : (0 : ℝ) ≤ a + 2) (hT : 0 ≤ T)
     (f : timeL2 (tensorHs (I := I) (M := M) g 0 2 a) T) :
@@ -501,9 +428,6 @@ theorem symmHs_solField_comm {a T : ℝ} (ha : (0 : ℝ) ≤ a)
   rw [maximalRegularitySolField_timeModeCoeff (I := I) (M := M) (a := a)
     hT (hCompact (I := I) (M := M) g) f j]
 
-/-- **Symmetrization commutes with the affine Duhamel solution field.**  The
-Duhamel field of the symmetrized data is the symmetrization of the Duhamel
-field. -/
 theorem symmHs_duhamel_comm {a T : ℝ} (ha : (0 : ℝ) ≤ a)
     (h2 : (0 : ℝ) ≤ a + 2) (hT : 0 < T) (hT1 : T ≤ 1)
     (u₀ : tensorHs (I := I) (M := M) g 0 2 (a + 2))
@@ -517,11 +441,6 @@ theorem symmHs_duhamel_comm {a T : ℝ} (ha : (0 : ℝ) ≤ a)
     symmHs_homField_comm (I := I) (M := M) g h2 hT.le u₀,
     symmHs_solField_comm (I := I) (M := M) g ha h2 hT.le f]
 
-/-! ## The symmetry input of `lowRadial_eq_self_along_sol` -/
-
-/-- **The Duhamel field of spectrally symmetric data is spectrally symmetric.**
-This is the honest solver-side statement: it consumes symmetry of the initial
-datum and of the forcing, and nothing else. -/
 theorem duhamel_symm_ae {a T : ℝ} (ha : (0 : ℝ) ≤ a) (h2 : (0 : ℝ) ≤ a + 2)
     (hT : 0 < T) (hT1 : T ≤ 1)
     (u₀ : tensorHs (I := I) (M := M) g 0 2 (a + 2))
@@ -538,11 +457,6 @@ theorem duhamel_symm_ae {a T : ℝ} (ha : (0 : ℝ) ≤ a) (h2 : (0 : ℝ) ≤ a
   refine (symmTimeL2_eq_self_iff (I := I) (M := M) g h2 _).1 ?_
   rw [symmHs_duhamel_comm (I := I) (M := M) g ha h2 hT hT1 u₀ f, hu₀, hfL]
 
-/-- **The rough low-regularity solution stays spectrally symmetric.**  With the
-zero initial datum used by `lowreg_partial_sol`, spectral symmetry of the
-forcing alone makes the Duhamel solution field spectrally symmetric almost
-everywhere — exactly the `hsymm` hypothesis of
-`lowRadial_eq_self_along_sol`. -/
 theorem lowreg_sol_symm {a T : ℝ} (ha : (0 : ℝ) ≤ a) (h2 : (0 : ℝ) ≤ a + 2)
     (hT : 0 < T) (hT1 : T ≤ 1)
     (f : timeL2 (tensorHs (I := I) (M := M) g 0 2 a) T)

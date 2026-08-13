@@ -6,14 +6,6 @@ set_option autoImplicit false
 set_option linter.style.longLine false
 set_option backward.isDefEq.respectTransparency false
 
-/-!
-# The own-lowered Uhlenbeck curvature speed
-
-This file packages the four invariant terms in the time derivative of a flow's
-own lowered curvature tensor.  It also records the pointwise squared-norm bound
-used when the forward-uniqueness metric gap is paired with that speed.
--/
-
 noncomputable section
 
 namespace DifferentialGeometry.PDE.RicciFlow
@@ -33,8 +25,6 @@ variable [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] [I.Boundaryless]
 variable [BoundarylessManifold I M]
 variable [NeZero (Module.finrank Real E)]
 
-/-- The intrinsic Ricci drift of one metric is controlled by
-`16 n^6 |Ric|^2 |Rm|^2`. -/
 theorem ricciDriftOwnSq_le (g : SmoothRiemannianMetric I M) (x : M) :
     normSq0S (I := I) g x 4 (ricciDrift04 (I := I) g x) ≤
       16 * (Module.finrank Real E : Real) ^ 6 *
@@ -65,8 +55,6 @@ theorem ricciDriftOwnSq_le (g : SmoothRiemannianMetric I M) (x : M) :
       mul_le_mul_of_nonneg_left hL (by norm_num)
     _ = _ := by ring
 
-/-- The own-lowered time speed of Riemann curvature: diffusion, the signed
-Uhlenbeck quadratic combination, Ricci drift, and the lowering reaction. -/
 def uhlSpeed04 (g : SmoothRiemannianMetric I M)
     (R : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
       (n := (∞ : WithTop ℕ∞)) 4)
@@ -78,8 +66,6 @@ def uhlSpeed04 (g : SmoothRiemannianMetric I M)
       (riemannOp (metricCov (I := I) g) x)
 
 omit [NeZero (Module.finrank Real E)] in
-/-- In any tangent basis, reconstructing the four invariant component terms
-gives the own-lowered Uhlenbeck speed tensor. -/
 theorem uhlSpeed04_low {Idx : Type*} [Fintype Idx]
     (g : SmoothRiemannianMetric I M)
     (R : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
@@ -110,8 +96,6 @@ theorem uhlSpeed04_low {Idx : Type*} [Fintype Idx]
     lowerTri_apply]
   rfl
 
-/-- The own-lowered Uhlenbeck speed is controlled by the second curvature
-derivative, the quadratic curvature reaction, and the Ricci lowering terms. -/
 theorem uhlSpeedSq_le (g : SmoothRiemannianMetric I M)
     (R : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
       (n := (∞ : WithTop ℕ∞)) 4)

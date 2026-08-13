@@ -6,44 +6,6 @@ set_option autoImplicit false
 set_option linter.style.longLine false
 set_option linter.unusedSectionVars false
 
-/-!
-# Forward-uniqueness closure: `E ≡ 0` and `g₁ = g₂` (Route-K brick K5)
-
-`Evolution/ForwardUniqueEnergy.lean` (K3) differentiates the Kotschwar energy exactly and
-`Evolution/ForwardUniqueRateLe.lean` (K4) bounds that derivative by `K·E − D`.  This file is
-the **scalar closure** of `ShortTime/FORWARD_UNIQUE_PRO_RULING.md` §6: the two facts plus
-the closed-edge hypothesis `g₁ a = g₂ a` force the energy to vanish on the whole compact
-slab, and a vanishing energy forces the two metrics to agree.
-
-No new analysis happens here.  The three steps are
-
-1. **Grönwall** — `E(a) = 0`, `E' ≤ K·E` on the *open* interval, `E` continuous up to the
-   closed edge, so `E ≡ 0` on `Icc a c`.  Derivatives are never taken at the edge.
-2. **Integral-zero-to-equality** — the energy density is a sum of three squared fibre norms,
-   hence nonnegative; a nonnegative *continuous* integrand with zero integral against the
-   Riemannian volume measure (which is positive on nonempty opens) vanishes identically, and
-   fibre positive-definiteness then kills the metric-difference carrier.
-3. **Continuation** — every `t ∈ Ico a b` lies in a compact subslab `Icc a c` with `c < b`,
-   so the per-subslab conclusion sups up to the half-open window.
-
-## Main results
-
-* `gronwall_zero_on` — the closed-edge Grönwall closure on `Icc a c`.
-* `energy_zero_on` — `∀ t ∈ Icc a c, forwardUniqueEnergy g₁ g₂ t = 0`, under the combined
-  K3 + K4 slab package.
-* `metric_eq_of_energy_zero` — `forwardUniqueEnergy g₁ g₂ t = 0 → g₁ t = g₂ t`.
-* `metrics_eq_on` — the compact-slab capstone `∀ t ∈ Icc a c, g₁ t = g₂ t`.
-* `metrics_eq_ico` — the half-open continuation `∀ t ∈ Ico a b, g₁ t = g₂ t`.
-
-## Hypothesis discipline
-
-`energy_zero_on` quotes the K3 and K4 hypothesis packages **verbatim**, quantified over the
-open subslab `Ioo a c`; the two theorems are called, never re-proved.  The carrier fields
-`Sfield`, `U`, `rem` therefore become time-indexed families and the K4 constants are
-slab-uniform, which is exactly the ruling's "constants slab-local, no global `Ico a b`
-constant" discipline.
--/
-
 noncomputable section
 
 namespace DifferentialGeometry.PDE.RicciFlow
@@ -55,21 +17,6 @@ open DifferentialGeometry.Integral.Measure
 
 section ScalarGronwall
 
-/-! ## The closed-edge Grönwall closure
-
-`Analysis/Spectral/Intrinsic/DeTurck/EdgeStrongData.lean` proves the same statement for the
-left edge `0` of `Icc 0 T`.  The forward-uniqueness slab starts at an arbitrary time `a`, so
-the statement is given here for `Icc a c`; the proof is the same two-step argument (ordinary
-Grönwall on `[a + ε, t]`, then `ε → 0⁺`).  Canonical home for the merged statement is
-`Analysis/ODE/`, next to `IntegralGronwall.lean`; it is kept local here because the file that
-holds the `Icc 0 T` version sits in the (currently unbuilt) intrinsic-spectral tree. -/
-
-/-- **Closed-edge Grönwall closure.**  A nonnegative function that vanishes at the left edge
-`a`, is continuous on the closed slab `Icc a c`, and satisfies `f' ≤ K · f` on the *open*
-slab `Ioo a c`, vanishes identically on `Icc a c`.
-
-No derivative at the edge is required: the differential inequality is used only on `Ioo a c`
-and the edge is reached by continuity. -/
 theorem gronwall_zero_on {a c K : ℝ} (hac : a < c)
     (energy energy' : ℝ → ℝ)
     (hcont : ContinuousOn energy (Icc a c))
@@ -136,27 +83,18 @@ variable [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
 
 section EdgeValue
 
-/-! ## The energy at the closed edge
-
-`h0 : g₁ a = g₂ a` makes all three difference carriers vanish, hence the density, hence the
-energy.  Together with `energy_nonneg` this supplies two of `gronwall_zero_on`'s inputs. -/
-
-/-- The squared fibre norm of the zero covariant tensor vanishes. -/
 private theorem normSq0S_zero (g : SmoothRiemannianMetric I M) (x : M) (s : ℕ) :
     normSq0S (I := I) g x s 0 = 0 :=
   ((tensor0SMetricData (I := I) g x s).inner_self_eq_zero_iff 0).2 rfl
 
-/-- A vanishing squared fibre norm forces the tensor to vanish. -/
 private theorem eq_zero_of_normSq0S (g : SmoothRiemannianMetric I M) (x : M) (s : ℕ)
     {A : Tensor0SSpace s I x} (h : normSq0S (I := I) g x s A = 0) : A = 0 :=
   ((tensor0SMetricData (I := I) g x s).inner_self_eq_zero_iff A).1 h
 
-/-- The Kotschwar energy is nonnegative: its density is a sum of three squared fibre norms. -/
 theorem energy_nonneg (g₁ g₂ : ℝ → SmoothRiemannianMetric I M) (t : ℝ) :
     0 ≤ forwardUniqueEnergy (I := I) (M := M) g₁ g₂ t :=
   integral_nonneg fun x => density_nonneg (I := I) g₁ g₂ t x
 
-/-- Equal metrics at time `t` give a vanishing energy density. -/
 theorem density_eq_zero_of_eq (g₁ g₂ : ℝ → SmoothRiemannianMetric I M) {t : ℝ}
     (h : g₁ t = g₂ t) (x : M) :
     forwardUniqueDensity (I := I) g₁ g₂ t x = 0 := by
@@ -165,8 +103,6 @@ theorem density_eq_zero_of_eq (g₁ g₂ : ℝ → SmoothRiemannianMetric I M) {
     normSq0S_zero, normSq0S_zero, normSq0S_zero]
   ring
 
-/-- **The closed-edge energy vanishes.**  This is the `E(a) = 0` input of `gronwall_zero_on`,
-supplied by the forward-uniqueness hypothesis `h0 : g₁ a = g₂ a`. -/
 theorem energy_eq_zero_of_eq (g₁ g₂ : ℝ → SmoothRiemannianMetric I M) {t : ℝ}
     (h : g₁ t = g₂ t) :
     forwardUniqueEnergy (I := I) (M := M) g₁ g₂ t = 0 := by
@@ -176,24 +112,6 @@ end EdgeValue
 
 section EnergyZero
 
-/-! ## Step 1: the energy vanishes on the compact slab
-
-The hypothesis list is the **union of the K3 and K4 packages**, quoted verbatim and
-quantified over the open subslab `Ioo a c` (the K3 window is `U := Ioo a c`), together with
-the two edge inputs `hinit` and `hcont`.  Neither theorem is re-proved: `energy_zero_on`
-calls `forwardUniqueEnergy_hasDerivAt` for the derivative and `forwardUniqueRate_le` (with
-`dissipation_nonneg`) for the differential inequality, and feeds both to
-`gronwall_zero_on`. -/
-
-/-- **The forward-uniqueness energy vanishes on the compact slab `Icc a c`.**
-
-`E' ≤ K·E − D ≤ K·E` on `Ioo a c` by K4, `E(a) = 0` by the closed-edge hypothesis
-`hinit : g₁ a = g₂ a`, `E ≥ 0` always, and `E` is continuous up to the closed edge; the
-Grönwall closure then forces `E ≡ 0`.  The Grönwall constant is K4's explicit
-`K = C_R + 4C_Ric + 2 + δC_A + δ⁻¹ + C_V + ε⁻¹C_U + C_rem`.
-
-The carrier fields `Sfield`, `Uflux`, `rem` are time-indexed families and the constants are
-slab-uniform: this is the ruling's "constants slab-local, no global `Ico a b` constant". -/
 theorem energy_zero_on
     (g₁ g₂ : ℝ → SmoothRiemannianMetric I M)
     (Adot : ℝ → (x : M) → Tensor0SSpace 3 I x)
@@ -205,7 +123,7 @@ theorem energy_zero_on
     (rem : ℝ → (x : M) → Tensor0SSpace 4 I x)
     {a c ε δ C_A C_R C_Ric C_V C_U C_rem : ℝ}
     (hac : a < c)
-    -- K3 package, on the open window `U := Ioo a c`
+
     (hgram : ∀ (x₀ : M) (i j : Fin (Module.finrank ℝ E)),
       ContMDiffOn (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ, ℝ) ∞
         (fun p : ℝ × M => chartGramMatrix (I := I) (g₁ p.1) x₀ p.2 i j)
@@ -225,7 +143,7 @@ theorem energy_zero_on
       HasDerivAt (fun r : ℝ => connDiffLowAt (I := I) (g₁ r) (g₂ r) x v) (Adot t x v) t)
     (hS : ∀ t ∈ Ioo a c, ∀ (x : M) (v : Fin 4 → TangentSpace I x),
       HasDerivAt (fun r : ℝ => rmDiffLowAt (I := I) (g₁ r) (g₂ r) x v) (Sdot t x v) t)
-    -- K4 package, slab-uniform constants and time-indexed carrier fields
+
     (hε : 0 < ε) (hδ : 0 < δ) (habs : δ * C_A + ε ≤ 1)
     (hcar : ∀ t ∈ Ioo a c, ∀ x, Sfield t x = rmDiffLowAt (I := I) (g₁ t) (g₂ t) x)
     (hSdec : ∀ t ∈ Ioo a c, ∀ x, Sdot t x =
@@ -273,7 +191,7 @@ theorem energy_zero_on
       (riemannianMeasureFamily (I := I) (M := M) g₁ t))
     (hidens : ∀ t ∈ Ioo a c, Integrable (fun x => forwardUniqueDensity (I := I) g₁ g₂ t x)
       (riemannianMeasureFamily (I := I) (M := M) g₁ t))
-    -- closed-edge inputs
+
     (hinit : g₁ a = g₂ a)
     (hcont : ContinuousOn (forwardUniqueEnergy (I := I) (M := M) g₁ g₂) (Icc a c)) :
     ∀ t ∈ Icc a c, forwardUniqueEnergy (I := I) (M := M) g₁ g₂ t = 0 := by
@@ -297,21 +215,6 @@ end EnergyZero
 
 section IntegralZero
 
-/-! ## Step 2: a vanishing energy forces the two metrics to agree
-
-The density is a sum of three squared fibre norms, so it is nonnegative; a nonnegative
-integrable function with zero integral vanishes almost everywhere; the Riemannian volume
-measure is positive on nonempty open sets, so a *continuous* a.e.-zero function is zero
-everywhere; and fibre positive-definiteness turns `|h₀₂|² = 0` into `h₀₂ = 0`, i.e. into
-equality of the two inner products. -/
-
-/-- **Extensionality for smooth Riemannian metrics.**  Only the `inner` field is data;
-`symm`, `pos`, `isVonNBounded` and `contMDiff` are `Prop`-valued, hence proof-irrelevant.
-
-Canonical home is `Geometry/Metric/Basic.lean`; this is the third local copy (see
-`Geometry/Metric/Sphere/QuotientDescent.lean` and
-`ShortTime/DeTurckRealizedSolutionFamily.lean`), kept private here because neither of those
-files is an admissible import for the `Evolution` layer. -/
 private theorem metricExtInner {g g' : SmoothRiemannianMetric I M}
     (h : ∀ (x : M) (v w : TangentSpace I x), g.inner x v w = g'.inner x v w) : g = g' := by
   obtain ⟨i₁, s₁, p₁, b₁, c₁⟩ := g
@@ -321,12 +224,6 @@ private theorem metricExtInner {g g' : SmoothRiemannianMetric I M}
   subst hi
   rfl
 
-/-- **Integral-zero-to-metric-equality.**  A vanishing forward-uniqueness energy at time `t`
-forces `g₁ t = g₂ t`.
-
-`hdcont` is the continuity of the energy density in the space variable at the fixed time `t`
-— the regularity that turns "a.e. zero" into "everywhere zero" against the full-support
-Riemannian volume measure; `hidens` is K4's own integrability side condition. -/
 theorem metric_eq_of_energy_zero (g₁ g₂ : ℝ → SmoothRiemannianMetric I M) {t : ℝ}
     (hdcont : Continuous (fun x => forwardUniqueDensity (I := I) g₁ g₂ t x))
     (hidens : Integrable (fun x => forwardUniqueDensity (I := I) g₁ g₂ t x)
@@ -363,17 +260,6 @@ end IntegralZero
 
 section Capstone
 
-/-! ## Step 3: the two metrics agree, first on `Icc a c`, then on `Ico a b`
-
-`metrics_eq_on` is the compact-slab capstone: it runs `energy_zero_on` and then
-`metric_eq_of_energy_zero` at every time of the slab.  `metrics_eq_ico` is the elementary
-continuation step: every `t ∈ Ico a b` lies in some compact subslab `Icc a c` with `c < b`,
-and the ruling's hypothesis package is per-subslab, so the conclusion sups up. -/
-
-/-- **Forward uniqueness on a compact slab.**  Under the combined K3 + K4 slab package, the
-closed-edge hypothesis `hinit : g₁ a = g₂ a`, continuity of the energy up to the closed edge,
-and the space-continuity/integrability of the density on the closed slab, the two flows agree
-on `Icc a c`. -/
 theorem metrics_eq_on
     (g₁ g₂ : ℝ → SmoothRiemannianMetric I M)
     (Adot : ℝ → (x : M) → Tensor0SSpace 3 I x)
@@ -461,10 +347,6 @@ theorem metrics_eq_on
   exact fun t ht => metric_eq_of_energy_zero (I := I) g₁ g₂ (hdcont t ht) (hidens t ht)
     (hzero t ht)
 
-/-- **Forward uniqueness on the half-open window.**  The ruling's hypothesis package is
-per-subslab, so the compact-slab conclusion of `metrics_eq_on` is quantified over the
-subslab endpoints `c ∈ Ioo a b`; every `t ∈ Ico a b` lies in `Icc a c` for
-`c = (t + b)/2 ∈ Ioo a b`, which is the ruling's "sup over `c < b`". -/
 theorem metrics_eq_ico (g₁ g₂ : ℝ → SmoothRiemannianMetric I M) {a b : ℝ}
     (h : ∀ c ∈ Ioo a b, ∀ t ∈ Icc a c, g₁ t = g₂ t) :
     ∀ t ∈ Ico a b, g₁ t = g₂ t := by

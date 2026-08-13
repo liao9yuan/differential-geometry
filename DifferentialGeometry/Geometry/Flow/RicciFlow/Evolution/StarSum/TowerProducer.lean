@@ -3,20 +3,6 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.IteratedRmTowerPro
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.BernsteinShiSolution
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.NablaRiemannHeatFrameInvariant
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 namespace DifferentialGeometry.PDE.RicciFlow
 
 attribute [local instance] Fintype.ofFinite Classical.propDecidable
@@ -33,8 +19,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 variable [IsManifold I 1 M] [IsManifold I 2 M]
 variable [CompleteSpace E] [SigmaCompactSpace M] [T2Space M]
 
-
-
 theorem compNormSqMulti_le_card {Idx : Type*} [Fintype Idx] {r : ℕ}
     (f : (Fin r → Idx) → Real) (B : Real) (hB : ∀ m : Fin r → Idx, |f m| ≤ B) :
     compNormSqMulti f ≤ (Fintype.card (Fin r → Idx) : Real) * B ^ 2 := by
@@ -46,10 +30,6 @@ theorem compNormSqMulti_le_card {Idx : Type*} [Fintype Idx] {r : ℕ}
     _ ≤ ∑ _m : Fin r → Idx, B ^ 2 := Finset.sum_le_sum fun m _ => hsq m
     _ = (Fintype.card (Fin r → Idx) : Real) * B ^ 2 := by
         rw [Finset.sum_const, Finset.card_univ, nsmul_eq_mul]
-
-
-
-
 
 omit [Module.Finite ℝ E] in
 omit [I.Boundaryless] [IsManifold I 2 M] [CompleteSpace E]
@@ -65,12 +45,6 @@ theorem normSq0S_le_card
     normSq0S (I := I) g x s A ≤ (Fintype.card (Fin s → Idx) : Real) * B ^ 2 := by
   rw [← compNormSqMulti_orthoBasis_eq_normSq0S (I := I) g basis horth A]
   exact compNormSqMulti_le_card (fun idx : Fin s → Idx => A (fun p => basis (idx p))) B hB
-
-
-
-
-
-
 
 theorem reactionContract_le {k : ℕ} {Idx : Type*} [Fintype Idx]
     (level resid : (Fin (4 + k) → Idx) → Real) (ric : Idx → Idx → Real)
@@ -165,8 +139,6 @@ theorem reactionContract_le {k : ℕ} {Idx : Type*} [Fintype Idx]
       Ssum := by
         ring
 
-
-
 omit [Module.Finite ℝ E] in
 omit [I.Boundaryless] in
 omit [SigmaCompactSpace M] in
@@ -216,13 +188,6 @@ theorem nablaKReactionAt_le
   refine le_of_eq (Finset.sum_congr rfl fun j _ => ?_)
   ring
 
-
-
-
-
-
-
-
 omit [Module.Finite ℝ E] in
 omit [I.Boundaryless] in
 omit [SigmaCompactSpace M] in
@@ -259,16 +224,6 @@ theorem nablaKReaction_le
       (ric t x) (Tdot t x)| ≤ _
   exact nablaKReactionAt_le (I := I) S t x (basis x) (gInv t x) (ric t x)
     (Tdot t x) w horth hgInv hlevel hRic Cres hCres hresid
-
-
-
-
-
-
-
-
-
-
 
 omit [TopologicalSpace M] [SigmaCompactSpace M] [T2Space M] in
 theorem towerHeatBoundOn_of_heatReact

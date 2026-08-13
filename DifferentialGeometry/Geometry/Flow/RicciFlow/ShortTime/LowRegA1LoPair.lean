@@ -1,19 +1,6 @@
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.DeTurckRemainderLowBaseA1LoPair
 import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.LowRegLiftAffine
 
-/-!
-# The radial low first-order action supplies the ShortTime core pair
-
-This module is the radius-aligned adapter from the intrinsic radial pair
-estimate to the `LowA1CorePair` predicate, together with the ball-local
-uniform bound it yields for the completed low first-order coefficient.
-
-These are the producers for `lowBaseN`-shaped statements, whose first-order
-arm is `lowA1Lo`.  The `hfLo` bridge itself no longer runs through them: since
-`lowreg_N_affine` moved to the refolded first-order action, its first-order
-coefficient is the `FLo` supplied by `refold_time`.
--/
-
 noncomputable section
 
 open Bundle Manifold
@@ -35,9 +22,6 @@ variable
       [IsManifold I ∞ M] [CompactSpace M] [I.Boundaryless]
       [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M]
 
-/-- In dimension three, one positive radial cutoff radius makes the completed
-low first-order action satisfy the ShortTime smooth-core pair predicate at
-every smaller realized cutoff radius. -/
 theorem lowA1Core_pair
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M) :
@@ -57,10 +41,7 @@ theorem lowA1Core_pair
 
 set_option maxHeartbeats 1000000 in
 set_option synthInstance.maxHeartbeats 1000000 in
-/-- A ball-local core pair estimate bounds the completed low first-order
-coefficient uniformly on the corresponding ambient `H3` ball.  The extra unit
-of radius is used only while passing from the dense smooth core to its
-completion. -/
+
 theorem lowA1Lo_ball
     (g : SmoothRiemannianMetric I M) {ρ δ : ℝ}
     (hρ : 0 ≤ ρ) (hδ0 : 0 ≤ δ) (hδ_le : δ ≤ 1 / 3)

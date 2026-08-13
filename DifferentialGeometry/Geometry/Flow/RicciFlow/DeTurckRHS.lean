@@ -3,8 +3,6 @@ import DifferentialGeometry.Geometry.Curvature.CurvatureOperator.RicciConnection
 import DifferentialGeometry.Geometry.Flow.VectorField
 import DifferentialGeometry.Geometry.Flow.LieDerivativeMetric
 
-
-
 namespace DifferentialGeometry
 namespace PDE
 namespace RicciFlow

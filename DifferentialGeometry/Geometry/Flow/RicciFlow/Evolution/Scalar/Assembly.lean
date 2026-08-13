@@ -2,12 +2,6 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.Scalar.RmTrace
 
 set_option autoImplicit false
 
-
-
-
-
-
-
 noncomputable section
 
 namespace DifferentialGeometry.PDE.RicciFlow
@@ -25,7 +19,6 @@ variable [CompleteSpace E] [SigmaCompactSpace M] [T2Space M]
 section TraceRoute
 
 variable {Idx : Type*} [Fintype Idx]
-
 
 omit [SigmaCompactSpace M] [T2Space M] in
 theorem scalarTraceInFrame_hasDerivWithinAt
@@ -80,7 +73,6 @@ theorem scalarTraceInFrame_hasDerivWithinAt
                   have hInv := h_inv t x (by simp) i j
                   have hRic := h_ricci t x i j
                   exact hInv.mul hRic))))
-
 
 omit [SigmaCompactSpace M] in
 @[deprecated "use a local or intrinsic scalar-evolution route instead" (since := "2026-05-22")]
@@ -140,8 +132,6 @@ theorem scalarEvolutionEquationOn_of_ricciEvolution
       (scalarLaplacianTraceInFrame_realizes (M := M) gInv roughLapRic)
       hInvSym hRicSym hRmTrace t x)
 
-
-
 omit [SigmaCompactSpace M] in
 @[deprecated "use a local or intrinsic scalar-evolution route instead" (since := "2026-05-22")]
 theorem scalarEvolutionEquationOn_of_ricciEvolution_regular
@@ -200,8 +190,6 @@ theorem scalarEvolutionEquationOn_of_ricciEvolution_regular
       (scalarLaplacianTraceInFrame_realizes (M := M) gInv roughLapRic)
       hInvSym hRicSym hRmTrace t x)
 
-
-
 @[deprecated "use a local or intrinsic scalar-evolution route instead" (since := "2026-05-22")]
 theorem scalarEvolutionEquationOn_of_ricciEvolution_lc
     [DecidableEq Idx]
@@ -252,7 +240,6 @@ theorem scalarEvolutionEquationOn_of_ricciEvolution_lc
   exact scalarEvolutionEquationOn_of_ricciEvolution_regular
     (I := I) S Rm04 gInv frame roughLapRic hframe hcover hTrace hOutput hFirst
     h_inv h_ricci hinv hRicSym
-
 
 end TraceRoute
 

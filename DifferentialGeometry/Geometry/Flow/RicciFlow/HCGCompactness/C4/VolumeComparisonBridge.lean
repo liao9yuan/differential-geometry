@@ -7,15 +7,6 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.C4.StepAInput
 
 set_option autoImplicit false
 
-
-
-
-
-
-
-
-
-
 noncomputable section
 
 universe u uE uH
@@ -31,12 +22,6 @@ variable [InnerProductSpace Real E] [FiniteDimensional Real E]
 variable [NeZero (Module.finrank Real E)] [CompleteSpace E]
 variable {H : Type uH} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H} [I.Boundaryless]
-
-
-
-
-
-
 
 theorem exists_pairR_of_boundedGeometry
     (Y : PointedRiemannianManifold.{u, uE, uH} (I := I))
@@ -118,12 +103,6 @@ theorem exists_pairR_of_boundedGeometry
     hvol (Rm := hgeom.C 0) (hgeom.nonneg 0)
       (rm04Bound_of_geom (I := I) hgeom)
   exact ⟨C, D, Blo, A, δ, hC, hD, hBlo, hδ, hsmall⟩
-
-
-
-
-
-
 
 theorem exists_pairR_of_seqBoundedGeometry
     (X : PointedRiemannianSeq.{u, uE, uH} (I := I))
@@ -210,8 +189,6 @@ theorem exists_pairR_of_seqBoundedGeometry
   simpa [Y, hgeom_k] using hsmall (s := s) hs hsd
 
 omit [NeZero (Module.finrank Real E)] in
-/-- Uniform bounded geometry gives the common lower Ricci bound used by the
-Bishop--Gromov stage of the volume-comparison route. -/
 theorem ricciLower_of_seq
     (X : PointedRiemannianSeq.{u, uE, uH} (I := I))
     (hgeom : SeqBoundedGeometry (I := I) X) (k : Nat) :
@@ -235,7 +212,6 @@ theorem ricciLower_of_seq
   simpa [Geometry.Riemannian.VolumeComparison.Rm04GlobalBound] using
     (rm04Bound_of_seq (I := I) hgeom k)
 
-/-- Uniform local-volume packing input for the Step A volume-comparison field. -/
 structure UniformBallPack
     (X : PointedRiemannianSeq.{u, uE, uH} (I := I)) where
 
@@ -299,12 +275,6 @@ structure UniformBallPack
         ENNReal.ofReal (U m r)
 
 namespace UniformBallPack
-
-
-
-
-
-
 
 def toVCInput {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
     (h : UniformBallPack (I := I) X) :

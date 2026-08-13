@@ -9,17 +9,6 @@ set_option linter.unusedSectionVars false
 set_option linter.unusedFintypeInType false
 set_option linter.unusedDecidableInType false
 
-/-!
-# Producers for the `Rm04Reduction` input packages
-
-`Evolution/Rm04Reduction.lean` proves the static reduction
-`rm04VarRHS = Δ Rm − 2(B − B + B − B) − drift` from ten named inputs.  This module
-discharges those inputs from a Ricci-flow solution `S` (and `hS`) alone.
-
-Current content: the canonical coordinate-frame lowered-curvature component array
-`rmComp`, and the discharge of the algebraic-symmetry package `Rm04Symm` for it.
--/
-
 noncomputable section
 
 namespace DifferentialGeometry.PDE.RicciFlow
@@ -37,12 +26,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 variable [IsManifold I 1 M]
 variable [CompleteSpace E] [SigmaCompactSpace M] [T2Space M]
 
-/-- The canonical lowered-curvature component array of a Ricci-flow solution in the
-coordinate frame centred at `x₀`, in the `FourComp` currency of `Evolution/Uhlenbeck.lean`.
-
-This is `realizedRmBase` written with `vec4` instead of a `Fin 4` slot map, so that the
-tensor-level curvature-symmetry producers of `Evolution/Ricci/Trace.lean` apply to it
-directly. -/
 def rmComp
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D) (x₀ : M) :
@@ -53,12 +36,6 @@ def rmComp
         (coordinateFrameAt (I := I) x₀ i x) (coordinateFrameAt (I := I) x₀ j x)
         (coordinateFrameAt (I := I) x₀ k x) (coordinateFrameAt (I := I) x₀ l x))
 
-/-- **`Rm04Symm` discharged from the solution.**  The algebraic curvature symmetries
-— antisymmetry in each slot pair, pair symmetry, and the first Bianchi identity — hold
-for `rmComp` at every regular time and every point, with `S` and `hS` as the only inputs.
-
-This discharges the `hsym` package of `rm04Var_eq_uhl` (`Evolution/Rm04Reduction.lean`)
-and the `Rm04Symm` argument of `rmQuad_eq_b`. -/
 theorem rm04SymmOfSol
     [IsManifold I (∞ + 1) M]
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
@@ -110,16 +87,6 @@ theorem rm04SymmOfSol
     exact hbi (coordinateFrameAt (I := I) x₀ a x) (coordinateFrameAt (I := I) x₀ b x)
       (coordinateFrameAt (I := I) x₀ c x) (coordinateFrameAt (I := I) x₀ d x)
 
-/-! ## The once-differentiated second Bianchi identity
-
-`Rm04LapIn.bianchi2` is the only input of `rm04Var_eq_uhl` with no pre-existing
-producer.  It is the covariant derivative of the second Bianchi identity, which holds
-for the canonical bundled `∇Rm` at *every* point; differentiating a globally vanishing
-cyclic combination is what produces it. -/
-
-/-- **Second Bianchi identity for the canonical bundled `∇Rm` of a solution.**
-The cyclic sum over the derivative slot and the first two curvature slots vanishes at
-every time and every point, with `S` as the only input. -/
 theorem rmSecondAt
     [IsManifold I (∞ + 1) M]
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
@@ -133,12 +100,9 @@ theorem rmSecondAt
     DifferentialGeometry.Integral.Connection.metricCov,
     DifferentialGeometry.Integral.Connection.metricRm04] using h
 
-/-- The three-cycle of the first three slots of a rank-`5` covariant tensor, fixing the
-last two slots: the permutation appearing in the second Bianchi identity. -/
 private def rotA : Equiv.Perm (Fin 5) :=
   ⟨![1, 2, 0, 3, 4], ![2, 0, 1, 3, 4], by decide, by decide⟩
 
-/-- The square of `rotA`. -/
 private def rotB : Equiv.Perm (Fin 5) :=
   ⟨![2, 0, 1, 3, 4], ![1, 2, 0, 3, 4], by decide, by decide⟩
 
@@ -159,7 +123,6 @@ private theorem vec5_self {x : M} (u : Fin 5 → TangentSpace I x) :
   funext i
   fin_cases i <;> rfl
 
-/-- `SecondBianchiAt` in slot-function form: the cyclic sum over `rotA` vanishes. -/
 private theorem secondCyc {x : M}
     {al : Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) 5 x}
     (h : DifferentialGeometry.Integral.Connection.SecondBianchiAt (I := I) al)
@@ -169,9 +132,6 @@ private theorem secondCyc {x : M}
   rw [← vec5_self (I := I) u, vec5_rotA, vec5_rotB]
   exact h5
 
-/-- Local evaluation of `∇α` on a permuted family of smooth slot fields: the derivative
-correction sum is reindexed so that the differentiated slot field, not its position, is
-the summation variable. -/
 private theorem nabPerm
     (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
     (X : ContMDiffSection I E (∞ : WithTop ℕ∞) (TangentSpace I : M → Type _))
@@ -203,10 +163,6 @@ private theorem nabPerm
   · have hne : sg b ≠ sg a := fun hh => hb (sg.injective hh)
     simp [hb, hne]
 
-/-- **The cyclic sum of `∇α` vanishes when the cyclic sum of `α` vanishes everywhere.**
-This is the differentiation step behind the once-differentiated second Bianchi identity:
-the derivative of the identically vanishing cyclic scalar kills the leading term, and each
-group of connection corrections is again a cyclic sum. -/
 private theorem nabCyc
     (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
     (X : ContMDiffSection I E (∞ : WithTop ℕ∞) (TangentSpace I : M → Type _))
@@ -228,7 +184,7 @@ private theorem nabCyc
   have e1 := nabPerm (I := I) cov X V al x rotA
   have e2 := nabPerm (I := I) cov X V al x rotB
   rw [e0, e1, e2]
-  -- the leading derivative terms
+
   have hd0 : MDifferentiableAt I 𝓘(Real, Real)
       (fun p : M => al p (fun a : Fin 5 => V a p)) x :=
     (tensor0SField_eval_smooth_slots_contMDiffAt (I := I) al V x).mdifferentiableAt (by simp)
@@ -253,7 +209,7 @@ private theorem nabCyc
   rw [hzero, extDerivFun_zero, extDerivFun_add (I := I) hd0 hd1] at estep
   have hD := congrArg (fun L : TangentSpace I x →L[Real] Real => L (X x)) estep
   simp only [ContinuousLinearMap.zero_apply, ContinuousLinearMap.add_apply] at hD
-  -- the connection-correction sums
+
   have hS :
       (∑ c : Fin 5,
           al x (fun b : Fin 5 =>
@@ -273,11 +229,6 @@ private theorem nabCyc
       ((cov (fun p : M => V c p) x) (X x)))
   linarith [hD, hS]
 
-/-- **The once-differentiated second Bianchi identity.**  The cyclic sum of the canonical
-bundled `∇²Rm` of a Ricci-flow solution over the second derivative slot and the first two
-curvature slots vanishes, at every time and every point, from `S` alone.
-
-This is the tensor-level source of `Rm04LapIn.bianchi2`. -/
 theorem rm2Bianchi
     [IsManifold I (∞ + 1) M]
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
@@ -324,9 +275,6 @@ theorem rm2Bianchi
   exact nabCyc (I := I) (S.family.connection t) X V (nablaRm04Field (I := I) S t)
     (fun y u => secondCyc (I := I) (rmSecondAt (I := I) S t y) u) x
 
-/-- **The algebraic curvature symmetries of the canonical bundled `∇²Rm`.**  The two
-derivative slots are inert: `∇²Rm` is antisymmetric in each curvature slot pair and
-symmetric under exchanging the two pairs. -/
 theorem rm2SymmAt
     [IsManifold I (∞ + 1) M]
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
@@ -353,9 +301,6 @@ theorem rm2SymmAt
     DifferentialGeometry.Integral.Connection.metricCov,
     DifferentialGeometry.Integral.Connection.metricRm04] using h
 
-/-- The canonical second-covariant-derivative curvature component array of a solution in
-the coordinate frame centred at `x₀`, in the `n2Rm` slot order of `Rm04LapIn`:
-`nab2RmComp S x₀ t x a b c d e f = (∇_a ∇_b Rm)_{cdef}`. -/
 def nab2RmComp
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D) (x₀ : M) :
@@ -370,10 +315,6 @@ def nab2RmComp
           (coordinateFrameAt (I := I) x₀ d x) (coordinateFrameAt (I := I) x₀ e x)
           (coordinateFrameAt (I := I) x₀ f x)))
 
-/-! ### The metric traces relating `∇²Ric` to `∇²Rm` -/
-
-/-- The canonical first covariant derivative of Ricci, spelled out so that the private
-`nablaRicField` of `Evolution/Scalar/IntrinsicDerivation.lean` is nameable here. -/
 private def solNabRic
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D) (t : Real) :
@@ -384,7 +325,6 @@ private def solNabRic
     (totalNabla0S_reg (E := E) (H := H) (I := I) (M := M)
       2 (S.family.connection t) (connSmoothInf (I := I) S t) (S.ricci t))
 
-/-- The canonical second covariant derivative of Ricci. -/
 private def solNab2Ric
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D) (t : Real) (x : M) :
@@ -404,8 +344,6 @@ private theorem coordNab2Eq
   simpa only [solNab2Ric, solNabRic] using
     coordNab2Ric_eq_nabla2RicField (I := I) S x₀ t d a i j
 
-/-- **`∇²Ric` is the first metric trace of `∇²Rm`** in the coordinate frame at the centre.
-This is `Rm04LapIn.n2RicTrace` for the canonical coordinate arrays. -/
 theorem n2RicTr
     [I.Boundaryless] [IsManifold I (∞ + 1) M]
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
@@ -442,8 +380,6 @@ theorem n2RicTr
     DifferentialGeometry.Integral.Connection.metricRicci,
     DifferentialGeometry.Integral.Connection.metricRm04, gInvAt, hb] using h
 
-/-- **Ricci is the first metric trace of `Rm`** in the coordinate frame at the centre.
-This is `Rm04LapIn.ricTrace` for the canonical coordinate arrays. -/
 theorem ricTr
     [I.Boundaryless] [IsManifold I (∞ + 1) M]
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
@@ -489,8 +425,6 @@ private theorem sumMulPair
   rw [Finset.sum_mul]
   exact Finset.sum_congr rfl fun r _ => by ring
 
-/-- **The `(0,4)` Ricci identity in coordinate-frame components at the centre.**
-This is `Rm04LapIn.ricciId` for the canonical coordinate arrays. -/
 theorem rmRicciId
     [I.Boundaryless] [IsManifold I (∞ + 1) M]
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
@@ -608,9 +542,6 @@ theorem rmRicciId
   rw [coordInvSymmOn (I := I) S x₀ (t : Real) hx₀ r p]
   ring
 
-/-- **`Rm04LapIn` discharged from the solution.**  All seven differential inputs of the
-static reduction `rm04Var_eq_uhl` hold for the canonical coordinate-frame arrays at the
-frame centre, at every regular time, from `S` and `hS` alone. -/
 theorem rm04LapInOfSol
     [I.Boundaryless] [IsManifold I (∞ + 1) M]
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
@@ -680,8 +611,6 @@ theorem rm04LapInOfSol
           congrArg Neg.neg (hswap34 a b q d p c)
       _ = nab2RmComp (I := I) S x₀ (t : Real) x₀ a b q d c p := neg_neg _
 
-/-! ### The remaining scalar inputs of `rm04Var_eq_uhl` -/
-
 private theorem rmCompBase
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D) (x₀ : M) (t : Real)
@@ -694,9 +623,6 @@ private theorem rmCompBase
   funext q
   fin_cases q <;> rfl
 
-/-- **Index raising for the curvature coefficient.**  The `(1,3)` Christoffel curvature
-coefficient at the frame centre is the inverse-metric raising of the last slot of the
-lowered curvature component array.  This is the `hraise` input of `rm04Var_eq_uhl`. -/
 theorem rmRaise
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -755,9 +681,6 @@ theorem rmRaise
           (I := I) (S.family.connection (t : Real)) x₀ a b c d := by
         simp
 
-/-! ### The `(0,2)` Ricci identity for `Ric` -/
-
-/-- The canonical second covariant derivative of Ricci as a bundled field. -/
 private def solNab2RicF
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D) (t : Real) :
@@ -788,9 +711,6 @@ private theorem solNab2RicReal
     (totalNabla0S_reg (E := E) (H := H) (I := I) (M := M)
       3 (S.family.connection t) (connSmoothInf (I := I) S t) (solNabRic (I := I) S t))
 
-/-- **The `(0,2)` Ricci identity for the solution's Ricci tensor.**  The `s = 2` analogue
-of `rm04_ricciIdentityAt`: the commutator of the canonical `∇²Ric` is the slotwise
-curvature action on `Ric`, at every regular time and point. -/
 theorem ricRicciIdAt
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -826,8 +746,6 @@ theorem ricRicciIdAt
     (solNab2Ric (I := I) S (t : Real) x)
     (rm13OfSol (I := I) S (t : Real) (D.regular_subset t.2)) rfl rfl h20 htor
 
-/-- **`RicCommAt` discharged from the solution.**  The `(0,2)` Ricci identity in
-coordinate-frame components at the frame centre; the `hcomm` input of `rm04Var_eq_uhl`. -/
 theorem ricCommOfSol
     [I.Boundaryless] [IsManifold I (∞ + 1) M]
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
@@ -954,10 +872,6 @@ theorem ricCommOfSol
         (t : Real) x₀ k p)]
   linarith [hri]
 
-/-- **The static Uhlenbeck reduction discharged from the solution.**  At the centre of the
-coordinate frame and at a regular time, the `∇²Ric`-expanded lowered-Riemann variation
-`rm04VarRHS` equals `ΔRm − 2(B − B + B − B) − drift` built entirely from the canonical
-coordinate arrays.  Every input of `rm04Var_eq_uhl` is discharged from `S`/`hS`. -/
 theorem rm04StaticOfSol
     [I.Boundaryless] [IsManifold I (∞ + 1) M]
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
@@ -996,17 +910,6 @@ theorem rm04StaticOfSol
     (ricCommOfSol (I := I) S hS x₀ t)
     (rm04LapInOfSol (I := I) S hS x₀ t) m
 
-/-- **The Uhlenbeck curvature evolution at the frame centre.**  Along a Ricci-flow
-solution, the canonical coordinate component of lowered Riemann satisfies
-
-`∂ₜ Rm_{ijkl} = Δ Rm_{ijkl} − 2(B_{ijkl} − B_{ijlk} + B_{ikjl} − B_{iljk}) − drift_{ijkl}`
-
-at the centre of the coordinate frame and at every regular time.
-
-`gInvDt` and `hmetricReg` are the only inputs beyond `S`/`hS`: they record the
-spacetime regularity of the coordinate-frame metric components together with a time
-derivative for the coordinate inverse metric.  Every other input of `rm04Var_of_sol`
-and of `rm04Var_eq_uhl` is discharged here. -/
 theorem rm04Evol_at
     [I.Boundaryless] [IsManifold I (∞ + 1) M]
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
@@ -1049,13 +952,6 @@ theorem rm04Evol_at
       (fun s hs => connCurvOfSol (I := I) S hS x₀ s hs) t m
   exact hbase.congr_deriv (rm04StaticOfSol (I := I) S hS x₀ t m)
 
-/-! ## Per-point-centred global families
-
-The centre-only limitation of the theorems above dissolves by letting every point be its
-own frame centre.  These are the families the forward-uniqueness lane consumes. -/
-
-/-- The coordinate frame at `y`, read at its own centre as a basis of `T_y M`.  This is
-the `basisAt` argument of the forward-uniqueness lane. -/
 def coordBasisAt (y : M) :
     Module.Basis (CoordinateIdx (𝕜 := Real) E) Real (TangentSpace I y) :=
   (coordinateFrameAt_isLocalFrame_one (I := I) y).toBasisAt
@@ -1065,16 +961,12 @@ def coordBasisAt (y : M) :
     (coordBasisAt (I := I) y i : TangentSpace I y) = coordinateFrameAt (I := I) y i y := by
   simp [coordBasisAt, IsLocalFrameOn.toBasisAt_coe]
 
-/-- The per-point-centred lowered-curvature component family: at each point the coordinate
-frame centred at that same point is used. -/
 def rm04Fam
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D) :
     FourComp M (CoordinateIdx (𝕜 := Real) E) :=
   fun r y i j k l => rmComp (I := I) S y r y i j k l
 
-/-- **`hreal` for the forward-uniqueness lane.**  The per-point-centred family is the
-metric's own lowered curvature evaluated on the per-point coordinate basis. -/
 theorem rm04Fam_real
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -1086,7 +978,6 @@ theorem rm04Fam_real
             (coordBasisAt (I := I) y k) (coordBasisAt (I := I) y l)) := by
   simp [rm04Fam, rmComp, SolutionFamily.rm04, SolutionOn.family]
 
-/-- The per-point-centred rough-Laplacian component family. -/
 def rm04LapFam
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D) :
@@ -1094,7 +985,6 @@ def rm04LapFam
   fun r y i j k l =>
     rmLap (coordInv (I := I) S y r y) (nab2RmComp (I := I) S y r y) i j k l
 
-/-- The per-point-centred Uhlenbeck `B` component family. -/
 def rm04BFam
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D) :
@@ -1102,7 +992,6 @@ def rm04BFam
   fun r y i j k l =>
     uhlenbeckBTensorInFrame (coordInv (I := I) S y) (rmComp (I := I) S y) r y i j k l
 
-/-- The per-point-centred once-raised Ricci component family. -/
 def ricUpFam
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D) :
@@ -1111,10 +1000,6 @@ def ricUpFam
     ricciOneUpCompInFrame (I := I) S (coordInv (I := I) S y)
       (coordinateFrameAt (I := I) y) r y i k
 
-/-- **`hev` for the forward-uniqueness lane.**  The per-point-centred families satisfy the
-Uhlenbeck reaction–diffusion evolution with the Ricci drift, at every regular time and
-every point.  The only input beyond `S`/`hS` is the per-centre coordinate-frame metric
-spacetime regularity package. -/
 theorem rm04EvolFam
     [I.Boundaryless] [IsManifold I (∞ + 1) M]
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
@@ -1144,12 +1029,6 @@ theorem rm04EvolFam
         if q = 0 then i else if q = 1 then j else if q = 2 then k else l) 3) = l from rfl]
     using h
 
-/-- **`hL` for the forward-uniqueness lane.**  The per-point-centred rough-Laplacian
-component family realizes the metric rough Laplacian `Δ_g = div_g ∘ ∇^g` of the metric's
-own lowered curvature field, read on the per-point coordinate basis.
-
-The slot map is `frameVec4 (fun m z ↦ coordBasisAt z m) y i j k l` on the nose — that
-definition unfolds to the `vec4` written here. -/
 theorem rm04LapFam_real
     [I.Boundaryless] [IsManifold I (∞ + 1) M]
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}

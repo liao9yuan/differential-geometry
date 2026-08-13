@@ -1,15 +1,6 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.LowRegRungFive
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.LowRegLadderRung
 
-/-!
-# Common ordered package for the low-regularity energy ladder
-
-This final-assembly module selects the three fixed bottom-rung certificates and
-the generic high-rung certificate once.  Two scalar envelopes then dominate all
-fixed-rung absorption gates, so later solve calibration never reselects
-incoherent existential witnesses.
--/
-
 noncomputable section
 
 open Bundle Manifold MeasureTheory Set Filter
@@ -27,7 +18,6 @@ open DifferentialGeometry.Analysis.Parabolic.QuasiLinear
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.DeTurck
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.MetricRealization
 
-/-- A fixed-rung gate is dominated by the common two-scalar envelope. -/
 theorem rungGate_le {Ctop Kr2 Kr1 Kcap A B δ R : ℝ}
     (hA : Ctop * Kcap ≤ A) (hB : Kr2 + Kr1 ≤ B)
     (hδ0 : 0 ≤ δ) (hR : 0 ≤ R) :
@@ -49,9 +39,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
   [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
   [T2Space M] [SigmaCompactSpace M]
 
-/-- A coherent pair of scalar envelopes for all fixed bottom-rung gates and the
-generic high-rung coefficient.  Each stored continuation retains the exact
-witnesses selected by its producer. -/
 def IsLowGateOrd (g : SmoothRiemannianMetric I M) (A B : ℝ) : Prop :=
   0 ≤ A ∧ 0 ≤ B ∧
     (∃ C2 Kr23 Kr13 K2 : ℝ,
@@ -65,8 +52,6 @@ def IsLowGateOrd (g : SmoothRiemannianMetric I M) (A B : ℝ) : Prop :=
         C4 * K4 ≤ A ∧ Kr25 + Kr15 ≤ B) ∧
     ∃ κ : ℝ, IsHmRungOrd (I := I) (M := M) g κ ∧ κ ≤ A
 
-/-- Select one coherent common gate package from the three fixed rungs and the
-generic all-rung producer. -/
 theorem lowregGatePack (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M) :
     ∃ A B : ℝ, IsLowGateOrd (I := I) (M := M) g A B := by

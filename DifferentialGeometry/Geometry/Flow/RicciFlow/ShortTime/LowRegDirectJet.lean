@@ -1,13 +1,5 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.LowRegAllOrderJet
 
-/-!
-# Direct low-regularity forcing jets
-
-This file is the feasibility gate for the direct-smoothing route.  It starts at
-the diagonal order-one adapted solve and bootstraps its forcing coordinates
-directly, without an adjacent-scale realization package.
--/
-
 noncomputable section
 
 open Bundle Manifold MeasureTheory Set Filter
@@ -36,7 +28,6 @@ variable
 
 open DifferentialGeometry.Analysis.Parabolic.TensorSpectral (symmS) in
 set_option linter.unusedVariables false in
-/-- One finite-order forcing bootstrap step at the order-one scale. -/
 private theorem force_step_one
     (g g_bg : SmoothRiemannianMetric I M) {R δ : ℝ}
     (hR : 0 < R) (hδ : δ < 1)
@@ -255,7 +246,6 @@ private theorem force_step_one
   rw [ht]
   exact hψ_coeff t htmem i
 
-/-- The finite-order forcing driver at the order-one scale. -/
 private theorem force_driver_one
     (g g_bg : SmoothRiemannianMetric I M) {R δ : ℝ}
     (hR : 0 < R) (hδ : δ < 1)
@@ -414,8 +404,6 @@ private theorem force_driver_one
       (fun i => perModeConv (TensorEigenIdx.lambda (I := I) (M := M) i) (fk i))
       hφ_cont hφ_mass hw_coeff
 
-/-- Primitive order-one solve data and all spatial masses produce one smooth
-forcing-coordinate family with all time-jet masses. -/
 private theorem force_jet_of_mass
     (g g_bg : SmoothRiemannianMetric I M) {R δ T : ℝ}
     (hR : 0 < R) (hδ : δ < 1)
@@ -499,8 +487,6 @@ private theorem force_jet_of_mass
     exact hfc_eqOn i ht
   exact ⟨fc, ⟨hfc_smooth, hfc_mass⟩, hfc_pin⟩
 
-/-- An adapted order-one solve has smooth forcing coordinates with all spatial
-and time-jet spectral masses on the original closed time slab. -/
 theorem lowreg_forceJet1 (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M)
     {δ Ctop B0 B1 D ρ P Rcap Ctop₂ Kr2 Kr1 Kcap T : ℝ}
@@ -538,8 +524,6 @@ theorem lowreg_forceJet1 (hDim : Module.finrank ℝ E = 3)
     (fun σ => lowreg_loMass (I := I) (M := M) hDim g hT hT1 fLo hlo σ)
 
 omit [BoundarylessManifold I M] in
-/-- Promote an all-order coordinate representative of an order-one forcing to
-an order-two time-`L²` forcing with the same coordinates. -/
 private theorem force_promote_two
     (g : SmoothRiemannianMetric I M) {T : ℝ} (hT : 0 < T)
     (fc : TensorEigenIdx (I := I) (M := M) g 0 2 → ℝ → ℝ)
@@ -618,8 +602,6 @@ private theorem force_promote_two
   simp only [W, tensorHs_of_spectralMass_majorant_coeff, hpr_id t htmem, htl i]
 
 omit [BoundarylessManifold I M] in
-/-- The order-one zero-datum carrier has the same pointwise Duhamel coordinates
-as any continuous forcing-coordinate representative pinned to its forcing. -/
 private theorem carrier_one_coeff
     (g : SmoothRiemannianMetric I M) {T : ℝ} (hT : 0 < T) (hT1 : T ≤ 1)
     (fLo : timeL2 (tensorHs (I := I) (M := M) g 0 2 ((1 : ℕ) : ℝ)) T)
@@ -674,8 +656,6 @@ private theorem carrier_one_coeff
   rw [Set.IccExtend_of_mem hT.le _ hs, hFrep_coeff s i, hpr_id s hs]
 
 omit [BoundarylessManifold I M] in
-/-- The promoted order-two Duhamel carrier is exactly the Lions--Magenes
-order-two representative of the original order-one Duhamel field. -/
 private theorem duhamel_mode_pin
     (g : SmoothRiemannianMetric I M) {T : ℝ} (hT : 0 < T) (hT1 : T ≤ 1)
     (fLo : timeL2 (tensorHs (I := I) (M := M) g 0 2 ((1 : ℕ) : ℝ)) T)
@@ -718,8 +698,6 @@ private theorem duhamel_mode_pin
   exact hh.trans (hlo t ht i).symm
 
 omit [BoundarylessManifold I M] in
-/-- The promoted order-two carrier inherits the order-one field's state radius
-at every time of the original closed slab. -/
 private theorem direct_state_bound
     (g : SmoothRiemannianMetric I M) {R T : ℝ} (hR : 0 < R)
     (hT : 0 < T) (hT1 : T ≤ 1)
@@ -754,9 +732,6 @@ private theorem direct_state_bound
   exact hrepr t ht
 
 open DifferentialGeometry.Analysis.Parabolic.TensorSpectral (symmS) in
-/-- The forcing coordinates produced from primitive order-one solve data
-are the coordinates of the genuine smooth Ricci--DeTurck nonlinearity on every
-smooth representative of the promoted carrier. -/
 private theorem direct_force_coeff
     (g g_bg : SmoothRiemannianMetric I M) {R δ T : ℝ}
     (hR : 0 < R) (hδ : δ < 1)
@@ -984,8 +959,6 @@ private theorem direct_force_coeff
   rw [← hψ_coeff t (Set.Ico_subset_Icc_self ht) i]
   rfl
 
-/-- All-order forcing mass supplies one finite radius realizing every smooth
-representative of the promoted carrier on the closed slab. -/
 private theorem direct_radius
     (g : SmoothRiemannianMetric I M) {T : ℝ} (hT : 0 < T)
     (uHi : MaxRegSolutionSpace (I := I) (M := M)
@@ -1047,8 +1020,6 @@ private theorem direct_radius
   linarith only [hnorm_le]
 
 open DifferentialGeometry.Analysis.Parabolic.TensorSpectral (symmS) in
-/-- Primitive fixed-background solve data and all spatial masses directly
-supply the all-order forcing and order-two carrier used by joint smoothing. -/
 theorem direct_jet_of_mass
     (g g_bg : SmoothRiemannianMetric I M) {R δ T : ℝ}
     (hR : 0 < R) (hδ : δ < 1)
@@ -1171,9 +1142,6 @@ theorem direct_jet_of_mass
   exact ⟨u, fHi, fc, R₀, htrace, rfl, hpinHi, hfc.1, hfc.2, hf_id', hR₀,
     hrealize, hforceOut, hstate⟩
 
-/-- An adapted diagonal order-one solve supplies the direct all-order packet on
-the original interval.  This is the compatibility wrapper for
-`direct_jet_of_mass`. -/
 theorem lowreg_directJet (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M)
     {δ Ctop B0 B1 D ρ P Rcap Ctop₂ Kr2 Kr1 Kcap T : ℝ}

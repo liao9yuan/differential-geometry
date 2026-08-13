@@ -4,13 +4,6 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.C4.StepCInput
 
 set_option autoImplicit false
 
-/-!
-# Strict distance convexity from an intrinsic H6 branch
-
-This file turns the provider-native Hessian positivity from `H6BranchMin` into
-the `StrictDistInput` consumed by the Step-C center-of-mass construction.
--/
-
 noncomputable section
 
 universe u uE uH
@@ -38,8 +31,6 @@ variable {I : ModelWithCorners Real E H} [I.Boundaryless]
 
 namespace H6NormalData
 
-/-- An intrinsic H6 branch makes the minimizing join a `StrictDistInput`
-whenever the center and active points fit in the retained physical cage. -/
 theorem strict_dist
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
     {hd : InjRadiusDecayInput (I := I) X}

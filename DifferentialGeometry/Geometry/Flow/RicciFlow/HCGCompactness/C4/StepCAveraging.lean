@@ -1,14 +1,6 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.C4.StepCAverageConvergence
 set_option autoImplicit false
 
-
-
-
-
-
-
-
-
 noncomputable section
 
 universe u uE uH uX uY
@@ -31,8 +23,6 @@ variable {H : Type uH} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type u} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
   [T2Space M] [T2Space (TangentBundle I M)] [SigmaCompactSpace M]
   [ConnectedSpace M] [T3Space M]
-
-
 
 namespace centerAverage
 
@@ -113,8 +103,6 @@ theorem unifTwoIdRegOn {s : Set M} {USeq : ℕ → ℕ → ι → Set M}
   refine ⟨N, fun k hk l hl x hx hμx => ?_⟩
   exact hN k hk l hl x hx (hregion k l x hx i hμx)
 
-
-
 theorem unifTwoIdDataOn {s : Set M} {USeq : ℕ → ℕ → ι → Set M}
     {μSeq : ℕ → ℕ → M → ι → ℝ} {ptsSeq : ℕ → ℕ → M → ι → M}
     {pSeq : ℕ → ℕ → M → M} {rSeq : ℕ → ℕ → M → ℝ}
@@ -181,9 +169,6 @@ theorem unifTwoIdDataOn {s : Set M} {USeq : ℕ → ℕ → ι → Set M}
   exact unifTwoIdRegOn (I := I) (g := g) (join := join) (USeq := USeq)
     hcomplete hr hqstar hactive_mem (fun k l x hx => (hdata k l x hx).1)
     hstrict (fun k l x hx i hμx => (hdata k l x hx).2 i hμx) hpts
-
-
-
 
 theorem unifTwoIdDataSelf {s : Set M} {USeq : ℕ → ℕ → ι → Set M}
     {μSeq : ℕ → ℕ → M → ι → ℝ} {ptsSeq : ℕ → ℕ → M → ι → M}
@@ -253,7 +238,6 @@ theorem unifTwoIdDataSelf {s : Set M} {USeq : ℕ → ℕ → ι → Set M}
       refine ⟨N, fun k hk l hl x hx hμx => ?_⟩
       exact hN k hk l hl x hx ((hdata k l x hx).2 i hμx))
 
-
 theorem eqn_local (x : X)
     (hdiffSummands :
       letI : RiemannianBundle (fun x : M => TangentSpace I x) :=
@@ -292,7 +276,6 @@ theorem eqn_local (x : X)
   simpa [centerAverage] using
     centerOfMass.expInv_eqn_local (I := I) (g := g) (μ := μ x) (pts := pts x)
       (join := join) (p := p x) (r := r x) (h x) hdiffSummands hsrc
-
 
 theorem eqn_local_on {s : Set X} {qstar : X → M}
     (hOn : ∀ x : X, x ∈ s → CenterInput (I := I) g (μ x) (pts x) join (p x) (r x))
@@ -363,8 +346,6 @@ theorem eqn_local_on {s : Set X} {qstar : X → M}
     (join := join) (p := p x) (r := r x) (hOn x hx) hdiff hsrc'
 
 end centerAverage
-
-
 
 theorem finite_cover_two_tail {J Y : Type*} [Finite J]
     {G : Set Y} {S : J → Set Y}

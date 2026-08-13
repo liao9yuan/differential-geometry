@@ -5,17 +5,6 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.C4.StepCStage
 
 set_option autoImplicit false
 
-/-!
-# Master-subsequence stage geometry
-
-The integer-radius diagonal records each fixed-radius stage package on a tail
-of one master selector.  This file transports the already proved local
-diffeomorphism, injectivity, and pointedness tails to the manifolds indexed
-directly by that master selector.  Only point/manifold indices are transported;
-the radius-local `LiveSlot` and `InterSlot` types are never identified across
-subsequences.
--/
-
 noncomputable section
 
 universe u uE uH
@@ -33,8 +22,6 @@ variable {H : Type uH} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H} [I.Boundaryless]
 variable {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
 
-/-- Transport a finite-stage comparison map along equalities of its two
-ambient sequence indices. -/
 noncomputable def stageMapCast
     (inp : MetricCompactCore (I := I) X)
     (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k))
@@ -168,9 +155,6 @@ private theorem cast_local
   subst L'
   simpa only [stageMapCast] using hgeom
 
-/-- A provider-native fixed-radius tail supplies local diffeomorphism and
-pointedness on the master sequence.  The same stage package is retained for
-the later injectivity and metric consumers. -/
 theorem HasRadiusTailOn.local_tail
     (inp : MetricCompactCore (I := I) X)
     (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k))
@@ -268,8 +252,6 @@ theorem HasRadiusTailOn.local_tail
     simpa only [Lq, Lbase, NetLimitData.hatSourceBall] using hloc0,
     by simpa only [Lq, Lbase] using hbase0⟩
 
-/-- A fixed H6-provider radius tail supplies local diffeomorphism, injectivity,
-and exact pointedness on the master sequence. -/
 theorem HasRadiusTailOn.geom_tail
     (inp : MetricCompactCore (I := I) X)
     (d : H6NormalData (I := I) X inp.decay)
@@ -395,11 +377,6 @@ theorem HasRadiusTailOn.geom_tail
     by simpa only [Lq, Lbase, NetLimitData.hatSourceBall] using hinj0,
     by simpa only [Lq, Lbase] using hbase0⟩
 
-/-- A fixed integer-radius tail supplies the first three Step-B1 comparison
-fields directly on the master sequence: local diffeomorphism on the retained
-open ball, global injectivity there, and exact basepoint preservation.  The
-witnessed radius-tail selector and index equality are retained so downstream
-metric estimates can use the very same transported map. -/
 theorem HasRadiusTail.geom_tail
     (inp : MetricCompactnessInputs (I := I) X)
     (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k))
@@ -518,4 +495,3 @@ theorem HasRadiusTail.geom_tail
 
 end HCGCompactness
 end DifferentialGeometry
-

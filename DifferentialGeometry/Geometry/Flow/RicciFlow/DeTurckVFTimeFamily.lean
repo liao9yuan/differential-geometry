@@ -4,7 +4,6 @@ import DifferentialGeometry.Geometry.Flow.VectorFieldSmooth
 import DifferentialGeometry.Analysis.Parabolic.DeTurckRicci.DeTurckVectorFieldContinuousInMetric
 import DifferentialGeometry.Geometry.Flow.DeTurckVFChartCoord
 
-
 namespace DifferentialGeometry.PDE.RicciFlow
 
 open Bundle Set

@@ -3,26 +3,6 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.MetricPreconv
 
 set_option autoImplicit false
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 noncomputable section
 
 namespace DifferentialGeometry
@@ -41,11 +21,6 @@ variable {I : ModelWithCorners Real E H} [I.Boundaryless]
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
 variable [T2Space M] [IsManifold I ∞ M] [SigmaCompactSpace M]
 variable [IsManifold I 1 M] [IsManifold I 2 M]
-
-
-
-
-
 
 omit [CompleteSpace E] in
 theorem exists_cInf_subseq_finiteFamily
@@ -77,13 +52,6 @@ theorem exists_cInf_subseq_finiteFamily
     · exact ⟨Φa, hΦaconv⟩
     · obtain ⟨Φinf, hΦinf⟩ := hconv p hps
       exact ⟨Φinf, hΦinf.comp_subseq hψ⟩
-
-
-
-
-
-
-
 
 theorem exists_framePairs_diag
     (gRef : SmoothRiemannianMetric I M) (gSeq : ℕ → SmoothRiemannianMetric I M)
@@ -128,7 +96,6 @@ theorem exists_framePairs_diag
   refine ⟨ψ, χ, hψ, hχcd, htsupp, hχ1, fun i j => ?_⟩
   obtain ⟨Φinf, hΦinf⟩ := hconv (i, j) (Finset.mem_univ _)
   exact ⟨Φinf, hΦinf⟩
-
 
 theorem exists_pairs_refs
     (gBase : SmoothRiemannianMetric I M)
@@ -178,11 +145,6 @@ theorem exists_pairs_refs
   refine ⟨ψ, χ, hψ, hχcd, htsupp, hχ1, fun i j => ?_⟩
   obtain ⟨Φinf, hΦinf⟩ := hconv (i, j) (Finset.mem_univ _)
   exact ⟨Φinf, hΦinf⟩
-
-
-
-
-
 
 theorem framePairs_pinned
     (gRef : SmoothRiemannianMetric I M) (gSeq : ℕ → SmoothRiemannianMetric I M)
@@ -262,7 +224,6 @@ theorem framePairs_pinned
     exact tendsto_nhds_unique hseq hlim
   rw [hpin] at hΦinf
   exact hΦinf
-
 
 theorem pairs_pinned_refs
     (gBase : SmoothRiemannianMetric I M)
@@ -345,11 +306,6 @@ theorem pairs_pinned_refs
   rw [hpin] at hΦinf
   exact hΦinf
 
-
-
-
-
-
 theorem exists_tower_conv
     (gRef : SmoothRiemannianMetric I M) (gSeq : ℕ → SmoothRiemannianMetric I M)
     (hbdd : ∀ q : ℕ, ∀ K : Set M, IsCompact K → ∃ C : Real, ∀ k : ℕ, ∀ z ∈ K,
@@ -414,7 +370,6 @@ theorem exists_tower_conv
       (fun k => Tensor0SBundle.metricTensorField (I := I) (gSeq (φ (ψ k))))
       (Tensor0SBundle.metricTensorField (I := I) gInf) x₀ hχcd htsupp hUopen hχU hUtarget
       hUKc Finset.univ frame hspan hpairsU V) a V
-
 
 theorem exists_tower_refs
     (gBase : SmoothRiemannianMetric I M)
@@ -487,15 +442,6 @@ theorem exists_tower_refs
       (Tensor0SBundle.metricTensorField (I := I) gInf) x₀ hχcd htsupp hUopen hχU hUtarget
       hUKc Finset.univ frame hspan hpairsU V) a V
 
-
-
-
-
-
-
-
-
-
 theorem componentConv_covDeriv_of_chartCInf
     (gRef : SmoothRiemannianMetric I M) (gSeq : ℕ → SmoothRiemannianMetric I M)
     (hbdd : ∀ q : ℕ, ∀ K : Set M, IsCompact K → ∃ C : Real, ∀ k : ℕ, ∀ z ∈ K,
@@ -539,11 +485,6 @@ theorem componentConv_covDeriv_of_chartCInf
   rw [hcar gInf] at htend
   exact htend.congr (fun k => hcar (gSeq (φ (ψ k))))
 
-
-
-
-
-
 omit [CompleteSpace E] [I.Boundaryless] [T2Space M] [IsManifold I ∞ M] [SigmaCompactSpace M]
     [IsManifold I 2 M] in
 theorem tangentConst_basis_expand (x₀ : M)
@@ -559,10 +500,6 @@ theorem tangentConst_basis_expand (x₀ : M)
   refine Finset.sum_congr rfl fun j _ => ?_
   rw [map_smul]
 
-
-
-
-
 omit [FiniteDimensional ℝ E] [CompleteSpace E] [I.Boundaryless] [T2Space M] [IsManifold I ∞ M]
     [SigmaCompactSpace M] in
 theorem bz_eq_tangentConst (x : M)
@@ -575,12 +512,6 @@ theorem bz_eq_tangentConst (x : M)
   set e := trivializationAt E (TangentSpace I : M → Type _) x with he
   rw [IsLocalFrameOn.toBasisAt_coe, e.localFrame_apply_of_mem_baseSet basisE hz]
   simp [Bundle.Trivialization.basisAt, tangentConstInChart_apply, he]
-
-
-
-
-
-
 
 omit [I.Boundaryless] in
 omit [SigmaCompactSpace M] in
@@ -639,12 +570,6 @@ private def TowerExtractor
               (fun w : M => (covDerivOfField (I := I) gRef
                 (Tensor0SBundle.metricTensorField (I := I) gInf) a) w
                   (fun a => V a w)) z)
-
-
-
-
-
-
 
 omit [I.Boundaryless] in
 private theorem exists_patch_core
@@ -779,7 +704,6 @@ private theorem exists_patch_core
   refine ⟨(Finset.range (p + 1)).sup k0fn, fun k hk a ha z hz => ?_⟩
   exact hk0fn a ha k (le_trans (Finset.le_sup (Finset.mem_range.2 (Nat.lt_succ_of_le ha))) hk) z hz
 
-
 theorem exists_uniform_patch
     (gRef : SmoothRiemannianMetric I M) (gSeq : ℕ → SmoothRiemannianMetric I M)
     (hbdd : ∀ q : ℕ, ∀ K : Set M, IsCompact K → ∃ C : Real, ∀ k : ℕ, ∀ z ∈ K,
@@ -795,7 +719,6 @@ theorem exists_uniform_patch
   apply exists_patch_core (I := I) gRef gSeq ?_ φ₀ gInf hconv x
   intro x₀ K₀ hK₀ hK₀chart φ gLim hLim
   exact exists_tower_conv (I := I) gRef gSeq hbdd x₀ hK₀ hK₀chart φ gLim hLim
-
 
 theorem exists_patch_refs
     (gBase : SmoothRiemannianMetric I M)
@@ -814,12 +737,6 @@ theorem exists_patch_refs
   apply exists_patch_core (I := I) gBase gSeq ?_ φ₀ gInf hconv x
   intro x₀ K₀ hK₀ hK₀chart φ gLim hLim
   exact exists_tower_refs (I := I) gBase gRef gSeq hbdd x₀ hK₀ hK₀chart φ gLim hLim
-
-
-
-
-
-
 
 theorem metricPreconvInf (hne : Nonempty M)
     (gRef : SmoothRiemannianMetric I M) (gSeq : ℕ → SmoothRiemannianMetric I M)
@@ -878,7 +795,6 @@ theorem metricPreconvInf (hne : Nonempty M)
   simpa only [Function.comp_apply] using
     hk0fn n hn k (le_trans (Finset.le_sup (f := fun n => k0fn n.1 n.2)
       (Finset.mem_attach F ⟨n, hn⟩)) hk) a ha z (hWC (e n) hzw)
-
 
 theorem metricCInf_refs (hne : Nonempty M)
     (gBase : SmoothRiemannianMetric I M)

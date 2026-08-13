@@ -1,13 +1,6 @@
 import DifferentialGeometry.Geometry.Exponential.GaussLemma
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.C4.PointedEmetric
 
-
-
-
-
-
-
-
 noncomputable section
 
 open Filter Set Bundle Manifold
@@ -29,9 +22,6 @@ variable [NeZero (Module.finrank Real E)] [CompleteSpace E]
 variable {H : Type uH} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H}
 variable [I.Boundaryless]
-
-
-
 
 theorem properBall_to_exp
     (Y : PointedRiemannianManifold.{u, uE, uH} (I := I))
@@ -124,9 +114,6 @@ theorem properBall_to_exp
       _ ≤ Real.sqrt (Y.metric.inner c v v) := hsqrtLe
       _ ≤ R := hmetricLe
   exact hnormLe.trans_lt hσ
-
-
-
 
 theorem exp_sigma_maps
     (Y : PointedRiemannianManifold.{u, uE, uH} (I := I))

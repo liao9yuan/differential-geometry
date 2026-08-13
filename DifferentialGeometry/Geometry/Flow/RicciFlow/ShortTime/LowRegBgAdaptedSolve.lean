@@ -1,18 +1,6 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.LowRegBgSolveAt
 import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.LowRegBgRungPack
 
-/-!
-# The fixed-background adapted low solve
-
-This module joins one fixed-background order-one solve with the metricwise
-background rung-three and gate certificates.  The stored absorption budget is
-evaluated at the solve packet's actual threshold and state radius.
-
-The constructor `adaptedBg_of_given` is deliberately metricwise: it consumes an
-already proved gate budget and does not choose a class-uniform threshold,
-radius, packet, or lifetime.
--/
-
 noncomputable section
 
 open Bundle Manifold MeasureTheory Set
@@ -39,10 +27,6 @@ variable
       [IsManifold I ∞ M] [CompactSpace M] [I.Boundaryless]
       [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M]
 
-/-- A fixed-background low solve paired with one ordered rung-three certificate
-and a coherent metricwise background gate package.  Its absorption budget uses
-the threshold and state radius stored in `K`; no class-first choice is asserted.
--/
 def IsAdaptedLowSolveBg (g₀ g_bg : SmoothRiemannianMetric I M)
     (K : LowRegBoundData) {T : ℝ} (hT : 0 < T) (hT1 : T ≤ 1)
     (u : MaxRegSolutionSpace (I := I) (M := M) (g := g₀) (r := 0) (s := 2)
@@ -67,14 +51,12 @@ variable {g₀ g_bg : SmoothRiemannianMetric I M} {K : LowRegBoundData}
   {gforce : timeL2
     (tensorHs (I := I) (M := M) g₀ 0 2 ((1 : ℕ) : ℝ)) T}
 
-/-- Read the exact fixed-background solve component of an adapted solve. -/
 theorem toIsBgSolveAt
     (h : IsAdaptedLowSolveBg (I := I) (M := M) g₀ g_bg K hT hT1
       u gforce Rcap Ctop₂ Kr2 Kr1 Kcap) :
     IsBgSolveAt (I := I) (M := M) g₀ g_bg K hT hT1 u gforce Rcap :=
   h.1
 
-/-- Read the underlying fixed-background fixed-point output. -/
 theorem toIsLowSolveBg
     (h : IsAdaptedLowSolveBg (I := I) (M := M) g₀ g_bg K hT hT1
       u gforce Rcap Ctop₂ Kr2 Kr1 Kcap) :
@@ -82,15 +64,12 @@ theorem toIsLowSolveBg
       h.toIsBgSolveAt.bounds hT hT1 u gforce :=
   h.toIsBgSolveAt.solve
 
-/-- Read the stored fixed-background ordered rung-three certificate. -/
 theorem toIsRung3OrdBg
     (h : IsAdaptedLowSolveBg (I := I) (M := M) g₀ g_bg K hT hT1
       u gforce Rcap Ctop₂ Kr2 Kr1 Kcap) :
     IsRung3OrdBg (I := I) (M := M) g₀ g_bg Ctop₂ Kr2 Kr1 Kcap :=
   h.2.1
 
-/-- Read the coherent background gate and the domination certificates for the
-stored rung-three tuple. -/
 theorem toGatePack
     (h : IsAdaptedLowSolveBg (I := I) (M := M) g₀ g_bg K hT hT1
       u gforce Rcap Ctop₂ Kr2 Kr1 Kcap) :
@@ -101,8 +80,6 @@ theorem toGatePack
           B * lowregStateRad K.top K.slope K.outer K.realize + ε < 1 :=
   h.2.2
 
-/-- Read the rung-three absorption budget already discharged by an adapted
-fixed-background solve. -/
 theorem absorb
     (h : IsAdaptedLowSolveBg (I := I) (M := M) g₀ g_bg K hT hT1
       u gforce Rcap Ctop₂ Kr2 Kr1 Kcap) :
@@ -118,9 +95,6 @@ theorem absorb
 
 end IsAdaptedLowSolveBg
 
-/-- Package a given fixed-background solve and a given metricwise gate once
-the gate budget has been proved for the solve packet's actual threshold and
-state radius.  The rung-three tuple remains metricwise existential data. -/
 theorem adaptedBg_of_given
     {g₀ g_bg : SmoothRiemannianMetric I M} {K : LowRegBoundData}
     {T Rcap : ℝ} {hT : 0 < T} {hT1 : T ≤ 1}

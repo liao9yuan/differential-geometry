@@ -11,40 +11,6 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.MetricPreconv
 
 set_option autoImplicit false
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 noncomputable section
 
 namespace DifferentialGeometry
@@ -67,14 +33,9 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
 variable [T2Space M] [IsManifold I ∞ M] [SigmaCompactSpace M]
 variable [IsManifold I 1 M] [IsManifold I 2 M]
 
-
-
 section JetExpansion
 
 variable (gRef : SmoothRiemannianMetric I M) (x : M)
-
-
-
 
 private def sRep
     (A0 : Tensor0SBundle.Tensor0SField (𝕜 := Real) (E := E) (H := H)
@@ -84,8 +45,6 @@ private def sRep
       (TangentSpace I : M → Type _)) : E → Real :=
   writtenInExtChartAt I 𝓘(Real, Real) x
     (fun w : M => (covDerivOfField (I := I) gRef A0 p) w (fun a => W a w))
-
-
 
 omit [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)] in
 omit [IsManifold I 2 M] in
@@ -103,8 +62,6 @@ private lemma sRep_diffAt
   have h1 : DifferentiableOn Real (sRep gRef x A0 p W) (extChartAt I x).target :=
     h.differentiableOn (by simp)
   exact h1.differentiableAt ((isOpen_extChartAt_target (I := I) x).mem_nhds hz)
-
-
 
 omit [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)] in
 omit [IsManifold I 2 M] in
@@ -125,8 +82,6 @@ private lemma sRep_fderiv_germ
       writtenInExtChartAt I 𝓘(Real, Real) x (towerStep (I := I) gRef A0 p W σ) :=
   fderiv_chartRep_eq_towerStep (I := I) gRef A0 p W x v σ hσ
     (Set.singleton_subset_iff.mpr (mem_chart_source H x)) rfl
-
-
 
 omit [Module.Finite ℝ E] in
 omit [NeZero (Module.finrank ℝ E)] in
@@ -154,9 +109,6 @@ private lemma sRep_pd_val
         (extChartAt I x x) := hval
     _ = towerStep (I := I) gRef A0 p W σ x := by
         rw [writtenInExtChartAt_real_apply, hx]
-
-
-
 
 omit [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)] in
 omit [I.Boundaryless] [SigmaCompactSpace M] [IsManifold I 2 M] in
@@ -190,8 +142,6 @@ private lemma towerStep_rep_split
     by_cases h : b = a
     · subst h; simp [covSection_apply]
     · simp [Function.update_of_ne h]
-
-
 
 omit [Module.Finite ℝ E] in
 omit [NeZero (Module.finrank ℝ E)] in
@@ -286,9 +236,6 @@ private lemma sRep_pd2_val
             = partialDeriv (E := E) mm (corr a) (extChartAt I x x) from rfl]
         exact sRep_pd_val gRef x A0 0 _ mm σmm hσmm
 
-
-
-
 omit [Module.Finite ℝ E] [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless]
     [T2Space M] [SigmaCompactSpace M] [IsManifold I 2 M] in
 private lemma eval_le
@@ -309,9 +256,6 @@ private lemma eval_le
     _ = (∏ a : Fin s, Real.sqrt (gRef.inner x (slots a) (slots a)))
           * Real.sqrt (normSq0S (I := I) gRef x s T) := by
         rw [mul_comm]
-
-
-
 
 omit [Module.Finite ℝ E] in
 omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [SigmaCompactSpace M] [IsManifold I 2 M] in
@@ -410,8 +354,6 @@ private lemma towVal_le
         have hs : 0 ≤ ∑ a : Fin (p + 2), Ca a := Finset.sum_nonneg fun a _ => hCann a
         nlinarith
 
-
-
 omit [Module.Finite ℝ E] in
 omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [SigmaCompactSpace M] [IsManifold I 2 M] in
 private lemma towVal_le'
@@ -466,9 +408,6 @@ private lemma towVal_le'
         have hs : 0 ≤ ∑ a : Fin (p + 2), Ca a := Finset.sum_nonneg fun a _ => hCann a
         nlinarith
 
-
-
-
 omit [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)] in
 omit [I.Boundaryless] [SigmaCompactSpace M] [IsManifold I 2 M] in
 private lemma gram_germ
@@ -517,7 +456,6 @@ private lemma gram_germ
   rw [hval, hzi, hzj, chartGramOnE]
   rw [chartGramMatrix_apply]
   congr 1
-
 
 omit [Module.Finite ℝ E] in
 omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [SigmaCompactSpace M] [IsManifold I 2 M] in
@@ -571,7 +509,6 @@ private lemma gram0_le
         mul_le_mul_of_nonneg_right hle hnn
     _ = (∑ t, Cf t) * metricDerivNorm (I := I) 0 u u' gRef x := rfl
 
-
 omit [Module.Finite ℝ E] in
 omit [NeZero (Module.finrank ℝ E)] in
 omit [IsManifold I 2 M] in
@@ -595,8 +532,6 @@ private lemma gram_pd_eq
       = fderiv Real _ (extChartAt I x x) ((chartModelBasis E) m)
     rw [hg.fderiv_eq]
   rw [h1, sRep_pd_val gRef x _ 0 ![σs i, σs j] m (σs m) (hσs m)]
-
-
 
 omit [Module.Finite ℝ E] in
 omit [NeZero (Module.finrank ℝ E)] in
@@ -642,7 +577,6 @@ private lemma gram_pd2_eq
     rw [hpd.fderiv_eq]
   rw [h1]
   exact sRep_pd2_val gRef x _ ![σs i, σs j] m mm (σs m) (σs mm) (hσs m) (hσs mm)
-
 
 omit [Module.Finite ℝ E] in
 omit [NeZero (Module.finrank ℝ E)] in
@@ -695,7 +629,6 @@ private lemma gram1_le
       + metricDerivNorm (I := I) 0 u u' gRef x :=
     add_nonneg (Real.sqrt_nonneg _) (Real.sqrt_nonneg _)
   exact mul_le_mul_of_nonneg_right hle hnn
-
 
 omit [Module.Finite ℝ E] in
 omit [NeZero (Module.finrank ℝ E)] in
@@ -881,8 +814,6 @@ section JetEndpoints
 
 variable (gRef : SmoothRiemannianMetric I M) (x : M)
 
-
-
 omit [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)] in
 omit [CompleteSpace E] [I.Boundaryless] [IsManifold I 2 M] in
 private lemma exists_slotSections
@@ -901,11 +832,6 @@ private lemma exists_slotSections
       isCompact_singleton (Set.singleton_subset_iff.mpr (mem_chart_source H x))
   choose σs hσs using hσex
   exact ⟨σs, hσs⟩
-
-
-
-
-
 
 omit [Module.Finite ℝ E] in
 omit [IsManifold I 2 M] in
@@ -1007,10 +933,6 @@ theorem jet2Diff_le_dNorm
       ≤ n2 * C0 * S + n3 * C1 * S + n4 * C2 * S := by
         exact add_le_add (add_le_add hA hB) hCc
     _ ≤ (n2 * C0 + n3 * C1 + n4 * C2 + 1) * S := by nlinarith
-
-
-
-
 
 omit [Module.Finite ℝ E] in
 omit [NeZero (Module.finrank ℝ E)] in
@@ -1169,14 +1091,11 @@ theorem gramJet_le_covNorm
 
 end JetEndpoints
 
-
-
 section InvGram
 
 open Matrix
 
 variable (gRef : SmoothRiemannianMetric I M) (x : M)
-
 
 omit [Module.Finite ℝ E] [CompleteSpace E] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
     [IsManifold I 2 M] in
@@ -1291,9 +1210,6 @@ private lemma gram_quad_low
           rw [← hr2]
           field_simp
 
-
-
-
 omit [Module.Finite ℝ E] in
 omit [CompleteSpace E] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [IsManifold I 2 M] in
 theorem invGram_le_of_low
@@ -1377,22 +1293,15 @@ theorem invGram_le_of_low
 
 end InvGram
 
-
-
 section RicciAssembly
 
 variable (gRef : SmoothRiemannianMetric I M) (x : M)
-
 
 private lemma abs_add_sub_le (A B C : Real) : |A + B - C| ≤ |A| + |B| + |C| := by
   calc |A + B - C| = |A + B + (-C)| := by ring_nf
     _ ≤ |A + B| + |(-C)| := abs_add_le _ _
     _ ≤ (|A| + |B|) + |(-C)| := by gcongr; exact abs_add_le _ _
     _ = |A| + |B| + |C| := by rw [abs_neg]
-
-
-
-
 
 omit [Module.Finite ℝ E] in
 omit [IsManifold I 2 M] in
@@ -1727,16 +1636,9 @@ theorem chartRicci_sub_le
 
 end RicciAssembly
 
-
-
 section Endpoints
 
 variable (gRef : SmoothRiemannianMetric I M) (x : M)
-
-
-
-
-
 
 omit [Module.Finite ℝ E] in
 omit [IsManifold I 2 M] in
@@ -1812,11 +1714,6 @@ theorem ricciSub_le_dNorm
         rw [Finset.sum_mul]
     _ ≤ (crep * (CR * CJ2) + 1) * S := by nlinarith
 
-
-
-
-
-
 omit [Module.Finite ℝ E] in
 omit [IsManifold I 2 M] in
 theorem ricciConv_of_dnConv
@@ -1865,22 +1762,9 @@ theorem ricciConv_of_dnConv
 
 end Endpoints
 
-
-
-
-
-
-
-
-
-
 section ScalarEndpoints
 
 variable (gRef : SmoothRiemannianMetric I M) (x : M)
-
-
-
-
 
 omit [Module.Finite ℝ E] in
 omit [I.Boundaryless] [SigmaCompactSpace M] [IsManifold I 2 M] in
@@ -1954,11 +1838,6 @@ private lemma invGram_sub_le
   refine le_trans (Finset.sum_le_sum fun q _ => hterm q) ?_
   rw [Finset.sum_const, Finset.card_univ, Fintype.card_fin, nsmul_eq_mul]
   exact le_of_eq (by ring)
-
-
-
-
-
 
 omit [Module.Finite ℝ E] in
 omit [IsManifold I 2 M] in
@@ -2039,12 +1918,6 @@ private lemma ricci_abs_le
             metricDerivNorm (I := I) a u gRef gRef x) ≤ CA * (3 * (B + B0)) :=
           mul_le_mul_of_nonneg_left hdsum hCA0.le
         linarith [hsub]
-
-
-
-
-
-
 
 omit [Module.Finite ℝ E] in
 omit [IsManifold I 2 M] in
@@ -2161,11 +2034,6 @@ theorem scalarSub_le_dNorm
   rw [hEq]
   exact mul_le_mul_of_nonneg_right (by linarith) hS0
 
-
-
-
-
-
 omit [Module.Finite ℝ E] in
 omit [IsManifold I 2 M] in
 theorem scalarConv_of_dnConv
@@ -2211,8 +2079,6 @@ theorem scalarConv_of_dnConv
     nlinarith
   exact lt_of_le_of_lt hb (lt_trans hlt hfin)
 
-/-- A four-factor telescoping bound, used for contractions whose metric and
-tensor factors both vary. -/
 private lemma abs_prod4_sub_le
     (a b c d A B C D : Real) :
     |a * b * c * d - A * B * C * D| ≤
@@ -2253,7 +2119,6 @@ private lemma abs_prod4_sub_le
           |A| * |B| * |C| * |d - D| := by
         simp only [abs_mul]
 
-/-- Monotonicity for a product of four nonnegative-controlled factors. -/
 private lemma mul4_le_mul4
     {a b c d A B C D : Real}
     (ha : a ≤ A) (hb : b ≤ B) (hc : c ≤ C) (hd : d ≤ D)
@@ -2266,8 +2131,6 @@ private lemma mul4_le_mul4
   exact mul_le_mul hABC hd hd0 (mul_nonneg (mul_nonneg hA0 hB0) hC0)
 
 omit [IsManifold I 2 M] in
-/-- Pair-uniform convergence estimate for the intrinsic squared Ricci norm.
-Both inverse-metric contractions and both Ricci factors are allowed to vary. -/
 theorem ricNormSub_le_dn (lam B : Real) (hlam : 0 < lam) (hB : 0 ≤ B) :
     ∃ C : Real, 0 < C ∧ ∀ u u' : SmoothRiemannianMetric I M,
       (∀ ξ : TangentSpace I x, lam * gRef.inner x ξ ξ ≤ u.inner x ξ ξ) →
@@ -2513,9 +2376,7 @@ theorem ricNormSub_le_dn (lam B : Real) (hlam : 0 < lam) (hB : 0 ≤ B) :
   exact mul_le_mul_of_nonneg_right (by linarith) hS0
 
   omit [IsManifold I 2 M] in
-  /-- Uniform-in-time convergence of the intrinsic squared Ricci norm at a fixed
-  point from the same `C²` metric-jet convergence package as Ricci and scalar
-curvature convergence. -/
+
 theorem ricNormConv_of_dn
     (gSeq : ℕ → Real → SmoothRiemannianMetric I M)
     (gInf : Real → SmoothRiemannianMetric I M)

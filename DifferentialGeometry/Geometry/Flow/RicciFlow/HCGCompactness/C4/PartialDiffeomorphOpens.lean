@@ -2,19 +2,6 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.C4.PullbackFi
 
 set_option autoImplicit false
 
-
-
-
-
-
-
-
-
-
-
-
-
-
 noncomputable section
 
 universe u uE uH
@@ -53,8 +40,6 @@ section OpensDiffeo
 
 open TopologicalSpace Topology
 
-
-
 omit [FiniteDimensional ℝ E] [CompleteSpace E] [IsManifold I ∞ M] [SigmaCompactSpace M] [T2Space M]
     [IsManifold I ∞ N] in
 theorem image_opens_isOpen (Φ : PartialDiffeomorph I I M N (∞ : WithTop ℕ∞))
@@ -74,10 +59,6 @@ theorem image_opens_isOpen (Φ : PartialDiffeomorph I I M N (∞ : WithTop ℕ�
       exact ⟨(Φ.symm : N → M) y, hy2, Φ.right_inv' hy1⟩
   rw [himg]
   exact Φ.symm.contMDiffOn_toFun.continuousOn.isOpen_inter_preimage Φ.open_target V.2
-
-
-
-
 
 noncomputable def PartialDiffeomorph.toOpensDiffeo
     (Φ : PartialDiffeomorph I I M N (∞ : WithTop ℕ∞))
@@ -131,8 +112,6 @@ noncomputable def PartialDiffeomorph.toOpensDiffeo
       exact Φ.symm.contMDiffOn_toFun.contMDiffAt (Φ.open_target.mem_nhds hqt)
     exact contMDiffAt_codRestr hmem hbase
 
-
-
 omit [FiniteDimensional ℝ E] [CompleteSpace E] [IsManifold I ∞ M] [SigmaCompactSpace M] [T2Space M]
     [IsManifold I ∞ N] in
 theorem PartialDiffeomorph.opensDiffeo_mfderiv
@@ -169,14 +148,11 @@ theorem PartialDiffeomorph.opensDiffeo_mfderiv
   simpa only [F, ContinuousLinearMap.comp_apply,
     mfderiv_subtype_val (I := I) W (F p), mfderiv_subtype_val (I := I) U p] using happ
 
-
-
 noncomputable def PartialDiffeomorph.opensMap
     (Φ : PartialDiffeomorph I I M N (∞ : WithTop ℕ∞))
     {U : Opens M} {V : Opens N} (_hU : (U : Set M) ⊆ Φ.source)
     (hUV : (Φ : M → N) '' (U : Set M) ⊆ (V : Set N)) : U → V :=
   fun x => ⟨(Φ : M → N) x, hUV ⟨x, x.2, rfl⟩⟩
-
 
 omit [FiniteDimensional ℝ E] [CompleteSpace E] [IsManifold I ∞ M] [SigmaCompactSpace M] [T2Space M]
     [IsManifold I ∞ N] in
@@ -196,7 +172,6 @@ theorem PartialDiffeomorph.opensMap_isOpenEmb
   rw [hfun]
   exact hinc.comp F.toHomeomorph.isOpenEmbedding
 
-
 omit [FiniteDimensional ℝ E] [CompleteSpace E] [IsManifold I ∞ M] [SigmaCompactSpace M] [T2Space M]
     [IsManifold I ∞ N] in
 theorem PartialDiffeomorph.opensMap_contMDiff
@@ -212,8 +187,6 @@ theorem PartialDiffeomorph.opensMap_contMDiff
       (Opens.inclusion hWV : W → V) ∘ F := rfl
   rw [hfun]
   exact (contMDiff_inclusion hWV).comp F.contMDiff
-
-
 
 omit [FiniteDimensional ℝ E] [CompleteSpace E] [IsManifold I ∞ M] [SigmaCompactSpace M] [T2Space M]
     [IsManifold I ∞ N] in
@@ -248,7 +221,6 @@ theorem PartialDiffeomorph.opensMap_mfderiv
   have happ := DFunLike.congr_fun (h1.symm.trans h2) v
   simpa only [F, ContinuousLinearMap.comp_apply,
     mfderiv_subtype_val (I := I) V (F p), mfderiv_subtype_val (I := I) U p] using happ
-
 
 omit [FiniteDimensional ℝ E] [CompleteSpace E] [IsManifold I ∞ M] [SigmaCompactSpace M] [T2Space M]
     [IsManifold I ∞ N] in
@@ -295,8 +267,6 @@ theorem PartialDiffeomorph.opensMap_inv_mdiff
   change Function.invFun (inc ∘ F) ((inc ∘ F) x) = x
   exact Function.leftInverse_invFun htotal x
 
-
-
 omit [IsManifold I ∞ N] in
 omit [FiniteDimensional ℝ E] [CompleteSpace E] in
 theorem invSubtype_mdiff (U : Opens N) [Nonempty U] :
@@ -312,9 +282,6 @@ theorem invSubtype_mdiff (U : Opens N) [Nonempty U] :
       (Function.leftInverse_invFun U.isOpenEmbedding'.injective u)
   exact (contMDiffAt_codRestr
     (fun z => (Function.invFun (Subtype.val : U → N) z).2) hamb).contMDiffWithinAt
-
-
-
 
 noncomputable def PartialDiffeomorph.liftTargetOpen
     {U : Opens N} [Nonempty U] (Φ : PartialDiffeomorph I I M U (∞ : WithTop ℕ∞))
@@ -369,7 +336,6 @@ noncomputable def PartialDiffeomorph.liftTargetOpen
         (Φ.open_target.mem_nhds (htarget.symm ▸ Set.mem_univ u))
     exact (hΦAt.comp y hinvAt).contMDiffWithinAt
 
-
 omit [IsManifold I ∞ M] [SigmaCompactSpace M] [T2Space M] in
 omit [IsManifold I ∞ N] in
 omit [FiniteDimensional ℝ E] [CompleteSpace E] in
@@ -377,7 +343,6 @@ omit [FiniteDimensional ℝ E] [CompleteSpace E] in
     {U : Opens N} [Nonempty U] (Φ : PartialDiffeomorph I I M U (∞ : WithTop ℕ∞))
     (htarget : Φ.target = Set.univ) :
     (PartialDiffeomorph.liftTargetOpen Φ htarget).source = Φ.source := rfl
-
 
 omit [IsManifold I ∞ M] [SigmaCompactSpace M] [T2Space M] in
 omit [IsManifold I ∞ N] in
@@ -387,7 +352,6 @@ omit [FiniteDimensional ℝ E] [CompleteSpace E] in
     (htarget : Φ.target = Set.univ) :
     (PartialDiffeomorph.liftTargetOpen Φ htarget).target = (U : Set N) := rfl
 
-
 omit [IsManifold I ∞ M] [SigmaCompactSpace M] [T2Space M] in
 omit [IsManifold I ∞ N] in
 omit [FiniteDimensional ℝ E] [CompleteSpace E] in
@@ -395,8 +359,6 @@ omit [FiniteDimensional ℝ E] [CompleteSpace E] in
     {U : Opens N} [Nonempty U] (Φ : PartialDiffeomorph I I M U (∞ : WithTop ℕ∞))
     (htarget : Φ.target = Set.univ) (x : M) :
     PartialDiffeomorph.liftTargetOpen Φ htarget x = (Φ x : N) := rfl
-
-
 
 omit [IsManifold I ∞ M] [SigmaCompactSpace M] [T2Space M] in
 omit [IsManifold I ∞ N] in

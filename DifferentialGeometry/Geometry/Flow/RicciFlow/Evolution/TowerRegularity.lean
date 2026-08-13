@@ -3,13 +3,6 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.IteratedNablaRmTow
 
 set_option autoImplicit false
 
-
-
-
-
-
-
-
 noncomputable section
 
 namespace DifferentialGeometry.PDE.RicciFlow
@@ -24,8 +17,6 @@ variable {H : Type*} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
 variable [IsManifold I ∞ M]
-
-
 
 theorem iterRmComp_smoothAt
     {Idx : Type*} [Fintype Idx]

@@ -7,15 +7,6 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.C4.VolumeOver
 set_option autoImplicit false
 set_option linter.style.longLine false
 
-/-!
-# Cheeger--Gromov--Taylor decay for bounded-geometry sequences
-
-This file specializes the pointwise Cheeger--Gromov--Taylor estimate to a
-bounded-geometry pointed sequence.  It produces the actual Riemannian distance,
-an exponential injectivity-radius profile, and the `InjRadiusDecayInput`
-consumed by Chapter 4 Step A.
--/
-
 noncomputable section
 
 open scoped ContDiff ENNReal Manifold Topology
@@ -124,7 +115,6 @@ private lemma cgt_quarter {s : Real} (hs : 0 < s) :
     s < (5 * s) / 4 := by
   nlinarith
 
-/-- The stored Riemannian emetric, converted to a finite real distance. -/
 noncomputable def riemSeqDist
     (X : PointedRiemannianSeq.{u, uE, uH} (I := I)) :
     PointedSeqDistance (I := I) X :=
@@ -132,14 +122,11 @@ noncomputable def riemSeqDist
     letI : EMetricSpace (X.obj k).M := (X.obj k).emetricSpace (I := I)
     (edist x y).toReal
 
--- The assembled producer is a single large declaration; its proof needs a
--- declaration-local heartbeat budget above Lean's default.
 set_option linter.style.setOption false in
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
 set_option maxHeartbeats 800000 in
-/-- Uniform bounded geometry and a basepoint injectivity bound produce the
-Cheeger--Gromov--Taylor exponential injectivity-radius profile used by Step A. -/
+
 def injDecay_of_bg
     (X : PointedRiemannianSeq.{u, uE, uH} (I := I))
     (hcomplete : SeqMetricComplete (I := I) X)
@@ -740,7 +727,6 @@ def injDecay_of_bg
   simpa only [n, b, C, D, PointedRiemannianManifold.intrInjRadius] using
     hfinal
 
-/-- The CGT producer stores the actual finite Riemannian distance. -/
 @[simp] theorem injDecay_dist
     (X : PointedRiemannianSeq.{u, uE, uH} (I := I))
     (hcomplete : SeqMetricComplete (I := I) X)
@@ -755,8 +741,6 @@ def injDecay_of_bg
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-/-- The distance stored by the CGT decay producer realizes each member's
-Riemannian emetric. -/
 theorem injDecay_realizes
     (X : PointedRiemannianSeq.{u, uE, uH} (I := I))
     (hcomplete : SeqMetricComplete (I := I) X)
@@ -799,9 +783,6 @@ theorem injDecay_realizes
         rw [IsRiemannianManifold.out (I := I)]
         exact riemannianEDist_ne_top (I := I) x y)).symm
 
-/-- Bounded geometry, completeness, connected members, and a basepoint
-injectivity bound produce the complete Step-A CGT input with its distance
-realization proof. -/
 theorem exists_injDecay
     (X : PointedRiemannianSeq.{u, uE, uH} (I := I))
     (hcomplete : SeqMetricComplete (I := I) X)

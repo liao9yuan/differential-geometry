@@ -4,15 +4,6 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.C4.StepCAtomC
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.C4.StepCPairGeometry
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.C4.StepCTransitionRefine
 
-
-
-
-
-
-
-
-
-
 noncomputable section
 
 open Filter Set
@@ -31,8 +22,6 @@ variable {I : ModelWithCorners Real E H}
 variable [I.Boundaryless]
 variable {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
 
-
-
 def InterSlot
     {hd : InjRadiusDecayInput (I := I) X} {D : Real}
     {P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k)}
@@ -41,8 +30,6 @@ def InterSlot
   { beta : LiveSlot L pb r // ∀ᶠ k in atTop,
     BInter hd D P L.lamInf
       (alpha.1 : Nat) (beta.1 : Nat) (L.φ k) }
-
-
 
 theorem inter_slot_of_binter
     (hd : InjRadiusDecayInput (I := I) X) {D : Real}
@@ -62,8 +49,6 @@ theorem inter_slot_of_binter
   have hgammaLive : L.alive (gamma : Nat) = true := by
     simpa only [hy, Option.isSome_some] using hgammaStable.symm
   exact ⟨⟨⟨gamma, hgammaLive⟩, htail⟩, rfl⟩
-
-
 
 theorem MetricCompactnessInputs.atom_trans_small
     (inp : MetricCompactnessInputs (I := I) X)
@@ -180,8 +165,6 @@ theorem MetricCompactnessInputs.atom_trans_small
       exact normalTrans_mapsTo (I := I) (X.obj (L.φ k)) x y hVy hmaps
         (Set.mem_singleton z)
 
-
-
 theorem MetricCompactnessInputs.weight_trans_small
     (inp : MetricCompactnessInputs (I := I) X)
     (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k))
@@ -217,9 +200,6 @@ theorem MetricCompactnessInputs.weight_trans_small
   apply inp.atom_trans_small P L r k hgp (beta k) gamma hGp z
   simpa only [seqAtomChart] using
     (num_ne_of_cut_ne (num_ne_of_raw_ne hweight))
-
-
-
 
 theorem MetricCompactnessInputs.pair_exp_maps_tail
     (inp : MetricCompactnessInputs (I := I) X)
@@ -293,9 +273,6 @@ theorem MetricCompactnessInputs.pair_exp_maps_tail
   exact L.pair_exp_maps inp.decay inp.hD P inp.pack r α.1 β.1
     hfreq k hk hx hy hradk hmetric hhalf
     (hgpk β.1 (seqCenterD inp.decay P L k (β.1 : Nat)) hy)
-
-
-
 
 theorem MetricCompactnessInputs.pair_overlap_tail
     (inp : MetricCompactnessInputs (I := I) X)
@@ -402,9 +379,6 @@ theorem MetricCompactnessInputs.pair_overlap_tail
     normalTrans_mapsTo (I := I) (X.obj (L.φ k))
       (seqCenterD inp.decay P L k (α.1 : Nat))
       (seqCenterD inp.decay P L k (β.1 : Nat)) hVy hmapsk⟩
-
-
-
 
 theorem MetricCompactnessInputs.exists_pair_trans
     (inp : MetricCompactnessInputs (I := I) X)

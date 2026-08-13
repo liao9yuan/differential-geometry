@@ -3,39 +3,6 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.ScalarLowerBound
 
 set_option autoImplicit false
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 noncomputable section
 
 namespace DifferentialGeometry.PDE.RicciFlow
@@ -49,14 +16,6 @@ variable {H : Type*} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 variable [CompleteSpace E] [SigmaCompactSpace M] [T2Space M]
-
-
-
-
-
-
-
-
 
 omit [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 theorem parabolicOperatorWithDrift_affine_sub
@@ -168,8 +127,6 @@ theorem parabolicOperatorWithDrift_affine_sub
   rw [htime, hheat]
   ring
 
-
-
 omit [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 theorem laplacianAt_linear_combo
     [VectorBundle Real E (TangentSpace I : M -> Type _)]
@@ -234,7 +191,6 @@ theorem laplacianAt_linear_combo
   rw [DifferentialGeometry.Integral.Connection.divergence_const_smul (I := I)
     (G.connection t) inferInstance c2 hgradg]
 
-
 omit [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 theorem heatOperator_linear_combo
     [VectorBundle Real E (TangentSpace I : M -> Type _)]
@@ -259,17 +215,6 @@ theorem heatOperator_linear_combo
     DifferentialGeometry.Integral.Connection.heatOperator_eq_laplacianAt,
     DifferentialGeometry.Integral.Connection.heatOperator_eq_laplacianAt]
   exact laplacianAt_linear_combo (I := I) G t f g c1 c2 x hf hg hgradf hgradg
-
-
-
-
-
-
-
-
-
-
-
 
 theorem scalar_subsolution_affine_bound
     [I.Boundaryless] [CompactSpace M]
@@ -386,16 +331,6 @@ theorem scalar_subsolution_affine_bound
   simp only [w] at this
   linarith
 
-
-
-
-
-
-
-
-
-
-
 def NablaRm04NormHeatBoundOn
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (nablaRmNormSq nablaRmNormLap rmNormSq : Real -> M -> Real) (cReact : Real) : Prop :=
@@ -409,24 +344,8 @@ def NablaRm04NormHeatBoundOn
       d <= nablaRmNormLap (t : Real) x +
         cReact * Real.sqrt (rmNormSq (t : Real) x) * nablaRmNormSq (t : Real) x
 
-
-
-
 def bernsteinConstant (cReact alpha : Real) : Real :=
   (1 + cReact * alpha) * (1 + 16 * alpha)
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 theorem bernstein_first_derivative_estimate
     [I.Boundaryless] [CompactSpace M]

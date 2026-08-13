@@ -1,14 +1,6 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.UnifPhiDevH2
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.LowRegPathSplit
 
-/-!
-# Class-first integrated top-path deviation
-
-The class-first pointwise/two-jet top-coefficient estimate is stable under the
-canonical coefficient path integral.  Thus the same radius and constant work
-for every metric in the order-three class.
--/
-
 set_option autoImplicit false
 set_option backward.isDefEq.respectTransparency false
 
@@ -42,8 +34,7 @@ private local instance instCompleteSpaceE : CompleteSpace E :=
 
 set_option maxHeartbeats 3200000 in
 set_option synthInstance.maxHeartbeats 1600000 in
-/-- One radius and one coefficient, fixed before the class metric varies,
-control the pointwise and two-jet deviation of the integrated top coefficient. -/
+
 theorem top_path_dev_unif
     (hDim : Module.finrank ℝ E = 3)
     (gBase : SmoothRiemannianMetric I M)

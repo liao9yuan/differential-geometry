@@ -5,15 +5,6 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.UnifVBH1
 import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.UnifAMixH1
 import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.UnifRiemH1
 
-/-!
-# Class-first order-zero tail bound
-
-This module assembles the five cancellation-preserving order-zero leaves into
-one dimension-three class-first affine `H1` cap.  Every coefficient is chosen
-before the class metric varies, and class metric jets are used only through
-order three.
--/
-
 set_option autoImplicit false
 set_option backward.isDefEq.respectTransparency false
 
@@ -52,8 +43,6 @@ private lemma sum5_sq_le_sq {a b c d e : ℝ}
     mul_nonneg hb he, mul_nonneg hc hd, mul_nonneg hc he,
     mul_nonneg hd he]
 
-/-- On a closed three-manifold, the cancellation-preserving
-`DLb + lieCorr0` tail has a class-first affine intrinsic `H1` cap. -/
 theorem tail_h1_unif
     (hDim : Module.finrank ℝ E = 3)
     (gBase : SmoothRiemannianMetric I M) {Λ : ℝ} (hΛ : 1 ≤ Λ)

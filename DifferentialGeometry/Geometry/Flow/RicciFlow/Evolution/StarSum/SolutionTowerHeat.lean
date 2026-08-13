@@ -4,15 +4,6 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.Metric.Evolution
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.StarSum.SolutionResidual
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.StarSum.TowerProducer
 
-
-
-
-
-
-
-
-
-
 noncomputable section
 
 namespace DifferentialGeometry.PDE.RicciFlow
@@ -53,14 +44,9 @@ variable [I.Boundaryless]
 variable [IsManifold I ∞ M] [IsManifold I 2 M]
 variable [SigmaCompactSpace M] [T2Space M] [CompactSpace M] [BoundarylessManifold I M]
 
-
-
 def towerSolConst (k : Nat) : Real :=
   2 * Real.sqrt (Fintype.card (Fin (4 + k) -> Fin 3) : Real) *
     (((4 + k : Nat) : Real) * (3 : Real) ^ 2 + resStarCost k)
-
-
-
 
 theorem towerHeatSol
     {alpha t0 omega : Real} {hAlphaOmega : alpha < omega}

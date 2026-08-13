@@ -2,24 +2,6 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.CovDerivStepCompLi
 
 set_option autoImplicit false
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 noncomputable section
 
 namespace DifferentialGeometry.PDE.RicciFlow
@@ -27,9 +9,6 @@ namespace DifferentialGeometry.PDE.RicciFlow
 open scoped BigOperators
 
 variable {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
-
-
-
 
 def contrTail {p q : ℕ}
     (A : (Fin (p + 1) → Idx) → Real) (B : (Fin (q + 1) → Idx) → Real) :
@@ -47,7 +26,6 @@ omit [DecidableEq Idx] in
       ∑ c : Idx,
         A (Fin.snoc (fun i : Fin p => idx (Fin.castAdd q i)) c) *
           B (Fin.snoc (fun j : Fin q => idx (Fin.natAdd p j)) c) := rfl
-
 
 omit [Fintype Idx] [DecidableEq Idx] in
 private theorem castAdd_append {p q : ℕ} (aPart : Fin p → Idx) (bPart : Fin q → Idx)
@@ -67,7 +45,6 @@ private theorem castAdd_ne_natAdd {p q : ℕ} (i : Fin p) (j : Fin q) :
   have := i.isLt
   omega
 
-
 omit [Fintype Idx] [DecidableEq Idx] in
 private theorem update_append_castAdd {p q : ℕ} (aPart : Fin p → Idx) (bPart : Fin q → Idx)
     (i : Fin p) (v : Idx) :
@@ -82,7 +59,6 @@ private theorem update_append_castAdd {p q : ℕ} (aPart : Fin p → Idx) (bPart
         Fin.append_left, Function.update_of_ne h]
   · rw [Fin.append_right, Function.update_of_ne (castAdd_ne_natAdd i j').symm, Fin.append_right]
 
-
 omit [Fintype Idx] [DecidableEq Idx] in
 private theorem update_append_natAdd {p q : ℕ} (aPart : Fin p → Idx) (bPart : Fin q → Idx)
     (j : Fin q) (v : Idx) :
@@ -96,8 +72,6 @@ private theorem update_append_natAdd {p q : ℕ} (aPart : Fin p → Idx) (bPart 
     · rw [Function.update_self, Function.update_self]
     · rw [Function.update_of_ne (fun he => h (Fin.natAdd_injective _ _ he)),
         Fin.append_right, Function.update_of_ne h]
-
-
 
 omit [Fintype Idx] [DecidableEq Idx] in
 private theorem snoc_cons_zero {p : ℕ} (d : Idx) (Y : Fin p → Idx) (c : Idx) :
@@ -137,11 +111,6 @@ private theorem update_snoc_castSucc {p : ℕ} (Y : Fin p → Idx) (c a : Idx) (
         Function.update_of_ne hkj, Fin.snoc_castSucc]
   · rw [Function.update_of_ne (Fin.castSucc_lt_last j).ne', Fin.snoc_last, Fin.snoc_last]
 
-
-
-
-
-
 def covDerivStepCompU {p : ℕ}
     (ext : (Fin (p + 1) → Idx) → Idx → Real)
     (chr : Idx → Idx → Idx → Real)
@@ -155,10 +124,6 @@ def covDerivStepCompU {p : ℕ}
         chr (n 0) a (Fin.tail n (Fin.last p)) *
           A (Function.update (Fin.tail n) (Fin.last p) a))
 
-
-
-
-
 omit [DecidableEq Idx] in
 theorem contrTail_contracted_cancel {p q : ℕ}
     (chr : Idx → Idx → Idx → Real) (d : Idx)
@@ -171,12 +136,6 @@ theorem contrTail_contracted_cancel {p q : ℕ}
   simp only [Finset.sum_mul, Finset.mul_sum]
   rw [Finset.sum_comm]
   refine Finset.sum_congr rfl fun c _ => Finset.sum_congr rfl fun a _ => by ring
-
-
-
-
-
-
 
 omit [DecidableEq Idx] in
 theorem covDerivStepCompU_contrTail_leibniz {p q : ℕ}

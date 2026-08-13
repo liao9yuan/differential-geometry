@@ -7,14 +7,6 @@ import DifferentialGeometry.Geometry.Operator.NormGradSqTime
 
 set_option autoImplicit false
 
-
-
-
-
-
-
-
-
 namespace DifferentialGeometry.PDE.RicciFlow.Entropy
 
 noncomputable section
@@ -39,8 +31,6 @@ variable {M : Type u} [TopologicalSpace M] [ChartedSpace H M]
 variable [IsManifold I ∞ M] [SigmaCompactSpace M] [T2Space M]
 
 private local instance : CompleteSpace E := FiniteDimensional.complete Real E
-
-
 
 theorem revGram_smooth
     {D : RealTimeInterval}
@@ -96,7 +86,6 @@ variable {M : Type u} [TopologicalSpace M] [ChartedSpace H M]
 variable [IsManifold I ∞ M] [SigmaCompactSpace M] [T2Space M]
 
 private local instance : CompleteSpace E := FiniteDimensional.complete Real E
-
 
 theorem revTrace_eq
     {D : RealTimeInterval}
@@ -170,8 +159,6 @@ variable [IsManifold I ∞ M] [SigmaCompactSpace M] [T2Space M]
 
 private local instance : CompleteSpace E := FiniteDimensional.complete Real E
 
-
-
 theorem revScalar_time
     [I.Boundaryless]
     {D : RealTimeInterval}
@@ -209,9 +196,6 @@ theorem revScalar_time
     simp only [laplacianAt, reverseFamily, G, flowG, SolutionOn.family]
     ring
   simpa only [Function.comp_apply, G] using hcomp.congr_deriv hderiv
-
-
-
 
 theorem revGradSq_time
     [I.Boundaryless]

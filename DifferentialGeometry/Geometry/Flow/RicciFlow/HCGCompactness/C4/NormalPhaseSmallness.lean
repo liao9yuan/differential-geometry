@@ -5,15 +5,6 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.C4.NormalPhas
 
 set_option autoImplicit false
 
-
-
-
-
-
-
-
-
-
 noncomputable section
 
 universe u uE uH
@@ -38,15 +29,12 @@ variable {I : ModelWithCorners Real E H} [I.Boundaryless]
 
 namespace NormalRadiusProfile
 
-
-
 def phaseRadius
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
     {hd : InjRadiusDecayInput (I := I) X}
     {hb : NormalCoordMetricBoundInput (I := I) X}
     (h : NormalRadiusProfile hd hb) (R : Real) : Real :=
   h.ratio * hd.mu R / 4
-
 
 theorem phaseRadius_pos
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
@@ -55,8 +43,6 @@ theorem phaseRadius_pos
     (h : NormalRadiusProfile hd hb) (R : Real) : 0 < h.phaseRadius R := by
   dsimp only [phaseRadius]
   exact div_pos (h.floor_pos R) (by norm_num)
-
-
 
 theorem phaseRadius_metric
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
@@ -72,8 +58,6 @@ theorem phaseRadius_metric
       dsimp only [phaseRadius]
       nlinarith [h.floor_pos R]
     _ ≤ hb.radius k x := h.floor_le_radius hx
-
-
 
 theorem phaseRadius_exp
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
@@ -99,8 +83,6 @@ theorem phaseRadius_exp
 
 end NormalRadiusProfile
 
-
-
 omit [NeZero (Module.finrank Real E)] in
 @[simp] theorem normalPhaseK_zero
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
@@ -108,8 +90,6 @@ omit [NeZero (Module.finrank Real E)] in
   apply NNReal.eq
   simp [normalPhaseK]
   rfl
-
-
 
 omit [NeZero (Module.finrank Real E)] in
 theorem normalPhaseK_cont
@@ -120,8 +100,6 @@ theorem normalPhaseK_cont
   apply Continuous.subtype_mk
   fun_prop
 
-
-
 omit [NeZero (Module.finrank Real E)] in
 theorem normalPhaseK_lim
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
@@ -131,8 +109,6 @@ theorem normalPhaseK_lim
       (nhds (normalPhaseK h 0)) := (normalPhaseK_cont h).continuousAt
   simpa using hcont
 
-
-
 omit [NeZero (Module.finrank Real E)] in
 theorem normalPhaseErr_lim
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
@@ -141,8 +117,6 @@ theorem normalPhaseErr_lim
       (nhds 0) (nhds 0) :=
   PhaseFlow.phaseErr_tendsto.comp (normalPhaseK_lim h)
 
-
-
 omit [NeZero (Module.finrank Real E)] in
 theorem normalPhaseErr_lt_ev
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
@@ -150,10 +124,6 @@ theorem normalPhaseErr_lt_ev
     {eps : NNReal} (heps : 0 < eps) :
     ∀ᶠ R in nhds 0, PhaseFlow.phaseErr (normalPhaseK h R) < eps :=
   normalPhaseErr_lim h (Iio_mem_nhds heps)
-
-
-
-
 
 omit [NeZero (Module.finrank Real E)] in
 theorem exists_normal_q_lt
@@ -214,10 +184,6 @@ theorem exists_normal_q_lt
 
 namespace NormalRadiusProfile
 
-
-
-
-
 theorem exists_phase_q
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
     {hd : InjRadiusDecayInput (I := I) X}
@@ -229,9 +195,6 @@ theorem exists_phase_q
       3 * hb.metricC 1 * (2 * (q : Real)) ^ 2 ≤ (q : Real) ∧
       PhaseFlow.phaseErr (normalPhaseK hb (2 * q)) < eps :=
   exists_normal_q_lt (I := I) hb (h.phaseRadius_pos R) heps
-
-
-
 
 theorem exists_phase_scale
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
@@ -439,8 +402,6 @@ variable {I : ModelWithCorners Real E H} [I.Boundaryless]
 
 omit [FiniteDimensional Real E] [CompleteSpace E]
   [NeZero (Module.finrank Real E)] [I.Boundaryless] in
-/-- The acceleration Lipschitz coefficient of a controlled chart vanishes at
-zero velocity radius. -/
 @[simp] theorem chartPhaseK_zero
     {M : Type u} [TopologicalSpace M] [ChartedSpace H M]
     [IsManifold I ∞ M] [SigmaCompactSpace M] [T2Space M]
@@ -454,8 +415,6 @@ zero velocity radius. -/
 
 omit [FiniteDimensional Real E] [CompleteSpace E]
   [NeZero (Module.finrank Real E)] [I.Boundaryless] in
-/-- The acceleration Lipschitz coefficient of a controlled chart is continuous
-in the velocity radius. -/
 theorem chartPhaseK_cont
     {M : Type u} [TopologicalSpace M] [ChartedSpace H M]
     [IsManifold I ∞ M] [SigmaCompactSpace M] [T2Space M]
@@ -469,8 +428,6 @@ theorem chartPhaseK_cont
 
 omit [FiniteDimensional Real E] [CompleteSpace E]
   [NeZero (Module.finrank Real E)] [I.Boundaryless] in
-/-- The acceleration Lipschitz coefficient of a controlled chart tends to zero
-with the velocity radius. -/
 theorem chartPhaseK_lim
     {M : Type u} [TopologicalSpace M] [ChartedSpace H M]
     [IsManifold I ∞ M] [SigmaCompactSpace M] [T2Space M]
@@ -484,8 +441,6 @@ theorem chartPhaseK_lim
 
 omit [FiniteDimensional Real E] [CompleteSpace E]
   [NeZero (Module.finrank Real E)] [I.Boundaryless] in
-/-- The time-one phase error of a controlled chart tends to zero with the
-velocity radius. -/
 theorem chartPhaseErr_lim
     {M : Type u} [TopologicalSpace M] [ChartedSpace H M]
     [IsManifold I ∞ M] [SigmaCompactSpace M] [T2Space M]
@@ -498,8 +453,6 @@ theorem chartPhaseErr_lim
 
 omit [FiniteDimensional Real E] [CompleteSpace E]
   [NeZero (Module.finrank Real E)] [I.Boundaryless] in
-/-- Every positive inverse-function threshold eventually dominates the phase
-endpoint error of a controlled chart. -/
 theorem chartPhaseErr_lt_ev
     {M : Type u} [TopologicalSpace M] [ChartedSpace H M]
     [IsManifold I ∞ M] [SigmaCompactSpace M] [T2Space M]
@@ -512,8 +465,6 @@ theorem chartPhaseErr_lt_ev
 
 omit [FiniteDimensional Real E] [CompleteSpace E]
   [NeZero (Module.finrank Real E)] [I.Boundaryless] in
-/-- A controlled chart admits a positive phase radius satisfying the flow
-fences and any prescribed positive endpoint-error threshold. -/
 theorem exists_chart_q_lt
     {M : Type u} [TopologicalSpace M] [ChartedSpace H M]
     [IsManifold I ∞ M] [SigmaCompactSpace M] [T2Space M]
@@ -575,8 +526,6 @@ theorem exists_chart_q_lt
 
 omit [FiniteDimensional Real E] [CompleteSpace E]
   [NeZero (Module.finrank Real E)] [I.Boundaryless] in
-/-- A controlled chart admits a positive radius satisfying the wider bilateral
-phase fence and any prescribed positive endpoint-error threshold. -/
 theorem exists_chart_biq_lt
     {M : Type u} [TopologicalSpace M] [ChartedSpace H M]
     [IsManifold I ∞ M] [SigmaCompactSpace M] [T2Space M]
@@ -642,8 +591,6 @@ theorem exists_chart_biq_lt
   · exact herrQ
 
 omit [FiniteDimensional Real E] [CompleteSpace E] [I.Boundaryless] in
-/-- A controlled chart admits a positive radius satisfying the wider bilateral
-phase fence and the inverse-function threshold. -/
 theorem exists_chart_biq
     {M : Type u} [TopologicalSpace M] [ChartedSpace H M]
     [IsManifold I ∞ M] [SigmaCompactSpace M] [T2Space M]
@@ -664,8 +611,6 @@ theorem exists_chart_biq
     (PhaseFlow.freeDiagInv_pos (E := E))
 
 omit [FiniteDimensional Real E] [CompleteSpace E] [I.Boundaryless] in
-/-- A controlled chart admits a bilateral phase radius whose quantitative
-inverse branch has approximation error strictly below `1 / 24`. -/
 theorem exists_chart_biq_inv
     {M : Type u} [TopologicalSpace M] [ChartedSpace H M]
     [IsManifold I ∞ M] [SigmaCompactSpace M] [T2Space M]
@@ -749,7 +694,6 @@ theorem exists_chart_biq_inv
     exact (lt_div_iff₀ (by norm_num : (0 : NNReal) < 24)).2 <| by
       simpa only [mul_comm] using hnum
   exact ⟨q, hq, hqWide, hqAccel, herr, hinvErr⟩
-
 
 end ControlledPhaseSmallness
 

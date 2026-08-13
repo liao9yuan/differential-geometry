@@ -4,14 +4,6 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.H6JacobiPair
 
 set_option autoImplicit false
 
-/-!
-# Metric-jet bounds for H6
-
-This file converts the finite-tube intrinsic Jacobi-jet estimates into scalar
-endpoint Gram-jet estimates. The multivariate metric bound is obtained later
-by polarization.
--/
-
 noncomputable section
 
 open Bundle Set
@@ -46,8 +38,6 @@ attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
 omit [ConnectedSpace M] [CompleteSpace E]
   [T2Space (TangentBundle I M)] in
-/-- A common bound for the launch Jacobi jets through order `n` controls the
-order-`n` endpoint Gram jet by the binomial factor `2 ^ n`. -/
 theorem intrMetricJet_abs_le
     [PseudoEMetricSpace M]
     [RiemannianBundle (fun x : M => TangentSpace I x)]
@@ -122,8 +112,6 @@ theorem intrMetricJet_abs_le
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-/-- On a fixed launch tube, bounded geometry controls the diagonal endpoint
-Gram jet at the central launch parameter. -/
 theorem intrMetricJet_tube
     (P : PointedRiemannianManifold.{u, uE, uH} (I := I))
     (hcomplete : MetricComplete (I := I) P)
@@ -201,8 +189,6 @@ theorem intrMetricJet_tube
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-/-- On a fixed launch ball, bounded geometry controls the full order-`n`
-Fréchet derivative of the intrinsic framed pullback metric. -/
 theorem intrMetric_deriv_le
     (P : PointedRiemannianManifold.{u, uE, uH} (I := I))
     (hcomplete : MetricComplete (I := I) P)

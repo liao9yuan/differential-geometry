@@ -2,19 +2,6 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.C4.PartialDif
 
 set_option autoImplicit false
 
-
-
-
-
-
-
-
-
-
-
-
-
-
 noncomputable section
 
 universe u uE uH
@@ -36,9 +23,6 @@ section PartialCovNaturality
 
 open TopologicalSpace
 
-
-
-
 omit [SigmaCompactSpace M] in
 theorem tensor02_eq_covDOF
     (A : Tensor0SBundle.Tensor0SField (𝕜 := Real) (E := E) (H := H)
@@ -53,9 +37,6 @@ theorem tensor02_eq_covDOF
         = covDerivOfField (I := I) gRef A (a + 1)
       rw [ih, covDerivOfField_succ]
 
-
-
-
 omit [FiniteDimensional ℝ E] [CompleteSpace E] in
 private theorem srm_ext {M' : Type*} [TopologicalSpace M'] [ChartedSpace H M']
     [IsManifold I ∞ M'] {g g' : SmoothRiemannianMetric I M'}
@@ -66,17 +47,6 @@ private theorem srm_ext {M' : Type*} [TopologicalSpace M'] [ChartedSpace H M']
     funext fun x => ContinuousLinearMap.ext fun v => ContinuousLinearMap.ext fun w => h x v w
   subst hi
   rfl
-
-
-
-
-
-
-
-
-
-
-
 
 omit [SigmaCompactSpace M] in
 theorem covNormWith_pd_zone [I.Boundaryless] [NeZero (Module.finrank ℝ E)]

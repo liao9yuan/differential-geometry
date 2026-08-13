@@ -2,15 +2,6 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.UhlenbeckBaseProdu
 
 set_option autoImplicit false
 
-/-!
-# Lowered-Riemann variation in second-Ricci-derivative form
-
-This module normalizes the arbitrary-dimensional lowered-Riemann time
-derivative from coordinate Christoffel variation terms to the canonical
-`nablaGammaDtFromNabla2RicInFrame` expression.  It does not perform the later
-Bianchi contraction or Ricci-commutator calculation.
--/
-
 noncomputable section
 
 namespace DifferentialGeometry.PDE.RicciFlow
@@ -28,9 +19,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 variable [IsManifold I 1 M]
 variable [CompleteSpace E] [SigmaCompactSpace M] [T2Space M]
 
-/-- The arbitrary-dimensional coordinate-frame variation of lowered Riemann
-after replacing the covariant derivative of the Christoffel variation by its
-explicit `∇²Ric` expression. -/
 def rm04VarRHS
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -55,9 +43,6 @@ def rm04VarRHS
             t x₀ (m 3) p))
 
 omit [NeZero (Module.finrank ℝ E)] in
-/-- Along a Ricci-flow solution, the time derivative of the canonical
-coordinate component of lowered Riemann is `rm04VarRHS`, the explicit
-arbitrary-dimensional `∇²Ric` variation formula. -/
 theorem rm04Var_of_sol
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)

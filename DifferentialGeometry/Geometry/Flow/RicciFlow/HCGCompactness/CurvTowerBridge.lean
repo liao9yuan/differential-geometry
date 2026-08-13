@@ -8,15 +8,6 @@ set_option linter.style.longLine false
 set_option linter.unusedSectionVars false
 set_option backward.isDefEq.respectTransparency false
 
-/-!
-# Canonical curvature-tower bridge
-
-This file identifies the static curvature-derivative tower used by the HCG
-bounded-geometry API with the intrinsic solution tower used by the
-Bernstein--Shi estimates.  The only representation difference is the
-definitionally different slot count `k + 4` versus `4 + k`.
--/
-
 noncomputable section
 
 universe u uE uH
@@ -38,8 +29,6 @@ variable [IsManifold I ∞ M] [IsManifold I 1 M] [IsManifold I 2 M]
 variable [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
 variable [SigmaCompactSpace M] [T2Space M]
 
-/-- The curvature step is the generic covariant-derivative step at base rank
-four. -/
 theorem curvStep_eq_covStep
     (g : SmoothRiemannianMetric I M) (a : Nat)
     (A : Tensor0SField (𝕜 := Real) (E := E) (H := H)
@@ -50,13 +39,10 @@ theorem curvStep_eq_covStep
   rw [covStep_apply]
   rfl
 
-/-- Recursive slot reindexing between the two curvature-tower arities. -/
 private def curvEquiv : (m : Nat) → Fin (4 + m) ≃ Fin (m + 4)
   | 0 => Equiv.refl _
   | (m + 1) => frontExtendEquiv (curvEquiv m)
 
-/-- The static curvature tower and the generic iterated derivative agree after
-slot reindexing, in the scalar normal form needed by the norm bridge. -/
 private theorem curv_apply_iterCov
     (g : SmoothRiemannianMetric I M) :
     ∀ (m : Nat) (x : M) (v : Fin (m + 4) → TangentSpace I x),
@@ -116,17 +102,6 @@ private theorem curv_apply_iterCov
                   (I := I) (M := M) g) (m + 1)) x)) v := by
           rfl
 
-/-- **The curvature-tower packaging identity** (`∇^m Rm` in generic covariant-derivative
-currency).
-
-The squared `g`-fibre norm of the static curvature-derivative tower `curvCovDeriv g m`
-equals the squared `g`-fibre norm of the *generic* iterated covariant derivative
-`iterCov g 4 (metricRm04 g) m` of the lowered Riemann tensor.
-
-This is the public face of the slot-reindexing bridge: it lets any estimate proved in the
-generic `iterCov` / `covStep` / `diffStep` currency (where `metricRm04 g` is just a
-`Tensor0SField` of rank `4`) be read off on the canonical static tower and conversely,
-without exposing the `Fin (4 + m) ≃ Fin (m + 4)` reindexing. -/
 theorem curvCovDeriv_normSq_eq
     (g : SmoothRiemannianMetric I M) (m : Nat) (x : M) :
     normSq0S (I := I) g x (m + 4) (curvCovDeriv (I := I) (M := M) g m x) =
@@ -157,8 +132,6 @@ theorem curvCovDeriv_normSq_eq
       (DifferentialGeometry.Integral.Connection.metricRm04
         (I := I) (M := M) g) m) x)
 
-/-- On a Ricci-flow solution, the HCG squared curvature-derivative norm is the
-intrinsic squared norm controlled by the Bernstein--Shi tower. -/
 theorem curvNormSq_eq
     {D : RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)

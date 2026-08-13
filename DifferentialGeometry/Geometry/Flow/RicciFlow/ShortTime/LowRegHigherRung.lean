@@ -1,14 +1,6 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.LowRegRungClosure
 import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.LowRegFatouMass
 
-/-!
-# Generic higher rungs for the low-regularity Galerkin trajectory
-
-The fixed ladder supplies one common `H⁵` cap.  The all-order smooth remainder
-package then closes every energy rung `6 + k` directly, with the same top
-coefficient `κ`; there is no induction on previously proved higher energies.
--/
-
 open Bundle Manifold MeasureTheory Set Filter
 open scoped Manifold Topology ContDiff ENNReal NNReal InnerProductSpace
 
@@ -33,10 +25,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
   [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
   [T2Space M] [SigmaCompactSpace M]
 
-/-- The all-order smooth remainder package, transported to the finite spectral
-arm of a retracted Galerkin state.  A common fifth-order cap prices the lower
-coefficient, while the highest-order coefficient remains exactly
-`κ * δ / (1 - δ)²`. -/
 theorem galArmMassHm (g₀ : SmoothRiemannianMetric I M)
     {κ R δ R5 : ℝ} (hhm : IsHmRungOrd (I := I) (M := M) g₀ κ)
     (hR : 0 ≤ R) (hδ : δ < 1) (hδ0 : 0 ≤ δ) (hδ3 : δ ≤ 1 / 3)
@@ -104,9 +92,6 @@ theorem galArmMassHm (g₀ : SmoothRiemannianMetric I M)
     (le_of_eq (Real.sqrt_sq (norm_nonneg _)))) ?_
   exact hb'
 
-/-- Every energy rung `6 + k` is uniformly bounded on a fixed rung-five
-trajectory.  The proof closes all scales directly from the common `H⁵` cap;
-the higher rungs do not recursively consume one another. -/
 theorem lowregHighRungs
     (g₀ : SmoothRiemannianMetric I M)
     {δ Ctop B0 B1 D ρ P Rcap T κ ε : ℝ}
@@ -302,8 +287,6 @@ theorem lowregHighRungs
     ring
   rw [hz]
 
-/-- One projected sequence, its modewise convergence, and pointwise uniform
-energy bounds at every integer order `5 + k`. -/
 def IsAllRungPath (g₀ : SmoothRiemannianMetric I M) {T : ℝ}
     (fLo : timeL2 (tensorHs (I := I) (M := M) g₀ 0 2 ((1 : ℕ) : ℝ)) T)
     (fseq : ℕ → timeL2 (tensorHs (I := I) (M := M) g₀ 0 2 ((1 : ℕ) : ℝ)) T) :
@@ -318,9 +301,6 @@ def IsAllRungPath (g₀ : SmoothRiemannianMetric I M) {T : ℝ}
         (lowregProjMode (I := I) (M := M) g₀ fseq N)
         (5 + (k : ℝ)) t ≤ Φ
 
-/-- The adapted solve carries one coherent all-integer-rung path package.  The
-common gate stored in the solve calibrates the generic coefficient once; the
-fixed `E₅` base and all `E_{6+k}` bounds remain on the same projected sequence. -/
 theorem lowregAllRungsAt
     (g₀ : SmoothRiemannianMetric I M)
     {δ Ctop B0 B1 D ρ P Rcap Ctop₂ Kr2 Kr1 Kcap T : ℝ}
@@ -366,8 +346,6 @@ theorem lowregAllRungsAt
       rw [hidx]
       exact hΦ N t ht
 
-/-- Fatou closure of the coherent all-rung path: every real Sobolev exponent
-has a uniform limiting spectral mass bound on the adapted low trajectory. -/
 theorem lowregAllMassAt
     (g₀ : SmoothRiemannianMetric I M)
     {δ Ctop B0 B1 D ρ P Rcap Ctop₂ Kr2 Kr1 Kcap T : ℝ}

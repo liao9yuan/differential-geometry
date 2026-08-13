@@ -3,18 +3,6 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.C4.StepBTrans
 
 set_option autoImplicit false
 
-
-
-
-
-
-
-
-
-
-
-
-
 noncomputable section
 
 universe u uE uH
@@ -32,12 +20,6 @@ variable {E : Type uE} [NormedAddCommGroup E] [InnerProductSpace Real E]
 variable [FiniteDimensional Real E] [NeZero (Module.finrank Real E)] [CompleteSpace E]
 variable {H : Type uH} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H} [I.Boundaryless]
-
-
-
-
-
-
 
 theorem existsLiveJointH6
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}

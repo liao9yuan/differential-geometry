@@ -2,15 +2,6 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.C4.StepCStage
 
 set_option autoImplicit false
 
-
-
-
-
-
-
-
-
-
 noncomputable section
 
 universe u uE uH
@@ -55,9 +46,6 @@ private theorem legacy_restrict_eq
       (normalExpPD (I := I) Y x).target := by
   rfl
 
-
-
-
 theorem liveCenters_radial
     (inp : MetricCompactnessInputs (I := I) X)
     (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k))
@@ -92,9 +80,6 @@ theorem liveCenters_radial
   have hk' := abs_lt.mp (hN k hk alpha)
   have hl' := abs_lt.mp (hN l hl alpha)
   linarith
-
-
-
 
 theorem HasStageJetData.mapsTo_tail
     (inp : MetricCompactnessInputs (I := I) X)
@@ -318,9 +303,6 @@ theorem HasStageJetData.mapsTo_tail
         linarith
   change dist (F x) Yl.basepoint ≤ R1
   exact hfinal.le
-
-
-
 
 theorem HasStageJetData.return_tail
     (inp : MetricCompactnessInputs (I := I) X)

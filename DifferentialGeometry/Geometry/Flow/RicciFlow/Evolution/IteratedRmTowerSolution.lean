@@ -8,15 +8,6 @@ import DifferentialGeometry.Geometry.Curvature.RicciOperatorNormBound
 
 set_option autoImplicit false
 
-/-!
-# The arbitrary-dimensional curvature-derivative tower of a Ricci-flow solution
-
-This file is the solution-facing owner of the arbitrary-dimensional curvature
-tower.  It assembles the intrinsic squared norms `|nabla^k Rm|^2`, their
-intrinsic scalar Laplacians, and the fixed costed residual field produced by the
-all-order commutation recursion.
--/
-
 noncomputable section
 
 namespace DifferentialGeometry.PDE.RicciFlow
@@ -33,9 +24,6 @@ variable [I.Boundaryless]
 variable [IsManifold I 1 M] [IsManifold I 2 M] [IsManifold I ∞ M]
 variable [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M]
 
-/-- An arbitrary-dimensional Ricci-flow solution directly produces the
-intrinsic curvature-tower heat bound with the explicit constructor-tree
-reaction cost. -/
 theorem towerHeatSol_raw
     {D : RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -187,9 +175,6 @@ theorem towerHeatSol_raw
   linarith [le_abs_self (nablaKReactionAt (I := I) S' k (t : Real) x basis
     (gInv (t : Real)) ric Tdot), hreact]
 
-/-- On every strictly positive-time tail, the direct solution tower applies to
-the restricted Ricci flow without an additional compactness or dimension
-hypothesis. -/
 theorem towerHeatSol_any
     {alpha t0 omega : Real} {halphaomega : alpha < omega}
     {S : SolutionOn (I := I) (M := M)

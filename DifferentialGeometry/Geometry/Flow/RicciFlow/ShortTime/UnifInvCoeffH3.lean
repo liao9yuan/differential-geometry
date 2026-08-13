@@ -1,13 +1,5 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.UnifInvCoeffH2
 
-/-!
-# Class-first inverse-metric coefficient H3 bound
-
-This module extends the class-first inverse-metric coefficient estimate through
-three covariant derivatives.  The smallness radius is still measured in `H2`,
-while the homogeneous output is measured in `H3`.
--/
-
 set_option autoImplicit false
 
 noncomputable section
@@ -47,12 +39,6 @@ private def invJetGrid3
         riemannianFiberNormSq (I := I) (M := M) g 0 (2 + e m) x
           ((iteratedCovGrad (I := I) g 0 2 (e m) T).toSection x)
 
-/-- **Dimension-three class-first inverse-metric coefficient H3 estimate.**
-
-One positive `H2` radius and one coefficient work for every metric in the
-order-three class.  On that ball, the inverse-metric difference coefficient
-has a pointwise order-zero bound and an `L2` jet bound through order three,
-both homogeneous in the perturbation's `H3` norm. -/
 theorem inv_coeff_h3_unif
     (hDim : Module.finrank ℝ E = 3)
     (gBase : SmoothRiemannianMetric I M)

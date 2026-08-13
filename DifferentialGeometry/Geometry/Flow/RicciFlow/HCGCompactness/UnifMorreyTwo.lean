@@ -1,15 +1,6 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.UnifJetTowerMatch
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.UnifReverseJetTwo
 
-/-!
-# Explicit rank-two class Morrey package
-
-This module closes the order-two metric-jet inputs of
-`fibreMorrey_unif_class` using `reverseJetPack`.  The resulting constant is
-chosen from the fixed background metric and the class parameter before the
-individual metric varies.
--/
-
 noncomputable section
 
 open Bundle Manifold MeasureTheory Set Filter Tensor0SBundle
@@ -40,8 +31,6 @@ private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
-/-- The fixed rank-two fibre-Morrey constant for the metric class with
-background `gBase` and comparability/forward-jet bound `Λ`. -/
 noncomputable def morreyTwoC
     (gBase : SmoothRiemannianMetric I M) (Λ : ℝ) : ℝ :=
   let L₁ := max (revJetOneC (E := E) Λ) Λ
@@ -51,9 +40,6 @@ noncomputable def morreyTwoC
     (kjetConst (Module.finrank ℝ E) Λ L₁ L₂ 2)
     (Module.finrank ℝ E) 2
 
-/-- `morreyTwoC` is nonnegative and controls every compactly supported
-rank-two tensor for every metric in the class whose forward metric jets of
-orders one and two are bounded by `Λ`. -/
 theorem morreyTwoC_spec
     (gBase : SmoothRiemannianMetric I M) {Λ : ℝ} (hΛ : 0 ≤ Λ)
     (hdim : Module.finrank ℝ E / 2 + 2 = 3) :

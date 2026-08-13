@@ -2,12 +2,6 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.ImprovedPinching.D
 
 set_option autoImplicit false
 
-
-
-
-
-
-
 noncomputable section
 
 namespace DifferentialGeometry.PDE.RicciFlow
@@ -22,13 +16,10 @@ variable {I : ModelWithCorners Real E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
 variable [IsManifold I ∞ M] [IsManifold I 1 M]
 
-
-
 def scalarSqLap
     (scalar scalarLap gradScalarNormSq : Real -> M -> Real) :
     Real -> M -> Real :=
   fun t x => 2 * scalar t x * scalarLap t x + 2 * gradScalarNormSq t x
-
 
 omit [Module.Finite ℝ E] in
 theorem sqLap_at
@@ -69,8 +60,6 @@ theorem sqLap_at
     linarith
   rw [hmain]
   ring
-
-
 
 omit [Module.Finite ℝ E] in
 theorem sqLap_realizes
@@ -120,13 +109,11 @@ theorem sqLap_realizes
     _ = DifferentialGeometry.Integral.Connection.heatOperator (I := I) G t
           (fun y : M => scalar t y ^ 2) x := rfl
 
-
 def tfLap
     (scalar scalarLap gradScalarNormSq ricciNormLap : Real -> M -> Real) :
     Real -> M -> Real :=
   fun t x => ricciNormLap t x -
     scalarSqLap scalar scalarLap gradScalarNormSq t x / 3
-
 
 def scalarSqHeatOn
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
@@ -140,8 +127,6 @@ def scalarSqHeatOn
           4 * scalar (t : Real) x * ricciNormSq (t : Real) x))
       D.carrier
       (t : Real)
-
-
 
 omit [TopologicalSpace M] in
 theorem sqHeat_of_scalar
@@ -161,7 +146,6 @@ theorem sqHeat_of_scalar
   · simp [scalarSqLap]
     ring
 
-
 def tfRicHeatOn
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (tfNormSq tfLap nablaRicNormSq gradScalarNormSq
@@ -177,8 +161,6 @@ def tfRicHeatOn
             2 * Q (t : Real) x) / scalar (t : Real) x))
       D.carrier
       (t : Real)
-
-
 
 omit [TopologicalSpace M] in
 theorem tfRicHeat_alg
@@ -243,9 +225,6 @@ theorem tfRicHeat_alg
     ring
   rw [hValue] at hDeriv
   exact hDeriv
-
-
-
 
 omit [TopologicalSpace M] in
 theorem tfHeat_base

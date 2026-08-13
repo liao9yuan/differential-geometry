@@ -4,14 +4,6 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.C4.StepBTrans
 
 set_option autoImplicit false
 
-/-!
-# Local transition limits from H6 normal-coordinate data
-
-This file connects the branch-parametric H6 chart provider to the existing
-generic isometry compactness engine.  No selected exponential branch or
-`expRadiusGp` occurs in the interface.
--/
-
 noncomputable section
 
 universe u uE uH
@@ -35,8 +27,7 @@ namespace H6NormalData
 set_option linter.style.setOption false in
 set_option maxHeartbeats 1200000 in
 set_option synthInstance.maxHeartbeats 1200000 in
-/-- H6 chart-metric bounds produce localized all-order derivative bounds for
-their transition maps. -/
+
 theorem trans_bounds_on
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
     {hd : InjRadiusDecayInput (I := I) X}
@@ -167,8 +158,7 @@ theorem trans_bounds_on
       d.metric_deriv k p (y k) z (hVrad' hz)
 
 set_option synthInstance.maxHeartbeats 1200000 in
-/-- A fixed pair of H6 chart transitions and their reverses admit one common
-`C∞`-convergent subsequence with the inverse cocycle on the limit overlap. -/
+
 theorem exists_trans_lim
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
     {hd : InjRadiusDecayInput (I := I) X}

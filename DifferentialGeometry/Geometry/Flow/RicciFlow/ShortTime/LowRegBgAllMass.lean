@@ -1,16 +1,6 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.LowRegBgHigherRung
 import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.LowRegHigherRung
 
-/-!
-# All-order mass at an arbitrary fixed DeTurck background
-
-This module closes the fixed-background Galerkin ladder into one coherent
-all-rung path and then applies the background-neutral Fatou mass theorem.  The
-Sobolev scale and all spectral objects remain based at the state metric `g₀`;
-only the nonlinear coefficient package uses the independent background
-`g_bg`.
--/
-
 open Bundle Manifold MeasureTheory Set Filter
 open scoped Manifold Topology ContDiff ENNReal NNReal InnerProductSpace
 
@@ -35,8 +25,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
   [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
   [T2Space M] [SigmaCompactSpace M]
 
-/-- An adapted fixed-background solve carries one coherent projected path with
-uniform energy bounds at every integer rung `5 + k`. -/
 theorem lowregAllRungsAtBg
     (g₀ g_bg : SmoothRiemannianMetric I M) (K : LowRegBoundData)
     {Rcap Ctop₂ Kr2 Kr1 Kcap T : ℝ}
@@ -86,8 +74,6 @@ theorem lowregAllRungsAtBg
       rw [hidx]
       exact hΦ N t ht
 
-/-- Fatou closure of the fixed-background all-rung path: every real Sobolev
-exponent has a uniform limiting spectral mass bound for the forcing path. -/
 theorem lowregAllMassAtBg
     (g₀ g_bg : SmoothRiemannianMetric I M) (K : LowRegBoundData)
     {Rcap Ctop₂ Kr2 Kr1 Kcap T : ℝ}
@@ -117,9 +103,6 @@ theorem lowregAllMassAtBg
   exact lowregMassOfEnergy (I := I) (M := M)
     g₀ gforce fseq hpath.1 hστ hΦ
 
-/-- Public fixed-background all-order mass endpoint.  The dimension-three
-hypothesis matches the smoothing consumer; the spectral mass proof itself is
-dimension-neutral. -/
 theorem lowreg_loMassBg (hDim : Module.finrank ℝ E = 3)
     (g₀ g_bg : SmoothRiemannianMetric I M) (K : LowRegBoundData)
     {Rcap Ctop₂ Kr2 Kr1 Kcap T : ℝ}

@@ -6,14 +6,6 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.UnifMorreyRS
 import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.UnifConvexJets
 import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.UnifEdgeCoeffH3
 
-/-!
-# Class-first principal-face pairing for the centered top kernel
-
-The coefficient left after subtracting the metric principal deviation is
-uniformly small in the fibre radius.  Pairing it against the order-four energy
-therefore costs only a class-first small multiple of the `H⁴` norm squared.
--/
-
 set_option autoImplicit false
 set_option backward.isDefEq.respectTransparency false
 
@@ -43,8 +35,6 @@ variable
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
-/-- One coefficient fixed before the class metric varies controls the centered
-top-kernel principal face at order four. -/
 theorem bcD2_pair_h4_unif
     (gBase : SmoothRiemannianMetric I M) {Λ : ℝ} (hΛ : 1 ≤ Λ) :
     ∃ C : ℝ, 0 ≤ C ∧
@@ -118,9 +108,6 @@ theorem bcD2_pair_h4_unif
       simp only [C]
       ring
 
-/-- After choosing the fibre radius before the class metric varies, the
-centered top-kernel principal face is absorbed by any prescribed order-four
-energy coefficient. -/
 theorem bcD2_pair_abs_unif
     (gBase : SmoothRiemannianMetric I M) {Λ : ℝ} (hΛ : 1 ≤ Λ) :
     ∀ {η : ℝ}, 0 < η →

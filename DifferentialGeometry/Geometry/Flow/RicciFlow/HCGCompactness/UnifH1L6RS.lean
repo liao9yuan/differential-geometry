@@ -2,15 +2,6 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.Estimates.H1H2AppCcRS
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.MetricLoweringTower
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.UnifJetTowerMatch
 
-/-!
-# Class-uniform mixed-tensor H1 to L6 control in dimension three
-
-The fixed-background `H¹ → L⁶` estimate is transported to every metric in a
-uniform-equivalence class.  Same-metric index lowering reduces arbitrary mixed
-valence to the covariant order-one jet transfer `jetCross_l2_one`; consequently
-only the first background-covariant derivative of the varying metric is used.
--/
-
 set_option autoImplicit false
 
 noncomputable section
@@ -43,8 +34,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
-/-- The factor contributed to an `L⁶` norm by the class-uniform comparison of
-Riemannian volume measures. -/
 def l6VolC (Λ : ℝ) (n : ℕ) : ℝ :=
   Real.sqrt (Λ ^ n) ^ (1 / 6 : ℝ)
 
@@ -53,8 +42,6 @@ lemma l6VolC_nonneg (Λ : ℝ) (n : ℕ) : 0 ≤ l6VolC Λ n :=
 
 omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless]
   [BoundarylessManifold I M] in
-/-- Real `L⁶` norms transfer across the class volume comparison with the
-explicit sixth-root density factor. -/
 private theorem lpNorm_vol_cross
     (gBase g : SmoothRiemannianMetric I M) {Λ : ℝ}
     (hEq : MetricUniformEquivalentOn (I := I) Set.univ gBase g Λ)
@@ -91,7 +78,6 @@ private theorem lpNorm_vol_cross
 
 omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless]
   [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
-/-- The fibre norm of a smooth covariant tensor is continuous. -/
 private theorem fiber0_cont
     (g : SmoothRiemannianMetric I M) (s : ℕ) (T : SmoothCcTensor g 0 s) :
     Continuous (fun x => Real.sqrt
@@ -104,9 +90,6 @@ private theorem fiber0_cont
     (I := I) (M := M) g 0 s x (T.toSection x),
     ← SmoothCcTensor.toFun_apply (I := I) (M := M) T x]
 
-/-- On a closed three-manifold, the mixed-tensor `H¹ → L⁶` constant can be
-chosen before the metric varies in a uniformly equivalent class.  Only the
-first background-covariant derivative of the varying metric is required. -/
 theorem h1Lp6RS_unif
     (hDim : Module.finrank ℝ E = 3)
     (gBase : SmoothRiemannianMetric I M)

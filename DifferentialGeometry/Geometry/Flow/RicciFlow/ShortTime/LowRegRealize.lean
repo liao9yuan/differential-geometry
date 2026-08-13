@@ -1,14 +1,6 @@
 import DifferentialGeometry.Analysis.Spectral.Tensor.Estimates.H2Pointwise
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.DeTurckRemainderDefs
 
-/-!
-# Three-dimensional low-regularity metric realization
-
-The spectral `H3` ball used by the low-regularity maximal-regularity solver
-lies in a fixed fibre-small metric ball.  This is the dimension-three
-replacement for the deliberately lossy high-order realization bound.
--/
-
 namespace DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral
 
 open scoped ContDiff Manifold Topology
@@ -25,8 +17,6 @@ variable
       [IsManifold I ∞ M] [CompactSpace M] [I.Boundaryless]
       [T2Space M] [SigmaCompactSpace M]
 
-/-- In dimension three, every positive fibre threshold admits a positive
-spectral `H²` radius on which symmetric perturbations realize metrics. -/
 theorem realize_at_delta
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M) {δ : ℝ} (hδ : 0 < δ) :
@@ -56,9 +46,6 @@ theorem realize_at_delta
   exact mul_le_mul_of_nonneg_right
     (mul_le_mul_of_nonneg_right hdelta (Real.sqrt_nonneg _)) (Real.sqrt_nonneg _)
 
-/-- In dimension three, a positive spectral `H2` radius directly supplies
-the fibre-smallness needed to realize every smooth perturbation in the state
-ball as a metric. -/
 theorem lowreg_realize_h2
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M) :
@@ -89,8 +76,6 @@ theorem lowreg_realize_h2
   exact mul_le_mul_of_nonneg_right
     (mul_le_mul_of_nonneg_right hdelta (Real.sqrt_nonneg _)) (Real.sqrt_nonneg _)
 
-/-- In dimension three, a positive spectral `H3` radius gives the exact
-realizability witness used by the Sobolev Ricci--DeTurck nonlinearity. -/
 theorem lowreg_realize
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M) :

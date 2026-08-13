@@ -11,7 +11,6 @@ import DifferentialGeometry.Analysis.Spectral.Intrinsic.HeatSemigroup.MaxRegSolu
 import DifferentialGeometry.Analysis.Parabolic.QuasiLinear.TensorMaximalRegularity.PointwiseSpectralCoordinate
 import DifferentialGeometry.Analysis.Parabolic.TimeSobolev.PointwiseDeriv
 
-
 namespace DifferentialGeometry.PDE.RicciFlow
 
 open Bundle

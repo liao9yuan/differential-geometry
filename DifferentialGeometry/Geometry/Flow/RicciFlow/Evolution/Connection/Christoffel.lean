@@ -2,12 +2,6 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.Connection.Pairing
 
 set_option autoImplicit false
 
-
-
-
-
-
-
 noncomputable section
 
 namespace DifferentialGeometry.PDE.RicciFlow
@@ -28,7 +22,6 @@ section Components
 variable {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
 variable {u : Set M}
 
-
 def ChristoffelVariationEquationInFrameOn
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -46,13 +39,6 @@ def ChristoffelVariationEquationInFrameOn
         D.carrier
         (t : Real)
 
-
-
-
-
-
-
-
 def ChristoffelVariationMixedDerivativeInFrameOn
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -65,11 +51,6 @@ def ChristoffelVariationMixedDerivativeInFrameOn
         DifferentialGeometry.Tensor.Coordinates.christoffelSymbolInFrame
           (S.family.connection s) frame hframe x i j k)
       (fun s x => rhs s x i j k)
-
-
-
-
-
 
 def ChristoffelVariationMixedDerivativeInFrameOnRegular
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
@@ -84,8 +65,6 @@ def ChristoffelVariationMixedDerivativeInFrameOnRegular
         DifferentialGeometry.Tensor.Coordinates.christoffelSymbolInFrame
           (S.family.connection s) frame hframe x i j k)
       (fun s x => rhs s x i j k)
-
-
 
 omit [Fintype Idx] [DecidableEq Idx] in
 omit [SigmaCompactSpace M] [T2Space M] in
@@ -103,7 +82,6 @@ theorem ChristoffelVariationMixedDerivativeInFrameOn.toRegular
   intro i j k
   exact (h i j k).toRegular (I := I) (regularSet := D.regular)
 
-
 def ChristoffelMetricVariationEquationInFrameOn
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -113,7 +91,6 @@ def ChristoffelMetricVariationEquationInFrameOn
     (metricCovDerivDt : Real -> M -> Idx -> Idx -> Idx -> Real) : Prop :=
   ChristoffelVariationEquationInFrameOn (I := I) S frame hframe
     (christoffelVariationRHSFromMetricVariationInFrame (M := M) gInv metricCovDerivDt)
-
 
 omit [DecidableEq Idx] in
 omit [SigmaCompactSpace M] [T2Space M] in
@@ -139,7 +116,6 @@ theorem christoffelMetricVariation_hasDerivWithinAt
       D.carrier
       (t : Real) :=
   h t x hx i j k
-
 
 def ChristoffelEvolutionEquationInFrameOn
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
@@ -189,8 +165,6 @@ theorem frameCoeff_eq_sum_inv_metricPairing
             (I := I) (M := M) (S.family.metric t) (hframe.toBasisAt hx)
             (fun i j : Idx => gInv t x i j) hinvAt k V
 
-
-
 omit [SigmaCompactSpace M] [T2Space M] in
 theorem frameCoeffLocal
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
@@ -221,8 +195,6 @@ theorem frameCoeffLocal
           DifferentialGeometry.Integral.Connection.basis_coord_eq_sum_inv_inner
             (I := I) (M := M) (S.family.metric t) (hframe.toBasisAt hx)
             (fun i j : Idx => gInv t x i j) hinvAt k V
-
-
 
 omit [SigmaCompactSpace M] [T2Space M] in
 theorem christoffelVariationEquationInFrameOn_of_pairing_local
@@ -280,8 +252,6 @@ theorem christoffelVariationEquationInFrameOn_of_pairing_local
     exact (frameCoeffLocal
       (I := I) S gInv frame hframe hinv (t : Real) hx k
       ((S.family.connection (t : Real) (frame j) x) (frame i x))).symm
-
-
 
 omit [SigmaCompactSpace M] [T2Space M] in
 theorem christoffelSymbol_sub_eq_sum_inv_connectionDiff
@@ -342,7 +312,6 @@ theorem christoffelSymbol_sub_eq_sum_inv_connectionDiff
               ((S.family.connection var (frame j) x) (frame i x) -
                 (S.family.connection base (frame j) x) (frame i x))]
 
-
 omit [SigmaCompactSpace M] [T2Space M] in
 theorem gammaSubLocal
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
@@ -402,7 +371,6 @@ theorem gammaSubLocal
               ((S.family.connection var (frame j) x) (frame i x) -
                 (S.family.connection base (frame j) x) (frame i x))]
 
-
 omit [SigmaCompactSpace M] [T2Space M] in
 theorem christoffelEvolutionEquationInFrameOn_of_pairing
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
@@ -451,8 +419,6 @@ theorem christoffelEvolutionEquationInFrameOn_of_pairing
     exact (frameCoeffLocal
       (I := I) S gInv frame hframe hinv (t : Real) hx k
       ((S.family.connection (t : Real) (frame j) x) (frame i x))).symm
-
-
 
 omit [SigmaCompactSpace M] [T2Space M] in
 theorem christoffelEvolutionEquationInFrameOn_of_pairing_local

@@ -93,13 +93,6 @@ theorem connDiff_push
         (mfderiv I I (Φ : M → M) x u)
         (mfderiv I I (Φ : M → M) x v) := htgt.symm
 
-/-- Pushing the DeTurck vector field of `g` relative to `Φ*h` through
-`dΦ` gives the DeTurck vector field of the pushed-forward metric
-`(Φ⁻¹)*g` relative to `h`.
-
-This is the trace of `connDiff_push`.  The pushed-forward source
-`g`-orthonormal frame is orthonormal for `(Φ⁻¹)*g`, so the two
-connection-difference traces agree term by term. -/
 theorem deTurckVF_push
     (g h : SmoothRiemannianMetric I M) (Φ : M ≃ₘ⟮I, I⟯ M) (x : M) :
     mfderiv I I (Φ : M → M) x
@@ -142,8 +135,6 @@ theorem deTurckVF_push
     (smoothOrthoFrame (I := I) g x i x)
     (smoothOrthoFrame (I := I) g x i x)
 
-/-- Vector-field form of `deTurckVF_push`: pushing forward the source
-DeTurck field gives the target DeTurck field at every target point. -/
 theorem push_deTurckVF
     (g h : SmoothRiemannianMetric I M) (Φ : M ≃ₘ⟮I, I⟯ M) (y : M) :
     Diffeomorph.pushforward Φ

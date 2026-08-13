@@ -4,14 +4,6 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.H6JacobiForce
 
 set_option autoImplicit false
 
-/-!
-# Intrinsic Jacobi pair bounds for H6
-
-This file converts the order-zero HCG curvature bound into simultaneous
-metric-norm bounds for an intrinsic Jacobi field and its covariant velocity.
-It is the base case for the differentiated Jacobi recursion used by H6.
--/
-
 noncomputable section
 
 open Bundle Set
@@ -32,7 +24,6 @@ variable {E : Type uE} [NormedAddCommGroup E]
 variable {H : Type uH} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H} [I.Boundaryless]
 
-/-- Uniform scalar bounds assigned to the six intrinsic jet leaves. -/
 def jetLeafCap (U B : Real) : IntrJetAtom -> Real
   | .pathT => U
   | .pathDt => 0
@@ -41,15 +32,12 @@ def jetLeafCap (U B : Real) : IntrJetAtom -> Real
   | .bJet _ => B
   | .bTime _ => B
 
-/-- The fixed scalar coefficient in the launch-jet Jacobi inequalities. -/
 def jetRate (C : Nat -> Real) (U : Real) : Real :=
   max (C 0 * U ^ 2) 1
 
-/-- The finite residual majorant used at the next launch-jet order. -/
 def jetEps (C : Nat -> Real) (U B : Real) (n : Nat) : Real :=
   (intrResidualTerm (n + 1)).majorant C (jetLeafCap U B)
 
-/-- Primitive-recursive scalar cap for all launch jets through a fixed order. -/
 def jetCap (C : Nat -> Real) (U D : Real) : Nat -> Real
   | 0 => gronwallBound D (jetRate C U) 0 1
   | n + 1 =>
@@ -57,19 +45,16 @@ def jetCap (C : Nat -> Real) (U D : Real) : Nat -> Real
         (gronwallBound 0 (jetRate C U)
           (jetEps C U (jetCap C U D n) n) 1)
 
-/-- Nonnegative path and jet caps give nonnegative leaf bounds. -/
 theorem jetLeafCap_nonneg
     {U B : Real} (hU : 0 <= U) (hB : 0 <= B) :
     forall atom, 0 <= jetLeafCap U B atom := by
   intro atom
   cases atom <;> simp only [jetLeafCap, hU, hB, le_refl]
 
-/-- The launch-jet Gronwall coefficient is positive. -/
 theorem jetRate_pos (C : Nat -> Real) (U : Real) :
     0 < jetRate C U := by
   exact lt_of_lt_of_le (by norm_num) (le_max_right _ _)
 
-/-- Nonnegative curvature and leaf caps give a nonnegative residual cap. -/
 theorem jetEps_nonneg
     (C : Nat -> Real) {U B : Real}
     (hC : forall k, 0 <= C k) (hU : 0 <= U) (hB : 0 <= B)
@@ -78,7 +63,6 @@ theorem jetEps_nonneg
   exact CurvJetTerm.majorant_nonneg C (jetLeafCap U B) hC
     (jetLeafCap_nonneg hU hB) (intrResidualTerm (n + 1))
 
-/-- Every finite launch-jet cap is nonnegative. -/
 theorem jetCap_nonneg
     (C : Nat -> Real) {U D : Real} (hD : 0 <= D) :
     forall n, 0 <= jetCap C U D n := by
@@ -91,14 +75,12 @@ theorem jetCap_nonneg
       rw [jetCap]
       exact ih.trans (le_max_left _ _)
 
-/-- The scalar launch-jet cap retains every previous order. -/
 theorem jetCap_le_succ
     (C : Nat -> Real) (U D : Real) (n : Nat) :
     jetCap C U D n <= jetCap C U D (n + 1) := by
   rw [jetCap]
   exact le_max_left _ _
 
-/-- The new inhomogeneous Gronwall bound is below the next scalar cap. -/
 theorem jetCap_step_le
     (C : Nat -> Real) (U D : Real) (n : Nat) :
     gronwallBound 0 (jetRate C U)
@@ -108,7 +90,6 @@ theorem jetCap_step_le
   exact le_max_right _ _
 
 omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
-/-- The affine launch speed stays below the prescribed tube speed. -/
 private theorem launch_speed_le
     (P : PointedRiemannianManifold.{u, uE, uH} (I := I))
     (p : P.M) (u a : E) {r R U D : Real} :
@@ -141,8 +122,6 @@ private theorem launch_speed_le
       gcongr
     _ <= U := hu
 
-/-- The six forcing summands collapse to the two H6 coefficients once both
-Jacobi position-velocity pairs are uniformly bounded. -/
 private theorem jac_force_cap
     {C0 C1 U BA BB LA LT LJ LK LDJ LF : Real}
     (hC0 : 0 <= C0) (hC1 : 0 <= C1) (hU : 0 <= U)
@@ -181,8 +160,6 @@ private theorem jac_force_cap
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-/-- An order-zero HCG curvature bound controls both an intrinsic Jacobi field
-and its covariant velocity on a fixed time interval. -/
 theorem intrJacobi_pair_le
     (P : PointedRiemannianManifold.{u, uE, uH} (I := I))
     (hcomplete : MetricComplete (I := I) P)
@@ -315,8 +292,6 @@ theorem intrJacobi_pair_le
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-/-- The first mixed launch forcing is uniformly controlled on the unit
-geodesic-time interval by the order-zero and order-one HCG curvature bounds. -/
 theorem intrMix_force_le
     (P : PointedRiemannianManifold.{u, uE, uH} (I := I))
     (hcomplete : MetricComplete (I := I) P)
@@ -503,8 +478,6 @@ theorem intrMix_force_le
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-/-- The first mixed launch-Jacobi field and its time covariant derivative obey
-a uniform inhomogeneous Gronwall bound on the unit geodesic-time interval. -/
 theorem intrMix_pair_le
     (P : PointedRiemannianManifold.{u, uE, uH} (I := I))
     (hcomplete : MetricComplete (I := I) P)
@@ -792,8 +765,6 @@ theorem intrMix_pair_le
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-/-- A residual bound for one intrinsic launch jet gives simultaneous bounds
-for that jet and its geodesic-time covariant derivative. -/
 theorem intrJet_pair_of
     (P : PointedRiemannianManifold.{u, uE, uH} (I := I))
     (hcomplete : MetricComplete (I := I) P)
@@ -1023,8 +994,6 @@ theorem intrJet_pair_of
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-/-- All intrinsic launch jets through order `n` are uniformly bounded on a
-finite affine launch tube and on geodesic times in `[0, 1]`. -/
 theorem intrJet_upto_le
     (P : PointedRiemannianManifold.{u, uE, uH} (I := I))
     (hcomplete : MetricComplete (I := I) P)

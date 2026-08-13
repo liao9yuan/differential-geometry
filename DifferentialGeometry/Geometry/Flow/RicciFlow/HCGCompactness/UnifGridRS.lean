@@ -2,15 +2,6 @@ import DifferentialGeometry.Analysis.Sobolev.TensorHilbert.RemainderCoeffPerOrde
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.UnifGagliardoNirenberg
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.UnifMorreyRS
 
-/-!
-# Three-dimensional class-uniform mixed two-arm grid
-
-This module combines the explicit mixed-valence product-grid coefficient with
-the class-first Gagliardo--Nirenberg and mixed Morrey producers.  At the fixed
-order-two window needed by the short-time tame estimates, one constant is
-chosen before the class metric and the two tensor fields vary.
--/
-
 set_option autoImplicit false
 
 noncomputable section
@@ -57,7 +48,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
-/-- A background-class upper bound for the explicit mixed two-arm grid coefficient. -/
 noncomputable def gridRSClassC
     (gBase : SmoothRiemannianMetric I M) (Λ : ℝ) (k : ℕ) : ℝ :=
   (k + 1) ^ 2 *
@@ -67,7 +57,6 @@ noncomputable def gridRSClassC
 
 omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless]
   [BoundarylessManifold I M] in
-/-- The class grid coefficient is nonnegative. -/
 theorem gridRSClassC_nonneg
     (gBase : SmoothRiemannianMetric I M) (Λ : ℝ) (k : ℕ) :
     0 ≤ gridRSClassC (E := E) (I := I) (M := M) gBase Λ k := by
@@ -95,8 +84,6 @@ private lemma gnGridCoeff_le
 
 omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless]
   [BoundarylessManifold I M] in
-/-- The metricwise mixed-grid coefficient is bounded by the fixed
-background-class coefficient. -/
 theorem grid_rs_const_le
     (gBase : SmoothRiemannianMetric I M) {Λ : ℝ}
     (g : SmoothRiemannianMetric I M)
@@ -114,12 +101,6 @@ theorem grid_rs_const_le
       (gnClassC_nonneg (E := E) (I := I) (M := M) gBase Λ m)
   · positivity
 
-/-- **Dimension-three class-first mixed two-arm order-two grid.**
-
-The constant is selected from the background class and the two tensor valences
-before `g`, `S`, and `T` vary.  The first two metric jets transfer the fixed
-Morrey pointwise caps, while the order-two tensor jet radii control the full
-integrated diagonal product grid. -/
 theorem grid_rs_unif
     (hDim : Module.finrank ℝ E = 3)
     (gBase : SmoothRiemannianMetric I M)

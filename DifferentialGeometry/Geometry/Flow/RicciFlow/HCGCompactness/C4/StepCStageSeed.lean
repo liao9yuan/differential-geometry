@@ -2,15 +2,6 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.C4.StepCStage
 
 set_option autoImplicit false
 
-
-
-
-
-
-
-
-
-
 noncomputable section
 
 universe u uE uH
@@ -34,7 +25,6 @@ variable {H : Type uH} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H} [I.Boundaryless]
 variable {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
 
-
 def IsStableNet
     (inp : MetricCompactCore (I := I) X)
     (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k))
@@ -44,7 +34,6 @@ def IsStableNet
       BInter inp.decay inp.D P L.lamInf a b (L.φ k)) ∨
     (∀ᶠ k in atTop,
       ¬ BInter inp.decay inp.D P L.lamInf a b (L.φ k))
-
 
 def HasStageRefine
     (inp : MetricCompactnessInputs (I := I) X)
@@ -66,8 +55,6 @@ def HasStageRefine
     HasStageJetData inp P L hr phi hphi hconn U C0 C1
       aInf Jinf Jbarinf gInf
 
-/-- The full actual stage-map package extracted at one construction radius
-through one coherent normal-chart provider. -/
 def HasStageRefineOn
     (inp : MetricCompactCore (I := I) X)
     (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k))
@@ -88,8 +75,6 @@ def HasStageRefineOn
     HasStageJetDataOn inp P L hr phi hphi hconn chart
       V U C0 C1 aInf Jinf Jbarinf gInf
 
-
-
 def HasStageSeed
     (inp : MetricCompactnessInputs (I := I) X)
     (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k))
@@ -102,8 +87,6 @@ def HasStageSeed
       ∀ (r : Real) (hr : 0 ≤ r),
         HasStageRefine inp P L hconn r hr
 
-/-- One stable net and a radius-independent provider-native refinement
-procedure for every stable net over the same metric compactness input. -/
 def HasStageSeedOn
     (inp : MetricCompactCore (I := I) X)
     (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k))
@@ -116,7 +99,6 @@ def HasStageSeedOn
     ∀ (L : NetLimitData inp.decay inp.D P), IsStableNet inp P L →
       ∀ (r : Real) (hr : 0 ≤ r),
         HasStageRefineOn inp P L hconn chart r hr
-
 
 theorem HasStageSeed.refine
     (inp : MetricCompactnessInputs (I := I) X)
@@ -131,8 +113,6 @@ theorem HasStageSeed.refine
     HasStageRefine inp P L hconn r hr :=
   hseed.2 L hstable r hr
 
-
-
 theorem HasStageSeed.subseq
     (inp : MetricCompactnessInputs (I := I) X)
     (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k))
@@ -146,7 +126,6 @@ theorem HasStageSeed.subseq
   apply hseed.refine inp P L0 hconn (L0.subseq hψ) _ r hr
   exact NetLimitData.stable_subseq inp.decay P L0 hψ hseed.1
 
-/-- Project the provider-native radius refinement from a stage seed. -/
 theorem HasStageSeedOn.refine
     (inp : MetricCompactCore (I := I) X)
     (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k))
@@ -161,8 +140,6 @@ theorem HasStageSeedOn.refine
     HasStageRefineOn inp P L hconn chart r hr :=
   hseed.2 L hstable r hr
 
-/-- Every strict refinement of a provider-native seed net remains eligible
-for the same chart family's radius-dependent stage-map producer. -/
 theorem HasStageSeedOn.subseq
     (inp : MetricCompactCore (I := I) X)
     (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k))
@@ -176,9 +153,6 @@ theorem HasStageSeedOn.subseq
     HasStageRefineOn inp P (L0.subseq hψ) hconn chart r hr := by
   apply hseed.refine inp P L0 hconn chart (L0.subseq hψ) _ r hr
   exact NetLimitData.stable_subseq inp.decay P L0 hψ hseed.1
-
-
-
 
 theorem MetricCompactBase.exists_stage_seed
     (b : MetricCompactBase (I := I) X)

@@ -3,14 +3,6 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.C4.NormalCoor
 
 set_option autoImplicit false
 
-/-!
-# H6 source-chart neighborhoods for Step B1
-
-The retained coordinate buffer is converted into a fixed pair of nested
-coordinate neighborhoods using the metric equivalence of the same H6 chart
-provider that defines the stage maps.
--/
-
 noncomputable section
 
 universe u uE uH
@@ -32,8 +24,6 @@ variable {H : Type uH} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H} [I.Boundaryless]
 variable {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
 
-/-- A buffered H6 coordinate center has fixed nested coordinate neighborhoods
-whose H6 chart images eventually remain in any prescribed larger source ball. -/
 theorem H6NormalData.source_stay
     (inp : MetricCompactCore (I := I) X)
     (d : H6NormalData (I := I) X inp.decay)

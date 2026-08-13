@@ -1,13 +1,6 @@
 import DifferentialGeometry.Analysis.ODE.PhaseEndpointInverse
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.C4.NormalPhaseSmallness
 
-
-
-
-
-
-
-
 noncomputable section
 
 universe u uE uH
@@ -23,8 +16,6 @@ variable [FiniteDimensional Real E] [CompleteSpace E]
 variable [NeZero (Module.finrank Real E)]
 variable {H : Type uH} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H} [I.Boundaryless]
-
-
 
 theorem exists_normal_q
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
@@ -90,8 +81,6 @@ theorem exists_normal_q
   · change 3 * C * (2 * qReal) ^ 2 ≤ qReal
     nlinarith
   · simpa only [threshold] using herrQ
-
-
 
 theorem exists_normal_inv
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}

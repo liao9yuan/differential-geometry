@@ -2,14 +2,6 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.C4.StepB1Metr
 
 set_option autoImplicit false
 
-/-!
-# Provider-native chart-metric bridge for Step B1
-
-This file upgrades the chart and pullback convergence bridge to the
-`HasStageJetDataOn` package.  All stage maps, chart readouts, and metric
-coefficients use the same `NormalChartFamily`.
--/
-
 noncomputable section
 
 universe u uE uH
@@ -31,8 +23,6 @@ variable {H : Type uH} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H} [I.Boundaryless]
 variable {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
 
-/-- Along two cofinal stage sequences, the readout of the actual comparison
-map in one coherent chart provider converges smoothly to the identity. -/
 theorem HasStageJetDataOn.chart_conv
     (inp : MetricCompactCore (I := I) X)
     (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k))
@@ -108,9 +98,6 @@ theorem HasStageJetDataOn.chart_conv
   have hsrc := hNs n hnS hzV
   simpa only using (hjet hzInt hsrc).2.2 j hj
 
-/-- On a compactly nested coordinate patch, the target-stage chart metric
-pulled back by the actual provider-native stage map converges smoothly to the
-retained limit metric. -/
 theorem HasStageJetDataOn.pb_conv
     (inp : MetricCompactCore (I := I) X)
     (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k))

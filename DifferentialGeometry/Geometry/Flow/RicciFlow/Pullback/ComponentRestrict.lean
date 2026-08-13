@@ -4,32 +4,6 @@ import DifferentialGeometry.Geometry.Geodesic.OpenSubtype
 
 set_option autoImplicit false
 
-/-!
-# Restricting endpoint-style Ricci-flow data to a connected component
-
-The public forward-uniqueness endpoint is stated on a compact manifold which
-need not be connected.  Its hypotheses are deliberately raw: joint chart-Gram
-smoothness on the open slab, joint continuity up to the closed initial edge,
-and the coefficientwise Ricci-flow equation.  This file transports those exact
-hypotheses to the open connected component of an arbitrary point.
-
-The transport does not package the family as an `IsSolutionOn`.  That would
-ask for stronger closed-edge smoothness than the endpoint supplies.  Instead,
-the chart-Gram fields are pulled back along the smooth open inclusion
-`(t,u) ↦ (t, (u : M))`, and the PDE uses the germ-locality theorem
-`ricciTensor_restrictOpen`.
-
-No connectedness instance is installed on the ambient manifold.
-
-## Main declarations
-
-* `compRestrict` is the time-dependent metric restricted to one component.
-* `compRestrict_init` transports equality of the initial metrics.
-* `compRestrict_smooth` transports open-slab joint chart-Gram smoothness.
-* `compRestrict_cont` transports closed-edge joint chart-Gram continuity.
-* `compRestrict_pde` transports the Ricci-flow equation.
--/
-
 noncomputable section
 
 open Bundle Manifold Set TopologicalSpace
@@ -50,7 +24,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
   [IsManifold I ∞ M] [CompactSpace M] [BoundarylessManifold I M]
   [T2Space M] [SigmaCompactSpace M]
 
-/-- A metric family restricted to the open connected component of `p`. -/
 noncomputable def compRestrict
     (g : ℝ → SmoothRiemannianMetric I M) (p : M) :
     ℝ → SmoothRiemannianMetric I (connCompOpen (I := I) p) := by
@@ -70,7 +43,6 @@ private theorem compBase_mem
 omit [NeZero (Module.finrank ℝ E)]
   [BoundarylessManifold I M]
   [SigmaCompactSpace M] in
-/-- Equality of two initial metrics survives restriction to a connected component. -/
 theorem compRestrict_init
     (g₁ g₂ : ℝ → SmoothRiemannianMetric I M) (p : M) (a : ℝ)
     (h₀ : g₁ a = g₂ a) :
@@ -81,7 +53,6 @@ theorem compRestrict_init
       g.restrictOpen (I := I) (connCompOpen (I := I) p)) h₀
 
 omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] [SigmaCompactSpace M] in
-/-- Open-slab joint chart-Gram smoothness survives restriction to a connected component. -/
 theorem compRestrict_smooth
     (g : ℝ → SmoothRiemannianMetric I M) (p : M) {a b : ℝ}
     (hsmooth : ∀ (x₀ : M) (i j : Fin (Module.finrank ℝ E)),
@@ -115,7 +86,6 @@ theorem compRestrict_smooth
       hsource i j)
 
 omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] [SigmaCompactSpace M] in
-/-- Closed-edge joint chart-Gram continuity survives restriction to a connected component. -/
 theorem compRestrict_cont
     (g : ℝ → SmoothRiemannianMetric I M) (p : M) {a b : ℝ}
     (hcont : ∀ (x₀ : M) (i j : Fin (Module.finrank ℝ E)),
@@ -148,7 +118,6 @@ theorem compRestrict_cont
       hsource i j)
 
 omit [NeZero (Module.finrank ℝ E)] in
-/-- The coefficientwise Ricci-flow PDE survives restriction to a connected component. -/
 theorem compRestrict_pde
     (g : ℝ → SmoothRiemannianMetric I M) (p : M) {a b : ℝ}
     (hpde : ∀ t ∈ Set.Ico a b, ∀ (x : M) (v w : TangentSpace I x),
@@ -162,13 +131,9 @@ theorem compRestrict_pde
         (Set.Ici a) t := by
   letI : CompactSpace (connCompOpen (I := I) p) := connCompCompact (I := I) p
   intro t ht x v w
-  -- For an open subtype these two tangent fibers are definitionally the same
-  -- model space `E`; this is also the shared-slot convention of
-  -- `ricciTensor_restrictOpen`, so no tangent-map transport is needed.
+
   simpa only [compRestrict, SmoothRiemannianMetric.restrictOpen_inner,
     ricciTensor_restrictOpen] using hpde t ht (x : M) v w
-
-/-! ## Reassembling componentwise uniqueness -/
 
 omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [CompactSpace M]
   [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
@@ -186,9 +151,6 @@ private theorem metric_ext
   rfl
 
 omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] [SigmaCompactSpace M] in
-/-- Equality of two metrics on every connected-component restriction implies
-equality of the ambient metrics.  It is enough at `x` to inspect the component
-anchored at `x` and evaluate the restricted equality at `connCompPt x`. -/
 theorem eq_of_compRestrict
     (g₁ g₂ : ℝ → SmoothRiemannianMetric I M) (t : ℝ)
     (hcomp : ∀ p : M,
@@ -204,15 +166,6 @@ theorem eq_of_compRestrict
     connCompPt] using hx
 
 omit [NeZero (Module.finrank ℝ E)] in
-/-- Reduction of the raw forward-uniqueness endpoint to the connected case.
-
-The final hypothesis is precisely a connected-manifold uniqueness consumer:
-for each component it receives the transported open-slab smoothness,
-closed-edge continuity, Ricci-flow PDE, and initial equality, and returns
-equality of the restricted flows.  The proof installs no connectedness on the
-ambient manifold; a caller proving that hypothesis may locally install
-`connCompConnected p` and `connCompCompact p` before invoking the connected
-DeTurck/HMF uniqueness theorem. -/
 theorem forward_of_comp
     (g₁ g₂ : ℝ → SmoothRiemannianMetric I M) {a b : ℝ} (hab : a < b)
     (h1smooth : ∀ (x₀ : M) (i j : Fin (Module.finrank ℝ E)),

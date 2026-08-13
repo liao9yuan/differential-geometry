@@ -3,63 +3,6 @@ import DifferentialGeometry.Tensor.RSTensor.MetricTrace.Higher
 
 set_option autoImplicit false
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 noncomputable section
 
 namespace DifferentialGeometry.Integral.Connection
@@ -73,14 +16,6 @@ variable [FiniteDimensional Real E]
 variable {H : Type*} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
-
-
-
-
-
-
-
-
 
 private def freezeAllButSlots
     (Y : Fin 4 → ContMDiffSection I E (∞ : WithTop ℕ∞)
@@ -107,16 +42,7 @@ private theorem freezeAllButSlots_apply
   · subst hi; simp [freezeAllButSlots]
   · simp [freezeAllButSlots, Function.update_of_ne hi]
 
-
-
-
-
-
-
 set_option backward.isDefEq.respectTransparency false in
-
-
-
 
 noncomputable def freezeAllBut04Field
     [CompleteSpace E]
@@ -238,13 +164,6 @@ theorem freezeAllBut04Field_apply_vec
       A x (Function.update (fun i : Fin 4 => Y i x) q W) := by
   rw [freezeAllBut04Field_apply]
   exact oneFormAtSlot0S_apply (I := I) (A x) (fun i : Fin 4 => Y i x) q W
-
-
-
-
-
-
-
 
 private theorem allBut04FreezeNabla
     [T2Space M] [CompleteSpace E] [I.Boundaryless] [IsManifold I 1 M]
@@ -402,8 +321,6 @@ private theorem allBut04FreezeNabla
 
 end DifferentialGeometry.Integral.Connection
 
-
-
 namespace DifferentialGeometry.PDE.RicciFlow
 
 open Bundle Tensor0SBundle
@@ -418,10 +335,6 @@ variable {I : ModelWithCorners Real E H} [I.Boundaryless]
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 variable [IsManifold I 1 M] [IsManifold I 2 M]
 variable [CompleteSpace E] [SigmaCompactSpace M] [T2Space M]
-
-
-
-
 
 def rmFrozenSlotField
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
@@ -456,7 +369,6 @@ theorem rmFrozenSlotField_apply_vec
       S.base.rm04 t x (Function.update (fun i : Fin 4 => Y i x) q W) :=
   freezeAllBut04Field_apply_vec (I := I) (M := M) (S.base.rm04 t) q Y x W
 
-
 omit [I.Boundaryless] [IsManifold I 2 M] in
 omit [SigmaCompactSpace M] [T2Space M] in
 private theorem rmFrozen_connSmoothInf
@@ -466,8 +378,6 @@ private theorem rmFrozen_connSmoothInf
       (S.family.connection t) (∞ : WithTop ℕ∞) := by
   simpa [SolutionFamily.connection, metricCov] using
     metricCov_smooth (I := I) (M := M) (S.base.metric t)
-
-
 
 def nablaRmFrozenSlotField
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
@@ -481,9 +391,6 @@ def nablaRmFrozenSlotField
     (totalNabla0S_reg (E := E) (H := H) (I := I) (M := M)
       1 (S.family.connection t) (rmFrozen_connSmoothInf (I := I) S t)
       (rmFrozenSlotField (I := I) S t q Y))
-
-
-
 
 omit [I.Boundaryless] in
 omit [SigmaCompactSpace M] in
@@ -500,20 +407,6 @@ theorem nablaRmFrozenSlotField_realizes
     (totalNabla0S_reg (E := E) (H := H) (I := I) (M := M)
       1 (S.family.connection t) (rmFrozen_connSmoothInf (I := I) S t)
       (rmFrozenSlotField (I := I) S t q Y))
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 omit [SigmaCompactSpace M] in
 theorem nablaRmFrozenSlot_eval

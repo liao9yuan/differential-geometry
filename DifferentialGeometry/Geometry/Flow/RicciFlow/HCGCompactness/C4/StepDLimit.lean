@@ -8,25 +8,6 @@ import DifferentialGeometry.Geometry.Topology.SigmaCompactOpen
 
 set_option autoImplicit false
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 noncomputable section
 
 universe u uE uH
@@ -35,10 +16,6 @@ namespace DifferentialGeometry
 namespace HCGCompactness
 
 open scoped Manifold ContDiff
-
-
-
-
 
 def limitPointed
     {E : Type uE} [NormedAddCommGroup E] [NormedSpace ℝ E]
@@ -53,10 +30,6 @@ def limitPointed
   M := S.toSeqSystem.Lim
   basepoint := S.toSeqSystem.incl 0 O₀
   metric := ginf
-
-
-
-
 
 def limitPointedCoc
     {E : Type uE} [NormedAddCommGroup E] [NormedSpace ℝ E]
@@ -79,8 +52,6 @@ variable {A : ℕ → Type u} [∀ k, TopologicalSpace (A k)] [∀ k, ChartedSpa
   [∀ k, IsManifold I ∞ (A k)] [∀ k, Nonempty (A k)]
   [∀ k, SigmaCompactSpace (A k)] [∀ k, T2Space (A k)]
 
-
-
 def factorPointed (S : SmoothSeqSystem I A) (O₀ : A 0)
     (g : ∀ k, SmoothRiemannianMetric I (A k)) (k : ℕ) :
     PointedRiemannianManifold.{u, uE, uH} (I := I) where
@@ -88,14 +59,10 @@ def factorPointed (S : SmoothSeqSystem I A) (O₀ : A 0)
   basepoint := S.toSeqSystem.F (Nat.zero_le k) O₀
   metric := g k
 
-
 def factorSeq (S : SmoothSeqSystem I A) (O₀ : A 0)
     (g : ∀ k, SmoothRiemannianMetric I (A k)) :
     PointedRiemannianSeq.{u, uE, uH} (I := I) where
   obj := factorPointed S O₀ g
-
-
-
 
 omit [FiniteDimensional ℝ E] [CompleteSpace E] [∀ (k : ℕ), SigmaCompactSpace (A k)]
     [∀ (k : ℕ), T2Space (A k)] in
@@ -109,9 +76,6 @@ theorem rangeExhausts (S : SmoothSeqSystem I A) :
     rw [hKeq]
     exact (Set.image_subset_range _ _).trans (S.toSeqSystem.range_incl_mono hk)
 
-
-
-
 noncomputable def limitCGMapsOf (S : SmoothSeqSystem I A) (O₀ : A 0)
     (gSeq gLim : ∀ k, SmoothRiemannianMetric I (A k)) (hgLim : S.MetricCocycle gLim) :
     PointedRiemannianCGMaps.{u, uE, uH} (I := I)
@@ -123,7 +87,6 @@ noncomputable def limitCGMapsOf (S : SmoothSeqSystem I A) (O₀ : A 0)
   source_exhausts := rangeExhausts S
   base_mem k := ⟨S.toSeqSystem.F (Nat.zero_le k) O₀, S.toSeqSystem.incl_comp (Nat.zero_le k) O₀⟩
   basepoint_map k := S.invIncl_incl_le (Nat.zero_le k) O₀
-
 
 noncomputable def limitCGMaps (S : SmoothSeqSystem I A) (O₀ : A 0)
     (g : ∀ k, SmoothRiemannianMetric I (A k)) (hg : S.MetricCocycle g) :
@@ -143,11 +106,6 @@ variable {H : Type uH} [TopologicalSpace H] {I : ModelWithCorners ℝ E H} [I.Bo
 variable {A : ℕ → Type u} [∀ k, TopologicalSpace (A k)] [∀ k, ChartedSpace H (A k)]
   [∀ k, IsManifold I ∞ (A k)] [∀ k, Nonempty (A k)]
   [∀ k, SigmaCompactSpace (A k)] [∀ k, T2Space (A k)]
-
-
-
-
-
 
 def limitCGConverges
     (S : SmoothSeqSystem I A) (O₀ : A 0)
@@ -331,8 +289,6 @@ section StepD5
 
 open Bundle
 
-
-
 theorem exists_first_exit
     {X : Type*} [TopologicalSpace X] {K : Set X} (hK : IsClosed K)
     {γ : ℝ → X} (hγ : ContinuousOn γ (Set.Icc 0 1))
@@ -382,7 +338,6 @@ theorem exists_first_exit
     · exact interior_subset (hbefore s ⟨hs.1, lt_of_le_of_ne hs.2 hst⟩)
   · rw [frontier, hK.closure_eq]
     exact ⟨htK, htNot⟩
-
 
 variable {E : Type uE} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E] [CompleteSpace E]

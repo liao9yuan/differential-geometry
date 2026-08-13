@@ -1,14 +1,6 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.CoordinateTowerRegularity
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.RmRealizationBridgeAllK
 
-
-
-
-
-
-
-
-
 namespace DifferentialGeometry.PDE.RicciFlow
 
 open Bundle Tensor0SBundle
@@ -25,8 +17,6 @@ variable [IsManifold I ∞ M] [IsManifold I 1 M] [IsManifold I 2 M]
 variable [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M]
 
 omit [NeZero (Module.finrank ℝ E)] in
-/-- Components of the intrinsic curvature-derivative tower in any smooth local
-frame are jointly `C∞` in spacetime at regular chart-good points. -/
 theorem frameTowerSmooth
     {alpha omega : Real} {hAlphaOmega : alpha < omega}
     {S : SolutionOn (I := I) (M := M)

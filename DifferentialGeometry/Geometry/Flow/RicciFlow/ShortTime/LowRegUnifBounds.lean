@@ -4,18 +4,6 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.UnifNZeroClass
 import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.UnifDenseTame
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.AllTimesBounds
 
-/-!
-# Class-uniform six-number input for the low-regularity solve
-
-This file records the exact quantifier boundary needed for a common
-fixed-point lifetime.  A single certified `LowRegBoundData` packet is chosen
-before the varying metric, while every metric keeps its own spectral spaces and
-its own proof of the analytic certificates in `IsLowBoundsAt`.
-
-No all-rung Sobolev comparison belongs to this package.  Higher regularity is a
-separate qualitative bootstrap after the common low solution has been built.
--/
-
 noncomputable section
 
 open Bundle Manifold MeasureTheory Set
@@ -43,8 +31,6 @@ variable
       [IsManifold I ∞ M] [CompactSpace M] [I.Boundaryless]
       [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M]
 
-/-- One explicit low-solve coefficient packet supplies the exact analytic
-certificates for every member of the order-three metric class. -/
 structure IsLowBoundsUnif
     (gBase : SmoothRiemannianMetric I M) (Λ : ℝ)
     (K : LowRegBoundData) : Prop where
@@ -54,9 +40,6 @@ structure IsLowBoundsUnif
       MetricCovDerivOrderBoundOn (I := I) Set.univ a g gBase Λ) →
     IsLowBoundsAt (I := I) (M := M) g gBase K
 
-/-- One horizon envelope dominates an exact analytic packet for every class
-member.  The exact packet may vary with the metric; only the six scalar caps
-are fixed before it. -/
 structure IsLowBoundsCap
     (gBase : SmoothRiemannianMetric I M) (Λ : ℝ)
     (U : LowRegHorizonData) : Prop where
@@ -67,7 +50,6 @@ structure IsLowBoundsCap
     ∃ K : LowRegBoundData,
       IsLowBoundsAt (I := I) (M := M) g gBase K ∧ IsLowBoundCap K U
 
-/-- A literal common packet gives a common horizon envelope by reflexivity. -/
 theorem IsLowBoundsUnif.toCaps
     {gBase : SmoothRiemannianMetric I M} {Λ : ℝ} {K : LowRegBoundData}
     (hK : IsLowBoundsUnif (I := I) (M := M) gBase Λ K) :
@@ -75,8 +57,6 @@ theorem IsLowBoundsUnif.toCaps
   bounds g hEq hjet :=
     ⟨K, hK.bounds g hEq hjet, boundCap_refl K⟩
 
-/-- Every three-dimensional order-three metric class admits one literal
-low-regularity coefficient packet, chosen before the class metric varies. -/
 theorem exists_lowBounds
     (hDim : Module.finrank ℝ E = 3)
     (gBase : SmoothRiemannianMetric I M) {Λ : ℝ} (hΛ : 1 ≤ Λ) :
@@ -162,8 +142,6 @@ theorem exists_lowBounds
   · simpa only [K, Q] using hzero0
   · simpa only [K, Q] using hcore'
 
-/-- Every three-dimensional order-three metric class admits one common
-low-regularity horizon envelope. -/
 theorem lowreg_bounds_unif
     (hDim : Module.finrank ℝ E = 3)
     (gBase : SmoothRiemannianMetric I M) {Λ : ℝ} (hΛ : 1 ≤ Λ) :
@@ -172,11 +150,6 @@ theorem lowreg_bounds_unif
   obtain ⟨K, hK⟩ := exists_lowBounds (I := I) (M := M) hDim gBase hΛ
   exact ⟨K.toHorizon, IsLowBoundsUnif.toCaps (I := I) (M := M) hK⟩
 
-/-- A class-uniform six-number package gives one positive closed horizon and a
-background-aware low solve for every member of the class.
-
-This is only the fixed-point assembly.  The producer of `IsLowBoundsUnif` and
-the qualitative smoothness bootstrap are separate theorems. -/
 theorem unif_solve_of_bounds
     (gBase : SmoothRiemannianMetric I M) {Λ : ℝ} (K : LowRegBoundData)
     (hK : IsLowBoundsUnif (I := I) (M := M) gBase Λ K) :
@@ -199,10 +172,6 @@ theorem unif_solve_of_bounds
   exact lowreg_sol_of_data (I := I) (M := M) g gBase K
     (hK.bounds g hEq hjet) hT hTτ hT1
 
-/-- A six-number envelope, rather than one literal packet, is enough to give a
-common positive horizon.  Each metric keeps its exact packet and solution
-witnesses, while `horizon_le_of_cap` transports the common time into that
-metric's fixed-point engine. -/
 theorem unif_solve_of_caps
     (gBase : SmoothRiemannianMetric I M) {Λ : ℝ} (U : LowRegHorizonData)
     (hU : IsLowBoundsCap (I := I) (M := M) gBase Λ U) :
@@ -229,8 +198,6 @@ theorem unif_solve_of_caps
     hT (hTτ.trans (horizon_le_of_cap hcap)) hT1
   exact ⟨K, hK, u, gforce, hcap, hsol⟩
 
-/-- Every three-dimensional order-three metric class admits low
-Ricci--DeTurck fixed-point solutions on one positive common horizon. -/
 theorem lowreg_solve_unif
     (hDim : Module.finrank ℝ E = 3)
     (gBase : SmoothRiemannianMetric I M) {Λ : ℝ} (hΛ : 1 ≤ Λ) :

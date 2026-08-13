@@ -3,16 +3,6 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.UnifCurvature
 import DifferentialGeometry.Geometry.Curvature.CurvatureOperator.PointwiseCurvatureDerivative
 import DifferentialGeometry.Geometry.Flow.ConnectionDifference
 
-/-!
-# The class-uniform first curvature jet
-
-This module assembles the intrinsic `(1,3)` curvature-derivative split.  The
-base derivative of the curvature difference is the differentiated Palatini
-term, while changing the differentiating connection contributes four
-algebraic connection-insertion terms.  The resulting estimates hold for every
-metric-comparability factor `Λ ≥ 1`; no perturbative `Λ < 2` gate remains.
--/
-
 set_option autoImplicit false
 
 noncomputable section
@@ -60,8 +50,6 @@ set_option linter.unusedSectionVars false in
     extSec1 (I := I) x v x = v :=
   smoothExtensionTangent_eq (I := I) x v
 
-/-- The four algebraic terms produced by changing the differentiating
-connection from `gBase` to `g₀` while keeping the curvature operator of `g₀`. -/
 noncomputable def curvConnAt
     (gBase g₀ : SmoothRiemannianMetric I M) (x : M)
     (D X Y Z : TangentSpace I x) : TangentSpace I x :=
@@ -73,8 +61,7 @@ noncomputable def curvConnAt
   R X Y (A Z D)
 
 set_option linter.unusedSectionVars false in
-/-- The pointwise first curvature derivative is the sum of the connection
-insertion, differentiated Palatini, and fixed-background terms. -/
+
 theorem nablaRm_split
     (gBase g₀ : SmoothRiemannianMetric I M) (x : M)
     (D X Y Z : TangentSpace I x) :
@@ -299,25 +286,20 @@ private theorem sqrt_sq_mul3 {F a b c : ℝ}
     Real.sqrt_mul ha, Real.sqrt_mul hb]
   ring
 
-/-- Explicit coefficient for the connection-insertion part of `∇Rm`. -/
 noncomputable def curvConnC (Λ Kb : ℝ) : ℝ :=
   4 * (Real.sqrt Λ) ^ 3 * (3 / 2 * Λ ^ 3 * Λ) *
     (Λ ^ 2 * (riemannDiffC Λ Λ Λ + Real.sqrt Kb))
 
-/-- Explicit operator coefficient for the full first curvature jet. -/
 noncomputable def rmOneOpC (Λ Kb₀ Kb₁ : ℝ) : ℝ :=
   curvConnC Λ Kb₀ + (Real.sqrt Λ) ^ 5 * palatiniOneC Λ +
     (Real.sqrt Λ) ^ 5 * Kb₁
 
-/-- The full first-curvature operator coefficient is nonnegative when its
-comparability and first fixed-background input are nonnegative. -/
 theorem rmOneOpC_nonneg {Λ Kb₀ Kb₁ : ℝ}
     (hΛ : 0 ≤ Λ) (hKb₁ : 0 ≤ Kb₁) :
     0 ≤ rmOneOpC Λ Kb₀ Kb₁ := by
   unfold rmOneOpC curvConnC palatiniOneC riemannDiffC
   positivity
 
-/-- Explicit section-norm coefficient for the full first curvature jet. -/
 noncomputable def rmOneC (Λ Kb₀ Kb₁ : ℝ) : ℝ :=
   Real.sqrt ((Module.finrank ℝ E : ℝ) ^ 5) * rmOneOpC Λ Kb₀ Kb₁
 
@@ -681,11 +663,7 @@ private theorem jet1_norm_le
       rw [Real.sqrt_mul (by positivity), Real.sqrt_sq hK]
 
 set_option linter.unusedSectionVars false in
-/-- The first covariant Riemann-operator jet with both fixed-background caps supplied.
 
-This operator-norm face is the reusable input for rank-fixed curvature-action estimates;
-its constant depends only on `Λ` and the two supplied background caps, while the variable
-metric enters only through comparability and metric jets through order three. -/
 theorem unifRmOpOne_of
     (gBase g₀ : SmoothRiemannianMetric I M) {Λ : ℝ}
     (hΛ : 1 ≤ Λ)
@@ -848,7 +826,7 @@ private theorem unifRmOpOne
       hKb₀0 hKb₀ hKb₁0 hKb₁ hcomp hjet1 hjet2 hjet3
 
 set_option linter.unusedSectionVars false in
-/-- The first curvature jet with both fixed-background caps supplied. -/
+
 theorem unifRmJetOne_of
     (gBase g₀ : SmoothRiemannianMetric I M) {Λ Kb₀ Kb₁ : ℝ}
     (hΛ : 1 ≤ Λ)
@@ -884,8 +862,7 @@ theorem unifRmJetOne_of
     jet1_norm_le (I := I) (M := M) g₀ hOp0 hOp x
 
 set_option linter.unusedSectionVars false in
-/-- For every `Λ ≥ 1`, the first lowered-curvature jet has a class-uniform
-`g₀` fibre bound using metric jets only through order three. -/
+
 theorem unifRmJetOne
     (gBase g₀ : SmoothRiemannianMetric I M) {Λ : ℝ}
     (hΛ : 1 ≤ Λ)
@@ -913,7 +890,7 @@ private theorem sq_le_of_sqrt_le {a K : ℝ}
   nlinarith [Real.sq_sqrt ha, Real.sqrt_nonneg a]
 
 set_option linter.unusedSectionVars false in
-/-- The section-currency first curvature jet with both background caps supplied. -/
+
 theorem unifRmSecOne_of
     (gBase g₀ : SmoothRiemannianMetric I M) {Λ Kb₀ Kb₁ : ℝ}
     (hΛ : 1 ≤ Λ)
@@ -946,8 +923,7 @@ theorem unifRmSecOne_of
     hKb₀0 hKb₀ hKb₁0 hKb₁ hcomp hjet1 hjet2 hjet3 x
 
 set_option linter.unusedSectionVars false in
-/-- For every `Λ ≥ 1`, the class-uniform first curvature jet in the smooth
-section currency used by the short-time existence estimates. -/
+
 theorem unifRmSecOne
     (gBase g₀ : SmoothRiemannianMetric I M) {Λ : ℝ}
     (hΛ : 1 ≤ Λ)

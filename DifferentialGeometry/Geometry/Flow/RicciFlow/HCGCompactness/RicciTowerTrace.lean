@@ -7,14 +7,6 @@ import DifferentialGeometry.Tensor.RSTensor.MetricTrace.NormBound
 
 set_option autoImplicit false
 
-
-
-
-
-
-
-
-
 noncomputable section
 
 namespace DifferentialGeometry.PDE.RicciFlow
@@ -33,7 +25,6 @@ variable [T2Space M] [SigmaCompactSpace M] [IsManifold I ∞ M]
 variable [IsManifold I 1 M] [IsManifold I 2 M]
 
 set_option backward.isDefEq.respectTransparency false in
-
 
 omit [SigmaCompactSpace M] in
 theorem exists_ric_trace
@@ -70,8 +61,6 @@ theorem exists_ric_trace
       rw [← MultilinearSection.domDomCongr_trans]
       exact hout
 
-
-
 omit [SigmaCompactSpace M] in
 theorem iterRic_normSq_le
     (g : SmoothRiemannianMetric I M)
@@ -106,8 +95,6 @@ theorem iterRic_normSq_le
   exact htrace.trans_eq
     (congrArg (fun z => (Module.finrank Real E : Real) ^ ((2 + k) + 2) * z) hperm)
 
-
-
 omit [I.Boundaryless] in
 omit [SigmaCompactSpace M] in
 theorem nablaKRm_eq_iterCov
@@ -127,8 +114,6 @@ theorem nablaKRm_eq_iterCov
         simpa [SolutionOn.family, SolutionFamily.connection, metricCov, ih] using hleft
       exact Tensor0SBundle.totalNabla0SRealizes_unique (I := I) hleft'
         (iterCov_realizes (I := I) (S.base.metric t) (S.base.rm04 t) k)
-
-
 
 theorem ricTower_normSq_le
     {D : RealTimeInterval}

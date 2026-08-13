@@ -2,14 +2,6 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.C4.StepCAtomP
 
 set_option autoImplicit false
 
-
-
-
-
-
-
-
-
 noncomputable section
 
 universe u uE uH uι
@@ -27,8 +19,6 @@ variable {E : Type uE} [NormedAddCommGroup E] [InnerProductSpace Real E]
 variable [FiniteDimensional Real E] [NeZero (Module.finrank Real E)] [CompleteSpace E]
 variable {H : Type uH} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H} [I.Boundaryless]
-
-
 
 def HasAtomWeightLim
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
@@ -54,8 +44,6 @@ def HasAtomWeightLim
     (∀ k, ContDiffOn Real (∞ : WithTop ℕ∞) (weight k) U) ∧
     ContDiffOn Real (∞ : WithTop ℕ∞) weightInf U ∧
     MapCInfConvOnCompacts U weight weightInf
-
-
 
 theorem HasAtomWeightLim.of_atoms
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
@@ -91,8 +79,6 @@ theorem HasAtomWeightLim.of_atoms
   exact atomWeight_of_atoms (I := I) hD P L hre pb r hr hgp beta U hU hcoverU
     aInf hdead hatom hatomSmooth hatomInfSmooth
 
-
-
 theorem HasAtomWeightLim.subseq
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
     {hd : InjRadiusDecayInput (I := I) X} {D : Real} {hD : 0 < D}
@@ -117,8 +103,6 @@ theorem HasAtomWeightLim.subseq
   · intro k
     simpa only [seqAtomChart_subseq] using hweightSmooth (ψ k)
   · simpa only [seqAtomChart_subseq] using hweightConv.comp_subseq hψ
-
-
 
 theorem HasAtomWeightLim.weight_ne_tail
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
@@ -147,8 +131,6 @@ theorem HasAtomWeightLim.weight_ne_tail
   exact
     ((tendsto_pi_nhds.mp (tendsto_of_cInf hweightConv hz)) gamma).eventually_ne
       hweight
-
-
 
 theorem HasAtomWeightLim.weight_data_of_innerCover
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
@@ -253,8 +235,6 @@ theorem HasAtomWeightLim.weight_data_of_innerCover
   · intro _z _hz _gamma _hweight
     exact Set.mem_univ _
 
-
-
 theorem HasAtomWeightLim.weight_data
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
     {hd : InjRadiusDecayInput (I := I) X} {D : Real} {hD : 0 < D}
@@ -300,8 +280,6 @@ theorem HasAtomWeightLim.weight_data
     apply hcover
     simpa only [NetLimitData.hatSourceBall] using hmap hz
   exact hlim.weight_data_of_innerCover hgp hcoverU
-
-
 
 theorem HasAtomWeightLim.binter_of_weight
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
@@ -357,8 +335,6 @@ theorem HasAtomWeightLim.binter_of_weight
     (seqAtom_mem_hat hd hD P L pb r k hgpK gamma (by
       simpa only [seqAtomChart] using
         (num_ne_of_cut_ne (num_ne_of_raw_ne hweightK))))
-
-
 
 theorem exists_atom_lim
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
@@ -425,8 +401,6 @@ theorem exists_atom_lim
   simpa only [HasAtomWeightLim] using
     existsAtomWeightH6 (I := I) metricInput hD P L hre pb r hr hgp rho
       beta U hU hovlJ hUmetric hUexp hmapsJ hVmetric hVexp hbetaU
-
-
 
 theorem exists_atom_fin
     {ι : Type uι} (s : Finset ι)
@@ -596,9 +570,6 @@ theorem exists_atom_fin
         have hsub := hprevInf.subseq hψ₁
         simpa only [ψ, Function.comp_apply, L₀, NetLimitData.subseq] using hsub
 
-/-- The checked output of the fixed-source atom/weight extraction for one
-coherent family of normal charts, separated from the particular subsequence on
-which it was obtained. -/
 def HasAtomWeightLimOn
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
     (chart : NormalChartFamily (I := I) X)
@@ -625,8 +596,6 @@ def HasAtomWeightLimOn
     ContDiffOn Real (∞ : WithTop ℕ∞) weightInf U ∧
     MapCInfConvOnCompacts U weight weightInf
 
-/-- Packages prescribed distance-atom limits for a coherent normal-chart
-family without a legacy exponential-radius premise. -/
 theorem HasAtomWeightLimOn.of_raw
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
     (chart : NormalChartFamily (I := I) X)
@@ -661,8 +630,6 @@ theorem HasAtomWeightLimOn.of_raw
   exact atomWeightOn_raw (I := I) chart hD P L hre pb r hr beta U hU
     hcoverU aInf hdead hatom hatomSmooth hatomInfSmooth
 
-/-- Compatibility form of `HasAtomWeightLimOn.of_raw` retaining the legacy
-normal-radius premise. -/
 theorem HasAtomWeightLimOn.of_atoms
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
     (chart : NormalChartFamily (I := I) X)
@@ -698,8 +665,6 @@ theorem HasAtomWeightLimOn.of_atoms
   exact HasAtomWeightLimOn.of_raw (I := I) chart hD P L hre pb r hr beta U hU
     hcoverU aInf hdead hatom hatomSmooth hatomInfSmooth
 
-/-- Atom and normalized-weight limits for a coherent normal-chart family
-persist along every further strict subsequence. -/
 theorem HasAtomWeightLimOn.subseq
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
     {chart : NormalChartFamily (I := I) X}
@@ -726,8 +691,6 @@ theorem HasAtomWeightLimOn.subseq
     simpa only [seqAtomOn_subseq] using hweightSmooth (ψ k)
   · simpa only [seqAtomOn_subseq] using hweightConv.comp_subseq hψ
 
-/-- A nonzero normalized limit weight for a coherent normal-chart family
-remains nonzero along a common tail of the extracting sequence. -/
 theorem HasAtomWeightLimOn.weight_ne_tail
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
     {chart : NormalChartFamily (I := I) X}
@@ -758,8 +721,6 @@ theorem HasAtomWeightLimOn.weight_ne_tail
     ((tendsto_pi_nhds.mp (tendsto_of_cInf hweightConv hz)) gamma).eventually_ne
       hweight
 
-/-- The normalized limit weights retain their pointwise finite weight data
-from the direct inner-cover hypothesis, without a legacy radius premise. -/
 theorem HasAtomWeightLimOn.weight_data_raw
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
     {chart : NormalChartFamily (I := I) X}
@@ -865,8 +826,6 @@ theorem HasAtomWeightLimOn.weight_data_raw
   · intro _z _hz _gamma _hweight
     exact Set.mem_univ _
 
-/-- Compatibility form of `HasAtomWeightLimOn.weight_data_raw` retaining the
-legacy normal-radius premise. -/
 theorem HasAtomWeightLimOn.weight_data_of_innerCover
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
     {chart : NormalChartFamily (I := I) X}
@@ -894,8 +853,6 @@ theorem HasAtomWeightLimOn.weight_data_of_innerCover
           (baseIndex hd hre pb hr)) z gamma) := by
   exact hlim.weight_data_raw hcoverU
 
-/-- Projection of normalized limit-weight data for a coherent normal-chart
-family whose images lie in the fixed closed source ball. -/
 theorem HasAtomWeightLimOn.weight_data
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
     {chart : NormalChartFamily (I := I) X}
@@ -944,9 +901,6 @@ theorem HasAtomWeightLimOn.weight_data
     simpa only [NetLimitData.hatSourceBall] using hmap hz
   exact hlim.weight_data_of_innerCover hgp hcoverU
 
-/-- A nonzero limit weight at a point in a coherent source chart forces
-eventual interaction between the source hat containing that point and the
-corresponding target hat. -/
 theorem HasAtomWeightLimOn.binter_of_weight
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
     {chart : NormalChartFamily (I := I) X}
@@ -1006,7 +960,5 @@ theorem HasAtomWeightLimOn.binter_of_weight
       simpa only [seqAtomOn] using
         (num_ne_of_cut_ne (num_ne_of_raw_ne hweightK))))
 
-
 end HCGCompactness
 end DifferentialGeometry
-

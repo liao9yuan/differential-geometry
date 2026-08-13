@@ -7,15 +7,6 @@ set_option autoImplicit false
 set_option linter.style.longLine false
 set_option linter.unusedSectionVars false
 
-/-!
-# MSM135 Chapter 4: concrete Step-C atoms
-
-This file specializes the intrinsic quadratic normal bump to the radii used by
-the strict inner cover.  It then packages the live ordered-net centers as a
-finite atom family and feeds that family to the generic pointwise Step-C weight
-producer.
--/
-
 noncomputable section
 
 universe u uE uH
@@ -37,10 +28,6 @@ variable [FiniteDimensional Real E] [NeZero (Module.finrank Real E)] [CompleteSp
 variable {H : Type uH} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H} [I.Boundaryless]
 
-/-! ## The fixed scalar bump -/
-
-/-- The scalar bump used by the Step-C atoms: it is one through quadratic
-radius `(3 * λ)^2` and supported through quadratic radius `(7 * λ / 2)^2`. -/
 noncomputable def stepCBump (lam : Real) (hlam : 0 < lam) : ContDiffBump (0 : Real) where
   rIn := (3 * lam) ^ 2
   rOut := (7 * lam / 2) ^ 2
@@ -58,15 +45,11 @@ noncomputable def stepCBump (lam : Real) (hlam : 0 < lam) : ContDiffBump (0 : Re
   rw [stepCBump_rOut, Real.sqrt_sq_eq_abs, abs_of_pos]
   positivity
 
-/-- The atom support radius lies strictly inside the `4 * λ` hat radius. -/
 theorem stepCBump_out_lt (lam : Real) (hlam : 0 < lam) :
     Real.sqrt (stepCBump lam hlam).rOut < 4 * lam := by
   rw [stepCBump_sqrt lam hlam]
   linarith
 
-/-! ## One intrinsic atom -/
-
-/-- The intrinsic Step-C atom centered at `p`. -/
 noncomputable def stepCAtom
     (Y : PointedRiemannianManifold.{u, uE, uH} (I := I)) (p : Y.M)
     (lam : Real) (hlam : 0 < lam) : Y.M → Real :=
@@ -77,7 +60,6 @@ noncomputable def stepCAtom
   letI : T2Space (TangentBundle I Y.M) := Y.t2TangentBundle
   quadNormal Y.metric p (stepCBump lam hlam)
 
-/-- A concrete Step-C atom takes values in `[0, 1]`. -/
 theorem stepCAtom_Icc
     (Y : PointedRiemannianManifold.{u, uE, uH} (I := I)) (p : Y.M)
     (lam : Real) (hlam : 0 < lam) (q : Y.M) :
@@ -89,15 +71,12 @@ theorem stepCAtom_Icc
   letI : T2Space (TangentBundle I Y.M) := Y.t2TangentBundle
   exact quadNormal_mem_Icc Y.metric p (stepCBump lam hlam) q
 
-/-- A concrete Step-C atom is nonnegative. -/
 theorem stepCAtom_nonneg
     (Y : PointedRiemannianManifold.{u, uE, uH} (I := I)) (p : Y.M)
     (lam : Real) (hlam : 0 < lam) (q : Y.M) :
     0 ≤ stepCAtom Y p lam hlam q :=
   (stepCAtom_Icc Y p lam hlam q).1
 
-/-- A nonzero Step-C atom lies in the four-lambda metric ball around its
-center, provided that ball stays inside the intrinsic normal radius. -/
 theorem stepCAtom_mem_ball
     (Y : PointedRiemannianManifold.{u, uE, uH} (I := I))
     (P : ProperMetricOn (I := I) Y) {p q : Y.M}
@@ -145,8 +124,6 @@ theorem stepCAtom_mem_ball
   rw [Metric.mem_ball, dist_comm, hdist_eq]
   exact hsqrt_lt
 
-/-- Inside a four-lambda intrinsic normal radius, a Step-C atom is exactly the
-fixed scalar bump of the squared realized distance from its center. -/
 theorem stepCAtom_eq_dist
     (Y : PointedRiemannianManifold.{u, uE, uH} (I := I))
     (P : ProperMetricOn (I := I) Y) {p q : Y.M}
@@ -219,14 +196,8 @@ theorem stepCAtom_eq_dist
       simpa only [Metric.mem_ball, dist_comm] using hmem
     exact hlocal hdist
 
-/-! ## Ordered-net atom families -/
-
 variable {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
 
-/-- The Step-C atom in one sequence member.  A dead ordered-net slot gives the
-zero function; a live slot is the fixed scalar bump of squared intrinsic
-distance from its center.  Normal-coordinate hypotheses are needed only to
-prove smoothness, not to define the atom. -/
 noncomputable def seqAtom (hd : InjRadiusDecayInput (I := I) X) {D : Real}
     (hD : 0 < D) (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k))
     (L : NetLimitData hd D P) (pb : hd.PackingBound D) (r : Real) (k : Nat)
@@ -239,7 +210,6 @@ noncomputable def seqAtom (hd : InjRadiusDecayInput (I := I) X) {D : Real}
         stepCBump (L.lamInf (gamma : Nat))
           (hd.lambda_pos hD (L.rInf (gamma : Nat))) ((dist c q) ^ 2)
 
-/-- Refining the net-limit data only reindexes the stage of each Step-C atom. -/
 @[simp] theorem seqAtom_subseq (hd : InjRadiusDecayInput (I := I) X) {D : Real}
     (hD : 0 < D) (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k))
     (L : NetLimitData hd D P) (pb : hd.PackingBound D) (r : Real)
@@ -274,9 +244,6 @@ theorem seqAtom_some (hd : InjRadiusDecayInput (I := I) X) {D : Real}
   letI : MetricSpace (X.obj (L.φ k)).M := (P (L.φ k)).ms
   simp [seqAtom, hc]
 
-/-- Every ordered-net atom is globally smooth when the fixed hat scale stays
-inside the intrinsic normal radius.  A dead slot is the zero function; a live
-slot is the globally smooth quadratic normal bump. -/
 theorem seqAtom_contMDiff (hd : InjRadiusDecayInput (I := I) X) {D : Real}
     (hD : 0 < D) (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k))
     (L : NetLimitData hd D P) (pb : hd.PackingBound D) (r : Real) (k : Nat)
@@ -318,7 +285,6 @@ theorem seqAtom_contMDiff (hd : InjRadiusDecayInput (I := I) X) {D : Real}
         quadNormal_contMDiff (X.obj (L.φ k)).metric c
           (stepCBump lam hlam) ((stepCBump_out_lt lam hlam).trans hR)
 
-/-- Every sequence atom takes values in `[0, 1]`. -/
 theorem seqAtom_Icc (hd : InjRadiusDecayInput (I := I) X) {D : Real}
     (hD : 0 < D) (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k))
     (L : NetLimitData hd D P) (pb : hd.PackingBound D) (r : Real) (k : Nat)
@@ -331,7 +297,6 @@ theorem seqAtom_Icc (hd : InjRadiusDecayInput (I := I) X) {D : Real}
       rw [seqAtom_some hd hD P L pb r k gamma hc]
       exact ⟨(stepCBump _ _).nonneg, (stepCBump _ _).le_one⟩
 
-/-- Every sequence atom is nonnegative. -/
 theorem seqAtom_nonneg (hd : InjRadiusDecayInput (I := I) X) {D : Real}
     (hD : 0 < D) (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k))
     (L : NetLimitData hd D P) (pb : hd.PackingBound D) (r : Real) (k : Nat)
@@ -339,8 +304,6 @@ theorem seqAtom_nonneg (hd : InjRadiusDecayInput (I := I) X) {D : Real}
     0 ≤ seqAtom hd hD P L pb r k gamma q :=
   (seqAtom_Icc hd hD P L pb r k gamma q).1
 
-/-- A live distance atom equals one on its associated strict inner ball,
-without any normal-chart radius hypothesis. -/
 theorem seqAtom_one_raw (hd : InjRadiusDecayInput (I := I) X) {D : Real}
     (hD : 0 < D) (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k))
     (L : NetLimitData hd D P) (pb : hd.PackingBound D) (r : Real) (k : Nat)
@@ -362,8 +325,6 @@ theorem seqAtom_one_raw (hd : InjRadiusDecayInput (I := I) X) {D : Real}
         abs_of_nonneg (sq_nonneg (dist c q)), stepCBump_rIn]
       exact (sq_le_sq₀ dist_nonneg (by positivity)).2 hdist_lt.le
 
-/-- Compatibility form of `seqAtom_one_raw` retaining the legacy normal-radius
-argument. -/
 theorem seqAtom_one (hd : InjRadiusDecayInput (I := I) X) {D : Real}
     (hD : 0 < D) (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k))
     (L : NetLimitData hd D P) (pb : hd.PackingBound D) (r : Real) (k : Nat)
@@ -373,8 +334,6 @@ theorem seqAtom_one (hd : InjRadiusDecayInput (I := I) X) {D : Real}
     seqAtom hd hD P L pb r k gamma q = 1 :=
   seqAtom_one_raw hd hD P L pb r k gamma hq
 
-/-- A nonzero distance atom can occur only in its associated `4 * λ` hat,
-without any normal-chart radius hypothesis. -/
 theorem seqAtom_mem_hat_raw (hd : InjRadiusDecayInput (I := I) X) {D : Real}
     (hD : 0 < D) (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k))
     (L : NetLimitData hd D P) (pb : hd.PackingBound D) (r : Real) (k : Nat)
@@ -400,8 +359,6 @@ theorem seqAtom_mem_hat_raw (hd : InjRadiusDecayInput (I := I) X) {D : Real}
       have hdist0 : 0 ≤ dist c q := dist_nonneg
       nlinarith
 
-/-- Compatibility form of `seqAtom_mem_hat_raw` retaining the legacy
-normal-radius argument. -/
 theorem seqAtom_mem_hat (hd : InjRadiusDecayInput (I := I) X) {D : Real}
     (hD : 0 < D) (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k))
     (L : NetLimitData hd D P) (pb : hd.PackingBound D) (r : Real) (k : Nat)
@@ -411,10 +368,6 @@ theorem seqAtom_mem_hat (hd : InjRadiusDecayInput (I := I) X) {D : Real}
     q ∈ L.hatBall hd D P pb r k gamma :=
   seqAtom_mem_hat_raw hd hD P L pb r k gamma hq
 
-/-! ## Pointwise normalized data -/
-
-/-- A strict-inner-ball cover produces the exact pointwise weight package
-directly from the distance atoms, without a normal-chart radius hypothesis. -/
 theorem seqWeights_data_raw (hd : InjRadiusDecayInput (I := I) X) {D : Real}
     (hD : 0 < D) (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k))
     (L : NetLimitData hd D P) (pb : hd.PackingBound D) (r : Real) (k : Nat)
@@ -441,9 +394,6 @@ theorem seqWeights_data_raw (hd : InjRadiusDecayInput (I := I) X) {D : Real}
   · intro x _hx gamma hne
     exact seqAtom_mem_hat_raw hd hD P L pb r k gamma hne
 
-/-- A strict-inner-ball cover produces the exact pointwise weight package used
-by the Step-C average.  The explicitly chosen slot `i0` supplies the base kill
-factor; active normalized weights remain subordinate to the `4 * λ` hats. -/
 theorem seqWeights_data (hd : InjRadiusDecayInput (I := I) X) {D : Real}
     (hD : 0 < D) (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k))
     (L : NetLimitData hd D P) (pb : hd.PackingBound D) (r : Real) (k : Nat)
@@ -457,8 +407,6 @@ theorem seqWeights_data (hd : InjRadiusDecayInput (I := I) X) {D : Real}
           (seqAtom hd hD P L pb r k) i0)) := by
   exact seqWeights_data_raw hd hD P L pb r k i0 hcover
 
-/-- For every fixed source radius, the intrinsic Step-C atoms eventually give
-the normalized weight package on the full frozen source ball. -/
 theorem seqWeights_ev (hd : InjRadiusDecayInput (I := I) X) {D : Real}
     (hD : 0 < D) (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k))
     (L : NetLimitData hd D P) (hre : hd.RealizesEdist) (pb : hd.PackingBound D)
@@ -493,8 +441,6 @@ private theorem packA_pos (hd : InjRadiusDecayInput (I := I) X) {D : Real}
       exact False.elim (hxy (hx.trans hy.symm)))
   simpa only [Finset.card_singleton, Nat.succ_le_iff] using hcard
 
-/-- The canonical Step-C base slot.  Nonnegative source radii force the packing
-bound to contain slot zero because the basepoint singleton must be counted. -/
 noncomputable def baseIndex (hd : InjRadiusDecayInput (I := I) X) {D : Real}
     (hre : hd.RealizesEdist) (pb : hd.PackingBound D) {r : Real} (hr : 0 ≤ r) :
     Fin (pb.A r) :=
@@ -504,8 +450,6 @@ noncomputable def baseIndex (hd : InjRadiusDecayInput (I := I) X) {D : Real}
     (hre : hd.RealizesEdist) (pb : hd.PackingBound D) {r : Real} (hr : 0 ≤ r) :
     (baseIndex hd hre pb hr : Nat) = 0 := rfl
 
-/-- The zeroth distance atom is one at the pointed basepoint without a
-normal-radius premise. -/
 theorem seqAtom_base_raw (hd : InjRadiusDecayInput (I := I) X) {D : Real}
     (hD : 0 < D) (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k))
     (L : NetLimitData hd D P) (hre : hd.RealizesEdist) (pb : hd.PackingBound D)
@@ -518,8 +462,6 @@ theorem seqAtom_base_raw (hd : InjRadiusDecayInput (I := I) X) {D : Real}
     dist_self]
   exact mul_pos (by norm_num) (hd.lambda_pos hD (L.rInf 0))
 
-/-- Compatibility form of `seqAtom_base_raw` retaining the legacy radius
-premise. -/
 theorem seqAtom_base (hd : InjRadiusDecayInput (I := I) X) {D : Real}
     (hD : 0 < D) (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k))
     (L : NetLimitData hd D P) (hre : hd.RealizesEdist) (pb : hd.PackingBound D)
@@ -529,8 +471,6 @@ theorem seqAtom_base (hd : InjRadiusDecayInput (I := I) X) {D : Real}
         (X.obj (L.φ k)).basepoint = 1 :=
   seqAtom_base_raw hd hD P L hre pb hr k
 
-/-- At the pointed basepoint the canonical cut-and-normalize construction is
-the Kronecker delta at slot zero, without a normal-radius premise. -/
 theorem seqWeights_base_raw (hd : InjRadiusDecayInput (I := I) X) {D : Real}
     (hD : 0 < D) (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k))
     (L : NetLimitData hd D P) (hre : hd.RealizesEdist) (pb : hd.PackingBound D)
@@ -550,8 +490,6 @@ theorem seqWeights_base_raw (hd : InjRadiusDecayInput (I := I) X) {D : Real}
   rw [hdelta.1, hbase]
   exact one_ne_zero
 
-/-- Compatibility form of `seqWeights_base_raw` retaining the legacy radius
-premise. -/
 theorem seqWeights_base (hd : InjRadiusDecayInput (I := I) X) {D : Real}
     (hD : 0 < D) (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k))
     (L : NetLimitData hd D P) (hre : hd.RealizesEdist) (pb : hd.PackingBound D)
@@ -564,8 +502,6 @@ theorem seqWeights_base (hd : InjRadiusDecayInput (I := I) X) {D : Real}
       ∀ j, j ≠ i0 → rawWeights num (X.obj (L.φ k)).basepoint j = 0 :=
   seqWeights_base_raw hd hD P L hre pb hr k
 
-/-- The eventual source-ball package specialized to the canonical zeroth base
-slot. -/
 theorem seqWeights_zero_ev (hd : InjRadiusDecayInput (I := I) X) {D : Real}
     (hD : 0 < D) (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k))
     (L : NetLimitData hd D P) (hre : hd.RealizesEdist) (pb : hd.PackingBound D)
@@ -580,4 +516,3 @@ theorem seqWeights_zero_ev (hd : InjRadiusDecayInput (I := I) X) {D : Real}
 
 end HCGCompactness
 end DifferentialGeometry
-

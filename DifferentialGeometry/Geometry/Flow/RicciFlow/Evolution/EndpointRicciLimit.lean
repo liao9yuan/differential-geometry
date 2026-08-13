@@ -5,17 +5,6 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.RicciFromJets
 import DifferentialGeometry.Geometry.Metric.ChartGram
 import Mathlib.Order.Filter.AtTopBot.CountablyGenerated
 
-
-
-
-
-
-
-
-
-
-
-
 noncomputable section
 
 namespace DifferentialGeometry.PDE.RicciFlow
@@ -36,9 +25,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
 variable [IsManifold I ∞ M] [IsManifold I 1 M] [IsManifold I 2 M]
 variable [SigmaCompactSpace M] [T2Space M] [CompactSpace M]
     [BoundarylessManifold I M]
-
-
-
 
 theorem ricci_tendsto_left
     {alpha omega : Real} {hAlphaOmega : alpha < omega}

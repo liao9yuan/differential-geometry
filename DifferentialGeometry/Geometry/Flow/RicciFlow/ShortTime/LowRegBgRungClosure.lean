@@ -2,15 +2,6 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.LowRegBgAdaptedSol
 import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.LowRegBgGalerkinIdent
 import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.LowRegBgFatouIdent
 
-/-!
-# Closing the fixed-background bottom energy rungs
-
-This module invokes the exact background rung-three, rung-four, and rung-five
-certificates stored in one adapted solve on one projected trajectory.  The
-Sobolev spaces, spectral projections, modes, and Galerkin energies remain on
-the state metric `g₀`; only the DeTurck nonlinearity uses `g_bg`.
--/
-
 noncomputable section
 
 open Bundle Manifold MeasureTheory Set Filter
@@ -37,10 +28,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
   [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
   [T2Space M] [SigmaCompactSpace M]
 
-/-- The proof package carried by one fixed-background projected trajectory
-after the bottom ladder has closed through order five.  It retains the exact
-mode convergence, continuity, ODE, zero-data, and fifth-energy certificates
-needed by every later higher rung. -/
 def IsRung5PathBg (g₀ g_bg : SmoothRiemannianMetric I M)
     (K : LowRegBoundData) {Rcap T : ℝ} {hT : 0 < T} {hT1 : T ≤ 1}
     (sol : MaxRegSolutionSpace (I := I) (M := M) (g := g₀) (r := 0) (s := 2)
@@ -75,9 +62,6 @@ def IsRung5PathBg (g₀ g_bg : SmoothRiemannianMetric I M)
         (eigenIdxFinset (I := I) (M := M) g₀ N)
         (lowregProjMode (I := I) (M := M) g₀ fseq N) 5 t ≤ Φ
 
-/-- One adapted fixed-background solve carries a projected trajectory with an
-`N,t`-uniform fifth-energy bound.  The three rung continuations are read from
-the single gate package stored in `hlo`; no rung producer is reselected. -/
 theorem lowregRung5PathAtBg
     (g₀ g_bg : SmoothRiemannianMetric I M) (K : LowRegBoundData)
     {Rcap Ctop₂ Kr2 Kr1 Kcap T : ℝ}

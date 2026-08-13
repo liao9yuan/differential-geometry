@@ -8,15 +8,6 @@ set_option autoImplicit false
 set_option linter.style.longLine false
 set_option linter.unusedSectionVars false
 
-/-!
-# Bounded Geometry Inputs
-
-The records in this file state the curvature and curvature-derivative
-assumptions used by MSM135 compactness theorems.  The pointwise bounds are
-defined from the canonical metric Riemann tensor and its iterated covariant
-derivatives, not as opaque placeholders.
--/
-
 noncomputable section
 
 universe u uE uH
@@ -36,9 +27,6 @@ section FixedMetric
 variable {M : Type u} [TopologicalSpace M] [ChartedSpace H M]
 variable [IsManifold I ∞ M] [SigmaCompactSpace M] [T2Space M]
 
-/-- One covariant-derivative step for the metric Riemann tensor.  The input has
-valence `a + 4`, and the derivative has valence `a + 5`, with derivative slots
-placed first. -/
 noncomputable def curvCovDerivStep
     (g : SmoothRiemannianMetric I M) (a : Nat)
     (A :
@@ -65,8 +53,6 @@ noncomputable def curvCovDerivStep
       Tensor0SBundle.totalNabla0S (𝕜 := Real) (E := E) (H := H)
         (I := I) (M := M) (a + 4) cov A hreg
 
-/-- The `k`-fold covariant derivative of the canonical lowered Riemann tensor
-of `g`.  The result has covariant valence `k + 4`. -/
 noncomputable def curvCovDeriv
     (g : SmoothRiemannianMetric I M) :
     (k : Nat) ->
@@ -89,7 +75,6 @@ noncomputable def curvCovDeriv
         simpa [Nat.add_assoc, Nat.add_comm, Nat.add_left_comm] using
           curvCovDerivStep (I := I) g k A)
 
-/-- Successor step of `curvCovDeriv`. -/
 theorem curvCovDeriv_succ
     (g : SmoothRiemannianMetric I M) (k : Nat) :
     curvCovDeriv (I := I) (M := M) g (k + 1) =
@@ -102,8 +87,6 @@ section PointwiseCurvature
 variable [InnerProductSpace Real E] [NeZero (Module.finrank Real E)]
   [I.Boundaryless]
 
-/-- The zeroth HCG curvature derivative is the metric lowering of the
-pointwise Riemann operator. -/
 theorem curvZero_apply
     (g : SmoothRiemannianMetric I M) (x : M)
     (X Y Z W : TangentSpace I x) :
@@ -137,8 +120,6 @@ theorem curvZero_apply
       (I := I) (M := M) g) x X Y Z]
   rfl
 
-/-- The first HCG curvature derivative is the metric lowering of the
-pointwise covariant derivative of the curvature operator. -/
 theorem curvOne_apply
     (g : SmoothRiemannianMetric I M) (x : M)
     (D X Y Z W : TangentSpace I x) :
@@ -155,19 +136,15 @@ theorem curvOne_apply
 
 end PointwiseCurvature
 
-/-- Squared norm `|nabla^k Rm(g)|_g^2` at a point. -/
 noncomputable def curvDerivNormSq
     (k : Nat) (g : SmoothRiemannianMetric I M) (x : M) : Real :=
   Tensor0SBundle.normSq0S (I := I) g x (k + 4)
     (curvCovDeriv (I := I) (M := M) g k x)
 
-/-- Norm `|nabla^k Rm(g)|_g` at a point. -/
 noncomputable def curvDerivNorm
     (k : Nat) (g : SmoothRiemannianMetric I M) (x : M) : Real :=
   Real.sqrt (curvDerivNormSq (I := I) (M := M) k g x)
 
-/-- Evaluation of an iterated curvature derivative is controlled by its
-pointwise metric norm. -/
 theorem curv_apply_le
     (g : SmoothRiemannianMetric I M) (k : Nat) (x : M)
     (v : Fin (k + 4) -> TangentSpace I x) :
@@ -180,7 +157,6 @@ theorem curv_apply_le
 
 end FixedMetric
 
-/-- Global bound `|nabla^k Rm| <= C` for one pointed metric object. -/
 def HasCurvDerivBound
     (X : PointedRiemannianManifold.{u, uE, uH} (I := I)) (k : Nat)
     (C : Real) : Prop :=
@@ -193,7 +169,6 @@ def HasCurvDerivBound
 
 namespace HasCurvDerivBound
 
-/-- Cancel a nonnegative factor from a quadratic estimate. -/
 private theorem sqrt_le_of_sq_le_mul {q A : Real}
     (hq : 0 <= q) (hA : 0 <= A) (h : q ^ 2 <= A * q) :
     q <= A := by
@@ -202,7 +177,6 @@ private theorem sqrt_le_of_sq_le_mul {q A : Real}
     exact hA
   · exact le_of_mul_le_mul_right (by simpa [pow_two] using h) hqpos
 
-/-- Nonnegativity of the metric quadratic form. -/
 private theorem inner_self_nonneg
     {M : Type u} [TopologicalSpace M] [ChartedSpace H M]
     [IsManifold I ∞ M] (g : SmoothRiemannianMetric I M)
@@ -213,8 +187,6 @@ private theorem inner_self_nonneg
     simp
   · exact le_of_lt (g.pos x v hv)
 
-/-- A global curvature-derivative norm bound controls evaluation on arbitrary
-tangent vectors. -/
 theorem apply_le
     (X : PointedRiemannianManifold.{u, uE, uH} (I := I))
     {k : Nat} {C : Real}
@@ -250,8 +222,6 @@ section PointwiseCurvature
 variable [InnerProductSpace Real E] [NeZero (Module.finrank Real E)]
   [I.Boundaryless]
 
-/-- A zeroth curvature-derivative bound controls the metric length of the
-pointwise Riemann operator. -/
 theorem riemannOp_le
     (P : PointedRiemannianManifold.{u, uE, uH} (I := I))
     {C : Real} (hP : HasCurvDerivBound (I := I) P 0 C) :
@@ -314,8 +284,6 @@ theorem riemannOp_le
     simpa [A, mul_assoc] using hbound
   exact sqrt_le_of_sq_le_mul (Real.sqrt_nonneg _) hA hquad
 
-/-- A first curvature-derivative bound controls the metric length of the
-pointwise vector-valued covariant derivative of the Riemann operator. -/
 theorem nablaRiemannOp_le
     (P : PointedRiemannianManifold.{u, uE, uH} (I := I))
     {C : Real} (hP : HasCurvDerivBound (I := I) P 1 C) :
@@ -383,8 +351,6 @@ end PointwiseCurvature
 
 end HasCurvDerivBound
 
-/-- A zeroth-order curvature-derivative bound supplies the global Rm04 bound
-used by the local volume-comparison endpoint. -/
 theorem rm04Bound_of_curv0
     (X : PointedRiemannianManifold.{u, uE, uH} (I := I)) {C : Real}
     (hX : HasCurvDerivBound (I := I) X 0 C) :
@@ -405,16 +371,12 @@ theorem rm04Bound_of_curv0
     HasCurvDerivBound, curvDerivNorm, curvDerivNormSq, curvCovDeriv,
     DifferentialGeometry.Integral.Connection.metricRm04_apply] using hX x
 
-/-- Bounded geometry for one pointed metric: all covariant derivatives of
-curvature have global bounds. -/
 structure BoundedGeometry
     (X : PointedRiemannianManifold.{u, uE, uH} (I := I)) where
   C : Nat -> Real
   nonneg : forall k : Nat, 0 <= C k
   bound : forall k : Nat, HasCurvDerivBound (I := I) X k (C k)
 
-/-- Bounded geometry supplies the zeroth-order Rm04 bound consumed by the
-volume-comparison endpoint. -/
 theorem rm04Bound_of_geom
     {X : PointedRiemannianManifold.{u, uE, uH} (I := I)}
     (hX : BoundedGeometry (I := I) X) :
@@ -427,8 +389,6 @@ theorem rm04Bound_of_geom
       (I := I) (M := X.M) X.metric (hX.C 0) :=
   rm04Bound_of_curv0 (I := I) X (hX.bound 0)
 
-/-- Uniform bounded geometry for a pointed metric sequence, matching MSM135
-Definition 3.8. -/
 structure SeqBoundedGeometry
     (X : PointedRiemannianSeq.{u, uE, uH} (I := I)) where
   C : Nat -> Real
@@ -437,7 +397,6 @@ structure SeqBoundedGeometry
 
 namespace SeqBoundedGeometry
 
-/-- Reindex uniform bounded geometry along a subsequence. -/
 def subseq
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
     (hX : SeqBoundedGeometry (I := I) X) (f : Nat -> Nat) :
@@ -450,8 +409,6 @@ def subseq
 
 end SeqBoundedGeometry
 
-/-- Uniform bounded geometry supplies the time-slice Rm04 bound for each
-sequence member. -/
 theorem rm04Bound_of_seq
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
     (hX : SeqBoundedGeometry (I := I) X) (i : Nat) :
@@ -464,16 +421,12 @@ theorem rm04Bound_of_seq
       (I := I) (M := (X.obj i).M) (X.obj i).metric (hX.C 0) :=
   rm04Bound_of_curv0 (I := I) (X.obj i) (hX.bound i 0)
 
-/-- Global spacetime zeroth-order curvature bound for one pointed flow. -/
 def HasSpacetimeCurvBound
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (F : PointedFlowData.{u, uE, uH} (I := I) D) (C : Real) : Prop :=
   forall t : Real, t ∈ D.carrier ->
     forall x : F.M, F.rmNormSq (I := I) t x <= C
 
-/-- Global spacetime family of spatial curvature-derivative bounds for one
-pointed flow.  At each time, this uses the Levi-Civita connection of the time
-slice metric. -/
 def HasSpacetimeCurvDerivBound
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (F : PointedFlowData.{u, uE, uH} (I := I) D) (k : Nat) (C : Real) : Prop :=
@@ -488,17 +441,12 @@ def HasSpacetimeCurvDerivBound
   forall t : Real, t ∈ D.carrier ->
     forall x : F.M, curvDerivNorm (I := I) k (F.S.family.metric t) x <= C
 
-/-- Uniform zeroth-order curvature bound for a pointed flow sequence. -/
 structure SpacetimeCurvBound
     (X : PointedFlowSeq.{u, uE, uH} (I := I)) where
   C : Real
   nonneg : 0 <= C
   bound : forall i : Nat, HasSpacetimeCurvBound (I := I) (X.term i) C
 
-/-- Uniform spacetime curvature-derivative bounds for a pointed flow sequence.
-
-This is stronger than the zeroth-order curvature bound and is the explicit
-input used until Shi-type derivative estimates are formalized. -/
 structure FlowDerivBounds
     (X : PointedFlowSeq.{u, uE, uH} (I := I)) where
   C : Nat -> Real
@@ -507,8 +455,6 @@ structure FlowDerivBounds
 
 namespace FlowDerivBounds
 
-/-- Restrict uniform spacetime curvature-derivative bounds to one carrier
-time-slice. -/
 def at_time
     {X : PointedFlowSeq.{u, uE, uH} (I := I)}
     (h : FlowDerivBounds (I := I) X) {t : Real} (ht : t ∈ X.D.carrier) :
@@ -522,11 +468,6 @@ def at_time
 
 end FlowDerivBounds
 
-/-- Honest derivative input for solution compactness.
-
-The time-zero bounded-geometry field is explicit because the primitive
-spacetime derivative predicates must also be retained for the flow-upgrade
-producer. -/
 structure FlowDerivativeInput
     (X : PointedFlowSeq.{u, uE, uH} (I := I)) where
   spacetime : FlowDerivBounds (I := I) X
@@ -534,4 +475,3 @@ structure FlowDerivativeInput
 
 end HCGCompactness
 end DifferentialGeometry
-

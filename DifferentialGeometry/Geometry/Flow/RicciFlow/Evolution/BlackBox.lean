@@ -2,18 +2,6 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.Ricci
 
 set_option autoImplicit false
 
-
-
-
-
-
-
-
-
-
-
-
-
 noncomputable section
 
 namespace DifferentialGeometry.PDE.RicciFlow
@@ -36,12 +24,6 @@ section Components
 variable {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
 variable {u : Set M}
 
-
-
-
-
-
-
 structure InverseMetricTimeRegularityBlackBoxInFrameOn
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (gInv : Real -> DifferentialGeometry.Integral.Connection.InverseMetricComponents M Idx) where
@@ -51,8 +33,6 @@ structure InverseMetricTimeRegularityBlackBoxInFrameOn
   uniqueTimeDerivatives :
     forall t : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime D,
       UniqueDiffWithinAt Real D.carrier (t : Real)
-
-
 
 omit [SigmaCompactSpace M] in
 theorem inverseMetricEvolution_of_timeRegularityBlackBox
@@ -69,13 +49,6 @@ theorem inverseMetricEvolution_of_timeRegularityBlackBox
     (I := I) (u := Set.univ) S hS gInv hbb.gInvDt frame
     (hbb.inverseMetricDerivative.toLocal Set.univ) hinv hbb.uniqueTimeDerivatives
 
-
-
-
-
-
-
-
 structure ConnectionVariationBlackBoxInFrameOn
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -88,8 +61,6 @@ structure ConnectionVariationBlackBoxInFrameOn
       (I := I) S frame u metricCovDerivDt
   metricCovDerivRicciFlow :
     MetricCovDerivDerivativeIsRicciFlowInFrame metricCovDerivDt nablaRic
-
-
 
 omit [Fintype Idx] [DecidableEq Idx] in
 omit [SigmaCompactSpace M] in
@@ -107,8 +78,6 @@ theorem variableMetricConnectionDiffDerivative_of_blackBox
   variableMetricConnectionDiffDerivative_of_metricCovDeriv
     (I := I) S hS frame hframe hu hbb.metricCovDerivDt nablaRic
     hbb.metricCovDerivDerivative hbb.metricCovDerivRicciFlow
-
-
 
 omit [SigmaCompactSpace M] in
 theorem christoffelEvolution_of_blackBox
@@ -132,12 +101,6 @@ theorem christoffelEvolution_of_blackBox
     hbb.metricCovDerivDt nablaRic hmetricFrame
     hbb.metricCovDerivDerivative hbb.metricCovDerivRicciFlow
 
-
-
-
-
-
-
 structure RicciEvolutionTimeRegularityBlackBoxInFrameOn
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -151,8 +114,6 @@ structure RicciEvolutionTimeRegularityBlackBoxInFrameOn
   contractedCommutators :
     RicciContractedCommutatorsInFrame
       (I := I) S Rm04 gInv frame nabla2Ric
-
-
 
 omit [DecidableEq Idx] in
 omit [SigmaCompactSpace M] [T2Space M] in
@@ -169,11 +130,6 @@ theorem ricciEvolution_of_timeRegularityBlackBox
   ricciEvolution_of_variation_commutators
     (I := I) S Rm04 gInv frame hbb.nabla2Ric
     hbb.ricciVariation hbb.contractedCommutators
-
-
-
-
-
 
 structure Section62TimeRegularityBlackBoxInFrameOn
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}

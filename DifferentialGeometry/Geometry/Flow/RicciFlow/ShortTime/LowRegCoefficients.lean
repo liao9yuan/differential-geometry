@@ -3,14 +3,6 @@ import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.RHSFirstDerivati
 import DifferentialGeometry.Analysis.Spectral.Tensor.UniformChartBounds.GramInvUniformEigenvalueLowerBound
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.MetricPreconv
 
-
-
-
-
-
-
-
-
 namespace DifferentialGeometry.PDE.RicciFlow
 
 open scoped ContDiff Manifold Topology BigOperators
@@ -30,8 +22,6 @@ variable
       [IsManifold I ∞ M] [CompactSpace M] [I.Boundaryless]
       [T2Space M] [SigmaCompactSpace M]
 
-
-
 structure LowRegCoeff where
   ellMin : ℝ
   ellMax : ℝ
@@ -43,10 +33,6 @@ structure LowRegCoeff where
   rhsD1Bound : ℝ
   rhsLip : ℝ
   rhsD1Lip : ℝ
-
-
-
-
 
 structure IsLowRegCoeff {ι : Type*}
     (gBase : SmoothRiemannianMetric I M)
@@ -141,9 +127,6 @@ structure IsLowRegCoeff {ι : Type*}
                 (extChartAt I α b)| ≤
               D.rhsD1Lip * metricJet3DiffSup (I := I) (M := M)
                 (gSeq k₁) (gSeq k₂) α (extChartAt I α b)
-
-
-
 
 theorem exists_low_reg_coeff {ι : Type*}
     (gBase : SmoothRiemannianMetric I M)

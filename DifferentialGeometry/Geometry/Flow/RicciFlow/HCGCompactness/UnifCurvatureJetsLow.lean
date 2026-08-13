@@ -2,28 +2,6 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.UnifCurvature
 import DifferentialGeometry.Geometry.Curvature.PerturbedCurvatureOperatorBound
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.CovDerivConnDiffQuadraticBound
 
-/-!
-# Low-order class-uniform curvature and connection-difference bounds (brick E3)
-
-This file now has two scopes.
-
-* `unifConnDiffSup` and `unifCovConnDiffSup` are finite-order estimates for
-  arbitrary `Λ ≥ 1`.  They use the explicit Koszul estimates
-  `connDiff_gJet_le` and `covDerivConnDiff_gJet_le`, so no perturbative
-  `Λ < 2` gate remains.
-* `unifRicSup` and its bilinear face `unifRicBilin` still use the older
-  perturbative Ricci asset and therefore retain `Λ < 2`.
-
-In every case the constant is chosen before the class member `g₀`.  The two
-connection-difference constants are explicit functions of `Λ`; the Ricci
-constant is closed in `(Λ, gBase)`.
-
-The arbitrary-`Λ` order-zero curvature producer now lives in
-`UnifCurvatureJetBound.lean`, while the differentiated Palatini and first
-curvature-jet assembly live in their dedicated sibling modules.  See
-`UnifCurvatureJetsLow.md` for the current consumer-migration status.
--/
-
 set_option autoImplicit false
 
 noncomputable section
@@ -53,8 +31,7 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
 set_option linter.unusedSectionVars false in
-/-- **The `Λ`-comparability input conversion.**  `Λ⁻¹ · gBase ≤ g₀` rearranges to
-`gBase ≤ Λ · g₀` on the diagonal. -/
+
 private lemma gBase_le_scaled (gBase g₀ : SmoothRiemannianMetric I M) {Λ : ℝ} (hΛ : 1 ≤ Λ)
     (hcomp : ∀ (x : M) (v : TangentSpace I x),
       Λ⁻¹ * gBase.inner x v v ≤ g₀.inner x v v ∧
@@ -65,18 +42,6 @@ private lemma gBase_le_scaled (gBase g₀ : SmoothRiemannianMetric I M) {Λ : �
   have hz := mul_le_mul_of_nonneg_left (hcomp x v).1 hΛ0.le
   rwa [← mul_assoc, mul_inv_cancel₀ hΛ0.ne', one_mul] at hz
 
-/-- **Class-uniform raised-Ricci sup (`1 ≤ Λ < 2`).**
-
-Under `Λ`-comparability of `g₀` with `gBase` and the class metric-jet bounds
-`MetricCovDerivOrderBoundOn` at orders `1` and `2`, the raised Ricci endomorphism
-of `g₀` obeys `g₀(Ric♯v, Ric♯v) ≤ C² · g₀(v,v)` with a constant `C = Λ · C₀`
-depending only on `(Λ, gBase)`, where `C₀` is the constant of
-`exists_ricEndoRaisedFib_perturbed_gQuadratic_le_of_jetEnvelope` at radius
-`δ₀ = Λ − 1` and envelope `B = n(Λ−1) + 2Λ`.
-
-Together with `ricEndoRaisedFib`'s defining property
-`g₀(Ric♯ v, w) = Ric(v, w)` this is the Ricci half of the E6 static-field
-fibre bound. -/
 theorem unifRicSup
     (gBase g₀ : SmoothRiemannianMetric I M) {Λ : ℝ} (hΛ : 1 ≤ Λ) (hΛ2 : Λ < 2)
     (hcomp : ∀ (x : M) (v : TangentSpace I x),
@@ -119,14 +84,12 @@ theorem unifRicSup
 set_option linter.unusedSectionVars false in
 attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
   Tensor0SBundle.tensorRSSpace_normedSpace in
-/-- Explicit order-zero connection-difference coefficient. -/
 noncomputable def connDiffZeroC (Λ : ℝ) : ℝ :=
   3 / 2 * Λ ^ 3 * Λ
 
 set_option linter.unusedSectionVars false in
 attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
   Tensor0SBundle.tensorRSSpace_normedSpace in
-/-- The order-zero connection-difference estimate with its fixed coefficient. -/
 theorem connDiffSup_le
     (gBase g₀ : SmoothRiemannianMetric I M) {Λ : ℝ} (hΛ : 1 ≤ Λ)
     (hcomp : ∀ (x : M) (v : TangentSpace I x),
@@ -149,16 +112,6 @@ theorem connDiffSup_le
 set_option linter.unusedSectionVars false in
 attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
   Tensor0SBundle.tensorRSSpace_normedSpace in
-/-- **Class-uniform connection-difference sup for arbitrary `Λ ≥ 1`, order `0`.**
-
-The Levi-Civita connection difference `A = Γ(g₀) − Γ(gBase)` has `gBase`-fibre
-length at most `C · √(gBase(v,v)) · √(gBase(w,w))` with `C` closed in
-`Λ`: the order-`1` metric jet of the class feeds the ungated finite-order
-Koszul estimate `connDiff_gJet_le`.
-
-This is the order-`0` half of the DeTurck vector-field envelope: the DeTurck
-field `W = deTurckVF g₀ gBase` is the `g₀`-trace of `A`
-(`deTurckVF_eq_orthoFrame_trace`). -/
 theorem unifConnDiffSup
     (gBase g₀ : SmoothRiemannianMetric I M) {Λ : ℝ} (hΛ : 1 ≤ Λ)
     (hcomp : ∀ (x : M) (v : TangentSpace I x),
@@ -179,14 +132,12 @@ theorem unifConnDiffSup
 set_option linter.unusedSectionVars false in
 attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
   Tensor0SBundle.tensorRSSpace_normedSpace in
-/-- Explicit order-one connection-difference coefficient. -/
 noncomputable def connDiffOneC (Λ : ℝ) : ℝ :=
   3 / 2 * Λ ^ 4 * (Λ + Λ * Λ ^ 2)
 
 set_option linter.unusedSectionVars false in
 attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
   Tensor0SBundle.tensorRSSpace_normedSpace in
-/-- The order-one connection-difference estimate with its fixed coefficient. -/
 theorem covConnDiff_le
     (gBase g₀ : SmoothRiemannianMetric I M) {Λ : ℝ} (hΛ : 1 ≤ Λ)
     (hcomp : ∀ (x : M) (v : TangentSpace I x),
@@ -216,19 +167,6 @@ theorem covConnDiff_le
 set_option linter.unusedSectionVars false in
 attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
   Tensor0SBundle.tensorRSSpace_normedSpace in
-/-- **Class-uniform connection-difference sup for arbitrary `Λ ≥ 1`, order `1`.**
-
-The first `gBase`-covariant derivative `∇^{gBase}A` of the connection difference
-obeys the `gBase`-quadratic bound with a constant closed in `(Λ, gBase)`,
-obtained directly from the ungated finite-order estimate
-`covDerivConnDiff_gJet_le`.
-
-This is the order-`1` half of the DeTurck vector-field envelope.  (An
-`MetricUniformEquivalentOn`-currency sibling with the *explicit* constant
-`(3/2)Λ⁴(Λ'' + ΛΛ'²)` and no `Λ < 2` gate is
-`HCGCompactness.covDerivConnDiff_gJet_le`; this statement is the jet-envelope
-face, matching the hypothesis package the other `Geometry/Curvature/` assets in
-this lane consume.) -/
 theorem unifCovConnDiffSup
     (gBase g₀ : SmoothRiemannianMetric I M) {Λ : ℝ} (hΛ : 1 ≤ Λ)
     (hcomp : ∀ (x : M) (v : TangentSpace I x),
@@ -256,18 +194,13 @@ theorem unifCovConnDiffSup
       hΛ hcomp hjet1 hjet2
 
 set_option linter.unusedSectionVars false in
-/-- Explicit zero-order Ricci coefficient with the fixed background curvature
-cap supplied. -/
+
 noncomputable def ricciZeroC (Λ Kb : ℝ) : ℝ :=
   (Module.finrank ℝ E : ℝ) *
     (Λ ^ 2 * (riemannDiffC Λ Λ Λ + Real.sqrt Kb))
 
 set_option linter.unusedSectionVars false in
-/-- **Class-uniform Ricci bilinear bound for arbitrary `Λ ≥ 1`.**
 
-The arbitrary-`Λ` curvature operator estimate `unifCurvSup` is traced in a
-`g₀`-orthonormal frame.  Cauchy--Schwarz on each trace summand gives the
-bilinear Ricci bound with the sole dimensional loss `finrank ℝ E`. -/
 theorem ricciBilin_of
     (gBase g₀ : SmoothRiemannianMetric I M) {Λ : ℝ} (hΛ : 1 ≤ Λ)
     {Kb : ℝ} (hKb0 : 0 ≤ Kb)
@@ -360,7 +293,7 @@ theorem ricciBilin_of
       ring
 
 set_option linter.unusedSectionVars false in
-/-- **Class-uniform Ricci bilinear bound for arbitrary `Λ ≥ 1`.** -/
+
 theorem unifRicBilin
     (gBase g₀ : SmoothRiemannianMetric I M) {Λ : ℝ} (hΛ : 1 ≤ Λ)
     (hcomp : ∀ (x : M) (v : TangentSpace I x),

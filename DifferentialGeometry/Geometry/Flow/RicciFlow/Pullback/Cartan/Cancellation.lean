@@ -6,7 +6,6 @@ import DifferentialGeometry.Geometry.Connection.LeviCivita.Defs
 import Mathlib.Analysis.Calculus.Deriv.Basic
 import Mathlib.Analysis.Calculus.Deriv.Add
 
-
 noncomputable section
 
 namespace DifferentialGeometry

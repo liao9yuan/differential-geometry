@@ -7,56 +7,6 @@ set_option linter.unusedSectionVars false
 set_option linter.unusedFintypeInType false
 set_option backward.isDefEq.respectTransparency false
 
-/-!
-# The invariant speed of the connection-difference carrier `A₀₃` (Route-K brick K1C)
-
-`ForwardUniqueConnectionDiff.lean` (K1) differentiates the *frame components* of the
-Christoffel difference `Γ¹ − Γ²`.  `ForwardUniqueEnergy.lean` (K3) consumes a completely
-invariant fact: a `(0,3)`-tensor speed `Adot` together with
-
-`∀ x v, HasDerivAt (fun r => connDiffLowAt (g₁ r) (g₂ r) x v) (Adot t x v) t`.
-
-This file is the adapter between the two.  The lowering carrier `g₁(t)` is itself moving,
-so the invariant speed of `A₀₃ = g₁(∇¹ − ∇², ·)` is a *sum of two* terms
-(`FORWARD_UNIQUE_PRO_RULING.md` §5: "lowering with `g₁` adds only terms involving
-`∂ₜg₁ = −2Ric₁`"):
-
-`∂ₜA₀₃ = −2 Ric₁((∇¹−∇²)(Y,X), Z) + g₁((∂ₜ(∇¹−∇²))(Y,X), Z)`.
-
-## Main definitions
-
-* `bilin12At A` — the `(1,2)` tensor of a continuous bilinear vector-valued map, the
-  `CovariantDerivative.difference`-free generalisation of `connectionDifferenceTensorAt`.
-* `lowerBilin q A` — the `(0,3)` tensor `(X, Y, Z) ↦ q(A(Y, X), Z)` obtained by lowering
-  the upper index of `A` against an **arbitrary** `(0,2)` fiber tensor `q` (not only a
-  metric: the reaction term lowers with `Ric₁`).
-* `connDiffDot g₁ g₂ Adot t x` — the invariant speed of `A₀₃`, the sum above.
-* `bilinOfComp b c` — the bilinear map with prescribed basis components; this is what turns
-  K1's *component* right-hand side into the invariant `Adot`.
-
-## Main results
-
-* `connDiffLow_hasDerivAt` — the `hA`-shaped fact K3 consumes, from the two Ricci-flow
-  equations plus the invariant speed of the connection difference.
-* `connDiffVec_hasDerivAt` — the frame → invariant adapter: K1's componentwise
-  Christoffel-difference derivatives give the vector-valued derivative of
-  `(∇¹ − ∇²)(Y, X)` at every pair of tangent vectors.
-* `connDiffLow_hasDerivAt_frame` — the two composed: the `hA` producer whose hypotheses
-  are exactly K1-shaped (frame components) plus the Ricci-flow equation of the *carrier*
-  `g₁` alone (the second flow's PDE is not needed: only `g₁` does the lowering).
-* `coeff_bilinOfComp` — the frame coefficients of `bilinOfComp` are the prescribed
-  components, so `hΓ` is discharged directly from K1's componentwise derivatives.
-* `christoffelInFrame_sol` — the definitional `SolutionOn` → metric-family bridge for K1's
-  Christoffel symbols.
-
-## Relocation TODO
-
-`bilin12At`/`lowerBilin` and the two basis-expansion lemmas are generic fiber algebra with
-canonical homes in `Tensor/RSTensor/NablaOnTensors/ConnectionDifference.lean` and
-`Tensor/RSTensor/Components.lean`.  They live here only because the brick protocol forbids
-editing existing files; move them when a second consumer appears.
--/
-
 noncomputable section
 
 namespace DifferentialGeometry.PDE.RicciFlow
@@ -76,10 +26,6 @@ section Lowering
 
 variable {x : M}
 
-/-- The `(1,2)` tensor determined by a continuous bilinear vector-valued map `A`: its value
-on a covector `α` and vectors `(X, Y)` is `α (A Y X)`.  This is
-`connectionDifferenceTensorAt` with the connection difference replaced by an arbitrary
-bilinear map; the two agree definitionally. -/
 def bilin12At
     (A : TangentSpace I x →L[Real] TangentSpace I x →L[Real] TangentSpace I x) :
     TensorRSSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) 1 2 x :=
@@ -114,8 +60,6 @@ theorem bilin12At_apply
   change connectionDifferenceOutput (I := I) A α v = _
   rw [connectionDifferenceOutput_apply]
 
-/-- Auxiliary lowering with the free slot in position `0`:
-`w ↦ q (w 0, A (w 2) (w 1))`. -/
 private def lowerBilinOut (q : Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) 2 x)
     (A : TangentSpace I x →L[Real] TangentSpace I x →L[Real] TangentSpace I x) :
     Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) 3 x :=
@@ -155,17 +99,12 @@ private theorem lowerBilinOut_apply
   funext a
   fin_cases a <;> simp [Fin.tail]
 
-/-- Slot permutation moving the free (lowered) slot from position `0` to position `2`. -/
 private def lowerStdPerm : Equiv.Perm (Fin 3) where
   toFun i := if i = 0 then 2 else if i = 1 then 0 else 1
   invFun i := if i = 0 then 1 else if i = 1 then 2 else 0
   left_inv i := by fin_cases i <;> simp
   right_inv i := by fin_cases i <;> simp
 
-/-- **Lowering the upper index of a bilinear vector-valued map against a `(0,2)` tensor.**
-`lowerBilin q A` is the `(0,3)` fiber tensor `(X, Y, Z) ↦ q (A Y X, Z)`.  Unlike
-`Integral.L2.lowerAllUpperIndices`, the lowering tensor `q` is arbitrary: the moving-carrier
-reaction term of `∂ₜA₀₃` lowers with `Ric₁`, not with a metric. -/
 def lowerBilin (q : Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) 2 x)
     (A : TangentSpace I x →L[Real] TangentSpace I x →L[Real] TangentSpace I x) :
     Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) 3 x :=
@@ -196,8 +135,6 @@ section Expansion
 
 variable {x : M}
 
-/-- Expansion of a `(0,2)` fiber tensor in its **first** slot along a finite basis of the
-tangent space. -/
 theorem tensor02_expand {ι : Type*} [Fintype ι]
     (q : Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) 2 x)
     (b : Module.Basis ι Real (TangentSpace I x)) (W Z : TangentSpace I x) :
@@ -219,7 +156,6 @@ theorem tensor02_expand {ι : Type*} [Fintype ι]
         refine Finset.sum_congr rfl fun k _ => ?_
         rw [q.map_update_smul, hupd, smul_eq_mul]
 
-/-- Expansion of a continuous bilinear vector-valued map along a finite basis. -/
 theorem bilin_expand {ι : Type*} [Fintype ι]
     (A : TangentSpace I x →L[Real] TangentSpace I x →L[Real] TangentSpace I x)
     (b : Module.Basis ι Real (TangentSpace I x)) (X Y : TangentSpace I x) :
@@ -245,15 +181,6 @@ end Expansion
 
 section Speed
 
-/-- **The invariant speed of the connection-difference carrier `A₀₃`.**
-
-`connDiffDot g₁ g₂ Adot t x` is the `(0,3)` fiber tensor
-
-`(X, Y, Z) ↦ −2 Ric₁((∇¹−∇²)(Y, X), Z) + g₁(t)(Adot x Y X, Z)`,
-
-where `Adot x` is the invariant speed of the `(1,2)` connection-difference tensor
-`∇¹ − ∇²` at `x` (produced from K1's frame components by `connDiffVec_hasDerivAt`).
-The first summand is the moving-carrier reaction created by `∂ₜg₁ = −2Ric₁`. -/
 def connDiffDot (g₁ g₂ : Real → SmoothRiemannianMetric I M)
     (Adot : (x : M) →
       TangentSpace I x →L[Real] TangentSpace I x →L[Real] TangentSpace I x)
@@ -303,10 +230,6 @@ section Adapter
 
 variable {x : M}
 
-/-- **K1C-a, invariant core.**  If the carrier `g₁` solves the Ricci-flow equation at `x`
-and the `(1,2)` connection difference `∇¹ − ∇²` has invariant time derivative `Adot x`,
-then the lowered carrier `A₀₃` has time derivative `connDiffDot`.  This is exactly the
-`hA` hypothesis of `forwardUniqueEnergy_hasDerivAt`. -/
 theorem connDiffLow_hasDerivAt
     (g₁ g₂ : Real → SmoothRiemannianMetric I M)
     (Adot : (x : M) →
@@ -334,7 +257,7 @@ theorem connDiffLow_hasDerivAt
       (metricCov (I := I) (g₂ r)) x (v 1) (v 0) with hF
   set Fdot : TangentSpace I x := (Adot x (v 1)) (v 0) with hFdot
   have hFderiv : HasDerivAt F Fdot t := hA (v 0) (v 1)
-  -- componentwise derivative of the moving vector
+
   have hcomp : ∀ k, HasDerivAt (fun r : Real => b.repr (F r) k) (b.repr Fdot k) t := by
     intro k
     have hL : HasDerivAt (fun r : Real =>
@@ -342,12 +265,12 @@ theorem connDiffLow_hasDerivAt
         ((LinearMap.toContinuousLinearMap (b.coord k)) Fdot) t :=
       (LinearMap.toContinuousLinearMap (b.coord k)).hasFDerivAt.comp_hasDerivAt t hFderiv
     simpa using hL
-  -- derivative of the moving metric components
+
   have hmet : ∀ k, HasDerivAt
       (fun r : Real => (g₁ r).inner x (b k) (v 2))
       ((-2 : Real) * metricRicciAt (I := I) (g₁ t) x
         (fun a : Fin 2 => if a = 0 then b k else v 2)) t := fun k => hPDE₁ (b k) (v 2)
-  -- the integrand as a finite sum of products
+
   have hsum : ∀ r : Real,
       connDiffLowAt (I := I) (g₁ r) (g₂ r) x v =
         ∑ k, b.repr (F r) k * (g₁ r).inner x (b k) (v 2) := by
@@ -411,10 +334,6 @@ section Frame
 
 variable {Idx : Type*} [Fintype Idx] {u : Set M} {x : M}
 
-/-- **K1C-a, frame producer.**  K1 differentiates the frame components of `Γ¹ − Γ²`; this
-turns those scalar facts into the invariant, vector-valued time derivative of the `(1,2)`
-connection difference at *every* pair of tangent vectors.  The hypothesis says exactly that
-the frame components of the supplied bilinear speed `Adot x` are the K1 derivatives. -/
 theorem connDiffVec_hasDerivAt
     (g₁ g₂ : Real → SmoothRiemannianMetric I M)
     (frame : Idx -> (y : M) -> TangentSpace I y)
@@ -445,7 +364,7 @@ theorem connDiffVec_hasDerivAt
     simp [IsLocalFrameOn.coeff, hx, hbdef, Module.Basis.coord_apply]
   have hfr : ∀ j : Idx, MDifferentiableAt I I.tangent (T% (frame j)) x := fun j =>
     (hframe.contMDiffAt hu hx j).mdifferentiableAt (by simp)
-  -- the componentwise K1 fact, read in the frame basis
+
   have hbasis : ∀ i j k : Idx,
       HasDerivAt
         (fun r : Real =>
@@ -487,7 +406,7 @@ theorem connDiffVec_hasDerivAt
       rw [hcoeff k, hbcoe i, hbcoe j]
     rw [hfun, hval]
     exact hΓ i j k
-  -- vector-valued derivative at basis vectors
+
   have hvec : ∀ i j : Idx,
       HasDerivAt
         (fun r : Real =>
@@ -507,7 +426,7 @@ theorem connDiffVec_hasDerivAt
     have := HasDerivAt.fun_sum (u := (Finset.univ : Finset Idx))
       (fun k (_ : k ∈ (Finset.univ : Finset Idx)) => (hbasis i j k).smul_const (b k))
     simpa only [← hsum] using this
-  -- bilinear expansion to arbitrary vectors
+
   have hexp : ∀ r : Real,
       CovariantDerivative.difference (metricCov (I := I) (g₁ r))
           (metricCov (I := I) (g₂ r)) x Y X =
@@ -529,10 +448,6 @@ theorem connDiffVec_hasDerivAt
       HasDerivAt.fun_sum fun i _ => (hvec i j).const_smul _
   simpa only [← hexp] using hstep
 
-/-- **K1C-a.**  The `hA` hypothesis of `forwardUniqueEnergy_hasDerivAt`, produced from
-K1-shaped inputs: the frame-component derivatives of the Christoffel difference (the
-conclusion of `christoffelEvolutionDiffInFrameOn`, realised by the invariant bilinear speed
-`Adot`) together with the Ricci-flow equation for the carrier `g₁`. -/
 theorem connDiffLow_hasDerivAt_frame
     (g₁ g₂ : Real → SmoothRiemannianMetric I M)
     (frame : Idx -> (y : M) -> TangentSpace I y)
@@ -557,10 +472,6 @@ theorem connDiffLow_hasDerivAt_frame
   connDiffLow_hasDerivAt (I := I) g₁ g₂ Adot hPDE₁
     (fun X Y => connDiffVec_hasDerivAt (I := I) g₁ g₂ frame hframe hu hx Adot hΓ X Y) v
 
-/-- The continuous bilinear vector-valued map with prescribed components in a basis:
-`bilinOfComp b c (b j) (b i) = ∑ k, c i j k • b k`.  This is what turns K1's *component*
-right-hand side `christoffelEvolutionRHSInFrame gInv₁ nablaRic₁ − christoffelEvolutionRHSInFrame
-gInv₂ nablaRic₂` into the invariant speed `Adot` that `connDiffDot` consumes. -/
 def bilinOfComp (b : Module.Basis Idx Real (TangentSpace I x))
     (c : Idx -> Idx -> Idx -> Real) :
     TangentSpace I x →L[Real] TangentSpace I x →L[Real] TangentSpace I x :=
@@ -581,9 +492,6 @@ theorem bilinOfComp_basis (b : Module.Basis Idx Real (TangentSpace I x))
   change (b.constr Real fun i' => ∑ k, c i' j k • b k) (b i) = _
   rw [Module.Basis.constr_basis]
 
-/-- The frame coefficients of `bilinOfComp` are the prescribed components: this discharges
-the `hΓ` hypothesis of `connDiffVec_hasDerivAt`/`connDiffLow_hasDerivAt_frame` directly from
-K1's componentwise derivative facts. -/
 theorem coeff_bilinOfComp (frame : Idx -> (y : M) -> TangentSpace I y)
     (hframe : IsLocalFrameOn I E 1 frame u) (hx : x ∈ u)
     (c : Idx -> Idx -> Idx -> Real) (i j k : Idx) :
@@ -607,9 +515,6 @@ section SolutionBridge
 
 variable {Idx : Type*} {u : Set M}
 
-/-- K1 is stated for `SolutionOn` pairs, this file for metric families.  The bridge is
-definitional: a `SolutionFamily`'s connection at time `s` *is* the Levi-Civita connection
-`metricCov` of its time-`s` metric. -/
 theorem christoffelInFrame_sol
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)

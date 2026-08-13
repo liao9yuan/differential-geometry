@@ -6,81 +6,6 @@ import Mathlib.Topology.Order.OrderClosed
 
 set_option autoImplicit false
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 noncomputable section
 
 namespace DifferentialGeometry.PDE.RicciFlow
@@ -97,18 +22,6 @@ variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
     [IsManifold I ∞ M] [CompactSpace M] [BoundarylessManifold I M]
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
-
-
-
-
-
-
-
-
-
-
-
-
 
 theorem tendsto_nhdsLT_of_bounded_deriv
     {F : Type*} [NormedAddCommGroup F] [NormedSpace ℝ F] [CompleteSpace F]
@@ -171,15 +84,6 @@ theorem tendsto_nhdsLT_of_bounded_deriv
         have := mul_lt_mul_of_pos_left hfrac hε
         rwa [mul_one] at this
 
-
-
-
-
-
-
-
-
-
 omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [BoundarylessManifold I M] [I.Boundaryless]
     [T2Space M] [SigmaCompactSpace M] in
 theorem chartGramMatrix_tendsto_nhdsLT_of_bounded_deriv
@@ -200,23 +104,6 @@ theorem chartGramMatrix_tendsto_nhdsLT_of_bounded_deriv
     hderiv (fun s hs => ?_)
   simpa [Real.norm_eq_abs] using hbound s hs
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 structure CinftyLimitData
     (g_fam : ℝ → SmoothRiemannianMetric I M) (α omega : ℝ) (hαomega : α < omega) where
 
@@ -228,8 +115,6 @@ structure CinftyLimitData
         Integral.Measure.chartGramMatrix (I := I) (g_fam s) x₀ x i j) (𝓝[<] omega)
         (𝓝 (Integral.Measure.chartGramMatrix (I := I) limitMetric x₀ x i j))
 
-
-
   ricci_match :
     ∀ (x : M) (v w : TangentSpace I x),
       Tendsto
@@ -238,28 +123,6 @@ structure CinftyLimitData
         (𝓝[<] omega)
         (𝓝 (DifferentialGeometry.Integral.Connection.ricciTensor (I := I)
           limitMetric x v w))
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 theorem restart_short_time (gomega : SmoothRiemannianMetric I M) :
     ∃ T : ℝ, 0 < T ∧ ∃ r : ℝ → SmoothRiemannianMetric I M,
@@ -285,15 +148,6 @@ theorem restart_short_time (gomega : SmoothRiemannianMetric I M) :
   intro x₀ i j
   exact (hsmooth x₀ i j).continuousOn
 
-
-
-
-
-
-
-
-
-
 def gluedFamily
     (g_fam : ℝ → SmoothRiemannianMetric I M)
     (r : ℝ → SmoothRiemannianMetric I M) (omega : ℝ) :
@@ -314,10 +168,6 @@ omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [CompactSpace M]
     gluedFamily (I := I) g_fam r omega s = r (s - omega) := by
   simp [gluedFamily, not_lt.mpr hs]
 
-
-
-
-
 omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [CompactSpace M]
     [BoundarylessManifold I M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 theorem gluedFamily_eq_left
@@ -325,37 +175,12 @@ theorem gluedFamily_eq_left
     ∀ s : ℝ, s < omega → gluedFamily (I := I) g_fam r omega s = g_fam s :=
   fun _ hs => gluedFamily_of_lt (I := I) g_fam r omega hs
 
-
-
 omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [CompactSpace M]
     [BoundarylessManifold I M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 @[simp] theorem gluedFamily_at_endpoint
     (g_fam r : ℝ → SmoothRiemannianMetric I M) (omega : ℝ) :
     gluedFamily (I := I) g_fam r omega omega = r 0 := by
   rw [gluedFamily_of_ge (I := I) g_fam r omega (le_refl omega), sub_self]
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] in
 omit [SigmaCompactSpace M] in
@@ -424,31 +249,6 @@ theorem gluedFamily_pde_cross_of_matching
     have hev : f =ᶠ[𝓝 s] g0 := by
       filter_upwards [Ioo_mem_nhds hs.1 hs.2] with t ht using hfg0 t ht
     rw [hev.deriv_eq, (hg0_hasDeriv s hs).deriv]
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] in
 omit [SigmaCompactSpace M] in
@@ -562,19 +362,6 @@ theorem gluedFamily_pde
       (by rw [gluedFamily_of_ge (I := I) g_fam r omega (le_of_lt htgt)])).congr_deriv ?_
     simp
 
-
-
-
-
-
-
-
-
-
-
-
-
-
 structure CinftyGlueData
     (g_fam r : ℝ → SmoothRiemannianMetric I M) (α omega ε : ℝ) : Prop where
 
@@ -586,7 +373,6 @@ structure CinftyGlueData
             (gluedFamily (I := I) g_fam r omega p.1) x₀ p.2 i j)
         (Set.Ioo α (omega + ε) ×ˢ (trivializationAt E (TangentSpace I) x₀).baseSet)
 
-
   gram_cont :
     ∀ (x₀ : M) (i j : Fin (Module.finrank ℝ E)),
       ContinuousOn
@@ -595,56 +381,10 @@ structure CinftyGlueData
             (gluedFamily (I := I) g_fam r omega p.1) x₀ p.2 i j)
         (Set.Ico α (omega + ε) ×ˢ (trivializationAt E (TangentSpace I) x₀).baseSet)
 
-
-
-
-
-
-
-
   metric_match :
     ∀ x : M, ∀ v w : TangentSpace I x,
       Tendsto (fun s : ℝ => (g_fam s).inner x v w) (𝓝[<] omega)
         (𝓝 ((r 0).inner x v w))
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 theorem ricci_flow_extends_construction
     (g_fam : ℝ → SmoothRiemannianMetric I M) {α omega : ℝ} (hαomega : α < omega)

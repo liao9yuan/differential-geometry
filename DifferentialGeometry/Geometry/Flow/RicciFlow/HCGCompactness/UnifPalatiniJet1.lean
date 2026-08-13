@@ -2,15 +2,6 @@ import DifferentialGeometry.Geometry.Curvature.CurvatureOperator.DifferentiatedP
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.UnifCurvatureJet1Diff
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.ConnDiffDeriv2Bound
 
-/-!
-# The class-uniform differentiated Palatini bound
-
-This module estimates the exact curvature-layer identity `covDerivPal_eq` at
-the fixed order needed by the uniform short-time existence lane.  Its only
-inputs are the already banked class-uniform bounds for the connection
-difference and its first two base covariant derivatives.
--/
-
 set_option autoImplicit false
 
 noncomputable section
@@ -125,8 +116,6 @@ private theorem covD2_eq_hcg
       HCGCompactness.covDerivConnDiff2 (I := I) gB g₀ D X Y Z x :=
   rfl
 
-/-- The differentiated Palatini self-difference evaluated on canonical smooth
-extensions of four tangent vectors. -/
 noncomputable def palatiniJet1At
     (gBase g₀ : SmoothRiemannianMetric I M) (x : M)
     (D X Y Z : TangentSpace I x) : TangentSpace I x :=
@@ -134,13 +123,12 @@ noncomputable def palatiniJet1At
     (extSec (I := I) x D) (extSec (I := I) x X)
     (extSec (I := I) x Y) (extSec (I := I) x Z) x
 
-/-- The explicit first differentiated-Palatini coefficient at class size `Λ`. -/
 def palatiniOneC (Λ : ℝ) : ℝ :=
   2 * (3 / 2 * Λ ^ 5 * Λ + 9 / 2 * Λ ^ 6 * Λ * Λ + 3 * Λ ^ 7 * Λ ^ 3) +
     4 * (3 / 2 * Λ ^ 3 * Λ) * (3 / 2 * Λ ^ 4 * (Λ + Λ * Λ ^ 2))
 
 set_option linter.unusedSectionVars false in
-/-- The differentiated Palatini term obeys the explicit `palatiniOneC` bound. -/
+
 theorem unifPalatini1_le
     (gBase g₀ : SmoothRiemannianMetric I M) {Λ : ℝ}
     (hΛ : 1 ≤ Λ)
@@ -397,8 +385,7 @@ theorem unifPalatini1_le
       dsimp [palatiniOneC, C₀, C₁, C₂]
 
 set_option linter.unusedSectionVars false in
-/-- The differentiated Palatini term has a class-uniform quadrilinear bound
-using metric jets only through order three. -/
+
 theorem unifPalatini1
     (gBase g₀ : SmoothRiemannianMetric I M) {Λ : ℝ}
     (hΛ : 1 ≤ Λ)

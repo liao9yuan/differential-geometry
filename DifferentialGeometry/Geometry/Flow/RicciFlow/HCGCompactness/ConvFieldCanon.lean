@@ -7,18 +7,6 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.ConvFieldOpen
 set_option autoImplicit false
 set_option backward.isDefEq.respectTransparency false
 
-/-!
-# Canonical open-flow upgrade producer
-
-This module is the readable meeting point of the concrete Step-D provenance
-lane and the open-window analytic lane.  It keeps the canonical metric
-conclusion, comparison maps, bump family, window data, source estimates, and
-raw open-window inputs visible before invoking `open_upgrade_of_raw`.
-
-No claim is made for an arbitrary `MetricCompactnessConclusion`: the time-zero
-reference and covariant data come specifically from `StepDCanonData`.
--/
-
 noncomputable section
 
 universe u uE uH
@@ -37,11 +25,6 @@ variable {H : Type uH} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H} [I.Boundaryless]
 variable {X : PointedFlowSeq.{u, uE, uH} (I := I)}
 
-/-- Produce the open Ricci-flow upgrade from the concrete canonical Step-D
-sidecar, completeness, and the sequence curvature bound.  The analytic
-producers remain separate: canonical-window metric equivalence, complete Shi,
-and the constants-first varying-source covariant/Lipschitz theorem are called
-explicitly before the grow-local raw inputs are assembled. -/
 theorem open_upgrade_canon
     (canon : StepDCanonData (I := I) (X.atZero (I := I)))
     {a b : Real} (hzero : (0 : Real) ∈ Set.Ioo a b)

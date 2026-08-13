@@ -13,14 +13,6 @@ import Mathlib.Analysis.Calculus.FDeriv.Extend
 
 set_option autoImplicit false
 
-
-
-
-
-
-
-
-
 noncomputable section
 
 namespace DifferentialGeometry.PDE.RicciFlow
@@ -37,10 +29,6 @@ variable [IsManifold I 1 M]
 variable [CompleteSpace E] [SigmaCompactSpace M] [T2Space M]
 variable [CompactSpace M] [BoundarylessManifold I M] [I.Boundaryless]
 
-
-
-
-
 def SolutionAgreesOn
     {D Dhat : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -50,7 +38,6 @@ def SolutionAgreesOn
     S.family.metric t = Shat.family.metric t ∧
       S.family.connection t = Shat.family.connection t ∧
         S.ricci t = Shat.ricci t
-
 
 def ExtendsPastEndpoint
     {alpha omega : Real} (hαω : alpha < omega)
@@ -65,15 +52,12 @@ def ExtendsPastEndpoint
         IsSolutionOn (I := I) Shat ∧
           SolutionAgreesOn (I := I) S Shat (Set.Ico alpha omega)
 
-
 def IsMaximalAtEndpoint
     {alpha omega : Real} (hαω : alpha < omega)
     (S : SolutionOn (I := I) (M := M)
       (DifferentialGeometry.Integral.Connection.RealTimeInterval.closedOpen alpha omega hαω)) :
         Prop :=
   ¬ ExtendsPastEndpoint (I := I) hαω S
-
-
 
 def Rm04RealizesSolutionConnectionOn
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
@@ -84,8 +68,6 @@ def Rm04RealizesSolutionConnectionOn
     DifferentialGeometry.Integral.Connection.Rm04RealizesConnection (I := I)
       (S.family.metric (t : Real)) (S.family.connection (t : Real))
       (Rm04 (t : Real))
-
-
 
 omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [CompactSpace M] [BoundarylessManifold I M]
     [I.Boundaryless] in
@@ -100,7 +82,6 @@ theorem rm04Realizes_metric
       (S.base.metric (t : Real))
       (metricCov (I := I) (M := M) (S.base.metric (t : Real)))
       (metricCov_smooth (I := I) (M := M) (S.base.metric (t : Real))))
-
 
 def curvatureNormSq
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
@@ -121,8 +102,6 @@ omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [CompactS
       Tensor0SBundle.normSq0S (I := I) (S.family.metric t) x 4 ((Rm04 t) x) := by
   rfl
 
-
-
 def Rm04NormSqUnboundedAt
     {alpha omega : Real} {hαω : alpha < omega}
     (S : SolutionOn (I := I) (M := M)
@@ -131,8 +110,6 @@ def Rm04NormSqUnboundedAt
       Prop :=
   forall K : Real, ∃ t : Real, ∃ x : M,
     alpha <= t ∧ t < omega ∧ K < curvatureNormSq (I := I) S Rm04 t x
-
-
 
 def Rm04NormSqBoundedAt
     {alpha omega : Real} {hαω : alpha < omega}
@@ -143,8 +120,6 @@ def Rm04NormSqBoundedAt
   ∃ K : Real, forall t : Real, forall x : M,
     alpha <= t -> t < omega ->
       curvatureNormSq (I := I) S Rm04 t x <= K
-
-
 
 omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [CompactSpace M]
     [BoundarylessManifold I M] [I.Boundaryless] in
@@ -295,11 +270,6 @@ theorem extends_of_rmBounded
       simp only [SolutionFamily.ricci]
       congr 1; exact hteq.symm
 
-
-
-
-
-
 theorem rmUnbounded_of_maximal
     {alpha omega : Real} {hαω : alpha < omega}
     {S : SolutionOn (I := I) (M := M)
@@ -314,9 +284,6 @@ theorem rmUnbounded_of_maximal
   exact hmax (extends_of_rmBounded (I := I) hdim hS hRm
     (rmBounded_of_not_unbounded (I := I) hnot))
 
-
-
-
 def FormsSingularityAt
     {alpha omega : Real} {hαω : alpha < omega}
     (S : SolutionOn (I := I) (M := M)
@@ -325,8 +292,6 @@ def FormsSingularityAt
   ∃ Rm04 : Real -> DifferentialGeometry.Integral.Connection.Tensor04Section (I := I) (M := M),
     Rm04RealizesSolutionConnectionOn (I := I) S Rm04 ∧
       Rm04NormSqUnboundedAt (I := I) S Rm04
-
-
 
 theorem formsSing_of_maximal
     {alpha omega : Real} {hαω : alpha < omega}
@@ -342,7 +307,6 @@ theorem formsSing_of_maximal
   rcases hRmEx with ⟨Rm04, hRm⟩
   exact ⟨Rm04, hRm, rmUnbounded_of_maximal (I := I) hdim hS hmax hRm⟩
 
-
 theorem formsSing_of_maximal_metric
     {alpha omega : Real} {hαω : alpha < omega}
     {S : SolutionOn (I := I) (M := M)
@@ -353,9 +317,6 @@ theorem formsSing_of_maximal_metric
     FormsSingularityAt (I := I) S := by
   exact formsSing_of_maximal (I := I) hdim hS hmax
     ⟨S.base.rm04, rm04Realizes_metric (I := I) S⟩
-
-
-
 
 def SingularIffMaximalAtEndpoint
     {alpha omega : Real} {hαω : alpha < omega}

@@ -22,16 +22,6 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.SolutionTimeRestri
 
 set_option autoImplicit false
 
-
-
-
-
-
-
-
-
-
-
 noncomputable section
 
 universe u uE uH
@@ -50,9 +40,6 @@ variable {I : ModelWithCorners Real E H}
 variable [I.Boundaryless]
 variable {M : Type u} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 variable [SigmaCompactSpace M] [T2Space M]
-
-
-
 
 omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
   [CompleteSpace E] [I.Boundaryless] [SigmaCompactSpace M] [T2Space M] in
@@ -1898,8 +1885,6 @@ def cghToHam3
   sourceToOrig := toOrig
   limitComplete := hcomplete
 
-
-
 structure Ham3SourceLink
     {g0 : SmoothRiemannianMetric I M}
     (P : Ham3FlowPackage (I := I) (M := M) g0)
@@ -1944,8 +1929,6 @@ structure Ham3SourceLink
     letI : T2Space (X.term i).M := (X.term i).t2
     (X.term i).S.scalar 0 (X.term i).basepoint =
       ham3RescaledScalar (I := I) P Q (origIndex i) 0 (Q.point (origIndex i))
-
-
 
 noncomputable def ham3SourceLink
     {omega : Real} (h0omega : 0 < omega)
@@ -2036,9 +2019,6 @@ theorem Ham3SourceLink.realizes
   · intro i t ht
     simpa [cghToHam3] using hsource.metric_eq i t ht
 
-
-
-
 def HamCGHConclusion
     {g0 : SmoothRiemannianMetric I M}
     (P : Ham3FlowPackage (I := I) (M := M) g0)
@@ -2058,11 +2038,6 @@ def HamCGHConclusion
        Ham3RicNonnegTransfer (I := I) (M := M) P Q hsel Lh /\
          LimitScalarPos (I := I) (M := M) Lh /\
          Ham3PinchTransfer (I := I) (M := M) P Q hsel Lh)
-
-
-
-
-
 
 omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 theorem baseScalarConv_of_smoothCGH
@@ -2109,8 +2084,6 @@ theorem baseScalarConv_of_smoothCGH
           simpa using hsource.baseScalar (subseq k)
 
 omit [NeZero (Module.finrank ℝ E)] in
-/-- Smooth CGH convergence transfers the time-zero improved-pinching decay to
-the limit trace-free Ricci norm. -/
 theorem tf_decay0_of_cgh
     {omega : Real} (h0omega : 0 < omega)
     {g0 : SmoothRiemannianMetric I M}
@@ -2231,9 +2204,6 @@ theorem tf_decay0_of_cgh
   exact hsmall 0 h0
 
 omit [NeZero (Module.finrank ℝ E)] in
-/-- The genuine time-zero smooth-CGH scalar and Ricci-norm convergence,
-Hamilton's improved pinching estimate, and the basepoint normalization make
-the retained limit slice a positive constant-curvature metric. -/
 theorem round0_of_cgh
     {omega : Real} (h0omega : 0 < omega)
     (hdim : Module.finrank Real E = 3)
@@ -2284,8 +2254,7 @@ theorem round0_of_cgh
         h0 hsubseq hconv hcomplete)
   have hbaseOne : LimitBaseScalarOne (I := I) (M := M) Lh :=
     limit_base_scalar_one (I := I) (M := M) P Q hsel hbaseConv
-  -- `Lh` is `let`-bound, so its instance-implicit structure fields are not picked
-  -- up by synthesis; install them explicitly for the evaluations below.
+
   letI : TopologicalSpace Lh.N := Lh.topology
   letI : ChartedSpace H Lh.N := Lh.charted
   letI : IsManifold I ∞ Lh.N := Lh.smooth
@@ -2383,9 +2352,6 @@ theorem const0_of_cgh
   simpa only [AdmitsConstPosSec] using
     (limit_to_orig (I := I) (M := M) hM h0h hconn hround)
 
-/-- A uniform time-zero injectivity bound feeds the Hamilton source through the
-provider-native H6 compactness route and produces a constant-positive-
-sectional-curvature metric on the original manifold. -/
 theorem ham3_const_of_inj
     {omega : Real} (h0omega : 0 < omega)
     (hM : Closed3Manifold (I := I) (M := M))
@@ -2564,9 +2530,6 @@ theorem exists_ham3_vol
       PDE.RicciFlow.Perelman.FlowMetricBall.setAt,
       PDE.RicciFlow.SolutionOn.timeRestrict_metric] using hkB
 
-/-- Genuine curvature-controlled time-zero base-ball volume bounds feed the
-pointwise CGT producer and then the provider-native Hamilton compactness
-consumer. -/
 theorem ham3_const_of_vol
     {omega : Real} (h0omega : 0 < omega)
     (hM : Closed3Manifold (I := I) (M := M))
@@ -2612,9 +2575,6 @@ theorem ham3_const_of_vol
     (I := I) (M := M) h0omega hM P hD Q hsel hrm hwindow
     hscalar hpinch hinj
 
-/-- The Hamilton blow-up data, raw curvature bound, and fixed backward window
-produce a constant-positive-sectional-curvature metric on the original closed
-connected three-manifold. -/
 theorem ham3_const
     {omega : Real} (h0omega : 0 < omega)
     (hM : Closed3Manifold (I := I) (M := M))
@@ -2637,9 +2597,6 @@ theorem ham3_const
     (I := I) (M := M) h0omega hM P hD Q hsel hrm hwindow
     hscalar hpinch V hV
 
-/-- The provider-native HCG route proves Hamilton's constant-curvature
-conclusion directly from a positive-Ricci metric on a closed connected
-three-manifold, without using the legacy `ham3_cgh_limit` black box. -/
 theorem ham3_const_hcg
     (hM : Closed3Manifold (I := I) (M := M))
     (hpos : AdmitsPosRicci (I := I) (M := M)) :
@@ -2684,8 +2641,6 @@ theorem ham3_const_hcg
     (I := I) (M := M) h0omega hM P hD Q hsel hrm hwindow
     hscalar hpinch
 
-/-- Hamilton's positive-Ricci theorem through the provider-native HCG route.
-Connectedness is part of the explicit `Closed3Manifold` hypothesis. -/
 theorem ham3_main_hcg
     (hM : Closed3Manifold (I := I) (M := M))
     (hpos : AdmitsPosRicci (I := I) (M := M)) :
@@ -2696,8 +2651,6 @@ theorem ham3_main_hcg
   exact ⟨hconst, (ham3_equiv (I := I) (M := M) hM).1 hconst⟩
 
 omit [NeZero (Module.finrank ℝ E)] in
-/-- A compactness conclusion from the new HCG interface supplies the old
-Hamilton Section 12 black-box conclusion. -/
 theorem toHam3Exists
     {g0 : SmoothRiemannianMetric I M}
     (P : Ham3FlowPackage (I := I) (M := M) g0)

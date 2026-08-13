@@ -2,12 +2,6 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.Ricci.GammaAlgebra
 
 set_option autoImplicit false
 
-
-
-
-
-
-
 noncomputable section
 
 namespace DifferentialGeometry.PDE.RicciFlow
@@ -50,8 +44,6 @@ def christoffelVariationCovDerivCoordAt
       DifferentialGeometry.Integral.Connection.christoffelCoordAt (I := I) cov x₀ dir j a *
         gammaDt t x₀ i a k)
 
-
-
 omit [SigmaCompactSpace M] in
 private theorem christoffelCoordAt_symm_of_isSolutionOn
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
@@ -79,8 +71,6 @@ private theorem christoffelCoordAt_symm_of_isSolutionOn
     (I := I) (S.family.connection (t : Real)) x₀ i j k
   rw [hzero] at hskew
   exact sub_eq_zero.mp hskew.symm
-
-
 
 omit [SigmaCompactSpace M] [T2Space M] in
 private theorem christoffelCoordDerivAt_hasDerivWithinAt_of_christoffelVariation
@@ -112,8 +102,6 @@ private theorem christoffelCoordDerivAt_hasDerivWithinAt_of_christoffelVariation
       (t := (t : Real)) t.2 (x := x₀) hx₀
       (coordinateFrameAt (I := I) x₀ dir x₀)
 
-
-
 omit [SigmaCompactSpace M] [T2Space M] in
 private theorem christoffelCoordAt_hasDerivWithinAt_of_christoffelVariation
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
@@ -137,11 +125,6 @@ private theorem christoffelCoordAt_hasDerivWithinAt_of_christoffelVariation
   have hx₀ : x₀ ∈ coordinateFrameSet (I := I) x₀ :=
     coordinateFrameAt_mem (I := I) x₀
   simpa [DifferentialGeometry.Integral.Connection.christoffelCoordAt] using hvar t x₀ hx₀ i j k
-
-
-
-
-
 
 omit [SigmaCompactSpace M] in
 theorem christoffelCurvCoeffAt_hasDerivWithinAt_of_christoffelVariation
@@ -294,7 +277,6 @@ theorem christoffelCurvCoeffAt_hasDerivWithinAt_of_christoffelVariation
     covDChristoffelVariation] using
     (christoffel_curv_variation_algebra Γ A dA hΓsymm i k j m)
 
-
 omit [SigmaCompactSpace M] in
 theorem christoffelRicciCoeffAt_hasDerivWithinAt_of_christoffelVariation
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
@@ -343,8 +325,6 @@ theorem christoffelRicciCoeffAt_hasDerivWithinAt_of_christoffelVariation
         (I := I) S hS rhs x₀ hvar hmix t k i j k
   refine hsum.congr_deriv ?_
   simp [ricciVariationFromConnectionRHSInFrame, Finset.sum_sub_distrib]
-
-
 
 omit [SigmaCompactSpace M] in
 theorem ricciVariationFormulaInCoordFrameAt_of_christoffelVariation
@@ -404,12 +384,6 @@ theorem ricciVariationFormulaInCoordFrameAt_of_christoffelVariation
   exact hderiv.congr
     (fun s hs => hricci s hs)
     (hricci (t : Real) (D.regular_subset t.2))
-
-
-
-
-
-
 
 omit [SigmaCompactSpace M] [T2Space M] in
 theorem gammaCovNab2Core
@@ -612,9 +586,6 @@ theorem gammaCovNab2Core
   refine Finset.sum_congr rfl fun l _hl => ?_
   rw [hnabla2_at d i j l, hnabla2_at d j i l, hnabla2_at d l i j]
 
-
-
-
 omit [SigmaCompactSpace M] [T2Space M] in
 theorem christoffelVariationCovDerivCoordAt_eq_nablaGammaDtFromNabla2RicInFrame
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
@@ -701,11 +672,6 @@ theorem christoffelVariationCovDerivCoordAt_eq_nablaGammaDtFromNabla2RicInFrame
   exact gammaCovNab2Core
     (I := I) S gInv nablaRic nabla2Ric x₀ t d k i j
     hginv_mdiff hN_mdiff hginv_zero hnabla2_at
-
-
-
-
-
 
 omit [SigmaCompactSpace M] in
 theorem ricciVarCore
@@ -846,9 +812,6 @@ theorem ricciVarCore
             (t : Real) x₀ i a a j)
     rw [hsum₁, hsum₂]
   exact hbase.congr_deriv hEq
-
-
-
 
 omit [SigmaCompactSpace M] in
 theorem ricciVariationFormulaInCoordFrameAt_of_christoffelEvolution_nabla2

@@ -5,19 +5,6 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.C4.GoodCoveri
 
 set_option autoImplicit false
 
-
-
-
-
-
-
-
-
-
-
-
-
-
 noncomputable section
 
 namespace DifferentialGeometry
@@ -29,12 +16,8 @@ open scoped Bundle Manifold ContDiff
 
 variable {M : Type*} [MetricSpace M] [ProperSpace M]
 
-
-
 def availSet (O : M) (lam : ℝ → ℝ) (U : Set M) : Set M :=
   {x | Disjoint (Metric.ball x (lam (dist x O))) U}
-
-
 
 omit [ProperSpace M] in
 theorem isClosed_availSet (O : M) {lam : ℝ → ℝ} (hlam : Continuous lam) (U : Set M) :
@@ -59,9 +42,6 @@ theorem isClosed_availSet (O : M) {lam : ℝ → ℝ} (hlam : Continuous lam) (U
   exact isClosed_le (hlam.comp (continuous_id.dist continuous_const))
     (Metric.continuous_infDist_pt U)
 
-
-
-
 theorem exists_min_dist_base (O : M) {S : Set M} (hScl : IsClosed S) (hSne : S.Nonempty) :
     ∃ x ∈ S, ∀ y ∈ S, dist x O ≤ dist y O := by
   obtain ⟨s₀, hs₀⟩ := hSne
@@ -77,7 +57,6 @@ theorem exists_min_dist_base (O : M) {S : Set M} (hScl : IsClosed S) (hSne : S.N
   · rw [Metric.mem_closedBall, not_le] at hy
     have hx_le : dist x O ≤ dist s₀ O := Metric.mem_closedBall.mp hxball
     linarith
-
 
 def forbidden (O : M) (lam : ℝ → ℝ) (prior : List M) : Set M :=
   ⋃ c ∈ prior, Metric.ball c (lam (dist c O))
@@ -102,8 +81,6 @@ theorem O_mem_netList (O : M) (lam : ℝ → ℝ) (hlam : Continuous lam) (α : 
       · exact List.mem_append_left _ ih
       · exact ih
 
-
-
 theorem netList_succ_spec (O : M) (lam : ℝ → ℝ) (hlam : Continuous lam) (α : ℕ)
     (h : (availSet O lam (forbidden O lam (netList O lam hlam α))).Nonempty) :
     ∃ x, netList O lam hlam (α + 1) = netList O lam hlam α ++ [x] ∧
@@ -118,12 +95,9 @@ theorem netList_succ_spec (O : M) (lam : ℝ → ℝ) (hlam : Continuous lam) (�
         (isClosed_availSet O hlam (forbidden O lam (netList O lam hlam α))) h).choose_spec.2⟩
   rw [netList, dif_pos h]
 
-
 def ballsDisjoint (O : M) (lam : ℝ → ℝ) (l : List M) : Prop :=
   l.Pairwise fun a b =>
     Disjoint (Metric.ball a (lam (dist a O))) (Metric.ball b (lam (dist b O)))
-
-
 
 theorem netList_ballsDisjoint (O : M) (lam : ℝ → ℝ) (hlam : Continuous lam) (α : ℕ) :
     ballsDisjoint O lam (netList O lam hlam α) := by
@@ -161,8 +135,6 @@ theorem mem_netList_succ (O : M) (lam : ℝ → ℝ) (hlam : Continuous lam) (α
   · rw [netList_succ_stop O lam hlam α h]
     exact ha
 
-
-
 omit [ProperSpace M] in
 theorem meets_of_not_avail (O : M) (lam : ℝ → ℝ) {l : List M} {p : M}
     (hp : p ∉ availSet O lam (forbidden O lam l)) :
@@ -172,8 +144,6 @@ theorem meets_of_not_avail (O : M) (lam : ℝ → ℝ) {l : List M} {p : M}
     not_forall] at hp
   obtain ⟨c, hc, hmeet⟩ := hp
   exact ⟨c, hc, hmeet⟩
-
-
 
 omit [ProperSpace M] in
 theorem dist_lt_two_lam {lam : ℝ → ℝ} (hanti : Antitone lam) {O p c : M}
@@ -186,12 +156,6 @@ theorem dist_lt_two_lam {lam : ℝ → ℝ} (hanti : Antitone lam) {O p c : M}
   have ht : dist p c ≤ dist p q + dist q c := dist_triangle p q c
   rw [dist_comm q p] at hqp
   linarith
-
-
-
-
-
-
 
 theorem netList_cover (O : M) {lam : ℝ → ℝ} (hlam : Continuous lam) (hanti : Antitone lam)
     (p : M) :
@@ -265,12 +229,10 @@ theorem netList_cover (O : M) {lam : ℝ → ℝ} (hlam : Continuous lam) (hanti
           rw [netList_succ_stop O lam hlam α h]
           exact hc
 
-
 omit [ProperSpace M] in
 theorem availSet_antitone (O : M) (lam : ℝ → ℝ) {U V : Set M} (hUV : U ⊆ V) :
     availSet O lam V ⊆ availSet O lam U :=
   fun _ hx => hx.mono_right hUV
-
 
 omit [ProperSpace M] in
 theorem forbidden_mono (O : M) (lam : ℝ → ℝ) {l l' : List M} (h : ∀ a ∈ l, a ∈ l') :
@@ -280,13 +242,11 @@ theorem forbidden_mono (O : M) (lam : ℝ → ℝ) {l l' : List M} (h : ∀ a �
   obtain ⟨c, hc, hzc⟩ := hz
   exact ⟨c, h c hc, hzc⟩
 
-
 theorem availSet_succ_subset (O : M) (lam : ℝ → ℝ) (hlam : Continuous lam) (α : ℕ) :
     availSet O lam (forbidden O lam (netList O lam hlam (α + 1))) ⊆
       availSet O lam (forbidden O lam (netList O lam hlam α)) :=
   availSet_antitone O lam
     (forbidden_mono O lam fun _ ha => mem_netList_succ O lam hlam α ha)
-
 
 theorem netList_dist_le_avail (O : M) (lam : ℝ → ℝ) (hlam : Continuous lam) (α : ℕ) :
     ∀ c ∈ netList O lam hlam α,
@@ -312,8 +272,6 @@ theorem netList_dist_le_avail (O : M) (lam : ℝ → ℝ) (hlam : Continuous lam
       · rw [netList_succ_stop O lam hlam α h] at hc
         exact ih c hc y hyα
 
-
-
 theorem netList_sorted (O : M) (lam : ℝ → ℝ) (hlam : Continuous lam) (α : ℕ) :
     (netList O lam hlam α).Pairwise fun a b => dist a O ≤ dist b O := by
   induction α with
@@ -331,9 +289,6 @@ theorem netList_sorted (O : M) (lam : ℝ → ℝ) (hlam : Continuous lam) (α :
         exact netList_dist_le_avail O lam hlam α a ha x hxavail
       · rw [netList_succ_stop O lam hlam α h]
         exact ih
-
-
-
 
 theorem netList_separated (O : M) {lam : ℝ → ℝ} (hlam : Continuous lam)
     (hanti : Antitone lam) (hpos : ∀ s : ℝ, 0 < lam s) (α : ℕ)
@@ -354,9 +309,6 @@ theorem netList_separated (O : M) {lam : ℝ → ℝ} (hlam : Continuous lam)
     exact lt_of_lt_of_le hlt (hanti hxr)
   exact Set.disjoint_left.mp hdisj hyx (Metric.mem_ball_self (hpos _))
 
-
-
-
 theorem netList_count_le (O : M) {lam : ℝ → ℝ} (hlam : Continuous lam)
     (hanti : Antitone lam) (hpos : ∀ s : ℝ, 0 < lam s) {A : ℝ → ℕ}
     (pack : ∀ (r : ℝ) (J : Finset M), (∀ x ∈ J, dist x O ≤ r) →
@@ -368,8 +320,6 @@ theorem netList_count_le (O : M) {lam : ℝ → ℝ} (hlam : Continuous lam)
   pack r J hJr fun x hx y hy hxy =>
     netList_separated O hlam hanti hpos α (hJl x hx) (hJl y hy) hxy (hJr x hx)
 
-
-
 theorem netList_dist_ge (O : M) {lam : ℝ → ℝ} (hlam : Continuous lam)
     (hanti : Antitone lam) (hpos : ∀ s : ℝ, 0 < lam s) (α : ℕ)
     {c : M} (hc : c ∈ netList O lam hlam α) (hcO : c ≠ O) :
@@ -377,13 +327,6 @@ theorem netList_dist_ge (O : M) {lam : ℝ → ℝ} (hlam : Continuous lam)
   have h := netList_separated O hlam hanti hpos α (O_mem_netList O lam hlam α) hc
     hcO.symm (le_of_eq (dist_self O))
   rwa [dist_comm] at h
-
-
-
-
-
-
-
 
 theorem netList_dist_le (O : M) {lam : ℝ → ℝ} (hlam : Continuous lam)
     (hanti : Antitone lam) (hpos : ∀ s : ℝ, 0 < lam s)
@@ -436,8 +379,6 @@ theorem netList_dist_le (O : M) {lam : ℝ → ℝ} (hlam : Continuous lam)
         push_cast
         nlinarith
 
-
-
 theorem netList_disjoint_of_le (O : M) {lam lam' : ℝ → ℝ} (hlam : Continuous lam)
     (hle : ∀ s : ℝ, lam' s ≤ lam s) (α : ℕ) :
     (netList O lam hlam α).Pairwise fun a b =>
@@ -447,8 +388,6 @@ theorem netList_disjoint_of_le (O : M) {lam lam' : ℝ → ℝ} (hlam : Continuo
     netList_ballsDisjoint O lam hlam α
   exact h.imp fun hd =>
     hd.mono (Metric.ball_subset_ball (hle _)) (Metric.ball_subset_ball (hle _))
-
-
 
 theorem netList_prefix (O : M) (lam : ℝ → ℝ) (hlam : Continuous lam) {α β : ℕ}
     (h : α ≤ β) : netList O lam hlam α <+: netList O lam hlam β := by
@@ -461,7 +400,6 @@ theorem netList_prefix (O : M) (lam : ℝ → ℝ) (hlam : Continuous lam) {α �
         rw [hxeq]
         exact List.prefix_append _ _
       · rw [netList_succ_stop O lam hlam β hav]
-
 
 theorem netList_stall (O : M) (lam : ℝ → ℝ) (hlam : Continuous lam) {α β : ℕ} (h : α ≤ β)
     (hav : ¬ (availSet O lam (forbidden O lam (netList O lam hlam α))).Nonempty) :
@@ -487,7 +425,6 @@ theorem netList_length_le (O : M) (lam : ℝ → ℝ) (hlam : Continuous lam) (�
       · rw [netList_succ_stop O lam hlam α h]
         omega
 
-
 theorem netList_length_full (O : M) (lam : ℝ → ℝ) (hlam : Continuous lam) (α : ℕ)
     (h : ∀ γ < α, (availSet O lam (forbidden O lam (netList O lam hlam γ))).Nonempty) :
     (netList O lam hlam α).length = α + 1 := by
@@ -497,8 +434,6 @@ theorem netList_length_full (O : M) (lam : ℝ → ℝ) (hlam : Continuous lam) 
       obtain ⟨x, hxeq, -, -⟩ := netList_succ_spec O lam hlam α (h α (Nat.lt_succ_self α))
       rw [hxeq, List.length_append, List.length_singleton,
         ih fun γ hγ => h γ (hγ.trans (Nat.lt_succ_self α))]
-
-
 
 theorem netList_alive_of_le (O : M) (lam : ℝ → ℝ) (hlam : Continuous lam) {γ β : ℕ}
     (h : γ ≤ β) (hβ : γ < (netList O lam hlam β).length) :
@@ -516,7 +451,6 @@ theorem netList_alive_of_le (O : M) (lam : ℝ → ℝ) (hlam : Continuous lam) 
   rw [hstall] at hβ
   omega
 
-
 theorem netList_nodup (O : M) {lam : ℝ → ℝ} (hlam : Continuous lam)
     (hpos : ∀ s : ℝ, 0 < lam s) (α : ℕ) : (netList O lam hlam α).Nodup := by
   have h := netList_ballsDisjoint O lam hlam α
@@ -525,7 +459,6 @@ theorem netList_nodup (O : M) {lam : ℝ → ℝ} (hlam : Continuous lam)
     exact Set.disjoint_left.mp hd (Metric.mem_ball_self (hpos _))
       (Metric.mem_ball_self (hpos _))
 
-
 noncomputable def netCenter (O : M) (lam : ℝ → ℝ) (hlam : Continuous lam) (α : ℕ) :
     Option M :=
   (netList O lam hlam α)[α]?
@@ -533,10 +466,8 @@ noncomputable def netCenter (O : M) (lam : ℝ → ℝ) (hlam : Continuous lam) 
 theorem netCenter_eq (O : M) (lam : ℝ → ℝ) (hlam : Continuous lam) (α : ℕ) :
     netCenter O lam hlam α = (netList O lam hlam α)[α]? := rfl
 
-
 theorem netCenter_zero (O : M) (lam : ℝ → ℝ) (hlam : Continuous lam) :
     netCenter O lam hlam 0 = some O := rfl
-
 
 theorem netCenter_lt_length (O : M) (lam : ℝ → ℝ) (hlam : Continuous lam) {α : ℕ}
     {x : M} (hx : netCenter O lam hlam α = some x) :
@@ -545,7 +476,6 @@ theorem netCenter_lt_length (O : M) (lam : ℝ → ℝ) (hlam : Continuous lam) 
   push Not at h
   rw [netCenter_eq, List.getElem?_eq_none h] at hx
   simp at hx
-
 
 noncomputable def netRadius (O : M) (lam : ℝ → ℝ) (hlam : Continuous lam) (α : ℕ) : ℝ :=
   match netCenter O lam hlam α with
@@ -563,8 +493,6 @@ theorem netCenter_mem (O : M) (lam : ℝ → ℝ) (hlam : Continuous lam) (α : 
   rw [netCenter_eq] at hx
   exact List.mem_of_getElem? hx
 
-
-
 theorem netRadius_mem (O : M) {lam : ℝ → ℝ} (hlam : Continuous lam)
     (hanti : Antitone lam) (hpos : ∀ s : ℝ, 0 < lam s)
     (hint : ∀ p : M, ∀ t : ℝ, 0 ≤ t → t ≤ dist p O → ∃ q : M, dist q O = t) (α : ℕ) :
@@ -578,14 +506,12 @@ theorem netRadius_mem (O : M) {lam : ℝ → ℝ} (hlam : Continuous lam)
       exact ⟨dist_nonneg,
         netList_dist_le O hlam hanti hpos hint α x (netCenter_mem O lam hlam α hc)⟩
 
-
 theorem netCenter_of_stage (O : M) (lam : ℝ → ℝ) (hlam : Continuous lam) {γ β : ℕ}
     (h : γ ≤ β) (hβ : γ < (netList O lam hlam β).length) :
     netCenter O lam hlam γ = (netList O lam hlam β)[γ]? := by
   have hγ : γ < (netList O lam hlam γ).length := netList_alive_of_le O lam hlam h hβ
   obtain ⟨t, ht⟩ := netList_prefix O lam hlam h
   rw [netCenter_eq, ← ht, List.getElem?_append_left hγ]
-
 
 theorem netCenter_stable (O : M) (lam : ℝ → ℝ) (hlam : Continuous lam) {α β : ℕ}
     (h : α ≤ β) {x : M} (hx : netCenter O lam hlam α = some x) :
@@ -594,7 +520,6 @@ theorem netCenter_stable (O : M) (lam : ℝ → ℝ) (hlam : Continuous lam) {α
   obtain ⟨t, ht⟩ := netList_prefix O lam hlam h
   rw [← ht, List.getElem?_append_left hlen, ← netCenter_eq]
   exact hx
-
 
 theorem netCenter_ne (O : M) {lam : ℝ → ℝ} (hlam : Continuous lam)
     (hpos : ∀ s : ℝ, 0 < lam s) {α β : ℕ} (hαβ : α ≠ β) {x y : M}
@@ -622,7 +547,6 @@ theorem netCenter_ne (O : M) {lam : ℝ → ℝ} (hlam : Continuous lam)
   · exact hαβ h
   · exact (List.pairwise_iff_getElem.mp hnd) β α hβl hαl h (hgβ.trans hgα.symm)
 
-
 theorem netCenter_disjoint (O : M) {lam : ℝ → ℝ} (hlam : Continuous lam)
     (hpos : ∀ s : ℝ, 0 < lam s) {α β : ℕ} (hαβ : α ≠ β) {x y : M}
     (hx : netCenter O lam hlam α = some x) (hy : netCenter O lam hlam β = some y) :
@@ -639,9 +563,6 @@ theorem netCenter_disjoint (O : M) {lam : ℝ → ℝ} (hlam : Continuous lam)
       Disjoint (Metric.ball a (lam (dist a O))) (Metric.ball b (lam (dist b O))) :=
     fun a b h => h.symm
   exact hpd.forall hsymm hxm hym hxy
-
-
-
 
 theorem netCenter_index_lt (O : M) {lam : ℝ → ℝ} (hlam : Continuous lam)
     (hanti : Antitone lam) (hpos : ∀ s : ℝ, 0 < lam s) {A : ℝ → ℕ}
@@ -677,9 +598,6 @@ theorem netCenter_index_lt (O : M) {lam : ℝ → ℝ} (hlam : Continuous lam)
     (netList O lam hlam α).toFinset
     (fun y hy => List.mem_toFinset.mp hy) hmemr
   omega
-
-
-
 
 theorem netList_passes (O : M) {lam : ℝ → ℝ} (hlam : Continuous lam)
     (hanti : Antitone lam) (hpos : ∀ s : ℝ, 0 < lam s) {A : ℝ → ℕ}
@@ -777,12 +695,6 @@ private theorem exists_proper_realization_aux {I : ModelWithCorners Real E H}
               (I := I) Y.metric x v)) Y.basepoint
     simpa using hhint
 
-
-
-
-
-
-
 omit [CompleteSpace E] in
 theorem exists_proper_realization {I : ModelWithCorners Real E H}
     [I.Boundaryless]
@@ -802,9 +714,6 @@ theorem exists_proper_realization {I : ModelWithCorners Real E H}
          ∃ q : Y.M, dist q Y.basepoint = t) := by
   exact exists_proper_realization_aux (I := I) Y hc hconn
 
-
-
-
 structure ProperMetricOn {I : ModelWithCorners Real E H}
     (Y : PointedRiemannianManifold.{u, uE, uH} (I := I)) where
   ms : MetricSpace Y.M
@@ -818,8 +727,6 @@ structure ProperMetricOn {I : ModelWithCorners Real E H}
   hint : letI : MetricSpace Y.M := ms
     ∀ p : Y.M, ∀ t : ℝ, 0 ≤ t → t ≤ dist p Y.basepoint →
       ∃ q : Y.M, dist q Y.basepoint = t
-
-
 
 omit [NeZero (Module.finrank ℝ E)] [CompleteSpace E] in
 theorem ProperMetricOn.top_eq {I : ModelWithCorners Real E H}
@@ -859,7 +766,6 @@ theorem ProperMetricOn.top_eq {I : ModelWithCorners Real E H}
   change P.ms.toPseudoMetricSpace.toUniformSpace.toTopologicalSpace = Y.topology
   rw [htop, hcan]
 
-
 noncomputable def properMetricOn {I : ModelWithCorners Real E H}
     [I.Boundaryless]
     (Y : PointedRiemannianManifold.{u, uE, uH} (I := I))
@@ -883,17 +789,12 @@ variable {I : ModelWithCorners Real E H}
 variable [I.Boundaryless]
 variable {X : PointedRiemannianSeq.{u', uE', uH'} (I := I)}
 
-
-
-
 noncomputable def orderedNet (hd : InjRadiusDecayInput (I := I) X) (D : Real)
     (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k)) (k α : Nat) :
     List ((X.obj k).M) :=
   letI : MetricSpace (X.obj k).M := (P k).ms
   haveI : ProperSpace (X.obj k).M := (P k).proper
   OrderedNet.netList (X.obj k).basepoint (hd.lambda D) (hd.lambda_continuous D) α
-
-
 
 omit [CompleteSpace E] in
 theorem ProperMetricOn.dist_eq (hd : InjRadiusDecayInput (I := I) X)
@@ -907,8 +808,6 @@ theorem ProperMetricOn.dist_eq (hd : InjRadiusDecayInput (I := I) X)
   exact (ENNReal.ofReal_eq_ofReal_iff
     (letI : MetricSpace (X.obj k).M := (P k).ms
      dist_nonneg) (hre.dist_nonneg k x y)).mp h2
-
-
 
 theorem packingBound_pack (hd : InjRadiusDecayInput (I := I) X)
     (hre : hd.RealizesEdist) {D : Real} (pb : hd.PackingBound D)

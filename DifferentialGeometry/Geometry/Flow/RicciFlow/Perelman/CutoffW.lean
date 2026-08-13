@@ -3,13 +3,6 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.Entropy.WEstimate
 import DifferentialGeometry.Analysis.Integration.LpNorm
 import Mathlib.Analysis.SpecialFunctions.Log.NegMulLog
 
-/-!
-# Normalized Perelman cutoffs
-
-This file converts a nonzero smooth cutoff into a unit-`L²` amplitude while
-keeping its support and recording the exact rescaling of its Dirichlet energy.
--/
-
 noncomputable section
 
 open MeasureTheory Set Bundle Manifold Function
@@ -38,9 +31,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
 omit [NeZero (Module.finrank ℝ E)] in
-/-- A nonzero smooth scalar can be normalized to unit `L²` mass without
-changing its support. Its Dirichlet energy is divided by the original squared
-`L²` norm. -/
 theorem normalize_cutoff
     (g : SmoothRiemannianMetric I M) {φ : M → ℝ}
     (hφ : ContMDiff I 𝓘(ℝ, ℝ) ∞ φ)
@@ -167,9 +157,6 @@ theorem normalize_cutoff
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-/-- A metric ball admits a smooth unit-`L²` amplitude supported in that ball.
-Its Dirichlet energy is bounded by the squared ratio of the outer gradient
-scale to the half-ball mass scale. -/
 theorem exists_cutoff_wdata
     [I.Boundaryless] (g : SmoothRiemannianMetric I M) (a : M)
     {r : ℝ} (hr : 0 < r) :
@@ -276,9 +263,6 @@ theorem exists_cutoff_wdata
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-/-- The normalized ball cutoff satisfies the scalar square-form upper bound
-obtained from its support volume, Dirichlet energy, and a scalar-curvature
-upper bound on the ball. -/
 theorem exists_cutoff_wform
     [I.Boundaryless] (g : SmoothRiemannianMetric I M) (a : M)
     {r : ℝ} (hr : 0 < r) {R : M → ℝ} (hRcont : Continuous R)

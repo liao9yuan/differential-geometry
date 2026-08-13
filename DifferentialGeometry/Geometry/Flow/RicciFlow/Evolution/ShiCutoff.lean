@@ -6,15 +6,6 @@ import DifferentialGeometry.Tensor.RSTensor.FiberMetric.Tensor0SMetric
 
 set_option autoImplicit false
 
-/-!
-# Barrier cutoffs for complete Ricci flows
-
-This file constructs the point-centered compactly supported barrier cutoffs
-used by the complete-noncompact Bernstein estimate.  The construction applies
-the quantitative scalar cutoff profile to the positively rescaled evolving
-distance and uses Calabi upper supports only at positive cutoff points.
--/
-
 noncomputable section
 
 universe u uE uH
@@ -115,9 +106,6 @@ private theorem cutoff_par_bound
     _ ≤ Ccut * a :=
       mul_le_mul_of_nonneg_right hcut ha0
 
-/-- A complete Ricci flow with a uniform curvature bound carries
-point-centered compactly supported barrier cutoffs on every closed forward
-time slab. -/
 theorem shiBarrierCutoff_of_sol
     {D : RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)

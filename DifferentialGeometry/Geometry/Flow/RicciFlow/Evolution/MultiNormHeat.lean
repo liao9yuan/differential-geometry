@@ -2,66 +2,15 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.NablaRiemannHeat
 
 set_option autoImplicit false
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 noncomputable section
 
 namespace DifferentialGeometry.PDE.RicciFlow
 
 open scoped BigOperators
 
-
-
-
-
-
-
-
 section PointwiseAlgebra
 
 variable {Idx : Type*} [Fintype Idx]
-
-
-
 
 def compPairMulti {r : ℕ} (A B : (Fin r → Idx) → Real) : Real :=
   ∑ m : Fin r → Idx, A m * B m
@@ -80,15 +29,6 @@ theorem compPairMulti_comm {r : ℕ} (A B : (Fin r → Idx) → Real) :
 
 end PointwiseAlgebra
 
-
-
-
-
-
-
-
-
-
 section Producer
 
 open Bundle
@@ -102,10 +42,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 variable [CompleteSpace E] [SigmaCompactSpace M] [T2Space M]
 variable {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
 
-
-
-
-
 def MultiLevelTimeDerivOn {r : ℕ}
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (level : Real -> M -> (Fin r → Idx) → Real)
@@ -118,17 +54,10 @@ def MultiLevelTimeDerivOn {r : ℕ}
       D.carrier
       (t : Real)
 
-
 def MultiNormSqDef {r : ℕ}
     (level : Real -> M -> (Fin r → Idx) → Real)
     (normSq : Real -> M -> Real) : Prop :=
   ∀ (t : Real) (x : M), normSq t x = compNormSqMulti (level t x)
-
-
-
-
-
-
 
 def MultiNormLaplacianSplit {r : ℕ}
     (level : Real -> M -> (Fin r → Idx) → Real)
@@ -142,18 +71,10 @@ def MultiNormLaplacianSplit {r : ℕ}
     (∀ (t : Real) (x : M),
       nextNormSq t x = compNormSqMulti (nextLevel t x))
 
-
-
-
-
 def multiReactionDown {r : ℕ}
     (level levelDt levelLap : Real -> M -> (Fin r → Idx) → Real)
     (t : Real) (x : M) : Real :=
   2 * compPairMulti (fun m => levelDt t x m - levelLap t x m) (level t x)
-
-
-
-
 
 omit [TopologicalSpace M] [SigmaCompactSpace M] [T2Space M] [DecidableEq Idx] in
 theorem hasDerivWithinAt_compNormSqMulti {r : ℕ}
@@ -194,20 +115,6 @@ theorem hasDerivWithinAt_compNormSqMulti {r : ℕ}
     ring
   rw [hval] at hsum
   simpa [compNormSqMulti] using hsum
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 omit [TopologicalSpace M] [SigmaCompactSpace M] [T2Space M] [DecidableEq Idx] in
 theorem multiNormHeatEquationOn_of_components {r : ℕ}
@@ -276,46 +183,6 @@ theorem multiNormHeatEquationOn_of_components {r : ℕ}
     rw [this, hpair]
   rw [hval]
   exact hfun
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 omit [TopologicalSpace M] [SigmaCompactSpace M] [T2Space M] [DecidableEq Idx] in
 theorem multiReactionDown_eq_of_residual {r : ℕ}

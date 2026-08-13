@@ -2,15 +2,6 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.LowRegBgC0Time
 import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.LowRegBgC1Time
 import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.LowRegBgTime
 
-/-!
-# Refolded same-background first-order action
-
-This module combines the action-level order-zero refold with the original
-order-one path coefficient.  The resulting bundle has the same second-order
-coefficient as the canonical low-base split and agrees with that split on the
-nonlinear self-action.
--/
-
 noncomputable section
 
 open Bundle Manifold MeasureTheory Set Filter
@@ -50,9 +41,6 @@ private theorem zero_fb_refold
     (mul_nonneg hδ (Real.sqrt_nonneg _))
     (Real.sqrt_nonneg _)
 
-/-- The path-integrated order-one arm against an arbitrary DeTurck background
-`gB`, isolated as an action bundle over the state metric `g`.  The diagonal
-`gB = g` is `oneCore`. -/
 noncomputable def oneCoreBg
     (g gB : SmoothRiemannianMetric I M)
     {ρ δ : ℝ} (hρ : 0 ≤ ρ) (hδ0 : 0 ≤ δ) (hδ_le : δ ≤ 1 / 3)
@@ -66,8 +54,6 @@ noncomputable def oneCoreBg
     g gB hρ hδ0 hδ_le hreal T).C1
   C2 := 0
 
-/-- The original path-integrated order-one arm, isolated as an action bundle.
-It is the same-background diagonal `oneCoreBg g g` of the two-metric arm. -/
 noncomputable def oneCore
     (g : SmoothRiemannianMetric I M)
     {ρ δ : ℝ} (hρ : 0 ≤ ρ) (hδ0 : 0 ≤ δ) (hδ_le : δ ≤ 1 / 3)
@@ -78,9 +64,6 @@ noncomputable def oneCore
     (T : SmoothCcTensor g 0 2) : LowBaseActionData g :=
   oneCoreBg (I := I) (M := M) g g hρ hδ0 hδ_le hreal T
 
-/-- The complete same-background refolded low-base bundle.  Its first-order
-coefficient is the sum of the order-zero passenger produced by the refold and
-the original path-integrated order-one coefficient. -/
 noncomputable def refoldCore
     (g : SmoothRiemannianMetric I M)
     {ρ δ : ℝ} (hρ : 0 ≤ ρ) (hδ0 : 0 ≤ δ) (hδ_le : δ ≤ 1 / 3)
@@ -142,8 +125,6 @@ private theorem refold_c2
         g g hρ hδ0 hδ_le hreal T).C2 := by
   rfl
 
-/-- On the smooth core, the sum of the two completed low actions realizes the
-complete refolded first-order action. -/
 theorem refoldLo_core
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M)
@@ -284,8 +265,6 @@ private theorem refold_action
     (refold_first (I := I) (M := M)
       g hρ hδ0 hδ_le hreal T)
 
-/-- The canonical same-background remainder split is unchanged after the
-order-zero self-action is refolded into `refoldCore`. -/
 theorem refold_split
     (g : SmoothRiemannianMetric I M)
     {ρ δ : ℝ} (hρ : 0 ≤ ρ) (hδ0 : 0 ≤ δ) (hδ_le : δ ≤ 1 / 3)
@@ -310,12 +289,6 @@ theorem refold_split
       (refold_action (I := I) (M := M)
         g hρ hδ0 hδ_le hreal T)
 
-/-- The complete refolded low-base bundle against an arbitrary DeTurck
-background `gB`.  Besides the order-zero passenger produced by the refold and
-the two-metric path-integrated order-one coefficient, its order-zero
-coefficient carries the background correction of the canonical low-base
-order-zero coefficient.  That correction vanishes on the diagonal, which is why
-`refoldCore` does not see it. -/
 noncomputable def refoldCoreBg
     (g gB : SmoothRiemannianMetric I M)
     {ρ δ : ℝ} (hρ : 0 ≤ ρ) (hδ0 : 0 ≤ δ) (hδ_le : δ ≤ 1 / 3)
@@ -385,8 +358,6 @@ private theorem refoldBg_c2
         g gB hρ hδ0 hδ_le hreal T).C2 := by
   rfl
 
-/-- The same-background diagonal of the arbitrary-background refold is the
-original refold: the order-zero background correction cancels. -/
 theorem refoldCoreBg_diag
     (g : SmoothRiemannianMetric I M)
     {ρ δ : ℝ} (hρ : 0 ≤ ρ) (hδ0 : 0 ≤ δ) (hδ_le : δ ≤ 1 / 3)
@@ -489,11 +460,6 @@ private theorem refoldBg_action
     (refoldBg_first (I := I) (M := M)
       g gB hρ hδ0 hδ_le hreal T)
 
-/-- **The canonical zero-based Ricci--DeTurck remainder split against an
-arbitrary DeTurck background, after the order-zero self-action is refolded.**
-The refolded bundle `refoldCoreBg g gB` reproduces the two-metric low-base
-split of `lowCoreBg_split` exactly; the same-background diagonal is
-`refold_split`. -/
 theorem refold_split_bg
     (g gB : SmoothRiemannianMetric I M)
     {ρ δ : ℝ} (hρ : 0 ≤ ρ) (hδ0 : 0 ≤ δ) (hδ_le : δ ≤ 1 / 3)
@@ -518,14 +484,6 @@ theorem refold_split_bg
       (refoldBg_action (I := I) (M := M)
         g gB hρ hδ0 hδ_le hreal T)
 
-/-- The order-zero **background correction** of the arbitrary-background
-low-base bundle, isolated as an action bundle over the state metric `g`.
-
-Its order-zero coefficient is the difference of the canonical low-base
-order-zero coefficients at background `gB` and at background `g`; its order-one
-and order-two coefficients vanish.  This is exactly the passenger by which
-`refoldCoreBg g gB` exceeds the pair `c0CoreData g`, `oneCoreBg g gB`, and it
-vanishes on the diagonal `gB = g`. -/
 noncomputable def deltaCoreBg
     (g gB : SmoothRiemannianMetric I M)
     {ρ δ : ℝ} (hρ : 0 ≤ ρ) (hδ0 : 0 ≤ δ) (hδ_le : δ ≤ 1 / 3)
@@ -541,9 +499,6 @@ noncomputable def deltaCoreBg
   C1 := 0
   C2 := 0
 
-/-- The arbitrary-background refold with its order-zero background correction
-removed: the coefficientwise sum of `c0CoreData g` and `oneCoreBg g gB`.  Only
-its order-zero and order-one coefficients are used, so its `C2` is zero. -/
 private noncomputable def refoldBgMid
     (g gB : SmoothRiemannianMetric I M)
     {ρ δ : ℝ} (hρ : 0 ≤ ρ) (hδ0 : 0 ≤ δ) (hδ_le : δ ≤ 1 / 3)
@@ -594,14 +549,6 @@ private theorem refoldMid_split1
           g gB hρ hδ0 hδ_le hreal T).C1 := by
   simp only [refoldCoreBg, refoldBgMid, deltaCoreBg, oneCoreBg, add_zero]
 
-/-- **The `H³ → H²` completion of the arbitrary-background refold is the sum of
-three completed actions**: the background-free order-zero refold action, the
-two-metric order-one action, and the order-zero background-correction action of
-`deltaCoreBg`.
-
-The identity is not definitional — each `a1Hi` is a norm extension — so it is
-supplied by the coefficient additivity `a1Hi_add` of the completion, applied
-along the coefficient decomposition of `refoldCoreBg`. -/
 theorem refoldBg_a1Hi_split
     (hDim : Module.finrank ℝ E = 3)
     (g gB : SmoothRiemannianMetric I M)
@@ -631,8 +578,6 @@ theorem refoldBg_a1Hi_split
       (refoldBgMid (I := I) (M := M) g gB hρ hδ0 hδ_le hreal T)
       rfl rfl]
 
-/-- The adjacent-scale partner of `refoldBg_a1Hi_split`: the `H² → H¹`
-completion of the arbitrary-background refold is the same three-term sum. -/
 theorem refoldBg_a1Lo_split
     (hDim : Module.finrank ℝ E = 3)
     (g gB : SmoothRiemannianMetric I M)
@@ -685,17 +630,6 @@ private noncomputable abbrev incl12
   tensorHsInclusion (I := I) (M := M) (g := g)
     (r := 0) (s := 2) (by norm_num)
 
-/-- **The trajectory-free affine packet of the complete refolded first-order
-action against an arbitrary DeTurck background `gB`.**  It is the sum of the
-background-free order-zero packet `c0_pack g` and the two-metric order-one
-packet `c1_bg_pack g gB`: on every coefficient radius `ρ ≤ ρ₀` the two completed
-action maps `FHi`, `FLo` are continuous, realize the refolded core action on
-smooth data, satisfy a common affine growth certificate `‖F x‖ ≤ Z + L‖x‖`, and
-form the Sobolev-inclusion square.
-
-Only the state metric `g` indexes the Sobolev scales; the background enters
-solely through the order-one coefficient `oneCoreBg g gB`.  The same-background
-diagonal is `refold_aff`. -/
 theorem refold_aff_bg
     (hDim : Module.finrank ℝ E = 3)
     (g gB : SmoothRiemannianMetric I M) :
@@ -826,19 +760,6 @@ theorem refold_aff_bg
   exact ⟨Z, L, hZ, hL, FHi, FLo, hFHi, hFLo,
     hHiCore, hLoCore, hFHiBd, hFLoBd, hcomm⟩
 
-/-- **The trajectory-free affine packet of the complete same-background
-refolded first-order action.**  It is the sum of the order-zero packet
-`c0_pack` and the order-one packet `c1_bg_pack`: on every coefficient radius
-`ρ ≤ ρ₀` the two completed action maps `FHi`, `FLo` are continuous, realize the
-refolded core action on smooth data, satisfy a common affine growth certificate
-`‖F x‖ ≤ Z + L‖x‖`, and form the Sobolev-inclusion square.
-
-No time horizon and no trajectory occur, so a consumer may cap a radius against
-`L` before any trajectory exists; the time-`L²` certificates along a trajectory
-are produced from this packet alone by `refoldAffA1_memLp` and
-`refoldAffA1Hi_memLp`, and the a.e. square by `refoldAffA1_compat`.
-
-This is the same-background diagonal `gB = g` of `refold_aff_bg`. -/
 theorem refold_aff
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M) :
@@ -882,22 +803,6 @@ theorem refold_aff
                 (FLo x).comp (incl32 (I := I) (M := M) g)) :=
   refold_aff_bg (I := I) (M := M) hDim g g
 
-/-- The trajectory-free affine packet of the order-zero background correction
-`deltaCoreBg g gB`, as a named predicate.
-
-**Proved** by `c0bg_pack` below; it was a registered honest input between ledger
-entries 205 and 207, and the name is kept because it is the interface through
-which `bgA1_of_refold` carries the *correct* bundle `refoldCoreBg g gB`.
-
-The clause list mirrors `c0_pack` and `c1_bg_pack` verbatim: on every
-coefficient radius `ρ ≤ ρ₀` the two completed maps `GHi`, `GLo` are continuous,
-realize the correction bundle's completed actions on smooth data, satisfy a
-common affine growth certificate `‖G x‖ ≤ Z + L‖x‖`, and form the
-Sobolev-inclusion square.  The square is a genuine obligation of the packet and
-not a direct instance of `a1_comm`: the latter is an identity between one
-*bundle*'s two completions, whereas the field it serves is an identity between
-the *maps* at an arbitrary, possibly non-smooth, state `x`; `c0bg_pack` reaches
-it as the density limit of `a1_comm`. -/
 def BgDeltaPack (g gB : SmoothRiemannianMetric I M) : Prop :=
   ∃ ρ0 : ℝ, 0 < ρ0 ∧
     ∀ {ρ δ : ℝ} (hρ : 0 < ρ) (_ : ρ ≤ ρ0)
@@ -932,8 +837,6 @@ def BgDeltaPack (g gB : SmoothRiemannianMetric I M) : Prop :=
             (incl12 (I := I) (M := M) g).comp (GHi x) =
               (GLo x).comp (incl32 (I := I) (M := M) g))
 
-/-- The zero action bundle: the reference point against which `a1_diff` turns a
-coefficient jet bound into an operator-norm bound. -/
 private noncomputable def zeroBundle
     (g : SmoothRiemannianMetric I M) : LowBaseActionData g where
   C0 := 0
@@ -997,13 +900,6 @@ private theorem zeroBundle_pair
       (le_antisymm ?_ (norm_nonneg _))
     simpa only [Real.sqrt_zero, mul_zero] using hLoNorm
 
-/-- The order-zero background correction is jointly *affine* in the state.
-
-This is the affine half of `BgDeltaPack`.  It is the exact analogue of the
-background-free `c0_core_affine`, with the genuinely quadratic coefficient
-envelope `c0Coeff_aff` replaced by the tame background-difference envelope
-`c0Bg_diff_tame`: the three quadratic arms of the self-remainder carry no
-background argument and cancel in the difference. -/
 private theorem c0bg_aff
     (hDim : Module.finrank ℝ E = 3)
     (g gB : SmoothRiemannianMetric I M) :
@@ -1104,14 +1000,6 @@ private theorem c0bg_aff
         simp only [Q, A3, Z, L]
         ring
 
-/-- On every bounded spectral `H3` core ball, the two completed realizations of
-the order-zero background correction are jointly Lipschitz in the state.
-
-This is the continuity half of `BgDeltaPack`.  Unlike `c0CorePair`, whose
-coefficient input is a single-background Lipschitz estimate, the correction is a
-*difference* of two backgrounds, so `c0_bg_pair_h2` is consumed twice — once at
-`gB` and once at the diagonal `gB = g` — and the two estimates are recombined by
-`jetSub`. -/
 private theorem c0bg_pair
     (hDim : Module.finrank ℝ E = 3)
     (g gB : SmoothRiemannianMetric I M) :
@@ -1382,20 +1270,6 @@ private theorem c0bg_pair
           Ca * (Kc * D) := hout.2
       _ = Ca * Kc * D := by ring
 
-/-- **The trajectory-free affine packet of the order-zero background
-correction**, i.e. the producer of `BgDeltaPack g gB`.
-
-On every coefficient radius `ρ ≤ ρ₀` the correction supplies a pair of completed
-action maps on the two adjacent scales, continuous, realizing `deltaCoreBg`'s
-completed actions on smooth data, with a common affine growth certificate
-`‖G x‖ ≤ Z + L‖x‖` and the Sobolev-inclusion square.
-
-The affine certificate is `c0bg_aff`, resting on the tame background-difference
-envelope `c0Bg_diff_tame`; the Lipschitz certificate needed to extend off the
-smooth core is `c0bg_pair`; the square is the density limit of `a1_comm`, which
-holds for every action bundle.  Together with `refold_aff_bg` this makes
-`bgA1_of_refold` — the first-order half of the fixed-background lift —
-unconditional. -/
 theorem c0bg_pack
     (hDim : Module.finrank ℝ E = 3)
     (g gB : SmoothRiemannianMetric I M) :

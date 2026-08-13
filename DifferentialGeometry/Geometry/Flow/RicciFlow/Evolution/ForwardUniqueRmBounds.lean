@@ -8,31 +8,6 @@ set_option linter.style.longLine false
 set_option linter.unusedSectionVars false
 set_option backward.isDefEq.respectTransparency false
 
-/-!
-# Pointwise norm bounds for the divergence-form carriers (Route-K bricks K2.4, K2.5)
-
-`Evolution/ForwardUniqueRmDiff.lean` organizes the two-metric Laplacian difference as
-`Δ_{g₁}T − Δ_{g₂}T = div_{g₁}(U) + R` with `U = lapDiffFlux g₁ g₂ T` and `R = lapDiffRem g₁ g₂ T`.
-The Kotschwar energy estimate consumes that identity only through *pointwise norm bounds* on
-`U` and `R` in terms of the three difference carriers of `Evolution/ForwardUniqueFields.lean`.
-This file proves them, for two fixed smooth metrics at a fixed point (no time parameter).
-
-## Main results
-
-* `connDiffVec_le` — the atomic estimate: the `g₁`-norm of `(∇¹ − ∇²)_X Y` is at most
-  `|A₀₃|_{g₁}·|X|_{g₁}·|Y|_{g₁}`, with sharp constant `1`.  This is the `A₀₃`-currency
-  companion of `Tensor0SBundle.connDiffVec_norm_le`, which is stated in the mixed
-  Hilbert–Schmidt currency `normSqRS (connectionDifferenceTensorAt …)`.
-* `lapDiffFlux_eval` — the pointwise evaluation `U(v, slots) = −∑ₐ T(slotsₐ ↦ (∇¹−∇²)(slotsₐ, v))`,
-  the statement that the flux is *algebraic* (zeroth order) in `T`.
-* `fluxNormSq_le` — **K2.4**: `|U|²_{g₁} ≤ s²·nˢ⁺¹·|A₀₃|²_{g₁}·|T|²_{g₁}`, `n = finrank ℝ E`.
-* `rmFluxNormSq_le` — the `(0,5)` curvature instance of K2.4 with the background factor supplied
-  as an explicit hypothesis.
-
-The background factors are always explicit hypothesis arguments or explicit right-hand factors:
-uniformity over a slab is the consumer's business, not this file's.
--/
-
 noncomputable section
 
 namespace DifferentialGeometry.PDE.RicciFlow
@@ -51,18 +26,12 @@ variable [CompleteSpace E] [SigmaCompactSpace M] [T2Space M]
 
 section Frame
 
-/-- Nonnegativity of the pointwise Riemannian square norm.  A local restatement: the library
-version `DifferentialGeometry.Analysis.Laplacian.metric_inner_self_nonneg` lives behind a
-model-space `[InnerProductSpace ℝ E]` section variable, which this project does not carry. -/
 private theorem innerSelfNonneg (g : SmoothRiemannianMetric I M) (x : M)
     (v : TangentSpace I x) : 0 ≤ g.inner x v v := by
   rcases eq_or_ne v 0 with hv | hv
   · simp [hv]
   · exact (g.pos x v hv).le
 
-/-- **A `g`-orthonormal basis of the tangent fibre at a point.**  Built from the fibre
-inner-product core of `g` at `x` via `stdOrthonormalBasis`; the index type is
-`Fin (finrank ℝ (TangentSpace I x))`, which is definitionally `Fin (finrank ℝ E)`. -/
 private theorem exists_onFrame (g : SmoothRiemannianMetric I M) (x : M) :
     ∃ b : Module.Basis (Fin (Module.finrank Real (TangentSpace I x))) Real
         (TangentSpace I x),
@@ -86,12 +55,9 @@ private theorem exists_onFrame (g : SmoothRiemannianMetric I M) (x : M) :
   rw [← hinner]
   exact ob.inner_eq_ite i j
 
-/-- The tangent fibre has the dimension of the model space (a definitional identity, named so
-that arithmetic rewrites can use it). -/
 private theorem frankEq (x : M) :
     (Module.finrank Real (TangentSpace I x) : Real) = (Module.finrank Real E : Real) := rfl
 
-/-- The identity inverse-metric witness attached to a `g`-orthonormal basis. -/
 private theorem onFrame_inv {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
     (g : SmoothRiemannianMetric I M) {x : M}
     (basis : Module.Basis Idx Real (TangentSpace I x))
@@ -100,11 +66,6 @@ private theorem onFrame_inv {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
   intro i j
   constructor <;> simp [identityInvMetric, diagonalInvMetric, hON]
 
-/-- Cauchy–Schwarz for the pointwise metric inner product.  A local restatement: the library
-version `DifferentialGeometry.Analysis.Laplacian.abs_metric_inner_le_sqrt_metric_quadratic`
-lives behind a model-space `[InnerProductSpace ℝ E]` section variable.  The proof here is the
-`(0,1)` case of the tensor Cauchy–Schwarz `abs_apply_le_sqrt_normSq0S`, applied to the flat
-covector of `u`. -/
 private theorem metricCS (g : SmoothRiemannianMetric I M) (x : M)
     (u v : TangentSpace I x) :
     |g.inner x u v| ≤ Real.sqrt (g.inner x u u) * Real.sqrt (g.inner x v v) := by
@@ -121,7 +82,6 @@ private theorem metricCS (g : SmoothRiemannianMetric I M) (x : M)
   rw [hαv, hαnorm] at h
   simpa using h
 
-/-- In a `g`-orthonormal basis, the coordinate functionals are the flat covectors. -/
 private theorem onFrame_coord {Idx : Type*} [DecidableEq Idx]
     (g : SmoothRiemannianMetric I M) {x : M}
     (basis : Module.Basis Idx Real (TangentSpace I x))
@@ -139,8 +99,6 @@ private theorem onFrame_coord {Idx : Type*} [DecidableEq Idx]
     · rw [if_neg h, if_neg (fun hh : j = i => h hh.symm)]
   exact congrArg (fun L : (TangentSpace I x) →ₗ[Real] Real => L v) hlin
 
-/-- Evaluating a covariant tensor on basis vectors of a `g`-orthonormal frame is bounded by
-its fibre norm (all slot lengths are `1`). -/
 private theorem absBasis_le {Idx : Type*} [Finite Idx] [DecidableEq Idx]
     (g : SmoothRiemannianMetric I M) {x : M} {k : ℕ}
     (basis : Module.Basis Idx Real (TangentSpace I x))
@@ -157,7 +115,6 @@ private theorem absBasis_le {Idx : Type*} [Finite Idx] [DecidableEq Idx]
   rw [hprod, mul_one] at h
   exact h
 
-/-- Crude parallelogram bound: `|A + B|² ≤ 2|A|² + 2|B|²`. -/
 private theorem normSqAdd_le {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
     (g : SmoothRiemannianMetric I M) {x : M} {k : ℕ}
     (basis : Module.Basis Idx Real (TangentSpace I x))
@@ -184,14 +141,6 @@ section Flux
 
 variable {s : ℕ}
 
-/-- **The flux is algebraic in `T`.**  Pointwise evaluation of `U = ∇¹T − ∇²T` on an arbitrary
-leading (divergence-slot) vector `v` and arbitrary lower-slot vectors: the derivative parts
-cancel and only the connection difference `(∇¹ − ∇²)` inserted into the lower slots survives.
-
-This is the field-level `lapDiffFlux` companion of
-`HCGCompactness.MetricCovDerivLinear.diffStep_eval`, restated here in the `metricCov` currency
-of the forward-uniqueness lane (that file's section block carries a model-space
-`[InnerProductSpace ℝ E]`). -/
 theorem lapDiffFlux_eval (g₁ g₂ : SmoothRiemannianMetric I M)
     (T : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
       (n := (∞ : WithTop ℕ∞)) s)
@@ -219,10 +168,10 @@ theorem lapDiffFlux_eval (g₁ g₂ : SmoothRiemannianMetric I M)
   have hVx : ∀ a, V a x = slots a := by
     intro a; rw [hV]; simpa using hVv a
   have hslots : (fun a : Fin s => V a x) = slots := by funext a; exact hVx a
-  -- the section-level identity
+
   have key := nabla0SFun_sub_cov (I := I) (metricCov (I := I) g₁) (metricCov (I := I) g₂)
     X V T x
-  -- split the fibre difference on the left of `key`
+
   have hsplit :
       ((nabla0SFun (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) s
             (metricCov (I := I) g₁) X T x) -
@@ -235,7 +184,7 @@ theorem lapDiffFlux_eval (g₁ g₂ : SmoothRiemannianMetric I M)
     Tensor0SSpace.sub_apply (I := I) s x _ _ _
   rw [hsplit] at key
   simp only [hXx, hVx] at key
-  -- the flux value, split the same way
+
   have hflux :
       lapDiffFlux (I := I) g₁ g₂ T x (Fin.cons (X x) (fun a : Fin s => V a x)) =
         totalNabla0SFun (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) s
@@ -248,13 +197,6 @@ theorem lapDiffFlux_eval (g₁ g₂ : SmoothRiemannianMetric I M)
   rw [hXx, hslots] at hflux
   rw [hflux, key]
 
-/-- **The atomic connection-difference estimate in `A₀₃` currency.**  The `g₁`-length of
-`(∇¹ − ∇²)_X Y` is at most `|A₀₃|_{g₁}` times the `g₁`-lengths of `X` and `Y`, with sharp
-constant `1`.
-
-Route: `A₀₃(X, Y, Z) = g₁((∇¹−∇²)_X Y, Z)` (`connDiffLowAt_apply`), so slotwise Cauchy–Schwarz
-(`abs_apply_le_sqrt_normSq0S`) applied at `Z = (∇¹−∇²)_X Y` reads off the square of the
-left-hand side. -/
 theorem connDiffVec_le (g₁ g₂ : SmoothRiemannianMetric I M) (x : M)
     (X Y : TangentSpace I x) :
     Real.sqrt (g₁.inner x
@@ -300,15 +242,6 @@ theorem connDiffVec_le (g₁ g₂ : SmoothRiemannianMetric I M) (x : M)
     rw [← hsq] at this
     nlinarith [this, hpos]
 
-/-- **K2.4 — the flux bound.**  The Kotschwar flux `U = ∇¹T − ∇²T` is controlled pointwise by
-the connection-difference carrier `A₀₃` times the background field itself (no derivative of the
-background enters: `U` is *algebraic* in `T`):
-
-`|U|²_{g₁} ≤ s²·nˢ⁺¹·|A₀₃|²_{g₁}·|T|²_{g₁}`,  `n = finrank ℝ E`.
-
-The dimension factor comes from bounding each of the `nˢ⁺¹` orthonormal-frame components of `U`
-by `s·|A₀₃|·|T|` (`lapDiffFlux_eval` + slotwise Cauchy–Schwarz + `connDiffVec_le`) and summing
-squares; the sharp constant `s` would need a per-component Parseval identity. -/
 theorem fluxNormSq_le (g₁ g₂ : SmoothRiemannianMetric I M)
     (T : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
       (n := (∞ : WithTop ℕ∞)) s)
@@ -398,9 +331,6 @@ section Trace
 
 variable {s : ℕ}
 
-/-- **Norm of the metric trace of the first two slots.**  `|tr_g V|²_g ≤ nˢ⁺²·|V|²_g`, with
-`n = finrank ℝ E`: in a `g`-orthonormal frame the trace is the `n`-term diagonal sum, so each
-of the `nˢ` components of `tr_g V` is at most `n·|V|_g`. -/
 theorem traceNormSq_le (g : SmoothRiemannianMetric I M) (x : M)
     (V : Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) (s + 2) x) :
     normSq0S (I := I) g x s (metricTraceFirstTwo0STensor (I := I) g V) ≤
@@ -476,8 +406,6 @@ end Trace
 
 section InverseMetric
 
-/-- Diagonal entries of the inverse metric of `g₂` in a `g₁`-orthonormal frame are between `0`
-and the comparison constant `Λ` of `g₁ ≤ Λ·g₂`. -/
 private theorem invDiag_le (g₁ g₂ : SmoothRiemannianMetric I M) {x : M} {Λ : Real}
     (hΛ0 : 0 ≤ Λ) (hΛ : ∀ v : TangentSpace I x, g₁.inner x v v ≤ Λ * g₂.inner x v v)
     {Idx : Type*} [DecidableEq Idx]
@@ -521,7 +449,6 @@ private theorem invDiag_le (g₁ g₂ : SmoothRiemannianMetric I M) {x : M} {Λ 
   · rw [hQ]
     nlinarith [hkey, hsqrt, hpos, Real.sqrt_nonneg (Λ * g₂.inner x u u)]
 
-/-- Every entry of the inverse metric of `g₂` in a `g₁`-orthonormal frame is bounded by `Λ`. -/
 private theorem invEntry_le (g₁ g₂ : SmoothRiemannianMetric I M) {x : M} {Λ : Real}
     (hΛ0 : 0 ≤ Λ) (hΛ : ∀ v : TangentSpace I x, g₁.inner x v v ≤ Λ * g₂.inner x v v)
     {Idx : Type*} [DecidableEq Idx]
@@ -562,9 +489,6 @@ private theorem invEntry_le (g₁ g₂ : SmoothRiemannianMetric I M) {x : M} {Λ
           (Real.sqrt_nonneg _) (Real.sqrt_nonneg _)
     _ = Λ := Real.mul_self_sqrt hΛ0
 
-/-- **The inverse-metric difference is `O(|h₀₂|)`.**  In a `g₁`-orthonormal frame, the entries
-of `g₁^{-1} − g₂^{-1}` are bounded by `n·Λ·|h₀₂|_{g₁}`, from the algebraic identity
-`g₁^{-1} − g₂^{-1} = −g₂^{-1}·h₀₂` in the frame and the entry bound `invEntry_le`. -/
 private theorem invDiff_le (g₁ g₂ : SmoothRiemannianMetric I M) {x : M} {Λ : Real}
     (hΛ0 : 0 ≤ Λ) (hΛ : ∀ v : TangentSpace I x, g₁.inner x v v ≤ Λ * g₂.inner x v v)
     {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
@@ -630,14 +554,6 @@ private theorem invDiff_le (g₁ g₂ : SmoothRiemannianMetric I M) {x : M} {Λ 
         rw [Finset.sum_const, Finset.card_univ]
         simp [nsmul_eq_mul]; ring
 
-/-- **The trace-difference bound.**  For a fixed `(0, s+2)` tensor, the difference of the two
-metric traces is the contraction of the inverse-metric difference against it, hence controlled
-by the metric-difference carrier `h₀₂`:
-
-`|tr_{g₁}W − tr_{g₂}W|²_{g₁} ≤ nˢ⁺⁶·Λ²·|h₀₂|²_{g₁}·|W|²_{g₁}`.
-
-The comparison constant `Λ` of `g₁ ≤ Λ·g₂` is an explicit hypothesis argument: no metric
-equivalence is hidden inside. -/
 theorem traceDiffNormSq_le (g₁ g₂ : SmoothRiemannianMetric I M) (x : M) {s : ℕ} {Λ : Real}
     (hΛ0 : 0 ≤ Λ) (hΛ : ∀ v : TangentSpace I x, g₁.inner x v v ≤ Λ * g₂.inner x v v)
     (W : Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) (s + 2) x) :
@@ -761,16 +677,6 @@ end InverseMetric
 
 section Remainder
 
-/-- **K2.5 — the remainder bound.**  The divergence-form remainder splits into a
-connection-difference term and an inverse-metric-difference term, each paired with its own
-background factor:
-
-`|R|²_{g₁} ≤ 2(s+1)²·n^{2s+4}·|A₀₃|²_{g₁}·B₁ + 2·n^{s+6}·Λ²·|h₀₂|²_{g₁}·B₂`,
-
-where `B₁` bounds `|∇²T|²_{g₁}` and `B₂` bounds `|∇²∇²T|²_{g₁}` — the second, one covariant
-derivative higher than Kotschwar's literal flux needs, is the recorded cost of the flux
-substitution (`ForwardUniqueRmDiff.md`).  Both background bounds and the metric comparison
-constant `Λ` are explicit hypothesis arguments. -/
 theorem remNormSq_le (g₁ g₂ : SmoothRiemannianMetric I M) {s : ℕ}
     (T : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
       (n := (∞ : WithTop ℕ∞)) s)
@@ -800,7 +706,7 @@ theorem remNormSq_le (g₁ g₂ : SmoothRiemannianMetric I M) {s : ℕ}
   rw [hsplit]
   refine le_trans (normSqAdd_le (I := I) g₁ basis hinv _ _) ?_
   have hnn : (0 : Real) ≤ (Module.finrank Real E : Real) := by positivity
-  -- first summand: trace of the flux
+
   have hfirst : normSq0S (I := I) g₁ x s
       (metricTraceFirstTwo0STensor (I := I) g₁ (U x)) ≤
         ((s : Real) + 1) ^ 2 * (Module.finrank Real E : Real) ^ (2 * s + 4) *
@@ -823,7 +729,7 @@ theorem remNormSq_le (g₁ g₂ : SmoothRiemannianMetric I M) {s : ℕ}
     refine le_trans (mul_le_mul_of_nonneg_left hchain (by positivity)) (le_of_eq ?_)
     rw [show 2 * s + 4 = (s + 2) + (s + 2) by ring, pow_add]
     ring
-  -- second summand: the trace difference
+
   have hsecond : normSq0S (I := I) g₁ x s
       (metricTraceFirstTwo0STensor (I := I) g₁ (W x) -
         metricTraceFirstTwo0STensor (I := I) g₂ (W x)) ≤
@@ -851,9 +757,6 @@ end Remainder
 
 section Curvature
 
-/-- **The `(0,5)` curvature instance of K2.4.**  With the background bound `|Rm₂|²_{g₁} ≤ B`
-supplied as an explicit hypothesis (slab-uniformity is the consumer's business), the
-forward-uniqueness flux `U₀₅` obeys `|U₀₅|²_{g₁} ≤ 16·n⁵·|A₀₃|²_{g₁}·B`. -/
 theorem rmFluxNormSq_le (g₁ g₂ : SmoothRiemannianMetric I M)
     (Rm2 : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
       (n := (∞ : WithTop ℕ∞)) 4)
@@ -871,11 +774,6 @@ theorem rmFluxNormSq_le (g₁ g₂ : SmoothRiemannianMetric I M)
   rw [this]
   exact mul_le_mul_of_nonneg_left hB hfac
 
-/-- **The `(0,4)` curvature instance of K2.5.**  With the two background bounds supplied as
-explicit hypotheses — `B₁` on `|∇²Rm₂|²_{g₁}` and `B₂` on `|∇²∇²Rm₂|²_{g₁}` — and the metric
-comparison constant `Λ` of `g₁ ≤ Λ·g₂`, the forward-uniqueness remainder obeys
-
-`|R₀₄|²_{g₁} ≤ 50·n¹²·|A₀₃|²_{g₁}·B₁ + 2·n¹⁰·Λ²·|h₀₂|²_{g₁}·B₂`. -/
 theorem rmRemNormSq_le (g₁ g₂ : SmoothRiemannianMetric I M)
     (Rm2 : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
       (n := (∞ : WithTop ℕ∞)) 4)

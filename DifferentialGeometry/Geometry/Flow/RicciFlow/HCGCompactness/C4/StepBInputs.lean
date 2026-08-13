@@ -12,36 +12,6 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.C4.StepAInput
 
 set_option autoImplicit false
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 noncomputable section
 
 universe u uE uH
@@ -84,10 +54,6 @@ private local instance : NormedAddCommGroup (E →L[Real] E →L[Real] E →L[Re
 private local instance : NormedSpace Real (E →L[Real] E →L[Real] E →L[Real] Real) :=
   ContinuousLinearMap.toNormedSpace
 
-
-
-
-
 noncomputable def normalTransition
     (X : PointedRiemannianManifold.{u, uE, uH} (I := I)) (x y : X.M) : E → E :=
   letI : TopologicalSpace X.M := X.topology
@@ -97,16 +63,6 @@ noncomputable def normalTransition
   fun z =>
     normalChartAt (I := I) X.metric y
       (expMapDiffeo (I := I) X.metric x z)
-
-
-
-
-
-
-
-
-
-
 
 noncomputable def normalCoordMetric
     (Y : PointedRiemannianManifold.{u, uE, uH} (I := I)) (x : Y.M) :
@@ -120,12 +76,6 @@ noncomputable def normalCoordMetric
       mfderiv 𝓘(Real, E) I (fun w => expMapDiffeo (I := I) Y.metric x w) z
     (ContinuousLinearMap.precomp Real D).comp
       ((Y.metric.inner (expMapDiffeo (I := I) Y.metric x z)).comp D)
-
-
-
-
-
-
 
 omit [NeZero (Module.finrank ℝ E)] in
 theorem expMapDiffeo_contMDiffOn_ball
@@ -154,9 +104,6 @@ theorem expMapDiffeo_contMDiffOn_ball
     exact (hforward w hwδ).contMDiffWithinAt
   exact hexp.congr (fun w hw => expMapDiffeo_apply_eq (I := I) Y.metric x hw.2)
 
-
-
-
 omit [NeZero (Module.finrank ℝ E)] in
 theorem normalCoordMetric_apply
     (Y : PointedRiemannianManifold.{u, uE, uH} (I := I)) (x : Y.M) (z v w : E) :
@@ -175,8 +122,6 @@ theorem normalCoordMetric_apply
   simp only [normalCoordMetric, ContinuousLinearMap.comp_apply,
     ContinuousLinearMap.precomp_apply]
   rfl
-
-
 
 omit [NeZero (Module.finrank ℝ E)] in
 theorem normalMetric_zero
@@ -250,12 +195,6 @@ theorem radialEnorm_normal
             (show TangentSpace I x from v)) := rfl
   rw [hinner, normalCoordMetric_apply (I := I),
     expMapDiffeo_apply_eq (I := I) Y.metric x hsrc, hev.mfderiv_eq]
-
-
-
-
-
-
 
 omit [NeZero (Module.finrank ℝ E)] in
 private theorem expMapDiffeo_pushforward_section_contMDiffOn
@@ -377,17 +316,6 @@ theorem normalCoordMetric_contDiffOn
   exact ⟨δ, hδ, normalCoordMetric_contDiffOn_of_smooth (I := I) Y x
     (Metric.isOpen_ball.inter (expMapDiffeo (I := I) Y.metric x).open_source) hf⟩
 
-
-
-
-
-
-
-
-
-
-
-
 omit [NeZero (Module.finrank ℝ E)] in
 theorem normalCoordMetric_contDiffOn_ball
     (Y : PointedRiemannianManifold.{u, uE, uH} (I := I)) (x : Y.M) :
@@ -406,12 +334,6 @@ theorem normalCoordMetric_contDiffOn_ball
   refine ⟨Metric.mem_ball.mpr ?_, hsub (Metric.mem_ball.mpr ?_)⟩
   · rw [dist_zero_right]; exact lt_of_lt_of_le hz (min_le_left _ _)
   · rw [dist_zero_right]; exact lt_of_lt_of_le hz (min_le_right _ _)
-
-
-
-
-
-
 
 theorem expMapDiffeo_contMDiffOn_expBall
     (Y : PointedRiemannianManifold.{u, uE, uH} (I := I)) (x : Y.M) :
@@ -437,12 +359,6 @@ theorem expMapDiffeo_contMDiffOn_expBall
   exact expMapDiffeo_apply_eq (I := I) Y.metric x
     (mem_expMapDiffeo_source_of_norm_lt_radius (I := I) Y.metric x hw)
 
-
-
-
-
-
-
 theorem normalCoordMetric_contDiffOn_expBall
     (Y : PointedRiemannianManifold.{u, uE, uH} (I := I)) (x : Y.M) :
     letI : TopologicalSpace Y.M := Y.topology
@@ -458,12 +374,6 @@ theorem normalCoordMetric_contDiffOn_expBall
   exact normalCoordMetric_contDiffOn_of_smooth (I := I) Y x Metric.isOpen_ball
     (expMapDiffeo_contMDiffOn_expBall (I := I) Y x)
 
-
-
-
-
-
-
 theorem contDiffOn_normalCoordMetric_of_subset_expBall
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)} (c : ∀ k : ℕ, (X.obj k).M) {U : Set E}
     (hsub : ∀ k,
@@ -475,9 +385,6 @@ theorem contDiffOn_normalCoordMetric_of_subset_expBall
     ∀ k, ContDiffOn Real (⊤ : ℕ∞) (normalCoordMetric (I := I) (X.obj k) (c k)) U :=
   fun k => (normalCoordMetric_contDiffOn_expBall (I := I) (X.obj k) (c k)).mono (hsub k)
 
-
-
-
 def NormalCoordMetricEquivOn
     (Y : PointedRiemannianManifold.{u, uE, uH} (I := I)) (x : Y.M) (U : Set E) :
     Prop :=
@@ -486,8 +393,6 @@ def NormalCoordMetricEquivOn
       normalCoordMetric (I := I) Y x z v v <= 2 * ‖v‖ ^ 2
 
 namespace NormalCoordMetricEquivOn
-
-
 
 omit [NeZero (Module.finrank ℝ E)] in
 theorem coercive
@@ -498,8 +403,6 @@ theorem coercive
   refine ⟨1 / 2, by norm_num, ?_⟩
   intro v
   simpa [pow_two, mul_assoc] using (h z hz v).1
-
-
 
 omit [NeZero (Module.finrank ℝ E)] in
 theorem sharp_norm_le
@@ -552,48 +455,24 @@ theorem abs_apply_le
 
 end NormalCoordMetricEquivOn
 
-
-
-
 def NormalCoordMetricDerivBound
     (Y : PointedRiemannianManifold.{u, uE, uH} (I := I)) (x : Y.M)
     (U : Set E) (p : Nat) (C : Real) : Prop :=
   forall z : E, z ∈ U ->
     ‖iteratedFDeriv Real p (normalCoordMetric (I := I) Y x) z‖ <= C
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 structure NormalCoordMetricBoundInput
     (X : PointedRiemannianSeq.{u, uE, uH} (I := I)) where
   metricC : Nat -> Real
   metricC_nonneg : forall p : Nat, 0 <= metricC p
 
-
   radius : forall k : Nat, (X.obj k).M -> Real
   radius_pos : forall (k : Nat) (x : (X.obj k).M), 0 < radius k x
-
 
   metric_equiv :
     forall (k : Nat) (x : (X.obj k).M),
       NormalCoordMetricEquivOn (I := I) (X.obj k) x
         (Metric.ball (0 : E) (radius k x))
-
 
   metric_deriv :
     forall (k p : Nat) (x : (X.obj k).M),
@@ -601,8 +480,6 @@ structure NormalCoordMetricBoundInput
         (Metric.ball (0 : E) (radius k x)) p (metricC p)
 
 namespace NormalCoordMetricBoundInput
-
-
 
 theorem half_le_gpConst
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
@@ -626,8 +503,6 @@ theorem half_le_gpConst
   intro v
   simpa only [normalMetric_zero (I := I) (X.obj k) x] using
     (h.metric_equiv k x 0 h0 v).1
-
-
 
 omit [NeZero (Module.finrank ℝ E)] in
 theorem fderiv_apply_le
@@ -655,11 +530,6 @@ theorem fderiv_apply_le
       gcongr
     _ = h.metricC 1 * ‖u‖ * ‖v‖ * ‖w‖ := rfl
 
-
-
-
-
-
 omit [NeZero (Module.finrank ℝ E)] in
 theorem koszulVec_norm_le
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
@@ -679,9 +549,6 @@ theorem koszulVec_norm_le
   norm_num at hraw ⊢
   ring_nf at hraw ⊢
   exact hraw
-
-
-
 
 omit [NeZero (Module.finrank ℝ E)] in
 theorem koszulVec_pair_le
@@ -868,8 +735,6 @@ theorem koszulVec_lip_on
     (by simpa only [G] using hmetric)
     (by simpa only [G] using hjet) v w
 
-
-
 theorem koszulVec_lip_le
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
     (h : NormalCoordMetricBoundInput (I := I) X)
@@ -893,10 +758,6 @@ theorem koszulVec_lip_le
       (6 * (h.metricC 1) ^ 2 + 3 * h.metricC 2) *
         ‖z - y‖ * ‖v‖ * ‖w‖ := by
   simpa using h.koszulVec_lip_on k x (fun _ hz' ↦ hz') hsub hz hy v w
-
-
-
-
 
 theorem koszulAccel_lip_on
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
@@ -982,7 +843,6 @@ theorem koszulAccel_lip_on
     _ = ((6 * (h.metricC 1) ^ 2 + 3 * h.metricC 2) * R ^ 2 +
           6 * h.metricC 1 * R) * ‖z - y‖ := by rfl
 
-
 theorem koszulAccel_lip_le
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
     (h : NormalCoordMetricBoundInput (I := I) X)
@@ -1007,7 +867,6 @@ theorem koszulAccel_lip_le
           6 * h.metricC 1 * R) * ‖z - y‖ := by
   simpa using h.koszulAccel_lip_on k x (fun _ hz' ↦ hz') hsub hR hz hy hzv hyv
 
-
 def subseq {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
     (h : NormalCoordMetricBoundInput (I := I) X) (f : Nat -> Nat) :
     NormalCoordMetricBoundInput (I := I) (X.subseq f) where
@@ -1026,30 +885,12 @@ def subseq {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
 
 end NormalCoordMetricBoundInput
 
-
-
-
-
-
-
-
-
-
-
-
-
 section NormalChartInftySmooth
 
 open scoped Manifold ContDiff Topology
 
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
 variable [IsManifold I ∞ M] [T2Space (TangentBundle I M)]
-
-
-
-
-
-
 
 theorem normalChartAt_contMDiffAt_infty
     (g : SmoothRiemannianMetric I M) (p : M) {v₀ : E}
@@ -1138,9 +979,6 @@ theorem normalChartAt_contMDiffAt_infty
     rw [Function.comp_apply, ← hΦv', Φ.left_inv hq'_pre]
   exact hcomp.congr_of_eventuallyEq heqEv
 
-
-
-
 theorem normalChartAt_contMDiffOn_infty
     (g : SmoothRiemannianMetric I M) (p : M) :
     ContMDiffOn I 𝓘(ℝ, E) ∞ (normalChartAt (I := I) g p)
@@ -1161,10 +999,6 @@ variable [NeZero (Module.finrank Real E)] [CompleteSpace E]
 variable {I : ModelWithCorners Real E H}
 variable [I.Boundaryless]
 
-/-- A controlled normal-ball chart at a point of a packaged pointed
-Riemannian manifold.  This abbreviation installs the manifold instances stored
-by `Y`, so downstream provider-parametric declarations do not repeat the same
-`letI` block in every chart argument. -/
 abbrev NormalChartAt
     (Y : PointedRiemannianManifold.{u, uE, uH} (I := I))
     (x : Y.M) : Type (max u uE) :=
@@ -1174,8 +1008,6 @@ abbrev NormalChartAt
   letI : T2Space (TangentBundle I Y.M) := Y.t2TangentBundle
   NormalBallChart (I := I) x
 
-/-- A coherent choice of controlled normal chart at every stage and center of
-a pointed Riemannian sequence. -/
 abbrev NormalChartFamily
     (X : PointedRiemannianSeq.{u, uE, uH} (I := I)) :=
   ∀ (k : Nat) (x : (X.obj k).M),
@@ -1183,15 +1015,12 @@ abbrev NormalChartFamily
 
 namespace NormalChartFamily
 
-/-- Restrict a normal-chart family along a sequence reindexing. -/
 def subseq
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
     (chart : NormalChartFamily (I := I) X) (f : Nat → Nat) :
     NormalChartFamily (I := I) (X.subseq f) :=
   fun k x => chart (f k) x
 
-/-- The coordinate transition between two members of one normal-chart family
-at the same sequence stage. -/
 def transition
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
     (chart : NormalChartFamily (I := I) X) (k : Nat)
@@ -1203,8 +1032,6 @@ def transition
     (X.obj k).t2TangentBundle
   (chart k x).transition (chart k y)
 
-/-- The metric of a sequence member pulled back through one chart in a
-coherent normal-chart family. -/
 noncomputable def metric
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
     (chart : NormalChartFamily (I := I) X) (k : Nat)
@@ -1218,8 +1045,6 @@ noncomputable def metric
 
 end NormalChartFamily
 
-/-- The existing selected raw normal-coordinate branch, packaged through
-the canonical branch-parametric normal-ball interface. -/
 noncomputable def legacyBallChart
     (Y : PointedRiemannianManifold.{u, uE, uH} (I := I)) (x : Y.M) :
     letI : TopologicalSpace Y.M := Y.topology
@@ -1254,7 +1079,6 @@ noncomputable def legacyBallChart
         rw [himage]
         exact normalChartAt_contMDiffOn_infty (I := I) Y.metric x }
 
-/-- The legacy raw normal-coordinate charts, packaged as one stage-indexed family. -/
 noncomputable def legacyChartFamily
     (X : PointedRiemannianSeq.{u, uE, uH} (I := I)) :
     NormalChartFamily (I := I) X :=
@@ -1281,7 +1105,6 @@ noncomputable def legacyChartFamily
       expMapDiffeo (I := I) Y.metric x z := by
   rfl
 
-/-- The inverse map carried by the legacy provider is the established raw normal-coordinate chart. -/
 @[simp] theorem legacyInv_eq
     (Y : PointedRiemannianManifold.{u, uE, uH} (I := I))
     (x : Y.M) :
@@ -1293,7 +1116,6 @@ noncomputable def legacyChartFamily
       normalChartAt (I := I) Y.metric x := by
   rfl
 
-/-- The target of the legacy exponential branch is the source of its raw inverse chart. -/
 @[simp] theorem legacyTarget_eq
     (Y : PointedRiemannianManifold.{u, uE, uH} (I := I))
     (x : Y.M) :
@@ -1305,7 +1127,6 @@ noncomputable def legacyChartFamily
       (normalChartAt (I := I) Y.metric x).source := by
   rfl
 
-/-- The controlled image of the legacy provider is the corresponding raw exponential image. -/
 theorem legacyImage_eq
     (Y : PointedRiemannianManifold.{u, uE, uH} (I := I))
     (x : Y.M) :
@@ -1328,8 +1149,6 @@ theorem legacyImage_eq
   exact expMapDiffeo_apply_eq (I := I) Y.metric x
     ((legacyBallChart (I := I) Y x).ball_subset hz)
 
-/-- The branch-parametric pullback metric of the legacy provider is the
-existing `normalCoordMetric`. -/
 theorem legacyMetric_eq
     (Y : PointedRiemannianManifold.{u, uE, uH} (I := I)) (x : Y.M) :
     letI : TopologicalSpace Y.M := Y.topology
@@ -1340,8 +1159,6 @@ theorem legacyMetric_eq
     normalCoordMetric (I := I) Y x := by
   rfl
 
-/-- The legacy sequence bounds presented through the common controlled-chart
-metric interface. -/
 def NormalCoordMetricBoundInput.metricBounds
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
     (h : NormalCoordMetricBoundInput (I := I) X)
@@ -1370,8 +1187,6 @@ def NormalCoordMetricBoundInput.metricBounds
         simpa only [legacyMetric_eq] using
           h.metric_deriv k p x }
 
-/-- The transition of the legacy chart provider is the established
-`normalTransition`. -/
 theorem legacyTransition_eq
     (Y : PointedRiemannianManifold.{u, uE, uH} (I := I))
     (x y : Y.M) :
@@ -1384,7 +1199,6 @@ theorem legacyTransition_eq
       normalTransition (I := I) Y x y := by
   rfl
 
-/-- Controlled overlap for the legacy provider is exactly the raw ball-and-image condition. -/
 theorem legacyOverlap_iff
     (Y : PointedRiemannianManifold.{u, uE, uH} (I := I))
     (x y : Y.M) (U : Set E) :
@@ -1407,8 +1221,6 @@ theorem legacyOverlap_iff
     legacyImage_eq]
   simp only [legacyChart_apply]
 
-/-- The generic branch-metric equivalence predicate specializes exactly to
-the established legacy predicate. -/
 theorem legacyEquiv_iff
     (Y : PointedRiemannianManifold.{u, uE, uH} (I := I))
     (x : Y.M) (U : Set E) :
@@ -1425,8 +1237,6 @@ theorem legacyEquiv_iff
   rw [NormalBallChart.MetricEquivOn, NormalCoordMetricEquivOn,
     legacyMetric_eq (I := I)]
 
-/-- The generic branch-metric derivative predicate specializes exactly to
-the established legacy predicate. -/
 theorem legacyDeriv_iff
     (Y : PointedRiemannianManifold.{u, uE, uH} (I := I))
     (x : Y.M) (U : Set E) (p : Nat) (C : Real) :
@@ -1443,7 +1253,6 @@ theorem legacyDeriv_iff
   letI : T2Space (TangentBundle I Y.M) := Y.t2TangentBundle
   rw [NormalBallChart.MetricDerivBound, NormalCoordMetricDerivBound,
     legacyMetric_eq (I := I)]
-
 
 end ControlledNormalCharts
 

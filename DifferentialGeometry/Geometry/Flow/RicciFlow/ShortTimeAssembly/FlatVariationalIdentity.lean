@@ -12,7 +12,6 @@ import DifferentialGeometry.Analysis.ODE.TimeDependentFlow.SmoothDependence.Glob
 import DifferentialGeometry.Analysis.ODE.TimeDependentFlow.SmoothInSpace.FlowRealisation.LocalChart
 import DifferentialGeometry.Analysis.ODE.TimeDependentFlow.VariationalEquation.FlatPairedResidual
 
-
 namespace DifferentialGeometry.PDE.RicciFlow
 
 open Bundle

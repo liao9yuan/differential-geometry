@@ -1,16 +1,6 @@
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.GradSlotCurvatureBound
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.UnifCurvatureJetOne
 
-/-!
-# Class-first gradient-slot curvature jets
-
-This module packages the order-zero and order-one fibre bounds for the
-canonical gradient-slot curvature coefficient uniformly over a
-three-dimensional metric class.  All constants are selected before the class
-metric varies, and the variable metric is used only through comparison and
-metric jets of orders one through three.
--/
-
 set_option autoImplicit false
 
 noncomputable section
@@ -38,9 +28,6 @@ private noncomputable def gradSlotGridC (C₀ C₁ : ℝ) (i : ℕ) : ℝ :=
   if i = 0 then (3 : ℝ) ^ 6 * (2 * C₀) ^ 2
   else (3 : ℝ) ^ 7 * (2 * C₁) ^ 2
 
-/-- In dimension three, the canonical gradient-slot curvature coefficient has
-one class-first pointwise fibre cap for its zeroth and first covariant jets.
-The class metric enters only after the cap is fixed. -/
 theorem gradSlot_grid_unif
     (hDim : Module.finrank ℝ E = 3)
     (gBase : SmoothRiemannianMetric I M) {Λ : ℝ} (hΛ : 1 ≤ Λ) :

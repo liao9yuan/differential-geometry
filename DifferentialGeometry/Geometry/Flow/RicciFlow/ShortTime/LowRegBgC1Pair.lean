@@ -3,15 +3,6 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.LowRegLieOne
 import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.UnifConvexJets
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.DeTurckRemainderLowBaseC1Lip
 
-/-!
-# Fixed-background order-one coefficient pairs
-
-This module isolates the two-state correction caused by replacing the frozen
-metric in the DeTurck background slot by a fixed background metric.  The Ricci
-order-one coefficient cancels from this correction.  The remaining Lie-arm
-passenger is factored before its fixed-order Sobolev estimate.
--/
-
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
@@ -347,8 +338,7 @@ private theorem kappa_fix_h2
 
 set_option maxHeartbeats 2400000 in
 set_option synthInstance.maxHeartbeats 2400000 in
-/-- On a sufficiently small spectral `H²` metric ball, the fixed-background
-correction to the `PsiB` Lie passenger is `H²`-Lipschitz in the state. -/
+
 theorem psiBg_pair_h2
     (hDim : Module.finrank ℝ E = 3)
     (g gB : SmoothRiemannianMetric I M)
@@ -724,9 +714,7 @@ private theorem lieTrace_eq1
 
 set_option maxHeartbeats 2400000 in
 set_option synthInstance.maxHeartbeats 2400000 in
-/-- The complete fixed-background correction to the order-one DeTurck Lie
-coefficient has a class-first intrinsic `H2` bound on every prescribed state
-radius.  The bound uses varying-metric derivatives only through order three. -/
+
 theorem lieBgCorr_unif
     (hDim : Module.finrank ℝ E = 3)
     (gBase : SmoothRiemannianMetric I M) {Λ : ℝ} (hΛ : 1 ≤ Λ)
@@ -926,8 +914,6 @@ theorem lieBgCorr_unif
         mul_nonneg (hQfix R hR) (hQpsi R hR)]
     _ = (B R) ^ 2 := rfl
 
-/-- The actual order-one low-base coefficient correction obtained by replacing
-the self background by one fixed background. -/
 noncomputable def lowC1CorrBg
     (g gBase : SmoothRiemannianMetric I M) (T : SmoothCcTensor g 0 2)
     {δ : ℝ} (hδ_lt : δ < 1)
@@ -962,8 +948,6 @@ private noncomputable def lowC1CorrInt
       (rhsLow1_path_joint (I := I) (M := M) g gBase T 0 hδT hδZ)
       (rhsLow1_path_joint (I := I) (M := M) g g T 0 hδT hδZ))
 
-/-- The actual low-base background correction is the interval integral of the
-background-self order-one coefficient difference. -/
 private theorem lowC1Corr_eq
     (g gBase : SmoothRiemannianMetric I M) (T : SmoothCcTensor g 0 2)
     {δ : ℝ} (hδ_lt : δ < 1)
@@ -1034,8 +1018,7 @@ private theorem rhs1_corr_eq
 
 set_option maxHeartbeats 2400000 in
 set_option synthInstance.maxHeartbeats 2400000 in
-/-- The actual low-base order-one background correction has a class-first
-intrinsic `H2` bound depending only on a preselected spectral `H2` radius. -/
+
 theorem lowC1Corr_unif
     (hDim : Module.finrank ℝ E = 3)
     (gBase : SmoothRiemannianMetric I M) {Λ : ℝ} (hΛ : 1 ≤ Λ)
@@ -1352,9 +1335,7 @@ private theorem lieBg_pair_h2
 
 set_option maxHeartbeats 2400000 in
 set_option synthInstance.maxHeartbeats 2400000 in
-/-- On a sufficiently small spectral `H²` metric ball, the complete order-one
-DeTurck Lie coefficient is Lipschitz for an arbitrary fixed background, with
-the same critical `H³/H²` two-arm modulus as the diagonal-background case. -/
+
 theorem lie1_bg_pair_h2
     (hDim : Module.finrank ℝ E = 3)
     (g gB : SmoothRiemannianMetric I M) :

@@ -4,14 +4,6 @@ import DifferentialGeometry.Geometry.Geodesic.PullbackCross
 
 set_option autoImplicit false
 
-
-
-
-
-
-
-
-
 noncomputable section
 
 universe u uE uH
@@ -32,8 +24,6 @@ variable [NeZero (Module.finrank Real E)]
 variable {H : Type uH} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H} [I.Boundaryless]
 
-
-
 def normalQuarter
     (Y : PointedRiemannianManifold.{u, uE, uH} (I := I)) (x : Y.M) :
     letI : TopologicalSpace Y.M := Y.topology
@@ -47,8 +37,6 @@ def normalQuarter
   letI : T2Space (TangentBundle I Y.M) := Y.t2TangentBundle
   exact ⟨Metric.ball (0 : E)
     (expMapC2Radius (I := I) Y.metric x / 4), Metric.isOpen_ball⟩
-
-
 
 theorem normalQuarter_sub
     (Y : PointedRiemannianManifold.{u, uE, uH} (I := I)) (x : Y.M) :
@@ -64,7 +52,6 @@ theorem normalQuarter_sub
   letI : T2Space (TangentBundle I Y.M) := Y.t2TangentBundle
   rw [normalExpPD_source]
   exact normalInner_sub (I := I) Y x
-
 
 def normalQuarterImage
     (Y : PointedRiemannianManifold.{u, uE, uH} (I := I)) (x : Y.M) :
@@ -82,8 +69,6 @@ def normalQuarterImage
     image_opens_isOpen (normalExpPD (I := I) Y x)
       (normalQuarter_sub (I := I) Y x)⟩
 
-
-
 noncomputable def normalQuarterDiffeo
     (Y : PointedRiemannianManifold.{u, uE, uH} (I := I)) (x : Y.M) :
     letI : TopologicalSpace Y.M := Y.topology
@@ -100,8 +85,6 @@ noncomputable def normalQuarterDiffeo
     PartialDiffeomorph.toOpensDiffeoCross (normalExpPD (I := I) Y x)
       (normalQuarter_sub (I := I) Y x)
 
-
-
 @[implicit_reducible] noncomputable def normalQuarterSigma
     (Y : PointedRiemannianManifold.{u, uE, uH} (I := I)) (x : Y.M) :
     letI : TopologicalSpace Y.M := Y.topology
@@ -116,7 +99,6 @@ noncomputable def normalQuarterDiffeo
   letI : LocallyCompactSpace (normalQuarter (I := I) Y x) :=
     (normalQuarter (I := I) Y x).2.locallyCompactSpace
   infer_instance
-
 
 @[implicit_reducible] noncomputable def normalQuarterImageSigma
     (Y : PointedRiemannianManifold.{u, uE, uH} (I := I)) (x : Y.M) :
@@ -139,8 +121,6 @@ noncomputable def normalQuarterDiffeo
   rw [← hrange]
   exact isSigmaCompact_range (normalQuarterDiffeo (I := I) Y x).continuous
 
-
-
 theorem quarterDiffeo_apply
     (Y : PointedRiemannianManifold.{u, uE, uH} (I := I)) (x : Y.M)
     (z : normalQuarter (I := I) Y x) :
@@ -152,8 +132,6 @@ theorem quarterDiffeo_apply
       normalQuarterImage (I := I) Y x) : Y.M) =
       expMapDiffeo (I := I) Y.metric x (z : E) := by
   rfl
-
-
 
 theorem quarterDiffeo_mfd
     (Y : PointedRiemannianManifold.{u, uE, uH} (I := I)) (x : Y.M)
@@ -191,8 +169,6 @@ private theorem metric_ext
   subst hi
   rfl
 
-
-
 theorem normalTotal_quarter
     (Y : PointedRiemannianManifold.{u, uE, uH} (I := I)) (x : Y.M) :
     letI : TopologicalSpace Y.M := Y.topology
@@ -228,9 +204,6 @@ theorem normalTotal_quarter
   rw [quarterDiffeo_apply, quarterDiffeo_mfd, quarterDiffeo_mfd]
   rw [normalTotal_inner (I := I) Y x (z : E) z.2 v w]
   exact normalCoordMetric_apply (I := I) Y x (z : E) v w
-
-
-
 
 theorem normal_cov_map
     (Y : PointedRiemannianManifold.{u, uE, uH} (I := I)) (x : Y.M) :
@@ -331,9 +304,6 @@ theorem normal_cov_map
   rw [← hleft, ← hres, ← hdir, ← hbase]
   exact hpbAmbient
 
-
-
-
 theorem normalGeo_map
     (Y : PointedRiemannianManifold.{u, uE, uH} (I := I)) (x : Y.M)
     (gamma : Real → E) (s : Set Real) (hs : IsOpen s)
@@ -418,4 +388,3 @@ theorem normalGeo_map
 
 end HCGCompactness
 end DifferentialGeometry
-

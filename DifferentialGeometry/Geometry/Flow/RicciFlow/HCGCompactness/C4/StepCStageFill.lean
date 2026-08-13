@@ -4,16 +4,6 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.C4.StepCProdu
 
 set_option autoImplicit false
 
-/-!
-# Smooth safety fillers for Step-C stage targets
-
-The finite-stage comparison map uses direct normal-transition targets only on
-their geometric overlap domains.  This file supplies a globally smooth
-two-bump filler: a safety clamp keeps the reverse transition inside its domain,
-while an activity cutoff turns the filled target back into the source point
-away from the active region.
--/
-
 namespace DifferentialGeometry
 namespace HCGCompactness
 
@@ -26,13 +16,10 @@ variable {X Y : Type*}
   [NormedAddCommGroup X] [NormedSpace Real X]
   [NormedAddCommGroup Y] [NormedSpace Real Y]
 
-/-- Smoothly fill a partially meaningful forward/reverse transition pair. -/
 def safeFill (cut : Y → Real) (safe : Y → Y)
     (F : X → Y) (R : Y → X) (x : X) : X :=
   x + cut (F x) • (R (safe (F x)) - x)
 
-/-- The safety filler is smooth on a source domain when the safety clamp sends
-the forward transition into the reverse transition's smoothness domain. -/
 theorem safeFill_smooth
     {U : Set X} {V : Set Y} {cut : Y → Real} {safe : Y → Y}
     {F : X → Y} {R : Y → X}
@@ -50,8 +37,6 @@ theorem safeFill_smooth
     ((hcut.contDiffOn.comp hF (fun _ _ => Set.mem_univ _)).smul
       (hback.sub contDiffOn_id))
 
-/-- A two-bump safety filler converges to the identity when its forward and
-reverse transition families converge and the filled limit is diagonal. -/
 theorem safeFill_diag
     [ProperSpace X] [ProperSpace Y]
     {U : Set X} {V : Set Y} (hU : IsOpen U) (hV : IsOpen V)
@@ -145,8 +130,6 @@ variable {H : Type uH} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H} [I.Boundaryless]
 variable {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
 
-/-- Totalize an old-`InterSlot` coordinate family to the original finite target
-slots.  A missing slot is filled by the source coordinate itself. -/
 noncomputable def stageTotal
     {hd : InjRadiusDecayInput (I := I) X} {D : Real}
     {P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k)}
@@ -158,8 +141,6 @@ noncomputable def stageTotal
   | some target => pairPts target a b z
   | none => z
 
-/-- A totalized old-`InterSlot` coordinate family is smooth whenever every
-interacting branch is smooth. -/
 theorem stageTotal_smooth
     {hd : InjRadiusDecayInput (I := I) X} {D : Real}
     {P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k)}
@@ -178,8 +159,6 @@ theorem stageTotal_smooth
   | none => exact contDiffOn_id
   | some target => exact hpair target
 
-/-- Totalization at the finite-slot boundary preserves convergence to the
-identity; the case split is on the fixed slot index, never on the point. -/
 theorem stageTotal_conv
     {hd : InjRadiusDecayInput (I := I) X} {D : Real}
     {P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k)}
@@ -199,8 +178,6 @@ theorem stageTotal_conv
   | none => exact mapCInfConv_const (U := U) id
   | some target => exact hpair target
 
-/-- The complete finite target tuple of totalized stage coordinates converges
-to the diagonal tuple on every source patch. -/
 theorem stageTotal_pi_conv
     {hd : InjRadiusDecayInput (I := I) X} {D : Real}
     {P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k)}
@@ -231,8 +208,6 @@ section Bumps
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]
   [HasContDiffBump E]
 
-/-- The activity cutoff: one on the closed `6 * lam` ball and supported in the
-open `7 * lam` ball. -/
 noncomputable def activityBump (lam : Real) (hlam : 0 < lam) :
     ContDiffBump (0 : E) where
   rIn := 6 * lam
@@ -240,8 +215,6 @@ noncomputable def activityBump (lam : Real) (hlam : 0 < lam) :
   rIn_pos := by positivity
   rIn_lt_rOut := by linarith
 
-/-- The safety cutoff: one on the closed `7 * lam` ball and supported in the
-open `8 * lam` ball. -/
 noncomputable def safetyBump (lam : Real) (hlam : 0 < lam) :
     ContDiffBump (0 : E) where
   rIn := 7 * lam
@@ -249,36 +222,29 @@ noncomputable def safetyBump (lam : Real) (hlam : 0 < lam) :
   rIn_pos := by positivity
   rIn_lt_rOut := by linarith
 
-/-- The radial safety clamp associated to the `7/8` bump. -/
 noncomputable def stageClamp (lam : Real) (hlam : 0 < lam) : E → E :=
   (safetyBump (E := E) lam hlam).radial
 
-/-- The Route-A two-bump filler for one transition pair. -/
 noncomputable def stageFill (lam : Real) (hlam : 0 < lam)
     (F R : E → E) : E → E :=
   safeFill (activityBump (E := E) lam hlam)
     (stageClamp (E := E) lam hlam) F R
 
-/-- The activity cutoff is one throughout the active closed `6 * lam` ball. -/
 theorem activity_one (lam : Real) (hlam : 0 < lam) {y : E}
     (hy : y ∈ Metric.closedBall 0 (6 * lam)) :
     activityBump (E := E) lam hlam y = 1 := by
   exact (activityBump (E := E) lam hlam).one_of_mem_closedBall hy
 
-/-- The safety clamp is the identity throughout the closed `7 * lam` ball. -/
 theorem stageClamp_eq (lam : Real) (hlam : 0 < lam) {y : E}
     (hy : y ∈ Metric.closedBall 0 (7 * lam)) :
     stageClamp (E := E) lam hlam y = y := by
   exact (safetyBump (E := E) lam hlam).radial_eq_self hy
 
-/-- The safety clamp globally lands in the open `8 * lam` ball. -/
 theorem stageClamp_mapsTo (lam : Real) (hlam : 0 < lam) :
     MapsTo (stageClamp (E := E) lam hlam) Set.univ
       (Metric.ball 0 (8 * lam)) := by
   exact (safetyBump (E := E) lam hlam).radial_mapsTo
 
-/-- On the active closed `6 * lam` ball, the two-bump filler equals the raw
-reverse-after-forward transition. -/
 theorem stageFill_eq_raw (lam : Real) (hlam : 0 < lam)
     (F R : E → E) {x : E}
     (hx : F x ∈ Metric.closedBall 0 (6 * lam)) :
@@ -289,16 +255,12 @@ theorem stageFill_eq_raw (lam : Real) (hlam : 0 < lam)
     stageClamp_eq lam hlam hx7, one_smul]
   exact add_sub_cancel x (R (F x))
 
-/-- If the activity cutoff vanishes, the filler is the source point. -/
 theorem stageFill_eq_self (lam : Real) (hlam : 0 < lam)
     (F R : E → E) {x : E}
     (hx : activityBump (E := E) lam hlam (F x) = 0) :
     stageFill lam hlam F R x = x := by
   simp only [stageFill, safeFill, hx, zero_smul, add_zero]
 
-/-- Convergent forward and reverse transitions give a smooth two-bump filler
-converging to the identity.  The inverse identity is needed only when the
-limit forward transition lies in the target `8 * lam` ball. -/
 theorem stageFill_conv [ProperSpace E]
     (lam : Real) (hlam : 0 < lam) {U : Set E} (hU : IsOpen U)
     {F R : Nat → E → E} {Finf Rinf : E → E}
@@ -353,8 +315,6 @@ variable {H : Type uH} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H} [I.Boundaryless]
 variable {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
 
-/-- The actual Route-A filler for one stabilized interacting pair and two
-finite stages. -/
 noncomputable def pairStageFill
     (inp : MetricCompactnessInputs (I := I) X)
     (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k))
@@ -382,8 +342,6 @@ noncomputable def pairStageFill
       (seqCenterD inp.decay P L l (target.1.1 : Nat))
       (seqCenterD inp.decay P L l (alpha.1 : Nat)))
 
-/-- The smooth finite target tuple on one source chart.  Interacting slots use
-`pairStageFill`; all other finite slots are the source coordinate. -/
 noncomputable def stagePts
     (inp : MetricCompactnessInputs (I := I) X)
     (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k))
@@ -392,8 +350,6 @@ noncomputable def stagePts
     (z : E) (gamma : Fin (inp.pack.A r)) : E :=
   stageTotal alpha (pairStageFill inp P L alpha) k l z gamma
 
-/-- The actual normalized source-stage weights in one prescribed source
-normal chart. -/
 noncomputable def stageWeight
     (inp : MetricCompactnessInputs (I := I) X)
     (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k))
@@ -409,8 +365,6 @@ noncomputable def stageWeight
         inp.pack r beta target k)
       i0) z gamma
 
-/-- The actual finite-stage chart configuration: normalized source weights
-paired with the smooth safety-totalized target tuple. -/
 noncomputable def stageCfg
     (inp : MetricCompactnessInputs (I := I) X)
     (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k))
@@ -419,8 +373,6 @@ noncomputable def stageCfg
     (Fin (inp.pack.A r) → Real) × (Fin (inp.pack.A r) → E) :=
   (stageWeight inp P L hr alpha k z, stagePts inp P L alpha k l z)
 
-/-- The interacting-pair filler after a strict refinement, while retaining the
-original stabilized `InterSlot L ... alpha` as its index. -/
 noncomputable def pairStageFillSub
     (inp : MetricCompactCore (I := I) X)
     (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k))
@@ -454,8 +406,6 @@ noncomputable def pairStageFillSub
         (chart (Lphi.φ l)
           (seqCenterD inp.decay P Lphi l (alpha.1 : Nat))))
 
-/-- Finite target coordinates on a refined sequence, still totalized through
-the original stabilized interaction family. -/
 noncomputable def stagePtsSub
     (inp : MetricCompactCore (I := I) X)
     (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k))
@@ -468,8 +418,6 @@ noncomputable def stagePtsSub
   stageTotal alpha
     (pairStageFillSub inp P L phi hphi alpha (chart := chart)) k l z gamma
 
-/-- Actual normalized chart weights after a strict refinement, indexed by the
-original source live slot. -/
 noncomputable def stageWeightSub
     (inp : MetricCompactCore (I := I) X)
     (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k))
@@ -496,8 +444,6 @@ noncomputable def stageWeightSub
       (seqCenterD inp.decay P Lphi k (alpha.1 : Nat))).hom z)
     gamma
 
-/-- The refined chart weight is exactly the global finite-stage weight at the
-point represented by that source chart. -/
 theorem stageWeightSub_eq
     (inp : MetricCompactCore (I := I) X)
     (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k))
@@ -526,8 +472,6 @@ theorem stageWeightSub_eq
         gamma := by
   rfl
 
-/-- The refined finite-stage local configuration with original interaction
-indices. -/
 noncomputable def stageCfgSub
     (inp : MetricCompactCore (I := I) X)
     (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k))
@@ -540,8 +484,6 @@ noncomputable def stageCfgSub
   (stageWeightSub inp P L hr phi hphi alpha k z (chart := chart),
     stagePtsSub inp P L phi hphi alpha k l z (chart := chart))
 
-/-- The actual distance-atom weights retain exact finite-stage normalization
-on every source patch, without a legacy normal-radius premise. -/
 theorem HasSuppConvDataOn.weightSub_ev_raw
     (inp : MetricCompactCore (I := I) X)
     (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k))
@@ -591,8 +533,6 @@ theorem HasSuppConvDataOn.weightSub_ev_raw
   exact ⟨hweight.nonneg, hweight.pos, hweight.sum_one,
     fun z _hz _gamma _hne => Set.mem_univ z⟩
 
-/-- Compatibility form of `HasSuppConvDataOn.weightSub_ev_raw` retaining the
-legacy radius premise. -/
 theorem HasSuppConvDataOn.weightSub_ev
     (inp : MetricCompactCore (I := I) X)
     (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k))
@@ -614,8 +554,6 @@ theorem HasSuppConvDataOn.weightSub_ev
   exact hdata.weightSub_ev_raw inp P L hr phi hphi chart
     U C0 C1 aInf Jinf Jbarinf
 
-/-- The actual normalized chart weights retain their exact finite-stage
-normalization on every source patch along one common tail. -/
 theorem HasSuppConvData.weightSub_ev
     (inp : MetricCompactnessInputs (I := I) X)
     (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k))
@@ -670,8 +608,6 @@ theorem HasSuppConvData.weightSub_ev
   exact ⟨hweight.nonneg, hweight.pos, hweight.sum_one,
     fun z _hz _gamma _hne => Set.mem_univ z⟩
 
-/-- A nonzero actual source-stage chart weight forces the corresponding
-forward transition into the active closed six-lambda ball. -/
 theorem stageWeight_small
     (inp : MetricCompactnessInputs (I := I) X)
     (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k))
@@ -710,8 +646,6 @@ theorem stageWeight_small
   apply inp.weight_trans_small P L r k hgp beta i0 gamma hC2 z
   simpa only [stageWeight, beta, i0] using hweight
 
-/-- Projection of `HasAtomWeightLim` to the actual chart-weight family used by
-`stageCfg`. -/
 theorem HasAtomWeightLim.stageWeight_data
     (inp : MetricCompactnessInputs (I := I) X)
     (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k))
@@ -733,9 +667,6 @@ theorem HasAtomWeightLim.stageWeight_data
   simpa only [stageWeight] using
     ⟨hlim.2.2.2.2.1, hlim.2.2.2.2.2.1, hlim.2.2.2.2.2.2⟩
 
-/-- Combine actual normalized-weight convergence with smooth stage-target
-tuple convergence to obtain convergence of the full finite-stage
-configuration. -/
 theorem stageCfg_conv
     (inp : MetricCompactnessInputs (I := I) X)
     (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k))
@@ -768,8 +699,6 @@ theorem stageCfg_conv
     (mapCInfConv_prodMk hU hweightKn hpts
       (fun m => hweightc (kn m)) hweightInfc hptsc hdiagc)
 
-/-- Refined-sequence projection of `HasAtomWeightLimOn`, retaining one coherent
-chart family and the original source live-slot index. -/
 theorem HasAtomWeightLimOn.stageWeightSub_data
     (inp : MetricCompactCore (I := I) X)
     (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k))
@@ -797,8 +726,6 @@ theorem HasAtomWeightLimOn.stageWeightSub_data
   simpa only [stageWeightSub] using
     ⟨hlim.2.2.2.2.1, hlim.2.2.2.2.2.1, hlim.2.2.2.2.2.2⟩
 
-/-- Refined-sequence projection of `HasAtomWeightLim`, retaining the original
-source live-slot index. -/
 theorem HasAtomWeightLim.stageWeightSub_data
     (inp : MetricCompactnessInputs (I := I) X)
     (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k))
@@ -823,9 +750,6 @@ theorem HasAtomWeightLim.stageWeightSub_data
   simpa only [stageWeightSub] using
     ⟨hlim.2.2.2.2.1, hlim.2.2.2.2.2.1, hlim.2.2.2.2.2.2⟩
 
-/-- Full refined local configuration convergence for one coherent chart
-family, with the old stabilized interaction family kept as the finite target
-index. -/
 theorem stageCfgSub_conv_on
     (inp : MetricCompactCore (I := I) X)
     (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k))
@@ -864,8 +788,6 @@ theorem stageCfgSub_conv_on
     (mapCInfConv_prodMk hU hweightKn hpts
       (fun m => hweightc (kn m)) hweightInfc hptsc hdiagc)
 
-/-- Full refined local configuration convergence, with the old stabilized
-interaction family kept as the finite target index. -/
 theorem stageCfgSub_conv
     (inp : MetricCompactnessInputs (I := I) X)
     (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k))
@@ -902,9 +824,6 @@ theorem stageCfgSub_conv
     (mapCInfConv_prodMk hU hweightKn hpts
       (fun m => hweightc (kn m)) hweightInfc hptsc hdiagc)
 
-/-- On an interacting target whose source-stage transition lies in its active
-six-lambda ball, the smooth finite-slot target is the raw two-transition
-target. -/
 theorem stagePts_eq_raw
     (inp : MetricCompactnessInputs (I := I) X)
     (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k))
@@ -944,8 +863,6 @@ theorem stagePts_eq_raw
         (seqCenterD inp.decay P L l (target.1.1 : Nat))
         (seqCenterD inp.decay P L l (alpha.1 : Nat))) hsmall)
 
-/-- At a nonzero actual weight, the smooth safety-totalized target agrees
-exactly with the raw direct two-transition target. -/
 theorem stagePts_eq_weight
     (inp : MetricCompactnessInputs (I := I) X)
     (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k))
@@ -977,9 +894,6 @@ theorem stagePts_eq_weight
   exact stagePts_eq_raw inp P L alpha target k l z
     (stageWeight_small inp P L hr alpha k hgp target.1.1 hC2 z hweight)
 
-/-- On a refined sequence, source-transition membership in the active
-six-lambda ball makes the safety-totalized target equal the raw two-transition
-target for any coherent chart family. -/
 theorem stagePtsSub_eq_raw
     (inp : MetricCompactCore (I := I) X)
     (P : ∀ j : Nat, ProperMetricOn (I := I) (X.obj j))
@@ -1064,8 +978,7 @@ theorem stagePtsSub_eq_raw
             (seqCenterD inp.decay P Lphi l (alpha.1 : Nat)))) hsmall)
 
 set_option maxHeartbeats 800000 in
-/-- On a refined sequence, a nonzero actual source weight makes the old-index
-Route-A target agree exactly with the raw two-transition target. -/
+
 theorem stagePtsSub_eq_ne
     (inp : MetricCompactnessInputs (I := I) X)
     (P : ∀ j : Nat, ProperMetricOn (I := I) (X.obj j))
@@ -1116,8 +1029,6 @@ theorem stagePtsSub_eq_ne
     exact stagePtsSub_eq_raw inp.toCore P L phi hphi alpha target k l z
       (chart := legacyChartFamily (I := I) X) (hsmall := hsmall)
 
-/-- The pair filler converges to the identity from the retained two-sided
-transition limits and the stagewise overlap smoothness facts. -/
 theorem pairStageFill_conv
     (inp : MetricCompactnessInputs (I := I) X)
     (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k))
@@ -1164,8 +1075,6 @@ theorem pairStageFill_conv
       Metric.isOpen_ball hJ hJbar hstage hJc hstageBar hJbarc hinv
       kn ln hkn hln)
 
-/-- Refined-sequence version of `pairStageFill_conv` which retains the old
-`InterSlot` index. -/
 theorem pairStageSub_conv
     (inp : MetricCompactCore (I := I) X)
     (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k))
@@ -1222,7 +1131,6 @@ theorem pairStageSub_conv
       Metric.isOpen_ball hJ hJbar hstage hJc hstageBar hJbarc hinv
       kn ln hkn hln)
 
-/-- Chart-family version of `pairStageSub_conv`. -/
 theorem pairSub_conv_on
     (inp : MetricCompactCore (I := I) X)
     (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k))
@@ -1282,8 +1190,6 @@ theorem pairSub_conv_on
       Metric.isOpen_ball hJ hJbar hstage hJc hstageBar hJbarc hinv
       kn ln hkn hln)
 
-/-- Stagewise smoothness of the two refined transitions implies smoothness of
-their old-index Route-A filler. -/
 theorem pairStageSub_smooth
     (inp : MetricCompactCore (I := I) X)
     (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k))
@@ -1332,7 +1238,6 @@ theorem pairStageSub_smooth
           (L.rInf (target.1.1 : Nat)))).radial_contDiff
       hstage hstageBar hsafe)
 
-/-- Chart-family version of `pairStageSub_smooth`. -/
 theorem pairSub_smooth_on
     (inp : MetricCompactCore (I := I) X)
     (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k))
@@ -1386,8 +1291,6 @@ theorem pairSub_smooth_on
           (L.rInf (target.1.1 : Nat)))).radial_contDiff
       hstage hstageBar hsafe)
 
-/-- Once every interacting refined pair has a smooth diagonal-convergent
-filler, the complete old-index finite target tuple converges to the diagonal. -/
 theorem stagePtsSub_conv
     (inp : MetricCompactCore (I := I) X)
     (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k))
@@ -1410,7 +1313,6 @@ theorem stagePtsSub_conv
   exact stageTotal_pi_conv alpha
     (pairStageFillSub inp P L phi hphi alpha) hU kn ln hpair hpairc
 
-/-- Chart-family version of `stagePtsSub_conv`. -/
 theorem ptsSub_conv_on
     (inp : MetricCompactCore (I := I) X)
     (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k))
@@ -1435,8 +1337,6 @@ theorem ptsSub_conv_on
     (pairStageFillSub inp P L phi hphi alpha (chart := chart))
     hU kn ln hpair hpairc
 
-/-- The chart-parametric support package makes the complete finite-stage point
-tuple converge to the diagonal on every retained source patch. -/
 theorem HasSuppConvDataOn.ptsSub_conv
     (inp : MetricCompactCore (I := I) X)
     (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k))
@@ -1549,8 +1449,6 @@ theorem HasSuppConvDataOn.ptsSub_conv
   exact ptsSub_conv_on inp P L phi hphi chart alpha
     (hUopen alpha) kn ln hpair hpairc
 
-/-- Uniform order-zero coordinate tail for the complete finite-stage point
-tuple of a prescribed chart family. -/
 theorem HasSuppConvDataOn.pts_coord_tail
     (inp : MetricCompactCore (I := I) X)
     (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k))
@@ -1613,9 +1511,7 @@ theorem HasSuppConvDataOn.pts_coord_tail
   exact hcoord.trans_lt (by linarith)
 
 set_option maxHeartbeats 800000 in
-/-- The retained support/transition package yields convergence of the complete
-Route-A stage configuration on every source patch, once the finite-stage
-transitions are smooth on their eight-lambda balls. -/
+
 theorem HasSuppConvData.cfgSub_conv
     (inp : MetricCompactnessInputs (I := I) X)
     (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k))
@@ -1683,8 +1579,6 @@ theorem HasSuppConvData.cfgSub_conv
   exact stageCfgSub_conv inp P L hr phi hphi alpha (U alpha)
     (hUopen alpha) (aInf alpha) (hlim alpha) kn ln hkn hpts hptsc
 
-/-- A chart-parametric support package provides both smoothness and convergence
-for the complete refined finite-stage configuration on every source patch. -/
 theorem HasSuppConvDataOn.cfgSub_data
     (inp : MetricCompactCore (I := I) X)
     (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k))
@@ -1776,8 +1670,7 @@ theorem HasSuppConvDataOn.cfgSub_data
     (hweightc (kn m)).prodMk (hptsc m)
 
 set_option maxHeartbeats 800000 in
-/-- The retained support package provides both smoothness and convergence for
-the complete refined finite-stage configuration on every source patch. -/
+
 theorem HasSuppConvData.cfgSub_data
     (inp : MetricCompactnessInputs (I := I) X)
     (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k))
@@ -1844,8 +1737,6 @@ theorem HasSuppConvData.cfgSub_data
   simpa only [stageCfgSub] using
     (hweightc (kn m)).prodMk (hptsc m)
 
-/-- The point component of the retained finite-stage configuration converges
-to the diagonal tuple on every source patch. -/
 theorem HasSuppConvData.ptsSub_conv
     (inp : MetricCompactnessInputs (I := I) X)
     (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k))
@@ -1876,9 +1767,6 @@ theorem HasSuppConvData.ptsSub_conv
   have hp := mapCInfConv_clm hU proj hconv hcfg hdiag
   simpa only [proj, stageCfgSub] using hp
 
-/-- On one common finite-stage tail, every nonzero actual target slot is an
-old stabilized interacting slot, and its Route-A filler is exactly the raw
-two-transition target. -/
 theorem HasSuppConvData.pts_eq_ne
     (inp : MetricCompactnessInputs (I := I) X)
     (h8 : (8 : Real) < inp.normalRadius.gpRatio * inp.D)
@@ -2017,8 +1905,6 @@ theorem HasSuppConvData.pts_eq_ne
       simpa only [htarget] using hC2gamma) z (by
       simpa only [htarget] using hweight))
 
-/-- Existing two-sided overlap tails make the Route-A filler smooth for every
-sufficiently large source stage and target stage. -/
 theorem pairFill_smooth
     (inp : MetricCompactnessInputs (I := I) X)
     (hradD : 2 * item3RadiusFactor inp.decay inp.D < inp.D)

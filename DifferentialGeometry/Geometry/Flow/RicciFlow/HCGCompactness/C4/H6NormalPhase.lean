@@ -3,15 +3,6 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.C4.NormalPhas
 
 set_option autoImplicit false
 
-/-!
-# H6 normal-phase producer
-
-This file runs the quantitative normal phase construction directly in the
-intrinsic H6 whole-ball charts.  On each fixed basepoint-distance sublevel it
-selects one source radius and one target radius that work at every stage and
-center.
--/
-
 noncomputable section
 
 universe u uE uH
@@ -37,15 +28,12 @@ variable [I.Boundaryless]
 
 namespace H6NormalData
 
-/-- One quarter of the uniform H6 chart-radius floor on a fixed
-basepoint-distance sublevel. -/
 def phaseRadius
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
     {hd : InjRadiusDecayInput (I := I) X}
     (d : H6NormalData (I := I) X hd) (R : Real) : Real :=
   d.ratio * hd.mu R / 4
 
-/-- The H6 phase radius is positive at every real sublevel. -/
 theorem phaseRadius_pos
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
     {hd : InjRadiusDecayInput (I := I) X}
@@ -53,8 +41,6 @@ theorem phaseRadius_pos
     0 < d.phaseRadius R := by
   exact div_pos (mul_pos d.ratio_pos (hd.mu_pos R)) (by norm_num)
 
-/-- The uniform H6 phase ball lies in every local metric-control ball on the
-chosen basepoint-distance sublevel. -/
 theorem phaseRadius_metric
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
     {hd : InjRadiusDecayInput (I := I) X}
@@ -79,8 +65,6 @@ theorem phaseRadius_metric
     (by norm_num)).trans
       (mul_le_mul_of_nonneg_left (hd.mu_antitone hx) d.ratio_pos.le)
 
-/-- The uniform H6 phase ball lies in the quarter-radius chart ball required by
-the bilateral phase-flow construction. -/
 theorem phaseRadius_chart
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
     {hd : InjRadiusDecayInput (I := I) X}
@@ -104,8 +88,6 @@ theorem phaseRadius_chart
     (mul_le_mul_of_nonneg_left (hd.mu_antitone hx) d.ratio_pos.le)
     (by norm_num)
 
-/-- The center-independent phase Lipschitz coefficient supplied by the H6
-metric-jet constants. -/
 def phaseK
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
     {hd : InjRadiusDecayInput (I := I) X}
@@ -123,8 +105,6 @@ def phaseK
         R.coe_nonneg)
 
 omit [CompleteSpace E] in
-/-- Every H6 chart presents the same phase coefficient because its metric
-bounds use the common constants `metricC`. -/
 theorem chartPhaseK_eq
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
     {hd : InjRadiusDecayInput (I := I) X}
@@ -145,7 +125,6 @@ theorem chartPhaseK_eq
   rfl
 
 omit [CompleteSpace E] in
-/-- The H6 phase error tends to zero with the velocity radius. -/
 theorem phaseErr_lt_ev
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
     {hd : InjRadiusDecayInput (I := I) X}
@@ -164,8 +143,6 @@ theorem phaseErr_lt_ev
   simpa only [b₀, d.chartPhaseK_eq] using
     chartPhaseErr_lt_ev (I := I) Y.metric b₀ heps
 
-/-- The H6 phase radius admits source and target scales proportional to the
-CGT profile.  The constants are independent of the exhaustion radius. -/
 theorem exists_phase_scale
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
     {hd : InjRadiusDecayInput (I := I) X}
@@ -359,9 +336,6 @@ theorem exists_phase_scale
           ((q : Real) / 2) := rfl
   exact ⟨q, rfl, hqRadius, hqAcc, herrOut, hinvErr, hδlower⟩
 
-/-- The proportional H6 phase scale can be shrunk once so that every center
-on a fixed distance sublevel carries the quantitative diagonal branch needed
-by the center-of-mass argument. -/
 theorem exists_min_scale
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
     {hd : InjRadiusDecayInput (I := I) X}
@@ -492,9 +466,6 @@ theorem exists_min_scale
   refine ⟨e, hdiag, hfence, ?_, hradius⟩
   simpa only [b, d.chartPhaseK_eq] using hinvApprox
 
-/-- On every fixed basepoint-distance sublevel, one source radius and one
-explicit target radius produce a fenced intrinsic H6 normal-diagonal branch at
-every stage and center, retaining the quantitative inverse approximation. -/
 theorem exists_diag_inv
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
     {hd : InjRadiusDecayInput (I := I) X}
@@ -612,8 +583,6 @@ theorem exists_diag_inv
   · simpa only [hδ'eq'] using hdiag
   · simpa only [b, d.chartPhaseK_eq] using hinvApprox
 
-/-- Compatibility projection of `exists_diag_inv` retaining the uniform
-provider branch and fence. -/
 theorem exists_uniform_diag
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
     {hd : InjRadiusDecayInput (I := I) X}

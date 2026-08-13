@@ -3,14 +3,6 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.UnifAppH12
 import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.UnifCoeffH2
 import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.UnifGridTame
 
-/-!
-# Class-first order-zero Ricci coefficient
-
-This module assembles the class-first connection-kernel grid, moving-trace
-coefficient, and mixed application estimate into the dimension-three intrinsic
-`H1` packet for the order-zero Ricci coefficient.
--/
-
 set_option autoImplicit false
 
 noncomputable section
@@ -58,10 +50,7 @@ private theorem pure_eq
   rfl
 
 set_option linter.unusedVariables false in
-/-- On a closed three-manifold, the order-zero Ricci
-connection-difference coefficient has a class-first affine intrinsic `H1`
-bound.  Its constants are selected before the class metric varies and use only
-the first two background-covariant metric jets. -/
+
 theorem ricci0_h1_unif
     (hDim : Module.finrank ℝ E = 3)
     (gBase : SmoothRiemannianMetric I M) {Λ : ℝ} (hΛ : 1 ≤ Λ)

@@ -2,13 +2,6 @@ import DifferentialGeometry.Analysis.Spectral.Intrinsic.Garding.ScalarNonautUnif
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.Garding.ScalarPotentialPairing
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Entropy.ConjPotential
 
-
-
-
-
-
-
-
 noncomputable section
 
 open Bundle Manifold MeasureTheory Set Filter
@@ -31,10 +24,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
   [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M]
 
 private local instance : CompleteSpace E := FiniteDimensional.complete Real E
-
-
-
-
 
 theorem scalar_crit_tame
     {D : RealTimeInterval} (S : SolutionOn (I := I) (M := M) D)

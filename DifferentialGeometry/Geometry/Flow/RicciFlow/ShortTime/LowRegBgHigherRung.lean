@@ -1,13 +1,5 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.LowRegBgRungClosure
 
-/-!
-# Higher-rung mass at an arbitrary fixed DeTurck background
-
-This module begins the fixed-background higher-rung bridge.  The Sobolev
-scale, eigenbasis, Galerkin state, and energy remain based at `g₀`, while the
-smooth DeTurck remainder is evaluated against the independent metric `g_bg`.
--/
-
 open Bundle Manifold MeasureTheory Set Filter
 open scoped Manifold Topology ContDiff ENNReal NNReal InnerProductSpace
 
@@ -32,10 +24,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
   [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
   [T2Space M] [SigmaCompactSpace M]
 
-/-- The all-order smooth remainder package at an arbitrary fixed DeTurck
-background, transported to the finite spectral arm of a retracted Galerkin
-state.  A common fifth-order cap prices the lower coefficient, while the
-highest-order coefficient remains `κ * δ / (1 - δ)²`. -/
 theorem galArmMassHmBg (g₀ g_bg : SmoothRiemannianMetric I M)
     {κ R δ R5 : ℝ} (hhm : IsHmRungOrdBg (I := I) (M := M) g₀ g_bg κ)
     (hR : 0 ≤ R) (hδ : δ < 1) (hδ0 : 0 ≤ δ) (hδ3 : δ ≤ 1 / 3)
@@ -103,9 +91,6 @@ theorem galArmMassHmBg (g₀ g_bg : SmoothRiemannianMetric I M)
     (le_of_eq (Real.sqrt_sq (norm_nonneg _)))) ?_
   exact hb'
 
-/-- Every energy rung `6 + k` is uniformly bounded on a fixed-background
-rung-five trajectory.  All higher scales close directly from the common
-`H⁵` cap; they do not recursively consume one another. -/
 theorem lowregHighRungsBg
     (g₀ g_bg : SmoothRiemannianMetric I M)
     (K : LowRegBoundData)

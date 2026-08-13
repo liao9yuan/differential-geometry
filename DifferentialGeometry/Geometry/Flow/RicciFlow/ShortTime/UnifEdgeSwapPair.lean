@@ -9,15 +9,6 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.UnifLp63
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.UnifMorreyRS
 import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.UnifConvexJets
 
-/-!
-# Uniform raw-top crossed edge pairing
-
-This module bounds the complete polarized raw-top cross block.  The proof uses
-the formal partner before spatial integration: one orientation is estimated in
-`L6 x L3 x L2`, while the swapped orientation is estimated in
-`L-infinity x L2 x L2`.
--/
-
 set_option autoImplicit false
 set_option backward.isDefEq.respectTransparency false
 
@@ -67,8 +58,6 @@ private theorem fiber_nonneg
     (S : SmoothCcTensor g r s) (x : M) :
     0 ≤ fiberLpFun g r s S x := Real.sqrt_nonneg _
 
-/-- A pointwise bilinear partner bound converts an inner product into the
-corresponding three-fibre-norm integral. -/
 private theorem inner_fiber_le
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (Q B : SmoothCcTensor g r s)
@@ -138,8 +127,6 @@ private theorem inner_fiber_le
     _ = K * ∫ x, fiberLpFun g rA sA A x * fiberLpFun g r s B x *
           fiberLpFun g rC sC C x ∂μ := by rw [integral_const_mul]
 
-/-- The symmetrized complete raw-top cross block is bounded by the supplied
-spectral `H2` radius times the order-four energy. -/
 theorem edge_swap_h4_unif
     (hDim : Module.finrank ℝ E = 3)
     (gBase : SmoothRiemannianMetric I M)
@@ -505,8 +492,6 @@ theorem edge_swap_h4_unif
       dsimp only [C]
       ring
 
-/-- The complete diagonal raw-top block is linear in the supplied spectral
-`H2` radius and bilinear in the order-three and order-four energies. -/
 theorem edge_diag_h4_unif
     (hDim : Module.finrank ℝ E = 3)
     (gBase : SmoothRiemannianMetric I M)

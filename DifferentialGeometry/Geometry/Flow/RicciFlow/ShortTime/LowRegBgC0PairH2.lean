@@ -3,15 +3,6 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.LowRegCoeffJets
 import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.LowRegDlbInsH2
 import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.LowRegInsertH1
 
-/-!
-# Fixed-background order-zero coefficient pairs in H2
-
-This module upgrades the three-dimensional fixed-background order-zero
-correction from the existing `H1` pair estimate to the `H3 → H2` currency used
-by the one-sided smooth bootstrap.  The mixed arm is treated first because all
-of its factor estimates already exist at `H2`.
--/
-
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
@@ -42,8 +33,6 @@ variable
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
-/-- The part of the lowered connection difference caused by changing the
-DeTurck background while keeping the moving metric fixed. -/
 private noncomputable def bgKappa
     (g gm gB : SmoothRiemannianMetric I M) : SmoothCcTensor g 0 3 :=
   lc0Kappa (I := I) (M := M) g gm gB -
@@ -74,7 +63,6 @@ private theorem bgKappa_pair
     pbLow_sub (I := I) (M := M) g T U g gB]
   module
 
-/-- One refolded half of the mixed order-zero background correction. -/
 private noncomputable def bgAmixHalf
     (g gm gB : SmoothRiemannianMetric I M)
     (σ : Equiv.Perm (Fin 4)) : SmoothCcTensor g 2 2 :=
@@ -149,8 +137,6 @@ private theorem bgAmix_eq
                 (lc0SwapPermRF * lieCorr0AMixPerm2))) by module,
     h0, h1]
 
-/-- The background-change part of the lowered connection has an `H2` bound
-and a linear two-state `H2` modulus. -/
 private theorem bgKappaH2
     (hDim : Module.finrank ℝ E = 3)
     (g gB : SmoothRiemannianMetric I M) :
@@ -203,8 +189,7 @@ private theorem bgKappaH2
       simpa only [lowJetSq, Nat.reduceAdd] using hTU)
 
 set_option maxHeartbeats 6400000 in
-/-- A refolded mixed half is `H2`-Lipschitz in the critical `H3/H2`
-two-state currency. -/
+
 private theorem amixHalfH2
     (hDim : Module.finrank ℝ E = 3)
     (g gB : SmoothRiemannianMetric I M) :
@@ -590,8 +575,7 @@ private theorem amixHalfH2
       ring
 
 set_option maxHeartbeats 2400000 in
-/-- The arbitrary-background mixed order-zero correction is `H2`-Lipschitz on
-a common spectral `H2` ball, in the critical `H3/H2` two-state currency. -/
+
 theorem amixBg_pair_h2
     (hDim : Module.finrank ℝ E = 3)
     (g gB : SmoothRiemannianMetric I M) :
@@ -689,8 +673,7 @@ theorem amixBg_pair_h2
       ring
 
 set_option maxHeartbeats 3200000 in
-/-- The three-term Palatini telescope for `lieBgLow` preserves prescribed
-`H2` root bounds for its two moving factors. -/
+
 private theorem lieBgLow_raw_h2
     (hDim : Module.finrank ℝ E = 3)
     (g gB : SmoothRiemannianMetric I M) :
@@ -791,9 +774,7 @@ private theorem lieBgLow_raw_h2
 
 set_option maxHeartbeats 3200000 in
 set_option linter.unusedVariables false in
-/-- The fixed-background low `DLa` coefficient is `H2`-Lipschitz in the
-critical `H3/H2` two-state currency.  The background is arbitrary but fixed;
-all spectral smallness is imposed only on the two moving metrics. -/
+
 private theorem lieBgLow_pair_h2
     (hDim : Module.finrank ℝ E = 3)
     (g gB : SmoothRiemannianMetric I M) :
@@ -892,8 +873,7 @@ private theorem lieBgLow_pair_h2
 
 set_option maxHeartbeats 2400000 in
 set_option linter.unusedVariables false in
-/-- The fixed-background low `DLa` coefficient has an `H2` single-state
-bound obtained from its two-state estimate against the zero perturbation. -/
+
 private theorem lieBgLow_bdd_h2
     (hDim : Module.finrank ℝ E = 3)
     (g gB : SmoothRiemannianMetric I M) :
@@ -1006,8 +986,6 @@ private theorem lieBgLow_bdd_h2
         dsimp only [C0, C1, L]
         ring
 
-/-- The raised slot-three factor is Lipschitz in the metric perturbation at
-the `H²` jet level. -/
 private theorem rev3_pair_h2
     (g gT gU : SmoothRiemannianMetric I M)
     (T U : SmoothCcTensor g 0 2)
@@ -1041,8 +1019,7 @@ private theorem rev3_pair_h2
   exact perturb_jet (I := I) (M := M) g 3 2 (T - U) hsymm
 
 set_option linter.unusedVariables false in
-/-- A background-dependent `H²` bound for the raised slot-three factor,
-with all state dependence recorded by the prescribed radius. -/
+
 private theorem rev3_bdd_h2
     (g : SmoothRiemannianMetric I M) :
     ∃ B : ℝ → ℝ,
@@ -1117,8 +1094,7 @@ private theorem rev3_bdd_h2
 
 set_option maxHeartbeats 3200000 in
 set_option linter.unusedVariables false in
-/-- The full fixed-background `DLa` core is `H²`-Lipschitz in the critical
-`H³/H²` two-state currency. -/
+
 private theorem lieBgCore_pair_h2
     (hDim : Module.finrank ℝ E = 3)
     (g gB : SmoothRiemannianMetric I M) :
@@ -1296,8 +1272,7 @@ private theorem lieBgCore_pair_h2
 
 set_option maxHeartbeats 2400000 in
 set_option linter.unusedVariables false in
-/-- The full fixed-background `DLa` core has an `H²` single-state bound whose
-dependence on the `H³` size remains affine. -/
+
 private theorem lieBgCore_bdd_h2
     (hDim : Module.finrank ℝ E = 3)
     (g gB : SmoothRiemannianMetric I M) :
@@ -1409,15 +1384,12 @@ private theorem lieBgCore_bdd_h2
         dsimp only [C0, C1, L]
         ring
 
-/-- The slot-extension and permutation package occurring in the fixed-background
-`DLa` refold. -/
 private noncomputable def dLaBgPass
     (g : SmoothRiemannianMetric I M) (S : SmoothCcTensor g 0 4) :
     SmoothCcTensor g 2 6 :=
   rsDomDomCongrSection (I := I) (M := M) g 2 6 lieCovSigma
     (slotExtendIter (I := I) (M := M) g 0 4 2 S)
 
-/-- The fixed-background `DLa` pass package preserves subtraction. -/
 private theorem dLaBgPass_sub
     (g : SmoothRiemannianMetric I M) (A B : SmoothCcTensor g 0 4) :
     dLaBgPass (I := I) (M := M) g (A - B) =
@@ -1426,8 +1398,6 @@ private theorem dLaBgPass_sub
   unfold dLaBgPass
   rw [slotIter_sub, rspermSub]
 
-/-- The fixed-background `DLa` pass package preserves `H²` jets up to the
-two inserted finite-dimensional slots. -/
 private theorem dLaBgPass_h2
     (g : SmoothRiemannianMetric I M) (S : SmoothCcTensor g 0 4) :
     lowJetSq (I := I) (M := M) g 2
@@ -1442,9 +1412,7 @@ private theorem dLaBgPass_h2
 set_option maxHeartbeats 3200000 in
 set_option synthInstance.maxHeartbeats 3200000 in
 set_option linter.unusedVariables false in
-/-- On a sufficiently small spectral `H²` metric ball, changing the fixed
-DeTurck background in the `DLa` coefficient is `H²`-Lipschitz in the critical
-`H³/H²` two-state currency. -/
+
 theorem dlaBg_pair_h2
     (hDim : Module.finrank ℝ E = 3)
     (g gB : SmoothRiemannianMetric I M) :
@@ -1731,9 +1699,7 @@ private theorem lie0_bg_split_h2
 set_option linter.unusedVariables false in
 set_option maxHeartbeats 3200000 in
 set_option synthInstance.maxHeartbeats 3200000 in
-/-- On a common spectral `H2` ball, the complete arbitrary-background
-order-zero DeTurck correction is `H2`-Lipschitz in the five adjacent-scale
-currencies `D3`, `D2`, `A * D2`, `N`, and `A * N`. -/
+
 theorem lie0_bg_pair_h2
     (hDim : Module.finrank ℝ E = 3)
     (g gB : SmoothRiemannianMetric I M) :

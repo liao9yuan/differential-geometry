@@ -6,25 +6,6 @@ import DifferentialGeometry.Geometry.Operator.GradientRegularity
 
 set_option autoImplicit false
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 noncomputable section
 
 open Bundle
@@ -47,22 +28,6 @@ variable {M : Type u} [TopologicalSpace M] [ChartedSpace H M]
 variable [IsManifold I ∞ M] [SigmaCompactSpace M] [T2Space M]
 variable [BoundarylessManifold I M]
 variable [IsManifold I 1 M]
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 omit [NeZero (Module.finrank ℝ E)] in
 omit [SigmaCompactSpace M] in
@@ -149,16 +114,6 @@ variable [FiniteDimensional Real E] [CompleteSpace E]
 variable {H : Type uH} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H}
 
-
-
-
-
-
-
-
-
-
-
 def flowOfMetric
     (D : DifferentialGeometry.Integral.Connection.RealTimeInterval)
     (P : PointedRiemannianManifold.{u, uE, uH} (I := I))
@@ -207,8 +162,6 @@ def flowOfMetric
       DifferentialGeometry.PDE.RicciFlow.SolutionOn (I := I) (M := P.M) D)
   isSolution := hsol
 
-
-
 theorem flowOfMetric_metric
     (D : DifferentialGeometry.Integral.Connection.RealTimeInterval)
     (P : PointedRiemannianManifold.{u, uE, uH} (I := I))
@@ -250,10 +203,6 @@ theorem flowOfMetric_metric
       infer_instance
     (flowOfMetric (I := I) D P g hsol).S.base.metric = g := by
   rfl
-
-
-
-
 
 theorem flowOfMetric_atTime
     (D : DifferentialGeometry.Integral.Connection.RealTimeInterval)

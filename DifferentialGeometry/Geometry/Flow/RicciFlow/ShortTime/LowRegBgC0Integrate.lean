@@ -1,11 +1,5 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.LowRegBgC0CoeffPair
 
-/-!
-# Order-zero path-integral identities
-
-Internal assembly layer for the low-regularity order-zero refold.
--/
-
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
@@ -300,7 +294,6 @@ theorem self_aff_int
             (iteratedCovGrad (I := I) g 0 2 1 T)) x v
   rw [hone, unit_add (I := I) (M := M) g,
     iteratedCovGrad_succ, iteratedCovGrad_zero]
-
 
 end LowRegBgC0Core
 end DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral

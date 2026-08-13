@@ -2,15 +2,6 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.Basic.Core
 
 set_option autoImplicit false
 
-
-
-
-
-
-
-
-
-
 noncomputable section
 
 open Filter Set
@@ -67,8 +58,6 @@ private theorem time_patch
   intro t ht y hy
   have hty : (t, y) ∈ V ×ˢ W := ⟨ht, hy⟩
   exact hVW hty
-
-
 
 omit [SigmaCompactSpace M] in
 theorem scalar_unif

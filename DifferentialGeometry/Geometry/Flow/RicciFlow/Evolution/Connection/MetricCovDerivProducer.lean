@@ -5,24 +5,6 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.BlackBox
 
 set_option autoImplicit false
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 noncomputable section
 
 namespace DifferentialGeometry.PDE.RicciFlow
@@ -41,11 +23,6 @@ variable [CompleteSpace E] [SigmaCompactSpace M] [T2Space M]
 
 variable {Idx : Type} [Fintype Idx] [DecidableEq Idx]
 variable {u : Set M}
-
-
-
-
-
 
 omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless]
     [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
@@ -72,13 +49,6 @@ theorem metricInner_mdiffAt
       (ϕ := fun b => g.inner b) (v := fun b => Y b) hg hY
   exact ((DifferentialGeometry.Integral.Connection.cotangentCov_pairing_contMDiff hgY hZ)
     x).mdifferentiableAt (by simp)
-
-
-
-
-
-
-
 
 omit [NeZero (Module.finrank ℝ E)] [Fintype Idx] [DecidableEq Idx] in
 omit [SigmaCompactSpace M] in
@@ -107,17 +77,6 @@ theorem metricFrameComp_fixedBaseSwap_of_solution
   intro t ht x
   have heq := hS.equation ⟨t, ht⟩ x (frame a x) (frame b x)
   simpa [ricciCompInFrame] using heq
-
-
-
-
-
-
-
-
-
-
-
 
 omit [NeZero (Module.finrank ℝ E)] [Fintype Idx] [DecidableEq Idx] in
 omit [SigmaCompactSpace M] in
@@ -167,11 +126,6 @@ theorem metricCovDerivDeriv_of_solution
       D.carrier (t : Real)
   exact hval ▸ hcomb
 
-
-
-
-
-
 def connectionVariationBlackBox_of_solution
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -193,10 +147,6 @@ def connectionVariationBlackBox_of_solution
   metricCovDerivDerivative :=
     metricCovDerivDeriv_of_solution (I := I) S hS frame hSmooth hFdiff hFtdiff
   metricCovDerivRicciFlow := fun _ _ _ _ _ => rfl
-
-
-
-
 
 omit [DecidableEq Idx] in
 omit [NeZero (Module.finrank ℝ E)] in

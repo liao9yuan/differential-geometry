@@ -6,15 +6,6 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.UnifRicci0
 import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.UnifDLaH1
 import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.UnifTailH1
 
-/-!
-# Class-first convex inputs for the low-regularity RHS coefficients
-
-This module feeds the class-uniform convex-path `H²`/`H³` jet package into the
-order-zero and order-one Ricci--DeTurck coefficient assemblies.  It fixes only
-the convex comparison constants before the metric varies; the coefficient
-functions returned by the two assemblies are still metricwise witnesses.
--/
-
 set_option autoImplicit false
 set_option backward.isDefEq.respectTransparency false
 
@@ -44,11 +35,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
-/-- A class-first convex-jet packet supplies the convex inputs of the
-order-zero affine coefficient assembly for every metric in the class.
-
-The returned `B0` and `B1` remain exact metricwise functions; this theorem does
-not claim that those deeper coefficient witnesses are class-uniform. -/
 theorem rhs0_h1_of_unif
     (hDim : Module.finrank ℝ E = 3)
     (gBase : SmoothRiemannianMetric I M) {Λ : ℝ} (C : ConvexJetData)
@@ -82,9 +68,6 @@ theorem rhs0_h1_of_unif
     hδ₀_nonneg hδ₀_lt C.h2C C.h3C hC.h2_nonneg hC.h3_nonneg
     hpath2 hpath3
 
-/-- On a closed three-manifold, one pair of coefficient functions controls the
-complete order-zero Ricci--DeTurck coefficient over the entire order-three
-metric class.  Both functions are selected before the class metric varies. -/
 theorem rhs0_h1_unif
     (hDim : Module.finrank ℝ E = 3)
     (gBase : SmoothRiemannianMetric I M) {Λ : ℝ} (hΛ : 1 ≤ Λ)
@@ -232,8 +215,6 @@ theorem rhs0_h1_unif
     ring
   exact hraw.trans (hbound.trans_eq (by rw [hfactor]))
 
-/-- The class-first order-zero coefficient bound passes unchanged to the `H1`
-jet of its interval-integrated coefficient field. -/
 theorem rhs0_path_unif
     (hDim : Module.finrank ℝ E = 3)
     (gBase : SmoothRiemannianMetric I M) {Λ : ℝ} (hΛ : 1 ≤ Λ)
@@ -276,11 +257,6 @@ theorem rhs0_path_unif
     (hcoeff g hEq hjet T T' hδ hδ' R A hR hA hT2 hT2' hT3 hT3')
   simpa only [rhsLow0PathIntegral] using hpath
 
-/-- A class-first convex-jet packet supplies the convex inputs of the
-order-one affine coefficient assembly for every metric in the class.
-
-As in `rhs0_h1_of_unif`, the returned coefficient functions are retained as
-metricwise exact witnesses. -/
 theorem rhs1_h2_of_unif
     (hDim : Module.finrank ℝ E = 3)
     (gBase : SmoothRiemannianMetric I M) {Λ : ℝ} (C : ConvexJetData)
@@ -314,9 +290,6 @@ theorem rhs1_h2_of_unif
     hδ₀_nonneg hδ₀_lt C.h2C C.h3C hC.h2_nonneg hC.h3_nonneg
     hpath2 hpath3
 
-/-- On a closed three-manifold, one pair of coefficient functions controls the
-complete order-one Ricci--DeTurck coefficient over the entire order-three
-metric class.  Both functions are selected before the class metric varies. -/
 theorem rhs1_h2_unif
     (hDim : Module.finrank ℝ E = 3)
     (gBase : SmoothRiemannianMetric I M) {Λ : ℝ} (hΛ : 1 ≤ Λ)
@@ -433,9 +406,6 @@ theorem rhs1_h2_unif
     ring
   exact hraw.trans (hbound.trans_eq (by rw [hfactor]))
 
-/-- On a closed three-manifold, the class-first order-one coefficient bound
-passes unchanged to the `H2` jet of its interval-integrated coefficient field.
-The two coefficient functions are selected before the class metric varies. -/
 theorem rhs1_path_unif
     (hDim : Module.finrank ℝ E = 3)
     (gBase : SmoothRiemannianMetric I M) {Λ : ℝ} (hΛ : 1 ≤ Λ)

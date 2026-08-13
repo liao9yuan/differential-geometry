@@ -4,15 +4,6 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.C4.NormalBran
 
 set_option autoImplicit false
 
-
-
-
-
-
-
-
-
-
 noncomputable section
 
 open Filter Set
@@ -30,8 +21,6 @@ variable {H : Type uH} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H} [I.Boundaryless]
 
 namespace MetricCompactnessInputs
-
-
 
 theorem exists_live_diag
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
@@ -136,8 +125,6 @@ theorem exists_live_diag
   refine ⟨psi, gInf, qStage, qInf, deltaStage, deltaInf, e, eInf,
     hpsi, hcenter, hgInf, hconv, hstage, hequiv, ?_⟩
   simpa only [index, Xpsi, c] using hpair
-
-
 
 theorem exists_slot_diag
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
@@ -255,9 +242,6 @@ theorem exists_slot_diag
   choose deltaStage deltaInf e eInf hpair using hpair
   exact ⟨psi, gInf, deltaStage, deltaInf, e, eInf,
     hpsi, hcenter, hmetric, hpair⟩
-
-
-
 
 theorem exists_diag_full
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}

@@ -3,16 +3,6 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.ConvFieldInpu
 
 set_option autoImplicit false
 
-/-!
-# Uniform source-flow covariant and time-Lipschitz bounds
-
-This file records the constants-first source-native analytic output used by the
-open-window convergence assembly.  It deliberately mentions neither bump
-functions nor the globally extended metrics: those are downstream localization
-devices, while the estimates here belong to the pulled-back Ricci flows on the
-varying source domains.
--/
-
 noncomputable section
 
 open Set
@@ -30,9 +20,6 @@ variable {X : PointedFlowSeq (I := I)}
 variable {P : PointedRiemannianManifold (I := I)}
 variable {subseq : Nat → Nat}
 
-/-- Uniform, constants-first covariant and time-Lipschitz control for the
-pulled-back source flows.  Both constants are chosen before the varying source
-index `k`; this is the quantifier order required by the compactness argument. -/
 structure SrcCovLipData
     (Φ : PointedCGHMaps (I := I) X P subseq)
     (R : letI : TopologicalSpace P.M := P.topology
@@ -41,8 +28,7 @@ structure SrcCovLipData
       SmoothRiemannianMetric I P.M)
     (hsrc : SrcSigma Φ) (htgt : TgtSigma Φ)
     (β ψ : ℝ) : Prop where
-  /-- Every reference-covariant metric tower is uniformly bounded on every
-  source domain and throughout the closed time window. -/
+
   cov :
     letI : TopologicalSpace P.M := P.topology
     letI : ChartedSpace H P.M := P.charted
@@ -66,8 +52,7 @@ structure SrcCovLipData
             metricCovDerivNorm (I := I) q
                 (srcMetric (I := I) Φ hsrc htgt k t)
                 (refRes (I := I) Φ R hsrc k) y ≤ Cq
-  /-- For each finite order, one Lipschitz constant controls all lower orders,
-  all source domains, and every pair of times in the window. -/
+
   lip :
     letI : TopologicalSpace P.M := P.topology
     letI : ChartedSpace H P.M := P.charted
@@ -96,9 +81,6 @@ structure SrcCovLipData
 
 omit [NeZero (Module.finrank ℝ E)]
   [I.Boundaryless] in
-/-- Joint order-zero metric and Ricci-evolution bounds in a fixed reference
-norm.  Both constants are explicit, so the result can be applied uniformly on
-varying source manifolds without choosing a compact spatial subcover. -/
 theorem covRic0_le
     {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [T2Space M]
     [IsManifold I ∞ M] [SigmaCompactSpace M]
@@ -345,9 +327,7 @@ theorem srcCovLip_of_flow
           (refRes (I := I) Φ R hsrc k) (i := 0) (t := t)
           (B := Bmax) (K := K0) hBmax (hequiv k t ht) y
           (hShi0 k 0 le_rfl 0 t ht y (Set.mem_univ y))).2
-  /- Strong induction chooses every numeric coefficient before the varying
-  source type. At positive order, `covOrderBound_stage_on` supplies the metric
-  tower bound and `ric_bound_field_on` supplies the evolution-tensor bound. -/
+
   have hcore : ∀ q : Nat, ∃ Cq Lq : ℝ, 0 ≤ Cq ∧ 0 ≤ Lq ∧
       (∀ k : Nat,
         letI : TopologicalSpace (SourceDomain (I := I) Φ k) :=
@@ -677,12 +657,6 @@ theorem srcCovLip_of_flow
       (mul_le_mul_of_nonneg_right hqle (abs_nonneg (s - t)))
 
 omit [NeZero (Module.finrank ℝ E)] in
-/-- Source-flow covariant and time-Lipschitz bounds from uniform metric
-equivalence, moving Shi estimates, and one uniform initial covariant envelope.
-
-This is the analytic owner of the varying-domain quantifier uniformity.  In
-particular, it must not be replaced by applying a per-source compact estimate
-after fixing `k`, since that would choose the constants in the wrong order. -/
 theorem srcCovLip_of_soln
     (Φ : PointedCGHMaps (I := I) X P subseq)
     (R : letI : TopologicalSpace P.M := P.topology
@@ -846,9 +820,7 @@ theorem srcCovLip_of_soln
           (refRes (I := I) Φ R hsrc k) (i := 0) (t := t)
           (B := Bmax) (K := K0) hBmax (hequiv k t ht) y
           (hShi0 k 0 le_rfl 0 t ht y (Set.mem_univ y))).2
-  /- Strong induction chooses every numeric coefficient before the varying
-  source type. At positive order, `covOrderBound_stage_on` supplies the metric
-  tower bound and `ric_bound_field_on` supplies the evolution-tensor bound. -/
+
   have hcore : ∀ q : Nat, ∃ Cq Lq : ℝ, 0 ≤ Cq ∧ 0 ≤ Lq ∧
       (∀ k : Nat,
         letI : TopologicalSpace (SourceDomain (I := I) Φ k) :=

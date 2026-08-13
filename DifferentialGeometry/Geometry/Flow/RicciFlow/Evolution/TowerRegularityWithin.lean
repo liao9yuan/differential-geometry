@@ -3,14 +3,6 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.IteratedNablaRmTow
 
 set_option autoImplicit false
 
-/-!
-# Within-set regularity of the iterated curvature component tower
-
-The moving curvature component recursion preserves joint spacetime smoothness
-up to the boundary of an arbitrary time set, provided the spatial frame is
-smooth on an open set.
--/
-
 noncomputable section
 
 namespace DifferentialGeometry.PDE.RicciFlow
@@ -24,9 +16,6 @@ variable {I : ModelWithCorners Real E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
 variable [IsManifold I ∞ M]
 
-/-- Joint spacetime smoothness within `J ×ˢ u` propagates through every level
-of the component recursion for iterated covariant derivatives of the lowered
-Riemann tensor. -/
 theorem iterRmComp_joint
     {Idx : Type*} [Fintype Idx]
     (frame : Idx -> (x : M) -> TangentSpace I x)

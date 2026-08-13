@@ -1,14 +1,6 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.UnifPhiCurv
 import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.UnifTopPathDev
 
-/-!
-# Class-first integrated top-path action
-
-This module combines the class-first top-coefficient deviation with the fixed
-curvature action left by the exact top-path split.  In dimension three, one
-radius and two coefficients work for every metric in the order-three class.
--/
-
 set_option autoImplicit false
 set_option backward.isDefEq.respectTransparency false
 
@@ -37,11 +29,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
-/-- **Dimension-three class-first integrated top-path action bound.**
-
-The radius and both action coefficients are chosen before the class metric
-varies.  The integrated top coefficient is a small `H3 -> H1` perturbation of
-the connection Laplacian, up to its fixed-curvature `H2 -> H1` term. -/
 theorem top_path_h1_unif
     (hDim : Module.finrank ℝ E = 3)
     (gBase : SmoothRiemannianMetric I M) {Λ : ℝ} (hΛ : 1 ≤ Λ) :

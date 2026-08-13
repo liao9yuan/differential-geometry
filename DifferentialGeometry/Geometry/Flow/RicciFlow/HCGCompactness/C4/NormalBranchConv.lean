@@ -4,14 +4,6 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.C4.NormalLimi
 
 set_option autoImplicit false
 
-
-
-
-
-
-
-
-
 noncomputable section
 
 open Filter Set
@@ -27,8 +19,6 @@ variable [FiniteDimensional Real E] [CompleteSpace E]
 variable [NeZero (Module.finrank Real E)]
 variable {H : Type uH} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H} [I.Boundaryless]
-
-
 
 def HasDiagPairConv
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
@@ -72,8 +62,6 @@ def HasDiagPairConv
     MapCInfConvOnCompacts (Metric.ball 0 delta₀)
       (fun n ↦ ((e n).symm : E × E → E × E)) eInf.symm
 
-
-
 theorem HasDiagPairConv.subseq
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
     {hcomplete : SeqMetricComplete (I := I) X}
@@ -105,8 +93,6 @@ theorem HasDiagPairConv.subseq
     himage, hf.eventually hstageMap, hinv.comp_tendsto_atTop hf⟩
   intro n
   simpa only [PointedRiemannianSeq.subseq] using hnormal (f n)
-
-
 
 theorem HasDiagPairConv.congr_stage
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
@@ -217,8 +203,6 @@ theorem HasDiagPairConv.congr_stage
     hInfDiag, hInfApprox, hforward', delta1, hdelta1,
     lt_min hdelta1ltStage' hdelta1ltInf, himage', hstageMap', hinv'⟩
 
-
-
 theorem HasDiagPairConv.inv_data
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
     {hcomplete : SeqMetricComplete (I := I) X}
@@ -264,8 +248,6 @@ theorem HasDiagPairConv.inv_data
   exact ⟨delta0, hdelta0,
     fun n ↦ (hnormal n).2.2.2.2.1.mono (hstageTarget n),
     hInfSymmC.mono hInfTarget0, hinv⟩
-
-
 
 theorem HasDiagPairConv.exists_diag_inv
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
@@ -345,9 +327,6 @@ theorem HasDiagPairConv.exists_diag_inv
       hInfSymmC hKt hKQ
 
 namespace NormalRadiusProfile
-
-
-
 
 theorem exists_diagInv_conv
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
@@ -487,9 +466,6 @@ theorem exists_diagInv_conv
     hforward hsource hstage_cd (lt_min hdelta hdeltaInf) htarget
     htargetInf hInf_cd' hInf_symm_cd' hbase
 
-
-
-
 theorem exists_diagPair_at
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
     {hd : InjRadiusDecayInput (I := I) X}
@@ -609,9 +585,6 @@ theorem exists_diagPair_at
         hInfSource, hInfZero, hInfTarget, hInfSmooth, hInfSymmSmooth,
         hInfDiag, ⟨η, hη, hInfApproxη⟩, hforward,
         delta₀, hdelta₀, hdelta₀lt, hInfMaps, hstageMaps, hinverse⟩)
-
-
-
 
 theorem exists_diagPair_conv
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}

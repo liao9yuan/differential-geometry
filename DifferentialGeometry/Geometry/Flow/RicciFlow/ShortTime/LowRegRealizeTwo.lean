@@ -3,35 +3,6 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.LowRegRHSSymm
 import DifferentialGeometry.Analysis.Parabolic.QuasiLinear.TensorMaximalRegularity.NonautonomousL2Realize
 import DifferentialGeometry.Analysis.Parabolic.QuasiLinear.TensorMaximalRegularity.LowRegOperatorTime
 
-/-!
-# Realization of the adjacent-scale lift, and the Ricci--DeTurck forcing identity
-
-Bricks C2 and C3 of the low-regularity Ricci--DeTurck bootstrap.
-
-* `lowreg_realize_two` turns the six `L2`-class conclusions of `lowreg_lift_two`
-  into one intrinsic `CrossScaleField` on the *unchanged* horizon, with zero
-  trace, the clean tensor heat equation, and the pinned intermediate
-  representative.  It is a pure composition: every hypothesis is the one
-  `lowreg_lift_two` already asks for, and no new frontier is introduced.
-* `lowRadial_eq_self_sol` discharges the spectral-symmetry input of
-  `lowRadial_eq_self_along_sol` from `lowreg_sol_symm_h3`, so that along the
-  order-one solution the *frozen radial* low-base coefficients are the genuine
-  coefficients.  Its only remaining inputs are exported by `lowreg_partial_sol`.
-* `lowreg_force_lo` is the unconditional half of the forcing identity: the
-  lifted forcing, read at the lower scale, is the genuine low-regularity
-  Ricci--DeTurck nonlinearity `lowRegN` at the genuine states.
-* `lowreg_force_id` upgrades that to the high scale.  Because the scale
-  inclusion is injective, *any* higher-order lift `N2` of `lowRegN` is hit
-  exactly: `fHi =ᵐ N2 ∘ state`.  The residual frontier is therefore precisely
-  the construction of `N2` -- an `H^σ`-valued Nemytskii map with
-  `tensorHsInclusion ∘ N2 = lowRegN` -- and nothing else.
-* `coreNAt` / `coreNAt_incl` exhibit that lift on the dense smooth core:
-  `deTurckSmoothN` has order-independent spectral coordinates, so raising its
-  order and including back is the identity.  What is missing for the full `N2`
-  is only the completed (dense-extension) version of this map, i.e. an
-  `H^σ`-valued tame estimate for the low-base nonlinearity.
--/
-
 noncomputable section
 
 open Bundle Manifold MeasureTheory Set Filter
@@ -57,18 +28,8 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
   [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
   [T2Space M] [SigmaCompactSpace M]
 
-/-! ## Exponent normalization of a coefficient family
-
-The Time-layer low-base families sit at *literal* Sobolev orders
-(`H4 →L H2`, `H3 →L H2`), while the lift indexes their domains arithmetically
-(`H^(aHi+2)`, `H^(aHi+1)`).  Precomposition with `tensorHsCongrL` moves them,
-and — because the transport is the identity after `cases` on the exponent
-equality — strong measurability, uniform operator bounds and time-`L²`
-membership all survive unchanged. -/
-
 omit [BoundarylessManifold I M] in
-/-- Normalizing the domain exponent of an operator family preserves strong
-measurability. -/
+
 theorem congrOp_aemeas {g : SmoothRiemannianMetric I M} {p q b T : ℝ}
     (hpq : p = q)
     (A : ℝ → tensorHs (I := I) (M := M) g 0 2 q →L[ℝ]
@@ -81,9 +42,7 @@ theorem congrOp_aemeas {g : SmoothRiemannianMetric I M} {p q b T : ℝ}
   simpa only [tensorHsCongrL_refl, ContinuousLinearMap.comp_id] using hA
 
 omit [BoundarylessManifold I M] in
-/-- Normalizing the domain exponent of an operator family preserves time-`L²`
-membership -- the `hA1 : MemLp A1 2` input of the non-autonomous fixed
-point. -/
+
 theorem congrOp_memLp {g : SmoothRiemannianMetric I M} {p q b T : ℝ}
     (hpq : p = q)
     (A : ℝ → tensorHs (I := I) (M := M) g 0 2 q →L[ℝ]
@@ -95,8 +54,6 @@ theorem congrOp_memLp {g : SmoothRiemannianMetric I M} {p q b T : ℝ}
   simpa only [tensorHsCongrL_refl, ContinuousLinearMap.comp_id] using hA
 
 omit [BoundarylessManifold I M] in
-/-- Normalizing the domain exponent of an operator family preserves every
-uniform operator bound. -/
 theorem congrOp_norm_le {g : SmoothRiemannianMetric I M} {p q b T C : ℝ}
     (hpq : p = q)
     (A : ℝ → tensorHs (I := I) (M := M) g 0 2 q →L[ℝ]
@@ -107,11 +64,6 @@ theorem congrOp_norm_le {g : SmoothRiemannianMetric I M} {p q b T C : ℝ}
   filter_upwards [hC] with t ht
   exact (opNorm_comp_congr_le (I := I) (M := M) hpq (A t)).trans ht
 
-/-! ## The two Lane-B coefficient families at the lift's exponents -/
-
-/-- The complete second-order low-base family along the order-one solution,
-with its domain normalized from the literal `H4` to the `H^(aHi+2)` demanded by
-the lift at `aHi = 2`. -/
 def liftA2Two (g : SmoothRiemannianMetric I M) {ρ δ : ℝ}
     (hρ : 0 ≤ ρ) (hδ0 : 0 ≤ δ) (hδ_le : δ ≤ 1 / 3)
     (hreal : ∀ S : SmoothCcTensor g 0 2,
@@ -134,9 +86,6 @@ def liftA2Two (g : SmoothRiemannianMetric I M) {ρ δ : ℝ}
       (tensorHsCongrL (I := I) (M := M) g 0 2
         (show (2 : ℝ) + 2 = (4 : ℝ) by norm_num))
 
-/-- The `A2` input packet of `lowreg_lift_two` at `aHi = 2`: strong
-measurability and the uniform smallness of the *complete* second-order family,
-consumed unconditionally from `lowRegA2Total_data`. -/
 theorem liftA2Two_data
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M) {ρ₀ δ : ℝ}
@@ -175,9 +124,6 @@ theorem liftA2Two_data
   exact ⟨congrOp_aemeas (I := I) (M := M) _ _ hmeas,
     congrOp_norm_le (I := I) (M := M) _ _ hbd⟩
 
-/-- The genuine first-order low-base family along the order-one solution, with
-its domain normalized from the literal `H3` to the `H^(aHi+1)` demanded by the
-lift at `aHi = 2`. -/
 def liftA1Two (g : SmoothRiemannianMetric I M) {ρ δ : ℝ}
     (hρ : 0 ≤ ρ) (hδ0 : 0 ≤ δ) (hδ_le : δ ≤ 1 / 3)
     (hreal : ∀ S : SmoothCcTensor g 0 2,
@@ -193,15 +139,6 @@ def liftA1Two (g : SmoothRiemannianMetric I M) {ρ δ : ℝ}
       (tensorHsCongrL (I := I) (M := M) g 0 2
         (show (2 : ℝ) + 1 = (3 : ℝ) by norm_num))
 
-/-- The `A1` input packet of `lowreg_lift_two` at `aHi = 2`: strong
-measurability and the time-`L²` membership of the first-order family, consumed
-from `lowRegA1_memLp`.
-
-`hcont` and `hlin` are *not* discharged here: they are the two facts about the
-completed first-order coefficient map that the low-base lane still owes (an
-operator bound **affine** in the `H3` state norm).  With the degree-six envelope
-currently in the tree the `MemLp` conclusion is false, so passing them on as
-hypotheses is the honest interface. -/
 theorem liftA1Two_data
     (g : SmoothRiemannianMetric I M) {ρ δ : ℝ}
     (hρ : 0 ≤ ρ) (hδ0 : 0 ≤ δ) (hδ_le : δ ≤ 1 / 3)
@@ -227,19 +164,7 @@ theorem liftA1Two_data
   exact ⟨congrOp_aemeas (I := I) (M := M) _ _ hmeas,
     congrOp_memLp (I := I) (M := M) _ _ hmem⟩
 
-/-! ## C2 -- the realized adjacent-scale cross-scale field -/
-
 omit [BoundarylessManifold I M] in
-/-- Intrinsic realization of the one-step adjacent-scale bootstrap.  The output
-of `lowreg_lift_two` determines a canonical `CrossScaleField` on the same
-horizon whose carrier solves the clean tensor heat equation with the lifted
-forcing, whose intermediate `H^(aHi+1)` representative vanishes at time zero and
-includes onto the order-one Duhamel field almost everywhere, and whose carrier
-includes onto the order-one maximal-regularity solution on the closed slab.
-
-Every hypothesis is a hypothesis of `lowreg_lift_two`; the three extra order
-proofs `hOrdUp`, `hOrdRp` only name the inclusions that the realization layer
-uses.  Nothing here is a new assumption about the Ricci--DeTurck coefficients. -/
 theorem lowreg_realize_two
     {g : SmoothRiemannianMetric I M} {T aLo aHi : ℝ}
     (hlo : aLo = aHi - 1) (hOrd : aLo ≤ aHi)
@@ -333,13 +258,8 @@ theorem lowreg_realize_two
   exact ⟨uHi, fHi, u, hulo, huhi, hfHi, htrace', hpde', hforce, hforce_ae,
     hcarrier, hzero, hcontsq, hreprlo, hreprlow⟩
 
-/-! ## Radial inactivity along the order-one solution, symmetry discharged -/
-
 omit [BoundarylessManifold I M] in
-/-- The exponent transport does not move the lower-scale size of a state: the
-`H2` view of a transported `H3` state has the norm of the untransported
-`H^(1+1)` view.  This is `tensorHsCongr_incl` read through
-`norm_tensorHsCongr`. -/
+
 theorem norm_incl_congr (g : SmoothRiemannianMetric I M)
     {a b c d : ℝ} (hac : a = c) (hbd : b = d) (hab : a ≤ b) (hcd : c ≤ d)
     (u : tensorHs (I := I) (M := M) g 0 2 b) :
@@ -349,11 +269,6 @@ theorem norm_incl_congr (g : SmoothRiemannianMetric I M)
   rw [← tensorHsCongr_incl (I := I) (M := M) hac hbd hab hcd u,
     norm_tensorHsCongr]
 
-/-- **Along the order-one solution the frozen radial coefficients are the
-genuine ones.**  Both total radial maps are the identity almost everywhere on
-the transported solver path, with the spectral-symmetry input discharged by
-`lowreg_sol_symm_h3` and the ball input taken in the form exported by
-`lowreg_partial_sol` (`field t ∈ lowerState g₀ 1 R`). -/
 theorem lowRadial_eq_self_sol
     (g₀ g_bg : SmoothRiemannianMetric I M) {R δ T ρ : ℝ}
     (hR : 0 < R) (hδ : δ < 1)
@@ -421,11 +336,6 @@ theorem lowRadial_eq_self_sol
     exact ht
   exact lowRadial_eq_self_along_sol (I := I) (M := M) g₀ hρ hRρ hsymm hballT
 
-/-! ## C3 -- the Ricci--DeTurck identification of the lifted forcing -/
-
-/-- The genuine smooth Ricci--DeTurck nonlinearity at an arbitrary spectral
-order, on the smooth part of the lower state ball.  At order one this is
-`coreN`. -/
 def coreNAt (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ) {R δ : ℝ}
     (hδ : δ < 1)
     (hreal : ∀ S : SmoothCcTensor g₀ 0 2,
@@ -448,10 +358,6 @@ theorem coreNAt_one (g₀ g_bg : SmoothRiemannianMetric I M) {R δ : ℝ}
       coreN (I := I) (M := M) g₀ g_bg hδ hreal :=
   rfl
 
-/-- **The smooth Ricci--DeTurck nonlinearity is natural for the scale
-inclusions.**  Its spectral coordinates are those of the smooth remainder and do
-not depend on the order, so raising the order and including back is the
-identity. -/
 theorem deTurckSmoothN_incl (g₀ g_bg : SmoothRiemannianMetric I M)
     {a b : ℕ} (hab : (a : ℝ) ≤ (b : ℝ)) (S : SmoothCcTensor g₀ 0 2)
     {δ : ℝ} (hδ_lt : δ < 1)
@@ -464,9 +370,6 @@ theorem deTurckSmoothN_incl (g₀ g_bg : SmoothRiemannianMetric I M)
     smoothN_eq_embed (I := I) (M := M) g₀ g_bg a S hδ_lt hδ,
     tensorHsInclusion_smoothCcToTensorHs (I := I) (M := M) g₀ hab]
 
-/-- On the dense smooth core, the higher-order nonlinearity is a genuine lift of
-`coreN` along the scale inclusion.  This is the smooth-core instance of the
-hypothesis `hN2` of `lowreg_force_id`. -/
 theorem coreNAt_incl (g₀ g_bg : SmoothRiemannianMetric I M) {R δ : ℝ}
     {a b : ℕ} (hab : (a : ℝ) ≤ (b : ℝ)) (hδ : δ < 1)
     (hreal : ∀ S : SmoothCcTensor g₀ 0 2,
@@ -479,10 +382,6 @@ theorem coreNAt_incl (g₀ g_bg : SmoothRiemannianMetric I M) {R δ : ℝ}
       coreNAt (I := I) (M := M) g₀ g_bg a hδ hreal x :=
   deTurckSmoothN_incl (I := I) (M := M) g₀ g_bg hab _ hδ _
 
-/-- **The lifted forcing is the genuine Ricci--DeTurck nonlinearity, read at the
-lower scale.**  Unconditional: it combines the pointwise almost-everywhere
-inclusion identity exported by `lowreg_lift_two` with the forcing
-identification exported by `lowreg_partial_sol`. -/
 theorem lowreg_force_lo
     (g₀ g_bg : SmoothRiemannianMetric I M) {R δ T σ : ℝ}
     (hR : 0 < R) (hδ : δ < 1)
@@ -507,19 +406,6 @@ theorem lowreg_force_lo
   filter_upwards [hincl, hforce] with t h1 h2
   rw [h1, h2]
 
-/-- **The Ricci--DeTurck Nemytskii identification of the lifted forcing.**  Given
-any higher-order lift `N2` of the genuine low-regularity nonlinearity along the
-scale inclusion, the lifted forcing is exactly `N2` at the genuine states.  No
-regularity, smallness, or coefficient hypothesis is used: the scale inclusion is
-injective, so the lower-scale identity `lowreg_force_lo` determines `fHi`
-outright.
-
-The single residual frontier of brick C3 is therefore the *construction* of
-`N2`, i.e. an `H^σ`-valued Nemytskii map with
-`tensorHsInclusion ∘ N2 = lowRegN`.  `coreNAt_incl` produces it on the dense
-smooth core; completing it to the whole lower state ball needs an
-`H^σ`-valued tame estimate for the low-base nonlinearity, which is the
-outstanding low-base lane. -/
 theorem lowreg_force_id
     (g₀ g_bg : SmoothRiemannianMetric I M) {R δ T σ : ℝ}
     (hR : 0 < R) (hδ : δ < 1)

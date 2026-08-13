@@ -11,14 +11,6 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.C4.PointedEme
 
 set_option autoImplicit false
 
-
-
-
-
-
-
-
-
 noncomputable section
 
 universe u uE uH
@@ -40,8 +32,6 @@ variable [FiniteDimensional Real E] [CompleteSpace E]
 variable [NeZero (Module.finrank Real E)]
 variable {H : Type uH} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H} [I.Boundaryless]
-
-
 
 private theorem exists_smooth_q
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
@@ -132,8 +122,6 @@ theorem normal_enorm
   simpa using
     (tensor0SBundle_enorm_eq_riemannianBundle_enorm (I := I) Y.metric y v)
 
-
-
 noncomputable def normalTangent
     (Y : PointedRiemannianManifold.{u, uE, uH} (I := I)) (x : Y.M)
     (z : E × E)
@@ -149,8 +137,6 @@ noncomputable def normalTangent
   letI : T2Space (TangentBundle I Y.M) := Y.t2TangentBundle
   exact c.tangent z
 
-/-- A pair of normal coordinates interpreted as a pair of ambient manifold
-points. -/
 noncomputable def normalPair
     (Y : PointedRiemannianManifold.{u, uE, uH} (I := I)) (x : Y.M)
     (z : E × E)
@@ -299,8 +285,6 @@ theorem normal_launch_mfd
         (fun u : E ↦ expMapDiffeo (I := I) Y.metric x u) (Z 0).1 (Z 0).2 := by
       rw [hgammaMfd]
 
-
-
 theorem normal_end_eq_intr
     (Y : PointedRiemannianManifold.{u, uE, uH} (I := I))
     (hcomplete : MetricComplete (I := I) Y)
@@ -407,8 +391,6 @@ theorem normal_end_eq_intr
       (mfderiv 𝓘(Real, Real) I Gamma 0 1)
       hGammaCont hGammaGeo rfl rfl)
 
-
-
 theorem normal_end_eq_diag
     (Y : PointedRiemannianManifold.{u, uE, uH} (I := I))
     (hcomplete : MetricComplete (I := I) Y)
@@ -483,11 +465,6 @@ theorem normal_end_eq_diag
   rw [hlaunch] at hend
   rw [normalPair, normalTangent, diagExp_apply]
   exact Prod.ext rfl hend
-
-
-
-
-
 
 theorem exists_normal_diag
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
@@ -617,9 +594,6 @@ theorem exists_normal_diag
   simpa only [hΦ0 z hz] using hdiag
 
 namespace NormalRadiusProfile
-
-
-
 
 theorem exists_flow_at
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
@@ -807,9 +781,6 @@ theorem exists_flow_at
     exact ⟨hzFirst', hzFirst', hzEnd'⟩
   exact ⟨Φ, e, hΦ0, hcurve, hstay, hcoe, heDiag, hfence⟩
 
-
-
-
 theorem exists_uniform_flow
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
     {hd : InjRadiusDecayInput (I := I) X}
@@ -855,8 +826,6 @@ theorem exists_uniform_flow
   obtain ⟨Φ, e, hΦ0, hΦcurve, hΦstay, he, hdiag, _hfence⟩ := hflow k x hx
   exact ⟨Φ, e, hΦ0, hΦcurve, hΦstay, he, hdiag⟩
 
-
-
 theorem exists_uniform_diag
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
     {hd : InjRadiusDecayInput (I := I) X}
@@ -888,9 +857,6 @@ theorem exists_uniform_diag
   exact ⟨e, he⟩
 
 end NormalRadiusProfile
-
-
-
 
 theorem normal_inv_eq
     (Y : PointedRiemannianManifold.{u, uE, uH} (I := I))
@@ -1050,8 +1016,6 @@ theorem chart_launch_mfd
     _ = mfderiv 𝓘(Real, E) I c.hom (Z 0).1 (Z 0).2 := by
       rw [hgammaMfd]
 
-/-- A fenced provider-phase trajectory reaches the intrinsic moving
-exponential of its actual launch tangent at time one. -/
 theorem chart_end_eq_intr
     (Y : PointedRiemannianManifold.{u, uE, uH} (I := I))
     (hcomplete : MetricComplete (I := I) Y)
@@ -1160,9 +1124,6 @@ theorem chart_end_eq_intr
       (mfderiv 𝓘(Real, Real) I Gamma 0 1)
       hGammaCont hGammaGeo rfl rfl)
 
-/-- The retained endpoint of a provider-phase trajectory is the intrinsic
-diagonal exponential after interpreting source and target through the same
-provider chart. -/
 theorem chart_end_eq_diag
     (Y : PointedRiemannianManifold.{u, uE, uH} (I := I))
     (hcomplete : MetricComplete (I := I) Y)
@@ -1243,8 +1204,6 @@ theorem chart_end_eq_diag
   rw [normalPair, normalTangent, diagExp_apply]
   exact Prod.ext rfl hend
 
-/-- The launch tangent of the pushed normal phase curve is the differential of
-the normal exponential applied to the phase velocity. -/
 theorem exists_chart_diag
     (Y : PointedRiemannianManifold.{u, uE, uH} (I := I))
     (hcomplete : MetricComplete (I := I) Y)
@@ -1374,8 +1333,6 @@ theorem exists_chart_diag
   rw [hcoe]
   simpa only [hΦ0 z hz] using hdiag
 
-/-- Prescribed bilateral phase budgets produce one provider-parametric
-quantitative diagonal branch and retain its coordinate fence. -/
 theorem exists_chart_diag_of
     (Y : PointedRiemannianManifold.{u, uE, uH} (I := I))
     (hcomplete : MetricComplete (I := I) Y)
@@ -1533,8 +1490,6 @@ theorem exists_chart_diag_of
     exact ⟨hrChart hzFirst, hrChart hzFirst, hrChart hzEnd⟩
   exact ⟨δ, e, hδ, hδeq, hIsDiag, hfence, hinvApprox⟩
 
-/-- A controlled chart admits one quantitative endpoint branch satisfying the
-provider-parametric intrinsic diagonal predicate. -/
 theorem exists_chart_diag_at
     (Y : PointedRiemannianManifold.{u, uE, uH} (I := I))
     (hcomplete : MetricComplete (I := I) Y)

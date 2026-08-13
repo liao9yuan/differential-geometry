@@ -5,14 +5,6 @@ import DifferentialGeometry.Geometry.Connection.ChartBridge.Hessian
 
 set_option autoImplicit false
 
-/-!
-# Minimizing tangents in the selected quantitative normal branch
-
-This file captures controlled intrinsic tangent vectors in the explicit source
-of the selected normal branch.  It does not compare the intrinsic exponential
-with the realized exponential.
--/
-
 noncomputable section
 
 universe u uE uH
@@ -36,8 +28,6 @@ variable [NeZero (Module.finrank Real E)]
 variable {H : Type uH} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H} [I.Boundaryless]
 
-/-- The normal-coordinate metric evaluates the ambient metric on the tangent
-vector represented by `normalTangent`. -/
 theorem normalTan_metric
     (Y : PointedRiemannianManifold.{u, uE, uH} (I := I)) (x : Y.M)
     (z : E × E) :
@@ -56,8 +46,6 @@ theorem normalTan_metric
   rw [normalCoordMetric_apply]
   rfl
 
-/-- The target of the tangent normal-coordinate homeomorphism consists of the
-tangent vectors based in the target of the restricted normal exponential. -/
 theorem normalTanHome_target
     (Y : PointedRiemannianManifold.{u, uE, uH} (I := I)) (x : Y.M) :
     letI : TopologicalSpace Y.M := Y.topology
@@ -80,8 +68,6 @@ theorem normalTanHome_target
 
 namespace IsNormalDiag
 
-/-- A tangent vector controlled in an arbitrary normal-ball provider belongs
-to the source of the selected quantitative branch. -/
 theorem tan_mem_of_ctrl
     (Y : PointedRiemannianManifold.{u, uE, uH} (I := I))
     (hcomplete : MetricComplete (I := I) Y)
@@ -228,8 +214,6 @@ theorem tan_mem_of_ctrl
   rw [← htransport.1]
   exact ⟨z, hzBall, hAz⟩
 
-/-- On a provider-controlled pair, the selected inverse is the globally
-minimizing intrinsic Hopf--Rinow tangent. -/
 theorem inv_is_min_ctrl
     (Y : PointedRiemannianManifold.{u, uE, uH} (I := I))
     (hcomplete : MetricComplete (I := I) Y)
@@ -337,8 +321,6 @@ theorem inv_is_min_ctrl
     exact hmap
   exact ⟨v, hdom, hinv, hexp, hlen⟩
 
-/-- On a provider-controlled pair, half the squared distance is half the
-squared norm of the selected minimizing inverse. -/
 theorem halfSq_eq_ctrl
     (Y : PointedRiemannianManifold.{u, uE, uH} (I := I))
     (hcomplete : MetricComplete (I := I) Y)
@@ -431,8 +413,6 @@ theorem halfSq_eq_ctrl
   dsimp only
   rw [hinv, ← hlen, Real.sq_sqrt hinnerNonneg]
 
-/-- Half the squared distance is smooth on every set whose points and fixed
-endpoint stay inside one provider-controlled minimizing branch. -/
 theorem halfSq_inf_ctrl
     (Y : PointedRiemannianManifold.{u, uE, uH} (I := I))
     (hcomplete : MetricComplete (I := I) Y)
@@ -573,8 +553,6 @@ theorem halfSq_inf_ctrl
     hρ hρq hρmetric (hctrl y hy).1 (hctrl y hy).2.1
     (hctrl y hy).2.2
 
-/-- On an open provider-controlled set, the half-squared-distance gradient is
-the negative selected minimizing inverse tangent. -/
 theorem grad_half_ctrl
     (Y : PointedRiemannianManifold.{u, uE, uH} (I := I))
     (hcomplete : MetricComplete (I := I) Y)
@@ -678,8 +656,6 @@ theorem grad_half_ctrl
   rw [hinv]
   exact hgrad
 
-/-- On an open provider-controlled set, the Hessian of half the squared
-distance is the metric pairing with the derivative of the selected inverse. -/
 theorem hess_half_ctrl
     (Y : PointedRiemannianManifold.{u, uE, uH} (I := I))
     (hcomplete : MetricComplete (I := I) Y)
@@ -814,8 +790,6 @@ theorem hess_half_ctrl
   simp only [gradient_eq_gradFun] at hcov'
   rw [hcov']
 
-/-- A controlled tangent vector over a point in the half-cage belongs to the
-source of the selected quantitative branch. -/
 theorem tan_mem_of_small
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
     (hb : NormalCoordMetricBoundInput (I := I) X) (k : Nat)
@@ -1021,8 +995,6 @@ theorem tan_mem_of_small
   rw [← htransport.1]
   exact ⟨z, hzBall, hAz⟩
 
-
-
 theorem inv_is_min
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
     (hb : NormalCoordMetricBoundInput (I := I) X) (k : Nat)
@@ -1149,8 +1121,6 @@ theorem inv_is_min
     exact hmap
   exact ⟨v, hdom, hinv, hexp, hlen⟩
 
-/-- On a controlled pair, half the squared distance is half the squared norm
-of the selected minimizing inverse. -/
 theorem halfSq_eq_inv
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
     (hb : NormalCoordMetricBoundInput (I := I) X) (k : Nat)
@@ -1240,8 +1210,6 @@ theorem halfSq_eq_inv
   dsimp only
   rw [hinv, ← hlen, Real.sq_sqrt hinnerNonneg]
 
-/-- On the explicit half-cage, half the squared distance to a fixed endpoint
-is smooth to all orders through the selected minimizing inverse. -/
 theorem halfSq_inf
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
     (hb : NormalCoordMetricBoundInput (I := I) X) (k : Nat)
@@ -1378,8 +1346,6 @@ theorem halfSq_inf
   exact halfSq_eq_inv (I := I) hb k hcomplete hconn x hq he hf
     hρ hρq hρmetric hρexp hy
 
-/-- On a controlled pair, the half-squared-distance gradient is the negative
-selected minimizing inverse tangent. -/
 theorem grad_half_inv
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
     (hb : NormalCoordMetricBoundInput (I := I) X) (k : Nat)
@@ -1488,9 +1454,6 @@ theorem grad_half_inv
   rw [hinv]
   exact hgrad
 
-/-- On the explicit half-cage, the Hessian of half the squared distance is the
-metric pairing with the Levi-Civita derivative of the negative selected
-inverse tangent.  This is the branch-native `lbl412` identity. -/
 theorem hess_half_inv
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
     (hb : NormalCoordMetricBoundInput (I := I) X) (k : Nat)

@@ -5,16 +5,6 @@ set_option linter.style.longLine false
 set_option linter.unusedSectionVars false
 set_option backward.isDefEq.respectTransparency false
 
-/-!
-# Tensorial Ricci-drift bounds for forward uniqueness
-
-The four Ricci actions in the lowered Riemann evolution are a signed slot
-combination of one tensor,
-`(X,Y,Z,W) ↦ Ric (Rm(X,Y)Z) W`.  This file records that invariant combination,
-identifies its components in an arbitrary basis, and bounds the difference of
-the two flows without component enumeration.
--/
-
 noncomputable section
 
 namespace DifferentialGeometry.PDE.RicciFlow
@@ -87,15 +77,12 @@ private def driftPerm (e : Equiv.Perm (Fin 4))
     driftPerm (I := I) e T v = T (fun a : Fin 4 => v (e a)) :=
   Tensor0SSpace.domDomCongr_apply (I := I) e T v
 
-/-- The signed four-slot combination which turns
-`Ric(Rm(X,Y)Z,W)` into the four Ricci actions on lowered Riemann curvature. -/
 def driftSlots
     (T : Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) 4 x) :
     Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) 4 x :=
   (T - driftPerm (I := I) driftPerm1 T) +
     (driftPerm (I := I) driftPerm2 T - driftPerm (I := I) driftPerm3 T)
 
-/-- Evaluation of `driftSlots` on four named vectors. -/
 theorem driftSlots_apply
     (T : Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) 4 x)
     (X Y Z W : TangentSpace I x) :
@@ -111,7 +98,6 @@ theorem driftSlots_apply
       funext a
       fin_cases a <;> simp [driftPerm1, driftPerm2, driftPerm3, vec4]
 
-/-- The Ricci-drift slot operation is additive. -/
 theorem driftSlots_add
     (A B : Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) 4 x) :
     driftSlots (I := I) (A + B) =
@@ -121,7 +107,6 @@ theorem driftSlots_add
     Tensor0SSpace.sub_apply (I := I) 4 x, driftPerm_apply]
   ring
 
-/-- The Ricci-drift slot operation commutes with subtraction. -/
 theorem driftSlots_sub
     (A B : Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) 4 x) :
     driftSlots (I := I) A - driftSlots (I := I) B =
@@ -134,7 +119,7 @@ theorem driftSlots_sub
 variable [NeZero (Module.finrank Real E)]
 
 set_option maxHeartbeats 1000000 in
-/-- Four slot-isometric summands cost at most `16` in squared norm. -/
+
 theorem driftSlotsSq_le (g : SmoothRiemannianMetric I M)
     (T : Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) 4 x) :
     normSq0S (I := I) g x 4 (driftSlots (I := I) T) ≤
@@ -200,7 +185,6 @@ private theorem drift02_sub_left
   rw [sub_add_cancel] at h
   exact eq_sub_of_add_eq h.symm
 
-/-- Bilinear splitting of a changed lowering tensor and a changed trilinear map. -/
 theorem lowerTri_split
     (q₁ q₂ : Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) 2 x)
     (A₁ A₂ : TangentSpace I x →L[Real] TangentSpace I x →L[Real]
@@ -218,7 +202,6 @@ theorem lowerTri_split
   rw [hA, drift02_sub_left]
   ring
 
-/-- Lowering the canonical curvature operator by its own metric is `metricRm04At`. -/
 theorem lowerRm_eq_rm04 (g : SmoothRiemannianMetric I M) (x : M) :
     lowerTri (I := I) (metricTensorField (I := I) g x)
         (riemannOp (metricCov (I := I) g) x) =
@@ -231,15 +214,12 @@ theorem lowerRm_eq_rm04 (g : SmoothRiemannianMetric I M) (x : M) :
   simpa only [hv] using
     (metricRm04At_inner (I := I) g x (v 0) (v 1) (v 2) (v 3)).symm
 
-/-- The intrinsic four-term Ricci drift in the lowered Riemann evolution. -/
 def ricciDrift04 (g : SmoothRiemannianMetric I M) (x : M) :
     Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) 4 x :=
   driftSlots (I := I)
     (lowerTri (I := I) (metricRicciAt (I := I) g x)
       (riemannOp (metricCov (I := I) g) x))
 
-/-- The two-flow Ricci-drift difference splits into a Ricci-difference term and
-a raised-curvature-difference term. -/
 theorem ricciDrift_sub (g₁ g₂ : SmoothRiemannianMetric I M) (x : M) :
     ricciDrift04 (I := I) g₁ x - ricciDrift04 (I := I) g₂ x =
       driftSlots (I := I)
@@ -255,9 +235,7 @@ theorem ricciDrift_sub (g₁ g₂ : SmoothRiemannianMetric I M) (x : M) :
 variable [NeZero (Module.finrank Real E)]
 
 set_option maxHeartbeats 1000000 in
-/-- The two-flow Ricci-drift difference is controlled by the Ricci difference
-against the first curvature and by the raised-curvature difference against the
-second Ricci tensor. -/
+
 theorem ricciDriftSq_le (g₁ g₂ : SmoothRiemannianMetric I M) (x : M) :
     normSq0S (I := I) g₁ x 4
         (ricciDrift04 (I := I) g₁ x - ricciDrift04 (I := I) g₂ x) ≤
@@ -430,8 +408,6 @@ private theorem ricciLow_comp
             refine Finset.sum_congr rfl fun p _ => ?_
             rw [Finset.sum_mul]
 
-/-- Components of the invariant Ricci drift in an arbitrary basis with a
-genuine inverse metric. -/
 theorem ricciDrift_comp
     (g : SmoothRiemannianMetric I M)
     (basis : Module.Basis Idx Real (TangentSpace I x))
@@ -510,7 +486,6 @@ theorem ricciDrift_comp
   rw [h1, h2, h3]
   ring
 
-/-- Reconstructing the canonical component formula gives the invariant Ricci drift. -/
 theorem ricciDrift_low
     (g : SmoothRiemannianMetric I M)
     (basis : Module.Basis Idx Real (TangentSpace I x))

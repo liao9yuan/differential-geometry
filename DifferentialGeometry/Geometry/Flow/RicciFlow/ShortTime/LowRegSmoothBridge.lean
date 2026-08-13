@@ -1,15 +1,5 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.LowRegDenseSolve
 
-/-!
-# Low-regularity smooth forcing bridge
-
-The dense lower-regularity nonlinearity agrees with the genuine smooth
-Ricci--DeTurck nonlinearity on its smooth core.  Consequently, whenever a
-smooth representative family is pinned to the maximal-regularity solution on
-the original time interval, the forcing identity transfers on that same
-interval; no post-solution time shrink is used here.
--/
-
 noncomputable section
 
 open Bundle Manifold MeasureTheory Set
@@ -35,8 +25,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
   [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
   [T2Space M] [SigmaCompactSpace M]
 
-/-- Symmetrizing a smooth `H3` state representative preserves its lower
-`H2` state-ball bound. -/
 theorem symm_h2_of_state
     (g₀ : SmoothRiemannianMetric I M) {R : ℝ}
     (S : SmoothCcTensor g₀ 0 2)
@@ -58,9 +46,6 @@ theorem symm_h2_of_state
       rw [tensorHsInclusion_smoothCcToTensorHs]
     _ ≤ R := hS
 
-/-- A continuous genuine core nonlinearity is recovered exactly by its dense
-extension at every point of the smooth core.  `lowreg_partial_sol` exports the
-required core continuity for its concrete `Nfun`. -/
 theorem lowRegN_on_core
     (g₀ g_bg : SmoothRiemannianMetric I M) {R δ : ℝ}
     (hR : 0 < R) (hδ : δ < 1)
@@ -76,8 +61,6 @@ theorem lowRegN_on_core
   simpa only [lowRegN] using
     (smoothCore_dense (I := I) (M := M) g₀ hR).extend_eq hcore x
 
-/-- On a directly supplied smooth state representative, `lowRegN` is the
-order-one spectral embedding of the genuine smooth Ricci--DeTurck remainder. -/
 theorem lowRegN_on_smooth
     (g₀ g_bg : SmoothRiemannianMetric I M) {R δ : ℝ}
     (hR : 0 < R) (hδ : δ < 1)
@@ -109,7 +92,6 @@ theorem lowRegN_on_smooth
   unfold coreN at hx
   simpa only [u, x, hrep] using hx
 
-/-- The static seed mass of the low-regularity Ricci--DeTurck forcing. -/
 theorem lowRegSeedMass
     (g₀ g_bg : SmoothRiemannianMetric I M) {R δ : ℝ}
     (hR : 0 < R) (hδ : δ < 1)
@@ -198,9 +180,6 @@ theorem lowRegSeedMass
             (hreal _ (symm_h2_of_state (I := I) (M := M) g₀
               (0 : SmoothCcTensor g₀ 0 2) hS)))‖ ^ 2 := by rw [hbridge]
 
-/-- If a smooth representative family is pinned to the lower-regularity
-maximal-regularity field, its forcing is the genuine smooth Ricci--DeTurck
-forcing almost everywhere on the original time interval `T`. -/
 theorem lowReg_force_smooth
     (g₀ g_bg : SmoothRiemannianMetric I M) {R δ T : ℝ}
     (hR : 0 < R) (hδ : δ < 1)

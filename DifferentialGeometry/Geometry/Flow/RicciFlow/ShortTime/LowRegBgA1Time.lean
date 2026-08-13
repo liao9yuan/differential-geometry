@@ -1,13 +1,5 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.LowRegBgTime
 
-/-!
-# Time packets for the fixed-background high first-order action
-
-This module converts the ball-local completed `H3 → H2` coefficient into the
-strongly measurable, time-square-integrable family consumed by the adjacent
-scale lift.  No smooth representative of the completed state is chosen.
--/
-
 noncomputable section
 
 open Bundle Manifold MeasureTheory Set Filter
@@ -57,8 +49,7 @@ private noncomputable abbrev incl12
 
 set_option maxHeartbeats 1000000 in
 set_option synthInstance.maxHeartbeats 1000000 in
-/-- A ball-local smooth-core pair estimate bounds the completed high
-first-order coefficient uniformly on the corresponding ambient `H3` ball. -/
+
 theorem lowA1HiBg_ball
     (g : SmoothRiemannianMetric I M) {ρ δ : ℝ}
     (hρ : 0 ≤ ρ) (hδ0 : 0 ≤ δ) (hδ_le : δ ≤ 1 / 3)
@@ -148,8 +139,7 @@ theorem lowA1HiBg_ball
 
 set_option maxHeartbeats 1000000 in
 set_option synthInstance.maxHeartbeats 1000000 in
-/-- A ball-local smooth-core pair estimate also bounds the completed low
-first-order coefficient uniformly on the ambient `H3` ball. -/
+
 theorem lowA1LoBg_ball
     (g : SmoothRiemannianMetric I M) {ρ δ : ℝ}
     (hρ : 0 ≤ ρ) (hδ0 : 0 ≤ δ) (hδ_le : δ ≤ 1 / 3)
@@ -237,9 +227,6 @@ theorem lowA1LoBg_ball
     simpa only [C] using
       add_le_add (mul_le_mul_of_nonneg_left hv hK₀) (le_refl ‖F 0‖)
 
-/-- Along an a.e. bounded measurable `H3` trajectory, the completed high
-first-order coefficient is strongly measurable, square-integrable in time, and
-uniformly bounded in operator norm. -/
 theorem lowA1HiBg_time
     (g : SmoothRiemannianMetric I M) {ρ δ : ℝ}
     (hρ : 0 ≤ ρ) (hδ0 : 0 ≤ δ) (hδ_le : δ ≤ 1 / 3)
@@ -278,8 +265,6 @@ theorem lowA1HiBg_time
     MemLp.of_bound (f := A) (p := 2) (μ := timeMeasure T) hmeas C hbd
   exact ⟨C, hC, hmeas, hmem, hbd⟩
 
-/-- The high first-order affine family freezes the radial passenger map at the
-same completed `H3` state as its coefficient. -/
 noncomputable def hiAffA1Bg
     (g : SmoothRiemannianMetric I M) {ρ δ : ℝ}
     (hρ : 0 ≤ ρ) (hδ0 : 0 ≤ δ) (hδ_le : δ ≤ 1 / 3)
@@ -296,8 +281,6 @@ noncomputable def hiAffA1Bg
         (radialCLM (I := I) (M := M) g (by norm_num) ρ
           (incl32 (I := I) (M := M) g (u t)))
 
-/-- Freezing the radial passenger map does not enlarge the high first-order
-coefficient norm. -/
 theorem hiAffA1Bg_le
     (g : SmoothRiemannianMetric I M) {ρ δ : ℝ}
     (hρ : 0 ≤ ρ) (hδ0 : 0 ≤ δ) (hδ_le : δ ≤ 1 / 3)
@@ -324,8 +307,6 @@ theorem hiAffA1Bg_le
     _ ≤ ‖A1‖ * 1 := mul_le_mul_of_nonneg_left hR3 (norm_nonneg A1)
     _ = ‖A1‖ := mul_one _
 
-/-- The radialized high first-order family supplies the measurable and
-time-`L²` coefficient packet used by the adjacent-scale affine equation. -/
 theorem hiAffA1Bg_data
     (g : SmoothRiemannianMetric I M) {ρ δ : ℝ}
     (hρ : 0 ≤ ρ) (hδ0 : 0 ≤ δ) (hδ_le : δ ≤ 1 / 3)
@@ -384,8 +365,6 @@ theorem hiAffA1Bg_data
       (p := 2) (μ := timeMeasure T) hmeas C hbd
   exact ⟨C, hC, hmeas, hmem, hbd⟩
 
-/-- The low first-order affine family freezes the same radial passenger map as
-the high family, now on the `H2 → H1` scale. -/
 noncomputable def loAffA1Bg
     (g : SmoothRiemannianMetric I M) {ρ δ : ℝ}
     (hρ : 0 ≤ ρ) (hδ0 : 0 ≤ δ) (hδ_le : δ ≤ 1 / 3)
@@ -402,8 +381,6 @@ noncomputable def loAffA1Bg
         (radialCLM (I := I) (M := M) g (by norm_num) ρ
           (incl32 (I := I) (M := M) g (u t)))
 
-/-- Freezing the radial passenger map does not enlarge the low first-order
-coefficient norm. -/
 theorem loAffA1Bg_le
     (g : SmoothRiemannianMetric I M) {ρ δ : ℝ}
     (hρ : 0 ≤ ρ) (hδ0 : 0 ≤ δ) (hδ_le : δ ≤ 1 / 3)
@@ -430,8 +407,6 @@ theorem loAffA1Bg_le
     _ ≤ ‖A1‖ * 1 := mul_le_mul_of_nonneg_left hR2 (norm_nonneg A1)
     _ = ‖A1‖ := mul_one _
 
-/-- The high and low radialized first-order time families commute with the
-adjacent Sobolev inclusions at every time. -/
 theorem affA1Bg_comm
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M) {ρ δ : ℝ}
@@ -476,8 +451,6 @@ theorem affA1Bg_comm
   rw [show J23 (R3 x) = R2 (J23 x) by
       exact DFunLike.congr_fun hrad x]
 
-/-- The radialized low first-order family supplies its matching measurable and
-time-`L²` coefficient packet on every a.e. bounded `H3` trajectory. -/
 theorem loAffA1Bg_data
     (g : SmoothRiemannianMetric I M) {ρ δ : ℝ}
     (hρ : 0 ≤ ρ) (hδ0 : 0 ≤ δ) (hδ_le : δ ≤ 1 / 3)

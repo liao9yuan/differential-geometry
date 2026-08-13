@@ -1,13 +1,5 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.UnifAppH1
 
-/-!
-# Class-first lower Ricci--DeTurck path estimate
-
-The order-zero and differentiated lower-path application cells are assembled
-with one coefficient chosen before the metric varies in the dimension-three
-order-three metric class.
--/
-
 set_option autoImplicit false
 
 noncomputable section
@@ -32,10 +24,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
-/-- **Dimension-three class-first lower-path estimate.**
-
-The two coefficient radii are measured by their natural squared jet sums, and
-no separate pointwise coefficient hypothesis is exposed. -/
 theorem lower_jet_unif
     (hDim : Module.finrank ℝ E = 3)
     (gBase : SmoothRiemannianMetric I M)

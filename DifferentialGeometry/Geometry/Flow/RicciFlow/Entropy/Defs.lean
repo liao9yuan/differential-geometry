@@ -8,30 +8,6 @@ import Mathlib.MeasureTheory.Measure.WithDensity
 
 set_option autoImplicit false
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 namespace DifferentialGeometry.PDE.RicciFlow.Entropy
 
 noncomputable section
@@ -40,47 +16,31 @@ open MeasureTheory
 
 variable {M : Type*}
 
-
-
-
 def perelmanDensityPrefactor (n : Nat) (tau : Real) : Real :=
   Real.rpow (4 * Real.pi * tau) (-(n : Real) / 2)
-
 
 def perelmanDensity (n : Nat) (tau : Real) (potential : M -> Real) : M -> Real :=
   fun x => perelmanDensityPrefactor n tau * Real.exp (-(potential x))
 
-
 def perelmanWeightedMeasure [MeasurableSpace M] (mu : Measure M) (n : Nat)
     (tau : Real) (potential : M -> Real) : Measure M :=
   mu.withDensity fun x => ENNReal.ofReal (perelmanDensity n tau potential x)
-
-
 
 def wEntropyBracket (n : Nat) (tau : Real)
     (scalarCurvature gradPotentialNormSq potential : M -> Real) : M -> Real :=
   fun x =>
     tau * (scalarCurvature x + gradPotentialNormSq x) + potential x - (n : Real)
 
-
-
-
-
 def wFunctional [MeasurableSpace M] (mu : Measure M) (n : Nat) (tau : Real)
     (scalarCurvature gradPotentialNormSq potential : M -> Real) : Real :=
   ∫ x, wEntropyBracket n tau scalarCurvature gradPotentialNormSq potential x
     ∂(perelmanWeightedMeasure mu n tau potential)
-
 
 theorem wFunctional_eq_integral [MeasurableSpace M] (mu : Measure M) (n : Nat)
     (tau : Real) (scalarCurvature gradPotentialNormSq potential : M -> Real) :
     wFunctional mu n tau scalarCurvature gradPotentialNormSq potential =
       ∫ x, wEntropyBracket n tau scalarCurvature gradPotentialNormSq potential x
         ∂(perelmanWeightedMeasure mu n tau potential) := rfl
-
-
-
-
 
 theorem wFunctional_base [MeasurableSpace M]
     (mu : Measure M) (n : Nat) (tau : Real)
@@ -129,13 +89,6 @@ private theorem wEntropyBracket_scale_eq {n : Nat} {tau c : Real}
             rw [hscalar x, hgrad x]
   rw [hmain]
 
-
-
-
-
-
-
-
 theorem wFunctional_scale_invariant_of_weightedMeasure_eq [MeasurableSpace M]
     {mu scaledMu : Measure M} {n : Nat} {tau c : Real}
     {scalarCurvature gradPotentialNormSq scaledScalarCurvature
@@ -152,13 +105,6 @@ theorem wFunctional_scale_invariant_of_weightedMeasure_eq [MeasurableSpace M]
   rw [hmeasure]
   exact integral_congr_ae <| Filter.Eventually.of_forall fun x =>
     wEntropyBracket_scale_eq (M := M) hscalar hgrad x
-
-
-
-
-
-
-
 
 theorem wFunctional_diffeomorphism_invariant_of_map [MeasurableSpace M]
     {mu pullbackMu : Measure M} {n : Nat} {tau : Real}
@@ -202,13 +148,6 @@ theorem wFunctional_diffeomorphism_invariant_of_map [MeasurableSpace M]
           (fun y => gradPotentialNormSq (phi y)) (fun y => potential (phi y)) x
         ∂perelmanWeightedMeasure pullbackMu n tau (fun x => potential (phi x)) := rfl
 
-
-
-
-
-
-
-
 def wFunctionalAlong [MeasurableSpace M] (mu : Real -> Measure M) (n : Nat)
     (tau : Real -> Real)
     (scalarCurvature gradPotentialNormSq potential : Real -> M -> Real) :
@@ -216,8 +155,6 @@ def wFunctionalAlong [MeasurableSpace M] (mu : Real -> Measure M) (n : Nat)
   fun s =>
     wFunctional (mu s) n (tau s) (scalarCurvature s)
       (gradPotentialNormSq s) (potential s)
-
-
 
 def WEntropyHasFirstVariationAt [MeasurableSpace M] (mu : Real -> Measure M)
     (n : Nat) (tau : Real -> Real)
@@ -227,15 +164,11 @@ def WEntropyHasFirstVariationAt [MeasurableSpace M] (mu : Real -> Measure M)
     (wFunctionalAlong mu n tau scalarCurvature gradPotentialNormSq potential)
     firstVariation s0
 
-
-
 def wEntropyFirstVariation [MeasurableSpace M] (mu : Real -> Measure M)
     (n : Nat) (tau : Real -> Real)
     (scalarCurvature gradPotentialNormSq potential : Real -> M -> Real)
     (s0 : Real) : Real :=
   deriv (wFunctionalAlong mu n tau scalarCurvature gradPotentialNormSq potential) s0
-
-
 
 theorem wEntropyFirstVariation_eq_of_hasFirstVariationAt [MeasurableSpace M]
     {mu : Real -> Measure M} {n : Nat} {tau : Real -> Real}
@@ -248,18 +181,6 @@ theorem wEntropyFirstVariation_eq_of_hasFirstVariationAt [MeasurableSpace M]
         potential s0 = firstVariation := by
   unfold wEntropyFirstVariation WEntropyHasFirstVariationAt at *
   exact h.deriv
-
-
-
-
-
-
-
-
-
-
-
-
 
 def wEntropyFirstVariationPreIBPIntegrand (n : Nat) (tau tauVariation : Real)
     (scalarCurvature lapPotential gradPotentialNormSq potential
@@ -275,13 +196,6 @@ def wEntropyFirstVariationPreIBPIntegrand (n : Nat) (tau tauVariation : Real)
           (scalarCurvature x + gradPotentialNormSq x) -
         ((n : Real) * tauVariation) / (2 * tau) *
           (potential x - (n : Real)))
-
-
-
-
-
-
-
 
 def wEntropyFirstVariationLemma61Integrand (n : Nat) (tau tauVariation : Real)
     (scalarCurvature lapPotential gradPotentialNormSq potential
@@ -318,16 +232,6 @@ private theorem wEntropyFirstVariationPreIBPIntegrand_eq_lemma61_add_ibp
   rw [hmetricRicciHess]
   field_simp [htau]
   ring
-
-
-
-
-
-
-
-
-
-
 
 theorem wEntropyFirstVariation_lemma61_of_preIBP [MeasurableSpace M]
     {weightedMeasure : Measure M} {n : Nat} {tau tauVariation firstVariation : Real}
@@ -418,8 +322,6 @@ theorem wEntropyFirstVariation_lemma61_of_preIBP [MeasurableSpace M]
         potentialVariation metricVariationTrace metricVariationRicciHess
         metricRicciHess x ∂weightedMeasure := by
         rw [hibp, mul_zero, add_zero]
-
-
 
 theorem wEntropyFirstVariation_eq_lemma61_of_hasFirstVariationAt_preIBP
     [MeasurableSpace M]

@@ -8,15 +8,6 @@ import DifferentialGeometry.Analysis.Sobolev.TensorHilbert.DeTurckVFEndoInsertTo
 import DifferentialGeometry.Analysis.Sobolev.TensorHilbert.LieCorr0CoefficientRefold
 import DifferentialGeometry.Analysis.Sobolev.TensorHilbert.LieCorr0VBRefold
 
-/-!
-# Class-first insertion-difference H1 bound
-
-This module upgrades the cancellation-preserving insertion estimate to a
-dimension-three class-first statement.  Every coefficient is selected from a
-fixed background metric, the order-three class parameter, and the fibre
-smallness ceiling before the class metric and perturbation vary.
--/
-
 set_option autoImplicit false
 set_option backward.isDefEq.respectTransparency false
 
@@ -58,12 +49,6 @@ private theorem connLow_self_zero
   rw [PDE.DeTurck.connDiff_self]
   simp
 
-/-- **Dimension-three class-first connection-difference `H1` bound.**
-
-One coefficient is selected from `(gBase, Λ, δ₀)` before the class metric,
-moving metric, and perturbation vary.  The proof integrates the public
-connection-difference pointwise grid with `h1_low_unif`, so it consumes only
-the first two class metric jets. -/
 theorem connSec_h1_unif
     (hDim : Module.finrank ℝ E = 3)
     (gBase : SmoothRiemannianMetric I M) {Λ : ℝ} (hΛ : 0 ≤ Λ)
@@ -99,13 +84,6 @@ theorem connSec_h1_unif
   simpa only [lowJetGrid, Combinatorics.antidiagonalTupleGrid] using
     hpt g₀ g₁ P htie hδ_le hδ_nonneg hbound i x
 
-/-- **Dimension-three class-first insertion-difference `H1` bound.**
-
-For the complete two-slot `lieCorr0` insertion background difference, one
-nonnegative radius function is fixed from `(gBase, Λ, δ₀)` before the class
-metric and perturbation vary.  The moving terms use only order-two metric
-jets; the order-three class jet is used solely for the fixed-background
-connection coefficient. -/
 theorem insert_h1_unif
     (hDim : Module.finrank ℝ E = 3)
     (gBase : SmoothRiemannianMetric I M) {Λ : ℝ} (hΛ : 1 ≤ Λ)

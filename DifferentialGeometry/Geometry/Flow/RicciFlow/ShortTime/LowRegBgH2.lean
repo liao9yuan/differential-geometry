@@ -4,15 +4,6 @@ import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.DeTurckRemainder
 import DifferentialGeometry.Analysis.Parabolic.RicciLinearization.RiemannCoefficientPalatiniRefoldCovDerivArmPairTrace
 import DifferentialGeometry.Analysis.Parabolic.RicciLinearization.RiemannCoefficientPalatiniRefoldEndoArmGridWindowBounds
 
-/-!
-# Fixed-background low-base coefficient bounds
-
-This module isolates the first-order correction caused by changing the fixed
-DeTurck background away from the frozen spectral metric.  The Ricci refold and
-the small second-order coefficient are unchanged; only the background-dependent
-Lie coefficients are estimated here.
--/
-
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
@@ -243,8 +234,6 @@ private theorem h2Jet_sum4
       ring
 
 omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] in
-/-- A jet-square bound through order three controls the single top covariant
-derivative.  This is the bridge feeding the tame grid producers. -/
 private theorem topNorm_le
     (g : SmoothRiemannianMetric I M) {P : SmoothCcTensor g 0 2} {A : ℝ}
     (hA : 0 ≤ A)
@@ -259,8 +248,7 @@ private theorem topNorm_le
   nlinarith [norm_nonneg (iteratedCovGrad (I := I) g 0 2 3 P)]
 
 set_option linter.unusedVariables false in
-/-- Tame form of the `DLa` background difference: the lower jets enter only
-through the `H2` radius `R`, and the top metric derivative only affinely. -/
+
 theorem dlaDiff_tame
     (hDim : Module.finrank ℝ E = 3)
     (g₀ gB : SmoothRiemannianMetric I M)
@@ -300,8 +288,7 @@ theorem dlaDiff_tame
       hpt g₁ P htie hδ_le hδ_nonneg hbound i x
 
 set_option linter.unusedVariables false in
-/-- Tame form of the `DLb` background difference: the lower jets enter only
-through the `H2` radius `R`, and the top metric derivative only affinely. -/
+
 theorem dlbDiff_tame
     (hDim : Module.finrank ℝ E = 3)
     (g₀ gB : SmoothRiemannianMetric I M)
@@ -341,9 +328,7 @@ theorem dlbDiff_tame
       hpt g₁ P htie hδ_le hδ_nonneg hbound i x
 
 set_option linter.unusedVariables false in
-/-- Tame form of the insertion background difference: the fixed-background
-factor is constant, so the top metric derivative enters only affinely through
-the moving lowered connection. -/
+
 theorem insert_tame
     (hDim : Module.finrank ℝ E = 3)
     (g₀ gB : SmoothRiemannianMetric I M) {δ₀ : ℝ} (hδ₀ : δ₀ < 1) :
@@ -536,14 +521,11 @@ theorem insert_tame
       simp only [B0, B1, BA]
       ring
 
-/-- The part of the lowered connection difference caused by changing the
-DeTurck background while the moving metric stays fixed. -/
 private noncomputable def bgKappa
     (g₀ g₁ gB : SmoothRiemannianMetric I M) : SmoothCcTensor g₀ 0 3 :=
   lc0Kappa (I := I) (M := M) g₀ g₁ gB -
     lc0Kappa (I := I) (M := M) g₀ g₁ g₀
 
-/-- One refolded half of the mixed order-zero background correction. -/
 private noncomputable def bgAmixHalf
     (g₀ g₁ gB : SmoothRiemannianMetric I M)
     (σ : Equiv.Perm (Fin 4)) : SmoothCcTensor g₀ 2 2 :=
@@ -588,9 +570,6 @@ private theorem amixHalf_bg
     ← appCcRS_sub_right, ← appCcRS_sub_right,
     ← appCcRS_sub_left, ← slotIter_sub]
 
-/-- The mixed order-zero background difference is twice the sum of the two
-refolded halves.  The self-background Koszul factor cancels, which is what
-makes the difference affine in the top metric derivative. -/
 private theorem bgAmix_eq
     (g₀ g₁ gB : SmoothRiemannianMetric I M) :
     lc0AMix (I := I) (M := M) g₀ g₁ gB -
@@ -624,9 +603,7 @@ private theorem bgAmix_eq
     h0, h1]
 
 set_option linter.unusedVariables false in
-/-- Each refolded half of the mixed background difference has an `H2` bound
-that is linear in the top metric derivative, with a coefficient depending only
-on the `H2` radius. -/
+
 private theorem amixHalf_tame
     (hDim : Module.finrank ℝ E = 3)
     (g₀ gB : SmoothRiemannianMetric I M) {δ₀ : ℝ} (hδ₀ : δ₀ < 1) :
@@ -766,9 +743,7 @@ private theorem amixHalf_tame
       ring
 
 set_option linter.unusedVariables false in
-/-- Tame form of the mixed-correction background difference.  The Koszul
-self-arm cancels between the two backgrounds, so the surviving product carries
-exactly one top metric derivative. -/
+
 theorem amixDiff_tame
     (hDim : Module.finrank ℝ E = 3)
     (g₀ gB : SmoothRiemannianMetric I M) {δ₀ : ℝ} (hδ₀ : δ₀ < 1) :
@@ -857,9 +832,7 @@ private theorem bgCorr_eq
   abel
 
 set_option linter.unusedVariables false in
-/-- Tame `H2` bound for the background-correction family.  The three quadratic
-arms of the self-remainder carry no background argument and cancel, so only the
-four background-sensitive arms survive, each with an affine top-order cost. -/
+
 private theorem bgCorrFam_tame
     (hDim : Module.finrank ℝ E = 3)
     (g₀ gB : SmoothRiemannianMetric I M)
@@ -1048,8 +1021,7 @@ theorem rhs_self_bg_corr_h2
     hcorr T hδ_le hδ_nonneg hδ hδZ R A hR hA hT2 hT3 s hs
 
 set_option linter.unusedVariables false in
-/-- One-parameter wrapper around `bgCorrFam_tame` for callers that use a single
-`H3` jet size. -/
+
 private theorem bgCorrFam_h2
     (hDim : Module.finrank ℝ E = 3)
     (g₀ gB : SmoothRiemannianMetric I M)
@@ -1216,8 +1188,7 @@ private theorem bgCorrInt_h2
   simpa only [bgCorrInt] using hpath
 
 set_option linter.unusedVariables false in
-/-- The complete fixed-background correction to the zero-order coefficient has
-an intrinsic `H2` bound controlled only by the state through order three. -/
+
 theorem bgCorr_h2
     (hDim : Module.finrank ℝ E = 3)
     (g₀ gB : SmoothRiemannianMetric I M)
@@ -1265,7 +1236,7 @@ private theorem fixedBg_h2
   rw [Real.sq_sqrt hQ]
 
 set_option linter.unusedVariables false in
-/-- Tame `H2` bound for the path-integrated background correction. -/
+
 private theorem bgCorr_tame
     (hDim : Module.finrank ℝ E = 3)
     (g₀ gB : SmoothRiemannianMetric I M)
@@ -1301,13 +1272,7 @@ private theorem bgCorr_tame
   exact hfam T hδ_le hδ_nonneg hδ hδZ R A hR hA hT2 hT3 s hs
 
 set_option linter.unusedVariables false in
-/-- The zero-order coefficient's dependence on the fixed DeTurck background is
-tame: on each `H2` ball the difference between the `gB` coefficient and the
-self-background coefficient is bounded affinely in the top metric derivative.
 
-This is the background-difference counterpart of the diagonal bound
-`lowC0_bg_h2`, which is genuinely quadratic; the three quadratic arms of the
-self-remainder carry no background argument and cancel here. -/
 theorem c0Bg_diff_tame
     (hDim : Module.finrank ℝ E = 3)
     (g₀ gB : SmoothRiemannianMetric I M) :
@@ -1378,8 +1343,6 @@ theorem c0Bg_diff_tame
       simp only [B0, B1, V]
       ring
 
-/-- The general fixed-background zero-order coefficient has an intrinsic `H2`
-bound depending only on the state through order three. -/
 theorem lowC0_bg_h2
     (hDim : Module.finrank ℝ E = 3)
     (g₀ gB : SmoothRiemannianMetric I M) :
@@ -1493,8 +1456,6 @@ theorem lowC0_bg_h2
       simp only [B, mul_pow, Real.sq_sqrt (hQ A)]
       norm_num
 
-/-- The general fixed-background order-one coefficient has an intrinsic `H2`
-bound depending only on the state through order three. -/
 theorem lowC1_bg_h2
     (hDim : Module.finrank ℝ E = 3)
     (g₀ gB : SmoothRiemannianMetric I M) :
@@ -1553,8 +1514,6 @@ theorem lowC1_bg_h2
       g₀ gB T (by norm_num) hδ hδZ]
     simpa only [lowJetSq, Nat.reduceAdd, B] using hraw
 
-/-- The two genuinely first-order coefficients at a fixed DeTurck background
-share one intrinsic `H2` envelope on every bounded state `H3` jet. -/
 theorem lowData_bg_coeff
     (hDim : Module.finrank ℝ E = 3)
     (g₀ gB : SmoothRiemannianMetric I M) :
@@ -1601,8 +1560,6 @@ theorem lowData_bg_coeff
       symm
       simpa only [B, Q] using Real.sq_sqrt (hQ A)
 
-/-- The fixed-background first-order action obeys compatible smooth-core
-`H3 → H2` and `H2 → H1` estimates under one coefficient envelope. -/
 theorem lowA1_bg_bounds
     (hDim : Module.finrank ℝ E = 3)
     (g₀ gB : SmoothRiemannianMetric I M) :

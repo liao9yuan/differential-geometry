@@ -5,15 +5,6 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.Scalar.JointRegula
 
 set_option autoImplicit false
 
-
-
-
-
-
-
-
-
-
 noncomputable section
 
 open Bundle Filter MeasureTheory Set
@@ -40,8 +31,6 @@ private local instance : MeasurableSpace E := borel E
 private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
-
-
 
 noncomputable def conjCoeff
     {D : RealTimeInterval} (S : SolutionOn (I := I) (M := M) D) (t : Real) :
@@ -71,8 +60,6 @@ theorem conjCoeff_joint
   simpa only [conjCoeff_apply] using
     (scalar_joint (I := I) S hS).neg
 
-
-
 noncomputable def conjCoeffRev
     {D : RealTimeInterval} (S : SolutionOn (I := I) (M := M) D) (T : Real) :
     M × Real → Real := fun p =>
@@ -99,8 +86,6 @@ theorem conjCoeff_rev
     (conjCoeff_joint (I := I) S hS).comp hmove
       (fun p hp => ⟨hp.2, Set.mem_univ p.1⟩)
 
-
-
 noncomputable def conjA1
     {D : RealTimeInterval} (S : SolutionOn (I := I) (M := M) D)
     (T : D.RegularTime) (s : Real) :
@@ -108,8 +93,6 @@ noncomputable def conjA1
       tensorHs (I := I) (M := M) (S.family.metric (T : Real)) 0 0 0 :=
   scalarPotH0 (I := I) (M := M) (S.family.metric (T : Real))
     (conjCoeff (I := I) (M := M) S ((T : Real) - s))
-
-
 
 omit [BoundarylessManifold I M] in
 theorem conjA1_cont
@@ -161,9 +144,6 @@ theorem conjA1_cont
           conjA1 (I := I) (M := M) S T s0‖ ≤ eta / 2 := by
     simpa only [conjA1] using hpair
   exact hop.trans_lt (half_lt_self heta)
-
-
-
 
 omit [BoundarylessManifold I M] in
 theorem conjA1_short

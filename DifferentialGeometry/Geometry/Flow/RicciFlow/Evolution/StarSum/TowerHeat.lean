@@ -1,18 +1,5 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.StarSum.TimeRecursion
 
-
-
-
-
-
-
-
-
-
-
-
-
-
 namespace DifferentialGeometry.PDE.RicciFlow
 
 open Bundle Tensor0SBundle DifferentialGeometry.Integral.Connection

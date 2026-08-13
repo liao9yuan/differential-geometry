@@ -5,14 +5,6 @@ set_option autoImplicit false
 set_option linter.style.longLine false
 set_option linter.unusedSectionVars false
 
-/-!
-# H6 normal-coordinate data
-
-This file assembles the intrinsic H6 radius and whole-ball chart selected by
-the Cheeger--Gromov--Taylor injectivity profile and the uniform intrinsic
-Jacobi estimates.
--/
-
 noncomputable section
 
 universe u uE uH
@@ -36,19 +28,15 @@ variable [I.Boundaryless]
 
 namespace InjRadiusDecayInput
 
-/-- The fixed H6 ratio obtained by comparing the uniform Jacobi radius with
-the largest value `mu 0` of the injectivity profile. -/
 def h6Ratio {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
     (hd : InjRadiusDecayInput (I := I) X) (r₀ : Real) : Real :=
   min (1 / 2) (r₀ / (2 * hd.mu 0))
 
-/-- The center-dependent H6 radius selected from the CGT profile. -/
 def h6Radius {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
     (hd : InjRadiusDecayInput (I := I) X) (r₀ : Real)
     (k : Nat) (x : (X.obj k).M) : Real :=
   hd.h6Ratio r₀ * hd.mu (hd.dist k x (X.obj k).basepoint)
 
-/-- The H6 ratio is positive when the uniform Jacobi radius is positive. -/
 theorem h6Ratio_pos {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
     (hd : InjRadiusDecayInput (I := I) X) {r₀ : Real} (hr₀ : 0 < r₀) :
     0 < hd.h6Ratio r₀ := by
@@ -56,13 +44,11 @@ theorem h6Ratio_pos {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
   exact lt_min (by norm_num)
     (div_pos hr₀ (mul_pos (by norm_num) (hd.mu_pos 0)))
 
-/-- The H6 ratio is strictly smaller than one. -/
 theorem h6Ratio_lt_one {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
     (hd : InjRadiusDecayInput (I := I) X) (r₀ : Real) :
     hd.h6Ratio r₀ < 1 :=
   lt_of_le_of_lt (min_le_left _ _) (by norm_num)
 
-/-- Capping the launch radius by one normalizes the global H6 radius. -/
 theorem h6Ratio_mu0_le_half
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
     (hd : InjRadiusDecayInput (I := I) X) {r₀ : Real} (hr₀ : r₀ ≤ 1) :
@@ -75,7 +61,6 @@ theorem h6Ratio_mu0_le_half
     _ = r₀ / 2 := by field_simp [ne_of_gt hmu₀]
     _ ≤ 1 / 2 := by linarith
 
-/-- Every selected H6 radius is positive. -/
 theorem h6Radius_pos {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
     (hd : InjRadiusDecayInput (I := I) X) {r₀ : Real} (hr₀ : 0 < r₀)
     (k : Nat) (x : (X.obj k).M) :
@@ -83,8 +68,6 @@ theorem h6Radius_pos {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
   mul_pos (hd.h6Ratio_pos hr₀)
     (hd.mu_pos (hd.dist k x (X.obj k).basepoint))
 
-/-- Every selected H6 radius is a strict subradius of the local-diffeomorphism
-radius used to define its global ratio. -/
 theorem h6Radius_lt_r0 {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
     (hd : InjRadiusDecayInput (I := I) X) (hreal : hd.RealizesEdist)
     {r₀ : Real} (hr₀ : 0 < r₀) (k : Nat) (x : (X.obj k).M) :
@@ -102,8 +85,6 @@ theorem h6Radius_lt_r0 {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
     _ = r₀ / 2 := by field_simp [ne_of_gt hmu₀]
     _ < r₀ := by linarith
 
-/-- Every selected H6 radius is a strict subradius of the CGT injectivity
-lower bound at the same center. -/
 theorem h6Radius_lt_mu {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
     (hd : InjRadiusDecayInput (I := I) X) (r₀ : Real)
     (k : Nat) (x : (X.obj k).M) :
@@ -118,8 +99,6 @@ end InjRadiusDecayInput
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-/-- The controlled radius and whole-ball intrinsic branches constructed before
-the independent all-order metric-jet estimates. -/
 structure H6BallData
     (X : PointedRiemannianSeq.{u, uE, uH} (I := I))
     (hd : InjRadiusDecayInput (I := I) X)
@@ -209,8 +188,6 @@ structure H6BallData
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-/-- The intrinsic H6 branch viewed through the branch-parametric consumer
-interface. -/
 noncomputable def H6BallData.normalChart
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
     {hd : InjRadiusDecayInput (I := I) X}
@@ -328,9 +305,6 @@ attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-/-- Proof-independent branch data presented to normal-coordinate consumers.
-Completeness and connectedness are needed to construct this package, not to
-use it. -/
 structure H6ChartData
     (X : PointedRiemannianSeq.{u, uE, uH} (I := I))
     (hd : InjRadiusDecayInput (I := I) X) where
@@ -392,7 +366,6 @@ namespace H6ChartData
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-/-- Every H6 chart radius is bounded by one fixed launch radius. -/
 theorem radius_le_global
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
     {hd : InjRadiusDecayInput (I := I) X}
@@ -416,8 +389,6 @@ theorem radius_le_global
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-/-- On its controlled ball, the metric pulled back by an H6 chart is the
-intrinsic framed pullback metric. -/
 theorem metric_eq_intr
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
     {hd : InjRadiusDecayInput (I := I) X}
@@ -508,9 +479,6 @@ theorem metric_eq_intr
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-/-- Every point in the intrinsic ball controlled by an H6 chart lies in its
-whole-ball image, and its inverse coordinate has norm equal to the intrinsic
-distance from the center. -/
 theorem readout_mem
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
     {hd : InjRadiusDecayInput (I := I) X}
@@ -621,8 +589,7 @@ theorem readout_mem
 end H6ChartData
 
 set_option synthInstance.maxHeartbeats 800000 in
-/-- The final H6 normal-coordinate package: one intrinsic branch provider,
-uniform Euclidean metric comparison, and all-order metric-jet bounds. -/
+
 structure H6NormalData
     (X : PointedRiemannianSeq.{u, uE, uH} (I := I))
     (hd : InjRadiusDecayInput (I := I) X)
@@ -648,7 +615,6 @@ structure H6NormalData
 
 namespace H6NormalData
 
-/-- Reindex the complete H6 normal-coordinate package along a subsequence. -/
 def subseq
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
     {hd : InjRadiusDecayInput (I := I) X}
@@ -677,9 +643,6 @@ def subseq
     intro k p x
     simpa [PointedRiemannianSeq.subseq] using d.metric_deriv (f k) p x
 
-/-- The metric at stage `k` pulled back through the H6 chart centered at `x`.
-This is the branch-independent replacement for the legacy
-`normalCoordMetric`. -/
 def chartMetric
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
     {hd : InjRadiusDecayInput (I := I) X}
@@ -692,8 +655,6 @@ def chartMetric
     (X.obj k).t2TangentBundle
   (d.chart k x).metric (X.obj k).metric
 
-/-- The H6 metric estimates presented through the common controlled-chart
-metric interface. -/
 def metricBounds
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
     {hd : InjRadiusDecayInput (I := I) X}
@@ -717,8 +678,6 @@ def metricBounds
       equiv := d.metric_equiv k x
       deriv := fun p => d.metric_deriv k p x }
 
-/-- Evaluate an H6 chart while installing the bundled manifold instances of
-the selected sequence member. -/
 def chartMap
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
     {hd : InjRadiusDecayInput (I := I) X}
@@ -731,7 +690,6 @@ def chartMap
     (X.obj k).t2TangentBundle
   (d.chart k x).hom
 
-/-- The transition between two H6 charts at the same sequence stage. -/
 def chartTransition
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
     {hd : InjRadiusDecayInput (I := I) X}
@@ -744,7 +702,6 @@ def chartTransition
     (X.obj k).t2TangentBundle
   (d.chart k x).transition (d.chart k y)
 
-/-- Controlled overlap of two H6 charts at one sequence stage. -/
 def ChartOverlapOn
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
     {hd : InjRadiusDecayInput (I := I) X}
@@ -761,8 +718,6 @@ end H6NormalData
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-/-- Forget construction-only completeness data from an intrinsic H6 ball
-package. -/
 noncomputable def H6BallData.toChartData
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
     {hd : InjRadiusDecayInput (I := I) X}
@@ -816,8 +771,6 @@ noncomputable def H6BallData.toChartData
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-/-- The intrinsic half/two estimate retained by the construction package,
-transported to its common branch-parametric chart. -/
 theorem H6BallData.normal_equiv
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
     {hd : InjRadiusDecayInput (I := I) X}
@@ -891,9 +844,6 @@ theorem H6BallData.normal_equiv
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-/-- Completeness, bounded geometry, and the CGT injectivity profile construct
-one positive global ratio and a controlled intrinsic whole-ball chart at every
-sequence center. -/
 theorem exists_h6BallData
     (X : PointedRiemannianSeq.{u, uE, uH} (I := I))
     (hcomplete : SeqMetricComplete (I := I) X)
@@ -1021,8 +971,6 @@ theorem exists_h6BallData
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-/-- Completeness, bounded geometry, and the CGT profile construct one
-proof-independent branch provider for the whole sequence. -/
 theorem exists_h6ChartData
     (X : PointedRiemannianSeq.{u, uE, uH} (I := I))
     (hcomplete : SeqMetricComplete (I := I) X)
@@ -1039,8 +987,6 @@ theorem exists_h6ChartData
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-/-- Completeness, connectedness, sequence bounded geometry, and the CGT
-injectivity profile construct the full H6 normal-coordinate package. -/
 theorem exists_h6NormalData
     (X : PointedRiemannianSeq.{u, uE, uH} (I := I))
     (hcomplete : SeqMetricComplete (I := I) X)

@@ -2,15 +2,6 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.C4.HatUniform
 
 set_option autoImplicit false
 
-
-
-
-
-
-
-
-
-
 noncomputable section
 
 universe u uE uH
@@ -271,10 +262,6 @@ theorem unifHatCageComp
       (by simpa [sourceK] using hKU)
       (by simpa [sourceK] using hKV)
 
-
-
-
-
 omit [Module.Finite ℝ E] in
 theorem unifHatCageSrc
     [FiniteDimensional Real E]
@@ -494,8 +481,6 @@ theorem unifHatCageSrc
           (by simpa [sourceK] using hKU)
           (by simpa [sourceK] using hKV))
 
-
-
 omit [Module.Finite ℝ E] in
 theorem unifHatCageSelfComp
     [FiniteDimensional Real E]
@@ -703,9 +688,6 @@ theorem unifHatCageSelfComp
       hVopen hB hA hBcont hAcont hid
       (by simpa [sourceK] using hKU)
       (by simpa [sourceK] using hKV)
-
-
-
 
 end NetLimitData
 

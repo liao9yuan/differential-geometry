@@ -9,19 +9,6 @@ import DifferentialGeometry.Tensor.RSTensor.MetricCompatibility
 
 set_option autoImplicit false
 
-
-
-
-
-
-
-
-
-
-
-
-
-
 noncomputable section
 
 universe u uE uH
@@ -38,14 +25,6 @@ variable {H : Type uH} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type u} [TopologicalSpace M] [ChartedSpace H M]
   [IsManifold I ∞ M] [SigmaCompactSpace M] [T2Space M]
 variable {N : Type u} [TopologicalSpace N] [ChartedSpace H N] [IsManifold I ∞ N]
-
-
-
-
-
-
-
-
 
 omit [CompleteSpace E] in
 theorem exists_pullbackField
@@ -117,7 +96,6 @@ theorem exists_pullbackField
   intro x hx v
   rw [Tensor0SBundle.metricTensorField_apply]
   exact hGinner x hx (v 0) (v 1)
-
 
 end HCGCompactness
 end DifferentialGeometry

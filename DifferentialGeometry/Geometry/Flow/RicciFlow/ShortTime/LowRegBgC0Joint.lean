@@ -1,11 +1,5 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.LowRegBgC0Alg
 
-/-!
-# Order-zero joint-smooth families
-
-Internal implementation layer for the low-regularity order-zero refold.
--/
-
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
@@ -1801,7 +1795,6 @@ theorem quad_act
       congr 1
     _ = _ :=
       appCc_assoc (I := I) (M := M) g 3 6 2 _ _ _
-
 
 end LowRegBgC0Core
 end DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral

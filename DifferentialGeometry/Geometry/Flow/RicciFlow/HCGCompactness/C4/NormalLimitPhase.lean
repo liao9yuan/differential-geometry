@@ -2,14 +2,6 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.C4.NormalPhas
 
 set_option autoImplicit false
 
-
-
-
-
-
-
-
-
 noncomputable section
 
 open Filter Set
@@ -27,8 +19,6 @@ variable {H : Type uH} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H} [I.Boundaryless]
 
 namespace NormalRadiusProfile
-
-
 
 theorem limit_accel_bounds
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
@@ -125,8 +115,6 @@ theorem limit_accel_bounds
     exact le_of_tendsto hnorm (Filter.Eventually.of_forall fun n ↦
       normalAccel_norm (I := I) hb n (c n)
         (h.phaseRadius_metric (hc n)) (h.phaseRadius_exp (hc n)) V z hz)
-
-
 
 theorem exists_limit_phase
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
@@ -299,8 +287,6 @@ theorem exists_limit_phase
     (contDiff_fst.contDiffOn : ContDiffOn Real ∞
       (fun z : E × E ↦ z.1) _).prodMk hslice.fst
   exact ⟨ΦInf, hinit, hcurve, hstay, hzeroEnd, happ, hendSmooth⟩
-
-
 
 theorem exists_limit_diag
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}

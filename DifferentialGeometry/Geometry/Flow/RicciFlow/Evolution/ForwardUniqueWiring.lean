@@ -11,56 +11,6 @@ set_option autoImplicit false
 set_option linter.style.longLine false
 set_option linter.unusedSectionVars false
 
-/-!
-# Wiring black box (B) into the endgame assembly (Route-K brick K7)
-
-`Evolution/ForwardUniqueAssembly.lean` proves `forward_unique_of_inputs`: black box (B)'s exact
-statement, with five data carriers and one residual `Prop` bundle `ForwardUniqueInputs` added.
-This file **constructs the five carriers from (B)'s own fields** and discharges the bundle
-members that today's producers can supply, so that instantiating the assembly at the endpoint
-is a matter of supplying the remaining, precisely-named, quantitative inputs.
-
-## The carriers
-
-All five are built from the two metric families alone:
-
-* `fuAvec` — `christoffelDiffSpeed` at the canonical chart-frame inverse/`∇Ric` families
-  (`ForwardUniqueLifts.lean`);
-* `fuSvec` — `uhlRmDiffSpeed` at the per-point-centred coordinate component families
-  (`Rm04Producer.lean`) of the two flows;
-* `fuSfield` — the genuine smooth `(0,4)` field `Rm⁰⁴(g₁) − g₁♭Rm¹³(g₂)`, whose pointwise value
-  is `rmDiffLowAt`;
-* `fuUflux`, `fuRem` — `sdecUflux` / `sdecRemFam` at those data.
-
-The component families are indexed by a *reference* time interval `refD`; every `RealTimeInterval`
-argument of `rm04Fam`/`rm04LapFam`/`rm04BFam`/`ricUpFam` and of `solOfMetric` is a phantom index
-— the value depends on the solution only through its metric family — so `fam_refD` transports a
-tail-interval statement to the reference one by `rfl`.
-
-## The discharge lemmas
-
-* `fuGamma` — the bundle's `gamma`, from `gamma_of_gram`;
-* `fuRmContAt` — the time-continuity auxiliary of the Uhlenbeck conversion, *unconditional*
-  on a positive-time tail: raising undoes lowering (`raiseAt_lower`), the lowered components
-  are differentiable by the tail evolution, the Gram matrix is differentiable by the
-  Ricci-flow equation, and the inverse of a continuous invertible matrix family is continuous;
-* `fuRm` — the bundle's `rm`, from `rm_of_uhlenbeck` fed by the unconditional tail producer
-  `rm04EvolFamTail` at the midpoint tail `t₀ = (a+t)/2`;
-* `fuSdec` — the bundle's `sdec`, from `sdec_of_uhlenbeck` at the same tail;
-* `fuSfield_apply` — the bundle's `car`, by construction of `fuSfield`;
-* the density-regularity members `dens`, `densCont`, `densInt`, `lapInt`, `divInt`, `nabInt`,
-  `disInt`, inside `fuInputs_of_gram`, from `ForwardUniqueDensReg.lean`;
-* `pairInt`, `restInt`, `remInt` — the three slots pairing a *bare pointwise* speed family —
-  from `fuPairInt`, `fuRestInt`, `fuRemInt`;
-* `energyCont` at every interior time, from `fuEnergyDeriv`.
-
-## What is NOT discharged here
-
-`bounds` (the six slab-uniform pointwise estimates), and `energyCont` at the **single** closed
-initial time `a`.  They are named, with their frontier, in `fuInputs_of_gram`'s hypothesis list
-and in `ForwardUniqueWiring.md`.
--/
-
 noncomputable section
 
 namespace DifferentialGeometry.PDE.RicciFlow
@@ -81,26 +31,12 @@ variable [IsManifold I 1 M] [IsManifold I 2 M] [IsManifold I ((∞ : WithTop ℕ
 variable [CompleteSpace E] [SigmaCompactSpace M] [T2Space M]
 variable [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
 
-/-! ## The reference time interval
-
-Every component family below reads its solution argument only through the underlying metric
-family, so the interval index is a phantom.  Fixing one reference interval keeps the carriers
-independent of the tail parameter chosen inside the proofs. -/
-
-/-- Reference interval used only to *name* the component families: all of them depend on the
-solution package solely through its metric family.  Private: the transport lemmas
-`fuRm04_eq` … `fuRicUp_eq` are the public interface to this choice. -/
 private def refD : RealTimeInterval := RealTimeInterval.univ 0
 
-/-! ## The data carriers of `ForwardUniqueInputs` -/
-
-/-- The flow's own smooth `(0,4)` curvature field, as a time-indexed family. -/
 def fuTf (g : Real → SmoothRiemannianMetric I M) (t : Real) :
     Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) (n := (∞ : WithTop ℕ∞)) 4 :=
   metricRm04 (I := I) (g t)
 
-/-- **The `Sfield` carrier**: the curvature-difference `(0,4)` field `S₀₄`, both terms lowered
-with `g₁`.  Its pointwise value is `rmDiffLowAt (g₁ t) (g₂ t)` (`fuSfield_apply`). -/
 def fuSfield (g₁ g₂ : Real → SmoothRiemannianMetric I M) (t : Real) :
     Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) (n := (∞ : WithTop ℕ∞)) 4 :=
   CovariantDerivative.rm04Section (I := I) (g₁ t) (metricCov (I := I) (g₁ t))
@@ -108,28 +44,22 @@ def fuSfield (g₁ g₂ : Real → SmoothRiemannianMetric I M) (t : Real) :
     CovariantDerivative.rm04Section (I := I) (g₁ t) (metricCov (I := I) (g₂ t))
       (metricCov_smooth (I := I) (g₂ t))
 
-/-- The per-point-centred lowered-curvature component family of a metric family. -/
 def fuRm04 (g : Real → SmoothRiemannianMetric I M) :
     FourComp M (CoordinateIdx (𝕜 := Real) E) :=
   rm04Fam (I := I) (D := refD) (solOfMetric (I := I) g)
 
-/-- The per-point-centred rough-Laplacian component family of a metric family. -/
 def fuLapRm (g : Real → SmoothRiemannianMetric I M) :
     FourComp M (CoordinateIdx (𝕜 := Real) E) :=
   rm04LapFam (I := I) (D := refD) (solOfMetric (I := I) g)
 
-/-- The per-point-centred Uhlenbeck `B` component family of a metric family. -/
 def fuBRm (g : Real → SmoothRiemannianMetric I M) :
     FourComp M (CoordinateIdx (𝕜 := Real) E) :=
   rm04BFam (I := I) (D := refD) (solOfMetric (I := I) g)
 
-/-- The per-point-centred once-raised Ricci component family of a metric family. -/
 def fuRicUp (g : Real → SmoothRiemannianMetric I M) :
     MatrixComp M (CoordinateIdx (𝕜 := Real) E) :=
   ricUpFam (I := I) (D := refD) (solOfMetric (I := I) g)
 
-/-- **The `Avec` carrier**: the bundled bilinear speed of the connection difference, at the
-canonical chart-frame inverse and `∇Ric` families of the two flows. -/
 def fuAvec (g₁ g₂ : Real → SmoothRiemannianMetric I M) (t : Real) (x : M) :
     TangentSpace I x →L[Real] TangentSpace I x →L[Real] TangentSpace I x :=
   christoffelDiffSpeed (I := I) (chartFrameInv (I := I) g₁) (chartFrameInv (I := I) g₂)
@@ -137,7 +67,7 @@ def fuAvec (g₁ g₂ : Real → SmoothRiemannianMetric I M) (t : Real) (x : M) 
 
 set_option synthInstance.maxHeartbeats 1000000 in
 set_option maxHeartbeats 1000000 in
-/-- **The `Svec` carrier**: the bundled trilinear speed of the raised curvature difference. -/
+
 def fuSvec (g₁ g₂ : Real → SmoothRiemannianMetric I M) (t : Real) (y : M) :
     TangentSpace I y →L[Real] TangentSpace I y →L[Real] TangentSpace I y →L[Real]
       TangentSpace I y :=
@@ -145,14 +75,13 @@ def fuSvec (g₁ g₂ : Real → SmoothRiemannianMetric I M) (t : Real) (y : M) 
     (fuRm04 (I := I) g₁) (fuLapRm (I := I) g₁) (fuBRm (I := I) g₁) (fuRicUp (I := I) g₁)
     (fuRm04 (I := I) g₂) (fuLapRm (I := I) g₂) (fuBRm (I := I) g₂) (fuRicUp (I := I) g₂) t y
 
-/-- **The `Uflux` carrier**: the K2 divergence flux of the `S`-equation. -/
 def fuUflux (g₁ g₂ : Real → SmoothRiemannianMetric I M) (t : Real) :
     Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) (n := (∞ : WithTop ℕ∞)) 5 :=
   sdecUflux (I := I) g₁ g₂ (fuTf (I := I) g₁) (fuTf (I := I) g₂) (fuSfield (I := I) g₁ g₂) t
 
 set_option synthInstance.maxHeartbeats 1000000 in
 set_option maxHeartbeats 1000000 in
-/-- **The `rem` carrier**: the K2 remainder of the `S`-equation. -/
+
 def fuRem (g₁ g₂ : Real → SmoothRiemannianMetric I M) (t : Real) (x : M) :
     Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) 4 x :=
   sdecRemFam (I := I) g₁ g₂ (coordBasisAt (I := I))
@@ -160,37 +89,24 @@ def fuRem (g₁ g₂ : Real → SmoothRiemannianMetric I M) (t : Real) (x : M) :
     (fuRm04 (I := I) g₂) (fuLapRm (I := I) g₂) (fuBRm (I := I) g₂) (fuRicUp (I := I) g₂)
     (fuTf (I := I) g₁) (fuTf (I := I) g₂) (fuSfield (I := I) g₁ g₂) t x
 
-/-! ## Realization of the carriers -/
-
-/-- **The bundle's `car` member, by construction.**  The supplied smooth `(0,4)` field is the
-curvature-difference carrier `S₀₄`. -/
 theorem fuSfield_apply (g₁ g₂ : Real → SmoothRiemannianMetric I M) (t : Real) (x : M) :
     fuSfield (I := I) g₁ g₂ t x = rmDiffLowAt (I := I) (g₁ t) (g₂ t) x := rfl
 
-/-- The `(0,4)` field carrier of one flow is that flow's own lowered curvature. -/
 theorem fuTf_apply (g : Real → SmoothRiemannianMetric I M) (t : Real) (y : M) :
     fuTf (I := I) g t y = metricRm04At (I := I) (g t) y := rfl
 
-/-! ## Transport of the component families across the interval index -/
-
-/-- The lowered-curvature component family does not see the interval index. -/
 theorem fuRm04_eq {D : RealTimeInterval} (g : Real → SmoothRiemannianMetric I M) :
     rm04Fam (I := I) (D := D) (solOfMetric (I := I) g) = fuRm04 (I := I) g := rfl
 
-/-- The rough-Laplacian component family does not see the interval index. -/
 theorem fuLapRm_eq {D : RealTimeInterval} (g : Real → SmoothRiemannianMetric I M) :
     rm04LapFam (I := I) (D := D) (solOfMetric (I := I) g) = fuLapRm (I := I) g := rfl
 
-/-- The Uhlenbeck `B` component family does not see the interval index. -/
 theorem fuBRm_eq {D : RealTimeInterval} (g : Real → SmoothRiemannianMetric I M) :
     rm04BFam (I := I) (D := D) (solOfMetric (I := I) g) = fuBRm (I := I) g := rfl
 
-/-- The raised-Ricci component family does not see the interval index. -/
 theorem fuRicUp_eq {D : RealTimeInterval} (g : Real → SmoothRiemannianMetric I M) :
     ricUpFam (I := I) (D := D) (solOfMetric (I := I) g) = fuRicUp (I := I) g := rfl
 
-/-- **`hreal`**: the lowered-curvature component family is the metric's own lowered curvature
-read on the per-point coordinate basis. -/
 theorem fuRm04_real (g : Real → SmoothRiemannianMetric I M)
     (r : Real) (y : M) (i j k l : CoordinateIdx (𝕜 := Real) E) :
     fuRm04 (I := I) g r y i j k l =
@@ -199,8 +115,6 @@ theorem fuRm04_real (g : Real → SmoothRiemannianMetric I M)
           (coordBasisAt (I := I) y k) (coordBasisAt (I := I) y l)) :=
   rm04Fam_real (I := I) (D := refD) (solOfMetric (I := I) g) r y i j k l
 
-/-- **`hL`**: the rough-Laplacian component family realizes the intrinsic rough Laplacian of
-the flow's own `(0,4)` curvature field. -/
 theorem fuLapRm_real (g : Real → SmoothRiemannianMetric I M)
     (r : Real) (y : M) (i j k l : CoordinateIdx (𝕜 := Real) E) :
     fuLapRm (I := I) g r y i j k l =
@@ -221,9 +135,7 @@ private theorem fuInv_real (g : Real → SmoothRiemannianMetric I M)
     coordInvReal (I := I) (solOfMetric (I := I) (D := refD) g) x t
 
 set_option maxHeartbeats 1000000 in
-/-- The canonical Uhlenbeck `B` components reconstruct the invariant
-quadratic curvature combination, independently of the metric used to lower
-the supplied component array. -/
+
 theorem fuB_low (gN g : Real → SmoothRiemannianMetric I M)
     (t : Real) (x : M) :
     lowOfComp (I := I) (gN t) (coordBasisAt (I := I) x)
@@ -277,8 +189,7 @@ theorem fuB_low (gN g : Real → SmoothRiemannianMetric I M)
   rw [hcomp, hB i j k l, hB i j l k, hB i k j l, hB i l j k]
 
 set_option maxHeartbeats 1000000 in
-/-- The canonical raised-Ricci and curvature components reconstruct the
-invariant Ricci drift, independently of the reconstruction metric. -/
+
 theorem fuDrift_low (gN g : Real → SmoothRiemannianMetric I M)
     (t : Real) (x : M) :
     lowOfComp (I := I) (gN t) (coordBasisAt (I := I) x)
@@ -310,8 +221,7 @@ theorem fuDrift_low (gN g : Real → SmoothRiemannianMetric I M)
   simp only [riemann04RicciDriftInFrame, hUp, fuRm04_real, basis]
 
 set_option maxHeartbeats 1000000 in
-/-- Lowering the canonical raised Uhlenbeck speed by its own metric gives the
-coordinate-free curvature speed tensor. -/
+
 theorem fuSpeed_low (g : Real → SmoothRiemannianMetric I M)
     (t : Real) (x : M) :
     lowerTri (I := I) (metricTensorField (I := I) (g t) x)
@@ -420,10 +330,6 @@ private theorem lowerRm_cross
           (vec4 (I := I) (v 0) (v 1) (v 2) (v 3)) :=
       (rm04mix_inner (I := I) g₁ g₂ x (v 0) (v 1) (v 2) (v 3)).symm
 
-/-! ## The `SolutionOn` package of a flow, and the tail Uhlenbeck interface -/
-
-/-- **(B)'s fields give a Ricci-flow solution package.**  Joint chart-Gram `C∞` on the
-`Ico`-slab plus the one-sided Ricci-flow equation is exactly `solutionOn_of_joint`'s input. -/
 theorem fuIsSol (g : Real → SmoothRiemannianMetric I M) {a b : Real} (hab : a < b)
     (hjoint : ∀ (x₀ : M) (i j : Fin (Module.finrank Real E)),
       ContMDiffOn (𝓘(Real, Real).prod I) 𝓘(Real) ∞
@@ -436,8 +342,6 @@ theorem fuIsSol (g : Real → SmoothRiemannianMetric I M) {a b : Real} (hab : a 
       (solOfMetric (I := I) (D := RealTimeInterval.closedOpen a b hab) g) :=
   solutionOn_of_joint (I := I) hab g hjoint hpde
 
-/-- **`hev` on a positive-time tail, in the wiring carriers.**  `rm04EvolFamTail` transported
-across the phantom interval index. -/
 theorem fuEvolTail (g : Real → SmoothRiemannianMetric I M) {a b t₀ : Real} {hab : a < b}
     {hb : t₀ < b} (hS : IsSolutionOn (I := I)
       (solOfMetric (I := I) (D := RealTimeInterval.closedOpen a b hab) g))
@@ -451,15 +355,6 @@ theorem fuEvolTail (g : Real → SmoothRiemannianMetric I M) {a b t₀ : Real} {
     ← fuRicUp_eq (I := I) (D := RealTimeInterval.closedOpen t₀ b hb) g]
   exact rm04EvolFamTail (I := I) hS ha rfl
 
-/-! ## The bundle members `gamma`, `rm`, `sdec`
-
-The three evolution members are produced at the *midpoint tail* `t₀ = (a+t)/2` of each interior
-time `t`: the tail producers are stated on `Ico t₀ b` with `a < t₀`, and `t` is interior to that
-tail, so the restriction costs nothing.  The carriers are the fixed reference-interval ones, so
-the same `Avec`/`Svec` serves every `t`. -/
-
-/-- Within-at continuity of a finite sum, the `ContinuousWithinAt` analogue of
-`continuous_finset_sum` (absent from Mathlib). -/
 private theorem cwaSum {ι : Type*} {N : Type*} [AddCommMonoid N] [TopologicalSpace N]
     [ContinuousAdd N] {f : ι → Real → N} (s : Finset ι) {u : Set Real} {t : Real}
     (h : ∀ i ∈ s, ContinuousWithinAt (f i) u t) :
@@ -473,13 +368,7 @@ private theorem cwaSum {ι : Type*} {N : Type*} [AddCommMonoid N] [TopologicalSp
         (ih fun j hj => h j (Finset.mem_insert_of_mem hj))
 
 set_option maxHeartbeats 1000000 in
-/-- **Time-continuity of the raised curvature on a positive-time tail — unconditional.**
 
-The one auxiliary of the Uhlenbeck conversion beyond the evolution itself.  It is *not* an
-input: at a fixed point the raised curvature is the inverse Gram matrix applied to the lowered
-components (`raiseAt_lower`), the lowered components are differentiable in time by the tail
-evolution, and the Gram matrix is differentiable in time by the Ricci-flow equation — so
-Cramer's rule for the inverse of a continuous invertible matrix family closes it. -/
 theorem fuRmContAt (g : Real → SmoothRiemannianMetric I M) {a b t₀ : Real} {hab : a < b}
     {hb : t₀ < b}
     (hS : IsSolutionOn (I := I)
@@ -496,7 +385,7 @@ theorem fuRmContAt (g : Real → SmoothRiemannianMetric I M) {a b t₀ : Real} {
   classical
   have htab : t ∈ Ico a b := ⟨(lt_trans ha ht.1).le, ht.2⟩
   have hsubIci : Ico t₀ b ⊆ Ici a := fun s hs => le_trans ha.le hs.1
-  -- the Gram matrix family of the coordinate basis, and its inverse
+
   have hmul : ∀ r : Real,
       (Matrix.of fun l m : CoordinateIdx (𝕜 := Real) E =>
           (g r).inner y (coordBasisAt (I := I) y l) (coordBasisAt (I := I) y m)) *
@@ -544,11 +433,11 @@ theorem fuRmContAt (g : Real → SmoothRiemannianMetric I M) {a b t₀ : Real} {
       funext r; rw [hinvEq r]; rfl
     rw [hfun]
     exact continuousWithinAt_pi.1 (continuousWithinAt_pi.1 hInvCont p) l
-  -- the lowered components are differentiable in time by the tail evolution
+
   have hc : ∀ l : CoordinateIdx (𝕜 := Real) E,
       ContinuousWithinAt (fun r : Real => fuRm04 (I := I) g r y i j k l) (Ico t₀ b) t :=
     fun l => (fuEvolTail (I := I) (hb := hb) g hS ha ⟨t, ht⟩ y i j k l).continuousWithinAt
-  -- raising undoes lowering
+
   have hV : ∀ r : Real,
       riemannOp (metricCov (I := I) (g r)) y (coordBasisAt (I := I) y i)
           (coordBasisAt (I := I) y j) (coordBasisAt (I := I) y k) =
@@ -573,8 +462,6 @@ theorem fuRmContAt (g : Real → SmoothRiemannianMetric I M) {a b t₀ : Real} {
   exact cwaSum _ fun p _ =>
     (cwaSum _ fun l _ => (hBcont p l).mul (hc l)).smul continuousWithinAt_const
 
-/-- **The bundle's `gamma` member, from (B)'s own fields.**  This is `gamma_of_gram` with the
-`Avec` carrier named. -/
 theorem fuGamma (g₁ g₂ : Real → SmoothRiemannianMetric I M) {a b : Real} (hab : a < b)
     (hjoint₁ : ∀ (x₀ : M) (i j : Fin (Module.finrank Real E)),
       ContMDiffOn (𝓘(Real, Real).prod I) 𝓘(Real) ∞
@@ -603,9 +490,7 @@ theorem fuGamma (g₁ g₂ : Real → SmoothRiemannianMetric I M) {a b : Real} (
 
 set_option synthInstance.maxHeartbeats 1000000 in
 set_option maxHeartbeats 1000000 in
-/-- **The bundle's `rm` member, from (B)'s own fields plus the two time-continuity inputs.**
-The Uhlenbeck evolution of each flow is supplied unconditionally by `fuEvolTail` on the
-midpoint tail. -/
+
 theorem fuRm (g₁ g₂ : Real → SmoothRiemannianMetric I M) {a b : Real} {hab : a < b}
     (hS₁ : IsSolutionOn (I := I)
       (solOfMetric (I := I) (D := RealTimeInterval.closedOpen a b hab) g₁))
@@ -642,8 +527,7 @@ theorem fuRm (g₁ g₂ : Real → SmoothRiemannianMetric I M) {a b : Real} {hab
 
 set_option synthInstance.maxHeartbeats 1000000 in
 set_option maxHeartbeats 1000000 in
-/-- **The bundle's `sdec` member, from (B)'s own fields plus the two time-continuity inputs.**
-The flux and remainder carriers are the constructed `fuUflux`/`fuRem`. -/
+
 theorem fuSdec (g₁ g₂ : Real → SmoothRiemannianMetric I M) {a b : Real} {hab : a < b}
     (hS₁ : IsSolutionOn (I := I)
       (solOfMetric (I := I) (D := RealTimeInterval.closedOpen a b hab) g₁))
@@ -685,27 +569,8 @@ theorem fuSdec (g₁ g₂ : Real → SmoothRiemannianMetric I M) {a b : Real} {h
     (fun _ _ y i j k l => fuLapRm_real (I := I) g₂ _ y i j k l)
     t ⟨ht0, ht.2⟩ x
 
-/-! ## The three bare-pointwise integrability slots
-
-`pairInt`, `restInt` and `remInt` pair a **bare pointwise** family (`rmSpeed … fuSvec`,
-`connSpeed … fuAvec`, `fuRem`), so `ForwardUniqueDensReg.lean`'s smooth-by-type argument does not
-reach them.  They are nevertheless continuous in `x`, and the route never touches the
-per-point-centred frame construction inside the carriers:
-
-* an invariant speed enters a rate integrand only through the combination
-  `movingReact0S + 2⟨Ṫ, T⟩`, which `normSq0S_moving_deriv` identifies as the time derivative of
-  one of the three energy thirds — a **scalar** already known to be jointly `C∞`
-  (`metricDiffSq_jointContMDiffOn`, `connDiffSq_jointContMDiffOn`, `rmDiffSq_jointContMDiffOn`);
-* the one leftover reaction `movingReact0S (g₁ t) x 4 Ric₁ S₀₄` is the same derivative with the
-  carrier **frozen** at time `t`, hence again the time partial of a jointly `C∞` scalar
-  (`fuFrozenJoint`);
-* `tderivCont` turns "jointly `C∞` on `J ×ˢ univ`" into "the time partial is continuous in `x`".
-
-Compactness of `M` then closes each slot through `integrable_of_continuous`. -/
-
 section SpeedContinuity
 
-/-- The chart-Gram package of black box (B), restricted to the open window. -/
 private theorem fuGramIoo (g : Real → SmoothRiemannianMetric I M) {a b : Real}
     (hjoint : ∀ (x₀ : M) (i j : Fin (Module.finrank Real E)),
       ContMDiffOn (𝓘(Real, Real).prod I) 𝓘(Real) ∞
@@ -717,13 +582,6 @@ private theorem fuGramIoo (g : Real → SmoothRiemannianMetric I M) {a b : Real}
         (Ioo a b ×ˢ (trivializationAt E (TangentSpace I) x₀).baseSet) := fun x₀ i j =>
   (hjoint x₀ i j).mono (Set.prod_mono_left Ioo_subset_Ico_self)
 
-/-- **The time partial of a jointly `C∞` scalar is continuous in space.**
-
-For `J ⊆ ℝ` open, `t ∈ J` and `F` jointly `C∞` on `J ×ˢ univ`, the map
-`x ↦ ∂ᵣF(r, x)|_{r=t}` is continuous.  Read through the chart at `x₀`, `F` becomes a `C∞`
-function on an open subset of `ℝ × E` whose `fderiv` is continuous
-(`ContDiffOn.continuousOn_fderiv_of_isOpen`); the time partial is that differential applied to
-`(1, 0)`. -/
 private theorem tderivCont {J : Set Real} (hJ : IsOpen J) {t : Real} (ht : t ∈ J)
     (F : Real → M → Real)
     (hF : ContMDiffOn (𝓘(Real, Real).prod I) 𝓘(Real, Real) ∞
@@ -735,7 +593,7 @@ private theorem tderivCont {J : Set Real} (hJ : IsOpen J) {t : Real} (ht : t ∈
   have hy₀ : (extChartAt I x₀) x₀ ∈ U :=
     mem_interior_iff_mem_nhds.2 (extChartAt_target_mem_nhds (I := I) x₀)
   have hprod : IsOpen (J ×ˢ U) := hJ.prod hUopen
-  -- transport the joint smoothness to the model space
+
   have hsymm : ContMDiffOn 𝓘(Real, E) I ∞ (extChartAt I x₀).symm (extChartAt I x₀).target :=
     contMDiffOn_extChartAt_symm (I := I) x₀
   have hfst : ContMDiffOn 𝓘(Real, Real × E) 𝓘(Real, Real) ∞
@@ -761,7 +619,7 @@ private theorem tderivCont {J : Set Real} (hJ : IsOpen J) {t : Real} (ht : t ∈
   have hfdCont : ContinuousOn
       (fderiv Real fun p : Real × E => F p.1 ((extChartAt I x₀).symm p.2)) (J ×ˢ U) :=
     hGd.continuousOn_fderiv_of_isOpen hprod hone
-  -- the time partial of the transported function is that differential at `(1, 0)`
+
   have hslice : ∀ y ∈ U, HasDerivAt
       (fun r : Real => F r ((extChartAt I x₀).symm y))
       ((fderiv Real (fun p : Real × E => F p.1 ((extChartAt I x₀).symm p.2)) (t, y))
@@ -774,7 +632,7 @@ private theorem tderivCont {J : Set Real} (hJ : IsOpen J) {t : Real} (ht : t ∈
     have hline : HasDerivAt (fun r : Real => ((r, y) : Real × E)) ((1 : Real), (0 : E)) t :=
       (hasDerivAt_id t).prodMk (hasDerivAt_const t y)
     simpa [Function.comp_def] using hdiff.comp_hasDerivAt t hline
-  -- near `x₀` the two readings agree
+
   have heq : (fun x : M => deriv (fun r : Real => F r x) t) =ᶠ[nhds x₀]
       fun x : M =>
         (fderiv Real (fun p : Real × E => F p.1 ((extChartAt I x₀).symm p.2))
@@ -793,10 +651,6 @@ private theorem tderivCont {J : Set Real} (hJ : IsOpen J) {t : Real} (ht : t ∈
     continuousAt_const.prodMk (continuousAt_extChartAt (I := I) x₀)
   exact ((hfdCont.continuousAt (hprod.mem_nhds ⟨ht, hy₀⟩)).comp hmap).clm_apply continuousAt_const
 
-/-- **`movingReact0S` is a genuine time derivative: the moving fibre norm of a frozen carrier.**
-Taking the tensor family constant in `normSq0S_moving_deriv` kills the pairing term, so the
-reaction is the derivative of `r ↦ |W|²_{g r}` — a basis-free characterisation that makes its
-spatial continuity a corollary of joint smoothness. -/
 private theorem fuReactDeriv {s : ℕ} {x : M} {t : Real}
     (g : Real → SmoothRiemannianMetric I M)
     (Q : Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) 2 x)
@@ -818,9 +672,6 @@ private theorem fuReactDeriv {s : ℕ} {x : M} {t : Real}
   rw [hz, mul_zero, add_zero] at h
   exact h
 
-/-- **The frozen-carrier moving norm is jointly `C∞`.**  The brick `normSq0S_jointContMDiffOn`
-with the tensor family constant in time: its chart-component input is `rmChartJoint` at the two
-*constant* metric families, exactly the trick that makes `dens_continuous` unconditional. -/
 private theorem fuFrozenJoint (g₁ g₂ : Real → SmoothRiemannianMetric I M) {a b : Real}
     (t₀ : Real)
     (hgram₁ : ∀ (x₀ : M) (i j : Fin (Module.finrank Real E)),
@@ -847,7 +698,6 @@ private theorem fuFrozenJoint (g₁ g₂ : Real → SmoothRiemannianMetric I M) 
   exact rmChartJoint (I := I) (fun _ => g₁ t₀) (fun _ => g₂ t₀) x₀
     (fun i j => hconst (g₁ t₀) x₀ i j) (fun i j => hconst (g₂ t₀) x₀ i j) K ht
 
-/-- **The leftover reaction of the curvature third is continuous in space.** -/
 private theorem fuReactCont (g₁ g₂ : Real → SmoothRiemannianMetric I M) {a b : Real}
     (hgram₁ : ∀ (x₀ : M) (i j : Fin (Module.finrank Real E)),
       ContMDiffOn (𝓘(Real, Real).prod I) 𝓘(Real, Real) ∞
@@ -866,7 +716,6 @@ private theorem fuReactCont (g₁ g₂ : Real → SmoothRiemannianMetric I M) {a
   exact (fuReactDeriv (I := I) g₁ (metricRicciAt (I := I) (g₁ t) x)
     (rmDiffLowAt (I := I) (g₁ t) (g₂ t) x) (pde_hasDerivAt (I := I) g₁ hpde₁ ht x)).deriv
 
-/-- The metric third's time derivative, in the moving-norm form. -/
 private theorem fuMetricSqD (g₁ g₂ : Real → SmoothRiemannianMetric I M) {a b : Real}
     (hpde₁ : ∀ t ∈ Ico a b, ∀ (x : M) (v w : TangentSpace I x),
       HasDerivWithinAt (fun s : Real => (g₁ s).inner x v w)
@@ -889,7 +738,7 @@ private theorem fuMetricSqD (g₁ g₂ : Real → SmoothRiemannianMetric I M) {a
 
 set_option synthInstance.maxHeartbeats 1000000 in
 set_option maxHeartbeats 1000000 in
-/-- The connection third's time derivative, in the moving-norm form, at the `Avec` carrier. -/
+
 private theorem fuConnSqD (g₁ g₂ : Real → SmoothRiemannianMetric I M) {a b : Real} (hab : a < b)
     (hjoint₁ : ∀ (x₀ : M) (i j : Fin (Module.finrank Real E)),
       ContMDiffOn (𝓘(Real, Real).prod I) 𝓘(Real) ∞
@@ -923,8 +772,7 @@ private theorem fuConnSqD (g₁ g₂ : Real → SmoothRiemannianMetric I M) {a b
 
 set_option synthInstance.maxHeartbeats 1000000 in
 set_option maxHeartbeats 1000000 in
-/-- The curvature third's time derivative, in the moving-norm form, at the `Svec` carrier.
-The pairing term is exactly the bundle's `pairInt` integrand. -/
+
 private theorem fuRmSqD (g₁ g₂ : Real → SmoothRiemannianMetric I M) {a b : Real} {hab : a < b}
     (hS₁ : IsSolutionOn (I := I)
       (solOfMetric (I := I) (D := RealTimeInterval.closedOpen a b hab) g₁))
@@ -954,11 +802,7 @@ private theorem fuRmSqD (g₁ g₂ : Real → SmoothRiemannianMetric I M) {a b :
 
 set_option synthInstance.maxHeartbeats 1000000 in
 set_option maxHeartbeats 1000000 in
-/-- **The bundle's `pairInt` member, from (B)'s own fields.**
 
-`2⟨Ṡ, S₀₄⟩ = ∂ₜ|S₀₄|² − movingReact0S`, and both terms on the right are time partials of jointly
-`C∞` scalars, hence continuous in `x`; on a compact manifold a continuous scalar is integrable
-against the moving Riemannian volume. -/
 theorem fuPairInt (g₁ g₂ : Real → SmoothRiemannianMetric I M) {a b : Real} (hab : a < b)
     (hjoint₁ : ∀ (x₀ : M) (i j : Fin (Module.finrank Real E)),
       ContMDiffOn (𝓘(Real, Real).prod I) 𝓘(Real) ∞
@@ -1001,10 +845,7 @@ theorem fuPairInt (g₁ g₂ : Real → SmoothRiemannianMetric I M) {a b : Real}
 
 set_option synthInstance.maxHeartbeats 1000000 in
 set_option maxHeartbeats 1000000 in
-/-- **The bundle's `remInt` member, from (B)'s own fields.**
 
-The `S`-equation `fuSdec` turns the remainder pairing into the `pairInt` integrand minus the two
-smooth-by-type pairings, so it inherits their continuity. -/
 theorem fuRemInt (g₁ g₂ : Real → SmoothRiemannianMetric I M) {a b : Real} (hab : a < b)
     (hjoint₁ : ∀ (x₀ : M) (i j : Fin (Module.finrank Real E)),
       ContMDiffOn (𝓘(Real, Real).prod I) 𝓘(Real) ∞
@@ -1073,14 +914,6 @@ theorem fuRemInt (g₁ g₂ : Real → SmoothRiemannianMetric I M) {a b : Real} 
       (covDiv0SField (I := I) (g₁ t) (fuUflux (I := I) g₁ g₂ t))
       (fuSfield (I := I) g₁ g₂ t)
 
-/-- **The moving-volume trace is the intrinsic metric trace of the flow speed.**  Under
-`∂ₜg = −2Q` the chart-defined `traceTimeDerivMetric` equals `−2 tr_{g t} Q`, a basis-free
-quantity.
-
-This duplicates `IntrinsicSpectral.traceTime_rd`
-(`Analysis/Spectral/Intrinsic/DeTurck/MovingEdgeEnergy.lean`), which sits in a *higher* layer than
-`Evolution/`, so importing it here would invert the layering.  **Relocation TODO**: both copies
-belong next to `traceTimeDerivMetric` in `Analysis/Integration/Measure/Family.lean`. -/
 private theorem fuTraceRd {x : M} {t : Real}
     (g : Real → SmoothRiemannianMetric I M)
     (Q : Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) 2 x)
@@ -1150,9 +983,6 @@ private theorem fuTraceRd {x : M} {t : Real}
       ring
     _ = (-2 : Real) * metricTracePair0SAt (I := I) (g t) Q := by rw [hscalar]
 
-/-- **The moving-volume trace is continuous in space.**  Along the flow it is `−2` times the
-fibre pairing of two smooth `(0,2)` fields (the metric and the Ricci section), so
-`inner0S_continuous` applies. -/
 private theorem fuTraceCont (g₁ : Real → SmoothRiemannianMetric I M) {a b : Real}
     (hpde₁ : ∀ t ∈ Ico a b, ∀ (x : M) (v w : TangentSpace I x),
       HasDerivWithinAt (fun s : Real => (g₁ s).inner x v w)
@@ -1192,11 +1022,7 @@ private theorem fuTraceCont (g₁ : Real → SmoothRiemannianMetric I M) {a b : 
 
 set_option synthInstance.maxHeartbeats 1000000 in
 set_option maxHeartbeats 1000000 in
-/-- **The bundle's `restInt` member, from (B)'s own fields.**
 
-`rateRest` groups the metric and connection thirds as `movingReact0S + 2⟨Ṫ, T⟩`, i.e. as the time
-derivatives of `|h₀₂|²` and `|A₀₃|²`; what is left is the frozen-carrier reaction of the curvature
-third and the moving-volume term.  All four summands are continuous in `x`. -/
 theorem fuRestInt (g₁ g₂ : Real → SmoothRiemannianMetric I M) {a b : Real} (hab : a < b)
     (hjoint₁ : ∀ (x₀ : M) (i j : Fin (Module.finrank Real E)),
       ContMDiffOn (𝓘(Real, Real).prod I) 𝓘(Real) ∞
@@ -1244,12 +1070,7 @@ theorem fuRestInt (g₁ g₂ : Real → SmoothRiemannianMetric I M) {a b : Real}
 
 set_option synthInstance.maxHeartbeats 1000000 in
 set_option maxHeartbeats 1000000 in
-/-- **The Kotschwar energy is differentiable at every interior time, from (B)'s own fields.**
 
-`forwardUniqueEnergy_hasDerivAt` (K3) is stated with purely window-local hypotheses — an open
-`U`, the chart-Gram package and the joint density smoothness on `U`, and the two flow equations
-and two carrier speeds at the single time `t` — every one of which the wiring already supplies at
-the constructed carriers. -/
 theorem fuEnergyDeriv (g₁ g₂ : Real → SmoothRiemannianMetric I M) {a b : Real} (hab : a < b)
     (hjoint₁ : ∀ (x₀ : M) (i j : Fin (Module.finrank Real E)),
       ContMDiffOn (𝓘(Real, Real).prod I) 𝓘(Real) ∞
@@ -1289,13 +1110,7 @@ theorem fuEnergyDeriv (g₁ g₂ : Real → SmoothRiemannianMetric I M) {a b : R
 
 set_option synthInstance.maxHeartbeats 1000000 in
 set_option maxHeartbeats 1000000 in
-/-- **The bundle's `energyCont` member, reduced to the single closed initial edge.**
 
-The energy is differentiable — hence continuous — at every *interior* time (`fuEnergyDeriv`), so
-the only content left in `energyCont` is the one-point statement at `t = a`.  That edge is a
-genuine analytic gap: `dens_jointContMDiffOn` lives on the open window because the joint
-Christoffel/Riemann tower (`gen_joint_christoffel`, `gen_joint_riemann`) is stated with
-`ContDiffAt`, so nothing controls the density at `t = a`. -/
 theorem fuEnergyCont (g₁ g₂ : Real → SmoothRiemannianMetric I M) {a b : Real} (hab : a < b)
     (hjoint₁ : ∀ (x₀ : M) (i j : Fin (Module.finrank Real E)),
       ContMDiffOn (𝓘(Real, Real).prod I) 𝓘(Real) ∞
@@ -1324,19 +1139,6 @@ end SpeedContinuity
 
 section SlabFields
 
-/-! ## Slab-uniform fields at the constructed carriers
-
-`Evolution/ForwardUniqueSup.lean` proves the six `ForwardUniqueSlab` estimates in *carrier*
-form; the two that are unconditional there — `ricciLe` and, once its three background sups are
-supplied, `fluxLe` — are instantiated here at the carriers this file builds.  The background
-sups themselves come from the closed-edge compactness layer (`rm04SlabSup`, `metricSlabSup`),
-which black box (B)'s own half-open chart-Gram fields feed after restriction to `Icc a c`. -/
-
-/-- The `P` slot of the constructed flux is the **cross-lowered** background curvature.
-
-`fuTf g₁ t − fuSfield g₁ g₂ t = Rm(∇²) lowered by g₁`: the flow-1 curvature minus the
-curvature difference is, term by term, the `g₁`-lowering of the *second* connection's Riemann
-tensor.  This is what turns `sdecFluxSq_le`'s abstract `B_P` into a curvature sup. -/
 theorem fuP_eq (g₁ g₂ : Real → SmoothRiemannianMetric I M) (t : Real) (x : M) :
     (fuTf (I := I) g₁ t - fuSfield (I := I) g₁ g₂ t) x =
       CovariantDerivative.riemannCurvature04At (I := I) (g₁ t) (metricCov (I := I) (g₂ t))
@@ -1346,12 +1148,6 @@ theorem fuP_eq (g₁ g₂ : Real → SmoothRiemannianMetric I M) (t : Real) (x :
   rw [hpt, fuTf_apply, fuSfield_apply]
   exact sub_sub_cancel _ _
 
-/-- **The `fluxLe` field of `ForwardUniqueSlab` at the constructed carrier, unconditional.**
-
-From black box (B)'s two chart-Gram fields alone: on every closed subslab the three background
-norms of `sdecFluxSq_le` — `|Rm₂|²_{g₁}`, `|P|²_{g₁}` and `|g₂|²_{g₁}` — are bounded by the
-extreme value theorem, and `fluxSlabLe` absorbs them into the energy density.  No estimate
-hypothesis and no PDE enter. -/
 theorem fuFluxSlab (g₁ g₂ : Real → SmoothRiemannianMetric I M) {a b : Real}
     (h1smooth : ∀ (x₀ : M) (i j : Fin (Module.finrank Real E)),
       ContMDiffOn (𝓘(Real, Real).prod I) 𝓘(Real) ∞
@@ -1390,12 +1186,6 @@ theorem fuFluxSlab (g₁ g₂ : Real → SmoothRiemannianMetric I M) {a b : Real
     (fun r => fuTf (I := I) g₁ r - fuSfield (I := I) g₁ g₂ r) t x hB₂0 hBP0 hBg0
     (hB₂ t hIcc x) hBPx (hBg t hIcc x)
 
-/-- **The `volLe` field of `ForwardUniqueSlab`, unconditional.**
-
-The volume drift is a background quantity of the *first* flow alone.  `fuTraceRd` reads the
-chart-defined `traceTimeDerivMetric` as `−2·tr_{g₁}Ric₁` under (B)'s own Ricci-flow field, and
-`volSlabSup` converts the closed-subslab Ricci sup into the constant `C_V = √(n·B)`.  No
-joint continuity of the drift itself is needed — the identity replaces it. -/
 theorem fuVolSlab (g₁ : Real → SmoothRiemannianMetric I M) {a b : Real}
     (h1smooth : ∀ (x₀ : M) (i j : Fin (Module.finrank Real E)),
       ContMDiffOn (𝓘(Real, Real).prod I) 𝓘(Real) ∞
@@ -1418,12 +1208,6 @@ theorem fuVolSlab (g₁ : Real → SmoothRiemannianMetric I M) {a b : Real}
   exact fuTraceRd (I := I) g₁ (metricRicciAt (I := I) (g₁ t) x)
     (pde_hasDerivAt (I := I) g₁ h1pde ⟨ht.1, lt_trans ht.2 hc.2⟩ x)
 
-/-- **The `reactLe` field of `ForwardUniqueSlab`, unconditional.**
-
-The three moving-metric reactions of the energy carriers need one background norm only,
-`sup |Ric₁|²_{g₁}`, which `ricciSlabSup` produces at `(g₁, g₁)` from (B)'s first chart-Gram
-field; `reactSlabLe` then pays the rank-uniform reaction bound `movingReactAbs_le`.  The
-metric-variation input of that bound is (B)'s own PDE field at interior times. -/
 theorem fuReactSlab (g₁ g₂ : Real → SmoothRiemannianMetric I M) {a b : Real}
     (h1smooth : ∀ (x₀ : M) (i j : Fin (Module.finrank Real E)),
       ContMDiffOn (𝓘(Real, Real).prod I) 𝓘(Real) ∞
@@ -1454,12 +1238,7 @@ theorem fuReactSlab (g₁ g₂ : Real → SmoothRiemannianMetric I M) {a b : Rea
 
 set_option synthInstance.maxHeartbeats 1000000 in
 set_option maxHeartbeats 2000000 in
-/-- **The `remLe` field of `ForwardUniqueSlab` at the constructed carrier.**
 
-Every background curvature, derivative, and metric-comparison factor in `sdecRem`
-has a closed-subslab supremum supplied by the chart-Gram regularity layer.  The
-four remainder summands are then controlled respectively by `rmDotRemSq_le`, the
-invariant `gapDot` split, `reLowerDefSq_le`, and the traced `reLowerPair` bound. -/
 theorem fuRemSlab (g₁ g₂ : Real → SmoothRiemannianMetric I M) {a b : Real}
     (h1smooth : ∀ (x₀ : M) (i j : Fin (Module.finrank Real E)),
       ContMDiffOn (𝓘(Real, Real).prod I) 𝓘(Real) ∞
@@ -2062,14 +1841,6 @@ theorem fuRemSlab (g₁ g₂ : Real → SmoothRiemannianMetric I M) {a b : Real}
       dsimp only [C_rem]
       ring
 
-/-- **The `adotLe` field of `ForwardUniqueSlab` at the constructed carrier.**
-
-The four background constants of `connDiffDot_normSq_le` are supplied on the closed subslab
-by `ricciSlabSup`, `nablaRicSlabSup`, and `metricCompSlab`.  Its component inputs are the
-canonical chart-frame inverse and `∇Ric` families: `fuGamma` supplies the Christoffel
-derivatives, `connDiffVec_hasDerivAt` turns them into the invariant connection-difference
-derivative, and `nablaRicReal_frame` identifies the explicit `chartNablaRic` components with
-the intrinsic covariant derivatives. -/
 theorem fuAdotSlab (g₁ g₂ : Real → SmoothRiemannianMetric I M) {a b : Real} (hab : a < b)
     (h1smooth : ∀ (x₀ : M) (i j : Fin (Module.finrank Real E)),
       ContMDiffOn (𝓘(Real, Real).prod I) 𝓘(Real) ∞
@@ -2298,11 +2069,7 @@ theorem fuAdotSlab (g₁ g₂ : Real → SmoothRiemannianMetric I M) {a b : Real
 
 set_option synthInstance.maxHeartbeats 1000000 in
 set_option maxHeartbeats 1000000 in
-/-- **`hbounds` at the constructed carriers, with all six estimates produced internally.**
 
-The chart-Gram regularity and Ricci-flow equations supply the closed-subslab background
-bounds used by `fuFluxSlab`, `fuVolSlab`, `fuReactSlab`, `fuRemSlab`, and `fuAdotSlab`;
-`ricciSlabLe` supplies the remaining universal curvature coefficient. -/
 theorem fuSlab_of_gram (g₁ g₂ : Real → SmoothRiemannianMetric I M) {a b : Real}
     (h1smooth : ∀ (x₀ : M) (i j : Fin (Module.finrank Real E)),
       ContMDiffOn (𝓘(Real, Real).prod I) 𝓘(Real) ∞
@@ -2340,27 +2107,9 @@ theorem fuSlab_of_gram (g₁ g₂ : Real → SmoothRiemannianMetric I M) {a b : 
 
 end SlabFields
 
-/-! ## The residual bundle, assembled
-
-`fuInputs_of_gram` builds `ForwardUniqueInputs` at the constructed carriers from black box
-(B)'s own fields plus **two** named residual hypotheses.  Everything else — the three evolution
-members, the realization member, the seven density-regularity members, and the three
-bare-pointwise integrability members — is discharged here. -/
-
 set_option synthInstance.maxHeartbeats 1000000 in
 set_option maxHeartbeats 1000000 in
-/-- **The standing bundle of the (B) endgame, at the constructed carriers.**
 
-From (B)'s own fields (`hjointᵢ`, `hpdeᵢ`) together with two residual inputs:
-
-* `hbounds` — K4's six slab-uniform pointwise estimates, per compact subslab;
-* `hedge` — continuity of the Kotschwar energy at the *single* closed initial time `a`.
-
-Nothing else remains: `gamma`/`rm`/`sdec` come from the tail Uhlenbeck and Christoffel
-producers, `car` is by construction, the density-regularity members come from
-`ForwardUniqueDensReg.lean`, the three bare-pointwise integrability members come from
-`fuPairInt`/`fuRestInt`/`fuRemInt`, and the interior half of `energyCont` comes from
-`fuEnergyDeriv`. -/
 theorem fuInputs_of_gram (g₁ g₂ : Real → SmoothRiemannianMetric I M) {a b : Real} (hab : a < b)
     (hjoint₁ : ∀ (x₀ : M) (i j : Fin (Module.finrank Real E)),
       ContMDiffOn (𝓘(Real, Real).prod I) 𝓘(Real) ∞
@@ -2408,11 +2157,7 @@ theorem fuInputs_of_gram (g₁ g₂ : Real → SmoothRiemannianMetric I M) {a b 
 
 set_option synthInstance.maxHeartbeats 1000000 in
 set_option maxHeartbeats 1000000 in
-/-- **Forward uniqueness from black box (B)'s own fields, modulo two named residual inputs.**
 
-This is `ricci_flow_forward_unique`'s statement with exactly the residual list of
-`fuInputs_of_gram` added: the slab-uniform pointwise bounds, and continuity of the Kotschwar
-energy at the single initial time.  Instantiating it is the whole content of the endpoint. -/
 theorem forward_unique_of_gram (g₁ g₂ : Real → SmoothRiemannianMetric I M) {a b : Real}
     (hab : a < b)
     (h1smooth : ∀ (x₀ : M) (i j : Fin (Module.finrank Real E)),

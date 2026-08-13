@@ -19,9 +19,6 @@ noncomputable def Diffeomorph.pushforward
     ∀ x : M, TangentSpace I x :=
   fun x => Φ.apply_symm_apply x ▸ (mfderiv I I Φ (Φ.symm x)) (W (Φ.symm x))
 
-/-- The pushforward of a vector field at the image of `x` is the manifold
-derivative of the diffeomorphism applied to the field at `x`.  This is the
-transport-free form used by time-dependent gauge equations. -/
 theorem Diffeomorph.pushforward_image
     {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
       [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
@@ -42,8 +39,6 @@ theorem Diffeomorph.pushforward_image
       (W (Φ.symm (Φ x))))).trans ?_
   rw [hbase]
 
-/-- The derivative of a diffeomorphism followed by the derivative of its
-inverse is the identity, in the order acting on a source tangent vector. -/
 theorem Diffeomorph.mfderiv_symm_self
     {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
       [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
@@ -68,9 +63,6 @@ theorem Diffeomorph.mfderiv_symm_self
   simpa only [ContinuousLinearMap.comp_apply,
     ContinuousLinearMap.id_apply] using happ
 
-/-- The derivative of an inverse diffeomorphism followed by the derivative of
-the original diffeomorphism is the identity, in the order acting on a target
-tangent vector. -/
 theorem Diffeomorph.mfderiv_self_symm
     {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
       [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
@@ -102,7 +94,6 @@ theorem Diffeomorph.mfderiv_self_symm
   simpa only [ContinuousLinearMap.comp_apply,
     ContinuousLinearMap.id_apply] using happ
 
-/-- Pushforward by the identity diffeomorphism fixes every vector field. -/
 @[simp] theorem Diffeomorph.pushforward_refl
     {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
       [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]

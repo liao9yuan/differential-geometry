@@ -3,16 +3,6 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.C4.DiagonalSu
 
 set_option autoImplicit false
 
-
-
-
-
-
-
-
-
-
-
 noncomputable section
 
 universe u uE uH
@@ -30,7 +20,6 @@ variable {I : ModelWithCorners Real E H}
 variable [I.Boundaryless]
 variable {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
 
-
 noncomputable def seqCenter (hd : InjRadiusDecayInput (I := I) X) (D : Real)
     (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k)) (k α : Nat) :
     Option ((X.obj k).M) :=
@@ -38,15 +27,12 @@ noncomputable def seqCenter (hd : InjRadiusDecayInput (I := I) X) (D : Real)
   haveI : ProperSpace (X.obj k).M := (P k).proper
   OrderedNet.netCenter (X.obj k).basepoint (hd.lambda D) (hd.lambda_continuous D) α
 
-
 @[simp] theorem seqCenter_zero (hd : InjRadiusDecayInput (I := I) X) (D : Real)
     (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k)) (k : Nat) :
     seqCenter hd D P k 0 = some (X.obj k).basepoint := by
   letI : MetricSpace (X.obj k).M := (P k).ms
   haveI : ProperSpace (X.obj k).M := (P k).proper
   exact OrderedNet.netCenter_zero _ _ _
-
-
 
 theorem seqCenter_dist_ge (hd : InjRadiusDecayInput (I := I) X) {D : Real} (hD : 0 < D)
     (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k)) (k : Nat) {α : Nat}
@@ -67,9 +53,6 @@ theorem seqCenter_dist_ge (hd : InjRadiusDecayInput (I := I) X) {D : Real} (hD :
     (OrderedNet.netCenter_mem (X.obj k).basepoint (hd.lambda D)
       (hd.lambda_continuous D) α hc') hcO
 
-
-
-
 theorem seqCenter_edist_ge (hd : InjRadiusDecayInput (I := I) X) {D : Real} (hD : 0 < D)
     (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k)) (k : Nat) {α : Nat}
     (hα : α ≠ 0) {c : (X.obj k).M} (hc : seqCenter hd D P k α = some c) :
@@ -80,13 +63,11 @@ theorem seqCenter_edist_ge (hd : InjRadiusDecayInput (I := I) X) {D : Real} (hD 
   rw [(P k).realizes c (X.obj k).basepoint]
   exact ENNReal.ofReal_le_ofReal (seqCenter_dist_ge hd hD P k hα hc)
 
-
 noncomputable def seqRadius (hd : InjRadiusDecayInput (I := I) X) (D : Real)
     (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k)) (k α : Nat) : Real :=
   letI : MetricSpace (X.obj k).M := (P k).ms
   haveI : ProperSpace (X.obj k).M := (P k).proper
   OrderedNet.netRadius (X.obj k).basepoint (hd.lambda D) (hd.lambda_continuous D) α
-
 
 theorem seqRadius_mem (hd : InjRadiusDecayInput (I := I) X) {D : Real} (hD : 0 < D)
     (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k)) (k α : Nat) :
@@ -96,8 +77,6 @@ theorem seqRadius_mem (hd : InjRadiusDecayInput (I := I) X) {D : Real} (hD : 0 <
   haveI : ProperSpace (X.obj k).M := (P k).proper
   exact OrderedNet.netRadius_mem (X.obj k).basepoint (hd.lambda_continuous D)
     (hd.lambda_antitone hD) (fun s => hd.lambda_pos hD s) (P k).hint α
-
-
 
 theorem seqCenter_mu_hasInj (hd : InjRadiusDecayInput (I := I) X)
     {D : Real} (hD : 0 < D)
@@ -116,9 +95,6 @@ theorem seqCenter_mu_hasInj (hd : InjRadiusDecayInput (I := I) X)
   rw [← hr]
   exact (seqRadius_mem hd hD P k α).2
 
-
-
-
 structure NetLimitData (hd : InjRadiusDecayInput (I := I) X) (D : Real)
     (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k)) where
   φ : Nat → Nat
@@ -132,7 +108,6 @@ structure NetLimitData (hd : InjRadiusDecayInput (I := I) X) (D : Real)
     Tendsto (fun k => seqRadius hd D P (φ k) α) atTop (𝓝 (rInf α))
 
 namespace NetLimitData
-
 
 def subseq {hd : InjRadiusDecayInput (I := I) X} {D : Real}
     {P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k)}
@@ -157,9 +132,6 @@ def subseq {hd : InjRadiusDecayInput (I := I) X} {D : Real}
 
 end NetLimitData
 
-
-
-
 theorem exists_netLimitData (hd : InjRadiusDecayInput (I := I) X) {D : Real}
     (hD : 0 < D) (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k)) :
     Nonempty (NetLimitData hd D P) := by
@@ -176,9 +148,6 @@ theorem exists_netLimitData (hd : InjRadiusDecayInput (I := I) X) {D : Real}
   · have h := (hrInftendsto α).comp hφ₂.tendsto_atTop
     simpa [Function.comp] using h
 
-
-
-
 theorem NetLimitData.lambda_window (hd : InjRadiusDecayInput (I := I) X) {D : Real}
     (hD : 0 < D) (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k))
     (L : NetLimitData hd D P) (α : Nat) :
@@ -194,7 +163,6 @@ theorem NetLimitData.lambda_window (hd : InjRadiusDecayInput (I := I) X) {D : Re
       (by linarith : hd.lambda D (L.rInf α) < 2 * hd.lambda D (L.rInf α)))
   exact hmem.mono fun k hk => ⟨hk.1.le, hk.2.le⟩
 
-
 noncomputable def NetLimitData.lamInf {hd : InjRadiusDecayInput (I := I) X} {D : Real}
     {P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k)} (L : NetLimitData hd D P)
     (α : Nat) : Real :=
@@ -204,9 +172,6 @@ noncomputable def NetLimitData.lamInf {hd : InjRadiusDecayInput (I := I) X} {D :
     {D : Real} {P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k)}
     (L : NetLimitData hd D P) {ψ : Nat -> Nat} (hψ : StrictMono ψ) :
     (L.subseq hψ).lamInf = L.lamInf := rfl
-
-
-
 
 theorem NetLimitData.tilde_disjoint (hd : InjRadiusDecayInput (I := I) X) {D : Real}
     (hD : 0 < D) (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k))
@@ -242,9 +207,6 @@ theorem NetLimitData.tilde_disjoint (hd : InjRadiusDecayInput (I := I) X) {D : R
     rw [hry] at h
     exact h
   exact hdisj.mono (Metric.ball_subset_ball h1) (Metric.ball_subset_ball h2)
-
-
-
 
 theorem NetLimitData.scaled_cover (hd : InjRadiusDecayInput (I := I) X) {D : Real}
     (hD : 0 < D) (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k))
@@ -310,8 +272,6 @@ theorem NetLimitData.scaled_cover (hd : InjRadiusDecayInput (I := I) X) {D : Rea
     nlinarith
   exact hcb.trans hscale
 
-
-
 theorem NetLimitData.hat_cover (hd : InjRadiusDecayInput (I := I) X) {D : Real}
     (hD : 0 < D) (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k))
     (L : NetLimitData hd D P) (hre : hd.RealizesEdist) (pb : hd.PackingBound D)
@@ -325,9 +285,6 @@ theorem NetLimitData.hat_cover (hd : InjRadiusDecayInput (I := I) X) {D : Real}
           (letI : MetricSpace (X.obj (L.φ k)).M := (P (L.φ k)).ms
            dist p c < 4 * L.lamInf γ) :=
   L.scaled_cover hd hD P hre pb r 4 (by norm_num)
-
-
-
 
 theorem NetLimitData.inner_cover (hd : InjRadiusDecayInput (I := I) X) {D : Real}
     (hD : 0 < D) (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k))
@@ -343,8 +300,6 @@ theorem NetLimitData.inner_cover (hd : InjRadiusDecayInput (I := I) X) {D : Real
            dist p c < 3 * L.lamInf γ) :=
   L.scaled_cover hd hD P hre pb r 3 (by norm_num)
 
-
-
 def BInter (hd : InjRadiusDecayInput (I := I) X) (D : Real)
     (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k)) (lamInf : Nat → Real)
     (α β k : Nat) : Prop :=
@@ -352,7 +307,6 @@ def BInter (hd : InjRadiusDecayInput (I := I) X) (D : Real)
     seqCenter hd D P k α = some x ∧ seqCenter hd D P k β = some y ∧
     (letI : MetricSpace (X.obj k).M := (P k).ms
      ¬ Disjoint (Metric.ball x (5 * lamInf α)) (Metric.ball y (5 * lamInf β)))
-
 
 theorem BInter.symm (hd : InjRadiusDecayInput (I := I) X) (D : Real)
     (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k)) (lamInf : Nat → Real)
@@ -362,8 +316,6 @@ theorem BInter.symm (hd : InjRadiusDecayInput (I := I) X) (D : Real)
   refine ⟨y, x, hy, hx, ?_⟩
   intro hdisj
   exact hinter hdisj.symm
-
-
 
 theorem NetLimitData.binter_stable_tail
     (hd : InjRadiusDecayInput (I := I) X) {D : Real}
@@ -384,10 +336,6 @@ theorem NetLimitData.binter_stable_tail
   · exact Filter.Eventually.of_forall fun _ _ => hinter
   · filter_upwards [hdisjoint] with k hk
     exact fun hmeet => (hk hmeet).elim
-
-
-
-
 
 theorem exists_stableNet (hd : InjRadiusDecayInput (I := I) X) {D : Real}
     (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k))
@@ -410,8 +358,6 @@ theorem exists_stableNet (hd : InjRadiusDecayInput (I := I) X) {D : Real}
     | true => exact Or.inl (hv.mono fun k hk => of_decide_eq_true hk)
     | false => exact Or.inr (hv.mono fun k hk => of_decide_eq_false hk)
 
-
-
 theorem NetLimitData.stable_subseq (hd : InjRadiusDecayInput (I := I) X) {D : Real}
     (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k))
     (L : NetLimitData hd D P) {ψ : Nat -> Nat} (hψ : StrictMono ψ)
@@ -432,9 +378,6 @@ theorem NetLimitData.stable_subseq (hd : InjRadiusDecayInput (I := I) X) {D : Re
   · exact Or.inr (by
       simpa [NetLimitData.subseq, Function.comp_apply] using
         hψ.tendsto_atTop.eventually h)
-
-
-
 
 theorem NetLimitData.rInf_close (hd : InjRadiusDecayInput (I := I) X) {D : Real}
     (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k)) (L : NetLimitData hd D P)
@@ -469,10 +412,6 @@ theorem NetLimitData.rInf_close (hd : InjRadiusDecayInput (I := I) X) {D : Real}
     linarith
   exact le_of_tendsto_of_tendsto ((L.tendsto β).mono_left inf_le_left)
     (((L.tendsto α).mono_left inf_le_left).add_const _) hev
-
-
-
-
 
 theorem NetLimitData.nesting (hd : InjRadiusDecayInput (I := I) X) {D : Real}
     (hD : 0 < D) (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k))
@@ -534,8 +473,6 @@ theorem NetLimitData.nesting (hd : InjRadiusDecayInput (I := I) X) {D : Real}
     have h2 : (5 : Real) * L.lamInf α ≤ 5 * E2 * L.lamInf β := by nlinarith
     have h3 : (5 : Real) * L.lamInf β ≤ 5 * E2 * L.lamInf β := by nlinarith
     nlinarith [mul_pos (lt_of_lt_of_le zero_lt_one (hE1ge1.trans hE12)) hlamβpos]
-
-
 
 theorem NetLimitData.inter_count (hd : InjRadiusDecayInput (I := I) X) {D : Real}
     (hD : 0 < D) (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k))
@@ -716,14 +653,6 @@ theorem NetLimitData.inter_count (hd : InjRadiusDecayInput (I := I) X) {D : Real
       rw [hvc, ← ProperMetricOn.dist_eq hd hre P (L.φ k)]
       exact hcont b.down)
   rwa [Finset.card_univ, Fintype.card_ulift, Fintype.card_coe] at hmul
-
-
-
-
-
-
-
-
 
 theorem exists_stableNetData (hd : InjRadiusDecayInput (I := I) X) {D : Real}
     (hD : 0 < D) (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k)) :

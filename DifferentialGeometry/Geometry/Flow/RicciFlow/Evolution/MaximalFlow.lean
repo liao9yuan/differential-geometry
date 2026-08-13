@@ -6,14 +6,6 @@ set_option autoImplicit false
 set_option linter.style.longLine false
 set_option linter.unusedSectionVars false
 
-/-!
-# Construction of a maximal Ricci flow
-
-This module orders all smooth Ricci-flow segments starting at a fixed metric,
-uses forward uniqueness to glue them below the supremum of their lifetimes,
-and proves that the resulting solution cannot extend past that supremum.
--/
-
 noncomputable section
 
 namespace DifferentialGeometry.PDE.RicciFlow
@@ -31,8 +23,6 @@ variable [IsManifold I 1 M] [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
 variable [SigmaCompactSpace M] [T2Space M]
 variable [CompactSpace M] [BoundarylessManifold I M] [I.Boundaryless]
 
-/-- A Ricci-flow solution on `[0,T)` starting at `g0`, retaining the joint
-one-sided regularity used by forward uniqueness and later gluing. -/
 structure FlowTo (g0 : SmoothRiemannianMetric I M) (T : Real) where
   hT : 0 < T
   S : SolutionOn (I := I) (M := M) (RealTimeInterval.closedOpen 0 T hT)
@@ -53,8 +43,6 @@ private structure FlowCover
   flow : FlowTo (I := I) (M := M) g0 T
   lt_end : t < T
 
-/-- Short-time existence supplies at least one element of the directed family
-of flows starting at `g0`. -/
 theorem flow_to_seed (g0 : SmoothRiemannianMetric I M) :
     ∃ T : Real, Nonempty (FlowTo (I := I) (M := M) g0 T) := by
   rcases short_time_joint (I := I) (M := M) g0 with
@@ -68,8 +56,6 @@ theorem flow_to_seed (g0 : SmoothRiemannianMetric I M) :
   · simpa [S] using hjoint
   · simpa [S] using hpde
 
-/-- Any two flow segments starting at the same metric agree on their common
-closed-open time interval. -/
 theorem flow_to_agree
     {g0 : SmoothRiemannianMetric I M} {T U : Real}
     (P : FlowTo (I := I) (M := M) g0 T)
@@ -96,7 +82,6 @@ theorem flow_to_agree
     exact Q.pde t ⟨ht.1, lt_of_lt_of_le ht.2 (min_le_right T U)⟩ x v w
   · exact P.start.trans Q.start.symm
 
-/-- Pointwise form of compatibility for a time lying in both flow segments. -/
 theorem flow_to_eq
     {g0 : SmoothRiemannianMetric I M} {T U t : Real}
     (P : FlowTo (I := I) (M := M) g0 T)
@@ -105,10 +90,6 @@ theorem flow_to_eq
     P.S.family.metric t = Q.S.family.metric t :=
   flow_to_agree (I := I) (M := M) P Q t ⟨h0, lt_min hT hU⟩
 
-/-- An extension of a candidate solution produces a strictly longer member of
-the same directed family.  Agreement with the old segment transports the
-one-sided regularity at time zero; positive times use the solution's interior
-regularity. -/
 theorem flow_to_extend
     {g0 : SmoothRiemannianMetric I M} {T : Real}
     (P : FlowTo (I := I) (M := M) g0 T)
@@ -178,8 +159,6 @@ theorem flow_to_extend
           ⟨le_of_lt ht_pos, ht.2⟩ x v w
   refine ⟨eps, heps, ⟨⟨hwide, Shat, hShat, hstart, hjoint, hpde⟩⟩⟩
 
-/-- A positive-scalar three-dimensional initial metric has a Ricci flow whose
-closed-open lifetime is maximal among all smooth extensions. -/
 theorem exists_max_flow
     [Nonempty M]
     (g0 : SmoothRiemannianMetric I M)

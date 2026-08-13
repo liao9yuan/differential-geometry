@@ -2,27 +2,6 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.Pullback.HarmonicGalerkin
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Pullback.HarmonicTension
 import DifferentialGeometry.Analysis.Integration.Measure.FamilyContinuityParam
 
-/-!
-# Dirichlet energy in exponential-section coordinates
-
-On a connected compact manifold, a smooth `(0,1)` tensor `S` is raised with a
-fixed target metric `q` and inserted into the intrinsic diagonal exponential.
-The resulting self-map
-
-`x ↦ exp^q_x (q♯ S(x))`
-
-is the local-addition realization used by the harmonic-map heat-flow gauge.
-This file defines its moving-domain Dirichlet energy and, on every finite
-spectral trial space, the concrete first-variation covector which drives the
-moving-mass Galerkin ODE.
-
-The first variation is taken after freezing the time variable.  This is
-essential at the initial edge: the metric coefficients are assumed continuous
-in time there, but need not be time differentiable.  Taking the Fréchet
-derivative of the *joint* `(time, coefficient)` function would therefore be
-incorrect (Lean's total `fderiv` is zero when total differentiability fails).
--/
-
 noncomputable section
 
 open Bundle Manifold MeasureTheory Set Tensor0SBundle
@@ -47,8 +26,6 @@ variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
   [IsManifold I ∞ M] [CompactSpace M] [T2Space M]
   [SigmaCompactSpace M] [BoundarylessManifold I M] [ConnectedSpace M]
-
-/-! ## The global intrinsic local addition on a connected component -/
 
 @[reducible] private noncomputable def hmfRiemBundle
     (q : SmoothRiemannianMetric I M) :
@@ -99,8 +76,6 @@ private theorem hmfEnorm
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-/-- The intrinsic diagonal exponential for the fixed target metric `q`, with
-all metric-space structures kept local to the definition. -/
 noncomputable def hmfDiagExp
     (q : SmoothRiemannianMetric I M) : TangentBundle I M → M × M := by
   letI : RiemannianBundle (fun x : M => TangentSpace I x) :=
@@ -113,8 +88,6 @@ noncomputable def hmfDiagExp
 omit [BoundarylessManifold I M] [ConnectedSpace M] in
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-/-- The intrinsic diagonal exponential used by the HMF local addition is
-finite-order smooth at every point of the zero section. -/
 theorem hmfDiagExp_cd_zero
     (q : SmoothRiemannianMetric I M) (x : M) (n : ℕ) (hn : 1 ≤ n) :
     ContMDiffAt I.tangent (I.prod I) (n : ℕ∞)
@@ -131,7 +104,6 @@ theorem hmfDiagExp_cd_zero
   exact diagExp_contMDiffAt_zero (I := I)
     q (hmfEnorm (I := I) q) x n hn
 
-/-- Exponential-section realization of a lowered tangent field. -/
 noncomputable def hmfAdd
     (q : SmoothRiemannianMetric I M) (S : SmoothCcTensor q 0 1) : M → M :=
   fun x =>
@@ -150,9 +122,6 @@ omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless]
 omit [BoundarylessManifold I M] [ConnectedSpace M] in
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-/-- The exponential-section realization sends the zero section to the identity
-map.  This is the base point for the finite-dimensional first-variation and
-Jacobi calculations. -/
 @[simp] theorem hmfAdd_zero
     (q : SmoothRiemannianMetric I M) :
     hmfAdd (I := I) (M := M) q (0 : SmoothCcTensor q 0 1) = id := by
@@ -176,10 +145,6 @@ omit [BoundarylessManifold I M] [ConnectedSpace M] in
   rw [hmfAdd_zero, mfderiv_id]
   rfl
 
-/-! ## Uniform finite-spectral local-addition chart -/
-
-/-- The tangent-bundle launch field obtained from a finite spectral
-coefficient and a point of the manifold. -/
 noncomputable def hmfSpecLaunch
     (q : SmoothRiemannianMetric I M)
     (S : Finset (TensorEigenIdx (I := I) (M := M) q 0 1))
@@ -198,10 +163,6 @@ omit [BoundarylessManifold I M] [ConnectedSpace M] in
   rfl
 
 omit [BoundarylessManifold I M] [ConnectedSpace M] in
-/-- The finite spectral launch field is jointly smooth in the coefficient and
-the base point.  This is proved as a finite sum of smooth scalar coefficients
-times fixed smooth tangent sections; no topology on the full space of smooth
-sections is introduced. -/
 theorem hmfSpecLaunch_cd
     (q : SmoothRiemannianMetric I M)
     (S : Finset (TensorEigenIdx (I := I) (M := M) q 0 1)) :
@@ -258,10 +219,6 @@ theorem hmfSpecLaunch_cd
   rw [map_smul, hmfUnknownLM_apply]
 
 omit [BoundarylessManifold I M] [ConnectedSpace M] in
-/-- For a fixed finite spectral trial space and finite differentiability
-order, one coefficient ball launches entirely into the smooth locus of the
-intrinsic diagonal exponential.  The radius is uniform in the manifold point
-but may depend on the finite mode set. -/
 theorem hmfSpecChart
     (q : SmoothRiemannianMetric I M)
     (S : Finset (TensorEigenIdx (I := I) (M := M) q 0 1))
@@ -307,9 +264,6 @@ theorem hmfSpecChart
   exact hAB hux
 
 omit [BoundarylessManifold I M] [ConnectedSpace M] in
-/-- On the fixed finite-spectral coefficient ball supplied by
-`hmfSpecChart`, the exponential-section map is jointly smooth in the
-coefficient and the manifold point. -/
 theorem hmfSpecAdd_cd
     (q : SmoothRiemannianMetric I M)
     (S : Finset (TensorEigenIdx (I := I) (M := M) q 0 1))
@@ -332,18 +286,6 @@ theorem hmfSpecAdd_cd
       (by exact_mod_cast le_top)
   exact ((hchart p.1 hp.1 p.2).comp p hlaunch).contMDiffWithinAt
 
-/-! ## Moving-domain Dirichlet energy -/
-
-/-- Pointwise Dirichlet density of a self-map `Phi : (M,h) → (M,q)`.  The
-trace is written in the fixed `q`-orthonormal frame: insertion of
-`h sharp o q flat` in the first derivative slot changes the trace from
-`q^{-1}` to `h^{-1}`.  Thus the moving metric appears only through the same
-zeroth-order inverse-cometric coefficient as `hmfFlux`, avoiding a
-time-dependent choice of orthonormal frame.
-
-The total `mfderiv` makes the definition meaningful before regularity is
-proved; the later geometric regularity theorem identifies it with the
-ordinary map differential on the local-addition ball. -/
 noncomputable def hmfDirDensity
     (q h : SmoothRiemannianMetric I M) (Phi : M → M) (x : M) : ℝ :=
   (1 / 2 : ℝ) *
@@ -369,18 +311,12 @@ omit [BoundarylessManifold I M] [ConnectedSpace M] in
   simp only [id_eq, mfderiv_id]
   rfl
 
-/-- Dirichlet energy of the exponential-section map represented by `S`, with
-moving domain metric `h` and fixed target metric `q`. -/
 noncomputable def hmfDirEnergy
     (q h : SmoothRiemannianMetric I M) (S : SmoothCcTensor q 0 1) : ℝ :=
   ∫ x, hmfDirDensity (I := I) (M := M) q h
       (hmfAdd (I := I) (M := M) q S) x
     ∂(riemannianVolumeMeasure (I := I) (M := M) h)
 
-/-! ## Concrete finite spectral first variation -/
-
-/-- The Dirichlet energy restricted to one finite intrinsic spectral trial
-space. -/
 noncomputable def hmfSpecEnergy
     (q : SmoothRiemannianMetric I M)
     (g : ℝ → SmoothRiemannianMetric I M)
@@ -389,10 +325,6 @@ noncomputable def hmfSpecEnergy
   hmfDirEnergy (I := I) (M := M) q (g t)
     (hmfSpecIncl (I := I) (M := M) q S u)
 
-/-- The negative vertical first variation of the finite Dirichlet energy.
-This is the concrete covector residual in the moving-mass Galerkin equation.
-Time is frozen before differentiating, so the definition remains meaningful
-when the metric family is only continuous at the initial edge. -/
 noncomputable def hmfSpecResid
     (q : SmoothRiemannianMetric I M)
     (g : ℝ → SmoothRiemannianMetric I M)
@@ -401,17 +333,6 @@ noncomputable def hmfSpecResid
     EuclideanSpace ℝ {i // i ∈ S} →L[ℝ] ℝ :=
   -fderiv ℝ (hmfSpecEnergy (I := I) (M := M) q g S t) u
 
-/-! ### Forced principal/low-order split
-
-The moving-mass equation is written with the negative energy variation on the
-right.  Consequently its coercive divergence-form part has the sign
-`-hmfWeakForm`.  The following definitions isolate that sign once, before any
-regularity or tame estimate for the genuinely nonlinear remainder is proved.
--/
-
-/-- The finite spectral realization of the signed moving weak principal
-operator.  This is the part of the negative Dirichlet variation forced by the
-zero-section vertical derivative of the exponential local addition. -/
 noncomputable def hmfSpecPrin
     (q : SmoothRiemannianMetric I M)
     (g : ℝ → SmoothRiemannianMetric I M)
@@ -433,10 +354,6 @@ omit [BoundarylessManifold I M] [ConnectedSpace M] in
         (hmfSpecIncl (I := I) (M := M) q S v) := by
   simp only [hmfSpecPrin, ContinuousLinearMap.neg_apply, hmfFinForm_apply]
 
-/-- The exact residual left after subtracting the signed moving weak
-principal operator.  No low-order estimate is hidden in this definition: the
-local-addition first-variation theorem must prove that this remainder has the
-required tame bounds uniformly in the spectral cutoff. -/
 noncomputable def hmfSpecLow
     (q : SmoothRiemannianMetric I M)
     (g : ℝ → SmoothRiemannianMetric I M)
@@ -447,9 +364,6 @@ noncomputable def hmfSpecLow
     hmfSpecPrin (I := I) (M := M) q g S t u
 
 omit [BoundarylessManifold I M] [ConnectedSpace M] in
-/-- Exact principal/remainder decomposition of the finite Dirichlet residual.
-The content of the subsequent analytic step is to estimate `hmfSpecLow`, not
-to alter this identity. -/
 theorem hmfSpec_split
     (q : SmoothRiemannianMetric I M)
     (g : ℝ → SmoothRiemannianMetric I M)
@@ -471,8 +385,6 @@ omit [BoundarylessManifold I M] [ConnectedSpace M] in
   simp only [hmfSpecPrin, map_zero, neg_zero]
 
 omit [BoundarylessManifold I M] [ConnectedSpace M] in
-/-- On a metric ball where the moving inverse cometric remains elliptic, the
-signed spectral principal part is dissipative. -/
 theorem hmfSpecPrin_nonpos
     (q : SmoothRiemannianMetric I M)
     (g : ℝ → SmoothRiemannianMetric I M)
@@ -491,10 +403,6 @@ theorem hmfSpecPrin_nonpos
     (hmfSpecIncl (I := I) (M := M) q S u))
 
 omit [BoundarylessManifold I M] [ConnectedSpace M] in
-/-- Quantitative frozen-gradient coercivity of the negative spectral
-principal part.  This is exactly the smooth-core estimate needed in the
-Galerkin energy identity; its constant is independent of the spectral
-cutoff. -/
 theorem hmfSpecPrin_lower
     (q : SmoothRiemannianMetric I M)
     (g : ℝ → SmoothRiemannianMetric I M)
@@ -529,8 +437,6 @@ omit [BoundarylessManifold I M] [ConnectedSpace M] in
       hmfSpecResid (I := I) (M := M) q g S t 0 := by
   simp only [hmfSpecLow, hmfSpecPrin_zero, sub_zero]
 
-/-- Radially globalized finite first variation.  It agrees with the true
-Dirichlet-energy residual throughout the chosen coefficient ball. -/
 noncomputable def hmfSpecResidR
     (q : SmoothRiemannianMetric I M)
     (g : ℝ → SmoothRiemannianMetric I M)
@@ -551,10 +457,6 @@ theorem hmfSpecResidR_eq
   rw [hmfSpecResidR, ballRetraction_eq_self_of_mem hu]
 
 omit [BoundarylessManifold I M] [ConnectedSpace M] in
-/-- Consumer-shaped radial-globalization theorem for the actual finite
-Dirichlet residual.  Once its joint continuity and state derivative are proved
-on a fixed coefficient ball, no additional growth hypothesis is needed for
-the finite ODE: global Lipschitz and affine bounds follow automatically. -/
 theorem hmfSpecRes_data
     (q : SmoothRiemannianMetric I M)
     (g : ℝ → SmoothRiemannianMetric I M)

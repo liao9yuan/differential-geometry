@@ -5,71 +5,6 @@ import DifferentialGeometry.Tensor.RSTensor.FiberMetric.Tensor0SBochnerProduct
 set_option autoImplicit false
 set_option backward.isDefEq.respectTransparency false
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 noncomputable section
 
 namespace DifferentialGeometry.PDE.RicciFlow
@@ -87,8 +22,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 variable [IsManifold I 1 M] [IsManifold I 2 M]
 variable [CompleteSpace E] [SigmaCompactSpace M] [T2Space M]
 
-
-
 private local instance tensor0SModelNormedSpace_local {s : ℕ} :
     NormedSpace ℝ (Tensor0SModel s ℝ E) :=
   Tensor0SBundle.tensor0SModel_normedSpace (𝕜 := Real) (E := E) s
@@ -96,34 +29,19 @@ private local instance tensor0SModelNormedSpace_local {s : ℕ} :
 private local instance tensor0SModelNormedAddCommGroup_local {s : ℕ} :
     NormedAddCommGroup (Tensor0SModel s ℝ E) := inferInstance
 
-
-
-
-
 section Fields
 
 variable {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
-
 
 def nablaRm04NormSqIntrinsic
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D) : Real -> M -> Real :=
   fun t x => normSq0S (I := I) (S.base.metric t) x 5 (nablaRm04Field (I := I) S t x)
 
-
-
 def nabla2Rm04NormSqIntrinsic
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D) : Real -> M -> Real :=
   fun t x => normSq0S (I := I) (S.base.metric t) x 6 (nabla2Rm04Field (I := I) S t x)
-
-
-
-
-
-
-
-
 
 def nablaRm04ReactionIntrinsic
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
@@ -149,32 +67,9 @@ def nablaRm04ReactionIntrinsic
 
 end Fields
 
-
-
-
-
-
 section HeatEquation
 
 variable {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 omit [Module.Finite ℝ E] in
 omit [I.Boundaryless] in
@@ -282,16 +177,9 @@ theorem nablaRm04NormHeatEquationOn_intrinsic
 
 end HeatEquation
 
-
-
-
-
-
 section Producer
 
 variable {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
-
-
 
 omit [I.Boundaryless] in
 omit [SigmaCompactSpace M] in
@@ -303,25 +191,6 @@ theorem nabla2Rm04NormSqIntrinsic_nonneg
   rw [normSq0S_eq_inner]
   exact (tensor0SMetricData (I := I) (S.base.metric t) x 6).inner_nonneg
     (nabla2Rm04Field (I := I) S t x)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 omit [Module.Finite ℝ E] in
 omit [I.Boundaryless] in

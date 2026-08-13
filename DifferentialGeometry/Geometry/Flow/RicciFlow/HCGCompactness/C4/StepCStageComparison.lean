@@ -12,15 +12,6 @@ import DifferentialGeometry.Geometry.Coordinates.LocalDiffeoIFT
 
 set_option autoImplicit false
 
-/-!
-# Local identification of the finite-stage comparison map
-
-This file connects the chart-independent map from `StepCStageMap` to the
-source-local center branches.  Every local construction is identified through
-the same unique global energy minimizer; local limit weights are never compared
-across source charts.
--/
-
 noncomputable section
 
 universe u uE uH
@@ -43,9 +34,6 @@ variable {H : Type uH} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H} [I.Boundaryless]
 variable {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
 
-/-- A center input for the active-filled direct targets proves uniqueness of
-the original finite-stage energy, hence supplies the proof branch used by the
-global stage comparison map. -/
 theorem uniqueStage_of_fill
     (inp : MetricCompactCore (I := I) X)
     (P : ∀ j : Nat, ProperMetricOn (I := I) (X.obj j))
@@ -108,8 +96,6 @@ theorem uniqueStage_of_fill
     (stageTarget inp P L s k l (chart := chart)) qstar join p rad x hcm
   simpa only [HasUniqueStageCenter, i0, mu] using huniq
 
-/-- On the controlled source ball, the global stage comparison map is exactly
-the center selected from any active-filled local `CenterInput`. -/
 theorem stageCompare_eq_cm
     (inp : MetricCompactCore (I := I) X)
     (P : ∀ j : Nat, ProperMetricOn (I := I) (X.obj j))
@@ -208,8 +194,6 @@ theorem stageCompare_eq_cm
         (stageTarget inp P L s k l (chart := chart)) qstar x z]
     exact centerOfMass.min hcm z
 
-/-- On one common source/target-stage tail, every nonzero Route-A chart target
-decodes to the corresponding chart-independent direct stage target. -/
 theorem HasSuppConvData.pts_target_tail
     (inp : MetricCompactnessInputs (I := I) X)
     (h8 : (8 : Real) < inp.normalRadius.gpRatio * inp.D)
@@ -409,9 +393,6 @@ theorem HasSuppConvData.pts_target_tail
       alpha.1 target.1.1 z
         (chart := legacyChartFamily (I := I) X)
 
-/-- On one rectangular source/target-stage tail, every target with nonzero
-actual weight lies uniformly close to the source coordinate in the target
-manifold. -/
 theorem HasSuppConvData.pts_target_dist
     (inp : MetricCompactnessInputs (I := I) X)
     (h8 : (8 : Real) < inp.normalRadius.gpRatio * inp.D)
@@ -479,9 +460,6 @@ theorem HasSuppConvData.pts_target_dist
   rw [← heq.1]
   exact hclose
 
-/-- Actual finite-stage weights and direct targets admit the selected strict
-center input on one rectangular all-pairs tail.  The radius can be chosen
-below any prescribed positive tolerance. -/
 theorem HasSuppConvData.actual_cm_tail
     (inp : MetricCompactnessInputs (I := I) X)
     (aMin : Real) (haMin : 0 < aMin)
@@ -883,8 +861,6 @@ theorem HasSuppConvData.actual_cm_tail
 
 namespace H6NormalData
 
-/-- The two phase-scale inequalities force the H6 chart ratio to dominate
-`48 * aMin`. -/
 theorem ratio_gt_48
     {hd : InjRadiusDecayInput (I := I) X}
     (d : H6NormalData (I := I) X hd) {aMin R : Real} {q : NNReal}
@@ -895,8 +871,6 @@ theorem ratio_gt_48
   dsimp only [phaseRadius] at hqRadius
   nlinarith
 
-/-- H6 normalization makes the covering radii of every interacting pair differ
-by a factor strictly smaller than three. -/
 theorem pair_lam_lt_three
     (inp : MetricCompactCore (I := I) X)
     (d : H6NormalData (I := I) X inp.decay)
@@ -1003,8 +977,6 @@ theorem pair_lam_lt_three
     (mul_lt_mul_of_pos_right hexp
       (inp.decay.lambda_pos inp.hD (L.rInf alpha)))
 
-/-- On the unit-enlarged center tail, the H6 stage chart contains the
-`384 * lamInf` ball. -/
 theorem stage_radius_gt
     (inp : MetricCompactCore (I := I) X)
     (d : H6NormalData (I := I) X inp.decay)
@@ -1065,8 +1037,6 @@ theorem stage_radius_gt
   rw [d.radius_eq]
   nlinarith [lamInf_lt_halfMin inp.decay inp.hD hphys P L gamma]
 
-/-- The H6 launch radius is contained in one quarter of the stage chart
-radius on the same unit-enlarged center tail. -/
 theorem stage_rho_le
     (inp : MetricCompactCore (I := I) X)
     (d : H6NormalData (I := I) X inp.decay)
@@ -1127,8 +1097,6 @@ theorem stage_rho_le
   rw [d.radius_eq]
   nlinarith
 
-/-- A six-lambda target coordinate issued from an interacting stage slot lies
-in the H6 chart centered at the source slot. -/
 theorem target_mem
     (inp : MetricCompactCore (I := I) X)
     (d : H6NormalData (I := I) X inp.decay)
@@ -1293,9 +1261,6 @@ theorem target_mem
   rw [← hvy]
   exact chiAlpha.hom.map_source (chiAlpha.ball_subset hv)
 
-/-- A nonzero refined provider weight places the source transition in the
-target slot's six-lambda ball once the H6 target chart has its branch radius.
-This is the source-side decode needed by the safety-totalized stage filler. -/
 theorem weight_trans_mem
     (inp : MetricCompactCore (I := I) X)
     (d : H6NormalData (I := I) X inp.decay)
@@ -1441,8 +1406,6 @@ theorem weight_trans_mem
       dsimp only [NetLimitData.lamInf]
       nlinarith
 
-/-- On one common H6 source/target-stage tail, every nonzero provider target
-decodes through the same chart family to the direct stage target. -/
 theorem pts_target_tail
     (inp : MetricCompactCore (I := I) X)
     (d : H6NormalData (I := I) X inp.decay)
@@ -1695,8 +1658,6 @@ theorem pts_target_tail
     exact stageTarget_chart (I := I) inp P Lphi r k l
       alpha.1 target.1.1 z (chart := d.chart)
 
-/-- Actual provider-chart weights and targets admit the H6 strict center input
-on one rectangular all-pairs tail. The center readout uses the same H6 chart. -/
 theorem actual_cm_tail
     (inp : MetricCompactCore (I := I) X)
     (d : H6NormalData (I := I) X inp.decay)
@@ -2077,8 +2038,6 @@ theorem actual_cm_tail
 
 end H6NormalData
 
-/-- The chart readout of the global stage comparison map agrees eventually,
-uniformly in both stage indices, with one canonical target-stage root cube. -/
 def HasStageRootReadout
     (inp : MetricCompactCore (I := I) X)
     (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k))
@@ -2123,8 +2082,6 @@ def HasStageRootReadout
             (chiK.hom z) (chart := chart) ∈
           chiL.hom.target
 
-/-- On one rectangular all-pairs tail, the chart readout of the global stage
-comparison map is the canonical root in the target-stage normal chart. -/
 theorem HasSuppConvData.stage_root_tail
     (inp : MetricCompactnessInputs (I := I) X)
     (aMin : Real) (haMin : 0 < aMin)
@@ -2435,9 +2392,6 @@ theorem HasSuppConvData.stage_root_tail
     simpa only [legacyChart_apply, chiL, x0, Yl, Lphi] using hout
   exact ⟨hchartReadout, hrootBall, hmapDecode, htarget⟩
 
-/-- On a strictly smaller source ball, the canonical root readout gives the
-actual stage-map chart germ.  Hence the global stage map is smooth there and
-inherits the root cube's uniform finite-order jet tail. -/
 theorem HasSuppConvData.stage_jet_of_root
     (inp : MetricCompactnessInputs (I := I) X)
     (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k))
@@ -2630,8 +2584,6 @@ theorem HasSuppConvData.stage_jet_of_root
   · simpa only [chiK, Yk, Lphi] using htarget
   · simpa only [Psi] using hout
 
-/-- One common pair-index tail on which every live source chart represents the
-actual global stage map smoothly and with the prescribed finite jet error. -/
 def HasStageJetTail
     (inp : MetricCompactCore (I := I) X)
     (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k))
@@ -2674,8 +2626,6 @@ def HasStageJetTail
           ContDiffAt Real ∞ Fkl z ∧
           ∀ j ≤ p, mapDerivNorm j Fkl id z ≤ eps
 
-/-- The rectangular actual-map jet tail persists under every further strict
-refinement of the stage subsequence. -/
 theorem HasStageJetTail.subseq
     (inp : MetricCompactCore (I := I) X)
     (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k))
@@ -2717,8 +2667,6 @@ theorem HasStageJetTail.subseq
   simpa only [NetLimitData.subseq_phi, Function.comp_apply,
     seqCenterD_subseq] using hN (ψ k) hkψ (ψ l) hlψ alpha z hz
 
-/-- The finitely many live source-chart root cubes admit one common
-pair-index threshold for smoothness and all derivatives through order `p`. -/
 theorem HasSuppConvData.stage_jet_tail
     (inp : MetricCompactnessInputs (I := I) X)
     (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k))
@@ -2794,9 +2742,6 @@ theorem HasSuppConvData.stage_jet_tail
     Finset.le_sup (f := N) (Finset.mem_univ alpha)
   exact hN alpha k (hAlpha.trans hk) l (hAlpha.trans hl) z hz
 
-/-- The selected finite family of diagonal branches produces one root cube per
-live source chart and, after a finite maximum, the all-chart stage-map jet
-tail on every strictly smaller source ball. -/
 theorem HasSuppConvData.exists_stage_tail
     (inp : MetricCompactnessInputs (I := I) X)
     (aMin : Real) (haMin : 0 < aMin)
@@ -2932,8 +2877,6 @@ theorem HasSuppConvData.exists_stage_tail
   exact hdata.stage_jet_tail inp P L hr phi hphi U C0 C1 aInf Jinf
     Jbarinf hconn e W PhiInf rootRho Phi3 hroot hread R hRr p eps heps
 
-/-- The actual stage comparison maps eventually preserve the pointed
-basepoint, uniformly in the target stage. -/
 def HasStageBaseTail
     (inp : MetricCompactCore (I := I) X)
     (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k))
@@ -2950,8 +2893,6 @@ def HasStageBaseTail
         (X.obj (Lphi.φ k)).basepoint =
       (X.obj (Lphi.φ l)).basepoint
 
-/-- Exact pointed preservation of the actual stage maps persists under every
-further strict refinement of the stage subsequence. -/
 theorem HasStageBaseTail.subseq
     (inp : MetricCompactCore (I := I) X)
     (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k))
@@ -2978,8 +2919,6 @@ theorem HasStageBaseTail.subseq
   rw [congrFun hmap _]
   simpa only [NetLimitData.subseq_phi, Function.comp_apply] using hk (ψ l)
 
-/-- Provider-native convergence of the local chart metrics on one domain per
-live source slot. -/
 def HasStageMetricOn
     (inp : MetricCompactCore (I := I) X)
     (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k))
@@ -3001,8 +2940,6 @@ def HasStageMetricOn
       (1 / 2 : Real) * ‖v‖ ^ 2 ≤ gInf alpha z v v ∧
         gInf alpha z v v ≤ 2 * ‖v‖ ^ 2
 
-/-- Provider-native local metric convergence persists under every further
-strict refinement of the extracting subsequence. -/
 theorem HasStageMetricOn.subseq
     (inp : MetricCompactCore (I := I) X)
     (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k))
@@ -3023,9 +2960,6 @@ theorem HasStageMetricOn.subseq
     seqCenterD_subseq] using
     hconv.comp_tendsto_atTop hψ.tendsto_atTop
 
-/-- Master-subsequence data for one coherent normal-chart provider: the finite
-source cover, local chart-metric limits, actual stage-map jets, and pointed
-base preservation all use the same family. -/
 def HasStageJetDataOn
     (inp : MetricCompactCore (I := I) X)
     (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k))
@@ -3050,8 +2984,6 @@ def HasStageJetDataOn
       (chart := chart)) ∧
   HasStageBaseTail inp P L hr phi hphi hconn (chart := chart)
 
-/-- The provider-native master stage package persists under every further
-strict refinement of its extracting subsequence. -/
 theorem HasStageJetDataOn.subseq
     (inp : MetricCompactCore (I := I) X)
     (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k))
@@ -3084,10 +3016,6 @@ theorem HasStageJetDataOn.subseq
   exact (hjets R hR p eps heps).subseq inp P L hr hphi hconn
     C0 R p eps (chart := chart) (hψ := hψ)
 
-/-- Master-subsequence data needed by the remaining legacy Step-B1 geometry:
-the finite source cover, the limiting local metrics, the actual global
-stage-map jet tail on every smaller source ball, and exact basepoint
-preservation. -/
 def HasStageJetData
     (inp : MetricCompactnessInputs (I := I) X)
     (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k))
@@ -3124,8 +3052,6 @@ def HasStageJetData
     HasStageJetTail inp P L hr phi hphi hconn C0 R p eps) ∧
   HasStageBaseTail inp P L hr phi hphi hconn
 
-/-- The full retained stage-map jet package persists under every further
-strict refinement of its extracting subsequence. -/
 theorem HasStageJetData.subseq
     (inp : MetricCompactnessInputs (I := I) X)
     (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k))
@@ -3156,8 +3082,6 @@ theorem HasStageJetData.subseq
     exact (hjets R hR p eps heps).subseq inp P L hr hphi hconn C0 R p eps
       (hψ := hψ)
 
-/-- The actual global stage maps are eventually local diffeomorphisms on every
-strictly smaller retained source ball. -/
 theorem HasStageJetData.hloc_tail
     (inp : MetricCompactnessInputs (I := I) X)
     (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k))
@@ -3343,8 +3267,6 @@ theorem HasStageJetData.hloc_tail
       Lphi] using hout
   exact Coordinates.hlocAt_of_coord c d hV hxc hcxV hmap hG hinv
 
-/-- The support/diagonal capstone now produces the actual global stage-map
-jet data on its single master subsequence. -/
 theorem MetricCompactBase.exists_stage_data
     (b : MetricCompactBase (I := I) X)
     (hcomplete : SeqMetricComplete (I := I) X)

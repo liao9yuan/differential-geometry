@@ -6,30 +6,6 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.CurvatureCoefficien
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.CurvatureCoefficientDifferenceJetTower.TsRungs
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.SlotPermJet
 
-/-!
-# Class-first pure-trace Lipschitz bounds
-
-This module is the second node of the class-uniform Lipschitz layer: it upgrades
-the metricwise pure-trace Lipschitz estimate to a dimension-three metric-class
-statement.  One `H²` radius and one Lipschitz coefficient are selected from
-`(gBase, Λ)` before the class metric varies.
-
-The two moving double traces `pureTrace g gT p` (`p = 2, 4`) split, by
-`pureTrace_split`, into the FIXED parallel self-cometric trace
-`cometricDoubleTraceField g p` applied to a slot-inserted inverse-metric
-difference endomorphism, plus that same fixed field.  Differencing kills the
-constant term, so the Lipschitz estimate reduces to three class-first inputs:
-
-* `invCoeff_h2_lip_unif` for the rank-two inverse-metric coefficient difference;
-* `appRS_h22_unif` at the two valences `(4, 4, 2)` and `(6, 6, 4)`;
-* the `H²` jet window of the fixed field `cometricDoubleTraceField g p`.
-
-The last one costs only the class volume: the field is parallel
-(`cometricDoubleTraceField_covGrad_eq_zero`), so every jet above order zero
-vanishes, and its order-zero fibre norm is the pure dimension constant of
-`cometricTrace_rfns_p`.  No new pointwise fibre analysis is needed.
--/
-
 set_option autoImplicit false
 
 noncomputable section
@@ -103,16 +79,6 @@ private theorem endoSlotZero_succ_eq_reindex_slotExtend
           (slotInsertEndoCc (I := I) (M := M) g q P)))
       (Equiv.swap (0 : Fin (q + 1 + 1)) 1)
   exact tsSlotInsertEndoCc_succ_eq_reindex_slotExtend (I := I) (M := M) g q P
-
-/-! ### The slot-insertion jet tower, re-derived from public producers
-
-The metricwise proof reduces the `H²` jet window of `endoSlotZeroCcTensor g 3` and
-`endoSlotZeroCcTensor g 5` to the one of `endoSlotZeroCcTensor g 1` through helpers that
-are private to the memory-walled `DeTurckRemainderLowBaseC2Lip` monolith.  The
-same reduction is rebuilt here from the public succ-step producers
-`tsSlotInsertEndoCc_succ_eq_reindex_slotExtend`,
-`rfns_iteratedCovGrad_rsDomDomCongr_both_eq` and
-`rfns_iteratedCovGrad_slotExtend_le`. -/
 
 private theorem insSuccPt (g : SmoothRiemannianMetric I M) (q : ℕ)
     (P : ContMDiffSection I (E →L[ℝ] E) ∞
@@ -260,13 +226,6 @@ private theorem ins5Jet (g : SmoothRiemannianMetric I M)
         (mul_le_mul_of_nonneg_left (ins3Jet (I := I) (M := M) g P) hfr) hfr
     _ = _ := by ring
 
-/-! ### The `H²` jet window of the fixed self-cometric double trace
-
-The self-cometric double-trace field is parallel, so only its order-zero term
-survives, and that term costs a pure dimension constant times the volume. -/
-
-/-- The `H²` jet window of the fixed self-cometric double-trace field is a
-dimension constant times the volume of `g`. -/
 private theorem dtJet (g : SmoothRiemannianMetric I M) (p : ℕ) :
     (∑ j ∈ Finset.range 3,
       ‖iteratedCovGrad (I := I) g (p + 2) p j
@@ -303,15 +262,7 @@ private theorem dtJet (g : SmoothRiemannianMetric I M) (p : ℕ) :
   simpa using h0
 
 set_option maxHeartbeats 1600000 in
-/-- **Dimension-three class-first pure-trace Lipschitz estimate.**
 
-One positive `H²` radius and one Lipschitz coefficient work for every metric in
-the order-three class: on the common ball, the moving cometric double traces at
-passenger ranks two and four are Lipschitz, in their first three covariant `L²`
-jets, in the `H²` distance of the two perturbations.
-
-This is the class-uniform sibling of the metricwise `trace24_h2_lip`.  All of
-its constants are selected from `(gBase, Λ)` before the class metric varies. -/
 theorem trace24_h2_lip_unif
     (hDim : Module.finrank ℝ E = 3)
     (gBase : SmoothRiemannianMetric I M)
@@ -391,7 +342,7 @@ theorem trace24_h2_lip_unif
     endoSlotZeroCcTensor (I := I) (M := M) g 3 dEndo
   let D₄ : SmoothCcTensor g 6 6 :=
     endoSlotZeroCcTensor (I := I) (M := M) g 5 dEndo
-  -- the fixed field's jet window, uniform in the class
+
   have hF₂ : (∑ j ∈ Finset.range 3,
       ‖iteratedCovGrad (I := I) g 4 2 j F₂‖ ^ 2) ≤ A₂ ^ 2 := by
     rw [hA₂sq]
@@ -404,7 +355,7 @@ theorem trace24_h2_lip_unif
     refine (dtJet (I := I) (M := M) g 4).trans ?_
     have hfr : (0 : ℝ) ≤ (Module.finrank ℝ E : ℝ) ^ (4 + 6) := by positivity
     exact mul_le_mul_of_nonneg_left hvolg hfr
-  -- the inverse-metric coefficient difference, through the class entry node
+
   have hslot1 :
       endoSlotZeroCcTensor (I := I) (M := M) g 1 dEndo =
         gInvDiffSlotCoeff (I := I) g gT -
@@ -457,7 +408,7 @@ theorem trace24_h2_lip_unif
       _ ≤ 81 * (Cinv * N) ^ 2 :=
         mul_le_mul_of_nonneg_left hinvJet (by norm_num)
       _ = (9 * Cinv * N) ^ 2 := by ring
-  -- the moving trace difference is the fixed field applied to the difference
+
   have htrace₂ :
       pureTrace (I := I) (M := M) g gT 2 -
           pureTrace (I := I) (M := M) g gU 2 =
@@ -532,24 +483,11 @@ theorem trace24_h2_lip_unif
   · exact pow_le_pow_left₀ (mul_nonneg hK₄ hN)
       (mul_le_mul_of_nonneg_right (le_add_of_nonneg_left hK₂) hN) 2
 
-/-! ### The double-trace pair split and the jet-window algebra
-
-`lieCovPair g gm` is the operator-field product of the two moving double traces
-at passenger ranks two and four (`LowBaseInternal.pairTrace_eq`), so a pair
-difference splits into two products, each carrying exactly one trace difference.
-Besides the range-three jet-window algebra, the only extra input is the
-DIAGONAL window `pureTrace g g p`, and that field is the fixed parallel one the
-previous section already bounds. -/
-
 omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] [SigmaCompactSpace M] in
-/-- The frozen-metric double trace IS the fixed self-cometric double-trace
-field: both sections are the fibre `cometricDoubleTraceFib g p`. -/
 private theorem ptSelf (g : SmoothRiemannianMetric I M) (p : ℕ) :
     pureTrace (I := I) (M := M) g g p =
       DeTurck.cometricDoubleTraceField (I := I) g p := rfl
 
-/-- The diagonal double-trace window is a pure dimension constant times the
-class volume: no perturbation and no metric-class jet enters. -/
 private theorem ptDiag (gBase g : SmoothRiemannianMetric I M) {Λ : ℝ}
     (hEq : MetricUniformEquivalentOn (I := I) Set.univ gBase g Λ) (p : ℕ) :
     (∑ j ∈ Finset.range 3,
@@ -565,7 +503,6 @@ private theorem ptDiag (gBase g : SmoothRiemannianMetric I M) {Λ : ℝ}
     (pow_nonneg (Nat.cast_nonneg _) (p + 6))
 
 omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] in
-/-- Range-three subadditivity of the squared covariant jet window. -/
 private theorem jetAdd (g : SmoothRiemannianMetric I M) {r s : ℕ}
     (A B : SmoothCcTensor g r s) :
     (∑ j ∈ Finset.range 3,
@@ -600,8 +537,6 @@ private theorem jetAdd (g : SmoothRiemannianMetric I M) {r s : ℕ}
           ‖iteratedCovGrad (I := I) g r s j B‖ ^ 2) := by
       simp only [mul_add, Finset.sum_add_distrib, Finset.mul_sum]
 
-/-- An absolute jet window from a difference window against a reference and the
-reference's own window. -/
 private theorem jetAbs (g : SmoothRiemannianMetric I M) {r s : ℕ}
     (A B : SmoothCcTensor g r s) {d b : ℝ}
     (hd : (∑ j ∈ Finset.range 3,
@@ -625,7 +560,6 @@ private theorem jetAbs (g : SmoothRiemannianMetric I M) {r s : ℕ}
     _ ≤ 2 * (d + b) :=
       mul_le_mul_of_nonneg_left (add_le_add hd hb) (by norm_num)
 
-/-- The double-trace pair difference splits into two one-difference products. -/
 private theorem pairSplit (g gT gU : SmoothRiemannianMetric I M) :
     lieCovPair (I := I) (M := M) g gT -
         lieCovPair (I := I) (M := M) g gU =
@@ -643,7 +577,7 @@ private theorem pairSplit (g gT gU : SmoothRiemannianMetric I M) :
   abel
 
 omit [BoundarylessManifold I M] in
-/-- The zero perturbation ties `g` to itself. -/
+
 private theorem zeroTie (g : SmoothRiemannianMetric I M)
     (y : M) (v w : TangentSpace I y) :
     g.inner y v w =
@@ -654,7 +588,6 @@ private theorem zeroTie (g : SmoothRiemannianMetric I M)
     ccTensorBilinSymm_smul]
   ring
 
-/-- The zero perturbation has zero spectral radius. -/
 private theorem zeroHs (g : SmoothRiemannianMetric I M) :
     ccTensorToHs (I := I) (M := M) g 2 (2 : ℝ)
       (0 : SmoothCcTensor g 0 2) = 0 := by
@@ -662,12 +595,6 @@ private theorem zeroHs (g : SmoothRiemannianMetric I M) :
       (0 : ℝ) • (0 : SmoothCcTensor g 0 2) from (zero_smul ℝ _).symm,
     ccTensorToHs_smul, zero_smul]
 
-/-- **Absolute size of the two moving double traces.**
-
-Reading a class pure-trace Lipschitz estimate against the zero perturbation
-turns its difference window into an absolute window, and the remaining diagonal
-term is the pure dimension/volume constant of `ptDiag`.  Both passenger ranks
-are produced at once because both come from the same reading. -/
 private theorem movWin (gBase g gm : SmoothRiemannianMetric I M) {Λ ρ Ct : ℝ}
     (hEq : MetricUniformEquivalentOn (I := I) Set.univ gBase g Λ)
     (hρ : 0 < ρ) (hCt : 0 ≤ Ct)
@@ -731,15 +658,6 @@ private theorem movWin (gBase g gm : SmoothRiemannianMetric I M) {Λ ρ Ct : ℝ
     jetAbs (I := I) (M := M) g _ _ (hcut _ h₄)
       (ptDiag (I := I) (M := M) gBase g hEq 4)⟩
 
-/-- **Dimension-three class-first double-trace pair Lipschitz estimate.**
-
-One positive `H²` radius and one Lipschitz coefficient work for every metric in
-the order-three class: on the common ball, the moving pair contraction
-`lieCovPair g gm` of the two double traces is Lipschitz, in its first three
-covariant `L²` jets, in the `H²` distance of the two perturbations.
-
-This is the class-uniform sibling of the metricwise `pairTrace_h2_lip`.  All of
-its constants are selected from `(gBase, Λ)` before the class metric varies. -/
 theorem pairTrace_h2_lip_unif
     (hDim : Module.finrank ℝ E = 3)
     (gBase : SmoothRiemannianMetric I M)
@@ -809,7 +727,7 @@ theorem pairTrace_h2_lip_unif
   have hjet2 := hjet 2 (by norm_num)
   let N : ℝ := ‖ccTensorToHs (I := I) (M := M) g 2 (2 : ℝ) (T - U)‖
   have hN : 0 ≤ N := norm_nonneg _
-  -- the moving traces, at absolute size, from the class Lipschitz node
+
   have hmov : ∀ (P : SmoothCcTensor g 0 2)
       (gm : SmoothRiemannianMetric I M),
       (∀ (y : M) (v w : TangentSpace I y),
@@ -868,17 +786,6 @@ theorem pairTrace_h2_lip_unif
       mul_nonneg (mul_nonneg hK₁ hN) (mul_nonneg hK₂ hN)]
   exact hfin.trans hend
 
-/-- **Dimension-three class-first double-trace pair bound.**
-
-One positive `H²` radius and one absolute size work for every metric in the
-order-three class: on the common ball, the moving pair contraction
-`lieCovPair g gT` of the two double traces has uniformly bounded first three
-covariant `L²` jets.
-
-This is the class-uniform sibling of the metricwise `pairTrace_h2_bdd`.  It
-does not read the Lipschitz estimate at the pair `(T, 0)`; instead the
-transparent factorization of `lieCovPair` is bounded factor by factor, each
-factor at absolute size from `movWin`. -/
 theorem pairTr_h2_bdd_unif
     (hDim : Module.finrank ℝ E = 3)
     (gBase : SmoothRiemannianMetric I M)
@@ -954,18 +861,6 @@ theorem pairTr_h2_bdd_unif
   dsimp only [B]
   exact happ g hEq hjet1 hjet2 _ _ B₂ B₄ hB₂ hB₄ hT₂ hT₄
 
-/-! ### The curvature-refold monomial split and its scalar tail
-
-`curvMono_eq` reads one curvature-refold monomial as the two-factor operator
-application `ccOperatorFieldComp g 4 6 2 (lieCovPair g gm) (monoExt g 0 2 4 (monoPerm σ) S)`:
-the moving factor is exactly the double-trace pair the previous section bounds,
-and the passenger factor is the perturbation read at extra width four.  So a
-monomial DIFFERENCE splits, like `pairSplit`, into two products each carrying
-exactly one difference, and the remaining work is scalar. -/
-
-/-- The curvature-refold monomial difference splits into two one-difference
-products: one carries the pair difference, the other the passenger
-difference. -/
 private theorem monoSplit (g gT gU : SmoothRiemannianMetric I M)
     (S R : SmoothCcTensor g 0 2) (σ : Equiv.Perm (Fin 4)) :
     curvatureRefoldMonomialCoeffField (I := I) (M := M) g gT
@@ -998,8 +893,6 @@ private theorem monoSplit (g gT gU : SmoothRiemannianMetric I M)
     appCcRS_sub_left, appCcRS_sub_right]
   abel
 
-/-- The scalar tail of a two-arm estimate: two one-sided products are jointly
-dominated by the product of the summed coefficient and the summed radius. -/
 private theorem twoArm {K₁ K₂ x y : ℝ}
     (hK₁ : 0 ≤ K₁) (hK₂ : 0 ≤ K₂) (hx : 0 ≤ x) (hy : 0 ≤ y) :
     2 * ((K₁ * x) ^ 2 + (K₂ * y) ^ 2) ≤ (2 * (K₁ + K₂) * (x + y)) ^ 2 := by
@@ -1024,20 +917,6 @@ private theorem twoArm {K₁ K₂ x y : ℝ}
       mul_le_mul_of_nonneg_left (add_le_add hs₁ hs₂) (by norm_num)
     _ = (2 * (K₁ + K₂) * (x + y)) ^ 2 := by ring
 
-/-- **Dimension-three class-first curvature-refold monomial Lipschitz
-estimate.**
-
-One positive `H²` radius and one Lipschitz coefficient work for every metric in
-the order-three class: on the common ball, a curvature-refold monomial is
-jointly Lipschitz — in its first three covariant `L²` jets — in the `H²`
-distance of the two perturbations `T`, `U` and in the jet distance of the two
-passengers `S`, `R`, at passenger size `A` and passenger distance `D`.
-
-This is the class-uniform sibling of the metricwise `curvMono_h2_lip`.  Its
-route is the metricwise one, with the private slot/permutation jet layer
-replaced by the public generic `monoExt` API and the two double-trace inputs
-replaced by their class-first siblings.  All constants are selected from
-`(gBase, Λ)` before the class metric varies. -/
 theorem curvMono_h2_lip_unif
     (hDim : Module.finrank ℝ E = 3)
     (gBase : SmoothRiemannianMetric I M)
@@ -1205,14 +1084,6 @@ theorem curvMono_h2_lip_unif
       dsimp only [C]
       exact twoArm hK₁ hK₂ (mul_nonneg hA hN) hD
 
-/-- **Dimension-three class-first curvature-refold monomial pair bound.**
-
-The diagonal specialization of `curvMono_h2_lip_unif`: read at the zero
-perturbation, the frozen monomial is Lipschitz in the passenger jet distance
-alone, uniformly over the order-three metric class.  The passenger size is
-supplied by the passenger itself, so no radius survives.
-
-This is the class-uniform sibling of the metricwise `curv_pair_h2`. -/
 theorem curv_pair_h2_unif
     (hDim : Module.finrank ℝ E = 3)
     (gBase : SmoothRiemannianMetric I M)

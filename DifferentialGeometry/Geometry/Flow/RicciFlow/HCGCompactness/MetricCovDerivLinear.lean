@@ -6,29 +6,6 @@ import DifferentialGeometry.Geometry.Curvature.CurvatureOperator.RicciConnDiffPa
 set_option autoImplicit false
 set_option backward.isDefEq.respectTransparency false
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 noncomputable section
 
 namespace DifferentialGeometry
@@ -61,7 +38,6 @@ noncomputable def covDerivOfField
         simpa [Nat.add_assoc, Nat.add_comm, Nat.add_left_comm] using
           metricCovDerivStep (I := I) gRef a A)
 
-
 omit [SigmaCompactSpace M] in
 theorem covDerivOfField_succ
     (gRef : SmoothRiemannianMetric I M)
@@ -73,15 +49,12 @@ theorem covDerivOfField_succ
       = metricCovDerivStep (I := I) gRef a (covDerivOfField (I := I) gRef A0 a) :=
   rfl
 
-
 omit [SigmaCompactSpace M] in
 theorem metricCovDeriv_succ
     (h gRef : SmoothRiemannianMetric I M) (a : Nat) :
     metricCovDeriv (I := I) h gRef (a + 1)
       = metricCovDerivStep (I := I) gRef a (metricCovDeriv (I := I) h gRef a) :=
   rfl
-
-
 
 omit [SigmaCompactSpace M] in
 theorem metricCovDeriv_eq_covDerivOfField
@@ -90,8 +63,6 @@ theorem metricCovDeriv_eq_covDerivOfField
       = covDerivOfField (I := I) gRef
           (Tensor0SBundle.metricTensorField (I := I) h) a :=
   rfl
-
-
 
 omit [SigmaCompactSpace M] in
 theorem metricCovDerivStep_apply
@@ -105,12 +76,6 @@ theorem metricCovDerivStep_apply
           (I := I) (M := M) (a + 2)
           (leviCivitaConnectionOfMetric (I := I) gRef) A x :=
   rfl
-
-
-
-
-
-
 
 omit [SigmaCompactSpace M] in
 theorem metricCovDeriv_succ_eval_smooth_slots_gen
@@ -137,7 +102,6 @@ theorem metricCovDeriv_succ_eval_smooth_slots_gen
     (leviCivitaConnectionOfMetric (I := I) gRef) X V
     (metricCovDeriv (I := I) h gRef a) x
 
-
 omit [SigmaCompactSpace M] in
 theorem metricCovDerivStep_smul
     (gRef : SmoothRiemannianMetric I M) (c : Real) (a : Nat)
@@ -149,7 +113,6 @@ theorem metricCovDerivStep_smul
   refine DFunLike.ext _ _ (fun x => ?_)
   rw [metricCovDerivStep_apply, ContMDiffSection.coe_smul, Pi.smul_apply,
     metricCovDerivStep_apply, Tensor0SBundle.totalNabla0SFun_smul]
-
 
 omit [SigmaCompactSpace M] in
 theorem covDerivOfField_smul
@@ -165,7 +128,6 @@ theorem covDerivOfField_smul
   | succ n ih =>
       rw [covDerivOfField_succ, covDerivOfField_succ, ih, metricCovDerivStep_smul]
 
-
 omit [SigmaCompactSpace M] in
 theorem metricCovDerivStep_add
     (gRef : SmoothRiemannianMetric I M) (a : Nat)
@@ -178,7 +140,6 @@ theorem metricCovDerivStep_add
   rw [metricCovDerivStep_apply, ContMDiffSection.coe_add, Pi.add_apply,
     metricCovDerivStep_apply, metricCovDerivStep_apply,
     Tensor0SBundle.totalNabla0SFun_add]
-
 
 omit [SigmaCompactSpace M] in
 theorem covDerivOfField_add
@@ -195,8 +156,6 @@ theorem covDerivOfField_add
       rw [covDerivOfField_succ, covDerivOfField_succ, covDerivOfField_succ, ih,
         metricCovDerivStep_add]
 
-
-
 omit [SigmaCompactSpace M] in
 theorem covDerivOfField_sub
     (gRef : SmoothRiemannianMetric I M)
@@ -208,11 +167,6 @@ theorem covDerivOfField_sub
       = covDerivOfField (I := I) gRef A0 a - covDerivOfField (I := I) gRef B0 a := by
   rw [sub_eq_add_neg, covDerivOfField_add, ← neg_one_smul Real B0,
     covDerivOfField_smul, neg_one_smul, ← sub_eq_add_neg]
-
-
-
-
-
 
 noncomputable def covStep
     (gRef : SmoothRiemannianMetric I M) (s : Nat)
@@ -244,7 +198,6 @@ noncomputable def covStep
     Tensor0SBundle.totalNabla0S (𝕜 := Real) (E := E) (H := H)
       (I := I) (M := M) s cov A hreg
 
-
 omit [SigmaCompactSpace M] in
 @[simp] theorem covStep_apply
     (gRef : SmoothRiemannianMetric I M) (s : Nat)
@@ -256,7 +209,6 @@ omit [SigmaCompactSpace M] in
           (DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric (I := I) gRef)
           A x :=
   rfl
-
 
 omit [SigmaCompactSpace M] in
 theorem covStep_add
@@ -270,7 +222,6 @@ theorem covStep_add
     covStep_apply, covStep_apply, Tensor0SBundle.totalNabla0SFun_add]
 
 omit [SigmaCompactSpace M] in
-/-- `covStep` is scalar-homogeneous in the tensor field. -/
 theorem covStep_smul
     (gRef : SmoothRiemannianMetric I M) (c : Real) (s : Nat)
     (A : Tensor0SBundle.Tensor0SField (𝕜 := Real) (E := E) (H := H)
@@ -282,9 +233,6 @@ theorem covStep_smul
     covStep_apply, Tensor0SBundle.totalNabla0SFun_smul]
 
 omit [SigmaCompactSpace M] in
-/-- `covStep` preserves differences in the tensor field (additivity plus
-`(-1)`-homogeneity).  This is the linearity fact behind the connection-difference
-splitting `covStep g₂ (∇^{g₁}S − ∇^{g₂}S)`. -/
 theorem covStep_sub
     (gRef : SmoothRiemannianMetric I M) (s : Nat)
     (A B : Tensor0SBundle.Tensor0SField (𝕜 := Real) (E := E) (H := H)
@@ -295,11 +243,6 @@ theorem covStep_sub
     covStep_smul, neg_one_smul, ← sub_eq_add_neg]
 
 omit [SigmaCompactSpace M] in
-/-- **Boundaryless-free smooth-slot recursion for one `covStep`** (generic rank).
-The `covStep` analogue of `metricCovDeriv_succ_eval_smooth_slots_gen`: evaluating
-`covStep g₂ r A` on `Fin.cons (X x) (V · x)` gives the leading scalar directional
-derivative of `y ↦ A y (V · y)` minus the Levi-Civita connection corrections in the
-non-leading slots.  This is the outer expansion gate for the base-Leibniz identity. -/
 theorem covStep_eval_smooth_slots
     (g₂ : SmoothRiemannianMetric I M) (r : Nat)
     (A : Tensor0SBundle.Tensor0SField (𝕜 := Real) (E := E) (H := H)
@@ -332,10 +275,6 @@ theorem covStep_eval_smooth_slots
     (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
     (leviCivitaConnectionOfMetric (I := I) g₂) X V A x
 
-/-- The `a`-fold background covariant derivative (Levi-Civita of `gRef`) of an
-arbitrary-rank covariant tensor field `A0`.  This is the book's `∇^a` on tensors
-of any valence; `covDerivOfField gRef A0 a = iterCov gRef 2 A0 a` for `(0,2)`
-fields. -/
 noncomputable def iterCov
     (gRef : SmoothRiemannianMetric I M) (r : Nat)
     (A0 : Tensor0SBundle.Tensor0SField (𝕜 := Real) (E := E) (H := H)
@@ -344,7 +283,6 @@ noncomputable def iterCov
       Tensor0SBundle.Tensor0SField (𝕜 := Real) (E := E) (H := H)
         (I := I) (M := M) (n := (∞ : WithTop ℕ∞)) (r + a) :=
   Nat.rec A0 (fun a A => covStep (I := I) gRef (r + a) A)
-
 
 omit [SigmaCompactSpace M] in
 theorem iterCov_succ
@@ -355,7 +293,6 @@ theorem iterCov_succ
     iterCov (I := I) gRef r A0 (a + 1)
       = covStep (I := I) gRef (r + a) (iterCov (I := I) gRef r A0 a) :=
   rfl
-
 
 omit [SigmaCompactSpace M] in
 theorem iterCov_add
@@ -370,10 +307,6 @@ theorem iterCov_add
   | succ n ih =>
       rw [iterCov_succ, iterCov_succ, iterCov_succ, ih, covStep_add]
 
-
-
-
-
 noncomputable def diffStep
     (g₁ g₂ : SmoothRiemannianMetric I M) (s : Nat)
     (S : Tensor0SBundle.Tensor0SField (𝕜 := Real) (E := E) (H := H)
@@ -383,19 +316,6 @@ noncomputable def diffStep
   covStep (I := I) g₁ s S - covStep (I := I) g₂ s S
 
 omit [SigmaCompactSpace M] in
-/-- **Generic-rank evaluation of the connection-difference step** (`diffStep_apply`).
-
-Contracting the single-step connection difference `diffStep g₁ g₂ s S = ∇^{g₁}S − ∇^{g₂}S`
-against a smooth vector field `X` in the leading (derivative) slot and smooth vector fields
-`V` in the remaining `s` slots gives the tensorial Christoffel-difference slot sum: the
-derivative parts cancel and only `Γ₁ − Γ₂ = CovariantDerivative.difference (LC g₁) (LC g₂)`
-survives, inserted into each lower slot.  This is the generic-`(0,s)` lift of
-`Tensor0SBundle.nabla0SFun_sub_cov` to the bundled tensor field, evaluated where the
-tensor-bundle model instances at rank `s+1` are in scope (this file carries
-`backward.isDefEq.respectTransparency false`, which lets `totalNabla0SFun_apply_section`
-elaborate at the variable rank `s+1`).  It is the evaluation gate of brick T's norm layer:
-the norm atom bounding `normSq0S (diffStep g₁ g₂ s S x)` expands the fibre norm through this
-identity. -/
 theorem diffStep_apply
     (g₁ g₂ : SmoothRiemannianMetric I M) (s : Nat)
     (S : Tensor0SBundle.Tensor0SField (𝕜 := Real) (E := E) (H := H)
@@ -439,16 +359,6 @@ theorem diffStep_apply
     (leviCivitaConnectionOfMetric (I := I) g₂) X V S x
 
 omit [SigmaCompactSpace M] in
-/-- **Pointwise evaluation of the connection-difference step on arbitrary tangent vectors.**
-
-The pointwise companion of `diffStep_apply`: it drops the smooth-section hypotheses, evaluating
-`diffStep g₁ g₂ s S x` on any leading (derivative-slot) vector `v` and any lower-slot tuple
-`slots`.  Every tangent vector at `x` is the value of a global smooth vector field
-(`Geometry.Riemannian.exists_contMDiff_vectorField_eq`, needing `[T2Space M]`), and the
-Christoffel-difference slot sum on the right depends only on those values, so the
-section-level identity `diffStep_apply` transfers verbatim.  This is the form consumed by the
-component / fibre-norm expansion of `normSq0S (diffStep g₁ g₂ s S x)`: each `component0S` is an
-evaluation of `diffStep g₁ g₂ s S x` on a tuple of basis vectors. -/
 theorem diffStep_eval
     (g₁ g₂ : SmoothRiemannianMetric I M) (s : Nat)
     (S : Tensor0SBundle.Tensor0SField (𝕜 := Real) (E := E) (H := H)
@@ -472,10 +382,6 @@ theorem diffStep_eval
   simp only [ContMDiffSection.coeFn_mk, hXv, hVv] at key
   exact key
 
-/-- The telescoping accumulator `Σ_{i=1}^{N} ∇₁^{N−i}(∇₁−∇₂)∇₂^{i−1}T`, built
-recursively so the rank is `r + N` at every stage with no index casts.  The
-recursion `accum (N+1) = ∇₁(accum N) + (∇₁−∇₂)∇₂ᴺT` increments the outer
-`∇₁`-power on every existing term and appends the new innermost term. -/
 noncomputable def telescAccum
     (g₁ g₂ : SmoothRiemannianMetric I M) (r : Nat)
     (T : Tensor0SBundle.Tensor0SField (𝕜 := Real) (E := E) (H := H)
@@ -487,9 +393,6 @@ noncomputable def telescAccum
   | (N + 1) =>
       covStep (I := I) g₁ (r + N) (telescAccum g₁ g₂ r T N)
         + diffStep (I := I) g₁ g₂ (r + N) (iterCov (I := I) g₂ r T N)
-
-
-
 
 omit [SigmaCompactSpace M] in
 theorem iterCov_telescoping
@@ -507,26 +410,6 @@ theorem iterCov_telescoping
       abel
 
 omit [SigmaCompactSpace M] in
-/-- **The base-connection Leibniz split of the connection-difference step**
-(brick T-B, committed-currency form).  Differentiating the single-step connection
-difference `diffStep g₁ g₂ s S = ∇^{g₁}S − ∇^{g₂}S` once more with the *base*
-connection `∇^{g₂}` splits, by the tensor-derivation (product) rule
-`∇^{g₂}(A ⋆ S) = (∇^{g₂}A) ⋆ S + A ⋆ (∇^{g₂}S)` where
-`A = Γ₁ − Γ₂ = connectionDifferenceTensorAt (LC g₁)(LC g₂)`, into
-
-* the **`A ⋆ (∇^{g₂}S)` term**, realized in committed currency as the connection
-  difference of the base derivative `diffStep g₁ g₂ (s+1) (covStep g₂ s S)`, and
-* the **`(∇^{g₂}A) ⋆ S` term**, realized as the *mixed second-derivative
-  commutator* `∇^{g₂}∇^{g₁}S − ∇^{g₁}∇^{g₂}S = covStep g₂ (covStep g₁ S)
-  − covStep g₁ (covStep g₂ S)` (whose second-order-in-`S` symbols cancel, leaving
-  a first-order-in-`S`, one-more-jet-of-`A` object).
-
-The identity itself is pure operator algebra (`covStep` additivity and the
-`diffStep` definition); it does not require materialising `∇^{g₂}A` as a mixed
-`(1,3)` tensor.  It is the algebraic backbone of the all-`∇^{g₂}` telescoping
-schematic: the first term feeds directly into the base-derivative norm recursion
-(bounded by `diffStep_jet_one_le` applied to `covStep g₂ s S`), and the mixed
-commutator isolates the single remaining jet-of-`A` frontier. -/
 theorem diffStep_leibniz
     (g₁ g₂ : SmoothRiemannianMetric I M) (s : Nat)
     (S : Tensor0SBundle.Tensor0SField (𝕜 := Real) (E := E) (H := H)
@@ -540,13 +423,6 @@ theorem diffStep_leibniz
   abel
 
 omit [SigmaCompactSpace M] in
-/-- **Base-connection splitting of one `iterCov` step.**  One further `∇^{g₁}`
-derivative of the `g₁`-iterated tower is the *base* `∇^{g₂}` derivative plus the
-single-step connection difference, both applied to `iterCov g₁ r T N`:
-`∇^{g₁} W = ∇^{g₂} W + (∇^{g₁} − ∇^{g₂}) W`.  This is the recursion driver for the
-all-`∇^{g₂}` telescoping norm bound: it rewrites the outer `g₁`-derivative of
-`iterCov_succ` into a base derivative (to be pushed inward by `diffStep_leibniz`)
-plus a connection-difference term (bounded pointwise by `diffStep_jet_one_le`). -/
 theorem iterCov_succ_diffStep
     (g₁ g₂ : SmoothRiemannianMetric I M) (r : Nat)
     (T : Tensor0SBundle.Tensor0SField (𝕜 := Real) (E := E) (H := H)
@@ -560,20 +436,6 @@ theorem iterCov_succ_diffStep
   abel
 
 omit [SigmaCompactSpace M] in
-/-- **The eval-form base-connection Leibniz for the connection-difference step**
-(brick T-B, the mixed-commutator/`∇₂A` insertion identity).  Evaluating one further
-*base* covariant derivative `∇^{g₂}` of the single-step connection difference
-`diffStep g₁ g₂ s S = ∇^{g₁}S − ∇^{g₂}S` on `Fin.cons w (Fin.cons v slots)` realises
-the standard tensor derivation `∇₂(A ⋆ S) = (∇₂A) ⋆ S + A ⋆ (∇₂S)`, where
-`A = Γ₁ − Γ₂ = CovariantDerivative.difference (LC g₁)(LC g₂)`:
-
-* the **`(∇₂A) ⋆ S` term** is the `covDerivConnDiff`-insertion sum (the directional
-  covariant derivative of the connection-difference tensor, `= covDerivDiff (LC g₂)(LC g₁)`),
-  materialising `∇₂A` at the eval level without a bundled `(1,2)` field, and
-* the **`A ⋆ (∇₂S)` term** is the `A`-insertion (direction `v`) applied to the base
-  derivative `∇₂_w S = covStep g₂ s S x (Fin.cons w ·)`.
-
-This is the eval identity feeding `mixedComm_norm_le`. -/
 theorem diffStep_leibniz_eval
     (g₁ g₂ : SmoothRiemannianMetric I M) (s : Nat)
     (S : Tensor0SBundle.Tensor0SField (𝕜 := Real) (E := E) (H := H)

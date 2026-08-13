@@ -5,15 +5,6 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.C4.PointedEme
 set_option autoImplicit false
 set_option linter.unusedSectionVars false
 
-/-!
-# Curvature-jet terms for the intrinsic H6 recursion
-
-This file gives the finite recursive term language used to normalize repeated
-launch derivatives of the intrinsic Jacobi forcing. Curvature nodes may contain
-other curvature terms in their slots, which is needed after commuting launch
-and time derivatives.
--/
-
 noncomputable section
 
 open Bundle
@@ -26,8 +17,6 @@ open scoped Bundle Manifold ContDiff ENNReal Topology
 namespace DifferentialGeometry
 namespace HCGCompactness
 
-/-- The five intrinsic jet families, together with the path acceleration leaf
-that vanishes on every geodesic slice. -/
 inductive IntrJetAtom
   | pathT
   | pathDt
@@ -36,8 +25,6 @@ inductive IntrJetAtom
   | bJet (n : Nat)
   | bTime (n : Nat)
 
-/-- Recursive expressions built from intrinsic launch jets and covariant
-curvature derivatives. -/
 inductive CurvJetTerm
   | zero
   | atom (a : IntrJetAtom)
@@ -55,8 +42,6 @@ private def slots3 (x y z : CurvJetTerm) : Fin 3 -> CurvJetTerm :=
 private def slots4 (w x y z : CurvJetTerm) : Fin 4 -> CurvJetTerm :=
   Fin.cons w (slots3 x y z)
 
-/-- The seven curvature terms in the one-step Jacobi correction at launch order
-`n`, before any further launch differentiation. -/
 def intrCorrTerm (n : Nat) : CurvJetTerm :=
   let T := CurvJetTerm.atom IntrJetAtom.pathT
   let dT := CurvJetTerm.atom IntrJetAtom.pathDt
@@ -72,14 +57,11 @@ def intrCorrTerm (n : Nat) : CurvJetTerm :=
     CurvJetTerm.curv 0 (slots3 B dA T) +
     CurvJetTerm.curv 0 (slots3 B T dA)
 
-/-- Fixed-order syntax tree for a finite sum. The order is part of the
-expression; no commutative-monoid laws are imposed on `CurvJetTerm`. -/
 def CurvJetTerm.finSum : {n : Nat} -> (Fin n -> CurvJetTerm) -> CurvJetTerm
   | 0, _ => 0
   | _ + 1, terms =>
       terms 0 + CurvJetTerm.finSum (fun i => terms i.succ)
 
-/-- One formal covariant derivative in the first launch parameter. -/
 def CurvJetTerm.launchDeriv : CurvJetTerm -> CurvJetTerm
   | .zero => 0
   | .atom .pathT => .atom (.aTime 0)
@@ -101,21 +83,16 @@ def CurvJetTerm.launchDeriv : CurvJetTerm -> CurvJetTerm
         CurvJetTerm.finSum (fun i =>
           .curv k (Function.update slots i (slots i).launchDeriv))
 
-/-- Iterate formal covariant differentiation in the first launch parameter. -/
 def CurvJetTerm.launchIter : Nat -> CurvJetTerm -> CurvJetTerm
   | 0, term => term
   | n + 1, term => (term.launchIter n).launchDeriv
 
-/-- Recursive curvature-jet expression for the Jacobi residual of the
-`n`th intrinsic launch jet. -/
 def intrResidualTerm : Nat -> CurvJetTerm
   | 0 => 0
   | n + 1 =>
       (intrResidualTerm n).launchDeriv +
         (-1 : Real) • intrCorrTerm n
 
-/-- Scalar majorant obtained by assigning bounds to curvature orders and jet
-leaves, then following the recursive algebra of a curvature-jet term. -/
 def CurvJetTerm.majorant
     (C : Nat -> Real) (B : IntrJetAtom -> Real) : CurvJetTerm -> Real
   | .zero => 0
@@ -124,7 +101,6 @@ def CurvJetTerm.majorant
   | .scale c x => |c| * x.majorant C B
   | .curv k slots => C k * ∏ i, (slots i).majorant C B
 
-/-- Nonnegative curvature and leaf bounds give a nonnegative term majorant. -/
 theorem CurvJetTerm.majorant_nonneg
     (C : Nat -> Real) (B : IntrJetAtom -> Real)
     (hC : forall k, 0 <= C k) (hB : forall atom, 0 <= B atom) :
@@ -142,7 +118,6 @@ theorem CurvJetTerm.majorant_nonneg
   | curv k slots ih =>
       exact mul_nonneg (hC k) (Finset.prod_nonneg fun i _ => ih i)
 
-/-- Every atom occurring in a recursive curvature-jet term satisfies `P`. -/
 def CurvJetTerm.AllAtoms : CurvJetTerm -> (IntrJetAtom -> Prop) -> Prop
   | CurvJetTerm.zero, _ => True
   | CurvJetTerm.atom leaf, P => P leaf
@@ -150,8 +125,6 @@ def CurvJetTerm.AllAtoms : CurvJetTerm -> (IntrJetAtom -> Prop) -> Prop
   | CurvJetTerm.scale _ x, P => x.AllAtoms P
   | CurvJetTerm.curv _ slots, P => forall i, (slots i).AllAtoms P
 
-/-- A jet atom has parameter order at most `n`; path atoms are present at every
-order. -/
 def IntrJetAtom.AtMost : IntrJetAtom -> Nat -> Prop
   | .pathT, _ => True
   | .pathDt, _ => True
@@ -160,7 +133,6 @@ def IntrJetAtom.AtMost : IntrJetAtom -> Nat -> Prop
   | .bJet k, n => k <= n
   | .bTime k, n => k <= n
 
-/-- Increasing the permitted order preserves atom admissibility. -/
 theorem IntrJetAtom.atMost_mono
     {atom : IntrJetAtom} {m n : Nat} (hmn : m <= n) :
     atom.AtMost m -> atom.AtMost n := by
@@ -184,7 +156,6 @@ theorem IntrJetAtom.atMost_mono
       intro hk
       exact hk.trans hmn
 
-/-- `AllAtoms` is monotone in its atom predicate. -/
 theorem CurvJetTerm.allAtoms_mono
     {P Q : IntrJetAtom -> Prop}
     (hPQ : forall atom, P atom -> Q atom) :
@@ -207,7 +178,6 @@ theorem CurvJetTerm.allAtoms_mono
       intro hterm i
       exact ih i (hterm i)
 
-/-- A fixed finite sum satisfies an atom predicate when every summand does. -/
 theorem CurvJetTerm.finSum_atoms
     {P : IntrJetAtom -> Prop} :
     forall {n : Nat} (terms : Fin n -> CurvJetTerm),
@@ -222,8 +192,6 @@ theorem CurvJetTerm.finSum_atoms
       intro terms hterms
       exact ⟨hterms 0, ih (fun i => terms i.succ) (fun i => hterms i.succ)⟩
 
-/-- One formal launch derivative raises every admitted jet order by at most
-one. -/
 theorem CurvJetTerm.launch_atoms :
     forall (term : CurvJetTerm) (n : Nat),
       term.AllAtoms (fun atom => atom.AtMost n) ->
@@ -310,8 +278,6 @@ private theorem slots4_atoms
   · exact hy
   · exact hz
 
-/-- The order-`n` Jacobi correction only contains jet leaves of order at most
-`n`. -/
 theorem intrCorrTerm_atoms (n : Nat) :
     (intrCorrTerm n).AllAtoms (fun atom => atom.AtMost n) := by
   let P : IntrJetAtom -> Prop := fun atom => atom.AtMost n
@@ -336,8 +302,6 @@ theorem intrCorrTerm_atoms (n : Nat) :
   have h7 := slots3_atoms hB hT hdA
   exact ⟨⟨⟨⟨⟨⟨h1, h2⟩, h3⟩, h4⟩, h5⟩, h6⟩, h7⟩
 
-/-- The residual for launch order `n + 1` only contains jet leaves through
-order `n`. -/
 theorem intrResidual_atoms :
     forall n : Nat,
       (intrResidualTerm (n + 1)).AllAtoms
@@ -359,7 +323,6 @@ theorem intrResidual_atoms :
         ⟨CurvJetTerm.launch_atoms (intrResidualTerm (n + 1)) n ih,
           intrCorrTerm_atoms (n + 1)⟩
 
-/-- The trivial atom predicate holds on every curvature-jet term. -/
 theorem CurvJetTerm.allAtoms_true :
     forall term : CurvJetTerm, term.AllAtoms (fun _ => True) := by
   intro term
@@ -383,7 +346,6 @@ variable [RiemannianBundle (fun x : M => TangentSpace I x)]
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-/-- Evaluate an intrinsic jet leaf over the affine launch family. -/
 noncomputable def IntrJetAtom.eval
     [PseudoEMetricSpace M]
     [IsRiemannianManifold I M] [CompleteSpace M]
@@ -415,7 +377,6 @@ noncomputable def IntrJetAtom.eval
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-/-- The geodesic acceleration leaf vanishes identically. -/
 theorem IntrJetAtom.pathDt_zero
     [PseudoEMetricSpace M]
     [IsRiemannianManifold I M] [CompleteSpace M]
@@ -453,7 +414,6 @@ theorem IntrJetAtom.pathDt_zero
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-/-- The first-launch position jet is the second-launch jet of the self-family. -/
 theorem IntrJetAtom.aJet_eq_self
     [PseudoEMetricSpace M]
     [IsRiemannianManifold I M] [CompleteSpace M]
@@ -480,7 +440,6 @@ theorem IntrJetAtom.aJet_eq_self
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-/-- The first-launch time jet is the second-launch time jet of the self-family. -/
 theorem IntrJetAtom.aTime_eq_self
     [PseudoEMetricSpace M]
     [IsRiemannianManifold I M] [CompleteSpace M]
@@ -513,7 +472,6 @@ theorem IntrJetAtom.aTime_eq_self
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-/-- Every first-launch position jet vanishes at geodesic time zero. -/
 theorem IntrJetAtom.aJet_time0
     [PseudoEMetricSpace M]
     [IsRiemannianManifold I M] [CompleteSpace M]
@@ -541,7 +499,6 @@ theorem IntrJetAtom.aJet_time0
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-/-- Every second-launch position jet vanishes at geodesic time zero. -/
 theorem IntrJetAtom.bJet_time0
     [PseudoEMetricSpace M]
     [IsRiemannianManifold I M] [CompleteSpace M]
@@ -556,8 +513,6 @@ theorem IntrJetAtom.bJet_time0
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-/-- Evaluate a recursive curvature-jet expression over the intrinsic affine
-launch family. -/
 noncomputable def CurvJetTerm.eval
     [PseudoEMetricSpace M]
     [IsRiemannianManifold I M] [CompleteSpace M]
@@ -582,8 +537,6 @@ noncomputable def CurvJetTerm.eval
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-/-- At one launch-time point, a recursive curvature-jet term is bounded by its
-scalar majorant when every atom admitted by `P` is bounded there. -/
 theorem CurvJetTerm.eval_le_at
     [PseudoEMetricSpace M]
     [IsRiemannianManifold I M] [CompleteSpace M]
@@ -705,8 +658,6 @@ theorem CurvJetTerm.eval_le_at
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-/-- A recursive curvature-jet term is bounded by its scalar majorant when the
-curvature operators and every atom admitted by `P` are uniformly bounded. -/
 theorem CurvJetTerm.eval_le_atoms
     [PseudoEMetricSpace M]
     [IsRiemannianManifold I M] [CompleteSpace M]
@@ -746,9 +697,6 @@ theorem CurvJetTerm.eval_le_atoms
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-/-- A recursive curvature-jet term is bounded by its scalar majorant whenever
-the curvature operators and the six jet-leaf families obey their assigned
-pointwise bounds. -/
 theorem CurvJetTerm.eval_le_of
     [PseudoEMetricSpace M]
     [IsRiemannianManifold I M] [CompleteSpace M]
@@ -787,9 +735,6 @@ theorem CurvJetTerm.eval_le_of
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-/-- Bounded geometry supplies the curvature-order hypotheses in
-`CurvJetTerm.eval_le_of`; only bounds for the six intrinsic jet leaves remain
-for the Jacobi recursion. -/
 theorem CurvJetTerm.eval_le_geom
     (P : PointedRiemannianManifold.{u, uE, uH} (I := I))
     (hcomplete : MetricComplete (I := I) P)
@@ -1293,7 +1238,6 @@ private theorem IntrJetAtom.covFst_time0_of_const
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-/-- The first-launch time jet of order zero has initial value `a`. -/
 theorem IntrJetAtom.aTime_zero
     [PseudoEMetricSpace M]
     [IsRiemannianManifold I M] [CompleteSpace M]
@@ -1327,7 +1271,6 @@ theorem IntrJetAtom.aTime_zero
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-/-- The second-launch time jet of order zero has initial value `b`. -/
 theorem IntrJetAtom.bTime_zero
     [PseudoEMetricSpace M]
     [IsRiemannianManifold I M] [CompleteSpace M]
@@ -1402,7 +1345,6 @@ private theorem IntrJetAtom.time_succ_zero
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-/-- Every positive-order first-launch time jet vanishes at geodesic time zero. -/
 theorem IntrJetAtom.aTime_succ_time0
     [PseudoEMetricSpace M]
     [IsRiemannianManifold I M] [CompleteSpace M]
@@ -1430,7 +1372,6 @@ theorem IntrJetAtom.aTime_succ_time0
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-/-- Every positive-order second-launch time jet vanishes at geodesic time zero. -/
 theorem IntrJetAtom.bTime_succ_time0
     [PseudoEMetricSpace M]
     [IsRiemannianManifold I M] [CompleteSpace M]
@@ -1458,8 +1399,6 @@ theorem IntrJetAtom.bTime_succ_time0
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-/-- Formal launch differentiation agrees with the intrinsic covariant
-derivative of every recursive curvature-jet expression. -/
 theorem CurvJetTerm.launchDeriv_eval
     [PseudoEMetricSpace M]
     [IsRiemannianManifold I M] [CompleteSpace M]
@@ -1665,8 +1604,6 @@ theorem CurvJetTerm.launchDeriv_eval
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-/-- Every iterated first-parameter covariant derivative is represented by the
-corresponding iterated curvature-jet term. -/
 theorem CurvJetTerm.launchIter_eval
     [PseudoEMetricSpace M]
     [IsRiemannianManifold I M] [CompleteSpace M]
@@ -1693,8 +1630,6 @@ theorem CurvJetTerm.launchIter_eval
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-/-- The intrinsic one-step Jacobi correction is exactly the evaluation of its
-seven-node curvature-jet expression. -/
 theorem intrCorrTerm_eval
     [PseudoEMetricSpace M]
     [IsRiemannianManifold I M] [CompleteSpace M]
@@ -1880,8 +1815,6 @@ theorem intrCorrTerm_eval
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-/-- The exact intrinsic Jacobi residual recurrence evaluates to the recursive
-curvature-jet expression `intrResidualTerm`. -/
 theorem intrResidualTerm_eval
     [PseudoEMetricSpace M]
     [IsRiemannianManifold I M] [CompleteSpace M]
@@ -1912,8 +1845,6 @@ theorem intrResidualTerm_eval
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-/-- Every launch derivative of the intrinsic Jacobi correction is the
-evaluation of the corresponding finite recursive curvature-jet term. -/
 theorem intrCorrIter_eval
     [PseudoEMetricSpace M]
     [IsRiemannianManifold I M] [CompleteSpace M]

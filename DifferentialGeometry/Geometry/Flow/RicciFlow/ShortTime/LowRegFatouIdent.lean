@@ -1,61 +1,6 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.LowRegAdaptedSolve
 import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.LowRegGalerkinIdent
 
-/-!
-# The rung-3 energy bound along the projected forcing sequence
-
-`lowregRung3` (`ShortTime/LowRegRungThree.lean`) bounds the `H³` Galerkin
-energy of *any* coefficient trajectory that solves the order-one `V_N` system.
-This file instantiates it at the trajectory the identification package
-`lowreg_proj_tendsto` / `lowreg_projMode_tendsto` already hands out — the mode
-coordinates
-
-  `lowregProjMode g₀ fseq N t i = perModeConv λᵢ (timeModeCoeff (fseq N) i) t`
-
-of the *projected* forcing sequence.  No ODE uniqueness is needed: the rung's
-trajectory is universally quantified, so it suffices to verify its three
-trajectory hypotheses on this concrete family.
-
-## Main results
-
-* `lowregProjMode` — the mode coordinates of the projected Duhamel field.
-* `lowregProjMode_zero`, `lowregProjMode_cont` — the rung's `hUinit`/`hUcont`.
-* `lowregFieldCombo` — the spatial identification: almost everywhere the
-  Duhamel field of `fseq N` **is** the finite spectral combination of its own
-  mode coordinates.  This is what turns the a.e. state ball into the `hc`
-  hypothesis of `galTameForce_eq`.
-* `lowregForceMode` — the a.e. per-mode forcing identity
-  `timeModeCoeff (fseq N) i =ᵐ galTameForce … (lowregProjMode …) i`.
-* `lowregForceCont` — the Galerkin forcing is continuous in time along the
-  projected mode coordinates (`tame_lip_balls` at the package's constants,
-  then `galTameForce_contOn`).
-* `lowregModeDeriv` — the rung's `hUderiv`: the per-mode scalar ODE.
-* `lowregFatouE3At` / `lowregFatouE3` — **the endpoint**: the `N`-uniform `H³`
-  energy bound along
-  the projected sequence, i.e. Fatou's `hbound`.
-* `lowregL2H3` — the time-integrated `H³` energy bound `∫₀^T E₃ ≤ ((1+T)b)²`
-  for a forcing of size `b`, which **discharges** the honest input `hL2H3` of
-  `lowregFatouE3`.
-* `lowregFatouPackAt` / `lowregFatouPack` — the exact or compatibility endpoint
-  fed from the corresponding projected-mode theorem, with `hL2H3` already
-  discharged: Fatou's `hconv` and `hbound` from one call.
-
-The a.e.-to-everywhere crossing happens once, in `lowregModeDeriv`: the forcing
-is only pinned down almost everywhere, but `perModeConv_timeL2_congr` converts
-an a.e. identity of forcings into a *pointwise* identity of convolutions on
-`[0,T]`, and `Set.IccExtend` supplies the globally continuous representative
-that `perModeConv_hasDerivAt` demands.
-
-Historically, the compatibility theorem `lowregFatouE3` exposed two honest
-inputs: the rung's absorption gate (the former GAP-ADAPTH), which stays an
-explicit hypothesis of its produced `∀ ε` statement, and the time-integrated
-energy bound `hL2H3`.  The second is **discharged** here by `lowregL2H3` — the
-projected maximal-regularity replay — so compatibility endpoint
-`lowregFatouPack` remains conditional on the gate alone.  The active exact
-endpoint `lowregFatouPackAt` consumes `IsAdaptedLowSolve`, whose stored budget
-discharges it.
--/
-
 noncomputable section
 
 open Bundle Manifold MeasureTheory Set Filter
@@ -81,15 +26,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
   [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
   [T2Space M] [SigmaCompactSpace M]
 
-/-! ## The projected mode coordinates -/
-
-/-- **The mode coordinates of the projected Duhamel field.**  For the forcing
-sequence `fseq` produced by `lowreg_proj_tendsto`, this is the eigen-coordinate
-family of the associated maximal-regularity solution: by
-`timeModeCoeff_eq_perModeConv_forcing` the `i`-th coordinate of the Duhamel
-field agrees almost everywhere with the scalar convolution
-`perModeConv λᵢ (timeModeCoeff (fseq N) i)`, and it is that convolution — a
-function defined at *every* time — which is taken as the definition. -/
 def lowregProjMode (g₀ : SmoothRiemannianMetric I M) {T : ℝ}
     (fseq : ℕ → timeL2 (tensorHs (I := I) (M := M) g₀ 0 2 ((1 : ℕ) : ℝ)) T)
     (N : ℕ) (t : ℝ) (i : TensorEigenIdx (I := I) (M := M) g₀ 0 2) : ℝ :=
@@ -97,7 +33,7 @@ def lowregProjMode (g₀ : SmoothRiemannianMetric I M) {T : ℝ}
     (fun u => (timeModeCoeff (I := I) (M := M) (fseq N) i) u) t
 
 omit [BoundarylessManifold I M] in
-/-- The projected mode coordinates start at zero: the rung's `hUinit`. -/
+
 @[simp] theorem lowregProjMode_zero (g₀ : SmoothRiemannianMetric I M) {T : ℝ}
     (fseq : ℕ → timeL2 (tensorHs (I := I) (M := M) g₀ 0 2 ((1 : ℕ) : ℝ)) T)
     (N : ℕ) (i : TensorEigenIdx (I := I) (M := M) g₀ 0 2) :
@@ -105,8 +41,7 @@ omit [BoundarylessManifold I M] in
   perModeConv_zero_left _ _
 
 omit [BoundarylessManifold I M] in
-/-- The projected mode coordinates are continuous on the closed slab: the
-rung's `hUcont`. -/
+
 theorem lowregProjMode_cont (g₀ : SmoothRiemannianMetric I M) {T : ℝ}
     (hT : 0 ≤ T)
     (fseq : ℕ → timeL2 (tensorHs (I := I) (M := M) g₀ 0 2 ((1 : ℕ) : ℝ)) T)
@@ -115,18 +50,6 @@ theorem lowregProjMode_cont (g₀ : SmoothRiemannianMetric I M) {T : ℝ}
       (Set.Icc (0 : ℝ) T) :=
   continuousOn_perModeConv_timeL2 _ _ hT
 
-/-! ## The spatial identification -/
-
-/-- **The Duhamel field is the finite spectral combination of its own mode
-coordinates.**  The forcing is a value of the truncated nonlinearity, so its
-Duhamel field is fixed by `Π_N` (`projField_fixed`); a `Π_N`-fixed state is the
-spectral combination over `eigenIdxFinset g₀ N` of its coefficients, and those
-coefficients are almost everywhere the per-mode convolutions.  Only finitely
-many coordinates are involved, so the finitely many a.e. identities intersect.
-
-This is the producer of the `hc` hypothesis of `galTameForce_eq`: an a.e. bound
-on the Duhamel field becomes an a.e. bound on `finiteEigenComboHs` of the mode
-coordinates, which is the state the Galerkin forcing evaluates. -/
 theorem lowregFieldCombo (g₀ : SmoothRiemannianMetric I M) {R T : ℝ}
     (hT : 0 < T) (hT1 : T ≤ 1) (N : ℕ)
     {Nfun : lowerState (I := I) (M := M) g₀ 1 R →
@@ -145,7 +68,7 @@ theorem lowregFieldCombo (g₀ : SmoothRiemannianMetric I M) {R T : ℝ}
   have h_compact := tensorResolventL2_isCompactOperator (I := I) (M := M) g₀ 0 2
   set fld := maxRegDuhamelSolField (I := I) (M := M) ((1 : ℕ) : ℝ) hT hT1
     (0 : tensorHs (I := I) (M := M) g₀ 0 2 (((1 : ℕ) : ℝ) + 2)) (fseq N) with hfld
-  -- the field is fixed by the spectral truncation at the gained regularity
+
   have hfix : timeL2EigenProj (I := I) (M := M) g₀ (((1 : ℕ) : ℝ) + 2) T N fld
       = fld := projField_fixed (I := I) (M := M) g₀ 1 hT hT1 N (fseq N) u hnem
   have hproj : ⇑(timeL2EigenProj (I := I) (M := M) g₀ (((1 : ℕ) : ℝ) + 2) T N fld)
@@ -156,7 +79,7 @@ theorem lowregFieldCombo (g₀ : SmoothRiemannianMetric I M) {R T : ℝ}
       spatialEigenProj (I := I) (M := M) g₀ (((1 : ℕ) : ℝ) + 2) N (fld t) := by
     rw [hfix] at hproj
     exact hproj
-  -- the finitely many coordinate identities
+
   have hmodes : ∀ᵐ t ∂(timeMeasure T),
       ∀ i ∈ eigenIdxFinset (I := I) (M := M) g₀ N,
         (fld t).coeff i = lowregProjMode (I := I) (M := M) g₀ fseq N t i := by
@@ -171,15 +94,6 @@ theorem lowregFieldCombo (g₀ : SmoothRiemannianMetric I M) {R T : ℝ}
   · rw [if_pos hj, if_pos hj, h2 j hj]
   · rw [if_neg hj, if_neg hj]
 
-/-! ## The a.e. forcing identity -/
-
-/-- **The projected forcing is the Galerkin forcing of the projected mode
-coordinates.**  Almost everywhere in time the `i`-th coordinate of `fseq N` is
-the `i`-th slot of `galTameForce` evaluated at `lowregProjMode g₀ fseq N t`:
-the a.e. Nemytskii identity supplies the truncated nonlinearity, the a.e. state
-ball makes the `aeSetLift` branch the honest one, `lowregFieldCombo` identifies
-the state as a finite spectral combination, and `galTameForce_eq` says the
-Galerkin retraction is inert there. -/
 theorem lowregForceMode (g₀ : SmoothRiemannianMetric I M) {R T : ℝ}
     (hR : 0 ≤ R) (hT : 0 < T) (hT1 : T ≤ 1) (N : ℕ)
     {Nfun : lowerState (I := I) (M := M) g₀ 1 R →
@@ -210,7 +124,7 @@ theorem lowregForceMode (g₀ : SmoothRiemannianMetric I M) {R T : ℝ}
     fld hball
   filter_upwards [timeModeCoeff_coeFn (I := I) (M := M) (fseq N) i, hnem, hball,
     hcombo, hcoe] with t h1 h2 h3 h4 h5
-  -- the lifted state is the finite spectral combination of the mode coordinates
+
   have hstate : ‖galLowView (I := I) (M := M) g₀ 1
       (finiteEigenComboHs (I := I) (M := M) g₀
         (eigenIdxFinset (I := I) (M := M) g₀ N)
@@ -227,16 +141,6 @@ theorem lowregForceMode (g₀ : SmoothRiemannianMetric I M) {R T : ℝ}
   rw [galTameForce_eq (I := I) (M := M) g₀ 1 hR Nfun
     (eigenIdxFinset (I := I) (M := M) g₀ N) hstate i]
 
-/-! ## Time continuity of the Galerkin forcing -/
-
-/-- **The Galerkin forcing is continuous in time along the projected mode
-coordinates.**  The three-arm tame estimate at the package's own constants
-gives, through `tame_lip_balls`, a Lipschitz constant for `lowregNfun` on the
-truncation ball `galTameBall`, which is exactly the gate `galTameForce_contOn`
-asks for; the truncation bound `1 + λᵢ ≤ N + 1` is `mem_eigenIdxFinset`.
-
-Stated for an arbitrary continuous coefficient family, since that is all the
-proof uses. -/
 theorem lowregForceCont (g₀ g_bg : SmoothRiemannianMetric I M)
     {δ Ctop B0 B1 ρ P : ℝ} (hδ : δ < 1) (hCtop : 0 ≤ Ctop) (hB0 : 0 ≤ B0)
     (hB1 : 0 ≤ B1) (hρ : 0 < ρ) (hP : 0 < P)
@@ -296,19 +200,7 @@ theorem lowregForceCont (g₀ g_bg : SmoothRiemannianMetric I M)
     (lowregNfun (I := I) (M := M) g₀ g_bg hδ hCtop hB1 hρ hP hreal)
     (eigenIdxFinset (I := I) (M := M) g₀ N) hκ0 hκ hK c hc i
 
-/-! ## The per-mode ODE -/
-
 omit [BoundarylessManifold I M] in
-/-- **The rung's `hUderiv` for the projected mode coordinates.**  The Galerkin
-forcing along the mode coordinates is continuous on `[0,T]` and agrees almost
-everywhere with the mode coordinate of the forcing, so its `Set.IccExtend` is a
-globally continuous representative; `perModeConv_hasDerivAt` differentiates the
-convolution of that representative, and `perModeConv_timeL2_congr` identifies
-the convolution with `lowregProjMode` pointwise on `[0,T]`.
-
-At an interior initial time `t < T` the slab `[0,T]` is a neighbourhood of `t`
-within `Set.Ici t`, which is what carries the identification across to the
-right-derivative the rung states. -/
 theorem lowregModeDeriv (g₀ : SmoothRiemannianMetric I M) {R T : ℝ}
     (hT : 0 < T) (hR : 0 ≤ R) (N : ℕ)
     {Nfun : lowerState (I := I) (M := M) g₀ 1 R →
@@ -339,13 +231,13 @@ theorem lowregModeDeriv (g₀ : SmoothRiemannianMetric I M) {R T : ℝ}
   have hFc : Continuous F := Continuous.Icc_extend' hFcont.restrict
   have hFeq : ∀ s ∈ Set.Icc (0 : ℝ) T, F s = G s := fun s hs =>
     Set.IccExtend_of_mem hT.le _ hs
-  -- the forcing coordinate agrees a.e. with the continuous representative
+
   have hae : (fun s => (timeModeCoeff (I := I) (M := M) (fseq N) i) s)
       =ᵐ[volume.restrict (Set.Icc (0 : ℝ) T)] F := by
     filter_upwards [hFmode, ae_restrict_mem (μ := volume) measurableSet_Icc]
       with s hs hsmem
     rw [hs, hFeq s hsmem]
-  -- hence the convolutions agree pointwise on the slab
+
   have hconv : ∀ s ∈ Set.Icc (0 : ℝ) T,
       lowregProjMode (I := I) (M := M) g₀ fseq N s i = perModeConv lam F s :=
     fun s hs => perModeConv_timeL2_congr lam hae hs
@@ -355,7 +247,7 @@ theorem lowregModeDeriv (g₀ : SmoothRiemannianMetric I M) {R T : ℝ}
   have hval : G t - lam * lowregProjMode (I := I) (M := M) g₀ fseq N t i =
       -lam * lowregProjMode (I := I) (M := M) g₀ fseq N t i + G t := by ring
   rw [hval] at hderiv
-  -- the slab is a neighbourhood of `t` inside `Set.Ici t`
+
   have hmem : Set.Icc (0 : ℝ) T ∈ 𝓝[Set.Ici t] t := by
     have h1 : Set.Iio T ∈ 𝓝[Set.Ici t] t :=
       nhdsWithin_le_nhds (Iio_mem_nhds ht.2)
@@ -366,22 +258,6 @@ theorem lowregModeDeriv (g₀ : SmoothRiemannianMetric I M) {R T : ℝ}
     (hconv t htIcc)
   filter_upwards [hmem] with s hs using hconv s hs
 
-/-! ## The endpoint: Fatou's `N`-uniform bound -/
-
-/-- **The `N`-uniform `H³` energy bound along the projected sequence.**
-
-This is `lowregRung3` instantiated at the trajectory `lowregProjMode g₀ fseq`,
-i.e. Fatou's `hbound`.  Its hypotheses are, in order: the dimension, the nine
-nonlinearity certificates of the identification package
-(`lowreg_proj_tendsto`, destructured once by the caller at *one* tuple of
-constants), the three per-`N` conjuncts of that package which the trajectory
-block consumes (a.e. state ball and a.e. Nemytskii identity), and the honest
-input `hL2H3` — the time-integrated `H³` energy bound, whose producer is the
-projected maximal-regularity replay.
-
-The conclusion keeps the rung's own shape, so the absorption gate
-`Ctop₂·Cδ + Kr2·R + Kr1·R + ε < 1` remains an explicit hypothesis of the
-produced `∀ ε` statement: nothing in the Fatou stage discharges it. -/
 theorem lowregFatouE3At
     (g₀ : SmoothRiemannianMetric I M)
     {δ Ctop B0 B1 ρ P T Bd Ctop₂ Kr2 Kr1 Kcap ε : ℝ}
@@ -442,7 +318,7 @@ theorem lowregFatouE3At
   classical
   set U : ℕ → ℝ → TensorEigenIdx (I := I) (M := M) g₀ 0 2 → ℝ :=
     lowregProjMode (I := I) (M := M) g₀ fseq with hU
-  -- the trajectory block
+
   have hUcont : ∀ N, ∀ i ∈ eigenIdxFinset (I := I) (M := M) g₀ N,
       ContinuousOn (fun t => U N t i) (Set.Icc (0 : ℝ) T) :=
     fun N i _ => lowregProjMode_cont (I := I) (M := M) g₀ hT.le fseq N i
@@ -464,7 +340,7 @@ theorem lowregFatouE3At
         htame N (U N) (fun j _ => hUcont N j (by assumption)) i
     · exact lowregForceMode (I := I) (M := M) g₀
         (lowregStateRad_pos hCtop hB1 hρ hP).le hT hT1 N fseq (hball N) (hnem N) i
-  -- the primitive `Pr` of the `H³` energy, from the time-integrated bound
+
   set EE : ℕ → ℝ → ℝ := fun N => Set.IccExtend hT.le
     (fun p : Set.Icc (0 : ℝ) T => galerkinEnergy (I := I) (M := M)
       (eigenIdxFinset (I := I) (M := M) g₀ N) (U N) 3 p.1) with hEE
@@ -523,8 +399,6 @@ theorem lowregFatouE3At
   exact hrung.2.2.2.2 hδ hδ0 hδ3 hCtop hB1 hρ hP hreal hcore hUcont hUderiv
     hUinit hPr0 hPrnn hPrcont hPrderiv hPrbd hε habs
 
-/-- Compatibility form of `lowregFatouE3At`.  It selects one ordered rung
-certificate and retains the former conditional absorption interface. -/
 theorem lowregFatouE3 (hDim : Module.finrank ℝ E = 3)
     (g₀ : SmoothRiemannianMetric I M) {δ Ctop B0 B1 ρ P T Bd : ℝ}
     (hT : 0 < T) (hT1 : T ≤ 1)
@@ -590,27 +464,6 @@ theorem lowregFatouE3 (hDim : Module.finrank ℝ E = 3)
     hB1 hρ hP hreal hcore htame fseq hball hnem hL2H3 hrung hε
     (by simpa only [Cδ] using habs)
 
-/-! ## The time-integrated energy: discharging `hL2H3` -/
-
-/-- **The time-integrated `H³` Galerkin energy of the projected trajectory is
-controlled by the size of its forcing.**  This is the honest input `hL2H3` of
-`lowregFatouE3`, discharged.
-
-Almost everywhere the Duhamel field of `fseq N` *is* the finite spectral
-combination of its own mode coordinates (`lowregFieldCombo`), and the squared
-`H³` norm of such a combination is exactly the weighted finite sum
-`∑_{i ∈ F} (1 + λᵢ)³ cᵢ²` (`finiteEigenCombo_spectral_normSq`), i.e. the
-Galerkin energy at `σ = 3`.  Integrating in time turns the left-hand side into
-the squared time-`L²` norm of the field, and maximal regularity with zero
-initial datum bounds that by `(1 + T)‖fseq N‖`
-(`norm_maxRegDuhamelSolField_zero_le`).
-
-No integrability hypothesis appears: the integrand is almost everywhere the
-squared pointwise norm of an `L²` element, and `timeMeasure T` is *by
-definition* Lebesgue measure restricted to `[0,T]`, so the Bochner integral
-against it is literally the set integral of `norm_sq_eq_integral`.  This is why
-the Bochner form — rather than an interval integral — is the shape `hL2H3`
-carries. -/
 theorem lowregL2H3 (g₀ : SmoothRiemannianMetric I M) {R T b : ℝ}
     (hT : 0 < T) (hT1 : T ≤ 1) (N : ℕ)
     {Nfun : lowerState (I := I) (M := M) g₀ 1 R →
@@ -628,7 +481,7 @@ theorem lowregL2H3 (g₀ : SmoothRiemannianMetric I M) {R T b : ℝ}
   set fld := maxRegDuhamelSolField (I := I) (M := M) ((1 : ℕ) : ℝ) hT hT1
     (0 : tensorHs (I := I) (M := M) g₀ 0 2 (((1 : ℕ) : ℝ) + 2)) (fseq N) with hfld
   have hexp : ((1 : ℕ) : ℝ) + 2 = (3 : ℝ) := by norm_num
-  -- the pointwise identification: the energy is the squared `H³` norm
+
   have hae : (fun t => galerkinEnergy (I := I) (M := M)
       (eigenIdxFinset (I := I) (M := M) g₀ N)
       (lowregProjMode (I := I) (M := M) g₀ fseq N) 3 t)
@@ -638,7 +491,7 @@ theorem lowregL2H3 (g₀ : SmoothRiemannianMetric I M) {R T b : ℝ}
     rw [ht, finiteEigenCombo_spectral_normSq, hexp]
     simp only [galerkinEnergy, tensorSobolevWeight]
   rw [MeasureTheory.integral_congr_ae hae]
-  -- the time integral of the squared pointwise norm is the squared time-`L²` norm
+
   have hint : ∫ t, ‖fld t‖ ^ 2 ∂(timeMeasure T) = ‖fld‖ ^ 2 :=
     (norm_sq_eq_integral fld).symm
   rw [hint]
@@ -648,9 +501,6 @@ theorem lowregL2H3 (g₀ : SmoothRiemannianMetric I M) {R T b : ℝ}
       (mul_le_mul_of_nonneg_left hnorm (by linarith))
   nlinarith [norm_nonneg fld, hle]
 
-/-- The calibrated Fatou package at one explicit adapted solve.  The stored
-ordered rung continuation is invoked with the package's already-proved budget,
-so no conditional absorption gate remains. -/
 theorem lowregFatouPackAt
     (g₀ : SmoothRiemannianMetric I M)
     {δ Ctop B0 B1 D ρ P Rcap Ctop₂ Kr2 Kr1 Kcap T : ℝ}
@@ -682,17 +532,6 @@ theorem lowregFatouPackAt
   exact lowregL2H3 (I := I) (M := M) g₀ hT hT1 N fseq _ ((hpack N).2.2.1)
     ((hpack N).2.2.2.2.2)
 
-/-- **The Fatou stage's input package.**  `lowregFatouE3` fed directly from
-`lowreg_projMode_tendsto`, with the honest input `hL2H3` already discharged by
-`lowregL2H3`: for a low solve there is a projected forcing sequence whose mode
-coordinates converge, at every mode and every time of the closed slab, to those
-of the limit forcing, and which carries the rung's `N`-uniform `H³` energy
-bound subject only to the absorption gate.
-
-The two conjuncts are exactly Fatou's `hconv` and `hbound`.  The bound the
-discharge supplies is `((1+T)·R/4)²` at the package's own state radius `R`,
-read off the package's forcing ball `‖fseq N‖ ≤ R/4`; it is `N`-free, which is
-all Fatou needs. -/
 theorem lowregFatouPack (hDim : Module.finrank ℝ E = 3)
     (g₀ : SmoothRiemannianMetric I M) {T : ℝ} (hT : 0 < T) (hT1 : T ≤ 1)
     (fLo : timeL2 (tensorHs (I := I) (M := M) g₀ 0 2 ((1 : ℕ) : ℝ)) T)

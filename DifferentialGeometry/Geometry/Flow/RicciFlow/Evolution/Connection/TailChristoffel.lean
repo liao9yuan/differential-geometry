@@ -3,14 +3,6 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.Connection.MetricC
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.Metric.TailFrameRegularity
 import DifferentialGeometry.Geometry.Curvature.MetricLeviCivitaReconcile
 
-
-
-
-
-
-
-
-
 set_option autoImplicit false
 
 noncomputable section
@@ -58,10 +50,6 @@ private theorem ricciFrameDiffAt
     filter_upwards [hsec] with y hy
     rw [hy i, hy j, metricRicciAt_apply_eq_ricciTensor]
   exact hsmooth.mdifferentiableAt (by simp)
-
-
-
-
 
 omit [NeZero (Module.finrank ℝ E)] in
 omit [SigmaCompactSpace M] in
@@ -145,8 +133,6 @@ theorem tailChristoffel
       (localFrameInvDt (E := E) (I := I) S' frame hframe)
       frame hframe1 hu htime hSmooth hFdiff hFtdiff
 
-
-
 omit [NeZero (Module.finrank ℝ E)] in
 omit [SigmaCompactSpace M] in
 theorem tailChristoffelReg
@@ -182,9 +168,6 @@ theorem tailChristoffelReg
     tailChristoffel (I := I) (Idx := Idx) hS hAlphaT0 hT0Omega frame hframe hu
   refine ⟨hframe1, ?_, hchr⟩
   exact tailFrameSpaceReg (I := I) hS hAlphaT0 hT0Omega frame hframe hu
-
-
-
 
 omit [NeZero (Module.finrank ℝ E)] in
 omit [SigmaCompactSpace M] in

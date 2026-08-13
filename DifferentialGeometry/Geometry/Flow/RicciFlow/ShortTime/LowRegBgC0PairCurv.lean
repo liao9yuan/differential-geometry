@@ -1,11 +1,5 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.LowRegBgC0PairBase
 
-/-!
-# Order-zero curvature pair estimates
-
-Internal pair-estimate layer for the low-regularity order-zero refold.
--/
-
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
@@ -686,7 +680,6 @@ theorem aaOnePairH2
     _ ≤ (B R * (1 + A) * D) ^ 2 :=
       pow_le_pow_left₀
         (mul_nonneg (by norm_num) (add_nonneg hx0 hy0)) hlead 2
-
 
 end LowRegBgC0Core
 end DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral

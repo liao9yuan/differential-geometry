@@ -4,14 +4,6 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.MetricCovDeri
 
 set_option autoImplicit false
 
-/-!
-# H6-provider exact-inverse component tails for Step B1
-
-This file transports the reverse metric-component argument to the coherent H6
-normal-chart family.  The reverse map is the exact `Function.invFunOn` of the
-forward provider-native stage comparison map.
--/
-
 noncomputable section
 
 universe u uE uH
@@ -38,9 +30,6 @@ variable {H : Type uH} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H} [I.Boundaryless]
 variable {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
 
-/-- On the moving target image of a smaller source ball, one rectangular
-pair-index tail controls every component of every finite covariant-derivative
-tower of the exact inverse H6-provider pullback-metric error. -/
 theorem H6NormalData.inv_cov_comp_tail
     (inp : MetricCompactCore (I := I) X)
     (d : H6NormalData (I := I) X inp.decay)

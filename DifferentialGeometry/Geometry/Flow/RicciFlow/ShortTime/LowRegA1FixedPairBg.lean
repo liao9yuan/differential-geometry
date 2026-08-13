@@ -6,15 +6,6 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.SobolevScale.FiniteSpectral
 import DifferentialGeometry.Analysis.Spectral.Tensor.SobolevScale.CrossScaleCauchySchwarz
 import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.LowRegRHSSymm
 
-/-!
-# Fixed-background first-order Galerkin pairing
-
-This module isolates the complete order-one correction caused by replacing the
-self DeTurck background by one fixed background.  The coefficient is estimated
-in intrinsic `H2` and paired directly against the Galerkin state at Rung 3, so
-the dissipation coefficient uses no fourth varying-metric jet.
--/
-
 noncomputable section
 
 open Bundle Manifold MeasureTheory Set
@@ -39,9 +30,6 @@ variable
       [IsManifold I ∞ M] [CompactSpace M] [I.Boundaryless]
       [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M]
 
-/-- The order-one Galerkin vector produced by the complete fixed-background
-`C1` correction.  The realization hypothesis supplies the metric certificates
-for both the retracted state and the zero endpoint. -/
 def galA1FixVecBg
     (g gBase : SmoothRiemannianMetric I M) {R δ : ℝ}
     (hR : 0 ≤ R) (hδ : δ < 1)
@@ -63,8 +51,6 @@ def galA1FixVecBg
       (lowC1CorrBg (I := I) (M := M) g gBase T hδ hT hZ)
       (iteratedCovGrad (I := I) g 0 2 1 T))
 
-/-- The signed weighted Galerkin pairing of the state coefficients with the
-complete fixed-background order-one correction. -/
 def galA1FixPairBg
     (g gBase : SmoothRiemannianMetric I M) {R δ : ℝ}
     (hR : 0 ≤ R) (hδ : δ < 1)
@@ -80,9 +66,6 @@ def galA1FixPairBg
     (c i * (galA1FixVecBg (I := I) (M := M) g gBase
       hR hδ hreal F c).coeff i)
 
-/-- The complementary fixed-background Galerkin arm: it retains the complete
-fixed-background second-order action and `C0` action, while replacing only its
-`C1` action by the self-background coefficient. -/
 def galA1RestVecBg
     (g gBase : SmoothRiemannianMetric I M) {R δ : ℝ}
     (hR : 0 ≤ R) (hδ : δ < 1)
@@ -107,8 +90,6 @@ def galA1RestVecBg
       appCc (I := I) (M := M) g 3 2 AS.C1
         (iteratedCovGrad (I := I) g 0 2 1 T))
 
-/-- The fixed-background Galerkin arm is exactly its retained `C2/C0` rest
-plus the complete `C1` background correction. -/
 theorem galArmVecBg_split
     (g gBase : SmoothRiemannianMetric I M) {R δ : ℝ}
     (hR : 0 ≤ R) (hδ : δ < 1)
@@ -128,8 +109,6 @@ theorem galArmVecBg_split
   simp only [LowBaseActionData.a1, appCc_sub_left]
   abel
 
-/-- The generic weighted Galerkin pairing of the state with the retained
-fixed-background `C2/C0` rest arm. -/
 def galA1RestPairBg
     (g gBase : SmoothRiemannianMetric I M) {R δ : ℝ}
     (hR : 0 ≤ R) (hδ : δ < 1)
@@ -145,8 +124,6 @@ def galA1RestPairBg
     (c i * (galA1RestVecBg (I := I) (M := M) g gBase
       hR hδ hreal F c).coeff i)
 
-/-- At Rung 3, the signed fixed-background arm pairing splits exactly into
-the retained rest pairing and the complete `C1` correction pairing. -/
 theorem galArmPair3_split
     (g gBase : SmoothRiemannianMetric I M) {R δ : ℝ}
     (hR : 0 ≤ R) (hδ : δ < 1)
@@ -207,9 +184,6 @@ private theorem lowArm_symm
           (0 : SmoothCcTensor g 0 2) hδ hZ) = _
   rw [symmS_sub, hsT, hsZ]
 
-/-- The signed Rung-3 Galerkin pairing of the complete fixed-background arm is
-exactly the diagonal complementary-iterate pairing of the retracted state with
-that arm, after multiplying by the radial retraction scalar. -/
 theorem galArmPair3_diag
     (g gBase : SmoothRiemannianMetric I M) {R δ : ℝ}
     (hR : 0 ≤ R) (hδ : δ < 1) (hδ0 : 0 ≤ δ) (hδ3 : δ ≤ 1 / 3)
@@ -324,10 +298,7 @@ theorem galArmPair4_diag
 
 set_option maxHeartbeats 2400000 in
 set_option synthInstance.maxHeartbeats 2400000 in
-/-- The complete fixed-background order-one correction obeys the Rung-3
-cross-scale energy estimate.  The scalar lower-energy coefficient is selected
-in the required order `eta -> g -> G`; the later Galerkin radius is harmless
-because the solver supplies the cap `R <= 1`. -/
+
 theorem galA1FixPair3_le
     (hDim : Module.finrank ℝ E = 3)
     (gBase : SmoothRiemannianMetric I M) {Λ : ℝ} (hΛ : 1 ≤ Λ)

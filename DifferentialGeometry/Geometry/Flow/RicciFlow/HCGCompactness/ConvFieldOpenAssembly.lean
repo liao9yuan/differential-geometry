@@ -4,15 +4,6 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.ConvFieldOpen
 
 set_option autoImplicit false
 
-/-!
-# Open-window flow-upgrade assembly
-
-This module is the concrete P4 capstone after the raw compact-window estimates
-have been produced.  It selects the common open-window limit, constructs the
-limit Ricci flow, identifies its time-zero slice, assembles `FlowUpgradeData`,
-and proves completeness of every limit time slice.
--/
-
 noncomputable section
 
 open Set Function Filter Bundle Manifold Tensor0SBundle
@@ -29,9 +20,6 @@ variable {H : Type*} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H} [I.Boundaryless]
 variable {X : PointedFlowSeq (I := I)}
 
-/-- Assemble a concrete smooth flow upgrade, together with completeness of all
-its time slices, from the four raw open-window estimates and the time-zero
-metric convergence witness aligned with the chosen comparison maps. -/
 theorem open_upgrade_of_raw
     (mc : MetricCompactnessConclusion (I := I) (X.atZero (I := I)))
     (Phi : PointedCGHMaps (I := I) X mc.limit mc.subseq)

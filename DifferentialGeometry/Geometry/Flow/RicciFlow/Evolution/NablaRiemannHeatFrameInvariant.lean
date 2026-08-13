@@ -3,73 +3,6 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.NablaRiemannHeatSo
 
 set_option autoImplicit false
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 noncomputable section
 
 namespace DifferentialGeometry.PDE.RicciFlow
@@ -87,21 +20,9 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 variable [IsManifold I 1 M] [IsManifold I 2 M]
 variable [CompleteSpace E] [SigmaCompactSpace M] [T2Space M]
 
-
-
-
-
-
-
-
 section FrameInvariance
 
 variable {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
-
-
-
-
-
 
 omit [FiniteDimensional ℝ E] [I.Boundaryless] [IsManifold I 1 M]
     [IsManifold I 2 M] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
@@ -125,18 +46,6 @@ theorem metricInverseInBasis_identity_of_orthonormal
       rw [identityInvMetric, diagonalInvMetric_eq_zero_of_ne hk, mul_zero]
     · intro h; exact absurd (Finset.mem_univ j) h
 
-
-
-
-
-
-
-
-
-
-
-
-
 omit [Module.Finite ℝ E] in
 omit [I.Boundaryless] [IsManifold I 2 M] [CompleteSpace E]
     [SigmaCompactSpace M] [T2Space M] in
@@ -158,22 +67,9 @@ theorem compNormSqMulti_orthoBasis_eq_normSq0S
 
 end FrameInvariance
 
-
-
-
-
-
-
-
-
-
 section ProducerNorms
 
 variable {n : ℕ}
-
-
-
-
 
 omit [Module.Finite ℝ E] in
 omit [I.Boundaryless] [IsManifold I 2 M] in
@@ -206,10 +102,6 @@ theorem rm04NormSqInFrame_orthoBasis_eq_normSq0S
   refine Finset.sum_congr rfl fun l _ => ?_
   simp only [DifferentialGeometry.Integral.Connection.rm04Comp]
   rw [hframe i, hframe j, hframe k, hframe l]
-
-
-
-
 
 omit [Module.Finite ℝ E] in
 omit [I.Boundaryless] in
@@ -254,33 +146,6 @@ theorem nablaRm04NormSqInFrame_orthoBasis_eq_normSq0S
   rw [htup]
 
 end ProducerNorms
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 omit [Module.Finite ℝ E] in
 theorem abs_spatialCommNablaRm_intrinsic_le
@@ -376,48 +241,5 @@ theorem abs_spatialCommNablaRm_intrinsic_le
     nablaRm04NormSqInFrame_orthoBasis_eq_normSq0S (I := I) S t x₀ frame' basis hframe' horth']
     at hbnd'
   exact hbnd'
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 end DifferentialGeometry.PDE.RicciFlow

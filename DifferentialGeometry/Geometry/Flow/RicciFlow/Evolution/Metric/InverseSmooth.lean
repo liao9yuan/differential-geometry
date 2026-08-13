@@ -2,15 +2,6 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.Metric.Basic
 
 set_option autoImplicit false
 
-
-
-
-
-
-
-
-
-
 noncomputable section
 
 namespace DifferentialGeometry.PDE.RicciFlow
@@ -577,8 +568,6 @@ theorem coordFrameGInvCLM_spacetimeSmooth
   exact
     (coordInvCLM_eq (I := I) S x0 (x := q.2) hq.2 q.1).symm
 
-
-
 theorem coordInvSmooth
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -622,8 +611,6 @@ theorem coordInvSmooth
     (sum_mul_pi_single (Idx := DifferentialGeometry.Tensor.Coordinates.CoordinateIdx (𝕜 := Real) E)
       (fun k => coordInv (I := I) S x0 p.1 p.2 i k) j).symm
 
-
-
 omit [SigmaCompactSpace M] in
 theorem coordFrameGramCLM_contOn
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
@@ -642,10 +629,6 @@ theorem coordFrameGramCLM_contOn
   apply continuousOn_finset_sum
   intro j _hj
   exact (coordMetricContOn (I := I) S hS x0 i j).smul continuousOn_const
-
-
-
-
 
 theorem coordFrameGInvCLM_contOn
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
@@ -701,15 +684,6 @@ theorem coordFrameGInvCLM_contOn
   · exact (coordInvCLM_eq (I := I) S x0 (x := q.2) hq.2 q.1).symm
   · exact (coordInvCLM_eq (I := I) S x0 (x := p.2) hp.2 p.1).symm
 
-
-
-
-
-
-
-
-
-
 theorem coordInvContOn
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -746,8 +720,6 @@ theorem coordInvContOn
     (sum_mul_pi_single (Idx := DifferentialGeometry.Tensor.Coordinates.CoordinateIdx (𝕜 := Real) E)
       (fun k => coordInv (I := I) S x0 p.1 p.2 i k) j).symm
 
-
-
 theorem coordInvSmoothAt
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -763,7 +735,6 @@ theorem coordInvSmoothAt
       (prod_mem_nhds (D.regular_isOpen.mem_nhds t.2)
         ((DifferentialGeometry.Tensor.Coordinates.coordinateFrameSet_open (I := I) x0).mem_nhds hx))
 
-/-- The canonical time-derivative field of the coordinate inverse metric. -/
 noncomputable def coordInvDt
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D) (x0 : M) :
@@ -772,8 +743,6 @@ noncomputable def coordInvDt
   fun t x i j =>
     derivWithin (fun s : Real => coordInv (I := I) S x0 s x i j) D.carrier t
 
-/-- Time regularity of the canonical coordinate inverse metric on its frame
-domain. -/
 theorem coordInvDerivLocal
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -860,15 +829,6 @@ theorem frameGInvCLM_spacetimeSmooth
   exact (frameGInvCLM_eq_inverse_at (I := I) S gInv frame q
     hleftq hrightq).symm
 
-
-
-
-
-
-
-
-
-
 omit [SigmaCompactSpace M] [T2Space M] in
 theorem gInv_spacetimeSmooth
     [DecidableEq Idx]
@@ -910,8 +870,6 @@ theorem gInv_spacetimeSmooth
   simpa using
     (sum_mul_pi_single (Idx := Idx) (fun k => gInv p.1 p.2 i k) j).symm
 
-
-
 omit [SigmaCompactSpace M] [T2Space M] in
 theorem MetricFrameSpacetimeRegularityInFrameOnLocal.gInv_mdiffAt
     [DecidableEq Idx]
@@ -944,8 +902,6 @@ theorem MetricFrameSpacetimeRegularityInFrameOnLocal.gInv_mdiffAt
       exact ⟨ht, hy⟩)
   exact (hcomp.contMDiffAt (hu.mem_nhds hx)).mdifferentiableAt (by simp)
 
-
-
 omit [SigmaCompactSpace M] [T2Space M] in
 theorem MetricFrameSpacetimeRegularityInFrameOnLocal.metricComp_mdiffAt
     [DecidableEq Idx]
@@ -977,7 +933,6 @@ theorem MetricFrameSpacetimeRegularityInFrameOnLocal.metricComp_mdiffAt
       intro y hy
       exact ⟨ht, hy⟩)
   exact (hcomp.contMDiffAt (hu.mem_nhds hx)).mdifferentiableAt (by simp)
-
 
 end Components
 

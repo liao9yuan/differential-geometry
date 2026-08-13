@@ -1,14 +1,5 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.LowRegFatouMass
 
-/-!
-# Closing the fixed low-regularity energy rungs
-
-The adapted solve now stores one common gate package.  This module invokes its
-exact rung-three, rung-four, and rung-five continuations on one projected
-trajectory and then performs the corresponding Fatou closure through order
-five.
--/
-
 noncomputable section
 
 open Bundle Manifold MeasureTheory Set Filter
@@ -35,10 +26,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
   [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
   [T2Space M] [SigmaCompactSpace M]
 
-/-- The proof package carried by one projected trajectory after the fixed
-bottom ladder has closed.  Besides mode convergence and the common fifth-energy
-cap, it retains the exact continuity, ODE, and zero-initial-data certificates
-needed to run every higher rung on this same trajectory. -/
 def IsRung5Path (g₀ : SmoothRiemannianMetric I M)
     {δ Ctop B0 B1 D ρ P Rcap T : ℝ} {hT : 0 < T} {hT1 : T ≤ 1}
     (fLo : timeL2 (tensorHs (I := I) (M := M) g₀ 0 2 ((1 : ℕ) : ℝ)) T)
@@ -73,9 +60,6 @@ def IsRung5Path (g₀ : SmoothRiemannianMetric I M)
         (eigenIdxFinset (I := I) (M := M) g₀ N)
         (lowregProjMode (I := I) (M := M) g₀ fseq N) 5 t ≤ Φ
 
-/-- The exact adapted trajectory carries a common `N,t`-uniform fifth-energy
-bound.  All three fixed continuations come from the one gate package stored in
-`hlo`; no rung producer is called again. -/
 theorem lowregRung5PathAt
     (g₀ : SmoothRiemannianMetric I M)
     {δ Ctop B0 B1 D ρ P Rcap Ctop₂ Kr2 Kr1 Kcap T : ℝ}
@@ -175,8 +159,6 @@ theorem lowregRung5PathAt
   exact ⟨hmode, hUcont, by simpa only [U] using hUderiv,
     by simpa only [U] using hUinit, Φ5, by simpa only [U] using hE5⟩
 
-/-- Compatibility projection of `lowregRung5PathAt`: the same trajectory and
-its fifth-energy bound, with the higher-rung ODE certificates hidden. -/
 theorem lowregRung5At
     (g₀ : SmoothRiemannianMetric I M)
     {δ Ctop B0 B1 D ρ P Rcap Ctop₂ Kr2 Kr1 Kcap T : ℝ}
@@ -198,8 +180,6 @@ theorem lowregRung5At
     g₀ hT hT1 fLo hlo
   exact ⟨fseq, hpath.1, hpath.2.2.2.2⟩
 
-/-- Fatou closure of the fixed bottom ladder: every real Sobolev exponent at
-most five has uniform spatial spectral mass on the adapted trajectory. -/
 theorem lowregMassFiveAt
     (g₀ : SmoothRiemannianMetric I M)
     {δ Ctop B0 B1 D ρ P Rcap Ctop₂ Kr2 Kr1 Kcap T : ℝ}

@@ -4,14 +4,6 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.C4.NormalPhas
 
 set_option autoImplicit false
 
-
-
-
-
-
-
-
-
 noncomputable section
 
 open Set
@@ -29,9 +21,6 @@ variable {H : Type uH} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H} [I.Boundaryless]
 
 namespace NormalRadiusProfile
-
-
-
 
 theorem diag_end_conv
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}

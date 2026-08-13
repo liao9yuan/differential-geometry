@@ -6,15 +6,6 @@ import DifferentialGeometry.Tensor.RSTensor.FiberMetric.ConnectionDifferenceNorm
 
 set_option autoImplicit false
 
-
-
-
-
-
-
-
-
-
 noncomputable section
 
 universe u uE uH
@@ -179,9 +170,6 @@ private theorem trace_sq_le
     (Tensor0SBundle.identityInvMetric
       (Idx := Fin (Module.finrank Real (TangentSpace I x))))
     hinv A
-
-
-
 
 omit [I.Boundaryless] [CompactSpace M] [NeZero (Module.finrank ℝ E)] in
 omit [SigmaCompactSpace M] in
@@ -435,10 +423,6 @@ private theorem lapDiff_sq_core
             (duSec (I := I) f hf x) := by
       simp only [Hess, du]
       ring
-
-
-
-
 
 omit [NeZero (Module.finrank ℝ E)] in
 omit [SigmaCompactSpace M] in

@@ -30,9 +30,6 @@ variable [T2Space M] [IsManifold I ∞ M] [SigmaCompactSpace M]
 local instance : IsManifold I ((∞ : WithTop ℕ∞) + 1) M := by
   simpa using (inferInstance : IsManifold I (∞ : WithTop ℕ∞) M)
 
-
-
-
 omit [CompleteSpace E] [T2Space M] [IsManifold I ∞ M] [SigmaCompactSpace M] in
 private theorem componentRS_eq_gen
     [IsManifold I 1 M]
@@ -42,7 +39,6 @@ private theorem componentRS_eq_gen
     (upper : Fin r -> Idx) (lower : Fin s -> Idx) :
     Tensor0SBundle.componentRS (I := I) basis T upper lower =
       Tensor0SBundle.componentRS_gen (I := I) basis T upper lower := rfl
-
 
 def localFrameOneOfInf
     {Idx : Type*} {u : Set M}
@@ -54,11 +50,6 @@ def localFrameOneOfInf
   contMDiffOn := fun i =>
     (hframe.contMDiffOn i).of_le (by decide : (1 : WithTop ℕ∞) <= ∞)
 
-
-
-
-
-
 def MetricUniformEquivalentOn
     (K : Set M)
     (gRef h : SmoothRiemannianMetric I M)
@@ -69,7 +60,6 @@ def MetricUniformEquivalentOn
         C⁻¹ * gRef.inner x v v <= h.inner x v v /\
           h.inner x v v <= C * gRef.inner x v v
 
-
 def MetricUniformEquivalentOnWindow
     (K : Set M) (β ψ : Real)
     (gRef : SmoothRiemannianMetric I M)
@@ -77,7 +67,6 @@ def MetricUniformEquivalentOnWindow
     (B : Real -> Real) : Prop :=
   forall i : Nat, forall t : Real, t ∈ Set.Icc β ψ ->
     MetricUniformEquivalentOn (I := I) K gRef (gSeq i t) (B t)
-
 
 omit [FiniteDimensional ℝ E] [CompleteSpace E] [T2Space M] [SigmaCompactSpace M] in
 theorem metricUniformEquivalentOn_of_le
@@ -103,7 +92,6 @@ theorem metricUniformEquivalentOn_of_le
     · exact le_trans (hEq.2 x hx v).2
         (mul_le_mul_of_nonneg_right hCC' hgin_nonneg)
 
-
 omit [FiniteDimensional ℝ E] [CompleteSpace E] [T2Space M] [SigmaCompactSpace M] in
 theorem metricUniformEquivalentOnWindow_mono
     {K K' : Set M} {β ψ : Real} {gRef : SmoothRiemannianMetric I M}
@@ -113,24 +101,14 @@ theorem metricUniformEquivalentOnWindow_mono
     MetricUniformEquivalentOnWindow (I := I) K' β ψ gRef gSeq B :=
   fun i t ht => ⟨(h i t ht).1, fun x hx v => (h i t ht).2 x (hKK hx) v⟩
 
-
-
 def metricEquivalenceFactor (C A t t0 : Real) : Real :=
   C * Real.exp (2 * A * |t - t0|)
-
-
-
 
 noncomputable def metricCovDerivNorm
     (a : Nat) (h gRef : SmoothRiemannianMetric I M) (x : M) : Real :=
   Real.sqrt
     (Tensor0SBundle.normSq0S (I := I) gRef x (a + 2)
       (metricCovDeriv (I := I) h gRef a x))
-
-
-
-
-
 
 noncomputable def metricCovDerivNormSupOn
     (K : Set M) (p : Nat)
@@ -140,26 +118,17 @@ noncomputable def metricCovDerivNormSupOn
       exists x : M, x ∈ K ∧
         metricCovDerivNorm (I := I) a h gRef x = r}
 
-
-
 def MetricCovDerivBoundOn
     (K : Set M) (p : Nat)
     (h gRef : SmoothRiemannianMetric I M)
     (C : Real) : Prop :=
   metricCovDerivNormSupOn (I := I) K p h gRef <= C
 
-
-
-
 def MetricCovDerivOrderBoundOn
     (K : Set M) (a : Nat)
     (h gRef : SmoothRiemannianMetric I M)
     (C : Real) : Prop :=
   forall x : M, x ∈ K -> metricCovDerivNorm (I := I) a h gRef x <= C
-
-
-
-
 
 omit [SigmaCompactSpace M] in
 theorem metricCovBound_of_pointwise
@@ -177,9 +146,6 @@ theorem metricCovBound_of_pointwise
   rcases hr with ⟨a, ha, x, hx, hr⟩
   simpa [← hr] using hpoint a ha x hx
 
-
-
-
 omit [SigmaCompactSpace M] in
 theorem metricCovBoundOne_of_orders
     (K : Set M) (h gRef : SmoothRiemannianMetric I M) (C : Real)
@@ -193,9 +159,6 @@ theorem metricCovBoundOne_of_orders
   · exact h0 x hx
   · exact h1 x hx
 
-
-
-
 def MetricCovDerivBoundsAtTimeOn
     (K : Set M) (t0 : Real)
     (gSeq : Nat -> Real -> SmoothRiemannianMetric I M)
@@ -203,8 +166,6 @@ def MetricCovDerivBoundsAtTimeOn
     (C : Nat -> Real) : Prop :=
   forall i p : Nat, 0 < p ->
     MetricCovDerivBoundOn (I := I) K p (gSeq i t0) gRef (C p)
-
-
 
 omit [SigmaCompactSpace M] in
 theorem metricCovAtTime_of_pointwise
@@ -224,8 +185,6 @@ theorem metricCovAtTime_of_pointwise
     metricCovBound_of_pointwise (I := I) K p (gSeq i t0) gRef (C p)
       (hC p) (hpoint i p hp)
 
-
-
 def MetricCovDerivBoundsOnWindow
     (K : Set M) (β ψ : Real)
     (gSeq : Nat -> Real -> SmoothRiemannianMetric I M)
@@ -234,8 +193,6 @@ def MetricCovDerivBoundsOnWindow
   forall i : Nat, forall t : Real, t ∈ Set.Icc β ψ ->
     forall p : Nat, MetricCovDerivBoundOn (I := I) K p (gSeq i t) gRef (C p)
 
-
-
 def MetricCovDerivOrderBoundOnWindow
     (K : Set M) (β ψ : Real)
     (gSeq : Nat -> Real -> SmoothRiemannianMetric I M)
@@ -243,7 +200,6 @@ def MetricCovDerivOrderBoundOnWindow
     (a : Nat) (C : Real) : Prop :=
   forall i : Nat, forall t : Real, t ∈ Set.Icc β ψ ->
     MetricCovDerivOrderBoundOn (I := I) K a (gSeq i t) gRef C
-
 
 omit [SigmaCompactSpace M] in
 theorem metricCovOrderWindow_mono
@@ -254,8 +210,6 @@ theorem metricCovOrderWindow_mono
     (h : MetricCovDerivOrderBoundOnWindow (I := I) K β ψ gSeq gRef a C) :
     MetricCovDerivOrderBoundOnWindow (I := I) K' β ψ gSeq gRef a C :=
   fun i t ht x hx => h i t ht x (hKK hx)
-
-
 
 omit [SigmaCompactSpace M] in
 theorem metricCovOrderWindow_of_pointwise
@@ -270,8 +224,6 @@ theorem metricCovOrderWindow_of_pointwise
     MetricCovDerivOrderBoundOnWindow (I := I) K β ψ gSeq gRef a C := by
   intro i t ht x hx
   exact hpoint i t ht x hx
-
-
 
 omit [SigmaCompactSpace M] in
 theorem metricCovBoundOneWindow_of_orders
@@ -288,8 +240,6 @@ theorem metricCovBoundOneWindow_of_orders
   intro i t ht
   exact metricCovBoundOne_of_orders (I := I) K (gSeq i t) gRef C hC
     (h0 i t ht) (h1 i t ht)
-
-
 
 omit [SigmaCompactSpace M] in
 theorem metricCovWindow_of_pointwise
@@ -310,16 +260,11 @@ theorem metricCovWindow_of_pointwise
     metricCovBound_of_pointwise (I := I) K p (gSeq i t) gRef (C p)
       (hC p) (hpoint i t ht p)
 
-
-
 noncomputable def metricCovCumulativeConstant
     (C : Nat -> Real) (p : Nat) : Real :=
   (Finset.range (p + 1)).sup' (by
     refine ⟨0, ?_⟩
     simp) C
-
-
-
 
 omit [SigmaCompactSpace M] in
 theorem metricCovBoundsWindow_of_orderBounds
@@ -345,12 +290,6 @@ theorem metricCovBoundsWindow_of_orderBounds
     have hamem : a ∈ Finset.range (p + 1) := by
       exact Finset.mem_range.mpr (Nat.lt_succ_of_le ha)
     exact le_trans (horder a i t ht x hx) (Finset.le_sup' C hamem)
-
-
-
-
-
-
 
 omit [T2Space M] [SigmaCompactSpace M] in
 theorem gammaL2_le_of_christoffel
@@ -413,8 +352,6 @@ theorem gammaL2_le_of_christoffel
     exact DifferentialGeometry.PDE.RicciFlow.christoffelRHS_id
       (M := M) gInv nablaRic (hinv_id s hs) i j k
 
-
-
 omit [SigmaCompactSpace M] in
 theorem metricCov1_coord
     {Idx : Type*} [Fintype Idx] {u : Set M}
@@ -458,9 +395,6 @@ theorem metricCov1_coord
   rw [ha, hb]
   simp [map_sum, map_smul, cov]
   ring
-
-
-
 
 omit [SigmaCompactSpace M] in
 theorem metricCovDeriv_two_eval_smooth_slots
@@ -531,9 +465,6 @@ theorem metricCovDeriv_two_eval_smooth_slots
               ((cov (fun p : M => V a p) x) (X x)))
   exact hmain
 
-
-
-
 omit [SigmaCompactSpace M] in
 theorem metricCovDeriv_three_eval_smooth_slots
     (h gRef : SmoothRiemannianMetric I M)
@@ -602,8 +533,6 @@ theorem metricCovDeriv_three_eval_smooth_slots
             (Function.update (fun b : Fin 4 => V b x) a
               ((cov (fun p : M => V a p) x) (X x)))
   exact hmain
-
-
 
 omit [SigmaCompactSpace M] in
 theorem metricCov2_coord
@@ -1066,8 +995,6 @@ theorem metricCov2_coord
   unfold DifferentialGeometry.Tensor.Coordinates.metricCovDeriv2ForMetricCompInFrame
   ring
 
-
-
 omit [SigmaCompactSpace M] in
 theorem metricCov3_coord
     {Idx : Type*} [Fintype Idx] {u : Set M}
@@ -1330,12 +1257,6 @@ theorem metricCov3_coord
   simp [slot, Function.update, cov]
   ring
 
-
-
-
-
-
-
 noncomputable def lcMetricFamily
     (g : Real -> SmoothRiemannianMetric I M) :
     DifferentialGeometry.Integral.Connection.RealizedMetricFamily (I := I) (M := M) Real where
@@ -1345,11 +1266,6 @@ noncomputable def lcMetricFamily
   metricCompatible := fun t : Real =>
     DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric_isMetricCompatible
       (I := I) (g t)
-
-
-
-
-
 
 omit [SigmaCompactSpace M] in
 theorem metricCovDeriv_one_component_eq_metricCovAtBase
@@ -1370,7 +1286,6 @@ theorem metricCovDeriv_one_component_eq_metricCovAtBase
     (h := g var) (gRef := g base) frame hframe hu hx d a b]
   unfold DifferentialGeometry.Integral.Connection.metricCovAtBase lcMetricFamily
   ring
-
 
 omit [SigmaCompactSpace M] in
 theorem componentL2Sq3_metricCovDeriv_one_eq_metricCovAtBase
@@ -1396,12 +1311,6 @@ theorem componentL2Sq3_metricCovDeriv_one_eq_metricCovAtBase
   exact congrArg (fun r : Real => r ^ 2)
     (metricCovDeriv_one_component_eq_metricCovAtBase
       (I := I) g frame hframe hu hx base var p.1 p.2.1 p.2.2)
-
-
-
-
-
-
 
 omit [SigmaCompactSpace M] in
 theorem metricGammaEquiv
@@ -1518,13 +1427,6 @@ theorem metricGammaEquiv
   · rw [hconnSq, hmetricSq]
     exact hcomp.2
 
-
-
-
-
-
-
-
 omit [CompleteSpace E] [T2Space M] [SigmaCompactSpace M] in
 theorem sqrt_normSq0S_three_diag_le
     {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
@@ -1562,12 +1464,6 @@ theorem sqrt_normSq0S_three_diag_le
     _ = Real.sqrt (C ^ 3) *
           Real.sqrt (Tensor0SBundle.normSq0S (I := I) g x 3 A) := by
           rw [Real.sqrt_mul (pow_nonneg hC 3)]
-
-
-
-
-
-
 
 omit [CompleteSpace E] [T2Space M] [SigmaCompactSpace M] in
 theorem exists_diagInv_of_metricUniformEquivalentOn
@@ -1712,8 +1608,6 @@ theorem exists_diagInv_of_metricUniformEquivalentOn
         exact False.elim (hj (Finset.mem_univ j))
   exact ⟨μ, basis, hginv, hhinv, hμ_nonneg, hμ_le⟩
 
-
-
 omit [FiniteDimensional ℝ E] [CompleteSpace E] [T2Space M] [SigmaCompactSpace M] in
 theorem metricUniformEquivalentOn_symm
     {K : Set M} {g h : SmoothRiemannianMetric I M} {C : Real}
@@ -1739,10 +1633,6 @@ theorem metricUniformEquivalentOn_symm
         _ <= C * h.inner x v v :=
           mul_le_mul_of_nonneg_left hlow hC_nonneg
 
-
-
-
-
 omit [CompleteSpace E] [T2Space M] [SigmaCompactSpace M] in
 theorem sqrt_normSq0S_three_le_of_metricUniformEquivalentOn
     {K : Set M} {g h : SmoothRiemannianMetric I M} {C : Real}
@@ -1762,9 +1652,6 @@ theorem sqrt_normSq0S_three_le_of_metricUniformEquivalentOn
       (hC := le_trans zero_le_one hEq.1) basis μ C
       hginv hhinv hμ_nonneg hμ_le A
 
-
-
-
 omit [CompleteSpace E] [T2Space M] [SigmaCompactSpace M] in
 theorem sqrt_normSq0S_three_le_of_metricUniformEquivalentOn_symm
     {K : Set M} {g h : SmoothRiemannianMetric I M} {C : Real}
@@ -1778,11 +1665,6 @@ theorem sqrt_normSq0S_three_le_of_metricUniformEquivalentOn_symm
   sqrt_normSq0S_three_le_of_metricUniformEquivalentOn
     (I := I) (K := K) (g := h) (h := g) (C := C)
     (metricUniformEquivalentOn_symm (I := I) hEq) hx A
-
-
-
-
-
 
 omit [SigmaCompactSpace M] in
 theorem covOne_le_connDiff
@@ -1829,11 +1711,6 @@ theorem covOne_le_connDiff
   exact le_trans hcompare
     (mul_le_mul_of_nonneg_left hgamma (Real.sqrt_nonneg _))
 
-
-
-
-
-
 omit [SigmaCompactSpace M] in
 theorem connDiff_le_covOne
     {Idx : Type*} [Fintype Idx] [DecidableEq Idx] {u K : Set M}
@@ -1877,8 +1754,6 @@ theorem connDiff_le_covOne
       hinv hinv_id hmetric_id).1
   exact le_trans hgamma
     (mul_le_mul_of_nonneg_left hnorm (by norm_num : (0 : Real) <= 3 / 2))
-
-
 
 omit [SigmaCompactSpace M] in
 theorem covOne_le_diff
@@ -1928,8 +1803,6 @@ theorem covOne_le_diff
       hEq' hinv' hinv_id hmetric_id'
   simpa [pair, lcMetricFamily] using hmain
 
-
-
 omit [SigmaCompactSpace M] in
 theorem diff_le_covOne
     {Idx : Type*} [Fintype Idx] [DecidableEq Idx] {u K : Set M}
@@ -1978,9 +1851,6 @@ theorem diff_le_covOne
       hEq' hinv' hinv_id hmetric_id'
   simpa [pair, lcMetricFamily] using hmain
 
-
-
-
 omit [T2Space M] [SigmaCompactSpace M] in
 theorem diffNormSq_eq_l2
     {Idx : Type*} [Fintype Idx] [DecidableEq Idx] {u : Set M}
@@ -2021,9 +1891,6 @@ theorem diffNormSq_eq_l2
       (base := 0) (var := 1) hinv' hinv_id
   simpa [pair, lcMetricFamily] using hmain
 
-
-
-
 omit [CompleteSpace E] [T2Space M] [SigmaCompactSpace M] in
 theorem normSqRS12_eq_l2
     {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
@@ -2045,10 +1912,6 @@ theorem normSqRS12_eq_l2
     (I := I) h x basis hinv A]
   rw [DifferentialGeometry.Integral.Connection.componentL2Sq3_eq_sum_upper_first]
   simp only [Tensor0SBundle.componentRS_apply_gen, Tensor0SBundle.componentRS_apply]
-
-
-
-
 
 omit [FiniteDimensional ℝ E] [CompleteSpace E] [T2Space M] [SigmaCompactSpace M] in
 theorem applyCons3
@@ -2075,8 +1938,6 @@ private theorem sub_swap_of_sub_eq_sub
     a - c = ((c - d) + b) - c := by rw [ha]
     _ = b - d := by abel
 
-
-
 omit [FiniteDimensional ℝ E] [CompleteSpace E] [T2Space M] [SigmaCompactSpace M] in
 theorem coord_eq_inner_id
     {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
@@ -2093,13 +1954,6 @@ theorem coord_eq_inner_id
       hinv a V
   simpa [Tensor0SBundle.identityInvMetric, Tensor0SBundle.diagonalInvMetric]
     using hcoord
-
-
-
-
-
-
-
 
 omit [SigmaCompactSpace M] in
 theorem covOneCompDiff
@@ -2294,9 +2148,6 @@ theorem covOneCompDiff
         rw [hterm1, hterm2]
         simp [covH, covG, add_comm]
 
-
-
-
 omit [SigmaCompactSpace M] in
 theorem connDiffBasisSymm
     {Idx : Type*} [Finite Idx]
@@ -2399,7 +2250,6 @@ theorem connDiffBasisSymm
         (basis a)) (basis b) := by
           simp [covH, covG, hX, hY]
 
-
 omit [SigmaCompactSpace M] in
 theorem connDiffCompSymm
     {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
@@ -2424,13 +2274,6 @@ theorem connDiffCompSymm
   rw [componentRS_eq_gen, Tensor0SBundle.componentRS_connectionDifferenceTensorAt]
   exact congrArg (basis.coord e)
     (connDiffBasisSymm (I := I) h gRef basis a b)
-
-
-
-
-
-
-
 
 omit [SigmaCompactSpace M] in
 theorem covOne_le_diff_basis
@@ -2508,8 +2351,6 @@ theorem covOne_le_diff_basis
   rw [hA, hD]
   exact hmain
 
-
-
 omit [SigmaCompactSpace M] in
 theorem covOne_le_diff_basis_lc
     {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
@@ -2531,12 +2372,6 @@ theorem covOne_le_diff_basis_lc
                 x)) := by
   exact covOne_le_diff_basis (I := I) h gRef basis hinv
     (fun a b c => covOneCompDiff (I := I) h gRef basis hinv a b c)
-
-
-
-
-
-
 
 omit [SigmaCompactSpace M] in
 theorem diff_le_covOne_basis
@@ -2613,9 +2448,6 @@ theorem diff_le_covOne_basis
   rw [hA, hD]
   exact hmain
 
-
-
-
 omit [SigmaCompactSpace M] in
 theorem connDiffCompEq
     {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
@@ -2684,8 +2516,6 @@ theorem connDiffCompEq
     _ = A a b e + A b a e - A e a b := by
           rw [hAabe, hAbae, hAeab]
 
-
-
 omit [SigmaCompactSpace M] in
 theorem diff_le_covOne_basis_lc
     {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
@@ -2707,10 +2537,6 @@ theorem diff_le_covOne_basis_lc
             (metricCovDeriv (I := I) h gRef 1 x)) := by
   exact diff_le_covOne_basis (I := I) h gRef basis hinv
     (fun a b e => connDiffCompEq (I := I) h gRef basis hinv a b e)
-
-
-
-
 
 omit [SigmaCompactSpace M] in
 theorem covOne_le_diff_basis_ref
@@ -2769,8 +2595,6 @@ theorem covOne_le_diff_basis_ref
   exact le_trans hcompare
     (mul_le_mul_of_nonneg_left hbasis (Real.sqrt_nonneg _))
 
-
-
 omit [SigmaCompactSpace M] in
 theorem covOne_le_diff_basis_ref_lc
     {Idx : Type*} [Fintype Idx] [DecidableEq Idx] {K : Set M}
@@ -2794,9 +2618,6 @@ theorem covOne_le_diff_basis_ref_lc
                   gRef) x))) := by
   exact covOne_le_diff_basis_ref (I := I) h gRef hxK C hEq basis hinv
     (fun a b c => covOneCompDiff (I := I) h gRef basis hinv a b c)
-
-
-
 
 omit [SigmaCompactSpace M] in
 theorem diff_le_covOne_basis_ref
@@ -2854,9 +2675,6 @@ theorem diff_le_covOne_basis_ref
   exact le_trans hbasis
     (mul_le_mul_of_nonneg_left hnorm (by norm_num : (0 : Real) <= 3 / 2))
 
-
-
-
 omit [SigmaCompactSpace M] in
 theorem diff_le_covOne_basis_ref_lc
     {Idx : Type*} [Fintype Idx] [DecidableEq Idx] {K : Set M}
@@ -2881,8 +2699,6 @@ theorem diff_le_covOne_basis_ref_lc
   exact diff_le_covOne_basis_ref (I := I) h gRef hxK C hEq basis hinv
     (fun a b e => connDiffCompEq (I := I) h gRef basis hinv a b e)
 
-
-
 omit [FiniteDimensional ℝ E] [CompleteSpace E] [T2Space M] [SigmaCompactSpace M] in
 theorem metricInvBasisId
     {Idx : Type*} [Fintype Idx] [DecidableEq Idx] {u : Set M}
@@ -2904,13 +2720,6 @@ theorem metricInvBasisId
       IsLocalFrameOn.toBasisAt_coe, hinv_id] using (hinv x i j).1
   · simpa [Tensor0SBundle.identityInvMetric, Tensor0SBundle.diagonalInvMetric,
       IsLocalFrameOn.toBasisAt_coe, hinv_id] using (hinv x i j).2
-
-
-
-
-
-
-
 
 omit [SigmaCompactSpace M] in
 theorem covOne_le_christoffel
@@ -3066,9 +2875,6 @@ theorem covOne_le_christoffel
     (mul_le_mul_of_nonneg_left
       (mul_le_mul_of_nonneg_left hconn (by norm_num : (0 : Real) <= 2))
       (Real.sqrt_nonneg _))
-
-
-
 
 omit [SigmaCompactSpace M] in
 theorem covOne_le_init

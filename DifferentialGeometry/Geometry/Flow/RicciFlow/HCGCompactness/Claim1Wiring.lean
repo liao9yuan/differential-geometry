@@ -7,24 +7,6 @@ import Mathlib.LinearAlgebra.Matrix.NonsingularInverse
 
 set_option autoImplicit false
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 noncomputable section
 
 namespace DifferentialGeometry.PDE.RicciFlow
@@ -45,13 +27,6 @@ variable [CompleteSpace E] [SigmaCompactSpace M] [T2Space M]
 variable [VectorBundle Real E (TangentSpace I : M → Type _)]
 variable [ContMDiffVectorBundle 1 E (TangentSpace I : M → Type _) I]
 variable {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
-
-
-
-
-
-
-
 
 omit [I.Boundaryless] [IsManifold I 2 M] [Fintype Idx] [DecidableEq Idx] in
 omit [SigmaCompactSpace M] [T2Space M] in
@@ -78,8 +53,6 @@ theorem lcChrist_e_mdiffOn [Finite Idx]
   simp [christoffelSymbolInFrame, IsLocalFrameOn.coeff, hz,
     Bundle.Trivialization.localFrame_coeff, hbasis]
 
-
-
 omit [FiniteDimensional ℝ E] [I.Boundaryless] [IsManifold I 2 M] [CompleteSpace E]
     [SigmaCompactSpace M] [T2Space M] [ContMDiffVectorBundle 1 E (TangentSpace I : M → Type _) I]
     [Fintype Idx] [DecidableEq Idx] in
@@ -93,7 +66,6 @@ theorem frame_e_mdiffOn
   (e₀.isLocalFrameOn_localFrame_baseSet I ∞ basisE).contMDiffOn d
 
 set_option backward.isDefEq.respectTransparency false in
-
 
 omit [I.Boundaryless] [IsManifold I 2 M] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M]
     [ContMDiffVectorBundle 1 E (TangentSpace I : M → Type _) I] [Fintype Idx] [DecidableEq Idx] in
@@ -122,9 +94,6 @@ theorem tensorComp_mdiffOn {r : ℕ}
     (v := fun (i : Fin r) (b : M) => e₀.localFrame basisE (k i) b) hv
   exact h.contMDiffWithinAt
 
-
-
-
 def akCompField
     (e₀ : Trivialization E (TotalSpace.proj : TotalSpace E (TangentSpace I : M → Type _) → M))
     [MemTrivializationAtlas e₀]
@@ -137,8 +106,6 @@ def akCompField
     christoffelSymbolInFrame (leviCivitaConnectionOfMetric (I := I) gRef)
       (fun a y' => e₀.localFrame basisE a y')
       (e₀.isLocalFrameOn_localFrame_baseSet I 1 basisE) y (m 0) (m 1) (m 2)
-
-
 
 omit [I.Boundaryless] [IsManifold I 2 M] [Fintype Idx] [DecidableEq Idx] in
 omit [SigmaCompactSpace M] [T2Space M] in
@@ -153,8 +120,6 @@ theorem akCompField_mdiffOn [Finite Idx]
     (lcChrist_e_mdiffOn e₀ gRef basisE (k 0) (k 1) (k 2))
 
 set_option backward.isDefEq.respectTransparency false in
-
-
 
 omit [I.Boundaryless] [IsManifold I 2 M] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M]
     [ContMDiffVectorBundle 1 E (TangentSpace I : M → Type _) I] [Fintype Idx] [DecidableEq Idx] in
@@ -181,13 +146,6 @@ theorem gCompField_mdiffOn
     (v := fun (i : Fin 2) (b : M) => e₀.localFrame basisE (k i) b) hv
   exact h.contMDiffWithinAt
 
-
-
-
-
-
-
-
 def gramE
     (e₀ : Trivialization E (TotalSpace.proj : TotalSpace E (TangentSpace I : M → Type _) → M))
     [MemTrivializationAtlas e₀]
@@ -206,8 +164,6 @@ theorem gramE_herm
   ext i j
   simp only [Matrix.conjTranspose_apply, star_trivial, gramE, Matrix.of_apply]
   exact g.symm y _ _
-
-
 
 omit [FiniteDimensional ℝ E] [I.Boundaryless] [IsManifold I 2 M] [CompleteSpace E]
     [SigmaCompactSpace M] [T2Space M] [ContMDiffVectorBundle 1 E (TangentSpace I : M → Type _) I]
@@ -241,8 +197,6 @@ theorem gramE_dotVec
   refine Finset.sum_congr rfl fun j _ => ?_
   ring
 
-
-
 omit [FiniteDimensional ℝ E] [I.Boundaryless] [IsManifold I 2 M] [CompleteSpace E]
     [SigmaCompactSpace M] [T2Space M] [Fintype Idx] [DecidableEq Idx] in
 theorem gramE_posDef [Finite Idx]
@@ -262,16 +216,12 @@ theorem gramE_posDef [Finite Idx]
     exact hc (funext (hli c hw0))
   exact g.pos y _ hwnz
 
-
-
 def ginvCompField
     (e₀ : Trivialization E (TotalSpace.proj : TotalSpace E (TangentSpace I : M → Type _) → M))
     [MemTrivializationAtlas e₀]
     (g : SmoothRiemannianMetric I M) (basisE : Module.Basis Idx Real E) :
     M → (Fin (1 + 1) → Idx) → Real :=
   fun y m => (gramE (I := I) e₀ g basisE y)⁻¹ (m 0) (m 1)
-
-
 
 omit [I.Boundaryless] [IsManifold I 2 M] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 theorem ginv_hinv
@@ -312,16 +262,6 @@ theorem ginv_hinv
   · simp
   · rw [if_neg h, if_neg fun hce => h hce.symm]
 
-
-
-
-
-
-
-
-
-
-
 omit [FiniteDimensional ℝ E] [I.Boundaryless] [IsManifold I ∞ M] [IsManifold I 2 M]
     [CompleteSpace E] [SigmaCompactSpace M] [T2Space M]
     [VectorBundle ℝ E (TangentSpace I : M → Type _)]
@@ -334,10 +274,6 @@ private theorem chr_eq_chartChr {u : Set M}
       DifferentialGeometry.Coordinates.christoffelSymbolInFrame cov frame hframe x i j k := rfl
 
 set_option backward.isDefEq.respectTransparency false in
-
-
-
-
 
 omit [I.Boundaryless] [DecidableEq Idx] in
 omit [SigmaCompactSpace M] in
@@ -522,11 +458,6 @@ theorem koszulComp_at
   rw [hLHS, hkos, hb1, hb2, hb3]
   ring
 
-
-
-
-
-
 omit [FiniteDimensional ℝ E] [I.Boundaryless] [IsManifold I 2 M] [CompleteSpace E]
     [SigmaCompactSpace M] [T2Space M] [ContMDiffVectorBundle 1 E (TangentSpace I : M → Type _) I] in
 theorem ginv_compL2_le
@@ -606,12 +537,6 @@ theorem ginv_compL2_le
     _ = Real.sqrt (Fintype.card Idx) / c := Real.sqrt_sq
         (div_nonneg (Real.sqrt_nonneg _) hc.le)
 
-
-
-
-
-
-
 omit [VectorBundle ℝ E (TangentSpace I : M → Type _)]
     [ContMDiffVectorBundle 1 E (TangentSpace I : M → Type _) I] in
 omit [I.Boundaryless] in
@@ -646,15 +571,7 @@ theorem compL2_tower_eq
   rw [IsLocalFrameOn.toBasisAt_coe]
   rfl
 
-
-
 set_option backward.isDefEq.respectTransparency false in
-
-
-
-
-
-
 
 omit [I.Boundaryless] in
 omit [SigmaCompactSpace M] in

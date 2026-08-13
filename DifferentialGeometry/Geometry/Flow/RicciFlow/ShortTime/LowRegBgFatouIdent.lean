@@ -1,16 +1,6 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.LowRegFatouIdent
 import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.LowRegBgRungThree
 
-/-!
-# Fixed-background rung-three Fatou identification
-
-This module frees the DeTurck background in the primitive rung-three Fatou
-endpoint.  The projected mode coordinates and their spatial, forcing, and
-time-derivative identifications are already polymorphic in the nonlinearity;
-only the `coreN`/`lowregNfun` background slot and the ordered rung certificate
-change here.
--/
-
 noncomputable section
 
 open Bundle Manifold MeasureTheory Set Filter
@@ -36,10 +26,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
   [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
   [T2Space M] [SigmaCompactSpace M]
 
-/-- The fixed-background primitive Fatou endpoint at one exact ordered
-rung-three certificate.  A projected forcing sequence with a uniform
-time-integrated `H³` energy bound has an `N`- and time-uniform `H³` energy
-bound, provided the stored rung-three absorption budget holds. -/
 theorem lowregFatouE3AtBg
     (g₀ g_bg : SmoothRiemannianMetric I M)
     {δ Ctop B0 B1 ρ P T Bd Ctop₂ Kr2 Kr1 Kcap ε : ℝ}

@@ -7,16 +7,6 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.UnifCoeffH2
 import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.UnifSlotFreeOne
 import DifferentialGeometry.Analysis.Sobolev.TensorHilbert.LieCorr0CoefficientRefold
 
-/-!
-# Class-first fixed-curvature correction H1 bound
-
-This module gives the dimension-three class-first affine `H1` estimate for
-`lc0Riem`.  The live double trace is controlled by the moving-trace packet,
-while the fixed curvature passenger is reduced to the rank-one free-slot
-curvature operator.  Its pointwise zeroth and first jets are then integrated
-using the class-uniform volume comparison.
--/
-
 set_option autoImplicit false
 set_option backward.isDefEq.respectTransparency false
 
@@ -138,10 +128,6 @@ private lemma riemPass_rfns
               (slotFreeOpCc (I := I) (M := M) g 1))).toSection x) := hsrc
     _ ≤ 3 * C i := hext
 
-/-- On a closed three-manifold, the fixed-curvature order-zero correction has
-one class-first affine intrinsic `H1` cap.  The coefficient of the separated
-third perturbation derivative is zero; class metric jets are used only through
-order three. -/
 theorem riem_h1_unif
     (hDim : Module.finrank ℝ E = 3)
     (gBase : SmoothRiemannianMetric I M) {Λ : ℝ} (hΛ : 1 ≤ Λ)

@@ -4,7 +4,6 @@ import DifferentialGeometry.Analysis.Integration.L2.SmoothSections.Defs
 import DifferentialGeometry.Tensor.Mixed.Field
 import DifferentialGeometry.Tensor.RSTensor.Coordinates.Field
 
-
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false

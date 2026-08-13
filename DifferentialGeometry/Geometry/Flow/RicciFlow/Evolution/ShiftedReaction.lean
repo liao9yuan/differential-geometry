@@ -4,15 +4,6 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.MaximumPrinciple.TensorWeak.
 set_option autoImplicit false
 set_option backward.isDefEq.respectTransparency false
 
-
-
-
-
-
-
-
-
-
 noncomputable section
 
 namespace DifferentialGeometry.PDE.RicciFlow
@@ -22,28 +13,20 @@ open Bundle
 open Tensor0SBundle
 open scoped BigOperators Manifold ContDiff
 
-
-
-
 def ricciSq3 (Ric : Fin 3 -> Fin 3 -> Real) (i j : Fin 3) : Real :=
   ∑ k : Fin 3, Ric i k * Ric k j
-
 
 def ricciScal3 (Ric : Fin 3 -> Fin 3 -> Real) : Real :=
   ∑ i : Fin 3, Ric i i
 
-
 def ricciNorm3 (Ric : Fin 3 -> Fin 3 -> Real) : Real :=
   ∑ i : Fin 3, ∑ j : Fin 3, Ric i j * Ric i j
-
-
 
 def ricciPresReact
     (Rm : Fin 3 -> Fin 3 -> Fin 3 -> Fin 3 -> Real)
     (Ric : Fin 3 -> Fin 3 -> Real) (i j : Fin 3) : Real :=
   2 * (∑ k : Fin 3, ∑ l : Fin 3, Rm i k j l * Ric k l) -
     2 * ricciSq3 Ric i j
-
 
 def pinchReact
     (delta : Real)
@@ -52,8 +35,6 @@ def pinchReact
   ricciPresReact Rm Ric i j -
     2 * delta * (ricciNorm3 Ric * DifferentialGeometry.Integral.Connection.delta3 i j -
       ricciScal3 Ric * Ric i j)
-
-
 
 def stdRmOfRic3
     (Ric : Fin 3 -> Fin 3 -> Real)
@@ -67,9 +48,6 @@ def stdRmOfRic3
             DifferentialGeometry.Integral.Connection.delta3 j l -
           DifferentialGeometry.Integral.Connection.delta3 i l *
             DifferentialGeometry.Integral.Connection.delta3 j k)
-
-
-
 
 theorem pinchReact_add_g00
     (delta a : Real) (Ric : Fin 3 -> Fin 3 -> Real) :
@@ -87,7 +65,6 @@ theorem pinchReact_add_g00
   simp [Fin.sum_univ_three, ricciScal3]
   ring_nf
 
-
 theorem ricciReactNull
     (l1 l2 l3 : Real) (hnull : l1 = 0) :
     ricciPresReact (DifferentialGeometry.Integral.Connection.stdRmDiag3 l1 l2 l3)
@@ -101,14 +78,12 @@ theorem ricciReactNull
   simp [Fin.sum_univ_three]
   ring
 
-
 theorem ricciReact_ge
     (l1 l2 l3 : Real) (hnull : l1 = 0) :
     0 <= ricciPresReact (DifferentialGeometry.Integral.Connection.stdRmDiag3 l1 l2 l3)
       (DifferentialGeometry.Integral.Connection.ricciDiag3 l1 l2 l3) 0 0 := by
   rw [ricciReactNull l1 l2 l3 hnull]
   positivity
-
 
 theorem pinchReactNull
     (delta l1 l2 l3 : Real)
@@ -147,7 +122,6 @@ theorem pinchReactNull
     ring
   nlinarith
 
-
 theorem pinchReact_ge
     (delta l1 l2 l3 : Real)
     (_hdelta0 : 0 <= delta) (hdelta13 : delta <= (1 : Real) / 3)
@@ -169,17 +143,12 @@ theorem pinchReact_ge
     positivity
   exact add_nonneg h1 h2
 
-
-
-
-
 def shiftScal3 (delta a b : Real) : Real :=
   (a + b) / (1 - 3 * delta)
 
 def shiftRic1 (delta a b : Real) : Real := delta * shiftScal3 delta a b
 def shiftRic2 (delta a b : Real) : Real := a + delta * shiftScal3 delta a b
 def shiftRic3 (delta a b : Real) : Real := b + delta * shiftScal3 delta a b
-
 
 theorem shiftScal3_eq
     (delta a b : Real) (hdelta13 : delta < (1 : Real) / 3) :
@@ -195,7 +164,6 @@ theorem shiftScal3_eq
   field_simp [hden, hden']
   ring
 
-
 theorem shiftNull3
     (delta a b : Real) (hdelta13 : delta < (1 : Real) / 3) :
     shiftRic1 delta a b =
@@ -203,7 +171,6 @@ theorem shiftNull3
         (shiftRic1 delta a b) (shiftRic2 delta a b) (shiftRic3 delta a b) := by
   rw [shiftScal3_eq delta a b hdelta13]
   rfl
-
 
 theorem pinchShiftNull_ge
     (delta a b : Real)
@@ -218,8 +185,6 @@ theorem pinchShiftNull_ge
     (shiftRic1 delta a b) (shiftRic2 delta a b) (shiftRic3 delta a b)
     hdelta0 (le_of_lt hdelta13) (shiftNull3 delta a b hdelta13)
 
-
-
 def shiftReact3 (delta a b : Real) : Real :=
   pinchReact delta
     (DifferentialGeometry.Integral.Connection.stdRmDiag3
@@ -228,15 +193,11 @@ def shiftReact3 (delta a b : Real) : Real :=
       (shiftRic1 delta a b) (shiftRic2 delta a b) (shiftRic3 delta a b))
     0 0
 
-
 theorem shiftReact3_nonneg
     (delta a b : Real)
     (hdelta0 : 0 < delta) (hdelta13 : delta < (1 : Real) / 3) :
     0 <= shiftReact3 delta a b := by
   exact pinchShiftNull_ge delta a b (le_of_lt hdelta0) hdelta13
-
-
-
 
 def shiftBlockS3 (a b c : Real) (i j : Fin 3) : Real :=
   if i = 0 then 0
@@ -246,18 +207,14 @@ def shiftBlockS3 (a b c : Real) (i j : Fin 3) : Real :=
   else
     if j = 1 then c else b
 
-
 def shiftRicBlock3 (delta a b c : Real) (i j : Fin 3) : Real :=
   shiftBlockS3 a b c i j +
     delta * shiftScal3 delta a b * DifferentialGeometry.Integral.Connection.delta3 i j
-
-
 
 def shiftReactBlock3 (delta a b c : Real) : Real :=
   pinchReact delta
     (stdRmOfRic3 (shiftRicBlock3 delta a b c))
     (shiftRicBlock3 delta a b c) 0 0
-
 
 theorem shiftReactBlock3_eq
     (delta a b c : Real) (hdelta13 : delta < (1 : Real) / 3) :
@@ -276,8 +233,6 @@ theorem shiftReactBlock3_eq
   simp [Fin.sum_univ_three, ricciScal3]
   field_simp [hden, hden', hden2]
   ring_nf
-
-
 
 theorem shiftReactBlock3_nonneg_of_lt
     (delta a b c : Real) (hdelta13 : delta < (1 : Real) / 3) :
@@ -299,14 +254,11 @@ theorem shiftReactBlock3_nonneg_of_lt
     positivity
   exact add_nonneg hterm1 hterm2
 
-
 theorem shiftReactBlock3_nonneg
     (delta a b c : Real)
     (_hdelta0 : 0 < delta) (hdelta13 : delta < (1 : Real) / 3) :
     0 <= shiftReactBlock3 delta a b c := by
   exact shiftReactBlock3_nonneg_of_lt delta a b c hdelta13
-
-
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]
 variable [FiniteDimensional Real E]
@@ -314,10 +266,6 @@ variable {H : Type*} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 variable [IsManifold I 1 M] [IsManifold I 2 M]
-
-
-
-
 
 structure ShiftBlockAt
     (g : SmoothRiemannianMetric I M)
@@ -328,8 +276,6 @@ structure ShiftBlockAt
   components :
     ∀ i j : Fin 3,
       A x (basis i) (basis j) = shiftBlockS3 a b c i j
-
-
 
 omit [FiniteDimensional ℝ E] [IsManifold I ∞ M] [IsManifold I 1 M] [IsManifold I 2 M] in
 theorem raw_null_of_smul
@@ -346,9 +292,6 @@ theorem raw_null_of_smul
     simpa [hscale_eval] using hnull
   have hr2 : r * r ≠ 0 := mul_ne_zero hr hr
   exact (mul_eq_zero.mp hmul).resolve_left hr2
-
-
-
 
 omit [FiniteDimensional ℝ E] [IsManifold I 1 M] [IsManifold I 2 M] in
 theorem shiftBlockOfNull
@@ -386,20 +329,12 @@ theorem shiftBlockOfNull
   · simpa [shiftBlockS3] using hsym (basis 2) (basis 1)
   · simp [shiftBlockS3]
 
-
-
-
-
-
 structure NullOrthonormalBasis3At
     (g : SmoothRiemannianMetric I M) (x : M)
     (v : TangentSpace I x) : Type _ where
   basis : Module.Basis (Fin 3) Real (TangentSpace I x)
   orthonormal : DifferentialGeometry.Integral.Connection.OrthonormalBasisAt (I := I) g x basis
   scale : ∃ r : Real, r ≠ 0 ∧ v = r • basis 0
-
-
-
 
 omit [IsManifold I 1 M] [IsManifold I 2 M] in
 theorem exists_nullOrthonormalBasis3At
@@ -472,14 +407,10 @@ theorem exists_nullOrthonormalBasis3At
     simp
   exact ⟨⟨basis, horth_basis, ⟨‖v‖, hvnorm, hscale⟩⟩⟩
 
-
-
 def shiftScalar3At
     (δ : Real) (g : SmoothRiemannianMetric I M) {x : M}
     (A : Tensor02At (I := I) (M := M) x) : Real :=
   metricTracePair0SAt (I := I) g A / (1 - 3 * δ)
-
-
 
 def shiftRic3At
     (δ : Real) (g : SmoothRiemannianMetric I M) {x : M}
@@ -487,7 +418,6 @@ def shiftRic3At
     Tensor02At (I := I) (M := M) x :=
   A + (δ * shiftScalar3At (I := I) (M := M) δ g A) •
     metricTensorField (I := I) g x
-
 
 omit [IsManifold I 2 M] in
 theorem metricTrace_metric3
@@ -507,8 +437,6 @@ theorem metricTrace_metric3
   norm_num [Fin.sum_univ_three, DifferentialGeometry.Integral.Connection.delta3,
     metricTensorField_apply,
     horth', vec2, DifferentialGeometry.Integral.Connection.vec2]
-
-
 
 omit [IsManifold I 2 M] in
 theorem shiftScalar_add_g
@@ -539,8 +467,6 @@ theorem shiftScalar_add_g
     smul_eq_mul]
   ring
 
-
-
 omit [IsManifold I 2 M] in
 theorem shiftRic_add_g
     {δ c : Real} {g : SmoothRiemannianMetric I M} {x : M}
@@ -559,8 +485,6 @@ theorem shiftRic_add_g
   simp [shiftRic3At, shiftScalar_add_g (I := I) (M := M) basis horth A]
   field_simp [hden, hden']
   ring_nf
-
-
 
 omit [IsManifold I 2 M] in
 theorem shiftScalar3At_pinch
@@ -603,8 +527,6 @@ theorem shiftScalar3At_pinch
     smul_eq_mul]
   field_simp [hden]
 
-
-
 omit [IsManifold I 2 M] in
 theorem shiftRic3At_pinch
     {δ : Real} {g : SmoothRiemannianMetric I M} {x : M}
@@ -621,8 +543,6 @@ theorem shiftRic3At_pinch
   rw [shiftRic3At, shiftScalar3At_pinch
     (I := I) (M := M) basis horth hδ Ric]
   simp
-
-
 
 omit [IsManifold I 1 M] [IsManifold I 2 M] in
 theorem shiftScalar3At_of_shiftBlock
@@ -646,8 +566,6 @@ theorem shiftScalar3At_of_shiftBlock
     hreal (basis 2) (basis 2), hblock.components 0 0,
     hblock.components 1 1, hblock.components 2 2]
   simp [shiftBlockS3]
-
-
 
 omit [IsManifold I 2 M] in
 theorem shiftRic3At_comp_of_shiftBlock
@@ -673,8 +591,6 @@ theorem shiftRic3At_comp_of_shiftBlock
   simp [Tensor0SBundle.Tensor0SSpace.add_apply, Tensor0SBundle.Tensor0SSpace.smul_apply,
     hreal (basis i) (basis j), hblock.components i j, hmetric, smul_eq_mul]
 
-
-
 def perm0213 : Equiv.Perm (Fin 4) where
   toFun := fun i =>
     if i = (0 : Fin 4) then 0
@@ -692,8 +608,6 @@ def perm0213 : Equiv.Perm (Fin 4) where
   right_inv := by
     intro i
     fin_cases i <;> simp
-
-
 
 def perm0312 : Equiv.Perm (Fin 4) where
   toFun := fun i =>
@@ -713,8 +627,6 @@ def perm0312 : Equiv.Perm (Fin 4) where
     intro i
     fin_cases i <;> simp
 
-
-
 def perm1203 : Equiv.Perm (Fin 4) where
   toFun := fun i =>
     if i = (0 : Fin 4) then 1
@@ -733,8 +645,6 @@ def perm1203 : Equiv.Perm (Fin 4) where
     intro i
     fin_cases i <;> simp
 
-
-
 def perm1302 : Equiv.Perm (Fin 4) where
   toFun := fun i =>
     if i = (0 : Fin 4) then 1
@@ -752,7 +662,6 @@ def perm1302 : Equiv.Perm (Fin 4) where
   right_inv := by
     intro i
     fin_cases i <;> simp
-
 
 def tensor04Pair
     {x : M} (A B : Tensor02At (I := I) (M := M) x)
@@ -821,8 +730,6 @@ theorem tensor04Pair_perm1302_vec4
     simp [perm1302, vec2, vec4, DifferentialGeometry.Integral.Connection.vec2,
       DifferentialGeometry.Integral.Connection.vec4, Function.comp_def]
 
-
-
 def rm04OfRic3At
     (g : SmoothRiemannianMetric I M) {x : M}
     (Ric : Tensor02At (I := I) (M := M) x) :
@@ -836,9 +743,6 @@ def rm04OfRic3At
     ((1 / 2 : Real) * R) •
       (tensor04Pair (I := I) (M := M) G G perm0213 -
         tensor04Pair (I := I) (M := M) G G perm0312)
-
-
-
 
 omit [IsManifold I 2 M] in
 theorem rm04OfRic3At_comp_orthonormal
@@ -869,10 +773,6 @@ theorem rm04OfRic3At_comp_orthonormal
     Tensor0SBundle.Tensor0SSpace.add_apply, Tensor0SBundle.Tensor0SSpace.sub_apply,
     Tensor0SBundle.Tensor0SSpace.smul_apply, smul_eq_mul]
 
-
-
-
-
 def ricciEndCLMAt
     (g : SmoothRiemannianMetric I M) {x : M}
     (Ric : Tensor02At (I := I) (M := M) x) :
@@ -889,8 +789,6 @@ theorem ricciEndCLMAt_apply
     ricciEndCLMAt (I := I) (M := M) g Ric X =
       DifferentialGeometry.Integral.Connection.ricciEndAt (I := I) g Ric X := by
   rfl
-
-
 
 def ricciQuadAt
     (g : SmoothRiemannianMetric I M) {x : M}
@@ -919,8 +817,6 @@ theorem ricciQuadAt_apply
   funext i
   fin_cases i <;> simp [vec2, DifferentialGeometry.Integral.Connection.vec2]
 
-
-
 def rm04Mid02At
     {x : M} (Rm04 : Tensor04At (I := I) (M := M) x)
     (X Y : TangentSpace I x) :
@@ -945,7 +841,6 @@ theorem rm04Mid02At_apply
   funext i
   fin_cases i <;> rfl
 
-
 def rm04MidCLMAt
     {x : M} (Rm04 : Tensor04At (I := I) (M := M) x) :
     TangentSpace I x →L[Real]
@@ -965,7 +860,6 @@ theorem rm04MidCLMAt_apply
   unfold rm04MidCLMAt rm04Mid02At
   rfl
 
-
 def inner02RightCLM
     (g : SmoothRiemannianMetric I M) {x : M}
     (A : Tensor02At (I := I) (M := M) x) :
@@ -981,8 +875,6 @@ theorem inner02RightCLM_apply
     inner02RightCLM (I := I) (M := M) g A B =
       inner0S (I := I) g x 2 A B := by
   rfl
-
-
 
 def rm04ContrRightCLM
     (g : SmoothRiemannianMetric I M) {x : M}
@@ -1032,7 +924,6 @@ theorem rm04ContrRightCLM_apply
       inner0S (I := I) g x 2 Ric
         (rm04Mid02At (I := I) (M := M) Rm04 X Y) := by
   rfl
-
 
 def rm04ContrCurried
     (g : SmoothRiemannianMetric I M) {x : M}
@@ -1085,7 +976,6 @@ def rm04ContrCurried
               (rm04Mid02At (I := I) (M := M) Rm04 X (m 0))
         rw [map_smul] }
 
-
 def rm04RicciContrAt
     (g : SmoothRiemannianMetric I M) {x : M}
     (Rm04 : Tensor04At (I := I) (M := M) x)
@@ -1125,8 +1015,6 @@ theorem rm04RicciContrAt_apply
         (rm04Mid02At (I := I) (M := M) Rm04 X Y)
   rfl
 
-
-
 def ricciReaction3At
     (g : SmoothRiemannianMetric I M) {x : M}
     (Ric : Tensor02At (I := I) (M := M) x) :
@@ -1134,8 +1022,6 @@ def ricciReaction3At
   2 • rm04RicciContrAt (I := I) (M := M) g
       (rm04OfRic3At (I := I) (M := M) g Ric) Ric -
     2 • ricciQuadAt (I := I) (M := M) g Ric
-
-
 
 def shiftNAt (delta : Real) : Tensor02ReactionAt (I := I) (M := M) :=
   fun _t g x A =>
@@ -1145,7 +1031,6 @@ def shiftNAt (delta : Real) : Tensor02ReactionAt (I := I) (M := M) :=
     ricciReaction3At (I := I) (M := M) g Ric -
       (2 * delta) •
         (RicNormSq • metricTensorField (I := I) g x - R • Ric)
-
 
 def shiftNRaw (delta : Real) : TwoTensorReaction (I := I) (M := M) :=
   Tensor02ReactionAt.toRawSymm (I := I) (M := M)
@@ -1158,8 +1043,6 @@ theorem shiftNRaw_symmInputOn
       (shiftNRaw (I := I) (M := M) delta) U :=
   Tensor02ReactionAt.toRawSymm_symmInputOn (I := I) (M := M) G
     (shiftNAt (I := I) (M := M) delta) U
-
-
 
 omit [IsManifold I 2 M] in
 theorem shiftNAt_pinch
@@ -1393,8 +1276,6 @@ theorem shiftNAt_comp_orthonormal
     hmetric, Tensor0SBundle.Tensor0SSpace.sub_apply,
     Tensor0SBundle.Tensor0SSpace.smul_apply, smul_eq_mul]
 
-
-
 omit [IsManifold I 2 M] in
 theorem shiftNAt_add_g_comp
     {delta c t : Real} {g : SmoothRiemannianMetric I M} {x : M}
@@ -1454,8 +1335,6 @@ theorem shiftNAt_add_g_comp
     shiftNAt_comp_orthonormal (I := I) (M := M) basis horth A 0 0]
   simp [hRicAdd, hRmAdd, hRm, htrace, Ric, a,
     pinchReact_add_g00]
-
-
 
 omit [IsManifold I 2 M] in
 theorem shiftNAt_add_g_quad
@@ -1562,8 +1441,6 @@ theorem shiftNAt_add_g_quad
       _ = r ^ 2 * (k * Q) := by rw [hcomp']
       _ = k * (r ^ 2 * Q) := by ring
 
-
-
 omit [IsManifold I 2 M] in
 theorem shiftNAt_comp_shiftBlock
     {delta t : Real} {g : SmoothRiemannianMetric I M}
@@ -1594,10 +1471,6 @@ theorem shiftNAt_comp_shiftBlock
   rw [shiftNAt_comp_orthonormal (I := I) (M := M) basis
     hblock.orthonormal A 0 0]
   simp [shiftReactBlock3, hRic, hRm]
-
-
-
-
 
 omit [IsManifold I 2 M] in
 theorem shiftNRaw_realizes_block
@@ -1630,8 +1503,6 @@ theorem shiftNRaw_realizes_block
       (vec2 (I := I) (basis 0) (basis 0)) =
     shiftReactBlock3 delta a b c
   exact shiftNAt_comp_shiftBlock (I := I) (M := M) hreal hblock
-
-
 
 omit [IsManifold I 2 M] in
 theorem shiftNRaw_null_symm_of_lt
@@ -1681,8 +1552,6 @@ theorem shiftNRaw_null_symm_of_lt
     exact mul_nonneg (sq_nonneg r)
       (shiftReactBlock3_nonneg_of_lt delta a b c hdelta13)
 
-
-
 omit [IsManifold I 2 M] in
 theorem shiftNRaw_null_symm
     {G : Real -> SmoothRiemannianMetric I M} {U : Set Real} {delta : Real}
@@ -1692,9 +1561,6 @@ theorem shiftNRaw_null_symm
       (shiftNRaw (I := I) (M := M) delta) U := by
   exact shiftNRaw_null_symm_of_lt (I := I) (M := M)
     (G := G) (U := U) hdelta13 hdim
-
-
-
 
 def tensor02FromBasis
     {x : M}
@@ -1728,8 +1594,6 @@ theorem tensor02FromBasis_apply
       C i j := by
   simpa [component0S_apply, slots2, vec2, DifferentialGeometry.Integral.Connection.vec2] using
     tensor02FromBasis_component (I := I) (M := M) basis C i j
-
-
 
 omit [FiniteDimensional ℝ E] [IsManifold I 1 M] [IsManifold I 2 M] in
 theorem tensor02_smul2
@@ -1773,7 +1637,6 @@ theorem tensor02_smul2
   rw [h1eq, h0eq]
   ring
 
-
 omit [IsManifold I 2 M] in
 theorem shiftNScaled
     {delta t : Real} {g : SmoothRiemannianMetric I M}
@@ -1791,10 +1654,6 @@ theorem shiftNScaled
   rw [tensor02_smul2 (I := I) (M := M)
     (shiftNAt (I := I) (M := M) delta t g x A) r (basis 0) (basis 0)]
   rw [shiftNAt_comp_shiftBlock (I := I) (M := M) hreal hblock]
-
-
-
-
 
 def shiftNAtBasis
     (δ : Real) (g : SmoothRiemannianMetric I M) {x : M}
@@ -1827,9 +1686,6 @@ theorem shiftNAtBasis_apply_basis
             (vec2 (I := I) (basis a) (basis b))) i j := by
   simp [shiftNAtBasis]
 
-
-
-
 omit [IsManifold I 2 M] in
 theorem shiftNAtBasis_comp_shiftBlock
     {δ : Real} {g : SmoothRiemannianMetric I M}
@@ -1858,10 +1714,6 @@ theorem shiftNAtBasis_comp_shiftBlock
     rw [rm04OfRic3At_comp_orthonormal (I := I) (M := M) basis hblock.orthonormal]
     simp [hRic]
   simp [shiftReactBlock3, hRic, hRm]
-
-
-
-
 
 omit [IsManifold I 2 M] in
 theorem shiftNBasisScaled

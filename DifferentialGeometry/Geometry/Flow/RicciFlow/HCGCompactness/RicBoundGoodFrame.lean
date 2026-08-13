@@ -5,26 +5,6 @@ import Mathlib.LinearAlgebra.QuadraticForm.Basic
 
 set_option autoImplicit false
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 noncomputable section
 
 namespace DifferentialGeometry.PDE.RicciFlow
@@ -45,8 +25,6 @@ variable [CompleteSpace E] [SigmaCompactSpace M] [T2Space M]
 variable [VectorBundle Real E (TangentSpace I : M → Type _)]
 variable [ContMDiffVectorBundle 1 E (TangentSpace I : M → Type _) I]
 variable {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
-
-
 
 omit [FiniteDimensional ℝ E] [I.Boundaryless] [IsManifold I 2 M] [CompleteSpace E]
     [SigmaCompactSpace M] [T2Space M] in
@@ -95,7 +73,6 @@ theorem gramInv_inverse
           Finset.sum_congr rfl fun k _ => by rw [hco]
       _ = if i = j then 1 else 0 := h
 
-
 omit [FiniteDimensional ℝ E] [I.Boundaryless] [IsManifold I 2 M] [CompleteSpace E]
     [SigmaCompactSpace M] [T2Space M] [ContMDiffVectorBundle 1 E (TangentSpace I : M → Type _) I] in
 theorem gramInv_symm
@@ -106,8 +83,6 @@ theorem gramInv_symm
     (gramE (I := I) e₀ g basisE y)⁻¹ i j = (gramE (I := I) e₀ g basisE y)⁻¹ j i := by
   have h := congr_fun (congr_fun ((gramE_herm (I := I) e₀ g basisE y).inv.eq) i) j
   simpa [Matrix.conjTranspose_apply] using h.symm
-
-
 
 omit [FiniteDimensional ℝ E] [I.Boundaryless] [IsManifold I 2 M] [CompleteSpace E]
     [SigmaCompactSpace M] [T2Space M] [ContMDiffVectorBundle 1 E (TangentSpace I : M → Type _) I]
@@ -123,9 +98,6 @@ theorem gramE_eq_one
   ext i j
   simp only [gramE, Matrix.of_apply, Matrix.one_apply]
   exact hON i j
-
-
-
 
 omit [I.Boundaryless] [IsManifold I 2 M] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M]
     [ContMDiffVectorBundle 1 E (TangentSpace I : M → Type _) I] in
@@ -220,10 +192,6 @@ theorem gramInv_near_id
   exact ⟨t ∩ e₀.baseSet, htopen.inter e₀.open_baseSet, ⟨hxt, hx⟩,
     Set.inter_subset_right, fun z hz => hsub hz⟩
 
-
-
-
-
 private theorem exists_orthonormalBasis_of_posDef
     {V : Type*} [AddCommGroup V] [Module Real V] [FiniteDimensional Real V]
     (B : LinearMap.BilinForm Real V) (hsymm : LinearMap.IsSymm B)
@@ -261,11 +229,6 @@ private theorem exists_orthonormalBasis_of_posDef
   · rw [if_neg hij]
     have horth : B (v i) (v j) = 0 := (LinearMap.isOrthoᵢ_def.mp hv) i j hij
     rw [horth, mul_zero]
-
-
-
-
-
 
 omit [I.Boundaryless] [IsManifold I 2 M] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M]
     [ContMDiffVectorBundle 1 E (TangentSpace I : M → Type _) I] in
@@ -309,14 +272,6 @@ theorem exists_trivONBasis
   refine ⟨b, fun i j => ?_⟩
   rw [← hsymmL i, ← hsymmL j]
   simpa [Q, LinearMap.mk₂_apply] using hb i j
-
-
-
-
-
-
-
-
 
 omit [I.Boundaryless] [IsManifold I 2 M] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 theorem exists_goodFrame_compBound
@@ -440,12 +395,6 @@ theorem exists_goodFrame_compBound
                 (((e₀.isLocalFrameOn_localFrame_baseSet I 1 basisE)).toBasisAt hz) A I0 ^ 2 :=
           mul_le_mul_of_nonneg_right hmono hcomp0
 
-
-
-
-
-
-
 omit [VectorBundle ℝ E (TangentSpace I : M → Type _)]
     [ContMDiffVectorBundle 1 E (TangentSpace I : M → Type _) I] in
 omit [I.Boundaryless] [DecidableEq Idx] in
@@ -515,11 +464,6 @@ theorem compL2_tower_le
             (iterCov (I := I) gM r T j y)) :=
         mul_le_mul_of_nonneg_right hs (Real.sqrt_nonneg _)
 
-
-
-
-
-
 omit [VectorBundle ℝ E (TangentSpace I : M → Type _)]
     [ContMDiffVectorBundle 1 E (TangentSpace I : M → Type _) I] in
 omit [I.Boundaryless] [DecidableEq Idx] in
@@ -545,9 +489,6 @@ theorem metricComp_le
     (T := Tensor0SBundle.metricTensorField (I := I) g) frame hframe hu hy hcomp j
   exact le_trans h
     (mul_le_mul_of_nonneg_left hbound (by positivity : (0 : Real) ≤ 2 ^ (2 + j)))
-
-
-
 
 omit [VectorBundle ℝ E (TangentSpace I : M → Type _)]
     [ContMDiffVectorBundle 1 E (TangentSpace I : M → Type _) I] in
@@ -617,10 +558,6 @@ theorem metricComp_mul
     _ = (2 ^ (2 + j) * Real.sqrt (C ^ (2 + j))) * eps := by ring
     _ ≤ 4 ^ (2 + j) * eps := mul_le_mul_of_nonneg_right hcoef heps0
     _ ≤ 4 ^ (2 + p) * eps := mul_le_mul_of_nonneg_right hpow heps0
-
-
-
-
 
 omit [VectorBundle ℝ E (TangentSpace I : M → Type _)]
     [ContMDiffVectorBundle 1 E (TangentSpace I : M → Type _) I] in
@@ -699,9 +636,6 @@ theorem sqrt_tower_le_compL2
 
 set_option backward.isDefEq.respectTransparency false in
 
-
-
-
 omit [I.Boundaryless] [IsManifold I 2 M] [ContMDiffVectorBundle 1 E (TangentSpace I : M → Type _) I]
     [Fintype Idx] [DecidableEq Idx] in
 omit [SigmaCompactSpace M] in
@@ -742,9 +676,6 @@ theorem ricCompField_mdiffOn
     (v := fun (i : Fin 2) (b : M) => e₀.localFrame basisE (k i) b) hv
   exact h.contMDiffWithinAt
 
-
-
-
 omit [FiniteDimensional ℝ E] [I.Boundaryless] [IsManifold I ∞ M] [IsManifold I 2 M]
     [CompleteSpace E] [SigmaCompactSpace M] [T2Space M]
     [VectorBundle ℝ E (TangentSpace I : M → Type _)]
@@ -759,10 +690,6 @@ theorem chrInFrame_mono
   unfold christoffelSymbolInFrame
   simp only [IsLocalFrameOn.coeff, dif_pos hz, dif_pos (hsub hz)]
   rfl
-
-
-
-
 
 omit [FiniteDimensional ℝ E] [I.Boundaryless] [IsManifold I 2 M] [CompleteSpace E]
     [SigmaCompactSpace M] [T2Space M] [ContMDiffVectorBundle 1 E (TangentSpace I : M → Type _) I] in

@@ -3,14 +3,6 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.UnifLp63
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.UnifMorreyRS
 import DifferentialGeometry.Analysis.Spectral.Tensor.Estimates.H1H2AppCcRS
 
-/-!
-# Class-first mixed H1-H2 application estimate
-
-This module supplies the generic-rank, dimension-three mixed application cell
-used by the low-regularity Ricci--DeTurck coefficient packets.  All analytic
-constants are chosen before the class metric varies.
--/
-
 set_option autoImplicit false
 
 noncomputable section
@@ -39,11 +31,6 @@ private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
-/-- **Dimension-three class-first mixed application estimate.**
-
-For arbitrary mixed valences, one coefficient controls an `H¹` operator field
-acting on an `H²` passenger into `H¹`.  Metric jets of orders one and two are
-the only class inputs. -/
 theorem appRS_h1_unif
     (hDim : Module.finrank ℝ E = 3)
     (gBase : SmoothRiemannianMetric I M)
@@ -108,11 +95,6 @@ theorem appRS_h1_unif
     Φ W A B hA hB hΦjet hWjet
   simpa only [C] using hlocal
 
-/-- **Dimension-three complementary class-first mixed application estimate.**
-
-For arbitrary mixed valences, an `H²` operator field acting on an `H¹`
-passenger is controlled in `H¹`.  As for `appRS_h1_unif`, only metric jets of
-orders one and two are used. -/
 theorem appRS_h2_unif
     (hDim : Module.finrank ℝ E = 3)
     (gBase : SmoothRiemannianMetric I M)

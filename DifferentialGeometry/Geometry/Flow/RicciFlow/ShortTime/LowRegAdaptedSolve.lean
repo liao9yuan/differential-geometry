@@ -1,15 +1,6 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.LowRegApplyTwo
 import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.LowRegRungPack
 
-/-!
-# The calibrated low-regularity solve package
-
-This file joins one exact order-one solve with the coherent ordered low-rung
-package.  The solver threshold and state cap are chosen after the common gate
-envelope, so the resulting package carries one absorption budget for every
-stored rung while still projecting to the stable `IsLowSolve` API.
--/
-
 noncomputable section
 
 open Bundle Manifold MeasureTheory Set
@@ -36,9 +27,6 @@ variable
       [IsManifold I ∞ M] [CompactSpace M] [I.Boundaryless]
       [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M]
 
-/-- An exact low solve paired with one fixed ordered rung-three certificate and
-the coherent all-rung gate package from which it was selected.  The common
-absorption budget is evaluated at the solve's own witnesses. -/
 def IsAdaptedLowSolve (g₀ : SmoothRiemannianMetric I M)
     {δ Ctop B0 B1 D ρ P T : ℝ} (hT : 0 < T) (hT1 : T ≤ 1)
     (fLo : timeL2 (tensorHs (I := I) (M := M) g₀ 0 2 ((1 : ℕ) : ℝ)) T)
@@ -52,7 +40,6 @@ def IsAdaptedLowSolve (g₀ : SmoothRiemannianMetric I M)
         A * (δ / (1 - δ) ^ 2) +
           B * lowregStateRad Ctop B1 ρ P + ε < 1
 
-/-- Read the exact solve component of an adapted solve. -/
 theorem IsAdaptedLowSolve.toIsLowSolveAt {g₀ : SmoothRiemannianMetric I M}
     {δ Ctop B0 B1 D ρ P T Rcap Ctop₂ Kr2 Kr1 Kcap : ℝ}
     {hT : 0 < T} {hT1 : T ≤ 1}
@@ -64,7 +51,6 @@ theorem IsAdaptedLowSolve.toIsLowSolveAt {g₀ : SmoothRiemannianMetric I M}
       (B1 := B1) (D := D) (ρ := ρ) (P := P) g₀ hT hT1 fLo Rcap :=
   h.1
 
-/-- Forget the calibration data of an adapted solve. -/
 theorem IsAdaptedLowSolve.toIsLowSolve {g₀ : SmoothRiemannianMetric I M}
     {δ Ctop B0 B1 D ρ P T Rcap Ctop₂ Kr2 Kr1 Kcap : ℝ}
     {hT : 0 < T} {hT1 : T ≤ 1}
@@ -75,7 +61,6 @@ theorem IsAdaptedLowSolve.toIsLowSolve {g₀ : SmoothRiemannianMetric I M}
     IsLowSolve (I := I) (M := M) g₀ hT hT1 fLo :=
   h.toIsLowSolveAt.toIsLowSolve
 
-/-- Read the stored ordered rung-three certificate of an adapted solve. -/
 theorem IsAdaptedLowSolve.toIsRung3Ord {g₀ : SmoothRiemannianMetric I M}
     {δ Ctop B0 B1 D ρ P T Rcap Ctop₂ Kr2 Kr1 Kcap : ℝ}
     {hT : 0 < T} {hT1 : T ≤ 1}
@@ -86,8 +71,6 @@ theorem IsAdaptedLowSolve.toIsRung3Ord {g₀ : SmoothRiemannianMetric I M}
     IsRung3Ord (I := I) (M := M) g₀ Ctop₂ Kr2 Kr1 Kcap :=
   h.2.1
 
-/-- Read the coherent common gate package and the domination certificates for
-the stored rung-three tuple. -/
 theorem IsAdaptedLowSolve.toGatePack {g₀ : SmoothRiemannianMetric I M}
     {δ Ctop B0 B1 D ρ P T Rcap Ctop₂ Kr2 Kr1 Kcap : ℝ}
     {hT : 0 < T} {hT1 : T ≤ 1}
@@ -102,7 +85,6 @@ theorem IsAdaptedLowSolve.toGatePack {g₀ : SmoothRiemannianMetric I M}
           B * lowregStateRad Ctop B1 ρ P + ε < 1 :=
   h.2.2
 
-/-- Read the already-discharged absorption budget of an adapted solve. -/
 theorem IsAdaptedLowSolve.absorb {g₀ : SmoothRiemannianMetric I M}
     {δ Ctop B0 B1 D ρ P T Rcap Ctop₂ Kr2 Kr1 Kcap : ℝ}
     {hT : 0 < T} {hT1 : T ≤ 1}
@@ -121,8 +103,6 @@ theorem IsAdaptedLowSolve.absorb {g₀ : SmoothRiemannianMetric I M}
     have hdom := rungGate_le hA hB h.1.hδ0 hR
     exact ⟨ε, hε, by linarith only [hdom, hbudget]⟩
 
-/-- Nonnegative common gate envelopes admit a positive fibre threshold and a
-positive radius cap for which every stored rung has room for absorption. -/
 theorem lowregGateAbsorb {A B : ℝ} (hA : 0 ≤ A) (hB : 0 ≤ B) :
     ∃ δ Rcap ε : ℝ,
       0 < δ ∧ δ ≤ 1 / 3 ∧ 0 < Rcap ∧ 0 < ε ∧
@@ -175,8 +155,6 @@ theorem lowregGateAbsorb {A B : ℝ} (hA : 0 ≤ A) (hB : 0 ≤ B) :
     (mul_le_mul_of_nonneg_left hR hB).trans hBR
   nlinarith [hgate, hrad]
 
-/-- Compatibility calibration for one fixed rung tuple.  New common-envelope
-calibration should use `lowregGateAbsorb`. -/
 theorem lowreg_absorb {Ctop₂ Kr2 Kr1 Kcap : ℝ}
     (hCtop₂ : 0 ≤ Ctop₂) (hKr2 : 0 ≤ Kr2)
     (hKr1 : 0 ≤ Kr1) (hKcap : 0 ≤ Kcap) :
@@ -196,10 +174,6 @@ theorem lowreg_absorb {Ctop₂ Kr2 Kr1 Kcap : ℝ}
           ring
     _ < 1 := hbudget hR
 
-/-- Produce the realized two-scale solve together with the exact low-solve and
-ordered rung witnesses whose absorption gate has already been discharged.  The
-actual state cap is the minimum of the caller's endpoint cap and the calibrated
-absorption cap. -/
 theorem lowreg_adapt_open
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M) {Rmax : ℝ} (hRmax : 0 < Rmax) :
@@ -247,8 +221,6 @@ theorem lowreg_adapt_open
     A, B, hgate, hA, hB, ε, hε, ?_⟩
   exact hbudget (hlo.hcap.trans hRcapAbs)
 
-/-- Compatibility projection of `lowreg_adapt_open` that forgets the proved
-admissibility of its contraction floor. -/
 theorem lowreg_solve_adapt
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M) {Rmax : ℝ} (hRmax : 0 < Rmax) :

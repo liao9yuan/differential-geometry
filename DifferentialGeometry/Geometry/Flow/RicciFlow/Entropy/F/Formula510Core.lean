@@ -1,6 +1,5 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Entropy.F.Geometry
 
-
 set_option autoImplicit false
 
 namespace DifferentialGeometry.PDE.RicciFlow.Entropy
@@ -16,18 +15,9 @@ open scoped Manifold ContDiff
 
 variable {M : Type*}
 
-
-
-
-
-
-
-
 section Formula510
 
 variable {Idx : Type*} [Fintype Idx]
-
-
 
 def MetricVariationChristoffelInFrame
     (gInv : M -> Idx -> Idx -> Real)
@@ -41,16 +31,12 @@ def MetricVariationChristoffelInFrame
             nablaMetricVariation x j i l -
               nablaMetricVariation x l i j)
 
-
-
 def MetricVariationChristoffelTraceInFrame
     (christoffelTraceVariation metricVariationTraceGradient :
       M -> Idx -> Real) : Prop :=
   ∀ x : M, ∀ j : Idx,
     christoffelTraceVariation x j =
       (1 / 2 : Real) * metricVariationTraceGradient x j
-
-
 
 def RicciVariationByChristoffelInFrame
     (ricciVariation : M -> Idx -> Idx -> Real)
@@ -60,8 +46,6 @@ def RicciVariationByChristoffelInFrame
     ricciVariation x i j =
       (∑ p : Idx, nablaChristoffelVariation x p p i j) -
         nablaChristoffelTraceVariation x i j
-
-
 
 def HessianPotentialVariationByChristoffelInFrame
     (hessianPotentialVariation hessianPotentialVariationDirection :
@@ -73,8 +57,6 @@ def HessianPotentialVariationByChristoffelInFrame
       hessianPotentialVariationDirection x i j -
         ∑ p : Idx, christoffelVariation x p i j * gradPotential x p
 
-
-
 def RicciHessianVariationWeightedDivergenceInFrame
     (ricciHessianVariation weightedDivergenceTerm shiftedHessianTerm :
       M -> Idx -> Idx -> Real) : Prop :=
@@ -82,13 +64,10 @@ def RicciHessianVariationWeightedDivergenceInFrame
     ricciHessianVariation x i j =
       weightedDivergenceTerm x i j + shiftedHessianTerm x i j
 
-
 def ricciHessianVariationInFrame
     (ricciVariation hessianVariation : M -> Idx -> Idx -> Real) :
     M -> Idx -> Idx -> Real :=
   fun x i j => ricciVariation x i j + hessianVariation x i j
-
-
 
 def christoffelWeightedDivergenceInFrame
     (nablaChristoffelVariation : M -> Idx -> Idx -> Idx -> Idx -> Real)
@@ -99,7 +78,6 @@ def christoffelWeightedDivergenceInFrame
     (∑ p : Idx, nablaChristoffelVariation x p p i j) -
       ∑ p : Idx, christoffelVariation x p i j * gradPotential x p
 
-
 def shiftedHessianInFrame
     (hessianPotentialVariationDirection metricTraceHessianHalf :
       M -> Idx -> Idx -> Real) :
@@ -107,8 +85,6 @@ def shiftedHessianInFrame
   fun x i j =>
     hessianPotentialVariationDirection x i j -
       metricTraceHessianHalf x i j
-
-
 
 theorem ricciHessianWeightedDivergence_of_ricci_hessian
     (ricciVariation hessianVariation hessianPotentialVariationDirection :
@@ -139,7 +115,6 @@ theorem ricciHessianWeightedDivergence_of_ricci_hessian
   simp [christoffelWeightedDivergenceInFrame, shiftedHessianInFrame,
     sub_eq_add_neg, add_comm, add_left_comm, add_assoc]
 
-
 def RicciHessianWeightedDensityVariationInFrame
     (weightedVariation weightedDivergenceTerm shiftedHessianTerm
       ricciHessian : M -> Idx -> Idx -> Real)
@@ -151,9 +126,6 @@ def RicciHessianWeightedDensityVariationInFrame
           ricciHessian x i j * density x *
             expWeightedMeasureVariationFactor potentialVariation
               metricVariationTrace x
-
-
-
 
 def densityWeightedDivergenceInFrame
     (density : M -> Real) (weightedDivergenceTerm : M -> Idx -> Idx -> Real) :
@@ -178,19 +150,15 @@ theorem ricciHessianWeightedDensity_of_divergence
   intro x i j
   rfl
 
-
 def metricVariationRicciHessContractInFrame
     (metricVariation ricciHessian : M -> Idx -> Idx -> Real) : M -> Real :=
   fun x =>
     ∑ i : Idx, ∑ j : Idx,
       metricVariation x i j * ricciHessian x i j
 
-
-
 def inverseMetricVariationContractionTermInFrame
     (metricVariation ricciHessian : M -> Idx -> Idx -> Real) : M -> Real :=
   fun x => -metricVariationRicciHessContractInFrame metricVariation ricciHessian x
-
 
 theorem inverseMetricVariationContractionTerm_eq_neg
     (metricVariation ricciHessian : M -> Idx -> Idx -> Real) :
@@ -199,7 +167,6 @@ theorem inverseMetricVariationContractionTerm_eq_neg
         ricciHessian x := rfl
 
 end Formula510
-
 
 def fFunctionalFormula510Integrand
     (scalarCurvature lapPotential gradPotentialNormSq
@@ -211,7 +178,6 @@ def fFunctionalFormula510Integrand
       (metricVariationTrace x / 2 - potentialVariation x) *
         (2 * lapPotential x - gradPotentialNormSq x + scalarCurvature x)
 
-
 def FFunctionalFormula510 [MeasurableSpace M] (weightedMeasure : Measure M)
     (firstVariation : Real)
     (scalarCurvature lapPotential gradPotentialNormSq potentialVariation
@@ -222,9 +188,6 @@ def FFunctionalFormula510 [MeasurableSpace M] (weightedMeasure : Measure M)
         gradPotentialNormSq potentialVariation metricVariationTrace
         metricVariationRicciHess x
       ∂weightedMeasure
-
-
-
 
 def fFunctionalPre510Integrand
     (scalarCurvature lapPotential _gradPotentialNormSq
@@ -238,8 +201,6 @@ def fFunctionalPre510Integrand
           expWeightedMeasureVariationFactor potentialVariation
             metricVariationTrace x
 
-
-
 def fFunctional510Remainder
     (lapPotential gradPotentialNormSq potentialVariation metricVariationTrace
       weightedDivergenceTrace shiftedTrace : M -> Real) :
@@ -250,8 +211,6 @@ def fFunctional510Remainder
         expWeightedMeasureVariationFactor potentialVariation
           metricVariationTrace x *
           (lapPotential x - gradPotentialNormSq x))
-
-
 
 theorem pre510_eq_final_add_rem
     (scalarCurvature lapPotential gradPotentialNormSq
@@ -271,11 +230,6 @@ theorem pre510_eq_final_add_rem
   unfold fFunctionalPre510Integrand fFunctionalFormula510Integrand
     fFunctional510Remainder expWeightedMeasureVariationFactor
   ring
-
-
-
-
-
 
 theorem expWeightedIntegralVariation_eq_pre510
     {scalarCurvature lapPotential gradPotentialNormSq potential
@@ -308,10 +262,6 @@ theorem expWeightedIntegralVariation_eq_pre510
   unfold expWeightedMeasureVariationFactor
   ring
 
-
-
-
-
 theorem expWeightedClosedVariation_eq_pre510
     {scalarCurvature lapPotential gradPotentialNormSq potential
       potentialVariation metricVariationTrace metricVariationRicciHess
@@ -335,8 +285,6 @@ theorem expWeightedClosedVariation_eq_pre510
   unfold expWeightedIntegralVariationIntegrand fFunctionalPre510Integrand
     fFunctionalClosedBracket
   rw [hvariation x]
-
-
 
 theorem rem510_integral_zero [MeasurableSpace M]
     {weightedMeasure : Measure M}
@@ -386,8 +334,6 @@ theorem rem510_integral_zero [MeasurableSpace M]
   rw [integral_sub hshift_int hcorr_int']
   rw [hdiv_zero, hshift']
   ring
-
-
 
 theorem formula510_of_rem_zero [MeasurableSpace M]
     {weightedMeasure : Measure M}
@@ -463,8 +409,6 @@ theorem formula510_of_rem_zero [MeasurableSpace M]
         ∂weightedMeasure := by
       rw [hrem_zero, add_zero]
 
-
-
 theorem formula510_of_ints [MeasurableSpace M]
     {weightedMeasure : Measure M}
     {firstVariation : Real}
@@ -513,7 +457,6 @@ theorem formula510_of_ints [MeasurableSpace M]
     exact hdiv_int.add (hshift_int.sub hcorr_int)
   · exact rem510_integral_zero hdiv_int hshift_int hcorr_int
       hdiv_zero hshift
-
 
 end
 

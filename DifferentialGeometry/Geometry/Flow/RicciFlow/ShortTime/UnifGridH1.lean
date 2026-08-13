@@ -1,14 +1,5 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.UnifGridH2
 
-/-!
-# Class-first uniform H1 grid summation
-
-This module integrates a pointwise order-one tensor estimate whose order-`i`
-window reaches perturbation derivatives through order `i + 1`.  In dimension
-three, the resulting coefficient is chosen before the class metric varies and
-uses only the metric's first two background-covariant jets.
--/
-
 set_option autoImplicit false
 
 noncomputable section
@@ -84,12 +75,6 @@ private theorem grid_h1_low
   exact Finset.sum_le_sum fun k hk =>
     (hgrid k (by have := Finset.mem_range.mp hk; omega)).2
 
-/-- **Dimension-three class-first low-window `H1` estimate.**
-
-For a pointwise order-one coefficient grid whose order-`i` window reaches
-perturbation derivatives through order `i + 1`, one nonnegative coefficient is
-chosen before the class metric and perturbation vary.  Only the class metric's
-first two background-covariant jets enter the estimate. -/
 theorem h1_low_unif
     (hDim : Module.finrank ℝ E = 3)
     (gBase : SmoothRiemannianMetric I M) {Λ : ℝ} (hΛ : 0 ≤ Λ)

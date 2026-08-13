@@ -7,36 +7,6 @@ import DifferentialGeometry.Geometry.Curvature.Components.RicciTrace
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.RicciDeTurckLinearization
 import DifferentialGeometry.Analysis.Spectral.Tensor.Variational.CovDerivPointwise
 
-/-!
-# Integration by parts in the forward-uniqueness lane's currency
-
-The forward-uniqueness lane (`ForwardUniqueRmDiff.lean` and its consumers) works with
-*field-level* `(0,s)` tensors — `Tensor0SField … s` — and the everywhere-defined operators
-`metricNabla0S` (one Levi-Civita step, derivative slot `0`) and `covDiv0SField`
-(`g`-trace of slots `0,1` of `metricNabla0S`).  The Green/IBP machinery
-(`Analysis/Elliptic/ConnectionLaplacian/GreenIdentityAndIBP/`) instead consumes the *bundled*
-compactly-supported type `SmoothCcTensor g 0 s` and its operators `covGrad`, `covDivergence`.
-
-This file is the bridge (brick `K2.7`).  On a closed manifold it
-
-* packages a lane field as a `SmoothCcTensor` (`ccLift0S`, compact support from
-  `CompactSpace M`);
-* identifies the two `∇` and the two `div` under that lift
-  (`covGradLift_eq`, `covDivLift_eq`);
-* and specialises the pairing theorem
-  `tensorL2Inner_covGrad_eq_neg_tensorL2Inner_covDivergence` to lane currency
-  (`l2Inner_nabla_eq_neg_div`), together with the principal Dirichlet partner
-  (`l2Inner_nabla_self_eq_neg_lap`).
-
-## Instance note
-
-Unlike the rest of the lane, this file carries `[InnerProductSpace ℝ E]` on the model space.
-That is *not* a choice: `covDivergence` and `tensorL2Inner_covGrad_eq_neg_tensorL2Inner_covDivergence`
-are stated over `[InnerProductSpace ℝ E]` (their orthonormal frame `smoothOrthoFrame` is built in
-the model), so the identification theorems below cannot even be *typed* without it.  Removing the
-taint is a producer-side `omit` campaign in the Green/IBP layer, not a job for this bridge.
--/
-
 noncomputable section
 
 set_option autoImplicit false
@@ -65,10 +35,6 @@ section Lift
 
 variable {s : ℕ}
 
-/-- **The lane lift.**  A smooth field-level `(0,s)` tensor on a closed manifold, packaged as
-the bundled compactly-supported `(0,s)` tensor consumed by the Green/IBP layer.  The section is
-the canonical unit-scalar lift `Tensor0SSpace s ≃ TensorRSSpace 0 s`; compact support is free
-from `CompactSpace M`. -/
 def ccLift0S (g : SmoothRiemannianMetric I M)
     (T : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
       (n := (∞ : WithTop ℕ∞)) s) :
@@ -82,7 +48,6 @@ def ccLift0S (g : SmoothRiemannianMetric I M)
     (ccLift0S (I := I) g T).toSection x =
       unitScalarRSLiftSection (I := I) (M := M) (fun y : M => T y) x := rfl
 
-/-- **Unit evaluation of the lift returns the original field.** -/
 @[simp] theorem ccLift0S_unit (g : SmoothRiemannianMetric I M)
     (T : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
       (n := (∞ : WithTop ℕ∞)) s) (x : M) :
@@ -91,7 +56,6 @@ def ccLift0S (g : SmoothRiemannianMetric I M)
         (unitZeroSec (I := I) (M := M) x) = T x :=
   unitScalarRSLiftSection_apply_unit (I := I) (M := M) (fun y : M => T y) x
 
-/-- The model `(0,s)`-form of the lift is the model form of the field. -/
 @[simp] theorem ccLift0S_unitModel (g : SmoothRiemannianMetric I M)
     (T : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
       (n := (∞ : WithTop ℕ∞)) s) (x : M) :
@@ -109,9 +73,6 @@ section Identification
 
 variable {s : ℕ}
 
-/-- **Directional covariant derivative of the lift, read at the unit.**  The bundled
-`(r = 0, s)` covariant derivative of `ccLift0S g T` in the direction `v` is the lane's
-`metricNabla0S g T` with `v` in its slot-`0` derivative position. -/
 theorem covDerivLift_unit (g : SmoothRiemannianMetric I M)
     (T : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
       (n := (∞ : WithTop ℕ∞)) s)
@@ -150,9 +111,6 @@ theorem covDerivLift_unit (g : SmoothRiemannianMetric I M)
       (LeviCivita (I := I) g) X T x slots).symm
   exact (congrArg (fun A : Tensor0SSpace s I x => A slots) key).trans hslot
 
-/-- Pointwise evaluation distributes over a finite sum of `(0,s)` fibre tensors.  (The fibre
-`AddCommGroup` is `inferInstanceAs` the multilinear-map one, so each step is `rfl`; this lemma
-exists only to give `rw` a syntactic handle.) -/
 private theorem tensor0SSum_apply {x : M} {s : ℕ} {ι : Type*} (t : Finset ι)
     (F : ι → Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) s x)
     (m : Fin s → TangentSpace I x) :
@@ -164,9 +122,6 @@ private theorem tensor0SSum_apply {x : M} {s : ℕ} {ι : Type*} (t : Finset ι)
     rw [Finset.sum_cons, Finset.sum_cons, ← ih]
     rfl
 
-/-- A `g`-orthonormal basis of `TangentSpace I x` realised by the centred smooth frame
-`smoothOrthoFrame g x`.  (Local replica of the private `centeredFrame_basis_exists` of
-`TensorCovDivergence.lean`.) -/
 private theorem orthoBasisAt (g : SmoothRiemannianMetric I M) (x : M) :
     ∃ frame : Module.Basis (Fin (Module.finrank Real E)) Real (TangentSpace I x),
       (∀ i, frame i = smoothOrthoFrame (I := I) g x i x) ∧
@@ -216,8 +171,6 @@ private theorem orthoBasisAt (g : SmoothRiemannianMetric I M) (x : M) :
           rw [coe_basisOfLinearIndependentOfCardEqFinrank]]
     exact hON i j
 
-/-- The `g`-trace of the first two slots of a `(0,s+2)` tensor is the diagonal frame sum over
-any `g`-orthonormal basis. -/
 private theorem traceFirstTwo_eq_frame_sum (g : SmoothRiemannianMetric I M) {x : M}
     (frame : Module.Basis (Fin (Module.finrank Real E)) Real (TangentSpace I x))
     (hON : ∀ i j, g.inner x (frame i) (frame j) = if i = j then (1 : Real) else 0)
@@ -240,10 +193,6 @@ private theorem traceFirstTwo_eq_frame_sum (g : SmoothRiemannianMetric I M) {x :
         A (metricTraceInput (I := I) (frame i) (frame j) slots) = 0
     rw [if_neg (fun h => hji h.symm), zero_mul]
 
-/-- **The lane divergence is the bundled divergence.**  Under `ccLift0S`, the bundled
-`covDivergence` of the Green/IBP layer, read at the unit `(0,0)`-tensor, is the lane's
-`covDiv0SField`.  Both contract the new derivative slot against the tensor's slot `0`
-with `g`. -/
 theorem covDivLift_unit (g : SmoothRiemannianMetric I M)
     (V : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
       (n := (∞ : WithTop ℕ∞)) (s + 1)) (x : M) :
@@ -300,7 +249,6 @@ theorem covDivLift_unit (g : SmoothRiemannianMetric I M)
   exact (traceFirstTwo_eq_frame_sum (I := I) g frame hON
     (metricNabla0S (I := I) g V x) slots).symm
 
-/-- **The lane divergence is the bundled divergence (bundled form).** -/
 theorem covDivLift_eq (g : SmoothRiemannianMetric I M)
     (V : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
       (n := (∞ : WithTop ℕ∞)) (s + 1)) :
@@ -315,8 +263,6 @@ theorem covDivLift_eq (g : SmoothRiemannianMetric I M)
     Tensor0SSpace.toModel (covDiv0SField (I := I) g V x)
   rw [covDivLift_unit]
 
-/-- **The lane covariant derivative is the bundled gradient.**  Under `ccLift0S`, `covGrad`
-of the Green/IBP layer is the lane's `metricNabla0S`. -/
 theorem covGradLift_eq (g : SmoothRiemannianMetric I M)
     (T : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
       (n := (∞ : WithTop ℕ∞)) s) :
@@ -349,12 +295,6 @@ section Payoff
 
 variable {s : ℕ}
 
-/-- **Integration by parts in lane currency.**  For a smooth field-level `(0,s)` tensor `T` and
-a smooth field-level `(0,s+1)` tensor `V` on a closed manifold,
-`⟨∇^g T, V⟩_{L²(g)} = −⟨T, div_g V⟩_{L²(g)}`,
-with `∇^g = metricNabla0S g` and `div_g = covDiv0SField g` the lane's operators.  This is the
-K4 entry point: the rate estimates consume this without touching `SmoothCcTensor` plumbing
-beyond `ccLift0S`. -/
 theorem l2Inner_nabla_eq_neg_div (g : SmoothRiemannianMetric I M)
     (T : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
       (n := (∞ : WithTop ℕ∞)) s)
@@ -370,9 +310,6 @@ theorem l2Inner_nabla_eq_neg_div (g : SmoothRiemannianMetric I M)
   exact tensorL2Inner_covGrad_eq_neg_tensorL2Inner_covDivergence (I := I) (M := M) g s
     (ccLift0S (I := I) g T) (ccLift0S (I := I) g V)
 
-/-- **Dirichlet form in lane currency.**  `⟨∇^g T, ∇^g T⟩_{L²(g)} = −⟨T, Δ_g T⟩_{L²(g)}` with
-`Δ_g = roughLap0SField g = div_g ∘ ∇^g` the lane's rough Laplacian.  Specialisation of
-`l2Inner_nabla_eq_neg_div` at `V = ∇^g T`. -/
 theorem l2Inner_nabla_self_eq_neg_lap (g : SmoothRiemannianMetric I M)
     (T : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
       (n := (∞ : WithTop ℕ∞)) s) :

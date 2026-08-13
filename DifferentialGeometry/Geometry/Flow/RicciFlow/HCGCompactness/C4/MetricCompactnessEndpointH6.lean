@@ -5,16 +5,6 @@ set_option autoImplicit false
 set_option linter.style.longLine false
 set_option linter.unusedSectionVars false
 
-/-!
-# H6-provider Chapter-4 endpoint assembly
-
-This module feeds the provider-native Step-B1 raw producer into the existing
-Step-D construction.  Its native conditional endpoint consumes a
-`MetricCompactSeed` together with matching `H6NormalData`; a
-`MetricCompactBase` wrapper is retained only for compatibility.  The
-unconditional geometric assembly lives in `MetricCompactnessUncondH6`.
--/
-
 noncomputable section
 
 universe u uE uH
@@ -30,7 +20,6 @@ variable {I : ModelWithCorners Real E H} [I.Boundaryless]
 
 namespace MetricCompactSeed
 
-/-- The canonical Step-D construction driven by one native H6 chart package. -/
 def metricCanonH6
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
     (b : MetricCompactSeed (I := I) X)
@@ -54,7 +43,6 @@ def metricCanonH6
     compactness_canon Ppsi B
   exact canon.ofSeqSubseq psi hpsi
 
-/-- Conditional metric compactness using the provider-native H6 route. -/
 def metricCompactH6
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
     (b : MetricCompactSeed (I := I) X)
@@ -66,7 +54,6 @@ def metricCompactH6
     MetricCompactnessConclusion (I := I) X :=
   (b.metricCanonH6 d hcomplete hconn).mc
 
-/-- The H6-provider canonical limit is connected. -/
 theorem metricCanonH6_conn
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
     (b : MetricCompactSeed (I := I) X)
@@ -87,7 +74,6 @@ end MetricCompactSeed
 
 namespace MetricCompactBase
 
-/-- Compatibility wrapper for the legacy normal-coordinate base. -/
 def metricCanonH6
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
     (b : MetricCompactBase (I := I) X)
@@ -99,7 +85,6 @@ def metricCanonH6
     StepDCanonData (I := I) X :=
   b.toSeed.metricCanonH6 d hcomplete hconn
 
-/-- Compatibility wrapper for the legacy normal-coordinate base. -/
 def metricCompactH6
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
     (b : MetricCompactBase (I := I) X)
@@ -111,7 +96,6 @@ def metricCompactH6
     MetricCompactnessConclusion (I := I) X :=
   b.toSeed.metricCompactH6 d hcomplete hconn
 
-/-- The compatibility H6-provider canonical limit is connected. -/
 theorem metricCanonH6_conn
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
     (b : MetricCompactBase (I := I) X)

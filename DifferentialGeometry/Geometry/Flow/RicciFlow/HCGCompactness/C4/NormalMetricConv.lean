@@ -4,15 +4,6 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.C4.StepBLocal
 
 set_option autoImplicit false
 
-
-
-
-
-
-
-
-
-
 noncomputable section
 
 open Filter Set Topology
@@ -30,8 +21,6 @@ variable {H : Type uH} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H} [I.Boundaryless]
 
 namespace MetricCompactnessInputs
-
-
 
 theorem exists_live_metric
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
@@ -125,8 +114,6 @@ theorem exists_live_metric
     simpa only [psi, X', input', index, c, PointedRiemannianSeq.subseq] using
       (normalCoordMetric_contDiffOn_expBall
         (I := I) (X'.obj (phi k)) (c alpha (phi k))).mono (hsub (phi k) alpha)
-
-
 
 theorem exists_slot_metric
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}

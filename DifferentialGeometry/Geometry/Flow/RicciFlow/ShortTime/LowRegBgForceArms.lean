@@ -1,14 +1,5 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.LowRegForceArms
 
-/-!
-# Fixed-background forcing arms
-
-This file begins the fixed-background Galerkin forcing layer.  The Sobolev
-scale and spectral data remain attached to the state metric `g₀`, while the
-Ricci--DeTurck nonlinearity is evaluated against an independent background
-metric `g_bg`.
--/
-
 noncomputable section
 
 open Bundle Manifold MeasureTheory Set
@@ -36,8 +27,6 @@ variable
       [IsManifold I ∞ M] [CompactSpace M] [I.Boundaryless]
       [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M]
 
-/-- The dense fixed-background nonlinearity on a Galerkin trajectory is the
-genuine smooth Ricci--DeTurck nonlinearity at its smooth representative. -/
 theorem galN_evalBg (g₀ g_bg : SmoothRiemannianMetric I M) {R δ : ℝ}
     (hR : 0 < R) (hδ : δ < 1)
     (hreal : ∀ T : SmoothCcTensor g₀ 0 2,
@@ -68,8 +57,6 @@ theorem galN_evalBg (g₀ g_bg : SmoothRiemannianMetric I M) {R δ : ℝ}
     (galCoreRep (I := I) (M := M) g₀ R S c)
     (galCoreRep_ball (I := I) (M := M) g₀ hR.le S c)
 
-/-- Along a fixed-background Galerkin trajectory, the forcing minus its static
-seed is the order-one embedding of the two canonical low-base arms. -/
 theorem galArmIdBg (g₀ g_bg : SmoothRiemannianMetric I M) {R δ : ℝ}
     (hR : 0 < R) (hδ : δ < 1) (hδ0 : 0 ≤ δ) (hδ3 : δ ≤ 1 / 3)
     (hreal : ∀ T : SmoothCcTensor g₀ 0 2,
@@ -139,8 +126,6 @@ theorem galArmIdBg (g₀ g_bg : SmoothRiemannianMetric I M) {R δ : ℝ}
             hδ3 hδ0 (galRepFib (I := I) (M := M) g₀ hR.le hreal S c)
             (lowregFibZero (I := I) (M := M) g₀ hR.le hreal)).1
 
-/-- The complete second-order coefficient along a fixed-background Galerkin
-trajectory has one cap independent of the mode set and coefficients. -/
 theorem galArmCapBg (g₀ g_bg : SmoothRiemannianMetric I M) {R δ : ℝ}
     (hR : 0 ≤ R) (hδ : δ < 1) (hδ0 : 0 ≤ δ) (hδ3 : δ ≤ 1 / 3)
     (hreal : ∀ T : SmoothCcTensor g₀ 0 2,
@@ -168,10 +153,6 @@ theorem galArmCapBg (g₀ g_bg : SmoothRiemannianMetric I M) {R δ : ℝ}
     hδ3 hδ0 (galRepFib (I := I) (M := M) g₀ hR hreal S c)
       (lowregFibZero (I := I) (M := M) g₀ hR hreal)).2 x
 
-/-- The seed-subtracted forcing arm for an arbitrary fixed DeTurck background.
-
-The Sobolev scale, eigenbasis, and trajectory representative stay attached to
-`g₀`; only the second slot of `lowBaseData` is freed to `g_bg`. -/
 def galArmVecBg (g₀ g_bg : SmoothRiemannianMetric I M) {R δ : ℝ}
     (hR : 0 ≤ R) (hδ : δ < 1)
     (hreal : ∀ T : SmoothCcTensor g₀ 0 2,
@@ -201,8 +182,6 @@ def galArmVecBg (g₀ g_bg : SmoothRiemannianMetric I M) {R δ : ℝ}
           (galCoreRep (I := I) (M := M) g₀ R F c)))
 
 open scoped Classical in
-/-- Each fixed-background Galerkin forcing coordinate is the static seed plus
-the embedded low-base arm sum on the truncation, and vanishes off it. -/
 theorem galForceArmBg (g₀ g_bg : SmoothRiemannianMetric I M)
     {δ Ctop B1 ρ P : ℝ} (hδ : δ < 1) (hδ0 : 0 ≤ δ) (hδ3 : δ ≤ 1 / 3)
     (hCtop : 0 ≤ Ctop) (hB1 : 0 ≤ B1) (hρ : 0 < ρ) (hP : 0 < P)

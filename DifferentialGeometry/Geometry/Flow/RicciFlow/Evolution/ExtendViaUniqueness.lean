@@ -6,32 +6,6 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.LowRegGaugeRemoval
 
 set_option autoImplicit false
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 noncomputable section
 
 namespace DifferentialGeometry.PDE.RicciFlow
@@ -43,34 +17,12 @@ open DifferentialGeometry.PDE
 open DifferentialGeometry.Integral.Connection
 open DifferentialGeometry.HCGCompactness
 
-
-
-
-
-
-
-
-
 variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
     [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
     [IsManifold I ∞ M] [CompactSpace M] [BoundarylessManifold I M]
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 theorem ricci_flow_unif_existence (hDim : Module.finrank ℝ E = 3)
     (gBase : SmoothRiemannianMetric I M) :
@@ -102,15 +54,6 @@ theorem ricci_flow_unif_existence (hDim : Module.finrank ℝ E = 3)
   obtain ⟨Φ_fam, hΦ0, hΦflow, g_RF, hpull, hinit, hsmooth, hcont, hpde⟩ :=
     ricci_gauge_of_dt (I := I) g₀ gBase g_DT hDT hJ
   exact ⟨g_RF, hinit, hsmooth, hcont, hpde⟩
-
-
-
-
-
-
-
-
-
 
 theorem ricci_flow_interior_restart
     (hDim : Module.finrank ℝ E = 3)
@@ -176,16 +119,6 @@ theorem ricci_flow_interior_restart
   obtain ⟨rr, hrr0, hrrS, hrrC, hrrP⟩ := hexist (g_fam t_star) hell_star hcov_star
   exact ⟨t_star, hstar_mem_αω, τ₀, hreach, rr, hrr0, hrrS, hrrC, hrrP⟩
 
-
-
-
-
-
-
-
-
-
-
 theorem ricci_flow_forward_unique
     (g₁ g₂ : ℝ → SmoothRiemannianMetric I M) {a b : ℝ} (hab : a < b)
     (h1smooth : ∀ (x₀ : M) (i j : Fin (Module.finrank ℝ E)),
@@ -216,13 +149,6 @@ theorem ricci_flow_forward_unique
     h1smooth h1cont h2smooth h2cont h1pde h2pde h0
     (fuSlab_of_gram (I := I) g₁ g₂ h1smooth h2smooth h1pde h2pde)
     (energyEdgeCont (I := I) g₁ g₂ hab h1smooth h2smooth)
-
-
-
-
-
-
-
 
 omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] in
 omit [SigmaCompactSpace M] in
@@ -401,9 +327,6 @@ theorem extend_construction_of_restart
         rw [hext_eq_r s (le_of_lt hs)]
       · rw [hext_t]
 
-
-
-
 private theorem expBounds_of_logDiff {fa fb R : ℝ}
     (hfa : 0 < fa) (hfb : 0 < fb) (hlog : |Real.log fb - Real.log fa| ≤ R) :
     Real.exp (-R) * fa ≤ fb ∧ fb ≤ Real.exp R * fa := by
@@ -423,13 +346,6 @@ private theorem expBounds_of_logDiff {fa fb R : ℝ}
       (Real.log_le_iff_le_exp (div_pos hfb hfa)).mp hlog_ratio
     calc fb = (fb / fa) * fa := by field_simp
       _ ≤ Real.exp R * fa := mul_le_mul_of_nonneg_right hratio_upper hfa.le
-
-
-
-
-
-
-
 
 omit [CompactSpace M] [I.Boundaryless] in
 omit [NeZero (Module.finrank ℝ E)] in

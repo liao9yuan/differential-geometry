@@ -2,15 +2,6 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.C4.StepCAtomJ
 
 set_option autoImplicit false
 
-
-
-
-
-
-
-
-
-
 noncomputable section
 
 universe u uE uH
@@ -29,13 +20,6 @@ variable [FiniteDimensional Real E] [NeZero (Module.finrank Real E)] [CompleteSp
 variable {H : Type uH} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H} [I.Boundaryless]
 
-
-
-
-
-/-- Packages per-slot distance-atom limits into the finite Pi-valued atom and
-normalized-weight limits.  The only geometric normalization premise is the
-direct stagewise inner-ball cover of the chart domain. -/
 theorem atomWeightOn_raw
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
     (chart : NormalChartFamily (I := I) X)
@@ -186,8 +170,6 @@ theorem atomWeightOn_raw
   exact ⟨hdead, hatomPiSmooth, hatomInfPiSmooth, hatomPi,
     hweightPiSmooth, hweightInfPiSmooth, hweightPi⟩
 
-/-- Compatibility form of `atomWeightOn_raw` retaining the legacy
-normal-radius premise. -/
 theorem atomWeightOn_of_atoms
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
     (chart : NormalChartFamily (I := I) X)
@@ -239,8 +221,6 @@ theorem atomWeightOn_of_atoms
   exact atomWeightOn_raw (I := I) chart hD P L hre pb r hr beta U hU
     hcoverU aInf hdead hatom hatomSmooth hatomInfSmooth
 
-/-- Compatibility form of `atomWeightOn_of_atoms` for the selected legacy
-framed normal charts. -/
 theorem atomWeight_of_atoms
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
     {hd : InjRadiusDecayInput (I := I) X} {D : Real} (hD : 0 < D)
@@ -390,8 +370,6 @@ theorem atomWeight_of_atoms
   dsimp only
   exact ⟨hdead, hatomPiSmooth, hatomInfPiSmooth, hatomPi,
     hweightPiSmooth, hweightInfPiSmooth, hweightPi⟩
-
-
 
 private theorem existsAtomWeightCore
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
@@ -674,8 +652,6 @@ private theorem existsAtomWeightCore
   exact atomWeight_of_atoms (I := I) hD P Lpsi hre pb r hr hgpPsi betapsi U hU
     hcoverPsi aInf hdead hatom hatomSmooth hatomInfSmooth
 
-
-
 theorem existsAtomWeightH6_of_innerCover
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
     (metricInput : NormalCoordMetricBoundInput (I := I) X)
@@ -757,8 +733,6 @@ theorem existsAtomWeightH6_of_innerCover
     hUexp hcoverU
     (existsLiveJointH6 (I := I) metricInput P L pb r rho beta U hU
       hovlJ hUmetric hUexp hmapsJ hVmetric hVexp)
-
-
 
 theorem existsAtomWeightH6
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}

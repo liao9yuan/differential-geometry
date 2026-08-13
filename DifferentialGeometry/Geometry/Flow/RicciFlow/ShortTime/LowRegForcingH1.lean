@@ -5,13 +5,6 @@ import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurckCoefficients.Metr
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.MetricRealization.RealizedCovGradJetInput
 import DifferentialGeometry.Analysis.Spectral.Tensor.SobolevScale.IteratedCovGradHsJetBound
 
-
-
-
-
-
-
-
 noncomputable section
 
 open Bundle Manifold MeasureTheory Set Filter Tensor0SBundle
@@ -209,8 +202,6 @@ private theorem rhs_cov_raw_eq
   rw [hderiv] at hinv
   simpa only [d, Jdx, y] using (eq_sub_iff_add_eq.mp hinv).symm
 
-
-
 theorem rhs_raw_lip {ι : Type*}
     (gBase : SmoothRiemannianMetric I M)
     (gSeq : ι → SmoothRiemannianMetric I M) (D : LowRegCoeff)
@@ -289,8 +280,6 @@ theorem rhs_raw_lip {ι : Type*}
       rw [hA_def]
       dsimp [B]
       ring
-
-
 
 theorem rhs_cov_lip {ι : Type*}
     (gBase : SmoothRiemannianMetric I M)
@@ -515,8 +504,6 @@ theorem rhs_cov_lip {ι : Type*}
       dsimp [B]
       ring
 
-
-
 theorem rhs_h0_lip {ι : Type*}
     (gBase : SmoothRiemannianMetric I M)
     (gSeq : ι → SmoothRiemannianMetric I M) (D : LowRegCoeff)
@@ -571,8 +558,6 @@ theorem rhs_h0_lip {ι : Type*}
         (mul_le_mul_of_nonneg_left hinput hC₀) hCsp
     _ = (Csp * C₀ * Cin) *
           ‖ccTensorToHs (I := I) (M := M) gBase 2 (2 : ℝ) U‖ := by ring
-
-
 
 theorem rhs_h1_bdd {ι : Type*}
     (gBase : SmoothRiemannianMetric I M)
@@ -759,8 +744,6 @@ theorem rhs_h1_bdd {ι : Type*}
       rw [hsum]
     _ ≤ Csp * (C₀ + C₁) :=
       mul_le_mul_of_nonneg_left (add_le_add (hL2₀ k) (hL2₁ k)) hCsp
-
-
 
 theorem rhs_h1_lip {ι : Type*}
     (gBase : SmoothRiemannianMetric I M)

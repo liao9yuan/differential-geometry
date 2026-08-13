@@ -5,40 +5,6 @@ import Mathlib.Analysis.Calculus.Implicit
 
 set_option autoImplicit false
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 noncomputable section
 
 namespace DifferentialGeometry
@@ -47,21 +13,6 @@ attribute [local instance] Fintype.ofFinite Classical.propDecidable
 namespace HCGCompactness
 
 open scoped Topology
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 theorem cmSolution_hasStrictFDerivAt
     {𝕜 : Type*} [NontriviallyNormedField 𝕜]
@@ -91,24 +42,12 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
   [T2Space M] [T2Space (TangentBundle I M)] [SigmaCompactSpace M]
   [ConnectedSpace M] [T3Space M]
 
-
-
-
-
-
-
 noncomputable def chartCmEqn (g : SmoothRiemannianMetric I M) {ι : Type} [Fintype ι]
     (p : M) (z : E) (params : (ι → ℝ) × (ι → E)) : E :=
   ∑ i : ι, params.1 i •
     (NormalCoordinates.normalChartAt (I := I) g
       ((NormalCoordinates.normalChartAt (I := I) g p).symm z)
       ((NormalCoordinates.normalChartAt (I := I) g p).symm (params.2 i)) : E)
-
-
-
-
-
-
 
 theorem chartCmEqn_center (g : SmoothRiemannianMetric I M) {ι : Type} [Fintype ι]
     (μ : ι → ℝ) (pts : ι → M) (join : M → M → ℝ → M) (p : M) (r : ℝ)
@@ -127,34 +66,10 @@ theorem chartCmEqn_center (g : SmoothRiemannianMetric I M) {ι : Type} [Fintype 
   simp only [NormalCoordinates.normalChartAt_left_inv (I := I) g p hcm,
     NormalCoordinates.normalChartAt_left_inv (I := I) g p (hpts i)]
 
-
-
-
-
-
-
-
-
 def CmHessianInput (g : SmoothRiemannianMetric I M) {ι : Type} [Fintype ι]
     (p : M) (z₀ : E) (params : (ι → ℝ) × (ι → E)) : Prop :=
   ∃ L : E ≃L[ℝ] E,
     HasFDerivAt (fun z : E => chartCmEqn (I := I) g p z params) (L : E →L[ℝ] E) z₀
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 omit [NeZero (Module.finrank ℝ E)] in
 theorem implicitSol_hasStrictFDerivAt
@@ -251,9 +166,6 @@ theorem implicitSol_hasStrictFDerivAt
     have hle : φ.leftFun zp = φ.leftFun φ.pt := hGzp.trans hz₀.symm
     exact congrArg Prod.fst (hzp.mp hle).symm
 
-
-
-
 omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] in
 theorem existsPinnedDeriv
     {ι : Type} [Fintype ι]
@@ -343,9 +255,6 @@ theorem existsPinnedDeriv
     hjoint.prodMk contDiffAt_snd
   exact ⟨Deq, hΦcd.hasStrictFDerivAt' hΦ_hd hn⟩
 
-
-
-
 omit [NeZero (Module.finrank ℝ E)] in
 theorem existsPinnedLocal
     {ι : Type} [Fintype ι]
@@ -363,14 +272,6 @@ theorem existsPinnedLocal
           fun w => (G w.1 w.2, w.2) := by
   obtain ⟨Deq, hΦ⟩ := existsPinnedDeriv G z₀ params₀ hn hjoint hinv
   exact ⟨hΦ.toOpenPartialHomeomorph _, hΦ.mem_toOpenPartialHomeomorph_source, rfl⟩
-
-
-
-
-
-
-
-
 
 omit [NeZero (Module.finrank ℝ E)] in
 theorem implicitSol_contDiffAt
@@ -429,7 +330,6 @@ theorem implicitSol_contDiffAt
     rw [hΦzp] at hzp
     change zp.1 = (invF ((0 : E), zp.2)).1
     rw [hzp]
-
 
 omit [NeZero (Module.finrank ℝ E)] [T2Space M] [SigmaCompactSpace M] [ConnectedSpace M]
     [T3Space M] in

@@ -3,41 +3,6 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.LowRegSmoothBridge
 import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.LowRegBgA1Refold
 import DifferentialGeometry.Analysis.DenseExtension
 
-/-!
-# The low-regularity nonlinearity is the frozen low-base affine action
-
-`lowreg_lift_two` (`ShortTime/LowRegLiftTwo.lean`) drives the order-two
-bootstrap by the *affine* fixed-point equation `f = nonautL2Map … A2 A1 f + f0`
-and consumes it as the hypothesis `hfLo`.  The low-regularity solver
-`lowreg_partial_sol` (`ShortTime/LowRegDenseSolve.lean`) instead exports its
-forcing in *Nemytskii* form, `gforce t = lowRegN (field t)`.  This file is the
-bridge between the two.
-
-The whole bridge reduces to one **state-level** identity,
-
-```
-lowRegN g₀ g₀ … w  =  refoldBaseN g₀ … FLo w
-                                                (for every `w` in the `H3` ball)
-```
-
-`lowreg_N_affine`, proved by a closed equalizer plus density of the smooth
-core: on the smooth core both sides are the spectral embedding of the genuine
-smooth Ricci--DeTurck remainder (`lowRegN_on_smooth`, then `refold_split`,
-`a2Lo_core`, `refoldLo_core`, `lowRadial_eq_self`), and the equalizer is closed
-because both sides are continuous.
-
-Closedness needs continuity of the two completed coefficient maps.  The `A2`
-half is banked (`lowA2_small` / `radialA2_lip`) and enters as the two
-hypotheses `hA2cont`, `hA2core`.  The `A1` half is the refolded continuous map
-`FLo`; its smooth-core formula is supplied by `refold_time`.  Thus the active
-state identity no longer consumes the false raw `hA1pair` route.
-
-**Background restriction.**  `lowBaseN`, `lowBaseForce` and `lowCoreData` are
-all single-metric (`lowBaseData g g`), and `liftForceLo_lowBase` is stated only
-at `g_bg = g`.  The bridge is therefore stated at `g_bg := g₀` and nowhere
-claims a general DeTurck background.
--/
-
 noncomputable section
 
 open Bundle Manifold MeasureTheory Set Filter
@@ -62,17 +27,12 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
   [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
   [T2Space M] [SigmaCompactSpace M]
 
-/-! ## Exponent and embedding bookkeeping -/
-
-/-- The two spectral embeddings of a smooth compactly supported `(0,2)`-tensor
-agree: they have the same eigenbasis coordinates by construction. -/
 theorem smoothCcToTensorHs_eq_ccToHs (g : SmoothRiemannianMetric I M) (σ : ℝ)
     (S : SmoothCcTensor g 0 2) :
     smoothCcToTensorHs (I := I) (M := M) g σ S =
       ccTensorToHs (I := I) (M := M) g 2 σ S :=
   tensorHs.ext (funext fun _ => rfl)
 
-/-- Exponent transport of the smooth spectral embedding. -/
 theorem tensorHsCongr_smoothCc (g : SmoothRiemannianMetric I M) {a b : ℝ}
     (hab : a = b) (S : SmoothCcTensor g 0 2) :
     tensorHsCongr (I := I) (M := M) g 0 2 hab
@@ -81,7 +41,6 @@ theorem tensorHsCongr_smoothCc (g : SmoothRiemannianMetric I M) {a b : ℝ}
   cases hab
   rfl
 
-/-- The scale inclusion computed on the smooth spectral embedding. -/
 theorem tensorHsInclusion_ccToHs (g : SmoothRiemannianMetric I M) {τ σ : ℝ}
     (hτσ : τ ≤ σ) (S : SmoothCcTensor g 0 2) :
     tensorHsInclusion (I := I) (M := M) (g := g) (r := 0) (s := 2) hτσ
@@ -92,7 +51,6 @@ theorem tensorHsInclusion_ccToHs (g : SmoothRiemannianMetric I M) {τ σ : ℝ}
   rw [tensorHsInclusion_coeff_apply, ccTensorToHs_coeff, ccTensorToHs_coeff]
 
 omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [BoundarylessManifold I M] in
-/-- Exponent transport is involutive. -/
 theorem tensorHsCongr_symm_self (g : SmoothRiemannianMetric I M) {a b : ℝ}
     (hab : a = b) (u : tensorHs (I := I) (M := M) g 0 2 a) :
     tensorHsCongr (I := I) (M := M) g 0 2 hab.symm
@@ -100,7 +58,6 @@ theorem tensorHsCongr_symm_self (g : SmoothRiemannianMetric I M) {a b : ℝ}
   cases hab
   rfl
 
-/-- The `H^σ` size of a smooth tensor does not depend on the spelling of `σ`. -/
 theorem norm_smoothCc_congr (g : SmoothRiemannianMetric I M) {a b : ℝ}
     (hab : a = b) (S : SmoothCcTensor g 0 2) :
     ‖smoothCcToTensorHs (I := I) (M := M) g a S‖ =
@@ -108,8 +65,6 @@ theorem norm_smoothCc_congr (g : SmoothRiemannianMetric I M) {a b : ℝ}
   cases hab
   rfl
 
-/-- The smooth Ricci--DeTurck nonlinearity is the spectral embedding of the
-genuine smooth remainder; this is its definition, named for rewriting. -/
 theorem deTurckSmoothN_eq (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
     (T : SmoothCcTensor g₀ 0 2) {δ : ℝ} (hδ_lt : δ < 1)
     (hδ : gFibreOpBound (I := I) (M := M) g₀
@@ -119,8 +74,6 @@ theorem deTurckSmoothN_eq (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
         (deTurckSmoothRemainder (I := I) g₀ g_bg T hδ_lt hδ) :=
   rfl
 
-/-- The smooth remainder depends on its tensor argument only, not on the
-smallness certificates. -/
 theorem deTurckSmoothRem_congr (g₀ g_bg : SmoothRiemannianMetric I M)
     {S U : SmoothCcTensor g₀ 0 2} (h : S = U) {δ : ℝ} (hδ_lt : δ < 1)
     (hS : gFibreOpBound (I := I) (M := M) g₀
@@ -132,17 +85,10 @@ theorem deTurckSmoothRem_congr (g₀ g_bg : SmoothRiemannianMetric I M)
   subst h
   rfl
 
-/-! ## The two consumers of the open `a1Lo` pair estimate -/
-
 section A1
 
 variable (g : SmoothRiemannianMetric I M) {ρ δ : ℝ}
 
-/-- The `D₄`-free ball-local pair estimate for the completed first-order low
-coefficient on the smooth core.  This is the single open analytic input of the
-`hfLo` bridge (the `a1Lo` half of the low-base pair lane's follow-up); it is
-kept as a named abbreviation so that its two consumers below make the
-dependency visible. -/
 abbrev LowA1CorePair (hρ : 0 ≤ ρ) (hδ0 : 0 ≤ δ) (hδ_le : δ ≤ 1 / 3)
     (hreal : ∀ S : SmoothCcTensor g 0 2,
       ‖ccTensorToHs (I := I) (M := M) g 2 (2 : ℝ) S‖ ≤ ρ →
@@ -161,8 +107,7 @@ abbrev LowA1CorePair (hρ : 0 ≤ ρ) (hδ0 : 0 ≤ δ) (hδ_le : δ ≤ 1 / 3)
 variable {g}
 
 set_option synthInstance.maxHeartbeats 1000000 in
-/-- The completed first-order low coefficient reads off its smooth-core value.
-Sibling of the `a2` statement in `radialA2_lip`. -/
+
 theorem lowA1Lo_core {hρ : 0 ≤ ρ} {hδ0 : 0 ≤ δ} {hδ_le : δ ≤ 1 / 3}
     {hreal : ∀ S : SmoothCcTensor g 0 2,
       ‖ccTensorToHs (I := I) (M := M) g 2 (2 : ℝ) S‖ ≤ ρ →
@@ -184,8 +129,7 @@ theorem lowA1Lo_core {hρ : 0 ≤ ρ} {hδ0 : 0 ≤ δ} {hδ_le : δ ≤ 1 / 3}
     hpair S
 
 set_option synthInstance.maxHeartbeats 1000000 in
-/-- The completed first-order low coefficient is continuous.  This is item (1)
-of the low-base pair lane's follow-up, conditional on the same open estimate. -/
+
 theorem lowA1Lo_cont {hρ : 0 ≤ ρ} {hδ0 : 0 ≤ δ} {hδ_le : δ ≤ 1 / 3}
     {hreal : ∀ S : SmoothCcTensor g 0 2,
       ‖ccTensorToHs (I := I) (M := M) g 2 (2 : ℝ) S‖ ≤ ρ →
@@ -204,11 +148,6 @@ theorem lowA1Lo_cont {hρ : 0 ≤ ρ} {hδ0 : 0 ≤ δ} {hδ_le : δ ≤ 1 / 3}
 
 end A1
 
-/-! ## Continuity of the frozen low-base forcing -/
-
-/-- The same-background low-base forcing with the refolded first-order
-coefficient.  The second-order completion is unchanged; `FLo` is the complete
-first-order action supplied by `refold_time`. -/
 noncomputable def refoldBaseN
     (g : SmoothRiemannianMetric I M)
     {ρ δ : ℝ} (hρ : 0 ≤ ρ) (hδ0 : 0 ≤ δ) (hδ_le : δ ≤ 1 / 3)
@@ -231,9 +170,6 @@ noncomputable def refoldBaseN
         (tensorHsInclusion (I := I) (M := M) (g := g) (r := 0) (s := 2)
           (show (2 : ℝ) ≤ (3 : ℝ) by norm_num) u))
 
-/-- The autonomous low-base forcing on the `H3` state space is continuous as
-soon as its two completed coefficient maps are.  Canonical home once both
-continuity inputs are unconditional: `DeTurckRemainderLowBaseFixedPoint`. -/
 theorem lowBaseN_cont
     (g : SmoothRiemannianMetric I M) {ρ δ : ℝ} (hρ : 0 < ρ)
     (hδ0 : 0 ≤ δ) (hδ_le : δ ≤ 1 / 3)
@@ -266,9 +202,6 @@ theorem lowBaseN_cont
         ((lowRadialHs_cont (I := I) (M := M) g hρ.le).comp hincl))
   exact (continuous_const.add h2).add h1
 
-/-- The refolded low-base forcing is continuous when its unchanged
-second-order completion and its complete first-order coefficient are
-continuous. -/
 theorem refoldBaseN_cont
     (g : SmoothRiemannianMetric I M) {ρ δ : ℝ} (hρ : 0 < ρ)
     (hδ0 : 0 ≤ δ) (hδ_le : δ ≤ 1 / 3)
@@ -305,17 +238,6 @@ theorem refoldBaseN_cont
       (hFLo.prodMk ((lowRadialHs_cont (I := I) (M := M) g hρ.le).comp hincl))
   exact (continuous_const.add h2).add h1
 
-/-! ## The state-level identity -/
-
-/-- **The low-regularity Nemytskii nonlinearity is the refolded low-base affine
-action.**  For every state `w` of the `H3` ball, the genuine dense-extension
-nonlinearity `lowRegN` agrees, after the exponent transport
-`((1 : ℕ) : ℝ) = (1 : ℝ)`, with `refoldBaseN` evaluated at the same state.
-
-`hNcont` and `hcore` are exported verbatim by `lowreg_partial_sol`; `hA2cont`
-and `hA2core` by `lowA2_small` / `radialA2_lip`.  The refolded first-order
-coefficient and its smooth-core formula are the state-level outputs of
-`refold_time`. -/
 theorem lowreg_N_affine
     (hDim : Module.finrank ℝ E = 3)
     (g₀ : SmoothRiemannianMetric I M) {R ρ δ : ℝ}
@@ -396,7 +318,7 @@ theorem lowreg_N_affine
               (show ((1 : ℕ) : ℝ) + 2 = (3 : ℝ) by norm_num) v.1)} := by
     intro v hv
     obtain ⟨S, hS⟩ := hv
-    -- the state-ball bound, read on the smooth representative
+
     have hball : ‖tensorHsInclusion (I := I) (M := M) (g := g₀)
         (r := 0) (s := 2)
         (show ((1 : ℕ) : ℝ) + 1 ≤ ((1 : ℕ) : ℝ) + 2 by linarith)
@@ -422,10 +344,10 @@ theorem lowreg_N_affine
       lowRadial_eq_self (I := I) (M := M) g₀ S hsymm2
     have hveq : v = ⟨smoothCcToTensorHs (I := I) (M := M) g₀
         (((1 : ℕ) : ℝ) + 2) S, hball⟩ := Subtype.ext hS.symm
-    -- abbreviations for the refolded coefficient bundle and the radial state
+
     set F := refoldCore (I := I) (M := M) g₀ hρ.le hδ0 hδ_le hreal' S with hF
     set S' := lowRadial (I := I) (M := M) g₀ ρ S with hS'
-    -- left-hand side on the smooth core
+
     have hsmoothN :
         deTurckSmoothRemainderTensorHs (I := I) (M := M) g₀ g₀ 1
             (symmS (I := I) (M := M) g₀ S) hδ
@@ -448,14 +370,14 @@ theorem lowreg_N_affine
         lowRegN_on_smooth (I := I) (M := M) g₀ g₀ hR hδ hreal hcore S hball,
         hsmoothN, tensorHsCongr_smoothCc,
         smoothCcToTensorHs_eq_ccToHs]
-    -- the transported state is the smooth spectral embedding at order three
+
     have hu : tensorHsCongr (I := I) (M := M) g₀ 0 2
           (show ((1 : ℕ) : ℝ) + 2 = (3 : ℝ) by norm_num)
           (v.1 : tensorHs (I := I) (M := M) g₀ 0 2 (((1 : ℕ) : ℝ) + 2)) =
         ccToHsLin (I := I) (M := M) g₀ 2 (3 : ℝ) S := by
       rw [hveq, tensorHsCongr_smoothCc, ccToHsLin_apply,
         smoothCcToTensorHs_eq_ccToHs]
-    -- the zero-based smooth split
+
     have hsplit :
         deTurckSmoothRemainder (I := I) g₀ g₀ S' hδ
               (hreal' _ (lowRadial_norm (I := I) (M := M) g₀ hρ.le S)) -
@@ -463,7 +385,7 @@ theorem lowreg_N_affine
               (0 : SmoothCcTensor g₀ 0 2) hδ (hreal' _ hzeroNorm) =
           F.a2 (I := I) (M := M) S' + F.a1 (I := I) (M := M) S' :=
       refold_split (I := I) (M := M) g₀ hρ.le hδ0 hδ_le hreal' S
-    -- the smooth-core read-offs of the refolded operator
+
     have e1 : tensorHsInclusion (I := I) (M := M) (g := g₀) (r := 0) (s := 2)
           (show (2 : ℝ) ≤ (3 : ℝ) by norm_num)
           (ccToHsLin (I := I) (M := M) g₀ 2 (3 : ℝ) S) =

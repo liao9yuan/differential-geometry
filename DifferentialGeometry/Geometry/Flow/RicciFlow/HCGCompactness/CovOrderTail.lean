@@ -3,14 +3,6 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.MetricCovDeri
 
 set_option autoImplicit false
 
-
-
-
-
-
-
-
-
 noncomputable section
 
 universe u uE uH
@@ -92,8 +84,6 @@ private theorem covOrder_zero_point
         (metricTensor0S (I := I) g x)) := hcomp
     _ = C * Real.sqrt (Module.finrank Real E : Real) := by rw [hsq, hself]
 
-
-
 omit [Module.Finite ℝ E] in
 omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [IsManifold I 2 M] in
 omit [SigmaCompactSpace M] in
@@ -119,8 +109,6 @@ variable [IsManifold I 1 M] [IsManifold I 2 M]
 variable [VectorBundle Real E (TangentSpace I : M → Type _)]
 variable [ContMDiffVectorBundle 1 E (TangentSpace I : M → Type _) I]
 
-
-
 omit [Module.Finite ℝ E] [I.Boundaryless] [IsManifold I 1 M] [IsManifold I 2 M]
     [VectorBundle ℝ E (TangentSpace I : M → Type _)]
     [ContMDiffVectorBundle 1 E (TangentSpace I : M → Type _) I] in
@@ -141,10 +129,6 @@ theorem exists_initC
   refine ⟨fun r => max (C r) 0, fun r => le_max_right _ _, ?_⟩
   intro r x
   exact le_trans (hC r x) (le_max_left _ _)
-
-
-
-
 
 omit [Module.Finite ℝ E] in
 omit [I.Boundaryless] in
@@ -196,10 +180,6 @@ theorem covOrder_stage_const
       init_bound := hinit
       timeRadius := timeRadius
       time_abs_le := htime }
-
-
-
-
 
 omit [Module.Finite ℝ E] in
 omit [I.Boundaryless] in
@@ -290,8 +270,6 @@ theorem covOrder_tower_const
         htime
   intro r h1 hrN
   simpa only [Stable] using hmain r h1 hrN K hKc U hU hKU (subset_refl U)
-
-
 
 omit [Module.Finite ℝ E] in
 omit [I.Boundaryless] in

@@ -1,11 +1,5 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.LowRegBgC0Zero
 
-/-!
-# First-order coefficient estimates
-
-Internal implementation layer for the low-regularity order-zero refold.
--/
-
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
@@ -2485,7 +2479,6 @@ theorem lowOneA_h2
         simpa only [B] using Real.sq_sqrt (hL R hR)
       simpa only [mul_pow] using
         congrArg (fun x : ℝ => x * (1 + A) ^ 2) hBR.symm
-
 
 end LowRegBgC0Core
 end DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral

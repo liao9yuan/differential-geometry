@@ -3,16 +3,6 @@ import Mathlib.Tactic.Ring
 
 set_option autoImplicit false
 
-
-
-
-
-
-
-
-
-
-
 noncomputable section
 
 namespace DifferentialGeometry.PDE.RicciFlow
@@ -34,8 +24,6 @@ section Components
 
 variable {Idx : Type*} [Fintype Idx]
 
-
-
 def raisedRm04CompInFrame
     (Rm04 : Real -> DifferentialGeometry.Integral.Connection.Tensor04Section (I := I) (M := M))
     (gInv : Real -> DifferentialGeometry.Integral.Connection.InverseMetricComponents M Idx)
@@ -56,8 +44,6 @@ omit [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
         gInv t x a p * gInv t x b q * gInv t x c r * gInv t x d s *
           DifferentialGeometry.Integral.Connection.rm04Comp (I := I) (Rm04 t) frame x p q r s := by
   rfl
-
-
 
 def rm04NormSqInFrame
     (Rm04 : Real -> DifferentialGeometry.Integral.Connection.Tensor04Section (I := I) (M := M))
@@ -81,14 +67,10 @@ omit [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
           raisedRm04CompInFrame (I := I) Rm04 gInv frame t x a b c d := by
   rfl
 
-
-
 private def derivProduct5RHS
     (u v w y z du dv dw dy dz : Real) : Real :=
   ((((du * v + u * dv) * w + (u * v) * dw) * y + ((u * v) * w) * dy) * z +
     (((u * v) * w) * y) * dz)
-
-
 
 def raisedRm04DerivRHSInFrame
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
@@ -111,7 +93,6 @@ def raisedRm04DerivRHSInFrame
       (inverseMetricEvolutionRHSInFrame (I := I) S gInv frame t x d s)
       (rm04Dt t x p q r s)
 
-
 def rm04NormDerivRHSInFrame
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -126,9 +107,6 @@ def rm04NormDerivRHSInFrame
       DifferentialGeometry.Integral.Connection.rm04Comp (I := I) (Rm04 t) frame x a b c d *
         raisedRm04DerivRHSInFrame (I := I) S Rm04 gInv frame rm04Dt
           t x a b c d)
-
-
-
 
 def Rm04NormRawDerivativeEquationOn
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
@@ -145,7 +123,6 @@ def Rm04NormRawDerivativeEquationOn
       D.carrier
       (t : Real)
 
-
 def roughLapRm04InnerInFrame
     (roughLapRm04 : Real -> M -> Idx -> Idx -> Idx -> Idx -> Real)
     (Rm04 : Real -> DifferentialGeometry.Integral.Connection.Tensor04Section (I := I) (M := M))
@@ -156,7 +133,6 @@ def roughLapRm04InnerInFrame
     ∑ a : Idx, ∑ b : Idx, ∑ c : Idx, ∑ d : Idx,
       roughLapRm04 t x a b c d *
         raisedRm04CompInFrame (I := I) Rm04 gInv frame t x a b c d
-
 
 def nablaRm04NormSqInFrame
     (nablaRm04 : Real -> M -> Idx -> Idx -> Idx -> Idx -> Idx -> Real)
@@ -169,10 +145,6 @@ def nablaRm04NormSqInFrame
       gInv t x a b *
         gInv t x i p * gInv t x j q * gInv t x k r * gInv t x l s *
           nablaRm04 t x a i j k l * nablaRm04 t x b p q r s
-
-
-
-
 
 def Rm04NormDerivativeSimplifiesInFrame
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
@@ -187,7 +159,6 @@ def Rm04NormDerivativeSimplifiesInFrame
         (t : Real) x =
       2 * roughLapInner (t : Real) x + reaction (t : Real) x
 
-
 def Rm04NormTimeDerivativeComponentsOn
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (rmNormSq roughLapInner reaction : Real -> M -> Real) : Prop :=
@@ -197,8 +168,6 @@ def Rm04NormTimeDerivativeComponentsOn
       (2 * roughLapInner (t : Real) x + reaction (t : Real) x)
       D.carrier
       (t : Real)
-
-
 
 omit [SigmaCompactSpace M] [T2Space M] in
 theorem rm04NormTimeDerivativeComponentsOn_of_rawDerivative
@@ -219,14 +188,10 @@ theorem rm04NormTimeDerivativeComponentsOn_of_rawDerivative
   intro t x
   simpa [h_simplify t x] using h_raw t x
 
-
-
 def Rm04NormLaplacianComponentsOn
     (rmNormLap roughLapInner nablaRmNormSq : Real -> M -> Real) : Prop :=
   ∀ (t : Real) (x : M),
     rmNormLap t x = 2 * roughLapInner t x + 2 * nablaRmNormSq t x
-
-
 
 def Rm04NormHeatEquationOn
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
@@ -238,8 +203,6 @@ def Rm04NormHeatEquationOn
         (-2 * nablaRmNormSq (t : Real) x + reaction (t : Real) x))
       D.carrier
       (t : Real)
-
-
 
 omit [TopologicalSpace M] [SigmaCompactSpace M] [T2Space M] in
 theorem rm04NormHeatEquationOn_of_components
@@ -260,8 +223,6 @@ theorem rm04NormHeatEquationOn_of_components
     ring
   rw [hvalue]
   exact h_dt t x
-
-
 
 omit [SigmaCompactSpace M] [T2Space M] in
 theorem rm04NormHeatEquationOn_of_rawDerivative

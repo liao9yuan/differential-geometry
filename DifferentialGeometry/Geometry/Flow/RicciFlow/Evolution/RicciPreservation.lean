@@ -13,15 +13,6 @@ import DifferentialGeometry.Tensor.RSTensor.QuadraticBounds.TimeSlab
 set_option autoImplicit false
 set_option backward.isDefEq.respectTransparency false
 
-
-
-
-
-
-
-
-
-
 noncomputable section
 
 namespace DifferentialGeometry.PDE.RicciFlow
@@ -30,8 +21,6 @@ open DifferentialGeometry.Integral.Connection
 open Bundle
 open Tensor0SBundle
 open scoped BigOperators Manifold ContDiff
-
-
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]
 variable [FiniteDimensional Real E]
@@ -52,11 +41,6 @@ private theorem tensor02_zero_apply {x : M}
     A (0 : Fin 2 → TangentSpace I x) = 0 := by
   with_unfolding_all exact A.map_coord_zero (0 : Fin 2) rfl
 
-
-
-
-
-
 def ShiftBlockReactRealizes
     (G : Real -> SmoothRiemannianMetric I M)
     (N : TwoTensorReaction (I := I) (M := M))
@@ -64,10 +48,6 @@ def ShiftBlockReactRealizes
     (A : RawTwoTensorField (I := I) (M := M)) {x : M}
     (v : TangentSpace I x) (a b c : Real) : Prop :=
   (N t (G t) A) x v v = shiftReactBlock3 delta a b c
-
-
-
-
 
 omit [FiniteDimensional ℝ E] in
 theorem shiftNullSymm_of_block
@@ -90,11 +70,6 @@ theorem shiftNullSymm_of_block
   rw [hreact]
   exact shiftReactBlock3_nonneg delta a b c hdelta0 hdelta13
 
-
-
-
-
-
 def ShiftBlockReactRealizesScaled
     (G : Real -> SmoothRiemannianMetric I M)
     (N : TwoTensorReaction (I := I) (M := M))
@@ -102,9 +77,6 @@ def ShiftBlockReactRealizesScaled
     (A : RawTwoTensorField (I := I) (M := M)) {x : M}
     (v : TangentSpace I x) (r a b c : Real) : Prop :=
   (N t (G t) A) x v v = r ^ 2 * shiftReactBlock3 delta a b c
-
-
-
 
 omit [FiniteDimensional ℝ E] in
 theorem shiftNullSymm_of_block_scaled
@@ -129,7 +101,6 @@ theorem shiftNullSymm_of_block_scaled
   exact mul_nonneg (sq_nonneg r)
     (shiftReactBlock3_nonneg delta a b c hdelta0 hdelta13)
 
-
 def pinchTensor
     (G : Real -> SmoothRiemannianMetric I M)
     (Ric : TwoTensorFamily (I := I) (M := M))
@@ -137,12 +108,9 @@ def pinchTensor
     TwoTensorFamily (I := I) (M := M) :=
   fun t x v w => Ric t x v w - delta * scalar t x * (G t).inner x v w
 
-
 def RicciPosInit
     (Ric : TwoTensorFamily (I := I) (M := M)) : Prop :=
   ∀ x, TwoTensorPositiveDefiniteAt (I := I) (M := M) (Ric 0) x
-
-
 
 def PinchInit
     (G : Real -> SmoothRiemannianMetric I M)
@@ -153,8 +121,6 @@ def PinchInit
       TwoTensorFamilyNonnegativeAtTime (I := I) (M := M)
         (pinchTensor (I := I) (M := M) G Ric scalar delta) 0
 
-
-
 def PinchInitLt
     (G : Real -> SmoothRiemannianMetric I M)
     (Ric : TwoTensorFamily (I := I) (M := M))
@@ -163,8 +129,6 @@ def PinchInitLt
     0 < delta ∧ delta < (1 : Real) / 3 ∧
       TwoTensorFamilyNonnegativeAtTime (I := I) (M := M)
         (pinchTensor (I := I) (M := M) G Ric scalar delta) 0
-
-
 
 omit [FiniteDimensional ℝ E] in
 theorem pinchInit_of_lt
@@ -176,9 +140,6 @@ theorem pinchInit_of_lt
   rcases hinit with ⟨delta, hdelta0, hdelta13, hpinch⟩
   exact ⟨delta, hdelta0, le_of_lt hdelta13, hpinch⟩
 
-
-
-
 def InitBounds
     (G : Real -> SmoothRiemannianMetric I M)
     (Ric : TwoTensorFamily (I := I) (M := M))
@@ -188,9 +149,6 @@ def InitBounds
       (∀ x v, c * (G 0).inner x v v <= Ric 0 x v v) ∧
       (∀ x, scalar 0 x <= C)
 
-
-
-
 def RicMinData
     (G : Real -> SmoothRiemannianMetric I M)
     (Ric : TwoTensorFamily (I := I) (M := M))
@@ -198,9 +156,6 @@ def RicMinData
   Continuous ricMin ∧
     (∀ x, 0 < ricMin x) ∧
     (∀ x v, ricMin x * (G 0).inner x v v <= Ric 0 x v v)
-
-
-
 
 structure MetricRicciData
     [SigmaCompactSpace M] [T2Space M]
@@ -212,14 +167,12 @@ structure MetricRicciData
   ricci_eq :
     ∀ x v w, Ric 0 x v w = K.ricci x (DifferentialGeometry.Integral.Connection.vec2 (I := I) v w)
 
-
 def MetricRicciPos
     [SigmaCompactSpace M] [T2Space M]
     {G : Real -> SmoothRiemannianMetric I M}
     {Ric : TwoTensorFamily (I := I) (M := M)}
     (D : MetricRicciData (I := I) (M := M) G Ric) : Prop :=
   ∀ x v, v ≠ 0 -> 0 < D.K.ricci x (DifferentialGeometry.Integral.Connection.vec2 (I := I) v v)
-
 
 def MetricRicciMin
     [SigmaCompactSpace M] [T2Space M]
@@ -233,18 +186,14 @@ def MetricRicciMin
       ricMin x * (G 0).inner x v v <=
         D.K.ricci x (DifferentialGeometry.Integral.Connection.vec2 (I := I) v v))
 
-
-
 abbrev UnitTangent (g : SmoothRiemannianMetric I M) : Type _ :=
   MetricUnitTangent (I := I) (M := M) g
 
 namespace UnitTangent
 
-
 def base {g : SmoothRiemannianMetric I M}
     (p : UnitTangent (I := I) (M := M) g) : M :=
   p.1.1
-
 
 def vec {g : SmoothRiemannianMetric I M}
     (p : UnitTangent (I := I) (M := M) g) :
@@ -279,7 +228,6 @@ theorem vec_mk {g : SmoothRiemannianMetric I M} {x : M}
 
 end UnitTangent
 
-
 def UnitRicciLower
     [SigmaCompactSpace M] [T2Space M]
     {G : Real -> SmoothRiemannianMetric I M}
@@ -288,7 +236,6 @@ def UnitRicciLower
   0 < c ∧
     ∀ x (v : TangentSpace I x), (G 0).inner x v v = 1 ->
       c <= D.K.ricci x (DifferentialGeometry.Integral.Connection.vec2 (I := I) v v)
-
 
 def unitRicEval
     [SigmaCompactSpace M] [T2Space M]
@@ -300,8 +247,6 @@ def unitRicEval
     (DifferentialGeometry.Integral.Connection.vec2 (I := I)
       (UnitTangent.vec (I := I) (M := M) p)
       (UnitTangent.vec (I := I) (M := M) p))
-
-
 
 theorem metricMin_unit
     [SigmaCompactSpace M] [T2Space M]
@@ -401,10 +346,6 @@ theorem metricMin_unit
     ring
   rwa [hcancel, hleft] at hmul
 
-
-
-
-
 theorem unitLower_raw
     [SigmaCompactSpace M] [T2Space M]
     {G : Real -> SmoothRiemannianMetric I M}
@@ -441,15 +382,11 @@ theorem unitLower_raw
     exfalso
     exact hne ⟨⟨(⟨x, v⟩ : TangentBundle I M), hunit⟩, Set.mem_univ _⟩
 
-
-
-
 theorem unitTan_compact
     [CompactSpace M] [SigmaCompactSpace M] [T2Space M]
     (g : SmoothRiemannianMetric I M) :
     IsCompact (Set.univ : Set (UnitTangent (I := I) (M := M) g)) := by
   exact metricUnit_compact (I := I) (M := M) g
-
 
 theorem unitRic_cont
     [SigmaCompactSpace M] [T2Space M]
@@ -465,8 +402,6 @@ theorem unitRic_cont
   funext i
   fin_cases i <;> simp [DifferentialGeometry.Integral.Connection.vec2]
 
-
-
 theorem unitLower_pos
     [CompactSpace M] [SigmaCompactSpace M] [T2Space M] [Nonempty M]
     {G : Real -> SmoothRiemannianMetric I M}
@@ -477,8 +412,6 @@ theorem unitLower_pos
   exact unitLower_raw (I := I) (M := M) D hpos
     (unitTan_compact (I := I) (M := M) (G 0))
     (unitRic_cont (I := I) (M := M) D)
-
-
 
 theorem metricMin_pos
     [CompactSpace M] [SigmaCompactSpace M] [T2Space M] [Nonempty M]
@@ -491,8 +424,6 @@ theorem metricMin_pos
   rcases unitLower_pos (I := I) (M := M) D hpos with ⟨c, hc⟩
   exact ⟨fun _ : M => c, metricMin_unit (I := I) (M := M) D hc⟩
 
-
-
 theorem ricciPos_metric
     [SigmaCompactSpace M] [T2Space M]
     {G : Real -> SmoothRiemannianMetric I M}
@@ -503,8 +434,6 @@ theorem ricciPos_metric
   intro x v hv
   rw [D.ricci_eq x v v]
   exact hpos x v hv
-
-
 
 theorem ricMin_of_metric
     [SigmaCompactSpace M] [T2Space M]
@@ -520,16 +449,12 @@ theorem ricMin_of_metric
   rw [D.ricci_eq x v v]
   exact hlower x v
 
-
-
 def BoundsOfPosRic
     (G : Real -> SmoothRiemannianMetric I M)
     (Ric : TwoTensorFamily (I := I) (M := M))
     (scalar : Real -> M -> Real) : Prop :=
   RicciPosInit (I := I) (M := M) Ric ->
     InitBounds (I := I) (M := M) G Ric scalar
-
-
 
 omit [FiniteDimensional ℝ E] in
 theorem ricPos_ricMin
@@ -542,8 +467,6 @@ theorem ricPos_ricMin
   intro x v hv
   have hgpos : 0 < (G 0).inner x v v := (G 0).pos x v hv
   exact lt_of_lt_of_le (mul_pos (hpos x) hgpos) (hlower x v)
-
-
 
 theorem scalarUpper_cont
     [CompactSpace M] [Nonempty M]
@@ -559,8 +482,6 @@ theorem scalarUpper_cont
   · intro x
     exact le_trans (hmax (by simp : x ∈ (Set.univ : Set M)))
       (le_max_right 1 (scalar 0 x0))
-
-
 
 omit [FiniteDimensional ℝ E] in
 theorem bounds_ricMin
@@ -595,8 +516,6 @@ theorem bounds_ricMin
   exact le_trans (mul_le_mul_of_nonneg_right (hc_le x) hg_nonneg)
     (hRicLower x v)
 
-
-
 omit [FiniteDimensional ℝ E] in
 theorem boundsPos_ricMin
     [CompactSpace M] [Nonempty M]
@@ -611,8 +530,6 @@ theorem boundsPos_ricMin
   exact bounds_ricMin (I := I) (M := M) (G := G) (Ric := Ric)
     (scalar := scalar) (ricMin := ricMin) hmin
     (scalarUpper_cont (M := M) hscalar)
-
-
 
 omit [FiniteDimensional ℝ E] in
 theorem pinchInitLt_bounds
@@ -663,8 +580,6 @@ theorem pinchInitLt_bounds
     le_trans hscaled_le (hRicLower x v)
   simpa [pinchTensor, sub_nonneg] using hpinch_le
 
-
-
 omit [FiniteDimensional ℝ E] in
 theorem pinchInit_of_bounds
     {G : Real -> SmoothRiemannianMetric I M}
@@ -675,8 +590,6 @@ theorem pinchInit_of_bounds
   exact pinchInit_of_lt (I := I) (M := M)
     (pinchInitLt_bounds (I := I) (M := M) (G := G) (Ric := Ric)
       (scalar := scalar) hbounds)
-
-
 
 omit [FiniteDimensional ℝ E] in
 theorem pinchInitLt_of_pos
@@ -689,8 +602,6 @@ theorem pinchInitLt_of_pos
   exact pinchInitLt_bounds (I := I) (M := M) (G := G) (Ric := Ric)
     (scalar := scalar) (hbounds hpos)
 
-
-
 omit [FiniteDimensional ℝ E] in
 theorem pinchInit_of_pos
     {G : Real -> SmoothRiemannianMetric I M}
@@ -702,8 +613,6 @@ theorem pinchInit_of_pos
   exact pinchInit_of_lt (I := I) (M := M)
     (pinchInitLt_of_pos (I := I) (M := M) (G := G) (Ric := Ric)
       (scalar := scalar) hpos hbounds)
-
-
 
 omit [FiniteDimensional ℝ E] in
 theorem pinchInitLt_ricMin
@@ -721,8 +630,6 @@ theorem pinchInitLt_ricMin
       (scalar := scalar) (ricMin := ricMin) hmin
       (scalarUpper_cont (M := M) hscalar))
 
-
-
 omit [FiniteDimensional ℝ E] in
 theorem pinchInit_ricMin
     [CompactSpace M] [Nonempty M]
@@ -736,9 +643,6 @@ theorem pinchInit_ricMin
   pinchInit_of_lt (I := I) (M := M)
     (pinchInitLt_ricMin (I := I) (M := M) (G := G) (Ric := Ric)
       (scalar := scalar) (ricMin := ricMin) hmin hscalar)
-
-
-
 
 theorem pinchInitLt_metric
     [CompactSpace M] [SigmaCompactSpace M] [T2Space M] [Nonempty M]
@@ -754,9 +658,6 @@ theorem pinchInitLt_metric
     (scalar := scalar) (ricMin := ricMin)
     (ricMin_of_metric (I := I) (M := M) D hmin) hscalar
 
-
-
-
 theorem pinchInit_metric
     [CompactSpace M] [SigmaCompactSpace M] [T2Space M] [Nonempty M]
     {G : Real -> SmoothRiemannianMetric I M}
@@ -771,8 +672,6 @@ theorem pinchInit_metric
     (pinchInitLt_metric (I := I) (M := M) (G := G) (Ric := Ric)
       (scalar := scalar) (ricMin := ricMin) D hmin hscalar)
 
-
-
 theorem pinchInitLt_pos
     [CompactSpace M] [SigmaCompactSpace M] [T2Space M] [Nonempty M]
     {G : Real -> SmoothRiemannianMetric I M}
@@ -785,8 +684,6 @@ theorem pinchInitLt_pos
   rcases metricMin_pos (I := I) (M := M) D hpos with ⟨ricMin, hmin⟩
   exact pinchInitLt_metric (I := I) (M := M) (G := G) (Ric := Ric)
     (scalar := scalar) (ricMin := ricMin) D hmin hscalar
-
-
 
 theorem pinchInit_pos
     [CompactSpace M] [SigmaCompactSpace M] [T2Space M] [Nonempty M]
@@ -801,7 +698,6 @@ theorem pinchInit_pos
     (pinchInitLt_pos (I := I) (M := M) (G := G) (Ric := Ric)
       (scalar := scalar) D hpos hscalar)
 
-
 noncomputable def metricData_sol0
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     [SigmaCompactSpace M] [T2Space M]
@@ -815,8 +711,6 @@ noncomputable def metricData_sol0
     simp [twoTensorSecToFamily, SolutionOn.ricci, SolutionFamily.ricci,
       metricCurvData, DifferentialGeometry.Integral.Connection.metricCurvData]
 
-
-
 theorem metricData_sol0_pos
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     [SigmaCompactSpace M] [T2Space M]
@@ -828,7 +722,6 @@ theorem metricData_sol0_pos
   intro x v hv
   have h := hpos x v hv
   simpa [metricData_sol0] using h
-
 
 theorem scalar0_cont_sol
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
@@ -845,17 +738,12 @@ theorem scalar0_cont_sol
   have hcomp := hS.scalarCont.comp_continuous hmap hmem
   simpa [Function.comp_def] using hcomp
 
-
 def PinchPres
     (G : Real -> SmoothRiemannianMetric I M)
     (Ric : TwoTensorFamily (I := I) (M := M))
     (scalar : Real -> M -> Real) (T delta : Real) : Prop :=
   TwoTensorFamilyNonnegativeOn (I := I) (M := M)
     (pinchTensor (I := I) (M := M) G Ric scalar delta) (Set.Icc 0 T)
-
-
-
-
 
 theorem ricciCov1
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
@@ -868,8 +756,6 @@ theorem ricciCov1
     (leviCivitaConnectionOfMetric_contMDiffCovariantDerivativeLocally_one
       (I := I) (M := M) (S.base.metric t))
 
-
-
 theorem ricciCovInf
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     [CompleteSpace E] [SigmaCompactSpace M] [T2Space M]
@@ -879,8 +765,6 @@ theorem ricciCovInf
       (∞ : WithTop ℕ∞) := by
   simpa [SolutionFamily.connection, metricCov] using
     metricCov_smooth (I := I) (M := M) (S.base.metric t)
-
-
 
 theorem ricciMetricComp
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
@@ -892,8 +776,6 @@ theorem ricciMetricComp
     (DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric_isMetricCompatible
       (I := I) (S.base.metric t))
 
-
-
 noncomputable def ricciDerivsWMP
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     [CompleteSpace E] [SigmaCompactSpace M] [T2Space M]
@@ -904,7 +786,6 @@ noncomputable def ricciDerivsWMP
     (E := E) (H := H) (I := I) (M := M)
     (S.base.connection t) (ricciCovInf (I := I) S t) (S.ricci t)
 
-
 noncomputable def ricciNablaWMP
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     [CompleteSpace E] [SigmaCompactSpace M] [T2Space M]
@@ -912,15 +793,12 @@ noncomputable def ricciNablaWMP
     TensorNabla1SecFamily (I := I) (M := M) :=
   fun t => (ricciDerivsWMP (I := I) S t).nablaA
 
-
 noncomputable def ricciNabla2WMP
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     [CompleteSpace E] [SigmaCompactSpace M] [T2Space M]
     (S : SolutionOn (I := I) (M := M) D) :
     TensorNabla2SecFamily (I := I) (M := M) :=
   fun t => (ricciDerivsWMP (I := I) S t).nabla2A
-
-
 
 theorem ricciSpatialWMP
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
@@ -936,8 +814,6 @@ theorem ricciSpatialWMP
   · intro t
     simpa [ricciNablaWMP, ricciNabla2WMP, ricciDerivsWMP] using
       (ricciDerivsWMP (I := I) S t).second
-
-
 
 noncomputable def pinchSec
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
@@ -963,8 +839,6 @@ noncomputable def pinchSec
         (I := I) (M := M) (n := (∞ : WithTop ℕ∞)) (s := 2)
         (fun x : M => delta * S.scalar t x) hscalar
         (metricTensorField (I := I) (S.base.metric t))
-
-
 
 noncomputable def pinchLipSec
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
@@ -1063,7 +937,6 @@ private theorem pinchSec_at_trace
   rw [hscalar]
   simp [sub_eq_add_neg]
 
-
 theorem ricciAt_symm
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     [SigmaCompactSpace M] [T2Space M]
@@ -1091,7 +964,6 @@ theorem ricciAt_symm
         DifferentialGeometry.Integral.Connection.metricRicciSymm (I := I) (M := M) (S.base.metric t)
           basis gInv hinv i j)
 
-
 theorem ricciSec_symm
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     [SigmaCompactSpace M] [T2Space M]
@@ -1102,7 +974,6 @@ theorem ricciSec_symm
   simpa [twoTensorSecToFamily, SolutionOn.ricci, SolutionFamily.ricci,
     SolutionOn.ricciAt, SolutionFamily.ricciAt] using
     ricciAt_symm (I := I) S t x v w
-
 
 theorem pinchSec_symm
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
@@ -1119,10 +990,6 @@ theorem pinchSec_symm
     SolutionOn.ricciAt, SolutionFamily.ricciAt, hg] using congrArg
       (fun z => z - delta * S.scalar t x * (S.base.metric t).inner x w v)
       hRic
-
-
-
-
 
 theorem shiftNRaw_pinch
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
@@ -1175,9 +1042,6 @@ theorem shiftNRaw_pinch
         (pinchSec (I := I) S delta) t x :=
     tensor02_realizes_ext (I := I) (M := M) hrealBundled hrealSec
   rw [hT]
-
-
-
 
 theorem shiftNRaw_barrier
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
@@ -1267,9 +1131,6 @@ theorem shiftNRaw_barrier
     tensor02_realizes_ext (I := I) (M := M) hrealBundled hrealSec
   rw [hT]
   simp [Bsec, tensorBarrierSecFamily]
-
-
-
 
 theorem shiftNRaw_barrier_diff
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
@@ -1748,10 +1609,6 @@ theorem pinchSec_quad
   rw [pinchSec_eq (I := I) S delta]
   simp [pinchTensor]
 
-
-
-
-
 theorem pinchSec_quad_deriv
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     [SigmaCompactSpace M] [T2Space M]
@@ -1805,10 +1662,6 @@ theorem pinchSec_quad_deriv
   · simpa [twoTensorSecToFamily, SolutionOn.ricci, SolutionOn.scalar,
       SolutionOn.family, mul_assoc] using
       (pinchSec_quad (I := I) (M := M) S delta t x v)
-
-
-
-
 
 theorem ricciQuadDeriv_coord
     [I.Boundaryless]
@@ -1898,10 +1751,6 @@ theorem ricciQuadDeriv_coord
     exact hsum_eval s
   · exact hsum_eval (t : Real)
 
-
-
-
-
 theorem pinchQuadDeriv_coord
     [I.Boundaryless]
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
@@ -1957,9 +1806,6 @@ theorem pinchQuadDeriv_coord
   exact pinchSec_quad_deriv (I := I) (M := M) S
     (delta := delta) hRic hScalar hMetric
 
-
-
-
 noncomputable def pinchMetricDerivs
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     [CompleteSpace E] [SigmaCompactSpace M] [T2Space M]
@@ -1992,8 +1838,6 @@ theorem pinchMetric_nabla2
     (x : M) (slots : Fin 4 -> TangentSpace I x) :
     (pinchMetricDerivs (I := I) S t).nabla2A x slots = 0 := by
   simp [pinchMetricDerivs]
-
-
 
 theorem pinchRough_smulMetric
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
@@ -2031,9 +1875,6 @@ theorem pinchRough_smulMetric
     (by intro X tail; simp)
     (by intro X Y tail; simp)
     hleib
-
-
-
 
 theorem pinchRough_hessMetric
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
@@ -2079,7 +1920,6 @@ theorem pinchRough_hessMetric
   rw [metricTensorField_apply]
   simp
 
-
 theorem scalarSmoothSec
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     [SigmaCompactSpace M] [T2Space M]
@@ -2089,7 +1929,6 @@ theorem scalarSmoothSec
   simpa [SolutionOn.scalar, SolutionFamily.scalar] using
     metricScalar_smooth (I := I) (M := M) (S.base.metric t)
 
-
 noncomputable def scalarDuSec
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     [SigmaCompactSpace M] [T2Space M]
@@ -2098,7 +1937,6 @@ noncomputable def scalarDuSec
   duSec (I := I) (fun x : M => S.scalar t x)
     (scalarSmoothSec (I := I) S t)
 
-
 noncomputable def scalarHessSec
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     [CompleteSpace E] [SigmaCompactSpace M] [T2Space M]
@@ -2106,7 +1944,6 @@ noncomputable def scalarHessSec
     TwoTensorSection (I := I) (M := M) :=
   hessianSec (I := I) (S.base.connection t) (ricciCovInf (I := I) S t)
     (fun x : M => S.scalar t x) (scalarSmoothSec (I := I) S t)
-
 
 noncomputable def scalarMetric1Sec
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
@@ -2118,7 +1955,6 @@ noncomputable def scalarMetric1Sec
     (E := TangentSpace I) (n := (∞ : WithTop ℕ∞)) (s := 1) (q := 2)
     (scalarDuSec (I := I) S t)
     (metricTensorField (I := I) (S.base.metric t))
-
 
 noncomputable def scalarMetric2Sec
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
@@ -2157,8 +1993,6 @@ theorem scalarMetric2Sec_apply
           Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) 4 x) := by
   rfl
 
-
-
 theorem scalarHessTrace_eq_lap
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     [CompleteSpace E] [SigmaCompactSpace M] [T2Space M]
@@ -2187,8 +2021,6 @@ theorem scalarHessTrace_eq_lap
     SolutionFamily.scalar,
     metricScalarAt, DifferentialGeometry.Integral.Connection.metricScalarAt, SolutionFamily.ricciAt,
     metricRicciAt] using htrace.symm
-
-
 
 theorem ricciRoughTrace_coord
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
@@ -2263,8 +2095,6 @@ theorem ricciRoughTrace_coord
           coordRoughRic (I := I) S x (coordNab2Ric (I := I) S x) t x i j
   simpa [b, frame, hcomp_if] using hsum
 
-
-
 theorem ricciRoughPair
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     [CompleteSpace E] [SigmaCompactSpace M] [T2Space M]
@@ -2333,8 +2163,6 @@ theorem ricciRoughPair
   change roughA (fun q : Fin 2 => if q = 0 then v else w) = _
   simpa [b, frame, hcomp_if] using hsum
 
-
-
 theorem scalarMetric_trace
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     [CompleteSpace E] [SigmaCompactSpace M] [T2Space M]
@@ -2386,9 +2214,6 @@ private theorem trace_sub_smul
   intro j _
   ring
 
-
-
-
 def pinchNab2Model
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     [CompleteSpace E] [SigmaCompactSpace M] [T2Space M]
@@ -2396,9 +2221,6 @@ def pinchNab2Model
     Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) 4 x :=
   ricciNabla2WMP (I := I) S t x -
     delta • scalarMetric2Sec (I := I) S t x
-
-
-
 
 theorem pinchNab2Model_trace
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
@@ -2426,8 +2248,6 @@ theorem pinchNab2Model_trace
     delta (DifferentialGeometry.Integral.Connection.vec2 (I := I) v v)]
   rw [scalarMetric_trace (I := I) S t basis gInv hinv v]
 
-
-
 theorem scalarHessSec_realizes
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     [CompleteSpace E] [SigmaCompactSpace M] [T2Space M]
@@ -2441,8 +2261,6 @@ theorem scalarHessSec_realizes
       (totalNabla0S_reg (E := E) (H := H) (I := I) (M := M)
         1 (S.base.connection t) (ricciCovInf (I := I) S t)
         (scalarDuSec (I := I) S t)))
-
-
 
 theorem scalarMetric1Sec_realizes
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
@@ -2571,8 +2389,6 @@ theorem scalarMetric1Sec_realizes
             linarith [hm0]
           rw [hmfunx, hdm]
           ring
-
-
 
 theorem scalarMetric2Sec_realizes
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
@@ -2783,7 +2599,6 @@ theorem scalarMetric2Sec_realizes
           ring_nf
           simp [W]
 
-
 noncomputable def pinchNablaModel
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     [CompleteSpace E] [SigmaCompactSpace M] [T2Space M]
@@ -2791,7 +2606,6 @@ noncomputable def pinchNablaModel
     TensorNabla1SecFamily (I := I) (M := M) :=
   fun t => ricciNablaWMP (I := I) S t -
     delta • scalarMetric1Sec (I := I) S t
-
 
 noncomputable def pinchNab2ModelSec
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
@@ -2819,8 +2633,6 @@ theorem pinchNab2ModelSec_apply
     pinchNab2ModelSec (I := I) S delta t x =
       pinchNab2Model (I := I) S delta t x := by
   simp [pinchNab2ModelSec, pinchNab2Model]
-
-
 
 theorem pinchHeat_coord
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
@@ -2852,8 +2664,6 @@ theorem pinchHeat_coord
   rw [ricciRoughTrace_coord (I := I) S t x v]
   rw [scalarHessTrace_eq_lap (I := I) S t x]
 
-
-
 def ricciCoordQuadRHS
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     [SigmaCompactSpace M] [T2Space M]
@@ -2869,7 +2679,6 @@ def ricciCoordQuadRHS
             (coordRoughRic (I := I) S x (coordNab2Ric (I := I) S x))
             t x i j
 
-
 def ricciCoordRough
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     [SigmaCompactSpace M] [T2Space M]
@@ -2881,8 +2690,6 @@ def ricciCoordRough
         (DifferentialGeometry.Tensor.Coordinates.coordinateFrameAt_toBasis (I := I) x).coord j v *
           coordRoughRic (I := I) S x (coordNab2Ric (I := I) S x) t x i j
 
-
-
 def ricciCoordReact
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     [SigmaCompactSpace M] [T2Space M]
@@ -2890,8 +2697,6 @@ def ricciCoordReact
     (t : Real) (x : M) (v : TangentSpace I x) : Real :=
   ricciCoordQuadRHS (I := I) S t x v -
     ricciCoordRough (I := I) S t x v
-
-
 
 noncomputable def ricciPairReact
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
@@ -2904,8 +2709,6 @@ noncomputable def ricciPairReact
         (DifferentialGeometry.Tensor.Coordinates.coordinateFrameAt_toBasis (I := I) x).coord i v *
           (DifferentialGeometry.Tensor.Coordinates.coordinateFrameAt_toBasis (I := I) x).coord j w *
             coordRoughRic (I := I) S x (coordNab2Ric (I := I) S x) t x i j
-
-
 
 def pinchCoordTime
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
@@ -2923,10 +2726,6 @@ def pinchCoordTime
           ((-2 : Real) * S.ricciAt t x
             (DifferentialGeometry.Integral.Connection.vec2 (I := I) v v)))
 
-
-
-
-
 def pinchCoordReact
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     [SigmaCompactSpace M] [T2Space M]
@@ -2939,7 +2738,6 @@ def pinchCoordReact
         S.scalar t x *
           ((-2 : Real) * S.ricciAt t x
             (DifferentialGeometry.Integral.Connection.vec2 (I := I) v v)))
-
 
 noncomputable def ricciActualReactAt
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
@@ -2964,7 +2762,6 @@ private theorem actualReact_apply
   unfold ricciActualReactAt
   simp only [Tensor0SSpace.sub_apply, real_smul0S_apply,
     Tensor0SSpace.nsmul_apply, nsmul_eq_mul, Nat.cast_ofNat]
-
 
 theorem actualReact_comp
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
@@ -3197,8 +2994,6 @@ private theorem ricciCoordReact_eq_actual
             c i j * L i j
   exact sum_coord_react_cancel c L R Q
 
-
-
 theorem pairReact_eq_actual
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     [SigmaCompactSpace M] [T2Space M]
@@ -3315,8 +3110,6 @@ theorem pairReact_eq_actual
             c i j * L i j
   exact sum_coord_react_cancel c L R Q
 
-
-
 theorem ricciPairDeriv
     [I.Boundaryless]
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
@@ -3410,8 +3203,5 @@ theorem shiftNRaw_pinchCoordReact
     simp [pinchCoordReact, metricTensorField_apply,
       SolutionOn.scalar_eq_metricTrace, vec2, DifferentialGeometry.Integral.Connection.vec2]
     ring
-
-
-
 
 end DifferentialGeometry.PDE.RicciFlow

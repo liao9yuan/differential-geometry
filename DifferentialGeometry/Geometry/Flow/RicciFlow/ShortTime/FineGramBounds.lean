@@ -1,17 +1,6 @@
 import DifferentialGeometry.Analysis.Sobolev.Chart.SmoothDensity.FineChartCover
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.MetricPreconv
 
-/-!
-# Uniform raw Gram jets on finite refined chart carriers
-
-The small-carrier parametrix needs raw, unweighted chart-Gram coefficients on
-the full closed outer coordinate balls, not only on the original canonical
-partition support.  This file applies `chartGram_of_orders` separately on each
-such compact pullback and takes a finite nonnegative sum of the resulting
-constants.  The family-uniform covariant bounds are restricted directly from
-`Set.univ`; no partition weight is divided out.
--/
-
 noncomputable section
 
 namespace DifferentialGeometry.PDE.RicciFlow
@@ -30,11 +19,6 @@ variable
       [T2Space M] [SigmaCompactSpace M]
 
 omit [NeZero (Module.finrank ℝ E)] in
-/-- Non-circular coefficient preparation on a fixed chart carrier.  First a
-positive coordinate collar radius `r₀` is chosen using only compactness and the
-chart target.  Then one constant is obtained on the resulting fixed compact
-buffer for every raw Gram jet of order at most three.  A later refinement may
-choose its radius from this constant while requiring `r ≤ r₀`. -/
 theorem bufferGram3_bnd
     {ι : Type*}
     (gRef : SmoothRiemannianMetric I M)
@@ -80,10 +64,6 @@ theorem bufferGram3_bnd
     (Finset.single_le_sum (fun m _ => hCq m) (Finset.mem_univ q'))
 
 omit [NeZero (Module.finrank ℝ E)] in
-/-- Uniform order-`r` raw chart-Gram bound on a finite family of refined outer
-closed balls.  The outer-ball hypothesis is purely chart geometry; the metric
-bound itself is obtained by restricting the supplied `Set.univ` covariant
-bound to each compact pullback. -/
 theorem fineGram_of_orders
     {ι : Type*}
     (gRef : SmoothRiemannianMetric I M)
@@ -138,8 +118,6 @@ theorem fineGram_of_orders
     (Finset.single_le_sum (fun w _ => hCz w) (Finset.mem_univ z))
 
 omit [NeZero (Module.finrank ℝ E)] in
-/-- One family-uniform constant controls every raw chart-Gram jet of order at
-most three on every finite refined outer closed ball. -/
 theorem fineGram3_bnd
     {ι : Type*}
     (gRef : SmoothRiemannianMetric I M)

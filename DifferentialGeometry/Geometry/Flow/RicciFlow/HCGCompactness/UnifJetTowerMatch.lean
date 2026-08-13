@@ -7,62 +7,6 @@ import DifferentialGeometry.Geometry.Connection.MetricCompatibility.TensorLoweri
 import DifferentialGeometry.Geometry.Connection.ChartTensorNabla.Agreement.Nabla0SFunAgreement
 import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.RiemannianFiberNormSq.RiemannianFiberNormSqTensorInnerBridge
 
-/-!
-# Generic-rank jet tower match, and the discharge of brick E4's `Kjet`
-
-Brick **E4** (`Analysis/Sobolev/Embedding/SobolevEmbeddingUnif.lean`) proves the
-class-uniform fibre-Morrey bound `fibreMorrey_unif_base` modulo one abstract
-input, `hjet`: the cross-metric transfer of covariant jets
-
-`‖∇^{gBase, j} T‖_{L²(gBase)} ≤ Kjet · ∑_{i < w} ‖∇^{g₀, i} T‖_{L²(g₀)}`,
-`w = finrank ℝ E / 2 + 2`.
-
-That input could not be discharged inside `Analysis/`, because its producers are
-the pointwise cross-metric tower bounds of `UnifCovSumCross.lean`, phrased with
-`MetricCovDerivOrderBoundOn` — a predicate of `HCGCompactness/AllTimesBounds.lean`,
-downstream of `Analysis/`.  This file is the `HCGCompactness/`-homed discharge.
-
-## The currency mismatch, and the missing lemma
-
-The pointwise producers speak `iterCov`/`covStep` on `Tensor0SField`; the Morrey
-chain speaks `iteratedCovGrad` on `SmoothCcTensor`.  The tower match between the
-two existed only in a specialized private form (`MetricCovDerivBridge.lean`, rank
-`(0,2)`, `metricCcTensor` only).  `iterCovGrad_unit_eq` below is its generic-rank
-version, obtained by the same induction on the order.
-
-## Main statements
-
-* `ccUnitField` — the unit-value `Tensor0SField` of a `(0, s)` `SmoothCcTensor`
-  (the metric-free smooth core the two formalisms share).
-* `iterCovGrad_unit_eq` — **the tower match**: the unit-value of the abstract
-  `iteratedCovGrad` tower is the intrinsic `iterCov` tower of `ccUnitField`.
-* `rfns0_unit_eq` — the fibre-inner bridge `riemannianFiberNormSq = normSq0S` at
-  generic rank `(0, s)`.
-* `rfns_iterCovGrad_eq` — the two composed: the Morrey chain's pointwise currency
-  written in the cross-metric layer's currency.
-* `jetOnePt`, `kjetOneC`, `jetCross_l2_one` — the order-one transfer with only
-  `∇^{gBase} g₀` as metric-jet input.
-* `jetTowerPt`, `sqrtRfns_cross_le` — the pointwise cross-metric jet bound at
-  orders `≤ 2`, with a closed constant in `(Λ, Λ', Λ'', finrank ℝ E, s)`.
-* `kjetConst`, `jetCross_l2` — its `L²` face, across the two volume measures.
-* `kjet_of_class` — E4's `hjet` slot, supplied from `Λ`-class data alone.
-* `fibreMorrey_unif_class` — brick E4 with **no** abstract input left: the
-  fibre-Morrey bound for every metric of the `Λ`-class, with a constant that is a
-  closed function of `(gBase, Λ, Λ', Λ'', dim, s)`.
-
-## Order budget
-
-`iterCovG1_two` (unconditional, `N = 2`) covers orders `≤ 2`, which is the whole
-supercritical window at `finrank ℝ E = 3` (`range (3/2 + 2) = range 3`).  So the
-lane's only `sorry`, `hAcc_of_jets` (`UnifCovSumN3.lean`), is **not** on this
-path.  `kjet_of_class` therefore carries the dimension hypothesis
-`finrank ℝ E / 2 + 2 = 3`.
-
-The separate order-one window uses only `iterCovG1_le` at `N = 1`; its
-accumulator vanishes.  Consequently `jetCross_l2_one` needs neither the reverse
-first metric jet nor an order-two metric jet.
--/
-
 set_option autoImplicit false
 
 noncomputable section
@@ -98,17 +42,8 @@ private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
-/-! ### The shared smooth core -/
-
 set_option linter.unusedSectionVars false in
-/-- **The unit-value tensor field of a `(0, s)` smooth compactly-supported tensor.**
 
-A `SmoothCcTensor g 0 s` is a section of `TensorRSSpace 0 s`, i.e. of
-`Tensor0SSpace 0 →L Tensor0SSpace s`; evaluating it at the (parallel) unit
-`(0,0)`-tensor produces a genuine `(0, s)`-tensor field.  This is the object the
-intrinsic tower `iterCov` consumes, and it does not mention `g`: the same section
-gives the same field for every metric, which is what makes the cross-metric
-statements below expressible. -/
 def ccUnitField (g : SmoothRiemannianMetric I M) (s : ℕ) (W : SmoothCcTensor g 0 s) :
     Tensor0SBundle.Tensor0SField (𝕜 := ℝ) (E := E) (H := H) (I := I) (M := M) ∞ s :=
   MixedSection.toMultilinearSection (𝕜 := ℝ) (F := E) (IB := I)
@@ -122,32 +57,12 @@ set_option linter.unusedSectionVars false in
         (unitZeroSec (I := I) (M := M) x) := rfl
 
 set_option linter.unusedSectionVars false in
-/-- **The unit-value field is metric-free.**  Recasting a `SmoothCcTensor` to
-another metric (`SmoothCcTensor.recast`, which keeps the underlying section)
-leaves its unit-value field unchanged. -/
+
 @[simp] lemma ccUnitField_recast (g g' : SmoothRiemannianMetric I M) (s : ℕ)
     (W : SmoothCcTensor g 0 s) :
     ccUnitField (I := I) g' s (W.recast (g' := g')) = ccUnitField (I := I) g s W := rfl
 
-/-! ### The tower match -/
-
 omit [NeZero (Module.finrank ℝ E)] in
-/-- **Tower match at generic rank (no arity cast).**
-
-For a smooth compactly-supported `(0, s)`-tensor `W` and every order `j`, the
-unit-value of the abstract iterated covariant gradient
-`iteratedCovGrad g 0 s j W` (a `(0, s + j)`-tensor section) is the intrinsic
-`iterCov` tower of `ccUnitField g s W` at order `j`.  Both sides live at arity
-`s + j`, so no arity cast enters.
-
-Generic-rank version of the private `(0,2)`/`metricCcTensor` specialization
-`iterCovGrad_unit_eq_iterCov` of `MetricCovDerivBridge.lean`, proved by the same
-induction: the successor step reads the `covGrad` unit-value
-(`covGrad_apply_unit_eval_genVal`), transports the unit through the directional
-covariant derivative (`covDeriv_unit_eval_eq_genVal`), applies the chart↔abstract
-agreement `nabla0SFun_eq_tensor0SCovariantDerivative`, and recognises the result
-as one `covStep` of `iterCov`.  Only the base case is simpler here: `ccUnitField`
-is *defined* as the unit-value, so `j = 0` is `rfl`. -/
 theorem iterCovGrad_unit_eq (g : SmoothRiemannianMetric I M) (s : ℕ)
     (W : SmoothCcTensor g 0 s) (j : ℕ) :
     (fun x : M => (show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace (s + j) I x from
@@ -196,11 +111,8 @@ theorem iterCovGrad_unit_eq (g : SmoothRiemannianMetric I M) (s : ℕ)
       (iterCov (I := I) g s (ccUnitField (I := I) g s W) j) x (Matrix.vecTail v)]
     rfl
 
-/-! ### The fibre-inner bridge -/
-
 set_option linter.unusedSectionVars false in
-/-- **`r = 0` index-lowering is unit-evaluation.**  Replica of the (private)
-upstream `lowerAllUpperIndices_zero_apply_unitModel`. -/
+
 private lemma lowerAllUpper0_unit (g : SmoothRiemannianMetric I M) (s : ℕ) (x : M)
     (W : SmoothCcTensor g 0 s) (w : Fin (0 + s) → TangentSpace I x) :
     lowerAllUpperIndices (I := I) (M := M) g 0 s x
@@ -216,15 +128,7 @@ private lemma lowerAllUpper0_unit (g : SmoothRiemannianMetric I M) (s : ℕ) (x 
   rfl
 
 set_option linter.unusedSectionVars false in
-/-- **Fibre-inner bridge (`(0, s)`).**  The `g`-Riemannian squared fibre norm of a
-smooth `(0, s)`-tensor section — the currency of the fibre-Morrey chain — equals
-the intrinsic `normSq0S` of its unit-value, the currency of the cross-metric
-comparison layer.  Both sides are expanded in one `g`-orthonormal frame.
 
-Generic-rank canonical form of the two private replicas
-`MetricCovDerivBridge.rfns_eq_normSq0S_unit` and
-`SobolevEmbeddingUnif.rfns0_eq_normSq0S`; those should be collapsed onto this one
-when their files are next touched. -/
 theorem rfns0_unit_eq (g : SmoothRiemannianMetric I M) (s : ℕ) (x : M)
     (W : SmoothCcTensor g 0 s) :
     riemannianFiberNormSq (I := I) (M := M) g 0 s x (W.toSection x) =
@@ -261,13 +165,6 @@ theorem rfns0_unit_eq (g : SmoothRiemannianMetric I M) (s : ℕ) (x : M)
      apply Fin.ext;
      simp)
 
-/-- **The Morrey chain's pointwise currency, in the cross-metric layer's currency.**
-
-The `g`-fibre squared norm of the `j`-th iterated covariant gradient of a
-`(0, s)`-tensor `W` is the `normSq0S` of the `j`-th intrinsic `iterCov` tower of
-`ccUnitField g s W`.  This is `rfns0_unit_eq` composed with `iterCovGrad_unit_eq`;
-it is the exact bridge that lets `iterCovG1_two` bound a member of the
-`iteratedCovGrad` jet sum. -/
 theorem rfns_iterCovGrad_eq (g : SmoothRiemannianMetric I M) (s j : ℕ)
     (W : SmoothCcTensor g 0 s) (x : M) :
     riemannianFiberNormSq (I := I) (M := M) g 0 (s + j) x
@@ -280,10 +177,6 @@ theorem rfns_iterCovGrad_eq (g : SmoothRiemannianMetric I M) (s j : ℕ)
   rw [rfns0_unit_eq (I := I) g (s + j) x (iteratedCovGrad (I := I) g 0 s j W)]
   exact congrArg (normSq0S (I := I) g x (s + j)) h
 
-/-! ### The closed pointwise constant -/
-
-/-- Nonnegativity of the `D_N` constant tower (local replica of the private
-`UnifCovSumCross.Dtower_nonneg`). -/
 private theorem dtowerNonneg (n : ℕ) {q : ℝ} (hq : 0 ≤ q) (r : ℕ) {Racc : ℕ → ℝ}
     (hR : ∀ m, 0 ≤ Racc m) (N : ℕ) : 0 ≤ Dtower n q r Racc N := by
   induction N with
@@ -296,7 +189,6 @@ private theorem dtowerNonneg (n : ℕ) {q : ℝ} (hq : 0 ≤ q) (r : ℕ) {Racc 
           Dtower n q r Racc N := mul_nonneg h2 ih
       simp only [Dtower]; linarith
 
-/-- The closed pointwise cross-metric jet constant for the order-one window. -/
 def jetOnePt (n : ℕ) (Λ Λ' : ℝ) (r : ℕ) : ℝ :=
   Real.sqrt (Λ ^ (r + 1)) *
     (1 + Dtower n ((3 / 2 : ℝ) * (Real.sqrt (Λ ^ 3) * Λ')) r (fun _ => 0) 1)
@@ -310,7 +202,6 @@ lemma jetOnePt_nonneg {Λ Λ' : ℝ} (hΛ' : 0 ≤ Λ') (n r : ℕ) :
     dtowerNonneg n hq r (fun _ => le_refl 0) 1
   exact mul_nonneg (Real.sqrt_nonneg _) (add_nonneg zero_le_one hD)
 
-/-- Nonnegativity of the `N = 2` accumulator family of `iterCovG1_two`. -/
 private lemma raccTwoNonneg {Λ Λ' Λ'' : ℝ} (hΛ : 0 ≤ Λ) (hΛ' : 0 ≤ Λ') (hΛ'' : 0 ≤ Λ'')
     (n r : ℕ) (m : ℕ) :
     0 ≤ (if m = 1 then
@@ -326,16 +217,6 @@ private lemma raccTwoNonneg {Λ Λ' Λ'' : ℝ} (hΛ : 0 ≤ Λ) (hΛ' : 0 ≤ �
     exact mul_nonneg h4 (add_nonneg h2 h3)
   · exact le_refl 0
 
-/-- **The closed pointwise cross-metric jet constant at orders `≤ 2`.**
-
-`jetTowerPt n Λ Λ' Λ'' r = √(Λ^{r+2}) · (1 + D₁ + D₂)`, where `D₁`, `D₂` are the
-`D_N` constant towers of `iterCovG1_le` / `iterCovG1_two` at `N = 1, 2` (the
-`N = 1` accumulator vanishes, the `N = 2` one is the `iterCovG1_two` family), and
-the leading `√(Λ^{r+2})` is the fibre-norm change of metric on a `(0, r+j)`
-tensor, `j ≤ 2`.
-
-Every factor is an explicit function of the comparability constant `Λ`, the
-metric-jet constants `Λ'`, `Λ''`, the dimension `n` and the base valence `r`. -/
 def jetTowerPt (n : ℕ) (Λ Λ' Λ'' : ℝ) (r : ℕ) : ℝ :=
   Real.sqrt (Λ ^ (r + 2)) *
     (1
@@ -362,11 +243,8 @@ lemma jetTowerPt_nonneg {Λ Λ' Λ'' : ℝ} (hΛ : 0 ≤ Λ) (hΛ' : 0 ≤ Λ') 
   have := Real.sqrt_nonneg (Λ ^ (r + 2))
   nlinarith
 
-/-! ### The pointwise cross-metric jet bound -/
-
 set_option linter.unusedSectionVars false in
-/-- `covStep` of the zero field vanishes (local replica of the private
-`UnifCovSumCross.covStep_zero'`). -/
+
 private theorem covStepZero (gRef : SmoothRiemannianMetric I M) (s : ℕ) :
     covStep (I := I) gRef s 0 = 0 := by
   have h := covStep_add (I := I) gRef s 0 0
@@ -376,8 +254,7 @@ private theorem covStepZero (gRef : SmoothRiemannianMetric I M) (s : ℕ) :
   exact add_left_cancel hc
 
 set_option linter.unusedSectionVars false in
-/-- The fibre norm of the zero tensor vanishes (local replica of the private
-`UnifCovSumCross.sqrt_normSq0S_zero`). -/
+
 private theorem sqrtNormSq0SZero (g : SmoothRiemannianMetric I M) (x : M) (s : ℕ) :
     Real.sqrt (normSq0S (I := I) g x s (0 : Tensor0SSpace s I x)) = 0 := by
   classical
@@ -390,7 +267,6 @@ private theorem sqrtNormSq0SZero (g : SmoothRiemannianMetric I M) (x : M) (s : �
   · refine Finset.sum_eq_zero (fun slots _ => ?_)
     rw [component0S_apply]; simp
 
-/-- The cross-metric covariant jet tower bound on the order-one window. -/
 private theorem towerCrossOne_le
     (gBase g₀ : SmoothRiemannianMetric I M) {Λ Λ' : ℝ}
     (hEq : MetricUniformEquivalentOn (I := I) Set.univ gBase g₀ Λ)
@@ -446,8 +322,6 @@ private theorem towerCrossOne_le
       (fun _ => le_refl 0) hEq hjet (Set.mem_univ x) 1 hacc
     nlinarith
 
-/-- Pointwise cross-metric jet transfer on the order-one window, in the
-Riemannian fibre-norm currency used by the Sobolev estimates. -/
 theorem sqrtRfns_one_le
     (gBase g₀ : SmoothRiemannianMetric I M) {Λ Λ' : ℝ}
     (hEq : MetricUniformEquivalentOn (I := I) Set.univ gBase g₀ Λ)
@@ -513,13 +387,6 @@ theorem sqrtRfns_one_le
               Real.sqrt (normSq0S (I := I) g₀ x (s + k)
                 (iterCov (I := I) g₀ s (ccUnitField (I := I) g₀ s T) k x)) := by ring
 
-/-- **The cross-metric jet tower bound at orders `≤ 2`, in `normSq0S` currency.**
-
-For a smooth `(0, s)`-tensor field `U`, the `g₀`-fibre norm of the `j`-th
-`gBase`-covariant derivative of `U` (`j ≤ 2`) is bounded by the `D`-tower constant
-times the `g₀`-jet sum of `U` over the whole window `k ≤ 2`.  Assembled from
-`iterCovG1_le` at `N = 1` (whose accumulator vanishes) and the unconditional
-`iterCovG1_two` at `N = 2`. -/
 private theorem towerCross_le
     (gBase g₀ : SmoothRiemannianMetric I M) {Λ Λ' Λ'' : ℝ}
     (hEq : MetricUniformEquivalentOn (I := I) Set.univ gBase g₀ Λ)
@@ -562,7 +429,7 @@ private theorem towerCross_le
       Real.sqrt (normSq0S (I := I) g₀ x (s + k) (iterCov (I := I) g₀ s U k x)) :=
     Finset.sum_nonneg (fun k _ => Real.sqrt_nonneg _)
   interval_cases j
-  · -- order `0`: the two towers agree, and this is the `k = 0` term
+  ·
     have hterm : Real.sqrt (normSq0S (I := I) g₀ x (s + 0) (iterCov (I := I) gBase s U 0 x)) ≤
         ∑ k ∈ Finset.range 3,
           Real.sqrt (normSq0S (I := I) g₀ x (s + k) (iterCov (I := I) g₀ s U k x)) :=
@@ -571,7 +438,7 @@ private theorem towerCross_le
           (iterCov (I := I) g₀ s U k x)))
         (fun k _ => Real.sqrt_nonneg _) (Finset.mem_range.mpr (by norm_num))
     nlinarith
-  · -- order `1`: `iterCovG1_le` with a vanishing accumulator
+  ·
     have hacc : ∀ m, m < 1 →
         Real.sqrt (normSq0S (I := I) g₀ x (s + m + 1)
             (covStep (I := I) g₀ (s + m) (telescAccum (I := I) gBase g₀ s U m) x)) ≤
@@ -595,19 +462,10 @@ private theorem towerCross_le
           Real.sqrt (normSq0S (I := I) g₀ x (s + k) (iterCov (I := I) g₀ s U k x)) :=
       Finset.sum_le_sum_of_subset_of_nonneg hsubset (fun k _ _ => Real.sqrt_nonneg _)
     nlinarith
-  · -- order `2`: the unconditional `iterCovG1_two`
+  ·
     have h2 := iterCovG1_two (I := I) gBase g₀ s U x hEq hjet hJet1 hJet2 (Set.mem_univ x)
     nlinarith
 
-/-- **The pointwise cross-metric jet bound, in the Morrey chain's currency.**
-
-For a `Λ`-comparable pair with metric-jet bounds `Λ'` (order 1, both directions)
-and `Λ''` (order 2), and every `(0, s)` smooth compactly-supported tensor `T` and
-order `j ≤ 2`, the `gBase`-fibre norm of `∇^{gBase, j} T` is bounded pointwise by
-`jetTowerPt` times the `g₀`-fibre-norm jet sum of `T` over `k ≤ 2`.
-
-This is `towerCross_le` read through the tower match `rfns_iterCovGrad_eq` on both
-sides, preceded by the fibre change of metric `covsumCross_fibNorm`. -/
 theorem sqrtRfns_cross_le
     (gBase g₀ : SmoothRiemannianMetric I M) {Λ Λ' Λ'' : ℝ}
     (hEq : MetricUniformEquivalentOn (I := I) Set.univ gBase g₀ Λ)
@@ -623,7 +481,7 @@ theorem sqrtRfns_cross_le
             ((iteratedCovGrad (I := I) g₀ 0 s k T).toSection x)) := by
   classical
   have hΛ0 : (0 : ℝ) ≤ Λ := le_trans zero_le_one hEq.1
-  -- rewrite both sides into `normSq0S`/`iterCov` currency
+
   have hL : riemannianFiberNormSq (I := I) (M := M) gBase 0 (s + j) x
         ((iteratedCovGrad (I := I) gBase 0 s j (T.recast (g' := gBase))).toSection x) =
       normSq0S (I := I) gBase x (s + j)
@@ -643,7 +501,7 @@ theorem sqrtRfns_cross_le
         Real.sqrt (normSq0S (I := I) g₀ x (s + k)
           (iterCov (I := I) g₀ s (ccUnitField (I := I) g₀ s T) k x)) from
     Finset.sum_congr rfl (fun k _ => by rw [hR k])]
-  -- fibre change of metric, then the tower bound
+
   have hfib := covsumCross_fibNorm (I := I) g₀ gBase
     (metricUniformEquivalentOn_symm (I := I) hEq) x (s + j)
     (iterCov (I := I) gBase s (ccUnitField (I := I) g₀ s T) j x)
@@ -688,9 +546,6 @@ theorem sqrtRfns_cross_le
               Real.sqrt (normSq0S (I := I) g₀ x (s + k)
                 (iterCov (I := I) g₀ s (ccUnitField (I := I) g₀ s T) k x)) := by ring
 
-/-! ### The `L²` face -/
-
-/-- The closed cross-metric `L²` jet-transfer constant for the order-one window. -/
 def kjetOneC (n : ℕ) (Λ Λ' : ℝ) (s : ℕ) : ℝ :=
   Real.sqrt (2 * Real.sqrt (Λ ^ n)) * jetOnePt n Λ Λ' s
 
@@ -698,9 +553,6 @@ lemma kjetOneC_nonneg {Λ Λ' : ℝ} (hΛ' : 0 ≤ Λ') (n s : ℕ) :
     0 ≤ kjetOneC n Λ Λ' s :=
   mul_nonneg (Real.sqrt_nonneg _) (jetOnePt_nonneg hΛ' n s)
 
-/-- Cross-metric `L²` transfer of covariant jets on the order-one window.
-Only the first derivative of the varying metric relative to the background is
-used. -/
 theorem jetCross_l2_one
     (gBase g₀ : SmoothRiemannianMetric I M) {Λ Λ' : ℝ}
     (hEq : MetricUniformEquivalentOn (I := I) Set.univ gBase g₀ Λ)
@@ -846,11 +698,6 @@ theorem jetCross_l2_one
   have hsqrt := Real.sqrt_le_sqrt hfinal
   rwa [Real.sqrt_sq (norm_nonneg _), Real.sqrt_sq hKnn] at hsqrt
 
-/-- **The closed cross-metric `L²` jet-transfer constant.**
-
-`kjetConst n Λ Λ' Λ'' s = √(3·√(Λⁿ)) · jetTowerPt n Λ Λ' Λ'' s`: the pointwise
-constant, times `√3` from one Cauchy–Schwarz over the three-term window and
-`√(√(Λⁿ))` from the cross-metric volume comparison `volumeMeasure_cross_le`. -/
 def kjetConst (n : ℕ) (Λ Λ' Λ'' : ℝ) (s : ℕ) : ℝ :=
   Real.sqrt (3 * Real.sqrt (Λ ^ n)) * jetTowerPt n Λ Λ' Λ'' s
 
@@ -858,18 +705,6 @@ lemma kjetConst_nonneg {Λ Λ' Λ'' : ℝ} (hΛ : 0 ≤ Λ) (hΛ' : 0 ≤ Λ') (
     (n s : ℕ) : 0 ≤ kjetConst n Λ Λ' Λ'' s :=
   mul_nonneg (Real.sqrt_nonneg _) (jetTowerPt_nonneg hΛ hΛ' hΛ'' n s)
 
-/-- **The cross-metric `L²` jet transfer (brick E4's `Kjet`, orders `≤ 2`).**
-
-For `Λ`-comparable `gBase`, `g₀` with metric-jet bounds `Λ'` (order 1) and `Λ''`
-(order 2), every `(0, s)` smooth compactly-supported tensor `T` and every order
-`j ≤ 2`:
-
-`‖∇^{gBase, j} T‖_{L²(gBase)} ≤ kjetConst · ∑_{k ≤ 2} ‖∇^{g₀, k} T‖_{L²(g₀)}`.
-
-The proof squares the pointwise bound `sqrtRfns_cross_le`, applies Cauchy–Schwarz
-over the three-term window, transports the integral from `dV_{gBase}` to
-`dV_{g₀}` through `volumeMeasure_cross_le`, and finally absorbs
-`∑ ‖·‖² ≤ (∑ ‖·‖)²`. -/
 theorem jetCross_l2
     (gBase g₀ : SmoothRiemannianMetric I M) {Λ Λ' Λ'' : ℝ}
     (hEq : MetricUniformEquivalentOn (I := I) Set.univ gBase g₀ Λ)
@@ -904,7 +739,7 @@ theorem jetCross_l2
       Finset.sum_nonneg (fun k _ => hRnn k x)
     have h2 : (0 : ℝ) ≤ 3 * P ^ 2 := by positivity
     exact mul_nonneg h2 this
-  -- pointwise squared bound
+
   have hpt : ∀ x : M,
       riemannianFiberNormSq (I := I) (M := M) gBase 0 (s + j) x (A.toSection x) ≤ F x := by
     intro x
@@ -932,7 +767,7 @@ theorem jetCross_l2
         _ ≤ P ^ 2 * (3 * ∑ k ∈ Finset.range 3, R k x) := hmul
         _ = F x := by rw [hF]; ring
     exact le_trans hsq2 hstep
-  -- integrability
+
   have hIntA : Integrable
       (fun x => riemannianFiberNormSq (I := I) (M := M) gBase 0 (s + j) x (A.toSection x)) μB :=
     integrable_riemannianFiberNormSq_toSection (I := I) (M := M) gBase 0 (s + j) A
@@ -945,7 +780,7 @@ theorem jetCross_l2
   have hIntFs : Integrable F (ENNReal.ofReal c • μ0) :=
     hIntF0.smul_measure ENNReal.ofReal_ne_top
   have hIntFB : Integrable F μB := hIntFs.mono_measure hmeasle
-  -- the integral chain
+
   have hnormA : ‖A‖ ^ 2 =
       ∫ x, riemannianFiberNormSq (I := I) (M := M) gBase 0 (s + j) x (A.toSection x) ∂μB := by
     rw [SmoothCcTensor.norm_def (I := I) (M := M) A, hμB]
@@ -974,7 +809,7 @@ theorem jetCross_l2
       _ = c * ∫ x, F x ∂μ0 := by
           rw [MeasureTheory.integral_smul_measure, ENNReal.toReal_ofReal hcnn, smul_eq_mul]
       _ = c * (3 * P ^ 2 * ∑ k ∈ Finset.range 3, b k ^ 2) := by rw [hIF0]
-  -- absorb `∑ b² ≤ (∑ b)²` and take square roots
+
   have hsumsq : ∑ k ∈ Finset.range 3, b k ^ 2 ≤ (∑ k ∈ Finset.range 3, b k) ^ 2 :=
     Finset.sum_sq_le_sq_sum_of_nonneg (fun k _ => hbnn k)
   have hSnn : (0 : ℝ) ≤ ∑ k ∈ Finset.range 3, b k := Finset.sum_nonneg (fun k _ => hbnn k)
@@ -997,13 +832,6 @@ theorem jetCross_l2
   have := Real.sqrt_le_sqrt hfinal
   rwa [Real.sqrt_sq (norm_nonneg _), Real.sqrt_sq hKnn] at this
 
-/-! ### Discharging brick E4 -/
-
-/-- **Brick E4's `Kjet`, supplied from `Λ`-class data.**
-
-At `finrank ℝ E / 2 + 2 = 3` (in particular `dim = 3`) the supercritical window
-is `{0, 1, 2}`, so the unconditional order-`≤ 2` transfer `jetCross_l2` covers it
-exactly.  This is literally the `hjet` slot of `fibreMorrey_unif_base`. -/
 theorem kjet_of_class
     (gBase g₀ : SmoothRiemannianMetric I M) {Λ Λ' Λ'' : ℝ}
     (hEq : MetricUniformEquivalentOn (I := I) Set.univ gBase g₀ Λ)
@@ -1024,17 +852,6 @@ theorem kjet_of_class
     omega
   exact jetCross_l2 (I := I) gBase g₀ hEq hjet hJet1 hJet2 hΛ' hΛ'' s S hj2
 
-/-- **Brick E4, with no abstract input left.**
-
-Every metric `g₀` that is `Λ`-comparable to the fixed background `gBase`, with
-`gBase`↔`g₀` metric jets bounded by `Λ'` (order 1) and `Λ''` (order 2), satisfies
-the fibre-Morrey / Sobolev-embedding bound with the single closed constant
-
-`morreyUnifConst Λ (baseMorreyConst gBase 0 s) (kjetConst dim Λ Λ' Λ'' s) dim s`,
-
-a function of the fixed background, the class data `(Λ, Λ', Λ'')`, the dimension
-and the valence only — never of the individual `g₀`.  This is
-`fibreMorrey_unif_base` with its `hjet` slot discharged by `kjet_of_class`. -/
 theorem fibreMorrey_unif_class
     (gBase g₀ : SmoothRiemannianMetric I M) {Λ Λ' Λ'' : ℝ}
     (hEq : MetricUniformEquivalentOn (I := I) Set.univ gBase g₀ Λ)

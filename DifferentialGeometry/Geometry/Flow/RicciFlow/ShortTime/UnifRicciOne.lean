@@ -1,13 +1,5 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.LowRegRicciOne
 
-/-!
-# Class-first order-one Ricci coefficient bound
-
-This module exposes the uniform metric-class form of the order-one Ricci
-connection-difference estimate while the lower analytic implementation remains
-general over normed model spaces.
--/
-
 noncomputable section
 
 open Bundle Manifold MeasureTheory Set Tensor0SBundle
@@ -32,10 +24,6 @@ variable
       [IsManifold I ∞ M] [CompactSpace M] [I.Boundaryless]
       [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M]
 
-/-- On a closed three-manifold, the order-one Ricci connection-difference
-coefficient has a class-first tame intrinsic `H2` bound.  Its constants are
-selected from the fixed background, the uniform metric class, and the fibre
-smallness ceiling before the class metric varies. -/
 theorem ricci1_h2_unif
     (hDim : Module.finrank ℝ E = 3)
     (gBase : SmoothRiemannianMetric I M) {Λ : ℝ} (hΛ : 1 ≤ Λ)

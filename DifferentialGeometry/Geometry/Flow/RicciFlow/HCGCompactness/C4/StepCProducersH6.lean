@@ -4,15 +4,6 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.C4.StepCStage
 
 set_option autoImplicit false
 
-/-!
-# H6 support and transition producers for Step C
-
-This file supplies the construction-level H6 chart geometry needed by
-`HasSuppConvDataOn`.  The estimates use the actual H6 chart radii and the
-five-lambda interaction geometry; they do not pass through the larger legacy
-normal-chart nesting constants.
--/
-
 noncomputable section
 
 universe u uE uH
@@ -36,7 +27,6 @@ variable {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
 
 namespace H6NormalData
 
-/-- The fixed H6 source patch at a stabilized live slot. -/
 def h6Patch
     {hd : InjRadiusDecayInput (I := I) X} {D : Real}
     {P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k)}
@@ -44,7 +34,6 @@ def h6Patch
     (alpha : LiveSlot L pb r) : Set E :=
   Metric.ball 0 ((21 / 10 : Real) * L.lamInf (alpha.1 : Nat))
 
-/-- The inner compact H6 source core. -/
 def h6Core0
     {hd : InjRadiusDecayInput (I := I) X} {D : Real}
     {P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k)}
@@ -52,7 +41,6 @@ def h6Core0
     (alpha : LiveSlot L pb r) : Set E :=
   Metric.closedBall 0 ((83 / 40 : Real) * L.lamInf (alpha.1 : Nat))
 
-/-- The outer compact H6 source core. -/
 def h6Core1
     {hd : InjRadiusDecayInput (I := I) X} {D : Real}
     {P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k)}
@@ -60,7 +48,6 @@ def h6Core1
     (alpha : LiveSlot L pb r) : Set E :=
   Metric.closedBall 0 ((167 / 80 : Real) * L.lamInf (alpha.1 : Nat))
 
-/-- The uniform pointwise buffer retained inside the inner H6 core. -/
 def h6Buffer
     {hd : InjRadiusDecayInput (I := I) X} {D : Real}
     {P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k)}
@@ -68,8 +55,6 @@ def h6Buffer
     (alpha : LiveSlot L pb r) : Real :=
   L.lamInf (alpha.1 : Nat) / 80
 
-/-- The Euclidean H6 patches have all static openness, compactness, nesting,
-convexity, and origin-membership properties required by the support package. -/
 theorem h6_core_geom
     (inp : MetricCompactCore (I := I) X)
     (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k))
@@ -141,8 +126,6 @@ theorem h6_core_geom
     change 0 < L.lamInf (alpha.1 : Nat) / 80
     nlinarith [hlam alpha]
 
-/-- A point inside the `2.05λ` cover radius retains its full `λ/80` closed
-buffer inside the inner H6 source core. -/
 theorem h6_buffer_mem
     (inp : MetricCompactCore (I := I) X)
     (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k))
@@ -168,9 +151,6 @@ theorem h6_buffer_mem
   rw [dist_eq_norm] at hw
   nlinarith
 
-/-- At one interacting stage, the H6 transition is defined on the full
-eight-lambda source ball, lands in a seventy-two-lambda target ball, and its
-Euclidean norm is the intrinsic radial distance from the target center. -/
 theorem pair_overlap_at
     (inp : MetricCompactCore (I := I) X)
     (d : H6NormalData (I := I) X inp.decay)
@@ -383,9 +363,6 @@ theorem pair_overlap_at
     simpa only [H6NormalData.chartTransition, H6NormalData.chartMap] using
       (hpoint z hz).2.2.2
 
-/-- An eventually intersecting live pair has H6 overlap, a uniform
-seventy-two-lambda transition target, and the exact radial readout on one
-common tail. -/
 theorem h6_pair_tail
     (inp : MetricCompactCore (I := I) X)
     (d : H6NormalData (I := I) X inp.decay)
@@ -422,9 +399,6 @@ theorem h6_pair_tail
   exact d.pair_overlap_at inp aMin hphys P L hcomplete hconn hratio
     (hcentersK alpha) (hcentersK gamma) hinter hinterK
 
-/-- The fixed Euclidean H6 patches eventually cover the source ball with a
-uniform inner-core buffer, and every patch maps into its own three-lambda
-inner ball. -/
 theorem h6_patch_tail
     (inp : MetricCompactCore (I := I) X)
     (d : H6NormalData (I := I) X inp.decay)
@@ -676,8 +650,6 @@ theorem h6_patch_tail
     hbuffer (Metric.mem_closedBall_self heta)
   exact mem_iUnion.mpr ⟨alpha, ⟨z, hzCore, hzy⟩⟩
 
-/-- On the stabilized live-center tail, the seventy-two-lambda extraction ball
-lies inside the corresponding H6 chart radius. -/
 theorem h6_rad72_tail
     (inp : MetricCompactCore (I := I) X)
     (d : H6NormalData (I := I) X inp.decay)
@@ -835,8 +807,6 @@ private theorem trans_fin
         · simpa only [Function.comp_apply] using hconv.comp_subseq hphi1
         · simpa only [Function.comp_apply] using hconvbar.comp_subseq hphi1
 
-/-- On a live target slot, the H6-pulled sequence atom is the fixed scalar
-bump of the squared H6 transition norm. -/
 theorem atomOn_readout
     (inp : MetricCompactCore (I := I) X)
     (d : H6NormalData (I := I) X inp.decay)
@@ -930,8 +900,6 @@ private theorem normBump_smooth
     exact (real_inner_self_eq_norm_sq _).symm
   exact (stepCBump lam hlam).contDiff.comp_contDiffOn hnorm
 
-/-- A live H6 atom converges to the scalar bump of the limiting transition
-norm once its interacting transition has been extracted. -/
 theorem atomOn_live_conv
     (inp : MetricCompactCore (I := I) X)
     (d : H6NormalData (I := I) X inp.decay)
@@ -976,8 +944,6 @@ theorem atomOn_live_conv
   exact atomOn_readout inp d P L r k alpha.1 gamma.1 hc
     (hreadK z hz)
 
-/-- A stabilized dead atom has zero limit after pullback by any selected normal
-chart family. -/
 theorem atomOn_dead_conv
     (chart : NormalChartFamily (I := I) X)
     (hd : InjRadiusDecayInput (I := I) X) {D : Real} (hD : 0 < D)
@@ -996,9 +962,6 @@ theorem atomOn_dead_conv
   intro z _hz
   simp [seqAtomOn, seqAtom_none hd hD P L pb r k gamma hk]
 
-/-- A slot eventually disjoint from the source five-lambda ball has zero atom
-limit after pullback by any chart family that maps the source patch into that
-ball. -/
 theorem atomOn_disjoint_conv
     (chart : NormalChartFamily (I := I) X)
     (hd : InjRadiusDecayInput (I := I) X) {D : Real} (hD : 0 < D)
@@ -1032,8 +995,6 @@ theorem atomOn_disjoint_conv
     (seqAtom_mem_hat_raw hd hD P L pb r k gamma (by
       simpa only [seqAtomOn] using hne))
 
-/-- The H6 chart family supplies the complete Step-C support, atom-weight, and
-transition package after one finite refinement. -/
 theorem exists_supp_data
     (inp : MetricCompactCore (I := I) X)
     (d : H6NormalData (I := I) X inp.decay)

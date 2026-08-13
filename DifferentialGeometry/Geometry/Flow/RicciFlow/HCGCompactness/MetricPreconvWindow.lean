@@ -3,33 +3,6 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.WindowPreconv
 
 set_option autoImplicit false
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 noncomputable section
 
 universe u uE uH
@@ -51,11 +24,6 @@ variable [T2Space M] [IsManifold I ∞ M] [SigmaCompactSpace M]
 variable [IsManifold I 1 M] [IsManifold I 2 M]
 variable [VectorBundle Real E (TangentSpace I : M → Type _)]
 variable [ContMDiffVectorBundle 1 E (TangentSpace I : M → Type _) I]
-
-
-
-
-
 
 omit [Module.Finite ℝ E] in
 omit [I.Boundaryless] in
@@ -96,14 +64,6 @@ theorem evolNorm_bound_of_ricBound
         have : Cpp * metricCovDerivNorm (I := I) N (gSeq i s) gRef x ≤ Cpp * CN :=
           mul_le_mul_of_nonneg_left hmcd hpp0
         linarith
-
-
-
-
-
-
-
-
 
 omit [Module.Finite ℝ E] in
 omit [I.Boundaryless] in

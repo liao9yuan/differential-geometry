@@ -1,13 +1,5 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.Metric.LocalFrameInverse
 
-
-
-
-
-
-
-
-
 noncomputable section
 
 namespace DifferentialGeometry.PDE.RicciFlow
@@ -23,8 +15,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
 variable [IsManifold I ∞ M] [SigmaCompactSpace M] [T2Space M]
 
 namespace SolutionOn
-
-
 
 def timeRestrict
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
@@ -48,8 +38,6 @@ omit [SigmaCompactSpace M] [T2Space M] in
   rfl
 
 end SolutionOn
-
-
 
 omit [SigmaCompactSpace M] in
 theorem isSoln_timeRestrict
@@ -112,8 +100,6 @@ theorem isSoln_timeRestrict
     simpa [ricciNorm, SolutionOn.timeRestrict, SolutionOn.family, SolutionOn.ricci] using
       hS.ricciNormGrad t (hcar ht) x
 
-
-
 omit [SigmaCompactSpace M] in
 theorem isSoln_tailRestrict
     {alpha t₀ omega : Real} {hαω : alpha < omega}
@@ -129,10 +115,6 @@ theorem isSoln_tailRestrict
     exact ⟨le_of_lt (lt_of_lt_of_le hαt₀ ht.1), ht.2⟩
   · intro t ht
     exact ⟨lt_trans hαt₀ ht.1, ht.2⟩
-
-
-
-
 
 omit [SigmaCompactSpace M] in
 theorem tailFrameTimeReg

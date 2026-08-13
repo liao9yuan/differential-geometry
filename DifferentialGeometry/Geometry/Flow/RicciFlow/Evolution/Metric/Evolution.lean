@@ -2,15 +2,6 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.Metric.Covariant
 
 set_option autoImplicit false
 
-
-
-
-
-
-
-
-
-
 noncomputable section
 
 namespace DifferentialGeometry.PDE.RicciFlow
@@ -31,12 +22,6 @@ section Components
 
 variable {Idx : Type*} [Fintype Idx]
 variable {u : Set M}
-
-
-
-
-
-
 
 omit [SigmaCompactSpace M] in
 theorem inverseMetricEvolutionEquationInFrame_of_inverse_components
@@ -83,11 +68,6 @@ theorem inverseMetricEvolutionEquationInFrame_of_inverse_components
       j
   exact (hdt t x hx i j).congr_deriv hsolve
 
-
-
-
-
-
 omit [SigmaCompactSpace M] in
 theorem inverseMetricEvolution_of_metricFrameTimeRegularity
     [DecidableEq Idx]
@@ -108,8 +88,6 @@ theorem inverseMetricEvolution_of_metricFrameTimeRegularity
     hreg.nondegenerateGram
     hreg.uniqueTimeDerivatives
 
-
-
 theorem coordInvLocal
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -125,11 +103,6 @@ theorem coordInvLocal
       DifferentialGeometry.Tensor.Coordinates.coordinateFrameAt_basis_apply] using (hbasis i j).1
   · simpa [coordInv, metricCompInFrame,
       DifferentialGeometry.Tensor.Coordinates.coordinateFrameAt_basis_apply] using (hbasis i j).2
-
-
-
-
-
 
 theorem coordInvEvol
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
@@ -275,8 +248,6 @@ theorem coordInvEvol
             Real) j (1 : Real))))
       hEq |>.symm
 
-
-
 omit [SigmaCompactSpace M] in
 theorem evol_inverse_metric_inFrame
     [DecidableEq Idx]
@@ -304,7 +275,6 @@ theorem evol_inverse_metric_inFrame
     inverseMetricEvolutionEquationInFrame_apply
       (I := I) (S := S) (gInv := gInv) (frame := frame) hEq t x hx i j
   simpa [inverseMetricEvolutionRHSInFrame] using h
-
 
 end Components
 

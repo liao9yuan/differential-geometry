@@ -3,25 +3,6 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.UnifAppH22
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.UnifMorreyRS
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.DeTurckRemainderLowBaseC2Lip
 
-/-!
-# Class-first inverse-metric coefficient Lipschitz bounds
-
-This module is the entry node of the class-uniform Lipschitz layer: it upgrades
-the metricwise `invCoeff_h2_lip` to a dimension-three metric-class statement.
-One `H²` radius and one Lipschitz coefficient are selected from `(gBase, Λ)`
-before the class metric varies.
-
-Every metric-dependent input of the metricwise proof is replaced by its
-class-first sibling: `inv_coeff_h2_unif` for the single-perturbation bound,
-`appRS_h22_unif` for the two-factor product, `morreyRS_unif` for the mixed
-pointwise fibre bound, and `covsum_hs_two` at the class curvature action for the
-covariant-jet window.  The one input with no pre-existing sibling — the `L²`
-size of the identity rank-two coefficient `slotInsertEndoCc g 1
-(fullRaisedEndoField g g)` — is supplied here in closed form
-`27 · volCompareC Λ · vol(gBase)`, from the public identity-endomorphism fibre
-bound and the class volume comparison.
--/
-
 set_option autoImplicit false
 
 noncomputable section
@@ -52,12 +33,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
-
-/-! ### Slot algebra re-derived from public producers
-
-The metricwise Lipschitz proof uses four slot-algebra helpers that are private
-to `DeTurckRemainderLowBaseC2Lip`.  Each is re-derived here from the public
-producer it is built on, so that this file never re-elaborates the monolith. -/
 
 omit [NeZero (Module.finrank ℝ E)] in
 private theorem permICG (g : SmoothRiemannianMetric I M) {s : ℕ}
@@ -205,12 +180,6 @@ private theorem perturbICG
       _ ≤ _ := symmICG (I := I) (M := M) g T i
   exact hslot.trans (mul_le_mul_of_nonneg_left hbase (by norm_num))
 
-/-! ### The identity rank-two coefficient
-
-`slotInsertEndoCc g 1 (fullRaisedEndoField g g)` is the identity `(2,2)`
-coefficient of `g`.  It is parallel, and its pointwise fibre norm is a pure
-dimension constant, so its whole `H²` jet window costs only the volume. -/
-
 private theorem idSlotPt
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M) (x : M) :
@@ -245,9 +214,6 @@ private theorem idSlotSucc
     (I := I) (M := M) g m, norm_zero, mul_zero] at h
   exact le_antisymm h (norm_nonneg _)
 
-/-- The class-first `H²` jet window of the identity rank-two coefficient.
-Only the order-zero term survives, and it costs the volume of `g` times a
-dimension constant. -/
 private theorem idSlotJet
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M) :
@@ -290,8 +256,6 @@ private theorem idSlotJet
   rw [hexp, h1, h2]
   simpa using h0
 
-/-- The full raised rank-two coefficient splits into the inverse-metric
-difference coefficient plus the identity coefficient. -/
 private theorem fullSlotSplit (g gm : SmoothRiemannianMetric I M) :
     slotInsertEndoCc (I := I) (M := M) g 1
         (fullRaisedEndoField (I := I) (M := M) g gm) =
@@ -340,16 +304,7 @@ private theorem jetAdd (g : SmoothRiemannianMetric I M) {r s : ℕ}
       simp only [mul_add, Finset.sum_add_distrib, Finset.mul_sum]
 
 set_option maxHeartbeats 1600000 in
-/-- **Dimension-three class-first inverse-metric coefficient Lipschitz
-estimate.**
 
-One positive `H²` radius and one Lipschitz coefficient work for every metric in
-the order-three class: on the common ball, the rank-two inverse-metric
-coefficient difference is controlled — pointwise and in its first three
-covariant `L²` jets — by the `H²` distance of the two perturbations.
-
-This is the class-uniform sibling of `invCoeff_h2_lip`.  All of its constants
-are selected from `(gBase, Λ)` before the class metric varies. -/
 theorem invCoeff_h2_lip_unif
     (hDim : Module.finrank ℝ E = 3)
     (gBase : SmoothRiemannianMetric I M)
@@ -427,14 +382,14 @@ theorem invCoeff_h2_lip_unif
   have hNT : 0 ≤ NT := norm_nonneg _
   have hNU : 0 ≤ NU := norm_nonneg _
   have hN : 0 ≤ N := norm_nonneg _
-  -- the identity coefficient's jet window, uniform in the class
+
   have hid : (∑ j ∈ Finset.range 3,
       ‖iteratedCovGrad (I := I) g 2 2 j
         (slotInsertEndoCc (I := I) (M := M) g 1
           (fullRaisedEndoField (I := I) (M := M) g g))‖ ^ 2) ≤ 27 * vol := by
     refine (idSlotJet (I := I) (M := M) hDim g).trans ?_
     exact mul_le_mul_of_nonneg_left hvolg (by norm_num)
-  -- the two full raised coefficients sit in the common jet ball of radius `A`
+
   have hfull : ∀ gm : SmoothRiemannianMetric I M,
       ∀ W : SmoothCcTensor g 0 2,
       ‖ccTensorToHs (I := I) (M := M) g 2 (2 : ℝ) W‖ ≤ ρ →
@@ -466,7 +421,7 @@ theorem invCoeff_h2_lip_unif
       _ = A ^ 2 := by rw [hAsq]
   have hfullT := hfull gT T hT hTtie
   have hfullU := hfull gU U hU hUtie
-  -- the perturbation slot of the difference
+
   have hpert : (∑ j ∈ Finset.range 3,
       ‖iteratedCovGrad (I := I) g 2 2 j
         (slotInsertEndoCc (I := I) (M := M) g 1
@@ -498,7 +453,7 @@ theorem invCoeff_h2_lip_unif
       _ ≤ 9 * (Ch * N) ^ 2 :=
         mul_le_mul_of_nonneg_left hsq (by norm_num)
       _ = (Cp * N) ^ 2 := by dsimp only [Cp]; ring
-  -- assemble the two-factor product
+
   have hMid : (∑ j ∈ Finset.range 3,
       ‖iteratedCovGrad (I := I) g 2 2 j
         (appCcRS (I := I) (M := M) g 2 2 2

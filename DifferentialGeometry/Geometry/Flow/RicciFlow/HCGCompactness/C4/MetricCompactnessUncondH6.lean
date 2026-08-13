@@ -7,14 +7,6 @@ set_option autoImplicit false
 set_option linter.style.longLine false
 set_option linter.unusedSectionVars false
 
-/-!
-# Unconditional metric compactness through the H6 provider
-
-This module assembles the provider-neutral CGT and Bishop--Gromov inputs from
-the hypotheses of MSM135 Theorem 3.9, constructs the native H6 chart package,
-and feeds both into the checked Step-B1/Step-D route.
--/
-
 noncomputable section
 
 universe u uE uH
@@ -28,8 +20,6 @@ variable [CompleteSpace E]
 variable {H : Type uH} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H} [I.Boundaryless]
 
-/-- Completeness, connectedness, bounded geometry, and a basepoint injectivity
-bound produce the provider-neutral geometric seed for Chapter 4. -/
 def metricSeedOfBG
     (X : PointedRiemannianSeq.{u, uE, uH} (I := I))
     (hcomplete : SeqMetricComplete (I := I) X)
@@ -53,7 +43,6 @@ def metricSeedOfBG
       dist_eq := out.2
       realizes := hreal }
 
-/-- MSM135 Theorem 3.9 through the provider-native H6 route. -/
 def metricCompactnessH6
     (X : PointedRiemannianSeq.{u, uE, uH} (I := I))
     (hcomplete : SeqMetricComplete (I := I) X)
@@ -68,9 +57,6 @@ def metricCompactnessH6
     exists_h6NormalData (I := I) X hcomplete hconn hgeom b.decay b.realizes
   exact b.metricCompactH6 (Classical.choice hd) hcomplete hconn
 
-/-- MSM135 Theorem 3.9: compactness for complete connected pointed Riemannian
-manifolds with uniformly bounded geometry and a basepoint injectivity-radius
-lower bound. -/
 def metricCompactness_of_connected
     (X : PointedRiemannianSeq.{u, uE, uH} (I := I))
     (hcomplete : SeqMetricComplete (I := I) X)

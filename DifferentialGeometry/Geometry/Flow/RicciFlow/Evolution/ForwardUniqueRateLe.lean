@@ -11,49 +11,6 @@ set_option autoImplicit false
 set_option linter.style.longLine false
 set_option linter.unusedSectionVars false
 
-/-!
-# The Kotschwar rate estimate `E' ≤ K·E − κ·D` (Route-K brick K4)
-
-`Evolution/ForwardUniqueEnergy.lean` differentiates the forward-uniqueness energy exactly:
-`HasDerivAt (forwardUniqueEnergy g₁ g₂) (forwardUniqueRate g₁ g₂ Adot Sdot t) t`.  This file
-turns that exact rate into the Grönwall-facing **estimate** of
-`ShortTime/FORWARD_UNIQUE_PRO_RULING.md` §6,
-
-`forwardUniqueRate ≤ K · forwardUniqueEnergy − κ · forwardUniqueDissipation`,
-
-where the dissipation is `D = ∫ |∇¹S₀₄|²_{g₁} dμ_{g₁}`.
-
-## Main definitions
-
-* `forwardUniqueDissipation g₁ Sfield t` — `D = ∫_M |∇^{g₁}S₀₄|²_{g₁} dμ_{g₁(t)}`.
-* `rateRest g₁ g₂ Adot t x` — the rate integrand minus the principal pairing `2⟨Ṡ, S₀₄⟩`.
-
-## Main results
-
-* `l2Inner_eq_integral` — the **currency bridge**: the model `L²` pairing that
-  `Evolution/ForwardUniqueIBP.lean` speaks is the integral of the fibre pairing `inner0S`
-  that the energy is built from.  `intInner_lap_eq_neg` / `intInner_div_eq_neg` are the two
-  integration-by-parts identities restated through it.
-* `ricciDiffSq_le` — sub-lemma 1, the Ricci-difference trace bound.
-* `sPart_le` — the analytic core: `∫2⟨Ṡ, S₀₄⟩ ≤ (ε − 2)·D + (ε⁻¹C_U + C_rem + 1)·E`.
-* `rateRest_le` / `intRateRest_le` — the `h`-, `A`- and volume parts.
-* `forwardUniqueRate_le` — the capstone `E′ ≤ K·E − D`.
-
-## Hypothesis discipline
-
-Every background/slab bound is a **named hypothesis argument**; nothing is hidden in an
-instance or in an implicit uniformity.  The named slots and their producers are
-
-* `hSdec` — the divergence-form decomposition of the `S₀₄` speed, in exactly the shape
-  `rmLowComp_deriv` (`Evolution/ForwardUniqueRmDot.lean`) supplies it;
-* `hAdot` — the K1C-b pointwise bound `|∂ₜA₀₃|² ≤ C(|h|² + |A|² + |∇¹S|²)`;
-* `hU`, `hrem` — the flux and remainder bounds, in the shape `rmFluxNormSq_le` /
-  `rmRemNormSq_le` (`Evolution/ForwardUniqueRmBounds.lean`) produce them;
-* `hreact`, `hvol` — the slab bounds on the moving-metric reaction and on the
-  moving-volume factor `½ tr_{g₁}(∂ₜg₁)`;
-* the integrability side conditions, one per integrand actually split off.
--/
-
 noncomputable section
 
 namespace DifferentialGeometry.PDE.RicciFlow
@@ -77,16 +34,8 @@ variable [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
 
 section Young
 
-/-! ## The `ε`-Young kit on covariant tensor fibres
-
-`Tensor0SMetricIneq.lean` supplies Cauchy–Schwarz (`abs_inner0S_le`) and the balanced
-polarization `two_inner0S_le`.  The absorption steps of the rate estimate need the
-*unbalanced* form with a free parameter, so that the `|∇¹S₀₄|²` produced by a cross term can
-be made a small multiple of the dissipation. -/
-
 variable {s : Nat}
 
-/-- **`ε`-Young on a tensor fibre.**  `2⟨A, B⟩ ≤ ε|A|² + ε⁻¹|B|²` for every `ε > 0`. -/
 theorem two_inner0S_le_eps (g : SmoothRiemannianMetric I M) (x : M) (s : Nat)
     (A B : Tensor0SSpace s I x) {ε : Real} (hε : 0 < ε) :
     2 * inner0S (I := I) g x s A B ≤
@@ -108,7 +57,6 @@ theorem two_inner0S_le_eps (g : SmoothRiemannianMetric I M) (x : M) (s : Nat)
   rw [← hp2, ← hq2]
   linarith [hcs, hkey, hexp]
 
-/-- **`ε`-Young with a sign flip.**  `-(2⟨A, B⟩) ≤ ε|A|² + ε⁻¹|B|²` for every `ε > 0`. -/
 theorem neg_two_inner0S_le_eps (g : SmoothRiemannianMetric I M) (x : M) (s : Nat)
     (A B : Tensor0SSpace s I x) {ε : Real} (hε : 0 < ε) :
     -(2 * inner0S (I := I) g x s A B) ≤
@@ -130,7 +78,6 @@ theorem neg_two_inner0S_le_eps (g : SmoothRiemannianMetric I M) (x : M) (s : Nat
   rw [← hp2, ← hq2]
   linarith [hcs, hkey, hexp]
 
-/-- Scaling of the fibre squared norm: `|c · A|² = c²|A|²`. -/
 theorem normSq0S_smul (g : SmoothRiemannianMetric I M) (x : M) (s : Nat)
     (c : Real) (A : Tensor0SSpace s I x) :
     normSq0S (I := I) g x s (c • A) = c ^ 2 * normSq0S (I := I) g x s A := by
@@ -141,9 +88,6 @@ end Young
 
 section Density
 
-/-! ## Pointwise algebra of the energy density -/
-
-/-- The energy density is nonnegative. -/
 theorem density_nonneg (g₁ g₂ : Real → SmoothRiemannianMetric I M) (t : Real) (x : M) :
     0 ≤ forwardUniqueDensity (I := I) g₁ g₂ t x := by
   have h₁ : (0 : Real) ≤ metricDiffSq (I := I) (g₁ t) (g₂ t) x := by
@@ -155,7 +99,6 @@ theorem density_nonneg (g₁ g₂ : Real → SmoothRiemannianMetric I M) (t : Re
   rw [forwardUniqueDensity]
   linarith
 
-/-- Each carrier's squared norm is dominated by the energy density. -/
 theorem metricDiffSq_le_dens (g₁ g₂ : Real → SmoothRiemannianMetric I M) (t : Real) (x : M) :
     metricDiffSq (I := I) (g₁ t) (g₂ t) x ≤ forwardUniqueDensity (I := I) g₁ g₂ t x := by
   have h₂ : (0 : Real) ≤ connDiffSq (I := I) (g₁ t) (g₂ t) x := by
@@ -189,12 +132,6 @@ section Dissipation
 
 variable [CompactSpace M]
 
-/-- **The Kotschwar dissipation** `D(t) = ∫_M |∇^{g₁}S₀₄|²_{g₁} dμ_{g₁(t)}`.
-
-The gradient is the lane's own one-step Levi-Civita derivative `metricNabla0S`, and the
-measure is the same moving Riemannian volume that carries `forwardUniqueEnergy`.  The
-carrier `Sfield` is supplied as a smooth field: `rmDiffLowAt` is a pointwise family, and it
-is the consumer's job (via `hcar`) to certify that `Sfield` realises it at time `t`. -/
 def forwardUniqueDissipation (g₁ : Real → SmoothRiemannianMetric I M)
     (Sfield : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
       (n := (∞ : WithTop ℕ∞)) 4)
@@ -202,7 +139,6 @@ def forwardUniqueDissipation (g₁ : Real → SmoothRiemannianMetric I M)
   ∫ x, normSq0S (I := I) (g₁ t) x 5 (metricNabla0S (I := I) (g₁ t) Sfield x)
     ∂(riemannianMeasureFamily (I := I) (M := M) g₁ t)
 
-/-- The dissipation is nonnegative. -/
 theorem dissipation_nonneg (g₁ : Real → SmoothRiemannianMetric I M)
     (Sfield : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
       (n := (∞ : WithTop ℕ∞)) 4)
@@ -214,25 +150,8 @@ end Dissipation
 
 section Pairing
 
-/-! ## The lane-currency `L²` pairing
-
-`Evolution/ForwardUniqueIBP.lean` proves integration by parts in the *model* currency
-`tensorL2Inner g 0 s (ccLift0S g T).toFun …`, while the energy of
-`Evolution/ForwardUniqueEnergy.lean` is an integral of the *fibre* pairing `inner0S`.  This
-section identifies the two, so that the rate estimate can consume the IBP theorems directly
-against the energy density.
-
-The diagonal identification expands both sides in one `g`-orthonormal frame — the model side
-through `tensorInnerPointwise_0s_eq_diag_sum_orthoFrame`, the fibre side through
-`normSq0S_identity_eq_sum_sq` — and the off-diagonal case follows by polarisation.  (The
-diagonal step re-derives the *private* `rfns_eq_normSq0S_unit` of
-`HCGCompactness/MetricCovDerivBridge.lean:181`, itself already duplicated at
-`HCGCompactness/UnifCurvatureJetBound.lean:477`; promoting that lemma is a dedup item for the
-`RiemannianFiberNormSq` layer, not for this brick.) -/
-
 variable {s : Nat}
 
-/-- **The `r = 0` index-lowering is unit evaluation.** -/
 private theorem lowerZero_unit (g : SmoothRiemannianMetric I M) (s : Nat) (x : M)
     (W : TensorRSSpace 0 s I x) (w : Fin (0 + s) → TangentSpace I x) :
     lowerAllUpperIndices (I := I) (M := M) g 0 s x (TensorRSSpace.toModel W) w =
@@ -244,7 +163,6 @@ private theorem lowerZero_unit (g : SmoothRiemannianMetric I M) (s : Nat) (x : M
   rw [← toModel_tensorRS_apply (I := I) (M := M) 0 s x W (unitZeroSec (I := I) (M := M) x)]
   rfl
 
-/-- Diagonal fibre/model identification of the `(0, s)` pointwise pairing. -/
 private theorem innerPtDiag (g : SmoothRiemannianMetric I M) (s : Nat) (x : M)
     (W : TensorRSSpace 0 s I x) :
     tensorInnerPointwise (I := I) (M := M) g 0 s x
@@ -277,9 +195,6 @@ private theorem innerPtDiag (g : SmoothRiemannianMetric I M) (s : Nat) (x : M)
      apply Fin.ext;
      simp)
 
-/-- **Fibre/model identification of the `(0, s)` pointwise pairing.**  The model Gram-matrix
-pairing of two `(0, s)`-tensors, read through the unit-scalar `(0, s) ≃ (r = 0, s)`
-identification, is the metric fibre pairing `inner0S` of their unit values. -/
 theorem innerPt_eq_inner0S (g : SmoothRiemannianMetric I M) (s : Nat) (x : M)
     (W₁ W₂ : TensorRSSpace 0 s I x) :
     tensorInnerPointwise (I := I) (M := M) g 0 s x
@@ -305,10 +220,6 @@ theorem innerPt_eq_inner0S (g : SmoothRiemannianMetric I M) (s : Nat) (x : M)
       (TensorRSSpace.toModel W₂) (TensorRSSpace.toModel W₁)] at h
   linarith
 
-/-- **The lane `L²` pairing is the integral of the fibre pairing.**  This is the bridge that
-lets the rate estimate consume `l2Inner_nabla_eq_neg_div` /
-`l2Inner_nabla_self_eq_neg_lap` (`Evolution/ForwardUniqueIBP.lean`) against the
-`inner0S`-integrals that make up `forwardUniqueRate`. -/
 theorem l2Inner_eq_integral (g : SmoothRiemannianMetric I M)
     (T T' : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
       (n := (∞ : WithTop ℕ∞)) s) :
@@ -331,23 +242,6 @@ end Pairing
 
 section RicciDiff
 
-/-! ## Sub-lemma 1 — the Ricci-difference trace bound
-
-Both Ricci tensors are traces of curvature: `Ric_i` is the pure contraction of the `(1,3)`
-Riemann tensor of `∇^i`, and a pure contraction is recovered from *any* lowering by tracing
-back with the *same* metric.  Taking `g₁` as that metric for both flows exhibits
-`Ric₁ − Ric₂` as a `g₁`-trace of the Kotschwar carrier `S₀₄`; the trace representative `V`
-and its norm bound are the named inputs here, so that a slot permutation or a residual
-`h₀₂`-algebraic lowering defect can be absorbed on the producer side without changing this
-estimate. -/
-
-/-- **The Ricci-difference trace bound.**  If the Ricci difference is the `g₁`-trace of a
-`(0,4)` representative `V` whose fibre norm is controlled by the curvature-difference density
-(plus a background multiple of the metric-difference density), then
-
-`|Ric₁ − Ric₂|²_{g₁} ≤ n⁴ · (|S₀₄|²_{g₁} + B · |h₀₂|²_{g₁})`,  `n = finrank ℝ E`.
-
-The dimension factor is `traceNormSq_le` at `s = 2`; no other content is added. -/
 theorem ricciDiffSq_le (g₁ g₂ : SmoothRiemannianMetric I M) (x : M)
     (V : Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) 4 x) {B : Real}
     (htr : metricRicciAt (I := I) g₁ x - metricRicciAt (I := I) g₂ x =
@@ -368,11 +262,6 @@ section RateSplit
 
 variable [CompactSpace M]
 
-/-- **The non-principal part of the rate integrand.**  Everything in the integrand of
-`forwardUniqueRate` except the curvature-difference pairing `2⟨Ṡ, S₀₄⟩`: the three
-moving-metric reactions, the metric- and connection-difference pairings, and the
-moving-volume term.  Only `2⟨Ṡ, S₀₄⟩` needs integration by parts, so isolating it keeps the
-integral splitting to a single step. -/
 def rateRest (g₁ g₂ : Real → SmoothRiemannianMetric I M)
     (Adot : Real → (x : M) → Tensor0SSpace 3 I x) (t : Real) (x : M) : Real :=
   (movingReact0S (I := I) (g₁ t) x 2 (metricRicciAt (I := I) (g₁ t) x)
@@ -388,7 +277,6 @@ def rateRest (g₁ g₂ : Real → SmoothRiemannianMetric I M)
   (1 / 2 : Real) * traceTimeDerivMetric (I := I) g₁ t x *
     forwardUniqueDensity (I := I) g₁ g₂ t x
 
-/-- The rate integrand splits as `rateRest + 2⟨Ṡ, S₀₄⟩`. -/
 theorem rateIntegrand_eq (g₁ g₂ : Real → SmoothRiemannianMetric I M)
     (Adot : Real → (x : M) → Tensor0SSpace 3 I x)
     (Sdot : Real → (x : M) → Tensor0SSpace 4 I x) (t : Real) (x : M) :
@@ -401,8 +289,6 @@ theorem rateIntegrand_eq (g₁ g₂ : Real → SmoothRiemannianMetric I M)
   rw [forwardUniqueDensityDot, rateRest]
   ring
 
-/-- `forwardUniqueRate` as the integral of `rateRest` plus the integral of the
-curvature-difference pairing, under the two integrability side conditions. -/
 theorem rate_eq_add (g₁ g₂ : Real → SmoothRiemannianMetric I M)
     (Adot : Real → (x : M) → Tensor0SSpace 3 I x)
     (Sdot : Real → (x : M) → Tensor0SSpace 4 I x) (t : Real)
@@ -429,8 +315,6 @@ section IBPCurrency
 
 variable [CompactSpace M] {s : Nat}
 
-/-- **The Dirichlet identity in lane currency.**  `∫⟨Δ_g T, T⟩ = −∫|∇^g T|²` on a closed
-manifold; `l2Inner_nabla_self_eq_neg_lap` transported through `l2Inner_eq_integral`. -/
 theorem intInner_lap_eq_neg (g : SmoothRiemannianMetric I M)
     (T : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
       (n := (∞ : WithTop ℕ∞)) s) :
@@ -455,8 +339,6 @@ theorem intInner_lap_eq_neg (g : SmoothRiemannianMetric I M)
         ∂(riemannianVolumeMeasure (I := I) (M := M) g) from rfl]
   linarith [h]
 
-/-- **Integration by parts in lane currency.**  `∫⟨div_g V, T⟩ = −∫⟨∇^g T, V⟩` on a closed
-manifold; `l2Inner_nabla_eq_neg_div` transported through `l2Inner_eq_integral`. -/
 theorem intInner_div_eq_neg (g : SmoothRiemannianMetric I M)
     (T : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
       (n := (∞ : WithTop ℕ∞)) s)
@@ -483,19 +365,6 @@ section SPart
 
 variable [CompactSpace M]
 
-/-- **The `S₀₄`-part of the rate (the analytic core).**
-
-With the curvature-difference speed decomposed in divergence form as
-`Ṡ = Δ_{g₁}S₀₄ + div_{g₁}U₀₅ + rem` — exactly the shape `rmLowComp_deriv`
-(`Evolution/ForwardUniqueRmDot.lean`) produces — the principal term integrates by parts to
-`−2·D`, the flux cross term absorbs into `ε·D` by Young at the cost of `ε⁻¹·C_U·E`, and the
-remainder is a plain zeroth-order Young step.  Altogether
-
-`∫ 2⟨Ṡ, S₀₄⟩ ≤ (ε − 2)·D + (ε⁻¹·C_U + C_rem + 1)·E`.
-
-The flux bound `hU` is the `rmFluxNormSq_le` shape (`|U₀₅|² ≤ C·|A₀₃|²·|Rm₂|²`, hence a
-multiple of the density on a slab); `hrem` is the `rmRemNormSq_le` + `rmDotRem` shape.  The
-integrability side conditions are named, one per integrand actually split off. -/
 theorem sPart_le
     (g₁ g₂ : Real → SmoothRiemannianMetric I M)
     (Sdot : Real → (x : M) → Tensor0SSpace 4 I x)
@@ -537,7 +406,7 @@ theorem sPart_le
   classical
   rw [forwardUniqueDissipation, forwardUniqueEnergy, riemannianMeasureFamily_def]
   set μ := riemannianVolumeMeasure (I := I) (M := M) (g₁ t) with hμ
-  -- Step 1: the integrand splits along the divergence-form decomposition
+
   have hsplitPt : ∀ x, 2 * inner0S (I := I) (g₁ t) x 4 (Sdot t x)
         (rmDiffLowAt (I := I) (g₁ t) (g₂ t) x) =
       2 * inner0S (I := I) (g₁ t) x 4
@@ -571,7 +440,7 @@ theorem sPart_le
       integral_congr_ae (Filter.Eventually.of_forall hsplitPt)
     rw [h1, integral_add (hilap.const_mul 2) hIBC,
       integral_add (hidiv.const_mul 2) (hirem.const_mul 2)]
-  -- Step 2: the principal term is exactly `-2 D`
+
   have hprin :
       (∫ x, 2 * inner0S (I := I) (g₁ t) x 4
           (roughLap0SField (I := I) (g₁ t) Sfield x) (Sfield x) ∂μ) =
@@ -579,7 +448,7 @@ theorem sPart_le
             (metricNabla0S (I := I) (g₁ t) Sfield x) ∂μ := by
     rw [integral_const_mul, intInner_lap_eq_neg (I := I) (g₁ t) Sfield]
     ring
-  -- Step 3: the flux cross term absorbs by Young
+
   have hflux :
       (∫ x, 2 * inner0S (I := I) (g₁ t) x 4
           (covDiv0SField (I := I) (g₁ t) U x) (Sfield x) ∂μ) ≤
@@ -630,7 +499,7 @@ theorem sPart_le
         integral_const_mul, integral_const_mul]
     rw [hrewrite]
     exact le_trans (integral_mono hIlhs hIrhs hptwise) (le_of_eq hval)
-  -- Step 4: the zeroth-order remainder
+
   have hremInt :
       (∫ x, 2 * inner0S (I := I) (g₁ t) x 4 (rem x) (Sfield x) ∂μ) ≤
         (C_rem + 1) * ∫ x, forwardUniqueDensity (I := I) g₁ g₂ t x ∂μ := by
@@ -651,7 +520,7 @@ theorem sPart_le
     exact le_trans (integral_mono (hirem.const_mul 2)
       (hidens.const_mul (C_rem + 1)) hptwise)
       (le_of_eq (integral_const_mul (C_rem + 1) _))
-  -- Assembly
+
   set D := ∫ x, normSq0S (I := I) (g₁ t) x 5
     (metricNabla0S (I := I) (g₁ t) Sfield x) ∂μ with hDdef
   set En := ∫ x, forwardUniqueDensity (I := I) g₁ g₂ t x ∂μ with hEndef
@@ -666,15 +535,6 @@ section RestPart
 
 variable [CompactSpace M]
 
-/-- **Pointwise bound on the non-principal part of the rate integrand.**
-
-The metric-difference pairing is closed by sub-lemma 1 (`hRic`, produced by `ricciDiffSq_le`),
-the connection-difference pairing by the K1C-b bound `hAdot` — whose `|∇¹S₀₄|²` share is made
-a *small* multiple `δ·C_A` of the dissipation density by the free Young parameter `δ` — the
-three moving-metric reactions by the slab bound `hreact`, and the moving-volume factor by the
-slab bound `hvol`.  Note `hAdot` is stated in the form implied by (and weaker than) the
-ruling's `|∂ₜA₀₃|² ≤ C(|h₀₂|² + |A₀₃|² + |∇¹S₀₄|²)`, since `|h₀₂|² + |A₀₃|²` is at most the
-energy density. -/
 theorem rateRest_le (g₁ g₂ : Real → SmoothRiemannianMetric I M)
     (Adot : Real → (x : M) → Tensor0SSpace 3 I x)
     (Sfield : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
@@ -702,7 +562,7 @@ theorem rateRest_le (g₁ g₂ : Real → SmoothRiemannianMetric I M)
         δ * C_A * normSq0S (I := I) (g₁ t) x 5
           (metricNabla0S (I := I) (g₁ t) Sfield x) := by
   have hdens := density_nonneg (I := I) g₁ g₂ t x
-  -- the metric-difference pairing
+
   have hhdot : normSq0S (I := I) (g₁ t) x 2 (metricDiffDot (I := I) g₁ g₂ t x) =
       4 * normSq0S (I := I) (g₁ t) x 2
         (metricRicciAt (I := I) (g₁ t) x - metricRicciAt (I := I) (g₂ t) x) := by
@@ -721,7 +581,7 @@ theorem rateRest_le (g₁ g₂ : Real → SmoothRiemannianMetric I M)
           forwardUniqueDensity (I := I) g₁ g₂ t x := by ring
     rw [hhdot, hm]
     linarith
-  -- the connection-difference pairing
+
   have hA : 2 * inner0S (I := I) (g₁ t) x 3 (Adot t x)
         (connDiffLowAt (I := I) (g₁ t) (g₂ t) x) ≤
       (δ * C_A + δ⁻¹) * forwardUniqueDensity (I := I) g₁ g₂ t x +
@@ -750,7 +610,7 @@ theorem rateRest_le (g₁ g₂ : Real → SmoothRiemannianMetric I M)
           δ⁻¹ * forwardUniqueDensity (I := I) g₁ g₂ t x := by ring
     rw [hc]
     linarith
-  -- the moving-volume factor
+
   have hv : (1 / 2 : Real) * traceTimeDerivMetric (I := I) g₁ t x *
         forwardUniqueDensity (I := I) g₁ g₂ t x ≤
       C_V * forwardUniqueDensity (I := I) g₁ g₂ t x :=
@@ -765,7 +625,6 @@ theorem rateRest_le (g₁ g₂ : Real → SmoothRiemannianMetric I M)
   rw [rateRest]
   linarith
 
-/-- The integrated form of `rateRest_le`. -/
 theorem intRateRest_le (g₁ g₂ : Real → SmoothRiemannianMetric I M)
     (Adot : Real → (x : M) → Tensor0SSpace 3 I x)
     (Sfield : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
@@ -817,30 +676,6 @@ section Capstone
 
 variable [CompactSpace M]
 
-/-- **The Kotschwar rate estimate** (Route-K brick K4).
-
-Under the named slab-hypothesis package below the exact first variation of the
-forward-uniqueness energy obeys
-
-`forwardUniqueRate ≤ K · forwardUniqueEnergy − forwardUniqueDissipation`,
-
-with `K = C_R + 4C_Ric + 2 + δC_A + δ⁻¹ + C_V + ε⁻¹C_U + C_rem` explicit in the slab
-constants.  This is `E′ ≤ K·E − κ·D ≤ K·E` of `ShortTime/FORWARD_UNIQUE_PRO_RULING.md` §6
-with `κ = 1`; the normalisation `κ = 1` is exactly what the Young smallness condition
-`habs : δ·C_A + ε ≤ 1` buys.
-
-The named hypotheses and their producers:
-
-* `hcar` — `Sfield` realises the carrier `S₀₄` at time `t`;
-* `hSdec` — the divergence-form decomposition of `Ṡ`, in the shape `rmLowComp_deriv`
-  (`Evolution/ForwardUniqueRmDot.lean`) supplies;
-* `hAdot` — the K1C-b bound on `|∂ₜA₀₃|²`;
-* `hU`, `hrem` — the K2.4 / K2.5 flux and remainder bounds
-  (`rmFluxNormSq_le`, `rmRemNormSq_le`), read against the energy density on the slab;
-* `hRic` — the Ricci-difference bound, produced by `ricciDiffSq_le`;
-* `hreact` — the slab bound on the three moving-metric reactions (a `|Ric₁|` bound);
-* `hvol` — the slab bound on the moving-volume factor `½ tr_{g₁}(∂ₜg₁)`;
-* `hirest … hidens` — the integrability side conditions, one per integrand split off. -/
 theorem forwardUniqueRate_le
     (g₁ g₂ : Real → SmoothRiemannianMetric I M)
     (Adot : Real → (x : M) → Tensor0SSpace 3 I x)

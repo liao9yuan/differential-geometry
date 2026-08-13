@@ -1,7 +1,6 @@
 import DifferentialGeometry.Analysis.Parabolic.DeTurckRicci.RHSSmoothQuasilinear
 import DifferentialGeometry.Geometry.Flow.LieDerivativeChartFrameIdentity
 
-
 noncomputable section
 
 open Bundle Manifold Set

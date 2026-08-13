@@ -4,14 +4,6 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.LowRegBgC1Pair
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.DeTurckRemainderLowBaseA1Pair
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.DeTurckRemainderLowBaseH2Pair
 
-/-!
-# Fixed-background low first-order action pairs
-
-This module integrates the sharp fixed-background `C0` and `C1` coefficient
-pairs along the realized metric path and packages the resulting low
-`H² → H¹` first-order action estimate.
--/
-
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
@@ -269,8 +261,7 @@ private theorem c0_bg_sub
 set_option maxHeartbeats 2400000 in
 set_option synthInstance.maxHeartbeats 2400000 in
 set_option linter.unusedVariables false in
-/-- The path-integrated order-zero background correction is `H¹`-Lipschitz
-with no third or fourth derivative of the state difference. -/
+
 theorem bg0_pair_h1
     (hDim : Module.finrank ℝ E = 3)
     (g gB : SmoothRiemannianMetric I M) :
@@ -457,8 +448,7 @@ theorem bg0_pair_h1
 set_option maxHeartbeats 3200000 in
 set_option synthInstance.maxHeartbeats 3200000 in
 set_option linter.unusedVariables false in
-/-- The path-integrated order-zero background correction is `H2`-Lipschitz in
-the critical adjacent-scale two-state currency. -/
+
 theorem bg0_pair_h2
     (hDim : Module.finrank ℝ E = 3)
     (g gB : SmoothRiemannianMetric I M) :
@@ -689,8 +679,7 @@ theorem bg0_pair_h2
 set_option maxHeartbeats 2400000 in
 set_option synthInstance.maxHeartbeats 2400000 in
 set_option linter.unusedVariables false in
-/-- The full arbitrary-background order-zero low-base coefficient is `H¹`-
-Lipschitz on a common spectral `H²` ball, with no fourth-jet input. -/
+
 theorem c0_bg_pair_h1
     (hDim : Module.finrank ℝ E = 3)
     (g gB : SmoothRiemannianMetric I M) :
@@ -754,8 +743,7 @@ theorem c0_bg_pair_h1
 set_option maxHeartbeats 3200000 in
 set_option synthInstance.maxHeartbeats 3200000 in
 set_option linter.unusedVariables false in
-/-- The full arbitrary-background order-zero low-base coefficient is
-`H2`-Lipschitz in the critical adjacent-scale two-state currency. -/
+
 theorem c0_bg_pair_h2
     (hDim : Module.finrank ℝ E = 3)
     (g gB : SmoothRiemannianMetric I M) :
@@ -900,8 +888,7 @@ private theorem c1_bg_sub
 set_option maxHeartbeats 2400000 in
 set_option synthInstance.maxHeartbeats 2400000 in
 set_option linter.unusedVariables false in
-/-- The complete pointwise order-one Ricci--DeTurck coefficient has the
-critical pair modulus for an arbitrary fixed DeTurck background. -/
+
 theorem rhs1_bg_pair_h2
     (hDim : Module.finrank ℝ E = 3)
     (g gB : SmoothRiemannianMetric I M) :
@@ -1048,8 +1035,7 @@ private theorem rhs1_bg_sub
 set_option maxHeartbeats 3200000 in
 set_option synthInstance.maxHeartbeats 3200000 in
 set_option linter.unusedVariables false in
-/-- The full arbitrary-background order-one low-base coefficient is `H²`-
-Lipschitz on a common spectral `H²` ball, with the critical `H³/H²` modulus. -/
+
 theorem c1_bg_pair_h2
     (hDim : Module.finrank ℝ E = 3)
     (g gB : SmoothRiemannianMetric I M) :
@@ -1251,8 +1237,7 @@ theorem c1_bg_pair_h2
 set_option maxHeartbeats 3200000 in
 set_option synthInstance.maxHeartbeats 3200000 in
 set_option linter.unusedVariables false in
-/-- The completed arbitrary-background low first-order action is locally
-Lipschitz on a common spectral `H²` ball, with no fourth-jet input. -/
+
 theorem a1Lo_bg_pair
     (hDim : Module.finrank ℝ E = 3)
     (g gB : SmoothRiemannianMetric I M) :
@@ -1388,9 +1373,7 @@ theorem a1Lo_bg_pair
 set_option maxHeartbeats 3200000 in
 set_option synthInstance.maxHeartbeats 3200000 in
 set_option linter.unusedVariables false in
-/-- On the same DeTurck background, the completed high first-order action is
-locally Lipschitz from the spectral `H3` state core to `H3 → H2`, with no
-fourth-jet input. -/
+
 theorem a1Hi_self_pair
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M) :
@@ -1527,9 +1510,7 @@ theorem a1Hi_self_pair
 set_option maxHeartbeats 3200000 in
 set_option synthInstance.maxHeartbeats 3200000 in
 set_option linter.unusedVariables false in
-/-- For an arbitrary fixed DeTurck background, the completed high first-order
-action is locally Lipschitz from the spectral `H3` state core to `H3 → H2`,
-with no fourth-jet input. -/
+
 theorem a1Hi_bg_pair
     (hDim : Module.finrank ℝ E = 3)
     (g gB : SmoothRiemannianMetric I M) :

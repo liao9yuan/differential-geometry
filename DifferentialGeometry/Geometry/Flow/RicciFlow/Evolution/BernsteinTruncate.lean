@@ -2,15 +2,6 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.BernsteinShiSoluti
 
 set_option autoImplicit false
 
-
-
-
-
-
-
-
-
-
 noncomputable section
 
 namespace DifferentialGeometry.PDE.RicciFlow
@@ -28,9 +19,6 @@ variable [I.Boundaryless] [CompactSpace M]
 variable [VectorBundle Real E (TangentSpace I : M -> Type _)]
 
 namespace BernsteinTower
-
-
-
 
 theorem estimate_of_heat
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}

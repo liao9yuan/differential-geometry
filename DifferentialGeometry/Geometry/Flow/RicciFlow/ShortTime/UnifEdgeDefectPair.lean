@@ -3,15 +3,6 @@ import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.RicciTopFibreBou
 import DifferentialGeometry.Analysis.Spectral.Tensor.Estimates.H2PrincipalPair
 import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.UnifConvexJets
 
-/-!
-# Lower pairing for the centered edge curvature defect
-
-The curvature defect exposed by `edge_center_peel` contains no derivative of
-the energy test tensor.  Its fixed-metric curvature constants are therefore
-lower-order constants, chosen after the metric, while the order-four energy
-coefficient remains arbitrarily small.
--/
-
 set_option autoImplicit false
 set_option backward.isDefEq.respectTransparency false
 
@@ -41,9 +32,6 @@ variable
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
-/-- The nonzero curvature-defect face of the centered edge peel is lower order:
-its order-four coefficient is arbitrarily small, and its remaining constant is
-chosen only after the smooth class metric is fixed. -/
 theorem bg_pair_abs_unif
     (gBase : SmoothRiemannianMetric I M) {Λ : ℝ} (hΛ : 1 ≤ Λ) :
     ∀ {η : ℝ}, 0 < η →

@@ -1,13 +1,6 @@
 import DifferentialGeometry.Analysis.Spectral.Tensor.Estimates.H1H2AppCcRS
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.UnifGridRS
 
-/-!
-# Class-first tame H3 application
-
-This module turns supplied pointwise fibre caps and order-three covariant
-jets into a class-first tame estimate for the mixed operator-field action.
--/
-
 set_option autoImplicit false
 
 noncomputable section
@@ -62,8 +55,6 @@ private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
-/-- A supplied pointwise cap and order-three jet for each input give a
-class-first tame order-three bound for the mixed operator-field action. -/
 theorem appRS_h3_sup_unif
     (gBase : SmoothRiemannianMetric I M) (Λ : ℝ) (p r c : ℕ) :
     ∃ C : ℝ, 0 ≤ C ∧

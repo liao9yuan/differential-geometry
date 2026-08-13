@@ -3,14 +3,6 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.SobolevScale.HsTwoJet
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.UnifGridRS
 import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.UnifConvexJets
 
-/-!
-# Class-first mixed H2 application estimate
-
-This module turns the class-uniform order-two mixed product grid into the
-dimension-three `H2 × H2 → H2` application estimate used by the low-regularity
-Ricci--DeTurck coefficient packets.
--/
-
 set_option autoImplicit false
 
 noncomputable section
@@ -63,12 +55,6 @@ private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
-/-- **Dimension-three class-first mixed `H2` application estimate.**
-
-For arbitrary mixed valences, the full order-two jet of an operator-field
-application is controlled by the product of the two input order-two jet
-radii.  The constant is selected before the class metric varies, and the
-public interface uses only metric jets of orders one and two. -/
 theorem appRS_h22_unif
     (hDim : Module.finrank ℝ E = 3)
     (gBase : SmoothRiemannianMetric I M)
@@ -173,12 +159,6 @@ theorem appRS_h22_unif
       rw [mul_pow, mul_pow, show C ^ 2 = K by
         simp only [C, Real.sq_sqrt hK]]
 
-/-- **Dimension-three class-first first-order `H3 → H2` application estimate.**
-
-An intrinsic order-two jet of a rank-`(3,2)` coefficient acts on one
-covariant derivative of a rank-two tensor from spectral `H3` to spectral
-`H2`.  The constant is selected before the metric varies over the order-three
-class. -/
 theorem appCc_h23_h2_unif
     (hDim : Module.finrank ℝ E = 3)
     (gBase : SmoothRiemannianMetric I M)

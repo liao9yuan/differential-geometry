@@ -5,15 +5,6 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.MaximumPrinciple.ScalarWeak
 
 set_option autoImplicit false
 
-
-
-
-
-
-
-
-
-
 noncomputable section
 
 namespace DifferentialGeometry.PDE.RicciFlow
@@ -28,20 +19,15 @@ variable {I : ModelWithCorners Real E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
 variable [IsManifold I ∞ M] [IsManifold I 1 M]
 
-
 def pinchWeight (scalar : Real -> M -> Real) (epsilon : Real) :
     Real -> M -> Real :=
   fun t x => scalar t x ^ (-epsilon)
-
 
 def PinchEstimateOn
     (tracefreeRicciNormSq scalar weight : Real -> M -> Real)
     (C : Real) (U : Set Real) : Prop :=
   ∀ t : Real, t ∈ U -> ∀ x : M,
     tracefreeRicciNormSq t x / scalar t x ^ 2 ≤ C * weight t x
-
-
-
 
 def pinchQuotient
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
@@ -52,7 +38,6 @@ def pinchQuotient
     (tfRicNormSq S.scalar (ricciNorm (I := I) S))
     S.scalar (1 : Real) (2 - epsilon)
 
-
 def pinchDriftVector
     (G : DifferentialGeometry.Integral.Connection.RealizedMetricFamily (I := I) (M := M) Real)
     (scalar : Real -> M -> Real) (epsilon : Real) :
@@ -60,7 +45,6 @@ def pinchDriftVector
   fun t x =>
     (2 * (1 - epsilon) / scalar t x) •
       DifferentialGeometry.Integral.Connection.gradientAt (I := I) G t (scalar t) x
-
 
 omit [Module.Finite ℝ E] [IsManifold I 1 M] in
 theorem pinchDriftTerm_eq_inner_drift
@@ -75,8 +59,6 @@ theorem pinchDriftTerm_eq_inner_drift
           (quotField (M := M) (tfRicNormSq scalar ricciNormSq)
             scalar (1 : Real) (2 - epsilon) t) x) := by
   simp [pinchDriftTerm, pinchDriftVector]
-
-
 
 omit [TopologicalSpace M] in
 theorem pinchEstimateOn_of_pinchQuotient_bound
@@ -113,7 +95,6 @@ theorem pinchEstimateOn_of_pinchQuotient_bound
     simp [div_eq_mul_inv]
   simpa [PinchEstimateOn, pinchWeight, hquot] using hmul
 
-
 omit [TopologicalSpace M] in
 theorem pinchSquareTerm_nonpos
     (scalar coupleSq : Real -> M -> Real) (epsilon t : Real) (x : M)
@@ -125,8 +106,6 @@ theorem pinchSquareTerm_nonpos
     div_nonpos_of_nonpos_of_nonneg (by norm_num) hden
   simpa [pinchSquareTerm] using
     mul_nonpos_of_nonpos_of_nonneg hcoef hcouple
-
-
 
 omit [TopologicalSpace M] in
 theorem pinchGradTerm_nonpos
@@ -160,8 +139,6 @@ theorem pinchGradTerm_nonpos
   rw [hterm]
   exact hmain
 
-
-
 omit [TopologicalSpace M] in
 theorem pinchReactTerm_nonpos
     (scalar ricciNormSq Q : Real -> M -> Real)
@@ -177,8 +154,6 @@ theorem pinchReactTerm_nonpos
     div_nonpos_of_nonpos_of_nonneg (by norm_num) hden
   simpa [pinchReactTerm] using
     mul_nonpos_of_nonpos_of_nonneg hcoef hreact
-
-
 
 omit [Module.Finite ℝ E] in
 theorem cubicQ_sub_nonneg_of_section9
@@ -209,7 +184,6 @@ theorem cubicQ_sub_nonneg_of_section9
     (hdim x) hscalar (le_of_lt hdelta0) hepsilon
     (hric t ht x) (hpinch t ht x)
 
-
 omit [Module.Finite ℝ E] in
 theorem scalGradSq_nonneg
     [Module.Finite ℝ E]
@@ -225,7 +199,6 @@ theorem scalGradSq_nonneg
   · simp [hv]
   · exact le_of_lt ((S.family.metric t).pos x v hv)
 
-
 omit [Module.Finite ℝ E] in
 theorem pinchCoupleSol_nonneg
     [Module.Finite ℝ E]
@@ -240,8 +213,6 @@ theorem pinchCoupleSol_nonneg
         (S.scalar t x) (S.ricci t x)
         (ricciNablaSec (I := I) S t x)
         (DifferentialGeometry.Integral.Connection.differential1FormFun (I := I) (S.scalar t) x))
-
-
 
 omit [Module.Finite ℝ E] [IsManifold I 1 M] in
 theorem pinchBookRHS_le_drift
@@ -268,9 +239,6 @@ theorem pinchBookRHS_le_drift
     pinchReactTerm_nonpos (M := M) scalar ricciNormSq Q epsilon t x hR hreact
   unfold pinchBookRHS
   nlinarith
-
-
-
 
 omit [Module.Finite ℝ E] in
 theorem pinchBookRHS_le_drift_sol
@@ -312,8 +280,6 @@ theorem pinchBookRHS_le_drift_sol
     (tfNonneg_sol (I := I) S (fun tt y => hdim y) t x)
     (cubicQ_sub_nonneg_of_section9 (I := I) S hdim hR hdelta0
       hepsilon ht hric hpinch)
-
-
 
 omit [Module.Finite ℝ E] in
 theorem pinchQuotient_parabolic_nonpos
@@ -398,7 +364,6 @@ theorem pinchQuotient_parabolic_nonpos
   rw [hderiv, hheat]
   linarith
 
-
 omit [Module.Finite ℝ E] in
 theorem pinchQuotient_initial_continuous
     [Module.Finite ℝ E]
@@ -426,7 +391,6 @@ theorem pinchQuotient_initial_continuous
     hscalarAt.rpow_const (Or.inl (ne_of_gt (hscalar0 x)))
   simpa [pinchQuotient, quotField] using htf.mul hpow
 
-
 theorem compact_nonneg_upper_bound
     [CompactSpace M] (f : M -> Real) (hf : Continuous f) :
     ∃ C : Real, 0 <= C ∧ ∀ x : M, f x <= C := by
@@ -443,7 +407,6 @@ theorem compact_nonneg_upper_bound
   · refine ⟨0, le_rfl, ?_⟩
     intro x
     exact False.elim (hne ⟨x⟩)
-
 
 omit [Module.Finite ℝ E] in
 theorem pinchQuotient_initial_bound
@@ -627,8 +590,6 @@ private theorem ricciNorm_slabCont
       exact ⟨hslab'.1.1, lt_of_le_of_lt hslab'.1.2 hTω⟩
     · exact hu_space
 
-
-
 omit [Module.Finite ℝ E] in
 theorem pinchQuotient_slab_continuous_of_ricciNorm
     [Module.Finite ℝ E]
@@ -683,7 +644,6 @@ theorem pinchQuotient_slab_continuous_of_ricciNorm
     simpa [pinchQuotient, quotField] using htf_cont.mul hpow_cont
   exact continuousOn_const.sub hquot_cont
 
-
 omit [Module.Finite ℝ E] in
 theorem pinchQuotient_space_pos
     [Module.Finite ℝ E]
@@ -719,7 +679,6 @@ theorem pinchQuotient_space_pos
   convert hprod using 1
   funext y
   simp [pinchQuotient, quotField, p]
-
 
 omit [Module.Finite ℝ E] in
 theorem pinchQuotient_grad_pos
@@ -795,13 +754,6 @@ theorem pinchQuotient_grad_pos
         (hfDiff y) (hhDiff y)
   rw [hgrad_eq]
   exact hsum
-
-
-
-
-
-
-
 
 omit [Module.Finite ℝ E] in
 theorem pinchQuot_slab_bound
@@ -993,14 +945,11 @@ theorem pinchQuot_slab_bound
     (pinchQuotient (I := I) S epsilon) C
     hw_cont hw_time hw_mdiff hw_grad hinit hsub hoperator_neg
 
-
 def carrierZeroExt
     (D : DifferentialGeometry.Integral.Connection.RealTimeInterval) (f : Real -> M -> Real) :
     Real -> M -> Real := by
   classical
   exact fun t x => if t ∈ D.carrier then f t x else 0
-
-
 
 def carrierScalarExt
     (D : DifferentialGeometry.Integral.Connection.RealTimeInterval) (scalar : Real -> M -> Real) :
@@ -1008,15 +957,12 @@ def carrierScalarExt
   classical
   exact fun t x => if t ∈ D.carrier then scalar t x else 1
 
-
 def carrierWeightExt
     (D : DifferentialGeometry.Integral.Connection.RealTimeInterval) (scalar : Real -> M -> Real)
     (epsilon : Real) : Real -> M -> Real := by
   classical
   exact fun t x =>
     if t ∈ D.carrier then pinchWeight (M := M) scalar epsilon t x else 0
-
-
 
 omit [TopologicalSpace M] in
 theorem pinchEstimate_ext
@@ -1034,13 +980,6 @@ theorem pinchEstimate_ext
   · simpa [carrierZeroExt, carrierScalarExt, carrierWeightExt, htD] using
       h t htD x
   · simp [carrierZeroExt, carrierScalarExt, carrierWeightExt, htD]
-
-
-
-
-
-
-
 
 omit [Module.Finite ℝ E] in
 theorem pinchEstimate_sol
@@ -1132,8 +1071,6 @@ theorem pinchEstimate_sol
     have ht_eq : t = 0 := le_antisymm ht_le0 ht0
     subst t
     simpa [pinchQuotient] using hCinit x
-
-
 
 omit [Module.Finite ℝ E] in
 theorem pinchEstimate_display_sol

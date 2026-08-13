@@ -3,15 +3,6 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.C4.NormalPhas
 
 set_option autoImplicit false
 
-
-
-
-
-
-
-
-
-
 noncomputable section
 
 universe u uE uH
@@ -32,10 +23,6 @@ section RawPhaseSym
 variable [NormedSpace Real E] [FiniteDimensional Real E] [CompleteSpace E]
 variable [NeZero (Module.finrank Real E)]
 variable {I : ModelWithCorners Real E H} [I.Boundaryless]
-
-
-
-
 
 theorem exists_normal_biflow
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
@@ -237,10 +224,6 @@ variable [InnerProductSpace Real E] [FiniteDimensional Real E] [CompleteSpace E]
 variable [NeZero (Module.finrank Real E)]
 variable {I : ModelWithCorners Real E H} [I.Boundaryless]
 
-/-- A sufficiently small controlled-chart phase ball has one common exact flow
-on a symmetric interval strictly containing `[-1, 1]`. Its forward endpoint
-retains the quantitative approximation to the free diagonal map and is smooth
-in the initial phase point. -/
 theorem exists_chartBiflow
     {M : Type u} [TopologicalSpace M] [ChartedSpace H M]
     [IsManifold I ∞ M] [SigmaCompactSpace M] [T2Space M]
@@ -428,7 +411,6 @@ theorem exists_chartBiflow
       hslice.fst
   simpa only [V] using
     ⟨Φ, hinit, hcont, hwithin, hderiv, hmem, hzeroEnd, happ, hendSmooth⟩
-
 
 end ControlledPhaseSym
 

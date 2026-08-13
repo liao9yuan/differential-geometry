@@ -7,15 +7,6 @@ set_option autoImplicit false
 set_option linter.style.longLine false
 set_option linter.unusedSectionVars false
 
-/-!
-# Closed-edge regularity of the covariant curvature tower
-
-The chart-Gram package of a metric family controls every finite covariant
-derivative of its lowered Riemann tensor jointly up to a one-sided time edge.
-The proof uses the fixed chart-trivialization frame, the within-set component
-tower, and the rank-uniform realization bridge.
--/
-
 noncomputable section
 
 namespace DifferentialGeometry.PDE.RicciFlow
@@ -67,8 +58,6 @@ private lemma local_frame_eq_chart
     (chartModelBasis E) hx]
   rfl
 
-/-- In the chart-trivialization frame, the intrinsic Christoffel coefficient
-agrees near the chart centre with the chart Christoffel coefficient. -/
 private lemma local_chr_eq_chart
     (g : SmoothRiemannianMetric I M) (α : M)
     {x : M} (hx : x ∈ chartLeviCivitaGoodSet (I := I) α)
@@ -150,9 +139,6 @@ private lemma local_chr_eq_chart
   simp only [map_smul, hcoeff]
   simp
 
-/-- Taking one covariant derivative preserves closed-edge joint regularity of
-chart-frame components.  The tensor field and the differentiating metric may
-vary independently in time. -/
 theorem nablaChartJoint
     {s : ℕ}
     (g : Real → SmoothRiemannianMetric I M)
@@ -320,8 +306,6 @@ theorem nablaChartJoint
   exact hintrinsic.mono_of_mem_nhdsWithin
     (prod_open_nhds e.open_baseSet hxbase (Set.subset_univ e.baseSet) J t)
 
-/-- Joint closed-edge regularity of the first derivative, with independent
-lowering, curvature-connection, and differentiating metrics. -/
 theorem crossRm1ChartJoint
     (gL gC gD : Real → SmoothRiemannianMetric I M) {J : Set Real}
     (x₀ : M)
@@ -357,8 +341,6 @@ theorem crossRm1ChartJoint
       (rm04ChartJoint (I := I) gL gC x₀ hgramL hgramC L hr)
   · exact ht
 
-/-- Joint closed-edge regularity of the second derivative, with independent
-lowering, curvature-connection, and differentiating metrics. -/
 theorem crossRm2ChartJoint
     (gL gC gD : Real → SmoothRiemannianMetric I M) {J : Set Real}
     (x₀ : M)
@@ -396,9 +378,6 @@ theorem crossRm2ChartJoint
       hgramL hgramC hgramD L hr
   · exact ht
 
-/-- Every chart-frame component of `∇ᵏRm` is jointly smooth within an
-arbitrary time set at the chart centre.  In particular, the statement remains
-valid at the closed initial edge of a forward slab. -/
 theorem nablaKRmChartJoint
     (g : Real → SmoothRiemannianMetric I M) {J : Set Real}
     (x₀ : M)

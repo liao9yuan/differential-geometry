@@ -3,15 +3,6 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.IteratedRmTowerHea
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.Metric.InverseSmooth
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.RmRealizationBridgeAllK
 
-
-
-
-
-
-
-
-
-
 noncomputable section
 
 namespace DifferentialGeometry.PDE.RicciFlow

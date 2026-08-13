@@ -3,15 +3,6 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.JetProductIntegral
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.UnifCovSumCross
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.UnifMorreyTwo
 
-/-!
-# Class-uniform volume inputs for Gagliardo--Nirenberg
-
-This module extracts explicit upper bounds for the volume radius and its inverse from the
-two-sided class volume comparison.  These are the only metric-dependent scalars in the explicit
-mixed-valence Gagliardo--Nirenberg coefficient, so the package is the class-facing input for the
-uniform interpolation producer.
--/
-
 set_option autoImplicit false
 
 noncomputable section
@@ -42,16 +33,13 @@ private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
-/-- The square root of the total Riemannian volume. -/
 noncomputable def metricVolRadius (g : SmoothRiemannianMetric I M) : ℝ :=
   Real.sqrt ((riemannianVolumeMeasure (I := I) (M := M) g) Set.univ).toReal
 
-/-- The volume-measure comparison factor supplied by `Λ`-metric equivalence. -/
 noncomputable def volCompareC (Λ : ℝ) : ℝ :=
   Real.sqrt (Λ ^ Module.finrank ℝ E)
 
 omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [BoundarylessManifold I M] in
-/-- Two-sided comparison of the real total volumes of uniformly equivalent metrics. -/
 theorem volumeReal_cross
     (gBase g : SmoothRiemannianMetric I M) {Λ : ℝ}
     (hEq : MetricUniformEquivalentOn (I := I) Set.univ gBase g Λ) :
@@ -88,8 +76,6 @@ theorem volumeReal_cross
       ENNReal.toReal_ofReal (Real.sqrt_nonneg _)] using hreal
 
 omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [BoundarylessManifold I M] in
-/-- The volume radii of uniformly equivalent metrics are compared by the square root of the
-volume-measure comparison factor. -/
 theorem volRadius_cross
     (gBase g : SmoothRiemannianMetric I M) {Λ : ℝ}
     (hEq : MetricUniformEquivalentOn (I := I) Set.univ gBase g Λ) :
@@ -108,9 +94,6 @@ theorem volRadius_cross
     rw [Real.sqrt_mul hL]
     rfl
 
-/-- A single explicit background-class constant controlling both the volume radius and its
-inverse for every metric in the class.  The zero-background-volume branch also covers the empty
-manifold without requiring a `Nonempty M` instance. -/
 noncomputable def volClassC
     (gBase : SmoothRiemannianMetric I M) (Λ : ℝ) : ℝ :=
   let S := Real.sqrt (volCompareC (E := E) Λ)
@@ -119,7 +102,6 @@ noncomputable def volClassC
 
 omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless]
   [BoundarylessManifold I M] in
-/-- The class volume constant is nonnegative. -/
 theorem volClassC_nonneg
     (gBase : SmoothRiemannianMetric I M) (Λ : ℝ) :
     0 ≤ volClassC (E := E) (I := I) (M := M) gBase Λ := by
@@ -132,8 +114,6 @@ theorem volClassC_nonneg
   exact le_trans (mul_nonneg hS hVBase) (le_max_left _ _)
 
 omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [BoundarylessManifold I M] in
-/-- `volClassC` simultaneously bounds the volume radius and its reciprocal for every metric
-uniformly equivalent to the fixed background. -/
 theorem volClassC_spec
     (gBase : SmoothRiemannianMetric I M) {Λ : ℝ}
     (g : SmoothRiemannianMetric I M)
@@ -174,12 +154,9 @@ theorem volClassC_spec
       rw [if_neg hVBase0]
       exact le_trans hinv (le_max_right _ _)
 
-/-- The class-uniform log-convexity coefficient obtained by replacing the metric volume-radius
-reciprocal in `gnLogConst` with a common class bound. -/
 def gnClassLogC (n k : ℕ) (B : ℝ) : ℝ :=
   max (max (gnStepConst n k) 1) (gnStepConst n k * B + gnStepConst n k)
 
-/-- The explicit class-first mixed-valence Gagliardo--Nirenberg coefficient. -/
 noncomputable def gnClassC
     (gBase : SmoothRiemannianMetric I M) (Λ : ℝ) (k : ℕ) : ℝ :=
   let B := volClassC (E := E) (I := I) (M := M) gBase Λ
@@ -187,7 +164,6 @@ noncomputable def gnClassC
 
 omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless]
   [BoundarylessManifold I M] in
-/-- The class-first Gagliardo--Nirenberg coefficient is nonnegative. -/
 theorem gnClassC_nonneg
     (gBase : SmoothRiemannianMetric I M) (Λ : ℝ) (k : ℕ) :
     0 ≤ gnClassC (E := E) (I := I) (M := M) gBase Λ k := by
@@ -196,8 +172,6 @@ theorem gnClassC_nonneg
     (le_trans (le_max_right _ _) (le_max_left _ _))) _) (sq_nonneg _)
 
 omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [BoundarylessManifold I M] in
-/-- Every per-metric explicit Gagliardo--Nirenberg coefficient is bounded by the single
-background-class coefficient. -/
 theorem gnClassC_spec
     (gBase : SmoothRiemannianMetric I M) {Λ : ℝ}
     (g : SmoothRiemannianMetric I M)
@@ -233,9 +207,6 @@ theorem gnClassC_spec
   have hmul := mul_le_mul hLogPow hMaxPow (sq_nonneg _) (pow_nonneg hClassLog0 _)
   simpa only [n, V, B, gnRsConst, gnClassC] using hmul
 
-/-- **Class-first mixed-valence Gagliardo--Nirenberg interpolation.**  The coefficient is chosen
-from `gBase`, `Λ`, the dimension, and the top order before the class metric, tensor valence, and
-tensor vary. -/
 theorem gn_rs_unif
     (gBase : SmoothRiemannianMetric I M) (Λ : ℝ) (k : ℕ) (hk : 1 ≤ k) :
     0 ≤ gnClassC (E := E) (I := I) (M := M) gBase Λ k ∧
@@ -262,7 +233,6 @@ theorem gn_rs_unif
   · exact Real.rpow_nonneg
       (Integral.L2.tensorL2Norm_nonneg (I := I) (M := M) g r (s + k) _) _
 
-/-- The class-first coefficient for a positive-order rank-two antidiagonal jet grid. -/
 noncomputable def rankTwoGridC
     (gBase : SmoothRiemannianMetric I M) (Λ : ℝ) (k : ℕ) (R : ℝ) : ℝ :=
   (∑ n ∈ Finset.range (k + 1),
@@ -274,7 +244,6 @@ noncomputable def rankTwoGridC
           (7 * k))
 
 omit [BoundarylessManifold I M] in
-/-- The positive-order rank-two grid coefficient is nonnegative. -/
 theorem rank_two_grid_nonneg
     (gBase : SmoothRiemannianMetric I M) (Λ : ℝ) (k : ℕ) (R : ℝ) :
     0 ≤ rankTwoGridC (E := E) (I := I) (M := M) gBase Λ k R := by
@@ -285,8 +254,6 @@ theorem rank_two_grid_nonneg
       (pow_nonneg (le_trans zero_le_one
         (le_trans (le_max_right _ 1) (le_max_right _ _))) _))
 
-/-- **Class-first positive-order rank-two grid estimate.**  The coefficient is fixed from the
-background class, the grid order, and the lower-jet radius before the metric and tensor vary. -/
 theorem rank_two_grid_unif
     (hDim : Module.finrank ℝ E = 3)
     (gBase : SmoothRiemannianMetric I M) {Λ : ℝ} (hΛ : 0 ≤ Λ)
@@ -440,7 +407,6 @@ theorem rank_two_grid_unif
     _ = rankTwoGridC (E := E) (I := I) (M := M) gBase Λ k R * A ^ 2 := by
         simp only [rankTwoGridC, G, Lam, mul_assoc]
 
-/-- The class-first `H²` grid coefficient, with the order-zero volume branch kept explicit. -/
 noncomputable def h2GridC
     (gBase : SmoothRiemannianMetric I M) (Λ R : ℝ) (k : ℕ) : ℝ :=
   if k = 0 then
@@ -449,7 +415,6 @@ noncomputable def h2GridC
   else
     rankTwoGridC (E := E) (I := I) (M := M) gBase Λ k R * R ^ 2
 
-/-- The class-first `H²` grid coefficient is nonnegative. -/
 theorem h2_grid_nonneg
     (gBase : SmoothRiemannianMetric I M) (Λ R : ℝ) (k : ℕ) :
     0 ≤ h2GridC (E := E) (I := I) (M := M) gBase Λ R k := by
@@ -460,9 +425,6 @@ theorem h2_grid_nonneg
       (rank_two_grid_nonneg (E := E) (I := I) (M := M) gBase Λ k R)
       (sq_nonneg R)
 
-/-- **Class-first `H²` antidiagonal-grid estimate.**  One coefficient family is chosen before
-the metric varies; the order-zero member is total volume and the positive members use
-`rank_two_grid_unif`. -/
 theorem h2_grid_unif
     (hDim : Module.finrank ℝ E = 3)
     (gBase : SmoothRiemannianMetric I M) {Λ : ℝ} (hΛ : 0 ≤ Λ) :
@@ -523,13 +485,10 @@ theorem h2_grid_unif
       hDim gBase hΛ k hk1 g hEq hjet1 hjet2 P R R hR hR hP2 htop
     simpa only [h2GridC, if_neg hk0] using hgrid
 
-/-- The class-first coefficient for the order-three top grid. -/
 noncomputable def h3TopGridC
     (gBase : SmoothRiemannianMetric I M) (Λ R : ℝ) : ℝ :=
   rankTwoGridC (E := E) (I := I) (M := M) gBase Λ 3 R
 
-/-- **Class-first tame order-three grid estimate.**  The lower `H²` radius is separated from
-the top third-derivative bound. -/
 theorem h3_top_grid_unif
     (hDim : Module.finrank ℝ E = 3)
     (gBase : SmoothRiemannianMetric I M) {Λ : ℝ} (hΛ : 0 ≤ Λ) :

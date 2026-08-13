@@ -5,15 +5,6 @@ set_option linter.style.longLine false
 set_option linter.unusedSectionVars false
 set_option backward.isDefEq.respectTransparency false
 
-/-!
-# Quadratic curvature pairings for forward uniqueness
-
-This file isolates the coordinate-free tensor algebra behind the quadratic
-curvature block.  A routed product of two `(0,4)` fields is traced twice, first
-to rank six and then to rank four.  The resulting pairing has a direct norm
-bound and satisfies the usual polarization identity.
--/
-
 noncomputable section
 
 namespace DifferentialGeometry.PDE.RicciFlow
@@ -32,7 +23,6 @@ variable [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
 variable [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] [I.Boundaryless]
 variable [BoundarylessManifold I M]
 
-/-- The twice-traced, slot-routed product of two `(0,4)` tensor fields. -/
 def bPair (g : SmoothRiemannianMetric I M) (σ : Fin 8 ≃ Fin 8)
     (A B : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
       (n := (∞ : WithTop ℕ∞)) 4) :
@@ -46,25 +36,20 @@ def bPair (g : SmoothRiemannianMetric I M) (σ : Fin 8 ≃ Fin 8)
           (E := TangentSpace I) (n := (∞ : WithTop ℕ∞))
           (s := 4) (q := 4) A B)))
 
-/-- The canonical routing for `B(A,B)_{abcd}`. -/
 def bPerm : Equiv.Perm (Fin 8) :=
   Equiv.ofBijective ![4, 0, 5, 2, 6, 1, 7, 3] (by decide)
 
-/-- The routing for `B(A,B)_{abdc}`. -/
 def bPerm2 : Equiv.Perm (Fin 8) :=
   Equiv.ofBijective ![4, 0, 5, 2, 7, 1, 6, 3] (by decide)
 
-/-- The routing for `B(A,B)_{acbd}`. -/
 def bPerm3 : Equiv.Perm (Fin 8) :=
   Equiv.ofBijective ![4, 0, 6, 2, 5, 1, 7, 3] (by decide)
 
-/-- The routing for `B(A,B)_{adbc}`. -/
 def bPerm4 : Equiv.Perm (Fin 8) :=
   Equiv.ofBijective ![4, 0, 7, 2, 5, 1, 6, 3] (by decide)
 
 set_option maxHeartbeats 1000000 in
-/-- Components of the canonically routed pairing are the Uhlenbeck double
-contraction of the two input tensors. -/
+
 theorem bPair_comp {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
     (g : SmoothRiemannianMetric I M) {x : M}
     (basis : Module.Basis Idx Real (TangentSpace I x))
@@ -123,7 +108,7 @@ theorem bPair_comp {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
   ring
 
 set_option maxHeartbeats 1000000 in
-/-- Components of the second routed pairing give the `abdc` contraction. -/
+
 theorem bPair2_comp {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
     (g : SmoothRiemannianMetric I M) {x : M}
     (basis : Module.Basis Idx Real (TangentSpace I x))
@@ -182,7 +167,7 @@ theorem bPair2_comp {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
   ring
 
 set_option maxHeartbeats 1000000 in
-/-- Components of the third routed pairing give the `acbd` contraction. -/
+
 theorem bPair3_comp {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
     (g : SmoothRiemannianMetric I M) {x : M}
     (basis : Module.Basis Idx Real (TangentSpace I x))
@@ -241,7 +226,7 @@ theorem bPair3_comp {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
   ring
 
 set_option maxHeartbeats 1000000 in
-/-- Components of the fourth routed pairing give the `adbc` contraction. -/
+
 theorem bPair4_comp {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
     (g : SmoothRiemannianMetric I M) {x : M}
     (basis : Module.Basis Idx Real (TangentSpace I x))
@@ -299,7 +284,6 @@ theorem bPair4_comp {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
   rw [hA, hB]
   ring
 
-/-- The four routed pairings in the Uhlenbeck curvature reaction. -/
 def bComb (g : SmoothRiemannianMetric I M)
     (A : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
       (n := (∞ : WithTop ℕ∞)) 4) :
@@ -309,8 +293,7 @@ def bComb (g : SmoothRiemannianMetric I M)
     (bPair (I := I) g bPerm3 A A - bPair (I := I) g bPerm4 A A)
 
 set_option maxHeartbeats 1000000 in
-/-- Components of `bComb` are the canonical four-term Uhlenbeck quadratic
-curvature contraction. -/
+
 theorem bComb_comp {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
     (g : SmoothRiemannianMetric I M) {x : M}
     (basis : Module.Basis Idx Real (TangentSpace I x))
@@ -355,7 +338,6 @@ theorem bComb_comp {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
   simp only [component0S_apply]
   ring
 
-/-- A metric-orthonormal basis of one tangent fibre. -/
 private theorem quad_onFrame (g : SmoothRiemannianMetric I M) (x : M) :
     ∃ b : Module.Basis (Fin (Module.finrank Real (TangentSpace I x))) Real
         (TangentSpace I x),
@@ -379,7 +361,6 @@ private theorem quad_onFrame (g : SmoothRiemannianMetric I M) (x : M) :
   rw [← hinner]
   exact ob.inner_eq_ite i j
 
-/-- Slot routing preserves the product formula for the squared fibre norm. -/
 private theorem routeProdSq (g : SmoothRiemannianMetric I M) (σ : Fin 8 ≃ Fin 8)
     (A B : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
       (n := (∞ : WithTop ℕ∞)) 4) (x : M) :
@@ -397,8 +378,6 @@ private theorem routeProdSq (g : SmoothRiemannianMetric I M) (σ : Fin 8 ≃ Fin
   rw [Tensor0SBundle.normSq0S_domDomCongr (I := I) g x basis hinv σ]
   exact normSq0S_product (I := I) g x basis hinv A B
 
-/-- The squared norm of a twice-traced routed product is bounded by the product
-of the input squared norms, at dimension cost `n^14`. -/
 theorem bPairSq_le (g : SmoothRiemannianMetric I M) (σ : Fin 8 ≃ Fin 8)
     (A B : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
       (n := (∞ : WithTop ℕ∞)) 4) (x : M) :
@@ -450,8 +429,7 @@ theorem bPairSq_le (g : SmoothRiemannianMetric I M) (σ : Fin 8 ≃ Fin 8)
             normSq0S (I := I) g x 4 (B x)) := by ring
 
 set_option maxHeartbeats 1000000 in
-/-- The squared norm of the four-term Uhlenbeck combination is bounded by
-`16 n^14` times the fourth power of the input tensor norm. -/
+
 theorem bCombSq_le (g : SmoothRiemannianMetric I M)
     (A : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
       (n := (∞ : WithTop ℕ∞)) 4) (x : M) :
@@ -519,7 +497,7 @@ theorem bCombSq_le (g : SmoothRiemannianMetric I M)
       ring
 
 set_option maxHeartbeats 1000000 in
-/-- Polarization of a quadratic twice-traced routed product. -/
+
 theorem bPair_sub (g : SmoothRiemannianMetric I M) (σ : Fin 8 ≃ Fin 8)
     (A B : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
       (n := (∞ : WithTop ℕ∞)) 4) :
@@ -582,8 +560,7 @@ theorem bPair_sub (g : SmoothRiemannianMetric I M) (σ : Fin 8 ≃ Fin 8)
   rw [metricTraceFirstTwoField_add (I := I) (M := M) (s := 4) g]
 
 set_option maxHeartbeats 1000000 in
-/-- Changing both metric contractions in a routed quadratic pairing is controlled
-by one metric-difference factor and the squared norms of the two inputs. -/
+
 theorem bMetSq_le (g₁ g₂ : SmoothRiemannianMetric I M) (σ : Fin 8 ≃ Fin 8)
     (A B : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
       (n := (∞ : WithTop ℕ∞)) 4)
@@ -759,8 +736,7 @@ theorem bMetSq_le (g₁ g₂ : SmoothRiemannianMetric I M) (σ : Fin 8 ≃ Fin 8
     _ = _ := by rw [hnR, hH0, hNA, hNB]
 
 set_option maxHeartbeats 1000000 in
-/-- The two-input quadratic pairing is Lipschitz in both the tensor inputs and
-the metric used for its two contractions. -/
+
 theorem bDiffSq_le (g₁ g₂ : SmoothRiemannianMetric I M) (σ : Fin 8 ≃ Fin 8)
     (A B : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
       (n := (∞ : WithTop ℕ∞)) 4)
@@ -846,8 +822,7 @@ theorem bDiffSq_le (g₁ g₂ : SmoothRiemannianMetric I M) (σ : Fin 8 ≃ Fin 
       ring
 
 set_option maxHeartbeats 1000000 in
-/-- The four-term Uhlenbeck combination is Lipschitz in the curvature tensor and
-in the metric used for its contractions. -/
+
 theorem bCombDiffSq_le (g₁ g₂ : SmoothRiemannianMetric I M)
     (A B : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
       (n := (∞ : WithTop ℕ∞)) 4)

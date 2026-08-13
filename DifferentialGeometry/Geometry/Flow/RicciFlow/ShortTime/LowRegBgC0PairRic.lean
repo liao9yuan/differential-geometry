@@ -1,11 +1,5 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.LowRegBgC0PairDA
 
-/-!
-# Order-zero Ricci pair estimate
-
-Internal derivative-estimate layer for the low-regularity order-zero refold.
--/
-
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
@@ -150,7 +144,6 @@ theorem ricciOnePairH2
     _ = (B R * (1 + A) * (D3 + D2 + A * D2 + N)) ^ 2 := by
       simp only [B, x, y, D, Q]
       ring
-
 
 end LowRegBgC0Core
 end DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral

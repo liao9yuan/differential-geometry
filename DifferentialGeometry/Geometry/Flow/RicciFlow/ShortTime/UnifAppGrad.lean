@@ -1,14 +1,6 @@
 import DifferentialGeometry.Analysis.Spectral.Tensor.Estimates.H2H3Principal
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.UnifGridRS
 
-/-!
-# Class-first differentiated application estimate
-
-This module feeds the dimension-three class-uniform mixed two-arm grid into
-the universal differentiated-contraction estimate.  The resulting coefficient
-is fixed before the class metric and the two tensor fields vary.
--/
-
 set_option autoImplicit false
 
 noncomputable section
@@ -33,11 +25,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
-/-- **Dimension-three class-first differentiated application estimate.**
-
-For a fixed background, class parameter, and valences, one coefficient is
-chosen before `g`, `Φ`, and `V` vary.  Metric jets through order two transfer
-the two `H²` jet radii to the mixed product grid. -/
 theorem appCc_grad_unif
     (hDim : Module.finrank ℝ E = 3)
     (gBase : SmoothRiemannianMetric I M)

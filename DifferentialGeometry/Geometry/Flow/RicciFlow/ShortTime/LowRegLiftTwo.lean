@@ -2,25 +2,6 @@ import DifferentialGeometry.Analysis.Parabolic.QuasiLinear.TensorMaximalRegulari
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.DeTurckRemainderLowBaseTime
 import DifferentialGeometry.Analysis.Spectral.Tensor.SobolevScale.ExponentCongr
 
-/-!
-# Radial inactivity along a rough solution, and one adjacent-scale lift
-
-Two solver-side bricks of the low-regularity Ricci--DeTurck bootstrap.
-
-* `lowRadialH3_eq_self` / `lowRadialHs_eq_self` are the honest `eq_self`
-  bridges for the two total radial maps: each is the identity exactly at a
-  spectrally symmetric state whose `H2` size is inside the cutoff radius.
-  A ball bound alone is **not** enough -- symmetrization is part of both maps.
-* `lowRadial_eq_self_along_sol` transports those two identities along a
-  time-dependent `H3` state path, which is how the frozen radial coefficients
-  along the order-one solution become the genuine coefficients.
-* `lowreg_lift_two` is the one-step adjacent-scale bootstrap: it feeds the
-  compatible high/low coefficient families and the low affine fixed point into
-  `nonautL2_lift` on the unchanged horizon, and additionally exports the two
-  *pointwise almost-everywhere* inclusion identities for the forcing and for
-  the Duhamel field (the engine only produces the `L2`-class equalities).
--/
-
 noncomputable section
 
 open Bundle Manifold MeasureTheory Set Filter
@@ -54,12 +35,6 @@ private abbrev incl32 (g : SmoothRiemannianMetric I M) :
   tensorHsInclusion (I := I) (M := M) (g := g) (r := 0) (s := 2)
     (by norm_num)
 
-/-! ## The two radial `eq_self` bridges -/
-
-/-- The total spectral `H2` radial map is the identity at a spectrally
-symmetric state lying inside its cutoff ball.  Both hypotheses are needed:
-`lowRadialHs` symmetrizes before retracting, so a ball bound alone does not
-make it the identity. -/
 theorem lowRadialHs_eq_self
     (g : SmoothRiemannianMetric I M) {ρ : ℝ} (hρ : 0 ≤ ρ)
     {v : metricH2 (I := I) (M := M) g}
@@ -70,8 +45,6 @@ theorem lowRadialHs_eq_self
   refine Eq.trans (congrArg (ballRetraction ρ) hsymm) ?_
   exact ballRetraction_eq_self_of_mem hv
 
-/-- The total mixed-scale `H3` radial map is the identity at a spectrally
-symmetric state whose `H2` inclusion lies inside the cutoff ball. -/
 theorem lowRadialH3_eq_self
     (g : SmoothRiemannianMetric I M) {ρ : ℝ} (hρ : 0 < ρ)
     {u : metricH3 (I := I) (M := M) g}
@@ -85,14 +58,6 @@ theorem lowRadialH3_eq_self
     (tensorHsInclusion_injective (I := I) (M := M) (g := g)
       (r := 0) (s := 2) (by norm_num)) hu
 
-/-- Along a spectrally symmetric `H3` state path whose `H2` size stays inside
-the cutoff radius, both total radial maps are the identity almost everywhere.
-This is the bridge that lets the frozen radial coefficients along the
-order-one solution be replaced by the genuine coefficients.
-
-The spectral symmetry `hsymm` is an honest input: it is *not* implied by the
-`H2` ball bound, and symmetry preservation for the rough fixed-point solution
-is a separate, still unproved statement. -/
 theorem lowRadial_eq_self_along_sol
     (g : SmoothRiemannianMetric I M) {T ρ R : ℝ} (hρ : 0 < ρ) (hRρ : R ≤ ρ)
     {u : ℝ → metricH3 (I := I) (M := M) g}
@@ -119,19 +84,8 @@ theorem lowRadial_eq_self_along_sol
     refine hcomm.symm.trans ?_
     exact congrArg (incl32 (I := I) (M := M) g) hs
 
-/-! ## One adjacent-scale lift of the rough solution -/
-
 omit [BoundarylessManifold I M] in
-/-- A commuting inclusion square produced at *literal* domain exponents — the
-shape of `a1_pair` (`1 ≤ 2` against `2 ≤ 3`) and of `a2_pair` (`1 ≤ 2` against
-`3 ≤ 4`) — transports to the *arithmetic* domain exponents demanded by
-`lowreg_lift_two` (`aLo + 1 ≤ aHi + 1`, resp. `aLo + 2 ≤ aHi + 2`), after
-precomposing each coefficient with the exponent transport.
 
-The codomains `aLo`, `aHi` need no transport: instantiating the lift at
-`aLo := (1 : ℝ)`, `aHi := (2 : ℝ)` already puts the two forcing scales at their
-literal orders, and the outer inclusion order `aLo ≤ aHi` is literally the
-`1 ≤ 2` of the pair endpoints. -/
 theorem liftCompat_congr {g : SmoothRiemannianMetric I M}
     {aLo aHi pLo pHi qLo qHi : ℝ}
     (hLo : pLo = qLo) (hHi : pHi = qHi)
@@ -156,16 +110,6 @@ theorem liftCompat_congr {g : SmoothRiemannianMetric I M}
     ← ContinuousLinearMap.comp_assoc, ← ContinuousLinearMap.comp_assoc, hsq]
 
 omit [BoundarylessManifold I M] in
-/-- Same-horizon adjacent-scale bootstrap of a zero-initial non-autonomous
-maximal-regularity solution, with the low Sobolev order carried by its own
-name `aLo` and with the two *pointwise* almost-everywhere inclusion identities
-exported alongside the `L2`-class ones produced by `nonautL2_lift`.
-
-Every coefficient-family input (measurability, the uniform `A2` bound, the
-`L2`-in-time `A1` bound, the two contraction smallness conditions) and the low
-affine fixed point are hypothesis parameters: they are exactly what the
-time-dependent low-base families of the Ricci--DeTurck lane must supply, and
-none of them is assumed silently. -/
 theorem lowreg_lift_two
     {g : SmoothRiemannianMetric I M} {T aLo aHi : ℝ}
     (hlo : aLo = aHi - 1) (hOrd : aLo ≤ aHi)

@@ -4,14 +4,6 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.C4.NormalMetr
 
 set_option autoImplicit false
 
-
-
-
-
-
-
-
-
 noncomputable section
 
 universe u uE uH
@@ -34,8 +26,6 @@ variable [NormedSpace Real E] [FiniteDimensional Real E] [CompleteSpace E]
 variable [NeZero (Module.finrank Real E)]
 variable {I : ModelWithCorners Real E H} [I.Boundaryless]
 
-
-
 noncomputable def normalAccel
     (Y : PointedRiemannianManifold.{u, uE, uH} (I := I)) (x : Y.M)
     (z : E × E) : E := by
@@ -47,7 +37,6 @@ noncomputable def normalAccel
   letI : T2Space (TangentBundle I Y.M) := Y.t2TangentBundle
   exact -((Integral.Connection.leviCivitaConnectionOfMetric (I := 𝓘(Real, E))
     (normalTotal (I := I) Y x) (fun _ : E ↦ z.2) z.1) z.2)
-
 
 @[simp] theorem normalAccel_zero
     (Y : PointedRiemannianManifold.{u, uE, uH} (I := I)) (x : Y.M) :
@@ -62,11 +51,8 @@ noncomputable def normalAccel
     ContinuousLinearMap.map_zero _
   rw [hz, neg_zero]
 
-
 def normalPhaseBox (r : Real) (R : ℝ≥0) : Set (E × E) :=
   {z | z.1 ∈ Metric.ball (0 : E) r ∧ ‖z.2‖ ≤ (R : Real)}
-
-
 
 def normalPhaseK
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
@@ -81,8 +67,6 @@ def normalPhaseK
     exact add_nonneg
       (mul_nonneg hA (sq_nonneg (R : Real)))
       (mul_nonneg (mul_nonneg (by norm_num) (h.metricC_nonneg 1)) R.coe_nonneg)
-
-
 
 omit [NeZero (Module.finrank ℝ E)] in
 theorem normalPhaseK_mono
@@ -102,8 +86,6 @@ theorem normalPhaseK_mono
   exact add_le_add
     (mul_le_mul_of_nonneg_left hsq hA)
     (mul_le_mul_of_nonneg_left hRS' hB)
-
-
 
 theorem normalAccel_eq
     (Y : PointedRiemannianManifold.{u, uE, uH} (I := I)) (x : Y.M) :
@@ -130,8 +112,6 @@ theorem normalAccel_eq
   rw [normal_cov_eq (I := I) Y x z.1 hz hco z.2 z.2]
   rfl
 
-
-
 theorem normalPhase_eq_spray
     (Y : PointedRiemannianManifold.{u, uE, uH} (I := I)) (x : Y.M) :
     letI : TopologicalSpace Y.M := Y.topology
@@ -156,7 +136,6 @@ theorem normalPhase_eq_spray
   rw [MetricKoszul.metricSpray_eq _ _ hco]
   change (z.2, normalAccel (I := I) Y x z) = _
   rw [normalAccel_eq (I := I) Y x z hz hco]
-
 
 theorem normalAccel_norm
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
@@ -193,9 +172,6 @@ theorem normalAccel_norm
       simpa only [mul_assoc] using mul_le_mul_of_nonneg_left
         (mul_self_le_mul_self (norm_nonneg z.2) hz.2) hC
     _ = 3 * h.metricC 1 * (R : Real) ^ 2 := by ring
-
-
-
 
 theorem normalAccel_lip
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
@@ -238,9 +214,6 @@ theorem normalAccel_lip
   rw [norm_sub_rev]
   simpa only [normalPhaseK, NNReal.coe_mk] using hraw
 
-
-
-
 theorem normalDiag_approx
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
     (h : NormalCoordMetricBoundInput (I := I) X)
@@ -266,10 +239,6 @@ theorem normalDiag_approx
   exact PhaseFlow.phase_diag_approx
     (normalAccel_lip (I := I) h k x hrMetric hrQuarter R)
     hinit hcont hderiv hmem
-
-
-
-
 
 theorem exists_normalFlow
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
@@ -385,8 +354,6 @@ variable {M : Type u} [TopologicalSpace M] [ChartedSpace H M]
 variable [IsManifold I ∞ M] [SigmaCompactSpace M] [T2Space M]
 variable [T2Space (TangentBundle I M)]
 
-/-- Lipschitz coefficient for the acceleration of one controlled normal-chart
-provider on a velocity ball of radius `R`. -/
 def chartPhaseK (g : SmoothRiemannianMetric I M) {p : M}
     {c : NormalBallChart (I := I) p} (b : c.MetricBounds g)
     (R : ℝ≥0) : ℝ≥0 where
@@ -405,8 +372,6 @@ omit [FiniteDimensional Real E] [CompleteSpace E]
   [NeZero (Module.finrank Real E)] [I.Boundaryless]
   [SigmaCompactSpace M] [T2Space M]
   [T2Space (TangentBundle I M)] in
-/-- The chart-acceleration Lipschitz coefficient is monotone in the velocity
-radius. -/
 theorem chartPhaseK_mono (g : SmoothRiemannianMetric I M) {p : M}
     {c : NormalBallChart (I := I) p} (b : c.MetricBounds g)
     {R S : ℝ≥0} (hRS : R ≤ S) :
@@ -425,7 +390,6 @@ theorem chartPhaseK_mono (g : SmoothRiemannianMetric I M) {p : M}
     (mul_le_mul_of_nonneg_left hsq hA)
     (mul_le_mul_of_nonneg_left hRS' hB)
 
-/-- Uniform acceleration-size bound for one controlled chart provider. -/
 theorem chartAccel_norm (g : SmoothRiemannianMetric I M) {p : M}
     (c : NormalBallChart (I := I) p) (b : c.MetricBounds g)
     {r : Real}
@@ -450,8 +414,6 @@ theorem chartAccel_norm (g : SmoothRiemannianMetric I M) {p : M}
         (mul_self_le_mul_self (norm_nonneg z.2) hz.2) hC
     _ = 3 * b.C 1 * (R : Real) ^ 2 := by ring
 
-/-- The acceleration of one controlled normal-chart provider is uniformly
-Lipschitz on every common metric and quarter-chart phase box. -/
 theorem chartAccel_lip (g : SmoothRiemannianMetric I M) {p : M}
     (c : NormalBallChart (I := I) p) (b : c.MetricBounds g)
     {r : Real}
@@ -482,8 +444,6 @@ theorem chartAccel_lip (g : SmoothRiemannianMetric I M) {p : M}
   rw [norm_sub_rev]
   simpa only [chartPhaseK, NNReal.coe_mk] using hraw
 
-/-- Conditional diagonal approximation for one controlled normal-chart
-provider. -/
 theorem chartDiag_approx (g : SmoothRiemannianMetric I M) {p : M}
     (c : NormalBallChart (I := I) p) (b : c.MetricBounds g)
     {r : Real}
@@ -504,8 +464,6 @@ theorem chartDiag_approx (g : SmoothRiemannianMetric I M) {p : M}
     (chartAccel_lip g c b hrMetric hrQuarter R)
     hinit hcont hderiv hmem
 
-/-- A sufficiently small ordinary phase ball admits a common time-one family
-for one controlled normal-chart provider. -/
 theorem exists_chartFlow (g : SmoothRiemannianMetric I M) {p : M}
     (c : NormalBallChart (I := I) p) (b : c.MetricBounds g)
     {r : Real}

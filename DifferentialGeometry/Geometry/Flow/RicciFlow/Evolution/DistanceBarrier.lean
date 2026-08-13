@@ -8,15 +8,6 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.MaximumPrinciple.ScalarWeak
 
 set_option autoImplicit false
 
-/-!
-# Calabi upper supports for evolving Riemannian distance
-
-This module owns the genuinely analytic geometry in the complete-noncompact
-Shi route.  Its endpoint constructs a smooth spacetime upper support for the
-positively rescaled Riemannian distance at one selected positive-time point.
-The support is local; no global smoothness across the cut locus is asserted.
--/
-
 noncomputable section
 
 universe u uE uH
@@ -43,12 +34,6 @@ private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 omit [NeZero (Module.finrank ℝ E)]
   [IsManifold I 2 M]
   [SigmaCompactSpace M] in
-/-- The time derivative of the length of a fixed regular path under Ricci flow.
-
-Only the metric evolves: the path and its velocity are held fixed.  The
-Ricci-flow equation differentiates the squared speed, the square-root chain
-rule differentiates the speed, and compactness of the parameter interval
-justifies differentiation under the interval integral. -/
 theorem pathLength_timeDeriv_of_ricciFlow
     {D : RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -263,8 +248,6 @@ theorem pathLength_timeDeriv_of_ricciFlow
 omit [NeZero (Module.finrank ℝ E)]
   [IsManifold I 2 M]
   [SigmaCompactSpace M] in
-/-- A quadratic Ricci bound gives the expected lower bound for the time
-derivative of the length of a fixed regular path. -/
 theorem pathLength_deriv_ge
     {D : RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -400,8 +383,6 @@ theorem pathLength_deriv_ge
 omit [IsManifold I 2 M] in
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-/-- An intrinsic geodesic with positive launch speed has nonzero velocity at
-every parameter time. -/
 private theorem intrGeo_vel_ne
     [RiemannianBundle (fun y : M => TangentSpace I y)]
     [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
@@ -430,7 +411,6 @@ private theorem intrGeo_vel_ne
     simpa only [map_zero] using h
   exact hv.ne' (hspeed.symm.trans hinner0)
 
-/-- The checked fields of one scaled evolving-distance support. -/
 private structure ScaledDistSupport
     {D : RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -466,7 +446,6 @@ private structure ScaledDistSupport
         (fun _ y => (0 : TangentSpace I y)) rho t x
 
 omit [IsManifold I 1 M] [IsManifold I 2 M] [SigmaCompactSpace M] in
-/-- Choose the dimension-normalized transverse Ricci comparison coefficient. -/
 private theorem exists_calabi_coeff
     (g : SmoothRiemannianMetric I M)
     {Λ : Real}
@@ -559,7 +538,6 @@ private theorem exists_calabi_coeff
   exact ⟨q, hq, hRicLower, hnq⟩
 
 omit [NeZero (Module.finrank ℝ E)] in
-/-- Convert the scalar curvature bound into the uniform quadratic Ricci bound. -/
 private theorem ricci_quad_of_curv
     {D : RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -601,8 +579,6 @@ private theorem ricci_quad_of_curv
       (ricci_quad_sol (I := I) S y v (hcurv0 s hs y))
   exact ⟨hΛ, hricQuad⟩
 
-/-- The unscaled fixed-time Calabi data and broken-path time estimate used
-before multiplying by the exponential Ricci-flow weight. -/
 private structure CalabiFlowCore
     {D : RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -640,7 +616,6 @@ private structure CalabiFlowCore
 omit [IsManifold I 2 M] in
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-/-- Construct the unscaled Calabi support and its broken-path time estimate. -/
 private theorem calabi_core_of_sol
     [RiemannianBundle (fun y : M => TangentSpace I y)]
     [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
@@ -916,7 +891,6 @@ private theorem calabi_core_of_sol
   · exact hrho0_x.trans hr.symm
 
 omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [IsManifold I 2 M] in
-/-- Multiply the unscaled Calabi core by the exponential Ricci-flow weight. -/
 private theorem CalabiFlowCore.scale
     [RiemannianBundle (fun y : M => TangentSpace I y)]
     [VectorBundle Real E (TangentSpace I : M → Type _)]
@@ -1084,8 +1058,6 @@ private theorem CalabiFlowCore.scale
 omit [IsManifold I 2 M] in
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-/-- Assemble the fixed-time Calabi core and apply the exponential time weight
-once the Ricci quadratic bound and time-slice completeness are available. -/
 private theorem scaled_of_quad
     {D : RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -1171,8 +1143,6 @@ private theorem scaled_of_quad
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-/-- Construct the bundled scaled-distance support used by the public
-upper-support theorem. -/
 private theorem scaledDist_support
     {D : RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -1213,13 +1183,6 @@ private theorem scaledDist_support
       (Λ := (Module.finrank Real E : Real) ^ 2 * Real.sqrt K)
       S hS O hT hreg hΛ hricQuad hcomplete_t ht htpos x hfinite hOx
 
-/-- A positively rescaled evolving distance admits a quantitative smooth
-Calabi upper support at every positive-time point of finite nonzero distance.
-
-This is the unique new geometric-analysis frontier in the Route B-prime
-complete-Shi producer.  The proof joins a point-pair minimizing geodesic, a
-fixed-first Calabi tail, fixed-metric Laplacian comparison, and the Ricci-flow
-variation of the length of the selected broken path. -/
 theorem scaledDist_calabiUpperSupport_of_sol
     {D : RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)

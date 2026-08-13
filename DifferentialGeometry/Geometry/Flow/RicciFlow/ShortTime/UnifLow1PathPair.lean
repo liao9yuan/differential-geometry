@@ -4,16 +4,6 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.SobolevScale.SpectralNormLI
 import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.UnifAppH22
 import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.UnifRhsConvex
 
-/-!
-# Class-first diagonal first-order path pairing
-
-This module isolates the first-order path contribution in the diagonal
-low-base normal form.  Its order-two coefficient jet and the class-first
-`H3 → H2` application estimate give a homogeneous Rung-3 pairing bound.  The
-quadratic `H3` passenger is converted to a small `H4` energy coefficient by
-the exact spectral interpolation `H3² ≤ H2·H4`.
--/
-
 set_option autoImplicit false
 
 noncomputable section
@@ -54,9 +44,6 @@ private lemma two_mul_le_eps {η x y : ℝ} (hη : 0 < η) :
   rw [hexpand] at hs
   linarith
 
-/-- The diagonal first-order path has a class-first quantitative Rung-3
-pairing bound.  Its only top-energy coefficient is linear in the supplied
-spectral `H2` radius. -/
 theorem low1_pair_h4_unif
     (hDim : Module.finrank ℝ E = 3)
     (gBase : SmoothRiemannianMetric I M)
@@ -190,9 +177,6 @@ theorem low1_pair_h4_unif
         (mul_le_mul_of_nonneg_left hy2Rz (mul_nonneg hC1 hz))
     _ = C0 * z * y + C1 * R * z ^ 2 := by ring
 
-/-- Every prescribed energy coefficient admits a class-first `H2` cap under
-which the complete diagonal first-order path contribution is absorbed into
-`η·H4² + G·H3²`. -/
 theorem low1_pair_abs_unif
     (hDim : Module.finrank ℝ E = 3)
     (gBase : SmoothRiemannianMetric I M)

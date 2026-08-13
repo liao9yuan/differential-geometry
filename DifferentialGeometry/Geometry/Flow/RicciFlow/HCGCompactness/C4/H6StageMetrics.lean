@@ -4,13 +4,6 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.C4.StepCStage
 
 set_option autoImplicit false
 
-/-!
-# Finite live-slot metric extraction for the H6 chart provider
-
-This module diagonalizes the fixed-center H6 metric compactness theorem across
-the finite live source slots. Each slot keeps its own phase-radius domain.
--/
-
 noncomputable section
 
 universe u uE uH
@@ -30,8 +23,6 @@ variable {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
 
 namespace H6NormalData
 
-/-- The H6 chart metrics at all live centers converge on their slotwise phase
-balls after one common strict subsequence. -/
 theorem exists_stage_metric
     (inp : MetricCompactCore (I := I) X)
     (d : H6NormalData (I := I) X inp.decay)
@@ -129,8 +120,6 @@ theorem exists_stage_metric
   · simpa only [V, Φ, psi, Function.comp_apply] using hconvAlpha
   · simpa only [V] using hQAlpha.2
 
-/-- Exact H6 stage-metric limits produce matched forward/inverse diagonal
-branches for every live slot, without changing the extracting subsequence. -/
 theorem exists_stage_pair
     (inp : MetricCompactCore (I := I) X)
     (d : H6NormalData (I := I) X inp.decay)

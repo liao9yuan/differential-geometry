@@ -273,5 +273,4 @@ theorem short_time_joint
       · exact h_interior t ⟨h0, ht.2⟩ x v w
   exact h_construct
 
-
 end DifferentialGeometry.PDE.RicciFlow

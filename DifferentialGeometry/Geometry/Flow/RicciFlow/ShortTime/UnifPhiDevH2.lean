@@ -2,15 +2,6 @@ import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.LowRegPathSplit
 import DifferentialGeometry.Analysis.Sobolev.TensorHilbert.PrincipalCoeffDimBound
 import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.UnifInvCoeffH2
 
-/-!
-# Class-first top-coefficient deviation
-
-This module combines the class-first inverse-metric coefficient estimate with
-dimension-only principal-coefficient bounds.  The resulting radius and
-deviation coefficient are fixed before the metric in the order-three class
-varies.
--/
-
 set_option autoImplicit false
 set_option backward.isDefEq.respectTransparency false
 
@@ -44,9 +35,7 @@ private local instance instCompleteSpaceE : CompleteSpace E :=
 
 set_option maxHeartbeats 3200000 in
 set_option synthInstance.maxHeartbeats 1600000 in
-/-- On every metric in a three-dimensional order-three class, one common
-`H²` radius and one common constant control the pointwise and two-jet
-deviation of the total top Ricci--DeTurck coefficient from its base value. -/
+
 theorem phi_dev_h2_unif
     (hDim : Module.finrank ℝ E = 3)
     (gBase : SmoothRiemannianMetric I M)

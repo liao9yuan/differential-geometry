@@ -3,13 +3,6 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.C4.StepCStage
 
 set_option autoImplicit false
 
-/-!
-# Uniform source buffers for the H6 chart provider
-
-This file converts the coordinate buffers retained by the provider-native
-support package into intrinsic metric buffers using the H6 chart metric bounds.
--/
-
 noncomputable section
 
 universe u uE uH
@@ -288,8 +281,6 @@ private theorem NormalBallChart.MetricEquivOn.inv_join_le
   have ht_abs : |t| = t := abs_of_nonneg ht.1
   simpa only [Real.norm_eq_abs, sub_zero, ht_abs, d, mul_assoc] using hmean
 
-/-- A coordinate closed-ball buffer for a controlled chart yields an intrinsic
-buffer in the same coordinate core, together with inverse-coordinate control. -/
 theorem NormalBallChart.MetricEquivOn.core_dist
     (Y : PointedRiemannianManifold.{u, uE, uH} (I := I))
     (hcomplete : MetricComplete (I := I) Y)
@@ -505,8 +496,6 @@ theorem NormalBallChart.MetricEquivOn.core_dist
           (riemannianEDist I (c.hom z) x).toReal := hfull'
   exact ⟨hxcore, hcoord⟩
 
-/-- The H6 source cover has a positive intrinsic buffer, uniform in the source
-slot and in every stage of the extracted subsequence. -/
 theorem H6NormalData.metric_buffer
     (inp : MetricCompactCore (I := I) X)
     (d : H6NormalData (I := I) X inp.decay)

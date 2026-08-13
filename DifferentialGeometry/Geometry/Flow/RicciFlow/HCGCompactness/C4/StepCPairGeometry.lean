@@ -1,14 +1,6 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.C4.GoodCoveringItem3
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.C4.ProperBallExp
 
-
-
-
-
-
-
-
-
 noncomputable section
 
 open Filter Set
@@ -26,10 +18,6 @@ variable {H : Type uH} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H}
 variable [I.Boundaryless]
 variable {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
-
-
-
-
 
 theorem NetLimitData.sigmaBall_nesting
     (hd : InjRadiusDecayInput (I := I) X) {D : Real} (hD : 0 < D)
@@ -108,10 +96,6 @@ theorem NetLimitData.sigmaBall_nesting
     _ = (item3RadiusFactor hd D / 2) * L.lamInf β := by
       rw [item3RadiusFactor, ← hE2]
       ring
-
-
-
-
 
 theorem NetLimitData.pair_exp_maps
     (hd : InjRadiusDecayInput (I := I) X) {D : Real} (hD : 0 < D)

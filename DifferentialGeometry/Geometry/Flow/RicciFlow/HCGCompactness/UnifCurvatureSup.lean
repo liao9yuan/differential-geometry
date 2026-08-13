@@ -3,17 +3,6 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.ConvFieldInpu
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.ConnDiffDerivBound
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.UnifCurvatureJetBound
 
-/-!
-# Class-uniform order-zero curvature bound
-
-This module is the light, canonical order-zero curvature producer for the HCG
-metric class. It derives an arbitrary-comparability Riemann-operator bound
-from metric equivalence and the first two background-covariant metric jets.
-
-It intentionally excludes the older metric-difference realization, small-
-perturbation, and convex-path compatibility layer in `UnifCurvatureJetBound`.
--/
-
 set_option autoImplicit false
 
 noncomputable section
@@ -43,9 +32,7 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
 set_option linter.unusedSectionVars false in
-/-- The `g`-norm triangle inequality on a fibre:
-`√(g(a+b,a+b)) ≤ √(g(a,a)) + √(g(b,b))`.  (Local copy of the private
-`gNorm_self_triangle` used in `PerturbedRiemannOpDifferenceBound`.) -/
+
 private lemma gAddNorm_le
     (g : SmoothRiemannianMetric I M) (x : M) (a b : TangentSpace I x) :
     Real.sqrt (g.inner x (a + b) (a + b)) ≤
@@ -81,7 +68,7 @@ private lemma gAddNorm_le
   linarith [hcs]
 
 set_option linter.unusedSectionVars false in
-/-- The `g`-norm triangle inequality for a fibre difference. -/
+
 private lemma gSubNorm_le
     (g : SmoothRiemannianMetric I M) (x : M) (a b : TangentSpace I x) :
     Real.sqrt (g.inner x (a - b) (a - b)) ≤
@@ -93,19 +80,13 @@ private lemma gSubNorm_le
   rw [show a - b = a + (-b) from by abel]
   exact h
 
-/-- The explicit arbitrary-comparability constant for the order-zero Riemann
-difference estimate. -/
 def riemannDiffC (Λ Λ' Λ'' : ℝ) : ℝ :=
   2 * (3 / 2 * Λ ^ 4 * (Λ'' + Λ * Λ' ^ 2)) +
     2 * (3 / 2 * Λ ^ 3 * Λ') ^ 2
 
 set_option linter.unusedSectionVars false in
 set_option maxHeartbeats 1600000 in
-/-- The ungated order-zero Riemann-difference estimate in metric-jet currency.
 
-It combines the classical curvature-difference identity with the explicit
-order-zero and order-one connection-difference bounds.  No smallness condition
-on `Λ - 1` is used. -/
 theorem riemannDiff_gJet_le
     {K : Set M} (g₂ g₁ : SmoothRiemannianMetric I M) {Λ Λ' Λ'' : ℝ}
     (hEq : MetricUniformEquivalentOn (I := I) K g₂ g₁ Λ)
@@ -306,17 +287,6 @@ theorem riemannDiff_gJet_le
     _ = riemannDiffC Λ Λ' Λ'' ^ 2 *
         g₂.inner x v v * g₂.inner x w w * g₂.inner x u u := by rw [hCd]
 
-/- **Order-0 curvature sup bound from supplied background and difference bounds.**
-
-Given any nonnegative order-0 Riemann *difference* bound `hdiff` and
-`Λ`-comparability of `g₀` with `gBase`, the absolute Riemann operator
-of `g₀` is bounded in the `g₀` inner product by `F²` with
-
-  `F = Λ² · (Cd + √Kbase)`,
-
-where `Kbase` is the fixed `gBase` curvature constant
-(`exists_uniform_riemannOp_LeviCivita_gNorm_bound`).  This composition theorem
-itself has no smallness restriction on `Λ`. -/
 private theorem curvSup_of_diff
     (gBase g₀ : SmoothRiemannianMetric I M) {Λ : ℝ} (hΛ : 1 ≤ Λ)
     (hcomp : ∀ (x : M) (v : TangentSpace I x),
@@ -346,14 +316,14 @@ private theorem curvSup_of_diff
   intro x v w u
   set R0 : TangentSpace I x := riemannOp (cov := LeviCivita (I := I) g₀) x v w u with hR0
   set Rb : TangentSpace I x := riemannOp (cov := LeviCivita (I := I) gBase) x v w u with hRb
-  -- fibre quadratics in the base metric, all nonnegative
+
   have hbvv0 : 0 ≤ gBase.inner x v v := metric_inner_self_nonneg (I := I) (M := M) gBase x v
   have hbww0 : 0 ≤ gBase.inner x w w := metric_inner_self_nonneg (I := I) (M := M) gBase x w
   have hbuu0 : 0 ≤ gBase.inner x u u := metric_inner_self_nonneg (I := I) (M := M) gBase x u
   set P3 : ℝ := gBase.inner x v v * gBase.inner x w w * gBase.inner x u u with hP3
   have hP30 : 0 ≤ P3 := by
     rw [hP3]; exact mul_nonneg (mul_nonneg hbvv0 hbww0) hbuu0
-  -- the two committed inputs, folded to `R0`/`Rb` and the single product `P3`
+
   have h := hdiff x v w u
   rw [← hR0, ← hRb] at h
   have hk := hKb x v w u
@@ -368,7 +338,7 @@ private theorem curvSup_of_diff
     calc gBase.inner x Rb Rb
         ≤ Kb * gBase.inner x v v * gBase.inner x w w * gBase.inner x u u := hk
       _ = Kb * (gBase.inner x v v * gBase.inner x w w * gBase.inner x u u) := by ring
-  -- √ of each input
+
   have hnDiff : Real.sqrt (gBase.inner x (R0 - Rb) (R0 - Rb)) ≤ Cd * Real.sqrt P3 := by
     calc Real.sqrt (gBase.inner x (R0 - Rb) (R0 - Rb))
         ≤ Real.sqrt (Cd ^ 2 * P3) := Real.sqrt_le_sqrt hd3
@@ -377,7 +347,7 @@ private theorem curvSup_of_diff
     calc Real.sqrt (gBase.inner x Rb Rb)
         ≤ Real.sqrt (Kb * P3) := Real.sqrt_le_sqrt hb3
       _ = Real.sqrt Kb * Real.sqrt P3 := by rw [Real.sqrt_mul hKb0]
-  -- triangle: `R0 = (R0 - Rb) + Rb`
+
   have hcancel : (R0 - Rb) + Rb = R0 := by abel
   have htri : Real.sqrt (gBase.inner x R0 R0) ≤
       (Cd + Real.sqrt Kb) * Real.sqrt P3 := by
@@ -388,7 +358,7 @@ private theorem curvSup_of_diff
             Real.sqrt (gBase.inner x Rb Rb) := htr
       _ ≤ Cd * Real.sqrt P3 + Real.sqrt Kb * Real.sqrt P3 := add_le_add hnDiff hnRb
       _ = (Cd + Real.sqrt Kb) * Real.sqrt P3 := by ring
-  -- square the triangle to get the base-metric curvature bound
+
   have hR0nn : 0 ≤ gBase.inner x R0 R0 :=
     metric_inner_self_nonneg (I := I) (M := M) gBase x R0
   have hbaseSq : gBase.inner x R0 R0 ≤ (Cd + Real.sqrt Kb) ^ 2 * P3 := by
@@ -399,10 +369,10 @@ private theorem curvSup_of_diff
             ((Cd + Real.sqrt Kb) * Real.sqrt P3) := hmm
       _ = (Cd + Real.sqrt Kb) ^ 2 * (Real.sqrt P3 * Real.sqrt P3) := by ring
       _ = (Cd + Real.sqrt Kb) ^ 2 * P3 := by rw [Real.mul_self_sqrt hP30]
-  -- convert the base-metric bound to the `g₀` inner product via comparability
+
   have hout : g₀.inner x R0 R0 ≤ Λ * gBase.inner x R0 R0 := (hcomp x R0).2
   have hcoeff_nn : 0 ≤ (Cd + Real.sqrt Kb) ^ 2 := sq_nonneg _
-  -- input conversion: `gBase(z,z) ≤ Λ · g₀(z,z)` on the diagonal
+
   have hinConv : ∀ z : TangentSpace I x, gBase.inner x z z ≤ Λ * g₀.inner x z z := by
     intro z
     have hz := (hcomp x z).1
@@ -420,7 +390,7 @@ private theorem curvSup_of_diff
     exact mul_le_mul hstep1 (hinConv u) hbuu0 (mul_nonneg hΛg0vv hΛg0ww)
   have hP3_conv : P3 ≤ Λ ^ 3 * (g₀.inner x v v * g₀.inner x w w * g₀.inner x u u) := by
     refine le_trans hstep2 (le_of_eq ?_); ring
-  -- assemble
+
   calc g₀.inner x R0 R0
       ≤ Λ * gBase.inner x R0 R0 := hout
     _ ≤ Λ * ((Cd + Real.sqrt Kb) ^ 2 * P3) :=
@@ -432,7 +402,6 @@ private theorem curvSup_of_diff
     _ = (Λ ^ 2 * (Cd + Real.sqrt Kb)) ^ 2 *
           g₀.inner x v v * g₀.inner x w w * g₀.inner x u u := by ring
 
-/-- The arbitrary-`Λ` curvature bound with the fixed background cap supplied. -/
 theorem unifCurvSup_of
     (gBase g₀ : SmoothRiemannianMetric I M) {Λ Kb : ℝ} (hΛ : 1 ≤ Λ)
     (hKb0 : 0 ≤ Kb)
@@ -462,11 +431,6 @@ theorem unifCurvSup_of
         riemannDiff_gJet_le (I := I) (M := M) gBase g₀
           hEq hjet1 hjet2 (Set.mem_univ x) v w u)
 
-/-- The class-uniform order-zero curvature bound for arbitrary `Λ ≥ 1`.
-
-The witness depends only on `gBase`, `Λ`, and the two metric-jet bounds; it is
-obtained from the ungated finite-order Riemann-difference estimate rather than
-from a small perturbation or a telescoping path. -/
 theorem unifCurvSup
     (gBase g₀ : SmoothRiemannianMetric I M) {Λ : ℝ} (hΛ : 1 ≤ Λ)
     (hcomp : ∀ (x : M) (v : TangentSpace I x),

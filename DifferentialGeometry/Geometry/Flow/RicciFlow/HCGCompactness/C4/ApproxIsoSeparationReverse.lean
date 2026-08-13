@@ -2,19 +2,6 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.C4.ApproxIsoS
 
 set_option autoImplicit false
 
-
-
-
-
-
-
-
-
-
-
-
-
-
 noncomputable section
 
 universe u uE uH
@@ -45,10 +32,6 @@ section PartialDataComp
 open TopologicalSpace
 
 set_option backward.isDefEq.respectTransparency false in
-
-
-
-
 
 noncomputable def compSepRev [I.Boundaryless] [NeZero (Module.finrank Real E)]
     {P : Type u} [TopologicalSpace P] [ChartedSpace H P] [IsManifold I ∞ P]
@@ -536,7 +519,6 @@ noncomputable def compSepRev [I.Boundaryless] [NeZero (Module.finrank Real E)]
       pullback_apply := fun y hy v => hPrapply y (hKimg hy) v
       c0_small := fun y hy => le_trans (hc0Pr y hy) hc0_out
       cov_small := fun a h1 h2 y hy => le_trans (hcovPr a h1 h2 y hy) hcov_out }
-
 
 end PartialDataComp
 

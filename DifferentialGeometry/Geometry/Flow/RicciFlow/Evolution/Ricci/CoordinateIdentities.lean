@@ -2,12 +2,6 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.Ricci.CoordinateRe
 
 set_option autoImplicit false
 
-
-
-
-
-
-
 noncomputable section
 
 namespace DifferentialGeometry.PDE.RicciFlow
@@ -47,8 +41,6 @@ theorem coordNab2Reg
         mdiffAt := coordNablaRegOn (I := I) S x₀ }
   · exact coordNab2On (I := I) S x₀
 
-
-
 theorem coordInvSymmOn
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -75,8 +67,6 @@ theorem coordInvSymmOn
       (fun a b : CoordinateIdx (𝕜 := Real) E =>
         coordInv (I := I) S x₀ t x a b)
       hinvAt i j
-
-
 
 theorem coordRicSymmOn
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
@@ -105,8 +95,6 @@ theorem coordRicSymmOn
       hinvAt i j
   simpa [ricciCompInFrame, SolutionOn.ricciAt, SolutionFamily.ricciAt,
     IsLocalFrameOn.toBasisAt_coe] using hsym
-
-
 
 theorem canNablaSymmAt
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
@@ -173,8 +161,6 @@ theorem canNablaSymmAt
   rw [hleft, hright]
   exact hsymm
 
-
-
 theorem coordNablaSymmOn
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -186,13 +172,6 @@ theorem coordNablaSymmOn
   let frame := coordinateFrameAt (I := I) x₀
   simpa [nablaRicComp, frame] using
     canNablaSymmAt (I := I) S t x (frame a x) (frame i x) (frame j x)
-
-
-
-
-
-
-
 
 theorem canBianchiAt
     [I.Boundaryless]
@@ -240,12 +219,6 @@ theorem canBianchiAt
       DifferentialGeometry.Integral.Connection.metricRm04,
       DifferentialGeometry.Integral.Connection.metricRicci,
     DifferentialGeometry.Integral.Connection.metricScalarAt, basis, hframe, gInvAt] using hmetric
-
-
-
-
-
-
 
 theorem coordBianchiTr
     [I.Boundaryless]
@@ -297,13 +270,6 @@ theorem coordBianchiTr
   simpa [basis, gInvAt, nablaRicT, nablaRicComp, hframe,
     IsLocalFrameOn.toBasisAt_coe] using htraces
 
-
-
-
-
-
-
-
 theorem coordBianchiOn
     [I.Boundaryless]
     [IsManifold I (∞ + 1) M]
@@ -347,12 +313,6 @@ theorem coordBianchiOn
         simpa [nabla2Ric, nablaRic, frame] using
           (coordNab2On (I := I) S x₀) (t : Real) x hx d a i j)
       htrace
-
-
-
-
-
-
 
 theorem canHessAt
     [I.Boundaryless]
@@ -461,11 +421,6 @@ theorem canHessAt
           refine Finset.sum_congr rfl fun l _ => ?_
           rw [hcan j i k l]
 
-
-
-
-
-
 theorem coordHessOn
     [I.Boundaryless]
     [IsManifold I (∞ + 1) M]
@@ -481,11 +436,6 @@ theorem coordHessOn
   have hx' : x = x₀ := by simpa using hx
   subst x
   exact canHessAt (I := I) S x₀ (t : Real) i j
-
-
-
-
-
 
 theorem coordCommAt
     [I.Boundaryless]
@@ -671,11 +621,6 @@ theorem coordCommAt
     ricciCommLoc (I := I) S S.base.rm04 gInv frame ({x₀} : Set M)
       nabla2Ric hbianchi hHess hsecond
 
-
-
-
-
-
 omit [SigmaCompactSpace M] in
 theorem ricciEvolCore
     [IsManifold I (∞ + 1) M]
@@ -752,13 +697,6 @@ theorem ricciEvolCore
       hRicTrace hRm hcurv hmix)
     hcomm
 
-
-
-
-
-
-
-
 omit [SigmaCompactSpace M] in
 theorem ricciEvolutionEquationInCoordFrameAt_of_christoffelEvolution_nabla2_commutators
     [IsManifold I (∞ + 1) M]
@@ -814,8 +752,6 @@ theorem ricciEvolutionEquationInCoordFrameAt_of_christoffelEvolution_nabla2_comm
       (I := I) S hS gInv gInvDt nablaRic nabla2Ric Rm13 x₀ hmetricReg
       hnablaReg hRicTrace hRm hcurv hmix)
     hcomm
-
-
 
 omit [SigmaCompactSpace M] in
 theorem evol_ricci_coordFrameAt_of_christoffelEvolution_nabla2_commutators
@@ -880,13 +816,6 @@ theorem evol_ricci_coordFrameAt_of_christoffelEvolution_nabla2_commutators
       hnablaReg hRicTrace hRm hcurv hmix hcomm
   have hAt := h t x₀ (by simp) i j
   simpa [ricciEvolutionRHSInFrame] using hAt
-
-
-
-
-
-
-
 
 theorem coordRicciEvol
     [I.Boundaryless]

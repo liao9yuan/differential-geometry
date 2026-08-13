@@ -1,15 +1,6 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.UnifRemainderH1
 import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.LowRegCoreTame
 
-/-!
-# Uniform tame low-regularity Ricci--DeTurck core estimate
-
-This module transports the class-first remainder estimate to the spectral
-smooth nonlinearity and then to the dense lower-state core.  The radius and
-all three tame coefficients are selected from the fixed background metric and
-the order-three metric-class cap before the class metric varies.
--/
-
 noncomputable section
 
 open Bundle Manifold MeasureTheory Set Tensor0SBundle
@@ -44,9 +35,6 @@ private theorem smoothHs_eq_ccHs'
   ext i
   rw [smoothCcToTensorHs_coeff, ccTensorToHs_coeff]
 
-/-- The class-first remainder estimate in spectral form.  The radius and
-coefficient functions depend only on the fixed background and the metric-class
-cap, not on the class metric. -/
 theorem smoothN_h1_unif
     (hDim : Module.finrank ℝ E = 3)
     (gBase : SmoothRiemannianMetric I M) {Λ : ℝ} (hΛ : 1 ≤ Λ)
@@ -116,8 +104,6 @@ theorem smoothN_h1_unif
   rw [show (1 : ℝ) + 1 = 2 by norm_num,
     show (1 : ℝ) + 2 = 3 by norm_num]
 
-/-- The genuine Ricci--DeTurck nonlinearity on every dense lower-state core in
-the order-three metric class satisfies one common three-arm estimate. -/
 theorem coreN_tame_unif
     (hDim : Module.finrank ℝ E = 3)
     (gBase : SmoothRiemannianMetric I M) {Λ : ℝ} (hΛ : 1 ≤ Λ)

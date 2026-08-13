@@ -1,16 +1,6 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.LowRegDenseSolve
 import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.UnifCoreTame
 
-/-!
-# Class-first dense low-regularity tame extension
-
-This module freezes the class-first `coreN` constants at an outer coefficient
-radius and carries the resulting three-arm estimate through the dense
-extension to the complete lower-state ball.  All constants are selected from
-the fixed background, class parameter, and fibre threshold before the class
-metric varies.
--/
-
 set_option autoImplicit false
 
 noncomputable section
@@ -39,8 +29,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
   [IsManifold I ∞ M] [CompactSpace M] [I.Boundaryless]
   [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M]
 
-/-- A class-first core estimate may be frozen at an outer coefficient radius
-`Q` and then restricted to a smaller state ball `R`. -/
 theorem coreN_outer_unif
     (hDim : Module.finrank ℝ E = 3)
     (gBase : SmoothRiemannianMetric I M) {Λ : ℝ} (hΛ : 1 ≤ Λ)
@@ -117,9 +105,6 @@ theorem coreN_outer_unif
   rw [hxN, hyN] at hbound
   simpa only [xQ, yQ, xQ0, yQ0] using hbound
 
-/-- The class-first dense extension is continuous on the full lower-state ball
-and retains the outer-radius three-arm estimate with the same uniform
-constants. -/
 theorem lowRegN_outer_unif
     (hDim : Module.finrank ℝ E = 3)
     (gBase : SmoothRiemannianMetric I M) {Λ : ℝ} (hΛ : 1 ≤ Λ)

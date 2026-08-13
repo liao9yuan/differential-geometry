@@ -6,18 +6,6 @@ import Mathlib.Topology.Order.Compact
 
 set_option autoImplicit false
 
-
-
-
-
-
-
-
-
-
-
-
-
 noncomputable section
 
 namespace DifferentialGeometry.PDE.RicciFlow
@@ -32,9 +20,6 @@ variable {I : ModelWithCorners Real E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 variable [CompleteSpace E] [SigmaCompactSpace M] [T2Space M]
 
-
-
-
 def scalarLowerBarrier (n c0 : Real) (t : Real) : Real :=
   c0 / (1 - (2 / n) * c0 * t)
 
@@ -42,14 +27,12 @@ def scalarLowerBarrier (n c0 : Real) (t : Real) : Real :=
     scalarLowerBarrier n c0 0 = c0 := by
   simp [scalarLowerBarrier]
 
-
 def scalarLowerReaction (n : Real) (a _t : Real) : Real :=
   (2 / n) * a ^ 2
 
 theorem scalarLowerReaction_apply (n a t : Real) :
     scalarLowerReaction n a t = (2 / n) * a ^ 2 := by
   rfl
-
 
 theorem scalarLowerBarrier_hasDerivWithinAt
     (s : Set Real) (n c0 t : Real)
@@ -101,8 +84,6 @@ theorem scalarLowerReaction_locallyLipschitz (n t : Real) :
     fun_prop
   exact hcd.locallyLipschitz
 
-
-
 omit [TopologicalSpace M] [SigmaCompactSpace M] [T2Space M] in
 theorem exists_scalarLowerReaction_lipschitzOn_valueSet
     (n T : Real) (u : Real -> M -> Real) (c : Real -> Real)
@@ -121,14 +102,6 @@ theorem exists_scalarLowerReaction_lipschitzOn_valueSet
   refine ⟨K, ?_⟩
   intro t _ht
   simpa [scalarLowerReaction] using hK
-
-
-
-
-
-
-
-
 
 theorem scalar_curvature_lower_bound_of_parabolic_inequality
     [I.Boundaryless] [CompactSpace M]
@@ -194,7 +167,6 @@ theorem scalar_curvature_lower_bound_of_parabolic_inequality
   · intro x
     simpa using hinit x
 
-
 theorem scalar_curvature_positive_of_lower_barrier
     {n c0 t Rtx : Real}
     (hbound : scalarLowerBarrier n c0 t <= Rtx)
@@ -205,12 +177,8 @@ theorem scalar_curvature_positive_of_lower_barrier
     exact div_pos hc0 hden
   exact lt_of_lt_of_le hbar hbound
 
-
-
-
 def InitialScalarLowerBound (scalar : Real -> M -> Real) (c0 : Real) : Prop :=
   forall x : M, c0 <= scalar 0 x
-
 
 def InitialScalarMinimum (scalar : Real -> M -> Real) (c0 : Real) : Prop :=
   exists x0 : M, scalar 0 x0 = c0 /\ InitialScalarLowerBound (M := M) scalar c0
@@ -251,14 +219,6 @@ theorem exists_initialScalarMinimum_of_continuous
   exact ⟨scalar 0 x0,
     initialScalarMinimum_of_isMinOn (M := M) scalar rfl hmin⟩
 
-
-
-
-
-
-
-
-
 structure ScalarLowerBoundWMPRegularity
     (G : DifferentialGeometry.Integral.Connection.RealizedMetricFamily (I := I) (M := M) Real)
     (T n c0 : Real) (scalar : Real -> M -> Real) (K : NNReal) : Prop where
@@ -289,15 +249,6 @@ structure ScalarLowerBoundWMPRegularity
     ∀ x : M, MDiffAt (T% fun y : M =>
       DifferentialGeometry.Integral.Connection.gradientFun (I := I) (G.metric t)
         (fun z : M => scalar t z - scalarLowerBarrier n c0 t) y) x
-
-
-
-
-
-
-
-
-
 
 theorem scalarRegOfSmooth
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
@@ -380,11 +331,6 @@ theorem scalarRegOfSmooth
     exact hreg.scalar_grad_sub_const t (hsubset t ht)
       (scalarLowerBarrier n c0 t) x
 
-
-
-
-
-
 def ScalarEvolutionAllTimesOn
     (T : Real) (scalar scalarLap ricciNormSq : Real -> M -> Real) : Prop :=
   forall t : Real, t ∈ Set.Icc 0 T -> forall x : M,
@@ -392,12 +338,6 @@ def ScalarEvolutionAllTimesOn
       (fun s : Real => scalar s x)
       (scalarLap t x + 2 * ricciNormSq t x)
       (Set.Icc 0 T) t
-
-
-
-
-
-
 
 omit [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 theorem scalar_parabolic_inequality_of_scalarEvolution_allTimes
@@ -444,13 +384,6 @@ theorem scalar_parabolic_inequality_of_scalarEvolution_allTimes
     _ <= 2 * ricciNormSq t x := hscale
     _ = DifferentialGeometry.Integral.Connection.parabolicOperatorWithDrift (I := I) G T
           (fun _t x => (0 : TangentSpace I x)) scalar t x := hparabolic.symm
-
-
-
-
-
-
-
 
 omit [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 theorem scalar_parabolic_inequality_of_scalarEvolution_regularTime
@@ -524,9 +457,6 @@ theorem scalar_parabolic_inequality_of_scalarEvolutionAllTimes
     (I := I) G T n hT scalar scalarLap ricciNormSq
     hscalar hlap hricci
 
-
-
-
 omit [SigmaCompactSpace M] in
 @[deprecated "use a local or intrinsic scalar lower-bound route instead" (since := "2026-05-22")]
 theorem scalar_parabolic_inequality_of_scalarEvolutionAllTimes_inFrame
@@ -572,7 +502,6 @@ theorem scalar_parabolic_inequality_of_scalarEvolutionAllTimes_inFrame
     (scalarLaplacianTraceInFrame (M := M) gInv roughLapRic)
     (ricciNormSqInFrame (I := I) S gInv frame)
     hscalar hlap hricci
-
 
 theorem scalar_curvature_lower_bound_of_scalarEvolution
     [I.Boundaryless] [CompactSpace M]
@@ -638,7 +567,6 @@ theorem scalar_curvature_lower_bound_of_scalarEvolution
     hw_cont hw_mdiff hw_grad hscalar_time hscalar_space hdiff_space
     hdiff_grad hparabolic hinit hF_lip
 
-
 theorem scalar_curvature_lower_bound_of_scalarEvolution_of_regularity
     [I.Boundaryless] [CompactSpace M]
     [VectorBundle Real E (TangentSpace I : M -> Type _)]
@@ -669,10 +597,6 @@ theorem scalar_curvature_lower_bound_of_scalarEvolution_of_regularity
     hreg.weighted_cont hreg.weighted_mdiff hreg.weighted_grad
     hreg.scalar_time hreg.scalar_space hreg.diff_space hreg.diff_grad
     hevol hlap hricci hinit hF_lip
-
-
-
-
 
 theorem scalar_curvature_lower_bound_of_scalarEvolution_closedOpen
     [I.Boundaryless] [CompactSpace M]
@@ -716,8 +640,6 @@ theorem scalar_curvature_lower_bound_of_scalarEvolution_closedOpen
     (I := I) (D := DifferentialGeometry.Integral.Connection.RealTimeInterval.closedOpen 0 omega h0ω)
     G T n c0 hT hn scalar scalarLap ricciNormSq K
     hslab hregular hden hreg hevol hlap hricci hinit hF_lip
-
-
 
 theorem scalar_curvature_lower_bound_of_scalarEvolution_initialMinimum
     [I.Boundaryless] [CompactSpace M]
@@ -775,9 +697,6 @@ theorem scalar_curvature_lower_bound_of_scalarEvolution_initialMinimum
     hw_cont hw_mdiff hw_grad hscalar_time hscalar_space hdiff_space
     hdiff_grad hevol hlap hricci
     (InitialScalarMinimum.lowerBound (M := M) hinit) hF_lip
-
-
-
 
 @[deprecated "use a local or intrinsic scalar lower-bound route instead" (since := "2026-05-22")]
 theorem scalar_curvature_lower_bound_of_scalarEvolution_inFrame
@@ -872,8 +791,6 @@ theorem scalar_curvature_lower_bound_of_scalarEvolution_inFrame
     (ricciNormSqInFrame (I := I) S gInv frame) K hslab hregular hden
     hw_cont hw_mdiff hw_grad hscalar_time hscalar_space hdiff_space
     hdiff_grad hevol hlap hricci hinit hF_lip
-
-
 
 @[deprecated "use a local or intrinsic scalar lower-bound route instead" (since := "2026-05-22")]
 theorem scalar_curvature_lower_bound_of_scalarEvolution_inFrame_closedOpen

@@ -3,13 +3,6 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.C4.NormalBran
 
 set_option autoImplicit false
 
-/-!
-# Exact inverse convergence for H6 normal branches
-
-This file constructs the limiting normal phase and matched exact-inverse
-branch directly from convergent metrics in the `H6NormalData` chart family.
--/
-
 noncomputable section
 
 open Bundle Filter Manifold Set TopologicalSpace
@@ -33,8 +26,6 @@ attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
 
 namespace H6NormalData
 
-/-- The acceleration of a limiting H6 chart metric inherits the uniform
-stage Lipschitz and size bounds on a fixed H6 phase box. -/
 theorem limit_accel_bounds
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
     {hd : InjRadiusDecayInput (I := I) X}
@@ -169,8 +160,6 @@ theorem limit_accel_bounds
           (d.phaseRadius_metric (hc n)) (d.phaseRadius_chart (hc n))
           V z hz)
 
-/-- A sufficiently small phase ball for a limiting H6 chart metric admits a
-confined time-one phase family with a smooth retained endpoint. -/
 theorem exists_limit_phase
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
     {hd : InjRadiusDecayInput (I := I) X}
@@ -343,8 +332,6 @@ theorem exists_limit_phase
       (fun z : E × E ↦ z.1) _).prodMk hslice.fst
   exact ⟨ΦInf, hinit, hcurve, hstay, hzeroEnd, happ, hendSmooth⟩
 
-/-- The limiting H6 phase endpoint has a quantitative partial inverse with
-smooth forward and inverse branches. -/
 theorem exists_limit_diag
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
     {hd : InjRadiusDecayInput (I := I) X}
@@ -695,8 +682,6 @@ private theorem exists_stage_flow
     by simpa only [c] using hfence, hΦ0, hcurve, hstay, hcoe,
     by simpa only [b, d.chartPhaseK_eq] using hinvApprox⟩
 
-/-- Exact inverse branches of H6 stage endpoints converge on a smaller common
-target ball once a confined limiting phase and endpoint have been selected. -/
 theorem exists_diagInv_conv
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
     {hd : InjRadiusDecayInput (I := I) X}
@@ -871,9 +856,6 @@ theorem exists_diagInv_conv
     (lt_min hdelta hdeltaInf) htarget htargetInf
     hInf_cd' hInf_symm_cd' hbase
 
-/-- A prescribed H6 stage radius with the retained phase budgets admits a
-matched limiting branch at half radius, with forward and exact-inverse
-convergence through the same H6 chart family. -/
 theorem exists_diagPair_at
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
     {hd : InjRadiusDecayInput (I := I) X}

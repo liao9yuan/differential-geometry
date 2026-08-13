@@ -5,16 +5,6 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.UnifAppH22
 import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.UnifCoeffH2
 import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.UnifFixedConnH2
 
-/-!
-# Low-regularity order-one DeTurck Lie coefficient
-
-This file proves the dimension-three `H2` jet estimate for the concrete
-order-one DeTurck Lie coefficient.  The proof first performs the exact
-connection-difference cancellations in the lowered `kappa` arm.  Consequently
-the third metric derivative occurs only once, while all inverse-metric and
-other multiplicative factors are controlled by the lower `H2` radius.
--/
-
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
@@ -322,8 +312,6 @@ private theorem symm_norm_le
   rw [perm_norm_eq (I := I) (M := M) g (Equiv.swap (0 : Fin 2) 1) T j]
   linarith [norm_nonneg (iteratedCovGrad (I := I) g 0 2 j T)]
 
-/-- The fixed background connection passenger in the order-one DeTurck Lie
-coefficient has one class-first intrinsic `H2` bound. -/
 theorem lieFix_h2_unif
     (hDim : Module.finrank ℝ E = 3)
     (gBase : SmoothRiemannianMetric I M) {Λ : ℝ} (hΛ : 1 ≤ Λ) :
@@ -344,8 +332,6 @@ theorem lieFix_h2_unif
   simpa only [iteratedCovGrad_neg, norm_neg] using
     hfix g₀ hEq hjet1 hjet2 hjet3
 
-/-- The fixed-background lower pullback correction has a class-first intrinsic
-`H2` bound depending only on the perturbation's `H2` radius. -/
 theorem pbLow_h2_unif
     (hDim : Module.finrank ℝ E = 3)
     (gBase : SmoothRiemannianMetric I M) {Λ : ℝ} (hΛ : 1 ≤ Λ) :
@@ -422,9 +408,6 @@ theorem pbLow_h2_unif
   rw [heq]
   simpa only [B] using hout
 
-/-- In dimension three, the full moving-metric lowered connection difference
-relative to a fixed background has a class-uniform `H1` bound controlled by the
-low metric `H2` size. -/
 theorem kappaBg_h1_unif
     (hDim : Module.finrank ℝ E = 3)
     (gBase : SmoothRiemannianMetric I M) {Λ : ℝ} (hΛ : 1 ≤ Λ) :
@@ -1168,9 +1151,6 @@ private theorem piece_h2_const
         (Real.sqrt ((Module.finrank ℝ E : ℝ) ^ 2) * Q)) ^ 2 := by
       rfl
 
-/-- A moving trace coefficient and an order-one passenger with class-first
-intrinsic `H2` bounds produce the corresponding Lie piece with a class-first
-intrinsic `H2` bound. -/
 theorem piece_h2_unif
     (hDim : Module.finrank ℝ E = 3)
     (gBase : SmoothRiemannianMetric I M) {Λ : ℝ} (hΛ : 1 ≤ Λ) :
@@ -1227,10 +1207,6 @@ theorem piece_h2_unif
         (Real.sqrt ((Module.finrank ℝ E : ℝ) ^ 2) * Q)) ^ 2 := by
       rfl
 
-/-- On a closed three-manifold, the concrete order-one DeTurck Lie
-coefficient has a tame intrinsic `H2` bound.  Its lower coefficients depend
-only on the perturbation `H2` radius, and the third metric derivative enters
-affinely after the exact self-background connection cancellation. -/
 theorem lie1_h2_tame
     (hDim : Module.finrank ℝ E = 3)
     (g₀ gB : SmoothRiemannianMetric I M)
@@ -1547,10 +1523,7 @@ theorem lie1_h2_tame
   simpa only [Q9] using hAll
 
 set_option maxHeartbeats 800000 in
-/-- On a closed three-manifold, the concrete order-one DeTurck Lie
-coefficient has a class-first tame intrinsic `H2` bound.  Its coefficient
-functions are selected from the fixed background, the uniform metric class,
-and the fibre-smallness ceiling before the class metric varies. -/
+
 theorem lie1_h2_unif
     (hDim : Module.finrank ℝ E = 3)
     (gBase : SmoothRiemannianMetric I M) {Λ : ℝ} (hΛ : 1 ≤ Λ)
@@ -1880,7 +1853,6 @@ theorem lie1_h2_unif
   rw [← hfactor]
   simpa only [Q9] using hAll
 
-/-- One-parameter compatibility wrapper around `lie1_h2_tame`. -/
 theorem lie1_h2
     (hDim : Module.finrank ℝ E = 3)
     (g₀ gB : SmoothRiemannianMetric I M)

@@ -2,15 +2,6 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.C4.HatSourceC
 
 set_option autoImplicit false
 
-
-
-
-
-
-
-
-
-
 noncomputable section
 
 universe u uE uH
@@ -143,10 +134,6 @@ theorem hatPtsOfCompact
   refine ⟨N, fun a ha b hb x hxsrc hxhat => ?_⟩
   exact hN a ha b hb x (hsub ⟨hxsrc, hxhat⟩)
 
-
-
-
-
 omit [FiniteDimensional ℝ E] in
 theorem hatChartPts
     [FiniteDimensional Real E]
@@ -278,10 +265,6 @@ theorem hatChartPts
   refine ⟨N, fun a ha b hb x hxsrc hxhat => ?_⟩
   exact hN a ha b hb x ⟨hxsrc, hxhat⟩
 
-
-
-
-
 omit [FiniteDimensional ℝ E] in
 theorem hatChartPtsSrcK
     [FiniteDimensional Real E]
@@ -389,9 +372,6 @@ theorem hatChartPtsSrcK
       (hclose gamma) eps heps
   refine ⟨N, fun a ha b hb x hxsrc hxhat => ?_⟩
   exact hN a ha b hb x ⟨hxsrc, hxhat⟩
-
-
-
 
 end NetLimitData
 

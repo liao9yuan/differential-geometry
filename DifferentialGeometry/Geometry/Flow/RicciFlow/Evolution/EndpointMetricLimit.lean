@@ -6,16 +6,6 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.MetricCovDeri
 import DifferentialGeometry.Tensor.RSTensor.Tensor0SRiemannian.Comparison
 import Mathlib.Topology.Order.IsLUB
 
-
-
-
-
-
-
-
-
-
-
 noncomputable section
 
 namespace DifferentialGeometry.PDE.RicciFlow
@@ -36,9 +26,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
 variable [IsManifold I ∞ M] [IsManifold I 1 M] [IsManifold I 2 M]
 variable [SigmaCompactSpace M] [T2Space M] [CompactSpace M]
     [BoundarylessManifold I M]
-
-
-
 
 theorem exists_endMetric
     {alpha omega : Real} {hAlphaOmega : alpha < omega}

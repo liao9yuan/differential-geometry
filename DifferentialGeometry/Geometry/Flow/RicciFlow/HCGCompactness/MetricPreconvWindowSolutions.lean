@@ -6,13 +6,6 @@ import DifferentialGeometry.Geometry.Operator.RoughLaplacian
 set_option autoImplicit false
 set_option backward.isDefEq.respectTransparency false
 
-
-
-
-
-
-
-
 namespace DifferentialGeometry
 namespace HCGCompactness
 
@@ -33,8 +26,6 @@ variable [IsManifold I 1 M] [IsManifold I 2 M]
 variable [VectorBundle Real E (TangentSpace I : M -> Type _)]
 variable [ContMDiffVectorBundle 1 E (TangentSpace I : M -> Type _) I]
 
-
-
 def SolSwapData
     (gRef : SmoothRiemannianMetric I M)
     (D : Nat -> RealTimeInterval)
@@ -48,7 +39,6 @@ def SolSwapData
         (fun a : Fin (p' + 2) => V a y))
       (fun r y => (covDerivOfField (I := I) gRef (solnEvolField (I := I) (S i) r) p') y
         (fun a : Fin (p' + 2) => V a y))
-
 
 structure SolCovData
     (β ψ t0 : Real)
@@ -75,7 +65,6 @@ structure SolCovData
           metricCovDerivNorm (I := I) r (gSeq i t0) gRef x <= initC r) /\
         (forall t : Real, t ∈ Set.Icc β ψ -> |t - t0| <= timeRadius)
 
-
 structure SolLipData
     (K : Set M) (β ψ : Real) (p : Nat)
     (gSeq : Nat -> Real -> SmoothRiemannianMetric I M)
@@ -99,7 +88,6 @@ structure SolLipData
         0 <= CN /\
         MetricCovDerivOrderBoundOnWindow (I := I) K β ψ gSeq gRef a CN
 
-
 structure SolLip0Data
     (K : Set M) (beta psiT : Real)
     (gSeq : Nat -> Real -> SmoothRiemannianMetric I M)
@@ -119,7 +107,6 @@ structure SolLip0Data
         (Tensor0SBundle.normSq0S (I := I) (gSeq i t) x 2
           (ricCovTower (I := I) (gSeq i t) (gSeq i t) 0 x)) <= KShi0
 
-
 def SolLowData
     (beta psiT : Real)
     (gSeq : Nat -> Real -> SmoothRiemannianMetric I M)
@@ -127,8 +114,6 @@ def SolLowData
   forall rho : Nat -> Nat, StrictMono rho -> forall t, t ∈ Set.Icc beta psiT ->
     exists c : Real, 0 < c /\ forall (k : Nat) (x : M) (v : TangentSpace I x),
       c * gRef.inner x v v <= (gSeq (rho k) t).inner x v v
-
-
 
 inductive SolWindowData : Type _ where
   | mk
@@ -147,7 +132,6 @@ inductive SolWindowData : Type _ where
       (Hlip : SolLipData (I := I) K beta psiT p gSeq gRef D S)
       (hlow : SolLowData (I := I) beta psiT gSeq gRef)
 
-
 inductive WindowMetricPreconvConclusion : Type _ where
   | intro
       (K : Set M) (beta psiT : Real) (p : Nat)
@@ -165,7 +149,6 @@ private lemma metricTensorField_eq_metricTensor0S
       metricTensor0S (I := I) g x := by
   ext v
   rw [Tensor0SBundle.metricTensorField_apply, metricTensor0S_apply]
-
 
 omit [Module.Finite ℝ E] in
 omit [I.Boundaryless] [SigmaCompactSpace M] [IsManifold I 2 M]
@@ -219,7 +202,6 @@ theorem covZeroBdd
   rw [hcov]
   exact le_trans hcomp (by rw [hself])
 
-
 omit [Module.Finite ℝ E] in
 omit [SigmaCompactSpace M] in
 theorem covBddAllSol
@@ -254,8 +236,6 @@ theorem covBddAllSol
       hDreg initC hinitC0 hinit timeRadius htime
     obtain ⟨C, hC⟩ := horders q.succ hq le_rfl
     exact ⟨C, fun k z hz => hC (rho k) t ht z hz⟩
-
-
 
 omit [Module.Finite ℝ E] in
 omit [I.Boundaryless] [ContMDiffVectorBundle 1 E (TangentSpace I : M → Type _) I] in
@@ -326,7 +306,6 @@ theorem hgLip0Sol
                 (mul_le_mul_of_nonneg_left hshi (Real.sqrt_nonneg _)) (by norm_num))
     s hs t ht x hx
 
-
 omit [Module.Finite ℝ E] in
 omit [I.Boundaryless] in
 omit [SigmaCompactSpace M] in
@@ -394,8 +373,6 @@ theorem hgLipFinSol
     exact le_trans (hspec.2 i s hs t ht x hx)
       (mul_le_mul_of_nonneg_right hchosen habs_nonneg)
 
-
-
 theorem denseIccSeq {beta psiT : Real} (hbeta : beta <= psiT) :
     exists e : Nat -> Real,
       (forall n : Nat, e n ∈ Set.Icc beta psiT) /\
@@ -414,8 +391,6 @@ theorem denseIccSeq {beta psiT : Real} (hbeta : beta <= psiT) :
     obtain ⟨n, hn⟩ := hdenseX.exists_dist_lt tx hdelta
     refine ⟨n, ?_⟩
     simpa [tx, eX, X, Subtype.dist_eq, Real.dist_eq] using hn
-
-
 
 omit [Module.Finite ℝ E] in
 theorem winGInfOfSol
@@ -450,7 +425,6 @@ theorem winGInfOfSol
   exact windowGInfOut (E := E) (H := H) (I := I) (M := M)
     hne K hK beta psiT p gSeq gRef e he hdense
     L hL hgLip (covBddAllSol (I := I) hS hmet hreg Hcov) hlow'
-
 
 noncomputable def winGInfOfData (hne : Nonempty M)
     (W : SolWindowData (I := I) (M := M)) :

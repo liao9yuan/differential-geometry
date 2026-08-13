@@ -2,12 +2,6 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.Scalar.Basic
 
 set_option autoImplicit false
 
-
-
-
-
-
-
 noncomputable section
 
 namespace DifferentialGeometry.PDE.RicciFlow
@@ -48,10 +42,6 @@ omit [SigmaCompactSpace M] [T2Space M] in
         gInv t x i j * ricciCompInFrame (I := I) S frame t x i j := by
   rfl
 
-
-
-
-
 theorem trace_sq_le_card_mul_sum_sq_two
     (A : Idx -> Idx -> Real) :
     (∑ i : Idx, A i i) ^ 2 <=
@@ -72,8 +62,6 @@ theorem trace_sq_le_card_mul_sum_sq_two
       (fun j _hj => sq_nonneg (A i j)) (Finset.mem_univ i)
   exact hcs.trans (mul_le_mul_of_nonneg_left hdiag (Nat.cast_nonneg _))
 
-
-
 theorem trace_sq_div_rank_le_sum_sq_two
     [Nonempty Idx] (A : Idx -> Idx -> Real) :
     (1 / (Fintype.card Idx : Real)) * (∑ i : Idx, A i i) ^ 2 <=
@@ -90,8 +78,6 @@ theorem trace_sq_div_rank_le_sum_sq_two
     simpa [mul_comm, mul_left_comm, mul_assoc] using h
   simpa [div_eq_mul_inv, one_div, mul_comm, mul_left_comm, mul_assoc] using hdiv
 
-
-
 def scalarTraceDerivRHSInFrame
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -106,8 +92,6 @@ def scalarTraceDerivRHSInFrame
       gInv t x i j *
         ricciEvolutionRHSInFrame (I := I) S Rm04 gInv frame roughLapRic t x i j)
 
-
-
 def ScalarLaplacianTraceInFrame
     (gInv : Real -> DifferentialGeometry.Integral.Connection.InverseMetricComponents M Idx)
     (roughLapRic : Real -> M -> Idx -> Idx -> Real)
@@ -115,8 +99,6 @@ def ScalarLaplacianTraceInFrame
   ∀ t x,
     scalarLap t x =
       ∑ i : Idx, ∑ j : Idx, gInv t x i j * roughLapRic t x i j
-
-
 
 def scalarLaplacianTraceInFrame
     (gInv : Real -> DifferentialGeometry.Integral.Connection.InverseMetricComponents M Idx)
@@ -133,8 +115,6 @@ omit [TopologicalSpace M] [SigmaCompactSpace M] [T2Space M] in
       ∑ i : Idx, ∑ j : Idx, gInv t x i j * roughLapRic t x i j := by
   rfl
 
-
-
 omit [TopologicalSpace M] [SigmaCompactSpace M] [T2Space M] in
 theorem scalarLaplacianTraceInFrame_realizes
     (gInv : Real -> DifferentialGeometry.Integral.Connection.InverseMetricComponents M Idx)
@@ -143,9 +123,6 @@ theorem scalarLaplacianTraceInFrame_realizes
       (scalarLaplacianTraceInFrame (M := M) gInv roughLapRic) := by
   intro t x
   rfl
-
-
-
 
 omit [SigmaCompactSpace M] [T2Space M] in
 theorem scalarLaplacianTraceInFrame_realizes_heatOperator_of_laplacianAt
@@ -167,12 +144,6 @@ theorem scalarLaplacianTraceInFrame_realizes_heatOperator_of_laplacianAt
     (I := I) (G := G) (T := T)
     (scalar := scalarTraceInFrame (I := I) S gInv frame)
     (scalarLap := scalarLaplacianTraceInFrame (M := M) gInv roughLapRic) h
-
-
-
-
-
-
 
 omit [SigmaCompactSpace M] [T2Space M] in
 @[deprecated "use a local or pointwise scalar trace statement instead" (since := "2026-05-22")]
@@ -243,8 +214,6 @@ theorem scalarLaplacianTraceInFrame_realizes_heatOperator_of_hessianTrace
         unfold DifferentialGeometry.Integral.Connection.laplacianAt
         exact htrace_tx.symm
 
-
-
 def RicciTraceNormCauchySchwarzInFrame
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -254,8 +223,6 @@ def RicciTraceNormCauchySchwarzInFrame
   forall t : Real, forall x : M,
     (1 / n) * (scalarTraceInFrame (I := I) S gInv frame t x) ^ 2 <=
       ricciNormSqInFrame (I := I) S gInv frame t x
-
-
 
 omit [SigmaCompactSpace M] [T2Space M] in
 theorem scalar_metricInverseInBasis_of_solution_frame
@@ -277,8 +244,6 @@ theorem scalar_metricInverseInBasis_of_solution_frame
       (hinv t x hx i j).1
   · simpa [metricCompInFrame, IsLocalFrameOn.toBasisAt_coe] using
       (hinv t x hx i j).2
-
-
 
 omit [SigmaCompactSpace M] in
 theorem scalarTraceInFrame_eq_metricTracePair
@@ -306,8 +271,6 @@ theorem scalarTraceInFrame_eq_metricTracePair
     (I := I) (S.family.metric t) basis (fun i j : Idx => gInv t x i j) hinvAt]
   simp [scalarTraceInFrame, ricciCompInFrame, basis, IsLocalFrameOn.toBasisAt_coe]
 
-
-
 omit [SigmaCompactSpace M] in
 theorem ricciNormSqInFrame_eq_normSq0S
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
@@ -332,8 +295,6 @@ theorem ricciNormSqInFrame_eq_normSq0S
   exact ricciNormSq_basis (I := I) S gInv frame basis hinvAt
     (by intro i; simp [basis, IsLocalFrameOn.toBasisAt_coe])
 
-
-
 omit [SigmaCompactSpace M] [T2Space M] in
 theorem raisedRicciCompInFrame_eq_of_orthonormal_inv
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
@@ -352,8 +313,6 @@ theorem raisedRicciCompInFrame_eq_of_orthonormal_inv
     ricciTwoTensorField
   simp [hInvDelta]
 
-
-
 omit [SigmaCompactSpace M] [T2Space M] in
 theorem scalarTraceInFrame_eq_trace_of_orthonormal_inv
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
@@ -369,7 +328,6 @@ theorem scalarTraceInFrame_eq_trace_of_orthonormal_inv
   classical
   unfold scalarTraceInFrame
   simp [hInvDelta]
-
 
 omit [SigmaCompactSpace M] [T2Space M] in
 theorem ricciNormSqInFrame_eq_sum_sq_of_orthonormal_inv
@@ -397,7 +355,6 @@ theorem ricciNormSqInFrame_eq_sum_sq_of_orthonormal_inv
   simp [ricciTwoTensorField, ricciCompInFrame]
   ring
 
-
 omit [SigmaCompactSpace M] [T2Space M] in
 theorem ricciNormSqInFrame_ge_scalarTrace_sq_div_rank_of_orthonormal_inv
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
@@ -421,8 +378,6 @@ theorem ricciNormSqInFrame_ge_scalarTrace_sq_div_rank_of_orthonormal_inv
 
 namespace RicciTraceNormCauchySchwarzInFrame
 
-
-
 omit [SigmaCompactSpace M] [T2Space M] in
 theorem of_orthonormal_inv
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
@@ -439,8 +394,6 @@ theorem of_orthonormal_inv
   intro t x
   exact ricciNormSqInFrame_ge_scalarTrace_sq_div_rank_of_orthonormal_inv
     (I := I) S gInv frame hInvDelta t x
-
-
 
 omit [SigmaCompactSpace M] in
 @[deprecated "use a local or pointwise frame statement instead" (since := "2026-05-22")]

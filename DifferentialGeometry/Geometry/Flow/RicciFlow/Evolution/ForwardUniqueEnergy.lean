@@ -6,47 +6,6 @@ set_option autoImplicit false
 set_option linter.style.longLine false
 set_option linter.unusedSectionVars false
 
-/-!
-# The Kotschwar forward-uniqueness energy and its exact first variation (Route-K brick K3)
-
-`ForwardUniqueFields.lean` supplies the three covariant difference carriers `h₀₂`, `A₀₃`,
-`S₀₄` and their `g₁`-squared norms `metricDiffSq`, `connDiffSq`, `rmDiffSq`.  This file
-assembles them into the Kotschwar energy of `ShortTime/FORWARD_UNIQUE_PRO_RULING.md` §3–§5,
-
-`E(t) = ∫_M (|h₀₂|² + |A₀₃|² + |S₀₄|²)_{g₁(t)} dμ_{g₁(t)}`,
-
-and differentiates it exactly.  **No estimate is proved here**: the whole content is the
-three moving-norm derivatives, the moving-volume derivative, and differentiation under the
-compact integral.  The Grönwall-facing estimate `forwardUniqueRate ≤ K · E − κ · D` is a
-separate brick.
-
-## Main definitions
-
-* `movingReact0S g x s Q W` — the rank-uniform metric-variation ("reaction") term in the
-  time derivative of `normSq0S g x s W` when the carrier satisfies `∂ₜg = −2Q`.
-* `forwardUniqueDensity g₁ g₂ t x` — the energy density `|h₀₂|² + |A₀₃|² + |S₀₄|²`.
-* `forwardUniqueEnergy g₁ g₂` — the energy, integrated against the moving volume `dμ_{g₁ t}`.
-* `metricDiffDot g₁ g₂ t x` — `∂ₜh₀₂ = −2(Ric₁ − Ric₂)`, the one carrier speed that the
-  Ricci-flow equations alone determine.
-* `forwardUniqueDensityDot`, `forwardUniqueRate` — the exact pointwise and integrated rates.
-
-## Main results
-
-* `normSq0S_moving_deriv` — the rank-uniform invariant moving-norm time derivative.
-* `metricDiff_hasDerivAt` — `∂ₜh₀₂` from the two Ricci-flow equations.
-* `density_hasDerivAt` — the exact pointwise derivative of the energy density.
-* `forwardUniqueEnergy_hasDerivAt` — `HasDerivAt (forwardUniqueEnergy g₁ g₂) (forwardUniqueRate …) t`.
-
-## Hypothesis discipline
-
-The metric difference's carrier speed is determined by the two flows, so `metricDiffDot` is a
-`def`, not an argument.  The connection- and curvature-difference speeds are **not** determined
-by the metric equations; they are supplied as explicit arguments `Adot`, `Sdot` together with
-plain `∀`-quantified `HasDerivAt` hypotheses, exactly as K1/K2 will produce them.  This is why
-`forwardUniqueRate` carries `Adot` and `Sdot` in its signature — the same way `movingRate`
-carries its background metric.
--/
-
 noncomputable section
 
 namespace DifferentialGeometry.PDE.RicciFlow
@@ -66,19 +25,6 @@ variable [CompleteSpace E] [SigmaCompactSpace M] [T2Space M]
 
 section MovingNorm
 
-/-! ## The rank-uniform moving-norm time derivative
-
-`Tensor0SBundle.hasDerivWithinAt_normSq0S_ricciFlow` is already rank-uniform, but it is
-stated in a chosen tangent basis with component arrays.  The two lemmas below package it
-invariantly: `movingReact0S` names the metric-variation term and `normSq0S_moving_deriv`
-states the product rule with both inputs invariant.  Only the canonical finite basis
-`Module.finBasis` occurs, and only inside the definition. -/
-
-/-- The **rank-uniform moving-metric reaction**: the metric-variation contribution to
-`∂ₜ (normSq0S g x s W)` when the carrier metric evolves by `∂ₜg = −2Q`.  It is the
-inverse-metric contraction `ricReactionContract` of `Q` against `W ⊗ W`, evaluated in the
-canonical finite tangent basis; `normSq0S_moving_deriv` identifies it as a genuine
-derivative, so the choice of basis is immaterial. -/
 def movingReact0S (g : SmoothRiemannianMetric I M) (x : M) (s : Nat)
     (Q : Tensor0SSpace 2 I x) (W : Tensor0SSpace s I x) : Real :=
   ricReactionContract
@@ -94,15 +40,6 @@ def movingReact0S (g : SmoothRiemannianMetric I M) (x : M) (s : Nat)
       tensor0SComponent (I := I) W
         (fun i => Module.finBasis Real (TangentSpace I x) i) J0)
 
-/-- **Rank-uniform invariant moving-norm time derivative.**  If the carrier metric family
-satisfies `∂ₜg = −2Q` at `t` and the `(0,s)` fiber family `T` has time derivative `Tdot`,
-then
-
-`∂ₜ (normSq0S (g t) x s (T t)) = movingReact0S (g t) x s Q (T t) + 2 ⟪Tdot, T t⟫`.
-
-Both hypotheses and both conclusion terms are basis free.  This is the rank-`s` form of the
-`(0,2)` pattern used by the moving Ricci–DeTurck energy; ranks `2`, `3`, `4` are what the
-three Kotschwar carriers need. -/
 theorem normSq0S_moving_deriv {s : Nat} {x : M} {t : Real}
     (g : Real → SmoothRiemannianMetric I M)
     (Q : Tensor0SSpace 2 I x)
@@ -177,21 +114,11 @@ end MovingNorm
 
 section Carriers
 
-/-! ## The one carrier speed determined by the two flows
-
-Under `∂ₜg₁ = −2Ric₁` and `∂ₜg₂ = −2Ric₂` the metric-difference carrier evolves by
-`∂ₜh₀₂ = −2(Ric₁ − Ric₂)`, a zero-order expression in the two Ricci tensors.  The
-connection- and curvature-difference speeds are *not* determined this way; they are the
-K1/K2 outputs and enter the energy derivative as supplied arguments. -/
-
-/-- `∂ₜh₀₂ = −2(Ric₁ − Ric₂)`, as a `(0,2)` fiber tensor built from the two canonical
-metric Ricci tensors. -/
 def metricDiffDot (g₁ g₂ : Real → SmoothRiemannianMetric I M) (t : Real) (x : M) :
     Tensor0SSpace 2 I x :=
   (-2 : Real) •
     (metricRicciAt (I := I) (g₁ t) x - metricRicciAt (I := I) (g₂ t) x)
 
-/-- The time derivative of the metric-difference carrier `h₀₂` under the two Ricci flows. -/
 theorem metricDiff_hasDerivAt
     (g₁ g₂ : Real → SmoothRiemannianMetric I M) {x : M} {t : Real}
     (hPDE₁ : ∀ X Y : TangentSpace I x,
@@ -251,28 +178,15 @@ private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
-/-! ## The energy, its density, and the exact rate -/
-
-/-- The Kotschwar energy density `|h₀₂|² + |A₀₃|² + |S₀₄|²`, all three norms taken in the
-moving carrier `g₁ t`. -/
 def forwardUniqueDensity (g₁ g₂ : Real → SmoothRiemannianMetric I M) (t : Real) (x : M) :
     Real :=
   metricDiffSq (I := I) (g₁ t) (g₂ t) x + connDiffSq (I := I) (g₁ t) (g₂ t) x +
     rmDiffSq (I := I) (g₁ t) (g₂ t) x
 
-/-- **The Kotschwar forward-uniqueness energy**
-`E(t) = ∫_M (|h₀₂|² + |A₀₃|² + |S₀₄|²)_{g₁(t)} dμ_{g₁(t)}`.
-
-The measure is the moving Riemannian volume of the carrier `g₁`, so that one metric supplies
-the connection, the fiber inner product, and the measure simultaneously. -/
 def forwardUniqueEnergy (g₁ g₂ : Real → SmoothRiemannianMetric I M) (t : Real) : Real :=
   ∫ x, forwardUniqueDensity (I := I) g₁ g₂ t x
     ∂(riemannianMeasureFamily (I := I) (M := M) g₁ t)
 
-/-- The exact pointwise time derivative of the energy density: for each of the three
-carriers, its moving-metric reaction plus twice its pairing with its own speed.  Only the
-metric-difference speed is computed (`metricDiffDot`); the connection- and
-curvature-difference speeds `Adot`, `Sdot` are supplied. -/
 def forwardUniqueDensityDot
     (g₁ g₂ : Real → SmoothRiemannianMetric I M)
     (Adot : Real → (x : M) → Tensor0SSpace 3 I x)
@@ -291,10 +205,6 @@ def forwardUniqueDensityDot
     2 * inner0S (I := I) (g₁ t) x 4 (Sdot t x)
       (rmDiffLowAt (I := I) (g₁ t) (g₂ t) x))
 
-/-- **The exact energy rate.**  The integrand is the pointwise density derivative plus the
-moving-volume term `½ tr_{g₁}(∂ₜg₁) · density`; under Ricci flow the latter factor is
-`−scal(g₁)`, but no such identification is used here.  No estimate is involved: this is
-literally the derivative produced by `forwardUniqueEnergy_hasDerivAt`. -/
 def forwardUniqueRate
     (g₁ g₂ : Real → SmoothRiemannianMetric I M)
     (Adot : Real → (x : M) → Tensor0SSpace 3 I x)
@@ -305,8 +215,6 @@ def forwardUniqueRate
         forwardUniqueDensity (I := I) g₁ g₂ t x
     ∂(riemannianMeasureFamily (I := I) (M := M) g₁ t)
 
-/-- The exact pointwise derivative of the energy density: three applications of
-`normSq0S_moving_deriv` with the common carrier speed `Q = Ric₁`. -/
 theorem density_hasDerivAt
     (g₁ g₂ : Real → SmoothRiemannianMetric I M)
     (Adot : Real → (x : M) → Tensor0SSpace 3 I x)
@@ -356,15 +264,6 @@ theorem density_hasDerivAt
       (fun r => rmDiffLowAt (I := I) (g₁ r) (g₂ r) x) (Sdot t x) hPDE₁ hS
   exact (hh.add hA').add hS'
 
-/-- **Exact first variation of the Kotschwar forward-uniqueness energy.**
-
-On an open time window `U` the energy is differentiable with derivative exactly
-`forwardUniqueRate`.  The hypotheses are: joint chart-Gram smoothness of the *carrier*
-`g₁` (this is what the moving volume measure needs), joint smoothness of the scalar energy
-density (the regularity input for differentiating under the compact integral), the two
-Ricci-flow equations, and the two supplied carrier speeds for `A₀₃` and `S₀₄`.
-
-No estimate occurs: cf. `forwardUniqueRate_le`, which is the separate analytic brick. -/
 theorem forwardUniqueEnergy_hasDerivAt
     (g₁ g₂ : Real → SmoothRiemannianMetric I M)
     (Adot : Real → (x : M) → Tensor0SSpace 3 I x)

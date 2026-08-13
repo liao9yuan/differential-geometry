@@ -3,15 +3,6 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.LowRegBgTime
 import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.LowRegBgA1Refold
 import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.LowRegBgA2Time
 
-/-!
-# Metricwise coefficient certificate for the fixed-background lift
-
-The scalar data in `BgLiftData` is chosen before the class metric varies.  This
-module keeps the subsequently constructed A1 maps separate from their proof
-certificate and records exactly the durable facts consumed by the adjacent-
-scale realization.
--/
-
 noncomputable section
 
 open Bundle Manifold MeasureTheory Set Filter
@@ -34,9 +25,6 @@ variable
       [IsManifold I ∞ M] [CompactSpace M] [I.Boundaryless]
       [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M]
 
-/-- The two completed first-order maps constructed after the class metric is
-known.  Proofs of continuity, core agreement, bounds, and compatibility live
-in `IsBgLiftAt`. -/
 structure BgLiftOps (g : SmoothRiemannianMetric I M) where
   a1Hi : tensorHs (I := I) (M := M) g 0 2 (3 : ℝ) →
     (tensorHs (I := I) (M := M) g 0 2 (3 : ℝ) →L[ℝ]
@@ -45,12 +33,6 @@ structure BgLiftOps (g : SmoothRiemannianMetric I M) where
     (tensorHs (I := I) (M := M) g 0 2 (2 : ℝ) →L[ℝ]
       tensorHs (I := I) (M := M) g 0 2 (1 : ℝ))
 
-/-- The class bound's realization certificate in the `ccTensorToHs` spelling
-used by the low-base coefficient layer, on the full class radius `K.realize`.
-
-This is the radius-maximal form, available before any `BgLiftData` is chosen,
-so a per-metric producer may run the coefficient machinery once and only then
-restrict to a lift datum's smaller coefficient radius. -/
 theorem IsLowBoundsAt.realizeCc
     {g gB : SmoothRiemannianMetric I M}
     {K : LowRegBoundData}
@@ -70,8 +52,6 @@ theorem IsLowBoundsAt.realizeCc
 
 namespace BgLiftData
 
-/-- Restrict the low-bound realization certificate to the coefficient radius
-stored in the class-first lift data. -/
 theorem realize
     {g gB : SmoothRiemannianMetric I M}
     {K : LowRegBoundData} (D : BgLiftData K)
@@ -85,17 +65,6 @@ theorem realize
 
 end BgLiftData
 
-/-- Metricwise **second-order** coefficient certificate at the scalar bounds
-fixed by `BgLiftData`.
-
-The A2 maps are the canonical completed maps `lowA2HiBg` and `lowA2LoBg`, so
-this half is pure proof content: it mentions no `BgLiftOps` data.  The core
-identity uses the actual fixed-background bundle `lowCoreDataBg`; no
-self-background refold identity is assumed.
-
-Split off from `IsBgLiftAt` so that the A2 contraction constant — whose
-class-uniform completion constant is still an open producer — does not block
-the independently workable A1 half (`IsBgA1At`). -/
 structure IsBgA2At
     (g gB : SmoothRiemannianMetric I M)
     (K : LowRegBoundData)
@@ -137,37 +106,6 @@ structure IsBgA2At
           (tensorHsInclusion (I := I) (M := M) (g := g) (r := 0) (s := 2)
             (show (3 : ℝ) ≤ 4 by norm_num))
 
-/-- Metricwise **first-order** coefficient certificate at the scalar bounds
-fixed by `BgLiftData`, stated against the **refolded** first-order bundle.
-
-The A1 maps are explicit `BgLiftOps` data because their class-first
-construction remains a separate producer.  The core identities pin them to the
-single refolded bundle `refoldCoreBg g gB`, whose coefficients are the
-background-free order-zero refold, the two-metric path-integrated order-one arm,
-and the order-zero background correction `deltaCoreBg g gB`.  That third
-summand is what makes `refold_split_bg` reproduce the arbitrary-background
-remainder exactly; a certificate stated against only the first two summands
-does not (ledger №203, route error #2).  `bgA1_of_refold` discharges every
-field below unconditionally, from `refold_aff_bg` for the first two summands
-and from `c0bg_pack` for the third.
-
-Why the refold is forced, not stylistic (ledger №196).  The two bound fields
-carry the affine shape `zero + slope * ‖x‖`, a verbatim mirror of the diagonal
-lift consumer `lowreg_apply_two` (`LowRegApplyTwo.lean`, hypotheses
-`hFHiBd`/`hFLoBd`) that `BgLiftData.zero`/`slope` and the horizon
-`lowregLiftHorizon' contract zero` are built for.  Against the *un-refolded*
-core `lowCoreDataBg`, that affine shape is refuted: №196 records a scaling
-witness on which the order-zero arm's connection-difference-quadratic terms grow
-like `A^{3/2}` at fixed `H²` radius, outgrowing every affine envelope.  So the
-bound fields are right and the core fields had to move — which is exactly the
-route-(c) ruling of ledger №199.
-
-`a1_square` needs no restatement: it is phrased on the `BgLiftOps` data, so
-supplying the refolded maps makes it the refolded square automatically.
-
-№194's `lowA1Bg_comm_bg`/`a1_comm` — the square of the *actual* fixed-background
-bundle `lowCoreDataBg` — remain true and are banked canonical API; they simply
-sit off this lift's critical path. -/
 structure IsBgA1At
     (g gB : SmoothRiemannianMetric I M)
     (K : LowRegBoundData)
@@ -196,14 +134,6 @@ structure IsBgA1At
         (tensorHsInclusion (I := I) (M := M) (g := g) (r := 0) (s := 2)
           (show (2 : ℝ) ≤ 3 by norm_num))
 
-/-- Metricwise coefficient certificate at the scalar bounds fixed by
-`BgLiftData`: the conjunction of the second-order certificate `IsBgA2At` and
-the first-order certificate `IsBgA1At`.
-
-This is the entrypoint the adjacent-scale realization consumes.  It is kept as
-the conjunction of the two halves so that the still-open A2 completion constant
-does not block the A1 half, which `bgA1_of_refold` produces; every one of the
-fourteen original fields remains reachable through the parent projections. -/
 structure IsBgLiftAt
     (g gB : SmoothRiemannianMetric I M)
     (K : LowRegBoundData)
@@ -212,32 +142,6 @@ structure IsBgLiftAt
   IsBgA2At (I := I) (M := M) g gB K hK D,
   IsBgA1At (I := I) (M := M) g gB K hK D F
 
-/-- **The first-order certificate `IsBgA1At` holds at arbitrary DeTurck
-background for the refolded A1 maps.**
-
-On every coefficient radius below a positive `ρ0`, `refold_aff_bg` produces the
-completed maps of the first two summands of `refoldCoreBg g gB` and `c0bg_pack`
-those of the third, the order-zero background correction `deltaCoreBg g gB`.
-Their pointwise sums are continuous, realize the whole refolded bundle's
-completed actions on smooth data (this is `refoldBg_a1Hi_split` /
-`refoldBg_a1Lo_split`, the coefficient additivity of the completions), satisfy
-the affine certificate `‖F x‖ ≤ (Z₁+Z₀) + (L₁+L₀)‖x‖`, and form the
-adjacent-scale inclusion square.  Those are precisely the seven fields of
-`IsBgA1At`.
-
-PDE honesty.  The bundle certified here is the one for which `refold_split_bg`
-reconstructs the arbitrary-background Ricci--DeTurck remainder exactly: the
-zero-based remainder difference at background `gB` equals `F.a2 S + F.a1 S` for
-`F = refoldCoreBg g gB`.  Dropping the `deltaCoreBg` summand — the statement
-this theorem carried before ledger entries 203--205 — would certify a bundle
-that does not reproduce the remainder off the diagonal.
-
-The two domination hypotheses `Z ≤ D.zero`, `L ≤ D.slope` are the honest seam
-between this per-metric producer and the class-first scalar data: `Z` and `L`
-still depend on `g`, so `BgLiftData.zero`/`slope` may only be chosen once a
-class-uniform version of the packet's constants exists.  The diagonal lane is
-arranged the same way — `lowreg_solve_open` obtains the packet *before* any
-trajectory exists and caps its realization radius against `L`. -/
 theorem bgA1_of_refold
     (hDim : Module.finrank ℝ E = 3)
     (g gB : SmoothRiemannianMetric I M)
@@ -318,33 +222,6 @@ theorem bgA1_of_refold
           (show (2 : ℝ) ≤ 3 by norm_num) v)
     simp only [ContinuousLinearMap.add_apply, map_add, h1, h2]
 
-/-- **The second-order certificate `IsBgA2At` holds at arbitrary DeTurck
-background.**
-
-On every coefficient radius below a positive `ρ0`, `radialA2Bg_lip` reads the
-two completed maps off the actual fixed-background bundle `lowCoreDataBg g gB`
-on smooth data, and `lowA2Bg_small` supplies their continuity, the adjacent-scale
-inclusion square, and two operator bounds that are *linear in the coefficient
-radius*.  Those are precisely the seven fields of `IsBgA2At`.
-
-The contraction knob is the RADIUS.  `C` is produced before any `BgLiftData` is
-seen, so the domination `C * D.coeffRadius ≤ D.contract` is dischargeable by
-choosing `D.coeffRadius ≤ min ρ0 (D.contract / C)` — subject only to
-`BgLiftData.state_le_radius`, i.e. to shrinking `K`'s state radius alongside it.
-The deviation threshold `K.threshold` is *not* a knob: it is pinned by the
-realization certificate and its cap `1/3` carries no smallness of its own.
-
-PDE honesty.  The core fields name `lowCoreDataBg g gB`, the bundle whose action
-`lowCoreBg_split` shows reproduces the zero-based Ricci--DeTurck remainder at
-background `gB`; no diagonal identification is used anywhere below.  The A1 half
-had to refold its bundle (ledger №199--206); the A2 half does not, because the
-complete second-order coefficient is already small at every background —
-`c2Bg_h2_small` — while the A1 order-zero arm is not affine off the diagonal.
-
-The domination hypothesis is the honest seam between this per-metric producer
-and the class-first scalar data, exactly as `bgA1_of_refold`'s `Z ≤ D.zero` and
-`L ≤ D.slope` are: `C` still depends on `g`, through `c2Bg_h2_small` and the
-completion transfer `a2_pair`, so a class-uniform `C` remains open. -/
 theorem bgA2_of_radial
     (hDim : Module.finrank ℝ E = 3)
     (g gB : SmoothRiemannianMetric I M)
@@ -376,17 +253,6 @@ theorem bgA2_of_radial
       a2Lo_core := hcoreLo
       a2_square := hsq }
 
-/-- **The whole metricwise certificate `IsBgLiftAt` at one arbitrary DeTurck
-background**: `bgA1_of_refold` and `bgA2_of_radial` compose on the smaller of
-their two coefficient radii.
-
-What this does and does not say.  For a *fixed* pair `(g, gB)` the fourteen-field
-certificate is now a theorem, conditional only on the three scalar dominations
-`Z ≤ D.zero`, `L ≤ D.slope`, `C * D.coeffRadius ≤ D.contract`.  It says nothing
-class-uniform: `Z`, `L` and `C` are all produced from `g`-dependent coefficient
-estimates, so a single `BgLiftData K` serving *every* metric of the class still
-needs class-uniform versions of the three constants.  That is the whole content
-of the remaining G3 lane; do not read this theorem as closing it. -/
 theorem bgLift_of_radial
     (hDim : Module.finrank ℝ E = 3)
     (g gB : SmoothRiemannianMetric I M)

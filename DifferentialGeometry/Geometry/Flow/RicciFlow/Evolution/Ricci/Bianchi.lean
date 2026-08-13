@@ -2,12 +2,6 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.Ricci.GammaCoord
 
 set_option autoImplicit false
 
-
-
-
-
-
-
 noncomputable section
 
 namespace DifferentialGeometry.PDE.RicciFlow
@@ -29,17 +23,12 @@ section Components
 variable {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
 variable {u : Set M}
 
-
 def roughLapRicInFrame
     (gInv : Real -> DifferentialGeometry.Integral.Connection.InverseMetricComponents M Idx)
     (nabla2Ric : Real -> M -> Idx -> Idx -> Idx -> Idx -> Real)
     (t : Real) (x : M) (i j : Idx) : Real :=
   ∑ a : Idx, ∑ b : Idx,
     gInv t x a b * nabla2Ric t x a b i j
-
-
-
-
 
 def Nabla2RicciTensorComponentsInFrameOn
     (frame : Idx -> (x : M) -> TangentSpace I x)
@@ -50,8 +39,6 @@ def Nabla2RicciTensorComponentsInFrameOn
     nabla2Ric t x d a i j =
       DifferentialGeometry.Integral.Connection.rm04Comp (I := I) (nabla2RicTensor t) frame x d a i j
 
-
-
 def Nab2RicLoc
     (frame : Idx -> (x : M) -> TangentSpace I x)
     (u : Set M)
@@ -61,12 +48,6 @@ def Nab2RicLoc
   forall t x, x ∈ u -> forall d a i j,
     nabla2Ric t x d a i j =
       DifferentialGeometry.Integral.Connection.rm04Comp (I := I) (nabla2RicTensor t) frame x d a i j
-
-
-
-
-
-
 
 def ricciVariationExpandedRHSInFrame
     (gInv : Real -> DifferentialGeometry.Integral.Connection.InverseMetricComponents M Idx)
@@ -83,8 +64,6 @@ def ricciVariationExpandedRHSInFrame
           nabla2Ric t x i j k l +
           nabla2Ric t x i l k j))
 
-
-
 omit [TopologicalSpace M] [SigmaCompactSpace M] [T2Space M] [DecidableEq Idx] in
 theorem ricciVariationFromConnectionRHSInFrame_nablaGammaDtFromNabla2Ric
     (gInv : Real -> DifferentialGeometry.Integral.Connection.InverseMetricComponents M Idx)
@@ -96,13 +75,6 @@ theorem ricciVariationFromConnectionRHSInFrame_nablaGammaDtFromNabla2Ric
       ricciVariationExpandedRHSInFrame (M := M) gInv nabla2Ric t x i j := by
   simp [ricciVariationFromConnectionRHSInFrame,
     nablaGammaDtFromNabla2RicInFrame, ricciVariationExpandedRHSInFrame]
-
-
-
-
-
-
-
 
 def RicciVariationExpandedRHS_eq_evolutionRHS
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
@@ -119,14 +91,12 @@ def RicciVariationExpandedRHS_eq_evolutionRHS
         (roughLapRicInFrame (M := M) gInv nabla2Ric)
         (t : Real) x i j
 
-
 def contractedNabla2RicLeftInFrame
     (gInv : Real -> DifferentialGeometry.Integral.Connection.InverseMetricComponents M Idx)
     (nabla2Ric : Real -> M -> Idx -> Idx -> Idx -> Idx -> Real)
     (t : Real) (x : M) (i j : Idx) : Real :=
   ∑ k : Idx, ∑ l : Idx,
     gInv t x k l * nabla2Ric t x k i j l
-
 
 def contractedNabla2RicRightInFrame
     (gInv : Real -> DifferentialGeometry.Integral.Connection.InverseMetricComponents M Idx)
@@ -135,15 +105,12 @@ def contractedNabla2RicRightInFrame
   ∑ k : Idx, ∑ l : Idx,
     gInv t x k l * nabla2Ric t x k j i l
 
-
-
 def scalarHessianFromNabla2RicInFrame
     (gInv : Real -> DifferentialGeometry.Integral.Connection.InverseMetricComponents M Idx)
     (nabla2Ric : Real -> M -> Idx -> Idx -> Idx -> Idx -> Real)
     (t : Real) (x : M) (i j : Idx) : Real :=
   ∑ k : Idx, ∑ l : Idx,
     gInv t x k l * nabla2Ric t x i j k l
-
 
 def contractedNabla2RicTraceAInFrame
     (gInv : Real -> DifferentialGeometry.Integral.Connection.InverseMetricComponents M Idx)
@@ -152,7 +119,6 @@ def contractedNabla2RicTraceAInFrame
   ∑ k : Idx, ∑ l : Idx,
     gInv t x k l * nabla2Ric t x i k j l
 
-
 def contractedNabla2RicTraceBInFrame
     (gInv : Real -> DifferentialGeometry.Integral.Connection.InverseMetricComponents M Idx)
     (nabla2Ric : Real -> M -> Idx -> Idx -> Idx -> Idx -> Real)
@@ -160,20 +126,12 @@ def contractedNabla2RicTraceBInFrame
   ∑ k : Idx, ∑ l : Idx,
     gInv t x k l * nabla2Ric t x i l k j
 
-
-
 def contractedNabla2RicTraceRightNaturalInFrame
     (gInv : Real -> DifferentialGeometry.Integral.Connection.InverseMetricComponents M Idx)
     (nabla2Ric : Real -> M -> Idx -> Idx -> Idx -> Idx -> Real)
     (t : Real) (x : M) (i j : Idx) : Real :=
   ∑ k : Idx, ∑ l : Idx,
     gInv t x k l * nabla2Ric t x j k i l
-
-
-
-
-
-
 
 def ContractedBianchiTraceInFrameOnLocal
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
@@ -194,10 +152,6 @@ def ContractedBianchiTraceInFrameOnLocal
           (∑ k : Idx, ∑ l : Idx,
             gInv (t : Real) x k l * nablaRic (t : Real) x j k l)
 
-
-
-
-
 def DifferentiatedContractedBianchiInFrame
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (gInv : Real -> DifferentialGeometry.Integral.Connection.InverseMetricComponents M Idx)
@@ -215,9 +169,6 @@ def DifferentiatedContractedBianchiInFrame
           scalarHessianFromNabla2RicInFrame (M := M) gInv nabla2Ric
           (t : Real) x i j
 
-
-
-
 def ScalarHessianFromNabla2RicSymmetricInFrame
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (gInv : Real -> DifferentialGeometry.Integral.Connection.InverseMetricComponents M Idx)
@@ -228,9 +179,6 @@ def ScalarHessianFromNabla2RicSymmetricInFrame
         (t : Real) x i j =
       scalarHessianFromNabla2RicInFrame (M := M) gInv nabla2Ric
         (t : Real) x j i
-
-
-
 
 omit [TopologicalSpace M] [SigmaCompactSpace M] [T2Space M] [DecidableEq Idx] in
 theorem contractedNabla2RicTraceRightNatural_eq_traceB
@@ -263,7 +211,6 @@ theorem contractedNabla2RicTraceRightNatural_eq_traceB
     _ = contractedNabla2RicTraceBInFrame (M := M) gInv nabla2Ric
           (t : Real) x i j := hB.symm
 
-
 def DifferentiatedContractedBianchiInFrameOnLocal
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (gInv : Real -> DifferentialGeometry.Integral.Connection.InverseMetricComponents M Idx)
@@ -283,7 +230,6 @@ def DifferentiatedContractedBianchiInFrameOnLocal
           scalarHessianFromNabla2RicInFrame (M := M) gInv nabla2Ric
             (t : Real) x i j
 
-
 def HessSymmLoc
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (gInv : Real -> DifferentialGeometry.Integral.Connection.InverseMetricComponents M Idx)
@@ -296,8 +242,6 @@ def HessSymmLoc
           (t : Real) x i j =
         scalarHessianFromNabla2RicInFrame (M := M) gInv nabla2Ric
           (t : Real) x j i
-
-
 
 omit [TopologicalSpace M] [SigmaCompactSpace M] [T2Space M] [DecidableEq Idx] in
 theorem traceRightNatLoc
@@ -606,8 +550,6 @@ theorem differentiatedContractedBianchiInFrameOnLocal_of_regular
     ring
   exact ⟨hA, hB⟩
 
-
-
 def RicciSecondDerivativeCommutatorsInFrame
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -630,8 +572,6 @@ def RicciSecondDerivativeCommutatorsInFrame
         rmRicciContractionCompInFrame (I := I) S Rm04 gInv frame
           (t : Real) x i j +
         ricciQuadraticCompInFrame (I := I) S gInv frame (t : Real) x i j
-
-
 
 def RicciSecCommLoc
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
@@ -658,8 +598,6 @@ def RicciSecCommLoc
             (t : Real) x i j +
           ricciQuadraticCompInFrame (I := I) S gInv frame (t : Real) x i j
 
-
-
 def RicciCurvatureCommutatorsInFrame
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -684,9 +622,6 @@ def RicciCurvatureCommutatorsInFrame
         rmRicciContractionCompInFrame (I := I) S Rm04 gInv frame
           (t : Real) x i j +
         ricciQuadraticCompInFrame (I := I) S gInv frame (t : Real) x i j
-
-
-
 
 omit [DecidableEq Idx] in
 omit [SigmaCompactSpace M] [T2Space M] in

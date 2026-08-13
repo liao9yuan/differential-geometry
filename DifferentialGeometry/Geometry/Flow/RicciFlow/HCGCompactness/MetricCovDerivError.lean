@@ -3,14 +3,6 @@ import DifferentialGeometry.Geometry.Metric.TensorInner.CoerciveBilinInverse
 
 set_option autoImplicit false
 
-/-!
-# Metric-error and tensor-field covariant norms
-
-This file identifies the positive-order covariant norm of a metric tensor field
-with the corresponding metric-difference seminorm. Metric compatibility kills
-the background metric at every positive covariant order.
--/
-
 noncomputable section
 
 universe u uE uH
@@ -35,8 +27,6 @@ variable [T2Space M] [SigmaCompactSpace M]
 variable [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
 
 omit [I.Boundaryless] [SigmaCompactSpace M] in
-/-- At covariant order zero, the metric-tensor error norm is exactly the
-metric-difference seminorm. -/
 theorem metricError_eq_zero
     (G g : SmoothRiemannianMetric I M) (x : M) :
     metricTensorErrorNorm (I := I)
@@ -44,9 +34,6 @@ theorem metricError_eq_zero
       metricDerivNorm (I := I) 0 G g g x := by
   rfl
 
-/-- At every positive covariant order, the norm of the iterated derivative of
-`metricTensorField G` equals the metric-difference seminorm from `G` to the
-background metric. -/
 theorem t02Norm_metricDiff
     (G g : SmoothRiemannianMetric I M) (a : Nat) (ha : 1 ≤ a) (x : M) :
     tensor02CovDerivNormWith (I := I) a
@@ -81,9 +68,6 @@ variable [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
 variable {N : Type u} [TopologicalSpace N] [ChartedSpace H N]
 variable [IsManifold I ∞ N]
 
-/-- Assemble localized pre-approximate-isometry data when a smooth metric
-realizes the pullback on the controlled set and all of its metric-difference
-seminorms through the requested order are small. -/
 noncomputable def PreApproxIsoDataOn.of_metric
     {K : Set M} {eps : Real} {p : Nat} {F : M → N}
     (G g : SmoothRiemannianMetric I M) (h : SmoothRiemannianMetric I N)
@@ -112,9 +96,6 @@ noncomputable def PreApproxIsoDataOn.of_metric
 
 end Carrier
 
-/-- A uniform component bound in an orthonormal basis for `g0`, followed by a
-pointwise metric-equivalence bound from `g0` to `g`, controls the intrinsic
-`g`-norm of a covariant tensor. -/
 theorem sqrt_norm_le_comp
     {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
     (g0 g : SmoothMetric_gen I M) (x : M) (s : Nat)
@@ -148,10 +129,6 @@ theorem sqrt_norm_le_comp
     g0 g x s hC hequiv T).trans
       (mul_le_mul_of_nonneg_left hroot (Real.sqrt_nonneg _))
 
-/-- A component bound in an arbitrary finite basis controls the intrinsic
-tensor norm whenever the metric is coercive relative to the ambient norm.
-The coordinate-norm factor records the norm equivalence of that basis, so no
-inner-product structure on the model space is needed. -/
 theorem sqrt_norm_le_basis_comp_of_coercive
     {Idx : Type*} [Fintype Idx]
     (g : SmoothMetric_gen I M) (x : M) (s : Nat)

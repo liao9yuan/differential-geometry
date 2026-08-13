@@ -7,7 +7,6 @@ import Mathlib.Analysis.Calculus.Deriv.Basic
 import Mathlib.Analysis.Calculus.Deriv.Mul
 import Mathlib.Geometry.Manifold.MFDeriv.Basic
 
-
 namespace DifferentialGeometry.PDE.RicciFlow.Pullback
 
 open Bundle

@@ -3,36 +3,7 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.MetricLapDiff
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.MetricCovDerivLinear
 import DifferentialGeometry.Geometry.Connection.LeviCivita.ChristoffelDiffKoszulDeriv
 
-/-!
-# Order-1 connection-difference-derivative: the ungated fibre→vector reduction (B2 P1)
-
-The B2 mission target is the UNGATED general-`Λ` pointwise bound on the output vector of
-`covDerivConnDiff g₂ g₁ X Y Z x` (`= (∇₂_X A)(Y, Z)` for `A = connDiff g₁ g₂`), the shared wall of the
-T-B `mixedComm_norm_le`/`hA1` and 2a-tel composition-(b) consumers.  See
-`HCGCompactness/UNIF_ITEM6_RECON.md` for the full route.
-
-This file lands the reference session's **P1** brick: the ungated half of the δ<1-gated
-`exists_covDerivConnDiff_gQuadratic_le_of_jetEnvelope` (`Curvature/CovDerivConnDiffQuadraticBound.lean`).
-It reduces the output-vector `g₂`-norm to the **fibre** norm of the bundled order-1 covariant derivative
-`covGrad g₂ 1 2 (connDiffSection g₁ g₂)`:
-```
-√(g₂(covDerivConnDiff g₂ g₁ (ext v)(ext w)(ext u) x, ·))
-    ≤ ‖(covGrad g₂ 1 2 (connDiffSection g₁ g₂)).toSection x‖ · √(g₂ v v)·√(g₂ w w)·√(g₂ u u).
-```
-There is **no `δ < 1` gate**: the reduction uses only the flat/eval bridge
-`connDiffSection_covGrad_eq_covDerivConnDiff` and the fibre Cauchy–Schwarz
-`abs_tensor_one_three_flat_eval_le_fibreNorm_mul_sqrt` (both public).  The δ<1 gate in the parent theorem is
-consumed exclusively by the fibre bound `‖covGrad connDiffSection‖ ≤ CA` (P2), which is the single
-remaining B2 frontier (the a=1 analogue of `lcDiff_norm_le`).
-
-NOTE (home debt): this brick is pure fibre-currency Curvature-layer content and canonically belongs
-next to `abs_tensor_one_three_flat_eval_le_fibreNorm_mul_sqrt` in
-`Geometry/Curvature/CovDerivConnDiffFibreExtraction.lean`; it is placed in this HCG leaf only because the
-leaf is the ratified B2 home and its editable set.  Promote upstream once B2 assembles.
--/
-
 noncomputable section
-
 
 open Bundle Manifold Set Filter Tensor0SBundle
 open scoped Manifold Topology ContDiff BigOperators
@@ -67,11 +38,6 @@ private local instance tensorRSNormedAddCommGroupOfRiemannianBundle
 
 omit [NeZero (Module.finrank ℝ E)] in
 set_option backward.isDefEq.respectTransparency false in
-/-- The flat/eval bridge specialised to the connection-difference section: the model-basis evaluation of
-`covGrad g₂ 1 2 (connDiffSection g₁ g₂)` on the `g₂`-flat of `A = covDerivConnDiff g₂ g₁ …` reads off the
-squared `g₂`-length of `A`.  Public re-derivation of the parent file's `private`
-`covGrad_connDiffSection_flat_eval_eq_inner`, built from the PUBLIC
-`connDiffSection_covGrad_eq_covDerivConnDiff`. -/
 private theorem covGrad_connDiffSection_flat_eval_eq_inner
     (g₂ g₁ : SmoothRiemannianMetric I M) (x : M) (v w u : TangentSpace I x) :
     Tensor0SSpace.toModel
@@ -129,17 +95,6 @@ private theorem covGrad_connDiffSection_flat_eval_eq_inner
 omit [NeZero (Module.finrank ℝ E)] in
 attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
   Tensor0SBundle.tensorRSSpace_normedSpace in
-/-- **B2 P1 — the ungated fibre→vector reduction.**
-
-The output-vector `g₂`-length of `covDerivConnDiff g₂ g₁ (ext v)(ext w)(ext u) x` is bounded by the
-`g₂`-fibre norm of the bundled order-1 covariant derivative `covGrad g₂ 1 2 (connDiffSection g₁ g₂)` at
-`x`, times the three vector `g₂`-lengths.  No `δ < 1` / metric-perturbation gate: this is the
-Cauchy–Schwarz half of `exists_covDerivConnDiff_gQuadratic_le_of_jetEnvelope`, valid at general `Λ`.
-
-Compose with any bound `‖(covGrad g₂ 1 2 (connDiffSection g₁ g₂)).toSection x‖ ≤ CA(Λ, Λ', Λ'')` (the
-B2 P2 frontier, the a=1 analogue of `lcDiff_norm_le`) to obtain the full B2 output-vector bound
-`≤ CA · √(g₂ v v)·√(g₂ w w)·√(g₂ u u)` that both consumers (`mixedComm_norm_le`/`hA1`, 2a-tel (b))
-require. -/
 theorem covDerivConnDiff_fibreNorm_le
     (g₂ g₁ : SmoothRiemannianMetric I M) (x : M) (v w u : TangentSpace I x) :
     letI : Bundle.RiemannianBundle (fun b : M => TensorRSSpace 1 3 I b) :=
@@ -204,19 +159,8 @@ theorem covDerivConnDiff_fibreNorm_le
     calc NA ≤ NW * Sv * Su * Sw := hcancel
       _ = NW * Sv * Sw * Su := by ring
 
-/-! ### B2 P2 — the a=1 Koszul fibre bound (currency + comparability + the dual-Koszul core)
-
-The remaining B2 frontier: bound the connection-difference-derivative output vector in the
-metric-jet currency `Λ, Λ', Λ''` and compose with P1.  The route is the eval/dual form of the
-differentiated Koszul identity `connDiff_koszul_deriv` (`ChristoffelDiffKoszulDeriv.lean`): pairing it
-against the output vector itself, bound each right-hand term by the multilinear Cauchy–Schwarz
-`abs_apply_le_sqrt_normSq0S` in the `∇₂²g₁`/`∇₂g₁` currency, re-expand the connection difference by the
-a=0 atom `connDiffVec_norm_le` + `lcDiff_norm_le`, then convert `g₁ ↔ g₂` by comparability. -/
-
 omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
   [SigmaCompactSpace M] in
-/-- Currency bridge: the bundled `∇₂g₁` field `totalNabla0S 2 (LC g₂) (metricTensorField g₁)` used by
-`connDiff_koszul_deriv` is the HCG metric covariant derivative `metricCovDeriv g₁ g₂ 1`. -/
 private theorem field_eq_mcd1
     [VectorBundle ℝ E (TangentSpace I : M → Type _)]
     [ContMDiffVectorBundle 1 E (TangentSpace I : M → Type _) I]
@@ -237,9 +181,6 @@ private theorem field_eq_mcd1
 
 omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
   [SigmaCompactSpace M] in
-/-- Currency bridge (order 2): the directional derivative `nabla0SFun 3 (LC g₂) W (∇₂g₁-field)` of the
-bundled first metric covariant derivative equals the second metric covariant derivative
-`metricCovDeriv g₁ g₂ 2` with the derivative direction `W x` in the leading slot. -/
 private theorem nabla3_eq_mcd2
     [VectorBundle ℝ E (TangentSpace I : M → Type _)]
     [ContMDiffVectorBundle 1 E (TangentSpace I : M → Type _) I]
@@ -263,9 +204,6 @@ private theorem nabla3_eq_mcd2
 
 omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
   [T2Space M] [SigmaCompactSpace M] in
-/-- General-order `(0,s)` norm comparison under `MetricUniformEquivalentOn K g₂ g₁ Λ`:
-`√normSq0S(g₁, s, A) ≤ √(Λ^s) · √normSq0S(g₂, s, A)`.  General-`s` sibling of
-`sqrt_normSq0S_three_le_of_metricUniformEquivalentOn` (used at `s = 3` and `s = 4`). -/
 theorem sqrt_normSq0S_comp
     {K : Set M} {g₂ g₁ : SmoothRiemannianMetric I M} {Λ : ℝ}
     (hEq : MetricUniformEquivalentOn (I := I) K g₂ g₁ Λ)
@@ -285,9 +223,7 @@ theorem sqrt_normSq0S_comp
         rw [Real.sqrt_mul (pow_nonneg (le_trans zero_le_one hEq.1) s)]
 
 set_option linter.unusedSectionVars false in
-/-- The a=0 connection-difference atom in the `metricCovDerivNorm` currency: the
-`metricDerivNorm`-free form of `lcDiff_norm_le`, read straight off the basis-level
-`diff_le_covOne_basis_ref_lc`. -/
+
 private theorem lcDiff_covOne_le
     {K : Set M} (g h : SmoothRiemannianMetric I M) {C : ℝ}
     (hEq : MetricUniformEquivalentOn (I := I) K g h C)
@@ -305,11 +241,7 @@ private theorem lcDiff_covOne_le
   exact diff_le_covOne_basis_ref_lc (I := I) h g hx C hEq basis hhinv
 
 set_option linter.unusedSectionVars false in
-/-- The ungated order-zero connection-difference bound in metric-jet currency.
 
-Under `Λ`-uniform equivalence and an order-one bound for `∇^{g₂} g₁`, the
-Levi-Civita connection difference is bounded in the `g₂` fibre by
-`(3 / 2) * Λ ^ 3 * Λ'`. -/
 theorem connDiff_gJet_le
     {K : Set M} {g₂ g₁ : SmoothRiemannianMetric I M} {Λ Λ' : ℝ}
     (hEq : MetricUniformEquivalentOn (I := I) K g₂ g₁ Λ)
@@ -410,12 +342,7 @@ theorem connDiff_gJet_le
 set_option maxHeartbeats 1600000 in
 set_option linter.unusedSectionVars false in
 set_option backward.isDefEq.respectTransparency false in
-/-- **B2 P2 — the dual Koszul core.**  Pairing the differentiated Koszul identity
-`connDiff_koszul_deriv` against the output vector itself bounds the `g₁`-length of
-`covDerivConnDiff g₂ g₁ (ext v) (ext w) (ext u) x` by the second and first metric covariant
-derivatives of `g₁` along `∇₂`, all measured in the `g₁` fibre.  Public: the a=2 dual core
-`covDConnDiff2_g1_le` (`ConnDiffDeriv2Bound.lean`) reuses it to bound the `∇₂A`-vector slots that
-appear in the a=2 clean Koszul identity. -/
+
 theorem covDerivConnDiff_g1_le
     (g₂ g₁ : SmoothRiemannianMetric I M) (x : M) (v w u : TangentSpace I x) :
     Real.sqrt (g₁.inner x
@@ -486,7 +413,7 @@ theorem covDerivConnDiff_g1_le
     rw [hWx] at h
     exact h
   rw [h4] at hkos
-  -- Cauchy–Schwarz in the `g₁` fibre, at the internal `g₁`-orthonormal basis.
+
   have hcs4 : ∀ a b c d : TangentSpace I x,
       |metricCovDeriv (I := I) g₁ g₂ 2 x (Fin.cons a ![b, c, d])| ≤
         Real.sqrt (Tensor0SBundle.normSq0S (I := I) g₁ x 4 (metricCovDeriv (I := I) g₁ g₂ 2 x)) *
@@ -511,7 +438,7 @@ theorem covDerivConnDiff_g1_le
     congr 1
     change (∏ i : Fin 3, Real.sqrt (g₁.inner x (![a, b, c] i) (![a, b, c] i))) = _
     simp [Fin.prod_univ_three]
-  -- the a=0 connection-difference atom re-expands `|A(u, w)|`
+
   have hSA : Real.sqrt (g₁.inner x Avec Avec) ≤
       Real.sqrt (Tensor0SBundle.normSqRS (I := I) (g := g₁) (x := x) 1 2
           (Tensor0SBundle.connectionDifferenceTensorAt (I := I)
@@ -522,7 +449,7 @@ theorem covDerivConnDiff_g1_le
     exact Tensor0SBundle.connDiffVec_norm_le (I := I) g₁
       (leviCivitaConnectionOfMetric (I := I) g₁)
       (leviCivitaConnectionOfMetric (I := I) g₂) w u
-  -- collect
+
   have hBB_nn : 0 ≤ g₁.inner x B B := metric_inner_self_nonneg (I := I) (M := M) g₁ x B
   have hBBsq : g₁.inner x B B = Real.sqrt (g₁.inner x B B) ^ 2 := (Real.sq_sqrt hBB_nn).symm
   rw [hBBsq] at hkos
@@ -587,15 +514,7 @@ theorem covDerivConnDiff_g1_le
     nlinarith [hdiv]
 
 set_option linter.unusedSectionVars false in
-/-- **B2 — the ungated order-1 connection-difference-derivative bound in the metric-jet currency.**
 
-Under uniform metric equivalence `MetricUniformEquivalentOn K g₂ g₁ Λ` and the exact-order metric
-covariant-derivative bounds `Λ'` (order 1) and `Λ''` (order 2), the output vector of
-`covDerivConnDiff g₂ g₁ (ext v) (ext w) (ext u) x` obeys the `g₂`-quadratic estimate with constant
-`CA = (3/2)·Λ⁴·(Λ'' + Λ·Λ'²)`.
-
-This is the `hA1` input of `covStepDiff_norm_le` (`HCGCompactness/UnifCovSumCross.lean`), and the
-shared wall of the T-B `mixedComm_norm_le` and 2a-tel composition-(b) consumers. -/
 theorem covDerivConnDiff_gJet_le
     {K : Set M} {g₂ g₁ : SmoothRiemannianMetric I M} {Λ Λ' Λ'' : ℝ}
     (hEq : MetricUniformEquivalentOn (I := I) K g₂ g₁ Λ)
@@ -631,9 +550,9 @@ theorem covDerivConnDiff_gJet_le
     rw [show Λ ^ 3 = Λ ^ 2 * Λ by ring, Real.sqrt_mul (by positivity), Real.sqrt_sq hLnn]
   have hcoefnn : (0 : ℝ) ≤ Λ * Real.sqrt Λ * Λ' :=
     mul_nonneg (mul_nonneg hLnn (Real.sqrt_nonneg _)) hL'nn
-  -- the dual core, in the `g₁` fibre
+
   have hcore := covDerivConnDiff_g1_le (I := I) g₂ g₁ x v w u
-  -- order-2 and order-1 metric jets, converted from the `g₂` to the `g₁` fibre
+
   have hM2 : Real.sqrt (Tensor0SBundle.normSq0S (I := I) g₁ x 4
       (metricCovDeriv (I := I) g₁ g₂ 2 x)) ≤ Λ ^ 2 * Λ'' := by
     have hcomp := sqrt_normSq0S_comp (I := I) hEq hx 4 (metricCovDeriv (I := I) g₁ g₂ 2 x)
@@ -668,7 +587,7 @@ theorem covDerivConnDiff_gJet_le
     (Tensor0SBundle.connectionDifferenceTensorAt (I := I)
       (leviCivitaConnectionOfMetric (I := I) g₁)
       (leviCivitaConnectionOfMetric (I := I) g₂) x)) := Real.sqrt_nonneg _
-  -- shorten the three fibre norms
+
   set M2 := Real.sqrt (Tensor0SBundle.normSq0S (I := I) g₁ x 4
     (metricCovDeriv (I := I) g₁ g₂ 2 x)) with hM2def
   set M1 := Real.sqrt (Tensor0SBundle.normSq0S (I := I) g₁ x 3
@@ -682,7 +601,7 @@ theorem covDerivConnDiff_gJet_le
       (smoothExtensionTangent (I := I) x v)
       (smoothExtensionTangent (I := I) x w)
       (smoothExtensionTangent (I := I) x u) x with hBdef
-  -- the polynomial bracket
+
   have hbr : 3 / 2 * M2 + M1 * NA ≤ 3 / 2 * Λ ^ 2 * (Λ'' + Λ * Λ' ^ 2) := by
     have hprod : M1 * NA ≤ (Λ * Real.sqrt Λ * Λ') * (3 / 2 * (Λ * Real.sqrt Λ * Λ')) :=
       mul_le_mul hM1 hNA hNAnn hcoefnn
@@ -693,7 +612,7 @@ theorem covDerivConnDiff_gJet_le
     nlinarith [hM2, hprod]
   have hbrnn : (0 : ℝ) ≤ 3 / 2 * M2 + M1 * NA :=
     add_nonneg (by linarith) (mul_nonneg hM1nn hNAnn)
-  -- vector comparability
+
   have hvec : ∀ z : TangentSpace I x,
       Real.sqrt (g₁.inner x z z) ≤ Real.sqrt Λ * Real.sqrt (g₂.inner x z z) := by
     intro z

@@ -1,12 +1,6 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.LowRegBgC0Integrate
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.LowRegBaseForce
 
-/-!
-# Order-zero refold assembly
-
-Internal assembly layer for the low-regularity order-zero refold.
--/
-
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
@@ -382,8 +376,6 @@ theorem refoldA1_hl
         rw [show C * Q * D = B R * X ^ 3 * D by
           simp only [B, Q]; ring, mul_pow, hDsq]
 
-/- The isolated order-zero self-action after moving its derivative-bearing
-factors into one additional first-order passenger coefficient. -/
 noncomputable def c0Data
     (g : SmoothRiemannianMetric I M) (T : SmoothCcTensor g 0 2)
     (hT : ∀ (x : M) (u v : TangentSpace I x),
@@ -560,7 +552,6 @@ theorem sqrt_scale_c0
     (q d : ℝ) (hq : 0 ≤ q) (hd : 0 ≤ d) :
     Real.sqrt (q * d ^ 2) = Real.sqrt q * d := by
   rw [Real.sqrt_mul hq, Real.sqrt_sq hd]
-
 
 end LowRegBgC0Core
 end DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral

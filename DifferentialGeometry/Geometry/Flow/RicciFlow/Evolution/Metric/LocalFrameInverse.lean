@@ -1,14 +1,5 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.Metric.InverseSmooth
 
-
-
-
-
-
-
-
-
-
 noncomputable section
 
 namespace DifferentialGeometry.PDE.RicciFlow
@@ -29,8 +20,6 @@ section Components
 
 variable {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
 variable {n : WithTop ℕ∞} {u : Set M}
-
-
 
 noncomputable def localFrameInv
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
@@ -58,8 +47,6 @@ omit [SigmaCompactSpace M] [T2Space M] in
       basisInvMetric (I := I) (M := M) (S.family.metric t) x
         (hframe.toBasisAt hx) i j := by
   simp [localFrameInv, hx]
-
-
 
 omit [SigmaCompactSpace M] [T2Space M] in
 theorem localFrameInv_real
@@ -147,7 +134,6 @@ theorem localFrameInv_time
       (contDiffOn_const (c := (0 : Real)) :
         ContDiffOn Real ∞ (fun _ : Real => (0 : Real)) K)
 
-
 noncomputable def localFrameInvDt
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -157,8 +143,6 @@ noncomputable def localFrameInvDt
   fun t x i j => derivWithin
     (fun s : Real => localFrameInv (I := I) S frame hframe s x i j)
     D.carrier t
-
-
 
 omit [SigmaCompactSpace M] [T2Space M] in
 theorem localFrameTimeReg

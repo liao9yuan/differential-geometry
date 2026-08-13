@@ -5,45 +5,9 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.Pullback.Cartan.Formula
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.UnifJetTowerMatch
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.ConnDiffDerivBound
 
-/-!
-# The class-uniform static Ricci–DeTurck field bound at order `0` (brick E3, `j = 0`)
-
-`ShortTime/UnifNZeroBound.lean` drives the class-uniform zero-state forcing bound `nZeroC` by a
-single geometric number `Ksup`, the fibre sup of the covariant `1`-jet of the *static*
-Ricci–DeTurck field `deTurckRHSSection gBase g₀`.  This file closes the `j = 0` half of that
-input for every `Λ ≥ 1`, with a constant closed in `(Λ, gBase)` alone.
-
-## Route
-
-`deTurckRicciRHS gBase g₀ = −2 Ric(g₀) + 𝓛_W g₀` with `W = deTurckVF g₀ gBase`.
-
-* the **Ricci** half is `unifRicBilin` (`UnifCurvatureJetsLow.lean`);
-* the **Lie** half is Cartan's formula `𝓛_W g₀(v,w) = g₀(∇_v W, w) + g₀(v, ∇_w W)`
-  (`cartan_formula_for_lie_deriv_metric`) fed by `deTurckVF_covDeriv_eq`
-  (`Geometry/Flow/DeTurckVFCovDeriv.lean`), which expresses `∇^{g₀} W` as the `g₀`-trace of
-  `∇^{g₀}(connDiff g₀ gBase)` and then, through `connDiff_outerCovDeriv_eq`, as the background
-  derivative `covDerivConnDiff gBase g₀` plus a quadratic `A · A` remainder.  The two class
-  bounds `unifCovConnDiffSup` and `unifConnDiffSup` control exactly those two pieces.
-
-The bilinear bound is read on a `g₀`-orthonormal frame and repackaged as a fibre-norm bound by
-`rfns0_unit_eq` + `normSq0S_le_card_of_component_bound`.
-
-## Main results
-
-* `covDerivConnDiff_tens` — `covDerivConnDiff` is tensorial: it depends on its three section
-  arguments only through their values at the point.
-* `unifCovDerivVF` — class-uniform bound on `g₀(∇^{g₀}_v W, w)`.
-* `unifRHSBilin` — class-uniform bilinear bound on `deTurckRicciRHS gBase g₀`.
-* `unifKsupZero` — the `j = 0` slot of `UnifNZeroBound`'s `hsup` hypothesis.
-
-The `j = 1` slot is *not* closed here: it needs `∇Ric`, blocked on the missing
-curvature-difference asset recorded in `UnifCurvatureJetsLow.md`.
--/
-
 set_option autoImplicit false
 set_option linter.style.setOption false
--- The `Λ`-power chains and the `Tensor0SModel` instance searches of the tensoriality
--- bridge both need the raised budgets used throughout this HCG layer.
+
 set_option maxHeartbeats 1000000
 set_option synthInstance.maxHeartbeats 1600000
 
@@ -74,15 +38,9 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
-/-! ## Tensoriality of the connection-difference derivative -/
-
 set_option linter.unusedSectionVars false in
 set_option backward.isDefEq.respectTransparency false in
-/-- **`covDerivConnDiff` is tensorial.**  The `(1,2)`-tensor `∇^{g₂}(connDiff g₁ g₂)` evaluated
-at `x` depends on its three section arguments only through their values at `x`.  Proved by
-pairing both readings with the same one-form through the public bridge
-`connDiffSection_covGrad_eq_covDerivConnDiff` — whose left-hand side is a genuine fibre tensor
-evaluated on the three values — and separating with the `g₂`-flat of the difference. -/
+
 theorem covDerivConnDiff_tens (g₂ g₁ : SmoothRiemannianMetric I M) (x : M)
     (X Y Z X' Y' Z' : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯)
     (hX : X x = X' x) (hY : Y x = Y' x) (hZ : Z x = Z' x) :
@@ -115,13 +73,8 @@ theorem covDerivConnDiff_tens (g₂ g₁ : SmoothRiemannianMetric I M) (x : M)
   by_contra hne
   exact absurd hz (ne_of_gt (g₂.pos x _ (sub_ne_zero.mpr hne)))
 
-/-! ## The per-frame-vector bilinear estimate -/
-
 set_option linter.unusedSectionVars false in
-/-- The single-frame-direction estimate behind `unifCovDerivVF`: for a `g₀`-unit vector `b`,
-the summand of `deTurckVF_covDeriv_eq` pairs with `w` inside
-`(C₁ + 3C₀²)Λ⁴ √(g₀(v,v)) √(g₀(w,w))`.  All the `Λ` powers come from converting between the
-`gBase`-lengths of the two class bounds and the `g₀`-lengths of the statement. -/
+
 private theorem rhsTermBound (gBase g₀ : SmoothRiemannianMetric I M) {Λ C₀ C₁ : ℝ}
     (hΛ : 1 ≤ Λ) (hC₀0 : 0 ≤ C₀) (hC₁0 : 0 ≤ C₁)
     (hcomp : ∀ (y : M) (u : TangentSpace I y),
@@ -163,7 +116,7 @@ private theorem rhsTermBound (gBase g₀ : SmoothRiemannianMetric I M) {Λ C₀ 
       rw [show (1 : ℝ) = Real.sqrt 1 from Real.sqrt_one.symm]
       exact Real.sqrt_le_sqrt hΛ
     nlinarith [Real.sq_sqrt hΛ0.le, Real.sqrt_nonneg Λ]
-  -- cross-metric length comparisons, in `Λ` (not `√Λ`) form
+
   have hcross : ∀ u : TangentSpace I x,
       Real.sqrt (gBase.inner x u u) ≤ Λ * Real.sqrt (g₀.inner x u u) := by
     intro u
@@ -189,7 +142,7 @@ private theorem rhsTermBound (gBase g₀ : SmoothRiemannianMetric I M) {Λ C₀ 
   have hvB : Real.sqrt (gBase.inner x v v) ≤ Λ * Real.sqrt (g₀.inner x v v) := hcross v
   have hSv0 : (0 : ℝ) ≤ Real.sqrt (g₀.inner x v v) := Real.sqrt_nonneg _
   have hSw0 : (0 : ℝ) ≤ Real.sqrt (g₀.inner x w w) := Real.sqrt_nonneg _
-  -- pairing step
+
   have hpair : ∀ (Y : TangentSpace I x) (c : ℝ),
       Real.sqrt (gBase.inner x Y Y) ≤ c →
       |g₀.inner x Y w| ≤ Λ * c * Real.sqrt (g₀.inner x w w) := by
@@ -197,7 +150,7 @@ private theorem rhsTermBound (gBase g₀ : SmoothRiemannianMetric I M) {Λ C₀ 
     refine le_trans (abs_metric_inner_le_sqrt_metric_quadratic (I := I) (M := M) g₀ x Y w) ?_
     exact mul_le_mul_of_nonneg_right
       (le_trans (hcross' Y) (mul_le_mul_of_nonneg_left hc hΛ0.le)) (Real.sqrt_nonneg _)
-  -- connection-difference product step
+
   have hAle : ∀ (p q : TangentSpace I x) (cp cq : ℝ), 0 ≤ cp →
       Real.sqrt (gBase.inner x p p) ≤ cp → Real.sqrt (gBase.inner x q q) ≤ cq →
       Real.sqrt (gBase.inner x
@@ -210,7 +163,7 @@ private theorem rhsTermBound (gBase g₀ : SmoothRiemannianMetric I M) {Λ C₀ 
         ≤ C₀ * cp * Real.sqrt (gBase.inner x q q) :=
           mul_le_mul_of_nonneg_right (mul_le_mul_of_nonneg_left hp hC₀0) (Real.sqrt_nonneg _)
       _ ≤ C₀ * cp * cq := mul_le_mul_of_nonneg_left hq (mul_nonneg hC₀0 hcp)
-  -- the four gBase-length bounds
+
   have hCbound : Real.sqrt (gBase.inner x
       (covDerivConnDiff (I := I) gBase g₀ (smoothExtensionTangent (I := I) x v)
         (smoothExtensionTangent (I := I) x b) (smoothExtensionTangent (I := I) x b) x)
@@ -273,7 +226,7 @@ private theorem rhsTermBound (gBase g₀ : SmoothRiemannianMetric I M) {Λ C₀ 
       (by positivity) hRbound hbB
     calc _ ≤ C₀ * (C₀ * Λ * (Λ * Real.sqrt (g₀.inner x v v))) * Λ := h
       _ = C₀ ^ 2 * Λ ^ 3 * Real.sqrt (g₀.inner x v v) := by ring
-  -- assemble
+
   have hadd1 : ∀ p q : TangentSpace I x,
       g₀.inner x (p + q) w = g₀.inner x p w + g₀.inner x q w := by
     intro p q; rw [map_add, ContinuousLinearMap.add_apply]
@@ -287,20 +240,14 @@ private theorem rhsTermBound (gBase g₀ : SmoothRiemannianMetric I M) {Λ C₀ 
   rcases abs_le.mp (hpair _ _ hQ3) with ⟨h4l, h4r⟩
   refine abs_le.mpr ⟨by nlinarith, by nlinarith⟩
 
-/-! ## The class-uniform DeTurck-field bounds -/
-
 set_option linter.unusedSectionVars false in
-/-- Explicit zero-order DeTurck-vector-field derivative coefficient. -/
+
 noncomputable def vfZeroC (Λ : ℝ) : ℝ :=
   (Module.finrank ℝ E : ℝ) *
     ((connDiffOneC Λ + 3 * connDiffZeroC Λ ^ 2) * Λ ^ 4)
 
 set_option linter.unusedSectionVars false in
-/-- **Class-uniform bound on the covariant derivative of the DeTurck vector field.**
 
-With `W = deTurckVF g₀ gBase`, `|g₀(∇^{g₀}_v W, w)| ≤ K √(g₀(v,v)) √(g₀(w,w))` with `K` closed
-in `(Λ, gBase)`: the trace identity `deTurckVF_covDeriv_eq` reduces this to the two banked class
-bounds `unifCovConnDiffSup` and `unifConnDiffSup`, read on a `g₀`-orthonormal frame. -/
 theorem unifCovDerivVF_of
     (gBase g₀ : SmoothRiemannianMetric I M) {Λ : ℝ} (hΛ : 1 ≤ Λ)
     (hcomp : ∀ (x : M) (v : TangentSpace I x),
@@ -392,7 +339,7 @@ theorem unifCovDerivVF_of
   ring
 
 set_option linter.unusedSectionVars false in
-/-- **Class-uniform bound on the covariant derivative of the DeTurck vector field.** -/
+
 theorem unifCovDerivVF
     (gBase g₀ : SmoothRiemannianMetric I M) {Λ : ℝ} (hΛ : 1 ≤ Λ)
     (hcomp : ∀ (x : M) (v : TangentSpace I x),
@@ -412,16 +359,12 @@ theorem unifCovDerivVF
   positivity
 
 set_option linter.unusedSectionVars false in
-/-- Explicit zero-order bilinear Ricci--DeTurck coefficient. -/
+
 noncomputable def rhsZeroC (Λ Kb : ℝ) : ℝ :=
   2 * ricciZeroC (E := E) Λ Kb + 2 * vfZeroC (E := E) Λ
 
 set_option linter.unusedSectionVars false in
-/-- **Class-uniform bilinear bound on the static Ricci–DeTurck field.**
 
-`|deTurckRicciRHS gBase g₀ (v,w)| ≤ K √(g₀(v,v)) √(g₀(w,w))` with `K` closed in `(Λ, gBase)`:
-the Ricci half is `unifRicBilin`, the Lie half is Cartan's formula
-(`cartan_formula_for_lie_deriv_metric`) fed by `unifCovDerivVF`. -/
 theorem unifRHSBilin_of
     (gBase g₀ : SmoothRiemannianMetric I M) {Λ : ℝ} (hΛ : 1 ≤ Λ)
     {Kb : ℝ} (hKb0 : 0 ≤ Kb)
@@ -467,7 +410,7 @@ theorem unifRHSBilin_of
   refine abs_le.mpr ⟨by nlinarith, by nlinarith⟩
 
 set_option linter.unusedSectionVars false in
-/-- **Class-uniform bilinear bound on the static Ricci–DeTurck field.** -/
+
 theorem unifRHSBilin
     (gBase g₀ : SmoothRiemannianMetric I M) {Λ : ℝ} (hΛ : 1 ≤ Λ)
     (hcomp : ∀ (x : M) (v : TangentSpace I x),
@@ -498,7 +441,7 @@ theorem unifRHSBilin
   linarith
 
 set_option linter.unusedSectionVars false in
-/-- The explicit zero-order bilinear coefficient is nonnegative. -/
+
 theorem rhsZeroC_nonneg {Kb Λ : ℝ} (hΛ : 1 ≤ Λ) :
     0 ≤ rhsZeroC (E := E) Λ Kb := by
   have hCd0 : 0 ≤ riemannDiffC Λ Λ Λ := by
@@ -514,20 +457,15 @@ theorem rhsZeroC_nonneg {Kb Λ : ℝ} (hΛ : 1 ≤ Λ) :
   dsimp [rhsZeroC]
   linarith
 
-/-- Explicit zero-order static Ricci--DeTurck fibre coefficient. -/
 noncomputable def ksupZeroC (Λ Kb : ℝ) : ℝ :=
   (Module.finrank ℝ E : ℝ) * rhsZeroC (E := E) Λ Kb
 
-/-- The explicit zero-order fibre coefficient is nonnegative. -/
 theorem ksupZeroC_nonneg {Kb Λ : ℝ} (hΛ : 1 ≤ Λ) :
     0 ≤ ksupZeroC (E := E) Λ Kb := by
   exact mul_nonneg (Nat.cast_nonneg _) (rhsZeroC_nonneg (E := E) hΛ)
 
 set_option linter.unusedSectionVars false in
-/-- **Class-uniform fibre bound on the static Ricci–DeTurck field (`j = 0`).**
 
-Reading `unifRHSBilin` on a `g₀`-orthonormal basis bounds every component of
-`deTurckRHSSection gBase g₀` by `K`, hence its `g₀`-fibre norm by `n · K`, `n = finrank ℝ E`. -/
 theorem unifRHSFib_of
     (gBase g₀ : SmoothRiemannianMetric I M) {Λ : ℝ} (hΛ : 1 ≤ Λ)
     {Kb : ℝ} (hKb0 : 0 ≤ Kb)
@@ -588,7 +526,7 @@ theorem unifRHSFib_of
       ring
 
 set_option linter.unusedSectionVars false in
-/-- **Class-uniform fibre bound on the static Ricci–DeTurck field (`j = 0`).** -/
+
 theorem unifRHSFib
     (gBase g₀ : SmoothRiemannianMetric I M) {Λ : ℝ} (hΛ : 1 ≤ Λ)
     (hcomp : ∀ (x : M) (v : TangentSpace I x),
@@ -607,8 +545,7 @@ theorem unifRHSFib
       hKb0 hKb hcomp hjet1 hjet2⟩
 
 set_option linter.unusedSectionVars false in
-/-- The `j = 0` static Ricci--DeTurck bound with the fixed background curvature
-cap supplied before the varying metric. -/
+
 theorem unifKsupZero_of
     (gBase g₀ : SmoothRiemannianMetric I M) {Λ Kb : ℝ} (hΛ : 1 ≤ Λ)
     (hKb0 : 0 ≤ Kb)
@@ -630,11 +567,7 @@ theorem unifKsupZero_of
     hKb0 hKb hcomp hjet1 hjet2
 
 set_option linter.unusedSectionVars false in
-/-- **The `j = 0` slot of `UnifNZeroBound`'s `Ksup` hypothesis.**
 
-`unifRHSFib` in the exact currency of `staticN_h1_le`'s `hsup` at `j = 0`: the covariant
-`0`-jet of `deTurckRHSSection gBase g₀` has class-uniform fibre bound for arbitrary
-`Λ ≥ 1`. -/
 theorem unifKsupZero
     (gBase g₀ : SmoothRiemannianMetric I M) {Λ : ℝ} (hΛ : 1 ≤ Λ)
     (hcomp : ∀ (x : M) (v : TangentSpace I x),

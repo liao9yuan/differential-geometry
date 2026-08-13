@@ -9,23 +9,6 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.C4.StepCSourc
 
 set_option autoImplicit false
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 noncomputable section
 
 universe u uE uH
@@ -64,17 +47,6 @@ noncomputable local instance stepCProducersModelBilinearNormedAddCommGroup :
 noncomputable local instance stepCProducersModelBilinearNormedSpace :
     NormedSpace ℝ (E →L[ℝ] E →L[ℝ] ℝ) :=
   ContinuousLinearMap.toNormedSpace
-
-
-
-
-
-
-
-
-
-
-
 
 theorem properBallImgOfRad
     (Y : PointedRiemannianManifold.{u, uE, uH} (I := I))
@@ -132,12 +104,6 @@ theorem properBallImgOfRad
   have hsq : Real.sqrt (Y.metric.inner c v v) < expRadiusGp (I := I) Y.metric c := by
     rw [hv_len]; exact hsmall
   exact norm_lt_expMapC2Radius_of_sqrt_inner_lt (I := I) Y.metric c hsq
-
-
-
-
-
-
 
 theorem properBallImgOfRad'
     (Y : PointedRiemannianManifold.{u, uE, uH} (I := I))
@@ -222,10 +188,6 @@ theorem properBallImgOfRad'
       _ ≤ R := hgc_le
   exact lt_of_le_of_lt hbound hσ
 
-
-
-
-
 theorem hatCageImg (hd : InjRadiusDecayInput (I := I) X) {D : Real}
     (P : forall k : Nat, ProperMetricOn (I := I) (X.obj k))
     (L : DifferentialGeometry.HCGCompactness.NetLimitData (X := X) hd D P)
@@ -264,14 +226,6 @@ theorem hatCageImg (hd : InjRadiusDecayInput (I := I) X) {D : Real}
       (NetLimitData.hatCageInClosed (I := I) (X := X) hd P L pb r n gamma hcenter)) ?_
   exact properBallImgOfRad (I := I) (X.obj (L.φ n)) (P (L.φ n))
     (c := center gamma) (R := 4 * L.lamInf (gamma : Nat)) hR
-
-
-
-
-
-
-
-
 
 theorem hatCageImg' (hd : InjRadiusDecayInput (I := I) X) {D : Real}
     (P : forall k : Nat, ProperMetricOn (I := I) (X.obj k))
@@ -322,12 +276,6 @@ theorem hatCageImg' (hd : InjRadiusDecayInput (I := I) X) {D : Real}
   exact properBallImgOfRad' (I := I) (X.obj (L.φ n)) (P (L.φ n))
     (c := center gamma) (R := 4 * L.lamInf (gamma : Nat)) (σ := sigma gamma) hR hσ
 
-
-
-
-
-
-
 theorem hUx_of_sigma (hd : InjRadiusDecayInput (I := I) X) {D : Real}
     (P : forall k : Nat, ProperMetricOn (I := I) (X.obj k))
     (L : DifferentialGeometry.HCGCompactness.NetLimitData (X := X) hd D P)
@@ -349,7 +297,6 @@ theorem hUx_of_sigma (hd : InjRadiusDecayInput (I := I) X) {D : Real}
   intro gamma k
   exact Metric.ball_subset_ball (hσ gamma k)
 
-
 def SigmaScaleAt (hd : InjRadiusDecayInput (I := I) X) {D : Real}
     (P : forall k : Nat, ProperMetricOn (I := I) (X.obj k))
     (L : DifferentialGeometry.HCGCompactness.NetLimitData (X := X) hd D P)
@@ -367,8 +314,6 @@ def SigmaScaleAt (hd : InjRadiusDecayInput (I := I) X) {D : Real}
         Real.sqrt (gpCoerciveConst (I := I) (X.obj (L.φ n)).metric (x gamma n)) < σ gamma ∧
       σ gamma ≤ expMapC2Radius (I := I) (X.obj (L.φ n)).metric (x gamma n)
 
-
-
 def SigmaScaleTail (hd : InjRadiusDecayInput (I := I) X) {D : Real}
     (P : forall k : Nat, ProperMetricOn (I := I) (X.obj k))
     (L : DifferentialGeometry.HCGCompactness.NetLimitData (X := X) hd D P)
@@ -376,13 +321,6 @@ def SigmaScaleTail (hd : InjRadiusDecayInput (I := I) X) {D : Real}
     (x : Fin (pb.A r) -> forall k : Nat, (X.obj (L.φ k)).M)
     (σ : Fin (pb.A r) -> Real) : Prop :=
   ∀ᶠ n in Filter.atTop, SigmaScaleAt (I := I) hd P L pb r x σ n
-
-
-
-
-
-
-
 
 def SigmaScaleField (hd : InjRadiusDecayInput (I := I) X) {D : Real}
     (P : forall k : Nat, ProperMetricOn (I := I) (X.obj k))
@@ -399,7 +337,6 @@ def SigmaScaleField (hd : InjRadiusDecayInput (I := I) X) {D : Real}
         Real.sqrt (gpCoerciveConst (I := I) (X.obj (L.φ k)).metric (x gamma k)) < σ gamma ∧
       σ gamma ≤ expMapC2Radius (I := I) (X.obj (L.φ k)).metric (x gamma k)
 
-
 theorem SigmaScaleField.at {hd : InjRadiusDecayInput (I := I) X} {D : Real}
     {P : forall k : Nat, ProperMetricOn (I := I) (X.obj k)}
     {L : DifferentialGeometry.HCGCompactness.NetLimitData (X := X) hd D P}
@@ -408,7 +345,6 @@ theorem SigmaScaleField.at {hd : InjRadiusDecayInput (I := I) X} {D : Real}
     {σ : Fin (pb.A r) -> Real}
     (hfield : SigmaScaleField (I := I) hd P L pb r x σ) (n : Nat) :
     SigmaScaleAt (I := I) hd P L pb r x σ n := fun gamma => hfield gamma n
-
 
 theorem SigmaScaleField.to_tail {hd : InjRadiusDecayInput (I := I) X} {D : Real}
     {P : forall k : Nat, ProperMetricOn (I := I) (X.obj k)}
@@ -419,7 +355,6 @@ theorem SigmaScaleField.to_tail {hd : InjRadiusDecayInput (I := I) X} {D : Real}
     (hfield : SigmaScaleField (I := I) hd P L pb r x σ) :
     SigmaScaleTail (I := I) hd P L pb r x σ :=
   Filter.Eventually.of_forall hfield.at
-
 
 theorem SigmaScaleTail.subseq {hd : InjRadiusDecayInput (I := I) X} {D : Real}
     {P : forall k : Nat, ProperMetricOn (I := I) (X.obj k)}
@@ -434,8 +369,6 @@ theorem SigmaScaleTail.subseq {hd : InjRadiusDecayInput (I := I) X} {D : Real}
   filter_upwards [hψ.tendsto_atTop.eventually htail] with n hn
   intro gamma
   exact hn gamma
-
-
 
 theorem SigmaScaleTail.exists_field
     {hd : InjRadiusDecayInput (I := I) X} {D : Real}
@@ -455,8 +388,6 @@ theorem SigmaScaleTail.exists_field
   refine ⟨ψ, hψ, ?_⟩
   intro gamma k
   exact hN (ψ k) (by simp only [ψ]; omega) gamma
-
-
 
 theorem SigmaScaleField.expRadiusGp {hd : InjRadiusDecayInput (I := I) X} {D : Real}
     {P : forall k : Nat, ProperMetricOn (I := I) (X.obj k)}
@@ -485,8 +416,6 @@ theorem SigmaScaleField.expRadiusGp {hd : InjRadiusDecayInput (I := I) X} {D : R
       expMapC2Radius (I := I) (X.obj (L.φ k)).metric (x gamma k) := lt_of_lt_of_le hlo hhi
   rw [div_lt_iff₀ hsc] at h1
   exact h1.trans_eq (mul_comm _ _)
-
-
 
 theorem NormalRadiusProfile.sigmaCenterTail
     {hd : InjRadiusDecayInput (I := I) X}
@@ -564,19 +493,12 @@ theorem NormalRadiusProfile.sigmaCenterTail
         (h.mul_lambda_lt_exp (D := D) (c := 16)
           (R := seqRadius hd D P (L.φ n) (gamma : Nat)) hD h16 hx).le
 
-
-
-
 omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [CompleteSpace E] in
 theorem binfMemClosed {U V' : Set E} {B : Nat -> E -> E} {Binf : E -> E}
     (hB : MapCInfConvOnCompacts U B Binf) {v : E} (hv : v ∈ U)
     (hV'closed : IsClosed V') (hmem : ∀ᶠ a in Filter.atTop, B a v ∈ V') :
     Binf v ∈ V' :=
   hV'closed.mem_of_tendsto (tendsto_of_cInf hB hv) hmem
-
-
-
-
 
 theorem HasAtomWeightLim.binf_of_live
     (inp : MetricCompactnessInputs (I := I) X)
@@ -652,7 +574,6 @@ theorem HasAtomWeightLim.binf_of_live
         (baseIndex inp.decay inp.realizes inp.pack hr) gamma.1 hC2 z hweightK)
   exact binfMemClosed hB hz Metric.isClosed_closedBall hmem
 
-
 theorem HasAtomWeightLim.binf_of_slot
     (inp : MetricCompactnessInputs (I := I) X)
     (hradD : 2 * item3RadiusFactor inp.decay inp.D < inp.D)
@@ -682,8 +603,6 @@ theorem HasAtomWeightLim.binf_of_slot
       Metric.closedBall 0 (6 * L.lamInf (target.1.1 : Nat)) := by
   exact hlim.binf_of_live inp hradD hradRatio P L r hr hgp alpha U aInf
     phi hphi target.1 (Binf target) hB hz hweight
-
-
 
 theorem HasAtomWeightLim.binf_of_weight
     (inp : MetricCompactnessInputs (I := I) X)
@@ -744,9 +663,6 @@ theorem HasAtomWeightLim.binf_of_weight
   simpa only [target] using
     (hlim.binf_of_slot inp hradD hradRatio P L r hr hgp alpha U aInf
       phi hphi target Binf (hB target) hz (by simpa only [target] using hweight))
-
-
-
 
 theorem MetricCompactnessInputs.exists_supp_trans
     (inp : MetricCompactnessInputs (I := I) X)
@@ -830,9 +746,6 @@ theorem MetricCompactnessInputs.exists_supp_trans
     hsource phi hphi Jinf (fun target K hK hKU p =>
       (hspec target).2.2.2.2.1 K hK (hKU.trans hUsub) p)
     hz gamma hweight
-
-
-
 
 theorem MetricCompactnessInputs.exists_supp_fin
     (inp : MetricCompactnessInputs (I := I) X)
@@ -939,8 +852,6 @@ theorem MetricCompactnessInputs.exists_supp_fin
           (hKU.trans (hUsub alpha)) p)
       hz gamma hweight
 
-
-
 noncomputable def interSlot?
     {hd : InjRadiusDecayInput (I := I) X} {D : Real}
     {P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k)}
@@ -953,9 +864,6 @@ noncomputable def interSlot?
       some (Classical.choose h)
     else
       none
-
-
-
 
 noncomputable def totalPts
     {M : Type u}
@@ -970,8 +878,6 @@ noncomputable def totalPts
   | some target => pairPts alpha target a b x
   | none => x
 
-
-
 @[simp] theorem activeFill_totalPts_zero
     {M : Type u}
     {hd : InjRadiusDecayInput (I := I) X} {D : Real}
@@ -985,9 +891,6 @@ noncomputable def totalPts
     centerAverage.activeFill mu (totalPts pairPts alpha a b)
         (fun y => y) x gamma = x := by
   simp [centerAverage.activeFill, hzero]
-
-
-
 
 theorem activeFill_totalPts_of_ne
     {M : Type u}
@@ -1023,7 +926,6 @@ theorem activeFill_totalPts_of_ne
       exact (h hexists).elim
   refine ⟨target, htarget, ?_⟩
   simp [centerAverage.activeFill, hne, totalPts, hlookup]
-
 
 theorem MetricCompactnessInputs.exists_atom_supp_fin
     (inp : MetricCompactnessInputs (I := I) X)
@@ -1636,17 +1538,10 @@ theorem MetricCompactnessInputs.exists_atom_supp_fin
           simpa only [gammaPhi, hslot] using hweight)
     simpa only [Jinf, gammaPhi, hslot, Lphi, NetLimitData.subseq_lamInf] using hmem
 
-
-
 def HasCompactCover {Y J : Type*} [TopologicalSpace Y]
     (sourceBall : Set Y) (sourcePatch : J → Set Y) : Prop :=
   ∃ K : J → Set Y, (∀ j, IsCompact (K j)) ∧
     (∀ j, K j ⊆ sourcePatch j) ∧ sourceBall = ⋃ j, K j
-
-
-
-
-
 
 def HasSuppConvData
     (inp : MetricCompactnessInputs (I := I) X)
@@ -1782,8 +1677,6 @@ def HasSuppConvData
         (seqCenterD inp.decay P Lphi k (alpha.1 : Nat)))
       (Metric.ball 0 (8 * L.lamInf (target.1.1 : Nat)))
 
-
-
 theorem HasSuppConvData.weight_on
     (inp : MetricCompactnessInputs (I := I) X)
     (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k))
@@ -1820,8 +1713,6 @@ theorem HasSuppConvData.weight_on
       hweightInfC, _hweightConv⟩
   exact ⟨hweightInfC, hweight alpha⟩
 
-
-
 theorem HasSuppConvData.core_on
     (inp : MetricCompactnessInputs (I := I) X)
     (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k))
@@ -1848,8 +1739,6 @@ theorem HasSuppConvData.core_on
       _hlim, _hweight, _htrans, _hsmooth⟩
   exact ⟨hU alpha, hC0 alpha, hC1 alpha, hC01 alpha, hC1U alpha⟩
 
-
-
 theorem HasSuppConvData.core_shape
     (inp : MetricCompactnessInputs (I := I) X)
     (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k))
@@ -1873,8 +1762,6 @@ theorem HasSuppConvData.core_shape
     ⟨_hU, _hU8, _hC0, _hC1, _hC01, _hC1U, hconvex, hzero,
       _hbuffer, _hcore, _hcover, _hlim, _hweight, _htrans, _hsmooth⟩
   exact ⟨hconvex alpha, hzero alpha⟩
-
-
 
 theorem HasSuppConvData.buffer_cover
     (inp : MetricCompactnessInputs (I := I) X)
@@ -1914,8 +1801,6 @@ theorem HasSuppConvData.buffer_cover
       hbuffer, _hcore, _hcover, _hlim, _hweight, _htrans, _hsmooth⟩
   exact hbuffer
 
-
-
 theorem HasSuppConvData.source_cover
     (inp : MetricCompactnessInputs (I := I) X)
     (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k))
@@ -1952,8 +1837,6 @@ theorem HasSuppConvData.source_cover
       _hbuffer, hcore, _hcover,
       _hlim, _hweight, _htrans, _hsmooth⟩
   exact hcore k
-
-
 
 theorem HasSuppConvData.geom_on
     (inp : MetricCompactnessInputs (I := I) X)
@@ -1999,8 +1882,6 @@ theorem HasSuppConvData.geom_on
       _hbuffer, _hcore, hgeom,
       _hlim, _hweight, _htrans, _hsmooth⟩
   exact (hgeom k).1 alpha
-
-
 
 theorem HasSuppConvData.subseq
     (inp : MetricCompactnessInputs (I := I) X)
@@ -2057,7 +1938,6 @@ theorem HasSuppConvData.subseq
   · intro alpha target k
     simpa only [NetLimitData.subseq_phi, Function.comp_apply,
       seqCenterD_subseq] using hsmooth alpha target (ψ k)
-
 
 theorem MetricCompactnessInputs.exists_supp_pts_fin
     (inp : MetricCompactnessInputs (I := I) X)
@@ -2557,8 +2437,6 @@ theorem MetricCompactnessInputs.exists_supp_pts_fin
       obtain ⟨target, hslot, _hmem⟩ := hsupp alpha (chi alpha x) hx.2 gamma hne
       exact htarget ⟨target, hslot⟩
 
-/-- Retained source-cover, normalized-weight, and transition-limit data for one
-coherent normal-chart family on one subsequence. -/
 def HasSuppConvDataOn
     (inp : MetricCompactCore (I := I) X)
     (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k))
@@ -2712,8 +2590,6 @@ def HasSuppConvDataOn
         (seqCenterD inp.decay P Lphi k (alpha.1 : Nat))))
       (Metric.ball 0 (8 * L.lamInf (target.1.1 : Nat)))
 
-/-- The retained legacy support package supplies the chart-parametric package
-for the established framed normal-chart family. -/
 theorem HasSuppConvData.toOnLegacy
     (inp : MetricCompactnessInputs (I := I) X)
     (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k))
@@ -2791,8 +2667,6 @@ theorem HasSuppConvData.toOnLegacy
     letI : T2Space (TangentBundle I Y.M) := Y.t2TangentBundle
     simpa only [legacyChartFamily, legacyTransition_eq] using hsmooth alpha target k
 
-/-- Projects the normalized weight family on one retained source domain for
-an arbitrary coherent chart family. -/
 theorem HasSuppConvDataOn.weight_on
     (inp : MetricCompactCore (I := I) X)
     (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k))
@@ -2830,8 +2704,6 @@ theorem HasSuppConvDataOn.weight_on
       hweightInfC, _hweightConv⟩
   exact ⟨hweightInfC, hweight alpha⟩
 
-/-- Projects one retained source domain and its nested compact cores from a
-chart-parametric support package. -/
 theorem HasSuppConvDataOn.core_on
     (inp : MetricCompactCore (I := I) X)
     (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k))
@@ -2859,8 +2731,6 @@ theorem HasSuppConvDataOn.core_on
       _hlim, _hweight, _htrans, _hsmooth⟩
   exact ⟨hU alpha, hC0 alpha, hC1 alpha, hC01 alpha, hC1U alpha⟩
 
-/-- Projects the radius and geometric maps-to data for one source slot from a
-chart-parametric support package. -/
 theorem HasSuppConvDataOn.geom_on
     (inp : MetricCompactCore (I := I) X)
     (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k))
@@ -2904,8 +2774,6 @@ theorem HasSuppConvDataOn.geom_on
       _hlim, _hweight, _htrans, _hsmooth⟩
   exact (hgeom k).1 alpha
 
-/-- Preserves the provider-native source-support package under strict
-refinement. -/
 theorem HasSuppConvDataOn.subseq
     (inp : MetricCompactCore (I := I) X)
     (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k))
@@ -2962,7 +2830,6 @@ theorem HasSuppConvDataOn.subseq
   · intro alpha target k
     simpa only [NetLimitData.subseq_phi, Function.comp_apply,
       seqCenterD_subseq] using hsmooth alpha target (ψ k)
-
 
 end HCGCompactness
 end DifferentialGeometry

@@ -1,14 +1,6 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.C4.StepCAverageBasic
 set_option autoImplicit false
 
-
-
-
-
-
-
-
-
 noncomputable section
 
 universe u uE uH uX uY
@@ -31,8 +23,6 @@ variable {H : Type uH} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type u} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
   [T2Space M] [T2Space (TangentBundle I M)] [SigmaCompactSpace M]
   [ConnectedSpace M] [T3Space M]
-
-
 
 namespace centerAverage
 
@@ -88,8 +78,6 @@ theorem unif_tendsto {s : Set X} {qstar : X → M}
     _ = ε / 2 := by ring
     _ < ε := by linarith
 
-
-
 theorem unif_tendsto_i {s : Set X} {qstar : X → M}
     {μSeq : ℕ → X → ι → ℝ} {ptsSeq : ℕ → X → ι → M}
     {pSeq : ℕ → X → M} {rSeq : ℕ → X → ℝ}
@@ -128,8 +116,6 @@ theorem unif_tendsto_i {s : Set X} {qstar : X → M}
   exact hfin.mono fun n hn x hx i => by
     exact hn i x hx
 
-
-
 theorem unif_tendsto_id {s : Set M}
     {μSeq : ℕ → M → ι → ℝ} {ptsSeq : ℕ → M → ι → M}
     {pSeq : ℕ → M → M} {rSeq : ℕ → M → ℝ}
@@ -157,9 +143,6 @@ theorem unif_tendsto_id {s : Set M}
     ⟨g.inner, g.contMDiff.continuous, fun _ _ _ => rfl⟩
   letI : MetricSpace M := HopfRinow.riemMetricSpace (I := I) (M := M)
   exact unif_tendsto_i (I := I) (g := g) (join := join) hSeq hpts
-
-
-
 
 theorem unif_two_index {s : Set X} {qstar : X → M}
     {μSeq : ℕ → ℕ → X → ι → ℝ} {ptsSeq : ℕ → ℕ → X → ι → M}
@@ -212,8 +195,6 @@ theorem unif_two_index {s : Set X} {qstar : X → M}
     _ = ε / 2 := by ring
     _ < ε := by linarith
 
-
-
 theorem unif_two_index_i {s : Set X} {qstar : X → M}
     {μSeq : ℕ → ℕ → X → ι → ℝ} {ptsSeq : ℕ → ℕ → X → ι → M}
     {pSeq : ℕ → ℕ → X → M} {rSeq : ℕ → ℕ → X → ℝ}
@@ -252,8 +233,6 @@ theorem unif_two_index_i {s : Set X} {qstar : X → M}
     exact Finset.le_sup (s := Finset.univ) (f := N) (Finset.mem_univ i)
   exact hN i k (le_trans hNi hk) l (le_trans hNi hl) x hx
 
-
-
 theorem unif_two_index_id {s : Set M}
     {μSeq : ℕ → ℕ → M → ι → ℝ} {ptsSeq : ℕ → ℕ → M → ι → M}
     {pSeq : ℕ → ℕ → M → M} {rSeq : ℕ → ℕ → M → ℝ}
@@ -283,8 +262,6 @@ theorem unif_two_index_id {s : Set M}
     ⟨g.inner, g.contMDiff.continuous, fun _ _ _ => rfl⟩
   letI : MetricSpace M := HopfRinow.riemMetricSpace (I := I) (M := M)
   exact unif_two_index_i (I := I) (g := g) (join := join) hSeq hpts
-
-
 
 theorem unif_two_id_fill {s : Set M}
     {μSeq : ℕ → ℕ → M → ι → ℝ} {ptsSeq : ℕ → ℕ → M → ι → M}
@@ -323,8 +300,6 @@ theorem unif_two_id_fill {s : Set M}
   by_cases hzero : μSeq k l x i = 0
   · simpa [activeFill, hzero] using hε
   · simpa [activeFill, hzero] using hN k hk l hl x hx hzero
-
-
 
 theorem unif_two_id_fill_on {s : Set M}
     {μSeq : ℕ → ℕ → M → ι → ℝ} {ptsSeq : ℕ → ℕ → M → ι → M}
@@ -387,8 +362,6 @@ theorem unif_two_id_fill_on {s : Set M}
         (qstar := x) (ε := ε / 4) (le_of_lt hquarter) hnear
   rw [centerAverageOn, dif_pos hx, dist_comm]
   exact lt_of_le_of_lt hdist (by nlinarith)
-
-
 
 theorem unifTwoIdOfFill {s : Set M}
     {μSeq : ℕ → ℕ → M → ι → ℝ} {ptsSeq : ℕ → ℕ → M → ι → M}
@@ -458,8 +431,6 @@ theorem unifTwoIdOfFill {s : Set M}
       (hstrict k l x))
     hpts
 
-
-
 theorem unifTwoIdOfFillOn {s : Set M}
     {μSeq : ℕ → ℕ → M → ι → ℝ} {ptsSeq : ℕ → ℕ → M → ι → M}
     {pSeq : ℕ → ℕ → M → M} {rSeq : ℕ → ℕ → M → ℝ}
@@ -527,12 +498,6 @@ theorem unifTwoIdOfFillOn {s : Set M}
       (hqstar k l x hx) (hactive_mem k l x hx) (hμ_nonneg k l x hx)
       (hμ_pos k l x hx) (hstrict k l x hx))
     hpts
-
-
-
-
-
-
 
 end centerAverage
 end HCGCompactness

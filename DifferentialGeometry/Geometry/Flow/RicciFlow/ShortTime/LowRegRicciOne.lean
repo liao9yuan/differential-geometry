@@ -4,14 +4,6 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.UnifCoeffH2
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.IteratedCovGradFibreNormPermutationInvariance
 import DifferentialGeometry.Analysis.Sobolev.TensorHilbert.RicciConnDiffOrder1TameEnvelope
 
-/-!
-# Low-regularity order-one Ricci coefficient
-
-This file proves the dimension-three `H2` jet estimate for the concrete
-order-one connection-difference coefficient in the Ricci linearization.  The
-proof uses only the metric perturbation jet through order three.
--/
-
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
@@ -415,10 +407,6 @@ private theorem kernel_h2
     _ ≤ 25 * A ^ 2 := mul_le_mul_of_nonneg_left hA (by norm_num)
     _ = (5 * A) ^ 2 := by ring
 
-/-- On a closed three-manifold, the concrete order-one Ricci
-connection-difference coefficient has a tame intrinsic `H2` bound.  The
-moving-trace factor depends only on the lower metric `H2` radius, while the
-third metric derivative enters through one affine top-order arm. -/
 theorem ricci1_h2_tame
     (hDim : Module.finrank ℝ E = 3)
     (g₀ : SmoothRiemannianMetric I M) {δ₀ : ℝ} (hδ₀ : δ₀ < 1) :
@@ -580,10 +568,6 @@ theorem ricci1_h2_tame
   rw [← hfactor]
   exact hout
 
-/-- On a closed three-manifold, the order-one Ricci connection-difference
-coefficient has a class-first tame intrinsic `H2` bound.  Its constants are
-selected from the fixed background, the uniform metric class, and the fibre
-smallness ceiling before the class metric varies. -/
 theorem ricci1_h2_unif_core
     {EU : Type*} [NormedAddCommGroup EU] [InnerProductSpace ℝ EU]
     [FiniteDimensional ℝ EU] [NeZero (Module.finrank ℝ EU)]
@@ -761,7 +745,6 @@ theorem ricci1_h2_unif_core
   rw [← hfactor]
   exact hout
 
-/-- One-parameter compatibility wrapper around `ricci1_h2_tame`. -/
 theorem ricci1_h2
     (hDim : Module.finrank ℝ E = 3)
     (g₀ : SmoothRiemannianMetric I M) {δ₀ : ℝ} (hδ₀ : δ₀ < 1) :

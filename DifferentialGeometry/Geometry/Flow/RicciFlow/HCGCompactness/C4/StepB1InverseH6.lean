@@ -4,14 +4,6 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.C4.StepCStage
 
 set_option autoImplicit false
 
-/-!
-# H6-provider exact inverse chart tails for Step B1
-
-The forward comparison map and both coordinate readouts use the same H6
-`NormalChartFamily`.  Target membership supplied by the stage-jet package is
-used explicitly whenever the chart inverse is decoded.
--/
-
 noncomputable section
 
 universe u uE uH
@@ -37,9 +29,7 @@ variable {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
 
 set_option maxHeartbeats 3000000 in
 set_option synthInstance.maxHeartbeats 1200000 in
-/-- Along cofinal stage sequences, the exact inverse of the H6-provider
-coordinate comparison map converges smoothly to the identity near every
-compact target core. -/
+
 theorem H6NormalData.inv_chart_conv
     (inp : MetricCompactCore (I := I) X)
     (d : H6NormalData (I := I) X inp.decay)

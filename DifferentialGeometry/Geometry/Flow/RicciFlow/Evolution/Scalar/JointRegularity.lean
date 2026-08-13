@@ -3,15 +3,6 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.Scalar.TraceAlgebr
 
 set_option autoImplicit false
 
-
-
-
-
-
-
-
-
-
 noncomputable section
 
 open Bundle Filter Set
@@ -30,8 +21,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
   [IsManifold I ∞ M] [SigmaCompactSpace M] [T2Space M]
 
 private local instance : CompleteSpace E := FiniteDimensional.complete Real E
-
-
 
 theorem scalar_joint
     {D : RealTimeInterval} (S : SolutionOn (I := I) (M := M) D)

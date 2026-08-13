@@ -2,15 +2,6 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.UnifCurvature
 import DifferentialGeometry.Geometry.Curvature.Bochner.PointwiseTensorCurvFirstOrderBound
 import DifferentialGeometry.Analysis.Spectral.Tensor.SobolevScale.UnifBochnerGap
 
-/-!
-# Explicit rank-two curvature action for the metric class
-
-This module combines the class-uniform tangent `R` and `nabla R` caps with the
-native supplied-cap pointwise commutator estimate.  The result is the exact
-rank-two, order-zero package used by the finite `H^2` realization route; no
-all-order curvature family enters.
--/
-
 noncomputable section
 
 open Bundle Manifold MeasureTheory Set Filter Tensor0SBundle
@@ -32,22 +23,16 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
   [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
   [T2Space M] [SigmaCompactSpace M]
 
-/-- The closed rank-two curvature-action coefficient determined by the class
-parameter and the supplied fixed-background `R` and `nabla R` caps. -/
 noncomputable def unifPtCurvZeroC (d : ℕ) (Λ Kb₀ Kb₁ : ℝ) : ℝ :=
   ptCurvZeroC d
     (Λ ^ 2 * (riemannDiffC Λ Λ Λ + Real.sqrt Kb₀))
     (rmOneOpC Λ Kb₀ Kb₁)
 
-/-- The closed rank-three curvature-action coefficient determined by the class
-parameter and the supplied fixed-background `R` and `∇R` caps. -/
 noncomputable def unifPtCurvThreeC (d : ℕ) (Λ Kb₀ Kb₁ : ℝ) : ℝ :=
   ptCurvRankC d 3
     (Λ ^ 2 * (riemannDiffC Λ Λ Λ + Real.sqrt Kb₀))
     (rmOneOpC Λ Kb₀ Kb₁)
 
-/-- The class metric jets through order three produce the exact rank-two,
-order-zero curvature-action package needed by the finite `H^2` comparison. -/
 theorem unifCurvAction0_of
     (gBase g₀ : SmoothRiemannianMetric I M) {Λ Kb₀ Kb₁ : ℝ}
     (hΛ : 1 ≤ Λ)
@@ -84,8 +69,6 @@ theorem unifCurvAction0_of
   simpa only [unifPtCurvZeroC, Finset.sum_range_succ, Finset.sum_range_zero,
     iteratedCovGrad_zero, iteratedCovGrad_succ, Nat.add_zero, zero_add] using h
 
-/-- The class metric jets through order three produce the rank-three,
-order-zero curvature-action package needed by the finite `H^3` comparison. -/
 theorem unifCurvAction3_of
     (gBase g₀ : SmoothRiemannianMetric I M) {Λ Kb₀ Kb₁ : ℝ}
     (hΛ : 1 ≤ Λ)

@@ -1,15 +1,6 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.LowRegGalerkinIdent
 import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.LowRegBgSolveAt
 
-/-!
-# Fixed-background Galerkin identification
-
-This module identifies a background-aware low forcing with the limit of its
-finite-dimensional projected forcings.  The Sobolev scale, eigenbasis, heat
-operator, and spectral projections remain attached to the state metric `g₀`;
-only `lowregNfun` uses the independent DeTurck background `g_bg`.
--/
-
 noncomputable section
 
 open Bundle Manifold MeasureTheory Set Filter
@@ -32,9 +23,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
   [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
   [T2Space M] [SigmaCompactSpace M]
 
-/-- A background-aware low forcing is the time-`L²(H¹)` limit of projected
-forcings on the state-metric eigenspaces, with the whole projected trajectory
-package retained for the energy argument. -/
 theorem lowreg_proj_atBg (g₀ g_bg : SmoothRiemannianMetric I M)
     (K : LowRegBoundData) {Rcap T : ℝ}
     (hT : 0 < T) (hT1 : T ≤ 1)
@@ -78,7 +66,7 @@ theorem lowreg_proj_atBg (g₀ g_bg : SmoothRiemannianMetric I M)
   set Nfun := lowregNfun (I := I) (M := M) g₀ g_bg hlo.hδ hlo.hCtop hlo.hB1
     hlo.hρ hlo.hP hlo.hreal
     with hNfundef
-  -- the three tame coefficients, in the normalised form `partial_sol_tame` wants
+
   set A : ℝ≥0 := Real.toNNReal (K.top * lowregOuterRad K.top K.outer K.realize / R) with hAdef
   set B : ℝ≥0 := Real.toNNReal K.base with hBdef
   set C : ℝ≥0 := Real.toNNReal K.slope with hCdef
@@ -115,12 +103,11 @@ theorem lowreg_proj_atBg (g₀ g_bg : SmoothRiemannianMetric I M)
     rw [hAR, hBcoe, hCcoe]
     exact hlo.htame u u'
   have hDnn : 0 ≤ K.zeroBd := le_trans (norm_nonneg _) hlo.hzero
-  -- the horizon cap, read off the closed formula
+
   have hTB : T ≤ 1 / (64 * ((B : ℝ) + 1) ^ 2) := by
     rw [hBcoe]
     exact le_trans hlo.hTτ (le_trans (min_le_right _ _) (min_le_left _ _))
-  -- for every truncation level, the projected solve produces a `V_N` forcing
-  -- whose distance to `fLo` is at most twice the truncation defect of `fLo`
+
   have hex : ∀ N : ℕ,
       ∃ gforce : timeL2 (tensorHs (I := I) (M := M) g₀ 0 2 ((1 : ℕ) : ℝ)) T,
         (timeL2EigenProj (I := I) (M := M) g₀ ((1 : ℕ) : ℝ) T N gforce =
@@ -170,8 +157,6 @@ theorem lowreg_proj_atBg (g₀ g_bg : SmoothRiemannianMetric I M)
   choose fseq hpack hK using hex
   exact ⟨fseq, projFix_tendsto (I := I) (M := M) g₀ (K := 2) fLo fseq hK, hpack⟩
 
-/-- Pointwise mode convergence for the background-aware projected sequence at
-one explicit low-solve packet. -/
 theorem lowreg_projMode_atBg (g₀ g_bg : SmoothRiemannianMetric I M)
     (K : LowRegBoundData) {Rcap T : ℝ}
     (hT : 0 < T) (hT1 : T ≤ 1)

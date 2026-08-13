@@ -3,14 +3,6 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.MovingShiProd
 
 set_option autoImplicit false
 
-
-
-
-
-
-
-
-
 noncomputable section
 
 namespace DifferentialGeometry.PDE.RicciFlow
@@ -28,9 +20,6 @@ variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners Real E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
     [IsManifold I ∞ M] [CompactSpace M] [BoundarylessManifold I M]
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
-
-
-
 
 theorem covTailBoundSol
     {alpha omega : Real} {hAlphaOmega : alpha < omega}

@@ -1,14 +1,5 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.LowRegBgRungThree
 
-/-!
-# The fixed-background fourth low-regularity Galerkin energy rung
-
-This module ports the rung-four Galerkin arm estimate and energy closure to an
-independent fixed DeTurck background `g_bg`.  The Sobolev scale, eigenbasis,
-Galerkin trajectory, and all energy quantities remain attached to the state
-metric `g₀`.
--/
-
 noncomputable section
 
 open Bundle Manifold MeasureTheory Set Filter
@@ -43,7 +34,7 @@ private theorem mul4Le {a b c d A B C D : ℝ}
     hd hd0 (mul_nonneg (mul_nonneg hA0 hB0) hC0)
 
 set_option linter.unusedSectionVars false in
-/-- The `q = 3` forcing-arm slot at an arbitrary fixed DeTurck background. -/
+
 theorem armOrder3Bg (hDim : Module.finrank ℝ E = 3)
     (g g_bg : SmoothRiemannianMetric I M) :
     ∃ Atop Ar2 Ar1 Krem : ℝ,
@@ -326,9 +317,6 @@ theorem armOrder3Bg (hDim : Module.finrank ℝ E = 3)
       dsimp only [Q, A, B, C, D]
       ring
 
-/-- The ordered rung-four spectral-arm certificate at an arbitrary fixed
-DeTurck background.  Its four gate constants are selected before the solve
-radius, fibre threshold, realization, and prior rung-three cap. -/
 theorem galArmMass4OrdBg (hDim : Module.finrank ℝ E = 3)
     (g₀ g_bg : SmoothRiemannianMetric I M) :
     ∃ Ctop Kr2 Kr1 Kcap : ℝ,
@@ -534,10 +522,6 @@ theorem galArmMass4OrdBg (hDim : Module.finrank ℝ E = 3)
   ring_nf
   exact le_rfl
 
-/-! ### The fixed-background rung-four endpoint and its explicit package -/
-
-/-- The `N`-uniform `H⁴` Galerkin energy bound at an arbitrary fixed DeTurck
-background.  The prior-rung input is a common pointwise `H³` cap. -/
 theorem lowregRung4OrdBg (hDim : Module.finrank ℝ E = 3)
     (g₀ g_bg : SmoothRiemannianMetric I M) :
     ∃ Ctop₃ Kr2 Kr1 Kcap : ℝ,
@@ -697,7 +681,6 @@ theorem lowregRung4OrdBg (hDim : Module.finrank ℝ E = 3)
     ring
   rw [hz]
 
-/-- One explicit ordered fixed-background rung-four certificate. -/
 def IsRung4OrdBg (g₀ g_bg : SmoothRiemannianMetric I M)
     (Ctop₃ Kr2 Kr1 Kcap : ℝ) : Prop :=
   0 ≤ Ctop₃ ∧ 0 ≤ Kr2 ∧ 0 ≤ Kr1 ∧ 0 ≤ Kcap ∧
@@ -737,8 +720,6 @@ def IsRung4OrdBg (g₀ g_bg : SmoothRiemannianMetric I M)
           galerkinEnergy (I := I) (M := M)
             (eigenIdxFinset (I := I) (M := M) g₀ N) (U N) 4 t ≤ Φ
 
-/-- Package the ordered fixed-background rung-four witnesses without erasing
-their coherence. -/
 theorem lowregRung4PackBg (hDim : Module.finrank ℝ E = 3)
     (g₀ g_bg : SmoothRiemannianMetric I M) :
     ∃ Ctop₃ Kr2 Kr1 Kcap : ℝ,

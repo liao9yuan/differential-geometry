@@ -4,14 +4,6 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.C4.NormalPhas
 
 set_option autoImplicit false
 
-
-
-
-
-
-
-
-
 noncomputable section
 
 universe u uE uH
@@ -32,8 +24,6 @@ variable [NormedSpace Real E] [FiniteDimensional Real E] [CompleteSpace E]
 variable [NeZero (Module.finrank Real E)]
 variable {I : ModelWithCorners Real E H} [I.Boundaryless]
 
-
-
 theorem normalPhaseVF_eq
     (Y : PointedRiemannianManifold.{u, uE, uH} (I := I))
     (x : Y.M) (a : E) (z : E × E) :
@@ -45,8 +35,6 @@ theorem normalPhaseVF_eq
     (g := normalTotal (I := I) Y x) (a := a)
     (z := z.1) (v := z.2) (w := z.2)]
   rfl
-
-
 
 theorem normalPhase_contDiff
     (Y : PointedRiemannianManifold.{u, uE, uH} (I := I)) (x : Y.M) :
@@ -62,8 +50,6 @@ theorem normalPhase_contDiff
     simpa only [extChartAt_model_space_eq_id, PartialEquiv.refl_target,
       interior_univ, Set.univ_prod_univ] using heq
   exact contDiffOn_univ.mp heq'
-
-
 
 theorem normalGeoOn_of_phase
     (Y : PointedRiemannianManifold.{u, uE, uH} (I := I))
@@ -114,8 +100,6 @@ theorem normalGeoOn_of_phase
     rw [← hneg]
     abel
 
-
-
 theorem normalGeoOn_of_right
     (Y : PointedRiemannianManifold.{u, uE, uH} (I := I))
     (x : Y.M) {Z : Real → E × E} {a b : Real} (hab : a < b)
@@ -132,8 +116,6 @@ theorem normalGeoOn_of_right
   intro t ht
   exact hasDerivAt_of_right hab hZcont hfield hZright ht
 
-
-
 theorem normalFlow_contDiff
     (Y : PointedRiemannianManifold.{u, uE, uH} (I := I))
     (x : Y.M) {Z : Real → E × E} {a b : Real} (hab : a < b)
@@ -143,8 +125,6 @@ theorem normalFlow_contDiff
       (Set.Ici t) t) :
     ContDiffOn Real ∞ Z (Set.Ioo a b) :=
   contDiffOn_of_right hab (normalPhase_contDiff (I := I) Y x) hZcont hZright
-
-
 
 theorem normalFlow_geoOn
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
@@ -194,8 +174,6 @@ variable {M : Type u} [TopologicalSpace M] [ChartedSpace H M]
 variable [IsManifold I ∞ M] [SigmaCompactSpace M] [T2Space M]
 variable [T2Space (TangentBundle I M)]
 
-/-- The chart geodesic phase field of a controlled normal-chart provider is
-the first-order phase field associated to its acceleration. -/
 theorem chartPhaseVF_eq (g : SmoothRiemannianMetric I M) {p : M}
     (c : NormalBallChart (I := I) p) (a : E) (z : E × E) :
     Geodesic.chartPhaseVF (I := 𝓘(Real, E))
@@ -207,8 +185,6 @@ theorem chartPhaseVF_eq (g : SmoothRiemannianMetric I M) {p : M}
     (z := z.1) (v := z.2) (w := z.2)]
   rfl
 
-/-- The phase field of a controlled normal-chart provider is globally smooth
-on the model phase space. -/
 theorem chartPhase_contDiff (g : SmoothRiemannianMetric I M) {p : M}
     (c : NormalBallChart (I := I) p) :
     ContDiff Real ∞
@@ -224,8 +200,6 @@ theorem chartPhase_contDiff (g : SmoothRiemannianMetric I M) {p : M}
       interior_univ, Set.univ_prod_univ] using heq
   exact contDiffOn_univ.mp heq'
 
-/-- A provider-phase trajectory has a geodesic first component on every open
-time set on which it solves the phase equation. -/
 theorem chartGeoOn_of_phase (g : SmoothRiemannianMetric I M) {p : M}
     (c : NormalBallChart (I := I) p)
     {Z : Real → E × E} {s : Set Real} (hs : IsOpen s)
@@ -275,8 +249,6 @@ theorem chartGeoOn_of_phase (g : SmoothRiemannianMetric I M) {p : M}
     rw [← hneg]
     abel
 
-/-- A continuous provider-phase trajectory satisfying the one-sided ODE
-interface is geodesic on the open time interval. -/
 theorem chartGeoOn_of_right (g : SmoothRiemannianMetric I M) {p : M}
     (c : NormalBallChart (I := I) p)
     {Z : Real → E × E} {a b : Real} (hab : a < b)
@@ -293,8 +265,6 @@ theorem chartGeoOn_of_right (g : SmoothRiemannianMetric I M) {p : M}
   intro t ht
   exact hasDerivAt_of_right hab hZcont hfield hZright ht
 
-/-- A continuous fenced trajectory of a provider phase field is smooth on the
-interior of its time interval. -/
 theorem chartFlow_contDiff (g : SmoothRiemannianMetric I M) {p : M}
     (c : NormalBallChart (I := I) p)
     {Z : Real → E × E} {a b : Real} (hab : a < b)
@@ -305,8 +275,6 @@ theorem chartFlow_contDiff (g : SmoothRiemannianMetric I M) {p : M}
     ContDiffOn Real ∞ Z (Set.Ioo a b) :=
   contDiffOn_of_right hab (chartPhase_contDiff (I := I) g c) hZcont hZright
 
-/-- A fenced provider-phase trajectory is a geodesic for the provider's total
-metric on `(0, 1)`. -/
 theorem chartFlow_geoOn (g : SmoothRiemannianMetric I M) {p : M}
     (c : NormalBallChart (I := I) p) (b : c.MetricBounds g)
     {r : Real}

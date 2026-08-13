@@ -6,18 +6,6 @@ import DifferentialGeometry.Geometry.Operator.HessianTraceRealization
 
 set_option autoImplicit false
 
-
-
-
-
-
-
-
-
-
-
-
-
 noncomputable section
 
 namespace DifferentialGeometry.PDE.RicciFlow
@@ -34,7 +22,6 @@ variable {I : ModelWithCorners Real E H} [I.Boundaryless]
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 variable [IsManifold I 1 M]
 variable [CompleteSpace E] [SigmaCompactSpace M] [T2Space M]
-
 
 private theorem sum_swap_four_local
     {Idx : Type*} [Fintype Idx] {R : Type*} [AddCommMonoid R]
@@ -58,7 +45,6 @@ private theorem sum_swap_four_local
             _ = ∑ b : Idx, ∑ i : Idx, ∑ j : Idx, F i j a b := by
                   rw [Finset.sum_comm]
 
-
 omit [I.Boundaryless] in
 omit [SigmaCompactSpace M] [T2Space M] in
 private theorem connSmoothInf
@@ -68,7 +54,6 @@ private theorem connSmoothInf
       (S.family.connection t) (∞ : WithTop ℕ∞) := by
   simpa [SolutionFamily.connection, metricCov] using
     metricCov_smooth (I := I) (M := M) (S.base.metric t)
-
 
 omit [I.Boundaryless] in
 omit [SigmaCompactSpace M] [T2Space M] in
@@ -81,7 +66,6 @@ private theorem isMetricCompatibleSol
     DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric_isMetricCompatible
       (I := I) (S.base.metric t)
 
-
 private def nablaRicField
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D) (t : Real) :
@@ -92,7 +76,6 @@ private def nablaRicField
     (totalNabla0S_reg (E := E) (H := H) (I := I) (M := M)
       2 (S.family.connection t) (connSmoothInf (I := I) S t) (S.ricci t))
 
-
 private def nabla2RicField
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D) (t : Real)
@@ -100,9 +83,6 @@ private def nabla2RicField
     Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) 4 x :=
   totalNabla0SFun (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
     3 (S.family.connection t) (nablaRicField (I := I) S t) x
-
-
-
 
 omit [I.Boundaryless] in
 theorem coordNab2Ric_eq_nabla2RicField
@@ -311,9 +291,6 @@ theorem coordNab2Ric_eq_nabla2RicField
   unfold DifferentialGeometry.PDE.RicciFlow.ricciSecondCovDerivCompInFrame
   ring
 
-
-
-
 theorem scalarLaplacianTraceInFrame_coord_eq_laplacianAt
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -454,9 +431,6 @@ theorem scalarLaplacianTraceInFrame_coord_eq_laplacianAt
   refine Finset.sum_congr rfl fun j _ => ?_
   ring
 
-
-
-
 omit [I.Boundaryless] in
 private theorem coordScalarRmTrace_center
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
@@ -544,8 +518,6 @@ private theorem coordScalarRmTrace_center
     ricciCompInFrame, ricciTwoTensorField,
     SolutionOn.ricciAt, SolutionFamily.ricciAt] using hmain
 
-
-
 omit [I.Boundaryless] in
 private theorem coordScalarTraceDerivRHS_center
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
@@ -627,9 +599,6 @@ private theorem coordScalarTraceDerivRHS_center
   rw [hsplit, hdt, hrm, hquad]
   ring
 
-
-
-
 private theorem coordScalarTrace_hasDerivWithinAt_center
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -705,11 +674,6 @@ private theorem coordScalarTrace_hasDerivWithinAt_center
                     exact hInv.mul hRic))))
   refine hbase.congr_deriv ?_
   exact coordScalarTraceDerivRHS_center (I := I) S hS x₀ t
-
-
-
-
-
 
 theorem scalarEvolution_of_isSolution
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}

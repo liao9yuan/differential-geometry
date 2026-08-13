@@ -6,13 +6,6 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.MetricCovDeri
 
 set_option autoImplicit false
 
-/-!
-# Provider-native intrinsic metric tails for Step B1
-
-The coordinate covariant-derivative tower is formed from the H6 chart metric
-and the stage comparison map read through the same H6 chart family.
--/
-
 noncomputable section
 
 universe u uE uH
@@ -35,8 +28,6 @@ variable {H : Type uH} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H} [I.Boundaryless]
 variable {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
 
-/-- On a smaller source ball, one rectangular pair-index tail controls every
-component of the pullback-metric covariant-derivative tower in the H6 charts. -/
 theorem H6NormalData.cov_comp_tail
     (inp : MetricCompactCore (I := I) X)
     (d : H6NormalData (I := I) X inp.decay)
@@ -859,9 +850,6 @@ private theorem chart_local_norm_le
         Gamma base a (z : E) slots| := congrArg abs hres
     _ ≤ bnd := by simpa only [e, Gamma, base] using hcomp slots
 
-/-- A smooth realization of the actual stage pullback metric has uniformly
-small intrinsic metric-difference seminorms on every strictly smaller retained
-source ball, using the same H6 chart provider as the stage map. -/
 theorem H6NormalData.fwd_norm_tail
     (inp : MetricCompactCore (I := I) X)
     (d : H6NormalData (I := I) X inp.decay)
@@ -1203,9 +1191,6 @@ theorem H6NormalData.fwd_norm_tail
       let afin : Fin (p + 1) := ⟨a, Nat.lt_succ_iff.mpr ha⟩
       simpa only [fac, afin, mul_assoc] using hbudget afin
 
-/-- A pair-local smooth realization of the exact H6-provider inverse
-pullback metric has uniformly small intrinsic metric-difference seminorms on
-the image of every strictly smaller retained source ball. -/
 theorem H6NormalData.inv_norm_tail
     (inp : MetricCompactCore (I := I) X)
     (d : H6NormalData (I := I) X inp.decay)

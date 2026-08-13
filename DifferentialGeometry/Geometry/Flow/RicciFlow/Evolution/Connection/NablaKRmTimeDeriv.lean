@@ -5,26 +5,6 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.Basic.RicciNorm
 
 set_option autoImplicit false
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 noncomputable section
 
 namespace DifferentialGeometry.PDE.RicciFlow
@@ -41,9 +21,6 @@ variable {I : ModelWithCorners Real E H} [I.Boundaryless]
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 variable [IsManifold I 1 M]
 variable [CompleteSpace E] [SigmaCompactSpace M] [T2Space M]
-
-
-
 
 omit [NeZero (Module.finrank ℝ E)] in
 theorem realizedChr_hasDerivWithinAt
@@ -83,9 +60,6 @@ theorem realizedChr_hasDerivWithinAt
   christoffelEvolution_of_solution (I := I) S hS (coordInv (I := I) S x₀) gInvDt
     (coordinateFrameAt (I := I) x₀) (coordinateFrameAt_isLocalFrame_one (I := I) x₀)
     (coordinateFrameSet_open (I := I) x₀) hmetricFrame hSmooth hFdiff hFtdiff t x hx i a p
-
-
-
 
 omit [NeZero (Module.finrank ℝ E)] in
 theorem nablaKRm_timeDeriv_of_solution

@@ -1,6 +1,5 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Entropy.F.Functional
 
-
 set_option autoImplicit false
 
 namespace DifferentialGeometry.PDE.RicciFlow.Entropy
@@ -16,13 +15,6 @@ open scoped Manifold ContDiff
 
 variable {M : Type*}
 
-
-
-
-
-
-
-
 section Geometry
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]
@@ -32,9 +24,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
-
-
-
 
 theorem weightedIBP
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
@@ -93,9 +82,6 @@ theorem weightedIBP
       DifferentialGeometry.Integral.DivergenceTheorem.expNegIBP
         (I := I) g hpotential hlap hgrad
 
-
-
-
 omit [TopologicalSpace M] in
 theorem bracket_eq_closed_of_ibp [MeasurableSpace M]
     (mu : Measure M)
@@ -146,8 +132,6 @@ theorem bracket_eq_closed_of_ibp [MeasurableSpace M]
     _ =
       ∫ x, fFunctionalClosedBracket scalarCurvature lapPotential x ∂μw := by
         rfl
-
-
 
 theorem weightedGreen
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
@@ -222,9 +206,6 @@ theorem weightedGreen
       intro x
       ring
 
-
-
-
 theorem weightedDivZero
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     (g : SmoothRiemannianMetric I M)
@@ -258,7 +239,6 @@ theorem weightedDivZero
         DifferentialGeometry.Integral.DivergenceTheorem.integral_divergence_eq_zero_of_compact
           (I := I) g X
 
-
 omit [FiniteDimensional ℝ E] [IsManifold I ∞ M] in
 theorem expNegPotentialDensity_contMDiff
     {potential : M -> Real}
@@ -266,7 +246,6 @@ theorem expNegPotentialDensity_contMDiff
     ContMDiff I 𝓘(Real, Real) ∞ (expNegPotentialDensity potential) := by
   simpa [expNegPotentialDensity] using
     Real.contDiff_exp.contMDiff.comp hpotential.neg
-
 
 omit [FiniteDimensional ℝ E] in
 theorem tangentSectionAction_expNeg
@@ -293,10 +272,6 @@ theorem tangentSectionAction_expNeg
   have happly := congrArg (fun L => L (X x)) hmf
   simpa [smul_eq_mul] using happly
 
-
-
-
-
 def connTraceVec
     {potential : M -> Real}
     (hpotential : ContMDiff I 𝓘(Real, Real) ∞ potential)
@@ -305,8 +280,6 @@ def connTraceVec
   DifferentialGeometry.Integral.DivergenceTheorem.smoothSmul
     (I := I) (expNegPotentialDensity potential)
     (expNegPotentialDensity_contMDiff (I := I) hpotential) traceVec
-
-
 
 theorem connTraceDivEq
     [I.Boundaryless] [T2Space M]
@@ -342,8 +315,6 @@ theorem connTraceDivEq
   rw [hactionTrace x, hweighted x]
   ring
 
-
-
 theorem weightedDivZero_of_connTrace
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     (g : SmoothRiemannianMetric I M)
@@ -374,8 +345,6 @@ theorem weightedDivZero_of_connTrace
     (connTraceVec (I := I) hpotential traceVec) hmeas
     (connTraceDivEq (I := I) g hpotential traceVec hdivTrace
       hactionTrace hweighted)
-
-
 
 theorem weighted_grad_zero
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
@@ -410,8 +379,6 @@ theorem weighted_grad_zero
         (I := I) g hpotential
         (DifferentialGeometry.Integral.DivergenceTheorem.grad_g (I := I) g hq) x)
     (fun _ => rfl)
-
-
 
 theorem shiftIntEq
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
@@ -495,7 +462,6 @@ theorem shiftIntEq
       unfold expWeightedMeasureVariationFactor
       ring
 
-
 theorem expWeightedMeasureIntegral_hasDerivAt_at
     [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     (G : DifferentialGeometry.Integral.Connection.RealizedMetricFamily (I := I) (M := M) Real)
@@ -572,7 +538,6 @@ theorem expWeightedMeasureIntegral_hasDerivAt_at
     expWeightedMeasureVariationFactor
   ring
 
-
 def fFunctionalBracketVariation
     (scalarCurvatureVariation gradPotentialNormSqVariation : M -> Real) :
     M -> Real :=
@@ -602,7 +567,6 @@ theorem fFunctionalBracket_hasDerivAt
   have h := (hscalar_deriv x).add (hgrad_deriv x)
   simpa [fFunctionalBracket, fFunctionalBracketVariation] using h
 
-
 omit [TopologicalSpace M] in
 theorem closedBracket_deriv
     {scalarCurvaturePath lapPotentialPath : Real -> M -> Real}
@@ -626,9 +590,6 @@ theorem closedBracket_deriv
       s0 := by
   have h := (hscalar_deriv x).add (hlap_deriv x)
   simpa [fFunctionalClosedBracket, fFunctionalClosedBracketVariation] using h
-
-
-
 
 theorem fFunctionalBaseIntegral_hasDerivAt_at
     [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
@@ -701,9 +662,6 @@ theorem fFunctionalBaseIntegral_hasDerivAt_at
       hscalar_deriv hgrad_deriv)
     htrace hmetric_reg hintegrand_reg
 
-
-
-
 theorem closedBase_deriv
     [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     (G : DifferentialGeometry.Integral.Connection.RealizedMetricFamily (I := I) (M := M) Real)
@@ -774,8 +732,6 @@ theorem closedBase_deriv
       hscalar_deriv hlap_deriv)
     htrace hmetric_reg hintegrand_reg
 
-
-
 omit [TopologicalSpace M] in
 theorem FFunctionalHasFirstVariationAt_of_baseIntegral_hasDerivAt
     [MeasurableSpace M]
@@ -807,7 +763,6 @@ theorem FFunctionalHasFirstVariationAt_of_baseIntegral_hasDerivAt
       gradPotentialNormSqPath potentialPath s0 firstVariation := by
   unfold FFunctionalHasFirstVariationAt fFunctionalAlong
   exact hbase.congr_of_eventuallyEq hbase_eq
-
 
 theorem FFunctionalHasFirstVariationAt_of_volumeVariation
     [T2Space M] [SigmaCompactSpace M] [CompactSpace M]

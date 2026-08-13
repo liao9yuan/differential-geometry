@@ -4,46 +4,10 @@ import DifferentialGeometry.Geometry.Metric.SmoothMetricFromCoeff
 set_option autoImplicit false
 set_option backward.isDefEq.respectTransparency false
 
-
-
-
-
-
-
-
-
-
-
-
-
-
 noncomputable section
 
 namespace DifferentialGeometry
 namespace HCGCompactness
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 theorem exists_diag_subseq
     (P : ℕ → (ℕ → ℕ) → Prop)
@@ -115,8 +79,6 @@ theorem exists_diag_subseq
       funext k; rw [Nat.add_comm]
     rw [hcomm]; exact hPtail
 
-
-
 section Realization
 
 open scoped Manifold ContDiff Topology
@@ -134,21 +96,12 @@ variable [IsManifold I 1 M] [IsManifold I 2 M]
 variable [VectorBundle Real E (TangentSpace I : M → Type _)]
 variable [ContMDiffVectorBundle 1 E (TangentSpace I : M → Type _) I]
 
-
-
-
 omit [CompleteSpace E] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [IsManifold I 2 M]
     [VectorBundle ℝ E (TangentSpace I : M → Type _)]
     [ContMDiffVectorBundle 1 E (TangentSpace I : M → Type _) I] in
 lemma frameVec_eq_tangentConst (x₀ : M) (i : Fin (Module.finrank Real E)) :
     Geometry.frameVec (I := I) x₀ i
       = tangentConstInChart (𝕜 := Real) (I := I) x₀ (Module.finBasis Real E i) := rfl
-
-
-
-
-
-
 
 lemma exists_tendsto_clm_of_basis_eval {W : Type*} [NormedAddCommGroup W] [NormedSpace Real W]
     [FiniteDimensional Real W] {n : ℕ} (b : Module.Basis (Fin n) Real W)
@@ -261,7 +214,6 @@ lemma exists_gm_symm_pos
     have hle : c * gRef.inner x v v ≤ gm x v v :=
       ge_of_tendsto (hev x v v) (Filter.Eventually.of_forall (fun m => hcle (φ m) x v))
     exact lt_of_lt_of_le (mul_pos hc (gRef.pos x v hv)) hle
-
 
 omit [I.Boundaryless] [IsManifold I 2 M] [VectorBundle ℝ E (TangentSpace I : M → Type _)]
     [ContMDiffVectorBundle 1 E (TangentSpace I : M → Type _) I] in

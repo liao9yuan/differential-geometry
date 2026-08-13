@@ -2,22 +2,6 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.MetricWkpData
 import Mathlib.Analysis.Calculus.MeanValue
 import Mathlib.Topology.MetricSpace.HolderNorm
 
-/-!
-# Uniform low-order Holder data for metric families
-
-The uniform short-time theorem assumes only covariant bounds through order
-three.  In the POU-weighted Euclidean chart model this is nevertheless enough
-for a uniform `C^{2,1/2}` bound.  The reason is elementary: the third Frechet
-derivative bounds the derivative of the second Frechet derivative, hence the
-second derivative is globally Lipschitz.  The same second derivative is
-globally bounded.  Interpolating those exponent-zero and exponent-one bounds
-gives global exponent-`1/2` Holder control, not merely control on the compact
-chart carrier.
-
-This is the data-side producer for the dimension-generic parabolic Holder
-route.  It does not use a high Sobolev norm and it does not use ellipticity.
--/
-
 noncomputable section
 
 open Bundle Manifold Set Tensor0SBundle
@@ -52,8 +36,6 @@ private local instance iterFDerivTargetNormedSpace (m : ℕ) :
   ContinuousMultilinearMap.normedSpace
 
 omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] in
-/-- A global bound on the next Frechet derivative makes an iterated Frechet
-derivative Lipschitz. -/
 private theorem iterFDeriv_lip
     {m : ℕ} {u : EuclN → ℝ} (hu : ContDiff ℝ (⊤ : ℕ∞) u)
     {C : ℝ} (hC : 0 ≤ C)
@@ -84,13 +66,6 @@ private theorem iterFDeriv_lip
     exact hnext x
 
 omit [BoundarylessManifold I M] in
-/-- Uniform intrinsic metric bounds through order three give simultaneous
-uniform `C^2` size and global exponent-`1/2` Holder control of the second Frechet
-derivative of every active POU-weighted metric-difference component.
-
-Both constants are chosen before the family index.  The Holder constant is
-also independent of the active chart and of the two covariant component
-indices. -/
 theorem metricDiff_c2half
     {ι : Type*}
     (gBase : SmoothRiemannianMetric I M)

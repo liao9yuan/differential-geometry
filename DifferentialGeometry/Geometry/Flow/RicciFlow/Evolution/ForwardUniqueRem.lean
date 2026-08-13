@@ -7,14 +7,6 @@ set_option linter.style.longLine false
 set_option linter.unusedSectionVars false
 set_option backward.isDefEq.respectTransparency false
 
-/-!
-# Tensorial evaluation of the forward-uniqueness remainder
-
-This file removes the two raw component carriers from `sdecRem`.  The componentwise
-`rmDotRem` is reconstructed as a genuine `(0,4)` tensor, while `gapDot` at the bundled
-Uhlenbeck speed is rewritten as two explicitly lowered tensor products.
--/
-
 noncomputable section
 
 namespace DifferentialGeometry.PDE.RicciFlow
@@ -36,7 +28,6 @@ section Fiber
 
 variable {Idx : Type*} [Fintype Idx] {x : M}
 
-/-- A `(0,4)` tensor is recovered from its components in any basis by `lowOfComp`. -/
 theorem lowOfComp_ext (g : SmoothRiemannianMetric I M)
     (b : Module.Basis Idx Real (TangentSpace I x))
     (c : Idx → Idx → Idx → Idx → Real)
@@ -55,8 +46,6 @@ theorem lowOfComp_ext (g : SmoothRiemannianMetric I M)
   rw [lowOfComp_eval]
   exact (hcomp (w 0) (w 1) (w 2) (w 3)).symm
 
-/-- Lowering a trilinear vector-valued map is the tensor reconstructed from its basis
-components.  The reconstruction metric is auxiliary; the resulting tensor is intrinsic. -/
 theorem lowerTri_low (g : SmoothRiemannianMetric I M)
     (q : Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) 2 x)
     (A : TangentSpace I x →L[Real] TangentSpace I x →L[Real] TangentSpace I x →L[Real]
@@ -77,8 +66,6 @@ section ComponentRemainder
 
 variable {Idx : Type*} [Fintype Idx]
 
-/-- The tensor reconstructed from `rmDotRem` splits into the intrinsic spatial remainder,
-the difference of the two quadratic blocks, and the difference of the two Ricci drifts. -/
 theorem rmDotRem_low
     (g₁ g₂ : SmoothRiemannianMetric I M)
     (T₂ : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
@@ -111,11 +98,7 @@ theorem rmDotRem_low
 variable [NeZero (Module.finrank Real E)]
 
 set_option maxHeartbeats 1000000 in
-/-- Pointwise squared-norm bound for the tensorized `rmDotRem`.
 
-The spatial term is bounded by `rmRemNormSq_le`; in particular its background inputs are
-the rank-`5` norm of `∇Rm₂` and the rank-`6` norm of the full `∇²Rm₂`.  The remaining
-arguments bound the already tensorized quadratic and drift differences. -/
 theorem rmDotRemSq_le
     (g₁ g₂ : SmoothRiemannianMetric I M)
     (T₂ : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
@@ -201,7 +184,6 @@ section ReLowerRemainder
 
 variable [NeZero (Module.finrank Real E)]
 
-/-- A `g`-orthonormal basis of one tangent fibre. -/
 private theorem rem_onFrame (g : SmoothRiemannianMetric I M) (x : M) :
     ∃ b : Module.Basis (Fin (Module.finrank Real (TangentSpace I x))) Real
         (TangentSpace I x),
@@ -225,7 +207,6 @@ private theorem rem_onFrame (g : SmoothRiemannianMetric I M) (x : M) :
   rw [← hinner]
   exact ob.inner_eq_ite i j
 
-/-- Coordinates in a `g`-orthonormal basis are the metric pairings with its vectors. -/
 private theorem rem_repr_inner {Idx : Type*} [Finite Idx] [DecidableEq Idx]
     (g : SmoothRiemannianMetric I M) {x : M}
     (basis : Module.Basis Idx Real (TangentSpace I x))
@@ -250,8 +231,7 @@ private theorem rem_repr_inner {Idx : Type*} [Finite Idx] [DecidableEq Idx]
     Finset.mem_univ, if_true]
 
 set_option maxHeartbeats 1000000 in
-/-- The last-slot re-lowering defect is the trace of the tensor product with the metric
-difference.  Consequently its squared norm carries one factor of `metricDiffSq`. -/
+
 theorem reLowerDefSq_le (g₁ g₂ : SmoothRiemannianMetric I M) {s : ℕ}
     (T : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
       (n := (∞ : WithTop ℕ∞)) (s + 1))
@@ -379,9 +359,6 @@ end ReLowerRemainder
 
 section LowerTriBound
 
-/-- Reversing the metric-difference carrier changes only its sign.  Under a
-two-sided metric comparison, its squared norm in the second metric is bounded
-by the standard rank-two comparison factor. -/
 theorem metricDiffSwap_le (g₁ g₂ : SmoothRiemannianMetric I M) (x : M)
     {C : Real} (hC : 1 ≤ C)
     (hequiv : ∀ v : TangentSpace I x,
@@ -398,8 +375,6 @@ theorem metricDiffSwap_le (g₁ g₂ : SmoothRiemannianMetric I M) (x : M)
 
 variable [NeZero (Module.finrank Real E)]
 
-/-- A rough Laplacian is one metric trace of the full second covariant
-derivative, so its squared norm costs the standard trace dimension factor. -/
 theorem roughLapSq_le (g : SmoothRiemannianMetric I M) {s : ℕ}
     (T : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
       (n := (∞ : WithTop ℕ∞)) s)
@@ -412,14 +387,11 @@ theorem roughLapSq_le (g : SmoothRiemannianMetric I M) {s : ℕ}
     (traceNormSq_le (I := I) (s := s) g x
       (metricNabla0S (I := I) g (metricNabla0S (I := I) g T) x))
 
-/-- The slot routing which realizes `lowerTri q A` as one metric trace of
-`(lowerTri g A) ⊗ q`. -/
 private def lowerTriPerm : Equiv.Perm (Fin 6) :=
   Equiv.ofBijective ![2, 3, 4, 0, 1, 5] (by decide)
 
 set_option maxHeartbeats 1000000 in
-/-- Lowering a trilinear vector-valued family by an arbitrary two-tensor costs the
-product of that two-tensor's norm and the norm of the same family lowered by `g`. -/
+
 theorem lowerTriSq_le (g : SmoothRiemannianMetric I M)
     {x : M}
     (Q : Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) 2 x)
@@ -501,8 +473,7 @@ theorem lowerTriSq_le (g : SmoothRiemannianMetric I M)
   simpa [P, mul_comm] using htr
 
 set_option maxHeartbeats 1000000 in
-/-- Pairing a trilinear family with the metric difference is the negative re-lowering
-defect of the same family lowered by the reference metric. -/
+
 theorem lowerTriDiffSq_le (g₁ g₂ : SmoothRiemannianMetric I M)
     {x : M}
     (A : TangentSpace I x →L[Real] TangentSpace I x →L[Real] TangentSpace I x →L[Real]
@@ -517,9 +488,7 @@ theorem lowerTriDiffSq_le (g₁ g₂ : SmoothRiemannianMetric I M)
     (lowerTriSq_le (I := I) g₁ (metricDiffAt (I := I) g₁ g₂ x) A)
 
 set_option maxHeartbeats 1000000 in
-/-- The metric-difference lowering can be estimated using the second metric's
-own lowering of the trilinear map, at the cost of a two-sided comparison
-constant. -/
+
 theorem lowerTriSwapSq_le (g₁ g₂ : SmoothRiemannianMetric I M)
     {x : M}
     (A : TangentSpace I x →L[Real] TangentSpace I x →L[Real] TangentSpace I x →L[Real]
@@ -579,8 +548,7 @@ theorem lowerTriSwapSq_le (g₁ g₂ : SmoothRiemannianMetric I M)
             metricDiffSq (I := I) g₁ g₂ x) := by ring
 
 set_option maxHeartbeats 1000000 in
-/-- The difference of the two own-lowered curvature tensors is controlled by
-the Kotschwar curvature difference plus the lowering gap. -/
+
 theorem ownRmDiffSq_le (g₁ g₂ : SmoothRiemannianMetric I M) (x : M)
     {BP : Real}
     (hP : normSq0S (I := I) g₁ x 4
@@ -678,8 +646,7 @@ theorem ownRmDiffSq_le (g₁ g₂ : SmoothRiemannianMetric I M) (x : M)
             metricDiffSq (I := I) g₁ g₂ x := by ring
 
 set_option maxHeartbeats 1000000 in
-/-- A traced, slot-permuted tensor product is controlled by the product of the two
-input squared norms. -/
+
 theorem traceProdSq_le (g : SmoothRiemannianMetric I M) {a b r : ℕ}
     (A : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
       (n := (∞ : WithTop ℕ∞)) a)
@@ -737,9 +704,6 @@ section GapRemainder
 
 variable {Idx : Type*} [Fintype Idx]
 
-/-- Lowering the actual raised Uhlenbeck speed by its own metric recovers the tensor whose
-frame components are the complete rough-Laplacian, quadratic, drift, and lowering-reaction
-right-hand side. -/
 theorem uhlSpeed_low
     (g : Real → SmoothRiemannianMetric I M)
     (basisAt : (y : M) → Module.Basis Idx Real (TangentSpace I y))
@@ -773,9 +737,6 @@ theorem uhlSpeed_low
   unfold uhlRaisedDeriv
   rw [inner_raiseAt]
 
-/-- At the real Uhlenbeck speed, `gapDot` is a sum of two genuine `(0,4)` tensors:
-`2 (Ric₁ - Ric₂) * Rm₂` and the metric difference paired with the explicit raised
-Uhlenbeck right-hand side.  In particular no bare `uhlRm2Vec` remains. -/
 theorem gapDot_uhl
     (g₁ g₂ : Real → SmoothRiemannianMetric I M)
     (basisAt : (y : M) → Module.Basis Idx Real (TangentSpace I y))

@@ -4,13 +4,6 @@ import DifferentialGeometry.Geometry.Connection.LeviCivita.PullbackConnection
 import DifferentialGeometry.Geometry.Curvature.CurvatureOperator.Defs
 import DifferentialGeometry.Geometry.Curvature.CurvatureOperator.CurvatureBundling
 
-
-
-
-
-
-
-
 namespace DifferentialGeometry.PDE.RicciFlow.Pullback
 
 open Bundle
@@ -23,18 +16,6 @@ variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 variable [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M]
-
-
-
-
-
-
-
-
-
-
-
-
 
 omit [NeZero (Module.finrank ℝ E)] in
 theorem riemann_pullback_conjugation

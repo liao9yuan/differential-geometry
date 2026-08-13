@@ -4,29 +4,6 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.NablaRiemannReacti
 
 set_option autoImplicit false
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 noncomputable section
 
 namespace DifferentialGeometry.PDE.RicciFlow
@@ -42,13 +19,6 @@ variable {I : ModelWithCorners Real E H} [I.Boundaryless]
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 variable [IsManifold I 1 M] [IsManifold I 2 M]
 variable [CompleteSpace E] [SigmaCompactSpace M] [T2Space M]
-
-
-
-
-
-
-
 
 def nablaKRmFrozenSlotField
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
@@ -70,7 +40,6 @@ theorem nablaKRmFrozenSlotField_apply_vec
     nablaKRmFrozenSlotField (I := I) S t k q Y x (fun _ : Fin 1 => W) =
       nablaKRm04Field (I := I) S t k x (Function.update (fun i : Fin (4 + k) => Y i x) q W) :=
   freezeAllBut0SField_apply_vec (I := I) (M := M) (nablaKRm04Field (I := I) S t k) q Y x W
-
 
 def nablaKRmNablaFrozenSlotField
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
@@ -102,8 +71,6 @@ theorem nablaKRmNablaFrozenSlotField_realizes
       (nablaKRmFrozenSlotField (I := I) S t k q Y))
 
 set_option backward.isDefEq.respectTransparency false in
-
-
 
 omit [I.Boundaryless] in
 omit [SigmaCompactSpace M] in
@@ -187,10 +154,6 @@ theorem nablaKRmFrozenSlotSharp_mdiffAt
     (β := fun y : M => nablaKRmFrozenSlotField (I := I) S t k q Y y)
     (fun α j => nablaKRmFrozenSlot_chartBasis_contMDiffOn (I := I) S t k q Y α j) x
 
-
-
-
-
 omit [SigmaCompactSpace M] in
 theorem nablaKRmFrozenSlot_eval
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
@@ -232,9 +195,6 @@ theorem nablaKRmFrozenSlot_eval
   rw [hBval, hAval]
   exact allBut0SFreezeNabla (I := I) (S.family.connection (t : Real)) hcov
     (nablaKRm04Field (I := I) S (t : Real) k) q X Y hYzero U
-
-
-
 
 def nablaKRmRaiseSlotSections
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
@@ -367,17 +327,12 @@ theorem nablaKRmRaise_summand_covDeriv
   rw [hcorr] at heval
   linarith [heval]
 
-
-
-
 def nablaKSlotSections {k : ℕ}
     (Vb Vc : ContMDiffSection I E (∞ : WithTop ℕ∞) (TangentSpace I : M → Type _))
     (Vm : Fin (4 + k) → ContMDiffSection I E (∞ : WithTop ℕ∞)
       (TangentSpace I : M → Type _)) :
     Fin (4 + (k + 2)) → ContMDiffSection I E (∞ : WithTop ℕ∞) (TangentSpace I : M → Type _) :=
   Fin.cons Vb (Fin.cons Vc Vm)
-
-
 
 omit [FiniteDimensional ℝ E] [I.Boundaryless] [IsManifold I ∞ M]
     [IsManifold I 2 M] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
@@ -393,12 +348,6 @@ theorem nablaKSlotSections_apply {k : ℕ}
   · refine Fin.cases ?_ (fun l => ?_) j
     · rfl
     · rfl
-
-
-
-
-
-
 
 omit [Module.Finite ℝ E] in
 omit [I.Boundaryless] in
@@ -529,16 +478,6 @@ theorem nablaK_antisym_eq_covDeriv_curvatureAction
       (Vb y) (Vc y) (fun i : Fin (4 + k) => Vm i y)
   rw [hfield]
 
-
-
-
-
-
-
-
-
-
-
 omit [Module.Finite ℝ E] in
 theorem nablaK_antisym_eq_rm04_raise_leibniz
     [FiniteDimensional Real E]
@@ -636,22 +575,9 @@ theorem nablaK_antisym_eq_rm04_raise_leibniz
   rw [hg_def]
   exact nablaKRmRaise_summand_covDeriv (I := I) S t x₀ k q X Vb Vc Vm hVb hVc (fun i => hVm i)
 
-
-
 section AllKBound
 
 variable {n : ℕ}
-
-
-
-
-
-
-
-
-
-
-
 
 omit [Module.Finite ℝ E] in
 theorem abs_nablaK_antisym_covConst_le
@@ -852,10 +778,6 @@ theorem abs_nablaK_antisym_covConst_le
   push_cast
   ring
 
-
-
-
-
 omit [Module.Finite ℝ E] in
 theorem abs_nablaK_antisym_basis_le
     [FiniteDimensional Real E]
@@ -901,11 +823,6 @@ theorem abs_nablaK_antisym_basis_le
       funext fun i => (hVm i).symm]
   exact abs_nablaK_antisym_covConst_le (I := I) S hS t k x₀ basis horth Xa Vb Vc Vm
     a b c m hXa hVb hVc hVm (hVbcov Xa) (hVccov Xa) (fun i => hVmcov i Xa)
-
-
-
-
-
 
 omit [Module.Finite ℝ E] in
 theorem abs_spatialBracket_nablaKRm_ortho_le
@@ -975,11 +892,6 @@ theorem abs_spatialBracket_nablaKRm_ortho_le
       (Fin.cons j m')
   rw [← compNormSqMulti_eq_compNormSq4_basis (I := I) (S.base.rm04 (t : Real) x₀) basis] at hC
   exact hC
-
-
-
-
-
 
 omit [Module.Finite ℝ E] in
 theorem abs_spatialComm_nablaKRm_ortho_le

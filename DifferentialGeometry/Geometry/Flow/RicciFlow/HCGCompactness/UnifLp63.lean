@@ -1,14 +1,6 @@
 import DifferentialGeometry.Analysis.Spectral.Tensor.Estimates.AppCcLpProduct
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.UnifGagliardoNirenberg
 
-/-!
-# Class-uniform finite-volume L6 to L3 comparison
-
-The total-volume factor in the closed-manifold `L⁶ → L³` estimate is bounded
-uniformly over a metric-equivalence class.  The resulting coefficient is
-independent of tensor valence and is chosen before the class metric varies.
--/
-
 set_option autoImplicit false
 
 noncomputable section
@@ -37,8 +29,6 @@ private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
 omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [BoundarylessManifold I M] in
-/-- One coefficient, independent of tensor valence, controls the finite-volume
-`L⁶ → L³` inclusion throughout a uniform metric-equivalence class. -/
 theorem fiberLp3_le_6_unif
     (gBase : SmoothRiemannianMetric I M) (Λ : ℝ) :
     ∃ C : ℝ, 0 ≤ C ∧

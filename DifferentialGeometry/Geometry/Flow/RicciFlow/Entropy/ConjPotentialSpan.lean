@@ -1,12 +1,5 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Entropy.ConjPotential
 
-/-!
-# Compact-interval conjugate potential
-
-This file packages the lower-order conjugate-heat operator on an already
-chosen reflected regular-time interval.
--/
-
 noncomputable section
 
 open Bundle Manifold MeasureTheory Set Filter
@@ -29,8 +22,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
 private local instance : CompleteSpace E := FiniteDimensional.complete Real E
 
 omit [BoundarylessManifold I M] in
-/-- On any prescribed compact reflected regular-time interval, the
-conjugate-heat potential operator is continuous and has one finite norm bound. -/
 theorem conjA1_on
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -63,8 +54,6 @@ theorem conjA1_on
 
 omit [NeZero (Module.finrank Real E)] [I.Boundaryless]
   [BoundarylessManifold I M] in
-/-- On a compact regular-time slab, the conjugate-heat scalar coefficient has
-one pointwise bound uniform in time and space. -/
 theorem conjCoeff_span
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)

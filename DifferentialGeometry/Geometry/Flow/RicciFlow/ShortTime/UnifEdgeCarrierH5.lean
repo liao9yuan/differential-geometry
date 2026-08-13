@@ -782,7 +782,6 @@ theorem edge_center_h5_unif
       dsimp only [G]
       nlinarith [mul_nonneg hGc hy4]
 
-
 end DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral
 
 end

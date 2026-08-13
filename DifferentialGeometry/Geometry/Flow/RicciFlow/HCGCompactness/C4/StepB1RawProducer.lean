@@ -5,15 +5,6 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.C4.StepCStage
 
 set_option autoImplicit false
 
-/-!
-# Concrete Step-B1 raw producer
-
-This final assembly layer deliberately states the real `StepB1RawInput`
-producer early.  Its proof is filled from the stage comparison map and the
-Route-A local configurations as those producers become available; no parallel
-endpoint record is introduced.
--/
-
 noncomputable section
 
 universe u uE uH
@@ -96,10 +87,6 @@ private theorem cast_preapprox
   subst L'
   simpa only [stageMapCast] using hnative
 
-/-- A metric-compactness base has a master subsequence carrying the concrete
-raw Step-B1 comparison data.  The target is stated at its final interface so
-the radius diagonal, stage-map geometry, and metric-error bridges can be filled
-in place rather than hidden behind another input structure. -/
 theorem MetricCompactBase.exists_b1_raw
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
     (b : MetricCompactBase (I := I) X)
@@ -197,8 +184,6 @@ theorem MetricCompactBase.exists_b1_raw
   · exact hpair.1
   · exact hpair.2
 
-/-- A provider-native master radius diagonal assembles the concrete Step-B1
-raw comparison input on its selected subsequence. -/
 theorem H6NormalData.b1_raw_of_diag
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
     (inp : MetricCompactCore (I := I) X)
@@ -293,9 +278,6 @@ theorem H6NormalData.b1_raw_of_diag
   · exact hpair.1
   · exact hpair.2
 
-/-- Provider-neutral geometric data equipped with its native H6 chart package
-has a master subsequence carrying concrete Step-B1 raw comparison data through
-that same provider. -/
 theorem MetricCompactSeed.exists_b1_raw_h6
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
     (b : MetricCompactSeed (I := I) X)
@@ -338,7 +320,6 @@ theorem MetricCompactSeed.exists_b1_raw_h6
   refine ⟨psi, hpsi, ?_⟩
   exact d.b1_raw_of_diag inp P L0 hcomplete hconn hseed psi htail
 
-/-- Compatibility wrapper for the legacy normal-coordinate base. -/
 theorem MetricCompactBase.exists_b1_raw_h6
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
     (b : MetricCompactBase (I := I) X)
@@ -359,4 +340,3 @@ theorem MetricCompactBase.exists_b1_raw_h6
 
 end HCGCompactness
 end DifferentialGeometry
-

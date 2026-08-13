@@ -2,15 +2,6 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.C4.HatPartiti
 
 set_option autoImplicit false
 
-
-
-
-
-
-
-
-
-
 noncomputable section
 
 universe u uE uH
@@ -279,9 +270,6 @@ theorem unifHatIdOn
         (hrho := hrho) a b hy)
     hstrict hpts
 
-
-
-
 omit [FiniteDimensional ℝ E] in
 theorem unifHatIdSelfOn
     [FiniteDimensional Real E]
@@ -497,11 +485,6 @@ theorem unifHatIdSelfOn
         (P := P) (L := L) (pb := pb) (r := r) (n := n) (rho := rho)
         (hrho := hrho) a b hy)
     hstrict hpts
-
-
-
-
-
 
 end NetLimitData
 

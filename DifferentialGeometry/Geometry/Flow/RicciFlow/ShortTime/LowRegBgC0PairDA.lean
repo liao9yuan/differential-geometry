@@ -1,11 +1,5 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.LowRegBgC0PairCurv
 
-/-!
-# Order-zero derivative-arm pair estimates
-
-Internal derivative-estimate layer for the low-regularity order-zero refold.
--/
-
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
@@ -494,7 +488,6 @@ theorem daOnePairH2
       nlinarith [sq_nonneg x, sq_nonneg y, mul_nonneg hx0 hy0]
     _ ≤ (B R * (1 + A) * Q) ^ 2 :=
       pow_le_pow_left₀ (mul_nonneg (by norm_num) (add_nonneg hx0 hy0)) hlin 2
-
 
 end LowRegBgC0Core
 end DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral

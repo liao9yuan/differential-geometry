@@ -7,15 +7,6 @@ import DifferentialGeometry.Analysis.Sobolev.TensorHilbert.InteriorProductJetBou
 import DifferentialGeometry.Analysis.Sobolev.TensorHilbert.LieCorr0CoefficientRefold
 import DifferentialGeometry.Analysis.Sobolev.TensorHilbert.LieCorr0VBRefold
 
-/-!
-# Class-first vector--bilinear H1 bound
-
-This module upgrades the cancellation-compatible `lc0VB` estimate to a
-dimension-three class-first statement.  The fixed cometric trace inside the
-interior-product arm is controlled by the moving-trace package at the zero
-perturbation, so no metric-dependent compactness constant enters the result.
--/
-
 set_option autoImplicit false
 set_option backward.isDefEq.respectTransparency false
 
@@ -47,9 +38,7 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
 set_option linter.unusedVariables false in
-/-- On a closed three-manifold, the genuine vector--bilinear order-zero
-correction has one class-first affine intrinsic `H1` cap.  Only class metric
-jets of orders one and two are used. -/
+
 theorem vb_h1_unif
     (hDim : Module.finrank ℝ E = 3)
     (gBase : SmoothRiemannianMetric I M) {Λ : ℝ} (hΛ : 1 ≤ Λ)

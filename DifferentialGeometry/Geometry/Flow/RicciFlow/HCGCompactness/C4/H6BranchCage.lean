@@ -3,14 +3,6 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.C4.HatCageSca
 
 set_option autoImplicit false
 
-/-!
-# Finite live-slot cages for the H6 branch provider
-
-This file joins the provider-native proportional H6 branch scale to the
-existing finite-hat distance ledger.  No legacy normal-coordinate radius is
-used in the selected branch data.
--/
-
 noncomputable section
 
 universe u uE uH
@@ -35,8 +27,6 @@ variable {I : ModelWithCorners Real E H} [I.Boundaryless]
 
 namespace H6NormalData
 
-/-- One global H6 minimizing coefficient supplies proportional diagonal
-branches for every stabilized live slot. -/
 theorem exists_live_scale
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
     {hd : InjRadiusDecayInput (I := I) X}

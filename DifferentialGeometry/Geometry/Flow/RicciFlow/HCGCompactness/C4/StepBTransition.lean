@@ -11,15 +11,6 @@ open Filter Topology
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] [FiniteDimensional ℝ E]
 
-
-
-
-
-
-
-
-
-
 theorem exists_transitionLimit_on
     {U V : Set E} (hU : IsOpen U) (hV : IsOpen V)
     (J : ℕ → E → E) (Jbar : ℕ → E → E)
@@ -53,7 +44,6 @@ variable [NeZero (Module.finrank Real E)] [CompleteSpace E]
 variable {H : Type uH} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H} [I.Boundaryless]
 
-/-- **Chart-overlap domain input** for normal coordinates. -/
 def NormalOverlapOn
     (Y : PointedRiemannianManifold.{u, uE, uH} (I := I)) (x y : Y.M) (U : Set E) : Prop :=
   letI : TopologicalSpace Y.M := Y.topology
@@ -65,7 +55,6 @@ def NormalOverlapOn
       expMapDiffeo (I := I) Y.metric x z ∈
         (normalChartAt (I := I) Y.metric y).source
 
-/-- Smoothness of a normal-coordinate transition on a mapped normal ball. -/
 theorem contDiffOn_normalTransition
     (Y : PointedRiemannianManifold.{u, uE, uH} (I := I)) (x y : Y.M) {U : Set E}
     (hUx :

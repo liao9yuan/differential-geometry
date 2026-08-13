@@ -6,30 +6,6 @@ import Mathlib.Analysis.Calculus.FDeriv.Mul
 
 set_option autoImplicit false
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 noncomputable section
 
 namespace DifferentialGeometry
@@ -40,12 +16,6 @@ open scoped Topology
 section AbstractOneBound
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
-
-
-
-
-
-
 
 theorem implicitDeriv_one_le
     {ι : Type} [Fintype ι]
@@ -125,14 +95,6 @@ theorem implicitDeriv_one_le
         mul_le_mul_of_nonneg_left (mul_le_mul_of_nonneg_right hB (norm_nonneg _)) hΛ0
     _ = Λ * B * ‖v‖ := by ring
 
-
-
-
-
-
-
-
-
 theorem implicitFDeriv_eq {P : Type*} [NormedAddCommGroup P] [NormedSpace ℝ P]
     (G : E → P → E) (f : P → E) (p₀ : P)
     (Df : P →L[ℝ] E) (Dj : (E × P) →L[ℝ] E)
@@ -183,11 +145,6 @@ theorem implicitFDeriv_eq {P : Type*} [NormedAddCommGroup P] [NormedSpace ℝ P]
     _ = -(Ring.inverse (Dj.comp (ContinuousLinearMap.inl ℝ E P))).comp
           (Dj.comp (ContinuousLinearMap.inr ℝ E P)) := ContinuousLinearMap.comp_neg _ _
 
-
-
-
-
-
 theorem implicitFDeriv_eventuallyEq {P : Type*} [NormedAddCommGroup P] [NormedSpace ℝ P]
     (G : E → P → E) (f : P → E) (params₀ : P)
     (Df : P → P →L[ℝ] E) (Dj : P → (E × P) →L[ℝ] E)
@@ -201,11 +158,6 @@ theorem implicitFDeriv_eventuallyEq {P : Type*} [NormedAddCommGroup P] [NormedSp
   filter_upwards [hf, hG, eventually_eventually_nhds.2 hrel, hinv] with p hfp hGp hrelp hinvp
   rw [hfp.fderiv]
   exact implicitFDeriv_eq G f p (Df p) (Dj p) hfp hGp hrelp hinvp
-
-
-
-
-
 
 theorem graphBlockDeriv {P : Type*} [NormedAddCommGroup P] [NormedSpace ℝ P]
     {E' : Type*} [NormedAddCommGroup E'] [NormedSpace ℝ E']
@@ -248,13 +200,6 @@ theorem graphBlockDeriv {P : Type*} [NormedAddCommGroup P] [NormedSpace ℝ P]
             _ ≤ max ‖Df₀‖ 1 * ‖v‖ :=
                 mul_le_mul_of_nonneg_right (le_max_right _ _) (norm_nonneg _)
     _ = ‖H'‖ * max ‖Df₀‖ 1 * ‖v‖ := by ring
-
-
-
-
-
-
-
 
 theorem implicitDeriv_two_le {P : Type*} [NormedAddCommGroup P] [NormedSpace ℝ P]
     [CompleteSpace E]
@@ -342,10 +287,6 @@ theorem implicitDeriv_two_le {P : Type*} [NormedAddCommGroup P] [NormedSpace ℝ
           _ ≤ Λ * (b₂ * ‖v‖) + Λ * Λ * (a₂ * ‖v‖) * b₁ := add_le_add h1 h2
           _ = (Λ ^ 2 * a₂ * b₁ + Λ * b₂) * ‖v‖ := by ring
 
-
-
-
-
 theorem multilinear_prod_opNorm_le {n : ℕ}
     {P F G : Type*} [NormedAddCommGroup P] [NormedSpace ℝ P]
     [NormedAddCommGroup F] [NormedSpace ℝ F] [NormedAddCommGroup G] [NormedSpace ℝ G]
@@ -359,7 +300,6 @@ theorem multilinear_prod_opNorm_le {n : ℕ}
   refine max_le ?_ ?_
   · exact (M.le_opNorm m).trans (mul_le_mul_of_nonneg_right (le_max_left _ _) hprod0)
   · exact (N.le_opNorm m).trans (mul_le_mul_of_nonneg_right (le_max_right _ _) hprod0)
-
 
 theorem norm_iteratedFDeriv_id_le {P : Type*} [NormedAddCommGroup P] [NormedSpace ℝ P]
     (i : ℕ) (hi : 1 ≤ i) (x : P) :
@@ -375,9 +315,6 @@ theorem norm_iteratedFDeriv_id_le {P : Type*} [NormedAddCommGroup P] [NormedSpac
     · rw [iteratedFDeriv_const_of_ne (Nat.succ_ne_zero l)]
       simp
 
-
-
-
 theorem norm_iteratedFDeriv_graph_le {P : Type*} [NormedAddCommGroup P] [NormedSpace ℝ P]
     {n : WithTop ℕ∞} (f : P → E) (x : P) (hf : ContDiffAt ℝ n f x)
     {i : ℕ} (hi : 1 ≤ i) (hin : (i : WithTop ℕ∞) ≤ n) :
@@ -389,12 +326,6 @@ theorem norm_iteratedFDeriv_graph_le {P : Type*} [NormedAddCommGroup P] [NormedS
   rw [e']
   exact (multilinear_prod_opNorm_le _ _).trans
     (max_le_max le_rfl (norm_iteratedFDeriv_id_le i hi x))
-
-
-
-
-
-
 
 theorem norm_iteratedFDeriv_graphComp_le {P : Type*} [NormedAddCommGroup P] [NormedSpace ℝ P]
     {F' : Type*} [NormedAddCommGroup F'] [NormedSpace ℝ F']
@@ -441,7 +372,6 @@ theorem norm_iteratedFDeriv_graphComp_le {P : Type*} [NormedAddCommGroup P] [Nor
 end AbstractOneBound
 
 section CmBounds
-
 
 open Set Bundle Manifold
 open scoped Topology Manifold ContDiff ENNReal

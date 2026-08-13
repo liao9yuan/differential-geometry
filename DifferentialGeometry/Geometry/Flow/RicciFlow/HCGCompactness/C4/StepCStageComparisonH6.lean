@@ -5,13 +5,6 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.C4.StepCStage
 
 set_option autoImplicit false
 
-/-!
-# H6 provider readout for the finite-stage comparison map
-
-This module keeps the provider-native root and jet consumers separate from the
-already large legacy comparison module.
--/
-
 noncomputable section
 
 universe u uE uH
@@ -36,8 +29,6 @@ variable {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
 
 namespace H6NormalData
 
-/-- The canonical root cube reads out the actual comparison map through the
-same H6 chart family used by its weights and stage targets. -/
 theorem stage_root_tail
     (inp : MetricCompactCore (I := I) X)
     (d : H6NormalData (I := I) X inp.decay)
@@ -415,8 +406,6 @@ theorem stage_root_tail
 
 end H6NormalData
 
-/-- On a smaller source ball, a provider-native root readout identifies the
-actual stage-map germ and transfers the canonical root cube's finite jet tail. -/
 theorem HasSuppConvDataOn.stage_jet_of_root
     (inp : MetricCompactCore (I := I) X)
     (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k))
@@ -594,8 +583,6 @@ theorem HasSuppConvDataOn.stage_jet_of_root
   refine ⟨htarget, ?_⟩
   simpa only [Psi] using hout
 
-/-- Finitely many provider-native root cubes admit one common pair-index jet
-tail for the actual global stage maps. -/
 theorem HasSuppConvDataOn.stage_jet_tail
     (inp : MetricCompactCore (I := I) X)
     (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k))
@@ -645,8 +632,6 @@ theorem HasSuppConvDataOn.stage_jet_tail
 
 namespace H6NormalData
 
-/-- The H6 chart family, its selected diagonal roots, and the intrinsic
-center readout produce the all-live-slot actual-map jet tail. -/
 theorem stage_jet_tail
     (inp : MetricCompactCore (I := I) X)
     (d : H6NormalData (I := I) X inp.decay)
@@ -766,8 +751,6 @@ theorem stage_jet_tail
   · exact hRr
   · exact heps
 
-/-- The H6 stage maps preserve the pointed basepoint on the same provider
-family used by their root and jet tails. -/
 theorem stage_base_tail
     (inp : MetricCompactCore (I := I) X)
     (d : H6NormalData (I := I) X inp.decay)
@@ -784,8 +767,6 @@ theorem stage_base_tail
     stageCmp_base_raw inp P (L.subseq hphi) r hr hconn k l
       (chart := d.chart)
 
-/-- One H6 refinement carries both the full support/transition package and
-pointed preservation for the actual stage maps, all through `d.chart`. -/
 theorem exists_supp_base
     (inp : MetricCompactCore (I := I) X)
     (d : H6NormalData (I := I) X inp.decay)
@@ -822,9 +803,6 @@ theorem exists_supp_base
   exact ⟨phi, hphi, U, C0, C1, aInf, Jinf, Jbarinf, hdata,
     d.stage_base_tail inp P L hr phi hphi hconn⟩
 
-/-- One H6 refinement carries the support/transition package, all live local
-metric limits on their slotwise phase balls, and pointed preservation through
-the same chart provider. -/
 theorem exists_supp_metric
     (inp : MetricCompactCore (I := I) X)
     (d : H6NormalData (I := I) X inp.decay)
@@ -942,8 +920,6 @@ theorem exists_supp_metric
   exact ⟨phi, hphi, V, U, C0, C1, aInf, Jinf, Jbarinf, gInf,
     fun _alpha => rfl, hcenter', hdata, hstageMetric, hbase⟩
 
-/-- The H6 support, metric, and branch producers assemble the full
-provider-native stage-map jet package on one fixed subsequence. -/
 theorem stage_data_of
     (inp : MetricCompactCore (I := I) X)
     (d : H6NormalData (I := I) X inp.decay)
@@ -1217,7 +1193,6 @@ private noncomputable def baseScale
       ConnectedSpace (X.obj k).M) : Real :=
   Classical.choose (d.exists_live_scale hre hcomplete hconn)
 
-/-- The fixed positive H6 coefficient used by every construction radius. -/
 noncomputable def stageScale
     {hd : InjRadiusDecayInput (I := I) X}
     (d : H6NormalData (I := I) X hd)
@@ -1228,7 +1203,6 @@ noncomputable def stageScale
       ConnectedSpace (X.obj k).M) : Real :=
   min (baseScale d hre hcomplete hconn) (d.ratio / 96)
 
-/-- The canonical H6 stage scale is positive. -/
 theorem stageScale_pos
     {hd : InjRadiusDecayInput (I := I) X}
     (d : H6NormalData (I := I) X hd)
@@ -1243,7 +1217,6 @@ theorem stageScale_pos
       (d.exists_live_scale hre hcomplete hconn)).1
   · exact div_pos d.ratio_pos (by norm_num)
 
-/-- Forty-eight canonical H6 stage scales fit inside the chart-radius ratio. -/
 theorem stageScale_ratio
     {hd : InjRadiusDecayInput (I := I) X}
     (d : H6NormalData (I := I) X hd)
@@ -1262,9 +1235,6 @@ theorem stageScale_ratio
     _ = d.ratio / 2 := by ring
     _ < d.ratio := half_lt_self d.ratio_pos
 
-/-- The H6 chart and branch producers supply the complete provider-native
-stage package at the canonical stage scale, assuming the physical cage
-budget. -/
 theorem stage_data
     (inp : MetricCompactCore (I := I) X)
     (d : H6NormalData (I := I) X inp.decay)
@@ -1349,7 +1319,6 @@ theorem stage_data
     phi hphi V U C0 C1 aInf Jinf Jbarinf gInf hV hdata hmetric
     hcomplete hconn hbase (fun n alpha => (hcenter n alpha).le) q hqdata
 
-/-- Existential compatibility form of the canonical H6 stage producer. -/
 theorem exists_stage_data
     (inp : MetricCompactCore (I := I) X)
     (d : H6NormalData (I := I) X inp.decay)
@@ -1383,8 +1352,6 @@ theorem exists_stage_data
   intro hphys P L hstable r hr
   exact d.stage_data inp hcomplete hconn hphys P L hstable r hr
 
-/-- The canonical H6 scale supplies a radius-independent seed and master
-diagonal once its physical cage budget is available. -/
 theorem stage_diag
     (inp : MetricCompactCore (I := I) X)
     (d : H6NormalData (I := I) X inp.decay)
@@ -1409,8 +1376,6 @@ theorem stage_diag
     hseed.exists_radius_diag inp P L0 hconn d.chart
   exact ⟨hseed, psi, hpsi, htail⟩
 
-/-- One H6 chart family supplies a radius-independent seed and a single
-integer-radius master diagonal whenever the physical cage budget closes. -/
 theorem exists_stage_diag
     (inp : MetricCompactCore (I := I) X)
     (d : H6NormalData (I := I) X inp.decay)

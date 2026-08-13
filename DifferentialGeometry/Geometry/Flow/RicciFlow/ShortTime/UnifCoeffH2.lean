@@ -3,14 +3,6 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.CurvatureCoefficien
 import DifferentialGeometry.Analysis.Sobolev.TensorHilbert.LieCorr0AMixRefold
 import DifferentialGeometry.Analysis.Sobolev.TensorHilbert.LieCorr0TraceRadiusFree
 
-/-!
-# Class-first H2 coefficient packages
-
-This module transports class-first pointwise coefficient grids through the
-dimension-three uniform `H2` summation theorem.  Its constants are selected
-before the class metric varies.
--/
-
 set_option autoImplicit false
 
 noncomputable section
@@ -37,12 +29,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
-/-- The moving double trace at every passenger rank has a class-first `H2`
-bound.
-
-Its coefficient is fixed from the background, class parameter, and one fibre
-smallness ceiling before either metric varies.  Only the class metric's first
-two jets are used. -/
 theorem trace_h2_unif
     (p : ℕ) (hDim : Module.finrank ℝ E = 3)
     (gBase : SmoothRiemannianMetric I M) {Λ : ℝ} (hΛ : 0 ≤ Λ)
@@ -79,7 +65,6 @@ theorem trace_h2_unif
   simpa only [lowJetGrid, Combinatorics.antidiagonalTupleGrid] using
     hpt g₀ g₁ P htie hδ_le hδ_nonneg hbound σ i x
 
-/-- Rank-two specialization of `trace_h2_unif`. -/
 theorem trace2_h2_unif
     (hDim : Module.finrank ℝ E = 3)
     (gBase : SmoothRiemannianMetric I M) {Λ : ℝ} (hΛ : 0 ≤ Λ)
@@ -107,11 +92,6 @@ theorem trace2_h2_unif
   simpa only [Nat.reduceAdd] using
     trace_h2_unif (I := I) (M := M) 2 hDim gBase hΛ hδ₀
 
-/-- The sharp-flat endomorphism has a class-first `H2` bound.
-
-The coefficient function depends only on the fixed background, the uniform
-metric class, and the fibre-smallness ceiling.  The path metric enters only
-through the perturbation's low `H2` radius. -/
 theorem sharp_h2_unif
     (hDim : Module.finrank ℝ E = 3)
     (gBase : SmoothRiemannianMetric I M) {Λ : ℝ} (hΛ : 0 ≤ Λ)
@@ -168,11 +148,6 @@ theorem sharp_h2_unif
     Finset.single_le_sum (fun k _ => hgrid_nn k) himem
   exact hraw.trans (mul_le_mul_of_nonneg_left hsingle (hC i))
 
-/-- The lowered connection difference has a class-first affine `H2` bound.
-
-The coefficient functions depend only on the fixed background, the class
-parameter, and the fibre-smallness ceiling.  The perturbation's third
-derivative remains the affine top-order input. -/
 theorem connLow_tame_unif
     (hDim : Module.finrank ℝ E = 3)
     (gBase : SmoothRiemannianMetric I M) {Λ : ℝ} (hΛ : 0 ≤ Λ)

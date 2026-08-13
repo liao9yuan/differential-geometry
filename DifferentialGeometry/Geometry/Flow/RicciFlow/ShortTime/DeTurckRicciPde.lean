@@ -12,13 +12,6 @@ import DifferentialGeometry.Analysis.ODE.TimeDependentFlow.Regularity.BareFlowFr
 import DifferentialGeometry.Analysis.ODE.TimeDependentFlow.SmoothDependence.GlobalClosedManifold
 import DifferentialGeometry.Analysis.Integration.Measure.ChartDensity
 
-
-
-
-
-
-
-
 namespace DifferentialGeometry.PDE.RicciFlow
 
 open Bundle
@@ -45,36 +38,6 @@ variable
     {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
       [IsManifold I ∞ M] [CompactSpace M] [BoundarylessManifold I M]
       [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 theorem deturck_metric_pde_interior
     (g_bg : SmoothRiemannianMetric I M) {T : ℝ} (a : ℕ)

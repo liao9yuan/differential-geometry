@@ -13,15 +13,6 @@ import DifferentialGeometry.Tensor.RSTensor.MetricCompatibility
 
 set_option autoImplicit false
 
-
-
-
-
-
-
-
-
-
 noncomputable section
 
 namespace DifferentialGeometry.PDE.RicciFlow
@@ -38,11 +29,9 @@ variable {I : ModelWithCorners Real E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
 variable [IsManifold I ∞ M] [IsManifold I 1 M]
 
-
 abbrev Tensor02Fam : Type _ :=
   Real -> (x : M) ->
     Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) 2 x
-
 
 def metric02
     (G : Real -> SmoothRiemannianMetric I M) :
@@ -55,7 +44,6 @@ theorem metric02_apply
     (t : Real) (x : M) (v : Fin 2 -> TangentSpace I x) :
     metric02 (I := I) G t x v = (G t).inner x (v 0) (v 1) := by
   simp [metric02]
-
 
 def tfRic
     (G : Real -> SmoothRiemannianMetric I M)
@@ -86,19 +74,12 @@ theorem tfRic_apply
       rw [Tensor0SSpace.smul_apply, metric02_apply]
       simp only [smul_eq_mul]
 
-
-
 abbrev tfRicNormSqAt (scalar ricciNormSq : Real) : Real :=
   tracefreeRicciNormSqAtOf scalar ricciNormSq
-
-
-
-
 
 abbrev tfRicNormSq
     (scalar ricciNormSq : Real -> M -> Real) : Real -> M -> Real :=
   tracefreeRicciNormSqOf scalar ricciNormSq
-
 
 omit [TopologicalSpace M] in
 theorem tfRicNormSq_compat
@@ -106,26 +87,19 @@ theorem tfRicNormSq_compat
     tfRicNormSq scalar ricciNormSq t x =
       tracefreeRicciNormSqOf scalar ricciNormSq t x := rfl
 
-
-
 def pinchP
     (scalar ricciNormSq : Real -> M -> Real) (epsilon : Real)
     (t : Real) (x : M) : Real :=
   tfRicNormSq scalar ricciNormSq t x / Real.rpow (scalar t x) (2 - epsilon)
 
-
-
 def cubicQAt (scalar ricciNormSq ricciTraceCube : Real) : Real :=
   2 * ricciNormSq ^ 2 + scalar ^ 4 -
     5 * scalar ^ 2 * ricciNormSq + 4 * scalar * ricciTraceCube
-
 
 def cubicQ
     (scalar ricciNormSq ricciTraceCube : Real -> M -> Real)
     (t : Real) (x : M) : Real :=
   cubicQAt (scalar t x) (ricciNormSq t x) (ricciTraceCube t x)
-
-
 
 theorem cubicQ_eigen (l1 l2 l3 : Real) :
     cubicQAt
@@ -135,8 +109,6 @@ theorem cubicQ_eigen (l1 l2 l3 : Real) :
       DifferentialGeometry.Integral.Connection.hamiltonCubicQ3 l1 l2 l3 := by
   unfold cubicQAt DifferentialGeometry.Integral.Connection.hamiltonCubicQ3
   ring
-
-
 
 theorem tfRic_eigen (l1 l2 l3 : Real) :
     tfRicNormSqAt
@@ -150,15 +122,9 @@ theorem tfRic_eigen (l1 l2 l3 : Real) :
     DifferentialGeometry.Integral.Connection.ricciEigenNormSq3
   ring
 
-
-
-
-
 def EigenPinchCtxOn
     (l1 l2 l3 : Real -> M -> Real) (delta : Real) : Prop :=
   forall t x, DifferentialGeometry.Integral.Connection.PinchEigen3 (l1 t x) (l2 t x) (l3 t x) delta
-
-
 
 theorem cubicQ_pinch
     {l1 l2 l3 delta epsilon : Real}
@@ -175,8 +141,6 @@ theorem cubicQ_pinch
             (DifferentialGeometry.Integral.Connection.ricciEigenNormSq3 l1 l2 l3) := by
   simpa [cubicQ_eigen, tfRic_eigen] using
     DifferentialGeometry.Integral.Connection.PinchEigen3.q_sub_nonneg hctx hepsilon
-
-
 
 omit [TopologicalSpace M] in
 theorem cubicQ_pinchOn
@@ -200,14 +164,10 @@ theorem cubicQ_pinchOn
   intro t x
   exact cubicQ_pinch (hctx t x) hepsilon
 
-
-
 def ricciReact3 (l1 l2 l3 : Real) : Real :=
   l1 * l2 * (l1 + l2 - l3) +
     l1 * l3 * (l1 + l3 - l2) +
       l2 * l3 * (l2 + l3 - l1)
-
-
 
 theorem react3_diag (l1 l2 l3 : Real) :
     (∑ i : Fin 3, ∑ j : Fin 3, ∑ k : Fin 3, ∑ l : Fin 3,
@@ -222,7 +182,6 @@ theorem react3_diag (l1 l2 l3 : Real) :
   simp [Fin.sum_univ_three]
   ring
 
-
 theorem curv3_diag_eq (l1 l2 l3 : Real) :
     (∑ i : Fin 3, ∑ j : Fin 3, ∑ k : Fin 3, ∑ l : Fin 3,
       DifferentialGeometry.Integral.Connection.stdRmDiag3 l1 l2 l3 i k j l *
@@ -236,10 +195,6 @@ theorem curv3_diag_eq (l1 l2 l3 : Real) :
   simp [Fin.sum_univ_three]
   ring
 
-
-
-
-
 theorem curv3_neg_eq (l1 l2 l3 : Real) :
     (∑ i : Fin 3, ∑ j : Fin 3, ∑ k : Fin 3, ∑ l : Fin 3,
       DifferentialGeometry.Integral.Connection.stdRmDiag3 (-l1) (-l2) (-l3) i k j l *
@@ -252,7 +207,6 @@ theorem curv3_neg_eq (l1 l2 l3 : Real) :
       DifferentialGeometry.Integral.Connection.delta3
   simp [Fin.sum_univ_three]
   ring
-
 
 def diagReact3
     (l1 l2 l3 : Real -> M -> Real) : Real -> M -> Real :=
@@ -280,7 +234,6 @@ theorem diagReact3_eq
       ricciReact3 (l1 t x) (l2 t x) (l3 t x) := by
   exact react3_diag (l1 t x) (l2 t x) (l3 t x)
 
-
 theorem tfRel_eigen (l1 l2 l3 : Real)
     (hR : DifferentialGeometry.Integral.Connection.ricciEigenScalar3 l1 l2 l3 ≠ 0) :
     4 * ricciReact3 l1 l2 l3 -
@@ -305,15 +258,11 @@ theorem tfRel_eigen (l1 l2 l3 : Real)
   field_simp [hR']
   ring_nf
 
-
 def tfRicReactRel
     (scalar ricciNormSq tfNormSq Q reaction : Real -> M -> Real) : Prop :=
   ∀ t x, scalar t x ≠ 0 ->
     4 * reaction t x - ((4 : Real) / 3) * scalar t x * ricciNormSq t x =
       (4 * ricciNormSq t x * tfNormSq t x - 2 * Q t x) / scalar t x
-
-
-
 
 omit [TopologicalSpace M] in
 theorem tfRel_from_eigen
@@ -343,8 +292,6 @@ theorem tfRel_from_eigen
     hcube t x]
   exact tfRel_eigen (l1 t x) (l2 t x) (l3 t x) hR'
 
-
-
 omit [TopologicalSpace M] in
 theorem tfRel_from_diag
     (scalar ricciNormSq ricciTraceCube : Real -> M -> Real)
@@ -366,8 +313,6 @@ theorem tfRel_from_diag
     scalar ricciNormSq ricciTraceCube (diagReact3 l1 l2 l3)
     l1 l2 l3 hscalar hnorm hcube
     (by intro t x; exact diagReact3_eq (M := M) l1 l2 l3 t x)
-
-
 
 theorem curvReact3_frame
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
@@ -406,9 +351,6 @@ theorem curvReact3_frame
   simp_rw [hRm]
   exact curv3_diag_eq l1 l2 l3
 
-
-
-
 theorem canonReact3_frame
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     [SigmaCompactSpace M] [T2Space M]
@@ -429,9 +371,6 @@ theorem canonReact3_frame
       -ricciReact3 l1 l2 l3 := by
   rw [ricciNormCurvatureReactionInFrame_apply,
     curvReact3_frame (I := I) S Rm04 gInv frame t x l1 l2 l3 hInv hRic hRm]
-
-
-
 
 theorem curv3_frame_neg
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
@@ -470,8 +409,6 @@ theorem curv3_frame_neg
   simp_rw [hRm]
   exact curv3_neg_eq l1 l2 l3
 
-
-
 theorem canon3_frame_neg
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     [SigmaCompactSpace M] [T2Space M]
@@ -494,15 +431,12 @@ theorem canon3_frame_neg
     curv3_frame_neg (I := I) S Rm04 gInv frame t x l1 l2 l3 hInv hRic hRm]
   ring
 
-
 def ricciNormAt {x : M}
     (Ric : DifferentialGeometry.Integral.Connection.Tensor02At (I := I) (M := M) x)
     (basis : Module.Basis (Fin 3) Real (TangentSpace I x)) : Real :=
   ∑ i : Fin 3, ∑ j : Fin 3,
     DifferentialGeometry.Integral.Connection.ricciCompAt (I := I) basis Ric i j *
       DifferentialGeometry.Integral.Connection.ricciCompAt (I := I) basis Ric i j
-
-
 
 def curvRicAt {x : M}
     (Ric : DifferentialGeometry.Integral.Connection.Tensor02At (I := I) (M := M) x)
@@ -513,13 +447,11 @@ def curvRicAt {x : M}
       DifferentialGeometry.Integral.Connection.ricciCompAt (I := I) basis Ric i j *
         DifferentialGeometry.Integral.Connection.ricciCompAt (I := I) basis Ric k l
 
-
 def reactAt {x : M}
     (Ric : DifferentialGeometry.Integral.Connection.Tensor02At (I := I) (M := M) x)
     (Rm04 : DifferentialGeometry.Integral.Connection.Tensor04At (I := I) (M := M) x)
     (basis : Module.Basis (Fin 3) Real (TangentSpace I x)) : Real :=
   -curvRicAt (I := I) Ric Rm04 basis
-
 
 def ricciCubeAt {x : M}
     (Ric : DifferentialGeometry.Integral.Connection.Tensor02At (I := I) (M := M) x)
@@ -602,8 +534,6 @@ theorem ricciEnd_diagVec {x : M}
               DifferentialGeometry.Integral.Connection.delta3, horth 2 0, horth 2 1, horth 2 2]
   exact ⟨h0, h1, h2⟩
 
-
-
 def ricciCubeInvAt {x : M}
     (g : SmoothRiemannianMetric I M)
     (Ric : DifferentialGeometry.Integral.Connection.Tensor02At (I := I) (M := M) x) : Real :=
@@ -652,7 +582,6 @@ theorem ricciCubeInv_diag {x : M}
       show T (T (T (basis 2))) = (l3 ^ 3) • basis 2 by
         simpa [LinearMap.comp_apply] using hT2c]
   simp [DifferentialGeometry.Integral.Connection.delta3, horth 0 0, horth 1 1, horth 2 2]
-
 
 def ricciCube
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
@@ -759,8 +688,6 @@ theorem curvRic_inner {x : M}
   rw [inner0S_eq_coord (I := I) g x 4 basis DifferentialGeometry.Integral.Connection.delta3 hinv]
   exact (coordPair04 (I := I) Ric Rm04 basis).symm
 
-
-
 theorem reactAt_eq_react
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     [SigmaCompactSpace M] [T2Space M]
@@ -779,8 +706,6 @@ theorem reactAt_eq_react
   unfold reactAt ricciReact
   rw [curvRic_inner (I := I) (S.base.metric t) (S.ricciAt t x)
     (S.base.rm04 t x) basis hinv]
-
-
 
 theorem react_frame {x : M}
     (g : SmoothRiemannianMetric I M)
@@ -947,9 +872,6 @@ theorem reactAt_diag {x : M}
   rw [curv3_neg_eq]
   ring
 
-
-
-
 omit [FiniteDimensional ℝ E] [IsManifold I 1 M] in
 theorem tfRel_basis {x : M}
     {Ric : DifferentialGeometry.Integral.Connection.Tensor02At (I := I) (M := M) x}
@@ -979,8 +901,6 @@ theorem tfRel_basis {x : M}
     hscalar, hcube]
   exact tfRel_eigen l1 l2 l3 hR'
 
-
-
 omit [IsManifold I 1 M] in
 omit [FiniteDimensional ℝ E] in
 theorem diag_neg {x : M}
@@ -1001,8 +921,6 @@ theorem diag_neg {x : M}
       simpa [DifferentialGeometry.Integral.Connection.ricciCompAt_apply,
         DifferentialGeometry.Integral.Connection.ricciDiag3] using
         congrArg Neg.neg hij
-
-
 
 omit [FiniteDimensional ℝ E] [IsManifold I 1 M] in
 theorem tfRel_trace {x : M}
@@ -1036,9 +954,6 @@ theorem tfRel_trace {x : M}
     simpa [DifferentialGeometry.Integral.Connection.standardRmCompAt_apply] using h
   exact tfRel_basis (I := I) (Ric := Ric) (Rm04 := Rm04)
     (basis := basis) hdiag hcube hRm hR
-
-
-
 
 theorem tfRel_point {x : M}
     {g : SmoothRiemannianMetric I M}
@@ -1231,9 +1146,6 @@ theorem tfRel_point_sec6
   rw [hnorm]
   exact hpoint
 
-
-
-
 theorem tfRel_pfirst
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     [SigmaCompactSpace M] [T2Space M]
@@ -1315,8 +1227,6 @@ theorem scalar_eq_diag {x : M}
   simp [DifferentialGeometry.Integral.Connection.delta3, h00, h11, h22,
     DifferentialGeometry.Integral.Connection.ricciEigenScalar3]
 
-
-
 omit [IsManifold I 1 M] in
 theorem scalarTrace_delta {x : M}
     (g : SmoothRiemannianMetric I M)
@@ -1334,8 +1244,6 @@ theorem scalarTrace_delta {x : M}
   unfold DifferentialGeometry.Integral.Connection.ScalarRealizesRicciTraceAt
   rw [DifferentialGeometry.Integral.Connection.metricTracePair0SAt_eq_sum_basis
     (I := I) g basis DifferentialGeometry.Integral.Connection.delta3 hinv Ric]
-
-
 
 omit [IsManifold I 1 M] in
 theorem firstTrace_delta
@@ -1410,8 +1318,6 @@ private theorem vec2_update_one {x : M}
       DifferentialGeometry.Integral.Connection.vec2 (I := I) X Y' := by
   funext a
   fin_cases a <;> simp [DifferentialGeometry.Integral.Connection.vec2, Function.update]
-
-
 
 omit [FiniteDimensional ℝ E] [IsManifold I 1 M] in
 theorem ricciSym_of_basis
@@ -1558,8 +1464,6 @@ theorem ricciSym_of_basis
   rw [hL, hR, hsym j i]
   ring
 
-
-
 omit [FiniteDimensional ℝ E] [IsManifold I 1 M] in
 theorem ricciSym_rm04
     {Idx : Type*} [Fintype Idx]
@@ -1584,10 +1488,6 @@ theorem ricciSym_rm04
     (fun i j =>
       DifferentialGeometry.Integral.Connection.ricciSymm_of_rm04 (I := I) basis gInv Ric Rm04 hTrace
         hPair hOutput hInput hInv i j)
-
-
-
-
 
 theorem tfRel_frame
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
@@ -1653,11 +1553,6 @@ theorem tfRel_frame
       (l1 t x) (l2 t x) (l3 t x)
       (hInv t x) (hRic t x) (hRm t x)
 
-
-
-
-
-
 theorem tfRel_data
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     [SigmaCompactSpace M] [T2Space M]
@@ -1719,8 +1614,6 @@ theorem tfRel_data
       hbasis t x i, hbasis t x k, hbasis t x j, hbasis t x l] using h
   exact tfRel_frame (I := I) S Rm04 gInv frame scalar ricciTraceCube
     l1 l2 l3 hscalar hcube hInv hRic hRm
-
-
 
 theorem tfRel_first
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}

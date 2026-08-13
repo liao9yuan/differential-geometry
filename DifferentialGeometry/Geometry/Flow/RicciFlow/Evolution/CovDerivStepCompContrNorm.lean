@@ -2,17 +2,6 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.CovDerivStepCompCo
 
 set_option autoImplicit false
 
-
-
-
-
-
-
-
-
-
-
-
 noncomputable section
 
 namespace DifferentialGeometry.PDE.RicciFlow
@@ -21,14 +10,12 @@ open scoped BigOperators
 
 variable {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
 
-
 def compL2Sq {r : ℕ} (T : (Fin r → Idx) → Real) : Real :=
   ∑ idx : Fin r → Idx, (T idx) ^ 2
 
 omit [DecidableEq Idx] in
 theorem compL2Sq_nonneg {r : ℕ} (T : (Fin r → Idx) → Real) : 0 ≤ compL2Sq T :=
   Finset.sum_nonneg fun _ _ => sq_nonneg _
-
 
 omit [DecidableEq Idx] in
 private theorem sum_snoc_split {p : ℕ} (F : (Fin (p + 1) → Idx) → Real) :
@@ -45,7 +32,6 @@ private theorem sum_snoc_split {p : ℕ} (F : (Fin (p + 1) → Idx) → Real) :
     (Fintype.sum_prod_type (fun gc : (Fin p → Idx) × Idx => F (Fin.snoc gc.1 gc.2))).symm]
   exact Fintype.sum_equiv e F (fun gc => F (Fin.snoc gc.1 gc.2))
     (fun f => by simp only [e, Equiv.coe_fn_mk, Fin.snoc_init_self])
-
 
 omit [DecidableEq Idx] in
 private theorem sum_append_split {p q : ℕ} (F : (Fin (p + q) → Idx) → Real) :
@@ -73,8 +59,6 @@ private theorem sum_append_split {p q : ℕ} (F : (Fin (p + q) → Idx) → Real
   refine Fin.addCases (fun i => ?_) (fun j => ?_) k
   · simp [Fin.append_left]
   · simp [Fin.append_right]
-
-
 
 omit [DecidableEq Idx] in
 theorem compL2Sq_contrTail_le {p q : ℕ}
@@ -107,7 +91,6 @@ theorem compL2Sq_contrTail_le {p q : ℕ}
           rw [compL2Sq, compL2Sq, sum_snoc_split (F := fun f => A f ^ 2),
             sum_snoc_split (F := fun f => B f ^ 2)]
 
-
 def compL2 {r : ℕ} (T : (Fin r → Idx) → Real) : Real := Real.sqrt (compL2Sq T)
 
 omit [DecidableEq Idx] in
@@ -117,8 +100,6 @@ theorem compL2_nonneg {r : ℕ} (T : (Fin r → Idx) → Real) : 0 ≤ compL2 T 
 omit [DecidableEq Idx] in
 theorem compL2_sq {r : ℕ} (T : (Fin r → Idx) → Real) : compL2 T ^ 2 = compL2Sq T := by
   rw [compL2, Real.sq_sqrt (compL2Sq_nonneg T)]
-
-
 
 omit [DecidableEq Idx] in
 theorem compL2Sq_comp_equiv {r r' : ℕ} (T : (Fin r → Idx) → Real) (e : Fin r ≃ Fin r') :
@@ -134,12 +115,10 @@ theorem compL2Sq_comp_equiv {r r' : ℕ} (T : (Fin r → Idx) → Real) (e : Fin
     simp [Equiv.arrowCongr_apply, Equiv.symm_symm]
   rw [hfun]
 
-
 omit [DecidableEq Idx] in
 theorem compL2_comp_equiv {r r' : ℕ} (T : (Fin r → Idx) → Real) (e : Fin r ≃ Fin r') :
     compL2 (fun idx : Fin r' → Idx => T (fun i => idx (e i))) = compL2 T := by
   rw [compL2, compL2, compL2Sq_comp_equiv]
-
 
 omit [DecidableEq Idx] in
 theorem compL2_contrTail_le {p q : ℕ}
@@ -147,7 +126,6 @@ theorem compL2_contrTail_le {p q : ℕ}
     compL2 (contrTail A B) ≤ compL2 A * compL2 B := by
   rw [compL2, compL2, compL2, ← Real.sqrt_mul (compL2Sq_nonneg A)]
   exact Real.sqrt_le_sqrt (compL2Sq_contrTail_le A B)
-
 
 omit [DecidableEq Idx] in
 theorem compL2_add_le {r : ℕ} (T U : (Fin r → Idx) → Real) :
@@ -178,7 +156,6 @@ theorem compL2_add_le {r : ℕ} (T U : (Fin r → Idx) → Real) :
     _ = compL2 T + compL2 U :=
           Real.sqrt_sq (add_nonneg (compL2_nonneg T) (compL2_nonneg U))
 
-
 omit [DecidableEq Idx] in
 theorem compL2_neg {r : ℕ} (T : (Fin r → Idx) → Real) :
     compL2 (fun idx => -T idx) = compL2 T := by
@@ -186,15 +163,12 @@ theorem compL2_neg {r : ℕ} (T : (Fin r → Idx) → Real) :
   congr 1
   exact Finset.sum_congr rfl fun idx _ => by ring
 
-
-
 omit [DecidableEq Idx] in
 theorem compL2_sub_le {r : ℕ} (T U : (Fin r → Idx) → Real) :
     compL2 (fun idx => T idx - U idx) ≤ compL2 T + compL2 U := by
   have h := compL2_add_le T (fun idx => -U idx)
   rw [compL2_neg] at h
   simpa only [sub_eq_add_neg] using h
-
 
 omit [DecidableEq Idx] in
 theorem compL2_smul {r : ℕ} (c : Real) (T : (Fin r → Idx) → Real) :
@@ -211,9 +185,6 @@ namespace DifferentialGeometry.HCGCompactness
 
 open scoped BigOperators
 
-
-
-
 theorem pascal_sum (m : ℕ) (g : ℕ → ℝ) :
     (∑ c ∈ Finset.range (m + 1), (m.choose c : ℝ) * g (c + 1)) +
         (∑ c ∈ Finset.range (m + 1), (m.choose c : ℝ) * g c)
@@ -226,9 +197,6 @@ theorem pascal_sum (m : ℕ) (g : ℕ → ℝ) :
     Nat.choose_eq_zero_of_lt (Nat.lt_succ_self m)]
   simp only [Nat.cast_zero, zero_mul, add_zero]
   ring
-
-
-
 
 theorem pascal_sum_notop (m : ℕ) (g : ℕ → ℝ) :
     (∑ c ∈ Finset.range m, (m.choose c : ℝ) * g (c + 1)) +

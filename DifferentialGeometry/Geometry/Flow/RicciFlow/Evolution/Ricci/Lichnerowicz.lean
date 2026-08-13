@@ -2,12 +2,6 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.Ricci.CoordinateId
 
 set_option autoImplicit false
 
-
-
-
-
-
-
 noncomputable section
 
 namespace DifferentialGeometry.PDE.RicciFlow
@@ -62,8 +56,6 @@ theorem evol_ricci_inFrame_of_variation_commutators
       t x i j
   simpa [ricciEvolutionRHSInFrame] using h
 
-
-
 def ricciTraceDerivRHSInFrame
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -76,9 +68,6 @@ def ricciTraceDerivRHSInFrame
     (inverseMetricEvolutionRHSInFrame (I := I) S gInv frame t x k l *
       DifferentialGeometry.Integral.Connection.rm04Comp (I := I) (Rm04 t) frame x k i j l +
     gInv t x k l * rm04Dt t x k i j l)
-
-
-
 
 def RicciTraceDerivativeSimplifiesInFrame
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
@@ -94,8 +83,6 @@ def RicciTraceDerivativeSimplifiesInFrame
         (t : Real) x i j =
       ricciEvolutionRHSInFrame (I := I) S Rm04 gInv frame roughLapRic
         (t : Real) x i j
-
-
 
 omit [DecidableEq Idx] in
 omit [SigmaCompactSpace M] in
@@ -175,15 +162,11 @@ theorem ricciEvolutionEquationInFrame_of_riemann_trace
         (I := I) S Rm04 gInv frame h_trace (t : Real) x i j
   exact hricci.congr_deriv (h_simplify t x i j)
 
-
-
-
 def tensorOneUpCompInFrame
     (gInv : Real -> DifferentialGeometry.Integral.Connection.InverseMetricComponents M Idx)
     (h : Real -> M -> Idx -> Idx -> Real)
     (t : Real) (x : M) (i k : Idx) : Real :=
   ∑ a : Idx, gInv t x k a * h t x i a
-
 
 def ricciLeftActionCompInFrame
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
@@ -196,7 +179,6 @@ def ricciLeftActionCompInFrame
     ricciOneUpCompInFrame (I := I) S gInv frame t x i k *
       h t x k j
 
-
 def ricciRightActionCompInFrame
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -207,12 +189,6 @@ def ricciRightActionCompInFrame
   ∑ k : Idx,
     ricciOneUpCompInFrame (I := I) S gInv frame t x j k *
       h t x k i
-
-
-
-
-
-
 
 def lichnerowiczRHSInFrame
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
@@ -228,7 +204,6 @@ def lichnerowiczRHSInFrame
         hRaised t x k l) -
     ricciLeftActionCompInFrame (I := I) S gInv frame h t x i j -
     ricciRightActionCompInFrame (I := I) S gInv frame h t x i j
-
 
 def RicciLichnerowiczEquationInFrame
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
@@ -248,10 +223,6 @@ def RicciLichnerowiczEquationInFrame
       D.carrier
       (t : Real)
 
-
-
-
-
 def RicciLichnerowiczSpecializesInFrame
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -268,7 +239,6 @@ def RicciLichnerowiczSpecializesInFrame
       ricciEvolutionRHSInFrame (I := I) S Rm04 gInv frame roughLapRic
         (t : Real) x i j
 
-
 def RicciSymmetricInFrameOn
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -276,8 +246,6 @@ def RicciSymmetricInFrameOn
   forall t x i j,
     ricciCompInFrame (I := I) S frame t x i j =
       ricciCompInFrame (I := I) S frame t x j i
-
-
 
 omit [DecidableEq Idx] in
 omit [SigmaCompactSpace M] [T2Space M] in
@@ -291,8 +259,6 @@ theorem ricciLeftActionCompInFrame_eq_quadratic
         (ricciCompInFrame (I := I) S frame) t x i j =
       ricciQuadraticCompInFrame (I := I) S gInv frame t x i j := by
   rfl
-
-
 
 omit [DecidableEq Idx] in
 omit [SigmaCompactSpace M] [T2Space M] in
@@ -346,8 +312,6 @@ theorem ricciRightActionCompInFrame_eq_quadratic_of_symm
           gInv t x k a * ricciCompInFrame (I := I) S frame t x i a) *
           ricciCompInFrame (I := I) S frame t x k j := by
           rfl
-
-
 
 omit [DecidableEq Idx] in
 omit [SigmaCompactSpace M] [T2Space M] in
@@ -459,9 +423,6 @@ private theorem rightActAt
           ricciCompInFrame (I := I) S frame t x k j := by
           rfl
 
-
-
-
 omit [DecidableEq Idx] in
 omit [SigmaCompactSpace M] [T2Space M] in
 theorem ricciLichnerowiczSpecializesInFrame_of_actions
@@ -489,8 +450,6 @@ theorem ricciLichnerowiczSpecializesInFrame_of_actions
     h_left t x i j, h_right t x i j]
   ring
 
-
-
 omit [DecidableEq Idx] in
 omit [SigmaCompactSpace M] [T2Space M] in
 theorem ricciLichnerowiczSpecializesInFrame_of_symm
@@ -512,9 +471,6 @@ theorem ricciLichnerowiczSpecializesInFrame_of_symm
     (fun t x i j =>
       ricciRightActionCompInFrame_eq_quadratic_of_symm
         (I := I) S gInv frame hRic hInv (t : Real) x i j)
-
-
-
 
 omit [DecidableEq Idx] in
 omit [SigmaCompactSpace M] [T2Space M] in
@@ -538,8 +494,6 @@ theorem ricciLichnerowiczSpecializesInFrame_regular
     exact ricciRightActionCompInFrame_eq_quadratic_at
       (I := I) S gInv frame (t : Real) x i j
       (fun a b => hInv (t : Real) x a b) (hRic t x)
-
-
 
 @[deprecated "use a local or pointwise Lichnerowicz specialization instead" (since := "2026-05-22")]
 theorem ricciLichnerowiczSpecializesInFrame_lc
@@ -596,8 +550,6 @@ theorem ricciLichnerowiczSpecializesInFrame_lc
   exact ricciLichnerowiczSpecializesInFrame_regular
     (I := I) S Rm04 gInv frame roughLapRic hRic hInv
 
-
-
 omit [DecidableEq Idx] in
 omit [SigmaCompactSpace M] [T2Space M] in
 theorem ricciLichnerowiczEquationInFrame_of_ricciEvolution
@@ -615,9 +567,6 @@ theorem ricciLichnerowiczEquationInFrame_of_ricciEvolution
       (I := I) S Rm04 gInv frame roughLapRic := by
   intro t x i j
   exact (h_ricci t x i j).congr_deriv (h_spec t x i j).symm
-
-
-
 
 omit [DecidableEq Idx] in
 omit [SigmaCompactSpace M] [T2Space M] in
@@ -638,8 +587,6 @@ theorem ricciLichnerowiczEquationInFrame_of_ricciEvolution_and_symm
     (I := I) S Rm04 gInv frame roughLapRic h_ricci
     (ricciLichnerowiczSpecializesInFrame_of_symm
       (I := I) S Rm04 gInv frame roughLapRic hRic hInv)
-
-
 
 @[deprecated "use a local or pointwise Lichnerowicz equation route instead" (since := "2026-05-22")]
 theorem ricciLichnerowiczEquationInFrame_of_ricciEvolution_lc
@@ -679,11 +626,6 @@ theorem ricciLichnerowiczEquationInFrame_of_ricciEvolution_lc
     (ricciLichnerowiczSpecializesInFrame_lc
       (I := I) S hS Rm13 Rm04 gInv frame roughLapRic hframe hcover
       hTrace hRm13 hLower hinv)
-
-
-
-
-
 
 omit [SigmaCompactSpace M] in
 theorem evol_ricci_lichnerowicz_coordFrameAt_of_christoffelEvolution_nabla2_commutators
@@ -799,9 +741,6 @@ theorem evol_ricci_lichnerowicz_coordFrameAt_of_christoffelEvolution_nabla2_comm
     ring
   exact hRicci.congr_deriv hSpecAt.symm
 
-
-
-
 omit [DecidableEq Idx] in
 omit [SigmaCompactSpace M] [T2Space M] in
 theorem ricciLichAt
@@ -846,8 +785,6 @@ theorem ricciLichAt
     ring
   exact hRicci.congr_deriv hSpec.symm
 
-
-
 theorem coordRicciLich
     [I.Boundaryless] [IsManifold I (∞ + 1) M]
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
@@ -877,8 +814,6 @@ theorem coordRicciLich
     exact coordRicSymmOn (I := I) S x₀ (t : Real)
       (coordinateFrameAt_mem (I := I) x₀) a b
 
-
-
 noncomputable def ricciPairRHS
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -890,8 +825,6 @@ noncomputable def ricciPairRHS
           (coordInv (I := I) S x₀) (coordinateFrameAt (I := I) x₀)
           (coordRoughRic (I := I) S x₀ (coordNab2Ric (I := I) S x₀))
           t x₀ i j
-
-
 
 theorem ricciPairCoord
     [I.Boundaryless] [IsManifold I (∞ + 1) M]

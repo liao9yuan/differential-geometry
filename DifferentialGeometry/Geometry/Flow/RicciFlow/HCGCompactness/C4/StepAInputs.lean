@@ -3,25 +3,6 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.C4.PointedEme
 
 set_option autoImplicit false
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 noncomputable section
 
 universe u uE uH
@@ -39,21 +20,9 @@ variable {H : Type uH} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H}
 variable [I.Boundaryless]
 
-
-
-
-
-
-
 abbrev PointedSeqDistance
     (X : PointedRiemannianSeq.{u, uE, uH} (I := I)) : Type _ :=
   forall k : Nat, (X.obj k).M -> (X.obj k).M -> Real
-
-
-
-
-
-
 
 structure InjRadiusDecayInput
     (X : PointedRiemannianSeq.{u, uE, uH} (I := I)) where
@@ -71,7 +40,6 @@ structure InjRadiusDecayInput
 
 namespace InjRadiusDecayInput
 
-
 def subseq {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
     (hd : InjRadiusDecayInput (I := I) X) (f : Nat -> Nat) :
     InjRadiusDecayInput (I := I) (X.subseq f) where
@@ -85,25 +53,20 @@ def subseq {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
     intro k x
     simpa [PointedRiemannianSeq.subseq] using hd.decay (f k) x
 
-/-- The Cheeger--Gromov--Taylor injectivity-radius profile appearing in
-`InjRadiusDecayInput.decay`. -/
 noncomputable def mu {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
     (hd : InjRadiusDecayInput (I := I) X) (r : Real) : Real :=
   hd.a * (min hd.baseInj.ρ 1) ^ (Module.finrank Real E) * Real.exp (-hd.C * r)
 
 omit [CompleteSpace E] in
-/-- The injectivity-radius profile is positive at every real radius. -/
 theorem mu_pos {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
     (hd : InjRadiusDecayInput (I := I) X) (r : Real) : 0 < hd.mu r :=
   mul_pos (mul_pos hd.a_pos (pow_pos (lt_min hd.baseInj.pos one_pos) _)) (Real.exp_pos _)
 
-/-- The injectivity-radius profile is nonnegative at every real radius. -/
 theorem mu_nonneg {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
     (hd : InjRadiusDecayInput (I := I) X) (r : Real) : 0 ≤ hd.mu r :=
   (hd.mu_pos r).le
 
 omit [CompleteSpace E] in
-/-- The injectivity-radius profile decreases with the basepoint distance. -/
 theorem mu_antitone {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
     (hd : InjRadiusDecayInput (I := I) X) : Antitone hd.mu := by
   intro r₁ r₂ h
@@ -113,8 +76,6 @@ theorem mu_antitone {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
     Real.exp_le_exp.mpr (by nlinarith [mul_le_mul_of_nonneg_left h hd.C_nonneg])
   exact mul_le_mul_of_nonneg_left hexp hK
 
-/-- The supplied distance realizes the Riemannian emetric of every sequence
-term and is therefore nonnegative. -/
 structure RealizesEdist {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
     (hd : InjRadiusDecayInput (I := I) X) : Prop where
   dist_nonneg : ∀ (k : Nat) (x y : (X.obj k).M), 0 ≤ hd.dist k x y
@@ -125,7 +86,6 @@ structure RealizesEdist {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
 namespace RealizesEdist
 
 omit [CompleteSpace E] in
-/-- Reindex the realized-distance proof along a subsequence. -/
 theorem subseq {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
     {hd : InjRadiusDecayInput (I := I) X}
     (hre : hd.RealizesEdist) (f : Nat → Nat) :
@@ -141,23 +101,6 @@ end RealizesEdist
 
 end InjRadiusDecayInput
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 structure VolumeComparisonInput
     (X : PointedRiemannianSeq.{u, uE, uH} (I := I)) where
   dist : PointedSeqDistance (I := I) X
@@ -165,8 +108,6 @@ structure VolumeComparisonInput
   r0 : Real
   r0_pos : 0 < r0
   Imult : Real -> Nat
-
-
 
   ballMult :
     forall (m : Real), forall k : Nat, forall {α : Type u}, [Fintype α] -> [DecidableEq α] ->
@@ -179,7 +120,6 @@ structure VolumeComparisonInput
           J.card <= Imult m
 
 namespace VolumeComparisonInput
-
 
 def subseq {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
     (vc : VolumeComparisonInput (I := I) X) (f : Nat -> Nat) :

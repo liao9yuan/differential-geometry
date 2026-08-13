@@ -4,15 +4,6 @@ set_option autoImplicit false
 set_option linter.style.longLine false
 set_option linter.unusedSectionVars false
 
-/-!
-# Fixed-window assembly from source estimates
-
-This module turns the constants-first source covariant/Lipschitz package into
-the fixed-window Arzelà--Ascoli output.  It does not assume that the closed
-window lies in the regular set of the restricted flow: that regularity belongs
-to the producer of `SrcCovLipData`, which may use a larger ambient solution.
--/
-
 noncomputable section
 
 open Set
@@ -30,8 +21,6 @@ variable {X : PointedFlowSeq (I := I)}
 variable {P : PointedRiemannianManifold (I := I)}
 variable {subseq : Nat → Nat}
 
-/-- Assemble the fixed-window convergence output from one uniform source
-metric-equivalence constant and the constants-first source estimates. -/
 noncomputable def convOut_of_src
     (Φ : PointedCGHMaps (I := I) X P subseq)
     (R : letI : TopologicalSpace P.M := P.topology
@@ -179,4 +168,3 @@ noncomputable def convOut_of_src
 
 end HCGCompactness
 end DifferentialGeometry
-

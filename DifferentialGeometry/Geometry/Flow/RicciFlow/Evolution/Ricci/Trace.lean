@@ -11,16 +11,6 @@ import Mathlib.Tactic.Ring
 
 set_option autoImplicit false
 
-
-
-
-
-
-
-
-
-
-
 noncomputable section
 
 namespace DifferentialGeometry.PDE.RicciFlow
@@ -42,8 +32,6 @@ section Components
 variable {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
 variable {u : Set M}
 
-
-
 def RicciTensorRealizesRm04TraceInFrameOn
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -54,9 +42,6 @@ def RicciTensorRealizesRm04TraceInFrameOn
     DifferentialGeometry.Integral.Connection.RicciTensorRealizesRm04TraceInFrame
       (I := I) (S.ricci t) (Rm04 t) (gInv t) frame
 
-
-
-
 def RicciTensorRealizesRm04FirstTraceInFrameOn
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -66,9 +51,6 @@ def RicciTensorRealizesRm04FirstTraceInFrameOn
   forall t : Real,
     DifferentialGeometry.Integral.Connection.RicciTensorRealizesRm04FirstTraceInFrame
       (I := I) (S.ricci t) (Rm04 t) (gInv t) frame
-
-
-
 
 def RicciTensorRealizesRm04FirstTraceInFrameOnRegular
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
@@ -99,8 +81,6 @@ theorem ricciCompInFrame_eq_rm04_trace
     DifferentialGeometry.Integral.Connection.ricciComp_eq_trace (I := I)
       (S.ricci t) (Rm04 t) (gInv t) frame (htrace t) x i j
 
-
-
 omit [SigmaCompactSpace M] [T2Space M] in
 private theorem metricInverseInBasis_of_solution_frame
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
@@ -120,7 +100,6 @@ private theorem metricInverseInBasis_of_solution_frame
   · simpa [metricCompInFrame, IsLocalFrameOn.toBasisAt_coe] using
       (hinv t x hx i j).2
 
-
 omit [SigmaCompactSpace M] [T2Space M] in
 theorem metricInverseInBasis_of_local
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
@@ -139,11 +118,6 @@ theorem metricInverseInBasis_of_local
       (hinv t x hx i j).1
   · simpa [metricCompInFrame, IsLocalFrameOn.toBasisAt_coe] using
       (hinv t x hx i j).2
-
-
-
-
-
 
 omit [SigmaCompactSpace M] in
 @[deprecated "use a local or pointwise frame statement instead" (since := "2026-05-22")]
@@ -191,16 +165,12 @@ theorem ricciTensorRealizesRm04FirstTraceInFrameOnRegular_of_rm13Trace
   simpa [DifferentialGeometry.Integral.Connection.RicciTensorRealizesRm04FirstTraceInFrame,
     IsLocalFrameOn.toBasisAt_coe] using hAt i j
 
-
-
 def ConnectionLocallySmoothOn
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D) : Prop :=
   forall t : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime D,
     CovariantDerivative.ContMDiffCovariantDerivativeLocally
       (S.family.connection (t : Real)) (1 : WithTop ℕ∞)
-
-
 
 omit [SigmaCompactSpace M] in
 theorem connSmoothOfSol
@@ -214,8 +184,6 @@ theorem connSmoothOfSol
   simpa [SolutionFamily.connection, metricCov] using
     Integral.Connection.leviCivitaConnectionOfMetric_contMDiffCovariantDerivativeLocally_one
       (I := I) (M := M) (S.base.metric s)
-
-
 
 omit [SigmaCompactSpace M] in
 theorem connCurvOfSol
@@ -235,7 +203,6 @@ theorem connCurvOfSol
   exact DifferentialGeometry.Integral.Connection.connection_curvature_coord_of_christoffel
     (I := I) (S.family.connection s) htop x₀
 
-
 omit [SigmaCompactSpace M] in
 theorem rm13OfSol
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
@@ -248,7 +215,6 @@ theorem rm13OfSol
     SolutionFamily.rm13, metricCov] using
       (metricCurvData (I := I) (M := M) (S.base.metric s)).h_rm13
 
-
 omit [SigmaCompactSpace M] in
 theorem ricciTraceOfSol
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
@@ -259,7 +225,6 @@ theorem ricciTraceOfSol
   intro s _hs
   simpa [SolutionOn.ricci_eq, SolutionFamily.ricci, SolutionFamily.rm13] using
     (metricCurvData (I := I) (M := M) (S.base.metric s)).h_ricci13
-
 
 def RicciSymmetricInFrameOnRegular
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
@@ -305,7 +270,6 @@ private theorem rm04Realizes_regular
     (S.family.connection (t : Real)) (Rm13 (t : Real)) (Rm04 (t : Real))
     (hRm13 t) (hLower t)
 
-
 theorem rm04OutputSkew_regular
     [IsManifold I (∞ + 1) M]
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
@@ -331,7 +295,6 @@ theorem rm04OutputSkew_regular
       (I := I) (lcAt_regular (I := I) S hS t))
     (Rm04 (t : Real))
     (rm04Realizes_regular (I := I) S Rm13 Rm04 hRm13 hLower t)
-
 
 theorem rm04FirstBianchi_regular
     [IsManifold I (∞ + 1) M]
@@ -359,7 +322,6 @@ theorem rm04FirstBianchi_regular
     (Rm04 (t : Real))
     (rm04Realizes_regular (I := I) S Rm13 Rm04 hRm13 hLower t)
 
-
 theorem rm04PairSymm_regular
     [IsManifold I (∞ + 1) M]
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
@@ -386,7 +348,6 @@ theorem rm04PairSymm_regular
     (lcAt_regular (I := I) S hS t) (Rm04 (t : Real))
     (rm04Realizes_regular (I := I) S Rm13 Rm04 hRm13 hLower t)
 
-
 theorem rm04InputSkew_regular_first_two
     [IsManifold I (∞ + 1) M]
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
@@ -411,10 +372,6 @@ theorem rm04InputSkew_regular_first_two
     (Rm04 (t : Real))
     (rm04Realizes_regular (I := I) S Rm13 Rm04 hRm13 hLower t)
 
-
-
-
-
 theorem rm04InputSkew_regular
     [IsManifold I (∞ + 1) M]
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
@@ -435,8 +392,6 @@ theorem rm04InputSkew_regular
           -Rm04 (t : Real) x (DifferentialGeometry.Integral.Connection.vec4 X Y Z W) :=
   rm04InputSkew_regular_first_two
     (I := I) S Rm13 Rm04 hRm13 hLower
-
-
 
 omit [SigmaCompactSpace M] in
 @[deprecated "use a local or pointwise frame statement instead" (since := "2026-05-22")]
@@ -490,9 +445,6 @@ theorem ricciSymm_regular
       i j
   simpa [basis, ricciCompInFrame, DifferentialGeometry.Integral.Connection.ricciComp,
     DifferentialGeometry.Integral.Connection.ricciComp, IsLocalFrameOn.toBasisAt_coe] using hsym
-
-
-
 
 def RiemannEvolutionEquationInFrameOn
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}

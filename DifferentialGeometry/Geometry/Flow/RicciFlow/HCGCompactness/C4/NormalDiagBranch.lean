@@ -7,14 +7,6 @@ import Mathlib.Topology.OpenPartialHomeomorph.Composition
 
 set_option autoImplicit false
 
-/-!
-# Intrinsic branch selected by the quantitative normal phase map
-
-This file transports the quantitative model-space diagonal branch through the
-normal exponential and its tangent map. The transported object is the same
-selected inverse branch, expressed intrinsically.
--/
-
 noncomputable section
 
 universe u uE uH
@@ -37,8 +29,6 @@ variable [NeZero (Module.finrank Real E)]
 variable {H : Type uH} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H} [I.Boundaryless]
 
-/-- Normal coordinates on a model tangent vector, transported to the ambient
-tangent bundle by the tangent map of the normal exponential. -/
 noncomputable def normalTanHome
     (Y : PointedRiemannianManifold.{u, uE, uH} (I := I)) (x : Y.M) :
     letI : TopologicalSpace Y.M := Y.topology
@@ -56,8 +46,6 @@ noncomputable def normalTanHome
   letI : T2Space (TangentBundle I Y.M) := Y.t2TangentBundle
   exact (legacyBallChart (I := I) Y x).tangentHome
 
-/-- A pair of normal coordinates transported to the ambient product by the
-normal exponential in each factor. -/
 noncomputable def normalPairHome
     (Y : PointedRiemannianManifold.{u, uE, uH} (I := I)) (x : Y.M) :
     letI : TopologicalSpace Y.M := Y.topology
@@ -71,8 +59,6 @@ noncomputable def normalPairHome
   letI : T2Space (TangentBundle I Y.M) := Y.t2TangentBundle
   exact (legacyBallChart (I := I) Y x).pairHome
 
-/-- On its normal-coordinate source, `normalTanHome` is the existing
-`normalTangent` realization. -/
 theorem normalTanHome_apply
     (Y : PointedRiemannianManifold.{u, uE, uH} (I := I)) (x : Y.M)
     (z : E × E) (hz : z.1 ∈ normalBall (I := I) Y x) :
@@ -94,7 +80,6 @@ theorem normalTanHome_apply
   apply (legacyBallChart (I := I) Y x).tangentHome_apply
   simpa only [normalBall, legacyBallChart_radius] using hz
 
-/-- `normalPairHome` is the existing `normalPair` realization. -/
 theorem normalPairHome_apply
     (Y : PointedRiemannianManifold.{u, uE, uH} (I := I)) (x : Y.M)
     (z : E × E) :
@@ -109,8 +94,6 @@ theorem normalPairHome_apply
   letI : T2Space (TangentBundle I Y.M) := Y.t2TangentBundle
   exact (legacyBallChart (I := I) Y x).pairHome_apply z
 
-/-- The source of the tangent normal-coordinate homeomorphism is determined
-by the base coordinate. -/
 theorem normalTanHome_source
     (Y : PointedRiemannianManifold.{u, uE, uH} (I := I)) (x : Y.M) :
     letI : TopologicalSpace Y.M := Y.topology
@@ -130,8 +113,6 @@ theorem normalTanHome_source
   rw [normalTanHome, (legacyBallChart (I := I) Y x).tangentHome_source]
   rfl
 
-/-- The source of the product normal-coordinate homeomorphism is the product
-of the two normal balls. -/
 theorem normalPair_source
     (Y : PointedRiemannianManifold.{u, uE, uH} (I := I)) (x : Y.M) :
     letI : TopologicalSpace Y.M := Y.topology
@@ -148,8 +129,6 @@ theorem normalPair_source
   rw [normalPairHome, (legacyBallChart (I := I) Y x).pairHome_source]
   rfl
 
-/-- The quantitative model branch transported to an intrinsic
-diagonal-exponential partial homeomorphism. -/
 noncomputable def normalDiagHome
     (Y : PointedRiemannianManifold.{u, uE, uH} (I := I)) (x : Y.M)
     (e : OpenPartialHomeomorph (E × E) (E × E)) :
@@ -169,8 +148,6 @@ noncomputable def normalDiagHome
   exact (legacyBallChart (I := I) Y x).tangentHome.symm.trans
     (e.trans (legacyBallChart (I := I) Y x).pairHome)
 
-/-- Tangent coordinates transported through an explicitly supplied controlled
-normal-ball chart. -/
 noncomputable def chartTanHome
     (Y : PointedRiemannianManifold.{u, uE, uH} (I := I)) (x : Y.M)
     (c : NormalChartAt (I := I) Y x) :
@@ -185,8 +162,6 @@ noncomputable def chartTanHome
   letI : T2Space (TangentBundle I Y.M) := Y.t2TangentBundle
   exact c.tangentHome
 
-/-- Pair coordinates transported through an explicitly supplied controlled
-normal-ball chart. -/
 noncomputable def chartPairHome
     (Y : PointedRiemannianManifold.{u, uE, uH} (I := I)) (x : Y.M)
     (c : NormalChartAt (I := I) Y x) :
@@ -201,8 +176,6 @@ noncomputable def chartPairHome
   letI : T2Space (TangentBundle I Y.M) := Y.t2TangentBundle
   exact c.pairHome
 
-/-- A model diagonal branch transported through an explicitly supplied
-controlled normal-ball chart. -/
 noncomputable def chartDiagHome
     (Y : PointedRiemannianManifold.{u, uE, uH} (I := I)) (x : Y.M)
     (c : NormalChartAt (I := I) Y x)
@@ -236,7 +209,6 @@ private theorem pair_mem_target
     rw [P.left_inv hwP]
     exact hwA
 
-/-- The normal tangent-coordinate homeomorphism is smooth on its source. -/
 theorem normalTanHome_inf
     (Y : PointedRiemannianManifold.{u, uE, uH} (I := I)) (x : Y.M) :
     letI : TopologicalSpace Y.M := Y.topology
@@ -279,8 +251,6 @@ theorem normalTanHome_inf
     (m.source ∩ (m : E × E → TangentBundle 𝓘(Real, E) E) ⁻¹' t.source)
   exact ht.comp' hmOn
 
-/-- The inverse normal tangent-coordinate homeomorphism is smooth on its
-target. -/
 theorem normalTan_inv_inf
     (Y : PointedRiemannianManifold.{u, uE, uH} (I := I)) (x : Y.M) :
     letI : TopologicalSpace Y.M := Y.topology
@@ -327,7 +297,6 @@ theorem normalTan_inv_inf
       (t.symm : TangentBundle I Y.M → TangentBundle 𝓘(Real, E) E) ⁻¹' m.target)
   exact hmOn.comp' ht
 
-/-- The product normal-coordinate homeomorphism is smooth on its source. -/
 theorem normalPairHome_inf
     (Y : PointedRiemannianManifold.{u, uE, uH} (I := I)) (x : Y.M) :
     letI : TopologicalSpace Y.M := Y.topology
@@ -346,8 +315,6 @@ theorem normalPairHome_inf
   simpa only [normalPairHome, OpenPartialHomeomorph.prod_source,
     OpenPartialHomeomorph.prod_apply] using h
 
-/-- The inverse product normal-coordinate homeomorphism is smooth on its
-target. -/
 theorem normalPair_inv_inf
     (Y : PointedRiemannianManifold.{u, uE, uH} (I := I)) (x : Y.M) :
     letI : TopologicalSpace Y.M := Y.topology
@@ -369,8 +336,6 @@ theorem normalPair_inv_inf
 
 namespace NormalCoordMetricBoundInput
 
-/-- Below the radial normal radius, the framed normal coordinate is bounded by
-twice the Riemannian distance. -/
 theorem chart_mem_norm_le
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
     (_h : NormalCoordMetricBoundInput (I := I) X)
@@ -463,8 +428,6 @@ theorem chart_mem_norm_le
   have hdistNonneg : 0 ≤ (riemannianEDist I c y).toReal := ENNReal.toReal_nonneg
   nlinarith
 
-/-- Below the radial normal radius, the raw exponential coordinate is bounded
-by twice the Riemannian distance. -/
 theorem raw_chart_mem_norm_le
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
     (h : NormalCoordMetricBoundInput (I := I) X)
@@ -567,8 +530,6 @@ end NormalCoordMetricBoundInput
 
 namespace IsNormalDiag
 
-/-- Two quantitative normal diagonal branches with the same source radius and
-the same intrinsic compatibility square agree as partial homeomorphisms. -/
 theorem eqOnSource
     (Y : PointedRiemannianManifold.{u, uE, uH} (I := I))
     (hcomplete : MetricComplete (I := I) Y)
@@ -647,8 +608,6 @@ theorem eqOnSource
   · rw [c.pairHome_apply, c.pairHome_apply]
     exact (hdiag z hzClosed).trans (hdiag' z hzClosed).symm
 
-/-- Transport a quantitative normal-coordinate branch to the selected
-intrinsic diagonal-exponential branch used by downstream readouts. -/
 noncomputable def toBranch
     (Y : PointedRiemannianManifold.{u, uE, uH} (I := I))
     (hcomplete : MetricComplete (I := I) Y)
@@ -799,8 +758,6 @@ noncomputable def toBranch
       (B.target ∩ (B.symm : Y.M × Y.M → E × E) ⁻¹' A.source)
     exact hAInf.comp' hBInv
 
-/-- The selected intrinsic branch retains the transported model
-partial homeomorphism as its underlying branch. -/
 @[simp] theorem toBranch_hom
     (Y : PointedRiemannianManifold.{u, uE, uH} (I := I))
     (hcomplete : MetricComplete (I := I) Y)
@@ -864,8 +821,6 @@ partial homeomorphism as its underlying branch. -/
   rcases h with ⟨_, _, _, _, _, _⟩
   rfl
 
-/-- The full quantitative model branch transports exactly to the intrinsic
-selected branch, including its source, target, and inverse formula. -/
 theorem full_transport
     (Y : PointedRiemannianManifold.{u, uE, uH} (I := I))
     (hcomplete : MetricComplete (I := I) Y)
@@ -1035,8 +990,6 @@ theorem full_transport
   rw [P.left_inv hwP]
   exact c.tangentHome_apply (e.symm w) hzNormal
 
-/-- The controlled-chart readout of the transported intrinsic branch is
-exactly the velocity coordinate of the underlying model inverse branch. -/
 theorem chart_readout
     (Y : PointedRiemannianManifold.{u, uE, uH} (I := I))
     (hcomplete : MetricComplete (I := I) Y)
@@ -1120,8 +1073,6 @@ theorem chart_readout
   rw [← c.tangentHome_apply (e.symm w) hzNormal]
   rw [c.tangentHome.left_inv hzSource]
 
-/-- Every point in the selected model target stays in the two controlled
-chart balls recorded by the branch fence. -/
 theorem target_mem_ball
     (Y : PointedRiemannianManifold.{u, uE, uH} (I := I))
     (hcomplete : MetricComplete (I := I) Y)
@@ -1196,8 +1147,6 @@ theorem target_mem_ball
     (hfence (e.symm w) (Metric.ball_subset_closedBall hzBall)).2
   simpa only [e.right_inv hw] using hzFence
 
-/-- The inverse of the selected model branch preserves the source normal
-coordinate on its whole target. -/
 theorem symm_fst_eq
     (Y : PointedRiemannianManifold.{u, uE, uH} (I := I))
     (hcomplete : MetricComplete (I := I) Y)
@@ -1285,8 +1234,6 @@ theorem symm_fst_eq
   · exact c.ball_subset hwNormal
   · exact hmap.symm
 
-/-- The transported selected inverse of a normal-coordinate pair is the
-normal tangent with the source coordinate left explicit. -/
 theorem inv_pair_normal
     (Y : PointedRiemannianManifold.{u, uE, uH} (I := I))
     (hcomplete : MetricComplete (I := I) Y)
@@ -1345,8 +1292,6 @@ theorem inv_pair_normal
   congr 1
   exact Prod.ext (symm_fst_eq (I := I) Y hcomplete hconn x h hf hw) rfl
 
-/-- Membership of a normal-coordinate pair in the transported intrinsic
-domain recovers membership in the selected model target. -/
 theorem target_of_pair_mem
     (Y : PointedRiemannianManifold.{u, uE, uH} (I := I))
     (hcomplete : MetricComplete (I := I) Y)
@@ -1411,8 +1356,6 @@ theorem target_of_pair_mem
   have htarget : P.symm (P w) ∈ e.target := hrest.2
   rwa [P.left_inv hw] at htarget
 
-/-- An ambient pair in a controlled provider image has its inverse chart
-coordinates in the selected model target. -/
 theorem target_of_inv_dom
     (Y : PointedRiemannianManifold.{u, uE, uH} (I := I))
     (hcomplete : MetricComplete (I := I) Y)
@@ -1486,8 +1429,6 @@ theorem target_of_inv_dom
   apply target_of_pair_mem (I := I) Y hcomplete hconn x hq h hcoordSource
   rwa [hpairEq]
 
-/-- An ambient pair in the transported branch domain has its normal-chart
-coordinate pair in the selected model target. -/
 theorem target_of_chart_dom
     (Y : PointedRiemannianManifold.{u, uE, uH} (I := I))
     (hcomplete : MetricComplete (I := I) Y)
@@ -1601,9 +1542,6 @@ theorem target_of_chart_dom
   apply target_of_pair_mem (I := I) Y hcomplete hconn x hq h hcoordSource
   rwa [hpairEq]
 
-/-- A model target closed ball transports into the selected intrinsic branch
-domain once both the target coordinates and inverse source coordinates fit in
-the named normal ball. -/
 theorem pair_mem_of_closed
     (Y : PointedRiemannianManifold.{u, uE, uH} (I := I))
     (hcomplete : MetricComplete (I := I) Y)
@@ -1705,8 +1643,6 @@ theorem pair_mem_of_closed
 
 end IsNormalDiag
 
-/-- One quantitative normal branch whose transported intrinsic domain contains
-the image of a fixed model-space closed ball. -/
 def HasNormalBranchDom
     (Y : PointedRiemannianManifold.{u, uE, uH} (I := I))
     (hcomplete : MetricComplete (I := I) Y)
@@ -1741,8 +1677,6 @@ def HasNormalBranchDom
           normalPair (I := I) Y x w (c := c) ∈
             (IsNormalDiag.toBranch (I := I) Y hcomplete hconn x hq he).dom
 
-/-- One quantitative normal branch carrying its phase fence, inverse linear
-approximation, and a fixed closed ball in the transported branch domain. -/
 def HasNormalBranchInv
     (Y : PointedRiemannianManifold.{u, uE, uH} (I := I))
     (hcomplete : MetricComplete (I := I) Y)
@@ -1784,8 +1718,6 @@ def HasNormalBranchInv
 
 namespace HasNormalBranchDom
 
-/-- A family of pairs lying in the half-radius Riemannian ball uses one and the
-same selected quantitative branch. -/
 theorem exists_pair_branch
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
     (hb : NormalCoordMetricBoundInput (I := I) X) (k : Nat)
@@ -1927,8 +1859,6 @@ theorem exists_pair_branch
   rw [← hnormalPair]
   exact hclosed (wa, wb) hwClosed
 
-/-- A controlled family of pairs lies in the fixed-trivialization readout
-domain of one selected quantitative branch. -/
 theorem exists_pair_readout
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
     (hb : NormalCoordMetricBoundInput (I := I) X) (k : Nat)
@@ -2013,8 +1943,6 @@ end HasNormalBranchDom
 
 namespace H6ChartData
 
-/-- A family of pairs in the intrinsic half-radius ball lies in the
-provider-coordinate readout domain of one selected H6 branch. -/
 theorem exists_pair_readout
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
     {hd : InjRadiusDecayInput (I := I) X}
@@ -2150,8 +2078,6 @@ end H6ChartData
 
 namespace NormalRadiusProfile
 
-/-- On a fixed basepoint-distance sublevel, one positive model target radius
-works for the transported selected branch at every stage and center. -/
 theorem exists_common_dom
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
     {hd : InjRadiusDecayInput (I := I) X}
@@ -2237,9 +2163,6 @@ end NormalRadiusProfile
 
 namespace H6NormalData
 
-/-- On a fixed basepoint-distance sublevel, one quantitative H6 branch,
-inverse approximation, and positive model domain work at every stage and
-center. -/
 theorem exists_common_inv
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
     {hd : InjRadiusDecayInput (I := I) X}
@@ -2345,8 +2268,6 @@ theorem exists_common_inv
   exact IsNormalDiag.pair_mem_of_closed (I := I) (X.obj k)
     (hcomplete.complete k) (hconn k) x hq he hw hqChart hρδ hρChart
 
-/-- Compatibility projection of `exists_common_inv` retaining only the
-provider branch domain used by earlier consumers. -/
 theorem exists_common_dom
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
     {hd : InjRadiusDecayInput (I := I) X}

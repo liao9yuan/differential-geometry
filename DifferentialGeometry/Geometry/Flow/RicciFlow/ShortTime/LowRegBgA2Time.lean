@@ -1,20 +1,6 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.LowRegBgTime
 import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.LowRegBgC2Small
 
-/-!
-# Time packets for the fixed-background complete second-order action
-
-This module turns the complete low-base `C₂` coefficient into the compatible
-measurable `H4 → H2` and `H3 → H1` families used by the adjacent-scale lift.
-The coefficient already includes the full principal deviation after subtraction
-of the fixed rough Laplacian; no separate principal arm is added here.
-
-The DeTurck background `gB` is independent of the class metric `g` throughout:
-the completed maps come from `lowCoreDataBg g gB`, and the smallness input is
-the fixed-background `c2Bg_h2_small`.  Only the realization data (`hreal`, the
-threshold bounds) is tied to `g`.
--/
-
 noncomputable section
 
 open Bundle Manifold MeasureTheory Set Filter
@@ -156,19 +142,6 @@ private theorem a2LoBg_total_le
   rw [← hcore S] at h
   exact h
 
-/-- After shrinking any realized spectral `H2` ball, the canonical radial
-second-order coefficient at an arbitrary fixed DeTurck background `gB` gives
-uniformly bounded compatible `H4 → H2` and `H3 → H1` operators.
-
-The fixed-background mirror of `radialA2_pair`, stated in the free-cutoff binder
-shape of `radialA2_pairR`: the constant `C` is chosen before `r`, which is what
-lets a consumer shrink the coefficient radius after seeing `C`.  That radius is
-the only contraction knob available here — the deviation threshold `δ` is capped
-by the realization certificate and cannot be shrunk independently.
-
-Only the smallness input changes with the background: `c2Bg_h2_small` replaces
-`c2_h2_small`, while the completion transfer `a2_pair` is background-blind,
-quantifying over every `LowBaseActionData g`. -/
 theorem radialA2Bg_pair
     (hDim : Module.finrank ℝ E = 3)
     (g gB : SmoothRiemannianMetric I M)
@@ -240,9 +213,7 @@ theorem radialA2Bg_pair
 
 set_option maxHeartbeats 1000000 in
 set_option synthInstance.maxHeartbeats 1000000 in
-/-- On every sufficiently small fixed-background cutoff, the complete radial
-second-order coefficient gives continuous compatible completed maps whose
-operator norms are linear in the chosen cutoff radius. -/
+
 theorem lowA2Bg_small
     (hDim : Module.finrank ℝ E = 3)
     (g gB : SmoothRiemannianMetric I M) {ρ₀ δ : ℝ}
@@ -316,8 +287,6 @@ theorem lowA2Bg_small
       g gB hr0 hδ0 hδ_le hreal' hlipLo.continuous hcoreLo
         (fun T => (hcoreBd T).2) v
 
-/-- The high complete second-order family freezes the radial passenger at the
-same H2 state at which its coefficient is evaluated. -/
 noncomputable def hiAffA2Bg
     (g : SmoothRiemannianMetric I M) {ρ δ : ℝ}
     (hρ : 0 ≤ ρ) (hδ0 : 0 ≤ δ) (hδ_le : δ ≤ 1 / 3)
@@ -333,8 +302,6 @@ noncomputable def hiAffA2Bg
         (radialCLM (I := I) (M := M) g (by norm_num) ρ
           (incl32 (I := I) (M := M) g (u t)))
 
-/-- The matching low complete second-order family uses the same frozen radial
-scalar on the H3 passenger scale. -/
 noncomputable def loAffA2Bg
     (g : SmoothRiemannianMetric I M) {ρ δ : ℝ}
     (hρ : 0 ≤ ρ) (hδ0 : 0 ≤ δ) (hδ_le : δ ≤ 1 / 3)
@@ -350,8 +317,6 @@ noncomputable def loAffA2Bg
         (radialCLM (I := I) (M := M) g (by norm_num) ρ
           (incl32 (I := I) (M := M) g (u t)))
 
-/-- Freezing the radial H4 passenger does not enlarge the high second-order
-coefficient norm. -/
 theorem hiAffA2Bg_le
     (g : SmoothRiemannianMetric I M) {ρ δ : ℝ}
     (hρ : 0 ≤ ρ) (hδ0 : 0 ≤ δ) (hδ_le : δ ≤ 1 / 3)
@@ -377,8 +342,6 @@ theorem hiAffA2Bg_le
     _ ≤ ‖A2‖ * 1 := mul_le_mul_of_nonneg_left hR4 (norm_nonneg A2)
     _ = ‖A2‖ := mul_one _
 
-/-- Freezing the radial H3 passenger does not enlarge the low second-order
-coefficient norm. -/
 theorem loAffA2Bg_le
     (g : SmoothRiemannianMetric I M) {ρ δ : ℝ}
     (hρ : 0 ≤ ρ) (hδ0 : 0 ≤ δ) (hδ_le : δ ≤ 1 / 3)
@@ -404,8 +367,6 @@ theorem loAffA2Bg_le
     _ ≤ ‖A2‖ * 1 := mul_le_mul_of_nonneg_left hR3 (norm_nonneg A2)
     _ = ‖A2‖ := mul_one _
 
-/-- The high and low radialized complete second-order families commute with
-the adjacent Sobolev inclusions at every time. -/
 theorem affA2Bg_comm
     (g : SmoothRiemannianMetric I M) {ρ δ : ℝ}
     (hρ : 0 ≤ ρ) (hδ0 : 0 ≤ δ) (hδ_le : δ ≤ 1 / 3)
@@ -453,8 +414,7 @@ theorem affA2Bg_comm
 
 set_option maxHeartbeats 1000000 in
 set_option synthInstance.maxHeartbeats 1000000 in
-/-- A measurable H3 trajectory gives measurable uniformly bounded compatible
-high and low complete second-order families after radializing the passengers. -/
+
 theorem affA2Bg_data
     (g : SmoothRiemannianMetric I M) {ρ δ c : ℝ}
     (hρ : 0 ≤ ρ) (hδ0 : 0 ≤ δ) (hδ_le : δ ≤ 1 / 3)

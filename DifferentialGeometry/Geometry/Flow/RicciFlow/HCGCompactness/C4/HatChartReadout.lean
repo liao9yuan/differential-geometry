@@ -2,14 +2,6 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.C4.NormalBran
 
 set_option autoImplicit false
 
-/-!
-# Finite center readout in a controlled normal chart
-
-This file records the chart-provider-independent result of the finite
-center-of-mass construction.  Legacy framed charts and intrinsic H6 charts
-instantiate the same predicate.
--/
-
 noncomputable section
 
 universe u uE uH
@@ -32,7 +24,6 @@ variable [NeZero (Module.finrank Real E)]
 variable {H : Type uH} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H} [I.Boundaryless]
 
-/-- Complete finite center data in one supplied controlled normal chart. -/
 def HasChartCmSol
     (Y : PointedRiemannianManifold.{u, uE, uH} (I := I))
     (hcomplete : MetricComplete (I := I) Y)

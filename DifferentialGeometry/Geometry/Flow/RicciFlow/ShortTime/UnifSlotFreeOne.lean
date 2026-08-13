@@ -1,15 +1,6 @@
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.SlotFreeCurvatureOperatorBound
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.UnifCurvatureJetOne
 
-/-!
-# Class-first rank-one free-slot curvature jets
-
-This module packages the order-zero and order-one fibre bounds for
-`slotFreeOpCc g 1` uniformly over a three-dimensional metric class. All
-constants are selected before the class metric varies, and the variable metric
-is used only through comparison and metric jets of orders one through three.
--/
-
 set_option autoImplicit false
 
 noncomputable section
@@ -37,9 +28,6 @@ private noncomputable def sfOneGridC (C₀ C₁ : ℝ) (i : ℕ) : ℝ :=
   if i = 0 then (3 : ℝ) ^ 4 * C₀ ^ 2
   else (3 : ℝ) ^ 5 * C₁ ^ 2
 
-/-- In dimension three, the canonical rank-one free-slot curvature operator
-has one class-first pointwise fibre cap for its zeroth and first covariant
-jets. The class metric enters only after the cap is fixed. -/
 theorem sfOne_grid_unif
     (hDim : Module.finrank ℝ E = 3)
     (gBase : SmoothRiemannianMetric I M) {Λ : ℝ} (hΛ : 1 ≤ Λ) :

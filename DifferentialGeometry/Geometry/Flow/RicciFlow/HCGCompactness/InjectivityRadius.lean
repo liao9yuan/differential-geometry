@@ -4,14 +4,6 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.C4.PointedEme
 
 set_option autoImplicit false
 
-
-
-
-
-
-
-
-
 noncomputable section
 
 universe u uE uH
@@ -30,15 +22,6 @@ variable [NeZero (Module.finrank Real E)] [CompleteSpace E]
 variable {H : Type uH} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H}
 variable [I.Boundaryless]
-
-
-
-
-
-
-
-
-
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
@@ -179,7 +162,6 @@ structure BaseInjBound
 
 namespace BaseInjBound
 
-
 def subseq {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
     (h : BaseInjBound (I := I) X) (f : Nat -> Nat) :
     BaseInjBound (I := I) (X.subseq f) where
@@ -190,7 +172,6 @@ def subseq {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
     simpa [PointedRiemannianSeq.subseq] using h.bound (f i)
 
 end BaseInjBound
-
 
 abbrev FlowBaseInjBound
     (X : PointedFlowSeq.{u, uE, uH} (I := I)) :=

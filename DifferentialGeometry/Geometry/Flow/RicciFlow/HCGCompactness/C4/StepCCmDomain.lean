@@ -4,17 +4,6 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.C4.NormalBran
 
 set_option autoImplicit false
 
-
-
-
-
-
-
-
-
-
-
-
 noncomputable section
 
 universe u uE uH
@@ -37,8 +26,6 @@ variable {M : Type u} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ 
   [T2Space M] [T2Space (TangentBundle I M)] [SigmaCompactSpace M]
   [ConnectedSpace M] [T3Space M]
 
-
-
 noncomputable def centerCfgOn
     (g : SmoothRiemannianMetric I M) (p : M) {ι : Type} [Fintype ι]
     (join : M -> M -> Real -> M) (r : Real)
@@ -52,7 +39,6 @@ noncomputable def centerCfgOn
     (fun params i => (NormalCoordinates.normalChartAt (I := I) g p).symm (params.2 i))
     join (fun _ => p) (fun _ => r) (fun _ => p) h
 
-
 noncomputable def chartCenterOn
     (g : SmoothRiemannianMetric I M) (p : M) {ι : Type} [Fintype ι]
     (join : M -> M -> Real -> M) (r : Real)
@@ -63,8 +49,6 @@ noncomputable def chartCenterOn
         join p r)
     (params : (ι -> Real) × (ι -> E)) : E :=
   NormalCoordinates.normalChartAt (I := I) g p (centerCfgOn (I := I) g p join r V h params)
-
-
 
 theorem centerCfgOn_eq
     (g : SmoothRiemannianMetric I M) (p : M) {ι : Type} [Fintype ι]
@@ -91,10 +75,6 @@ variable {P₀ : Type*} [TopologicalSpace P₀] [T2Space P₀]
 
 omit [NormedSpace Real E] [FiniteDimensional Real E]
   [NeZero (Module.finrank Real E)] in
-/-- Local pinned inverses along a compact graph glue to one continuous ambient
-root extension.  The common injectivity neighborhood is returned explicitly;
-agreement with the original root on `B` follows from injectivity, not merely
-from the fact that both functions solve the same equation. -/
 theorem existsRootExtension
     (G : E -> P₀ -> E) {A B : Set P₀} (hA : IsCompact A) (hAB : A ⊆ B)
     (c : P₀ -> E) (hc : ContinuousOn c B)
@@ -768,8 +748,6 @@ variable [FiniteDimensional Real E] [CompleteSpace E]
 variable [NeZero (Module.finrank Real E)]
 variable {H : Type uH} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H} [I.Boundaryless]
-
-
 
 theorem centerReadoutB_min
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}

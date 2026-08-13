@@ -3,15 +3,6 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.C4.StepCAtomC
 
 set_option autoImplicit false
 
-/-!
-# Finite-stage Step-C comparison map
-
-This file defines the finite-stage comparison map used by Step B1. Its weights
-are the actual normalized Step-C atoms at the source stage, and its target
-points are direct readouts through one coherent normal-chart family. The
-legacy framed family remains the default provider.
--/
-
 noncomputable section
 
 universe u uE uH
@@ -34,9 +25,6 @@ variable {H : Type uH} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H} [I.Boundaryless]
 variable {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
 
-/-- The direct target-stage point associated with one finite Step-C slot.  The
-partial-equivalence coercions make this a total function; its geometric chart
-meaning is used only on the controlled normal-coordinate domains. -/
 noncomputable def stageTarget
     (inp : MetricCompactCore (I := I) X)
     (P : ∀ j : Nat, ProperMetricOn (I := I) (X.obj j))
@@ -60,10 +48,6 @@ noncomputable def stageTarget
   (chart (L.φ l) (seqCenterD inp.decay P L l (gamma : Nat))).hom
     ((chart (L.φ k) (seqCenterD inp.decay P L k (gamma : Nat))).inv x)
 
-/-- In any prescribed source-slot coordinates, the direct stage target is the
-source transition followed by the target transition.  This is a total-function
-identity; domain hypotheses are needed only for its geometric inverse-chart
-interpretation. -/
 @[simp] theorem stageTarget_chart
     (inp : MetricCompactCore (I := I) X)
     (P : ∀ j : Nat, ProperMetricOn (I := I) (X.obj j))
@@ -99,8 +83,6 @@ interpretation. -/
             (seqCenterD inp.decay P L k (gamma : Nat))) z) := by
   rfl
 
-/-- When the direct target lies in the prescribed target-stage source chart,
-the local two-transition expression decodes to that same manifold point. -/
 theorem stageTarget_local
     (inp : MetricCompactCore (I := I) X)
     (P : ∀ j : Nat, ProperMetricOn (I := I) (X.obj j))
@@ -170,8 +152,6 @@ theorem stageTarget_local
   exact (chart (L.φ l)
     (seqCenterD inp.decay P L l (alpha : Nat))).hom.right_inv hsrc
 
-/-- Refining the net-limit data only reindexes the source and target stages of
-the direct finite-stage target point. -/
 @[simp] theorem stageTarget_subseq
     (inp : MetricCompactCore (I := I) X)
     (P : ∀ j : Nat, ProperMetricOn (I := I) (X.obj j))
@@ -183,7 +163,6 @@ the direct finite-stage target point. -/
       stageTarget inp P L s (ψ k) (ψ l) (chart := chart) := by
   rfl
 
-/-- The actual finite-stage center energy has exactly one global minimizer. -/
 def HasUniqueStageCenter
     (inp : MetricCompactCore (I := I) X)
     (P : ∀ j : Nat, ProperMetricOn (I := I) (X.obj j))
@@ -219,8 +198,6 @@ def HasUniqueStageCenter
           x gamma)
         (stageTarget inp P L s k l x (chart := chart)) z
 
-/-- Unique global minimization for the actual stage energy is unchanged by a
-further strict reindexing of the net-limit data. -/
 theorem uniqueCenter_subseq
     (inp : MetricCompactCore (I := I) X)
     (P : ∀ j : Nat, ProperMetricOn (I := I) (X.obj j))
@@ -245,10 +222,6 @@ theorem uniqueCenter_subseq
     NetLimitData.subseq_phi, Function.comp_apply]
   rfl
 
-/-- The global finite-stage comparison map.  Inside the controlled closed
-source ball it selects the unique global center of the actual stage energy;
-outside that ball, or when uniqueness fails, it uses the target
-basepoint as a harmless totalization. -/
 noncomputable def stageComparisonMap
     (inp : MetricCompactCore (I := I) X)
     (P : ∀ j : Nat, ProperMetricOn (I := I) (X.obj j))
@@ -270,8 +243,6 @@ noncomputable def stageComparisonMap
     else
       (X.obj (L.φ l)).basepoint
 
-/-- On the controlled source ball, once uniqueness is available, the global
-stage map is the chosen unique minimizer. -/
 theorem stageCompare_choose
     (inp : MetricCompactCore (I := I) X)
     (P : ∀ j : Nat, ProperMetricOn (I := I) (X.obj j))
@@ -288,8 +259,6 @@ theorem stageCompare_choose
       Classical.choose huniq.exists := by
   simp only [stageComparisonMap, hx, huniq, dite_true]
 
-/-- If the controlled source-ball test or unique-center test fails, the total
-stage comparison map uses the target basepoint. -/
 theorem stageCompare_default
     (inp : MetricCompactCore (I := I) X)
     (P : ∀ j : Nat, ProperMetricOn (I := I) (X.obj j))
@@ -310,8 +279,6 @@ theorem stageCompare_default
     · simp only [stageComparisonMap, hx, huniq, dite_true, dite_false]
     · simp only [stageComparisonMap, hx, dite_false]
 
-/-- Reindexing the net-limit data only reindexes the two stage arguments of
-the chart-independent comparison map. -/
 @[simp] theorem stageCompare_subseq
     (inp : MetricCompactCore (I := I) X)
     (P : ∀ j : Nat, ProperMetricOn (I := I) (X.obj j))
@@ -365,8 +332,6 @@ the chart-independent comparison map. -/
         (Or.inl hx)]
     simp only [NetLimitData.subseq_phi, Function.comp_apply]
 
-/-- The finite-stage comparison map preserves the pointed basepoint for the
-canonical distance atoms, without a normal-radius premise. -/
 theorem stageCmp_base_raw
     (inp : MetricCompactCore (I := I) X)
     (P : ∀ j : Nat, ProperMetricOn (I := I) (X.obj j))
@@ -485,8 +450,6 @@ theorem stageCmp_base_raw
     · exact hmin
   · simp only [stageComparisonMap, hx, huniq, dite_true, dite_false]
 
-/-- Compatibility form of `stageCmp_base_raw` retaining the legacy
-normal-radius premise. -/
 theorem stageCompare_base
     (inp : MetricCompactCore (I := I) X)
     (P : ∀ j : Nat, ProperMetricOn (I := I) (X.obj j))
@@ -505,4 +468,3 @@ theorem stageCompare_base
 
 end HCGCompactness
 end DifferentialGeometry
-

@@ -2,13 +2,6 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.Basic.Components
 
 set_option autoImplicit false
 
-
-
-
-
-
-
-
 noncomputable section
 
 namespace DifferentialGeometry.PDE.RicciFlow
@@ -24,8 +17,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 variable [IsManifold I 1 M]
 variable [CompleteSpace E] [SigmaCompactSpace M] [T2Space M]
 
-
-
 def ScalarEvolutionEquationOn
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (scalar scalarLap ricciNormSq : Real -> M -> Real) : Prop :=
@@ -35,12 +26,6 @@ def ScalarEvolutionEquationOn
       (scalarLap (t : Real) x + 2 * ricciNormSq (t : Real) x)
       D.carrier
       (t : Real)
-
-
-
-
-
-
 
 def RicciNormTimeDerivativeComponentsOn
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
@@ -55,8 +40,6 @@ def RicciNormTimeDerivativeComponentsOn
 section RicciNormDerivative
 
 variable {Idx : Type*} [Fintype Idx]
-
-
 
 omit [SigmaCompactSpace M] [T2Space M] in
 theorem ricciNormTimeDerivativeComponentsOn_of_ricciEvolution
@@ -79,8 +62,6 @@ theorem ricciNormTimeDerivativeComponentsOn_of_ricciEvolution
     ricciNormSqInFrame_hasDerivWithinAt
       (I := I) S Rm04 gInv frame roughLapRic h_inv h_ricci t x (by simp)
   simpa [h_simplify t x] using hnorm
-
-
 
 omit [SigmaCompactSpace M] [T2Space M] in
 theorem ricciNormTimeDerivativeComponentsOn_of_ricciEvolution_canonical
@@ -110,14 +91,10 @@ theorem ricciNormTimeDerivativeComponentsOn_of_ricciEvolution_canonical
 
 end RicciNormDerivative
 
-
-
 def RicciNormLaplacianComponentsOn
     (ricciNormLap roughLapInner nablaRicNormSq : Real -> M -> Real) : Prop :=
   ∀ (t : Real) (x : M),
     ricciNormLap t x = 2 * roughLapInner t x + 2 * nablaRicNormSq t x
-
-
 
 omit [TopologicalSpace M] [SigmaCompactSpace M] [T2Space M] in
 theorem ricciNormLaplacianComponentsOn_of_bochner
@@ -126,8 +103,6 @@ theorem ricciNormLaplacianComponentsOn_of_bochner
       (M := M) (Time := Real) ricciNormLap roughLapInner nablaRicNormSq) :
     RicciNormLaplacianComponentsOn ricciNormLap roughLapInner nablaRicNormSq :=
   h_lap
-
-
 
 omit [SigmaCompactSpace M] [T2Space M] in
 theorem ricciNormLaplacianComponentsOn_of_normSq_laplacian_expansion
@@ -153,8 +128,6 @@ theorem ricciNormLaplacianComponentsOn_of_normSq_laplacian_expansion
   intro t x
   simpa [roughLapRicciInnerInFrame, nablaRicciNormSqInFrame] using hrealized t x
 
-
-
 noncomputable def coordInv
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     [SigmaCompactSpace M] [T2Space M]
@@ -165,8 +138,6 @@ noncomputable def coordInv
   fun t x i j =>
     DifferentialGeometry.Tensor.Coordinates.inverseMetricFlatModelInChart_component
       (I := I) (S.family.metric t) x0 i j (extChartAt I x0 x)
-
-
 
 omit [SigmaCompactSpace M] [T2Space M] in
 theorem coordInvReal
@@ -181,9 +152,6 @@ theorem coordInvReal
   simpa [coordInv] using
     Tensor.Coordinates.inverseMetricFlatModelInChart_metricInverseInBasis_center
       (I := I) (S.family.metric t) x0
-
-
-
 
 noncomputable def coordRoughRic
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
@@ -202,8 +170,6 @@ noncomputable def coordRoughRic
     ∑ a : DifferentialGeometry.Tensor.Coordinates.CoordinateIdx (𝕜 := Real) E,
       ∑ b : DifferentialGeometry.Tensor.Coordinates.CoordinateIdx (𝕜 := Real) E,
         coordInv (I := I) S x0 t x a b * nabla2Ric t x a b i j
-
-
 
 noncomputable def coordNab2Ric
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
@@ -251,8 +217,6 @@ noncomputable def coordNab2Ric
             (I := I) x0)
             t x a i p)
 
-
-
 def RicciNormHeatEquationOn
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (ricciNormSq ricciNormLap nablaRicNormSq reaction : Real -> M -> Real) : Prop :=
@@ -263,8 +227,6 @@ def RicciNormHeatEquationOn
         (-2 * nablaRicNormSq (t : Real) x + 4 * reaction (t : Real) x))
       D.carrier
       (t : Real)
-
-
 
 omit [TopologicalSpace M] [SigmaCompactSpace M] [T2Space M] in
 theorem ricciNormHeatEquationOn_of_components
@@ -285,13 +247,6 @@ theorem ricciNormHeatEquationOn_of_components
     ring
   rw [hvalue]
   exact h_dt t x
-
-
-
-
-
-
-
 
 structure IsSmoothSolutionOn
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
@@ -357,8 +312,6 @@ structure IsSmoothSolutionOn
 
 namespace IsSmoothSolutionOn
 
-
-
 theorem toIsSolutionOn
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     {S : SolutionOn (I := I) (M := M) D}
@@ -366,16 +319,12 @@ theorem toIsSolutionOn
     IsSolutionOn (I := I) S :=
   hS.isSolution
 
-
-
 theorem scalarCont
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     {S : SolutionOn (I := I) (M := M) D}
     (hS : IsSmoothSolutionOn (I := I) (M := M) S) :
     ScalarSTContOn (I := I) (M := M) S :=
   hS.scalarSTCont
-
-
 
 theorem scalarReg
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
@@ -389,9 +338,6 @@ end IsSmoothSolutionOn
 section RicciNormAssembly
 
 variable {Idx : Type*} [Fintype Idx]
-
-
-
 
 omit [SigmaCompactSpace M] [T2Space M] in
 theorem ricciNormHeatEquationOn_of_solution
@@ -429,8 +375,6 @@ theorem ricciNormHeatEquationOn_of_solution
         h_inv h_ricci hInvSym hRicSym)
       h_lap
 
-
-
 omit [SigmaCompactSpace M] [T2Space M] in
 theorem ricciNormHeatEquationOn_of_solution_canonical_laplacian
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
@@ -461,9 +405,6 @@ theorem ricciNormHeatEquationOn_of_solution_canonical_laplacian
       h_inv h_ricci hInvSym hRicSym
       (ricciNormLaplacianComponentsOn_of_normSq_laplacian_expansion
         (I := I) S gInv frame roughLapRic ricciNormLap nablaRic h_lap)
-
-
-
 
 omit [SigmaCompactSpace M] in
 theorem ricci_heat_mc

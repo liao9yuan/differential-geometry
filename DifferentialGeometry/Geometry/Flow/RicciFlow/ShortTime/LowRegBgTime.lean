@@ -5,13 +5,6 @@ import DifferentialGeometry.Analysis.DenseExtension
 import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.LowRegBgA1Pair
 import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.LowRegBgH2
 
-/-!
-# Fixed-background low-base radial core
-
-This module evaluates the canonical low-base action at the existing spectral
-radial state while retaining an independent fixed DeTurck background.
--/
-
 noncomputable section
 
 open Bundle Manifold MeasureTheory
@@ -54,8 +47,6 @@ private theorem zero_fibre_bound
     (mul_nonneg hδ (Real.sqrt_nonneg _))
     (Real.sqrt_nonneg _)
 
-/-- The canonical radial low-base bundle with an independent fixed DeTurck
-background. -/
 noncomputable def lowCoreDataBg
     (g gB : SmoothRiemannianMetric I M)
     {ρ δ : ℝ} (hρ : 0 ≤ ρ) (hδ0 : 0 ≤ δ) (hδ_le : δ ≤ 1 / 3)
@@ -70,8 +61,6 @@ noncomputable def lowCoreDataBg
     (hreal _ (lowRadial_norm (I := I) (M := M) g hρ T))
     (zero_fibre_bound (I := I) (M := M) g hδ0)
 
-/-- The fixed-background radial bundle gives the exact zero-based smooth
-Ricci--DeTurck remainder split. -/
 theorem lowCoreBg_split
     (g gB : SmoothRiemannianMetric I M)
     {ρ δ : ℝ} (hρ : 0 ≤ ρ) (hδ0 : 0 ≤ δ) (hδ_le : δ ≤ 1 / 3)
@@ -196,8 +185,6 @@ private theorem highBgCore_value
         ⟨ccToHsLin (I := I) (M := M) g 2 (3 : ℝ) T, ⟨T, rfl⟩⟩
   simp only [highBgCore, hrep]
 
-/-- Ball-local smooth-core pair predicate for the arbitrary-background low
-first-order action. -/
 def BgA1CorePair
     (g gB : SmoothRiemannianMetric I M)
     {ρ δ : ℝ} (hρ : 0 ≤ ρ) (hδ0 : 0 ≤ δ) (hδ_le : δ ≤ 1 / 3)
@@ -215,7 +202,6 @@ def BgA1CorePair
         K * ‖ccToHsLin (I := I) (M := M) g 2 (3 : ℝ) T -
           ccToHsLin (I := I) (M := M) g 2 (3 : ℝ) U‖
 
-/-- Ball-local smooth-core pair predicate for the high first-order action. -/
 def BgA1HiCorePair
     (g gB : SmoothRiemannianMetric I M)
     {ρ δ : ℝ} (hρ : 0 ≤ ρ) (hδ0 : 0 ≤ δ) (hδ_le : δ ≤ 1 / 3)
@@ -233,8 +219,6 @@ def BgA1HiCorePair
         K * ‖ccToHsLin (I := I) (M := M) g 2 (3 : ℝ) T -
           ccToHsLin (I := I) (M := M) g 2 (3 : ℝ) U‖
 
-/-- The radial high first-order coefficient as an `H3 → H2` operator-valued
-map on the completed `H3` state space. -/
 noncomputable def lowA1HiBg
     (g gB : SmoothRiemannianMetric I M)
     {ρ δ : ℝ} (hρ : 0 ≤ ρ) (hδ0 : 0 ≤ δ) (hδ_le : δ ≤ 1 / 3)
@@ -249,8 +233,6 @@ noncomputable def lowA1HiBg
     (highBgCore (I := I) (M := M) g gB hρ hδ0 hδ_le hreal
       fun A => A.a1Hi (I := I) (M := M))
 
-/-- The arbitrary-background radial first-order coefficient as an `H2 → H1`
-operator-valued map on the completed `H3` state space. -/
 noncomputable def lowA1LoBg
     (g gB : SmoothRiemannianMetric I M)
     {ρ δ : ℝ} (hρ : 0 ≤ ρ) (hδ0 : 0 ≤ δ) (hδ_le : δ ≤ 1 / 3)
@@ -290,8 +272,6 @@ private theorem sqrt_scale
     Real.sqrt (q * d ^ 2) = Real.sqrt q * d := by
   rw [Real.sqrt_mul hq, Real.sqrt_sq hd]
 
-/-- One positive spectral cutoff radius makes the arbitrary-background radial
-low first-order action locally Lipschitz on every bounded H3 core ball. -/
 theorem radialA1Bg_pair
     (hDim : Module.finrank ℝ E = 3)
     (g gB : SmoothRiemannianMetric I M) :
@@ -551,8 +531,6 @@ theorem radialA1Bg_pair
         ccToHsLin (I := I) (M := M) g 2 (3 : ℝ) U‖ := by
       simp only [D]
 
-/-- One positive spectral cutoff radius makes the same-background radial high
-first-order action locally Lipschitz on every bounded H3 core ball. -/
 theorem radialA1Hi_self
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M) :
@@ -791,8 +769,6 @@ theorem radialA1Hi_self
         ccToHsLin (I := I) (M := M) g 2 (3 : ℝ) U‖ := by
       simp only [D]
 
-/-- One positive spectral cutoff radius makes the arbitrary-background radial
-high first-order action locally Lipschitz on every bounded `H3` core ball. -/
 theorem radialA1HiBg_pair
     (hDim : Module.finrank ℝ E = 3)
     (g gB : SmoothRiemannianMetric I M) :
@@ -1046,8 +1022,7 @@ theorem radialA1HiBg_pair
       simp only [D]
 
 set_option synthInstance.maxHeartbeats 1000000 in
-/-- The completed arbitrary-background low first-order map takes its canonical
-value on every smooth H3 core state. -/
+
 theorem lowA1LoBg_core
     (g gB : SmoothRiemannianMetric I M)
     {ρ δ : ℝ} {hρ : 0 ≤ ρ} {hδ0 : 0 ≤ δ} {hδ_le : δ ≤ 1 / 3}
@@ -1074,8 +1049,7 @@ theorem lowA1LoBg_core
     (by simpa only [BgA1CorePair] using hpair) T
 
 set_option synthInstance.maxHeartbeats 1000000 in
-/-- The completed arbitrary-background radial low first-order coefficient is
-continuous on the H3 state space. -/
+
 theorem lowA1LoBg_cont
     (g gB : SmoothRiemannianMetric I M)
     {ρ δ : ℝ} {hρ : 0 ≤ ρ} {hδ0 : 0 ≤ δ} {hδ_le : δ ≤ 1 / 3}
@@ -1098,8 +1072,6 @@ theorem lowA1LoBg_cont
         (fun A => A.a1Lo (I := I) (M := M)))
     (by simpa only [BgA1CorePair] using hpair)
 
-/-- Continuous arbitrary-background A1 coefficients preserve a.e. strong
-measurability of time-dependent H3 states. -/
 theorem lowA1LoBg_aesm
     {Ω : Type*} [MeasurableSpace Ω] {μ : Measure Ω}
     (g gB : SmoothRiemannianMetric I M)
@@ -1118,8 +1090,7 @@ theorem lowA1LoBg_aesm
   (lowA1LoBg_cont (I := I) (M := M) g gB hpair).comp_aestronglyMeasurable hu
 
 set_option synthInstance.maxHeartbeats 1000000 in
-/-- The completed high first-order map takes its canonical value on every
-smooth H3 core state. -/
+
 theorem lowA1HiBg_core
     (g gB : SmoothRiemannianMetric I M)
     {ρ δ : ℝ} {hρ : 0 ≤ ρ} {hδ0 : 0 ≤ δ} {hδ_le : δ ≤ 1 / 3}
@@ -1146,8 +1117,7 @@ theorem lowA1HiBg_core
     (by simpa only [BgA1HiCorePair] using hpair) T
 
 set_option synthInstance.maxHeartbeats 1000000 in
-/-- The completed radial high first-order coefficient is continuous on the H3
-state space. -/
+
 theorem lowA1HiBg_cont
     (g gB : SmoothRiemannianMetric I M)
     {ρ δ : ℝ} {hρ : 0 ≤ ρ} {hδ0 : 0 ≤ δ} {hδ_le : δ ≤ 1 / 3}
@@ -1170,8 +1140,6 @@ theorem lowA1HiBg_cont
         (fun A => A.a1Hi (I := I) (M := M)))
     (by simpa only [BgA1HiCorePair] using hpair)
 
-/-- Continuous high A1 coefficients preserve a.e. strong measurability of
-time-dependent H3 states. -/
 theorem lowA1HiBg_aesm
     {Ω : Type*} [MeasurableSpace Ω] {μ : Measure Ω}
     (g gB : SmoothRiemannianMetric I M)
@@ -1189,8 +1157,6 @@ theorem lowA1HiBg_aesm
         g gB hρ hδ0 hδ_le hreal (u t)) μ :=
   (lowA1HiBg_cont (I := I) (M := M) g gB hpair).comp_aestronglyMeasurable hu
 
-/-- On the same DeTurck background, the completed high and low first-order
-actions are the two adjacent-scale realizations of one smooth-core formula. -/
 theorem lowA1Bg_comm
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M)
@@ -1247,10 +1213,6 @@ theorem lowA1Bg_comm
     lowA1LoBg_core (I := I) (M := M) g g hLo T]
   simpa only [lowCoreDataBg, lowCoreData] using (hcoreComm T).2.2
 
-/-- On an ARBITRARY DeTurck background, the completed high and low
-first-order actions are the two adjacent-scale realizations of one
-smooth-core formula.  The smooth-core square is the bundle-generic
-`a1_comm`; the completed square follows by density. -/
 theorem lowA1Bg_comm_bg
     (hDim : Module.finrank ℝ E = 3)
     (g gB : SmoothRiemannianMetric I M)
@@ -1306,8 +1268,6 @@ theorem lowA1Bg_comm_bg
   exact a1_comm (I := I) (M := M) hDim g
     (lowCoreDataBg (I := I) (M := M) g gB hρ.le hδ0 hδ_le hreal T)
 
-/-- The fixed-background radial second-order coefficient as an `H4 → H2`
-operator-valued map on the completed `H2` state space. -/
 noncomputable def lowA2HiBg
     (g gB : SmoothRiemannianMetric I M)
     {ρ δ : ℝ} (hρ : 0 ≤ ρ) (hδ0 : 0 ≤ δ) (hδ_le : δ ≤ 1 / 3)
@@ -1321,8 +1281,6 @@ noncomputable def lowA2HiBg
     (lowBgCore (I := I) (M := M) g gB hρ hδ0 hδ_le hreal
       fun A => A.a2Hi (I := I) (M := M))
 
-/-- The same fixed-background radial second-order coefficient as an
-`H3 → H1` operator-valued map on the completed `H2` state space. -/
 noncomputable def lowA2LoBg
     (g gB : SmoothRiemannianMetric I M)
     {ρ δ : ℝ} (hρ : 0 ≤ ρ) (hδ0 : 0 ≤ δ) (hδ_le : δ ≤ 1 / 3)
@@ -1447,9 +1405,6 @@ private theorem lowBg_ext_core
     _ = _ := lowBgCore_value (I := I) (M := M)
       g gB hρ hδ0 hδ_le hreal proj T
 
-/-- Below one realized spectral `H2` cutoff, the fixed-background total
-second-order coefficient gives compatible Lipschitz `H4 → H2` and `H3 → H1`
-operator maps on the completed `H2` state space. -/
 theorem radialA2Bg_lip
     (hDim : Module.finrank ℝ E = 3)
     (g gB : SmoothRiemannianMetric I M)

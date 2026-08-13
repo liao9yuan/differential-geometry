@@ -2,15 +2,6 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.LowRegLieOne
 import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.UnifAppH12
 import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.UnifCoeffH2
 
-/-!
-# Class-first mixed-connection H1 bound
-
-This module upgrades the cancellation-compatible `lc0AMix` estimate to a
-dimension-three class-first statement.  The fixed-background connection factor
-uses the low `H1` cap from `kappaBg_h1_unif`; the self-background Koszul factor
-carries the unique third derivative of the perturbation.
--/
-
 set_option autoImplicit false
 set_option backward.isDefEq.respectTransparency false
 
@@ -98,9 +89,6 @@ private theorem amix_jet_sum2
       ring
     _ ≤ 2 * (A ^ 2 + B ^ 2) := by gcongr
 
-/-- On a closed three-manifold, the genuine mixed-connection order-zero
-correction has one class-first affine intrinsic `H1` cap.  Class metric jets
-through order three suffice. -/
 theorem amix_h1_unif
     (hDim : Module.finrank ℝ E = 3)
     (gBase : SmoothRiemannianMetric I M) {Λ : ℝ} (hΛ : 1 ≤ Λ)

@@ -3,13 +3,6 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.Scalar
 
 set_option autoImplicit false
 
-
-
-
-
-
-
-
 noncomputable section
 
 namespace DifferentialGeometry.PDE.RicciFlow
@@ -50,8 +43,6 @@ private theorem sum_swap_four
             _ = ∑ l : Idx, ∑ i : Idx, ∑ j : Idx, F i j k l := by
                   rw [Finset.sum_comm]
 
-
-
 omit [TopologicalSpace M] [SigmaCompactSpace M] [T2Space M] in
 theorem scalarHessianFromNabla2Ric_trace_eq_roughLapRic_trace
     (gInv : Real -> DifferentialGeometry.Integral.Connection.InverseMetricComponents M Idx)
@@ -86,12 +77,6 @@ theorem scalarHessianFromNabla2Ric_trace_eq_roughLapRic_trace
             (∑ k : Idx, ∑ l : Idx,
               gInv t x k l * nabla2Ric t x k l i j) := by
           simp [Finset.mul_sum]
-
-
-
-
-
-
 
 omit [SigmaCompactSpace M] [T2Space M] in
 @[deprecated "use a local or pointwise scalar trace statement instead" (since := "2026-05-22")]

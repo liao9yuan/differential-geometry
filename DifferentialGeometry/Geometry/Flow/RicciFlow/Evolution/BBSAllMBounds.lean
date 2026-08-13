@@ -19,9 +19,6 @@ variable [IsManifold I ∞ M] [IsManifold I 1 M] [IsManifold I 2 M]
 variable [SigmaCompactSpace M] [T2Space M] [CompactSpace M]
   [BoundarylessManifold I M]
 
-
-
-
 theorem bbsAllMBounds
     {alpha omega : Real} {hAlphaOmega : alpha < omega}
     (S : SolutionOn (I := I) (M := M)

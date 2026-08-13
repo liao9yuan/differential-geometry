@@ -4,15 +4,6 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.C4.StepCAvera
 
 set_option autoImplicit false
 
-
-
-
-
-
-
-
-
-
 noncomputable section
 
 universe u uE uH
@@ -34,8 +25,6 @@ variable [FiniteDimensional Real E] [CompleteSpace E]
 variable [NeZero (Module.finrank Real E)]
 variable {H : Type uH} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H} [I.Boundaryless]
-
-
 
 def HasHatCmEqn
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
@@ -133,8 +122,6 @@ def HasHatCmEqn
           (NormalCoordinates.normalChartAt
             (I := I) (X.obj (L.φ n)).metric x0 c)
           (mu, xi) = 0
-
-
 
 def HasHatCmStrictAt
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
@@ -256,8 +243,6 @@ def HasHatCmStrictAt
                           zp.1 zp.2 = 0 →
                           zp.1 = f zp.2)
 
-
-
 def HasHatCmStrict
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
     (hd : InjRadiusDecayInput (I := I) X) {D : Real}
@@ -307,12 +292,6 @@ def HasHatCmStrict
   ∃ alpha : LiveSlot L pb r,
     HasHatCmStrictAt (I := I) hd P L pb r n hcomplete hconn q δ alpha
       mu pts join x rad hcm
-
-
-
-
-
-
 
 theorem exists_hat_cm_tail
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
@@ -588,8 +567,6 @@ theorem exists_hat_cm_tail
       (radSeq a b x) hcm hdata.2 (hN a ha b hbN x hx)
     simpa only [HasHatCmEqn] using hout
 
-
-
 theorem exists_hat_cm_tail_support
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
     {hd : InjRadiusDecayInput (I := I) X}
@@ -771,9 +748,6 @@ theorem exists_hat_cm_tail_support
         (radSeq a b x) hcm (hmu.sum_one x hx) (hs hx)
         (hN a ha b hbN x hx alpha)
       simpa only [HasHatCmStrictAt] using hout
-
-
-
 
 theorem exists_hat_cm_min
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}

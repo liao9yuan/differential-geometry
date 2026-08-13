@@ -3,26 +3,6 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.IteratedRmTowerHea
 
 set_option autoImplicit false
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 noncomputable section
 
 namespace DifferentialGeometry.PDE.RicciFlow
@@ -40,11 +20,6 @@ variable [IsManifold I 1 M] [IsManifold I 2 M]
 variable [CompleteSpace E] [SigmaCompactSpace M] [T2Space M]
 
 variable {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
-
-
-
-
-
 
 omit [I.Boundaryless] in
 omit [SigmaCompactSpace M] in
@@ -161,19 +136,6 @@ theorem nablaRicReal_frame
   simpa [ricciCovDerivCompInFrame, sub_eq_add_neg, add_assoc, add_comm, add_left_comm]
     using heval
 
-
-
-
-
-
-
-
-
-
-
-
-
-
 omit [Module.Finite ℝ E] in
 theorem ricciCovDeriv_trace_nablaRm
     [Module.Finite ℝ E]
@@ -221,39 +183,12 @@ theorem ricciCovDeriv_trace_nablaRm
       4 (S.family.connection t) (S.base.rm04 t) x
       (vec5 (I := I) (basis d) (basis i) (basis a) (basis b) (basis j)))
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 def lfBase
     {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
     (S : SolutionOn (I := I) (M := M) D)
     (frame : Idx → (y : M) → TangentSpace I y) :
     Real → M → (Fin 4 → Idx) → Real :=
   fun s => frameComp0S (I := I) (S.base.rm04 s) frame
-
-
-
 
 def lfChr
     {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
@@ -263,11 +198,6 @@ def lfChr
     Real → M → Idx → Idx → Idx → Real :=
   fun s y =>
     christoffelSymbolInFrame (S.family.connection s) frame hframe y
-
-
-
-
-
 
 omit [Module.Finite ℝ E] in
 omit [I.Boundaryless] [IsManifold I 2 M] [CompleteSpace E]
@@ -288,13 +218,9 @@ private theorem traceOrthoEq
 
 set_option backward.isDefEq.respectTransparency false in
 
-
 def gammaStarCost (k : ℕ) : Real :=
   9 * (12 + 3 * k)
 
-/-- The canonical Christoffel-time correction field.  Its construction depends
-only on the solution, time, and tower level; a local frame is used only to
-verify its component formula. -/
 def gammaStarField
     (S : SolutionOn (I := I) (M := M) D) (t : Real) (k : ℕ) :
     Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
@@ -309,7 +235,6 @@ def gammaStarField
       starBaseField (I := I) S t (k + 1) 1 k 0 (sigmaRic3 k q)
 
 omit [I.Boundaryless] [SigmaCompactSpace M] in
-/-- Exact constructor cost of the canonical Christoffel-time correction. -/
 theorem gammaStarField_cost
     (S : SolutionOn (I := I) (M := M) D) (t : Real) (k : ℕ)
     {Idx : Type*} [Fintype Idx] :
@@ -354,15 +279,6 @@ theorem gammaStarField_cost
   ring
 
 omit [FiniteDimensional Real E] in
-/-- **The gamma correction is a `StarSum2` element, UNIFORMLY on `u`.**  ONE global witness `Tgamma`,
-with the component equality holding for every `y ∈ u` — the shape the `resStarLFU` succ assembly
-needs (`spatialCommStarSum` is already `∀x`; a fixed-`x` `∃` would give a per-`y` witness that could
-not collapse into one endpoint `T`).  The Christoffel-time correction `covDerivStepDt (∂ₜΓ) (∇ᵏRm)`
-arising in `iteratedRmCompDt_succ` is, componentwise in the orthonormal frame, the components of a
-level-`(k+1)` star sum, via the global witness `(-1)•TA + (-1)•TB + TC` (the `sigmaRic` route sums)
-with the center fixed only inside the per-`y` component proof (basis `hframe.toBasisAt hy`,
-orthonormality from `horthU y hy`).  Its exact arbitrary-index cost is
-`rmGammaCost (Fintype.card Idx) k`. -/
 private theorem gammaStarU
     [Module.Finite ℝ E]
     (S : SolutionOn (I := I) (M := M) D) (t : Real) (k : ℕ)
@@ -518,8 +434,6 @@ private theorem gammaStarU
     simp only [show Fin.tail I0 s = I0 s.succ from rfl]
     ring
 
-
-
 omit [FiniteDimensional ℝ E] [I.Boundaryless] [IsManifold I ∞ M]
     [IsManifold I 1 M] [IsManifold I 2 M] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 private theorem frameExtGerm {Idx : Type*} {r : ℕ}
@@ -531,9 +445,6 @@ private theorem frameExtGerm {Idx : Type*} {r : ℕ}
   simp only [frameExtData]
   exact extDerivFun_eventuallyEq_congr (I := I) (frame d y) (hfield.mono fun z hz => congrFun hz m)
 
-/-- The canonical successor residual field.  It is fixed before any point or
-local-frame choice: differentiate the previous residual field and subtract the
-spatial-commutator and Christoffel-time correction fields. -/
 def resStarNext
     (S : SolutionOn (I := I) (M := M) D)
     (t : RealTimeInterval.RegularTime D) (k : ℕ)
@@ -545,7 +456,6 @@ def resStarNext
     (-1 : Real) • commStarField (I := I) S t k +
     (-1 : Real) • gammaStarField (I := I) S (t : Real) k
 
-/-- Exact constructor cost of the canonical successor residual field. -/
 theorem resStarNext_cost
     (S : SolutionOn (I := I) (M := M) D) (hS : IsSolutionOn (I := I) S)
     (k : ℕ) (t : RealTimeInterval.RegularTime D)
@@ -565,9 +475,7 @@ theorem resStarNext_cost
   simp only [abs_neg, abs_one, one_mul, rmResidualCost]
 
 set_option backward.isDefEq.respectTransparency false in
-/-- The fixed canonical successor has the exact constructor cost and realizes
-the level-`k+1` component heat equation on every supplied orthonormal frame
-patch. -/
+
 theorem resStarNext_spec
     (S : SolutionOn (I := I) (M := M) D) (hS : IsSolutionOn (I := I) S)
     (k : ℕ) (t : RealTimeInterval.RegularTime D)
@@ -837,8 +745,6 @@ theorem resStarNext_spec
     unfold resStarNext
     exact hderiv.congr_deriv hval.symm
 
-/-- Compatibility wrapper exposing the canonical successor as an existential
-field.  The witness is definitionally `resStarNext`. -/
 theorem resStarSucc
     (S : SolutionOn (I := I) (M := M) D) (hS : IsSolutionOn (I := I) S)
     (k : ℕ) (t : RealTimeInterval.RegularTime D)
@@ -912,18 +818,14 @@ theorem resStarSucc
 
 set_option backward.isDefEq.respectTransparency false in
 
-
-
 def resStarCost : ℕ → Real
   | 0 => 108
   | k + 1 => 2 * resStarCost k + commStarCost 3 k + gammaStarCost k
 
-/-- The dimension-three gamma compatibility cost is the generic cost at cardinality three. -/
 private theorem gammaCost_eq (k : ℕ) :
     gammaStarCost k = rmGammaCost 3 k := by
   norm_num [gammaStarCost, rmGammaCost]
 
-/-- The dimension-three residual compatibility cost is the generic ledger at cardinality three. -/
 private theorem resCost_eq (k : ℕ) :
     resStarCost k = rmResidualCost 3 k := by
   induction k with

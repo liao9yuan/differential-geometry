@@ -2,15 +2,6 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.C4.HatChartCo
 
 set_option autoImplicit false
 
-
-
-
-
-
-
-
-
-
 noncomputable section
 
 universe u uE uH
@@ -36,10 +27,7 @@ variable {M : Type u} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ 
   [T2Space M] [T2Space (TangentBundle I M)] [SigmaCompactSpace M]
   [ConnectedSpace M] [T3Space M]
 
-
 namespace NetLimitData
-
-
 
 noncomputable def hatSourceBall (hd : InjRadiusDecayInput (I := I) X) {D : Real}
     (P : forall k : Nat, ProperMetricOn (I := I) (X.obj k))
@@ -58,8 +46,6 @@ omit [Module.Finite ℝ E] in
     (r : Real) (n : Nat) {ψ : Nat -> Nat} (hψ : StrictMono ψ) :
     NetLimitData.hatSourceBall (I := I) (X := X) hd P (L.subseq hψ) r n =
       NetLimitData.hatSourceBall (I := I) (X := X) hd P L r (ψ n) := rfl
-
-
 
 omit [Module.Finite ℝ E] in
 theorem hatSource_nhds
@@ -99,7 +85,6 @@ theorem hatSource_nhds
   letI : MetricSpace Y.M := (P (L.φ n)).ms
   simpa only [hatSourceBall] using (Metric.ball_subset_closedBall hy)
 
-
 omit [Module.Finite ℝ E] in
 theorem hatSourceCompact
     [FiniteDimensional Real E]
@@ -120,8 +105,6 @@ theorem hatSourceCompact
       (isCompact_closedBall (X.obj (L.φ n)).basepoint r)
   rw [← htop]
   exact hcompact
-
-
 
 omit [Module.Finite ℝ E] in
 theorem sourceComplete
@@ -156,7 +139,6 @@ theorem sourceComplete
     CompleteSpace (X.obj (L.φ n)).M := by
   have h := MetricComplete.complete (I := I) (X.obj (L.φ n)) (hX.complete (L.φ n))
   simpa using h
-
 
 omit [Module.Finite ℝ E] in
 theorem hatBallInCompact
@@ -193,9 +175,6 @@ theorem hatBallInCompact
           simpa [NetLimitData.hatBall, hcenter, Metric.mem_ball] using hx
         simpa [Metric.mem_closedBall] using le_of_lt hdist
 
-
-
-
 noncomputable def hatSourceCage (hd : InjRadiusDecayInput (I := I) X) {D : Real}
     (P : forall k : Nat, ProperMetricOn (I := I) (X.obj k))
     (L : DifferentialGeometry.HCGCompactness.NetLimitData (X := X) hd D P)
@@ -220,7 +199,6 @@ omit [Module.Finite ℝ E] in
       NetLimitData.hatSourceCage (I := I) (X := X) hd P L pb r (ψ n) gamma := by
   simp [hatSourceCage]
   rfl
-
 
 omit [Module.Finite ℝ E] in
 theorem hatCageData
@@ -255,7 +233,6 @@ theorem hatCageData
   · simpa [NetLimitData.hatSourceCage, S, H] using
       (subset_closure : S ∩ H ⊆ closure (S ∩ H))
 
-
 omit [Module.Finite ℝ E] in
 theorem hatCageCompact
     [FiniteDimensional Real E]
@@ -269,8 +246,6 @@ theorem hatCageCompact
   letI : TopologicalSpace (X.obj (L.φ n)).M := (X.obj (L.φ n)).topology
   intro gamma
   exact (NetLimitData.hatCageData (I := I) (X := X) hd P L pb r n gamma).1
-
-
 
 omit [Module.Finite ℝ E] in
 theorem hatCageSub
@@ -289,8 +264,6 @@ theorem hatCageSub
   letI : TopologicalSpace (X.obj (L.φ n)).M := (X.obj (L.φ n)).topology
   intro gamma
   exact (NetLimitData.hatCageData (I := I) (X := X) hd P L pb r n gamma).2
-
-
 
 omit [Module.Finite ℝ E] in
 theorem hatCageInClosed
@@ -334,8 +307,6 @@ theorem hatCageInClosed
     simpa [Metric.mem_closedBall] using le_of_lt hdist
   simpa [NetLimitData.hatSourceCage] using closure_minimal hsub hclosed
 
-
-
 omit [Module.Finite ℝ E] in
 theorem hatCageSrcOfBall
     [FiniteDimensional Real E]
@@ -373,10 +344,6 @@ theorem hatCageSrcOfBall
     (NetLimitData.hatCageInClosed (I := I) (X := X) hd P L pb r n gamma hcenter).trans
       hball
 
-
-
-
-
 omit [Module.Finite ℝ E] in
 theorem hatCageSrcOfRad
     [FiniteDimensional Real E]
@@ -407,9 +374,6 @@ theorem hatCageSrcOfRad
     NetLimitData.hatCageSrcOfBall (X := X) hd P L pb r n center gamma
       hcenter
       (properBallSrcOfRad (I := I) (Y := X.obj (L.φ n)) (P := P (L.φ n)) hR)
-
-
-
 
 omit [Module.Finite ℝ E] in
 theorem hatCageSrcCases
@@ -448,9 +412,6 @@ theorem hatCageSrcCases
       rcases hR gamma c hc with ⟨rfl, hrad⟩
       exact NetLimitData.hatCageSrcOfRad (I := I) (X := X) hd P L pb r n center
         gamma hc hrad
-
-
-
 
 omit [Module.Finite ℝ E] in
 theorem hatSuppCageData
@@ -578,9 +539,6 @@ theorem hatSuppCageData
       intro y hy
       exact ⟨hSuppCage gamma y hy.1 hy.2, hSuppV gamma y hy.1 hy.2⟩
     exact (closure_minimal hsupp hclosed hx).2
-
-
-
 
 end NetLimitData
 

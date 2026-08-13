@@ -2,13 +2,6 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.C4.StepB1RawP
 
 set_option autoImplicit false
 
-/-!
-# Textbook Step B1
-
-This module exposes the ball-to-image partial-diffeomorphism conclusion of
-MSM135 Chapter 4 Step B1 from the native metric-compactness producer.
--/
-
 noncomputable section
 
 universe u uE uH
@@ -24,11 +17,6 @@ variable [NeZero (Module.finrank Real E)]
 variable {H : Type uH} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H} [I.Boundaryless]
 
-/-- **MSM135 Chapter 4 Step B1 (`lbl397`).** A metric-compactness base admits
-one subsequence on which, for every positive radius and tolerance below one
-and every finite derivative order, all sufficiently late pairs are joined by
-a pointed partial diffeomorphism that is an approximate isometry on the
-closed source ball. -/
 theorem MetricCompactBase.exists_b1
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
     (b : MetricCompactBase (I := I) X)

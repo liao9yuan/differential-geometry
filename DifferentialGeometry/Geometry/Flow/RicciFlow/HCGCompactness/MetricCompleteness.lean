@@ -3,14 +3,6 @@ import DifferentialGeometry.Geometry.Metric.DistanceScaling
 
 set_option autoImplicit false
 
-/-!
-# Completeness under a uniform lower metric bound
-
-This file transfers completeness between two smooth Riemannian metrics on the
-same pointed manifold.  A positive global lower bound makes every Cauchy
-sequence for the larger metric Cauchy for the complete reference metric.
--/
-
 noncomputable section
 
 universe u uE uH
@@ -29,8 +21,6 @@ variable {H : Type uH} [TopologicalSpace H]
 omit [CompleteSpace E] in
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-/-- A smooth metric which globally dominates a positive multiple of a complete
-reference metric is complete. -/
 theorem complete_of_lower
     {I : ModelWithCorners Real E H}
     (X : PointedRiemannianManifold.{u, uE, uH} (I := I))

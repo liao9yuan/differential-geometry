@@ -1,11 +1,5 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.LowRegBgC0One
 
-/-!
-# Order-zero pair foundations
-
-Internal pair-estimate layer for the low-regularity order-zero refold.
--/
-
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
@@ -489,7 +483,6 @@ theorem aaBlkOnePairH2
   refine (hout _ _ P (2 * (x + y)) hP hxy0 hp hsum).trans_eq ?_
   simp only [C, x, y]
   ring
-
 
 end LowRegBgC0Core
 end DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral

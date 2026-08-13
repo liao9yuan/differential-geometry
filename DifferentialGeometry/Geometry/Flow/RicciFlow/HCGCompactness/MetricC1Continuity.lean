@@ -7,15 +7,6 @@ import Mathlib.Topology.Instances.Matrix
 
 set_option autoImplicit false
 
-
-
-
-
-
-
-
-
-
 noncomputable section
 
 universe u uE uH
@@ -41,8 +32,6 @@ variable [ContMDiffVectorBundle 1 E (TangentSpace I : M → Type _) I]
 omit [I.Boundaryless] [SigmaCompactSpace M] [IsManifold I 2 M]
   [VectorBundle ℝ E (TangentSpace I : M → Type _)]
   [ContMDiffVectorBundle 1 E (TangentSpace I : M → Type _) I] in
-/-- Local continuity of a varying-background metric-difference norm, once all
-of its coordinate-frame components are known to be continuous. -/
 private theorem derivNorm_pair_cont
     {D : RealTimeInterval}
     (G : RealizedMetricFamilyOn (I := I) (M := M) D)
@@ -202,8 +191,6 @@ private theorem derivNorm_pair_cont
 omit [I.Boundaryless] [SigmaCompactSpace M] [IsManifold I 2 M]
   [VectorBundle ℝ E (TangentSpace I : M → Type _)]
   [ContMDiffVectorBundle 1 E (TangentSpace I : M → Type _) I] in
-/-- Order-zero varying-background metric-difference continuity at a diagonal
-regular spacetime point. -/
 private theorem metric0_pair_cont
     {D : RealTimeInterval}
     (G : RealizedMetricFamilyOn (I := I) (M := M) D)
@@ -262,10 +249,6 @@ private theorem metric0_pair_cont
 omit [I.Boundaryless] [SigmaCompactSpace M] [IsManifold I 2 M]
   [VectorBundle ℝ E (TangentSpace I : M → Type _)]
   [ContMDiffVectorBundle 1 E (TangentSpace I : M → Type _) I] in
-/-- Order-one varying-background metric-difference continuity at a diagonal
-regular spacetime point.  The proof remains fully scalar in one coordinate
-frame; the moving Levi--Civita coefficients are expanded by the Koszul
-formula and a finite inverse-Gram contraction. -/
 private theorem metric1_pair_cont
     {D : RealTimeInterval}
     (G : RealizedMetricFamilyOn (I := I) (M := M) D)
@@ -509,8 +492,6 @@ variable [CompactSpace M]
 omit [I.Boundaryless] [SigmaCompactSpace M] [IsManifold I 2 M]
   [VectorBundle ℝ E (TangentSpace I : M → Type _)]
   [ContMDiffVectorBundle 1 E (TangentSpace I : M → Type _) I] in
-/-- Around one regular diagonal time, the order-zero and order-one
-varying-background seminorms are jointly small, uniformly in space. -/
 private theorem metric_pair_event
     {D : RealTimeInterval}
     (G : RealizedMetricFamilyOn (I := I) (M := M) D)
@@ -564,9 +545,6 @@ private theorem metric_pair_event
 omit [I.Boundaryless] [SigmaCompactSpace M] [IsManifold I 2 M]
   [VectorBundle ℝ E (TangentSpace I : M → Type _)]
   [ContMDiffVectorBundle 1 E (TangentSpace I : M → Type _) I] in
-/-- A smooth metric family has one order-one metric-jet modulus on every
-compact regular-time slab, with the derivative connection and tensor norm both
-taken at the varying base time. -/
 theorem metric_c1_span
     {D : RealTimeInterval}
     (G : RealizedMetricFamilyOn (I := I) (M := M) D)
@@ -652,9 +630,6 @@ end Compact
 omit [FiniteDimensional Real E] [I.Boundaryless] [SigmaCompactSpace M]
   [IsManifold I 2 M]
   [ContMDiffVectorBundle 1 E (TangentSpace I : M → Type _) I] in
-/-- A fully applied metric derivative relative to a fixed background is
-continuous at every regular spacetime point when its slots come from one
-actual smooth local frame. -/
 theorem metricCov_cont
     [Module.Finite ℝ E]
     {D : RealTimeInterval}
@@ -713,8 +688,6 @@ theorem metricCov_cont
   funext j
   exact (hp j).symm
 
-
-
 omit [Module.Finite ℝ E] in
 omit [I.Boundaryless] [IsManifold I 2 M]
     [ContMDiffVectorBundle 1 E (TangentSpace I : M → Type _) I] in
@@ -737,8 +710,6 @@ theorem metricCov_smooth
       ((T : Real), x) :=
   metricCov_cont (I := I) G hG (G.metric (T : Real)) T.2
     frame hframe hu hx a slots
-
-
 
 omit [Module.Finite ℝ E] in
 omit [I.Boundaryless] [IsManifold I 2 M] in
@@ -841,8 +812,6 @@ private theorem metric_c_patch
       IsLocalFrameOn.toBasisAt_coe] using hle
   exact lt_of_le_of_lt hle' hpair.1
 
-
-
 omit [Module.Finite ℝ E] in
 omit [I.Boundaryless] [IsManifold I 2 M] in
 omit [SigmaCompactSpace M] in
@@ -870,8 +839,6 @@ private theorem metric_c1_patch
   rcases ha' with rfl | rfl
   · exact h0 t ht.1 y hy.1
   · exact h1 t ht.2 y hy.2
-
-
 
 omit [Module.Finite ℝ E] in
 omit [I.Boundaryless] [IsManifold I 2 M] in
@@ -980,8 +947,6 @@ section Compact
 
 variable [CompactSpace M]
 
-
-
 omit [Module.Finite ℝ E] in
 omit [I.Boundaryless] [IsManifold I 2 M] in
 omit [SigmaCompactSpace M] in
@@ -1017,8 +982,6 @@ private theorem metric_b_event
   exact (hloc x r (hr x hxF) y hyW).trans
     (Finset.single_le_sum (fun z _ => hC z) hxF)
 
-
-
 omit [Module.Finite ℝ E] in
 omit [I.Boundaryless] [IsManifold I 2 M] in
 omit [SigmaCompactSpace M] in
@@ -1048,8 +1011,6 @@ private theorem metric_b_compact
   exact (hOsub r htO' y).trans
     (Finset.single_le_sum (fun z _ => hC z) hrF)
 
-
-
 omit [Module.Finite ℝ E] in
 omit [I.Boundaryless] [IsManifold I 2 M] in
 omit [SigmaCompactSpace M] in
@@ -1075,8 +1036,6 @@ theorem metric_cp_bdd
     exact (hbound a t ht y).trans
       (Finset.single_le_sum (fun j _ => hB j)
         (by simp only [Finset.mem_range]; omega))
-
-
 
 omit [Module.Finite ℝ E] in
 omit [I.Boundaryless] [IsManifold I 2 M] in
@@ -1110,8 +1069,6 @@ private theorem metric_c_event
   obtain ⟨x, hxF, hyW⟩ :=
     Set.mem_iUnion₂.mp (hF (Set.mem_univ y))
   exact hloc x t (ht x hxF) y hyW
-
-
 
 omit [Module.Finite ℝ E] in
 omit [I.Boundaryless] [IsManifold I 2 M] in
@@ -1169,8 +1126,6 @@ theorem metric_cp_tendsto
     exact Real.sqrt_nonneg _
   simpa only [Real.dist_eq, sub_zero, abs_of_nonneg hnonneg] using
     hsup.trans_lt (half_lt_self hε)
-
-
 
 omit [Module.Finite ℝ E] in
 omit [I.Boundaryless] [IsManifold I 2 M] in

@@ -2,14 +2,6 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.ConvFieldOpen
 
 set_option autoImplicit false
 
-/-!
-# Time-zero identification for an open-window metric limit
-
-The open-window output has the same selected sequence and limit family on each
-canonical closed window, so time-zero identification is read from any window
-containing zero.
--/
-
 noncomputable section
 
 open Set Bundle Manifold
@@ -34,8 +26,6 @@ namespace OpenConvOut
 
 omit [NeZero (Module.finrank ℝ E)]
   [I.Boundaryless] in
-/-- Identify the time-zero open-window limit with any pointwise time-zero
-limit of the pulled-back source metrics along the underlying sequence. -/
 theorem gInf_zero_eq
     (R : letI : TopologicalSpace P.M := P.topology;
       letI : ChartedSpace H P.M := P.charted;

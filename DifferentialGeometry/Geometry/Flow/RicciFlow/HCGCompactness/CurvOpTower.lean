@@ -12,14 +12,6 @@ import DifferentialGeometry.Tensor.RSTensor.Tensor0SRiemannian.Smooth
 set_option autoImplicit false
 set_option linter.unusedSectionVars false
 
-/-!
-# Vector-valued curvature derivative tower
-
-This file raises the final covariant slot of the HCG curvature-derivative
-tower.  The resulting pointwise vector is the form needed by differentiated
-Jacobi equations.
--/
-
 noncomputable section
 
 open Bundle Manifold Set Tensor0SBundle
@@ -150,8 +142,6 @@ private noncomputable def curvLastCov
         m (Fin.last (k + 3)) c w
     simpa only [m, update_snoc_last] using hmap
 
-/-- Raise the final slot of the `k`-th covariant derivative of the lowered
-Riemann tensor. -/
 noncomputable def curvOpN
     (g : SmoothRiemannianMetric I M) (k : Nat) (x : M)
     (v : Fin (k + 3) -> TangentSpace I x) :
@@ -280,7 +270,6 @@ private theorem curvOpN_update_smul
   change curvOpNMap (I := I) g k x (Function.update v i (c • y)) = _
   rw [MultilinearMap.map_update_smul, curvOpNMap_apply]
 
-/-- The raised curvature derivative vanishes when any input slot vanishes. -/
 theorem curvOpN_zero_at
     (g : SmoothRiemannianMetric I M) (k : Nat) (x : M)
     (v : Fin (k + 3) -> TangentSpace I x) (i : Fin (k + 3))
@@ -291,8 +280,6 @@ theorem curvOpN_zero_at
     curvOpN_update_smul (I := I) g k x v i (0 : Real)
       (0 : TangentSpace I x)
 
-/-- The final-slot raising in `curvOpN` agrees with the public realized
-one-form sharp interface. -/
 theorem curvOpN_eq_sharp
     (g : SmoothRiemannianMetric I M) (k : Nat) (x : M)
     (v : Fin (k + 3) -> TangentSpace I x) :
@@ -310,8 +297,6 @@ theorem curvOpN_eq_sharp
   exact congrArg (curvCovDeriv (I := I) (M := M) g k x)
     (update_snoc_last v 0 w).symm
 
-/-- Smooth one-form obtained by freezing all but the final slot of
-`curvCovDeriv g k` against `Y`. -/
 noncomputable def curvOpNForm
     (g : SmoothRiemannianMetric I M) (k : Nat)
     (Y : Fin (k + 3) ->
@@ -327,7 +312,6 @@ noncomputable def curvOpNForm
         ContMDiffSection I E (∞ : WithTop ℕ∞)
           (TangentSpace I : M -> Type _)) Y 0)
 
-/-- Pointwise evaluation of the frozen final-slot one-form. -/
 @[simp] theorem curvOpNForm_apply
     (g : SmoothRiemannianMetric I M) (k : Nat)
     (Y : Fin (k + 3) ->
@@ -342,7 +326,6 @@ noncomputable def curvOpNForm
   rw [DifferentialGeometry.PDE.RicciFlow.freezeAllBut0SField_apply]
   rw [snoc_section_apply]
 
-/-- Smooth vector field obtained by raising `curvOpNForm`. -/
 noncomputable def curvOpNField
     (g : SmoothRiemannianMetric I M) (k : Nat)
     (Y : Fin (k + 3) ->
@@ -359,7 +342,6 @@ noncomputable def curvOpNField
         exact oneForm_comp_smooth
           (I := I) (curvOpNForm (I := I) g k Y) a j))
 
-/-- Pointwise evaluation of the smooth raised curvature-derivative field. -/
 @[simp] theorem curvOpNField_apply
     (g : SmoothRiemannianMetric I M) (k : Nat)
     (Y : Fin (k + 3) ->
@@ -373,8 +355,6 @@ noncomputable def curvOpNField
       (curvOpNForm (I := I) g k Y x) = _
   rw [curvOpNForm_apply]
 
-/-- Evaluating the raised curvature-derivative tower on smooth tangent fields
-along a smooth curve gives a smooth tangent field along that curve. -/
 theorem curvOpN_smoothAlong
     (g : SmoothRiemannianMetric I M) (k : Nat)
     (gamma : Real -> M)
@@ -821,8 +801,6 @@ private theorem curvOpNabla_eval
       (curvCovDeriv (I := I) (M := M) g k) (Fin.last (k + 3))
       X Yfull hYfull U)
 
-/-- Covariantly differentiating the final-slot-raised curvature tower obeys
-the full frozen-slot Leibniz rule. -/
 theorem curvOpN_cov_sum
     (g : SmoothRiemannianMetric I M) (k : Nat)
     (X : ContMDiffSection I E (∞ : WithTop ℕ∞)
@@ -896,11 +874,6 @@ theorem curvOpN_cov_sum
         (Function.update (fun j : Fin (k + 3) => Y j x) i
           (curvSlotCov (I := I) g k X Y x i))).symm
 
-/-- The full curvature-tower Leibniz rule restricted to a smooth curve.
-
-This is the along-curve form of `curvOpN_cov_sum` for slots obtained by
-restricting global smooth tangent fields.  It is the base bridge used to prove
-the corresponding formula for arbitrary smooth fields along a curve. -/
 theorem curvOpN_cov_restrict
     (g : SmoothRiemannianMetric I M) (k : Nat)
     (γ : Real -> M)
@@ -962,11 +935,6 @@ theorem curvOpN_cov_restrict
   intro i hi
   rw [hslot i]
 
-/-- The slot-corrected covariant derivative of a curvature-tower evaluation
-along a curve.
-
-Subtracting the derivatives of every evaluated slot leaves only the
-covariant derivative of the curvature tensor itself. -/
 noncomputable def curvOpNDerivAlong
     (g : SmoothRiemannianMetric I M) (k : Nat)
     (γ : Real -> M)
@@ -1649,8 +1617,6 @@ private theorem curvOpNDeriv_all
   rw [hUniv] at hall
   exact hall
 
-/-- On restrictions of global smooth slots, the slot-corrected along-curve
-derivative is exactly the next curvature-tower level. -/
 theorem curvOpNDeriv_comp
     (g : SmoothRiemannianMetric I M) (k : Nat)
     (γ : Real -> M)
@@ -1677,8 +1643,6 @@ theorem curvOpNDeriv_comp
   rw [curvOpN_cov_restrict (I := I) g k γ Y t hγ]
   abel
 
-/-- The slot-corrected derivative of the curvature tower along a smooth curve
-is the next tower level for arbitrary smooth along-curve slots. -/
 theorem curvOpN_covAlong
     (g : SmoothRiemannianMetric I M) (k : Nat)
     (gamma : Real -> M)
@@ -1727,9 +1691,6 @@ theorem curvOpN_covAlong
       · rfl
       · exact hG i
 
-/-- Covariantly differentiating the final-slot-raised curvature tower gives
-the next tower level when the frozen slots are covariantly constant at the
-base point. -/
 theorem curvOpN_cov
     (g : SmoothRiemannianMetric I M) (k : Nat)
     (X : ContMDiffSection I E (∞ : WithTop ℕ∞)
@@ -1819,8 +1780,6 @@ theorem curvOpN_cov
       rw [DifferentialGeometry.Integral.Connection.oneFormAtSlot0S_apply]
       rw [update_snoc_last]
 
-/-- Pairing `curvOpN` with a final vector recovers the lowered curvature
-derivative tensor. -/
 theorem curvOpN_inner
     (g : SmoothRiemannianMetric I M) (k : Nat) (x : M)
     (v : Fin (k + 3) -> TangentSpace I x) (w : TangentSpace I x) :
@@ -1897,8 +1856,6 @@ private theorem snoc_vec4
         (4 : Fin 5) = W
     rw [show (4 : Fin 5) = Fin.last 4 by rfl, Fin.snoc_last]
 
-/-- The zeroth raised curvature derivative is the Riemann curvature
-operator. -/
 theorem curvOpN_zero
     (g : SmoothRiemannianMetric I M) (x : M)
     (X Y Z : TangentSpace I x) :
@@ -1932,8 +1889,6 @@ theorem curvOpN_zero
             x X Y Z) W :=
       (g.symm x _ _).symm
 
-/-- The first raised curvature derivative is the pointwise covariant
-derivative of the Riemann curvature operator. -/
 theorem curvOpN_one
     (g : SmoothRiemannianMetric I M) (x : M)
     (D X Y Z : TangentSpace I x) :
@@ -1966,8 +1921,6 @@ theorem curvOpN_one
             (I := I) g x D X Y Z) W :=
       (g.symm x _ _).symm
 
-/-- A curvature evaluation along a curve is the zeroth raised curvature
-derivative evaluated on the three pointwise slots. -/
 theorem curvAlong_eq_op0
     (g : SmoothRiemannianMetric I M) (gamma : Real -> M)
     (X Y Z : forall s : Real, TangentSpace I (gamma s)) (t : Real) :
@@ -1978,8 +1931,6 @@ theorem curvAlong_eq_op0
   simpa only [curvAlong] using
     (curvOpN_zero (I := I) g (gamma t) (X t) (Y t) (Z t)).symm
 
-/-- The covariant curvature derivative along a smooth curve is the first
-raised curvature derivative evaluated on the curve velocity and three slots. -/
 theorem curvDeriv_eq_op1
     (g : SmoothRiemannianMetric I M) (gamma : Real -> M)
     (X Y Z : forall s : Real, TangentSpace I (gamma s)) (t : Real)
@@ -2038,8 +1989,6 @@ private theorem inner_self_nonneg
     simp
   · exact le_of_lt (g.pos x v hv)
 
-/-- A bound on the `k`-th curvature derivative controls its vector-valued
-final-slot raising. -/
 theorem curvOpN_le
     (P : PointedRiemannianManifold.{u, uE, uH} (I := I))
     {k : Nat} {C : Real} (hP : HasCurvDerivBound (I := I) P k C) :

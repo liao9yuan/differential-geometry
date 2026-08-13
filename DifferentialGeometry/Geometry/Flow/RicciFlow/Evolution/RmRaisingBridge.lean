@@ -2,66 +2,6 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.NablaRiemannCommut
 
 set_option autoImplicit false
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 noncomputable section
 
 namespace DifferentialGeometry.PDE.RicciFlow
@@ -79,17 +19,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 variable [IsManifold I 1 M] [IsManifold I 2 M]
 variable [CompleteSpace E] [SigmaCompactSpace M] [T2Space M]
 
-
-
-
-
-
-
-
-
-
-
-
 omit [I.Boundaryless] [IsManifold I 2 M] in
 theorem solution_rm04LowersRm13At
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
@@ -106,21 +35,6 @@ theorem solution_rm04LowersRm13At
       (metricCurvData (I := I) (M := M) (S.base.metric t)).h_rm04
       x
   simpa [SolutionFamily.rm13, SolutionFamily.rm04] using h
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 omit [I.Boundaryless] [IsManifold I 2 M] [CompleteSpace E]
     [SigmaCompactSpace M] [T2Space M] in
@@ -146,22 +60,6 @@ theorem rm13_apply_eq_rm04_raise
       cotangentSharp_inner_eval]
   rw [hβ]
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 omit [I.Boundaryless] [IsManifold I 2 M] [CompleteSpace E]
     [SigmaCompactSpace M] [T2Space M] in
 theorem curvatureAction0SAt_eq_rm04_raise
@@ -185,28 +83,6 @@ theorem curvatureAction0SAt_eq_rm04_raise
   refine Finset.sum_congr rfl fun q _ => ?_
   exact rm13_apply_eq_rm04_raise (I := I) g (Rm13 x) Rm04 hLower
     (oneFormAtSlot0S (I := I) alpha slots q) X Y (slots q)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 omit [I.Boundaryless] in
 theorem nablaLapComm_secondTerm_eq_rm04_raise

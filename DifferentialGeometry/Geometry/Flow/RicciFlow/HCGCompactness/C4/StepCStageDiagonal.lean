@@ -2,14 +2,6 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.C4.StepCStage
 
 set_option autoImplicit false
 
-
-
-
-
-
-
-
-
 noncomputable section
 
 universe u uE uH
@@ -32,8 +24,6 @@ variable {H : Type uH} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H} [I.Boundaryless]
 variable {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
 
-
-
 structure NestedSubseq where
   sigma : Nat → Nat → Nat
   tau : Nat → Nat → Nat
@@ -44,19 +34,14 @@ structure NestedSubseq where
 
 namespace NestedSubseq
 
-
 def diag (T : NestedSubseq) (m : Nat) : Nat := T.sigma (m + 1) m
-
 
 def tailComp (T : NestedSubseq) (q : Nat) : Nat → (Nat → Nat)
   | 0 => id
   | n + 1 => T.tailComp q n ∘ T.tau (q + 1 + n)
 
-
-
 def tailFactor (T : NestedSubseq) (q n : Nat) : Nat :=
   T.tailComp q n (q + n)
-
 
 theorem tailComp_strict (T : NestedSubseq) (q : Nat) :
     ∀ n, StrictMono (T.tailComp q n) := by
@@ -65,8 +50,6 @@ theorem tailComp_strict (T : NestedSubseq) (q : Nat) :
   | zero => exact strictMono_id
   | succ n ih =>
       exact ih.comp (T.tau_strict (q + 1 + n))
-
-
 
 theorem sigma_factor (T : NestedSubseq) (q n : Nat) :
     T.sigma (q + n + 1) = T.sigma (q + 1) ∘ T.tailComp q n := by
@@ -80,7 +63,6 @@ theorem sigma_factor (T : NestedSubseq) (q n : Nat) :
       simp only [tailComp, Function.comp_apply]
       rw [show q + n + 1 = q + 1 + n by omega]
 
-
 theorem tailFactor_strict (T : NestedSubseq) (q : Nat) :
     StrictMono (T.tailFactor q) := by
   apply strictMono_nat_of_lt_succ
@@ -93,7 +75,6 @@ theorem tailFactor_strict (T : NestedSubseq) (q : Nat) :
   have hle := (T.tau_strict (q + 1 + n)).id_le (q + (n + 1))
   exact hlt.trans_le hle
 
-
 theorem diag_strict (T : NestedSubseq) : StrictMono T.diag := by
   apply strictMono_nat_of_lt_succ
   intro n
@@ -103,8 +84,6 @@ theorem diag_strict (T : NestedSubseq) : StrictMono T.diag := by
   have hle := (T.tau_strict (n + 1)).id_le (n + 1)
   exact (Nat.lt_succ_self n).trans_le hle
 
-
-
 theorem diag_step_factor (T : NestedSubseq) (q n : Nat) :
     T.diag (q + n) =
       T.sigma q (T.tau q (T.tailFactor q n)) := by
@@ -113,7 +92,6 @@ theorem diag_step_factor (T : NestedSubseq) (q n : Nat) :
   simpa only [diag, tailFactor, Function.comp_apply] using hfactor
 
 end NestedSubseq
-
 
 structure StagePayload
     (inp : MetricCompactnessInputs (I := I) X)
@@ -139,7 +117,6 @@ structure StagePayload
   data : HasStageJetData inp P L hr phi phi_strict hconn U C0 C1
     aInf Jinf Jbarinf gInf
 
-
 theorem HasStageRefine.payload_nonempty
     (inp : MetricCompactnessInputs (I := I) X)
     (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k))
@@ -153,9 +130,6 @@ theorem HasStageRefine.payload_nonempty
   rcases h with ⟨phi, hphi, U, C0, C1, aInf, Jinf, Jbarinf, gInf, hdata⟩
   exact ⟨⟨phi, hphi, U, C0, C1, aInf, Jinf, Jbarinf, gInf, hdata⟩⟩
 
-
-/-- The dependent provider-native chart and convergence data selected at one
-radius step. -/
 structure StagePayloadOn
     (inp : MetricCompactCore (I := I) X)
     (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k))
@@ -182,7 +156,6 @@ structure StagePayloadOn
   data : HasStageJetDataOn inp P L hr phi phi_strict hconn chart
     V U C0 C1 aInf Jinf Jbarinf gInf
 
-/-- A provider-native radius refinement has a selected dependent payload. -/
 theorem HasStageRefineOn.payload_nonempty
     (inp : MetricCompactCore (I := I) X)
     (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k))
@@ -203,8 +176,6 @@ structure StageState where
   sigma : Nat → Nat
   sigma_strict : StrictMono sigma
 
-
-
 noncomputable def choosePayload
     (inp : MetricCompactnessInputs (I := I) X)
     (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k))
@@ -222,7 +193,6 @@ noncomputable def choosePayload
         (NetLimitData.stable_subseq inp.decay P L0 S.sigma_strict hseed.1)
         (m : Real) (Nat.cast_nonneg m)
 
-
 noncomputable def nextState
     (inp : MetricCompactnessInputs (I := I) X)
     (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k))
@@ -234,7 +204,6 @@ noncomputable def nextState
     (S : StageState) (m : Nat) : StageState :=
   let d := choosePayload inp P L0 hconn hseed S m
   ⟨S.sigma ∘ d.phi, S.sigma_strict.comp d.phi_strict⟩
-
 
 noncomputable def stageStates
     (inp : MetricCompactnessInputs (I := I) X)
@@ -248,7 +217,6 @@ noncomputable def stageStates
   | m + 1 => nextState inp P L0 hconn hseed
       (stageStates inp P L0 hconn hseed m) m
 
-
 noncomputable def radiusPayload
     (inp : MetricCompactnessInputs (I := I) X)
     (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k))
@@ -259,7 +227,6 @@ noncomputable def radiusPayload
     (hseed : HasStageSeed inp P L0 hconn) (m : Nat) :=
   choosePayload inp P L0 hconn hseed
     (stageStates inp P L0 hconn hseed m) m
-
 
 noncomputable def stageNested
     (inp : MetricCompactnessInputs (I := I) X)
@@ -277,8 +244,6 @@ noncomputable def stageNested
   sigma_succ m := by
     rw [stageStates]
     rfl
-
-
 
 def HasRadiusTail
     (inp : MetricCompactnessInputs (I := I) X)
@@ -298,9 +263,6 @@ def HasRadiusTail
     HasStageJetData inp P (L0.subseq S.sigma_strict)
       (Nat.cast_nonneg q) (d.phi ∘ rho) (d.phi_strict.comp hrho)
       hconn d.U d.C0 d.C1 d.aInf d.Jinf d.Jbarinf d.gInf
-
-
-
 
 theorem HasStageSeed.exists_radius_diag
     (inp : MetricCompactnessInputs (I := I) X)
@@ -337,10 +299,6 @@ theorem HasStageSeed.exists_radius_diag
       (Nat.cast_nonneg q) d.phi_strict hconn d.U d.C0 d.C1 d.aInf
       d.Jinf d.Jbarinf d.gInf hrho
 
-
-
-/-- Select the provider-native payload supplied by a stage seed at one state
-and integer radius. -/
 noncomputable def choosePayloadOn
     (inp : MetricCompactCore (I := I) X)
     (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k))
@@ -360,8 +318,6 @@ noncomputable def choosePayloadOn
         (NetLimitData.stable_subseq inp.decay P L0 S.sigma_strict hseed.1)
         (m : Real) (Nat.cast_nonneg m)
 
-/-- Advance one provider-native radius-tower state by its selected strict
-refinement. -/
 noncomputable def nextStateOn
     (inp : MetricCompactCore (I := I) X)
     (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k))
@@ -375,7 +331,6 @@ noncomputable def nextStateOn
   let d := choosePayloadOn inp P L0 hconn chart hseed S m
   ⟨S.sigma ∘ d.phi, S.sigma_strict.comp d.phi_strict⟩
 
-/-- The recursively nested selectors for all integer radii of one provider. -/
 noncomputable def stageStatesOn
     (inp : MetricCompactCore (I := I) X)
     (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k))
@@ -389,7 +344,6 @@ noncomputable def stageStatesOn
   | m + 1 => nextStateOn inp P L0 hconn chart hseed
       (stageStatesOn inp P L0 hconn chart hseed m) m
 
-/-- The selected provider-native stage payload at radius `m`. -/
 noncomputable def radiusPayloadOn
     (inp : MetricCompactCore (I := I) X)
     (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k))
@@ -402,7 +356,6 @@ noncomputable def radiusPayloadOn
   choosePayloadOn inp P L0 hconn chart hseed
     (stageStatesOn inp P L0 hconn chart hseed m) m
 
-/-- The provider-native radius tower as a generic nested-subsequence datum. -/
 noncomputable def stageNestedOn
     (inp : MetricCompactCore (I := I) X)
     (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k))
@@ -423,8 +376,6 @@ noncomputable def stageNestedOn
     rw [stageStatesOn]
     rfl
 
-/-- At a fixed integer radius, a tail of the provider-native master selector
-is represented by one further refinement of that radius's payload. -/
 def HasRadiusTailOn
     (inp : MetricCompactCore (I := I) X)
     (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k))
@@ -445,8 +396,6 @@ def HasRadiusTailOn
       (Nat.cast_nonneg q) (d.phi ∘ rho) (d.phi_strict.comp hrho)
       hconn chart d.V d.U d.C0 d.C1 d.aInf d.Jinf d.Jbarinf d.gInf
 
-/-- One strict master subsequence retains every fixed-radius provider-native
-stage package on a tail. -/
 theorem HasStageSeedOn.exists_radius_diag
     (inp : MetricCompactCore (I := I) X)
     (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k))

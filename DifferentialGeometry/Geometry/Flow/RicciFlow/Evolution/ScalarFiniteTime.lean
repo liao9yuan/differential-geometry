@@ -2,16 +2,6 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.ScalarLowerBound
 
 set_option autoImplicit false
 
-
-
-
-
-
-
-
-
-
-
 noncomputable section
 
 namespace DifferentialGeometry.PDE.RicciFlow
@@ -26,17 +16,11 @@ variable {I : ModelWithCorners Real E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 variable [CompleteSpace E] [SigmaCompactSpace M] [T2Space M]
 
-
-
-
 def scalarBlowupTime (n c0 : Real) : Real :=
   n / (2 * c0)
 
-
 def ScalarBoundedAboveOnSlab (scalar : Real -> M -> Real) (T : Real) : Prop :=
   exists B : Real, forall t : Real, t ∈ Set.Icc 0 T -> forall x : M, scalar t x <= B
-
-
 
 def ScalarLowerBarrierBoundUpToPole
     (scalar : Real -> M -> Real) (n c0 omega : Real) : Prop :=
@@ -172,8 +156,6 @@ theorem of_continuousOn
 
 end ScalarBoundedAboveOnSlab
 
-
-
 theorem scalarLowerBarrierBoundUpToPole_of_scalarEvolution_closedOpen
     [I.Boundaryless] [CompactSpace M]
     [VectorBundle Real E (TangentSpace I : M -> Type _)]
@@ -218,9 +200,6 @@ theorem scalarLowerBarrierBoundUpToPole_of_scalarEvolution_closedOpen
       (hricci T hT_pos hT_omega hT_blow)
       hinit (hF_lip T hT_pos hT_omega hT_blow)
   exact hbound T ⟨le_of_lt hT_pos, le_rfl⟩ x
-
-
-
 
 theorem positive_scalar_finite_time_of_scalarEvolution_closedOpen
     [I.Boundaryless] [CompactSpace M] [Nonempty M]
@@ -274,11 +253,6 @@ theorem positive_scalar_finite_time_of_scalarEvolution_closedOpen
   have hle := scalar_endpoint_le_blowupTime_of_lower_barrier_bound
     (M := M) hn hc0 hlower hbounded
   exact hnot hle
-
-
-
-
-
 
 theorem finiteTime3D
     [I.Boundaryless] [CompactSpace M] [Nonempty M]

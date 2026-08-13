@@ -1,14 +1,5 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.LowRegRungThree
 
-/-!
-# The fourth low-regularity Galerkin energy rung
-
-This module isolates the new `q = 3` forcing-arm estimate needed after the
-checked rung-three bound.  Its top coefficient has exactly the same ordered
-absorption whitelist as rung three; every remaining term is affine in the
-`H⁴` energy after the already-available `H³` cap is inserted.
--/
-
 noncomputable section
 
 open Bundle Manifold MeasureTheory Set Filter
@@ -43,9 +34,7 @@ private theorem mul4Le {a b c d A B C D : ℝ}
     hd hd0 (mul_nonneg (mul_nonneg hA0 hB0) hC0)
 
 set_option linter.unusedSectionVars false in
-/-- The new `q = 3` arm slot, with the three and only three top-order
-coefficients separated from a lower bucket that is linear in the fifth jet
-window. -/
+
 theorem armOrder3 (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M) :
     ∃ Atop Ar2 Ar1 Krem : ℝ,
@@ -327,12 +316,6 @@ theorem armOrder3 (hDim : Module.finrank ℝ E = 3)
       dsimp only [Q, A, B, C, D]
       ring
 
-/-- **The ordered rung-four spectral-arm certificate.**
-
-The four gate constants are selected from the background metric before the
-solve radius, fibre threshold, realization, and the prior rung-three cap.  Once
-that cap is supplied, the lower part is affine in `√E₄`; neither lower constant
-can affect the `E₅` absorption coefficient. -/
 theorem galArmMass4Ord (hDim : Module.finrank ℝ E = 3)
     (g₀ : SmoothRiemannianMetric I M) :
     ∃ Ctop Kr2 Kr1 Kcap : ℝ,
@@ -536,12 +519,6 @@ theorem galArmMass4Ord (hDim : Module.finrank ℝ E = 3)
   ring_nf
   exact le_rfl
 
-/-! ### The rung-four endpoint and its explicit package -/
-
-/-- **Rung 4: the `N`-uniform `H⁴` energy bound on the same Galerkin
-trajectory.**  The only prior-rung input is a pointwise common `H³` cap; the
-four absorption constants remain ordered before all solve data and before that
-cap. -/
 theorem lowregRung4Ord (hDim : Module.finrank ℝ E = 3)
     (g₀ : SmoothRiemannianMetric I M) :
     ∃ Ctop₃ Kr2 Kr1 Kcap : ℝ,
@@ -691,9 +668,6 @@ theorem lowregRung4Ord (hDim : Module.finrank ℝ E = 3)
     ring
   rw [hz]
 
-/-- One explicit ordered rung-four certificate.  The indices retain the exact
-gate tuple selected by `lowregRung4Ord`, so later common calibration can invoke
-the same continuation rather than reselecting incomparable existentials. -/
 def IsRung4Ord (g₀ : SmoothRiemannianMetric I M)
     (Ctop₃ Kr2 Kr1 Kcap : ℝ) : Prop :=
   0 ≤ Ctop₃ ∧ 0 ≤ Kr2 ∧ 0 ≤ Kr1 ∧ 0 ≤ Kcap ∧
@@ -732,7 +706,6 @@ def IsRung4Ord (g₀ : SmoothRiemannianMetric I M)
           galerkinEnergy (I := I) (M := M)
             (eigenIdxFinset (I := I) (M := M) g₀ N) (U N) 4 t ≤ Φ
 
-/-- Package the ordered rung-four witnesses without erasing their coherence. -/
 theorem lowregRung4Pack (hDim : Module.finrank ℝ E = 3)
     (g₀ : SmoothRiemannianMetric I M) :
     ∃ Ctop₃ Kr2 Kr1 Kcap : ℝ,

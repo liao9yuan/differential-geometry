@@ -3,14 +3,6 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.C4.StepCParti
 
 set_option autoImplicit false
 
-/-!
-# Finite-hat physical cage scales
-
-This file isolates the provider-independent distance and scalar ledgers for the
-stabilized finite hats.  Both the legacy normal branch and the intrinsic H6
-branch consume these facts.
--/
-
 noncomputable section
 
 universe u uE uH
@@ -32,8 +24,6 @@ variable [NeZero (Module.finrank Real E)]
 variable {H : Type uH} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H} [I.Boundaryless]
 
-/-- All slots in the frozen packing range share one aliveness-stabilization
-tail. -/
 theorem aliveSlots_tail
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
     (hd : InjRadiusDecayInput (I := I) X) {D : Real}
@@ -44,7 +34,6 @@ theorem aliveSlots_tail
         L.alive (gamma : Nat) :=
   Filter.eventually_all.mpr fun gamma => L.alive_eventually (gamma : Nat)
 
-/-- Membership in a stabilized finite hat forces its slot to be live. -/
 theorem hat_mem_live
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
     (hd : InjRadiusDecayInput (I := I) X) {D : Real}
@@ -59,8 +48,6 @@ theorem hat_mem_live
   | none => simp [NetLimitData.hatBall, hc] at hx
   | some c => simpa [hc] using hstable.symm
 
-/-- A point in a finite hat is within the canonical four-lambda radius of the
-totalized center at that stage. -/
 theorem hat_dist_centerD
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
     (hd : InjRadiusDecayInput (I := I) X) {D : Real}
@@ -76,8 +63,6 @@ theorem hat_dist_centerD
   | none => simp [NetLimitData.hatBall, hc] at hx
   | some c => simpa [NetLimitData.hatBall, seqCenterD, hc] using hx
 
-/-- A stabilized live center eventually obeys the explicit ordered-net
-basepoint-distance bound. -/
 theorem seqCenterD_dist_le
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
     (hd : InjRadiusDecayInput (I := I) X) {D : Real} (hD : 0 < D)
@@ -100,8 +85,6 @@ theorem seqCenterD_dist_le
   rw [← hr]
   exact (seqRadius_mem hd hD P (L.φ k) gamma).2
 
-/-- A totalized center eventually lies in the unit enlargement of its limiting
-ordered-net radius. -/
 theorem seqCenterD_rInf_lt
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
     (hd : InjRadiusDecayInput (I := I) X) {D : Real}
@@ -119,8 +102,6 @@ theorem seqCenterD_rInf_lt
     ← seqCenterD_dist_eq (I := I) hd P L k gamma]
   exact hk
 
-/-- The finitely many stabilized live centers share the unit-enlarged
-limiting-radius tail. -/
 theorem liveCenters_rInf
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
     (hd : InjRadiusDecayInput (I := I) X) {D : Real}
@@ -133,8 +114,6 @@ theorem liveCenters_rInf
   Filter.eventually_all.mpr fun gamma =>
     seqCenterD_rInf_lt (I := I) hd P hre L (gamma.1 : Nat)
 
-/-- A single pre-packing divisor budget places every canonical hat radius
-strictly below half of the slotwise minimizing-branch radius. -/
 theorem lamInf_lt_halfMin
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
     (hd : InjRadiusDecayInput (I := I) X) {D aMin : Real} (hD : 0 < D)
@@ -164,8 +143,6 @@ theorem lamInf_lt_halfMin
     _ < (aMin * hd.mu (L.rInf gamma + 1)) / 2 :=
       div_lt_div_of_pos_right hhat (by norm_num)
 
-/-- Choose an arbitrarily small positive center radius while retaining the
-six-radius physical cage around one stabilized hat. -/
 theorem exists_cage_rad
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
     (hd : InjRadiusDecayInput (I := I) X) {D aMin : Real} (hD : 0 < D)
@@ -196,8 +173,6 @@ theorem exists_cage_rad
     (div_pos (mul_pos haMin (hd.mu_pos _)) (by norm_num))).2 (by
       simpa only [rho] using hreal)
 
-/-- Uniform decay of the active-point radius fits the physical center/point
-cage for every stabilized live slot after one common pair-index threshold. -/
 theorem exists_rad_cage
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
     (hd : InjRadiusDecayInput (I := I) X) {D aMin : Real} (hD : 0 < D)
@@ -237,8 +212,6 @@ theorem exists_rad_cage
   exact (ENNReal.ofReal_lt_ofReal_iff
     (div_pos (mul_pos haMin (hd.mu_pos _)) (by norm_num))).2 hreal
 
-/-- All stabilized live centers obey their ordered-net bounds on one common
-tail. -/
 theorem liveCenters_dist_le
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
     (hd : InjRadiusDecayInput (I := I) X) {D : Real} (hD : 0 < D)
@@ -252,8 +225,6 @@ theorem liveCenters_dist_le
   Filter.eventually_all.mpr fun gamma =>
     seqCenterD_dist_le (I := I) hd hD P hre L (gamma.1 : Nat) gamma.2
 
-/-- On one common tail, every live center lies in the fixed packing-cage
-sublevel. -/
 theorem liveCenters_cage
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
     (hd : InjRadiusDecayInput (I := I) X) {D : Real} (hD : 0 < D)

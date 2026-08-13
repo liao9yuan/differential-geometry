@@ -1,14 +1,6 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.LowRegRungThree
 import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.LowRegBgForceArms
 
-/-!
-# Fixed-background rung-three Galerkin estimate
-
-This module mirrors the rung-three energy route while keeping the Sobolev scale
-and eigenbasis on the state metric `g₀` and freeing only the DeTurck background
-slot to `g_bg`.  The ordered fibre cap is still selected before `δ`.
--/
-
 noncomputable section
 
 open Bundle Manifold MeasureTheory Set Filter
@@ -34,29 +26,14 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
   [T2Space M] [SigmaCompactSpace M]
 
 set_option linter.unusedSectionVars false in
-/-- Monotonicity of a triple product of nonnegative factors. -/
+
 private theorem mul3Le {a b c A B C : ℝ} (hb0 : 0 ≤ b) (hc0 : 0 ≤ c)
     (hA : 0 ≤ A) (hB : 0 ≤ B) (ha : a ≤ A) (hb : b ≤ B) (hc : c ≤ C) :
     a * b * c ≤ A * B * C :=
   mul_le_mul (mul_le_mul ha hb hb0 hA) hc hc0 (mul_nonneg hA hB)
 
-/-! ### The arm ladder at the rung-3 window -/
-
 set_option linter.unusedSectionVars false in
-/-- **The rung-3 arm ladder.**
 
-The covariant jets through order `2` of the two low-base arms `a₂ T`, `a₁ T`
-are bounded by an affine expression in the three jet handles the trajectory
-supplies: the top window `√(∑_{j≤4}‖∇ʲT‖²) ≤ X`, the middle window
-`√(∑_{j≤3}‖∇ʲT‖²) ≤ Y`, and the class window `√(∑_{j≤2}‖∇ʲT‖²) ≤ Z`.
-
-The point of the statement is **which constants multiply `X`**: exactly
-`Ctop · Cδ` (the `a₂` top slot at `q = 2`), `Kr2 · Z` (the `a₂` slot `i = q`)
-and `Kr1 · Z` (the `a₁` `C₁` slot `i = q-1`).  Every other Leibniz slot of the
-six per-index bounds carries at most two `Y`-factors and lands in the
-`(1+Y)²(1+Z)²` bucket, so it prices as a middle (`L¹`-in-time) coefficient and
-never touches the dissipation.  This is the slot-to-destination map of the
-module docstring, realized. -/
 theorem armLadder3Bg (hDim : Module.finrank ℝ E = 3)
     (g g_bg : SmoothRiemannianMetric I M) :
     ∃ Ctop Kr2 Kr1 Kmid : ℝ, 0 ≤ Ctop ∧ 0 ≤ Kr2 ∧ 0 ≤ Kr1 ∧ 0 ≤ Kmid ∧
@@ -143,7 +120,7 @@ theorem armLadder3Bg (hDim : Module.finrank ℝ E = 3)
     show (0 : ℕ) + 4 = 4 from rfl, show (1 : ℕ) + 4 = 5 from rfl,
     show (0 : ℕ) - 1 = 0 from rfl, show (1 : ℕ) - 0 = 1 from rfl,
     show (2 : ℕ) - 0 = 2 from rfl] at H20 H21 H22 H10 H11 H12
-  -- name the four jet windows that occur
+
   set J2 : ℝ := Real.sqrt (∑ j ∈ Finset.range 2,
     ‖iteratedCovGrad (I := I) g 0 2 j T‖ ^ 2) with hJ2def
   set J3 : ℝ := Real.sqrt (∑ j ∈ Finset.range 3,
@@ -163,7 +140,7 @@ theorem armLadder3Bg (hDim : Module.finrank ℝ E = 3)
   have hJ2Z : J2 ≤ Z := le_trans hJ23 h3
   have hJ3Y : J3 ≤ Y := le_trans hJ34 h4
   have hXnn : (0 : ℝ) ≤ X := le_trans hJ5nn h5
-  -- the middle bucket
+
   set P : ℝ := (1 + Y) ^ 2 * (1 + Z) ^ 2 with hPdef
   have hPnn : (0 : ℝ) ≤ P := by rw [hPdef]; positivity
   have m1 : (0 : ℝ) ≤ Y * Z := mul_nonneg hY hZ
@@ -186,10 +163,10 @@ theorem armLadder3Bg (hDim : Module.finrank ℝ E = 3)
     rw [hPdef]; linarith [hY, hZ, m1, m2, m3, m4, m5, m6]
   have p8 : (1 + Y) * (1 + Z) * Z ≤ P := by
     rw [hPdef]; linarith [hY, hZ, m1, m2, m3, m4, m5, m6]
-  -- the windows are opaque from here on: linear arithmetic must not unfold them
+
   clear_value J2 J3 J4 J5 P
   clear hJ2def hJ3def hJ4def hJ5def hPdef m1 m2 m3 m4 m5 m6
-  -- every Leibniz slot, priced against the middle bucket
+
   have eZ : J3 ≤ P := le_trans h3 p1
   have eY : J4 ≤ P := le_trans h4 p2
   have e1 : (1 + J4) * J3 ≤ P :=
@@ -219,7 +196,7 @@ theorem armLadder3Bg (hDim : Module.finrank ℝ E = 3)
     have hstep : (1 + J5) * J3 ≤ (1 + X) * Z :=
       mul_le_mul (by linarith) h3 hJ3nn (by linarith)
     linarith [hstep, p1]
-  -- the six per-index bounds, each regrouped into its `(α, middle)` pair
+
   have b20 : ‖iteratedCovGrad (I := I) g 0 2 0
       ((lowBaseData (I := I) (M := M) g g_bg T
         (lt_of_le_of_lt hδ_le (by norm_num)) hδg hδZ).a2 (I := I) (M := M) T)‖ ≤
@@ -346,22 +323,6 @@ theorem armLadder3Bg (hDim : Module.finrank ℝ E = 3)
     mul_nonneg (add_nonneg (hCqa 0) (hCqa 1)) hPnn,
     mul_nonneg hRest hPnn, mul_nonneg (mul_nonneg hRest hCδ) hPnn]
 
-/-- **The rung-3 ladder input, with its gate constants ordered first.**
-
-The `H²` mode mass of the forcing arm obeys the ladder
-`‖arm‖_{2} ≤ α·√E₄ + Kmid·(1 + √E₃)²` with the top coefficient decomposed as
-
-`α = Ctop·Cδ + Kr2·R + Kr1·R`,
-
-i.e. exactly the whitelist of the module docstring: the `a₂` top slot against
-the small fibre cap `Cδ`, and the two radius-priced Leibniz slots (`a₂` at
-`i = q`, `a₁`'s `C₁` group at `i = q-1`).  The four gate constants are
-fixed before the radius, fibre parameter, and realization data.  The middle
-coefficient is returned afterwards because it genuinely depends on the radius
-and fibre parameter, but it never enters the dissipation gate.
-
-The middle term is quadratic in `√E₃`, which is what makes it an `L¹`-in-time
-Grönwall coefficient (`galRiderBound`) rather than a dissipation cost. -/
 theorem galArmMassOrdBg (hDim : Module.finrank ℝ E = 3)
     (g₀ g_bg : SmoothRiemannianMetric I M) :
     ∃ Ctop Kr2 Kr1 Kcap : ℝ,
@@ -430,7 +391,7 @@ theorem galArmMassOrdBg (hDim : Module.finrank ℝ E = 3)
   have hs3nn : (0 : ℝ) ≤ s3 := by rw [hs3def]; positivity
   have hsym := ccTensorBilin_symmS_symm
     (I := I) (M := M) g₀ (galCoreRep (I := I) (M := M) g₀ R F c)
-  -- the jet handles of the trajectory representative
+
   have h5 : Real.sqrt (∑ j ∈ Finset.range 5,
       ‖iteratedCovGrad (I := I) g₀ 0 2 j
         (symmS (I := I) (M := M) g₀
@@ -451,7 +412,7 @@ theorem galArmMassOrdBg (hDim : Module.finrank ℝ E = 3)
     (galRepFib (I := I) (M := M) g₀ hR hreal F c)
     (lowregFibZero (I := I) (M := M) g₀ hR hreal) hCδ (hcap F c)
     (mul_nonneg hC3 hs3nn) (mul_nonneg hCR hR) h5 h4 h3
-  -- the mass is at most the spectral norm of the arm
+
   have hmass := cc_partial_le_norm (I := I) (M := M) g₀ 2 (2 : ℝ)
     ((lowBaseData (I := I) (M := M) g₀ g_bg
           (symmS (I := I) (M := M) g₀
@@ -473,7 +434,7 @@ theorem galArmMassOrdBg (hDim : Module.finrank ℝ E = 3)
   refine le_trans (mul_le_mul_of_nonneg_left
     (le_trans (Finset.sum_le_sum (fun j _ => by
       rw [iteratedCovGrad_add]; exact norm_add_le _ _)) hladb) hChs) ?_
-  -- the final regrouping into the whitelist form
+
   have h1 : (1 : ℝ) + C3 * s3 ≤ (1 + C3) * (1 + s3) := by
     nlinarith [hC3, hs3nn]
   have hsq : (1 + C3 * s3) ^ 2 ≤ (1 + C3) ^ 2 * (1 + s3) ^ 2 := by
@@ -494,32 +455,6 @@ theorem galArmMassOrdBg (hDim : Module.finrank ℝ E = 3)
             (1 + s3) ^ 2 := by ring
   nlinarith [hB]
 
-/-! ### The rung-3 endpoint -/
-
-/-- **Rung 3: the `N`-uniform `H³` energy bound for the order-one Galerkin
-trajectory.**
-
-For a solution `U` of the order-one `V_N` Galerkin system (`lowregGalSol`) at
-the certificates of `IsLowSolve`, together with the registered honest input
-`Pr` — the primitive form of the a-priori bound `∫₀^T E₃(U_N) ≤ B` — there are
-four constants, depending only on the background metric, the dimension and the
-class data, such that the single absorption inequality
-
-`Ctop·Cδ + K_R·R + K_R^{a₁}·R + ε < 1`   (`R = lowregStateRad Ctop B1 ρ P`)
-
-implies an `N`- and `t`-uniform bound on `E₃(U N t)`.
-
-The four contributions on the left are exactly the whitelist of the module
-docstring: the `a₂` top Leibniz slot against the small fibre cap `Cδ`, the two
-radius-priced slots (`a₂` at `i = q`, `a₁`'s `C₁` group at `i = q-1`), and the
-two Young steps of `two_sum_ladder_add_le`, whose joint cost is the single
-`ε`.  Nothing else reaches the dissipation: every remaining Leibniz slot is
-quadratic in `√E₃` and is consumed by `galRiderBound`'s `L¹`-in-time rider.
-
-`Pr` is **not discharged here.**  Its producer — the projected maximal-regularity
-replay of PSTOP §6.1(ii) together with the Galerkin identification — is a
-registered obligation of the campaign, and this theorem consumes it as an
-explicit hypothesis. -/
 theorem lowregRung3OrdBg (hDim : Module.finrank ℝ E = 3)
     (g₀ g_bg : SmoothRiemannianMetric I M) :
     ∃ Ctop₂ Kr2 Kr1 Kcap : ℝ,
@@ -580,7 +515,7 @@ theorem lowregRung3OrdBg (hDim : Module.finrank ℝ E = 3)
       (ρ := ρ) hP.le hreal) hcore
   change Ctop₂ * Cδ + Kr2 * lowregStateRad Ctop B1 ρ P +
       Kr1 * lowregStateRad Ctop B1 ρ P + ε < 1 at hH
-  -- the per-`(N, t)` closure at `σ = 3`
+
   have hclosure : ∀ N : ℕ, ∀ t ∈ Set.Ico (0 : ℝ) T,
       2 * ∑ i ∈ eigenIdxFinset (I := I) (M := M) g₀ N,
           tensorSobolevWeight (I := I) (M := M) i 3 *
@@ -599,7 +534,7 @@ theorem lowregRung3OrdBg (hDim : Module.finrank ℝ E = 3)
               (eigenIdxFinset (I := I) (M := M) g₀ N) (U N) 3 t) +
           Kmid ^ 2 / ε := by
     intro N t _
-    -- the forcing splits as arm plus static seed
+
     have hsplit : ∀ i ∈ eigenIdxFinset (I := I) (M := M) g₀ N,
         galTameForce (I := I) (M := M) g₀ 1 hRpos.le
             (lowregNfun (I := I) (M := M) g₀ g_bg hδ hCtop hB1 hρ hP hreal)
@@ -614,7 +549,7 @@ theorem lowregRung3OrdBg (hDim : Module.finrank ℝ E = 3)
       rw [galForceArmBg (I := I) (M := M) g₀ g_bg hδ hδ0 hδ3 hCtop hB1 hρ hP hreal
         hcore (eigenIdxFinset (I := I) (M := M) g₀ N) (U N t) i, if_pos hi]
       exact add_comm _ _
-    -- the static seed's mode mass
+
     have hstat : ∑ i ∈ eigenIdxFinset (I := I) (M := M) g₀ N,
         tensorSobolevWeight (I := I) (M := M) i 3 *
           ((lowregNfun (I := I) (M := M) g₀ g_bg hδ hCtop hB1 hρ hP hreal
@@ -622,7 +557,7 @@ theorem lowregRung3OrdBg (hDim : Module.finrank ℝ E = 3)
           ≤ Cseed 3 ^ 2 := by
       have h := hseed 3 (eigenIdxFinset (I := I) (M := M) g₀ N)
       simpa only [Nat.cast_ofNat] using h
-    -- the ladder, from the arm mass bound
+
     have hladder :
         Real.sqrt (∑ i ∈ eigenIdxFinset (I := I) (M := M) g₀ N,
             tensorSobolevWeight (I := I) (M := M) i (3 - 1) *
@@ -699,9 +634,6 @@ theorem lowregRung3OrdBg (hDim : Module.finrank ℝ E = 3)
     rw [hUinit N i]; ring
   rw [hz]
 
-/-- One explicit ordered rung-three certificate.  The four gate constants are
-indices of the predicate, so every downstream use invokes the same continuation
-instead of reselecting unrelated witnesses from `lowregRung3OrdBg`. -/
 def IsRung3OrdBg (g₀ g_bg : SmoothRiemannianMetric I M)
     (Ctop₂ Kr2 Kr1 Kcap : ℝ) : Prop :=
   0 ≤ Ctop₂ ∧ 0 ≤ Kr2 ∧ 0 ≤ Kr1 ∧ 0 ≤ Kcap ∧
@@ -745,8 +677,6 @@ def IsRung3OrdBg (g₀ g_bg : SmoothRiemannianMetric I M)
           galerkinEnergy (I := I) (M := M)
             (eigenIdxFinset (I := I) (M := M) g₀ N) (U N) 3 t ≤ Φ
 
-/-- Package the ordered witnesses supplied by `lowregRung3OrdBg` without changing
-that theorem's compatibility statement. -/
 theorem lowregRung3PackBg (hDim : Module.finrank ℝ E = 3)
     (g₀ g_bg : SmoothRiemannianMetric I M) :
     ∃ Ctop₂ Kr2 Kr1 Kcap : ℝ, IsRung3OrdBg (I := I) (M := M) g₀ g_bg Ctop₂ Kr2 Kr1 Kcap := by

@@ -2,16 +2,6 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.IteratedNablaRmTow
 
 set_option autoImplicit false
 
-
-
-
-
-
-
-
-
-
-
 noncomputable section
 
 namespace DifferentialGeometry.PDE.RicciFlow
@@ -19,7 +9,6 @@ namespace DifferentialGeometry.PDE.RicciFlow
 open scoped BigOperators
 
 variable {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
-
 
 omit [DecidableEq Idx] in
 theorem covDerivStepComp_add {r : ℕ}
@@ -45,7 +34,6 @@ theorem covDerivStepComp_add {r : ℕ}
     refine Finset.sum_congr rfl fun p _ => by ring
   rw [hsum]
   ring
-
 
 omit [DecidableEq Idx] in
 theorem covDerivStepComp_smul {r : ℕ} (c : Real)

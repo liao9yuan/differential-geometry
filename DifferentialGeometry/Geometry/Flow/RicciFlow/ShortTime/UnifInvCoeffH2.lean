@@ -3,14 +3,6 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.InverseMetricRaised
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.UnifGagliardoNirenberg
 import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.UnifConvexJets
 
-/-!
-# Class-first inverse-metric coefficient bounds
-
-This module upgrades the local `inv_coeff_h2` estimate to a dimension-three
-metric-class statement.  The realization radius and the pointwise/two-jet
-coefficient are selected before the class metric varies.
--/
-
 set_option autoImplicit false
 
 noncomputable section
@@ -51,12 +43,7 @@ private def invJetGrid
           ((iteratedCovGrad (I := I) g 0 2 (e m) T).toSection x)
 
 set_option maxHeartbeats 1600000 in
-/-- **Dimension-three class-first inverse-metric coefficient estimate.**
 
-One positive `H²` radius and one coefficient work for every metric in the
-order-three class.  On that ball, the inverse-metric difference coefficient
-has a pointwise order-zero bound and an `L²` jet bound through order two, both
-linear in the perturbation norm. -/
 theorem inv_coeff_h2_unif
     (hDim : Module.finrank ℝ E = 3)
     (gBase : SmoothRiemannianMetric I M)

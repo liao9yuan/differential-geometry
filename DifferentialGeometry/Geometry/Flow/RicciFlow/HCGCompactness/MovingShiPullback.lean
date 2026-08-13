@@ -1,20 +1,6 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.RicBound
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.MetricCovDerivPullback
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 noncomputable section
 
 open Set Function Filter Bundle Manifold
@@ -32,8 +18,6 @@ variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H} [I.Boun
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 variable {N : Type*} [TopologicalSpace N] [ChartedSpace H N] [IsManifold I ∞ N]
 
-
-
 omit [NeZero (Module.finrank ℝ E)] in
 omit [I.Boundaryless] in
 theorem covDerivOfField_apply_eq_iterCov
@@ -47,11 +31,6 @@ theorem covDerivOfField_apply_eq_iterCov
       = iterCov (I := I) gRef 2 A0 m x (slots ∘ ⇑(acEquiv m)) := by
   rw [covDerivOfField_eq_iterCov]
   rfl
-
-
-
-
-
 
 omit [I.Boundaryless] in
 omit [NeZero (Module.finrank ℝ E)] in
@@ -85,10 +64,6 @@ theorem ricCovTower_pullback
   rw [e1, e2] at hpb
   exact hpb
 
-
-
-
-
 omit [I.Boundaryless] in
 omit [NeZero (Module.finrank ℝ E)] in
 theorem ricCovTower_normSq0S_pullback
@@ -108,12 +83,6 @@ theorem ricCovTower_normSq0S_pullback
       (Diffeomorph.pullbackMetric (I := I) g Φ) s x)
     (ricCovTower (I := I) g g s (Φ x))
     (fun slots => ricCovTower_pullback (I := I) g Φ s x slots)
-
-
-
-
-
-
 
 omit [I.Boundaryless] in
 omit [NeZero (Module.finrank ℝ E)] in

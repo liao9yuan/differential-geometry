@@ -2,14 +2,6 @@ import DifferentialGeometry.Analysis.Sobolev.TensorHilbert.DeTurckLieKernelL2Jet
 import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.UnifFixedConnH2
 import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.UnifGridTame
 
-/-!
-# Class-first DLa H1 coefficient
-
-This module combines the lower-layer DLa pointwise grid with the reusable
-fixed-background connection grid and the three-dimensional affine `H1`
-integrator.
--/
-
 set_option autoImplicit false
 
 noncomputable section
@@ -38,9 +30,7 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
 set_option linter.unusedVariables false in
-/-- In dimension three, the DLa coefficient has one class-first affine
-spectral `H1` cap.  The fixed-background connection input uses class metric
-jets only through order three. -/
+
 theorem dla_h1_unif
     (hDim : Module.finrank ℝ E = 3)
     (gBase : SmoothRiemannianMetric I M) {Λ : ℝ} (hΛ : 1 ≤ Λ)

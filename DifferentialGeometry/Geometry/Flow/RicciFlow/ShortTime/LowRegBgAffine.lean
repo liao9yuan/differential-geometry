@@ -3,14 +3,6 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.LowRegSmoothBridge
 import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.UnifNZeroBound
 import DifferentialGeometry.Analysis.Spectral.Tensor.SobolevScale.ExponentCongr
 
-/-!
-# Fixed-background low affine identity
-
-This module assembles the completed low-order action while keeping the DeTurck
-background independent of the frozen spectral metric.  It is the
-arbitrary-background replacement for the state identity in `LowRegLiftAffine`.
--/
-
 noncomputable section
 
 open Bundle Manifold MeasureTheory Set Filter
@@ -106,15 +98,11 @@ private theorem smoothRem_congr
   subst h
   rfl
 
-/-- The zero-state Ricci--DeTurck forcing at the low scale, with an independent
-fixed DeTurck background. -/
 noncomputable def lowBaseForceBg
     (g gB : SmoothRiemannianMetric I M) : metricH1 (I := I) (M := M) g :=
   incl21Bg (I := I) (M := M) g
     (baseForceH2 (I := I) (M := M) g gB)
 
-/-- The fixed-background low forcing is the direct spectral embedding of the
-zero-state smooth remainder. -/
 theorem lowBaseForceBg_core
     (g gB : SmoothRiemannianMetric I M) :
     lowBaseForceBg (I := I) (M := M) g gB =
@@ -127,8 +115,6 @@ theorem lowBaseForceBg_core
   simp only [lowBaseForceBg, incl21Bg, baseForceH2,
     tensorHsInclusion_coeff_apply, ccTensorToHs_coeff]
 
-/-- The completed low affine forcing with an independent fixed DeTurck
-background. -/
 noncomputable def lowBaseNBg
     (g gB : SmoothRiemannianMetric I M)
     {ρ δ : ℝ} (hρ : 0 ≤ ρ) (hδ0 : 0 ≤ δ) (hδ_le : δ ≤ 1 / 3)
@@ -146,8 +132,6 @@ noncomputable def lowBaseNBg
       (lowRadialHs (I := I) (M := M) g ρ
         (incl32Bg (I := I) (M := M) g u))
 
-/-- The fixed-background completed low affine forcing is continuous whenever
-its two operator-valued coefficient maps are continuous. -/
 theorem lowBaseNBg_cont
     (g gB : SmoothRiemannianMetric I M) {ρ δ : ℝ} (hρ : 0 < ρ)
     (hδ0 : 0 ≤ δ) (hδ_le : δ ≤ 1 / 3)
@@ -179,8 +163,6 @@ theorem lowBaseNBg_cont
         ((lowRadialHs_cont (I := I) (M := M) g hρ.le).comp hincl))
   exact (continuous_const.add h2).add h1
 
-/-- The completed lower Ricci--DeTurck nonlinearity is the fixed-background
-affine action on every state of the lower `H3` ball. -/
 theorem lowreg_N_bg_affine
     (hDim : Module.finrank ℝ E = 3)
     (g gB : SmoothRiemannianMetric I M) {R ρ δ : ℝ}

@@ -7,84 +7,6 @@ set_option linter.unusedSectionVars false
 set_option linter.unusedFintypeInType false
 set_option backward.isDefEq.respectTransparency false
 
-/-!
-# The Kotschwar `S`-equation in divergence form (Route-K brick K6c)
-
-`Evolution/ForwardUniqueAssembly.lean` (K6a) reduced black box (B) to the standing bundle
-`ForwardUniqueInputs`; `Evolution/ForwardUniqueLifts.lean` (K6b) collapsed its `rm` and
-`gamma` members.  This file collapses the remaining K2-B member, `sdec`:
-
-```
-∂ₜS₀₄ = Δ₁S₀₄ + div₁U′ + rem′
-```
-
-from **exactly** the ruling-R1 standing inputs (the two per-flow *own-lowered* Uhlenbeck
-interfaces `Riemann04BTensorWithRicciDriftEvolutionInFrameOn`), the two per-flow Ricci-flow
-equations, and the same benign realization/continuity inputs `rm_of_uhlenbeck` and
-`rmDiffComp_deriv` already carry.
-
-## The route (planner ruling R7)
-
-`S₀₄ = rmDiffLowAt g₁ g₂` lowers *both* curvatures with `g₁`, while the honest interfaces
-describe each flow's own-lowered `(0,4)` curvature.  Split
-
-```
-S₀₄ = D + G,      D = Rm04₁ − Rm04₂,      G = Rm04₂ − g₁♭Rm¹³₂,
-```
-
-so that `D` is exactly the object the two interfaces difference (`rmDiffComp_deriv`, K2.6-core)
-and `G` is the lowering gap.  Writing `P = g₁♭Rm¹³₂ = Rm04₁ − S₀₄` (a *field*, since both
-summands are fields) the gap is `G = reLower g₂ g₁ P − P`: the K2.6c re-lowering operator with
-its two metric arguments **swapped**, so that its trace metric and its connection are both
-`g₁`.  With that orientation the banked commutator `lapComm_reLower_eq` produces a `g₁`
-divergence — the divergence the Kotschwar energy integrates by parts against — and the key
-identity is the mirror of `nabla2_metric1`:
-
-```
-∇¹g₂ = (∇¹ − ∇²)g₂ = lapDiffFlux g₁ g₂ g₂        (`nabla1_metric2`)
-```
-
-i.e. `∇¹g₂` is `A₀₃`-algebraic, exactly as `∇²g₁` is.  Both defect carriers of the commutator
-are therefore `A₀₃`-flux algebra against the background `P`.
-
-The time derivative of the gap is the moving-carrier product rule `∂ₜ(−h₀₂(Rm¹³₂ ·, ·))`:
-
-```
-∂ₜG = 2(Ric₁ − Ric₂)(Rm¹³₂ ·, ·) − h₀₂(∂ₜRm¹³₂ ·, ·)        (`gap_deriv`)
-```
-
-— manifestly (difference × background), with `∂ₜRm¹³₂` the raised flow-`2` speed that
-`rmVecComp_deriv` already produces from that flow's own interface.
-
-Assembling, and using `Δ₁D = Δ₁S₀₄ − Δ₁G`,
-
-```
-U′ = lapDiffFlux g₁ g₂ Rm04₂ − reLowerPair g₁ P (lapDiffFlux g₁ g₂ g₂)      (`sdecFlux`)
-rem′ = rmDotRem + ∂ₜG − (reLower g₂ g₁ − id)(Δ₁P) − tr₁(reLowerPair g₁ (∇¹P) (∇¹g₂))
-```
-
-(`sdecRem`), every summand of which is either `A₀₃`-flux algebra against a background factor
-or a difference carrier against a bounded background.  Norm bounds are **not** in scope here
-(the bundle's `bounds` field covers them); the shapes are kept bound-statable.
-
-## Main definitions
-
-* `nabla1_metric2` — the key identity `∇¹g₂ = lapDiffFlux g₁ g₂ g₂`.
-* `lowOfComp` — the `(0,4)` fiber tensor with prescribed frame components (the `(0,4)`
-  analogue of `quadOfComp`, obtained by lowering the raised component family).
-* `gapAt`, `gapDot`, `gap_deriv` — the lowering gap and its time derivative.
-* `sdecFlux`, `sdecRem` — the explicit `U′` and `rem′`.
-* `sdec_core`, `sdec_of_uhlenbeck` — the `sdec` member of `ForwardUniqueInputs`, verbatim.
-
-## Relocation TODO
-
-`inner_raiseAt` belongs next to `raiseAt_lower` (`ForwardUniqueRmBridge.lean`);
-`vec3_deriv_basis` is the generic form of `rmDiffVec_hasDerivAt_of_basis`
-(`ForwardUniqueLifts.lean`); `innerCurve_deriv` is the invariant core already inlined in
-`rmDiffLow_hasDerivAt` (`ForwardUniqueRmDot.lean`).  The brick protocol forbade editing those
-files.
--/
-
 noncomputable section
 
 namespace DifferentialGeometry.PDE.RicciFlow
@@ -92,13 +14,6 @@ namespace DifferentialGeometry.PDE.RicciFlow
 open Bundle Tensor0SBundle
 open DifferentialGeometry.Integral.Connection
 open scoped Manifold ContDiff BigOperators Topology
-
-/-! ## Part 1: the `NormedSpace` core
-
-Everything below the final restatement lives in the `NormedSpace ℝ E` context of
-`ForwardUniqueRmDot.lean` / `ForwardUniqueReLower.lean`; only the last theorem, which mentions
-`rmSpeed`, needs the `InnerProductSpace ℝ E` context of `ForwardUniqueAssembly.lean`, and it
-gets its own section (the `IPS`/`NormedSpace` split must be a *section* split). -/
 
 section NormedBase
 
@@ -115,7 +30,6 @@ section Algebra
 
 variable {s : ℕ}
 
-/-- Pointwise evaluation of a field difference. -/
 private theorem fieldSub_eval
     (A B : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
       (n := (∞ : WithTop ℕ∞)) s) (x : M) (v : Fin s -> TangentSpace I x) :
@@ -124,7 +38,6 @@ private theorem fieldSub_eval
   rw [h]
   exact Tensor0SSpace.sub_apply (I := I) s x _ _ v
 
-/-- Pointwise evaluation of a field sum. -/
 private theorem fieldAdd_eval
     (A B : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
       (n := (∞ : WithTop ℕ∞)) s) (x : M) (v : Fin s -> TangentSpace I x) :
@@ -133,7 +46,6 @@ private theorem fieldAdd_eval
   rw [h]
   exact Tensor0SSpace.add_apply (I := I) s x _ _ v
 
-/-- The metric `(0,2)` tensor field read in the slot-`0` convention. -/
 private theorem metField0 (g : SmoothRiemannianMetric I M) (x : M)
     (u Z : TangentSpace I x) :
     metricTensorField (I := I) g x (fun a : Fin 2 => if a = 0 then u else Z) =
@@ -142,16 +54,8 @@ private theorem metField0 (g : SmoothRiemannianMetric I M) (x : M)
 
 end Algebra
 
-/-! ## The key identity: `∇¹g₂` is `A₀₃`-algebraic -/
-
 section KeyIdentity
 
-/-- **`∇¹g₂ = (∇¹ − ∇²)g₂ = lapDiffFlux g₁ g₂ g₂`** — the mirror of `nabla2_metric1`.  Since
-`∇²g₂ = 0`, the covariant derivative of the *other* metric taken with the `g₁` connection is
-exactly the connection-difference flux applied to `g₂`: no derivative of the metric difference
-appears, so `∇¹h₀₂ = −lapDiffFlux g₁ g₂ g₂` is `A₀₃`-algebraic as well.  This is the identity
-that makes the swapped re-lowering commutator (`lapComm_reLower_eq g₂ g₁`) produce a `g₁`
-divergence with `A₀₃`-algebraic carriers. -/
 theorem nabla1_metric2 (g₁ g₂ : SmoothRiemannianMetric I M) :
     metricNabla0S (I := I) g₁ (metricTensorField (I := I) g₂) =
       lapDiffFlux (I := I) g₁ g₂ (metricTensorField (I := I) g₂) := by
@@ -160,14 +64,10 @@ theorem nabla1_metric2 (g₁ g₂ : SmoothRiemannianMetric I M) :
 
 end KeyIdentity
 
-/-! ## Fiber algebra: prescribed components, and the two metric pairings -/
-
 section Fiber
 
 variable {Idx : Type*} [Fintype Idx] {x : M}
 
-/-- **Lowering undoes raising.**  The `g`-pairing of `raiseAt g x basis a` against a basis
-vector returns the prescribed component.  (Companion of `raiseAt_lower`.) -/
 theorem inner_raiseAt (g : SmoothRiemannianMetric I M) (x : M)
     (basis : Module.Basis Idx Real (TangentSpace I x)) (a : Idx -> Real) (m : Idx) :
     g.inner x (raiseAt (I := I) g x basis a) (basis m) = a m := by
@@ -203,9 +103,6 @@ theorem inner_raiseAt (g : SmoothRiemannianMetric I M) (x : M)
   rw [Finset.sum_congr rfl fun l (_ : l ∈ Finset.univ) => hrow l]
   simp
 
-/-- **The re-lowering endomorphism moves the metric.**  `sharpFlat g₂ g₁ = g₁♯ ∘ g₂♭` turns a
-`g₁`-pairing into a `g₂`-pairing.  This is the pointwise content of `mixLow_eq_rm04`, stated
-for an arbitrary vector rather than for a curvature value. -/
 theorem inner_sharpFlat (g₁ g₂ : SmoothRiemannianMetric I M) (x : M)
     (V W : TangentSpace I x) :
     g₁.inner x V (sharpFlat (I := I) g₂ g₁ x W) = g₂.inner x V W := by
@@ -225,9 +122,7 @@ theorem inner_sharpFlat (g₁ g₂ : SmoothRiemannianMetric I M) (x : M)
     _ = g₂.inner x V W := g₂.symm x W V
 
 set_option synthInstance.maxHeartbeats 1000000 in
-/-- **The mixed lowering, read on the curvature operator.**  The `g₁`-lowered `(0,4)` Riemann
-tensor of `g₂` is the `g₁`-pairing of `riemannOp (metricCov g₂)` with the last slot.  (The
-own-metric case is `metricRm04At_inner`.) -/
+
 theorem rm04mix_inner (g₁ g₂ : SmoothRiemannianMetric I M) (x : M)
     (X Y Z W : TangentSpace I x) :
     CovariantDerivative.riemannCurvature04At (I := I) g₁ (metricCov (I := I) g₂)
@@ -241,9 +136,7 @@ theorem rm04mix_inner (g₁ g₂ : SmoothRiemannianMetric I M) (x : M)
   exact g₁.symm x W _
 
 set_option synthInstance.maxHeartbeats 1000000 in
-/-- **The `(0,4)` fiber tensor with prescribed frame components.**  The `(0,4)` analogue of
-`quadOfComp`: raise the component family with `g`, package it as a trilinear map, and lower
-the result again.  `lowOfComp_eval` reads the components back. -/
+
 def lowOfComp (g : SmoothRiemannianMetric I M) {x : M}
     (b : Module.Basis Idx Real (TangentSpace I x))
     (c : Idx -> Idx -> Idx -> Idx -> Real) :
@@ -253,7 +146,7 @@ def lowOfComp (g : SmoothRiemannianMetric I M) {x : M}
       (fun i j k l => b.repr (raiseAt (I := I) g x b (fun m : Idx => c i j k m)) l))
 
 set_option synthInstance.maxHeartbeats 1000000 in
-/-- The frame components of `lowOfComp` are the prescribed ones. -/
+
 theorem lowOfComp_eval (g : SmoothRiemannianMetric I M) {x : M}
     (b : Module.Basis Idx Real (TangentSpace I x))
     (c : Idx -> Idx -> Idx -> Idx -> Real) (i j k l : Idx) :
@@ -269,16 +162,12 @@ theorem lowOfComp_eval (g : SmoothRiemannianMetric I M) {x : M}
 
 end Fiber
 
-/-! ## The lowering gap and its time derivative -/
-
 section Gap
 
 variable {x : M}
 
 set_option synthInstance.maxHeartbeats 1000000 in
-/-- **The lowering gap `G`.**  The difference between the own-lowered `(0,4)` curvature of
-`g₂` and its `g₁`-lowered representative: `G(X,Y,Z,W) = −h₀₂(Rm¹³₂(X,Y)Z, W)`.  Adding it to
-`Rm04₁ − Rm04₂` — the object the two honest interfaces difference — gives `S₀₄`. -/
+
 def gapAt (g₁ g₂ : SmoothRiemannianMetric I M) (x : M) :
     Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) 4 x :=
   metricRm04At (I := I) g₂ x -
@@ -286,8 +175,7 @@ def gapAt (g₁ g₂ : SmoothRiemannianMetric I M) (x : M) :
       (metricCov_smooth (I := I) g₂) x
 
 set_option synthInstance.maxHeartbeats 1000000 in
-/-- **The `S₀₄` split.**  `S₀₄ = (Rm04₁ − Rm04₂) + G`: pure algebra, since both sides are
-`Rm04₁` minus the `g₁`-lowered curvature of `g₂`. -/
+
 theorem rmDiffLow_split (g₁ g₂ : SmoothRiemannianMetric I M) (x : M)
     (v : Fin 4 -> TangentSpace I x) :
     rmDiffLowAt (I := I) g₁ g₂ x v =
@@ -300,9 +188,7 @@ theorem rmDiffLow_split (g₁ g₂ : SmoothRiemannianMetric I M) (x : M)
   ring
 
 set_option synthInstance.maxHeartbeats 1000000 in
-/-- **The time derivative of the lowering gap**, in the shape ruling R7 asks for: a
-`(Ric₁ − Ric₂)`-difference against the background curvature, plus the metric difference `h₀₂`
-against the background curvature speed. -/
+
 def gapDot (g₁ g₂ : SmoothRiemannianMetric I M) {x : M}
     (Rm2dot : TangentSpace I x →L[Real] TangentSpace I x →L[Real] TangentSpace I x →L[Real]
       TangentSpace I x) :
@@ -314,16 +200,12 @@ def gapDot (g₁ g₂ : SmoothRiemannianMetric I M) {x : M}
 
 end Gap
 
-/-! ## Derivative machinery for the gap -/
-
 section Deriv
 
 variable {x : M}
 
 set_option synthInstance.maxHeartbeats 1000000 in
-/-- **Frame → invariant lift for a curve of trilinear maps.**  The generic form of
-`rmDiffVec_hasDerivAt_of_basis`: basis-triple derivatives determine the derivative at every
-triple. -/
+
 theorem vec3_deriv_basis {Idx : Type*} [Fintype Idx]
     (F : Real -> (TangentSpace I x →L[Real] TangentSpace I x →L[Real] TangentSpace I x →L[Real]
       TangentSpace I x))
@@ -353,10 +235,7 @@ theorem vec3_deriv_basis {Idx : Type*} [Fintype Idx]
   simpa only [← hexp] using hstep
 
 set_option synthInstance.maxHeartbeats 1000000 in
-/-- **Moving-metric pairing of a moving vector.**  The invariant product rule already inlined
-in `rmDiffLow_hasDerivAt`, isolated: if the vector curve `V` is differentiable and the metric
-family solves the Ricci-flow equation at `x`, then the pairing is differentiable with the
-`∂ₜg = −2Ric` reaction term. -/
+
 theorem innerCurve_deriv (g : Real -> SmoothRiemannianMetric I M)
     (V : Real -> TangentSpace I x) (Vdot Z : TangentSpace I x) {t : Real}
     (hV : HasDerivAt V Vdot t)
@@ -414,10 +293,7 @@ theorem innerCurve_deriv (g : Real -> SmoothRiemannianMetric I M)
 
 set_option synthInstance.maxHeartbeats 1000000 in
 set_option maxHeartbeats 1000000 in
-/-- **The time derivative of the lowering gap.**  `∂ₜG = 2(Ric₁ − Ric₂)(Rm¹³₂ ·, ·) −
-h₀₂(∂ₜRm¹³₂ ·, ·)`: both summands are a *difference* carrier against a background factor,
-which is the shape the bundle's `bounds` field consumes.  Only each flow's own metric PDE and
-the flow-`2` curvature speed enter. -/
+
 theorem gap_deriv (g₁ g₂ : Real -> SmoothRiemannianMetric I M)
     (Rm2dot : TangentSpace I x →L[Real] TangentSpace I x →L[Real] TangentSpace I x →L[Real]
       TangentSpace I x)
@@ -491,15 +367,10 @@ theorem gap_deriv (g₁ g₂ : Real -> SmoothRiemannianMetric I M)
 
 end Deriv
 
-/-! ## The gap as a re-lowering, and its rough Laplacian -/
-
 section LapGap
 
 set_option synthInstance.maxHeartbeats 1000000 in
-/-- **The gap is the swapped re-lowering.**  If the field `P` realizes the `g₁`-lowered
-curvature of `g₂`, then `reLower g₂ g₁ P` — the K2.6c re-lowering with its two metric
-arguments **swapped**, so that its trace metric and its connection are both `g₁` — realizes
-the own-lowered `Rm04₂`.  Hence `G = reLower g₂ g₁ P − P`. -/
+
 theorem reLower_rm2Low (g₁ g₂ : SmoothRiemannianMetric I M)
     (P : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
       (n := (∞ : WithTop ℕ∞)) 4) (x : M)
@@ -523,18 +394,7 @@ theorem reLower_rm2Low (g₁ g₂ : SmoothRiemannianMetric I M)
   rw [metricRm04At_inner]
 
 set_option synthInstance.maxHeartbeats 1000000 in
-/-- **The rough Laplacian of the gap, in divergence form.**
 
-```
-Δ₁(reLower g₂ g₁ P − P) = (reLower g₂ g₁ − id)(Δ₁P) + div₁Q + tr₁Q′,
-Q  = reLowerPair g₁ P (∇¹g₂),        Q′ = reLowerPair g₁ (∇¹P) (∇¹g₂),
-```
-
-with `∇¹g₂ = lapDiffFlux g₁ g₂ g₂` (`nabla1_metric2`), so both carriers are `A₀₃`-flux algebra
-against the background `P`.  The divergence is the **`g₁`** divergence — the one the Kotschwar
-energy integrates by parts against — which is exactly what the swapped argument order buys.
-The leading term is `(id − g₁♯h₀₂♭)` applied to the last slot of `Δ₁P`: a difference carrier
-against a bounded background. -/
 theorem lapGap_eq (g₁ g₂ : SmoothRiemannianMetric I M)
     (P : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
       (n := (∞ : WithTop ℕ∞)) 4) :
@@ -563,16 +423,12 @@ theorem lapGap_eq (g₁ g₂ : SmoothRiemannianMetric I M)
 
 end LapGap
 
-/-! ## The flow-`2` curvature speed as an invariant trilinear map -/
-
 section Rm2Speed
 
 variable {Idx : Type*} [Fintype Idx]
 
 set_option synthInstance.maxHeartbeats 1000000 in
-/-- **The bundled `(1,3)` speed of one flow's curvature.**  The `quadOfComp` package of
-`uhlRaisedDeriv`: the invariant form of the raised right-hand side that `rmVecComp_deriv`
-produces from that flow's own-lowered Uhlenbeck interface. -/
+
 def uhlRm2Vec (g : Real -> SmoothRiemannianMetric I M)
     (basisAt : (y : M) -> Module.Basis Idx Real (TangentSpace I y))
     (Rm04 roughLapRm04 B : FourComp M Idx) (ricciOneUp : MatrixComp M Idx)
@@ -585,8 +441,7 @@ def uhlRm2Vec (g : Real -> SmoothRiemannianMetric I M)
 
 set_option synthInstance.maxHeartbeats 1000000 in
 set_option maxHeartbeats 1000000 in
-/-- **The flow's curvature speed at every triple**, from its own-lowered interface, its own
-metric PDE and the two benign realization/continuity inputs of `rmVecComp_deriv`. -/
+
 theorem uhlRm2_deriv
     {D : RealTimeInterval}
     (g : Real -> SmoothRiemannianMetric I M)
@@ -628,16 +483,10 @@ theorem uhlRm2_deriv
 
 end Rm2Speed
 
-/-! ## The `S`-equation -/
-
 section Assembly
 
 variable {Idx : Type*} [Fintype Idx]
 
-/-- **`U′`: the flux of the `S`-equation.**  The K2.3 flux of the *background* field `Rm04₂`
-minus the re-lowering commutator flux; both carriers are the connection-difference flux `A₀₃`
-acting algebraically on a background factor, and neither differentiates a difference carrier —
-that is the divergence-form property the energy estimate consumes. -/
 def sdecFlux (g₁ g₂ : SmoothRiemannianMetric I M)
     (Tf₂ P : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
       (n := (∞ : WithTop ℕ∞)) 4) :
@@ -646,16 +495,6 @@ def sdecFlux (g₁ g₂ : SmoothRiemannianMetric I M)
   lapDiffFlux (I := I) g₁ g₂ Tf₂ -
     reLowerPair (I := I) g₁ P (lapDiffFlux (I := I) g₁ g₂ (metricTensorField (I := I) g₂))
 
-/-- **`rem′`: the remainder of the `S`-equation.**  Four manifest shapes:
-
-* `lowOfComp g₁ b R₀` — the K2.6-core componentwise remainder `rmDotRem`, tensorised: the K2.3
-  spatial remainder of the background plus the two flows' `B`-quadratic and Ricci-drift
-  *differences* (`driftDiff_split` exhibits the last one as a difference against a background);
-* `gapDot` — `2(Ric₁ − Ric₂)(Rm¹³₂ ·, ·) − h₀₂(∂ₜRm¹³₂ ·, ·)`;
-* `(reLower g₂ g₁ − id)(Δ₁P)` — the metric difference against the bounded background `Δ₁P`;
-* `tr₁(reLowerPair g₁ (∇¹P) (∇¹g₂))` — `A₀₃`-flux algebra against `∇¹P`.
-
-No derivative of a difference carrier appears outside the divergence. -/
 def sdecRem (g₁ g₂ : SmoothRiemannianMetric I M) {x : M}
     (P : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
       (n := (∞ : WithTop ℕ∞)) 4)
@@ -673,16 +512,7 @@ def sdecRem (g₁ g₂ : SmoothRiemannianMetric I M) {x : M}
 
 set_option synthInstance.maxHeartbeats 1000000 in
 set_option maxHeartbeats 2000000 in
-/-- **K6c: the Kotschwar `S`-equation in divergence form** (`ForwardUniqueAssembly`'s `sdec`
-member, in the `NormedSpace` currency of `rmDiffDot`).
 
-The invariant speed of `S₀₄` splits as `Δ₁S₀₄ + div₁U′ + rem′` with `U′ = sdecFlux` and
-`rem′ = sdecRem` explicit.  Inputs: the two per-flow **own-lowered** Uhlenbeck interfaces
-(ruling R1), the two per-flow Ricci-flow equations, and the realization/continuity inputs that
-`rm_of_uhlenbeck` and `rmDiffComp_deriv` already carry — the supplied `(0,4)` fields realize
-each flow's own curvature (`hT₁`, `hT₂`) and the carrier (`hcar`, the bundle's own `car`
-field), and the supplied rough-Laplacian families realize the intrinsic ones (`hL₁`, `hL₂`).
-No cross-metric lowering is ever assumed. -/
 theorem sdec_core
     {D : RealTimeInterval}
     (g₁ g₂ : Real -> SmoothRiemannianMetric I M)
@@ -749,19 +579,19 @@ theorem sdec_core
   have hnhds : D.carrier ∈ 𝓝 t := D.regular_mem_nhds (hreg ht)
   set P : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
     (n := (∞ : WithTop ℕ∞)) 4 := Tf₁ t - Sfield t with hPdef
-  -- `P` realizes the `g₁`-lowered curvature of `g₂`.
+
   have hPreal : ∀ y : M, P y =
       CovariantDerivative.riemannCurvature04At (I := I) (g₁ t) (metricCov (I := I) (g₂ t))
         (metricCov_smooth (I := I) (g₂ t)) y := by
     intro y
     have hval : P y = Tf₁ t y - Sfield t y := rfl
     rw [hval, hT₁ t ht y, hcar t ht y, ← rm2Low_eq_sub]
-  -- the swapped re-lowering of `P` is the own-lowered curvature of `g₂`
+
   have hRl : reLower (I := I) (g₂ t) (g₁ t) P = Tf₂ t := by
     refine DFunLike.ext _ _ fun y => ?_
     rw [reLower_rm2Low (I := I) (g₁ t) (g₂ t) P y (hPreal y)]
     exact (hT₂ t ht y).symm
-  -- the field split `Rm04₁ − Rm04₂ = S₀₄ − G`
+
   have hsplit : Tf₁ t - Tf₂ t = Sfield t - (reLower (I := I) (g₂ t) (g₁ t) P - P) := by
     rw [hRl, hPdef]; abel
   have hlapD : roughLap0SField (I := I) (g₁ t) (Tf₁ t - Tf₂ t) =
@@ -769,7 +599,7 @@ theorem sdec_core
         roughLap0SField (I := I) (g₁ t) (reLower (I := I) (g₂ t) (g₁ t) P - P) := by
     rw [hsplit, roughLap0SField_sub]
   have hlapG := lapGap_eq (I := I) (g₁ t) (g₂ t) P
-  -- reduce the tensor identity to frame tuples
+
   refine ContinuousMultilinearMap.toMultilinearMap_injective
     (Module.Basis.ext_multilinear (fun _ : Fin 4 => basisAt x) fun w => ?_)
   have hw : (fun p : Fin 4 => (basisAt x) (w p)) =
@@ -784,7 +614,7 @@ theorem sdec_core
   set v : Fin 4 -> TangentSpace I x :=
     frameVec4 (I := I) (fun m z => basisAt z m) x i j k l with hvdef
   have hvv : v = vec4 (I := I) (basisAt x i) (basisAt x j) (basisAt x k) (basisAt x l) := rfl
-  -- the three derivative facts
+
   have hPDE₁' : ∀ X Y : TangentSpace I x,
       HasDerivAt (fun r : Real => (g₁ r).inner x X Y)
         ((-2 : Real) * metricRicciAt (I := I) (g₁ t) x
@@ -828,7 +658,7 @@ theorem sdec_core
     funext fun r => rmDiffLow_split (I := I) (g₁ r) (g₂ r) x v
   rw [hfunS] at hS
   have huniq := hS.unique (hD.add hG)
-  -- pointwise evaluation of the three field identities
+
   have e1 : roughLap0SField (I := I) (g₁ t) (Tf₁ t - Tf₂ t) x v =
       roughLap0SField (I := I) (g₁ t) (Sfield t) x v -
         roughLap0SField (I := I) (g₁ t) (reLower (I := I) (g₂ t) (g₁ t) P - P) x v := by
@@ -873,7 +703,6 @@ theorem sdec_core
   rw [huniq, e1, e2]
   ring
 
-/-- **The `Uflux` datum of `ForwardUniqueInputs`**, as a time-indexed family. -/
 def sdecUflux (g₁ g₂ : Real -> SmoothRiemannianMetric I M)
     (Tf₁ Tf₂ Sfield : Real -> Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
       (n := (∞ : WithTop ℕ∞)) 4) (t : Real) :
@@ -881,7 +710,6 @@ def sdecUflux (g₁ g₂ : Real -> SmoothRiemannianMetric I M)
       (n := (∞ : WithTop ℕ∞)) 5 :=
   sdecFlux (I := I) (g₁ t) (g₂ t) (Tf₂ t) (Tf₁ t - Sfield t)
 
-/-- **The `rem` datum of `ForwardUniqueInputs`**, as a time-indexed pointwise family. -/
 def sdecRemFam (g₁ g₂ : Real -> SmoothRiemannianMetric I M)
     (basisAt : (y : M) -> Module.Basis Idx Real (TangentSpace I y))
     (Rm04₁ B₁ : FourComp M Idx) (ricciOneUp₁ : MatrixComp M Idx)
@@ -898,13 +726,6 @@ end Assembly
 
 end NormedBase
 
-/-! ## Part 2: the bundle's `sdec` member
-
-`rmSpeed` is defined in the `InnerProductSpace ℝ E` context of
-`Evolution/ForwardUniqueAssembly.lean`, so the restatement gets its own section; the proof is
-`sdec_core` across the instance diamond (`rmSpeed g₁ g₂ Svec t x = rmDiffDot g₁ g₂ (Svec t) t x`
-definitionally). -/
-
 section Bundle
 
 variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace Real E]
@@ -920,24 +741,7 @@ variable {Idx : Type*} [Fintype Idx]
 
 set_option synthInstance.maxHeartbeats 1000000 in
 set_option maxHeartbeats 1000000 in
-/-- **K6c collapse of the bundle's `sdec` member.**
 
-The `sdec` field of `ForwardUniqueAssembly.ForwardUniqueInputs`, verbatim, for the same speed
-carrier `Svec = uhlRmDiffSpeed` that `rm_of_uhlenbeck` (K6b) produces for the `rm` field, with
-`Uflux = sdecUflux` and `rem = sdecRemFam` **constructed**, not assumed.
-
-Residual inputs, all shared with `rm_of_uhlenbeck` / `rmDiffComp_deriv`:
-
-* `hev₁`, `hev₂` — the two per-flow **own-lowered** Uhlenbeck interfaces (ruling R1);
-* `hPDE₁`, `hPDE₂` — the two per-flow Ricci-flow equations in the lane's `metricRicciAt`
-  currency, one-sided within the interval carrier;
-* `hreal₁`, `hreal₂`, `hcont₁`, `hcont₂` — the realization/continuity inputs of
-  `rmVecComp_deriv` (each flow's **own** lowering only);
-* `hT₁`, `hT₂`, `hL₁`, `hL₂` — the supplied `(0,4)` fields realize each flow's own curvature
-  and the supplied rough-Laplacian families realize the intrinsic ones;
-* `hcar` — the bundle's own `car` field.
-
-No cross-metric lowering, no new carrier and no norm bound is assumed here. -/
 theorem sdec_of_uhlenbeck
     {D : RealTimeInterval}
     (g₁ g₂ : Real -> SmoothRiemannianMetric I M)

@@ -1,15 +1,6 @@
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.LowRegTraceH3Pair
 import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.LowRegBgC0Zero
 
-/-!
-# Cancellation-preserving `H²` pair bound for `DLb + Insert`
-
-The two arbitrary-background corrections must be added before estimation.  In
-that sum, their moving-connection contributions combine into the derivative of
-one moving-trace difference.  The trace is controlled in `H³`, so the final
-coefficient is controlled in `H²` without requesting fourth metric jets.
--/
-
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
@@ -39,8 +30,6 @@ variable
     {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
       [IsManifold I ∞ M] [CompactSpace M] [I.Boundaryless]
       [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M]
-
-/-! ### The exact cancellation package -/
 
 private noncomputable def endoPairH2
     (g : SmoothRiemannianMetric I M)
@@ -554,10 +543,7 @@ private theorem raise_h2
   rw [norm_iCG_cometricRaiseSlot0Field_eq]
 
 set_option linter.unusedVariables false in
-/-- The arbitrary-background `DLb` correction and endomorphism insertion,
-combined before estimation, form an `H²`-Lipschitz pair on the fixed fibre-small
-metric ball.  Both endpoints carry an `H³` cap, and the bound uses only the
-adjacent-scale currency `D3 + D2 + A * D2`. -/
+
 theorem dlbIns_pair_h2
     (hDim : Module.finrank ℝ E = 3)
     (g g_bg : SmoothRiemannianMetric I M) :

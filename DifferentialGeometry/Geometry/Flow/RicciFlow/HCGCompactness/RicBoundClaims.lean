@@ -2,44 +2,6 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.Lemma45Engine
 
 set_option autoImplicit false
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 noncomputable section
 
 namespace DifferentialGeometry.PDE.RicciFlow
@@ -60,15 +22,7 @@ variable [CompleteSpace E] [SigmaCompactSpace M] [T2Space M]
 
 variable {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
 
-
 omit [I.Boundaryless] [SigmaCompactSpace M] in
-/-- **Geometric Claim 1** (ric_bound Step 3, MSM135 Lemma 3.11).  On a local-frame
-domain `u`, let `chrG`/`chrH` be the frame Christoffels of the Levi-Civita
-connections of the moving metric `g` and the fixed reference `gRef`.  If the
-`g`-component inverse is bounded (`hGinv`) and the `chrH`-derivatives of the
-`g`-components are bounded up to order `m` (`hK`), then
-`|∇_{H,U}^m (Γ_G − Γ_H)| ≤ C·(1 + |∇_H^{m+1} g|)` on `u`.
-`AkMFold.claim1` with `hkoszul` discharged by `hkoszul_of_leviCivita`. -/
 theorem claim1_LC_bound {u : Set M} (hu : IsOpen u)
     (gRef : SmoothRiemannianMetric I M)
     (frame : Idx → (x : M) → TangentSpace I x)
@@ -148,7 +102,6 @@ theorem claim1_LC_bound {u : Set M} (hu : IsOpen u)
   simpa only [hKR] using hmain
 
 omit [I.Boundaryless] [SigmaCompactSpace M] in
-/-- Existential compatibility form of `claim1_LC_bound`. -/
 theorem claim1_LC {u : Set M} (hu : IsOpen u)
     (gRef : SmoothRiemannianMetric I M)
     (frame : Idx → (x : M) → TangentSpace I x)
@@ -200,11 +153,6 @@ theorem claim1_LC {u : Set M} (hu : IsOpen u)
   exact ⟨claim1Const C0 (3 / 2) K m, claim1Const_nonneg C0 (3 / 2) K m,
     claim1_LC_bound hu gRef frame hframe hframeS hchrH C0 K m⟩
 
-
-
-
-
-
 omit [FiniteDimensional ℝ E] [I.Boundaryless] [IsManifold I ∞ M] [IsManifold I 1 M]
     [IsManifold I 2 M] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 private theorem contMDiffOn_finsetSum' {ι : Type*} {u : Set M} (t : Finset ι)
@@ -236,13 +184,6 @@ private theorem compL2_finsetSum_le {ι : Type*} {r : ℕ} (t : Finset ι)
       funext n; rw [Finset.sum_insert hb]
     rw [hrw, Finset.sum_insert hb]
     exact le_trans (compL2_add_le _ _) (by linarith [ih])
-
-
-
-
-
-
-
 
 omit [I.Boundaryless] [IsManifold I 2 M] [CompleteSpace E] [SigmaCompactSpace M]
     [DecidableEq Idx] in
@@ -412,13 +353,6 @@ theorem mixed_oneStep_rev {r : ℕ} {u : Set M} (hu : IsOpen u)
           ∑ j ∈ Finset.range (k + 1),
             compL2 (iterCovComp (I := I) frame chrH X j x) := by
         linarith [hcorrBound]
-
-
-
-
-
-
-
 
 omit [I.Boundaryless] [IsManifold I 2 M] [CompleteSpace E] [SigmaCompactSpace M]
     [DecidableEq Idx] in
@@ -610,13 +544,6 @@ theorem mixed_oneStep_top {r : ℕ} {u : Set M} (hu : IsOpen u)
             compL2 (iterCovComp (I := I) frame chrH X j x) := by
         linarith [hcorrBound]
 
-
-
-
-
-
-
-
 private theorem claim2DoubleAux (L : ℕ) (A : ℕ → Real) (hA : ∀ n : ℕ, 0 ≤ A n)
     (K : Real) (hK0 : 0 ≤ K) :
     ∀ k : ℕ, ∃ Ck : Real, 0 ≤ Ck ∧
@@ -665,13 +592,6 @@ private theorem claim2DoubleAux (L : ℕ) (A : ℕ → Real) (hA : ∀ n : ℕ, 
         mul_le_mul_of_nonneg_left h3 (hA k')
       linarith
 
-
-
-
-
-
-
-
 theorem claim2Double (L : ℕ) (A : ℕ → Real) (hA : ∀ n : ℕ, 0 ≤ A n)
     (K : Real) (hK0 : 0 ≤ K) :
     ∃ C : Real, 0 ≤ C ∧
@@ -690,21 +610,17 @@ theorem claim2Double (L : ℕ) (A : ℕ → Real) (hA : ∀ n : ℕ, 0 ≤ A n)
       (Finset.mem_range.mpr (by omega))
   linarith
 
-/-- A proof-independent numeric witness selected from the pure Claim-2 theorem
-after normalizing the coefficient family and base bound to be nonnegative. -/
 noncomputable def claim2Const (L : ℕ) (A : ℕ → Real) (K : Real) : Real :=
   Classical.choose <|
     claim2Double L (fun n => max (A n) 0) (fun n => le_max_right (A n) 0)
       (max K 0) (le_max_right K 0)
 
-/-- The normalized Claim-2 witness is nonnegative. -/
 theorem claim2Const_nonneg (L : ℕ) (A : ℕ → Real) (K : Real) :
     0 ≤ claim2Const L A K :=
   (Classical.choose_spec <|
     claim2Double L (fun n => max (A n) 0) (fun n => le_max_right (A n) 0)
       (max K 0) (le_max_right K 0)).1
 
-/-- The fixed-witness form of the pure Claim-2 induction. -/
 theorem claim2Const_spec (L : ℕ) (A : ℕ → Real) (hA : ∀ n : ℕ, 0 ≤ A n)
     (K : Real) (hK0 : 0 ≤ K)
     (W : ℕ → ℕ → Real) (hW0 : ∀ i k, 0 ≤ W i k)
@@ -727,18 +643,8 @@ theorem claim2Const_spec (L : ℕ) (A : ℕ → Real) (hA : ∀ n : ℕ, 0 ≤ A
       claim2Double L (fun n => max (A n) 0) (fun n => le_max_right (A n) 0)
         (max K 0) (le_max_right K 0)).2 W hW0 hBase' hOne'
 
-/-! ## R2: geometric Claim 2 -/
-
 omit [I.Boundaryless] [IsManifold I 2 M] [CompleteSpace E] [SigmaCompactSpace M]
     [DecidableEq Idx] in
-/-- **Geometric Claim 2** (mixed derivatives, ric_bound Step 3).  If the
-`chrH`-towers of the difference-Christoffel array are bounded below order `L`
-(`hDbound`, Claim 1's output) and the pure `chrG`-towers of `T` are bounded up to
-order `L` (`hShi`, the Shi input), then every mixed tower
-`|∇_H^a (∇_G^b T)|` with `a + b ≤ L` is uniformly bounded on `u`.
-Strong induction on the `chrH`-count via `claim2Double`, with the one-step
-recursion supplied by `mixed_oneStep_rev` at `ε = 1` and the rank factor
-absorbed by the monotonicity of `oneStepConst` in the rank. -/
 theorem claim2_component_bound {r₀ : ℕ} {u : Set M} (hu : IsOpen u)
     (frame : Idx → (x : M) → TangentSpace I x)
     (chrH : M → Idx → Idx → Idx → Real)
@@ -824,7 +730,6 @@ theorem claim2_component_bound {r₀ : ℕ} {u : Set M} (hu : IsOpen u)
 
 omit [I.Boundaryless] [IsManifold I 2 M] [CompleteSpace E] [SigmaCompactSpace M]
     [DecidableEq Idx] in
-/-- Existential compatibility form of `claim2_component_bound`. -/
 theorem claim2_component {r₀ : ℕ} {u : Set M} (hu : IsOpen u)
     (frame : Idx → (x : M) → TangentSpace I x)
     (chrH : M → Idx → Idx → Idx → Real)
@@ -849,10 +754,6 @@ theorem claim2_component {r₀ : ℕ} {u : Set M} (hu : IsOpen u)
     claim2Const_nonneg L (fun k => oneStepConst B k (r₀ + L)) K,
     claim2_component_bound hu frame chrH hframe hchrH B hB L K hK0⟩
 
-/-! ## R3b: the (A_N) descent -/
-
-
-
 private theorem chain_le (V Q : ℕ → Real) (N : ℕ)
     (hstep : ∀ i, i < N → V i ≤ V (i + 1) + Q i) :
     V 0 ≤ V N + ∑ i ∈ Finset.range N, Q i := by
@@ -865,13 +766,11 @@ private theorem chain_le (V Q : ℕ → Real) (N : ℕ)
     rw [Finset.sum_range_succ]
     linarith
 
-/-- The explicit numeric witness in the mixed-descent estimate. -/
 def mixedDescentConst (r₀ N : ℕ) (B : ℕ → Real) (C₂ K : Real) : Real :=
   K + (N : Real) *
     ((((r₀ + N : ℕ) : Real) * (1 + ∑ c ∈ Finset.range N, B c) * C₂) +
       (∑ k ∈ Finset.range N, oneStepConst B k (r₀ + N)) * ((N : Real) * C₂))
 
-/-- The mixed-descent witness is nonnegative under the natural input bounds. -/
 theorem mixedDescentConst_nonneg {r₀ N : ℕ} {B : ℕ → Real} {C₂ K : Real}
     (hB : ∀ n, 0 ≤ B n) (hC₂ : 0 ≤ C₂) (hK : 0 ≤ K) :
     0 ≤ mixedDescentConst r₀ N B C₂ K := by
@@ -887,17 +786,6 @@ theorem mixedDescentConst_nonneg {r₀ N : ℕ} {B : ℕ → Real} {C₂ K : Rea
 
 omit [I.Boundaryless] [IsManifold I 2 M] [CompleteSpace E] [SigmaCompactSpace M]
     [DecidableEq Idx] in
-/-- **The mixed descent** — the analytic core of ric_bound Step 4's `(A_N)`:
-`|∇_H^N T| ≤ C·(1 + |∇_{H,U}^{N-1} D|)` pointwise on `u`, from uniform
-difference-tower bounds BELOW the top order (`hDlow`), mixed-tower bounds up to
-total order `N − 1` (`hmix`, Claim 2's output), and the order-`N` pure
-`chrG`-tower bound (`hShiN`, the Shi input).  Descend
-`V i := |∇_H^{N-i}(∇_G^i T)|` from `V 0 = |∇_H^N T|` to `V N = |∇_G^N T|` by
-`mixed_oneStep_top` at every step (its isolated top factor needs no hypothesis);
-the top D-factor is bounded by `|∇_{H,U}^{N-1} D| + Σ B` in both the `i = 0` and
-`i ≥ 1` cases, so the per-step cost `Q` is uniform in `i` and the chain sum
-collapses.  Composing with Claim 1's pointwise bound on `|∇_{H,U}^{N-1} D|`
-yields the book's `(A_N)`. -/
 theorem mixed_descent_bound {r₀ : ℕ} {u : Set M} (hu : IsOpen u)
     (frame : Idx → (x : M) → TangentSpace I x)
     (chrH : M → Idx → Idx → Idx → Real)
@@ -1074,7 +962,6 @@ theorem mixed_descent_bound {r₀ : ℕ} {u : Set M} (hu : IsOpen u)
 
 omit [I.Boundaryless] [IsManifold I 2 M] [CompleteSpace E] [SigmaCompactSpace M]
     [DecidableEq Idx] in
-/-- Existential compatibility form of `mixed_descent_bound`. -/
 theorem mixed_descent {r₀ : ℕ} {u : Set M} (hu : IsOpen u)
     (frame : Idx → (x : M) → TangentSpace I x)
     (chrH : M → Idx → Idx → Idx → Real)
@@ -1104,22 +991,12 @@ theorem mixed_descent {r₀ : ℕ} {u : Set M} (hu : IsOpen u)
     mixedDescentConst_nonneg hB hC₂0 hK0,
     mixed_descent_bound hu frame chrH hframe hchrH B hB N hN C₂ hC₂0 K hK0⟩
 
-/-! ## R4a: the per-frame component `(A_N)` bound
-
-The component-level heart of ric_bound Step 4, stated generically in the two
-frame Christoffels and the metric component field, taking Claim 1's two outputs
-(`hDlow` = the lower-order difference-tower constants, `hDtop` = the top
-difference-tower bounded linearly by `|∇_H^N g|`) as hypotheses. Composing
-`claim2_component` (the mixed bounds), `mixed_descent` (the `(A_N)` descent),
-and `hDtop` gives the linear bound `|∇_H^N T| ≤ Cpp·|∇_H^N g| + Cppp`. -/
-/-- The explicit slope and offset in the per-frame component `(A_N)` bound. -/
 noncomputable def aNConst (r₀ N : ℕ) (B : ℕ → Real) (Ctop KShi : Real) :
     Real × Real :=
   let C₂ := claim2Const (N - 1) (fun k => oneStepConst B k (r₀ + (N - 1))) KShi
   let Cdesc := mixedDescentConst r₀ N B C₂ KShi
   (Cdesc * Ctop, Cdesc * (1 + Ctop))
 
-/-- The slope in `aNConst` is nonnegative under the natural input bounds. -/
 theorem aNConst_fst_nonneg {r₀ N : ℕ} {B : ℕ → Real} {Ctop KShi : Real}
     (hB : ∀ n, 0 ≤ B n) (hCtop : 0 ≤ Ctop) (hKShi : 0 ≤ KShi) :
     0 ≤ (aNConst r₀ N B Ctop KShi).1 := by
@@ -1130,7 +1007,6 @@ theorem aNConst_fst_nonneg {r₀ N : ℕ} {B : ℕ → Real} {Ctop KShi : Real}
       hKShi)
     hCtop
 
-/-- The offset in `aNConst` is nonnegative under the natural input bounds. -/
 theorem aNConst_snd_nonneg {r₀ N : ℕ} {B : ℕ → Real} {Ctop KShi : Real}
     (hB : ∀ n, 0 ≤ B n) (hCtop : 0 ≤ Ctop) (hKShi : 0 ≤ KShi) :
     0 ≤ (aNConst r₀ N B Ctop KShi).2 := by
@@ -1143,14 +1019,6 @@ theorem aNConst_snd_nonneg {r₀ N : ℕ} {B : ℕ → Real} {Ctop KShi : Real}
 
 omit [I.Boundaryless] [IsManifold I 2 M] [CompleteSpace E] [SigmaCompactSpace M]
     [DecidableEq Idx] in
-/-- **Per-frame component `(A_N)`** (ric_bound Step 4, component form).  On a
-smooth frame domain `u`, for two connections whose difference-Christoffel tower
-satisfies the Claim-1 bounds — lower orders bounded by constants (`hDlow`, the
-input `claim2_component`/`mixed_descent` share) and the top order `N − 1` bounded
-linearly by the metric `N`-tower (`hDtop`, `claim1_LC` at `m = N − 1`) — and a
-field `T` with pure-`chrG` (Shi) bounds up to order `N` (`hShi`), the
-`chrH`-tower of `T` at order `N` is bounded linearly by the metric `N`-tower:
-`|∇_H^N T| ≤ Cpp·|∇_H^N g| + Cppp` on `u`. -/
 theorem aN_component_bound {r₀ rg : ℕ} {u : Set M} (hu : IsOpen u)
     (frame : Idx → (x : M) → TangentSpace I x)
     (chrH : M → Idx → Idx → Idx → Real)
@@ -1185,10 +1053,10 @@ theorem aN_component_bound {r₀ rg : ℕ} {u : Set M} (hu : IsOpen u)
   let Cdesc := mixedDescentConst r₀ N B C₂ KShi
   have hCdesc0 : 0 ≤ Cdesc := mixedDescentConst_nonneg hB0 hC₂0 hKShi0
   intro chrG hchrG T hT hDlow gComp hDtop hShi x hx
-  -- the mixed bounds (Claim 2) at `L = N - 1`
+
   have hmixU := claim2_component_bound (r₀ := r₀) hu frame chrH hframe hchrH
     B hB0 (N - 1) KShi hKShi0
-  -- the `(A_N)` descent: `|∇_H^N T| ≤ Cdesc·(1 + |∇_{H,U}^{N-1} D|)`
+
   have hdescU := mixed_descent_bound (r₀ := r₀) hu frame chrH hframe hchrH
     B hB0 N hN C₂ hC₂0 KShi hKShi0
   have hmix := hmixU chrG hchrG T hT (fun c hc z hz => hDlow c hc z hz)
@@ -1209,7 +1077,6 @@ theorem aN_component_bound {r₀ rg : ℕ} {u : Set M} (hu : IsOpen u)
 
 omit [I.Boundaryless] [IsManifold I 2 M] [CompleteSpace E] [SigmaCompactSpace M]
     [DecidableEq Idx] in
-/-- Existential compatibility form of `aN_component_bound`. -/
 theorem aN_component {r₀ rg : ℕ} {u : Set M} (hu : IsOpen u)
     (frame : Idx → (x : M) → TangentSpace I x)
     (chrH : M → Idx → Idx → Idx → Real)

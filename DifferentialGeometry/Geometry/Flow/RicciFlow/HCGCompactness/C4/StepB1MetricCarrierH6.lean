@@ -4,14 +4,6 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.C4.StepCStage
 
 set_option autoImplicit false
 
-/-!
-# H6-provider Step-B1 metric carriers
-
-This file assembles the forward and inverse pre-approximate-isometry carriers
-from the metric, local-diffeomorphism, and injectivity tails built with one H6
-normal-chart family.
--/
-
 noncomputable section
 
 universe u uE uH
@@ -29,8 +21,6 @@ variable {I : ModelWithCorners Real E H} [I.Boundaryless]
 variable [NeZero (Module.finrank Real E)]
 variable {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
 
-/-- H6-provider stage jets produce the two native Step-B1 metric carriers on
-one rectangular pair-index tail. -/
 theorem H6NormalData.preapprox_tail
     (inp : MetricCompactCore (I := I) X)
     (d : H6NormalData (I := I) X inp.decay)

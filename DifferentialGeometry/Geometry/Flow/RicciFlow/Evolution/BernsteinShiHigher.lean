@@ -2,30 +2,6 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.BernsteinShi
 
 set_option autoImplicit false
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 noncomputable section
 
 namespace DifferentialGeometry.PDE.RicciFlow
@@ -39,9 +15,6 @@ variable {H : Type*} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 variable [CompleteSpace E] [SigmaCompactSpace M] [T2Space M]
-
-
-
 
 omit [FiniteDimensional ℝ E] [IsManifold I ∞ M] [CompleteSpace E] [SigmaCompactSpace M]
     [T2Space M] in
@@ -64,8 +37,6 @@ theorem mdifferentiableAt_finset_sum_smul
         (Filter.Eventually.of_forall fun z => by simp [smul_eq_mul])).add htail
 
 omit [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
-/-- The gradient of a finite scalar linear combination is the same linear
-combination of the gradients. -/
 theorem gradientFun_sum
     [VectorBundle Real E (TangentSpace I : M -> Type _)]
     {ι : Type*} (s : Finset ι)
@@ -103,8 +74,6 @@ theorem gradientFun_sum
       rw [Finset.sum_insert has]
 
 omit [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
-/-- Differentiability of the gradient section of a finite scalar sum
-`Σ_{i ∈ s} c i · f i`, given the per-summand gradient-section data. -/
 theorem mdiffAt_gradientFun_finset_sum_smul
     [VectorBundle Real E (TangentSpace I : M -> Type _)]
     {ι : Type*} (s : Finset ι)
@@ -127,7 +96,7 @@ theorem mdiffAt_gradientFun_finset_sum_smul
               y) := by
     funext y
     exact gradientFun_sum (I := I) s G t f c y (fun i hi => hf i hi y)
-  -- Differentiability of that sum of scaled sections.
+
   have hsection_eq :
       (T% fun y : M =>
           DifferentialGeometry.Integral.Connection.gradientFun (I := I) (G.metric t)
@@ -255,45 +224,17 @@ theorem heatOperator_linear_combo_finset
   rw [DifferentialGeometry.Integral.Connection.heatOperatorWithDrift_zero_drift,
     DifferentialGeometry.Integral.Connection.heatOperator_eq_laplacianAt]
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 def towerBarGood (c : Real) (C : ℕ -> Real) (k : ℕ) : Real :=
   c * C k * ∑ j ∈ Finset.range (k + 1), C j * C (k - j)
-
-
 
 def towerBarTop (c : Real) (C : ℕ -> Real) (m : ℕ) : Real :=
   2 * c + c * (∑ j ∈ Finset.Ico 1 m, C j * C (m - j)) / 2
 
-
-
 def towerFactCoeff (m i : ℕ) : Real :=
   (Nat.factorial (m - 1) : Real) / (Nat.factorial i : Real)
 
-/-- The Bernstein weight `β` at level `m`.  The full value `C̄_m α + m`
-dominates the top-level bad term and leaves the coefficient slack needed by
-graded cutoff localization. -/
 def towerBeta (c α : Real) (C : ℕ -> Real) (m : ℕ) : Real :=
   towerBarTop c C m * α + (m : Real)
-
-
-
-
-
 
 noncomputable def towerConstSq (c α : Real) (m : ℕ) : Real :=
   Nat.strongRecOn' m fun n ih =>
@@ -306,24 +247,18 @@ noncomputable def towerConstSq (c α : Real) (m : ℕ) : Real :=
           towerBeta c α C n *
             ∑ i ∈ Finset.range n, towerFactCoeff n i * towerBarGood c C i) * α
 
-
 noncomputable def towerConst (c α : Real) (m : ℕ) : Real :=
   Real.sqrt (towerConstSq c α m)
-
 
 @[simp] theorem towerConstSq_zero (c α : Real) : towerConstSq c α 0 = 1 := by
   rw [towerConstSq, Nat.strongRecOn'_beta]
   simp
 
-
 @[simp] theorem towerConst_zero (c α : Real) : towerConst c α 0 = 1 := by
   rw [towerConst, towerConstSq_zero, Real.sqrt_one]
 
-
 theorem towerConst_nonneg (c α : Real) (m : ℕ) : 0 <= towerConst c α m :=
   Real.sqrt_nonneg _
-
-
 
 theorem towerBarGood_congr (c : Real) {C C' : ℕ -> Real} {k : ℕ}
     (h : ∀ j ∈ Finset.range (k + 1), C j = C' j) :
@@ -336,8 +271,6 @@ theorem towerBarGood_congr (c : Real) {C C' : ℕ -> Real} {k : ℕ}
   intro j hj
   rw [h j hj, h (k - j) (by
     simp only [Finset.mem_range] at hj ⊢; omega)]
-
-
 
 theorem towerBarTop_congr (c : Real) {C C' : ℕ -> Real} {m : ℕ}
     (h : ∀ j ∈ Finset.range m, C j = C' j) :
@@ -352,15 +285,11 @@ theorem towerBarTop_congr (c : Real) {C C' : ℕ -> Real} {m : ℕ}
       h (m - j) (by simp only [Finset.mem_range]; omega)]
   rw [hsum]
 
-
-
 theorem towerBeta_congr (c α : Real) {C C' : ℕ -> Real} {m : ℕ}
     (h : ∀ j ∈ Finset.range m, C j = C' j) :
     towerBeta c α C m = towerBeta c α C' m := by
   unfold towerBeta
   rw [towerBarTop_congr c h]
-
-
 
 theorem towerConstSq_pos (c α : Real) {n : ℕ} (hn : 0 < n) :
     towerConstSq c α n =
@@ -393,11 +322,8 @@ theorem towerConstSq_pos (c α : Real) {n : ℕ} (hn : 0 < n) :
         simp only [Finset.mem_range] at hi hj ⊢; omega))]
   rw [hLHS, towerBeta_congr c α hCeq, towerBarTop_congr c hCeq, hgoodsum]
 
-
 theorem towerFactCoeff_nonneg (m i : ℕ) : 0 <= towerFactCoeff m i := by
   rw [towerFactCoeff]; positivity
-
-
 
 theorem nat_mul_towerFactCoeff (m : ℕ) {k : ℕ} (hk : 1 <= k) :
     (k : Real) * towerFactCoeff m k = towerFactCoeff m (k - 1) := by
@@ -409,7 +335,6 @@ theorem nat_mul_towerFactCoeff (m : ℕ) {k : ℕ} (hk : 1 <= k) :
   have hjsucc : ((j : Real) + 1) ≠ 0 := by positivity
   field_simp
 
-
 theorem towerBarGood_nonneg {c : Real} (hc : 0 <= c) (α : Real) (k : ℕ) :
     0 <= towerBarGood c (towerConst c α) k := by
   rw [towerBarGood]
@@ -417,7 +342,6 @@ theorem towerBarGood_nonneg {c : Real} (hc : 0 <= c) (α : Real) (k : ℕ) :
   apply Finset.sum_nonneg
   intro j _
   exact mul_nonneg (towerConst_nonneg _ _ _) (towerConst_nonneg _ _ _)
-
 
 theorem towerBarTop_nonneg {c : Real} (hc : 0 <= c) (α : Real) (m : ℕ) :
     0 <= towerBarTop c (towerConst c α) m := by
@@ -431,13 +355,11 @@ theorem towerBarTop_nonneg {c : Real} (hc : 0 <= c) (α : Real) (m : ℕ) :
     exact mul_nonneg (towerConst_nonneg _ _ _) (towerConst_nonneg _ _ _)
   linarith
 
-
 theorem towerBeta_nonneg {c α : Real} (hc : 0 <= c) (hα : 0 <= α) (m : ℕ) :
     0 <= towerBeta c α (towerConst c α) m := by
   rw [towerBeta]
   have := towerBarTop_nonneg hc α m
   positivity
-
 
 theorem towerConstSq_nonneg {c α : Real} (hc : 0 <= c) (hα : 0 <= α) (m : ℕ) :
     0 <= towerConstSq c α m := by
@@ -459,7 +381,6 @@ theorem towerConstSq_nonneg {c α : Real} (hc : 0 <= c) (hα : 0 <= α) (m : ℕ
       apply mul_nonneg _ hα; positivity
     linarith
 
-
 theorem towerConst_sq {c α : Real} (hc : 0 <= c) (hα : 0 <= α) (m : ℕ) :
     (towerConst c α m) ^ 2 = towerConstSq c α m := by
   rw [towerConst, Real.sq_sqrt (towerConstSq_nonneg hc hα m)]
@@ -478,17 +399,9 @@ variable {I : ModelWithCorners Real E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 variable [CompleteSpace E] [SigmaCompactSpace M] [T2Space M]
 
-
-
-
-
 def towerReactionSum (w : ℕ -> Real -> M -> Real) (c : Real) (k : ℕ) (t : Real) (x : M) : Real :=
   ∑ j ∈ Finset.range (k + 1),
     c * Real.sqrt (w j t x) * Real.sqrt (w (k - j) t x) * Real.sqrt (w k t x)
-
-
-
-
 
 def TowerHeatBoundOn
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
@@ -500,7 +413,6 @@ def TowerHeatBoundOn
         (-2 * w (k + 1) (t : Real) x + towerReactionSum (M := M) w c k (t : Real) x)
 
 omit [TopologicalSpace M] [SigmaCompactSpace M] [T2Space M] in
-/-- The schematic reaction sum is monotone in its coefficient. -/
 theorem towerReactionSum_mono
     {w : ℕ -> Real -> M -> Real} {c₀ c₁ : Real} {k : ℕ} {t : Real} {x : M}
     (hc : c₀ ≤ c₁) :
@@ -515,7 +427,6 @@ theorem towerReactionSum_mono
     (Real.sqrt_nonneg _)
 
 omit [TopologicalSpace M] [SigmaCompactSpace M] [T2Space M] in
-/-- A tower heat bound remains valid after increasing the reaction cost. -/
 theorem TowerHeatBoundOn.mono_cost
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     {w wLap : ℕ -> Real -> M -> Real} {c₀ c₁ : Real} {k : ℕ}
@@ -528,14 +439,6 @@ theorem TowerHeatBoundOn.mono_cost
   apply add_le_add_right
   exact towerReactionSum_mono (M := M) hc
 
-/-- A uniform Bernstein–Bando–Shi derivative tower over the slab `[0,T]`.
-This bundles the level fields `w k = |∇ᵏRm|²`, their realized
-Laplacian fields `wLap k`, the schematic heat inequalities (eq 7.4), the
-curvature bound `w 0 ≤ K²`, the time bound `T ≤ α/K`, and the per-level
-regularity hypotheses needed by a maximum-principle consumer, all in the style
-of the Stage-1 first-derivative estimate.  Compactness is deliberately not part
-of the data; the closed and complete-noncompact consumers impose their own
-global analytic hypotheses. -/
 structure BernsteinTower
     [I.Boundaryless]
     [VectorBundle Real E (TangentSpace I : M -> Type _)]
@@ -574,7 +477,6 @@ structure BernsteinTower
     DifferentialGeometry.Integral.Connection.heatOperatorWithDrift (I := I) G t
       (fun _y : M => (0 : TangentSpace I _y)) (w k t) x = wLap k t x
 
-
   hw_cont : ∀ k : ℕ, ContinuousOn (fun p : Real × M => w k p.1 p.2)
     (DifferentialGeometry.Integral.Connection.spacetimeSlab (M := M) T)
 
@@ -603,9 +505,6 @@ theorem sqrt_pow_mul_w_le (B : BernsteinTower (I := I) G) (j : ℕ)
         apply Real.sqrt_le_sqrt
         rw [hsq]; exact hbound
     _ = towerConst B.c B.α j * B.K := Real.sqrt_sq hrhs_nonneg
-
-
-
 
 theorem tpow_mul_sqrt_triple {t : Real} (ht : 0 <= t) (k j : ℕ) (hj : j <= k)
     (a b d : Real) :
@@ -678,8 +577,6 @@ theorem tpow_mul_reactionSum_le (B : BernsteinTower (I := I) G) (k : ℕ)
       <= B.c * ((C j * B.K) * (C (k - j) * B.K) * (C k * B.K)) :=
         mul_le_mul_of_nonneg_left hprod_le B.hc
     _ = B.c * (C j * C (k - j)) * C k * B.K ^ 3 := by ring
-
-
 
 theorem sum_range_succ_split {α : Type*} [AddCommMonoid α] (f : ℕ -> α) {m : ℕ} (hm : 1 <= m) :
     ∑ j ∈ Finset.range (m + 1), f j =
@@ -812,10 +709,6 @@ theorem reactionSum_top_le (B : BernsteinTower (I := I) G) {m : ℕ} (hm : 1 <= 
   nlinarith [hbdry0, hbdrym, hmidsum, mul_nonneg (mul_nonneg B.hc (le_of_lt B.hK)) hKtm_nonneg,
     hwm_nonneg, hKtm_nonneg, B.hc, le_of_lt B.hK]
 
-
-
-
-
 def Gcoef (B : BernsteinTower (I := I) G) (m i : ℕ) : Real :=
   if i = m then 1 else towerBeta B.c B.α (towerConst B.c B.α) m * towerFactCoeff m i
 omit [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
@@ -826,9 +719,6 @@ theorem Gcoef_nonneg (B : BernsteinTower (I := I) G) (m i : ℕ) :
   · norm_num
   · exact mul_nonneg (towerBeta_nonneg B.hc B.hα m) (towerFactCoeff_nonneg m i)
 
-/-- The indexed Bernstein quantity
-`G(s,y) = Σ_{i=0}^{m} Gcoef·sⁱ·(w i s y)` of Chow–Knopf eq (between 7.5 and 7.6),
-written as a single `Finset.range (m+1)` sum. -/
 def Gfun (B : BernsteinTower (I := I) G) (m : ℕ) (s : Real) (y : M) : Real :=
   ∑ i ∈ Finset.range (m + 1), Gcoef (I := I) B m i * s ^ i * B.w i s y
 omit [CompleteSpace E]
@@ -1023,10 +913,6 @@ theorem Wterms_nonpos (B : BernsteinTower (I := I) G) {m : ℕ} (hm : 1 <= m)
 omit [CompleteSpace E]
   [SigmaCompactSpace M]
   [T2Space M] in
-/-- The Bernstein combination retains the top-order dissipation before the
-maximum-principle step.  Lower-level negative terms telescope against the time
-weights, while the untouched term `-2 * t^m * w (m+1)` remains available for
-absorbing cutoff-gradient errors in the complete-noncompact argument. -/
 theorem Gfun_dissipative (B : BernsteinTower (I := I) G)
     {m : ℕ} (hm : 1 ≤ m) {t : Real}
     (htmem : t ∈ Set.Icc 0 B.T) (htpos : 0 < t) (x : M)
@@ -1189,12 +1075,6 @@ theorem Gfun_dissipative (B : BernsteinTower (I := I) G)
   rw [hforce]
   linarith [hmid_le, htop_le, hWnonpos]
 
-/-- **Bernstein–Bando–Shi higher derivative estimate (parametric core).**
-
-For a uniform derivative tower on a closed manifold, every level satisfies the
-on-diagonal bound `tᵐ · w m ≤ (towerConst c α m)² · K²` on positive times of the
-slab `[0,T]`, where `towerConst c α m` depends only on `m`, `α` and the tower
-constant `c`.  Equivalently `w m (t,x) ≤ (towerConst c α m)² K² / tᵐ`. -/
 theorem estimate [CompactSpace M] (B : BernsteinTower (I := I) G) :
     ∀ m : ℕ, ∀ t : Real, t ∈ Set.Icc 0 B.T -> 0 < t -> ∀ x : M,
       t ^ m * B.w m t x <= (towerConst B.c B.α m) ^ 2 * B.K ^ 2 := by
@@ -1233,8 +1113,7 @@ theorem estimate [CompactSpace M] (B : BernsteinTower (I := I) G) :
             (B.hw_nonneg (m + 1) s hsmem y)
         rw [hbBar]
         linarith
-      -- ===== Regularity of `Gfun` (for the maximum principle). =====
-      -- Each level's gradient/spatial differentiability transfers to the sum.
+
       have hGspace : ∀ s : Real, s ∈ Set.Icc 0 B.T -> 0 < s -> ∀ y : M,
           MDifferentiableAt I 𝓘(Real, Real) (Gfun (I := I) B m s) y := by
         intro s hsmem hspos y
@@ -1357,8 +1236,7 @@ theorem estimate [CompactSpace M] (B : BernsteinTower (I := I) G) :
       have hGle : Gfun (I := I) B m t x <= aBar + bBar * t := hPartA t htmem x
       rw [towerConst_sq B.hc B.hα]
       linarith [hwm_le_G, hGle, hfinal]
-/-- The on-diagonal bound in the textbook shape
-`w m (t,x) ≤ (towerConst c α m)² K²/tᵐ` for `t ∈ (0,T]`, an immediate corollary of `estimate`. -/
+
 theorem estimate_div [CompactSpace M] (B : BernsteinTower (I := I) G)
     (m : ℕ) {t : Real} (htmem : t ∈ Set.Icc 0 B.T) (htpos : 0 < t) (x : M) :
     B.w m t x <= (towerConst B.c B.α m) ^ 2 * B.K ^ 2 / t ^ m := by

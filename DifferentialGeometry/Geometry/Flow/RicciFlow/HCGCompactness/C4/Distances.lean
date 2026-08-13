@@ -5,14 +5,6 @@ import Mathlib.Topology.MetricSpace.Lipschitz
 
 set_option autoImplicit false
 
-
-
-
-
-
-
-
-
 namespace DifferentialGeometry
 namespace HCGCompactness
 
@@ -23,16 +15,6 @@ section RiemannianNorm
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace
-
-
-
-
-
-
-
-
-
-
 
 theorem edist_le_of_path_comp
     {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]
@@ -69,8 +51,6 @@ theorem edist_le_of_path_comp
       exact (iInf_le _ η).trans (iInf_le _ hη)
   exact htarget.trans hlen
 
-
-
 theorem pathComp_tangent
     {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]
     {H : Type*} [TopologicalSpace H] {I : ModelWithCorners Real E H}
@@ -101,8 +81,6 @@ theorem pathComp_tangent
     _ = A * (∫⁻ t, ‖mfderiv% γ t 1‖ₑ) := by
           rw [MeasureTheory.lintegral_const_mul' A _ hA_ne_top]
 
-
-
 theorem dist_le_of_path_comp
     {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]
     {H : Type*} [TopologicalSpace H] {I : ModelWithCorners Real E H}
@@ -132,8 +110,6 @@ theorem dist_le_of_path_comp
       simpa [ENNReal.ofReal, Real.toNNReal_of_nonneg (Real.sqrt_nonneg (1 + eps))] using hraw
   simpa using hF.dist_le_mul x y
 
-
-
 theorem dist_le_tangent
     {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]
     {H : Type*} [TopologicalSpace H] {I : ModelWithCorners Real E H}
@@ -157,11 +133,6 @@ theorem dist_le_tangent
   exact dist_le_of_path_comp (I := I) F heps
     (pathComp_tangent (I := I) F ENNReal.ofReal_ne_top hspeed) x y
 
-
-
-
-
-
 theorem lipschitz_sqrt_of_dist_le
     {X Y : Type*} [PseudoMetricSpace X] [PseudoMetricSpace Y]
     (F : X -> Y) {eps : Real}
@@ -169,12 +140,6 @@ theorem lipschitz_sqrt_of_dist_le
       dist (F x) (F y) <= Real.sqrt (1 + eps) * dist x y) :
     LipschitzWith ⟨Real.sqrt (1 + eps), Real.sqrt_nonneg (1 + eps)⟩ F := by
   exact LipschitzWith.of_dist_le_mul hdist
-
-
-
-
-
-
 
 theorem image_ball_subset_of_lipschitz_sqrt
     {X Y : Type*} [PseudoMetricSpace X] [PseudoMetricSpace Y]
@@ -189,12 +154,6 @@ theorem image_ball_subset_of_lipschitz_sqrt
   intro y hy
   rcases hy with ⟨x, hx, rfl⟩
   exact hF.mapsTo_ball (ne_of_gt hKpos) x0 r hx
-
-
-
-
-
-
 
 theorem image_ball_subset_of_path_comp
     {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]
@@ -226,8 +185,6 @@ theorem image_ball_subset_of_path_comp
       simpa [ENNReal.ofReal, Real.toNNReal_of_nonneg (Real.sqrt_nonneg (1 + eps))] using hraw
   exact image_ball_subset_of_lipschitz_sqrt F heps hF x0 r
 
-
-
 theorem image_ball_tangent
     {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]
     {H : Type*} [TopologicalSpace H] {I : ModelWithCorners Real E H}
@@ -251,13 +208,6 @@ theorem image_ball_tangent
       Metric.ball (F x0) (Real.sqrt (1 + eps) * r) := by
   exact image_ball_subset_of_path_comp (I := I) F heps
     (pathComp_tangent (I := I) F ENNReal.ofReal_ne_top hspeed) x0 r
-
-
-
-
-
-
-
 
 theorem image_ball_local
     {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]
@@ -306,7 +256,6 @@ variable [FiniteDimensional Real E]
 variable {H : Type uH} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H}
 variable {M : Type u} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
-
 
 theorem speed_le_of_c0
     (P : Tensor0SBundle.Tensor0SField (𝕜 := Real) (E := E) (H := H)
@@ -361,10 +310,6 @@ variable {I : ModelWithCorners Real E H}
 variable {M : Type u} [TopologicalSpace M] [ChartedSpace H M] [T2Space M]
   [IsManifold I ∞ M] [SigmaCompactSpace M]
 variable {N : Type u} [TopologicalSpace N] [ChartedSpace H N] [IsManifold I ∞ N]
-
-
-
-
 
 omit [SigmaCompactSpace M] in
 theorem data_image_ball

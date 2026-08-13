@@ -5,14 +5,6 @@ import DifferentialGeometry.Geometry.Comparison.GeodesicConvexity
 
 set_option autoImplicit false
 
-
-
-
-
-
-
-
-
 noncomputable section
 
 universe u uE uH
@@ -100,8 +92,7 @@ variable {J : ModelWithCorners Real F H'} [J.Boundaryless]
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-/-- A controlled chart whose pullback metric is bounded above by twice the
-model metric is `sqrt 2`-Lipschitz on every segment in the controlled set. -/
+
 theorem NormalBallChart.MetricEquivOn.hom_dist_le
     (Y : PointedRiemannianManifold.{u, uE, uH} (I := J))
     (P : ProperMetricOn (I := J) Y) {c : Y.M} :
@@ -209,8 +200,6 @@ theorem NormalBallChart.MetricEquivOn.hom_dist_le
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-/-- The inverse coordinates of a controlled chart are `sqrt 2`-Lipschitz
-along a minimizing geodesic that stays in the controlled coordinate set. -/
 theorem NormalBallChart.MetricEquivOn.inv_dist_le
     (Y : PointedRiemannianManifold.{u, uE, uH} (I := J))
     (hcomplete : MetricComplete (I := J) Y)

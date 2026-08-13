@@ -1,14 +1,6 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.UnifPhiDevH2
 import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.UnifInvCoeffH3
 
-/-!
-# Homogeneous class-first top-coefficient deviation in H3
-
-This module keeps the class-first `H²` realization radius and pointwise
-deviation estimate, while upgrading the coefficient jet estimate through order
-three to a homogeneous spectral `H³` bound.
--/
-
 set_option autoImplicit false
 set_option backward.isDefEq.respectTransparency false
 
@@ -42,10 +34,7 @@ private local instance instCompleteSpaceE : CompleteSpace E :=
 
 set_option maxHeartbeats 3200000 in
 set_option synthInstance.maxHeartbeats 1600000 in
-/-- On every metric in a three-dimensional order-three class, one common
-`H²` radius controls realization and pointwise top-coefficient deviation, while
-the full three-jet deviation is homogeneous in the endpoint spectral `H³`
-norms. -/
+
 theorem phi_dev_h3_unif
     (hDim : Module.finrank ℝ E = 3)
     (gBase : SmoothRiemannianMetric I M)

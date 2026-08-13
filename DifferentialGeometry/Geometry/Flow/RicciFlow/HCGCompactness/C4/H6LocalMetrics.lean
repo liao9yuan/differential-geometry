@@ -3,14 +3,6 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.C4.StepBLocal
 
 set_option autoImplicit false
 
-/-!
-# Local metric limits from H6 normal-coordinate data
-
-This file is the first branch-parametric Step-B consumer.  It obtains the
-fixed-center local metric limit directly from `H6NormalData`, without referring
-to the legacy selected exponential branch or `expRadiusGp`.
--/
-
 noncomputable section
 
 universe u uE uH
@@ -30,8 +22,7 @@ variable {H : Type uH} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H} [I.Boundaryless]
 
 set_option synthInstance.maxHeartbeats 800000 in
-/-- A fixed sequence of H6 chart metrics admits a `C∞`-convergent subsequence
-on every open model domain contained in their controlled radius balls. -/
+
 theorem exists_h6_metric_lim
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
     {hd : InjRadiusDecayInput (I := I) X}
@@ -89,8 +80,7 @@ theorem exists_h6_metric_lim
       d.metric_equiv k (c k) z (hrad hz) v
 
 set_option synthInstance.maxHeartbeats 800000 in
-/-- Finitely many H6 chart metrics admit one common `C∞`-convergent
-subsequence on a fixed open model domain. -/
+
 theorem exists_h6_metric_pi
     {ι : Type*} [Fintype ι]
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}

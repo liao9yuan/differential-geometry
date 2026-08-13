@@ -2,15 +2,6 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.LowRegBgC1Pair
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.DeTurckRemainderLowBaseC2Lip
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.DeTurckRemainderLowBaseH2VB
 
-/-!
-# Fixed-background order-zero coefficient pairs
-
-This module estimates the order-zero correction caused by replacing the
-frozen DeTurck background with a fixed smooth background.  Exact Palatini
-factorization is performed before the `H¹` estimate, so the state difference is
-measured only in `H²` and no fourth state derivative occurs.
--/
-
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
@@ -1358,10 +1349,7 @@ private theorem coreBddH1
 
 set_option maxHeartbeats 2400000 in
 set_option synthInstance.maxHeartbeats 2400000 in
-/-- On a sufficiently small spectral `H²` metric ball, changing the fixed
-DeTurck background in the `DLa` order-zero coefficient is `H¹`-Lipschitz.
-The state difference enters only through its intrinsic and spectral `H²`
-sizes; no fourth state derivative is used. -/
+
 theorem dlaBg_pair_h1
     (hDim : Module.finrank ℝ E = 3)
     (g g_bg : SmoothRiemannianMetric I M)
@@ -2099,10 +2087,6 @@ private theorem raiseH1
   intro q _
   rw [norm_iCG_cometricRaiseSlot0Field_eq]
 
-/-- The cancellation-preserving sum of the `DLb` background correction and
-the endomorphism insertion is `H¹`-Lipschitz on a spectral `H²` metric ball.
-The two terms are combined before estimation, so no third or fourth state
-derivative occurs. -/
 theorem dlbIns_pair_h1
     (hDim : Module.finrank ℝ E = 3)
     (g g_bg : SmoothRiemannianMetric I M) :
@@ -3127,10 +3111,6 @@ private theorem amixBg_eq
                 (lc0SwapPermRF * lieCorr0AMixPerm2))) by module,
     h0, h1]
 
-/-- On a spectral `H²` metric ball, the fixed-background mixed order-zero
-coefficient is `H¹`-Lipschitz in the metric state.  The exact background
-subtraction is refolded before the estimate, so no third or fourth state
-derivative is used. -/
 theorem amixBg_pair_h1
     (hDim : Module.finrank ℝ E = 3)
     (g g_bg : SmoothRiemannianMetric I M) :
@@ -3247,10 +3227,7 @@ private theorem lie0_bg_split
 
 set_option maxHeartbeats 2400000 in
 set_option synthInstance.maxHeartbeats 2400000 in
-/-- On a sufficiently small spectral `H²` metric ball, the complete order-zero
-DeTurck background correction is `H¹`-Lipschitz.  Its state-difference modulus
-uses only intrinsic and spectral `H²` data; the endpoint state itself enters
-through an `H³` coefficient radius, with no fourth derivative. -/
+
 theorem lie0_bg_pair_h1
     (hDim : Module.finrank ℝ E = 3)
     (g gB : SmoothRiemannianMetric I M)

@@ -11,32 +11,6 @@ import DifferentialGeometry.Analysis.Calculus.SpaceJet
 import DifferentialGeometry.Analysis.Calculus.TimeSliceSwap
 import DifferentialGeometry.Analysis.Calculus.TimeSliceBootstrap
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 noncomputable section
 
 namespace DifferentialGeometry
@@ -94,12 +68,6 @@ theorem chartGramBound_contOn
   exact (Real.continuous_sqrt.comp_continuousOn hii).mul
     (Real.continuous_sqrt.comp_continuousOn hjj)
 
-
-
-
-
-
-
 omit [SigmaCompactSpace M] in
 theorem chartGram_sub_le
     (gRef u u' : SmoothRiemannianMetric I M) (x₀ x : M)
@@ -139,13 +107,6 @@ theorem chartGram_sub_le
   rw [Fin.prod_univ_two]
   simp only [Matrix.cons_val_zero, Matrix.cons_val_one]
   rfl
-
-
-
-
-
-
-
 
 omit [SigmaCompactSpace M] in
 theorem chartGramLim_contOn
@@ -871,10 +832,6 @@ theorem gramJets_of_stage
     ⟨hp₀.1, interior_subset hCint⟩).mono_of_mem_nhdsWithin hmem
 
 omit [NeZero (Module.finrank ℝ E)] in
-/-- Every finite spatial chart jet of the fixed-window limit metric is jointly
-continuous in time and chart position.  This is the locally uniform limit of
-the corresponding finite-stage jets; the conversion from covariant metric
-convergence to chart jets is provided by `chartJet_sub_le`. -/
 theorem gramJets
     {R : letI : TopologicalSpace P.M := P.topology
       letI : ChartedSpace H P.M := P.charted
@@ -1021,8 +978,6 @@ theorem gramJets
     ⟨hp₀.1, interior_subset hCint⟩).mono_of_mem_nhdsWithin hmem
 
 omit [NeZero (Module.finrank ℝ E)] in
-/-- The matrix-valued spatial chart jets of the limit metric are jointly
-continuous on the fixed time window and the interior chart target. -/
 private theorem gramPiJets
     {R : letI : TopologicalSpace P.M := P.topology
       letI : ChartedSpace H P.M := P.charted
@@ -1174,7 +1129,6 @@ private theorem uniform_comp_cpt
   filter_upwards [h _ hlocal] with i hi x hx
   exact hi x hx ⟨x, hx, rfl⟩
 
--- Elaborating the geometric instance chain requires the larger synthesis budget.
 private theorem gramJet_tendsto
     {R : letI : TopologicalSpace P.M := P.topology
       letI : ChartedSpace H P.M := P.charted
@@ -1387,8 +1341,6 @@ private theorem gramRHS_tendsto
     (isCompact_Icc.image_of_continuousOn hJinf) hop
   simpa only [J, Jinf, op] using hcomp
 
-/-- The fixed-window limit chart-Gram entries satisfy the Ricci-flow equation
-on the closed convergence window. -/
 theorem gramPDE
     {R : letI : TopologicalSpace P.M := P.topology
       letI : ChartedSpace H P.M := P.charted
@@ -1519,8 +1471,6 @@ theorem gramPDE
   exact hasDeriv_lim_tail (convex_Icc β ψ) ht f f' g h hderiv hfg hunif
 
 omit [CompleteSpace E] [NeZero (Module.finrank Real E)] in
-/-- Transfer a jointly smooth scalar chart-Gram readout on the model chart
-back to the corresponding manifold chart-Gram entry. -/
 private theorem gramModel_to_mfld
     (g : Real → letI : TopologicalSpace P.M := P.topology
       letI : ChartedSpace H P.M := P.charted
@@ -1733,9 +1683,6 @@ theorem metricPDE_regular
     simpa only [gt] using hpde.congr_deriv hjet
   exact metricPDE_of_gram (I := I) co.gInf x hbasis v w
 
-/-- Fixed-window joint spacetime smoothness of the limit metric in the
-trivialization-based chart-Gram readout. This is the remaining analytic
-regularity frontier. -/
 theorem gramSmooth
     {R : letI : TopologicalSpace P.M := P.topology
       letI : ChartedSpace H P.M := P.charted
@@ -2327,8 +2274,6 @@ end ConvOut
 
 namespace OpenConvOut
 
-/-- Assemble joint smoothness of the open-interval limit metric from joint
-chart-Gram smoothness on every canonical compact window. -/
 theorem smoothMetric
     {R : letI : TopologicalSpace P.M := P.topology
       letI : ChartedSpace H P.M := P.charted
@@ -2427,8 +2372,6 @@ theorem smoothMetric
 
 variable [I.Boundaryless]
 
-/-- Joint chart-Gram smoothness of the glued limit metric on the ambient open
-time interval. -/
 theorem gramSmooth
     {R : letI : TopologicalSpace P.M := P.topology
       letI : ChartedSpace H P.M := P.charted
@@ -2468,8 +2411,6 @@ theorem gramSmooth
       ((trivializationAt E (TangentSpace I) x₀).open_baseSet.mem_nhds hp.2)
   exact (hlocal.contMDiffAt hnhds).contMDiffWithinAt
 
-/-- The fixed-window analytic theorem supplies the open-interval metric
-regularity package on the one subsequence carried by `OpenConvOut`. -/
 theorem smoothMetric_of_conv
     {R : letI : TopologicalSpace P.M := P.topology
       letI : ChartedSpace H P.M := P.charted

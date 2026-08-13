@@ -5,14 +5,6 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.C4.StepCAvera
 
 set_option autoImplicit false
 
-/-!
-# Finite-hat readout from the H6 chart provider
-
-This file joins the intrinsic H6 live branches to the finite center-of-mass
-construction.  The resulting equation and implicit solution are expressed only
-through the controlled `NormalBallChart` carried by `H6NormalData`.
--/
-
 noncomputable section
 
 universe u uE uH
@@ -35,8 +27,6 @@ variable [NeZero (Module.finrank Real E)]
 variable {H : Type uH} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H} [I.Boundaryless]
 
-/-- A prescribed live slot carries one H6 diagonal branch and the complete
-provider-chart center equation with its strict local implicit solution. -/
 def HasH6HatSol
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
     {hd : InjRadiusDecayInput (I := I) X}
@@ -93,8 +83,6 @@ def HasH6HatSol
 
 namespace H6NormalData
 
-/-- A physical finite-hat cage and one H6 live branch give the complete
-provider-native center equation and strict local solution. -/
 theorem hat_sol_of_cage
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
     {hd : InjRadiusDecayInput (I := I) X}
@@ -303,9 +291,6 @@ theorem hat_sol_of_cage
       hρChart hpairs
   exact ⟨hq, e, he, hf, by simpa only [x0, y, rho0] using hsol⟩
 
-/-- One proportional H6 scale supplies every stabilized finite-hat
-center-of-mass problem with a provider-native branch, strict center equation,
-and local implicit solution. -/
 theorem exists_hat_min
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
     {hd : InjRadiusDecayInput (I := I) X}

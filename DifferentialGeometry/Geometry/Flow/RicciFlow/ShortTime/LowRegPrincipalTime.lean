@@ -1,14 +1,6 @@
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.PrincipalTimeH2
 import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.LowRegBootstrapOne
 
-/-!
-# Low-regularity Ricci--DeTurck principal time family
-
-This file connects the same-horizon `H2` representative of the order-one
-Ricci--DeTurck solution to the actual low-regularity `H4 -> H2` principal
-operator family.
--/
-
 noncomputable section
 
 open Bundle Manifold MeasureTheory Set Filter
@@ -42,16 +34,12 @@ private abbrev metricH3 (g : SmoothRiemannianMetric I M) :=
 private abbrev metricH4 (g : SmoothRiemannianMetric I M) :=
   tensorHs (I := I) (M := M) g 0 2 (4 : ℝ)
 
-/-- The canonical identification of the order-one intermediate exponent
-`1 + 1` with the literal Sobolev exponent `2`. -/
 def orderOneH2Iso (g : SmoothRiemannianMetric I M) :
     tensorHs (I := I) (M := M) g 0 2 ((1 : ℝ) + 1) ≃ₗᵢ[ℝ]
       metricH2 (I := I) (M := M) g := by
   rw [show (1 : ℝ) + 1 = 2 by norm_num]
   exact LinearIsometryEquiv.refl ℝ _
 
-/-- The order-one Ricci--DeTurck solution's same-horizon `H2` representative,
-packaged as a time-`L2` field. -/
 def lowRegStateL2
     (g : SmoothRiemannianMetric I M) {T R : ℝ}
     (hT : 0 < T) (hT1 : T ≤ 1)
@@ -71,8 +59,6 @@ def lowRegStateL2
         g 0 2 (1 : ℝ) hT hT1 0 f hR hball)
 
 omit [BoundarylessManifold I M] in
-/-- The `H2` state field agrees almost everywhere with the direct inclusion of
-the order-one top companion field. -/
 theorem lowRegState_ae
     (g : SmoothRiemannianMetric I M) {T R : ℝ}
     (hT : 0 < T) (hT1 : T ≤ 1)
@@ -109,8 +95,6 @@ theorem lowRegState_ae
       (orderOneH2Iso (I := I) (M := M) g) (hc.trans hf))
 
 omit [BoundarylessManifold I M] in
-/-- The packaged `H2` state retains the order-one solver's state radius almost
-everywhere. -/
 theorem lowRegState_ae_le
     (g : SmoothRiemannianMetric I M) {T R : ℝ}
     (hT : 0 < T) (hT1 : T ≤ 1)
@@ -133,8 +117,6 @@ theorem lowRegState_ae_le
   rw [ht, LinearIsometryEquiv.norm_map]
   exact hbound
 
-/-- The actual low-regularity Ricci--DeTurck principal operator evaluated along
-the order-one solution's same-horizon `H2` state field. -/
 def lowRegA2Time
     (g : SmoothRiemannianMetric I M) {T R : ℝ}
     (hT : 0 < T) (hT1 : T ≤ 1)
@@ -153,8 +135,6 @@ def lowRegA2Time
     (lowRegStateL2 (I := I) (M := M)
       g hT hT1 f hR hball)
 
-/-- The packaged principal family is almost everywhere the genuine
-low-regularity principal operator of the original top companion field. -/
 theorem lowRegA2_ae
     (g : SmoothRiemannianMetric I M) {T R : ℝ}
     (hT : 0 < T) (hT1 : T ≤ 1)
@@ -189,9 +169,6 @@ theorem lowRegA2_ae
   simpa only [lowRegA2Time] using hp.trans (congrArg
     (lowRegPrincipal (I := I) (M := M) g) hf)
 
-/-- In dimension three, one positive `H2` radius controls the actual
-time-dependent principal family on every smaller state ball, with a bound
-linear in the chosen radius. -/
 theorem lowRegA2_data
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M) :

@@ -8,15 +8,6 @@ set_option autoImplicit false
 set_option linter.style.longLine false
 set_option linter.unusedSectionVars false
 
-/-!
-# Off-centre chart components of the covariant derivative of Ricci
-
-This file identifies the chart-frame components of `metricNabla0S g Ric` with the
-spatial derivative of the chart Ricci coefficient and the two Christoffel correction
-terms.  It is the component bridge needed to turn the half-open chart derivative tower
-into joint regularity of `∇Ric`.
--/
-
 noncomputable section
 
 namespace DifferentialGeometry.PDE.RicciFlow
@@ -40,8 +31,6 @@ variable [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
 variable [CompleteSpace E] [SigmaCompactSpace M] [T2Space M]
 variable [I.Boundaryless] [BoundarylessManifold I M]
 
-/-- The off-centre chart-frame component of `∇Ric` is the spatial derivative of
-the chart Ricci coefficient minus the two Levi-Civita Christoffel corrections. -/
 theorem nablaRicChartComp
     (g : SmoothRiemannianMetric I M)
     (Ric : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)

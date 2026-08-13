@@ -6,15 +6,6 @@ set_option autoImplicit false
 set_option linter.style.longLine false
 set_option linter.unusedSectionVars false
 
-/-!
-# Finite lifetime of a positive-scalar Ricci-flow segment
-
-This module applies the scalar lower-barrier argument directly to an arbitrary
-`SolutionOn` segment.  The initial scalar minimum is chosen from the fixed
-initial metric, so the resulting endpoint bound is uniform over every segment
-starting at that metric.
--/
-
 noncomputable section
 
 namespace DifferentialGeometry.PDE.RicciFlow
@@ -30,8 +21,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 variable [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
 variable [SigmaCompactSpace M] [T2Space M]
 
-/-- Positive Ricci curvature on a three-dimensional metric implies positive
-scalar curvature pointwise. -/
 theorem scalar_pos_of_ricci
     (g0 : SmoothRiemannianMetric I M)
     (hdim : Module.finrank Real E = 3)
@@ -103,9 +92,6 @@ private theorem scalar_sq_le_ric
   simpa [SolutionOn.scalar, SolutionFamily.scalar, ricciNorm,
     DifferentialGeometry.Tensor.Coordinates.CoordinateIdx, hcard, hcoef] using h
 
-/-- Every three-dimensional Ricci-flow segment starting at the same
-positive-scalar metric ends before the pole determined by that metric's fixed
-scalar minimum. -/
 theorem flow_end_le
     [CompactSpace M] [Nonempty M] [I.Boundaryless]
     (g0 : SmoothRiemannianMetric I M)

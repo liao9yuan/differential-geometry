@@ -4,14 +4,6 @@ import DifferentialGeometry.Geometry.Curvature.MetricLeviCivitaReconcile
 
 set_option autoImplicit false
 
-
-
-
-
-
-
-
-
 noncomputable section
 
 namespace DifferentialGeometry.PDE.RicciFlow
@@ -58,8 +50,6 @@ theorem ricciFrame_mdiffAt
     filter_upwards [hsec] with y hy
     rw [hy i, hy j, metricRicciAt_apply_eq_ricciTensor]
   exact hsmooth.mdifferentiableAt (by simp)
-
-
 
 omit [NeZero (Module.finrank ℝ E)] in
 omit [SigmaCompactSpace M] in
@@ -164,13 +154,6 @@ theorem tailFrameSpaceReg
   exact hderiv.congr_deriv heq
 
 omit [NeZero (Module.finrank ℝ E)] in
-/-- On a strictly positive-time tail, the canonical chart inverse metric carries
-the full spacetime metric regularity package in the coordinate frame centred at
-`x₀`.
-
-This is the `coordInv` counterpart of `tailFrameSpaceReg`.  The four fields that
-do not mention the inverse components are transported from that theorem by
-`congrInv`; the two that do come from `coordInvLocal` and `coordInvDerivLocal`. -/
 theorem tailCoordFrameReg
     {alpha t0 omega : Real} {hAlphaOmega : alpha < omega}
     {S : SolutionOn (I := I) (M := M)

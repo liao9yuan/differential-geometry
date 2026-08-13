@@ -2,13 +2,6 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.C4.StepCStage
 
 set_option autoImplicit false
 
-/-!
-# H6 target-ball and return control
-
-The target-ball and approximate-return estimates in this file use the intrinsic
-H6 chart provider and its metric bounds throughout.
--/
-
 noncomputable section
 
 universe u uE uH
@@ -31,8 +24,6 @@ variable {H : Type uH} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H} [I.Boundaryless]
 variable {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
 
-/-- Stabilized live centers have a common pairwise radial tail using only the
-provider-neutral compactness core. -/
 theorem liveCenters_core
     (inp : MetricCompactCore (I := I) X)
     (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k))
@@ -68,8 +59,6 @@ theorem liveCenters_core
   have hl' := abs_lt.mp (hN l hl alpha)
   linarith
 
-/-- Under the explicit construction-radius room, H6-provider stage maps
-eventually send the smaller retained source ball into the larger target ball. -/
 theorem H6NormalData.mapsTo_tail
     (inp : MetricCompactCore (I := I) X)
     (d : H6NormalData (I := I) X inp.decay)
@@ -290,8 +279,6 @@ theorem H6NormalData.mapsTo_tail
   change dist (F x) Yl.basepoint ≤ R1
   exact hfinal.le
 
-/-- On the same construction-radius budget, the reverse H6-provider stage map
-is an approximate return map for the forward stage map. -/
 theorem H6NormalData.return_tail
     (inp : MetricCompactCore (I := I) X)
     (d : H6NormalData (I := I) X inp.decay)

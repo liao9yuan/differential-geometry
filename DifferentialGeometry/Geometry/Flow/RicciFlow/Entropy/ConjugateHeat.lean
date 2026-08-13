@@ -6,14 +6,6 @@ import Mathlib.Analysis.Calculus.MeanValue
 
 set_option autoImplicit false
 
-
-
-
-
-
-
-
-
 namespace DifferentialGeometry.PDE.RicciFlow.Entropy
 
 noncomputable section
@@ -33,10 +25,6 @@ variable {I : ModelWithCorners Real E H}
 variable {M : Type u} [TopologicalSpace M] [ChartedSpace H M]
 variable [IsManifold I ∞ M]
 
-
-
-
-
 def reverseFamily
     (G : DifferentialGeometry.Integral.Connection.RealizedMetricFamily
       (I := I) (M := M) Real)
@@ -55,11 +43,6 @@ omit [FiniteDimensional ℝ E] in
     (reverseFamily G T).metric s = G.metric (T - s) := by
   rfl
 
-/-- Translate a reversed heat-potential solution by a positive-time offset.
-
-The new reverse time `r` reads the old solution at `r - a`; simultaneously
-moving the terminal anchor from `T` to `T + a` leaves the underlying original
-metric time unchanged. -/
 theorem heat_pot_add
     (D : DifferentialGeometry.Integral.Connection.RealTimeInterval)
     (G : DifferentialGeometry.Integral.Connection.RealizedMetricFamily
@@ -119,7 +102,6 @@ theorem heat_pot_add
       simp only [reverseFamily,
         DifferentialGeometry.Integral.Connection.laplacianAt, htime]
 
-/-- Read a spacetime scalar field backwards from terminal time `T`. -/
 def reverseHeat (T : Real) (u : Real → M → Real) : Real → M → Real :=
   fun s x => u (T - s) x
 
@@ -128,7 +110,6 @@ omit [TopologicalSpace M] in
     (T : Real) (u : Real → M → Real) (s : Real) (x : M) :
     reverseHeat T u s x = u (T - s) x := by
   rfl
-
 
 omit [TopologicalSpace M] in
 theorem reverse_deriv
@@ -141,8 +122,6 @@ theorem reverse_deriv
       (hasDerivAt_const (x := s) (c := T)).sub (hasDerivAt_id (x := s))
   have hcomp := hu.hasDerivAt.comp s hsub
   simpa [reverseHeat] using hcomp.deriv
-
-
 
 theorem conj_heat_forward
     (G : DifferentialGeometry.Integral.Connection.RealizedMetricFamily
@@ -167,8 +146,6 @@ theorem conj_heat_forward
         scalar (T - s) x * u (T - s) x
   ring
 
-
-
 theorem conj_heat_backward
     (G : DifferentialGeometry.Integral.Connection.RealizedMetricFamily
       (I := I) (M := M) Real)
@@ -192,7 +169,6 @@ theorem conj_heat_backward
   rw [show T - (T - t) = t by ring]
   ring
 
-
 omit [TopologicalSpace M] in
 @[simp] theorem reverse_heat_reverse
     (T : Real) (u : Real → M → Real) :
@@ -201,8 +177,6 @@ omit [TopologicalSpace M] in
   change u (T - (T - s)) x = u s x
   rw [show T - (T - s) = s by ring]
 
-
-
 def IsConjHeatOn
     (D : DifferentialGeometry.Integral.Connection.RealTimeInterval)
     (G : DifferentialGeometry.Integral.Connection.RealizedMetricFamily
@@ -210,8 +184,6 @@ def IsConjHeatOn
     (scalar u : Real → M → Real) (T : Real) : Prop :=
   DifferentialGeometry.Analysis.Parabolic.IsHeatPotOn D (reverseFamily G T)
     (fun s x => -scalar (T - s) x) (reverseHeat T u)
-
-
 
 theorem conj_heat_of_pot
     (D : DifferentialGeometry.Integral.Connection.RealTimeInterval)
@@ -222,8 +194,6 @@ theorem conj_heat_of_pot
       (reverseFamily G T) (fun s x => -scalar (T - s) x) v) :
     IsConjHeatOn D G scalar (reverseHeat T v) T := by
   simpa only [IsConjHeatOn, reverse_heat_reverse] using h
-
-
 
 theorem heat_pot_to_conj
     (D : DifferentialGeometry.Integral.Connection.RealTimeInterval)
@@ -250,12 +220,6 @@ theorem heat_pot_to_conj
         -scalar (T - (T - t)) x * v (T - t) x) * -1
   rw [show T - (T - t) = t by ring]
   ring
-
-
-
-
-
-
 
 theorem conj_heat_mass_deriv
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
@@ -301,8 +265,6 @@ theorem conj_heat_mass_deriv
       _ = 0 := by rw [integral_neg, hlap, neg_zero]
   exact hvariation.congr_deriv hmass
 
-
-
 theorem conj_heat_mass_eq
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     (G : DifferentialGeometry.Integral.Connection.RealizedMetricFamily
@@ -340,8 +302,6 @@ theorem conj_heat_mass_eq
     constant_of_has_deriv_right_zero hdiff.continuousOn (fun t ht =>
       (hderiv t ⟨ht.1, le_of_lt ht.2⟩).hasDerivWithinAt)
   simpa only [mass] using hconst b (Set.right_mem_Icc.mpr hab)
-
-
 
 theorem conj_heat_mass_one
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]

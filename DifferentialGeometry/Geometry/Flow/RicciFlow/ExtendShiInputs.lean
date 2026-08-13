@@ -7,18 +7,6 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.UniformChartBounds.ChartGra
 import DifferentialGeometry.Geometry.Metric.ChartGram
 import DifferentialGeometry.Geometry.Curvature.RicciOperatorNormBound
 
-
-
-
-
-
-
-
-
-
-
-
-
 namespace DifferentialGeometry.PDE.RicciFlow
 
 open Bundle Set Filter
@@ -36,8 +24,6 @@ variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
     [IsManifold I ∞ M] [CompactSpace M] [BoundarylessManifold I M]
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
-
-
 
 private theorem hasDerivWithinAt_Ici_boundary {a b : ℝ} (hab : a < b) (f e : ℝ → ℝ)
     (h_cont : ContinuousOn f (Set.Ico a b))
@@ -72,12 +58,6 @@ private theorem tensor2_eval_contOn {K : Set ℝ}
   exact hA.eval_continuous (P := {s : ℝ // s ∈ K}) (τ := Subtype.val)
     (b := fun _ => x) continuous_subtype_val (fun p => p.2) continuous_const
     (v := fun i _ => vec2 v w i) (fun _ => continuous_const)
-
-
-
-
-
-
 
 omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] in
 omit [SigmaCompactSpace M] in
@@ -121,12 +101,6 @@ theorem ricciFlowPDE_Ici_of_soln
         hmem).const_mul (-2)
   · exact hinterior t ⟨hlt, ht.2⟩ x v w
 
-
-
-
-
-
-
 omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] in
 omit [SigmaCompactSpace M] in
 theorem hell_of_soln
@@ -142,10 +116,6 @@ theorem hell_of_soln
           (S.base.metric s).inner x v v ≤ Λ * (S.base.metric alpha).inner x v v :=
   metricEquiv_of_ricBound (fun t => S.base.metric t) hαω hK
     (ricciFlowPDE_Ici_of_soln hS) hric
-
-
-
-
 
 omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [CompactSpace M]
     [BoundarylessManifold I M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
@@ -180,17 +150,6 @@ private theorem metricInnerSq_le (g : SmoothRiemannianMetric I M) (x : M)
       have := mul_nonneg hval hc.le
       rwa [div_mul_cancel₀ _ hc.ne'] at this
     linarith
-
-
-
-
-
-
-
-
-
-
-
 
 omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [BoundarylessManifold I M] [I.Boundaryless]
     [T2Space M] [SigmaCompactSpace M] in
@@ -231,9 +190,6 @@ private theorem chartGramEntry_le_of_equiv
     nlinarith [abs_nonneg (g.inner x ei ej), sq_abs (g.inner x ei ej), hcs, hCM]
   exact habs
 
-
-
-
 omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [BoundarylessManifold I M] [I.Boundaryless]
     [T2Space M] [SigmaCompactSpace M] in
 private theorem exists_gRefDiag_bound (gRef : SmoothRiemannianMetric I M) (α₀ : M)
@@ -251,14 +207,11 @@ private theorem exists_gRefDiag_bound (gRef : SmoothRiemannianMetric I M) (α₀
     _ ≤ ∑ a' : Fin (Module.finrank ℝ E), Ci a' :=
         Finset.single_le_sum (fun i _ => (hCi_pos i).le) (Finset.mem_univ a)
 
-
 omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [CompactSpace M]
     [BoundarylessManifold I M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 private theorem goodSet_subset_chartSource (α₀ : M) :
     chartLeviCivitaGoodSet (I := I) α₀ ⊆ (chartAt H α₀).source :=
   fun _ hz => extChartAt_source I α₀ ▸ hz.1.1
-
-
 
 omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [BoundarylessManifold I M] [I.Boundaryless]
     [T2Space M] [SigmaCompactSpace M] in
@@ -277,11 +230,6 @@ private theorem chartJet0_le_of_equiv
     rw [Integral.DivergenceTheorem.chartGramOnE_def, (extChartAt I α₀).left_inv hxsrc]
   rw [hred]
   exact chartGramEntry_le_of_equiv gRef g hC0 hM0 α₀ hequiv hgRef i j hx
-
-
-
-
-
 
 omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] in
 omit [SigmaCompactSpace M] in
@@ -304,13 +252,6 @@ private theorem ric_quad_le_of_rm04
   have hquad := tensor02_quadForm_abs_le_of_unit_bound g (metricRicciAt g x) hunit v
   rw [← metricRicciAt_apply_eq_ricciTensor g x v v]
   exact hquad
-
-
-
-
-
-
-
 
 omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] in
 theorem ric_quad_le_of_realizes
@@ -352,11 +293,6 @@ theorem ric_quad_le_of_realizes
       Finset.mem_univ, if_true]
   exact ric_quad_le_of_rm04 (I := I) g x basis hON hinv (Rm04sec x) htrace hnorm v
 
-
-
-
-
-
 omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [BoundarylessManifold I M] [I.Boundaryless]
     [SigmaCompactSpace M] in
 theorem chartGram_smooth_of_soln
@@ -382,11 +318,6 @@ theorem chartGram_smooth_of_soln
   have hx : p.2 ∈ e.baseSet := hp.2
   simp only [Integral.Measure.chartGramMatrix_apply, hbridge hx i, hbridge hx j,
     SolutionOn.family]
-
-
-
-
-
 
 omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [BoundarylessManifold I M] [I.Boundaryless]
     [SigmaCompactSpace M] in
@@ -432,14 +363,6 @@ theorem chartGram_cont_of_soln
   rw [Tensor0SBundle.metricTensorField_apply]
   simp [Integral.Measure.chartGramMatrix_apply, SolutionOn.family]
 
-
-
-
-
-
-
-
-
 omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] in
 theorem ric_quad_le_of_soln
     {alpha omega : ℝ} {hαω : alpha < omega}
@@ -459,8 +382,6 @@ theorem ric_quad_le_of_soln
     (hbound t x ht.1 ht.2) v
   rwa [show Module.finrank ℝ (TangentSpace I x) = Module.finrank ℝ E from rfl] at h
 
-
-
 theorem movingShi_of_soln
     {alpha omega : ℝ} {hαω : alpha < omega}
     {S : SolutionOn (I := I) (M := M) (RealTimeInterval.closedOpen alpha omega hαω)}
@@ -473,9 +394,6 @@ theorem movingShi_of_soln
         MovingShiBoundOn (I := I) Set.univ tShi ψ
           (fun _ t => S.base.metric t) 3 KShi := by
   exact movingShiBoundSol (I := I) _hdim _hS _hbound
-
-
-
 
 theorem shiCovBound_of_soln
     {alpha omega : ℝ} {hαω : alpha < omega}
@@ -575,11 +493,6 @@ theorem shiCovBound_of_soln
     intro x hx
     exact le_trans (hposAll s hs a ha1 ha3 x hx)
       (le_trans (le_max_right _ _) (le_max_right _ _))
-
-
-
-
-
 
 theorem extendInputs_of_soln
     {alpha omega : ℝ} {hαω : alpha < omega}

@@ -2,16 +2,6 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.LowRegBgA1Time
 import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.LowRegRhsOne
 import DifferentialGeometry.Analysis.Parabolic.QuasiLinear.TensorMaximalRegularity.NonautonomousL2Cross
 
-/-!
-# The affine packet of the fixed-background order-one arm
-
-This module isolates the path-integrated `C1 · ∇W` arm of the low-base action.
-Unlike the complete first-order coefficient, this arm has an affine high-jet
-bound on every fixed `H2` state ball.  The packet `c1_bg_pack` is stated before
-any time horizon or trajectory, so that a consumer can cap a radius against the
-growth constant `L` and only then build a trajectory.
--/
-
 noncomputable section
 
 open Bundle Manifold MeasureTheory Set Filter
@@ -68,7 +58,6 @@ private theorem incl32_core
   funext i
   simp only [incl32, tensorHsInclusion_coeff_apply, ccTensorToHs_coeff]
 
-/-- The isolated order-one arm, represented in the common action bundle. -/
 private noncomputable def c1Part
     {g : SmoothRiemannianMetric I M} (A : LowBaseActionData g) :
     LowBaseActionData g where
@@ -154,8 +143,6 @@ private theorem zero_fb
     (mul_nonneg hδ (Real.sqrt_nonneg _))
     (Real.sqrt_nonneg _)
 
-/-- On a fixed spectral `H2` ball, the path-integrated order-one coefficient
-has an `H2` jet bound affine in the independent `H3` size. -/
 theorem c1_bg_aff
     (hDim : Module.finrank ℝ E = 3)
     (g gB : SmoothRiemannianMetric I M)
@@ -754,14 +741,6 @@ private theorem c1_ext_pair
   exact ⟨Z, L, hZ, hL, FHi, FLo, hFHi, hFLo,
     hFHiCore, hFLoCore, hFHiBd, hFLoBd, hcomm⟩
 
-/-- **The trajectory-free affine packet of the fixed-background order-one
-arm.**  On every coefficient radius `ρ ≤ ρ₀` the path-integrated order-one
-coefficient supplies a pair of completed action maps on the two adjacent
-Sobolev scales, continuous, realizing the order-one core action on smooth data,
-with a common affine growth certificate `‖F x‖ ≤ Z + L‖x‖` and the
-Sobolev-inclusion square.  No time horizon and no trajectory occur here: `Z`
-and `L` depend only on `ρ, δ` and the realization bound, so a consumer may cap
-a radius against `L` before any trajectory exists. -/
 theorem c1_bg_pack
     (hDim : Module.finrank ℝ E = 3)
     (g gB : SmoothRiemannianMetric I M) :

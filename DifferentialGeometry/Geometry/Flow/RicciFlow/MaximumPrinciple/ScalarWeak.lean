@@ -8,17 +8,6 @@ import Mathlib.Tactic
 
 set_option autoImplicit false
 
-
-
-
-
-
-
-
-
-
-
-
 namespace DifferentialGeometry.Integral.Connection
 
 noncomputable section
@@ -32,10 +21,8 @@ variable {H : Type*} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 
-
 def spacetimeSlab (T : Real) : Set (Real × M) :=
   Set.Icc 0 T ×ˢ Set.univ
-
 
 def parabolicOperatorWithDrift
     (G : RealizedMetricFamily (I := I) (M := M) Real)
@@ -52,7 +39,6 @@ def parabolicOperatorWithDrift
       derivWithin (fun s : Real => u s x) (Set.Icc 0 T) t -
         heatOperatorWithDrift (I := I) G t (X t) (u t) x := by
   rfl
-
 
 theorem parabolic_const_sub
     [VectorBundle Real E (TangentSpace I : M -> Type _)]
@@ -135,7 +121,6 @@ theorem parabolic_const_sub
   rw [htime, hheat]
   ring
 
-/-- The drifted parabolic operator is additive. -/
 theorem parabolic_add
     [VectorBundle Real E (TangentSpace I : M -> Type _)]
     (G : RealizedMetricFamily (I := I) (M := M) Real)
@@ -161,7 +146,6 @@ theorem parabolic_add
     hu_space hv_space hu_grad hv_grad]
   ring
 
-/-- The drifted parabolic operator scales by a fixed real scalar. -/
 theorem parabolic_smul
     [VectorBundle Real E (TangentSpace I : M -> Type _)]
     (G : RealizedMetricFamily (I := I) (M := M) Real)
@@ -187,7 +171,6 @@ theorem parabolic_smul
   rw [hheat']
   ring
 
-/-- The drifted parabolic operator commutes with a finite sum. -/
 theorem parabolic_sum
     [VectorBundle Real E (TangentSpace I : M -> Type _)]
     {κ : Type} (s : Finset κ)
@@ -315,7 +298,6 @@ theorem parabolic_sum
               parabolicOperatorWithDrift (I := I) G T X (u i) t x := by
           rw [Finset.sum_insert ha]
 
-/-- The drifted parabolic operator satisfies the scalar product rule. -/
 theorem parabolic_mul
     [VectorBundle Real E (TangentSpace I : M -> Type _)]
     (G : RealizedMetricFamily (I := I) (M := M) Real)
@@ -413,8 +395,6 @@ private theorem lap_comp_nhds
         (I := I) g hφ' hf.self_of_nhds]
       simp [c]
 
-/-- The drifted parabolic operator satisfies the scalar chain rule using
-spatial differentiability only near the evaluation point. -/
 theorem parabolic_comp_nhds
     [VectorBundle Real E (TangentSpace I : M → Type _)]
     (G : RealizedMetricFamily (I := I) (M := M) Real)
@@ -458,7 +438,6 @@ theorem parabolic_comp_nhds
   simp only [map_smul, smul_eq_mul]
   ring
 
-/-- The drifted parabolic operator satisfies the scalar chain rule. -/
 theorem parabolic_comp
     [VectorBundle Real E (TangentSpace I : M -> Type _)]
     (G : RealizedMetricFamily (I := I) (M := M) Real)
@@ -496,11 +475,6 @@ theorem parabolic_comp
     hφ hφ' hu_space hu_grad]
   ring
 
-/-! ## Algebraic core of the negative-region estimate -/
-
-
-
-
 theorem reaction_difference_lower_bound_on_negative_region
     {uval cval Fu Fc L : Real}
     (hlip : |Fu - Fc| <= L * |uval - cval|)
@@ -514,8 +488,6 @@ theorem reaction_difference_lower_bound_on_negative_region
       rw [hvabs]
       ring
     _ <= Fu - Fc := hlow_abs
-
-
 
 theorem negative_region_parabolic_lower_bound
     {uval cval Pu Pv cderiv Fu Fc L : Real}
@@ -534,16 +506,6 @@ theorem negative_region_parabolic_lower_bound
         exact sub_le_sub_right hsuper Fc
       _ = Pv := hsub.symm
   exact le_trans hlow hupper
-
-
-
-
-
-
-
-
-
-
 
 theorem parabolic_sub_time_curve_identity
     [VectorBundle Real E (TangentSpace I : M -> Type _)]
@@ -570,11 +532,6 @@ theorem parabolic_sub_time_curve_identity
     exact heatOperatorWithDrift_sub_const (I := I) G t (X t) (c t) hu_space x
   rw [htime, hheat]
   ring
-
-
-
-
-
 
 theorem parabolic_exp_rescale_identity
     [VectorBundle Real E (TangentSpace I : M -> Type _)]
@@ -630,9 +587,6 @@ theorem parabolic_exp_rescale_identity
   rw [htime, hheat]
   ring
 
-
-/-- A smooth local upper support for a spacetime scalar function at one point,
-with the parabolic inequality needed by the weak maximum principle. -/
 structure ParabolicUpperSupportAt
     (G : RealizedMetricFamily (I := I) (M := M) Real)
     (T : Real)
@@ -654,14 +608,11 @@ structure ParabolicUpperSupportAt
   operator_nonneg :
     0 <= parabolicOperatorWithDrift (I := I) G T X v t x
 
-/-- Compactness of the realized spacetime slab. -/
 private theorem spacetimeSlab_isCompact
     [CompactSpace M] (T : Real) :
     IsCompact (spacetimeSlab (M := M) T) := by
   unfold spacetimeSlab
   exact isCompact_Icc.prod isCompact_univ
-
-
 
 private theorem derivWithin_nonpos_at_Icc_min_of_pos
     {φ : Real -> Real} {T t : Real}
@@ -690,7 +641,6 @@ private theorem derivWithin_nonpos_at_Icc_min_of_pos
   rw [hlin] at hnonneg
   exact nonpos_of_mul_nonneg_right hnonneg htneg
 
-
 omit [TopologicalSpace M] in
 private theorem derivWithin_add_eps_mul_time
     {w : Real -> M -> Real} {T t ε : Real} {x : M}
@@ -710,7 +660,6 @@ private theorem derivWithin_add_eps_mul_time
     ring
   rw [derivWithin_fun_add hw hlinear]
   rw [hderiv_linear]
-
 
 theorem strict_barrier_nonnegative_of_positive_time
     [I.Boundaryless]
@@ -824,12 +773,6 @@ theorem strict_barrier_nonnegative_of_positive_time
       linarith
     exact not_lt_of_ge hbarrier hbarrier_neg
 
-
-
-
-
-
-
 theorem strict_barrier_posReg
     [I.Boundaryless]
     [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] [CompactSpace M]
@@ -942,9 +885,6 @@ theorem strict_barrier_posReg
       linarith
     exact not_lt_of_ge hbarrier hbarrier_neg
 
-/-- Strict-barrier scalar WMP for a function supported in one compact spatial
-set throughout the time slab.  Unlike `strict_barrier_posReg`, this theorem
-does not require the ambient manifold to be compact. -/
 theorem strict_barrier_cpt
     [I.Boundaryless]
     [CompleteSpace E] [SigmaCompactSpace M] [T2Space M]
@@ -1067,8 +1007,6 @@ theorem strict_barrier_cpt
       linarith
     exact not_lt_of_ge hbarrier hbarrier_neg
 
-/-- Compact-support weak maximum principle from smooth local upper supports at
-the possible negative points. -/
 theorem strict_barrier_cpt_of_upperSupport
     [I.Boundaryless]
     [CompleteSpace E] [SigmaCompactSpace M] [T2Space M]
@@ -1229,7 +1167,6 @@ theorem strict_barrier_cpt_of_upperSupport
       linarith
     exact not_lt_of_ge hbarrier hbarrier_neg
 
-/-- Strict-barrier form of the scalar weak maximum principle. -/
 theorem strict_barrier_nonnegative
     [I.Boundaryless]
     [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] [CompactSpace M]
@@ -1254,12 +1191,6 @@ theorem strict_barrier_nonnegative
   strict_barrier_nonnegative_of_positive_time (I := I) G T hT X w
     hw_cont hw0 hw_time hw_mdiff hw_grad
     (fun t ht _htpos x hwneg => hnegative t ht x hwneg)
-
-
-
-
-
-
 
 theorem scalar_wmp_sub_const_of_parabolic_nonpos
     [I.Boundaryless]
@@ -1312,8 +1243,6 @@ theorem scalar_wmp_sub_const_of_parabolic_nonpos
   intro t ht x
   exact sub_nonneg.mp (by simpa [w] using hw_nonneg t ht x)
 
-
-
 theorem scalar_sub_const_posReg
     [I.Boundaryless]
     [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] [CompactSpace M]
@@ -1365,13 +1294,6 @@ theorem scalar_sub_const_posReg
       hnegative
   intro t ht x
   exact sub_nonneg.mp (by simpa [w] using hw_nonneg t ht x)
-
-
-
-
-
-
-
 
 theorem scalar_weak_maximum_principle_supersolutions_of_lipschitz_on_values
     [I.Boundaryless]
@@ -1466,9 +1388,6 @@ theorem scalar_weak_maximum_principle_supersolutions_of_lipschitz_on_values
     exact not_lt_of_ge (hw_nonneg t ht x) hprodneg
   exact sub_nonneg.mp (by simpa [v] using hvnonneg)
 
-
-
-
 theorem scalar_weak_maximum_principle_supersolutions_of_lipschitz_on_values_of_positive_time
     [I.Boundaryless]
     [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] [CompactSpace M]
@@ -1562,14 +1481,6 @@ theorem scalar_weak_maximum_principle_supersolutions_of_lipschitz_on_values_of_p
     exact not_lt_of_ge (hw_nonneg t ht x) hprodneg
   exact sub_nonneg.mp (by simpa [v] using hvnonneg)
 
-
-
-
-
-
-
-
-
 theorem msm110_ch4_scalar_supersolutions
     [I.Boundaryless]
     [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] [CompactSpace M]
@@ -1613,10 +1524,6 @@ theorem msm110_ch4_scalar_supersolutions
       hneg
   intro t ht x
   exact sub_nonneg.mp (by simpa [w] using hw_nonneg t ht x)
-
-
-
-
 
 theorem msm110_ch4_scalar_pointwise_bounds
     [I.Boundaryless]
@@ -1679,11 +1586,6 @@ theorem msm110_ch4_scalar_pointwise_bounds
   intro t ht x
   exact ⟨hlower t ht x, sub_nonneg.mp (hupper_nonneg t ht x)⟩
 
-
-
-
-
-
 theorem msm110_ch4_scalar_linear_reaction
     [I.Boundaryless]
     [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] [CompactSpace M]
@@ -1728,11 +1630,6 @@ theorem msm110_ch4_scalar_linear_reaction
   have hprod : 0 <= Real.exp (-C * t) * u t x := by
     simpa [J] using hJ_nonneg t ht x
   exact (mul_nonneg_iff_of_pos_left (Real.exp_pos (-C * t))).mp hprod
-
-
-
-
-
 
 theorem linear_react_nonneg
     [I.Boundaryless]
@@ -1805,15 +1702,6 @@ theorem linear_react_nonneg
       exact lt_of_mul_lt_mul_left (by simpa using hJneg)
         (Real.exp_pos (-C * 0)).le
     exact False.elim (not_lt_of_ge (hinit x) hu_neg)
-
-
-
-
-
-
-
-
-
 
 theorem scalar_weak_maximum_principle_supersolutions_of_weighted_lipschitz_on_values
     [I.Boundaryless]
@@ -1924,13 +1812,6 @@ theorem scalar_weak_maximum_principle_supersolutions_of_weighted_lipschitz_on_va
     exact not_lt_of_ge (hw_nonneg t ht x) hprodneg
   exact sub_nonneg.mp (by simpa [v] using hvnonneg)
 
-
-
-
-
-
-
-
 theorem scalar_wmp_supersolutions_of_lipschitz_on_values_of_regular
     [I.Boundaryless]
     [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] [CompactSpace M]
@@ -2017,8 +1898,6 @@ theorem scalar_wmp_supersolutions_of_lipschitz_on_values_of_regular
         simpa [hT0] using ht.2
       exact le_antisymm htle ht.1
     simpa [ht0] using hinit x
-
-
 
 theorem scalar_wmp_supersolutions_of_lipschitz_on_values_of_regular_positive_time
     [I.Boundaryless]
@@ -2107,12 +1986,8 @@ theorem scalar_wmp_supersolutions_of_lipschitz_on_values_of_regular_positive_tim
       exact le_antisymm htle ht.1
     simpa [ht0] using hinit x
 
-
-
-
 def scalarValueSet (u : Real -> M -> Real) (c : Real -> Real) (t : Real) : Set Real :=
   Set.range (fun x : M => u t x) ∪ {c t}
-
 
 theorem scalarValueSet_isCompact_of_continuous
     [CompactSpace M]
@@ -2122,8 +1997,6 @@ theorem scalarValueSet_isCompact_of_continuous
   have hrange : IsCompact (Set.range (fun x : M => u t x)) := by
     simpa using (isCompact_univ.image hu)
   exact hrange.union isCompact_singleton
-
-
 
 theorem exists_abs_lipschitzOnWith_of_locallyLipschitzOn_isCompact
     {f : Real -> Real} {s : Set Real}
@@ -2135,8 +2008,6 @@ theorem exists_abs_lipschitzOnWith_of_locallyLipschitzOn_isCompact
   refine ⟨K, ?_⟩
   intro a ha b hb
   simpa [Real.dist_eq] using hK.dist_le_mul a ha b hb
-
-
 
 omit [TopologicalSpace M] in
 theorem exists_time_dependent_lipschitz_bound_on_values
@@ -2181,7 +2052,6 @@ theorem exists_time_dependent_lipschitz_bound_on_values
       rfl
     exact Classical.choose_spec (hExists t ht) (u t x) hu_mem (c t) hc_mem
 
-
 omit [TopologicalSpace M] in
 theorem exists_time_dependent_lipschitz_bound_on_values_of_locallyLipschitz
     (F : Real -> Real -> Real)
@@ -2197,10 +2067,8 @@ theorem exists_time_dependent_lipschitz_bound_on_values_of_locallyLipschitz
   exact exists_time_dependent_lipschitz_bound_on_values (M := M) F u c T
     (fun t ht => (hF t ht).locallyLipschitzOn) hcompact
 
-
 def scalarWMPValueSet (T : Real) (u : Real -> M -> Real) (c : Real -> Real) : Set Real :=
   (fun p : Real × M => u p.1 p.2) '' spacetimeSlab (M := M) T ∪ c '' Set.Icc 0 T
-
 
 omit [TopologicalSpace M] in
 theorem scalarWMPValueSet_u_mem
@@ -2211,7 +2079,6 @@ theorem scalarWMPValueSet_u_mem
   refine ⟨(t, x), ?_, rfl⟩
   exact ⟨ht, trivial⟩
 
-
 omit [TopologicalSpace M] in
 theorem scalarWMPValueSet_c_mem
     (T : Real) (u : Real -> M -> Real) (c : Real -> Real)
@@ -2219,8 +2086,6 @@ theorem scalarWMPValueSet_c_mem
     c t ∈ scalarWMPValueSet (M := M) T u c := by
   right
   exact ⟨t, ht, rfl⟩
-
-
 
 theorem scalarWMPValueSet_isCompact
     [CompactSpace M]
@@ -2232,8 +2097,6 @@ theorem scalarWMPValueSet_isCompact
   have hslab : IsCompact (spacetimeSlab (M := M) T) := by
     simpa [spacetimeSlab] using (isCompact_Icc.prod (isCompact_univ : IsCompact (Set.univ : Set M)))
   exact (hslab.image_of_continuousOn hu_cont).union (isCompact_Icc.image_of_continuousOn hc_cont)
-
-
 
 omit [TopologicalSpace M] in
 theorem scalarWMP_lipschitz_on_valueSet_bound
@@ -2250,13 +2113,6 @@ theorem scalarWMP_lipschitz_on_valueSet_bound
   have hc_mem : c t ∈ scalarWMPValueSet (M := M) T u c :=
     scalarWMPValueSet_c_mem (M := M) T u c ht
   simpa [Real.dist_eq] using (hF_lip t ht).dist_le_mul (u t x) hu_mem (c t) hc_mem
-
-
-
-
-
-
-
 
 theorem scalar_wmp_supersolutions_of_lipschitz_on_value_set_of_regular
     [I.Boundaryless]
@@ -2304,8 +2160,6 @@ theorem scalar_wmp_supersolutions_of_lipschitz_on_value_set_of_regular
     hsuper hode hinit
     (scalarWMP_lipschitz_on_valueSet_bound (M := M) T u c F K hF_lip)
 
-
-
 theorem scalar_wmp_supersolutions_of_lipschitz_on_value_set_of_regular_positive_time
     [I.Boundaryless]
     [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] [CompactSpace M]
@@ -2352,13 +2206,6 @@ theorem scalar_wmp_supersolutions_of_lipschitz_on_value_set_of_regular_positive_
     hsuper hode hinit
     (scalarWMP_lipschitz_on_valueSet_bound (M := M) T u c F K hF_lip)
 
-
-
-
-
-
-
-
 theorem scalar_wmp_super_theorem_7_1
     [I.Boundaryless]
     [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] [CompactSpace M]
@@ -2403,13 +2250,6 @@ theorem scalar_wmp_super_theorem_7_1
   scalar_wmp_supersolutions_of_lipschitz_on_value_set_of_regular
     (I := I) G T hT X u c F K hw_cont hw_mdiff hw_grad hu_time hc_time
     hu_space hv_space hv_grad hsuper hode hinit hF_lip
-
-
-
-
-
-
-
 
 theorem scalar_wmp_sub_theorem_7_2
     [I.Boundaryless]
@@ -2475,12 +2315,6 @@ theorem scalar_wmp_sub_theorem_7_2
       (fun x => by linarith [hinit x]) hF_lip_neg
   intro t ht x
   linarith [hneg t ht x]
-
-
-
-
-
-
 
 theorem msm110_ch4_scalar_ode_lower
     [I.Boundaryless]

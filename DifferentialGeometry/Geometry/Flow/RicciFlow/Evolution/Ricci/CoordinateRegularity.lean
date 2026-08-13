@@ -2,12 +2,6 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.Ricci.Commutator
 
 set_option autoImplicit false
 
-
-
-
-
-
-
 noncomputable section
 
 namespace DifferentialGeometry.PDE.RicciFlow
@@ -33,8 +27,6 @@ section CoordinateFrameRicciEvolution
 
 open DifferentialGeometry.Tensor.Coordinates
 
-
-
 theorem coordInvMdiff
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -44,8 +36,6 @@ theorem coordInvMdiff
       (fun y : M => coordInv (I := I) S x₀ t y a b) x₀ := by
   simpa [coordInv] using
     DifferentialGeometry.Tensor.Coordinates.gInvComp_mdiffAt (I := I) (S.family.metric t) x₀ a b
-
-
 
 theorem coordInvMdiffOn
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
@@ -57,8 +47,6 @@ theorem coordInvMdiffOn
       (fun y : M => coordInv (I := I) S x₀ t y a b) x := by
   simpa [coordInv] using
     DifferentialGeometry.Integral.Connection.coordGInvMdiff (I := I) (S.family.metric t) x₀ hx a b
-
-
 
 omit [SigmaCompactSpace M] [T2Space M] in
 theorem coordMetricMdiff
@@ -78,8 +66,6 @@ theorem coordMetricMdiff
       (coordinateFrameSet_open (I := I) x₀)
       (coordinateFrameAt_mem (I := I) x₀) a b
 
-
-
 omit [SigmaCompactSpace M] [T2Space M] in
 theorem coordMetricMdiffOn
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
@@ -98,8 +84,6 @@ theorem coordMetricMdiffOn
       (coordinateFrameAt_isLocalFrame_one (I := I) x₀)
       (coordinateFrameSet_open (I := I) x₀)
       hx a b
-
-
 
 theorem coordInvCovZero
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
@@ -123,8 +107,6 @@ theorem coordInvCovZero
     (fun a b => coordMetricMdiff (I := I) S x₀ (t : Real) a b)
     d k l
 
-
-
 theorem coordInvCovZeroOn
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -147,8 +129,6 @@ theorem coordInvCovZeroOn
     (fun a b => coordInvMdiffOn (I := I) S x₀ (t : Real) x hx a b)
     (fun a b => coordMetricMdiffOn (I := I) S x₀ (t : Real) x hx a b)
     d k l
-
-
 
 omit [SigmaCompactSpace M] in
 theorem coordRicciMdiff
@@ -204,8 +184,6 @@ theorem coordRicciMdiff
       (S.ricci t) V x
       (fun q => (hV q).of_le (by simp))
   simpa [hfun] using hEval
-
-
 
 omit [SigmaCompactSpace M] in
 theorem coordNablaReg
@@ -274,8 +252,6 @@ theorem coordNablaReg
       frame]
   simpa [hfun] using hmdiff
 
-
-
 omit [SigmaCompactSpace M] in
 theorem coordNablaRegOn
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
@@ -342,8 +318,6 @@ theorem coordNablaRegOn
     simp [nablaRicComp, derivs, CanonicalSpatialDerivs0S.of_smooth_connection,
       frame]
   simpa [hfun] using hmdiff
-
-
 
 omit [SigmaCompactSpace M] in
 theorem coordNablaReal
@@ -480,8 +454,6 @@ theorem coordNablaReal
   simpa [ricciCovDerivCompInFrame, frame, sub_eq_add_neg, add_assoc, add_comm, add_left_comm]
     using heval
 
-
-
 omit [SigmaCompactSpace M] in
 theorem coordNablaRealOn
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
@@ -614,12 +586,6 @@ theorem coordNablaRealOn
   rw [Fin.sum_univ_two, hterm0, hterm1] at heval
   simpa [ricciCovDerivCompInFrame, frame, sub_eq_add_neg, add_assoc, add_comm, add_left_comm]
     using heval
-
-
-
-
-
-
 
 theorem coordNab2Can
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
@@ -922,8 +888,6 @@ theorem coordNab2Can
           rw [hcorr]
           ring
 
-
-
 omit [SigmaCompactSpace M] in
 theorem coordMetricDeriv
     [I.Boundaryless]
@@ -959,8 +923,6 @@ theorem coordMetricDeriv
         (I := I) S hS (coordinateFrameAt (I := I) x₀)
         ⟨t, ht⟩ x a b
 
-
-
 omit [SigmaCompactSpace M] in
 theorem coordMetricMix
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
@@ -990,8 +952,6 @@ theorem coordMetricMix
     hmix
     (nablaRicComp (I := I) S (coordinateFrameAt (I := I) x₀))
     (coordNablaRealOn (I := I) S x₀)
-
-
 
 theorem coordGammaEvol
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
@@ -1027,8 +987,6 @@ theorem coordGammaEvol
       (M := M)
       (nablaRicComp (I := I) S (coordinateFrameAt (I := I) x₀)))
 
-
-
 omit [SigmaCompactSpace M] [T2Space M] in
 theorem coordGammaForm
     [I.Boundaryless]
@@ -1045,8 +1003,6 @@ theorem coordGammaForm
   simpa [SolutionOn.family, SolutionFamily.connection] using
     (DifferentialGeometry.Integral.Connection.leviCivitaChristoffelModelRHS_eq_christoffel_of_mem
       (I := I) (g := S.family.metric s) x₀ hx i j k).symm
-
-
 
 omit [SigmaCompactSpace M] [T2Space M] in
 theorem coordGammaMdiff
@@ -1116,8 +1072,6 @@ theorem coordGammaMdiff
     rw [hbasis]
   exact hmdiff.congr_of_eventuallyEq heq.symm
 
-
-
 theorem coordGammaRhsMd
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -1175,8 +1129,6 @@ theorem coordGammaRhsMd
   exact hsum.congr_of_eventuallyEq (by
     filter_upwards with y
     simp [Finset.sum_apply])
-
-
 
 omit [SigmaCompactSpace M] in
 private theorem coordDgSmAt
@@ -1236,8 +1188,6 @@ private theorem coordDgSmAt
       DifferentialGeometry.Integral.Connection.directionalDeriv] using hflat
   exact hD.congr_of_eventuallyEq heq
 
-
-
 private theorem gammaRhsSm
     [I.Boundaryless]
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
@@ -1276,12 +1226,6 @@ private theorem gammaRhsSm
   have h₃ := coordDgSmAt (I := I) S hS x₀ t x hx l i j
   exact hInv'.mul ((h₁.add h₂).sub h₃)
 
-
-
-
-
-
-
 theorem coordGammaSmoothInf
     [I.Boundaryless]
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
@@ -1313,7 +1257,6 @@ theorem coordGammaSmoothInf
     exact coordGammaForm (I := I) S x₀ p.1 hp i j k
   exact hmodel.congr_of_eventuallyEq heq
 
-
 theorem coordGammaSmoothAt
     [I.Boundaryless]
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
@@ -1330,8 +1273,6 @@ theorem coordGammaSmoothAt
       ((t : Real), x) := by
   exact (coordGammaSmoothInf (I := I) S hS x₀ t x hx i j k).of_le
     (WithTop.coe_le_coe.mpr le_top)
-
-
 
 theorem coordGammaMix
     [I.Boundaryless]
@@ -1375,8 +1316,6 @@ theorem coordGammaMix
   · intro t ht x hx
     exact hGamma ⟨t, ht⟩ x hx i j k
 
-
-
 theorem coordNab2At
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -1389,8 +1328,6 @@ theorem coordNab2At
         (nablaRicComp (I := I) S (coordinateFrameAt (I := I) x₀))
         t x₀ d a i j := by
   rfl
-
-
 
 theorem coordNab2On
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}

@@ -4,13 +4,6 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.TowerRegularity
 
 set_option autoImplicit false
 
-
-
-
-
-
-
-
 noncomputable section
 
 namespace DifferentialGeometry.PDE.RicciFlow
@@ -29,8 +22,6 @@ variable [IsManifold I ∞ M] [IsManifold I 1 M]
 variable [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M]
 
 omit [NeZero (Module.finrank ℝ E)] in
-/-- Every finite level of the realized coordinate-frame curvature tower is
-jointly smooth at regular spacetime points in the chart good set. -/
 theorem coordTowerSmooth
     {alpha omega : Real} {hAlphaOmega : alpha < omega}
     {S : SolutionOn (I := I) (M := M)

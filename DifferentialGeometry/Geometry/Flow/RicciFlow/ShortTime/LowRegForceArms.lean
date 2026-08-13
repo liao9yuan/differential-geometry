@@ -3,55 +3,6 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.LowRegGalerkinSol
 import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.UnifNZeroBound
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.DeTurckRemainderLowBaseAction
 
-/-!
-# The forcing arms along the order-one Galerkin trajectory
-
-The order-one Galerkin system (`lowregGalSol`) reports its forcing through
-`galTameForce`, which evaluates the *dense* nonlinearity `lowregNfun` at the
-retracted spectral state `galTameStateC`.  A per-scale energy estimate has to
-price that forcing against the covariant jets of a genuine smooth tensor, so it
-first needs the state written as a smooth representative and the forcing written
-as the canonical low-base action split.
-
-This module supplies exactly that translation layer, in three steps.
-
-* **The state is in the smooth core with a named representative.**
-  `galCoreRep` is the retracted finite eigen-combination
-  `(min 1 (R / ‖·‖)) • finiteEigenCombo g₀ S c`; `galCoreRep_eq` identifies its
-  spectral embedding with `galTameStateC`, and `galState_core` records the
-  resulting `smoothCore` membership.  No density or continuity input is used
-  here: the representative is exhibited, not chosen.
-* **The nonlinearity is evaluated on it.**  `galN_eval` runs the existing
-  evaluation layer (`lowRegN_on_smooth`) at that representative, so the forcing
-  along the trajectory is the genuine smooth Ricci--DeTurck nonlinearity
-  `deTurckSmoothN g₀ g₀ 1 (symmS g₀ (galCoreRep …))`.
-* **The forcing, minus its static seed, is the embedded arm sum.**  `galArmId`
-  subtracts `𝒩(0)` — the same zero-state element the seed mass
-  `lowRegSeedMass` and the `D`-field of `IsLowSolve` speak about — and rewrites
-  the difference as `smoothCcToTensorHs g₀ 1 (A.a2 T + A.a1 T)` for the
-  canonical low-base data `A = lowBaseData g₀ g₀ T`, `T = symmS g₀ (galCoreRep …)`.
-  `galArmCap` carries the accompanying `C2` fibre cap with the constant hoisted
-  out of the trajectory, in the shape `a2PerIdxLin`'s `hfib` binder consumes.
-  `galForceArm` reads the whole package on a single Galerkin forcing
-  coordinate, which is the form the ODE's right-hand side exposes.
-
-## Inputs
-
-Every statement takes the certificates of `IsLowSolve` directly — the fibre
-threshold `0 ≤ δ ≤ 1/3` together with `δ < 1`, the metric realization bound
-`hreal`, and continuity of the smooth core `coreN`.  Constants and certificates
-precede the trajectory data `(S, c)` throughout, so a consumer destructures once
-and applies per time.  `lowreg_proj_tendsto` now re-exports exactly these
-certificates at its own bound constants, so a caller working on the projected
-trajectory can feed that one package here without re-destructuring `IsLowSolve`
-(which would produce an incomparable witness tuple).
-
-The `lowBaseData` witness written here uses the ambient `hδ : δ < 1`; the
-per-index ladder estimates (`a2PerIdxLin`, `a1PerIdxLin`) write the
-definitionally equal `lt_of_le_of_lt hδ3 (by norm_num)` in the same slot, so the
-two readings of `lowBaseData … .a2` are the same term.
--/
-
 noncomputable section
 
 open Bundle Manifold MeasureTheory Set Filter
@@ -76,14 +27,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
   [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
   [T2Space M] [SigmaCompactSpace M]
 
-/-! ### The named smooth representative of a retracted Galerkin state -/
-
-/-- **The smooth representative of the retracted Galerkin state.**
-
-`galTameStateC g₀ 1 R S c` is the radial retraction, at the lower `H²` radius
-`R`, of the spectral combination of the coefficient family `c` over the finite
-mode set `S`.  Its smooth representative is the same retraction applied to the
-genuine smooth finite eigen-combination `finiteEigenCombo g₀ S c`. -/
 def galCoreRep (g₀ : SmoothRiemannianMetric I M) (R : ℝ)
     (S : Finset (TensorEigenIdx (I := I) (M := M) g₀ 0 2))
     (c : TensorEigenIdx (I := I) (M := M) g₀ 0 2 → ℝ) :
@@ -92,7 +35,6 @@ def galCoreRep (g₀ : SmoothRiemannianMetric I M) (R : ℝ)
       (finiteEigenComboHs (I := I) (M := M) g₀ S c (((1 : ℕ) : ℝ) + 2))‖)) •
     finiteEigenCombo (I := I) (M := M) g₀ S c
 
-/-- The spectral embedding of `galCoreRep` is the retracted Galerkin state. -/
 theorem galCoreRep_eq (g₀ : SmoothRiemannianMetric I M) (R : ℝ)
     (S : Finset (TensorEigenIdx (I := I) (M := M) g₀ 0 2))
     (c : TensorEigenIdx (I := I) (M := M) g₀ 0 2 → ℝ) :
@@ -101,10 +43,6 @@ theorem galCoreRep_eq (g₀ : SmoothRiemannianMetric I M) (R : ℝ)
       galTameStateC (I := I) (M := M) g₀ 1 R S c := by
   rw [galCoreRep, smoothCcToTensorHs_smul, ← finiteEigenComboHs_eq, galTameStateC]
 
-/-- The retracted, symmetrized Galerkin representative retains its exact
-radial scale in every spectral Sobolev norm.  This zero-safe form is used when
-a homogeneous tensor estimate is transferred back to the unretracted modal
-coefficients. -/
 theorem galRepHs_scale (g₀ : SmoothRiemannianMetric I M) (σ : ℝ)
     {R : ℝ} (hR : 0 ≤ R)
     (F : Finset (TensorEigenIdx (I := I) (M := M) g₀ 0 2))
@@ -137,9 +75,6 @@ theorem galRepHs_scale (g₀ : SmoothRiemannianMetric I M) (σ : ℝ)
     rfl
   rw [hnorm]
 
-/-- The retracted, symmetrized Galerkin representative is a contraction at
-every spectral Sobolev order.  In particular, the coefficient of a highest
-derivative term is not enlarged by an order-dependent comparison constant. -/
 theorem galRepHs_le (g₀ : SmoothRiemannianMetric I M) (σ : ℝ)
     {R : ℝ} (hR : 0 ≤ R)
     (F : Finset (TensorEigenIdx (I := I) (M := M) g₀ 0 2))
@@ -179,9 +114,6 @@ theorem galRepHs_le (g₀ : SmoothRiemannianMetric I M) (σ : ℝ)
       mul_le_mul_of_nonneg_right hθ1 (norm_nonneg _)
     _ = _ := by rw [one_mul, hnorm]
 
-/-- The smooth representative of the retracted Galerkin state stays in the
-lower `H²` ball of radius `R`; this is `galTameStateC_mem` read through
-`galCoreRep_eq`. -/
 theorem galCoreRep_ball (g₀ : SmoothRiemannianMetric I M) {R : ℝ} (hR : 0 ≤ R)
     (S : Finset (TensorEigenIdx (I := I) (M := M) g₀ 0 2))
     (c : TensorEigenIdx (I := I) (M := M) g₀ 0 2 → ℝ) :
@@ -192,8 +124,6 @@ theorem galCoreRep_ball (g₀ : SmoothRiemannianMetric I M) {R : ℝ} (hR : 0 �
   rw [galCoreRep_eq]
   exact galTameStateC_mem (I := I) (M := M) g₀ 1 hR S c
 
-/-- **The Galerkin trajectory lives in the smooth core.**  Every retracted
-Galerkin state is a point of `smoothCore g₀ R`, with `galCoreRep` as witness. -/
 theorem galState_core (g₀ : SmoothRiemannianMetric I M) {R : ℝ} (hR : 0 ≤ R)
     (S : Finset (TensorEigenIdx (I := I) (M := M) g₀ 0 2))
     (c : TensorEigenIdx (I := I) (M := M) g₀ 0 2 → ℝ) :
@@ -204,11 +134,6 @@ theorem galState_core (g₀ : SmoothRiemannianMetric I M) {R : ℝ} (hR : 0 ≤ 
   ⟨galCoreRep (I := I) (M := M) g₀ R S c,
     galCoreRep_eq (I := I) (M := M) g₀ R S c⟩
 
-/-! ### Transport of the fibre certificates to the trajectory -/
-
-/-- The metric realization bound at the symmetrized trajectory
-representative.  This is the `hδg` slot of `lowData_split`, `a2PerIdxLin` and
-`a1PerIdxLin` along the Galerkin trajectory. -/
 theorem galRepFib (g₀ : SmoothRiemannianMetric I M) {R δ : ℝ} (hR : 0 ≤ R)
     (hreal : ∀ T : SmoothCcTensor g₀ 0 2,
       ‖smoothCcToTensorHs (I := I) (M := M) g₀
@@ -225,8 +150,6 @@ theorem galRepFib (g₀ : SmoothRiemannianMetric I M) {R δ : ℝ} (hR : 0 ≤ R
     (galCoreRep (I := I) (M := M) g₀ R S c)
     (galCoreRep_ball (I := I) (M := M) g₀ hR S c))
 
-/-- The metric realization bound at the zero perturbation.  This is the `hδZ`
-slot of `lowData_split`, `a2PerIdxLin` and `a1PerIdxLin`. -/
 theorem lowregFibZero (g₀ : SmoothRiemannianMetric I M) {R δ : ℝ} (hR : 0 ≤ R)
     (hreal : ∀ T : SmoothCcTensor g₀ 0 2,
       ‖smoothCcToTensorHs (I := I) (M := M) g₀
@@ -239,14 +162,6 @@ theorem lowregFibZero (g₀ : SmoothRiemannianMetric I M) {R δ : ℝ} (hR : 0 �
   rw [smoothCcToTensorHs_zero, norm_zero]
   exact hR
 
-/-! ### The forcing along the trajectory -/
-
-/-- **The dense nonlinearity on the Galerkin trajectory is the genuine smooth
-one.**  Evaluated at a retracted Galerkin state, `lowRegN` is the order-one
-spectral embedding of the smooth Ricci--DeTurck remainder at the symmetrized
-representative `symmS g₀ (galCoreRep …)`.  This is `lowRegN_on_smooth` at the
-representative supplied by `galCoreRep_eq`; `lowRegSeedMass` is the same
-pattern at the zero state. -/
 theorem galN_eval (g₀ : SmoothRiemannianMetric I M) {R δ : ℝ}
     (hR : 0 < R) (hδ : δ < 1)
     (hreal : ∀ T : SmoothCcTensor g₀ 0 2,
@@ -276,17 +191,6 @@ theorem galN_eval (g₀ : SmoothRiemannianMetric I M) {R δ : ℝ}
     (galCoreRep (I := I) (M := M) g₀ R S c)
     (galCoreRep_ball (I := I) (M := M) g₀ hR.le S c)
 
-/-- **The trajectory forcing, minus its static seed, is the embedded arm sum.**
-
-Along the order-one Galerkin trajectory the difference between the
-nonlinearity at a retracted Galerkin state and the nonlinearity at the zero
-state is the order-one spectral embedding of the canonical low-base action
-split `A.a2 T + A.a1 T`, with `T = symmS g₀ (galCoreRep g₀ R S c)` and
-`A = lowBaseData g₀ g₀ T`.  The zero-state element is the one
-`lowRegSeedMass` bounds, so the seed handle composes without transport.
-
-The arms are exactly the objects the per-index ladder estimates
-`a2PerIdxLin` and `a1PerIdxLin` bound, at the same `lowBaseData`. -/
 theorem galArmId (g₀ : SmoothRiemannianMetric I M) {R δ : ℝ}
     (hR : 0 < R) (hδ : δ < 1) (hδ0 : 0 ≤ δ) (hδ3 : δ ≤ 1 / 3)
     (hreal : ∀ T : SmoothCcTensor g₀ 0 2,
@@ -354,13 +258,6 @@ theorem galArmId (g₀ : SmoothRiemannianMetric I M) {R δ : ℝ}
             hδ3 hδ0 (galRepFib (I := I) (M := M) g₀ hR.le hreal S c)
             (lowregFibZero (I := I) (M := M) g₀ hR.le hreal)).1
 
-/-- **The `C2` fibre cap along the trajectory, with the constant hoisted.**
-
-`lowData_split`'s second clause, read at the symmetrized Galerkin
-representative: one constant `Cδ`, independent of the mode set and of the
-coefficient family — hence of the Galerkin level — caps the complete
-second-order coefficient of every state on the trajectory.  This is exactly the
-`hfib` binder of `a2PerIdxLin`. -/
 theorem galArmCap (g₀ : SmoothRiemannianMetric I M) {R δ : ℝ}
     (hR : 0 ≤ R) (hδ : δ < 1) (hδ0 : 0 ≤ δ) (hδ3 : δ ≤ 1 / 3)
     (hreal : ∀ T : SmoothCcTensor g₀ 0 2,
@@ -389,18 +286,6 @@ theorem galArmCap (g₀ : SmoothRiemannianMetric I M) {R δ : ℝ}
     (lowregFibZero (I := I) (M := M) g₀ hR hreal)).2 x
 
 open scoped Classical in
-/-- **The Galerkin forcing coordinate as seed plus arms.**
-
-The right-hand side of the `V_S` Galerkin ODE reports its forcing through
-`galTameForce`; on the truncation this coordinate is the corresponding
-eigen-coefficient of the static seed `𝒩(0)` plus that of the embedded arm sum,
-and it vanishes off the truncation.  Combined with `lowRegSeedMass` for the
-seed and with `a2PerIdxLin` / `a1PerIdxLin` for the arms, this is the per-mode
-form a Galerkin energy estimate pairs against.
-
-The hypotheses are the fields of `IsLowSolve` at the six numbers: `δ < 1`,
-`0 ≤ δ ≤ 1/3`, the realization bound at radius `P`, and continuity of the
-smooth core `coreN` at the very realization `lowregNfun` uses. -/
 theorem galForceArm (g₀ : SmoothRiemannianMetric I M)
     {δ Ctop B1 ρ P : ℝ} (hδ : δ < 1) (hδ0 : 0 ≤ δ) (hδ3 : δ ≤ 1 / 3)
     (hCtop : 0 ≤ Ctop) (hB1 : 0 ≤ B1) (hρ : 0 < ρ) (hP : 0 < P)

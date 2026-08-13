@@ -2,12 +2,6 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.LowRegBgC0Amix
 import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.LowRegBgC0PairRic
 import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.LowRegBgC0PairEst
 
-/-!
-# Order-zero completed coefficient pair estimate
-
-Internal assembly layer for the low-regularity order-zero refold.
--/
-
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
@@ -395,7 +389,6 @@ theorem lowOneIntPairH2
   rw [lowOneIntSub (I := I) (M := M)
     g T U hδ_lt hδT hδU hδZ]
   simpa only [lowOneADiff, Φ, S, D, lowJetSq, Nat.reduceAdd] using hpath
-
 
 end LowRegBgC0Core
 end DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral

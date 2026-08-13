@@ -3,13 +3,6 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.ConvFieldPDE
 
 set_option autoImplicit false
 
-/-!
-# Scalar-curvature convergence on an open time interval
-
-This module reads the fixed-window pointwise scalar producer through the one
-subsequence and one limit metric family supplied by `OpenConvOut`.
--/
-
 noncomputable section
 
 open Set Function Filter Bundle Manifold TopologicalSpace Tensor0SBundle
@@ -31,8 +24,6 @@ variable (Φ : PointedCGHMaps (I := I) X P subseq)
 
 namespace OpenConvOut
 
-/-- Scalar curvature converges pointwise at every carrier time of an open
-interval, using the canonical compact window that contains that time. -/
 theorem scalar_conv
     {R : letI : TopologicalSpace P.M := P.topology
       letI : ChartedSpace H P.M := P.charted
@@ -113,8 +104,6 @@ theorem scalar_conv
       (fun k s hs ↦ hbound n k s hs) (fun q ↦ hcovTail n q)
       (OpenConvOut.at_window Φ co n) htWin x
 
-/-- The intrinsic squared Ricci norm converges pointwise at every carrier time
-of an open interval, using the same canonical compact windows as `scalar_conv`. -/
 theorem ricNorm_conv
     {R : letI : TopologicalSpace P.M := P.topology
       letI : ChartedSpace H P.M := P.charted

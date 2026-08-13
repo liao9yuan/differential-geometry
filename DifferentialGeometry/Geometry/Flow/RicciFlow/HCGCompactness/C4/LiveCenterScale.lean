@@ -2,13 +2,6 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.C4.GoodCoveri
 
 set_option autoImplicit false
 
-/-!
-# Stabilized ordered-net centers
-
-This file contains the provider-independent total center and finite live-slot
-API used by both the Step-C atom layer and the H6 branch construction.
--/
-
 noncomputable section
 
 namespace DifferentialGeometry
@@ -25,9 +18,6 @@ variable [CompleteSpace E]
 variable {H : Type uH} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H} [I.Boundaryless]
 
-/-- A total center family for one ordered-net slot. Before the slot becomes
-live it uses the pointed basepoint; once the slot is live it is definitionally
-the center carried by `seqCenter`. -/
 noncomputable def seqCenterD
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
     (hd : InjRadiusDecayInput (I := I) X) {D : Real}
@@ -35,8 +25,6 @@ noncomputable def seqCenterD
     (L : NetLimitData hd D P) (k gamma : Nat) : (X.obj (L.φ k)).M :=
   (seqCenter hd D P (L.φ k) gamma).getD (X.obj (L.φ k)).basepoint
 
-/-- The totalized center has exactly the ordered-net radius, including the
-dead-slot convention where both sides are zero. -/
 theorem seqCenterD_dist_eq
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
     (hd : InjRadiusDecayInput (I := I) X) {D : Real}
@@ -51,8 +39,6 @@ theorem seqCenterD_dist_eq
   cases OrderedNet.netCenter (X.obj (L.φ k)).basepoint (hd.lambda D)
       (hd.lambda_continuous D) gamma <;> simp
 
-/-- Totalized moving centers commute with strict refinement of the net-limit
-data. -/
 @[simp] theorem seqCenterD_subseq
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
     (hd : InjRadiusDecayInput (I := I) X) {D : Real}
@@ -61,8 +47,6 @@ data. -/
     (k gamma : Nat) :
     seqCenterD hd P (L.subseq hψ) k gamma = seqCenterD hd P L (ψ k) gamma := rfl
 
-/-- The finite subtype of slots whose Boolean profile stabilizes to live. Only
-these slots require metric and transition-map extraction. -/
 def LiveSlot
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
     {hd : InjRadiusDecayInput (I := I) X} {D : Real}
@@ -70,7 +54,6 @@ def LiveSlot
     (L : NetLimitData hd D P) (pb : hd.PackingBound D) (r : Real) :=
   {gamma : Fin (pb.A r) // L.alive (gamma : Nat) = true}
 
-/-- The stabilized live-slot subtype inherits finiteness from the frozen cage. -/
 noncomputable instance liveSlotFintype
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
     {hd : InjRadiusDecayInput (I := I) X} {D : Real}
@@ -82,8 +65,6 @@ noncomputable instance liveSlotFintype
       Subtype.val_injective
   exact Fintype.ofFinite (LiveSlot L pb r)
 
-/-- If a slot is live at one index, its totalized center recovers the actual
-`some` value. -/
 theorem seqCenterD_some
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
     (hd : InjRadiusDecayInput (I := I) X) {D : Real}
@@ -95,8 +76,6 @@ theorem seqCenterD_some
   | none => simp [hc] at h
   | some c => simp [seqCenterD, hc]
 
-/-- A slot whose stabilized Boolean is live eventually agrees with the
-totalized center family. -/
 theorem seqCenterD_live
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
     (hd : InjRadiusDecayInput (I := I) X) {D : Real}
@@ -107,7 +86,6 @@ theorem seqCenterD_live
   (L.alive_eventually gamma).mono fun k hk =>
     seqCenterD_some hd P L k gamma (hk.trans hgamma)
 
-/-- A slot whose stabilized Boolean is dead eventually has no center. -/
 theorem seqCenter_dead
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
     (hd : InjRadiusDecayInput (I := I) X) {D : Real}

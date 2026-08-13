@@ -2,12 +2,6 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.Connection.Christo
 
 set_option autoImplicit false
 
-
-
-
-
-
-
 noncomputable section
 
 namespace DifferentialGeometry.PDE.RicciFlow
@@ -27,7 +21,6 @@ section Components
 
 variable {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
 variable {u : Set M}
-
 
 omit [SigmaCompactSpace M] in
 theorem christoffelMetricVariationEquationInFrameOn_of_metricVariation
@@ -60,14 +53,6 @@ theorem christoffelMetricVariationEquationInFrameOn_of_metricVariation
     (connectionVariationPairing_of_metricVariation
       (I := I) S hS frame hframe hu pairDt metricCovDerivDt
       hpair hvarDiff hmetric hunique)
-
-
-
-
-
-
-
-
 
 omit [SigmaCompactSpace M] in
 theorem christoffelEvolution_of_metricFrameTimeRegularity
@@ -157,11 +142,6 @@ theorem christoffelEvolution_of_metricFrameTimeRegularity
     · ring
   simpa [gamma, target, christoffelEvolutionRHSInFrame] using hGamma
 
-
-
-
-
-
 omit [SigmaCompactSpace M] in
 theorem gammaEvolOfInv
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
@@ -247,8 +227,6 @@ theorem gammaEvolOfInv
       ring
     · ring
   simpa [gamma, target, christoffelEvolutionRHSInFrame] using hGamma
-
-
 
 omit [SigmaCompactSpace M] in
 theorem gammaEvolLocal
@@ -336,11 +314,6 @@ theorem gammaEvolLocal
     · ring
   simpa [gamma, target, christoffelEvolutionRHSInFrame] using hGamma
 
-
-
-
-
-
 omit [SigmaCompactSpace M] in
 theorem christoffelEvolution_of_spacetimeSmoothMetric
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
@@ -369,11 +342,6 @@ theorem christoffelEvolution_of_spacetimeSmoothMetric
       (I := I) S hS gInv gInvDt frame hreg nablaRic hnabla)
     (metricCovDerivDerivativeIsRicciFlowInFrame_neg_two
       (M := M) (Idx := Idx) nablaRic)
-
-
-
-
-
 
 omit [SigmaCompactSpace M] in
 theorem evol_christoffel_inFrame
@@ -414,9 +382,6 @@ theorem evol_christoffel_inFrame
     (christoffelEvolutionRHSInFrame_eq_coordinates_rhs
       (M := M) gInv nablaRic (t : Real) x i j k)
 
-
-
-
 omit [SigmaCompactSpace M] in
 theorem christoffelEvolution_of_ricciFlowMetricVariation
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
@@ -450,8 +415,6 @@ theorem christoffelEvolution_of_ricciFlowMetricVariation
       (I := I) S hS frame hframe hu pairDt metricCovDerivDt nablaRic
       hpair hvarDiff hmetric hmetricRicci hunique)
 
-
-
 omit [SigmaCompactSpace M] [T2Space M] in
 theorem christoffelEvolution_of_koszul
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
@@ -469,7 +432,6 @@ theorem christoffelEvolution_of_koszul
     (I := I) S gInv frame hframe nablaRic hinv
     (connectionVariationPairing_of_koszul
       (I := I) S frame pairDt nablaRic hdt hkoszul)
-
 
 end Components
 

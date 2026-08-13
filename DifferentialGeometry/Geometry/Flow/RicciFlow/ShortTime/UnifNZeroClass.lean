@@ -1,15 +1,6 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.UnifNZeroBound
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.UnifDeTurckRHSOne
 
-/-!
-# Explicit class-uniform zero-state package
-
-This module packages the already-proved uniform static Ricci--DeTurck one-jet
-bound as the `zeroBd` face of the low-regularity common-time interface.  The
-continuity of the smooth core remains an explicit input because it is produced
-together with the future tame/A2/affine packet.
--/
-
 noncomputable section
 
 open Bundle Manifold MeasureTheory Set Filter Tensor0SBundle
@@ -32,16 +23,9 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
   [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
   [T2Space M] [SigmaCompactSpace M]
 
-/-! ### Explicit zero-state data and proof packages -/
-
-/-- The scalar upper cap for the zero-state nonlinearity. -/
 structure LowRegZeroData where
   zeroBd : ℝ
 
-/-- One nonnegative zero-state cap works for every order-three class metric.
-
-The realization and smooth-core continuity arguments stay local to each metric;
-the scalar cap itself is fixed before the metric varies. -/
 structure IsLowZeroUnif
     (gBase : SmoothRiemannianMetric I M) (Λ : ℝ)
     (Z : LowRegZeroData) : Prop where
@@ -61,15 +45,12 @@ structure IsLowZeroUnif
       ‖lowRegN (I := I) (M := M) g gBase hR hδ hreal
         ⟨0, zero_mem_lowerState (I := I) (M := M) g 1 hR.le⟩‖ ≤ Z.zeroBd
 
-/-- The closed zero-state cap built from a uniform static-field one-jet cap. -/
 noncomputable def lowZeroData
     (gBase : SmoothRiemannianMetric I M) (Λ Ksup : ℝ) : LowRegZeroData where
   zeroBd := nZeroC Ksup Λ
     ((riemannianVolumeMeasure (I := I) (M := M) gBase).real Set.univ)
     (Module.finrank ℝ E)
 
-/-- A supplied class-uniform static-field one-jet cap gives the explicit
-zero-state package. -/
 theorem lowZero_unif_of
     (gBase : SmoothRiemannianMetric I M) {Λ Ksup : ℝ}
     (hKsup : 0 ≤ Ksup)
@@ -100,8 +81,6 @@ theorem lowZero_unif_of
     simpa only [lowZeroData] using
       nZero_unif (I := I) (M := M) gBase g hR hδ hreal hcore hKsup hEq hsupg
 
-/-- Every fixed background and class parameter at least one admit one explicit
-class-uniform zero-state package. -/
 theorem exists_lowZero
     (gBase : SmoothRiemannianMetric I M) {Λ : ℝ} (hΛ : 1 ≤ Λ) :
     ∃ Z : LowRegZeroData,
@@ -111,8 +90,6 @@ theorem exists_lowZero
   exact ⟨lowZeroData (I := I) (M := M) gBase Λ Ksup,
     lowZero_unif_of (I := I) (M := M) gBase hKsup hsup⟩
 
-/-- Read a class-uniform zero-state package in the exact six-number
-`lowregNfun` shape consumed by `IsLowBoundsAt.hzero`. -/
 theorem lowZero_nfun
     {gBase : SmoothRiemannianMetric I M} {Λ : ℝ} {Z : LowRegZeroData}
     (hZ : IsLowZeroUnif (I := I) (M := M) gBase Λ Z)

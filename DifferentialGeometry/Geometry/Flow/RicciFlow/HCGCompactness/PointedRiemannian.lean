@@ -4,14 +4,6 @@ import DifferentialGeometry.Geometry.Metric.Basic
 
 set_option autoImplicit false
 
-
-
-
-
-
-
-
-
 noncomputable section
 
 universe u uE uH
@@ -25,11 +17,6 @@ open scoped Manifold ContDiff Bundle
 variable {E : Type uE} [NormedAddCommGroup E] [NormedSpace Real E]
 variable [FiniteDimensional Real E] [CompleteSpace E]
 variable {H : Type uH} [TopologicalSpace H]
-
-
-
-
-
 
 structure PointedRiemannianManifold
     (I : ModelWithCorners Real E H) where
@@ -47,13 +34,11 @@ namespace PointedRiemannianManifold
 
 variable {I : ModelWithCorners Real E H}
 
-
 def repoint (X : PointedRiemannianManifold.{u, uE, uH} (I := I)) (x : X.M) :
     PointedRiemannianManifold.{u, uE, uH} (I := I) :=
   { X with basepoint := x }
 
 end PointedRiemannianManifold
-
 
 structure PointedRiemannianSeq (I : ModelWithCorners Real E H) where
   obj : Nat -> PointedRiemannianManifold.{u, uE, uH} (I := I)
@@ -62,23 +47,18 @@ namespace PointedRiemannianSeq
 
 variable {I : ModelWithCorners Real E H}
 
-
 def basepoint (X : PointedRiemannianSeq.{u, uE, uH} (I := I)) (i : Nat) :
     (X.obj i).M :=
   (X.obj i).basepoint
-
 
 def subseq (X : PointedRiemannianSeq.{u, uE, uH} (I := I)) (f : Nat -> Nat) :
     PointedRiemannianSeq.{u, uE, uH} (I := I) where
   obj := fun i => X.obj (f i)
 
-
 def repoint (X : PointedRiemannianSeq.{u, uE, uH} (I := I))
     (b : forall i : Nat, (X.obj i).M) :
     PointedRiemannianSeq.{u, uE, uH} (I := I) where
   obj i := (X.obj i).repoint (b i)
-
-
 
 omit [FiniteDimensional ℝ E] [CompleteSpace E] in
 theorem connected_subseq
@@ -95,12 +75,6 @@ theorem connected_subseq
   simpa only [subseq] using hX (f k)
 
 end PointedRiemannianSeq
-
-
-
-
-
-
 
 def MetricComplete {I : ModelWithCorners Real E H}
     (X : PointedRiemannianManifold.{u, uE, uH} (I := I)) : Prop :=
@@ -123,8 +97,6 @@ def MetricComplete {I : ModelWithCorners Real E H}
   CompleteSpace X.M
 
 namespace MetricComplete
-
-
 
 omit [CompleteSpace E] in
 theorem complete {I : ModelWithCorners Real E H}
@@ -151,7 +123,6 @@ theorem complete {I : ModelWithCorners Real E H}
 
 end MetricComplete
 
-
 structure SeqMetricComplete {I : ModelWithCorners Real E H}
     (X : PointedRiemannianSeq.{u, uE, uH} (I := I)) : Prop where
   complete : forall i : Nat, MetricComplete (I := I) (X.obj i)
@@ -159,7 +130,6 @@ structure SeqMetricComplete {I : ModelWithCorners Real E H}
 namespace SeqMetricComplete
 
 variable {I : ModelWithCorners Real E H}
-
 
 omit [CompleteSpace E] in
 theorem subseq

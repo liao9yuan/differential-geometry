@@ -8,59 +8,6 @@ set_option linter.unusedSectionVars false
 set_option linter.unusedFintypeInType false
 set_option backward.isDefEq.respectTransparency false
 
-/-!
-# The re-lowering operator and its covariant Leibniz defect (Route-K brick K2.6c)
-
-`Evolution/ForwardUniqueRmBridge.lean` identified the R4 carrier mismatch as a concrete
-operator (`mixLow_eq_rm04`): the `g₁`-lowered Riemann tensor of `g₂` is the own-lowered
-`Rm04₂` with its **last slot precomposed by** `Φ = g₂♯ ∘ g₁♭` (`sharpFlat`).  This file
-builds that re-lowering as a field operator and computes its first-order covariant
-Leibniz defect.
-
-## The representation
-
-The `(0,s)` stack carries no covariant derivative of a mixed `(1,1)` field, so `Φ` cannot
-be differentiated directly.  Instead the last-slot precomposition is realized as a
-`g₂`-trace of a tensor product,
-
-```
-reLower g₁ g₂ T = tr_{g₂} ((T ⊗ g₁) · reLowerPerm),
-```
-
-where `reLowerPerm` moves `T`'s last slot and `g₁`'s first slot to the front (the two slots
-`metricTraceFirstTwoField` contracts) and keeps `T₀ … T_{s-1}, (g₁)₁` in order.  This is a
-smooth field by construction, and `reLower_apply` checks it against the intended semantics
-(`Function.update`-form last-slot precomposition by `sharpFlat`), with `reLower_rm04`
-the `mixLow_eq_rm04` instance.
-
-## The defect
-
-Differentiating the three layers — `nabla_metricTraceFirstTwo0S` through the trace,
-`totalNabla0SFun_domDomCongr` through the reindexing, `nabla0SFun_product_eval` through the
-product — gives
-
-```
-∇²(reLower T) − reLower(∇²T) = reLowerPair g₂ T (∇²g₁),
-```
-
-with `reLowerPair` the same trace-of-product construction with `g₁` replaced by an arbitrary
-`(0,3)` field.  By `nabla2_metric1` (`∇²g₁ = −lapDiffFlux g₁ g₂ g₁`) the right-hand side is
-**algebraic** in the connection-difference flux and `T`: no derivative of `T` beyond the one
-displayed and no derivative of the difference carrier appears.
-
-## The payoff
-
-Instantiating `lapComm_eq_div_flux` with `L = reLowerOp` turns the abstract defect carriers
-of the R4 organization into explicit ones:
-
-```
-Δ₂(reLower T) − reLower(Δ₂ T) = div₂(reLowerPair g₂ T (∇²g₁)) + tr_{g₂}(reLowerPair g₂ (∇²T) (∇²g₁)).
-```
-
-Both carriers are algebraic in `(A₀₃-flux, T, ∇²T)`.  Norm bounds are out of scope here;
-the `lapDiffFlux_eval`/`fluxNormSq_le` pattern of `ForwardUniqueRmBounds.lean` covers them.
--/
-
 noncomputable section
 
 namespace DifferentialGeometry.PDE.RicciFlow
@@ -77,14 +24,8 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 variable [IsManifold I 1 M] [IsManifold I 2 M] [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
 variable [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] [I.Boundaryless]
 
-/-! ## The re-lowering slot permutation -/
-
 section Perm
 
-/-- **Slot permutation for the re-lowering operator.**  On `Fin (s+3)` it sends
-`k ↦ k+2` for `k < s`, `s ↦ 0`, `s+1 ↦ 1` and fixes `s+2`: it moves the last slot of `T`
-and the first slot of `g₁` in `T ⊗ g₁` to the two leading positions contracted by
-`metricTraceFirstTwoField`, leaving `T₀ … T_{s-1}, (g₁)₁` in order. -/
 def reLowerPerm (s : ℕ) : Equiv.Perm (Fin (s + 1 + 2)) :=
   Equiv.ofLeftInverseOfCardLE (le_refl _)
     (fun k : Fin (s + 1 + 2) =>
@@ -113,8 +54,6 @@ theorem reLowerPerm_val (s : ℕ) (k : Fin (s + 1 + 2)) :
       else if (k : ℕ) = s + 1 then ⟨1, by omega⟩ else k : Fin (s + 1 + 2)) : ℕ) = _
   split_ifs <;> rfl
 
-/-- The first `s+1` slots of the permuted product tuple: the tail with its **last** entry
-replaced by the first trace vector. -/
 theorem reLowerPerm_first {s : ℕ} {x : M} (a b : TangentSpace I x)
     (tail : Fin (s + 1) -> TangentSpace I x) (k : Fin (s + 1)) :
     metricTraceInput (I := I) a b tail (reLowerPerm s (Fin.castAdd 2 k)) =
@@ -140,8 +79,6 @@ theorem reLowerPerm_first {s : ℕ} {x : M} (a b : TangentSpace I x)
     simp only [hv]
     rw [dif_pos (trivial : True), hlast, Function.update_self]
 
-/-- Slot `s+1` of the permuted product tuple (the first slot of the second factor) is the
-**second** trace vector. -/
 theorem reLowerPerm_snd0 {s : ℕ} {x : M} (a b : TangentSpace I x)
     (tail : Fin (s + 1) -> TangentSpace I x) :
     metricTraceInput (I := I) a b tail (reLowerPerm s (Fin.natAdd (s + 1) (0 : Fin 2))) = b := by
@@ -153,8 +90,6 @@ theorem reLowerPerm_snd0 {s : ℕ} {x : M} (a b : TangentSpace I x)
   simp only [hv]
   rw [dif_neg (by omega : ¬((1 : ℕ) = 0)), dif_pos (trivial : True)]
 
-/-- Slot `s+2` of the permuted product tuple (the second slot of the second factor) is the
-**last** entry of the tail. -/
 theorem reLowerPerm_snd1 {s : ℕ} {x : M} (a b : TangentSpace I x)
     (tail : Fin (s + 1) -> TangentSpace I x) :
     metricTraceInput (I := I) a b tail (reLowerPerm s (Fin.natAdd (s + 1) (1 : Fin 2))) =
@@ -170,12 +105,8 @@ theorem reLowerPerm_snd1 {s : ℕ} {x : M} (a b : TangentSpace I x)
 
 end Perm
 
-/-! ## The re-lowering operator -/
-
 section ReLower
 
-/-- **General-basis evaluation of the first-two metric trace.**  Basis-free companion of
-`metricTraceFirstTwoField_eq_sum`, which is tied to the centred coordinate frame. -/
 theorem traceField_eq_sum {s : ℕ} (g : SmoothRiemannianMetric I M)
     (A : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
       (n := (∞ : WithTop ℕ∞)) (s + 2))
@@ -190,7 +121,6 @@ theorem traceField_eq_sum {s : ℕ} (g : SmoothRiemannianMetric I M)
     metricTraceFirstTwo0SAt_eq_sum_basis (I := I) g basis gInv hinv (A x) tail]
   rfl
 
-/-- Exchange of two nested pairs of finite sums. -/
 private theorem sum_comm4 {Idx : Type*} [Fintype Idx] (F : Idx -> Idx -> Idx -> Idx -> Real) :
     (∑ a : Idx, ∑ b : Idx, ∑ i : Idx, ∑ j : Idx, F a b i j) =
       ∑ i : Idx, ∑ j : Idx, ∑ a : Idx, ∑ b : Idx, F a b i j := by
@@ -204,7 +134,6 @@ private theorem sum_comm4 {Idx : Type*} [Fintype Idx] (F : Idx -> Idx -> Idx -> 
     _ = ∑ i : Idx, ∑ j : Idx, ∑ a : Idx, ∑ b : Idx, F a b i j :=
         Finset.sum_congr rfl fun i _ => Finset.sum_comm
 
-/-- Expansion of one slot of a covariant tensor along a finite basis. -/
 private theorem slot_expand {s : ℕ} {Idx : Type*} [Fintype Idx] {x : M}
     (A : Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) s x)
     (m : Fin s -> TangentSpace I x) (i : Fin s) (c : Idx -> Real)
@@ -219,10 +148,6 @@ private theorem slot_expand {s : ℕ} {Idx : Type*} [Fintype Idx] {x : M}
         refine Finset.sum_congr rfl fun p _ => ?_
         rw [Tensor0SSpace.map_update_smul, smul_eq_mul]
 
-/-- **The re-lowering operator on `(0,s+1)` fields.**  `reLower g₁ g₂ T` precomposes the
-**last** slot of `T` with the endomorphism `Φ = g₂♯ ∘ g₁♭` of `sharpFlat`.  It is realized
-as the `g₂`-trace of the permuted product `T ⊗ g₁` (see `reLowerPerm`), which makes it a
-smooth field with no mixed-variance object anywhere in the construction. -/
 def reLower (g₁ g₂ : SmoothRiemannianMetric I M) {s : ℕ}
     (T : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
       (n := (∞ : WithTop ℕ∞)) (s + 1)) :
@@ -235,9 +160,6 @@ def reLower (g₁ g₂ : SmoothRiemannianMetric I M) {s : ℕ}
         (E := TangentSpace I) (n := (∞ : WithTop ℕ∞)) (s := s + 1) (q := 2)
         T (metricTensorField (I := I) g₁)))
 
-/-- **Basis evaluation of the re-lowering.**  The trace-of-product representation, read off
-in an arbitrary basis: the first trace index feeds `T`'s last slot, the second is paired by
-`g₁` against the last input vector. -/
 theorem reLower_eval (g₁ g₂ : SmoothRiemannianMetric I M) {s : ℕ}
     (T : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
       (n := (∞ : WithTop ℕ∞)) (s + 1))
@@ -273,7 +195,6 @@ theorem reLower_eval (g₁ g₂ : SmoothRiemannianMetric I M) {s : ℕ}
     rw [reLowerPerm_snd0 (I := I) (basis i) (basis j) tail,
       reLowerPerm_snd1 (I := I) (basis i) (basis j) tail]
 
-/-- `sharpFlat` written through the `raiseAt` basis formula of `ForwardUniqueRmBridge`. -/
 theorem sharpFlat_eq_raise (g₁ g₂ : SmoothRiemannianMetric I M)
     {Idx : Type*} [Fintype Idx] {x : M}
     (basis : Module.Basis Idx Real (TangentSpace I x)) (V : TangentSpace I x) :
@@ -295,8 +216,6 @@ theorem sharpFlat_eq_raise (g₁ g₂ : SmoothRiemannianMetric I M)
     (funext fun l => (hflat l).symm)]
   exact (raiseAt_lower (I := I) g₂ x basis (sharpFlat (I := I) g₁ g₂ x V)).symm
 
-/-- **The semantic pin (deliverable 1).**  The trace-of-product construction *is* the
-last-slot precomposition by `Φ = g₂♯ ∘ g₁♭`. -/
 theorem reLower_apply (g₁ g₂ : SmoothRiemannianMetric I M) {s : ℕ}
     (T : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
       (n := (∞ : WithTop ℕ∞)) (s + 1))
@@ -320,9 +239,6 @@ theorem reLower_apply (g₁ g₂ : SmoothRiemannianMetric I M) {s : ℕ}
   rw [g₁.symm x (basis l) (tail (Fin.last s))]
   ring
 
-/-- **The `mixLow_eq_rm04` instance (deliverable 1, checked against the pinned semantics).**
-Re-lowering the own-`g₂`-lowered curvature gives the `g₁`-lowered Riemann tensor of `g₂` —
-exactly the carrier of the R4 mismatch. -/
 theorem reLower_rm04 (g₁ g₂ : SmoothRiemannianMetric I M)
     (Rm2 : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
       (n := (∞ : WithTop ℕ∞)) 4)
@@ -343,14 +259,8 @@ theorem reLower_rm04 (g₁ g₂ : SmoothRiemannianMetric I M)
 
 end ReLower
 
-/-! ## The defect carrier -/
-
 section Pair
 
-/-- **Slot permutation for the re-lowering defect carrier.**  On `Fin (s+4)` it sends
-`k ↦ k+3` for `k < s`, `s ↦ 0`, `s+1 ↦ 2`, `s+2 ↦ 1` and fixes `s+3`: in `T ⊗ K` (with `K`
-a `(0,3)` field whose slot `0` is a derivative slot) it moves `T`'s last slot and `K`'s
-middle slot to the two leading positions contracted by `metricTraceFirstTwoField`. -/
 def reLowerPerm2 (s : ℕ) : Equiv.Perm (Fin (s + 1 + 3)) :=
   Equiv.ofLeftInverseOfCardLE (le_refl _)
     (fun k : Fin (s + 1 + 3) =>
@@ -384,7 +294,6 @@ theorem reLowerPerm2_val (s : ℕ) (k : Fin (s + 1 + 3)) :
       else if (k : ℕ) = s + 2 then ⟨1, by omega⟩ else k : Fin (s + 1 + 3)) : ℕ) = _
   split_ifs <;> rfl
 
-/-- The first `s+1` slots of the permuted `T ⊗ K` tuple. -/
 theorem reLowerPerm2_first {s : ℕ} {x : M} (a b : TangentSpace I x)
     (u : Fin (s + 2) -> TangentSpace I x) (k : Fin (s + 1)) :
     metricTraceInput (I := I) a b u (reLowerPerm2 s (Fin.castAdd 3 k)) =
@@ -410,7 +319,6 @@ theorem reLowerPerm2_first {s : ℕ} {x : M} (a b : TangentSpace I x)
     simp only [hv]
     rw [dif_pos (trivial : True), hlast, Function.update_self]
 
-/-- Slot `s+1` of the permuted `T ⊗ K` tuple is `K`'s derivative slot input. -/
 theorem reLowerPerm2_snd0 {s : ℕ} {x : M} (a b : TangentSpace I x)
     (u : Fin (s + 2) -> TangentSpace I x) :
     metricTraceInput (I := I) a b u (reLowerPerm2 s (Fin.natAdd (s + 1) (0 : Fin 3))) = u 0 := by
@@ -423,7 +331,6 @@ theorem reLowerPerm2_snd0 {s : ℕ} {x : M} (a b : TangentSpace I x)
   rw [dif_neg (by omega : ¬((2 : ℕ) = 0)), dif_neg (by omega : ¬((2 : ℕ) = 1))]
   exact congrArg u (Fin.ext (by simp))
 
-/-- Slot `s+2` of the permuted `T ⊗ K` tuple is the **second** trace vector. -/
 theorem reLowerPerm2_snd1 {s : ℕ} {x : M} (a b : TangentSpace I x)
     (u : Fin (s + 2) -> TangentSpace I x) :
     metricTraceInput (I := I) a b u (reLowerPerm2 s (Fin.natAdd (s + 1) (1 : Fin 3))) = b := by
@@ -436,7 +343,6 @@ theorem reLowerPerm2_snd1 {s : ℕ} {x : M} (a b : TangentSpace I x)
   simp only [hv]
   rw [dif_neg (by omega : ¬((1 : ℕ) = 0)), dif_pos (trivial : True)]
 
-/-- Slot `s+3` of the permuted `T ⊗ K` tuple is the **last** input vector. -/
 theorem reLowerPerm2_snd2 {s : ℕ} {x : M} (a b : TangentSpace I x)
     (u : Fin (s + 2) -> TangentSpace I x) :
     metricTraceInput (I := I) a b u (reLowerPerm2 s (Fin.natAdd (s + 1) (2 : Fin 3))) =
@@ -451,11 +357,6 @@ theorem reLowerPerm2_snd2 {s : ℕ} {x : M} (a b : TangentSpace I x)
   rw [dif_neg (by omega : ¬(s + 3 = 0)), dif_neg (by omega : ¬(s + 3 = 1))]
   exact congrArg u (Fin.ext (by simp))
 
-/-- **The defect carrier.**  `reLowerPair g₂ T K` is the bilinear `g₂`-contraction of a
-`(0,s+1)` field `T` with a `(0,3)` field `K`, pairing `T`'s last slot against `K`'s middle
-slot; `K`'s first slot becomes the leading (derivative) slot of the result and `K`'s last
-slot becomes its trailing slot.  With `K = ∇²g₁` this is exactly the Leibniz defect of
-`reLower` (`nabla_reLower`). -/
 def reLowerPair (g₂ : SmoothRiemannianMetric I M) {s : ℕ}
     (T : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
       (n := (∞ : WithTop ℕ∞)) (s + 1))
@@ -469,7 +370,6 @@ def reLowerPair (g₂ : SmoothRiemannianMetric I M) {s : ℕ}
       (MultilinearSection.product (𝕜 := Real) (F := E) (IB := I)
         (E := TangentSpace I) (n := (∞ : WithTop ℕ∞)) (s := s + 1) (q := 3) T K))
 
-/-- Basis evaluation of the defect carrier. -/
 theorem reLowerPair_eval (g₂ : SmoothRiemannianMetric I M) {s : ℕ}
     (T : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
       (n := (∞ : WithTop ℕ∞)) (s + 1))
@@ -519,11 +419,8 @@ theorem reLowerPair_eval (g₂ : SmoothRiemannianMetric I M) {s : ℕ}
 
 end Pair
 
-/-! ## The covariant Leibniz defect -/
-
 section Defect
 
-/-- Unfolding lemma for `reLower` (the trace-of-product representation). -/
 theorem reLower_eq_trace (g₁ g₂ : SmoothRiemannianMetric I M) {s : ℕ}
     (T : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
       (n := (∞ : WithTop ℕ∞)) (s + 1)) :
@@ -535,8 +432,6 @@ theorem reLower_eq_trace (g₁ g₂ : SmoothRiemannianMetric I M) {s : ℕ}
             (E := TangentSpace I) (n := (∞ : WithTop ℕ∞)) (s := s + 1) (q := 2)
             T (metricTensorField (I := I) g₁))) := rfl
 
-/-- The Levi-Civita connection of a smooth metric is `C¹`-locally smooth (the hypothesis
-shape `nabla_metricTraceFirstTwo0S` consumes). -/
 private theorem metricCov_one (g : SmoothRiemannianMetric I M) :
     CovariantDerivative.ContMDiffCovariantDerivativeLocally
       (I := I) (E := E) (M := M) (metricCov (I := I) g) (1 : WithTop ℕ∞) := by
@@ -544,9 +439,6 @@ private theorem metricCov_one (g : SmoothRiemannianMetric I M) :
     (DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric_contMDiffCovariantDerivativeLocally_one
       (I := I) (M := M) g)
 
-/-- **Evaluated tensor-product Leibniz rule for the canonical total covariant derivative.**
-Arbitrary-slot form of `nabla0SFun_product_eval`, obtained by realizing the direction and
-the slots as values of smooth sections. -/
 theorem nablaProd_eval {s q : ℕ}
     (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
     (A : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
@@ -591,7 +483,6 @@ theorem nablaProd_eval {s q : ℕ}
   simp only [hV, hXsec] at h1 h2
   rw [h1, h2]
 
-/-- Replacing the last slot of a `Fin.cons` tuple. -/
 private theorem update_cons_last {s : ℕ} {x : M} (X : TangentSpace I x)
     (tail : Fin (s + 1) -> TangentSpace I x) (v : TangentSpace I x) :
     Function.update (Fin.cons X tail : Fin (s + 1 + 1) -> TangentSpace I x)
@@ -613,14 +504,12 @@ private theorem update_cons_last {s : ℕ} {x : M} (X : TangentSpace I x)
         exact fun hc => hj (Fin.succ_injective _ hc)
       rw [Function.update_of_ne hne, Function.update_of_ne hj, Fin.cons_succ]
 
-/-- The last entry of a `Fin.cons` tuple. -/
 private theorem cons_last {s : ℕ} {x : M} (X : TangentSpace I x)
     (tail : Fin (s + 1) -> TangentSpace I x) :
     (Fin.cons X tail : Fin (s + 1 + 1) -> TangentSpace I x) (Fin.last (s + 1)) =
       tail (Fin.last s) := by
   rw [← Fin.succ_last, Fin.cons_succ]
 
-/-- Recognizing a `Fin.cons` of a `Fin 2` tuple as a `vec3`. -/
 private theorem cons2_vec3 {x : M} (X Y Z : TangentSpace I x)
     (v : Fin 2 -> TangentSpace I x) (h0 : v 0 = Y) (h1 : v 1 = Z) :
     (Fin.cons X v : Fin 3 -> TangentSpace I x) = vec3 (I := I) X Y Z := by
@@ -636,7 +525,6 @@ private theorem cons2_vec3 {x : M} (X Y Z : TangentSpace I x)
     rw [show (2 : Fin 3) = (1 : Fin 2).succ from rfl, Fin.cons_succ, h1]
     simp [vec3]
 
-/-- **The first-order covariant Leibniz defect of the re-lowering, pointwise.** -/
 theorem nabla_reLower_eval (g₁ g₂ : SmoothRiemannianMetric I M) {s : ℕ}
     (T : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
       (n := (∞ : WithTop ℕ∞)) (s + 1))
@@ -684,7 +572,7 @@ theorem nabla_reLower_eval (g₁ g₂ : SmoothRiemannianMetric I M) {s : ℕ}
   refine Finset.sum_congr rfl fun j _ => ?_
   rw [← mul_add]
   congr 1
-  -- the per-index Leibniz identity
+
   rw [totalNabla0SFun_domDomCongr (I := I) (metricCov (I := I) g₂) (reLowerPerm s)
       (MultilinearSection.product (𝕜 := Real) (F := E) (IB := I)
         (E := TangentSpace I) (n := (∞ : WithTop ℕ∞)) (s := s + 1) (q := 2)
@@ -723,16 +611,6 @@ theorem nabla_reLower_eval (g₁ g₂ : SmoothRiemannianMetric I M) {s : ℕ}
     update_cons_last (I := I) X tail (basis i), cons_last (I := I) X tail,
     Fin.tail_cons, Fin.cons_zero]
 
-/-- **Deliverable 2: the covariant Leibniz defect of the re-lowering.**
-
-`∇²` passes through `reLower` up to the algebraic pairing of `T` with `∇²g₁`:
-
-```
-∇²(reLower T) = reLower(∇²T) + reLowerPair g₂ T (∇²g₁).
-```
-
-The defect carries **no** derivative of `T` beyond the one already displayed and no
-derivative of the re-lowering endomorphism: it is bilinear in `T` and `∇²g₁`. -/
 theorem nabla_reLower (g₁ g₂ : SmoothRiemannianMetric I M) {s : ℕ}
     (T : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
       (n := (∞ : WithTop ℕ∞)) (s + 1)) :
@@ -766,9 +644,6 @@ theorem nabla_reLower (g₁ g₂ : SmoothRiemannianMetric I M) {s : ℕ}
       (s + 1) (metricCov (I := I) g₂) Y (reLower (I := I) g₁ g₂ T) x slots
   exact totalNabla0SRealizes_unique h1 h2
 
-/-- **The defect is `A₀₃`-algebraic.**  Rewriting `∇²g₁` through `nabla2_metric1`
-(`∇²g₁ = −lapDiffFlux g₁ g₂ g₁`) exhibits the Leibniz defect as an algebraic expression in
-the connection-difference flux and `T`. -/
 theorem nabla_reLower_flux (g₁ g₂ : SmoothRiemannianMetric I M) {s : ℕ}
     (T : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
       (n := (∞ : WithTop ℕ∞)) (s + 1)) :
@@ -778,7 +653,6 @@ theorem nabla_reLower_flux (g₁ g₂ : SmoothRiemannianMetric I M) {s : ℕ}
           (-lapDiffFlux (I := I) g₁ g₂ (metricTensorField (I := I) g₁)) := by
   rw [nabla_reLower (I := I) g₁ g₂ T, nabla2_metric1 (I := I) g₁ g₂]
 
-/-- Equal metrics: the re-lowering is the identity, so its Leibniz defect vanishes. -/
 theorem reLowerPair_self (g : SmoothRiemannianMetric I M) {s : ℕ}
     (T : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
       (n := (∞ : WithTop ℕ∞)) (s + 1)) :
@@ -798,13 +672,8 @@ theorem reLowerPair_self (g : SmoothRiemannianMetric I M) {s : ℕ}
 
 end Defect
 
-/-! ## The `[reLower, Δ₂]` commutator in divergence form -/
-
 section Payoff
 
-/-- **The rank-indexed re-lowering operator**, the shape `lapCommFlux` / `lapCommRem` /
-`lapComm_eq_div_flux` consume.  A scalar has no slot to re-lower, so the operator is the
-identity in rank `0`. -/
 def reLowerOp (g₁ g₂ : SmoothRiemannianMetric I M) :
     ∀ k : ℕ, Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
         (n := (∞ : WithTop ℕ∞)) k ->
@@ -818,10 +687,6 @@ def reLowerOp (g₁ g₂ : SmoothRiemannianMetric I M) :
       (n := (∞ : WithTop ℕ∞)) (k + 1)) :
     reLowerOp (I := I) g₁ g₂ (k + 1) T = reLower (I := I) g₁ g₂ T := rfl
 
-/-- **The commutator flux is the algebraic defect carrier.**  The abstract
-`lapCommFlux` of `ForwardUniqueRmBridge.lean`, instantiated at `L = reLowerOp`, is exactly
-`reLowerPair g₂ T (∇²g₁)` — bilinear in `T` and `∇²g₁`, hence `A₀₃`-algebraic by
-`nabla2_metric1`. -/
 theorem lapCommFlux_reLower (g₁ g₂ : SmoothRiemannianMetric I M) {k : ℕ}
     (T : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
       (n := (∞ : WithTop ℕ∞)) (k + 1)) :
@@ -831,9 +696,6 @@ theorem lapCommFlux_reLower (g₁ g₂ : SmoothRiemannianMetric I M) {k : ℕ}
   rw [lapCommFlux, reLowerOp_succ, reLowerOp_succ, nabla_reLower]
   abel
 
-/-- **The `[reLower, Δ₂]` commutator in divergence form** (first half of deliverable 3).
-The flux carrier is explicit and algebraic; the remainder is identified in
-`lapCommRem_reLower`. -/
 theorem lapComm_reLower (g₁ g₂ : SmoothRiemannianMetric I M) {k : ℕ}
     (T : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
       (n := (∞ : WithTop ℕ∞)) (k + 1)) :
@@ -847,7 +709,6 @@ theorem lapComm_reLower (g₁ g₂ : SmoothRiemannianMetric I M) {k : ℕ}
   rw [lapCommFlux_reLower (I := I) g₁ g₂ T] at h
   simpa using h
 
-/-- The last entry of a trace-input tuple. -/
 private theorem traceInput_last {k : ℕ} {x : M} (a b : TangentSpace I x)
     (tail : Fin (k + 1) -> TangentSpace I x) :
     metricTraceInput (I := I) a b tail (Fin.last (k + 2)) = tail (Fin.last k) := by
@@ -857,8 +718,6 @@ private theorem traceInput_last {k : ℕ} {x : M} (a b : TangentSpace I x)
   rw [dif_neg (by omega : ¬(k + 2 = 0)), dif_neg (by omega : ¬(k + 2 = 1))]
   exact congrArg tail (Fin.ext (by simp))
 
-/-- Replacing the last entry of a trace-input tuple is replacing the last entry of its
-tail: the trace pair and the re-lowered slot never interfere. -/
 private theorem traceInput_update_last {k : ℕ} {x : M} (a b : TangentSpace I x)
     (tail : Fin (k + 1) -> TangentSpace I x) (v : TangentSpace I x) :
     Function.update (metricTraceInput (I := I) a b tail) (Fin.last (k + 2)) v =
@@ -880,9 +739,6 @@ private theorem traceInput_update_last {k : ℕ} {x : M} (a b : TangentSpace I x
         omega
       exact (Function.update_of_ne hne v tail).symm
 
-/-- **The re-lowering commutes with the first-two metric trace.**  `reLower` acts on the
-*last* slot and the trace contracts the *first two*, so the two operations are independent;
-the proof is the exchange of the two basis double sums. -/
 theorem trace_reLower (g₁ g₂ : SmoothRiemannianMetric I M) {k : ℕ}
     (A : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
       (n := (∞ : WithTop ℕ∞)) (k + 2 + 1)) :
@@ -933,9 +789,6 @@ theorem trace_reLower (g₁ g₂ : SmoothRiemannianMetric I M) {k : ℕ}
   simp only [hL, hR]
   exact sum_comm4 _
 
-/-- **The commutator remainder is the traced algebraic defect carrier.**  The abstract
-`lapCommRem` of `ForwardUniqueRmBridge.lean`, instantiated at `L = reLowerOp`, is the
-`g₂`-trace of `reLowerPair g₂ (∇²T) (∇²g₁)`: algebraic in `∇²T` and `∇²g₁`. -/
 theorem lapCommRem_reLower (g₁ g₂ : SmoothRiemannianMetric I M) {k : ℕ}
     (T : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
       (n := (∞ : WithTop ℕ∞)) (k + 1)) :
@@ -947,16 +800,6 @@ theorem lapCommRem_reLower (g₁ g₂ : SmoothRiemannianMetric I M) {k : ℕ}
     nabla_reLower, metricTraceFirstTwoField_add, trace_reLower]
   abel
 
-/-- **Deliverable 3: the concrete divergence-form `[reLower, Δ₂]` commutator.**
-
-```
-Δ₂(reLower T) − reLower(Δ₂ T) = div₂(reLowerPair g₂ T ∇²g₁) + tr_{g₂}(reLowerPair g₂ (∇²T) ∇²g₁),
-```
-
-with **both** carriers algebraic in `(∇²g₁, T, ∇²T)`; `nabla2_metric1` turns `∇²g₁` into
-`−lapDiffFlux g₁ g₂ g₁`, i.e. into the `A₀₃` connection-difference flux
-(`lapComm_reLower_flux`).  This retires the abstract defect carriers of the R4
-organization. -/
 theorem lapComm_reLower_eq (g₁ g₂ : SmoothRiemannianMetric I M) {k : ℕ}
     (T : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
       (n := (∞ : WithTop ℕ∞)) (k + 1)) :
@@ -970,8 +813,6 @@ theorem lapComm_reLower_eq (g₁ g₂ : SmoothRiemannianMetric I M) {k : ℕ}
             (metricNabla0S (I := I) g₂ (metricTensorField (I := I) g₁))) := by
   rw [lapComm_reLower (I := I) g₁ g₂ T, lapCommRem_reLower (I := I) g₁ g₂ T]
 
-/-- The same commutator with both carriers written through the connection-difference flux
-`A₀₃` (`nabla2_metric1`). -/
 theorem lapComm_reLower_flux (g₁ g₂ : SmoothRiemannianMetric I M) {k : ℕ}
     (T : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
       (n := (∞ : WithTop ℕ∞)) (k + 1)) :

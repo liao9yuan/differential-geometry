@@ -2,15 +2,6 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.LowRegBgC0Core
 import DifferentialGeometry.Analysis.DenseExtension
 import DifferentialGeometry.Analysis.Parabolic.QuasiLinear.TensorMaximalRegularity.NonautonomousL2Cross
 
-/-!
-# The affine packet of the refolded order-zero arm
-
-This module completes the radial smooth-core order-zero action on the two
-adjacent Sobolev scales and certifies its affine growth.  The packet `c0_pack`
-is stated before any time horizon or trajectory, so that a consumer can cap a
-radius against the growth constant `L` and only then build a trajectory.
--/
-
 noncomputable section
 
 open Bundle Manifold MeasureTheory Set Filter
@@ -313,14 +304,6 @@ private theorem a1_comm_any
   obtain ⟨_, _, _, _, hcomm⟩ := hpair A Q hQ hHi hLo
   simpa only [incl12, incl32] using hcomm
 
-/-- **The trajectory-free affine packet of the same-background order-zero
-refold.**  On every coefficient radius `ρ ≤ ρ₀` the refold supplies a pair of
-completed action maps `FHi`, `FLo` on the two adjacent scales, continuous,
-realizing the order-zero core action on smooth data, with a common affine growth
-certificate `‖F x‖ ≤ Z + L‖x‖` and the Sobolev-inclusion square.  Nothing here
-mentions a time horizon or a trajectory: `Z` and `L` depend only on `ρ, δ` and
-the realization bound, so a consumer may cap a radius against `L` before any
-trajectory exists. -/
 theorem c0_pack
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M) :

@@ -3,14 +3,6 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.C4.StepCSmoot
 
 set_option autoImplicit false
 
-/-!
-# Center equations in controlled normal-ball coordinates
-
-This file formulates the selected-branch center equation in the coordinates
-carried by an explicit `NormalBallChart`.  It is the provider-aware counterpart
-of the legacy fixed-trivialization equation `chartCmEqnB`.
--/
-
 noncomputable section
 
 namespace DifferentialGeometry
@@ -36,8 +28,6 @@ variable [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace
 
-/-- The selected-branch center equation expressed in the tangent coordinates
-of a controlled normal-ball chart. -/
 noncomputable def chartCmEqnC
     [IsContinuousRiemannianBundle E (fun x : M => TangentSpace I x)]
     (g : SmoothRiemannianMetric I M)
@@ -49,10 +39,6 @@ noncomputable def chartCmEqnC
   ∑ i, params.1 i •
     B.chartReadout c (c.hom z, c.hom (params.2 i))
 
-/-- Complete local center-equation data in one controlled normal-ball chart:
-the coordinates lie in the provider domain, the selected readout equation
-vanishes, its center derivative is invertible, and it has a strict local
-implicit solution. -/
 def HasCmSolC
     [IsContinuousRiemannianBundle E (fun x : M => TangentSpace I x)]
     (g : SmoothRiemannianMetric I M)
@@ -82,8 +68,6 @@ def HasCmSolC
 
 omit [T2Space (TangentBundle I M)] [CompleteSpace E] [ConnectedSpace M]
     [T3Space M] in
-/-- A zero weighted sum of selected inverse tangents gives the center equation
-in the coordinates of any controlled normal-ball chart. -/
 theorem chartCmC_zero_of_sum
     [IsContinuousRiemannianBundle E (fun x : M => TangentSpace I x)]
     (g : SmoothRiemannianMetric I M)
@@ -134,9 +118,6 @@ theorem chartCmC_zero_of_sum
     _ = 0 := map_zero _
 
 omit [CompleteSpace E] [ConnectedSpace M] [T3Space M] in
-/-- The controlled-chart center equation is jointly smooth wherever the
-center and point coordinates stay in the provider ball and every pair stays
-in the selected readout domain. -/
 theorem chartCmEqnC_cdAt
     [IsContinuousRiemannianBundle E (fun x : M => TangentSpace I x)]
     (g : SmoothRiemannianMetric I M)
@@ -201,8 +182,6 @@ theorem chartCmEqnC_cdAt
     exact hcomp
 
 omit [CompleteSpace E] [ConnectedSpace M] [T3Space M] in
-/-- The controlled-chart center equation has a strictly differentiable local
-implicit solution once its center derivative is invertible. -/
 theorem readoutSolC_strict
     [IsContinuousRiemannianBundle E (fun x : M => TangentSpace I x)]
     (g : SmoothRiemannianMetric I M)
@@ -245,8 +224,6 @@ theorem readoutSolC_strict
     z₀ params₀ _ hjoint hinv hzero
 
 omit [CompleteSpace E] [ConnectedSpace M] [T3Space M] in
-/-- The controlled-chart center equation has a finite-order smooth local
-implicit solution once its center derivative is invertible. -/
 theorem readoutSolC_cdAt
     [IsContinuousRiemannianBundle E (fun x : M => TangentSpace I x)]
     (g : SmoothRiemannianMetric I M)

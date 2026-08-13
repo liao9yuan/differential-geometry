@@ -515,7 +515,6 @@ private theorem three_corner_pair_h5_le
   dsimp only [V, W, z]
   nlinarith
 
-
 set_option backward.isDefEq.respectTransparency false in
 theorem edge_corner_h1_unif
     (hDim : Module.finrank ℝ E = 3)

@@ -4,13 +4,6 @@ import DifferentialGeometry.Geometry.Exponential.NormalBallGeodesic
 
 set_option autoImplicit false
 
-/-!
-# Minimizing inverse on intrinsic H6 normal balls
-
-This file discharges the provider-control hypotheses of `NormalBranchMin`
-directly from the intrinsic whole-ball readout carried by `H6NormalData`.
--/
-
 noncomputable section
 
 universe u uE uH
@@ -37,8 +30,6 @@ variable {I : ModelWithCorners Real E H} [I.Boundaryless]
 
 namespace H6NormalData
 
-/-- An intrinsic half-cage point satisfies all provider controls needed by the
-selected minimizing inverse. -/
 theorem halfCage_ctrl
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
     {hd : InjRadiusDecayInput (I := I) X}
@@ -144,7 +135,6 @@ theorem halfCage_ctrl
       _ = ENNReal.ofReal ρ := hsum
   exact ⟨hyTarget, hyCoord, hyp⟩
 
-/-- Half the squared distance is smooth on an intrinsic H6 half-cage. -/
 theorem halfSq_inf
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
     {hd : InjRadiusDecayInput (I := I) X}
@@ -231,8 +221,6 @@ theorem halfSq_inf
   · intro y hy
     exact d.halfCage_ctrl k hcomplete hconn x hρ hρChart hy
 
-/-- On an intrinsic H6 half-cage, the half-squared-distance gradient is the
-negative selected minimizing inverse tangent. -/
 theorem grad_half
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
     {hd : InjRadiusDecayInput (I := I) X}
@@ -334,8 +322,6 @@ theorem grad_half
   · intro z hz
     exact d.halfCage_ctrl k hcomplete hconn x hρ hρChart hz
 
-/-- On an intrinsic H6 half-cage, the half-squared-distance Hessian is the
-metric pairing with the derivative of the selected inverse. -/
 theorem hess_half
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
     {hd : InjRadiusDecayInput (I := I) X}
@@ -442,8 +428,6 @@ theorem hess_half
   · intro z hz
     exact d.halfCage_ctrl k hcomplete hconn x hρ hρChart hz
 
-/-- In an intrinsic H6 chart, the Levi-Civita derivative of the selected
-inverse tangent field is the pushforward of its model-space derivative. -/
 theorem inv_cov
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
     {hd : InjRadiusDecayInput (I := I) X}
@@ -649,8 +633,6 @@ theorem inv_cov
   rw [hsrc, htgt] at hmap
   simpa only [c, B, Vloc, VTan, Zloc, y0, pt, zInner] using hmap
 
-/-- In an intrinsic H6 chart, the controlled half-squared-distance Hessian is
-the negative provider-metric pairing with the model covariant derivative. -/
 theorem hess_coord
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
     {hd : InjRadiusDecayInput (I := I) X}
@@ -822,8 +804,6 @@ theorem hess_coord
           (fun u : E => (e.symm (u, xi)).2) z) v) w := by
             rw [c.metric_apply]
 
-/-- The H6 model-space covariant derivative is the Frechet derivative plus
-the raised Koszul correction of the provider metric. -/
 theorem cov_expand
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
     {hd : InjRadiusDecayInput (I := I) X}
@@ -936,8 +916,6 @@ theorem cov_expand
       (X.obj k).metric hzMetric) V hVmd v
   simpa only [c, V, VTan, Integral.Connection.metricCov] using hcov
 
-/-- The H6 inverse-linear and first metric-jet errors give the quantitative
-provider-chart Hessian lower bound. -/
 theorem hess_lower
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
     {hd : InjRadiusDecayInput (I := I) X}
@@ -1152,8 +1130,6 @@ theorem hess_lower
     (le_abs_self _).trans hKabs
   nlinarith
 
-/-- The H6 phase and acceleration budgets make the provider-chart Hessian at
-least one sixth of the pullback metric. -/
 theorem hess_sixth
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
     {hd : InjRadiusDecayInput (I := I) X}
@@ -1266,8 +1242,6 @@ theorem hess_sixth
     (mul_nonneg (by norm_num) (sq_nonneg ‖v‖)).trans hquad.1
   exact (mul_le_mul_of_nonneg_right hcoef hg0).trans hlower
 
-/-- Every controlled H6 half-cage squared-distance Hessian is positive
-definite, with no reference to the legacy exponential radius. -/
 theorem hess_pos
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
     {hd : InjRadiusDecayInput (I := I) X}
@@ -1445,8 +1419,6 @@ theorem hess_pos
     simpa only [c, hptDecode] using hhess
   nlinarith
 
-/-- A center selected inside an intrinsic H6 half-cage supplies the complete
-provider-native data for the controlled chart center equation. -/
 theorem center_data
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
     {hd : InjRadiusDecayInput (I := I) X}
@@ -1650,8 +1622,6 @@ theorem center_data
       hzBall hreadDom hsum'
   exact ⟨hyCtrl.1, hzBall, hxiBall, htgt, hreadDom, hzero⟩
 
-/-- A center selected inside an intrinsic H6 half-cage has an invertible
-provider-chart derivative and a strictly differentiable local solution. -/
 theorem center_sol
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
     {hd : InjRadiusDecayInput (I := I) X}

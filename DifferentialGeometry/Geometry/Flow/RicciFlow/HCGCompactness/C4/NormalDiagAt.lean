@@ -1,12 +1,5 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.C4.NormalPhaseEndpoint
 
-
-
-
-
-
-
-
 noncomputable section
 
 open Set Bundle Manifold
@@ -28,10 +21,6 @@ variable [FiniteDimensional Real E] [CompleteSpace E]
 variable [NeZero (Module.finrank Real E)]
 variable {H : Type uH} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H} [I.Boundaryless]
-
-
-
-
 
 theorem normalDiagAtFull
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
@@ -171,7 +160,6 @@ theorem normalDiagAtFull
     have hzEnd' := hrNormal hzEnd
     rw [hcoe]
     exact ⟨hzFirst', hzFirst', hzEnd'⟩
-
 
 theorem normalDiagAt
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}

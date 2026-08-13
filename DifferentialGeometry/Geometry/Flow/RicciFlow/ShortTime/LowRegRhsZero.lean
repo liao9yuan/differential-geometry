@@ -2,15 +2,6 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.LowRegInsertH1
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurckCoefficients.RHSPathIntegral
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.ParametricJetIntegral
 
-/-!
-# Low-regularity order-zero Ricci--DeTurck path coefficient
-
-This file assembles the cancellation-preserving order-zero coefficient bounds
-from the concrete low-regularity arms.  In dimension three, endpoint spectral
-`H3` bounds control the pointwise-in-path intrinsic `H1` jet and hence, by the
-parameter-integral jet theorem, the same jet of `rhsLow0PathIntegral`.
--/
-
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
@@ -39,10 +30,6 @@ variable
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
-/-- In dimension three, a common endpoint spectral `H3` bound controls the
-pointwise-in-path intrinsic `H1` jet of the complete order-zero
-Ricci--DeTurck coefficient.  The insertion arm is estimated only after its
-background cancellation, so no fourth metric derivative is used. -/
 theorem rhs0_h1
     (hDim : Module.finrank ℝ E = 3)
     (g₀ g_bg : SmoothRiemannianMetric I M)
@@ -129,8 +116,6 @@ theorem rhs0_h1
     simpa only [g₁] using htail)
   simpa only [B] using hout
 
-/-- The pointwise-in-path order-zero `H1` coefficient bound passes unchanged
-to its interval-integrated coefficient field. -/
 theorem rhs0_path_h1
     (hDim : Module.finrank ℝ E = 3)
     (g₀ g_bg : SmoothRiemannianMetric I M)

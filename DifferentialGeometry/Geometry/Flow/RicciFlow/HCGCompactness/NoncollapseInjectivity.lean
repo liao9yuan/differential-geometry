@@ -7,16 +7,6 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.C4.VolumeOver
 
 set_option autoImplicit false
 
-
-
-
-
-
-
-
-
-
-
 noncomputable section
 
 universe u uE uH
@@ -42,8 +32,6 @@ variable {H : Type uH} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H} [I.Boundaryless]
 
 namespace PointedFlowData
-
-
 
 def baseFlowBall
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
@@ -77,9 +65,6 @@ def baseFlowBall
 
 end PointedFlowData
 
-
-
-
 structure FlowBaseVolData
     (X : PointedFlowSeq.{u, uE, uH} (I := I)) where
   zero_mem : 0 ∈ X.D.carrier
@@ -87,8 +72,6 @@ structure FlowBaseVolData
   kappa_pos : 0 < kappa
   radius : Real
   radius_pos : 0 < radius
-
-
 
 structure IsFlowBaseVolBound
     {X : PointedFlowSeq.{u, uE, uH} (I := I)}
@@ -121,10 +104,6 @@ structure IsFlowBaseVolBound
     letI : T2Space (X.term i).M := (X.term i).t2
     (PointedFlowData.baseFlowBall (I := I) (X.term i)
       V.zero_mem V.radius V.radius_pos).IsKappaNoncollapsed V.kappa
-
-
-
-
 
 private lemma ofReal_add_mul {a b c : Real}
     (ha : 0 ≤ a) (hb : 0 ≤ b) :

@@ -13,7 +13,6 @@ import DifferentialGeometry.Geometry.Metric.Basic
 import Mathlib.Analysis.Calculus.Deriv.Basic
 import Mathlib.Topology.Order.IntermediateValue
 
-
 set_option autoImplicit false
 set_option backward.isDefEq.respectTransparency false
 
@@ -31,43 +30,29 @@ variable {I : ModelWithCorners Real E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 variable [IsManifold I 1 M] [IsManifold I 2 M]
 
-
-
-
-
-
-
-
 abbrev TwoTensorFamily : Type _ :=
   Real -> RawTwoTensorField (I := I) (M := M)
-
 
 abbrev TimeDependentVectorField : Type _ :=
   Real -> (x : M) -> TangentSpace I x
 
-
 abbrev TensorQuadraticFormFamily : Type _ :=
   Real -> (x : M) -> TangentSpace I x -> Real
-
 
 abbrev TensorNabla1Family : Type _ :=
   Real -> (x : M) ->
     Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) 3 x
 
-
 abbrev TensorNabla2Family : Type _ :=
   Real -> (x : M) ->
     Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) 4 x
-
 
 abbrev TwoTensorReaction : Type _ :=
   Real -> SmoothRiemannianMetric I M -> RawTwoTensorField (I := I) (M := M) ->
     RawTwoTensorField (I := I) (M := M)
 
-
 def TwoTensorSymmetricAt (A : RawTwoTensorField (I := I) (M := M)) (x : M) : Prop :=
   ∀ X Y : TangentSpace I x, A x X Y = A x Y X
-
 
 structure TwoTensorBilinearAt (A : RawTwoTensorField (I := I) (M := M)) (x : M) :
     Prop where
@@ -80,32 +65,23 @@ structure TwoTensorBilinearAt (A : RawTwoTensorField (I := I) (M := M)) (x : M) 
   smul_right : ∀ (c : Real) (X Z : TangentSpace I x),
     A x X (c • Z) = c * A x X Z
 
-
 def TwoTensorNonnegativeAt (A : RawTwoTensorField (I := I) (M := M)) (x : M) : Prop :=
   ∀ v : TangentSpace I x, 0 ≤ A x v v
 
-
 def TwoTensorPositiveDefiniteAt (A : RawTwoTensorField (I := I) (M := M)) (x : M) : Prop :=
   ∀ v : TangentSpace I x, v ≠ 0 -> 0 < A x v v
-
 
 def TwoTensorFamilySymmetricOn (S : TwoTensorFamily (I := I) (M := M))
     (U : Set Real) : Prop :=
   ∀ t, t ∈ U -> ∀ x, TwoTensorSymmetricAt (I := I) (M := M) (S t) x
 
-
 def TwoTensorFamilyNonnegativeOn (S : TwoTensorFamily (I := I) (M := M))
     (U : Set Real) : Prop :=
   ∀ t, t ∈ U -> ∀ x, TwoTensorNonnegativeAt (I := I) (M := M) (S t) x
 
-
 def TwoTensorFamilyNonnegativeAtTime (S : TwoTensorFamily (I := I) (M := M))
     (t : Real) : Prop :=
   ∀ x, TwoTensorNonnegativeAt (I := I) (M := M) (S t) x
-
-
-
-
 
 def tensorBarrierFamily
     (G : Real -> SmoothRiemannianMetric I M)
@@ -122,22 +98,17 @@ omit [FiniteDimensional ℝ E] [IsManifold I 1 M] [IsManifold I 2 M] in
       S t x v w + epsilon * (delta + t - t0) * (G t).inner x v w := by
   rfl
 
-
 abbrev TwoTensorSecFamily : Type _ :=
   Real -> Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
     (n := (∞ : WithTop ℕ∞)) 2
-
 
 abbrev TensorNabla1SecFamily : Type _ :=
   Real -> Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
     (n := (∞ : WithTop ℕ∞)) 3
 
-
 abbrev TensorNabla2SecFamily : Type _ :=
   Real -> Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
     (n := (∞ : WithTop ℕ∞)) 4
-
-
 
 def twoTensorSecToFamily
     (S : TwoTensorSecFamily (I := I) (M := M)) :
@@ -152,8 +123,6 @@ theorem twoTensorSecToFamily_apply
     twoTensorSecToFamily (I := I) (M := M) S t x v w =
       S t x (vec2 (I := I) v w) := by
   rfl
-
-
 
 omit [IsManifold I ∞ M] [IsManifold I 2 M] in
 theorem twoTensorSecToFamily_bilin
@@ -217,9 +186,6 @@ theorem twoTensorSecToFamily_bilin
       fin_cases i <;> simp [m, vec2, DifferentialGeometry.Integral.Connection.vec2, Function.update]
     simpa [twoTensorSecToFamily, hleft, hZ, smul_eq_mul] using hmap
 
-
-
-
 noncomputable def tensorBarrierSecFamily
     (G : Real -> SmoothRiemannianMetric I M)
     (S : TwoTensorSecFamily (I := I) (M := M))
@@ -281,7 +247,6 @@ theorem quad02_sec_eq
     _ = twoTensorSecToFamily (I := I) (M := M) S t x v v :=
           eval02_sec_eq (I := I) (M := M) S t x v v
 
-
 omit [FiniteDimensional ℝ E] [IsManifold I 1 M] [IsManifold I 2 M] in
 theorem barrierSymmAt
     {G : Real -> SmoothRiemannianMetric I M}
@@ -293,7 +258,6 @@ theorem barrierSymmAt
   intro v w
   simp [tensorBarrierFamily, hS v w, (G t).symm x v w]
 
-
 omit [FiniteDimensional ℝ E] [IsManifold I 1 M] [IsManifold I 2 M] in
 theorem metricInner_bilinAt
     (G : Real -> SmoothRiemannianMetric I M)
@@ -301,7 +265,6 @@ theorem metricInner_bilinAt
     TwoTensorBilinearAt (I := I) (M := M)
       (fun y v w => (G t).inner y v w) x := by
   constructor <;> intros <;> simp
-
 
 omit [FiniteDimensional ℝ E] [IsManifold I 1 M] [IsManifold I 2 M] in
 theorem barrierBilinearAt
@@ -331,7 +294,6 @@ theorem vec2_self_eq_const {x : M} (v : TangentSpace I x) :
   funext i
   fin_cases i <;> simp [vec2, DifferentialGeometry.Integral.Connection.vec2]
 
-
 omit [IsManifold I 2 M] in
 omit [IsManifold I 2 M] in
 theorem barrierSec_smul2
@@ -351,7 +313,6 @@ theorem barrierSec_smul2
     a v
   simpa [quad02, twoTensorSecToFamily, vec2_self_eq_const] using hscale
 
-
 omit [IsManifold I 2 M] in
 theorem barrierFamily_smul2
     (G : Real -> SmoothRiemannianMetric I M)
@@ -369,8 +330,6 @@ theorem barrierFamily_smul2
       (a • v) (a • v),
     ← tensorBarrierSec_apply (I := I) (M := M) G S epsilon delta t0 t x v v]
   exact barrierSec_smul2 (I := I) (M := M) G S epsilon delta t0 t x a v
-
-
 
 omit [IsManifold I 2 M] in
 theorem negBarrier_unit
@@ -435,7 +394,6 @@ theorem negBarrier_unit
     simpa [B] using hneg
   exact mul_neg_of_pos_of_neg hcoeff_pos hnegB
 
-
 def barrierUnitQuad
     (G : Real -> SmoothRiemannianMetric I M)
     (S : TwoTensorFamily (I := I) (M := M))
@@ -462,8 +420,6 @@ theorem barrierUnitQuad_mk
       tensorBarrierFamily (I := I) (M := M) G S epsilon delta t0 t x v v := by
   rfl
 
-
-
 omit [IsManifold I 2 M] in
 theorem negBarrier_unitSlab
     (G : Real -> SmoothRiemannianMetric I M)
@@ -485,8 +441,6 @@ theorem negBarrier_unitSlab
       (⟨(⟨x, u⟩ : TangentBundle I M), hunit⟩ :
         MetricUnitTangent (I := I) (M := M) (G t))⟩, rfl, ?_⟩
   simpa using hneg_u
-
-
 
 omit [IsManifold I 2 M] in
 theorem failure_unitSlab
@@ -534,20 +488,15 @@ theorem metricUnitSlab_timeVal_cont
   continuous_subtype_val.comp
     (metricUnitSlab_time_cont (I := I) (M := M) G tA tB)
 
-
 def metricBundleQuad
     (G : Real -> SmoothRiemannianMetric I M) (K : Set Real)
     (q : {t : Real // t ∈ K} × TangentBundle I M) : Real :=
   metricTimeBundleQuad (I := I) (M := M) G K q
 
-
-
 def tensorSecBundleQuad
     (S : TwoTensorSecFamily (I := I) (M := M)) (K : Set Real)
     (q : {t : Real // t ∈ K} × TangentBundle I M) : Real :=
   S q.1.1 q.2.proj (fun _ : Fin 2 => q.2.2)
-
-
 
 omit [IsManifold I 2 M] in
 theorem metricFamQuadCont
@@ -584,8 +533,6 @@ theorem metricFamQuadCont
     Tensor0SSpace.toModel, tensor0SSpace_continuousLinearEquiv_apply,
     metricTensorField_apply, vec2_self_eq_const] using hEval
 
-
-
 omit [IsManifold I 2 M] in
 theorem tensorQuadCont
     (S : TwoTensorSecFamily (I := I) (M := M)) (K : Set Real)
@@ -620,7 +567,6 @@ theorem tensorQuadCont
   simpa [tensorSecBundleQuad, T, b, v, vec2_self_eq_const,
     Tensor0SSpace.toModel, tensor0SSpace_continuousLinearEquiv_apply] using hEval
 
-
 def barrierBundleQuad
     (G : Real -> SmoothRiemannianMetric I M)
     (S : TwoTensorFamily (I := I) (M := M))
@@ -628,8 +574,6 @@ def barrierBundleQuad
     (q : {t : Real // t ∈ K} × TangentBundle I M) : Real :=
   tensorBarrierFamily (I := I) (M := M) G S epsilon delta t0
     q.1.1 q.2.proj q.2.2 q.2.2
-
-
 
 omit [IsManifold I 2 M] in
 omit [IsManifold I 2 M] in
@@ -660,8 +604,6 @@ theorem barrierBundleCont
   simp [barrierBundleQuad, tensorSecBundleQuad, metricBundleQuad,
     metricTimeBundleQuad, tensorBarrierFamily, twoTensorSecToFamily,
     vec2_self_eq_const, mul_assoc]
-
-
 
 def barrierTimeSlabQuad
     (G : Real -> SmoothRiemannianMetric I M)
@@ -702,8 +644,6 @@ theorem barrierTimeSlabQuad_mk
       tensorBarrierFamily (I := I) (M := M) G S epsilon delta t0 t x v v := by
   rfl
 
-
-
 omit [IsManifold I 2 M] in
 theorem barrierTimeCont
     (G : Real -> SmoothRiemannianMetric I M)
@@ -725,8 +665,6 @@ theorem barrierTimeCont
     MetricUnitTangentTimeSlab.vec, MetricUnitTangentTimeSlab.bundlePoint]
     using hbundle.comp hsub
 
-
-
 omit [IsManifold I 2 M] in
 theorem negBarrier_timeSlab
     (G : Real -> SmoothRiemannianMetric I M)
@@ -746,8 +684,6 @@ theorem negBarrier_timeSlab
     negBarrier_unit (I := I) (M := M) G S epsilon delta t0 t x v hneg
   refine ⟨⟨(⟨t, ht⟩, (⟨x, u⟩ : TangentBundle I M)), hunit⟩, rfl, ?_⟩
   simpa using hneg_u
-
-
 
 omit [IsManifold I 2 M] in
 theorem failure_timeSlab

@@ -2,14 +2,6 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.Ricci
 
 set_option autoImplicit false
 
-
-
-
-
-
-
-
-
 noncomputable section
 
 namespace DifferentialGeometry.PDE.RicciFlow
@@ -23,9 +15,6 @@ variable {H : Type*} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 variable [IsManifold I 1 M]
-
-
-
 
 structure TFLapReg
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
@@ -66,12 +55,6 @@ structure TFLapReg
         DifferentialGeometry.Integral.Connection.gradientFun (I := I) (S.family.metric t)
           (fun z : M => S.scalar t z ^ 2 / 3) y) x
 
-
-
-
-
-
-
 theorem tfLapReg
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     [SigmaCompactSpace M] [T2Space M]
@@ -87,8 +70,6 @@ theorem tfLapReg
       scalar_sq_grad := hS.scalarRegular.scalar_sq_grad
       scalar_sq_div_space := hS.scalarRegular.scalar_sq_div_space
       scalar_sq_div_grad := hS.scalarRegular.scalar_sq_div_grad }
-
-
 
 theorem tfLapCore
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
@@ -171,12 +152,6 @@ theorem tfLapCore
           rw [hdiv, hsq]
           simp [G, ricciNormLap, flowG]
 
-
-
-
-
-
-
 structure RicciHeatData
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     [SigmaCompactSpace M] [T2Space M]
@@ -188,8 +163,6 @@ structure RicciHeatData
   laplacian :
     RicciNormLaplacianComponentsOn
       (ricciNormLap (I := I) S) roughLapInner (ricciGradSq (I := I) S)
-
-
 
 theorem ricciHeat_of_data
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
@@ -209,7 +182,6 @@ theorem ricciHeat_of_data
       (ricciReact (I := I) S)
       h.timeDeriv
       h.laplacian
-
 
 omit [FiniteDimensional ℝ E] in
 @[simp]
@@ -390,8 +362,6 @@ private theorem coordPair4_eq
                 (basis d))) := by
           ring
 
-
-
 private def ricciDataOfFrame
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     [SigmaCompactSpace M] [T2Space M]
@@ -459,9 +429,6 @@ private def ricciDataOfFrame
     exact (hlap t x).trans (by
       rw [hnabla t x])
 
-
-
-
 theorem coordReact
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     [SigmaCompactSpace M] [T2Space M]
@@ -489,12 +456,6 @@ theorem coordReact
   refine Finset.sum_congr rfl fun k _ => ?_
   refine Finset.sum_congr rfl fun l _ => ?_
   simp [DifferentialGeometry.Tensor.Coordinates.coordinateFrameAt_toBasis_apply]
-
-
-
-
-
-
 
 def ricciDataAtCoord
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
@@ -608,10 +569,6 @@ def ricciDataAtCoord
           2 * ricciGradSq (I := I) S t x
     exact hLap t x
 
-
-
-
-
 def ricciHeatDataSmooth
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     [SigmaCompactSpace M] [T2Space M]
@@ -625,10 +582,6 @@ def ricciHeatDataSmooth
       (fun x0 => hS.invSymm x0)
       (fun x0 => hS.ricciSymm x0)
       hS.ricciLap
-
-
-
-
 
 theorem ricciHeatSmooth
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}

@@ -7,17 +7,6 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.UnifGagliardo
 import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.UnifAppH1
 import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.UnifGradSlot
 
-/-!
-# Class-first fixed curvature coefficient
-
-This module packages the zeroth-order curvature coefficient left by the
-Ricci--DeTurck top-order symmetrization.  In dimension three, its first two
-intrinsic jets have one class-first bound depending only on the fixed
-background and the metric-class parameter.  The resulting coefficient acts
-uniformly from spectral `H2` to spectral `H1`, and its diagonal pairing with
-two connection-Laplacian factors has the homogeneous `H4`/`H3` energy form.
--/
-
 set_option autoImplicit false
 set_option backward.isDefEq.respectTransparency false
 
@@ -45,11 +34,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
-/-- **Dimension-three class-first curvature-coefficient jet bound.**
-
-The coefficient is chosen from the fixed background and the metric-class
-parameter before the class metric varies.  Only the class metric's first
-three background-covariant jets are used. -/
 theorem phiCurv_jet_unif
     (hDim : Module.finrank ℝ E = 3)
     (gBase : SmoothRiemannianMetric I M) {Λ : ℝ} (hΛ : 1 ≤ Λ) :
@@ -164,10 +148,6 @@ theorem phiCurv_jet_unif
   rw [hjet_eq]
   exact pow_le_pow_left₀ (norm_nonneg _) hφnorm 2
 
-/-- **Dimension-three class-first fixed-curvature action bound.**
-
-The fixed curvature term left in the top-order split acts uniformly from
-spectral `H2` to spectral `H1` over the whole order-three metric class. -/
 theorem fixed_curv_h1_unif
     (hDim : Module.finrank ℝ E = 3)
     (gBase : SmoothRiemannianMetric I M) {Λ : ℝ} (hΛ : 1 ≤ Λ) :
@@ -190,11 +170,6 @@ theorem fixed_curv_h1_unif
   exact happ g hEq hjet (phiMetCurvCoeff (I := I) g gBase g) U
     Aφ hAφ (hφ g hEq hjet)
 
-/-- **Class-first diagonal fixed-curvature pairing bound.**
-
-For every positive top-energy coefficient, one constant chosen before the
-order-three class metric varies controls the zeroth-order curvature term in
-the diagonal low-base normal form by `η * H4² + G * H3²`. -/
 theorem curv_pair_abs_unif
     (hDim : Module.finrank ℝ E = 3)
     (gBase : SmoothRiemannianMetric I M) {Λ : ℝ} (hΛ : 1 ≤ Λ) :

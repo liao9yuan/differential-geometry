@@ -6,24 +6,6 @@ import DifferentialGeometry.Analysis.Calculus.SmoothExtension.JetPartialDeriv
 import DifferentialGeometry.Analysis.Calculus.SmoothExtension.JetGlueParam
 import DifferentialGeometry.Analysis.Calculus.TimeJetEvolution
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 noncomputable section
 
 open Bundle Manifold Set MeasureTheory
@@ -41,8 +23,6 @@ variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 
-
-
 def chartGramPi (g : SmoothRiemannianMetric I M) (α : M) :
     E → (Fin (Module.finrank ℝ E) → Fin (Module.finrank ℝ E) → ℝ) :=
   fun w l m => chartGramOnE (I := I) g α l m w
@@ -51,7 +31,6 @@ omit [NeZero (Module.finrank ℝ E)] in
 @[simp] theorem chartGramPi_apply (g : SmoothRiemannianMetric I M) (α : M) (w : E)
     (l m : Fin (Module.finrank ℝ E)) :
     chartGramPi (I := I) g α w l m = chartGramOnE (I := I) g α l m w := rfl
-
 
 omit [NeZero (Module.finrank ℝ E)] in
 theorem jet2_chartGram_d1 (g : SmoothRiemannianMetric I M) (α : M) {y : E}
@@ -62,8 +41,6 @@ theorem jet2_chartGram_d1 (g : SmoothRiemannianMetric I M) (α : M) {y : E}
   simp only [jet2]
   rw [fderiv_matEntry hG (chartModelBasis E i) l m]
   rfl
-
-
 
 omit [NeZero (Module.finrank ℝ E)] in
 theorem jet2_chartGram_d2 (g : SmoothRiemannianMetric I M) (α : M) {y : E}
@@ -82,8 +59,6 @@ theorem jet2_chartGram_d2 (g : SmoothRiemannianMetric I M) (α : M) {y : E}
   rw [hinner.fderiv_eq]
   rfl
 
-
-
 omit [NeZero (Module.finrank ℝ E)] in
 theorem jet2_chartGram_invGram (g : SmoothRiemannianMetric I M) (α : M) (y : E)
     (k l : Fin (Module.finrank ℝ E)) :
@@ -96,8 +71,6 @@ theorem jet2_chartGram_invGram (g : SmoothRiemannianMetric I M) (α : M) (y : E)
   rw [hmat, chartInvGramOnE_def]
   simp only [chartInvGramMatrix]
 
-
-
 omit [NeZero (Module.finrank ℝ E)] in
 theorem chartChristoffel_eq_jet (g : SmoothRiemannianMetric I M) (α : M) {y : E}
     (hG : DifferentiableAt ℝ (chartGramPi (I := I) g α) y) (i j k : Fin (Module.finrank ℝ E)) :
@@ -109,9 +82,6 @@ theorem chartChristoffel_eq_jet (g : SmoothRiemannianMetric I M) (α : M) {y : E
   refine Finset.sum_congr rfl (fun l _ => ?_)
   rw [jet2_chartGram_invGram g α y k l, chartInvGramOnE_def,
     jet2_chartGram_d1 g α hG i l j, jet2_chartGram_d1 g α hG j l i, jet2_chartGram_d1 g α hG l i j]
-
-
-
 
 omit [NeZero (Module.finrank ℝ E)] in
 theorem chartChristoffelDeriv_eq_jet (g : SmoothRiemannianMetric I M) (α : M) {y : E}
@@ -129,8 +99,6 @@ theorem chartChristoffelDeriv_eq_jet (g : SmoothRiemannianMetric I M) (α : M) {
   rw [partialDeriv_chartInvGramOnE_eq g α y m k l hy]
   simp only [gramBracket, gramBracketDeriv, jet2_chartGram_invGram g α y,
     jet2_chartGram_d1 g α hG, jet2_chartGram_d2 g α hG1 hG2]
-
-
 
 omit [NeZero (Module.finrank ℝ E)] in
 theorem chartRiemann_eq_jet (g : SmoothRiemannianMetric I M) (α : M) {y : E}
@@ -150,8 +118,6 @@ theorem chartRiemann_eq_jet (g : SmoothRiemannianMetric I M) (α : M) {y : E}
   rw [chartChristoffel_eq_jet g α hG j m l, chartChristoffel_eq_jet g α hG i k m,
     chartChristoffel_eq_jet g α hG k m l, chartChristoffel_eq_jet g α hG i j m]
 
-
-
 omit [NeZero (Module.finrank ℝ E)] in
 theorem chartRicci_eq_jet (g : SmoothRiemannianMetric I M) (α : M) {y : E}
     (hy : y ∈ interior (extChartAt I α).target)
@@ -165,9 +131,6 @@ theorem chartRicci_eq_jet (g : SmoothRiemannianMetric I M) (α : M) {y : E}
   simp only [jetRicci]
   exact Finset.sum_congr rfl (fun j _ => chartRiemann_eq_jet g α hy hG hG1 hG2 i j k j)
 
-
-
-
 omit [NeZero (Module.finrank ℝ E)] in
 theorem jetRicciFlow_chartGram (g : SmoothRiemannianMetric I M) (α : M) {y : E}
     (hy : y ∈ interior (extChartAt I α).target)
@@ -178,12 +141,6 @@ theorem jetRicciFlow_chartGram (g : SmoothRiemannianMetric I M) (α : M) {y : E}
     jetRicciFlow (chartModelBasis E) (jet2 (chartGramPi (I := I) g α) y) i k
       = -2 * chartRicciTensor (I := I) g α i k y := by
   rw [jetRicciFlow, chartRicci_eq_jet g α hy hG hG1 hG2 i k]
-
-
-
-
-
-
 
 omit [NeZero (Module.finrank ℝ E)] in
 theorem ricciFlowChartGram_jetMatch (g₁ g₂ : ℝ → SmoothRiemannianMetric I M) (α : M)
@@ -210,12 +167,6 @@ theorem ricciFlowChartGram_jetMatch (g₁ g₂ : ℝ → SmoothRiemannianMetric 
     (fun w hw => contDiffAt_jetRicciFlow (chartModelBasis E) (hdet w hw))
     hcurveL hcurveR hevolL hevolR hbdry
 
-
-
-
-
-
-
 omit [NeZero (Module.finrank ℝ E)] in
 theorem chartGramEvolution_of_pde (g : ℝ → SmoothRiemannianMetric I M) (α : M) {y : E} {sL : Set ℝ}
     {t : ℝ} (hsL : UniqueDiffWithinAt ℝ sL t)
@@ -239,13 +190,6 @@ theorem chartGramEvolution_of_pde (g : ℝ → SmoothRiemannianMetric I M) (α :
   funext i k
   exact (jetRicciFlow_chartGram (g t) α hy hG hG1 hG2 i k).symm
 
-
-
-
-
-
-
-
 omit [NeZero (Module.finrank ℝ E)] in
 theorem chartGramEntryPDE_of_metricPDE [I.Boundaryless] [SigmaCompactSpace M] [T2Space M]
     (g : ℝ → SmoothRiemannianMetric I M) (α : M) {y : E} {sL : Set ℝ} {t : ℝ}
@@ -267,13 +211,6 @@ theorem chartGramEntryPDE_of_metricPDE [I.Boundaryless] [SigmaCompactSpace M] [T
     rw [ricciTensor_chartBasisVec_alpha_eq (g t) α i k hgs, hyt]
   rw [← hbridge]
   exact hmpde
-
-
-
-
-
-
-
 
 private theorem bilin_deriv_basis
     {V : Type*} [NormedAddCommGroup V] [NormedSpace ℝ V]

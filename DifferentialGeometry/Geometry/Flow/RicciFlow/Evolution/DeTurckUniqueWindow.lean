@@ -1,16 +1,6 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.ExtendedSolutionRegularity
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.SmoothStrongPair
 
-/-!
-# Interior Ricci--DeTurck uniqueness from chart-Gram regularity
-
-This file is the geometric consumer of the reverse strong-solution bridge.  It
-starts from the chart-Gram regularity carried by smooth Ricci-flow solution
-packages, constructs `MetricFamilySmoothOn`, translates one regular interior
-time to zero, and invokes the automatic local Ricci--DeTurck uniqueness
-theorem.
--/
-
 noncomputable section
 
 open Bundle Manifold Set Filter
@@ -40,8 +30,6 @@ private theorem continuousOn_prod_slice
 
 omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless]
   [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
-/-- Two smooth Riemannian metrics are equal if their Gram matrices agree in
-the chart basis centred at every base point. -/
 theorem metric_eq_chartGram
     (g h : SmoothRiemannianMetric I M)
     (hgram : ∀ (x : M) (i j : Fin (Module.finrank Real E)),
@@ -79,9 +67,6 @@ theorem metric_eq_chartGram
 
 omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless]
   [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
-/-- Equality on a left half-window passes to its right endpoint from the
-existing joint chart-Gram `C⁰` regularity.  This is the closedness input for
-forward Ricci--DeTurck continuation. -/
 theorem metric_eq_leftLim
     (g₁ g₂ : Real → SmoothRiemannianMetric I M) {a b c d : Real}
     (hd : d ∈ Ioo a b) (hcd : c < d)
@@ -135,12 +120,6 @@ theorem metric_eq_leftLim
     hlim₂.congr' (heqGram.eventuallyEq_of_mem self_mem_nhdsWithin).symm
   exact tendsto_nhds_unique hlim₁ hlim₁'
 
-/-- Two smooth Ricci--DeTurck metric paths with chart-Gram regularity which
-agree at one interior time agree on a positive common forward window.  The
-window length and all maximal-regularity budgets are chosen internally.
-
-This is an interior continuation theorem.  It neither constructs a harmonic
-map heat-flow gauge nor starts from a merely continuous original endpoint. -/
 theorem chartRD_local
     (g₁ g₂ : ℝ → SmoothRiemannianMetric I M) {a b c : ℝ} (hab : a < b)
     (hc : c ∈ Ioo a b) (g_bg : SmoothRiemannianMetric I M)
@@ -215,11 +194,6 @@ theorem chartRD_local
   intro t ht
   simpa only [G₁, G₂, Sol₁, Sol₂, SolutionOn.family] using huniq t ht
 
-/-- Two smooth Ricci--DeTurck paths which agree at one interior time agree on
-the whole common forward interior interval.  The proof uses a supremum of
-already-reached times.  Closedness at the supremum is supplied by
-`metric_eq_leftLim`; no uniform lower bound on the successive local lifetimes
-is assumed. -/
 theorem chartRD_forward
     (g₁ g₂ : Real → SmoothRiemannianMetric I M) {a b c : Real} (hab : a < b)
     (hc : c ∈ Ioo a b) (g_bg : SmoothRiemannianMetric I M)

@@ -14,15 +14,6 @@ import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.LieCorrectionTra
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.SobolevNonlinearityExistenceSymmetrizationNormBounds
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurckCoefficients.RHSThreeArmCancel
 
-/-!
-# Low-regularity jets of concrete Ricci--DeTurck coefficients
-
-This file converts the intrinsic antidiagonal product-grid bounds for the
-realized metric path into the first two `L2` jets of the concrete order-zero
-Ricci and DeTurck `DLa` coefficient fields.  Only the metric jet through order
-three is used.
--/
-
 noncomputable section
 
 open Bundle Manifold MeasureTheory Set Tensor0SBundle
@@ -345,7 +336,6 @@ private theorem jet_add2
       simp only [mul_add, Finset.sum_add_distrib, Finset.mul_sum]
     _ ≤ 2 * (4 * a ^ 2 + b ^ 2) := by gcongr
 
-/-- Jet-squared wrapper around the mixed `H1 × H2 → H1` operator estimate. -/
 private theorem app_h1h2_j1
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M) (p r c : ℕ) :
@@ -372,7 +362,6 @@ private theorem app_h1h2_j1
   simpa only [Finset.sum_range_succ, Finset.sum_range_zero, zero_add,
     iteratedCovGrad_zero, iteratedCovGrad_succ, Nat.zero_add] using hsquare
 
-/-- Jet-squared wrapper around the complementary `H2 × H1 → H1` estimate. -/
 private theorem app_h2h1_j1
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M) (p r c : ℕ) :
@@ -399,8 +388,6 @@ private theorem app_h2h1_j1
   simpa only [Finset.sum_range_succ, Finset.sum_range_zero, zero_add,
     iteratedCovGrad_zero, iteratedCovGrad_succ, Nat.zero_add] using hsquare
 
-/-- The spectral `H3` norm controls the four-term squared intrinsic jet of
-every point of a convex metric segment, with the same endpoint bound. -/
 theorem convex_h3_jet (g₀ : SmoothRiemannianMetric I M) :
     ∃ C : ℝ, 0 ≤ C ∧
       ∀ (T T' : SmoothCcTensor g₀ 0 2) (R : ℝ), 0 ≤ R →
@@ -453,7 +440,6 @@ theorem convex_h3_jet (g₀ : SmoothRiemannianMetric I M) :
           (convexPerturbation (I := I) g₀ T T' s)))
       hsum 2)
 
-/-- Intrinsic antidiagonal product grid of the metric-perturbation jet. -/
 def lowJetGrid (g : SmoothRiemannianMetric I M)
     (P : SmoothCcTensor g 0 2) (k : ℕ) (x : M) : ℝ :=
   ∑ n ∈ Finset.range (k + 1),
@@ -514,9 +500,6 @@ theorem grid_h1_le
   exact Finset.sum_le_sum fun k hk =>
     (hgrid k (by have := Finset.mem_range.mp hk; omega)).2
 
-/-- In dimension three, a pointwise coefficient-jet bound by the metric
-product grid through total order three integrates to a uniform `H1` bound.
-This is the common final step for all concrete order-zero coefficient pieces. -/
 theorem h1_of_grid
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M) {r s : ℕ} (C : ℕ → ℝ)
@@ -561,10 +544,6 @@ theorem h1_of_grid
 
 omit [NeZero (Module.finrank ℝ E)]
   [BoundarylessManifold I M] in
-/-- Integrate an `H2` coefficient jet whose order-`i` pointwise bound uses
-only the sharp metric grid window through total order `i`.  This is the tame
-variant for moving traces: when `i < 3`, only metric grids through order two
-occur, hence the metric `H2` jet suffices. -/
 theorem grid_h2_low
     (g : SmoothRiemannianMetric I M) {r s : ℕ} (P : SmoothCcTensor g 0 2)
     (K C : ℕ → ℝ)
@@ -615,8 +594,6 @@ theorem grid_h2_low
   exact Finset.sum_le_sum fun k hk =>
     (hgrid k (by have := Finset.mem_range.mp hk; omega)).2
 
-/-- In dimension three, the sharp trace grid window integrates to an `H2`
-bound depending only on the metric `H2` jet. -/
 theorem h2_of_grid_low
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M) {r s : ℕ} (C : ℕ → ℝ)
@@ -661,12 +638,6 @@ theorem h2_of_grid_low
 
 omit [NeZero (Module.finrank ℝ E)]
   [BoundarylessManifold I M] in
-/-- Integrate a pointwise coefficient grid through two covariant derivatives.
-
-The `i + 2` window is the sharp one needed for a connection-difference
-coefficient: its zeroth-order term already contains one derivative of the
-metric.  When `i < 3`, every requested product grid has total order at most
-three, exactly the range supplied by `h3_grid_int`. -/
 theorem grid_h2_le
     (g : SmoothRiemannianMetric I M) {r s : ℕ} (P : SmoothCcTensor g 0 2)
     (K C : ℕ → ℝ)
@@ -717,8 +688,6 @@ theorem grid_h2_le
   exact Finset.sum_le_sum fun k hk =>
     (hgrid k (by have := Finset.mem_range.mp hk; omega)).2
 
-/-- In dimension three, a pointwise grid bound with the connection-difference
-window `i + 2` gives a uniform intrinsic `H2` bound. -/
 theorem h2_of_grid
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M) {r s : ℕ} (C : ℕ → ℝ)
@@ -761,11 +730,6 @@ theorem h2_of_grid
     simp only [B, Real.sq_sqrt (hQ A hA)]]
   exact hle
 
-/-- Tame form of `h2_of_grid`: the grids through total order two depend only
-on the lower `H2` radius `R`, while the total-order-three grid is linear in
-the top derivative bound `A`.  The square-root subadditivity is packaged in
-the conclusion, so downstream product estimates see the affine bound
-`B0 R + B1 R * A` directly. -/
 theorem h2_grid_tame
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M) {r s : ℕ} (C : ℕ → ℝ)
@@ -885,9 +849,6 @@ theorem h2_grid_tame
       nlinarith [mul_nonneg (Real.sqrt_nonneg (Q0 R))
         (mul_nonneg (Real.sqrt_nonneg (Q1 R)) hA)]
 
-/-- Covariant derivatives of an iterated slot extension cost only the expected
-finite-dimensional factor.  The added identity slots are parallel, so no
-derivative is lost. -/
 theorem slotIter_rfns
     (g : SmoothRiemannianMetric I M) (r s : ℕ) :
     ∀ (w : ℕ) (Φ : SmoothCcTensor g r s) (i : ℕ) (x : M),
@@ -929,7 +890,6 @@ theorem slotIter_rfns
           rw [pow_succ]
           ring
 
-/-- Integrated version of `slotIter_rfns`. -/
 theorem slotIter_l2
     (g : SmoothRiemannianMetric I M) (r s w i : ℕ)
     (Φ : SmoothCcTensor g r s) :
@@ -963,8 +923,6 @@ theorem slotIter_l2
   rw [MeasureTheory.integral_const_mul, hint] at hsq
   exact hsq
 
-/-- The complete `H2` jet of an iterated slot extension has the same
-finite-dimensional loss and no Sobolev-order loss. -/
 theorem slotIter_h2
     (g : SmoothRiemannianMetric I M) (r s w : ℕ)
     (Φ : SmoothCcTensor g r s) :
@@ -980,7 +938,6 @@ theorem slotIter_h2
       Finset.sum_le_sum fun i _ => slotIter_l2 (I := I) (M := M) g r s w i Φ
     _ = _ := by rw [Finset.mul_sum]
 
-/-- The analogous range-two (`H1`) slot-extension estimate. -/
 theorem slotIter_h1
     (g : SmoothRiemannianMetric I M) (r s w : ℕ)
     (Φ : SmoothCcTensor g r s) :
@@ -996,7 +953,6 @@ theorem slotIter_h1
       Finset.sum_le_sum fun i _ => slotIter_l2 (I := I) (M := M) g r s w i Φ
     _ = _ := by rw [Finset.mul_sum]
 
-/-- Scalar-bound form of `slotIter_h2`. -/
 theorem slotIter_h2b
     (g : SmoothRiemannianMetric I M) (r s w : ℕ)
     (Φ : SmoothCcTensor g r s) (A : ℝ)
@@ -1018,7 +974,6 @@ theorem slotIter_h2b
     _ = (Real.sqrt ((Module.finrank ℝ E : ℝ) ^ w) * A) ^ 2 := by
       rw [mul_pow, Real.sq_sqrt hf]
 
-/-- Scalar-bound form of `slotIter_h1`. -/
 theorem slotIter_h1b
     (g : SmoothRiemannianMetric I M) (r s w : ℕ)
     (Φ : SmoothCcTensor g r s) (A : ℝ)
@@ -1040,9 +995,6 @@ theorem slotIter_h1b
     _ = (Real.sqrt ((Module.finrank ℝ E : ℝ) ^ w) * A) ^ 2 := by
       rw [mul_pow, Real.sq_sqrt hf]
 
-/-- A moving double trace of arbitrary passenger rank has an intrinsic `H2`
-bound from only the metric `H2` jet.  This is the reusable low factor for all
-three nested traces in the `VB` and `AMix` normal forms. -/
 theorem trace_h2
     (p : ℕ) (hDim : Module.finrank ℝ E = 3)
     (g₀ : SmoothRiemannianMetric I M) {δ₀ : ℝ} (hδ₀ : δ₀ < 1) :
@@ -1073,7 +1025,6 @@ theorem trace_h2
   simpa only [lowJetGrid, Combinatorics.antidiagonalTupleGrid] using
     hpt g₁ P htie hδ_le hδ_nonneg hbound σ i x
 
-/-- Rank-two specialization of `trace_h2`. -/
 theorem trace2_h2
     (hDim : Module.finrank ℝ E = 3)
     (g₀ : SmoothRiemannianMetric I M) {δ₀ : ℝ} (hδ₀ : δ₀ < 1) :
@@ -1094,8 +1045,6 @@ theorem trace2_h2
             (lc0Tr (I := I) (M := M) g₀ g₁ 2 σ)‖ ^ 2) ≤ (B A) ^ 2 := by
   simpa only [Nat.reduceAdd] using trace_h2 (I := I) (M := M) 2 hDim g₀ hδ₀
 
-/-- The metric-lowered connection difference has an intrinsic `H2` bound
-from the perturbation `H3` jet. -/
 theorem connLow_h2
     (hDim : Module.finrank ℝ E = 3)
     (g₀ : SmoothRiemannianMetric I M) {δ₀ : ℝ} (hδ₀ : δ₀ < 1) :
@@ -1128,9 +1077,6 @@ theorem connLow_h2
   simpa only [lowJetGrid, Combinatorics.antidiagonalTupleGrid] using
     hpt g₁ P htie hδ_le hδ_nonneg hbound i x
 
-/-- Tame `H2` bound for the lowered connection difference.  The lower
-coefficient depends only on the perturbation `H2` radius, while the third
-metric derivative enters through one affine top-order arm. -/
 theorem connLow_tame
     (hDim : Module.finrank ℝ E = 3)
     (g₀ : SmoothRiemannianMetric I M) {δ₀ : ℝ} (hδ₀ : δ₀ < 1) :
@@ -1174,9 +1120,6 @@ theorem connLow_tame
   simpa only [lowJetGrid, Combinatorics.antidiagonalTupleGrid] using
     hpt g₁ P htie hδ_le hδ_nonneg hbound i x
 
-/-- On the self-background arm, the lowered connection difference has an
-`H1` jet controlled only by the metric `H2` jet.  This is the low factor in
-the tame `VB` and `AMix` product allocations. -/
 theorem kappaSelf_h1
     (g₀ g₁ : SmoothRiemannianMetric I M) (P : SmoothCcTensor g₀ 0 2)
     (htie : ∀ (y : M) (v w : TangentSpace I y),
@@ -1217,9 +1160,6 @@ theorem kappaSelf_h1
     sq_nonneg ‖iteratedCovGrad (I := I) g₀ 0 2 1 P‖,
     sq_nonneg ‖iteratedCovGrad (I := I) g₀ 0 2 2 P‖]
 
-/-- On the self-background arm, the lowered connection difference is bounded
-in `H2` directly by the perturbation `H3` jet.  No inverse-metric estimate is
-used: `lc0Kappa_self_eq_koszulCovecCc` first performs the exact Koszul cancellation. -/
 theorem kappaSelf_h2
     (g₀ g₁ : SmoothRiemannianMetric I M) (P : SmoothCcTensor g₀ 0 2)
     (htie : ∀ (y : M) (v w : TangentSpace I y),
@@ -1288,7 +1228,6 @@ private theorem coeffJets_domDomCongr_sub
   simp only [ContinuousMultilinearMap.sub_apply,
     ContinuousMultilinearMap.domDomCongr_apply]
 
-/-- The symmetrized first covariant derivative is additive under subtraction. -/
 theorem symm_grad3_sub
     (g : SmoothRiemannianMetric I M) (T U : SmoothCcTensor g 0 2) :
     symmSCovGrad3 (I := I) (M := M) g (T - U) =
@@ -1297,7 +1236,6 @@ theorem symm_grad3_sub
   rw [symmSCovGrad3_def, symmSCovGrad3_def, symmSCovGrad3_def,
     symmS_sub, covGrad_sub]
 
-/-- The covector-valued Koszul tensor is additive under subtraction. -/
 theorem koszul_covec_sub
     (g : SmoothRiemannianMetric I M) (T U : SmoothCcTensor g 0 2) :
     koszulCovecCc (I := I) g (T - U) =
@@ -1308,9 +1246,6 @@ theorem koszul_covec_sub
     coeffJets_domDomCongr_sub]
   module
 
-/-- On the self-background arm, the difference of two lowered connection
-coefficients has an `H2` jet controlled by the `H3` jet of the metric
-difference. -/
 theorem kappa_self_pair_h2
     (g gT gU : SmoothRiemannianMetric I M)
     (T U : SmoothCcTensor g 0 2)
@@ -1365,8 +1300,6 @@ theorem kappa_self_pair_h2
     sq_nonneg ‖iteratedCovGrad (I := I) g 0 2 2 (T - U)‖,
     sq_nonneg ‖iteratedCovGrad (I := I) g 0 2 3 (T - U)‖]
 
-/-- The perturbation pairing with a fixed background connection difference is
-`H2`-controlled by the perturbation `H2` jet. -/
 theorem pbLow_h2
     (hDim : Module.finrank ℝ E = 3)
     (g₀ gB : SmoothRiemannianMetric I M) :
@@ -1437,8 +1370,6 @@ theorem pbLow_h2
   rw [heq]
   simpa only [B] using hout
 
-/-- The perturbation pairing with a fixed background connection difference is
-linearly `H2`-controlled by the perturbation `H2` jet. -/
 theorem pbLow_h2_mul
     (hDim : Module.finrank ℝ E = 3)
     (g₀ gB : SmoothRiemannianMetric I M) :
@@ -1509,8 +1440,6 @@ theorem pbLow_h2_mul
   rw [heq]
   simpa only [C] using hout
 
-/-- The full moving-metric lowered connection difference relative to a fixed
-background has an `H1` jet controlled solely by the low metric `H2` size. -/
 theorem kappaBg_h1
     (hDim : Module.finrank ℝ E = 3)
     (g₀ gB : SmoothRiemannianMetric I M) :
@@ -1603,9 +1532,6 @@ theorem kappaBg_h1
   change Q R ≤ (B R) ^ 2
   rw [show (B R) ^ 2 = Q R by simp only [B, Real.sq_sqrt (hQ R)]]
 
-/-- Tame `H2` control of the full moving-metric lowered connection difference.
-The self-background Koszul arm uses the top metric `H3` size `A`, while the
-fixed-background pairing uses only the low metric `H2` size `R`. -/
 theorem kappaBg_tame
     (hDim : Module.finrank ℝ E = 3)
     (g₀ gB : SmoothRiemannianMetric I M) :
@@ -1694,8 +1620,6 @@ theorem kappaBg_tame
   change Q R A ≤ (B R A) ^ 2
   rw [show (B R A) ^ 2 = Q R A by simp only [B, Real.sq_sqrt (hQ R A)]]
 
-/-- One-parameter wrapper around `kappaBg_tame` for callers that already use
-a single `H3` jet size. -/
 theorem kappaBg_h2
     (hDim : Module.finrank ℝ E = 3)
     (g₀ gB : SmoothRiemannianMetric I M) :
@@ -1722,9 +1646,6 @@ theorem kappaBg_h2
       (fun j _ _ => sq_nonneg _)).trans hP
   simpa only [B] using hBt g₁ P htie A A hA hA hP2 hP
 
-/-- In dimension three, the concrete order-zero Ricci connection-difference
-coefficient has an intrinsic `H1` bound depending only on the metric `H3` jet
-size and a fixed common fibre ellipticity bound. -/
 theorem ricci0_h1
     (hDim : Module.finrank ℝ E = 3)
     (g₀ : SmoothRiemannianMetric I M) {δ₀ : ℝ} (hδ₀ : δ₀ < 1) :
@@ -1774,9 +1695,6 @@ theorem ricci0_h1
     simp only [B, Real.sq_sqrt (hQ A hA)]]
   exact hle
 
-/-- In dimension three, the `DLa` part of the concrete order-zero DeTurck
-coefficient has an intrinsic `H1` bound from the same metric `H3` data.  The
-fixed DeTurck gauge background is independent of the frozen spectral metric. -/
 theorem dla_h1
     (hDim : Module.finrank ℝ E = 3)
     (g₀ g_bg : SmoothRiemannianMetric I M)
@@ -1827,9 +1745,6 @@ theorem dla_h1
     simp only [B, Real.sq_sqrt (hQ A hA)]]
   exact hle
 
-/-- In dimension three, changing the fixed DeTurck background in the `DLb`
-coefficient costs only an intrinsic `H1` jet of the metric perturbation.  In
-particular, no derivative beyond the endpoint `H3` ball is used. -/
 theorem dlbDiff_h1
     (hDim : Module.finrank ℝ E = 3)
     (g₀ g_bg : SmoothRiemannianMetric I M)
@@ -1904,10 +1819,6 @@ theorem dlbDiff_h1
     simp only [B, Real.sq_sqrt (hQ A hA)]]
   exact hle
 
--- The rank-changing operator composition needs an enlarged local elaboration budget.
-/-- In dimension three, the fixed-curvature piece of `lieCorr0` has an
-intrinsic `H1` bound from only the metric `H3` jet.  Algebraically it is one
-moving cometric trace acting on a fixed smooth curvature passenger. -/
 theorem riem_h1
     (hDim : Module.finrank ℝ E = 3)
     (g₀ : SmoothRiemannianMetric I M) {δ₀ : ℝ} (hδ₀ : δ₀ < 1) :
@@ -1982,10 +1893,6 @@ theorem riem_h1
   simpa only [lc0RiemField, iteratedCovGrad_smul_real, norm_smul,
     Real.norm_eq_abs, abs_neg, abs_one, one_mul] using hAppJet
 
-/-- Tame `H1` jet bound for the cancellation-compatible operator normal form
-of the vector--bilinear correction.  Every moving trace is a low `H2` factor;
-the unique top `H3` derivative is carried linearly by the self-background
-Koszul tensor. -/
 theorem vbForm_h1
     (hDim : Module.finrank ℝ E = 3)
     (g₀ : SmoothRiemannianMetric I M) {δ₀ : ℝ} (hδ₀ : δ₀ < 1) :
@@ -2118,10 +2025,6 @@ theorem vbForm_h1
     _ ≤ 4 * (Ob R A) ^ 2 := mul_le_mul_of_nonneg_left hOut (by norm_num)
     _ = (B R A) ^ 2 := by dsimp only [B]; ring
 
-/-- Tame `H1` jet bound for the mixed connection-correction normal form.  The
-background connection factor is kept in low `H1`, the self-background Koszul
-factor carries the unique top derivative in `H2`, and every subsequent moving
-trace is allocated as `H2 × H1 → H1`. -/
 theorem amixForm_h1
     (hDim : Module.finrank ℝ E = 3)
     (g₀ gB : SmoothRiemannianMetric I M) {δ₀ : ℝ} (hδ₀ : δ₀ < 1) :
@@ -2271,7 +2174,6 @@ theorem amixForm_h1
       mul_le_mul_of_nonneg_left hsum (by norm_num)
     _ = (B R A) ^ 2 := by dsimp only [B]; ring
 
-/-- Tame `H1` jet bound for the genuine vector--bilinear correction. -/
 theorem vb_h1
     (hDim : Module.finrank ℝ E = 3)
     (g₀ : SmoothRiemannianMetric I M) {δ₀ : ℝ} (hδ₀ : δ₀ < 1) :
@@ -2298,7 +2200,6 @@ theorem vb_h1
   rw [lc0VB_eq_lc0VBField (I := I) (M := M) g₀ g₁]
   exact hform g₁ P htie hδ_le hδ_nonneg hbound R A hR hA hP2 hP3
 
-/-- Tame `H1` jet bound for the genuine mixed connection correction. -/
 theorem amix_h1
     (hDim : Module.finrank ℝ E = 3)
     (g₀ gB : SmoothRiemannianMetric I M) {δ₀ : ℝ} (hδ₀ : δ₀ < 1) :
@@ -2326,9 +2227,6 @@ theorem amix_h1
   rw [lc0AMix_eq_lc0AMixField (I := I) (M := M) g₀ g₁ gB]
   exact hform g₁ P htie hδ_le hδ_nonneg hbound R A hR hA hP2 hP3
 
-/-- The combined order-zero tail splits into a background-change term and the
-base-background pair in which the leading endomorphism contribution cancels
-against `lieCorr0`. -/
 theorem tail0_split
     (g₀ g₁ g_bg : SmoothRiemannianMetric I M) :
     deTurckLieDLbCoeffField (I := I) (M := M) g₀ g₁ g_bg +
@@ -2340,10 +2238,6 @@ theorem tail0_split
   rw [endoArmField_eq_dLbCoeffField (I := I) (M := M) g₀ g₁ g₀]
   abel
 
-/-- Cancellation-preserving five-piece normal form of the complete order-zero
-tail.  The first summand records the change of DeTurck background; the second
-is the insertion difference left after cancelling the base-background
-endomorphism arm. -/
 theorem tail0_decomp
     (g₀ g₁ g_bg : SmoothRiemannianMetric I M) :
     deTurckLieDLbCoeffField (I := I) (M := M) g₀ g₁ g_bg +
@@ -2358,8 +2252,6 @@ theorem tail0_decomp
   rw [tail0_split (I := I) (M := M) g₀ g₁ g_bg,
     tail_base_split (I := I) (M := M) g₀ g₁ g_bg]
 
-/-- Assemble the five cancellation-preserving order-zero pieces into the
-`H1` jet of the complete `DLb + lieCorr0` tail. -/
 theorem tail_h1_parts
     (g₀ g₁ g_bg : SmoothRiemannianMetric I M)
     (Bd Bi Bv Ba Br : ℝ)
@@ -2410,10 +2302,6 @@ theorem tail_h1_parts
   rw [htail, Real.sq_sqrt hinside]
   exact hsum
 
-/-- Direct synthesis of the complete order-zero path coefficient.  The sole
-remaining input is the low jet of the combined `DLb + lieCorr0` tail, so the
-essential cancellation inside that pair is retained.  The Ricci and `DLa`
-bounds are supplied above from the endpoint spectral `H3` ball. -/
 theorem rhs0_h1_of_aux
     (hDim : Module.finrank ℝ E = 3)
     (g₀ g_bg : SmoothRiemannianMetric I M)
@@ -2513,8 +2401,6 @@ theorem rhs0_h1_of_aux
   rw [hrhs, Real.sq_sqrt hinside]
   simpa only [ne_eq, OfNat.ofNat_ne_zero, not_false_eq_true, zero_pow, add_zero] using hsum
 
-/-- Assemble supplied `H1` bounds for the Ricci, `DLa`, and cancellation-preserving
-tail pieces into an `H1` bound for the complete order-zero RHS coefficient. -/
 theorem rhs0_h1_parts
     (g₀ g_bg : SmoothRiemannianMetric I M)
     (T T' : SmoothCcTensor g₀ 0 2)
@@ -2581,9 +2467,6 @@ theorem rhs0_h1_parts
   simpa only [ne_eq, OfNat.ofNat_ne_zero, not_false_eq_true, zero_pow,
     add_zero] using hsum
 
-/-- Direct two-piece synthesis of the complete order-one path coefficient.
-Its precise remaining producers are an `H2` jet bound for the Ricci order-one
-`appCcRS` field and an `H2` jet bound for `deTurckLieArm1Coeff`. -/
 theorem rhs1_h2_of_aux
     (g₀ g_bg : SmoothRiemannianMetric I M)
     (T T' : SmoothCcTensor g₀ 0 2)

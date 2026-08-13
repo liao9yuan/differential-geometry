@@ -2,21 +2,6 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.MetricLoweringTower
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.UnifJetTowerMatch
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.UnifReverseJetTwo
 
-/-!
-# Three-dimensional class-uniform Morrey estimates for mixed tensors
-
-The existing class-uniform Morrey theorem is covariant: it applies to
-`SmoothCcTensor g 0 s`.  The live short-time consumers also need mixed tensors,
-first at valence `(3, 2)`.  This file lowers every upper index with the variable
-metric `g`, applies the covariant theorem at rank `r + s`, and transfers the
-pointwise and `L²` jet norms back by the exact same-metric lowering isometry.
-
-The public interface is deliberately three-dimensional.  It is generic in the
-mixed valence `(r, s)`, while the Sobolev window is fixed to the exact orders
-`0,1,2`.  A later general-dimensional API can replace this finite window without
-changing the lowering layer.
--/
-
 set_option autoImplicit false
 
 noncomputable section
@@ -52,9 +37,6 @@ private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
-/-- The explicit class-uniform mixed Morrey constant in dimension three.
-The two reverse metric-jet constants and every Sobolev constant are selected
-from the fixed background and `Λ` before the class metric varies. -/
 def morreyRSC (gBase : SmoothRiemannianMetric I M) (Λ : ℝ) (r s : ℕ) : ℝ :=
   let L₁ := max (revJetOneC (E := E) Λ) Λ
   let L₂ := revJetTwoC (E := E) Λ
@@ -63,7 +45,6 @@ def morreyRSC (gBase : SmoothRiemannianMetric I M) (Λ : ℝ) (r s : ℕ) : ℝ 
     (kjetConst (Module.finrank ℝ E) Λ L₁ L₂ (r + s))
     (Module.finrank ℝ E) (r + s)
 
-/-- The explicit mixed Morrey constant is nonnegative when `1 ≤ Λ`. -/
 lemma morreyRSC_nonneg (gBase : SmoothRiemannianMetric I M) {Λ : ℝ}
     (hΛ : 1 ≤ Λ) (r s : ℕ) :
     0 ≤ morreyRSC (I := I) (M := M) gBase Λ r s := by
@@ -79,12 +60,6 @@ lemma morreyRSC_nonneg (gBase : SmoothRiemannianMetric I M) {Λ : ℝ}
     (kjetConst_nonneg hΛ0 hL₁ hL₂ (Module.finrank ℝ E) (r + s))
     (Module.finrank ℝ E) (r + s)
 
-/-- **Class-uniform mixed Morrey in dimension three.**
-
-For fixed `gBase`, `Λ`, and valence `(r,s)`, one nonnegative constant is chosen
-before the class metric `g` varies.  Uniform equivalence and the first two
-forward metric jets bounded by `Λ` then control the pointwise mixed fibre norm
-by the `L²` covariant-jet window `j = 0,1,2`. -/
 theorem morreyRS_unif
     (hDim : Module.finrank ℝ E = 3)
     (gBase : SmoothRiemannianMetric I M)

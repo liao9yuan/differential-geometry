@@ -3,14 +3,6 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.MetricComplet
 
 set_option autoImplicit false
 
-/-!
-# Completeness of fixed-window limit metrics
-
-A positive lower bound for the selected metric sequence makes every time slice
-of the fixed-window limit complete whenever the reference pointed manifold is
-complete.
--/
-
 noncomputable section
 
 open Set Bundle Manifold
@@ -34,9 +26,6 @@ variable (Φ : PointedCGHMaps (I := I) X P subseq)
 namespace ConvOut
 
 omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
-/-- A fixed-window limit slice is complete when the reference metric is
-complete and the selected sequence uniformly dominates a positive multiple of
-that metric. -/
 theorem complete_at
     (hP : MetricComplete (I := I) P)
     {bf : BumpFamily (I := I) Φ} {hsrc : SrcSigma Φ} {htgt : TgtSigma Φ}

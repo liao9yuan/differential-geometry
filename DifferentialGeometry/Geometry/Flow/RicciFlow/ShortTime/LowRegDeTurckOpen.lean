@@ -1,14 +1,6 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.LowRegAllOrderJet
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.DeTurckRHSRepresentation
 
-/-!
-# The positive per-metric Ricci--DeTurck endpoint
-
-This final assembly specializes `lowreg_joint_open` to the geometric
-Ricci--DeTurck right-hand side using the representation theorem from the
-intrinsic DeTurck layer.
--/
-
 noncomputable section
 
 open Bundle Manifold MeasureTheory Set
@@ -36,8 +28,6 @@ variable
       [IsManifold I ∞ M] [CompactSpace M] [I.Boundaryless]
       [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M]
 
-/-- Every fixed three-dimensional metric has a positive-horizon low-regularity
-Ricci--DeTurck solution with the full joint chart-Gram regularity package. -/
 theorem lowreg_dt_open (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M) :
     ∃ T₀ : ℝ, 0 < T₀ ∧

@@ -2,15 +2,6 @@ import DifferentialGeometry.Analysis.Sobolev.TensorHilbert.DeTurckLieCoeffL2JetB
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.CurvatureCoefficientDifferenceJetTower.TsTransport
 import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.UnifInsertH1
 
-/-!
-# Class-first DLb background-difference H1 bound
-
-This module gives the dimension-three class-first estimate for the `DLb`
-coefficient difference between one fixed DeTurck background and the frozen
-background.  The cancellation is taken before estimating, so the perturbation
-is consumed only through its `H2` jet.
--/
-
 set_option autoImplicit false
 set_option backward.isDefEq.respectTransparency false
 
@@ -138,11 +129,7 @@ private theorem wAlphaB_sub_eq_appCcRS
         (wOmega (I := I) (M := M) g₀ g₁ gB)).symm
 
 set_option maxHeartbeats 800000 in
-/-- **Dimension-three class-first `DLb` background-difference `H1` bound.**
 
-One nonnegative radius function is selected from `(gBase, Λ, δ₀)` before the
-class metric, moving metric, and perturbation vary.  The class consumes metric
-jets through order three, while the perturbation consumes only its `H2` jet. -/
 theorem dlbDiff_h1_unif
     (hDim : Module.finrank ℝ E = 3)
     (gBase : SmoothRiemannianMetric I M) {Λ : ℝ} (hΛ : 1 ≤ Λ)

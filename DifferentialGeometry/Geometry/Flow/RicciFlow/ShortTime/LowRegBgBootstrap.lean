@@ -32,7 +32,6 @@ variable
       [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M]
 
 open DifferentialGeometry.Analysis.Parabolic.TensorSpectral (symmS) in
-/-- The smooth-state DeTurck remainder with an independent fixed background. -/
 noncomputable def lowregNsecBg (g g_bg : SmoothRiemannianMetric I M)
     (S : SmoothCcTensor g 0 2) {δ : ℝ} (hδ_lt : δ < 1)
     (hδ : gFibreOpBound (I := I) (M := M) g
@@ -43,8 +42,7 @@ noncomputable def lowregNsecBg (g g_bg : SmoothRiemannianMetric I M)
     (gFibreOpBound_symmS (I := I) (M := M) g S hδ)
 
 set_option linter.unusedVariables false in
-/-- The same-horizon order-two regularity packet needed to turn a fixed-
-background low solution into a jointly smooth metric solution. -/
+
 structure BgSmoothPacket (g g_bg : SmoothRiemannianMetric I M)
     (K : LowRegBoundData) (T : ℝ) where
   carrier : MaxRegSolutionSpace (I := I) (M := M)
@@ -91,9 +89,6 @@ structure BgSmoothPacket (g g_bg : SmoothRiemannianMetric I M)
         (SmoothCcTensor.toL2 (g := g) (r := 0) (s := 2)
           (lowregNsecBg (I := I) (M := M) g g_bg (F t) hδ_lt (hδ t))) i
 
-/-- A fixed-background order-one solve with all spatial spectral masses
-directly supplies the same-horizon smoothness packet.  The dimension-dependent
-work is isolated in the producer of `hmass`. -/
 theorem bg_packet_of_mass
     (g g_bg : SmoothRiemannianMetric I M) (K : LowRegBoundData)
     (hK : IsLowBoundsAt (I := I) (M := M) g g_bg K)
@@ -148,8 +143,6 @@ theorem bg_packet_of_mass
   · intro F δ hδ_lt hδ hpin _hball
     simpa only [lowregNsecBg] using hforceCoeff F hδ_lt hδ hpin
 
-/-- A fixed-background regularity packet realizes a smooth Ricci--DeTurck
-solution on exactly the packet's horizon. -/
 theorem dt_of_bg_packet (g g_bg : SmoothRiemannianMetric I M)
     (K : LowRegBoundData)
     (hK : IsLowBoundsAt (I := I) (M := M) g g_bg K) {T : ℝ}
@@ -211,9 +204,6 @@ theorem dt_of_bg_packet (g g_bg : SmoothRiemannianMetric I M)
     rw [heq]
     exact (hflow t ht x v w).const_add (g.inner x v w)
 
-/-- The order-one fixed-background solve has a canonical same-horizon `H²`
-cross representative.  It realizes the supplied maximal-regularity carrier at
-every time and inherits its lower-state bound on the whole closed slab. -/
 theorem lowSolve_cross
     (g g_bg : SmoothRiemannianMetric I M)
     (K : LowRegBoundData)
@@ -254,9 +244,6 @@ theorem lowSolve_cross
       (lowregStateRad_pos K.top_nonneg K.slope_nonneg K.outer_pos
         K.realize_pos).le hfield
 
-/-- An adapted fixed-background solve supplies the same-horizon smoothness
-packet through its all-order spatial mass.  This is a metricwise consumer; it
-does not choose an adapted packet or assert class-first uniformity. -/
 theorem bg_packet_of_adapt (hDim : Module.finrank ℝ E = 3)
     (g g_bg : SmoothRiemannianMetric I M) (K : LowRegBoundData)
     {T Rcap Ctop₂ Kr2 Kr1 Kcap : ℝ}
@@ -273,8 +260,6 @@ theorem bg_packet_of_adapt (hDim : Module.finrank ℝ E = 3)
       (fun σ => lowreg_loMassBg (I := I) (M := M) hDim g g_bg K
         hT hT1 uLo gforce hlo σ)
 
-/-- Every three-dimensional order-three metric class has a common horizon for
-smooth Ricci--DeTurck solutions against the fixed class background. -/
 theorem lowreg_dt_unif (hDim : Module.finrank ℝ E = 3)
     (gBase : SmoothRiemannianMetric I M) {Λ : ℝ} (hΛ : 1 ≤ Λ) :
     ∃ T : ℝ, 0 < T ∧

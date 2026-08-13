@@ -5,14 +5,6 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.Entropy.ConjGalerkin
 
 set_option autoImplicit false
 
-
-
-
-
-
-
-
-
 noncomputable section
 
 open Bundle Filter MeasureTheory Set
@@ -112,8 +104,6 @@ private theorem gal_crit_nf
   exact hcrit
 
 open scoped Classical in
-/-- Prescribed-interval Galerkin solutions have all-order energy bounds when
-the genuine finite-core perturbation satisfies the critical estimate. -/
 theorem gal_bound_on
     {D : RealTimeInterval} (S : SolutionOn (I := I) (M := M) D)
     (T : D.RegularTime) {tau : Real}
@@ -299,9 +289,6 @@ theorem gal_bound_on
   · simpa only [zero_add] using hbounds
 
 open scoped Classical in
-/-- Every sequence of finite scalar truncations of one smooth initial datum has
-solutions on a common interval, with Galerkin energies bounded uniformly in the
-truncation at every natural Sobolev order. -/
 theorem scalar_gal_bound
     {D : RealTimeInterval} (S : SolutionOn (I := I) (M := M) D)
     (hS : IsSolutionOn (I := I) S) (T : D.RegularTime) :

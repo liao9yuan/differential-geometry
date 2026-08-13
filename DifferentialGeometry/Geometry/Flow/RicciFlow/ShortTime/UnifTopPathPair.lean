@@ -4,14 +4,6 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.UnifAppH1
 import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.UnifConvexJets
 import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.UnifTopPathDev
 
-/-!
-# Class-first top-path principal pairing
-
-The integrated top-coefficient deviation is small directly in its natural
-principal energy form.  The radius and coefficient are chosen before the
-metric varies over the order-three class.
- -/
-
 set_option autoImplicit false
 set_option backward.isDefEq.respectTransparency false
 
@@ -42,9 +34,6 @@ variable
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
-/-- One radius and one coefficient, fixed before the class metric varies,
-control the integrated top-path deviation in the natural `H²` principal
-pairing. -/
 theorem top_pair_h2_unif
     (hDim : Module.finrank ℝ E = 3)
     (gBase : SmoothRiemannianMetric I M)
@@ -105,9 +94,6 @@ theorem top_pair_h2_unif
       simp only [C]
       ring
 
-/-- The class-first order-four principal form obtained by applying
-`top_pair_h2_unif` to `(1 - Δ_∇) U`.  The order-four norm is an energy term,
-not a radius assumption. -/
 theorem top_pair_h4_unif
     (hDim : Module.finrank ℝ E = 3)
     (gBase : SmoothRiemannianMetric I M)
@@ -238,9 +224,6 @@ theorem top_pair_h5_unif
       dsimp only [C]
       ring
 
-/-- For every prescribed principal-energy coefficient, one class-first `H²`
-cap absorbs twice the absolute top-path principal form into the order-four
-energy. -/
 theorem top_pair_abs_unif
     (hDim : Module.finrank ℝ E = 3)
     (gBase : SmoothRiemannianMetric I M)

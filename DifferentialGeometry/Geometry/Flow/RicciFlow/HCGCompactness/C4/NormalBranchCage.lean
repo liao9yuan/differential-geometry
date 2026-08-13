@@ -8,13 +8,6 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.C4.StepCSmoot
 
 set_option autoImplicit false
 
-
-
-
-
-
-
-
 noncomputable section
 
 universe u uE uH
@@ -38,11 +31,6 @@ variable [NeZero (Module.finrank Real E)]
 variable {H : Type uH} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H} [I.Boundaryless]
 
-
-
-
-
-
 def HasLiveBrFull
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
     {hd : InjRadiusDecayInput (I := I) X} {D : Real}
@@ -59,9 +47,6 @@ def HasLiveBrFull
       (hcomplete.complete (L.φ n)) (hconn (L.φ n))
       (seqCenterD hd P L n (gamma.1 : Nat)) (q gamma) (δ gamma)
       (aMin * hd.mu (L.rInf (gamma.1 : Nat) + 1))
-
-
-
 
 theorem exists_slot_min
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
@@ -236,11 +221,6 @@ theorem exists_slot_min
       (X.obj (L.φ k)).t2TangentBundle
     exact hcentres (L.φ k) (seqCenterD hd P L k (gamma.1 : Nat)) (hk gamma).le
 
-
-
-
-
-
 theorem exists_live_dom
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
     (hd : InjRadiusDecayInput (I := I) X) {D : Real} (hD : 0 < D)
@@ -269,9 +249,6 @@ theorem exists_live_dom
   refine ⟨aρ, haρ, q, δ, ?_⟩
   filter_upwards [liveCenters_cage hd hD P hre L pb r] with k hk
   exact fun gamma => hdom (L.φ k) (seqCenterD hd P L k (gamma.1 : Nat)) (hk gamma)
-
-
-
 
 theorem exists_live_min
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
@@ -334,8 +311,6 @@ theorem exists_live_min
     (X.obj (L.φ k)).t2TangentBundle
   simpa only [Rlive, ρ] using
     hcentres (L.φ k) (seqCenterD hd P L k (gamma.1 : Nat)) (hk gamma)
-
-
 
 theorem HasNormalBrFull.exists_cm_eqn
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
@@ -470,9 +445,6 @@ theorem HasNormalBrFull.exists_cm_eqn
   have hz := centerReadoutB_min (I := I) hb k hcomplete hconn x hq he hf
     mu xi join p r h' hρ hρq hρmetric hρexp hpairs''
   simpa only [xi, hdecode] using hz
-
-
-
 
 theorem HasNormalBrFull.exists_cm_deriv
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
@@ -672,10 +644,6 @@ theorem HasNormalBrFull.exists_cm_deriv
     mu xi htgt h.μ_nonneg hsum hzero
   simpa only [c, xi] using ⟨hcSource, htgt, hzNormal, hzero, hsol⟩
 
-
-
-/-- The legacy selected branch produces the provider-independent finite center
-readout carried by its controlled normal-ball chart. -/
 theorem HasNormalBrFull.exists_cmC
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
     (hb : NormalCoordMetricBoundInput (I := I) X) (k : Nat)
@@ -1058,8 +1026,6 @@ theorem exists_hat_cm_eqn_at
     hradCage hρ hρq hρmetric hρexp
   simpa only [x0, rho0] using hresult
 
-
-
 theorem exists_hat_cm_sol_at
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
     (hd : InjRadiusDecayInput (I := I) X) {D aMin : Real}
@@ -1240,10 +1206,6 @@ theorem exists_hat_cm_sol_at
     hradCage hρ hρq hρmetric hρexp
   simpa only [x0, rho0] using hresult
 
-
-
-/-- A prescribed live source slot supplies the provider-independent center
-readout at the legacy chart, ready for a later H6 provider switch. -/
 theorem exists_hat_cmC_at
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
     (hd : InjRadiusDecayInput (I := I) X) {D aMin : Real}
@@ -1527,8 +1489,6 @@ theorem exists_hat_cm_eqn
   refine ⟨gammaLive, ?_⟩
   exact exists_hat_cm_eqn_at (I := I) hd P hre L pb r k hcomplete hconn
     q δ hqdata hbranch gammaLive mu pts join x rad h hxhat (hradCage gammaLive)
-
-
 
 theorem exists_cm_branch
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}

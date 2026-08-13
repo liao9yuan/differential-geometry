@@ -2,15 +2,6 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.Metric.InverseSmoo
 
 set_option autoImplicit false
 
-
-
-
-
-
-
-
-
-
 noncomputable section
 
 namespace DifferentialGeometry.PDE.RicciFlow
@@ -31,10 +22,6 @@ section Components
 
 variable {Idx : Type*} [Fintype Idx]
 variable {u : Set M}
-
-
-
-
 
 def inverseMetricCovDerivCompInFrame
     (gInv : Real -> DifferentialGeometry.Integral.Connection.InverseMetricComponents M Idx)
@@ -356,12 +343,6 @@ theorem inverseMetric_derivative_solve
                           rw [hsymm b j]
                           ring
 
-
-
-
-
-
-
 omit [SigmaCompactSpace M] [T2Space M] in
 theorem inverseMetricCovDerivCompInFrame_eq_zero
     [DecidableEq Idx]
@@ -662,8 +643,6 @@ theorem inverseMetricCovDerivCompInFrame_eq_zero
   rw [hDU]
   ring
 
-
-
 omit [SigmaCompactSpace M] [T2Space M] in
 theorem invCovZeroLocal
     [DecidableEq Idx]
@@ -963,7 +942,6 @@ theorem invCovZeroLocal
       (∑ a : Idx, Γ a l * U k a) = 0
   rw [hDU]
   ring
-
 
 end Components
 

@@ -1,19 +1,5 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.LowRegLiftAffine
 
-/-!
-# The low-regularity forcing satisfies the low affine fixed-point equation
-
-The coefficient families here split the refolded low-base action
-`refoldBaseN` into its second- and first-order summands at the exact Sobolev
-exponents consumed by `lowreg_lift_two`.  The radial maps stay inside the
-families, so their self-application is definitionally the zero-based low
-action and does not double-count the principal arm.
-
-The first-order family is built from the complete refolded low action `FLo`
-produced by `refold_time`, not from the dense extension `lowA1Lo`: only the
-refolded route has an unconditional continuity and affine-growth certificate.
--/
-
 noncomputable section
 
 open Bundle Manifold MeasureTheory Set Filter
@@ -66,10 +52,6 @@ private def affState
     (maxRegDuhamelSolField (I := I) (M := M)
       (1 : ℝ) hT hT1 0 f t)
 
-/-- The order-one Duhamel trajectory as a time-`L²` field at the lower-state
-exponent `((1 : ℕ) : ℝ) + 2`.  This is the state in which the trajectory ball
-hypothesis of `lowreg_hfLo_data` is phrased, so it has to be nameable by that
-theorem's callers. -/
 def stateField
     (g : SmoothRiemannianMetric I M) {T : ℝ}
     (hT : 0 < T) (hT1 : T ≤ 1)
@@ -98,10 +80,6 @@ private theorem stateField_ae
       (maxRegDuhamelSolField (I := I) (M := M)
         (1 : ℝ) hT hT1 0 f)
 
-/-- The order-one Duhamel trajectory as a time-`L²` field at the literal
-exponent `3`.  This is the state that `refold_time` is evaluated at, and its
-time-`L²` norm is the size appearing in both first-order operator
-certificates. -/
 def duhH3
     (g : SmoothRiemannianMetric I M) {T : ℝ}
     (hT : 0 < T) (hT1 : T ≤ 1)
@@ -129,10 +107,7 @@ private theorem duhH3_ae
         (0 : tensorHs (I := I) (M := M) g 0 2 ((1 : ℝ) + 2)) f)
 
 omit [BoundarylessManifold I M] in
-/-- The time-`L²` lift of an exponent transport is norm preserving, because the
-transport itself is a linear isometry.  (Canonical home: beside `tensorHsCongrL`
-in `SobolevScale/ExponentCongr.lean`, once that file sees the time-`L²`
-layer.) -/
+
 theorem norm_congrLp (g : SmoothRiemannianMetric I M) {a b T : ℝ} (h : a = b)
     (u : timeL2 (tensorHs (I := I) (M := M) g 0 2 a) T) :
     ‖(tensorHsCongrL (I := I) (M := M) g 0 2 h).compLpL 2 (timeMeasure T) u‖ =
@@ -145,12 +120,6 @@ theorem norm_congrLp (g : SmoothRiemannianMetric I M) {a b T : ℝ} (h : a = b)
   rw [ht, tensorHsCongrL_apply, norm_tensorHsCongr]
 
 omit [BoundarylessManifold I M] in
-/-- **The core maximal-regularity size of the order-one Duhamel trajectory.**
-With zero initial datum, the `L²_t H³` size of the trajectory is controlled by
-the `L²_t H¹` size of its forcing with the `T`-benign constant `1 + T ≤ 2`.
-This is the `duhH3` spelling of `norm_maxRegDuhamelSolField_zero_le`, and it is
-what replaces a pointwise `L^∞_t H³` trajectory bound in the smallness chain of
-the adjacent-scale lift. -/
 theorem norm_duhH3_le
     (g : SmoothRiemannianMetric I M) {T : ℝ}
     (hT : 0 < T) (hT1 : T ≤ 1)
@@ -190,8 +159,6 @@ private theorem hsCongr_trans
   cases hbc
   rfl
 
-/-- The complete second-order low family along the order-one Duhamel field.
-Its radial factor is part of the family, exactly as in `lowBaseA`. -/
 def lowAffA2
     (g : SmoothRiemannianMetric I M)
     {ρ δ : ℝ} (hρ : 0 ≤ ρ) (hδ0 : 0 ≤ δ) (hδ_le : δ ≤ 1 / 3)
@@ -214,8 +181,6 @@ def lowAffA2
         (tensorHsCongrL (I := I) (M := M) g 0 2
           (show (1 : ℝ) + 2 = 3 by norm_num)))
 
-/-- Radialization and exponent normalization do not enlarge the complete low
-second-order coefficient norm. -/
 theorem lowAffA2_le
     (g : SmoothRiemannianMetric I M)
     {ρ δ : ℝ} (hρ : 0 ≤ ρ) (hδ0 : 0 ≤ δ) (hδ_le : δ ≤ 1 / 3)
@@ -254,9 +219,6 @@ theorem lowAffA2_le
       mul_le_mul_of_nonneg_left hR3Q (norm_nonneg A2)
     _ = ‖A2‖ := mul_one _
 
-/-- A continuous uniformly bounded completed second-order coefficient produces
-the exact strongly measurable low time family and its `NNReal` pointwise
-operator bound. -/
 theorem lowAffA2_data
     (g : SmoothRiemannianMetric I M)
     {ρ δ : ℝ} (hρ : 0 ≤ ρ) (hδ0 : 0 ≤ δ) (hδ_le : δ ≤ 1 / 3)
@@ -338,10 +300,6 @@ theorem lowAffA2_data
         (hbd (incl32 (I := I) (M := M) g (u t)))
   exact ⟨C2, rfl, hmeas, hbound⟩
 
-/-- The complete second-order high family along the order-one Duhamel field.
-It is the `H⁴ → H²` sibling of `lowAffA2`, normalized to the arithmetic domain
-exponent `(2 : ℝ) + 2` that the adjacent-scale lift consumes at `aHi = 2`, and
-it carries the same radial factor selected by the same `H²` state. -/
 def lowAffA2Hi
     (g : SmoothRiemannianMetric I M)
     {ρ δ : ℝ} (hρ : 0 ≤ ρ) (hδ0 : 0 ≤ δ) (hδ_le : δ ≤ 1 / 3)
@@ -364,8 +322,6 @@ def lowAffA2Hi
         (tensorHsCongrL (I := I) (M := M) g 0 2
           (show (2 : ℝ) + 2 = 4 by norm_num)))
 
-/-- Radialization and exponent normalization do not enlarge the complete high
-second-order coefficient norm. -/
 theorem lowAffA2Hi_le
     (g : SmoothRiemannianMetric I M)
     {ρ δ : ℝ} (hρ : 0 ≤ ρ) (hδ0 : 0 ≤ δ) (hδ_le : δ ≤ 1 / 3)
@@ -404,9 +360,6 @@ theorem lowAffA2Hi_le
       mul_le_mul_of_nonneg_left hR4Q (norm_nonneg A2)
     _ = ‖A2‖ := mul_one _
 
-/-- A continuous uniformly bounded completed high second-order coefficient
-produces the exact strongly measurable high time family and its `NNReal`
-pointwise operator bound. -/
 theorem lowAffA2Hi_data
     (g : SmoothRiemannianMetric I M)
     {ρ δ : ℝ} (hρ : 0 ≤ ρ) (hδ0 : 0 ≤ δ) (hδ_le : δ ≤ 1 / 3)
@@ -474,11 +427,6 @@ theorem lowAffA2Hi_data
   exact (lowAffA2Hi_le (I := I) (M := M)
     g hρ hδ0 hδ_le hreal hT hT1 f t).trans (hbd _)
 
-/-- The two second-order families form the canonical Sobolev-inclusion square
-at every time: this is the `hA2compat` input of the adjacent-scale lift at
-`aLo = 1`, `aHi = 2`.  Its only genuine inputs are the completed `H²`-state
-square of `lowA2Hi` / `lowA2Lo` and the fact that the frozen radial passenger
-commutes with the scale inclusions. -/
 theorem lowAffA2_compat
     (g : SmoothRiemannianMetric I M)
     {ρ δ : ℝ} (hρ : 0 ≤ ρ) (hδ0 : 0 ≤ δ) (hδ_le : δ ≤ 1 / 3)
@@ -532,10 +480,6 @@ theorem lowAffA2_compat
     tensorHsCongrL_apply, hincl]
   exact hpt
 
-/-- The first-order low family along the order-one Duhamel field, built from
-the complete refolded low action `FLo`.  It acts on the canonical intermediate
-`H2` representative and contains the same radial factor as the first-order
-summand of `refoldBaseN`. -/
 def refoldAffA1
     (g : SmoothRiemannianMetric I M) (ρ : ℝ)
     (FLo : loH3 (I := I) (M := M) g →
@@ -553,8 +497,6 @@ def refoldAffA1
         (tensorHsCongrL (I := I) (M := M) g 0 2
           (show (1 : ℝ) + 1 = 2 by norm_num)))
 
-/-- Radialization and exponent normalization do not enlarge the refolded low
-first-order coefficient norm. -/
 theorem refoldAffA1_le
     (g : SmoothRiemannianMetric I M) {ρ : ℝ} (hρ : 0 ≤ ρ)
     (FLo : loH3 (I := I) (M := M) g →
@@ -585,8 +527,6 @@ theorem refoldAffA1_le
       mul_le_mul_of_nonneg_left hR2Q (norm_nonneg A1)
     _ = ‖A1‖ := mul_one _
 
-/-- The refolded first-order family along a continuous action is strongly
-measurable in time. -/
 theorem refoldAffA1_aemeas
     (g : SmoothRiemannianMetric I M) (ρ : ℝ)
     (FLo : loH3 (I := I) (M := M) g →
@@ -635,9 +575,6 @@ theorem refoldAffA1_aemeas
       (loH1 (I := I) (M := M) g)).continuous₂
         |>.comp_aestronglyMeasurable₂ hA1 hR2Q
 
-/-- The time-`L²` certificate of the refolded low first-order family: the affine
-state bound of `refold_time` gives membership together with the Minkowski norm
-estimate in the size of the `H³` Duhamel trajectory. -/
 theorem refoldAffA1_memLp
     (g : SmoothRiemannianMetric I M) {ρ : ℝ} (hρ : 0 ≤ ρ)
     (FLo : loH3 (I := I) (M := M) g →
@@ -657,11 +594,6 @@ theorem refoldAffA1_memLp
   rw [hd]
   exact (refoldAffA1_le (I := I) (M := M) g hρ FLo hT hT1 f t).trans (hFbd _)
 
-/-- The first-order high family along the order-one Duhamel field, built from
-the complete refolded high action `FHi` produced by `refold_time`.  It is the
-`H³ → H²` sibling of `refoldAffA1`, normalized to the arithmetic domain
-exponent `(2 : ℝ) + 1` that the adjacent-scale lift consumes at `aHi = 2`, and
-it carries the same radial factor. -/
 def refoldAffA1Hi
     (g : SmoothRiemannianMetric I M) (ρ : ℝ)
     (FHi : loH3 (I := I) (M := M) g →
@@ -679,8 +611,6 @@ def refoldAffA1Hi
         (tensorHsCongrL (I := I) (M := M) g 0 2
           (show (2 : ℝ) + 1 = 3 by norm_num)))
 
-/-- Radialization and exponent normalization do not enlarge the refolded high
-first-order coefficient norm. -/
 theorem refoldAffA1Hi_le
     (g : SmoothRiemannianMetric I M) {ρ : ℝ} (hρ : 0 ≤ ρ)
     (FHi : loH3 (I := I) (M := M) g →
@@ -711,8 +641,6 @@ theorem refoldAffA1Hi_le
       mul_le_mul_of_nonneg_left hR3Q (norm_nonneg A1)
     _ = ‖A1‖ := mul_one _
 
-/-- The refolded high first-order family along a continuous action is strongly
-measurable in time. -/
 theorem refoldAffA1Hi_aemeas
     (g : SmoothRiemannianMetric I M) (ρ : ℝ)
     (FHi : loH3 (I := I) (M := M) g →
@@ -761,9 +689,6 @@ theorem refoldAffA1Hi_aemeas
       (loH2 (I := I) (M := M) g)).continuous₂
         |>.comp_aestronglyMeasurable₂ hA1 hR3Q
 
-/-- The time-`L²` certificate of the refolded high first-order family: the
-`H³`-side sibling of `refoldAffA1_memLp`, with the same Minkowski bound in the
-size of the `H³` Duhamel trajectory and no trajectory hypothesis. -/
 theorem refoldAffA1Hi_memLp
     (g : SmoothRiemannianMetric I M) {ρ : ℝ} (hρ : 0 ≤ ρ)
     (FHi : loH3 (I := I) (M := M) g →
@@ -783,11 +708,6 @@ theorem refoldAffA1Hi_memLp
   rw [hd]
   exact (refoldAffA1Hi_le (I := I) (M := M) g hρ FHi hT hT1 f t).trans (hFbd _)
 
-/-- The two refolded first-order families form the canonical Sobolev-inclusion
-square at almost every time: this is the `hA1compat` input of the
-adjacent-scale lift at `aLo = 1`, `aHi = 2`.  Its only input is the
-trajectory-free square of the affine packet (`refold_aff`), transported through
-the frozen radial passenger and the two exponent normalizations. -/
 theorem refoldAffA1_compat
     (g : SmoothRiemannianMetric I M) (ρ : ℝ)
     (FHi : loH3 (I := I) (M := M) g →
@@ -905,12 +825,6 @@ private theorem refoldAff_self
   rw [hv, h3, h2]
   abel
 
-/-- The genuine low-regularity forcing satisfies the exact low affine
-fixed-point equation consumed by `lowreg_lift_two`.  The first-order family is
-built from the complete refolded low action `FLo`, whose continuity and
-smooth-core formula are the state-level outputs of `refold_time`; the
-coefficient measurability and time-integrability packets are the independent
-operator-family inputs of `lowreg_lift_two`. -/
 theorem lowreg_hfLo
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M)
@@ -1099,22 +1013,6 @@ theorem lowreg_hfLo
   rw [hft, hstate', ← hself]
   abel
 
-/-- The complete affine packet on one radius, on both adjacent scales, along a
-given trajectory.
-
-It *consumes* the trajectory-free affine packet of `refold_aff` — the two
-refolded first-order actions `FHi`, `FLo` with their continuity, the low
-smooth-core formula, the common affine growth constants `Z, L` and the
-Sobolev-inclusion square — and produces the low second-order family with its
-`NNReal` pointwise bound, the two first-order `MemLp` witnesses with their
-time-`L²` Minkowski bounds `≤ L‖duhH3 f‖ + √T·Z`, the a.e. Sobolev-inclusion
-square of the two first-order families, and the exact low fixed-point equality.
-Taking the packet instead of producing it is what lets a caller cap its state
-radius against `L` before any trajectory exists.
-
-The only trajectory hypotheses are the lower-state ball and the Nemytskii
-forcing identity: the first-order sizes are certified in `L²_t` through
-`memLp_clm_affine`, never pointwise in time. -/
 theorem lowreg_hfLo_data
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M)

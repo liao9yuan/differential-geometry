@@ -1,7 +1,6 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Entropy.F.TraceAlgebra
 import DifferentialGeometry.Geometry.Connection.LeviCivita.DivergenceFrameInvariance
 
-
 set_option autoImplicit false
 
 namespace DifferentialGeometry.PDE.RicciFlow.Entropy
@@ -17,21 +16,6 @@ open scoped Manifold ContDiff
 
 variable {M : Type*}
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 section GeometryFormula510
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]
@@ -41,9 +25,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
   [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
 
 private local instance : CompleteSpace E := FiniteDimensional.complete Real E
-
-
-
 
 omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M]
     [SigmaCompactSpace M] in
@@ -61,14 +42,11 @@ private theorem coordinateFrameAt_coeff_one_eq
   unfold IsLocalFrameOn.coeff
   rw [dif_pos hx, dif_pos hx, hbasis]
 
-
 def gInvFun
     (g : SmoothRiemannianMetric I M)
     (x : M) (i j : CoordinateIdx (𝕜 := Real) E) : M -> Real :=
   fun y : M =>
     inverseMetricFlatModelInChart_component (I := I) g x i j (extChartAt I x y)
-
-
 
 def compFun
     (A : Tensor0SBundle.TensorRSField (𝕜 := Real) (E := E) (H := H)
@@ -83,10 +61,6 @@ def compFun
           (fun _ : Fin 1 => p)) y))
       (fun q : Fin 2 =>
         coordinateFrameAt (I := I) x (if q = 0 then i else j) y)
-
-
-
-
 
 omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M]
     [SigmaCompactSpace M] in

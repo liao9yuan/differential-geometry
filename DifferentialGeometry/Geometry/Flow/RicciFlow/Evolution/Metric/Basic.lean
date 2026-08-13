@@ -5,15 +5,6 @@ import DifferentialGeometry.Geometry.Coordinates.Christoffel
 
 set_option autoImplicit false
 
-
-
-
-
-
-
-
-
-
 noncomputable section
 
 namespace DifferentialGeometry.PDE.RicciFlow
@@ -35,7 +26,6 @@ section Components
 variable {Idx : Type*} [Fintype Idx]
 variable {u : Set M}
 
-
 def metricCompInFrame
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -53,7 +43,6 @@ omit [SigmaCompactSpace M] [T2Space M] in
     metricCompInFrame (I := I) S frame t x i j =
       (S.family.metric t).inner x (frame i x) (frame j x) := by
   rfl
-
 
 omit [Fintype Idx] in
 omit [SigmaCompactSpace M] in
@@ -73,8 +62,6 @@ theorem metricCompInFrame_hasDerivWithinAt
     metric_derivWithin_eq_neg_two_ricci (I := I) S hS t x
       (frame i x) (frame j x)
 
-
-
 omit [SigmaCompactSpace M] in
 theorem coordMetricSmooth
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
@@ -90,8 +77,6 @@ theorem coordMetricSmooth
     hS.smoothMetric.frameCompSmooth
       (coordinateFrameAt (I := I) x₀)
       (coordinateFrameAt_isLocalFrame (I := I) x₀) i j
-
-
 
 omit [SigmaCompactSpace M] in
 theorem coordMetricSmoothAt
@@ -110,13 +95,6 @@ theorem coordMetricSmoothAt
     (coordMetricSmooth (I := I) S hS x₀ i j).contMDiffAt
       (prod_mem_nhds (D.regular_isOpen.mem_nhds t.2)
         ((coordinateFrameSet_open (I := I) x₀).mem_nhds hx))
-
-
-
-
-
-
-
 
 omit [SigmaCompactSpace M] in
 theorem coordMetricContOn
@@ -157,10 +135,6 @@ theorem coordMetricContOn
   rw [Tensor0SBundle.metricTensorField_apply]
   simp [metricCompInFrame]
 
-
-
-
-
 @[deprecated "use InvMetricLocal on the actual local frame domain" (since := "2026-05-22")]
 def InverseMetricComponentsInFrameOn [DecidableEq Idx]
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
@@ -174,7 +148,6 @@ def InverseMetricComponentsInFrameOn [DecidableEq Idx]
       (∑ k : Idx,
         metricCompInFrame (I := I) S frame t x i k * gInv t x k j) =
         (if i = j then 1 else 0)
-
 
 def InvMetricLocal [DecidableEq Idx]
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
@@ -190,21 +163,12 @@ def InvMetricLocal [DecidableEq Idx]
         metricCompInFrame (I := I) S frame t x i k * gInv t x k j) =
         (if i = j then 1 else 0)
 
-
-
-
-
-
 @[deprecated "use pointwise inverse symmetry or derive it from MetricInverseInBasis_gen"
     (since := "2026-05-22")]
 def SymmetricInverseMetricComponentsInFrameOn
     (gInv : Real -> DifferentialGeometry.Integral.Connection.InverseMetricComponents M Idx) :
       Prop :=
   forall t x i j, gInv t x i j = gInv t x j i
-
-
-
-
 
 omit [SigmaCompactSpace M] [T2Space M] in
 @[deprecated "derive pointwise symmetry from MetricInverseInBasis_gen or InvMetricLocal"
@@ -225,7 +189,6 @@ theorem gInv_symm [DecidableEq Idx]
       simpa [metricCompInFrame] using hinv t y a b)
     x i j
 
-
 def InverseMetricDerivativeComponentsOn
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (gInv : Real -> DifferentialGeometry.Integral.Connection.InverseMetricComponents M Idx)
@@ -238,8 +201,6 @@ def InverseMetricDerivativeComponentsOn
       D.carrier
       (t : Real)
 
-/-- Componentwise time regularity of supplied inverse-metric components on a
-local frame domain. -/
 def InvMetricDerivLocal
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (gInv : Real -> DifferentialGeometry.Integral.Connection.InverseMetricComponents M Idx)
@@ -254,7 +215,6 @@ def InvMetricDerivLocal
         (t : Real)
 
 omit [TopologicalSpace M] [SigmaCompactSpace M] [T2Space M] [Fintype Idx] in
-/-- Global inverse-component time regularity restricts to any frame domain. -/
 theorem InverseMetricDerivativeComponentsOn.toLocal
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     {gInv : Real -> DifferentialGeometry.Integral.Connection.InverseMetricComponents M Idx}
@@ -263,15 +223,6 @@ theorem InverseMetricDerivativeComponentsOn.toLocal
     (u : Set M) :
     InvMetricDerivLocal (D := D) gInv gInvDt u :=
   fun t x _hx i j => hdt t x i j
-
-
-
-
-
-
-
-
-
 
 structure MetricFrameTimeRegularityInFrameOnLocal
     [DecidableEq Idx]
@@ -287,7 +238,6 @@ structure MetricFrameTimeRegularityInFrameOnLocal
         (fun t : Real => metricCompInFrame (I := I) S frame t x i j)
         D.carrier
 
-
   nondegenerateGram :
     InvMetricLocal (I := I) S gInv frame u
   inverseMetricDerivative :
@@ -295,12 +245,6 @@ structure MetricFrameTimeRegularityInFrameOnLocal
   uniqueTimeDerivatives :
     forall t : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime D,
       UniqueDiffWithinAt Real D.carrier (t : Real)
-
-
-
-
-
-
 
 structure MetricFrameSpacetimeRegularityInFrameOnLocal
     [DecidableEq Idx]
@@ -334,8 +278,6 @@ structure MetricFrameSpacetimeRegularityInFrameOnLocal
           (t : Real)
 
 omit [SigmaCompactSpace M] [T2Space M] in
-/-- Replace the inverse-component family in a spacetime metric-frame package,
-keeping all metric-side regularity fields unchanged. -/
 theorem MetricFrameSpacetimeRegularityInFrameOnLocal.congrInv
     [DecidableEq Idx]
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
@@ -356,7 +298,6 @@ theorem MetricFrameSpacetimeRegularityInFrameOnLocal.congrInv
   uniqueTimeDerivatives := h.uniqueTimeDerivatives
   frameMetricSpacetimeSmooth := h.frameMetricSpacetimeSmooth
   frameMetricExtDerivTimeDerivative := h.frameMetricExtDerivTimeDerivative
-
 
 end Components
 

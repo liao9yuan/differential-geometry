@@ -2,14 +2,6 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.C4.StepCCente
 
 set_option autoImplicit false
 
-
-
-
-
-
-
-
-
 noncomputable section
 
 universe u uE uH uX uY
@@ -33,8 +25,6 @@ variable {M : Type u} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ 
   [T2Space M] [T2Space (TangentBundle I M)] [SigmaCompactSpace M]
   [ConnectedSpace M] [T3Space M]
 
-
-
 omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M]
     [T2Space (TangentBundle I M)] [SigmaCompactSpace M] [ConnectedSpace M] [T3Space M] in
 theorem metricEnorm (g : SmoothRiemannianMetric I M) :
@@ -49,16 +39,12 @@ theorem metricEnorm (g : SmoothRiemannianMetric I M) :
     (DifferentialGeometry.Geometry.Riemannian.tensor0SBundle_enorm_eq_riemannianBundle_enorm
       (I := I) g x v)
 
-
 noncomputable def centerAverage (g : SmoothRiemannianMetric I M)
     {X : Type uX} {ι : Type} [Fintype ι] (μ : X → ι → ℝ)
     (pts : X → ι → M) (join : M → M → ℝ → M) (p : X → M) (r : X → ℝ)
     (h : ∀ x : X, CenterInput (I := I) g (μ x) (pts x) join (p x) (r x))
     (x : X) : M :=
   centerOfMass (I := I) g (μ x) (pts x) join (p x) (r x) (h x)
-
-
-
 
 noncomputable def centerAverageOn (g : SmoothRiemannianMetric I M)
     {X : Type uX} {ι : Type} [Fintype ι] (s : Set X) (μ : X → ι → ℝ)
@@ -77,15 +63,10 @@ namespace centerAverage
 
 variable {g : SmoothRiemannianMetric I M} {X : Type uX} {ι : Type}
 
-
-
-
 noncomputable def activeFill (μ : X → ι → ℝ) (pts : X → ι → M)
     (qstar : X → M) : X → ι → M := by
   classical
   exact fun x i => if μ x i = 0 then qstar x else pts x i
-
-
 
 omit [T3Space M] in
 omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M]
@@ -98,8 +79,6 @@ theorem energy_activeFill [Fintype ι] (g : SmoothRiemannianMetric I M)
   apply CenterOfMass.centerEnergy_congr
   intro i hi
   simp only [activeFill, hi, ↓reduceIte]
-
-
 
 theorem uniqueMin_activeFill [Fintype ι] (g : SmoothRiemannianMetric I M)
     (μ : X → ι → ℝ) (pts : X → ι → M) (qstar : X → M)
@@ -126,8 +105,6 @@ theorem uniqueMin_activeFill [Fintype ι] (g : SmoothRiemannianMetric I M)
     rw [energy_activeFill g μ pts qstar x y',
       energy_activeFill g μ pts qstar x z]
     exact hy' z
-
-
 
 omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M]
     [T2Space (TangentBundle I M)] [SigmaCompactSpace M] in
@@ -248,14 +225,11 @@ theorem exists_active_radius {Y : Type uY} [PseudoMetricSpace Y] {s : Set X}
       lt_of_le_of_lt hsum_le (hcard ▸ hcard_lt)
     simpa [radSeq] using add_lt_add_of_lt_of_lt hsum_lt (hNtail a ha_tail)
 
-
-
 structure WeightDataOn (s : Set X) (U : ι → Set X) (μ : X → ι → ℝ) : Prop where
   nonneg : ∀ x ∈ s, ∀ i : ι, 0 ≤ μ x i
   pos : ∀ x ∈ s, ∃ i : ι, 0 < μ x i
   sum_one : ∀ x ∈ s, ∑ i : ι, μ x i = 1
   active_mem : ∀ x ∈ s, ∀ i : ι, μ x i ≠ 0 → x ∈ U i
-
 
 theorem WeightDataOn.comp {Y : Type uY} {s : Set Y} {U : Set X}
     {R : ι → Set X} {μ : X → ι → ℝ} {f : Y → X}
@@ -271,8 +245,6 @@ theorem WeightDataOn.comp {Y : Type uY} {s : Set Y} {U : Set X}
   · intro y hy i hne
     exact h.active_mem (f y) (hf hy) i hne
 
-
-
 theorem WeightDataOn.data {s : Set X} {U : ι → Set X} {μ : X → ι → ℝ}
     (h : WeightDataOn s U μ) {x : X} (hx : x ∈ s) :
     ((∀ i : ι, 0 ≤ μ x i) ∧ (∃ i : ι, 0 < μ x i) ∧ ∑ i : ι, μ x i = 1) ∧
@@ -283,17 +255,12 @@ variable {μ : X → ι → ℝ} {pts : X → ι → M} {join : M → M → ℝ 
   {p : X → M} {r : X → ℝ}
   (h : ∀ x : X, CenterInput (I := I) g (μ x) (pts x) join (p x) (r x))
 
-
-
 theorem on_eq {s : Set X} {qstar : X → M}
     (hOn : ∀ x : X, x ∈ s → CenterInput (I := I) g (μ x) (pts x) join (p x) (r x))
     {x : X} (hx : x ∈ s) :
     centerAverageOn (I := I) g s μ pts join p r qstar hOn x =
       centerOfMass (I := I) g (μ x) (pts x) join (p x) (r x) (hOn x hx) := by
   simp [centerAverageOn, hx]
-
-
-
 
 omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M]
     [T2Space (TangentBundle I M)] [SigmaCompactSpace M] in
@@ -343,9 +310,6 @@ theorem inputOfFill {qstar : X → M} (x : X)
   · simpa [activeFill, hzero] using hqstar
   · simpa [activeFill, hzero] using hactive i hzero
 
-
-
-
 omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M]
     [T2Space (TangentBundle I M)] [SigmaCompactSpace M] in
 theorem inputOfFillSelf {qstar : X -> M} (x : X)
@@ -380,7 +344,6 @@ theorem inputOfFillSelf {qstar : X -> M} (x : X)
     hμ_nonneg hμ_pos hstrict
   simpa using hr
 
-
 theorem mem (x : X) :
     letI : RiemannianBundle (fun x : M => TangentSpace I x) :=
       ⟨g.toRiemannianMetric⟩
@@ -391,8 +354,6 @@ theorem mem (x : X) :
   simpa [centerAverage] using
     centerOfMass.mem (I := I) (g := g) (μ := μ x) (pts := pts x) (join := join)
       (p := p x) (r := r x) (h x)
-
-
 
 theorem mem_on {s : Set X} {qstar : X → M}
     (hOn : ∀ x : X, x ∈ s → CenterInput (I := I) g (μ x) (pts x) join (p x) (r x))
@@ -413,8 +374,6 @@ theorem mem_on {s : Set X} {qstar : X → M}
     (r := r) hOn hx]
   exact centerOfMass.mem (I := I) (g := g) (μ := μ x) (pts := pts x)
     (join := join) (p := p x) (r := r x) (hOn x hx)
-
-
 
 theorem eq_of_all_eq {qstar : X → M} (x : X)
     (hpts : ∀ i : ι, pts x i = qstar x) :
@@ -441,7 +400,6 @@ theorem eq_of_all_eq {qstar : X → M} (x : X)
           (by norm_num) hnear
   exact dist_eq_zero.mp (le_antisymm hdist dist_nonneg)
 
-
 theorem dist_le {qstar : X → M} {ε : ℝ} (x : X) (hε : 0 ≤ ε)
     (hnear :
       letI : RiemannianBundle (fun x : M => TangentSpace I x) :=
@@ -459,8 +417,6 @@ theorem dist_le {qstar : X → M} {ε : ℝ} (x : X) (hε : 0 ≤ ε)
   simpa [centerAverage] using
     centerOfMass.dist_le (I := I) (g := g) (μ := μ x) (pts := pts x)
       (join := join) (p := p x) (r := r x) (h x) (qstar := qstar x) hε hnear
-
-
 
 theorem dist_le_on {s : Set X} {default target : X → M} {ε : ℝ}
     (hOn : ∀ x : X, x ∈ s → CenterInput (I := I) g (μ x) (pts x) join (p x) (r x))
@@ -488,9 +444,6 @@ theorem dist_le_on {s : Set X} {default target : X → M} {ε : ℝ}
     (r := r) hOn hx]
   exact centerOfMass.dist_le (I := I) (g := g) (μ := μ x) (pts := pts x)
     (join := join) (p := p x) (r := r x) (hOn x hx) (qstar := target x) hε hnear
-
-
-
 
 end centerAverage
 end HCGCompactness

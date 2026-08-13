@@ -3,15 +3,6 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.SobolevScale.UnifBochnerGap
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.AllTimesBounds
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.UnifCurvActionZero
 
-/-!
-# Class-uniform convex-path jet package
-
-This module separates the finite Sobolev conversion from the geometric production of
-curvature-action constants.  A single class-first rank-two/rank-three curvature-action package
-produces simultaneous class-first `H²` and `H³` covariant-jet bounds along every convex tensor
-segment.
--/
-
 set_option autoImplicit false
 
 noncomputable section
@@ -39,19 +30,14 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
-/-- The two curvature-action constants needed by the finite `H²`/`H³` comparison. -/
 structure CurvActionData where
   rankTwo : ℝ
   rankThree : ℝ
 
-/-- The closed curvature-action constants determined by the class parameter and fixed-background
-curvature caps. -/
 noncomputable def classCurvActions (d : ℕ) (Λ Kb₀ Kb₁ : ℝ) : CurvActionData where
   rankTwo := unifPtCurvZeroC d Λ Kb₀ Kb₁
   rankThree := unifPtCurvThreeC d Λ Kb₀ Kb₁
 
-/-- `K` bounds the order-zero curvature action at tensor ranks two and three, uniformly over
-the entire metric class.  The constants are data fixed before the class metric varies. -/
 structure IsCurvActionUnif
     (gBase : SmoothRiemannianMetric I M) (Λ : ℝ) (K : CurvActionData) : Prop where
   bounds : ∀ (g : SmoothRiemannianMetric I M),
@@ -61,8 +47,6 @@ structure IsCurvActionUnif
     IsCurvAction0 (I := I) (M := M) g 2 K.rankTwo ∧
       IsCurvAction0 (I := I) (M := M) g 3 K.rankThree
 
-/-- Supplied fixed-background curvature caps produce the explicit rank-two/rank-three
-curvature-action package uniformly over the order-three metric class. -/
 theorem class_curv_actions
     (gBase : SmoothRiemannianMetric I M) {Λ Kb₀ Kb₁ : ℝ}
     (hΛ : 1 ≤ Λ)
@@ -95,8 +79,6 @@ theorem class_curv_actions
       (unifCurvAction3_of (I := I) (M := M) gBase g hΛ
         hKb₀_nonneg hKb₀ hKb₁_nonneg hKb₁ hcomp hjet1 hjet2 hjet3)
 
-/-- Every fixed background and class parameter at least one admit one explicit uniform
-curvature-action packet. -/
 theorem exists_curv_actions
     (gBase : SmoothRiemannianMetric I M) {Λ : ℝ} (hΛ : 1 ≤ Λ) :
     ∃ K : CurvActionData, IsCurvActionUnif (I := I) (M := M) gBase Λ K := by
@@ -114,26 +96,20 @@ theorem exists_curv_actions
     class_curv_actions (I := I) (M := M) gBase hΛ
       hKb₀_nonneg hKb₀ hKb₁_nonneg hKb₁'⟩
 
-/-- The explicit finite `H²` coefficient associated with a curvature-action package. -/
 noncomputable def convexH2C (K : CurvActionData) : ℝ :=
   h2CovsumC K.rankTwo
 
-/-- The explicit finite `H³` coefficient associated with a curvature-action package. -/
 noncomputable def convexH3C (K : CurvActionData) : ℝ :=
   h3CovsumC K.rankTwo K.rankThree
 
-/-- The two class-first convex-path jet coefficients. -/
 structure ConvexJetData where
   h2C : ℝ
   h3C : ℝ
 
-/-- The closed convex-path coefficient packet attached to `K`. -/
 noncomputable def convexJetData (K : CurvActionData) : ConvexJetData where
   h2C := convexH2C K
   h3C := convexH3C K
 
-/-- `C` gives simultaneous class-uniform `H²` and `H³` intrinsic jet bounds along every
-convex tensor segment. -/
 structure IsConvexJetUnif
     (gBase : SmoothRiemannianMetric I M) (Λ : ℝ) (C : ConvexJetData) : Prop where
   h2_nonneg : 0 ≤ C.h2C
@@ -186,8 +162,6 @@ private theorem convex_hs_norm_le
         (mul_le_mul_of_nonneg_left hT hs0)
     _ = R := by ring
 
-/-- A class-first rank-two/rank-three curvature-action package produces one explicit,
-simultaneous class-first convex-path `H²`/`H³` jet package. -/
 theorem convex_h23_of_act
     (gBase : SmoothRiemannianMetric I M) (Λ : ℝ) (K : CurvActionData)
     (hK : IsCurvActionUnif (I := I) (M := M) gBase Λ K) :
@@ -235,15 +209,12 @@ theorem convex_h23_of_act
           (iteratedCovGrad (I := I) g 0 2 j
             (convexPerturbation (I := I) g T T' s))) hsum' 2)
 
-/-- Existential wrapper for consumers that do not need the closed coefficient formula. -/
 theorem convex_jets_of_act
     (gBase : SmoothRiemannianMetric I M) (Λ : ℝ) (K : CurvActionData)
     (hK : IsCurvActionUnif (I := I) (M := M) gBase Λ K) :
     ∃ C : ConvexJetData, IsConvexJetUnif (I := I) (M := M) gBase Λ C :=
   ⟨convexJetData K, convex_h23_of_act (I := I) (M := M) gBase Λ K hK⟩
 
-/-- Supplied fixed-background curvature caps produce the explicit simultaneous class-first
-convex-path `H²`/`H³` jet package. -/
 theorem convex_h23_unif
     (gBase : SmoothRiemannianMetric I M) {Λ Kb₀ Kb₁ : ℝ}
     (hΛ : 1 ≤ Λ)
@@ -265,8 +236,6 @@ theorem convex_h23_unif
     (class_curv_actions (I := I) (M := M) gBase hΛ
       hKb₀_nonneg hKb₀ hKb₁_nonneg hKb₁)
 
-/-- Every fixed background and class parameter at least one admit one explicit simultaneous
-convex-path `H²`/`H³` jet packet. -/
 theorem exists_convex_jets
     (gBase : SmoothRiemannianMetric I M) {Λ : ℝ} (hΛ : 1 ≤ Λ) :
     ∃ C : ConvexJetData, IsConvexJetUnif (I := I) (M := M) gBase Λ C := by

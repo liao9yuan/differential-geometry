@@ -1,17 +1,6 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.LowRegRungPack
 import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.LowRegBgRungFive
 
-/-!
-# Metricwise fixed-background gate package
-
-This module selects the three fixed bottom-rung certificates and the generic
-high-rung certificate for one pair `(g, g_bg)`.  The scalar envelopes are
-metricwise bookkeeping only: no class-first uniformity is asserted here.
-
-The scalar domination theorem `rungGate_le` is background-neutral and is reused
-unchanged from `LowRegRungPack`.
--/
-
 noncomputable section
 
 open Bundle Manifold MeasureTheory Set Filter
@@ -36,10 +25,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
   [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
   [T2Space M] [SigmaCompactSpace M]
 
-/-- A coherent pair of metricwise scalar envelopes for the three fixed
-background bottom-rung gates and the generic background high-rung coefficient.
-Each stored continuation retains the exact witnesses selected for `(g, g_bg)`.
--/
 def IsLowGateOrdBg (g g_bg : SmoothRiemannianMetric I M) (A B : ℝ) : Prop :=
   0 ≤ A ∧ 0 ≤ B ∧
     (∃ C2 Kr23 Kr13 K2 : ℝ,
@@ -53,8 +38,6 @@ def IsLowGateOrdBg (g g_bg : SmoothRiemannianMetric I M) (A B : ℝ) : Prop :=
         C4 * K4 ≤ A ∧ Kr25 + Kr15 ≤ B) ∧
     ∃ κ : ℝ, IsHmRungOrdBg (I := I) (M := M) g g_bg κ ∧ κ ≤ A
 
-/-- Select one coherent metricwise gate package from the three fixed-background
-rungs and the arbitrary-background all-rung producer. -/
 theorem lowregGatePackBg (hDim : Module.finrank ℝ E = 3)
     (g g_bg : SmoothRiemannianMetric I M) :
     ∃ A B : ℝ, IsLowGateOrdBg (I := I) (M := M) g g_bg A B := by

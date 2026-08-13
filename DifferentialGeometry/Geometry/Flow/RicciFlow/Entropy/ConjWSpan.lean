@@ -3,14 +3,6 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.Entropy.WVariation
 
 set_option autoImplicit false
 
-/-!
-# Exact-interval W comparison for Galerkin limits
-
-The existing endpoint-continuity theorem supplies the right limit at reverse
-time zero.  Exact heat-potential reconstruction then supplies antitonicity on
-the whole positive interior, so no second lifespan is selected.
--/
-
 namespace DifferentialGeometry.PDE.RicciFlow.Entropy
 
 noncomputable section
@@ -37,8 +29,6 @@ private local instance : CompleteSpace E := FiniteDimensional.complete Real E
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
-/-- Every strictly interior reverse-time value of an exact Galerkin heat
-potential has W value at most its prescribed value at reverse time zero. -/
 theorem gallim_w_lt
     [NeZero (Module.finrank Real E)] [I.Boundaryless]
     [BoundarylessManifold I M] [CompactSpace M]

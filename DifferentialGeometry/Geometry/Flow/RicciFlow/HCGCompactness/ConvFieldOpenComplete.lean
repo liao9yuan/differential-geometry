@@ -3,14 +3,6 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.MetricComplet
 
 set_option autoImplicit false
 
-/-!
-# Completeness of open-window limit metrics
-
-A windowwise positive lower bound for the selected metric sequence makes every
-time slice of the open-window limit complete whenever the reference pointed
-manifold is complete.
--/
-
 noncomputable section
 
 open Set Bundle Manifold
@@ -35,9 +27,6 @@ namespace OpenConvOut
 
 omit [NeZero (Module.finrank ℝ E)]
   [I.Boundaryless] in
-/-- A time slice of an open-window metric limit is complete when the reference
-metric is complete and the selected sequence has positive windowwise lower
-bounds relative to it. -/
 theorem complete_at
     (hP : MetricComplete (I := I) P)
     {bf : BumpFamily (I := I) Φ} {hsrc : SrcSigma Φ} {htgt : TgtSigma Φ}

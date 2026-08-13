@@ -3,13 +3,6 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.C4.StepCStage
 
 set_option autoImplicit false
 
-/-!
-# H6-provider injectivity of finite-stage comparison maps
-
-The proof combines the H6 intrinsic source buffer, the reverse-stage
-approximate return, and the provider-native order-one jet tail.
--/
-
 noncomputable section
 
 universe u uE uH
@@ -32,8 +25,6 @@ variable {H : Type uH} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H} [I.Boundaryless]
 variable {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
 
-/-- With the explicit construction-radius room, H6-provider comparison maps
-are eventually injective on the smaller retained source ball. -/
 theorem H6NormalData.inj_tail
     (inp : MetricCompactCore (I := I) X)
     (d : H6NormalData (I := I) X inp.decay)

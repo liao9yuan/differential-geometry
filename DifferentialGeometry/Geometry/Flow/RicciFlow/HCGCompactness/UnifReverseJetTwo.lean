@@ -4,15 +4,6 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.ConnDiffDeriv
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.MetricCovDerivLinear
 import DifferentialGeometry.Tensor.RSTensor.FiberMetric.Tensor0SMetricIneq
 
-/-!
-# Reverse metric jets through order two
-
-This module exposes the narrow bidirectional order-two metric-jet package used
-by class-uniform Morrey estimates.  It is kept below the order-three
-Ricci--DeTurck right-hand-side assembly so consumers need not import that large
-module merely to reverse the first two metric jets.
--/
-
 noncomputable section
 
 open Bundle Manifold Set Filter Tensor0SBundle
@@ -125,8 +116,6 @@ private theorem sqrt_normSq_zero
     rw [component0S_apply]
     simp
 
-/-- The metric's intrinsic covariant-derivative sum has only its order-zero
-term, whose norm is the square root of the model dimension. -/
 theorem metric_self_sum
     (g : SmoothRiemannianMetric I M) (x : M) (N : ℕ) :
     ∑ k ∈ Finset.range (N + 1),
@@ -145,15 +134,11 @@ theorem metric_self_sum
     exact sqrt_normSq_zero (I := I) g x _
   · simp
 
-/-- The explicit coefficient that reverses a first metric-jet bound under
-`Λ`-uniform equivalence. -/
 noncomputable def revJetOneC (Λ : ℝ) : ℝ :=
   2 * Real.sqrt ((Module.finrank ℝ E : ℝ) ^ 3) *
     ((3 / 2 : ℝ) * (Real.sqrt (Λ ^ 3) * Λ)) *
     (Real.sqrt (Λ ^ 2) * Real.sqrt (Module.finrank ℝ E : ℝ))
 
-/-- The explicit coefficient that reverses a second metric-jet bound under
-`Λ`-uniform equivalence and first/second forward jet control. -/
 noncomputable def revJetTwoC (Λ : ℝ) : ℝ :=
   let L₁ := max (revJetOneC (E := E) Λ) Λ
   let D := Dtower (Module.finrank ℝ E)
@@ -166,8 +151,6 @@ noncomputable def revJetTwoC (Λ : ℝ) : ℝ :=
   max 0 (Real.sqrt (Λ ^ 4) *
     (D * Real.sqrt (Module.finrank ℝ E : ℝ)))
 
-/-- A forward first metric-jet bound reverses under uniform metric
-equivalence, with coefficient `revJetOneC`. -/
 theorem reverseJetOne
     (gBase g₀ : SmoothRiemannianMetric I M) {Λ : ℝ}
     (hEq : MetricUniformEquivalentOn (I := I) Set.univ gBase g₀ Λ)
@@ -204,8 +187,6 @@ theorem reverseJetOne
   dsimp [revJetOneC]
   exact mul_le_mul_of_nonneg_left hmetric (by positivity)
 
-/-- Forward first and second metric-jet bounds reverse at order two under
-uniform metric equivalence, with coefficient `revJetTwoC`. -/
 theorem reverseJetTwo
     (gBase g₀ : SmoothRiemannianMetric I M) {Λ : ℝ}
     (hEq : MetricUniformEquivalentOn (I := I) Set.univ gBase g₀ Λ)
@@ -252,11 +233,6 @@ theorem reverseJetTwo
     (Real.sqrt_nonneg _)).trans ?_)
   exact le_max_right _ _
 
-/-- The exact bidirectional metric-jet packet consumed by the order-two
-cross-metric Morrey estimate.  Forward metric jets through order two, together
-with `Λ`-equivalence, give one common first-order bound in both directions and
-a reverse second-order bound.  All three constants depend only on `Λ` and the
-model dimension, never on the individual metric `g₀`. -/
 theorem reverseJetPack
     (gBase g₀ : SmoothRiemannianMetric I M) {Λ : ℝ}
     (hEq : MetricUniformEquivalentOn (I := I) Set.univ gBase g₀ Λ)

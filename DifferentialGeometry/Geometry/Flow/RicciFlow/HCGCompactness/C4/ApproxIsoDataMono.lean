@@ -2,19 +2,6 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.C4.ApproxIsoS
 
 set_option autoImplicit false
 
-
-
-
-
-
-
-
-
-
-
-
-
-
 noncomputable section
 
 universe u uE uH
@@ -34,8 +21,6 @@ variable {N : Type u} [TopologicalSpace N] [ChartedSpace H N] [IsManifold I ∞ 
 
 section DataMono
 
-
-
 def PreApproxIsoDataOn.mono [T2Space N] [SigmaCompactSpace N]
     {K K' : Set M} {ε ε' : ℝ} {p : ℕ}
     {Phi : M → N} {g : SmoothRiemannianMetric I M} {h : SmoothRiemannianMetric I N}
@@ -51,7 +36,6 @@ def PreApproxIsoDataOn.mono [T2Space N] [SigmaCompactSpace N]
   cov_deriv_small := fun a h1 h2 x hx =>
     le_trans (D.cov_deriv_small a h1 h2 x (hK hx)) hε
 
-
 def BookApproxIsoPartialData.mono [T2Space N] [SigmaCompactSpace N]
     {K K' : Set M} {ε ε' : ℝ} {p : ℕ}
     {Phi : PartialDiffeomorph I I M N (∞ : WithTop ℕ∞)}
@@ -62,8 +46,6 @@ def BookApproxIsoPartialData.mono [T2Space N] [SigmaCompactSpace N]
   source_sub := fun _ hx => D.source_sub (hK hx)
   forward := D.forward.mono hK hε hε1
   reverse := (D.reverse.mono (Set.image_mono hK) hε hε1 :)
-
-
 
 def PreApproxIsoDataOn.monoP [T2Space N] [SigmaCompactSpace N]
     {K : Set M} {ε : ℝ} {p p' : ℕ}
@@ -78,7 +60,6 @@ def PreApproxIsoDataOn.monoP [T2Space N] [SigmaCompactSpace N]
   c0_small := D.c0_small
   cov_deriv_small := fun a h1 h2 x hx =>
     D.cov_deriv_small a h1 (le_trans h2 hp) x hx
-
 
 def BookApproxIsoPartialData.monoP [T2Space N] [SigmaCompactSpace N]
     {K : Set M} {ε : ℝ} {p p' : ℕ}
