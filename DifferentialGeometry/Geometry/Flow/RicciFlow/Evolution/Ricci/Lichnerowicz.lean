@@ -495,6 +495,7 @@ theorem ricciLichnerowiczSpecializesInFrame_regular
       (I := I) S gInv frame (t : Real) x i j
       (fun a b => hInv (t : Real) x a b) (hRic t x)
 
+@[deprecated "use a local or pointwise Lichnerowicz specialization instead" (since := "2026-05-22")]
 theorem ricciLichnerowiczSpecializesInFrame_lc
     [IsManifold I (∞ + 1) M]
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
@@ -587,6 +588,7 @@ theorem ricciLichnerowiczEquationInFrame_of_ricciEvolution_and_symm
     (ricciLichnerowiczSpecializesInFrame_of_symm
       (I := I) S Rm04 gInv frame roughLapRic hRic hInv)
 
+@[deprecated "use a local or pointwise Lichnerowicz equation route instead" (since := "2026-05-22")]
 theorem ricciLichnerowiczEquationInFrame_of_ricciEvolution_lc
     [IsManifold I (∞ + 1) M]
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}

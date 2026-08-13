@@ -34,6 +34,7 @@ def ScalarRmRicciTraceInFrame
       -ricciNormSqInFrame (I := I) S gInv frame (t : Real) x
 
 omit [SigmaCompactSpace M] in
+@[deprecated "use a local or pointwise frame statement instead" (since := "2026-05-22")]
 theorem scalarRmRicciTraceInFrame_of_rm04_first_trace
     [DecidableEq Idx]
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
@@ -96,6 +97,7 @@ theorem scalarRmRicciTraceInFrame_of_rm04_first_trace
     IsLocalFrameOn.toBasisAt_coe] using hmain
 
 omit [SigmaCompactSpace M] in
+@[deprecated "use a local or pointwise frame statement instead" (since := "2026-05-22")]
 theorem scalarRmRicciTraceInFrame_of_rm04_first_trace_regular
     [DecidableEq Idx]
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}

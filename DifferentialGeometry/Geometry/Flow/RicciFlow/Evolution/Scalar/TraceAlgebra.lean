@@ -146,6 +146,7 @@ theorem scalarLaplacianTraceInFrame_realizes_heatOperator_of_laplacianAt
     (scalarLap := scalarLaplacianTraceInFrame (M := M) gInv roughLapRic) h
 
 omit [SigmaCompactSpace M] [T2Space M] in
+@[deprecated "use a local or pointwise scalar trace statement instead" (since := "2026-05-22")]
 theorem scalarLaplacianTraceInFrame_realizes_heatOperator_of_hessianTrace
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     {u : Set M}
@@ -395,6 +396,7 @@ theorem of_orthonormal_inv
     (I := I) S gInv frame hInvDelta t x
 
 omit [SigmaCompactSpace M] in
+@[deprecated "use a local or pointwise frame statement instead" (since := "2026-05-22")]
 theorem of_metric_inverse_frame
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     {u : Set M}

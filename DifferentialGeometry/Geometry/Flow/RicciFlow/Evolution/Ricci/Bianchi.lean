@@ -276,6 +276,8 @@ theorem traceRightNatLoc
           (t : Real) x i j := hB.symm
 
 omit [TopologicalSpace M] [SigmaCompactSpace M] [T2Space M] [DecidableEq Idx] in
+@[deprecated "use DifferentiatedContractedBianchiInFrameOnLocal or a pointwise producer"
+    (since := "2026-05-22")]
 theorem DifferentiatedContractedBianchiInFrame.of_local_cover
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     {u : Set M}
