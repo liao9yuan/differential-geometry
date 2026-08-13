@@ -268,7 +268,7 @@ theorem ricciRightActionCompInFrame_eq_quadratic_of_symm
     (gInv : Real -> DifferentialGeometry.Integral.Connection.InverseMetricComponents M Idx)
     (frame : Idx -> (x : M) -> TangentSpace I x)
     (hRic : RicciSymmetricInFrameOn (I := I) S frame)
-    (hInv : SymmetricInverseMetricComponentsInFrameOn gInv)
+    (hInv : ∀ t x i j, gInv t x i j = gInv t x j i)
     (t : Real) (x : M) (i j : Idx) :
     ricciRightActionCompInFrame (I := I) S gInv frame
         (ricciCompInFrame (I := I) S frame) t x i j =
@@ -460,7 +460,7 @@ theorem ricciLichnerowiczSpecializesInFrame_of_symm
     (frame : Idx -> (x : M) -> TangentSpace I x)
     (roughLapRic : Real -> M -> Idx -> Idx -> Real)
     (hRic : RicciSymmetricInFrameOn (I := I) S frame)
-    (hInv : SymmetricInverseMetricComponentsInFrameOn gInv) :
+    (hInv : ∀ t x i j, gInv t x i j = gInv t x j i) :
     RicciLichnerowiczSpecializesInFrame
       (I := I) S Rm04 gInv frame roughLapRic :=
   ricciLichnerowiczSpecializesInFrame_of_actions
@@ -482,7 +482,7 @@ theorem ricciLichnerowiczSpecializesInFrame_regular
     (frame : Idx -> (x : M) -> TangentSpace I x)
     (roughLapRic : Real -> M -> Idx -> Idx -> Real)
     (hRic : RicciSymmetricInFrameOnRegular (I := I) S frame)
-    (hInv : SymmetricInverseMetricComponentsInFrameOn gInv) :
+    (hInv : ∀ t x i j, gInv t x i j = gInv t x j i) :
     RicciLichnerowiczSpecializesInFrame
       (I := I) S Rm04 gInv frame roughLapRic := by
   refine ricciLichnerowiczSpecializesInFrame_of_actions
@@ -536,7 +536,7 @@ theorem ricciLichnerowiczSpecializesInFrame_lc
     ricciSymm_regular (I := I) S Rm04 gInv frame hframe
       hcover hinv
       hTrace hPair hOutput hInput
-  have hInv : SymmetricInverseMetricComponentsInFrameOn gInv := by
+  have hInv : ∀ t x i j, gInv t x i j = gInv t x j i := by
     intro t x i j
     have hinvAt :
         Tensor0SBundle.MetricInverseInBasis_gen
@@ -580,7 +580,7 @@ theorem ricciLichnerowiczEquationInFrame_of_ricciEvolution_and_symm
     (h_ricci : RicciEvolutionEquationInFrame
       (I := I) S Rm04 gInv frame roughLapRic)
     (hRic : RicciSymmetricInFrameOn (I := I) S frame)
-    (hInv : SymmetricInverseMetricComponentsInFrameOn gInv) :
+    (hInv : ∀ t x i j, gInv t x i j = gInv t x j i) :
     RicciLichnerowiczEquationInFrame
       (I := I) S Rm04 gInv frame roughLapRic :=
   ricciLichnerowiczEquationInFrame_of_ricciEvolution
