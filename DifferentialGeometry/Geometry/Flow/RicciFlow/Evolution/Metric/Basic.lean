@@ -135,7 +135,6 @@ theorem coordMetricContOn
   rw [Tensor0SBundle.metricTensorField_apply]
   simp [metricCompInFrame]
 
-@[deprecated "use InvMetricLocal on the actual local frame domain" (since := "2026-05-22")]
 def InverseMetricComponentsInFrameOn [DecidableEq Idx]
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -163,8 +162,6 @@ def InvMetricLocal [DecidableEq Idx]
         metricCompInFrame (I := I) S frame t x i k * gInv t x k j) =
         (if i = j then 1 else 0)
 
-@[deprecated "use pointwise inverse symmetry or derive it from MetricInverseInBasis_gen"
-    (since := "2026-05-22")]
 def SymmetricInverseMetricComponentsInFrameOn
     (gInv : Real -> DifferentialGeometry.Integral.Connection.InverseMetricComponents M Idx) :
       Prop :=

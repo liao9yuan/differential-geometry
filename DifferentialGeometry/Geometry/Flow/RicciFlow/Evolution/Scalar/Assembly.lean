@@ -75,7 +75,6 @@ theorem scalarTraceInFrame_hasDerivWithinAt
                   exact hInv.mul hRic))))
 
 omit [SigmaCompactSpace M] in
-@[deprecated "use a local or intrinsic scalar-evolution route instead" (since := "2026-05-22")]
 theorem scalarEvolutionEquationOn_of_ricciEvolution
     [DecidableEq Idx]
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
@@ -133,7 +132,6 @@ theorem scalarEvolutionEquationOn_of_ricciEvolution
       hInvSym hRicSym hRmTrace t x)
 
 omit [SigmaCompactSpace M] in
-@[deprecated "use a local or intrinsic scalar-evolution route instead" (since := "2026-05-22")]
 theorem scalarEvolutionEquationOn_of_ricciEvolution_regular
     [DecidableEq Idx]
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
@@ -190,7 +188,6 @@ theorem scalarEvolutionEquationOn_of_ricciEvolution_regular
       (scalarLaplacianTraceInFrame_realizes (M := M) gInv roughLapRic)
       hInvSym hRicSym hRmTrace t x)
 
-@[deprecated "use a local or intrinsic scalar-evolution route instead" (since := "2026-05-22")]
 theorem scalarEvolutionEquationOn_of_ricciEvolution_lc
     [DecidableEq Idx]
     [IsManifold I (∞ + 1) M]

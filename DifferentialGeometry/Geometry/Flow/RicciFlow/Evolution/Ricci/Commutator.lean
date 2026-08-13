@@ -187,7 +187,6 @@ private theorem contractedCurvatureAction_right_eq
             hgInvAt, hbasis]
 
 omit [SigmaCompactSpace M] in
-@[deprecated "use a local or pointwise commutator producer instead" (since := "2026-05-22")]
 theorem ricciSecondDerivativeCommutatorsInFrame_of_tensor0S_ricciIdentity
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     {u : Set M}
@@ -911,7 +910,6 @@ theorem RicciContractedCommutatorsInFrame_of_differentiatedBianchi_and_commutato
       (M := M) gInv nabla2Ric hbianchi t x i j⟩
 
 omit [SigmaCompactSpace M] in
-@[deprecated "use the local contracted-commutator route instead" (since := "2026-05-22")]
 theorem RicciContractedCommutatorsInFrame_of_differentiatedBianchi_and_tensor0S_ricciIdentity
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     {u : Set M}
@@ -969,7 +967,6 @@ theorem RicciContractedCommutatorsInFrame_of_differentiatedBianchi_and_tensor0S_
         nabla2RicTensor nabla2Ric
         hNabla2 hRicciId hRicTrace13 hLower hPair hOutput hFirst hRic))
 
-@[deprecated "use the local contracted-commutator route instead" (since := "2026-05-22")]
 theorem RicciContractedCommutatorsInFrame_of_tensor0S_ricciIdentity_lc
     [IsManifold I (∞ + 1) M]
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
