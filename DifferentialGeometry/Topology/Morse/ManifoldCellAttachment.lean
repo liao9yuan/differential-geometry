@@ -18692,7 +18692,7 @@ private noncomputable def homeomorphOfSetEq {M : Type*} [TopologicalSpace M] {s 
     rw [h]
     exact x.2)
 
-noncomputable def morseHandleAdjunctionEquivRoundedSublevelSharp {m k : ℕ} (hk : k ≤ m + 1)
+private noncomputable def morseHandleAdjunctionEquivRoundedSublevelSharp {m k : ℕ} (hk : k ≤ m + 1)
     (c ε r δ R₀ R₁ : ℝ) {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M]
     [ChartedSpace H M] [T2Space M]
     {I : ModelWithCorners ℝ (MorseModel (m + 1)) H} {f : M → ℝ}
@@ -18813,6 +18813,112 @@ theorem morseHandleAdjunctionEquivRoundedSublevel_cell {m k : ℕ} (hk : k ≤ m
   dsimp [morseHandleAdjunctionEquivRoundedSublevel]
   exact morseHandleRoundAdjunctionHomeoCapRounded_cell hk c ε r δ θ R₀ data hε hδ hθ hδr hθr hr hεr
     hεr' hR0 hR0lt hbig hRbig hcont d
+
+private theorem morseCapRoundedLowerRound_eq_self_of_deep {m k : ℕ} (hk : k ≤ m + 1)
+    (c ε r δ θ η : ℝ) {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M]
+    [ChartedSpace H M] {I : ModelWithCorners ℝ (MorseModel (m + 1)) H} {f : M → ℝ}
+    (data : MorseChart (m + 1) k hk c I f)
+    (hδ : 0 < δ) (hθ : 0 < θ) (hη : r ^ 2 + δ ≤ 2 * η)
+    {x : M} (hx : f x ≤ c - ε - η) :
+    morseCapRoundedLowerRound hk c ε r δ θ data x = x := by
+  by_cases hb : x ∈ morseChartBallImage hk c data
+  · rcases hb with ⟨y, hy, hxy⟩
+    have hsrc : y ∈ data.χ.source := data.hχsrc y (le_of_lt hy)
+    have hsymm : data.χ.symm x = y := by
+      rw [← hxy]
+      exact data.χ.left_inv hsrc
+    have hneg : r ^ 2 + 2 * ε + δ ≤ ‖negPart hk y‖ ^ 2 := by
+      have hnorm := data.hnorm y (le_of_lt hy)
+      have hsplit := morseNormalForm_split hk c y
+      have hfx : f (data.χ y) ≤ c - ε - η := by
+        simpa [← hxy] using hx
+      have hnonneg : 0 ≤ ‖posPart hk y‖ ^ 2 := sq_nonneg _
+      nlinarith [hη, hnorm, hsplit, hfx, hnonneg]
+    dsimp [morseCapRoundedLowerRound]
+    rw [if_pos ⟨y, hy, hxy⟩]
+    have hself : modelLowerRoundMap hk ε r δ θ (data.χ.symm x) = data.χ.symm x := by
+      rw [hsymm]
+      exact modelLowerRoundMap_eq_self_of_ge hk ε r δ θ hθ hδ y hneg
+    rw [hself]
+    rw [hsymm]
+    exact hxy
+  · dsimp [morseCapRoundedLowerRound]
+    rw [if_neg hb]
+
+theorem morseHandleAdjunctionEquivRoundedSublevel_lower_deep {m k : ℕ} (hk : k ≤ m + 1)
+    (c ε r δ θ R₀ R₀' R₁' η : ℝ) {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M]
+    [ChartedSpace H M] [T2Space M]
+    {I : ModelWithCorners ℝ (MorseModel (m + 1)) H} {f : M → ℝ}
+    (data : MorseChart (m + 1) k hk c I f)
+    (hε : 0 < ε) (hδ : 0 < δ) (hθ : 0 < θ) (hδr : δ < r ^ 2) (hθr : θ < r ^ 2) (hr : 0 < r)
+    (hεr : Real.sqrt (2 * ε + 2 * r ^ 2) ≤ data.R)
+    (hεr' : Real.sqrt (2 * ε + 2 * r ^ 2) < data.R / 2)
+    (hR0 : 0 ≤ R₀) (hR0lt : R₀ < data.R) (hbig : 2 * (r ^ 2 + 2 * ε + δ) ≤ R₀ ^ 2)
+    (hRbig : r ^ 2 + 2 * ε + δ ≤ (data.R / 2) ^ 2)
+    (hR : R₀' < R₁') (hR0' : 0 ≤ R₀') (hbig' : 2 * (r ^ 2 + 2 * ε + δ) ≤ R₀' ^ 2)
+    (hR₁big : 2 * (data.R / 2) ^ 2 - 2 * ε ≤ R₁' ^ 2) (hR₁₂R : R₁' ≤ data.R)
+    (hcont : Continuous f) (hη : r ^ 2 + δ ≤ 2 * η)
+    {x : M} (hx : f x ≤ c - ε) (hdeep : f x ≤ c - ε - η) :
+    (morseHandleAdjunctionEquivRoundedSublevel hk c ε r δ θ R₀ R₀' R₁' data hε hδ hθ hδr
+      hθr hr hεr hεr' hR0 hR0lt hbig hRbig hR hR0' hbig' hR₁big hR₁₂R hcont
+      (Handle.lower (morseAttachingEmbedding hk c ε r data hε hεr) ⟨x, hx⟩)).1 = x := by
+  rw [morseHandleAdjunctionEquivRoundedSublevel_lower hk c ε r δ θ R₀ R₀' R₁' data hε hδ hθ hδr
+    hθr hr hεr hεr' hR0 hR0lt hbig hRbig hR hR0' hbig' hR₁big hR₁₂R hcont ⟨x, hx⟩]
+  exact morseCapRoundedLowerRound_eq_self_of_deep hk c ε r δ θ η data hδ hθ hη hdeep
+
+theorem morseHandleAdjunctionEquivRoundedSublevel_symm_rel_deep {m k : ℕ} (hk : k ≤ m + 1)
+    (c ε r δ θ R₀ R₀' R₁' η : ℝ) {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M]
+    [ChartedSpace H M] [T2Space M]
+    {I : ModelWithCorners ℝ (MorseModel (m + 1)) H} {f : M → ℝ}
+    (data : MorseChart (m + 1) k hk c I f)
+    (hε : 0 < ε) (hδ : 0 < δ) (hθ : 0 < θ) (hδr : δ < r ^ 2) (hθr : θ < r ^ 2)
+    (hr : 0 < r) (hεr : Real.sqrt (2 * ε + 2 * r ^ 2) ≤ data.R)
+    (hεr' : Real.sqrt (2 * ε + 2 * r ^ 2) < data.R / 2)
+    (hR0 : 0 ≤ R₀) (hR0lt : R₀ < data.R) (hbig : 2 * (r ^ 2 + 2 * ε + δ) ≤ R₀ ^ 2)
+    (hRbig : r ^ 2 + 2 * ε + δ ≤ (data.R / 2) ^ 2)
+    (hR : R₀' < R₁') (hR0' : 0 ≤ R₀') (hbig' : 2 * (r ^ 2 + 2 * ε + δ) ≤ R₀' ^ 2)
+    (hR₁big : 2 * (data.R / 2) ^ 2 - 2 * ε ≤ R₁' ^ 2) (hR₁₂R : R₁' ≤ data.R)
+    (hcont : Continuous f) (hη : r ^ 2 + δ ≤ 2 * η)
+    {y : M} (hy : f y ≤ c - ε - η)
+    (hy_round : morseRoundedFunction hk c ε r δ R₀' R₁' data y ≤ c) :
+    (morseHandleAdjunctionEquivRoundedSublevel hk c ε r δ θ R₀ R₀' R₁' data hε hδ hθ hδr
+      hθr hr hεr hεr' hR0 hR0lt hbig hRbig hR hR0' hbig' hR₁big hR₁₂R hcont).symm ⟨y, hy_round⟩ =
+      Handle.lower (morseAttachingEmbedding hk c ε r data hε
+        (le_trans (le_of_lt hεr') (by nlinarith [data.hRpos] : data.R / 2 ≤ data.R)))
+        ⟨y, by
+          have hsum : 0 ≤ r ^ 2 + δ := by positivity
+          have hη0 : 0 ≤ η := by nlinarith [hη, hsum]
+          change f y ≤ c - ε
+          nlinarith [hy, hη0]⟩ := by
+  have hto : (morseHandleAdjunctionEquivRoundedSublevel hk c ε r δ θ R₀ R₀' R₁' data hε hδ hθ hδr
+      hθr hr hεr hεr' hR0 hR0lt hbig hRbig hR hR0' hbig' hR₁big hR₁₂R hcont)
+      (Handle.lower (morseAttachingEmbedding hk c ε r data hε
+        (le_trans (le_of_lt hεr') (by nlinarith [data.hRpos] : data.R / 2 ≤ data.R)))
+        ⟨y, by
+          have hsum : 0 ≤ r ^ 2 + δ := by positivity
+          have hη0 : 0 ≤ η := by nlinarith [hη, hsum]
+          change f y ≤ c - ε
+          nlinarith [hy, hη0]⟩) = ⟨y, hy_round⟩ := by
+    apply Subtype.ext
+    rw [morseHandleAdjunctionEquivRoundedSublevel_lower hk c ε r δ θ R₀ R₀' R₁' data hε hδ hθ hδr
+      hθr hr hεr hεr' hR0 hR0lt hbig hRbig hR hR0' hbig' hR₁big hR₁₂R hcont ⟨y, by
+        have hsum : 0 ≤ r ^ 2 + δ := by positivity
+        have hη0 : 0 ≤ η := by nlinarith [hη, hsum]
+        change f y ≤ c - ε
+        nlinarith [hy, hη0]⟩]
+    exact morseCapRoundedLowerRound_eq_self_of_deep hk c ε r δ θ η data hδ hθ hη hy
+  exact (congrArg (fun z => (morseHandleAdjunctionEquivRoundedSublevel hk c ε r δ θ R₀ R₀' R₁' data
+      hε hδ hθ hδr hθr hr hεr hεr' hR0 hR0lt hbig hRbig hR hR0' hbig' hR₁big hR₁₂R hcont).symm z)
+      hto.symm).trans
+    ((morseHandleAdjunctionEquivRoundedSublevel hk c ε r δ θ R₀ R₀' R₁' data hε hδ hθ hδr hθr hr
+      hεr hεr' hR0 hR0lt hbig hRbig hR hR0' hbig' hR₁big hR₁₂R hcont).left_inv
+      (Handle.lower (morseAttachingEmbedding hk c ε r data hε
+        (le_trans (le_of_lt hεr') (by nlinarith [data.hRpos] : data.R / 2 ≤ data.R)))
+        ⟨y, by
+          have hsum : 0 ≤ r ^ 2 + δ := by positivity
+          have hη0 : 0 ≤ η := by nlinarith [hη, hsum]
+          change f y ≤ c - ε
+          nlinarith [hy, hη0]⟩))
 
 theorem contMDiff_morseHandleAdjunctionCell {m k : ℕ} (hk : k ≤ m + 1)
     (c ε r δ θ R₀ R₀' R₁' R₁'' : ℝ) {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M]
@@ -19177,7 +19283,7 @@ theorem contMDiff_morseHandleAdjunctionLower {m k : ℕ} (hk : k ≤ m + 1)
   exact Handle.contMDiff_lower_of_contMDiff (I := morseModelWithCornersHalfSpace m) (φ := φ)
     (h := H) (hf := hf_lower)
 
-theorem morseHandleAdjunctionEquivRoundedSublevelSharp_lower {m k : ℕ} (hk : k ≤ m + 1)
+private theorem morseHandleAdjunctionEquivRoundedSublevelSharp_lower {m k : ℕ} (hk : k ≤ m + 1)
     (c ε r δ R₀ R₁ η : ℝ) {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M]
     [ChartedSpace H M] [T2Space M]
     {I : ModelWithCorners ℝ (MorseModel (m + 1)) H} {f : M → ℝ}
@@ -19850,7 +19956,7 @@ theorem morseLowerAttachingChartPoint_model_norm_sq_le {m k : ℕ} (hk : k ≤ m
   exact hnorm'
 
 
-theorem morseHandleAdjunctionEquivRoundedSublevelSharp_symm_rel_deep {m k : ℕ} (hk : k ≤ m + 1)
+private theorem morseHandleAdjunctionEquivRoundedSublevelSharp_symm_rel_deep {m k : ℕ} (hk : k ≤ m + 1)
     (c ε r δ R₀ R₁ η : ℝ) {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M]
     [ChartedSpace H M] [T2Space M]
     {I : ModelWithCorners ℝ (MorseModel (m + 1)) H} {f : M → ℝ}
@@ -19898,8 +20004,7 @@ theorem morseHandleAdjunctionEquivRoundedSublevelSharp_symm_rel_deep {m k : ℕ}
           change f y ≤ c - ε
           nlinarith [hy, hη0]⟩))
 
-@[reducible]
-noncomputable def morseHandleAdjunctionChartedSpaceSharp {m k : ℕ} (hk : k ≤ m + 1)
+@[reducible] private noncomputable def morseHandleAdjunctionChartedSpaceSharp {m k : ℕ} (hk : k ≤ m + 1)
     (c ε r δ R₀ R₁ R₁' : ℝ) {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M]
     [ChartedSpace H M] [T2Space M]
     {I : ModelWithCorners ℝ (MorseModel (m + 1)) H} [I.Boundaryless]
@@ -19928,8 +20033,7 @@ noncomputable def morseHandleAdjunctionChartedSpaceSharp {m k : ℕ} (hk : k ≤
     (morseHandleAdjunctionEquivRoundedSublevelSharp hk c ε r δ R₀ R₁ data hε hδ hδr hr hεr' hbigR
       hR hR0 hbig hRbig hR₁big hR₁₂R hcont)
 
-@[reducible]
-noncomputable def morseCapRoundedLowerUnionChartedSpace {m k : ℕ} (hk : k ≤ m + 1)
+@[reducible] private noncomputable def morseCapRoundedLowerUnionChartedSpace {m k : ℕ} (hk : k ≤ m + 1)
     (c ε r δ θ R₀ R₁ R₁' : ℝ) {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M]
     [ChartedSpace H M] [T2Space M]
     {I : ModelWithCorners ℝ (MorseModel (m + 1)) H} [I.Boundaryless]
@@ -19961,7 +20065,7 @@ noncomputable def morseCapRoundedLowerUnionChartedSpace {m k : ℕ} (hk : k ≤ 
       (le_of_lt (lt_trans hεr' (by nlinarith [data.hRpos] : data.R / 2 < data.R)))
       hεr' hR0 (lt_of_lt_of_le hR hR₁₂R) hbig hRbig hcont).symm
 
-theorem morseHandleAdjunctionIsManifoldSharp {m k : ℕ} (hk : k ≤ m + 1)
+private theorem morseHandleAdjunctionIsManifoldSharp {m k : ℕ} (hk : k ≤ m + 1)
     (c ε r δ R₀ R₁ R₁' : ℝ) {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M]
     [ChartedSpace H M] [T2Space M]
     {I : ModelWithCorners ℝ (MorseModel (m + 1)) H} [I.Boundaryless]
@@ -20000,7 +20104,7 @@ theorem morseHandleAdjunctionIsManifoldSharp {m k : ℕ} (hk : k ≤ m + 1)
     (morseHandleAdjunctionEquivRoundedSublevelSharp hk c ε r δ R₀ R₁ data hε hδ hδr hr hεr' hbigR
       hR hR0 hbig hRbig hR₁big hR₁₂R hcont)
 
-theorem morseCapRoundedLowerUnionIsManifold {m k : ℕ} (hk : k ≤ m + 1)
+private theorem morseCapRoundedLowerUnionIsManifold {m k : ℕ} (hk : k ≤ m + 1)
     (c ε r δ θ R₀ R₁ R₁' : ℝ) {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M]
     [ChartedSpace H M] [T2Space M]
     {I : ModelWithCorners ℝ (MorseModel (m + 1)) H} [I.Boundaryless]
@@ -20044,7 +20148,7 @@ theorem morseCapRoundedLowerUnionIsManifold {m k : ℕ} (hk : k ≤ m + 1)
       (le_of_lt (lt_trans hεr' (by nlinarith [data.hRpos] : data.R / 2 < data.R)))
       hεr' hR0 (lt_of_lt_of_le hR hR₁₂R) hbig hRbig hcont).symm
 
-noncomputable def morseHandleAdjunctionDiffeomorphRoundedSublevelSharp {m k : ℕ} (hk : k ≤ m + 1)
+private noncomputable def morseHandleAdjunctionDiffeomorphRoundedSublevelSharp {m k : ℕ} (hk : k ≤ m + 1)
     (c ε r δ R₀ R₁ R₁' : ℝ) {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M]
     [ChartedSpace H M] [T2Space M]
     {I : ModelWithCorners ℝ (MorseModel (m + 1)) H} [I.Boundaryless]
