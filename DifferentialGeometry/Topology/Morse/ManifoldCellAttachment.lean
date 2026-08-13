@@ -12853,6 +12853,125 @@ theorem morseHandleRoundAdjunctionLower_injective {m k : ℕ} (hk : k ≤ m + 1)
   exact Subtype.ext (congrArg (fun z : {y : M // y ∈ morseCapRoundedLowerSublevel hk c ε r δ θ data ∪
     Set.range (handleRoundEmbedding hk c ε r δ θ data)} => z.1) hto)
 
+noncomputable def morseHandleRoundAdjunctionCellRangeHomeo {m k : ℕ} (hk : k ≤ m + 1)
+    (c ε r δ θ : ℝ) {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M]
+    [T2Space M] [ChartedSpace H M] {I : ModelWithCorners ℝ (MorseModel (m + 1)) H} {f : M → ℝ}
+    (data : MorseChart (m + 1) k hk c I f)
+    (hε : 0 < ε) (hδ : 0 < δ) (hθ : 0 < θ) (hδr : δ < r ^ 2) (hθr : θ < r ^ 2) (hr : 0 < r)
+    (hεr : Real.sqrt (2 * ε + 2 * r ^ 2) ≤ data.R)
+    (hεr' : Real.sqrt (2 * ε + 2 * r ^ 2) < data.R / 2)
+    (hcont : Continuous f)
+    [NeZero k] [NeZero (m + 1 - k)] :
+    StandardHandle k (m + 1 - k) ≃ₜ
+      {z : Handle.AdjunctionSpace k (m + 1 - k)
+        (handleRoundAttachingEmbeddingCapSubtype hk c ε r δ θ data hε hδ hθ hδr hθr hεr') //
+        z ∈ Set.range (Handle.cell
+          (handleRoundAttachingEmbeddingCapSubtype hk c ε r δ θ data hε hδ hθ hδr hθr hεr'))} := by
+  let A' : Type := Handle.AdjunctionSpace k (m + 1 - k)
+    (handleRoundAttachingEmbeddingCapSubtype hk c ε r δ θ data hε hδ hθ hδr hθr hεr')
+  let h : A' ≃ₜ
+      {x : M // x ∈ morseCapRoundedLowerSublevel hk c ε r δ θ data ∪
+        Set.range (handleRoundEmbedding hk c ε r δ θ data)} :=
+    morseHandleRoundAdjunctionHomeoUnion hk c ε r δ θ data hε hδ hθ hδr hθr hr hεr hεr' hcont
+  haveI : T2Space A' := h.symm.t2Space
+  let e : StandardHandle k (m + 1 - k) ≃
+      {z : A' // z ∈ Set.range (Handle.cell
+        (handleRoundAttachingEmbeddingCapSubtype hk c ε r δ θ data hε hδ hθ hδr hθr hεr'))} :=
+    Equiv.ofBijective (fun d =>
+      ⟨Handle.cell (handleRoundAttachingEmbeddingCapSubtype hk c ε r δ θ data hε hδ hθ hδr hθr hεr') d,
+        ⟨d, rfl⟩⟩)
+      (by
+        constructor
+        · intro d d' hdd'
+          apply morseHandleRoundAdjunctionCell_injective hk c ε r δ θ data hε hδ hθ hδr hθr hr hεr hεr'
+            hcont
+          exact congrArg Subtype.val hdd'
+        · intro z
+          refine ⟨Classical.choose z.2, ?_⟩
+          apply Subtype.ext
+          exact Classical.choose_spec z.2)
+  have hecont : Continuous e := by
+    dsimp [e]
+    exact Continuous.subtype_mk
+      (continuous_cell (handleRoundAttachingEmbeddingCapSubtype hk c ε r δ θ data hε hδ hθ hδr hθr hεr'))
+      (by intro d; exact ⟨d, rfl⟩)
+  exact Continuous.homeoOfEquivCompactToT2 (f := e) hecont
+
+noncomputable def morseHandleRoundAdjunctionLowerRangeHomeo {m k : ℕ} (hk : k ≤ m + 1)
+    (c ε r δ θ : ℝ) {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M]
+    [T2Space M] [ChartedSpace H M] {I : ModelWithCorners ℝ (MorseModel (m + 1)) H} {f : M → ℝ}
+    (data : MorseChart (m + 1) k hk c I f)
+    (hε : 0 < ε) (hδ : 0 < δ) (hθ : 0 < θ) (hδr : δ < r ^ 2) (hθr : θ < r ^ 2) (hr : 0 < r)
+    (hεr : Real.sqrt (2 * ε + 2 * r ^ 2) ≤ data.R)
+    (hεr' : Real.sqrt (2 * ε + 2 * r ^ 2) < data.R / 2)
+    (hcont : Continuous f)
+    [NeZero k] [NeZero (m + 1 - k)] :
+    {x : M // x ∈ morseCapRoundedLowerSublevel hk c ε r δ θ data} ≃ₜ
+      {z : Handle.AdjunctionSpace k (m + 1 - k)
+        (handleRoundAttachingEmbeddingCapSubtype hk c ε r δ θ data hε hδ hθ hδr hθr hεr') //
+        z ∈ Set.range (Handle.lower
+          (handleRoundAttachingEmbeddingCapSubtype hk c ε r δ θ data hε hδ hθ hδr hθr hεr'))} := by
+  let A' : Type := Handle.AdjunctionSpace k (m + 1 - k)
+    (handleRoundAttachingEmbeddingCapSubtype hk c ε r δ θ data hε hδ hθ hδr hθr hεr')
+  let h : A' ≃ₜ
+      {x : M // x ∈ morseCapRoundedLowerSublevel hk c ε r δ θ data ∪
+        Set.range (handleRoundEmbedding hk c ε r δ θ data)} :=
+    morseHandleRoundAdjunctionHomeoUnion hk c ε r δ θ data hε hδ hθ hδr hθr hr hεr hεr' hcont
+  let toFun : {x : M // x ∈ morseCapRoundedLowerSublevel hk c ε r δ θ data} →
+      {z : A' // z ∈ Set.range (Handle.lower
+        (handleRoundAttachingEmbeddingCapSubtype hk c ε r δ θ data hε hδ hθ hδr hθr hεr'))} :=
+    fun x => ⟨Handle.lower
+      (handleRoundAttachingEmbeddingCapSubtype hk c ε r δ θ data hε hδ hθ hδr hθr hεr') x, ⟨x, rfl⟩⟩
+  let invFun : {z : A' // z ∈ Set.range (Handle.lower
+        (handleRoundAttachingEmbeddingCapSubtype hk c ε r δ θ data hε hδ hθ hδr hθr hεr'))} →
+      {x : M // x ∈ morseCapRoundedLowerSublevel hk c ε r δ θ data} :=
+    fun z =>
+      ⟨(h z.1).1, by
+        rcases z.2 with ⟨x₀, hx₀⟩
+        rw [← hx₀]
+        rw [morseHandleRoundAdjunctionHomeoUnion_lower hk c ε r δ θ data hε hδ hθ hδr hθr hr hεr hεr'
+          hcont x₀]
+        exact x₀.2⟩
+  let e : {x : M // x ∈ morseCapRoundedLowerSublevel hk c ε r δ θ data} ≃
+      {z : A' // z ∈ Set.range (Handle.lower
+        (handleRoundAttachingEmbeddingCapSubtype hk c ε r δ θ data hε hδ hθ hδr hθr hεr'))} := by
+    refine { toFun := toFun, invFun := invFun, left_inv := ?_, right_inv := ?_ }
+    · intro x
+      apply Subtype.ext
+      have hto := morseHandleRoundAdjunctionHomeoUnion_lower hk c ε r δ θ data hε hδ hθ hδr hθr hr hεr
+        hεr' hcont x
+      dsimp [invFun, toFun]
+      rw [hto]
+    · intro z
+      rcases z.2 with ⟨x₀, hx₀⟩
+      apply Subtype.ext
+      apply h.injective
+      have hto := morseHandleRoundAdjunctionHomeoUnion_lower hk c ε r δ θ data hε hδ hθ hδr hθr hr hεr
+        hεr' hcont x₀
+      have hz : h z.1 = ⟨x₀.1, Or.inl x₀.2⟩ := by
+        rw [← hx₀]
+        exact hto
+      have hL := morseHandleRoundAdjunctionHomeoUnion_lower hk c ε r δ θ data hε hδ hθ hδr hθr hr hεr
+        hεr' hcont (invFun z)
+      dsimp [toFun]
+      rw [hL, hz]
+      apply Subtype.ext
+      change (h z.1).1 = x₀.1
+      rw [hz]
+  refine { toEquiv := e, continuous_toFun := ?_, continuous_invFun := ?_ }
+  · exact Continuous.subtype_mk
+      (continuous_lower (handleRoundAttachingEmbeddingCapSubtype hk c ε r δ θ data hε hδ hθ hδr hθr hεr'))
+      (by intro x; exact ⟨x, rfl⟩)
+  · exact Continuous.subtype_mk
+      (continuous_subtype_val.comp (h.continuous.comp continuous_subtype_val)) (by
+        intro z
+        rcases z.2 with ⟨x₀, hx₀⟩
+        change (h z.1).1 ∈ morseCapRoundedLowerSublevel hk c ε r δ θ data
+        rw [← hx₀]
+        rw [morseHandleRoundAdjunctionHomeoUnion_lower hk c ε r δ θ data hε hδ hθ hδr hθr hr hεr hεr'
+          hcont x₀]
+        exact x₀.2)
+
 theorem morseHandleRoundAdjunctionHomeoUnion_attachingRegion {m k : ℕ} (hk : k ≤ m + 1) (c ε r δ θ : ℝ)
     {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M] [T2Space M] [ChartedSpace H M]
     {I : ModelWithCorners ℝ (MorseModel (m + 1)) H} {f : M → ℝ}
