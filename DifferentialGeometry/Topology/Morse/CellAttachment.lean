@@ -7318,7 +7318,8 @@ theorem modelRoundCapInterp_le_one {ε r a b : ℝ} (hε : 0 < ε) (ha1 : a ≤ 
     nlinarith [ha', h2]
 
 theorem modelRoundCapInverse_params {ε r t φ a b : ℝ} (hε : 0 < ε) (hr : 0 < r)
-    (ht2 : 2 * ε < t) (htr : t < r ^ 2 + 2 * ε) (hφ0 : 0 ≤ φ) (hφ1 : φ ≤ 1)
+    (htpos : 0 < t) (htr : t < r ^ 2 + 2 * ε) (hφ0 : 0 ≤ φ) (hφ1 : φ ≤ 1)
+    (hphiD : 2 * ε - t ≤ φ * (r ^ 2 + 2 * ε - t))
     (ha : a = t / (t + φ * (r ^ 2 + 2 * ε - t)))
     (hb : b = (t / a - 2 * ε) / r ^ 2) :
     (2 * ε + r ^ 2 * b) * a = t ∧
@@ -7328,7 +7329,6 @@ theorem modelRoundCapInverse_params {ε r t φ a b : ℝ} (hε : 0 < ε) (hr : 0
   have hDpos : 0 < D := by
     dsimp [D]
     nlinarith [htr]
-  have htpos : 0 < t := by nlinarith [ht2, hε]
   have hden_pos : 0 < t + φ * D := by nlinarith [htpos, hφ0, hDpos]
   have hden_ne : t + φ * D ≠ 0 := ne_of_gt hden_pos
   have hane_aux : 0 < a := by
@@ -7366,7 +7366,8 @@ theorem modelRoundCapInverse_params {ε r t φ a b : ℝ} (hε : 0 < ε) (hr : 0
     rw [div_nonneg_iff]
     left
     constructor
-    · nlinarith [hrec, ht2, hε]
+    · dsimp [D] at hrec
+      nlinarith [hrec, hphiD]
     · exact le_of_lt hr2pos
   have hb1 : b ≤ 1 := by
     rw [hb]
@@ -8920,8 +8921,8 @@ theorem modelAttachedRegion_mem_handleRound_of_negPart_gt {n k : ℕ} (hk : k �
   have htpos : 0 < t := by nlinarith [ht2, hε]
   let a : ℝ := t / (t + φ * D)
   let b : ℝ := (t / a - 2 * ε) / r ^ 2
-  have hparams := modelRoundCapInverse_params (hε := hε) (hr := hr) (ht2 := ht2) (htr := ht_lt)
-    (hφ0 := hφ0) (hφ1 := hφ1) (ha := by
+  have hparams := modelRoundCapInverse_params (hε := hε) (hr := hr) (htpos := htpos) (htr := ht_lt)
+    (hφ0 := hφ0) (hφ1 := hφ1) (hphiD := by nlinarith [ht2, hφ0, hDpos]) (ha := by
       rfl) (hb := by
       rfl)
   have ht_eq : (2 * ε + r ^ 2 * b) * a = t := hparams.1
