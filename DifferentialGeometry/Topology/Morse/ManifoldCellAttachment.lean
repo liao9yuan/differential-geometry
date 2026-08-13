@@ -12978,8 +12978,7 @@ noncomputable def morseHandleRoundAdjunctionHomeoUnion {m k : ℕ}
     (hε : 0 < ε) (hδ : 0 < δ) (hθ : 0 < θ) (hδr : δ < r ^ 2) (hθr : θ < r ^ 2) (hr : 0 < r)
     (hεr : Real.sqrt (2 * ε + 2 * r ^ 2) ≤ data.R)
     (hεr' : Real.sqrt (2 * ε + 2 * r ^ 2) < data.R / 2)
-    (hcont : Continuous f)
-    [NeZero k] [NeZero (m + 1 - k)] :
+    (hcont : Continuous f) :
     Handle.AdjunctionSpace k (m + 1 - k)
       (handleRoundAttachingEmbeddingCapSubtype hk c ε r δ θ data hε hδ hθ hδr hθr hεr') ≃ₜ
       {x : M // x ∈ morseCapRoundedLowerSublevel hk c ε r δ θ data ∪
@@ -13004,7 +13003,6 @@ theorem morseHandleRoundAdjunctionHomeoUnion_lower {m k : ℕ} (hk : k ≤ m + 1
     (hεr : Real.sqrt (2 * ε + 2 * r ^ 2) ≤ data.R)
     (hεr' : Real.sqrt (2 * ε + 2 * r ^ 2) < data.R / 2)
     (hcont : Continuous f)
-    [NeZero k] [NeZero (m + 1 - k)]
     (x : {x : M // x ∈ morseCapRoundedLowerSublevel hk c ε r δ θ data}) :
     morseHandleRoundAdjunctionHomeoUnion hk c ε r δ θ data hε hδ hθ hδr hθr hr hεr hεr' hcont
       (Handle.lower (handleRoundAttachingEmbeddingCapSubtype hk c ε r δ θ data hε hδ hθ hδr hθr hεr') x) =
@@ -13030,7 +13028,6 @@ theorem morseHandleRoundAdjunctionHomeoUnion_cell {m k : ℕ} (hk : k ≤ m + 1)
     (hεr : Real.sqrt (2 * ε + 2 * r ^ 2) ≤ data.R)
     (hεr' : Real.sqrt (2 * ε + 2 * r ^ 2) < data.R / 2)
     (hcont : Continuous f)
-    [NeZero k] [NeZero (m + 1 - k)]
     (p : StandardHandle k (m + 1 - k)) :
     morseHandleRoundAdjunctionHomeoUnion hk c ε r δ θ data hε hδ hθ hδr hθr hr hεr hεr' hcont
       (Handle.cell (handleRoundAttachingEmbeddingCapSubtype hk c ε r δ θ data hε hδ hθ hδr hθr hεr') p) =
@@ -14682,7 +14679,7 @@ noncomputable def morseHandleRoundAdjunctionHomeoCapRounded {m k : ℕ} (hk : k 
     (hR0 : 0 ≤ R₀) (hR0lt : R₀ < data.R)
     (hbig : 2 * (r ^ 2 + 2 * ε + δ) ≤ R₀ ^ 2)
     (hRbig : r ^ 2 + 2 * ε + δ ≤ (data.R / 2) ^ 2)
-    (hcont : Continuous f) [NeZero k] [NeZero (m + 1 - k)] :
+    (hcont : Continuous f) :
     Handle.AdjunctionSpace k (m + 1 - k)
         (morseAttachingEmbedding hk c ε r data hε hεr) ≃ₜ
       {x : M // x ∈ morseCapRoundedLowerSublevel hk c ε r δ θ data ∪
@@ -14710,7 +14707,7 @@ theorem morseHandleRoundAdjunctionHomeoCapRounded_comm {m k : ℕ} (hk : k ≤ m
     (hR0 : 0 ≤ R₀) (hR0lt : R₀ < data.R)
     (hbig : 2 * (r ^ 2 + 2 * ε + δ) ≤ R₀ ^ 2)
     (hRbig : r ^ 2 + 2 * ε + δ ≤ (data.R / 2) ^ 2)
-    (hcont : Continuous f) [NeZero k] [NeZero (m + 1 - k)]
+    (hcont : Continuous f)
     (z : Handle.AdjunctionSpace k (m + 1 - k)
       (morseAttachingEmbedding hk c ε r data hε hεr)) :
     (morseHandleRoundAdjunctionHomeoUnion hk c ε r δ θ data hε hδ hθ hδr hθr hr hεr hεr' hcont).toFun
@@ -14739,7 +14736,7 @@ theorem morseHandleRoundAdjunctionHomeoCapRounded_lower {m k : ℕ} (hk : k ≤ 
     (hR0 : 0 ≤ R₀) (hR0lt : R₀ < data.R)
     (hbig : 2 * (r ^ 2 + 2 * ε + δ) ≤ R₀ ^ 2)
     (hRbig : r ^ 2 + 2 * ε + δ ≤ (data.R / 2) ^ 2)
-    (hcont : Continuous f) [NeZero k] [NeZero (m + 1 - k)]
+    (hcont : Continuous f)
     (x : SublevelSpace f (c - ε)) :
     (morseHandleRoundAdjunctionHomeoCapRounded hk c ε r δ θ R₀ data hε hδ hθ hδr hθr hr hεr hεr'
       hR0 hR0lt hbig hRbig hcont
@@ -14760,7 +14757,7 @@ theorem morseHandleRoundAdjunctionHomeoCapRounded_cell {m k : ℕ} (hk : k ≤ m
     (hR0 : 0 ≤ R₀) (hR0lt : R₀ < data.R)
     (hbig : 2 * (r ^ 2 + 2 * ε + δ) ≤ R₀ ^ 2)
     (hRbig : r ^ 2 + 2 * ε + δ ≤ (data.R / 2) ^ 2)
-    (hcont : Continuous f) [NeZero k] [NeZero (m + 1 - k)]
+    (hcont : Continuous f)
     (d : StandardHandle k (m + 1 - k)) :
     (morseHandleRoundAdjunctionHomeoCapRounded hk c ε r δ θ R₀ data hε hδ hθ hδr hθr hr hεr hεr'
       hR0 hR0lt hbig hRbig hcont
@@ -18729,7 +18726,7 @@ noncomputable def morseHandleAdjunctionEquivRoundedSublevelCapRounded {m k : ℕ
     (hRbig : r ^ 2 + 2 * ε + δ ≤ (data.R / 2) ^ 2)
     (hR : R₀' < R₁') (hR0' : 0 ≤ R₀') (hbig' : 2 * (r ^ 2 + 2 * ε + δ) ≤ R₀' ^ 2)
     (hR₁big : 2 * (data.R / 2) ^ 2 - 2 * ε ≤ R₁' ^ 2) (hR₁₂R : R₁' ≤ data.R)
-    (hcont : Continuous f) [NeZero k] [NeZero (m + 1 - k)] :
+    (hcont : Continuous f) :
     Handle.AdjunctionSpace k (m + 1 - k)
       (morseAttachingEmbedding hk c ε r data hε
         (le_trans (le_of_lt hεr') (by nlinarith [data.hRpos] : data.R / 2 ≤ data.R))) ≃ₜ
@@ -18760,7 +18757,7 @@ noncomputable def morseHandleAdjunctionChartedSpaceCapRounded {m k : ℕ} (hk : 
     (hcont : Continuous f)
     (hf : ContMDiff I 𝓘(ℝ, ℝ) (↑(⊤ : ℕ∞) : WithTop ℕ∞) f)
     (hreg_f : ∀ x : M, f x = c - ε → ¬ IsCriticalPointAt I f x)
-    [NeZero k] [NeZero (m + 1 - k)] :
+    :
     ChartedSpace (MorseHalfSpace m)
       (Handle.AdjunctionSpace k (m + 1 - k)
         (morseAttachingEmbedding hk c ε r data hε
@@ -18785,7 +18782,7 @@ theorem morseHandleAdjunctionEquivRoundedSublevelCapRounded_lower {m k : ℕ} (h
     (hRbig : r ^ 2 + 2 * ε + δ ≤ (data.R / 2) ^ 2)
     (hR : R₀' < R₁') (hR0' : 0 ≤ R₀') (hbig' : 2 * (r ^ 2 + 2 * ε + δ) ≤ R₀' ^ 2)
     (hR₁big : 2 * (data.R / 2) ^ 2 - 2 * ε ≤ R₁' ^ 2) (hR₁₂R : R₁' ≤ data.R)
-    (hcont : Continuous f) [NeZero k] [NeZero (m + 1 - k)]
+    (hcont : Continuous f)
     (x : SublevelSpace f (c - ε)) :
     (morseHandleAdjunctionEquivRoundedSublevelCapRounded hk c ε r δ θ R₀ R₀' R₁' data hε hδ hθ
       hδr hθr hr hεr hεr' hR0 hR0lt hbig hRbig hR hR0' hbig' hR₁big hR₁₂R hcont
@@ -18807,7 +18804,7 @@ theorem morseHandleAdjunctionEquivRoundedSublevelCapRounded_cell {m k : ℕ} (hk
     (hRbig : r ^ 2 + 2 * ε + δ ≤ (data.R / 2) ^ 2)
     (hR : R₀' < R₁') (hR0' : 0 ≤ R₀') (hbig' : 2 * (r ^ 2 + 2 * ε + δ) ≤ R₀' ^ 2)
     (hR₁big : 2 * (data.R / 2) ^ 2 - 2 * ε ≤ R₁' ^ 2) (hR₁₂R : R₁' ≤ data.R)
-    (hcont : Continuous f) [NeZero k] [NeZero (m + 1 - k)]
+    (hcont : Continuous f)
     (d : StandardHandle k (m + 1 - k)) :
     (morseHandleAdjunctionEquivRoundedSublevelCapRounded hk c ε r δ θ R₀ R₀' R₁' data hε hδ hθ
       hδr hθr hr hεr hεr' hR0 hR0lt hbig hRbig hR hR0' hbig' hR₁big hR₁₂R hcont
@@ -18914,7 +18911,7 @@ theorem contMDiff_morseHandleAdjunctionLower {m k : ℕ} (hk : k ≤ m + 1)
     (hcont : Continuous f)
     (hf : ContMDiff I 𝓘(ℝ, ℝ) (↑(⊤ : ℕ∞) : WithTop ℕ∞) f)
     (hreg_f : ∀ x : M, f x = c - ε → ¬ IsCriticalPointAt I f x)
-    [NeZero k] [NeZero (m + 1 - k)] :
+    :
     @ContMDiff ℝ _ (MorseModel (m + 1)) _ _ (MorseHalfSpace m) _
       (morseModelWithCornersHalfSpace m)
       (SublevelSpace f (c - ε)) _ (manifoldSublevelChartedSpace I f (c - ε) hf hreg_f)
@@ -19943,7 +19940,7 @@ noncomputable def morseHandleAdjunctionDiffeomorphRoundedSublevelCapRounded {m k
     (hcont : Continuous f)
     (hf : ContMDiff I 𝓘(ℝ, ℝ) (↑(⊤ : ℕ∞) : WithTop ℕ∞) f)
     (hreg_f : ∀ x : M, f x = c - ε → ¬ IsCriticalPointAt I f x)
-    [NeZero k] [NeZero (m + 1 - k)] :
+    :
     @Diffeomorph ℝ _ (MorseModel (m + 1)) _ _ (MorseModel (m + 1)) _ _
       (MorseHalfSpace m) _ (MorseHalfSpace m) _ (morseModelWithCornersHalfSpace m)
       (morseModelWithCornersHalfSpace m)
