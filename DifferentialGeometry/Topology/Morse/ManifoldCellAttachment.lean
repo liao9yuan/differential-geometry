@@ -16257,6 +16257,77 @@ theorem morseRoundedFunction_eq_f_add_eps_of_not_mem_closedBall {m k : ℕ} (hk 
   dsimp [morseRoundedFunction]
   rw [if_neg hx]
 
+theorem morseRoundedFunction_handleRoundEmbedding_eq_modelAttachedFunction {m k : ℕ} (hk : k ≤ m + 1)
+    (c ε r δ θ R₀' R₁' : ℝ) {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M]
+    [ChartedSpace H M] {I : ModelWithCorners ℝ (MorseModel (m + 1)) H} {f : M → ℝ}
+    (data : MorseChart (m + 1) k hk c I f)
+    (hε : 0 < ε) (hδ : 0 < δ) (hθ : 0 < θ) (hδr : δ < r ^ 2) (hθr : θ < r ^ 2)
+    (hr : 0 < r) (hR : R₀' < R₁') (hR0' : 0 ≤ R₀')
+    (hbig' : 2 * (r ^ 2 + 2 * ε + δ) ≤ R₀' ^ 2)
+    (hR₁₂R : R₁' ≤ data.R)
+    (d : StandardHandle k (m + 1 - k)) :
+    morseRoundedFunction hk c ε r δ R₀' R₁' data
+        (handleRoundEmbedding hk c ε r δ θ data d) =
+      modelAttachedFunction hk c ε r δ (modelHandleRoundMap hk ε r δ θ d) := by
+  have hnorm : morseNorm (m + 1) (modelHandleRoundMap hk ε r δ θ d) ≤ R₀' := by
+    have hle := modelHandleRoundMap_norm_le hk ε r δ θ hε hδ hθ hδr hθr hr d
+    have hsqrt : Real.sqrt (2 * ε + 2 * r ^ 2) ≤ R₀' := by
+      have h1 : 2 * ε + 2 * r ^ 2 ≤ 2 * (r ^ 2 + 2 * ε + δ) := by nlinarith [hε, hδ]
+      have h2 := Real.sqrt_le_sqrt h1
+      have h3 : Real.sqrt (2 * (r ^ 2 + 2 * ε + δ)) ≤ R₀' := by
+        exact le_trans (Real.sqrt_le_sqrt hbig') (by
+          rw [Real.sqrt_sq_eq_abs]
+          exact le_of_eq (abs_of_nonneg hR0'))
+      exact le_trans h2 h3
+    exact le_trans hle hsqrt
+  have hsrc : modelHandleRoundMap hk ε r δ θ d ∈ data.χ.source :=
+    data.hχsrc (modelHandleRoundMap hk ε r δ θ d) (le_trans hnorm (le_trans (le_of_lt hR) hR₁₂R))
+  have hball : handleRoundEmbedding hk c ε r δ θ data d ∈
+      data.χ '' {y : MorseModel (m + 1) | morseNorm (m + 1) y ≤ R₁'} := by
+    dsimp [handleRoundEmbedding]
+    refine ⟨modelHandleRoundMap hk ε r δ θ d, ?_, rfl⟩
+    exact le_trans hnorm (le_of_lt hR)
+  have heq₁ := morseRoundedFunction_eq_model_of_mem_closedBall hk c ε r δ R₀' R₁' data hball
+  have heq₂ : modelRoundedFunction hk c ε r δ R₀' R₁' (modelHandleRoundMap hk ε r δ θ d) =
+      modelAttachedFunction hk c ε r δ (modelHandleRoundMap hk ε r δ θ d) :=
+    modelRoundedFunction_eq_attached_of_norm_le hk c ε r δ R₀' R₁' hR hR0' hnorm
+  rw [heq₁]
+  dsimp [handleRoundEmbedding]
+  rw [data.χ.left_inv hsrc]
+  rw [heq₂]
+
+theorem handleRoundEmbedding_roundedFunction_eq_c_of_cocore_eq_one {m k : ℕ} (hk : k ≤ m + 1)
+    (c ε r δ θ R₀' R₁' : ℝ) {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M]
+    [ChartedSpace H M] {I : ModelWithCorners ℝ (MorseModel (m + 1)) H} {f : M → ℝ}
+    (data : MorseChart (m + 1) k hk c I f)
+    (hε : 0 < ε) (hδ : 0 < δ) (hθ : 0 < θ) (hδr : δ < r ^ 2) (hθr : θ < r ^ 2)
+    (hr : 0 < r) (hR : R₀' < R₁') (hR0' : 0 ≤ R₀')
+    (hbig' : 2 * (r ^ 2 + 2 * ε + δ) ≤ R₀' ^ 2)
+    (hR₁₂R : R₁' ≤ data.R)
+    (d : StandardHandle k (m + 1 - k))
+    (hp : ‖(d.2 : EuclideanSpace ℝ (Fin (m + 1 - k)))‖ = 1) :
+    morseRoundedFunction hk c ε r δ R₀' R₁' data
+        (handleRoundEmbedding hk c ε r δ θ data d) = c := by
+  rw [morseRoundedFunction_handleRoundEmbedding_eq_modelAttachedFunction hk c ε r δ θ R₀' R₁' data
+    hε hδ hθ hδr hθr hr hR hR0' hbig' hR₁₂R d]
+  exact modelHandleRoundMap_attachedFunction_eq_c_of_cocore_eq_one hk c ε r δ θ hε hδ hθ hδr hθr hr d hp
+
+theorem handleRoundEmbedding_roundedFunction_lt_c_of_cocore_lt_one {m k : ℕ} (hk : k ≤ m + 1)
+    (c ε r δ θ R₀' R₁' : ℝ) {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M]
+    [ChartedSpace H M] {I : ModelWithCorners ℝ (MorseModel (m + 1)) H} {f : M → ℝ}
+    (data : MorseChart (m + 1) k hk c I f)
+    (hε : 0 < ε) (hδ : 0 < δ) (hθ : 0 < θ) (hδr : δ < r ^ 2) (hθr : θ < r ^ 2)
+    (hr : 0 < r) (hR : R₀' < R₁') (hR0' : 0 ≤ R₀')
+    (hbig' : 2 * (r ^ 2 + 2 * ε + δ) ≤ R₀' ^ 2)
+    (hR₁₂R : R₁' ≤ data.R)
+    (d : StandardHandle k (m + 1 - k))
+    (hp : ‖(d.2 : EuclideanSpace ℝ (Fin (m + 1 - k)))‖ < 1) :
+    morseRoundedFunction hk c ε r δ R₀' R₁' data
+        (handleRoundEmbedding hk c ε r δ θ data d) < c := by
+  rw [morseRoundedFunction_handleRoundEmbedding_eq_modelAttachedFunction hk c ε r δ θ R₀' R₁' data
+    hε hδ hθ hδr hθr hr hR hR0' hbig' hR₁₂R d]
+  exact modelHandleRoundMap_attachedFunction_lt_c_of_cocore_lt_one hk c ε r δ θ hε hδ hθ hδr hθr hr d hp
+
 noncomputable def morseCapRoundedLowerFunction {m k : ℕ} (hk : k ≤ m + 1)
     (c ε r δ θ R₀ R₁ : ℝ)
     {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M] [ChartedSpace H M]
