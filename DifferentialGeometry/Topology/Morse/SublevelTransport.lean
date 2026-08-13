@@ -1188,22 +1188,22 @@ theorem exists_morseHandleAdjunction_diffeomorph_upperSublevel_of_morseChart
       x = data.p ∨ ¬ IsCriticalPointAt I f x)
     [NeZero k] [NeZero (m + 1 - k)] :
     ∃ ε : ℝ, ∃ hε : 0 < ε,
-      ∃ r : ℝ, ∃ hεr : Real.sqrt (2 * ε + 2 * r ^ 2) ≤ data.R,
+      ∃ r : ℝ, ∃ h : 0 < r ∧ Real.sqrt (2 * ε + 2 * r ^ 2) ≤ data.R,
       ∃ η : ℝ, ∃ hηpos : 0 < η,
       ∃ hreg_f : ∀ x : M, f x = c - ε → ¬ IsCriticalPointAt I f x,
       ∃ hreg_upper : ∀ x : M, f x = c + ε → ¬ IsCriticalPointAt I f x,
       ∃ hcs : ChartedSpace (MorseHalfSpace m)
-        (Handle.AdjunctionSpace k (m + 1 - k) (morseAttachingEmbedding hk c ε r data hε hεr)),
+        (Handle.AdjunctionSpace k (m + 1 - k) (morseAttachingEmbedding hk c ε r data hε h.2)),
       ∃ e : @Diffeomorph ℝ _ (MorseModel (m + 1)) _ _ (MorseModel (m + 1)) _ _
         (MorseHalfSpace m) _ (MorseHalfSpace m) _ (morseModelWithCornersHalfSpace m)
         (morseModelWithCornersHalfSpace m)
-        (Handle.AdjunctionSpace k (m + 1 - k) (morseAttachingEmbedding hk c ε r data hε hεr)) _ hcs
+        (Handle.AdjunctionSpace k (m + 1 - k) (morseAttachingEmbedding hk c ε r data hε h.2)) _ hcs
         (SublevelSpace f (c + ε)) _
         (manifoldSublevelChartedSpace I f (c + ε) hf hreg_upper)
         (⊤ : ℕ∞),
         @IsManifold ℝ _ (MorseModel (m + 1)) _ _ (MorseHalfSpace m) _
           (morseModelWithCornersHalfSpace m) (⊤ : ℕ∞)
-          (Handle.AdjunctionSpace k (m + 1 - k) (morseAttachingEmbedding hk c ε r data hε hεr)) _ hcs ∧
+          (Handle.AdjunctionSpace k (m + 1 - k) (morseAttachingEmbedding hk c ε r data hε h.2)) _ hcs ∧
         @IsManifold ℝ _ (MorseModel (m + 1)) _ _ (MorseHalfSpace m) _
           (morseModelWithCornersHalfSpace m) (⊤ : ℕ∞)
           (SublevelSpace f (c + ε)) _
@@ -1213,9 +1213,9 @@ theorem exists_morseHandleAdjunction_diffeomorph_upperSublevel_of_morseChart
           (SublevelSpace f (c - ε)) _ (manifoldSublevelChartedSpace I f (c - ε) hf hreg_f)
           (MorseModel (m + 1)) _ _ (MorseHalfSpace m) _
           (morseModelWithCornersHalfSpace m)
-          (Handle.AdjunctionSpace k (m + 1 - k) (morseAttachingEmbedding hk c ε r data hε hεr)) _ hcs
+          (Handle.AdjunctionSpace k (m + 1 - k) (morseAttachingEmbedding hk c ε r data hε h.2)) _ hcs
           (⊤ : ℕ∞)
-          (Handle.lower (morseAttachingEmbedding hk c ε r data hε hεr)) ∧
+          (Handle.lower (morseAttachingEmbedding hk c ε r data hε h.2)) ∧
         @ContMDiff ℝ _
           (EuclideanSpace ℝ (Fin ((k - 1) + 1)) × EuclideanSpace ℝ (Fin (((m + 1 - k - 1) + 1)))) _ _
           (ModelProd (EuclideanHalfSpace ((k - 1) + 1)) (EuclideanHalfSpace ((m + 1 - k - 1) + 1))) _
@@ -1224,16 +1224,16 @@ theorem exists_morseHandleAdjunction_diffeomorph_upperSublevel_of_morseChart
           (Handle.StandardHandle k (m + 1 - k)) _ (Handle.standardHandleChartedSpace k (m + 1 - k))
           (MorseModel (m + 1)) _ _ (MorseHalfSpace m) _
           (morseModelWithCornersHalfSpace m)
-          (Handle.AdjunctionSpace k (m + 1 - k) (morseAttachingEmbedding hk c ε r data hε hεr)) _ hcs
+          (Handle.AdjunctionSpace k (m + 1 - k) (morseAttachingEmbedding hk c ε r data hε h.2)) _ hcs
           (⊤ : ℕ∞)
-          (Handle.cell (morseAttachingEmbedding hk c ε r data hε hεr)) ∧
+          (Handle.cell (morseAttachingEmbedding hk c ε r data hε h.2)) ∧
         (∀ x : M, f x ≤ c - ε - η → ∀ hx : f x ≤ c - ε,
-          (e (Handle.lower (morseAttachingEmbedding hk c ε r data hε hεr) ⟨x, hx⟩)).1 = x) ∧
+          (e (Handle.lower (morseAttachingEmbedding hk c ε r data hε h.2) ⟨x, hx⟩)).1 = x) ∧
         (∀ y : M, (hydeep : f y ≤ c - ε - η) → ∀ hy : f y ≤ c + ε,
           ∀ z : Handle.AdjunctionSpace k (m + 1 - k)
-              (morseAttachingEmbedding hk c ε r data hε hεr),
+              (morseAttachingEmbedding hk c ε r data hε h.2),
             e z = ⟨y, hy⟩ →
-              z = Handle.lower (morseAttachingEmbedding hk c ε r data hε hεr)
+              z = Handle.lower (morseAttachingEmbedding hk c ε r data hε h.2)
                 ⟨y, le_trans hydeep (by linarith [hηpos] : c - ε - η ≤ c - ε)⟩) := by
   classical
   rcases morseHandleAttachment_real_params data.R data.R' a data.hRpos ha haR hRR' with
@@ -1307,7 +1307,7 @@ theorem exists_morseHandleAdjunction_diffeomorph_upperSublevel_of_morseChart
       (Handle.cell (morseAttachingEmbedding hk c ε r data hε hεr)) :=
     contMDiff_morseHandleAdjunctionCell hk c ε r δ θ R₀ R₀' R₁' R₁'' data hε hδ hθ hδr hθr hr hεr
       hεr' hR0 hR0lt hbig hRbig hR hR0' hbig' hR₁big hR₁₂R hR₁₂ hR₁₂R'' hR₁₂R''' hRR' hcont hf hreg_f
-  refine ⟨ε, hε, r, hεr, η, hηpos, hreg_f, hreg_upper,
+  refine ⟨ε, hε, r, ⟨hr, hεr⟩, η, hηpos, hreg_f, hreg_upper,
     morseHandleAdjunctionChartedSpace hk c ε r δ θ R₀ R₀' R₁' R₁'' data hε hδ hθ hδr hθr hr
       hεr hεr' hR0 hR0lt hbig hRbig hR hR0' hbig' hR₁big hR₁₂R hR₁₂ hR₁₂R'' hR₁₂R''' hcont hf hreg_f,
     e,
@@ -1325,24 +1325,24 @@ theorem exists_morseHandleAdjunction_diffeomorph_upperSublevel_of_morseChart_zer
     (hcompact : IsCompact (f ⁻¹' Set.Icc (c - a) (c + a)))
     (hunique : ∀ x : M, f x ∈ Set.Icc (c - a) (c + a) →
       x = data.p ∨ ¬ IsCriticalPointAt I f x)
-    [NeZero (m + 1)] :
+    :
     ∃ ε : ℝ, ∃ hε : 0 < ε,
-      ∃ r : ℝ, ∃ hεr : Real.sqrt (2 * ε + 2 * r ^ 2) ≤ data.R,
+      ∃ r : ℝ, ∃ h : 0 < r ∧ Real.sqrt (2 * ε + 2 * r ^ 2) ≤ data.R,
       ∃ η : ℝ, ∃ hηpos : 0 < η,
       ∃ hreg_f : ∀ x : M, f x = c - ε → ¬ IsCriticalPointAt I f x,
       ∃ hreg_upper : ∀ x : M, f x = c + ε → ¬ IsCriticalPointAt I f x,
       ∃ hcs : ChartedSpace (MorseHalfSpace m)
-        (Handle.AdjunctionSpace 0 (m + 1) (morseAttachingEmbedding (zero_le (m + 1)) c ε r data hε hεr)),
+        (Handle.AdjunctionSpace 0 (m + 1) (morseAttachingEmbedding (zero_le (m + 1)) c ε r data hε h.2)),
       ∃ e : @Diffeomorph ℝ _ (MorseModel (m + 1)) _ _ (MorseModel (m + 1)) _ _
         (MorseHalfSpace m) _ (MorseHalfSpace m) _ (morseModelWithCornersHalfSpace m)
         (morseModelWithCornersHalfSpace m)
-        (Handle.AdjunctionSpace 0 (m + 1) (morseAttachingEmbedding (zero_le (m + 1)) c ε r data hε hεr)) _ hcs
+        (Handle.AdjunctionSpace 0 (m + 1) (morseAttachingEmbedding (zero_le (m + 1)) c ε r data hε h.2)) _ hcs
         (SublevelSpace f (c + ε)) _
         (manifoldSublevelChartedSpace I f (c + ε) hf hreg_upper)
         (⊤ : ℕ∞),
         @IsManifold ℝ _ (MorseModel (m + 1)) _ _ (MorseHalfSpace m) _
           (morseModelWithCornersHalfSpace m) (⊤ : ℕ∞)
-          (Handle.AdjunctionSpace 0 (m + 1) (morseAttachingEmbedding (zero_le (m + 1)) c ε r data hε hεr)) _ hcs ∧
+          (Handle.AdjunctionSpace 0 (m + 1) (morseAttachingEmbedding (zero_le (m + 1)) c ε r data hε h.2)) _ hcs ∧
         @IsManifold ℝ _ (MorseModel (m + 1)) _ _ (MorseHalfSpace m) _
           (morseModelWithCornersHalfSpace m) (⊤ : ℕ∞)
           (SublevelSpace f (c + ε)) _
@@ -1352,9 +1352,9 @@ theorem exists_morseHandleAdjunction_diffeomorph_upperSublevel_of_morseChart_zer
           (SublevelSpace f (c - ε)) _ (manifoldSublevelChartedSpace I f (c - ε) hf hreg_f)
           (MorseModel (m + 1)) _ _ (MorseHalfSpace m) _
           (morseModelWithCornersHalfSpace m)
-          (Handle.AdjunctionSpace 0 (m + 1) (morseAttachingEmbedding (zero_le (m + 1)) c ε r data hε hεr)) _ hcs
+          (Handle.AdjunctionSpace 0 (m + 1) (morseAttachingEmbedding (zero_le (m + 1)) c ε r data hε h.2)) _ hcs
           (⊤ : ℕ∞)
-          (Handle.lower (morseAttachingEmbedding (zero_le (m + 1)) c ε r data hε hεr)) ∧
+          (Handle.lower (morseAttachingEmbedding (zero_le (m + 1)) c ε r data hε h.2)) ∧
         @ContMDiff ℝ _
           (EuclideanSpace ℝ (Fin 0) × EuclideanSpace ℝ (Fin (((m + 1 - 1) + 1)))) _ _
           (ModelProd (EuclideanSpace ℝ (Fin 0)) (EuclideanHalfSpace ((m + 1 - 1) + 1))) _
@@ -1362,16 +1362,16 @@ theorem exists_morseHandleAdjunction_diffeomorph_upperSublevel_of_morseChart_zer
           (Handle.StandardHandle 0 (m + 1)) _ (Handle.standardHandleZeroChartedSpace (m + 1))
           (MorseModel (m + 1)) _ _ (MorseHalfSpace m) _
           (morseModelWithCornersHalfSpace m)
-          (Handle.AdjunctionSpace 0 (m + 1) (morseAttachingEmbedding (zero_le (m + 1)) c ε r data hε hεr)) _ hcs
+          (Handle.AdjunctionSpace 0 (m + 1) (morseAttachingEmbedding (zero_le (m + 1)) c ε r data hε h.2)) _ hcs
           (⊤ : ℕ∞)
-          (Handle.cell (morseAttachingEmbedding (zero_le (m + 1)) c ε r data hε hεr)) ∧
+          (Handle.cell (morseAttachingEmbedding (zero_le (m + 1)) c ε r data hε h.2)) ∧
         (∀ x : M, f x ≤ c - ε - η → ∀ hx : f x ≤ c - ε,
-          (e (Handle.lower (morseAttachingEmbedding (zero_le (m + 1)) c ε r data hε hεr) ⟨x, hx⟩)).1 = x) ∧
+          (e (Handle.lower (morseAttachingEmbedding (zero_le (m + 1)) c ε r data hε h.2) ⟨x, hx⟩)).1 = x) ∧
         (∀ y : M, (hydeep : f y ≤ c - ε - η) → ∀ hy : f y ≤ c + ε,
           ∀ z : Handle.AdjunctionSpace 0 (m + 1)
-              (morseAttachingEmbedding (zero_le (m + 1)) c ε r data hε hεr),
+              (morseAttachingEmbedding (zero_le (m + 1)) c ε r data hε h.2),
             e z = ⟨y, hy⟩ →
-              z = Handle.lower (morseAttachingEmbedding (zero_le (m + 1)) c ε r data hε hεr)
+              z = Handle.lower (morseAttachingEmbedding (zero_le (m + 1)) c ε r data hε h.2)
                 ⟨y, le_trans hydeep (by linarith [hηpos] : c - ε - η ≤ c - ε)⟩) := by
   classical
   rcases morseHandleAttachment_real_params data.R data.R' a data.hRpos ha haR hRR' with
@@ -1444,7 +1444,7 @@ theorem exists_morseHandleAdjunction_diffeomorph_upperSublevel_of_morseChart_zer
       (Handle.cell (morseAttachingEmbedding (zero_le (m + 1)) c ε r data hε hεr)) :=
     contMDiff_morseHandleAdjunctionCell_zero c ε r δ θ R₀ R₀' R₁' R₁'' data hε hδ hθ hδr hθr hr hεr
       hεr' hR0 hR0lt hbig hRbig hR hR0' hbig' hR₁big hR₁₂R hR₁₂ hR₁₂R'' hR₁₂R''' hRR' hcont hf hreg_f
-  refine ⟨ε, hε, r, hεr, η, hηpos, hreg_f, hreg_upper,
+  refine ⟨ε, hε, r, ⟨hr, hεr⟩, η, hηpos, hreg_f, hreg_upper,
     morseHandleAdjunctionChartedSpace (zero_le (m + 1)) c ε r δ θ R₀ R₀' R₁' R₁'' data hε hδ hθ hδr hθr hr
       hεr hεr' hR0 hR0lt hbig hRbig hR hR0' hbig' hR₁big hR₁₂R hR₁₂ hR₁₂R'' hR₁₂R''' hcont hf hreg_f,
     e,
@@ -1462,24 +1462,24 @@ theorem exists_morseHandleAdjunction_diffeomorph_upperSublevel_of_morseChart_top
     (hcompact : IsCompact (f ⁻¹' Set.Icc (c - a) (c + a)))
     (hunique : ∀ x : M, f x ∈ Set.Icc (c - a) (c + a) →
       x = data.p ∨ ¬ IsCriticalPointAt I f x)
-    [NeZero (m + 1)] :
+    :
     ∃ ε : ℝ, ∃ hε : 0 < ε,
-      ∃ r : ℝ, ∃ hεr : Real.sqrt (2 * ε + 2 * r ^ 2) ≤ data.R,
+      ∃ r : ℝ, ∃ h : 0 < r ∧ Real.sqrt (2 * ε + 2 * r ^ 2) ≤ data.R,
       ∃ η : ℝ, ∃ hηpos : 0 < η,
       ∃ hreg_f : ∀ x : M, f x = c - ε → ¬ IsCriticalPointAt I f x,
       ∃ hreg_upper : ∀ x : M, f x = c + ε → ¬ IsCriticalPointAt I f x,
       ∃ hcs : ChartedSpace (MorseHalfSpace m)
-        (Handle.AdjunctionSpace (m + 1) (m + 1 - (m + 1)) (morseAttachingEmbedding (le_rfl : m + 1 ≤ m + 1) c ε r data hε hεr)),
+        (Handle.AdjunctionSpace (m + 1) (m + 1 - (m + 1)) (morseAttachingEmbedding (le_rfl : m + 1 ≤ m + 1) c ε r data hε h.2)),
       ∃ e : @Diffeomorph ℝ _ (MorseModel (m + 1)) _ _ (MorseModel (m + 1)) _ _
         (MorseHalfSpace m) _ (MorseHalfSpace m) _ (morseModelWithCornersHalfSpace m)
         (morseModelWithCornersHalfSpace m)
-        (Handle.AdjunctionSpace (m + 1) (m + 1 - (m + 1)) (morseAttachingEmbedding (le_rfl : m + 1 ≤ m + 1) c ε r data hε hεr)) _ hcs
+        (Handle.AdjunctionSpace (m + 1) (m + 1 - (m + 1)) (morseAttachingEmbedding (le_rfl : m + 1 ≤ m + 1) c ε r data hε h.2)) _ hcs
         (SublevelSpace f (c + ε)) _
         (manifoldSublevelChartedSpace I f (c + ε) hf hreg_upper)
         (⊤ : ℕ∞),
         @IsManifold ℝ _ (MorseModel (m + 1)) _ _ (MorseHalfSpace m) _
           (morseModelWithCornersHalfSpace m) (⊤ : ℕ∞)
-          (Handle.AdjunctionSpace (m + 1) (m + 1 - (m + 1)) (morseAttachingEmbedding (le_rfl : m + 1 ≤ m + 1) c ε r data hε hεr)) _ hcs ∧
+          (Handle.AdjunctionSpace (m + 1) (m + 1 - (m + 1)) (morseAttachingEmbedding (le_rfl : m + 1 ≤ m + 1) c ε r data hε h.2)) _ hcs ∧
         @IsManifold ℝ _ (MorseModel (m + 1)) _ _ (MorseHalfSpace m) _
           (morseModelWithCornersHalfSpace m) (⊤ : ℕ∞)
           (SublevelSpace f (c + ε)) _
@@ -1489,9 +1489,9 @@ theorem exists_morseHandleAdjunction_diffeomorph_upperSublevel_of_morseChart_top
           (SublevelSpace f (c - ε)) _ (manifoldSublevelChartedSpace I f (c - ε) hf hreg_f)
           (MorseModel (m + 1)) _ _ (MorseHalfSpace m) _
           (morseModelWithCornersHalfSpace m)
-          (Handle.AdjunctionSpace (m + 1) (m + 1 - (m + 1)) (morseAttachingEmbedding (le_rfl : m + 1 ≤ m + 1) c ε r data hε hεr)) _ hcs
+          (Handle.AdjunctionSpace (m + 1) (m + 1 - (m + 1)) (morseAttachingEmbedding (le_rfl : m + 1 ≤ m + 1) c ε r data hε h.2)) _ hcs
           (⊤ : ℕ∞)
-          (Handle.lower (morseAttachingEmbedding (le_rfl : m + 1 ≤ m + 1) c ε r data hε hεr)) ∧
+          (Handle.lower (morseAttachingEmbedding (le_rfl : m + 1 ≤ m + 1) c ε r data hε h.2)) ∧
         @ContMDiff ℝ _
           (EuclideanSpace ℝ (Fin (((m + 1 - 1) + 1))) × EuclideanSpace ℝ (Fin 0)) _ _
           (ModelProd (EuclideanHalfSpace (((m + 1 - 1) + 1))) (EuclideanSpace ℝ (Fin 0))) _
@@ -1499,16 +1499,16 @@ theorem exists_morseHandleAdjunction_diffeomorph_upperSublevel_of_morseChart_top
           (Handle.StandardHandle (m + 1) (m + 1 - (m + 1))) _ (Handle.standardHandleTopSubChartedSpace (m + 1))
           (MorseModel (m + 1)) _ _ (MorseHalfSpace m) _
           (morseModelWithCornersHalfSpace m)
-          (Handle.AdjunctionSpace (m + 1) (m + 1 - (m + 1)) (morseAttachingEmbedding (le_rfl : m + 1 ≤ m + 1) c ε r data hε hεr)) _ hcs
+          (Handle.AdjunctionSpace (m + 1) (m + 1 - (m + 1)) (morseAttachingEmbedding (le_rfl : m + 1 ≤ m + 1) c ε r data hε h.2)) _ hcs
           (⊤ : ℕ∞)
-          (Handle.cell (morseAttachingEmbedding (le_rfl : m + 1 ≤ m + 1) c ε r data hε hεr)) ∧
+          (Handle.cell (morseAttachingEmbedding (le_rfl : m + 1 ≤ m + 1) c ε r data hε h.2)) ∧
         (∀ x : M, f x ≤ c - ε - η → ∀ hx : f x ≤ c - ε,
-          (e (Handle.lower (morseAttachingEmbedding (le_rfl : m + 1 ≤ m + 1) c ε r data hε hεr) ⟨x, hx⟩)).1 = x) ∧
+          (e (Handle.lower (morseAttachingEmbedding (le_rfl : m + 1 ≤ m + 1) c ε r data hε h.2) ⟨x, hx⟩)).1 = x) ∧
         (∀ y : M, (hydeep : f y ≤ c - ε - η) → ∀ hy : f y ≤ c + ε,
           ∀ z : Handle.AdjunctionSpace (m + 1) (m + 1 - (m + 1))
-              (morseAttachingEmbedding (le_rfl : m + 1 ≤ m + 1) c ε r data hε hεr),
+              (morseAttachingEmbedding (le_rfl : m + 1 ≤ m + 1) c ε r data hε h.2),
             e z = ⟨y, hy⟩ →
-              z = Handle.lower (morseAttachingEmbedding (le_rfl : m + 1 ≤ m + 1) c ε r data hε hεr)
+              z = Handle.lower (morseAttachingEmbedding (le_rfl : m + 1 ≤ m + 1) c ε r data hε h.2)
                 ⟨y, le_trans hydeep (by linarith [hηpos] : c - ε - η ≤ c - ε)⟩) := by
   classical
   rcases morseHandleAttachment_real_params data.R data.R' a data.hRpos ha haR hRR' with
@@ -1581,7 +1581,7 @@ theorem exists_morseHandleAdjunction_diffeomorph_upperSublevel_of_morseChart_top
       (Handle.cell (morseAttachingEmbedding (le_rfl : m + 1 ≤ m + 1) c ε r data hε hεr)) :=
     contMDiff_morseHandleAdjunctionCell_top c ε r δ θ R₀ R₀' R₁' R₁'' data hε hδ hθ hδr hθr hr hεr
       hεr' hR0 hR0lt hbig hRbig hR hR0' hbig' hR₁big hR₁₂R hR₁₂ hR₁₂R'' hR₁₂R''' hRR' hcont hf hreg_f
-  refine ⟨ε, hε, r, hεr, η, hηpos, hreg_f, hreg_upper,
+  refine ⟨ε, hε, r, ⟨hr, hεr⟩, η, hηpos, hreg_f, hreg_upper,
     morseHandleAdjunctionChartedSpace (le_rfl : m + 1 ≤ m + 1) c ε r δ θ R₀ R₀' R₁' R₁'' data hε hδ hθ hδr hθr hr
       hεr hεr' hR0 hR0lt hbig hRbig hR hR0' hbig' hR₁big hR₁₂R hR₁₂ hR₁₂R'' hR₁₂R''' hcont hf hreg_f,
     e,
