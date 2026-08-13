@@ -12810,6 +12810,42 @@ theorem morseHandleRoundAdjunctionHomeoUnion_attachingRegion {m k : ℕ} (hk : k
           (handleRoundAttachingEmbeddingCapSubtype hk c ε r δ θ data hε hδ hθ hδr hθr hεr' a)) := by
   rw [Handle.adjunction_coherence]
 
+theorem handleRoundEmbedding_mem_capRoundedLowerSublevel_iff {m k : ℕ} (hk : k ≤ m + 1)
+    (c ε r δ θ : ℝ)
+    {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M] [T2Space M] [ChartedSpace H M]
+    {I : ModelWithCorners ℝ (MorseModel (m + 1)) H} {f : M → ℝ}
+    (data : MorseChart (m + 1) k hk c I f)
+    (hε : 0 < ε) (hδ : 0 < δ) (hθ : 0 < θ) (hδr : δ < r ^ 2) (hθr : θ < r ^ 2) (hr : 0 < r)
+    (hεr : Real.sqrt (2 * ε + 2 * r ^ 2) ≤ data.R)
+    (hεr' : Real.sqrt (2 * ε + 2 * r ^ 2) < data.R / 2)
+    (p : StandardHandle k (m + 1 - k)) :
+    handleRoundEmbedding hk c ε r δ θ data p ∈
+        morseCapRoundedLowerSublevel hk c ε r δ θ data ↔
+      ‖(p.1 : EuclideanSpace ℝ (Fin k))‖ = 1 := by
+  constructor
+  · intro hmem
+    by_contra hne
+    have hpnot : p ∈ Set.univ \ attachingRegion k (m + 1 - k) := by
+      constructor
+      · trivial
+      · intro ha
+        exact hne ha
+    have hdis := disjoint_handleRoundEmbedding_capRoundedLowerSublevel hk c ε r δ θ data hε hδ hθ hδr hθr hr hεr hεr'
+    exact (Set.disjoint_left.mp hdis) ⟨p, hpnot, rfl⟩ hmem
+  · intro hp
+    let a : AttachingRegion k (m + 1 - k) :=
+      ⟨⟨(p.1 : EuclideanSpace ℝ (Fin k)), hp⟩, p.2⟩
+    have heq : handleRoundEmbedding hk c ε r δ θ data p =
+        handleRoundAttachingEmbedding hk c ε r δ θ data a := by
+      change data.χ (modelHandleRoundMap hk ε r δ θ p) =
+        data.χ (modelLowerRoundMap hk ε r δ θ (cocoreModelPoint hk ε r a))
+      have hattach := handleRoundEmbedding_attaching_eq_lower hk c ε r δ θ data hε hδ hθ hδr hr a
+      change handleRoundEmbedding hk c ε r δ θ data (attachingInclusion k (m + 1 - k) a) =
+        handleRoundAttachingEmbedding hk c ε r δ θ data a at hattach
+      simpa [a] using hattach
+    rw [heq]
+    exact handleRoundAttachingEmbedding_mem_capRoundedLowerSublevel hk c ε r δ θ data hε hδ hθ hδr hθr hεr' a
+
 theorem range_handleEmbedding_subset_ballImage {m k : ℕ} (hk : k ≤ m + 1) (c ε r : ℝ)
     {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M] [ChartedSpace H M]
     {I : ModelWithCorners ℝ (MorseModel (m + 1)) H} {f : M → ℝ}
