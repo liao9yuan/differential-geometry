@@ -27,7 +27,6 @@ def metricDiffAt (g₁ g₂ : SmoothRiemannianMetric I M) (x : M) :
     Tensor0SSpace 2 I x :=
   metricTensorField (I := I) g₁ x - metricTensorField (I := I) g₂ x
 
-omit [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 @[simp]
 theorem metricDiffAt_apply (g₁ g₂ : SmoothRiemannianMetric I M) (x : M)
     (v : Fin 2 -> TangentSpace I x) :
@@ -39,7 +38,6 @@ theorem metricDiffAt_apply (g₁ g₂ : SmoothRiemannianMetric I M) (x : M)
       (metricTensorField (I := I) g₁ x) (metricTensorField (I := I) g₂ x) v
   rw [h, metricTensorField_apply, metricTensorField_apply]
 
-omit [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 @[simp]
 theorem metricDiffAt_self (g : SmoothRiemannianMetric I M) (x : M) :
     metricDiffAt (I := I) g g x = 0 :=
@@ -138,7 +136,6 @@ def rmDiffLowAt (g₁ g₂ : SmoothRiemannianMetric I M) (x : M) :
     DifferentialGeometry.Integral.Connection.CovariantDerivative.riemannCurvature04At
       (I := I) g₁ (metricCov (I := I) g₂) (metricCov_smooth (I := I) g₂) x
 
-omit [IsManifold I (∞ + 1) M] [SigmaCompactSpace M] [T2Space M] in
 theorem rmDiffLowAt_apply (g₁ g₂ : SmoothRiemannianMetric I M) (x : M)
     (v : Fin 4 -> TangentSpace I x) :
     rmDiffLowAt (I := I) g₁ g₂ x v =
@@ -147,7 +144,6 @@ theorem rmDiffLowAt_apply (g₁ g₂ : SmoothRiemannianMetric I M) (x : M)
           (I := I) g₁ (metricCov (I := I) g₂) (metricCov_smooth (I := I) g₂) x v :=
   Tensor0SSpace.sub_apply (I := I) 4 x _ _ v
 
-omit [IsManifold I (∞ + 1) M] [SigmaCompactSpace M] [T2Space M] in
 theorem rmDiffLowAt_std (g₁ g₂ : SmoothRiemannianMetric I M) (x : M)
     (X Y Z W : TangentSpace I x) :
     rmDiffLowAt (I := I) g₁ g₂ x
@@ -174,7 +170,6 @@ theorem rmDiffLowAt_std (g₁ g₂ : SmoothRiemannianMetric I M) (x : M)
       (I := I) g₁ (metricCov (I := I) g₂) (metricCov_smooth (I := I) g₂) X Y Z W]
   rfl
 
-omit [IsManifold I (∞ + 1) M] [SigmaCompactSpace M] [T2Space M] in
 @[simp]
 theorem rmDiffLowAt_self (g : SmoothRiemannianMetric I M) (x : M) :
     rmDiffLowAt (I := I) g g x = 0 :=
@@ -193,17 +188,14 @@ def connDiffSq (g₁ g₂ : SmoothRiemannianMetric I M) (x : M) : Real :=
 def rmDiffSq (g₁ g₂ : SmoothRiemannianMetric I M) (x : M) : Real :=
   normSq0S (I := I) g₁ x 4 (rmDiffLowAt (I := I) g₁ g₂ x)
 
-omit [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 theorem metricDiffSq_def (g₁ g₂ : SmoothRiemannianMetric I M) (x : M) :
     metricDiffSq (I := I) g₁ g₂ x =
       normSq0S (I := I) g₁ x 2 (metricDiffAt (I := I) g₁ g₂ x) := rfl
 
-omit [IsManifold I (∞ + 1) M] [SigmaCompactSpace M] [T2Space M] in
 theorem connDiffSq_def (g₁ g₂ : SmoothRiemannianMetric I M) (x : M) :
     connDiffSq (I := I) g₁ g₂ x =
       normSq0S (I := I) g₁ x 3 (connDiffLowAt (I := I) g₁ g₂ x) := rfl
 
-omit [IsManifold I (∞ + 1) M] [SigmaCompactSpace M] [T2Space M] in
 theorem rmDiffSq_def (g₁ g₂ : SmoothRiemannianMetric I M) (x : M) :
     rmDiffSq (I := I) g₁ g₂ x =
       normSq0S (I := I) g₁ x 4 (rmDiffLowAt (I := I) g₁ g₂ x) := rfl
