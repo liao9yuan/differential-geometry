@@ -111,7 +111,6 @@ private theorem slotFree_cov_sec
       (slotFreeOpCc (I := I) (M := M) g s).toSection.contMDiff Asec.contMDiff
   have hV_at : TensorSectionMDiffAt (I := I) (s + 2) V x :=
     (hV_smooth x).mdifferentiableAt (by simp)
-
   let VU : ∀ y : M, Tensor0SSpace (s + 1) I y := fun y =>
     Tensor0SNabla.curriedSection I M V y (U y)
   have hVU_smooth :
@@ -123,7 +122,6 @@ private theorem slotFree_cov_sec
       U.contMDiff
   have hVU_at : TensorSectionMDiffAt (I := I) (s + 1) VU x :=
     (hVU_smooth x).mdifferentiableAt (by simp)
-
   let DU : ContMDiffSection I E ∞ (fun y : M => TangentSpace I y) :=
     ⟨fun y => (LeviCivita (I := I) g).toFun (fun z => U z) y (D y),
       covApply_contMDiff (cov := LeviCivita (I := I) g) D.contMDiff U.contMDiff⟩
@@ -153,7 +151,6 @@ private theorem slotFree_cov_sec
         (fun y => DA y) := by
     funext y
     rfl
-
   have hVW :
       (fun y : M => Tensor0SNabla.curriedSection I M VU y (W y)) =
         (fun y : M => riemannSec
@@ -168,7 +165,6 @@ private theorem slotFree_cov_sec
       Tensor0SNabla.curriedSection_apply,
       TensorMultilinear.tensor0S_curry_apply_eval] using
       slotFree_riem_eval (I := I) (M := M) g s U W Asec y q
-
   have hDU :
       Tensor0SSpace.toModel (V x)
           (Fin.cons ((LeviCivita (I := I) g).toFun (fun y => U y) x (D x))
@@ -180,7 +176,6 @@ private theorem slotFree_cov_sec
             (fun y => DU y) (fun y => W y) (fun y => Asec y) x) m := by
     simpa only [V, DU, slotFreeOpCc_apply, ContMDiffSection.coeFn_mk] using
       slotFree_riem_eval (I := I) (M := M) g s DU W Asec x m
-
   have hDW :
       Tensor0SSpace.toModel (VU x)
           (Fin.cons ((LeviCivita (I := I) g).toFun (fun y => W y) x (D x)) m) =
@@ -193,7 +188,6 @@ private theorem slotFree_cov_sec
       ContMDiffSection.coeFn_mk, Tensor0SNabla.curriedSection_apply,
       TensorMultilinear.tensor0S_curry_apply_eval] using
       slotFree_riem_eval (I := I) (M := M) g s U DW Asec x m
-
   have hDA :
       Tensor0SSpace.toModel
           ((show Tensor0SSpace s I x →L[ℝ] Tensor0SSpace (s + 2) I x from
@@ -208,7 +202,6 @@ private theorem slotFree_cov_sec
             (fun y => U y) (fun y => W y) (fun y => DA y) x) m := by
     simpa only [DA, slotFreeOpCc_apply, ContMDiffSection.coeFn_mk] using
       slotFree_riem_eval (I := I) (M := M) g s U W DA x m
-
   have hHom := TensorRSNabla.tensorRSCovariantDerivative_apply
     (I := I) (M := M) s (s + 2) (LeviCivita (I := I) g)
     (slotFreeOpCc (I := I) (M := M) g s).toSection Asec x (D x)
@@ -216,7 +209,6 @@ private theorem slotFree_cov_sec
     (I := I) (M := M) g (s + 1) V hV_at U (D x) (Fin.cons (W x) m)
   have hpeelW := tensor0SCovariantDerivative_succ_consEval_peel
     (I := I) (M := M) g s VU hVU_at W (D x) m
-
   rw [hHom, Tensor0SSpace.toModel_sub,
     ContinuousMultilinearMap.sub_apply]
   change

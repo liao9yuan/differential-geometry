@@ -1052,7 +1052,6 @@ theorem chart_launch_mfd
 
 /-- A fenced provider-phase trajectory reaches the intrinsic moving
 exponential of its actual launch tangent at time one. -/
-
 theorem chart_end_eq_intr
     (Y : PointedRiemannianManifold.{u, uE, uH} (I := I))
     (hcomplete : MetricComplete (I := I) Y)
@@ -1164,7 +1163,6 @@ theorem chart_end_eq_intr
 /-- The retained endpoint of a provider-phase trajectory is the intrinsic
 diagonal exponential after interpreting source and target through the same
 provider chart. -/
-
 theorem chart_end_eq_diag
     (Y : PointedRiemannianManifold.{u, uE, uH} (I := I))
     (hcomplete : MetricComplete (I := I) Y)
@@ -1247,7 +1245,6 @@ theorem chart_end_eq_diag
 
 /-- The launch tangent of the pushed normal phase curve is the differential of
 the normal exponential applied to the phase velocity. -/
-
 theorem exists_chart_diag
     (Y : PointedRiemannianManifold.{u, uE, uH} (I := I))
     (hcomplete : MetricComplete (I := I) Y)
@@ -1379,7 +1376,6 @@ theorem exists_chart_diag
 
 /-- Prescribed bilateral phase budgets produce one provider-parametric
 quantitative diagonal branch and retain its coordinate fence. -/
-
 theorem exists_chart_diag_of
     (Y : PointedRiemannianManifold.{u, uE, uH} (I := I))
     (hcomplete : MetricComplete (I := I) Y)
@@ -1539,7 +1535,6 @@ theorem exists_chart_diag_of
 
 /-- A controlled chart admits one quantitative endpoint branch satisfying the
 provider-parametric intrinsic diagonal predicate. -/
-
 theorem exists_chart_diag_at
     (Y : PointedRiemannianManifold.{u, uE, uH} (I := I))
     (hcomplete : MetricComplete (I := I) Y)

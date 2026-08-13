@@ -171,7 +171,6 @@ theorem boundedFactorGridWindow_integral_ballUniform_tameWindow
           (∑ j ∈ Finset.range (i + 2), ‖iteratedCovGrad (I := I) g₀ 0 2 j P‖ ^ 2) +
             ‖iteratedCovGrad (I := I) g₀ 0 2 (i + 2) P‖ ^ 2 :=
         Finset.sum_range_succ _ (i + 2)
-
       have htop : ‖iteratedCovGrad (I := I) g₀ 0 2 (i + 2) P‖ ^ 2 ≤ R ^ 2 := by
         have h := hPball (i + 2) (by omega)
         nlinarith [norm_nonneg (iteratedCovGrad (I := I) g₀ 0 2 (i + 2) P)]

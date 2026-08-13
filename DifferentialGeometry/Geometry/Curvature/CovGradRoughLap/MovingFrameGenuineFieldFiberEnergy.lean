@@ -225,14 +225,12 @@ theorem genuineTrace_le_of
       (fun y : M => S.toSection y) x = ∑ i : Fin n, F i := by
     rw [genuineCurvTraceFixedFrameCurvatureOnly]
   rw [htrace]
-
   have hW : ContMDiff I (I.prod 𝓘(ℝ, E)) ∞ (T% (smoothExtensionTangent (I := I) x v)) :=
     smoothExtensionTangent_contMDiff (I := I) x v
   have hS_total : ContMDiff I (I.prod 𝓘(ℝ, TensorRSModel 0 s ℝ E)) ∞
       (fun y : M => TotalSpace.mk' (TensorRSModel 0 s ℝ E)
         (E := fun z : M => TensorRSSpace 0 s I z) y (S.toSection y)) :=
     S.toSection.contMDiff
-
   have hFop : ∀ i : Fin n, F i =
       riemannOp (tensorCov (I := I) g 0 s) x
         (smoothOrthoFrame (I := I) g x i x) (smoothExtensionTangent (I := I) x v x)
@@ -241,7 +239,6 @@ theorem genuineTrace_le_of
     intro i
     rw [hF_def]
     exact tensor3rdCurv_pure_R_eq_riemannOp (I := I) g 0 s i hW hS_total
-
   have hcovApply_le : ∀ i : Fin n,
       riemannianFiberNormSq (I := I) (M := M) g 0 s x
           (covApply (tensorCov (I := I) g 0 s) (smoothOrthoFrame (I := I) g x i)
@@ -256,7 +253,6 @@ theorem genuineTrace_le_of
       rw [heF_def]
       exact smoothOrthoFrame_orthonormal_at_center (I := I) g x a b
     set K₀ : Fin 0 → Fin n := fun k => k.elim0 with hK₀
-
     have hweight : ∀ (m : ℕ),
         ((ContinuousMultilinearMap.mkPiAlgebra ℝ (Fin 0) ℝ).compContinuousLinearMap
           (fun k => g.inner x (eF (K₀ k))) : Tensor0SSpace 0 I x) =
@@ -309,7 +305,6 @@ theorem genuineTrace_le_of
         exact absurd (Subsingleton.elim K (fun k : Fin 0 => k.elim0)) hK
       · intro h
         exact absurd (Finset.mem_univ (fun k : Fin 0 => k.elim0)) h
-
     have hslice_eq :
         riemannianFiberNormSq (I := I) (M := M) g 0 s x
             (slot0Curry (I := I) (M := M) g x s eF K₀
@@ -350,7 +345,6 @@ theorem genuineTrace_le_of
     rw [← hslice_eq]
     exact riemannianFiberNormSq_slot0Curry_le_of_frame (I := I) (M := M) g s x eF K₀
       hreprS hreprSucc ((covGrad (I := I) (M := M) g 0 s S).toSection x) i
-
   have hgv : g.inner x (smoothExtensionTangent (I := I) x v x)
       (smoothExtensionTangent (I := I) x v x) = 1 := by
     rw [smoothExtensionTangent_eq x v]
@@ -373,7 +367,6 @@ theorem genuineTrace_le_of
     refine le_trans hbound ?_
     refine mul_le_mul_of_nonneg_left ?_ hC_nonneg
     exact hcovApply_le i
-
   calc riemannianFiberNormSq (I := I) (M := M) g 0 s x (∑ i : Fin n, F i)
       ≤ (n : ℝ) * ∑ i : Fin n,
           riemannianFiberNormSq (I := I) (M := M) g 0 s x (F i) := by

@@ -143,7 +143,6 @@ lemma continuousBilinearMap_basis_expand
           f (fun k : Fin 2 => chartModelBasis E (Jdx k)) := hpull
     rw [hpull']; rfl
   rw [Finset.sum_congr rfl (fun Jdx _ => h_pull Jdx)]
-
   rw [← (finTwoArrowEquiv (Fin (Module.finrank ℝ E))).symm.sum_comp
     (fun Jdx : Fin 2 → Fin (Module.finrank ℝ E) =>
       (∏ k : Fin 2, ((chartModelBasis E).repr (v k)) (Jdx k)) *

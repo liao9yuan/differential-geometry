@@ -241,7 +241,6 @@ theorem atomWeightOn_of_atoms
 
 /-- Compatibility form of `atomWeightOn_of_atoms` for the selected legacy
 framed normal charts. -/
-
 theorem atomWeight_of_atoms
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
     {hd : InjRadiusDecayInput (I := I) X} {D : Real} (hD : 0 < D)

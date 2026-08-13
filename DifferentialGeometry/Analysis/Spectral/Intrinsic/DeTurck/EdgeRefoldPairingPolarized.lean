@@ -189,7 +189,6 @@ private lemma edge_bitrace_move
 
 /-- Insert a smooth tangent endomorphism into one of the two covariant slots
 of a rank-two tensor. -/
-
 private def edgeEvalCLM (s : Nat) (x : M) (v : Fin s → E) :
     Tensor0SSpace s I x →L[Real] Real :=
   haveI : FiniteDimensional Real (Tensor0SSpace s I x) := inferInstance
