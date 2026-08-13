@@ -123,6 +123,7 @@ noncomputable def riemSeqDist
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
+set_option maxHeartbeats 800000 in
 
 def injDecay_of_bg
     (X : PointedRiemannianSeq.{u, uE, uH} (I := I))
