@@ -187,8 +187,6 @@ section Curvature
 
 variable {Idx : Type*} [Fintype Idx] {x : M}
 
-set_option synthInstance.maxHeartbeats 1000000 in
-
 theorem metricRm04At_inner (g : SmoothRiemannianMetric I M) (x : M)
     (X Y Z W : TangentSpace I x) :
     metricRm04At (I := I) g x
@@ -205,8 +203,6 @@ theorem metricRm04At_inner (g : SmoothRiemannianMetric I M) (x : M)
       DifferentialGeometry.Integral.Connection.CovariantDerivative.riemannCurvature04At
         (I := I) g (metricCov (I := I) g) (metricCov_smooth (I := I) g) x from rfl, h]
   exact g.symm x W _
-
-set_option synthInstance.maxHeartbeats 1000000 in
 
 theorem rmVec_deriv
     (g : Real -> SmoothRiemannianMetric I M)
@@ -239,8 +235,6 @@ theorem rmVec_deriv
   intro l
   have h := hev l
   simpa only [metricRm04At_inner (I := I)] using h
-
-set_option synthInstance.maxHeartbeats 1000000 in
 
 theorem rmVecComp_deriv
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
@@ -291,8 +285,6 @@ theorem rmVecComp_deriv
     funext fun r => hreal r l
   rw [hfun] at h
   exact h
-
-set_option synthInstance.maxHeartbeats 1000000 in
 
 theorem rmDiffVec_deriv
     (g₁ g₂ : Real -> SmoothRiemannianMetric I M)
@@ -402,8 +394,6 @@ theorem sharpFlat_self (g : SmoothRiemannianMetric I M) (x : M) (W : TangentSpac
   change (tangentFlatEquiv_gen (I := I) g x).symm
     ((tangentFlatEquiv_gen (I := I) g x) W) = W
   exact (tangentFlatEquiv_gen (I := I) g x).symm_apply_apply W
-
-set_option synthInstance.maxHeartbeats 1000000 in
 
 theorem mixLow_eq_rm04 (g₁ g₂ : SmoothRiemannianMetric I M) (x : M)
     (X Y Z W : TangentSpace I x) :
