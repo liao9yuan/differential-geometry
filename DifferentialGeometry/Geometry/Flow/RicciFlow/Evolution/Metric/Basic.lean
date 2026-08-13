@@ -171,22 +171,20 @@ def SymmetricInverseMetricComponentsInFrameOn
   forall t x i j, gInv t x i j = gInv t x j i
 
 omit [SigmaCompactSpace M] [T2Space M] in
-@[deprecated "derive pointwise symmetry from MetricInverseInBasis_gen or InvMetricLocal"
-    (since := "2026-05-22")]
 theorem gInv_symm [DecidableEq Idx]
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
     (gInv : Real -> DifferentialGeometry.Integral.Connection.InverseMetricComponents M Idx)
     (frame : Idx -> (x : M) -> TangentSpace I x)
-    (hinv : InverseMetricComponentsInFrameOn (I := I) S gInv frame) :
-    SymmetricInverseMetricComponentsInFrameOn gInv := by
+    (hinv : InvMetricLocal (I := I) S gInv frame Set.univ) :
+    ∀ t x i j, gInv t x i j = gInv t x j i := by
   intro t x i j
   exact DifferentialGeometry.Integral.Connection.invComp_symm
     (I := I) (g := S.family.metric t)
     (gInv := fun x i j => gInv t x i j) frame
     (by
       intro y a b
-      simpa [metricCompInFrame] using hinv t y a b)
+      simpa [metricCompInFrame] using hinv t y (Set.mem_univ y) a b)
     x i j
 
 def InverseMetricDerivativeComponentsOn
