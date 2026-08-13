@@ -2462,6 +2462,16 @@ theorem modelRoundedFunction_lt_c_iff_attachedFunction_lt {n k : ℕ} (hk : k �
       exact (ne_of_lt hy) hc'
     exact lt_of_le_of_ne hle hne
 
+theorem modelRoundedFunction_lowerRound_lt_c {n k : ℕ} (hk : k ≤ n)
+    (c ε r δ θ R₀ R₁ : ℝ) (hε : 0 < ε) (hδ : 0 < δ) (hθ : 0 < θ)
+    (hδr : δ < r ^ 2) (hθr : θ < r ^ 2) (hR : R₀ < R₁) (hR0 : 0 ≤ R₀)
+    (hbig : 2 * (r ^ 2 + 2 * ε + δ) ≤ R₀ ^ 2)
+    (y : MorseModel n) (hy : morseNormalForm hk c y < c - ε) :
+    modelRoundedFunction hk c ε r δ R₀ R₁ (modelLowerRoundMap hk ε r δ θ y) < c := by
+  exact (modelRoundedFunction_lt_c_iff_attachedFunction_lt hk c ε r δ R₀ R₁ hε hδ hR hR0 hbig
+    (modelLowerRoundMap hk ε r δ θ y)).mpr
+    (modelLowerRoundMap_mem_attached_strict hk c ε r δ θ hδ hθ hδr hθr y hy)
+
 theorem fderiv_modelRoundedFunction_ne_zero {n k : ℕ} (hk : k ≤ n)
     (c ε r δ R₀ R₁ : ℝ) (hε : 0 < ε) (hδ : 0 < δ) (hδr : δ < r ^ 2)
     (hR : R₀ < R₁) (hR0 : 0 ≤ R₀) (hbig : 2 * (r ^ 2 + 2 * ε + δ) ≤ R₀ ^ 2)
