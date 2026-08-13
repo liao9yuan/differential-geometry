@@ -4,14 +4,6 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.SobolevScale.AppD2Hs
 import DifferentialGeometry.Analysis.Spectral.Tensor.SobolevScale.Inclusion
 import DifferentialGeometry.Analysis.Spectral.Tensor.SobolevScale.SmoothCcDense
 
-/-!
-# Compatible completions of the low-base second-order action
-
-This module completes the single smooth-core formula
-`LowBaseActionData.a2` on the adjacent Sobolev scales used by the
-low-regularity Ricci--DeTurck bootstrap.
--/
-
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
@@ -52,14 +44,12 @@ private noncomputable def lowA2Core
     simp only [RingHom.id_apply, LowBaseActionData.a2,
       iteratedCovGrad_smul, appCc_smul_right, ccTensorToHs_smul]
 
-/-- The complete low-base second-order action on the high adjacent scale. -/
 noncomputable def LowBaseActionData.a2Hi
     {g : SmoothRiemannianMetric I M} (A : LowBaseActionData g) :
     tensorHs (I := I) (M := M) g 0 2 (4 : ℝ) →L[ℝ]
       tensorHs (I := I) (M := M) g 0 2 (2 : ℝ) :=
   appD2Hs (I := I) (M := M) g 2 2 A.C2
 
-/-- The same low-base second-order action on the lower adjacent scale. -/
 noncomputable def LowBaseActionData.a2Lo
     {g : SmoothRiemannianMetric I M} (A : LowBaseActionData g) :
     tensorHs (I := I) (M := M) g 0 2 (3 : ℝ) →L[ℝ]
@@ -67,8 +57,6 @@ noncomputable def LowBaseActionData.a2Lo
   (lowA2Core (I := I) (M := M) g A (1 : ℝ)).extendOfNorm
     (ccToHsLin (I := I) (M := M) g 2 (3 : ℝ))
 
-/-- Pointwise and two-jet bounds on one coefficient give compatible
-`H4 → H2` and `H3 → H1` completions of its second-order action. -/
 theorem a2_pair
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M) :
@@ -193,8 +181,6 @@ private noncomputable def a2Delta
   C1 := 0
   C2 := A.C2 - B.C2
 
-/-- The high adjacent-scale realization agrees with the smooth second-order
-action on the dense smooth core. -/
 theorem a2Hi_core
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M) (A : LowBaseActionData g)
@@ -206,8 +192,6 @@ theorem a2Hi_core
   simpa only [LowBaseActionData.a2Hi, LowBaseActionData.a2] using
     appD2Hs_core (I := I) (M := M) hDim g 2 2 A.C2 W
 
-/-- The low adjacent-scale realization agrees with the same smooth
-second-order action on the dense smooth core. -/
 theorem a2Lo_core
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M) (A : LowBaseActionData g)
@@ -240,8 +224,6 @@ theorem a2Lo_core
     exact le_add_of_nonneg_left hK
   exact (hpair A B hB hpointB hjetB).2.2.2.1 W
 
-/-- The two adjacent-scale realizations of one second-order action commute
-with the canonical Sobolev inclusions. -/
 theorem a2_comm
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M) (A : LowBaseActionData g) :
@@ -284,8 +266,6 @@ theorem a2_comm
   intro W
   exact congrFun hfun W
 
-/-- A two-jet bound on the difference of two second-order coefficients
-controls the differences of both adjacent-scale completed actions. -/
 theorem a2_diff
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M) :

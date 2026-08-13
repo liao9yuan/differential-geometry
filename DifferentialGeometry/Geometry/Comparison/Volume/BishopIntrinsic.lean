@@ -5,15 +5,6 @@ import DifferentialGeometry.Geometry.Exponential.IntrinsicSmooth
 
 set_option autoImplicit false
 
-/-!
-# Intrinsic Bishop comparison along a complete radial geodesic
-
-This file removes the chart-radius restriction from the radial mean-curvature
-comparison.  The raw exponential is used only through its germ at the pole;
-all Jacobi, nonconjugacy, and Riccati data on the positive interval belong to
-the complete intrinsic geodesic.
--/
-
 noncomputable section
 
 open Bundle Filter Function Manifold Set
@@ -46,8 +37,6 @@ variable [RiemannianBundle (fun x : M ↦ TangentSpace I x)]
 variable [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
   [IsContinuousRiemannianBundle E (fun x : M ↦ TangentSpace I x)]
 
-/-- Near the pole, the complete intrinsic radial geodesic and its
-initial-velocity Jacobi field agree with the chart-fixed realizations. -/
 theorem intrJacobi_raw
     (g : SmoothRiemannianMetric I M)
     (hEnorm : ∀ (y : M) (v : TangentSpace I y),
@@ -256,8 +245,6 @@ private theorem intrVel_smul
   exact hvel
 
 omit [T2Space (TangentBundle I M)] in
-/-- A perpendicular intrinsic Jacobi field remains perpendicular to the radial
-velocity away from the launch time. -/
 theorem intrJacobi_perp_ne
     (g : SmoothRiemannianMetric I M)
     (hEnorm : ∀ (y : M) (v : TangentSpace I y),
@@ -505,9 +492,6 @@ private theorem intrJacobi_li
   rw [hfield]
   exact hmapped
 
-/-- Whole-tail intrinsic Bishop comparison.  The raw exponential is used only
-as a germ at the pole; nonconjugacy and the Riccati argument run along the
-complete intrinsic geodesic. -/
 theorem exists_intrMean
     (g : SmoothRiemannianMetric I M)
     (hEnorm : ∀ (y : M) (w : TangentSpace I y),
@@ -695,12 +679,6 @@ theorem exists_intrMean
       _ = ((d : Real) / ell + (d : Real) * q) * ell := by
         rw [add_mul, div_mul_cancel₀ _ hell.ne']
 
-/-- Whole-tail intrinsic Bishop ratio monotonicity.  Companion to
-`exists_intrMean`: for the same transverse Jacobi frame the density ratio to the
-hyperbolic model is antitone along the complete intrinsic geodesic.  The speed
-`ell = √(g.inner p u u)` scales the model, so the comparison is against
-`hypDensity (q * ell)`.  Assumes a positive transverse dimension (dropping the
-degenerate `finrank = 1` case that `exists_intrMean` handles). -/
 theorem exists_intrRatio
     (g : SmoothRiemannianMetric I M)
     (hEnorm : ∀ (y : M) (w : TangentSpace I y),
@@ -851,11 +829,6 @@ theorem exists_intrRatio
   exact curveRatio_anti (I := I) (n := (2 : WithTop ℕ∞)) (by norm_num)
     g γ V (q * ell) b d (mul_nonneg hq hell.le) hγ hVdiff hLI hW hmean
 
-/-- Frame-input companion to `exists_intrRatio`.  Given a `gₓ`-orthonormal
-transverse frame `v` (perpendicular to `u`), the transverse-Jacobi density ratio
-to the speed-scaled hyperbolic model is antitone along the complete intrinsic
-geodesic.  Exposing the frame lets a caller feed the SAME frame to the sharp
-pole-limit lemma, so the antitone bound and the pole limit refer to one frame. -/
 theorem intrRatioOfFrame
     (g : SmoothRiemannianMetric I M)
     (hEnorm : ∀ (y : M) (w : TangentSpace I y),

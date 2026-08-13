@@ -3,15 +3,6 @@ import Mathlib.Topology.Homotopy.Path
 
 set_option autoImplicit false
 
-/-!
-# Length-controlled path homotopies
-
-This file records the quantitative path-homotopy relation used by the
-Cheeger--Gromov--Taylor propeller argument.  Unlike the ordinary homotopy
-quotient, a `ShortHomotopy` retains one strict length bound for every
-intermediate path.
--/
-
 noncomputable section
 
 open Filter Set
@@ -27,14 +18,9 @@ variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners Real E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
 variable [∀ x : M, ENorm (TangentSpace I x)]
 
-/-- Length of a path on its canonical unit-interval extension. -/
 noncomputable def pathLen {x y : M} (γ : Path x y) : ENNReal :=
   Manifold.pathELength I γ.extend 0 1
 
-/-- A path is flat `C¹` when its canonical extension is globally `C¹` and
-locally constant at both endpoints.  The flat endpoint collars make ordinary
-path concatenation genuinely `C¹`; arbitrary smooth segments are converted to
-this form by a monotone smooth reparametrization. -/
 structure IsFlatC1Path {x y : M} (p : Path x y) : Prop where
   c1 : ContMDiff 𝓘(Real, Real) I 1 p.extend
   flat_zero : p.extend =ᶠ[𝓝 0] (fun _ : Real => x)
@@ -45,7 +31,6 @@ namespace IsFlatC1Path
 variable {x y z : M} {p : Path x y} {q : Path y z}
 
 omit [∀ x : M, ENorm (TangentSpace I x)] in
-/-- The constant path is flat `C¹`. -/
 theorem refl (x : M) : IsFlatC1Path (I := I) (Path.refl x) where
   c1 := by
     simpa only [Path.refl_extend] using
@@ -54,7 +39,6 @@ theorem refl (x : M) : IsFlatC1Path (I := I) (Path.refl x) where
   flat_one := Filter.Eventually.of_forall fun _ => rfl
 
 omit [∀ x : M, ENorm (TangentSpace I x)] in
-/-- Reversing the parameter preserves flat `C¹` regularity. -/
 theorem symm (hp : IsFlatC1Path (I := I) p) :
     IsFlatC1Path (I := I) p.symm where
   c1 := by
@@ -80,7 +64,6 @@ theorem symm (hp : IsFlatC1Path (I := I) p) :
         Tendsto (fun t : Real => 1 - t) (𝓝 1) (𝓝 0))
 
 omit [∀ x : M, ENorm (TangentSpace I x)] in
-/-- Concatenating paths with flat endpoint collars preserves `C¹` regularity. -/
 theorem trans
     (hp : IsFlatC1Path (I := I) p)
     (hq : IsFlatC1Path (I := I) q) :
@@ -152,7 +135,6 @@ theorem trans
 
 end IsFlatC1Path
 
-/-- The constant path has zero length. -/
 @[simp]
 theorem pathLen_refl
     [∀ z : M, ENormSMulClass Real (TangentSpace I z)]
@@ -175,7 +157,6 @@ section PathLength
 
 variable [∀ z : M, ENormSMulClass Real (TangentSpace I z)]
 
-/-- Reversing a flat `C¹` path preserves its length. -/
 theorem pathLen_symm {x y : M} {p : Path x y}
     (hp : IsFlatC1Path (I := I) p) :
     pathLen (I := I) p.symm = pathLen (I := I) p := by
@@ -194,7 +175,6 @@ theorem pathLen_symm {x y : M} {p : Path x y}
         simpa using
           hp.c1.contMDiffOn.mdifferentiableOn one_ne_zero))
 
-/-- Length is additive under concatenation of flat `C¹` paths. -/
 theorem pathLen_trans {x y z : M}
     {p : Path x y} {q : Path y z}
     (hp : IsFlatC1Path (I := I) p)
@@ -269,10 +249,6 @@ section FlatPath
 
 variable [∀ z : M, ENormSMulClass Real (TangentSpace I z)]
 
-/-- Points at Riemannian edistance strictly below `r` are joined by a flat
-`C¹` path of length strictly below `r`.  This packages Mathlib's
-locally-constant-endpoint curve as a `Path`, the form used by CGT
-concatenation and lift arguments. -/
 theorem exists_flat_path
     {x y : M} {r : ENNReal}
     (hxy : Manifold.riemannianEDist I x y < r) :
@@ -362,15 +338,11 @@ theorem exists_flat_path
 
 end FlatPath
 
-/-- A fixed-endpoint path homotopy whose every slice has length at most `L`
-and is flat `C¹`. -/
 structure ShortHomotopy (L : ENNReal) {x y : M} (p q : Path x y) where
   hom : p.Homotopy q
   flat : ∀ t : unitInterval, IsFlatC1Path (I := I) (hom.eval t)
   length_le : ∀ t : unitInterval, pathLen (I := I) (hom.eval t) ≤ L
 
-/-- Two paths are short-homotopic below `L` when a selected
-`ShortHomotopy` joins them. -/
 def ShortHomotopic (L : ENNReal) {x y : M} (p q : Path x y) : Prop :=
   Nonempty (ShortHomotopy (I := I) L p q)
 
@@ -380,7 +352,6 @@ variable [IsManifold I 1 M]
 variable [∀ z : M, ENormSMulClass Real (TangentSpace I z)]
 variable {L : ENNReal} {x y : M} {p q r : Path x y}
 
-/-- Widening the common length bound preserves a short homotopy. -/
 noncomputable def mono {L' : ENNReal}
     (F : ShortHomotopy (I := I) L p q) (hLL' : L ≤ L') :
     ShortHomotopy (I := I) L' p q where
@@ -388,7 +359,6 @@ noncomputable def mono {L' : ENNReal}
   flat := F.flat
   length_le t := (F.length_le t).trans hLL'
 
-/-- A path shorter than `L` has the constant short homotopy to itself. -/
 noncomputable def refl
     (hpC1 : IsFlatC1Path (I := I) p)
     (hp : pathLen (I := I) p ≤ L) :
@@ -399,7 +369,6 @@ noncomputable def refl
   length_le t := by
     simpa only [Path.Homotopy.eval, Path.Homotopy.refl_apply] using hp
 
-/-- Reversing the homotopy parameter preserves its slice-length bound. -/
 noncomputable def symm (F : ShortHomotopy (I := I) L p q) :
     ShortHomotopy (I := I) L q p where
   hom := F.hom.symm
@@ -410,8 +379,6 @@ noncomputable def symm (F : ShortHomotopy (I := I) L p q) :
     simpa only [Path.Homotopy.eval, Path.Homotopy.symm_apply] using
       F.length_le (unitInterval.symm t)
 
-/-- Concatenating two short homotopies in the homotopy parameter preserves
-their common slice-length bound. -/
 noncomputable def trans
     (F : ShortHomotopy (I := I) L p q)
     (G : ShortHomotopy (I := I) L q r) :
@@ -477,7 +444,6 @@ private theorem hcomp_refl_eval {z : M} {c : Path y z}
     change (Path.Homotopy.refl c) (t, _) = _
     rw [Path.Homotopy.refl_apply]
 
-/-- Append one fixed flat path to every slice of a short homotopy. -/
 noncomputable def appendRight {z : M} {c : Path y z}
     (F : ShortHomotopy (I := I) L p q)
     (hc : IsFlatC1Path (I := I) c) :

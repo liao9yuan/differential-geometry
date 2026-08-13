@@ -3,13 +3,6 @@ import DifferentialGeometry.Analysis.Integration.L2.SmoothSections.Retag
 import DifferentialGeometry.Geometry.Connection.TensorNabla.OperatorFieldInputSlotSymmetrization
 import DifferentialGeometry.Geometry.Connection.TensorNabla.OperatorFieldOutputSlotPermutation
 
-/-!
-# Moving-metric pair trace
-
-This module isolates the exact operator algebra for tracing two disjoint pairs
-with a moving metric.  It contains no Sobolev estimates or metric-jet bounds.
--/
-
 noncomputable section
 
 set_option linter.style.setOption false
@@ -53,7 +46,6 @@ private lemma rank0_eq_smul_unit (x : M) (t : Tensor0SSpace 0 I x) :
     rfl]
   rw [smul_eq_mul, mul_one]
 
-/-- The two-fold passenger-slot extension used by the pair trace. -/
 def slotExtendTwo (g : SmoothRiemannianMetric I M)
     (X : SmoothCcTensor g 0 4) : SmoothCcTensor g 2 6 :=
   slotExtend (I := I) (M := M) g 1 5
@@ -152,22 +144,16 @@ private lemma slotExtendTwo_toModel
   rw [Tensor0SSpace.toModel_smul,
     ContinuousMultilinearMap.smul_apply, smul_eq_mul]
 
-/-- The slot permutation that places the two input slots and the two traced
-pairs in the order used by the moving pair trace. -/
 def sigmaE : Equiv.Perm (Fin 6) :=
   ⟨fun i => (![1, 3, 4, 5, 0, 2] : Fin 6 → Fin 6) i,
    fun i => (![4, 0, 5, 1, 2, 3] : Fin 6 → Fin 6) i,
    by decide, by decide⟩
 
-/-- Double trace with respect to a moving metric, retagged over the fixed
-background metric. -/
 def mvDoubleTraceField (g gm : SmoothRiemannianMetric I M) (s : ℕ) :
     SmoothCcTensor g (s + 2) s :=
   SmoothCcTensor.retagEquiv gm g (s + 2) s
     (cometricDoubleTraceField (I := I) gm s)
 
-/-- The exact operator that traces two disjoint pairs with the moving
-cometric. -/
 def mvPairTraceOp (g gm : SmoothRiemannianMetric I M) :
     SmoothCcTensor g 6 2 :=
   appCcRS (I := I) (M := M) g 6 4 2
@@ -177,9 +163,6 @@ def mvPairTraceOp (g gm : SmoothRiemannianMetric I M) :
 set_option backward.isDefEq.respectTransparency false in
 set_option linter.unusedSectionVars false in
 set_option maxHeartbeats 12800000 in
-/-- Applying the moving pair trace to a two-slot extension contracts the
-input tensor against the same two moving-frame indices that enter the
-four-tensor. -/
 theorem mvPairTrace_apply
     (g gm : SmoothRiemannianMetric I M) (X : SmoothCcTensor g 0 4)
     (x : M) (D : Tensor0SSpace 2 I x) (v : Fin 2 → E) :

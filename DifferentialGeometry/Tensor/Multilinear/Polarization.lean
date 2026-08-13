@@ -3,13 +3,6 @@ import Mathlib.Combinatorics.Enumerative.IncidenceAlgebra
 import Mathlib.Data.Finset.Interval
 import Mathlib.Data.Fintype.Perm
 
-/-!
-# Polarization bounds for symmetric continuous multilinear maps
-
-This file recovers a symmetric continuous multilinear map from its diagonal
-values and derives a uniform operator-norm bound from a diagonal bound.
--/
-
 noncomputable section
 
 open Finset
@@ -21,8 +14,6 @@ variable {E F : Type*}
   [NormedAddCommGroup E] [NormedSpace ℝ E]
   [NormedAddCommGroup F] [NormedSpace ℝ F]
 
-/-- A multilinear map is symmetric if reindexing its arguments by any
-permutation leaves it unchanged. -/
 def IsSymmetric {n : ℕ}
     (A : ContinuousMultilinearMap ℝ (fun _ : Fin n => E) F) : Prop :=
   ∀ σ : Equiv.Perm (Fin n), A.domDomCongr σ = A
@@ -171,8 +162,6 @@ private theorem apply_diag_sum
     obtain ⟨i, hi⟩ := hg
     exact A.map_coord_zero i (by simp [hi])
 
-/-- Möbius polarization recovers a symmetric multilinear map from its diagonal
-values. -/
 theorem polarization_eq
     {n : ℕ} {A : ContinuousMultilinearMap ℝ (fun _ : Fin n => E) F}
     (hA : A.IsSymmetric) (v : Fin n → E) :
@@ -238,8 +227,6 @@ theorem polarization_eq
     _ = (n.factorial : ℝ) • A v :=
       (Nat.cast_smul_eq_nsmul ℝ n.factorial (A v)).symm
 
-/-- An explicit finite constant controlling symmetric multilinear maps by
-their diagonal values. -/
 def polarConst (n : ℕ) : ℝ :=
   ∑ s : Finset (Fin n),
     ‖IncidenceAlgebra.mu ℝ s Finset.univ‖ * (s.card : ℝ) ^ n
@@ -325,8 +312,6 @@ private theorem unit_apply_le
       · exact norm_nonneg _
     _ ≤ polarConst n * C := hfac
 
-/-- A symmetric continuous multilinear map is bounded in operator norm by any
-homogeneous bound for its diagonal values. -/
 theorem opNorm_le_diag
     {n : ℕ} {A : ContinuousMultilinearMap ℝ (fun _ : Fin n => E) F}
     (hA : A.IsSymmetric) {C : ℝ} (hC : 0 ≤ C)
@@ -366,8 +351,6 @@ theorem opNorm_le_diag
         mul_le_mul_of_nonneg_left hunit hprod
       _ = (polarConst n * C) * ∏ i, ‖v i‖ := by ring
 
-/-- A symmetric continuous multilinear map is bounded in operator norm by a
-uniform bound for its diagonal values on the closed unit ball. -/
 theorem opNorm_le_diag_unit
     {n : ℕ} {A : ContinuousMultilinearMap ℝ (fun _ : Fin n => E) F}
     (hA : A.IsSymmetric) {C : ℝ} (hC : 0 ≤ C)
@@ -410,8 +393,6 @@ namespace ContinuousLinearMap
 variable {E : Type*}
   [NormedAddCommGroup E] [NormedSpace ℝ E]
 
-/-- A symmetric real bilinear form is controlled in operator norm by its
-diagonal values on the closed unit ball. -/
 theorem opNorm_le_diag2
     (B : E →L[ℝ] E →L[ℝ] ℝ)
     (hsymm : ∀ v w, B v w = B w v)

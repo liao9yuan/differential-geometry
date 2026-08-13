@@ -11,20 +11,6 @@ import DifferentialGeometry.Geometry.Metric.CompactPerturbationComplete
 
 set_option autoImplicit false
 
-/-!
-# Complete-extension base for the CGT Whitehead argument
-
-The intrinsic exponential pullback metric lives on an open model ball and is
-not complete.  This file extends it to a complete metric on the whole model
-space while preserving it on a buffered inner ball.  The selected minimizing
-geodesic for the complete extension will then be confined to that agreement
-region by a first-hit argument.
-
-Connectedness is not added to the ambient HCG input.  The model pullback ball
-is connected on its own, and any later legacy ambient theorem is to be applied
-only after restricting to the connected component containing the basepoint.
--/
-
 noncomputable section
 
 open Bundle Manifold Metric Set TopologicalSpace
@@ -57,28 +43,23 @@ noncomputable local instance {R : Real} :
     (Geometry.isSigmaCompact_of_isOpen
       𝓘(Real, E) (intrPullBall (E := E) R).isOpen)
 
-/-- The CGT cutoff is one through radius `3R/4` and supported through radius
-`7R/8`.  Both radii lie strictly inside the pullback ball. -/
 noncomputable def intrCut (R : Real) (hR : 0 < R) :
     ContDiffBump (0 : E) :=
   ⟨3 * R / 4, 7 * R / 8, by linarith, by linarith⟩
 
 omit [NeZero (Module.finrank Real E)] in
-/-- The CGT cutoff is smooth. -/
 theorem intrCut_smooth (R : Real) (hR : 0 < R) :
     ContMDiff 𝓘(Real, E) 𝓘(Real, Real) ∞
       (intrCut (E := E) R hR : E → Real) :=
   (intrCut (E := E) R hR).contDiff.contMDiff
 
 omit [NeZero (Module.finrank Real E)] in
-/-- The CGT cutoff takes values in the unit interval. -/
 theorem intrCut_range (R : Real) (hR : 0 < R) (z : E) :
     intrCut (E := E) R hR z ∈ Set.Icc (0 : Real) 1 :=
   ⟨(intrCut (E := E) R hR).nonneg,
     (intrCut (E := E) R hR).le_one⟩
 
 omit [NeZero (Module.finrank Real E)] in
-/-- The topological support of the CGT cutoff lies in the pullback ball. -/
 theorem intrCut_support (R : Real) (hR : 0 < R) :
     tsupport (intrCut (E := E) R hR : E → Real) ⊆
       (intrPullBall (E := E) R : Set E) := by
@@ -88,7 +69,6 @@ theorem intrCut_support (R : Real) (hR : 0 < R) :
   exact Metric.closedBall_subset_ball (by linarith)
 
 omit [NeZero (Module.finrank Real E)] in
-/-- The CGT cutoff has compact support. -/
 theorem intrCut_compact (R : Real) (hR : 0 < R) :
     IsCompact (tsupport (intrCut (E := E) R hR : E → Real)) := by
   letI : ProperSpace E := FiniteDimensional.proper Real E
@@ -96,7 +76,6 @@ theorem intrCut_compact (R : Real) (hR : 0 < R) :
   exact isCompact_closedBall (0 : E) (7 * R / 8)
 
 omit [NeZero (Module.finrank Real E)] in
-/-- The CGT cutoff is one on the buffered agreement ball. -/
 theorem intrCut_one (R : Real) (hR : 0 < R) {z : E}
     (hz : z ∈ Metric.ball (0 : E) (3 * R / 4)) :
     intrCut (E := E) R hR z = 1 :=
@@ -104,7 +83,6 @@ theorem intrCut_one (R : Real) (hR : 0 < R) {z : E}
     (Metric.ball_subset_closedBall hz)
 
 omit [NeZero (Module.finrank Real E)] in
-/-- The CGT cutoff is one on the closed buffered agreement ball. -/
 theorem intrCut_one_closed (R : Real) (hR : 0 < R) {z : E}
     (hz : z ∈ Metric.closedBall (0 : E) (3 * R / 4)) :
     intrCut (E := E) R hR z = 1 :=
@@ -112,7 +90,6 @@ theorem intrCut_one_closed (R : Real) (hR : 0 < R) {z : E}
 
 omit [InnerProductSpace Real E] [FiniteDimensional Real E]
   [NeZero (Module.finrank Real E)] in
-/-- The buffered agreement ball lies in the pullback ball. -/
 theorem intrInner_subset (R : Real) (hR : 0 < R) :
     Metric.ball (0 : E) (3 * R / 4) ⊆
       (intrPullBall (E := E) R : Set E) :=
@@ -120,13 +97,11 @@ theorem intrInner_subset (R : Real) (hR : 0 < R) :
 
 omit [InnerProductSpace Real E] [FiniteDimensional Real E]
   [NeZero (Module.finrank Real E)] in
-/-- The closed buffered agreement ball lies in the pullback ball. -/
 theorem intrClosed_subset (R : Real) (hR : 0 < R) :
     Metric.closedBall (0 : E) (3 * R / 4) ⊆
       (intrPullBall (E := E) R : Set E) :=
   Metric.closedBall_subset_ball (by linarith)
 
-/-- The open agreement region inside the intrinsic pullback ball. -/
 def intrAgree (R : Real) : Opens (intrPullBall (E := E) R) :=
   ⟨Subtype.val ⁻¹' Metric.ball (0 : E) (3 * R / 4),
     Metric.isOpen_ball.preimage continuous_subtype_val⟩
@@ -137,8 +112,6 @@ noncomputable local instance {R : Real} :
     (Geometry.isSigmaCompact_of_isOpen
       𝓘(Real, E) (intrAgree (E := E) R).isOpen)
 
-/-- The total CGT metric obtained by blending the pullback metric into the
-canonical flat metric. -/
 noncomputable def intrExtMetric
     (g : SmoothRiemannianMetric I M)
     (hEnorm : ∀ (x : M) (v : TangentSpace I x),
@@ -157,8 +130,6 @@ noncomputable def intrExtMetric
     (intrCut_range (E := E) R hR)
     (intrCut_support (E := E) R hR)
 
-/-- On the buffered inner ball, the complete extension is exactly the CGT
-pullback metric. -/
 theorem intrExt_inner
     (g : SmoothRiemannianMetric I M)
     (hEnorm : ∀ (x : M) (v : TangentSpace I x),
@@ -185,8 +156,6 @@ theorem intrExt_inner
       (fun z hz => intrCut_one_closed (E := E) R hR hz)
       (intrClosed_subset (E := E) R hR) z hz v w
 
-/-- On the open agreement region, the restricted complete extension is exactly
-the restricted intrinsic pullback metric. -/
 theorem intrExt_restrict
     (g : SmoothRiemannianMetric I M)
     (hEnorm : ∀ (x : M) (v : TangentSpace I x),
@@ -211,9 +180,6 @@ theorem intrExt_restrict
   simpa only using
     intrExt_inner (I := I) g hEnorm p hR hloc hz v w
 
-/-- A smooth curve in the pullback ball which stays in the agreement region
-is a pullback geodesic whenever its ambient-value curve is a geodesic for the
-complete extension. -/
 theorem intrPull_geo_of_ext
     (g : SmoothRiemannianMetric I M)
     (hEnorm : ∀ (x : M) (v : TangentSpace I x),
@@ -294,8 +260,6 @@ theorem intrPull_geo_of_ext
   exact Geodesic.HasGeodesicEquationAt.congr_of_eventuallyEq_at
     (heq t ht).eq_of_nhds.symm (heq t ht).symm (hgeoPullV t ht)
 
-/-- A smooth pullback geodesic which stays in the agreement region is also a
-geodesic for the complete extension after forgetting the pullback subtype. -/
 theorem intrExt_geo_of_pull
     (g : SmoothRiemannianMetric I M)
     (hEnorm : ∀ (x : M) (v : TangentSpace I x),
@@ -380,8 +344,6 @@ theorem intrExt_geo_of_pull
   exact Geodesic.HasGeodesicEquationAt.congr_of_eventuallyEq_at
     heqE.eq_of_nhds.symm heqE.symm (hgeoExt t ht)
 
-/-- A path contained in the agreement core has the same length for the total
-extension as its intrinsic framed exponential image. -/
 theorem intrExt_pathLen
     (g : SmoothRiemannianMetric I M)
     (hEnorm : ∀ (x : M) (v : TangentSpace I x),
@@ -477,8 +439,6 @@ theorem intrExt_pathLen
           (intrinsicFramedExp (I := I) g hEnorm p) (γ t) v) := by
       rw [intrFrameMetric_apply]
 
-/-- A radial path contained in the agreement core has exactly its model
-radius as length for the complete extension. -/
 theorem intrExt_radial_len
     (g : SmoothRiemannianMetric I M)
     (hEnorm : ∀ (x : M) (v : TangentSpace I x),
@@ -549,8 +509,6 @@ theorem intrExt_radial_len
     _ = ENNReal.ofReal ‖z‖ := by
       simpa only [zU] using hrad
 
-/-- Two points in a radius-`a` core have complete-extension distance at most
-`2a`, witnessed by the two radial segments through the model origin. -/
 theorem intrExt_edist_le
     (g : SmoothRiemannianMetric I M)
     (hEnorm : ∀ (x : M) (v : TangentSpace I x),
@@ -621,7 +579,6 @@ theorem intrExt_edist_le
     _ ≤ ENNReal.ofReal (2 * a) := by
       exact ENNReal.ofReal_le_ofReal (by linarith)
 
-/-- The total CGT extension is a complete Riemannian metric. -/
 theorem intrExt_complete
     (g : SmoothRiemannianMetric I M)
     (hEnorm : ∀ (x : M) (v : TangentSpace I x),
@@ -645,7 +602,6 @@ theorem intrExt_complete
       (intrCut_support (E := E) R hR)
       (intrCut_compact (E := E) R hR)
 
-/-- The canonical selected minimizing join for the complete CGT extension. -/
 noncomputable def intrExtJoin
     (g : SmoothRiemannianMetric I M)
     (hEnorm : ∀ (x : M) (v : TangentSpace I x),
@@ -676,7 +632,6 @@ noncomputable def intrExtJoin
         (I := 𝓘(Real, E)) gExt z v
   exact minJoin (I := 𝓘(Real, E)) gExt hExt x y
 
-/-- The complete-extension join starts at its first endpoint. -/
 @[simp] theorem intrExtJoin_zero
     (g : SmoothRiemannianMetric I M)
     (hEnorm : ∀ (x : M) (v : TangentSpace I x),
@@ -690,7 +645,6 @@ noncomputable def intrExtJoin
     intrExtJoin (I := I) g hEnorm p hR hloc x y 0 = x := by
   simp only [intrExtJoin, minJoin_zero]
 
-/-- The complete-extension join ends at its second endpoint. -/
 @[simp] theorem intrExtJoin_one
     (g : SmoothRiemannianMetric I M)
     (hEnorm : ∀ (x : M) (v : TangentSpace I x),
@@ -704,7 +658,6 @@ noncomputable def intrExtJoin
     intrExtJoin (I := I) g hEnorm p hR hloc x y 1 = y := by
   simp only [intrExtJoin, minJoin_one]
 
-/-- The selected complete-extension join is smooth. -/
 theorem intrExtJoin_smooth
     (g : SmoothRiemannianMetric I M)
     (hEnorm : ∀ (x : M) (v : TangentSpace I x),
@@ -740,7 +693,6 @@ theorem intrExtJoin_smooth
       (I := 𝓘(Real, E)) gExt hExt x
         (minimizingVec (I := 𝓘(Real, E)) gExt hExt x y)
 
-/-- The selected complete-extension join is a geodesic. -/
 theorem intrExtJoin_geo
     (g : SmoothRiemannianMetric I M)
     (hEnorm : ∀ (x : M) (v : TangentSpace I x),
@@ -1026,9 +978,6 @@ private theorem intrExtJoin_budget
     (ENNReal.ofReal_le_ofReal_iff (add_nonneg ha hL)).mp hB
   exact (not_le_of_gt hbudget) hreal
 
-/-- If both endpoints lie in a radius-`a` core with `4a < R`, the selected
-complete-extension minimizing join stays strictly inside the metric-agreement
-ball of radius `3R/4`. -/
 theorem intrExtJoin_fenced
     (g : SmoothRiemannianMetric I M)
     (hEnorm : ∀ (x : M) (v : TangentSpace I x),
@@ -1232,11 +1181,6 @@ private theorem exists_join_curve
       hEq (x := (1 : Real)) (by norm_num)
   · simpa only [γ] using hEq
 
-/-- For a fixed pair of core points, the complete-extension minimizing
-geodesic admits a globally smooth codrestriction to the pullback ball.  The
-codrestricted curve agrees with the ambient minimizing geodesic on a
-neighborhood of `[0, 1]`, and is therefore a pullback geodesic on that
-interval. -/
 theorem exists_fenced_curve
     (g : SmoothRiemannianMetric I M)
     (hEnorm : ∀ (x : M) (v : TangentSpace I x),
@@ -1264,10 +1208,6 @@ theorem exists_fenced_curve
   apply exists_join_curve (I := I) g hEnorm p hR hloc
   exact intrExtJoin_fenced (I := I) g hEnorm p hR h4aR hloc hx hy
 
-/-- The pullback and complete-extension distances agree whenever the starting
-point and the extension distance fit strictly inside the agreement radius.
-This budget form remains applicable on neighborhoods of closed-core boundary
-points. -/
 theorem intrPull_edist_eq_ext_of_budget
     (g : SmoothRiemannianMetric I M)
     (hEnorm : ∀ (x : M) (v : TangentSpace I x),
@@ -1533,8 +1473,6 @@ theorem intrPull_edist_eq_ext_of_budget
       simpa only [η] using hlen_of_stay hγC1 hstay
     exact (not_lt_of_ge (hExtPath.trans_eq hlen.symm)) hγlen
 
-/-- On the radius-`a` core, the pullback distance agrees with the distance of
-the complete extension. -/
 theorem intrCore_edist_eq
     (g : SmoothRiemannianMetric I M)
     (hEnorm : ∀ (x : M) (v : TangentSpace I x),
@@ -1575,8 +1513,6 @@ theorem intrCore_edist_eq
   dsimp only [L]
   linarith
 
-/-- The complete-extension intrinsic geodesic launched from `x` with velocity
-`v`. -/
 noncomputable def intrExtLaunch
     (g : SmoothRiemannianMetric I M)
     (hEnorm : ∀ (x : M) (v : TangentSpace I x),
@@ -1607,8 +1543,6 @@ noncomputable def intrExtLaunch
         (I := 𝓘(Real, E)) gExt z w
   exact intrinsicGeodesic (I := 𝓘(Real, E)) gExt hExt x v
 
-/-- Every complete-extension geodesic whose launch speed fits the strict
-agreement-radius budget remains in the agreement ball on `[0, 1]`. -/
 theorem intrExt_shortLaunch_fenced
     (g : SmoothRiemannianMetric I M)
     (hEnorm : ∀ (x : M) (v : TangentSpace I x),
@@ -1779,9 +1713,6 @@ theorem intrExt_shortLaunch_fenced
       (add_pos_of_nonneg_of_pos ha hstarPos)).mp hB
   exact (not_lt_of_ge hbudgetStar.le) hreal
 
-/-- A complete-extension geodesic of speed at most `L` joining two points of
-the radius-`a` core stays in the radius-`a + L / 2` ball.  The proof combines
-the two endpoint distance budgets. -/
 theorem intrExt_scale_bound
     (g : SmoothRiemannianMetric I M)
     (hEnorm : ∀ (x : M) (v : TangentSpace I x),
@@ -1955,8 +1886,6 @@ theorem intrExt_scale_bound
   simpa only [γ, gExt, hExt, intrExtLaunch] using
     (show ‖γ t‖ ≤ a + L / 2 by nlinarith)
 
-/-- A complete-extension geodesic of speed at most `2a` joining two points of
-the radius-`a` core stays in the radius-`2a` ball. -/
 theorem intrExt_short_bound
     (g : SmoothRiemannianMetric I M)
     (hEnorm : ∀ (x : M) (v : TangentSpace I x),
@@ -2074,9 +2003,6 @@ private theorem intrExt_quad_le
       rw [intrExt_inner (I := I) g hEnorm p hR hloc hzClosed J J,
         intrExt_inner (I := I) g hEnorm p hR hloc hzClosed V V]
 
-/-- A complete-extension launch with controlled speed and a fenced trajectory
-is nonconjugate when the agreement-region curvature bound stays below the
-one-sided Jacobi threshold. -/
 theorem intrExt_not_conj_of_shortLaunch
     (g : SmoothRiemannianMetric I M)
     (hEnorm : ∀ (x : M) (v : TangentSpace I x),
@@ -2595,9 +2521,6 @@ theorem intrExt_not_conj_of_shortLaunch
     nlinarith [hcIoo.1]
   exact (ne_of_gt hpairpos) hpair0
 
-/-- A nonzero perpendicular Jacobi direction along a fenced
-complete-extension launch has positive terminal index pairing below the
-one-sided curvature scale. -/
 theorem intrExt_pair_pos
     (g : SmoothRiemannianMetric I M)
     (hEnorm : ∀ (x : M) (v : TangentSpace I x),
@@ -2821,13 +2744,6 @@ theorem intrExt_pair_pos
       (I := 𝓘(Real, E)) gExt γ J hγ hgeo hJdiff hDJdiff
       (fun t _ht => hJac t) hJ0 hJ1 hspeed hJperp hκ0 hκπ hcurv
 
-/-- Two points in the radius-`a` core admit a smooth minimizing geodesic for
-the complete extension which stays in the strict metric-agreement ball.
-
-The curve is kept in the ambient model space.  This avoids a non-geodesic
-global reparametrization merely to totalize it as a curve in the open pullback
-subtype; downstream local pullback arguments may codrestrict it on
-`[0, 1]` using the strict fence. -/
 theorem exists_fenced_ext
     (g : SmoothRiemannianMetric I M)
     (hEnorm : ∀ (x : M) (v : TangentSpace I x),
@@ -2883,10 +2799,6 @@ theorem exists_fenced_ext
   · simpa only [γ, gExt, riemannianEDistOf] using
       minJoin_arcLength (I := 𝓘(Real, E)) gExt hExt x y
 
-/-- A single globally defined join on the pullback ball whose restriction to
-each pair of points in the radius-`a` core is a smooth pullback geodesic,
-strictly fenced inside the agreement region.  Outside the core the join is
-filled arbitrarily; no geodesic claim is made there. -/
 theorem exists_fenced_min
     (g : SmoothRiemannianMetric I M)
     (hEnorm : ∀ (x : M) (v : TangentSpace I x),

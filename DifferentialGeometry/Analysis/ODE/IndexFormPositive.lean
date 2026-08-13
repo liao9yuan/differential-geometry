@@ -3,15 +3,6 @@ import Mathlib.Analysis.SpecialFunctions.Trigonometric.ArctanDeriv
 
 set_option autoImplicit false
 
-/-!
-# Positive index forms below the upper-curvature scale
-
-This file proves the one-sided Dirichlet/free Poincare estimate used by the
-upper-curvature endpoint form of Rauch comparison.  The proof completes a
-square with a regularized cotangent weight, so it obtains the sharp
-`(pi / 2)^2` threshold without a Fourier expansion.
--/
-
 open Set intervalIntegral MeasureTheory
 open scoped RealInnerProductSpace
 
@@ -21,12 +12,9 @@ namespace DifferentialGeometry.Analysis.ODE
 
 variable {F : Type*} [NormedAddCommGroup F] [InnerProductSpace ℝ F]
 
-/-- The regularized cotangent weight used in the one-sided Poincare identity. -/
 private def endWeight (a d t : ℝ) : ℝ :=
   a * Real.tan (Real.pi / 2 - a * (t + d))
 
-/-- The regularized cotangent weight solves the scalar Riccati equation
-`phi' = -a^2 - phi^2` throughout the controlled interval. -/
 private theorem hasDerivAt_endWeight
     {a d t : ℝ}
     (hangle :
@@ -57,9 +45,6 @@ private theorem hasDerivAt_endWeight
     field_simp [hcos]
     nlinarith [Real.sin_sq_add_cos_sq θ]
 
-/-- Strict one-sided Poincare inequality below the first
-Dirichlet/free frequency.  Only the left endpoint is fixed; nonvanishing at the
-right endpoint makes the inequality strict. -/
 theorem left_poincare_lt
     {a : ℝ} (ha : 0 < a) (haπ : a < Real.pi / 2)
     {y v : ℝ → F}
@@ -190,9 +175,6 @@ theorem left_poincare_lt
     intervalIntegral.integral_const_mul] at henergy_pos
   linarith
 
-/-- A Jacobi solution that starts at zero has positive endpoint pairing whenever
-the curvature quadratic form stays strictly below the first one-sided
-Dirichlet/free frequency. -/
 theorem IsJacobiSolOn.end_pair_pos
     [CompleteSpace F]
     {R : ℝ → F →L[ℝ] F} {y v : ℝ → F} {κ : ℝ}

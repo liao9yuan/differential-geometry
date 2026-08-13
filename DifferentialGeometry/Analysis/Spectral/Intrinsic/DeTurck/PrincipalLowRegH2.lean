@@ -3,14 +3,6 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.CometricDoubleTrace
 import DifferentialGeometry.Analysis.Spectral.Tensor.SobolevScale.FractionalPower
 import DifferentialGeometry.Analysis.Spectral.Tensor.SobolevScale.IterCovGradHs
 
-/-!
-# Low-regularity DeTurck principal operators
-
-This file assembles the principal Ricci--DeTurck perturbation directly from a
-spectral `H2` metric deviation.  The construction uses only fixed-background
-operators and the Neumann inverse correction.
--/
-
 noncomputable section
 
 open Bundle Manifold
@@ -47,8 +39,6 @@ private abbrev rank2H2 (g : SmoothRiemannianMetric I M) :=
 private abbrev rank4H2 (g : SmoothRiemannianMetric I M) :=
   tensorHs (I := I) (M := M) g 0 4 (2 : ℝ)
 
-/-- The fixed-background second covariant derivative from spectral `H4`
-rank-two tensors to spectral `H2` rank-four tensors. -/
 noncomputable def hessianH2
     (g : SmoothRiemannianMetric I M) :
     rank2H4 (I := I) (M := M) g →L[ℝ]
@@ -59,8 +49,6 @@ noncomputable def hessianH2
       (by norm_num : (4 : ℝ) = (2 : ℝ) + (2 : ℝ))).toContinuousLinearEquiv.toContinuousLinearMap
   exact (iterCovGradHs (I := I) (M := M) g 2 2 2).comp J
 
-/-- The fixed-background cometric double trace on spectral `H2` rank-four
-tensors. -/
 noncomputable def traceH2
     (g : SmoothRiemannianMetric I M) :
     rank4H2 (I := I) (M := M) g →L[ℝ]
@@ -68,8 +56,6 @@ noncomputable def traceH2
   appHs (I := I) (M := M) g 4 2 2
     (cometricDoubleTraceField (I := I) g 2)
 
-/-- The completed fixed Hessian agrees with the geometric second covariant
-derivative on smooth tensors. -/
 theorem hessianH2_core
     (g : SmoothRiemannianMetric I M) (U : SmoothCcTensor g 0 2) :
     hessianH2 (I := I) (M := M) g
@@ -94,7 +80,6 @@ theorem hessianH2_core
   rw [hessianH2, ContinuousLinearMap.comp_apply, hcast]
   exact iterCovGradHs_core (I := I) (M := M) g 2 2 2 U
 
-/-- The completed fixed double trace agrees with its smooth tensor action. -/
 theorem traceH2_core
     (g : SmoothRiemannianMetric I M) (V : SmoothCcTensor g 0 4) :
     traceH2 (I := I) (M := M) g
@@ -105,8 +90,6 @@ theorem traceH2_core
   exact appHs_core (I := I) (M := M) g 4 2 2
     (cometricDoubleTraceField (I := I) g 2) V
 
-/-- The principal Ricci--DeTurck perturbation associated to an arbitrary
-spectral `H2` metric deviation. -/
 noncomputable def lowRegPrincipal
     (g : SmoothRiemannianMetric I M)
     (T : metricH2 (I := I) (M := M) g) :
@@ -116,8 +99,6 @@ noncomputable def lowRegPrincipal
     ((invPerturbH2 (I := I) (M := M) g T).comp
       (hessianH2 (I := I) (M := M) g))
 
-/-- On a three-dimensional small `H2` metric ball, the low-regularity
-principal operator is linear in the size of the metric deviation. -/
 theorem lowRegPrincipal_norm
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M) :
@@ -155,8 +136,6 @@ theorem lowRegPrincipal_norm
       dsimp only [C]
       ring
 
-/-- On a fixed small `H2` metric ball, the low-regularity principal operator
-is uniformly Lipschitz as a map into bounded `H4 → H2` operators. -/
 theorem lowRegPrincipal_lip
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M) :

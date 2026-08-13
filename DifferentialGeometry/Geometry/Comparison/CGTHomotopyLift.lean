@@ -4,15 +4,6 @@ import Mathlib.Topology.Homotopy.Lifting
 
 set_option autoImplicit false
 
-/-!
-# Homotopy invariance of short intrinsic exponential lifts
-
-This file applies the abstract monodromy theorem for separated local
-homeomorphisms to the selected short lifts supplied by `CGTExpLift`.  The
-flat-`C¹` condition on every homotopy slice makes the derivative-integral
-length bound mathematically honest.
--/
-
 noncomputable section
 
 open Bundle Function Manifold Set TopologicalSpace
@@ -46,8 +37,6 @@ variable {g : SmoothRiemannianMetric I M}
     ‖v‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner x v v))}
   {L : ENNReal} {R : Real} {x y : M} {p q : Path x y}
 
-/-- A bounded flat-`C¹` path homotopy admits a selected lift for every slice,
-and all selected lifts have the same endpoint. -/
 theorem exists_lift_family
     (F : ShortHomotopy (I := I) L p q)
     (hLR : L < ENNReal.ofReal R)
@@ -137,8 +126,6 @@ theorem exists_lift_family
   refine ⟨lift, fun t => ?_⟩
   exact congrArg Subtype.val (hend t)
 
-/-- Any two lifts of the endpoint slices of a bounded flat-`C¹` homotopy,
-normalized at the model origin, have the same endpoint. -/
 theorem lift_end_eq
     (F : ShortHomotopy (I := I) L p q)
     (hLR : L < ENNReal.ofReal R)
@@ -186,9 +173,6 @@ variable {g : SmoothRiemannianMetric I M}
   {R : Real} {x y z : M}
   {p q : Path x y} {c : Path y z}
 
-/-- The midpoint of a lift of `p.trans c` is the endpoint of the lift of
-`p`.  This is the lift-level form of the standard path-concatenation
-parameterization. -/
 theorem append_mid_eq
     (A :
       IntrFrameLift (I := I) g hEnorm x p.extend 0 1)
@@ -240,8 +224,6 @@ theorem append_mid_eq
   convert heq ⟨by norm_num, le_rfl⟩ using 1
   norm_num
 
-/-- If two lifts of paths with the same appended suffix have equal final
-values, then their values already agree at the concatenation midpoint. -/
 theorem cancel_right
     (P :
       IntrFrameLift (I := I) g hEnorm x (p.trans c).extend 0 1)
@@ -291,9 +273,6 @@ theorem cancel_right
     hP.eqOn_of_eq Metric.isOpen_ball hloc hQ
       ⟨by norm_num, le_rfl⟩ hend ⟨le_rfl, by norm_num⟩
 
-/-- Right cancellation for endpoints of selected short exponential lifts.
-It is the lift-level replacement for inserting and contracting the spur
-`c.trans c.symm` in the classical CGT proof. -/
 theorem end_eq_of_append
     (A :
       IntrFrameLift (I := I) g hEnorm x p.extend 0 1)
@@ -331,9 +310,6 @@ variable {g : SmoothRiemannianMetric I M}
     ‖v‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner x v v))}
   {L : ENNReal} {R : Real} {x y : M} {p q : Path x y}
 
-/-- Appending one common suffix is cancellative for endpoints of short
-intrinsic exponential lifts.  The proof uses homotopy invariance for the full
-paths and local-homeomorphism uniqueness backwards along the common suffix. -/
 theorem lift_end_cancel
     {z : M} {c : Path y z}
     (F : ShortHomotopy (I := I) L (p.trans c) (q.trans c))

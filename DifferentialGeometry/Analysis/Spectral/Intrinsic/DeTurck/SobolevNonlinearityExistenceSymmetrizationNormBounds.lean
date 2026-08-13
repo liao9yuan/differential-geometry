@@ -122,8 +122,6 @@ theorem norm_iteratedCovGrad_tensorSymmetrization_le (g₀ : SmoothRiemannianMet
   linarith
 
 omit [NeZero (Module.finrank ℝ E)] in
-/-- Compatibility name for the covariant-derivative norm contraction under
-two-tensor symmetrization. -/
 theorem norm_iteratedCovGrad_symmS_le (g₀ : SmoothRiemannianMetric I M)
     (T : SmoothCcTensor g₀ 0 2) (k : ℕ) :
     ‖iteratedCovGrad (I := I) g₀ 0 2 k (symmS (I := I) (M := M) g₀ T)‖ ≤

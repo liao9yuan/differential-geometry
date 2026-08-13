@@ -1,16 +1,5 @@
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.CurvatureCoefficientDifferenceJetTower.PairTrace
 
-/-!
-# Pair-trace difference grids and the metric-factor telescope
-
-Chunk of the `CurvatureCoefficientDifferenceJetTower` tower, split
-out of the former 15111-line monolith (no longer elaborable in a
-single Lean process).  Every declaration is verbatim.  The former
-`private` helpers were promoted into the internal `CurvatureCoefficientDifferenceJetTower`
-scope, so the public `Connection` API is unchanged.  Chunk map:
-`CurvatureCoefficientDifferenceJetTower.md`.
--/
-
 noncomputable section
 
 set_option linter.style.setOption false
@@ -705,7 +694,6 @@ end CurvatureCoefficientDifferenceJetTower
 
 set_option linter.unusedVariables false in
 set_option maxHeartbeats 12800000 in
-
 set_option linter.unusedVariables false in
 set_option maxHeartbeats 12800000 in
 theorem rfns_iteratedCovGrad_riemannCoeff_metricFactorTelescope_traceConversion_le

@@ -1,15 +1,6 @@
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.DeTurckRemainderLowBaseA1Pair
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.DeTurckRemainderLowBaseTimeA1
 
-/-!
-# Ball-local pair estimate for the radial low first-order action
-
-This module combines the fourth-jet-free `a1Lo_pair_lip` estimate with the
-canonical spectral `H2` radial cutoff.  On every bounded `H3` piece of the
-smooth core, the resulting completed `H2 → H1` action is Lipschitz in the
-spectral `H3` distance.
--/
-
 noncomputable section
 
 open Bundle Manifold
@@ -51,10 +42,6 @@ private theorem ccToHsSub
   simpa only [ccToHsLin_apply] using
     map_sub (ccToHsLin (I := I) (M := M) g 2 σ) T U
 
-/-- On a sufficiently small realized `H2` cutoff ball, the radial completed
-`H2 → H1` first-order action is Lipschitz on every bounded spectral `H3`
-piece of the smooth core.  The Lipschitz constant may depend on the `H3`
-radius, while the difference is measured only in `H3`. -/
 theorem radialA1Lo_pair
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M) :

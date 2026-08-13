@@ -6,13 +6,6 @@ import DifferentialGeometry.Geometry.Connection.ParallelTransport.AlongCurve
 import DifferentialGeometry.Geometry.Curvature.CurvatureOperator.PointwiseCurvatureDerivative
 import DifferentialGeometry.Geometry.Comparison.Variation.PerpFrame
 
-/-!
-# Curvature derivative along a curve
-
-This file identifies the covariant derivative of curvature along a smooth
-curve with the pointwise covariant derivative of the Riemann operator.
--/
-
 noncomputable section
 
 set_option autoImplicit false
@@ -39,8 +32,6 @@ variable {I : ModelWithCorners Real E H} [I.Boundaryless]
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
   [IsManifold I ∞ M] [T2Space M] [SigmaCompactSpace M]
 
-/-- A smooth field along a smooth curve admits, near a fixed parameter, a
-finite chart-frame expansion with globally smooth scalar coefficients. -/
 private theorem exists_smooth_exp
     (γ : Real -> M) (V : ∀ s, TangentSpace I (γ s)) (t : Real)
     (hγ : ContMDiff 𝓘(Real, Real) I ∞ γ)
@@ -116,8 +107,6 @@ private theorem exists_smooth_exp
   rw [hcs i, hBs i]
   rfl
 
-/-- At a fixed time, the first slot of `curvDerivAlong` depends only on the
-value of the field in that slot. -/
 private theorem curvDeriv_left_at
     (g : SmoothRiemannianMetric I M) (γ : Real -> M)
     (X X' Y Z : ∀ s, TangentSpace I (γ s)) (t : Real)
@@ -217,8 +206,6 @@ private theorem curvDeriv_left_at
       (curvDeriv_congr (I := I) g γ hcexp'
         Filter.EventuallyEq.rfl Filter.EventuallyEq.rfl).symm
 
-/-- At a fixed time, the second slot of `curvDerivAlong` depends only on the
-value of the field in that slot. -/
 private theorem curvDeriv_mid_at
     (g : SmoothRiemannianMetric I M) (γ : Real -> M)
     (X Y Y' Z : ∀ s, TangentSpace I (γ s)) (t : Real)
@@ -318,8 +305,6 @@ private theorem curvDeriv_mid_at
       (curvDeriv_congr (I := I) g γ Filter.EventuallyEq.rfl hcexp'
         Filter.EventuallyEq.rfl).symm
 
-/-- At a fixed time, the third slot of `curvDerivAlong` depends only on the
-value of the field in that slot. -/
 private theorem curvDeriv_right_at
     (g : SmoothRiemannianMetric I M) (γ : Real -> M)
     (X Y Z Z' : ∀ s, TangentSpace I (γ s)) (t : Real)
@@ -419,8 +404,6 @@ private theorem curvDeriv_right_at
       (curvDeriv_congr (I := I) g γ Filter.EventuallyEq.rfl
         Filter.EventuallyEq.rfl hcexp').symm
 
-/-- For smooth fields along a smooth curve, `curvDerivAlong` at one time only
-depends on the values of its three fields at that time. -/
 theorem curvDeriv_congr_at
     (g : SmoothRiemannianMetric I M) (γ : Real -> M)
     (X X' Y Y' Z Z' : ∀ s, TangentSpace I (γ s)) (t : Real)
@@ -464,8 +447,6 @@ theorem curvDeriv_congr_at
       curvDeriv_right_at (I := I) g γ X' Y' Z Z' t
         hγ hX' hY' hZ hZ' hZt
 
-/-- On restrictions of smooth global fields, the curvature derivative along a
-smooth curve is the pointwise covariant derivative of the Riemann operator. -/
 theorem curvDeriv_restrict
     (g : SmoothRiemannianMetric I M) (γ : Real -> M)
     (X Y Z : ContMDiffSection I E (∞ : WithTop ℕ∞)
@@ -557,9 +538,6 @@ theorem curvDeriv_restrict
   rw [← hD]
   rfl
 
-/-- The covariant curvature derivative along a smooth curve is the pointwise
-covariant derivative of the Riemann operator, for arbitrary smooth fields along
-the curve. -/
 theorem curvDeriv_eq_nabla
     (g : SmoothRiemannianMetric I M) (γ : Real -> M)
     (X Y Z : ∀ s, TangentSpace I (γ s)) (t : Real)

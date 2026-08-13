@@ -1,30 +1,5 @@
 import DifferentialGeometry.Analysis.Sobolev.TensorHilbert.AtgwArmFold
 
-/-!
-# Radius-free grid currency for the order-one Ricci kernel
-
-The order-one arm of the linearized Ricci operator is *linear* in the
-connection difference — `kernelField_eq_neg_arm_combination` exhibits
-`linearizedRicciConnDiffOrder1KernelField g₀ g₁` as five slot-permuted copies of
-the single insertion field `connDiffContrInsertionField g₀ g₁`, each carrying
-exactly one `connDiffSection`.  That is what separates it from the order-zero
-arm, where the `A·A` term is quadratic and no radius-free bound exists.
-
-This module converts that structure into the `antidiagonalTupleGridWindow`
-currency that the radius-free composer `AtgwArmFold` consumes:
-
-* `permAppEqRs` — the public bridge `appCcRS (slotPermCc σ) S = rsDomDomCongrSection σ S`
-  (`permApp_eq_rs` lives `private` inside the read-only low-base action file).
-* `ricci1Split` — the split rewritten with `rsDomDomCongrSection` in place of
-  the `appCcRS`/`slotPermCc` pair, which is the form whose fibre jets are a
-  pointwise *isometry* of the original's.
-* `ricciKerAtgw` — the resulting radius-free pointwise window, at offset `+2`.
-
-Offset `+2` (not `+3`) is the whole point: the kernel costs exactly one
-derivative of the state, so folding it against an order-zero-capped arm lands on
-`range (i + 2)`, the budget the low-base `C1` jet tower spends.
--/
-
 noncomputable section
 
 set_option linter.style.setOption false
@@ -55,11 +30,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
 set_option linter.unusedSectionVars false in
-/-- **Applying the parallel slot-permutation field is the slot permutation.**
-
-Public re-derivation of the `private` `permApp_eq_rs` of the read-only low-base
-action module.  It is what lets a permuted arm be recognised as a fibre isometry
-of its argument at every jet order. -/
 theorem permAppEqRs (g : SmoothRiemannianMetric I M) {r s : ℕ}
     (σ : Equiv.Perm (Fin s)) (S : SmoothCcTensor g r s) :
     appCcRS (I := I) (M := M) g r s s
@@ -84,12 +54,6 @@ theorem permAppEqRs (g : SmoothRiemannianMetric I M) {r s : ℕ}
     toModel_rsDomDomCongr_apply]
 
 set_option linter.unusedSectionVars false in
-/-- **The order-one Ricci kernel as five slot permutations of one insertion.**
-
-`ricci1Split` is `kernelField_eq_neg_arm_combination` with the
-`appCcRS`/`slotPermCc` pairs collapsed to `rsDomDomCongrSection`, which is the
-form in which each summand is a *pointwise fibre isometry* of
-`connDiffContrInsertionField g₀ g₁` at every covariant jet order. -/
 theorem ricci1Split (g₀ g₁ : SmoothRiemannianMetric I M) :
     linearizedRicciConnDiffOrder1KernelField (I := I) g₀ g₁ =
       -(reindexCoeffGen (I := I) (M := M) g₀ 3 4
@@ -129,7 +93,6 @@ private lemma rfnsSmul (g : SmoothRiemannianMetric I M) (r s : ℕ) (x : M)
   ring
 
 set_option linter.unusedSectionVars false in
-/-- Negation is a pointwise fibre isometry at every jet order. -/
 private lemma rfnsNegIcg (g : SmoothRiemannianMetric I M) {r s : ℕ} (l : ℕ) (x : M)
     (X : SmoothCcTensor g r s) :
     riemannianFiberNormSq (I := I) (M := M) g r (s + l) x
@@ -143,8 +106,6 @@ private lemma rfnsNegIcg (g : SmoothRiemannianMetric I M) {r s : ℕ} (l : ℕ) 
   norm_num
 
 set_option linter.unusedSectionVars false in
-/-- The permuted/reindexed kernel arms are pointwise fibre isometries of the
-insertion field at every jet order. -/
 private lemma rfnsArmEq (g₀ g₁ : SmoothRiemannianMetric I M)
     (σ : Equiv.Perm (Fin 4)) (l : ℕ) (x : M) :
     riemannianFiberNormSq (I := I) (M := M) g₀ 3 (4 + l) x
@@ -162,12 +123,6 @@ private lemma rfnsArmEq (g₀ g₁ : SmoothRiemannianMetric I M)
       rw [rsDomDomCongrSection_toSection, toModel_rsDomDomCongr_apply]) l x
 
 set_option linter.unusedVariables false in
-/-- **Radius-free pointwise grid window for the order-one insertion field.**
-
-`|∇ˡ(connDiffContrInsertionField g₀ g₁)|²(x) ≤ Cins l · atgw(bP)(l + 2)`: the
-insertion is a reindexed double slot extension of `connDiffSection`, so it
-inherits the connection difference's offset `+2` window at the cost of two
-dimension factors. -/
 theorem insertAtgw (g₀ : SmoothRiemannianMetric I M) {δ₀ : ℝ} (hδ₀ : δ₀ < 1) :
     ∃ Cins : ℕ → ℝ, (∀ l, 0 ≤ Cins l) ∧
       ∀ (g₁ : SmoothRiemannianMetric I M) (P : SmoothCcTensor g₀ 0 2)
@@ -216,13 +171,6 @@ theorem insertAtgw (g₀ : SmoothRiemannianMetric I M) {δ₀ : ℝ} (hδ₀ : �
     _ = (Module.finrank ℝ E : ℝ) * ((Module.finrank ℝ E : ℝ) * Ccd l) * W := by ring
 
 set_option linter.unusedVariables false in
-/-- **Radius-free pointwise grid window for the order-one Ricci kernel.**
-
-`|∇ˡ(linearizedRicciConnDiffOrder1KernelField g₀ g₁)|²(x) ≤ Kk l · atgw(bP)(l + 2)`.
-
-The kernel is five permuted copies of the insertion field, so the offset stays
-at `+2` — one derivative of the state — and only a fixed combinatorial factor
-(`46`, from four binary applications of `2`-subadditivity) is paid. -/
 theorem ricciKerAtgw (g₀ : SmoothRiemannianMetric I M) {δ₀ : ℝ} (hδ₀ : δ₀ < 1) :
     ∃ Kk : ℕ → ℝ, (∀ l, 0 ≤ Kk l) ∧
       ∀ (g₁ : SmoothRiemannianMetric I M) (P : SmoothCcTensor g₀ 0 2)
@@ -255,7 +203,6 @@ theorem ricciKerAtgw (g₀ : SmoothRiemannianMetric I M) {δ₀ : ℝ} (hδ₀ :
   set A4 : SmoothCcTensor g₀ 3 4 :=
     reindexCoeffGen (I := I) (M := M) g₀ 3 4
       (rsDomDomCongrSection (I := I) (M := M) g₀ 3 4 kOutPerm1203 O) kInPerm120 with hA4_def
-  -- abbreviation for the pointwise fibre jet of a `(3,4)` field at order `l`
   set F : SmoothCcTensor g₀ 3 4 → ℝ := fun X =>
     riemannianFiberNormSq (I := I) (M := M) g₀ 3 (4 + l) x
       ((iteratedCovGrad (I := I) g₀ 3 4 l X).toSection x) with hF_def
@@ -266,7 +213,6 @@ theorem ricciKerAtgw (g₀ : SmoothRiemannianMetric I M) {δ₀ : ℝ} (hδ₀ :
     rw [iteratedCovGrad_add (I := I) g₀ 3 4 l X Y, SmoothCcTensor.toSection_add,
       ContMDiffSection.coe_add, Pi.add_apply]
     exact riemannianFiberNormSq_add_le (I := I) (M := M) g₀ 3 (4 + l) x _ _
-  -- every arm has the insertion field's fibre jet
   have harm : ∀ (σ : Equiv.Perm (Fin 4)) (ρ : Equiv.Perm (Fin 3)),
       F (reindexCoeffGen (I := I) (M := M) g₀ 3 4
         (rsDomDomCongrSection (I := I) (M := M) g₀ 3 4 σ O) ρ) = F O := by

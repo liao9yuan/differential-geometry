@@ -4,14 +4,6 @@ import DifferentialGeometry.Geometry.Comparison.Variation.MinimalGeodesicNoConju
 
 set_option autoImplicit false
 
-/-!
-# Interior nonconjugacy on the segment domain
-
-This file connects the set-level segment domain to the index-form theorem that
-a length-minimizing geodesic has no interior conjugate vector.  It is the
-nondegeneracy input used by the segment-polar volume comparison layer.
--/
-
 noncomputable section
 
 open Set Function Filter Bundle Manifold MeasureTheory
@@ -35,8 +27,6 @@ variable [RiemannianBundle (fun x : M => TangentSpace I x)]
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-/-- Every nonzero segment-domain ray is free of conjugate vectors before its
-endpoint.  No connectedness or injectivity-radius hypothesis is needed. -/
 theorem segDom_no_conj
     [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
     [IsContinuousRiemannianBundle E (fun y : M => TangentSpace I y)]

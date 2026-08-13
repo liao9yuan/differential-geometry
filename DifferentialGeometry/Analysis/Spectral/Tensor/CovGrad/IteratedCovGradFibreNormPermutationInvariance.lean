@@ -1,6 +1,5 @@
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.SymmAbsorbedCoeffInputReindexBounds
 
-
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
@@ -95,7 +94,6 @@ theorem riemannianFiberNormSq_iteratedCovGrad_rs_eq_of_section_domDomCongr
   rw [hsec]
   exact riemannianFiberNormSq_domDomCongr_covariant (I := I) (M := M) g r (s + i) x τ _
 
-/-- Compatibility name for covariant-slot permutation invariance along all jets. -/
 alias rfns_iteratedCovGrad_rs_eq_of_section_domDomCongr :=
   riemannianFiberNormSq_iteratedCovGrad_rs_eq_of_section_domDomCongr
 
@@ -114,7 +112,6 @@ theorem riemannianFiberNormSq_iteratedCovGrad_reindexCoeffGen_eq
     DifferentialGeometry.Analysis.Parabolic.TensorSpectral.reindexCoeffGen_toSection,
     DifferentialGeometry.Analysis.Parabolic.TensorSpectral.riemannianFiberNormSq_reindexCoeffFibGen]
 
-/-- Compatibility name for source-slot reindexing invariance along all jets. -/
 alias rfns_iteratedCovGrad_reindexCoeffGen_eq :=
   riemannianFiberNormSq_iteratedCovGrad_reindexCoeffGen_eq
 

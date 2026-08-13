@@ -1,16 +1,6 @@
 import DifferentialGeometry.Analysis.Parabolic.QuasiLinear.TensorMaximalRegularity.NonautonomousL2
 import DifferentialGeometry.Analysis.Parabolic.QuasiLinear.TensorMaximalRegularity.NonautonomousL2Cross
 
-/-!
-# Same-horizon lift for non-autonomous maximal regularity
-
-This file lifts a zero-initial non-autonomous maximal-regularity solution
-through one adjacent Sobolev level.  Compatible high- and low-scale operator
-families make inclusion intertwine their forcing maps; uniqueness of the low
-contraction then identifies the included high solution with the prescribed
-low solution without shrinking the time interval.
--/
-
 noncomputable section
 
 open Bundle Manifold MeasureTheory Set Filter
@@ -522,10 +512,6 @@ private theorem affine_unique
     exact hq.symm
   exact hcontr.fixedPoint_unique' hfixf hfixq
 
-/-- A zero-initial non-autonomous solution lifts by one Sobolev order on the
-same time horizon when the high- and low-scale operator families commute with
-the canonical inclusions.  The included high forcing is the prescribed low
-fixed point, and the corresponding full Duhamel fields agree after inclusion. -/
 theorem nonautL2_lift
     (hT : 0 < T) (hT1 : T ≤ 1)
     (hcompact : IsCompactOperator (tensorResolventL2

@@ -34,7 +34,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
 set_option linter.unusedSectionVars false in
-
 private lemma trace42_apply
     (L : Tensor0SBundle.Tensor0SModel 1 ℝ E →L[ℝ] E)
     (D : Tensor0SBundle.Tensor0SModel 4 ℝ E) (m : Fin 2 → E) :
@@ -52,11 +51,6 @@ private lemma trace42_apply
   congr 1
 
 omit [BoundarylessManifold I M] [SigmaCompactSpace M] in
-/--
-The doubled Ricci principal-coefficient deviation is the canonical sum of the
-two Koszul reindexings of the DeTurck cometric coefficient minus that
-coefficient.
--/
 theorem ricci2_pcc_eq (g₀ g₁ : SmoothRiemannianMetric I M) :
     (ricciArmPrincipalCoeff (I := I) (M := M) g₀ g₁
           - ricciArmPrincipalCoeff (I := I) (M := M) g₀ g₀)

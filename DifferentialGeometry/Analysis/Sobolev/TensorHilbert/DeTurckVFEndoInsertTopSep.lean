@@ -1,11 +1,6 @@
 import DifferentialGeometry.Analysis.Sobolev.TensorHilbert.DeTurckVFEndoInsertProducers
 import DifferentialGeometry.Analysis.Sobolev.TensorHilbert.DeTurckVectorFieldL2JetBound
 
-/-! # DeTurck vector-field endo-insert top-separated API (split 3/3)
-
-Public API (`connDiffDVFSection`, `realizedFam_*_ballUniform`) and the `DLbTopSeparated`
-assembly ending in `deTurckLieWEndoInsert_realizedFam_jetL2_{perOrder,summed}_topSeparated`. -/
-
 noncomputable section
 
 set_option linter.style.setOption false
@@ -35,18 +30,7 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
   [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M]
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
-/-! ## The `wAlphaB` (connection-difference) half as an isolated `(1,1)` insert
 
-The `lc0Insert`-difference `Kc` atom needs the connection-difference half of the DeTurck
-endomorphism ISOLATED from its covariant-derivative half.  We expose that half as a smooth
-endo section `connDiffDVFSection` whose slot-`0` insertion is exactly
-`cometricRaiseSlot0Field g₀ 0 (wAlphaB …)` — the `wAlphaA`-free part of
-`deTurckLieWEndoInsert_eq_cometricRaise`. -/
-
-/-- The connection-difference half of the DeTurck endomorphism as a smooth `(1, 1)`-endo
-section: `x ↦ connDiff g₁ g₀ x (deTurckVF g₁ g_ref x)`.  `deTurckLieWEndoSection` is this plus
-the covariant-derivative (`wAlphaA`) half; its slot-`0` insert is
-`cometricRaiseSlot0Field g₀ 0 (wAlphaB g₀ g₁ g_ref)` (`connDiffDVFInsert_eq_cometricRaise`). -/
 def connDiffDVFSection (g₀ g₁ g_ref : SmoothRiemannianMetric I M) :
     ContMDiffSection I (E →L[ℝ] E) ∞
       (fun x : M => TangentSpace I x →L[ℝ] TangentSpace I x) where
@@ -57,7 +41,6 @@ def connDiffDVFSection (g₀ g₁ g_ref : SmoothRiemannianMetric I M) :
       (PDE.DeTurck.deTurckVF (I := I) g₁ g_ref).contMDiff
 
 omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [BoundarylessManifold I M] [SigmaCompactSpace M] in
-/-- Slot insertion is subtractive in the inserted endomorphism section. -/
 lemma slotInsertEndoCc_sub (g₀ : SmoothRiemannianMetric I M) (s : ℕ)
     (Λ Λ' : ContMDiffSection I (E →L[ℝ] E) ∞
       (fun x : M => TangentSpace I x →L[ℝ] TangentSpace I x)) :
@@ -90,9 +73,6 @@ lemma slotInsertEndoCc_sub (g₀ : SmoothRiemannianMetric I M) (s : ℕ)
     slotInsertEndoFib_sub_left (I := I) (M := M) (s + 1) 0 x (Λ x) (Λ' x)]
   rw [ContinuousLinearMap.sub_apply]
 
-/-- **HOIST.**  Slot-`0` insertion of the connection-difference endomorphism is the slot-`0`
-cometric raise of `wAlphaB`.  The `wAlphaA`-free companion of
-`deTurckLieWEndoInsert_eq_cometricRaise`. -/
 theorem connDiffDVFInsert_eq_cometricRaise (g₀ g₁ g_ref : SmoothRiemannianMetric I M) :
     slotInsertEndoCc (I := I) (M := M) g₀ 0 (connDiffDVFSection (I := I) (M := M) g₀ g₁ g_ref) =
       cometricRaiseSlot0Field (I := I) (M := M) g₀ 0 (wAlphaB (I := I) (M := M) g₀ g₁ g_ref) := by
@@ -128,7 +108,6 @@ theorem connDiffDVFInsert_eq_cometricRaise (g₀ g₁ g_ref : SmoothRiemannianMe
   rfl
 
 omit [NeZero (Module.finrank ℝ E)] in
-/-- The slot-`0` cometric raise is a jet isometry (generic `(0, s + 2)` field). -/
 lemma norm_iCG_cometricRaiseSlot0Field_eq (g₀ : SmoothRiemannianMetric I M) (s : ℕ)
     (W : SmoothCcTensor g₀ 0 (s + 2)) (i : ℕ) :
     ‖iteratedCovGrad (I := I) g₀ 1 (s + 1) i
@@ -142,10 +121,6 @@ lemma norm_iCG_cometricRaiseSlot0Field_eq (g₀ : SmoothRiemannianMetric I M) (s
   exact rfns_iteratedCovGrad_cometricRaiseSlot0Field_eq (I := I) (M := M) g₀ s W i x
 
 set_option linter.unusedVariables false in
-/-- **Per-order `wAlphaB` jet-`L²` (`ballUniform`).**  The connection-difference half
-`wAlphaB = appCc(wCA)(wOmega)` is `∇²P`-free, so each `∇^i` is bounded uniformly over the ball
-(the `hBsum` arm of `wAlpha_order0_jetL2_generic`, isolated for reuse by the `lc0Insert`-diff
-atom). -/
 private theorem wAlphaB_jetL2_perOrder_generic
     (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
     (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) {R : ℝ} (hR : 0 ≤ R)
@@ -374,8 +349,6 @@ theorem deTurckLieWEndoInsert_realizedFam_rfns_order0_ballUniform
   rw [h1]
   exact hval
 
-/-- Squared triangle over two summands: `t ≤ u + v`, `u² ≤ c₁`, `v² ≤ c₂` give
-`t² ≤ 2·(c₁ + c₂)`. -/
 private theorem sq_le_two_add (t u v c1 c2 : ℝ) (ht : 0 ≤ t) (hu : 0 ≤ u) (hv : 0 ≤ v)
     (htri : t ≤ u + v) (h1 : u ^ 2 ≤ c1) (h2 : v ^ 2 ≤ c2) : t ^ 2 ≤ 2 * (c1 + c2) := by
   have huv : 0 ≤ u + v := by linarith
@@ -385,11 +358,6 @@ set_option linter.unusedVariables false in
 open DifferentialGeometry.PDE.DeTurck.RicciLinearization
   (convexPerturbation convexPerturbation_gFibreOpBound realizedFam_inner_of_mem
     Icc_subset_realizedSmallSet) in
-/-- **`(1, 1)` endo-difference `ballUniform` producer.**  Per-order jet-`L²` bound for the
-slot-`0` insertion of the connection-difference endomorphism DIFFERENCE
-`connDiffDVFSection g₀ g₁ g₀ − connDiffDVFSection g₀ g₁ g_bg`, at `g₁ = realizedFam`, uniform
-over the ball (`∇²P`-free ⟹ pure `ballUniform`, no top term).  The `lc0Insert`-difference `Kc`
-atom consumes this: via `nEndo_diff` the leaf's `(2, 2)` insert-difference reduces to it. -/
 theorem connDiffDVFInsertDiff_realizedFam_jetL2_perOrder_ballUniform
     (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
     (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) {R : ℝ} (hR : 0 ≤ R)
@@ -530,15 +498,8 @@ theorem connDiffDVFInsertDiff_realizedFam_jetL2_perOrder_ballUniform
     have hb := hFbg_nn i
     nlinarith [hF0_nn i, hFbg_nn i]
 
-/-! ### DLb top-separated tower (insert-level producer)
-
-Top-separated `realizedFam` jetL2 producer for `deTurckLieWEndoInsert`, the DLb sibling of the DLa
-kernel top separation.  The top order `∇^{i+2}T` enters only through `wAlphaA = ∇^{i+1}wOmega`; the
-remainder currency is `antidiagonalTupleGridWindow` (integrated by the tame-window integrator).  See
-`DeTurckVectorFieldL2JetBound.md`. -/
 section DLbTopSeparated
 
-/-- Pure `Finset` window-shift helper (copied verbatim from the sibling top-separated files). -/
 private lemma sum_shift_le (g : ℕ → ℝ) (hg : ∀ j, 0 ≤ g j) (m c : ℕ) :
     ∑ i ∈ Finset.range m, g (i + c) ≤ ∑ j ∈ Finset.range (m + c), g j := by
   classical
@@ -557,8 +518,6 @@ private lemma sum_shift_le (g : ℕ → ℝ) (hg : ∀ j, 0 ≤ g j) (m c : ℕ)
     _ ≤ ∑ j ∈ Finset.range (m + c), g j :=
         Finset.sum_le_sum_of_subset_of_nonneg hsub (fun j _ _ => hg j)
 
-/-- Summation of a per-order top-separated jet bound with independent top offset `p` and low-window
-offset `q` (copied from the sibling top-separated files). -/
 private lemma jetL2_sum_lowShift
     (a p q : ℕ) (Ktop : ℝ) (hKtop : 0 ≤ Ktop) (Kc : ℕ → ℝ) (hKc : ∀ i, 0 ≤ Kc i)
     (f w : ℕ → ℝ) (hw : ∀ j, 0 ≤ w j)
@@ -587,9 +546,6 @@ private lemma jetL2_sum_lowShift
     linarith
   linarith [hA, hB]
 
-/-- Reshape the connDiffSection top-separated engine remainder
-`∑_{k<j} b(j-k)·antidiagonalTupleGrid b (k+1)` into `Cj·antidiagonalTupleGridWindow b (j+2)`
-(public-grid analogue of the DLa `engineRem_le_dLaGridWin`). -/
 private lemma engineRem_le_grid (b : ℕ → ℝ) (hb : ∀ j, 0 ≤ b j) (j : ℕ) :
     ∑ k ∈ Finset.range j,
         b (j - k) * Combinatorics.antidiagonalTupleGrid b (k + 1) ≤
@@ -631,9 +587,6 @@ private lemma engineRem_le_grid (b : ℕ → ℝ) (hb : ∀ j, 0 ≤ b j) (j : �
 
 set_option linter.unusedVariables false in
 set_option linter.unusedSectionVars false in
-/-- **connDiffSection top-separated jet bound in `antidiagonalTupleGridWindow` currency.**  Top
-coefficient `Ktop = 2·Kt0` (`R`-independent engine head); remainder is a single grid window (house
-`R`-pattern).  Public-grid re-derivation of the DLa `exists_rfns_connDiffSection_topsep_dla`. -/
 private theorem exists_rfns_connDiff_topsep
     (g₀ : SmoothRiemannianMetric I M) {δ₀ : ℝ} (hδ₀ : δ₀ < 1) :
     ∃ Ktop : ℝ, 0 ≤ Ktop ∧ ∃ Kc : ℕ → ℝ, (∀ j, 0 ≤ Kc j) ∧
@@ -722,10 +675,6 @@ private theorem exists_rfns_connDiff_topsep
 
 set_option linter.unusedVariables false in
 set_option linter.unusedSectionVars false in
-/-- **connDiffSection L2 top-separated bound.**  Integrates `exists_rfns_connDiff_topsep`: the top
-`‖∇^{n+1}P‖²` stays separated with the `R`-free coefficient `Ktop = 2·Kt0`; the grid-window remainder
-integrates to a ball-uniform per-order constant `C n` (absorbed into `Kc·1` downstream via the
-tame-window integrator + the `hPball` conversion `∑_{j≤k}‖∇^jP‖² ≤ (k+1)R²`). -/
 private theorem connDiff_L2_topsep
     (g₀ : SmoothRiemannianMetric I M) (a : ℕ)
     (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) {R : ℝ} (hR : 0 ≤ R)
@@ -752,7 +701,6 @@ private theorem connDiff_L2_topsep
   intro g₁ P htie δ hδ_le hδ0 hδ hPball n hn
   haveI : IsFiniteMeasure (riemannianVolumeMeasure (I := I) (M := M) g₀) :=
     riemannianVolumeMeasure_isFiniteMeasure_of_compactSpace g₀
-  -- per-index grid integrability + ball-uniform integral bound (via tame-window integrator)
   have hAG : ∀ k : ℕ, k ≤ a + 2 →
       MeasureTheory.Integrable (fun x => Combinatorics.antidiagonalTupleGrid
           (fun l => riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + l) x
@@ -786,7 +734,6 @@ private theorem connDiff_L2_topsep
         _ = ((k : ℝ) + 1) * R ^ 2 := by
             rw [Finset.sum_const, Finset.card_range, nsmul_eq_mul, Nat.cast_add, Nat.cast_one]
     exact mul_le_mul_of_nonneg_left (by linarith [hsum]) (hK_nn k)
-  -- window integrability + integral bound
   have hwin_int : MeasureTheory.Integrable (fun x => Combinatorics.antidiagonalTupleGridWindow
       (fun l => riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + l) x
         ((iteratedCovGrad (I := I) g₀ 0 2 l P).toSection x)) (n + 2))
@@ -804,14 +751,12 @@ private theorem connDiff_L2_topsep
       have := Finset.mem_range.mp hk; omega)).1)]
     refine Finset.sum_le_sum (fun k hk => (hAG k ?_).2)
     have := Finset.mem_range.mp hk; omega
-  -- top integrability
   have htop_int : MeasureTheory.Integrable (fun x =>
       riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + (n + 1)) x
         ((iteratedCovGrad (I := I) g₀ 0 2 (n + 1) P).toSection x))
       (riemannianVolumeMeasure (I := I) (M := M) g₀) :=
     integrable_riemannianFiberNormSq_toSection (I := I) (M := M) g₀ 0 (2 + (n + 1))
       (iteratedCovGrad (I := I) g₀ 0 2 (n + 1) P)
-  -- pointwise top-separated bound, integrated
   have hbridge := normSq_le_integral_of_pointwise_fiberNormSq_le_rs (I := I) (M := M) g₀ 1 (2 + n)
     (iteratedCovGrad (I := I) g₀ 1 2 n (connDiffSection (I := I) g₁ g₀))
     (fun x => Ktop_pt * riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + (n + 1)) x
@@ -848,9 +793,6 @@ private theorem connDiff_L2_topsep
 
 set_option linter.unusedVariables false in
 set_option linter.unusedSectionVars false in
-/-- **wXi L2 top-separated bound.**  `wXi = connDiffLoweredCc g₁ − connDiffLoweredCc g_bg`; the
-`g₁` part carries the top `‖∇^{n+1}P‖²` (via `connDiff_L2_topsep`), the `g_bg` part is a `T`-free
-constant folded into `C n`.  `Ktop = 2·(connDiff Ktop)`, `R`-free. -/
 private theorem wXi_L2_topsep
     (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
     (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) {R : ℝ} (hR : 0 ≤ R)
@@ -892,11 +834,6 @@ private theorem wXi_L2_topsep
 
 set_option linter.unusedVariables false in
 set_option linter.unusedSectionVars false in
-/-- **wOmega L2 top-separated bound** (genuine corner peel).  `wOmega = appCc cometricCastG0 wXi`;
-the argCorner Leibniz decomposition isolates the corner `appCcRS ψ_{n,n} (∇ⁿwXi)` — whose
-coefficient fiber norm is the `R`-free order-`0` bound `ΛClow 0` (`rfns_appCcRS_appCcLeibnizPsi_diag_le`
-carries no `appCcGdiag`), feeding `wXi_L2_topsep` for the top `‖∇^{n+1}P‖²` — from a top-free lower
-sum bounded ball-uniformly by the two-arm grid integrator.  `Ktop = 2·ΛClow 0·Ktop_xi`, `R`-free. -/
 private theorem wOmega_L2_topsep
     (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
     (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) {R : ℝ} (hR : 0 ≤ R)
@@ -966,20 +903,17 @@ private theorem wOmega_L2_topsep
     riemannianVolumeMeasure_isFiniteMeasure_of_compactSpace g₀
   obtain ⟨hCsup, hCsum⟩ := hCgen g₁ P hδ_le hδ htie hPball
   obtain ⟨hXlow, hXsum⟩ := hXgen g₁ P htie hδ_le hδ0 hδ hPball
-  -- uniform `R`-free order-0 fiber bound on `cometricCastG0`
   have hc0 : ∀ x : M, riemannianFiberNormSq (I := I) (M := M) g₀ 3 1 x
       ((cometricCastG0 (I := I) g₀ g₁).toSection x) ≤ ΛClow 0 := by
     intro x
     have h := hClow g₁ P htie hδ_le hδ0 hδ hPball 0 (by norm_num) x
     simpa only [iteratedCovGrad_zero] using h
-  -- order-0 sup bound on `wXi` (`√(ΛX 0)`)
   have hX0 : ∀ x : M, riemannianFiberNormSq (I := I) (M := M) g₀ 0 3 x
       ((wXi (I := I) (M := M) g₀ g₁ g_bg).toSection x) ≤ (Real.sqrt (ΛX 0)) ^ 2 := by
     intro x
     rw [Real.sq_sqrt (hΛX_nn 0)]
     have h := hXlow 0 (by norm_num) x
     simpa only [iteratedCovGrad_zero] using h
-  -- integrability of the two arms of the pointwise envelope
   have hwxi_int : MeasureTheory.Integrable
       (fun x => riemannianFiberNormSq (I := I) (M := M) g₀ 0 (3 + n) x
         ((iteratedCovGrad (I := I) g₀ 0 3 n (wXi (I := I) (M := M) g₀ g₁ g_bg)).toSection x))
@@ -989,7 +923,6 @@ private theorem wOmega_L2_topsep
   obtain ⟨htri_int, htri_bd⟩ := hCT n (cometricCastG0 (I := I) g₀ g₁)
     (wXi (I := I) (M := M) g₀ g₁ g_bg) ΛCsup (Real.sqrt (ΛX 0)) hΛCsup_nn (Real.sqrt_nonneg _)
     hCsup hX0
-  -- `wOmega = appCcRS 0 (cometricCastG0) (wXi)`
   have hwform : wOmega (I := I) (M := M) g₀ g₁ g_bg =
       appCcRS (I := I) (M := M) g₀ 0 3 1 (cometricCastG0 (I := I) g₀ g₁)
         (wXi (I := I) (M := M) g₀ g₁ g_bg) := by
@@ -998,7 +931,6 @@ private theorem wOmega_L2_topsep
           (wXi (I := I) (M := M) g₀ g₁ g_bg) from rfl]
     exact (appCcRS_zero_eq_appCc (I := I) (M := M) g₀ 3 1 (cometricCastG0 (I := I) g₀ g₁)
       (wXi (I := I) (M := M) g₀ g₁ g_bg)).symm
-  -- pointwise top-separated envelope for `∇ⁿ wOmega`
   have hpt : ∀ x : M,
       riemannianFiberNormSq (I := I) (M := M) g₀ 0 (1 + n) x
           ((iteratedCovGrad (I := I) g₀ 0 1 n (wOmega (I := I) (M := M) g₀ g₁ g_bg)).toSection x) ≤
@@ -1033,7 +965,6 @@ private theorem wOmega_L2_topsep
                 (wXi (I := I) (M := M) g₀ g₁ g_bg))).toSection x
         from by rw [SmoothCcTensor.toSection_add]; rfl]
     refine le_trans (riemannianFiberNormSq_add_le (I := I) (M := M) g₀ 0 (1 + n) x _ _) ?_
-    -- corner: coefficient fiber norm `≤ ΛClow 0`, no `appCcGdiag`
     have hcorner : riemannianFiberNormSq (I := I) (M := M) g₀ 0 (1 + n) x
         ((appCcRS (I := I) (M := M) g₀ 0 (3 + n) (1 + n)
           (appCcLeibnizPsi (I := I) (M := M) g₀ 3 1 (cometricCastG0 (I := I) g₀ g₁) n n)
@@ -1046,7 +977,6 @@ private theorem wOmega_L2_topsep
         (iteratedCovGrad (I := I) g₀ 0 3 n (wXi (I := I) (M := M) g₀ g₁ g_bg)) x) ?_
       exact mul_le_mul_of_nonneg_right (hc0 x)
         (riemannianFiberNormSq_nonneg (I := I) (M := M) g₀ 0 (3 + n) x _)
-    -- lower sum: top-free, bounded by the two-arm triangular grid
     have hlower : riemannianFiberNormSq (I := I) (M := M) g₀ 0 (1 + n) x
         ((∑ k ∈ Finset.range n,
           appCcRS (I := I) (M := M) g₀ 0 (3 + k) (1 + n)
@@ -1065,7 +995,6 @@ private theorem wOmega_L2_topsep
         (cometricCastG0 (I := I) g₀ g₁) (wXi (I := I) (M := M) g₀ g₁ g_bg) n x) ?_
       refine mul_le_mul_of_nonneg_left ?_
         (mul_nonneg (Nat.cast_nonneg n) (appCcGdiag_nonneg (E := E) n))
-      -- antidiagonal ≤ triangular grid
       set A : ℕ → ℝ := fun i => riemannianFiberNormSq (I := I) (M := M) g₀ 3 (1 + i) x
         ((iteratedCovGrad (I := I) g₀ 3 1 i (cometricCastG0 (I := I) g₀ g₁)).toSection x)
         with hA_def
@@ -1114,7 +1043,6 @@ private theorem wOmega_L2_topsep
     nlinarith [hcorner, hlower,
       riemannianFiberNormSq_nonneg (I := I) (M := M) g₀ 0 (3 + n) x
         ((iteratedCovGrad (I := I) g₀ 0 3 n (wXi (I := I) (M := M) g₀ g₁ g_bg)).toSection x)]
-  -- integrate the envelope
   have hbridge := normSq_le_integral_of_pointwise_fiberNormSq_le_rs (I := I) (M := M) g₀ 0 (1 + n)
     (iteratedCovGrad (I := I) g₀ 0 1 n (wOmega (I := I) (M := M) g₀ g₁ g_bg))
     (fun x => (2 * ΛClow 0) * riemannianFiberNormSq (I := I) (M := M) g₀ 0 (3 + n) x
@@ -1133,14 +1061,12 @@ private theorem wOmega_L2_topsep
   rw [MeasureTheory.integral_add (hwxi_int.const_mul (2 * ΛClow 0))
       (htri_int.const_mul (2 * ((n : ℝ) * appCcGdiag (E := E) n))),
     MeasureTheory.integral_const_mul, MeasureTheory.integral_const_mul] at hbridge
-  -- ∫ wxi = ‖∇ⁿ wXi‖²
   have hwxi_eq : (∫ x, riemannianFiberNormSq (I := I) (M := M) g₀ 0 (3 + n) x
         ((iteratedCovGrad (I := I) g₀ 0 3 n (wXi (I := I) (M := M) g₀ g₁ g_bg)).toSection x)
         ∂(riemannianVolumeMeasure (I := I) (M := M) g₀)) =
       ‖iteratedCovGrad (I := I) g₀ 0 3 n (wXi (I := I) (M := M) g₀ g₁ g_bg)‖ ^ 2 := by
     rw [SmoothCcTensor.norm_def, tensorL2Norm_sq_toFun_eq_integral_riemannianFiberNormSq_rs]
   rw [hwxi_eq] at hbridge
-  -- two-arm integral bound → ball-uniform constant
   have hgrid_ballU : (∫ x, (∑ i ∈ Finset.range (n + 1),
         riemannianFiberNormSq (I := I) (M := M) g₀ 3 (1 + i) x
             ((iteratedCovGrad (I := I) g₀ 3 1 i (cometricCastG0 (I := I) g₀ g₁)).toSection x)
@@ -1160,7 +1086,6 @@ private theorem wOmega_L2_topsep
         ‖iteratedCovGrad (I := I) g₀ 0 3 l (wXi (I := I) (M := M) g₀ g₁ g_bg)‖ ^ 2) ≤
         ΛCsup ^ 2 * FX n := mul_le_mul_of_nonneg_left (hXsum n hn) (sq_nonneg ΛCsup)
     linarith [e1, e2]
-  -- assemble
   have htop := hxi g₁ P htie hδ_le hδ0 hδ hPball n hn
   have hc1 : (2 * ΛClow 0) *
         ‖iteratedCovGrad (I := I) g₀ 0 3 n (wXi (I := I) (M := M) g₀ g₁ g_bg)‖ ^ 2 ≤
@@ -1190,10 +1115,6 @@ private theorem wOmega_L2_topsep
 
 set_option linter.unusedVariables false in
 set_option linter.unusedSectionVars false in
-/-- **wAlpha L2 top-separated bound.**  `wAlpha = wAlphaA + wAlphaB`; the `wAlphaA` arm is
-`‖∇ⁱwAlphaA‖² = ‖∇^{i+1}wOmega‖²` (`norm_iCG_wAlphaA_eq_succ_wOmega`), top-separated by
-`wOmega_L2_topsep` at `n = i+1` (top `‖∇^{i+2}P‖²`); the `wAlphaB` arm is a two-arm product
-`appCc wCA wOmega`, bounded ball-uniformly (top-free, folded into `C`).  `Ktop = 2·Ktop_om`. -/
 private theorem wAlpha_L2_topsep
     (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
     (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) {R : ℝ} (hR : 0 ≤ R)
@@ -1271,7 +1192,6 @@ private theorem wAlpha_L2_topsep
   have hBform : wAlphaB (I := I) (M := M) g₀ g₁ g_bg =
       appCc (I := I) (M := M) g₀ 1 2 (wCA (I := I) (M := M) g₀ g₁)
         (wOmega (I := I) (M := M) g₀ g₁ g_bg) := rfl
-  -- wAlphaB ball-uniform (top-free)
   have hBi : ‖iteratedCovGrad (I := I) g₀ 0 2 i (wAlphaB (I := I) (M := M) g₀ g₁ g_bg)‖ ^ 2 ≤
       appCcGdiag (E := E) i * (CT i * (ΛO 0 * FCd i + ΛCd 0 * FO i)) := by
     have hO0 : ∀ x : M, riemannianFiberNormSq (I := I) (M := M) g₀ 0 1 x
@@ -1319,12 +1239,10 @@ private theorem wAlpha_L2_topsep
         ‖iteratedCovGrad (I := I) g₀ 0 1 l (wOmega (I := I) (M := M) g₀ g₁ g_bg)‖ ^ 2) ≤
         ΛCd 0 * FO i := mul_le_mul_of_nonneg_left (hOsum i (by omega)) (hΛCd_nn 0)
     linarith [e1, e2]
-  -- wAlphaA top-separated (top `‖∇^{i+2}P‖²`)
   have hAi : ‖iteratedCovGrad (I := I) g₀ 0 2 i (wAlphaA (I := I) (M := M) g₀ g₁ g_bg)‖ ^ 2 ≤
       Ktop_om * ‖iteratedCovGrad (I := I) g₀ 0 2 (i + 2) P‖ ^ 2 + Com (i + 1) := by
     rw [norm_iCG_wAlphaA_eq_succ_wOmega (I := I) (M := M) g₀ g₁ g_bg i]
     exact hom g₁ P htie hδ_le hδ0 hδ hPball (i + 1) (by omega)
-  -- wAlpha = wAlphaA + wAlphaB, triangle
   have htri : ‖iteratedCovGrad (I := I) g₀ 0 2 i (wAlpha (I := I) (M := M) g₀ g₁ g_bg)‖ ≤
       ‖iteratedCovGrad (I := I) g₀ 0 2 i (wAlphaA (I := I) (M := M) g₀ g₁ g_bg)‖ +
         ‖iteratedCovGrad (I := I) g₀ 0 2 i (wAlphaB (I := I) (M := M) g₀ g₁ g_bg)‖ := by
@@ -1336,8 +1254,6 @@ private theorem wAlpha_L2_topsep
     norm_nonneg (iteratedCovGrad (I := I) g₀ 0 2 i (wAlpha (I := I) (M := M) g₀ g₁ g_bg)),
     sq_nonneg (‖iteratedCovGrad (I := I) g₀ 0 2 i (wAlphaA (I := I) (M := M) g₀ g₁ g_bg)‖ -
       ‖iteratedCovGrad (I := I) g₀ 0 2 i (wAlphaB (I := I) (M := M) g₀ g₁ g_bg)‖)]
-
-
 
 end DLbTopSeparated
 

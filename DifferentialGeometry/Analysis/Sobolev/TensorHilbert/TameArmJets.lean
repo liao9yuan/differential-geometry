@@ -1,41 +1,6 @@
 import DifferentialGeometry.Analysis.Sobolev.TensorHilbert.TameMarkWin
 import DifferentialGeometry.Analysis.Sobolev.TensorHilbert.SelfLowCapWindows
 
-/-!
-# The quadratic zero-order arms with their `∇P` factors kept explicit
-
-`SelfLowCapWindows.lean` produces each `selfLow_split` summand's window in the
-`∇P`-**capped** currency.  That currency spends both caps inside `shiftConst`, so
-its constants have `Λ`-degree growing with the order — fatal for the tame
-deliverable, which needs a constant affine in `‖∇P‖²_∞`.
-
-This module re-derives the same trees in the **marked** currency of
-`TameMarkWin.lean`, where the two `∇P` factors of a quadratic arm stay visible
-and **no cap is spent at all**: the resulting constants are state-free.
-
-Currently covered: the `A·A` arm `ricciAAArm` (`ricciAAMark`).  The chain is a
-one-for-one re-run of `ricciAACap` with `capOfArm ↦ mkOfTop`:
-
-```
-connDiffSection      topSeparated  -->  u = 1   (mkOfTop; NO cap)
-  slotExtend ×2, reindex           -->  u = 1   (insertion field)
-  slotExtend ×1, reindex           -->  u = 1   (inner insertion field)
-permCoeff (Fin 3 / Fin 4)          -->  u = 0   (mkOfBnd)
-  aaCoreP / aaCore = perm ⋆ (Ins ⋆ (perm ⋆ Inn))
-                                   -->  u = 2   (mkApp: the marks ADD)
-ricciAAKer = Σ six pieces          -->  u = 2   (mkAdd, mkReindex)
-fourTraceCast                      -->  u = 0   (mkOfWin, offset `+1`)
-ricciAAArm = cast ⋆ ricciAAKer     -->  u = 2   ✓
-```
-
-The load-bearing input is `rfns_iteratedCovGrad_connDiffSection_topSeparated_le`:
-it already presents `∇ʲ(connDiffSection)` as `Ktop·|∇^{j+1}P|²` plus residual
-monomials `|∇^{j-k}P|²·grid(k+1)`, every one of which carries an EXPLICIT jet of
-the state of order at least one and has total weight exactly `j + 1`.  That is a
-once-marked window; the ordinary `atgw bP (j+2)` window of the same arm is not,
-because it also admits the bare constant and the unaccompanied top jet.
--/
-
 noncomputable section
 
 set_option autoImplicit false
@@ -66,17 +31,7 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
-/-! ### The connection difference, once marked -/
-
 set_option linter.unusedVariables false in
-/-- **The connection difference carries an explicit `∇P` factor.**
-
-`|∇ʲ(connDiffSection g₁ g₀)|²(x) ≤ Kcd j · markGrid (bP x) 1 j`: every monomial
-of the bound has an explicit factor `|∇^cP|²` with `c ≥ 1` and total weight
-exactly `j + 1`.  This is `rfns_iteratedCovGrad_connDiffSection_topSeparated_le`
-read in the marked currency, and it is the entry point of the whole tame chain —
-`rfns_iCG_connDiffSection_atgw_rf`, the same arm's ordinary window, has thrown
-the mark away. -/
 theorem connDiffMark (g₀ : SmoothRiemannianMetric I M) {δ₀ : ℝ} (hδ₀ : δ₀ < 1) :
     ∃ Kcd : ℕ → ℝ, (∀ j, 0 ≤ Kcd j) ∧
       ∀ (g₁ : SmoothRiemannianMetric I M) (P : SmoothCcTensor g₀ 0 2)
@@ -120,21 +75,7 @@ theorem connDiffMark (g₀ : SmoothRiemannianMetric I M) {δ₀ : ℝ} (hδ₀ :
             (gridBase (I := I) (M := M) g₀ P x) (k + 1) := h2
   linarith [h1', h2']
 
-/-! ### The `A·A` arm -/
-
 set_option linter.unusedVariables false in
-/-- **The `A·A` Ricci arm in the marked currency: two explicit `∇P` factors.**
-
-`|∇ⁱ(ricciAAArm g₀ g₁)|²(x) ≤ K i · markGrid (bP x) 2 i` with `K` **state-free** —
-no `Λ` and no Sobolev radius appear anywhere in the statement.  Every monomial of
-the bound carries two explicit jets of the state of order at least one and has
-total weight at most `i + 2`, so the out-of-budget single jet `|∇^{i+2}P|²` does
-not occur.
-
-Compare `ricciAACap`, whose constant is `foldConst` of `shiftConst Λ (i+1)`
-factors — `Λ`-degree `3(i+1)`, i.e. degree `6(i+1)` in `‖T‖_{H³}`.  The degree is
-gone here because no monomial is ever re-based: the marks are carried, not
-paid. -/
 theorem ricciAAMark (g₀ : SmoothRiemannianMetric I M) {δ₀ : ℝ} (hδ₀ : δ₀ < 1) :
     ∃ K : ℕ → ℝ, (∀ i, 0 ≤ K i) ∧
       ∀ (g₁ : SmoothRiemannianMetric I M) (P : SmoothCcTensor g₀ 0 2)
@@ -189,7 +130,6 @@ theorem ricciAAMark (g₀ : SmoothRiemannianMetric I M) {δ₀ : ℝ} (hδ₀ : 
     fun i => foldConst_nn (u := 0) (v := 0) hKft_nn hK94_nn i, ?_⟩
   intro g₁ P htie δ hδ_le hδ0 hδ
   have hcdP := hcd g₁ P htie hδ_le hδ0 hδ
-  -- the two permutation coefficients, state-free, unmarked
   have hP4 : ∀ ρ : Equiv.Perm (Fin 4),
       HasMarkWin (I := I) (M := M) g₀ P (permCoeff (I := I) (M := M) g₀ ρ) 0 SP4 := by
     intro ρ
@@ -204,7 +144,6 @@ theorem ricciAAMark (g₀ : SmoothRiemannianMetric I M) {δ₀ : ℝ} (hδ₀ : 
       (mkOfBnd (I := I) (M := M) g₀ P _ (fun i => hS3_nn ρ i) (fun i x => hS3 ρ i x))
     exact Finset.single_le_sum (f := fun r => S3 r i)
       (fun r _ => hS3_nn r i) (Finset.mem_univ ρ)
-  -- the two insertions, each once marked
   have hInn : HasMarkWin (I := I) (M := M) g₀ P
       (connDiffContrInsertionInnerField (I := I) g₀ g₁) 1 KInn := by
     refine mkCongr (I := I) (M := M) g₀ P
@@ -217,7 +156,6 @@ theorem ricciAAMark (g₀ : SmoothRiemannianMetric I M) {δ₀ : ℝ} (hδ₀ : 
       (connDiffContrInsertionField_eq_reindex_slotExtend_two (I := I) (M := M) g₀ g₁) ?_
     exact mkReindex (I := I) (M := M) g₀ P coreInPerm201
       (mkSlotExt (I := I) (M := M) g₀ P (mkSlotExt (I := I) (M := M) g₀ P hcdP))
-  -- the two shapes, each twice marked
   have hShapeA : ∀ (ρ : Equiv.Perm (Fin 4)) (ρ' : Equiv.Perm (Fin 3)),
       HasMarkWin (I := I) (M := M) g₀ P
         (aaCoreP (I := I) (M := M) g₀ g₁ ρ ρ') 2 KA := by
@@ -250,7 +188,6 @@ theorem ricciAAMark (g₀ : SmoothRiemannianMetric I M) {δ₀ : ℝ} (hδ₀ : 
       HasMarkWin (I := I) (M := M) g₀ P (aaCore (I := I) (M := M) g₀ g₁ ρ) 2 KQ :=
     fun ρ => mkMono (I := I) (M := M) g₀ P
       (fun i => by have := hKA_nn i; simp only [hKQ_def]; linarith) (hShapeB ρ)
-  -- the six pieces, summed
   have hKer : HasMarkWin (I := I) (M := M) g₀ P
       (ricciAAKer (I := I) (M := M) g₀ g₁) 2 (fun i => 94 * KQ i) := by
     refine mkCongr (I := I) (M := M) g₀ P
@@ -268,32 +205,12 @@ theorem ricciAAMark (g₀ : SmoothRiemannianMetric I M) {δ₀ : ℝ} (hδ₀ : 
         (mkReindex (I := I) (M := M) g₀ P innerCoreInPerm10 (hA' _ _)))
     intro i
     exact le_of_eq (by ring)
-  -- the four-trace cast: no derivative of the state, unmarked
   have hFT : HasMarkWin (I := I) (M := M) g₀ P
       (ricciCometricFourTraceCastG0 (I := I) g₀ g₁) 0 Kft :=
     mkOfWin (I := I) (M := M) g₀ P _ (fun n y => hft g₁ P htie hδ_le hδ0 hδ n y)
   simpa using mkApp (I := I) (M := M) g₀ P _ _ hKft_nn hK94_nn hFT hKer
 
 set_option linter.unusedVariables false in
-/-- **The `A·A` arm's tame `L²` jet bound — the deliverable shape.**
-
-```
-‖∇ⁱ(ricciAAArm g₀ g₁)‖²  ≤  (K₀ i + K₂ i · ‖P‖²_{H³}) · (1 + ∑_{j < i+2} ‖∇ʲP‖²)
-```
-
-with `K₀, K₂` constants of the background metric and the order alone — chosen
-BEFORE the state, no Sobolev radius `R₀`, no opaque cap, no Galerkin index, and
-exactly ONE power of `‖P‖²_{H³}` (here written explicitly as
-`∑_{j < 3} ‖∇^{1+j}P‖²`, the jet form `gradCapLin` produces).
-
-The two inputs are the marked window `ricciAAMark` (state-free constants, the two
-`∇P` factors explicit) and the tame integration `markJet`; the `∇P` cap is spent
-exactly once, at the very end, through `gradCapLin`.  The only hypothesis on the
-state beyond the standard fibre-operator bound is the δ-anchor `|P|_∞ ≤ 1`, which
-at `finrank = 3` is implied by `‖P‖_∞ ≤ finrank/3`.
-
-Compare `ricciAACap`-then-`capJet`: same left-hand side, but a constant of
-`Λ`-degree `3(i+1)`, i.e. degree `6(i+1)` in `‖P‖_{H³}`. -/
 theorem ricciAAJet (hDim : Module.finrank ℝ E = 3)
     (g₀ : SmoothRiemannianMetric I M) {δ₀ : ℝ} (hδ₀ : δ₀ < 1) :
     ∃ K0 K2 : ℕ → ℝ, (∀ i, 0 ≤ K0 i) ∧ (∀ i, 0 ≤ K2 i) ∧
@@ -342,4 +259,3 @@ theorem ricciAAJet (hDim : Module.finrank ℝ E = 3)
 end DifferentialGeometry.Integral.Connection
 
 end
-

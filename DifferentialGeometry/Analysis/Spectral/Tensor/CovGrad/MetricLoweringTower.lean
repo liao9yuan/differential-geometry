@@ -5,21 +5,6 @@ import DifferentialGeometry.Geometry.Connection.MetricCompatibility.TensorLoweri
 import DifferentialGeometry.Geometry.Connection.MetricCompatibility.TensorRSMetricCompatible
 import DifferentialGeometry.Tensor.RSTensor.Coordinates.Field
 
-/-!
-# Metric lowering of mixed tensor jet towers
-
-This file packages metric lowering of every contravariant slot of a smooth
-compactly-supported `(r, s)`-tensor as a covariant `(0, r + s)`-tensor.  The
-Levi-Civita connection preserves this lowering.  Up to the canonical constant
-slot permutation which moves each new derivative slot past the lowered upper
-block, pointwise fibre norms and `L²` norms of the covariant jet tower are
-therefore unchanged.
-
-Only the order window `j ≤ 2` is exported here.  It is the exact window needed
-by the three-dimensional class-uniform Morrey producer; no general-dimensional
-Sobolev-window bookkeeping belongs in this lowering layer.
--/
-
 set_option autoImplicit false
 
 noncomputable section
@@ -56,25 +41,18 @@ private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
-/-- The smooth covariant field obtained by lowering every upper index of a
-mixed tensor section with the same metric that defines its covariant
-derivative. -/
 def lowerRSField (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (T : SmoothCcTensor g r s) :
     Tensor0SField (𝕜 := ℝ) (E := E) (H := H) (I := I) (M := M) ∞ (r + s) :=
   ⟨liftedTensorSection (I := I) (M := M) g r s T.toSection,
     liftedTensorSection_contMDiff (I := I) (M := M) g r s T.toSection⟩
 
-/-- Lower every contravariant index of a compactly-supported smooth mixed
-tensor.  Compact support is automatic on the closed manifold. -/
 def lowerCc (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (T : SmoothCcTensor g r s) : SmoothCcTensor g 0 (r + s) where
   toSection := (lowerRSField (I := I) (M := M) g r s T).toTensorRSField ∞
   hasCompactSupport := HasCompactSupport.of_compactSpace _
 
 omit [I.Boundaryless] in
-/-- The section value of `lowerCc` is the canonical upper-rank-zero lift of
-the pointwise metric-lowered tensor. -/
 @[simp] theorem lowerCc_apply (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (T : SmoothCcTensor g r s) (x : M) :
     (lowerCc (I := I) (M := M) g r s T).toSection x =
@@ -85,7 +63,6 @@ the pointwise metric-lowered tensor. -/
     (lowerRSField (I := I) (M := M) g r s T) x
 
 omit [I.Boundaryless] in
-/-- Unit evaluation removes the canonical upper-rank-zero lift in `lowerCc`. -/
 @[simp] theorem lowerCc_unit (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (T : SmoothCcTensor g r s) (x : M) :
     (show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace (r + s) I x from
@@ -102,7 +79,6 @@ omit [I.Boundaryless] in
   rw [hunit, one_smul]
 
 omit [I.Boundaryless] in
-/-- Same-metric index lowering is an exact pointwise fibre-norm isometry. -/
 theorem lowerCc_rfns (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (T : SmoothCcTensor g r s) (x : M) :
     riemannianFiberNormSq (I := I) (M := M) g 0 (r + s) x
@@ -117,9 +93,6 @@ theorem lowerCc_rfns (g : SmoothRiemannianMetric I M) (r s : ℕ)
 private def lowerGradPerm (r s : ℕ) : Equiv.Perm (Fin ((r + s) + 1)) :=
   Fin.cycleRange ⟨r, by omega⟩
 
-/-- One covariant gradient commutes with same-metric lowering up to the
-constant cycle which moves the new derivative slot past the lowered upper
-block. -/
 private lemma lowerCc_grad_rel (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (T : SmoothCcTensor g r s) :
     ∀ y : M,
@@ -257,14 +230,6 @@ private lemma lowerCc_grad_rfns (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (covGrad (I := I) (M := M) g r s T) x
   simpa only [iteratedCovGrad_zero, Nat.add_zero] using hperm.trans hlower
 
-/-- Lowering commutes with the covariant jet tower, up to the canonical slot
-rotation, and hence preserves the pointwise fibre norm.  The exported order
-budget is exactly the three-dimensional Morrey window `j = 0,1,2`.
-
-The remaining proof is a bounded slot-transport argument: at one derivative
-the words `[D,U,L]` and `[U,D,L]` differ by `Fin.cycleRange r`; metric
-parallelism is `loweredCovDerivAt_eq_lower_tensorCovDerivAt_rs`, and the second
-step follows from the existing iterated slot-permutation naturality theorem. -/
 theorem lowerCc_jet_rfns (g : SmoothRiemannianMetric I M) (r s j : ℕ)
     (T : SmoothCcTensor g r s) (hj : j ≤ 2) (x : M) :
     riemannianFiberNormSq (I := I) (M := M) g 0 ((r + s) + j) x
@@ -293,8 +258,6 @@ theorem lowerCc_jet_rfns (g : SmoothRiemannianMetric I M) (r s j : ℕ)
     simpa only [iteratedCovGrad_succ, iteratedCovGrad_zero, Nat.add_zero] using
       hperm.trans hnext
 
-/-- The `L²` norm of each order-`≤ 2` mixed covariant jet is unchanged by
-same-metric lowering. -/
 theorem lowerCc_jet_norm (g : SmoothRiemannianMetric I M) (r s j : ℕ)
     (T : SmoothCcTensor g r s) (hj : j ≤ 2) :
     ‖PDE.RicciFlow.iteratedCovGrad

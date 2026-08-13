@@ -4,20 +4,6 @@ import Mathlib.Analysis.Calculus.TangentCone.Basic
 import Mathlib.Data.Nat.Choose.Sum
 import Mathlib.Topology.Order.Compact
 
-/-!
-# All-order Leibniz bound for a single-difference scalar product
-
-The analytic engine of the all-order (Faà-di-Bruno) chart-jet Lipschitz estimate for
-the Ricci–DeTurck right-hand side. The chart-coordinate Ricci and Lie–DeTurck
-components are polynomial/rational expressions in the chart-Gram entries, the inverse
-chart-Gram, and their partial derivatives. Their difference between two metrics
-telescopes, term by term, into a finite sum of products in which **exactly one factor
-is a difference** of constituent scalar fields and every other factor is a smooth scalar
-field uniformly bounded in every derivative order on a compact set.
-
-This file proves the order-`N` norm bound for one such single-difference product.
--/
-
 noncomputable section
 
 open Set Filter
@@ -31,8 +17,6 @@ namespace DeTurckCoefficients
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
 
-/-- The order-`N` iterated-derivative seminorm of a scalar field `f` on a set `s`,
-evaluated at `y`. -/
 def iteratedFDerivSeminorm (N : ℕ) (f : E → ℝ) (s : Set E) (y : E) : ℝ :=
   ∑ l ∈ Finset.range (N + 1), ‖iteratedFDerivWithin ℝ l f s y‖
 
@@ -40,7 +24,6 @@ lemma iteratedFDerivSeminorm_nonneg (N : ℕ) (f : E → ℝ) (s : Set E) (y : E
     0 ≤ iteratedFDerivSeminorm N f s y :=
   Finset.sum_nonneg fun _ _ => norm_nonneg _
 
-/-- The order-`N` seminorm is monotone in `N`. -/
 lemma iteratedFDerivSeminorm_mono
     {N N' : ℕ} (hN : N ≤ N') (f : E → ℝ) (s : Set E) (y : E) :
     iteratedFDerivSeminorm N f s y ≤ iteratedFDerivSeminorm N' f s y := by
@@ -48,14 +31,12 @@ lemma iteratedFDerivSeminorm_mono
   refine Finset.sum_le_sum_of_subset_of_nonneg ?_ (fun _ _ _ => norm_nonneg _)
   exact Finset.range_mono (Nat.succ_le_succ hN)
 
-/-- Each iterated derivative of order `l ≤ N` is bounded by the order-`N` seminorm. -/
 lemma norm_iteratedFDerivWithin_le_seminorm
     {N l : ℕ} (hl : l ≤ N) (f : E → ℝ) (s : Set E) (y : E) :
     ‖iteratedFDerivWithin ℝ l f s y‖ ≤ iteratedFDerivSeminorm N f s y :=
   Finset.single_le_sum (f := fun l => ‖iteratedFDerivWithin ℝ l f s y‖)
     (fun _ _ => norm_nonneg _) (Finset.mem_range.mpr (Nat.lt_succ_of_le hl))
 
-/-- The order-`N` seminorm of a difference is symmetric under swapping its terms. -/
 lemma iteratedFDerivSeminorm_sub_comm
     {f g : E → ℝ} {s : Set E} (hs : UniqueDiffOn ℝ s) {y : E} (hy : y ∈ s) (N : ℕ) :
     iteratedFDerivSeminorm N (fun z => f z - g z) s y =
@@ -73,7 +54,6 @@ lemma iteratedFDerivSeminorm_sub_comm
           iteratedFDerivWithin_neg_apply hs hy
   rw [hvec, norm_neg]
 
-/-- A smooth scalar field is uniformly `Cᴺ`-bounded on a compact subset of its open domain. -/
 theorem exists_uniform_iteratedFDerivWithin_bound_of_contDiffOn
     {f : E → ℝ} {s : Set E} (hs : IsOpen s) (hf : ContDiffOn ℝ ∞ f s)
     {K : Set E} (hK : IsCompact K) (hKsub : K ⊆ s) (N : ℕ) :
@@ -100,7 +80,6 @@ theorem exists_uniform_iteratedFDerivWithin_bound_of_contDiffOn
   exact Finset.single_le_sum (f := fun m => Bm m) (fun i _ => hBm_nn i)
     (Finset.mem_range.mpr (Nat.lt_succ_of_le hmN))
 
-/-- The order-`N` Leibniz bound for a single-difference scalar product. -/
 theorem norm_iteratedFDerivWithin_mul_le_uniformBound
     {δ h : E → ℝ} {s : Set E} (hs : IsOpen s)
     (hδ : ContDiffOn ℝ ∞ δ s) (hh : ContDiffOn ℝ ∞ h s)

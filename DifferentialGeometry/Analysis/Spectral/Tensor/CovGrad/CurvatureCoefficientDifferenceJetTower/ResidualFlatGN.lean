@@ -21,22 +21,6 @@ import DifferentialGeometry.Analysis.Sobolev.BoundedFactorProductGrid
 import Mathlib.Analysis.MeanInequalities
 import Mathlib.Data.Fin.Tuple.NatAntidiagonal
 
-/-!
-# Gagliardo–Nirenberg interpolation input for the capped-top-layer flat integral
-
-The `hGNv` proof block extracted from
-`boundedFactorGrid_cappedTopLayer_integral_flat` (`ResidualFlat.lean`) so that it
-elaborates in its own Lean process; a memory refactor only, the hog theorem's
-statement is unchanged.
-
-The interpolation constant is passed in as a function `Cgn` together with the
-single identification `hCgn_ch` naming it as the chosen witness of the
-Gagliardo–Nirenberg existential, so that the `Exists.choose` bookkeeping happens
-once, in the consumer.
-
-Chunk map: `../CurvatureCoefficientDifferenceJetTower.md`.
--/
-
 noncomputable section
 
 set_option linter.style.setOption false
@@ -70,9 +54,6 @@ private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
 namespace CurvatureCoefficientDifferenceJetTower
 
-/-- Gagliardo–Nirenberg interpolation for the intermediate jets of `∇²P`, with
-the interpolation constant supplied as `Cgn i₀` through the identification
-`hCgn_ch`, and the top jet written as a `SmoothCcTensor` norm. -/
 theorem jetGNInterp (g₀ : SmoothRiemannianMetric I M) (P : SmoothCcTensor g₀ 0 2)
     {Cgn : ℕ → ℝ}
     (hCgn_ch : ∀ (k : ℕ) (hk : 1 ≤ k),

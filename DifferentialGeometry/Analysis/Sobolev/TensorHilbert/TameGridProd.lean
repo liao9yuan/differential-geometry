@@ -2,46 +2,6 @@ import DifferentialGeometry.Analysis.Sobolev.TensorHilbert.GradCapAtgw
 import DifferentialGeometry.Analysis.Sobolev.TensorHilbert.DeTurckVFEndoInsertProducers
 import DifferentialGeometry.Analysis.Parabolic.RicciLinearization.CurvatureRefoldMonomialFibreNormBound
 
-/-!
-# The tame currency: grid products whose constant is affine in the `∇P` cap
-
-The capped currency of `GradCapAtgw.lean` runs the whole antidiagonal grid in
-the shifted (`∇P`) base, so every tuple entry is charged to `Λ₁ = ‖∇P‖_∞` and
-the resulting constants are polynomials in `Λ₁` whose degree grows with the jet
-order.  For the quadratic C0 summands that is fatal: the target constant must be
-**affine** in `Λ₁²` (one power of `‖T‖²_{H³}`), not a growing power.
-
-This module supplies the currency in which that is possible.  The mechanism is
-the classical Moser/Gagliardo–Nirenberg tame split: measure a single `∇P` factor
-in `L^∞` (one power of `Λ₁`) and interpolate every remaining factor at the
-*fixed* `δ`-anchor `‖P‖_∞ ≤ 1`, where the interpolation constant no longer sees
-the state.
-
-* `gridIntUnit` — the **state-free** per-antidiagonal grid-product integral.  It
-  is `grid_prod_int_le` with the order-zero cap normalized to `Λ₀ ≤ 1`: the
-  workhorse constant `(max Λ₀ (max C 1))^{7i}` then collapses to `(max C 1)^{7i}`,
-  which depends on the background metric and the order alone.  Unlike
-  `atgGridIntRs` the top jet is kept as a bare `‖∇ⁱP‖²` with no additive `1`,
-  which is what lets a rescaling be undone without creating a `Λ₁⁴` term.
-* `gridIntTwo` — the two-factor specialization, the shape every Leibniz product
-  node actually produces.
-* `gridIntGrad` — **the quadratic tame product**.  For `c₁ + c₂ = i + 2` with
-  `c₁, c₂ ≥ 1`,
-  `∫ |∇^{c₁}P|²·|∇^{c₂}P|² ≤ K i · (1 + Λ₁²) · ‖∇^{i+1}P‖²`,
-  with `K` state-free.  This is the first estimate in the tree in which a
-  product of two once-differentiated arms lands inside the `range (i+2)` budget
-  at a constant that is affine — not a growing power — in the `∇P` cap.  The
-  proof rescales `∇P` by `max Λ₁ 1` to normalize its sup to `1`, applies
-  `gridIntUnit` in the shifted base at total order `i`, and undoes the rescaling;
-  the two orders `i ≤ 1`, where the shifted grid has no room, are closed by
-  `intCapMul` instead.
-* `gradCapLin` — the `∇P` cap with its `H³` dependence kept **explicit**:
-  `|∇T|²(x) ≤ c · ∑_{j<3} ‖∇^{1+j}T‖²`, `c` a constant of the background alone.
-  `gradCapOfJets` hides that dependence inside an existential over a fixed
-  radius, which is exactly why the capped currency could not exhibit its own
-  degree; this is the form in which `Λ₁²` may be replaced by `c‖T‖²_{H³}`.
--/
-
 noncomputable section
 
 set_option linter.style.setOption false
@@ -70,8 +30,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
-/-! ### Continuity and integrability of fibre-norm products -/
-
 set_option linter.unusedSectionVars false in
 private theorem contRfns (g₀ : SmoothRiemannianMetric I M) {r s : ℕ}
     (S : SmoothCcTensor g₀ r s) :
@@ -83,12 +41,6 @@ private theorem contRfns (g₀ : SmoothRiemannianMetric I M) {r s : ℕ}
       (S.toSection x),
     ← Integral.L2.SmoothCcTensor.toFun_apply (I := I) (M := M) S x]
 
-/-- **The `L^∞`-capped factor comes out of a fibre-norm product integral.**
-
-If the fibre norm of `A` is bounded by `Λ` everywhere, then the integral of
-`|A|²·|B|²` is at most `Λ²‖B‖²_{L²}`.  This is the degenerate (`no interpolation
-needed`) end of the tame split, used at the two orders where the shifted grid is
-too short to carry a two-factor tuple. -/
 private theorem intCapMul (g₀ : SmoothRiemannianMetric I M) {r s t : ℕ}
     (A : SmoothCcTensor g₀ r s) (B : SmoothCcTensor g₀ r t) {Λ : ℝ}
     (hA : ∀ x : M, riemannianFiberNormSq (I := I) (M := M) g₀ r s x
@@ -130,10 +82,6 @@ private theorem intCapMul (g₀ : SmoothRiemannianMetric I M) {r s t : ℕ}
   rw [hnorm]
 
 omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] in
-/-- **Scaling of the `L²` norm of a smooth compactly supported tensor.**
-
-`SmoothCcTensor` carries a seminorm but no `NormedSpace` instance, so the
-scaling law is proved through the fibre-norm integral. -/
 private theorem normSqSmul (g₀ : SmoothRiemannianMetric I M) {r s : ℕ} (c : ℝ)
     (S : SmoothCcTensor g₀ r s) :
     ‖(c • S : SmoothCcTensor g₀ r s)‖ ^ 2 = c ^ 2 * ‖S‖ ^ 2 := by
@@ -154,19 +102,6 @@ private theorem normSqSmul (g₀ : SmoothRiemannianMetric I M) {r s : ℕ} (c : 
   rw [SmoothCcTensor.toSection_smul, ContMDiffSection.coe_smul, Pi.smul_apply,
     riemannianFiberNormSq_smul (I := I) (M := M) g₀ r s x c _]
 
-/-! ### The state-free grid-product integral -/
-
-/-- **The per-antidiagonal grid-product integral at a unit order-zero cap.**
-
-For a tensor whose fibre norm is bounded by `Λ₀ ≤ 1` and any tuple of orders
-summing to `i`, the integral of the product of the corresponding fibre-norm
-squares is at most `K i · ‖∇ⁱP‖²_{L²}` with `K` depending on the background
-metric and the order only — **not** on the state.
-
-This is `grid_prod_int_le` with the cap normalized: its workhorse constant is
-`(max Λ₀ (max C 1))^{7i}`, and `Λ₀ ≤ 1 ≤ max C 1` collapses the outer maximum.
-The top jet is kept bare (no additive `1`), which is what makes the constant
-survive a rescaling of the base tensor. -/
 theorem gridIntUnit (g₀ : SmoothRiemannianMetric I M) (rb sb : ℕ) :
     ∃ K : ℕ → ℝ, (∀ i, 0 ≤ K i) ∧
       ∀ (P : SmoothCcTensor g₀ rb sb) {Λ₀ : ℝ}, 0 ≤ Λ₀ → Λ₀ ≤ 1 →
@@ -211,10 +146,6 @@ theorem gridIntUnit (g₀ : SmoothRiemannianMetric I M) (rb sb : ℕ) :
       max_eq_right (le_trans hΛ₀1 (le_max_right _ _))
     rw [hmax]
 
-/-- **Two-factor specialization of `gridIntUnit`.**
-
-The shape every Leibniz product node produces: two covariant gradients whose
-orders sum to `i`, integrated against each other. -/
 theorem gridIntTwo (g₀ : SmoothRiemannianMetric I M) (rb sb : ℕ) :
     ∃ K : ℕ → ℝ, (∀ i, 0 ≤ K i) ∧
       ∀ (P : SmoothCcTensor g₀ rb sb) {Λ₀ : ℝ}, 0 ≤ Λ₀ → Λ₀ ≤ 1 →
@@ -240,29 +171,6 @@ theorem gridIntTwo (g₀ : SmoothRiemannianMetric I M) (rb sb : ℕ) :
   rw [Fin.prod_univ_two]
   rfl
 
-/-! ### The quadratic tame product -/
-
-/-- **The quadratic tame product: a constant affine in the `∇P` cap.**
-
-For orders `c₁, c₂ ≥ 1` with `c₁ + c₂ = k + 1`,
-```
-∫ |∇^{c₁}P|² · |∇^{c₂}P|²  ≤  K k · (1 + Λ₁²) · ‖∇ᵏP‖²_{L²},
-```
-where `Λ₁` is any pointwise bound for `|∇P|` and `K` is a constant of the
-background metric and the order alone.  A per-order arm window at order `i` feeds
-this at `k = i + 1`, i.e. inside the `range (i + 2)` budget.
-
-This is the estimate the capped-grid currency cannot produce.  There, a product
-of two once-differentiated arms is read in the shifted base, every tuple entry is
-charged to `Λ₁`, and the constant becomes a polynomial in `Λ₁` whose degree grows
-with the order.  Here exactly **one** power of `Λ₁²` appears.
-
-The proof normalizes: with `Λ := max Λ₁ 1`, the rescaled gradient `Λ⁻¹ • ∇P` has
-unit sup, so `gridIntUnit` applies in the shifted base at total order
-`(c₁ - 1) + (c₂ - 1) = k - 1` with a state-free constant; undoing the rescaling
-multiplies by `Λ⁴` on the left and `Λ⁻²` on the right, leaving a single `Λ²`,
-and `Λ² ≤ 1 + Λ₁²`.  The two short orders `k ≤ 2` force `min (c₁, c₂) = 1`, where
-the capped factor may simply be pulled out (`intCapMul`). -/
 theorem gridIntGrad (g₀ : SmoothRiemannianMetric I M) :
     ∃ K : ℕ → ℝ, (∀ k, 0 ≤ K k) ∧
       ∀ (P : SmoothCcTensor g₀ 0 2) {Λ₁ : ℝ}, 0 ≤ Λ₁ →
@@ -297,14 +205,13 @@ theorem gridIntGrad (g₀ : SmoothRiemannianMetric I M) :
   have hKmax : K2 m ≤ max (K2 m) 1 := le_max_left _ _
   have hone_le : (1 : ℝ) ≤ max (K2 m) 1 := le_max_right _ _
   by_cases hm2 : 2 ≤ m
-  · -- the shifted grid has room: rescale `∇P` to unit sup
+  ·
     set Λ : ℝ := max Λ₁ 1 with hΛdef
     have hΛ1 : (1 : ℝ) ≤ Λ := le_max_right _ _
     have hΛ_pos : (0 : ℝ) < Λ := lt_of_lt_of_le zero_lt_one hΛ1
     have hΛ_ne : Λ ≠ 0 := ne_of_gt hΛ_pos
     set u : SmoothCcTensor g₀ 0 (2 + 1) := iteratedCovGrad (I := I) g₀ 0 2 1 P with hu
     set v : SmoothCcTensor g₀ 0 (2 + 1) := (Λ⁻¹ : ℝ) • u with hv
-    -- the rescaled gradient has unit sup
     have hvsup : ∀ x : M, riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + 1) x
         (v.toSection x) ≤ (1 : ℝ) ^ 2 := by
       intro x
@@ -325,7 +232,6 @@ theorem gridIntGrad (g₀ : SmoothRiemannianMetric I M) :
         mul_le_mul_of_nonneg_left hcapx hinv_nn
       refine hmul.trans (le_of_eq ?_)
       field_simp
-    -- the rescaled jets, in the form that undoes the rescaling by `ring`
     have hjet : ∀ (d : ℕ) (x : M),
         Λ ^ 2 * riemannianFiberNormSq (I := I) (M := M) g₀ 0 ((2 + 1) + d) x
             ((iteratedCovGrad (I := I) g₀ 0 (2 + 1) d v).toSection x) =
@@ -337,18 +243,15 @@ theorem gridIntGrad (g₀ : SmoothRiemannianMetric I M) :
         riemannianFiberNormSq_smul (I := I) (M := M) g₀ 0 ((2 + 1) + d) x (Λ⁻¹) _, hu,
         rfns_iteratedCovGrad_comp (I := I) (M := M) g₀ 0 2 1 d P x]
       field_simp
-    -- the top jet of the rescaled gradient
     have htop : Λ ^ 2 * ‖iteratedCovGrad (I := I) g₀ 0 (2 + 1) m v‖ ^ 2 = Rtop ^ 2 := by
       rw [hv, iteratedCovGrad_smul_real (I := I) (M := M) g₀ 0 (2 + 1) m (Λ⁻¹) u,
         normSqSmul (I := I) (M := M) g₀ (Λ⁻¹) _, hu,
         icgNormComp (I := I) (M := M) g₀ 0 2 1 m P, ← hRtop]
       field_simp
-    -- the two orders, shifted
     obtain ⟨d₁, rfl⟩ : ∃ d, c₁ = 1 + d := ⟨c₁ - 1, by omega⟩
     obtain ⟨d₂, rfl⟩ : ∃ d, c₂ = 1 + d := ⟨c₂ - 1, by omega⟩
     have hdsum : d₁ + d₂ = m := by omega
     have hgrid := h2 v (Λ₀ := 1) zero_le_one (le_refl 1) hvsup m d₁ d₂ hm2 hdsum
-    -- undo the rescaling
     have hlhs : (∫ x, riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + (1 + d₁)) x
             ((iteratedCovGrad (I := I) g₀ 0 2 (1 + d₁) P).toSection x) *
           riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + (1 + d₂)) x
@@ -381,7 +284,7 @@ theorem gridIntGrad (g₀ : SmoothRiemannianMetric I M) :
     have hpos : (0 : ℝ) ≤ (1 + Λ₁ ^ 2) * Rtop ^ 2 :=
       mul_nonneg (by linarith [hΛsq_nn]) hRtop_nn
     nlinarith [mul_le_mul_of_nonneg_right hKmax hpos]
-  · -- `m ≤ 1`: one of the two orders is `1`, and the cap comes out directly
+  ·
     have hcase : c₁ = 1 ∧ c₂ = 1 + m ∨ c₂ = 1 ∧ c₁ = 1 + m := by omega
     have hpos : (0 : ℝ) ≤ (1 + Λ₁ ^ 2) * Rtop ^ 2 :=
       mul_nonneg (by linarith [hΛsq_nn]) hRtop_nn
@@ -411,19 +314,6 @@ theorem gridIntGrad (g₀ : SmoothRiemannianMetric I M) :
         (iteratedCovGrad (I := I) g₀ 0 2 1 P)
         (iteratedCovGrad (I := I) g₀ 0 2 (1 + m) P) hcap) hfin
 
-/-- **The tame split when the Leibniz term carries a bare `∇P` factor.**
-
-If one factor of a product node is an undifferentiated `∇P`, it is measured in
-`L^∞` — one power of `Λ₁²` — and the remaining tuple, of total order `k`, is
-integrated at the state's own δ-anchor with a state-free constant:
-```
-∫ |∇P|² · ∏_m |∇^{e_m}P|²  ≤  Λ₁² · K k · ‖∇ᵏP‖²_{L²}   (∑ e_m = k).
-```
-
-Together with `gridIntGrad` this covers every Leibniz term of a quadratic C0 arm
-except those in which **all** factors carry at least two derivatives and there
-are at least three of them (which first occurs at jet order `4`); see
-`TameGridProd.md`. -/
 theorem gridIntPull (g₀ : SmoothRiemannianMetric I M) :
     ∃ K : ℕ → ℝ, (∀ k, 0 ≤ K k) ∧
       ∀ (P : SmoothCcTensor g₀ 0 2) {Λ₀ Λ₁ : ℝ}, 0 ≤ Λ₀ → Λ₀ ≤ 1 →
@@ -473,23 +363,6 @@ theorem gridIntPull (g₀ : SmoothRiemannianMetric I M) :
   refine hmono.trans ?_
   exact mul_le_mul_of_nonneg_left (hK P hΛ₀0 hΛ₀1 hsup k hk1 n hn e he) (sq_nonneg Λ₁)
 
-/-! ### The `∇P` cap with its `H³` dependence explicit -/
-
-/-- **The `∇P` cap, stated linearly in the state's own jets.**
-
-In dimension three the first covariant gradient of a `(0,2)` state is bounded
-pointwise by the state's covariant `L²` jets through order three:
-```
-|∇T|²(x)  ≤  c · ∑_{j < 3} ‖∇^{1+j}T‖²_{L²} ,
-```
-with `c` a constant of the background metric alone.
-
-`gradCapOfJets` is the same fibre embedding with the jet sum replaced by a fixed
-radius `R₀` *before* the constant is chosen, so the `H³` dependence disappears
-inside an existential; that is precisely why the capped currency cannot exhibit
-its own degree in `‖T‖_{H³}`.  Here the dependence is kept explicit, which is
-what turns the `Λ₁²` of `gridIntGrad` into `c‖T‖²_{H³}` and produces the
-`K₀ + K₂‖T‖²_{H³}` shape. -/
 theorem gradCapLin (hDim : Module.finrank ℝ E = 3)
     (g₀ : SmoothRiemannianMetric I M) :
     ∃ c : ℝ, 0 ≤ c ∧
@@ -513,4 +386,3 @@ theorem gradCapLin (hDim : Module.finrank ℝ E = 3)
 end DifferentialGeometry.Integral.Connection
 
 end
-

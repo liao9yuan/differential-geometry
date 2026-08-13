@@ -2,14 +2,6 @@ import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.DeTurckRemainder
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.EdgeLowerPairing
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.EdgePathPairing
 
-/-!
-# Diagonal low-base slope pairing normal forms
-
-This leaf module exposes the exact diagonal path form of the low-base action.
-The coefficient state and acted field remain the same tensor throughout; no
-off-diagonal frozen-operator identity is asserted.
- -/
-
 noncomputable section
 
 open Bundle Manifold Set Filter Tensor0SBundle MeasureTheory intervalIntegral
@@ -55,10 +47,6 @@ private theorem unitModel_add_app
     rfl
   rw [hfun, ContinuousMultilinearMap.add_apply]
 
-/-- The complete diagonal low-base action is the sum of the corrected
-zero-order path, the first-order path, and the top-path deviation from the
-carrier coefficient.  This is the exact form consumed by the paired Rung-3
-analysis. -/
 theorem lowBase_path_nf
     (g g_bg : SmoothRiemannianMetric I M) (T : SmoothCcTensor g 0 2)
     (hTsymm : ∀ (x : M) (v w : TangentSpace I x),
@@ -133,11 +121,6 @@ theorem lowBase_path_nf
   simp only [appCc_add_left, appCc_sub_left]
   module
 
-/-- Applying `1 - Δ∇` to the diagonal low-base action leaves one joint
-zero/top commutator block, the first-order path, and the undifferentiated
-carrier curvature fold.  The `B02` block must remain joint in the subsequent
-paired estimate: estimating its two summands separately destroys the
-order-zero/order-two cancellation. -/
 theorem lowBase_L_nf
     (g g_bg : SmoothRiemannianMetric I M) (T : SmoothCcTensor g 0 2)
     (hTsymm : ∀ (x : M) (v w : TangentSpace I x),
@@ -259,9 +242,6 @@ theorem lowBase_L_nf
     hL_lap, htopLT]
   module
 
-/-- The diagonal path-integrated zero-order action is exactly its lower refold
-plus the canonical Riemann--Lie top pair.  The Hessian state and passenger are
-both `T`; this theorem asserts no arbitrary-passenger low-base refold. -/
 theorem low0_path_refold
     (g g_bg : SmoothRiemannianMetric I M) (T : SmoothCcTensor g 0 2)
     (hTsymm : ∀ (x : M) (v w : TangentSpace I x),
@@ -380,7 +360,6 @@ theorem low0_path_refold
   simpa only [unitModel_add_app] using congrArg
     (fun W => unitModel (I := I) (M := M) g 2 W x v) hpoint
 
-/-- Exact raw-commutator normal form for the joint zero/top `B02` block. -/
 theorem b02_raw_nf
     (g g_bg : SmoothRiemannianMetric I M) (T : SmoothCcTensor g 0 2)
     (hTsymm : ∀ (x : M) (v w : TangentSpace I x),
@@ -437,7 +416,6 @@ theorem b02_raw_nf
   rw [oneMinusConn_add (I := I) (M := M) g 0 2]
   module
 
-/-- Exact carrier-centered normal form for the joint zero/top `B02` block. -/
 theorem b02_center_nf
     (g g_bg : SmoothRiemannianMetric I M) (T : SmoothCcTensor g 0 2)
     (hTsymm : ∀ (x : M) (v w : TangentSpace I x),

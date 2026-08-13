@@ -2,38 +2,6 @@ import DifferentialGeometry.Analysis.Sobolev.MarkedTupleGrid
 import DifferentialGeometry.Analysis.Sobolev.TensorHilbert.TameGridProd
 import DifferentialGeometry.Analysis.Sobolev.TensorHilbert.GNTwoAnchor
 
-/-!
-# The marked arm calculus: `∇P` factors kept explicit through a product tree
-
-`GradCapArms.lean` carries an arm's pointwise window through the product tree in
-the `∇P`-**capped** currency: the level bookkeeping is right, but every factor of
-weight `0` or `1` is spent into the constant `shiftConst Λ (i+1)`, whose degree in
-`Λ ≥ ‖∇P‖_∞` grows with the order.  For the quadratic zero-order summands that is
-fatal — the deliverable needs a constant AFFINE in `‖∇P‖²_∞`.
-
-This module carries the same trees in the **marked** currency of
-`MarkedTupleGrid.lean`:
-
-`HasMarkWin g₀ P X u K  ↔  ∀ i x, |∇ⁱX|²(x) ≤ K i · markGrid (bP x) u i`,
-
-where `bP x j = |∇ʲP|²(x)`.  A `markGrid … u i` monomial carries `u` explicit
-factors of weight at least one and has total weight at most `i + u`, so:
-
-* a state-free arm and an `F(P)`-type coefficient arm enter at `u = 0`
-  (`mkOfBnd`, `mkOfWin`) — their existing radius-free window at offset `+1` IS
-  `markGrid … 0 i`;
-* an arm carrying exactly one derivative of the state enters at `u = 1`
-  (`mkOfTop`) from the `topSeparated` producers of the tree, which already
-  deliver the shape `Ktop·|∇^{i+1}P|² + Kc i·∑_k |∇^{i-k}P|²·grid(k+1)` — every
-  term of which has an explicit `∇P` factor;
-* products ADD the marks (`mkApp`), so a quadratic arm — a tree with exactly two
-  once-differentiated factors — lands at `u = 2`, total weight `≤ i + 2`, with
-  the two `∇P` factors still visible.
-
-Nothing here spends a cap, so the constants stay state-free; the `∇P` cap is
-spent once, after integration, by the tame layer of `TameGridProd.lean`.
--/
-
 noncomputable section
 
 set_option autoImplicit false
@@ -62,18 +30,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
-/-! ### The invariant -/
-
-/-- **The marked grid window of an arm.**
-
-`X`'s order-`i` pointwise fibre jet is bounded by `K i` times the marked grid
-window of level `i` with `u` marks in the jets of the state.  Every monomial of
-that window carries `u` explicit factors `|∇^{c}P|²` with `c ≥ 1` and has total
-weight at most `i + u`.
-
-At `u = 2` this is exactly the hypothesis under which the integrated monomials of
-a quadratic arm are tame: the top-weight monomials have two positive factors, so
-none of them is the single out-of-budget jet `|∇^{i+2}P|²`. -/
 def HasMarkWin (g₀ : SmoothRiemannianMetric I M) (P : SmoothCcTensor g₀ 0 2)
     {r c : ℕ} (X : SmoothCcTensor g₀ r c) (u : ℕ) (K : ℕ → ℝ) : Prop :=
   ∀ (i : ℕ) (x : M),
@@ -82,29 +38,18 @@ def HasMarkWin (g₀ : SmoothRiemannianMetric I M) (P : SmoothCcTensor g₀ 0 2)
       K i * Combinatorics.markGrid (gridBase (I := I) (M := M) g₀ P x) u i
 
 set_option linter.unusedSectionVars false in
-/-- The marked window is nonnegative. -/
 private lemma mkWnn (g₀ : SmoothRiemannianMetric I M) (P : SmoothCcTensor g₀ 0 2)
     (x : M) (u i : ℕ) :
     (0 : ℝ) ≤ Combinatorics.markGrid (gridBase (I := I) (M := M) g₀ P x) u i :=
   Combinatorics.markGrid_nn _ (gridBase_nn (I := I) (M := M) g₀ P x) u i
 
 set_option linter.unusedSectionVars false in
-/-- The unmarked window is at least one. -/
 private lemma mkW1 (g₀ : SmoothRiemannianMetric I M) (P : SmoothCcTensor g₀ 0 2)
     (x : M) (i : ℕ) :
     (1 : ℝ) ≤ Combinatorics.markGrid (gridBase (I := I) (M := M) g₀ P x) 0 i :=
   Combinatorics.one_le_markGrid0 _ (gridBase_nn (I := I) (M := M) g₀ P x) i
 
-/-! ### The pointwise Leibniz fold -/
-
 set_option linter.unusedVariables false in
-/-- **The marked two-arm pointwise fold: the marks add.**
-
-If `Φ` has a `u`-marked window at level `i'` and `W` a `v`-marked window at level
-`l`, then `appCcRS g₀ p a b Φ W` has a `(u+v)`-marked window at level `n`, at the
-same fold constant the unmarked currency pays.  Compare `atgwFold`, where the
-offsets add but the marks are invisible; here the two `∇P` factors of a quadratic
-arm survive the fold. -/
 theorem markFold (g₀ : SmoothRiemannianMetric I M) {p a b : ℕ} (u v : ℕ)
     (Φ : SmoothCcTensor g₀ a b) (W : SmoothCcTensor g₀ p a)
     (P : SmoothCcTensor g₀ 0 2) {KΦ KW : ℕ → ℝ}
@@ -205,11 +150,7 @@ theorem markFold (g₀ : SmoothRiemannianMetric I M) {p a b : ℕ} (u v : ℕ)
         rw [Finset.sum_mul]
         exact Finset.sum_congr rfl (fun i' _ => by rw [Finset.sum_mul])
 
-/-! ### Bridges in -/
-
 set_option linter.unusedVariables false in
-/-- **A state-free arm enters unmarked.**  Its own uniform bound suffices,
-because the unmarked window is at least one. -/
 theorem mkOfBnd (g₀ : SmoothRiemannianMetric I M) (P : SmoothCcTensor g₀ 0 2)
     {r c : ℕ} (X : SmoothCcTensor g₀ r c) {S : ℕ → ℝ} (hS : ∀ i, 0 ≤ S i)
     (hX : ∀ (i : ℕ) (x : M),
@@ -222,10 +163,6 @@ theorem mkOfBnd (g₀ : SmoothRiemannianMetric I M) (P : SmoothCcTensor g₀ 0 2
 
 omit [BoundarylessManifold I M] in
 set_option linter.unusedVariables false in
-/-- **An `F(P)`-type coefficient arm enters unmarked.**
-
-Its radius-free window at `bP`-offset `+1` — no derivative of the state — IS the
-unmarked marked window, by definition of `markGrid` at `u = 0`. -/
 theorem mkOfWin (g₀ : SmoothRiemannianMetric I M) (P : SmoothCcTensor g₀ 0 2)
     {r c : ℕ} (X : SmoothCcTensor g₀ r c) {K : ℕ → ℝ}
     (hX : ∀ (i : ℕ) (x : M),
@@ -237,14 +174,6 @@ theorem mkOfWin (g₀ : SmoothRiemannianMetric I M) (P : SmoothCcTensor g₀ 0 2
 
 omit [BoundarylessManifold I M] in
 set_option linter.unusedSectionVars false in
-/-- **The state itself enters unmarked.**
-
-`|∇ⁱP|²` is the single-factor monomial of weight `i`, which is a term of
-`atgw bP (i+1) = markGrid bP 0 i` for `i ≥ 1`; the δ-anchor `|P|²_∞ ≤ 1` covers
-the exceptional order `i = 0`, where the unmarked window is exactly `1`.  This is
-the bridge that lets an arm *linear in `P` itself* — the curvature head
-`lrCurvF g₀ P` of the Palatini residual — enter the marked currency, and it is
-the marked sibling of `capOfP`, which had to spend both pointwise caps. -/
 theorem mkOfP (g₀ : SmoothRiemannianMetric I M) (P : SmoothCcTensor g₀ 0 2)
     (hP0 : ∀ x : M, gridBase (I := I) (M := M) g₀ P x 0 ≤ 1) :
     HasMarkWin (I := I) (M := M) g₀ P P 0 (fun _ => 1) := by
@@ -267,12 +196,6 @@ theorem mkOfP (g₀ : SmoothRiemannianMetric I M) (P : SmoothCcTensor g₀ 0 2)
   exact hgoal
 
 set_option linter.unusedSectionVars false in
-/-- **The gradient of the state enters once-marked, at constant one.**
-
-`|∇ⁱ(∇P)|² = |∇^{i+1}P|² = bP (i+1)`, which is the mark-only monomial of
-`markGrid bP 1 i` — the single marked factor of maximal order with an empty
-grid.  No estimate is involved and no hypothesis on the state is needed; this is
-the marked sibling of `capOfDP`, which had to spend a pointwise cap. -/
 theorem mkOfDP (g₀ : SmoothRiemannianMetric I M) (P : SmoothCcTensor g₀ 0 2) :
     HasMarkWin (I := I) (M := M) g₀ P (covGrad (I := I) (M := M) g₀ 0 2 P) 1
       (fun _ => 1) := by
@@ -285,19 +208,6 @@ theorem mkOfDP (g₀ : SmoothRiemannianMetric I M) (P : SmoothCcTensor g₀ 0 2)
 
 omit [BoundarylessManifold I M] in
 set_option linter.unusedVariables false in
-/-- **An arm carrying one derivative of the state enters once-marked.**
-
-This is the entry the whole tame currency turns on.  The `topSeparated`
-producers of the tree deliver an order-one arm as
-
-`|∇ⁱX|²(x) ≤ Ktop·|∇^{i+1}P|²(x) + Kc i·∑_{k<i} |∇^{i-k}P|²(x)·grid(bP x)(k+1)`,
-
-i.e. as a sum of monomials each of which carries an EXPLICIT factor `|∇^cP|²`
-with `c ≥ 1` and has total weight exactly `i + 1`.  That is a once-marked window
-of level `i`.  The ordinary `atgw bP (i+2)` window of the same arm is NOT: it
-also contains the constant monomial and the single top jet `|∇^{i+1}P|²`
-unaccompanied, which is what put the quadratic summands one order over
-budget. -/
 theorem mkOfTop (g₀ : SmoothRiemannianMetric I M) (P : SmoothCcTensor g₀ 0 2)
     {r c : ℕ} (X : SmoothCcTensor g₀ r c) {Ktop : ℝ} (hKtop : 0 ≤ Ktop)
     {Kc : ℕ → ℝ} (hKc : ∀ i, 0 ≤ Kc i)
@@ -316,11 +226,9 @@ theorem mkOfTop (g₀ : SmoothRiemannianMetric I M) (P : SmoothCcTensor g₀ 0 2
   have hb : ∀ j, 0 ≤ b j := gridBase_nn (I := I) (M := M) g₀ P x
   set W : ℝ := Combinatorics.markGrid b 1 i with hW_def
   have hWnn : 0 ≤ W := Combinatorics.markGrid_nn b hb 1 i
-  -- the top jet is a marked monomial with an empty grid
   have htop : b (i + 1) ≤ W := by
     have h := Combinatorics.markOne_of_term b hb (j := i) (c := i) (k := 0) (by omega)
     rwa [Combinatorics.antidiagonalTupleGrid_zero, mul_one] at h
-  -- every residual monomial is a marked monomial
   have hres : ∀ k ∈ Finset.range i,
       b (i - k) * Combinatorics.antidiagonalTupleGrid b (k + 1) ≤ W := by
     intro k hk
@@ -344,19 +252,6 @@ theorem mkOfTop (g₀ : SmoothRiemannianMetric I M) (P : SmoothCcTensor g₀ 0 2
 
 omit [BoundarylessManifold I M] in
 set_option linter.unusedVariables false in
-/-- **An arm whose jets are bounded by the EXACT-weight grid enters
-once-marked.**
-
-An *exact*-weight producer delivers `|∇ⁱX|²(x) ≤ K i · grid(bP x)(i+1)`, a sum of
-monomials of total weight exactly `i + 1`, so each carries at least one factor
-`|∇^cP|²` with `c ≥ 1`.  Under the order-zero anchor `|P|²_∞ ≤ 1` — the same
-δ-anchor `mkOfP` consumes, and the exact reason it is needed — that is a
-once-marked window of level `i`, at the cost of the monomial count.
-
-This is the entry `mkOfTop`'s siblings cannot give: an arm whose covariant
-derivative is exact-weight (a *parallel* fixed part plus a moving part costing
-one derivative of the state) is delivered by the tree as a grid, not as a
-separated top term. -/
 theorem mkOfAtg (g₀ : SmoothRiemannianMetric I M) (P : SmoothCcTensor g₀ 0 2)
     (hP0 : ∀ x : M, gridBase (I := I) (M := M) g₀ P x 0 ≤ 1)
     {r c : ℕ} (X : SmoothCcTensor g₀ r c) {K : ℕ → ℝ} (hK : ∀ i, 0 ≤ K i)
@@ -378,10 +273,7 @@ theorem mkOfAtg (g₀ : SmoothRiemannianMetric I M) (P : SmoothCcTensor g₀ 0 2
     _ = (K i * Combinatorics.antidiagonalTupleGridCount (i + 1)) *
           Combinatorics.markGrid b 1 i := by ring
 
-/-! ### The calculus -/
-
 set_option linter.unusedVariables false in
-/-- **The marked window is closed under `appCcRS`, and the marks add.** -/
 theorem mkApp (g₀ : SmoothRiemannianMetric I M) (P : SmoothCcTensor g₀ 0 2)
     {p a b : ℕ} (Φ : SmoothCcTensor g₀ a b) (W : SmoothCcTensor g₀ p a)
     {u v : ℕ} {KΦ KW : ℕ → ℝ} (hKΦ : ∀ i, 0 ≤ KΦ i) (hKW : ∀ l, 0 ≤ KW l)
@@ -393,7 +285,6 @@ theorem mkApp (g₀ : SmoothRiemannianMetric I M) (P : SmoothCcTensor g₀ 0 2)
   exact markFold (I := I) (M := M) g₀ u v Φ W P hKΦ hKW hΦ hW n x
 
 set_option linter.unusedSectionVars false in
-/-- Weakening the constant of a marked window. -/
 theorem mkMono (g₀ : SmoothRiemannianMetric I M) (P : SmoothCcTensor g₀ 0 2)
     {r c u : ℕ} {X : SmoothCcTensor g₀ r c} {K K' : ℕ → ℝ}
     (hKK : ∀ i, K i ≤ K' i) (hX : HasMarkWin (I := I) (M := M) g₀ P X u K) :
@@ -403,7 +294,6 @@ theorem mkMono (g₀ : SmoothRiemannianMetric I M) (P : SmoothCcTensor g₀ 0 2)
     (mul_le_mul_of_nonneg_right (hKK i) (mkWnn (I := I) (M := M) g₀ P x u i))
 
 set_option linter.unusedSectionVars false in
-/-- The marked window transports along an equality of arms. -/
 theorem mkCongr (g₀ : SmoothRiemannianMetric I M) (P : SmoothCcTensor g₀ 0 2)
     {r c u : ℕ} {X Y : SmoothCcTensor g₀ r c} {K : ℕ → ℝ} (hXY : Y = X)
     (hX : HasMarkWin (I := I) (M := M) g₀ P X u K) :
@@ -411,7 +301,6 @@ theorem mkCongr (g₀ : SmoothRiemannianMetric I M) (P : SmoothCcTensor g₀ 0 2
   rw [hXY]; exact hX
 
 set_option linter.unusedSectionVars false in
-/-- Two-subadditivity of the marked window, at a fixed mark count. -/
 theorem mkAdd (g₀ : SmoothRiemannianMetric I M) (P : SmoothCcTensor g₀ 0 2)
     {r c u : ℕ} {X Y : SmoothCcTensor g₀ r c} {KX KY : ℕ → ℝ}
     (hX : HasMarkWin (I := I) (M := M) g₀ P X u KX)
@@ -433,7 +322,6 @@ theorem mkAdd (g₀ : SmoothRiemannianMetric I M) (P : SmoothCcTensor g₀ 0 2)
   nlinarith [h1, h2, mkWnn (I := I) (M := M) g₀ P x u i]
 
 set_option linter.unusedSectionVars false in
-/-- Scalar multiples: the constant picks up `t ^ 2`. -/
 theorem mkSmul (g₀ : SmoothRiemannianMetric I M) (P : SmoothCcTensor g₀ 0 2)
     {r c u : ℕ} {X : SmoothCcTensor g₀ r c} {K : ℕ → ℝ} (t : ℝ)
     (hX : HasMarkWin (I := I) (M := M) g₀ P X u K) :
@@ -450,7 +338,6 @@ theorem mkSmul (g₀ : SmoothRiemannianMetric I M) (P : SmoothCcTensor g₀ 0 2)
   exact mul_le_mul_of_nonneg_left (hX i x) (sq_nonneg t)
 
 set_option linter.unusedSectionVars false in
-/-- Negation is a marked-window isometry. -/
 theorem mkNeg (g₀ : SmoothRiemannianMetric I M) (P : SmoothCcTensor g₀ 0 2)
     {r c u : ℕ} {X : SmoothCcTensor g₀ r c} {K : ℕ → ℝ}
     (hX : HasMarkWin (I := I) (M := M) g₀ P X u K) :
@@ -462,7 +349,6 @@ theorem mkNeg (g₀ : SmoothRiemannianMetric I M) (P : SmoothCcTensor g₀ 0 2)
   norm_num
 
 set_option linter.unusedSectionVars false in
-/-- Differences of marked arms. -/
 theorem mkSub (g₀ : SmoothRiemannianMetric I M) (P : SmoothCcTensor g₀ 0 2)
     {r c u : ℕ} {X Y : SmoothCcTensor g₀ r c} {KX KY : ℕ → ℝ}
     (hX : HasMarkWin (I := I) (M := M) g₀ P X u KX)
@@ -472,7 +358,6 @@ theorem mkSub (g₀ : SmoothRiemannianMetric I M) (P : SmoothCcTensor g₀ 0 2)
   rwa [← sub_eq_add_neg] at h
 
 set_option linter.unusedSectionVars false in
-/-- Source-slot reindexing is a marked-window isometry. -/
 theorem mkReindex (g₀ : SmoothRiemannianMetric I M) (P : SmoothCcTensor g₀ 0 2)
     {r c u : ℕ} {X : SmoothCcTensor g₀ r c} {K : ℕ → ℝ} (ρ : Equiv.Perm (Fin r))
     (hX : HasMarkWin (I := I) (M := M) g₀ P X u K) :
@@ -483,8 +368,6 @@ theorem mkReindex (g₀ : SmoothRiemannianMetric I M) (P : SmoothCcTensor g₀ 0
   exact hX i x
 
 set_option linter.unusedSectionVars false in
-/-- Output-slot permutation is a marked-window isometry.  The marked sibling of
-`capDdc`. -/
 theorem mkDdc (g₀ : SmoothRiemannianMetric I M) (P : SmoothCcTensor g₀ 0 2)
     {r c u : ℕ} {X : SmoothCcTensor g₀ r c} {K : ℕ → ℝ} (σ : Equiv.Perm (Fin c))
     (hX : HasMarkWin (I := I) (M := M) g₀ P X u K) :
@@ -497,10 +380,6 @@ theorem mkDdc (g₀ : SmoothRiemannianMetric I M) (P : SmoothCcTensor g₀ 0 2)
   exact hX i x
 
 set_option linter.unusedSectionVars false in
-/-- Output-slot permutation of a purely covariant arm is a marked-window
-isometry.  The marked sibling of `capDdc0`: `domDomCongrSection` is the form the
-Palatini normal forms use, `rsDomDomCongrSection` the form the pair traces
-use. -/
 theorem mkDdc0 (g₀ : SmoothRiemannianMetric I M) (P : SmoothCcTensor g₀ 0 2)
     {c u : ℕ} {X : SmoothCcTensor g₀ 0 c} {K : ℕ → ℝ} (σ : Equiv.Perm (Fin c))
     (hX : HasMarkWin (I := I) (M := M) g₀ P X u K) :
@@ -510,7 +389,6 @@ theorem mkDdc0 (g₀ : SmoothRiemannianMetric I M) (P : SmoothCcTensor g₀ 0 2)
   exact hX i x
 
 set_option linter.unusedSectionVars false in
-/-- One slot extension costs one dimension factor. -/
 theorem mkSlotExt (g₀ : SmoothRiemannianMetric I M) (P : SmoothCcTensor g₀ 0 2)
     {r c u : ℕ} {X : SmoothCcTensor g₀ r c} {K : ℕ → ℝ}
     (hX : HasMarkWin (I := I) (M := M) g₀ P X u K) :
@@ -523,9 +401,6 @@ theorem mkSlotExt (g₀ : SmoothRiemannianMetric I M) (P : SmoothCcTensor g₀ 0
   exact mul_le_mul_of_nonneg_left (hX i x) hfr
 
 set_option linter.unusedSectionVars false in
-/-- Iterated slot extension costs a power of the dimension.  The marked sibling
-of `capIter`; the mark count is untouched because slot extension is a purely
-structural widening. -/
 theorem mkIter (g₀ : SmoothRiemannianMetric I M) (P : SmoothCcTensor g₀ 0 2)
     {r c u : ℕ} {X : SmoothCcTensor g₀ r c} {K : ℕ → ℝ} (w : ℕ)
     (hX : HasMarkWin (I := I) (M := M) g₀ P X u K) :
@@ -544,36 +419,7 @@ theorem mkIter (g₀ : SmoothRiemannianMetric I M) (P : SmoothCcTensor g₀ 0 2)
       ring_nf
       exact le_of_eq rfl
 
-/-! ### The class-3 case
-
-The tame integration of a marked monomial splits into four classes.  Three of
-them are closed by `TameGridProd.lean` (`gridIntUnit`, `gridIntPull`,
-`gridIntGrad`).  The fourth — three or more factors, every one of them carrying
-at least two derivatives — needs the free-weight interpolation of
-`GNTwoAnchor.lean` and is closed here. -/
-
 set_option linter.unusedVariables false in
-/-- **The class-3 case of the marked-monomial dispatch.**
-
-Two marked factors of order `c₁, c₂ ≥ 2`, an unmarked tuple `e` of total weight
-`k ≥ 1` with **no** entry equal to `1`, and total weight `c₁ + c₂ + k = m + 1`
-exactly.
-
-Monomial inventory.  Discarding the weight-`0` entries (each bounded by
-`Λ₀ ≤ 1`), such a monomial is `∏_{j ≤ q} |∇^{c_j}P|²` with `q ≥ 3`, every
-`c_j ≥ 2`, and `∑ c_j = m + 1`.  Hence `m + 1 ≥ 6`: the case is **empty for
-`m ≤ 4`**, i.e. for tower orders `i = m - 1 ≤ 3`.  At the first order where it
-occurs, `m = 5` (tower order `i = 4`), the inventory is the single monomial
-`c = (2, 2, 2)`, i.e. `∫ |∇²P|⁶`.
-
-Why one power of `Λ₁²` suffices.  A three-point interpolation with weights `α_j`
-(anchor `‖∇P‖_∞`), `β_j` (anchor `‖P‖_∞ ≤ 1`) and `θ_j` (top `‖∇^mP‖_{L²}`)
-obeying `c_j = α_j + θ_j·m`, `∑ α_j = 1`, `∑ θ_j = 1` is feasible exactly when
-`q ≥ 2`.  Pure `∇P`-anchoring would cost `Λ₁^{2(q-1)}`, which is `Λ₁⁴` or worse
-at `q ≥ 3`, and pure `P`-anchoring overshoots the derivative budget by one; the
-bound below spends the interpolation BETWEEN the two Gagliardo–Nirenberg scales
-(`gnProdJet`), where the total `Λ₁` exponent is pinned to `2` by
-`∑ c_j = m + 1` and `∑ θ_j = 1`. -/
 theorem gridIntHigh (g₀ : SmoothRiemannianMetric I M) :
     ∃ K : ℕ → ℝ, (∀ m, 0 ≤ K m) ∧
       ∀ (P : SmoothCcTensor g₀ 0 2) {Λ₀ Λ₁ : ℝ}, 0 ≤ Λ₀ → Λ₀ ≤ 1 → 0 ≤ Λ₁ →
@@ -592,7 +438,6 @@ theorem gridIntHigh (g₀ : SmoothRiemannianMetric I M) :
   obtain ⟨K, hK0, hK⟩ := Integral.Connection.gnProdJet (I := I) (M := M) g₀ 0 2
   refine ⟨K, hK0, ?_⟩
   intro P Λ₀ Λ₁ hΛ₀0 hΛ₀1 hΛ₁0 hsup0 hsup1 m c₁ c₂ k n e hc₁ hc₂ hk1 hnk he hne hsum
-  -- the tuple of all factor orders: the two marked ones, then the unmarked block
   obtain ⟨cc, hcc⟩ : ∃ cc : Fin (n + 2) → ℕ, cc = Fin.cons c₁ (Fin.cons c₂ e) := ⟨_, rfl⟩
   have hcc0 : cc 0 = c₁ := by rw [hcc]; simp
   have hcc1 : cc (Fin.succ 0) = c₂ := by rw [hcc]; simp
@@ -636,7 +481,6 @@ theorem gridIntHigh (g₀ : SmoothRiemannianMetric I M) :
   have hsumt : ∑ j ∈ t, cc j = m + 1 := by
     rw [Finset.sum_subset (Finset.subset_univ t) (fun j _ hj => hc0t j hj), hccsum]
     exact hsum
-  -- the monomial is the full product over the tuple
   have hint : ∀ x : M,
       gridBase (I := I) (M := M) g₀ P x c₁ * gridBase (I := I) (M := M) g₀ P x c₂ *
           ∏ q : Fin n, gridBase (I := I) (M := M) g₀ P x (e q) =
@@ -652,34 +496,13 @@ theorem gridIntHigh (g₀ : SmoothRiemannianMetric I M) :
   have h1 : Λ₁ ^ 2 ≤ 1 + Λ₁ ^ 2 := by nlinarith [sq_nonneg Λ₁]
   exact mul_le_mul_of_nonneg_right (mul_le_mul_of_nonneg_left h1 (hK0 m)) (sq_nonneg _)
 
-/-! ### The tame integral of one marked monomial -/
-
 set_option linter.unusedSectionVars false in
-/-- Shape of the final comparison used by every branch of the dispatch. -/
 private lemma leTame {c R K L J : ℝ} (hcKL : c ≤ K * L) (hKL0 : 0 ≤ K * L)
     (hR0 : 0 ≤ R) (hRJ : R ≤ J) : c * R ≤ K * L * J := by
   calc c * R ≤ K * L * R := mul_le_mul_of_nonneg_right hcKL hR0
     _ ≤ K * L * J := mul_le_mul_of_nonneg_left hRJ hKL0
 
 set_option linter.unusedVariables false in
-/-- **The tame integral of one marked monomial.**
-
-A monomial of `markGrid (bP x) 2 n` at `m = n + 1` is
-`|∇^{c₁}P|²·|∇^{c₂}P|²·∏_q |∇^{e q}P|²` with `c₁, c₂ ≥ 1` and total weight
-`c₁ + c₂ + k ≤ m + 1`.  Its integral is bounded by
-`K m·(1 + Λ₁²)·(1 + ∑_{j ≤ m} ‖∇ʲP‖²)` with `K` **state-free**, by the four-way
-dispatch:
-
-* total weight `≤ m` — inside the budget already, `gridIntUnit` at the `δ`-anchor
-  gives a state-free constant and no `Λ₁` at all;
-* total weight `m + 1` with a bare `∇P` factor (`c₁ = 1`, `c₂ = 1`, or some
-  `e q = 1`) — `gridIntPull` measures it in `L^∞`, one power of `Λ₁²`;
-* total weight `m + 1`, `c₁, c₂ ≥ 2` and no unmarked factor (`k = 0`) — exactly
-  `gridIntGrad`, one power of `Λ₁²`;
-* the residual class — `gridIntHigh`, the frontier.
-
-The marked structure is what excludes the fifth possibility, a single factor
-`|∇^{m+1}P|²`, which is out of budget and cannot be tamed at all. -/
 theorem markMon (g₀ : SmoothRiemannianMetric I M) :
     ∃ K : ℕ → ℝ, (∀ m, 0 ≤ K m) ∧
       ∀ (P : SmoothCcTensor g₀ 0 2) {Λ₀ Λ₁ : ℝ}, 0 ≤ Λ₀ → Λ₀ ≤ 1 → 0 ≤ Λ₁ →
@@ -717,7 +540,6 @@ theorem markMon (g₀ : SmoothRiemannianMetric I M) :
     simp only [hKmon_def]; linarith
   have hL1 : (1 : ℝ) ≤ 1 + Λ₁ ^ 2 := by nlinarith [sq_nonneg Λ₁]
   have hKL0 : (0 : ℝ) ≤ Kmon * (1 + Λ₁ ^ 2) := mul_nonneg hKmon_nn (by linarith)
-  -- the state jets below the budget are inside `JS`
   have hjet : ∀ s : ℕ, s ≤ m →
       ‖iteratedCovGrad (I := I) g₀ 0 2 s P‖ ^ 2 ≤ JS := by
     intro s hs
@@ -727,7 +549,7 @@ theorem markMon (g₀ : SmoothRiemannianMetric I M) :
       (fun j _ => sq_nonneg _) hmem
     simp only [hJS_def]; linarith
   by_cases hlt : c₁ + c₂ + k ≤ m
-  · -- CLASS 0: inside the budget already; state-free
+  ·
     set f : Fin (n + 2) → ℕ := Fin.cons c₁ (Fin.cons c₂ e) with hf_def
     have hfsum : (∑ q, f q) = c₁ + c₂ + k := by
       rw [hf_def, Fin.sum_univ_succ, Fin.cons_zero]
@@ -752,11 +574,11 @@ theorem markMon (g₀ : SmoothRiemannianMetric I M) :
     have := hKP_nn m; have := hKG_nn m; have := hKH_nn m
     have hK : KU (c₁ + c₂ + k) ≤ Kmon := by simp only [hKmon_def]; linarith
     nlinarith [hK, hKmon_nn, hL1]
-  · -- the top weight: `c₁ + c₂ + k = m + 1`
+  ·
     have htop : c₁ + c₂ + k = m + 1 := by omega
     have hm1 : 1 ≤ m := by omega
     by_cases h1 : c₁ = 1
-    · -- CLASS 1a: the first mark is a bare `∇P`
+    ·
       subst h1
       set f : Fin (n + 1) → ℕ := Fin.cons c₂ e with hf_def
       have hfsum : (∑ q, f q) = m := by
@@ -784,7 +606,7 @@ theorem markMon (g₀ : SmoothRiemannianMetric I M) :
         have := hKG_nn m; have := hKH_nn m; simp only [hKmon_def]; linarith
       nlinarith [hKP, hKP_nn m, hKmon_nn, sq_nonneg Λ₁]
     · by_cases h2 : c₂ = 1
-      · -- CLASS 1b: the second mark is a bare `∇P`
+      ·
         subst h2
         set f : Fin (n + 1) → ℕ := Fin.cons c₁ e with hf_def
         have hfsum : (∑ q, f q) = m := by
@@ -812,11 +634,11 @@ theorem markMon (g₀ : SmoothRiemannianMetric I M) :
         have hKP : KP m ≤ Kmon := by
           have := hKG_nn m; have := hKH_nn m; simp only [hKmon_def]; linarith
         nlinarith [hKP, hKP_nn m, hKmon_nn, sq_nonneg Λ₁]
-      · -- both marks carry at least two derivatives
+      ·
         have hc₁2 : 2 ≤ c₁ := by omega
         have hc₂2 : 2 ≤ c₂ := by omega
         by_cases hk0 : k = 0
-        · -- CLASS 2: the pure two-factor product
+        ·
           subst hk0
           have hn0 : n = 0 := by omega
           subst hn0
@@ -839,7 +661,7 @@ theorem markMon (g₀ : SmoothRiemannianMetric I M) :
           nlinarith [hKG, hKG_nn m, hKmon_nn, sq_nonneg Λ₁]
         · have hk1 : 1 ≤ k := by omega
           by_cases hone : ∃ q : Fin n, e q = 1
-          · -- CLASS 1c: an unmarked factor is a bare `∇P`
+          ·
             obtain ⟨q₀, hq₀⟩ := hone
             have hnpos : 0 < n := by
               rcases Nat.eq_zero_or_pos n with h | h
@@ -886,7 +708,7 @@ theorem markMon (g₀ : SmoothRiemannianMetric I M) :
             have hKP : KP m ≤ Kmon := by
               have := hKG_nn m; have := hKH_nn m; simp only [hKmon_def]; linarith
             nlinarith [hKP, hKP_nn m, hKmon_nn, sq_nonneg Λ₁]
-          · -- CLASS 3: the frontier
+          ·
             simp only [not_exists] at hone
             have hres := hHigh P hΛ₀0 hΛ₀1 hΛ₁0 hsup hcap m c₁ c₂ k n e
               hc₁2 hc₂2 hk1 hnk he hone htop
@@ -896,10 +718,7 @@ theorem markMon (g₀ : SmoothRiemannianMetric I M) :
               have := hKP_nn m; have := hKG_nn m; simp only [hKmon_def]; linarith
             nlinarith [hKH, hKH_nn m, hKmon_nn, sq_nonneg Λ₁]
 
-/-! ### The bridge out: the tame `L²` jet bound -/
-
 set_option linter.unusedSectionVars false in
-/-- Continuity of a single state jet's fibre norm. -/
 private lemma contGB (g₀ : SmoothRiemannianMetric I M) (P : SmoothCcTensor g₀ 0 2)
     (j : ℕ) : Continuous (fun x : M => gridBase (I := I) (M := M) g₀ P x j) := by
   have hc : Continuous (fun x : M =>
@@ -915,7 +734,6 @@ private lemma contGB (g₀ : SmoothRiemannianMetric I M) (P : SmoothCcTensor g�
   exact hc
 
 set_option linter.unusedSectionVars false in
-/-- Continuity of one antidiagonal grid level. -/
 private lemma contGrid (g₀ : SmoothRiemannianMetric I M) (P : SmoothCcTensor g₀ 0 2)
     (k : ℕ) : Continuous (fun x : M =>
       Combinatorics.antidiagonalTupleGrid (gridBase (I := I) (M := M) g₀ P x) k) := by
@@ -930,7 +748,6 @@ private lemma contGrid (g₀ : SmoothRiemannianMetric I M) (P : SmoothCcTensor g
     continuous_finset_prod _ (fun q _ => contGB (I := I) (M := M) g₀ P (e q))))
 
 set_option linter.unusedSectionVars false in
-/-- Continuity of a marked grid window. -/
 private lemma contMk (g₀ : SmoothRiemannianMetric I M) (P : SmoothCcTensor g₀ 0 2)
     (u w : ℕ) : Continuous (fun x : M =>
       Combinatorics.markGrid (gridBase (I := I) (M := M) g₀ P x) u w) := by
@@ -955,15 +772,6 @@ private lemma contMk (g₀ : SmoothRiemannianMetric I M) (P : SmoothCcTensor g�
         (contGB (I := I) (M := M) g₀ P (c + 1)).mul (ih (w - c)))
 
 set_option linter.unusedVariables false in
-/-- **Bridge out at `u = 0`: an unmarked window is already tame.**
-
-An arm with no derivative of the state has `markGrid · 0 n = atgw · (n + 1)` by
-definition, so `atgwToJet` at `w = 1` integrates it into the `range (n + 1)`
-budget — strictly inside the `range (n + 2)` the deliverable allows — with a
-constant that is state-free and carries **no** power of `Λ₁` at all.  This is the
-`K₂ = 0` end of the tame shape, and it is what the linear summands consume.
-
-The δ-anchor `|P|_∞ ≤ 1` is the only hypothesis on the state. -/
 theorem markJet0 (g₀ : SmoothRiemannianMetric I M) :
     ∃ K0 : ℕ → ℝ, (∀ n, 0 ≤ K0 n) ∧
       ∀ (P : SmoothCcTensor g₀ 0 2),
@@ -1000,18 +808,6 @@ theorem markJet0 (g₀ : SmoothRiemannianMetric I M) :
   linarith
 
 set_option linter.unusedVariables false in
-/-- **Bridge out: a twice-marked window integrates into the tame `range (n + 2)`
-bound.**
-
-`‖∇ⁿX‖² ≤ K n · (K₀ n · (1 + Λ₁²)) · (1 + ∑_{j < n+2} ‖∇ʲP‖²)` with `K₀`
-**state-free** — it is a combinatorial count of the monomials of
-`markGrid · 2 n` times `markMon`'s state-free constant, and the ONLY state
-dependence is the single explicit power of `Λ₁² = ‖∇P‖²_∞`.  Substituting
-`gradCapLin` for `Λ₁²` turns this into the audit's
-`(K₀ + K₂‖T‖²_{H³})·(1 + ∑_{j<n+2}‖∇ʲT‖²)`.
-
-Compare `capJet`, whose constant already carries `shiftConst Λ (n+1)` from the
-arm side: there the `Λ`-degree grows with `n`, here it is exactly one. -/
 theorem markJet (g₀ : SmoothRiemannianMetric I M) :
     ∃ K0 : ℕ → ℝ, (∀ n, 0 ≤ K0 n) ∧
       ∀ (P : SmoothCcTensor g₀ 0 2) {Λ₀ Λ₁ : ℝ}, 0 ≤ Λ₀ → Λ₀ ≤ 1 → 0 ≤ Λ₁ →
@@ -1061,7 +857,6 @@ theorem markJet (g₀ : SmoothRiemannianMetric I M) :
     intro f hf
     rw [hμ]
     exact hf.integrable_of_hasCompactSupport (HasCompactSupport.of_compactSpace _)
-  -- LEVEL 3: two marks against one grid level
   have h3 : ∀ cc dd k : ℕ, cc + dd + k ≤ n →
       (∫ x, b x (cc + 1) * b x (dd + 1) *
           Combinatorics.antidiagonalTupleGrid (b x) k ∂μ) ≤
@@ -1111,7 +906,6 @@ theorem markJet (g₀ : SmoothRiemannianMetric I M) :
             rw [Finset.sum_const, nsmul_eq_mul]
     refine le_trans (Finset.sum_le_sum hstep) ?_
     rw [Combinatorics.antidiagonalTupleGridCount, Finset.sum_mul]
-  -- LEVEL 2: two marks against a whole window
   have h2 : ∀ cc dd w : ℕ, cc + dd + w ≤ n + 1 →
       (∫ x, b x (cc + 1) * b x (dd + 1) *
           Combinatorics.antidiagonalTupleGridWindow (b x) w ∂μ) ≤ CT n * Cmon := by
@@ -1147,7 +941,6 @@ theorem markJet (g₀ : SmoothRiemannianMetric I M) :
           exact Finset.sum_le_sum_of_subset_of_nonneg
             (fun z hz => Finset.mem_range.mpr (by rw [Finset.mem_range] at hz; omega))
             (fun k _ _ => Combinatorics.antidiagonalTupleGridCount_nonneg k)
-  -- LEVEL 1: one mark against a once-marked window
   have h1 : ∀ cc w : ℕ, cc + w ≤ n →
       (∫ x, b x (cc + 1) * Combinatorics.markGrid (b x) 1 w ∂μ) ≤
         ((n : ℝ) + 1) * (CT n * Cmon) := by
@@ -1190,7 +983,6 @@ theorem markJet (g₀ : SmoothRiemannianMetric I M) :
           refine mul_le_mul_of_nonneg_right ?_ (mul_nonneg (hCT_nn n) hCmon_nn)
           have hwn : (w : ℝ) ≤ (n : ℝ) := by exact_mod_cast (by omega : w ≤ n)
           linarith
-  -- LEVEL 0: the twice-marked window
   have h0 : (∫ x, Combinatorics.markGrid (b x) 2 n ∂μ) ≤
       ((n : ℝ) + 1) * (((n : ℝ) + 1) * (CT n * Cmon)) := by
     have hexp : (fun x : M => Combinatorics.markGrid (b x) 2 n)
@@ -1214,7 +1006,6 @@ theorem markJet (g₀ : SmoothRiemannianMetric I M) :
           rw [Finset.sum_const, Finset.card_range, nsmul_eq_mul]
           push_cast
           ring
-  -- assemble
   have hwinInt : MeasureTheory.Integrable
       (fun x => K n * Combinatorics.markGrid (b x) 2 n) μ :=
     hint _ ((contMk (I := I) (M := M) g₀ P 2 n).const_mul (K n))

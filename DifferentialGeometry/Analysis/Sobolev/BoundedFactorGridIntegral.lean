@@ -2,20 +2,6 @@ import DifferentialGeometry.Analysis.Sobolev.BoundedFactorProductGrid
 import Mathlib.MeasureTheory.Function.LocallyIntegrable
 import Mathlib.MeasureTheory.Integral.Bochner.Basic
 
-/-!
-# Integrals of bounded-factor product grids
-
-Generic integration layer for `Combinatorics.boundedFactorGrid`.  On a compact
-space carrying a finite Borel measure, a grid whose factors `x ↦ b x l` are
-continuous is integrable, and its integral is the double sum of the integrals of
-its antidiagonal cells.
-
-Nothing here mentions tensors, metrics or manifolds: the factor family is an
-arbitrary `b : X → ℕ → ℝ`.  Geometric consumers instantiate `b` with a pointwise
-fibre norm, which keeps the (expensive) tensor elaboration out of the grid
-bookkeeping.
--/
-
 noncomputable section
 
 open MeasureTheory
@@ -28,14 +14,10 @@ variable {X : Type*} [TopologicalSpace X] [MeasurableSpace X] [OpensMeasurableSp
   [CompactSpace X] {μ : Measure X} [IsFiniteMeasure μ]
 
 omit [OpensMeasurableSpace X] [CompactSpace X] in
-/-- On a compact space a finite measure is finite on compacts; used to feed
-`Continuous.integrable_of_hasCompactSupport`. -/
 private theorem finOnCpt (μ : Measure X) [IsFiniteMeasure μ] :
     IsFiniteMeasureOnCompacts μ :=
   ⟨fun K _ => MeasureTheory.measure_lt_top μ K⟩
 
-/-- A single antidiagonal cell `x ↦ ∏ m, b x (e m)` of a bounded-factor grid is
-integrable, since it is continuous on a compact space. -/
 theorem bdFactorCell_int (b : X → ℕ → ℝ) (hcont : ∀ l : ℕ, Continuous fun x => b x l)
     (n : ℕ) (e : Fin n → ℕ) :
     Integrable (fun x => ∏ m : Fin n, b x (e m)) μ := by
@@ -44,7 +26,6 @@ theorem bdFactorCell_int (b : X → ℕ → ℝ) (hcont : ∀ l : ℕ, Continuou
     (HasCompactSupport.of_compactSpace _)
 
 omit [MeasurableSpace X] [OpensMeasurableSpace X] [CompactSpace X] in
-/-- A bounded-factor grid with continuous factors is continuous. -/
 theorem bdFactorGrid_cont (b : X → ℕ → ℝ) (hcont : ∀ l : ℕ, Continuous fun x => b x l)
     (K k : ℕ) :
     Continuous fun x => boundedFactorGrid (b x) K k := by
@@ -53,8 +34,6 @@ theorem bdFactorGrid_cont (b : X → ℕ → ℝ) (hcont : ∀ l : ℕ, Continuo
   refine continuous_finset_sum _ (fun e _ => ?_)
   exact continuous_finset_prod _ (fun m _ => hcont (e m))
 
-/-- A bounded-factor grid with continuous factors is integrable on a compact
-space with a finite measure. -/
 theorem bdFactorGrid_int (b : X → ℕ → ℝ) (hcont : ∀ l : ℕ, Continuous fun x => b x l)
     (K k : ℕ) :
     Integrable (fun x => boundedFactorGrid (b x) K k) μ := by
@@ -62,8 +41,6 @@ theorem bdFactorGrid_int (b : X → ℕ → ℝ) (hcont : ∀ l : ℕ, Continuou
   exact (bdFactorGrid_cont b hcont K k).integrable_of_hasCompactSupport
     (HasCompactSupport.of_compactSpace _)
 
-/-- The integral of a bounded-factor grid is the double sum of the integrals of
-its capped antidiagonal cells. -/
 theorem bdFactorGrid_int_eq (b : X → ℕ → ℝ) (hcont : ∀ l : ℕ, Continuous fun x => b x l)
     (K k : ℕ) :
     (∫ x, boundedFactorGrid (b x) K k ∂μ) =

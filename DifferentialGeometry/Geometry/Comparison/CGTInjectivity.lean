@@ -7,20 +7,6 @@ import DifferentialGeometry.Geometry.Comparison.CGTPropeller
 
 set_option autoImplicit false
 
-/-!
-# Cheeger--Gromov--Taylor injectivity estimates
-
-This file separates the analytic and topological parts of the
-Cheeger--Gromov--Taylor injectivity-radius estimate.  `intrPullVol` is the
-Riemannian pullback volume of an intrinsic framed tangent ball.  The first
-result bounds it by the hyperbolic model whenever the radial exponential has
-no conjugate vectors.
-
-The remaining theorem in this layer is the original geodesic-loop
-collision/overlap estimate.  Its injectivity-radius corollary belongs after the
-separate local collision-to-loop lemma.
--/
-
 noncomputable section
 
 open Bundle Function Manifold MeasureTheory Metric Set
@@ -57,8 +43,6 @@ variable [RiemannianBundle (fun x : M => TangentSpace I x)]
 variable [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
   [IsContinuousRiemannianBundle E (fun x : M => TangentSpace I x)]
 
-/-- Pullback Riemannian volume of the radius-`R` model ball under the complete
-intrinsic framed exponential at `p`. -/
 noncomputable def intrPullVol
     (g : SmoothRiemannianMetric I M)
     (hEnorm : ∀ (y : M) (w : TangentSpace I y),
@@ -77,8 +61,6 @@ noncomputable def intrPullVol
     ∂(volume : Measure E)
 
 omit [CompleteSpace E] [ConnectedSpace M] in
-/-- The intrinsic pullback volume is bounded by the hyperbolic model volume
-when every nonzero radial launch vector is nonconjugate before time one. -/
 theorem intrPullVol_le_hyp
     (g : SmoothRiemannianMetric I M)
     (hEnorm : ∀ (y : M) (w : TangentSpace I y),
@@ -181,22 +163,6 @@ private theorem ratio_le_half
       rw [add_comm P V, mul_comm]
 
 omit [T2Space (TangentBundle I M)] in
-/-- **Cheeger--Gromov--Taylor flat-loop estimate.**
-
-Suppose the radius-`R` intrinsic framed exponential ball is nonsingular, the
-global `Rm04` norm is bounded by `K`, and `R ≤ π / √K`.  A based flat
-`C¹` loop of length `2ℓ`, carrying a normalized intrinsic-exponential lift
-with nonzero endpoint, then satisfies the CGT lower bound
-
-`ℓ ≥ (r₀ / 2) · V(B(p,s)) / (V(B(p,s)) + V⁰(B(0,r₀+s)))`
-
-whenever `r₀ + 2s < R` and `r₀ < R / 4`.
-
-The nonsingularity input is explicit at this lower boundary so the theorem
-isolates the propeller argument from the separate Rauch comparison theorem.
-The proof constructs distinct bounded-length radial classes by iterating the
-loop, propagates them to inverse sheets above `B(p,s)`, and applies the area
-formula. -/
 theorem flatLoop_ge_cgt
     (g : SmoothRiemannianMetric I M)
     (hEnorm : ∀ (y : M) (w : TangentSpace I y),
@@ -372,9 +338,6 @@ theorem flatLoop_ge_cgt
   dsimp only [L] at hArealL
   linarith
 
-/-- Two distinct short radial vectors with the same intrinsic exponential
-endpoint produce a nontrivial flat lifted loop, hence satisfy the CGT lower
-bound at half their total norm. -/
 theorem collision_ge_cgt
     (g : SmoothRiemannianMetric I M)
     (hEnorm : ∀ (y : M) (w : TangentSpace I y),
@@ -519,11 +482,6 @@ theorem collision_ge_cgt
     flatLoop_ge_cgt (I := I) g hEnorm p hK hR hRpi hRm hloc
       hr₀ hs hfit hquarter c hc hell hcLen A hA
 
-/-- **Cheeger--Gromov--Taylor geodesic-loop estimate.**
-
-This is the radial-loop specialization of `flatLoop_ge_cgt`: a nonzero
-radial vector returning to the basepoint supplies the required normalized
-flat-loop lift. -/
 theorem intrLoop_ge_cgt
     (g : SmoothRiemannianMetric I M)
     (hEnorm : ∀ (y : M) (w : TangentSpace I y),
@@ -582,12 +540,6 @@ theorem intrLoop_ge_cgt
     flatLoop_ge_cgt (I := I) g hEnorm p hK hR hRpi hRm hloc
       hr₀ hs hfit hquarter c hc hell hcLen A hA
 
-/-- **Pointwise Cheeger--Gromov--Taylor injectivity-radius estimate.**
-
-Under a curvature-scale nonsingularity radius `R`, the intrinsic framed
-injectivity radius at `p` is bounded below by the standard CGT volume ratio.
-The proof turns any collision inside the proposed ball into the flat lifted
-loop consumed by `collision_ge_cgt`. -/
 theorem intrInj_ge_cgt
     (g : SmoothRiemannianMetric I M)
     (hEnorm : ∀ (y : M) (w : TangentSpace I y),

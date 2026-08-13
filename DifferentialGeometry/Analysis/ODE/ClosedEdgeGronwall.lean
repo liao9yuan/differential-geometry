@@ -3,14 +3,6 @@ import Mathlib.Analysis.ODE.Gronwall
 set_option autoImplicit false
 set_option linter.style.longLine false
 
-/-!
-# Closed-edge Gronwall closure
-
-This module gives the scalar uniqueness argument used when a nonnegative
-energy is continuous up to the left edge but differentiable only in the open
-time interval.
--/
-
 noncomputable section
 
 open Filter Set
@@ -18,9 +10,6 @@ open scoped Topology
 
 namespace DifferentialGeometry.Analysis.ODE
 
-/-- A nonnegative energy which vanishes at the left edge and satisfies
-`energy' ≤ K * energy` on the open interval vanishes on the closed interval.
-No derivative at the left edge is required. -/
 theorem gronwall_zero_on {a c K : ℝ} (hac : a < c)
     (energy energy' : ℝ → ℝ)
     (hcont : ContinuousOn energy (Icc a c))

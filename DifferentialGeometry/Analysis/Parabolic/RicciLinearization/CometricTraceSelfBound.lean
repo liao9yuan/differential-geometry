@@ -3,14 +3,6 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.SymmAbsorbedCoeffIn
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.RicciDeTurckSectionDifferenceKoszulSecondCovGrad
 import DifferentialGeometry.Geometry.Connection.TensorNabla.OperatorFieldOutputSlotPermutation
 
-/-!
-# Dimension-only bound for the self-cometric trace
-
-The double-trace operator of a metric is parallel and has a pointwise mixed
-tensor norm bounded solely by the dimension.  This removes an unnecessary
-metricwise compactness witness from downstream principal-coefficient bounds.
--/
-
 set_option autoImplicit false
 set_option backward.isDefEq.respectTransparency false
 set_option maxHeartbeats 800000
@@ -40,8 +32,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
 omit [BoundarylessManifold I M] [SigmaCompactSpace M] in
-/-- The self-cometric double trace at rank two has squared fibre norm at most
-the sixth power of the dimension, independently of the metric. -/
 theorem cometricTrace_rfns
     (g : SmoothRiemannianMetric I M) (x : M) :
     riemannianFiberNormSq (I := I) (M := M) g 4 2 x
@@ -90,8 +80,6 @@ private def traceIdx1 (p : ℕ) : Fin (p + 2 + 1) := ⟨1, by omega⟩
 
 private def traceIdx2 (p : ℕ) : Fin (p + 2 + 1) := ⟨2, by omega⟩
 
-/-- The source-slot three-cycle which moves one newly inserted passenger slot
-behind the two traced slots. -/
 private def traceSuccPerm (p : ℕ) : Equiv.Perm (Fin (p + 2 + 1)) :=
   (Equiv.swap (traceIdx0 p) (traceIdx1 p)).trans
     (Equiv.swap (traceIdx0 p) (traceIdx2 p))
@@ -177,8 +165,6 @@ private theorem traceSucc_tuple
     rfl
 
 omit [BoundarylessManifold I M] [SigmaCompactSpace M] in
-/-- Adding one passenger slot to the cometric trace is slot extension followed
-by the fixed source-slot three-cycle. -/
 private theorem traceSucc_fib
     (g : SmoothRiemannianMetric I M) (p : ℕ) (x : M) :
     reindexCoeffFibGen (I := I) (p + 2 + 1) (p + 1) (traceSuccPerm p) x
@@ -203,8 +189,6 @@ private theorem traceSucc_fib
           ((Module.finBasis ℝ E).cDualBasis k)))
       ((Module.finBasis ℝ E) k) (Fin.cons (m 0) (Fin.tail m)))
 
-/-- Each additional passenger slot multiplies the squared fibre norm of the
-self-cometric trace by the dimension. -/
 private theorem traceSucc_rfns
     (g : SmoothRiemannianMetric I M) (p : ℕ) (x : M) :
     riemannianFiberNormSq (I := I) (M := M) g ((p + 1) + 2) (p + 1) x
@@ -218,9 +202,6 @@ private theorem traceSucc_rfns
   exact rfns_slotExtendFib_eq (I := I) (M := M) g (p + 2) p x
     (cometricDoubleTraceFib (I := I) g p x)
 
-/-- The rank-generic self-cometric double trace has a dimension-only squared
-fibre-norm bound.  The deliberately loose exponent keeps one formula valid at
-all passenger ranks, including ranks zero and one. -/
 theorem cometricTrace_rfns_p
     (p : ℕ) (g : SmoothRiemannianMetric I M) (x : M) :
     riemannianFiberNormSq (I := I) (M := M) g (p + 2) p x
@@ -360,10 +341,6 @@ private theorem ricciSelf_twice_eq
     ContinuousMultilinearMap.domDomCongr_apply]
   ring
 
-/-- The self Ricci principal coefficient is the fixed three-trace linear
-combination of the self-cometric double trace and its input/output slot
-reindexings.  In particular, all of its positive covariant derivatives reduce
-to those of the parallel self-cometric trace. -/
 theorem ricciSelf_eq
     (g : SmoothRiemannianMetric I M) :
     ricciArmPrincipalCoeff (I := I) (M := M) g g =

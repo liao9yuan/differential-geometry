@@ -2,14 +2,6 @@ import DifferentialGeometry.Geometry.Coordinates.LocalDiffeoOpen
 
 set_option autoImplicit false
 
-/-!
-# Compact continuation through a local diffeomorphism
-
-This file records the generic lift predicate and uniqueness theorem used by
-compact-continuation arguments.  Existence is proved from a compact fence in
-the next layer of this file; no covering-map hypothesis is assumed.
--/
-
 noncomputable section
 
 open Filter Function Set Topology TopologicalSpace
@@ -23,8 +15,6 @@ variable {H : Type*} [TopologicalSpace H]
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
   [IsManifold I ∞ M]
 
-/-- A continuous lift of `γ` through `F` on a closed interval, with a selected
-starting point and values constrained to `U`. -/
 def IsLiftOn
     (F : E → M) (γ : Real → M) (U : Set E)
     (e₀ : E) (a t : Real) (η : Real → E) : Prop :=
@@ -38,23 +28,18 @@ variable {F : E → M} {γ : Real → M} {U : Set E}
   {e₀ : E} {a b : Real} {η ζ : Real → E}
 
 omit [NormedSpace Real E] [TopologicalSpace M] in
-/-- A lift is continuous on its parameter interval. -/
 theorem continuousOn
     (hη : IsLiftOn F γ U e₀ a b η) :
     ContinuousOn η (Set.Icc a b) :=
   hη.1
 
 omit [NormedSpace Real E] [TopologicalSpace M] in
-/-- A lift maps its parameter interval into the selected source set. -/
 theorem mapsTo
     (hη : IsLiftOn F γ U e₀ a b η) :
     Set.MapsTo η (Set.Icc a b) U :=
   fun s hs ↦ (hη.2.2 s hs).1
 
 omit [IsManifold I ∞ M] in
-/-- Extend a lift across one selected local inverse branch.  The branch-value
-hypothesis into `U` is stated separately because a local-diffeomorphism witness
-need not have its whole source contained in the ambient source set `U`. -/
 theorem extend
     {t u : Real}
     (hat : a ≤ t)
@@ -119,8 +104,6 @@ theorem extend
       exact φ.right_inv htarget
 
 omit [IsManifold I ∞ M] in
-/-- A continuous lift of a `C¹` path through a smooth local diffeomorphism is
-automatically `C¹` on the whole parameter interval. -/
 theorem contDiffOn
     (hloc :
       IsLocalDiffeomorphOn 𝓘(Real, E) I ∞ F U)
@@ -154,10 +137,6 @@ theorem contDiffOn
   exact hbranch.congr_of_eventuallyEq heq (heq.eq_of_nhdsWithin hx)
 
 omit [IsManifold I ∞ M] in
-/-- Two lifts through a local diffeomorphism that agree at one point of a
-closed interval agree throughout that interval.  Their selected left-endpoint
-values may differ; equality at the chosen point is the only normalization
-needed. -/
 theorem eqOn_of_eq
     {e₁ e₂ : E} {t₀ : Real}
     (hU : IsOpen U)
@@ -200,9 +179,6 @@ theorem eqOn_of_eq
   exact congrArg Subtype.val this
 
 omit [IsManifold I ∞ M] in
-/-- Two lifts through a local diffeomorphism that agree at the left endpoint
-agree throughout a nonempty closed interval.  The conclusion is `EqOn`
-because values outside the interval are intentionally unconstrained. -/
 theorem eqOn
     (hab : a ≤ b) (hU : IsOpen U)
     (hloc :
@@ -214,10 +190,6 @@ theorem eqOn
     (hη.2.1.trans hζ.2.1.symm)
 
 omit [IsManifold I ∞ M] in
-/-- A path through a local diffeomorphism has a lift on the whole compact
-interval provided the endpoints of every partial lift stay in one fixed compact
-subset of the source.  This is the compact-continuation theorem; it does not
-assume that the local diffeomorphism is a covering map. -/
 theorem exists_of_compact
     [T2Space M]
     {K : Set E}

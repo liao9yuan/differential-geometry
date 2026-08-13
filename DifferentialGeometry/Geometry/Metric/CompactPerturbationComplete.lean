@@ -4,14 +4,6 @@ import DifferentialGeometry.Geometry.Metric.Completeness
 
 set_option autoImplicit false
 
-/-!
-# Completeness under compactly supported metric changes
-
-A smooth Riemannian metric that agrees off a compact set with a complete metric
-is complete.  The result applies in particular to the metric produced by
-`SmoothRiemannianMetric.bumpExtendOpen` when its cutoff has compact support.
--/
-
 noncomputable section
 
 universe u uE uH
@@ -23,8 +15,6 @@ open Manifold
 
 namespace DifferentialGeometry
 
-/-- The canonical flat smooth Riemannian metric on a finite-dimensional real
-inner-product model space. -/
 noncomputable def flatModelMetric
     (E : Type uE) [NormedAddCommGroup E] [InnerProductSpace Real E]
     [FiniteDimensional Real E] :
@@ -44,8 +34,6 @@ variable {I : ModelWithCorners Real E H}
 variable {M : Type u} [TopologicalSpace M] [ChartedSpace H M]
   [IsManifold I ∞ M] [SigmaCompactSpace M] [T2Space M]
 
-/-- Replacing a complete smooth Riemannian metric on a compact set preserves
-completeness. -/
 theorem of_eq_off_compact
     {g h : SmoothRiemannianMetric I M}
     (hg : RiemannianMetricComplete (I := I) g)
@@ -67,8 +55,6 @@ theorem of_eq_off_compact
     simpa only [one_mul] using
       mul_le_mul_of_nonneg_right (min_le_right c 1) hgnonneg
 
-/-- A bump extension is complete when its fallback metric is complete and the
-cutoff has compact topological support. -/
 theorem bumpExtend_complete
     (R : SmoothRiemannianMetric I M)
     (hR : RiemannianMetricComplete (I := I) R)
@@ -88,8 +74,6 @@ theorem bumpExtend_complete
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-/-- The canonical flat smooth Riemannian metric on a complete
-finite-dimensional inner-product model space is complete. -/
 theorem flatModel_complete
     {E : Type uE} [NormedAddCommGroup E] [InnerProductSpace Real E]
     [FiniteDimensional Real E] [CompleteSpace E] :

@@ -7,7 +7,6 @@ import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.DeTurckRemainder
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.DeTurckPrincipalCometricExtraction
 import Mathlib.Analysis.MeanInequalities
 
-
 noncomputable section
 
 open MeasureTheory Set Filter Topology Bundle Manifold Tensor0SBundle ContinuousLinearMap
@@ -877,8 +876,6 @@ private theorem young_weighted_product_bound
     _ ≤ CS * CT * (wi * (ΛT ^ 2 * NS ^ 2) + wl * (ΛS ^ 2 * NT ^ 2)) :=
         mul_le_mul_of_nonneg_left hyoung (by positivity)
 
-/-- The explicit mixed-valence Gagliardo--Nirenberg coefficient at one product-grid total order.
-The order-zero branch is unused by interpolation cells and is normalized to zero. -/
 noncomputable def gnGridCoeff
     (g : SmoothRiemannianMetric I M) (m : ℕ) : ℝ :=
   if 1 ≤ m then
@@ -889,7 +886,6 @@ noncomputable def gnGridCoeff
 
 omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless]
   [BoundarylessManifold I M] in
-/-- `gnGridCoeff` is nonnegative. -/
 theorem gnGridCoeff_nonneg
     (g : SmoothRiemannianMetric I M) (m : ℕ) :
     0 ≤ gnGridCoeff (I := I) (M := M) g m := by
@@ -900,7 +896,6 @@ theorem gnGridCoeff_nonneg
       (le_trans (le_max_right _ _) (le_max_left _ _))) _) (sq_nonneg _)
   · exact le_refl 0
 
-/-- The explicit per-metric coefficient for the mixed-valence diagonal two-arm product grid. -/
 noncomputable def gridRsConst
     (g : SmoothRiemannianMetric I M) (k : ℕ) : ℝ :=
   (k + 1) ^ 2 *
@@ -909,7 +904,6 @@ noncomputable def gridRsConst
 
 omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless]
   [BoundarylessManifold I M] in
-/-- `gridRsConst` is nonnegative. -/
 theorem gridRsConst_nonneg
     (g : SmoothRiemannianMetric I M) (k : ℕ) :
     0 ≤ gridRsConst (I := I) (M := M) g k := by
@@ -920,8 +914,6 @@ theorem gridRsConst_nonneg
       mul_nonneg (gnGridCoeff_nonneg (I := I) (M := M) g m)
         (gnGridCoeff_nonneg (I := I) (M := M) g m)))
 
-/-- The integrated mixed-valence diagonal two-arm product grid with its explicit per-metric
-Gagliardo--Nirenberg coefficient. -/
 theorem grid_rs_bound
     (g : SmoothRiemannianMetric I M) (r₁ r₂ s₁ s₂ k : ℕ) :
     0 ≤ gridRsConst (I := I) (M := M) g k ∧
@@ -1299,7 +1291,6 @@ theorem grid_rs_bound
     rw [hc]
     ring
 
-/-- Existential compatibility form of `grid_rs_bound`. -/
 theorem exists_integrated_iteratedCovGrad_diagonalProductGrid_twoArm_rs_le
     (g : SmoothRiemannianMetric I M) (r₁ r₂ s₁ s₂ k : ℕ) :
     ∃ C : ℝ, 0 ≤ C ∧
@@ -1687,7 +1678,6 @@ noncomputable def cometricDoubleTraceCastG0 (g₀ g₁ : SmoothRiemannianMetric 
     (DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.DeTurck.cometricDoubleTraceField
       (I := I) g₁ 1).hasCompactSupport
 
-/-- Compatibility name for the background-cast cometric double trace. -/
 abbrev cometricCastG0 (g₀ g₁ : SmoothRiemannianMetric I M) :
     SmoothCcTensor g₀ 3 1 :=
   cometricDoubleTraceCastG0 (I := I) g₀ g₁
@@ -1707,7 +1697,6 @@ theorem ricciArmOrder1KoszulCoeff_eq_raisedKoszul_contract_cometricDoubleTraceCa
   rfl
 
 omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] in
-/-- Compatibility form using the former application notation. -/
 theorem ricciArmOrder1KoszulCoeff_eq_appCcRS
     (g₀ g₁ : SmoothRiemannianMetric I M) :
     DifferentialGeometry.Analysis.Parabolic.TensorSpectral.ricciArmOrder1KoszulCoeff

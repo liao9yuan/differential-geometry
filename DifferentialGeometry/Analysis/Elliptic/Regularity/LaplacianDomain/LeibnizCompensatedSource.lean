@@ -3,7 +3,6 @@ import DifferentialGeometry.Analysis.Elliptic.Regularity.SmoothScalar.MulLp
 import DifferentialGeometry.Analysis.Elliptic.Operator.VariationalLaplacian
 import DifferentialGeometry.Geometry.Operator.Laplacian
 
-
 noncomputable section
 
 open Bundle Manifold MeasureTheory Set Filter
@@ -52,7 +51,6 @@ noncomputable def leibnizCompensatedSource (g : SmoothRiemannianMetric I M) (α 
         (laplacianOfChartPOU (I := I) (M := M) g α)
         (H1ComplToLp (I := I) (M := M) g u_h)
 
-/-- Compatibility name for the Leibniz-compensated `L²` source. -/
 abbrev fHLeibniz := leibnizCompensatedSource (I := I) (M := M)
 
 omit [NeZero (Module.finrank ℝ E)] in

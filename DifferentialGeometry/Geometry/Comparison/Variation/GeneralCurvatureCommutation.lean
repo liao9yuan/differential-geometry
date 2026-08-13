@@ -4,14 +4,6 @@ import DifferentialGeometry.Geometry.Comparison.Variation.JacobiField
 set_option autoImplicit false
 set_option linter.unusedSectionVars false
 
-/-!
-# Curvature commutation for a general variation field
-
-This file lifts the fixed-chart curvature commutator to an arbitrary smooth
-vector field along a two-parameter variation.  The existing velocity-field
-theorems are special cases of this geometric identity.
--/
-
 noncomputable section
 
 open Set Function Filter Manifold Bundle
@@ -35,8 +27,6 @@ open DifferentialGeometry.Geometry.Riemannian.AlongCurve
 open DifferentialGeometry.Geometry.Riemannian.Geodesic
 open DifferentialGeometry.Integral.Connection
 
-/-- Covariant differentiation of a field along the first parameter of a
-two-parameter family. -/
 noncomputable def covFst
     (g : SmoothRiemannianMetric I M) (f : Real → Real → M)
     (V : ∀ s t : Real, TangentSpace I (f s t)) (s t : Real) :
@@ -44,8 +34,6 @@ noncomputable def covFst
   covDerivAlong (I := I) g (fun r : Real => f r t)
     (fun r : Real => V r t) s
 
-/-- Covariant differentiation of a field along the second parameter of a
-two-parameter family. -/
 noncomputable def covSnd
     (g : SmoothRiemannianMetric I M) (f : Real → Real → M)
     (V : ∀ s t : Real, TangentSpace I (f s t)) (s t : Real) :
@@ -53,40 +41,34 @@ noncomputable def covSnd
   covDerivAlong (I := I) g (fun v : Real => f s v)
     (fun v : Real => V s v) t
 
-/-- Velocity of a two-parameter family in its first parameter. -/
 noncomputable def varFst (f : Real → Real → M) (s t : Real) :
     TangentSpace I (f s t) :=
   mfderiv (modelWithCornersSelf Real Real) I (fun r : Real => f r t) s
     (1 : Real)
 
-/-- Velocity of a two-parameter family in its second parameter. -/
 noncomputable def varSnd (f : Real → Real → M) (s t : Real) :
     TangentSpace I (f s t) :=
   mfderiv (modelWithCornersSelf Real Real) I (fun v : Real => f s v) t
     (1 : Real)
 
-/-- Two covariant derivatives in the second parameter. -/
 noncomputable def covSnd2
     (g : SmoothRiemannianMetric I M) (f : Real → Real → M)
     (V : ∀ s t : Real, TangentSpace I (f s t)) (s t : Real) :
     TangentSpace I (f s t) :=
   covSnd (I := I) g f (fun r v => covSnd (I := I) g f V r v) s t
 
-/-- First-parameter differentiation after second-parameter differentiation. -/
 noncomputable def covFstSnd
     (g : SmoothRiemannianMetric I M) (f : Real → Real → M)
     (V : ∀ s t : Real, TangentSpace I (f s t)) (s t : Real) :
     TangentSpace I (f s t) :=
   covFst (I := I) g f (fun r v => covSnd (I := I) g f V r v) s t
 
-/-- Second-parameter differentiation after first-parameter differentiation. -/
 noncomputable def covSndFst
     (g : SmoothRiemannianMetric I M) (f : Real → Real → M)
     (V : ∀ s t : Real, TangentSpace I (f s t)) (s t : Real) :
     TangentSpace I (f s t) :=
   covSnd (I := I) g f (fun r v => covFst (I := I) g f V r v) s t
 
-/-- The curvature operator evaluated on three vector fields along one curve. -/
 noncomputable def curvAlong
     (g : SmoothRiemannianMetric I M) (γ : Real → M)
     (X Y Z : ∀ s : Real, TangentSpace I (γ s)) (t : Real) :
@@ -95,7 +77,6 @@ noncomputable def curvAlong
     (DifferentialGeometry.Integral.Connection.LeviCivita (I := I) g) (γ t))
     (X t) (Y t) (Z t)
 
-/-- Curvature of the two parameter velocities acting on a field. -/
 noncomputable def varCurv
     (g : SmoothRiemannianMetric I M) (f : Real → Real → M)
     (V : ∀ s t : Real, TangentSpace I (f s t)) (s t : Real) :
@@ -105,7 +86,6 @@ noncomputable def varCurv
     (fun v : Real => varSnd (I := I) f s v)
     (fun v : Real => V s v) t
 
-/-- The Jacobi curvature term `R(V,T)T` for a two-parameter family. -/
 noncomputable def jacCurv
     (g : SmoothRiemannianMetric I M) (f : Real → Real → M)
     (V : ∀ s t : Real, TangentSpace I (f s t)) (s t : Real) :
@@ -115,10 +95,6 @@ noncomputable def jacCurv
     (fun r : Real => varSnd (I := I) f r t)
     (fun r : Real => varSnd (I := I) f r t) s
 
-/-- The covariant derivative of curvature along a curve, evaluated on three
-fields along that curve.  The slot-derivative corrections make this the direct
-intrinsic `(∇R)(X,Y)Z` object rather than the derivative of a chosen
-coordinate representation. -/
 noncomputable def curvDerivAlong
     (g : SmoothRiemannianMetric I M) (γ : Real → M)
     (X Y Z : ∀ s : Real, TangentSpace I (γ s)) (t : Real) :
@@ -132,9 +108,6 @@ noncomputable def curvDerivAlong
     curvAlong (I := I) g γ X Y
       (fun s : Real => covDerivAlong (I := I) g γ Z s) t
 
-/-- Forcing in the first parameter derivative of the Jacobi equation. It
-contains one curvature derivative in each parameter direction and only
-lower-order field and velocity derivatives. -/
 noncomputable def jacVarForce
     (g : SmoothRiemannianMetric I M) (f : Real → Real → M)
     (V : ∀ s t : Real, TangentSpace I (f s t)) (t : Real) :
@@ -169,8 +142,6 @@ noncomputable def jacVarForce
           covSnd (I := I) g f
             (fun s w => varFst (I := I) f s w) 0 v) t)
 
-/-- Covariant Leibniz expansion for curvature evaluated on fields along a
-curve. -/
 theorem cov_curvAlong
     (g : SmoothRiemannianMetric I M) (γ : Real → M)
     (X Y Z : ∀ s : Real, TangentSpace I (γ s)) (t : Real) :
@@ -263,8 +234,6 @@ theorem curvAlong_smooth
       (v := Z) hR2 hZ
   simpa only [curvAlong] using hR3
 
-/-- The Jacobi curvature term of a jointly smooth variation field and a
-jointly smooth time-velocity field is jointly smooth. -/
 theorem jacCurv_smooth
     (g : SmoothRiemannianMetric I M) (f : Real -> Real -> M)
     (V : ∀ s t : Real, TangentSpace I (f s t))
@@ -359,8 +328,6 @@ theorem jacCurv_smooth
       (v := T) hR2 hT
   simpa only [F, T, jacCurv, curvAlong] using hR3
 
-/-- Multiplying the first field by a smooth scalar function only scales the
-covariant curvature derivative by the scalar's value at the evaluation time. -/
 theorem curvDeriv_smul_left
     (g : SmoothRiemannianMetric I M) (γ : Real -> M)
     (f : Real -> Real) (X Y Z : ∀ s, TangentSpace I (γ s)) (t : Real)
@@ -404,8 +371,6 @@ theorem curvDeriv_smul_left
     ContinuousLinearMap.add_apply, ContinuousLinearMap.smul_apply]
   module
 
-/-- Multiplying the second field by a differentiable scalar function only
-scales the covariant curvature derivative at the evaluation time. -/
 theorem curvDeriv_smul_mid
     (g : SmoothRiemannianMetric I M) (γ : Real -> M)
     (f : Real -> Real) (X Y Z : ∀ s, TangentSpace I (γ s)) (t : Real)
@@ -449,8 +414,6 @@ theorem curvDeriv_smul_mid
     ContinuousLinearMap.add_apply, ContinuousLinearMap.smul_apply]
   module
 
-/-- Multiplying the third field by a differentiable scalar function only
-scales the covariant curvature derivative at the evaluation time. -/
 theorem curvDeriv_smul_right
     (g : SmoothRiemannianMetric I M) (γ : Real -> M)
     (f : Real -> Real) (X Y Z : ∀ s, TangentSpace I (γ s)) (t : Real)
@@ -493,7 +456,6 @@ theorem curvDeriv_smul_right
   simp only [map_add, map_smul]
   module
 
-/-- The covariant curvature derivative is additive in its first field. -/
 theorem curvDeriv_add_left
     (g : SmoothRiemannianMetric I M) (γ : Real -> M)
     (X X' Y Z : ∀ s, TangentSpace I (γ s)) (t : Real)
@@ -546,7 +508,6 @@ theorem curvDeriv_add_left
   simp only [map_add, ContinuousLinearMap.add_apply]
   abel
 
-/-- The covariant curvature derivative is additive in its second field. -/
 theorem curvDeriv_add_mid
     (g : SmoothRiemannianMetric I M) (γ : Real -> M)
     (X Y Y' Z : ∀ s, TangentSpace I (γ s)) (t : Real)
@@ -599,7 +560,6 @@ theorem curvDeriv_add_mid
   simp only [map_add, ContinuousLinearMap.add_apply]
   abel
 
-/-- The covariant curvature derivative is additive in its third field. -/
 theorem curvDeriv_add_right
     (g : SmoothRiemannianMetric I M) (γ : Real -> M)
     (X Y Z Z' : ∀ s, TangentSpace I (γ s)) (t : Real)
@@ -652,8 +612,6 @@ theorem curvDeriv_add_right
   simp only [map_add]
   abel
 
-/-- The covariant curvature derivative only depends on the germs of its three
-fields at the evaluation time. -/
 theorem curvDeriv_congr
     (g : SmoothRiemannianMetric I M) (γ : Real -> M)
     {X X' Y Y' Z Z' : ∀ s, TangentSpace I (γ s)} {t : Real}
@@ -681,8 +639,6 @@ theorem curvDeriv_congr
   simp only
   rw [hDX, hDY, hDZ, hXt, hYt, hZt]
 
-/-- The covariant curvature derivative commutes with finite sums in its first
-field. -/
 theorem curvDeriv_sum_left
     {ι : Type*} (g : SmoothRiemannianMetric I M) (γ : Real -> M)
     (s : Finset ι) (X : ι -> ∀ u, TangentSpace I (γ u))
@@ -744,8 +700,6 @@ theorem curvDeriv_sum_left
   simp only [map_sum, ContinuousLinearMap.sum_apply,
     Finset.sum_sub_distrib]
 
-/-- The covariant curvature derivative commutes with finite sums in its second
-field. -/
 theorem curvDeriv_sum_mid
     {ι : Type*} (g : SmoothRiemannianMetric I M) (γ : Real -> M)
     (s : Finset ι) (X : ∀ u, TangentSpace I (γ u))
@@ -800,8 +754,6 @@ theorem curvDeriv_sum_mid
   simp only [map_sum, ContinuousLinearMap.sum_apply,
     Finset.sum_sub_distrib]
 
-/-- The covariant curvature derivative commutes with finite sums in its third
-field. -/
 theorem curvDeriv_sum_right
     {ι : Type*} (g : SmoothRiemannianMetric I M) (γ : Real -> M)
     (s : Finset ι) (X Y : ∀ u, TangentSpace I (γ u))
@@ -922,8 +874,6 @@ private lemma fieldCoord_contDiffAt
     ← chartedSpaceSelf_prod]
   exact hfiber'
 
-/-- A jointly smooth tangent field has a differentiable pinned chart
-representation on every second-parameter slice. -/
 lemma chartRep_snd_diff
     (f : Real → Real → M)
     (V : ∀ s t : Real, TangentSpace I (f s t))
@@ -992,13 +942,6 @@ private lemma gammaContr_contDiffAt
       (chartCoordCLM (E := E) j).contDiff.contDiffAt.comp q₀ hQ
   exact (hΓ.mul hPi).mul hQj
 
-/-- Covariant derivatives of a general smooth field along a two-parameter
-variation commute up to the Levi-Civita curvature operator.
-
-The hypotheses state the actual regularity consumed by the two nested
-covariant derivatives: joint `C²` regularity in one fixed foot chart,
-differentiability of the two inner slice representations, and
-differentiability of the two resulting outer representations. -/
 theorem cov_commute_curv
     (g : SmoothRiemannianMetric I M) (f : Real → Real → M)
     (hf : IsSmoothVariation (I := I) f)
@@ -1260,8 +1203,6 @@ theorem cov_commute_curv
   rw [houterCoordL, houterCoordR]
   exact hfixed
 
-/-- Taking the covariant derivative in the second parameter preserves joint
-smoothness of a tangent field along a smooth two-parameter family. -/
 theorem cov_snd_smooth
     (g : SmoothRiemannianMetric I M) (f : Real → Real → M)
     (V : ∀ s t : Real, TangentSpace I (f s t))
@@ -1475,8 +1416,6 @@ theorem cov_snd_smooth
       ← chartedSpaceSelf_prod] at hfiberCD
     simpa only [F, β] using hfiberCD
 
-/-- Taking the covariant derivative in the first parameter preserves joint
-smoothness of a tangent field along a smooth two-parameter family. -/
 theorem cov_fst_smooth
     (g : SmoothRiemannianMetric I M) (f : Real → Real → M)
     (V : ∀ s t : Real, TangentSpace I (f s t))
@@ -1519,8 +1458,6 @@ theorem cov_fst_smooth
   have hcomp := hsnd.comp hswap
   simpa only [swap, Function.comp_apply] using hcomp
 
-/-- Covariant derivatives of a jointly smooth tangent field along a smooth
-two-parameter variation commute up to curvature. -/
 theorem cov_commute_smooth
     (g : SmoothRiemannianMetric I M) (f : Real → Real → M)
     (hf : IsSmoothVariation (I := I) f)
@@ -1730,9 +1667,6 @@ theorem cov_commute_smooth
     cov_commute_curv (I := I) g f hf V t hV2 hinnerL hinnerR
       houterL houterR
 
-/-- Commuting a first-parameter derivative past two second-parameter
-covariant derivatives produces the derivative of the first curvature
-commutator and one additional curvature term. -/
 theorem cov_snd2_commute
     (g : SmoothRiemannianMetric I M) (f : Real → Real → M)
     (hf : IsSmoothVariation (I := I) f)
@@ -1816,8 +1750,6 @@ theorem cov_snd2_commute
           (fun s v => covSnd (I := I) g f V s v) 0 t
   linear_combination (norm := module) hcomm2
 
-/-- Leibniz expansion of the second-parameter derivative of the variation
-curvature term. -/
 theorem cov_varCurv
     (g : SmoothRiemannianMetric I M) (f : Real → Real → M)
     (V : ∀ s t : Real, TangentSpace I (f s t)) (s t : Real) :
@@ -1849,8 +1781,6 @@ theorem cov_varCurv
       (fun v : Real => varSnd (I := I) f s v)
       (fun v : Real => V s v) t
 
-/-- Leibniz expansion of the first-parameter derivative of the Jacobi
-curvature term. -/
 theorem cov_jacCurv
     (g : SmoothRiemannianMetric I M) (f : Real → Real → M)
     (V : ∀ s t : Real, TangentSpace I (f s t)) (s t : Real) :
@@ -1882,9 +1812,6 @@ theorem cov_jacCurv
       (fun r : Real => varSnd (I := I) f r t)
       (fun r : Real => varSnd (I := I) f r t) s
 
-/-- Fully expanded second commutator. The forcing contains one covariant
-curvature derivative and only lower parameter derivatives of the field and
-variation velocities. -/
 theorem cov_snd2_expand
     (g : SmoothRiemannianMetric I M) (f : Real → Real → M)
     (hf : IsSmoothVariation (I := I) f)
@@ -2026,9 +1953,6 @@ theorem cov_snd2_expand
   rw [hlead, hlast] at hraw
   linear_combination (norm := module) hraw
 
-/-- The first parameter derivative of a smooth family of Jacobi fields
-satisfies an inhomogeneous Jacobi equation with the explicit lower-order
-forcing `jacVarForce`. -/
 theorem jacobi_var_eq
     (g : SmoothRiemannianMetric I M) (f : Real → Real → M)
     (hf : IsSmoothVariation (I := I) f)

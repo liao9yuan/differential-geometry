@@ -28,15 +28,6 @@ private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 set_option synthInstance.maxHeartbeats 1600000 in
 set_option maxHeartbeats 3200000 in
 set_option linter.unusedVariables false in
-/-- A product of tensor-jet fibre norms on one antidiagonal has a tame
-integral bound from a zeroth-order pointwise bound, the top-order `L²` norm,
-and the corresponding Gagliardo--Nirenberg estimates.
-
-The base valence `(r, s)` is generic and inferred from `P`: the argument uses
-only Hölder, the fibre-norm `L¹` API and the supplied `hGNP`, none of which sees
-the valence.  Instantiating at `(0, 2)` gives the state's own grid; at
-`(0, 3)` it gives the grid of `∇P`, which is what the `∇P`-capped currency of
-the quadratic C0 summands runs on. -/
 theorem grid_prod_int_le
     (g₀ : SmoothRiemannianMetric I M) {r s : ℕ}
     (P : SmoothCcTensor g₀ r s)

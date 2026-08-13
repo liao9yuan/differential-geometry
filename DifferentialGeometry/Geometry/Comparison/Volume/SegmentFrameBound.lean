@@ -3,14 +3,6 @@ import DifferentialGeometry.Geometry.Comparison.Volume.SegmentPole
 
 set_option autoImplicit false
 
-/-!
-# Full endpoint density bound in an orthonormal frame
-
-This file assembles the sharp transverse comparison with the Gauss radial split
-and removes the adapted-frame choice. The resulting invariant statement applies
-to any pointwise orthonormal basis.
--/
-
 noncomputable section
 
 open Bundle Filter Function Manifold Matrix Set
@@ -221,8 +213,6 @@ private theorem fullDens_eq_trans
           congr 2
 
 omit [T2Space (TangentBundle I M)] in
-/-- Multiplying the endpoint exponential density at `t • u` by the radial
-Jacobian power `t^(n-1)` recovers the transverse Jacobi density at time `t`. -/
 theorem expDens_scale
     (g : SmoothRiemannianMetric I M)
     (hEnorm : ∀ (y : M) (w : TangentSpace I y),
@@ -267,9 +257,6 @@ theorem expDens_scale
   rw [abs_of_pos ht] at hscale
   exact hscale.symm
 
-/-- The endpoint Jacobian density of the intrinsic exponential, measured in any
-orthonormal basis at the launch point, is bounded by the hyperbolic model
-density. Nonconjugacy is required only on the open radial segment. -/
 theorem expDens_le_hyp
     (g : SmoothRiemannianMetric I M)
     (hEnorm : ∀ (y : M) (w : TangentSpace I y),

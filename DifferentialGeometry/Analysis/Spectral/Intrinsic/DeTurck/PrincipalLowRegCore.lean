@@ -2,13 +2,6 @@ import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.PrincipalLowRegH
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.PrincipalOpH2
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.InverseMetricRaisedEndomorphismJetBound
 
-/-!
-# Smooth-core realization of the low-regularity principal operator
-
-This file identifies the Banach-algebra Neumann correction with the geometric
-moving inverse-cometric coefficient on smooth metric deviations.
--/
-
 noncomputable section
 
 open Bundle Manifold MeasureTheory Set Filter Tensor0SBundle
@@ -352,8 +345,6 @@ private lemma fullH2_inverse
         rw [hleft, one_mul]
   simpa only [B] using hgeom.symm
 
-/-- On a smooth metric deviation, the Neumann correction is exactly the
-moving inverse-metric difference acting in the leading covariant slot. -/
 theorem invPerturbH2_core
     (hDim : Module.finrank ℝ E = 3)
     (g₀ g₁ : SmoothRiemannianMetric I M) (T : SmoothCcTensor g₀ 0 2)
@@ -374,8 +365,6 @@ theorem invPerturbH2_core
     fullH2_inverse (I := I) (M := M) hDim g₀ g₁ T htie hsmall,
     fullH2_sub_one (I := I) (M := M) g₀ g₀ g₁]
 
-/-- On a smooth small metric deviation, the low-regularity principal
-correction agrees with the geometric DeTurck principal-cometric arm. -/
 theorem lowRegPrincipal_core
     (hDim : Module.finrank ℝ E = 3)
     (g₀ g₁ : SmoothRiemannianMetric I M) (T : SmoothCcTensor g₀ 0 2)

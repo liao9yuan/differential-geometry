@@ -6,13 +6,6 @@ import DifferentialGeometry.Geometry.Connection.ChartFrame.ChartMetric
 import DifferentialGeometry.Geometry.Operator.Gradient
 import DifferentialGeometry.Tensor.RSTensor.BundleTrivialization.TensorRSBundleLocalityIdentities
 
-/-!
-# Chart-basis tensor and cometric readouts
-
-This module records the pointwise chart-basis identities used to convert
-intrinsic tensor and cometric evaluations into raw chart components.
--/
-
 noncomputable section
 
 set_option linter.style.setOption false

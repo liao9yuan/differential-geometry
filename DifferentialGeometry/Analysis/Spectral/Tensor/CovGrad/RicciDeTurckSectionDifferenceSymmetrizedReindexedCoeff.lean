@@ -10,7 +10,6 @@ import DifferentialGeometry.Geometry.Curvature.CurvatureOperator.SlotFreeCurvatu
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.RicciDeTurckSectionDifferenceKoszulSecondCovGrad
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.RicciDeTurckSectionDifferencePrincipalEndomorphismTrace
 
-
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
@@ -46,7 +45,6 @@ noncomputable def ccTensor02Symm (g₀ : SmoothRiemannianMetric I M) (T : Smooth
     SmoothCcTensor g₀ 0 2 :=
   (1 / 2 : ℝ) • (T + domDomCongrSection (I := I) g₀ (Equiv.swap (0 : Fin 2) 1) T)
 
-/-- Compatibility name for the symmetric part of a covariant two-tensor section. -/
 abbrev symmS (g₀ : SmoothRiemannianMetric I M) (T : SmoothCcTensor g₀ 0 2) :
     SmoothCcTensor g₀ 0 2 :=
   ccTensor02Symm (I := I) (M := M) g₀ T
@@ -61,7 +59,6 @@ lemma unitModel_add2 (g₀ : SmoothRiemannianMetric I M)
   rw [SmoothCcTensor.toSection_add, ContMDiffSection.coe_add, Pi.add_apply,
     ContinuousLinearMap.add_apply, Tensor0SSpace.toModel_add]
 
-
 omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] in
 omit [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private lemma unitModel_eq_ccTensorBilin (g₀ : SmoothRiemannianMetric I M)
@@ -75,7 +72,6 @@ private lemma unitModel_eq_ccTensorBilin (g₀ : SmoothRiemannianMetric I M)
   refine congrArg _ ?_
   funext k
   fin_cases k <;> rfl
-
 
 omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 omit [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
@@ -92,7 +88,6 @@ private lemma ccTensorBilin_domDomCongrSection_swap (g₀ : SmoothRiemannianMetr
   funext k
   fin_cases k <;> simp [Equiv.swap_apply_left, Equiv.swap_apply_right]
 
-
 omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] in
 omit [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 lemma ccTensorBilin_add (g₀ : SmoothRiemannianMetric I M)
@@ -105,7 +100,6 @@ lemma ccTensorBilin_add (g₀ : SmoothRiemannianMetric I M)
       ← unitModel_eq_ccTensorBilin (I := I) (M := M) g₀ T b u w]
   rw [unitModel_add2 (I := I) (M := M) g₀ S T b, ContinuousMultilinearMap.add_apply]
 
-
 omit [BoundarylessManifold I M] in
 omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M]
     [SigmaCompactSpace M] in
@@ -115,7 +109,6 @@ lemma ccTensorBilin_smul (g₀ : SmoothRiemannianMetric I M)
       c * smoothCcTensorBilinForm (I := I) g₀ S b u w := by
   rw [ccTensorBilin_apply, ccTensorBilin_apply, ccTensorModel_smul,
     ContinuousMultilinearMap.smul_apply, smul_eq_mul]
-
 
 omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 omit [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
@@ -127,7 +120,6 @@ theorem ccTensorBilin_symmS (g₀ : SmoothRiemannianMetric I M) (T : SmoothCcTen
     ccTensorBilin_domDomCongrSection_swap (I := I) (M := M) g₀ T b u w,
     ccTensorBilinSymm_apply]
 
-
 omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 omit [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 theorem symmS_hbil_of_realize (g₀ g₁ : SmoothRiemannianMetric I M) (T : SmoothCcTensor g₀ 0 2)
@@ -138,7 +130,6 @@ theorem symmS_hbil_of_realize (g₀ g₁ : SmoothRiemannianMetric I M) (T : Smoo
       g₁.inner b u w - g₀.inner b u w := by
   rw [ccTensorBilin_symmS (I := I) (M := M) g₀ T b u w, hg₁ b u w]
   ring
-
 
 omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 omit [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
@@ -157,7 +148,6 @@ private lemma unitModel_domDomCongrSection_swap_add (g₀ : SmoothRiemannianMetr
   rw [ContinuousMultilinearMap.domDomCongr_apply, ContinuousMultilinearMap.add_apply,
     ContinuousMultilinearMap.add_apply, ContinuousMultilinearMap.domDomCongr_apply,
     ContinuousMultilinearMap.domDomCongr_apply]
-
 
 omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 omit [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
@@ -178,7 +168,6 @@ private lemma unitModel_domDomCongrSection_swap_smul (g₀ : SmoothRiemannianMet
   intro m
   rw [ContinuousMultilinearMap.domDomCongr_apply, ContinuousMultilinearMap.smul_apply,
     ContinuousMultilinearMap.smul_apply, ContinuousMultilinearMap.domDomCongr_apply]
-
 
 omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
     [T2Space M] [SigmaCompactSpace M] in
@@ -502,7 +491,6 @@ def palatiniTracedPrincipalRemainderCrossMetric (g₀ gop gcov : SmoothRiemannia
   secondKoszulFrameRemainder (I := I) (M := M) g₀ gop S' Z Y x
     + alignmentTraceRemainderCross (I := I) (M := M) g₀ gop gcov Z Y x
 
-
 omit [NeZero (Module.finrank ℝ E)] in
 theorem palatini_tracedPrincipal_cross_eq_combinedTrace
     (g₀ gop gcov : SmoothRiemannianMetric I M) (S' : SmoothCcTensor g₀ 0 2)
@@ -557,7 +545,6 @@ def palatiniTracedPrincipalDiffRemainder (g₀ g₁ g₁' : SmoothRiemannianMetr
     (S S' : SmoothCcTensor g₀ 0 2) (Z Y : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) (x : M) : ℝ :=
   palatiniTracedPrincipalRemainder (I := I) (M := M) g₀ g₁ S Z Y x
     - palatiniTracedPrincipalRemainderCrossMetric (I := I) (M := M) g₀ g₁ g₁' S' Z Y x
-
 
 omit [NeZero (Module.finrank ℝ E)] in
 theorem palatini_tracedPrincipalDiff_covector_eq_combinedTrace
@@ -657,7 +644,6 @@ def palatiniTracedPrincipalZRemainderCross (g₀ gop gcov : SmoothRiemannianMetr
             smoothExtensionTangent_contMDiff (I := I) x ((chartModelBasis E) i)⟩)
           W x (V x)) i)
 
-
 omit [NeZero (Module.finrank ℝ E)] in
 theorem palatini_tracedPrincipal_Zslot_cross_eq_combinedTrace
     (g₀ gop gcov : SmoothRiemannianMetric I M) (S' : SmoothCcTensor g₀ 0 2)
@@ -731,7 +717,6 @@ def palatiniTracedPrincipalZDiffRemainder (g₀ g₁ g₁' : SmoothRiemannianMet
     (S S' : SmoothCcTensor g₀ 0 2) (V W : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) (x : M) : ℝ :=
   palatiniTracedPrincipalZRemainder (I := I) (M := M) g₀ g₁ S V W x
     - palatiniTracedPrincipalZRemainderCross (I := I) (M := M) g₀ g₁ g₁' S' V W x
-
 
 omit [NeZero (Module.finrank ℝ E)] in
 theorem palatini_tracedPrincipalDiff_Zslot_eq_combinedTrace
@@ -818,7 +803,6 @@ noncomputable def reindexCoeffFib (σ' : Equiv.Perm (Fin 4)) (x : M)
             σ').toContinuousLinearEquiv.toContinuousLinearMap).comp
         (Tensor0SBundle.tensor0SSpace_continuousLinearEquiv (I := I) 4 x).toContinuousLinearMap))
 
-
 omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless]
     [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 theorem reindexCoeffFib_apply (σ' : Equiv.Perm (Fin 4)) (x : M)
@@ -832,7 +816,6 @@ theorem reindexCoeffFib_apply (σ' : Equiv.Perm (Fin 4)) (x : M)
     ContinuousLinearMap.comp_apply]
   congr 1
 
-
 omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless]
     [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private theorem reindexCoeffFib_add (σ' : Equiv.Perm (Fin 4)) (x : M)
@@ -844,7 +827,6 @@ private theorem reindexCoeffFib_add (σ' : Equiv.Perm (Fin 4)) (x : M)
     ContinuousLinearMap.add_apply]
 
 set_option backward.isDefEq.respectTransparency false in
-
 omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
     [SigmaCompactSpace M] in
 theorem reindexCoeffFib_contMDiff (g₀ : SmoothRiemannianMetric I M)
@@ -910,7 +892,6 @@ noncomputable def reindexCoeff (g₀ : SmoothRiemannianMetric I M)
       contMDiff_toFun := reindexCoeffFib_contMDiff (I := I) (M := M) g₀ R σ' }
   hasCompactSupport := HasCompactSupport.of_compactSpace _
 
-
 omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [BoundarylessManifold I M]
     [SigmaCompactSpace M] in
 @[simp] theorem reindexCoeff_toSection (g₀ : SmoothRiemannianMetric I M)
@@ -922,7 +903,6 @@ omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [BoundarylessManifold I M]
             R.toSection x)) := rfl
 
 set_option backward.isDefEq.respectTransparency false in
-
 omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [BoundarylessManifold I M]
     [SigmaCompactSpace M] in
 theorem reindexCoeff_appCc_eq (g₀ : SmoothRiemannianMetric I M)

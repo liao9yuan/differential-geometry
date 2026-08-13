@@ -3,14 +3,6 @@ import DifferentialGeometry.Geometry.Comparison.Variation.FixedChartIdentities
 import DifferentialGeometry.Geometry.Connection.ChartBridge.RiemannBasisBracket
 import DifferentialGeometry.Geometry.Connection.ParallelTransport.CovariantDerivativeAlong
 
-/-!
-# Smooth finite-frame expansions along a curve
-
-This file packages the local finite-frame expansion used to transfer
-tensorial identities from restrictions of global smooth tangent fields to
-arbitrary smooth tangent fields along a curve.
--/
-
 noncomputable section
 
 set_option autoImplicit false
@@ -37,8 +29,6 @@ variable {I : ModelWithCorners Real E H} [I.Boundaryless]
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
   [IsManifold I ∞ M] [T2Space M] [SigmaCompactSpace M]
 
-/-- A finite sum of smooth tangent fields along the same smooth base curve is
-smooth as a tangent-bundle-valued map. -/
 theorem contMDiff_sum_along
     {ι : Type*} (s : Finset ι) (gamma : Real -> M)
     (V : ι -> forall t, TangentSpace I (gamma t))
@@ -85,10 +75,6 @@ theorem contMDiff_sum_along
     Real (gamma t) ht]
   rw [map_sum]
 
-/-- A smooth tangent field along a smooth curve has, near a fixed parameter,
-a finite expansion in any globally smooth extension of the chart frame.
-The scalar coefficients are globally smooth and their values at the base
-parameter are the pinned-chart coordinates of the field. -/
 theorem exists_frame_exp
     (gamma : Real -> M) (V : forall s, TangentSpace I (gamma s)) (t : Real)
     (hgamma : ContMDiff 𝓘(Real, Real) I ∞ gamma)

@@ -1,54 +1,6 @@
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.HeatSemigroup.GalerkinParabolicEnergyDeTurck
 import DifferentialGeometry.Analysis.Parabolic.QuasiLinear.TensorMaximalRegularity.TameForcingFixedPoint
 
-/-!
-# The Galerkin ODE system of a tame, ball-Lipschitz nonlinearity
-
-`GalerkinParabolicEnergyDeTurck.lean` builds the `V_N` Galerkin system for the
-Ricci--DeTurck nonlinearity under the *super-critical* gate
-`2·finrank ℝ E + 10 ≤ a`, which is exactly the regularity at which that
-nonlinearity is **globally Lipschitz** on the top Sobolev space.  At the
-critical order `a = 1` no such gate is available, and provably so: the third
-arm of the tame estimate carries the ambient `H^{a+2}` norm of its endpoints,
-which the state set `lowerState g₀ a R` does not bound.
-
-On a spectral truncation the obstruction disappears.  `V_S` is finite
-dimensional, so the two Sobolev scales `H^{a+1}` and `H^{a+2}` are equivalent
-there — quantitatively `‖u‖_{a+2} ≤ √κ ‖u‖_{a+1}` whenever `1 + λᵢ ≤ κ` on the
-truncation — and therefore the state ball is a *bounded* set for the top norm
-on `V_S`.  `tame_lip_balls` then supplies a genuine Lipschitz constant there,
-which is all Picard--Lindelöf needs.
-
-## The construction
-
-The nonlinearity is only defined on `lowerState g₀ a R`, so the coordinate
-vector field is built from the **radially retracted** state: `galTameRetr`
-rescales a coordinate vector so that the `H^{a+1}` view of its spectral
-combination has norm at most `R`.  The retraction is conjugate to
-`ballRetraction` on `H^{a+1}` (`galTameRetr_view`), hence `1`-Lipschitz there,
-and `galCoordNormLe` transports that back to coordinates.  It is **inert
-exactly on the state ball** (`galTameRetr_eq`): the region where it does
-nothing is `‖u‖_{a+1} ≤ R`, the scale-uniform condition an energy estimate can
-hope to produce, not an `H^{a+2}` condition.
-
-## Main results
-
-* `galCoordNormLe`, `galTopNormLe`, `galEmbTopLe` — the truncated spectral norm
-  comparisons.
-* `galTameRetr`, `galTameStateC` — the retracted coordinate vector and the
-  retracted state as a function of an eigen-coefficient family, with
-  `galTameRetr_mem`, `galTameRetr_eq`, `galTameRetr_top`, `galTameState_lip`.
-* `galTameField` — the coordinate vector field `−Λ w + Π_S N(retract w)`, with
-  `galTameField_lip` and `galTameField_aff`.
-* `galTameForce` — the Galerkin forcing coordinate, the analogue of
-  `deTurckGalerkinForcingSymm`, with `galTameForce_contOn` for its continuity
-  in time along a continuous state.
-* `galTameSolOne` — the `V_S` Galerkin system with zero seed, solved on the
-  **whole** interval `[0, T]`, for every `T`.
-* `galTamePerMode` — the mode coordinates of such a solution are the per-mode
-  convolutions `perModeConv λᵢ Fᵢ` of its own forcing coordinates.
--/
-
 noncomputable section
 
 open Bundle Manifold MeasureTheory Set Filter
@@ -72,10 +24,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
   [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
   [T2Space M] [SigmaCompactSpace M]
 
-/-! ### The lower view and the truncated norm comparisons -/
-
-/-- The `H^{a+1}` view of an `H^{a+2}` state — the operator whose closed ball
-of radius `R` is `lowerState g₀ a R`. -/
 abbrev galLowView (g₀ : SmoothRiemannianMetric I M) (a : ℕ) :
     tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2) →L[ℝ]
       tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 1) :=
@@ -83,7 +31,6 @@ abbrev galLowView (g₀ : SmoothRiemannianMetric I M) (a : ℕ) :
     (show (a : ℝ) + 1 ≤ (a : ℝ) + 2 by linarith)
 
 open scoped Classical in
-/-- The Galerkin embedding is the spectral combination of its coordinates. -/
 theorem galEmbedCombo (g₀ : SmoothRiemannianMetric I M) (a : ℕ)
     (S : Finset (TensorEigenIdx (I := I) (M := M) g₀ 0 2))
     (w : EuclideanSpace ℝ {i // i ∈ S}) :
@@ -98,8 +45,6 @@ theorem galEmbedCombo (g₀ : SmoothRiemannianMetric I M) (a : ℕ)
   · rw [if_neg hi, dif_neg hi]
 
 omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [BoundarylessManifold I M] in
-/-- The lower view of a spectral combination is the spectral combination at the
-exponent `a + 1`. -/
 theorem galViewComboC (g₀ : SmoothRiemannianMetric I M) (a : ℕ)
     (S : Finset (TensorEigenIdx (I := I) (M := M) g₀ 0 2))
     (c : TensorEigenIdx (I := I) (M := M) g₀ 0 2 → ℝ) :
@@ -112,8 +57,6 @@ theorem galViewComboC (g₀ : SmoothRiemannianMetric I M) (a : ℕ)
     finiteEigenComboHs_coeff]
 
 open scoped Classical in
-/-- The `H^{a+1}` view of the Galerkin embedding is the spectral combination of
-its coordinates at the exponent `a + 1`. -/
 theorem galViewCombo (g₀ : SmoothRiemannianMetric I M) (a : ℕ)
     (S : Finset (TensorEigenIdx (I := I) (M := M) g₀ 0 2))
     (w : EuclideanSpace ℝ {i // i ∈ S}) :
@@ -125,11 +68,6 @@ theorem galViewCombo (g₀ : SmoothRiemannianMetric I M) (a : ℕ)
     galViewComboC (I := I) (M := M) g₀ a S]
 
 open scoped Classical in
-/-- **The coordinate norm is below the lower view.**  On the truncation `V_S`
-the Euclidean coordinate norm never exceeds the `H^{a+1}` norm of the
-corresponding spectral combination, because every Sobolev weight at a
-non-negative exponent is at least one.  This is the antilipschitz bound that
-transports the `H^{a+1}` retraction back to coordinates. -/
 theorem galCoordNormLe (g₀ : SmoothRiemannianMetric I M) (a : ℕ)
     (S : Finset (TensorEigenIdx (I := I) (M := M) g₀ 0 2))
     (w : EuclideanSpace ℝ {i // i ∈ S}) :
@@ -164,10 +102,6 @@ theorem galCoordNormLe (g₀ : SmoothRiemannianMetric I M) (a : ℕ)
   rwa [Real.sqrt_sq (norm_nonneg _), Real.sqrt_sq (norm_nonneg _)] at hfin
 
 omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [BoundarylessManifold I M] in
-/-- **The truncated Sobolev comparison.**  If every eigenvalue of the
-truncation satisfies `1 + λᵢ ≤ κ`, the `H^{a+2}` norm of a spectral
-combination supported there is at most `√κ` times its `H^{a+1}` norm.  This is
-what makes the state ball a *bounded* set for the top norm on `V_S`. -/
 theorem galTopNormLe (g₀ : SmoothRiemannianMetric I M) (a : ℕ)
     (S : Finset (TensorEigenIdx (I := I) (M := M) g₀ 0 2)) {κ : ℝ}
     (hκ0 : 0 ≤ κ)
@@ -207,8 +141,6 @@ theorem galTopNormLe (g₀ : SmoothRiemannianMetric I M) (a : ℕ)
   rwa [Real.sqrt_sq (norm_nonneg _), Real.sqrt_mul hκ0,
     Real.sqrt_sq (norm_nonneg _)] at hsqrt
 
-/-- The coordinate form of `galTopNormLe`: on the truncation the top norm of
-the Galerkin embedding is at most `√κ` times its lower view. -/
 theorem galEmbTopLe (g₀ : SmoothRiemannianMetric I M) (a : ℕ)
     (S : Finset (TensorEigenIdx (I := I) (M := M) g₀ 0 2)) {κ : ℝ}
     (hκ0 : 0 ≤ κ)
@@ -222,18 +154,12 @@ theorem galEmbTopLe (g₀ : SmoothRiemannianMetric I M) (a : ℕ)
     galViewComboC (I := I) (M := M) g₀ a S]
   exact galTopNormLe (I := I) (M := M) g₀ a S hκ0 hκ _
 
-/-! ### The retracted Galerkin state -/
-
-/-- The retracted `V_S` coordinate vector: rescaled so that the `H^{a+1}` view
-of its spectral combination has norm at most `R`. -/
 def galTameRetr (g₀ : SmoothRiemannianMetric I M) (a : ℕ) (R : ℝ)
     (S : Finset (TensorEigenIdx (I := I) (M := M) g₀ 0 2))
     (w : EuclideanSpace ℝ {i // i ∈ S}) : EuclideanSpace ℝ {i // i ∈ S} :=
   (min 1 (R / ‖galLowView (I := I) (M := M) g₀ a
     (galerkinCoordEmbed (I := I) (M := M) g₀ a S w)‖)) • w
 
-/-- The retracted state as a function of an eigen-coefficient family.  This is
-the form the Galerkin ODE reports, matching `deTurckGalerkinForcingSymm`. -/
 def galTameStateC (g₀ : SmoothRiemannianMetric I M) (a : ℕ) (R : ℝ)
     (S : Finset (TensorEigenIdx (I := I) (M := M) g₀ 0 2))
     (c : TensorEigenIdx (I := I) (M := M) g₀ 0 2 → ℝ) :
@@ -243,8 +169,6 @@ def galTameStateC (g₀ : SmoothRiemannianMetric I M) (a : ℕ) (R : ℝ)
     finiteEigenComboHs (I := I) (M := M) g₀ S c ((a : ℝ) + 2)
 
 open scoped Classical in
-/-- Embedding the retracted coordinate vector gives the retracted state of its
-coordinate family. -/
 theorem galTameState_eq (g₀ : SmoothRiemannianMetric I M) (a : ℕ) (R : ℝ)
     (S : Finset (TensorEigenIdx (I := I) (M := M) g₀ 0 2))
     (w : EuclideanSpace ℝ {i // i ∈ S}) :
@@ -256,11 +180,6 @@ theorem galTameState_eq (g₀ : SmoothRiemannianMetric I M) (a : ℕ) (R : ℝ)
     galEmbedCombo (I := I) (M := M) g₀ a S w]
 
 open scoped Classical in
-/-- The coefficient-family reading of `galTameState_eq`: the retracted state of
-a family `c` is the embedding of the retracted coordinate vector of `c`.  Only
-the values of `c` on the truncation matter, so no support hypothesis is needed.
-This is the bridge that turns a statement about `galTameField` into one about
-`galTameForce`. -/
 theorem galTameStateC_emb (g₀ : SmoothRiemannianMetric I M) (a : ℕ) (R : ℝ)
     (S : Finset (TensorEigenIdx (I := I) (M := M) g₀ 0 2))
     (c : TensorEigenIdx (I := I) (M := M) g₀ 0 2 → ℝ) :
@@ -287,8 +206,6 @@ theorem galTameStateC_emb (g₀ : SmoothRiemannianMetric I M) (a : ℕ) (R : ℝ
   exact key _ (fun i hi => dif_pos hi)
 
 omit [BoundarylessManifold I M] in
-/-- The lower view of the retracted state is the radial retraction of the lower
-view.  Everything about `galTameRetr` follows from this conjugation. -/
 theorem galTameRetr_view (g₀ : SmoothRiemannianMetric I M) (a : ℕ) (R : ℝ)
     (S : Finset (TensorEigenIdx (I := I) (M := M) g₀ 0 2))
     (w : EuclideanSpace ℝ {i // i ∈ S}) :
@@ -300,7 +217,6 @@ theorem galTameRetr_view (g₀ : SmoothRiemannianMetric I M) (a : ℕ) (R : ℝ)
   rw [galTameRetr, map_smul, map_smul, ballRetraction]
 
 omit [BoundarylessManifold I M] in
-/-- The retracted state lies in the state ball. -/
 theorem galTameRetr_mem (g₀ : SmoothRiemannianMetric I M) (a : ℕ) {R : ℝ}
     (hR : 0 ≤ R) (S : Finset (TensorEigenIdx (I := I) (M := M) g₀ 0 2))
     (w : EuclideanSpace ℝ {i // i ∈ S}) :
@@ -314,7 +230,6 @@ theorem galTameRetr_mem (g₀ : SmoothRiemannianMetric I M) (a : ℕ) {R : ℝ}
   exact ballRetraction_mem_closedBall hR _
 
 omit [BoundarylessManifold I M] in
-/-- The retracted state, in coefficient-family form, lies in the state ball. -/
 theorem galTameStateC_mem (g₀ : SmoothRiemannianMetric I M) (a : ℕ) {R : ℝ}
     (hR : 0 ≤ R) (S : Finset (TensorEigenIdx (I := I) (M := M) g₀ 0 2))
     (c : TensorEigenIdx (I := I) (M := M) g₀ 0 2 → ℝ) :
@@ -326,8 +241,6 @@ theorem galTameStateC_mem (g₀ : SmoothRiemannianMetric I M) (a : ℕ) {R : ℝ
   exact ballRetraction_mem_closedBall (X :=
     tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 1)) hR _
 
-/-- The retraction is inert exactly on the state ball: if the lower view of the
-Galerkin embedding already has norm at most `R`, nothing happens. -/
 theorem galTameRetr_eq (g₀ : SmoothRiemannianMetric I M) (a : ℕ) {R : ℝ}
     (S : Finset (TensorEigenIdx (I := I) (M := M) g₀ 0 2))
     {w : EuclideanSpace ℝ {i // i ∈ S}}
@@ -345,9 +258,6 @@ theorem galTameRetr_eq (g₀ : SmoothRiemannianMetric I M) (a : ℕ) {R : ℝ}
       (one_le_div h0).2 hw
     rw [galTameRetr, min_eq_left hone, one_smul]
 
-/-- The top-order norm of the retracted state is at most `√κ · R`, uniformly in
-the coordinate vector.  This is the bound that turns the tame estimate into a
-genuine Lipschitz estimate on the truncation. -/
 theorem galTameRetr_top (g₀ : SmoothRiemannianMetric I M) (a : ℕ) {R : ℝ}
     (hR : 0 ≤ R) (S : Finset (TensorEigenIdx (I := I) (M := M) g₀ 0 2))
     {κ : ℝ} (hκ0 : 0 ≤ κ)
@@ -360,9 +270,6 @@ theorem galTameRetr_top (g₀ : SmoothRiemannianMetric I M) (a : ℕ) {R : ℝ}
   rw [galTameRetr_view]
   exact ballRetraction_mem_closedBall hR _
 
-/-- The retracted state depends Lipschitz-continuously on the coordinate
-vector, measured in the **top** norm.  The constant involves `√κ` and is
-therefore not uniform in the truncation; only existence uses it. -/
 theorem galTameState_lip (g₀ : SmoothRiemannianMetric I M) (a : ℕ) {R : ℝ}
     (hR : 0 ≤ R) (S : Finset (TensorEigenIdx (I := I) (M := M) g₀ 0 2))
     {κ : ℝ} (hκ0 : 0 ≤ κ)
@@ -404,11 +311,6 @@ theorem galTameState_lip (g₀ : SmoothRiemannianMetric I M) (a : ℕ) {R : ℝ}
         mul_le_mul_of_nonneg_left hbound (Real.sqrt_nonneg κ)
     _ = Real.sqrt κ * ‖L‖ * ‖w - w'‖ := by ring
 
-/-! ### The coordinate vector field -/
-
-/-- The Galerkin coordinate vector field of a state-ball nonlinearity: the
-spectral diagonal plus the truncated nonlinearity evaluated at the retracted
-state. -/
 def galTameField (g₀ : SmoothRiemannianMetric I M) (a : ℕ) {R : ℝ} (hR : 0 ≤ R)
     (Nfun : lowerState (I := I) (M := M) g₀ a R →
       tensorHs (I := I) (M := M) g₀ 0 2 (a : ℝ))
@@ -436,15 +338,12 @@ omit [BoundarylessManifold I M] in
     (galerkinCoordRestrict (I := I) (M := M) g₀ a S _) j = _
   rw [galerkinCoordDiag_apply, galerkinCoordRestrict_apply]
 
-/-- The set on which `tame_lip_balls` supplies the Lipschitz constant used by
-the Galerkin field: the states of top norm at most `√κ · R`. -/
 def galTameBall (g₀ : SmoothRiemannianMetric I M) (a : ℕ) (R κ : ℝ) :
     Set (lowerState (I := I) (M := M) g₀ a R) :=
   {x : lowerState (I := I) (M := M) g₀ a R |
     dist (x : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2))
       (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2)) ≤ Real.sqrt κ * R}
 
-/-- Every retracted state lies in `galTameBall`. -/
 theorem galTameRetr_ball (g₀ : SmoothRiemannianMetric I M) (a : ℕ) {R : ℝ}
     (hR : 0 ≤ R) (S : Finset (TensorEigenIdx (I := I) (M := M) g₀ 0 2))
     {κ : ℝ} (hκ0 : 0 ≤ κ)
@@ -461,9 +360,6 @@ theorem galTameRetr_ball (g₀ : SmoothRiemannianMetric I M) (a : ℕ) {R : ℝ}
   rw [dist_zero_right]
   exact galTameRetr_top (I := I) (M := M) g₀ a hR S hκ0 hκ w
 
-/-- The Galerkin coordinate vector field is globally Lipschitz.  The constant
-is not uniform in the truncation — only existence is at stake — but the region
-on which the retraction is inert is. -/
 theorem galTameField_lip (g₀ : SmoothRiemannianMetric I M) (a : ℕ) {R : ℝ}
     (hR : 0 ≤ R)
     (Nfun : lowerState (I := I) (M := M) g₀ a R →
@@ -520,8 +416,6 @@ theorem galTameField_lip (g₀ : SmoothRiemannianMetric I M) (a : ℕ) {R : ℝ}
   rw [Real.coe_toNNReal']
   exact le_max_left _ _
 
-/-- The Galerkin coordinate vector field satisfies a global affine bound: the
-retraction caps the nonlinearity, so only the spectral diagonal grows. -/
 theorem galTameField_aff (g₀ : SmoothRiemannianMetric I M) (a : ℕ) {R : ℝ}
     (hR : 0 ≤ R)
     (Nfun : lowerState (I := I) (M := M) g₀ a R →
@@ -576,12 +470,7 @@ theorem galTameField_aff (g₀ : SmoothRiemannianMetric I M) (a : ℕ) {R : ℝ}
   rw [hcoe]
   linarith
 
-/-! ### The Galerkin forcing and the `V_S` system -/
-
 open scoped Classical in
-/-- The Galerkin forcing coordinate: the `i`-th eigen-coefficient of the
-nonlinearity at the retracted state of the coefficient family `c`, killed off
-the truncation.  This is the tame analogue of `deTurckGalerkinForcingSymm`. -/
 def galTameForce (g₀ : SmoothRiemannianMetric I M) (a : ℕ) {R : ℝ} (hR : 0 ≤ R)
     (Nfun : lowerState (I := I) (M := M) g₀ a R →
       tensorHs (I := I) (M := M) g₀ 0 2 (a : ℝ))
@@ -594,11 +483,6 @@ def galTameForce (g₀ : SmoothRiemannianMetric I M) (a : ℕ) {R : ℝ} (hR : 0
   else 0
 
 omit [BoundarylessManifold I M] in
-/-- **The retraction is inert on the state ball.**  If the `H^{a+1}` view of a
-spectral combination already has norm at most `R`, the retracted state is that
-combination itself.  This is the bridge an energy estimate needs: the region on
-which it must place the Galerkin trajectory is a bound on the *lower* norm, not
-on the top norm. -/
 theorem galTameStateC_eq (g₀ : SmoothRiemannianMetric I M) (a : ℕ) {R : ℝ}
     (S : Finset (TensorEigenIdx (I := I) (M := M) g₀ 0 2))
     {c : TensorEigenIdx (I := I) (M := M) g₀ 0 2 → ℝ}
@@ -624,8 +508,6 @@ theorem galTameStateC_eq (g₀ : SmoothRiemannianMetric I M) (a : ℕ) {R : ℝ}
 
 open scoped Classical in
 omit [BoundarylessManifold I M] in
-/-- On the state ball the Galerkin forcing is the *true* truncated
-nonlinearity: the retraction does nothing. -/
 theorem galTameForce_eq (g₀ : SmoothRiemannianMetric I M) (a : ℕ) {R : ℝ}
     (hR : 0 ≤ R)
     (Nfun : lowerState (I := I) (M := M) g₀ a R →
@@ -662,17 +544,6 @@ omit [BoundarylessManifold I M] in
       else 0 := rfl
 
 open scoped Classical in
-/-- **The Galerkin forcing is continuous in time along a continuous state.**
-
-The retracted state is a Lipschitz function of the coordinate vector
-(`galTameState_lip`) and always lies in `galTameBall` (`galTameRetr_ball`),
-where the nonlinearity is Lipschitz; so the forcing coordinate inherits the
-continuity of the coefficient family on the truncation.  No global Lipschitz
-gate on `Nfun` is used, and off the truncation the forcing is constant.
-
-The hypotheses are those `galTameField_lip` already asks for, which is how the
-`V_S` system is built, so a call site holding a `galTameSolOne` solution has
-them.  This is the input the per-mode identification `galTamePerMode` needs. -/
 theorem galTameForce_contOn (g₀ : SmoothRiemannianMetric I M) (a : ℕ) {R : ℝ}
     (hR : 0 ≤ R)
     (Nfun : lowerState (I := I) (M := M) g₀ a R →
@@ -732,19 +603,6 @@ theorem galTameForce_contOn (g₀ : SmoothRiemannianMetric I M) (a : ℕ) {R : �
     rw [galTameForce_apply, if_neg hi]
 
 open scoped Classical in
-/-- **The `V_S` Galerkin system of a tame nonlinearity, with zero seed.**
-
-The nonlinearity is only assumed to satisfy the critical three-arm tame
-estimate on the state ball; no global Lipschitz gate is used.  The truncation
-bound `1 + λᵢ ≤ κ` makes the state ball bounded for the top norm on `V_S`, so
-`tame_lip_balls` gives a Lipschitz constant there and the retracted field is
-globally Lipschitz with a global affine bound.  The solution therefore exists
-on the **whole** interval `[0, T]`, for every `T`.
-
-The forcing reported is `galTameForce`, the nonlinearity at the *retracted*
-state.  `galTameRetr_eq` says the retraction is inert exactly where the
-`H^{a+1}` view of the state has norm at most `R`, so on that region the system
-is the true Galerkin system. -/
 theorem galTameSolOne (g₀ : SmoothRiemannianMetric I M) (a : ℕ) {R : ℝ}
     (hR : 0 ≤ R)
     (Nfun : lowerState (I := I) (M := M) g₀ a R →
@@ -873,18 +731,6 @@ theorem galTameSolOne (g₀ : SmoothRiemannianMetric I M) (a : ℕ) {R : ℝ}
     simp only [dif_neg hi]
 
 open DifferentialGeometry.Analysis.Parabolic.MaximalRegularity in
-/-- **The Galerkin coordinates are the per-mode convolutions of the forcing.**
-
-On each mode of the truncation, a solution of the `V_S` system with zero seed —
-the output of `galTameSolOne`, or any family with the same three properties —
-is the Duhamel integral `perModeConv λᵢ Fᵢ` of its own forcing coordinate.
-Both sides solve the scalar ODE `φ' = −λᵢ·φ + Fᵢ` with `φ(0) = 0` on `[0, T]`,
-and the forcing is continuous by `galTameForce_contOn`, so
-`ODE_solution_unique_of_mem_Icc_right` identifies them.
-
-No Lipschitz gate on `a` appears.  In the super-critical analogue
-`galerkinPerMode_eq_perModeConv` the gate enters only through the continuity of
-the forcing, which the tame route supplies unconditionally. -/
 theorem galTamePerMode (g₀ : SmoothRiemannianMetric I M) (a : ℕ) {R : ℝ}
     (hR : 0 ≤ R)
     (Nfun : lowerState (I := I) (M := M) g₀ a R →

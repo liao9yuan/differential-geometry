@@ -1,48 +1,5 @@
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.DeTurckRemainderLowBaseH2VB
 
-/-!
-# The `H²` covariant-arm class of the second-order low-base telescope
-
-**Class 2** of the five-class capstone `selfLow_pair_h2`: the DeTurck--Lie
-covariant-derivative edge against its refolded pair-trace partner.
-
-The public residual identity `lieCov_residual`
-(`RiemannCoefficientPalatiniRefold`) turns that edge into a *single* product
-
-```
-(-1) • app₂₆₂( lieCovPair gm , X ),
-X = rsPerm(lieCovSigma)( Ext²( lieCovR4 T ) ),
-```
-
-so the whole class reduces to the `H²` jet of the fourth-covariant normal form
-`lieCovR4 = -(s/2)·CurvF(T) - QuadF(gm)` and of its two-state difference.  The
-`lieCovPair` factor is already public at `H²` (`LowBaseInternal.pairTrace_pair_h2`
-/ `pairTrace_bdd_h2`, both `A`-free), so the new content is the `X` slot.
-
-The `X` slot is built here in two layers.
-
-* `armBddH2` / `armPairH2` for the connection arm (via the `s = 0` endo/section
-  identity `bdConnDiffSection_eq_armSlotEndoCc_zero` and the public
-  `connSec_self_h2` / `connSec_sub_tame`), `hatBddH2` / `hatPairH2` for the
-  moving lowering correction (the public `lieOmega_bdd_h2` / `lieOmega_pair_h2`
-  restated on `lrOmegaHat`), `curvBddH2` for the curvature head (linear in the
-  state against the frozen kernels `lrRiemW1`, `lrRiemW2`), and `quadBddH2` /
-  `quadPairH2` for the six permuted `arm ⊗ hat` blocks of `lrQuadF`.
-* `r4BddH2` / `r4PairH2`, then `covXBddH2` / `covXPairH2` after the two slot
-  extensions and the output-slot permutation.
-
-The `X` slot carries an `A²` passenger (arm ~ `A` against hat ~ `A`), which is
-inadmissible against a difference.  As in classes 3 and 4 the `A`-carrying
-producers are therefore re-read at the interpolated third-jet size
-`a = √(Cip·R·A4)` (`jetInterp3`), after which `(1+a)⁴ ≤ 8(1 + (Cip R A4)²)`
-puts the whole excess into the single `A4`-linear arm (`amixScalar`).  The two
-connection-difference pair moduli are fed with `D2 := D3`, legitimate since
-`J2 (T-U) ≤ J3 (T-U)`.
-
-Split out of `DeTurckRemainderLowBaseH2VB` to keep every file below the
-source-size limit; the shared `H²` jet algebra lives there and is imported.
--/
-
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
@@ -73,21 +30,7 @@ variable
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
-/-! ### The `lieCovR4` covariant arm at the `H²` level
-
-Class 2 of the second-order telescope.  The public residual identity
-`lieCov_residual` (Palatini) turns the DeTurck--Lie covariant-derivative edge
-against its refolded pair-trace partner into the single product
-`app₂₆₂(lieCovPair gm, X)` with `X = rsPerm(lieCovSigma)(Ext²(lieCovR4 T))`, so
-the whole class reduces to the `H²` jet of `lieCovR4` and of its two-state
-difference.  `lieCovR4 = -(s/2)·CurvF(T) - QuadF(gm)` is linear in `T` in its
-curvature head and a product `arm ⊗ hat` in its quadratic head.
-
-The `H¹` siblings of the transfer helpers below are `private` to
-`DeTurckRemainderLowBaseLip`; they are re-established here at `H²`. -/
-
 omit [NeZero (Module.finrank ℝ E)] in
-/-- Input-slot permutation is an `H²` jet isometry on `(0,s)` tensors. -/
 theorem domH2
     (g : SmoothRiemannianMetric I M) {s : ℕ}
     (σ : Equiv.Perm (Fin s)) (S : SmoothCcTensor g 0 s) :
@@ -107,7 +50,6 @@ theorem domH2
       (I := I) (M := M) g σ S q x
 
 set_option linter.unusedVariables false in
-/-- Input-slot permutation is additive. -/
 theorem domSub
     (g : SmoothRiemannianMetric I M) {s : ℕ}
     (σ : Equiv.Perm (Fin s)) (A B : SmoothCcTensor g 0 s) :
@@ -134,8 +76,6 @@ theorem domSub
   simp only [ContinuousMultilinearMap.sub_apply,
     ContinuousMultilinearMap.domDomCongr_apply]
 
-/-- One step of the connection-arm slot tower: raising the arm index by one is a
-slot extension composed with two index permutations. -/
 theorem armSuccEq
     (g : SmoothRiemannianMetric I M) (s : ℕ)
     (A : ContMDiffSection I (E →L[ℝ] (E →L[ℝ] E)) ∞
@@ -216,7 +156,6 @@ theorem armSuccEq
 
 set_option synthInstance.maxHeartbeats 1000000 in
 set_option maxHeartbeats 1600000 in
-/-- The connection-arm slot extension is additive. -/
 theorem armSub
     (g : SmoothRiemannianMetric I M) (s : ℕ)
     (A B : ContMDiffSection I (E →L[ℝ] (E →L[ℝ] E)) ∞
@@ -264,8 +203,6 @@ theorem armSub
       ContinuousMultilinearMap.sub_apply]
   rw [hLHS, hRHS, show ((A - B) x) = A x - B x from rfl, hfib]
 
-/-- Raising the connection-arm index by one costs a single factor of the fibre
-dimension in the `H²` jet. -/
 theorem armSuccH2
     (g : SmoothRiemannianMetric I M) (s : ℕ)
     (A : ContMDiffSection I (E →L[ℝ] (E →L[ℝ] E)) ∞
@@ -279,7 +216,6 @@ theorem armSuccH2
   rw [armSuccEq (I := I) (M := M) g s A, reindexJet, rspermH2]
   exact slotH2 (I := I) (M := M) g (s + 1) (s + 1 + 1) _
 
-/-- The second connection arm costs two factors of the fibre dimension. -/
 theorem arm2H2
     (g : SmoothRiemannianMetric I M)
     (A : ContMDiffSection I (E →L[ℝ] (E →L[ℝ] E)) ∞
@@ -308,9 +244,6 @@ theorem arm2H2
           (armSlotEndoCc (I := I) (M := M) g 0 A) := by ring
 
 set_option linter.unusedVariables false in
-/-- **Single-state `H²` bound for the moving lowering correction.**  Restates
-the public `lieOmega_bdd_h2` on `lrOmegaHat`, which is the same section under a
-different (public) name. -/
 theorem hatBddH2
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M) :
@@ -341,8 +274,6 @@ theorem hatBddH2
     hbdd gT T hT hTtie hδ_le hδ0 hδT hδZ R A hR hA hT2 hT3⟩
 
 set_option linter.unusedVariables false in
-/-- **Two-state `H²` modulus for the moving lowering correction.**  Restates the
-public `lieOmega_pair_h2` on `lrOmegaHat`. -/
 theorem hatPairH2
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M) :
@@ -389,8 +320,6 @@ theorem hatPairH2
         R A D2 D3 hR hA hD2 hD3 hT2 hU2 hT3 hTU2 hTU3⟩
 
 omit [BoundarylessManifold I M] in
-/-- Six-term jet splitting, hoisted so that the `lrQuadF` block bookkeeping
-never reaches `linarith` with tensor-sized monomials. -/
 theorem jetSix
     (g : SmoothRiemannianMetric I M) {r s : ℕ} (m : ℕ)
     (t1 t2 t3 t4 t5 t6 : SmoothCcTensor g r s) {K : ℝ}
@@ -410,7 +339,6 @@ theorem jetSix
   linarith
 
 omit [BoundarylessManifold I M] in
-/-- `A²` sits inside the quartic envelope. -/
 theorem envSq {A : ℝ} (hA : 0 ≤ A) : A ^ 2 ≤ (1 + A) ^ 4 := by
   have h1 : A ^ 2 ≤ (1 + A) ^ 2 := pow_le_pow_left₀ hA (by linarith) 2
   have h2 : (1 : ℝ) ≤ (1 + A) ^ 2 := by nlinarith
@@ -421,14 +349,10 @@ theorem envSq {A : ℝ} (hA : 0 ≤ A) : A ^ 2 ≤ (1 + A) ^ 4 := by
     _ = (1 + A) ^ 4 := by ring
 
 omit [BoundarylessManifold I M] in
-/-- `A⁴` sits inside the quartic envelope. -/
 theorem envQuart {A : ℝ} (hA : 0 ≤ A) : A ^ 4 ≤ (1 + A) ^ 4 :=
   pow_le_pow_left₀ hA (by linarith) 4
 
 set_option linter.unusedVariables false in
-/-- **Single-state `H²` bound for the second DeTurck connection arm.**  The arm
-is `A`-sized (not `(1+A)`-sized): it is a pure connection difference, so the
-sharp `wXi` bound applies through the `s = 0` endo/section identity. -/
 theorem armBddH2
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M) :
@@ -485,9 +409,6 @@ theorem armBddH2
 set_option synthInstance.maxHeartbeats 1000000 in
 set_option maxHeartbeats 1600000 in
 set_option linter.unusedVariables false in
-/-- **Two-state `H²` modulus for the second DeTurck connection arm.**  Inherited
-from the public `connSec_sub_tame` through the `s = 0` endo/section identity and
-two slot extensions. -/
 theorem armPairH2
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M) :
@@ -583,7 +504,6 @@ theorem armPairH2
         (Module.finrank ℝ E : ℝ) * B1 R * D2 +
         (Module.finrank ℝ E : ℝ) * B1 R * A * D2) ^ 2 := by ring
 
-/-- The curvature head of `lieCovR4` is linear in the state. -/
 theorem curvSub
     (g : SmoothRiemannianMetric I M) (T U : SmoothCcTensor g 0 2) :
     lrCurvF (I := I) (M := M) g T - lrCurvF (I := I) (M := M) g U =
@@ -592,9 +512,6 @@ theorem curvSub
   rw [appCcRS_sub_right, appCcRS_sub_right]
   module
 
-/-- **`H²` bound for the curvature head.**  `lrCurvF` contracts the state
-against two frozen background curvature kernels, so its `H²` jet is controlled
-by the state's `H²` jet with an `A`-free constant. -/
 theorem curvBddH2
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M) :
@@ -644,7 +561,6 @@ theorem curvBddH2
           (lrRiemW2 (I := I) (M := M) g)) *
         lowJetSq (I := I) (M := M) g 2 T := by ring
 
-/-- The six permuted blocks of `lrQuadF` obey a common jet bound. -/
 theorem quadSixH2
     (g : SmoothRiemannianMetric I M)
     (X Y : SmoothCcTensor g 0 4) {K : ℝ}
@@ -661,8 +577,6 @@ theorem quadSixH2
     (by rw [domH2]; exact hY) (by rw [domH2]; exact hY)
     (by rw [domH2]; exact hY) (by rw [domH2]; exact hY)
 
-/-- **`H²` bound for the quadratic head.**  `lrQuadF` is six permuted copies of
-the product `arm ⊗ hat`. -/
 theorem quadBddH2
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M) :
@@ -704,7 +618,6 @@ theorem quadBddH2
   ring
 
 omit [NeZero (Module.finrank ℝ E)] in
-/-- Telescoping of the `lrQB` block. -/
 theorem quadTelB
     (g gT gU : SmoothRiemannianMetric I M) :
     lrQB (I := I) (M := M) g gT - lrQB (I := I) (M := M) g gU =
@@ -723,7 +636,6 @@ theorem quadTelB
   rw [appCcRS_sub_right, appCcRS_sub_left]
   module
 
-/-- Telescoping of the `lrQA` block. -/
 theorem quadTelA
     (g gT gU : SmoothRiemannianMetric I M) :
     lrQA (I := I) (M := M) g gT - lrQA (I := I) (M := M) g gU =
@@ -745,8 +657,6 @@ theorem quadTelA
   module
 
 set_option maxHeartbeats 1600000 in
-/-- **Two-state `H²` modulus for the quadratic head.**  Both factors telescope,
-so the difference is bounded by the two mixed products. -/
 theorem quadPairH2
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M) :
@@ -854,7 +764,6 @@ theorem quadPairH2
   ring
 
 omit [BoundarylessManifold I M] in
-/-- The quartic envelope dominates `1`. -/
 theorem envOne {A : ℝ} (hA : 0 ≤ A) : (1 : ℝ) ≤ (1 + A) ^ 4 := by
   have h2 : (1 : ℝ) ≤ (1 + A) ^ 2 := by nlinarith
   calc (1 : ℝ) = 1 * 1 := (one_mul 1).symm
@@ -864,9 +773,6 @@ theorem envOne {A : ℝ} (hA : 0 ≤ A) : (1 : ℝ) ≤ (1 + A) ^ 4 := by
 
 set_option maxHeartbeats 1600000 in
 set_option linter.unusedVariables false in
-/-- **Single-state `H²` bound for the fourth-covariant normal form.**  Its
-curvature head is `A`-linear and its quadratic head is `A²`-sized, so the whole
-jet sits inside the quartic envelope. -/
 theorem r4BddH2
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M) :
@@ -1031,10 +937,6 @@ theorem r4BddH2
 
 set_option maxHeartbeats 3200000 in
 set_option linter.unusedVariables false in
-/-- **Two-state `H²` modulus for the fourth-covariant normal form.**  The
-curvature head is linear, hence contributes only the third-jet difference; the
-quadratic head telescopes into `arm ⊗ Δhat` and `Δarm ⊗ hat`, both of which fold
-through `pairFold3` into the quartic envelope times `D3²`. -/
 theorem r4PairH2
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M) :
@@ -1183,7 +1085,7 @@ theorem r4PairH2
     (jetMono (I := I) (M := M) g (by norm_num : (2 : ℕ) ≤ 3) (P - Q)).trans hPQ3
   have hTU2 : lowJetSq (I := I) (M := M) g 2 (T - U) ≤ D3 ^ 2 :=
     (jetMono (I := I) (M := M) g (by norm_num : (2 : ℕ) ≤ 3) (T - U)).trans hTU3
-  -- the envelope and the difference budget
+
   set pl2 : ℝ := (1 + A) ^ 2 with hpl2
   have hpl21 : (1 : ℝ) ≤ pl2 := by
     rw [hpl2]
@@ -1196,7 +1098,7 @@ theorem r4PairH2
   have hquart : pl2 * (pl2 * D3 ^ 2) = (1 + A) ^ 4 * D3 ^ 2 := by
     rw [hpl2]
     ring
-  -- the four factor moduli
+
   have hCFd : lowJetSq (I := I) (M := M) g 2
       (lrCurvF (I := I) (M := M) g T -
         lrCurvF (I := I) (M := M) g U) ≤ Cc * D3 ^ 2 := by
@@ -1226,7 +1128,7 @@ theorem r4PairH2
       hδ_le hδ0 hδP hδQ R A D3 D3 hR hA hD3 hD3
       hQ2 hP3 hPQ2 hPQ3).trans ?_
     exact pairFold3 hpl21 hplA2 hd0 le_rfl
-  -- the quadratic head
+
   have hQFd : lowJetSq (I := I) (M := M) g 2
       (lrQuadF (I := I) (M := M) g gmT -
         lrQuadF (I := I) (M := M) g gmU) ≤
@@ -1280,7 +1182,7 @@ theorem r4PairH2
           Ma R * (Bt R) ^ 2 * ((1 + A) ^ 4 * D3 ^ 2)) :=
         mul_le_mul_of_nonneg_left (add_le_add e1 e2) hCq
       _ = Cq * Kq R * ((1 + A) ^ 4 * D3 ^ 2) := hsum
-  -- assembly
+
   have hdecomp : lieCovR4 (I := I) (M := M) g T hδT hδZ s -
       lieCovR4 (I := I) (M := M) g U hδU hδZ s =
       (-(s / 2) : ℝ) • (lrCurvF (I := I) (M := M) g T -
@@ -1362,9 +1264,6 @@ theorem r4PairH2
       linarith
 
 set_option linter.unusedVariables false in
-/-- **The `X`-slot of class 2, single state.**  The `lieCovR4` normal form is
-extended into two extra slot pairs and its output slots are permuted; both
-operations are `H²` jet transfers. -/
 theorem covXBddH2
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M) :
@@ -1425,8 +1324,6 @@ theorem covXBddH2
 
 set_option maxHeartbeats 1600000 in
 set_option linter.unusedVariables false in
-/-- **The `X`-slot of class 2, two states.**  Both transfers are additive, so
-the difference reduces to the `lieCovR4` two-state modulus. -/
 theorem covXPairH2
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M) :
@@ -1507,8 +1404,6 @@ theorem covXPairH2
     _ = fr ^ 2 * Cr R * ((1 + A) ^ 4 * D3 ^ 2) := by ring
 
 omit [BoundarylessManifold I M] in
-/-- The refolded pair-trace partner of the Lie covariant-derivative edge, in the
-fixed-permutation normal form consumed by `lieCov_residual`. -/
 theorem edgeEq
     (g : SmoothRiemannianMetric I M) (T : SmoothCcTensor g 0 2)
     {δ : ℝ}
@@ -1531,20 +1426,6 @@ theorem edgeEq
 set_option maxHeartbeats 6400000 in
 set_option synthInstance.maxHeartbeats 1000000 in
 set_option linter.unusedVariables false in
-/-- **Class 2 of the second-order five-class telescope** — the DeTurck--Lie
-covariant-derivative edge against its refolded pair-trace partner obeys the
-admissible modulus
-`(B0 R · (1+A) · (D4 + D3 + D2 + N) + B1 R · A4 · (D3 + N))²`.
-
-By `lieCov_residual` the edge is the single product
-`(-1) • app₂₆₂(lieCovPair gm, X)` with `X = rsPerm(Ext²(lieCovR4 T))`.  The
-`lieCovPair` factor is `A`-free at `H²` (`pairTrace_bdd_h2`) and its difference
-is purely spectral (`pairTrace_pair_h2`); the `X` factor is `A²`-sized
-(`covXBddH2`) and its difference is `(1+A)⁴·D3²`-sized (`covXPairH2`).  The
-`A²` passenger is inadmissible against a difference, so — exactly as in classes
-3 and 4 — both states are re-read at the interpolated third-jet size
-`a = √(Cip·R·A4)` (`jetInterp3`), and `amixScalar` collapses `(1+a)⁴` into the
-single `A4`-linear arm. -/
 theorem lieCovH2Pair
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M) :
@@ -1662,7 +1543,7 @@ theorem lieCovH2Pair
     rw [hPQ, ccTensorToHs_smul, norm_smul]
     exact (mul_le_mul_of_nonneg_right hsabs (norm_nonneg _)).trans
       (by simpa using hTUn)
-  -- the interpolated third-jet size of the two states
+
   set a : ℝ := Real.sqrt (Cip * (R * A4)) with hadef
   have ha0 : 0 ≤ a := Real.sqrt_nonneg _
   have hasq : a ^ 2 = Cip * (R * A4) :=
@@ -1689,7 +1570,7 @@ theorem lieCovH2Pair
   have hNu : N ^ 2 ≤ u := by
     rw [hu]
     linarith [sq_nonneg D3]
-  -- the residual identity turns the edge into a single product
+
   have hUT :
       deTurckLieCovDerivArmField (I := I) (M := M) g gmT g -
         deTurckLieCovDerivRefoldPairTraceFamily (I := I) (M := M)
@@ -1753,7 +1634,7 @@ theorem lieCovH2Pair
     rw [appCcRS_sub_left, appCcRS_sub_right]
     module
   rw [htel, jetSmul, neg_one_sq, one_mul]
-  -- the four factor moduli, all read at the interpolated size `a`
+
   have hPairD : lowJetSq (I := I) (M := M) g 2
       (lieCovPair (I := I) (M := M) g gmT -
         lieCovPair (I := I) (M := M) g gmU) ≤ (Cp * N) ^ 2 := by
@@ -1784,7 +1665,7 @@ theorem lieCovH2Pair
       hT2 hU2 hT3i hU3i hTU3 hs).trans (le_of_eq ?_)
     rw [hpl2]
     ring
-  -- the two telescope terms
+
   have hc1 : (0 : ℝ) ≤ Ca * Cp ^ 2 * Dx R :=
     mul_nonneg (mul_nonneg hCa (sq_nonneg _)) (hDx R hR)
   have hc2 : (0 : ℝ) ≤ Ca * Bp ^ 2 * Cx R :=

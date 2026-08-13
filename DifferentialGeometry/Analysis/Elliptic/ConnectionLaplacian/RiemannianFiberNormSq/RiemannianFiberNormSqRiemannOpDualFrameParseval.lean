@@ -2,7 +2,6 @@ import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.RiemannianFibe
 import Mathlib.Analysis.InnerProductSpace.PiL2
 import Mathlib.Algebra.Order.BigOperators.Ring.Finset
 
-
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
@@ -52,7 +51,6 @@ noncomputable def coframePair
   (ContinuousMultilinearMap.mkPiAlgebra ℝ (Fin 2) ℝ).compContinuousLinearMap
     (fun k : Fin 2 => g.inner x (e ((![a, b] : Fin 2 → Fin n) k)))
 
-/-- Compatibility name for the rank-two orthonormal coframe tensor. -/
 abbrev coframe2
     (g : SmoothRiemannianMetric I M) (x : M)
     {n : ℕ} (e : Fin n → TangentSpace I x) (a b : Fin n) :

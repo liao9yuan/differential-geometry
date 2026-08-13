@@ -1,15 +1,6 @@
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.GradSlotCurvature
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.OperatorFieldFibreNormJet
 
-/-!
-# Pointwise bounds for the gradient-slot curvature coefficient
-
-This module converts tangent-operator bounds for `Rm` and `nabla Rm` into
-intrinsic fibre bounds for the canonical mixed coefficient
-`gradSlotCurvCoeff`.  The conversion is finite-dimensional Parseval in a
-metric-orthonormal frame and is independent of compactness.
--/
-
 set_option autoImplicit false
 
 noncomputable section
@@ -224,8 +215,6 @@ private lemma gradSlot_comp1_le
           Real.sqrt_one, mul_one] using hb
     _ = 2 * C := by simp
 
-/-- A tangent-operator curvature cap controls the order-zero fibre norm of the
-canonical rank-two gradient-slot coefficient. -/
 theorem gradSlot_rfns_zero
     (g : SmoothRiemannianMetric I M) {C : ℝ} (hC : 0 ≤ C)
     (hR : ∀ (x : M) (v w u : TangentSpace I x),
@@ -265,8 +254,6 @@ theorem gradSlot_rfns_zero
       push_cast
       ring
 
-/-- A tangent-operator `nabla Rm` cap controls the first fibre jet of the
-canonical rank-two gradient-slot coefficient. -/
 theorem gradSlot_rfns_one
     (g : SmoothRiemannianMetric I M) {C : ℝ} (hC : 0 ≤ C)
     (hR : ∀ (x : M) (D X Y Z : TangentSpace I x),

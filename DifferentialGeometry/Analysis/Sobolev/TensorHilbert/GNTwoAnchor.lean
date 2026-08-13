@@ -2,42 +2,6 @@ import DifferentialGeometry.Analysis.Sobolev.TensorHilbert.GradCapAtgw
 import DifferentialGeometry.Analysis.Sobolev.GagliardoNirenbergLpFiberNorm
 import DifferentialGeometry.Analysis.Integration.L2.FiniteProductHolderFiberNorm
 
-/-!
-# The two-anchor Gagliardo–Nirenberg bound for one covariant jet
-
-The tree carries two Gagliardo–Nirenberg scales for the covariant jets of a
-single tensor, both of them *two-point* interpolations between an `L^∞` anchor
-and a top-order `L²` jet:
-
-* the `Ψ`-anchored scale — `exists_gagliardoNirenberg_iteratedCovGrad_lpFiberNorm_le_rs`
-  at base `Ψ` and top order `m`, whose sup anchor is `Λ₀ = ‖Ψ‖_∞`;
-* the `∇Ψ`-anchored scale — the same statement at base `∇Ψ` and top order
-  `m - 1`, whose sup anchor is `Λ₁ = ‖∇Ψ‖_∞`.
-
-The first measures `∇^cΨ` in `L^{2m/c}` and spends no `Λ₁`; the second measures
-it in `L^{2(m-1)/(c-1)}` and spends `Λ₁^{2(m-c)/(m-1)}`.  A product of several
-jets needs an exponent *between* the two, and neither scale alone reaches it —
-this is the gap recorded in `gridIntHigh`'s docstring as "the interpolation
-BETWEEN the two scales".
-
-`gnTwoAnchor` closes that gap.  For every intermediate weight
-`θ ∈ [(c-1)/(m-1), c/m]` it bounds the `L^{2/θ}` fibre norm of `∇^cΨ` by
-```
-(∫ |∇^cΨ|^{2·(1/θ)})^θ ≤ C m · Λ₁^{2(c - θm)} · ‖∇^mΨ‖_{L²}^{2θ},
-```
-with `C` **state-free** (a function of the top order alone).  The two endpoints
-are the two scales; the interior is Lyapunov interpolation (`lyapunov_pow_le`)
-between them, the `Λ₀` weight being discarded against `Λ₀ ≤ 1`.  The `Λ₁`
-exponent `2(c - θm)` is nonnegative on the stated range and vanishes exactly at
-`θ = c/m`, i.e. exactly at the `Ψ`-anchored endpoint.
-
-The point of the free weight is that a product `∏_j |∇^{c_j}Ψ|²` with
-`∑ c_j = m + 1` can be split by Hölder at *any* weights `θ_j > 0` summing to `1`
-(`holder_integral_prod_riemannianFiberNormSq_le`); choosing them on the segments
-above makes every factor payable and forces the total `Λ₁` exponent to be
-`2(∑ c_j - m) = 2`.
--/
-
 noncomputable section
 
 set_option linter.style.setOption false
@@ -57,10 +21,6 @@ open DifferentialGeometry.Analysis.Parabolic.TensorSpectral
 open DifferentialGeometry.Analysis.Sobolev.TensorHilbert
 open DifferentialGeometry.Analysis.Sobolev.Tensor
 
-/-! ### Real-variable core -/
-
-/-- Turning a `q`-th-root bound into the bound on the quantity itself:
-if `X ≥ 0`, `a·b = 1` with `b ≥ 0`, and `X ^ a ≤ Y`, then `X ≤ Y ^ b`. -/
 private lemma rpowFlip {X Y a b : ℝ} (hX : 0 ≤ X) (hb : 0 ≤ b) (hab : a * b = 1)
     (h : X ^ a ≤ Y) : X ≤ Y ^ b := by
   have h1 : (0 : ℝ) ≤ X ^ a := Real.rpow_nonneg hX a
@@ -71,12 +31,6 @@ section RealCore
 
 variable {α : Type*} [MeasurableSpace α] {μ : MeasureTheory.Measure α}
 
-/-- **The real-variable core of the two-anchor interpolation.**
-
-Given a nonnegative `F` controlled at the two exponents `pA` and `pB` by
-`K ^ p · R²` (with a `Λ`-weight on the `pB` side), the intermediate exponent
-`1/θ = lam·pA + (1-lam)·pB` obeys the interpolated bound, with the two constants
-absorbed at the harmless powers `1` and `2` because `θ·pA ≤ 1` and `θ·pB ≤ 2`. -/
 private lemma gnMixCore (F : α → ℝ) (hFnn : ∀ x, 0 ≤ F x)
     {pA pB θ lam Λ R KA KB : ℝ}
     (hpA : 0 < pA) (hpB : 0 < pB)
@@ -101,7 +55,6 @@ private lemma gnMixCore (F : α → ℝ) (hFnn : ∀ x, 0 ≤ F x)
     MeasureTheory.integral_nonneg (fun x => Real.rpow_nonneg (hFnn x) _)
   have hIθnn : 0 ≤ ∫ x, F x ^ (1 / θ) ∂μ :=
     MeasureTheory.integral_nonneg (fun x => Real.rpow_nonneg (hFnn x) _)
-  -- the interpolated bound on the integral itself
   have e3 : (R ^ (2 : ℝ)) ^ lam * (R ^ (2 : ℝ)) ^ (1 - lam) = R ^ (2 : ℝ) := by
     rw [← Real.rpow_add' hR2 (by intro hcon; linarith)]
     norm_num
@@ -133,7 +86,6 @@ private lemma gnMixCore (F : α → ℝ) (hFnn : ∀ x, 0 ≤ F x)
             ((R ^ (2 : ℝ)) ^ lam * (R ^ (2 : ℝ)) ^ (1 - lam)) := by ring
       _ = KA ^ (pA * lam) * KB ^ (pB * (1 - lam)) * Λ ^ (2 * (pB - 1) * (1 - lam)) *
             R ^ (2 : ℝ) := by rw [e3]
-  -- raise to the power `θ` and absorb the two constants
   have hZ0 : (0 : ℝ) ≤ KA ^ (pA * lam) * KB ^ (pB * (1 - lam)) *
       Λ ^ (2 * (pB - 1) * (1 - lam)) * R ^ (2 : ℝ) :=
     mul_nonneg (mul_nonneg (mul_nonneg (Real.rpow_nonneg hKA0 _) (Real.rpow_nonneg hKB0 _))
@@ -153,7 +105,6 @@ private lemma gnMixCore (F : α → ℝ) (hFnn : ∀ x, 0 ≤ F x)
       ← Real.rpow_mul hKA0, ← Real.rpow_mul hKB0, ← Real.rpow_mul hΛ, ← Real.rpow_mul hR]
   rw [h6] at h5
   refine le_trans h5 ?_
-  -- now the two constant powers are ≤ `KA ^ 1` and `KB ^ 2`
   have hcA : KA ^ (pA * lam * θ) ≤ KA := by
     have hexp : pA * lam * θ ≤ 1 := by nlinarith [mul_nonneg hθ0.le hpA.le]
     calc KA ^ (pA * lam * θ) ≤ KA ^ (1 : ℝ) :=
@@ -188,13 +139,7 @@ private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
-/-! ### The `Lᵖ` Gagliardo–Nirenberg scale as a constant family -/
-
 set_option linter.unusedSectionVars false in
-/-- The `Lᵖ`-fibre Gagliardo–Nirenberg scale with its constant packaged as a
-family indexed by the top order `k`, so that the constant can be chosen before
-the top order is known.  Pure repackaging of
-`exists_gagliardoNirenberg_iteratedCovGrad_lpFiberNorm_le_rs`. -/
 private theorem gnFam (g₀ : SmoothRiemannianMetric I M) (r s : ℕ) :
     ∃ A : ℕ → ℝ, (∀ k, 0 ≤ A k) ∧
       ∀ (u : SmoothCcTensor g₀ r s) (Λ : ℝ), 0 ≤ Λ →
@@ -225,27 +170,7 @@ private theorem gnFam (g₀ : SmoothRiemannianMetric I M) (r s : ℕ) :
   choose A hA0 hA using h
   exact ⟨A, hA0, fun u Λ hΛ hsup k j hj0 hjk => hA k u Λ hΛ hsup j hj0 hjk⟩
 
-/-! ### The two-anchor bound -/
-
 set_option linter.unusedSectionVars false in
-/-- **The per-factor two-anchor Gagliardo–Nirenberg bound.**
-
-For a state `Ψ` with `‖Ψ‖_∞ ≤ Λ₀ ≤ 1` and `‖∇Ψ‖_∞ ≤ Λ₁`, every intermediate
-covariant jet `∇^cΨ` with `2 ≤ c < m` obeys, at every interpolation weight
-`θ` between the `∇Ψ`-anchored value `(c-1)/(m-1)` and the `Ψ`-anchored value
-`c/m`,
-```
-(∫ |∇^cΨ|^{2/θ})^θ ≤ C m · Λ₁^{2(c - θm)} · ‖∇^mΨ‖_{L²}^{2θ},
-```
-the constant `C` depending on the top order alone — not on `Ψ`, `Λ₀`, `Λ₁`, `c`
-or `θ`.
-
-The two endpoint weights are exactly the two Gagliardo–Nirenberg scales the tree
-already carries (`θ = c/m` is the `Ψ`-anchored one, whose `Λ₁` exponent
-vanishes; `θ = (c-1)/(m-1)` is the `∇Ψ`-anchored one, whose `Λ₁` exponent is the
-maximal `2(m-c)/(m-1)`); the interior is Lyapunov interpolation between them.
-The free weight is what lets a Hölder split of a jet product choose one `θ_j`
-per factor with `∑ θ_j = 1`. -/
 theorem gnTwoAnchor (g₀ : SmoothRiemannianMetric I M) (r s : ℕ) :
     ∃ C : ℕ → ℝ, (∀ m, 0 ≤ C m) ∧
       ∀ (Ψ : SmoothCcTensor g₀ r s) {Λ₀ Λ₁ : ℝ}, 0 ≤ Λ₀ → Λ₀ ≤ 1 → 0 ≤ Λ₁ →
@@ -278,11 +203,9 @@ theorem gnTwoAnchor (g₀ : SmoothRiemannianMetric I M) (r s : ℕ) :
   rw [hcast d, hcast n] at hθlo hθhi ⊢
   rw [show (1 + (d : ℝ)) - 1 = (d : ℝ) by ring, show (1 + (n : ℝ)) - 1 = (n : ℝ) by ring]
     at hθlo
-  -- name the integrand
   obtain ⟨F, hFapp⟩ : ∃ F : M → ℝ, ∀ x : M,
       riemannianFiberNormSq (I := I) (M := M) g₀ r (s + (1 + d)) x
         ((iteratedCovGrad (I := I) g₀ r s (1 + d) Ψ).toSection x) = F x := ⟨_, fun _ => rfl⟩
-  -- the two Gagliardo–Nirenberg endpoints, normalized
   have hAraw := hA Ψ Λ₀ hΛ₀0 hsup0 (1 + n) (1 + d) (by omega) (by omega)
   have hBraw := hB (iteratedCovGrad (I := I) g₀ r s 1 Ψ) Λ₁ hΛ₁0 hsup1 n d (by omega) (by omega)
   rw [hcast d, hcast n] at hAraw
@@ -294,7 +217,6 @@ theorem gnTwoAnchor (g₀ : SmoothRiemannianMetric I M) (r s : ℕ) :
   rw [← SmoothCcTensor.norm_def (I := I) (M := M)
       (iteratedCovGrad (I := I) g₀ r (s + 1) n (iteratedCovGrad (I := I) g₀ r s 1 Ψ)),
     icgNormComp (I := I) (M := M) g₀ r s 1 n Ψ, mul_div_assoc] at hBraw
-  -- pointwise regularity of the integrand
   have hFnn : ∀ x, 0 ≤ F x := by
     intro x
     rw [← hFapp x]
@@ -315,7 +237,6 @@ theorem gnTwoAnchor (g₀ : SmoothRiemannianMetric I M) (r s : ℕ) :
     intro p hp
     exact (hFcont.rpow_const (fun _ => Or.inr hp)).integrable_of_hasCompactSupport
       (HasCompactSupport.of_compactSpace _)
-  -- the exponents
   set R : ℝ := ‖iteratedCovGrad (I := I) g₀ r s (1 + n) Ψ‖ with hRdef
   set tA : ℝ := (1 + (d : ℝ)) / (1 + (n : ℝ)) with htAdef
   set pA : ℝ := (1 + (n : ℝ)) / (1 + (d : ℝ)) with hpAdef
@@ -359,7 +280,6 @@ theorem gnTwoAnchor (g₀ : SmoothRiemannianMetric I M) (r s : ℕ) :
     rw [hlamdef, div_le_one hden]; linarith
   have hmix : 1 / θ = lam * pA + (1 - lam) * pB := by
     rw [hlamdef]; field_simp; ring
-  -- endpoint A
   have hΛ₀e : Λ₀ ^ (2 * (1 - tA)) ≤ 1 := Real.rpow_le_one hΛ₀0 hΛ₀1 (by linarith)
   have hEA1 : (∫ x, F x ^ pA ∂(riemannianVolumeMeasure (I := I) (M := M) g₀)) ^ tA ≤
       max 1 (A (1 + n)) * R ^ (2 * tA) := by
@@ -378,7 +298,6 @@ theorem gnTwoAnchor (g₀ : SmoothRiemannianMetric I M) (r s : ℕ) :
     refine le_trans (rpowFlip hX hpApos.le htApA hEA1) (le_of_eq ?_)
     rw [Real.mul_rpow (le_trans zero_le_one (le_max_left _ _)) (Real.rpow_nonneg hRnn _),
       ← Real.rpow_mul hRnn, show (2 : ℝ) * tA * pA = 2 by rw [mul_assoc, htApA, mul_one]]
-  -- endpoint B
   have hEB1 : (∫ x, F x ^ pB ∂(riemannianVolumeMeasure (I := I) (M := M) g₀)) ^ tB ≤
       max 1 (B n) * Λ₁ ^ (2 * (1 - tB)) * R ^ (2 * tB) := by
     refine le_trans hBraw ?_
@@ -398,7 +317,6 @@ theorem gnTwoAnchor (g₀ : SmoothRiemannianMetric I M) (r s : ℕ) :
       show (2 : ℝ) * (1 - tB) * pB = 2 * (pB - 1) by
         field_simp
         nlinarith [htBpB]]
-  -- the exponent identity
   have hnd_ne : ((n : ℝ) - (d : ℝ)) ≠ 0 := ne_of_gt (by linarith)
   have hlam' : 1 - lam = (1 / θ - pA) / (pB - pA) := by
     rw [hlamdef]; field_simp; ring
@@ -411,7 +329,6 @@ theorem gnTwoAnchor (g₀ : SmoothRiemannianMetric I M) (r s : ℕ) :
   have hexp : 2 * (pB - 1) * (1 - lam) * θ = 2 * ((1 + (d : ℝ)) - θ * (1 + (n : ℝ))) := by
     rw [hlam', hq1, hq2, hq3]
     field_simp
-  -- assemble
   have hcore := gnMixCore (μ := riemannianVolumeMeasure (I := I) (M := M) g₀) F hFnn
     hpApos hpBpos (hint pA hpApos.le) (hint pB hpBpos.le) hθ0 hlam0 hlam1 hmix hθpA hθpB
     hΛ₁0 hRnn (le_max_left 1 (A (1 + n))) (le_max_left 1 (B n)) hEA hEB
@@ -419,15 +336,6 @@ theorem gnTwoAnchor (g₀ : SmoothRiemannianMetric I M) (r s : ℕ) :
   rw [show (1 + n) - 1 = n from by omega, ← hexp]
   exact hcore
 
-/-! ### The free-weight product assembly -/
-
-/-- **The quadratic-budget identity.**
-
-If the orders of a jet monomial sum to `mR + 1` and its Hölder weights sum to
-`1`, the `Λ₁` exponents `2(cf j - θ j · mR)` that `gnTwoAnchor` charges to the
-individual factors sum to exactly `2`, whatever the weights are.  This is the
-core of the free-weight design: it is what makes the product bound *quadratic* in
-the gradient cap — one power of `Λ₁²`, never more — with no slack to spend. -/
 private lemma gnExpSum {ι : Type*} (s : Finset ι) (cf θ : ι → ℝ) (mR : ℝ)
     (hsum : ∑ j ∈ s, cf j = mR + 1) (hθ : ∑ j ∈ s, θ j = 1) :
     ∑ j ∈ s, 2 * (cf j - θ j * mR) = 2 := by
@@ -436,16 +344,6 @@ private lemma gnExpSum {ι : Type*} (s : Finset ι) (cf θ : ι → ℝ) (mR : �
     ring
   rw [← Finset.mul_sum, h, mul_one]
 
-/-- **The free Hölder weights of a jet monomial.**
-
-For at least two factors of orders `2 ≤ cf j ≤ mR` with `∑ cf j = mR + 1`, a
-single convex ratio `t = (1 - L)/(U - L)` between the two Gagliardo–Nirenberg
-endpoint weight families — `(cf j - 1)/(mR - 1)`, of total `L`, and `cf j / mR`,
-of total `U` — produces a Hölder weight family: `∑ θ j = 1`, and every `θ j` lies
-in its own admissible band `[(cf j - 1)/(mR - 1), cf j / mR]`.
-
-`L ≤ 1` is exactly the two-factor hypothesis and `1 < U` is automatic, so
-`t ∈ [0, 1]` and the interpolation never leaves the band. -/
 private lemma gnFreeWt {ι : Type*} (s : Finset ι) (cf : ι → ℝ) (mR : ℝ)
     (hm1 : 1 < mR) (hcm : ∀ j ∈ s, cf j ≤ mR)
     (hQ : 2 ≤ (s.card : ℝ)) (hsum : ∑ j ∈ s, cf j = mR + 1) :
@@ -482,22 +380,6 @@ private lemma gnFreeWt {ι : Type*} (s : Finset ι) (cf : ι → ℝ) (mR : ℝ)
     nlinarith [mul_nonneg (by linarith : (0 : ℝ) ≤ 1 - tt) (sub_nonneg.mpr hab)]
 
 set_option linter.unusedSectionVars false in
-/-- **The free-weight product bound for a jet monomial.**
-
-For a state `Ψ` with `‖Ψ‖_∞ ≤ Λ₀ ≤ 1` and `‖∇Ψ‖_∞ ≤ Λ₁`, and any tuple of jet
-orders `c` supported on a set `t` of at least two indices, each order at least
-`2` and totalling `m + 1`,
-```
-∫ ∏_j |∇^{c j}Ψ|²  ≤  K m · Λ₁² · ‖∇^mΨ‖²_{L²},
-```
-with `K` depending on the top order alone.
-
-The orders off `t` are `0`, and those factors are discarded against `Λ₀ ≤ 1`.
-The active factors are split by Hölder at the free weights of `gnFreeWt` and each
-is paid by `gnTwoAnchor`; `gnExpSum` is what pins the total `Λ₁` exponent to
-exactly `2`, and `∑ θ j = 1` pins the top jet to exactly `‖∇^mΨ‖²`.  The number
-of active factors is at most `m + 1` (each order is at least `2`), which is what
-keeps the constant state-free. -/
 theorem gnProdJet (g₀ : SmoothRiemannianMetric I M) (r s : ℕ) :
     ∃ K : ℕ → ℝ, (∀ m, 0 ≤ K m) ∧
       ∀ (Ψ : SmoothCcTensor g₀ r s) {Λ₀ Λ₁ : ℝ}, 0 ≤ Λ₀ → Λ₀ ≤ 1 → 0 ≤ Λ₁ →
@@ -516,7 +398,6 @@ theorem gnProdJet (g₀ : SmoothRiemannianMetric I M) (r s : ℕ) :
   refine ⟨fun m => max 1 (C m) ^ (m + 1),
     fun m => pow_nonneg (le_trans zero_le_one (le_max_left _ _)) _, ?_⟩
   intro Ψ Λ₀ Λ₁ hΛ₀0 hΛ₀1 hΛ₁0 hsup0 hsup1 m N c t hc2 hc0 hQ2 hsum
-  -- combinatorics of the exponent tuple: at least two factors, each of order ≥ 2
   have hcard : 2 * t.card ≤ m + 1 := by
     have h1 : ∑ _j ∈ t, 2 ≤ ∑ j ∈ t, c j := Finset.sum_le_sum hc2
     rw [Finset.sum_const, smul_eq_mul, hsum] at h1
@@ -550,7 +431,6 @@ theorem gnProdJet (g₀ : SmoothRiemannianMetric I M) (r s : ℕ) :
     have hhi := (le_div_iff₀ hmR0).mp (hθband j hj).2
     linarith
   have hθ2nn : ∀ j ∈ t, 0 ≤ 2 * θ j := fun j hj => by have := hθpos j hj; linarith
-  -- Hölder at the free weights, the order-`0` factors discarded against `Λ₀ ≤ 1`
   have hΛone : ∀ j ∈ (Finset.univ : Finset (Fin N)) \ t, ∀ x : M,
       riemannianFiberNormSq (I := I) (M := M) g₀ r (s + c j) x
         ((iteratedCovGrad (I := I) g₀ r s (c j) Ψ).toSection x) ≤ 1 := by
@@ -570,7 +450,6 @@ theorem gnProdJet (g₀ : SmoothRiemannianMetric I M) (r s : ℕ) :
     (fun _ _ => zero_le_one) hΛone θ (by rw [hsd]; exact hθpos) (by rw [hsd]; exact hθsum)
   rw [hsd, Finset.prod_const_one, one_mul] at hhold
   refine le_trans hhold ?_
-  -- one `gnTwoAnchor` per active factor
   have hfacnn : ∀ j ∈ t, (0 : ℝ) ≤
       (∫ x, riemannianFiberNormSq (I := I) (M := M) g₀ r (s + c j) x
           ((iteratedCovGrad (I := I) g₀ r s (c j) Ψ).toSection x) ^ (1 / θ j)
@@ -586,7 +465,6 @@ theorem gnProdJet (g₀ : SmoothRiemannianMetric I M) (r s : ℕ) :
     hC Ψ hΛ₀0 hΛ₀1 hΛ₁0 hsup0 hsup1 m (c j) (hc2 j hj) (hcltm j hj) (θ j)
       (hθband j hj).1 (hθband j hj).2
   refine le_trans (Finset.prod_le_prod hfacnn hfac) ?_
-  -- the two exponent sums: `Λ₁` lands on `2`, the top jet lands on `2`
   have hαsum : ∑ j ∈ t, 2 * ((c j : ℝ) - θ j * (m : ℝ)) = 2 :=
     gnExpSum t (fun j => (c j : ℝ)) θ (m : ℝ) hcfsum hθsum
   have hθ2sum : ∑ j ∈ t, 2 * θ j = 2 := by rw [← Finset.mul_sum, hθsum, mul_one]
@@ -601,7 +479,6 @@ theorem gnProdJet (g₀ : SmoothRiemannianMetric I M) (r s : ℕ) :
   have hrp : ∀ y : ℝ, y ^ (2 : ℝ) = y ^ 2 := by
     intro y; rw [show (2 : ℝ) = ((2 : ℕ) : ℝ) by norm_num, Real.rpow_natCast]
   rw [hprodeq, hrp, hrp]
-  -- the number of active factors is bounded before the constant is chosen
   have hCle : C m ^ t.card ≤ max 1 (C m) ^ (m + 1) :=
     le_trans (pow_le_pow_left₀ (hC0 m) (le_max_right _ _) _)
       (pow_le_pow_right₀ (le_max_left _ _) (by omega))

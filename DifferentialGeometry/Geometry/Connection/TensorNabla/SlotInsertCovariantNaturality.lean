@@ -2,7 +2,6 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.OperatorFieldCovari
 import DifferentialGeometry.Geometry.Curvature.CurvatureOperator.SlotFreeCurvatureOperatorField
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.HomFieldActionIteratedCovGradWindow
 
-
 noncomputable section
 set_option backward.isDefEq.respectTransparency false
 open Bundle Manifold MeasureTheory Set Filter Tensor0SBundle
@@ -72,7 +71,6 @@ def endoSlotZeroCcTensor (g : SmoothRiemannianMetric I M) (s : ℕ)
         slotInsertEndoFib_contMDiff (I := I) (M := M) g (s + 1) 0 (fun x : M => Λ x) Λ.contMDiff }
   hasCompactSupport := HasCompactSupport.of_compactSpace _
 
-/-- Compatibility name for insertion of an endomorphism in the zeroth covariant slot. -/
 abbrev slotInsertEndoCc (g : SmoothRiemannianMetric I M) (s : ℕ)
     (Λ : ContMDiffSection I (E →L[ℝ] E) ∞
       (fun x : M => TangentSpace I x →L[ℝ] TangentSpace I x)) :
@@ -90,8 +88,6 @@ omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [BoundarylessManifold I M]
       slotInsertEndoFib (I := I) (M := M) (s + 1) 0 x (Λ x) := rfl
 
 omit [CompleteSpace E] in
-/-- Composition of leading-slot insertions reverses the endomorphism
-composition, as expected for covariant slots. -/
 lemma slotInsertFib_comp (s : ℕ) (x : M)
     (A B : TangentSpace I x →L[ℝ] TangentSpace I x) :
     ContinuousLinearMap.comp
@@ -108,8 +104,6 @@ lemma slotInsertFib_comp (s : ℕ) (x : M)
     ContinuousLinearMap.comp_apply, Function.update_self, Function.update_idem]
 
 omit [CompleteSpace E] in
-/-- Inserting the identity endomorphism in the leading covariant slot is the
-identity tensor operator. -/
 lemma slotInsertFib_id (s : ℕ) (x : M) :
     slotInsertEndoFib (I := I) (M := M) (s + 1) 0 x
         (ContinuousLinearMap.id ℝ (TangentSpace I x)) =
@@ -122,7 +116,6 @@ lemma slotInsertFib_id (s : ℕ) (x : M) :
     ContinuousLinearMap.id_apply, Function.update_eq_self]
 
 omit [CompleteSpace E] in
-/-- Insertion in the leading covariant slot is additive in the endomorphism field. -/
 lemma slotInsertEndoCc_add (g : SmoothRiemannianMetric I M) (s : ℕ)
     (A B : ContMDiffSection I (E →L[ℝ] E) ∞
       (fun x : M => TangentSpace I x →L[ℝ] TangentSpace I x)) :
@@ -148,7 +141,6 @@ lemma slotInsertEndoCc_add (g : SmoothRiemannianMetric I M) (s : ℕ)
   rw [slotInsertEndoFib_add_left, ContinuousLinearMap.add_apply]
 
 omit [CompleteSpace E] in
-/-- Insertion in the leading covariant slot commutes with scalar multiplication. -/
 lemma slotInsertEndoCc_smul (g : SmoothRiemannianMetric I M) (s : ℕ) (a : ℝ)
     (A : ContMDiffSection I (E →L[ℝ] E) ∞
       (fun x : M => TangentSpace I x →L[ℝ] TangentSpace I x)) :
@@ -386,7 +378,6 @@ lemma cotangent_slot_apply (x : M)
     fin_cases k
     simp]
   rfl
-
 
 end Connection
 end Integral

@@ -1,44 +1,5 @@
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.DeTurckRemainderLowBaseH2Pair
 
-/-!
-# The pairwise Lipschitz estimate for the first-order low-base action
-
-`DeTurckRemainderLowBaseC2Lip` carries the second-order pair `c2_pair_lip` /
-`a2_pair_lip`: on a common spectral `H²` ball the complete canonical
-second-order coefficient, and both adjacent-scale completions of its action,
-are Lipschitz in the state with modulus `C · ‖T - U‖_{H²}` and **no** dependence
-on the higher jets of the states.
-
-This module is the first-order sibling.  Both halves of the two-jet coefficient
-difference already exist:
-
-* `c0Diff_h2_tame` (`DeTurckRemainderLowBaseH2Pair`) bounds the `H²` jet of the
-  zero-order coefficient difference;
-* `c1Diff_tame` (`DeTurckRemainderLowBaseLip`) bounds the `H²` jet of the
-  order-one coefficient difference.
-
-`c1_pair_lip` glues them along `lowC0_sub` / `lowC1_sub` into the single
-two-jet input that `a1_diff` consumes, and `a1_pair_lip` pushes that through
-`a1_diff` to the two completed actions `a1Hi` (`H³ → H²`) and `a1Lo`
-(`H² → H¹`).
-
-## The modulus is genuinely not uniform in the state
-
-Unlike the second-order coefficient, which is algebraic in the state, the
-first-order coefficient is `∇`-linear in the state with metric-inverse
-coefficients.  Its difference therefore carries the cross term
-`(P(g_T⁻¹) - P(g_U⁻¹)) ∗ ∇T`, whose `H²` jet costs `‖T - U‖ · ‖T‖_{H³}`; this
-is the `B1 · A · D2` slot of `c1Diff_tame` and it is sharp, not lossy.  The
-modulus recorded here is accordingly
-
-  `K R · (1 + A + A₄) · (D₄ + D₃ + D₂ + N)`
-
-with `A`, `A₄` the third and fourth jet sizes of the states and
-`D₂, D₃, D₄, N` the second/third/fourth-jet and spectral differences.  **No
-estimate of the shape `C · ‖T - U‖_{H³}` with `C` independent of the states can
-hold** — see the same-name `.md`.
--/
-
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
@@ -58,12 +19,6 @@ open DifferentialGeometry.PDE.DeTurck.RicciLinearization
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.DeTurck
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.DeTurckCoefficients
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.MetricRealization
-
-/-! ### Scalar bookkeeping
-
-The two producers deliver their moduli in different shapes.  These two purely
-real lemmas merge them into the single admissible envelope
-`K · (1 + A + A₄) · (D₄ + D₃ + D₂ + N)`. -/
 
 private theorem a1PairArith
     (c0 c1 e0 e1 a a4 d2 d3 d4 n nrm : ℝ)
@@ -126,11 +81,6 @@ variable
 
 set_option maxHeartbeats 1600000 in
 set_option linter.unusedVariables false in
-/-- **The two-jet `H²` bound for the pairwise first-order low-base
-coefficient.**  On a common spectral `H²` ball the sum of the `H²` jets of the
-zero- and order-one coefficient differences obeys the admissible envelope
-`(K R · (1 + A + A₄) · (D₄ + D₃ + D₂ + N))²`.  This is the exact input shape of
-`a1_diff`, and the first-order sibling of `c2_pair_lip`. -/
 theorem c1_pair_lip
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M) :
@@ -246,12 +196,6 @@ theorem c1_pair_lip
 
 set_option maxHeartbeats 1600000 in
 set_option linter.unusedVariables false in
-/-- **The pairwise Lipschitz bound for both completed first-order actions.**
-On a common spectral `H²` ball, the operator-norm differences of the two
-adjacent-scale completions `a1Hi : H³ → H²` and `a1Lo : H² → H¹` of the
-canonical first-order low-base action obey the admissible envelope
-`K R · (1 + A + A₄) · (D₄ + D₃ + D₂ + N)`.  This is the first-order sibling of
-`a2_pair_lip`; the extra `(1 + A + A₄)` factor is unavoidable. -/
 theorem a1_pair_lip
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M) :
@@ -409,10 +353,6 @@ private theorem loPairArith
 
 set_option maxHeartbeats 1600000 in
 set_option linter.unusedVariables false in
-/-- The completed low first-order action is locally Lipschitz on a common
-spectral `H²` ball without any fourth-jet input.  Its coefficient reads the
-state only through `H³`, and the difference only through `H³`, `H²`, and the
-spectral `H²` norm. -/
 theorem a1Lo_pair_lip
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M) :

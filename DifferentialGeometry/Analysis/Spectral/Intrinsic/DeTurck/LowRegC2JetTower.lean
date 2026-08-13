@@ -1,31 +1,6 @@
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.DeTurckRemainderLowBaseAction
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.LowRegOpJetWindows
 
-/-!
-# The all-order jet tower of the low-base second-order coefficient
-
-The complete zero-based second-order coefficient
-
-`A.C2 = rhsRefoldTopInt + selfTopInt - deTurckPhiMetTotal`
-
-is a *path integral* over the radial segment joining the background carrier to
-the state, so its `i`-th covariant jet is not accessible by algebra.  This
-module supplies the two layers that turn a per-parameter jet bound into an
-all-order jet tower for `A.C2`:
-
-* `path_add_sub_jet` — the order-generic differentiation-under-the-integral
-  layer.  It is the covariant-jet sibling of `path_add_sub_cap`
-  (`LowRegPathSplit.lean`, fibre-pointwise) and the order-generic form of the
-  fixed-order `h2` step used inside `c2_h2_small`: a uniform covariant `L²` jet
-  bound of order `n` for the *cancellation-preserving* integrand passes to the
-  sum of the two integrated pieces minus the fixed coefficient, with the same
-  constant, at every order `n`.
-* `topKer_jet` — the estimate: the per-order jet tower of the integrand
-  itself, uniform in the path parameter, on the ball-free Moser route.
-
-Both are sorry-free, so `c2_jet_tower` and `a2_ladder` are unconditional.
--/
-
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
@@ -54,9 +29,6 @@ variable
 
 omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless]
     [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
-/-- A constant coefficient family is jointly smooth along the realized
-segment.  This is the joint-smoothness certificate that the fixed coefficient
-of a cancellation-preserving path integrand needs. -/
 theorem armConst
     (g : SmoothRiemannianMetric I M) {r : ℕ}
     (A : SmoothCcTensor g r 2) {δ δ' : ℝ} :
@@ -65,13 +37,6 @@ theorem armConst
   (A.toSection.contMDiff.comp_contMDiffOn contMDiffOn_fst).mono (Set.subset_univ _)
 
 omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
-/-- **Integrand linearity of the radial coefficient path integral, on a
-difference.**
-
-Two path integrals over the same realized segment differ by the path integral
-of the difference of their integrands.  The joint smoothness of the difference
-is taken as an input so that the caller may supply whichever assembly it
-already has. -/
 theorem path_sub_eq
     (g : SmoothRiemannianMetric I M) (r : ℕ)
     {δ δ' : ℝ}
@@ -114,13 +79,6 @@ theorem path_sub_eq
   rw [intervalIntegral.integral_sub hIΦ hIΨ]
 
 omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
-/-- **Integrand linearity of the radial coefficient path integral, on the
-cancellation-preserving combination.**
-
-The sum of two path integrals minus a fixed coefficient is the single path
-integral of `t ↦ Φ t + Ψ t - C`: the constant integrates to itself over the
-unit segment.  This is the algebraic content that lets `path_add_sub_jet` and
-`path_add_sub_cap` transport an integrand cap through one path integral. -/
 theorem path_add_sub_eq
     (g : SmoothRiemannianMetric I M) (r : ℕ)
     {δ δ' : ℝ}
@@ -168,17 +126,6 @@ theorem path_add_sub_eq
   norm_num
 
 set_option maxHeartbeats 800000 in
-/-- **Differentiation under the path integral, at every order.**
-
-If the cancellation-preserving integrand `t ↦ Φ t + Ψ t - C` has covariant
-`L²` jet of order `n` bounded by `Λ` uniformly for `t ∈ [0,1]`, then so does
-`∫Φ + ∫Ψ - C`, with the *same* constant `Λ` and at *every* order `n`.
-
-This is the order-generic form of the fixed-order step that `c2_h2_small`
-carries out at `n = 2`, and the covariant-jet sibling of the fibre-pointwise
-`path_add_sub_cap`.  Unlike those two it does not take the joint smoothness of
-the combined integrand as an extra input: it is assembled from `hΦ` and `hΨ`
-by `threeArmJoint_add`/`threeArmJoint_sub`. -/
 theorem path_add_sub_jet
     (g : SmoothRiemannianMetric I M) (r n : ℕ)
     {δ δ' : ℝ}
@@ -221,54 +168,6 @@ theorem path_add_sub_jet
   exact le_of_le_of_eq hmain hsq
 
 set_option linter.unusedVariables false in
-/-- **The per-order jet tower of the complete top path integrand, uniform in
-the path parameter.**
-
-For every order `i` and every `s ∈ [0,1]`, the covariant `L²` jet of order `i`
-of the integrand
-
-`rhsRefoldTop g g_bg T s + rhsSelfTop g T s - deTurckPhiMetTotal g g_bg g`
-
-is controlled by the state's own jets through order `i` — the **sharp** window
-`∑_{j < i+1}`, i.e. `lowJetSq g i T` itself — with a constant depending only on
-the background metrics and `i`, in particular on neither the state nor the path
-parameter.
-
-The wider `range (i + 2)` form is kept as `topKer_jet` below, for consumers
-written against the C0/C1 towers' shape.  The sharp window is what the
-tower-direct rung-`k` pairing needs: it keeps the coefficient's `L^∞` cost at
-state order `k + 1` rather than `k + 2` (PSTOP §6.4 adapter G / (B-WIN)).
-
-**Why no a-priori ball appears.**  `c2_jet_tower` — the consumer — is stated at
-an *arbitrary* order `a`, so the `H^{a+2}` ball it carries gives no usable
-low-order control at `a = 0`; the ball is vestigial there.  The only smallness
-input used here is `hδ_le : δ ≤ 1/3`, which through `hδg` bounds `T` in `L^∞`.
-That is exactly what the Moser pairing consumes: `appRS_hn_sup`
-(`Tensor/Estimates/AppCcRSJetMul.lean`) multiplies each arm's `L^∞` bound by
-the *other* arm's full `L²` jet, so a product of affine jet windows is again
-affine, with no Sobolev ball and no order gate.
-
-**Route.**  `topKernel_eq` expands the integrand into `lieRefold2 g T s`, the
-metric deviation `Φmet(gm) - Φmet(g)`, and `(-2s) • ricciTop g gm T`, where
-`gm = realizedFam g T 0 s` is the radial metric.  Along that path the
-perturbation is `s • T`, which carries the *same* fibre bound `δ` and jets
-dominated by `T`'s (`pathPert_rad`); the three summands are then the
-all-order Moser windows `moserWin_lieRef2`, `moserWin_phiDev` and
-`moserWin_ricciTop` of `LowRegOpJetWindows.lean`, combined by `moserWin_add`
-and `moserWin_smul`.  Every window has derivative offset `w = 0`, i.e. order
-`i` on the left costs order `i` of `T`; that is precisely the sharp window
-stated here, with no order of slack left in it.
-
-The two scalars cost nothing: `|-2s| ≤ 2` and `s ≤ 1` on `[0,1]`, absorbed by
-`moserWin_mono`, which is why no constant below mentions `s`.
-
-The existing all-order `lieRefold2` producer
-`exists_deTurckLieCovDerivRefoldC2Family_cap_l2JetWindow`
-(`RicciLinearization/RiemannCoefficientPalatiniRefold.lean:18865`) is
-deliberately *not* used: it gates on `2 * finrank ℝ E + 10 ≤ a` (dimension
-three: `a ≥ 16`), which would undo `a2_ladder`'s `3 ≤ a` bottom, and its data
-hypothesis is a pointwise jet window rather than an `L^∞` bound.  The Moser
-route reaches the same conclusion ball-free and gate-free. -/
 theorem topKerJetSharp
     (hDim : Module.finrank ℝ E = 3)
     (g g_bg : SmoothRiemannianMetric I M) :
@@ -304,7 +203,6 @@ theorem topKerJetSharp
   have hδ_lt : δ < 1 := lt_of_le_of_lt hδ_le h31
   have hs0 : (0 : ℝ) ≤ s := hs.1
   have hs1 : s ≤ 1 := hs.2
-  -- the state is its own `L^∞` witness: symmetry identifies it with `ccTensor02Symm g T`
   have hTsup : ∀ x : M, riemannianFiberNormSq (I := I) (M := M) g 0 2 x
       (T.toSection x) ≤ ((Module.finrank ℝ E : ℝ) * (1 / 3)) ^ 2 := by
     intro x
@@ -314,7 +212,6 @@ theorem topKerJetSharp
       ((ccTensor02Symm (I := I) (M := M) g T).toSection x) ≤ _ at h
     rwa [symmS_eq_self_of_ccTensorBilin_symm (I := I) (M := M) g T hT] at h
   have hpert := pathPert_rad (I := I) (M := M) g T hδ0 hδ_le hδ_lt hδg hδZ hTsup hs
-  -- the three summands, each an affine window with `s`-free constants
   have hLw := hL T hTsup hδ0 hδ_le hδ_lt hδg hδZ hs
   have hPw := hP T (realizedFam (I := I) g T 0 hδg hδZ s)
     (convexPerturbation (I := I) g T 0 s) hpert
@@ -344,12 +241,6 @@ theorem topKerJetSharp
   exact mul_le_mul_of_nonneg_right (le_abs_self _) (by linarith only [hjetT])
 
 set_option linter.unusedVariables false in
-/-- **The `range (i + 2)` compatibility form of `topKerJetSharp`.**
-
-Byte-identical to the statement this file carried before the window
-sharpening, so that every consumer written against the wider window keeps
-working unchanged.  The mathematical content is `topKerJetSharp`; this is its
-one-step weakening by `Finset.sum_le_sum_of_subset_of_nonneg`. -/
 theorem topKer_jet
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M) :

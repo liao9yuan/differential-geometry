@@ -2,39 +2,6 @@ import DifferentialGeometry.Analysis.Sobolev.TensorHilbert.RicciOrder1RadiusFree
 import DifferentialGeometry.Analysis.Sobolev.TensorHilbert.LieCorr0CoeffDiffRadiusFree
 import DifferentialGeometry.Analysis.Sobolev.TensorHilbert.DeTurckLieArm1CoeffL2JetBound
 
-/-!
-# Radius-free grid currency for the order-one low-base integrand
-
-The order-one path integrand of the low-base split is
-
-`rhsLow1Coeff g₀ g_bg T T' s
-  = (-2) • linearizedRicciConnDiffOrder1CoeffField g₀ g₁ + deTurckLieArm1Coeff g₀ g₁ g_bg`,
-
-with `g₁` the realized metric along the radial segment.  Both summands are
-**linear** in the connection difference — that is what separates the order-one
-coefficient from the order-zero one, where the `A·A` arm is quadratic — so both
-carry an `antidiagonalTupleGridWindow` bound at offset `+2`, i.e. one derivative
-of the state, with no Sobolev ball and no order gate.
-
-This module produces those two windows:
-
-* `ricci1Atgw` — the Ricci arm `appCcRS (fourTrace) (order-1 kernel)`, folded from
-  the outer factor's `+1` window (`fourTrAtgw`) against `ricciKerAtgw`'s `+2`.
-* `lieA1Atgw` — the DeTurck Lie arm at the frozen background `g_bg = g₀`, folded
-  piecewise from `dltcAtgw` (`+1`) against the three `Ψ` factors' `+2` windows.
-
-The `+1` window of the two outer trace factors has a common source: both
-`ricciCometricFourTraceCastG0` and `deTurckLieTraceCoeff` are slot reindexings of
-`ricciArmPrincipalCoeffPure`, whose window is `pureAtgw`.  The only genuinely new
-`Ψ` is `lieArm1PsiB`; it is the moving-metric-lowered connection difference
-raised and slot-permuted, so its window comes from `b4_mcd_atgw` through the
-sign identity `metricConnDiffLoweredCc_eq_neg_kappa`.
-
-Every statement here is radius-free and gate-free, which is what the all-order
-jet tower `c1_jet_tower` needs and what the flat ball-uniform producers cannot
-give.
--/
-
 noncomputable section
 
 set_option linter.style.setOption false
@@ -64,8 +31,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
-/-! ### Sign and scalar bookkeeping -/
-
 omit [BoundarylessManifold I M] in
 private lemma l1IcgSmul (g : SmoothRiemannianMetric I M) (r s j : ℕ)
     (c : ℝ) (w : SmoothCcTensor g r s) :
@@ -86,17 +51,7 @@ private lemma l1RfnsNeg (g : SmoothRiemannianMetric I M) {r s : ℕ} (l : ℕ) (
     Pi.smul_apply, riemannianFiberNormSq_smul]
   norm_num
 
-/-! ### The `+1` window of the outer trace factors -/
-
 set_option linter.unusedVariables false in
-/-- **Radius-free pointwise grid window for the pure Ricci principal coefficient.**
-
-`|∇ˡ(ricciArmPrincipalCoeffPure g₀ g₁)|²(x) ≤ Kp l · atgw(bP)(l + 1)`.
-
-Offset `+1`: the coefficient is the background double trace plus one endomorphism
-insertion built from the inverse-metric difference, and the difference costs no
-derivative of the state.  This is the valence-`(4,2)` sibling of
-`rfns_iCG_cometricCastG0_atgw_rf`. -/
 theorem pureAtgw (g₀ : SmoothRiemannianMetric I M) {δ₀ : ℝ} (hδ₀ : δ₀ < 1) :
     ∃ Kp : ℕ → ℝ, (∀ l, 0 ≤ Kp l) ∧
       ∀ (g₁ : SmoothRiemannianMetric I M) (P : SmoothCcTensor g₀ 0 2)
@@ -137,7 +92,6 @@ theorem pureAtgw (g₀ : SmoothRiemannianMetric I M) {δ₀ : ℝ} (hδ₀ : δ�
     Combinatorics.one_le_antidiagonalTupleGridWindow bP hbP_nn (by omega)
   set W : SmoothCcTensor g₀ 4 4 :=
     slotInsertEndoCc (I := I) (M := M) g₀ 3 (gInvDiffRaisedEndoField (I := I) g₀ g₁) with hW_def
-  -- the constant outer factor is a window at offset `0`
   have hΦw : ∀ (i' : ℕ) (y : M),
       riemannianFiberNormSq (I := I) (M := M) g₀ 4 (2 + i') y
           ((iteratedCovGrad (I := I) g₀ 4 2 i' Φ).toSection y) ≤
@@ -149,7 +103,6 @@ theorem pureAtgw (g₀ : SmoothRiemannianMetric I M) {δ₀ : ℝ} (hδ₀ : δ�
       Combinatorics.one_le_antidiagonalTupleGridWindow _
         (gridBase_nn (I := I) (M := M) g₀ P y) (by omega)
     exact le_trans (hSΦ i' y) (le_mul_of_one_le_right (hSΦ_nn i') hy)
-  -- the endomorphism-insertion arm is a window at offset `0`
   have hWw : ∀ (q : ℕ) (y : M),
       riemannianFiberNormSq (I := I) (M := M) g₀ 4 (4 + q) y
           ((iteratedCovGrad (I := I) g₀ 4 4 q W).toSection y) ≤
@@ -215,12 +168,6 @@ theorem pureAtgw (g₀ : SmoothRiemannianMetric I M) {δ₀ : ℝ} (hδ₀ : δ�
   nlinarith [hA, hAw, hBw]
 
 set_option linter.unusedVariables false in
-/-- **Radius-free pointwise grid window for the Ricci four-trace cast.**
-
-`|∇ⁿ(ricciCometricFourTraceCastG0 g₀ g₁)|²(x) ≤ K n · atgw(bP)(n + 1)`.  This is
-the `diagonalProductGrid` producer of `RicciConnDiffOrder0KernelJetGrid` read in
-window currency: the window at level `n + 1` *is* the grid sum over
-`range (n + 1)`. -/
 theorem fourTrAtgw (g₀ : SmoothRiemannianMetric I M) {δ₀ : ℝ} (hδ₀ : δ₀ < 1) :
     ∃ Kft : ℕ → ℝ, (∀ n, 0 ≤ Kft n) ∧
       ∀ (g₁ : SmoothRiemannianMetric I M) (P : SmoothCcTensor g₀ 0 2)
@@ -250,9 +197,6 @@ theorem fourTrAtgw (g₀ : SmoothRiemannianMetric I M) {δ₀ : ℝ} (hδ₀ : �
   rwa [hwin] at h
 
 set_option linter.unusedSectionVars false in
-/-- **The DeTurck Lie trace coefficient is a slot reindexing of the pure Ricci
-principal coefficient.**  Both are the moving cometric double trace read through
-a fixed source-slot permutation; only the permutation differs. -/
 theorem dltcEqPure (g₀ g₁ : SmoothRiemannianMetric I M) (σ : Equiv.Perm (Fin 4)) :
     deTurckLieTraceCoeff (I := I) (M := M) g₀ g₁ σ =
       reindexCoeffGen (I := I) (M := M) g₀ 4 2
@@ -266,11 +210,6 @@ theorem dltcEqPure (g₀ g₁ : SmoothRiemannianMetric I M) (σ : Equiv.Perm (Fi
   rfl
 
 set_option linter.unusedVariables false in
-/-- **Radius-free pointwise grid window for the DeTurck Lie trace coefficient.**
-
-`|∇ˡ(deTurckLieTraceCoeff g₀ g₁ σ)|²(x) ≤ Kp l · atgw(bP)(l + 1)`, at the same
-constant as `pureAtgw` because the reindexing is a fibre isometry at every jet
-order. -/
 theorem dltcAtgw (g₀ : SmoothRiemannianMetric I M) {δ₀ : ℝ} (hδ₀ : δ₀ < 1) :
     ∃ Kp : ℕ → ℝ, (∀ l, 0 ≤ Kp l) ∧
       ∀ (g₁ : SmoothRiemannianMetric I M) (P : SmoothCcTensor g₀ 0 2)
@@ -293,18 +232,7 @@ theorem dltcAtgw (g₀ : SmoothRiemannianMetric I M) {δ₀ : ℝ} (hδ₀ : δ�
       (ricciArmPrincipalCoeffPure (I := I) (M := M) g₀ g₁) σ l x]
   exact hp g₁ P htie hδ_le hδ0 hδ l x
 
-/-! ### The Ricci arm -/
-
 set_option linter.unusedVariables false in
-/-- **Radius-free pointwise grid window for the order-one Ricci coefficient
-field.**
-
-`|∇ⁿ(linearizedRicciConnDiffOrder1CoeffField g₀ g₁)|²(x) ≤ K n · atgw(bP)(n + 2)`.
-
-The coefficient is the four-trace cast applied to the order-one kernel; the cast
-costs no derivative of the state (`fourTrAtgw`, offset `+1`) and the kernel costs
-exactly one (`ricciKerAtgw`, offset `+2`), so the Leibniz fold lands at `+2` —
-the `range (i + 2)` budget of the `C1` jet tower. -/
 theorem ricci1Atgw (g₀ : SmoothRiemannianMetric I M) {δ₀ : ℝ} (hδ₀ : δ₀ < 1) :
     ∃ Kr : ℕ → ℝ, (∀ n, 0 ≤ Kr n) ∧
       ∀ (g₁ : SmoothRiemannianMetric I M) (P : SmoothCcTensor g₀ 0 2)
@@ -355,14 +283,7 @@ theorem ricci1Atgw (g₀ : SmoothRiemannianMetric I M) {δ₀ : ℝ} (hδ₀ : �
   rw [hidx] at hfold
   exact hfold
 
-/-! ### The `Ψ` factors of the Lie arm -/
-
 set_option linter.unusedVariables false in
-/-- **Radius-free pointwise grid window for `sharpFlatEndoCc`.**
-
-`|∇ˡ(sharpFlatEndoCc g₀ g₁)|²(x) ≤ S l · atgw(bP)(l + 1)`: the endomorphism is the
-identity plus an inverse-metric difference, so it costs no derivative of the
-state. -/
 theorem sfEndoAtgw (g₀ : SmoothRiemannianMetric I M) {δ₀ : ℝ} (hδ₀ : δ₀ < 1) :
     ∃ Ksf : ℕ → ℝ, (∀ l, 0 ≤ Ksf l) ∧
       ∀ (g₁ : SmoothRiemannianMetric I M) (P : SmoothCcTensor g₀ 0 2)
@@ -388,12 +309,6 @@ theorem sfEndoAtgw (g₀ : SmoothRiemannianMetric I M) {δ₀ : ℝ} (hδ₀ : �
     (gridBase_nn (I := I) (M := M) g₀ P x) (by omega)
 
 set_option linter.unusedVariables false in
-/-- **Radius-free pointwise grid window for the moving-lowered connection
-difference, raised and slot-permuted.**
-
-This is the `Ψ`-shaped factor of `lieArm1PsiB`: raising slot `0` and permuting
-slots are fibre isometries at every jet order, so the window is the one
-`b4_mcd_atgw` supplies for `metricConnDiffLoweredCc`, at offset `+2`. -/
 theorem kappaAtgw (g₀ g_bg : SmoothRiemannianMetric I M) {δ₀ : ℝ} (hδ₀ : δ₀ < 1)
     {Λ₀ : ℝ} (hΛ₀0 : 0 ≤ Λ₀) :
     ∃ Kκ : ℕ → ℝ, (∀ l, 0 ≤ Kκ l) ∧
@@ -441,12 +356,6 @@ theorem kappaAtgw (g₀ g_bg : SmoothRiemannianMetric I M) {δ₀ : ℝ} (hδ₀
   rwa [hbase] at h
 
 set_option linter.unusedVariables false in
-/-- **Radius-free pointwise grid window for `lieArm1PsiB`.**
-
-`|∇ⁿ(lieArm1PsiB g₀ g₁ g_bg)|²(x) ≤ K n · atgw(bP)(n + 2)`.  `lieArm1PsiB` is the
-moving-lowered connection difference (offset `+2`) composed with the sharp-flat
-endomorphism (offset `+1` — no derivative of the state), so the fold stays at
-`+2`. -/
 theorem psiBAtgw (g₀ g_bg : SmoothRiemannianMetric I M) {δ₀ : ℝ} (hδ₀ : δ₀ < 1)
     {Λ₀ : ℝ} (hΛ₀0 : 0 ≤ Λ₀) :
     ∃ Kψ : ℕ → ℝ, (∀ n, 0 ≤ Kψ n) ∧
@@ -510,8 +419,6 @@ theorem psiBAtgw (g₀ g_bg : SmoothRiemannianMetric I M) {δ₀ : ℝ} (hδ₀ 
   exact hfold
 
 set_option linter.unusedSectionVars false in
-/-- The fixed connection-difference offset is controlled by every positive
-state grid window. -/
 theorem fixCdAtgw (g₀ g_bg : SmoothRiemannianMetric I M) :
     ∃ Kfx : ℕ → ℝ, (∀ n, 0 ≤ Kfx n) ∧
       ∀ (P : SmoothCcTensor g₀ 0 2) (n : ℕ) (x : M),
@@ -538,8 +445,6 @@ theorem fixCdAtgw (g₀ g_bg : SmoothRiemannianMetric I M) :
     nlinarith)
 
 set_option linter.unusedVariables false in
-/-- The moving-background connection factor has the same offset-two grid
-window as the ordinary connection difference. -/
 theorem bgCcAtgw (g₀ g_bg : SmoothRiemannianMetric I M)
     {δ₀ : ℝ} (hδ₀ : δ₀ < 1) :
     ∃ Kbg : ℕ → ℝ, (∀ n, 0 ≤ Kbg n) ∧
@@ -588,8 +493,6 @@ theorem bgCcAtgw (g₀ g_bg : SmoothRiemannianMetric I M)
     _ = (2 * Kcd n + 2 * Kfx n) * W := by ring
 
 set_option linter.unusedSectionVars false in
-/-- At the frozen background the `lieArm1` background arm is the plain connection
-difference. -/
 theorem bgCcEqConn (g₀ g₁ : SmoothRiemannianMetric I M) :
     lieArm1ConnDiffBgCc (I := I) (M := M) g₀ g₁ g₀ = connDiffSection (I := I) g₁ g₀ := by
   apply SmoothCcTensor.ext
@@ -597,16 +500,7 @@ theorem bgCcEqConn (g₀ g₁ : SmoothRiemannianMetric I M) :
   intro x
   rfl
 
-/-! ### The Lie arm -/
-
 set_option linter.unusedVariables false in
-/-- **Radius-free pointwise grid window for one `lieArm1Piece`.**
-
-Given a `Ψ` factor with an offset-`+2` window, the piece
-`reindex (appCcRS (deTurckLieTraceCoeff σ') (slotExtend² Ψ)) ρ` again has an
-offset-`+2` window: the reindexing and the two slot extensions are fibre
-isometries up to dimension factors, and the trace coefficient costs no
-derivative of the state. -/
 theorem pieceAtgw (g₀ : SmoothRiemannianMetric I M) {δ₀ : ℝ} (hδ₀ : δ₀ < 1)
     (Kψ : ℕ → ℝ) (hKψ_nn : ∀ l, 0 ≤ Kψ l) :
     ∃ Kpc : ℕ → ℝ, (∀ n, 0 ≤ Kpc n) ∧
@@ -682,15 +576,6 @@ theorem pieceAtgw (g₀ : SmoothRiemannianMetric I M) {δ₀ : ℝ} (hδ₀ : δ
   exact hfold
 
 set_option linter.unusedVariables false in
-/-- **Radius-free pointwise grid window for the order-one DeTurck Lie
-coefficient at an arbitrary fixed background.**
-
-`|∇ⁿ(deTurckLieArm1Coeff g₀ g₁ g₀)|²(x) ≤ K n · atgw(bP)(n + 2)`.
-
-`deTurckLieArm1Coeff_eq_lieArm1Piece_sum` writes the coefficient as fourteen
-`lieArm1Piece`s over three `Ψ` factors.  The independent background contributes
-only the fixed offset `lieArm1FixCd g₀ g_bg`; positive grid windows absorb its
-state-free jets. -/
 theorem lieA1AtgwBg (g₀ g_bg : SmoothRiemannianMetric I M)
     {δ₀ : ℝ} (hδ₀ : δ₀ < 1)
     {Λ₀ : ℝ} (hΛ₀0 : 0 ≤ Λ₀) :
@@ -727,7 +612,6 @@ theorem lieA1AtgwBg (g₀ g_bg : SmoothRiemannianMetric I M)
   have hbW_nn : 0 ≤ bW :=
     Combinatorics.antidiagonalTupleGridWindow_nonneg _
       (gridBase_nn (I := I) (M := M) g₀ P x) _
-  -- the two `Ψ` factors, both at offset `+2` with the common constant `KΨ`
   have hΨcd : ∀ (l : ℕ) (y : M),
       riemannianFiberNormSq (I := I) (M := M) g₀ 1 (2 + l) y
           ((iteratedCovGrad (I := I) g₀ 1 2 l (connDiffSection (I := I) g₁ g₀)).toSection y) ≤
@@ -777,7 +661,6 @@ theorem lieA1AtgwBg (g₀ g_bg : SmoothRiemannianMetric I M)
     have := hKψ_nn l
     simp only [hKΨ_def]
     linarith
-  -- the fibre jet functional at order `n`, and its two-subadditivity
   set F : SmoothCcTensor g₀ 3 2 → ℝ := fun X =>
     riemannianFiberNormSq (I := I) (M := M) g₀ 3 (2 + n) x
       ((iteratedCovGrad (I := I) g₀ 3 2 n X).toSection x) with hF_def
@@ -797,7 +680,6 @@ theorem lieA1AtgwBg (g₀ g_bg : SmoothRiemannianMetric I M)
     have h := hFadd X (-Y)
     rw [hFneg Y] at h
     rwa [sub_eq_add_neg]
-  -- every piece is bounded by the same window
   have hpiece : ∀ (σ' : Equiv.Perm (Fin 4)) (ρ : Equiv.Perm (Fin 3))
       (Ψ : SmoothCcTensor g₀ 1 2),
       (∀ (l : ℕ) (y : M), riemannianFiberNormSq (I := I) (M := M) g₀ 1 (2 + l) y
@@ -863,7 +745,6 @@ theorem lieA1AtgwBg (g₀ g_bg : SmoothRiemannianMetric I M)
   have hC5b : F C5 ≤ Kpc n * bW := hpiece _ _ _ hΨcd
   have hC6b : F C6 ≤ Kpc n * bW := hpiece _ _ _ hΨcd
   have hDb : F D ≤ Kpc n * bW := hpiece _ _ _ hΨcd
-  -- cascade the two-subadditivity along the recorded bracketing
   have e1 := hFadd B1 B2
   have e2 := hFsub (B1 + B2) B3
   have e3 := hFsub (B1 + B2 - B3) B4
@@ -893,7 +774,6 @@ theorem lieA1AtgwBg (g₀ g_bg : SmoothRiemannianMetric I M)
   exact le_of_eq (by ring)
 
 set_option linter.unusedVariables false in
-/-- Diagonal-background compatibility wrapper for `lieA1AtgwBg`. -/
 theorem lieA1Atgw (g₀ : SmoothRiemannianMetric I M)
     {δ₀ : ℝ} (hδ₀ : δ₀ < 1) {Λ₀ : ℝ} (hΛ₀0 : 0 ≤ Λ₀) :
     ∃ Kl : ℕ → ℝ, (∀ n, 0 ≤ Kl n) ∧
@@ -912,15 +792,7 @@ theorem lieA1Atgw (g₀ : SmoothRiemannianMetric I M)
             (gridBase (I := I) (M := M) g₀ P x) (n + 2) :=
   lieA1AtgwBg (I := I) (M := M) g₀ g₀ hδ₀ hΛ₀0
 
-/-! ### The full order-one integrand -/
-
 set_option linter.unusedVariables false in
-/-- **Radius-free pointwise grid window for the order-one low-base integrand.**
-
-`|∇ⁿ((-2) • ricci₁ + lieArm₁)|²(x) ≤ K n · atgw(bP)(n + 2)`: both arms are linear
-in the connection difference, so the whole integrand costs exactly one derivative
-of the state.  Integrating this against `atgwToJet` at offset `w = 2` is the
-`range (i + 2)` budget of `c1_jet_tower`. -/
 theorem low1AtgwBg (g₀ g_bg : SmoothRiemannianMetric I M)
     {δ₀ : ℝ} (hδ₀ : δ₀ < 1)
     {Λ₀ : ℝ} (hΛ₀0 : 0 ≤ Λ₀) :
@@ -976,7 +848,6 @@ theorem low1AtgwBg (g₀ g_bg : SmoothRiemannianMetric I M)
     _ = (8 * Kr n + 2 * Kl n) * W := by ring
 
 set_option linter.unusedVariables false in
-/-- Diagonal-background compatibility wrapper for `low1AtgwBg`. -/
 theorem low1Atgw (g₀ : SmoothRiemannianMetric I M)
     {δ₀ : ℝ} (hδ₀ : δ₀ < 1) {Λ₀ : ℝ} (hΛ₀0 : 0 ≤ Λ₀) :
     ∃ K : ℕ → ℝ, (∀ n, 0 ≤ K n) ∧

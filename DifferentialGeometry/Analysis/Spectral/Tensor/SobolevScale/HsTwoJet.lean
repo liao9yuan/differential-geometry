@@ -1,13 +1,5 @@
 import DifferentialGeometry.Analysis.Spectral.Tensor.SobolevScale.IteratedCovGradHsJetBound
 
-/-!
-# A curvature-free easy `H^2` comparison
-
-This file gives the finite easy direction from the covariant two-jet to the
-spectral `H^2` norm.  Its constant depends only on the model dimension, so it
-is uniform over every class of smooth Riemannian metrics.
--/
-
 set_option autoImplicit false
 
 noncomputable section
@@ -33,14 +25,10 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
-/-- The dimension-only constant in the easy spectral `H^2` comparison. -/
 def hsTwoJetC (d : ℕ) : ℝ := Real.sqrt (2 * (1 + (d : ℝ) ^ 2))
 
-/-- The easy spectral `H^2` comparison constant is nonnegative. -/
 theorem hsTwoJetC_nonneg (d : ℕ) : 0 ≤ hsTwoJetC d := Real.sqrt_nonneg _
 
-/-- The rough connection Laplacian is bounded by the second covariant
-gradient with the explicit model-dimension trace constant. -/
 theorem rawLap_le_grad2
     (g : SmoothRiemannianMetric I M) (s : ℕ) (S : SmoothCcTensor g 0 s) :
     ‖rawTensorConnLapSmooth (I := I) g 0 s S‖ ≤
@@ -109,9 +97,6 @@ private theorem mode_summable_two
     rw [ccTensorToHs_coeff, hweight]
     exact mul_le_mul_of_nonneg_right hpow (sq_nonneg c)
 
-/-- The spectral `H^2` norm is controlled by the covariant jet through order
-two with a constant depending only on the dimension.  No curvature or metric
-jet hypothesis enters this easy direction. -/
 theorem hs_two_le_jet
     (g : SmoothRiemannianMetric I M) (s : ℕ) (S : SmoothCcTensor g 0 s) :
     ‖ccTensorToHs (I := I) (M := M) g s (2 : ℝ) S‖ ≤

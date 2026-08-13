@@ -1,14 +1,5 @@
 import DifferentialGeometry.Analysis.Parabolic.QuasiLinear.TensorMaximalRegularity.LocallyLipschitzExistence
 
-/-!
-# Zero-initial Duhamel fields at the intermediate scale
-
-This file packages the zero-initial maximal-regularity Duhamel solution as a
-cross-scale field.  Its produced intermediate representative is measurable,
-linear in the forcing almost everywhere, and uniformly bounded in time by the
-forcing norm.
--/
-
 noncomputable section
 
 open Bundle Manifold MeasureTheory Set Filter
@@ -42,7 +33,6 @@ private local instance : BorelSpace M := ⟨rfl⟩
 variable {g : SmoothRiemannianMetric I M} {r s : ℕ}
 variable {a T : ℝ}
 
-/-- The zero-initial Duhamel solution as a cross-scale field. -/
 def zeroDuhamelCross (hT : 0 < T) (hT1 : T ≤ 1)
     (h_compact : IsCompactOperator (tensorResolventL2
       (I := I) (M := M) g r s))
@@ -52,7 +42,6 @@ def zeroDuhamelCross (hT : 0 < T) (hT1 : T ≤ 1)
     (h_compact := h_compact) hT hT1 0 f
 
 omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] in
-/-- The produced intermediate representative has zero initial value. -/
 theorem zeroRepr_zero (hT : 0 < T) (hT1 : T ≤ 1)
     (h_compact : IsCompactOperator (tensorResolventL2
       (I := I) (M := M) g r s))
@@ -65,8 +54,6 @@ theorem zeroRepr_zero (hT : 0 < T) (hT1 : T ≤ 1)
       (0 : tensorHs (I := I) (M := M) g r s (a + 2)) f
 
 omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] in
-/-- The intermediate representative agrees almost everywhere with the
-zero-initial `H^(a+1)` Duhamel companion field. -/
 theorem zeroRepr_ae (hT : 0 < T) (hT1 : T ≤ 1)
     (h_compact : IsCompactOperator (tensorResolventL2
       (I := I) (M := M) g r s))
@@ -80,8 +67,6 @@ theorem zeroRepr_ae (hT : 0 < T) (hT1 : T ≤ 1)
       (h_compact := h_compact) hT hT1
       (0 : tensorHs (I := I) (M := M) g r s (a + 2)) f
 
-/-- The produced representative is strongly measurable for the restricted
-time measure. -/
 theorem zeroRepr_meas (hT : 0 < T) (hT1 : T ≤ 1)
     (h_compact : IsCompactOperator (tensorResolventL2
       (I := I) (M := M) g r s))
@@ -131,8 +116,6 @@ private theorem duhField_sub (hT : 0 < T) (hT1 : T ≤ 1)
   rw [maxRegDuhamelSolFieldHa1,
     homField_zero (I := I) (M := M) (a := a) hT h_compact, zero_add]
 
-/-- The zero-initial intermediate representative commutes almost everywhere
-with subtraction of forcing terms. -/
 theorem zeroRepr_sub_ae (hT : 0 < T) (hT1 : T ≤ 1)
     (h_compact : IsCompactOperator (tensorResolventL2
       (I := I) (M := M) g r s))
@@ -156,8 +139,6 @@ theorem zeroRepr_sub_ae (hT : 0 < T) (hT1 : T ≤ 1)
   rw [hft, hf't, hdt]
   exact hst.symm
 
-/-- Uniform-in-time control of the zero-initial intermediate representative.
-The constant remains bounded as the horizon tends to zero. -/
 theorem zeroRepr_norm_le (hT : 0 < T) (hT1 : T ≤ 1)
     (h_compact : IsCompactOperator (tensorResolventL2
       (I := I) (M := M) g r s))

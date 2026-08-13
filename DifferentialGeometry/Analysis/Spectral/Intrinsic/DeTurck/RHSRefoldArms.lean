@@ -3,14 +3,6 @@ import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurckCoefficients.RHST
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurckCoefficients.RHSPathIntegral
 import DifferentialGeometry.Analysis.Parabolic.RicciLinearization.ThreeArmJointAlgebra
 
-/-!
-# Refolded Ricci--DeTurck slope arms
-
-This module combines the exact order-zero refold with the complete three-arm
-Ricci--DeTurck slope.  It is purely algebraic: no Sobolev or high-jet
-hypothesis is introduced.
--/
-
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
@@ -38,8 +30,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
   [IsManifold I ∞ M] [CompactSpace M] [I.Boundaryless]
   [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M]
 
-/-- The complete second-order coefficient after the order-zero Palatini and
-DeTurck pair-trace pieces have been returned to the top arm. -/
 def rhsRefoldTop
     (g g_bg : SmoothRiemannianMetric I M) (T : SmoothCcTensor g 0 2)
     {δ : ℝ}
@@ -54,9 +44,6 @@ def rhsRefoldTop
 
 set_option maxHeartbeats 1600000 in
 set_option synthInstance.maxHeartbeats 1600000 in
-/-- The DeTurck second-order refold is jointly smooth on the realized metric
-segment. The finite jet radius used to project the existing quantitative
-theorem is chosen inside the proof and does not occur in this interface. -/
 theorem lieRefold2_joint
     (g : SmoothRiemannianMetric I M) (T : SmoothCcTensor g 0 2)
     {δ : ℝ} (hδ_lt : δ < 1)
@@ -94,8 +81,6 @@ theorem lieRefold2_joint
   simpa only [lieRefold2] using
     (hmain T le_rfl hδ hδZ hball).1
 
-/-- The complete refolded top coefficient is jointly smooth along the realized
-metric segment, with no theorem-facing high-jet hypothesis. -/
 theorem rhsRefoldTop_joint
     (g g_bg : SmoothRiemannianMetric I M) (T : SmoothCcTensor g 0 2)
     {δ : ℝ} (hδ_lt : δ < 1)
@@ -128,9 +113,6 @@ private theorem zero_symm (g : SmoothRiemannianMetric I M) :
   simp only [ccTensorBilin_apply, ccTensorModel_smul,
     ContinuousMultilinearMap.smul_apply, smul_eq_mul, zero_mul]
 
-/-- Along the segment from the carrier to a symmetric metric deviation, the
-complete Ricci--DeTurck slope is exactly the refolded zero-, one-, and
-two-order background-covariant expression. -/
 theorem rhsSlope_refold
     (g g_bg : SmoothRiemannianMetric I M) (T : SmoothCcTensor g 0 2)
     (hT : ∀ (x : M) (v w : TangentSpace I x),

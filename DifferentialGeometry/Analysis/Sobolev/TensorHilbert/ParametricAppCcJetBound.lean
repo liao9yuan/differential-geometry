@@ -1,13 +1,6 @@
 import DifferentialGeometry.Analysis.Sobolev.TensorHilbert.HomFieldActionL2JetBound
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.ParametricJetBound
 
-
-
-
-
-
-
-
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
@@ -32,8 +25,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
   [T2Space M] [SigmaCompactSpace M]
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
-
-
 
 theorem app_jet_sq_le
     (g : SmoothRiemannianMetric I M) (b c j : ℕ)
@@ -99,10 +90,6 @@ theorem app_jet_sq_le
       tensorL2Norm_sq_toFun_eq_integral_riemannianFiberNormSq_rs
         (I := I) (M := M) g 0 (b + l)])
 
-/-- The head/tail `L²` Leibniz assembly of an operator-field action.
-
-Index zero keeps the coefficient in `L∞`; every positive index puts the data
-window in `L∞` and reads the coefficient jet in `L²`. -/
 theorem app_jet_sq_head
     (g : SmoothRiemannianMetric I M) (b c j : ℕ)
     (Φ : SmoothCcTensor g b c) (W : SmoothCcTensor g 0 b) (B : ℝ) (D : ℕ → ℝ)
@@ -200,11 +187,6 @@ theorem app_jet_sq_head
       tensorL2Norm_sq_toFun_eq_integral_riemannianFiberNormSq_rs
         (I := I) (M := M) g b (c + i)]
 
-/-- The mixed per-index Hölder split of the operator-field Leibniz sum.
-
-At indices in `S`, the coefficient jet is capped pointwise; at complementary
-indices the data window is capped pointwise and the coefficient jet is read in
-`L²`. -/
 theorem app_jet_sq_split
     (g : SmoothRiemannianMetric I M) (b c j : ℕ)
     (Φ : SmoothCcTensor g b c) (W : SmoothCcTensor g 0 b)
@@ -322,8 +304,6 @@ theorem app_jet_sq_split
       tensorL2Norm_sq_toFun_eq_integral_riemannianFiberNormSq_rs
         (I := I) (M := M) g b (c + i)]
 
-
-
 theorem app_jet_of_bdd
     (g : SmoothRiemannianMetric I M) (b c : ℕ) {α : Type*}
     (Φ : α → SmoothCcTensor g b c) (K : Set α) (B : ℕ → ℝ)
@@ -414,9 +394,6 @@ theorem app_jet_of_bdd
     change ‖iteratedCovGrad (I := I) g 0 c j
         (operatorFieldApply (I := I) (M := M) g b c (Φ t) W)‖ ≤ (A + 1) * J
     exact le_of_sq_le_sq htarget (mul_nonneg (add_nonneg hA_nn zero_le_one) hJ_nn)
-
-
-
 
 theorem param_app_jet
     (g : SmoothRiemannianMetric I M) (b c : ℕ)

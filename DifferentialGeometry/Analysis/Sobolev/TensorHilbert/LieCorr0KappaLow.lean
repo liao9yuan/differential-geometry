@@ -3,15 +3,6 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.IteratedCovGradFibr
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.MetricRealization.TensorHsRealize
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.DeTurckRemainderTameLipschitzLieCorrectionKappaBounds
 
-/-!
-# Low-regularity lowered connection-difference identities
-
-This leaf contains only the lowered connection-difference and perturbative
-passenger identities needed by the three-dimensional low-regularity
-Ricci--DeTurck estimates. It is independent of the unfinished broad
-`LieCorr0LowJet` module.
--/
-
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
@@ -39,7 +30,6 @@ variable
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
 omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [SigmaCompactSpace M] in
-/-- Fibre evaluation of the moving lowered connection difference. -/
 theorem kappa_unit (g₀ g₁ gB : SmoothRiemannianMetric I M) (x : M)
     (m : Fin 3 → TangentSpace I x) :
     unitModel (I := I) (M := M) g₀ 3
@@ -64,8 +54,6 @@ private theorem koszul_g1 (g₀ g₁ : SmoothRiemannianMetric I M)
   rfl
 
 omit [NeZero (Module.finrank ℝ E)] in
-/-- The self-background lowered connection difference is exactly the cyclic
-Koszul covector of the metric perturbation. -/
 theorem kappa_self (g₀ g₁ : SmoothRiemannianMetric I M)
     (P : SmoothCcTensor g₀ 0 2)
     (htie : ∀ (y : M) (v w : TangentSpace I y),
@@ -85,7 +73,6 @@ private def pbLowCompatField (g₀ : SmoothRiemannianMetric I M)
     ccBilinConnDiffLoweredFib_contMDiff (I := I) g₀ P gA gB⟩
 
 omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
-/-- Fibre evaluation of the perturbative lowered connection difference. -/
 theorem pbLow_unit (g₀ : SmoothRiemannianMetric I M)
     (P : SmoothCcTensor g₀ 0 2) (gA gB : SmoothRiemannianMetric I M)
     (x : M) (m : Fin 3 → TangentSpace I x) :
@@ -104,8 +91,6 @@ theorem pbLow_unit (g₀ : SmoothRiemannianMetric I M)
     ContinuousMultilinearMap.constOfIsEmpty_apply, one_smul]
   exact ccBilinConnDiffLoweredFib_toModel (I := I) g₀ P gA gB x m
 
-/-- The perturbative lowered connection-difference passenger is subtractive in
-the perturbation tensor. -/
 theorem pbLow_sub (g₀ : SmoothRiemannianMetric I M)
     (P Q : SmoothCcTensor g₀ 0 2) (gA gB : SmoothRiemannianMetric I M) :
     lc0PbLow (I := I) (M := M) g₀ (P - Q) gA gB =
@@ -148,9 +133,6 @@ private theorem unit_add0 (g₀ : SmoothRiemannianMetric I M) (s : ℕ)
           (unitTensor (I := I) (M := M) x) from rfl]
   rw [Tensor0SSpace.toModel_add, ContinuousMultilinearMap.add_apply]
 
-/-- The moving-metric lowered connection difference splits into the
-self-background Koszul term, the fixed background connection difference, and
-the perturbative passenger. -/
 theorem kappa_bg (g₀ g₁ gB : SmoothRiemannianMetric I M)
     (P : SmoothCcTensor g₀ 0 2)
     (htie : ∀ (y : M) (v w : TangentSpace I y),
@@ -177,7 +159,6 @@ theorem kappa_bg (g₀ g₁ gB : SmoothRiemannianMetric I M)
   rw [ContinuousLinearMap.add_apply, ContinuousLinearMap.add_apply]
   ring
 
-/-- Reversing a fixed connection difference reverses its frozen lowering. -/
 theorem kappa_base_neg (g₀ gB : SmoothRiemannianMetric I M) :
     lc0Kappa (I := I) (M := M) g₀ g₀ gB =
       -connDiffLoweredCc (I := I) g₀ gB := by
@@ -218,8 +199,6 @@ private theorem ip_toModel (s : ℕ) (x : M) (v : TangentSpace I x)
   rw [h1]
   rfl
 
-/-- Raising and cyclically rotating the perturbative passenger exposes the
-fixed connection-difference operator acting on the raised perturbation. -/
 theorem pbLow_raise (g₀ gB : SmoothRiemannianMetric I M)
     (P : SmoothCcTensor g₀ 0 2) :
     cometricRaiseSlot0Field (I := I) (M := M) g₀ 1
@@ -351,8 +330,6 @@ theorem pbLow_raise (g₀ gB : SmoothRiemannianMetric I M)
   rw [hLHS, hLHSval]
   exact hRHS.symm
 
-/-- The perturbative passenger and its raised operator realization have equal
-pointwise covariant-jet norms. -/
 theorem pbLow_rfns (g₀ gB : SmoothRiemannianMetric I M)
     (P : SmoothCcTensor g₀ 0 2) (n : ℕ) (x : M) :
     riemannianFiberNormSq (I := I) (M := M) g₀ 0 (3 + n) x

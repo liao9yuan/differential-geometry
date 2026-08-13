@@ -1,6 +1,5 @@
 import DifferentialGeometry.Analysis.Sobolev.Embedding.SobolevEmbeddingCmOrderDropping
 
-
 noncomputable section
 
 open Bundle Manifold MeasureTheory Set Filter Topology Metric Tensor0SBundle
@@ -168,7 +167,6 @@ def tensorComponentEuclideanChart (g : SmoothRiemannianMetric I M) (r s : ℕ)
     ∘ (extChartAt I α).symm
     ∘ (toEuclidean (E := E)).symm
 
-/-- Compatibility name for a raw Euclidean chart component. -/
 abbrev rawPullR (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) (α : M)
     (Idx : Fin r → Fin (Module.finrank ℝ E))
@@ -229,7 +227,6 @@ def tensorComponentAbsSum (g : SmoothRiemannianMetric I M) (r s : ℕ)
         (Fin s → Fin (Module.finrank ℝ E)),
     |tensorComponentEuclideanChart (I := I) (M := M) g r s S α q.1 q.2 y|
 
-/-- Compatibility name for the absolute sum of raw chart components. -/
 abbrev zeroContentR (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) (α : M) (y : EuclN) : ℝ :=
   tensorComponentAbsSum (I := I) (M := M) g r s S α y

@@ -4,13 +4,6 @@ import Mathlib.Analysis.Normed.Module.Connected
 
 set_option autoImplicit false
 
-/-!
-# Strict Jensen convexity on the CGT pullback core
-
-This module turns the localized true-distance branch germ into the
-consumer-facing midpoint Jensen theorem used by the center-of-mass assembly.
--/
-
 noncomputable section
 
 open Bundle Filter Function Manifold Metric Set TopologicalSpace
@@ -163,9 +156,6 @@ private theorem branch_hess_zero
   exact hh
 
 set_option maxHeartbeats 800000 in
-/-- A selected complete-extension branch has positive energy Hessian in every
-nonzero endpoint direction when its launch remains in the controlled region
-and obeys the one-sided curvature scale. -/
 theorem intrBranch_hess_pos
     (g : SmoothRiemannianMetric I M)
     (hEnorm : ∀ (x : M) (v : TangentSpace I x),
@@ -628,9 +618,6 @@ theorem intrBranch_hess_pos
         add_zero, zero_add]
       exact add_pos_of_pos_of_nonneg hWW hrad
 
-/-- A family of complete-extension minimizing joins whose controlled segments
-stay in the pullback core.  The predicate retains the geometric path data
-needed by local-isometry consumers in addition to endpoint convexity. -/
 def IsCoreMinJoin
     (g : SmoothRiemannianMetric I M)
     (hEnorm : ∀ (x : M) (v : TangentSpace I x),
@@ -663,9 +650,6 @@ def IsCoreMinJoin
 
 set_option maxHeartbeats 1200000 in
 attribute [-instance] Subtype.metricSpace Subtype.pseudoMetricSpace in
-/-- On the controlled pullback core, one fixed family of fenced minimizing
-joins both stays in the core and makes half squared distance from every core
-point strictly midpoint Jensen convex. -/
 theorem intrCore_jensen_min
     (g : SmoothRiemannianMetric I M)
     (hEnorm : ∀ (x : M) (v : TangentSpace I x),
@@ -1023,9 +1007,6 @@ theorem intrCore_jensen_min
     rw [hdistPull]
 
 attribute [-instance] Subtype.metricSpace Subtype.pseudoMetricSpace in
-/-- A controlled core join realizes the pullback Riemannian distance.  This
-retains the minimizing-length content of the complete-extension construction
-for local-isometry transport arguments. -/
 theorem coreJoin_len
     (g : SmoothRiemannianMetric I M)
     (hEnorm : ∀ (x : M) (v : TangentSpace I x),
@@ -1143,8 +1124,6 @@ theorem coreJoin_len
         (I := I) g hEnorm p hR h4aR hloc hx hy
 
 attribute [-instance] Subtype.metricSpace Subtype.pseudoMetricSpace in
-/-- Half squared distance from every controlled-core point satisfies strict
-midpoint Jensen convexity along one fixed family of fenced minimizing joins. -/
 theorem intrCore_jensen
     (g : SmoothRiemannianMetric I M)
     (hEnorm : ∀ (x : M) (v : TangentSpace I x),

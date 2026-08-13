@@ -211,8 +211,6 @@ theorem two_mul_sum_crossScale_le_eps
 
 omit [CompactSpace M] in
 omit [NeZero (Module.finrank ℝ E)] in
-/-- Absolute-value form of the cross-scale Young estimate. It controls a
-signed spectral energy pairing without choosing the sign of the forcing. -/
 theorem two_abs_cross_le_eps
     (S : Finset (TensorEigenIdx (I := I) (M := M) g r s)) (sigma : ℝ)
     (f h : TensorEigenIdx (I := I) (M := M) g r s → ℝ) {epsilon : ℝ}
@@ -332,26 +330,6 @@ theorem two_mul_sum_sameScale_le_sqrt
 
 omit [CompactSpace M] in
 omit [NeZero (Module.finrank ℝ E)] in
-/-- **Parabolic energy closure from a ladder bound on the forcing.**
-
-The forcing coordinates split as `f = fd + fs` on `S`, where the *difference* part
-`fd` obeys a ladder bound one scale below (`α` on the top scale `σ + 1`, `β` on the
-middle scale `σ`) and the *static* part `fs` is bounded at the middle scale by `D`.
-Then the pairing `2 ∑ w^σ · u · f` — the source term of the `H^σ` energy identity —
-is dominated by
-
-  `(2α + ε) · E_{σ+1}(u) + (β²/ε) · E_σ(u) + 2D · √(E_σ(u))`,
-
-which is exactly the closure hypothesis of the parabolic energy hierarchy: a small
-multiple of the dissipation, a benign multiple of the energy at the same scale, and
-a `√`-seed carrying the static source.  The dissipation constant is `2α + ε`, so the
-absorption margin is available as soon as `α < 1`, with `ε` free to be chosen inside
-the remaining room.
-
-The two halves are `abs_sum_crossScale_le` (the weight-split Cauchy–Schwarz that
-shifts one derivative from the forcing to the state) and
-`two_mul_sum_sameScale_le_sqrt` (the same-scale pairing of the static source); the
-only extra ingredient is one Young inequality on the mixed term `√E_{σ+1}·√E_σ`. -/
 theorem two_mul_sum_ladder_le
     (S : Finset (TensorEigenIdx (I := I) (M := M) g r s)) (σ : ℝ)
     (u fd fs f : TensorEigenIdx (I := I) (M := M) g r s → ℝ)
@@ -383,14 +361,12 @@ theorem two_mul_sum_ladder_le
   have hsE0 : 0 ≤ sE := Real.sqrt_nonneg _
   have hsA2 : sA ^ 2 = A := Real.sq_sqrt hA0
   have hsE2 : sE ^ 2 = Eσ := Real.sq_sqrt hE0
-  -- split the pairing into its difference and static halves
   have hsum : ∑ i ∈ S, tensorSobolevWeight (I := I) (M := M) i σ * (u i * f i) =
       (∑ i ∈ S, tensorSobolevWeight (I := I) (M := M) i σ * (u i * fd i)) +
         ∑ i ∈ S, tensorSobolevWeight (I := I) (M := M) i σ * (u i * fs i) := by
     rw [← Finset.sum_add_distrib]
     refine Finset.sum_congr rfl (fun i hi => ?_)
     rw [hsplit i hi]; ring
-  -- the difference half: Cauchy-Schwarz across scales, then the ladder, then Young
   have hcross : ∑ i ∈ S, tensorSobolevWeight (I := I) (M := M) i σ * (u i * fd i) ≤
       sA * Real.sqrt B :=
     le_trans (le_abs_self _) (abs_sum_crossScale_le (I := I) (M := M) S σ u fd)
@@ -415,7 +391,6 @@ theorem two_mul_sum_ladder_le
       have : sA * (α * sA + β * sE) = α * (sA ^ 2) + β * (sA * sE) := by ring
       rw [this, hsA2]
     nlinarith [hchain, hyoung]
-  -- the static half: same-scale pairing
   have hstatle := two_mul_sum_sameScale_le_sqrt (I := I) (M := M) S σ u fs hD hstat
   rw [← hEdef, ← hsEdef] at hstatle
   rw [hsum]
@@ -423,18 +398,6 @@ theorem two_mul_sum_ladder_le
 
 omit [CompactSpace M] in
 omit [NeZero (Module.finrank ℝ E)] in
-/-- **Parabolic energy closure from a ladder bound carrying an additive constant.**
-
-`two_mul_sum_ladder_le` with the ladder hypothesis widened by a constant term
-`γ`, i.e. `‖fd‖_{σ-1} ≤ α‖u‖_{σ+1} + β‖u‖_σ + γ`.  A low-regularity ladder
-produces such a `γ` whenever a Leibniz slot is priced by a fixed radius rather
-than by the state, so the closure must carry it.
-
-The extra term is absorbed by one further Young inequality
-`2γ√E_{σ+1} ≤ ε·E_{σ+1} + γ²/ε` at the *same* `ε` as the mixed term, so the
-dissipation constant is `2α + 2ε` — the absorption margin is available as soon
-as `α + ε < 1` — and the closure gains the additive slot `γ²/ε`, which the
-single-scale Grönwall engine consumes. -/
 theorem two_sum_ladder_add_le
     (S : Finset (TensorEigenIdx (I := I) (M := M) g r s)) (σ : ℝ)
     (u fd fs f : TensorEigenIdx (I := I) (M := M) g r s → ℝ)
@@ -490,7 +453,6 @@ theorem two_sum_ladder_add_le
     have hcancel : sε * (β / sε) = β := by field_simp
     rw [hcancel, hsε2, hsA2, hsE2] at hexpand
     nlinarith [sq_nonneg (sε * sA - (β / sε) * sE), hexpand]
-  -- the new Young step, at the same `ε`: `2γ·√A ≤ ε·A + γ²/ε`
   have hyoung' : 2 * γ * sA ≤ ε * A + γ ^ 2 / ε := by
     have hkey : ε * (ε * A + γ ^ 2 / ε - 2 * γ * sA) = (ε * sA - γ) ^ 2 := by
       rw [← hsA2]; field_simp; ring

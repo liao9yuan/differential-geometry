@@ -1,7 +1,6 @@
 import Mathlib.Geometry.Manifold.VectorBundle.Riemannian
 import Mathlib.Geometry.Manifold.VectorBundle.Tangent
 
-
 namespace DifferentialGeometry
 
 open Bundle
@@ -15,8 +14,6 @@ abbrev SmoothRiemannianMetric
     [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M] : Type _ :=
   Bundle.ContMDiffRiemannianMetric I ∞ E (TangentSpace I : M -> Type _)
 
-/-- Two smooth Riemannian metrics are equal when their fiberwise inner
-products agree. -/
 @[ext]
 theorem SmoothRiemannianMetric.ext_inner
     {I : ModelWithCorners Real E H}

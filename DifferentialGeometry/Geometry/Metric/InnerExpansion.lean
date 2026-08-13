@@ -5,26 +5,6 @@ import Mathlib.Analysis.InnerProductSpace.PiL2
 set_option autoImplicit false
 set_option linter.unusedSectionVars false
 
-/-!
-# Orthonormal expansion in a tangent fiber
-
-Fiber-level linear algebra for a `g`-orthonormal family in a tangent space:
-
-* `inner_sum_orthonormal` — the ℓ²-identity
-  `g.inner x (∑ cᵢ • vᵢ) (∑ cⱼ • vⱼ) = ∑ cᵢ²` (pure bilinearity of the
-  `ContinuousLinearMap`-valued metric; no instance transport needed);
-* `expand_orthonormal` — a `g`-orthonormal family of full cardinality spans:
-  `u = ∑ (g.inner x (vᵢ) u) • vᵢ` (via the `tangentMetricData_gen` inner-product
-  transport and `OrthonormalBasis.sum_repr'`);
-* `inner_self_eq_sum_sq` — the combination
-  `g.inner x u u = ∑ (g.inner x (vᵢ) u)²`.
-
-These serve the parallel-frame reduction of covariant ODEs along curves
-(`covDerivAlong_expand`): coefficients of a field in a parallel `g`-ON frame
-carry the full `g`-norm, so Grönwall estimates on the coefficient vector
-control the field. (MSM135 Chapter 4, Step A item 3a / Step B B0.)
--/
-
 noncomputable section
 
 namespace DifferentialGeometry
@@ -39,7 +19,6 @@ variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 
-/-- The metric length of a sum is at most the sum of the metric lengths. -/
 theorem sqrt_inner_add_le
     (g : SmoothRiemannianMetric I M) (x : M)
     (v w : TangentSpace I x) :
@@ -63,7 +42,6 @@ theorem sqrt_inner_add_le
   rw [hnorm, hnorm, hnorm]
   exact norm_add_le v w
 
-/-- Metric length is homogeneous under real scalar multiplication. -/
 theorem sqrt_inner_smul
     (g : SmoothRiemannianMetric I M) (x : M)
     (c : Real) (v : TangentSpace I x) :
@@ -86,9 +64,6 @@ theorem sqrt_inner_smul
       real_inner_self_eq_norm_sq, Real.sqrt_sq_eq_abs, abs_norm]
   rw [hnorm, hnorm, norm_smul, Real.norm_eq_abs]
 
-/-- **ℓ²-identity for a `g`-orthonormal family.**  The metric of a linear
-combination against itself collapses to the sum of squared coefficients.  Pure
-bilinearity: `g.inner x` is `ContinuousLinearMap`-valued in each slot. -/
 theorem inner_sum_orthonormal (g : SmoothRiemannianMetric I M) (x : M)
     {ι : Type*} [Fintype ι] [DecidableEq ι] (v : ι → TangentSpace I x)
     (hON : ∀ i j, g.inner x (v i) (v j) = if i = j then (1 : ℝ) else 0)
@@ -110,9 +85,6 @@ theorem inner_sum_orthonormal (g : SmoothRiemannianMetric I M) (x : M)
   refine Finset.sum_congr rfl fun i _ => ?_
   rw [ContinuousLinearMap.smul_apply, smul_eq_mul, hexp i, sq]
 
-/-- **Orthonormal expansion in a tangent fiber.**  A `g`-orthonormal family of
-full cardinality is an orthonormal basis, so every vector expands as
-`u = ∑ (g.inner x (vᵢ) u) • vᵢ`. -/
 theorem expand_orthonormal (g : SmoothRiemannianMetric I M) (x : M)
     {ι : Type*} [Fintype ι] [DecidableEq ι] [Nonempty ι]
     (hcard : Fintype.card ι = Module.finrank ℝ (TangentSpace I x))
@@ -149,8 +121,6 @@ theorem expand_orthonormal (g : SmoothRiemannianMetric I M) (x : M)
         refine Finset.sum_congr rfl fun i _ => ?_
         rw [hb i, hg]
 
-/-- **The `g`-norm² through a `g`-orthonormal family**: the coefficients of the
-orthonormal expansion carry the full metric. -/
 theorem inner_self_eq_sum_sq (g : SmoothRiemannianMetric I M) (x : M)
     {ι : Type*} [Fintype ι] [DecidableEq ι] [Nonempty ι]
     (hcard : Fintype.card ι = Module.finrank ℝ (TangentSpace I x))
@@ -164,4 +134,3 @@ theorem inner_self_eq_sum_sq (g : SmoothRiemannianMetric I M) (x : M)
 end Riemannian
 end Geometry
 end DifferentialGeometry
-

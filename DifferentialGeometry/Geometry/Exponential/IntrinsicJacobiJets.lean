@@ -7,14 +7,6 @@ import DifferentialGeometry.Geometry.Exponential.IntrinsicVelocity
 set_option autoImplicit false
 set_option linter.unusedSectionVars false
 
-/-!
-# Launch derivatives of intrinsic Jacobi fields
-
-This file starts the parameter-jet API for the complete intrinsic exponential.
-The basic family varies two launch directions and geodesic time jointly.  Its
-mixed launch derivatives commute by torsion-freeness.
--/
-
 noncomputable section
 
 open Bundle
@@ -38,8 +30,6 @@ variable [RiemannianBundle (fun x : M => TangentSpace I x)]
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-/-- The complete intrinsic geodesic family with two affine launch parameters
-and one time parameter. -/
 noncomputable def intrLaunch3
     [PseudoEMetricSpace M]
     [IsRiemannianManifold I M] [CompleteSpace M]
@@ -53,8 +43,6 @@ noncomputable def intrLaunch3
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-/-- The two-launch intrinsic geodesic family is jointly smooth in both launch
-parameters and time. -/
 theorem intrLaunch3_smooth
     [PseudoEMetricSpace M]
     [IsRiemannianManifold I M] [CompleteSpace M]
@@ -106,9 +94,6 @@ theorem intrLaunch3_smooth
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-/-- The second-launch derivative of the intrinsic three-parameter geodesic
-family, represented by the total derivative in the corresponding launch
-direction. -/
 noncomputable def intrLaunchJ
     [PseudoEMetricSpace M]
     [IsRiemannianManifold I M] [CompleteSpace M]
@@ -126,8 +111,6 @@ noncomputable def intrLaunchJ
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-/-- The second-launch Jacobi field is jointly smooth in the first launch
-parameter and geodesic time. -/
 theorem intrLaunchJ_smooth
     [PseudoEMetricSpace M]
     [IsRiemannianManifold I M] [CompleteSpace M]
@@ -183,8 +166,6 @@ theorem intrLaunchJ_smooth
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-/-- The covariant launch-parameter jet of the intrinsic Jacobi field. Order
-zero is the Jacobi field itself. -/
 noncomputable def intrLaunchJet
     [PseudoEMetricSpace M]
     [IsRiemannianManifold I M] [CompleteSpace M]
@@ -238,8 +219,6 @@ theorem intrLaunchJet_succ
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-/-- Every finite covariant launch jet of the intrinsic Jacobi field is jointly
-smooth in launch parameter and geodesic time. -/
 theorem intrLaunchJet_smooth
     [PseudoEMetricSpace M]
     [IsRiemannianManifold I M] [CompleteSpace M]
@@ -277,8 +256,6 @@ theorem intrLaunchJet_smooth
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-/-- The covariant derivative in the first launch parameter of the
-second-launch Jacobi field is jointly smooth with geodesic time. -/
 theorem intrLaunchMix_smooth
     [PseudoEMetricSpace M]
     [IsRiemannianManifold I M] [CompleteSpace M]
@@ -319,8 +296,6 @@ theorem intrLaunchMix_smooth
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-/-- The time covariant derivative of the mixed launch-Jacobi field is jointly
-smooth with the first launch parameter. -/
 theorem intrMixDeriv_smooth
     [PseudoEMetricSpace M]
     [IsRiemannianManifold I M] [CompleteSpace M]
@@ -365,8 +340,6 @@ theorem intrMixDeriv_smooth
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-/-- Applying the derivative of the intrinsic three-parameter launch to any
-fixed parameter direction gives a jointly smooth tangent field. -/
 theorem intrLaunchDir_smooth
     [PseudoEMetricSpace M]
     [IsRiemannianManifold I M] [CompleteSpace M]
@@ -423,8 +396,6 @@ theorem intrLaunchDir_smooth
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-/-- The total derivative in the first launch direction is the first partial
-velocity of the corresponding two-parameter family. -/
 theorem intrLaunchA_eq
     [PseudoEMetricSpace M]
     [IsRiemannianManifold I M] [CompleteSpace M]
@@ -476,8 +447,6 @@ theorem intrLaunchA_eq
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-/-- On the central launch slice, the first parameter velocity is the intrinsic
-Jacobi field launched by `a`. -/
 theorem intrLaunchA_zero
     [PseudoEMetricSpace M]
     [IsRiemannianManifold I M] [CompleteSpace M]
@@ -505,8 +474,6 @@ theorem intrLaunchA_zero
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-/-- The total derivative in the geodesic-time direction is the second partial
-velocity of the corresponding two-parameter family. -/
 theorem intrLaunchT_eq
     [PseudoEMetricSpace M]
     [IsRiemannianManifold I M] [CompleteSpace M]
@@ -558,8 +525,6 @@ theorem intrLaunchT_eq
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-/-- The bundled launch derivative agrees with the one-variable derivative used
-by the Jacobi-field API. -/
 theorem intrLaunchJ_eq
     [PseudoEMetricSpace M]
     [IsRiemannianManifold I M] [CompleteSpace M]
@@ -607,8 +572,6 @@ theorem intrLaunchJ_eq
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-/-- When the two affine launch directions agree, the first-parameter velocity
-is the bundled second-launch Jacobi field at every first parameter. -/
 theorem intrLaunchA_self
     [PseudoEMetricSpace M]
     [IsRiemannianManifold I M] [CompleteSpace M]
@@ -666,8 +629,6 @@ theorem intrLaunchA_self
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-/-- Iterating the first launch derivative of its velocity agrees with the
-existing intrinsic launch-Jacobi jet in the same direction. -/
 theorem intrAJet_self
     [PseudoEMetricSpace M]
     [IsRiemannianManifold I M] [CompleteSpace M]
@@ -698,8 +659,6 @@ theorem intrAJet_self
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-/-- The intrinsic launch-Jacobi field vanishes at geodesic time zero for every
-first launch parameter. -/
 theorem intrLaunchJ_time0
     [PseudoEMetricSpace M]
     [IsRiemannianManifold I M] [CompleteSpace M]
@@ -721,8 +680,6 @@ theorem intrLaunchJ_time0
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-/-- Every first-parameter jet of the intrinsic launch-Jacobi field vanishes at
-geodesic time zero. -/
 theorem intrLaunchJet_time0
     [PseudoEMetricSpace M]
     [IsRiemannianManifold I M] [CompleteSpace M]
@@ -742,8 +699,6 @@ theorem intrLaunchJet_time0
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-/-- The time derivative of the intrinsic launch-Jacobi field at geodesic time
-zero is its launch direction, uniformly in the first launch parameter. -/
 theorem intrLaunchDJ_time0
     [PseudoEMetricSpace M]
     [IsRiemannianManifold I M] [CompleteSpace M]
@@ -788,8 +743,6 @@ theorem intrLaunchDJ_time0
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-/-- At every first launch parameter, the second-parameter derivative is the
-intrinsic Jacobi field launched from the corresponding affine velocity. -/
 theorem intrLaunchJ_at
     [PseudoEMetricSpace M]
     [IsRiemannianManifold I M] [CompleteSpace M]
@@ -806,8 +759,6 @@ theorem intrLaunchJ_at
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-/-- On the central launch slice, the second parameter derivative is the
-intrinsic Jacobi field launched by `b`. -/
 theorem intrLaunchJ_zero
     [PseudoEMetricSpace M]
     [IsRiemannianManifold I M] [CompleteSpace M]
@@ -834,9 +785,6 @@ theorem intrLaunchJ_zero
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-/-- On the central launch slice, the time covariant derivative of the first
-parameter velocity is the covariant derivative of the corresponding intrinsic
-Jacobi field. -/
 theorem intrLaunchDA_zero
     [PseudoEMetricSpace M]
     [IsRiemannianManifold I M] [CompleteSpace M]
@@ -873,8 +821,6 @@ theorem intrLaunchDA_zero
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-/-- On the central launch slice, the time covariant derivative of the bundled
-second-launch field is the derivative of its intrinsic Jacobi field. -/
 theorem intrLaunchDJ_zero
     [PseudoEMetricSpace M]
     [IsRiemannianManifold I M] [CompleteSpace M]
@@ -912,8 +858,6 @@ theorem intrLaunchDJ_zero
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-/-- For every fixed first launch parameter, the second launch derivative is a
-Jacobi field along the corresponding complete intrinsic geodesic. -/
 theorem intrLaunch_jacobi
     [PseudoEMetricSpace M]
     [IsRiemannianManifold I M] [CompleteSpace M]
@@ -947,7 +891,6 @@ theorem intrLaunch_jacobi
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-/-- The covariant mixed launch derivative vanishes at geodesic time zero. -/
 theorem intrLaunch_mix_zero
     [PseudoEMetricSpace M]
     [IsRiemannianManifold I M] [CompleteSpace M]
@@ -998,8 +941,6 @@ theorem intrLaunch_mix_zero
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-/-- The covariant mixed derivatives in two affine launch directions commute
-at every geodesic time. -/
 theorem intrLaunch_commute
     [PseudoEMetricSpace M]
     [IsRiemannianManifold I M] [CompleteSpace M]
@@ -1046,8 +987,6 @@ theorem intrLaunch_commute
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-/-- The time covariant derivative of the mixed launch-Jacobi field also
-vanishes at geodesic time zero. -/
 theorem intrLaunch_dmix0
     [PseudoEMetricSpace M]
     [IsRiemannianManifold I M] [CompleteSpace M]
@@ -1187,8 +1126,6 @@ theorem intrLaunch_dmix0
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-/-- The first launch derivative of the intrinsic launch-Jacobi family satisfies
-the explicit inhomogeneous Jacobi equation. -/
 theorem intrLaunch_var_eq
     [PseudoEMetricSpace M]
     [IsRiemannianManifold I M] [CompleteSpace M]
@@ -1260,7 +1197,6 @@ theorem intrLaunch_var_eq
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-/-- The Jacobi residual of the `n`th intrinsic launch jet. -/
 noncomputable def intrJetResidual
     [PseudoEMetricSpace M]
     [IsRiemannianManifold I M] [CompleteSpace M]
@@ -1279,8 +1215,6 @@ noncomputable def intrJetResidual
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-/-- The lower-order correction in the residual recurrence for intrinsic launch
-jets. -/
 noncomputable def intrJetCorr
     [PseudoEMetricSpace M]
     [IsRiemannianManifold I M] [CompleteSpace M]
@@ -1299,8 +1233,6 @@ noncomputable def intrJetCorr
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-/-- The zeroth intrinsic launch jet is a Jacobi field, so its Jacobi residual
-vanishes. -/
 @[simp]
 theorem intrJetResidual_zero
     [PseudoEMetricSpace M]
@@ -1330,8 +1262,6 @@ theorem intrJetResidual_zero
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-/-- The curvature term in the Jacobi residual of every intrinsic launch jet is
-jointly smooth in launch parameter and time. -/
 theorem intrJetCurv_smooth
     [PseudoEMetricSpace M]
     [IsRiemannianManifold I M] [CompleteSpace M]
@@ -1388,8 +1318,6 @@ theorem intrJetCurv_smooth
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-/-- Intrinsic launch jets satisfy the exact finite-order Jacobi residual
-recurrence. -/
 theorem intrJetResidual_succ
     [PseudoEMetricSpace M]
     [IsRiemannianManifold I M] [CompleteSpace M]

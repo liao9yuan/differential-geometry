@@ -1,14 +1,6 @@
 import DifferentialGeometry.Geometry.Comparison.Volume.BishopPolarFramed
 import Mathlib.MeasureTheory.Measure.Lebesgue.VolumeOfBalls
 
-/-!
-# Local Bishop comparison for center-metric normal balls
-
-This file assembles the radial Jacobi comparison uniformly over the unit
-sphere in orthonormally framed normal coordinates.  It keeps every radius
-inside the selected normal source and does not use cut-time data.
--/
-
 noncomputable section
 
 open Filter Metric Set Bundle MeasureTheory
@@ -29,7 +21,6 @@ private lemma hypSn_scale (q δ t : Real) (hδ : δ ≠ 0) :
     rw [show (q * δ) * t = q * (δ * t) by ring]
     field_simp
 
-/-- Hyperbolic radial density scales with its degree under radial dilation. -/
 theorem hypDens_scale (q δ : Real) (d : Nat) (t : Real)
     (hδ : δ ≠ 0) :
     δ ^ d * hypDensity (q * δ) d t = hypDensity q d (δ * t) := by
@@ -266,11 +257,9 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
   [IsManifold I (⊤ : WithTop ℕ∞) M] [T2Space M] [SigmaCompactSpace M]
   [T2Space (TangentBundle I M)]
 
-/-- Hyperbolic radial model volume, without the sphere-area factor. -/
 def hypRadVol (q : Real) (d : Nat) (R : Real) : Real :=
   ∫ t in (0 : Real)..R, hypDensity q d t
 
-/-- The canonical sphere mass depends only on the real dimension. -/
 theorem volSphere_finrank
     [MeasurableSpace E] [BorelSpace E] :
     (volume : Measure E).toSphere Set.univ =
@@ -286,15 +275,12 @@ theorem volSphere_finrank
     InnerProductSpace.volume_ball, EuclideanSpace.volume_ball]
   simp only [finrank_euclideanSpace, Fintype.card_fin]
 
-/-- The hyperbolic radial model volume is positive at positive radius. -/
 theorem hypRadVol_pos {q R : Real} {d : Nat} (hq : 0 ≤ q) (hR : 0 < R) :
     0 < hypRadVol q d R := by
   exact intervalIntegral.intervalIntegral_pos_of_pos_on
     ((hypDen_continuous q d).intervalIntegrable (0 : Real) R)
     (fun t ht => hypDensity_pos hq ht.1) hR
 
-/-- The endpoint-normalized hyperbolic density has radial integral
-`hypRadVol` against the polar power measure. -/
 theorem hypRad_lintegral
     (q : Real) (hq : 0 ≤ q) (d : Nat) {R : Real} (hR : 0 < R) :
     (∫⁻ r : Ioi (0 : Real),
@@ -338,8 +324,6 @@ theorem hypRad_lintegral
   · filter_upwards [] with r
     exact ENNReal.ofReal_lt_top
 
-/-- The hyperbolic endpoint density integrates over a canonical Euclidean ball
-to the sphere mass times the radial model volume. -/
 theorem hypBall_lintegral
     [MeasurableSpace E] [BorelSpace E]
     (q : Real) (hq : 0 ≤ q) {R : Real} (hR : 0 < R) :
@@ -423,7 +407,6 @@ theorem hypBall_lintegral
         ENNReal.ofReal (hypRadVol q d R) := by
       rw [lintegral_const, one_mul, hrad]
 
-/-- Volume of a center-metric tangent ball under the framed normal map. -/
 def normalBallVolume (g : SmoothRiemannianMetric I M) (p : M)
     (R : Real) : ENNReal :=
   riemannianVolumeMeasure (I := I) (M := M) g
@@ -431,8 +414,6 @@ def normalBallVolume (g : SmoothRiemannianMetric I M) (p : M)
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-/-- On one center-dependent radius, every framed unit direction has an
-antitone ratio of its polar density to the hyperbolic model density. -/
 theorem exists_framed_ratio
     [PseudoEMetricSpace M] [RiemannianBundle (fun x : M => TangentSpace I x)]
     [IsRiemannianManifold I M] [CompleteSpace M] [ConnectedSpace M]
@@ -653,7 +634,6 @@ theorem exists_framed_ratio
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-/-- Local Bishop comparison for framed normal balls, in cross-multiplied form. -/
 theorem normalBall_cross
     [PseudoEMetricSpace M] [RiemannianBundle (fun x : M => TangentSpace I x)]
     [IsRiemannianManifold I M] [CompleteSpace M] [ConnectedSpace M]
@@ -764,8 +744,6 @@ theorem normalBall_cross
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-/-- The framed normal-ball volume divided by the hyperbolic model volume is
-antitone on one center-dependent interval. -/
 theorem normalBall_ratio
     [PseudoEMetricSpace M] [RiemannianBundle (fun x : M => TangentSpace I x)]
     [IsRiemannianManifold I M] [CompleteSpace M] [ConnectedSpace M]

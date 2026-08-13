@@ -1,25 +1,5 @@
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.DeTurckRemainderLowBaseAction
 
-/-!
-# The `k = 0` dissipation rung of the zero-based Ricci--DeTurck remainder
-
-On a closed three-manifold this module records the lowest rung of the
-supercritical dissipation ladder
-
-`‖N T - N 0‖_{H^{k+1}} ≤ Cδ₀ ‖T‖_{H^{k+3}} + C k ‖T‖_{H^{k+2}}`,  `Cδ₀ < 1`,
-
-at `k = 0`, i.e. an `H1`-output estimate whose top-order term is carried by the
-`H3` norm with a constant that is *smaller than one* on a sufficiently small
-spectral `H2` ball, and whose remaining term only costs the `H2` norm.
-
-The two summands are the canonical zero-based smooth-core split
-`N T - N 0 = a₂ T + a₁ T` of `lowData_split`: the small second-order action
-`a₂` supplies the top-order term (its coefficient is pointwise and two-jet
-small by `c2_h2_small`), and the genuinely first-order action `a₁` supplies the
-lower-order term (`a1_h2_h1` together with the coefficient envelope
-`lowData_a1_coeff`).
--/
-
 noncomputable section
 set_option backward.isDefEq.respectTransparency false
 
@@ -43,8 +23,6 @@ variable
       [IsManifold I ∞ M] [CompactSpace M] [I.Boundaryless]
       [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M]
 
-/-- The covariant `L²` jet square-sum through any order `n` is controlled by
-the spectral `H^n` norm.  This is the order-generic form of `hs2_low2`. -/
 private theorem jetSq_le_hs
     (g : SmoothRiemannianMetric I M) (s n : ℕ) :
     ∃ C : ℝ, 0 ≤ C ∧ ∀ T : SmoothCcTensor g 0 s,
@@ -58,21 +36,6 @@ private theorem jetSq_le_hs
     (Finset.sum_nonneg (fun _ _ => norm_nonneg _)) (hjet T) 2
 
 set_option linter.unusedVariables false in
-/-- **The `k = 0` rung of the low-regularity dissipation ladder.**
-
-In dimension three there is a spectral `H2` radius `ρ` and constants
-`Cδ₀ < 1`, `C₀`, such that every symmetric `T` lying in the `H2` ball of
-radius `ρ` and in the `H3` ball of radius `R₀` satisfies
-
-`‖N T - N 0‖_{H1} ≤ Cδ₀ ‖T‖_{H3} + C₀ ‖T‖_{H2}`,
-
-where `N` is the zero-based smooth Ricci--DeTurck remainder over the
-background `g₀`.  The top-order constant `Cδ₀` is smaller than one because it
-is proportional to the ball radius `ρ`; the remaining constant `C₀` depends on
-`R₀` only.
-
-The binders `hT` and `hδ0` are consumed by the proof, not by the statement,
-so the unused-variable linter is switched off for this declaration. -/
 theorem n_diff_h1_rung
     (hDim : Module.finrank ℝ E = 3)
     (g₀ : SmoothRiemannianMetric I M) (R₀ : ℝ) :
@@ -108,7 +71,6 @@ theorem n_diff_h1_rung
   obtain ⟨Csp, hCsp, hsp⟩ := hs_le_jet (I := I) (M := M) g₀ 2 1
   have hcc : (0 : ℝ) ≤ Capp * Cc2 := mul_nonneg hCapp hCc2
   have hden : (0 : ℝ) < 2 * (Capp * Cc2 + 1) := by linarith
-  -- the shrunken `H2` radius making the top-order constant a contraction
   obtain ⟨ρ, hρpos, hρ2le, hsmall⟩ :
       ∃ ρ : ℝ, 0 < ρ ∧ ρ ≤ ρ2 ∧ Capp * Cc2 * ρ < 1 := by
     refine ⟨min ρ2 (1 / (2 * (Capp * Cc2 + 1))),
@@ -120,7 +82,6 @@ theorem n_diff_h1_rung
       rw [mul_one_div, div_lt_one hden]
       linarith
     linarith
-  -- the `H3`-ball coefficient envelope of the first-order arm
   obtain ⟨B, hB0, hBsq⟩ :
       ∃ B : ℝ, 0 ≤ B ∧ Ka1 * (1 + (Chs3 * R₀) ^ 2) ^ 6 = B ^ 2 :=
     ⟨Real.sqrt (Ka1 * (1 + (Chs3 * R₀) ^ 2) ^ 6), Real.sqrt_nonneg _,
@@ -134,8 +95,6 @@ theorem n_diff_h1_rung
     norm_nonneg _
   have hN3 : (0 : ℝ) ≤ ‖ccTensorToHs (I := I) (M := M) g₀ 2 (3 : ℝ) T‖ :=
     norm_nonneg _
-  -- the canonical zero-based smooth-core split, with its coefficient data made
-  -- opaque so that no later step unfolds the path-integral witnesses
   obtain ⟨A, hsplitA, hc2pt, hc2jet, hcoefT⟩ :
       ∃ A : LowBaseActionData g₀,
         deTurckSmoothRemainder (I := I) g₀ g₀ T
@@ -158,7 +117,6 @@ theorem n_diff_h1_rung
       (hc2 T hT hδ_le hδ0 hδ hδZ (R := ρ) hρpos.le hρ2le hball2).2,
       hcoef T hT hδ_le hδ0 hδ hδZ⟩
   rw [hsplitA]
-  -- the top-order arm is a contraction on the `H2` ball
   have ha2 :
       ‖ccTensorToHs (I := I) (M := M) g₀ 2 (1 : ℝ)
           (A.a2 (I := I) (M := M) T)‖ ≤
@@ -173,7 +131,6 @@ theorem n_diff_h1_rung
             ‖ccTensorToHs (I := I) (M := M) g₀ 2 (3 : ℝ) T‖ := hb
       _ = Capp * Cc2 * ρ *
             ‖ccTensorToHs (I := I) (M := M) g₀ 2 (3 : ℝ) T‖ := by ring
-  -- jet control of the state from the two spectral balls
   have hjet2T :
       lowJetSq (I := I) (M := M) g₀ 2 T ≤
         (Chs2 * ‖ccTensorToHs (I := I) (M := M) g₀ 2 (2 : ℝ) T‖) ^ 2 := by
@@ -189,7 +146,6 @@ theorem n_diff_h1_rung
   have hjnn : (0 : ℝ) ≤ lowJetSq (I := I) (M := M) g₀ 3 T := by
     simp only [lowJetSq]
     exact Finset.sum_nonneg (fun _ _ => sq_nonneg _)
-  -- the first-order coefficient envelope on the `H3` ball
   have hcoefB :
       lowJetSq (I := I) (M := M) g₀ 2 A.C0 +
         lowJetSq (I := I) (M := M) g₀ 2 A.C1 ≤ B ^ 2 := by
@@ -197,7 +153,6 @@ theorem n_diff_h1_rung
     rw [← hBsq]
     refine mul_le_mul_of_nonneg_left (pow_le_pow_left₀ (by linarith) ?_ 6) hKa1
     linarith
-  -- the first-order arm only costs the `H2` norm
   have hX : (0 : ℝ) ≤
       Ca1 * B * (Chs2 * ‖ccTensorToHs (I := I) (M := M) g₀ 2 (2 : ℝ) T‖) :=
     mul_nonneg (mul_nonneg hCa1 hB0) (mul_nonneg hChs2 hN2)
@@ -256,7 +211,6 @@ theorem n_diff_h1_rung
         mul_le_mul_of_nonneg_left hsum hCsp
       _ = 2 * Csp * Ca1 * B * Chs2 *
             ‖ccTensorToHs (I := I) (M := M) g₀ 2 (2 : ℝ) T‖ := by ring
-  -- assemble
   rw [ccTensorToHs_add (I := I) (M := M) g₀ 2 (1 : ℝ)]
   exact (norm_add_le _ _).trans (add_le_add ha2 ha1norm)
 

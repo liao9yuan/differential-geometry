@@ -7,7 +7,6 @@ import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.NonlinearitySpec
 import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.RiemannianFiberNormSq.RiemannianFiberNormSqRiemannOpVWFactorBound
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.SingleSlotOperatorFiberNormBound
 
-
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
@@ -67,7 +66,6 @@ def smoothCcTensorBilinForm (g : SmoothRiemannianMetric I M)
     TangentSpace I x →L[ℝ] TangentSpace I x →L[ℝ] ℝ :=
   (bilinFormToModel E).symm (ccTensorModel (I := I) g T x)
 
-/-- Compatibility name for the continuous bilinear form underlying a covariant two-tensor. -/
 abbrev ccTensorBilin (g : SmoothRiemannianMetric I M)
     (T : SmoothCcTensor g 0 2) (x : M) :
     TangentSpace I x →L[ℝ] TangentSpace I x →L[ℝ] ℝ :=

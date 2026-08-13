@@ -4,14 +4,6 @@ import DifferentialGeometry.Geometry.Exponential.IntrinsicFramedCoordinates
 
 set_option autoImplicit false
 
-/-!
-# Jacobi formula for intrinsic framed coordinates
-
-This file identifies the differential of the total intrinsic framed
-exponential with the canonical intrinsic Jacobi field. It then evaluates the
-induced pullback metric through those endpoint Jacobi fields.
--/
-
 noncomputable section
 
 open Bundle
@@ -38,8 +30,6 @@ variable {M : Type u} [TopologicalSpace M] [ChartedSpace H M]
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
 omit [ConnectedSpace M] [CompleteSpace E] [T2Space (TangentBundle I M)] in
-/-- The differential of the total intrinsic framed exponential is the
-endpoint intrinsic Jacobi field with normal-frame initial direction. -/
 theorem intrFrame_deriv
     [PseudoEMetricSpace M]
     [RiemannianBundle (fun x : M => TangentSpace I x)]
@@ -60,8 +50,6 @@ theorem intrFrame_deriv
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
 omit [ConnectedSpace M] [CompleteSpace E] [T2Space (TangentBundle I M)] in
-/-- The intrinsic framed pullback metric is the endpoint Gram form of the
-canonical intrinsic Jacobi fields. -/
 theorem intr_metric_jacobi
     [PseudoEMetricSpace M]
     [RiemannianBundle (fun x : M => TangentSpace I x)]
@@ -84,8 +72,6 @@ theorem intr_metric_jacobi
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
 omit [ConnectedSpace M] [CompleteSpace E] [T2Space (TangentBundle I M)] in
-/-- A positive lower bound for the intrinsic framed pullback metric makes the
-endpoint differential injective. -/
 theorem intrFrame_deriv_inj
     [PseudoEMetricSpace M]
     [RiemannianBundle (fun x : M => TangentSpace I x)]
@@ -128,8 +114,6 @@ theorem intrFrame_deriv_inj
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
 omit [ConnectedSpace M] [CompleteSpace E] [T2Space (TangentBundle I M)] in
-/-- A positive lower bound for the intrinsic framed pullback metric excludes
-conjugacy at the corresponding intrinsic launch vector. -/
 theorem intrFrame_not_conj
     [PseudoEMetricSpace M]
     [RiemannianBundle (fun x : M => TangentSpace I x)]

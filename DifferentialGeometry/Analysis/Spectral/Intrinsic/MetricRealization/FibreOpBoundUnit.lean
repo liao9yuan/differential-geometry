@@ -6,13 +6,6 @@ import DifferentialGeometry.Tensor.RSTensor.QuadraticBounds.Unit
 set_option autoImplicit false
 set_option linter.style.longLine false
 
-/-!
-# Fibre operator bounds from unit quadratic bounds
-
-A symmetric bilinear field controlled on unit vectors is controlled in the
-intrinsic fibre operator norm by polarization.
--/
-
 noncomputable section
 
 open Bundle Tensor0SBundle
@@ -30,8 +23,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
   [IsManifold I ∞ M]
 
 omit [FiniteDimensional ℝ E] in
-/-- A uniform unit-vector bound for a symmetric bilinear field implies the
-intrinsic fibre operator bound with the same constant. -/
 theorem gOpBound_unitQuad
     (q : SmoothRiemannianMetric I M)
     (A : ∀ x : M, TangentSpace I x →L[ℝ]

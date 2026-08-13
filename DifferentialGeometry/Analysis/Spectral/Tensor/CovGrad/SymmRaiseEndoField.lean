@@ -2,15 +2,6 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.RaisedKoszulCometri
 import DifferentialGeometry.Geometry.Metric.ChartGram
 import DifferentialGeometry.Geometry.Operator.MetricSharpSmooth
 
-/-!
-# Fixed-background raising of a symmetric two-tensor
-
-This file packages the tangent endomorphism obtained by raising one slot of a
-smooth symmetric two-tensor with a fixed Riemannian metric.  It is the
-linear, fixed-background coefficient used by low-regularity principal
-operators.
--/
-
 noncomputable section
 
 set_option linter.style.setOption false
@@ -43,8 +34,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
-/-- Raise the second slot of a smooth symmetric two-tensor with the fixed
-background metric. -/
 noncomputable def symmRaiseEndoFib (g : SmoothRiemannianMetric I M)
     (T : SmoothCcTensor g 0 2) (x : M) :
     TangentSpace I x →L[ℝ] TangentSpace I x :=
@@ -86,7 +75,6 @@ omit [BoundarylessManifold I M] in
   rfl
 
 omit [BoundarylessManifold I M] in
-/-- The raised endomorphism represents the symmetrized bilinear form. -/
 lemma inner_symmRaiseEndo (g : SmoothRiemannianMetric I M)
     (T : SmoothCcTensor g 0 2) (x : M) (v w : TangentSpace I x) :
     g.inner x (symmRaiseEndoFib (I := I) (M := M) g T x v) w =
@@ -151,7 +139,6 @@ private theorem symmRaiseEndo_smooth (g : SmoothRiemannianMetric I M)
       (symmRaiseEndoFib (I := I) (M := M) g T x (Y x))
   rw [symmRaiseEndoFib_apply]
 
-/-- The smooth fixed-background raised endomorphism field. -/
 noncomputable def symmRaiseEndo (g : SmoothRiemannianMetric I M)
     (T : SmoothCcTensor g 0 2) :
     ContMDiffSection I (E →L[ℝ] E) ∞
@@ -194,7 +181,6 @@ private lemma ccBilinSymm_add (g : SmoothRiemannianMetric I M)
     ContinuousMultilinearMap.add_apply]
   ring
 
-/-- Fixed-background raising is additive in the covariant tensor. -/
 lemma symmRaiseEndo_add (g : SmoothRiemannianMetric I M)
     (T U : SmoothCcTensor g 0 2) :
     symmRaiseEndo (I := I) (M := M) g (T + U) =
@@ -218,7 +204,6 @@ lemma symmRaiseEndo_add (g : SmoothRiemannianMetric I M)
   rw [ContinuousLinearMap.add_apply, ccBilinSymm_add]
   rw [inner_symmRaiseEndo, inner_symmRaiseEndo]
 
-/-- Fixed-background raising commutes with scalar multiplication. -/
 lemma symmRaiseEndo_smul (g : SmoothRiemannianMetric I M) (a : ℝ)
     (T : SmoothCcTensor g 0 2) :
     symmRaiseEndo (I := I) (M := M) g (a • T) =
@@ -276,8 +261,6 @@ private lemma toModel_om_single (x : M) (om : Tensor0SSpace 1 I x)
   rw [cotangentToDual_apply]
   rfl
 
-/-- At rank one, inserting the raised endomorphism is the fixed-background
-cometric raise of the symmetrized covariant tensor. -/
 lemma insert_symmRaise_eq (g : SmoothRiemannianMetric I M)
     (T : SmoothCcTensor g 0 2) :
     slotInsertEndoCc (I := I) (M := M) g 0

@@ -2,15 +2,6 @@ import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.PrincipalResidua
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.DeTurckRemainderLowBaseC1Lip
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.DeTurckRemainderLowBasePair
 
-/-!
-# Pairwise low-base Ricci--DeTurck remainder
-
-This module records the exact coefficient difference which remains after
-subtracting the complete canonical second-order low-base action.  It does not
-replace the missing fixed-order coefficient-difference estimate by an
-assumption.
--/
-
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
@@ -39,8 +30,6 @@ variable
       [IsManifold I ∞ M] [CompactSpace M] [I.Boundaryless]
       [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M]
 
-/-- Difference of the first-order coefficients of two low-base action data
-bundles.  Its second-order coefficient is exactly zero. -/
 noncomputable def LowBaseActionData.a1Sub
     {g : SmoothRiemannianMetric I M}
     (A B : LowBaseActionData g) : LowBaseActionData g where
@@ -62,8 +51,6 @@ private theorem app_sub_right
   rw [hneg]
   rfl
 
-/-- The canonical difference of the zero-based low-base first-order
-coefficients at two perturbations. -/
 noncomputable def lowBaseDiff
     (g : SmoothRiemannianMetric I M)
     (T U : SmoothCcTensor g 0 2)
@@ -79,8 +66,6 @@ noncomputable def lowBaseDiff
   (lowBaseData (I := I) (M := M) g g T hδ_lt hδT hδZ).a1Sub
     (lowBaseData (I := I) (M := M) g g U hδ_lt hδU hδZ)
 
-/-- Pointwise splitting of the radial order-one coefficient difference into
-its Ricci connection-difference and DeTurck--Lie arms. -/
 theorem rhsLow1_sub
     (g : SmoothRiemannianMetric I M)
     (T U : SmoothCcTensor g 0 2)
@@ -107,9 +92,6 @@ theorem rhsLow1_sub
   simp only [rhsLow1Coeff, smul_sub]
   abel
 
-/-- The integrated difference of the two radial order-one coefficient
-families.  This is the exact pairwise producer underlying the `C1` component
-of `lowBaseDiff`. -/
 noncomputable def lowC1Diff
     (g : SmoothRiemannianMetric I M)
     (T U : SmoothCcTensor g 0 2)
@@ -135,8 +117,6 @@ noncomputable def lowC1Diff
       (rhsLow1_path_joint (I := I) (M := M) g g T 0 hδT hδZ)
       (rhsLow1_path_joint (I := I) (M := M) g g U 0 hδU hδZ))
 
-/-- The `C1` coefficient difference in the canonical low-base data is exactly
-the path integral of the pointwise radial-family difference. -/
 theorem lowC1_sub
     (g : SmoothRiemannianMetric I M)
     (T U : SmoothCcTensor g 0 2)
@@ -191,9 +171,6 @@ theorem lowC1_sub
     ContMDiffSection.coe_sub, Pi.sub_apply, TensorRSSpace.toModel_sub]
   rw [intervalIntegral.integral_sub hTint hUint]
 
-/-- The integrated difference of the two transparent zero-arm self-action
-families.  The fixed background-curvature coefficient is not part of this
-difference. -/
 noncomputable def lowC0Diff
     (g : SmoothRiemannianMetric I M)
     (T U : SmoothCcTensor g 0 2)
@@ -290,8 +267,6 @@ private theorem selfLow_parts
       simp only [sub_self, zero_add, add_zero]
       abel
 
-/-- The `C0` coefficient difference in the canonical low-base data is exactly
-the path integral of the transparent zero-arm family difference. -/
 theorem lowC0_sub
     (g : SmoothRiemannianMetric I M)
     (T U : SmoothCcTensor g 0 2)
@@ -370,8 +345,6 @@ theorem lowC0_sub
     _ = lowC0Diff (I := I) (M := M)
         g T U hδ_lt hδT hδU hδZ := hInt
 
-/-- The `C1` projection of the canonical pairwise bundle is the explicit
-path-integrated family difference. -/
 theorem lowBaseDiff_c1
     (g : SmoothRiemannianMetric I M)
     (T U : SmoothCcTensor g 0 2)
@@ -390,8 +363,6 @@ theorem lowBaseDiff_c1
   simpa only [lowBaseDiff, LowBaseActionData.a1Sub] using
     lowC1_sub (I := I) (M := M) g T U hδ_lt hδT hδU hδZ
 
-/-- The `C0` projection of the canonical pairwise bundle is the explicit
-path-integrated transparent self-action difference. -/
 theorem lowBaseDiff_c0
     (g : SmoothRiemannianMetric I M)
     (T U : SmoothCcTensor g 0 2)
@@ -410,9 +381,6 @@ theorem lowBaseDiff_c0
   simpa only [lowBaseDiff, LowBaseActionData.a1Sub] using
     lowC0_sub (I := I) (M := M) g T U hδ_lt hδT hδU hδZ
 
-/-- Radius-free H2 Lipschitz control in the explicit perturbation slot of the
-moving-lowering correction.  This is one genuine telescope arm in the
-pairwise `C0` coefficient difference. -/
 theorem metricCorr_sub_h2
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M) :
@@ -432,9 +400,6 @@ theorem metricCorr_sub_h2
   rw [← metricCorr_sub (I := I) (M := M) g g₁ g_bg P Q]
   simpa only [lowJetSq, Nat.reduceAdd] using hmul g₁ g_bg (P - Q)
 
-/-- Exact two-slot telescope for the moving-lowering correction.  The first
-summand is controlled by `metricCorr_sub_h2`; the second isolates the remaining
-moving-metric coefficient difference. -/
 theorem metricCorr_tel
     (g gT gU g_bg : SmoothRiemannianMetric I M)
     (T U : SmoothCcTensor g 0 2) :
@@ -447,8 +412,6 @@ theorem metricCorr_tel
   abel
 
 omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
-/-- The fixed DeTurck background cancels from the pairwise difference of the
-background-lowered connection arm. -/
 theorem wXi_sub
     (g gT gU g_bg : SmoothRiemannianMetric I M) :
     wXi (I := I) (M := M) g gT g_bg -
@@ -516,8 +479,6 @@ private theorem jet_add_lip
 
 set_option maxHeartbeats 1800000 in
 set_option synthInstance.maxHeartbeats 1800000 in
-/-- On a common spectral `H²` ball, the path-integrated order-one
-Ricci--DeTurck coefficient has the critical `H³/H²` two-arm modulus. -/
 theorem c1Diff_tame
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M) :
@@ -768,9 +729,6 @@ private theorem riemLive_eq
       (I := I) (M := M) g gm 2 x).symm
 
 set_option maxHeartbeats 1800000 in
-/-- The curvature passenger in the transparent zero-arm decomposition is
-locally `H²`-Lipschitz in the moving metric, with only an `H²` state
-difference on the right. -/
 theorem riem_pair_h2
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M) :
@@ -1000,8 +958,6 @@ private theorem lieArm2_jet1_le
       rw [Finset.mul_sum]
 
 set_option linter.unusedVariables false in
-/-- The lifted connection arm in the covariant-derivative residual preserves
-the critical two-state `H²` modulus of the underlying connection difference. -/
 theorem lieArm2_pair_h2
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M) :
@@ -1076,8 +1032,6 @@ theorem lieArm2_pair_h2
       ring
 
 set_option linter.unusedVariables false in
-/-- At the low endpoint, the lifted connection arm is Lipschitz in the
-metric `H²` difference; no `H³` difference is required. -/
 theorem lieArm2_pair_h1
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M) :
@@ -1151,9 +1105,6 @@ theorem lieArm2_pair_h1
       ring
 
 set_option maxHeartbeats 1600000 in
-/-- Complete radius-free H2 telescope for the two-state moving-lowering
-correction.  The sole remaining pairwise geometric factor is the H2
-difference of the two `wXi` connection coefficients. -/
 theorem metricCorr_pair
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M) :
@@ -1279,9 +1230,6 @@ private theorem wXi_zero_lip
   rfl
 
 set_option linter.unusedVariables false in
-/-- On a common fibre-small metric neighborhood, the complete two-state
-moving-lowering correction is `H²`-Lipschitz with polynomial dependence on
-the two `H³` state jets. -/
 theorem metricCorr_pair_h3
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M) :
@@ -1625,8 +1573,6 @@ private theorem lieArm2_self_le
       rw [Finset.mul_sum]
 
 set_option linter.unusedVariables false in
-/-- A lifted connection arm is controlled by the low `H²` radius and the
-endpoint `H³` size. -/
 theorem lieArm2_bdd_h2
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M) :
@@ -2107,8 +2053,6 @@ private theorem dom_h1_lip
     riemannianFiberNormSq_iteratedCovGrad_domDomCongrSection
       (I := I) (M := M) g σ S q x
 
-/-- Narrow `H¹` form of the two-state Riemann-pass modulus: the `H¹` jet of
-the `lc0Riem` difference is controlled by the same `H²`-difference norm. -/
 theorem riem_pair_h1
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M) :
@@ -2234,8 +2178,6 @@ private theorem omega_pair_h1
 
 set_option maxHeartbeats 1600000 in
 set_option linter.unusedVariables false in
-/-- The reverse-raised connection product in the Lie zero-head has the
-two-state `H¹` modulus with only the `H²` state difference `D2`. -/
 theorem lieOmega_pair_h1
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M) :
@@ -3488,7 +3430,6 @@ private theorem armSlot_sub_lip
       ContinuousMultilinearMap.sub_apply]
   rw [hLHS, hRHS, show ((A - B) x) = A x - B x from rfl, hfib]
 
-
 private theorem armU_bdd_h2
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M) :
@@ -3713,8 +3654,6 @@ private theorem lcvPair_h2_bdd
 
 set_option maxHeartbeats 1600000 in
 set_option linter.unusedVariables false in
-/-- The reverse-raised connection product in the Lie zero-head has the
-critical two-state `H²` modulus. -/
 theorem lieOmega_pair_h2
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M) :
@@ -3894,8 +3833,6 @@ theorem lieOmega_pair_h2
     _ = (B0 R * D3 + B1 R * D2 + B1 R * A * D2) ^ 2 := rfl
 
 set_option linter.unusedVariables false in
-/-- A single reverse-raised connection product is controlled by the low
-`H²` radius and the endpoint `H³` size. -/
 theorem lieOmega_bdd_h2
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M) :
@@ -3984,9 +3921,6 @@ theorem lieOmega_bdd_h2
       ring
 
 set_option linter.unusedVariables false in
-/-- The complete moving-lowering correction has the critical two-state tame
-estimate: the `H³` difference is multiplied only by the common `H²` radius,
-whereas endpoint `H³` size multiplies only the `H²` difference. -/
 private theorem hat_bdd_h2
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M) :
@@ -5556,10 +5490,6 @@ private theorem vbmcd_sub_h1_lip
 set_option maxHeartbeats 3200000 in
 set_option synthInstance.maxHeartbeats 1000000 in
 set_option linter.unusedVariables false in
-/-- **Class 3 of the C0 `H¹` five-class telescope.**  On a common spectral `H²` ball the
-vector--bilinear zeroth-order DeTurck correction `lc0VB` is `H¹`-Lipschitz along the
-realized family, with only the `H²` state difference `D2` and the `Hˢ` difference `N`
-on the right and the third-jet size `A` entering polynomially. -/
 private theorem vb_pair_h1
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M) :
@@ -5596,7 +5526,7 @@ private theorem vb_pair_h1
             lc0VB (I := I) (M := M) g
               (realizedFam (I := I) g U 0 hδU hδZ s)) ≤
         B R * ((1 + A + A ^ 2) ^ 4 * (D2 ^ 2 + N ^ 2)) := by
-  -- ## product moduli
+
   obtain ⟨Cout, hCout, happOut⟩ :=
     app_h21_mul_lip (I := I) (M := M) hDim g 2 4 2
   obtain ⟨Cin1, hCin1, happIn1⟩ :=
@@ -5611,11 +5541,11 @@ private theorem vb_pair_h1
     app_h21_mul_lip (I := I) (M := M) hDim g 0 3 1
   obtain ⟨Cw2, hCw2, happW2⟩ :=
     app_h2_mul_lip (I := I) (M := M) hDim g 0 3 1
-  -- ## factor moduli
+
   obtain ⟨ρt1, Ct1, hρt1, hCt1, htp1⟩ :=
-    LowBaseInternal.trace1_pair_h2 (I := I) (M := M) hDim g      -- (M1)
+    LowBaseInternal.trace1_pair_h2 (I := I) (M := M) hDim g
   obtain ⟨ρb1, Bt1, hρb1, hBt1, htb1⟩ :=
-    LowBaseInternal.trace1_h2_bdd (I := I) (M := M) hDim g       -- (M2)
+    LowBaseInternal.trace1_h2_bdd (I := I) (M := M) hDim g
   obtain ⟨ρt2, Ct2, hρt2, hCt2, htp2⟩ :=
     LowBaseInternal.trace2_pair_h2 (I := I) (M := M) hDim g
   obtain ⟨ρb2, Bt2, hρb2, hBt2, htb2⟩ :=
@@ -5631,7 +5561,7 @@ private theorem vb_pair_h1
       (δ₀ := (1 : ℝ) / 3) (by norm_num) (by norm_num)
   obtain ⟨Bs, hBs, hwxib⟩ :=
     wXi_self_tame (I := I) (M := M) hDim g
-  -- ## fixed scalars
+
   set fr : ℝ := (Module.finrank ℝ E : ℝ) with hfrdef
   have hfr : 0 ≤ fr := Nat.cast_nonneg _
   set Jp : ℝ := lowJetSq (I := I) (M := M) g 2 (ipHead (I := I) (M := M) g)
@@ -5640,7 +5570,7 @@ private theorem vb_pair_h1
   set ρ : ℝ := min (min ρt1 ρb1) (min ρt2 ρb2) with hρdef
   have hρ0 : 0 < ρ :=
     lt_min (lt_min hρt1 hρb1) (lt_min hρt2 hρb2)
-  -- ## constant ladder
+
   let Wb : ℝ → ℝ := fun R => Cw2 * Bt1 ^ 2 * (Bs R) ^ 2
   let Wm : ℝ → ℝ := fun R =>
     2 * (Cw1 * Ct1 ^ 2 * (Bs R) ^ 2 +
@@ -5690,9 +5620,7 @@ private theorem vb_pair_h1
     linarith
   intro T U hT hU δ hδ_le hδ0 hδT hδU hδZ
     R A D2 N hR hA hD2 hN hT2 hU2 hT3 hU3 hTU2 hTn hUn hTUn s hs
-  ------------------------------------------------------------------
-  -- ## standard plumbing block (verbatim from `amixHalf_pair_h1`)
-  ------------------------------------------------------------------
+
   have hδ_lt : δ < 1 := lt_of_le_of_lt hδ_le (by norm_num)
   set gmT : SmoothRiemannianMetric I M :=
     realizedFam (I := I) g T 0 hδT hδZ s with hgmT
@@ -5792,9 +5720,7 @@ private theorem vb_pair_h1
     rw [hPQ, ccTensorToHs_smul, norm_smul]
     exact (mul_le_mul_of_nonneg_right hsabs (norm_nonneg _)).trans
       (by simpa using hTUn)
-  ------------------------------------------------------------------
-  -- ## polynomial bookkeeping
-  ------------------------------------------------------------------
+
   set pl2 : ℝ := (1 + A + A ^ 2) ^ 2 with hpl2
   have hb1 : (1 : ℝ) ≤ 1 + A + A ^ 2 := by nlinarith [hA, sq_nonneg A]
   have hpl21 : (1 : ℝ) ≤ pl2 := by
@@ -5826,7 +5752,7 @@ private theorem vb_pair_h1
       have : D2 ^ 2 ≤ D2 ^ 2 + N ^ 2 := by nlinarith [sq_nonneg N]
       exact mul_le_mul_of_nonneg_left this hpl20
     linarith
-  -- the `(B0·D2 + B1·A·D2)² ≤ (2B0² + 2B1²)·(pl2·u)` folding, used twice
+
   have hpairfold : ∀ b0 b1 : ℝ,
       (b0 * D2 + b1 * A * D2) ^ 2 ≤
         (2 * b0 ^ 2 + 2 * b1 ^ 2) * (pl2 * u) := by
@@ -5840,9 +5766,7 @@ private theorem vb_pair_h1
     have e2 : 2 * b1 ^ 2 * (A ^ 2 * D2 ^ 2) ≤ 2 * b1 ^ 2 * (pl2 * u) :=
       mul_le_mul_of_nonneg_left hA2D (by positivity)
     linarith
-  ------------------------------------------------------------------
-  -- ## the moving factors
-  ------------------------------------------------------------------
+
   set mcdT : SmoothCcTensor g 0 3 :=
     metricConnDiffLoweredCc (I := I) (M := M) g gmT g with hmT
   set mcdU : SmoothCcTensor g 0 3 :=
@@ -5869,9 +5793,7 @@ private theorem vb_pair_h1
     ccOperatorFieldComp (I := I) (M := M) g 2 1 4 VmT IpT with hInT
   set InU : SmoothCcTensor g 2 4 :=
     ccOperatorFieldComp (I := I) (M := M) g 2 1 4 VmU IpU with hInU
-  ------------------------------------------------------------------
-  -- ## trace moduli (ρ-cascade), verbatim shape from `amixHalf_pair_h1`
-  ------------------------------------------------------------------
+
   have hρc : ρ ≤ ρt1 ∧ ρ ≤ ρb1 ∧ ρ ≤ ρt2 ∧ ρ ≤ ρb2 := by
     refine ⟨?_, ?_, ?_, ?_⟩ <;>
       · rw [hρdef]
@@ -5934,9 +5856,7 @@ private theorem vb_pair_h1
   have htb1' := htrb 1 Bt1 ρb1 htb1 hρc.2.1
   have htp2' := htrp 2 Ct2 ρt2 htp2 hCt2 hρc.2.2.1
   have htb2' := htrb 2 Bt2 ρb2 htb2 hρc.2.2.2
-  ------------------------------------------------------------------
-  -- ## mcd / connection-difference moduli
-  ------------------------------------------------------------------
+
   have hmbT : lowJetSq (I := I) (M := M) g 2 mcdT ≤ (Bm R) ^ 2 * (2 * pl2) := by
     rw [hmT]
     refine (hmcdb gmT P hPsymm hPtie hδ_le hδ0 hδP R A hR hA hP2 hP3).trans ?_
@@ -5955,7 +5875,7 @@ private theorem vb_pair_h1
     exact (hmcdp gmT gmU P Q hPsymm hQsymm hPtie hQtie
       hδ_le hδ0 hδP hδ_le hδ0 hδQ R A D2 hR hA hD2 hQ2 hP3 hPQ2).trans
       (hpairfold (B0m R) (B1m R))
-  -- `connDiffLoweredCc` via `wXi_self_eq`
+
   have hcdT2 : lowJetSq (I := I) (M := M) g 2 cdT ≤ (Bs R) ^ 2 * pl2 := by
     rw [hcdT, ← wXi_self_eq (I := I) (M := M) g gmT]
     refine (hwxib gmT P hPsymm hPtie hδ_le hδ0 hδP hδZ R A hR hA hP2 hP3).trans ?_
@@ -5971,9 +5891,7 @@ private theorem vb_pair_h1
     exact (hwxip gmT gmU g P Q hPsymm hQsymm hPtie hQtie
       hδ_le hδ0 hδP hδ_le hδ0 hδQ R A D2 hR hA hD2 hQ2 hP3 hPQ2).trans
       (hpairfold (W0 R) (W1 R))
-  ------------------------------------------------------------------
-  -- ## level ω : `wOmega`
-  ------------------------------------------------------------------
+
   have hTr1U2 : lowJetSq (I := I) (M := M) g 2 Tr1U ≤ Bt1 ^ 2 := by
     rw [hTr1U, trPair_jet_lip]
     exact htb1'.2
@@ -6040,9 +5958,7 @@ private theorem vb_pair_h1
             Cw1 * Bt1 ^ 2 * (2 * (W0 R) ^ 2 + 2 * (W1 R) ^ 2) * (pl2 * u)) := by
         linarith [h1, h2]
       _ = Wm R * (pl2 * u) := by simp only [Wm]; ring
-  ------------------------------------------------------------------
-  -- ## level ip : `ipLowCc`
-  ------------------------------------------------------------------
+
   have hIpT2 : lowJetSq (I := I) (M := M) g 2 IpT ≤ Ib R * pl2 := by
     rw [hIpT, ip_form_lip]
     refine (happIp2 (ipHead (I := I) (M := M) g) _).trans ?_
@@ -6089,9 +6005,7 @@ private theorem vb_pair_h1
           (jet_nonneg_lip (I := I) (M := M) (m := 1) g _)
           (mul_nonneg hCip1 hJp)
       _ = Im R * (pl2 * u) := by simp only [Im]; ring
-  ------------------------------------------------------------------
-  -- ## level vbMcd
-  ------------------------------------------------------------------
+
   have hVmT2 : lowJetSq (I := I) (M := M) g 2 VmT ≤ Vb R * pl2 := by
     rw [hVmT]
     refine (vbmcd_h2_lip (I := I) (M := M) g gmT).trans ?_
@@ -6126,9 +6040,7 @@ private theorem vb_pair_h1
         rw [hmT, hmU] at this
         exact mul_le_mul_of_nonneg_left this hfr
       _ = Vd R * (pl2 * u) := by simp only [Vd]; ring
-  ------------------------------------------------------------------
-  -- ## level In (inner `ccOperatorFieldComp`)
-  ------------------------------------------------------------------
+
   have hInT1 : lowJetSq (I := I) (M := M) g 1 InT ≤ Sin R * (pl2 * pl2) := by
     rw [hInT]
     refine (happIn1 VmT IpT).trans ?_
@@ -6179,9 +6091,7 @@ private theorem vb_pair_h1
         jet_add_lip (I := I) (M := M) g 1 _ _
       _ ≤ 2 * (Kv R * ((pl2 * pl2) * u) + Ki R * ((pl2 * pl2) * u)) := by
         linarith [h1, h2]
-  ------------------------------------------------------------------
-  -- ## level Lv (outer trace) and the outer telescope
-  ------------------------------------------------------------------
+
   have hLvd2 : lowJetSq (I := I) (M := M) g 2 (LvT - LvU) ≤ Ct2 ^ 2 * u := by
     rw [hLvT, hLvU, riemLive_eq, riemLive_eq]
     exact htp2'
@@ -6526,7 +6436,7 @@ private theorem amixHalf_pair_h1
   have hu0 : 0 ≤ u := by
     rw [hu]
     positivity
-  -- mcd moduli
+
   have hmb : ∀ (gm : SmoothRiemannianMetric I M)
       (Pt : SmoothCcTensor g 0 2),
       (∀ (x : M) (u v : TangentSpace I x),
@@ -6589,7 +6499,7 @@ private theorem amixHalf_pair_h1
         2 * (B1m R) ^ 2 * (pl2 * u) :=
       mul_le_mul_of_nonneg_left hA2D (by positivity)
     linarith
-  -- trace moduli (ρ-cascade)
+
   have hρc : ρ ≤ ρt2 ∧ ρ ≤ ρt3 ∧ ρ ≤ ρt4 ∧ ρ ≤ ρb2 ∧ ρ ≤ ρb3 ∧
       ρ ≤ ρb4 := by
     refine ⟨?_, ?_, ?_, ?_, ?_, ?_⟩ <;>
@@ -6663,7 +6573,7 @@ private theorem amixHalf_pair_h1
   have htb2' := htrb 2 Bt2 ρb2 htb2 hρc.2.2.2.1
   have htb3' := htrb 3 Bt3 ρb3 htb3 hρc.2.2.2.2.1
   have htb4' := htrb 4 Bt4 ρb4 htb4 hρc.2.2.2.2.2
-  -- stack abbreviations
+
   set S5T : SmoothCcTensor g 2 5 :=
     slotExtendIter (I := I) (M := M) g 0 3 2 mcdT with hS5Tdef
   set S5U : SmoothCcTensor g 2 5 :=
@@ -6698,7 +6608,7 @@ private theorem amixHalf_pair_h1
   have hHalfU : lc0AMixHalfRF (I := I) (M := M) g gmU g σlast =
       ccOperatorFieldComp (I := I) (M := M) g 2 4 2
         (lc0TraceRF (I := I) (M := M) g gmU 2 σlast) S2U := rfl
-  -- singles, T-state
+
   have hmcdT1 : lowJetSq (I := I) (M := M) g 1 mcdT ≤
       (Bm R) ^ 2 * (2 * pl2) :=
     le_trans (jet_mono_lip (I := I) (M := M) g (by norm_num) mcdT) hmbT
@@ -6866,7 +6776,7 @@ private theorem amixHalf_pair_h1
           (jet_nonneg_lip (I := I) (M := M) (m := 1) g _)
           (mul_nonneg hCa2 (sq_nonneg _))
       _ = S2b R * (pl2 * pl2) := by simp only [S2b]; ring
-  -- level-5 difference
+
   have hdel5 : S5T - S5U =
       slotExtend (I := I) (M := M) g 1 4
         (slotExtend (I := I) (M := M) g 0 3 (mcdT - mcdU)) := by
@@ -6896,7 +6806,7 @@ private theorem amixHalf_pair_h1
         mul_le_mul_of_nonneg_left
           (mul_le_mul_of_nonneg_left hmpd hfr) hfr
       _ = M5 R * (pl2 * u) := by simp only [M5]; ring
-  -- level-4 difference
+
   have hdel4 : S4T - S4U =
       ccOperatorFieldComp (I := I) (M := M) g 2 5 3
           (lc0TraceRF (I := I) (M := M) g gmT 3 LieCorr0Core.lieCorr0AMixPermQ -
@@ -6957,7 +6867,7 @@ private theorem amixHalf_pair_h1
         jet_add_lip (I := I) (M := M) g 1 _ _
       _ ≤ 2 * (K4 R * (pl2 * u) + K5 R * (pl2 * u)) := by
         linarith [h1, h2]
-  -- level-3 difference
+
   have hdel3 : S3T - S3U =
       ccOperatorFieldComp (I := I) (M := M) g 2 3 6 (E3T - E3U) S4T +
         ccOperatorFieldComp (I := I) (M := M) g 2 3 6 E3U (S4T - S4U) := by
@@ -7046,7 +6956,7 @@ private theorem amixHalf_pair_h1
       _ ≤ 2 * (K3 R * ((pl2 * pl2) * u) +
           K34 R * ((pl2 * pl2) * u)) := by
         linarith [h1, h2]
-  -- level-2 difference
+
   have hdel2 : S2T - S2U =
       ccOperatorFieldComp (I := I) (M := M) g 2 6 4
           (lc0TraceRF (I := I) (M := M) g gmT 4 LieCorr0Core.lieCorr0AMixPerm1 -
@@ -7109,7 +7019,7 @@ private theorem amixHalf_pair_h1
       _ ≤ 2 * (K2 R * ((pl2 * pl2) * u) +
           K23 R * ((pl2 * pl2) * u)) := by
         linarith [h1, h2]
-  -- level-1 (Half) difference
+
   have htrd2 : lowJetSq (I := I) (M := M) g 2
       (lc0TraceRF (I := I) (M := M) g gmT 2 σlast -
         lc0TraceRF (I := I) (M := M) g gmU 2 σlast) ≤
@@ -7280,19 +7190,6 @@ private theorem amix_pair_h1
     _ = 16 * Bh R * ((1 + A + A ^ 2) ^ 4 * (D2 ^ 2 + N ^ 2)) := by
       ring
 
-
-
-
-/-! ############################################################################
-    ## Class 1 of the `C0` `H¹` five-class telescope: shared leaves.
-
-    Everything below builds the two-state `H¹` modulus of
-    `LowBaseInternal.ricciGoodLow` along the realized family.  This first block
-    collects the jet-algebra leaves (subtraction folding, gradient transfer),
-    the input symmetrizer, the two connection-insertion fields, the moving
-    four-trace, the refold coefficient, and the `dagLowOp` moduli.
-    ############################################################################ -/
-
 private theorem jet_sub_lip
     (g : SmoothRiemannianMetric I M) {r s : ℕ} (m : ℕ)
     (S V : SmoothCcTensor g r s) :
@@ -7326,7 +7223,6 @@ private theorem grad_l2_sq_lip
   exact rfns_iteratedCovGrad_covGrad_comm_rs
     (I := I) (M := M) g r s i S x
 
-/-- `H¹` gradient transfer: one covariant derivative costs one jet level. -/
 private theorem grad_h1_le_h2_lip
     (g : SmoothRiemannianMetric I M) {r s : ℕ}
     (S : SmoothCcTensor g r s) :
@@ -7342,7 +7238,6 @@ private theorem grad_h1_le_h2_lip
   nlinarith [sq_nonneg ‖iteratedCovGrad (I := I) g r s 0 S‖,
     sq_nonneg ‖S‖]
 
-/-- `H²` gradient transfer: one covariant derivative costs one jet level. -/
 private theorem grad_h2_le_h3_lip
     (g : SmoothRiemannianMetric I M) {r s : ℕ}
     (S : SmoothCcTensor g r s) :
@@ -7359,10 +7254,7 @@ private theorem grad_h2_le_h3_lip
   nlinarith [sq_nonneg ‖iteratedCovGrad (I := I) g r s 0 S‖,
     sq_nonneg ‖S‖]
 
-/-! ### Layer A — the input symmetrizer at `H¹` -/
-
 omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [BoundarylessManifold I M] in
-/-- `ccInputSymm` is linear, so it commutes with the two-state difference. -/
 private theorem ccSymm_sub_lip
     (g : SmoothRiemannianMetric I M) (C D : SmoothCcTensor g 2 2) :
     ccInputSymm (I := I) (M := M) g C -
@@ -7380,9 +7272,6 @@ private theorem ccSymm_sub_lip
   rw [hC, hD, hCD, appCcRS_sub_left]
   module
 
-/-- `H¹` size of the input symmetrizer: the swap field is a fixed background
-tensor, so its `H²` jet is a constant and the moving factor is consumed at
-`H¹`. -/
 private theorem inputSymm_h1
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M) :
@@ -7438,10 +7327,7 @@ private theorem inputSymm_h1
   rw [hform, jet_smul_lip]
   linarith [hsum, hnn]
 
-/-! ### Layer B — the two connection-insertion fields -/
-
 set_option linter.unusedVariables false in
-/-- Single-state `H²` size of the mixed connection-difference section. -/
 private theorem connSec_bdd_h2
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M) :
@@ -7473,7 +7359,6 @@ private theorem connSec_bdd_h2
   exact hw gT T hT hTtie hδ_le hδ0 hδT hδZ R A hR hA hT2 hT3
 
 set_option linter.unusedVariables false in
-/-- Single-state `H²` size of the outer connection-insertion field. -/
 private theorem connIns_bdd_h2
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M) :
@@ -7527,7 +7412,6 @@ private theorem connIns_bdd_h2
     _ = (Module.finrank ℝ E : ℝ) ^ 2 * (Bs R * A) ^ 2 := by ring
 
 set_option linter.unusedVariables false in
-/-- `H¹` two-state modulus of the outer connection-insertion field. -/
 private theorem connIns_pair_h1
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M)
@@ -7615,7 +7499,6 @@ private theorem connIns_pair_h1
         (B0 R * D2 + B1 R * A * D2) ^ 2 := by ring
 
 set_option linter.unusedVariables false in
-/-- Single-state `H²` size of the inner connection-insertion field. -/
 private theorem connInn_bdd_h2
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M) :
@@ -7652,7 +7535,6 @@ private theorem connInn_bdd_h2
     (mul_le_mul_of_nonneg_left hbase hfr)
 
 set_option linter.unusedVariables false in
-/-- `H¹` two-state modulus of the inner connection-insertion field. -/
 private theorem connInn_pair_h1
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M)
@@ -7714,9 +7596,6 @@ private theorem connInn_pair_h1
   exact (slot_h1_lip (I := I) (M := M) g 1 2 _).trans
     (mul_le_mul_of_nonneg_left hp hfr)
 
-/-! ### Layer C — the moving four-trace -/
-
-/-- The pure Ricci principal coefficient is the moving two-slot pure trace. -/
 private theorem pureCoeff_eq_lip
     (g gm : SmoothRiemannianMetric I M) :
     ricciArmPrincipalCoeffPure (I := I) (M := M) g gm =
@@ -7726,7 +7605,6 @@ private theorem pureCoeff_eq_lip
   intro x
   rw [ricciArmPrincipalCoeffPure_toSection, pureTrace_toSection]
 
-/-- Jet bookkeeping for the reindexed four-trace combination. -/
 private theorem fourtrace_jet_le
     (g : SmoothRiemannianMetric I M) (F : SmoothCcTensor g 4 2) :
     lowJetSq (I := I) (M := M) g 2
@@ -7767,7 +7645,6 @@ private theorem fourtrace_jet_le
   linarith [e1, e2, e3, hJ0]
 
 set_option linter.unusedVariables false in
-/-- Single-state `H²` size of the moving four-trace on the spectral ball. -/
 private theorem fourtrace_bdd_h2
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M) :
@@ -7793,8 +7670,6 @@ private theorem fourtrace_bdd_h2
   linarith [hF]
 
 set_option linter.unusedVariables false in
-/-- Two-state `H²` modulus of the moving four-trace in the spectral `Hˢ`
-currency. -/
 private theorem fourtrace_pair_h2
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M) :
@@ -7852,9 +7727,6 @@ private theorem fourtrace_pair_h2
   refine (fourtrace_jet_le (I := I) (M := M) g _).trans ?_
   linarith [hF]
 
-/-! ### Layer D — the refold coefficient -/
-
-/-- `refoldKernelContractionMonomialField` is linear in its kernel slot. -/
 private theorem refold_sub_lip
     (g : SmoothRiemannianMetric I M)
     (G H : SmoothCcTensor g 0 4) (σ : Equiv.Perm (Fin 4)) :
@@ -7870,7 +7742,6 @@ private theorem refold_sub_lip
   rw [dom_sub_lip, slotExtend_sub, slotExtend_sub, rsperm_sub_lip,
     appCcRS_sub_right]
 
-/-- `H¹` size of the refold coefficient in terms of its kernel slot. -/
 private theorem refold_h1_lip
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M) :
@@ -7950,7 +7821,6 @@ private theorem refold_h1_lip
         ((Module.finrank ℝ E : ℝ) * (Module.finrank ℝ E : ℝ)) *
         lowJetSq (I := I) (M := M) g 1 G := by ring
 
-/-- `H²` size of the refold coefficient in terms of its kernel slot. -/
 private theorem refold_h2_lip
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M) :
@@ -8030,11 +7900,7 @@ private theorem refold_h2_lip
         ((Module.finrank ℝ E : ℝ) * (Module.finrank ℝ E : ℝ)) *
         lowJetSq (I := I) (M := M) g 2 G := by ring
 
-/-! ### Layer E — the `dagLowOp` moduli -/
-
 set_option linter.unusedVariables false in
-/-- Single-state `H²` size of the lower Ricci derivative coefficient,
-imported from the already-verified action-level bound. -/
 private theorem dagLow_bdd_h2
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M) :
@@ -8064,8 +7930,6 @@ private theorem dagLow_bdd_h2
   exact mul_le_mul_of_nonneg_left (by linarith) hK
 
 set_option linter.unusedVariables false in
-/-- `H¹` two-state modulus of the lower Ricci derivative coefficient, in the
-spectral `Hˢ` currency (the only moving factor is `connLowOp`). -/
 private theorem dagLow_pair_h1
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M) :
@@ -8138,8 +8002,6 @@ private theorem dagLow_pair_h1
           (permCoeff (I := I) (M := M) g LowBaseInternal.daPermA) * Cc ^ 2 *
         ‖ccTensorToHs (I := I) (M := M) g 2 (2 : ℝ) (T - U)‖ ^ 2 := by ring
 
-/-! ### Layer F — the quadratic (`AA`) Ricci arm -/
-
 private def aaP3201 : Equiv.Perm (Fin 4) :=
   ⟨![3, 2, 0, 1], ![2, 3, 1, 0], by decide, by decide⟩
 
@@ -8164,7 +8026,6 @@ private def aaP102 : Equiv.Perm (Fin 3) :=
 private def aaP120 : Equiv.Perm (Fin 3) :=
   ⟨![1, 2, 0], ![2, 0, 1], by decide, by decide⟩
 
-/-- Permuted inner connection-insertion factor of a quadratic Ricci block. -/
 private noncomputable def aaInn
     (g gm : SmoothRiemannianMetric I M) (ρ : Equiv.Perm (Fin 3)) :
     SmoothCcTensor g 2 3 :=
@@ -8172,8 +8033,6 @@ private noncomputable def aaInn
     (permCoeff (I := I) (M := M) g ρ)
     (connDiffContrInsertionInnerField (I := I) g gm)
 
-/-- Generic quadratic Ricci block: a frozen slot permutation applied to the
-product of the outer connection-insertion field with an inner factor. -/
 private noncomputable def aaBlk
     (g gm : SmoothRiemannianMetric I M) (pm : Equiv.Perm (Fin 4))
     (Z : SmoothCcTensor g 2 3) : SmoothCcTensor g 2 4 :=
@@ -8183,7 +8042,6 @@ private noncomputable def aaBlk
       (connDiffContrInsertionField (I := I) g gm) Z)
 
 set_option maxHeartbeats 1600000 in
-/-- The six quadratic blocks of the order-zero Ricci kernel. -/
 private theorem aaKer_eq_lip (g gm : SmoothRiemannianMetric I M) :
     ricciAAKer (I := I) (M := M) g gm =
       aaBlk (I := I) (M := M) g gm aaP3201
@@ -8204,8 +8062,6 @@ private theorem aaKer_eq_lip (g gm : SmoothRiemannianMetric I M) :
             (aaInn (I := I) (M := M) g gm aaP120)) innerCoreInPerm10 :=
   rfl
 
-/-- Uniform `H²` size of the frozen slot permutations occurring in the
-quadratic Ricci kernel. -/
 private noncomputable def aaPK (g : SmoothRiemannianMetric I M) : ℝ :=
   lowJetSq (I := I) (M := M) g 2 (permCoeff (I := I) (M := M) g aaP3201) +
     lowJetSq (I := I) (M := M) g 2 (permCoeff (I := I) (M := M) g aaP2301) +
@@ -8312,7 +8168,6 @@ private theorem aaPK_ge3 (g : SmoothRiemannianMetric I M)
   unfold aaPK
   rcases hρ with rfl | rfl <;> linarith
 
-/-- Generic single-state `H²` size of a quadratic Ricci block. -/
 private theorem aaBlk_h2
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M) :
@@ -8360,9 +8215,6 @@ private theorem aaBlk_h2
             (connDiffContrInsertionField (I := I) g gm) *
           lowJetSq (I := I) (M := M) g 2 Z)) := by ring
 
-/-- Generic two-state `H¹` modulus of a quadratic Ricci block: both connection
-factors are consumed at `J1` on the difference side and at `J2` on the frozen
-side. -/
 private theorem aaBlk_pair_h1
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M) :
@@ -8474,7 +8326,6 @@ private theorem aaBlk_pair_h1
 
 set_option maxHeartbeats 1600000 in
 set_option linter.unusedVariables false in
-/-- Single-state `H²` size of the quadratic Ricci kernel. -/
 private theorem aaKer_bdd_h2
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M) :
@@ -8677,7 +8528,6 @@ private theorem aaKer_bdd_h2
 
 set_option maxHeartbeats 1600000 in
 set_option linter.unusedVariables false in
-/-- `H¹` two-state modulus of the quadratic Ricci kernel: `D2`-only. -/
 private theorem aaKer_pair_h1
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M) :
@@ -9042,7 +8892,6 @@ private theorem aaKer_pair_h1
 
 set_option maxHeartbeats 1600000 in
 set_option linter.unusedVariables false in
-/-- Two-state `H¹` modulus of the whole quadratic Ricci arm. -/
 private theorem ricciAA_pair_h1
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M) :
@@ -9229,14 +9078,9 @@ private theorem ricciAA_pair_h1
         2 * (K1 R * (W * u) + K2 R * (W * u)) := by linarith [h1, h2]
     _ = B R * ((1 + A + A ^ 2) ^ 4 * (D2 ^ 2 + N ^ 2)) := hsum
 
-/-! ### Layer G — the derivative-of-connection (`DA`) Ricci arm -/
-
 set_option maxHeartbeats 6400000 in
 set_option synthInstance.maxHeartbeats 1000000 in
 set_option linter.unusedVariables false in
-/-- Two-state `H¹` modulus of the lower derivative-of-connection Ricci arm.
-This is where the second argument of `ricciGoodLow` moves, and it is consumed
-only through `J1 (covGrad (P - Q)) ≤ J2 (P - Q) ≤ D2 ^ 2`. -/
 private theorem ricciDA_pair_h1
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M) :
@@ -9326,7 +9170,7 @@ private theorem ricciDA_pair_h1
     linarith only [e1, e2]
   intro gT gU P Q hP hQ hPtie hQtie δ hδ_le hδ0 hδP hδQ
     R A D2 N hR hA hD2 hN hP2 hQ2 hP3 hQ3 hPQ2 hPn hQn hPQn
-  -- ## polynomial bookkeeping
+
   set p : ℝ := 1 + A + A ^ 2 with hp
   have hp1 : (1 : ℝ) ≤ p := by
     rw [hp]; linarith only [hA, sq_nonneg A]
@@ -9351,7 +9195,7 @@ private theorem ricciDA_pair_h1
   have huple : u ≤ p * u := by
     have h := mul_le_mul_of_nonneg_right hp1 hu0
     linarith only [h]
-  -- ## the moving factors
+
   set GT : SmoothCcTensor g 0 4 :=
     ccOperatorFieldComp (I := I) (M := M) g 0 3 4
       (LowBaseInternal.dagLowOp (I := I) (M := M) g gT)
@@ -9386,7 +9230,7 @@ private theorem ricciDA_pair_h1
   have hgd1 : lowJetSq (I := I) (M := M) g 1
       (covGrad (I := I) (M := M) g 0 2 (P - Q)) ≤ D2 ^ 2 :=
     (grad_h1_le_h2_lip (I := I) (M := M) g (P - Q)).trans hPQ2
-  -- ## the `G` telescope
+
   have hGcomb : ccOperatorFieldComp (I := I) (M := M) g 0 3 4
         (LowBaseInternal.dagLowOp (I := I) (M := M) g gT -
           LowBaseInternal.dagLowOp (I := I) (M := M) g gU)
@@ -9485,7 +9329,7 @@ private theorem ricciDA_pair_h1
           Cb034 * Kdag * ((1 + A ^ 2) * A ^ 2) := by ring
       _ ≤ Cb034 * Kdag * (2 * p ^ 2) := hmulc
       _ = 2 * (Cb034 * Kdag) * p ^ 2 := by ring
-  -- ## the endomorphism slot factors
+
   have hETb : lowJetSq (I := I) (M := M) g 2 ET ≤ Be R ^ 2 := by
     rw [hET]
     exact hfsb gT P hP hPtie hδ_le hδ0 hδP R hR hP2
@@ -9507,7 +9351,7 @@ private theorem ricciDA_pair_h1
         2 * Be1 R ^ 2 * (p * u) :=
       mul_le_mul_of_nonneg_left e2 (by positivity)
     linarith only [f1, f2]
-  -- ## the two contraction monomials
+
   have hmono : ∀ σ : Equiv.Perm (Fin 4),
       lowJetSq (I := I) (M := M) g 1
         (LowBaseInternal.daMono (I := I) (M := M) g gT GT σ -
@@ -9579,7 +9423,7 @@ private theorem ricciDA_pair_h1
       ring
     refine (jet_add_lip (I := I) (M := M) g 1 _ _).trans ?_
     linarith only [e1, e2]
-  -- ## assemble the two monomials
+
   have hDAT : LowBaseInternal.ricciDALow (I := I) (M := M) g gT P =
       LowBaseInternal.daMono (I := I) (M := M) g gT GT
           LowBaseInternal.daPermA -
@@ -9625,16 +9469,9 @@ private theorem ricciDA_pair_h1
   refine le_trans ?_ (le_of_eq hlast)
   linarith only [hA', hB', hfold]
 
-/-! ### Capstone — class 1 of the `C0` `H¹` five-class telescope -/
-
 set_option maxHeartbeats 3200000 in
 set_option synthInstance.maxHeartbeats 1000000 in
 set_option linter.unusedVariables false in
-/-- **Class 1 of the `C0` `H¹` five-class telescope.**  On a common spectral
-`H²` ball the symmetrized first-order Ricci coefficient `ricciGoodLow` is
-`H¹`-Lipschitz along the realized family, with only the `H²` state difference
-`D2` and the `Hˢ` difference `N` on the right and the third-jet size `A`
-entering polynomially. -/
 private theorem good_pair_h1
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M) :
@@ -9683,9 +9520,7 @@ private theorem good_pair_h1
     positivity
   intro T U hT hU δ hδ_le hδ0 hδT hδU hδZ
     R A D2 N hR hA hD2 hN hT2 hU2 hT3 hU3 hTU2 hTn hUn hTUn s hs
-  ------------------------------------------------------------------
-  -- ## standard plumbing block
-  ------------------------------------------------------------------
+
   have hδ_lt : δ < 1 := lt_of_le_of_lt hδ_le (by norm_num)
   set gmT : SmoothRiemannianMetric I M :=
     realizedFam (I := I) g T 0 hδT hδZ s with hgmT
@@ -9787,9 +9622,7 @@ private theorem good_pair_h1
       (by simpa using hTUn)
   obtain ⟨hPnA, hQnA⟩ := hball ρA (min_le_left _ _)
   obtain ⟨hPnD, hQnD⟩ := hball ρD (min_le_right _ _)
-  ------------------------------------------------------------------
-  -- ## the two arms
-  ------------------------------------------------------------------
+
   set Z : ℝ := (1 + A + A ^ 2) ^ 4 * (D2 ^ 2 + N ^ 2) with hZ
   have hAA : lowJetSq (I := I) (M := M) g 1
       (ricciAAArm (I := I) (M := M) g gmT -
@@ -9804,9 +9637,7 @@ private theorem good_pair_h1
     rw [hZ]
     exact hda gmT gmU P Q hPsymm hQsymm hPtie hQtie hδ_le hδ0 hδP hδQ
       R A D2 N hR hA hD2 hN hP2 hQ2 hP3 hQ3 hPQ2 hPnD hQnD hPQn
-  ------------------------------------------------------------------
-  -- ## symmetrizer + two-term ladder
-  ------------------------------------------------------------------
+
   have hlowT : LowBaseInternal.ricciLow (I := I) (M := M) g gmT P =
       ricciAAArm (I := I) (M := M) g gmT +
         LowBaseInternal.ricciDALow (I := I) (M := M) g gmT P := rfl
@@ -9917,9 +9748,6 @@ private theorem selfLow_sub_parts
 
 set_option maxHeartbeats 3200000 in
 set_option linter.unusedVariables false in
-/-- **The five-class master telescope at fixed `s`.**  On a common spectral
-`H²` ball the transparent self-action family difference is `H¹`-Lipschitz
-with the uniform `(1+A+A²)⁴·(D2²+N²)` modulus. -/
 private theorem selfLow_pair_h1
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M) :
@@ -10006,7 +9834,7 @@ private theorem selfLow_pair_h1
   have hXa := hamix T U hT hU hδ_le hδ0 hδT hδU hδZ
     R A D2 N hR hA hD2 hN hT2 hU2 hT3 hU3 hTU2
     (hTn.trans hρc.2.2.2.1) (hUn.trans hρc.2.2.2.1) hTUn hs
-  -- riem needs the (P,Q) plumbing
+
   set gmT : SmoothRiemannianMetric I M :=
     realizedFam (I := I) g T 0 hδT hδZ s with hgmT
   set gmU : SmoothRiemannianMetric I M :=
@@ -10142,10 +9970,6 @@ private theorem selfLow_pair_h1
 
 set_option maxHeartbeats 3200000 in
 set_option linter.unusedVariables false in
-/-- **The tame `H¹` bound for the pairwise `C0` coefficient difference.**
-On a common spectral `H²` ball the path-integrated transparent
-self-action difference obeys the uniform low-regularity modulus
-`B R · (1+A+A²)⁴ · (D2²+N²)`. -/
 theorem c0Diff_tame
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M) :
@@ -10287,12 +10111,6 @@ private theorem grad_shift_lip
 
 set_option maxHeartbeats 3200000 in
 set_option linter.unusedVariables false in
-/-- **The uniform low-regularity Lipschitz bound for the pairwise
-first-order action at the low `H² → H¹` scale.**  On a common spectral
-`H²` ball, the difference action of two realized low-base data sets is
-`H¹`-operator-bounded with modulus controlled by the `H²` state
-difference `D2`, the `H³` state difference `D3`, and the spectral
-difference `N` — the uniform-uniqueness estimate of the `C0` lane. -/
 theorem a1Sub_lo_tame
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M) :
@@ -10646,8 +10464,6 @@ theorem metricCorr_tame
       pow_le_pow_left₀ hlin0 hlin 2
 
 set_option linter.unusedVariables false in
-/-- The moving-lowering correction has the low-scale `H² → H¹` tame modulus.
-The state difference is measured only in `H²`; no `H³` difference enters. -/
 theorem metricCorr_tame_h1
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M) :
@@ -10877,8 +10693,6 @@ private theorem a1_comm_any
           hDsq]
   exact (hpair A Q hQ hHi hLo).2.2.2.2
 
-/-- The difference of two completed first-order actions preserves the
-adjacent-scale commuting square. -/
 theorem a1_sub_comm
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M)
@@ -10902,7 +10716,6 @@ theorem a1_sub_comm
     ContinuousLinearMap.sub_apply, map_sub]
   rw [hAW, hBW]
 
-/-- Exact polarization of two first-order low-base actions. -/
 theorem a1_sub
     (g : SmoothRiemannianMetric I M)
     (A B : LowBaseActionData g) (T U : SmoothCcTensor g 0 2) :
@@ -10914,9 +10727,6 @@ theorem a1_sub
     iteratedCovGrad_sub, appCc_sub_left, app_sub_right]
   module
 
-/-- After the complete second-order action is subtracted, the pairwise lower
-residual is the sum of one frozen first-order action on `T - U` and the
-canonical first-order coefficient difference acting on `U`. -/
 theorem lowResidual_sub
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M)

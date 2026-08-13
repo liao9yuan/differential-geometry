@@ -2,15 +2,6 @@ import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.DeTurckRemainder
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.DeTurckRemainderLowBaseC2Lip
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.DeTurckRemainderLowBaseTime
 
-/-!
-# Radial low-base second-order operators
-
-This module promotes the canonical radial smooth-core second-order coefficient
-to its two compatible adjacent-scale operator realizations.  It uses only the
-pointwise and two-jet smallness already proved for the complete canonical
-coefficient.
--/
-
 noncomputable section
 
 open Bundle Manifold
@@ -283,9 +274,6 @@ private theorem a2Lo_ext_core
     _ = _ := LowBaseTimeInternal.a2LoCore_value
       (I := I) (M := M) g hρ hδ0 hδ_le hreal T
 
-/-- After shrinking any realized spectral `H2` ball, the canonical radial
-second-order coefficient gives uniformly bounded compatible `H4 → H2` and
-`H3 → H1` operators. -/
 theorem radialA2_pair
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M)
@@ -363,9 +351,6 @@ theorem radialA2_pair
   · simp only [C]
     ring
 
-/-- The radial second-order pair estimate with a free smaller cutoff.  The
-coefficient `C` is chosen before `r`, so a consumer may shrink `r` after seeing
-`C` while retaining both operator bounds and the inclusion square. -/
 theorem radialA2_pairR
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M)
@@ -444,10 +429,6 @@ theorem radialA2_pairR
   · simp only [C]
     ring
 
-/-- Below one realized spectral `H2` cutoff, both total radial second-order
-operator maps are Lipschitz on the completed `H2` state space.  The same
-modulus, smooth-core read-offs, and commuting square hold at every smaller
-cutoff; the modulus depends only on the low state difference. -/
 theorem radialA2_lip
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M)

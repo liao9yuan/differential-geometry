@@ -2,14 +2,6 @@ import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.EdgePartnerBound
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.EdgeRefoldPairingPolarized
 import DifferentialGeometry.Analysis.Spectral.Tensor.Estimates.AppCcLpProduct
 
-/-!
-# Polarized closed-edge formal-partner bounds
-
-The bilinear formal partner estimates are kept separate from their diagonal
-specializations.  The constants are selected before the reference metric and
-the two independent tensor passengers vary.
--/
-
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
@@ -212,9 +204,6 @@ private lemma edgeRaise_one_mul (g : SmoothRiemannianMetric I M) :
     _ = D * (W1 * P0 + P1) := by simp only [D]; ring
     _ = _ := rfl
 
-/-- A polarized Palatini formal partner is pointwise bilinear in its raised
-coefficient state and its independent test tensor, with a constant chosen
-before the reference metric varies. -/
 theorem edgeBi_zero_unif :
     ∃ C : Real, 0 ≤ C ∧
       ∀ (g gm : SmoothRiemannianMetric I M)
@@ -285,9 +274,6 @@ theorem edgeBi_zero_unif :
         riemannianFiberNormSq (I := I) (M := M) g 0 2 x
           (V.toSection x) := by simp only [C]; ring
 
-/-- The complete polarized raw top partner is pointwise bilinear in its
-passenger and test tensors, with one constant chosen before the reference
-metric, raw permutations, and realized path parameter vary. -/
 theorem edgeTopBi_zero_unif :
     ∃ K : Real, 0 ≤ K ∧
       ∀ (g : SmoothRiemannianMetric I M)
@@ -532,7 +518,6 @@ theorem edgeTopBi_zero_unif :
       (mul_nonneg (Real.sqrt_nonneg _) (Real.sqrt_nonneg _))
       (Real.sqrt_nonneg _))
 
-/-- Metricwise compatibility projection of `edgeBi_zero_unif`. -/
 theorem edgePartnerBi_zero (g : SmoothRiemannianMetric I M) :
     ∃ C : Real, 0 ≤ C ∧
       ∀ (gm : SmoothRiemannianMetric I M)
@@ -553,10 +538,6 @@ theorem edgePartnerBi_zero (g : SmoothRiemannianMetric I M) :
   obtain ⟨C, hC, hbound⟩ := edgeBi_zero_unif (I := I) (M := M)
   exact ⟨C, hC, hbound g⟩
 
-/-- After one covariant derivative, a polarized Palatini formal partner obeys
-the exact trilinear Leibniz bound.  Only the moving metric perturbation is
-controlled in the half fibre ball; the raised state and the independent test
-tensor have no radius hypothesis. -/
 theorem edgePartnerBi_one (g : SmoothRiemannianMetric I M) :
     ∃ C : Real, 0 ≤ C ∧
       ∀ (gm : SmoothRiemannianMetric I M)

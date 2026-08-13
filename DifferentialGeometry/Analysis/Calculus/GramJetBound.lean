@@ -3,18 +3,6 @@ import Mathlib.Analysis.InnerProductSpace.LinearMap
 
 set_option autoImplicit false
 
-/-!
-# Derivative bounds for Gram fields
-
-This file packages the fixed bilinear operation
-
-`(A, B) ↦ ((u, v) ↦ ⟪A u, B v⟫)`
-
-and applies the standard iterated-derivative bound for continuous bilinear maps.
-The result is the analytic bridge from derivative bounds for a fixed-space
-linear-map field to derivative bounds for its Gram field.
--/
-
 namespace DifferentialGeometry
 
 open scoped ContDiff
@@ -79,8 +67,6 @@ private theorem gramLinear_bound (A B : E →L[ℝ] F) :
       · exact B.le_opNorm v
     _ = (‖A‖ * ‖B‖) * ‖u‖ * ‖v‖ := by ring
 
-/-- The continuous bilinear operation sending two linear maps to their
-pointwise Gram bilinear form. -/
 noncomputable def gramBilinear :
     (E →L[ℝ] F) →L[ℝ] (E →L[ℝ] F) →L[ℝ] (E →L[ℝ] E →L[ℝ] ℝ) :=
   (gramLinear (E := E) (F := F)).mkContinuous₂ 1 (by
@@ -88,15 +74,12 @@ noncomputable def gramBilinear :
     change ‖gramLinear (E := E) (F := F) A B‖ ≤ 1 * ‖A‖ * ‖B‖
     simpa only [one_mul] using gramLinear_bound (E := E) (F := F) A B)
 
-/-- Evaluation of `gramBilinear` on vectors. -/
 @[simp]
 theorem gramBilinear_apply (A B : E →L[ℝ] F) (u v : E) :
     gramBilinear A B u v =
       (innerSL ℝ : F →L[ℝ] F →L[ℝ] ℝ) (A u) (B v) :=
   rfl
 
-/-- A fixed-space linear-map field controls every derivative of its Gram field
-through the bilinear Leibniz sum. -/
 theorem gram_jet_le {N : WithTop ℕ∞} {J : D → (E →L[ℝ] F)}
     (hJ : ContDiff ℝ N J) (x : D) {n : ℕ} (hn : n ≤ N) :
     ‖iteratedFDeriv ℝ n (fun z => gramBilinear (J z) (J z)) x‖ ≤

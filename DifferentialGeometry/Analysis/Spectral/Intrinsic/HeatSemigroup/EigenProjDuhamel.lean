@@ -1,42 +1,6 @@
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.HeatSemigroup.TimeL2EigenProjection
 import DifferentialGeometry.Analysis.Parabolic.QuasiLinear.TensorMaximalRegularity.SolutionSpace
 
-/-!
-# The spectral truncation commutes with the Duhamel family
-
-The Galerkin projector `spatialEigenProj g σ N` keeps the eigenmodes below the
-cut `eigenIdxFinset g N` and kills the rest; `timeL2EigenProj g σ T N` is its
-pointwise action on `L²([0,T]; Hˢ)`.  The maximal-regularity machinery acts
-*diagonally* on the same eigenbasis: `homModeCoeff` multiplies the `i`-th
-coordinate by `e^{-λᵢ t}` and `solModeCoeff` convolves it against the same
-kernel, both as a function of the mode `i` alone.  Two mode-diagonal operations
-commute, so the solve of a truncated forcing is the truncation of the solve.
-
-This is the commutation the projected (Galerkin) energy argument needs: the
-projected trajectory is `V_N`-valued, so pairing it against the truncated
-forcing is legitimate.
-
-## Main results
-
-* `spatialProj_idem` — the truncation is idempotent.
-* `timeProj_modeCoeff` — the eigen-coordinates of a truncated time-`L²` field:
-  kept below the cut, zero above it.
-* `proj_solModeCoeff`, `proj_derivModeCoeff`, `proj_homModeCoeff` — the same
-  for the three per-mode Duhamel coordinates.
-* `proj_solField_comm`, `proj_derivField_comm`, `proj_homField_comm` — the
-  truncation commutes with the maximal-regularity solution field, with its
-  time-derivative field, and with the homogeneous-flow field.
-* `proj_duhamel_comm`, `projDuhamel_zero` — the truncation commutes with the
-  affine Duhamel field `maxRegDuhamelSolField` (general initial datum, and the
-  zero-datum form used by the forcing fixed point).
-* `proj_maxRegOp_deriv` — the map-level statement: the solution operator's
-  time derivative commutes with the truncation (its trace is `0` either way).
-* `projSol_mode_zero`, `projSol_fixed` — the projected solve is `V_N`-valued.
-
-The mode-diagonality template is the one already used for the spectral
-symmetrizer in `ShortTime/LowRegSymmPreserve.lean`.
--/
-
 noncomputable section
 
 open Bundle Manifold MeasureTheory Set Filter
@@ -63,11 +27,7 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 variable (g : SmoothRiemannianMetric I M)
 
-/-! ## The truncation in eigen-coordinates -/
-
 open scoped Classical in
-/-- The eigen-coordinates of a spectrally truncated tensor: the modes below the
-cut survive unchanged, the modes above it are zero. -/
 theorem spatialProj_coeff (σ : ℝ) (N : ℕ)
     (W : tensorHs (I := I) (M := M) g 0 2 σ)
     (i : TensorEigenIdx (I := I) (M := M) g 0 2) :
@@ -76,9 +36,6 @@ theorem spatialProj_coeff (σ : ℝ) (N : ℕ)
   rw [spatialEigenProj_apply, finiteEigenComboHs_coeff]
 
 open scoped Classical in
-/-- **The spectral truncation is idempotent**: keeping the modes below the cut
-twice keeps them once.  This is what identifies a forcing produced by the
-truncated nonlinearity as a fixed vector of the truncation. -/
 theorem spatialProj_idem (σ : ℝ) (N : ℕ)
     (W : tensorHs (I := I) (M := M) g 0 2 σ) :
     spatialEigenProj (I := I) (M := M) g σ N
@@ -90,7 +47,6 @@ theorem spatialProj_idem (σ : ℝ) (N : ℕ)
   by_cases hi : i ∈ eigenIdxFinset (I := I) (M := M) g N <;> simp [hi]
 
 omit [BoundarylessManifold I M] in
-/-- The spectral truncation is a `1`-Lipschitz map of `Hˢ`. -/
 theorem spatialProj_lip (σ : ℝ) (N : ℕ) :
     LipschitzWith 1 (spatialEigenProj (I := I) (M := M) g σ N) := by
   refine LipschitzWith.of_dist_le_mul (fun W W' => ?_)
@@ -98,7 +54,6 @@ theorem spatialProj_lip (σ : ℝ) (N : ℕ) :
   exact norm_spatialEigenProj_apply_le (I := I) (M := M) g σ N (W - W')
 
 open scoped Classical in
-/-- The eigen-coordinates of a truncated time-`L²` field. -/
 theorem timeProj_modeCoeff (σ T : ℝ) (N : ℕ)
     (f : timeL2 (tensorHs (I := I) (M := M) g 0 2 σ) T)
     (i : TensorEigenIdx (I := I) (M := M) g 0 2) :
@@ -124,10 +79,7 @@ theorem timeProj_modeCoeff (σ T : ℝ) (N : ℕ)
       with t h1 h2 h3
     rw [h1, h2, spatialProj_coeff, if_neg hi, h3, Pi.zero_apply]
 
-/-! ## Commutation with the per-mode Duhamel coordinates -/
-
 open scoped Classical in
-/-- The per-mode Duhamel coordinate of a truncated forcing. -/
 theorem proj_solModeCoeff {a T : ℝ} (hT : 0 ≤ T) (N : ℕ)
     (f : timeL2 (tensorHs (I := I) (M := M) g 0 2 a) T)
     (i : TensorEigenIdx (I := I) (M := M) g 0 2) :
@@ -142,7 +94,6 @@ theorem proj_solModeCoeff {a T : ℝ} (hT : 0 ≤ T) (N : ℕ)
   · rw [if_neg hi, if_neg hi, map_zero]
 
 open scoped Classical in
-/-- The per-mode time-derivative coordinate of a truncated forcing. -/
 theorem proj_derivModeCoeff {a T : ℝ} (hT : 0 ≤ T) (N : ℕ)
     (f : timeL2 (tensorHs (I := I) (M := M) g 0 2 a) T)
     (i : TensorEigenIdx (I := I) (M := M) g 0 2) :
@@ -166,7 +117,6 @@ private lemma homModeCoeFn {a T : ℝ}
   coeFn_ofContinuousOn _
 
 open scoped Classical in
-/-- The homogeneous-flow coordinate of a truncated initial datum. -/
 theorem proj_homModeCoeff {a T : ℝ} (N : ℕ)
     (u₀ : tensorHs (I := I) (M := M) g 0 2 (a + 2))
     (i : TensorEigenIdx (I := I) (M := M) g 0 2) :
@@ -189,11 +139,6 @@ theorem proj_homModeCoeff {a T : ℝ} (N : ℕ)
       with t h1 h2
     rw [h1, h2, spatialProj_coeff, if_neg hi, mul_zero, Pi.zero_apply]
 
-/-! ## Commutation with the Duhamel fields -/
-
-/-- **The truncation commutes with the maximal-regularity solution field.**
-Solving the truncated forcing and truncating the solution agree; in particular
-the projected solve gains the same two Sobolev derivatives. -/
 theorem proj_solField_comm {a T : ℝ} (hT : 0 ≤ T) (N : ℕ)
     (h_compact : IsCompactOperator (tensorResolventL2 (I := I) (M := M) g 0 2))
     (f : timeL2 (tensorHs (I := I) (M := M) g 0 2 a) T) :
@@ -211,7 +156,6 @@ theorem proj_solField_comm {a T : ℝ} (hT : 0 ≤ T) (N : ℕ)
     maximalRegularitySolField_timeModeCoeff (I := I) (M := M) (a := a) hT
       h_compact f i]
 
-/-- **The truncation commutes with the maximal-regularity derivative field.** -/
 theorem proj_derivField_comm {a T : ℝ} (hT : 0 ≤ T) (N : ℕ)
     (h_compact : IsCompactOperator (tensorResolventL2 (I := I) (M := M) g 0 2))
     (f : timeL2 (tensorHs (I := I) (M := M) g 0 2 a) T) :
@@ -229,7 +173,6 @@ theorem proj_derivField_comm {a T : ℝ} (hT : 0 ≤ T) (N : ℕ)
     maximalRegularityDerivField_timeModeCoeff (I := I) (M := M) (a := a) hT
       h_compact f i]
 
-/-- **The truncation commutes with the homogeneous heat-flow field.** -/
 theorem proj_homField_comm {a T : ℝ} (hT : 0 ≤ T) (N : ℕ)
     (h_compact : IsCompactOperator (tensorResolventL2 (I := I) (M := M) g 0 2))
     (u₀ : tensorHs (I := I) (M := M) g 0 2 (a + 2)) :
@@ -247,8 +190,6 @@ theorem proj_homField_comm {a T : ℝ} (hT : 0 ≤ T) (N : ℕ)
     maxRegHomogeneousSolField_timeModeCoeff (I := I) (M := M) (a := a) (T := T)
       hT u₀ i]
 
-/-- **The truncation commutes with the affine Duhamel field.**  The Duhamel
-field of truncated data is the truncation of the Duhamel field. -/
 theorem proj_duhamel_comm {a T : ℝ} (hT : 0 < T) (hT1 : T ≤ 1) (N : ℕ)
     (h_compact : IsCompactOperator (tensorResolventL2 (I := I) (M := M) g 0 2))
     (u₀ : tensorHs (I := I) (M := M) g 0 2 (a + 2))
@@ -262,8 +203,6 @@ theorem proj_duhamel_comm {a T : ℝ} (hT : 0 < T) (hT1 : T ≤ 1) (N : ℕ)
     proj_homField_comm (I := I) (M := M) g hT.le N h_compact u₀,
     proj_solField_comm (I := I) (M := M) g hT.le N h_compact f]
 
-/-- **The zero-datum Duhamel field of a truncated forcing is truncated.**  This
-is the form consumed by the forcing fixed point, whose seed is `0`. -/
 theorem projDuhamel_zero {a T : ℝ} (hT : 0 < T) (hT1 : T ≤ 1) (N : ℕ)
     (h_compact : IsCompactOperator (tensorResolventL2 (I := I) (M := M) g 0 2))
     (f : timeL2 (tensorHs (I := I) (M := M) g 0 2 a) T) :
@@ -277,9 +216,6 @@ theorem projDuhamel_zero {a T : ℝ} (hT : 0 < T) (hT1 : T ≤ 1) (N : ℕ)
     (0 : tensorHs (I := I) (M := M) g 0 2 (a + 2)) f
   rwa [map_zero] at h
 
-/-- **The map-level commutation.**  The `L²` time derivative of the solution
-operator commutes with the truncation; its initial trace is `0` for either
-forcing, so this is the whole content at the level of `maximalRegularityOp`. -/
 theorem proj_maxRegOp_deriv {a T : ℝ} (hT : 0 < T) (hT1 : T ≤ 1) (N : ℕ)
     (h_compact : IsCompactOperator (tensorResolventL2 (I := I) (M := M) g 0 2))
     (f : timeL2 (tensorHs (I := I) (M := M) g 0 2 a) T) :
@@ -292,11 +228,6 @@ theorem proj_maxRegOp_deriv {a T : ℝ} (hT : 0 < T) (hT1 : T ≤ 1) (N : ℕ)
   rw [maximalRegularityOp_timeDeriv, maximalRegularityOp_timeDeriv,
     proj_derivField_comm (I := I) (M := M) g hT.le N h_compact f]
 
-/-! ## The projected solve is `V_N`-valued -/
-
-/-- **The projected solve has no mass above the cut.**  Its eigen-coordinates
-vanish outside `eigenIdxFinset g N`, so it takes values in the Galerkin space
-`V_N` — the fact the projected energy identity consumes. -/
 theorem projSol_mode_zero {a T : ℝ} (hT : 0 ≤ T) (N : ℕ)
     (h_compact : IsCompactOperator (tensorResolventL2 (I := I) (M := M) g 0 2))
     (f : timeL2 (tensorHs (I := I) (M := M) g 0 2 a) T)
@@ -309,9 +240,6 @@ theorem projSol_mode_zero {a T : ℝ} (hT : 0 ≤ T) (N : ℕ)
       h_compact (timeL2EigenProj (I := I) (M := M) g a T N f) i,
     proj_solModeCoeff (I := I) (M := M) g hT N f i, if_neg hi]
 
-/-- **The projected solve is fixed by the truncation**, the operator form of
-`projSol_mode_zero`: the solve of a truncated forcing lies in the range of the
-truncation at the gained regularity `H^{a+2}`. -/
 theorem projSol_fixed {a T : ℝ} (hT : 0 ≤ T) (N : ℕ)
     (h_compact : IsCompactOperator (tensorResolventL2 (I := I) (M := M) g 0 2))
     (f : timeL2 (tensorHs (I := I) (M := M) g 0 2 a) T) :

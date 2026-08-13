@@ -7,7 +7,6 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.ConnectionDifferenc
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.RaisedKoszulCometricRaise
 import DifferentialGeometry.Analysis.Sobolev.AntidiagonalTupleProductGrid
 
-
 noncomputable section
 
 open Bundle Manifold MeasureTheory Set Filter Tensor0SBundle
@@ -1340,8 +1339,6 @@ private theorem
     refine le_trans hStep (le_of_eq ?_)
     rw [hSdef]
 
-/-- A single ceiling below one fixes the slot-zero inverse-difference grid
-coefficient before either metric varies. -/
 theorem invDiff_zero_unif
     {δ₀ : ℝ} (hδ₀ : δ₀ < 1) :
     ∃ C : ℕ → ℝ, (∀ i, 0 ≤ C i) ∧
@@ -1444,7 +1441,6 @@ theorem invDiff_zero_unif
         (fun j => riemannianFiberNormSq_nonneg (I := I) (M := M) g₀ 0 (2 + j) x _) (i' + 1))
     linarith
 
-/-- Fixed-background wrapper for `invDiff_zero_unif`. -/
 theorem riemannianFiberNormSq_iteratedCovGrad_slotInsertEndoCc_zero_gInvDiffRaisedEndo_diagGrid_le
     (g₀ : SmoothRiemannianMetric I M) {δ₀ : ℝ} (hδ₀ : δ₀ < 1) :
     ∃ C : ℕ → ℝ, (∀ i, 0 ≤ C i) ∧
@@ -1466,7 +1462,6 @@ theorem riemannianFiberNormSq_iteratedCovGrad_slotInsertEndoCc_zero_gInvDiffRais
   obtain ⟨C, hC, hbnd⟩ := invDiff_zero_unif (I := I) (M := M) hδ₀
   exact ⟨C, hC, hbnd g₀⟩
 
-/-- Compatibility wrapper for the former slot-zero theorem name. -/
 theorem rfns_iteratedCovGrad_slotInsertEndoCc_zero_gInvDiffRaisedEndoField_diagonalProductGrid_le
     (g₀ : SmoothRiemannianMetric I M) {δ₀ : ℝ} (hδ₀ : δ₀ < 1) :
     ∃ C : ℕ → ℝ, (∀ i, 0 ≤ C i) ∧
@@ -1488,8 +1483,6 @@ theorem rfns_iteratedCovGrad_slotInsertEndoCc_zero_gInvDiffRaisedEndoField_diago
   riemannianFiberNormSq_iteratedCovGrad_slotInsertEndoCc_zero_gInvDiffRaisedEndo_diagGrid_le
     (E := E) (I := I) (M := M) g₀ hδ₀
 
-/-- A single ceiling below one fixes the slot-one inverse-difference grid
-coefficient before either metric varies. -/
 theorem invDiff_slot_unif
     {δ₀ : ℝ} (hδ₀ : δ₀ < 1) :
     ∃ C : ℕ → ℝ, (∀ i, 0 ≤ C i) ∧
@@ -1521,7 +1514,6 @@ theorem invDiff_slot_unif
   rw [mul_assoc]
   exact mul_le_mul_of_nonneg_left hchild (Nat.cast_nonneg _)
 
-/-- Fixed-background wrapper for `invDiff_slot_unif`. -/
 theorem rfns_iteratedCovGrad_slotInsertEndoCc_gInvDiffRaisedEndoField_diagonalProductGrid_le
     (g₀ : SmoothRiemannianMetric I M) {δ₀ : ℝ} (hδ₀ : δ₀ < 1) :
     ∃ C : ℕ → ℝ, (∀ i, 0 ≤ C i) ∧
@@ -1543,8 +1535,6 @@ theorem rfns_iteratedCovGrad_slotInsertEndoCc_gInvDiffRaisedEndoField_diagonalPr
   obtain ⟨C, hC, hbnd⟩ := invDiff_slot_unif (I := I) (M := M) hδ₀
   exact ⟨C, hC, hbnd g₀⟩
 
-/-- A single ceiling below one fixes the full inverse-difference coefficient
-grid before either metric varies. -/
 theorem invDiff_grid_unif
     {δ₀ : ℝ} (hδ₀ : δ₀ < 1) :
     ∃ C : ℕ → ℝ, (∀ i, 0 ≤ C i) ∧
@@ -1567,7 +1557,6 @@ theorem invDiff_grid_unif
   rw [gInvDiffSlotCoeff_eq_slotInsertEndoCc (E := E) (I := I) g₀ g₁]
   exact hbnd g₀ g₁ T htie hδ_le hδ0 hbound i x
 
-/-- Fixed-background wrapper for `invDiff_grid_unif`. -/
 theorem riemannianFiberNormSq_iteratedCovGrad_gInvDiffSlotCoeff_diagonalProductGrid_le
     (g₀ : SmoothRiemannianMetric I M) {δ₀ : ℝ} (hδ₀ : δ₀ < 1) :
     ∃ C : ℕ → ℝ, (∀ i, 0 ≤ C i) ∧
@@ -1588,7 +1577,6 @@ theorem riemannianFiberNormSq_iteratedCovGrad_gInvDiffSlotCoeff_diagonalProductG
   obtain ⟨C, hC, hbnd⟩ := invDiff_grid_unif (I := I) (M := M) hδ₀
   exact ⟨C, hC, hbnd g₀⟩
 
-/-- Compatibility wrapper for the former full-grid theorem name. -/
 theorem rfns_iteratedCovGrad_gInvDiffSlotCoeff_diagonalProductGrid_le
     (g₀ : SmoothRiemannianMetric I M) {δ₀ : ℝ} (hδ₀ : δ₀ < 1) :
     ∃ C : ℕ → ℝ, (∀ i, 0 ≤ C i) ∧

@@ -4,14 +4,6 @@ import DifferentialGeometry.Geometry.Metric.DistanceScaling
 
 set_option autoImplicit false
 
-/-!
-# Completeness of a smooth Riemannian metric
-
-This file packages completeness of the extended distance induced by a smooth
-Riemannian metric without choosing a basepoint.  It also transfers completeness
-across a global uniform equivalence of smooth metrics.
--/
-
 noncomputable section
 
 universe u uE uH
@@ -30,8 +22,6 @@ variable {M : Type u} [TopologicalSpace M] [ChartedSpace H M]
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-/-- Completeness of the extended distance induced by a smooth Riemannian
-metric, independently of any distinguished point. -/
 structure RiemannianMetricComplete
     (g : SmoothRiemannianMetric I M) : Prop where
   complete :
@@ -54,8 +44,6 @@ namespace RiemannianMetricComplete
 omit [CompleteSpace E] in
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-/-- A global positive lower bound by a complete smooth Riemannian metric
-preserves completeness. -/
 theorem of_lower
     {g h : SmoothRiemannianMetric I M}
     (hg : RiemannianMetricComplete (I := I) g)
@@ -119,8 +107,6 @@ theorem of_lower
 omit [CompleteSpace E] in
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-/-- Global uniform equivalence of smooth Riemannian metrics preserves
-completeness. -/
 theorem of_uniformEquiv
     {g h : SmoothRiemannianMetric I M}
     (hg : RiemannianMetricComplete (I := I) g)

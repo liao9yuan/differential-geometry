@@ -6,15 +6,6 @@ import DifferentialGeometry.Geometry.Exponential.IntrinsicSmooth
 
 set_option autoImplicit false
 
-/-!
-# Covariant Gronwall bounds for intrinsic Jacobi fields
-
-This file specializes the abstract covariant Gronwall estimate to the complete
-intrinsic geodesic and its initial-velocity Jacobi field. It discharges the
-global regularity, parallel-frame, and initial-value obligations without a
-chart-radius hypothesis.
--/
-
 noncomputable section
 
 open Bundle Manifold Set
@@ -39,8 +30,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-/-- A uniform `(0,4)` Riemann-tensor fiber bound along one complete intrinsic
-geodesic segment. -/
 def IntrinsicRm04Bound
     [PseudoEMetricSpace M]
     [RiemannianBundle (fun x : M => TangentSpace I x)]
@@ -59,8 +48,6 @@ def IntrinsicRm04Bound
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-/-- A bound for the intrinsic lowered Riemann tensor gives the exact
-second-order ODE estimate required by the covariant Gronwall theorem. -/
 theorem intrJacobi_ode
     [PseudoEMetricSpace M]
     [RiemannianBundle (fun x : M => TangentSpace I x)]
@@ -220,9 +207,6 @@ theorem intrJacobi_ode
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-/-- Intrinsic Jacobi endpoint bounds from the abstract covariant second-order
-estimate. All regularity, parallel-frame, and initial-value inputs are derived
-from completeness. -/
 theorem intrJacobi_bounds
     [PseudoEMetricSpace M]
     [RiemannianBundle (fun x : M => TangentSpace I x)]
@@ -320,8 +304,6 @@ theorem intrJacobi_bounds
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-/-- Simultaneous bounds for a smooth inhomogeneous field along a complete
-intrinsic geodesic. The parallel frame and chart regularity are derived here. -/
 theorem intrForce_pair
     [PseudoEMetricSpace M]
     [RiemannianBundle (fun x : M => TangentSpace I x)]
@@ -433,8 +415,6 @@ theorem intrForce_pair
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-/-- Simultaneous metric-norm bounds for an intrinsic Jacobi field and its
-covariant velocity. -/
 theorem intrJacobi_pair
     [PseudoEMetricSpace M]
     [RiemannianBundle (fun x : M => TangentSpace I x)]

@@ -2,15 +2,6 @@ import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.PrincipalLowRegC
 import DifferentialGeometry.Analysis.Spectral.Tensor.Estimates.H1H2AppCcRS
 import DifferentialGeometry.Analysis.Spectral.Tensor.SobolevScale.Inclusion
 
-/-!
-# Adjacent low-regularity DeTurck principal operators
-
-This module constructs the same inverse-cometric principal correction on the
-adjacent spectral scales `H4 → H2` and `H3 → H1`.  The lower operator is
-completed from the intrinsic `H2 × H1 → H1` multiplication estimate, and the
-two operators agree under the canonical Sobolev inclusions.
--/
-
 noncomputable section
 
 open Bundle Manifold MeasureTheory Set Filter Tensor0SBundle
@@ -649,9 +640,6 @@ private theorem invPerturbH1_norm
       dsimp only [C]
       ring
 
-/-- The inverse-cometric principal correction acting from spectral `H3` to
-spectral `H1`, built from the same spectral `H2` metric deviation as the
-`H4 → H2` realization. -/
 noncomputable def lowRegPrincipalLo
     (g : SmoothRiemannianMetric I M)
     (T : metricH2 (I := I) (M := M) g) :
@@ -696,11 +684,6 @@ private theorem principalLo_norm
       dsimp only [C]
       ring
 
-/-- On one spectral `H2` metric ball, the low principal correction depends
-continuously on the metric deviation.  This is what a time-dependent low
-principal family needs for strong measurability, and unlike the `H4 -> H2`
-side it needs no Lipschitz estimate: on the ball the perturbed identity is a
-unit, and `Ring.inverse` is continuous at units of a complete normed ring. -/
 theorem principalLo_cont
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M) :
@@ -1009,8 +992,6 @@ private theorem principal_comm_small
           (hessianH1 (I := I) (M := M) g
             (inc43 (I := I) (M := M) g U))) := by rw [hhess]
 
-/-- On one spectral `H2` metric ball, the `H4 → H2` and `H3 → H1`
-principal corrections form the canonical Sobolev-inclusion square. -/
 theorem principal_comm
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M) :
@@ -1047,8 +1028,6 @@ theorem principal_comm
       (inc43 (I := I) (M := M) g)
   exact principal_comm_small (I := I) (M := M) hDim g T h2 h1
 
-/-- The high and low principal corrections obey linear operator-norm bounds
-on one common spectral `H2` metric ball. -/
 theorem principal_pair_norm
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M) :
@@ -1067,8 +1046,6 @@ theorem principal_pair_norm
   exact ⟨hhigh T (hT.trans (min_le_left _ _)),
     hlow T (hT.trans (min_le_right _ _))⟩
 
-/-- On one spectral `H2` metric ball, the low principal correction agrees on
-smooth tensors with the geometric inverse-cometric principal arm. -/
 theorem principalLo_core
     (hDim : Module.finrank ℝ E = 3)
     (g₀ : SmoothRiemannianMetric I M) :

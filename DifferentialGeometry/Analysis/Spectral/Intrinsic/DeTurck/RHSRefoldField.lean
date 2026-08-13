@@ -3,14 +3,6 @@ import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.RHSZeroRefold
 import DifferentialGeometry.Analysis.Parabolic.RicciLinearization.RicciArmResidualCoefficientFieldsBackgroundDifferenceRefold
 import DifferentialGeometry.Analysis.Sobolev.TensorHilbert.DeTurckLieKernelL2JetBoundCoeffFieldOrderZeroIdentities
 
-/-!
-# Field identity for the order-zero Ricci refold
-
-This module promotes the exact Palatini action identity to an equality of
-coefficient fields.  The public result removes the residual Ricci arms before
-any Sobolev estimate is taken.
--/
-
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
@@ -149,9 +141,6 @@ private theorem halfRiem_refold
     backgroundRicciCommutatorDiffRefoldRemainderField,
     appCc_refoldKernelContractionField] using hprim
 
-/-- The Ricci part of the order-zero refold is exactly the connection
-difference coefficient plus one explicit Palatini kernel.  In particular, the
-`AA` and background-curvature residual fields cancel before estimation. -/
 theorem ricciRefold_eq
     (g g1 : SmoothRiemannianMetric I M) (P : SmoothCcTensor g 0 2)
     (htie : ∀ (x : M) (v w : TangentSpace I x),
@@ -195,10 +184,6 @@ theorem ricciRefold_eq
   rw [htwice]
   module
 
-/-- The complete order-zero refold is the sum of the two Ricci Palatini
-fields, the two DeTurck coefficient fields, `lieCorr0`, and the negative Lie
-pair.  Thus all principal Ricci and DeTurck cancellations occur before any
-Sobolev estimate. -/
 theorem rhsRefold_eq
     (g g_bg : SmoothRiemannianMetric I M)
     (T : SmoothCcTensor g 0 2) {delta : Real}

@@ -1,11 +1,5 @@
 import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.RiemannianFiberNormSq.BareSlot0CurryParseval
 
-/-!
-# Compatibility re-export for bare slot-zero Parseval identities
-
-The implementation lives in the analysis hierarchy; this module preserves the former import path.
--/
-
 noncomputable section
 
 open Bundle Manifold Tensor0SBundle
@@ -19,13 +13,11 @@ variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
   [IsManifold I ∞ M]
 
-/-- Compatibility name for the canonical rank-zero tensor wrapper. -/
 abbrev tensor0SAsRS {s : ℕ} (x : M) (C : Tensor0SSpace s I x) :
     TensorRSSpace 0 s I x :=
   tensor0SToTensorRS (I := I) (M := M) x C
 
 omit [CompleteSpace E] in
-/-- Compatibility form of the bare slot-zero curry identity. -/
 lemma slot0Curry_eq_tensor0SAsRS_curry_unitZeroSec
     (g : SmoothRiemannianMetric I M) (x : M) (s : ℕ)
     {n : ℕ} (e : Fin n → TangentSpace I x) (K₀ : Fin 0 → Fin n)

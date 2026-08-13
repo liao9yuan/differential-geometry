@@ -2,46 +2,6 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.Estimates.H2Pointwise
 import DifferentialGeometry.Analysis.Spectral.Tensor.SobolevScale.UnifBochnerGap
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.SmoothPathHs
 
-/-!
-# Class-uniform `H²` → fibre-operator control (item-6 packet, bricks E2 and E5)
-
-`H2Pointwise.lean` proves the per-metric chain
-
-* `hs2_fiber_sq` — `|T|²_g(x) ≤ C² ‖T‖²_{H²}` pointwise, and
-* `hs2_op_bound` — the fibrewise operator bound `gFibreOpBound g (ccTensorBilinSymm g T)
-  (C · ‖T‖_{H²})` consumed by the metric-realization radius `realize_at_thr`,
-
-but both conclude with an `∃ C` whose witness is built from two `Classical.choose`
-constants: the fibre-Morrey constant of
-`exists_riemannianFiberNorm_le_iteratedCovGrad_l2_jetSum_supercritical` and the Gårding
-constant of `hsJet_le`.  Two metrics of the same `Λ`-comparability class therefore receive
-unrelated radii, and the realization radius `P` cannot floor a class-level horizon.
-
-This file removes the second `Classical.choose` and parameterizes the first.
-
-* **Brick E2** — the rank-`(0,2)` `smoothCcToTensorHs` face of the class-uniform Sobolev
-  comparison.  `ccHs_eq_smoothHs` identifies the two smooth spectral embeddings (they have
-  the same eigenbasis coordinates by construction), and `hsCovsum_smoothCc` /
-  `covsumHs_smoothCc` restate `UnifBochnerGap`'s constant-exposed endpoints
-  `hsCovsum_unif_const` / `covsum_hs_unif_const` in the currency the DeTurck stack speaks.
-* **Brick E5** — `hs2_op_bound_unif`, the class-uniform sibling of `hs2_op_bound`, whose
-  constant is the closed `hs2OpC Cpt Fc d = Cpt · covsumHsC Fc d 2 + 1`, and the resulting
-  closed realization radius `unifRealizeRad = θ(d) / hs2OpC` together with
-  `realize_at_unif`, the class-uniform sibling of `realize_at_thr`.
-* **Finite `H²` face** — `realize_at_action` replaces the all-order `Fc`/`hcurv` input by the
-  exact rank-two, order-zero package `IsCurvAction0 g 2 K`. Its radius `actionRealizeRad` is
-  closed in the Morrey constant, `K`, and the dimension.
-
-**Parameterized input (brick E4 is not landed).**  The fibre-Morrey constant `Cpt` is taken
-as an explicit hypothesis `hmorrey`, stated verbatim in the shape of
-`exists_riemannianFiberNorm_le_iteratedCovGrad_l2_jetSum_supercritical`, so that E4's
-`Λ`-uniform producer drops in without restatement.  Everything else — the whole Gårding /
-Bochner backbone — is closed in `(Fc, finrank ℝ E)` through `covsumHsC`.
-
-The legacy all-order endpoints retain `hcurv` for compatibility. The realization-facing finite
-endpoints need only `IsCurvAction0 g 2 K`; no differentiated curvature action enters `H²`.
--/
-
 noncomputable section
 
 open scoped ContDiff Manifold Topology BigOperators
@@ -67,18 +27,12 @@ variable
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
-/-! ### Brick E2: the rank-`(0,2)` `smoothCcToTensorHs` face -/
-
-/-- Norm face of `ccHs_eq_smoothHs`. -/
 theorem norm_ccHs_eq_smoothHs (g₀ : SmoothRiemannianMetric I M) (σ : ℝ)
     (T : SmoothCcTensor g₀ 0 2) :
     ‖ccTensorToHs (I := I) (M := M) g₀ 2 σ T‖ =
       ‖smoothCcToTensorHs (I := I) (M := M) g₀ σ T‖ := by
   rw [ccHs_eq_smoothHs]
 
-/-- **Class-uniform spectral `H^n` ≤ covariant jet, in `smoothCcToTensorHs` currency**
-(brick E2, easy direction).  The rank-`(0,2)` face of `hsCovsum_unif_const`, with the same
-closed constant `hsCovsumC Fc d n`. -/
 theorem hsCovsum_smoothCc
     (g₀ : SmoothRiemannianMetric I M)
     (Fc : ℕ → ℝ) (hFc : ∀ p, 0 ≤ Fc p)
@@ -94,10 +48,6 @@ theorem hsCovsum_smoothCc
   rw [← norm_ccHs_eq_smoothHs]
   exact hsCovsum_unif_const (I := I) (M := M) g₀ Fc hFc hcurv 2 n T
 
-/-- **Class-uniform covariant jet ≤ spectral `H^n`, in `smoothCcToTensorHs` currency**
-(brick E2, hard direction).  The rank-`(0,2)` face of `covsum_hs_unif_const`, with the same
-closed constant `covsumHsC Fc d n`.  Constant-exposed sibling of the `∃ C` wrapper
-`exists_iteratedCovGrad_sum_le_smoothCcToTensorHs`. -/
 theorem covsumHs_smoothCc
     (g₀ : SmoothRiemannianMetric I M)
     (Fc : ℕ → ℝ) (hFc : ∀ p, 0 ≤ Fc p)
@@ -113,10 +63,6 @@ theorem covsumHs_smoothCc
   rw [← norm_ccHs_eq_smoothHs]
   exact covsum_hs_unif_const (I := I) (M := M) g₀ Fc hFc hcurv 2 n T
 
-/-- The rank-`(0,2)` DeTurck-currency face of the finite curvature-action `H²` comparison.
-
-This endpoint needs only the order-zero action package `IsCurvAction0 g₀ 2 K`; unlike
-`covsumHs_smoothCc`, it does not quantify over differentiated actions or unrelated tensor ranks. -/
 theorem covsumHs2_smoothCc
     (g₀ : SmoothRiemannianMetric I M) {K : ℝ}
     (hact : IsCurvAction0 (I := I) (M := M) g₀ 2 K)
@@ -126,15 +72,8 @@ theorem covsumHs2_smoothCc
   rw [← norm_ccHs_eq_smoothHs]
   exact covsum_hs_two (I := I) (M := M) g₀ 2 hact T
 
-/-! ### Brick E5: the closed constants -/
-
-/-- The closed pointwise-fibre constant of `hs2_fiber_sq_unif`: the fibre-Morrey constant
-`Cpt` times the closed Gårding constant `covsumHsC Fc d 2` at spectral order `2`. -/
 def hs2FibreC (Cpt : ℝ) (Fc : ℕ → ℝ) (d : ℕ) : ℝ := Cpt * covsumHsC Fc d 2
 
-/-- The closed constant of `hs2_op_bound_unif`, `hs2FibreC + 1`.  The shift keeps it
-strictly positive, so it may be divided by (`unifRealizeRad`), exactly as `hs2_op_bound`'s
-`C0 + 1`. -/
 def hs2OpC (Cpt : ℝ) (Fc : ℕ → ℝ) (d : ℕ) : ℝ := hs2FibreC Cpt Fc d + 1
 
 theorem hs2FibreC_nonneg {Cpt : ℝ} (hCpt : 0 ≤ Cpt) {Fc : ℕ → ℝ}
@@ -152,35 +91,20 @@ theorem hs2FibreC_le_opC (Cpt : ℝ) (Fc : ℕ → ℝ) (d : ℕ) :
   unfold hs2OpC
   linarith
 
-/-- The finite-action pointwise-fibre constant: the Morrey constant times `h2CovsumC`. -/
 def hs2FibreActionC (Cpt K : ℝ) : ℝ := Cpt * h2CovsumC K
 
-/-- The strictly positive finite-action fibre-operator constant. -/
 def hs2OpActionC (Cpt K : ℝ) : ℝ := hs2FibreActionC Cpt K + 1
 
-/-- The finite-action pointwise-fibre constant is nonnegative for nonnegative Morrey input. -/
 theorem hs2FibreAct_nonneg {Cpt : ℝ} (hCpt : 0 ≤ Cpt) (K : ℝ) :
     0 ≤ hs2FibreActionC Cpt K :=
   mul_nonneg hCpt (h2CovsumC_nonneg K)
 
-/-- The shifted finite-action fibre-operator constant is strictly positive. -/
 theorem hs2OpActionC_pos {Cpt : ℝ} (hCpt : 0 ≤ Cpt) (K : ℝ) :
     0 < hs2OpActionC Cpt K := by
   have h := hs2FibreAct_nonneg hCpt K
   unfold hs2OpActionC
   linarith
 
-/-! ### Brick E5: the class-uniform pointwise and operator bounds -/
-
-/-- **Class-uniform pointwise `H²` fibre bound** (brick E5).  The sibling of `hs2_fiber_sq`
-with the closed constant `hs2FibreC Cpt Fc d = Cpt · covsumHsC Fc d 2`: in dimension three
-the spectral `H²` norm controls the pointwise squared fibre norm of a smooth covariant
-tensor with a constant depending only on the fibre-Morrey input `Cpt`, the curvature-jet
-family `Fc`, and `d = finrank ℝ E`.
-
-`hmorrey` is stated verbatim in the shape of
-`exists_riemannianFiberNorm_le_iteratedCovGrad_l2_jetSum_supercritical`; brick E4 supplies a
-`Λ`-uniform `Cpt`. -/
 theorem hs2_fiber_sq_unif
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M) (s : ℕ)
@@ -232,10 +156,6 @@ theorem hs2_fiber_sq_unif
       unfold hs2FibreC
       ring
 
-/-- Pointwise `H²` fibre control from the finite rank-two curvature-action package.
-
-The only geometric comparison input is `IsCurvAction0 g 2 K`; the Morrey hypothesis is the
-existing rank-two three-jet estimate. -/
 theorem hs2_fiber_sq_action
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M) {K : ℝ}
@@ -285,12 +205,6 @@ theorem hs2_fiber_sq_action
 omit [BoundarylessManifold I M] in
 attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
   Tensor0SBundle.tensorRSSpace_normedSpace in
-/-- **A uniform pointwise fibre bound is a fibrewise operator bound.**
-
-If the `g`-fibre norm of the smooth `(0,2)`-tensor `T` is bounded by `K` at every point, its
-symmetrization `ccTensorBilinSymm g T` is `K`-small in the `g`-operator sense.  This is the
-reusable Cauchy–Schwarz + symmetrization algebra of `hs2_op_bound`, isolated so that the
-per-metric and the class-uniform bounds share it instead of duplicating it. -/
 theorem gFibreOp_of_fiberSq
     (g : SmoothRiemannianMetric I M) (T : SmoothCcTensor g 0 2) {K : ℝ}
     (hK : 0 ≤ K)
@@ -340,13 +254,6 @@ theorem gFibreOp_of_fiberSq
       mul_le_mul_of_nonneg_left (add_le_add hvw hwv) (by norm_num)
     _ = K * Real.sqrt (g.inner x v v) * Real.sqrt (g.inner x w w) := by ring
 
-/-- **The class-uniform `H²` → fibre-operator bound** (brick E5).
-
-The sibling of `hs2_op_bound` whose constant is the closed
-`hs2OpC Cpt Fc d = Cpt · covsumHsC Fc d 2 + 1`: it depends only on the fibre-Morrey input
-`Cpt`, the curvature-jet family `Fc`, and `d = finrank ℝ E`, so two metrics of the same
-`Λ`-class sharing `(Cpt, Fc)` receive the SAME constant.  That is what makes the realization
-radius `unifRealizeRad` — and hence the horizon it floors — class-uniform. -/
 theorem hs2_op_bound_unif
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M)
@@ -385,10 +292,6 @@ theorem hs2_op_bound_unif
     _ = (hs2OpC Cpt Fc (Module.finrank ℝ E) *
           ‖ccTensorToHs (I := I) (M := M) g 2 (2 : ℝ) T‖) ^ 2 := by ring
 
-/-- The finite-action `H²` fibre-operator bound.
-
-Its constant depends only on the Morrey input `Cpt` and the rank-two order-zero curvature-action
-constant `K`; it has no all-order `Fc` or `hcurv` argument. -/
 theorem hs2_op_bound_action
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M) {K : ℝ}
@@ -421,8 +324,6 @@ theorem hs2_op_bound_action
     _ = (hs2OpActionC Cpt K *
           ‖ccTensorToHs (I := I) (M := M) g 2 (2 : ℝ) T‖) ^ 2 := by ring
 
-/-- `smoothCcToTensorHs` face of `hs2_op_bound_unif` (brick E2 × E5): the class-uniform
-operator bound in the currency of the DeTurck stack and of the realization radius. -/
 theorem hs2_op_smoothCc_unif
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M)
@@ -444,13 +345,6 @@ theorem hs2_op_smoothCc_unif
   rw [← norm_ccHs_eq_smoothHs]
   exact hs2_op_bound_unif (I := I) (M := M) hDim g Fc hFc hcurv hCpt hmorrey T
 
-/-! ### Brick E5: the class-uniform realization radius `P` -/
-
-/-- **The class-uniform metric-realization radius** `P = θ(d) / hs2OpC Cpt Fc d`.
-
-`θ(d) = deTurckArmContractionThresholdSharp d` is a dimension-only quantity, and `hs2OpC` is
-closed in `(Cpt, Fc, d)`, so `unifRealizeRad` is a single number for the whole
-`Λ`-comparability class — the class-level replacement of the `∃ R` of `realize_at_thr`. -/
 def unifRealizeRad (Cpt : ℝ) (Fc : ℕ → ℝ) (d : ℕ) : ℝ :=
   deTurckArmContractionThresholdSharp d / hs2OpC Cpt Fc d
 
@@ -458,20 +352,13 @@ theorem unifRealizeRad_pos {Cpt : ℝ} (hCpt : 0 ≤ Cpt) {Fc : ℕ → ℝ}
     (hFc : ∀ p, 0 ≤ Fc p) (d : ℕ) : 0 < unifRealizeRad Cpt Fc d :=
   div_pos (deTurckArmContractionThreshold''_pos d) (hs2OpC_pos hCpt hFc d)
 
-/-- The realization radius determined by the finite rank-two curvature-action package. -/
 def actionRealizeRad (Cpt K : ℝ) (d : ℕ) : ℝ :=
   deTurckArmContractionThresholdSharp d / hs2OpActionC Cpt K
 
-/-- The finite-action realization radius is strictly positive. -/
 theorem actionRealizeRad_pos {Cpt : ℝ} (hCpt : 0 ≤ Cpt) (K : ℝ) (d : ℕ) :
     0 < actionRealizeRad Cpt K d :=
   div_pos (deTurckArmContractionThreshold''_pos d) (hs2OpActionC_pos hCpt K)
 
-/-- The metric-realization bound from the finite rank-two curvature-action package.
-
-This is the realization producer consumed by the uniform low-regularity solve: its radius is closed
-in `(Cpt, K, finrank)` and its hypotheses mention neither an all-order curvature family nor
-differentiated curvature actions. -/
 theorem realize_at_action
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M) {K : ℝ}
@@ -516,13 +403,6 @@ theorem realize_at_action
     (mul_le_mul_of_nonneg_right hdelta (Real.sqrt_nonneg _))
     (Real.sqrt_nonneg _)
 
-/-- **The class-uniform realization bound** (brick E5): the sibling of `realize_at_thr` whose
-radius is the closed `unifRealizeRad Cpt Fc d`.
-
-The conclusion is exactly the `hreal` hypothesis of `lowreg_partial_sol_of_bounds`
-(`ShortTime/UnifClassBounds.lean`) at `P := unifRealizeRad Cpt Fc (finrank ℝ E)` and
-`δ := deTurckArmContractionThresholdSharp (finrank ℝ E)`, so the realization radius of the
-six-number solve is no longer an existential. -/
 theorem realize_at_unif
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M)

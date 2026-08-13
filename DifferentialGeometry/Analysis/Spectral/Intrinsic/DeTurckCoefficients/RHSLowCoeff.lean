@@ -2,14 +2,6 @@ import DifferentialGeometry.Analysis.Parabolic.RicciLinearization.RicciLineariza
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurckCoefficients.LieCorr0Core
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.RicciDeTurckSectionDifference
 
-/-!
-# Low-order Ricci--DeTurck path coefficients
-
-This module contains the coefficient definitions needed before the quantitative
-three-arm estimates.  Keeping them below the estimate layer lets exact
-Ricci--DeTurck identities depend only on the geometric coefficient producers.
--/
-
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
@@ -33,8 +25,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
   [CompactSpace M] [SigmaCompactSpace M] [T2Space M] [I.Boundaryless]
   [BoundarylessManifold I M]
 
-/-- The complete order-zero coefficient after the Ricci and DeTurck terms are
-combined along the realized metric path. -/
 def rhsLow0Coeff
     (g₀ g_bg : SmoothRiemannianMetric I M) (T T' : SmoothCcTensor g₀ 0 2)
     {δ : ℝ}

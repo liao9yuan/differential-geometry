@@ -2,15 +2,6 @@ import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.DeTurckRemainder
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.CurvatureCoefficientDifferenceJetTower.Lowered
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.IteratedCovGradFibreNormPermutationInvariance
 
-/-!
-# Uniform fibre bound for the transparent Ricci top coefficient
-
-The top Palatini coefficient is controlled pointwise by the fibre-smallness
-radius, with its constant chosen before the background metric varies.  The
-proof uses only the inverse-metric bound and the fact that the Koszul slot
-permutations are fibre isometries.
--/
-
 noncomputable section
 
 set_option linter.style.setOption false
@@ -94,8 +85,6 @@ private theorem conn_nf
               permCoeff (I := I) (M := M) g
                 (Equiv.swap (1 : Fin 3) 2)))) := rfl
 
-/-- The derivative-top Koszul coefficient has a dimension-only fibre bound,
-uniformly over every perturbation in the one-third fibre ball. -/
 theorem dagTop_cap_unif :
     ∃ K : ℝ, 0 ≤ K ∧
       ∀ (g gm : SmoothRiemannianMetric I M)
@@ -251,8 +240,6 @@ theorem dagTop_cap_unif :
     _ ≤ n * (3 * F) := mul_le_mul_of_nonneg_left hconn (by positivity)
     _ = K := by dsimp only [K]; ring
 
-/-- The transparent Ricci top coefficient is uniformly linear in the fibre
-perturbation radius on the diagonal realized segment. -/
 theorem ricciTop_cap_unif :
     ∃ K : ℝ, 0 ≤ K ∧
       ∀ (g : SmoothRiemannianMetric I M) (T : SmoothCcTensor g 0 2)
@@ -318,8 +305,6 @@ theorem ricciTop_cap_unif :
       simp only [K]
       ring
 
-/-- The complete principal-face coefficient left after subtracting the metric
-principal deviation is uniformly small in the fibre radius. -/
 theorem topKer_cap_unif :
     ∃ K : ℝ, 0 ≤ K ∧
       ∀ (g : SmoothRiemannianMetric I M) (T : SmoothCcTensor g 0 2)

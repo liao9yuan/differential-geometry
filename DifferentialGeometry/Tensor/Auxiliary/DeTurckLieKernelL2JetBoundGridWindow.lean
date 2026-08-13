@@ -65,7 +65,6 @@ open DifferentialGeometry.Analysis.Sobolev.TensorHilbert
 def antidiagonalTupleGridPartialSum (b : ℕ → ℝ) (m : ℕ) : ℝ :=
   ∑ k ∈ Finset.range m, Combinatorics.antidiagonalTupleGrid b k
 
-/-- Compatibility name for the DLa antidiagonal grid window. -/
 abbrev dLaGridWin := antidiagonalTupleGridPartialSum
 
 lemma dLaGridWin_nonneg (b : ℕ → ℝ) (hb : ∀ j, 0 ≤ b j) (m : ℕ) :
@@ -203,7 +202,6 @@ def antidiagonalTuplePairCount (m1 m2 : ℕ) : ℝ :=
   ∑ k1 ∈ Finset.range m1, ∑ k2 ∈ Finset.range m2, antidiagonalTupleTotalCount k1 *
     antidiagonalTupleTotalCount k2
 
-/-- Compatibility name for the product coefficient of two DLa grid windows. -/
 abbrev dLaPairCount := antidiagonalTuplePairCount
 
 lemma dLaPairCount_nonneg (m1 m2 : ℕ) : 0 ≤ antidiagonalTuplePairCount m1 m2 :=

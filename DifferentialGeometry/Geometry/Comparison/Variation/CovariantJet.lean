@@ -3,15 +3,6 @@ import DifferentialGeometry.Geometry.Comparison.Variation.GeneralCurvatureCommut
 
 set_option autoImplicit false
 
-/-!
-# Covariant parameter jets
-
-This file iterates covariant differentiation in the first parameter of a
-two-parameter variation. The construction retains a genuine tangent field over
-the same variation, so it can be reused by differentiated Jacobi equations and
-metric-compatible product formulas.
--/
-
 noncomputable section
 
 open Bundle
@@ -47,8 +38,6 @@ private theorem covFst_shift
 omit [InnerProductSpace Real E] [FiniteDimensional Real E]
   [NeZero (Module.finrank Real E)] [I.Boundaryless] [T2Space M]
   [SigmaCompactSpace M] in
-/-- Translating the first variation parameter does not change its velocity,
-apart from translating the evaluation point. -/
 theorem varFst_shift
     (f : Real -> Real -> M) (hf : IsSmoothVariation (I := I) f)
     (c t : Real) :
@@ -143,8 +132,6 @@ private theorem varSnd_shift
   rw [varSnd, varSnd, hcurve]
   rfl
 
-/-- A jointly smooth tangent field has a differentiable pinned chart
-representation on every first-parameter slice. -/
 lemma chartRep_fst_diff
     (f : Real -> Real -> M)
     (V : forall s t : Real, TangentSpace I (f s t))
@@ -181,8 +168,6 @@ lemma chartRep_fst_diff
     chartRep_snd_diff (I := I) (fun a b => f b a)
       (fun a b => V b a) hVswap t s
 
-/-- Covariant differentiation in the first parameter is additive on jointly
-smooth tangent fields. -/
 theorem covFst_add
     (g : SmoothRiemannianMetric I M) (f : Real -> Real -> M)
     (V W : forall s t : Real, TangentSpace I (f s t))
@@ -209,8 +194,6 @@ theorem covFst_add
       (chartRep_fst_diff (I := I) f V hV s t)
       (chartRep_fst_diff (I := I) f W hW s t)
 
-/-- Covariant derivatives of a jointly smooth tangent field commute up to
-curvature at an arbitrary first parameter. -/
 theorem cov_commute_at
     (g : SmoothRiemannianMetric I M) (f : Real -> Real -> M)
     (hf : IsSmoothVariation (I := I) f)
@@ -295,8 +278,6 @@ theorem cov_commute_at
   rw [hleft, hright, hcurv] at hraw
   exact hraw
 
-/-- The fully expanded second commutator at an arbitrary first parameter.
-This is the translation-covariant form of `cov_snd2_expand`. -/
 theorem cov_snd2_expand_at
     (g : SmoothRiemannianMetric I M) (f : Real -> Real -> M)
     (hf : IsSmoothVariation (I := I) f)
@@ -456,16 +437,12 @@ theorem cov_snd2_expand_at
   rw [hleft, hlead, hcurvD, hcurv1, hcurv2, hvar] at hraw
   exact hraw
 
-/-- The Jacobi-equation residual of a tangent field over a two-parameter
-variation. -/
 noncomputable def jacResidual
     (g : SmoothRiemannianMetric I M) (f : Real -> Real -> M)
     (V : forall s t : Real, TangentSpace I (f s t)) (s t : Real) :
     TangentSpace I (f s t) :=
   covSnd2 (I := I) g f V s t + jacCurv (I := I) g f V s t
 
-/-- The lower-order correction produced when the first-parameter covariant
-derivative is commuted through the Jacobi operator. -/
 noncomputable def jacStepCorr
     (g : SmoothRiemannianMetric I M) (f : Real -> Real -> M)
     (V : forall s t : Real, TangentSpace I (f s t)) (s t : Real) :
@@ -506,8 +483,6 @@ noncomputable def jacStepCorr
         covFst (I := I) g f
           (fun a v => varSnd (I := I) f a v) r t) s
 
-/-- One covariant launch derivative of the Jacobi residual equals the residual
-of the differentiated field plus the explicit lower-order correction. -/
 theorem jacResidual_step
     (g : SmoothRiemannianMetric I M) (f : Real -> Real -> M)
     (hf : IsSmoothVariation (I := I) f)
@@ -565,8 +540,6 @@ theorem jacResidual_step
   rw [hadd]
   linear_combination (norm := module) - hD2comm - hRcomm
 
-/-- Iterated covariant differentiation in the first parameter of a
-two-parameter tangent field. -/
 noncomputable def covFstIter
     (g : SmoothRiemannianMetric I M) (f : Real -> Real -> M) :
     Nat -> (forall s t : Real, TangentSpace I (f s t)) ->
@@ -598,8 +571,6 @@ theorem covFstIter_succ
   rfl
 
 omit [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
-/-- Every iterated first-parameter covariant derivative of a field that
-vanishes on one parameter slice also vanishes on that slice. -/
 theorem covFstIter_zero_of
     (g : SmoothRiemannianMetric I M) (f : Real -> Real -> M)
     (V : forall s t : Real, TangentSpace I (f s t))
@@ -623,8 +594,6 @@ theorem covFstIter_zero_of
       rw [hfield]
       exact covDerivAlong_zero (I := I) g (fun r : Real => f r t) s
 
-/-- Joint smoothness is preserved by every iterated covariant derivative in
-the first variation parameter. -/
 theorem covFstIter_smooth
     (g : SmoothRiemannianMetric I M) (f : Real -> Real -> M)
     (V : forall s t : Real, TangentSpace I (f s t))
@@ -655,23 +624,18 @@ theorem covFstIter_smooth
           (fun s t => covFstIter (I := I) g f n V s t) ih
       simpa only [covFstIter_succ, covFst] using hnext
 
-/-- The Jacobi residual of the `n`th covariant first-parameter jet. -/
 noncomputable def jacJetResidual
     (g : SmoothRiemannianMetric I M) (f : Real -> Real -> M)
     (V : forall s t : Real, TangentSpace I (f s t))
     (n : Nat) (s t : Real) : TangentSpace I (f s t) :=
   jacResidual (I := I) g f (covFstIter (I := I) g f n V) s t
 
-/-- The lower-order correction attached to the `n`th covariant
-first-parameter jet. -/
 noncomputable def jacJetCorr
     (g : SmoothRiemannianMetric I M) (f : Real -> Real -> M)
     (V : forall s t : Real, TangentSpace I (f s t))
     (n : Nat) (s t : Real) : TangentSpace I (f s t) :=
   jacStepCorr (I := I) g f (covFstIter (I := I) g f n V) s t
 
-/-- Successive covariant parameter jets satisfy the exact residual recurrence:
-differentiate the previous residual and subtract its explicit correction. -/
 theorem jacJetResidual_succ
     (g : SmoothRiemannianMetric I M) (f : Real -> Real -> M)
     (hf : IsSmoothVariation (I := I) f)
@@ -705,8 +669,6 @@ theorem jacJetResidual_succ
       (covFstIter_smooth (I := I) g f V hV n) hJn s t
   simpa only [jacJetResidual, jacJetCorr, covFstIter_succ] using hstep
 
-/-- Metric compatibility differentiates the inner product of two covariant
-parameter jets by raising the order on either factor. -/
 theorem innerJet_deriv
     (g : SmoothRiemannianMetric I M) (f : Real -> Real -> M)
     (V W : forall s t : Real, TangentSpace I (f s t))

@@ -3,14 +3,6 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.CurvatureCoefficien
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.SlotPermJet
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurckCoefficients.LieCorr0Split
 
-/-!
-# Operator-product refold for the mixed zeroth-order Lie correction
-
-This leaf exposes only the exact five-factor operator product used by the
-radius-free `lc0AMix` estimate.  It is independent of the unfinished broad
-`LieCorr0LowJet` refold file.
--/
-
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
@@ -37,13 +29,11 @@ variable
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
-/-- A moving cometric trace with a fixed permutation of its input slots. -/
 def lc0TraceRF (g₀ g₁ : SmoothRiemannianMetric I M) (p : ℕ)
     (σ : Equiv.Perm (Fin (p + 2))) : SmoothCcTensor g₀ (p + 2) p :=
   reindexCoeffGen (I := I) (M := M) g₀ (p + 2) p
     (pureTrace (I := I) (M := M) g₀ g₁ p) σ
 
-/-- The fibre of `lc0TraceRF` is the trace step in the canonical `lc0AMix` formula. -/
 theorem lc0TraceRF_fiber (g₀ g₁ : SmoothRiemannianMetric I M) (p : ℕ)
     (σ : Equiv.Perm (Fin (p + 2))) (x : M) :
     (show Tensor0SSpace (p + 2) I x →L[ℝ] Tensor0SSpace p I x from
@@ -236,7 +226,6 @@ private lemma mcd_fiber (g₀ g₁ gB : SmoothRiemannianMetric I M) (x : M) :
   rw [ContinuousLinearMap.smulRight_apply, MixedSection.eval₀_apply,
     ContinuousMultilinearMap.constOfIsEmpty_apply, one_smul]
 
-/-- One unsymmetrized half of the nested mixed connection correction. -/
 def lc0AMixHalfRF (g₀ g₁ gB : SmoothRiemannianMetric I M)
     (σlast : Equiv.Perm (Fin 4)) : SmoothCcTensor g₀ 2 2 :=
   appCcRS (I := I) (M := M) g₀ 2 4 2
@@ -251,7 +240,6 @@ def lc0AMixHalfRF (g₀ g₁ gB : SmoothRiemannianMetric I M)
           (slotExtendIter (I := I) (M := M) g₀ 0 3 2
             (metricConnDiffLoweredCc (I := I) (M := M) g₀ g₁ g₀)))))
 
-/-- Input permutation that realizes swapping the two final output slots. -/
 def lc0SwapPermRF : Equiv.Perm (Fin 4) :=
   ⟨![0, 1, 3, 2], ![0, 1, 3, 2], by decide, by decide⟩
 
@@ -298,7 +286,6 @@ private lemma swap_trace (g₁ : SmoothRiemannianMetric I M)
   rw [hpt (σ i)]
   rfl
 
-/-- Symmetrized operator-product normal form of the mixed connection correction. -/
 def lc0AMixFormRF (g₀ g₁ gB : SmoothRiemannianMetric I M) :
     SmoothCcTensor g₀ 2 2 :=
   (2 : ℝ) •
@@ -381,7 +368,6 @@ private lemma amixForm_fiber (g₀ g₁ gB : SmoothRiemannianMetric I M) (x : M)
       ContinuousLinearMap.add_apply, ContinuousLinearMap.comp_apply]]
   rfl
 
-/-- The canonical mixed zeroth-order Lie correction equals its five-factor product form. -/
 theorem amix_refold_rf (g₀ g₁ gB : SmoothRiemannianMetric I M) :
     lc0AMix (I := I) (M := M) g₀ g₁ gB =
       lc0AMixFormRF (I := I) (M := M) g₀ g₁ gB := by
@@ -393,17 +379,11 @@ theorem amix_refold_rf (g₀ g₁ gB : SmoothRiemannianMetric I M) :
   change lieCorr0AMixFib (I := I) g₀ g₁ gB x D = _
   exact (amixForm_fiber (I := I) (M := M) g₀ g₁ gB x D).symm
 
-/-! ## Fixed-background difference -/
-
-/-- The lowered connection-difference factor that remains after changing only
-the fixed DeTurck background. -/
 def lc0BgKappaRF (g₀ g₁ gB : SmoothRiemannianMetric I M) :
     SmoothCcTensor g₀ 0 3 :=
   metricConnDiffLoweredCc (I := I) (M := M) g₀ g₁ gB -
     metricConnDiffLoweredCc (I := I) (M := M) g₀ g₁ g₀
 
-/-- One unsymmetrized half of the mixed correction after the fixed-background
-difference has been moved into its lowered connection factor. -/
 def lc0AMixBgHalfRF (g₀ g₁ gB : SmoothRiemannianMetric I M)
     (σ : Equiv.Perm (Fin 4)) : SmoothCcTensor g₀ 2 2 :=
   appCcRS (I := I) (M := M) g₀ 2 4 2
@@ -418,8 +398,6 @@ def lc0AMixBgHalfRF (g₀ g₁ gB : SmoothRiemannianMetric I M)
           (slotExtendIter (I := I) (M := M) g₀ 0 3 2
             (metricConnDiffLoweredCc (I := I) (M := M) g₀ g₁ g₀)))))
 
-/-- Changing the fixed background in one mixed half changes only its first
-lowered connection factor. -/
 theorem amix_half_bg_rf
     (g₀ g₁ gB : SmoothRiemannianMetric I M)
     (σ : Equiv.Perm (Fin 4)) :
@@ -430,8 +408,6 @@ theorem amix_half_bg_rf
   rw [← appCcRS_sub_right, ← appCcRS_sub_right,
     ← appCcRS_sub_left, ← slotIterSub]
 
-/-- Exact fixed-background-difference factorization of the mixed zeroth-order
-Lie correction. -/
 theorem amix_bg_refold_rf
     (g₀ g₁ gB : SmoothRiemannianMetric I M) :
     lc0AMix (I := I) (M := M) g₀ g₁ gB -

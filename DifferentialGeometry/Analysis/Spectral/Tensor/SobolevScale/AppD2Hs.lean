@@ -1,14 +1,6 @@
 import DifferentialGeometry.Analysis.Spectral.Tensor.Estimates.H2H4Principal
 import DifferentialGeometry.Analysis.Spectral.Tensor.SobolevScale.SmoothCcDense
 
-/-!
-# Completed second-derivative tensor actions
-
-This file completes the smooth-core action `U ↦ Φ(∇²U)` from spectral `H4`
-to spectral `H2`.  In dimension three its operator norm is controlled by the
-intrinsic `H2` jet of the mixed-tensor coefficient.
--/
-
 noncomputable section
 
 open Bundle Manifold MeasureTheory Set Filter Tensor0SBundle
@@ -47,8 +39,6 @@ private noncomputable def appD2CcLin
     exact appCc_smul_right (I := I) (M := M) g (s + 2) c a Φ
       (iteratedCovGrad (I := I) g 0 s 2 U)
 
-/-- A fixed smooth mixed-tensor coefficient acting on a second covariant
-derivative, completed from spectral `H4` to spectral `H2`. -/
 noncomputable def appD2Hs
     (g : SmoothRiemannianMetric I M) (s c : ℕ)
     (Φ : SmoothCcTensor g (s + 2) c) :
@@ -58,8 +48,6 @@ noncomputable def appD2Hs
       (appD2CcLin (I := I) (M := M) g s c Φ)).extendOfNorm
     (ccToHsLin (I := I) (M := M) g s (4 : ℝ))
 
-/-- In dimension three, the norm of the completed second-derivative action is
-linear in an intrinsic `H2` coefficient-jet envelope. -/
 theorem appD2Hs_norm
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M) (s c : ℕ) :
@@ -86,8 +74,6 @@ theorem appD2Hs_norm
         ‖ccTensorToHs (I := I) (M := M) g s (4 : ℝ) U‖
   simpa only [mul_assoc] using happ Φ U A hA hΦ
 
-/-- The completed second-derivative action agrees with its geometric
-smooth-core formula. -/
 theorem appD2Hs_core
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M) (s c : ℕ)

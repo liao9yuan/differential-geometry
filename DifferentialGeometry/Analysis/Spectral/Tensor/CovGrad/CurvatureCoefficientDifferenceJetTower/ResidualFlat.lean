@@ -3,18 +3,6 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.CurvatureCoefficien
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.CurvatureCoefficientDifferenceJetTower.ResidualFlatGN
 import DifferentialGeometry.Analysis.Sobolev.BoundedFactorGridIntegral
 
-/-!
-# Capped-top-layer flat integral
-
-Chunk of the `CurvatureCoefficientDifferenceJetTower` tower, split
-out of the former 15111-line monolith (no longer elaborable in a
-single Lean process).  The public statement is verbatim; its proof
-blocks were extracted into `ResidualFlatSup`, `ResidualFlatGN` and the
-generic `Analysis.Sobolev.BoundedFactorGridIntegral` because the single
-declaration no longer fitted in memory either.  Chunk map:
-`CurvatureCoefficientDifferenceJetTower.md`.
--/
-
 noncomputable section
 
 set_option linter.style.setOption false

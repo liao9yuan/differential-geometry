@@ -5,14 +5,6 @@ import DifferentialGeometry.Geometry.Exponential.NormalBallChart
 set_option autoImplicit false
 set_option linter.unusedSectionVars false
 
-/-!
-# Intrinsic framed exponential local diffeomorphisms
-
-This file conjugates a fixed-first intrinsic exponential branch by the
-orthonormal normal frame. It then turns pointwise branch witnesses into a
-local-diffeomorphism statement on an entire model-space set.
--/
-
 noncomputable section
 
 open Bundle Set
@@ -46,8 +38,6 @@ variable [PseudoEMetricSpace M]
 namespace Exponential
 namespace ExpInvBranch
 
-/-- Conjugate a fixed-first intrinsic exponential branch by the center's
-orthonormal normal frame. -/
 noncomputable def framed
     {g : SmoothRiemannianMetric I M}
     {hEnorm : ∀ (x : M) (w : TangentSpace I x),
@@ -103,8 +93,6 @@ noncomputable def framed
     B.framed z = B.hom (intrFrameCLE (I := I) g p z) :=
   rfl
 
-/-- The framed branch agrees with the complete intrinsic framed exponential
-on its source. -/
 theorem framed_eq_intr
     {g : SmoothRiemannianMetric I M}
     {hEnorm : ∀ (x : M) (w : TangentSpace I x),
@@ -124,8 +112,6 @@ namespace NormalCoordinates
 
 open Exponential
 
-/-- A selected fixed-first branch through `z` makes the complete intrinsic
-framed exponential a local diffeomorphism at `z`. -/
 theorem intrFrame_localAt
     (g : SmoothRiemannianMetric I M)
     (hEnorm : ∀ (x : M) (w : TangentSpace I x),
@@ -138,8 +124,6 @@ theorem intrFrame_localAt
   change intrFrameCLE (I := I) g p z ∈ B.hom.source
   simpa only [intrFrameCLE_apply] using hz
 
-/-- Pointwise fixed-first branches on `U` assemble to a local-diffeomorphism
-statement for the complete intrinsic framed exponential on all of `U`. -/
 theorem intrFrame_localOn
     (g : SmoothRiemannianMetric I M)
     (hEnorm : ∀ (x : M) (w : TangentSpace I x),
@@ -153,9 +137,6 @@ theorem intrFrame_localOn
   obtain ⟨B, hz⟩ := hbranch z z.2
   exact intrFrame_localAt (I := I) g hEnorm p B hz
 
-/-- A controlled whole-ball inverse branch for the complete intrinsic framed
-exponential. The radius is an explicit parameter rather than a qualitative
-choice hidden in the branch. -/
 structure IntrinsicBallChart
     (g : SmoothRiemannianMetric I M)
     (hEnorm : ∀ (x : M) (w : TangentSpace I x),
@@ -170,8 +151,6 @@ structure IntrinsicBallChart
     EqOn hom (intrinsicFramedExp (I := I) g hEnorm p)
       (Metric.ball (0 : E) r)
 
-/-- Forget the intrinsic construction while retaining its controlled branch,
-pullback-metric carrier, and all-order smoothness. -/
 def IntrinsicBallChart.toNormalBallChart
     (g : SmoothRiemannianMetric I M)
     (hEnorm : ∀ (x : M) (w : TangentSpace I x),
@@ -186,8 +165,6 @@ def IntrinsicBallChart.toNormalBallChart
     exact intrFrame_zero (I := I) g hEnorm p
   exact NormalBallChart.ofHigher (I := I) hr c.hom hsub hzero
 
-/-- Local nonsingularity and injectivity on a model ball assemble to one
-controlled intrinsic whole-ball chart. -/
 theorem exists_intrBallChart
     (g : SmoothRiemannianMetric I M)
     (hEnorm : ∀ (x : M) (w : TangentSpace I x),

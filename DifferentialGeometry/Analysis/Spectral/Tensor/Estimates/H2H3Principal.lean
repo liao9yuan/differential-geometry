@@ -2,15 +2,6 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.Estimates.H2Pointwise
 import DifferentialGeometry.Analysis.Sobolev.TensorHilbert.AppCcJetWindowTame
 import DifferentialGeometry.Analysis.Sobolev.TensorHilbert.RemainderCoeffPerOrderJetEnvelopes
 
-
-
-
-
-
-
-
-
-
 namespace DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral
 
 open scoped ContDiff Manifold Topology BigOperators
@@ -60,9 +51,6 @@ private theorem grad_icg2_norm
     norm_nonneg (iteratedCovGrad (I := I) g 0 s 3 U)]
 
 omit [NeZero (Module.finrank ℝ E)] in
-/-- A supplied order-two two-arm grid controls the differentiated-coefficient
-cross term.  This separates the universal contraction estimate from the
-choice of a metricwise or class-uniform grid coefficient. -/
 theorem appCc_grad_of_grid
     (g : SmoothRiemannianMetric I M) (s c : ℕ) (Cg : ℝ) (hCg : 0 ≤ Cg)
     (Φ : SmoothCcTensor g (s + 2) c) (V : SmoothCcTensor g 0 (s + 1))
@@ -158,9 +146,6 @@ theorem appCc_grad_of_grid
   refine le_of_sq_le_sq ?_ (by positivity)
   rw [mul_pow, mul_pow, Real.sq_sqrt hCg]
   simpa [mul_assoc] using hsq'
-
-
-
 
 theorem appCc_grad_l2
     (g : SmoothRiemannianMetric I M) (s c : ℕ) :
@@ -283,9 +268,6 @@ theorem appCc_grad_l2
   refine le_of_sq_le_sq ?_ (by positivity)
   rw [mul_pow, mul_pow, Real.sq_sqrt (by positivity : 0 ≤ 2 * Cg)]
   simpa [mul_assoc] using hsq'
-
-
-
 
 theorem appCc_h2_h3_h1
     (hDim : Module.finrank ℝ E = 3)
@@ -442,8 +424,6 @@ theorem appCc_h2_h3_h1
           _ = (Cin + (Ccr * Cgr + sd * Cin)) * A * N := by ring) hCsp
     _ = (Csp * K) * A * N := by dsimp [K]; ring
 
-
-
 theorem appCc_c1_h2_h1
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M) (r c : ℕ) :
@@ -587,8 +567,6 @@ theorem appCc_c1_h2_h1
           _ = (Cin + (Cpt + sd * Cin)) * B * N := by ring) hCsp
     _ = (Csp * K) * (B0 + B1) * N := by dsimp [B, K]; ring
 
-
-
 theorem appCc_h2_h2_h1
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M) (r c : ℕ) :
@@ -623,8 +601,6 @@ theorem appCc_h2_h2_h1
       hbound Φ U A A hA hA hΦsup hΦ1
     _ = (2 * C) * A *
           ‖ccTensorToHs (I := I) (M := M) g r (2 : ℝ) U‖ := by ring
-
-
 
 theorem appCc_h2_cov_h1
     (hDim : Module.finrank ℝ E = 3)
@@ -791,8 +767,6 @@ theorem appCc_h2_cov_h1
             add_le_add hY0 hY1
           _ = (Cin + (Ccr * Cu + sd * Cin)) * A * N := by ring) hCsp
     _ = (Csp * K) * A * N := by dsimp [K]; ring
-
-
 
 theorem appCc_h3_h1
     (g : SmoothRiemannianMetric I M) (s c : ℕ) :

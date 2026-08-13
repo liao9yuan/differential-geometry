@@ -1,14 +1,6 @@
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.SobolevNonlinearityExistence
 import DifferentialGeometry.Analysis.Spectral.Tensor.Spectrum.SlotSwapEquivariance
 
-/-!
-# The realized Ricci--DeTurck representation
-
-This file identifies the low-regularity remainder plus the frozen connection
-Laplacian with the geometric Ricci--DeTurck right-hand side.  The statement is
-pointwise and belongs below the short-time existence assembly.
--/
-
 noncomputable section
 
 open Bundle Manifold MeasureTheory Set
@@ -129,8 +121,6 @@ private theorem bilinSymm_sec_congr
     ccTensorBilin_apply, ccTensorBilin_apply, ccTensorBilin_apply,
     ccTensorBilin_apply, hmodel v w, hmodel w v]
 
-/-- The realized low-regularity remainder plus the frozen connection Laplacian
-is the Ricci--DeTurck right-hand side. -/
 theorem deTurck_rem_repr
     (g₀ g_bg : SmoothRiemannianMetric I M)
     (S : SmoothCcTensor g₀ 0 2) {δ : ℝ}

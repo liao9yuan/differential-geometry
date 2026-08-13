@@ -1,47 +1,5 @@
 import DifferentialGeometry.Analysis.Spectral.Tensor.Estimates.H1H2AppCcRS
 
-/-!
-# All-order product jet estimate for the mixed operator-field action `appCcRS`
-
-The `appCc`/`appCcRS` estimate family in this directory is stocked at *fixed*
-jet order: `appRS_h1_h2_h1`, `appRS_h2_h1_h1` and `appRS_h2_h2_h2` all pin the
-covariant `L2` jet window to order one or two.  Everything that consumes them
-downstream (the `app_h2_mul`-style product bounds of the DeTurck low-base
-action) is therefore fixed-order too, which is what blocks an all-order jet
-tower for the DeTurck remainder coefficients.
-
-This file supplies the order-generic members.  Three statements, in increasing
-strength of hypothesis:
-
-* `appRS_hn_sup` — the engine.  For every order `n`, the order-`n` covariant
-  `L2` jet of `appCcRS g p r c Φ W` is bounded by the **Moser pairing**
-  `C n * (B² · jet_n Φ + A² · jet_n W)`, where `A`, `B` are pointwise fibre
-  bounds for `Φ`, `W`.  No dimension hypothesis, no order gate, and *sharp in
-  the jet order*: order `n` on the right for order `n` on the left.
-* `appCcRS_jet_mul` — the product form
-  `jet_n (appCcRS g p r c Φ W) ≤ C n * jet_n Φ * jet_n W`,
-  i.e. the statement that the covariant `H^n` jet is an algebra for the
-  operator-field action.  This needs the supercritical gate
-  `finrank ℝ E / 2 + 1 ≤ n` (in dimension three: `2 ≤ n`), and the gate is
-  necessary: at `n = 0` the claim is the false `L²·L² ⊆ L²`.
-* `appRS_hn_hn_hn` — the same fact in the envelope shape used by the rest of the
-  family, on a closed three-manifold.  At `n = 2` it is `appRS_h2_h2_h2`.
-
-`C n` grows with `n` (it contains the `n`-th Leibniz grid weight `appCcGdiag`,
-exponential in `n`); no `n`-uniform constant is asserted.
-
-The proof composes three order-generic facts that already exist in the tree and
-adds no new tensor calculus: the pointwise Leibniz diagonal product grid at
-arbitrary contravariant rank
-(`rfns_iteratedCovGrad_appCcRS_diagonalProductGrid_rankLeft_le`), its integrated
-Gagliardo--Nirenberg two-arm companion
-(`exists_integrated_iteratedCovGrad_diagonalProductGrid_twoArm_rs_le`), and the
-sharp `C0` jet-sum Sobolev window
-(`exists_riemannianFiberNorm_le_iteratedCovGrad_l2_jetSum_supercritical`).  The
-only content is that the per-order cells of the grid are summed against a single
-window instead of a fixed one, which is exactly what removes the order gate.
--/
-
 noncomputable section
 
 namespace DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral
@@ -69,17 +27,6 @@ private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
-/-- **All-order Moser jet estimate for the mixed operator-field action.**
-
-For every order `n`, arbitrary valences `p, r, c`, and pointwise fibre bounds
-`A` for `Φ` and `B` for `W`,
-
-`∑_{j ≤ n} ‖∇ʲ(appCcRS g p r c Φ W)‖² ≤ C n * (B² ∑_{j ≤ n} ‖∇ʲΦ‖² +
-  A² ∑_{j ≤ n} ‖∇ʲW‖²)`.
-
-The pairing is the Moser one: each arm's `L∞` bound multiplies the *other* arm's
-full `L2` jet, so the estimate is sharp in the jet order and needs neither a
-dimension hypothesis nor an order gate.  `C n` grows with `n`. -/
 theorem appRS_hn_sup (g : SmoothRiemannianMetric I M) (p r c : ℕ) :
     ∃ C : ℕ → ℝ, (∀ n, 0 ≤ C n) ∧
       ∀ (n : ℕ) (Φ : SmoothCcTensor g r c) (W : SmoothCcTensor g p r) (A B : ℝ),
@@ -180,19 +127,6 @@ theorem appRS_hn_sup (g : SmoothRiemannianMetric I M) (p r c : ℕ) :
           (B ^ 2 * SΦ + A ^ 2 * SW) := by
         rw [Finset.sum_mul]
 
-/-- **All-order product jet estimate for the mixed operator-field action.**
-
-Above the Sobolev supercritical threshold `finrank ℝ E / 2 + 1 ≤ n` (in
-dimension three: `2 ≤ n`), the covariant `L2` jet through order `n` is an
-algebra for `appCcRS`:
-
-`∑_{j ≤ n} ‖∇ʲ(appCcRS g p r c Φ W)‖² ≤ C n * (∑_{j ≤ n} ‖∇ʲΦ‖²) *
-  (∑_{j ≤ n} ‖∇ʲW‖²)`.
-
-This is the order-generic replacement for the fixed-order-two product bounds of
-the DeTurck low-base action.  The gate is necessary, not technical: below the
-threshold the jet sum does not control the pointwise fibre norm and the claim
-degenerates to `L² · L² ⊆ L²`, which is false.  `C n` grows with `n`. -/
 theorem appCcRS_jet_mul (g : SmoothRiemannianMetric I M) (p r c : ℕ) :
     ∃ C : ℕ → ℝ, (∀ n, 0 ≤ C n) ∧
       ∀ (n : ℕ), Module.finrank ℝ E / 2 + 1 ≤ n →
@@ -257,12 +191,6 @@ theorem appCcRS_jet_mul (g : SmoothRiemannianMetric I M) (p r c : ℕ) :
     _ = K n * (CW ^ 2 + CΦ ^ 2) * SΦ * SW := by
         rw [hA2, hB2]; ring
 
-/-- **Dimension-three envelope form of the all-order product jet estimate.**
-
-The `appRS_h*` family's envelope shape, at every order `n ≥ 2`: if the covariant
-`L2` jets of `Φ` and `W` through order `n` are bounded by `A²` and `B²`, so is
-the jet of `appCcRS g p r c Φ W` by `(C n * A * B)²`.  At `n = 2` this is
-`appRS_h2_h2_h2`. -/
 theorem appRS_hn_hn_hn (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M) (p r c : ℕ) :
     ∃ C : ℕ → ℝ, (∀ n, 0 ≤ C n) ∧

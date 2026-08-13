@@ -1,15 +1,6 @@
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.DeTurckRemainderLowBaseAction
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.PrincipalLowRegCore
 
-/-!
-# Principal-subtracted low-regularity Ricci--DeTurck residual
-
-This module records the canonical smooth residual obtained after subtracting
-the variable-cometric principal action from the zero-based Ricci--DeTurck
-remainder.  Its exact low-base split keeps the remaining small second-order
-action visible and separates the genuinely first-order diagonal term.
--/
-
 noncomputable section
 set_option backward.isDefEq.respectTransparency false
 
@@ -34,8 +25,6 @@ variable
       [IsManifold I ∞ M] [CompactSpace M] [I.Boundaryless]
       [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M]
 
-/-- The zero-based smooth Ricci--DeTurck remainder after subtracting exactly
-the moving-cometric principal action. -/
 noncomputable def principalResidual
     (g : SmoothRiemannianMetric I M) (T : SmoothCcTensor g 0 2)
     {δ : ℝ} (hδ_lt : δ < 1)
@@ -51,8 +40,6 @@ noncomputable def principalResidual
     deTurckPrincipalCometricArm (I := I) (M := M) g
       (tensorSectionRealizeMetric (I := I) g T hδ_lt hδ) T
 
-/-- The spectral `H2` residual formed with the completed low-regularity
-principal operator. -/
 noncomputable def principalResidualH2
     (g : SmoothRiemannianMetric I M) (T : SmoothCcTensor g 0 2)
     {δ : ℝ} (hδ_lt : δ < 1)
@@ -70,8 +57,6 @@ noncomputable def principalResidualH2
       (ccTensorToHs (I := I) (M := M) g 2 (2 : ℝ) T)
       (ccTensorToHs (I := I) (M := M) g 2 (4 : ℝ) T)
 
-/-- The canonical lower residual obtained after subtracting the complete
-low-base second-order action. -/
 noncomputable def lowBaseResidual
     (g : SmoothRiemannianMetric I M) (T : SmoothCcTensor g 0 2)
     {δ : ℝ} (hδ_lt : δ < 1)
@@ -87,8 +72,6 @@ noncomputable def lowBaseResidual
     (lowBaseData (I := I) (M := M) g g T hδ_lt hδ hδZ).a2
       (I := I) (M := M) T
 
-/-- The spectral `H2` realization of the complete-A2-subtracted lower
-residual. -/
 noncomputable def lowBaseResidualH2
     (g : SmoothRiemannianMetric I M) (T : SmoothCcTensor g 0 2)
     {δ : ℝ} (hδ_lt : δ < 1)
@@ -101,8 +84,6 @@ noncomputable def lowBaseResidualH2
   ccTensorToHs (I := I) (M := M) g 2 (2 : ℝ)
     (lowBaseResidual (I := I) (M := M) g T hδ_lt hδ hδZ)
 
-/-- On the smooth metric core, the completed principal-subtracted residual is
-the spectral realization of `principalResidual`. -/
 theorem residualH2_core
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M) (T : SmoothCcTensor g 0 2)
@@ -144,10 +125,6 @@ theorem residualH2_core
   rw [hsub, hsub, hprincipal]
   rw [hsub]
 
-/-- The canonical principal-subtracted residual is the sum of the unresolved
-second-order tail and the genuinely first-order low-base action.  The latter
-has the sharp diagonal `H3 → H2` estimate with constants depending only on the
-lower `H2` radius. -/
 theorem residual_split_h2
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M) :
@@ -194,9 +171,6 @@ theorem residual_split_h2
   rw [hmain.1]
   abel
 
-/-- After subtracting the complete canonical second-order action, the smooth
-lower residual is exactly the low-base first-order action and has the sharp
-diagonal `H3 → H2` jet bound. -/
 theorem lowResidual_diag
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M) :

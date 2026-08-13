@@ -4,18 +4,6 @@ import DifferentialGeometry.Tensor.RSTensor.ContractionLeibniz
 set_option autoImplicit false
 set_option backward.isDefEq.respectTransparency false
 
-
-
-
-
-
-
-
-
-
-
-
-
 noncomputable section
 
 namespace Tensor0SBundle
@@ -29,7 +17,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
 variable [IsManifold I 1 M] [IsManifold I 2 M]
 variable [IsManifold I (∞ : WithTop ℕ∞) M]
 variable [T2Space M]
-
 
 omit [IsManifold I 2 M] [T2Space M] in
 theorem normSq0S_product {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
@@ -84,8 +71,6 @@ theorem normSq0S_product {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
   rfl
 
 omit [IsManifold I 2 M] [T2Space M] in
-/-- The Frobenius norm square is multiplicative on the pointwise tensor
-product of two covariant tensor fibers. -/
 theorem normSq0S_prod {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
     (g : SmoothMetric_gen I M) (x : M) {s q : ℕ}
     (basis : Module.Basis Idx Real (TangentSpace I x))
@@ -134,13 +119,6 @@ theorem normSq0S_prod {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
     rfl
   rw [hprod, mul_pow]
   rfl
-
-
-
-
-
-
-
 
 omit [IsManifold I 2 M] [T2Space M] in
 theorem normSq0S_domDomCongr {Idx : Type*} [Fintype Idx] [DecidableEq Idx]

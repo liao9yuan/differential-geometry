@@ -8,23 +8,6 @@ import DifferentialGeometry.Analysis.Sobolev.TensorHilbert.InteriorProductJetBou
 import DifferentialGeometry.Geometry.Curvature.CurvatureOperator.SlotFreeCurvatureOperatorDerivative
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.CurvatureCoefficientDifferenceJetTower.PairTrace
 
-/-!
-# `lieCorr0Field` realizedFam jet-L2 top-separated producer
-
-The second genuinely-missing `C₀` constituent of the `Ψ₀` map
-(`Ψ₀ = -2·arm0Field + deTurckLieCoeffField + lieCorr0Field`).  We produce the
-`realizedFam` per-order and summed top-separated jet-L2 bounds for
-`lieCorr0Field`, shape-matching the `deTurckLieCoeffField` siblings.
-
-`lieCorr0Field` genuinely carries the top window `∇^{i+2}T` (RULING 2, not the
-traceHessian pattern): via `lc0_decomp` it is
-`lc0Insert + lc0VB + lc0AMix + lc0Riem`, and `lc0Insert` contains the base
-insertion `lc0Insert g₀ g₁ g₀ = -deTurckLieDLbCoeffField g₀ g₁ g₀` whose
-`∇^i` reaches `∇^{i+2}T` — its top-separation is inherited verbatim from the
-committed DLb field producer at `g_bg := g₀` (`Ktop` R-free).  The remaining
-four pieces are `∇²T`-free and land in the `R`-carrying `Kc`.
--/
-
 noncomputable section
 
 set_option autoImplicit false
@@ -66,8 +49,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
 omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
-/-- The reanchoring endomorphism arm field and the DLb coefficient field are the
-same object (both are `ofCLM (deTurckLieDLbFib g₁ g_bg)`). -/
 theorem endoArm_eq_dlb (g₀ g₁ g_bg : SmoothRiemannianMetric I M) :
     deTurckLieEndoArmField (I := I) (M := M) g₀ g₁ g_bg =
       deTurckLieDLbCoeffField (I := I) (M := M) g₀ g₁ g_bg := by
@@ -76,9 +57,6 @@ theorem endoArm_eq_dlb (g₀ g₁ g_bg : SmoothRiemannianMetric I M) :
   intro x
   rw [deTurckLieEndoArmField_toSection, deTurckLieDLbCoeffField_toSection]
 
-/-- The base insertion piece is the negative of the DLb coefficient field.
-Combines `insert_base` (at `g_bg := g₀`) with `endoArm_eq_dlb`; this routes
-`lieCorr0Field`'s top window through the committed DLb producer. -/
 theorem lc0Insert_base_eq_neg_dlb (g₀ g₁ : SmoothRiemannianMetric I M) :
     lc0Insert (I := I) (M := M) g₀ g₁ g₀ =
       -deTurckLieDLbCoeffField (I := I) (M := M) g₀ g₁ g₀ := by
@@ -87,8 +65,6 @@ theorem lc0Insert_base_eq_neg_dlb (g₀ g₁ : SmoothRiemannianMetric I M) :
   rw [eq_neg_of_add_eq_zero_left h, endoArm_eq_dlb]
 
 set_option linter.unusedVariables false in
-/-- **Top piece.**  The base insertion piece inherits the DLb field producer's
-top-separated bound at `g_bg := g₀` (`Ktop` R-free). -/
 private theorem lc0InsertBase_realizedFam_perOrder_topSeparated
     (g₀ : SmoothRiemannianMetric I M) (a : ℕ)
     (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) {R : ℝ} (hR : 0 ≤ R)
@@ -120,8 +96,6 @@ private theorem lc0InsertBase_realizedFam_perOrder_topSeparated
   rw [lc0Insert_base_eq_neg_dlb, iteratedCovGrad_neg, norm_neg]
   exact hb
 
-/-- Five-way squared triangle: `t ≤ a+b+c+d+e` (all nonneg) gives
-`t² ≤ 5·(a²+b²+c²+d²+e²)`.  Used for the `lc0_decomp` five-summand assembly. -/
 private theorem sq_le_five_add (t a b c d e : ℝ) (ht : 0 ≤ t)
     (ha : 0 ≤ a) (hb : 0 ≤ b) (hc : 0 ≤ c) (hd : 0 ≤ d) (he : 0 ≤ e)
     (htri : t ≤ a + b + c + d + e) :
@@ -131,30 +105,15 @@ private theorem sq_le_five_add (t a b c d e : ℝ) (ht : 0 ≤ t)
     sq_nonneg (a - d), sq_nonneg (a - e), sq_nonneg (b - c), sq_nonneg (b - d),
     sq_nonneg (b - e), sq_nonneg (c - d), sq_nonneg (c - e), sq_nonneg (d - e)]
 
-/-! ## The `lc0Riem` `Kc` atom
-
-`lc0Riem g₀ g₁` is the fixed-curvature piece
-`-traceStep(g₁, RiemPerm2) ∘ traceStep(g₀, RiemPerm1) ∘ prodKappa(lieCorr0RiemLoweredFib g₀)`.
-Only the outer `g₁`-cometric double trace moves with `g₁`; everything to its right
-depends on `g₀` alone.  We therefore write the piece as `appCcRS` of a live
-`(4, 2)` cometric arm against a fixed `(2, 4)` passenger, and control the live arm
-by the committed rank-`1` cometric envelope through `slotExtend`. -/
-
-/-- Source-slot three-cycle `0 ↦ 1 ↦ 2 ↦ 0` relating the rank-`2` cometric double
-trace to the passenger-extension of the rank-`1` one. -/
 private def lc0RiemSrc : Equiv.Perm (Fin 4) :=
   ⟨![1, 2, 0, 3], ![2, 0, 1, 3], by decide, by decide⟩
 
-/-- **Live arm.**  The moving cometric double trace at rank `2`, presented as a
-`g₀`-based `(4, 2)` operator field built from the committed rank-`1` cast
-`cometricCastG0`. -/
 noncomputable def lc0RiemLive (g₀ g₁ : SmoothRiemannianMetric I M) :
     SmoothCcTensor g₀ 4 2 :=
   reindexCoeffGen (I := I) (M := M) g₀ 4 2
     (slotExtend (I := I) (M := M) g₀ 3 1 (cometricCastG0 (I := I) g₀ g₁)) lc0RiemSrc
 
 omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] [SigmaCompactSpace M] in
-/-- The live arm's fibre is exactly the rank-`2` `g₁`-cometric double trace. -/
 theorem lc0RiemLive_fiber (g₀ g₁ : SmoothRiemannianMetric I M) (x : M) :
     (show Tensor0SSpace 4 I x →L[ℝ] Tensor0SSpace 2 I x from
         (lc0RiemLive (I := I) (M := M) g₀ g₁).toSection x) =
@@ -184,8 +143,6 @@ theorem lc0RiemLive_fiber (g₀ g₁ : SmoothRiemannianMetric I M) (x : M) :
   funext i
   fin_cases i <;> rfl
 
-/-- The fixed passenger fibre: everything in `lieCorr0RiemFib` to the right of the
-moving cometric double trace, including the outer slot permutation. -/
 private noncomputable def lc0RiemPassFib (g₀ : SmoothRiemannianMetric I M) (x : M) :
     Tensor0SSpace 2 I x →L[ℝ] Tensor0SSpace 4 I x :=
   (domDomCongrFibRank (I := I) 4 lieCorr0RiemPerm2 x).comp
@@ -219,8 +176,6 @@ private theorem lc0RiemPassFib_contMDiff (g₀ : SmoothRiemannianMetric I M) :
   rw [lc0RiemPassFib]
   rw [ContinuousLinearMap.comp_apply, ContinuousLinearMap.comp_apply, domDomCongrFibRank_apply]
 
-/-- **Fixed passenger.**  The `g₀`-only `(2, 4)` operator field carrying the
-curvature insertion and the background trace step of `lc0Riem`. -/
 noncomputable def lc0RiemPass (g₀ : SmoothRiemannianMetric I M) :
     SmoothCcTensor g₀ 2 4 where
   toSection :=
@@ -304,8 +259,6 @@ private lemma lc0RiemPass_sum
   rw [hYval]
   rfl
 
-/-- The fixed Riemann passenger evaluates by inserting the curvature operator
-in its first covariant passenger slot. -/
 theorem lc0RiemPass_eval
     (g : SmoothRiemannianMetric I M) (x : M)
     (D : Tensor0SSpace 2 I x) (v : Fin 4 → TangentSpace I x) :
@@ -478,8 +431,6 @@ private lemma lc0RiemRF_eval
   funext i
   fin_cases i <;> rfl
 
-/-- The fixed Riemann passenger is a source swap, one slot extension, and an
-output permutation of the canonical rank-one free-slot curvature operator. -/
 theorem lc0RiemPass_refold
     (g : SmoothRiemannianMetric I M) :
     lc0RiemPass (I := I) (M := M) g =
@@ -517,7 +468,6 @@ theorem lc0RiemPass_refold
     lc0RiemRF_eval]
   ring
 
-/-- Fibrewise form of the two-arm factorization of the fixed-curvature piece. -/
 private theorem lc0RiemFib_eq (g₀ g₁ : SmoothRiemannianMetric I M) (x : M) :
     lieCorr0RiemFib (I := I) g₀ g₁ x =
       -((show Tensor0SSpace 4 I x →L[ℝ] Tensor0SSpace 2 I x from
@@ -527,8 +477,6 @@ private theorem lc0RiemFib_eq (g₀ g₁ : SmoothRiemannianMetric I M) (x : M) :
   rw [lieCorr0RiemFib, lc0RiemLive_fiber, neg_one_smul]
   rfl
 
-/-- **The `lc0Riem` two-arm factorization.**  The fixed-curvature piece is the
-operator-field action of the live rank-`2` cometric arm on the fixed passenger. -/
 theorem lc0Riem_eq_app (g₀ g₁ : SmoothRiemannianMetric I M) :
     lc0Riem (I := I) (M := M) g₀ g₁ =
       -appCcRS (I := I) (M := M) g₀ 2 4 2
@@ -539,8 +487,6 @@ theorem lc0Riem_eq_app (g₀ g₁ : SmoothRiemannianMetric I M) :
   rw [SmoothCcTensor.toSection_neg, ContMDiffSection.coe_neg, Pi.neg_apply, appCcRS_toSection]
   exact lc0RiemFib_eq (I := I) (M := M) g₀ g₁ x
 
-/-- Pointwise: the live arm's jets are dominated by the jets of the committed
-rank-`1` cometric cast, at the cost of one factor of the dimension. -/
 theorem lc0RiemLive_rfns_le (g₀ g₁ : SmoothRiemannianMetric I M) (m : ℕ) (x : M) :
     riemannianFiberNormSq (I := I) (M := M) g₀ 4 (2 + m) x
         ((iteratedCovGrad (I := I) g₀ 4 2 m
@@ -552,7 +498,6 @@ theorem lc0RiemLive_rfns_le (g₀ g₁ : SmoothRiemannianMetric I M) (m : ℕ) (
   exact rfns_iteratedCovGrad_slotExtend_le (I := I) (M := M) g₀ 3 1
     (cometricCastG0 (I := I) g₀ g₁) m x
 
-/-- `L²` form of `lc0RiemLive_rfns_le`. -/
 theorem lc0RiemLive_l2_le (g₀ g₁ : SmoothRiemannianMetric I M) (m : ℕ) :
     ‖iteratedCovGrad (I := I) g₀ 4 2 m (lc0RiemLive (I := I) (M := M) g₀ g₁)‖ ^ 2 ≤
       (Module.finrank ℝ E : ℝ) *
@@ -575,9 +520,6 @@ theorem lc0RiemLive_l2_le (g₀ g₁ : SmoothRiemannianMetric I M) (m : ℕ) :
     ← SmoothCcTensor.norm_def]
 
 set_option linter.unusedVariables false in
-/-- **`lc0Riem` `Kc` atom.**  The fixed-curvature piece of `lieCorr0Field` satisfies
-the `realizedFam` per-order top-separated jet-`L²` bound with vanishing top constant:
-its `∇^i` never reaches `∇^{i+2}T`, so all of it lands in the `R`-carrying `Kc`. -/
 private theorem lc0Riem_realizedFam_perOrder_topSep
     (g₀ : SmoothRiemannianMetric I M) (a : ℕ)
     (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) {R : ℝ} (hR : 0 ≤ R)
@@ -666,7 +608,6 @@ private theorem lc0Riem_realizedFam_perOrder_topSep
       _ = R := by ring
   obtain ⟨hsup0, hjet⟩ := hcom (realizedFam (I := I) g₀ T T' hδ hδ' s)
     (convexPerturbation (I := I) g₀ T T' s) hδP_le hδP htie hPball
-  -- order-`0` fibre sup bounds for the two arms
   have hLsup : ∀ x : M, riemannianFiberNormSq (I := I) (M := M) g₀ 4 2 x
       ((lc0RiemLive (I := I) (M := M) g₀
         (realizedFam (I := I) g₀ T T' hδ hδ' s)).toSection x) ≤
@@ -686,7 +627,6 @@ private theorem lc0Riem_realizedFam_perOrder_topSep
     (lc0RiemLive (I := I) (M := M) g₀ (realizedFam (I := I) g₀ T T' hδ hδ' s))
     (lc0RiemPass (I := I) g₀) (Real.sqrt (fr * Λ ^ 2)) (Real.sqrt KP)
     (Real.sqrt_nonneg _) (Real.sqrt_nonneg _) hLsup hPsup
-  -- the live arm's jet-`L²` sum
   have hLsum : ∑ m ∈ Finset.range (i + 1),
       ‖iteratedCovGrad (I := I) g₀ 4 2 m
         (lc0RiemLive (I := I) (M := M) g₀
@@ -706,7 +646,6 @@ private theorem lc0Riem_realizedFam_perOrder_topSep
                 (realizedFam (I := I) g₀ T T' hδ hδ' s))‖ ^ 2 := by
           rw [Finset.mul_sum]
       _ ≤ fr * F i := mul_le_mul_of_nonneg_left (hjet i hi) hfr_nn
-  -- pointwise product grid for the two-arm action, then integrate
   have hnorm : ‖iteratedCovGrad (I := I) g₀ 2 2 i
         (appCcRS (I := I) (M := M) g₀ 2 4 2
           (lc0RiemLive (I := I) (M := M) g₀ (realizedFam (I := I) g₀ T T' hδ hδ' s))
@@ -730,7 +669,6 @@ private theorem lc0Riem_realizedFam_perOrder_topSep
     refine le_trans key ?_
     rw [MeasureTheory.integral_const_mul]
     exact mul_le_mul_of_nonneg_left hgrid_bd (appCcGdiag_nonneg (E := E) i)
-  -- assemble
   rw [lc0Riem_eq_app, iteratedCovGrad_neg, norm_neg]
   have hKPsq : Real.sqrt KP ^ 2 = KP := Real.sq_sqrt hKP_nn
   have hΛsq : Real.sqrt (fr * Λ ^ 2) ^ 2 = fr * Λ ^ 2 :=
@@ -759,32 +697,12 @@ private theorem lc0Riem_realizedFam_perOrder_topSep
           (mul_nonneg (mul_nonneg hfr_nn (sq_nonneg Λ)) (hNPass_nn i))))
   nlinarith [le_trans hnorm hmid, hsum_nn, hKc_nn]
 
-/-! ## The `lc0Insert`-difference `Kc` atom (`lc0Insert g_bg − lc0Insert g₀`)
-
-By `nEndo_diff` (`LieCorr0Split.lean:103`) the difference of insertion pieces is the `(2, 2)`
-derivation insertion of the endomorphism
-`connDiff g₁ g₀ (deTurckVF g₁ g₀) − connDiff g₁ g₀ (deTurckVF g₁ g_bg)`
-= `connDiffDVFSection g₀ g₁ g₀ − connDiffDVFSection g₀ g₁ g_bg` (`endoDiffSection`).  Its
-slot-`0` `(1, 1)` insertion is `cometricRaiseSlot0Field g₀ 0 (wAlphaB g₀ g₁ g₀ − wAlphaB g₀ g₁ g_bg)`
-(producer HOIST `connDiffDVFInsert_eq_cometricRaise`).  Since `wAlphaB` is `∇²P`-free its jets are
-`ballUniform` per order, so the `(1, 1)` object is bounded by the producer
-`connDiffDVFInsertDiff_realizedFam_jetL2_perOrder_ballUniform` (crude triangle
-`wAlphaB g₀ − wAlphaB g_bg`; the `wOmegaDiff_eq` cancellation is NOT needed for a `ballUniform`
-bound).  Here we (a) prove the `(2, 2)` insert-difference is the slotInsert-sum of `endoDiffSection`
-(`lc0InsDiff_eq`, mirroring `deTurckLieDLbCoeffField_eq_slotInsert_sum`), (b)
-reduce it to the `(1, 1)` object `×4·finrank` (mirroring `normSq_iCG_dlbField_le`), and (c) chain the
-producer bound to discharge the atom. -/
-
-/-- Squared triangle over two summands (copied from `DeTurckLieCoeffL2JetBound`; the original is
-`private`). -/
 private theorem sq_le_two_add (t u v c1 c2 : ℝ) (ht : 0 ≤ t) (hu : 0 ≤ u) (hv : 0 ≤ v)
     (htri : t ≤ u + v) (h1 : u ^ 2 ≤ c1) (h2 : v ^ 2 ≤ c2) : t ^ 2 ≤ 2 * (c1 + c2) := by
   have huv : 0 ≤ u + v := by linarith
   nlinarith [mul_le_mul htri htri ht huv, sq_nonneg (u - v), h1, h2, hu, hv]
 
 set_option linter.unusedSectionVars false in
-/-- Pointwise `rfns(∇^i X) ≤ c·rfns(∇^i Y)` upgrades to `‖∇^i X‖² ≤ c·‖∇^i Y‖²` (copied from
-`DeTurckLieCoeffL2JetBound`; the original is `private`). -/
 private theorem normSq_iCG_le_scaled (g₀ : SmoothRiemannianMetric I M)
     (X : SmoothCcTensor g₀ 2 2) (Y : SmoothCcTensor g₀ 1 1) (i : ℕ) (c : ℝ)
     (hpt : ∀ x : M,
@@ -812,16 +730,12 @@ private theorem normSq_iCG_le_scaled (g₀ : SmoothRiemannianMetric I M)
   exact (tensorL2Norm_sq_toFun_eq_integral_riemannianFiberNormSq_rs (I := I) (M := M) g₀ 1 (1 + i)
     (iteratedCovGrad (I := I) g₀ 1 1 i Y)).symm
 
-/-- The `(1, 1)` endomorphism-difference section carried by the `lc0Insert`-difference:
-`connDiffDVFSection g₀ g₁ g₀ − connDiffDVFSection g₀ g₁ g_bg`; equals `lieCorr0NEndo g_bg − g₀`
-pointwise (`nEndo_diff`). -/
 def endoDiffSection (g₀ g₁ g_bg : SmoothRiemannianMetric I M) :
     ContMDiffSection I (E →L[ℝ] E) ∞ (fun x : M => TangentSpace I x →L[ℝ] TangentSpace I x) :=
   connDiffDVFSection (I := I) (M := M) g₀ g₁ g₀ -
     connDiffDVFSection (I := I) (M := M) g₀ g₁ g_bg
 
 omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] in
-/-- Pointwise: the endo-difference section is the `lieCorr0NEndo` difference (`nEndo_diff`). -/
 private lemma endoDiffSection_apply (g₀ g₁ g_bg : SmoothRiemannianMetric I M) (x : M) :
     endoDiffSection (I := I) (M := M) g₀ g₁ g_bg x =
       lieCorr0NEndo (I := I) g₀ g₁ g_bg x - lieCorr0NEndo (I := I) g₀ g₁ g₀ x := by
@@ -829,8 +743,6 @@ private lemma endoDiffSection_apply (g₀ g₁ g_bg : SmoothRiemannianMetric I M
   exact (nEndo_diff (I := I) (M := M) g₀ g₁ g_bg x).symm
 
 set_option linter.unusedSectionVars false in
-/-- **Field identity.**  The `lc0Insert`-difference is the slotInsert-sum of the endo-difference
-section (mirrors `deTurckLieDLbCoeffField_eq_slotInsert_sum`). -/
 theorem lc0InsDiff_eq (g₀ g₁ g_bg : SmoothRiemannianMetric I M) :
     lc0Insert (I := I) (M := M) g₀ g₁ g_bg - lc0Insert (I := I) (M := M) g₀ g₁ g₀ =
       slotInsertEndoCc (I := I) (M := M) g₀ 1 (endoDiffSection (I := I) (M := M) g₀ g₁ g_bg)
@@ -971,8 +883,6 @@ theorem lc0InsDiff_eq (g₀ g₁ g_bg : SmoothRiemannianMetric I M) :
   ring
 
 set_option linter.unusedSectionVars false in
-/-- **`(2, 2) → (1, 1)` reduction.**  The `lc0Insert`-difference jet is bounded by
-`4·finrank` times the slot-`0` insert of `endoDiffSection` (mirrors `normSq_iCG_dlbField_le`). -/
 theorem normSq_iCG_lc0InsertDiff_le (g₀ g₁ g_bg : SmoothRiemannianMetric I M) (i : ℕ) :
     ‖iteratedCovGrad (I := I) g₀ 2 2 i
         (lc0Insert (I := I) (M := M) g₀ g₁ g_bg -
@@ -1040,10 +950,6 @@ theorem normSq_iCG_lc0InsertDiff_le (g₀ g₁ g_bg : SmoothRiemannianMetric I M
     (norm_add_le _ _) hL2A hL2B) (le_of_eq (by ring))
 
 set_option linter.unusedVariables false in
-/-- **Per-order `ballUniform` jet-`L²` bound for the `lc0Insert`-difference piece.**  Reduces the
-`(2, 2)` insert-difference to the `(1, 1)` `endoDiffSection` insert (`normSq_iCG_lc0InsertDiff_le`)
-and chains the producer bound (`connDiffDVFInsertDiff_realizedFam_jetL2_perOrder_ballUniform`).  No
-`sorry`: the former "missing engine" is the producer's HOIST + `wAlphaB` bound. -/
 private theorem lc0InsertDiff_ballUniform
     (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
     (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) {R : ℝ} (hR : 0 ≤ R)
@@ -1076,12 +982,6 @@ private theorem lc0InsertDiff_ballUniform
   exact mul_le_mul_of_nonneg_left hprod hfr_nn
 
 set_option linter.unusedVariables false in
-/-- **`lc0Insert`-difference `Kc` atom.**  Per-order top-separated jet-`L²` bound for
-`lc0Insert g_bg − lc0Insert g₀` with vanishing top constant (`∇²T`-free: all of it
-lands in the `R`-carrying `Kc`).  Proved from the `ballUniform` bound
-`lc0InsertDiff_ballUniform` by the trivial `Ktop = 0` reshape (`K i ≤ K i·(1+low)`).
-Sorry-free: the former "missing engine" is the producer HOIST
-`connDiffDVFInsert_eq_cometricRaise` + `wAlphaB` per-order bound. -/
 private theorem lc0InsertDiff_realizedFam_perOrder_topSep
     (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
     (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) {R : ℝ} (hR : 0 ≤ R)
@@ -1114,40 +1014,6 @@ private theorem lc0InsertDiff_realizedFam_perOrder_topSep
     Finset.sum_nonneg (fun j _ => add_nonneg (sq_nonneg _) (sq_nonneg _))
   nlinarith [hb, hK_nn i, hlow_nn, mul_nonneg (hK_nn i) hlow_nn]
 
-/-! ## The `lc0VB` `Kc` atom (`2·traceStep(g₁) ∘ prodKappa(metricConnDiffLowered) ∘ ip(deTurckVF)`)
-
-`lc0VB g₀ g₁` (`LieCorr0Core:144`) is the vector-bundle contraction piece
-`2 · traceStep(g₁, VBPerm) ∘ prodKappa(metricConnDiffLoweredFib g₁ g₁ g₀)
-     ∘ interior_product(deTurckVF g₁ g₀)`.  Unlike `lc0Riem` (fixed g₀-only
-passenger) and `lc0Insert`-diff (the `wAlphaB` slot-insert hoist), it carries
-**two moving arms** — the g₁-lowered connection difference `metricConnDiffLowered
-g₁ g₁ g₀` and the DeTurck field `deTurckVF g₁ g₀` — so neither of the two banked
-routes applies.  It is a genuine interior-product contraction whose deTurckVF is a
-single field (no g₀↔g_bg difference ⟹ no cancellation à la atom 2).
-
-**RECON VERDICT (route 3 — a real engine gap; see the `.md` note).**  The Arm1
-template `deTurckLieArm1Coeff_realizedFam_jetL2_perOrder_ballUniform`
-(`DeTurckLieArm1CoeffL2JetBound.lean`) has the same *shape*, and its generic
-*kernel* transfers: `lieArm1_deTurckVF_cometric_trace` expresses
-`deTurckVF g₁ gB` as the g₁-cometric trace of `connDiff g₁ gB` (generic in `gB`),
-and the committed product grid `rfns_iteratedCovGrad_appCcRS_diagonalProductGrid_rankLeft_le`
-+ integrator `exists_integrated_iteratedCovGrad_diagonalProductGrid_twoArm_rs_le`
-bound any resulting `appCcRS` (both already used by `lc0Riem`).  But the *end-to-end*
-fold does NOT transfer: Arm1's `deTurckLieArm1Coeff_eq_lieArm1Piece_sum` is a
-~2000-line Arm1-specific identity whose live arm is `deTurckLieTraceCoeff`
-(traceHessian), not `metricConnDiffLowered`; `lieArm1_slot2_vf_trace` is
-slot-2-of-rank-3 specific; and `metricConnDiffLowered g₁ g₁ g₀` has **no reusable
-jet producer** (Arm1's `lieArm1LoweredBgKappa`/`lieArm1_kappa_feed` are private and
-field-specific).  A tree-wide grep confirms there is no committed generic
-interior-product-fold engine.  So `lc0VB` needs a hand-built fibre identity
-`lieCorr0VBFib = reindexCoeffGen(appCcRS g₀ p a b Φ W)` plus per-order producers
-for both connDiff-family arms — analogous to Arm1's `lieArm1PsiB`/`lieArm1_psiB_feed`
-chain, not a one-lemma reuse.  Stated here with ONE isolated `sorry` at the
-`ballUniform` frontier (as atom 2's first session did). -/
-
-/-- **The `lc0VB` moving passenger fibre.**  Everything in `lieCorr0VBFib` to the right of the
-outer `g₁`-cometric double trace: the `VBPerm` reindex, the `metricConnDiffLowered` product, and
-the `deTurckVF` interior product.  A `(2, 4)` operator field. -/
 private noncomputable def lc0VBPassFib (g₀ g₁ : SmoothRiemannianMetric I M) (x : M) :
     Tensor0SSpace 2 I x →L[ℝ] Tensor0SSpace 4 I x :=
   (domDomCongrFibRank (I := I) 4 lieCorr0VBPerm x).comp
@@ -1191,9 +1057,6 @@ private theorem lc0VBPassFib_contMDiff (g₀ g₁ : SmoothRiemannianMetric I M) 
   rw [lc0VBPassFib]
   rw [ContinuousLinearMap.comp_apply, ContinuousLinearMap.comp_apply, domDomCongrFibRank_apply]
 
-/-- **The `lc0VB` moving passenger.**  The `(2, 4)` operator field carrying the `VBPerm` reindex,
-the `metricConnDiffLowered` product, and the `deTurckVF` interior product.  Public for the
-radius-free re-derivation (brick 4). -/
 noncomputable def lc0VBPass (g₀ g₁ : SmoothRiemannianMetric I M) :
     SmoothCcTensor g₀ 2 4 where
   toSection :=
@@ -1203,8 +1066,6 @@ noncomputable def lc0VBPass (g₀ g₁ : SmoothRiemannianMetric I M) :
       contMDiff_toFun := lc0VBPassFib_contMDiff (I := I) g₀ g₁ }
   hasCompactSupport := HasCompactSupport.of_compactSpace _
 
-/-- Fibrewise two-arm factorization: the live rank-`2` `g₁`-cometric double trace (shared with
-`lc0Riem` via `lc0RiemLive`) acting on the moving passenger. -/
 private theorem lc0VBFib_eq (g₀ g₁ : SmoothRiemannianMetric I M) (x : M) :
     lieCorr0VBFib (I := I) g₀ g₁ x =
       (2 : ℝ) • ((show Tensor0SSpace 4 I x →L[ℝ] Tensor0SSpace 2 I x from
@@ -1214,9 +1075,6 @@ private theorem lc0VBFib_eq (g₀ g₁ : SmoothRiemannianMetric I M) (x : M) :
   rw [lieCorr0VBFib, lc0RiemLive_fiber]
   rfl
 
-/-- **The `lc0VB` two-arm factorization.**  The vector-bundle contraction piece is `2 ·` the
-operator-field action of the live rank-`2` cometric arm (reused from `lc0Riem`) on the moving
-passenger `lc0VBPass`.  Public for the radius-free re-derivation (brick 4). -/
 theorem lc0VB_eq_app (g₀ g₁ : SmoothRiemannianMetric I M) :
     lc0VB (I := I) (M := M) g₀ g₁ =
       (2 : ℝ) • appCcRS (I := I) (M := M) g₀ 2 4 2
@@ -1227,19 +1085,6 @@ theorem lc0VB_eq_app (g₀ g₁ : SmoothRiemannianMetric I M) :
   rw [SmoothCcTensor.toSection_smul, ContMDiffSection.coe_smul, Pi.smul_apply, appCcRS_toSection]
   exact lc0VBFib_eq (I := I) (M := M) g₀ g₁ x
 
-/-! ### `vbPass` discharge machinery: the two-arm split of the moving passenger
-
-`lc0VBPass = [ddc(VBPerm) ∘ prodKappa(mcd)] ∘ ip(deTurckVF)`, split as
-`appCcRS g₀ 2 1 4 vbMcdArm (ipLowCc g₀ (wOmega g₀ g₁ g₀))`:
-
-* `vbMcdArm` is the `(1, 4)` head; its jets equal (`rfns_iteratedCovGrad_rs_eq_of_section_domDomCongr`
-  + the `prodKappa = slotExtend` identity `vbPK_eq_slotExt`) the jets of
-  `slotExtend (metricConnDiffLoweredCc g₀ g₁ g₀)`, hence reduce to the session-6 producer;
-* the `ip` tail is the committed `ipLowCc` at `ω := wOmega g₀ g₁ g₀` (the `g₀`-lowered
-  `deTurckVF g₁ g₀`, by `wOmega_unitModel_apply`), with jets from `wOmega`'s producer. -/
-
-/-- The `(1, 4)` head of the moving passenger: the `VBPerm` reindex composed with the
-`metricConnDiffLowered` product. -/
 private noncomputable def vbMcdArmFib (g₀ g₁ : SmoothRiemannianMetric I M) (x : M) :
     Tensor0SSpace 1 I x →L[ℝ] Tensor0SSpace 4 I x :=
   (domDomCongrFibRank (I := I) 4 lieCorr0VBPerm x).comp
@@ -1270,9 +1115,6 @@ private theorem vbMcdArmFib_contMDiff (g₀ g₁ : SmoothRiemannianMetric I M) :
   rw [vbMcdArmFib]
   rw [ContinuousLinearMap.comp_apply, domDomCongrFibRank_apply]
 
-/-- The `(1, 4)` head of the `lc0VB` moving passenger (`VBPerm` reindex ∘ `metricConnDiffLowered`
-product) as a smooth compactly-supported operator field.  Public for the radius-free
-re-derivation (brick 4). -/
 noncomputable def vbMcdArm (g₀ g₁ : SmoothRiemannianMetric I M) :
     SmoothCcTensor g₀ 1 4 where
   toSection :=
@@ -1283,8 +1125,6 @@ noncomputable def vbMcdArm (g₀ g₁ : SmoothRiemannianMetric I M) :
   hasCompactSupport := HasCompactSupport.of_compactSpace _
 
 omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [SigmaCompactSpace M] in
-/-- Leaf-local unit-model read of the `metricConnDiffLowered` arm (clone of the Arm1-private
-`metricConnDiffLoweredCc_unitModel_apply` at `g_bg := g₀`). -/
 private lemma vbMcd_unitModel (g₀ g₁ : SmoothRiemannianMetric I M) (x : M)
     (m : Fin 3 → TangentSpace I x) :
     unitModel (I := I) (M := M) g₀ 3 (metricConnDiffLoweredCc (I := I) (M := M) g₀ g₁ g₀) x m =
@@ -1301,7 +1141,6 @@ private lemma vbMcd_unitModel (g₀ g₁ : SmoothRiemannianMetric I M) (x : M)
   exact metricConnDiffLoweredFib_toModel (I := I) g₁ g₁ g₀ x m
 
 set_option linter.unusedSectionVars false in
-/-- Rank-`0` tensors are scalar multiples of the unit tensor (leaf-local clone). -/
 private lemma vb_rank0_smul_unit (x : M) (c : Tensor0SSpace 0 I x) :
     c = Tensor0SSpace.toModel c (fun i : Fin 0 => i.elim0) •
       unitTensor (I := I) (M := M) x := by
@@ -1316,9 +1155,6 @@ private lemma vb_rank0_smul_unit (x : M) (c : Tensor0SSpace 0 I x) :
   funext i
   exact i.elim0
 
-/-- **The session-8 `prodKappa = slotExtend` identity** (Finding 1): the
-`metricConnDiffLowered` product factor of `lc0VBPass` is the slot extension of the
-`metricConnDiffLoweredCc` tensor. -/
 private lemma vbPK_eq_slotExt (g₀ g₁ : SmoothRiemannianMetric I M) (x : M)
     (B : Tensor0SSpace 1 I x) :
     Tensor0SSpace.toModel
@@ -1373,7 +1209,6 @@ private lemma vbPK_eq_slotExt (g₀ g₁ : SmoothRiemannianMetric I M) (x : M)
   rw [hcast, hnat]
   rw [metricConnDiffLoweredFib_toModel (I := I) g₁ g₁ g₀ x (fun j => Fin.tail u j)]
 
-/-- The head's jets read as an output-slot permutation of `slotExtend (mcdCc)`. -/
 private lemma vbMcdArm_rel (g₀ g₁ : SmoothRiemannianMetric I M) :
     ∀ (y : M) (d : Tensor0SSpace 1 I y),
       Tensor0SSpace.toModel
@@ -1394,7 +1229,6 @@ private lemma vbMcdArm_rel (g₀ g₁ : SmoothRiemannianMetric I M) :
   exact congrArg (ContinuousMultilinearMap.domDomCongr lieCorr0VBPerm)
     (vbPK_eq_slotExt (I := I) (M := M) g₀ g₁ y d)
 
-/-- Pointwise: the head's jets are dominated by the `metricConnDiffLowered` jets. -/
 lemma vbMcdArm_rfns_le (g₀ g₁ : SmoothRiemannianMetric I M) (m : ℕ) (x : M) :
     riemannianFiberNormSq (I := I) (M := M) g₀ 1 (4 + m) x
         ((iteratedCovGrad (I := I) g₀ 1 4 m (vbMcdArm (I := I) (M := M) g₀ g₁)).toSection x) ≤
@@ -1409,7 +1243,6 @@ lemma vbMcdArm_rfns_le (g₀ g₁ : SmoothRiemannianMetric I M) (m : ℕ) (x : M
   exact rfns_iteratedCovGrad_slotExtend_le (I := I) (M := M) g₀ 0 3
     (metricConnDiffLoweredCc (I := I) (M := M) g₀ g₁ g₀) m x
 
-/-- `L²` form of `vbMcdArm_rfns_le`. -/
 lemma vbMcdArm_l2_le (g₀ g₁ : SmoothRiemannianMetric I M) (m : ℕ) :
     ‖iteratedCovGrad (I := I) g₀ 1 4 m (vbMcdArm (I := I) (M := M) g₀ g₁)‖ ^ 2 ≤
       (Module.finrank ℝ E : ℝ) *
@@ -1435,9 +1268,6 @@ lemma vbMcdArm_l2_le (g₀ g₁ : SmoothRiemannianMetric I M) (m : ℕ) :
         (metricConnDiffLoweredCc (I := I) (M := M) g₀ g₁ g₀)),
     ← SmoothCcTensor.norm_def]
 
-/-- **The two-arm split of the moving passenger**: `lc0VBPass` is the operator-field action of
-the `(1, 4)` head on the interior-product tail `ipLowCc (wOmega g₀ g₁ g₀)`.  Public for the
-radius-free re-derivation (brick 4). -/
 theorem vbSplit (g₀ g₁ : SmoothRiemannianMetric I M) :
     lc0VBPass (I := I) (M := M) g₀ g₁ =
       appCcRS (I := I) (M := M) g₀ 2 1 4 (vbMcdArm (I := I) (M := M) g₀ g₁)
@@ -1460,14 +1290,6 @@ theorem vbSplit (g₀ g₁ : SmoothRiemannianMetric I M) :
 
 set_option linter.unusedSectionVars false in
 set_option linter.unusedVariables false in
-/-- **VBPass jet bound (discharged).**  The g₁-generic order-`0` fibre-norm sup + per-order
-jet-`L²` sum bounds for the moving passenger `lc0VBPass g₀ g₁ = domDomCongr(VBPerm) ∘
-prodKappa(metricConnDiffLoweredFib g₁ g₁ g₀) ∘ ip(deTurckVF g₁ g₀)`.  Via the two-arm split
-`vbSplit` (`lc0VBPass = appCcRS g₀ 2 1 4 vbMcdArm (ipLowCc g₀ (wOmega g₀ g₁ g₀))`), the
-product grid, and the two-arm integrator: the head's jets reduce to the session-6
-`metricConnDiffLoweredCc` producer (output-permutation invariance + `slotExtend`), and the
-interior-product tail's jets reduce through the committed `ipLowCc` engine to the `wOmega`
-producer (the `g₀`-lowered `deTurckVF`). -/
 private theorem vbPass_jetL2
     (g₀ : SmoothRiemannianMetric I M) (a : ℕ)
     (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) {R : ℝ} (hR : 0 ≤ R)
@@ -1511,7 +1333,7 @@ private theorem vbPass_jetL2
   refine ⟨BS * BT, F, mul_nonneg hBS_nn hBT_nn, hF_nn, ?_⟩
   intro g₁ P δ hδ_le hδ htie hPball
   by_cases hM : Nonempty M
-  · -- nonempty: derive `0 ≤ δ` from the fibre bound and feed the two producers
+  ·
     obtain ⟨x0⟩ := hM
     have hδ0 : 0 ≤ δ := by
       haveI : Nontrivial E := Module.nontrivial_of_finrank_pos (R := ℝ) (M := E)
@@ -1548,7 +1370,7 @@ private theorem vbPass_jetL2
       rw [Finset.sum_range_one]
       exact mul_le_mul_of_nonneg_left (hΩ_sup 0 (by omega) x) (hcip_nn 0)
     refine ⟨?_, ?_⟩
-    · -- order-0 fibre sup for the passenger, via the product grid at order 0
+    ·
       intro x
       rw [vbSplit (I := I) (M := M) g₀ g₁]
       have h := rfns_iteratedCovGrad_appCcRS_diagonalProductGrid_rankLeft_le
@@ -1564,7 +1386,7 @@ private theorem vbPass_jetL2
       rw [Real.sq_sqrt hBT_nn] at h2
       exact mul_le_mul h1 h2
         (riemannianFiberNormSq_nonneg (I := I) (M := M) g₀ 2 1 x _) hBS_nn
-    · -- per-order jet-`L²` sums
+    ·
       intro i hi
       rw [vbSplit (I := I) (M := M) g₀ g₁]
       simp only [hF_def]
@@ -1610,7 +1432,7 @@ private theorem vbPass_jetL2
           omega
         refine le_trans (hcipL (wOmega (I := I) (M := M) g₀ g₁ g₀) l) ?_
         exact mul_le_mul_of_nonneg_left (hΩ_jets l hl_le) (hcipL_nn l)
-  · -- empty manifold: the sup is vacuous and every jet-`L²` norm vanishes
+  ·
     haveI hEmpty : IsEmpty M := not_nonempty_iff.mp hM
     refine ⟨fun x => (hEmpty.false x).elim, ?_⟩
     intro i hi
@@ -1624,11 +1446,6 @@ private theorem vbPass_jetL2
     exact hF_nn i
 
 set_option linter.unusedVariables false in
-/-- **Per-order `ballUniform` jet-`L²` bound for the `lc0VB` piece.**  Via the two-arm
-factorization `lc0VB = 2 · appCcRS g₀ 2 4 2 lc0RiemLive lc0VBPass` (`lc0VB_eq_app`): the live arm
-`lc0RiemLive` (reused from `lc0Riem`, the moving `g₁`-cometric double trace) is bounded by the
-committed cometric double-trace envelope, and the moving passenger `lc0VBPass` by `vbPass_jetL2`;
-the product grid + two-arm integrator combine them.  Carries the single `sorry` of `vbPass_jetL2`. -/
 private theorem lc0VB_ballUniform
     (g₀ : SmoothRiemannianMetric I M) (a : ℕ)
     (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) {R : ℝ} (hR : 0 ≤ R)
@@ -1774,7 +1591,6 @@ private theorem lc0VB_ballUniform
     refine le_trans key ?_
     rw [MeasureTheory.integral_const_mul]
     exact mul_le_mul_of_nonneg_left hgrid_bd (appCcGdiag_nonneg (E := E) i)
-  -- assemble: ‖∇^i lc0VB‖² = 4·‖∇^i appCcRS‖² ≤ K i
   have hsmul : ‖iteratedCovGrad (I := I) g₀ 2 2 i
         (lc0VB (I := I) (M := M) g₀ (realizedFam (I := I) g₀ T T' hδ hδ' s))‖ ^ 2 =
       4 * ‖iteratedCovGrad (I := I) g₀ 2 2 i
@@ -1808,11 +1624,6 @@ private theorem lc0VB_ballUniform
   exact le_of_eq (by ring)
 
 set_option linter.unusedVariables false in
-/-- **`lc0VB` `Kc` atom.**  Per-order top-separated jet-`L²` bound for the
-vector-bundle contraction piece with vanishing top constant (`∇²T`-free: all of it
-lands in the `R`-carrying `Kc`).  Proved from `lc0VB_ballUniform` by the trivial
-`Ktop = 0` reshape (`K i ≤ K i·(1 + low)`).  Carries the single `sorry` of
-`lc0VB_ballUniform` until the interior-product fold engine lands. -/
 private theorem lc0VB_realizedFam_perOrder_topSep
     (g₀ : SmoothRiemannianMetric I M) (a : ℕ)
     (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) {R : ℝ} (hR : 0 ≤ R)

@@ -5,12 +5,6 @@ import DifferentialGeometry.Geometry.Curvature.CovGradRoughLap.GradientField
 import DifferentialGeometry.Geometry.Curvature.CurvatureOperator.SlotFreeCurvatureOperatorField
 import DifferentialGeometry.Geometry.Curvature.CurvatureOperator.SlotFreeCurvatureOperatorDerivative
 
-/-!
-# Curvature coefficient for the leading gradient-slot commutator
-
-This module packages the Ricci identity for the first two slots of a second
-covariant gradient as the action of a fixed smooth curvature coefficient.
--/
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
@@ -54,9 +48,6 @@ private theorem unitModel_sub
       rfl]
   rw [Tensor0SSpace.toModel_sub]
 
-/-- The canonical smooth coefficient for the antisymmetric part of the first
-two slots of a second covariant derivative. Fibrewise it is the slotwise
-curvature operator on covariant two-tensors. -/
 noncomputable def gradSlotCurvCoeff
     (g₀ : SmoothRiemannianMetric I M) : SmoothCcTensor g₀ 2 4 where
   toSection :=
@@ -69,8 +60,6 @@ noncomputable def gradSlotCurvCoeff
   hasCompactSupport := HasCompactSupport.of_compactSpace _
 
 omit [I.Boundaryless] in
-/-- The fibre value of `gradSlotCurvCoeff` is the canonical two-slot
-curvature operator. -/
 @[simp] theorem gradSlotCurv_apply
     (g₀ : SmoothRiemannianMetric I M) (x : M) :
     (gradSlotCurvCoeff (I := I) (M := M) g₀).toSection x =
@@ -78,8 +67,6 @@ curvature operator. -/
         TensorRSSpace.ofCLM
           (slotFreeCurvOpFib (I := I) (M := M) g₀ 2 x)) := rfl
 
-/-- The canonical gradient-slot curvature coefficient acts by inserting the
-Levi-Civita curvature operator into each covariant slot. -/
 theorem gradSlotCurv_eval
     (g₀ : SmoothRiemannianMetric I M) (x : M)
     (A : Tensor0SSpace 2 I x) (u w : TangentSpace I x)
@@ -94,8 +81,6 @@ theorem gradSlotCurv_eval
   rw [gradSlotCurv_apply]
   exact slotFreeCurvOpFib_apply_eval (I := I) (M := M) g₀ 2 x A u w m
 
-/-- The first covariant derivative of the canonical gradient-slot curvature
-coefficient acts by inserting `∇Rm` into each covariant input slot. -/
 theorem gradSlot_cov_eval
     (g₀ : SmoothRiemannianMetric I M) (x : M)
     (A : Tensor0SSpace 2 I x) (d u w : TangentSpace I x)
@@ -128,8 +113,6 @@ theorem gradSlot_cov_eval
 
 set_option maxHeartbeats 3200000 in
 set_option synthInstance.maxHeartbeats 1600000 in
-/-- The antisymmetric part in the two leading slots of `∇²S` is the action of
-a canonical smooth curvature coefficient on `S`. -/
 theorem gradSlotCurv_spec
     (g₀ : SmoothRiemannianMetric I M) (S : SmoothCcTensor g₀ 0 2) :
     iteratedCovGrad (I := I) g₀ 0 2 2 S -
@@ -258,7 +241,6 @@ theorem gradSlotCurv_spec
   conv_rhs => rw [unitModel, hv0]
   rfl
 
-/-- Compatibility existence form of `gradSlotCurv_spec`. -/
 theorem gradSlot_sub_eq_curv
     (g₀ : SmoothRiemannianMetric I M) :
     ∃ C : SmoothCcTensor g₀ 2 4,

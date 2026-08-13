@@ -1,52 +1,6 @@
 import DifferentialGeometry.Analysis.Sobolev.TensorHilbert.TameArmJets
 import DifferentialGeometry.Analysis.Sobolev.TensorHilbert.LieCorr0VBRefold
 
-/-!
-# The `lieCorr0` summands with their `∇P` factors kept explicit
-
-`SelfLowCapWindows.lean` produces the `lieCorr0` summands of `selfLow_split` in
-the `∇P`-**capped** currency, whose constants have `Λ`-degree growing with the
-order.  `TameArmJets.lean` re-derives the Ricci `A·A` arm in the **marked**
-currency of `TameMarkWin.lean`, where the two `∇P` factors of a quadratic arm
-stay visible and no cap is spent.  This module does the same for the two
-`lieCorr0` summands that are quadratic in the connection difference, `lc0VB` and
-`lc0AMix`, and for the linear one, `lc0Riem`.
-
-The entry point of both quadratic chains is the **marked `wXi`**.  At the base
-background the tree already proves that `wXi` has no state-free part:
-`wXi_self_eq` says `wXi g₀ g₁ g₀ = connDiffLoweredCc g₀ g₁` *as tensors*, so the
-`T`-free per-order constant that `rfns_iCG_wXi_atgw_rf` folds for the `g_bg` half
-vanishes identically at the `lc0VB`/`lc0AMix` call sites.  Composing that with
-the valence bridge `connLow_rfns` and the marked connection difference
-`connDiffMark` gives `wXi` a once-marked window with **state-free** constants.
-
-```
-wXi g₀ g₁ g₀ = connDiffLoweredCc g₀ g₁     -->  u = 1   (wXiMark)
-  mcd = wXi + ½Φ_A ⋆ wXi + ½Φ_B ⋆ wXi      -->  u = 1   (mcdMark; Φ is `F(P)`, u = 0)
-  wOmega = cometricCast ⋆ wXi              -->  u = 1   (wOmegaMark)
-  ipLowCc (wOmega)                         -->  u = 1   (ipLowMark)
-vbMcdArm                                   -->  u = 1   (dominated by mcd)
-  lc0VBPass = vbMcdArm ⋆ ipLowCc(wOmega)   -->  u = 2   (marks ADD)
-lc0RiemLive                                -->  u = 0   (mkOfWin, offset `+1`)
-  lc0VB = 2 · lc0RiemLive ⋆ lc0VBPass      -->  u = 2   ✓
-lc0AMix = 2·(half + half), each half
-  = trace ⋆ trace ⋆ mcd ⋆ trace ⋆ mcd      -->  u = 2   ✓  (at `g_bg = g₀`)
-lc0Riem = -(lc0RiemLive ⋆ lc0RiemPass)     -->  u = 0      (linear; no `∇P` at all)
-```
-
-The only hypothesis beyond the standard fibre-operator bound is the δ-anchor
-`|P|_∞ ≤ 1`, needed because the `mcd` correction operator `b4Phi` carries an
-order-zero factor of the state; at `finrank = 3` it is implied by
-`‖P‖_∞ ≤ finrank/3`.
-
-**`lc0AMix` is stated at `g_bg = g₀` only, and this is sharp.**  At a general
-DeTurck background `wXi g₀ g₁ g_bg = connDiffLoweredCc g₀ g₁ −
-connDiffLoweredCc g₀ g_bg` retains a state-free summand, so the `mcd(·, g_bg)`
-factor of the five-factor product is only `u = 0` and the summand is *affine*,
-not quadratic, in `∇P`.  `g_bg = g₀` is what the consumer
-(`ShortTime/LowRegBgH2.lean`) uses.
--/
-
 noncomputable section
 
 set_option autoImplicit false
@@ -78,20 +32,7 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
-/-! ### The lowered connection difference at the base background, once marked -/
-
 set_option linter.unusedVariables false in
-/-- **`wXi` at the base background carries an explicit `∇P` factor.**
-
-`|∇ⁱ(wXi g₀ g₁ g₀)|²(x) ≤ Kcd i · markGrid (bP x) 1 i`, with `Kcd` **state-free**
-— the same constant `connDiffMark` produces, because at `g_bg = g₀` the two
-tensors are literally equal (`wXi_self_eq`) and their fibre jets agree with those
-of `connDiffSection` (`connLow_rfns`).
-
-Compare `rfns_iCG_wXi_atgw_rf`, which weakens this to the unmarked
-`atgw bP (i + 2)` window AND folds a `T`-free per-order constant for the `g_bg`
-half — here that constant is not merely small, it is absent: the `g_bg` half is
-the zero tensor. -/
 theorem wXiMark (g₀ : SmoothRiemannianMetric I M) {δ₀ : ℝ} (hδ₀ : δ₀ < 1) :
     ∃ K : ℕ → ℝ, (∀ j, 0 ≤ K j) ∧
       ∀ (g₁ : SmoothRiemannianMetric I M) (P : SmoothCcTensor g₀ 0 2)
@@ -110,8 +51,6 @@ theorem wXiMark (g₀ : SmoothRiemannianMetric I M) {δ₀ : ℝ} (hδ₀ : δ�
   exact hcd g₁ P htie hδ_le hδ0 hδ i x
 
 set_option linter.unusedVariables false in
-/-- Subtracting two copies of the moving-lowering split commutes with the two
-fixed operator-field arms. -/
 private theorem mcd_corr_sub (g₀ : SmoothRiemannianMetric I M)
     (ΦA ΦB : SmoothCcTensor g₀ 3 3) (W₁ W₂ : SmoothCcTensor g₀ 0 3) :
     (W₁ +
@@ -137,16 +76,6 @@ private theorem mcd_corr_sub (g₀ : SmoothRiemannianMetric I M)
   module
 
 set_option linter.unusedVariables false in
-/-- **Changing the fixed DeTurck background costs only the sharp unmarked
-offset.**
-
-For fixed `g₀` and `gB`, the difference of the two moving-lowered connection
-differences has an `atgw (n + 1)` bound.  Indeed, subtracting the two
-`b4_mcd_eq` identities makes the moving part of `wXi` cancel, leaving the fixed
-tensor `connDiffLoweredCc g₀ g₀ - connDiffLoweredCc g₀ gB`; each lowering
-correction is then the same order-zero `b4Phi(P)` operator applied to that fixed
-tensor.  In particular, no metric-radius or fibre-operator hypothesis is
-needed. -/
 theorem mcdBgAtgw (g₀ gB : SmoothRiemannianMetric I M) :
     ∃ K : ℕ → ℝ, (∀ j, 0 ≤ K j) ∧
       ∀ (g₁ : SmoothRiemannianMetric I M) (P : SmoothCcTensor g₀ 0 2)
@@ -240,16 +169,6 @@ theorem mcdBgAtgw (g₀ gB : SmoothRiemannianMetric I M) :
   simpa only [Combinatorics.markGrid_zero] using hmark n x
 
 set_option linter.unusedVariables false in
-/-- **The `g₁`-lowered connection difference at the base background, once
-marked.**
-
-`b4_mcd_eq` writes it as `wXi + ½ Φ_A ⋆ wXi + ½ Φ_B ⋆ wXi`, where the correction
-operator `Φ` is built from the state with **no** derivative — an `F(P)`-type
-coefficient, entering unmarked through its `atgw bP (l + 1)` window.  So the
-whole arm inherits `wXi`'s single mark.
-
-The δ-anchor `|P|_∞ ≤ 1` is what makes the constant state-free: `b4_phi_atgw`'s
-constant is affine in `Λ₀²`, and it is evaluated at `Λ₀ = 1`. -/
 theorem mcdMark (g₀ : SmoothRiemannianMetric I M) {δ₀ : ℝ} (hδ₀ : δ₀ < 1) :
     ∃ K : ℕ → ℝ, (∀ j, 0 ≤ K j) ∧
       ∀ (g₁ : SmoothRiemannianMetric I M) (P : SmoothCcTensor g₀ 0 2)
@@ -288,7 +207,6 @@ theorem mcdMark (g₀ : SmoothRiemannianMetric I M) {δ₀ : ℝ} (hδ₀ : δ�
       (wXi (I := I) (M := M) g₀ g₁ g₀) 1 Kwx := hwx g₁ P htie hδ_le hδ0 hδ
   have hbnn : ∀ y : M, ∀ j, 0 ≤ gridBase (I := I) (M := M) g₀ P y j :=
     fun y => gridBase_nn (I := I) (M := M) g₀ P y
-  -- the correction terms, stated for a generic operator so `b4Phi` is never named
   have hcorr : ∀ Φ : SmoothCcTensor g₀ 3 3,
       (∀ (n : ℕ) (y : M),
         riemannianFiberNormSq (I := I) (M := M) g₀ 3 (3 + n) y
@@ -315,14 +233,7 @@ theorem mcdMark (g₀ : SmoothRiemannianMetric I M) {δ₀ : ℝ} (hδ₀ : δ�
           (mul_le_mul_of_nonneg_right (hsingle _ n)
             (Combinatorics.antidiagonalTupleGridWindow_nonneg _ (hbnn y) _))))))
 
-/-! ### The `wOmega` covector and its interior product -/
-
 set_option linter.unusedVariables false in
-/-- **The `g₀`-lowered DeTurck covector at the base background, once marked.**
-
-`wOmega = cometricCastG0 ⋆ wXi`; the moving cometric cast costs no derivative of
-the state (its radius-free window sits at `bP`-offset `+1`), so the product keeps
-`wXi`'s single mark. -/
 theorem wOmegaMark (g₀ : SmoothRiemannianMetric I M) {δ₀ : ℝ} (hδ₀ : δ₀ < 1) :
     ∃ K : ℕ → ℝ, (∀ j, 0 ≤ K j) ∧
       ∀ (g₁ : SmoothRiemannianMetric I M) (P : SmoothCcTensor g₀ 0 2)
@@ -350,12 +261,6 @@ theorem wOmegaMark (g₀ : SmoothRiemannianMetric I M) {δ₀ : ℝ} (hδ₀ : �
     (hwx g₁ P htie hδ_le hδ0 hδ)
 
 set_option linter.unusedVariables false in
-/-- **The interior product preserves the mark count.**
-
-`rfns_icg_ipLow_le` bounds `∇ˡ(ipLowCc g₀ om)` by the jets of `om` up to order
-`l`; the marked window is monotone in its level, so the whole sum collapses onto
-level `l` and the mark count is untouched.  The trace factor is `∇`-parallel and
-state-free, so it contributes no mark. -/
 theorem ipLowMark (g₀ : SmoothRiemannianMetric I M) :
     ∃ c : ℕ → ℝ, (∀ l, 0 ≤ c l) ∧
       ∀ (P : SmoothCcTensor g₀ 0 2) {u : ℕ} (om : SmoothCcTensor g₀ 0 1)
@@ -386,20 +291,7 @@ theorem ipLowMark (g₀ : SmoothRiemannianMetric I M) :
           Combinatorics.markGrid (gridBase (I := I) (M := M) g₀ P x) u l := by
         rw [Finset.sum_mul]
 
-/-! ### `lc0VB`: the vector-bilinear summand -/
-
 set_option linter.unusedVariables false in
-/-- **`lc0VB` in the marked currency: two explicit `∇P` factors.**
-
-`|∇ⁱ(lc0VB g₀ g₁)|²(x) ≤ K i · markGrid (bP x) 2 i` with `K` **state-free** — no
-`Λ`, no Sobolev radius.  The two marks are the two connection differences of the
-product `lc0RiemLive ⋆ (vbMcdArm ⋆ ipLowCc (wOmega))`: `vbMcdArm` is dominated by
-the lowered connection difference `mcd`, and `wOmega` is the cometric trace of
-`wXi`; the live cometric arm and the interior-product trace carry no derivative
-of the state.
-
-Compare `lc0VBCapAtgw`, whose constant is a `foldConst` of `shiftConst Λ (i+1)`
-factors.  The δ-anchor `|P|_∞ ≤ 1` enters only through `mcdMark`. -/
 theorem lc0VBMark (g₀ : SmoothRiemannianMetric I M) {δ₀ : ℝ} (hδ₀ : δ₀ < 1) :
     ∃ K : ℕ → ℝ, (∀ i, 0 ≤ K i) ∧
       ∀ (g₁ : SmoothRiemannianMetric I M) (P : SmoothCcTensor g₀ 0 2)
@@ -430,25 +322,21 @@ theorem lc0VBMark (g₀ : SmoothRiemannianMetric I M) {δ₀ : ℝ} (hδ₀ : δ
   refine ⟨fun i => (2 : ℝ) ^ 2 * foldConst (E := E) 0 0 KC KPass i, fun i => by
     have := foldConst_nn (E := E) (u := 0) (v := 0) hKC_nn hKPass_nn i; nlinarith, ?_⟩
   intro g₁ P htie δ hδ_le hδ0 hδ hP0
-  -- the head of the passenger, dominated by `mcd`
   have hA : HasMarkWin (I := I) (M := M) g₀ P (vbMcdArm (I := I) (M := M) g₀ g₁) 1 KA := by
     intro m y
     refine le_trans (vbMcdArm_rfns_le (I := I) (M := M) g₀ g₁ m y) ?_
     rw [hKA_def, mul_assoc]
     exact mul_le_mul_of_nonneg_left
       (hmcd g₁ P htie hδ_le hδ0 hδ hP0 m y) hfr_nn
-  -- the interior-product tail of the passenger
   have hB : HasMarkWin (I := I) (M := M) g₀ P
       (ipLowCc (I := I) (M := M) g₀ (wOmega (I := I) (M := M) g₀ g₁ g₀)) 1 KB :=
     hip P _ hKΩ_nn (hΩ g₁ P htie hδ_le hδ0 hδ)
-  -- the live cometric arm, no derivative of the state
   have hC : HasMarkWin (I := I) (M := M) g₀ P
       (lc0RiemLive (I := I) (M := M) g₀ g₁) 0 KC := by
     refine mkOfWin (I := I) (M := M) g₀ P _ (fun m y => ?_)
     refine le_trans (lc0RiemLive_rfns_le (I := I) (M := M) g₀ g₁ m y) ?_
     rw [hKC_def, mul_assoc]
     exact mul_le_mul_of_nonneg_left (hcg g₁ P htie hδ_le hδ0 hδ m y) hfr_nn
-  -- the two folds
   have hPass : HasMarkWin (I := I) (M := M) g₀ P
       (lc0VBPass (I := I) (M := M) g₀ g₁) 2 KPass := by
     refine mkCongr (I := I) (M := M) g₀ P (vbSplit (I := I) (M := M) g₀ g₁) ?_
@@ -458,20 +346,6 @@ theorem lc0VBMark (g₀ : SmoothRiemannianMetric I M) {δ₀ : ℝ} (hδ₀ : δ
   simpa using mkApp (I := I) (M := M) g₀ P _ _ hKC_nn hKPass_nn hC hPass
 
 set_option linter.unusedVariables false in
-/-- **`lc0VB`'s tame `L²` jet bound — the deliverable shape.**
-
-```
-‖∇ⁱ(lc0VB g₀ g₁)‖²  ≤  (K₀ i + K₂ i · ‖P‖²_{H³}) · (1 + ∑_{j < i+2} ‖∇ʲP‖²)
-```
-
-with `K₀, K₂` constants of the background metric and the order alone — chosen
-BEFORE the state, no Sobolev radius `R₀`, no opaque cap, no Galerkin index, and
-exactly ONE power of `‖P‖²_{H³}`.  The same shape as `ricciAAJet`, produced the
-same way: the marked window `lc0VBMark` plus the tame integration `markJet`, the
-`∇P` cap being spent exactly once at the end through `gradCapLin`.
-
-Compare `lc0VBCapJet`: same left-hand side and the same `range (i + 2)` budget,
-but with a constant of `Λ`-degree growing linearly in `i`. -/
 theorem lc0VBJet (hDim : Module.finrank ℝ E = 3)
     (g₀ : SmoothRiemannianMetric I M) {δ₀ : ℝ} (hδ₀ : δ₀ < 1) :
     ∃ K0 K2 : ℕ → ℝ, (∀ i, 0 ≤ K0 i) ∧ (∀ i, 0 ≤ K2 i) ∧
@@ -517,8 +391,6 @@ theorem lc0VBJet (hDim : Module.finrank ℝ E = 3)
   rw [hΛ₁sq]
   ring
 
-/-! ### `lc0AMix`: the five-factor mixed summand -/
-
 private noncomputable def markOneConst (n : ℕ) : ℝ :=
   ∑ c ∈ Finset.range (n + 1),
     Combinatorics.antidiagonalTupleGridWindowMulConst (c + 1) (n - c)
@@ -527,8 +399,6 @@ private lemma markOneConst_nn (n : ℕ) : 0 ≤ markOneConst n :=
   Finset.sum_nonneg (fun c _ =>
     Combinatorics.antidiagonalTupleGridWindowMulConst_nonneg (c + 1) (n - c))
 
-/-- A once-marked level-`n` window is bounded by the ordinary sharp
-offset-`n+2` window with a state-free combinatorial constant. -/
 private lemma mark_one_atgw (b : ℕ → ℝ) (hb : ∀ j, 0 ≤ b j) (n : ℕ) :
     Combinatorics.markGrid b 1 n ≤
       markOneConst n * Combinatorics.antidiagonalTupleGridWindow b (n + 2) := by
@@ -574,19 +444,6 @@ private lemma mark_one_atgw (b : ℕ → ℝ) (hb : ∀ j, 0 ≤ b j) (n : ℕ) 
       rw [markOneConst, Finset.sum_mul]
 
 set_option linter.unusedVariables false in
-/-- **`lc0AMix` at the base background, in the marked currency.**
-
-`amix_refold_rf` writes the summand as two copies of the five-factor product
-`trace ⋆ trace ⋆ mcd ⋆ trace ⋆ mcd`.  The three moving traces carry no derivative
-of the state (offset `+1` windows, unmarked); the two lowered connection
-differences carry one each, and the marks add through the four folds, so the
-summand is genuinely twice marked with **state-free** constants.
-
-`g_bg = g₀` is not a convenience: at a general DeTurck background
-`wXi g₀ g₁ g_bg = connDiffLoweredCc g₀ g₁ − connDiffLoweredCc g₀ g_bg` keeps a
-state-free summand, the outer `mcd` factor is then only `u = 0`, and `lc0AMix` is
-affine — not quadratic — in `∇P`.  The consumer (`ShortTime/LowRegBgH2.lean`)
-uses `g_bg = g₀`. -/
 theorem lc0AMixMark (g₀ : SmoothRiemannianMetric I M) {δ₀ : ℝ} (hδ₀ : δ₀ < 1) :
     ∃ K : ℕ → ℝ, (∀ i, 0 ≤ K i) ∧
       ∀ (g₁ : SmoothRiemannianMetric I M) (P : SmoothCcTensor g₀ 0 2)
@@ -628,7 +485,6 @@ theorem lc0AMixMark (g₀ : SmoothRiemannianMetric I M) {δ₀ : ℝ} (hδ₀ : 
   have hmcdP : HasMarkWin (I := I) (M := M) g₀ P
       (metricConnDiffLoweredCc (I := I) (M := M) g₀ g₁ g₀) 1 Kmcd :=
     hmcd g₁ P htie hδ_le hδ0 hδ hP0
-  -- the three moving traces: no derivative of the state
   have htrace : ∀ (p : ℕ) (C : ℕ → ℝ),
       (∀ (σ : Equiv.Perm (Fin (p + 2))) (i : ℕ) (x : M),
         riemannianFiberNormSq (I := I) (M := M) g₀ (p + 2) (p + i) x
@@ -652,7 +508,6 @@ theorem lc0AMixMark (g₀ : SmoothRiemannianMetric I M) {δ₀ : ℝ} (hδ₀ : 
   have hT4 : HasMarkWin (I := I) (M := M) g₀ P
       (lc0TraceRF (I := I) (M := M) g₀ g₁ 4 lieCorr0AMixPerm1) 0 Ctr4 :=
     htrace 4 Ctr4 (fun σ i x => htr4 g₁ P htie hδ_le hδ0 hδ σ i x) _
-  -- the two lowered connection differences, extended into their slots
   have hM2 : HasMarkWin (I := I) (M := M) g₀ P
       (slotExtendIter (I := I) (M := M) g₀ 0 3 2
         (metricConnDiffLoweredCc (I := I) (M := M) g₀ g₁ g₀)) 1 KM2 := by
@@ -663,7 +518,6 @@ theorem lc0AMixMark (g₀ : SmoothRiemannianMetric I M) {δ₀ : ℝ} (hδ₀ : 
         (metricConnDiffLoweredCc (I := I) (M := M) g₀ g₁ g₀)) 1 KM3 := by
     rw [hKM3_def]
     exact mkIter (I := I) (M := M) g₀ P 3 hmcdP
-  -- the four nested folds
   have hhalf : ∀ σ : Equiv.Perm (Fin 4),
       HasMarkWin (I := I) (M := M) g₀ P
         (lc0AMixHalfRF (I := I) (M := M) g₀ g₁ g₀ σ) 2 Khalf := by
@@ -689,14 +543,6 @@ theorem lc0AMixMark (g₀ : SmoothRiemannianMetric I M) {δ₀ : ℝ} (hδ₀ : 
       (hhalf (lc0SwapPermRF * lieCorr0AMixPerm2)))
 
 set_option linter.unusedVariables false in
-/-- **The arbitrary-fixed-background part of `lc0AMix` has the sharp
-offset-`n+2` pointwise window.**
-
-The exact `amix_bg_refold_rf` identity puts the background difference in one
-lowered connection factor.  `mcdBgAtgw` makes that factor unmarked at offset
-`n+1`, while the remaining base-background connection factor carries one mark.
-The five-factor product is therefore once marked, and `mark_one_atgw` converts
-that mark to the ordinary sharp offset `n+2`. -/
 theorem amixBgAtgw (g₀ gB : SmoothRiemannianMetric I M)
     {δ₀ : ℝ} (hδ₀ : δ₀ < 1) :
     ∃ K : ℕ → ℝ, (∀ i, 0 ≤ K i) ∧
@@ -833,16 +679,6 @@ theorem amixBgAtgw (g₀ gB : SmoothRiemannianMetric I M)
           (gridBase (I := I) (M := M) g₀ P x) (n + 2) := by ring
 
 set_option linter.unusedVariables false in
-/-- **`lc0AMix`'s tame `L²` jet bound at the base background — the deliverable
-shape.**
-
-```
-‖∇ⁱ(lc0AMix g₀ g₁ g₀)‖²  ≤  (K₀ i + K₂ i · ‖P‖²_{H³}) · (1 + ∑_{j < i+2} ‖∇ʲP‖²)
-```
-
-Constants BEFORE the state, no Sobolev radius, no opaque cap, exactly one power
-of `‖P‖²_{H³}`.  Compare `lc0AMixCap`, whose constant carries `shiftConst Λ`
-factors from all five arms. -/
 theorem lc0AMixJet (hDim : Module.finrank ℝ E = 3)
     (g₀ : SmoothRiemannianMetric I M) {δ₀ : ℝ} (hδ₀ : δ₀ < 1) :
     ∃ K0 K2 : ℕ → ℝ, (∀ i, 0 ≤ K0 i) ∧ (∀ i, 0 ≤ K2 i) ∧
@@ -889,14 +725,6 @@ theorem lc0AMixJet (hDim : Module.finrank ℝ E = 3)
   ring
 
 set_option linter.unusedVariables false in
-/-- **Consumer-ready tame jet bound for `lc0AMix` at an arbitrary fixed
-background.**
-
-The fixed-background difference is integrated directly from `amixBgAtgw` at
-offset `n+2`, contributing only to the state-free `K0` arm.  The remaining
-base-background term is `lc0AMixJet`; hence the full arbitrary-background
-coefficient has the same affine `K0/K2` tame shape and introduces no new power
-of the `H³` state norm. -/
 theorem lc0AMixJetBg (hDim : Module.finrank ℝ E = 3)
     (g₀ gB : SmoothRiemannianMetric I M) {δ₀ : ℝ} (hδ₀ : δ₀ < 1) :
     ∃ K0 K2 : ℕ → ℝ, (∀ i, 0 ≤ K0 i) ∧ (∀ i, 0 ≤ K2 i) ∧
@@ -972,15 +800,7 @@ theorem lc0AMixJetBg (hDim : Module.finrank ℝ E = 3)
           ‖iteratedCovGrad (I := I) g₀ 0 2 j P‖ ^ 2) := by
       rw [← hH3_def, ← hJS_def]
 
-/-! ### `lc0Riem`: the fixed-curvature summand -/
-
 set_option linter.unusedVariables false in
-/-- **`lc0Riem` in the marked currency: no derivative of the state at all.**
-
-`lc0Riem = −(lc0RiemLive ⋆ lc0RiemPass)`: the live cometric arm costs no
-derivative of the state (window at `bP`-offset `+1`) and the passenger is
-state-free, so the summand is *linear* and enters at `u = 0`.  Its tame bound
-therefore needs no `∇P` cap whatsoever (`lc0RiemJet`, `K₂ = 0`). -/
 theorem lc0RiemMark (g₀ : SmoothRiemannianMetric I M) {δ₀ : ℝ} (hδ₀ : δ₀ < 1) :
     ∃ K : ℕ → ℝ, (∀ i, 0 ≤ K i) ∧
       ∀ (g₁ : SmoothRiemannianMetric I M) (P : SmoothCcTensor g₀ 0 2)
@@ -1014,17 +834,6 @@ theorem lc0RiemMark (g₀ : SmoothRiemannianMetric I M) {δ₀ : ℝ} (hδ₀ : 
   simpa using mkApp (I := I) (M := M) g₀ P _ _ hKC_nn hSPass_nn hLive hPass
 
 set_option linter.unusedVariables false in
-/-- **`lc0Riem`'s tame `L²` jet bound — the deliverable shape with `K₂ = 0`.**
-
-```
-‖∇ⁱ(lc0Riem g₀ g₁)‖²  ≤  K₀ i · (1 + ∑_{j < i+2} ‖∇ʲP‖²)
-```
-
-no `‖P‖²_{H³}` factor at all, because the summand is linear in the connection
-difference.  Compare `lc0Riem_perOrder_rf`, which is radius-free but lands on
-`range (i + 3)` — one order over what `selfLow_jet` may spend; the marked
-currency recovers the order for free, since an unmarked window is already at
-`atgw bP (i + 1)`. -/
 theorem lc0RiemJet (g₀ : SmoothRiemannianMetric I M) {δ₀ : ℝ} (hδ₀ : δ₀ < 1) :
     ∃ K0 : ℕ → ℝ, (∀ i, 0 ≤ K0 i) ∧
       ∀ (g₁ : SmoothRiemannianMetric I M) (P : SmoothCcTensor g₀ 0 2)

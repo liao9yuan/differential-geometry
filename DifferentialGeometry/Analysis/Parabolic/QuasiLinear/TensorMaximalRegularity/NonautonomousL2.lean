@@ -1,15 +1,6 @@
 import DifferentialGeometry.Analysis.Parabolic.QuasiLinear.TensorMaximalRegularity.ZeroDuhamelCross
 import DifferentialGeometry.Analysis.Parabolic.TimeSobolev.TimeOperatorL2
 
-/-!
-# Non-autonomous perturbations with an L2 first-order coefficient
-
-The top-order perturbation remains uniformly bounded in time.  The
-first-order coefficient is only square-integrable in operator norm and acts
-on the uniformly bounded intermediate representative of the zero-initial
-Duhamel solution.
--/
-
 noncomputable section
 
 open Bundle Manifold MeasureTheory Set Filter
@@ -43,7 +34,6 @@ private local instance : BorelSpace M := ⟨rfl⟩
 variable {g : SmoothRiemannianMetric I M} {r s : ℕ}
 variable {a T : ℝ}
 
-/-- The uniform intermediate-representative bound as a nonnegative real. -/
 def zeroReprNN (hT : 0 < T)
     (f : timeL2 (tensorHs (I := I) (M := M) g r s a) T) : NNReal :=
   ⟨2 * Real.sqrt (1 + T) * ‖f‖, by positivity⟩
@@ -56,8 +46,6 @@ theorem zeroReprNN_coe (hT : 0 < T)
       2 * Real.sqrt (1 + T) * ‖f‖ :=
   rfl
 
-/-- The zero-initial representative satisfies its canonical bound almost
-everywhere for the restricted time measure. -/
 theorem zeroRepr_ae_le (hT : 0 < T) (hT1 : T ≤ 1)
     (h_compact : IsCompactOperator (tensorResolventL2
       (I := I) (M := M) g r s))
@@ -70,7 +58,6 @@ theorem zeroRepr_ae_le (hT : 0 < T) (hT1 : T ≤ 1)
   simpa only [zeroReprNN_coe] using
     zeroRepr_norm_le (I := I) (M := M) hT hT1 h_compact f ht
 
-/-- The first-order non-autonomous arm with an `L2` operator coefficient. -/
 def a1L2Term (hT : 0 < T) (hT1 : T ≤ 1)
     (h_compact : IsCompactOperator (tensorResolventL2
       (I := I) (M := M) g r s))
@@ -86,7 +73,6 @@ def a1L2Term (hT : 0 < T) (hT1 : T ≤ 1)
     (zeroReprNN (I := I) (M := M) hT f)
     (zeroRepr_ae_le (I := I) (M := M) hT hT1 h_compact f)
 
-/-- The `L2` first-order arm is linear under subtraction of forcing terms. -/
 theorem a1L2Term_sub (hT : 0 < T) (hT1 : T ≤ 1)
     (h_compact : IsCompactOperator (tensorResolventL2
       (I := I) (M := M) g r s))
@@ -154,8 +140,6 @@ theorem a1L2Term_sub (hT : 0 < T) (hT1 : T ≤ 1)
     hsub_bound hud_bound hsub_ae
   simpa only [a1L2Term, uf, uf', ud] using hsub.trans hcongr
 
-/-- The first-order arm norm is controlled by the operator-family `L2` norm
-times the uniform intermediate-representative bound. -/
 theorem a1L2Term_norm (hT : 0 < T) (hT1 : T ≤ 1)
     (h_compact : IsCompactOperator (tensorResolventL2
       (I := I) (M := M) g r s))
@@ -174,7 +158,6 @@ theorem a1L2Term_norm (hT : 0 < T) (hT1 : T ≤ 1)
   rw [zeroReprNN_coe]
   ring
 
-/-- Lipschitz estimate for the `L2` first-order arm. -/
 theorem a1L2_dist_le (hT : 0 < T) (hT1 : T ≤ 1)
     (h_compact : IsCompactOperator (tensorResolventL2
       (I := I) (M := M) g r s))
@@ -190,8 +173,6 @@ theorem a1L2_dist_le (hT : 0 < T) (hT1 : T ≤ 1)
   exact a1L2Term_norm (I := I) (M := M)
     hT hT1 h_compact A1 hA1 (f - f')
 
-/-- The forcing-space map with a bounded top-order arm and an `L2` first-order
-arm, for zero initial data. -/
 def nonautL2Map (hT : 0 < T) (hT1 : T ≤ 1)
     (h_compact : IsCompactOperator (tensorResolventL2
       (I := I) (M := M) g r s))
@@ -209,8 +190,6 @@ def nonautL2Map (hT : 0 < T) (hT1 : T ≤ 1)
         (maxRegDuhamelSolField (I := I) (M := M) a hT hT1 0 f) +
       a1L2Term (I := I) (M := M) hT hT1 h_compact A1 hA1 f
 
-/-- The mixed non-autonomous forcing map has the sum of the top-order and
-`L2` first-order Lipschitz constants. -/
 theorem nonautL2_dist_le
     (hT : 0 < T) (hT1 : T ≤ 1)
     (h_compact : IsCompactOperator (tensorResolventL2
@@ -295,8 +274,6 @@ theorem nonautL2_dist_le
           2 * Real.sqrt (1 + T) * ‖hA1.toLp A1‖) * ‖f - f'‖ := by
       ring
 
-/-- Under the mixed smallness condition, the forcing-space map is a
-contraction. -/
 theorem nonautL2_contract
     (hT : 0 < T) (hT1 : T ≤ 1)
     (h_compact : IsCompactOperator (tensorResolventL2
@@ -327,8 +304,6 @@ theorem nonautL2_contract
       hT hT1 h_compact A2 hA2 C2 hC2 A1 hA1 f f'
     simpa only [NNReal.coe_mk] using h
 
-/-- Strong zero-initial existence for a bounded top-order perturbation, an
-`L2` first-order perturbation, and a prescribed affine forcing. -/
 theorem nonautL2_forced
     (hT : 0 < T) (hT1 : T ≤ 1)
     (h_compact : IsCompactOperator (tensorResolventL2

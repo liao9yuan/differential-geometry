@@ -2,15 +2,6 @@ import DifferentialGeometry.Analysis.Sobolev.TensorHilbert.DeTurckVFJetRadiusFre
 import DifferentialGeometry.Analysis.Sobolev.TensorHilbert.LieCorr0CoeffL2JetBound
 import DifferentialGeometry.Analysis.Sobolev.TensorHilbert.TameArmJets
 
-/-!
-# Sharp pointwise window for the `lc0Insert` background difference
-
-Changing only the fixed DeTurck background leaves a product of the moving
-connection difference with a moving-cometric trace of a fixed passenger.  The
-first factor costs one state derivative and the second costs none, so the full
-insertion difference has the sharp `i + 2` pointwise grid window.
--/
-
 noncomputable section
 
 set_option autoImplicit false
@@ -164,8 +155,6 @@ private theorem alphaDiffAtgw
   exact hfold
 
 set_option linter.unusedVariables false in
-/-- The change in the `lc0Insert` coefficient under a change of fixed DeTurck
-background has the sharp pointwise window of a one-derivative state arm. -/
 theorem lc0InsDiffAtgw
     (g₀ g_bg : SmoothRiemannianMetric I M)
     {δ₀ : ℝ} (hδ₀ : δ₀ < 1) :

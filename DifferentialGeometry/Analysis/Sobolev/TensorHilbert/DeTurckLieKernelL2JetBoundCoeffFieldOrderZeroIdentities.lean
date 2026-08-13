@@ -47,8 +47,6 @@ def deTurckLieConnDiffDerivCoeffField (g₀ g₁ g_bg : SmoothRiemannianMetric I
       contMDiff_toFun := dLaBiContrFib_contMDiff (I := I) g₁ g_bg }
   hasCompactSupport := HasCompactSupport.of_compactSpace _
 
-/-- Compatibility name for the connection-derivative half of the DeTurck--Lie
-coefficient field. -/
 abbrev deTurckLieDLaCoeffField := @deTurckLieConnDiffDerivCoeffField
 
 omit [I.Boundaryless] in

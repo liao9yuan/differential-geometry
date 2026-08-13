@@ -1,14 +1,6 @@
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.DeTurckRemainderDefs
 import DifferentialGeometry.Analysis.Spectral.Tensor.SobolevScale.IteratedCovGradHsJetBound
 
-/-!
-# Fixed background forcing at Sobolev order two
-
-This file packages the Ricci-DeTurck remainder at zero metric deviation as an
-`H^2` spectral tensor.  It is the affine forcing term for the order-two
-nonautonomous bootstrap.
--/
-
 noncomputable section
 
 open Bundle Manifold MeasureTheory Set Filter Tensor0SBundle
@@ -31,7 +23,6 @@ variable
       [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M]
 
 omit [BoundarylessManifold I M] in
-/-- The symmetrized extraction of the zero smooth tensor section vanishes. -/
 theorem ccTensorBilinSymm_zero_apply (g : SmoothRiemannianMetric I M)
     (x : M) (v w : TangentSpace I x) :
     ccTensorBilinSymm (I := I) g (0 : SmoothCcTensor g 0 2) x v w = 0 := by
@@ -42,7 +33,6 @@ theorem ccTensorBilinSymm_zero_apply (g : SmoothRiemannianMetric I M)
   ring
 
 omit [BoundarylessManifold I M] in
-/-- The zero smooth tensor is uniformly fibre-small with constant zero. -/
 theorem gFibreOpBound_ccTensorBilinSymm_zero
     (g : SmoothRiemannianMetric I M) :
     gFibreOpBound (I := I) (M := M) g
@@ -51,7 +41,6 @@ theorem gFibreOpBound_ccTensorBilinSymm_zero
   rw [ccTensorBilinSymm_zero_apply]
   simp only [abs_zero, zero_mul, le_refl]
 
-/-- The fixed Ricci-DeTurck affine forcing at Sobolev order two. -/
 def baseForceH2 (g₀ g_bg : SmoothRiemannianMetric I M) :
     tensorHs (I := I) (M := M) g₀ 0 2 (2 : ℝ) :=
   ccTensorToHs (I := I) (M := M) g₀ 2 (2 : ℝ)
@@ -59,8 +48,6 @@ def baseForceH2 (g₀ g_bg : SmoothRiemannianMetric I M) :
       (0 : SmoothCcTensor g₀ 0 2) (by norm_num)
       (gFibreOpBound_ccTensorBilinSymm_zero (I := I) (M := M) g₀))
 
-/-- `baseForceH2` is the spectral embedding of the genuine smooth remainder at
-zero metric deviation. -/
 theorem baseForceH2_core (g₀ g_bg : SmoothRiemannianMetric I M) :
     baseForceH2 (I := I) (M := M) g₀ g_bg =
       ccTensorToHs (I := I) (M := M) g₀ 2 (2 : ℝ)

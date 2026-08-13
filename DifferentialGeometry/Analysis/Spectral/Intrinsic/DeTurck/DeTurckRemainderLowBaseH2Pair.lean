@@ -1,37 +1,6 @@
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.DeTurckRemainderLowBaseC1Lip
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.DeTurckRemainderLowBaseH2Cov
 
-/-!
-# The `H²` pairwise estimate for the zero-order low-base coefficient
-
-`DeTurckRemainderLowBaseLip` produces the pairwise modulus for the transparent
-zero-arm self-action only at the `H¹` level, and with a `(1+A+A²)⁴` envelope in
-the third-jet size `A`.  Every downstream consumer of the low-regularity
-Ricci--DeTurck fixed point (the third arm of the tame three-arm estimate, and
-`MemLp A1 2` in time) admits only a factor which is *linear* in the `H³` size.
-
-This module records the `H²` level of that chain in the critical orientation
-`(B0 R · D3 + B1 R · D2 + B1 R · A · D2 + B2 R · N)²`, i.e. linear in the
-third-jet size `A` and linear in the third-jet difference `D3`, matching the
-corrected `UNIF_N_PRO_RULING` second-order arms at the `a = 2` rung.
-
-The admissible modulus class is
-`(B0 R · (1+A) · (D4 + D3 + D2 + N) + B1 R · A4 · (D3 + N))²`
-with `A` the third-jet size of either state, `A4` the fourth-jet size of either
-state (allowed **linearly**, as an endpoint tame factor), and `D2, D3, D4, N`
-the second/third/fourth-jet and spectral differences.  Every difference slot
-carries either an `A`-degree `≤ 1` or an `A4`-degree `≤ 1` coefficient; `A4²`,
-`D4·A4` and any `A`-degree `≥ 2` against a difference are excluded.
-
-Classes 1, 4, and 5 are proved here; class 3 (`vbH2Pair`) is proved in the
-sibling module `DeTurckRemainderLowBaseH2VB`, which also carries the shared
-`H²` jet algebra (`jetInterp3`, `appH2`, `amixScalar`, the slot/reindex/trace
-transfer layer), and class 2 (`lieCovH2Pair`) in
-`DeTurckRemainderLowBaseH2Cov`.  The class-1 proof first sharpens the six-block
-`ricciAAKer` estimate, then pairs the AA and DA pieces before applying the
-input symmetrizer; the resulting high arm is linear in `A4`.
--/
-
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
@@ -60,12 +29,6 @@ variable
     {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
       [IsManifold I ∞ M] [CompactSpace M] [I.Boundaryless]
       [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M]
-
-/-! ### The five-class telescope at fixed path parameter
-
-`selfLow_parts` and `selfLow_sub_parts` are private to
-`DeTurckRemainderLowBaseLip`; both are level-agnostic identities and are
-re-established here from the public producers. -/
 
 private theorem selfParts
     (g : SmoothRiemannianMetric I M) (T : SmoothCcTensor g 0 2)
@@ -184,15 +147,6 @@ private theorem selfSubParts
     selfParts (I := I) (M := M) g U hU hδ_lt hδU hδZ hs]
   dsimp only
   module
-
-
-/-! ### A tame `H³` product used by the Ricci class
-
-The ordinary `H³` algebra estimate puts three derivatives on both factors.
-For the inverse-metric resolvent telescope below that would create a spurious
-quadratic high-state factor.  At the fixed three-dimensional rung we instead
-differentiate the application once and use the already proved `H²` algebra
-estimate on the two Leibniz terms. -/
 
 omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] in
 private theorem gradSq
@@ -477,7 +431,6 @@ private theorem appRightH3
     _ = C * lowJetSq (I := I) (M := M) g 3 Φ := by
       simp only [C]
       ring
-
 
 private theorem endoSlotL2
     (g : SmoothRiemannianMetric I M) (s i : ℕ)
@@ -1227,8 +1180,6 @@ private theorem fullPairH3
 
 set_option maxHeartbeats 1600000 in
 set_option linter.unusedVariables false in
-/-- The inverse-metric slot insertion is locally Lipschitz in the intrinsic
-`H²` coefficient norm on a fixed spectral metric ball. -/
 theorem full_pair_h2
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M)
@@ -1559,8 +1510,6 @@ private theorem connPairH3
 
 set_option maxHeartbeats 2200000 in
 set_option linter.unusedVariables false in
-/-- The transferred lower Palatini coefficient is locally Lipschitz in the
-intrinsic `H²` coefficient norm on a fixed spectral metric ball. -/
 theorem dag_pair_h2
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M)
@@ -2121,8 +2070,6 @@ private theorem connOutPairH2
     _ = (B R * (D3 + D2 + A * D2)) ^ 2 := by
       simp only [B]
       ring
-
-/-! ### The sharp quadratic Ricci kernel -/
 
 private def aaP3201H2 : Equiv.Perm (Fin 4) :=
   ⟨![3, 2, 0, 1], ![2, 3, 1, 0], by decide, by decide⟩
@@ -3027,8 +2974,6 @@ private theorem aaKerPairH2
   simp only [Q, S, D]
   rw [mul_pow, mul_pow, hBsq]
   ring
-
-/-! ### Fixed H² transfer operators for the Ricci arms -/
 
 private theorem pureCoeffEqH2
     (g gm : SmoothRiemannianMetric I M) :
@@ -4283,17 +4228,7 @@ private theorem ccSymmSubH2
   rw [appCcRS_sub_left]
   module
 
-/-! ### The five classes at the `H²` level
-
-Each class lemma bounds one summand of `selfSubParts` in `lowJetSq 2` with the
-admissible modulus of the corrected ruling. -/
 set_option linter.unusedVariables false in
-/-- **Class 1** — the symmetrized first-order Ricci coefficient
-`ricciGoodLow` along the realized family.
-
-The proof uses the sharp six-block AA estimate, the inverse-slot H²
-factorization, the DA pair estimate with third-jet interpolation, and the
-bounded input symmetrizer. -/
 private theorem goodH2Pair
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M) :
@@ -4644,17 +4579,6 @@ by
 
 set_option maxHeartbeats 6400000 in
 set_option linter.unusedVariables false in
-/-- **Class 4, one half.**  The unsymmetrized five-factor half of `lc0AMix`
-obeys the admissible second-order modulus.
-
-The chain is `Tr₂ · Tr₄ · Ext³mcd · Tr₃ · Ext²mcd`, so it carries *two*
-connection-difference factors.  Each of them is bounded by `mcd_h2_bdd` in the
-form `(Bm R (1+A))`, which against a difference would give the inadmissible
-`A`-degree `2`.  Both are therefore re-paired through `jetInterp3`: the third
-jet of the realized perturbation is re-read as `√(C·R·A4)`, so that
-`(1+√(C R A4))⁴ ≤ 8(1 + (C R A4)²)` is `A4`-linear in the square root scale.
-The `A·D2` slot of `mcd_pair_h2` is fed with `D2 := D3` (legitimate since
-`J2 (T-U) ≤ J3 (T-U)`), turning it into the admissible `A4·D3` arm. -/
 private theorem amixHalfH2Pair
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M) :
@@ -4919,7 +4843,7 @@ private theorem amixHalfH2Pair
     rw [hPQ, ccTensorToHs_smul, norm_smul]
     exact (mul_le_mul_of_nonneg_right hsabs (norm_nonneg _)).trans
       (by simpa using hTUn)
-  -- the interpolated third-jet size of the two states
+
   set a : ℝ := Real.sqrt (Cip * (R * A4)) with hadef
   have ha0 : 0 ≤ a := Real.sqrt_nonneg _
   have hasq : a ^ 2 = Cip * (R * A4) :=
@@ -4952,7 +4876,7 @@ private theorem amixHalfH2Pair
   have hNu : N ^ 2 ≤ u := by
     rw [hu]
     linarith [sq_nonneg D3]
-  -- the two connection-difference factors
+
   set mcdT : SmoothCcTensor g 0 3 :=
     metricConnDiffLoweredCc (I := I) (M := M) g gmT g with hmT
   set mcdU : SmoothCcTensor g 0 3 :=
@@ -5003,7 +4927,7 @@ private theorem amixHalfH2Pair
       ring
     rw [hM5eq]
     linarith
-  -- trace moduli (ρ-cascade)
+
   have hρc : ρ ≤ ρt2 ∧ ρ ≤ ρt3 ∧ ρ ≤ ρt4 ∧ ρ ≤ ρb2 ∧ ρ ≤ ρb3 ∧
       ρ ≤ ρb4 := by
     refine ⟨?_, ?_, ?_, ?_, ?_, ?_⟩ <;>
@@ -5077,7 +5001,7 @@ private theorem amixHalfH2Pair
   have htb2' := htrb 2 Bt2 ρb2 htb2 hρc.2.2.2.1
   have htb3' := htrb 3 Bt3 ρb3 htb3 hρc.2.2.2.2.1
   have htb4' := htrb 4 Bt4 ρb4 htb4 hρc.2.2.2.2.2
-  -- stack abbreviations
+
   set S5T : SmoothCcTensor g 2 5 :=
     slotExtendIter (I := I) (M := M) g 0 3 2 mcdT with hS5Tdef
   set S5U : SmoothCcTensor g 2 5 :=
@@ -5112,7 +5036,7 @@ private theorem amixHalfH2Pair
   have hHalfU : lc0AMixHalfRF (I := I) (M := M) g gmU g σlast =
       appCcRS (I := I) (M := M) g 2 4 2
         (lc0TraceRF (I := I) (M := M) g gmU 2 σlast) S2U := rfl
-  -- bounded chain, T-state
+
   have hS5T2 : lowJetSq (I := I) (M := M) g 2 S5T ≤ S5b R * pl2 := by
     rw [hS5Tdef]
     have h0 : slotExtendIter (I := I) (M := M) g 0 3 2 mcdT =
@@ -5248,7 +5172,7 @@ private theorem amixHalfH2Pair
       _ = S2b R * (pl2 * pl2) := by
         simp only [S2b]
         ring
-  -- level-5 difference
+
   have hdel5 : S5T - S5U =
       slotExtend (I := I) (M := M) g 1 4
         (slotExtend (I := I) (M := M) g 0 3 (mcdT - mcdU)) := by
@@ -5279,7 +5203,7 @@ private theorem amixHalfH2Pair
       _ = D5c R * (pl2 * u) := by
         simp only [D5c]
         ring
-  -- level-4 difference
+
   have hdel4 : S4T - S4U =
       appCcRS (I := I) (M := M) g 2 5 3
           (lc0TraceRF (I := I) (M := M) g gmT 3 LieCorr0Core.lieCorr0AMixPermQ -
@@ -5346,7 +5270,7 @@ private theorem amixHalfH2Pair
         jetAdd (I := I) (M := M) g 2 _ _
       _ ≤ 2 * (K4 R * (pl2 * u) + K5 R * (pl2 * u)) := by
         linarith [h1, h2]
-  -- level-3 difference
+
   have hdel3 : S3T - S3U =
       appCcRS (I := I) (M := M) g 2 3 6 (E3T - E3U) S4T +
         appCcRS (I := I) (M := M) g 2 3 6 E3U (S4T - S4U) := by
@@ -5439,7 +5363,7 @@ private theorem amixHalfH2Pair
       _ ≤ 2 * (K3 R * ((pl2 * pl2) * u) +
           K34 R * ((pl2 * pl2) * u)) := by
         linarith [h1, h2]
-  -- level-2 difference
+
   have hdel2 : S2T - S2U =
       appCcRS (I := I) (M := M) g 2 6 4
           (lc0TraceRF (I := I) (M := M) g gmT 4 LieCorr0Core.lieCorr0AMixPerm1 -
@@ -5508,7 +5432,7 @@ private theorem amixHalfH2Pair
       _ ≤ 2 * (K2 R * ((pl2 * pl2) * u) +
           K23 R * ((pl2 * pl2) * u)) := by
         linarith [h1, h2]
-  -- the half itself
+
   have htrd2 : lowJetSq (I := I) (M := M) g 2
       (lc0TraceRF (I := I) (M := M) g gmT 2 σlast -
         lc0TraceRF (I := I) (M := M) g gmU 2 σlast) ≤
@@ -5589,19 +5513,6 @@ private theorem amixHalfH2Pair
 
 set_option maxHeartbeats 3200000 in
 set_option linter.unusedVariables false in
-/-- **Class 4** — the mixed connection--cometric zero head `lc0AMix`.  Proved.
-
-`amix_refold_rf` writes `lc0AMix` as `2 •` the sum of the two half products
-`Tr₂ · Tr₄ · Ext³mcd · Tr₃ · Ext²mcd`, symmetrized by `lc0SwapPermRF`; each half
-is estimated by `amixHalfH2Pair` and the two halves are added.
-
-The five-factor telescope carries *two* connection-difference factors, so the
-naive bounded chain is `(1+A)²` against a difference — outside the arm class.
-Both are re-paired through `jetInterp3`; see `amixHalfH2Pair` for the
-orientation.  No publicization from `DeTurckRemainderLowBaseLip` was needed:
-`trace{2,3,4}_pair_h2 / _h2_bdd`, `mcd_pair_h2`, `mcd_h2_bdd` and
-`appRS_h2_h2_h2` are all public, and the `H¹` chain's private slot/reindex/
-product helpers are re-derived above from the public `rfns` layer. -/
 private theorem amixH2Pair
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M) :
@@ -5722,7 +5633,6 @@ private theorem amixH2Pair
 
 set_option maxHeartbeats 1600000 in
 set_option linter.unusedVariables false in
-/-- **Class 5** — the curvature passenger `lc0Riem`.  Proved: only the spectral difference enters, with an `A`-free constant. -/
 private theorem riemH2Pair
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M) :
@@ -5822,16 +5732,9 @@ private theorem riemH2Pair
     nlinarith [this]
   exact pow_le_pow_left₀ (mul_nonneg hC hN) hbig 2
 
-
-/-! ### The master telescope and its path integral -/
-
 set_option maxHeartbeats 6400000 in
 set_option synthInstance.maxHeartbeats 1000000 in
 set_option linter.unusedVariables false in
-/-- **The five-class `H²` master telescope.**  On a common small spectral `H²`
-ball the transparent self-action family difference obeys the admissible
-second-order modulus of the corrected ruling: every difference slot carries a
-coefficient of `A`-degree `≤ 1` or `A4`-degree `≤ 1`. -/
 theorem selfLow_pair_h2
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M) :
@@ -6089,8 +5992,6 @@ theorem selfLow_pair_h2
 
 set_option maxHeartbeats 3200000 in
 set_option linter.unusedVariables false in
-/-- **The `H²` tame bound for the pairwise `C0` coefficient difference.**  The
-path integral of `selfLow_pair_h2`; the `C0` half of `lowA1_pair_tame`. -/
 theorem c0Diff_h2_tame
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M) :
@@ -6189,14 +6090,6 @@ theorem c0Diff_h2_tame
       Btot ^ 2 := by
     simpa only [lowJetSq, lowC0Diff, Φ, S, Nat.reduceAdd] using hpath
   exact hfin
-
-/-! ### Local `H3` pair estimates
-
-The compatibility endpoint above keeps the historical `H4` telescope.  The
-lemmas below instead use the already-proved factorwise `H3` pair estimates
-directly.  Their constants may grow polynomially with the common `H3` radius;
-this is the correct local modulus for extending the coefficient map on `H3`.
--/
 
 set_option maxHeartbeats 3200000 in
 set_option linter.unusedVariables false in
@@ -7774,7 +7667,7 @@ private theorem vb_h3_pair
     rw [hPQ, ccTensorToHs_smul, norm_smul]
     exact (mul_le_mul_of_nonneg_right hsabs (norm_nonneg _)).trans
       (by simpa using hTUn)
-  -- Read the factorwise telescope directly at the actual H3 radius.
+
   set a : ℝ := A with hadef
   have ha0 : 0 ≤ a := by rw [hadef]; exact hA
   have hP3i : lowJetSq (I := I) (M := M) g 3 P ≤ a ^ 2 := by
@@ -7806,7 +7699,7 @@ private theorem vb_h3_pair
     rw [hu]
     linarith [sq_nonneg D3]
   have hpl2u : 0 ≤ pl2 * u := mul_nonneg hpl20 hu0
-  -- the moving factors
+
   set mcdT : SmoothCcTensor g 0 3 :=
     metricConnDiffLoweredCc (I := I) (M := M) g gmT g with hmT
   set mcdU : SmoothCcTensor g 0 3 :=
@@ -7835,7 +7728,7 @@ private theorem vb_h3_pair
     appCcRS (I := I) (M := M) g 2 1 4 VmT IpT with hInT
   set InU : SmoothCcTensor g 2 4 :=
     appCcRS (I := I) (M := M) g 2 1 4 VmU IpU with hInU
-  -- trace moduli (ρ-cascade)
+
   have hρc : ρ ≤ ρt1 ∧ ρ ≤ ρb1 ∧ ρ ≤ ρt2 ∧ ρ ≤ ρb2 := by
     refine ⟨?_, ?_, ?_, ?_⟩ <;>
       · rw [hρdef]
@@ -7900,7 +7793,7 @@ private theorem vb_h3_pair
   have htb1' := htrb 1 Bt1 ρb1 htb1 hρc.2.1
   have htp2' := htrp 2 Ct2 ρt2 htp2 hCt2 hρc.2.2.1
   have htb2' := htrb 2 Bt2 ρb2 htb2 hρc.2.2.2
-  -- the two connection-difference producers
+
   have hmbT : lowJetSq (I := I) (M := M) g 2 mcdT ≤ (Bm R) ^ 2 * pl2 := by
     have h := hmcdb gmT P hPsymm hPtie hδ_le hδ0 hδP R a hR ha0 hP2 hP3i
     rw [hmT]
@@ -7941,7 +7834,7 @@ private theorem vb_h3_pair
     refine (pairFold3 (b0 := W0 R) (b1 := W1 R) (a := a) (pl2 := pl2)
       (u := u) (D3 := D3) hpl21 hplA2 hu0 hD3le).trans (le_of_eq ?_)
     simp only [M5w]
-  -- level ω : `wOmega`
+
   have hTr1T2 : lowJetSq (I := I) (M := M) g 2 Tr1T ≤ Bt1 ^ 2 := by
     rw [hTr1T, trJet]
     exact htb1'.1
@@ -8013,7 +7906,7 @@ private theorem vb_h3_pair
       _ = Wm R * (pl2 * u) := by
         simp only [Wm]
         ring
-  -- level ip : `ipLowCc`
+
   have hIpT2 : lowJetSq (I := I) (M := M) g 2 IpT ≤ Ib R * pl2 := by
     rw [hIpT, ipForm]
     refine (happIp (ipHead (I := I) (M := M) g) _).trans ?_
@@ -8063,7 +7956,7 @@ private theorem vb_h3_pair
       _ = Im R * (pl2 * u) := by
         simp only [Im]
         ring
-  -- level vbMcd
+
   have hVmT2 : lowJetSq (I := I) (M := M) g 2 VmT ≤ Vb R * pl2 := by
     rw [hVmT]
     refine (vbmcdH2 (I := I) (M := M) g gmT).trans ?_
@@ -8105,7 +7998,7 @@ private theorem vb_h3_pair
       _ = Vd R * (pl2 * u) := by
         simp only [Vd]
         ring
-  -- level In (inner `appCcRS`)
+
   have hInT2 : lowJetSq (I := I) (M := M) g 2 InT ≤ Sin R * (pl2 * pl2) := by
     rw [hInT]
     refine (happIn VmT IpT).trans ?_
@@ -8164,7 +8057,7 @@ private theorem vb_h3_pair
         jetAdd (I := I) (M := M) g 2 _ _
       _ ≤ 2 * (Kv R * ((pl2 * pl2) * u) + Ki R * ((pl2 * pl2) * u)) := by
         linarith [h1, h2]
-  -- level Lv (outer live trace) and the outer telescope
+
   have hLvd2 : lowJetSq (I := I) (M := M) g 2 (LvT - LvU) ≤ Ct2 ^ 2 * u := by
     rw [hLvT, hLvU, riemLiveEq, riemLiveEq]
     exact htp2'
@@ -8502,7 +8395,7 @@ private theorem amixHalf_h3_pair
     rw [hPQ, ccTensorToHs_smul, norm_smul]
     exact (mul_le_mul_of_nonneg_right hsabs (norm_nonneg _)).trans
       (by simpa using hTUn)
-  -- Read the factorwise telescope directly at the actual H3 radius.
+
   set a : ℝ := A with hadef
   have ha0 : 0 ≤ a := by rw [hadef]; exact hA
   have hP3i : lowJetSq (I := I) (M := M) g 3 P ≤ a ^ 2 := by
@@ -8533,7 +8426,7 @@ private theorem amixHalf_h3_pair
   have hNu : N ^ 2 ≤ u := by
     rw [hu]
     linarith [sq_nonneg D3]
-  -- the two connection-difference factors
+
   set mcdT : SmoothCcTensor g 0 3 :=
     metricConnDiffLoweredCc (I := I) (M := M) g gmT g with hmT
   set mcdU : SmoothCcTensor g 0 3 :=
@@ -8584,7 +8477,7 @@ private theorem amixHalf_h3_pair
       ring
     rw [hM5eq]
     linarith
-  -- trace moduli (ρ-cascade)
+
   have hρc : ρ ≤ ρt2 ∧ ρ ≤ ρt3 ∧ ρ ≤ ρt4 ∧ ρ ≤ ρb2 ∧ ρ ≤ ρb3 ∧
       ρ ≤ ρb4 := by
     refine ⟨?_, ?_, ?_, ?_, ?_, ?_⟩ <;>
@@ -8658,7 +8551,7 @@ private theorem amixHalf_h3_pair
   have htb2' := htrb 2 Bt2 ρb2 htb2 hρc.2.2.2.1
   have htb3' := htrb 3 Bt3 ρb3 htb3 hρc.2.2.2.2.1
   have htb4' := htrb 4 Bt4 ρb4 htb4 hρc.2.2.2.2.2
-  -- stack abbreviations
+
   set S5T : SmoothCcTensor g 2 5 :=
     slotExtendIter (I := I) (M := M) g 0 3 2 mcdT with hS5Tdef
   set S5U : SmoothCcTensor g 2 5 :=
@@ -8693,7 +8586,7 @@ private theorem amixHalf_h3_pair
   have hHalfU : lc0AMixHalfRF (I := I) (M := M) g gmU g σlast =
       appCcRS (I := I) (M := M) g 2 4 2
         (lc0TraceRF (I := I) (M := M) g gmU 2 σlast) S2U := rfl
-  -- bounded chain, T-state
+
   have hS5T2 : lowJetSq (I := I) (M := M) g 2 S5T ≤ S5b R * pl2 := by
     rw [hS5Tdef]
     have h0 : slotExtendIter (I := I) (M := M) g 0 3 2 mcdT =
@@ -8829,7 +8722,7 @@ private theorem amixHalf_h3_pair
       _ = S2b R * (pl2 * pl2) := by
         simp only [S2b]
         ring
-  -- level-5 difference
+
   have hdel5 : S5T - S5U =
       slotExtend (I := I) (M := M) g 1 4
         (slotExtend (I := I) (M := M) g 0 3 (mcdT - mcdU)) := by
@@ -8860,7 +8753,7 @@ private theorem amixHalf_h3_pair
       _ = D5c R * (pl2 * u) := by
         simp only [D5c]
         ring
-  -- level-4 difference
+
   have hdel4 : S4T - S4U =
       appCcRS (I := I) (M := M) g 2 5 3
           (lc0TraceRF (I := I) (M := M) g gmT 3 LieCorr0Core.lieCorr0AMixPermQ -
@@ -8927,7 +8820,7 @@ private theorem amixHalf_h3_pair
         jetAdd (I := I) (M := M) g 2 _ _
       _ ≤ 2 * (K4 R * (pl2 * u) + K5 R * (pl2 * u)) := by
         linarith [h1, h2]
-  -- level-3 difference
+
   have hdel3 : S3T - S3U =
       appCcRS (I := I) (M := M) g 2 3 6 (E3T - E3U) S4T +
         appCcRS (I := I) (M := M) g 2 3 6 E3U (S4T - S4U) := by
@@ -9020,7 +8913,7 @@ private theorem amixHalf_h3_pair
       _ ≤ 2 * (K3 R * ((pl2 * pl2) * u) +
           K34 R * ((pl2 * pl2) * u)) := by
         linarith [h1, h2]
-  -- level-2 difference
+
   have hdel2 : S2T - S2U =
       appCcRS (I := I) (M := M) g 2 6 4
           (lc0TraceRF (I := I) (M := M) g gmT 4 LieCorr0Core.lieCorr0AMixPerm1 -
@@ -9089,7 +8982,7 @@ private theorem amixHalf_h3_pair
       _ ≤ 2 * (K2 R * ((pl2 * pl2) * u) +
           K23 R * ((pl2 * pl2) * u)) := by
         linarith [h1, h2]
-  -- the half itself
+
   have htrd2 : lowJetSq (I := I) (M := M) g 2
       (lc0TraceRF (I := I) (M := M) g gmT 2 σlast -
         lc0TraceRF (I := I) (M := M) g gmU 2 σlast) ≤
@@ -9529,8 +9422,6 @@ private theorem selfLow_h3_pair
 
 set_option maxHeartbeats 3200000 in
 set_option linter.unusedVariables false in
-/-- The zero-order radial coefficient is locally Lipschitz from the spectral
-`H3` state core to coefficient `H2`; its modulus contains no fourth jet. -/
 theorem c0_pair_h3
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M) :

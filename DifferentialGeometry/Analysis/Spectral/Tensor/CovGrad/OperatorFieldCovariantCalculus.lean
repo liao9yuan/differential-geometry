@@ -1,6 +1,5 @@
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.OperatorFieldEvaluationLeibniz
 
-
 noncomputable section
 
 open Bundle Manifold MeasureTheory Set Filter Tensor0SBundle
@@ -56,7 +55,6 @@ theorem riemannianFiberNormSq_comp_clm_le
   exact hCφ W
 
 set_option backward.isDefEq.respectTransparency false in
-
 def appCcFib (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (Φ : SmoothCcTensor g r s) (W : SmoothCcTensor g 0 r) (x : M) :
     TensorRSSpace 0 s I x :=
@@ -64,7 +62,6 @@ def appCcFib (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace r I x from W.toSection x)
 
 set_option backward.isDefEq.respectTransparency false in
-
 omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
     [SigmaCompactSpace M] [CompleteSpace E] in
 theorem appCcFib_contMDiff (g : SmoothRiemannianMetric I M) (r s : ℕ)
@@ -95,7 +92,6 @@ theorem appCcFib_contMDiff (g : SmoothRiemannianMetric I M) (r s : ℕ)
   exact ContMDiff.clm_bundle_apply (b := id) Φ.toSection.contMDiff hWY
 
 set_option backward.isDefEq.respectTransparency false in
-
 def operatorFieldApply (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (Φ : SmoothCcTensor g r s) (W : SmoothCcTensor g 0 r) : SmoothCcTensor g 0 s where
   toSection :=
@@ -103,13 +99,11 @@ def operatorFieldApply (g : SmoothRiemannianMetric I M) (r s : ℕ)
       contMDiff_toFun := appCcFib_contMDiff (I := I) (M := M) g r s Φ W }
   hasCompactSupport := HasCompactSupport.of_compactSpace _
 
-/-- Compatibility name for the rank-zero operator-field action. -/
 abbrev appCc (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (Φ : SmoothCcTensor g r s) (W : SmoothCcTensor g 0 r) : SmoothCcTensor g 0 s :=
   operatorFieldApply g r s Φ W
 
 set_option backward.isDefEq.respectTransparency false in
-
 omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [BoundarylessManifold I M] [SigmaCompactSpace M]
     [CompleteSpace E] in
 @[simp] lemma appCc_toSection (g : SmoothRiemannianMetric I M) (r s : ℕ)
@@ -119,7 +113,6 @@ omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [BoundarylessManifold I M]
         (show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace r I x from W.toSection x) := rfl
 
 set_option backward.isDefEq.respectTransparency false in
-
 def slotExtendPointwise (_g : SmoothRiemannianMetric I M) (r s : ℕ) (x : M)
     (A : Tensor0SSpace r I x →L[ℝ] Tensor0SSpace s I x) :
     Tensor0SSpace (r + 1) I x →L[ℝ] Tensor0SSpace (s + 1) I x :=
@@ -138,14 +131,12 @@ def slotExtendPointwise (_g : SmoothRiemannianMetric I M) (r s : ℕ) (x : M)
             (tensor0S_curry (I := I) (M := M) (𝕜 := ℝ) s x).symm]
         rfl }
 
-/-- Compatibility name for the pointwise passenger-slot extension. -/
 abbrev slotExtendFib (g : SmoothRiemannianMetric I M) (r s : ℕ) (x : M)
     (A : Tensor0SSpace r I x →L[ℝ] Tensor0SSpace s I x) :
     Tensor0SSpace (r + 1) I x →L[ℝ] Tensor0SSpace (s + 1) I x :=
   slotExtendPointwise g r s x A
 
 set_option backward.isDefEq.respectTransparency false in
-
 omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
     [T2Space M] [SigmaCompactSpace M] [CompleteSpace E] in
 @[simp] lemma slotExtendFib_apply (g : SmoothRiemannianMetric I M) (r s : ℕ) (x : M)
@@ -157,7 +148,6 @@ omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [Boundary
   rfl
 
 set_option backward.isDefEq.respectTransparency false in
-
 omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
     [T2Space M] [SigmaCompactSpace M] [CompleteSpace E] in
 lemma slotExtendFib_apply_eval (g : SmoothRiemannianMetric I M) (r s : ℕ) (x : M)
@@ -176,7 +166,6 @@ lemma slotExtendFib_apply_eval (g : SmoothRiemannianMetric I M) (r s : ℕ) (x :
   rfl
 
 set_option backward.isDefEq.respectTransparency false in
-
 omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
     [T2Space M] [SigmaCompactSpace M] [CompleteSpace E] in
 theorem contMDiff_uncurriedSection_of_contMDiff_homSection {n : ℕ}
@@ -227,7 +216,6 @@ theorem contMDiff_uncurriedSection_of_contMDiff_homSection {n : ℕ}
     (continuousMultilinearCurryLeftEquiv ℝ (fun _ : Fin (n + 1) => E) ℝ) _).symm
 
 set_option backward.isDefEq.respectTransparency false in
-
 omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
     [SigmaCompactSpace M] [CompleteSpace E] in
 theorem slotExtendFib_contMDiff (g : SmoothRiemannianMetric I M) (r s : ℕ)
@@ -293,7 +281,6 @@ theorem slotExtendFib_contMDiff (g : SmoothRiemannianMetric I M) (r s : ℕ)
       ((tensor0S_curry (I := I) (M := M) (𝕜 := ℝ) r x) (Y x))) hG
 
 set_option backward.isDefEq.respectTransparency false in
-
 def slotExtend (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (Φ : SmoothCcTensor g r s) : SmoothCcTensor g (r + 1) (s + 1) where
   toSection :=
@@ -305,7 +292,6 @@ def slotExtend (g : SmoothRiemannianMetric I M) (r s : ℕ)
   hasCompactSupport := HasCompactSupport.of_compactSpace _
 
 set_option backward.isDefEq.respectTransparency false in
-
 omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [BoundarylessManifold I M] [SigmaCompactSpace M]
     [CompleteSpace E] in
 @[simp] lemma slotExtend_toSection (g : SmoothRiemannianMetric I M) (r s : ℕ)
@@ -316,7 +302,6 @@ omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [BoundarylessManifold I M]
           (show Tensor0SSpace r I x →L[ℝ] Tensor0SSpace s I x from Φ.toSection x)) := rfl
 
 set_option backward.isDefEq.respectTransparency false in
-
 omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [BoundarylessManifold I M] [SigmaCompactSpace M]
     [CompleteSpace E] in
 theorem slotExtend_sub (g : SmoothRiemannianMetric I M) (r s : ℕ)
@@ -362,7 +347,6 @@ theorem slotExtend_sub (g : SmoothRiemannianMetric I M) (r s : ℕ)
   rw [map_sub]
 
 set_option backward.isDefEq.respectTransparency false in
-
 omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [BoundarylessManifold I M] [SigmaCompactSpace M]
     [CompleteSpace E] in
 theorem appCc_add_right (g : SmoothRiemannianMetric I M) (r s : ℕ)
@@ -383,7 +367,6 @@ theorem appCc_add_right (g : SmoothRiemannianMetric I M) (r s : ℕ)
   rw [ContinuousLinearMap.comp_add]
 
 set_option backward.isDefEq.respectTransparency false in
-
 omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [BoundarylessManifold I M] [SigmaCompactSpace M]
     [CompleteSpace E] in
 theorem appCc_smul_right (g : SmoothRiemannianMetric I M) (r s : ℕ)
@@ -401,7 +384,6 @@ theorem appCc_smul_right (g : SmoothRiemannianMetric I M) (r s : ℕ)
   rw [ContinuousLinearMap.comp_smul]
 
 set_option backward.isDefEq.respectTransparency false in
-
 omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [BoundarylessManifold I M] [SigmaCompactSpace M]
     [CompleteSpace E] in
 theorem appCc_smul_left (g : SmoothRiemannianMetric I M) (r s : ℕ)
@@ -419,7 +401,6 @@ theorem appCc_smul_left (g : SmoothRiemannianMetric I M) (r s : ℕ)
   rw [ContinuousLinearMap.smul_comp]
 
 set_option backward.isDefEq.respectTransparency false in
-
 omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [BoundarylessManifold I M] [SigmaCompactSpace M]
     [CompleteSpace E] in
 theorem appCc_add_left (g : SmoothRiemannianMetric I M) (r s : ℕ)
@@ -528,7 +509,6 @@ theorem tensorCovDerivAt_appCc_eq (g : SmoothRiemannianMetric I M) (r s : ℕ)
   abel
 
 set_option backward.isDefEq.respectTransparency false in
-
 omit [BoundarylessManifold I M] [CompleteSpace E] in
 omit [NeZero (Module.finrank ℝ E)] in
 theorem tensor0S_curry_covGrad_appCc_eq (g : SmoothRiemannianMetric I M) (r : ℕ)
@@ -619,10 +599,8 @@ theorem covGrad_operatorFieldApply_eq (g : SmoothRiemannianMetric I M) (r s : �
   rw [ContinuousLinearMap.add_apply, ContinuousLinearMap.comp_apply, ContinuousLinearMap.comp_apply,
     Tensor0SSpace.toModel_add, ContinuousMultilinearMap.add_apply]
 
-/-- Compatibility name for the covariant product rule of `appCc`. -/
 alias covGrad_appCc_eq := covGrad_operatorFieldApply_eq
 
-/-- Compatibility name for the fibre Cauchy--Schwarz estimate for `appCc`. -/
 alias riemannianFiberNormSq_appCLM_le := riemannianFiberNormSq_comp_clm_le
 
 end Connection

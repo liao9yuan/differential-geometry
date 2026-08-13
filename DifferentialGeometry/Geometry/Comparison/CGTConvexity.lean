@@ -5,15 +5,6 @@ import DifferentialGeometry.Geometry.Metric.DistanceScaling
 
 set_option autoImplicit false
 
-/-!
-# Convex cores in the CGT pullback ball
-
-This file packages the compact concentric cores used by the
-Cheeger--Gromov--Taylor center argument.  The ambient pullback ball remains
-open and may be incomplete; compactness is inherited from the corresponding
-closed model ball.
--/
-
 noncomputable section
 
 open Metric Set
@@ -27,13 +18,11 @@ namespace CGT
 variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace Real E]
   [FiniteDimensional Real E] [NeZero (Module.finrank Real E)]
 
-/-- The closed model-radius core inside the open CGT pullback ball. -/
 def intrCore (R a : Real) : Set (intrPullBall (E := E) R) :=
   {z | ‖(z : E)‖ ≤ a}
 
 omit [InnerProductSpace Real E] [FiniteDimensional Real E]
   [NeZero (Module.finrank Real E)] in
-/-- Membership in a CGT core is the ambient model-norm bound. -/
 @[simp] theorem mem_intrCore
     {R a : Real} {z : intrPullBall (E := E) R} :
     z ∈ intrCore (E := E) R a ↔ ‖(z : E)‖ ≤ a :=
@@ -41,7 +30,6 @@ omit [InnerProductSpace Real E] [FiniteDimensional Real E]
 
 omit [InnerProductSpace Real E] [FiniteDimensional Real E]
   [NeZero (Module.finrank Real E)] in
-/-- A smaller concentric core is contained in a larger one. -/
 theorem intrCore_mono
     {R a b : Real} (hab : a ≤ b) :
     intrCore (E := E) R a ⊆ intrCore (E := E) R b := by
@@ -49,7 +37,6 @@ theorem intrCore_mono
   exact hz.trans hab
 
 omit [NeZero (Module.finrank Real E)] in
-/-- A core whose closed radius is below the pullback radius is compact. -/
 theorem intrCore_compact
     {R a : Real} (haR : a < R) :
     IsCompact (intrCore (E := E) R a) := by
@@ -73,7 +60,6 @@ theorem intrCore_compact
   rw [himage]
   exact isCompact_closedBall (0 : E) a
 
-/-- The model origin as a point of a positive-radius pullback ball. -/
 def intrZero {R : Real} (hR : 0 < R) : intrPullBall (E := E) R :=
   ⟨0, by
     change (0 : E) ∈ Metric.ball 0 R
@@ -81,13 +67,11 @@ def intrZero {R : Real} (hR : 0 < R) : intrPullBall (E := E) R :=
 
 omit [InnerProductSpace Real E] [FiniteDimensional Real E]
   [NeZero (Module.finrank Real E)] in
-/-- Every nonnegative core in a positive pullback ball contains the origin. -/
 theorem intrZero_mem
     {R a : Real} (hR : 0 < R) (ha : 0 ≤ a) :
     intrZero (E := E) hR ∈ intrCore (E := E) R a := by
   simpa only [mem_intrCore, intrZero, norm_zero] using ha
 
-/-- The canonical smooth radial path in the pullback ball. -/
 noncomputable def intrRadial
     {R : Real} (z : intrPullBall (E := E) R) (t : Real) :
     intrPullBall (E := E) R := by
@@ -105,7 +89,6 @@ noncomputable def intrRadial
   exact (mul_le_of_le_one_left (norm_nonneg _) hle).trans_lt hzR
 
 omit [FiniteDimensional Real E] [NeZero (Module.finrank Real E)] in
-/-- The pullback radial path starts at the model origin. -/
 @[simp] theorem intrRadial_zero
     {R : Real} (hR : 0 < R) (z : intrPullBall (E := E) R) :
     intrRadial (E := E) z 0 = intrZero (E := E) hR := by
@@ -114,7 +97,6 @@ omit [FiniteDimensional Real E] [NeZero (Module.finrank Real E)] in
     Real.smoothTransition.zero_of_nonpos le_rfl, zero_smul]
 
 omit [FiniteDimensional Real E] [NeZero (Module.finrank Real E)] in
-/-- The pullback radial path ends at its defining point. -/
 @[simp] theorem intrRadial_one
     {R : Real} (z : intrPullBall (E := E) R) :
     intrRadial (E := E) z 1 = z := by
@@ -123,7 +105,6 @@ omit [FiniteDimensional Real E] [NeZero (Module.finrank Real E)] in
     one_smul]
 
 omit [FiniteDimensional Real E] [NeZero (Module.finrank Real E)] in
-/-- The canonical pullback radial path is smooth. -/
 theorem intrRadial_smooth
     {R : Real} (z : intrPullBall (E := E) R) :
     ContMDiff 𝓘(Real, Real) 𝓘(Real, E) ∞
@@ -167,7 +148,6 @@ noncomputable local instance {R : Real} :
     (Geometry.isSigmaCompact_of_isOpen
       𝓘(Real, E) (intrPullBall (E := E) R).isOpen)
 
-/-- The canonical radial path has model length for the CGT pullback metric. -/
 theorem intrRadial_len
     (g : SmoothRiemannianMetric I M)
     (hEnorm : ∀ (y : M) (w : TangentSpace I y),
@@ -250,9 +230,6 @@ theorem intrRadial_len
   simpa only [Real.smoothTransition.zero_of_nonpos le_rfl,
     Real.smoothTransition.one_of_one_le le_rfl] using hbase
 
-/-- The pullback distance from the model origin is exactly the ambient model
-norm.  This uses only local nonsingularity of the intrinsic exponential, not
-global injectivity or completeness of the open pullback ball. -/
 theorem intrPull_dist_zero
     (g : SmoothRiemannianMetric I M)
     (hEnorm : ∀ (y : M) (w : TangentSpace I y),
@@ -330,11 +307,6 @@ theorem intrPull_dist_zero
       exact hlift
     exact (not_lt_of_ge hnorm_le) hγlen
 
-/-- A perpendicular Jacobi field in the CGT pullback ball has positive endpoint
-pairing below the first one-sided Dirichlet/free curvature scale.
-
-This is the pullback-metric Whitehead endpoint estimate.  It uses neither
-completeness nor connectedness of the open pullback ball. -/
 theorem intrPull_pair_pos
     (g : SmoothRiemannianMetric I M)
     (hEnorm : ∀ (y : M) (w : TangentSpace I y),
@@ -419,8 +391,6 @@ theorem intrPull_pair_pos
     rw [hspeed t ht] at hquad
     simpa only [mul_assoc, mul_left_comm, mul_comm] using hquad
 
-/-- A point strictly inside a CGT core is at pullback distance less than twice
-the core radius from every point of the closed core. -/
 theorem intrCore_edist_lt
     (g : SmoothRiemannianMetric I M)
     (hEnorm : ∀ (y : M) (w : TangentSpace I y),

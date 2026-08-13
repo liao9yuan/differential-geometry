@@ -3,15 +3,6 @@ import DifferentialGeometry.Geometry.Coordinates.LocalDiffeoLift
 
 set_option autoImplicit false
 
-/-!
-# Short lifts of the intrinsic framed exponential
-
-This file owns the compact-continuation lift used by the
-Cheeger--Gromov--Taylor collision argument.  The lift starts at the model
-origin, and the intrinsic Gauss length fence keeps every partial lift inside
-the prescribed model ball.
--/
-
 noncomputable section
 
 open Bundle Function Manifold Set
@@ -38,8 +29,6 @@ variable [RiemannianBundle (fun x : M ↦ TangentSpace I x)]
 variable [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
   [IsContinuousRiemannianBundle E (fun x : M ↦ TangentSpace I x)]
 
-/-- A selected `C¹` lift of a path through the intrinsic framed exponential,
-normalized to start at the model origin. -/
 structure IntrFrameLift
     (g : SmoothRiemannianMetric I M)
     (hEnorm : ∀ (x : M) (v : TangentSpace I x),
@@ -60,8 +49,6 @@ variable {g : SmoothRiemannianMetric I M}
     ‖v‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner x v v))}
   {p : M} {γ : Real → M} {a b R : Real}
 
-/-- The model norm of every value of an intrinsic framed lift is bounded by
-the total length of the base path. -/
 theorem norm_le_length
     (L : IntrFrameLift (I := I) g hEnorm p γ a b)
     (hfin : Manifold.pathELength I γ a b ≠ ⊤)
@@ -99,8 +86,6 @@ theorem norm_le_length
     (ENNReal.toReal_le_toReal ENNReal.ofReal_ne_top hfin).mpr hchain
   simpa only [ENNReal.toReal_ofReal (norm_nonneg _)] using hreal
 
-/-- Every partial value of a short intrinsic exponential lift stays strictly
-inside the controlling model ball. -/
 theorem norm_lt
     (L : IntrFrameLift (I := I) g hEnorm p γ a b)
     (hR : 0 < R)
@@ -138,8 +123,6 @@ theorem norm_lt
       _ < ENNReal.ofReal R := hlen
   exact (ENNReal.ofReal_lt_ofReal_iff hR).mp hlt
 
-/-- A short lift maps its full parameter interval into the controlling model
-ball. -/
 theorem maps_ball
     (L : IntrFrameLift (I := I) g hEnorm p γ a b)
     (hR : 0 < R)
@@ -149,8 +132,6 @@ theorem maps_ball
   intro t ht
   simpa only [Metric.mem_ball, dist_zero_right] using L.norm_lt hR hlen ht
 
-/-- Two short lifts through the same locally diffeomorphic intrinsic framed
-exponential agree on their full common parameter interval. -/
 theorem eqOn
     (L L' : IntrFrameLift (I := I) g hEnorm p γ a b)
     (hab : a ≤ b) (hR : 0 < R)
@@ -177,8 +158,6 @@ theorem eqOn
 
 end IntrFrameLift
 
-/-- A `C¹` path shorter than the local-diffeomorphism radius of the intrinsic
-framed exponential has a selected lift on its full parameter interval. -/
 theorem exists_intr_lift
     (g : SmoothRiemannianMetric I M)
     (hEnorm : ∀ (x : M) (v : TangentSpace I x),

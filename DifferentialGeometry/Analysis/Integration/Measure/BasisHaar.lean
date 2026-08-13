@@ -1,15 +1,6 @@
 import Mathlib.MeasureTheory.Integral.Lebesgue.Add
 import Mathlib.MeasureTheory.Measure.Lebesgue.EqHaar
 
-/-!
-# Change of basis for basis-normalized Haar measure
-
-The additive Haar measures attached to two bases differ by the absolute
-determinant of their change-of-basis matrix.  This is the normalization bridge
-needed when a Jacobian density and its reference Haar measure are changed
-simultaneously.
--/
-
 noncomputable section
 
 open MeasureTheory
@@ -21,8 +12,6 @@ variable {ι E : Type*} [Fintype ι] [DecidableEq ι]
   [NormedAddCommGroup E] [NormedSpace ℝ E] [FiniteDimensional ℝ E]
   [MeasurableSpace E] [BorelSpace E]
 
-/-- Changing from `b` to `b'` multiplies the basis-normalized Haar measure by
-the absolute determinant of the basis change. -/
 theorem det_smul_addHaar (b b' : Basis ι ℝ E) :
     ENNReal.ofReal |b.det b'| • b'.addHaar = b.addHaar := by
   change Real.toNNReal |b.det b'| • b'.addHaar = b.addHaar
@@ -33,8 +22,6 @@ theorem det_smul_addHaar (b b' : Basis ι ℝ E) :
   rw [← ENNReal.ofReal_mul (abs_nonneg (b.det b')), ← abs_mul,
     b.det_mul_det b' b, b.det_self, abs_one, ENNReal.ofReal_one]
 
-/-- A basis change transfers its determinant from the Haar measure to the
-integrand of a nonnegative integral. -/
 theorem lintegral_basis_det (b b' : Basis ι ℝ E) (f : E → ENNReal) :
     (∫⁻ x, f x ∂b.addHaar) =
       ∫⁻ x, ENNReal.ofReal |b.det b'| * f x ∂b'.addHaar := by

@@ -5,8 +5,6 @@ import DifferentialGeometry.Geometry.Exponential.MinimizingGeodesic
 import Mathlib.Topology.Connected.PathConnected
 import Mathlib.Topology.UnitInterval
 
-
-
 open Set Bundle Manifold
 open scoped Topology Manifold ContDiff ENNReal
 
@@ -96,7 +94,6 @@ noncomputable def minimizingVec
     (hopf_rinow_expMapIntrinsic_surjective_minimizing
       (I := I) g hEnorm a b)
 
-
 theorem minimizingVec_exp
     (g : SmoothRiemannianMetric I M)
     (hEnorm : ∀ (x : M) (w : TangentSpace I x),
@@ -106,7 +103,6 @@ theorem minimizingVec_exp
   (Classical.choose_spec
     (hopf_rinow_expMapIntrinsic_surjective_minimizing
       (I := I) g hEnorm a b)).1
-
 
 theorem minimizingVec_len
     (g : SmoothRiemannianMetric I M)
@@ -120,7 +116,6 @@ theorem minimizingVec_len
     (hopf_rinow_expMapIntrinsic_surjective_minimizing
       (I := I) g hEnorm a b)).2
 
-
 noncomputable def minJoin
     (g : SmoothRiemannianMetric I M)
     (hEnorm : ∀ (x : M) (w : TangentSpace I x),
@@ -129,7 +124,6 @@ noncomputable def minJoin
   intrinsicGeodesic (I := I) g hEnorm a
     (minimizingVec (I := I) g hEnorm a b) t
 
-
 @[simp] theorem minJoin_zero
     (g : SmoothRiemannianMetric I M)
     (hEnorm : ∀ (x : M) (w : TangentSpace I x),
@@ -137,7 +131,6 @@ noncomputable def minJoin
     (a b : M) : minJoin (I := I) g hEnorm a b 0 = a := by
   exact intrinsicGeodesic_zero (I := I) g hEnorm a
     (minimizingVec (I := I) g hEnorm a b)
-
 
 @[simp] theorem minJoin_one
     (g : SmoothRiemannianMetric I M)
@@ -148,7 +141,6 @@ noncomputable def minJoin
     (minimizingVec (I := I) g hEnorm a b) 1 = b
   rw [← expMapIntrinsic_def, minimizingVec_exp]
 
-
 theorem minJoin_cont
     (g : SmoothRiemannianMetric I M)
     (hEnorm : ∀ (x : M) (w : TangentSpace I x),
@@ -156,7 +148,6 @@ theorem minJoin_cont
     (a b : M) : Continuous (minJoin (I := I) g hEnorm a b) :=
   intrinsicGeodesic_continuous (I := I) g hEnorm a
     (minimizingVec (I := I) g hEnorm a b)
-
 
 theorem minJoin_edist_le
     (g : SmoothRiemannianMetric I M)
@@ -170,8 +161,6 @@ theorem minJoin_edist_le
       (I := I) g hEnorm a (minimizingVec (I := I) g hEnorm a b)
         (s := 0) (t := t) ht
 
-/-- The selected minimizing join has arc length equal to the real value of the
-Riemannian endpoint distance. -/
 theorem minJoin_arcLength
     (g : SmoothRiemannianMetric I M)
     (hEnorm : ∀ (x : M) (w : TangentSpace I x),
@@ -209,8 +198,6 @@ theorem minJoin_arcLength
     (riemannianEDist I a b).toReal
   rw [harc, minimizingVec_len]
 
-/-- The selected minimizing join has path length equal to the real value of
-the Riemannian endpoint distance. -/
 theorem minJoin_pathLen
     (g : SmoothRiemannianMetric I M)
     (hEnorm : ∀ (x : M) (w : TangentSpace I x),

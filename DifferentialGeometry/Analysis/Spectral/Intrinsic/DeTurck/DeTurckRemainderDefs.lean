@@ -69,13 +69,6 @@ def smoothCcToTensorHs (g₀ : SmoothRiemannianMetric I M) (σ : ℝ)
         (SmoothCcTensor.toL2 T) i :=
   rfl
 
-/-- **The two spectral packagings of a finite eigen-combination agree.**
-
-`finiteEigenComboHs g₀ F c σ` — the `H^σ` element cut out coordinate-wise by the indicator
-`if i ∈ F then c i else 0` — is the canonical smooth-tensor embedding
-`smoothCcToTensorHs g₀ σ` of the genuine smooth tensor `finiteEigenCombo g₀ F c`.  This is
-the bridge that lets a Galerkin argument phrased in eigen-coordinates be read as a
-statement about a smooth compactly-supported section, and conversely. -/
 theorem finiteEigenComboHs_eq (g₀ : SmoothRiemannianMetric I M)
     (F : Finset (DifferentialGeometry.Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx
       (I := I) (M := M) g₀ 0 2))

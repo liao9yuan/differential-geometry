@@ -3,14 +3,6 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.EllipticBridge.EigenvectorW
 import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.RawConnLapLinear
 import DifferentialGeometry.Analysis.Spectral.Tensor.Spectrum.SlotSwapEquivariance
 
-
-
-
-
-
-
-
-
 noncomputable section
 
 open Bundle Manifold MeasureTheory Set Filter
@@ -32,8 +24,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
   [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M]
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
-
-
 
 theorem cc_iter_coeff
     (g : SmoothRiemannianMetric I M) (s n : ℕ)
@@ -90,8 +80,6 @@ theorem cc_l2_pair_tsum
   rw [show (⟪SmoothCcTensor.toL2 A, b i⟫_ℝ : ℝ) =
       ⟪b i, SmoothCcTensor.toL2 A⟫_ℝ from real_inner_comm _ _]
 
-
-
 theorem cc_pair_tsum
     (g : SmoothRiemannianMetric I M) (s n : ℕ)
     (U A : SmoothCcTensor g 0 s) :
@@ -120,8 +108,6 @@ theorem cc_pair_tsum
   rw [hweight]
   ring
 
-/-- Splitting an integer Sobolev weight as `a + b` places `b` iterates of
-`1 - Delta_nabla` on the first tensor and `a` iterates on the second tensor. -/
 theorem cc_pair_tsum_split
     (g : SmoothRiemannianMetric I M) (s a b : ℕ)
     (U A : SmoothCcTensor g 0 s) :
@@ -153,9 +139,6 @@ theorem cc_pair_tsum_split
   rw [hweight, pow_add]
   ring
 
-/-- The finite weighted pairing of coefficients `c` with a smooth `(0, 2)`
-tensor splits as an `L2` pairing with complementary integer iterates of
-`1 - Delta_nabla`. -/
 theorem finite_pair_split
     (g : SmoothRiemannianMetric I M)
     (F : Finset
@@ -310,8 +293,6 @@ private theorem connIter_symmS
       rw [hraw]
       exact (symmS_sub (I := I) (M := M) g _ _).symm
 
-/-- Scaling and symmetrizing a finite `(0, 2)` spectral combination places the
-scaled symmetric tensor in the first slot of the complementary iterate pairing. -/
 theorem finite_symm_scale
     (g : SmoothRiemannianMetric I M)
     (F : Finset
@@ -350,8 +331,6 @@ theorem finite_symm_scale
   rw [connIter_smul (I := I) (M := M),
     connIter_symmS (I := I) (M := M), SmoothCcTensor.toFun_smul,
     tensorL2Inner_smul_left, hsymm_pair, hsymmA]
-
-
 
 theorem finite_repr_norm
     (g : SmoothRiemannianMetric I M) (s m : ℕ)
@@ -393,9 +372,6 @@ theorem finite_repr_norm
         by_contra hne
         exact hi (hT.mem_toFinset.mpr (Function.mem_support.mpr hne))
       norm_num [hcoeff]
-
-
-
 
 theorem finite_cc_pair
     (g : SmoothRiemannianMetric I M) (s n : ℕ)

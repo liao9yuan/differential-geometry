@@ -3,16 +3,6 @@ import DifferentialGeometry.Geometry.Exponential.IntrinsicVelocity
 import DifferentialGeometry.Geometry.Exponential.JacobiVariation
 import DifferentialGeometry.Geometry.Exponential.Smoothness.IntrinsicMfderivZero
 
-/-!
-# Intrinsic framed exponential coordinates
-
-This migration layer writes the complete intrinsic exponential in the fixed
-orthonormal model coordinates supplied by `normalFrame`.  It is deliberately
-separate from the current chart-fixed `framedExpMap`: once the intrinsic map,
-local branch, and pullback metric have been migrated, the canonical framed
-names will be switched to these semantics and this temporary name removed.
--/
-
 noncomputable section
 
 open Bundle Set
@@ -36,19 +26,11 @@ variable {M : Type u} [TopologicalSpace M] [ChartedSpace H M]
   [IsManifold I ∞ M] [T2Space M] [T2Space (TangentBundle I M)]
   [SigmaCompactSpace M] [ConnectedSpace M]
 
-/-- The normal-frame linear map, viewed in the fixed model norm on both sides.
-
-The tangent fiber and `E` are definitionally the same vector space, but their
-available norm instances differ when the Riemannian bundle norm is active.
-Finite dimensionality makes the underlying linear map continuous for the fixed
-model norm used by manifold derivatives. -/
 noncomputable def intrFrameCLM
     (g : SmoothRiemannianMetric I M) (p : M) : E →L[Real] E :=
   LinearMap.toContinuousLinearMap
     (normalFrame (I := I) g p).toLinearEquiv.toLinearMap
 
-/-- The normal-frame linear equivalence, viewed in the fixed model norm on
-both sides. -/
 noncomputable def intrFrameCLE
     (g : SmoothRiemannianMetric I M) (p : M) : E ≃L[Real] E := by
   let L : E ≃ₗ[Real] E := (normalFrame (I := I) g p).toLinearEquiv
@@ -75,11 +57,6 @@ section
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace
 
-/-- The complete intrinsic exponential after identifying the model space with
-the tangent fiber by the center's orthonormal normal frame.
-
-This is a migration name. It will become `framedExpMap` after the chart-fixed
-branch has been moved below the intrinsic import boundary. -/
 noncomputable def intrinsicFramedExp
     [PseudoEMetricSpace M]
     [RiemannianBundle (fun x : M => TangentSpace I x)]
@@ -110,8 +87,6 @@ omit [ConnectedSpace M] in
 
 omit [CompleteSpace E] [T2Space (TangentBundle I M)] in
 omit [ConnectedSpace M] in
-/-- The intrinsic framed exponential is globally smooth in its model-vector
-argument. -/
 theorem intrFrame_smooth
     [PseudoEMetricSpace M]
     [RiemannianBundle (fun x : M => TangentSpace I x)]
@@ -128,7 +103,6 @@ theorem intrFrame_smooth
 
 omit [CompleteSpace E]
   [ConnectedSpace M] in
-/-- The intrinsic framed exponential sends the model origin to its center. -/
 @[simp] theorem intrFrame_zero
     [PseudoEMetricSpace M]
     [RiemannianBundle (fun x : M => TangentSpace I x)]
@@ -148,8 +122,6 @@ omit [CompleteSpace E]
   exact expMap_zero (I := I) g p
 
 omit [ConnectedSpace M] in
-/-- At the origin, the derivative of the intrinsic framed exponential is the
-normal-frame linear equivalence. -/
 theorem intrFrame_deriv_zero
     [PseudoEMetricSpace M]
     [RiemannianBundle (fun x : M => TangentSpace I x)]
@@ -237,8 +209,6 @@ theorem intrFrame_mfderiv
 
 omit [CompleteSpace E]
   [ConnectedSpace M] in
-/-- On a positive model ball, the intrinsic framed exponential agrees with
-the existing chart-fixed framed exponential. -/
 theorem exists_intrFrame_eq
     [PseudoEMetricSpace M]
     [RiemannianBundle (fun x : M => TangentSpace I x)]
@@ -261,8 +231,6 @@ theorem exists_intrFrame_eq
   rw [intrFrame_apply, framedExpMap_apply]
   exact hagree (by simpa only [normalFrame_sqrt] using hnorm)
 
-/-- A chosen positive radius on which the intrinsic and chart-fixed framed
-exponentials agree. This choice is migration-only and is not the H6 radius. -/
 noncomputable def intrFrameRadius
     [PseudoEMetricSpace M]
     [RiemannianBundle (fun x : M => TangentSpace I x)]
@@ -304,11 +272,6 @@ theorem intrFrame_eq_of_mem
       framedExpMap (I := I) g p z :=
   (Classical.choose_spec (exists_intrFrame_eq (I := I) g hEnorm p)).2 z hz
 
-/-- A temporary selected local branch for the intrinsic framed exponential.
-
-Its source is the intersection of the legacy branch source with the agreement
-ball, and its inverse is exactly the legacy framed chart. It exists only to
-keep consumers usable until the canonical framed names are switched. -/
 noncomputable def intrFrameDiffeo
     [PseudoEMetricSpace M]
     [RiemannianBundle (fun x : M => TangentSpace I x)]
@@ -421,8 +384,6 @@ omit [ConnectedSpace M] in
   rfl
 
 omit [ConnectedSpace M] in
-/-- On the temporary branch source, the total intrinsic framed exponential is
-the legacy selected branch. -/
 theorem intrFrame_eq_old
     [PseudoEMetricSpace M]
     [RiemannianBundle (fun x : M => TangentSpace I x)]
@@ -439,8 +400,6 @@ theorem intrFrame_eq_old
   exact (intrFrame_eq_of_mem (I := I) g hEnorm p hz.2).trans
     (framedExp_eq_expMap (I := I) g p hz.1).symm
 
-/-- The Riemannian metric pulled back by the total intrinsic framed
-exponential. It does not depend on a selected local inverse. -/
 noncomputable def intrFrameMetric
     [PseudoEMetricSpace M]
     [RiemannianBundle (fun x : M => TangentSpace I x)]
@@ -498,8 +457,6 @@ omit [ConnectedSpace M] in
   exact normalFrame_inner (I := I) g p v w
 
 omit [ConnectedSpace M] in
-/-- On the migration branch source, the intrinsic total-map pullback metric is
-the legacy selected-branch pullback metric. -/
 theorem intrFrameMetric_eq
     [PseudoEMetricSpace M]
     [RiemannianBundle (fun x : M => TangentSpace I x)]

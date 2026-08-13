@@ -5,37 +5,6 @@ import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.DeTurckRemainder
 import DifferentialGeometry.Analysis.Spectral.Tensor.SobolevScale.ExponentCongr
 import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.LowRegPrincipalTime
 
-/-!
-# Low-regularity Ricci--DeTurck operator fields along the order-one solution
-
-`LowRegPrincipalTime` evaluates the *principal* `H4 → H2` coefficient along the
-order-one Ricci--DeTurck solution.  This file adds the two remaining
-operator-valued time fields consumed by the adjacent-scale bootstrap:
-
-* `lowRegA1Time`, the genuine first-order low-base action `H3 → H2` evaluated
-  along the solution's own `H3` field, with `lowRegA1_memLp` giving its strong
-  measurability, its pointwise operator bound, and its time-`L²` membership --
-  the hypothesis `hA1 : MemLp A1 2` of the non-autonomous `L²` fixed point;
-* `lowRegA2Total`, the *complete* second-order family `principal + extra a2`,
-  with `lowRegA2Total_data` giving strong measurability and uniform smallness.
-  This family, not `lowRegA2Time`, is the one the bootstrap must consume.
-
-The first-order family is the one whose time-`L²` membership needs an operator
-bound **affine** in the `H3` state norm.  The bound currently available in the
-tree (`remainder_low_pair`) is of degree six in that norm, so `lowRegA1_memLp`
-takes the affine bound `hlin` and the state-map continuity `hcont` as explicit
-hypotheses.  Both are consequences of one Lipschitz estimate for the completed
-first-order coefficient map (`LipschitzWith.continuous`, then the triangle
-inequality at the zero state); that estimate is the outstanding low-base
-frontier.
-
-Norms of the completed coefficient maps are written through an explicit
-`show … from` at the adjacent-scale operator type.  The coefficient module
-states `lowA1Hi` / `lowA2Hi` at *private* operator abbreviations, and instance
-search for the operator-norm structure does not get through those heads from
-another module.
--/
-
 noncomputable section
 
 open Bundle Manifold MeasureTheory Set Filter
@@ -68,53 +37,37 @@ private abbrev metricH2 (g : SmoothRiemannianMetric I M) :=
 private abbrev metricH4 (g : SmoothRiemannianMetric I M) :=
   tensorHs (I := I) (M := M) g 0 2 (4 : ℝ)
 
-/-- The Sobolev scale carrying the order-one solution field. -/
 private abbrev solH3 (g : SmoothRiemannianMetric I M) :=
   tensorHs (I := I) (M := M) g 0 2 ((1 : ℝ) + 2)
 
-/-- The Sobolev scale carrying the low-base first-order operator state. -/
 private abbrev opH3 (g : SmoothRiemannianMetric I M) :=
   tensorHs (I := I) (M := M) g 0 2 (3 : ℝ)
 
-/-- The adjacent-scale first-order operator type. -/
 private abbrev a1Op (g : SmoothRiemannianMetric I M) :=
   tensorHs (I := I) (M := M) g 0 2 (3 : ℝ) →L[ℝ]
     tensorHs (I := I) (M := M) g 0 2 (2 : ℝ)
 
-/-- The adjacent-scale second-order operator type. -/
 private abbrev a2Op (g : SmoothRiemannianMetric I M) :=
   tensorHs (I := I) (M := M) g 0 2 (4 : ℝ) →L[ℝ]
     tensorHs (I := I) (M := M) g 0 2 (2 : ℝ)
 
-/-- The lower adjacent-scale first-order operator type. -/
 private abbrev a1LoOp (g : SmoothRiemannianMetric I M) :=
   tensorHs (I := I) (M := M) g 0 2 (2 : ℝ) →L[ℝ]
     tensorHs (I := I) (M := M) g 0 2 (1 : ℝ)
 
-/-- The lower adjacent-scale second-order operator type. -/
 private abbrev a2LoOp (g : SmoothRiemannianMetric I M) :=
   tensorHs (I := I) (M := M) g 0 2 (3 : ℝ) →L[ℝ]
     tensorHs (I := I) (M := M) g 0 2 (1 : ℝ)
 
-/-- The low principal operator type, at the `(1 : ℕ)`-spelled bottom exponent
-in which `PrincipalLowRegPair` states it. -/
 private abbrev pLoOp (g : SmoothRiemannianMetric I M) :=
   tensorHs (I := I) (M := M) g 0 2 (3 : ℝ) →L[ℝ]
     tensorHs (I := I) (M := M) g 0 2 ((1 : ℕ) : ℝ)
 
-/-- The canonical identification of the order-one top exponent `1 + 2` with the
-literal Sobolev exponent `3`, as an instance of the scale transport
-`tensorHsCongr`. -/
 private abbrev solToOpH3 (g : SmoothRiemannianMetric I M) :
     solH3 (I := I) (M := M) g ≃ₗᵢ[ℝ] opH3 (I := I) (M := M) g :=
   tensorHsCongr (I := I) (M := M) g 0 2
     (show (1 : ℝ) + 2 = (3 : ℝ) by norm_num)
 
-/-! ## The first-order operator field -/
-
-/-- The genuine first-order low-base action evaluated along the order-one
-Ricci--DeTurck solution's own `H3` field.  The state is the full `H3` field,
-not its `H2` inclusion, because `lowA1Hi` is an `H3`-state coefficient. -/
 def lowRegA1Time
     (g : SmoothRiemannianMetric I M) {ρ δ : ℝ}
     (hρ : 0 ≤ ρ) (hδ0 : 0 ≤ δ) (hδ_le : δ ≤ 1 / 3)
@@ -131,18 +84,6 @@ def lowRegA1Time
       (maxRegDuhamelSolField (I := I) (M := M) (1 : ℝ) hT hT1
         (0 : solH3 (I := I) (M := M) g) f t))
 
-/-- The first-order operator field is strongly measurable, inherits the affine
-operator bound of its coefficient map, and is square-integrable in operator
-norm.  The last conclusion is exactly the hypothesis `hA1 : MemLp A1 2` of the
-non-autonomous time-`L²` fixed point.
-
-`hcont` and `hlin` are the two facts about the completed first-order
-coefficient map that the low-base lane still owes.  Both follow from a single
-Lipschitz estimate `LipschitzWith C (lowA1Hi …)`: continuity is
-`LipschitzWith.continuous`, and the affine bound is the triangle inequality at
-the zero state with `Φ := max ‖lowA1Hi … 0‖ C`.  The bound must be affine: with
-the degree-six envelope of `remainder_low_pair` the time-`L²` conclusion
-fails. -/
 theorem lowRegA1_memLp
     (g : SmoothRiemannianMetric I M) {ρ δ : ℝ}
     (hρ : 0 ≤ ρ) (hδ0 : 0 ≤ δ) (hδ_le : δ ≤ 1 / 3)
@@ -209,8 +150,6 @@ theorem lowRegA1_memLp
       hmeas hΦ hΦ haffine
   exact ⟨hmeas, hbound, hmem⟩
 
-/-! ## The completed first-order commuting square -/
-
 private theorem coreLip
     {X Y : Type*} [SeminormedAddCommGroup X] [SeminormedAddCommGroup Y]
     {D : Set X} {C : ℝ} (hC : 0 ≤ C) (F : D → Y)
@@ -220,8 +159,6 @@ private theorem coreLip
   intro x y
   simpa only [NNReal.coe_mk, dist_eq_norm, Subtype.dist_eq] using hF x y
 
-/-- A Lipschitz estimate for a smooth-core coefficient, read through the `H3`
-smooth-core subtype on which the first-order coefficient maps are completed. -/
 private theorem highCorePair {Y : Type*} [SeminormedAddCommGroup Y]
     (g : SmoothRiemannianMetric I M) {C : ℝ}
     (F : LowBaseTimeInternal.HighCore (I := I) (M := M) g → Y)
@@ -244,40 +181,6 @@ private theorem highCorePair {Y : Type*} [SeminormedAddCommGroup Y]
   rw [hx, hy, hval, hval, ← map_sub]
   simpa only [ccToHsLin_apply] using hpair T U
 
-/-- Both completed first-order coefficient maps are Lipschitz on the `H3` state
-space, both read off the smooth core, and they satisfy the `∀ v` commuting
-inclusion square.
-
-This is the first-order sibling of `radialA2_lip`.  The square itself is
-unconditional on the smooth core (`radialA1_pair`) and the completion is a
-dense extension, so the *only* inputs beyond the ones `lowA1Hi` / `lowA1Lo`
-already carry are the two smooth-core Lipschitz estimates `hHiPair` /
-`hLoPair` -- the first-order analogue of `a2_pair_lip`, and the single low-base
-estimate the lane still owes.  The modulus is taken against the `H3` size of
-the state difference, one order weaker than the `H2` modulus that the
-second-order estimate achieves.
-
-**WARNING -- `hHiPair` is unsatisfiable as stated, so this theorem is
-vacuous.**  `a1Hi` is an `H³ → H²` operator, so its coefficient is read at the
-`H²` jet, which costs the *third* jet of the state; the radial cutoff
-`lowRadial` inside `lowCoreData` bounds only the spectral `H²` size, and leaves
-that third jet free.  Concretely the coefficient difference contains the
-cross term `(P(g_T⁻¹) - P(g_U⁻¹)) ∗ ∇T`, i.e. the `B1 · A · D2` slot of
-`c1Diff_tame` (`DeTurckRemainderLowBaseLip`), which is sharp: taking `U = T + εV`
-with `V` fixed and low-frequency and `T` oscillatory with `‖T‖_{H²} ≤ ρ/2` but
-`‖T‖_{H³} = A → ∞` makes the left side `≍ εA` and the right side `≍ Cε`.  No
-constant `C` independent of the states works.
-
-The honest replacement is the *ball-local* estimate: for states with
-`lowJetSq g 3 T, lowJetSq g 3 U ≤ A²`, the difference is bounded by
-`K A · ‖T - U‖_{H³}` -- see `a1_pair_lip`
-(`DeTurckRemainderLowBaseA1Pair`) for the currently available version of that
-estimate, and the same-name `.md` for what the restatement then needs (a
-dense-extension lemma for locally Lipschitz core maps, since the conclusion can
-only be `Continuous`, never `LipschitzWith`).  `hLoPair` is by contrast
-*plausibly true* -- `a1Lo` reads its coefficient at the `H¹` jet, which the `H²`
-ball does control -- but the tree's `c0Diff_tame` / `c1Diff_tame` moduli are too
-lossy in `A` to prove it. -/
 theorem lowA1_lip
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M) {ρ δ C : ℝ}
@@ -401,10 +304,6 @@ theorem lowA1_lip
   rw [hcoreHi T, hcoreLo T]
   exact (hpair T).2.2
 
-/-- The completed first-order commuting square, in the shape the adjacent-scale
-lift consumes.
-
-**WARNING -- vacuous: `hHiPair` is unsatisfiable; see `lowA1_lip`.** -/
 theorem lowA1_square
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M) {ρ δ C : ℝ}
@@ -436,8 +335,6 @@ theorem lowA1_square
   (lowA1_lip (I := I) (M := M) hDim g hρ hδ0 hδ_le hreal hC
     hHiPair hLoPair).2.2.2.2 v
 
-/-- The low sibling of the first-order operator field: the same `H3` state,
-read through the completed `H2 → H1` coefficient. -/
 def lowRegA1TimeLo
     (g : SmoothRiemannianMetric I M) {ρ δ : ℝ}
     (hρ : 0 ≤ ρ) (hδ0 : 0 ≤ δ) (hδ_le : δ ≤ 1 / 3)
@@ -454,11 +351,6 @@ def lowRegA1TimeLo
       (maxRegDuhamelSolField (I := I) (M := M) (1 : ℝ) hT hT1
         (0 : solH3 (I := I) (M := M) g) f t))
 
-/-- The two first-order operator fields along the order-one solution commute
-with the Sobolev inclusions at *every* time, not merely almost everywhere:
-the spatial square holds at every state.
-
-**WARNING -- vacuous: `hHiPair` is unsatisfiable; see `lowA1_lip`.** -/
 theorem lowRegA1_square
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M) {ρ δ C : ℝ}
@@ -495,10 +387,6 @@ theorem lowRegA1_square
     lowA1_square (I := I) (M := M) hDim g hρ hδ0 hδ_le hreal hC
       hHiPair hLoPair _
 
-/-- The low first-order operator field is strongly measurable and
-square-integrable in operator norm.  This is the `hA1Lo : MemLp A1Lo 2` input
-of the adjacent-scale lift; it takes the same two conditional facts about the
-completed coefficient map as its high sibling `lowRegA1_memLp`. -/
 theorem lowRegA1Lo_memLp
     (g : SmoothRiemannianMetric I M) {ρ δ : ℝ}
     (hρ : 0 ≤ ρ) (hδ0 : 0 ≤ δ) (hδ_le : δ ≤ 1 / 3)
@@ -556,12 +444,6 @@ theorem lowRegA1Lo_memLp
       hmeas hΦ hΦ haffine
   exact ⟨hmeas, hmem⟩
 
-/-! ## The complete second-order operator field -/
-
-/-- The complete second-order low-base family along the order-one solution: the
-low-regularity principal `H4 → H2` coefficient plus the extra second-order arm
-of the low-base action.  Downstream consumers must use this family and not
-`lowRegA2Time`, which carries only the principal part. -/
 def lowRegA2Total
     (g : SmoothRiemannianMetric I M) {ρ δ : ℝ}
     (hρ : 0 ≤ ρ) (hδ0 : 0 ≤ δ) (hδ_le : δ ≤ 1 / 3)
@@ -586,8 +468,6 @@ def lowRegA2Total
       lowA2Hi (I := I) (M := M) g hρ hδ0 hδ_le hreal
         (lowRegStateL2 (I := I) (M := M) g hT hT1 f hR hball t)
 
-/-- A continuous completed second-order coefficient map that reads off the
-smooth core and is uniformly bounded there is uniformly bounded everywhere. -/
 private theorem a2Hi_total_le
     (g : SmoothRiemannianMetric I M) {ρ δ c : ℝ}
     (hρ : 0 ≤ ρ) (hδ0 : 0 ≤ δ) (hδ_le : δ ≤ 1 / 3)
@@ -623,7 +503,6 @@ private theorem a2Hi_total_le
   rw [← hcore S] at h
   exact h
 
-/-- The `H3 → H1` sibling of `a2Hi_total_le`. -/
 private theorem a2Lo_total_le
     (g : SmoothRiemannianMetric I M) {ρ δ c : ℝ}
     (hρ : 0 ≤ ρ) (hδ0 : 0 ≤ δ) (hδ_le : δ ≤ 1 / 3)
@@ -659,12 +538,6 @@ private theorem a2Lo_total_le
   rw [← hcore S] at h
   exact h
 
-/-- One shrunken realized spectral `H2` cutoff on which **both** completed extra
-second-order coefficient maps are continuous and uniformly small, and on which
-they satisfy the `∀ v` commuting inclusion square.  The smallness is the `C2`
-fibre and two-jet cap of `c2_h2_small`, transported by `radialA2_pair`; the
-continuity and the square are `radialA2_lip`.  The two radii are matched by
-running `radialA2_pair` inside the cutoff produced by `radialA2_lip`. -/
 theorem lowA2_small
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M) {ρ₀ δ : ℝ}
@@ -712,10 +585,6 @@ theorem lowA2_small
   · exact a2Lo_total_le (I := I) (M := M) g hρ0 hδ0 hδ_le hreal'
       hlipLo.continuous hcoreLo (fun S => (hpairdata S hρ0 hρA_le).2.1) v
 
-/-- A non-vacuous version of `lowA2_small`: the realized cutoff is chosen after
-the common pair coefficient, so the reported operator floor satisfies
-`C * ρ < 1`.  The completed maps retain the same continuity, bounds, and
-commuting square. -/
 theorem lowA2_small_one
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M) {ρ₀ δ : ℝ}
@@ -776,9 +645,6 @@ theorem lowA2_small_one
   · exact a2Lo_total_le (I := I) (M := M) g hρ0 hδ0 hδ_le hreal'
       hlipLo.continuous hcoreLo (fun S => (hpairdata hρ0 hρA' S).2.1) v
 
-/-- The complete second-order family along the order-one solution is strongly
-measurable and uniformly small in operator norm, on one positive spectral `H2`
-radius that also controls the solution's own state ball. -/
 theorem lowRegA2Total_data
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M) {ρ₀ δ : ℝ}
@@ -853,12 +719,6 @@ theorem lowRegA2Total_data
       add_le_add (mul_le_mul_of_nonneg_left hRρ CP.coe_nonneg) le_rfl
     _ = ((CP : ℝ) + CA) * ρ := by ring
 
-/-! ## The low sibling of the complete second-order family -/
-
-/-- The low-regularity principal operator, normalized to the literal bottom
-exponent `(1 : ℝ)`, evaluated along the order-one solution's own `H2` state
-field.  The state is the *same* ball lift that `lowRegA2Time` evaluates at, so
-the two families are compared at every time, not only almost everywhere. -/
 def lowRegA2TimeLo
     (g : SmoothRiemannianMetric I M) {T R : ℝ}
     (hT : 0 < T) (hT1 : T ≤ 1)
@@ -880,14 +740,6 @@ def lowRegA2TimeLo
         (aeSetLift (principalBall_zero (I := I) (M := M) g hR)
           (lowRegStateL2 (I := I) (M := M) g hT hT1 f hR hball) t).1)
 
-/-- The complete low principal producer: one positive spectral `H2` radius on
-which the low principal family along the order-one solution is strongly
-measurable, linearly bounded, and forms the canonical Sobolev-inclusion square
-with its `H4 → H2` sibling `lowRegA2Time` at *every* time.
-
-Measurability needs no Lipschitz estimate for the `H3 → H1` correction: on the
-ball the perturbed identity is a unit, so `principalLo_cont` gives continuity
-directly from continuity of `Ring.inverse` at units. -/
 theorem lowRegA2Lo_data
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M) :
@@ -986,8 +838,6 @@ theorem lowRegA2Lo_data
       tensorHsCongrL_refl, ContinuousLinearMap.comp_id] at hstep
     exact hstep
 
-/-- The low sibling of the complete second-order family: the low principal
-family plus the low extra `a2` arm, both at the literal bottom exponent. -/
 def lowRegA2TotalLo
     (g : SmoothRiemannianMetric I M) {ρ δ : ℝ}
     (hρ : 0 ≤ ρ) (hδ0 : 0 ≤ δ) (hδ_le : δ ≤ 1 / 3)
@@ -1012,11 +862,6 @@ def lowRegA2TotalLo
       lowA2Lo (I := I) (M := M) g hρ hδ0 hδ_le hreal
         (lowRegStateL2 (I := I) (M := M) g hT hT1 f hR hball t)
 
-/-- The complete low second-order family along the order-one solution is
-strongly measurable and uniformly small in operator norm, on one positive
-spectral `H2` radius, and it forms the canonical Sobolev-inclusion square with
-`lowRegA2Total` at every time.  Together with `lowRegA2Total_data` this is the
-`A2` half of the adjacent-scale lift's input packet. -/
 theorem lowRegA2TotalLo_data
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M) {ρ₀ δ : ℝ}

@@ -1,44 +1,6 @@
 import DifferentialGeometry.Geometry.Flow.DeTurckVFConnDiffVariation
 import DifferentialGeometry.Geometry.Curvature.Bochner.OrthonormalFrameTrace
 
-/-!
-# The covariant derivative of the DeTurck vector field
-
-The DeTurck vector field `W = deTurckVF g g_bg` is the `g`-cometric trace of the
-connection-difference tensor `A = connDiff g g_bg`.  Because `∇^{g} g = 0`, and hence
-`∇^{g} g^{-1} = 0`, differentiating the trace with `∇^{g}` commutes with the contraction:
-$$
-  \nabla^{g}_v W \;=\; \operatorname{tr}_g \bigl(\nabla^{g}_v A\bigr).
-$$
-
-This file proves that identity, in the frame currency the rest of the tree uses, and the
-frame linear algebra it rests on.
-
-## Main results
-
-* `orthoFrame_expand` — Parseval expansion `u = ∑ᵢ g(u, Bᵢ) • Bᵢ` of a tangent vector in a
-  `g_x`-orthonormal frame.
-* `frameDiag_indep` — the diagonal frame trace `∑ᵢ A(Bᵢ, Bᵢ)` of a vector-valued bilinear map
-  is independent of the `g_x`-orthonormal frame.
-* `deTurckVF_frame_trace` — consequently the DeTurck vector field is the diagonal trace of
-  `connDiff g g_bg` against *any* `g_x`-orthonormal frame, not only the `x`-centred
-  `smoothOrthoFrame g x`.
-* `frameCorr_vanish` — the moving-frame correction `∑ᵢ A(∇_v Bᵢ, Bᵢ)` vanishes, by the
-  skew-symmetry of the connection one-form on a `g`-orthonormal frame
-  (`smoothOrthoFrame_cov_skew`) paired with the symmetry of `A` (`connDiff_symm`).
-* `deTurckVF_covDeriv_eq` — the identity above, with the right-hand side already converted by
-  `connDiff_outerCovDeriv_eq` into the *background* covariant derivative
-  `covDerivConnDiff g_bg g` plus a quadratic `A · A` remainder.  Both pieces are exactly the
-  objects the `Λ`-class jet-envelope bounds control.
-
-## Convention
-
-`connDiff g g' x w v = ∇^{g}_v w - ∇^{g'}_v w` — first argument the differentiated section
-value, second the direction (the project's `connDiff` argument order).  The frame
-`Bᵢ = smoothOrthoFrame g x i` is a *smooth section*, `g_y`-orthonormal for every `y` in its
-orthonormality neighbourhood `smoothOrthoFrameNbhd x`, so it can be differentiated.
--/
-
 set_option autoImplicit false
 
 noncomputable section
@@ -59,11 +21,7 @@ variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 variable [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M]
 
-/-! ## Frame linear algebra -/
-
 set_option linter.unusedSectionVars false in
-/-- **Parseval expansion in a `g_x`-orthonormal frame.**  A tangent vector is recovered from
-its `g_x`-inner products against a `g_x`-orthonormal frame `B`. -/
 theorem orthoFrame_expand (g : SmoothRiemannianMetric I M) (x : M)
     (B : Fin (Module.finrank ℝ E) → TangentSpace I x)
     (hB : ∀ i j : Fin (Module.finrank ℝ E),
@@ -116,9 +74,6 @@ theorem orthoFrame_expand (g : SmoothRiemannianMetric I M) (x : M)
   exact lt_irrefl 0 this
 
 set_option linter.unusedSectionVars false in
-/-- **Frame-independence of the diagonal trace.**  For a vector-valued continuous bilinear map
-`A` on `T_x M`, the diagonal sum `∑ᵢ A(Bᵢ, Bᵢ)` over a `g_x`-orthonormal frame is the
-`g`-cometric contraction of `A`, hence independent of the chosen frame. -/
 theorem frameDiag_indep (g : SmoothRiemannianMetric I M) (x : M)
     (B B' : Fin (Module.finrank ℝ E) → TangentSpace I x)
     (hB : ∀ i j : Fin (Module.finrank ℝ E),
@@ -161,11 +116,6 @@ theorem frameDiag_indep (g : SmoothRiemannianMetric I M) (x : M)
   simp
 
 set_option linter.unusedSectionVars false in
-/-- **The DeTurck vector field as the diagonal trace against an arbitrary orthonormal frame.**
-
-Generalisation of `deTurckVF_eq_orthoFrame_trace` from the `x`-centred smooth orthonormal
-frame to any `g_x`-orthonormal family: `W(x) = ∑ᵢ A(Bᵢ, Bᵢ)` with `A = connDiff g g_bg x`.
-This is what makes the *frozen* (`x`-centred) frame usable at nearby points. -/
 theorem deTurckVF_frame_trace (g g_bg : SmoothRiemannianMetric I M) (x : M)
     (B : Fin (Module.finrank ℝ E) → TangentSpace I x)
     (hB : ∀ i j : Fin (Module.finrank ℝ E),
@@ -179,14 +129,7 @@ theorem deTurckVF_frame_trace (g g_bg : SmoothRiemannianMetric I M) (x : M)
     (fun i j => smoothOrthoFrame_orthonormal_at_center (I := I) g x i j) hB
     (connDiff (I := I) g g_bg x)
 
-/-! ## The moving-frame correction -/
-
 set_option linter.unusedSectionVars false in
-/-- **A skew family paired diagonally against a symmetric bilinear map vanishes.**
-
-If `D` pairs skew-symmetrically with a `g_x`-orthonormal frame `B`
-(`g(Dᵢ, Bⱼ) = − g(Dⱼ, Bᵢ)`) and `A` is symmetric, then `∑ᵢ A(Dᵢ, Bᵢ) = 0`: expanding `Dᵢ`
-in the frame turns the sum into a skew ⊗ symmetric contraction. -/
 private theorem skewDiag_zero (g : SmoothRiemannianMetric I M) (x : M)
     (B D : Fin (Module.finrank ℝ E) → TangentSpace I x)
     (hB : ∀ i j : Fin (Module.finrank ℝ E),
@@ -228,16 +171,6 @@ private theorem skewDiag_zero (g : SmoothRiemannianMetric I M) (x : M)
   · exact h
 
 set_option linter.unusedSectionVars false in
-/-- **The moving-frame correction vanishes.**
-
-For the smooth `g`-orthonormal frame `Bᵢ = smoothOrthoFrame g x i`, the diagonal contraction
-of the connection-difference tensor against the frame's own covariant derivative vanishes:
-```
-∑ᵢ A(∇^{g}_v Bᵢ, Bᵢ) = 0,   A = connDiff g g_bg.
-```
-The frame one-form `g(∇_v Bᵢ, Bⱼ)` is skew (`smoothOrthoFrame_cov_skew`, i.e. `∇^{g} g = 0`
-read on the frame) while `A` is symmetric (`connDiff_symm`, torsion-freeness of both
-Levi-Civita connections).  This is what makes `∇^{g}` commute with the `g`-trace. -/
 theorem frameCorr_vanish (g g_bg : SmoothRiemannianMetric I M) (x : M)
     (v : TangentSpace I x) :
     ∑ i : Fin (Module.finrank ℝ E),
@@ -254,10 +187,7 @@ theorem frameCorr_vanish (g g_bg : SmoothRiemannianMetric I M) (x : M)
     (connDiff (I := I) g g_bg x)
     (fun u w => connDiff_symm (I := I) g g_bg x u w)
 
-/-! ## Covariant differentiation through a finite sum of sections -/
-
 set_option linter.unusedSectionVars false in
-/-- A covariant derivative distributes over a finite sum of smooth sections. -/
 private theorem cov_sum (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
     {ι : Type*} (σ : ι → Π b : M, TangentSpace I b)
     (hσ : ∀ i, ContMDiff I (I.prod 𝓘(ℝ, E)) ∞ (T% (σ i))) (s : Finset ι) (x : M) :
@@ -277,25 +207,7 @@ private theorem cov_sum (cov : CovariantDerivative I E (TangentSpace I : M → T
     rw [hstep, cov.isCovariantDerivativeOnUniv.add ((hσ a x).mdifferentiableAt (by simp))
       ((hsm x).mdifferentiableAt (by simp)) (Set.mem_univ x), ih, Finset.sum_insert ha]
 
-/-! ## The covariant derivative of the DeTurck vector field -/
-
 set_option linter.unusedSectionVars false in
-/-- **`∇^{g}` commutes with the `g`-trace defining the DeTurck vector field.**
-
-Write `A = connDiff g g_bg`, `W = deTurckVF g g_bg` and `Bᵢ = smoothOrthoFrame g x i`.  Since
-`W = tr_g A` and `∇^{g} g^{-1} = 0`, the `g`-covariant derivative of `W` is the `g`-trace of
-`∇^{g} A`; and `connDiff_outerCovDeriv_eq` rewrites `∇^{g}A` as the *background* derivative
-`∇^{g_bg} A = covDerivConnDiff g_bg g` plus the quadratic `A · A` action.  Hence
-$$
-  \nabla^{g}_v W \;=\; \sum_i \Bigl[(\nabla^{g_{bg}}_v A)(B_i, B_i)
-    + A(A(B_i,B_i), v) - A(B_i, A(B_i, v)) - A(A(B_i, v), B_i)\Bigr].
-$$
-The moving-frame correction produced by differentiating the frame is discharged by
-`frameCorr_vanish`.
-
-Both right-hand-side ingredients are exactly what the `Λ`-class jet-envelope bounds
-`unifCovConnDiffSup` and `unifConnDiffSup` control, so this is the identity that closes the
-Lie half of the static Ricci–DeTurck field. -/
 theorem deTurckVF_covDeriv_eq (g g_bg : SmoothRiemannianMetric I M) (x : M)
     (v : TangentSpace I x) :
     (LeviCivita (I := I) g).toFun

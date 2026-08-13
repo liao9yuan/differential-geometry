@@ -2,13 +2,6 @@ import DifferentialGeometry.Analysis.Parabolic.RicciLinearization.RicciLineariza
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.ParametricJetIntegral
 import DifferentialGeometry.Bundle.RicciDifferenceMeanValueClmSectionJointSmoothness
 
-/-!
-# Algebra of jointly smooth three-arm coefficient families
-
-This module records the constant-family, additive, scalar, and fixed-composition
-closure properties of `linearizedRicciThreeArmHjoint`.
--/
-
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
@@ -32,8 +25,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
 
 omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [SigmaCompactSpace M]
     [T2Space M] [I.Boundaryless] [BoundarylessManifold I M] in
-/-- A constant coefficient family is jointly smooth on every realized
-parameter slab. -/
 theorem threeArmJoint_const
     (g : SmoothRiemannianMetric I M) {r : ℕ}
     (A : SmoothCcTensor g r 2) {δ δ' : ℝ} :
@@ -44,8 +35,6 @@ theorem threeArmJoint_const
 
 omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [SigmaCompactSpace M]
     [T2Space M] [I.Boundaryless] [BoundarylessManifold I M] in
-/-- Jointly smooth three-arm coefficient families are closed under
-fibrewise addition. -/
 theorem threeArmJoint_add
     (g : SmoothRiemannianMetric I M) {r : ℕ}
     (A B : ℝ → SmoothCcTensor g r 2) {δ δ' : ℝ}
@@ -67,8 +56,6 @@ theorem threeArmJoint_add
 
 omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [SigmaCompactSpace M]
     [T2Space M] [I.Boundaryless] [BoundarylessManifold I M] in
-/-- Jointly smooth three-arm coefficient families are closed under
-fibrewise subtraction. -/
 theorem threeArmJoint_sub
     (g : SmoothRiemannianMetric I M) {r : ℕ}
     (A B : ℝ → SmoothCcTensor g r 2) {δ δ' : ℝ}
@@ -90,8 +77,6 @@ theorem threeArmJoint_sub
 
 omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [SigmaCompactSpace M]
     [T2Space M] [I.Boundaryless] [BoundarylessManifold I M] in
-/-- Jointly smooth three-arm coefficient families are closed under
-constant scalar multiplication. -/
 theorem threeArmJoint_smul
     (g : SmoothRiemannianMetric I M) {r : ℕ}
     (c : ℝ) (A : ℝ → SmoothCcTensor g r 2) {δ δ' : ℝ}
@@ -128,8 +113,6 @@ theorem threeArmJoint_smul
         c ((A p₀.2).toSection p₀.1)
 
 omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [BoundarylessManifold I M] [SigmaCompactSpace M] in
-/-- Postcomposition by a fixed smooth coefficient preserves joint smoothness
-of a three-arm coefficient family. -/
 theorem threeArmJoint_comp
     (g : SmoothRiemannianMetric I M) {a b : ℕ}
     (A : ℝ → SmoothCcTensor g b 2) (B : SmoothCcTensor g a b)

@@ -3,15 +3,6 @@ import DifferentialGeometry.Geometry.Exponential.NormalBallChart
 
 set_option autoImplicit false
 
-/-!
-# Tangent and pair homes of controlled normal-ball charts
-
-This file upgrades a `NormalBallChart` to the two partial homeomorphisms used
-by diagonal-exponential consumers.  The constructions depend only on the
-chart provider, so both legacy and intrinsic H6 charts use the same transport
-API.
--/
-
 noncomputable section
 
 universe u uE uH
@@ -32,24 +23,18 @@ variable [IsManifold I ∞ M]
 
 namespace NormalBallChart
 
-/-- Model tangent coordinates transported through the tangent map of a
-controlled normal-ball chart. -/
 noncomputable def tangentHome {p : M}
     (c : NormalBallChart (I := I) p) :
     OpenPartialHomeomorph (E × E) (TangentBundle I M) :=
   (tangentBundleModelSpaceHomeomorph 𝓘(Real, E)).symm.toOpenPartialHomeomorph.trans
     (PartialDiffeomorph.tangentHome c.restrictBall (by simp))
 
-/-- A pair of model coordinates transported through a controlled normal-ball
-chart in each factor. -/
 noncomputable def pairHome {p : M}
     (c : NormalBallChart (I := I) p) :
     OpenPartialHomeomorph (E × E) (M × M) :=
   c.restrictBall.toOpenPartialHomeomorph.prod
     c.restrictBall.toOpenPartialHomeomorph
 
-/-- On the controlled source ball, `tangentHome` is the provider's tangent
-realization. -/
 theorem tangentHome_apply {p : M}
     (c : NormalBallChart (I := I) p) (z : E × E)
     (hz : z.1 ∈ Metric.ball (0 : E) c.radius) :
@@ -75,7 +60,6 @@ omit [IsManifold I ∞ M] in
     c.pairHome z = c.pair z :=
   rfl
 
-/-- The source of the tangent home is determined by the base coordinate. -/
 theorem tangentHome_source {p : M}
     (c : NormalBallChart (I := I) p) :
     c.tangentHome.source =
@@ -90,8 +74,6 @@ theorem tangentHome_source {p : M}
   · intro hz
     exact ⟨mem_univ z, hz⟩
 
-/-- The target of the tangent-coordinate home consists exactly of tangent
-vectors based in the controlled chart image. -/
 theorem tangentHome_target {p : M}
     (c : NormalBallChart (I := I) p) :
     c.tangentHome.target =
@@ -102,8 +84,6 @@ theorem tangentHome_target {p : M}
     PartialDiffeomorph.tangentHome, Set.mem_inter_iff, Set.mem_preimage]
   simp
 
-/-- The inverse tangent-coordinate home reads a tangent vector through the
-differential of the inverse controlled chart. -/
 theorem tangentHome_symm_apply {p : M}
     (c : NormalBallChart (I := I) p) {y : M}
     (hy : y ∈ c.restrictBall.target) (v : TangentSpace I y) :
@@ -124,14 +104,12 @@ theorem tangentHome_symm_apply {p : M}
   rfl
 
 omit [IsManifold I ∞ M] in
-/-- The source of the pair home is the product of the two controlled balls. -/
 @[simp] theorem pairHome_source {p : M}
     (c : NormalBallChart (I := I) p) :
     c.pairHome.source =
       Metric.ball (0 : E) c.radius ×ˢ Metric.ball (0 : E) c.radius :=
   rfl
 
-/-- The tangent-coordinate home is smooth to all orders on its source. -/
 theorem tangentHome_inf {p : M}
     (c : NormalBallChart (I := I) p) :
     ContMDiffOn 𝓘(Real, E × E) I.tangent ∞
@@ -164,8 +142,6 @@ theorem tangentHome_inf {p : M}
       (m : E × E → TangentBundle 𝓘(Real, E) E) ⁻¹' t.source)
   exact ht.comp' hmOn
 
-/-- The inverse tangent-coordinate home is smooth to all orders on its
-target. -/
 theorem tangentHome_inv_inf {p : M}
     (c : NormalBallChart (I := I) p) :
     ContMDiffOn I.tangent 𝓘(Real, E × E) ∞
@@ -200,7 +176,6 @@ theorem tangentHome_inv_inf {p : M}
   exact hmOn.comp' ht
 
 omit [IsManifold I ∞ M] in
-/-- The pair-coordinate home is smooth to all orders on its source. -/
 theorem pairHome_inf {p : M}
     (c : NormalBallChart (I := I) p) :
     ContMDiffOn 𝓘(Real, E × E) (I.prod I) ∞
@@ -212,7 +187,6 @@ theorem pairHome_inf {p : M}
     OpenPartialHomeomorph.prod_apply] using h
 
 omit [IsManifold I ∞ M] in
-/-- The inverse pair-coordinate home is smooth to all orders on its target. -/
 theorem pairHome_inv_inf {p : M}
     (c : NormalBallChart (I := I) p) :
     ContMDiffOn (I.prod I) 𝓘(Real, E × E) ∞

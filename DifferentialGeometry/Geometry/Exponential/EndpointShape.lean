@@ -6,14 +6,6 @@ import DifferentialGeometry.Geometry.Comparison.Variation.CovariantChainRule
 
 set_option autoImplicit false
 
-/-!
-# Endpoint Jacobi fields for selected exponential branches
-
-This file names the intrinsic initial-velocity Jacobi field and records that a
-selected fixed-first inverse branch preserves linear independence at time one.
-The second-order endpoint shape identity will be built on this API.
--/
-
 noncomputable section
 
 open Bundle Manifold Filter
@@ -45,8 +37,6 @@ variable [RiemannianBundle (fun x : M ↦ TangentSpace I x)]
 variable [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
   [IsContinuousRiemannianBundle E (fun x : M ↦ TangentSpace I x)]
 
-/-- The intrinsic Jacobi field obtained by varying the initial velocity along
-the affine line `u + r • w`. -/
 noncomputable def intrinsicJacobi
     (g : SmoothRiemannianMetric I M)
     (hEnorm : ∀ (y : M) (v : TangentSpace I y),
@@ -59,7 +49,6 @@ noncomputable def intrinsicJacobi
       intrinsicGeodesic (I := I) g hEnorm p (u + r • w) s)
     0 1
 
-/-- The intrinsic initial-velocity Jacobi field vanishes at the launch time. -/
 @[simp] theorem intrinsicJacobi_zero
     (g : SmoothRiemannianMetric I M)
     (hEnorm : ∀ (y : M) (v : TangentSpace I y),
@@ -76,8 +65,6 @@ noncomputable def intrinsicJacobi
   rw [hconst, mfderiv_const]
   rfl
 
-/-- The intrinsic Jacobi field and its first covariant derivative have
-differentiable chart representatives at every time. -/
 theorem intrJacobi_diff
     (g : SmoothRiemannianMetric I M)
     (hEnorm : ∀ (y : M) (v : TangentSpace I y),
@@ -122,8 +109,6 @@ theorem intrJacobi_diff
     rw [hbase, hfield] at h
     exact h
 
-/-- Pairing an endpoint Jacobi field with the terminal radial velocity recovers
-the corresponding launch pairing. -/
 theorem intrinsicJacobi_perp
     (g : SmoothRiemannianMetric I M)
     (hEnorm : ∀ (y : M) (v : TangentSpace I y),
@@ -203,8 +188,6 @@ private theorem intrVel_smul
   rw [hct] at hvel
   exact hvel
 
-/-- A perpendicular intrinsic Jacobi field remains perpendicular to the radial
-velocity away from the launch time. -/
 theorem intrJacobi_perp_ne
     (g : SmoothRiemannianMetric I M)
     (hEnorm : ∀ (y : M) (v : TangentSpace I y),
@@ -267,8 +250,6 @@ theorem intrJacobi_perp_ne
       hscaled
   exact (mul_eq_zero.mp hmul).resolve_left ht
 
-/-- The intrinsic Jacobi field obtained by varying a launch in its own radial
-direction equals the geodesic velocity at time one. -/
 theorem intrJacobi_self
     (g : SmoothRiemannianMetric I M)
     (hEnorm : ∀ (y : M) (v : TangentSpace I y),
@@ -352,9 +333,6 @@ private theorem intrGeodesic_smooth
   rw [heq] at hcomp
   exact hcomp
 
-/-- The first covariant derivative of an intrinsic Jacobi field launched
-perpendicular to the radial direction remains perpendicular to the radial
-velocity at every nonzero time. -/
 theorem intrJacobi_dperp
     (g : SmoothRiemannianMetric I M)
     (hEnorm : ∀ (y : M) (v : TangentSpace I y),
@@ -450,9 +428,6 @@ private theorem launch_sq_deriv
     ring
   exact hvalue ▸ hsum
 
-/-- The covariant derivative of the terminal unit radial velocity under an
-affine change of initial velocity is the terminal Jacobi derivative, together
-with the derivative of the normalizing launch length. -/
 theorem endpointJacobi_eq
     (g : SmoothRiemannianMetric I M)
     (hEnorm : ∀ (y : M) (v : TangentSpace I y),
@@ -565,8 +540,6 @@ theorem endpointJacobi_eq
   rw [hcoef, neg_smul]
   abel
 
-/-- The Hessian of selected fixed-first branch energy is the terminal pairing
-of the corresponding intrinsic Jacobi field with its covariant derivative. -/
 theorem branchEnergy_hess
     {g : SmoothRiemannianMetric I M}
     {hEnorm : ∀ (y : M) (w : TangentSpace I y),
@@ -742,9 +715,6 @@ theorem branchEnergy_hess
   simp only [q, J, expMapIntrinsic_def] at hhess hpair ⊢
   exact hhess.trans hpair
 
-/-- The Hessian of the selected fixed-first branch radius at a time-one
-intrinsic endpoint is the normalized endpoint Jacobi derivative, with the
-rank-one correction coming from differentiating the launch length. -/
 theorem branchHess_jacobi
     {g : SmoothRiemannianMetric I M}
     {hEnorm : ∀ (y : M) (w : TangentSpace I y),
@@ -979,8 +949,6 @@ theorem branchHess_jacobi
   field_simp [hroot_ne]
   rfl
 
-/-- For launch directions perpendicular to the radial direction, the
-rank-one normalization correction in `branchHess_jacobi` vanishes. -/
 theorem branchHess_shape
     {g : SmoothRiemannianMetric I M}
     {hEnorm : ∀ (y : M) (w : TangentSpace I y),
@@ -1009,8 +977,6 @@ theorem branchHess_shape
     (w₁ := w₁) (w₂ := w₂), hw₁, hw₂]
   ring
 
-/-- A selected fixed-first inverse branch carries a linearly independent
-initial family to a linearly independent family of endpoint Jacobi fields. -/
 theorem intrinsicJacobi_li
     {ι : Type*}
     {g : SmoothRiemannianMetric I M}

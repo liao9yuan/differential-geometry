@@ -4,16 +4,6 @@ import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.DeTurckRemainder
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.DeTurckRemainderLowBaseA2
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.DeTurckPrincipalCoeffIdentity
 
-/-!
-# Low-base second-order coefficient Lipschitz estimates
-
-This module supplies the two-endpoint low-regularity estimates needed to
-compare the canonical second-order coefficient in the intrinsic
-Ricci--DeTurck remainder split.  The first brick identifies the geometric
-moving-inverse insertion with the completed Neumann correction and transfers
-the resolvent Lipschitz estimate back to smooth coefficient actions.
--/
-
 noncomputable section
 
 open Bundle Manifold MeasureTheory Set Filter Tensor0SBundle
@@ -766,8 +756,6 @@ private theorem invSlot_factor
     slotInsertEndoFib_smul_left, neg_one_smul]
   rw [ContinuousLinearMap.comp_assoc]
 
-/-- The difference of the two inverse-metric rank-two coefficients factors
-through fixed-background raising of the metric perturbation difference. -/
 theorem invSlot_sub_factor
     (g gT gU : SmoothRiemannianMetric I M)
     (T U : SmoothCcTensor g 0 2)
@@ -1172,9 +1160,6 @@ private theorem perturbSlot2_jet
         ‖ccTensorToHs (I := I) (M := M) g 2 (2 : ℝ) T‖) ^ 2 := by
       ring
 
-/-- On a common small three-dimensional spectral `H2` ball, the rank-two
-inverse-metric coefficient is Lipschitz in both its pointwise norm and its
-first three covariant `L²` jets. -/
 theorem invCoeff_h2_lip
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M) :
@@ -2104,8 +2089,6 @@ private theorem curvMono_h2_lip
         _ = (2 * (K₁ + K₂) * (A * N + D)) ^ 2 := by ring
 
 set_option maxHeartbeats 1800000 in
-/-- A fixed-background curvature-refold monomial is bounded on intrinsic
-`H²` coefficient differences. -/
 theorem curv_pair_h2
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M) :
@@ -3634,9 +3617,6 @@ private theorem ricciRad_pair
       dsimp only [C]
       ring
 
-/-- On a three-dimensional spectral `H2` ball, the smooth geometric
-moving-inverse insertion is Lipschitz as a bounded operator on rank-four
-spectral `H2` tensors. -/
 theorem invGeomOp_lip
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M) :
@@ -3696,8 +3676,6 @@ theorem invGeomOp_lip
   rw [← hTcore, ← hUcore]
   exact hLip TH2 UH2 hTLip hULip
 
-/-- On a three-dimensional spectral `H2` ball, the complete geometric
-principal correction is Lipschitz as a bounded operator from `H4` to `H2`. -/
 theorem principalGeom_lip
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M) :
@@ -4160,8 +4138,6 @@ private theorem c2Kernel_pair_eq
   · exact LowBaseInternal.topKernel_eq
       (I := I) (M := M) g g_bg U hUδ hZδ s
 
-/-- The canonical two-endpoint top coefficient is integrated from this
-jointly smooth pointwise family difference. -/
 noncomputable def c2Diff
     (g g_bg : SmoothRiemannianMetric I M)
     (T U : SmoothCcTensor g 0 2) {δ : ℝ}
@@ -4191,8 +4167,6 @@ noncomputable def c2Diff
 
 set_option maxHeartbeats 600000 in
 set_option synthInstance.maxHeartbeats 1200000 in
-/-- The difference of the canonical low-base second-order coefficients is the
-path integral of the explicit two-endpoint top-family difference. -/
 theorem lowC2_sub
     (g g_bg : SmoothRiemannianMetric I M)
     (T U : SmoothCcTensor g 0 2) {δ : ℝ}
@@ -4532,9 +4506,6 @@ private theorem c2Diff_h2
   simpa only [lowJetSq, c2Diff, Φ, S, N, Nat.reduceAdd] using hpath
 
 set_option maxHeartbeats 1000000 in
-/-- On a common spectral `H²` ball, the complete canonical second-order
-coefficient is Lipschitz in both pointwise fibre norm and its intrinsic
-coefficient `H²` jet. -/
 theorem c2_pair_lip
     (hDim : Module.finrank ℝ E = 3)
     (g g_bg : SmoothRiemannianMetric I M) :
@@ -4621,8 +4592,6 @@ theorem c2_pair_lip
   · simpa only [D, N] using hjet
 
 set_option maxHeartbeats 1000000 in
-/-- On the same spectral `H²` ball, both adjacent-scale realizations of the
-complete canonical second-order action are Lipschitz in the state. -/
 theorem a2_pair_lip
     (hDim : Module.finrank ℝ E = 3)
     (g g_bg : SmoothRiemannianMetric I M) :
@@ -4683,8 +4652,6 @@ theorem a2_pair_lip
 
 namespace LowBaseInternal
 
-/-- The full moving Lie-covariant trace pair is locally Lipschitz on the
-metric `H²` perturbation ball in its intrinsic coefficient `H²` jet. -/
 theorem pairTrace_pair_h2
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M) :
@@ -4713,8 +4680,6 @@ theorem pairTrace_pair_h2
   simpa only [lowJetSq, c2JetSq, Nat.reduceAdd] using
     hpair T U gT gU hTtie hUtie hT hU
 
-/-- On the same local metric ball, the full moving Lie-covariant trace pair
-has a uniform intrinsic coefficient `H²` jet bound. -/
 theorem pairTrace_bdd_h2
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M) :
@@ -4854,7 +4819,6 @@ private theorem trace1_h2_lip
       dsimp only [K₁]
       ring ▸ h)
 
-/-- Two-state `H²` modulus of the moving one-slot trace coefficient. -/
 theorem trace1_pair_h2
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M) :
@@ -4883,8 +4847,6 @@ theorem trace1_pair_h2
   simpa only [lowJetSq, c2JetSq, Nat.reduceAdd] using
     htrace T U gT gU hTtie hUtie hT hU
 
-/-- On the same local metric ball, the moving one-slot trace coefficient
-has a uniform intrinsic `H²` jet bound. -/
 theorem trace1_h2_bdd
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M) :
@@ -4972,8 +4934,6 @@ theorem trace1_h2_bdd
         add_le_add hdiff le_rfl
     _ = Z := rfl
 
-/-- The moving two-slot trace coefficient is locally Lipschitz from the
-metric `H²` perturbation ball to its intrinsic coefficient `H²` jet. -/
 private theorem insert4_jet_c2
     (g : SmoothRiemannianMetric I M)
     (Λ : ContMDiffSection I (E →L[ℝ] E) ∞
@@ -5120,7 +5080,6 @@ private theorem trace3_h2_lip
       dsimp only [K₃]
       ring ▸ h)
 
-/-- Two-state `H²` modulus of the moving three-slot trace coefficient. -/
 theorem trace3_pair_h2
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M) :
@@ -5149,8 +5108,6 @@ theorem trace3_pair_h2
   simpa only [lowJetSq, c2JetSq, Nat.reduceAdd] using
     htrace T U gT gU hTtie hUtie hT hU
 
-/-- On the same local metric ball, the moving three-slot trace coefficient
-has a uniform intrinsic `H²` jet bound. -/
 theorem trace3_h2_bdd
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M) :
@@ -5266,8 +5223,6 @@ theorem trace2_pair_h2
   simpa only [lowJetSq, c2JetSq, Nat.reduceAdd] using
     (htrace T U gT gU hTtie hUtie hT hU).1
 
-/-- On the same local metric ball, the moving two-slot trace coefficient
-has a uniform intrinsic `H²` jet bound. -/
 theorem trace2_h2_bdd
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M) :
@@ -5355,7 +5310,6 @@ theorem trace2_h2_bdd
         add_le_add hdiff le_rfl
     _ = Z := rfl
 
-/-- Two-state `H²` modulus of the moving four-slot trace coefficient. -/
 theorem trace4_pair_h2
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M) :
@@ -5384,8 +5338,6 @@ theorem trace4_pair_h2
   simpa only [lowJetSq, c2JetSq, Nat.reduceAdd] using
     (htrace T U gT gU hTtie hUtie hT hU).2
 
-/-- On the same local metric ball, the moving four-slot trace coefficient
-has a uniform intrinsic `H²` jet bound. -/
 theorem trace4_h2_bdd
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M) :
@@ -5473,8 +5425,6 @@ theorem trace4_h2_bdd
         add_le_add hdiff le_rfl
     _ = Z := rfl
 
-/-- The low connection insertion coefficient is locally Lipschitz from the
-metric `H²` perturbation ball to its intrinsic coefficient `H²` jet. -/
 theorem connLow_pair_h2
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M) :
@@ -5503,8 +5453,6 @@ theorem connLow_pair_h2
   simpa only [lowJetSq, c2JetSq, Nat.reduceAdd] using
     hlip T U gT gU hTtie hUtie hT hU
 
-/-- On the same local metric ball, the low connection insertion coefficient
-has a uniform intrinsic `H²` jet bound. -/
 theorem connLow_h2_bdd
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M) :

@@ -6,7 +6,6 @@ import Mathlib.Geometry.Manifold.MFDeriv.Basic
 import DifferentialGeometry.Geometry.Connection.LeviCivita.MetricCompatible
 import DifferentialGeometry.Bundle.Section
 
-
 noncomputable section
 
 open Bundle Manifold Set
@@ -44,7 +43,6 @@ variable
 @[reducible] def directionalDeriv (f : M → ℝ) (x : M) (v : TangentSpace I x) : ℝ :=
   (mfderiv I 𝓘(ℝ) f x) v
 
-/-- Compatibility name for the directional manifold derivative at a point. -/
 @[reducible] def directionalDerivAt (f : M → ℝ) (x : M) (v : TangentSpace I x) : ℝ :=
   directionalDeriv (I := I) f x v
 

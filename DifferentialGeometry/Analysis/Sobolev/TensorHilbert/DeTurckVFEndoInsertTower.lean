@@ -7,11 +7,6 @@ import DifferentialGeometry.Geometry.Connection.TensorNabla.SlotInsertCovariantN
 import DifferentialGeometry.Geometry.Flow.DeTurckVectorFieldL2JetBoundEndomorphismCometricRaise
 import Mathlib.Analysis.MeanInequalities
 
-/-! # DeTurck vector-field endo-insert tower (split 1/3 of `DeTurckVectorFieldL2JetBound`)
-
-Definitional tower `wVF/wXi/wOmega/wAlpha*` for the DeTurck-Lie W-endomorphism insert and its
-pointwise/unit-model decompositions. Consumed by `DeTurckVFEndoInsertProducers`. -/
-
 noncomputable section
 
 set_option linter.style.setOption false
@@ -71,7 +66,6 @@ def wAlpha (g₀ g₁ g_bg : SmoothRiemannianMetric I M) : SmoothCcTensor g₀ 0
   wAlphaA (I := I) (M := M) g₀ g₁ g_bg + wAlphaB (I := I) (M := M) g₀ g₁ g_bg
 
 omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [BoundarylessManifold I M] [SigmaCompactSpace M] in
-/-- Right-subtractivity of the operator-field action `appCc` (mirrors `appCc_add_right`). -/
 private theorem appCc_sub_right (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (Φ : SmoothCcTensor g r s) (W₁ W₂ : SmoothCcTensor g 0 r) :
     appCc (I := I) (M := M) g r s Φ (W₁ - W₂) =
@@ -87,12 +81,6 @@ private theorem appCc_sub_right (g : SmoothRiemannianMetric I M) (r s : ℕ)
     rw [SmoothCcTensor.toSection_sub]; rfl]
   rw [ContinuousLinearMap.comp_sub]
 
-/-- **Difference-algebra keystone.**  The `wOmega`-difference (the deTurckVF-difference in
-`wOmega` form) collapses the moving `connDiffLoweredCc g₀ g₁` factor and leaves a
-`g₁`-cometric double trace on the *fixed* passenger `wXi g₀ g_bg g₀`:
-`wOmega g₀ g₁ g₀ − wOmega g₀ g₁ g_bg = appCc (cometricCastG0 g₀ g₁) (wXi g₀ g_bg g₀)`.
-This is what turns the `lc0Insert`-difference endomorphism's interior-product contraction
-into a moving-cometric-on-fixed-passenger `appCc` (the `lc0Riem` pattern). -/
 theorem wOmegaDiff_eq (g₀ g₁ g_bg : SmoothRiemannianMetric I M) :
     wOmega (I := I) (M := M) g₀ g₁ g₀ - wOmega (I := I) (M := M) g₀ g₁ g_bg =
       appCc (I := I) (M := M) g₀ 3 1 (cometricCastG0 (I := I) g₀ g₁)
@@ -126,9 +114,6 @@ private lemma unitModel_sub (g₀ : SmoothRiemannianMetric I M) (s : ℕ)
   rw [SmoothCcTensor.toSection_sub, ContMDiffSection.coe_sub, Pi.sub_apply,
     ContinuousLinearMap.sub_apply, Tensor0SSpace.toModel_sub]
 
-/-- **`wXi` is the `g₀`-lowered connection difference `g₁ ↔ g_bg`** at unit-model level (via the
-endpoint cocycle).  Public bridge for the radius-free `metricConnDiffLowered` decomposition
-(`mcd = wXi + P-correction`, brick 4). -/
 lemma wXi_unitModel_apply (g₀ g₁ g_bg : SmoothRiemannianMetric I M) (x : M)
     (m : Fin 3 → TangentSpace I x) :
     unitModel (I := I) (M := M) g₀ 3 (wXi (I := I) (M := M) g₀ g₁ g_bg) x m =
@@ -153,9 +138,6 @@ private lemma wOmega_toSection_unit (g₀ g₁ g_bg : SmoothRiemannianMetric I M
   rw [wOmega, appCc_toSection]
   rfl
 
-/-- **`wOmega` is the `g₀`-lowering of the DeTurck vector field**: the unit-model read of
-`wOmega g₀ g₁ g_bg` at `x` is the `g₀`-pairing with `wVF g₁ g_bg x = deTurckVF g₁ g_bg x`.
-Public bridge consumed by the `lc0VB` interior-product arm (`LieCorr0CoeffL2JetBound`). -/
 lemma wOmega_unitModel_apply (g₀ g₁ g_bg : SmoothRiemannianMetric I M) (x : M)
     (z : TangentSpace I x) :
     unitModel (I := I) (M := M) g₀ 1 (wOmega (I := I) (M := M) g₀ g₁ g_bg) x
@@ -337,8 +319,6 @@ private lemma wVF_contMDiff (g₁ g_bg : SmoothRiemannianMetric I M) :
         (wVF (I := I) (M := M) g₁ g_bg b)) :=
   (PDE.DeTurck.deTurckVF (I := I) g₁ g_bg).contMDiff
 
-/-- The unit-model value of `wAlphaA` is the `g₀`-lowered covariant derivative of the
-DeTurck vector field, with the passenger slot first. -/
 lemma wAlphaA_unit_apply (g₀ g₁ g_bg : SmoothRiemannianMetric I M) (x : M)
     (u w : TangentSpace I x) :
     unitModel (I := I) (M := M) g₀ 2 (wAlphaA (I := I) (M := M) g₀ g₁ g_bg) x ![u, w] =
@@ -457,8 +437,6 @@ private lemma wEndo_eq_covDeriv_add_connDiff (g₀ g₁ g_bg : SmoothRiemannianM
   abel
 
 omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] [SigmaCompactSpace M] in
-/-- Generic `cotangentToDual` action of a slot-`0` cometric raise of any `(0, 2)` field:
-the raise of `A` pairs against `om` as the `unitModel` of `A` fed the sharp of `om`. -/
 lemma cotangentToDual_cometricRaiseSlot0_gen
     (g₀ : SmoothRiemannianMetric I M) (A : SmoothCcTensor g₀ 0 2) (x : M)
     (om : Tensor0SSpace 1 I x) (w : TangentSpace I x) :

@@ -1,12 +1,5 @@
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.EdgeRefoldPairing
 
-/-!
-# Exact Ricci--DeTurck refold kernel
-
-This file records the kernel identification used by the low-regularity
-Ricci--DeTurck refold chain, on top of the complete closed-edge pairing API.
--/
-
 noncomputable section
 
 set_option linter.style.setOption false
@@ -37,8 +30,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
   [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M]
 
 omit [BoundarylessManifold I M] in
-/-- A frame-paired Ricci C2 family is the corresponding Palatini kernel
-weighted by the symmetric part of the metric deviation. -/
 theorem riemannC2_eq_kernel
     (g : SmoothRiemannianMetric I M) (T : SmoothCcTensor g 0 2) {δ : ℝ}
     (hδ : gFibreOpBound (I := I) (M := M) g

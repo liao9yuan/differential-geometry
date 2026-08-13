@@ -3,14 +3,6 @@ import DifferentialGeometry.Geometry.Exponential.NormalBallHome
 
 set_option autoImplicit false
 
-
-
-
-
-
-
-
-
 noncomputable section
 
 open Bundle Manifold Set
@@ -38,8 +30,6 @@ variable [RiemannianBundle (fun x : M ↦ TangentSpace I x)]
 variable [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
   [IsContinuousRiemannianBundle E (fun x : M ↦ TangentSpace I x)]
 
-
-
 noncomputable def diagReadout
     {g : SmoothRiemannianMetric I M}
     {hEnorm : ∀ (x : M) (w : TangentSpace I x),
@@ -48,16 +38,12 @@ noncomputable def diagReadout
     (y : M × M) : E :=
   (trivializationAt E (TangentSpace I) p (B.inv y)).2
 
-
-
 def readDom
     {g : SmoothRiemannianMetric I M}
     {hEnorm : ∀ (x : M) (w : TangentSpace I x),
       ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner x w w))}
     {p : M} (B : DiagInvBranch (I := I) g hEnorm p) : Set (M × M) :=
   B.dom ∩ Prod.fst ⁻¹' (trivializationAt E (TangentSpace I) p).baseSet
-
-
 
 omit [ConnectedSpace M] in
 omit [InnerProductSpace ℝ E] in
@@ -108,8 +94,6 @@ variable [RiemannianBundle (fun x : M' ↦ TangentSpace I' x)]
 variable [PseudoEMetricSpace M'] [IsRiemannianManifold I' M'] [CompleteSpace M']
   [IsContinuousRiemannianBundle E' (fun x : M' ↦ TangentSpace I' x)]
 
-/-- The fiber coordinate of a selected inverse branch in the tangent
-coordinates carried by a controlled normal-ball chart. -/
 noncomputable def chartReadout
     {g : SmoothRiemannianMetric I' M'}
     {hEnorm : ∀ (x : M') (w : TangentSpace I' x),
@@ -118,8 +102,6 @@ noncomputable def chartReadout
     (c : NormalBallChart (I := I') p) (y : M' × M') : E' :=
   (c.tangentHome.symm (B.inv y)).2
 
-/-- The branch target restricted to points whose first coordinate lies in the
-image of a controlled normal-ball chart. -/
 def chartReadDom
     {g : SmoothRiemannianMetric I' M'}
     {hEnorm : ∀ (x : M') (w : TangentSpace I' x),
@@ -129,8 +111,6 @@ def chartReadDom
   B.dom ∩ Prod.fst ⁻¹' c.restrictBall.target
 
 omit [ConnectedSpace M'] in
-/-- A selected branch has an open all-order readout domain in the tangent
-coordinates supplied by any controlled normal-ball chart at its center. -/
 theorem chartReadoutInf
     [T2Space (TangentBundle I' M')]
     {g : SmoothRiemannianMetric I' M'}

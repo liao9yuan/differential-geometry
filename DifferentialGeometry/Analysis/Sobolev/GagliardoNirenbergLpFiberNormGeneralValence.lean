@@ -15,7 +15,6 @@ import DifferentialGeometry.Analysis.Sobolev.GagliardoNirenbergLpFiberNormKatoSe
 import DifferentialGeometry.Analysis.Sobolev.GagliardoNirenbergLpFiberNormWeightedCovIBP
 import DifferentialGeometry.Analysis.Sobolev.GagliardoNirenbergLpFiberNormSecondOrderInterp
 
-
 noncomputable section
 
 open MeasureTheory Set Filter Topology
@@ -47,13 +46,10 @@ section GeneralValenceRS
 
 open Bundle Tensor0SBundle Tensor0SNabla TensorRSNabla TensorMultilinear
 
-/-- The mixed-valence jet log-convexity coefficient at volume radius `V`. -/
 def gnLogConst (n k : ℕ) (V : ℝ) : ℝ :=
   max (max (gnStepConst n k) 1)
     (gnStepConst n k * (1 / V) + gnStepConst n k)
 
-/-- The explicit mixed-valence Gagliardo–Nirenberg coefficient at volume radius
-`V = sqrt (vol M)`. -/
 def gnRsConst (n k : ℕ) (V : ℝ) : ℝ :=
   gnLogConst n k V ^ (2 * k ^ 2) * (max 1 V) ^ 2
 
@@ -394,7 +390,6 @@ theorem gn_rs_bound
           ak ^ (2 * (j : ℝ) / k) := by ring
     _ = C * Λ₀ ^ (2 * (1 - (j : ℝ) / k)) * ak ^ (2 * (j : ℝ) / k) := by rw [hC]
 
-/-- Existential compatibility form of `gn_rs_bound`. -/
 theorem exists_gagliardoNirenberg_iteratedCovGrad_lpFiberNorm_le_rs
     (g : SmoothRiemannianMetric I M) (r s k : ℕ) (hk : 1 ≤ k) :
     ∃ C : ℝ, 0 ≤ C ∧

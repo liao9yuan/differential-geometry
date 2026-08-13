@@ -1,15 +1,6 @@
 import DifferentialGeometry.Analysis.Parabolic.QuasiLinear.TensorMaximalRegularity.LocalNemytskii
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.PrincipalLowRegH2
 
-/-!
-# Time-dependent low-regularity DeTurck principal operators
-
-This file restricts the low-regularity Ricci--DeTurck principal operator to a
-small spectral `H2` metric ball and evaluates it on almost-everywhere
-ball-valued time fields.  The resulting operator family is strongly measurable
-and uniformly small as an `H4 -> H2` operator family.
--/
-
 noncomputable section
 
 open Bundle Manifold MeasureTheory Set Filter
@@ -41,30 +32,23 @@ private abbrev rank2H4 (g : SmoothRiemannianMetric I M) :=
 private abbrev rank2H2 (g : SmoothRiemannianMetric I M) :=
   tensorHs (I := I) (M := M) g 0 2 (2 : ℝ)
 
-/-- The closed spectral `H2` ball on which the principal coefficient is
-uniformly controlled. -/
 def principalBall (g : SmoothRiemannianMetric I M) (ρ : ℝ) :
     Set (metricH2 (I := I) (M := M) g) :=
   {T | ‖T‖ ≤ ρ}
 
 omit [BoundarylessManifold I M] in
-/-- The zero metric deviation belongs to every nonnegative principal ball. -/
 theorem principalBall_zero (g : SmoothRiemannianMetric I M)
     {ρ : ℝ} (hρ : 0 ≤ ρ) :
     (0 : metricH2 (I := I) (M := M) g) ∈
       principalBall (I := I) (M := M) g ρ := by
   simpa only [principalBall, Set.mem_setOf_eq, norm_zero] using hρ
 
-/-- The low-regularity principal coefficient restricted to its controlled
-spectral `H2` ball. -/
 def principalOnBall (g : SmoothRiemannianMetric I M) (ρ : ℝ) :
     principalBall (I := I) (M := M) g ρ →
       (rank2H4 (I := I) (M := M) g →L[ℝ]
         rank2H2 (I := I) (M := M) g) :=
   fun T => lowRegPrincipal (I := I) (M := M) g T.1
 
-/-- In dimension three, one small spectral `H2` ball carries both a Lipschitz
-principal coefficient and a uniform bound linear in the ball radius. -/
 theorem principalBall_data
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M) :
@@ -114,8 +98,6 @@ theorem principalBall_data
         mul_le_mul_of_nonneg_right (le_max_left Cn Cl) (norm_nonneg _)
       _ = (C : ℝ) * ‖(T : metricH2 (I := I) (M := M) g)‖ := rfl
 
-/-- An operator-norm Lipschitz bound on a principal ball gives continuity for
-the canonical continuous-linear-map topology. -/
 theorem principalOnBall_cont
     (g : SmoothRiemannianMetric I M) {ρ : ℝ} {C : NNReal}
     (hL : ∀ T U : principalBall (I := I) (M := M) g ρ,
@@ -212,8 +194,6 @@ theorem principalOnBall_cont
     (principalOnBall (I := I) (M := M) g ρ T)
   simpa only [sub_add_cancel, zero_add] using hto
 
-/-- The principal operator family obtained from the canonical
-almost-everywhere lift of an `H2` time field into a principal ball. -/
 def principalTime (g : SmoothRiemannianMetric I M) {ρ : ℝ}
     (hρ : 0 ≤ ρ) {T : ℝ}
     (f : timeL2 (metricH2 (I := I) (M := M) g) T) :
@@ -222,8 +202,6 @@ def principalTime (g : SmoothRiemannianMetric I M) {ρ : ℝ}
   fun t => principalOnBall (I := I) (M := M) g ρ
     (aeSetLift (principalBall_zero (I := I) (M := M) g hρ) f t)
 
-/-- A Lipschitz principal coefficient produces a strongly measurable operator
-family along every almost-everywhere ball-valued `H2` time field. -/
 theorem principalTime_aesm
     (g : SmoothRiemannianMetric I M) {ρ : ℝ} (hρ : 0 ≤ ρ)
     {C : NNReal}
@@ -245,8 +223,6 @@ theorem principalTime_aesm
     (aeSetLift_aesm
       (principalBall_zero (I := I) (M := M) g hρ) f hf')
 
-/-- On the almost-everywhere state ball, the lifted principal family agrees
-with direct evaluation of the low-regularity principal coefficient. -/
 theorem principalTime_ae
     (g : SmoothRiemannianMetric I M) {ρ : ℝ} (hρ : 0 ≤ ρ)
     {T : ℝ} (f : timeL2 (metricH2 (I := I) (M := M) g) T)
@@ -259,8 +235,6 @@ theorem principalTime_ae
     simpa only [principalBall, Set.mem_setOf_eq] using ht
   simp only [principalTime, principalOnBall, aeSetLift, dif_pos hmem]
 
-/-- The spatial principal-ball bound gives the required almost-everywhere
-uniform operator bound for the time-dependent family. -/
 theorem principalTime_ae_le
     (g : SmoothRiemannianMetric I M) {ρ : ℝ} (hρ : 0 ≤ ρ)
     {C : NNReal}
@@ -276,9 +250,6 @@ theorem principalTime_ae_le
   exact (hbound U).trans
     (mul_le_mul_of_nonneg_left U.property C.coe_nonneg)
 
-/-- The complete dimension-three time-family producer: one positive radius
-controls every smaller state radius, every time horizon, and every
-almost-everywhere ball-valued `H2` metric path. -/
 theorem principalTime_data
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M) :

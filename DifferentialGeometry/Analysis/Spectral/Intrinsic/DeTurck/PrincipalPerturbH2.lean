@@ -4,15 +4,6 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.SymmRaiseEndoField
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.OperatorFieldFibreNormJet
 import DifferentialGeometry.Analysis.Sobolev.TensorHilbert.MetricArmCoeffJetTower
 
-/-!
-# Low-regularity principal-coefficient perturbations
-
-This file completes the linear metric perturbation of the DeTurck principal
-coefficient from spectral `H2` metrics to bounded operators on rank-four
-spectral `H2` tensors.  The construction uses the fixed background cometric;
-no derivative of an inverse moving metric enters the coefficient map.
--/
-
 noncomputable section
 
 open Bundle Manifold MeasureTheory Set Filter Tensor0SBundle
@@ -56,8 +47,6 @@ private local instance rank4EndSpace
     NormedSpace ℝ (rank4End (I := I) (M := M) g) :=
   ContinuousLinearMap.toNormedSpace
 
-/-- The smooth rank-four coefficient produced by inserting the fixed-background
-raised endomorphism in the leading covariant slot. -/
 def perturbCoeff4
     (g : SmoothRiemannianMetric I M) (T : SmoothCcTensor g 0 2) :
     SmoothCcTensor g 4 4 :=
@@ -336,8 +325,6 @@ private noncomputable def perturbCcLin
       appHs_smul (I := I) (M := M) g 4 4 2 a
         (perturbCoeff4 (I := I) (M := M) g T) V
 
-/-- The fixed-background principal-coefficient perturbation, extended from
-spectral `H2` metric deviations to bounded operators on rank-four `H2`. -/
 noncomputable def perturbH2
     (g : SmoothRiemannianMetric I M) :
     metricH2 (I := I) (M := M) g →L[ℝ]
@@ -346,8 +333,6 @@ noncomputable def perturbH2
     (perturbCcLin (I := I) (M := M) g)
       (ccToHsLin (I := I) (M := M) g 2 (2 : ℝ))
 
-/-- On smooth metric deviations, `perturbH2` is the completed action of the
-explicit fixed-background rank-four coefficient. -/
 theorem perturbH2_core
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M) (T : SmoothCcTensor g 0 2) :
@@ -367,8 +352,6 @@ theorem perturbH2_core
   obtain ⟨C, _, hC⟩ := perturbCc_bound (I := I) (M := M) hDim g
   exact ⟨C, hC⟩
 
-/-- In dimension three, the low-regularity principal perturbation is bounded
-linearly by the spectral `H2` size of the metric deviation. -/
 theorem perturbH2_norm
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M) :

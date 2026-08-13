@@ -42,7 +42,6 @@ theorem curvOpField_apply_eq_pureRGenuineDiffOp
   (Classical.choose_spec (exists_baseOperatorField_apply_eq_pureRGenuineDiffOp (I := I) (M := M) g)
     s S).symm
 
-/-- Compatibility name for the order-zero curvature operator-field action identity. -/
 theorem appCc_curvOpField_eq_pureRGenuineDiffOp
     (g : SmoothRiemannianMetric I M) (s : ℕ) (S : SmoothCcTensor g 0 s) :
     appCc (I := I) (M := M) g (s + 0) (s + 0) (curvOpField (I := I) (M := M) g s) S =
@@ -121,7 +120,6 @@ theorem appCc_slotExtend_curvOpField_covGrad_unit_eval
   rw [tensor0S_curry_covGrad_appCc_eq (I := I) (M := M) g (s + 0) S x d v0]
 
 set_option backward.isDefEq.respectTransparency false in
-
 theorem covGrad_pureRGenuineDiffOp_unit_eval_eq_genuineDiffCurv_add_spectator
     (g : SmoothRiemannianMetric I M) (s : ℕ) (S : SmoothCcTensor g 0 s) (x : M)
     (d : Tensor0SSpace 0 I x) (v0 : E) (vs : Fin (s + 0) → E) :

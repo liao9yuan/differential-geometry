@@ -4,14 +4,6 @@ import Mathlib.Data.ENNReal.Real
 set_option autoImplicit false
 set_option linter.unusedSectionVars false
 
-/-!
-# Intrinsic framed injectivity radius
-
-This file defines the injectivity radius of the complete intrinsic framed
-exponential.  It is separate from the legacy chart-fixed `injRadius` while the
-normal-coordinate consumers migrate to intrinsic whole-ball branches.
--/
-
 noncomputable section
 
 open Bundle Set
@@ -41,7 +33,6 @@ variable [PseudoEMetricSpace M]
   [IsRiemannianManifold I M] [CompleteSpace M]
   [IsContinuousRiemannianBundle E (fun x : M => TangentSpace I x)]
 
-/-- Radii on which the complete intrinsic framed exponential is injective. -/
 def intrInjRadiusSet
     (g : SmoothRiemannianMetric I M)
     (hEnorm : ∀ x : M, ∀ v : TangentSpace I x,
@@ -50,7 +41,6 @@ def intrInjRadiusSet
   {r | InjOn (intrinsicFramedExp (I := I) g hEnorm p)
     (Metric.eball (0 : E) r)}
 
-/-- The injectivity radius of the complete intrinsic framed exponential. -/
 def intrInjRadius
     (g : SmoothRiemannianMetric I M)
     (hEnorm : ∀ x : M, ∀ v : TangentSpace I x,
@@ -58,7 +48,6 @@ def intrInjRadius
     (p : M) : ℝ≥0∞ :=
   sSup (intrInjRadiusSet (I := I) g hEnorm p)
 
-/-- The intrinsic injectivity-radius set is downward closed. -/
 lemma intrInj_down
     (g : SmoothRiemannianMetric I M)
     (hEnorm : ∀ x : M, ∀ v : TangentSpace I x,
@@ -68,7 +57,6 @@ lemma intrInj_down
     r' ∈ intrInjRadiusSet (I := I) g hEnorm p :=
   hr.mono (Metric.eball_subset_eball h)
 
-/-- The zero radius belongs to the intrinsic injectivity-radius set. -/
 lemma zero_mem_intrInj
     (g : SmoothRiemannianMetric I M)
     (hEnorm : ∀ x : M, ∀ v : TangentSpace I x,
@@ -80,7 +68,6 @@ lemma zero_mem_intrInj
   rw [Metric.eball_zero]
   exact Set.injOn_empty _
 
-/-- Every admissible radius is bounded by the intrinsic injectivity radius. -/
 lemma le_intrInjRadius
     (g : SmoothRiemannianMetric I M)
     (hEnorm : ∀ x : M, ∀ v : TangentSpace I x,
@@ -91,8 +78,6 @@ lemma le_intrInjRadius
   le_sSup hr
 
 omit [ConnectedSpace M] in
-/-- The intrinsic framed exponential is injective on every extended ball
-strictly below its intrinsic injectivity radius. -/
 theorem intrInjOn_eball
     (g : SmoothRiemannianMetric I M)
     (hEnorm : ∀ x : M, ∀ v : TangentSpace I x,
@@ -107,7 +92,6 @@ theorem intrInjOn_eball
     (Metric.eball_subset_eball (le_of_lt hr_lt_r'))
 
 omit [ConnectedSpace M] in
-/-- Real-radius form of `intrInjOn_eball`. -/
 theorem intrInjOn_ball
     (g : SmoothRiemannianMetric I M)
     (hEnorm : ∀ x : M, ∀ v : TangentSpace I x,

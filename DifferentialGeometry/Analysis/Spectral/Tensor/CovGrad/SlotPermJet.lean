@@ -1,34 +1,5 @@
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.CurvatureCoefficientDifferenceJetTower.PairTrace
 
-/-!
-# Covariant jet windows of passenger-slot extension and output-slot permutation
-
-Two elementary structural operations on an operator field
-`A : SmoothCcTensor g r s` are used throughout the low-regularity
-Ricci--DeTurck coefficient estimates to read a fixed field at a larger
-valence:
-
-* `slotExtend` / `slotExtendIter` add passenger slots on both sides, and
-* `rsDomDomCongrSection` permutes the output slots.
-
-This file records, once and rank/order-generically, what each of them does
-to the order-`m` covariant `L²` jet window
-`∑ j ∈ Finset.range (m + 1), ‖iteratedCovGrad g r s j A‖ ^ 2`:
-
-* one passenger slot costs exactly one factor of `Module.finrank ℝ E`
-  (`slotIcgSq`, `slotJet`), hence `w` slots cost `finrank ^ w`
-  (`slotIterJet`);
-* an output-slot permutation is an isometry on every jet order
-  (`rspermSq`, `rspermJet`);
-* the composite `monoExt` — extend by `w` passenger slots, then permute —
-  is additive on differences (`monoExtSub`) and costs `finrank ^ w`
-  (`monoExtJet`).
-
-All constants are pure dimension powers: no metric class, no uniform
-equivalence and no covariant-derivative order bound enters, so the
-statements are usable both metricwise and class-uniformly.
--/
-
 noncomputable section
 
 open Bundle Manifold MeasureTheory Set Filter Tensor0SBundle
@@ -53,11 +24,7 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
-/-! ### One passenger slot -/
-
 set_option linter.unusedSectionVars false in
-/-- **One passenger-slot extension costs one factor of the dimension**, at each
-covariant-gradient order separately. -/
 theorem slotIcgSq (g : SmoothRiemannianMetric I M) (r s i : ℕ)
     (A : SmoothCcTensor g r s) :
     ‖iteratedCovGrad (I := I) g (r + 1) (s + 1) i
@@ -103,7 +70,6 @@ theorem slotIcgSq (g : SmoothRiemannianMetric I M) (r s i : ℕ)
   exact hsq
 
 set_option linter.unusedSectionVars false in
-/-- **Order-`m` jet window of one passenger-slot extension.** -/
 theorem slotJet (g : SmoothRiemannianMetric I M) (r s m : ℕ)
     (A : SmoothCcTensor g r s) :
     (∑ j ∈ Finset.range (m + 1),
@@ -125,11 +91,7 @@ theorem slotJet (g : SmoothRiemannianMetric I M) (r s m : ℕ)
           ‖iteratedCovGrad (I := I) g r s j A‖ ^ 2 := by
       rw [Finset.mul_sum]
 
-/-! ### Many passenger slots -/
-
 set_option linter.unusedSectionVars false in
-/-- **Order-`m` jet window of the `w`-fold passenger-slot extension**: the cost
-is exactly `w` factors of the dimension. -/
 theorem slotIterJet (g : SmoothRiemannianMetric I M) (r s m w : ℕ)
     (A : SmoothCcTensor g r s) :
     (∑ j ∈ Finset.range (m + 1),
@@ -168,7 +130,6 @@ theorem slotIterJet (g : SmoothRiemannianMetric I M) (r s m w : ℕ)
               ‖iteratedCovGrad (I := I) g r s j A‖ ^ 2 := by ring
 
 set_option linter.unusedSectionVars false in
-/-- The `w`-fold passenger-slot extension distributes over subtraction. -/
 theorem slotIterSub (g : SmoothRiemannianMetric I M) (r s w : ℕ)
     (A B : SmoothCcTensor g r s) :
     slotExtendIter (I := I) (M := M) g r s w (A - B) =
@@ -185,11 +146,7 @@ theorem slotIterSub (g : SmoothRiemannianMetric I M) (r s w : ℕ)
           (slotExtendIter (I := I) (M := M) g r s w B)
     rw [ih, slotExtend_sub]
 
-/-! ### Output-slot permutation -/
-
 set_option linter.unusedSectionVars false in
-/-- **An output-slot permutation is an `L²` isometry at every covariant-gradient
-order.** -/
 theorem rspermSq (g : SmoothRiemannianMetric I M) {r s : ℕ}
     (σ : Equiv.Perm (Fin s)) (A : SmoothCcTensor g r s) (i : ℕ) :
     ‖iteratedCovGrad (I := I) g r s i
@@ -209,7 +166,6 @@ theorem rspermSq (g : SmoothRiemannianMetric I M) {r s : ℕ}
           toModel_rsDomDomCongr_apply]) i x
 
 set_option linter.unusedSectionVars false in
-/-- **Order-`m` jet window of an output-slot permutation**: unchanged. -/
 theorem rspermJet (g : SmoothRiemannianMetric I M) {r s : ℕ} (m : ℕ)
     (σ : Equiv.Perm (Fin s)) (A : SmoothCcTensor g r s) :
     (∑ j ∈ Finset.range (m + 1),
@@ -220,13 +176,7 @@ theorem rspermJet (g : SmoothRiemannianMetric I M) {r s : ℕ} (m : ℕ)
   Finset.sum_congr rfl fun i _ =>
     rspermSq (I := I) (M := M) g σ A i
 
-/-! ### The composite reading -/
-
 set_option linter.unusedSectionVars false in
-/-- **The monomial reading of a fixed operator field at extra width `w`.**  Add
-`w` passenger slots on both sides, then permute the output slots by `τ`.  This
-is the shape in which a low-valence coefficient enters a curvature-refold
-monomial. -/
 def monoExt (g : SmoothRiemannianMetric I M) (r s w : ℕ)
     (τ : Equiv.Perm (Fin (s + w))) (A : SmoothCcTensor g r s) :
     SmoothCcTensor g (r + w) (s + w) :=
@@ -234,7 +184,6 @@ def monoExt (g : SmoothRiemannianMetric I M) (r s w : ℕ)
     (slotExtendIter (I := I) (M := M) g r s w A)
 
 set_option linter.unusedSectionVars false in
-/-- The monomial reading distributes over subtraction. -/
 theorem monoExtSub (g : SmoothRiemannianMetric I M) (r s w : ℕ)
     (τ : Equiv.Perm (Fin (s + w))) (A B : SmoothCcTensor g r s) :
     monoExt (I := I) (M := M) g r s w τ (A - B) =
@@ -245,8 +194,6 @@ theorem monoExtSub (g : SmoothRiemannianMetric I M) (r s w : ℕ)
   rfl
 
 set_option linter.unusedSectionVars false in
-/-- **Order-`m` jet window of the monomial reading**: `w` factors of the
-dimension, and nothing else. -/
 theorem monoExtJet (g : SmoothRiemannianMetric I M) (r s w m : ℕ)
     (τ : Equiv.Perm (Fin (s + w))) (A : SmoothCcTensor g r s) :
     (∑ j ∈ Finset.range (m + 1),

@@ -4,14 +4,6 @@ import DifferentialGeometry.Geometry.Exponential.IntrinsicBallDiffeo
 
 set_option autoImplicit false
 
-/-!
-# Volume lower bounds from intrinsic exponential charts
-
-This file turns a quantitative lower bound for the metric pulled back by an
-intrinsic framed exponential chart into a lower bound for the Riemannian volume
-of the corresponding intrinsic metric ball.
--/
-
 noncomputable section
 
 open scoped ContDiff ENNReal Manifold Matrix
@@ -43,21 +35,16 @@ private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
-/-- A fixed positive lower bound for the norm of a unit coefficient vector
-after reconstruction in the model basis. -/
 noncomputable def modelCoeffMin : Real :=
   (‖(toEuclidean (E := E) : E →L[Real]
       EuclideanSpace Real (Fin (Module.finrank Real E)))‖ + 1)⁻¹
 
 omit [NeZero (Module.finrank Real E)] in
-/-- The model-basis coefficient lower bound is positive. -/
 theorem modelCoeffMin_pos : 0 < modelCoeffMin (E := E) := by
   apply inv_pos.mpr
   exact add_pos_of_nonneg_of_pos (norm_nonneg _) one_pos
 
 omit [NeZero (Module.finrank Real E)] in
-/-- A unit Euclidean coefficient vector reconstructs to a model vector whose
-norm is at least `modelCoeffMin`. -/
 theorem modelCoeffMin_le
     (v : EuclideanSpace Real (Fin (Module.finrank Real E)))
     (hv : ‖v‖ = 1) :
@@ -105,8 +92,6 @@ theorem modelCoeffMin_le
   simpa [modelCoeffMin, K, L, hw] using hmin
 
 omit [NeZero (Module.finrank Real E)] [T2Space M] [SigmaCompactSpace M] in
-/-- Half-Euclidean coercivity of a controlled chart gives a uniform lower
-bound for its Riemannian volume density. -/
 theorem param_dens_ge
     (g : SmoothRiemannianMetric I M) {p : M}
     (c : NormalBallChart (I := I) p)
@@ -188,8 +173,6 @@ theorem param_dens_ge
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-/-- An injective intrinsic exponential chart with half-Euclidean pullback
-metric has a uniform model-ball lower bound inside the intrinsic metric ball. -/
 theorem intrBall_vol_ge
     [PseudoEMetricSpace M]
     [RiemannianBundle (fun x : M => TangentSpace I x)]

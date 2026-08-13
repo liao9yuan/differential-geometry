@@ -10,9 +10,7 @@ import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.RiemannianFibe
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.IteratedCovGradFibreNormPermutationInvariance
 import DifferentialGeometry.Analysis.Sobolev.AntidiagonalTupleProductGrid
 
-
 noncomputable section
-
 
 open Bundle Manifold MeasureTheory Set Filter Tensor0SBundle
 open scoped Manifold Topology ContDiff ENNReal BigOperators
@@ -134,7 +132,6 @@ def bilinearSlotInsertCLM (s : ℕ) (x : M)
       map_smul' := fun c D => by
         rw [armCurryCLM_smul, curry_symm_smul_aux]; rfl }
 
-/-- Compatibility name for the fibrewise bilinear-arm slot insertion map. -/
 abbrev armSlotFib (s : ℕ) (x : M)
     (Arm : TangentSpace I x →L[ℝ] (TangentSpace I x →L[ℝ] TangentSpace I x)) :
     Tensor0SSpace (s + 1) I x →L[ℝ] Tensor0SSpace (s + 1 + 1) I x :=

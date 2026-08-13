@@ -1,42 +1,6 @@
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.HeatSemigroup.EigenProjPartialSol
 import DifferentialGeometry.Analysis.Parabolic.QuasiLinear.TensorMaximalRegularity.TameForcingFixedPoint
 
-/-!
-# The spectrally truncated TAME nonlinearity solves on the same horizon
-
-`EigenProjPartialSol.lean` identifies the Galerkin limit for `partial_sol_const`,
-whose nonlinearity is **globally Lipschitz** on the state ball.  At the critical
-low regularity that hypothesis is unavailable and provably so: the state set
-`lowerState g₀ a R` bounds only the `H^{a+1}` norm, while the third arm of the
-Ricci--DeTurck tame estimate carries the ambient `H^{a+2}` norm of its
-endpoints.  The campaign's solver is therefore `partial_sol_tame`, and this file
-is the tame counterpart of the whole identification layer.
-
-Nothing about the argument changes.  The spectral truncation has norm at most
-one, so `Π_N ∘ Nfun` inherits continuity, the static bound and the *three-arm*
-estimate with the same constants `A, B, C, D`; the projected system is the same
-solve on the same closed-form horizon in the same forcing ball of radius `R/4`;
-and subtracting the two fixed-point equations inside the one contraction
-`Λ = A·R·(1+T) + B·2√T + 2·C·(R/4)·√(1+T)·(1+T) ≤ 1/2` identifies the projected
-forcing with the unprojected one at rate `‖(Π_N - 1) f_*‖`.
-
-## Main results
-
-* `projN_cont`, `projN_tame` — continuity and the three-arm estimate are
-  inherited verbatim, with the same constants.
-* `proj_partial_sol_tame` — the projected tame forcing fixed point, on the
-  identical horizon `T₀`.
-* `projN_nemytskiiTame` — truncating before or after the tame Nemytskii
-  operator agrees.
-* `projFixTame_dist_le`, `projFixTame_le_two` — the fixed-point stability bound
-  `‖f_N - f_*‖ ≤ (1 - Λ)⁻¹ ‖Π_N f_* - f_*‖`, and its absolute-constant form.
-
-The limit steps (`projFix_tendsto`, `projField_tendsto`) and the
-`V_N`-valuedness lemmas (`projForce_fixed`, `projField_fixed`) of
-`EigenProjPartialSol.lean` carry no Lipschitz hypothesis and are reused
-unchanged.
--/
-
 noncomputable section
 
 open Bundle Manifold MeasureTheory Set Filter
@@ -59,9 +23,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
   [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
   [T2Space M] [SigmaCompactSpace M]
 
-/-! ## The truncated nonlinearity keeps every tame slot -/
-
-/-- The truncated nonlinearity is continuous whenever `Nfun` is. -/
 theorem projN_cont (g₀ : SmoothRiemannianMetric I M) (a : ℕ) {R : ℝ} (N : ℕ)
     {Nfun : lowerState (I := I) (M := M) g₀ a R →
       tensorHs (I := I) (M := M) g₀ 0 2 (a : ℝ)}
@@ -71,8 +32,6 @@ theorem projN_cont (g₀ : SmoothRiemannianMetric I M) (a : ℕ) {R : ℝ} (N : 
   simpa [projNfun, Function.comp_def] using h
 
 omit [BoundarylessManifold I M] in
-/-- The truncated nonlinearity keeps the three-arm tame estimate of `Nfun`,
-with the same constants `A, B, C`. -/
 theorem projN_tame (g₀ : SmoothRiemannianMetric I M) (a : ℕ) {R : ℝ} (N : ℕ)
     {A B C : ℝ≥0}
     {Nfun : lowerState (I := I) (M := M) g₀ a R →
@@ -111,11 +70,6 @@ theorem projN_tame (g₀ : SmoothRiemannianMetric I M) (a : ℕ) {R : ℝ} (N : 
         norm_spatialEigenProj_apply_le (I := I) (M := M) g₀ (a : ℝ) N _
     _ ≤ _ := hsingle u u'
 
-/-- **The projected tame forcing fixed point, on the identical horizon.**  The
-spectrally truncated nonlinearity `Π_N ∘ Nfun` inherits all the hypotheses of
-`partial_sol_tame` with the same constants, so the projected system is solved on
-the *same* closed-form horizon `T₀`, in the same forcing ball of radius `R/4`,
-with every constant free of the truncation level `N`. -/
 theorem proj_partial_sol_tame
     (g₀ : SmoothRiemannianMetric I M) (a : ℕ) {R : ℝ} (hR : 0 < R) (N : ℕ)
     (Nfun : lowerState (I := I) (M := M) g₀ a R →
@@ -162,11 +116,6 @@ theorem proj_partial_sol_tame
     (projN_zero (I := I) (M := M) g₀ a hR.le N hzero) hsmallA hsmallC
     (projN_tame (I := I) (M := M) g₀ a N hsingle)
 
-/-! ## The truncation passes through the tame Nemytskii operator -/
-
-/-- **Truncating before or after the tame Nemytskii operator agrees.**  The
-spectral projector acts pointwise in time, so the time-`L²` field of the
-truncated nonlinearity is the truncation of the time-`L²` field of `Nfun`. -/
 theorem projN_nemytskiiTame (g₀ : SmoothRiemannianMetric I M) (a : ℕ) {R : ℝ}
     (hR : 0 ≤ R) (N : ℕ) {A B C : ℝ≥0} {T : ℝ}
     {Nfun : lowerState (I := I) (M := M) g₀ a R →
@@ -204,12 +153,6 @@ theorem projN_nemytskiiTame (g₀ : SmoothRiemannianMetric I M) (a : ℕ) {R : �
   filter_upwards [hL, hP, hN] with t h1 h2 h3
   rw [h1, h2, h3, projNfun]
 
-/-! ## Fixed-point stability -/
-
-/-- The tame contraction factor of `partial_sol_tame`'s forcing map is at most
-`1/2` on the forcing ball of radius `R/4`: its three arms are bounded by `1/8`,
-`1/4` and `1/8` respectively, by the top-arm smallness `A·R ≤ 1/16`, the horizon
-cap `T ≤ 1/(64(B+1)²)` and the tame-arm smallness `C·R ≤ 1/16`. -/
 private lemma lamHalfTame {A B C : ℝ≥0} {R T : ℝ} (hR : 0 ≤ R)
     (hsmallA : (A : ℝ) * R ≤ 1 / 16) (hsmallC : (C : ℝ) * R ≤ 1 / 16)
     (hT0 : 0 ≤ T) (hT1 : T ≤ 1)
@@ -263,17 +206,6 @@ private lemma lamHalfTame {A B C : ℝ≥0} {R T : ℝ} (hR : 0 ≤ R)
       _ = 1 / 8 := by norm_num
   linarith
 
-/-- **Fixed-point stability of the spectral truncation, tame case.**  Let `f_*`
-solve the unprojected tame forcing fixed-point equation and `f_N` the projected
-one, both in the `R/4` forcing ball on the same horizon.  Subtracting the two
-equations and using that the projected map is the same `Λ`-contraction gives
-
-  `‖f_N - f_*‖ ≤ (1 - Λ)⁻¹ ‖Π_N f_* - f_*‖`,
-  `Λ = A·R·(1+T) + B·2√T + 2·C·(R/4)·√(1+T)·(1+T)`.
-
-The right-hand side is the truncation defect of the *unprojected* fixed point
-alone, so it tends to zero — this is the identification of the Galerkin limit at
-critical regularity, in place of a compactness-plus-uniqueness argument. -/
 theorem projFixTame_dist_le
     (g₀ : SmoothRiemannianMetric I M) (a : ℕ) {R : ℝ} (hR : 0 < R) (N : ℕ)
     {A B C : ℝ≥0}
@@ -313,7 +245,6 @@ theorem projFixTame_dist_le
   have h2R : 2 * (R / 4) ≤ R := by linarith
   have hSs := field_mem_lower (I := I) (M := M) g₀ a hT hT1 h2R fstar hsB
   have hSN := field_mem_lower (I := I) (M := M) g₀ a hT hT1 h2R fN hNB
-  -- the unprojected fixed-point equation, as an identity of `L²` fields
   have hstarFix :
       nemytskiiTame (I := I) (M := M) g₀ a hR.le hcont hsingle
           (maxRegDuhamelSolField (I := I) (M := M) (a : ℝ) hT hT1
@@ -322,7 +253,6 @@ theorem projFixTame_dist_le
     MeasureTheory.Lp.ext
       ((nemytskiiTame_coeFn (I := I) (M := M) g₀ a hR.le hcont hsingle _ hSs).trans
         hsE.symm)
-  -- the projected fixed-point equation
   have hNfix :
       nemytskiiTame (I := I) (M := M) g₀ a hR.le
           (projN_cont (I := I) (M := M) g₀ a N hcont)
@@ -334,7 +264,6 @@ theorem projFixTame_dist_le
       ((nemytskiiTame_coeFn (I := I) (M := M) g₀ a hR.le
         (projN_cont (I := I) (M := M) g₀ a N hcont)
         (projN_tame (I := I) (M := M) g₀ a N hsingle) _ hSN).trans hNE.symm)
-  -- the projected map at the unprojected fixed point is `Π_N f_*`
   have hbridge :
       nemytskiiTame (I := I) (M := M) g₀ a hR.le
           (projN_cont (I := I) (M := M) g₀ a N hcont)
@@ -377,11 +306,6 @@ theorem projFixTame_dist_le
   rw [inv_mul_eq_div, le_div_iff₀ hpos]
   nlinarith [htri, hcontr, norm_nonneg (fN - fstar)]
 
-/-- **The tame stability modulus is an absolute constant.**  `partial_sol_tame`'s
-own hypotheses force `Λ ≤ 1/2`, so the factor `(1 - Λ)⁻¹` of
-`projFixTame_dist_le` is at most `2`, independently of `N`, `T`, `R` and the
-nonlinear constants.  Together with `projFix_tendsto` (with `K = 2`) this is the
-Galerkin identification at critical regularity. -/
 theorem projFixTame_le_two
     (g₀ : SmoothRiemannianMetric I M) (a : ℕ) {R : ℝ} (hR : 0 < R) (N : ℕ)
     {A B C : ℝ≥0}

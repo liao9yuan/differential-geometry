@@ -3,43 +3,6 @@ import DifferentialGeometry.Analysis.Sobolev.TensorHilbert.SelfLowCapWindows
 import DifferentialGeometry.Analysis.Sobolev.TensorHilbert.RicciArmResidualFieldGridWindow
 import DifferentialGeometry.Analysis.Sobolev.TensorHilbert.TameLieCorrJets
 
-/-!
-# The two per-arm capped windows of the zero-order self-action integrand
-
-`SelfLowCapWindows.lean` supplies four of the six arm windows that
-`selfLow_jet` consumes.  The two remaining ones are the arms whose factors live
-in the low-base action module and in the Palatini refold, and they are collected
-here so that neither of those two very large modules has to be touched.
-
-* `ricciDACap` — the transferred lower Ricci Palatini arm
-  `ricciDALow g₀ g₁ P`.  Both of its factors carry exactly one derivative of the
-  state (`dagLowOp` is the covariant derivative of the inverse-metric-difference
-  coefficient `connLowOp`, and the second factor is `∇P` itself), so the arm is
-  quadratic in `∇P` and is honest only in the capped currency.
-* `lieCovCap` — the difference of the DeTurck--Lie covariant-derivative arm and
-  its subtracted edge pairing.  `lieCov_residual` collapses the difference to a
-  single product whose right factor is the fourth-covariant normal form
-  `lieCovR4 = (-(s/2))•lrCurvF T − lrQuadF g₁`; the `s`-factor in front of the
-  curvature head is exactly what turns the state `T` into the perturbation
-  `P = s•T`, which is what makes that head capped at all.
-
-Everything below is assembled from the calculus of `GradCapArms.lean`; no arm
-is re-estimated.  The only new pointwise inputs are `endoAtgw` (the full raised
-endomorphism inserted into a slot) and `clAtgw` (the transparent Koszul
-coefficient), both obtained from existing radius-free producers.
-
-The final section re-reads the `lieCov` arm in the **marked** currency of
-`TameMarkWin.lean`, where the constants are state-free and the deliverable is the
-tame `L²` jet bound `lieCovJet` in the shape `ricciAAJet` fixes.  The point is
-that the residual carries **no second derivative of the state at all**:
-`lrCurvF g₀ T` is the fixed background curvature contracted with `T` itself
-(`lrCurvF_unitModel_apply`), so it is linear and order zero, and `lieCovPair` is
-a pure double moving trace.  The only quadratic part is `lrQuadF`, so the arm
-splits — along the sub-linearity of `ccOperatorFieldComp`, `rsDomDomCongrSection` and
-`slotExtendIter` — into an unmarked half handled by `markJet0` and a twice-marked
-half handled by `markJet`.
--/
-
 noncomputable section
 
 set_option autoImplicit false
@@ -73,11 +36,7 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
-/-! ### The inserted full raised endomorphism -/
-
 set_option linter.unusedSectionVars false in
-/-- The slot insertion of the full raised endomorphism splits into the
-inverse-metric difference and the frozen identity insertion. -/
 private lemma sieSplit (g₀ g₁ : SmoothRiemannianMetric I M) (s : ℕ) :
     slotInsertEndoCc (I := I) (M := M) g₀ s
         (fullRaisedEndoField (I := I) (M := M) g₀ g₁) =
@@ -94,14 +53,6 @@ private lemma sieSplit (g₀ g₁ : SmoothRiemannianMetric I M) (s : ℕ) :
   abel
 
 set_option linter.unusedVariables false in
-/-- **Radius-free pointwise grid window for the inserted full raised
-endomorphism.**
-
-`|∇ⁱ(slotInsertEndoCc g₀ s (fullRaisedEndoField g₀ g₁))|²(x) ≤ C i · atgw(bP)(i+1)`.
-
-Offset `+1`: the endomorphism is the identity plus the inverse-metric
-difference, and the difference costs no derivative of the state.  This is the
-generic-`s` sibling of the insertion appearing inside `pureAtgw`. -/
 private theorem endoAtgw (g₀ : SmoothRiemannianMetric I M) {δ₀ : ℝ} (hδ₀ : δ₀ < 1) (s : ℕ) :
     ∃ C : ℕ → ℝ, (∀ i, 0 ≤ C i) ∧
       ∀ (g₁ : SmoothRiemannianMetric I M) (P : SmoothCcTensor g₀ 0 2)
@@ -196,16 +147,7 @@ private theorem endoAtgw (g₀ : SmoothRiemannianMetric I M) {δ₀ : ℝ} (hδ�
     le_trans (hSid i x) (le_mul_of_one_le_right (hSid_nn i) hone)
   nlinarith [hA, hB, hWnn]
 
-/-! ### The transparent Koszul coefficient -/
-
 set_option linter.unusedSectionVars false in
-/-- The transparent lowered connection-difference coefficient is the fixed
-Koszul factor read through one endomorphism insertion and one slot
-permutation.
-
-The Koszul factor itself is `private` to the low-base action module, so it is
-abstracted here rather than named: only its existence and its independence of
-the moving metric are used. -/
 private lemma clSplit (g₀ : SmoothRiemannianMetric I M) :
     ∃ Z : SmoothCcTensor g₀ 3 3, ∀ g₁ : SmoothRiemannianMetric I M,
       connLowOp (I := I) (M := M) g₀ g₁ =
@@ -216,12 +158,6 @@ private lemma clSplit (g₀ : SmoothRiemannianMetric I M) :
   ⟨_, fun _ => rfl⟩
 
 set_option linter.unusedVariables false in
-/-- **Radius-free pointwise grid window for the transparent lowered
-connection-difference coefficient.**
-
-`|∇ⁱ(connLowOp g₀ g₁)|²(x) ≤ C i · atgw(bP)(i+1)`: a fixed permutation
-coefficient against the inserted full raised endomorphism against the fixed
-Koszul factor, all three at offset `+1`, folded at offsets `(0,0)`. -/
 private theorem clAtgw (g₀ : SmoothRiemannianMetric I M) {δ₀ : ℝ} (hδ₀ : δ₀ < 1) :
     ∃ C : ℕ → ℝ, (∀ i, 0 ≤ C i) ∧
       ∀ (g₁ : SmoothRiemannianMetric I M) (P : SmoothCcTensor g₀ 0 2)
@@ -306,18 +242,7 @@ private theorem clAtgw (g₀ : SmoothRiemannianMetric I M) {δ₀ : ℝ} (hδ₀
   rw [hidx] at houter
   exact houter
 
-/-! ### The Palatini arm -/
-
 set_option linter.unusedVariables false in
-/-- **Capped window of the transferred lower Ricci Palatini arm.**
-
-`ricciDALow g₀ g₁ P = daContr g₀ g₁ (dagLowOp g₀ g₁ ⋆ ∇P)`.  `daContr` is a
-difference of two contraction monomials, and
-`refoldKernelContractionMonomialField_eq_mvPairTraceRefold` factors each
-monomial's head as `mvPairTraceOp ⋆ ddc (Ext² (ddc G))` for an ARBITRARY `(0,4)`
-argument `G`.  Both factors of `G` carry one derivative of the state, so `G`
-itself is quadratic in `∇P`; the capped currency is closed under `ccOperatorFieldComp`, so
-the whole tree stays at level `i + 1`. -/
 theorem ricciDACap (g₀ : SmoothRiemannianMetric I M)
     {δ₀ : ℝ} (hδ₀ : δ₀ < 1) {Λ : ℝ} (hΛ1 : 1 ≤ Λ) :
     ∃ K : ℕ → ℝ, (∀ i, 0 ≤ K i) ∧
@@ -342,7 +267,6 @@ theorem ricciDACap (g₀ : SmoothRiemannianMetric I M)
       (iteratedCovGrad (I := I) g₀ 6 2 i (mvPairTraceOp (I := I) (M := M) g₀ g₀)))
   set fr : ℝ := (Module.finrank ℝ E : ℝ) with hfr_def
   have hfr_nn : (0 : ℝ) ≤ fr := Nat.cast_nonneg _
-  -- the covariant derivative of the Koszul coefficient, capped
   set KCov : ℕ → ℝ := fun i => Ccl (i + 1) * shiftConst Λ (i + 1) with hKCov_def
   have hKCov_nn : ∀ i, 0 ≤ KCov i := fun i =>
     mul_nonneg (hCcl_nn (i + 1)) (shiftConst_nn hΛ0 _)
@@ -365,14 +289,12 @@ theorem ricciDACap (g₀ : SmoothRiemannianMetric I M)
     foldConst_nn (E := E) (u := 0) (v := 0) hKRK_nn hKE1_nn i
   refine ⟨fun i => 2 * KMo i + 2 * KMo i, fun i => by have := hKMo_nn i; linarith, ?_⟩
   intro g₁ P htie δ hδ_le hδ0 hδ hP0 hP1
-  -- the fixed permutation coefficient and the moving pair trace, state-free
   have hA : HasCapWin (I := I) (M := M) g₀ P
       (permCoeff (I := I) (M := M) g₀ daPermA) SA :=
     capOfBnd (I := I) (M := M) g₀ P _ hSA_nn (fun i x => hSA i x)
   have hM : HasCapWin (I := I) (M := M) g₀ P
       (mvPairTraceOp (I := I) (M := M) g₀ g₀) SM :=
     capOfBnd (I := I) (M := M) g₀ P _ hSM_nn (fun i x => hSM i x)
-  -- one derivative of the Koszul coefficient
   have hCov : HasCapWin (I := I) (M := M) g₀ P
       (covGrad (I := I) (M := M) g₀ 3 3 (connLowOp (I := I) (M := M) g₀ g₁)) KCov := by
     refine capOfArm (I := I) (M := M) g₀ P hΛ1 hP0 hP1 _
@@ -386,7 +308,6 @@ theorem ricciDACap (g₀ : SmoothRiemannianMetric I M)
   have hDag : HasCapWin (I := I) (M := M) g₀ P
       (dagLowOp (I := I) (M := M) g₀ g₁) KDag :=
     capApp (I := I) (M := M) g₀ P _ _ hSA_nn hKCov_nn hA hCov
-  -- the `(0,4)` argument of the contraction monomials
   have hDP : HasCapWin (I := I) (M := M) g₀ P
       (covGrad (I := I) (M := M) g₀ 0 2 P) (fun _ => Λ) :=
     capOfDP (I := I) (M := M) g₀ P hΛ1 hP1
@@ -395,7 +316,6 @@ theorem ricciDACap (g₀ : SmoothRiemannianMetric I M)
         (dagLowOp (I := I) (M := M) g₀ g₁)
         (covGrad (I := I) (M := M) g₀ 0 2 P)) KG :=
     capApp (I := I) (M := M) g₀ P _ _ hKDag_nn (fun _ => hΛ0) hDag hDP
-  -- the inserted endomorphism of the monomial tail
   have hE1 : HasCapWin (I := I) (M := M) g₀ P
       (slotInsertEndoCc (I := I) (M := M) g₀ 1
         (fullRaisedEndoField (I := I) (M := M) g₀ g₁)) KE1 := by
@@ -404,7 +324,6 @@ theorem ricciDACap (g₀ : SmoothRiemannianMetric I M)
     refine mul_le_mul_of_nonneg_left ?_ (hCe1_nn i)
     exact Combinatorics.antidiagonalTupleGridWindow_mono _
       (gridBase_nn (I := I) (M := M) g₀ P y) (by omega)
-  -- each contraction monomial
   have hMono : ∀ σ : Equiv.Perm (Fin 4),
       HasCapWin (I := I) (M := M) g₀ P
         (daMono (I := I) (M := M) g₀ g₁
@@ -429,16 +348,7 @@ theorem ricciDACap (g₀ : SmoothRiemannianMetric I M)
     exact capApp (I := I) (M := M) g₀ P _ _ hKRK_nn hKE1_nn hRK hE1
   exact capSub (I := I) (M := M) g₀ P (hMono daPermA) (hMono daPermB)
 
-/-! ### The moving pair trace of the covariant-derivative residual -/
-
 set_option linter.unusedVariables false in
-/-- **Radius-free pointwise grid window for the moving cometric double trace.**
-
-`|∇ⁱ(pureTrace g₀ g₁ s)|²(x) ≤ C i · atgw(bP)(i+1)`.  Offset `+1`: by
-`pureTrace_split` the moving trace is the fixed parallel trace plus one
-endomorphism insertion built from the inverse-metric difference, and the
-difference costs no derivative of the state.  This is the generic-valence
-sibling of `pureAtgw`. -/
 private theorem ptAtgw (g₀ : SmoothRiemannianMetric I M) {δ₀ : ℝ} (hδ₀ : δ₀ < 1) (s : ℕ) :
     ∃ C : ℕ → ℝ, (∀ i, 0 ≤ C i) ∧
       ∀ (g₁ : SmoothRiemannianMetric I M) (P : SmoothCcTensor g₀ 0 2)
@@ -557,11 +467,6 @@ private theorem ptAtgw (g₀ : SmoothRiemannianMetric I M) {δ₀ : ℝ} (hδ₀
   nlinarith [hA, hAw, hB, hWnn]
 
 set_option linter.unusedVariables false in
-/-- **Capped window of the pair-cometric contraction of the residual.**
-
-`lieCovPair` is the double moving trace against the quadruple moving trace, so
-it costs no derivative of the state at all; both factors enter through
-`ptAtgw`. -/
 private theorem pairCap (g₀ : SmoothRiemannianMetric I M)
     {δ₀ : ℝ} (hδ₀ : δ₀ < 1) {Λ : ℝ} (hΛ1 : 1 ≤ Λ) :
     ∃ K : ℕ → ℝ, (∀ i, 0 ≤ K i) ∧
@@ -607,10 +512,7 @@ private theorem pairCap (g₀ : SmoothRiemannianMetric I M)
   exact capCongr (I := I) (M := M) g₀ P hpair
     (capApp (I := I) (M := M) g₀ P _ _ hK2_nn hK4_nn hP2 hP4)
 
-/-! ### The curvature head of the residual normal form -/
-
 set_option linter.unusedSectionVars false in
-/-- The curvature head of the Palatini residual is linear in the state. -/
 private lemma curvSmul (g₀ : SmoothRiemannianMetric I M)
     (T : SmoothCcTensor g₀ 0 2) (t : ℝ) :
     lrCurvF (I := I) (M := M) g₀ (t • T) = t • lrCurvF (I := I) (M := M) g₀ T := by
@@ -627,13 +529,6 @@ private lemma curvSmul (g₀ : SmoothRiemannianMetric I M)
   rw [appCcRS_smul_right, appCcRS_smul_right, smul_add]
 
 set_option linter.unusedVariables false in
-/-- **Capped window of the curvature head, read at the perturbation.**
-
-`lrCurvF g₀ P` is the fixed background curvature paired with `P` itself, so it
-costs no derivative of the state; it is capped because `capOfP` spends the two
-pointwise caps on `P`.  This is why the `s`-factor in front of `lrCurvF` inside
-`lieCovR4` is load-bearing rather than decorative: it is what converts the state
-`T`, whose order-zero jet is uncapped, into `P = s•T`, whose is not. -/
 private theorem curvCap (g₀ : SmoothRiemannianMetric I M) {Λ : ℝ} (hΛ1 : 1 ≤ Λ) :
     ∃ K : ℕ → ℝ, (∀ i, 0 ≤ K i) ∧
       ∀ (P : SmoothCcTensor g₀ 0 2)
@@ -670,20 +565,8 @@ private theorem curvCap (g₀ : SmoothRiemannianMetric I M) {Λ : ℝ} (hΛ1 : 1
   exact capCongr (I := I) (M := M) g₀ P (rfl : lrCurvF (I := I) (M := M) g₀ P = _)
     (capAdd (I := I) (M := M) g₀ P h1 h2)
 
-/-! ### The connection-difference quadratic of the residual normal form -/
-
 open CurvatureCoefficientDifferenceJetTower in
 set_option linter.unusedVariables false in
-/-- **Radius-free pointwise grid window for the REVERSED raised endomorphism,
-inserted into a slot.**
-
-`|∇ⁱ(slotInsertEndoCc g₀ s (fullRaisedEndoField g₁ g₀))|²(x) ≤ C i · atgw(bP)(i+1)`.
-
-The reversed insertion is the recovery endomorphism (`fullRev0_eq`), which is
-the frozen identity plus the raised symmetric perturbation (`omRecover_add`).
-The identity part has vanishing jets in every positive order, and the raised
-perturbation is a fibre isometry away from `symmS P`; the order-zero exception
-is covered by the fibre smallness `δ ≤ δ₀`, not by a cap. -/
 private theorem revEndoAtgw (g₀ : SmoothRiemannianMetric I M) {δ₀ : ℝ} (hδ₀ : δ₀ < 1) (s : ℕ) :
     ∃ C : ℕ → ℝ, (∀ i, 0 ≤ C i) ∧
       ∀ (g₁ : SmoothRiemannianMetric I M) (P : SmoothCcTensor g₀ 0 2)
@@ -812,11 +695,6 @@ private theorem revEndoAtgw (g₀ : SmoothRiemannianMetric I M) {δ₀ : ℝ} (h
   exact mul_le_mul_of_nonneg_left h2 (pow_nonneg hfr_nn s)
 
 set_option linter.unusedVariables false in
-/-- **Capped window of the moving-lowered connection difference.**
-
-`lrOmegaHat g₀ g₁` is the reversed endomorphism insertion against the lowered
-connection difference: the first factor costs no derivative of the state, the
-second exactly one, so the product is capped. -/
 private theorem omegaCap (g₀ : SmoothRiemannianMetric I M)
     {δ₀ : ℝ} (hδ₀ : δ₀ < 1) {Λ : ℝ} (hΛ1 : 1 ≤ Λ) :
     ∃ K : ℕ → ℝ, (∀ i, 0 ≤ K i) ∧
@@ -858,15 +736,6 @@ private theorem omegaCap (g₀ : SmoothRiemannianMetric I M)
       (capDdc0 (I := I) (M := M) g₀ P (finRotate 3) hCL))
 
 set_option linter.unusedVariables false in
-/-- **Capped window of the Palatini connection-difference quadratic.**
-
-`lrQuadF g₀ g₁` is the six-term normal form of `∇g ⋆ ∇g` contracted with the
-MOVING metric.  `lrQA`/`lrQB` are `lieCovArm2 ⋆ lrOmegaHat` — the first factor
-is the connection difference read as a slot-inserting arm (`lieCovArm2_l2`
-transfers its jets to `connDiffSection`), the second is the moving-lowered
-connection difference — and both carry exactly one derivative of the state, so
-the summand is quadratic in `∇P` and lands in the capped currency exactly like
-`lc0AMix`.  The six output-slot permutations are fibre isometries. -/
 private theorem lrQuadCap (g₀ : SmoothRiemannianMetric I M)
     {δ₀ : ℝ} (hδ₀ : δ₀ < 1) {Λ : ℝ} (hΛ1 : 1 ≤ Λ) :
     ∃ K : ℕ → ℝ, (∀ i, 0 ≤ K i) ∧
@@ -921,20 +790,7 @@ private theorem lrQuadCap (g₀ : SmoothRiemannianMetric I M)
   refine capMono (I := I) (M := M) g₀ P (fun i => ?_) hsum
   exact le_of_eq (by ring)
 
-/-! ### The DeTurck--Lie covariant-derivative edge -/
-
 set_option linter.unusedVariables false in
-/-- **Capped window of the Palatini covariant-derivative arm against its
-subtracted edge pairing.**
-
-Neither `deTurckLieCovDerivArmField` nor `edgeLiePairFam` carries a window at
-this level on its own — the first has a `∇A` head and the second a `∇²T` head —
-but their difference does: `lieCov_residual` identifies it with the single
-product `(-1) • lieCovPair ⋆ rsPerm (Ext² (lieCovR4))`, whose left factor is a
-pure moving double trace (no derivative of the state) and whose right factor is
-the fourth-covariant normal form `(-(s/2))•lrCurvF T − lrQuadF g₁`.  The
-`s`-factor is absorbed into the perturbation, `P = s•T`, which is what makes the
-curvature head capped. -/
 theorem lieCovCap (g₀ : SmoothRiemannianMetric I M)
     {δ₀ : ℝ} (hδ₀ : δ₀ < 1) {Λ : ℝ} (hΛ1 : 1 ≤ Λ) :
     ∃ K : ℕ → ℝ, (∀ i, 0 ≤ K i) ∧
@@ -994,7 +850,6 @@ theorem lieCovCap (g₀ : SmoothRiemannianMetric I M)
       rw [abs_of_nonneg (by linarith only [hs1] : (0 : ℝ) ≤ 1 - s), abs_of_nonneg hs0]
       ring
     rwa [heq] at hraw
-  -- the curvature head, with the path parameter absorbed into the perturbation
   have hcurv : ((-(s / 2) : ℝ)) • lrCurvF (I := I) (M := M) g₀ T =
       ((-(1 / 2) : ℝ)) • lrCurvF (I := I) (M := M) g₀ P := by
     rw [hPeq, curvSmul (I := I) (M := M) g₀ T s, smul_smul]
@@ -1030,22 +885,7 @@ theorem lieCovCap (g₀ : SmoothRiemannianMetric I M)
   exact capSmul (I := I) (M := M) g₀ P (-1 : ℝ)
     (capApp (I := I) (M := M) g₀ P _ _ hKP_nn hKE_nn hPw hExt)
 
-/-! ### The Palatini covariant-derivative residual in the marked currency
-
-The capped chain above spends a `shiftConst Λ (i+1)` on every arm.  The marked
-chain below spends nothing: `lieCovPair`, `lrCurvF g₀ P` and the endomorphism
-insertions are all order zero in the state and enter unmarked, and the only
-factors that carry a derivative are the two connection differences inside
-`lrQuadF`.  Hence the residual is `(unmarked) + (twice marked)`, which is exactly
-the pair of shapes `markJet0` and `markJet` consume. -/
-
 set_option linter.unusedVariables false in
-/-- **`lieCovPair` in the marked currency: no derivative of the state.**
-
-The double moving trace against the quadruple moving trace; both factors enter
-through `ptAtgw`, whose `atgw bP (i+1)` window *is* the unmarked marked window by
-definition of `markGrid` at `u = 0`.  Constants are state-free — no `Λ`, no
-Sobolev radius. -/
 theorem pairMark (g₀ : SmoothRiemannianMetric I M) {δ₀ : ℝ} (hδ₀ : δ₀ < 1) :
     ∃ K : ℕ → ℝ, (∀ i, 0 ≤ K i) ∧
       ∀ (g₁ : SmoothRiemannianMetric I M) (P : SmoothCcTensor g₀ 0 2)
@@ -1071,13 +911,6 @@ theorem pairMark (g₀ : SmoothRiemannianMetric I M) {δ₀ : ℝ} (hδ₀ : δ�
   simpa using mkApp (I := I) (M := M) g₀ P _ _ hC2_nn hC4_nn hP2 hP4
 
 set_option linter.unusedVariables false in
-/-- **The curvature head in the marked currency: linear, order zero, unmarked.**
-
-`lrCurvF g₀ P` is the *fixed background* Riemann tensor contracted with `P`
-itself — `lrCurvF_unitModel_apply` shows there is no covariant derivative of the
-state anywhere in it — so it enters at `u = 0` through `mkOfP`, and its tame
-bound needs no `∇P` cap at all.  The `∇²T` one might expect from the name of the
-subtracted edge does not survive `lieCov_residual`: it is cancelled there. -/
 theorem curvMark (g₀ : SmoothRiemannianMetric I M) :
     ∃ K : ℕ → ℝ, (∀ i, 0 ≤ K i) ∧
       ∀ (P : SmoothCcTensor g₀ 0 2),
@@ -1114,11 +947,6 @@ theorem curvMark (g₀ : SmoothRiemannianMetric I M) :
   simpa using mkAdd (I := I) (M := M) g₀ P h1 h2
 
 set_option linter.unusedVariables false in
-/-- **The moving-lowered connection difference, once marked.**
-
-`lrOmegaHat` is the reversed endomorphism insertion (order zero, `revEndoAtgw`)
-against the lowered connection difference, whose jets transfer to
-`connDiffSection` by `connLow_rfns` and are once marked by `connDiffMark`. -/
 theorem omegaMark (g₀ : SmoothRiemannianMetric I M) {δ₀ : ℝ} (hδ₀ : δ₀ < 1) :
     ∃ K : ℕ → ℝ, (∀ i, 0 ≤ K i) ∧
       ∀ (g₁ : SmoothRiemannianMetric I M) (P : SmoothCcTensor g₀ 0 2)
@@ -1148,12 +976,6 @@ theorem omegaMark (g₀ : SmoothRiemannianMetric I M) {δ₀ : ℝ} (hδ₀ : δ
     (mkDdc0 (I := I) (M := M) g₀ P (finRotate 3) hCL)
 
 set_option linter.unusedVariables false in
-/-- **The Palatini connection-difference quadratic: two explicit `∇P` factors.**
-
-`lrQA`/`lrQB` are `lieCovArm2 ⋆ lrOmegaHat`, each factor once marked, so the six
-output-slot permutations of the normal form are all twice marked, with
-**state-free** constants.  This is the only part of the covariant-derivative
-residual that is quadratic in the state at all. -/
 theorem lrQuadMark (g₀ : SmoothRiemannianMetric I M) {δ₀ : ℝ} (hδ₀ : δ₀ < 1) :
     ∃ K : ℕ → ℝ, (∀ i, 0 ≤ K i) ∧
       ∀ (g₁ : SmoothRiemannianMetric I M) (P : SmoothCcTensor g₀ 0 2)
@@ -1205,7 +1027,6 @@ theorem lrQuadMark (g₀ : SmoothRiemannianMetric I M) {δ₀ : ℝ} (hδ₀ : �
 
 open CurvatureCoefficientDifferenceJetTower in
 set_option linter.unusedSectionVars false in
-/-- Two slot extensions of a purely covariant arm are additive on differences. -/
 private lemma extSub (g₀ : SmoothRiemannianMetric I M) (X Y : SmoothCcTensor g₀ 0 4) :
     slotExtendIter (I := I) (M := M) g₀ 0 4 2 (X - Y) =
       slotExtendIter (I := I) (M := M) g₀ 0 4 2 X -
@@ -1218,34 +1039,6 @@ private lemma extSub (g₀ : SmoothRiemannianMetric I M) (X Y : SmoothCcTensor g
 
 open CurvatureCoefficientDifferenceJetTower in
 set_option linter.unusedVariables false in
-/-- **The DeTurck--Lie covariant-derivative residual's tame `L²` jet bound.**
-
-```
-‖∇ⁱ(deTurckLieCovDerivArmField − edgeLiePairFam)‖²
-    ≤ (K₀ i + K₂ i · ‖P‖²_{H³}) · (1 + ∑_{j < i+2} ‖∇ʲP‖²)
-```
-
-with `K₀, K₂` chosen before the state — background metric and order only, no
-Sobolev radius, no cap, no `s`, and exactly ONE power of `‖P‖²_{H³}`.
-
-The residual carries **no second derivative of the state**.  `lieCov_residual`
-collapses the difference of the `∇A`-headed arm and the `∇²T`-headed edge to the
-single product `(−1) • lieCovPair ⋆ σ(Ext²(lieCovR4))`, and there
-`lieCovR4 = (−½)•lrCurvF P − lrQuadF g₁` has an order-zero curvature head
-(`lrCurvF` is the *fixed background* Riemann tensor contracted with `P` itself)
-and a quadratic connection-difference tail.  The two halves therefore have
-different mark counts and are split along the sub-linearity of `slotExtendIter`,
-`rsDomDomCongrSection` and `ccOperatorFieldComp`: the curvature half is unmarked and consumes
-`markJet0` (no `Λ₁`, axiom-clean), the quadratic half is twice marked and
-consumes `markJet`.
-
-The `s`-factor in front of `lrCurvF` inside `lieCovR4` is load-bearing exactly as
-in `lieCovCap`: it turns the state `T`, whose order-zero jet is uncontrolled,
-into the perturbation `P = s•T`, whose δ-anchor `|P|_∞ ≤ 1` is the only
-hypothesis on the state beyond the standard fibre-operator bound.
-
-Compare `lieCovCap`-then-`capJet`: same left-hand side, but a constant of
-`Λ`-degree growing with the order. -/
 theorem lieCovJet (hDim : Module.finrank ℝ E = 3)
     (g₀ : SmoothRiemannianMetric I M) {δ₀ : ℝ} (hδ₀ : δ₀ < 1) :
     ∃ K0 K2 : ℕ → ℝ, (∀ i, 0 ≤ K0 i) ∧ (∀ i, 0 ≤ K2 i) ∧
@@ -1325,7 +1118,6 @@ theorem lieCovJet (hDim : Module.finrank ℝ E = 3)
       rw [abs_of_nonneg (by linarith only [hs1] : (0 : ℝ) ≤ 1 - s), abs_of_nonneg hs0]
       ring
     rwa [heq] at hraw
-  -- the two halves of the fourth-covariant normal form
   have hcurv : ((-(s / 2) : ℝ)) • lrCurvF (I := I) (M := M) g₀ T =
       ((-(1 / 2) : ℝ)) • lrCurvF (I := I) (M := M) g₀ P := by
     rw [hPeq, curvSmul (I := I) (M := M) g₀ T s, smul_smul]
@@ -1360,7 +1152,6 @@ theorem lieCovJet (hDim : Module.finrank ℝ E = 3)
     simpa using mkApp (I := I) (M := M) g₀ P _ _ hKP_nn hKEB_nn hPw
       (mkDdc (I := I) (M := M) g₀ P lieCovSigma
         (mkIter (I := I) (M := M) g₀ P 2 hBw))
-  -- the residual, split along the sub-linearity of the three structural maps
   have hres :
       deTurckLieCovDerivArmField (I := I) (M := M) g₀
           (realizedFam (I := I) g₀ T 0 hδg hδZ s) g₀ -
@@ -1392,7 +1183,6 @@ theorem lieCovJet (hDim : Module.finrank ℝ E = 3)
     rw [hres0, lieCovR4_eq (I := I) (M := M) g₀ T hδg hδZ s, hcurv,
       extSub (I := I) (M := M) g₀, rsDomDomCongrSection_sub_cc,
       ccOperatorFieldComp_sub_right, neg_smul, one_smul, neg_sub]
-  -- the tame bounds of the two halves
   set H3 : ℝ := ∑ j ∈ Finset.range 3,
     ‖iteratedCovGrad (I := I) g₀ 0 2 (1 + j) P‖ ^ 2 with hH3_def
   have hH3_nn : 0 ≤ H3 := Finset.sum_nonneg (fun _ _ => sq_nonneg _)
@@ -1416,7 +1206,6 @@ theorem lieCovJet (hDim : Module.finrank ℝ E = 3)
     simp only [hJS_def]; linarith
   have hbA := hjet0 P hP0 _ hKAr_nn hArmA i
   have hbB := hjet P (Λ₀ := 1) zero_le_one (le_refl _) hΛ₁0 hsup hcap _ hKBr_nn hArmB i
-  -- assemble
   rw [hres, iteratedCovGrad_sub]
   have hnA : (0 : ℝ) ≤ ‖iteratedCovGrad (I := I) g₀ 2 2 i
       (ccOperatorFieldComp (I := I) (M := M) g₀ 2 6 2
@@ -1527,25 +1316,9 @@ theorem lieCovJet (hDim : Module.finrank ℝ E = 3)
         2 * (KBr i * K0B i) * cg * H3) * JS := by ring
   linarith [hAfin, hBfin, hgoal.le, hgoal.ge]
 
-/-! ### The covariant derivative of the transparent Koszul coefficient
-
-`clAtgw` reads `connLowOp` itself; the Palatini `∇A ⋆ ∇T` arm needs its
-*covariant derivative* one level lower, i.e. once marked at level `i` rather than
-unmarked at level `i + 1`.  What buys the level is that the two outer factors of
-`connLowOp` are slot permutations and the inner endomorphism insertion is the
-identity at `g₁ = g₀`: after the permutations are recognised as fibre isometries,
-the derivative has nowhere to fall except on the inverse-metric difference, whose
-jets are an EXACT-weight grid — the input of `mkOfAtg`. -/
-
 set_option backward.isDefEq.respectTransparency false in
 open CurvatureCoefficientDifferenceJetTower in
 set_option linter.unusedSectionVars false in
-/-- **The frozen endomorphism insertion is `∇`-parallel, at every slot.**
-
-`slotInsertEndoCc g₀ s (fullRaisedEndoField g₀ g₀)` is the identity operator on
-`Tensor0SSpace (s+1)`, and `endoCovariantDerivative_fullRaised_id_eq_zero` is
-slot-independent, so the generic-`s` statement is the `s = 0` proof verbatim.
-The `s = 0` case is the public `covGrad_slotInsert_fullRaised_id_eq_zero`. -/
 private lemma sieZero (g₀ : SmoothRiemannianMetric I M) (s : ℕ) :
     covGrad (I := I) (M := M) g₀ (s + 1) (s + 1)
         (slotInsertEndoCc (I := I) (M := M) g₀ s
@@ -1580,11 +1353,6 @@ private lemma sieZero (g₀ : SmoothRiemannianMetric I M) (s : ℕ) :
   simp [SmoothCcTensor.toSection_zero]
 
 set_option linter.unusedSectionVars false in
-/-- **Applying a slot-permutation field on the source side is a source reindex.**
-
-The right-hand companion of `permAppEqRs`: precomposition with `permCoeff g₀ ρ`
-permutes the INPUT slots, which is exactly `reindexCoeffGen`.  Both sides are
-fibre-norm isometries of `Φ` at every covariant jet order. -/
 private lemma permRe (g₀ : SmoothRiemannianMetric I M) {d : ℕ}
     (Φ : SmoothCcTensor g₀ d d) (ρ : Equiv.Perm (Fin d)) :
     ccOperatorFieldComp (I := I) (M := M) g₀ d d d Φ
@@ -1602,14 +1370,6 @@ private lemma permRe (g₀ : SmoothRiemannianMetric I M) {d : ℕ}
   rw [slotPermCLM_apply]
 
 set_option linter.unusedSectionVars false in
-/-- **The transparent Koszul coefficient, with its permutation content written
-out.**
-
-The witness of `clSplit` is here supplied explicitly — as the half-sum of three
-`permCoeff` fields — rather than left opaque.  The private `koszulOp` of the
-read-only low-base action module is still never named: the equation holds by
-`rfl` because its body IS this combination, and writing the body is what lets the
-three permutations be recognised as source reindexes. -/
 private lemma clZ (g₀ g₁ : SmoothRiemannianMetric I M) :
     connLowOp (I := I) (M := M) g₀ g₁ =
       ccOperatorFieldComp (I := I) (M := M) g₀ 3 3 3 (permCoeff (I := I) (M := M) g₀ lowPerm)
@@ -1632,17 +1392,6 @@ private lemma icgSm (g₀ : SmoothRiemannianMetric I M) (r c j : ℕ) (k : ℝ)
 
 open CurvatureCoefficientDifferenceJetTower in
 set_option linter.unusedVariables false in
-/-- **Every positive-order jet of the transparent Koszul coefficient is an
-EXACT-weight grid.**
-
-`|∇^{i+1}(connLowOp g₀ g₁)|²(x) ≤ C i · grid(bP x)(i + 1)`: no constant monomial
-and no bare lower-weight monomial, which is exactly what `clAtgw` — an `atgw`
-*window* — cannot say.  Three facts do it: the outer permutation is a fibre
-isometry (`rfns_iteratedCovGrad_rs_eq_of_section_domDomCongr`), the inner Koszul
-factor is three source reindexes (`clZ` + `permRe`), and at `g₁ = g₀` the
-remaining endomorphism insertion is `∇`-parallel (`sieZero`), so the whole
-derivative sits on the inverse-metric difference, whose jets the tree already
-delivers at exact weight. -/
 private theorem clExact (g₀ : SmoothRiemannianMetric I M) {δ₀ : ℝ} (hδ₀ : δ₀ < 1) :
     ∃ C : ℕ → ℝ, (∀ i, 0 ≤ C i) ∧
       ∀ (g₁ : SmoothRiemannianMetric I M) (P : SmoothCcTensor g₀ 0 2)
@@ -1667,7 +1416,6 @@ private theorem clExact (g₀ : SmoothRiemannianMetric I M) {δ₀ : ℝ} (hδ�
     have : (0 : ℝ) ≤ fr ^ 2 * Cb (i + 1) := mul_nonneg (by positivity) (hCb_nn (i + 1))
     linarith, ?_⟩
   intro g₁ P htie δ hδ_le hδ0 hδ i x
-  -- the endomorphism insertion and the explicit Koszul witness
   set E₁ : SmoothCcTensor g₀ 3 3 :=
     slotInsertEndoCc (I := I) (M := M) g₀ 2
       (fullRaisedEndoField (I := I) (M := M) g₀ g₁) with hE₁_def
@@ -1676,7 +1424,6 @@ private theorem clExact (g₀ : SmoothRiemannianMetric I M) {δ₀ : ℝ} (hδ�
       permCoeff (I := I) (M := M) g₀ (finRotate 3) -
       permCoeff (I := I) (M := M) g₀ (Equiv.swap (1 : Fin 3) 2)) with hZc_def
   set Y : SmoothCcTensor g₀ 3 3 := ccOperatorFieldComp (I := I) (M := M) g₀ 3 3 3 E₁ Zc with hY_def
-  -- (1) the outer permutation is a fibre isometry at every jet order
   have hiso : riemannianFiberNormSq (I := I) (M := M) g₀ 3 (3 + (i + 1)) x
       ((iteratedCovGrad (I := I) g₀ 3 3 (i + 1)
         (connLowOp (I := I) (M := M) g₀ g₁)).toSection x) =
@@ -1689,14 +1436,12 @@ private theorem clExact (g₀ : SmoothRiemannianMetric I M) {δ₀ : ℝ} (hδ�
         (slotPermCLM (I := I) lowPerm y
           ((show Tensor0SSpace 3 I y →L[ℝ] Tensor0SSpace 3 I y from Y.toSection y) d)) = _
     rw [slotPermCLM_apply, Tensor0SSpace.toModel_ofModel]
-  -- (2) the Koszul witness turns the product into three source reindexes
   have hYsplit : Y = (1 / 2 : ℝ) •
       (reindexCoeffGen (I := I) (M := M) g₀ 3 3 E₁ (Equiv.swap (0 : Fin 3) 2) +
         reindexCoeffGen (I := I) (M := M) g₀ 3 3 E₁ (finRotate 3) -
         reindexCoeffGen (I := I) (M := M) g₀ 3 3 E₁ (Equiv.swap (1 : Fin 3) 2)) := by
     rw [hY_def, hZc_def, appCcRS_smul_right, appCcRS_sub_right, appCcRS_add_right,
       permRe, permRe, permRe]
-  -- (3) each reindexed copy has the fibre jets of the insertion itself
   set q : ℝ := riemannianFiberNormSq (I := I) (M := M) g₀ 3 (3 + (i + 1)) x
     ((iteratedCovGrad (I := I) g₀ 3 3 (i + 1) E₁).toSection x) with hq_def
   have hq_nn : 0 ≤ q := riemannianFiberNormSq_nonneg _ _ _ _ _
@@ -1728,7 +1473,6 @@ private theorem clExact (g₀ : SmoothRiemannianMetric I M) {δ₀ : ℝ} (hδ�
     rw [hC] at hsub
     rw [hA, hB] at hadd
     nlinarith [hq_nn, hsub, hadd]
-  -- (4) the insertion's own positive-order jets are an exact-weight grid
   have hE : q ≤ (fr ^ 2 * Cb (i + 1)) * Combinatorics.antidiagonalTupleGrid
       (gridBase (I := I) (M := M) g₀ P x) (i + 1) := by
     have hzero : iteratedCovGrad (I := I) g₀ 3 3 (i + 1)
@@ -1771,14 +1515,6 @@ private theorem clExact (g₀ : SmoothRiemannianMetric I M) {δ₀ : ℝ} (hδ�
   nlinarith [hYq, hE, hgnn]
 
 set_option linter.unusedVariables false in
-/-- **The covariant derivative of the transparent Koszul coefficient is a
-once-marked arm at its own level.**
-
-`clAtgw` says `connLowOp` is unmarked at level `i`; this says `∇(connLowOp)` is
-once *marked* at level `i` — not merely unmarked at level `i + 1`, which is one
-level over the tame budget and is what blocked the `∇A ⋆ ∇T` arm.  It is the
-marked sibling of the `capOfArm` step inside `ricciDACap`, and the δ-anchor
-`|P|²_∞ ≤ 1` is the only extra hypothesis (it is what `mkOfAtg` spends). -/
 private theorem clCovMk (g₀ : SmoothRiemannianMetric I M) {δ₀ : ℝ} (hδ₀ : δ₀ < 1) :
     ∃ K : ℕ → ℝ, (∀ i, 0 ≤ K i) ∧
       ∀ (g₁ : SmoothRiemannianMetric I M) (P : SmoothCcTensor g₀ 0 2)
@@ -1800,16 +1536,6 @@ private theorem clCovMk (g₀ : SmoothRiemannianMetric I M) {δ₀ : ℝ} (hδ�
   exact hC g₁ P htie hδ_le hδ0 hδ i x
 
 set_option linter.unusedVariables false in
-/-- **Twice-marked window of the transferred lower Ricci Palatini arm.**
-
-`ricciDALow g₀ g₁ P = daContr g₀ g₁ (dagLowOp g₀ g₁ ⋆ ∇P)` with
-`dagLowOp = permCoeff(daPermA) ⋆ ∇(connLowOp)`.  Both factors of the `(0,4)`
-argument carry exactly one derivative of the state — `∇(connLowOp)` by `clCovMk`
-and `∇P` by `mkOfDP` — so the argument is TWICE marked, and every other factor of
-the Palatini normal form (`permCoeff`, `mvPairTraceOp g₀ g₀`, the inserted full
-raised endomorphism) is unmarked.  This is `ricciDACap` with `capOfArm ↦ clCovMk`,
-`capOfDP ↦ mkOfDP` and the `cap`-calculus replaced by the marked one; the payoff
-is that no constant carries a `Λ`-degree growing with the order. -/
 theorem ricciDAMark (g₀ : SmoothRiemannianMetric I M) {δ₀ : ℝ} (hδ₀ : δ₀ < 1) :
     ∃ K : ℕ → ℝ, (∀ i, 0 ≤ K i) ∧
       ∀ (g₁ : SmoothRiemannianMetric I M) (P : SmoothCcTensor g₀ 0 2)
@@ -1896,20 +1622,6 @@ theorem ricciDAMark (g₀ : SmoothRiemannianMetric I M) {δ₀ : ℝ} (hδ₀ : 
   exact mkSub (I := I) (M := M) g₀ P (hMono daPermA) (hMono daPermB)
 
 set_option linter.unusedVariables false in
-/-- **The Palatini `∇A ⋆ ∇P` arm's tame `L²` jet bound.**
-
-```
-‖∇ⁱ(ricciDALow g₀ g₁ P)‖² ≤ (K₀ i + K₂ i · ‖P‖²_{H³}) · (1 + ∑_{j<i+2} ‖∇ʲP‖²)
-```
-
-with `K₀, K₂` chosen before the state — background metric and order only, no
-Sobolev radius, no cap, and exactly ONE power of `‖P‖²_{H³}` (spelled
-`∑_{j<3} ‖∇^{1+j}P‖²`, `gradCapLin`'s convention).  The δ-anchor `|P|²_∞ ≤ 1` is
-the only hypothesis on the state beyond the standard fibre-operator bound.
-
-Compare `ricciDACap`-then-`capJet`: same left-hand side, but a constant whose
-`Λ`-degree grows with the order.  This is the sixth and last of the arm jets that
-`selfLow_split` needs; it is the exact sibling of `ricciAAJet`. -/
 theorem ricciDAJet (hDim : Module.finrank ℝ E = 3)
     (g₀ : SmoothRiemannianMetric I M) {δ₀ : ℝ} (hδ₀ : δ₀ < 1) :
     ∃ K0 K2 : ℕ → ℝ, (∀ i, 0 ≤ K0 i) ∧ (∀ i, 0 ≤ K2 i) ∧

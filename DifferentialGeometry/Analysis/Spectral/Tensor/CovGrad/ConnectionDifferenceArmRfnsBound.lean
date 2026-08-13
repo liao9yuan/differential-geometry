@@ -1,7 +1,6 @@
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.ConnectionDifferenceJetTower
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.ConnectionDifferenceFibreBound
 
-
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
@@ -397,7 +396,6 @@ theorem riemannianFiberNormSq_raisedKoszul_le_of_lt_one
             = Real.sqrt ((n : ℝ) ^ 3) ^ 2 * (((1 + δ₀) * C₀) ^ 2 * G ^ 2) from by ring]
         rw [hsq]
 
-/-- Compatibility name for the order-zero raised-Koszul fibre estimate. -/
 alias rfns_raisedKoszul_le_of_lt_one :=
   riemannianFiberNormSq_raisedKoszul_le_of_lt_one
 

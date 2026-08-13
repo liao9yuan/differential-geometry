@@ -4,7 +4,6 @@ import DifferentialGeometry.Analysis.Sobolev.TensorHilbert.CometricInverseDiffer
 import DifferentialGeometry.Analysis.Sobolev.TensorHilbert.MetricArmCoeffJetTower
 import DifferentialGeometry.Geometry.Connection.TensorNabla.CotangentCovDerivIdentification
 
-
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
@@ -1853,7 +1852,6 @@ theorem riemannianFiberNormSq_iteratedCovGrad_connDiffSection_diagonalProductGri
     (I := I) (M := M) g₀ j 1 1 2
     (raisedKoszul (I := I) g₀ g₁) (sharpFlatEndoCc (I := I) g₀ g₁) x
 
-/-- Compatibility name for the connection-difference diagonal product-grid estimate. -/
 alias rfns_iteratedCovGrad_connDiffSection_diagonalProductGrid_le :=
   riemannianFiberNormSq_iteratedCovGrad_connDiffSection_diagonalProductGrid_le
 

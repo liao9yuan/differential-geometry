@@ -1,13 +1,5 @@
 import DifferentialGeometry.Analysis.Spectral.Tensor.Estimates.H2H4Principal
 
-/-!
-# Three-dimensional first-order H3 to H2 action
-
-This file applies the covariant `H2` algebra estimate to one derivative of an
-`H3` tensor.  It is the smooth-core estimate for completed first-order
-operators in the low-regularity Ricci-DeTurck bootstrap.
--/
-
 namespace DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral
 
 open scoped ContDiff Manifold Topology BigOperators
@@ -24,8 +16,6 @@ variable
       [IsManifold I ∞ M] [CompactSpace M] [I.Boundaryless]
       [T2Space M] [SigmaCompactSpace M]
 
-/-- In dimension three, an operator coefficient with an intrinsic `H2` jet
-acts on one covariant derivative from spectral `H3` to spectral `H2`. -/
 theorem appCc_h2_h3_h2
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M) (s c : ℕ) :

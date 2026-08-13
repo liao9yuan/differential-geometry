@@ -2,14 +2,6 @@ import DifferentialGeometry.Analysis.Sobolev.TensorHilbert.LieCorr0AMixRefold
 import DifferentialGeometry.Analysis.Sobolev.TensorHilbert.DeTurckVFJetRadiusFree
 import DifferentialGeometry.Analysis.Parabolic.RicciLinearization.CometricTraceSelfBound
 
-/-!
-# Radius-free pointwise bounds for moving `lc0AMix` traces
-
-The fixed trace contributes bounded background jets.  The moving part is a
-single inverse-metric-difference insertion, controlled by a low
-antidiagonal-grid window with constants independent of a high Sobolev radius.
--/
-
 noncomputable section
 
 set_option autoImplicit false
@@ -209,8 +201,6 @@ private theorem trace_grid_of
   linarith
 
 set_option linter.unusedVariables false in
-/-- At every passenger rank, one smallness ceiling fixes the moving-trace
-pointwise grid before either metric varies. -/
 theorem trace_grid_unif
     (p : ℕ) {δ₀ : ℝ} (hδ₀ : δ₀ < 1) :
     ∃ C : ℕ → ℝ, (∀ i, 0 ≤ C i) ∧
@@ -278,7 +268,6 @@ theorem trace_grid_unif
       g₁ P htie hδ_le hδ_nonneg hbound σ i x
 
 set_option linter.unusedVariables false in
-/-- Rank-two specialization of `trace_grid_unif`. -/
 theorem trace2_grid_unif
     {δ₀ : ℝ} (hδ₀ : δ₀ < 1) :
     ∃ C : ℕ → ℝ, (∀ i, 0 ≤ C i) ∧
@@ -299,8 +288,6 @@ theorem trace2_grid_unif
   simpa only [Nat.reduceAdd] using trace_grid_unif (I := I) (M := M) 2 hδ₀
 
 set_option linter.unusedVariables false in
-/-- Metric-local compatibility wrapper for `trace2_grid_unif` and the
-rank-generic pointwise moving-trace grid. -/
 theorem trace_grid_rf
     (p : ℕ) (g₀ : SmoothRiemannianMetric I M) {δ₀ : ℝ} (hδ₀ : δ₀ < 1) :
     ∃ C : ℕ → ℝ, (∀ i, 0 ≤ C i) ∧

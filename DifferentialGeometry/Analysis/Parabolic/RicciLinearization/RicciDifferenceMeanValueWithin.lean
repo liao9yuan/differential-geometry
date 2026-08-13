@@ -1,52 +1,5 @@
 import DifferentialGeometry.Analysis.Parabolic.RicciLinearization.RicciDifferenceMeanValue
 
-/-!
-# The half-open-slab (`ContDiffWithinAt`) chart-Gram → Christoffel → Riemann tower
-
-`RicciDifferenceMeanValue.lean` builds the generic joint `(s, y)`-smoothness tower
-`GenJointGram → gen_joint_invGram → gen_joint_gramBracket → gen_joint_christoffel →
-gen_joint_riemann` in the **`ContDiffAt`** class: at every `s₀` of the time set it demands a
-*two-sided* time neighbourhood.  That is strictly stronger than what a forward parabolic
-problem supplies at its initial time, so the tower cannot be fed on a half-open slab `Ico a b`
-at `s₀ = a`.
-
-This file is the **`ContDiffWithinAt` re-threading of that same chain**, valid on
-`S ×ˢ interior (extChartAt I α).target` for an *arbitrary* time set `S : Set ℝ` — in
-particular for `S = Ico a b` and `S = Icc a c`.
-
-The mathematics is unchanged, and the reason it re-threads is a single structural fact: every
-step of the tower differentiates **only in the spatial variable**.  So the parameter set
-`S ×ˢ U` never needs unique differentiability; only the spatial factor `U` does, and
-`U = interior (extChartAt I α).target` is open.  Concretely, `ContDiffWithinAt.fderivWithin_apply`
-is applied with parameter set `s := S ×ˢ U` and differentiation set `t := U`, and
-`fderivWithin ℝ · U = fderiv ℝ ·` on the open `U` returns the tower's `partialDeriv`.
-
-## Main results
-
-* `partialDerivWithin` — the crux step: a jointly `C^∞`-within family of scalar functions has
-  jointly `C^∞`-within spatial partial derivatives, on `S ×ˢ U` with `U` open and `S` arbitrary.
-* `GenJointGramOn` — the `ContDiffWithinAt` hypothesis package replacing `GenJointGram`, plus
-  `genJointGramOn_of_gen` witnessing that it is *weaker* than the two-sided package.
-* `invGramWithin`, `bracketWithin`, `christoffelWithin`, `partChristWithin`, `riemannWithin`,
-  `ricciWithin` — the chain, mirroring `gen_joint_invGram` … `gen_joint_ricci` one for one.
-* `christWithin_of_open` / `riemWithin_of_open` — the **compatibility guard**: for an open time
-  set the `Within` conclusions specialize back to the original `ContDiffAt` statements of
-  `gen_joint_christoffel` / `gen_joint_riemann`.
-* `genGramOn_of_field` — the producer taking a chart-Gram field of exactly the shape carried by
-  the forward-uniqueness black box (`ContMDiffOn … (J ×ˢ baseSet)`, `J` arbitrary) to
-  `GenJointGramOn`.
-* `jointOnMWithin`, `christWithinM` / `riemWithinM` — the same joint regularity transported back
-  to the manifold source `ℝ × M`.
-* `christSlabCont` / `riemSlabCont` — the consumer-facing corollary: joint `ContinuousOn` of the
-  chart Christoffel and chart Riemann coefficient families on the **closed** subslab
-  `Icc a c ×ˢ baseSet`, from an `Ico a b` chart-Gram field.  This is the extreme-value-theorem
-  input of `Evolution/ForwardUniqueSup.lean`'s `slabBound` / `normSqSlabBound` engine.
-* `christSlabContAt` / `riemSlabContAt` — the same at the chart centre, stated within
-  `Icc a c ×ˢ univ`, which is the shape a `normSq0S`-style diagonal assembly consumes.
-
-See `RicciDifferenceMeanValueWithin.md`.
--/
-
 noncomputable section
 
 set_option autoImplicit false
@@ -73,23 +26,13 @@ variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 
-/-! ### The spatial partial derivative, within a product set -/
-
 omit [NeZero (Module.finrank ℝ E)] in
-/-- On an open spatial set the tower's `partialDeriv` is the corresponding directional
-`fderivWithin`.  This is the only place the openness of the spatial factor is used. -/
 theorem partialDeriv_of_isOpen {U : Set E} (hU : IsOpen U) (u : E → ℝ)
     (q : Fin (Module.finrank ℝ E)) {y : E} (hy : y ∈ U) :
     partialDeriv (E := E) q u y = fderivWithin ℝ u U y ((chartModelBasis E) q) := by
   rw [partialDeriv, fderivWithin_of_isOpen hU hy]
 
 omit [NeZero (Module.finrank ℝ E)] in
-/-- **The crux step.**  If a family of scalar functions `Ψ` is jointly `C^∞` *within*
-`S ×ˢ U` at `(s₀, y₀)`, then so is each of its **spatial** partial derivatives.
-
-No condition whatsoever is imposed on the time set `S`: the derivative is taken only in the
-spatial factor `U`, which is open and hence has unique derivatives.  This is exactly why the
-whole tower survives a half-open time slab. -/
 theorem partialDerivWithin
     (Ψ : ℝ → E → ℝ) (q : Fin (Module.finrank ℝ E))
     {S : Set ℝ} {U : Set E} (hU : IsOpen U) {s₀ : ℝ} {y₀ : E}
@@ -117,19 +60,10 @@ theorem partialDerivWithin
   exact hfd.congr (fun p hp => partialDeriv_of_isOpen hU _ q hp.2)
     (partialDeriv_of_isOpen hU _ q hy)
 
-/-! ### The `ContDiffWithinAt` hypothesis package -/
-
 section GenTower
 
 variable (gfam : ℝ → SmoothRiemannianMetric I M) (α : M)
 
-/-- **The half-open-slab hypothesis bundle.**  The `ContDiffWithinAt` replacement of
-`GenJointGram`: joint `C^∞` of the chart Gram entries *within* `S ×ˢ interior target` at every
-base point with `s₀ ∈ S` and `y₀` chart-interior, plus positive-definiteness of the Gram over
-the chart base set for `s₀ ∈ S`.
-
-Unlike `GenJointGram` this does **not** require a two-sided time neighbourhood, so it is
-satisfiable for `S = Ico a b` at the initial time `s₀ = a`. -/
 def GenJointGramOn (S : Set ℝ) : Prop :=
   (∀ (i j : Fin (Module.finrank ℝ E)) {s₀ : ℝ} {y₀ : E}, s₀ ∈ S →
       y₀ ∈ interior (extChartAt I α).target →
@@ -140,9 +74,6 @@ def GenJointGramOn (S : Set ℝ) : Prop :=
       0 < (chartGramMatrix (I := I) (gfam s₀) α x).det)
 
 omit [NeZero (Module.finrank ℝ E)] in
-/-- The two-sided package is stronger: `GenJointGram` implies `GenJointGramOn`.  Hence every
-consumer of the `Within` tower below can also be fed by the settled producers of
-`RicciDifferenceMeanValue.lean` (`genGram_of_family`, …). -/
 theorem genJointGramOn_of_gen {S : Set ℝ}
     (hG : ChartGramFamilyJointSmoothNondegenerate (I := I) gfam α S) :
     GenJointGramOn (I := I) gfam α S := by
@@ -150,12 +81,7 @@ theorem genJointGramOn_of_gen {S : Set ℝ}
   intro s₀ hs x hx
   exact hG.2 hs hx
 
-/-! ### The chain -/
-
 omit [NeZero (Module.finrank ℝ E)] in
-/-- **Inverse Gram, within.**  Cramer's rule `G⁻¹ = (det G)⁻¹ · adj G` is a rational expression
-in the Gram entries with nonvanishing denominator, hence re-threads verbatim.  Mirrors
-`gen_joint_invGram`. -/
 theorem invGramWithin {S : Set ℝ} (hG : GenJointGramOn (I := I) gfam α S)
     (k l : Fin (Module.finrank ℝ E)) {s₀ : ℝ} {y₀ : E} (hs : s₀ ∈ S)
     (hy : y₀ ∈ interior (extChartAt I α).target) :
@@ -241,8 +167,6 @@ theorem invGramWithin {S : Set ℝ} (hG : GenJointGramOn (I := I) gfam α S)
   exact ((contDiffAt_inv _ hdet_ne).comp_contDiffWithinAt (s₀, y₀) hdet).mul (hadj k l)
 
 omit [NeZero (Module.finrank ℝ E)] in
-/-- **Koszul bracket, within.**  `S^g_{ij,l} = ∂_i G_{lj} + ∂_j G_{li} − ∂_l G_{ij}`: three
-spatial partial derivatives of Gram entries.  Mirrors `gen_joint_gramBracket`. -/
 theorem bracketWithin {S : Set ℝ} (hG : GenJointGramOn (I := I) gfam α S)
     (i j l : Fin (Module.finrank ℝ E)) {s₀ : ℝ} {y₀ : E} (hs : s₀ ∈ S)
     (hy : y₀ ∈ interior (extChartAt I α).target) :
@@ -263,11 +187,6 @@ theorem bracketWithin {S : Set ℝ} (hG : GenJointGramOn (I := I) gfam α S)
     (partialDerivWithin (fun s y => chartGramOnE (I := I) (gfam s) α i j y) l
       isOpen_interior hs hy (hG.1 i j hs hy))
 
-/-- **The chart Christoffel symbols are jointly `C^∞`-within on a half-open time slab.**
-
-`Γ^k_{ij} = ½ ∑_l G^{kl} S_{ij,l}`: the inverse Gram times the Koszul bracket.  This is the
-`ContDiffWithinAt` replacement of `gen_joint_christoffel`, and the first of the two statements
-that the forward-uniqueness slab-bound engine is gated on. -/
 theorem christoffelWithin {S : Set ℝ} (hG : GenJointGramOn (I := I) gfam α S)
     (i j k : Fin (Module.finrank ℝ E)) {s₀ : ℝ} {y₀ : E} (hs : s₀ ∈ S)
     (hy : y₀ ∈ interior (extChartAt I α).target) :
@@ -284,8 +203,6 @@ theorem christoffelWithin {S : Set ℝ} (hG : GenJointGramOn (I := I) gfam α S)
   exact (invGramWithin (I := I) gfam α hG k l hs hy).mul
     (bracketWithin (I := I) gfam α hG i j l hs hy)
 
-/-- One more spatial derivative of the Christoffel symbols.  Mirrors
-`gen_joint_partial_christoffel`. -/
 theorem partChristWithin {S : Set ℝ} (hG : GenJointGramOn (I := I) gfam α S)
     (m i j k : Fin (Module.finrank ℝ E)) {s₀ : ℝ} {y₀ : E} (hs : s₀ ∈ S)
     (hy : y₀ ∈ interior (extChartAt I α).target) :
@@ -296,10 +213,6 @@ theorem partChristWithin {S : Set ℝ} (hG : GenJointGramOn (I := I) gfam α S)
   partialDerivWithin (fun s y => chartChristoffel (I := I) (gfam s) α i j k y) m
     isOpen_interior hs hy (christoffelWithin (I := I) gfam α hG i j k hs hy)
 
-/-- **The chart Riemann coefficients are jointly `C^∞`-within on a half-open time slab.**
-
-`R^l_{ijk} = ∂_j Γ^l_{ik} − ∂_k Γ^l_{ij} + Γ·Γ`.  This is the `ContDiffWithinAt` replacement of
-`gen_joint_riemann`. -/
 theorem riemannWithin {S : Set ℝ} (hG : GenJointGramOn (I := I) gfam α S)
     (i j k l : Fin (Module.finrank ℝ E)) {s₀ : ℝ} {y₀ : E} (hs : s₀ ∈ S)
     (hy : y₀ ∈ interior (extChartAt I α).target) :
@@ -325,8 +238,6 @@ theorem riemannWithin {S : Set ℝ} (hG : GenJointGramOn (I := I) gfam α S)
     ((christoffelWithin (I := I) gfam α hG k m l hs hy).mul
       (christoffelWithin (I := I) gfam α hG i j m hs hy))
 
-/-- **The chart Ricci coefficients, within.**  The `j`-trace of `riemannWithin`; the
-`ContDiffWithinAt` replacement of the (private) `gen_joint_ricci`. -/
 theorem ricciWithin {S : Set ℝ} (hG : GenJointGramOn (I := I) gfam α S)
     (i k : Fin (Module.finrank ℝ E)) {s₀ : ℝ} {y₀ : E} (hs : s₀ ∈ S)
     (hy : y₀ ∈ interior (extChartAt I α).target) :
@@ -340,9 +251,6 @@ theorem ricciWithin {S : Set ℝ} (hG : GenJointGramOn (I := I) gfam α S)
   rw [heq]
   exact ContDiffWithinAt.sum (fun j _ => riemannWithin (I := I) gfam α hG i j k j hs hy)
 
-/-- One more spatial derivative of the chart Riemann coefficients.  The `∂(chart Riemann)`
-layer, obtained from `riemannWithin` exactly as `partChristWithin` is obtained from
-`christoffelWithin`. -/
 theorem partRiemWithin {S : Set ℝ} (hG : GenJointGramOn (I := I) gfam α S)
     (m i j k l : Fin (Module.finrank ℝ E)) {s₀ : ℝ} {y₀ : E} (hs : s₀ ∈ S)
     (hy : y₀ ∈ interior (extChartAt I α).target) :
@@ -354,9 +262,6 @@ theorem partRiemWithin {S : Set ℝ} (hG : GenJointGramOn (I := I) gfam α S)
   partialDerivWithin (fun s y => chartRiemannTensor (I := I) (gfam s) α i j k l y) m
     isOpen_interior hs hy (riemannWithin (I := I) gfam α hG i j k l hs hy)
 
-/-- One more spatial derivative of the chart Ricci coefficients.  The `∂(chart Ricci)` layer:
-the coordinate ingredient of a `∇Ric` chart-frame component reading, the other ingredient
-being `christoffelWithin`. -/
 theorem partRicciWithin {S : Set ℝ} (hG : GenJointGramOn (I := I) gfam α S)
     (m i k : Fin (Module.finrank ℝ E)) {s₀ : ℝ} {y₀ : E} (hs : s₀ ∈ S)
     (hy : y₀ ∈ interior (extChartAt I α).target) :
@@ -367,14 +272,6 @@ theorem partRicciWithin {S : Set ℝ} (hG : GenJointGramOn (I := I) gfam α S)
   partialDerivWithin (fun s y => chartRicciTensor (I := I) (gfam s) α i k y) m
     isOpen_interior hs hy (ricciWithin (I := I) gfam α hG i k hs hy)
 
-/-! ### Compatibility guard
-
-For an **open** time set the `Within` conclusions specialize back to the original `ContDiffAt`
-statements, so nothing was lost in the re-threading: `christoffelWithin` / `riemannWithin`
-subsume `gen_joint_christoffel` / `gen_joint_riemann`. -/
-
-/-- Compatibility guard for `christoffelWithin`: for open `S` it recovers the conclusion of
-`gen_joint_christoffel`. -/
 theorem christWithin_of_open {S : Set ℝ} (hS : IsOpen S) (hG : GenJointGramOn (I := I) gfam α S)
     (i j k : Fin (Module.finrank ℝ E)) {s₀ : ℝ} {y₀ : E} (hs : s₀ ∈ S)
     (hy : y₀ ∈ interior (extChartAt I α).target) :
@@ -383,8 +280,6 @@ theorem christWithin_of_open {S : Set ℝ} (hS : IsOpen S) (hG : GenJointGramOn 
   (christoffelWithin (I := I) gfam α hG i j k hs hy).contDiffAt
     ((hS.prod isOpen_interior).mem_nhds ⟨hs, hy⟩)
 
-/-- Compatibility guard for `riemannWithin`: for open `S` it recovers the conclusion of
-`gen_joint_riemann`. -/
 theorem riemWithin_of_open {S : Set ℝ} (hS : IsOpen S) (hG : GenJointGramOn (I := I) gfam α S)
     (i j k l : Fin (Module.finrank ℝ E)) {s₀ : ℝ} {y₀ : E} (hs : s₀ ∈ S)
     (hy : y₀ ∈ interior (extChartAt I α).target) :
@@ -395,25 +290,11 @@ theorem riemWithin_of_open {S : Set ℝ} (hS : IsOpen S) (hG : GenJointGramOn (I
 
 end GenTower
 
-/-! ## The manifold-source consumer layer
-
-The tower above lives on `ℝ × E`.  The forward-uniqueness slab-bound engine
-(`Evolution/ForwardUniqueSup.lean`) consumes joint continuity on `ℝ × M`; this section performs
-the transport and specializes to the closed subslab `Icc a c` of a half-open `Ico a b` field. -/
-
 section Consumer
 
 variable [I.Boundaryless]
 
 omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
-/-- **The producer.**  A chart-Gram field of exactly the shape carried by the forward-uniqueness
-black box — joint `C^∞` on `J ×ˢ baseSet` for an *arbitrary* time set `J`, in particular a
-half-open `Ico a b` — yields the `Within` hypothesis package.
-
-Only the transport `ℝ × M → ℝ × E` along `(t, y) ↦ (t, φ_α⁻¹ y)` is performed here; the Gram
-determinant positivity is unconditional.  This is the `ContDiffWithinAt` replacement of the
-(private) `genGram_of_joint` of `Evolution/ForwardUniqueDensReg.lean`, with its `IsOpen J`
-hypothesis dropped. -/
 theorem genGramOn_of_field (g : ℝ → SmoothRiemannianMetric I M) {J : Set ℝ} (α : M)
     (hgram : ∀ i j : Fin (Module.finrank ℝ E),
       ContMDiffOn (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ, ℝ) ∞
@@ -461,9 +342,6 @@ theorem genGramOn_of_field (g : ℝ → SmoothRiemannianMetric I M) {J : Set ℝ
     exact chartGramMatrix_det_pos (I := I) (g s₀) α hx
 
 omit [NeZero (Module.finrank ℝ E)] in
-/-- Transport of a joint `ℝ × E` chart-scalar `ContDiffWithinAt` statement back to the manifold
-source `ℝ × M`, along `(t, x) ↦ (t, φ_α x)`.  The `ContDiffWithinAt` replacement of the
-(private) `jointOnM` of `Evolution/ForwardUniqueDensReg.lean`. -/
 theorem jointOnMWithin (α : M) (F : ℝ → E → ℝ) {J : Set ℝ} {t : ℝ} {x : M}
     (hF : ContDiffWithinAt ℝ ∞ (fun r : ℝ × E => F r.1 r.2)
       (J ×ˢ interior (extChartAt I α).target) (t, extChartAt I α x))
@@ -499,7 +377,6 @@ theorem jointOnMWithin (α : M) (F : ℝ → E → ℝ) {J : Set ℝ} {t : ℝ} 
     hF.contMDiffWithinAt.comp ((t, x) : ℝ × M) hΦ hmapsΦ
 
 omit [NeZero (Module.finrank ℝ E)] in
-/-- A chart-source point lands in the interior of the extended chart target. -/
 private theorem chart_mem_interior (α : M) {x : M} (hx : x ∈ (chartAt H α).source) :
     extChartAt I α x ∈ interior (extChartAt I α).target := by
   have hsrc : x ∈ (extChartAt I α).source := by
@@ -507,7 +384,6 @@ private theorem chart_mem_interior (α : M) {x : M} (hx : x ∈ (chartAt H α).s
   exact extChartAt_target_subset_interior_of_boundaryless (I := I) α
     ((extChartAt I α).map_source hsrc)
 
-/-- **The chart Christoffel symbols on the manifold source, within a half-open time slab.** -/
 theorem christWithinM (g : ℝ → SmoothRiemannianMetric I M) {J : Set ℝ} (α : M)
     (hG : GenJointGramOn (I := I) g α J) (i j k : Fin (Module.finrank ℝ E))
     {t : ℝ} (ht : t ∈ J) {x : M} (hx : x ∈ (chartAt H α).source) :
@@ -517,7 +393,6 @@ theorem christWithinM (g : ℝ → SmoothRiemannianMetric I M) {J : Set ℝ} (α
   jointOnMWithin (I := I) α (fun s y => chartChristoffel (I := I) (g s) α i j k y)
     (christoffelWithin (I := I) g α hG i j k ht (chart_mem_interior (I := I) α hx)) hx
 
-/-- **The chart Riemann coefficients on the manifold source, within a half-open time slab.** -/
 theorem riemWithinM (g : ℝ → SmoothRiemannianMetric I M) {J : Set ℝ} (α : M)
     (hG : GenJointGramOn (I := I) g α J) (i j k l : Fin (Module.finrank ℝ E))
     {t : ℝ} (ht : t ∈ J) {x : M} (hx : x ∈ (chartAt H α).source) :
@@ -527,7 +402,6 @@ theorem riemWithinM (g : ℝ → SmoothRiemannianMetric I M) {J : Set ℝ} (α :
   jointOnMWithin (I := I) α (fun s y => chartRiemannTensor (I := I) (g s) α i j k l y)
     (riemannWithin (I := I) g α hG i j k l ht (chart_mem_interior (I := I) α hx)) hx
 
-/-- **The chart Ricci coefficients on the manifold source, within a half-open time slab.** -/
 theorem ricciWithinM (g : ℝ → SmoothRiemannianMetric I M) {J : Set ℝ} (α : M)
     (hG : GenJointGramOn (I := I) g α J) (i k : Fin (Module.finrank ℝ E))
     {t : ℝ} (ht : t ∈ J) {x : M} (hx : x ∈ (chartAt H α).source) :
@@ -537,8 +411,6 @@ theorem ricciWithinM (g : ℝ → SmoothRiemannianMetric I M) {J : Set ℝ} (α 
   jointOnMWithin (I := I) α (fun s y => chartRicciTensor (I := I) (g s) α i k y)
     (ricciWithin (I := I) g α hG i k ht (chart_mem_interior (I := I) α hx)) hx
 
-/-- **The spatial derivative of the chart Riemann coefficients, on the manifold source.**  The
-`∇Rm` chart-component input of the forward-uniqueness slab sups. -/
 theorem partRiemWithinM (g : ℝ → SmoothRiemannianMetric I M) {J : Set ℝ} (α : M)
     (hG : GenJointGramOn (I := I) g α J) (m i j k l : Fin (Module.finrank ℝ E))
     {t : ℝ} (ht : t ∈ J) {x : M} (hx : x ∈ (chartAt H α).source) :
@@ -552,9 +424,6 @@ theorem partRiemWithinM (g : ℝ → SmoothRiemannianMetric I M) {J : Set ℝ} (
       partialDeriv (E := E) m (fun z => chartRiemannTensor (I := I) (g s) α i j k l z) y)
     (partRiemWithin (I := I) g α hG m i j k l ht (chart_mem_interior (I := I) α hx)) hx
 
-/-- **The spatial derivative of the chart Ricci coefficients, on the manifold source.**  With
-`christWithinM` this is the pair of coordinate ingredients of a `∇Ric` chart-frame component
-reading. -/
 theorem partRicciWithinM (g : ℝ → SmoothRiemannianMetric I M) {J : Set ℝ} (α : M)
     (hG : GenJointGramOn (I := I) g α J) (m i k : Fin (Module.finrank ℝ E))
     {t : ℝ} (ht : t ∈ J) {x : M} (hx : x ∈ (chartAt H α).source) :
@@ -567,20 +436,10 @@ theorem partRicciWithinM (g : ℝ → SmoothRiemannianMetric I M) {J : Set ℝ} 
     (fun s y => partialDeriv (E := E) m (fun z => chartRicciTensor (I := I) (g s) α i k z) y)
     (partRicciWithin (I := I) g α hG m i k ht (chart_mem_interior (I := I) α hx)) hx
 
-/-! ### The closed-subslab continuity corollary
-
-`Evolution/ForwardUniqueSup.lean`'s `slabBound` / `normSqSlabBound` need joint `ContinuousOn` up
-to the **closed** initial edge.  Given the black box's `Ico a b` chart-Gram field and any
-`c < b`, the two statements below deliver exactly that for the chart Christoffel and chart
-Riemann coefficient families. -/
-
-/-- `Icc a c ⊆ Ico a b` when `c < b`. -/
 private theorem icc_subset_ico {a b c : ℝ} (hcb : c < b) : Icc a c ⊆ Ico a b :=
   fun _ hx => ⟨hx.1, lt_of_le_of_lt hx.2 hcb⟩
 
 omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
-/-- At the chart centre the trivialization base set is a spatial neighbourhood, so the closed
-subslab over it is a neighbourhood of `(t, x₀)` within the closed subslab over `univ`. -/
 private theorem slabBase_nhdsWithin (x₀ : M) (a c t : ℝ) :
     Icc a c ×ˢ (trivializationAt E (TangentSpace I) x₀).baseSet ∈
       𝓝[Icc a c ×ˢ (univ : Set M)] ((t, x₀) : ℝ × M) := by
@@ -598,10 +457,6 @@ private theorem slabBase_nhdsWithin (x₀ : M) (a c t : ℝ) :
   have := inter_mem_nhdsWithin (Icc a c ×ˢ (univ : Set M)) (a := ((t, x₀) : ℝ × M)) hopen
   rwa [hset] at this
 
-/-- **The consumer-facing Christoffel corollary.**  From the forward-uniqueness black box's own
-chart-Gram field on the half-open slab `Ico a b`, the chart Christoffel family is jointly
-continuous on the closed subslab `Icc a c ×ˢ baseSet` for every `c < b` — the extreme-value
-input of `slabBound`. -/
 theorem christSlabCont (g : ℝ → SmoothRiemannianMetric I M) {a b c : ℝ} (hcb : c < b) (x₀ : M)
     (hgram : ∀ i j : Fin (Module.finrank ℝ E),
       ContMDiffOn (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ) ∞
@@ -620,8 +475,6 @@ theorem christSlabCont (g : ℝ → SmoothRiemannianMetric I M) {a b c : ℝ} (h
   exact ((christWithinM (I := I) g x₀ hG i j k (hsub hp).1
     (hsub hp).2).continuousWithinAt).mono hsub
 
-/-- **The consumer-facing Riemann corollary.**  Same statement for the chart Riemann
-coefficients. -/
 theorem riemSlabCont (g : ℝ → SmoothRiemannianMetric I M) {a b c : ℝ} (hcb : c < b) (x₀ : M)
     (hgram : ∀ i j : Fin (Module.finrank ℝ E),
       ContMDiffOn (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ) ∞
@@ -640,10 +493,6 @@ theorem riemSlabCont (g : ℝ → SmoothRiemannianMetric I M) {a b c : ℝ} (hcb
   exact ((riemWithinM (I := I) g x₀ hG i j k l (hsub hp).1
     (hsub hp).2).continuousWithinAt).mono hsub
 
-/-- **The chart-centre form.**  At the chart centre `x₀` the trivialization base set is a
-neighbourhood, so the closed-subslab continuity of `christSlabCont` also holds *within*
-`Icc a c ×ˢ univ` — the shape a `normSq0S`-style diagonal assembly (`normSq0S_jointContMDiffOn`)
-feeds to `slabBound`. -/
 theorem christSlabContAt (g : ℝ → SmoothRiemannianMetric I M) {a b c : ℝ} (hcb : c < b) (x₀ : M)
     (hgram : ∀ i j : Fin (Module.finrank ℝ E),
       ContMDiffOn (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ) ∞
@@ -658,7 +507,6 @@ theorem christSlabContAt (g : ℝ → SmoothRiemannianMetric I M) {a b c : ℝ} 
   have hbase := christSlabCont (I := I) g hcb x₀ hgram i j k (t, x₀) ⟨ht, hx₀⟩
   exact hbase.mono_of_mem_nhdsWithin (slabBase_nhdsWithin (I := I) x₀ a c t)
 
-/-- **The chart-centre form for the Riemann coefficients.** -/
 theorem riemSlabContAt (g : ℝ → SmoothRiemannianMetric I M) {a b c : ℝ} (hcb : c < b) (x₀ : M)
     (hgram : ∀ i j : Fin (Module.finrank ℝ E),
       ContMDiffOn (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ) ∞

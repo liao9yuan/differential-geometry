@@ -1,16 +1,5 @@
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.CurvatureCoefficientDifferenceJetTower.Envelope
 
-/-!
-# Top-separated residual integrator: ball-uniform tame window
-
-Chunk of the `CurvatureCoefficientDifferenceJetTower` tower, split
-out of the former 15111-line monolith (no longer elaborable in a
-single Lean process).  Every declaration is verbatim.  The former
-`private` helpers were promoted into the internal `CurvatureCoefficientDifferenceJetTower`
-scope, so the public `Connection` API is unchanged.  Chunk map:
-`CurvatureCoefficientDifferenceJetTower.md`.
--/
-
 noncomputable section
 
 set_option linter.style.setOption false

@@ -1,36 +1,5 @@
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.CurvatureCoefficientDifferenceJetTower
 
-/-!
-# Radius-free jet-L² bound for the arm0 base curvature-coefficient difference
-
-Consumer sibling of THE GATE
-(`boundedFactorGridWindow_integral_radiusFree_topSeparated`), the second brick of the
-Pro-ruled repair of UNIF item-2.  See `ShortTime/THREEARM_RECON.md` §11/§11b and the
-per-file note `CurvatureCoeffDiffRadiusFree.md`.
-
-The R-dependent original is
-`ricciArmOrder0BaseCoeff_perOrder_l2_topSeparated_generic`, whose `Kc` routes through the
-ball-uniform tame-window integrator.  Its *only* radius dependence is that single
-integration step; the per-order head split
-(`rfns_iteratedCovGrad_ricciArmOrder0{Riemann,Curv}Coeff_backgroundDifference_topSeparated_le`)
-and the pointwise residual grid bound are already radius-free.  Replacing the ball-uniform
-integrator with THE GATE (which keeps the top jet as an explicit `Ktop·‖∇^{i+2}‖²` leak)
-makes the whole coefficient bound radius-free:
-```
-∑_{i ≤ a} ‖∇ⁱ(ricciArmOrder0RiemannCoeff g₀ g₁ − ricciArmOrder0CurvCoeff g₀ g₁)‖²
-   ≤ Ktop · ∑_{j ≤ a+2} ‖∇ʲ(symmS g₀ T)‖²
-   + Klow · (1 + ∑_{j ≤ a+1} ‖∇ʲ(symmS g₀ T)‖²)
-```
-with `Ktop`, `Klow` depending only on `g₀`, `a`, `dim E`, `δ₀` — no ball radius `R`, no
-`H^{a+2}` ball hypothesis; the only smallness input is the fibre operator-norm bound
-`gFibreOpBound g₀ (ccTensorBilinSymm g₀ T) δ` with `δ ≤ δ₀`.
-
-Per the §11 pointwise-head caveat, the capped antidiagonal top terms are *not* routed
-through the pointwise-head API; they land in the explicit top L² envelope
-`Ktop · ∑ ‖∇ʲ‖²` supplied by the gate.  The grids run over `symmS g₀ T` (the
-geometrically correct perturbation, the one the fibre-small bridge controls), not raw `T`.
--/
-
 noncomputable section
 
 open Bundle Manifold MeasureTheory Set Filter Tensor0SBundle
@@ -61,12 +30,7 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
-/-! ### Local re-derivations of the `symmS` transfer lemmas (private in
-`DeTurckRemainderTameLipschitz`). -/
-
 omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [BoundarylessManifold I M] [SigmaCompactSpace M] in
-/-- Symmetrizing an already-symmetrized bilinear form is a no-op:
-`ccTensorBilinSymm g₀ (symmS g₀ T) = ccTensorBilinSymm g₀ T` pointwise. -/
 private theorem ccTensorBilinSymm_symmS_app_rf
     (g₀ : SmoothRiemannianMetric I M) (T : SmoothCcTensor g₀ 0 2)
     (x : M) (v w : TangentSpace I x) :
@@ -76,7 +40,6 @@ private theorem ccTensorBilinSymm_symmS_app_rf
     ccTensorBilinSymm_symm (I := I) g₀ T x w v, ccTensorBilinSymm_apply]
   ring
 
-/-- Fibre operator-norm smallness transfers from `T` to its symmetrization. -/
 private theorem gFibreOpBound_symmS_rf
     (g₀ : SmoothRiemannianMetric I M) (T : SmoothCcTensor g₀ 0 2)
     {δ : ℝ} (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ) :
@@ -86,17 +49,12 @@ private theorem gFibreOpBound_symmS_rf
   rw [ccTensorBilinSymm_symmS_app_rf (I := I) (M := M) g₀ T x v w]
   exact hδ x v w
 
-/-! ### Generic real helpers (no geometry). -/
-
-/-- Power-mean five-term bound `(a+b+c+d+e)² ≤ 5·(a²+b²+c²+d²+e²)`. -/
 private lemma sq_sum5_le (a b c d e : ℝ) :
     (a + b + c + d + e) ^ 2 ≤ 5 * (a ^ 2 + b ^ 2 + c ^ 2 + d ^ 2 + e ^ 2) := by
   nlinarith [sq_nonneg (a - b), sq_nonneg (a - c), sq_nonneg (a - d), sq_nonneg (a - e),
     sq_nonneg (b - c), sq_nonneg (b - d), sq_nonneg (b - e), sq_nonneg (c - d),
     sq_nonneg (c - e), sq_nonneg (d - e)]
 
-/-- Shifted-range domination for a nonnegative sequence:
-`∑_{i < m} g (i + c) ≤ ∑_{j < m + c} g j`. -/
 private lemma sum_shift_le_rf (g : ℕ → ℝ) (hg : ∀ j, 0 ≤ g j) (m c : ℕ) :
     ∑ i ∈ Finset.range m, g (i + c) ≤ ∑ j ∈ Finset.range (m + c), g j := by
   classical
@@ -115,16 +73,7 @@ private lemma sum_shift_le_rf (g : ℕ → ℝ) (hg : ∀ j, 0 ≤ g j) (m c : �
     _ ≤ ∑ j ∈ Finset.range (m + c), g j :=
         Finset.sum_le_sum_of_subset_of_nonneg hsub (fun j _ _ => hg j)
 
-/-! ### Radius-free per-order engine. -/
-
 set_option linter.unusedVariables false in
-/-- Radius-free per-order jet-L² bound for the arm0 base curvature-coefficient difference
-`ricciArmOrder0RiemannCoeff g₀ g₁ − ricciArmOrder0CurvCoeff g₀ g₁`.  With a fixed
-zeroth-order fibre bound `Λ₀` (from fibre smallness, not a Sobolev ball radius), the order-`i`
-jet-L² norm splits into a top leak `Atop i · ‖∇^{i+2}(symmS g₀ T)‖²` and a low part
-`Alow i · (1 + ∑_{j ≤ i+1} ‖∇ʲ(symmS g₀ T)‖²)`, with `Atop`, `Alow` depending only on `g₀`
-and `Λ₀`.  Sibling of `ricciArmOrder0BaseCoeff_perOrder_l2_topSeparated_generic` with the
-radius-free gate in place of the ball-uniform integrator. -/
 theorem ricciArmOrder0BaseCoeff_perOrder_l2_radiusFree
     (g₀ : SmoothRiemannianMetric I M) {δ₀ : ℝ} (hδ₀ : δ₀ < 1)
     {Λ₀ : ℝ} (hΛ₀0 : 0 ≤ Λ₀) :
@@ -163,7 +112,6 @@ theorem ricciArmOrder0BaseCoeff_perOrder_l2_radiusFree
           ricciArmOrder0CurvCoeff (I := I) (M := M) g₀ g₀)‖ ^ 2,
     fun i => by have := hKcCr_nn i; have := hKcCu_nn i; have := hKlg_nn i; positivity, ?_⟩
   intro g₁ T δ hδ_le hδ0 hδ htie hsup i
-  -- symmS transfer: run the background-difference machinery on `symmS g₀ T`.
   have htie_s : ∀ (y : M) (v w : TangentSpace I y),
       g₁.inner y v w = g₀.inner y v w +
         ccTensorBilinSymm (I := I) g₀ (symmS (I := I) (M := M) g₀ T) y v w := by
@@ -189,7 +137,6 @@ theorem ricciArmOrder0BaseCoeff_perOrder_l2_radiusFree
     (ricciArmOrder0CurvCoeff (I := I) (M := M) g₀ g₁ -
       ricciArmOrder0CurvCoeff (I := I) (M := M) g₀ g₀) with hCuDiff
   have hlow_nn : 0 ≤ low := Finset.sum_nonneg (fun _ _ => sq_nonneg _)
-  -- 5-term section decomposition of the coefficient jet.
   have hC5 : iteratedCovGrad (I := I) g₀ 2 2 i
         (ricciArmOrder0RiemannCoeff (I := I) (M := M) g₀ g₁ -
           ricciArmOrder0CurvCoeff (I := I) (M := M) g₀ g₁) =
@@ -208,7 +155,6 @@ theorem ricciArmOrder0BaseCoeff_perOrder_l2_radiusFree
           ricciArmOrder0CurvCoeff (I := I) (M := M) g₀ g₀) := by abel
     rw [hsum, iteratedCovGrad_sub, iteratedCovGrad_add]
     abel
-  -- L² five-term triangle.
   have hnorm : ‖iteratedCovGrad (I := I) g₀ 2 2 i
         (ricciArmOrder0RiemannCoeff (I := I) (M := M) g₀ g₁ -
           ricciArmOrder0CurvCoeff (I := I) (M := M) g₀ g₁)‖ ≤
@@ -230,7 +176,6 @@ theorem ricciArmOrder0BaseCoeff_perOrder_l2_radiusFree
     refine le_trans ?_ (sq_sum5_le _ _ _ _ _)
     simp only [pow_two]
     exact mul_self_le_mul_self (norm_nonneg _) hnorm
-  -- Head L² bounds: ‖Hd‖² ≤ Kt · W.
   have hheadL2 : ∀ (Hd : SmoothCcTensor g₀ 2 (2 + i)) (Kt : ℝ),
       (∀ x : M, riemannianFiberNormSq (I := I) (M := M) g₀ 2 (2 + i) x (Hd.toSection x) ≤
         Kt * riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + (i + 2)) x
@@ -260,7 +205,6 @@ theorem ricciArmOrder0BaseCoeff_perOrder_l2_radiusFree
     exact key
   have hHcr : ‖HdCr‖ ^ 2 ≤ KtCr * W := hheadL2 HdCr KtCr hCr_head
   have hHcu : ‖HdCu‖ ^ 2 ≤ KtCu * W := hheadL2 HdCu KtCu hCu_head
-  -- Residual L² bounds: ‖res‖² ≤ Kc·Klg·(1+low) + Kc·Ktg·W, via the GATE.
   have hresL2 : ∀ (D : SmoothCcTensor g₀ 2 (2 + i)) (Kc : ℝ), 0 ≤ Kc →
       (∀ x : M, riemannianFiberNormSq (I := I) (M := M) g₀ 2 (2 + i) x (D.toSection x) ≤
         Kc * Combinatorics.boundedFactorGridWindow
@@ -285,7 +229,6 @@ theorem ricciArmOrder0BaseCoeff_perOrder_l2_radiusFree
     hresL2 (RieDiff - HdCr) (KcCr i) (hKcCr_nn i) hCr_res
   have hRcu : ‖CuDiff - HdCu‖ ^ 2 ≤ KcCu i * Klg i * (1 + low) + KcCu i * Ktg i * W :=
     hresL2 (CuDiff - HdCu) (KcCu i) (hKcCu_nn i) hCu_res
-  -- Assemble.
   set B : ℝ := ‖iteratedCovGrad (I := I) g₀ 2 2 i
     (ricciArmOrder0RiemannCoeff (I := I) (M := M) g₀ g₀ -
       ricciArmOrder0CurvCoeff (I := I) (M := M) g₀ g₀)‖ ^ 2 with hB
@@ -306,15 +249,7 @@ theorem ricciArmOrder0BaseCoeff_perOrder_l2_radiusFree
     ring
   linarith [hbal, hslack]
 
-/-! ### Radius-free summed sibling (the consumer-gate deliverable). -/
-
 set_option linter.unusedVariables false in
-/-- **Radius-free summed jet-L² bound for the arm0 base curvature-coefficient difference.**
-Summing the per-order radius-free engine over `i ≤ a` gives a single bound whose top data
-weight is at order `a+2` and low data weight at order `a+1`, with constants `Ktop`, `Klow`
-depending only on `g₀`, `a`, `dim E`, `δ₀` — no ball radius `R`, no `H^{a+2}` ball
-hypothesis.  This is the consumer sibling of THE GATE, the second brick of the Pro-ruled
-repair of UNIF item-2; the perturbation grids run over `symmS g₀ T`. -/
 theorem ricciArmOrder0BaseCoeff_summed_l2_radiusFree
     (g₀ : SmoothRiemannianMetric I M) (a : ℕ) {δ₀ : ℝ} (hδ₀ : δ₀ < 1) :
     ∃ Ktop : ℝ, 0 ≤ Ktop ∧ ∃ Klow : ℝ, 0 ≤ Klow ∧
@@ -342,7 +277,6 @@ theorem ricciArmOrder0BaseCoeff_summed_l2_radiusFree
   intro g₁ T δ hδ_le hδ htie
   by_cases hM : Nonempty M
   · obtain ⟨x₀⟩ := hM
-    -- 0 ≤ δ from the fibre bound at a nonzero tangent vector.
     have hδ0 : 0 ≤ δ := by
       obtain ⟨v, hv⟩ : ∃ v : TangentSpace I x₀, v ≠ 0 := by
         haveI : Nontrivial (TangentSpace I x₀) := by
@@ -380,7 +314,6 @@ theorem ricciArmOrder0BaseCoeff_summed_l2_radiusFree
           Alow i * (1 + ∑ j ∈ Finset.range (i + 2),
             ‖iteratedCovGrad (I := I) g₀ 0 2 j (symmS (I := I) (M := M) g₀ T)‖ ^ 2) :=
       fun i _ => hper g₁ T hδ_le hδ0 hδ htie hsup i
-    -- sum over i ≤ a.
     set w : ℕ → ℝ := fun j =>
       ‖iteratedCovGrad (I := I) g₀ 0 2 j (symmS (I := I) (M := M) g₀ T)‖ ^ 2 with hw
     have hw_nn : ∀ j, 0 ≤ w j := fun j => sq_nonneg _
@@ -402,7 +335,7 @@ theorem ricciArmOrder0BaseCoeff_summed_l2_radiusFree
       _ ≤ (∑ i ∈ Finset.range (a + 1), Atop i) * (∑ j ∈ Finset.range (a + 3), w j) +
             (∑ i ∈ Finset.range (a + 1), Alow i) * (1 + ∑ j ∈ Finset.range (a + 2), w j) := by
           refine add_le_add ?_ ?_
-          · -- top weight lands at range (a+3)
+          ·
             calc ∑ i ∈ Finset.range (a + 1), Atop i * w (i + 2)
                 ≤ ∑ i ∈ Finset.range (a + 1), Atop i * (∑ j ∈ Finset.range (a + 3), w j) := by
                   refine Finset.sum_le_sum (fun i hi => ?_)
@@ -412,7 +345,7 @@ theorem ricciArmOrder0BaseCoeff_summed_l2_radiusFree
                     (Finset.mem_range.mpr (by omega))
               _ = (∑ i ∈ Finset.range (a + 1), Atop i) * (∑ j ∈ Finset.range (a + 3), w j) := by
                   rw [Finset.sum_mul]
-          · -- low weight lands at range (a+2)
+          ·
             calc ∑ i ∈ Finset.range (a + 1), Alow i * (1 + ∑ j ∈ Finset.range (i + 2), w j)
                 ≤ ∑ i ∈ Finset.range (a + 1),
                     Alow i * (1 + ∑ j ∈ Finset.range (a + 2), w j) := by
@@ -426,7 +359,7 @@ theorem ricciArmOrder0BaseCoeff_summed_l2_radiusFree
               _ = (∑ i ∈ Finset.range (a + 1), Alow i) *
                     (1 + ∑ j ∈ Finset.range (a + 2), w j) := by
                   rw [Finset.sum_mul]
-  · -- empty M: every L² norm is 0.
+  ·
     haveI hM' : IsEmpty M := not_nonempty_iff.mp hM
     have hL0 : ∑ i ∈ Finset.range (a + 1),
         ‖iteratedCovGrad (I := I) g₀ 2 2 i

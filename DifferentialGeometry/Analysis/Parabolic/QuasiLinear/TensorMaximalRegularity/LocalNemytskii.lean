@@ -1,17 +1,6 @@
 import DifferentialGeometry.Analysis.Parabolic.QuasiLinear.TensorMaximalRegularity.ForcingFixedPoint
 import DifferentialGeometry.Analysis.Parabolic.QuasiLinear.TensorMaximalRegularity.LocallyLipschitzExistence
 
-/-!
-# Nemytskii operators on an almost-everywhere state set
-
-Maximal regularity controls a critical quasilinear solution in a lower
-Sobolev norm uniformly in time, while retaining only an `L²` bound in the top
-Sobolev norm.  Thus a geometric nonlinearity may be defined and Lipschitz only
-on a closed lower-norm state set, even though its arguments are top-norm
-fields.  This file packages the measure-theoretic construction needed in that
-situation without extending the nonlinearity outside its genuine state set.
--/
-
 noncomputable section
 
 open MeasureTheory Set Filter
@@ -27,23 +16,17 @@ variable {X Y : Type*}
   [NormedAddCommGroup Y] [NormedSpace ℝ Y] [CompleteSpace Y]
 variable {T : ℝ}
 
-/-- Lift a time field to a state-set subtype, using the zero state off the
-set.  The exceptional branch is irrelevant whenever the field lies in the
-state set almost everywhere. -/
 def aeSetLift {S : Set X} (hzero : (0 : X) ∈ S) (f : timeL2 X T) : ℝ → S :=
   by
     classical
     exact fun t => if ht : f t ∈ S then ⟨f t, ht⟩ else ⟨0, hzero⟩
 
-/-- The subtype lift has the original field as its coercion almost
-everywhere. -/
 theorem aeSetLift_coe_ae {S : Set X} (hzero : (0 : X) ∈ S)
     (f : timeL2 X T) (hf : ∀ᵐ t ∂(timeMeasure T), f t ∈ S) :
     (fun t => ((aeSetLift hzero f t : S) : X)) =ᵐ[timeMeasure T] fun t => f t := by
   filter_upwards [hf] with t ht
   simp only [aeSetLift, dif_pos ht]
 
-/-- The subtype lift is almost-everywhere strongly measurable. -/
 theorem aeSetLift_aesm {S : Set X} (hzero : (0 : X) ∈ S)
     (f : timeL2 X T) (hf : ∀ᵐ t ∂(timeMeasure T), f t ∈ S) :
     AEStronglyMeasurable (aeSetLift hzero f) (timeMeasure T) := by
@@ -52,8 +35,6 @@ theorem aeSetLift_aesm {S : Set X} (hzero : (0 : X) ∈ S)
     (aeSetLift_coe_ae hzero f hf).symm
 
 omit [NormedSpace ℝ Y] [CompleteSpace Y] in
-/-- A Lipschitz map on a state-set subtype sends every top-norm time field
-which remains in that state set almost everywhere to an `L²` field. -/
 theorem memLp_on {S : Set X} (hzero : (0 : X) ∈ S)
     {N : S → Y} {L : ℝ≥0} (hN : LipschitzWith L N)
     (f : timeL2 X T) (hf : ∀ᵐ t ∂(timeMeasure T), f t ∈ S) :
@@ -81,16 +62,12 @@ theorem memLp_on {S : Set X} (hzero : (0 : X) ∈ S)
   rw [hfun]
   exact hsum
 
-/-- The pointwise Nemytskii field associated to a Lipschitz nonlinearity on
-an almost-everywhere state set. -/
 def nemytskiiOn {S : Set X} (hzero : (0 : X) ∈ S)
     {N : S → Y} {L : ℝ≥0} (hN : LipschitzWith L N)
     (f : timeL2 X T) (hf : ∀ᵐ t ∂(timeMeasure T), f t ∈ S) :
     timeL2 Y T :=
   (memLp_on hzero hN f hf).toLp (fun t => N (aeSetLift hzero f t))
 
-/-- `nemytskiiOn` is represented by the partial nonlinearity evaluated on
-the canonical subtype lift. -/
 theorem nemytskiiOn_coeFn {S : Set X} (hzero : (0 : X) ∈ S)
     {N : S → Y} {L : ℝ≥0} (hN : LipschitzWith L N)
     (f : timeL2 X T) (hf : ∀ᵐ t ∂(timeMeasure T), f t ∈ S) :
@@ -98,8 +75,6 @@ theorem nemytskiiOn_coeFn {S : Set X} (hzero : (0 : X) ∈ S)
       fun t => N (aeSetLift hzero f t) :=
   (memLp_on hzero hN f hf).coeFn_toLp
 
-/-- The Nemytskii field of the zero time field is the constant state-set
-value `N 0`, hence has the sharp finite-slab `L²` bound. -/
 theorem nemytskiiOn_zero_le {S : Set X} (hzero : (0 : X) ∈ S)
     {N : S → Y} {L : ℝ≥0} (hN : LipschitzWith L N) {T : ℝ}
     (hf : ∀ᵐ t ∂(timeMeasure T), ((0 : timeL2 X T) t) ∈ S) :
@@ -117,11 +92,6 @@ theorem nemytskiiOn_zero_le {S : Set X} (hzero : (0 : X) ∈ S)
     Subtype.ext hval
   rw [hsub]
 
-/-- A four-term `L²` Minkowski estimate: a pointwise bound of one time field by
-a nonnegative combination of the pointwise norms of four others integrates to
-the same combination of their `L²` norms.  It is the integration step of the
-three-arm tame estimate, whose right-hand side has four terms once the tame arm
-is split across its two endpoints. -/
 theorem timeL2_norm_le_four
     {Z W V : Type*}
     [NormedAddCommGroup Z] [NormedSpace ℝ Z] [CompleteSpace Z]
@@ -234,21 +204,7 @@ theorem timeL2_norm_le_four
     ENNReal.toReal_ofReal hA, ENNReal.toReal_ofReal hB,
     ENNReal.toReal_ofReal hC, ENNReal.toReal_ofReal hD]
 
-/-! ## The tame Nemytskii operator
-
-At critical regularity a geometric nonlinearity need not be Lipschitz on its
-state set: its sharp estimate has a *tame* third arm in which the ambient
-top-order norm of either endpoint multiplies the lower-order norm of their
-difference, and that factor is unbounded on a state set which controls only the
-lower-order norm.  The three-arm estimate is nevertheless enough to build the
-`L²` Nemytskii field, because on the state set the lower-order operator `J` is
-bounded by `R`, so the tame arm contributes a term linear in `‖f t‖`. -/
-
 omit [NormedSpace ℝ Y] [CompleteSpace Y] in
-/-- A continuous state-set map satisfying the three-arm tame estimate sends
-every top-order `L²` field which remains in the state set to an `L²` field.
-This is the tame counterpart of `memLp_on`; no global Lipschitz constant is
-asserted or available. -/
 theorem memLp_tame {S : Set X} (hzero : (0 : X) ∈ S) {R : ℝ} (hR : 0 ≤ R)
     {Z : Type*} [NormedAddCommGroup Z] [NormedSpace ℝ Z]
     (J : X →L[ℝ] Z) (hstate : ∀ u : S, ‖J (u : X)‖ ≤ R)
@@ -316,10 +272,6 @@ theorem memLp_tame {S : Set X} (hzero : (0 : X) ∈ S) {R : ℝ} (hR : 0 ≤ R)
   rw [hu, Real.norm_eq_abs, abs_of_nonneg hmajor0]
   exact hn
 
-/-- The pointwise Nemytskii field of a continuous nonlinearity satisfying the
-three-arm tame estimate on an almost-everywhere state set.  This is the tame
-counterpart of `nemytskiiOn`, and it is the `L²` forcing map whose fixed points
-are the critical quasilinear solutions. -/
 def nemytskiiTameOn {S : Set X} (hzero : (0 : X) ∈ S) {R : ℝ} (hR : 0 ≤ R)
     {Z : Type*} [NormedAddCommGroup Z] [NormedSpace ℝ Z]
     (J : X →L[ℝ] Z) (hstate : ∀ u : S, ‖J (u : X)‖ ≤ R)
@@ -335,8 +287,6 @@ def nemytskiiTameOn {S : Set X} (hzero : (0 : X) ∈ S) {R : ℝ} (hR : 0 ≤ R)
   (memLp_tame hzero hR J hstate N hN A B C htame f hf).toLp
     (fun t => N (aeSetLift hzero f t))
 
-/-- `nemytskiiTameOn` is represented by the partial nonlinearity evaluated on
-the canonical subtype lift. -/
 theorem nemytskiiTameOn_coeFn {S : Set X} (hzero : (0 : X) ∈ S) {R : ℝ}
     (hR : 0 ≤ R) {Z : Type*} [NormedAddCommGroup Z] [NormedSpace ℝ Z]
     (J : X →L[ℝ] Z) (hstate : ∀ u : S, ‖J (u : X)‖ ≤ R)

@@ -1,16 +1,5 @@
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.CurvatureCoefficientDifferenceJetTower.TraceGrid
 
-/-!
-# Per-order L2 ball-uniform bounds and tame envelopes
-
-Chunk of the `CurvatureCoefficientDifferenceJetTower` tower, split
-out of the former 15111-line monolith (no longer elaborable in a
-single Lean process).  Every declaration is verbatim.  The former
-`private` helpers were promoted into the internal `CurvatureCoefficientDifferenceJetTower`
-scope, so the public `Connection` API is unchanged.  Chunk map:
-`CurvatureCoefficientDifferenceJetTower.md`.
--/
-
 noncomputable section
 
 set_option linter.style.setOption false
@@ -611,7 +600,6 @@ theorem ricciArmOrder0CurvCoeff_backgroundDifference_perOrder_l2_ballUniform
         (ricEndoBackgroundDifferenceField (I := I) (M := M) g₀ g₁)))]
   rw [← SmoothCcTensor.norm_def]
   exact mul_le_mul_of_nonneg_left hKi (by positivity)
-
 
 set_option maxHeartbeats 12800000 in
 set_option linter.unusedVariables false in

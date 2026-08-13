@@ -6,54 +6,6 @@ import DifferentialGeometry.Geometry.Curvature.Components.RicciTrace
 import DifferentialGeometry.Geometry.Curvature.RicciOperatorNormBound
 import DifferentialGeometry.Tensor.RSTensor.Tensor0SRiemannian.Comparison
 
-/-!
-# Class-uniform fibre-Morrey constant (item-6 brick E4)
-
-The sharp fibre-Morrey embedding
-`exists_riemannianFiberNorm_le_iteratedCovGrad_l2_jetSum_supercritical`
-(`SobolevEmbeddingSharpC0JetSum.lean`) produces, for each metric `g`, an
-existential constant `C(g)`.  Two metrics of the same comparability class
-therefore receive *unrelated* constants, so that endpoint cannot floor a
-class-uniform existence time.  This file supplies the constant-exposed sibling:
-a closed formula `morreyUnifConst` and the theorem that every metric that is
-`Λ`-comparable to a fixed background `gBase` satisfies the fibre-Morrey bound
-with that single constant.
-
-## The route
-
-The chart atlas and the partition of unity used by the per-metric endpoint are
-metric-free (`chartAtlasPOU`, subordinate to the chart sources), so the covering
-data are literally the same object for every metric on `(I, M)`.  Only two
-factors move with the metric:
-
-* the **fibre/Gram factor**, controlled by comparability alone
-  (`fibreNormSq_cross_le` below, constant `Λ ^ s`, one `Λ` per covariant slot);
-* the **covariant-jet conversion**, i.e. the change of Levi-Civita connection
-  between `g₀` and `gBase`, which is governed by the metric jets.
-
-The first factor is discharged here outright.  The second enters as the abstract
-input `hjet` with an explicit constant `Kjet`, exactly as the spectral brick S1
-(`UnifBochnerGap.lean`) takes its curvature-jet envelope `Fc` abstractly:
-`MetricCovDerivOrderBoundOn` lives downstream of `Analysis/`, so an `Analysis/`
-leaf must consume the jet input in constant-exposed form.  See
-`SobolevEmbeddingUnif.md` for the discharge ledger.
-
-## Main statements
-
-* `SmoothCcTensor.recast` — the metric-free transport of a smooth
-  compactly-supported tensor section between metrics.
-* `fibreNormSq_cross_le` — pointwise fibre-norm comparison under comparability.
-* `morreyUnifConst` — the closed constant `√(Λ^s) · Cb · (n/2+2) · Kjet`.
-* `fibreMorrey_unif` — the class-uniform fibre-Morrey bound.
-* `baseMorreyConst` / `fibreMorrey_unif_base` — the same bound with the
-  background constant realized once at the fixed metric `gBase`.
-
-The spectral face (`H²(g₀) → C⁰`) is NOT duplicated here: `fibreMorrey_unif_base`
-is exactly the `hmorrey` input of `hs2_fiber_sq_unif`
-(`Analysis/Spectral/Tensor/Estimates/H2PointwiseUnif.lean`, brick E5), which
-composes it with the Gårding constant `covsumHsC`.
--/
-
 set_option autoImplicit false
 
 noncomputable section
@@ -74,14 +26,6 @@ variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 
-/-- **Metric-free recast of a smooth compactly-supported tensor section.**
-
-Neither field of `SmoothCcTensor` mentions the metric: `g` is carried only to
-make the type metric-indexed, so that metric-dependent norms can be attached.
-Hence one and the same section is a `SmoothCcTensor g r s` for every `g`, and
-cross-metric statements can be phrased on the common smooth core.
-
-Hoist candidate: `Analysis/Integration/L2/SmoothSections/Defs.lean`. -/
 def SmoothCcTensor.recast {g g' : SmoothRiemannianMetric I M} {r s : ℕ}
     (T : SmoothCcTensor g r s) : SmoothCcTensor g' r s where
   toSection := T.toSection
@@ -109,13 +53,7 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
   [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
   [T2Space M] [SigmaCompactSpace M]
 
-/-! ### The fibre/Gram factor -/
-
 omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] in
-/-- **`r = 0` index-lowering is unit-evaluation.**  Replica of the (private)
-upstream `lowerAllUpperIndices_zero_apply_unitModel`: lowering the model
-coercion of a `(0, s)`-tensor section against no upper slots is exactly
-evaluating the section on the unit `(0, 0)`-tensor. -/
 private lemma lowerAllUpper_zero_unit
     (g : SmoothRiemannianMetric I M) (s : ℕ) (x : M)
     (W : SmoothCcTensor g 0 s) (w : Fin (0 + s) → TangentSpace I x) :
@@ -132,11 +70,6 @@ private lemma lowerAllUpper_zero_unit
   rfl
 
 omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] in
-/-- **Fibre-inner bridge (`(0, s)`).**  The `g`-Riemannian squared fibre norm of
-a smooth `(0, s)`-tensor section — the currency of the fibre-Morrey embedding —
-equals the intrinsic `normSq0S` of its unit-value, the currency of the
-metric-comparison layer `normSq0S_le_of_metric_equiv`.  Both are expanded in one
-`g`-orthonormal frame. -/
 private lemma rfns0_eq_normSq0S
     (g : SmoothRiemannianMetric I M) (s : ℕ) (x : M) (W : SmoothCcTensor g 0 s) :
     riemannianFiberNormSq (I := I) (M := M) g 0 s x (W.toSection x) =
@@ -173,13 +106,6 @@ private lemma rfns0_eq_normSq0S
      simp)
 
 omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] in
-/-- **Cross-metric fibre-norm comparison (the Gram factor of brick E4).**
-
-If `g₀` is `Λ`-comparable to `gBase` then the `g₀`-fibre squared norm of a
-covariant `(0, s)`-tensor section is at most `Λ ^ s` times its `gBase`-fibre
-squared norm — one factor of `Λ` per covariant slot.  This is the *only*
-`g₀`-dependence of the fibre-Morrey chain that comes from the metric itself
-rather than from its jets, and it is bounded by comparability alone. -/
 theorem fibreNormSq_cross_le
     (gBase g₀ : SmoothRiemannianMetric I M) {Λ : ℝ} (hΛ : 1 ≤ Λ)
     (hequiv : ∀ (x : M) (v : TangentSpace I x),
@@ -196,20 +122,6 @@ theorem fibreNormSq_cross_le
       (unitZeroSec (I := I) (M := M) x))).2
   rwa [zpow_natCast] at h
 
-/-! ### The class-uniform constant -/
-
-/-- **The class-uniform fibre-Morrey constant.**
-
-`morreyUnifConst Λ Cb Kjet n s = √(Λ^s) · Cb · (n/2+2) · Kjet`, where
-
-* `√(Λ^s)` is the fibre/Gram factor of `fibreNormSq_cross_le`;
-* `Cb` is the fibre-Morrey constant of the fixed background metric;
-* `n/2+2` is the (metric-free) number of jet orders in the supercritical window,
-  entering through one Cauchy–Schwarz over that window;
-* `Kjet` is the cross-metric covariant-jet transfer constant.
-
-Every factor is an explicit function of the background data, the comparability
-constant and the dimension: no choice is made at a variable metric. -/
 def morreyUnifConst (Λ Cb Kjet : ℝ) (n s : ℕ) : ℝ :=
   Real.sqrt (Λ ^ s) * (Cb * ((n / 2 + 2 : ℕ) : ℝ) * Kjet)
 
@@ -227,17 +139,6 @@ lemma morreyUnifConst_sq {Λ Cb Kjet : ℝ} (hΛ : 0 ≤ Λ) (n s : ℕ) :
   ring
 
 omit [NeZero (Module.finrank ℝ E)] in
-/-- **The uniform fibre-Morrey / Sobolev-embedding bound (brick E4).**
-
-Fix a background metric `gBase` with fibre-Morrey constant `Cb` in the
-supercritical window `j < n/2 + 2`, and let `Kjet` bound the transfer of
-`gBase`-covariant jets by `g₀`-covariant jets over the same window.  Then *every*
-metric `g₀` that is `Λ`-comparable to `gBase` satisfies the fibre-Morrey bound
-with the single closed constant `morreyUnifConst Λ Cb Kjet (finrank ℝ E) s`.
-
-This is the constant-exposed sibling of
-`exists_riemannianFiberNorm_le_iteratedCovGrad_l2_jetSum_supercritical`, whose
-`∃ C` conclusion is not class-uniform. -/
 theorem fibreMorrey_unif
     (gBase g₀ : SmoothRiemannianMetric I M) {Λ : ℝ} (hΛ : 1 ≤ Λ)
     (hequiv : ∀ (x : M) (v : TangentSpace I x),
@@ -267,12 +168,10 @@ theorem fibreMorrey_unif
     with hS_def
   have hQ_nn : 0 ≤ Q := Finset.sum_nonneg fun i _ => sq_nonneg _
   have hS_nn : 0 ≤ S := Finset.sum_nonneg fun i _ => norm_nonneg _
-  -- Cauchy-Schwarz over the (metric-free) supercritical window
   have hCS : S ^ 2 ≤ (w : ℝ) * Q := by
     have h := sq_sum_le_card_mul_sum_sq (s := Finset.range w)
       (f := fun i => ‖iteratedCovGrad (I := I) g₀ 0 s i T‖)
     simpa [hS_def, hQ_def] using h
-  -- the jet transfer, squared and summed over the window
   have hjet_sq : ∀ j ∈ Finset.range w,
       ‖iteratedCovGrad (I := I) gBase 0 s j (T.recast (g' := gBase))‖ ^ 2 ≤
         Kjet ^ 2 * S ^ 2 := by
@@ -296,7 +195,6 @@ theorem fibreMorrey_unif
         ≤ (w : ℝ) * (Kjet ^ 2 * S ^ 2) := hstep
       _ ≤ (w : ℝ) * (Kjet ^ 2 * ((w : ℝ) * Q)) := hmul
       _ = (w : ℝ) ^ 2 * Kjet ^ 2 * Q := by ring
-  -- background Morrey bound, then the fibre/Gram comparison
   have hCb_sq_nn : (0 : ℝ) ≤ Cb ^ 2 := sq_nonneg Cb
   have hbase' :
       riemannianFiberNormSq (I := I) (M := M) gBase 0 s x
@@ -315,12 +213,6 @@ theorem fibreMorrey_unif
         rw [morreyUnifConst_sq hΛ0, ← hw_def]
         ring
 
-/-! ### Realizing the background constant at the fixed metric -/
-
-/-- **The background fibre-Morrey constant.**  The existential constant of
-`exists_riemannianFiberNorm_le_iteratedCovGrad_l2_jetSum_supercritical`, chosen
-once and for all at the *fixed* background metric.  It is pure `gBase`-data: no
-choice is made at a variable metric of the class. -/
 def baseMorreyConst (gBase : SmoothRiemannianMetric I M) (r s : ℕ) : ℝ :=
   (exists_riemannianFiberNorm_le_iteratedCovGrad_l2_jetSum_supercritical
     (I := I) (M := M) gBase r s).choose
@@ -342,14 +234,6 @@ lemma fibreNormSq_le_baseMorreyConst
   (exists_riemannianFiberNorm_le_iteratedCovGrad_l2_jetSum_supercritical
     (I := I) (M := M) gBase r s).choose_spec.2 W x
 
-/-- **Brick E4, background-realized form.**  Same as `fibreMorrey_unif`, with the
-background constant supplied by the fixed-metric endpoint.  The resulting
-constant
-
-`morreyUnifConst Λ (baseMorreyConst gBase 0 s) Kjet (finrank ℝ E) s`
-
-depends only on `gBase`, the comparability constant `Λ`, the jet-transfer
-constant `Kjet` and the dimension — never on the individual `g₀`. -/
 theorem fibreMorrey_unif_base
     (gBase g₀ : SmoothRiemannianMetric I M) {Λ : ℝ} (hΛ : 1 ≤ Λ)
     (hequiv : ∀ (x : M) (v : TangentSpace I x),

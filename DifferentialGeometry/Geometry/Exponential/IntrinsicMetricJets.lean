@@ -7,14 +7,6 @@ import Mathlib.Analysis.Calculus.IteratedDeriv.Lemmas
 
 set_option autoImplicit false
 
-/-!
-# Metric jets in intrinsic framed coordinates
-
-This file differentiates the endpoint Gram formula for the intrinsic framed
-pullback metric. The resulting binomial sum is expressed through the covariant
-launch jets of the intrinsic Jacobi field.
--/
-
 noncomputable section
 
 open Bundle
@@ -43,8 +35,6 @@ attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
 omit [ConnectedSpace M] [CompleteSpace E]
   [T2Space (TangentBundle I M)] in
-/-- The order-`n` endpoint Gram jet along the affine launch line
-`u + r a`, with the same endpoint Jacobi direction in both metric slots. -/
 noncomputable def intrMetricJet
     [PseudoEMetricSpace M]
     [RiemannianBundle (fun x : M => TangentSpace I x)]
@@ -88,8 +78,6 @@ attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
 omit [ConnectedSpace M] [CompleteSpace E]
   [T2Space (TangentBundle I M)] in
-/-- Along an affine model-space launch line, the diagonal intrinsic framed
-metric is the order-zero endpoint Gram jet in normal-frame variables. -/
 theorem intrMetric_line
     [PseudoEMetricSpace M]
     [RiemannianBundle (fun x : M => TangentSpace I x)]
@@ -131,8 +119,6 @@ attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
 omit [ConnectedSpace M] [CompleteSpace E]
   [T2Space (TangentBundle I M)] in
-/-- The derivative of the order-`n` endpoint Gram jet is the order-`n + 1`
-endpoint Gram jet. -/
 theorem intrMetricJet_deriv
     [PseudoEMetricSpace M]
     [RiemannianBundle (fun x : M => TangentSpace I x)]
@@ -210,8 +196,6 @@ attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
 omit [ConnectedSpace M] [CompleteSpace E]
   [T2Space (TangentBundle I M)] in
-/-- The ordinary order-`n` derivative of the order-zero endpoint Gram function
-is the order-`n` endpoint Gram jet. -/
 theorem intrMetricJet_iter
     [PseudoEMetricSpace M]
     [RiemannianBundle (fun x : M => TangentSpace I x)]
@@ -235,8 +219,6 @@ attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
 omit [ConnectedSpace M] [CompleteSpace E]
   [T2Space (TangentBundle I M)] in
-/-- Evaluating a repeated-direction Fréchet jet of the intrinsic framed metric
-in two fixed metric directions gives the corresponding endpoint Gram jet. -/
 theorem intrMetric_diag_jet
     [PseudoEMetricSpace M]
     [RiemannianBundle (fun x : M => TangentSpace I x)]

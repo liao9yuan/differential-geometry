@@ -3,15 +3,6 @@ import DifferentialGeometry.Geometry.Comparison.HalfSqDistGrad
 
 set_option autoImplicit false
 
-/-!
-# Flat radial paths for the CGT collision argument
-
-This file gives the intrinsic framed radial segment a fixed smooth
-reparameterization with constant endpoint collars.  Its selected exponential
-lift is explicit, ends at the original model vector, and has exactly the model
-norm as its Riemannian length.
--/
-
 noncomputable section
 
 open Bundle Filter Function Manifold Set
@@ -77,7 +68,6 @@ private theorem flatTime_one_nhds :
   rw [flatTime, Real.smoothTransition.one_of_one_le]
   linarith
 
-/-- The intrinsic framed radial path with fixed smooth endpoint collars. -/
 noncomputable def radialFlat
     (g : SmoothRiemannianMetric I M)
     (hEnorm : ∀ (y : M) (w : TangentSpace I y),
@@ -101,8 +91,6 @@ noncomputable def radialFlat
         intrinsicFramedExp (I := I) g hEnorm p u
     rw [flatTime_one, one_smul]
 
-/-- The canonical real-line extension of `radialFlat` is the same radial
-formula, since `flatTime` is already constant outside the unit interval. -/
 theorem radialFlat_extend
     (g : SmoothRiemannianMetric I M)
     (hEnorm : ∀ (y : M) (w : TangentSpace I y),
@@ -129,7 +117,6 @@ theorem radialFlat_extend
       · simp only [one_smul]
       · linarith
 
-/-- The canonical radial path is flat `C¹`. -/
 theorem radialFlat_flat
     (g : SmoothRiemannianMetric I M)
     (hEnorm : ∀ (y : M) (w : TangentSpace I y),
@@ -150,8 +137,6 @@ theorem radialFlat_flat
     filter_upwards [flatTime_one_nhds] with t ht
     rw [ht, one_smul]
 
-/-- The flat radial segment has exactly the model norm as its extended
-Riemannian length. -/
 theorem radialFlat_len
     (g : SmoothRiemannianMetric I M)
     (hEnorm : ∀ (y : M) (w : TangentSpace I y),
@@ -200,7 +185,6 @@ theorem radialFlat_len
         hγC1.mdifferentiableOn one_ne_zero)]
   simpa only [flatTime_zero, flatTime_one] using hbase
 
-/-- The explicit lift of the canonical flat radial path. -/
 noncomputable def radialFlatLift
     (g : SmoothRiemannianMetric I M)
     (hEnorm : ∀ (y : M) (w : TangentSpace I y),
@@ -218,7 +202,6 @@ noncomputable def radialFlatLift
     rw [radialFlat_extend]
     rfl
 
-/-- The explicit flat radial lift ends at its defining model vector. -/
 @[simp] theorem radialLift_one
     (g : SmoothRiemannianMetric I M)
     (hEnorm : ∀ (y : M) (w : TangentSpace I y),

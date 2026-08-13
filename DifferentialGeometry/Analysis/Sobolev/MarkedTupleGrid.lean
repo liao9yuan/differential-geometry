@@ -1,42 +1,10 @@
 import DifferentialGeometry.Analysis.Sobolev.AntidiagonalTupleProductGrid
 
-/-!
-# Marked antidiagonal grid windows
-
-`antidiagonalTupleGridWindow b w` collects every monomial `∏ b (e m)` of total
-weight `< w`, with no record of how many factors carry a *positive* weight.  For
-the quadratic zero-order arms that record is exactly what the tame currency
-needs: a monomial of top weight with a single factor is one derivative over
-budget, while a monomial of the same weight with two positive factors is inside
-the budget once one of them is measured in `L^∞`.
-
-`markGrid b u w` is the window that keeps the record: `u` distinguished factors,
-each of weight at least one, times an ordinary grid window, with the total weight
-of a monomial at most `w + u`.
-
-```
-markGrid b 0       w = antidiagonalTupleGridWindow b (w + 1)
-markGrid b (u + 1) w = ∑_{c ≤ w} b (c + 1) · markGrid b u (w - c)
-```
-
-The three facts a fold needs are `markGrid_nn`, `markGrid_mono` and
-`markGrid_mul`: the marks ADD under multiplication, at the same combinatorial
-constant `antidiagonalTupleGridWindowMulConst` the unmarked window already pays.
-That is what lets a product of two arms, each carrying one derivative of the
-state, land at `u = 2` — the hypothesis under which the integrated monomials are
-tame.
--/
-
 open scoped BigOperators
 
 namespace DifferentialGeometry
 namespace Combinatorics
 
-/-- **The marked antidiagonal grid window.**
-
-`markGrid b u w` is the sum of all monomials `b c₁ ⋯ b c_u · ∏ b (e m)` with
-every `c_j ≥ 1` and `∑ c_j + ∑ e m ≤ w + u`.  At `u = 0` it is the ordinary
-window of level `w + 1`. -/
 noncomputable def markGrid (b : ℕ → ℝ) : ℕ → ℕ → ℝ
   | 0, w => antidiagonalTupleGridWindow b (w + 1)
   | u + 1, w => ∑ c ∈ Finset.range (w + 1), b (c + 1) * markGrid b u (w - c)
@@ -48,7 +16,6 @@ lemma markGrid_succ (b : ℕ → ℝ) (u w : ℕ) :
     markGrid b (u + 1) w =
       ∑ c ∈ Finset.range (w + 1), b (c + 1) * markGrid b u (w - c) := rfl
 
-/-- The marked window is nonnegative. -/
 lemma markGrid_nn (b : ℕ → ℝ) (hb : ∀ j, 0 ≤ b j) (u w : ℕ) :
     0 ≤ markGrid b u w := by
   induction u generalizing w with
@@ -57,12 +24,10 @@ lemma markGrid_nn (b : ℕ → ℝ) (hb : ∀ j, 0 ≤ b j) (u w : ℕ) :
       rw [markGrid_succ]
       exact Finset.sum_nonneg (fun c _ => mul_nonneg (hb _) (ih _))
 
-/-- The unmarked window is at least one. -/
 lemma one_le_markGrid0 (b : ℕ → ℝ) (hb : ∀ j, 0 ≤ b j) (w : ℕ) :
     (1 : ℝ) ≤ markGrid b 0 w :=
   one_le_antidiagonalTupleGridWindow b hb (by omega)
 
-/-- The marked window is monotone in its level. -/
 lemma markGrid_mono (b : ℕ → ℝ) (hb : ∀ j, 0 ≤ b j) (u : ℕ) {w w' : ℕ} (h : w ≤ w') :
     markGrid b u w ≤ markGrid b u w' := by
   induction u generalizing w w' with
@@ -81,7 +46,6 @@ lemma markGrid_mono (b : ℕ → ℝ) (hb : ∀ j, 0 ≤ b j) (u : ℕ) {w w' : 
           (fun c _ _ => mul_nonneg (hb _) (markGrid_nn b hb u _))
       exact le_trans hstep hsub
 
-/-- The window multiplication constant is monotone in both levels. -/
 lemma mulConst_mono {a c a' c' : ℕ} (ha : a ≤ a') (hc : c ≤ c') :
     antidiagonalTupleGridWindowMulConst a c ≤
       antidiagonalTupleGridWindowMulConst a' c' := by
@@ -106,8 +70,6 @@ lemma mulConst_mono {a c a' c' : ℕ} (ha : a ≤ a') (hc : c ≤ c') :
       (fun j _ _ => Finset.sum_nonneg (fun k _ => hnn j k))
   exact le_trans h1 h2
 
-/-- Shifting the inner level of a marked window upward stays inside the marked
-window of the shifted level. -/
 lemma markGrid_shift (b : ℕ → ℝ) (hb : ∀ j, 0 ≤ b j) (u w t : ℕ) :
     (∑ c ∈ Finset.range (w + 1), b (c + 1) * markGrid b u (w - c + t)) ≤
       markGrid b (u + 1) (w + t) := by
@@ -126,11 +88,6 @@ lemma markGrid_shift (b : ℕ → ℝ) (hb : ∀ j, 0 ≤ b j) (u w t : ℕ) :
       (fun c _ _ => mul_nonneg (hb _) (markGrid_nn b hb u _))
   exact le_trans hstep hsub
 
-/-- **The marks add under multiplication.**
-
-Two marked windows multiply into a marked window whose mark count is the sum and
-whose level is the sum, at the same combinatorial constant the unmarked window
-already pays.  This is the only property a Leibniz fold needs. -/
 theorem markGrid_mul (b : ℕ → ℝ) (hb : ∀ j, 0 ≤ b j) (u₁ u₂ w₁ w₂ : ℕ) :
     markGrid b u₁ w₁ * markGrid b u₂ w₂ ≤
       antidiagonalTupleGridWindowMulConst w₁ w₂ *
@@ -206,12 +163,6 @@ theorem markGrid_mul (b : ℕ → ℝ) (hb : ∀ j, 0 ≤ b j) (u₁ u₂ w₁ w
       rw [hidx]
       exact markGrid_shift b hb (u + u₂) w₁ w₂
 
-/-- **Entry bridge for a once-marked arm.**
-
-A monomial `b (c + 1) · grid b k` whose total weight `c + 1 + k` is at most
-`j + 1` is a term of the once-marked window of level `j`.  This is the shape
-every `topSeparated` producer of the tree delivers: a bare jet of the state times
-an ordinary grid of the complementary weight. -/
 lemma markOne_of_term (b : ℕ → ℝ) (hb : ∀ j, 0 ≤ b j) {j c k : ℕ}
     (h : c + 1 + k ≤ j + 1) :
     b (c + 1) * antidiagonalTupleGrid b k ≤ markGrid b 1 j := by
@@ -224,21 +175,6 @@ lemma markOne_of_term (b : ℕ → ℝ) (hb : ∀ j, 0 ≤ b j) {j c k : ℕ}
   rw [markGrid_zero]
   exact antidiagonalTupleGrid_le_window b hb (by omega)
 
-/-! ### From an exact-weight grid to a once-marked window
-
-An *exact-weight* grid `antidiagonalTupleGrid b (i + 1)` collects only monomials
-of total weight exactly `i + 1`, so every one of them carries at least one factor
-`b c` with `c ≥ 1`.  Under the order-zero anchor `b 0 ≤ 1` that is enough to put
-it inside the once-marked window of level `i`: the anchor is what lets the
-inert `b 0` factors of an over-long tuple be dropped.  This is the entry every
-*exact-weight* producer of the tree needs, the sibling of `markOne_of_term` for
-producers that deliver a grid rather than a separated top term. -/
-
-/-- **A monomial sits under the grid of its own weight.**
-
-The `b 0 ≤ 1` anchor is needed because a tuple may be longer than its total
-weight, in which case it is not itself a term of the grid; the excess factors are
-`b 0` and are dropped. -/
 lemma prodLeGrid (b : ℕ → ℝ) (hb : ∀ j, 0 ≤ b j) (hb0 : b 0 ≤ 1) :
     ∀ (n : ℕ) (e : Fin n → ℕ),
       (∏ m : Fin n, b (e m)) ≤ antidiagonalTupleGrid b (∑ m, e m)
@@ -259,8 +195,6 @@ lemma prodLeGrid (b : ℕ → ℝ) (hb : ∀ j, 0 ≤ b j) (hb0 : b 0 ≤ 1) :
             (∑ m : Fin n, e m.succ) (q + 1) (by omega)
           rwa [Nat.add_comm (∑ m : Fin n, e m.succ) (q + 1)] at h
 
-/-- **A monomial of exact weight `i + 1` sits under the once-marked window of
-level `i`.** -/
 lemma prodLeMark1 (b : ℕ → ℝ) (hb : ∀ j, 0 ≤ b j) (hb0 : b 0 ≤ 1) (i : ℕ) :
     ∀ (n : ℕ) (e : Fin n → ℕ), (∑ m, e m) = i + 1 →
       (∏ m : Fin n, b (e m)) ≤ markGrid b 1 i
@@ -284,12 +218,6 @@ lemma prodLeMark1 (b : ℕ → ℝ) (hb : ∀ j, 0 ≤ b j) (hb0 : b 0 ≤ 1) (i
           rw [hsum]
           exact markOne_of_term b hb (by rw [hq] at he; omega)
 
-/-- **An exact-weight grid is a once-marked window, up to the monomial count.**
-
-`antidiagonalTupleGrid b (i + 1) ≤ count (i + 1) · markGrid b 1 i` whenever
-`b 0 ≤ 1`.  This is the bridge that turns any producer delivering an *exact*
-weight-`(i+1)` grid at level `i + 1` — an arm whose covariant derivative always
-costs one derivative of the state — into a once-marked arm of level `i`. -/
 lemma atgLeMark1 (b : ℕ → ℝ) (hb : ∀ j, 0 ≤ b j) (hb0 : b 0 ≤ 1) (i : ℕ) :
     antidiagonalTupleGrid b (i + 1) ≤
       antidiagonalTupleGridCount (i + 1) * markGrid b 1 i := by

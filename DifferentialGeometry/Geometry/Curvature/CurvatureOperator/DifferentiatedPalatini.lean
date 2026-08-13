@@ -2,15 +2,6 @@ import DifferentialGeometry.Geometry.Curvature.CurvatureOperator.RicciConnDiffPa
 import DifferentialGeometry.Geometry.Connection.LeviCivita.Smooth.Connection
 import DifferentialGeometry.Geometry.Curvature.Bianchi
 
-/-!
-# The differentiated Palatini identity
-
-This module expands the base covariant derivative of the `(1,3)` Palatini
-field into the clean second connection-difference jet and the four quadratic
-`(∇A) * A` terms.  It is the exact algebraic input for the order-one uniform
-curvature envelope; no class bound or curvature estimate enters here.
--/
-
 set_option autoImplicit false
 
 noncomputable section
@@ -48,7 +39,6 @@ private local instance :
     ContMDiffVectorBundle 1 E (TangentSpace I : M → Type _) I :=
   TangentBundle.contMDiffVectorBundle (I := I) (M := M) (n := 1)
 
-/-- The second covariant derivative of the connection-difference tensor. -/
 noncomputable def covDerivConnDiff2 (gB g₀ : SmoothRiemannianMetric I M)
     (D X Y Z : Π b : M, TangentSpace I b) (x : M) : TangentSpace I x :=
   covApply (LeviCivita (I := I) gB) D
@@ -61,7 +51,6 @@ noncomputable def covDerivConnDiff2 (gB g₀ : SmoothRiemannianMetric I M)
       (covApply (LeviCivita (I := I) gB) D Z) x
 
 set_option linter.unusedSectionVars false in
-/-- Unfolding of the second connection-difference derivative. -/
 theorem covDerivConnDiff2_eq (gB g₀ : SmoothRiemannianMetric I M)
     (D X Y Z : Π b : M, TangentSpace I b) (x : M) :
     covDerivConnDiff2 (I := I) gB g₀ D X Y Z x =
@@ -75,7 +64,6 @@ theorem covDerivConnDiff2_eq (gB g₀ : SmoothRiemannianMetric I M)
           (covApply (LeviCivita (I := I) gB) D Z) x :=
   rfl
 
-/-- The `(1,3)` Palatini curvature-difference field `R(g₀) - R(gB)`. -/
 noncomputable def palatiniDiffSec (gB g₀ : SmoothRiemannianMetric I M)
     (X Y Z : Π b : M, TangentSpace I b) : Π b : M, TangentSpace I b :=
   fun p =>
@@ -288,7 +276,6 @@ private theorem cov_palQuad
   abel
 
 set_option linter.unusedSectionVars false in
-/-- The base covariant derivative of the Palatini curvature-difference field. -/
 noncomputable def covDerivPalatini (gB g₀ : SmoothRiemannianMetric I M)
     (D X Y Z : ContMDiffSection I E (∞ : WithTop ℕ∞)
       (TangentSpace I : M → Type _)) (x : M) : TangentSpace I x :=
@@ -304,8 +291,6 @@ noncomputable def covDerivPalatini (gB g₀ : SmoothRiemannianMetric I M)
     palatiniDiffSec (I := I) gB g₀ (fun p => X p) (fun p => Y p)
       (fun p => ((LeviCivita (I := I) gB) (fun q => Z q) p) (D p)) x
 
-/-- The curvature derivative with `gD` differentiating the curvature operator
-produced by `gR`. -/
 noncomputable def mixedCurvDeriv (gD gR : SmoothRiemannianMetric I M)
     (D X Y Z : ContMDiffSection I E (∞ : WithTop ℕ∞)
       (TangentSpace I : M → Type _)) (x : M) : TangentSpace I x :=
@@ -326,8 +311,6 @@ noncomputable def mixedCurvDeriv (gD gR : SmoothRiemannianMetric I M)
       (fun p : M => ((LeviCivita (I := I) gD) (fun q => Z q) p) (D p)) x
 
 set_option linter.unusedSectionVars false in
-/-- A mixed curvature derivative minus the base curvature derivative is the
-base derivative of the Palatini curvature-difference field. -/
 theorem mixed_sub_eq_pal
     (gB g₀ : SmoothRiemannianMetric I M)
     (D X Y Z : ContMDiffSection I E (∞ : WithTop ℕ∞)
@@ -369,14 +352,6 @@ theorem mixed_sub_eq_pal
   simp only [palatiniDiffSec]
   abel
 
-/-! ## Exact expansion -/
-
-/-- **Differentiated Palatini identity.**
-
-The base derivative of `R(g₀) - R(gB)` is the skew difference of the clean
-second connection-difference jet plus the four product-rule terms containing
-one `∇A` and one `A`.  In particular, no curvature occurs on the right-hand
-side. -/
 theorem covDerivPal_eq
     (gB g₀ : SmoothRiemannianMetric I M)
     (D X Y Z : ContMDiffSection I E (∞ : WithTop ℕ∞)

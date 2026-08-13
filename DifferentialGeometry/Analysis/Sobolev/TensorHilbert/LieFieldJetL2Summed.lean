@@ -1,44 +1,5 @@
 import DifferentialGeometry.Analysis.Sobolev.TensorHilbert.ConnDiffJetL2Summed
 
-/-!
-# Summed data-weighted jet-L2 bound for the Lie field (REUSE of the connDiff producer)
-
-This file proves the **Lie field** analogue of the connection-difference summed bound in
-`ConnDiffJetL2Summed.lean`: a single `R`-independent-top data-weighted jet-L2 bound for the
-`(3,4)` field `linearizedRicciConnDiffOrder1KernelField g₀ g₁`.
-
-The construction follows the roadmap of `RemainderCoeffTopSeparated.md` ("Lie — combination of
-connDiff"): the Lie field is definitionally the negation of a sum of five slot-permuted /
-reindexed copies of `connDiffContrInsertionField g₀ g₁`
-(`lieJetKernelField_eq_neg_arm_combination`), each copy having the **same** iterated-covariant-gradient
-norm as the connDiff field (permutation/reindex are fibrewise isometries).  A triangle inequality
-over the five copies (`c3_norm_five_le`) gives the per-order structural bridge
-`‖∇^i (Lie …)‖ ≤ 5 · ‖∇^i (connDiff …)‖`, hence `‖∇^i (Lie …)‖² ≤ 25 · ‖∇^i (connDiff …)‖²`.  The
-already-landed connDiff summed producer
-`connDiffContrInsertionField_realizedFam_jetL2_summed_topSeparated` is then reused as a black box.
-
-Because the bridge multiplies BOTH the connDiff top-split coefficient and the lumped low
-coefficient by the same pure combinatorial factor `25` (the `5·`-triangle squared), the resulting
-Lie **top-split coefficient `Ktop = 25 · Ktop_connDiff`** stays `(g₀, hδ₀)`-only (`R`-independent),
-and `Kc = 25 · Kc_connDiff` follows the accepted house `R`-pattern.
-
-The end shape (both windows land at order `a+2`):
-```
-∑_{i ≤ a} ‖∇^i (linearizedRicciConnDiffOrder1KernelField g₀ (realizedFam …))‖²
-  ≤ Ktop · (∑_{j < a+2} (‖∇^j T‖² + ‖∇^j T'‖²))
-  +  Kc  · (1 + ∑_{j < a+2} (‖∇^j T‖² + ‖∇^j T'‖²))
-```
-This is constituent 4-of-5 of the data-weighted threeArm precursor (R1τ item (2)); see
-`UNIF_EXISTENCE_PLAN.md` "Planner acceptance №5" and `RemainderCoeffTopSeparated.md`.  Only
-`traceHessian` remains after this.
-
-The private arm-combination helpers (`lieJetSlotPermCc`, the seven permutations,
-`lieJetKernelField_eq_neg_arm_combination`, `armOuter_rfns_eq`, `armFull_rfns_eq`, `armOuter_norm_eq`,
-`armFull_norm_eq`, `c3_norm_five_le`) are copied verbatim from the committed-clean
-`RicciConnDiffOrder1TameEnvelope.lean` (where they are `private`, hence not importable); provenance
-comments mark each.  They use only public sub-lemmas.
--/
-
 set_option autoImplicit false
 set_option relaxedAutoImplicit false
 set_option maxSynthPendingDepth 3
@@ -70,15 +31,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
   [T2Space M] [SigmaCompactSpace M]
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
-
-/-! ### Copied private arm-combination stack
-
-All eight declarations below are copied verbatim from the committed-clean
-`RicciConnDiffOrder1TameEnvelope.lean` (lines ~649–886), where they are `private` and hence not
-importable.  They depend only on public sub-lemmas (`slotPermCLM`, `slotPermCLM_apply`,
-`slotPermCLM_field_contMDiff`, `rfns_iteratedCovGrad_rs_eq_of_section_domDomCongr`,
-`rfns_iteratedCovGrad_reindexCoeffGen_eq`, `Tensor0SSpace.toModel_ofModel`, `SmoothCcTensor.norm_def`,
-`tensorL2Norm_sq_toFun_eq_integral_riemannianFiberNormSq_rs`). -/
 
 private def lieJetKOutPerm0312 : Equiv.Perm (Fin 4) :=
   ⟨![0, 3, 1, 2], ![0, 2, 3, 1], by decide, by decide⟩
@@ -254,13 +206,6 @@ private lemma c3_norm_five_le {V : Type*} [SeminormedAddCommGroup V] {a b c d e 
   have t4 := norm_add_le a b
   linarith
 
-/-! ### Per-order structural bridge: Lie ≤ 5 · connDiff (squared: 25 ·) -/
-
-/-- Per-order structural bridge (generic in `g₁`): the Lie field's jet-L2 norm is bounded by
-`5 ·` the connection-difference field's, because the Lie field is the negation of a sum of five
-slot-permuted / reindexed copies of `connDiffContrInsertionField`, each an isometry of the jet.
-Squared, this gives the `25 ·` factor threaded into the summed producer.  Mirrors the `h5`/`hsq`
-block of `linearizedRicciConnDiffOrder1KernelField_order0sup_perOrder_l2_tameEnvelope_generic`. -/
 private theorem lie_normSq_le_25 (g₀ g₁ : SmoothRiemannianMetric I M) (i : ℕ) :
     ‖iteratedCovGrad (I := I) g₀ 3 4 i
         (linearizedRicciConnDiffOrder1KernelField (I := I) g₀ g₁)‖ ^ 2 ≤
@@ -287,12 +232,6 @@ private theorem lie_normSq_le_25 (g₀ g₁ : SmoothRiemannianMetric I M) (i : �
     _ = 25 * ‖iteratedCovGrad (I := I) g₀ 3 4 i
           (connDiffContrInsertionField (I := I) g₀ g₁)‖ ^ 2 := by ring
 
-/-! ### `realizedFam` per-order and summed bounds (REUSE of the connDiff producers). -/
-
-/-- `realizedFam` per-order top-separated bound for the Lie field: the connDiff per-order producer
-composed with the `25 ·` structural bridge.  Top coefficient `Ktop = 25 · Ktop_connDiff` is
-`R`-independent; the lumped low coefficient `Kc i = 25 · Kc_connDiff i` follows the house
-`R`-pattern. -/
 theorem linearizedRicciConnDiffOrder1KernelField_realizedFam_jetL2_perOrder_topSeparated
     (g₀ : SmoothRiemannianMetric I M) (a : ℕ)
     (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) {R : ℝ} (hR : 0 ≤ R)
@@ -341,13 +280,6 @@ theorem linearizedRicciConnDiffOrder1KernelField_realizedFam_jetL2_perOrder_topS
             (‖iteratedCovGrad (I := I) g₀ 0 2 j T‖ ^ 2 +
               ‖iteratedCovGrad (I := I) g₀ 0 2 j T'‖ ^ 2)) := by ring
 
-/-- **Summed** data-weighted jet-L2 bound for the Lie field (constituent 4-of-5 of the
-data-weighted threeArm precursor).  Sums the `25 ·` structural bridge over `i ≤ a` and reuses the
-already-landed connDiff summed producer
-`connDiffContrInsertionField_realizedFam_jetL2_summed_topSeparated` as a black box.  Both data
-windows land at order `a+2`; `Ktop = 25 · Ktop_connDiff` is `R`-independent (the `5·`-triangle
-squared times the `(g₀,hδ₀)`-only connDiff head), and `Kc = 25 · Kc_connDiff` follows the accepted
-house `R`-pattern. -/
 theorem linearizedRicciConnDiffOrder1KernelField_realizedFam_jetL2_summed_topSeparated
     (g₀ : SmoothRiemannianMetric I M) (a : ℕ)
     (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) {R : ℝ} (hR : 0 ≤ R)

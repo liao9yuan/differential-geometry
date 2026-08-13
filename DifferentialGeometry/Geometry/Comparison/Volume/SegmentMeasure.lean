@@ -6,15 +6,6 @@ import DifferentialGeometry.Geometry.Exponential.NormalFrame
 
 set_option autoImplicit false
 
-/-!
-# Normal-frame measure normalization for segment comparison
-
-The chart-basis determinant in the exponential Jacobian and the determinant
-relating the corresponding basis-normalized Haar measures cancel.  This file
-records that simultaneous change of basis and then transports the resulting
-integral through the center-metric normal frame.
--/
-
 noncomputable section
 
 open Bundle Function Manifold MeasureTheory Metric Set
@@ -36,8 +27,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
   [IsManifold I (↑(⊤ : ℕ∞) : WithTop ℕ∞) M]
 
 omit [NeZero (Module.finrank Real E)] [I.Boundaryless] in
-/-- The center-metric normal frame pulls the `g`-radial ball back to the
-canonical model ball. -/
 theorem preimage_gBall
     (g : SmoothRiemannianMetric I M) (x : M) (R : Real) :
     (normalFrame (I := I) (E := E) g x) ⁻¹'
@@ -60,10 +49,6 @@ private local instance : BorelSpace M := ⟨rfl⟩
 omit [T2Space (TangentBundle I M)] in
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-/-- The chart-basis exponential-Jacobian integral equals the normal-basis
-Jacobian integral in canonical model coordinates.  The determinant from the
-basis change cancels exactly against the determinant relating the two Haar
-normalizations. -/
 theorem expJac_normal_int
     [ConnectedSpace M] [PseudoEMetricSpace M]
     [IsRiemannianManifold I M] [CompleteSpace M]
@@ -151,9 +136,6 @@ theorem expJac_normal_int
 omit [T2Space (TangentBundle I M)] in
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-/-- A pointwise inverse-fibre lower bound for the orthonormally framed
-intrinsic exponential gives the corresponding multiplicity-weighted area
-bound in normal-frame coordinates. -/
 theorem framed_mul_le_area
     [ConnectedSpace M] [PseudoEMetricSpace M]
     [IsRiemannianManifold I M] [CompleteSpace M]

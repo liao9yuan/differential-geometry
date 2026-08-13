@@ -13,7 +13,6 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.IteratedCovGradLine
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.FlatArmCoeffConnectionDifferenceBridge
 import DifferentialGeometry.Analysis.Sobolev.TensorHilbert.DeTurckLieArm1CoeffPieceConnDiffFeed
 
-
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
@@ -208,8 +207,6 @@ private def metricConnDiffLoweredField (g₁ g_bg : SmoothRiemannianMetric I M) 
   ⟨fun x => metricConnDiffLoweredFib (I := I) g₁ g₁ g_bg x,
     metricConnDiffLoweredFib_contMDiff (I := I) g₁ g₁ g_bg⟩
 
-/-- The connection difference between the moving and background metrics,
-lowered by the moving metric and viewed as a tensor over the reference metric. -/
 def metricConnDiffLoweredCc (g₀ g₁ g_bg : SmoothRiemannianMetric I M) :
     SmoothCcTensor g₀ 0 3 where
   toSection :=
@@ -236,9 +233,6 @@ private lemma metricConnDiffLoweredCc_unitModel_apply
   exact metricConnDiffLoweredFib_toModel (I := I) g₁ g₁ g_bg x m
 
 set_option linter.unusedSectionVars false in
-/-- The moving-metric lowering is the negative of the Arm-1 background
-connection-difference tensor; the sign comes only from reversing the two
-connections in their difference. -/
 theorem metricConnDiffLoweredCc_eq_neg_kappa
     (g₀ g₁ g_bg : SmoothRiemannianMetric I M) :
     metricConnDiffLoweredCc (I := I) (M := M) g₀ g₁ g_bg =
@@ -1010,8 +1004,6 @@ private theorem lieArm1_kappa_feed (g₀ g_bg : SmoothRiemannianMetric I M) (a :
         (hC2b q hq_le)
     linarith [hAsum, hCsum, hDsum, hBsum]
 
-/-- Uniform pointwise and per-order jet bounds for the moving-metric-lowered
-connection-difference tensor. -/
 theorem metricConnDiffLoweredCc_jetL2_ballUniform_generic
     (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
     (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) {R : ℝ} (hR : 0 ≤ R)

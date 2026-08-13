@@ -8,15 +8,6 @@ import Mathlib.Geometry.Manifold.Riemannian.Basic
 set_option autoImplicit false
 set_option linter.unusedSectionVars false
 
-/-!
-# Metrics carried by controlled normal-ball charts
-
-This file realizes the pullback coefficients of a `NormalBallChart` as a
-smooth metric on its explicit ball and extends that metric smoothly to the
-whole model space.  The construction is independent of the exponential-map
-provider.
--/
-
 noncomputable section
 
 universe u uE uH
@@ -40,16 +31,12 @@ variable [T2Space (TangentBundle I M)]
 
 namespace NormalBallChart
 
-/-- The explicit source ball carried by a controlled normal chart. -/
 def ball {p : M} (c : NormalBallChart (I := I) p) : Opens E :=
   ⟨Metric.ball (0 : E) c.radius, Metric.isOpen_ball⟩
 
-/-- The open image of a controlled normal ball. -/
 def image {p : M} (c : NormalBallChart (I := I) p) : Opens M :=
   ⟨c.restrictBall.target, c.restrictBall.open_target⟩
 
-/-- The restricted chart as a global diffeomorphism from its source ball to
-its image. -/
 noncomputable def ballDiffeo {p : M}
     (c : NormalBallChart (I := I) p) :
     Diffeomorph (modelWithCornersSelf Real E) I c.ball c.image ∞ := by
@@ -93,8 +80,6 @@ private theorem ballDiffeo_mfd {p : M}
       exact hq) z v
   simpa only [ballDiffeo, restrictBall_apply] using h
 
-/-- The smooth metric on the controlled source ball obtained by pulling back
-the ambient metric through the chart provider. -/
 noncomputable def localMetric (g : SmoothRiemannianMetric I M) {p : M}
     (c : NormalBallChart (I := I) p) :
     SmoothRiemannianMetric (modelWithCornersSelf Real E) c.ball := by
@@ -103,8 +88,6 @@ noncomputable def localMetric (g : SmoothRiemannianMetric I M) {p : M}
   exact Diffeomorph.pullbackMetricCross
     (g.restrictOpen (I := I) c.image) c.ballDiffeo
 
-/-- The realized local metric has exactly the branch-parametric pullback
-coefficients. -/
 theorem localMetric_inner (g : SmoothRiemannianMetric I M) {p : M}
     (c : NormalBallChart (I := I) p) (z : c.ball) (v w : E) :
     (c.localMetric g).inner z v w = c.metric g z v w := by
@@ -115,8 +98,6 @@ theorem localMetric_inner (g : SmoothRiemannianMetric I M) {p : M}
   rw [ballDiffeo_apply, ballDiffeo_mfd, ballDiffeo_mfd]
   rfl
 
-/-- A smooth cutoff equal to one on the quarter-radius ball and supported in
-the half-radius ball. -/
 noncomputable def cut {p : M}
     (c : NormalBallChart (I := I) p) : ContDiffBump (0 : E) :=
   ⟨c.radius / 4, c.radius / 2,
@@ -156,8 +137,6 @@ private noncomputable def flatMetric :
   isVonNBounded := (riemannianMetricVectorSpace E).isVonNBounded
   contMDiff := (riemannianMetricVectorSpace E).contMDiff.of_le le_top
 
-/-- A total smooth metric on the model space agreeing with the chart pullback
-metric on the quarter-radius ball. -/
 noncomputable def totalMetric (g : SmoothRiemannianMetric I M) {p : M}
     (c : NormalBallChart (I := I) p) :
     SmoothRiemannianMetric (modelWithCornersSelf Real E) E := by
@@ -165,8 +144,6 @@ noncomputable def totalMetric (g : SmoothRiemannianMetric I M) {p : M}
   exact (flatMetric (E := E)).bumpExtendOpen c.ball (c.localMetric g)
     (c.cut : E → Real) c.cut_smooth c.cut_range c.cut_support
 
-/-- On the inner ball, the total extension equals the branch-parametric
-pullback metric. -/
 theorem totalMetric_inner (g : SmoothRiemannianMetric I M) {p : M}
     (c : NormalBallChart (I := I) p) (z : E)
     (hz : z ∈ Metric.ball (0 : E) (c.radius / 4)) (v w : E) :
@@ -185,7 +162,6 @@ theorem totalMetric_inner (g : SmoothRiemannianMetric I M) {p : M}
           (fun q hq => c.cut_one hq) hsub z hz v w
     _ = c.metric g z v w := c.localMetric_inner g ⟨z, hsub hz⟩ v w
 
-/-- Coefficient-field form of `totalMetric_inner`. -/
 theorem totalMetric_eq (g : SmoothRiemannianMetric I M) {p : M}
     (c : NormalBallChart (I := I) p) (z : E)
     (hz : z ∈ Metric.ball (0 : E) (c.radius / 4)) :
@@ -196,8 +172,6 @@ theorem totalMetric_eq (g : SmoothRiemannianMetric I M) {p : M}
   intro w
   exact c.totalMetric_inner g z hz v w
 
-/-- On the inner ball, the Levi-Civita derivative of constant fields for the
-total extension is the Koszul vector of the chart pullback coefficients. -/
 theorem total_cov_const (g : SmoothRiemannianMetric I M) {p : M}
     (c : NormalBallChart (I := I) p) (z : E)
     (hz : z ∈ Metric.ball (0 : E) (c.radius / 4))
@@ -218,8 +192,6 @@ theorem total_cov_const (g : SmoothRiemannianMetric I M) {p : M}
   exact _root_.DifferentialGeometry.Integral.Connection.const_cov_eq_nhds
     (c.totalMetric g) (c.metric g) hEq hdiff hco v w
 
-/-- On the inner ball, the total metric connection is the Frechet derivative
-plus the Koszul correction of the chart pullback coefficients. -/
 theorem total_cov_fderiv (g : SmoothRiemannianMetric I M) {p : M}
     (c : NormalBallChart (I := I) p) (z : E)
     (hz : z ∈ Metric.ball (0 : E) (c.radius / 4))
@@ -245,8 +217,6 @@ theorem total_cov_fderiv (g : SmoothRiemannianMetric I M) {p : M}
   exact _root_.DifferentialGeometry.Integral.Connection.cov_eq_fderiv_add
     (c.totalMetric g) (c.metric g) hEq hdiff hco V _hV v
 
-/-- Geodesic acceleration of the total metric extension carried by a
-controlled normal chart. -/
 noncomputable def accel (g : SmoothRiemannianMetric I M) {p : M}
     (c : NormalBallChart (I := I) p) (z : E × E) : E :=
   -((_root_.DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric
@@ -269,8 +239,6 @@ noncomputable def accel (g : SmoothRiemannianMetric I M) {p : M}
     ContinuousLinearMap.map_zero _
   rw [hz, neg_zero]
 
-/-- On the inner ball, chart acceleration is the negative raised Koszul
-vector of the branch pullback coefficients. -/
 theorem accel_eq (g : SmoothRiemannianMetric I M) {p : M}
     (c : NormalBallChart (I := I) p) (z : E × E)
     (hz : z.1 ∈ Metric.ball (0 : E) (c.radius / 4))

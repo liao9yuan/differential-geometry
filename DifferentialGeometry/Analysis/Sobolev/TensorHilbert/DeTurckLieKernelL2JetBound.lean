@@ -408,8 +408,6 @@ theorem deTurckLieDLaCoeffField_realizedFam_jetL2_perOrder_ballUniform
           nlinarith [sq_nonneg R]
   linarith [hsum_le]
 
-/-! ### Compatibility extraction surface for class-first finite windows -/
-
 namespace DLaUniformInternal
 
 noncomputable abbrev dlaKernel := @dLaKernelRaisedCc

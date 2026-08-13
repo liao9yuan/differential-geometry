@@ -231,20 +231,6 @@ theorem energy_hierarchy_explicit_bound_perScale
   calc Mk k t ≤ gronwallBound (B0 k) (C k + 1) ((seed k) ^ 2 / 4) (t - 0) := hgron t htIcc
     _ ≤ gronwallBound (B0 k) (C k + 1) ((seed k) ^ 2 / 4) T := hmono
 
-/-- **Energy hierarchy with an `L¹`-in-time Grönwall coefficient.**
-
-Same conclusion as `energy_hierarchy_explicit_bound_perScale`, but the coefficient
-multiplying `Mk k` is allowed to carry an extra time-dependent, merely integrable
-summand `A t`.  The integrability is supplied through a primitive `S` with
-`S 0 = 0`, `S ≥ 0`, `S' = A` and `S ≤ Sbd` on the slab; the resulting bound is the
-constant-coefficient Grönwall bound inflated by the single factor `Real.exp Sbd`.
-
-This is the shape a parabolic energy hierarchy takes when the coefficient of the
-zeroth-order term is controlled only in `L¹_t` — e.g. when it is a quadratic
-expression in a trajectory norm that is bounded in `L²_t` but not in `C_t`.  The
-proof is the substitution `Mk ↦ Mk · exp (-S)`, which turns the variable
-coefficient into the constant one and leaves the dissipation term and the
-`√`-seed term in place. -/
 theorem energy_hier_l1_bound
     {T c Sbd : ℝ} {C : ℕ → ℝ} {Mk Mk' : ℕ → ℝ → ℝ} {seed B0 : ℕ → ℝ}
     {A S : ℝ → ℝ}
@@ -292,7 +278,6 @@ theorem energy_hier_l1_bound
       rw [hedef, Real.exp_le_one_iff]
       linarith [hSnn t htIcc]
     have hMnn : 0 ≤ Mk k t := hMnonneg k t htIcc
-    -- the seed term: `√(Mk) · e ≤ √(Mk · e)`
     have hsqrt : Real.sqrt (Mk k t) * e ≤ Real.sqrt (Nk k t) := by
       have hsplit : Real.sqrt (Nk k t) = Real.sqrt (Mk k t) * Real.sqrt e := by
         simp only [hNkdef, ← hedef]
@@ -498,21 +483,6 @@ theorem galerkin_energy_uniform_bound
   exact hkey N k t ht
 
 omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] in
-/-- **`N`-uniform per-scale Galerkin energy bound with an `L¹`-in-time coefficient.**
-
-`galerkin_energy_uniform_bound_perScale` with the zeroth-order Grönwall coefficient
-allowed to carry an extra time-dependent summand `A N t`, integrable in the sense that
-it admits a primitive `S N` with `S N 0 = 0`, `0 ≤ S N ≤ Sbd` on the slab.  The
-coefficient family is indexed by the Galerkin level `N`, but the primitive bound
-`Sbd` is a single scalar shared by all levels — that shared bound, not integrability
-of any `sup`, is what makes the conclusion `N`-uniform.  The bound is still uniform
-in `N` and in `t ∈ Icc 0 T`, and every constant is `N`-free provided
-`Cδ, Cmid, seed, B0, Sbd` are.
-
-This is the form the projected (Galerkin) parabolic hierarchy takes when the
-coefficient jets are capped by a trajectory norm that is controlled only in
-`L²_t` — the cap then enters the coefficient quadratically, so `A ∈ L¹_t` with
-`∫₀^T A` bounded by the square of the `L²_t` bound. -/
 theorem galerkin_energy_l1_bound
     {U : ℕ → ℝ → TensorEigenIdx (I := I) (M := M) g r s₀ → ℝ}
     {Fseq : ℕ → ℝ → TensorEigenIdx (I := I) (M := M) g r s₀ → ℝ}
@@ -600,21 +570,6 @@ theorem galerkin_energy_l1_bound
     gronwallBound (B0 k) ((Cmid k + 2) + 1) ((seed k) ^ 2 / 4) T, fun N t ht => ?_⟩
   exact hkey N k t ht
 
-/-- **Single-scale energy bound with an `L¹`-in-time coefficient and an additive
-source.**
-
-The scale-indexed engines (`energy_hier_l1_bound` and its siblings) demand the
-closure inequality at *every* scale with one shared dissipation constant.  A
-low-regularity ladder delivers it at a *single* scale only — its top-scale
-prefactor grows with the scale — so a rung estimate needs this restatement: one
-energy `Y` at the working scale, one nonnegative `Yhi` at the scale above (only
-its sign is used, since the dissipation term is discarded), and an additive
-constant `c₀` in the differential inequality, which no existing engine carries.
-
-The conclusion is the constant-coefficient Grönwall bound with the additive
-source folded into the Grönwall `ε` slot beside the Young remainder
-`seed ^ 2 / 4` of the `√`-seed, inflated by the single factor `Real.exp Sbd`
-coming from the `L¹` coefficient `A` through its primitive `S`. -/
 theorem energy_l1_single
     {T c Sbd C seed B0 c₀ : ℝ} {Y Yhi Y' A S : ℝ → ℝ}
     (hc : 0 ≤ c) (hC : 0 ≤ C) (hseed : 0 ≤ seed) (hc₀ : 0 ≤ c₀)
@@ -646,7 +601,6 @@ theorem energy_l1_single
     have hEq : Y' t * Real.exp (-S t) + Y t * (Real.exp (-S t) * -A t) = Z' t := by
       simp only [hZ'def]; ring
     rwa [hEq] at hmul
-  -- the substituted quantity obeys a constant-coefficient Grönwall inequality
   have hZbound : ∀ t ∈ Set.Ico (0 : ℝ) T,
       Z' t ≤ (C + 1) * Z t + (seed ^ 2 / 4 + c₀) := by
     intro t ht
@@ -657,7 +611,6 @@ theorem energy_l1_single
       rw [hedef, Real.exp_le_one_iff]; linarith [hSnn t htIcc]
     have hYt : 0 ≤ Y t := hYnn t htIcc
     have hZt : 0 ≤ Z t := hZnn t htIcc
-    -- the `√`-seed survives the substitution: `√Y · e ≤ √(Y · e)`
     have hsqrt : Real.sqrt (Y t) * e ≤ Real.sqrt (Z t) := by
       have hsplit : Real.sqrt (Z t) = Real.sqrt (Y t) * Real.sqrt e := by
         simp only [hZdef, ← hedef]; exact Real.sqrt_mul hYt e
@@ -717,19 +670,6 @@ theorem energy_l1_single
     _ = Real.exp Sbd * gronwallBound B0 (C + 1) (seed ^ 2 / 4 + c₀) T := by ring
 
 omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] in
-/-- **`N`-uniform Galerkin energy bound at a single scale, with an `L¹`-in-time
-coefficient and an additive source.**
-
-`galerkin_energy_l1_bound` restricted to one fixed Sobolev scale `σ` and widened
-by an additive constant `c₀` in the closure hypothesis.  Both changes are forced
-by the low-regularity ladder, which closes the energy identity at one scale only
-(its top-scale prefactor grows with the scale) and produces a genuine additive
-remainder from the static part of the forcing.
-
-Every constant in the resulting bound is `N`-free provided
-`Cδ, Cmid, seed, B0, c₀, Sbd` are; the `L¹` coefficient `A N` may depend on the
-Galerkin level, but the bound `Sbd` on its primitive is shared, and that shared
-bound is what makes the conclusion `N`-uniform. -/
 theorem galerkin_l1_single
     {U : ℕ → ℝ → TensorEigenIdx (I := I) (M := M) g r s₀ → ℝ}
     {Fseq : ℕ → ℝ → TensorEigenIdx (I := I) (M := M) g r s₀ → ℝ}
@@ -832,18 +772,6 @@ theorem gal_rider_bound_at
     exact mul_le_mul_of_nonneg_left hle hCrid
 
 omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] in
-/-- **`N`-uniform single-scale Galerkin bound with the quadratic `L¹` rider.**
-
-`galerkin_l1_single` in the form a low-regularity rung actually produces it: the
-`L¹`-in-time Grönwall coefficient is not abstract but the concrete affine
-expression `Crid · (1 + E_σ)` in the very energy being estimated — the shape a
-ladder slot takes when its coefficient factor is a state quantity at the working
-scale rather than a class quantity — and its integrability is exactly the
-a-priori bound on `∫₀^T E_σ`, supplied here in primitive form as `P`.
-
-The rider's primitive is `Crid · (t + P N t)`, so a single shared bound `B` on
-`P` yields the single shared bound `Crid · (T + B)` that
-`galerkin_l1_single` needs, and the conclusion is `N`-uniform. -/
 theorem galRiderBound
     {U : ℕ → ℝ → TensorEigenIdx (I := I) (M := M) g r s₀ → ℝ}
     {Fseq : ℕ → ℝ → TensorEigenIdx (I := I) (M := M) g r s₀ → ℝ}
@@ -895,14 +823,6 @@ theorem galRiderBound
     have hle : t + P N t ≤ T + B := add_le_add ht.2 (hPbd N t ht)
     exact mul_le_mul_of_nonneg_left hle hCrid
 
-/-- **A single-scale `L¹` energy estimate retaining the dissipation primitive.**
-
-This is the dissipation-preserving sibling of `energy_l1_single`.  If `D` is a
-nonnegative primitive of the next-scale energy `Yhi`, then the augmented energy
-`Y + c D` satisfies the same Grönwall bound as `Y`: the dissipative term in
-`Y'` cancels the derivative of `c D`.  Nonnegativity of the time-dependent
-coefficient `A` lets the remaining right-hand side enlarge from `Y` to the
-augmented energy. -/
 theorem energy_l1_diss
     {T c Sbd C seed B0 c₀ : ℝ} {Y Yhi Y' A S D : ℝ → ℝ}
     (hc : 0 < c) (hC : 0 ≤ C) (hseed : 0 ≤ seed) (hc₀ : 0 ≤ c₀)
@@ -966,12 +886,6 @@ theorem energy_l1_diss
     hWinit
 
 omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] in
-/-- **The quadratic Galerkin rider with its next-scale dissipation retained.**
-
-This strengthens `galRiderBound`.  Besides the working-scale energy bound it
-returns a uniform bound for any nonnegative primitive `D N` of the next-scale
-energy.  The latter is the input needed to use rung `σ` as the `L¹` rider for
-rung `σ + 1`. -/
 theorem galRiderDiss
     {U : ℕ → ℝ → TensorEigenIdx (I := I) (M := M) g r s₀ → ℝ}
     {Fseq : ℕ → ℝ → TensorEigenIdx (I := I) (M := M) g r s₀ → ℝ}

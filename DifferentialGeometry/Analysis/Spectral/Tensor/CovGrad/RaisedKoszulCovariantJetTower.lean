@@ -2,7 +2,6 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.ConnectionDifferenc
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.RaisedKoszulParallelRaiseJetBound
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.CometricRaiseSlot0CovariantParallelism
 
-
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
@@ -495,7 +494,6 @@ lemma riemannianFiberNormSq_iteratedCovGrad_cometricRaiseSlot0Field_koszul_eq
   rw [rfns_domDomCongrSection_eq]
   rw [rfns_castRankCc_rk]
 
-/-- Compatibility name for the cometric-raised Koszul jet norm identity. -/
 alias rfns_iteratedCovGrad_cometricRaiseSlot0Field_koszul_eq :=
   riemannianFiberNormSq_iteratedCovGrad_cometricRaiseSlot0Field_koszul_eq
 

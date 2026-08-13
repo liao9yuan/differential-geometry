@@ -4,15 +4,6 @@ import DifferentialGeometry.Geometry.Exponential.NormalFrame
 
 set_option autoImplicit false
 
-/-!
-# Radially strict segment domain
-
-The radially strict segment domain consists of the minimizing launch vectors
-whose minimizing ray extends a positive amount past its endpoint.  It removes
-only the terminal point of each finite minimizing ray, without selecting a cut
-time.
--/
-
 noncomputable section
 
 open Set Function Filter Bundle Manifold MeasureTheory
@@ -43,7 +34,6 @@ private local instance instBorelTangent (x : M) :
 omit [T2Space (TangentBundle I M)] in
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-/-- Minimizing launch vectors whose ray is still minimizing past its endpoint. -/
 def SegInt [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
     [IsContinuousRiemannianBundle E (fun y : M => TangentSpace I y)]
   (g : SmoothRiemannianMetric I M)
@@ -68,7 +58,6 @@ theorem mem_segInt [PseudoEMetricSpace M] [IsRiemannianManifold I M]
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-/-- Radially strict minimizing vectors are minimizing at their own endpoint. -/
 theorem segInt_subset [ConnectedSpace M] [PseudoEMetricSpace M]
     [IsRiemannianManifold I M] [CompleteSpace M]
     [IsContinuousRiemannianBundle E (fun y : M => TangentSpace I y)]
@@ -86,7 +75,6 @@ theorem segInt_subset [ConnectedSpace M] [PseudoEMetricSpace M]
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-/-- The radially strict segment domain is star-shaped. -/
 theorem segInt_smul [ConnectedSpace M] [PseudoEMetricSpace M]
     [IsRiemannianManifold I M] [CompleteSpace M]
     [IsContinuousRiemannianBundle E (fun y : M => TangentSpace I y)]
@@ -104,7 +92,6 @@ theorem segInt_smul [ConnectedSpace M] [PseudoEMetricSpace M]
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-/-- The radially strict segment domain is Borel measurable. -/
 theorem measurableSet_segInt [ConnectedSpace M] [PseudoEMetricSpace M]
     [IsRiemannianManifold I M] [CompleteSpace M]
     [IsContinuousRiemannianBundle E (fun y : M => TangentSpace I y)]
@@ -141,9 +128,6 @@ theorem measurableSet_segInt [ConnectedSpace M] [PseudoEMetricSpace M]
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-/-- The intrinsic exponential is injective on the radially strict segment
-domain.  The proof is the no-corner argument for two minimizing rays, extending
-one of them past their common endpoint. -/
 theorem exp_inj_segInt [ConnectedSpace M] [PseudoEMetricSpace M]
     [IsRiemannianManifold I M] [CompleteSpace M]
     [IsContinuousRiemannianBundle E (fun y : M => TangentSpace I y)]
@@ -385,8 +369,6 @@ theorem exp_inj_segInt [ConnectedSpace M] [PseudoEMetricSpace M]
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-/-- Every radially strict minimizing vector is nonconjugate, including the
-origin. -/
 theorem segInt_no_conj [ConnectedSpace M] [PseudoEMetricSpace M]
     [IsRiemannianManifold I M] [CompleteSpace M]
     [IsContinuousRiemannianBundle E (fun y : M => TangentSpace I y)]
@@ -419,8 +401,6 @@ theorem segInt_no_conj [ConnectedSpace M] [PseudoEMetricSpace M]
 omit [T2Space (TangentBundle I M)] in
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-/-- Along a positive ray, the closed segment domain has at most one point
-outside its radially strict part. -/
 theorem segEnd_ray_sub [ConnectedSpace M] [PseudoEMetricSpace M]
     [IsRiemannianManifold I M] [CompleteSpace M]
     [IsContinuousRiemannianBundle E (fun y : M => TangentSpace I y)]
@@ -452,8 +432,6 @@ theorem segEnd_ray_sub [ConnectedSpace M] [PseudoEMetricSpace M]
 omit [T2Space (TangentBundle I M)] in
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-/-- The terminal part of the segment domain has zero model volume after
-transport through the normal frame. -/
 theorem segEnd_zero [ConnectedSpace M] [PseudoEMetricSpace M]
     [IsRiemannianManifold I M] [CompleteSpace M]
     [IsContinuousRiemannianBundle E (fun y : M => TangentSpace I y)]

@@ -1,14 +1,6 @@
 import DifferentialGeometry.Analysis.Parabolic.RicciLinearization.CometricTraceSelfBound
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.DeTurckPrincipalCometricExtraction
 
-/-!
-# Dimension-only principal coefficient bounds
-
-This module replaces the metricwise compactness constants in the principal
-Ricci--DeTurck coefficient estimates by explicit constants depending only on
-the model-space dimension.
--/
-
 set_option autoImplicit false
 
 noncomputable section
@@ -36,24 +28,18 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
-/-- Dimension-only coefficient for the DeTurck principal jet of order `i`. -/
 def pccJetC (i : ℕ) : ℝ :=
   appCcGdiag (E := E) i * (Module.finrank ℝ E : ℝ) ^ 8
 
-/-- Dimension-only coefficient for the Ricci principal-difference jet of order `i`. -/
 def ricciJetC (i : ℕ) : ℝ := (10 / 4 : ℝ) * pccJetC (E := E) i
 
 omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] in
-/-- The DeTurck dimension-only jet coefficient is nonnegative. -/
 theorem pccJetC_nonneg (i : ℕ) : 0 ≤ pccJetC (E := E) i := by
   exact mul_nonneg (appCcGdiag_nonneg (E := E) i) (by positivity)
 
-/-- The Ricci dimension-only jet coefficient is nonnegative. -/
 theorem ricciJetC_nonneg (i : ℕ) : 0 ≤ ricciJetC (E := E) i := by
   exact mul_nonneg (by norm_num) (pccJetC_nonneg (E := E) i)
 
-/-- The DeTurck principal coefficient has a pointwise jet bound whose constant
-depends only on dimension. -/
 theorem pcc_rfns_le
     (g₀ g₁ : SmoothRiemannianMetric I M) (i : ℕ) (x : M) :
     riemannianFiberNormSq (I := I) (M := M) g₀ 4 (2 + i) x
@@ -70,8 +56,6 @@ theorem pcc_rfns_le
   simp only [pccJetC]
   ring
 
-/-- The Ricci principal-coefficient difference has a pointwise jet bound whose
-constant depends only on dimension. -/
 theorem ricci_rfns_le
     (g₀ g₁ : SmoothRiemannianMetric I M) (i : ℕ) (x : M) :
     riemannianFiberNormSq (I := I) (M := M) g₀ 4 (2 + i) x
@@ -100,8 +84,6 @@ theorem ricci_rfns_le
 set_option linter.style.setOption false in
 set_option backward.isDefEq.respectTransparency false in
 set_option synthInstance.maxHeartbeats 1600000 in
-/-- The trace-Hessian coefficient difference is the canonical slot reindexing
-of the DeTurck principal coefficient. -/
 theorem traceCoeff_sub_eq
     (g₀ g₁ : SmoothRiemannianMetric I M) :
     traceHessianCoeff (I := I) (M := M) g₀ g₁ -
@@ -123,8 +105,6 @@ theorem traceCoeff_sub_eq
     ContinuousLinearMap.comp_apply, ContinuousLinearMap.comp_apply,
     domDomCongrFib_apply]
 
-/-- The trace-Hessian coefficient difference has the same dimension-only
-pointwise jet bound as the DeTurck principal coefficient. -/
 theorem trace_rfns_le
     (g₀ g₁ : SmoothRiemannianMetric I M) (i : ℕ) (x : M) :
     riemannianFiberNormSq (I := I) (M := M) g₀ 4 (2 + i) x
@@ -182,8 +162,6 @@ private theorem jetL2_of_rfns
     (I := I) (M := M) g 2 (2 + j)
     (iteratedCovGrad (I := I) g 2 2 j B)).symm
 
-/-- The DeTurck principal coefficient has an `L²` jet bound whose coefficient
-depends only on dimension. -/
 theorem pcc_l2_le
     (g₀ g₁ : SmoothRiemannianMetric I M) (i : ℕ) :
     ‖iteratedCovGrad (I := I) g₀ 4 2 i
@@ -196,8 +174,6 @@ theorem pcc_l2_le
     (gInvDiffSlotCoeff (I := I) g₀ g₁) (pccJetC (E := E) i) i
     (pcc_rfns_le (I := I) (M := M) g₀ g₁ i)
 
-/-- The Ricci principal-coefficient difference has an `L²` jet bound whose
-coefficient depends only on dimension. -/
 theorem ricci_l2_le
     (g₀ g₁ : SmoothRiemannianMetric I M) (i : ℕ) :
     ‖iteratedCovGrad (I := I) g₀ 4 2 i
@@ -212,8 +188,6 @@ theorem ricci_l2_le
     (gInvDiffSlotCoeff (I := I) g₀ g₁) (ricciJetC (E := E) i) i
     (ricci_rfns_le (I := I) (M := M) g₀ g₁ i)
 
-/-- The trace-Hessian coefficient difference has an `L²` jet bound whose
-coefficient depends only on dimension. -/
 theorem trace_l2_le
     (g₀ g₁ : SmoothRiemannianMetric I M) (i : ℕ) :
     ‖iteratedCovGrad (I := I) g₀ 4 2 i

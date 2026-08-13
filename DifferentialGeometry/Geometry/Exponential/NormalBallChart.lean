@@ -8,14 +8,6 @@ import DifferentialGeometry.Geometry.Metric.TensorInner.MetricKoszul
 set_option autoImplicit false
 set_option linter.unusedSectionVars false
 
-/-!
-# Controlled normal-coordinate ball charts
-
-This file packages the branch data used by normal-coordinate consumers without
-choosing a particular exponential-map construction.  Both the legacy selected
-branch and the complete intrinsic branch implement the same interface.
--/
-
 noncomputable section
 
 universe u uE uH
@@ -35,10 +27,6 @@ variable {I : ModelWithCorners Real E H} [I.Boundaryless]
 variable {M : Type u} [TopologicalSpace M] [ChartedSpace H M]
 variable [IsManifold I ∞ M] [T2Space (TangentBundle I M)]
 
-/-- A normal-coordinate partial diffeomorphism controlled on one explicit
-model-space ball.  The underlying partial diffeomorphism only needs the
-project's established `C^1` carrier; all-order smoothness on the controlled
-forward and inverse domains is recorded separately. -/
 structure NormalBallChart (p : M) where
   radius : Real
   radius_pos : 0 < radius
@@ -54,8 +42,6 @@ structure NormalBallChart (p : M) where
 
 namespace NormalBallChart
 
-/-- Regard an all-order partial diffeomorphism as a controlled normal ball
-chart with the established `C^1` carrier type. -/
 def ofHigher {p : M} {r : Real} (hr : 0 < r)
     (Φ : PartialDiffeomorph (modelWithCornersSelf Real E) I E M ∞)
     (hsub : Metric.ball (0 : E) r ⊆ Φ.source)
@@ -90,8 +76,6 @@ def ofHigher {p : M} {r : Real} (hr : 0 < r)
     (ofHigher (I := I) hr Φ hsub hzero).hom z = Φ z :=
   rfl
 
-/-- Restrict a controlled chart to its named ball and upgrade the restricted
-branch to the all-order smoothness recorded by the provider. -/
 noncomputable def restrictBall {p : M}
     (c : NormalBallChart (I := I) p) :
     PartialDiffeomorph (modelWithCornersSelf Real E) I E M ∞ := by
@@ -134,19 +118,14 @@ noncomputable def restrictBall {p : M}
     c.restrictBall z = c.hom z :=
   rfl
 
-/-- The inverse coordinate map carried by a controlled normal ball chart. -/
 def inv {p : M} (c : NormalBallChart (I := I) p) : M → E :=
   c.hom.symm
 
-/-- The coordinate transition from `c` to `d` on their meaningful overlap. -/
 def transition {p q : M}
     (c : NormalBallChart (I := I) p)
     (d : NormalBallChart (I := I) q) : E → E :=
   fun z => d.inv (c.hom z)
 
-/-- Controlled overlap of two normal ball charts.  Both the source point and
-its image in the second chart stay in the balls where all-order smoothness is
-recorded. -/
 def OverlapOn {p q : M}
     (c : NormalBallChart (I := I) p)
     (d : NormalBallChart (I := I) q) (U : Set E) : Prop :=
@@ -155,8 +134,6 @@ def OverlapOn {p q : M}
 
 namespace OverlapOn
 
-/-- A controlled overlap point lies in the first partial diffeomorphism's
-source. -/
 theorem source {p q : M}
     {c : NormalBallChart (I := I) p}
     {d : NormalBallChart (I := I) q} {U : Set E}
@@ -164,8 +141,6 @@ theorem source {p q : M}
     z ∈ c.hom.source :=
   c.ball_subset (h z hz).1
 
-/-- The manifold image of a controlled overlap point lies in the second
-partial diffeomorphism's target. -/
 theorem target {p q : M}
     {c : NormalBallChart (I := I) p}
     {d : NormalBallChart (I := I) q} {U : Set E}
@@ -175,8 +150,6 @@ theorem target {p q : M}
   rw [← heq]
   exact d.hom.map_source (d.ball_subset hw)
 
-/-- The transition coordinate of a controlled overlap point stays in the
-second controlled ball. -/
 theorem coord_mem {p q : M}
     {c : NormalBallChart (I := I) p}
     {d : NormalBallChart (I := I) q} {U : Set E}
@@ -190,8 +163,6 @@ theorem coord_mem {p q : M}
   rw [hcoord]
   exact hw
 
-/-- Applying the second chart map after the transition recovers the first
-chart map. -/
 theorem map_eq {p q : M}
     {c : NormalBallChart (I := I) p}
     {d : NormalBallChart (I := I) q} {U : Set E}
@@ -202,7 +173,6 @@ theorem map_eq {p q : M}
 
 end OverlapOn
 
-/-- A controlled normal-chart transition is smooth to all orders. -/
 theorem transition_smooth {p q : M}
     (c : NormalBallChart (I := I) p)
     (d : NormalBallChart (I := I) q) {U : Set E}
@@ -217,7 +187,6 @@ theorem transition_smooth {p q : M}
   simpa only [transition, inv, Function.comp_def] using
     d.smooth_inv.comp hc hmap
 
-/-- A controlled transition followed by its reverse is the identity. -/
 theorem transition_cancel {p q : M}
     (c : NormalBallChart (I := I) p)
     (d : NormalBallChart (I := I) q) {U : Set E}
@@ -227,8 +196,6 @@ theorem transition_cancel {p q : M}
   rw [hovl.map_eq hz]
   exact c.hom.left_inv (hovl.source hz)
 
-/-- A phase-space point interpreted as a tangent vector through the controlled
-chart provider. -/
 noncomputable def tangent {p : M}
     (c : NormalBallChart (I := I) p) (z : E × E) :
     TangentBundle I M :=
@@ -236,7 +203,6 @@ noncomputable def tangent {p : M}
     mfderiv (modelWithCornersSelf Real E) I
       (fun u : E => c.hom u) z.1 z.2⟩
 
-/-- The zero phase coordinate is the zero tangent vector at the chart center. -/
 @[simp] theorem tangent_zero {p : M}
     (c : NormalBallChart (I := I) p) :
     c.tangent 0 = (⟨p, (0 : E)⟩ : TangentBundle I M) := by
@@ -247,13 +213,10 @@ noncomputable def tangent {p : M}
     (fun u : E => c.hom u) 0) 0 = (0 : E)
   exact ContinuousLinearMap.map_zero _
 
-/-- Two model coordinates interpreted as a pair of manifold points through
-the controlled chart provider. -/
 def pair {p : M}
     (c : NormalBallChart (I := I) p) (z : E × E) : M × M :=
   (c.hom z.1, c.hom z.2)
 
-/-- The Riemannian metric pulled back by the branch carried by `c`. -/
 def metric (g : SmoothRiemannianMetric I M) {p : M}
     (c : NormalBallChart (I := I) p) :
     E → E →L[Real] E →L[Real] Real :=
@@ -263,7 +226,6 @@ def metric (g : SmoothRiemannianMetric I M) {p : M}
     (ContinuousLinearMap.precomp Real D).comp
       ((g.inner (c.hom z)).comp D)
 
-/-- Evaluation of the metric pulled back through a controlled normal chart. -/
 theorem metric_apply (g : SmoothRiemannianMetric I M) {p : M}
     (c : NormalBallChart (I := I) p) (z v w : E) :
     c.metric g z v w =
@@ -274,8 +236,6 @@ theorem metric_apply (g : SmoothRiemannianMetric I M) {p : M}
     ContinuousLinearMap.precomp_apply]
   rfl
 
-/-- A controlled transition is an exact isometry between the two pullback
-metrics. -/
 theorem transition_isom (g : SmoothRiemannianMetric I M) {p q : M}
     (c : NormalBallChart (I := I) p)
     (d : NormalBallChart (I := I) q) {U : Set E}
@@ -376,8 +336,6 @@ private theorem push_smooth {p : M}
   rw [hmf]
 
 set_option synthInstance.maxHeartbeats 800000 in
-/-- On every open set where the branch map is `C∞`, its pullback metric is
-`C∞` as a model-space bilinear-form-valued map. -/
 theorem metric_contDiffOn (g : SmoothRiemannianMetric I M) {p : M}
     (c : NormalBallChart (I := I) p) {U : Set E}
     (hU : IsOpen U)
@@ -431,7 +389,6 @@ theorem metric_contDiffOn (g : SmoothRiemannianMetric I M) {p : M}
   rw [← contMDiffOn_iff_contDiffOn]
   exact (hscalar v w).congr fun z _ => c.metric_apply g z v w
 
-/-- Euclidean half/two comparison for the metric pulled back by `c` on `U`. -/
 def MetricEquivOn (g : SmoothRiemannianMetric I M) {p : M}
     (c : NormalBallChart (I := I) p) (U : Set E) : Prop :=
   ∀ z ∈ U, ∀ v : E,
@@ -439,8 +396,6 @@ def MetricEquivOn (g : SmoothRiemannianMetric I M) {p : M}
       c.metric g z v v ≤ 2 * ‖v‖ ^ 2
 
 set_option synthInstance.maxHeartbeats 800000 in
-/-- Uniform order-`p` Euclidean derivative bound for the metric pulled back by
-`c` on `U`. -/
 def MetricDerivBound (g : SmoothRiemannianMetric I M) {p₀ : M}
     (c : NormalBallChart (I := I) p₀) (U : Set E)
     (p : Nat) (C : Real) : Prop :=
@@ -449,7 +404,6 @@ def MetricDerivBound (g : SmoothRiemannianMetric I M) {p₀ : M}
 namespace MetricDerivBound
 
 set_option synthInstance.maxHeartbeats 800000 in
-/-- Transfer a metric-jet bound across equality on an open coordinate domain. -/
 theorem of_eqOn (g : SmoothRiemannianMetric I M) {p₀ : M}
     {c : NormalBallChart (I := I) p₀} {U : Set E} (hU : IsOpen U)
     {f : E → E →L[Real] E →L[Real] Real} {p : Nat} {C : Real}
@@ -464,9 +418,6 @@ theorem of_eqOn (g : SmoothRiemannianMetric I M) {p₀ : M}
 
 end MetricDerivBound
 
-/-- Uniform Euclidean metric bounds carried by one controlled normal chart.
-This is the common quantitative interface implemented by both the legacy
-selected branch and the intrinsic H6 branch. -/
 structure MetricBounds (g : SmoothRiemannianMetric I M) {p : M}
     (c : NormalBallChart (I := I) p) where
   C : Nat → Real
@@ -479,7 +430,6 @@ structure MetricBounds (g : SmoothRiemannianMetric I M) {p : M}
 
 namespace MetricEquivOn
 
-/-- The lower half of branch-metric equivalence is pointwise coercivity. -/
 theorem coercive (g : SmoothRiemannianMetric I M) {p : M}
     {c : NormalBallChart (I := I) p} {U : Set E}
     (h : c.MetricEquivOn g U) {z : E} (hz : z ∈ U) :
@@ -488,7 +438,6 @@ theorem coercive (g : SmoothRiemannianMetric I M) {p : M}
   intro v
   simpa [pow_two, mul_assoc] using (h z hz v).1
 
-/-- The sharp map of a half-coercive branch metric has norm at most two. -/
 theorem sharp_norm_le (g : SmoothRiemannianMetric I M) {p : M}
     {c : NormalBallChart (I := I) p} {U : Set E}
     (h : c.MetricEquivOn g U) {z : E} (hz : z ∈ U)
@@ -502,8 +451,6 @@ theorem sharp_norm_le (g : SmoothRiemannianMetric I M) {p : M}
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-/-- The quadratic upper bound controls every mixed evaluation of a pullback
-metric by the model norms. -/
 theorem abs_apply_le (g : SmoothRiemannianMetric I M) {p : M}
     {c : NormalBallChart (I := I) p} {U : Set E}
     (h : c.MetricEquivOn g U) {z : E} (hz : z ∈ U) (v w : E) :
@@ -530,8 +477,6 @@ theorem abs_apply_le (g : SmoothRiemannianMetric I M) {p : M}
     (mul_nonneg (mul_nonneg (by norm_num) (norm_nonneg v)) (norm_nonneg w))
 
 set_option synthInstance.maxHeartbeats 800000 in
-/-- Half/two metric equivalence supplies the uniform order-zero metric-jet
-bound with constant two. -/
 theorem deriv_zero (g : SmoothRiemannianMetric I M) {p : M}
     {c : NormalBallChart (I := I) p} {U : Set E}
     (h : c.MetricEquivOn g U) :
@@ -546,8 +491,6 @@ end MetricEquivOn
 namespace MetricBounds
 
 set_option synthInstance.maxHeartbeats 800000 in
-/-- The order-one metric bound controls each trilinear evaluation of the
-Frechet derivative of a branch metric. -/
 theorem fderiv_apply_le (g : SmoothRiemannianMetric I M) {p : M}
     {c : NormalBallChart (I := I) p} (h : c.MetricBounds g)
     {z : E} (hz : z ∈ Metric.ball (0 : E) h.radius) (u v w : E) :
@@ -571,8 +514,6 @@ theorem fderiv_apply_le (g : SmoothRiemannianMetric I M) {p : M}
     _ ≤ (h.C 1 * ‖u‖) * ‖v‖ * ‖w‖ := by gcongr
     _ = h.C 1 * ‖u‖ * ‖v‖ * ‖w‖ := rfl
 
-/-- Raising the coordinate Koszul covector on a controlled branch has the
-explicit first-jet bound. -/
 theorem koszulVec_norm_le (g : SmoothRiemannianMetric I M) {p : M}
     {c : NormalBallChart (I := I) p} (h : c.MetricBounds g)
     {z : E} (hz : z ∈ Metric.ball (0 : E) h.radius) (v w : E) :
@@ -591,7 +532,6 @@ theorem koszulVec_norm_le (g : SmoothRiemannianMetric I M) {p : M}
   ring_nf at hraw ⊢
   exact hraw
 
-/-- Pairwise raised-Koszul estimate from first- and second-jet variation. -/
 theorem koszulVec_pair_le (g : SmoothRiemannianMetric I M) {p : M}
     {c : NormalBallChart (I := I) p} (h : c.MetricBounds g)
     {z y : E}
@@ -667,8 +607,6 @@ private theorem fderiv_eval3
 
 set_option maxHeartbeats 2000000 in
 set_option synthInstance.maxHeartbeats 2000000 in
-/-- The raised branch Koszul vector is Lipschitz in position on every smaller
-ball, with a constant determined by the first two metric bounds. -/
 theorem koszulVec_lip_on (g : SmoothRiemannianMetric I M) {p : M}
     {c : NormalBallChart (I := I) p} (h : c.MetricBounds g)
     {r : Real}
@@ -780,8 +718,6 @@ theorem koszulVec_lip_on (g : SmoothRiemannianMetric I M) {p : M}
     (by simpa only [G] using hmetric)
     (by simpa only [G] using hjet) v w
 
-/-- The raised branch Koszul acceleration is Lipschitz on a controlled phase
-box, with a coefficient tending to zero with the velocity radius. -/
 theorem koszulAccel_lip_on (g : SmoothRiemannianMetric I M) {p : M}
     {c : NormalBallChart (I := I) p} (h : c.MetricBounds g)
     {r : Real}

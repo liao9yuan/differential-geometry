@@ -1,25 +1,6 @@
 import DifferentialGeometry.Analysis.Sobolev.TensorHilbert.DeTurckVFEndoInsertProducers
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.CurvatureCoefficientDifferenceJetTower
 
-/-! # Radius-free DeTurck vector-field endo-insert jet-L² tower (brick 3b)
-
-Radius-free (`R`-free) siblings of the private DeTurck-vector-field jet-L² tower in
-`DeTurckVFEndoInsertProducers`, built on THE GATE / workhorse
-(`antidiagonalTupleGrid_integral_radiusFree`) from `CurvatureCoefficientDifferenceJetTower`.  These
-discharge (in later 3b sessions) the frontier `deTurckLieCoeffField_perOrder_l2_radiusFree`
-(`DeTurckLieCoeffDiffRadiusFree.lean`, one flagged `sorry`).  The arm0 exemplar is
-`CurvatureCoeffDiffRadiusFree.lean`; see `DeTurckVFJetRadiusFree.md` and `ShortTime/THREEARM_RECON.md`
-§11c/§11d.
-
-Each R-dependent bottom producer converts `∫ grid_q` (the antidiagonal-tuple product grid over the
-`P`-jets) into a FLAT `R`-dependent constant via the ball-uniform integrator
-`diagonalProductGrid_rfns_integral_ballUniform_succ` (needs `hPball : ∀ j ≤ a+2, ‖∇ʲP‖ ≤ R`).  The
-workhorse `antidiagonalTupleGrid_integral_radiusFree` has the byte-identical integrand and instead
-yields `∫ grid_q ≤ K_rf q · (1 + ‖∇^q P‖²)` from only the order-0 fibre bound
-`hsup : ∀ x, rfns g₀ 0 2 x (P.toSection x) ≤ Λ₀²`.  Swapping it turns the producer's flat `F i` into
-a LOW WINDOW `Flow i · (1 + ∑_{j≤i} ‖∇ʲP‖²)` with `Flow` radius-free.  The three split parts
-(`DeTurckVFEndoInsert{Tower,Producers,TopSep}`) are read-only. -/
-
 noncomputable section
 
 set_option linter.style.setOption false
@@ -50,14 +31,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
-/-! ### Radius-free `cometricCastG0` low-order producer.
-
-Radius-free sibling of `cometricCastG0_order0sup_jetL2_succ_generic`
-(`DeTurckVFEndoInsertProducers.lean:834`).  The single ball-uniform integration step (bounding the
-`gInvDiff` endo `W`-jets) is replaced by the radius-free workhorse; the resulting per-order flat
-constant `F i` becomes the low window `Flow i · (1 + ∑_{j≤i} ‖∇ʲP‖²)`.  The order-0 sup `Λ` is
-already radius-free (it uses only the fibre bound at order 0, where the antidiagonal grid degenerates
-to `1`). -/
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.DeTurck in
 open DifferentialGeometry.Analysis.Sobolev.TensorHilbert in
 set_option linter.unusedVariables false in
@@ -125,7 +98,7 @@ theorem cometricCastG0_order0sup_jetL2_radiusFree
     have h := cometricCastG0_eq_doubleTrace_add_appCcRS (I := I) g₀ g₁
     rw [← hΦ_def, ← hW_def] at h
     exact h
-  -- order-0 W sup: `rfns(W) ≤ ΛT2` (fibre bound at order 0, grid₀ = 1).
+
   have hΛT : ∀ x : M,
       riemannianFiberNormSq (I := I) (M := M) g₀ 3 3 x (W.toSection x) ≤ ΛT2 := by
     intro x
@@ -145,7 +118,7 @@ theorem cometricCastG0_order0sup_jetL2_radiusFree
               (gInvDiffRaisedEndoField (I := I) g₀ g₁)).toSection x) := h1
       _ ≤ fr ^ 2 * C_base 0 := mul_le_mul_of_nonneg_left h2 (sq_nonneg fr)
       _ = ΛT2 := hΛT2_def.symm
-  -- W L² jets via the workhorse: `‖∇^q W‖² ≤ KW_rf q · (1 + ‖∇^q P‖²)`.
+
   have hstep2 : ∀ q : ℕ,
       ‖iteratedCovGrad (I := I) g₀ 3 3 q W‖ ^ 2 ≤
         KW_rf q * (1 + ‖iteratedCovGrad (I := I) g₀ 0 2 q P‖ ^ 2) := by
@@ -197,9 +170,9 @@ theorem cometricCastG0_order0sup_jetL2_radiusFree
         ≤ fr ^ 2 * C_base q * (K_rf q * (1 + ‖iteratedCovGrad (I := I) g₀ 0 2 q P‖ ^ 2)) :=
           mul_le_mul_of_nonneg_left hgb (mul_nonneg (sq_nonneg fr) (hC_base_nn q))
       _ = fr ^ 2 * C_base q * K_rf q * (1 + ‖iteratedCovGrad (I := I) g₀ 0 2 q P‖ ^ 2) := by ring
-  -- Now the main per-order body over i.
+
   refine ⟨?_, ?_⟩
-  · -- order-0 sup of cometricCastG0.
+  ·
     intro x
     rw [Real.sq_sqrt (by
       have := hSΦ_nn 0
@@ -218,12 +191,12 @@ theorem cometricCastG0_order0sup_jetL2_radiusFree
         (Φ.toSection x) (W.toSection x)) ?_
       exact mul_le_mul hΦ0 (hΛT x) (riemannianFiberNormSq_nonneg _ _ _ _ _) (hSΦ_nn 0)
     linarith
-  · -- low-window L² jet bound over i.
+  ·
     intro i hi
     set S : ℝ := ∑ j ∈ Finset.range (i + 1),
       ‖iteratedCovGrad (I := I) g₀ 0 2 j P‖ ^ 2 with hS_def
     have hS_nn : 0 ≤ S := Finset.sum_nonneg (fun _ _ => sq_nonneg _)
-    -- appCcRS L² jets: `‖∇^l appCcRS‖² ≤ kd l · (1 + S)`.
+
     have hstep3 : ∀ l : ℕ, l ≤ i →
         ‖iteratedCovGrad (I := I) g₀ 3 1 l (appCcRS (I := I) (M := M) g₀ 3 3 1 Φ W)‖ ^ 2 ≤
           kd l * (1 + S) := by
@@ -278,7 +251,7 @@ theorem cometricCastG0_order0sup_jetL2_radiusFree
           tensorL2Norm_sq_toFun_eq_integral_riemannianFiberNormSq_rs (I := I) (M := M) g₀ 3 (3 + q)
             (iteratedCovGrad (I := I) g₀ 3 3 q W)]
       rw [Finset.sum_congr rfl hconv]
-      -- Route `∑_{q≤l} ‖∇^q W‖²` (workhorse) into `(∑ KW_rf q) · (1 + S)`.
+
       have hWsum : (∑ q ∈ Finset.range (l + 1), ‖iteratedCovGrad (I := I) g₀ 3 3 q W‖ ^ 2) ≤
           (∑ q ∈ Finset.range (l + 1), KW_rf q) * (1 + S) := by
         calc (∑ q ∈ Finset.range (l + 1), ‖iteratedCovGrad (I := I) g₀ 3 3 q W‖ ^ 2)
@@ -301,7 +274,7 @@ theorem cometricCastG0_order0sup_jetL2_radiusFree
             mul_le_mul_of_nonneg_left hWsum
               (mul_nonneg (appCcGdiag_nonneg _) (Finset.sum_nonneg (fun i' _ => hSΦ_nn i')))
         _ = kd l * (1 + S) := by rw [hkd_def]; ring
-    -- Per-order assembly: `‖∇^l cometricCastG0‖² ≤ (2 aL l + 2 kd l)·(1 + S)`.
+
     have hterm : ∀ l ∈ Finset.range (i + 1),
         ‖iteratedCovGrad (I := I) g₀ 3 1 l (cometricCastG0 (I := I) g₀ g₁)‖ ^ 2 ≤
           (2 * aL l + 2 * kd l) * (1 + S) := by
@@ -325,16 +298,6 @@ theorem cometricCastG0_order0sup_jetL2_radiusFree
         ≤ ∑ l ∈ Finset.range (i + 1), (2 * aL l + 2 * kd l) * (1 + S) :=
           Finset.sum_le_sum hterm
       _ = (∑ l ∈ Finset.range (i + 1), (2 * aL l + 2 * kd l)) * (1 + S) := by rw [Finset.sum_mul]
-
-/-! ### Radius-free `sharpFlatEndoCc` low-order producer.
-
-Radius-free sibling of `sharpFlatEndoCc_lowOrder_jetL2_succ_generic`
-(`DeTurckVFEndoInsertProducers.lean:1314`).  `sharpFlatEndoCc = DiffIns + IdIns` where
-`DiffIns = slotInsertEndoCc g₀ 0 (gInvDiffRaisedEndoField g₀ g₁)` carries the perturbation and
-`IdIns = slotInsertEndoCc g₀ 0 (fullRaisedEndoField g₀ g₀)` is `T`-independent.  The `DiffIns` grid
-is integrated by the radius-free workhorse (byte-identical integrand, order-0 fibre input `Λ₀`); the
-`IdIns` jets are a `T`-free constant.  The decomposition helpers are re-derived here (their originals
-are `private` in the read-only Producers split part; every sibling re-derives them). -/
 
 omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [BoundarylessManifold I M] [SigmaCompactSpace M] in
 private lemma gInvRaisedEndo_self_rf (g₀ : SmoothRiemannianMetric I M) (x : M) :
@@ -479,7 +442,7 @@ theorem sharpFlatEndoCc_lowOrder_jetL2_radiusFree
     rw [sharpFlatEndoCc_eq_insert_fullRaised_rf (I := I) (M := M) g₀ g₁,
       fullRaisedEndoField_decomp_rf (I := I) (M := M) g₀ g₁,
       slotInsertEndoCc_add_rf (I := I) (M := M) g₀ 0]
-  -- Pointwise `DiffIns` grid bound (slot 0, direct from `hC_base`).
+
   have hDiff_pt : ∀ (n : ℕ) (x : M),
       riemannianFiberNormSq (I := I) (M := M) g₀ 1 (1 + n) x
           ((iteratedCovGrad (I := I) g₀ 1 1 n DiffIns).toSection x) ≤
@@ -490,7 +453,7 @@ theorem sharpFlatEndoCc_lowOrder_jetL2_radiusFree
     intro n x
     have h2 := hC_base g₁ P htie hδ_le hδ0 hδ n x
     simpa only [hDiffIns_def] using h2
-  -- `DiffIns` L² jets via the workhorse.
+
   have hDiff2 : ∀ q : ℕ,
       ‖iteratedCovGrad (I := I) g₀ 1 1 q DiffIns‖ ^ 2 ≤
         KW q * (1 + ‖iteratedCovGrad (I := I) g₀ 0 2 q P‖ ^ 2) := by
@@ -515,7 +478,7 @@ theorem sharpFlatEndoCc_lowOrder_jetL2_radiusFree
           mul_le_mul_of_nonneg_left hgb (hC_base_nn q)
       _ = C_base q * K_rf q * (1 + ‖iteratedCovGrad (I := I) g₀ 0 2 q P‖ ^ 2) := by ring
   refine ⟨?_, ?_⟩
-  · -- order-0 sup of sharpFlatEndoCc.
+  ·
     intro x
     rw [Real.sq_sqrt (by have := hC_base_nn 0; have := hSId_nn 0; linarith :
       (0 : ℝ) ≤ 2 * C_base 0 + 2 * SId 0)]
@@ -536,7 +499,7 @@ theorem sharpFlatEndoCc_lowOrder_jetL2_radiusFree
       simp only [iteratedCovGrad_zero] at h
       exact h
     linarith
-  · -- low-window L² jet bound over i.
+  ·
     intro i hi
     set S : ℝ := ∑ j ∈ Finset.range (i + 1),
       ‖iteratedCovGrad (I := I) g₀ 0 2 j P‖ ^ 2 with hS_def
@@ -568,16 +531,6 @@ theorem sharpFlatEndoCc_lowOrder_jetL2_radiusFree
           Finset.sum_le_sum hterm
       _ = (∑ q ∈ Finset.range (i + 1), (2 * KW q + 2 * FId q)) * (1 + S) := by rw [Finset.sum_mul]
 
-/-! ### Radius-free `connDiffSection` low-order producer (grid-mul composer).
-
-Radius-free sibling of `connDiffSection_lowOrder_jetL2_succ_generic`.  Routed NOT through the
-R-dependent two-arm integrator (which needs the `R`-dependent order-0 sup of `raisedKoszul ~ ∇P`)
-but through the R-FREE head engine `rfns_iteratedCovGrad_connDiffSection_topSeparated_le` (JetTower),
-whose constants are `g₀/δ₀`-only and whose remainder is `antidiagonalTupleGrid` currency.  The head
-engine folds the `appCcRS(raisedKoszul)(sharpFlatEndoCc)` product internally, so this producer needs
-neither a `raisedKoszul` nor a `sharpFlatEndoCc` R-free sibling.  The corner `‖∇^{q+1}P‖²` and the
-remainder `∑_{k<q} rfns(∇^{q-k}P)·grid(k+1)` are folded into the single grid `grid(q+1)` via
-`single_factor_mul_antidiagonalTupleGrid_le`, then integrated by the workhorse → low window. -/
 set_option linter.unusedVariables false in
 set_option maxHeartbeats 1600000 in
 theorem connDiffSection_lowOrder_jetL2_radiusFree
@@ -610,7 +563,7 @@ theorem connDiffSection_lowOrder_jetL2_radiusFree
   refine ⟨fun i => ∑ q ∈ Finset.range (i + 1), D q,
     fun i => Finset.sum_nonneg (fun q _ => hD_nn q), ?_⟩
   intro g₁ P htie δ hδ_le hδ0 hδ hsup i hi
-  -- Single-grid integral via the workhorse: `∫ grid k ≤ K_rf k · (1 + ‖∇^k P‖²)`.
+
   have hAG : ∀ k : ℕ,
       MeasureTheory.Integrable
           (fun x => Combinatorics.antidiagonalTupleGrid
@@ -631,7 +584,7 @@ theorem connDiffSection_lowOrder_jetL2_radiusFree
               ((iteratedCovGrad (I := I) g₀ 0 2 (e m) P).toSection x)) := by
       funext x; rw [Combinatorics.antidiagonalTupleGrid]
     rw [hExpand]; exact hK_rf P hsup k
-  -- Per-order L² bound: fold corner + remainder into `grid (q+1)`, integrate.
+
   have hL2 : ∀ q : ℕ,
       ‖iteratedCovGrad (I := I) g₀ 1 2 q (connDiffSection (I := I) g₁ g₀)‖ ^ 2 ≤
         D q * (1 + ‖iteratedCovGrad (I := I) g₀ 0 2 (q + 1) P‖ ^ 2) := by
@@ -707,7 +660,7 @@ theorem connDiffSection_lowOrder_jetL2_radiusFree
             (by have := hKt0_nn; have := hKc0_nn q; positivity)
       _ = (2 * Kt0 + 2 * Kc0 q * (q : ℝ)) * K_rf (q + 1) *
             (1 + ‖iteratedCovGrad (I := I) g₀ 0 2 (q + 1) P‖ ^ 2) := by ring
-  -- Sum over `q ≤ i` and collect into the window at order `i+1`.
+
   set S' : ℝ := ∑ j ∈ Finset.range (i + 2),
     ‖iteratedCovGrad (I := I) g₀ 0 2 j P‖ ^ 2 with hS'_def
   have hS'_nn : 0 ≤ S' := Finset.sum_nonneg (fun _ _ => sq_nonneg _)
@@ -726,11 +679,6 @@ theorem connDiffSection_lowOrder_jetL2_radiusFree
         linarith
     _ = (∑ q ∈ Finset.range (i + 1), D q) * (1 + S') := by rw [Finset.sum_mul]
 
-/-! ### Radius-free `wXi` low-order producer.
-
-`wXi = connDiffLoweredCc g₀ g₁ − connDiffLoweredCc g₀ g_bg`.  The `g₁`-half jets equal the
-`connDiffSection g₁ g₀` jets (`norm_iCG_connDiffLoweredCc_eq_connDiffSection`) → R-free low window;
-the `g_bg`-half is `T`-independent, a fixed per-order constant absorbed into the window's `1`. -/
 set_option linter.unusedVariables false in
 theorem wXi_lowOrder_jetL2_radiusFree
     (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
@@ -763,7 +711,6 @@ theorem wXi_lowOrder_jetL2_radiusFree
   set S' : ℝ := ∑ j ∈ Finset.range (i + 2),
     ‖iteratedCovGrad (I := I) g₀ 0 2 j P‖ ^ 2 with hS'_def
   have hS'_nn : 0 ≤ S' := Finset.sum_nonneg (fun _ _ => sq_nonneg _)
-  -- Per-order squared triangle over the `g₁` / `g_bg` halves.
   have hper : ∀ q : ℕ,
       ‖iteratedCovGrad (I := I) g₀ 0 3 q (wXi (I := I) (M := M) g₀ g₁ g_bg)‖ ^ 2 ≤
         2 * ‖iteratedCovGrad (I := I) g₀ 0 3 q (connDiffLoweredCc (I := I) g₀ g₁)‖ ^ 2 +
@@ -779,7 +726,6 @@ theorem wXi_lowOrder_jetL2_radiusFree
       norm_nonneg (iteratedCovGrad (I := I) g₀ 0 3 q (connDiffLoweredCc (I := I) g₀ g_bg)),
       sq_nonneg (‖iteratedCovGrad (I := I) g₀ 0 3 q (connDiffLoweredCc (I := I) g₀ g₁)‖ -
         ‖iteratedCovGrad (I := I) g₀ 0 3 q (connDiffLoweredCc (I := I) g₀ g_bg)‖)]
-  -- The `g₁`-half sum equals the `connDiffSection` sum, controlled by `hcd`.
   have hg1 : (∑ q ∈ Finset.range (i + 1),
         ‖iteratedCovGrad (I := I) g₀ 0 3 q (connDiffLoweredCc (I := I) g₀ g₁)‖ ^ 2) ≤
       Flow_cd i * (1 + S') := by
@@ -813,16 +759,7 @@ theorem wXi_lowOrder_jetL2_radiusFree
         nlinarith [hg1, hbg_nn, hone, mul_nonneg hbg_nn hS'_nn]
     _ = (2 * Flow_cd i + 2 * ∑ q ∈ Finset.range (i + 1), FBg q) * (1 + S') := by ring
 
-/-! ### Radius-free pointwise grid bounds for the wOmega two-arm fold (session 3).
-
-`wOmega = appCc(cometricCastG0, wXi)`.  Its R-free `_lowOrder` bound folds the two-arm product into a
-single antidiagonal-tuple grid.  These are the two pointwise `antidiagonalTupleGridWindow`-currency
-bounds the fold consumes.  `rfns_iCG_cometricCastG0_atgw_rf` re-derives (in-leaf, R-free)
-the private `rfns_iteratedCovGrad_cometricCastG0_gridWindow_le`. -/
-
 set_option linter.unusedVariables false in
-/-- **Pointwise radius-free `atgw` bound for the moving cometric cast** (exposed for the
-brick-4 `lc0VB`/`lc0AMix` discharge): `|∇ˡ(cometricCastG0 g₀ g₁)|²(x) ≤ Kcg l · atgw(bP)(l+1)`. -/
 lemma rfns_iCG_cometricCastG0_atgw_rf
     (g₀ : SmoothRiemannianMetric I M) {δ₀ : ℝ} (hδ₀ : δ₀ < 1) :
     ∃ Kcg : ℕ → ℝ, (∀ l, 0 ≤ Kcg l) ∧
@@ -964,14 +901,7 @@ lemma rfns_iCG_cometricCastG0_atgw_rf
       _ = (2 * SΦ l + 2 * (appCcGdiag (E := E) l * (∑ i' ∈ Finset.range (l + 1), SΦ i') *
             (fr ^ 2 * ∑ q ∈ Finset.range (l + 1), C_base q))) * atgw := by ring
 
-/-! Radius-free pointwise `antidiagonalTupleGridWindow`-currency bound for `connDiffSection`, via the
-public R-free head engine + `single_factor_mul_antidiagonalTupleGrid_le`.  The `wXi` grid bound builds
-on this (through the connDiffLoweredCc↔connDiffSection valence bridge). -/
 set_option linter.unusedVariables false in
-/-- **Pointwise radius-free `atgw` bound for the connection difference**:
-`|∇ˡ(connDiffSection g₁ g₀)|²(x) ≤ Ccd l · atgw(bP)(l + 2)`.  The offset is
-`+2` because the connection difference costs one derivative of the state; this
-is the base currency every order-one arm folds against. -/
 lemma rfns_iCG_connDiffSection_atgw_rf
     (g₀ : SmoothRiemannianMetric I M) {δ₀ : ℝ} (hδ₀ : δ₀ < 1) :
     ∃ Ccd : ℕ → ℝ, (∀ l, 0 ≤ Ccd l) ∧
@@ -1045,12 +975,7 @@ lemma rfns_iCG_connDiffSection_atgw_rf
   refine mul_le_mul_of_nonneg_left hgrid_grid ?_
   have := hKt0_nn; have := hKc0_nn l; positivity
 
-/-! Radius-free pointwise grid bound for `wXi`, via the public valence bridge `connLow_rfns`
-(`connDiffLoweredCc ↔ connDiffSection` fibre-norm identity) + the connDiffSection grid bound; the
-`g_bg` half is a `T`-free per-order constant folded into the window. -/
 set_option linter.unusedVariables false in
-/-- **Pointwise radius-free `atgw` bound for `wXi`** (exposed for the brick-4
-`lc0VB`/`lc0AMix` discharge): `|∇ˡ(wXi g₀ g₁ g_bg)|²(x) ≤ Kwx l · atgw(bP)(l+2)`. -/
 lemma rfns_iCG_wXi_atgw_rf
     (g₀ g_bg : SmoothRiemannianMetric I M) {δ₀ : ℝ} (hδ₀ : δ₀ < 1) :
     ∃ Kwx : ℕ → ℝ, (∀ l, 0 ≤ Kwx l) ∧
@@ -1112,13 +1037,6 @@ lemma rfns_iCG_wXi_atgw_rf
     mul_nonneg hCcd_l_nn (le_trans zero_le_one hatgw_one),
     mul_nonneg hSBg_l_nn (le_trans zero_le_one hatgw_one)]
 
-/-! ### Radius-free `wOmega` low-order producer (the two-arm grid-mul composer, session 3).
-
-`wOmega = appCc(cometricCastG0, wXi)`.  The two-arm Leibniz product
-`∑_{i'} rfns(∇^{i'}cometricCastG0)·∑_l rfns(∇ˡwXi)` folds — per term — into a single
-`antidiagonalTupleGridWindow(n+2)` via the two pointwise grid bounds above +
-`antidiagonalTupleGridWindow_mul_le` (`atgw(i'+1)·atgw(l+2) ≤ Const·atgw(i'+l+2) ≤ Const·atgw(n+2)`),
-then integrates by the workhorse → low window.  No `R`, no `ΛX 0` sup. -/
 set_option linter.unusedVariables false in
 set_option maxHeartbeats 1600000 in
 theorem wOmega_lowOrder_jetL2_radiusFree
@@ -1158,7 +1076,7 @@ theorem wOmega_lowOrder_jetL2_radiusFree
     fun i => Finset.sum_nonneg (fun q _ => mul_nonneg (hKomega_nn q)
       (Finset.sum_nonneg (fun k _ => hK_rf_nn k))), ?_⟩
   intro g₁ P htie δ hδ_le hδ0 hδ hsup i hi
-  -- Per-order pointwise fold into a single `antidiagonalTupleGridWindow (n+2)`.
+
   have hpt : ∀ (n : ℕ) (x : M),
       riemannianFiberNormSq (I := I) (M := M) g₀ 0 (1 + n) x
           ((iteratedCovGrad (I := I) g₀ 0 1 n (wOmega (I := I) (M := M) g₀ g₁ g_bg)).toSection x) ≤
@@ -1175,7 +1093,7 @@ theorem wOmega_lowOrder_jetL2_radiusFree
     refine le_trans hleib ?_
     rw [hKomega_def, mul_assoc]
     refine mul_le_mul_of_nonneg_left ?_ (appCcGdiag_nonneg (E := E) n)
-    -- inner: `∑_i cg(i)·∑_l wXi(l) ≤ (∑∑ Kcg·Kwx·WindowConst)·atgw(n+2)`.
+
     have hterm : ∀ i' ∈ Finset.range (n + 1),
         riemannianFiberNormSq (I := I) (M := M) g₀ 3 (1 + i') x
             ((iteratedCovGrad (I := I) g₀ 3 1 i' (cometricCastG0 (I := I) g₀ g₁)).toSection x) *
@@ -1189,8 +1107,7 @@ theorem wOmega_lowOrder_jetL2_radiusFree
       have hi'n : i' ≤ n := by rw [Finset.mem_range] at hi'; omega
       have hcgi := hcg g₁ P htie hδ_le hδ0 hδ i' x
       rw [Finset.mul_sum]
-      -- per-`l` bound on `range (n+1-i')` (where `i'+l ≤ n`, so the window mono holds), then
-      -- extend the (nonneg) constant terms to `range (n+1)`.
+
       refine le_trans (Finset.sum_le_sum (fun l hl => ?_))
         (Finset.sum_le_sum_of_subset_of_nonneg (Finset.range_mono (by omega)) (fun l _ _ => ?_))
       swap
@@ -1246,7 +1163,7 @@ theorem wOmega_lowOrder_jetL2_radiusFree
             Combinatorics.antidiagonalTupleGridWindow bP (n + 2) := by
           rw [Finset.sum_mul]
           exact Finset.sum_congr rfl (fun i' _ => by rw [Finset.sum_mul])
-  -- Per-grid workhorse integration.
+
   have hAG : ∀ k : ℕ,
       MeasureTheory.Integrable
           (fun x => Combinatorics.antidiagonalTupleGrid
@@ -1267,7 +1184,7 @@ theorem wOmega_lowOrder_jetL2_radiusFree
               ((iteratedCovGrad (I := I) g₀ 0 2 (e m) P).toSection x)) := by
       funext x; rw [Combinatorics.antidiagonalTupleGrid]
     rw [hExpand]; exact hK_rf P hsup k
-  -- L² per-order bound: integrate `hpt` and route the window through the workhorse.
+
   have hL2 : ∀ n : ℕ,
       ‖iteratedCovGrad (I := I) g₀ 0 1 n (wOmega (I := I) (M := M) g₀ g₁ g_bg)‖ ^ 2 ≤
         Komega n * ∑ k ∈ Finset.range (n + 2),
@@ -1301,7 +1218,7 @@ theorem wOmega_lowOrder_jetL2_radiusFree
       rw [MeasureTheory.integral_finset_sum _ (fun k _ => (hAG k).1)]
       exact Finset.sum_le_sum (fun k _ => (hAG k).2)
     exact hwin_bd
-  -- Sum over `q ≤ i` and collect into the window at order `i+1`.
+
   set S' : ℝ := ∑ j ∈ Finset.range (i + 2),
     ‖iteratedCovGrad (I := I) g₀ 0 2 j P‖ ^ 2 with hS'_def
   have hS'_nn : 0 ≤ S' := Finset.sum_nonneg (fun _ _ => sq_nonneg _)
@@ -1333,19 +1250,7 @@ theorem wOmega_lowOrder_jetL2_radiusFree
     _ = (∑ q ∈ Finset.range (i + 1), Komega q * ∑ k ∈ Finset.range (q + 2), K_rf k) * (1 + S') := by
         rw [Finset.sum_mul]
 
-/-! ### Radius-free `_L2_topsep` layer (session 4).
-
-Radius-free siblings of the private `_L2_topsep` tower in `DeTurckVFEndoInsertTopSep.lean`
-(`connDiff_L2_topsep` / `wXi_L2_topsep` / `wOmega_L2_topsep` / `wAlpha_L2_topsep`).  Each keeps the
-top-order data term `Ktop · ‖∇^{top}P‖²` explicit and separate (`Ktop` radius-free, `g₀/g_bg/δ₀`-only),
-and integrates the top-free remainder through the radius-free workhorse
-`antidiagonalTupleGrid_integral_radiusFree` (swapping the R-dependent ball-uniform tame-window
-integrator) into a low window `Flow n · (1 + ∑_{j < n+2} ‖∇ʲP‖²)`.  No `R`, no `hPball`. -/
-
 set_option linter.unusedVariables false in
-/-- Radius-free top-separated pointwise engine for `connDiffSection`: top coefficient `Ktop = 2·Kt0`
-on `rfns(∇^{l+1}P)` (`R`-free head), remainder a single `antidiagonalTupleGridWindow (l+2)`.  Sibling of
-the private `exists_rfns_connDiff_topsep`, with the `l · grid` remainder fold (no count currency). -/
 private lemma exists_rfns_connDiff_topsep_rf
     (g₀ : SmoothRiemannianMetric I M) {δ₀ : ℝ} (hδ₀ : δ₀ < 1) :
     ∃ Ktop : ℝ, 0 ≤ Ktop ∧ ∃ Kc : ℕ → ℝ, (∀ l, 0 ≤ Kc l) ∧
@@ -1425,9 +1330,6 @@ private lemma exists_rfns_connDiff_topsep_rf
 
 set_option linter.unusedVariables false in
 set_option maxHeartbeats 1600000 in
-/-- **Radius-free `connDiffSection` L² top-separated bound.**  Top `‖∇^{n+1}P‖²` with `R`-free
-coefficient `Ktop = 2·Kt0`; the grid-window remainder integrates through the workhorse into the low
-window `Flow n · (1 + ∑_{j < n+2} ‖∇ʲP‖²)`.  Radius-free sibling of `connDiff_L2_topsep`. -/
 theorem connDiff_L2_topsep_rf
     (g₀ : SmoothRiemannianMetric I M) (a : ℕ)
     (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) {δ₀ : ℝ} (hδ₀ : δ₀ < 1)
@@ -1458,7 +1360,7 @@ theorem connDiff_L2_topsep_rf
   set S' : ℝ := ∑ j ∈ Finset.range (n + 2),
     ‖iteratedCovGrad (I := I) g₀ 0 2 j P‖ ^ 2 with hS'_def
   have hS'_nn : 0 ≤ S' := Finset.sum_nonneg (fun _ _ => sq_nonneg _)
-  -- workhorse: per-grid integrability + integral bound.
+
   have hAG : ∀ k : ℕ,
       MeasureTheory.Integrable
           (fun x => Combinatorics.antidiagonalTupleGrid
@@ -1543,9 +1445,6 @@ theorem connDiff_L2_topsep_rf
         + (Kc_pt n * ∑ k ∈ Finset.range (n + 2), K_rf k) * (1 + S') := by ring
 
 set_option linter.unusedVariables false in
-/-- **Radius-free `wXi` L² top-separated bound.**  `wXi = connDiffLoweredCc g₁ − connDiffLoweredCc
-g_bg`; the `g₁` part carries the top `‖∇^{n+1}P‖²` (via `connDiff_L2_topsep_rf`), the `g_bg` part is a
-`T`-free per-order constant folded into the low window's `1`.  `Ktop = 2·(connDiff Ktop)`, `R`-free. -/
 theorem wXi_L2_topsep_rf
     (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
     (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) {δ₀ : ℝ} (hδ₀ : δ₀ < 1)
@@ -1596,10 +1495,6 @@ theorem wXi_L2_topsep_rf
     hFcd_nn n, hS'_nn, mul_nonneg (hFcd_nn n) hS'_nn]
 
 set_option linter.unusedVariables false in
-/-- Radius-free two-arm grid fold for the `wOmega` lower sum: the triangular product
-`∑_{i'} rfns(∇^{i'}cometricCastG0)·∑_{l} rfns(∇ˡwXi)` folds — via the two pointwise `atgw`-currency
-grid bounds + `antidiagonalTupleGridWindow_mul_le` — into a single `antidiagonalTupleGridWindow (n+2)`.
-Same fold as `wOmega_lowOrder_jetL2_radiusFree`'s inner double sum. -/
 private lemma cometricCastG0_wXi_twoArm_fold_rf
     (g₀ g_bg : SmoothRiemannianMetric I M) {δ₀ : ℝ} (hδ₀ : δ₀ < 1) :
     ∃ Klower : ℕ → ℝ, (∀ n, 0 ≤ Klower n) ∧
@@ -1697,11 +1592,6 @@ private lemma cometricCastG0_wXi_twoArm_fold_rf
 
 set_option linter.unusedVariables false in
 set_option maxHeartbeats 1600000 in
-/-- Radius-free pointwise top-separated envelope for `wOmega`.  Corner `Kc_top · rfns(∇ⁿwXi)`
-(`Kc_top = 2·ΛC²`, the `R`-free order-0 `cometricCastG0` sup) plus the top-free lower two-arm sum
-folded into a single `antidiagonalTupleGridWindow (n+2)`.  The pointwise engine behind
-`wOmega_L2_topsep_rf`; split out so the corner-peel and the workhorse integration keep separate
-heartbeat budgets. -/
 private lemma exists_rfns_wOmega_topsep_rf
     (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
     (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) {δ₀ : ℝ} (hδ₀ : δ₀ < 1)
@@ -1744,7 +1634,7 @@ private lemma exists_rfns_wOmega_topsep_rf
     (cometricCastG0 (I := I) g₀ g₁) (wXi (I := I) (M := M) g₀ g₁ g_bg) n]
   rw [SmoothCcTensor.toSection_add, ContMDiffSection.coe_add, Pi.add_apply]
   refine le_trans (riemannianFiberNormSq_add_le (I := I) (M := M) g₀ 0 (1 + n) x _ _) ?_
-  -- corner: coefficient fibre norm `≤ ΛC²`, no `appCcGdiag`
+
   have hcorner : riemannianFiberNormSq (I := I) (M := M) g₀ 0 (1 + n) x
       ((appCcRS (I := I) (M := M) g₀ 0 (3 + n) (1 + n)
         (appCcLeibnizPsi (I := I) (M := M) g₀ 3 1 (cometricCastG0 (I := I) g₀ g₁) n n)
@@ -1757,7 +1647,7 @@ private lemma exists_rfns_wOmega_topsep_rf
       (iteratedCovGrad (I := I) g₀ 0 3 n (wXi (I := I) (M := M) g₀ g₁ g_bg)) x) ?_
     exact mul_le_mul_of_nonneg_right (hCsup x)
       (riemannianFiberNormSq_nonneg (I := I) (M := M) g₀ 0 (3 + n) x _)
-  -- lower sum: top-free, bounded by the two-arm triangular grid, then folded into `atgw (n+2)`
+
   have hlower : riemannianFiberNormSq (I := I) (M := M) g₀ 0 (1 + n) x
       ((∑ k ∈ Finset.range n,
         appCcRS (I := I) (M := M) g₀ 0 (3 + k) (1 + n)
@@ -1821,7 +1711,7 @@ private lemma exists_rfns_wOmega_topsep_rf
           ≤ ∑ k ∈ Finset.range n, A (n - k) * ∑ l ∈ Finset.range (n + 1 - (n - k)), B l := hstep1
         _ = ∑ k ∈ Finset.range n, A (k + 1) * ∑ l ∈ Finset.range (n + 1 - (k + 1)), B l := hstep2
         _ ≤ ∑ i ∈ Finset.range (n + 1), A i * ∑ l ∈ Finset.range (n + 1 - i), B l := hstep3
-  -- fold the lower two-arm sum into a single grid window
+
   have hlower_fold : riemannianFiberNormSq (I := I) (M := M) g₀ 0 (1 + n) x
       ((∑ k ∈ Finset.range n,
         appCcRS (I := I) (M := M) g₀ 0 (3 + k) (1 + n)
@@ -1846,11 +1736,6 @@ private lemma exists_rfns_wOmega_topsep_rf
 
 set_option linter.unusedVariables false in
 set_option maxHeartbeats 1600000 in
-/-- **Radius-free `wOmega` L² top-separated bound** (genuine corner peel).  `wOmega = appCc
-cometricCastG0 wXi`; the argCorner Leibniz isolates the corner `appCcRS ψ_{n,n} (∇ⁿwXi)` — coefficient
-fibre norm bounded by the `R`-free order-0 sup `ΛC²` of `cometricCastG0`, feeding `wXi_L2_topsep_rf`
-for the top `‖∇^{n+1}P‖²` — from a top-free lower two-arm sum folded through the workhorse into the low
-window.  `Ktop = 2·ΛC²·Ktop_xi`, `R`-free. -/
 theorem wOmega_L2_topsep_rf
     (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
     (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) {δ₀ : ℝ} (hδ₀ : δ₀ < 1)
@@ -1893,7 +1778,7 @@ theorem wOmega_L2_topsep_rf
               (fun j => riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + j) x
                 ((iteratedCovGrad (I := I) g₀ 0 2 j P).toSection x)) (n + 2) :=
     fun x => hpt_gen g₁ P htie hδ_le hδ0 hδ hsup n x
-  -- integrate the envelope.
+
   have hAG : ∀ k : ℕ,
       MeasureTheory.Integrable
           (fun x => Combinatorics.antidiagonalTupleGrid
@@ -1991,9 +1876,6 @@ theorem wOmega_L2_topsep_rf
               ∑ k ∈ Finset.range (n + 2), K_rf k) * (1 + S') := by ring
 
 set_option linter.unusedVariables false in
-/-- Radius-free pointwise `atgw`-currency grid bound for `wOmega` (folding the corner in — no top
-separation, no `hsup`).  Built from the full Leibniz `appCc_iteratedCovGrad_diagonalProductGrid_le` +
-the `cometricCastG0`×`wXi` two-arm fold.  Feeds the `wAlphaB` two-arm fold. -/
 private lemma rfns_iCG_wOmega_atgw_rf
     (g₀ g_bg : SmoothRiemannianMetric I M) {δ₀ : ℝ} (hδ₀ : δ₀ < 1) :
     ∃ Kwo : ℕ → ℝ, (∀ n, 0 ≤ Kwo n) ∧
@@ -2020,10 +1902,6 @@ private lemma rfns_iCG_wOmega_atgw_rf
   exact mul_le_mul_of_nonneg_left (hfold g₁ P htie hδ_le hδ0 hδ n x) (appCcGdiag_nonneg (E := E) n)
 
 set_option linter.unusedVariables false in
-/-- Radius-free two-arm grid fold for the `wAlphaB` sum: the triangular product
-`∑_n rfns(∇ⁿwCA)·∑_l rfns(∇ˡwOmega)` folds — via the `wCA` (`= connDiffSection`) and `wOmega` pointwise
-grid bounds + `antidiagonalTupleGridWindow_mul_le` — into a single `antidiagonalTupleGridWindow (i+3)`
-(both arms carry the `+2` offset, so the fused window is one higher than the `wOmega` fold). -/
 private lemma wCA_wOmega_twoArm_fold_rf
     (g₀ g_bg : SmoothRiemannianMetric I M) {δ₀ : ℝ} (hδ₀ : δ₀ < 1) :
     ∃ KB : ℕ → ℝ, (∀ i, 0 ≤ KB i) ∧
@@ -2128,10 +2006,6 @@ private lemma wCA_wOmega_twoArm_fold_rf
 
 set_option linter.unusedVariables false in
 set_option maxHeartbeats 1600000 in
-/-- Radius-free per-order L² bound for the top-free `wAlphaB = appCc wCA wOmega` arm.  The two-arm
-Leibniz product is folded into a single `antidiagonalTupleGridWindow (i+3)` (`wCA_wOmega_twoArm_fold_rf`)
-and integrated through the workhorse into the low window `FlowB i · (1 + ∑_{j < i+3} ‖∇ʲP‖²)`.
-Public: consumed by the brick-4 `lc0Insert`-difference arm (`LieCorr0CoeffDiffRadiusFree.lean`). -/
 lemma wAlphaB_L2_perOrder_rf
     (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
     (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) {δ₀ : ℝ} (hδ₀ : δ₀ < 1)
@@ -2160,7 +2034,7 @@ lemma wAlphaB_L2_perOrder_rf
   set S' : ℝ := ∑ j ∈ Finset.range (i + 3),
     ‖iteratedCovGrad (I := I) g₀ 0 2 j P‖ ^ 2 with hS'_def
   have hS'_nn : 0 ≤ S' := Finset.sum_nonneg (fun _ _ => sq_nonneg _)
-  -- pointwise: `rfns(∇ⁱwAlphaB) ≤ (appCcGdiag i · KB i) · atgw (i+3)`.
+
   have hpt : ∀ x : M,
       riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + i) x
           ((iteratedCovGrad (I := I) g₀ 0 2 i (wAlphaB (I := I) (M := M) g₀ g₁ g_bg)).toSection x) ≤
@@ -2173,7 +2047,7 @@ lemma wAlphaB_L2_perOrder_rf
     rw [mul_assoc]
     exact mul_le_mul_of_nonneg_left (hfoldB g₁ P htie hδ_le hδ0 hδ i x)
       (appCcGdiag_nonneg (E := E) i)
-  -- workhorse: per-grid integrability + integral bound.
+
   have hAG : ∀ k : ℕ,
       MeasureTheory.Integrable
           (fun x => Combinatorics.antidiagonalTupleGrid
@@ -2233,13 +2107,6 @@ lemma wAlphaB_L2_perOrder_rf
     _ = ((appCcGdiag (E := E) i * KB i) * ∑ k ∈ Finset.range (i + 3), K_rf k) * (1 + S') := by ring
 
 set_option linter.unusedVariables false in
-/-- **Radius-free `wAlpha` L² top-separated bound** (top of the DeTurck-VF tower).
-`wAlpha = wAlphaA + wAlphaB`; the `wAlphaA` arm is `‖∇ⁱwAlphaA‖² = ‖∇^{i+1}wOmega‖²`
-(`norm_iCG_wAlphaA_eq_succ_wOmega`), top-separated by `wOmega_L2_topsep_rf` at `n = i+1` — top
-`‖∇^{i+2}P‖²`; the `wAlphaB` arm is top-free (`wAlphaB_L2_perOrder_rf`).  Both low windows land at
-`∑_{j < i+3}`.  `Ktop = 2·Ktop_om`, radius-free.  Session-5 discharge lifts this through
-`norm_iCG_wEndoInsert_eq_wAlpha` + the DLa/DLb split; the top index `i+2` still sits in the low
-window (range `i+3`) and is split out there. -/
 theorem wAlpha_L2_topsep_rf
     (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
     (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) {δ₀ : ℝ} (hδ₀ : δ₀ < 1)
@@ -2268,16 +2135,13 @@ theorem wAlpha_L2_topsep_rf
   set S' : ℝ := ∑ j ∈ Finset.range (i + 3),
     ‖iteratedCovGrad (I := I) g₀ 0 2 j P‖ ^ 2 with hS'_def
   have hS'_nn : 0 ≤ S' := Finset.sum_nonneg (fun _ _ => sq_nonneg _)
-  -- `wAlphaA`: top-separated via `wOmega_L2_topsep_rf` at `n = i+1` (top `‖∇^{i+2}P‖²`).
   have hA : ‖iteratedCovGrad (I := I) g₀ 0 2 i (wAlphaA (I := I) (M := M) g₀ g₁ g_bg)‖ ^ 2 ≤
       Ktop_om * ‖iteratedCovGrad (I := I) g₀ 0 2 (i + 2) P‖ ^ 2 + Flow_om (i + 1) * (1 + S') := by
     rw [norm_iCG_wAlphaA_eq_succ_wOmega (I := I) (M := M) g₀ g₁ g_bg i, hS'_def]
     exact hom g₁ P htie hδ_le hδ0 hδ hsup (i + 1) (by omega)
-  -- `wAlphaB`: top-free low window.
   have hBi : ‖iteratedCovGrad (I := I) g₀ 0 2 i (wAlphaB (I := I) (M := M) g₀ g₁ g_bg)‖ ^ 2 ≤
       FlowB i * (1 + S') := by
     rw [hS'_def]; exact hB g₁ P htie hδ_le hδ0 hδ hsup i
-  -- triangle over `wAlpha = wAlphaA + wAlphaB`.
   have htri : ‖iteratedCovGrad (I := I) g₀ 0 2 i (wAlpha (I := I) (M := M) g₀ g₁ g_bg)‖ ≤
       ‖iteratedCovGrad (I := I) g₀ 0 2 i (wAlphaA (I := I) (M := M) g₀ g₁ g_bg)‖ +
         ‖iteratedCovGrad (I := I) g₀ 0 2 i (wAlphaB (I := I) (M := M) g₀ g₁ g_bg)‖ := by

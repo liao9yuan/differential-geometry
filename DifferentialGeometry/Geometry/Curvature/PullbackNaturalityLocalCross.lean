@@ -7,15 +7,6 @@ import DifferentialGeometry.Geometry.Topology.SigmaCompactOpen
 set_option autoImplicit false
 set_option linter.unusedSectionVars false
 
-/-!
-# Curvature naturality for cross-model local pullback metrics
-
-The lowered metric Riemann tensor of `localPullMetric g f hf` is the pullback
-of the target tensor at every point.  The proof restricts a selected local
-inverse branch to open subtypes and applies the existing global cross-model
-pullback naturality theorem.
--/
-
 noncomputable section
 
 namespace DifferentialGeometry.Integral.Connection
@@ -38,8 +29,6 @@ variable {N : Type*} [TopologicalSpace N] [ChartedSpace G N]
   [IsManifold J ((∞ : WithTop ℕ∞) + 1) N]
   [T2Space N] [SigmaCompactSpace N] [J.Boundaryless]
 
-/-- The `(0,4)` metric Riemann tensor of a cross-model local pullback metric
-is the target tensor evaluated on the pushed-forward vectors. -/
 theorem rm04_localPull
     (g : SmoothRiemannianMetric J N) (f : M → N)
     (hf : IsLocalDiffeomorph I J ∞ f)

@@ -1,6 +1,5 @@
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.OperatorFieldCovariantCalculusRS
 
-
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
@@ -71,7 +70,6 @@ def inputSlotSwapFib (x : M) : Tensor0SSpace 2 I x →L[ℝ] Tensor0SSpace 2 I x
         rw [Tensor0SSpace.toModel_smul, domDomCongr_swap_smul, ofModel_smul]
         rfl }
 
-/-- Compatibility name for the input-slot transposition operator. -/
 abbrev slotSwapFib (x : M) : Tensor0SSpace 2 I x →L[ℝ] Tensor0SSpace 2 I x :=
   inputSlotSwapFib (I := I) (M := M) x
 
@@ -142,7 +140,6 @@ def ccInputSlotSwapField (g : SmoothRiemannianMetric I M) : SmoothCcTensor g 2 2
       contMDiff_toFun := ccSlotSwapFib_contMDiff (I := I) (M := M) }
   hasCompactSupport := HasCompactSupport.of_compactSpace _
 
-/-- Compatibility name for the smooth input-slot transposition field. -/
 abbrev ccSlotSwapField (g : SmoothRiemannianMetric I M) : SmoothCcTensor g 2 2 :=
   ccInputSlotSwapField (I := I) (M := M) g
 
@@ -157,7 +154,6 @@ def ccInputSlotSymm (g : SmoothRiemannianMetric I M) (C : SmoothCcTensor g 2 2) 
   (1 / 2 : ℝ) • (C + ccOperatorFieldComp (I := I) (M := M) g 2 2 2 C
     (ccInputSlotSwapField (I := I) (M := M) g))
 
-/-- Compatibility name for symmetrization in the two input slots. -/
 abbrev ccInputSymm (g : SmoothRiemannianMetric I M) (C : SmoothCcTensor g 2 2) :
     SmoothCcTensor g 2 2 :=
   ccInputSlotSymm (I := I) (M := M) g C
@@ -171,7 +167,6 @@ lemma ccInputSymm_toSection (g : SmoothRiemannianMetric I M) (C : SmoothCcTensor
         (show TensorRSSpace 2 2 I x from
           (show Tensor0SSpace 2 I x →L[ℝ] Tensor0SSpace 2 I x from C.toSection x).comp
             (inputSlotSwapFib (I := I) (M := M) x))) := rfl
-
 
 omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [BoundarylessManifold I M] [CompleteSpace E] in
 theorem ccInputSymm_add (g : SmoothRiemannianMetric I M) (C D : SmoothCcTensor g 2 2) :
@@ -189,7 +184,6 @@ theorem ccInputSymm_add (g : SmoothRiemannianMetric I M) (C D : SmoothCcTensor g
           (ccInputSlotSwapField (I := I) (M := M) g)) from by
     abel]
   rw [smul_add]
-
 
 omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [BoundarylessManifold I M] [CompleteSpace E] in
 lemma sub_ccInputSymm_eq_half_smul_sub_appCcRS (g : SmoothRiemannianMetric I M)

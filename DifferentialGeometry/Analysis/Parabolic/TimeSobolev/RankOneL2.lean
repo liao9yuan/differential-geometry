@@ -3,14 +3,6 @@ import Mathlib.MeasureTheory.Function.StronglyMeasurable.Lemmas
 
 set_option autoImplicit false
 
-/-!
-# Rank-one operator families along time-dependent paths
-
-This file provides the pointwise algebra, measurability, and `MemLp` transfer
-for the normalized rank-one family built from a measurable inner-product
-direction path and a measurable normed residual path.
--/
-
 noncomputable section
 
 open MeasureTheory
@@ -22,13 +14,9 @@ variable [NormedAddCommGroup X] [InnerProductSpace ℝ X]
 variable [NormedAddCommGroup Y] [NormedSpace ℝ Y]
 variable {μ : Measure ℝ} {p : ENNReal}
 
-/-- The normalized rank-one operator taking the direction `u t` to the
-residual `r t`, with the inverse scalar interpreted as zero when `u t = 0`. -/
 def rankOneAlong (u : ℝ → X) (r : ℝ → Y) (t : ℝ) : X →L[ℝ] Y :=
   (‖u t‖ ^ 2)⁻¹ • InnerProductSpace.rankOne ℝ (r t) (u t)
 
-/-- The normalized rank-one operator sends `u t` to `r t` when the residual
-vanishes whenever the direction does. -/
 theorem rankOneAlong_self
     {u : ℝ → X} {r : ℝ → Y} {t : ℝ}
     (hzero : u t = 0 → r t = 0) :
@@ -41,8 +29,6 @@ theorem rankOneAlong_self
   · rw [← mul_smul, inv_mul_cancel₀ (pow_ne_zero 2 (norm_ne_zero_iff.mpr hu)),
       one_smul]
 
-/-- A relative residual bound gives a pointwise operator-norm bound for the
-normalized rank-one family. -/
 theorem norm_rankOneAlong_le
     {u : ℝ → X} {r : ℝ → Y} {t b : ℝ}
     (hb : 0 ≤ b) (hr : ‖r t‖ ≤ b * ‖u t‖) :
@@ -65,8 +51,6 @@ theorem norm_rankOneAlong_le
               b * ((‖u t‖ ^ 2)⁻¹ * ‖u t‖ ^ 2) := by ring
           _ = b := by rw [inv_mul_cancel₀ (pow_ne_zero 2 hu0), mul_one]
 
-/-- Measurable direction and residual paths produce an almost-everywhere
-strongly measurable normalized rank-one operator family. -/
 theorem rankOneAlong_aesm
     {u : ℝ → X} {r : ℝ → Y}
     (hu : AEStronglyMeasurable u μ)
@@ -87,8 +71,6 @@ theorem rankOneAlong_aesm
     (hu.norm.pow 2).aemeasurable.inv.aestronglyMeasurable
   exact hscale.smul hrank
 
-/-- A real scalar `MemLp` majorant for the relative residual transfers to the
-normalized rank-one operator family. -/
 theorem memLp_rankOneAlong
     {u : ℝ → X} {r : ℝ → Y} {b : ℝ → ℝ}
     (hu : AEStronglyMeasurable u μ)

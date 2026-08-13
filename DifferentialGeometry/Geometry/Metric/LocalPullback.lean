@@ -4,15 +4,6 @@ import Mathlib.Geometry.Manifold.Riemannian.PathELength
 set_option autoImplicit false
 set_option linter.unusedSectionVars false
 
-/-!
-# Pullback metrics along local diffeomorphisms
-
-A smooth local diffeomorphism has an everywhere invertible differential, so
-the pointwise pullback of a Riemannian metric is again a smooth Riemannian
-metric.  Unlike `Diffeomorph.pullbackMetricCross`, this construction does not
-require global injectivity or a global inverse.
--/
-
 noncomputable section
 
 namespace DifferentialGeometry
@@ -35,7 +26,6 @@ variable {N : Type*} [TopologicalSpace N] [ChartedSpace G N]
 
 private theorem infty_ne_zero : (∞ : WithTop ℕ∞) ≠ 0 := by decide
 
-/-- Fiberwise pullback of a target metric along a local diffeomorphism. -/
 noncomputable def localPullInner
     (g : SmoothRiemannianMetric J N) (f : M → N) (x : M) :
     TangentSpace I x →L[Real] TangentSpace I x →L[Real] Real :=
@@ -43,7 +33,6 @@ noncomputable def localPullInner
     mfderiv I J f x
   (ContinuousLinearMap.precomp Real D).comp ((g.inner (f x)).comp D)
 
-/-- Evaluation of the fiberwise local pullback form. -/
 theorem localPullInner_apply
     (g : SmoothRiemannianMetric J N) (f : M → N)
     (x : M) (v w : TangentSpace I x) :
@@ -125,8 +114,6 @@ private theorem push_smooth
         (f x) (mfderiv I J f x (Y x))) := by
   exact (hf.contMDiff_tangentMap (le_refl _)).comp hY
 
-/-- The pullback of a smooth Riemannian metric along a smooth local
-diffeomorphism.  No global injectivity is required. -/
 noncomputable def localPullMetric
     [SigmaCompactSpace M] [T2Space M]
     (g : SmoothRiemannianMetric J N) (f : M → N)
@@ -196,7 +183,6 @@ noncomputable def localPullMetric
     filter_upwards with y
     rfl
 
-/-- Evaluation of the local pullback metric. -/
 theorem localPullMetric_inner
     [SigmaCompactSpace M] [T2Space M]
     (g : SmoothRiemannianMetric J N) (f : M → N)
@@ -206,8 +192,6 @@ theorem localPullMetric_inner
       g.inner (f x) (mfderiv I J f x v) (mfderiv I J f x w) :=
   localPullInner_apply (I := I) (J := J) g f x v w
 
-/-- The differential of a local diffeomorphism is fiberwise isometric for its
-local pullback metric. -/
 theorem localPull_enorm
     [SigmaCompactSpace M] [T2Space M]
     [RiemannianBundle (fun y : N ↦ TangentSpace J y)]
@@ -231,8 +215,6 @@ theorem localPull_enorm
     rfl
   rw [hsrc, localPullMetric_inner]
 
-/-- A local diffeomorphism preserves the length of every `C¹` path when its
-source is equipped with the local pullback metric. -/
 theorem localPull_pathLen
     [SigmaCompactSpace M] [T2Space M]
     [RiemannianBundle (fun y : N ↦ TangentSpace J y)]

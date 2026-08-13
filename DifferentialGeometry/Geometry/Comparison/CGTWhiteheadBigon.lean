@@ -6,14 +6,6 @@ import Mathlib.Order.Filter.AtTopBot.CountablyGenerated
 
 set_option autoImplicit false
 
-/-!
-# Localized Whitehead uniqueness for CGT
-
-This module contains the hard localized Whitehead/Klingenberg producer above
-the complete-extension, fence, and short-launch nonconjugacy infrastructure in
-`CGTWhiteheadBase`.
--/
-
 noncomputable section
 
 open Bundle Manifold Metric Set TopologicalSpace
@@ -79,9 +71,6 @@ theorem exists_short_scale
   dsimp only [cap] at hLcap
   linarith
 
-/-- The selected complete-extension minimizing launch between two core points
-is nonconjugate.  The curvature and radius hypotheses provide a derived scale
-strictly larger than `2a`, leaving room for later branch perturbations. -/
 theorem intrCore_min_regular
     (g : SmoothRiemannianMetric I M)
     (hEnorm : ∀ (x : M) (v : TangentSpace I x),
@@ -188,8 +177,7 @@ theorem intrCore_min_regular
   exact hnot
 
 set_option linter.unusedSectionVars false
-/-- If the velocity partial of a smooth endpoint family is invertible, pairing
-the endpoint with the pinned base is locally injective. -/
+
 private theorem pinned_inj_nhds
     (F : E × E → E) (hF : ContDiff Real ∞ F)
     {x u : E}
@@ -233,7 +221,6 @@ private theorem pinned_inj_nhds
   simpa only [e, H, Analysis.pinnedRootMap] using e.injOn
 set_option linter.unusedSectionVars true
 
-/-- Controlled pairs of distinct launches with a common controlled endpoint. -/
 private def shortBigons
     (F : E × E → E) (ell : E × E → Real) (a L : Real) :
     Set (E × E × E) :=
@@ -246,9 +233,7 @@ private def shortBigons
     z.2.1 ≠ z.2.2}
 
 set_option linter.unusedSectionVars false
-/-- Controlled short bigons form a compact set once bounded launches are
-coercive and the moving-base endpoint pair is locally injective on every
-possible diagonal limit. -/
+
 private theorem shortBigons_compact
     (F : E × E → E) (ell : E × E → Real) (a L B : Real)
     (hF : Continuous F) (hell : Continuous ell)
@@ -344,8 +329,6 @@ private theorem shortBigons_compact
   · simpa only [Metric.mem_closedBall, dist_zero_right] using hb.2
 set_option linter.unusedSectionVars true
 
-/-- A unique minimizing launch lying in a fixed inverse branch remains the
-selected minimizing launch for all nearby endpoints. -/
 theorem intrExt_minVec_mem
     (g : SmoothRiemannianMetric I M)
     (hEnorm : ∀ (x : M) (v : TangentSpace I x),
@@ -531,8 +514,6 @@ theorem intrExt_minVec_mem
     B.hom.open_source.mem_nhds hu
   exact hmv hBopen
 
-/-- Once selected minimizing launches stay in one inverse branch, its energy
-is the true half-squared distance on the same endpoint germ. -/
 theorem branchEnergy_min_germ
     [ConnectedSpace M]
     (g : SmoothRiemannianMetric I M)
@@ -570,11 +551,6 @@ theorem branchEnergy_min_germ
     (Real.sq_sqrt
       (gInner_self_nonneg (I := I) g pt v)).symm
 
-/-- A radial line through the pullback origin is a complete-extension
-geodesic on a time interval strictly larger than `[0, 1]`, provided that the
-unit-time endpoint lies in the strict metric-agreement ball.  The auxiliary
-global curve in the pullback ball is only a smooth radial clamp; the geodesic
-claim is made on the interval where that clamp is the identity. -/
 private theorem intrExt_radial_geo
     (g : SmoothRiemannianMetric I M)
     (hEnorm : ∀ (x : M) (v : TangentSpace I x),
@@ -732,8 +708,6 @@ private theorem intrExt_radial_geo
     (g := intrExtMetric (I := I) g hEnorm p hR hloc)
     heq.eq_of_nhds.symm heq.symm (hext_geo t ht)
 
-/-- Radial launches from the pullback origin are the model-space radial
-segments throughout the strict metric-agreement ball. -/
 theorem intrExt_radial_eq
     (g : SmoothRiemannianMetric I M)
     (hEnorm : ∀ (x : M) (v : TangentSpace I x),
@@ -830,8 +804,6 @@ theorem intrExt_radial_eq
   have hΓt : Γ t = t • z := heq htO
   simpa only [Γ, gExt, hExt, intrExtLaunch] using hΓt
 
-/-- The exponential of the complete extension at the pullback origin is the
-model-space identity throughout the strict metric-agreement ball. -/
 theorem intrExt_exp_zero
     (g : SmoothRiemannianMetric I M)
     (hEnorm : ∀ (x : M) (v : TangentSpace I x),
@@ -847,7 +819,6 @@ theorem intrExt_exp_zero
     intrExt_radial_eq (I := I) g hEnorm p hR hloc hz
       (t := (1 : Real)) ⟨zero_le_one, le_rfl⟩
 
-/-- The identity partial diffeomorphism on the strict agreement ball. -/
 private noncomputable def intrOriginHom {R : Real} :
     PartialDiffeomorph 𝓘(Real, E) 𝓘(Real, E) E E ∞ where
   toPartialEquiv :=
@@ -869,8 +840,6 @@ variable
         (intrinsicFramedExp (I := I) g hEnorm p)
         (Metric.ball (0 : E) R))
 
-/-- At the pullback origin, the complete-extension metric is the original
-model inner product. -/
 theorem intrExt_inner_zero (v w : E) :
     (intrExtMetric (I := I) g hEnorm p hR hloc).inner (0 : E) v w =
       Inner.inner Real v w := by
@@ -882,8 +851,6 @@ theorem intrExt_inner_zero (v w : E) :
     intrPullMetric_inner, intrFrameMetric_zero]
   rfl
 
-/-- The origin energy defined by the complete-extension metric is exactly half
-the squared model norm, without appealing to a distance germ. -/
 theorem intrOrigin_energy (z : E) :
     (1 / 2 : Real) *
         (intrExtMetric (I := I) g hEnorm p hR hloc).inner (0 : E) z z =
@@ -930,8 +897,6 @@ private theorem halfSq_line_deriv2 (z : E) (t : Real) :
   simpa only [one_mul] using
     ((hasDerivAt_id t).mul_const (‖z‖ ^ 2)).deriv
 
-/-- At the pullback origin, the Hessian of the explicit origin energy is the
-model inner product on diagonal directions. -/
 theorem intrOrigin_hess_zero
     (g : SmoothRiemannianMetric I M)
     (hEnorm : ∀ (x : M) (v : TangentSpace I x),
@@ -1055,8 +1020,6 @@ theorem intrOrigin_hess_zero
   rw [show z₀ = ε • Y by rfl, hscale, hnorm] at hdiag
   nlinarith [sq_pos_of_pos hε]
 
-/-- Away from the origin, the explicit origin energy has positive Hessian in
-every nonzero direction under the fenced one-sided curvature budget. -/
 theorem intrOrigin_hess_pos
     (g : SmoothRiemannianMetric I M)
     (hEnorm : ∀ (x : M) (v : TangentSpace I x),
@@ -1383,8 +1346,6 @@ theorem intrOrigin_hess_pos
       add_zero, zero_add]
     exact add_pos_of_pos_of_nonneg hWW hrad
 
-/-- The explicit origin energy has positive Hessian at every controlled point,
-including the pullback origin. -/
 theorem intrOrigin_hess_all
     (g : SmoothRiemannianMetric I M)
     (hEnorm : ∀ (x : M) (v : TangentSpace I x),
@@ -1417,8 +1378,6 @@ theorem intrOrigin_hess_all
       intrOrigin_hess_pos (I := I) g hEnorm p hR hloc
         hK hRm hsmall hz hzL hz0 hY
 
-/-- On a controlled geodesic, the explicit pullback-origin energy is strictly
-convex.  This statement uses the model norm directly, not a distance germ. -/
 theorem intrOrigin_strict
     (g : SmoothRiemannianMetric I M)
     (hEnorm : ∀ (x : M) (v : TangentSpace I x),
@@ -1466,9 +1425,6 @@ theorem intrOrigin_strict
     intrOrigin_hess_all (I := I) g hEnorm p hR hloc
       hK hRm hsmall (hfence t ht) (hbound t ht) (hvel t ht)
 
-/-- A short complete-extension edge with both endpoints in the radius-`a`
-core stays in that core.  The larger scale `L` controls the Hessian, while
-convexity of the explicit origin energy recovers the original radius `a`. -/
 theorem intrExt_edge_core
     (g : SmoothRiemannianMetric I M)
     (hEnorm : ∀ (x : M) (v : TangentSpace I x),
@@ -1607,8 +1563,6 @@ theorem intrExt_edge_core
       (sq_le_sq₀ (norm_nonneg (γ t)) ha).1 hγSq
     simpa only [γ, gExt, hExt, intrExtLaunch] using hnorm
 
-/-- A nonstationary controlled geodesic cannot return to the same point at two
-successive positive periods. -/
 theorem intrOrigin_no_return
     (g : SmoothRiemannianMetric I M)
     (hEnorm : ∀ (x : M) (v : TangentSpace I x),
@@ -1671,9 +1625,6 @@ theorem intrOrigin_no_return
   linarith
 
 set_option maxHeartbeats 800000 in
-/-- Two controlled complete-extension launches from a core point to the same
-core endpoint agree.  This is the localized short-bigon theorem used by the
-regular-and-unique minimizing-vector producer. -/
 theorem intrCore_short_inj
     (g : SmoothRiemannianMetric I M)
     (hEnorm : ∀ (x : M) (v : TangentSpace I x),

@@ -3,15 +3,6 @@ import DifferentialGeometry.Geometry.Comparison.Variation.PerpFrameIndex
 
 set_option autoImplicit false
 
-/-!
-# Positive endpoint pairing for a Jacobi field
-
-This module converts a geometric Jacobi field into its coefficient ODE in a
-parallel orthonormal frame of the velocity complement.  The sharp
-Dirichlet/free estimate in `IndexFormPositive` then gives positivity of the
-endpoint pairing.
--/
-
 open Set Function Manifold Bundle
 open scoped Topology Manifold ContDiff RealInnerProductSpace Bundle
 
@@ -37,12 +28,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-/-- A Jacobi field that starts at zero has positive endpoint pairing when its
-curvature quadratic form stays below the first one-sided Dirichlet/free
-frequency.
-
-This is the geometry-to-ODE adapter.  It does not require completeness or
-connectedness of the manifold, so it also applies on an open pullback ball. -/
 theorem jacobi_pair_pos
     [RiemannianBundle (fun x : M => TangentSpace I x)]
     [PseudoEMetricSpace M] [IsRiemannianManifold I M]

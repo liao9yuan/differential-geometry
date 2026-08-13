@@ -7,13 +7,6 @@ import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.PrincipalCoeffH2
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.DeTurckRemainderTameLipschitzPhiMetTotalCurvatureFold
 import DifferentialGeometry.Analysis.Sobolev.TensorHilbert.RemainderCoeffL2JetMoser
 
-
-
-
-
-
-
-
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
@@ -132,8 +125,6 @@ theorem reindex_sub
   exact ContinuousLinearMap.sub_comp _ _ _
 
 set_option maxHeartbeats 3200000 in
-/-- The second-order Lie refold is pointwise small using only fibre metric
-smallness; no Sobolev radius or high-order jet hypothesis is required. -/
 theorem lieRefold2_cap
     (g : SmoothRiemannianMetric I M) (T : SmoothCcTensor g 0 2)
     {δ : ℝ} (hδ_lt : δ < 1) (hδ0 : 0 ≤ δ)
@@ -243,8 +234,6 @@ theorem lieRefold2_cap
   rw [htarget]
   nlinarith [hscaled, sq_nonneg B]
 
-/-- The complete principal Ricci--DeTurck coefficient deviation is pointwise
-small under fibre metric smallness alone. -/
 theorem phiMet_cap
     (g g_bg : SmoothRiemannianMetric I M) :
     ∃ K : ℝ, 0 ≤ K ∧
@@ -366,8 +355,6 @@ theorem phiMet_cap
   exact hscaled
 
 omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
-/-- A uniform pointwise cap for a cancellation-preserving path integrand
-controls the sum of its two integrated pieces minus the fixed coefficient. -/
 theorem path_add_sub_cap
     (g : SmoothRiemannianMetric I M) (r : ℕ)
     {δ δ' : ℝ}
@@ -911,8 +898,6 @@ theorem top_path_dev_h2
       (realizedSmallSet (δ := δ) (δ' := δ')) hSopen hSI hjdev hCR
       (fun t ht => by simpa using (hper t ht).2)
 
-
-
 theorem top_path_split
     (g₀ g_bg : SmoothRiemannianMetric I M)
     (T T' : SmoothCcTensor g₀ 0 2)
@@ -958,8 +943,6 @@ theorem top_path_split
   rw [appCc_add_left, appCc_sub_left,
     phiMet_curv_fold (I := I) (M := M) g₀ g_bg g₀ U]
 
-
-
 theorem fixed_curv_h1
     (hDim : Module.finrank ℝ E = 3)
     (g₀ g_bg : SmoothRiemannianMetric I M) :
@@ -989,9 +972,6 @@ theorem fixed_curv_h1
     exact hKbound x
   simpa only [C, B1] using happ
     (phiMetCurvCoeff (I := I) g₀ g_bg g₀) U B0 B1 hB0 hB1 hpoint (le_refl B1)
-
-
-
 
 theorem top_path_h1
     (hDim : Module.finrank ℝ E = 3)
@@ -1039,9 +1019,6 @@ theorem top_path_h1
   rw [top_path_split (I := I) (M := M) g₀ g_bg T T'
     hδ_lt hδ hδ'_lt hδ' U, ccTensorToHs_add]
   exact (norm_add_le _ _).trans (add_le_add htop' hlow')
-
-
-
 
 theorem top_path_ball_h1
     (hDim : Module.finrank ℝ E = 3)

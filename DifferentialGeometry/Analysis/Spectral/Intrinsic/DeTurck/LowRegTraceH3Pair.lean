@@ -2,15 +2,6 @@ import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.DeTurckRemainder
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.LowRegOpJetWindows
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.CurvatureCoefficientDifferenceJetTower.TsRungs
 
-/-!
-# Three-dimensional tame `H³` pair bounds for the moving trace
-
-This module exposes the small reusable `H³` pair interface needed by the
-fixed-background low-regularity coefficient estimates.  Its final currency is
-`D3 + D2 + A * D2`: the third-order difference, its second-order companion,
-and the tame endpoint-high/difference-low product.
--/
-
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
@@ -39,8 +30,6 @@ variable
     {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
       [IsManifold I ∞ M] [CompactSpace M] [I.Boundaryless]
       [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M]
-
-/-! ### A tame three-dimensional `H³` application estimate -/
 
 omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] in
 private theorem grad_sq
@@ -106,8 +95,6 @@ private theorem h3_tame_sc
   nlinarith only [h0Y, h1Y, h2X]
 
 set_option maxHeartbeats 1600000 in
-/-- In dimension three, applying a tensor-valued coefficient is tame from
-`H³ × H²` and `H² × H³` into `H³`. -/
 theorem app_h3_tame
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M) (p r c : ℕ) :
@@ -219,8 +206,6 @@ theorem app_h3_tame
           lowJetSq (I := I) (M := M) g 2 Φ *
             lowJetSq (I := I) (M := M) g 3 W) := by
       simp only [X, Z]
-
-/-! ### Inverse-slot endpoint and difference bounds -/
 
 private theorem endo_slot_l2
     (g : SmoothRiemannianMetric I M) (s i : ℕ)
@@ -377,8 +362,6 @@ private theorem full_slot_h3
 
 set_option maxHeartbeats 2400000 in
 set_option linter.unusedVariables false in
-/-- On a fixed fibre-small metric ball, the inverse-metric slot difference has
-the three-dimensional tame `H³` modulus `D3 + D2 + A * D2`. -/
 theorem inv_slot_pair_h3
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M)
@@ -595,8 +578,6 @@ theorem inv_slot_pair_h3
     _ = (B R * (D3 + D2 + A * D2)) ^ 2 := by
       rw [mul_pow, hBsq]
 
-/-! ### One-extra-slot transfer -/
-
 private theorem insert_succ_l2
     (g : SmoothRiemannianMetric I M) (s i : ℕ)
     (Λ : ContMDiffSection I (E →L[ℝ] E) ∞
@@ -697,8 +678,6 @@ namespace LowBaseInternal
 
 set_option maxHeartbeats 2400000 in
 set_option linter.unusedVariables false in
-/-- On a fixed fibre-small metric ball, the moving one-slot trace has the
-three-dimensional tame `H³` pair modulus `D3 + D2 + A * D2`. -/
 theorem trace1_pair_h3
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M)

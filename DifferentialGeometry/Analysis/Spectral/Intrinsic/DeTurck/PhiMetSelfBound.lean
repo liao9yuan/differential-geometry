@@ -2,15 +2,6 @@ import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.DeTurckTopCoeff
 import DifferentialGeometry.Analysis.Parabolic.RicciLinearization.CometricTraceSelfBound
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.IteratedCovGradFibreNormPermutationInvariance
 
-/-!
-# Dimension-only bound for the self Ricci--DeTurck top coefficient
-
-The fixed-background top coefficient at the base metric is parallel.  This
-module records an explicit pointwise bound which is nonzero only at covariant
-order zero.  The constant is independent of the metric and of the DeTurck
-background.
--/
-
 set_option autoImplicit false
 set_option backward.isDefEq.respectTransparency false
 set_option maxHeartbeats 800000
@@ -40,12 +31,10 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
-/-- Explicit dimension-only bound for the self Ricci--DeTurck top coefficient. -/
 def phiSelfC (i : ℕ) : ℝ :=
   if i = 0 then 34 * (Module.finrank ℝ E : ℝ) ^ 6 else 0
 
 set_option linter.unusedSectionVars false in
-/-- The self top-coefficient bound is nonnegative. -/
 theorem phiSelfC_nonneg (i : ℕ) : 0 ≤ phiSelfC (E := E) i := by
   by_cases hi : i = 0
   · simp only [phiSelfC, hi, if_pos]
@@ -279,8 +268,6 @@ private theorem ricciSelf_grid
       simp only [selfTraceC, Nat.succ_ne_zero, if_false] at htrace ⊢
       nlinarith
 
-/-- Every covariant jet of the self Ricci--DeTurck top coefficient has an
-explicit dimension-only pointwise bound.  Positive-order jets vanish. -/
 theorem phiSelf_grid
     (g g_bg : SmoothRiemannianMetric I M) (i : ℕ) (x : M) :
     riemannianFiberNormSq (I := I) (M := M) g 4 (2 + i) x

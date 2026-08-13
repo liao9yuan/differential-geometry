@@ -6,27 +6,6 @@ import Mathlib.Analysis.InnerProductSpace.PiL2
 
 set_option autoImplicit false
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 noncomputable section
 
 open Set Function Manifold Bundle
@@ -47,14 +26,7 @@ variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
   [T2Space M] [SigmaCompactSpace M]
 
-
-
-
-
 omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [T2Space M] [SigmaCompactSpace M] in
-/-- **Inhomogeneous covariant Gronwall pair transfer.** A parallel orthonormal
-frame transports a covariant second-order estimate with a uniform forcing term
-to simultaneous metric-norm bounds for the field and its covariant velocity. -/
 theorem covGronwall_pair_at
     (g : SmoothRiemannianMetric I M) (gamma : ℝ → M)
     {K eps delta b : ℝ}
@@ -388,8 +360,6 @@ theorem covGronwall_bounds_at
   · intro t ht
     simpa [hJnorm t ht, hwnorm] using hge t ht
 
-
-
 omit [T2Space M] [SigmaCompactSpace M] in
 omit [InnerProductSpace ℝ E] in
 omit [NeZero (Module.finrank ℝ E)] in
@@ -431,12 +401,6 @@ theorem covGronwall_bounds
   refine covGronwall_bounds_at (I := I) g γ (fun t _ => ?_) hcard F J
     hK hb hpar hON hFdiff hJdiff hDJdiff hODE hJ0 hDJ0
   exact hγ.contMDiffAt
-
-
-
-
-
-
 
 omit [T2Space M] [SigmaCompactSpace M] in
 omit [InnerProductSpace ℝ E] in
@@ -599,8 +563,6 @@ theorem covGronwall_ne_zero_at
   change (g.inner (γ b) (F i b)) 0 = (0 : EuclideanSpace ℝ ι) i
   rw [map_zero]
   rfl
-
-
 
 omit [T2Space M] [SigmaCompactSpace M] in
 omit [InnerProductSpace ℝ E] in

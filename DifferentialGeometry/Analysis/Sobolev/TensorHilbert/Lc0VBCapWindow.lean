@@ -1,33 +1,6 @@
 import DifferentialGeometry.Analysis.Sobolev.TensorHilbert.GradCapAtgw
 import DifferentialGeometry.Analysis.Sobolev.TensorHilbert.LieCorr0CoeffDiffRadiusFree
 
-/-!
-# `lc0VB` in the `∇P`-capped currency: the `range (i+2)` window
-
-`lc0VB` is one of the two summands of `selfLow_split` that are QUADRATIC in the
-connection difference.  Its radius-free window
-(`b4_vb_atgw`, `LieCorr0CoeffDiffRadiusFree.lean`) lands at `atgw bP (i+3)` and
-therefore integrates only into the `range (i+3)` budget — one order over what
-`selfLow_jet` may spend.
-
-This module re-derives the window in the `∇P`-capped currency of
-`GradCapAtgw.lean` and lands on `range (i + 2)`.  It is the smoke test of that
-currency: nothing about `lc0VB` is re-proved, the SAME three arm windows are fed
-in, only the base of the grid changes.
-
-```
-vbMcdArm             atgw bP (i'+2)  --armShift-->  atgw b'P (i'+1)
-ipLowCc (wOmega)     atgw bP (q+2)   --armShift-->  atgw b'P (q+1)
-   atgwCapArm        ->  lc0VBPass   :               atgw b'P (n+1)     (vbSplit)
-lc0RiemLive          atgw bP (i'+1) ≤ atgw bP (i'+2) --armShift--> atgw b'P (i'+1)
-   atgwFold (0,0)    ->  lc0VB / 2   :               atgw b'P (n+1)     (lc0VB_eq_app)
-   atgwCapToJet w=1  ->  ‖∇ⁿ lc0VB‖² ≤ K · (1 + ∑_{j<n+2} ‖∇ʲP‖²)       ✓
-```
-
-The two caps consumed are `|P|_∞ ≤ Λ` and `|∇P|_∞ ≤ Λ`; the second is the new
-one, produced from the `H^{a+2}` ball at gate `1 ≤ a` by `gradCapOfBall`.
--/
-
 noncomputable section
 
 set_option autoImplicit false
@@ -59,11 +32,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
 set_option linter.unusedVariables false in
-/-- **The `∇P`-capped pointwise window of `lc0VB`.**
-
-`|∇ⁱ(lc0VB g₀ g₁)|²(x) ≤ Kvb i · atgw b'P (i + 1)`, with `b'P` the jets of `∇P`.
-Compare `b4_vb_atgw`, whose window is `atgw bP (i + 3)`: one grid level higher in
-the base that does NOT see the `∇P` cap, hence one derivative over budget. -/
 theorem lc0VBCapAtgw (g₀ : SmoothRiemannianMetric I M)
     {δ₀ : ℝ} (hδ₀ : δ₀ < 1) {Λ : ℝ} (hΛ1 : 1 ≤ Λ) :
     ∃ Kvb : ℕ → ℝ, (∀ i, 0 ≤ Kvb i) ∧
@@ -116,7 +84,6 @@ theorem lc0VBCapAtgw (g₀ : SmoothRiemannianMetric I M)
     intro y
     rw [Real.sq_sqrt hΛ0]
     simpa using hP0 y
-  -- arm 1: the `metricConnDiffLowered` head of the passenger
   have hA : ∀ (m : ℕ) (y : M),
       riemannianFiberNormSq (I := I) (M := M) g₀ 1 (4 + m) y
           ((iteratedCovGrad (I := I) g₀ 1 4 m
@@ -128,7 +95,6 @@ theorem lc0VBCapAtgw (g₀ : SmoothRiemannianMetric I M)
     rw [hKA_def, mul_assoc]
     exact mul_le_mul_of_nonneg_left
       (hmcd g₁ P htie hδ_le hδ0 hδ hsup m y) hfr_nn
-  -- arm 2: the interior-product tail of the passenger
   have hB : ∀ (q : ℕ) (y : M),
       riemannianFiberNormSq (I := I) (M := M) g₀ 2 (1 + q) y
           ((iteratedCovGrad (I := I) g₀ 2 1 q
@@ -160,7 +126,6 @@ theorem lc0VBCapAtgw (g₀ : SmoothRiemannianMetric I M)
             Combinatorics.antidiagonalTupleGridWindow
               (gridBase (I := I) (M := M) g₀ P y) (q + 2) := by
           rw [Finset.sum_mul]
-  -- the passenger, folded in the shifted base
   have hPass : ∀ (n : ℕ) (y : M),
       riemannianFiberNormSq (I := I) (M := M) g₀ 2 (4 + n) y
           ((iteratedCovGrad (I := I) g₀ 2 4 n
@@ -174,7 +139,6 @@ theorem lc0VBCapAtgw (g₀ : SmoothRiemannianMetric I M)
       (vbMcdArm (I := I) (M := M) g₀ g₁)
       (ipLowCc (I := I) (M := M) g₀ (wOmega (I := I) (M := M) g₀ g₁ g₀))
       hKA_nn hKB_nn hA hB n y
-  -- the live cometric arm, weakened to offset `+2` and then shifted
   have hC : ∀ (m : ℕ) (y : M),
       riemannianFiberNormSq (I := I) (M := M) g₀ 4 (2 + m) y
           ((iteratedCovGrad (I := I) g₀ 4 2 m
@@ -192,7 +156,6 @@ theorem lc0VBCapAtgw (g₀ : SmoothRiemannianMetric I M)
   have hC' := armShift (I := I) (M := M) g₀ P hΛ1 hP0 hP1
     (lc0RiemLive (I := I) (M := M) g₀ g₁) hKC_nn 0
     (fun m y => by simpa using hC m y)
-  -- the outer fold, already in the shifted base
   have houter : riemannianFiberNormSq (I := I) (M := M) g₀ 2 (2 + i) x
       ((iteratedCovGrad (I := I) g₀ 2 2 i
         (appCcRS (I := I) (M := M) g₀ 2 4 2 (lc0RiemLive (I := I) (M := M) g₀ g₁)
@@ -206,7 +169,6 @@ theorem lc0VBCapAtgw (g₀ : SmoothRiemannianMetric I M)
       (iteratedCovGrad (I := I) g₀ 0 2 1 P)
       (fun j => mul_nonneg (hKC_nn j) (shiftConst_nn hΛ0 _)) hKPass_nn
       (fun j y => by simpa using hC' j y) (fun l y => by simpa using hPass l y) i x
-  -- restore the factor `2` of `lc0VB_eq_app`
   rw [lc0VB_eq_app (I := I) (M := M) g₀ g₁,
     iteratedCovGrad_smul_real (I := I) (M := M) g₀ 2 2 i (2 : ℝ) _,
     SmoothCcTensor.toSection_smul, ContMDiffSection.coe_smul, Pi.smul_apply,
@@ -216,13 +178,6 @@ theorem lc0VBCapAtgw (g₀ : SmoothRiemannianMetric I M)
   exact mul_le_mul_of_nonneg_left houter (by norm_num)
 
 set_option linter.unusedVariables false in
-/-- **`lc0VB` lands on the `range (i+2)` budget** — the smoke test of the
-`Λ₁`-capped currency, and the shape `selfLow_jet` needs for this summand.
-
-Compare `lc0VB_perOrder_rf` (`LieCorr0CoeffDiffRadiusFree.lean`), which is
-radius-free but lands on `range (i+3)`.  The extra input here is exactly the
-pointwise cap on `∇P`, which `gradCapOfBall` produces from the `H^{a+2}` ball at
-the gate `1 ≤ a`. -/
 theorem lc0VBCapJet (g₀ : SmoothRiemannianMetric I M)
     {δ₀ : ℝ} (hδ₀ : δ₀ < 1) {Λ : ℝ} (hΛ1 : 1 ≤ Λ) :
     ∃ K : ℕ → ℝ, (∀ i, 0 ≤ K i) ∧

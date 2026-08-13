@@ -1,34 +1,5 @@
 import DifferentialGeometry.Analysis.Sobolev.TensorHilbert.DeTurckVFJetRadiusFree
 
-/-!
-# Generic radius-free antidiagonal-grid arm composer
-
-Every radius-free per-order producer in the `DeTurck`/`LieCorr0` layer is built
-the same way: each factor of a two-arm `appCcRS` product carries a *pointwise*
-`antidiagonalTupleGridWindow` bound in the state's own fibre jets, the Leibniz
-product of the two windows folds into a single window, and one application of
-the grid integral workhorse turns the pointwise window into an affine `L²` jet
-window.  Up to now that argument was rewritten in full at every arm
-(`cometricCastG0_wXi_twoArm_fold_rf`, `wCA_wOmega_twoArm_fold_rf`, the eight
-`b4_*_atgw` folds of `LieCorr0CoeffDiffRadiusFree`).
-
-This module states the argument **once**, at generic valence and generic
-derivative offsets:
-
-* `atgwFold` — the pointwise two-arm Leibniz fold.  Arms whose windows sit at
-  offsets `u + 1` and `v + 1` produce a product window at offset
-  `u + v + 1`, with a constant that is a finite sum of the two arms'
-  constants against `antidiagonalTupleGridWindowMulConst`.
-* `atgwToJet` — the integration step.  A pointwise window at offset `w`
-  integrates to `K · (∑ Kint) · (1 + ∑_{j < n + w} ‖∇ʲP‖²)`, i.e. exactly the
-  `range (n + w)` budget of the low-window towers.
-
-Both are radius-free: the only input about the state is the fixed order-zero
-fibre bound `Λ₀` that the workhorse consumes.  Neither carries an order gate,
-so they compose at **every** jet order — which is what the `∀ i` jet towers
-need and what the flat ball-uniform producers (gated `i ≤ a`) cannot give.
--/
-
 noncomputable section
 
 set_option linter.style.setOption false
@@ -56,13 +27,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
-/-- The pointwise fibre-jet family of the state that every grid window is
-measured against: `gridBase g₀ P x j = |∇ʲP|²(x)`.
-
-The base valence `(rb, sb)` is implicit and inferred from `P`.  `(0, 2)` is the
-state's own jet family; `(0, 3)` applied to `∇P` is the SHIFTED family
-`j ↦ |∇^{j+1}P|²`, on which the `∇P`-capped currency of the quadratic C0
-summands runs (`gradBase_eq`). -/
 def gridBase (g₀ : SmoothRiemannianMetric I M) {rb sb : ℕ}
     (P : SmoothCcTensor g₀ rb sb)
     (x : M) : ℕ → ℝ :=
@@ -70,20 +34,17 @@ def gridBase (g₀ : SmoothRiemannianMetric I M) {rb sb : ℕ}
     ((iteratedCovGrad (I := I) g₀ rb sb j P).toSection x)
 
 omit [BoundarylessManifold I M] in
-/-- The state's fibre-jet family is nonnegative. -/
 lemma gridBase_nn (g₀ : SmoothRiemannianMetric I M) {rb sb : ℕ}
     (P : SmoothCcTensor g₀ rb sb)
     (x : M) (j : ℕ) : 0 ≤ gridBase (I := I) (M := M) g₀ P x j :=
   riemannianFiberNormSq_nonneg (I := I) (M := M) g₀ rb (sb + j) x _
 
-/-- The constant produced by the two-arm fold at order `n`. -/
 def foldConst (u v : ℕ) (KΦ KW : ℕ → ℝ) (n : ℕ) : ℝ :=
   appCcGdiag (E := E) n *
     ∑ i' ∈ Finset.range (n + 1), ∑ l ∈ Finset.range (n + 1),
       KΦ i' * KW l * Combinatorics.antidiagonalTupleGridWindowMulConst (i' + u) (l + v)
 
 omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] in
-/-- The fold constant is nonnegative. -/
 lemma foldConst_nn {u v : ℕ} {KΦ KW : ℕ → ℝ}
     (hKΦ : ∀ i, 0 ≤ KΦ i) (hKW : ∀ l, 0 ≤ KW l) (n : ℕ) :
     0 ≤ foldConst (E := E) u v KΦ KW n := by
@@ -92,16 +53,6 @@ lemma foldConst_nn {u v : ℕ} {KΦ KW : ℕ → ℝ}
   exact mul_nonneg (mul_nonneg (hKΦ i') (hKW l))
     (Combinatorics.antidiagonalTupleGridWindowMulConst_nonneg _ _)
 
-/-- **The two-arm pointwise grid fold.**
-
-If the operator arm `Φ` has its order-`i'` fibre jet bounded by
-`KΦ i' · atgw(i' + u + 1)` and the argument arm `W` by `KW l · atgw(l + v + 1)`,
-both measured against the state's own fibre jets, then the product
-`appCcRS g₀ 0 a b Φ W` has its order-`n` fibre jet bounded by
-`foldConst u v KΦ KW n · atgw(n + u + v + 1)`.
-
-This is the pointwise half of every radius-free two-arm producer; the offsets
-add and one window is spent on the Leibniz diagonal. -/
 theorem atgwFold (g₀ : SmoothRiemannianMetric I M) {p a b : ℕ} (u v : ℕ)
     (Φ : SmoothCcTensor g₀ a b) (W : SmoothCcTensor g₀ p a)
     {rb sb : ℕ} (P : SmoothCcTensor g₀ rb sb) {KΦ KW : ℕ → ℝ}
@@ -204,18 +155,6 @@ theorem atgwFold (g₀ : SmoothRiemannianMetric I M) {p a b : ℕ} (u v : ℕ)
         rw [Finset.sum_mul]
         exact Finset.sum_congr rfl (fun i' _ => by rw [Finset.sum_mul])
 
-/-- **The grid-window integration step.**
-
-A pointwise `antidiagonalTupleGridWindow` bound at offset `w` integrates to the
-affine `L²` jet bound with the `range (n + w)` budget.  The constant `Kint` is
-the radius-free grid workhorse constant: it depends on the background metric and
-on the fixed order-zero fibre bound `Λ₀` only, never on a Sobolev ball radius,
-and there is no order gate.
-
-Base valence `(rb, sb)` generic.  At `(0, 2)` the order-zero cap is `‖P‖_∞`
-(the compatibility instance `atgwToJet` below); at `(0, 3)` applied to `∇P` it
-is `‖∇P‖_∞ = Λ₁`, and the budget lands one order lower in `P`, which is the
-whole content of the capped currency (`atgwCapToJet`). -/
 theorem atgwToJetRs (g₀ : SmoothRiemannianMetric I M) (rb sb : ℕ)
     {Λ₀ : ℝ} (hΛ₀0 : 0 ≤ Λ₀) :
     ∃ Kint : ℕ → ℝ, (∀ k, 0 ≤ Kint k) ∧
@@ -238,7 +177,6 @@ theorem atgwToJetRs (g₀ : SmoothRiemannianMetric I M) (rb sb : ℕ)
     atgGridIntRs (I := I) (M := M) g₀ rb sb hΛ₀0
   refine ⟨Kint, hKint_nn, ?_⟩
   intro P hsup r c n w X K hK hX
-  -- the grid at each level: integrable, with the workhorse bound
   have hgrid : ∀ k : ℕ,
       MeasureTheory.Integrable
           (fun x => Combinatorics.antidiagonalTupleGrid
@@ -256,7 +194,6 @@ theorem atgwToJetRs (g₀ : SmoothRiemannianMetric I M) (rb sb : ℕ)
               ((iteratedCovGrad (I := I) g₀ rb sb (e q) P).toSection x)) := by
       funext y; rw [Combinatorics.antidiagonalTupleGrid]; rfl
     rw [hExpand]; exact hKint P hsup k
-  -- the window at level `n + w`: a finite sum of grids
   have hwinInt : MeasureTheory.Integrable
       (fun x => K * Combinatorics.antidiagonalTupleGridWindow
         (gridBase (I := I) (M := M) g₀ P x) (n + w))
@@ -315,9 +252,6 @@ theorem atgwToJetRs (g₀ : SmoothRiemannianMetric I M) (rb sb : ℕ)
           (1 + ∑ j ∈ Finset.range (n + w),
             ‖iteratedCovGrad (I := I) g₀ rb sb j P‖ ^ 2) := by ring
 
-/-- **Compatibility instance of the integration step at the state's own valence
-`(0, 2)`.**  Content is `atgwToJetRs` at `(rb, sb) = (0, 2)`; this is the form
-the radius-free low-window towers consume. -/
 theorem atgwToJet (g₀ : SmoothRiemannianMetric I M) {Λ₀ : ℝ} (hΛ₀0 : 0 ≤ Λ₀) :
     ∃ Kint : ℕ → ℝ, (∀ k, 0 ≤ Kint k) ∧
       ∀ (P : SmoothCcTensor g₀ 0 2),

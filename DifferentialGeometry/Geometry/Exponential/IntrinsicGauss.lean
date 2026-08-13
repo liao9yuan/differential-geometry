@@ -9,14 +9,6 @@ import DifferentialGeometry.Analysis.Elliptic.MetricBounds
 
 set_option autoImplicit false
 
-/-!
-# Intrinsic Gauss lemma
-
-This file proves Gauss's lemma directly for the complete intrinsic exponential.
-Unlike the chart-fixed compatibility theorem, the result has no radius,
-coordinate-source, or connectedness hypothesis.
--/
-
 noncomputable section
 
 open Bundle Manifold Set Filter Function MeasureTheory
@@ -89,10 +81,6 @@ private theorem launch_inner_deriv
     ring
   exact hval ▸ hd
 
-/-- **Gauss's lemma for the complete intrinsic exponential.**  Pairing the
-terminal velocity of the intrinsic geodesic launched by `u` with the
-vector-slot differential of the time-one intrinsic exponential in direction
-`w` recovers the base metric pairing `gₚ(u,w)`. -/
 theorem intrinsic_gauss
     (g : SmoothRiemannianMetric I M)
     (hEnorm : ∀ (x : M) (v : TangentSpace I x),
@@ -280,8 +268,6 @@ variable [RiemannianBundle (fun x : N ↦ TangentSpace J x)]
 variable [PseudoEMetricSpace N] [IsRiemannianManifold J N] [CompleteSpace N]
   [IsContinuousRiemannianBundle V (fun x : N ↦ TangentSpace J x)]
 
-/-- The differential of the intrinsic framed exponential dominates the radial
-component of every model-space direction. -/
 theorem intrFrame_radial_le
     (g : SmoothRiemannianMetric J N)
     (hEnorm : ∀ (x : N) (v : TangentSpace J x),
@@ -335,10 +321,6 @@ theorem intrFrame_radial_le
         (intrFrameMetric (I := J) g hEnorm p z v v) := by
       rw [hspeed, intrFrameMetric_apply]
 
-/-- A `C¹` curve in intrinsic framed coordinates that starts at the model
-origin cannot gain radial norm faster than the Riemannian length of its image.
-This is the radius fence used in the continuation proof for short exponential
-lifts. -/
 theorem intrLift_norm_le
     (g : SmoothRiemannianMetric J N)
     (hEnorm : ∀ (x : N) (v : TangentSpace J x),

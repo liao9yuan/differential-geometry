@@ -44,8 +44,6 @@ variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
   [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M]
 
-/-- Compatibility name for the reindexed trace-coefficient application used
-by the order-one DeTurck Lie arm. -/
 abbrev lieArm1Piece := @deTurckLieTraceCoeffPiece
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E

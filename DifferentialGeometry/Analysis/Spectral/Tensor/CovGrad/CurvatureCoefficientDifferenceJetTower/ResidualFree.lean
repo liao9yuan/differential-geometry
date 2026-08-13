@@ -1,16 +1,5 @@
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.CurvatureCoefficientDifferenceJetTower.ResidualWindow
 
-/-!
-# Radius-free grid integrators
-
-Chunk of the `CurvatureCoefficientDifferenceJetTower` tower, split
-out of the former 15111-line monolith (no longer elaborable in a
-single Lean process).  Every declaration is verbatim.  The former
-`private` helpers were promoted into the internal `CurvatureCoefficientDifferenceJetTower`
-scope, so the public `Connection` API is unchanged.  Chunk map:
-`CurvatureCoefficientDifferenceJetTower.md`.
--/
-
 noncomputable section
 
 set_option linter.style.setOption false
@@ -54,21 +43,6 @@ open DifferentialGeometry.Integral.DivergenceTheorem
 set_option backward.isDefEq.respectTransparency false
 
 set_option linter.unusedVariables false in
-/-- Radius-free per-order antidiagonal grid integral bound.  With a FIXED
-zeroth-order fibre bound `Λ₀` (from fibre smallness, not from a Sobolev ball
-radius), the integral of the order-`i` antidiagonal product grid is controlled
-by a constant `K i` — depending only on `g₀` and `Λ₀` — times `1 + ‖∇ⁱP‖²`,
-keeping the top jet EXPLICIT.  Sibling of
-`antidiagonalTupleGrid_integral_ballUniform_tameWindow`; the only differences are
-the fixed `Λ₀` (so the constant is radius-free) and that the top jet is not
-lumped back into a low window.
-
-The base valence `(r, s)` is generic.  Nothing in the argument sees it: the
-Gagliardo--Nirenberg input and the per-antidiagonal workhorse `grid_prod_int_le`
-are both valence-generic.  `(0, 2)` is the state's own grid (the compatibility
-instance `antidiagonalTupleGrid_integral_radiusFree` just below); `(0, 3)` is
-the grid of `∇P`, whose order-zero cap is `‖∇P‖_∞` — the `Λ₁` currency the
-quadratic C0 summands need. -/
 theorem atgGridIntRs
     (g₀ : SmoothRiemannianMetric I M) (r s : ℕ) {Λ₀ : ℝ} (hΛ₀0 : 0 ≤ Λ₀) :
     ∃ K : ℕ → ℝ, (∀ i, 0 ≤ K i) ∧
@@ -246,9 +220,6 @@ theorem atgGridIntRs
           linarith
 
 set_option linter.unusedVariables false in
-/-- **Compatibility instance at the state's own valence `(0, 2)`.**  This is the
-statement every existing radius-free per-order producer consumes; the content is
-`atgGridIntRs` at `(r, s) = (0, 2)`. -/
 theorem antidiagonalTupleGrid_integral_radiusFree
     (g₀ : SmoothRiemannianMetric I M) {Λ₀ : ℝ} (hΛ₀0 : 0 ≤ Λ₀) :
     ∃ K : ℕ → ℝ, (∀ i, 0 ≤ K i) ∧
@@ -272,18 +243,6 @@ theorem antidiagonalTupleGrid_integral_radiusFree
   atgGridIntRs (I := I) (M := M) g₀ 0 2 hΛ₀0
 
 set_option linter.unusedVariables false in
-/-- THE GATE.  Radius-free, top-separated integrator for `boundedFactorGridWindow`.
-With a fixed zeroth-order fibre bound `Λ₀`, the window integral splits into a LOW
-part `Klow i · (1 + ∑_{j≤i+1}‖∇ʲP‖²)` and an EXPLICIT top leak
-`Ktop i · ‖∇^{i+2}P‖²`, with `Klow`, `Ktop` depending only on `g₀` and `Λ₀`
-(radius-free).  Sibling of
-`boundedFactorGridWindow_integral_ballUniform_tameWindow_allOrders` with the
-opposite constant choice: the top jet is carried as a separate leak instead of
-hidden inside an `R`-dependent flat constant.
-
-Base valence `(r, s)` generic, exactly as for `atgGridIntRs`; the compatibility
-instance at `(0, 2)` is `boundedFactorGridWindow_integral_radiusFree_topSeparated`
-just below. -/
 theorem bfGridWinIntRs
     (g₀ : SmoothRiemannianMetric I M) (r s : ℕ) {Λ₀ : ℝ} (hΛ₀0 : 0 ≤ Λ₀) :
     ∃ Klow : ℕ → ℝ, (∀ i, 0 ≤ Klow i) ∧ ∃ Ktop : ℕ → ℝ, (∀ i, 0 ≤ Ktop i) ∧
@@ -372,13 +331,11 @@ theorem bfGridWinIntRs
       ∑ k ∈ Finset.range (i + 3), Kt k * (1 + ‖iteratedCovGrad (I := I) g₀ r s k P‖ ^ 2) :=
     Finset.sum_le_sum (fun k _ => hint2_k k)
   refine le_trans hstep1 ?_
-  -- beta-reduce the `Klow i` / `Ktop i` redexes so `linarith` sees plain atoms.
   show (∑ k ∈ Finset.range (i + 3),
         Kt k * (1 + ‖iteratedCovGrad (I := I) g₀ r s k P‖ ^ 2)) ≤
       (∑ k ∈ Finset.range (i + 3), Kt k) *
           (1 + ∑ j ∈ Finset.range (i + 2), ‖iteratedCovGrad (I := I) g₀ r s j P‖ ^ 2) +
         Kt (i + 2) * ‖iteratedCovGrad (I := I) g₀ r s (i + 2) P‖ ^ 2
-  -- Algebra: distribute, peel the top layer k = i+2, and route low layers to the window.
   have hS_nn : 0 ≤ ∑ j ∈ Finset.range (i + 2),
       ‖iteratedCovGrad (I := I) g₀ r s j P‖ ^ 2 :=
     Finset.sum_nonneg (fun _ _ => sq_nonneg _)
@@ -430,8 +387,6 @@ theorem bfGridWinIntRs
   linarith [hlow, hexp]
 
 set_option linter.unusedVariables false in
-/-- **Compatibility instance at the state's own valence `(0, 2)`.**  Content is
-`bfGridWinIntRs` at `(r, s) = (0, 2)`. -/
 theorem boundedFactorGridWindow_integral_radiusFree_topSeparated
     (g₀ : SmoothRiemannianMetric I M) {Λ₀ : ℝ} (hΛ₀0 : 0 ≤ Λ₀) :
     ∃ Klow : ℕ → ℝ, (∀ i, 0 ≤ Klow i) ∧ ∃ Ktop : ℕ → ℝ, (∀ i, 0 ≤ Ktop i) ∧

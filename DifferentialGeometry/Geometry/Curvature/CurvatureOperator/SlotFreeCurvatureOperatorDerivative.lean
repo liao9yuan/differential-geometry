@@ -1,15 +1,6 @@
 import DifferentialGeometry.Geometry.Curvature.CurvatureOperator.SlotFreeCurvatureOperatorField
 import DifferentialGeometry.Geometry.Curvature.CurvatureOperator.PointwiseCurvatureDerivative
 
-/-!
-# Covariant derivative of the two-free-slot curvature operator
-
-This file identifies the covariant derivative of the canonical two-free-slot
-curvature operator field with the slot-wise action of the covariant derivative
-of the Riemann operator.  It is the first-jet companion to
-`slotFreeCurvOpFib_apply_eval`.
--/
-
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
@@ -33,8 +24,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
-/-- The smooth compactly supported `(s, s + 2)`-tensor underlying the canonical
-two-free-slot curvature operator. -/
 noncomputable def slotFreeOpCc (g : SmoothRiemannianMetric I M) (s : ℕ) :
     L2.SmoothCcTensor g s (s + 2) where
   toSection :=
@@ -44,8 +33,6 @@ noncomputable def slotFreeOpCc (g : SmoothRiemannianMetric I M) (s : ℕ) :
   hasCompactSupport := HasCompactSupport.of_compactSpace _
 
 omit [I.Boundaryless] in
-/-- The fibre value of `slotFreeOpCc` is the canonical two-free-slot
-curvature operator. -/
 @[simp] theorem slotFreeOpCc_apply
     (g : SmoothRiemannianMetric I M) (s : ℕ) (x : M) :
     (slotFreeOpCc (I := I) (M := M) g s).toSection x =
@@ -53,8 +40,6 @@ curvature operator. -/
         (slotFreeCurvOpFib (I := I) (M := M) g s x) := rfl
 
 omit [CompactSpace M] in
-/-- Pointwise, the canonical free-slot operator is the induced tensor
-curvature written through smooth direction fields. -/
 private lemma slotFree_riem_eval
     (g : SmoothRiemannianMetric I M) (s : ℕ)
     (P Q : ContMDiffSection I E ∞ (fun y : M => TangentSpace I y))
@@ -84,7 +69,6 @@ private lemma slotFree_riem_eval
     (smoothExtensionTangent_contMDiff (I := I) y (q k))]
   rw [smoothExtensionTangent_eq (I := I) y (q k)]
 
-/-- Smooth-section form of the differentiated free-slot operator identity. -/
 private theorem slotFree_cov_sec
     (g : SmoothRiemannianMetric I M) (s : ℕ)
     (D U W : ContMDiffSection I E ∞ (fun y : M => TangentSpace I y))
@@ -228,9 +212,6 @@ private theorem slotFree_cov_sec
   simp only [Tensor0SSpace.toModel_sub, ContinuousMultilinearMap.sub_apply]
   ring
 
-/-- The covariant derivative of the two-free-slot curvature operator, applied
-to a fibre tensor and read on its derivative slot followed by its two curvature
-slots, is the slot-wise action of `∇Rm` on that tensor. -/
 theorem slotFree_cov_eval
     (g : SmoothRiemannianMetric I M) (s : ℕ) (x : M)
     (d : TangentSpace I x) (A : Tensor0SSpace s I x)

@@ -21,24 +21,6 @@ import DifferentialGeometry.Analysis.Sobolev.BoundedFactorProductGrid
 import Mathlib.Analysis.MeanInequalities
 import Mathlib.Data.Fin.Tuple.NatAntidiagonal
 
-/-!
-# Pointwise fibre-norm inputs for the capped-top-layer flat integral
-
-Two proof blocks extracted from
-`boundedFactorGrid_cappedTopLayer_integral_flat` (`ResidualFlat.lean`) so that
-each elaborates in its own Lean process; the extraction is a memory refactor
-only, and the hog theorem's statement is unchanged.
-
-- `rfnsIterCont`: continuity of `x ↦ rfns(∇ˡP)(x)`, the factor family of the
-  grid.
-- `jetSupLow`: the low-order pointwise fibre bound `rfns(∇ᵐP) ≤ Λ²` for `m ≤ 2`
-  obtained from a jet ball, with the supercritical embedding constant `Cemb` and
-  its fixed-window spec passed as parameters (so this file never touches the
-  supercritical lemma).
-
-Chunk map: `../CurvatureCoefficientDifferenceJetTower.md`.
--/
-
 noncomputable section
 
 set_option linter.style.setOption false
@@ -73,8 +55,6 @@ private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 namespace CurvatureCoefficientDifferenceJetTower
 
 omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] in
-/-- Continuity of `x ↦ rfns(g₀, 0, 2 + l)(x)((∇ˡP).toSection x)`, the factor
-family of the capped-top-layer grid. -/
 theorem rfnsIterCont (g₀ : SmoothRiemannianMetric I M) (P : SmoothCcTensor g₀ 0 2)
     (l : ℕ) :
     Continuous (fun x => riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + l) x
@@ -88,10 +68,6 @@ theorem rfnsIterCont (g₀ : SmoothRiemannianMetric I M) (P : SmoothCcTensor g�
       (iteratedCovGrad (I := I) g₀ 0 2 l P) x]
 
 set_option linter.unusedVariables false in
-/-- Low-order pointwise fibre bound from a jet ball: if the supercritical
-fixed-window embedding `hCemb` holds and every jet of `P` up to order `a + 2` is
-bounded by `R`, then `rfns(∇ᵐP)(x) ≤ Λ²` for all `m ≤ 2`, where
-`Λ = Cemb * √(a + 2) * R`. -/
 theorem jetSupLow (g₀ : SmoothRiemannianMetric I M) {a : ℕ} {R Cemb Lam : ℝ}
     (hR : 0 ≤ R)
     (hCemb : ∀ (W : SmoothCcTensor g₀ 0 2) (x : M),

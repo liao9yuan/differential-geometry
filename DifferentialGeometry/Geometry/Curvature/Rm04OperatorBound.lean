@@ -3,14 +3,6 @@ import DifferentialGeometry.Geometry.Metric.InnerExpansion
 
 set_option autoImplicit false
 
-/-!
-# Curvature-operator bound from the lowered Riemann tensor
-
-This file turns the intrinsic fiber norm of the canonical `(0,4)` Riemann
-tensor into a pointwise bound for `R(J,V)V`.  The estimate is independent of
-any exponential-map or radial-coordinate construction.
--/
-
 noncomputable section
 
 namespace DifferentialGeometry
@@ -29,8 +21,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
   [IsManifold I ∞ M] [T2Space M] [SigmaCompactSpace M]
 
 omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] in
-/-- The canonical lowered Riemann tensor evaluates as the metric pairing with
-the curvature operator. -/
 theorem rm04_eq_inner
     (g : SmoothRiemannianMetric I M) (q : M)
     (J V W : TangentSpace I q) :
@@ -70,8 +60,6 @@ private theorem rm04_slot_prod_le
   ring_nf
   exact le_rfl
 
-/-- A pointwise bound for the lowered Riemann tensor controls its sectional
-quadratic form without a dimension loss. -/
 theorem riemann_quad_le
     {Idx : Type*} [Finite Idx] [DecidableEq Idx]
     (g : SmoothRiemannianMetric I M) {q : M}
@@ -142,9 +130,6 @@ theorem riemann_quad_le
       mul_le_mul_of_nonneg_right hRm (mul_nonneg hJJ hVV)
     _ = K * g.inner q J J * g.inner q V V := by ring
 
-/-- The squared length of `R(J,V)V` is bounded by the intrinsic squared norm of
-the canonical lowered Riemann tensor, with only the dimension factor coming
-from the final tangent-vector component. -/
 theorem riemannOp_sq_le
     {Idx : Type*} [Fintype Idx] [DecidableEq Idx] [Nonempty Idx]
     (g : SmoothRiemannianMetric I M) (q : M)

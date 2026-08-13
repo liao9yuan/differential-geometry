@@ -1,7 +1,5 @@
 import DifferentialGeometry.Analysis.Sobolev.TensorHilbert.RicciConnDiffOrder1TameEnvelope
 
-
-
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
@@ -30,7 +28,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
   [T2Space M] [SigmaCompactSpace M]
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
-
 
 omit [I.Boundaryless] in
 omit [NeZero (Module.finrank ℝ E)] in
@@ -78,10 +75,8 @@ omit [SigmaCompactSpace M] in
 def innerContractionSwapPerm : Equiv.Perm (Fin 2) :=
   ⟨![1, 0], ![1, 0], by decide, by decide⟩
 
-/-- Compatibility name for the two-slot inner-contraction swap. -/
 abbrev innerCoreInPerm10 : Equiv.Perm (Fin 2) :=
   innerContractionSwapPerm
-
 
 omit [I.Boundaryless] in
 omit [NeZero (Module.finrank ℝ E)] in
@@ -239,7 +234,6 @@ private lemma rs13ContrVec_pairing (x : M) (B : Tensor0SBundle.TensorRSSpace 1 3
   exact Finset.sum_congr rfl (fun i _ => by
     rw [map_smul, ContinuousMultilinearMap.smul_apply, smul_eq_mul])
 
-
 omit [NeZero (Module.finrank ℝ E)] in
 theorem connDiffGradContrInsertionFib_contMDiff (g₀ g₁ : SmoothRiemannianMetric I M) :
     ContMDiff I (I.prod 𝓘(ℝ, Tensor0SBundle.TensorRSModel 2 4 ℝ E)) ∞
@@ -285,7 +279,6 @@ omit [NeZero (Module.finrank ℝ E)] in
         connContrCLM (I := I) 1 2 x
           ((covGrad (I := I) (M := M) g₀ 1 2
             (connDiffSection (I := I) g₁ g₀)).toSection x)) := rfl
-
 
 omit [NeZero (Module.finrank ℝ E)] in
 theorem connDiffGradContrInsertionField_eq_reindex_slotExtend
@@ -366,7 +359,6 @@ theorem connDiffGradContrInsertionField_eq_reindex_slotExtend
     fin_cases j <;> rfl
   exact hL.trans hR.symm
 
-
 omit [NeZero (Module.finrank ℝ E)] in
 theorem linearizedRicciConnDiffOrder0KernelFib_contMDiff
     (g₀ g₁ : SmoothRiemannianMetric I M) :
@@ -414,7 +406,6 @@ omit [NeZero (Module.finrank ℝ E)] in
           ((connDiffSection (I := I) g₁ g₀).toSection x)
           ((covGrad (I := I) (M := M) g₀ 1 2
             (connDiffSection (I := I) g₁ g₀)).toSection x)) := rfl
-
 
 omit [NeZero (Module.finrank ℝ E)] in
 theorem linearizedRicciConnDiffOrder0CoeffField_eq_ricciCometricFourTrace_comp_kernelField
@@ -602,7 +593,6 @@ private lemma o0Rfns_smul (g : SmoothRiemannianMetric I M) (r s : ℕ) (x : M)
     tensorInnerPointwise_smul_right]
   ring
 
-
 private theorem quadArm_rfns_windowGrid_le (g₀ : SmoothRiemannianMetric I M)
     (b : ℕ → ℝ) (hb : ∀ j, 0 ≤ b j)
     (core : SmoothCcTensor g₀ 3 4) (W23 : SmoothCcTensor g₀ 2 3)
@@ -722,7 +712,6 @@ private lemma rfns_eightArm_cascade (g : SmoothRiemannianMetric I M) (r s : ℕ)
   have cm8 := riemannianFiberNormSq_sub_le (I := I) (M := M) g r s x
     (v1 + v2 + v3 + v4 + v5 + v6 - v7) v8
   linarith [c12, c123, c1234, c12345, c123456, cm7, cm8, h1, h2, h3, h4, h5, h6, h7, h8]
-
 
 theorem rfns_iteratedCovGrad_linearizedRicciConnDiffOrder0KernelField_diagonalProductGrid_le
     (g₀ : SmoothRiemannianMetric I M) {δ₀ : ℝ} (hδ₀ : δ₀ < 1) :
@@ -1083,7 +1072,6 @@ theorem rfns_iteratedCovGrad_linearizedRicciConnDiffOrder0KernelField_diagonalPr
   exact rfns_eightArm_cascade (I := I) (M := M) g₀ 2 (4 + l) x
     _ _ _ _ _ _ _ _ hB1 hB2 hB3 hB4 hB5 hB6 hB7 hB8
 
-
 theorem rfns_iteratedCovGrad_ricciCometricFourTraceCastG0_diagonalProductGrid_le
     (g₀ : SmoothRiemannianMetric I M) {δ₀ : ℝ} (hδ₀ : δ₀ < 1) :
     ∃ C : ℕ → ℝ, (∀ n, 0 ≤ C n) ∧
@@ -1339,8 +1327,6 @@ theorem rfns_iteratedCovGrad_ricciCometricFourTraceCastG0_diagonalProductGrid_le
   nlinarith [c12, c3, c4, hpure, hpn]
 
 set_option maxHeartbeats 1600000 in
-/-- A single fibre-smallness ceiling fixes the order-zero Ricci connection-kernel
-grid before either metric varies. -/
 theorem ricci0_ker_grid_unif {δ₀ : ℝ} (hδ₀ : δ₀ < 1) :
     ∃ C : ℕ → ℝ, (∀ l, 0 ≤ C l) ∧
       ∀ (g₀ g₁ : SmoothRiemannianMetric I M) (P : SmoothCcTensor g₀ 0 2)

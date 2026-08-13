@@ -5,17 +5,7 @@ import DifferentialGeometry.Analysis.Sobolev.TensorHilbert.RemainderCoeffPerOrde
 import Mathlib.MeasureTheory.Function.LpSeminorm.CompareExp
 import Mathlib.MeasureTheory.Function.LpSeminorm.LpNorm
 
-/-!
-# Mixed H1-H2 product estimate for mixed tensor passengers
-
-On a closed three-manifold, an operator field with one intrinsic `L2` jet
-acts on a mixed tensor with two intrinsic `L2` jets to produce an `H1` mixed
-tensor.  The proof uses the mixed `H1 → L6` embedding, finite-volume
-`L6 → L3`, and the covariant Leibniz rule for `appCcRS`.
--/
-
 namespace DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral
-
 
 open scoped ContDiff Manifold Topology BigOperators ENNReal
 open MeasureTheory
@@ -73,8 +63,6 @@ private theorem h1_norm_sq_jet
       (covGrad (I := I) (M := M) g r s S)]
 
 omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] in
-/-- The mixed-tensor `H1` norm squared is the sum of the intrinsic zeroth and
-first covariant `L2` jets. -/
 theorem h1_jet_sq
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) :
@@ -285,8 +273,6 @@ private theorem rs_l2_right
   exact hsq
 
 omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [BoundarylessManifold I M] in
-/-- The complementary `L²` composition estimate: a pointwise-bounded
-operator acts on an `L²` passenger. -/
 private theorem rs_l2_left
     (g : SmoothRiemannianMetric I M) (p r c : ℕ)
     (Φ : SmoothCcTensor g r c) (W : SmoothCcTensor g p r)
@@ -400,11 +386,6 @@ private theorem rs_l6_l3_l2
   rw [← fiber_rs_lp2 (I := I) (M := M) g p c Y]
   exact hreal
 
-/-- A supplied pointwise bound, `H¹ → L⁶` coefficient bound, and `H¹ → L³`
-passenger-gradient bound control the mixed application in `H¹`.
-
-This is the metric-local analytic kernel used by both the original
-dimension-three theorem and class-uniform wrappers. -/
 theorem appRS_h1_of
     (g : SmoothRiemannianMetric I M) (p r c : ℕ)
     (Cpt CΦ CG : ℝ) (hCpt : 0 ≤ Cpt) (hCΦ : 0 ≤ CΦ) (hCG : 0 ≤ CG)
@@ -571,8 +552,6 @@ theorem appRS_h1_of
     _ ≤ Cpt * A * B + (Cpt + Ks) * A * B := add_le_add hY0 hY1
     _ = K * A * B := by dsimp [K, Ks, sd]; ring
 
-/-- In dimension three, an operator field with one `L2` jet acting on a
-mixed tensor with two `L2` jets is controlled in mixed-tensor `H1`. -/
 theorem appRS_h1_h2_h1
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M) (p r c : ℕ) :
@@ -745,11 +724,6 @@ theorem appRS_h1_h2_h1
     _ ≤ Cpt * A * B + (Cpt + Ks) * A * B := add_le_add hY0 hY1
     _ = K * A * B := by dsimp [K]; ring
 
-/-- A supplied pointwise `H2` coefficient bound and the two critical mixed
-Sobolev providers give the complementary `H2 × H1 -> H1` application bound.
-
-This is the constant-exposed kernel used by class-first consumers; it contains
-no metric-dependent existential choice. -/
 theorem appRS_h2_of
     (g : SmoothRiemannianMetric I M) (p r c : ℕ)
     (Cpt CG CW : ℝ) (hCpt : 0 ≤ Cpt) (hCG : 0 ≤ CG) (hCW : 0 ≤ CW)
@@ -943,13 +917,6 @@ theorem appRS_h2_of
       dsimp only [Kcross, Kslot, sd]
       ring
 
-/-- In dimension three, the complementary mixed product allocation also
-holds: an operator field with two intrinsic `L2` jets acting on a passenger
-with one intrinsic `L2` jet is controlled in mixed-tensor `H1`.
-
-This orientation is needed by nested Ricci--DeTurck coefficients: an inner
-composition is first estimated in `H1`, while the outer moving trace remains
-in the low `H2` class. -/
 theorem appRS_h2_h1_h1
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M) (p r c : ℕ) :
@@ -1147,9 +1114,6 @@ theorem appRS_h2_h1_h1
     _ ≤ Cpt * A * B + (Kcross + Kslot) * A * B := add_le_add hY0 hY1
     _ = K * A * B := by dsimp only [K]; ring
 
-/-- On a closed three-manifold, the intrinsic mixed-tensor `H2` jet is an
-algebra for `appCcRS`.  The middle second-derivative cell is discharged by the
-canonical two-arm Gagliardo--Nirenberg product-grid estimate. -/
 theorem appRS_h2_h2_h2
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M) (p r c : ℕ) :

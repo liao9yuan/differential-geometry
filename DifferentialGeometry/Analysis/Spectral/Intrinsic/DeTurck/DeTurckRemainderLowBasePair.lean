@@ -2,14 +2,6 @@ import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.DeTurckRemainder
 import DifferentialGeometry.Analysis.Spectral.Tensor.SobolevScale.SmoothCcDense
 import DifferentialGeometry.Analysis.Spectral.Tensor.SobolevScale.Inclusion
 
-/-!
-# Compatible completions of the low-base first-order action
-
-This module completes the single smooth-core formula
-`LowBaseActionData.a1` on the adjacent Sobolev scales used by the
-low-regularity Ricci--DeTurck bootstrap.
--/
-
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
@@ -38,8 +30,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
   [IsManifold I ∞ M] [CompactSpace M] [I.Boundaryless]
   [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M]
 
-/-- The covariant jet-square through order three is controlled by the
-spectral `H3` norm. -/
 theorem jet3_le_hs
     (g : SmoothRiemannianMetric I M) :
     ∃ C : ℝ, 0 ≤ C ∧
@@ -64,8 +54,6 @@ theorem jet3_le_hs
           (iteratedCovGrad (I := I) g 0 2 j W)))
         (by simpa only [Nat.reduceAdd] using hjet W) 2
 
-/-- The covariant jet-square through order two is controlled by the
-spectral `H2` norm. -/
 theorem jet2_le_hs
     (g : SmoothRiemannianMetric I M) :
     ∃ C : ℝ, 0 ≤ C ∧
@@ -278,7 +266,6 @@ private noncomputable def lowA1Core
       iteratedCovGrad_smul, appCc_smul_right, ccTensorToHs_add,
       ccTensorToHs_smul, smul_add]
 
-/-- The first-order low-base action completed from spectral `H3` to `H2`. -/
 noncomputable def LowBaseActionData.a1Hi
     {g : SmoothRiemannianMetric I M} (A : LowBaseActionData g) :
     tensorHs (I := I) (M := M) g 0 2 (3 : ℝ) →L[ℝ]
@@ -286,8 +273,6 @@ noncomputable def LowBaseActionData.a1Hi
   (lowA1Core (I := I) (M := M) g A (2 : ℝ)).extendOfNorm
     (ccToHsLin (I := I) (M := M) g 2 (3 : ℝ))
 
-/-- The same first-order low-base action completed from spectral `H2` to
-spectral `H1`. -/
 noncomputable def LowBaseActionData.a1Lo
     {g : SmoothRiemannianMetric I M} (A : LowBaseActionData g) :
     tensorHs (I := I) (M := M) g 0 2 (2 : ℝ) →L[ℝ]
@@ -295,8 +280,6 @@ noncomputable def LowBaseActionData.a1Lo
   (lowA1Core (I := I) (M := M) g A (1 : ℝ)).extendOfNorm
     (ccToHsLin (I := I) (M := M) g 2 (2 : ℝ))
 
-/-- One pair of smooth-core jet estimates yields bounded adjacent-scale
-completions of the same first-order action and their commuting square. -/
 theorem a1_pair
     (g : SmoothRiemannianMetric I M) :
     ∃ C : ℝ, 0 ≤ C ∧
@@ -492,9 +475,6 @@ private theorem a1Hi_core_any
   apply LinearMap.extendOfNorm_eq hdense3
   exact ⟨Cs * Real.sqrt Q, hspec A Q hQ hact⟩
 
-/-- The low adjacent-scale realization of the first-order action agrees with
-the smooth first-order action on the dense smooth core.  This is the `a1`
-sibling of `a2Lo_core`. -/
 theorem a1Lo_core_any
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M) (A : LowBaseActionData g)
@@ -569,9 +549,6 @@ private theorem grad_jet1_pair
   rw [h0, h1]
   nlinarith [sq_nonneg ‖W‖]
 
-/-- A one-jet bound on the zeroth-order coefficient and a two-jet bound on
-the first-order coefficient control the completed `H2 → H1` action
-difference. -/
 theorem a1Lo_diff
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M) :
@@ -724,8 +701,6 @@ theorem a1Lo_diff
     exact congrFun hfun W
   rwa [← hLo]
 
-/-- A two-jet bound on the difference of the first-order coefficients controls
-the differences of both adjacent-scale completed actions. -/
 theorem a1_diff
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M) :
@@ -879,8 +854,6 @@ theorem a1_diff
   · rwa [← hHi]
   · rwa [← hLo]
 
-/-- The zero-based low-base split together with the two compatible completed
-realizations of its first-order action. -/
 theorem remainder_low_pair
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M) :

@@ -3,15 +3,6 @@ import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.EdgePathPairing
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.PathIntegralFibreNormTransfer
 import DifferentialGeometry.Analysis.Spectral.Tensor.Estimates.AppCcLpProduct
 
-/-!
-# Pointwise bound for the path-integrated closed-edge partner
-
-This module transfers the complete fixed-path-parameter bound for the raw
-closed-edge formal partner through `pathIntegralCoeffField`.  The resulting
-bound keeps the passenger and test tensors independent and does not perform
-spatial integration by parts.
--/
-
 noncomputable section
 
 set_option autoImplicit false
@@ -51,8 +42,6 @@ private abbrev JointRS
     ((Set.univ : Set M) ×ˢ S)
 
 omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
-/-- A pointwise fibre cap transfers unchanged through a unit-length smooth
-coefficient path integral. -/
 private theorem fiber_path_le
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (Φ : Real → SmoothCcTensor g r s) (S : Set Real)
@@ -78,9 +67,6 @@ private theorem fiber_path_le
   have hroot := Real.sqrt_le_sqrt hsq
   simpa only [fiberLpFun, Real.sqrt_sq hA] using hroot
 
-/-- The complete path-integrated raw top partner is pointwise bilinear in its
-passenger and test tensors, with one coefficient chosen before the metric,
-raw permutations, and path vary. -/
 theorem edgeTopInt_zero_unif :
     ∃ K : Real, 0 ≤ K ∧
       ∀ (g : SmoothRiemannianMetric I M)

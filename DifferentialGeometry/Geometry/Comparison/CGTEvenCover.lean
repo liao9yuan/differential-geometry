@@ -2,15 +2,6 @@ import DifferentialGeometry.Geometry.Comparison.CGTRadialPath
 
 set_option autoImplicit false
 
-/-!
-# The CGT even-cover injection
-
-This file proves the injection half of Cheeger--Gromov--Taylor Lemma 4.5.
-Actual inverse fibers of the intrinsic framed exponential are transported
-along one short path.  Right cancellation of the common suffix proves that
-the transport is injective.
--/
-
 noncomputable section
 
 open Bundle Function Manifold Set
@@ -37,8 +28,6 @@ variable [RiemannianBundle (fun x : M ↦ TangentSpace I x)]
 variable [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
   [IsContinuousRiemannianBundle E (fun x : M ↦ TangentSpace I x)]
 
-/-- The inverse fiber of the intrinsic framed exponential inside one model
-ball. -/
 def intrFiber
     (g : SmoothRiemannianMetric I M)
     (hEnorm : ∀ (x : M) (v : TangentSpace I x),
@@ -112,9 +101,6 @@ private theorem radialLoopLift_one
     (radialLoopLift (I := I) g hEnorm p u hu).toFun 1 = u := by
   exact radialLift_one (I := I) g hEnorm p u
 
-/-- Transport along one short path injects the inverse fiber over the basepoint
-into the inverse fiber over the target.  This is the injection form of
-Cheeger--Gromov--Taylor Lemma 4.5. -/
 theorem exists_fiber_inj
     (g : SmoothRiemannianMetric I M)
     (hEnorm : ∀ (x : M) (v : TangentSpace I x),
@@ -213,8 +199,6 @@ theorem exists_fiber_inj
       hR huR hvR (hpathR u) (hpathR v) hloc hend
   simpa only [A, B, radialLoopLift_one] using hcancel
 
-/-- The inverse-fiber injection gives the corresponding extended-cardinality
-inequality. -/
 theorem fiber_encard_le
     (g : SmoothRiemannianMetric I M)
     (hEnorm : ∀ (x : M) (v : TangentSpace I x),

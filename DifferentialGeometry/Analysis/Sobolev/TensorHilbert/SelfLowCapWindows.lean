@@ -3,36 +3,6 @@ import DifferentialGeometry.Analysis.Sobolev.TensorHilbert.Lc0VBCapWindow
 import DifferentialGeometry.Analysis.Sobolev.TensorHilbert.Low1KerRadiusFree
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.EdgeRicciPairing
 
-/-!
-# The five summands of `selfLow_split` in the `∇P`-capped currency
-
-`selfLow_split` writes the zero-arm self-action integrand as
-
-`rhsSelfLow = (-2)•ricciGoodLow + (deTurckLieCovDerivArmField − edgeLiePairFam)
-  + lc0VB + lc0AMix + lc0Riem`,
-
-and `selfLow_jet` must bound its `L²` jets by the state's own jets through order
-`i + 1` only.  Three of the five summands are quadratic in the connection
-difference (`ricciGoodLow`'s `A·A` and `∇A ⋆ ∇T` arms, `lc0VB`, `lc0AMix`), so
-the ordinary radius-free currency lands one order over budget; the capped
-currency of `GradCapAtgw`/`GradCapArms` recovers the order.
-
-This module produces the capped window `HasCapWin g₀ P · K` of each summand.  In
-every case the recipe is the same and mechanical:
-
-* every factor of the product tree has an ordinary radius-free window at
-  `bP`-offset at most `+2` — one derivative of the state — and enters the capped
-  currency through `capOfArm` (or `capOfBnd` when it is state-free);
-* the tree is then reassembled with `capApp`/`capAdd`/`capSmul`/`capReindex`,
-  all of which preserve the capped level `i + 1`;
-* `capJet` integrates the result into the `range (i + 2)` budget.
-
-Nothing about the geometry of the summands is re-proved: the arm windows are the
-ones the radius-free layer already supplies, and the structural identities
-(`lc0Riem_eq_app`, `amix_refold_rf`, `aaKerSplit`, `lieCov_residual`) are the
-ones already committed.
--/
-
 noncomputable section
 
 set_option autoImplicit false
@@ -64,15 +34,7 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
-/-! ### `lc0Riem`: the fixed-curvature summand -/
-
 set_option linter.unusedVariables false in
-/-- **`lc0Riem` in the capped currency.**
-
-`lc0Riem = -(lc0RiemLive ⋆ lc0RiemPass)` with a live cometric arm costing no
-derivative of the state and a state-free passenger, so this summand is honest
-already in the radius-free currency; the capped statement is produced only so
-that all five summands speak the same language at the assembly. -/
 theorem lc0RiemCap (g₀ : SmoothRiemannianMetric I M)
     {δ₀ : ℝ} (hδ₀ : δ₀ < 1) {Λ : ℝ} (hΛ1 : 1 ≤ Λ) :
     ∃ K : ℕ → ℝ, (∀ i, 0 ≤ K i) ∧
@@ -99,7 +61,6 @@ theorem lc0RiemCap (g₀ : SmoothRiemannianMetric I M)
   refine ⟨foldConst (E := E) 0 0 KLive SPass,
     fun i => foldConst_nn (u := 0) (v := 0) hKLive_nn hSPass_nn i, ?_⟩
   intro g₁ P htie δ hδ_le hδ0 hδ hP0 hP1
-  -- the live cometric arm: offset `+1`, weakened to `+2`, then shifted
   have hLive : HasCapWin (I := I) (M := M) g₀ P
       (lc0RiemLive (I := I) (M := M) g₀ g₁) KLive := by
     refine capOfArm (I := I) (M := M) g₀ P hΛ1 hP0 hP1 _
@@ -111,25 +72,13 @@ theorem lc0RiemCap (g₀ : SmoothRiemannianMetric I M)
     refine le_trans (hcg g₁ P htie hδ_le hδ0 hδ m y) ?_
     refine mul_le_mul_of_nonneg_left ?_ (hKcg_nn m)
     exact Combinatorics.antidiagonalTupleGridWindow_mono _ hbnn (by omega)
-  -- the state-free passenger
   have hPass : HasCapWin (I := I) (M := M) g₀ P (lc0RiemPass (I := I) g₀) SPass :=
     capOfBnd (I := I) (M := M) g₀ P _ hSPass_nn (fun l y => hSPass l y)
   refine capCongr (I := I) (M := M) g₀ P (lc0Riem_eq_app (I := I) (M := M) g₀ g₁) ?_
   exact capNeg (I := I) (M := M) g₀ P
     (capApp (I := I) (M := M) g₀ P _ _ hKLive_nn hSPass_nn hLive hPass)
 
-/-! ### `lc0AMix`: the five-factor mixed summand -/
-
 set_option linter.unusedVariables false in
-/-- **`lc0AMix` in the capped currency.**
-
-`amix_refold_rf` writes the summand as two copies of the five-factor product
-`trace ⋆ trace ⋆ mcd ⋆ trace ⋆ mcd`.  The three traces cost no derivative of the
-state, the two lowered connection differences cost one each — so the summand is
-quadratic in `∇P` and its radius-free window `b4_amix_atgw` sits at
-`atgw bP (i + 3)`, one level over budget.  Shifting each of the five factors
-first and only then folding recovers the level: every factor lands at
-`atgw b'P (i + 1)` and the folds preserve that. -/
 theorem lc0AMixCap (g₀ g_bg : SmoothRiemannianMetric I M)
     {δ₀ : ℝ} (hδ₀ : δ₀ < 1) {Λ : ℝ} (hΛ1 : 1 ≤ Λ) :
     ∃ K : ℕ → ℝ, (∀ i, 0 ≤ K i) ∧
@@ -187,7 +136,6 @@ theorem lc0AMixCap (g₀ g_bg : SmoothRiemannianMetric I M)
     intro y
     rw [Real.sq_sqrt hΛ0]
     simpa using hP0 y
-  -- the three moving traces: offset `+1`, weakened to `+2`, then shifted
   have htrace : ∀ (p : ℕ) (C : ℕ → ℝ), (∀ i, 0 ≤ C i) →
       (∀ (σ : Equiv.Perm (Fin (p + 2))) (i : ℕ) (x : M),
         riemannianFiberNormSq (I := I) (M := M) g₀ (p + 2) (p + i) x
@@ -222,7 +170,6 @@ theorem lc0AMixCap (g₀ g_bg : SmoothRiemannianMetric I M)
   have hT4 : HasCapWin (I := I) (M := M) g₀ P
       (lc0TraceRF (I := I) (M := M) g₀ g₁ 4 lieCorr0AMixPerm1) KT4 :=
     htrace 4 Ctr4 hCtr4_nn (fun σ i x => htr4 g₁ P htie hδ_le hδ0 hδ σ i x) _
-  -- the two lowered connection differences, extended into their slots
   have hmcd : ∀ (gb : SmoothRiemannianMetric I M) (Km : ℕ → ℝ), (∀ i, 0 ≤ Km i) →
       (∀ (n : ℕ) (x : M),
         riemannianFiberNormSq (I := I) (M := M) g₀ 0 (3 + n) x
@@ -246,7 +193,6 @@ theorem lc0AMixCap (g₀ g_bg : SmoothRiemannianMetric I M)
         (metricConnDiffLoweredCc (I := I) (M := M) g₀ g₁ g_bg)) KMB :=
     capIter (I := I) (M := M) g₀ P 3
       (hmcd g_bg KmB hKmB_nn (fun n x => hmB g₁ P htie hδ_le hδ0 hδ hsup n x))
-  -- the four nested folds
   have hhalf : ∀ σ : Equiv.Perm (Fin 4),
       HasCapWin (I := I) (M := M) g₀ P
         (lc0AMixHalfRF (I := I) (M := M) g₀ g₁ g_bg σ) Khalf := by
@@ -274,16 +220,6 @@ theorem lc0AMixCap (g₀ g_bg : SmoothRiemannianMetric I M)
   have := hKhalf_nn i
   nlinarith [this]
 
-/-! ### `ricciAAArm`: the connection-difference-quadratic Ricci arm
-
-`ricciAAKer` is a SINGLE arm which is itself quadratic in the connection
-difference, so shifting its folded window is not sharp — the shift is sharp only
-when every grid entry of the bound carries a factor.  The two arms have to be
-exposed first.  These are the six pieces of the kernel; the split is the public
-re-derivation of the `private` `aaKer_eq` of the read-only low-base action
-module, and each piece is `permCoeff ⋆ (insertion ⋆ innerInsertion)` with both
-insertions carrying exactly one derivative of the state. -/
-
 private def aaP3201 : Equiv.Perm (Fin 4) := ⟨![3, 2, 0, 1], ![2, 3, 1, 0], by decide, by decide⟩
 private def aaP2301 : Equiv.Perm (Fin 4) := ⟨![2, 3, 0, 1], ![2, 3, 0, 1], by decide, by decide⟩
 private def aaP3102 : Equiv.Perm (Fin 4) := ⟨![3, 1, 0, 2], ![2, 1, 3, 0], by decide, by decide⟩
@@ -293,8 +229,6 @@ private def aaP2103 : Equiv.Perm (Fin 4) := ⟨![2, 1, 0, 3], ![2, 1, 0, 3], by 
 private def aaP102 : Equiv.Perm (Fin 3) := ⟨![1, 0, 2], ![1, 0, 2], by decide, by decide⟩
 private def aaP120 : Equiv.Perm (Fin 3) := ⟨![1, 2, 0], ![2, 0, 1], by decide, by decide⟩
 
-/-- The two-arm core of a quadratic Ricci kernel piece, with the inner insertion
-read through a slot permutation. -/
 def aaCoreP (g₀ g₁ : SmoothRiemannianMetric I M) (ρ : Equiv.Perm (Fin 4))
     (ρ' : Equiv.Perm (Fin 3)) : SmoothCcTensor g₀ 2 4 :=
   appCcRS (I := I) (M := M) g₀ 2 4 4 (permCoeff (I := I) (M := M) g₀ ρ)
@@ -303,8 +237,6 @@ def aaCoreP (g₀ g₁ : SmoothRiemannianMetric I M) (ρ : Equiv.Perm (Fin 4))
       (appCcRS (I := I) (M := M) g₀ 2 3 3 (permCoeff (I := I) (M := M) g₀ ρ')
         (connDiffContrInsertionInnerField (I := I) g₀ g₁)))
 
-/-- The two-arm core of a quadratic Ricci kernel piece, with the inner insertion
-read directly. -/
 def aaCore (g₀ g₁ : SmoothRiemannianMetric I M) (ρ : Equiv.Perm (Fin 4)) :
     SmoothCcTensor g₀ 2 4 :=
   appCcRS (I := I) (M := M) g₀ 2 4 4 (permCoeff (I := I) (M := M) g₀ ρ)
@@ -313,12 +245,6 @@ def aaCore (g₀ g₁ : SmoothRiemannianMetric I M) (ρ : Equiv.Perm (Fin 4)) :
       (connDiffContrInsertionInnerField (I := I) g₀ g₁))
 
 omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [SigmaCompactSpace M] in
-/-- **Public two-arm split of the quadratic Ricci kernel.**
-
-`ricciAAKer` is the sum of six slot-reindexed two-arm cores, each an insertion
-against an inner insertion.  Public re-derivation of the `private` `aaKer_eq`;
-this is what lets the base shift be applied per arm, which is the only way the
-quadratic kernel enters the `range (i + 2)` budget. -/
 theorem aaKerSplit (g₀ g₁ : SmoothRiemannianMetric I M) :
     ricciAAKer (I := I) (M := M) g₀ g₁ =
       aaCoreP (I := I) (M := M) g₀ g₁ aaP3201 aaP102 +
@@ -332,12 +258,6 @@ theorem aaKerSplit (g₀ g₁ : SmoothRiemannianMetric I M) :
           (aaCoreP (I := I) (M := M) g₀ g₁ aaP2103 aaP120) innerCoreInPerm10 := rfl
 
 set_option linter.unusedVariables false in
-/-- **`ricciAAArm` in the capped currency.**
-
-The four-trace cast costs no derivative of the state; the kernel is six copies
-of a product of two arms each carrying one.  Shifting the two insertions
-separately — which `aaKerSplit` is what makes possible — puts every factor at
-level `i + 1` in the jets of `∇P`, and the folds preserve it. -/
 theorem ricciAACap (g₀ : SmoothRiemannianMetric I M)
     {δ₀ : ℝ} (hδ₀ : δ₀ < 1) {Λ : ℝ} (hΛ1 : 1 ≤ Λ) :
     ∃ K : ℕ → ℝ, (∀ i, 0 ≤ K i) ∧
@@ -400,7 +320,6 @@ theorem ricciAACap (g₀ : SmoothRiemannianMetric I M)
   refine ⟨foldConst (E := E) 0 0 KFT (fun i => 94 * KQ i),
     fun i => foldConst_nn (u := 0) (v := 0) hKFT_nn hK94_nn i, ?_⟩
   intro g₁ P htie δ hδ_le hδ0 hδ hP0 hP1
-  -- the two permutation coefficients, state-free
   have hP4 : ∀ ρ : Equiv.Perm (Fin 4),
       HasCapWin (I := I) (M := M) g₀ P (permCoeff (I := I) (M := M) g₀ ρ) SP4 := by
     intro ρ
@@ -415,7 +334,6 @@ theorem ricciAACap (g₀ : SmoothRiemannianMetric I M)
       (capOfBnd (I := I) (M := M) g₀ P _ (fun i => hS3_nn ρ i) (fun i x => hS3 ρ i x))
     exact Finset.single_le_sum (f := fun r => S3 r i)
       (fun r _ => hS3_nn r i) (Finset.mem_univ ρ)
-  -- the two insertions, each carrying one derivative of the state
   have hIns : HasCapWin (I := I) (M := M) g₀ P
       (connDiffContrInsertionField (I := I) g₀ g₁) KIns :=
     capOfArm (I := I) (M := M) g₀ P hΛ1 hP0 hP1 _ hCins_nn
@@ -431,7 +349,6 @@ theorem ricciAACap (g₀ : SmoothRiemannianMetric I M)
       (connDiffContrInsertionInnerField_eq_reindex_slotExtend (I := I) (M := M) g₀ g₁) ?_
     exact capReindex (I := I) (M := M) g₀ P innerCoreInPerm10
       (capSlotExt (I := I) (M := M) g₀ P hcdcap)
-  -- the two shapes
   have hShapeA : ∀ (ρ : Equiv.Perm (Fin 4)) (ρ' : Equiv.Perm (Fin 3)),
       HasCapWin (I := I) (M := M) g₀ P (aaCoreP (I := I) (M := M) g₀ g₁ ρ ρ') KA := by
     intro ρ ρ'
@@ -451,7 +368,6 @@ theorem ricciAACap (g₀ : SmoothRiemannianMetric I M)
       HasCapWin (I := I) (M := M) g₀ P (aaCore (I := I) (M := M) g₀ g₁ ρ) KQ :=
     fun ρ => capMono (I := I) (M := M) g₀ P
       (fun i => by have := hKA_nn i; simp only [hKQ_def]; linarith) (hShapeB ρ)
-  -- the six pieces, summed
   have hKer : HasCapWin (I := I) (M := M) g₀ P
       (ricciAAKer (I := I) (M := M) g₀ g₁) (fun i => 94 * KQ i) := by
     refine capCongr (I := I) (M := M) g₀ P
@@ -468,7 +384,6 @@ theorem ricciAACap (g₀ : SmoothRiemannianMetric I M)
       (capReindex (I := I) (M := M) g₀ P innerCoreInPerm10 (hA' aaP2103 aaP120))
     refine capMono (I := I) (M := M) g₀ P (fun i => ?_) hsum
     exact le_of_eq (by ring)
-  -- the four-trace cast, offset `+1`, weakened and shifted
   have hFT : HasCapWin (I := I) (M := M) g₀ P
       (ricciCometricFourTraceCastG0 (I := I) g₀ g₁) KFT := by
     refine capOfArm (I := I) (M := M) g₀ P hΛ1 hP0 hP1 _ hKft_nn (fun n y => ?_)

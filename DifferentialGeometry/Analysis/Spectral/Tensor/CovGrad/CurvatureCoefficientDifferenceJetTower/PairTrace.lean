@@ -1,16 +1,5 @@
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.CurvatureCoefficientDifferenceJetTower.Palatini
 
-/-!
-# Pair-trace representation of the Riemann coefficient difference
-
-Chunk of the `CurvatureCoefficientDifferenceJetTower` tower, split
-out of the former 15111-line monolith (no longer elaborable in a
-single Lean process).  Every declaration is verbatim.  The former
-`private` helpers were promoted into the internal `CurvatureCoefficientDifferenceJetTower`
-scope, so the public `Connection` API is unchanged.  Chunk map:
-`CurvatureCoefficientDifferenceJetTower.md`.
--/
-
 noncomputable section
 
 set_option linter.style.setOption false
@@ -1988,25 +1977,17 @@ lemma pureDoubleTraceField_cross_split (g₀ g₁ : SmoothRiemannianMetric I M) 
 
 end CurvatureCoefficientDifferenceJetTower
 
-/-- The moving cometric double-trace field, retagged to the frozen metric.
-
-This short public name exposes the canonical field used internally by the
-curvature coefficient tower.  Its fibre is the genuine `g₁⁻¹` double trace;
-the frozen metric `g₀` only supplies the Hilbert-bundle tag. -/
 noncomputable def pureTrace (g₀ g₁ : SmoothRiemannianMetric I M) (s : ℕ) :
     SmoothCcTensor g₀ (s + 2) s :=
   pureDoubleTraceField (I := I) (M := M) g₀ g₁ s
 
 omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] [SigmaCompactSpace M] in
-/-- Fibre readout of the moving cometric double trace. -/
 @[simp] theorem pureTrace_toSection
     (g₀ g₁ : SmoothRiemannianMetric I M) (s : ℕ) (x : M) :
     (pureTrace (I := I) (M := M) g₀ g₁ s).toSection x =
       (show TensorRSSpace (s + 2) s I x from
         cometricDoubleTraceFib (I := I) g₁ s x) := rfl
 
-/-- The moving double trace is the fixed parallel trace plus the exact
-inverse-metric-difference correction. -/
 theorem pureTrace_split (g₀ g₁ : SmoothRiemannianMetric I M) (s : ℕ) :
     pureTrace (I := I) (M := M) g₀ g₁ s =
       appCcRS (I := I) (M := M) g₀ (s + 2) (s + 2) s

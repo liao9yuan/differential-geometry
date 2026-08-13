@@ -2,16 +2,6 @@ import DifferentialGeometry.Analysis.Sobolev.TensorHilbert.DeTurckLieKernelL2Jet
 import DifferentialGeometry.Analysis.Sobolev.TensorHilbert.LieCorr0TraceRadiusFree
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.CurvatureCoefficientDifferenceJetTower.Lowered
 
-/-!
-# Class-first finite-window bound for the DLa coefficient
-
-This module keeps the fixed-background connection tower abstract.  A
-nonnegative cap for its first three jets is selected before any metric varies;
-all coefficient constants are then selected before the metrics.  The final
-producer exposes only the two output orders consumed by the dimension-three
-`H1` grid integrator.
--/
-
 noncomputable section
 
 set_option autoImplicit false
@@ -591,10 +581,6 @@ private theorem pair_trace_grid_unif
       rw [← Finset.sum_mul, ← mul_assoc]
 
 set_option linter.unusedVariables false in
-/-- A cap for the first three fixed-background connection-difference jets
-fixes the two-order DLa coefficient grid before any metric varies.  The cap is
-kept as a raw, operator-independent tower so later coefficient factories can
-reuse the same class input. -/
 theorem dla_grid_of_conn
     {δ₀ : ℝ} (hδ₀ : δ₀ < 1) (F : ℕ → ℝ) (hF : ∀ j, 0 ≤ F j) :
     ∃ C : ℕ → ℝ, (∀ i, 0 ≤ C i) ∧

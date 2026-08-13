@@ -1,99 +1,5 @@
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.LowRegA2PerIndex
 
-/-!
-# The ball-free per-index assembly of the low-base first-order arm
-
-The tower-direct energy rungs of the bottom block need the `H^q` size of the
-first-order arm
-
-`a₁ T = appCc C₀ T + appCc C₁ (∇T)`
-
-(the Lean `LowBaseActionData.a1`; the paper's `a₁` and `a₀` arms are its two
-summands — there is no separate `a₀` field) **without** an a-priori Sobolev
-ball, and with the Leibniz sum priced index by index.
-
-## The per-group mixed Hölder split
-
-Each Leibniz index chooses for itself which factor goes into `L^∞`, and the two
-`appCc` summands choose **different thresholds**.
-
-* Coefficient side.  `|∇ⁱC|_∞` costs the fibre Sobolev embedding's `+2` `L²`
-  orders, so it reads the `range (i+2)` tower of `C₀`/`C₁` at index `i+2`, hence
-  state jets of order `i+3`.  The companion data window `l ≤ q-i` stays in `L²`.
-* State side.  `∇ⁱC` is read in `L²` at its own tower index (state order `i+1`)
-  and the data window — the terms `l ≤ q-i` — is capped by the class sup norms
-  `|T|_∞ ≲ ‖T‖_{H²}` and `|∇T|_∞ ≲ ‖T‖_{H³}`, the two `L^∞` factors PSTOP §6.4
-  names.
-
-The `C₁` summand takes the threshold `S = Finset.range q`: coefficient side at
-`i < q`, state side at `i = q`.  Its `i = q-1` coefficient sup reaches state
-order `q+2`, paired against the class window `J 3`; that is the arm's
-`K_R^{a₁}·R` absorption term, and it is the ONLY occurrence of `q+2` in the
-whole arm.  A state-side choice at `i = q-1` is not available to `C₁`: its data
-is `∇T`, so the `l = 1` term would need `|∇²T|_∞`, i.e. state order `4`.
-
-The `C₀` summand takes the lower threshold `S = Finset.range (q-1)`: state side
-at BOTH `i = q-1` and `i = q`.  This is legal exactly because `C₀`'s data is
-`T`, so its `l = 1` term is only `|∇T|_∞ ≲ ‖T‖_{H³}` (order `3`, in budget).
-The gain is the point of the re-split: the `C₀` tower is quadratic in `T`, so
-every `C₀` slot carries the extra factor `1 + J 4` — an `H³` (hence `L²_t`)
-quantity, not a class one — and at the coefficient-side index `i = q-1` that
-evolving factor would have multiplied a state-order-`q+2` window.  With the
-lower threshold the `C₀` group never reaches `q+2` at all (for `q ≥ 2`), so its
-evolving factors meet only class and same-scale windows and land in the `L¹_t`
-Grönwall coefficient rather than in the `E_{k+1}` absorption.
-
-The uniform *state*-side choice at every `i ≥ 1` — the first version of this
-file — is route-wrong and was refuted before it had a consumer: it puts state
-order `q+2` in the DATA factor of the `i = 1` slot of the `C₁` group, whose
-companion is the coefficient factor `1 + jet₃`, and the `1` there is `R`-free.
-After the cross-scale pairing that slot is quadratic in `√E_{q+2}` and hands the
-absorption a non-small, `R`-free constant.  See `LowRegA1PerIndex.md` and the
-correction block of PSTOP §6.4.
-
-The engine implementing the mixed choice is `app_jet_sq_split`
-(`Analysis/Sobolev/TensorHilbert/ParametricAppCcJetBound.lean`), used with
-`S = Finset.range (q-1)` for `C₀` and `S = Finset.range q` for `C₁`.
-
-## Main results
-
-* `a1PerIdxJetBg` — the squared per-index `H^q` bound for `A.a1 T` with an
-  arbitrary fixed DeTurck background, split into its two `appCc` summands,
-  ball-free, all constants fixed before `T` and `δ`.
-* `a1PerIdxLinBg` — its linear (square-root) form, the shape the rung pairing
-  consumes.
-* `a1PerIdxJet` and `a1PerIdxLin` — diagonal-background compatibility wrappers.
-
-## The order budget
-
-With `J n = ∑_{j < n} ‖∇ʲT‖²`, so that `J n` sees state jets of order `≤ n-1`,
-and reading `q - 1 + 2 = q + 1` (valid for `q ≥ 1`):
-
-| slot | coefficient factor | data factor | top state order |
-|---|---|---|---|
-| `C₀`, `i ≤ q-2` | `(1+J 4)(1+J(i+4))`, sup | `J(q-i+1)` | `max(i+3, 3) ≤ q+1` |
-| `C₀`, `i = q-1` | `(1+J 4)(1+J(q+1))`, `L²` | `J 4`, sup | `max(q, 3)` |
-| `C₀`, `i = q` | `(1+J 4)(1+J(q+2))`, `L²` | `J 3`, sup | `max(q+1, 3)` |
-| `C₁`, `i < q` | `(1+J(i+4))`, sup | `J(q-i+2)` | `i+3 ≤ q+2` |
-| `C₁`, `i = q` | `(1+J(q+2))`, `L²` | `J 4`, sup | `max(q+1, 3)` |
-
-For `q ≥ 2` — every rung, since `q = k-1 ≥ 2` — no state order exceeds `q+2`,
-the whole `C₀` group stays at `≤ q+1`, and `q+2` is reached in exactly one slot
-of the whole arm: the `C₁` coefficient sup at `i = q-1`, whose data companion
-there is the class-order window `J 3`.  The `q ≥ 2` scoping is real, and applies
-to the `C₀` claim too: at `q = 1` the `C₀` data sups already reach `3 = q+2`.
-
-Consequence for the rung.  The single `q+2` slot carries a class-radius
-coefficient, i.e. this arm contributes its own `K_R^{a₁}·R` to the `E_{k+1}`
-absorption, and PSTOP adapter H is the WIDENED premise
-`Cq(k-1)·Cδ* + (K_R + K_R^{a₁})·R + 2ε < 1` — unchanged by the `C₀` re-split,
-since only `a₂` and the `C₁` group feed it.  That premise is threaded by the
-consumer (brick 4b); nothing here discharges it, and nothing here needs a small
-fibre constant.  The `C₀` group's evolving factors `1 + J 4` now multiply class
-and same-scale windows only; their destination is the `L¹_t` Grönwall
-coefficient (`∫ E₃ ≤ B₃²`), not the absorption.
--/
-
 noncomputable section
 
 open MeasureTheory Set Filter Topology Bundle Manifold
@@ -118,10 +24,6 @@ variable
       [IsManifold I ∞ M] [CompactSpace M] [I.Boundaryless]
       [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M]
 
-/-! ## The two `appCc` summands of `a₁` -/
-
-/-- A two-element `Finset` sum of a nonnegative family is at most the sum of the
-two values, whether or not the two indices coincide. -/
 private theorem sumPairLe (f : ℕ → ℝ) (hf : ∀ i, 0 ≤ f i) (a b : ℕ) :
     ∑ i ∈ ({a, b} : Finset ℕ), f i ≤ f a + f b := by
   classical
@@ -132,32 +34,6 @@ private theorem sumPairLe (f : ℕ → ℝ) (hf : ∀ i, 0 ≤ f i) (a b : ℕ) 
   · exact le_of_eq (Finset.sum_pair hab)
 
 set_option linter.unusedSectionVars false in
-/-- **The zero-order summand `appCc C₀ T`, per index and ball-free.**
-
-Leibniz indices `i ≤ q-2` are priced on the coefficient side: `|∇ⁱC₀|_∞` costs
-the fibre embedding on the jets of `∇ⁱC₀` through order `2`, hence the `C₀`
-tower at index `≤ i+2` and the state at order `≤ i+3 ≤ q+1`, and the data window
-`l ≤ q-i` stays in `L²`.
-
-**Both** top indices `i = q-1` and `i = q` are priced on the state side.  At
-`i = q` a coefficient sup would reach state order `q+3`; at `i = q-1` it would
-reach `q+2`, and although that is inside the rung's own budget it is the slot
-whose evolving `C₀` prefactor cannot be paid for by the ladder (the `C₀` tower
-is quadratic, so the slot carries `1 + J 4` on top of the class window).  Both
-are read in `L²` at their own tower index instead, and their data windows are
-sup-capped: `|T|_∞ ≲ ‖T‖_{H²}` at `i = q`, and `|T|_∞ + |∇T|_∞ ≲ ‖T‖_{H³}` at
-`i = q-1`.  The second cap is legal here and *not* for the `C₁` group precisely
-because `C₀`'s data is `T`, so its `l = 1` term is only `∇T` (order `3`) where
-`C₁`'s would be `∇²T` (order `4`).
-
-Consequence — the point of the re-split: the `C₀` group never reaches state
-order `q+2`.  The factor `1 + J 4` is the quadratic `‖∇T‖²_{H²}` term of
-`c0_jet_tower_quad`.
-
-The `i = q-1` coefficient window is written `range (q-1+2)`, which is
-`range (q+1)` for every `q ≥ 1`; that shape also keeps the statement true at the
-degenerate `q = 0`, where `range (q-1) = ∅` and the arm is entirely state-side.
--/
 private theorem a1Arm0Bg (hDim : Module.finrank ℝ E = 3)
     (g g_bg : SmoothRiemannianMetric I M) :
     ∃ C K : ℕ → ℝ, (∀ q, 0 ≤ C q) ∧ (∀ i, 0 ≤ K i) ∧
@@ -255,13 +131,11 @@ private theorem a1Arm0Bg (hDim : Module.finrank ℝ E = 3)
     linarith only [h1]
   have hK_nn : ∀ i, 0 ≤ K i := fun i =>
     le_trans (add_nonneg (hK0_nn i) (hK2_nn i)) (hKt_le i)
-  -- the quadratic tower factor is dominated by the order-`3` state window
   have hH3 : (∑ j ∈ Finset.range 3,
       ‖iteratedCovGrad (I := I) g 0 2 (1 + j) T‖ ^ 2) ≤ J 4 := by
     refine le_trans (le_of_eq ?_) (icgWinShift (I := I) (M := M) g 0 2 1 2 T)
     exact Finset.sum_congr rfl (fun l _ => by
       rw [icgNormComp (I := I) (M := M) g 0 2 1 l T])
-  -- the coefficient's own jets, in `L²`, with the quadratic factor loosened
   have hcoeff : ∀ i : ℕ,
       ‖iteratedCovGrad (I := I) g 2 2 i A.C0‖ ^ 2 ≤
         (K0t i + K2t i) * (1 + J 4) * (1 + J (i + 2)) := by
@@ -276,7 +150,6 @@ private theorem a1Arm0Bg (hDim : Module.finrank ℝ E = 3)
         K0t i + K0t i * J 4 + (K2t i + K2t i * J 4) := by ring
     have h4 : (0 : ℝ) ≤ K2t i := hK2_nn i
     linarith only [h1, h2, h3, h4]
-  -- the coefficient sup caps used at the indices `i < q`
   have hsup : ∀ (i : ℕ) (x : M),
       riemannianFiberNormSq (I := I) (M := M) g 2 (2 + i) x
           ((iteratedCovGrad (I := I) g 2 2 i A.C0).toSection x) ≤
@@ -314,7 +187,6 @@ private theorem a1Arm0Bg (hDim : Module.finrank ℝ E = 3)
       _ = (Cs i ^ 2 * ∑ p ∈ Finset.range 3, (K0t (i + p) + K2t (i + p))) *
             ((1 + J 4) * (1 + J (i + 4))) := by
           rw [← Finset.sum_mul]; ring
-  -- the two class sup caps on the data, used at the two state-side indices
   have hCd2_nn : (0 : ℝ) ≤ Cd0 ^ 2 + Cd1 ^ 2 := by positivity
   have hdata0 : ∀ x : M,
       riemannianFiberNormSq (I := I) (M := M) g 0 2 x (T.toSection x) ≤
@@ -401,7 +273,6 @@ private theorem a1Arm0Bg (hDim : Module.finrank ℝ E = 3)
           le_mul_of_one_le_left hnn (by linarith only [hCd2_nn])
       _ = (1 + (Cd0 ^ 2 + Cd1 ^ 2)) *
             (K i * (1 + J 4) * (1 + J (i + 4)) * J (q - i + 1)) := by ring
-  -- the lower state-side index `i = q-1`: coefficient in `L²`, data `|T| + |∇T|`
   have hMid : (Cd0 ^ 2 + Cd1 ^ 2) * J (q + 3 - (q - 1)) *
         ‖iteratedCovGrad (I := I) g 2 2 (q - 1) A.C0‖ ^ 2 ≤
       (1 + (Cd0 ^ 2 + Cd1 ^ 2)) *
@@ -438,7 +309,6 @@ private theorem a1Arm0Bg (hDim : Module.finrank ℝ E = 3)
           mul_le_mul_of_nonneg_right (by linarith only []) hnn
       _ = (1 + (Cd0 ^ 2 + Cd1 ^ 2)) *
             (K (q - 1) * (1 + J 4) * (1 + J (q - 1 + 2)) * J 4) := by ring
-  -- the top state-side index `i = q`, unchanged: data `|T|_∞ ≲ ‖T‖_{H²}`
   have hTop : (Cd0 ^ 2 + Cd1 ^ 2) * J (q + 3 - q) *
         ‖iteratedCovGrad (I := I) g 2 2 q A.C0‖ ^ 2 ≤
       (1 + (Cd0 ^ 2 + Cd1 ^ 2)) * (K q * (1 + J 4) * (1 + J (q + 2)) * J 3) := by
@@ -472,13 +342,6 @@ private theorem a1Arm0Bg (hDim : Module.finrank ℝ E = 3)
   ring
 
 set_option linter.unusedSectionVars false in
-/-- **The first-order summand `appCc C₁ (∇T)`, per index and ball-free.**
-
-Same mixed Hölder choice as `a1Arm0`: the coefficient sup at the indices
-`i < q`, the state sup at the top index `i = q`.  The data is `∇T`, so a data
-window `l ≤ n` here reads the state through order `n+1`; at the top index the
-single data term is capped by `|∇T|_∞ ≲ ‖T‖_{H³}`, the second of §6.4's two
-named `L^∞` factors. -/
 private theorem a1Arm1Bg (hDim : Module.finrank ℝ E = 3)
     (g g_bg : SmoothRiemannianMetric I M) :
     ∃ C K : ℕ → ℝ, (∀ q, 0 ≤ C q) ∧ (∀ i, 0 ≤ K i) ∧
@@ -555,7 +418,6 @@ private theorem a1Arm1Bg (hDim : Module.finrank ℝ E = 3)
   have hcoeff : ∀ i : ℕ,
       ‖iteratedCovGrad (I := I) g 3 2 i A.C1‖ ^ 2 ≤ Kc i * (1 + J (i + 2)) :=
     fun i => htow T hT hδ0 hδ_le hδg hδZ i
-  -- the shifted state windows of `∇T`
   have hshift : ∀ n : ℕ,
       (∑ p ∈ Finset.range (n + 1),
         ‖iteratedCovGrad (I := I) g 0 3 p
@@ -673,59 +535,17 @@ private theorem a1Arm1Bg (hDim : Module.finrank ℝ E = 3)
     (appCcGdiag_nonneg (E := E) q)) (le_of_eq ?_)
   ring
 
-/-! ## The two arms assembled -/
-
-/-- The triangle inequality, squared and split. -/
 private theorem sqAddLe {a b s : ℝ} (h0 : 0 ≤ s) (h : s ≤ a + b) :
     s ^ 2 ≤ 2 * a ^ 2 + 2 * b ^ 2 := by
   nlinarith [mul_self_le_mul_self h0 h, sq_nonneg (a - b)]
 
 set_option linter.unusedSectionVars false in
-/-- Two independently bounded squared norms combine with a common constant. -/
 private theorem combine2 {a b c d u v : ℝ} (hu : 0 ≤ u) (hv : 0 ≤ v)
     (hc : 0 ≤ c) (hd : 0 ≤ d) (h1 : a ≤ c * u) (h2 : b ≤ d * v) :
     2 * a + 2 * b ≤ 2 * (c + d) * (u + v) := by
   nlinarith [mul_nonneg hc hv, mul_nonneg hd hu]
 
 set_option linter.unusedSectionVars false in
-/-- **The ball-free per-index `H^q`-jet assembly of the fixed-background `a₁` arm.**
-
-With `J n = ∑_{j < n} ‖∇ʲT‖²`,
-
-`‖∇^q(a₁ T)‖² ≤ Cq q · (`
-  `∑_{i ≤ q-2} K₀ i · (1+J 4) · (1+J(i+4)) · J(q-i+1)`
-  `+ K₀ (q-1) · (1+J 4) · (1+J(q-1+2)) · J 4 + K₀ q · (1+J 4) · (1+J(q+2)) · J 3`
-  `+ ∑_{i < q} K₁ i · (1+J(i+4)) · J(q-i+2) + K₁ q · (1+J(q+2)) · J 4)`,
-
-the first two lines being the zero-order summand `appCc C₀ T` and the third the
-first-order summand `appCc C₁ (∇T)`.  All constants are fixed before `T` and
-`δ`, and no Sobolev ball occurs.
-
-**The per-group Hölder choice, and the order budget.**  A coefficient sup
-`|∇ⁱC|_∞` costs the fibre embedding's `+2` orders on top of the `range (i+2)`
-tower, so it reads state jets of order `i+3`, while its data window `l ≤ q-i`
-stays in `L²`; a state-side index reads `∇ⁱC` in `L²` (state order `i+1`) and
-sup-caps the data by the class norms `|T|_∞ ≲ ‖T‖_{H²}`, `|∇T|_∞ ≲ ‖T‖_{H³}`.
-
-The two summands threshold differently.  `C₁` is coefficient-side for `i < q`
-and state-side at `i = q`; a state-side `i = q-1` is unavailable to it, since
-its data is `∇T` and the `l = 1` term would need `|∇²T|_∞`.  `C₀` is
-coefficient-side only for `i ≤ q-2` and state-side at BOTH `i = q-1` and
-`i = q`, which its data `T` permits.  The window `q-1+2` is `q+1` for every
-`q ≥ 1`; the shape keeps the statement true at `q = 0`.
-
-**For `q ≥ 2`** — every rung, and the scoping is real: at `q = 1` the `C₀` data
-sups already reach `3 = q+2` — no state order exceeds `q+2`, the whole `C₀`
-group stays at `≤ q+1`, and `q+2` occurs in exactly one slot of the arm: the
-`C₁` coefficient sup at `i = q-1`, against the class-order data window `J 3`.
-So this arm's `E_{k+1}` contribution carries a class-radius coefficient: it
-needs no small fibre constant, but it is not free either — it feeds its own
-`K_R^{a₁}·R` into PSTOP's widened adapter H,
-`Cq(k-1)·Cδ* + (K_R + K_R^{a₁})·R + 2ε < 1`, which the consumer threads and
-which the `C₀` re-split leaves unchanged.  The `C₀` tower is quadratic in `T`,
-so every `C₀` slot carries the extra factor `1 + J 4`, an `H³` rather than a
-class quantity; after the re-split those factors multiply class and same-scale
-windows only, and their destination is the `L¹_t` Grönwall coefficient. -/
 theorem a1PerIdxJetBg (hDim : Module.finrank ℝ E = 3)
     (g g_bg : SmoothRiemannianMetric I M) :
     ∃ Cq K0 K1 : ℕ → ℝ, (∀ q, 0 ≤ Cq q) ∧ (∀ i, 0 ≤ K0 i) ∧ (∀ i, 0 ≤ K1 i) ∧
@@ -812,7 +632,6 @@ theorem a1PerIdxJetBg (hDim : Module.finrank ℝ E = 3)
     · exact mul_nonneg (mul_nonneg (hK1_nn q)
         (by linarith only [hJ_nn (q + 2)])) (hJ_nn _)
 
-/-- Diagonal-background compatibility wrapper for `a1PerIdxJetBg`. -/
 theorem a1PerIdxJet (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M) :
     ∃ Cq K0 K1 : ℕ → ℝ, (∀ q, 0 ≤ Cq q) ∧ (∀ i, 0 ≤ K0 i) ∧ (∀ i, 0 ≤ K1 i) ∧
@@ -864,10 +683,7 @@ theorem a1PerIdxJet (hDim : Module.finrank ℝ E = 3)
                     ‖iteratedCovGrad (I := I) g 0 2 j T‖ ^ 2))) :=
   a1PerIdxJetBg (I := I) (M := M) hDim g g
 
-/-! ## The linear form the rung pairing consumes -/
-
 set_option linter.unusedSectionVars false in
-/-- `√(1 + x) ≤ 1 + √x`. -/
 private theorem sqrtOnePlus (x : ℝ) (hx : 0 ≤ x) :
     Real.sqrt (1 + x) ≤ 1 + Real.sqrt x := by
   have hle : (1 : ℝ) + x ≤ (1 + Real.sqrt x) ^ 2 := by
@@ -878,28 +694,6 @@ private theorem sqrtOnePlus (x : ℝ) (hx : 0 ≤ x) :
     _ = 1 + Real.sqrt x := Real.sqrt_sq (by positivity)
 
 set_option linter.unusedSectionVars false in
-/-- **The fixed-background per-index `a₁` assembly in the linear pairing form.**
-
-With `jetₙ = (∑_{j < n} ‖∇ʲT‖²)^{1/2}`, the square root of `a1PerIdxJet`'s
-windows:
-
-`‖∇^q(a₁ T)‖ ≤ Cq q · (`
-  `∑_{i ≤ q-2} K₀ i · (1+jet₄) · (1+jet_{i+4}) · jet_{q-i+1}`
-  `+ K₀ (q-1) · (1+jet₄) · (1+jet_{q-1+2}) · jet₄`
-  `+ K₀ q · (1+jet₄) · (1+jet_{q+2}) · jet₃`
-  `+ ∑_{i < q} K₁ i · (1+jet_{i+4}) · jet_{q-i+2} + K₁ q · (1+jet_{q+2}) · jet₄)`.
-
-At the rung `q = k-1` every jet order is `≤ k+1`, and — for `q ≥ 2`, which is
-every rung — the top order `k+1` occurs only in the coefficient factor
-`1 + jet_{i+4}` of the single index `i = q-1` of the **`C₁`** group, whose data
-companion there is `jet₃`, a class quantity.  The `C₀` group is state-side at
-both `i = q-1` and `i = q` and stays a full order below.  Pairing therefore
-costs this arm a `K_R^{a₁}·R` term in the absorption, not a smallness constant:
-PSTOP's adapter H in its widened form
-`Cq(k-1)·Cδ* + (K_R + K_R^{a₁})·R + 2ε < 1`, threaded by the consumer and
-unchanged by the `C₀` re-split.  The `C₀` slots also carry `1 + jet₄`, an `H³`
-rather than a class factor; they now multiply class and same-scale windows only,
-so they belong in the `L¹_t` Grönwall coefficient. -/
 theorem a1PerIdxLinBg (hDim : Module.finrank ℝ E = 3)
     (g g_bg : SmoothRiemannianMetric I M) :
     ∃ Cq K0 K1 : ℕ → ℝ, (∀ q, 0 ≤ Cq q) ∧ (∀ i, 0 ≤ K0 i) ∧ (∀ i, 0 ≤ K1 i) ∧
@@ -960,7 +754,6 @@ theorem a1PerIdxLinBg (hDim : Module.finrank ℝ E = 3)
     ‖iteratedCovGrad (I := I) g 0 2 j T‖ ^ 2 with hJ
   have hJ_nn : ∀ n, 0 ≤ J n := fun n =>
     Finset.sum_nonneg (fun _ _ => sq_nonneg _)
-  -- the four groups of the squared bound, and their nonnegativity
   have hterm0 : ∀ i : ℕ,
       0 ≤ K0 i * (1 + J 4) * (1 + J (i + 4)) * J (q - i + 1) := fun i =>
     mul_nonneg (mul_nonneg (mul_nonneg (hK0_nn i)
@@ -999,7 +792,6 @@ theorem a1PerIdxLinBg (hDim : Module.finrank ℝ E = 3)
       K1 i * (1 + J (i + 4)) * J (q - i + 2)) +
       K1 q * (1 + J (q + 2)) * J 4 := add_nonneg hS1_nn htop1
   have h := hsq T hT hδ0 hδ_le hδg hδZ q
-  -- take the square root of the squared bound
   have hroot : ‖iteratedCovGrad (I := I) g 0 2 q
       ((lowBaseData (I := I) (M := M) g g_bg T
         (lt_of_le_of_lt hδ_le (by norm_num)) hδg hδZ).a1
@@ -1019,7 +811,7 @@ theorem a1PerIdxLinBg (hDim : Module.finrank ℝ E = 3)
   refine mul_le_mul_of_nonneg_left ?_ (Real.sqrt_nonneg _)
   refine le_trans (sqrtAdd2 _ _ hA0_nn hA1_nn) ?_
   refine add_le_add ?_ ?_
-  · -- the `C₀` group
+  ·
     refine le_trans (sqrtAdd2 _ _ hSM0_nn htop0) ?_
     refine add_le_add (le_trans (sqrtAdd2 _ _ hS0_nn hmid0) ?_) ?_
     · refine add_le_add ?_ ?_
@@ -1076,7 +868,7 @@ theorem a1PerIdxLinBg (hDim : Module.finrank ℝ E = 3)
           (Real.sqrt_nonneg _)
       · exact mul_nonneg (Real.sqrt_nonneg _)
           (by linarith only [Real.sqrt_nonneg (J 4)])
-  · -- the `C₁` group
+  ·
     refine le_trans (sqrtAdd2 _ _ hS1_nn htop1) ?_
     refine add_le_add ?_ ?_
     · refine le_trans (sqrtFinSum (Finset.range q) _ hterm1) ?_
@@ -1100,7 +892,6 @@ theorem a1PerIdxLinBg (hDim : Module.finrank ℝ E = 3)
       exact mul_le_mul_of_nonneg_left (sqrtOnePlus _ (hJ_nn (q + 2)))
         (Real.sqrt_nonneg _)
 
-/-- Diagonal-background compatibility wrapper for `a1PerIdxLinBg`. -/
 theorem a1PerIdxLin (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M) :
     ∃ Cq K0 K1 : ℕ → ℝ, (∀ q, 0 ≤ Cq q) ∧ (∀ i, 0 ≤ K0 i) ∧ (∀ i, 0 ≤ K1 i) ∧

@@ -349,10 +349,6 @@ theorem deTurckLieDLbCoeffField_realizedFam_jetL2_perOrder_ballUniform
     (norm_nonneg _) (norm_nonneg _) (norm_nonneg _)
     (norm_add_le _ _) hL2A hL2B
 
-/-- Per-order `×4·finrank` transport of the `(2,2)` field jet to the `(1,1)` insert jet, via the
-slotInsert/reindex decomposition (`deTurckLieDLbCoeffField_eq_slotInsert_sum`); each summand is
-`≤ finrank·‖∇ⁱ wEndoInsert‖²` (`rfns_iteratedCovGrad_dlbSlotZero_le`/`dlbSlotOne_le`), and
-`sq_le_two_add` yields the factor `4·finrank`.  `R`-free bounded factor. -/
 theorem normSq_iCG_dlbField_le (g₀ g₁ g_bg : SmoothRiemannianMetric I M) (i : ℕ) :
     ‖iteratedCovGrad (I := I) g₀ 2 2 i (deTurckLieDLbCoeffField (I := I) g₀ g₁ g_bg)‖ ^ 2 ≤
       4 * (Module.finrank ℝ E : ℝ) *
@@ -469,8 +465,6 @@ private lemma dlb_reindex_sub (g₀ : SmoothRiemannianMetric I M)
     ContinuousLinearMap.sub_apply]
 
 set_option linter.unusedSectionVars false in
-/-- A background difference of `DLb` jets is bounded by the corresponding
-inserted DeTurck-endomorphism difference jet. -/
 theorem dlbDiff_jet_le
     (g₀ g₁ g_bg g_ref : SmoothRiemannianMetric I M) (i : ℕ) :
     ‖iteratedCovGrad (I := I) g₀ 2 2 i
@@ -557,10 +551,6 @@ theorem dlbDiff_jet_le
   refine le_trans (sq_le_two_add _ _ _ _ _ (norm_nonneg _) (norm_nonneg _)
     (norm_nonneg _) (norm_add_le _ _) hL2A hL2B) (le_of_eq (by ring))
 
-
-/-- **`realizedFam` per-order top-separated jet-L2 bound** for the DLb coefficient field.  Thin
-`×4·finrank` transport of `deTurckLieWEndoInsert_realizedFam_jetL2_perOrder_topSeparated` through
-`normSq_iCG_dlbField_le`; `Ktop = 4·finrank·Ktop_insert` stays `R`-free. -/
 theorem deTurckLieDLbCoeffField_realizedFam_jetL2_perOrder_topSeparated
     (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
     (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) {R : ℝ} (hR : 0 ≤ R)
@@ -609,8 +599,6 @@ theorem deTurckLieDLbCoeffField_realizedFam_jetL2_perOrder_topSeparated
   refine le_trans hstep (le_of_eq ?_)
   ring
 
-/-- **Summed** `realizedFam` top-separated jet-L2 bound for the DLb coefficient field.  Thin
-`×4·finrank` transport of the summed insert bound; both windows `a+3`, `Ktop` `R`-free. -/
 theorem deTurckLieDLbCoeffField_realizedFam_jetL2_summed_topSeparated
     (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
     (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) {R : ℝ} (hR : 0 ≤ R)
@@ -837,9 +825,6 @@ theorem deTurckLieCoeffField_realizedFam_rfns_order0_ballUniform
       (realizedFam (I := I) g₀ T T' hδ hδ' s) g_bg).toSection x)
   linarith [hadd, ha, hb]
 
-/-- Pointwise combined triangle `‖∇ⁱ deTurckLieCoeffField‖² ≤ 2‖∇ⁱ DLa‖² + 2‖∇ⁱ DLb‖²`, from the
-committed additive split `deTurckLieDLaCoeffField_add_deTurckLieDLbCoeffField` + `sq_le_two_add`.
-Generic over `g₁`, so both combined endpoints reuse it. -/
 private theorem normSq_iCG_deTurckLieCoeff_le (g₀ g₁ g_bg : SmoothRiemannianMetric I M) (i : ℕ) :
     ‖iteratedCovGrad (I := I) g₀ 2 2 i (deTurckLieCoeffField (I := I) (M := M) g₀ g₁ g_bg)‖ ^ 2 ≤
       2 * ‖iteratedCovGrad (I := I) g₀ 2 2 i (deTurckLieConnDiffDerivCoeffField (I := I) g₀ g₁ g_bg)‖ ^ 2
@@ -860,10 +845,6 @@ private theorem normSq_iCG_deTurckLieCoeff_le (g₀ g₁ g_bg : SmoothRiemannian
     (norm_nonneg _) (norm_nonneg _) (norm_nonneg _)
     (norm_add_le _ _) (le_refl _) (le_refl _)) (le_of_eq (by ring))
 
-/-- **`realizedFam` per-order top-separated jet-L2 bound** for the full DeTurck-Lie coefficient field
-`deTurckLieCoeffField = deTurckLieDLaCoeffField + deTurckLieDLbCoeffField`.  Combines the DLa and DLb
-field endpoints by the pointwise triangle; `Ktop = 2·(Ktop_DLa + Ktop_DLb)` stays `R`-free, single
-combined `Kc`.  This CLOSES the `deTurckLieCoeffField` constituent. -/
 theorem deTurckLieCoeffField_realizedFam_jetL2_perOrder_topSeparated
     (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
     (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) {R : ℝ} (hR : 0 ≤ R)
@@ -921,8 +902,6 @@ theorem deTurckLieCoeffField_realizedFam_jetL2_perOrder_topSeparated
   refine le_trans (add_le_add h1 h2) (le_of_eq ?_)
   ring
 
-/-- **Summed** `realizedFam` top-separated jet-L2 bound for the full DeTurck-Lie coefficient field.
-Both windows `a+3`, `Ktop = 2·(Ktop_DLa + Ktop_DLb)` `R`-free, single combined `Kc`. -/
 theorem deTurckLieCoeffField_realizedFam_jetL2_summed_topSeparated
     (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
     (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) {R : ℝ} (hR : 0 ≤ R)

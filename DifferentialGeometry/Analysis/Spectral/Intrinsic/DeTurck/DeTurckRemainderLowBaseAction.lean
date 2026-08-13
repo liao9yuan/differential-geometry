@@ -15,13 +15,7 @@ import DifferentialGeometry.Analysis.Sobolev.TensorHilbert.LieCorr0CoeffDiffRadi
 import DifferentialGeometry.Analysis.Sobolev.TensorHilbert.RicciArmResidualFieldGridWindow
 import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.LowRegRicciOne
 import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.LowRegLieOne
-/-!
-# Low-base Ricci--DeTurck remainder actions
 
-This module gives the fixed-order smooth-core action split used by uniform
-low-regularity Ricci--DeTurck existence.  The dangerous Ricci zero-head is
-refolded at the self-action level before any Sobolev estimate is taken.
--/
 noncomputable section
 set_option backward.isDefEq.respectTransparency false
 open Bundle Manifold MeasureTheory Set Filter Tensor0SBundle
@@ -61,7 +55,7 @@ private theorem zero_eq_unit (x : M) (D : Tensor0SSpace 0 I x) :
     simpa [Tensor0SNabla.scalarFn_apply, unitTensor] using hx
   apply (Tensor0SNabla.tensor0Iso I M x).injective
   rw [map_smul, hunit, smul_eq_mul, mul_one]
-/-! ## The fixed Koszul operator -/
+
 private theorem permCoeff_app
     (g : SmoothRiemannianMetric I M) {d : ℕ}
     (ρ : Equiv.Perm (Fin d)) (S : SmoothCcTensor g 0 d) :
@@ -264,7 +258,7 @@ private theorem connLowOp_app
       rw [← appCcRS_zero_eq_appCc]
       exact koszulOp_app (I := I) (M := M) g T hT]
   exact connLowerK (I := I) (M := M) g gm T htie
-/-! ## Action-level extraction of the Ricci derivative head -/
+
 private def daPermA : Equiv.Perm (Fin 4) :=
   ⟨![1, 2, 3, 0], ![3, 0, 1, 2], by decide, by decide⟩
 private def daPermB : Equiv.Perm (Fin 4) :=
@@ -1290,8 +1284,6 @@ private theorem ricciGood_eq_safe
     ccInputSymm_app (I := I) (M := M) g _ SW hSW] at hs
   exact hs.symm
 
-/-! ## Jointly smooth coefficient families -/
-
 private abbrev JointRS
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (S : Set ℝ)
     (A : ℝ → SmoothCcTensor g r s) : Prop :=
@@ -2198,8 +2190,6 @@ private theorem refoldLow_joint
     (threeArmJoint_smul (I := I) (M := M) g (2 : ℝ) _ hinner)
   simpa only [ricciRefold0] using hall
 
-/-! ## The complete zero-arm self-action refold -/
-
 private def rhsSelfLow
     (g g_bg : SmoothRiemannianMetric I M) (T : SmoothCcTensor g 0 2)
     {δ : ℝ}
@@ -2876,7 +2866,6 @@ private theorem top_sub_lap
   rw [hlap, appCc_sub_left, ← hcurv]
   abel
 
-/-- Squared intrinsic covariant `L2` jet through order `m`. -/
 noncomputable def lowJetSq
     (g : SmoothRiemannianMetric I M) {r s : ℕ} (m : ℕ)
     (S : SmoothCcTensor g r s) : ℝ :=
@@ -3328,14 +3317,12 @@ private theorem app_quad
         simpa only [C] using (Real.sq_sqrt hCa).symm]
       ring
 
-/-- Three intrinsic coefficients of the smooth-core low-base action split. -/
 structure LowBaseActionData
     (g : SmoothRiemannianMetric I M) where
   C0 : SmoothCcTensor g 2 2
   C1 : SmoothCcTensor g 3 2
   C2 : SmoothCcTensor g 4 2
 
-/-- The genuinely first-order action associated to low-base coefficient data. -/
 noncomputable def LowBaseActionData.a1
     {g : SmoothRiemannianMetric I M} (A : LowBaseActionData g)
     (W : SmoothCcTensor g 0 2) : SmoothCcTensor g 0 2 :=
@@ -3343,15 +3330,12 @@ noncomputable def LowBaseActionData.a1
     appCc (I := I) (M := M) g 3 2 A.C1
       (iteratedCovGrad (I := I) g 0 2 1 W)
 
-/-- The small second-order action associated to low-base coefficient data. -/
 noncomputable def LowBaseActionData.a2
     {g : SmoothRiemannianMetric I M} (A : LowBaseActionData g)
     (W : SmoothCcTensor g 0 2) : SmoothCcTensor g 0 2 :=
   appCc (I := I) (M := M) g 4 2 A.C2
     (iteratedCovGrad (I := I) g 0 2 2 W)
 
-/-- The canonical three-coefficient producer for the zero-based low-regularity
-Ricci--DeTurck action split. -/
 noncomputable def lowBaseData
     (g g_bg : SmoothRiemannianMetric I M) (T : SmoothCcTensor g 0 2)
     {δ : ℝ} (hδ_lt : δ < 1)
@@ -3370,30 +3354,17 @@ noncomputable def lowBaseData
     selfTopInt (I := I) (M := M) g T hδ_lt hδ hδZ -
     deTurckPhiMetTotal (I := I) (M := M) g g_bg g
 
-/-!
-## Internal top-coefficient bridge
-
-These transparent declarations expose only the finite product tree used by
-the sibling pairwise-coefficient module.  They are deliberately namespaced as
-implementation data rather than additions to the user-facing low-base API.
--/
-
 namespace LowBaseInternal
 
-/-- Slot rotation used by the lowered connection-difference coefficient. -/
 def lowPerm : Equiv.Perm (Fin 3) :=
   ⟨![2, 0, 1], ![1, 2, 0], by decide, by decide⟩
 
-/-- First curvature-refold permutation in the Ricci top coefficient. -/
 def daPermA : Equiv.Perm (Fin 4) :=
   ⟨![1, 2, 3, 0], ![3, 0, 1, 2], by decide, by decide⟩
 
-/-- Second curvature-refold permutation in the Ricci top coefficient. -/
 def daPermB : Equiv.Perm (Fin 4) :=
   ⟨![1, 0, 2, 3], ![1, 0, 2, 3], by decide, by decide⟩
 
-/-- Transparent lowered connection-difference coefficient used by the
-fixed-order top telescope. -/
 noncomputable def connLowOp
     (g gm : SmoothRiemannianMetric I M) : SmoothCcTensor g 3 3 :=
   appCcRS (I := I) (M := M) g 3 3 3
@@ -3403,8 +3374,6 @@ noncomputable def connLowOp
         (fullRaisedEndoField (I := I) (M := M) g gm))
       (koszulOp (I := I) (M := M) g))
 
-/-- The lowered connection difference is the first-order action of the
-transparent Koszul coefficient. -/
 theorem connLow_app
     (g gm : SmoothRiemannianMetric I M) (T : SmoothCcTensor g 0 2)
     (hT : ∀ (x : M) (u v : TangentSpace I x),
@@ -3419,8 +3388,6 @@ theorem connLow_app
       connDiffLoweredCc (I := I) g gm :=
   connLowOp_app (I := I) (M := M) g gm T hT htie
 
-/-- The transparent Koszul coefficient is jointly smooth along the realized
-metric segment. -/
 theorem connLow_joint
     (g : SmoothRiemannianMetric I M) (T : SmoothCcTensor g 0 2)
     {δ : ℝ}
@@ -3440,7 +3407,6 @@ theorem connLow_joint
   exact IntrinsicSpectral.connLow_joint
     (I := I) (M := M) g T hδ hδZ
 
-/-- Transparent top derivative coefficient in the Ricci connection arm. -/
 noncomputable def dagTopOp
     (g gm : SmoothRiemannianMetric I M) : SmoothCcTensor g 4 4 :=
   appCcRS (I := I) (M := M) g 4 4 4
@@ -3448,7 +3414,6 @@ noncomputable def dagTopOp
     (slotExtend (I := I) (M := M) g 3 3
       (connLowOp (I := I) (M := M) g gm))
 
-/-- Transparent lower derivative coefficient in the Ricci connection arm. -/
 noncomputable def dagLowOp
     (g gm : SmoothRiemannianMetric I M) : SmoothCcTensor g 3 4 :=
   appCcRS (I := I) (M := M) g 3 4 4
@@ -3456,7 +3421,6 @@ noncomputable def dagLowOp
     (covGrad (I := I) (M := M) g 3 3
       (connLowOp (I := I) (M := M) g gm))
 
-/-- Transparent moving-inverse weight in the Ricci Palatini refold. -/
 noncomputable def daWeight
     (g gm : SmoothRiemannianMetric I M) (W : SmoothCcTensor g 0 2) :
     SmoothCcTensor g 0 2 :=
@@ -3464,7 +3428,6 @@ noncomputable def daWeight
     (slotInsertEndoCc (I := I) (M := M) g 1
       (fullRaisedEndoField (I := I) (M := M) g gm)) W
 
-/-- One transparent contraction monomial in the Ricci low coefficient. -/
 noncomputable def daMono
     (g gm : SmoothRiemannianMetric I M) (G : SmoothCcTensor g 0 4)
     (σ : Equiv.Perm (Fin 4)) : SmoothCcTensor g 2 2 :=
@@ -3473,15 +3436,12 @@ noncomputable def daMono
     (slotInsertEndoCc (I := I) (M := M) g 1
       (fullRaisedEndoField (I := I) (M := M) g gm))
 
-/-- Difference of the two contraction monomials in the Ricci low
-coefficient. -/
 noncomputable def daContr
     (g gm : SmoothRiemannianMetric I M) (G : SmoothCcTensor g 0 4) :
     SmoothCcTensor g 2 2 :=
   daMono (I := I) (M := M) g gm G daPermA -
     daMono (I := I) (M := M) g gm G daPermB
 
-/-- One transparent curvature-refold monomial in the Ricci top coefficient. -/
 noncomputable def daTransMono
     (g gm : SmoothRiemannianMetric I M) (W : SmoothCcTensor g 0 2)
     (σ : Equiv.Perm (Fin 4)) : SmoothCcTensor g 4 2 :=
@@ -3491,16 +3451,12 @@ noncomputable def daTransMono
     (ccTensorUnitValueSection_contMDiff (I := I) (M := M) g
       (daWeight (I := I) (M := M) g gm W)) σ
 
-/-- The two-monomial Palatini transfer coefficient in transparent form. -/
 noncomputable def daTrans
     (g gm : SmoothRiemannianMetric I M) (W : SmoothCcTensor g 0 2) :
     SmoothCcTensor g 4 2 :=
   daTransMono (I := I) (M := M) g gm W daPermA -
     daTransMono (I := I) (M := M) g gm W daPermB
 
-/-- The Palatini transfer coefficient has the explicit fibre bound supplied by
-the metric perturbation radius.  The statement is restricted to the diagonal
-realized path used by the low-base split. -/
 theorem daTrans_cap
     (g : SmoothRiemannianMetric I M) (T : SmoothCcTensor g 0 2)
     (hT : ∀ (x : M) (u v : TangentSpace I x),
@@ -3542,7 +3498,6 @@ private theorem daContr_swap
   rw [daContr, daTrans, appCc_sub_left, appCc_sub_left,
     daMono_swap, daMono_swap]
 
-/-- Transparent Ricci top coefficient used by the pairwise C2 telescope. -/
 noncomputable def ricciTop
     (g gm : SmoothRiemannianMetric I M) (T : SmoothCcTensor g 0 2) :
     SmoothCcTensor g 4 2 :=
@@ -3550,7 +3505,6 @@ noncomputable def ricciTop
     (daTrans (I := I) (M := M) g gm T)
     (dagTopOp (I := I) (M := M) g gm)
 
-/-- Transparent lower part of the Ricci derivative-of-connection arm. -/
 noncomputable def ricciDALow
     (g gm : SmoothRiemannianMetric I M) (T : SmoothCcTensor g 0 2) :
     SmoothCcTensor g 2 2 :=
@@ -3559,9 +3513,6 @@ noncomputable def ricciDALow
       (dagLowOp (I := I) (M := M) g gm)
       (covGrad (I := I) (M := M) g 0 2 T))
 
-/-- First-order passenger coefficient obtained by exchanging the lower
-Palatini derivative factor with the tensor on which the Ricci coefficient
-acts. -/
 noncomputable def ricciDAOne
     (g gm : SmoothRiemannianMetric I M) (W : SmoothCcTensor g 0 2) :
     SmoothCcTensor g 3 2 :=
@@ -3569,8 +3520,6 @@ noncomputable def ricciDAOne
     (daTrans (I := I) (M := M) g gm W)
     (dagLowOp (I := I) (M := M) g gm)
 
-/-- The lower Ricci Palatini self-action is exactly a first-order passenger
-action. -/
 theorem ricciDA_one
     (g gm : SmoothRiemannianMetric I M) (P W : SmoothCcTensor g 0 2) :
     operatorFieldApply (I := I) (M := M) g 2 2
@@ -3612,8 +3561,6 @@ private theorem dagLow_joint
   have hout := joint_app (I := I) (M := M) g _ _ hp hd'
   simpa only [dagLowOp] using hout
 
-/-- The transferred lower Palatini coefficient is jointly smooth along the
-realized metric segment. -/
 theorem ricciDAOne_joint
     (g : SmoothRiemannianMetric I M) (T W : SmoothCcTensor g 0 2)
     {δ : ℝ}
@@ -3636,23 +3583,18 @@ theorem ricciDAOne_joint
   have hout := joint_app (I := I) (M := M) g _ _ hA hB
   simpa only [linearizedRicciThreeArmHjoint, ricciDAOne] using hout
 
-/-- Transparent first-order Ricci coefficient after the Palatini head has
-been transferred to the second-order action. -/
 noncomputable def ricciLow
     (g gm : SmoothRiemannianMetric I M) (T : SmoothCcTensor g 0 2) :
     SmoothCcTensor g 2 2 :=
   ricciAAArm (I := I) (M := M) g gm +
     ricciDALow (I := I) (M := M) g gm T
 
-/-- Symmetrized transparent first-order Ricci coefficient. -/
 noncomputable def ricciGoodLow
     (g gm : SmoothRiemannianMetric I M) (T : SmoothCcTensor g 0 2) :
     SmoothCcTensor g 2 2 :=
   ccInputSlotSymm (I := I) (M := M) g
     (ricciLow (I := I) (M := M) g gm T)
 
-/-- The explicit second-derivative coefficient removed from the raw Ricci
-zero arm before estimating its self-action. -/
 noncomputable def ricciDanger
     (g gm : SmoothRiemannianMetric I M) (T : SmoothCcTensor g 0 2) :
     SmoothCcTensor g 2 2 :=
@@ -3661,8 +3603,6 @@ noncomputable def ricciDanger
       (dagTopOp (I := I) (M := M) g gm)
       (iteratedCovGrad (I := I) g 0 2 2 T))
 
-/-- The raw Ricci zero coefficient with its self-action second-order head
-removed. -/
 noncomputable def ricciSafeLow
     (g gm : SmoothRiemannianMetric I M) (T : SmoothCcTensor g 0 2) :
     SmoothCcTensor g 2 2 :=
@@ -3671,7 +3611,6 @@ noncomputable def ricciSafeLow
         (I := I) (M := M) g gm -
       ricciDanger (I := I) (M := M) g gm T)
 
-/-- Transparent self-action top integrand before path integration. -/
 noncomputable def rhsSelfTop
     (g : SmoothRiemannianMetric I M) (T : SmoothCcTensor g 0 2)
     {δ : ℝ}
@@ -3685,8 +3624,6 @@ noncomputable def rhsSelfTop
   (-2 * s : ℝ) • ricciTop (I := I) (M := M) g gm T +
     (-1 : ℝ) • ricciRefold2 (I := I) (M := M) g T hδ hδZ s
 
-/-- Transparent zero-arm self-action integrand after extracting its complete
-second-order head. -/
 noncomputable def rhsSelfLow
     (g g_bg : SmoothRiemannianMetric I M) (T : SmoothCcTensor g 0 2)
     {δ : ℝ}
@@ -3703,8 +3640,6 @@ noncomputable def rhsSelfLow
     edgeLiePairFam (I := I) (M := M) g T hδ hδZ
       lieRefoldQ lieRefoldEps s
 
-/-- The raw refolded zero arm splits into its transparent lower and top
-self-action pieces on the diagonal realized path. -/
 theorem self_refold
     (g g_bg : SmoothRiemannianMetric I M) (T : SmoothCcTensor g 0 2)
     (hT : ∀ (x : M) (u v : TangentSpace I x),
@@ -3727,8 +3662,6 @@ theorem self_refold
   exact IntrinsicSpectral.rhsSelf_refold
     (I := I) (M := M) g g_bg T hT hδ_lt hδ hδZ hs
 
-/-- On the symmetric realized segment, the transparent zero-arm integrand
-uses only the first-order Ricci coefficient. -/
 theorem selfLow_good
     (g g_bg : SmoothRiemannianMetric I M) (T : SmoothCcTensor g 0 2)
     (hT : ∀ (x : M) (u v : TangentSpace I x),
@@ -3751,8 +3684,6 @@ theorem selfLow_good
   exact IntrinsicSpectral.rhsSelf_good
     (I := I) (M := M) g g_bg T hT hδ_lt hδ hδZ hs
 
-/-- The transparent self-action top integrand is jointly smooth on the
-realized path domain. -/
 theorem selfTop_joint
     (g : SmoothRiemannianMetric I M) (T : SmoothCcTensor g 0 2)
     {δ : ℝ}
@@ -3767,8 +3698,6 @@ theorem selfTop_joint
   exact IntrinsicSpectral.selfTop_joint
     (I := I) (M := M) g T hδ hδZ
 
-/-- The transparent zero-arm self-action integrand is jointly smooth on the
-realized path domain. -/
 theorem selfLow_joint
     (g g_bg : SmoothRiemannianMetric I M) (T : SmoothCcTensor g 0 2)
     {δ : ℝ}
@@ -3783,7 +3712,6 @@ theorem selfLow_joint
   exact IntrinsicSpectral.selfLow_joint
     (I := I) (M := M) g g_bg T hδ hδZ
 
-/-- Path integral of the transparent self-action top integrand. -/
 noncomputable def selfTopInt
     (g : SmoothRiemannianMetric I M) (T : SmoothCcTensor g 0 2)
     {δ : ℝ} (hδ_lt : δ < 1)
@@ -3802,7 +3730,6 @@ noncomputable def selfTopInt
       exact Icc_subset_realizedSmallSet hδ_lt hδ_lt)
     (selfTop_joint (I := I) (M := M) g T hδ hδZ)
 
-/-- Path integral of the transparent zero-arm self-action integrand. -/
 noncomputable def selfLowInt
     (g g_bg : SmoothRiemannianMetric I M) (T : SmoothCcTensor g 0 2)
     {δ : ℝ} (hδ_lt : δ < 1)
@@ -3821,7 +3748,6 @@ noncomputable def selfLowInt
       exact Icc_subset_realizedSmallSet hδ_lt hδ_lt)
     (selfLow_joint (I := I) (M := M) g g_bg T hδ hδZ)
 
-/-- Exact three-term form of the complete top path integrand. -/
 theorem topKernel_eq
     (g g_bg : SmoothRiemannianMetric I M) (T : SmoothCcTensor g 0 2)
     {δ : ℝ}
@@ -3842,7 +3768,6 @@ theorem topKernel_eq
   simp only [rhsRefoldTop, rhsRefold2, rhsSelfTop]
   module
 
-/-- The canonical C2 projection uses the transparent self-action integral. -/
 theorem c2_eq
     (g g_bg : SmoothRiemannianMetric I M) (T : SmoothCcTensor g 0 2)
     {δ : ℝ} (hδ_lt : δ < 1)
@@ -3858,8 +3783,6 @@ theorem c2_eq
         deTurckPhiMetTotal (I := I) (M := M) g g_bg g := by
   rfl
 
-/-- The canonical C0 projection is the transparent self-action integral plus
-the fixed curvature coefficient. -/
 theorem c0_eq
     (g g_bg : SmoothRiemannianMetric I M) (T : SmoothCcTensor g 0 2)
     {δ : ℝ} (hδ_lt : δ < 1)
@@ -3873,8 +3796,6 @@ theorem c0_eq
         phiMetCurvCoeff (I := I) g g_bg g := by
   rfl
 
-/-- The canonical C1 projection is the public radial order-one path
-integral. -/
 theorem c1_eq
     (g g_bg : SmoothRiemannianMetric I M) (T : SmoothCcTensor g 0 2)
     {δ : ℝ} (hδ_lt : δ < 1)
@@ -3891,9 +3812,6 @@ theorem c1_eq
 end LowBaseInternal
 
 set_option maxHeartbeats 1600000 in
-/-- The zero-based Ricci--DeTurck remainder at an arbitrary fixed DeTurck
-background is the canonical low-base second-order action plus its first-order
-action, with a fibre-small complete second-order coefficient. -/
 theorem lowData_split
     (g g_bg : SmoothRiemannianMetric I M) :
     ∃ K : ℝ, 0 ≤ K ∧
@@ -3992,8 +3910,6 @@ theorem lowData_split
   simp only [lowBaseData, LowBaseActionData.a1,
     LowBaseActionData.a2, appCc_add_left, appCc_sub_left]
   abel
-
-/-! ## Fixed three-dimensional action estimates -/
 
 omit [BoundarylessManifold I M] in
 private theorem jet_nonneg
@@ -5992,7 +5908,6 @@ private theorem h3p_app_of
 
 set_option maxHeartbeats 1600000 in
 set_option linter.unusedVariables false in
-/-- Single-state H3 bound: `lowJetSq g 3 (connLowOp g g₁) ≤ K * (1 + lowJetSq g 3 P)`. -/
 theorem connLow_h3_rf
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M)
@@ -6059,7 +5974,6 @@ theorem connLow_h3_rf
 
 set_option maxHeartbeats 1600000 in
 set_option linter.unusedVariables false in
-/-- Single-state H2 bound: `lowJetSq g 2 (dagLowOp g g₁) ≤ K * (1 + lowJetSq g 3 P)`. -/
 theorem dagLow_h2_rf
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M)
@@ -8913,8 +8827,6 @@ private theorem lc0AMix_act_tame
     (Ba R) R A (hBa R hR) hR hA hcoeff hW2
   simpa only [D, mul_assoc] using hraw
 
-/-! ## Fixed-order normal form for the covariant-derivative residual -/
-
 private def lcvSigma1 : Equiv.Perm (Fin 6) :=
   ⟨fun i => (![0, 5, 2, 1, 3, 4] : Fin 6 → Fin 6) i,
    fun i => (![0, 3, 2, 4, 5, 1] : Fin 6 → Fin 6) i,
@@ -9034,13 +8946,10 @@ private theorem lcvPair_eq
 
 namespace LowBaseInternal
 
-/-- Six-slot permutation realizing a four-slot passenger permutation inside
-the two-trace curvature-refold product. -/
 def monoPerm (σ : Equiv.Perm (Fin 4)) : Equiv.Perm (Fin 6) :=
   ((finSumFinEquiv (m := 4) (n := 2)).permCongr
     (Equiv.sumCongr σ (Equiv.refl (Fin 2)))).trans lieCovSigma
 
-/-- Transparent two-trace product form of one curvature-refold monomial. -/
 theorem curvMono_eq
     (g gm : SmoothRiemannianMetric I M)
     (S : SmoothCcTensor g 0 2) (σ : Equiv.Perm (Fin 4)) :
@@ -9055,7 +8964,6 @@ theorem curvMono_eq
   simpa only [monoPerm] using
     curvMono_pair (I := I) (M := M) g gm S σ
 
-/-- Transparent factorization of the moving double-trace coefficient. -/
 theorem pairTrace_eq
     (g gm : SmoothRiemannianMetric I M) :
     lieCovPair (I := I) (M := M) g gm =
@@ -9410,9 +9318,6 @@ private theorem lcvPair_h2_low
 
 set_option maxHeartbeats 2400000 in
 set_option linter.unusedVariables false in
-/-- The transferred lower Palatini coefficient has a radius-free fixed-order
-`H2` bound, with only the `H3` size of the metric perturbation entering its
-first-order coefficient envelope. -/
 theorem ricciDAOne_h2
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M) :
@@ -13176,8 +13081,6 @@ private theorem grad_jet1
   rw [h0, h1]
   nlinarith [sq_nonneg ‖W‖]
 
-/-- In dimension three, the first-order smooth-core action maps an `H3` jet
-to an `H2` jet under one common `H2` coefficient envelope. -/
 theorem a1_h3_h2
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M) :
@@ -13243,8 +13146,6 @@ theorem a1_h3_h2
       mul_le_mul_of_nonneg_right hcoef (sq_nonneg _)
     _ = (C * B * D) ^ 2 := by simp only [C]; ring
 
-/-- In dimension three, the same first-order smooth-core action maps an `H2`
-jet to an `H1` jet under the same kind of `H2` coefficient envelope. -/
 theorem a1_h2_h1
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M) :
@@ -13322,8 +13223,6 @@ theorem a1_h2_h1
       mul_le_mul_of_nonneg_right hcoef (sq_nonneg _)
     _ = (C * B * D) ^ 2 := by simp only [C]; ring
 
-/-- In dimension three, the complete canonical second-order coefficient is
-pointwise and two-jet small on a sufficiently small spectral `H2` ball. -/
 theorem c2_h2_small
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M) :
@@ -13608,9 +13507,6 @@ theorem c2_h2_small
       pow_le_pow_left₀ (mul_nonneg hptfac0 hR0)
         (mul_le_mul_of_nonneg_right hptfac hR0) 2
 
-/-- The zero-based split may be chosen so that its first-order part has a
-diagonal `H3 → H2` bound which is affine-quadratic in the high jet and whose
-coefficient depends only on the lower `H2` radius. -/
 theorem remainder_diag_h2
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M) :
@@ -13663,8 +13559,6 @@ theorem remainder_diag_h2
   · simpa only [L] using
       hdiag T hT hδ_le hδ0 hδ hδZ R A hR hA hT2 hT3
 
-/-- The canonical same-background first-order coefficients have a fixed
-two-jet window depending polynomially only on the state through order three. -/
 theorem lowData_a1_coeff
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M) :
@@ -13724,9 +13618,6 @@ theorem lowData_a1_coeff
       add_le_add_right (mul_le_mul_of_nonneg_left hX36 hK1) _
     _ = K * X ^ 6 := by simp only [K]; ring
 
-/-- The same-background zero-based Ricci--DeTurck remainder is the sum of a
-fibre-small second-order action and one first-order action which obeys both
-fixed low-regularity estimates. -/
 theorem remainder_low_split
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M) :

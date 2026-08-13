@@ -6,7 +6,6 @@ import Mathlib.Geometry.Manifold.VectorBundle.Hom
 import Mathlib.Analysis.InnerProductSpace.Basic
 import Mathlib.Analysis.SpecialFunctions.Sqrt
 
-
 noncomputable section
 
 open Bundle Set IsManifold ContinuousLinearMap
@@ -34,7 +33,6 @@ def metricCauchySchwarzBound
   ∀ (x : M) (v w : TangentSpace I x),
     |h x v w| ≤ δ * Real.sqrt (g.inner x v v) * Real.sqrt (g.inner x w w)
 
-/-- Compatibility name for the intrinsic metric Cauchy--Schwarz bound. -/
 abbrev gFibreOpBound
     (g : SmoothRiemannianMetric I M)
     (h : ∀ x : M, TangentSpace I x →L[ℝ] TangentSpace I x →L[ℝ] ℝ)

@@ -1,15 +1,6 @@
 import DifferentialGeometry.Analysis.Spectral.Tensor.Estimates.H1H2AppCcRS
 import DifferentialGeometry.Analysis.Spectral.Tensor.SobolevScale.IteratedCovGradHsJetBound
 
-/-!
-# Three-dimensional H2 principal action
-
-This file specializes the mixed-tensor `H2` algebra estimate to covariant
-passengers and applies it to a second covariant derivative.  The resulting
-estimate is the low-regularity principal action from spectral `H4` to
-spectral `H2`.
--/
-
 namespace DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral
 
 open scoped ContDiff Manifold Topology BigOperators
@@ -26,8 +17,6 @@ variable
       [IsManifold I ∞ M] [CompactSpace M] [I.Boundaryless]
       [T2Space M] [SigmaCompactSpace M]
 
-/-- On a closed three-manifold, the covariant `H2` jet is an algebra for
-operator-field application. -/
 theorem appCc_h2_h2_h2
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M) (r c : ℕ) :
@@ -49,9 +38,6 @@ theorem appCc_h2_h2_h2
   simpa only [appCcRS_zero_eq_appCc] using
     happ Φ W A B hA hB hΦ hW
 
-/-- In dimension three, an operator coefficient with an intrinsic `H2` jet
-acts on the second covariant derivative from spectral `H4` to spectral
-`H2`. -/
 theorem appCc_h2_h4_h2
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M) (s c : ℕ) :

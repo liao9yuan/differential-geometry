@@ -43,11 +43,8 @@ section GeneralValenceRS
 
 open Bundle Tensor0SBundle Tensor0SNabla TensorRSNabla TensorMultilinear
 
-/-- The metric-independent coefficient in the mixed-valence second-order
-Gagliardo–Nirenberg step. -/
 def gnStepConst (n k : ℕ) : ℝ :=
   max (2 * ((k : ℝ) - 1) + Real.sqrt (n : ℝ)) 1
-
 
 private lemma real_two_mul_add_nonneg {a b : ℝ} (ha : 0 ≤ a) (hb : 0 ≤ b) :
     0 ≤ 2 * a + b := by linarith
@@ -227,7 +224,6 @@ theorem secondOrderInterp_lpFiberJet_fin_rs
             apply mul_le_mul_of_nonneg_right hcoef_le (mul_nonneg hAw_nn hC_nn)
         _ = K' * Aw * C := by ring
   · exfalso; omega
-
 
 theorem secondOrderInterp_lpFiberJet_sup_rs
     (g : SmoothRiemannianMetric I M) (k r : ℕ) (_hk : 1 ≤ k) :

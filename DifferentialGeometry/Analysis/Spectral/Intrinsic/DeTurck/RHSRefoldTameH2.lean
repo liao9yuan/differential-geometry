@@ -7,13 +7,6 @@ import DifferentialGeometry.Analysis.Sobolev.TensorHilbert.LieCorr0CoeffDiffRadi
 import DifferentialGeometry.Analysis.Spectral.Tensor.Estimates.H3BoundedGrid
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.CurvatureCoeffDiffRadiusFree
 
-/-!
-# Tame H2 bounds for the refolded Ricci--DeTurck coefficients
-
-This module retains the single metric `H4` head in the order-zero coefficient
-and controls every lower bounded-factor window from the metric `H3` jet.
--/
-
 noncomputable section
 
 open Bundle Manifold MeasureTheory Set Tensor0SBundle
@@ -329,9 +322,6 @@ private theorem edgeLie_eq_sum
   intro i _
   module
 
-/-- A single Palatini pair-trace monomial has a uniform intrinsic `H2` tame
-bound.  The permutation is arbitrary, so the same constants control all six
-monomials in the DeTurck Lie pair. -/
 theorem mono_h2_tame
     (hDim : Module.finrank Real E = 3)
     (g : SmoothRiemannianMetric I M) {delta0 : Real}
@@ -444,9 +434,6 @@ theorem mono_h2_tame
             ring
       simpa only [V, hsymm] using hV)
 
-/-- Along the realized metric segment, the complete DeTurck Lie pair has an
-intrinsic `H2` tame bound with constants independent of the path parameter and
-of all six slot permutations. -/
 theorem liePair_h2_tame
     (hDim : Module.finrank Real E = 3)
     (g : SmoothRiemannianMetric I M) {delta0 : Real}
@@ -654,9 +641,6 @@ theorem liePair_h2_tame
         ring
       · rfl
 
-/-- In dimension three, the Ricci connection-difference coefficient has a
-tame intrinsic `H2` bound: the bounded-factor remainder depends only on the
-metric `H3` jet, while the single head is linear in the metric `H4` jet. -/
 theorem ricciConn_h2_tame
     (hDim : Module.finrank Real E = 3)
     (g : SmoothRiemannianMetric I M) {delta0 : Real}
@@ -703,9 +687,6 @@ theorem ricciConn_h2_tame
       simpa only [Ctop] using
         hpoint g1 P htie hdelta_le hdelta_nonneg hbound i x)
 
-/-- In dimension three, the Palatini kernel left by the exact Ricci field
-refold has the same tame `H2` shape as the connection-difference coefficient.
-Only the fourth metric jet remains explicit. -/
 theorem ricciKer_h2_tame
     (hDim : Module.finrank Real E = 3)
     (g : SmoothRiemannianMetric I M) {delta0 : Real}
@@ -765,9 +746,6 @@ theorem ricciKer_h2_tame
       simpa only [Ctop, hsymm] using
         hpoint g1 P htie hdelta_le hdelta_nonneg hbound i x)
 
-/-- The Ricci base curvature coefficient has an intrinsic `H2` tame bound.
-The fourth metric jet remains as one explicit head, while the lower part
-depends only on the first four metric jets. -/
 theorem ricciBase_h2_tame
     (g : SmoothRiemannianMetric I M) {delta0 : Real}
     (hdelta0_lt : delta0 < 1) :
@@ -851,9 +829,6 @@ theorem ricciBase_h2_tame
         exact Real.sq_sqrt hinner]
       ring
 
-/-- The `DLa` part of the DeTurck coefficient has an intrinsic `H2` tame
-bound without a supercritical Sobolev-index assumption.  Fibre smallness fixes
-the zeroth-order grid radius; the fourth metric jet remains explicit. -/
 theorem dLa_h2_tame
     (g g_bg : SmoothRiemannianMetric I M) {delta0 : Real}
     (hdelta0_nonneg : 0 <= delta0) (hdelta0_lt : delta0 < 1) :
@@ -1022,10 +997,6 @@ theorem dLa_h2_tame
       rw [show (B A) ^ 2 = Kt * A ^ 2 + Kl * (1 + A ^ 2) by
         exact Real.sq_sqrt hinner]
 
-/-- The `DLb` part of the DeTurck coefficient has an intrinsic `H2` tame
-bound without a theorem-facing high-index hypothesis.  The all-order producer
-is used at one fixed background-dependent supercritical index, while only
-orders zero through two are consumed. -/
 theorem dLb_h2_tame
     (g g_bg : SmoothRiemannianMetric I M) {delta0 : Real}
     (hdelta0_nonneg : 0 <= delta0) (hdelta0_lt : delta0 < 1) :
@@ -1199,9 +1170,6 @@ theorem dLb_h2_tame
       rw [show (B A) ^ 2 = Kt * A ^ 2 + Kl * (1 + A ^ 2) by
         exact Real.sq_sqrt hinner]
 
-/-- The lower `lieCorr0` coefficient has an intrinsic `H2` tame bound with
-uniform lower-order constants.  The supercritical order required by the
-all-order producer is fixed inside the proof and is absent from this API. -/
 theorem lieCorr_h2_tame
     (g g_bg : SmoothRiemannianMetric I M) {delta0 : Real}
     (hdelta0_nonneg : 0 <= delta0) (hdelta0_lt : delta0 < 1) :
@@ -1352,9 +1320,6 @@ theorem lieCorr_h2_tame
       rw [show (B A) ^ 2 = Kt * A ^ 2 + Kl * (1 + A ^ 2) by
         exact Real.sq_sqrt hinner]
 
-/-- The complete refolded order-zero Ricci--DeTurck coefficient has the
-same-horizon tame `H2` shape.  All lower terms depend only on the metric `H3`
-radius, while every fourth metric derivative remains in an explicit head. -/
 theorem rhs0_h2_tame
     (hDim : Module.finrank Real E = 3)
     (g g_bg : SmoothRiemannianMetric I M) {delta0 : Real}

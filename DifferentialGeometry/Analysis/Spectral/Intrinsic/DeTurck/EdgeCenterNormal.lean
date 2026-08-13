@@ -3,15 +3,6 @@ import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.RHSZeroRefold
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.Garding.ConnLapPairing
 import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.GreenIdentityAndIBP.RoughLaplacianAppCcCommutation
 
-/-!
-# Fixed-parameter centered edge normal form
-
-This leaf module performs the exact diagonal cancellation in the joint
-order-zero/top edge block before any estimate is taken.  The refold identity
-is used only with the path state and acted tensor both equal to `T`; the two
-off-diagonal pair fields remain explicit algebraic cross terms.
--/
-
 noncomputable section
 
 set_option linter.style.setOption false
@@ -41,9 +32,6 @@ variable
 private local instance : CompleteSpace E := FiniteDimensional.complete Real E
 
 omit [BoundarylessManifold I M] in
-/-- For the canonical Ricci--DeTurck permutations, the raw top coefficient
-reduces to the six monomials with output codes `0321`, `1320`, `0123`,
-`1023`, `3012`, and `3102`, with signs `++----`. -/
 theorem edge_q_six
     (g : SmoothRiemannianMetric I M) (T U : SmoothCcTensor g 0 2)
     {delta : Real}
@@ -89,9 +77,6 @@ theorem edge_q_six
   simp [lieRefoldEps]
   module
 
-/-- With the canonical Ricci--DeTurck refold data, the arbitrary rank-four
-top pair applied to the path state is exactly the raw top refold coefficient
-applied to the same rank-four field. -/
 theorem edgeTopG_rhs
     (g : SmoothRiemannianMetric I M) (T : SmoothCcTensor g 0 2)
     (G : SmoothCcTensor g 0 4) {delta : Real}
@@ -110,11 +95,6 @@ theorem edgeTopG_rhs
     edgeTopG_apply (I := I) (M := M) g T G hdelta hdeltaZ
       ricciRefoldQA ricciRefoldQB lieRefoldQ lieRefoldEps s
 
-/-- Exact normal form of the rank-four raw-Laplacian argument corner in the
-complete polarized edge map.  The first summand on the right is the Hessian of
-the raw Laplacian of `U`; the remaining two summands are the full
-Hessian--Laplacian curvature defect, before any permutation cancellation or
-estimate. -/
 theorem edge_arg2_nf
     (g : SmoothRiemannianMetric I M) (T U : SmoothCcTensor g 0 2)
     {delta : Real}
@@ -140,8 +120,6 @@ theorem edge_arg2_nf
         hdelta hdeltaZ qA qB q epsilon s := by
   rw [rawConnLap_iteratedCovGrad_two_comm (I := I) (M := M) g 2 U]
 
-/-- Folding the non-pure top coefficient into its curvature reaction commutes
-with taking the one-minus-rough-Laplacian commutator on an acted tensor. -/
 theorem phiMet_fold_comm
     (g₀ g_bg g : SmoothRiemannianMetric I M)
     (S : SmoothCcTensor g₀ 0 2) :
@@ -185,9 +163,6 @@ theorem phiMet_fold_comm
   rw [hS, hLS]
   simp only [iteratedCovGrad_zero]
 
-/-- At a fixed path parameter, the complete centered diagonal zero/top block
-is a lower carrier/residual arm, the variable-cometric commutator, the folded
-curvature difference on `LT`, and the two raw off-diagonal pair terms. -/
 theorem edge_center_s_nf
     (g g_bg : SmoothRiemannianMetric I M) (T : SmoothCcTensor g 0 2)
     (hTsymm : ∀ (x : M) (v w : TangentSpace I x),

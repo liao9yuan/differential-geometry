@@ -7,46 +7,6 @@ import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.SobolevNonlinear
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.SymmAbsorbedCoeffInputReindexBounds
 import DifferentialGeometry.Analysis.Spectral.Tensor.Estimates.H1H2AppCcRS
 
-/-!
-# Radius-free jet-L² bound for the `lieCorr0` coefficient field
-
-**Brick 4** of the Pro-ruled repair of UNIF item-2 (see `ShortTime/THREEARM_RECON.md` §11/§11d
-and the per-file note `LieCorr0CoeffDiffRadiusFree.md`) — the `lieCorr0Field` sibling of brick 3
-(`DeTurckLieCoeffDiffRadiusFree.lean`), built by the same pattern: RHS jets over `symmS g₀ T`,
-top window `a + 2`, low window `a + 1`, constants depending only on `g₀`, `g_bg`, `a`, `dim E`,
-`δ₀` — no ball radius `R`, no `H^{a+2}` ball hypothesis:
-```
-∑_{i ≤ a} ‖∇ⁱ(lieCorr0Field g₀ g₁ g_bg)‖²
-   ≤ Ktop · ∑_{j ≤ a+2} ‖∇ʲ(symmS g₀ T)‖²
-   + Klow · (1 + ∑_{j ≤ a+1} ‖∇ʲ(symmS g₀ T)‖²)
-```
-
-The per-order engine goes through the five-way split of `lc0_decomp` + `insert_base`
-(`LieCorr0Split.lean`): `lieCorr0Field = lc0Insert g₀ + (lc0Insert g_bg − lc0Insert g₀) + lc0VB
-+ lc0AMix + lc0Riem`, with per-piece radius-free arm engines:
-
-* **base insert** (the only top-carrying piece): `lc0Insert g₀ g₁ g₀ = −DLb(g₀,g₁,g₀)`
-  (`lc0Insert_base_eq_neg_dlb`), bounded through `normSq_iCG_dlbField_le` +
-  `norm_iCG_wEndoInsert_eq_wAlpha` + the radius-free tower top `wAlpha_L2_topsep_rf` at
-  `g_bg := g₀` (brick-3's DLb arm verbatim);
-* **insert difference**: `(2,2) → (1,1)` reduction `normSq_iCG_lc0InsertDiff_le`, then
-  `slotInsertEndoCc_sub` + the HOIST `connDiffDVFInsert_eq_cometricRaise` ×2 + the cometric-raise
-  jet isometry, landing on the radius-free `wAlphaB_L2_perOrder_rf` ×2;
-* **`lc0Riem`**: the committed two-arm factorization `lc0Riem_eq_app` (live rank-2 cometric arm ×
-  fixed `g₀`-curvature passenger) with the ball-uniform cometric producer swapped for the
-  radius-free `cometricCastG0_order0sup_jetL2_radiusFree`; the two-arm integrator's constant is
-  already `g₀`-only;
-* **`lc0VB`**: PROVED radius-free via the exposed frozen-leaf factorizations
-  `lc0VB_eq_app`/`vbSplit`, the fibre identity `b4_mcd_eq`, and the pointwise `atgw` jets
-  assembly over the committed producers (`rfns_iCG_{cometricCastG0,wXi}_atgw_rf`,
-  `rfns_icg_ipLow_le`), integrated once by `antidiagonalTupleGrid_integral_radiusFree`;
-* **`lc0AMix`**: PROVED through the exact five-factor refold in `LieCorr0AMixRefold`, the
-  moving-trace grid producer `trace_grid_rf`, two radius-free connection-difference arms,
-  four product-grid joins, and one radius-free integration.
-
-Status: the brick-4 per-order and summed radius-free producers are proved without `sorryAx`.
--/
-
 noncomputable section
 
 set_option autoImplicit false
@@ -86,15 +46,11 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
-/-- Squared triangle over two summands (local copy of the private
-`DeTurckLieCoeffL2JetBound` helper). -/
 private theorem sq_le_two_add (t u v c1 c2 : ℝ) (ht : 0 ≤ t) (hu : 0 ≤ u) (hv : 0 ≤ v)
     (htri : t ≤ u + v) (h1 : u ^ 2 ≤ c1) (h2 : v ^ 2 ≤ c2) : t ^ 2 ≤ 2 * (c1 + c2) := by
   have huv : 0 ≤ u + v := by linarith
   nlinarith [mul_le_mul htri htri ht huv, sq_nonneg (u - v), h1, h2, hu, hv]
 
-/-- Five-way squared triangle: `t ≤ a+b+c+d+e` (all nonneg) gives
-`t² ≤ 5·(a²+b²+c²+d²+e²)` (local copy of the private `LieCorr0CoeffL2JetBound` helper). -/
 private theorem sq_le_five_add (t a b c d e : ℝ) (ht : 0 ≤ t)
     (ha : 0 ≤ a) (hb : 0 ≤ b) (hc : 0 ≤ c) (hd : 0 ≤ d) (he : 0 ≤ e)
     (htri : t ≤ a + b + c + d + e) :
@@ -104,14 +60,7 @@ private theorem sq_le_five_add (t a b c d e : ℝ) (ht : 0 ≤ t)
     sq_nonneg (a - d), sq_nonneg (a - e), sq_nonneg (b - c), sq_nonneg (b - d),
     sq_nonneg (b - e), sq_nonneg (c - d), sq_nonneg (c - e), sq_nonneg (d - e)]
 
-/-! ### Per-piece radius-free arm engines (five-way split of `lc0_decomp`). -/
-
 set_option linter.unusedVariables false in
-/-- **Base-insert arm (the top-carrying piece).**  `lc0Insert g₀ g₁ g₀ = −DLb(g₀,g₁,g₀)`
-(`lc0Insert_base_eq_neg_dlb`), so its jets are `4·finrank` times the `deTurckLieWEndoInsert`
-jets (`normSq_iCG_dlbField_le`), which equal the `wAlpha` jets
-(`norm_iCG_wEndoInsert_eq_wAlpha`), top-separated by the radius-free tower top
-`wAlpha_L2_topsep_rf` at `g_bg := g₀` — brick-3's DLb arm engine verbatim. -/
 private lemma lc0Base_perOrder_rf
     (g₀ : SmoothRiemannianMetric I M) (a : ℕ)
     (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) {δ₀ : ℝ} (hδ₀ : δ₀ < 1)
@@ -158,11 +107,6 @@ private lemma lc0Base_perOrder_rf
             ‖iteratedCovGrad (I := I) g₀ 0 2 j P‖ ^ 2) := by ring
 
 set_option linter.unusedVariables false in
-/-- **Insert-difference arm (top-free).**  `(2,2) → (1,1)` reduction
-(`normSq_iCG_lc0InsertDiff_le`), then split the endo difference (`slotInsertEndoCc_sub`),
-hoist both slot inserts to cometric raises of `wAlphaB` (`connDiffDVFInsert_eq_cometricRaise`),
-drop the raise by the jet isometry (`norm_iCG_cometricRaiseSlot0Field_eq`), and feed the
-radius-free `wAlphaB_L2_perOrder_rf` at `g_bg := g₀` and `g_bg := g_bg`. -/
 private lemma lc0Diff_perOrder_rf
     (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
     (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) {δ₀ : ℝ} (hδ₀ : δ₀ < 1)
@@ -189,7 +133,6 @@ private lemma lc0Diff_perOrder_rf
   refine ⟨fun i => 4 * (Module.finrank ℝ E : ℝ) * (2 * FB0 i + 2 * FBb i),
     fun i => mul_nonneg h4fr_nn (by have := hFB0_nn i; have := hFBb_nn i; linarith), ?_⟩
   intro g₁ P htie δ hδ_le hδ0 hδ hsup i
-  -- split the slot-`0` insert of the endo difference into the two `wAlphaB` cometric raises.
   have hsplit : slotInsertEndoCc (I := I) (M := M) g₀ 0
       (connDiffDVFSection (I := I) (M := M) g₀ g₁ g₀ -
         connDiffDVFSection (I := I) (M := M) g₀ g₁ g_bg) =
@@ -205,7 +148,6 @@ private lemma lc0Diff_perOrder_rf
       cometricRaiseSlot0Field (I := I) (M := M) g₀ 0 (wAlphaB (I := I) (M := M) g₀ g₁ g₀) -
         cometricRaiseSlot0Field (I := I) (M := M) g₀ 0 (wAlphaB (I := I) (M := M) g₀ g₁ g_bg) :=
     hsplit
-  -- jet isometries for the two raises.
   have e0 : ‖iteratedCovGrad (I := I) g₀ 1 1 i
       (cometricRaiseSlot0Field (I := I) (M := M) g₀ 0 (wAlphaB (I := I) (M := M) g₀ g₁ g₀))‖ =
       ‖iteratedCovGrad (I := I) g₀ 0 2 i (wAlphaB (I := I) (M := M) g₀ g₁ g₀)‖ :=
@@ -251,12 +193,6 @@ private lemma lc0Diff_perOrder_rf
             ‖iteratedCovGrad (I := I) g₀ 0 2 j P‖ ^ 2) := by ring
 
 set_option linter.unusedVariables false in
-/-- **`lc0Riem` arm (top-free).**  Radius-free sibling of the committed
-`lc0Riem_realizedFam_perOrder_topSep` route: the two-arm factorization `lc0Riem_eq_app` (live
-rank-2 cometric arm `lc0RiemLive`, fixed passenger `lc0RiemPass`), the pointwise product grid,
-and the two-arm integrator (whose constant is `g₀`-only), with the live arm's order-0 sup and
-jet sums supplied by the radius-free `cometricCastG0_order0sup_jetL2_radiusFree` instead of the
-ball-uniform cometric envelope. -/
 private lemma lc0Riem_perOrder_rf
     (g₀ : SmoothRiemannianMetric I M) (a : ℕ)
     (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) {δ₀ : ℝ} (hδ₀ : δ₀ < 1)
@@ -306,7 +242,6 @@ private lemma lc0Riem_perOrder_rf
     intro x hx
     rw [Finset.mem_range] at hx ⊢
     omega
-  -- order-`0` fibre sup bounds for the two arms.
   have hLsup : ∀ x : M, riemannianFiberNormSq (I := I) (M := M) g₀ 4 2 x
       ((lc0RiemLive (I := I) (M := M) g₀ g₁).toSection x) ≤
       Real.sqrt (fr * Λ ^ 2) ^ 2 := by
@@ -324,7 +259,6 @@ private lemma lc0Riem_perOrder_rf
     (lc0RiemLive (I := I) (M := M) g₀ g₁) (lc0RiemPass (I := I) g₀)
     (Real.sqrt (fr * Λ ^ 2)) (Real.sqrt KP)
     (Real.sqrt_nonneg _) (Real.sqrt_nonneg _) hLsup hPsup
-  -- the live arm's jet-`L²` sum through the radius-free cometric producer.
   have hLsum : ∑ m ∈ Finset.range (i + 1),
       ‖iteratedCovGrad (I := I) g₀ 4 2 m (lc0RiemLive (I := I) (M := M) g₀ g₁)‖ ^ 2 ≤
       fr * (Fcg i * (1 + W1)) := by
@@ -339,7 +273,6 @@ private lemma lc0Riem_perOrder_rf
       _ ≤ fr * (Fcg i * (1 + W1)) := by
           refine mul_le_mul_of_nonneg_left ?_ hfr_nn
           simpa [hW1] using hjet i hi
-  -- pointwise product grid for the two-arm action, then integrate.
   have hnorm : ‖iteratedCovGrad (I := I) g₀ 2 2 i
         (appCcRS (I := I) (M := M) g₀ 2 4 2
           (lc0RiemLive (I := I) (M := M) g₀ g₁) (lc0RiemPass (I := I) g₀))‖ ^ 2 ≤
@@ -364,7 +297,6 @@ private lemma lc0Riem_perOrder_rf
   have hΛsq : Real.sqrt (fr * Λ ^ 2) ^ 2 = fr * Λ ^ 2 :=
     Real.sq_sqrt (mul_nonneg hfr_nn (sq_nonneg Λ))
   rw [hKPsq, hΛsq] at hnorm
-  -- pad the flat passenger constant into the `(1 + W3)` low window.
   have hpad : Cint i * (KP * ∑ m ∈ Finset.range (i + 1),
         ‖iteratedCovGrad (I := I) g₀ 4 2 m (lc0RiemLive (I := I) (M := M) g₀ g₁)‖ ^ 2
       + fr * Λ ^ 2 * NPass i) ≤
@@ -401,16 +333,6 @@ private lemma lc0Riem_perOrder_rf
     _ = appCcGdiag (E := E) i *
           (Cint i * (KP * (fr * Fcg i) + fr * Λ ^ 2 * NPass i)) * (1 + W3) := by ring
 
-/-! ### The radius-free `metricConnDiffLowered` producer and the `lc0VB` arm
-
-`mcdCc g₀ g₁ g_bg` (the `g₁`-lowered connection difference) splits by `htie` as
-`wXi g₀ g₁ g_bg` (its `g₀`-lowering, with the committed pointwise `atgw` bound
-`rfns_iCG_wXi_atgw_rf`) plus the `P`-paired correction — realized here as the two-orientation
-trace `½·appCc(ΦA)(wXi) + ½·appCc(ΦB)(wXi)`, where `ΦA/ΦB` are `(3,3)`-operators built from the
-`∇`-parallel `g₀`-cometric double trace, a source reindex, and `slotExtend³ P` (the `ipLowCc`
-pattern one rank up).  Everything is pointwise in the workhorse `atgw` currency; the single
-integration at the end (`antidiagonalTupleGrid_integral_radiusFree`) produces the low window. -/
-
 omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] in
 private theorem b4_icg_zero (g : SmoothRiemannianMetric I M) (r s j : ℕ) :
     iteratedCovGrad (I := I) g r s j (0 : SmoothCcTensor g r s) = 0 := by
@@ -440,7 +362,6 @@ private lemma b4_rfns_smul (g : SmoothRiemannianMetric I M) (r s : ℕ)
     tensorInnerPointwise_smul_right]
   ring
 
-/-- The jets of the fixed rank-`3` cometric double trace vanish from order `1` on. -/
 private lemma b4_trace_succ (g : SmoothRiemannianMetric I M) (i : ℕ) (x : M) :
     riemannianFiberNormSq (I := I) (M := M) g 5 (3 + (i + 1)) x
         ((iteratedCovGrad (I := I) g 5 3 (i + 1)
@@ -456,8 +377,6 @@ private lemma b4_trace_succ (g : SmoothRiemannianMetric I M) (i : ℕ) (x : M) :
   exact riemannianFiberNormSq_zero (I := I) (M := M) g 5 (3 + 1 + i) x
 
 set_option linter.unusedSectionVars false in
-/-- A single positive-order jet monomial sits inside the antidiagonal grid at its own order
-(the order-`0` term instead goes through the `Λ₀` fibre-smallness sup). -/
 private lemma b4_bP_le_grid (b : ℕ → ℝ) (hb : ∀ j, 0 ≤ b j) (m : ℕ) :
     b (m + 1) ≤ Combinatorics.antidiagonalTupleGrid b (m + 1) := by
   classical
@@ -478,8 +397,6 @@ private lemma b4_bP_le_grid (b : ℕ → ℝ) (hb : ∀ j, 0 ≤ b j) (m : ℕ) 
     (fun n _ => Finset.sum_nonneg (fun e _ =>
       Finset.prod_nonneg (fun k _ => hb (e k)))) hmem1
 
-/-- Iterating passenger-slot extension costs one factor of `finrank` per added slot, uniformly
-at every covariant-derivative order. -/
 private lemma b4_slotIter_le (g : SmoothRiemannianMetric I M) (r s w : ℕ)
     (Φ : SmoothCcTensor g r s) (i : ℕ) (x : M) :
     riemannianFiberNormSq (I := I) (M := M) g (r + w) ((s + w) + i) x
@@ -517,8 +434,6 @@ private lemma b4_slotIter_le (g : SmoothRiemannianMetric I M) (r s w : ℕ)
             rw [pow_succ]
             ring
 
-/-- The constant produced when two pointwise antidiagonal-grid-window bounds are combined by
-the covariant Leibniz rule. -/
 private noncomputable def b4JoinK (u v : ℕ) (A B : ℕ → ℝ) (n : ℕ) : ℝ :=
   appCcGdiag (E := E) n *
     ∑ i ∈ Finset.range (n + 1), ∑ j ∈ Finset.range (n + 1),
@@ -533,8 +448,6 @@ private lemma b4JoinK_nonneg (u v : ℕ) (A B : ℕ → ℝ)
   exact mul_nonneg (mul_nonneg (hA i) (hB j))
     (Combinatorics.antidiagonalTupleGridWindowMulConst_nonneg (i + u) (j + v))
 
-/-- Two pointwise `atgw` bounds with shifts `u+1` and `v+1` combine to shift `u+v+1`.
-The coefficient is independent of the underlying tensor fields and of the evaluation point. -/
 private lemma b4_join_atgw (g : SmoothRiemannianMetric I M)
     (p a b u v n : ℕ) (Φ : SmoothCcTensor g a b) (W : SmoothCcTensor g p a)
     (x : M) (grid : ℕ → ℝ) (hgrid : ∀ j, 0 ≤ grid j)
@@ -622,22 +535,17 @@ private lemma b4_join_atgw (g : SmoothRiemannianMetric I M)
         rw [Finset.sum_mul]
         exact Finset.sum_congr rfl (fun i _ => by rw [Finset.sum_mul])
 
-/-- The `A`-orientation trace permutation: the diagonal pair `(0,1)` of the trace tuple is read
-into slots `(2,3)` of `wXi ⊗ P` (pairing `P`'s slot `0`). -/
 private def b4PermA : Equiv.Perm (Fin 5) :=
   ⟨![2, 3, 0, 1, 4], ![2, 3, 0, 1, 4], by decide, by decide⟩
 
-/-- The `B`-orientation trace permutation (pairing `P`'s slot `1`). -/
 private def b4PermB : Equiv.Perm (Fin 5) :=
   ⟨![2, 3, 0, 4, 1], ![2, 4, 0, 1, 3], by decide, by decide⟩
 
-/-- The triple slot extension `T ↦ T ⊗ P` on rank-`3` tensors. -/
 private noncomputable def b4Pk3 (g₀ : SmoothRiemannianMetric I M)
     (P : SmoothCcTensor g₀ 0 2) : SmoothCcTensor g₀ 3 5 :=
   slotExtend (I := I) (M := M) g₀ 2 4
     (slotExtend (I := I) (M := M) g₀ 1 3 (slotExtend (I := I) (M := M) g₀ 0 2 P))
 
-/-- The `(3,3)` correction operator at orientation `σ`. -/
 private noncomputable def b4Phi (g₀ : SmoothRiemannianMetric I M)
     (P : SmoothCcTensor g₀ 0 2) (σ : Equiv.Perm (Fin 5)) : SmoothCcTensor g₀ 3 3 :=
   appCcRS (I := I) (M := M) g₀ 3 5 3
@@ -895,7 +803,6 @@ private theorem b4_phi_h2
         b4Jet2 (I := I) (M := M) g 0 2 P := by ring
 
 omit [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
-/-- Center evaluation of the rank-`3` cometric double trace (orthoframe diagonal). -/
 private lemma b4_trace_center (g : SmoothRiemannianMetric I M) (x : M)
     (D : Tensor0SSpace 5 I x) (m : Fin 3 → E) :
     Tensor0SSpace.toModel (cometricDoubleTraceFib (I := I) g 3 x D) m =
@@ -914,7 +821,6 @@ private lemma b4_trace_center (g : SmoothRiemannianMetric I M) (x : M)
     (Tensor0SSpace.toModel D) m
 
 set_option linter.unusedSectionVars false in
-/-- Rank-`0` tensors are scalar multiples of the unit tensor (local clone). -/
 private lemma b4_rank0_unit (x : M) (c : Tensor0SSpace 0 I x) :
     c = Tensor0SSpace.toModel c (fun i : Fin 0 => i.elim0) •
       unitTensor (I := I) (M := M) x := by
@@ -929,7 +835,6 @@ private lemma b4_rank0_unit (x : M) (c : Tensor0SSpace 0 I x) :
   funext i
   exact i.elim0
 
-/-- Tuple evaluation of the triple slot extension: the `D ⊗ P` reading. -/
 private lemma b4_pk3_toModel (g₀ : SmoothRiemannianMetric I M)
     (P : SmoothCcTensor g₀ 0 2) (x : M) (D : Tensor0SSpace 3 I x)
     (u0 u1 u2 u3 u4 : E) :
@@ -999,7 +904,6 @@ private lemma b4_pk3_toModel (g₀ : SmoothRiemannianMetric I M)
   rw [unitModel]
 
 set_option linter.unusedSectionVars false in
-/-- Slot-`0` multilinear expansion under a finite `smul`-sum (local clone). -/
 private lemma b4_cons_sum_smul {n : ℕ}
     (Zm : Tensor0SModel (n + 1) ℝ E) (d : ℕ) (t : Fin d → ℝ)
     (u : Fin d → E) (rest : Fin n → E) :
@@ -1033,7 +937,6 @@ private lemma b4_cons_sum_smul {n : ℕ}
   rw [← h1 (u c)]
 
 set_option linter.unusedSectionVars false in
-/-- Slot-`1` multilinear expansion under a finite `smul`-sum (local clone). -/
 private lemma b4_cons1_sum_smul {n : ℕ}
     (Zm : Tensor0SModel (n + 2) ℝ E) (aa : E) (d : ℕ) (t : Fin d → ℝ)
     (u : Fin d → E) (rest : Fin n → E) :
@@ -1069,7 +972,6 @@ private lemma b4_cons1_sum_smul {n : ℕ}
   rw [← h1 (u c)]
 
 set_option linter.unusedSectionVars false in
-/-- Orthonormal-frame expansion at the frame center (local clone). -/
 private theorem b4_frame_expand (g : SmoothRiemannianMetric I M) (x : M)
     (u : TangentSpace I x) :
     u = ∑ i : Fin (Module.finrank ℝ E),
@@ -1123,7 +1025,6 @@ private theorem b4_frame_expand (g : SmoothRiemannianMetric I M) (x : M)
       rw [hcoeff i, hbse i]
 
 set_option linter.unusedSectionVars false in
-/-- `unitModel` is additive (local clone). -/
 private lemma b4_unitModel_add (g₀ : SmoothRiemannianMetric I M) (s : ℕ)
     (A B : SmoothCcTensor g₀ 0 s) (x : M) :
     unitModel (I := I) (M := M) g₀ s (A + B) x =
@@ -1133,7 +1034,6 @@ private lemma b4_unitModel_add (g₀ : SmoothRiemannianMetric I M) (s : ℕ)
     ContinuousLinearMap.add_apply, Tensor0SSpace.toModel_add]
 
 set_option linter.unusedSectionVars false in
-/-- `unitModel` commutes with real scaling (local clone). -/
 private lemma b4_unitModel_smul (g₀ : SmoothRiemannianMetric I M) (s : ℕ) (c : ℝ)
     (A : SmoothCcTensor g₀ 0 s) (x : M) :
     unitModel (I := I) (M := M) g₀ s (c • A) x =
@@ -1143,8 +1043,6 @@ private lemma b4_unitModel_smul (g₀ : SmoothRiemannianMetric I M) (s : ℕ) (c
     ContinuousLinearMap.smul_apply, Tensor0SSpace.toModel_smul]
 
 omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [SigmaCompactSpace M] in
-/-- `unitModel` of the local `metricConnDiffLoweredCc` (clone of the Arm1-private lemma,
-`g_bg`-generic). -/
 private lemma b4_mcd_unitModel (g₀ g₁ g_bg : SmoothRiemannianMetric I M) (x : M)
     (m : Fin 3 → TangentSpace I x) :
     unitModel (I := I) (M := M) g₀ 3 (metricConnDiffLoweredCc (I := I) (M := M) g₀ g₁ g_bg) x m =
@@ -1161,7 +1059,6 @@ private lemma b4_mcd_unitModel (g₀ g₁ g_bg : SmoothRiemannianMetric I M) (x 
   exact metricConnDiffLoweredFib_toModel (I := I) g₁ g₁ g_bg x m
 
 omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [BoundarylessManifold I M] [SigmaCompactSpace M] in
-/-- `unitModel` of an `appCc` application, as the fibre action on the unit value. -/
 private lemma b4_appCc_unitModel (g₀ : SmoothRiemannianMetric I M) (r s : ℕ)
     (Φ : SmoothCcTensor g₀ r s) (W : SmoothCcTensor g₀ 0 r) (x : M) :
     unitModel (I := I) (M := M) g₀ s (appCc (I := I) (M := M) g₀ r s Φ W) x =
@@ -1173,7 +1070,6 @@ private lemma b4_appCc_unitModel (g₀ : SmoothRiemannianMetric I M) (r s : ℕ)
   rfl
 
 set_option linter.unusedSectionVars false in
-/-- The unit value of a `(0,3)`-tensor read back through `unitModel`. -/
 private lemma b4_unit_read (g₀ : SmoothRiemannianMetric I M)
     (W : SmoothCcTensor g₀ 0 3) (x : M) (v : Fin 3 → E) :
     Tensor0SSpace.toModel
@@ -1182,8 +1078,6 @@ private lemma b4_unit_read (g₀ : SmoothRiemannianMetric I M)
       unitModel (I := I) (M := M) g₀ 3 W x v := by
   rw [unitModel]
 
-/-- **The radius-free `mcd` split** (the session's fibre identity): by `htie`, the `g₁`-lowered
-connection difference is its `g₀`-lowering plus the two-orientation `P`-trace correction. -/
 theorem b4_mcd_eq (g₀ g₁ g_bg : SmoothRiemannianMetric I M)
     (P : SmoothCcTensor g₀ 0 2)
     (htie : ∀ (y : M) (v w : TangentSpace I y),
@@ -1404,8 +1298,6 @@ theorem b4_mcd_eq (g₀ g₁ g_bg : SmoothRiemannianMetric I M)
   rw [hccb V (m 2), hccb (m 2) V]
   ring
 
-/-- The correction from background lowering to moving-metric lowering of the
-connection-difference covariant tensor. -/
 noncomputable def metricLowerCorr
     (g₀ g₁ g_bg : SmoothRiemannianMetric I M)
     (P : SmoothCcTensor g₀ 0 2) : SmoothCcTensor g₀ 0 3 :=
@@ -1417,8 +1309,6 @@ noncomputable def metricLowerCorr
       (wXi (I := I) (M := M) g₀ g₁ g_bg)
 
 omit [NeZero (Module.finrank ℝ E)] in
-/-- The moving-lowering correction is linear in the metric-perturbation
-slot. -/
 theorem metricCorr_sub
     (g₀ g₁ g_bg : SmoothRiemannianMetric I M)
     (P Q : SmoothCcTensor g₀ 0 2) :
@@ -1429,8 +1319,6 @@ theorem metricCorr_sub
     appCcRS_sub_right, appCc_sub_left]
   module
 
-/-- Moving-metric lowering is background lowering plus the bilinear metric
-perturbation correction. -/
 theorem mcd_lower_split
     (g₀ g₁ g_bg : SmoothRiemannianMetric I M)
     (P : SmoothCcTensor g₀ 0 2)
@@ -1534,8 +1422,6 @@ private theorem metricCorrAct_h2
         b4Jet2 (I := I) (M := M) g₀ 0 3 W := by
       nlinarith
 
-/-- On a closed three-manifold, the moving-lowering correction is H²-bilinear
-in the metric perturbation and the background-lowered connection difference. -/
 theorem metricCorr_h2_mul
     (hDim : Module.finrank ℝ E = 3)
     (g₀ : SmoothRiemannianMetric I M) :
@@ -1662,9 +1548,6 @@ private theorem b4App_sub
   rw [hneg]
   rfl
 
-/-- The moving-lowering correction is uniformly H²-Lipschitz in the
-moving-metric connection-difference slot, with the metric perturbation as
-the other bilinear factor. -/
 theorem metricCorr_move
     (hDim : Module.finrank ℝ E = 3)
     (g₀ : SmoothRiemannianMetric I M) :
@@ -1744,15 +1627,7 @@ theorem metricCorr_move
   rw [heq]
   simpa only [b4Jet2, W, W₁, W₂] using hraw
 
-/-! #### The `atgw` jets assembly for the `lc0VB` half (session-2 resumption items (1)–(5)).
-
-All bounds below are POINTWISE in the workhorse `atgw` currency
-(`Combinatorics.antidiagonalTupleGridWindow` over `bP j = |∇ʲP|²(x)`), multiplied by
-`antidiagonalTupleGridWindow_mul_le`/`_mono`, and integrated ONCE at the end via the public
-`antidiagonalTupleGrid_integral_radiusFree`. -/
-
 set_option linter.unusedSectionVars false in
-/-- Triple `slotExtend` jet domination: the `b4Pk3` jets are `(dim E)³` times the `P` jets. -/
 private lemma b4_pk3_rfns_le (g₀ : SmoothRiemannianMetric I M)
     (P : SmoothCcTensor g₀ 0 2) (q : ℕ) (x : M) :
     riemannianFiberNormSq (I := I) (M := M) g₀ 3 (5 + q) x
@@ -1787,11 +1662,6 @@ private lemma b4_pk3_rfns_le (g₀ : SmoothRiemannianMetric I M)
             ((iteratedCovGrad (I := I) g₀ 0 2 q P).toSection x) := by ring
 
 set_option linter.unusedVariables false in
-/-- **(1) Pointwise `atgw` bound for the correction operator `b4Phi`.**  The trace arm is a
-fixed tensor (per-order constants via `exists_bound_riemannianFiberNormSq_smoothCcTensor`, after
-stripping the source reindex); the `slotExtend³ P` arm lands in the grid window at `l + 1`
-(order `0` through the `Λ₀` sup, positive orders through `b4_bP_le_grid`).  Constants depend
-only on `g₀`, `Λ₀`, `l`, `dim E`. -/
 lemma b4_phi_atgw (g₀ : SmoothRiemannianMetric I M) (σ : Equiv.Perm (Fin 5))
     {Λ₀ : ℝ} (hΛ₀0 : 0 ≤ Λ₀) :
     ∃ Kphi : ℕ → ℝ, (∀ l, 0 ≤ Kphi l) ∧
@@ -1828,7 +1698,6 @@ lemma b4_phi_atgw (g₀ : SmoothRiemannianMetric I M) (σ : Equiv.Perm (Fin 5))
   have hatgw_one : (1 : ℝ) ≤ atgw :=
     Combinatorics.one_le_antidiagonalTupleGridWindow bP hbP_nn (by omega)
   have hatgw_nn : (0 : ℝ) ≤ atgw := le_trans zero_le_one hatgw_one
-  -- every window-range entry of `bP` is absorbed by the window.
   have hbPw : ∀ q : ℕ, q < l + 1 → bP q ≤ (1 + Λ₀ ^ 2) * atgw := by
     intro q hq
     cases q with
@@ -1845,7 +1714,6 @@ lemma b4_phi_atgw (g₀ : SmoothRiemannianMetric I M) (σ : Equiv.Perm (Fin 5))
               b4_bP_le_grid bP hbP_nn m
           _ ≤ atgw := Combinatorics.antidiagonalTupleGrid_le_window bP hbP_nn hq
           _ ≤ (1 + Λ₀ ^ 2) * atgw := by nlinarith [hatgw_nn, sq_nonneg Λ₀]
-  -- the trace arm is a per-order constant (source reindex stripped).
   have hΦarm : ∀ i' : ℕ, riemannianFiberNormSq (I := I) (M := M) g₀ 5 (3 + i') x
       ((iteratedCovGrad (I := I) g₀ 5 3 i'
         (reindexCoeffGen (I := I) (M := M) g₀ 5 3
@@ -1854,7 +1722,6 @@ lemma b4_phi_atgw (g₀ : SmoothRiemannianMetric I M) (σ : Equiv.Perm (Fin 5))
     rw [rfns_iteratedCovGrad_reindexCoeffGen_eq (I := I) (M := M) g₀ 5 3
       (cometricDoubleTraceField (I := I) g₀ 3) σ i' x]
     exact hSΦ i' x
-  -- the `slotExtend³ P` arm is absorbed by the window.
   have hqsum : ∀ i' : ℕ, (∑ q ∈ Finset.range (l + 1 - i'),
         riemannianFiberNormSq (I := I) (M := M) g₀ 3 (5 + q) x
           ((iteratedCovGrad (I := I) g₀ 3 5 q
@@ -1881,7 +1748,6 @@ lemma b4_phi_atgw (g₀ : SmoothRiemannianMetric I M) (σ : Equiv.Perm (Fin 5))
           rw [Finset.sum_const, Finset.card_range, nsmul_eq_mul]
           push_cast
           ring
-  -- assemble through the rank-left product grid.
   have hleib := rfns_iteratedCovGrad_appCcRS_diagonalProductGrid_rankLeft_le
     (I := I) (M := M) g₀ l 3 5 3
     (reindexCoeffGen (I := I) (M := M) g₀ 5 3 (cometricDoubleTraceField (I := I) g₀ 3) σ)
@@ -1911,9 +1777,6 @@ lemma b4_phi_atgw (g₀ : SmoothRiemannianMetric I M) (σ : Equiv.Perm (Fin 5))
           (fr ^ 3 * (((l : ℝ) + 1) * (1 + Λ₀ ^ 2)) * atgw) := by rw [Finset.sum_mul]
 
 set_option linter.unusedVariables false in
-/-- **(2a) Pointwise `atgw` bound for the correction application `appCc (b4Phi σ) (wXi)`** —
-the `wOmega` two-arm fold with the cometric arm replaced by `b4Phi`:
-`|∇ⁿ(appCc (b4Phi σ P) (wXi g₀ g₁ gb))|²(x) ≤ Kap n · atgw(bP)(n+2)`. -/
 private lemma b4_app_atgw (g₀ gb : SmoothRiemannianMetric I M) (σ : Equiv.Perm (Fin 5))
     {δ₀ : ℝ} (hδ₀ : δ₀ < 1) {Λ₀ : ℝ} (hΛ₀0 : 0 ≤ Λ₀) :
     ∃ Kap : ℕ → ℝ, (∀ n, 0 ≤ Kap n) ∧
@@ -2027,14 +1890,6 @@ private lemma b4_app_atgw (g₀ gb : SmoothRiemannianMetric I M) (σ : Equiv.Per
         exact Finset.sum_congr rfl (fun i' _ => by rw [Finset.sum_mul])
 
 set_option linter.unusedVariables false in
-/-- **(2) Pointwise radius-free `atgw` bound for the `g₁`-lowered connection difference** via
-the fibre identity `b4_mcd_eq`:
-`|∇ⁿ(metricConnDiffLoweredCc g₀ g₁ gb)|²(x) ≤ Kmcd n · atgw(bP)(n+2)`.
-
-Offset `+2` — one derivative of the state — because the moving lowering only adds an
-order-zero factor to the background-lowered connection difference `wXi`.  Public: this is
-the currency the DeTurck order-one Lie arm spends on `lieArm1PsiB`, whose `Ψ` factor is
-exactly this arm raised and slot-permuted. -/
 theorem b4_mcd_atgw (g₀ gb : SmoothRiemannianMetric I M)
     {δ₀ : ℝ} (hδ₀ : δ₀ < 1) {Λ₀ : ℝ} (hΛ₀0 : 0 ≤ Λ₀) :
     ∃ Kmcd : ℕ → ℝ, (∀ n, 0 ≤ Kmcd n) ∧
@@ -2061,7 +1916,6 @@ theorem b4_mcd_atgw (g₀ gb : SmoothRiemannianMetric I M)
   have hwxn := hwx g₁ P htie hδ_le hδ0 hδ n x
   have hUbd := hapA g₁ P htie hδ_le hδ0 hδ hsup n x
   have hVbd := hapB g₁ P htie hδ_le hδ0 hδ hsup n x
-  -- the order-`n` jet of the fibre identity, at the section value.
   have hsec : ((iteratedCovGrad (I := I) g₀ 0 3 n
       (metricConnDiffLoweredCc (I := I) (M := M) g₀ g₁ gb)).toSection x) =
       ((iteratedCovGrad (I := I) g₀ 0 3 n (wXi (I := I) (M := M) g₀ g₁ gb)).toSection x) +
@@ -2122,9 +1976,6 @@ theorem b4_mcd_atgw (g₀ gb : SmoothRiemannianMetric I M)
             ((iteratedCovGrad (I := I) g₀ 0 2 j P).toSection x)) (n + 2) := by ring
 
 set_option linter.unusedVariables false in
-/-- Radius-free per-order jet bound for the moving-metric-lowered connection
-difference.  Its order-`i` estimate uses perturbation jets only through order
-`i + 1`; in particular, the order-two case is an `H³` window. -/
 theorem mcd_l2_radiusFree
     (g₀ gb : SmoothRiemannianMetric I M)
     {δ₀ : ℝ} (hδ₀ : δ₀ < 1) {Λ₀ : ℝ} (hΛ₀0 : 0 ≤ Λ₀) :
@@ -2237,13 +2088,6 @@ theorem mcd_l2_radiusFree
       ring
 
 set_option linter.unusedVariables false in
-/-- **(3) Pointwise radius-free `atgw` bound for `wOmega`** — the in-proof fold of the tower's
-`wOmega_lowOrder_jetL2_radiusFree` re-derived at the pointwise level from the two exposed
-producers: `|∇ⁿ(wOmega g₀ g₁ gb)|²(x) ≤ KΩ n · atgw(bP)(n+2)`.
-
-Public: it is the tail arm of `lc0VBPass`, and the `∇P`-capped re-derivation of the
-`lc0VB` window (`Lc0VBCapWindow.lean`, brick A1-CUR-2) has to re-enter the fold at
-the ARM level rather than reuse the already-folded `b4_vb_atgw`. -/
 theorem b4_wOmega_atgw (g₀ gb : SmoothRiemannianMetric I M)
     {δ₀ : ℝ} (hδ₀ : δ₀ < 1) :
     ∃ KΩ : ℕ → ℝ, (∀ n, 0 ≤ KΩ n) ∧
@@ -2351,10 +2195,6 @@ theorem b4_wOmega_atgw (g₀ gb : SmoothRiemannianMetric I M)
         exact Finset.sum_congr rfl (fun i' _ => by rw [Finset.sum_mul])
 
 set_option linter.unusedVariables false in
-/-- **(4a) Pointwise radius-free `atgw` bound for the moving passenger `lc0VBPass`** via the
-exposed two-arm split `vbSplit`: the `vbMcdArm` head reduces (output-permutation invariance +
-`slotExtend`) to the `mcd` bound (2), the `ipLowCc` tail to the `wOmega` bound (3):
-`|∇ⁿ(lc0VBPass g₀ g₁)|²(x) ≤ Kvp n · atgw(bP)(n+3)`. -/
 private lemma b4_vbPass_atgw (g₀ : SmoothRiemannianMetric I M)
     {δ₀ : ℝ} (hδ₀ : δ₀ < 1) {Λ₀ : ℝ} (hΛ₀0 : 0 ≤ Λ₀) :
     ∃ Kvp : ℕ → ℝ, (∀ n, 0 ≤ Kvp n) ∧
@@ -2512,10 +2352,6 @@ private lemma b4_vbPass_atgw (g₀ : SmoothRiemannianMetric I M)
         exact Finset.sum_congr rfl (fun i' _ => by rw [Finset.sum_mul])
 
 set_option linter.unusedVariables false in
-/-- **(4b) Pointwise radius-free `atgw` bound for `lc0VB`** via the exposed factorization
-`lc0VB_eq_app`: the shared live cometric arm (bounded by the exposed
-`rfns_iCG_cometricCastG0_atgw_rf`) acting on the moving passenger (4a); the window lands at
-`atgw(bP)(i+3)`: `|∇ⁱ(lc0VB g₀ g₁)|²(x) ≤ Kvb i · atgw(bP)(i+3)`. -/
 private lemma b4_vb_atgw (g₀ : SmoothRiemannianMetric I M)
     {δ₀ : ℝ} (hδ₀ : δ₀ < 1) {Λ₀ : ℝ} (hΛ₀0 : 0 ≤ Λ₀) :
     ∃ Kvb : ℕ → ℝ, (∀ i, 0 ≤ Kvb i) ∧
@@ -2558,7 +2394,6 @@ private lemma b4_vb_atgw (g₀ : SmoothRiemannianMetric I M)
           (lc0VBPass (I := I) (M := M) g₀ g₁))).toSection x) from by
     rw [SmoothCcTensor.toSection_smul]; rfl]
   rw [b4_rfns_smul (I := I) (M := M) g₀ 2 (2 + i) x 2 _]
-  -- the un-scaled two-arm bound.
   have hmain : riemannianFiberNormSq (I := I) (M := M) g₀ 2 (2 + i) x
       ((iteratedCovGrad (I := I) g₀ 2 2 i
         (appCcRS (I := I) (M := M) g₀ 2 4 2 (lc0RiemLive (I := I) (M := M) g₀ g₁)
@@ -2670,10 +2505,6 @@ private lemma b4_vb_atgw (g₀ : SmoothRiemannianMetric I M)
           Combinatorics.antidiagonalTupleGridWindow bP (i + 3) := by ring
 
 set_option linter.unusedVariables false in
-/-- **(5) Radius-free per-order low-window jet-L² bound for `lc0VB`** (the proved half of the
-former `lc0VBAMix` frontier): the pointwise `atgw` bound (4b) integrated once by the public
-workhorse `antidiagonalTupleGrid_integral_radiusFree`, landing exactly on the
-`range (i + 3)` low window. -/
 private lemma lc0VB_perOrder_rf (g₀ : SmoothRiemannianMetric I M)
     {δ₀ : ℝ} (hδ₀ : δ₀ < 1) {Λ₀ : ℝ} (hΛ₀0 : 0 ≤ Λ₀) :
     ∃ Flow : ℕ → ℝ, (∀ i, 0 ≤ Flow i) ∧
@@ -2768,9 +2599,6 @@ private lemma lc0VB_perOrder_rf (g₀ : SmoothRiemannianMetric I M)
     _ = (Kvb i * ∑ k ∈ Finset.range (i + 3), K_rf k) * (1 + S') := by ring
 
 set_option linter.unusedVariables false in
-/-- Pointwise radius-free `atgw` bound for the five-factor `lc0AMix` chain.  The three moving
-trace factors use the public `trace_grid_rf`; the two connection-difference factors use
-`b4_mcd_atgw` after passenger-slot extension. -/
 private lemma b4_amix_atgw (g₀ g_bg : SmoothRiemannianMetric I M)
     {δ₀ : ℝ} (hδ₀ : δ₀ < 1) {Λ₀ : ℝ} (hΛ₀0 : 0 ≤ Λ₀) :
     ∃ Kam : ℕ → ℝ, (∀ n, 0 ≤ Kam n) ∧
@@ -2975,9 +2803,6 @@ private lemma b4_amix_atgw (g₀ g_bg : SmoothRiemannianMetric I M)
     _ = (16 * Khalf n) * Combinatorics.antidiagonalTupleGridWindow bP (n + 3) := by ring
 
 set_option linter.unusedVariables false in
-/-- Radius-free per-order low-window jet-L² bound for `lc0AMix`.  The five-factor pointwise
-product has three moving cometric traces and two connection-difference arms; integrating its
-antidiagonal-grid window introduces no high Sobolev radius. -/
 private lemma lc0AMix_perOrder_rf
     (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
     (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) {δ₀ : ℝ} (hδ₀ : δ₀ < 1)
@@ -3079,10 +2904,6 @@ private lemma lc0AMix_perOrder_rf
     _ = (Kam i * ∑ k ∈ Finset.range (i + 3), K_rf k) * (1 + S') := by ring
 
 set_option linter.unusedVariables false in
-/-- Radius-free per-order low-window jet-L² bound for the `lc0VB + lc0AMix` pair.  The `lc0VB`
-half is PROVED (`lc0VB_perOrder_rf`, the `atgw` jets assembly over `vbSplit`/`lc0VB_eq_app` and
-the fibre identity `b4_mcd_eq`); the `lc0AMix` half is provided by the exact five-factor
-refold and `lc0AMix_perOrder_rf`. -/
 private lemma lc0VBAMix_perOrder_rf
     (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
     (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) {δ₀ : ℝ} (hδ₀ : δ₀ < 1)
@@ -3116,16 +2937,7 @@ private lemma lc0VBAMix_perOrder_rf
     _ = (Fvb i + Fam i) * (1 + ∑ j ∈ Finset.range (i + 3),
           ‖iteratedCovGrad (I := I) g₀ 0 2 j P‖ ^ 2) := by ring
 
-/-! ### Radius-free per-order engine (five-way assembly). -/
-
 set_option linter.unusedVariables false in
-/-- **Radius-free per-order jet-L² bound for the `lieCorr0` coefficient field**
-`lieCorr0Field g₀ g₁ g_bg`.  With a fixed zeroth-order fibre bound `Λ₀` (fibre smallness, not a
-Sobolev ball radius), the order-`i` jet-L² norm splits into a top leak
-`Atop i · ‖∇^{i+2}(symmS g₀ T)‖²` and a low part `Alow i · (1 + ∑_{j ≤ i+1} ‖∇ʲ(symmS g₀ T)‖²)`,
-with `Atop`, `Alow` depending only on `g₀`, `g_bg`, `a`, `dim E`, `Λ₀`.  Brick-4 sibling of
-`deTurckLieCoeffField_perOrder_l2_radiusFree`, assembled from the five-way split
-`lc0_decomp`/`insert_base` with the per-piece radius-free arm engines. -/
 theorem lieCorr0Field_perOrder_l2_radiusFree
     (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
     (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) {δ₀ : ℝ} (hδ₀ : δ₀ < 1)
@@ -3180,7 +2992,6 @@ theorem lieCorr0Field_perOrder_l2_radiusFree
   have hd := hdiff g₁ P htie' hδ_le hδ0 hδ' hsup i
   have hvm := hvbamix g₁ P htie' hδ_le hδ0 hδ' hsup i hi
   have hr := hriem g₁ P htie' hδ_le hδ0 hδ' hsup i (by omega)
-  -- five-way split of the field.
   have hfield : lieCorr0Field (I := I) (M := M) g₀ g₁ g_bg =
       lc0Insert (I := I) (M := M) g₀ g₁ g₀ +
         (lc0Insert (I := I) (M := M) g₀ g₁ g_bg - lc0Insert (I := I) (M := M) g₀ g₁ g₀) +
@@ -3240,7 +3051,6 @@ theorem lieCorr0Field_perOrder_l2_radiusFree
     ‖iteratedCovGrad (I := I) g₀ 2 2 i (lc0Riem (I := I) (M := M) g₀ g₁)‖
     (norm_nonneg _) (norm_nonneg _) (norm_nonneg _) (norm_nonneg _) (norm_nonneg _)
     (norm_nonneg _) htri
-  -- range split: peel the top cell `‖∇^{i+2}P‖²` out of the `i+3` low windows.
   have hsplit3 : (∑ j ∈ Finset.range (i + 3), ‖iteratedCovGrad (I := I) g₀ 0 2 j P‖ ^ 2) =
       (∑ j ∈ Finset.range (i + 2), ‖iteratedCovGrad (I := I) g₀ 0 2 j P‖ ^ 2) +
         ‖iteratedCovGrad (I := I) g₀ 0 2 (i + 2) P‖ ^ 2 := by
@@ -3273,16 +3083,7 @@ theorem lieCorr0Field_perOrder_l2_radiusFree
         (5 * (Fb i + Fd i + Fvm i + Fr i)) * (1 + ∑ j ∈ Finset.range (i + 2),
           ‖iteratedCovGrad (I := I) g₀ 0 2 j P‖ ^ 2) := by ring
 
-/-! ### Radius-free summed sibling (the brick-4 deliverable). -/
-
 set_option linter.unusedVariables false in
-/-- **Radius-free summed jet-L² bound for the `lieCorr0` coefficient field.**
-Summing the per-order radius-free engine over `i ≤ a` gives a single bound whose top data weight
-is at order `a+2` and low data weight at order `a+1`, with constants `Ktop`, `Klow` depending
-only on `g₀`, `g_bg`, `a`, `dim E`, `δ₀` — no ball radius `R`, no `H^{a+2}` ball hypothesis.
-This is the `lieCorr0` consumer sibling of THE GATE, the fourth brick of the Pro-ruled repair of
-UNIF item-2; the perturbation grids run over `symmS g₀ T`.  Sibling of
-`deTurckLieCoeffField_summed_l2_radiusFree`. -/
 theorem lieCorr0Field_summed_l2_radiusFree
     (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
     (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) {δ₀ : ℝ} (hδ₀ : δ₀ < 1) :
@@ -3310,7 +3111,6 @@ theorem lieCorr0Field_summed_l2_radiusFree
   intro g₁ T δ hδ_le hδ htie
   by_cases hM : Nonempty M
   · obtain ⟨x₀⟩ := hM
-    -- 0 ≤ δ from the fibre bound at a nonzero tangent vector.
     have hδ0 : 0 ≤ δ := by
       obtain ⟨v, hv⟩ : ∃ v : TangentSpace I x₀, v ≠ 0 := by
         haveI : Nontrivial (TangentSpace I x₀) := by
@@ -3347,7 +3147,6 @@ theorem lieCorr0Field_summed_l2_radiusFree
           Alow i * (1 + ∑ j ∈ Finset.range (i + 2),
             ‖iteratedCovGrad (I := I) g₀ 0 2 j (symmS (I := I) (M := M) g₀ T)‖ ^ 2) :=
       fun i hi => hper g₁ T hδ_le hδ0 hδ htie hsup i hi
-    -- sum over i ≤ a.
     set w : ℕ → ℝ := fun j =>
       ‖iteratedCovGrad (I := I) g₀ 0 2 j (symmS (I := I) (M := M) g₀ T)‖ ^ 2 with hw
     have hw_nn : ∀ j, 0 ≤ w j := fun j => sq_nonneg _
@@ -3364,7 +3163,7 @@ theorem lieCorr0Field_summed_l2_radiusFree
       _ ≤ (∑ i ∈ Finset.range (a + 1), Atop i) * (∑ j ∈ Finset.range (a + 3), w j) +
             (∑ i ∈ Finset.range (a + 1), Alow i) * (1 + ∑ j ∈ Finset.range (a + 2), w j) := by
           refine add_le_add ?_ ?_
-          · -- top weight lands at range (a+3)
+          ·
             calc ∑ i ∈ Finset.range (a + 1), Atop i * w (i + 2)
                 ≤ ∑ i ∈ Finset.range (a + 1), Atop i * (∑ j ∈ Finset.range (a + 3), w j) := by
                   refine Finset.sum_le_sum (fun i hi => ?_)
@@ -3374,7 +3173,7 @@ theorem lieCorr0Field_summed_l2_radiusFree
                     (Finset.mem_range.mpr (by omega))
               _ = (∑ i ∈ Finset.range (a + 1), Atop i) * (∑ j ∈ Finset.range (a + 3), w j) := by
                   rw [Finset.sum_mul]
-          · -- low weight lands at range (a+2)
+          ·
             calc ∑ i ∈ Finset.range (a + 1), Alow i * (1 + ∑ j ∈ Finset.range (i + 2), w j)
                 ≤ ∑ i ∈ Finset.range (a + 1),
                     Alow i * (1 + ∑ j ∈ Finset.range (a + 2), w j) := by
@@ -3388,7 +3187,7 @@ theorem lieCorr0Field_summed_l2_radiusFree
               _ = (∑ i ∈ Finset.range (a + 1), Alow i) *
                     (1 + ∑ j ∈ Finset.range (a + 2), w j) := by
                   rw [Finset.sum_mul]
-  · -- empty M: every L² norm is 0.
+  ·
     haveI hM' : IsEmpty M := not_nonempty_iff.mp hM
     have hL0 : ∑ i ∈ Finset.range (a + 1),
         ‖iteratedCovGrad (I := I) g₀ 2 2 i

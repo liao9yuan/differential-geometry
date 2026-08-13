@@ -1,14 +1,6 @@
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.PrincipalCoeffH2
 import DifferentialGeometry.Analysis.Spectral.Tensor.SobolevScale.AppD2Hs
 
-/-!
-# Low-regularity DeTurck principal operator
-
-This file packages the DeTurck principal-cometric arm as a completed operator
-from spectral `H4` to spectral `H2`.  On a three-dimensional small `H2`
-metric ball, its operator norm is linear in the metric deviation.
--/
-
 noncomputable section
 
 open Bundle Manifold
@@ -32,8 +24,6 @@ variable
       [IsManifold I ∞ M] [CompactSpace M] [I.Boundaryless]
       [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M]
 
-/-- The completed DeTurck principal-cometric action from spectral `H4` to
-spectral `H2`. -/
 noncomputable def principalOpH2
     (g₀ g₁ : SmoothRiemannianMetric I M) :
     tensorHs (I := I) (M := M) g₀ 0 2 (4 : ℝ) →L[ℝ]
@@ -41,8 +31,6 @@ noncomputable def principalOpH2
   appD2Hs (I := I) (M := M) g₀ 2 2
     (deTurckPrincipalCometricCoeff (I := I) (M := M) g₀ g₁)
 
-/-- On a three-dimensional spectral `H2` metric ball, the completed DeTurck
-principal operator has norm linear in the metric deviation. -/
 theorem principalOpH2_norm
     (hDim : Module.finrank ℝ E = 3)
     (g₀ : SmoothRiemannianMetric I M) :
@@ -70,8 +58,6 @@ theorem principalOpH2_norm
     A hA (by simpa only [A, N] using hjet)
   simpa only [principalOpH2, A, N, mul_assoc] using hbound
 
-/-- On smooth spectral inputs, the completed principal operator is exactly
-the geometric DeTurck principal-cometric arm. -/
 theorem principalOpH2_core
     (hDim : Module.finrank ℝ E = 3)
     (g₀ g₁ : SmoothRiemannianMetric I M)

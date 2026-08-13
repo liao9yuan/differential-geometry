@@ -1,67 +1,6 @@
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.DeTurckRemainderLowBaseAction
 import DifferentialGeometry.Analysis.Spectral.Tensor.Estimates.AppCcRSJetMul
 
-/-!
-# All-order Moser jet windows for the low-base operator families
-
-`topKer_jet` (`DeTurck/LowRegC2JetTower.lean`) needs, for **every** order `i`,
-an affine covariant `L2` jet window
-
-`lowJetSq g i F ≤ K i * (1 + lowJetSq g i T)`
-
-for each operator family occurring in the three summands of `topKernel_eq`.
-The tree stocks these only at the fixed order two, as `private` helpers inside
-`DeTurckRemainderLowBaseAction.lean` (`full_slot_h2_low`, `connLow_h2_low`,
-`curvMono_h2`), and those fixed-order members linearize the quadratic product
-step with an `H2` ball (`lowJetSq g 2 P ≤ 1`), which the ball-free route of
-planner ruling No. 104 forbids.
-
-This module supplies the order-generic members on the Moser route.  The single
-organizing device is the predicate `IsMoserWin g T A S X`, which records
-*both* halves that the Moser pairing consumes: a pointwise fibre bound `S` for
-`X` and an affine jet envelope `A` for `X` against the state `T`.  Carrying the
-pointwise bound alongside the jet bound is exactly what keeps the estimate
-affine: `appRS_hn_sup` multiplies each arm's `L∞` bound by the *other* arm's
-`L2` jet, so a product of two windows is again a window, with no ball and no
-order gate.
-
-Closure lemmas: `moserWin_appRS` (operator-field action), `moserWin_slot`
-(`slotExtend`), `moserWin_rsperm` (covariant slot permutation),
-`moserWin_sub`, `moserWin_const` (background objects).
-
-Family windows, in dependency order:
-
-* `moserWin_sharp` — `sharpFlatEndoCc g g₁`, the metric-inverse core.  All
-  orders, from the free-`a` radius-free engine
-  `sharpFlatEndoCc_lowOrder_jetL2_radiusFree`.
-* `moserWin_fullSlot` — `slotInsertEndoCc g s (fullRaisedEndoField g g₁)`,
-  the general-`i` replacement for `full_slot_h2_low`.
-* `moserWin_connLow` — `connLowOp g g₁`, the general-`i` replacement for
-  `connLow_h2_low`.
-* `moserWin_dagTop` — **family `dagTopOp`**.
-* `moserWin_curvMono` — the general-`i` replacement for `curvMono_h2`.
-* `moserWin_daTrans` — **family `daTrans`**.
-* `moserWin_ricciTop` — the assembled `ricciTop` summand of `topKernel_eq`.
-* `moserWin_phiDev` — the metric-deviation summand of `topKernel_eq`.
-* `moserWin_pureTr`, `moserWin_lieCovP`, `moserWin_monoMov`,
-  `moserWin_lieRef2` — the moving-metric branch: the curvature-refold monomials
-  of `lieRefold2` take their pair coefficient at the *path* metric, so
-  `lieCovPair g gm` is not a constant and gets its own window through
-  `pairTrace_eq`'s two `pureTrace` factors.
-* `pathPert_rad` — the discharge of `IsPathPert` along the radial path
-  `s ↦ realizedFam g T 0 s`, uniformly for `s ∈ [0, 1]`.
-
-Every window has honest derivative offset `w = 0`: order `n` on the left costs
-order `n` of `T` on the right, well inside `topKer_jet`'s `range (i + 2)`
-budget.  The only smallness input is the fibre certificate
-`gFibreOpBound g (ccTensorBilinSymm g P) δ` with `δ ≤ δ₀ < 1`; no Sobolev ball
-and no `finrank` gate appears anywhere in this file.
-
-Every family window quantifies the state `T` **inside** its existential, so a
-single constant sequence serves all states.  This is what `topKer_jet` needs:
-its `Kk` is chosen before `T`.
--/
-
 noncomputable section
 set_option backward.isDefEq.respectTransparency false
 
@@ -96,13 +35,6 @@ private local instance : BorelSpace M := ⟨rfl⟩
 
 section Window
 
-/-- **Moser window.**  `IsMoserWin g T A S X` says that the tensor `X` carries
-the two data the Moser pairing consumes against the state `T`: the pointwise
-fibre bound `S` and, at every jet order `n`, the affine covariant `L2` jet
-envelope `A n * (1 + lowJetSq g n T)`.
-
-The pointwise half is what keeps products affine, so the predicate is closed
-under the operator-field action with no Sobolev ball and no order gate. -/
 def IsMoserWin (g : SmoothRiemannianMetric I M) {r c : ℕ}
     (T : SmoothCcTensor g 0 2) (A : ℕ → ℝ) (S : ℝ)
     (X : SmoothCcTensor g r c) : Prop :=
@@ -113,14 +45,12 @@ def IsMoserWin (g : SmoothRiemannianMetric I M) {r c : ℕ}
     A n * (1 + lowJetSq (I := I) (M := M) g n T))
 
 omit [BoundarylessManifold I M] in
-/-- The squared covariant jet is nonnegative. -/
 theorem jetNn (g : SmoothRiemannianMetric I M) {r c m : ℕ}
     (X : SmoothCcTensor g r c) :
     0 ≤ lowJetSq (I := I) (M := M) g m X :=
   Finset.sum_nonneg fun _ _ => sq_nonneg _
 
 omit [BoundarylessManifold I M] in
-/-- `2`-subadditivity of the squared covariant jet on a difference. -/
 theorem jetSub (g : SmoothRiemannianMetric I M) {r c : ℕ} (m : ℕ)
     (X Y : SmoothCcTensor g r c) :
     lowJetSq (I := I) (M := M) g m (X - Y) ≤
@@ -154,7 +84,6 @@ theorem jetSub (g : SmoothRiemannianMetric I M) {r c : ℕ} (m : ℕ)
       simp only [mul_add, Finset.sum_add_distrib, Finset.mul_sum]
 
 omit [BoundarylessManifold I M] in
-/-- The negation leaves the squared covariant jet unchanged. -/
 theorem jetNeg (g : SmoothRiemannianMetric I M) {r c : ℕ} (m : ℕ)
     (Y : SmoothCcTensor g r c) :
     lowJetSq (I := I) (M := M) g m (-Y) =
@@ -166,7 +95,6 @@ theorem jetNeg (g : SmoothRiemannianMetric I M) {r c : ℕ} (m : ℕ)
     norm_num
 
 omit [BoundarylessManifold I M] in
-/-- `2`-subadditivity of the squared covariant jet on a sum, for the operator-window lane. -/
 theorem opJetAdd (g : SmoothRiemannianMetric I M) {r c : ℕ} (m : ℕ)
     (X Y : SmoothCcTensor g r c) :
     lowJetSq (I := I) (M := M) g m (X + Y) ≤
@@ -176,7 +104,6 @@ theorem opJetAdd (g : SmoothRiemannianMetric I M) {r c : ℕ} (m : ℕ)
   rwa [sub_neg_eq_add, jetNeg (I := I) (M := M) g m Y] at h
 
 omit [BoundarylessManifold I M] in
-/-- Every jet envelope in a window is nonnegative. -/
 theorem moserWin_nnA {g : SmoothRiemannianMetric I M} {r c : ℕ}
     {T : SmoothCcTensor g 0 2} {A : ℕ → ℝ} {S : ℝ}
     {X : SmoothCcTensor g r c} (h : IsMoserWin (I := I) (M := M) g T A S X)
@@ -189,7 +116,6 @@ theorem moserWin_nnA {g : SmoothRiemannianMetric I M} {r c : ℕ}
   nlinarith [hle, hX, hpos]
 
 omit [BoundarylessManifold I M] in
-/-- Enlarging both constants preserves a window. -/
 theorem moserWin_mono {g : SmoothRiemannianMetric I M} {r c : ℕ}
     {T : SmoothCcTensor g 0 2} {A A' : ℕ → ℝ} {S S' : ℝ}
     {X : SmoothCcTensor g r c} (h : IsMoserWin (I := I) (M := M) g T A S X)
@@ -202,10 +128,6 @@ theorem moserWin_mono {g : SmoothRiemannianMetric I M} {r c : ℕ}
     linarith
 
 omit [BoundarylessManifold I M] in
-/-- A background object with no metric dependence is a window — for **every**
-state `T`, with the same constants.  The uniformity in `T` is what lets the
-downstream family windows produce a single constant sequence ahead of the
-state, as `topKer_jet` requires. -/
 theorem moserWin_const (g : SmoothRiemannianMetric I M) {r c : ℕ}
     (X : SmoothCcTensor g r c) :
     ∃ (A : ℕ → ℝ) (S : ℝ), ∀ T : SmoothCcTensor g 0 2,
@@ -221,7 +143,6 @@ theorem moserWin_const (g : SmoothRiemannianMetric I M) {r c : ℕ}
     nlinarith [jetNn (I := I) (M := M) (m := n) g X]
 
 omit [BoundarylessManifold I M] in
-/-- The squared covariant jet is monotone in the order. -/
 theorem jetMono (g : SmoothRiemannianMetric I M) {r c m n : ℕ} (hmn : m ≤ n)
     (X : SmoothCcTensor g r c) :
     lowJetSq (I := I) (M := M) g m X ≤ lowJetSq (I := I) (M := M) g n X := by
@@ -231,7 +152,6 @@ theorem jetMono (g : SmoothRiemannianMetric I M) {r c m n : ℕ} (hmn : m ≤ n)
     (fun _ _ _ => sq_nonneg _)
 
 omit [BoundarylessManifold I M] in
-/-- A sum of windows is a window. -/
 theorem moserWin_add {g : SmoothRiemannianMetric I M} {r c : ℕ}
     {T : SmoothCcTensor g 0 2} {A B : ℕ → ℝ} {S U : ℝ}
     {X Y : SmoothCcTensor g r c}
@@ -252,7 +172,6 @@ theorem moserWin_add {g : SmoothRiemannianMetric I M} {r c : ℕ}
       (by nlinarith [hX.2.2 n, hY.2.2 n])
 
 omit [BoundarylessManifold I M] in
-/-- A difference of windows is a window. -/
 theorem moserWin_sub {g : SmoothRiemannianMetric I M} {r c : ℕ}
     {T : SmoothCcTensor g 0 2} {A B : ℕ → ℝ} {S U : ℝ}
     {X Y : SmoothCcTensor g r c}
@@ -273,7 +192,6 @@ theorem moserWin_sub {g : SmoothRiemannianMetric I M} {r c : ℕ}
       (by nlinarith [hX.2.2 n, hY.2.2 n])
 
 omit [BoundarylessManifold I M] in
-/-- The squared covariant jet is homogeneous of degree two in the operator-window lane. -/
 theorem opJetSmul (g : SmoothRiemannianMetric I M) {r c : ℕ} (m : ℕ) (a : ℝ)
     (X : SmoothCcTensor g r c) :
     lowJetSq (I := I) (M := M) g m (a • X) =
@@ -284,7 +202,6 @@ theorem opJetSmul (g : SmoothRiemannianMetric I M) {r c : ℕ} (m : ℕ) (a : �
   rw [iteratedCovGrad_smul, norm_smul, mul_pow, Real.norm_eq_abs, sq_abs]
 
 omit [BoundarylessManifold I M] in
-/-- A scalar multiple of a window is a window. -/
 theorem moserWin_smul {g : SmoothRiemannianMetric I M} {r c : ℕ}
     {T : SmoothCcTensor g 0 2} {A : ℕ → ℝ} {S : ℝ} {X : SmoothCcTensor g r c}
     (a : ℝ) (h : IsMoserWin (I := I) (M := M) g T A S X) :
@@ -308,7 +225,6 @@ end Window
 section Transfer
 
 omit [BoundarylessManifold I M] in
-/-- Integrating a pointwise fibre-norm domination gives the `L2` domination. -/
 private theorem l2OfPt (g : SmoothRiemannianMetric I M) {a b a' b' : ℕ}
     (X : SmoothCcTensor g a b) (Y : SmoothCcTensor g a' b') {K : ℝ}
     (h : ∀ x : M, riemannianFiberNormSq (I := I) (M := M) g a b x (X.toSection x) ≤
@@ -329,8 +245,6 @@ private theorem l2OfPt (g : SmoothRiemannianMetric I M) {a b a' b' : ℕ}
   rwa [MeasureTheory.integral_const_mul, hint] at hsq
 
 omit [BoundarylessManifold I M] in
-/-- A per-order pointwise fibre-norm domination transfers to every jet
-window. -/
 private theorem jetOfPt (g : SmoothRiemannianMetric I M) {a b a' b' : ℕ}
     (X : SmoothCcTensor g a b) (Y : SmoothCcTensor g a' b') {K : ℝ}
     (h : ∀ (i : ℕ) (x : M),
@@ -347,9 +261,6 @@ private theorem jetOfPt (g : SmoothRiemannianMetric I M) {a b a' b' : ℕ}
     l2OfPt (I := I) (M := M) g (iteratedCovGrad (I := I) g a b i X)
       (iteratedCovGrad (I := I) g a' b' i Y) (h i)
 
-/-- **The Moser product step.**  A window times a window is a window: each
-arm's pointwise bound multiplies the other arm's jet envelope, so the result is
-still affine in the state's jets.  No order gate and no Sobolev ball. -/
 theorem moserWin_appRS (g : SmoothRiemannianMetric I M) (p r c : ℕ) :
     ∃ C : ℕ → ℝ, (∀ n, 0 ≤ C n) ∧
       ∀ (T : SmoothCcTensor g 0 2) (A B : ℕ → ℝ) (S U : ℝ)
@@ -411,7 +322,6 @@ theorem moserWin_appRS (g : SmoothRiemannianMetric I M) (p r c : ℕ) :
       _ = C n * (U ^ 2 * A n + S ^ 2 * B n) *
           (1 + lowJetSq (I := I) (M := M) g n T) := by ring
 
-/-- Slot extension of a window is a window, at cost one dimension factor. -/
 theorem moserWin_slot {g : SmoothRiemannianMetric I M} {r c : ℕ}
     {T : SmoothCcTensor g 0 2} {A : ℕ → ℝ} {S : ℝ} {Φ : SmoothCcTensor g r c}
     (h : IsMoserWin (I := I) (M := M) g T A S Φ) :
@@ -438,9 +348,6 @@ theorem moserWin_slot {g : SmoothRiemannianMetric I M} {r c : ℕ}
     nlinarith [hstep, h.2.2 n, hfr, hT]
 
 omit [BoundarylessManifold I M] in
-/-- **Window transfer along a per-order domination.**  If `X` is dominated
-pointwise at order zero and in every `L2` jet by `Y`, then `Y`'s window
-transfers to `X`. -/
 theorem moserWin_dom {g : SmoothRiemannianMetric I M} {a b a' b' : ℕ}
     {T : SmoothCcTensor g 0 2} {A : ℕ → ℝ} {S Cs : ℝ} {Cj : ℕ → ℝ}
     {X : SmoothCcTensor g a b} {Y : SmoothCcTensor g a' b'}
@@ -482,7 +389,6 @@ theorem moserWin_dom {g : SmoothRiemannianMetric I M} {a b a' b' : ℕ}
       _ = (∑ i ∈ Finset.range (n + 1), Cj i) * A n *
           (1 + lowJetSq (I := I) (M := M) g n T) := by ring
 
-/-- Reindexing the contravariant slots preserves a window unchanged. -/
 theorem moserWin_reindex {g : SmoothRiemannianMetric I M} {r c : ℕ}
     {T : SmoothCcTensor g 0 2} {A : ℕ → ℝ} {S : ℝ} {R : SmoothCcTensor g r c}
     (ρ : Equiv.Perm (Fin r)) (h : IsMoserWin (I := I) (M := M) g T A S R) :
@@ -502,7 +408,6 @@ theorem moserWin_reindex {g : SmoothRiemannianMetric I M} {r c : ℕ}
     rw [one_mul] at hstep
     exact hstep.trans (h.2.2 n)
 
-/-- Permuting the covariant slots preserves a window unchanged. -/
 theorem moserWin_rsperm {g : SmoothRiemannianMetric I M} {r c : ℕ}
     {T : SmoothCcTensor g 0 2} {A : ℕ → ℝ} {S : ℝ} {Φ : SmoothCcTensor g r c}
     (σ : Equiv.Perm (Fin c)) (h : IsMoserWin (I := I) (M := M) g T A S Φ) :
@@ -535,16 +440,6 @@ end Transfer
 
 section Core
 
-/-- **Path-perturbation data over the state `T`, at fibre size `δ₀`.**
-
-The moving metric `g₁` is `g` plus the symmetric perturbation `P`, whose fibre
-operator norm is at most `δ₀`, together with the matching pointwise fibre
-certificate for `P` and the jet domination of `P` by `T`.
-
-For the radial path `g₁ = realizedFam g T 0 hδ hδZ s` with
-`P = convexPerturbation g T 0 s` this holds for every `s ∈ [0, 1]` with the
-*same* `δ₀`, which is where the uniformity in the path parameter comes from:
-none of the constants produced below depends on `s`. -/
 def IsPathPert (g g₁ : SmoothRiemannianMetric I M)
     (P T : SmoothCcTensor g 0 2) (δ₀ : ℝ) : Prop :=
   (∃ δ : ℝ, 0 ≤ δ ∧ δ ≤ δ₀ ∧
@@ -557,9 +452,6 @@ def IsPathPert (g g₁ : SmoothRiemannianMetric I M)
     lowJetSq (I := I) (M := M) g n T)
 
 omit [BoundarylessManifold I M] in
-/-- The state is its own window, with its own fibre certificate as pointwise
-bound.  This is the arm that the Moser pairing pays the `L∞` smallness on, and
-it is the only place where `δ ≤ 1/3` enters. -/
 theorem moserWin_self {g : SmoothRiemannianMetric I M}
     {T : SmoothCcTensor g 0 2} {δ₀ : ℝ} (hδ₀0 : 0 ≤ δ₀)
     (hTsup : ∀ x : M, riemannianFiberNormSq (I := I) (M := M) g 0 2 x
@@ -572,9 +464,6 @@ theorem moserWin_self {g : SmoothRiemannianMetric I M}
   linarith
 
 omit [NeZero (Module.finrank ℝ E)] in
-/-- The slot symmetrization is dominated, pointwise and at every jet order, by
-the state itself: `symmS` is a half-sum of `T` and a covariant slot
-permutation of `T`, and the permutation is a fibre isometry. -/
 private theorem rfnsSymmS (g : SmoothRiemannianMetric I M)
     (T : SmoothCcTensor g 0 2) (j : ℕ) (x : M) :
     riemannianFiberNormSq (I := I) (M := M) g 0 (2 + j) x
@@ -607,11 +496,6 @@ private theorem rfnsSymmS (g : SmoothRiemannianMetric I M)
   nlinarith [riemannianFiberNormSq_nonneg (I := I) (M := M) g 0 (2 + j) x
     ((iteratedCovGrad (I := I) g 0 2 j T).toSection x)]
 
-/-- **Window for the slot symmetrization of the state.**
-
-`symmS g T` is the argument the curvature-refold monomials of `lieRefold2`
-actually see.  Its window is the state's own, with the same constants: the
-symmetrization is a fibre-norm contraction at every jet order. -/
 theorem moserWin_symmS (g : SmoothRiemannianMetric I M) {δ₀ : ℝ}
     (hδ₀0 : 0 ≤ δ₀) :
     ∃ (A : ℕ → ℝ) (S : ℝ),
@@ -634,8 +518,6 @@ theorem moserWin_symmS (g : SmoothRiemannianMetric I M) {δ₀ : ℝ}
     linarith
 
 omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] [SigmaCompactSpace M] in
-/-- Slot-zero insertion of the full raised endomorphism is the sharp-flat
-endomorphism field. -/
 private theorem sharpSlot0 (g g₁ : SmoothRiemannianMetric I M) :
     sharpFlatEndoCc (I := I) g g₁ =
       slotInsertEndoCc (I := I) (M := M) g 0
@@ -677,13 +559,6 @@ private theorem sharpSlot0 (g g₁ : SmoothRiemannianMetric I M) :
   rw [cotangentToDualLinear_apply, cotangentToDual_g0FlatCLM]
   rw [g.symm x w (inverseMetricSharpFib (I := I) g₁ x om)]
 
-/-- **All-order window for the metric-inverse core.**
-
-The general-order replacement for the fixed-order-two private `sharp_h2_low`.
-Both are read off the same radius-free engine
-`sharpFlatEndoCc_lowOrder_jetL2_radiusFree`; the point is that its order cap
-`a` is a free parameter, so raising `a` with the requested order gives every
-order at no cost.  Derivative offset `w = 0`. -/
 theorem moserWin_sharp (g : SmoothRiemannianMetric I M)
     {δ₀ : ℝ} (hδ₀0 : 0 ≤ δ₀) (hδ₀ : δ₀ < 1) :
     ∃ (A : ℕ → ℝ) (S : ℝ),
@@ -718,8 +593,6 @@ theorem moserWin_sharp (g : SmoothRiemannianMetric I M)
   refine (hmain n T g₁ P hpert).2.trans ?_
   exact mul_le_mul_of_nonneg_left (by linarith [hpert.2.2.2 n]) (hKf n)
 
-/-- Raising the insertion slot preserves a window, at cost `s` dimension
-factors. -/
 theorem moserWin_endoIns {g : SmoothRiemannianMetric I M}
     {T : SmoothCcTensor g 0 2} {A : ℕ → ℝ} {S : ℝ} (s : ℕ)
     (Λ : ContMDiffSection I (E →L[ℝ] E) ∞
@@ -756,10 +629,6 @@ theorem moserWin_endoIns {g : SmoothRiemannianMetric I M}
       _ = (Module.finrank ℝ E : ℝ) ^ s * A n *
           (1 + lowJetSq (I := I) (M := M) g n T) := by ring
 
-/-- **All-order window for the inserted full raised endomorphism.**
-
-The general-order replacement for the fixed-order-two private
-`full_slot_h2_low`.  Derivative offset `w = 0`. -/
 theorem moserWin_fullSlot (g : SmoothRiemannianMetric I M)
     (s : ℕ) {δ₀ : ℝ} (hδ₀0 : 0 ≤ δ₀) (hδ₀ : δ₀ < 1) :
     ∃ (A : ℕ → ℝ) (S : ℝ),
@@ -779,7 +648,6 @@ theorem moserWin_fullSlot (g : SmoothRiemannianMetric I M)
   exact hwin T g₁ P hpert
 
 omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [BoundarylessManifold I M] [SigmaCompactSpace M] in
-/-- The full raised endomorphism at the background metric is the identity. -/
 private lemma raisedSelf (g : SmoothRiemannianMetric I M) (x : M) :
     metricComparisonEndo (I := I) g g x =
       ContinuousLinearMap.id ℝ (TangentSpace I x) := by
@@ -788,7 +656,6 @@ private lemma raisedSelf (g : SmoothRiemannianMetric I M) (x : M) :
   rw [gInvRaisedEndo_apply, inverseMetricSharpFib_g0FlatCLM,
     ContinuousLinearMap.id_apply]
 
-/-- The full raised endomorphism splits off its background identity part. -/
 private lemma raisedDecomp (g g₁ : SmoothRiemannianMetric I M) :
     fullRaisedEndoField (I := I) (M := M) g g₁ =
       gInvDiffRaisedEndoField (I := I) g g₁ +
@@ -808,7 +675,6 @@ private lemma raisedDecomp (g g₁ : SmoothRiemannianMetric I M) :
   rw [fullRaisedEndoField_apply, raisedSelf, ContinuousLinearMap.id_apply]
   rw [gInvRaisedEndo_eq_diff_add_id]
 
-/-- Slot insertion is additive in the endomorphism field. -/
 private lemma insAdd (g : SmoothRiemannianMetric I M) (s : ℕ)
     (A B : ContMDiffSection I (E →L[ℝ] E) ∞
       (fun x : M => TangentSpace I x →L[ℝ] TangentSpace I x)) :
@@ -830,12 +696,6 @@ private lemma insAdd (g : SmoothRiemannianMetric I M) (s : ℕ)
   rw [show ((A + B) x) = A x + B x from by rw [ContMDiffSection.coe_add]; rfl]
   rw [slotInsertEndoFib_add_left, ContinuousLinearMap.add_apply]
 
-/-- **All-order window for the inserted inverse-metric-difference
-endomorphism, at an arbitrary slot.**
-
-This is the common core of the cometric inverse-difference multiplier
-`gInvDiffSlotCoeff` (slot `1`) and of the moving double trace `pureTrace`
-(slot `s + 1`).  Derivative offset `w = 0`. -/
 theorem moserWin_gInvSlot (g : SmoothRiemannianMetric I M)
     (k : ℕ) {δ₀ : ℝ} (hδ₀0 : 0 ≤ δ₀) (hδ₀ : δ₀ < 1) :
     ∃ (A : ℕ → ℝ) (S : ℝ),
@@ -866,15 +726,6 @@ theorem moserWin_gInvSlot (g : SmoothRiemannianMetric I M)
   rw [hdiff]
   exact moserWin_sub (I := I) (M := M) (hwin T g₁ P hpert) (hI T)
 
-/-- **All-order window for the cometric inverse-difference multiplier.**
-
-`gInvDiffSlotCoeff g gm` is the factor through which the metric deviation
-`deTurckPhiMetTotal g g_bg gm - deTurckPhiMetTotal g g_bg g` is controlled, by
-the per-order producers
-`traceHessianCoeff_sub_background_jetL2_le_gInvDiffSlotCoeff_jetL2` and
-`ricciArmPrincipalCoeff_sub_background_jetL2_le_gInvDiffSlotCoeff_jetL2`.
-Only the fixed-order-two, ball-based `inv_coeff_h2` was stocked; this is the
-ball-free general-order member.  Derivative offset `w = 0`. -/
 theorem moserWin_gInvDiff (g : SmoothRiemannianMetric I M)
     {δ₀ : ℝ} (hδ₀0 : 0 ≤ δ₀) (hδ₀ : δ₀ < 1) :
     ∃ (A : ℕ → ℝ) (S : ℝ),
@@ -892,13 +743,6 @@ end Core
 
 section Families
 
-/-- **All-order window for the lowered connection-difference coefficient.**
-
-The general-order replacement for the fixed-order-two private
-`connLow_h2_low`.  The two background factors (the low permutation coefficient
-and the Koszul coefficient) enter only as constants; the whole metric
-dependence is the inserted full raised endomorphism.  Derivative offset
-`w = 0`. -/
 theorem moserWin_connLow (g : SmoothRiemannianMetric I M)
     {δ₀ : ℝ} (hδ₀0 : 0 ≤ δ₀) (hδ₀ : δ₀ < 1) :
     ∃ (A : ℕ → ℝ) (S : ℝ),
@@ -929,12 +773,6 @@ theorem moserWin_connLow (g : SmoothRiemannianMetric I M)
     SQ (SF * SK) _ _ (hQ T)
     (happ T AF AK SF SK _ _ (hF T g₁ P hpert) (hK T))
 
-/-- **All-order window for the family `dagTopOp`.**
-
-`dagTopOp g gm` is the top derivative coefficient of the Ricci connection arm
-in the `ricciTop` summand of `topKernel_eq`.  This is the general-order
-statement that the fixed-order-two `ricciTop_h2` proof only had as an inline
-`have`.  Derivative offset `w = 0`, uniform in the path parameter. -/
 theorem moserWin_dagTop (g : SmoothRiemannianMetric I M)
     {δ₀ : ℝ} (hδ₀0 : 0 ≤ δ₀) (hδ₀ : δ₀ < 1) :
     ∃ (A : ℕ → ℝ) (S : ℝ),
@@ -957,13 +795,6 @@ theorem moserWin_dagTop (g : SmoothRiemannianMetric I M)
     (Real.sqrt (Module.finrank ℝ E : ℝ) * SC) _ _ (hP T)
     (moserWin_slot (I := I) (M := M) (hCw T g₁ P hpert))
 
-/-- **All-order window for the moving-inverse weight.**
-
-`daWeight g gm T` is the state `T` acted on by the inserted full raised
-endomorphism of the moving metric.  The Moser pairing is what keeps this
-affine: the fixed-order-two route needed `lowJetSq g 2 P ≤ 1` here and got a
-quadratic bound, whereas the `L∞` slot of `appRS_hn_sup` turns the same product
-into an affine window.  Derivative offset `w = 0`. -/
 theorem moserWin_daWeight (g : SmoothRiemannianMetric I M)
     {δ₀ : ℝ} (hδ₀0 : 0 ≤ δ₀) (hδ₀ : δ₀ < 1) :
     ∃ (A : ℕ → ℝ) (S : ℝ),
@@ -996,12 +827,6 @@ theorem moserWin_daWeight (g : SmoothRiemannianMetric I M)
   exact happ T AF (fun _ => 1) SF ((Module.finrank ℝ E : ℝ) * δ₀) _ _
     (hF T g₁ P hpert) hself
 
-/-- **All-order window for one curvature-refold monomial.**
-
-The general-order replacement for the fixed-order-two private `curvMono_h2`.
-The transparent two-trace product form `curvMono_eq` reduces it to the
-background pair coefficient times a four-fold slot extension of the weight, and
-both factors are already windows. -/
 theorem moserWin_curvMono (g : SmoothRiemannianMetric I M)
     {A : ℕ → ℝ} {S : ℝ} :
     ∃ (A' : ℕ → ℝ) (S' : ℝ),
@@ -1040,12 +865,6 @@ theorem moserWin_curvMono (g : SmoothRiemannianMetric I M)
     (sfr * (sfr * (sfr * (sfr * S)))) _ _ (hL T)
     (moserWin_rsperm (I := I) (M := M) (monoPerm σ) hslots)
 
-/-- **All-order window for the family `daTrans`.**
-
-`daTrans g gm T` is the two-monomial Palatini transfer coefficient of the
-`ricciTop` summand of `topKernel_eq`.  The general-order replacement for the
-fixed-order-two chain `full_slot_h2_low` → `curvMono_h2` → `ricciTop_h2`'s
-inline `hTrans`.  Derivative offset `w = 0`, uniform in the path parameter. -/
 theorem moserWin_daTrans (g : SmoothRiemannianMetric I M)
     {δ₀ : ℝ} (hδ₀0 : 0 ≤ δ₀) (hδ₀ : δ₀ < 1) :
     ∃ (A : ℕ → ℝ) (S : ℝ),
@@ -1068,13 +887,6 @@ theorem moserWin_daTrans (g : SmoothRiemannianMetric I M)
     (hmono T _ daPermA (hW T hTsup g₁ P hpert))
     (hmono T _ daPermB (hW T hTsup g₁ P hpert))
 
-/-- **All-order window for the `ricciTop` summand of `topKernel_eq`.**
-
-The general-order replacement for `ricciTop_h2`, ball-free: where the
-fixed-order statement needed `lowJetSq g 2 P ≤ 1` and `lowJetSq g 2 T ≤ R ^ 2`,
-this one needs only the fibre certificates.  Derivative offset `w = 0`, so
-`lowJetSq g i (ricciTop g gm T) ≤ K i * (1 + lowJetSq g i T)` sits strictly
-inside `topKer_jet`'s `Finset.range (i + 2)` budget. -/
 theorem moserWin_ricciTop (g : SmoothRiemannianMetric I M)
     {δ₀ : ℝ} (hδ₀0 : 0 ≤ δ₀) (hδ₀ : δ₀ < 1) :
     ∃ (A : ℕ → ℝ) (S : ℝ),
@@ -1095,7 +907,6 @@ theorem moserWin_ricciTop (g : SmoothRiemannianMetric I M)
   exact happ T AT AD ST SD _ _ (hT T hTsup g₁ P hpert) (hD T g₁ P hpert)
 
 omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [BoundarylessManifold I M] [SigmaCompactSpace M] in
-/-- Reindexing distributes over a difference of coefficients. -/
 private lemma reindexSub (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (X Y : SmoothCcTensor g r s) (ρ : Equiv.Perm (Fin r)) :
     reindexCoeffGen (I := I) (M := M) g r s (X - Y) ρ =
@@ -1116,16 +927,6 @@ private lemma reindexSub (g : SmoothRiemannianMetric I M) (r s : ℕ)
   rw [reindexCoeffFibGen, reindexCoeffFibGen, reindexCoeffFibGen]
   exact ContinuousLinearMap.sub_comp _ _ _
 
-/-- **All-order window for the family `deTurckPhiMetTotal ∘ realizedFam`.**
-
-The metric-deviation summand of `topKernel_eq`.  The two per-order producers
-`traceHessianCoeff_sub_background_jetL2_le_gInvDiffSlotCoeff_jetL2` and
-`ricciArmPrincipalCoeff_sub_background_jetL2_le_gInvDiffSlotCoeff_jetL2` were
-already order-generic; what was missing was the ball-free general-order window
-for their common factor `gInvDiffSlotCoeff`, which `moserWin_gInvDiff` now
-supplies.  The general-order replacement for `phi_dev_h2`, which needed an
-`H2` ball on the state.  Derivative offset `w = 0`, uniform in the path
-parameter. -/
 theorem moserWin_phiDev (g g_bg : SmoothRiemannianMetric I M)
     {δ₀ : ℝ} (hδ₀0 : 0 ≤ δ₀) (hδ₀ : δ₀ < 1) :
     ∃ (A : ℕ → ℝ) (S : ℝ),
@@ -1209,11 +1010,6 @@ end Families
 
 section LieRefold
 
-/-- **All-order window for the moving cometric double trace.**
-
-`pureTrace g gm k` is the genuine `gm⁻¹` double trace retagged to the frozen
-metric.  `pureTrace_split` writes it as the fixed parallel trace plus the
-inverse-metric-difference correction, and both pieces are windows. -/
 theorem moserWin_pureTr (g : SmoothRiemannianMetric I M) (k : ℕ)
     {δ₀ : ℝ} (hδ₀0 : 0 ≤ δ₀) (hδ₀ : δ₀ < 1) :
     ∃ (A : ℕ → ℝ) (S : ℝ),
@@ -1233,11 +1029,6 @@ theorem moserWin_pureTr (g : SmoothRiemannianMetric I M) (k : ℕ)
   exact moserWin_add (I := I) (M := M)
     (happ T AD AG SD SG _ _ (hD T) (hG T g₁ P hpert)) (hD T)
 
-/-- **All-order window for the moving double-trace pair coefficient.**
-
-`lieCovPair g gm` is the one factor of the curvature-refold monomials that is
-*not* constant along the radial path: its second metric argument is the moving
-`gm`.  `pairTrace_eq` factors it into two `pureTrace`s. -/
 theorem moserWin_lieCovP (g : SmoothRiemannianMetric I M)
     {δ₀ : ℝ} (hδ₀0 : 0 ≤ δ₀) (hδ₀ : δ₀ < 1) :
     ∃ (A : ℕ → ℝ) (S : ℝ),
@@ -1254,13 +1045,6 @@ theorem moserWin_lieCovP (g : SmoothRiemannianMetric I M)
   rw [pairTrace_eq (I := I) (M := M) g g₁]
   exact happ T A2 A4 S2 S4 _ _ (h2 T g₁ P hpert) (h4 T g₁ P hpert)
 
-/-- **All-order window for a curvature-refold monomial over the moving
-metric.**
-
-The moving sibling of `moserWin_curvMono`: the pair coefficient is taken at the
-path metric `g₁` rather than the background, so its constant factor comes from
-`moserWin_lieCovP` instead of `moserWin_const`.  These are the monomials of
-`lieRefold2`. -/
 theorem moserWin_monoMov (g : SmoothRiemannianMetric I M)
     {δ₀ : ℝ} (hδ₀0 : 0 ≤ δ₀) (hδ₀ : δ₀ < 1) {A : ℕ → ℝ} {S : ℝ} :
     ∃ (A' : ℕ → ℝ) (S' : ℝ),
@@ -1303,19 +1087,12 @@ theorem moserWin_monoMov (g : SmoothRiemannianMetric I M)
 
 omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless]
   [BoundarylessManifold I M] in
-/-- The convex perturbation from the zero endpoint is the radial scaling. -/
 private lemma cvxRad (g : SmoothRiemannianMetric I M)
     (T : SmoothCcTensor g 0 2) (s : ℝ) :
     convexPerturbation (I := I) g T (0 : SmoothCcTensor g 0 2) s = s • T := by
   simp [convexPerturbation]
 
 omit [BoundarylessManifold I M] in
-/-- **The radial path is path-perturbation data, uniformly on `[0, 1]`.**
-
-At every parameter `s ∈ [0, 1]` the realized family `realizedFam g T 0 s` is
-`g` plus `s • T`, whose fibre operator norm is at most the *same* `δ` as `T`'s,
-and whose jets are dominated by `T`'s.  This is the discharge that makes every
-constant produced by the family windows independent of `s`. -/
 theorem pathPert_rad (g : SmoothRiemannianMetric I M)
     (T : SmoothCcTensor g 0 2) {δ₀ δ : ℝ} (hδ0 : 0 ≤ δ) (hδ_le : δ ≤ δ₀)
     (hδ_lt : δ < 1)
@@ -1355,13 +1132,6 @@ theorem pathPert_rad (g : SmoothRiemannianMetric I M)
   · rw [cvxRad, opJetSmul]
     nlinarith [jetNn (I := I) (M := M) (m := n) g T]
 
-/-- **All-order window for the `lieRefold2` summand of `topKernel_eq`.**
-
-The remaining summand, and the only one whose curvature monomials are taken
-over the *moving* metric.  `deTurckLieCovDerivRefoldC2Family_eq_symmS_weight`
-writes it as `s` times a three-term signed combination of monomials in
-`symmS g T`; each is a window by `moserWin_monoMov`, and both scalars are
-bounded by one, so the constants do not see `s`.  Derivative offset `w = 0`. -/
 theorem moserWin_lieRef2 (g : SmoothRiemannianMetric I M)
     {δ₀ : ℝ} (hδ₀0 : 0 ≤ δ₀) (hδ₀ : δ₀ < 1) :
     ∃ (A : ℕ → ℝ) (S : ℝ),

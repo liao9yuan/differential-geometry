@@ -3,15 +3,6 @@ import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.EdgeRicciPairing
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.RHSRefoldPathIntegral
 import DifferentialGeometry.Geometry.Metric.TensorInner.TensorRSRiemannianBundle
 
-/-!
-# Path-integrated closed-edge formal pairing
-
-This module integrates the complete polarized Riemann--Lie top pair and its
-formal partner along the realized radial metric path.  The endpoint is kept in
-formal-partner form: no spatial integration by parts is performed, so a later
-consumer may test against `L² T` without creating an `H⁵` charge.
--/
-
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
@@ -540,8 +531,6 @@ private theorem edgeTopPartner_joint
             ((q i).trans (Equiv.swap (0 : Fin 4) 1)))))
   simpa only [Fin.sum_univ_three] using hall
 
-/-- Path integral of the complete polarized raw top pair.  The radial metric
-path is fixed by `T`, while `U` supplies the Hessian in the coefficient. -/
 def edgeTopPairInt
     (g : SmoothRiemannianMetric I M) (T U : SmoothCcTensor g 0 2)
     {delta : Real} (hdelta_lt : delta < 1)
@@ -562,8 +551,6 @@ def edgeTopPairInt
     (edgeTopPair_joint (I := I) (M := M)
       g T U hdelta hdeltaZ qA qB q epsilon)
 
-/-- Path integral of the complete polarized formal partner.  `P` is the
-coefficient passenger and `V` is the test tensor. -/
 def edgeTopPartnerInt
     (g : SmoothRiemannianMetric I M) (T P V : SmoothCcTensor g 0 2)
     {delta : Real} (hdelta_lt : delta < 1)
@@ -646,8 +633,6 @@ private theorem path_app_zero
       (appCc (I := I) (M := M) g b c (A t) W) x v
   simp only [Psi, appCcRS_zero_eq_appCc]
 
-/-- Applying the integrated raw top-pair coefficient to a fixed passenger is
-the path integral of the corresponding pointwise applications. -/
 theorem edgeTopPairInt_apply
     (g : SmoothRiemannianMetric I M) (T U P : SmoothCcTensor g 0 2)
     {delta : Real} (hdelta_lt : delta < 1)
@@ -756,9 +741,6 @@ private theorem path_inner_point
       ((Z t).toFun x) (G.toFun x)
   exact hpoint t x
 
-/-- The path-integrated complete raw top pair has the path-integrated
-polarized formal partner.  This identity performs no spatial integration by
-parts and therefore remains admissible when `V` is an `L²`-order test. -/
 theorem edgePath_inner_bi
     (g : SmoothRiemannianMetric I M) (T P U V : SmoothCcTensor g 0 2)
     {delta : Real} (hdelta_lt : delta < 1)

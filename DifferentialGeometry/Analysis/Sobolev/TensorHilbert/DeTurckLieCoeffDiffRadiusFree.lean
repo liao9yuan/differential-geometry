@@ -2,45 +2,6 @@ import DifferentialGeometry.Analysis.Sobolev.TensorHilbert.DeTurckLieCoeffL2JetB
 import DifferentialGeometry.Analysis.Sobolev.TensorHilbert.DeTurckVFJetRadiusFree
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.SobolevNonlinearityExistence
 
-/-!
-# Radius-free jet-L² bound for the DeTurck-Lie coefficient field
-
-Consumer sibling of THE GATE
-(`boundedFactorGridWindow_integral_radiusFree_topSeparated`) and its per-order workhorse
-(`antidiagonalTupleGrid_integral_radiusFree`), the **third brick** of the Pro-ruled repair of
-UNIF item-2.  See `ShortTime/THREEARM_RECON.md` §11/§11c and the per-file note
-`DeTurckLieCoeffDiffRadiusFree.md`.  The arm0 exemplar is
-`Analysis/Spectral/Tensor/CovGrad/CurvatureCoeffDiffRadiusFree.lean`
-(`ricciArmOrder0BaseCoeff_summed_l2_radiusFree`).
-
-The R-dependent original is
-`deTurckLieCoeffField_realizedFam_jetL2_summed_topSeparated`
-(`DeTurckLieCoeffL2JetBound.lean:799`), whose combined `Kc` routes — through the private
-DeTurck-vector-field tower (`wAlpha`/`wOmega`/`wXi`/`wCA`) — into the two ball-uniform
-integrators `diagonalProductGrid_rfns_integral_ballUniform_succ` (VF file) and
-`antidiagonalTupleGrid_integral_ballUniform_tameWindow` (monolith).  Both integrators have the
-**exact same integrand** as the radius-free workhorse `antidiagonalTupleGrid_integral_radiusFree`
-(monolith :14455); the radius enters *only* in their constants (`Λ = C_emb·R` before the
-`R^{7k}` grid).  Replacing them with the fixed-`Λ₀` workhorse makes the whole coefficient bound
-radius-free:
-```
-∑_{i ≤ a} ‖∇ⁱ(deTurckLieCoeffField g₀ g₁ g_bg)‖²
-   ≤ Ktop · ∑_{j ≤ a+2} ‖∇ʲ(symmS g₀ T)‖²
-   + Klow · (1 + ∑_{j ≤ a+1} ‖∇ʲ(symmS g₀ T)‖²)
-```
-with `Ktop`, `Klow` depending only on `g₀`, `g_bg`, `a`, `dim E`, `δ₀` — no ball radius `R`, no
-`H^{a+2}` ball hypothesis; the only smallness input is the fibre operator-norm bound
-`gFibreOpBound g₀ (ccTensorBilinSymm g₀ T) δ` with `δ ≤ δ₀`.
-
-**Status (COMPLETE — 2026-07-26, session 5).** Both public theorems are proved and axiom-clean
-(`[propext, Classical.choice, Quot.sound]`, no `sorryAx`).  The summed deliverable and its `symmS`
-fibre-small wiring reduce to the *per-order* radius-free engine
-`deTurckLieCoeffField_perOrder_l2_radiusFree`, which is discharged via the `DLa + DLb` split: the DLb
-arm through `deTurckLieWEndoInsert`/`wAlpha_L2_topsep_rf`, the DLa arm by integrating the R-free
-pointwise `rfns_iCG_dLaField_topsep` through `antidiagonalTupleGrid_integral_radiusFree` (in place of
-the two ball-uniform integrators).  The full route is analysed in `DeTurckLieCoeffDiffRadiusFree.md`.
--/
-
 noncomputable section
 
 open Bundle Manifold MeasureTheory Set Filter Tensor0SBundle
@@ -68,13 +29,7 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
-/-! ### Per-order DLa / DLb radius-free engines feeding the frontier. -/
-
 set_option linter.unusedVariables false in
-/-- Radius-free per-order jet-L² bound for the `deTurckLieDLaCoeffField` arm.  Integrates the public
-R-free pointwise top-separated engine `rfns_iCG_dLaField_topsep` (top `(appCcGdiag i)²·rfns(∇^{i+2}P)`,
-`dLaGridWin (i+3)` remainder) through the radius-free workhorse.  This arm does
-not require the supercritical Sobolev index used by the companion `DLb` arm. -/
 theorem dLaField_perOrder_rf
     (g₀ g_bg : SmoothRiemannianMetric I M) {δ₀ : ℝ} (hδ₀ : δ₀ < 1)
     {Λ₀ : ℝ} (hΛ₀0 : 0 ≤ Λ₀) :
@@ -220,9 +175,6 @@ theorem dLaField_perOrder_rf
         + (Kc_a i * ∑ k ∈ Finset.range (i + 3), K_rf k) * (1 + S') := by ring
 
 set_option linter.unusedVariables false in
-/-- Radius-free per-order jet-L² bound for the `deTurckLieDLbCoeffField` arm.  `‖∇ⁱDLb‖² ≤
-4·finrank·‖∇ⁱwEndoInsert‖²` (`normSq_iCG_dlbField_le`); the insert jet equals the `wAlpha` jet
-(`norm_iCG_wEndoInsert_eq_wAlpha`), top-separated by the radius-free `wAlpha_L2_topsep_rf`. -/
 theorem dLbField_perOrder_rf
     (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
     (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) {δ₀ : ℝ} (hδ₀ : δ₀ < 1)
@@ -263,25 +215,7 @@ theorem dLbField_perOrder_rf
           4 * (Module.finrank ℝ E : ℝ) * Kb_flow i * (1 + ∑ j ∈ Finset.range (i + 3),
             ‖iteratedCovGrad (I := I) g₀ 0 2 j P‖ ^ 2) := by ring
 
-/-! ### Radius-free per-order engine (the frontier). -/
-
 set_option linter.unusedVariables false in
-/-- **Radius-free per-order jet-L² bound for the DeTurck-Lie coefficient field**
-`deTurckLieCoeffField g₀ g₁ g_bg`.  With a fixed zeroth-order fibre bound `Λ₀` (from fibre
-smallness, not a Sobolev ball radius), the order-`i` jet-L² norm splits into a top leak
-`Atop i · ‖∇^{i+2}(symmS g₀ T)‖²` and a low part
-`Alow i · (1 + ∑_{j ≤ i+1} ‖∇ʲ(symmS g₀ T)‖²)`, with `Atop`, `Alow` depending only on `g₀`,
-`g_bg`, `a`, `dim E`, `Λ₀`.  Sibling of `deTurckLieCoeffField_realizedFam_jetL2_perOrder_topSeparated`
-with the radius-free workhorse `antidiagonalTupleGrid_integral_radiusFree` in place of the two
-ball-uniform integrators.
-
-PROVED (session 5): `deTurckLieCoeffField = DLa + DLb` (`‖∇ⁱfield‖² ≤ 2‖∇ⁱDLa‖² + 2‖∇ⁱDLb‖²`).
-`DLb` = `4·finrank·‖∇ⁱwEndoInsert‖²` = `4·finrank·‖∇ⁱwAlpha‖²` (the `deTurckLieWEndoInsert` isometry
-`norm_iCG_wEndoInsert_eq_wAlpha`), top-separated by the R-free `wAlpha_L2_topsep_rf` (`dLbField_perOrder_rf`).
-`DLa` integrates the R-free pointwise `rfns_iCG_dLaField_topsep` through
-`antidiagonalTupleGrid_integral_radiusFree` in place of the ball-uniform tame-window integrator
-(`dLaField_perOrder_rf`).  Perturbation `P := symmS g₀ T`; one `Finset.sum_range_succ` peels the top
-cell out of the `i+3` window into `Atop`.  See the `.md` note. -/
 theorem deTurckLieCoeffField_perOrder_l2_radiusFree
     (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
     (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) {δ₀ : ℝ} (hδ₀ : δ₀ < 1)
@@ -327,7 +261,6 @@ theorem deTurckLieCoeffField_perOrder_l2_radiusFree
       (I := I) (M := M) g₀ T hδ
   have ha := hDLa g₁ P htie' hδ_le hδ0 hδ' hsup i
   have hb := hDLb g₁ P htie' hδ_le hδ0 hδ' hsup i hi
-  -- combined triangle `‖∇ⁱ field‖² ≤ 2‖∇ⁱ DLa‖² + 2‖∇ⁱ DLb‖²`.
   have hcomb : ‖iteratedCovGrad (I := I) g₀ 2 2 i
         (deTurckLieCoeffField (I := I) (M := M) g₀ g₁ g_bg)‖ ^ 2 ≤
       2 * ‖iteratedCovGrad (I := I) g₀ 2 2 i (deTurckLieDLaCoeffField (I := I) g₀ g₁ g_bg)‖ ^ 2 +
@@ -348,7 +281,6 @@ theorem deTurckLieCoeffField_perOrder_l2_radiusFree
           + iteratedCovGrad (I := I) g₀ 2 2 i (deTurckLieDLbCoeffField (I := I) g₀ g₁ g_bg)),
       sq_nonneg (‖iteratedCovGrad (I := I) g₀ 2 2 i (deTurckLieDLaCoeffField (I := I) g₀ g₁ g_bg)‖ -
         ‖iteratedCovGrad (I := I) g₀ 2 2 i (deTurckLieDLbCoeffField (I := I) g₀ g₁ g_bg)‖)]
-  -- range split: peel `‖∇^{i+2}P‖²` (index `i+2`) out of the `i+3` low window into the top.
   have hsplit : (∑ j ∈ Finset.range (i + 3), ‖iteratedCovGrad (I := I) g₀ 0 2 j P‖ ^ 2) =
       (∑ j ∈ Finset.range (i + 2), ‖iteratedCovGrad (I := I) g₀ 0 2 j P‖ ^ 2) +
         ‖iteratedCovGrad (I := I) g₀ 0 2 (i + 2) P‖ ^ 2 := by
@@ -374,16 +306,7 @@ theorem deTurckLieCoeffField_perOrder_l2_radiusFree
         (2 * Ka_low i + 2 * Kb_low i) * (1 + ∑ j ∈ Finset.range (i + 2),
           ‖iteratedCovGrad (I := I) g₀ 0 2 j P‖ ^ 2) := by ring
 
-/-! ### Radius-free summed sibling (the consumer-gate deliverable). -/
-
 set_option linter.unusedVariables false in
-/-- **Radius-free summed jet-L² bound for the DeTurck-Lie coefficient field.**
-Summing the per-order radius-free engine over `i ≤ a` gives a single bound whose top data weight
-is at order `a+2` and low data weight at order `a+1`, with constants `Ktop`, `Klow` depending only
-on `g₀`, `g_bg`, `a`, `dim E`, `δ₀` — no ball radius `R`, no `H^{a+2}` ball hypothesis.  This is
-the DeTurck-Lie consumer sibling of THE GATE, the third brick of the Pro-ruled repair of UNIF
-item-2; the perturbation grids run over `symmS g₀ T`.  Sibling of
-`deTurckLieCoeffField_realizedFam_jetL2_summed_topSeparated` (`:799`). -/
 theorem deTurckLieCoeffField_summed_l2_radiusFree
     (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
     (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) {δ₀ : ℝ} (hδ₀ : δ₀ < 1) :
@@ -411,7 +334,6 @@ theorem deTurckLieCoeffField_summed_l2_radiusFree
   intro g₁ T δ hδ_le hδ htie
   by_cases hM : Nonempty M
   · obtain ⟨x₀⟩ := hM
-    -- 0 ≤ δ from the fibre bound at a nonzero tangent vector.
     have hδ0 : 0 ≤ δ := by
       obtain ⟨v, hv⟩ : ∃ v : TangentSpace I x₀, v ≠ 0 := by
         haveI : Nontrivial (TangentSpace I x₀) := by
@@ -448,7 +370,6 @@ theorem deTurckLieCoeffField_summed_l2_radiusFree
           Alow i * (1 + ∑ j ∈ Finset.range (i + 2),
             ‖iteratedCovGrad (I := I) g₀ 0 2 j (symmS (I := I) (M := M) g₀ T)‖ ^ 2) :=
       fun i hi => hper g₁ T hδ_le hδ0 hδ htie hsup i hi
-    -- sum over i ≤ a.
     set w : ℕ → ℝ := fun j =>
       ‖iteratedCovGrad (I := I) g₀ 0 2 j (symmS (I := I) (M := M) g₀ T)‖ ^ 2 with hw
     have hw_nn : ∀ j, 0 ≤ w j := fun j => sq_nonneg _
@@ -465,7 +386,7 @@ theorem deTurckLieCoeffField_summed_l2_radiusFree
       _ ≤ (∑ i ∈ Finset.range (a + 1), Atop i) * (∑ j ∈ Finset.range (a + 3), w j) +
             (∑ i ∈ Finset.range (a + 1), Alow i) * (1 + ∑ j ∈ Finset.range (a + 2), w j) := by
           refine add_le_add ?_ ?_
-          · -- top weight lands at range (a+3)
+          ·
             calc ∑ i ∈ Finset.range (a + 1), Atop i * w (i + 2)
                 ≤ ∑ i ∈ Finset.range (a + 1), Atop i * (∑ j ∈ Finset.range (a + 3), w j) := by
                   refine Finset.sum_le_sum (fun i hi => ?_)
@@ -475,7 +396,7 @@ theorem deTurckLieCoeffField_summed_l2_radiusFree
                     (Finset.mem_range.mpr (by omega))
               _ = (∑ i ∈ Finset.range (a + 1), Atop i) * (∑ j ∈ Finset.range (a + 3), w j) := by
                   rw [Finset.sum_mul]
-          · -- low weight lands at range (a+2)
+          ·
             calc ∑ i ∈ Finset.range (a + 1), Alow i * (1 + ∑ j ∈ Finset.range (i + 2), w j)
                 ≤ ∑ i ∈ Finset.range (a + 1),
                     Alow i * (1 + ∑ j ∈ Finset.range (a + 2), w j) := by
@@ -489,7 +410,7 @@ theorem deTurckLieCoeffField_summed_l2_radiusFree
               _ = (∑ i ∈ Finset.range (a + 1), Alow i) *
                     (1 + ∑ j ∈ Finset.range (a + 2), w j) := by
                   rw [Finset.sum_mul]
-  · -- empty M: every L² norm is 0.
+  ·
     haveI hM' : IsEmpty M := not_nonempty_iff.mp hM
     have hL0 : ∑ i ∈ Finset.range (a + 1),
         ‖iteratedCovGrad (I := I) g₀ 2 2 i

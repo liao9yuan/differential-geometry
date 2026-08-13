@@ -1,13 +1,6 @@
 import DifferentialGeometry.Analysis.Spectral.Tensor.Estimates.H2H4Principal
 import DifferentialGeometry.Analysis.Spectral.Tensor.SobolevScale.ParametricAppHs
 
-/-!
-# Completed H2 tensor actions
-
-This file bounds the completed operator-field action on spectral `H2` by the
-intrinsic `H2` jet of its smooth mixed-tensor coefficient.
--/
-
 noncomputable section
 
 open Bundle Manifold
@@ -31,9 +24,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
-/-- On a closed three-manifold, the completed action of a smooth mixed-tensor
-coefficient on spectral `H2` has operator norm controlled by its intrinsic
-`H2` covariant jet. -/
 theorem appHs_h2_norm
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M) (b c : ℕ) :

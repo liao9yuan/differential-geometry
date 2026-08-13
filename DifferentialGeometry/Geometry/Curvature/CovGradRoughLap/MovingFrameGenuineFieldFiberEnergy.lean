@@ -4,7 +4,6 @@ import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.RiemannianFibe
 import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.RiemannianFiberNormSq.UniformCurvatureSup
 import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.Slot0SliceFiberNormDomination
 
-
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
@@ -28,7 +27,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
   [T2Space M] [SigmaCompactSpace M]
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
-
 
 omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless]
     [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
@@ -126,7 +124,6 @@ private lemma riemannianFiberNormSq_eq_sum_toModel_sq
     have : Fin.cast (Nat.zero_add s) (Fin.natAdd 0 k) = k := by ext; simp
     rw [this]
 
-
 omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] in
 omit [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private lemma orthoWeighted_frame_sum_collapse
@@ -193,10 +190,6 @@ private lemma frame_field_energy_eq_sum_trace_fiberNormSq
   refine Finset.sum_congr rfl (fun a₀ _ => ?_)
   rw [riemannianFiberNormSq_eq_sum_toModel_sq (I := I) (M := M) g s x (Tr a₀) e hn horth]
 
-/-- **Supplied-cap pure-Riemann genuine-trace fibre bound.** If the rank-`s` tensor curvature
-operator has squared fibre coefficient `C`, then its genuine moving-frame trace has coefficient
-`n² C`, where `n = finrank E`.  This is the structural fixed-rank form used by metric-uniform
-consumers; it does not compactness-uniformise the curvature coefficient. -/
 theorem genuineTrace_le_of
     (g : SmoothRiemannianMetric I M) (s : ℕ) {C : ℝ} (hC_nonneg : 0 ≤ C)
     (hC_bound : ∀ (x : M) (v w : TangentSpace I x) (T : TensorRSSpace 0 s I x),

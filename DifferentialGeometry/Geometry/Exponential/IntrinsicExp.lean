@@ -6,8 +6,6 @@ import DifferentialGeometry.Geometry.Geodesic.CrossVFReduction
 import DifferentialGeometry.Geometry.Exponential.Defs
 import DifferentialGeometry.Geometry.Metric.TensorInner.TangentNormDiamond
 
-
-
 noncomputable section
 
 open Bundle Manifold Set Filter Function
@@ -1739,8 +1737,6 @@ theorem intrinsicGeodesic_smul
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-/-- Scaling the launch velocity rescales every parameter time of the complete
-intrinsic geodesic. -/
 theorem intrGeo_smul_apply
     [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
     [IsContinuousRiemannianBundle E (fun (x : M) ↦ TangentSpace I x)]

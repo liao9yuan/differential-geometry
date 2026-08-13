@@ -2,15 +2,6 @@ import DifferentialGeometry.Analysis.Sobolev.TensorHilbert.AppCcJetWindowTame
 import DifferentialGeometry.Analysis.Spectral.Tensor.Estimates.H2PointwiseUnif
 import DifferentialGeometry.Analysis.Spectral.Tensor.SobolevScale.SpectralNormLIterateLadder
 
-/-!
-# An H² principal-form estimate
-
-This module bounds a second-order coefficient only after it is placed in the
-natural `(1 - Δ_∇)` energy pairing.  The estimate uses a pointwise coefficient
-bound and the finite rank-two `H²` Bochner comparison; it never asks for a
-covariant fourth jet of the acted tensor.
- -/
-
 noncomputable section
 
 open Bundle Manifold Set Filter Tensor0SBundle
@@ -33,8 +24,6 @@ variable
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
-/-- A pointwise bound for a rank-four coefficient controls its second-order
-action in the natural rank-two `H²` energy pairing. -/
 theorem appD2_pair_h2
     (g : SmoothRiemannianMetric I M) {K B : ℝ}
     (hact : IsCurvAction0 (I := I) (M := M) g 2 K)
@@ -98,8 +87,6 @@ theorem appD2_pair_h2
       exact mul_le_mul_of_nonneg_left hA hH2
     _ = B * h2CovsumC K * H2 ^ 2 := by ring
 
-/-- The order-four energy face of `appD2_pair_h2`, obtained by applying the
-same `H²` form estimate to `(1 - Δ_∇) U`. -/
 theorem appD2_pair_h4
     (g : SmoothRiemannianMetric I M) {K B : ℝ}
     (hact : IsCurvAction0 (I := I) (M := M) g 2 K)

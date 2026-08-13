@@ -2,14 +2,6 @@ import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.DeTurckRemainder
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.LowRegBaseForce
 import DifferentialGeometry.Analysis.Parabolic.QuasiLinear.TensorMaximalRegularity.TameForcingFixedPoint
 
-/-!
-# Low-base Ricci--DeTurck fixed-point forcing
-
-This module assembles the compatible total low-base coefficient actions into
-the autonomous `H3 → H1` forcing consumed by the tame maximal-regularity
-fixed-point theorem.
--/
-
 noncomputable section
 
 open Bundle Manifold MeasureTheory Set
@@ -63,15 +55,11 @@ private theorem clm_apply_sub_le
   exact (norm_add_le _ _).trans
     (add_le_add ((A - B).le_opNorm x) (B.le_opNorm (x - y)))
 
-/-- The fixed zero-state Ricci--DeTurck remainder, lowered from `H2` to the
-`H1` forcing scale. -/
 noncomputable def lowBaseForce (g : SmoothRiemannianMetric I M) :
     metricH1 (I := I) (M := M) g :=
   incl21 (I := I) (M := M) g
     (baseForceH2 (I := I) (M := M) g g)
 
-/-- The fixed `H1` forcing is the direct spectral embedding of the genuine
-smooth zero-state remainder. -/
 theorem lowBaseForce_core (g : SmoothRiemannianMetric I M) :
     lowBaseForce (I := I) (M := M) g =
       ccTensorToHs (I := I) (M := M) g 2 (1 : ℝ)
@@ -83,10 +71,6 @@ theorem lowBaseForce_core (g : SmoothRiemannianMetric I M) :
   simp only [lowBaseForce, incl21, baseForceH2,
     tensorHsInclusion_coeff_apply, ccTensorToHs_coeff]
 
-/-- The canonical total low-base autonomous forcing on the `H3` state space.
-The second-order coefficient sees the included `H2` state and acts on the
-`H3` radial passenger; the first-order coefficient sees the `H3` state and
-acts on the compatible `H2` radial passenger. -/
 noncomputable def lowBaseN
     (g : SmoothRiemannianMetric I M)
     {ρ δ : ℝ} (hρ : 0 ≤ ρ) (hδ0 : 0 ≤ δ) (hδ_le : δ ≤ 1 / 3)
@@ -104,9 +88,6 @@ noncomputable def lowBaseN
       (lowRadialHs (I := I) (M := M) g ρ
         (incl32 (I := I) (M := M) g u))
 
-/-- At a fixed state, the full low-base variable-coefficient action is one
-continuous linear map from `H3` to `H1`.  Its radial scalars are frozen from
-the lower `H2` state, so only the final self-application is nonlinear. -/
 noncomputable def lowBaseA
     (g : SmoothRiemannianMetric I M)
     {ρ δ : ℝ} (hρ : 0 ≤ ρ) (hδ0 : 0 ≤ δ) (hδ_le : δ ≤ 1 / 3)
@@ -126,8 +107,6 @@ noncomputable def lowBaseA
         (incl32 (I := I) (M := M) g u)).comp
           (incl32 (I := I) (M := M) g))
 
-/-- The autonomous low-base forcing is the fixed zero-state force plus the
-self-application of the frozen variable-coefficient operator. -/
 theorem lowBaseN_frozen
     (g : SmoothRiemannianMetric I M)
     {ρ δ : ℝ} (hρ : 0 < ρ) (hδ0 : 0 ≤ δ) (hδ_le : δ ≤ 1 / 3)
@@ -145,9 +124,6 @@ theorem lowBaseN_frozen
     radialCLM_h2 (I := I) (M := M) g hρ.le]
   module
 
-/-- The frozen full operator is bounded by the sum of its canonical second-
-and first-order coefficient norms; radialization and Sobolev inclusion cost no
-additional factor. -/
 theorem lowBaseA_le
     (g : SmoothRiemannianMetric I M)
     {ρ δ : ℝ} (hρ : 0 ≤ ρ) (hδ0 : 0 ≤ δ) (hδ_le : δ ≤ 1 / 3)
@@ -199,8 +175,6 @@ theorem lowBaseA_le
         (mul_le_mul_of_nonneg_left hR2J (norm_nonneg A1))
     _ = ‖A2‖ + ‖A1‖ := by ring
 
-/-- Measurable coefficient paths and a measurable state path assemble into a
-measurable family of full frozen low-base operators. -/
 theorem lowBaseA_aemeas
     {Ω : Type*} [MeasurableSpace Ω] {μ : Measure Ω}
     (g : SmoothRiemannianMetric I M)
@@ -401,9 +375,6 @@ private theorem lowBaseN_radial_le
   refine htel.trans ?_
   gcongr
 
-/-- The low-base forcing restricted to the maximal-regularity lower-state
-ball.  The state radius is independent of the outer coefficient cutoff
-radius, and will be chosen smaller in the contraction argument. -/
 noncomputable def lowBaseNBall
     (g : SmoothRiemannianMetric I M)
     {ρ δ R : ℝ} (hρ : 0 ≤ ρ) (hδ0 : 0 ≤ δ) (hδ_le : δ ≤ 1 / 3)
@@ -420,8 +391,6 @@ noncomputable def lowBaseNBall
         norm_num at hu ⊢
         exact hu)
 
-/-- At the zero state, the nonlinear radial actions vanish and only the fixed
-zero-state remainder remains. -/
 @[simp] theorem lowBaseN_zero
     (g : SmoothRiemannianMetric I M)
     {ρ δ : ℝ} (hρ : 0 < ρ) (hδ0 : 0 ≤ δ) (hδ_le : δ ≤ 1 / 3)

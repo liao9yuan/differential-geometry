@@ -1,15 +1,6 @@
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.EdgeCenterNormal
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.DeTurckRemainderLowBaseAction
 
-/-!
-# Complete centered edge commutator
-
-This leaf module peels the fixed-parameter diagonal zero/top block into its
-transparent lower action, the explicit principal Hessian head, the complete
-curvature defect, and the three rough-Laplacian Leibniz corners.  No derivative
-is moved onto an energy test tensor.
--/
-
 noncomputable section
 
 set_option linter.style.setOption false
@@ -53,9 +44,6 @@ private theorem appCc_sub_right_ec
     abel
   exact eq_sub_of_add_eq h
 
-/-- The exact non-Green peel of the fixed-parameter centered diagonal edge
-block.  The three product-rule corners and the Hessian--Laplacian curvature
-defect remain explicit; the two off-diagonal pair actions remain as `Cross`. -/
 theorem edge_center_peel
     (g g_bg : SmoothRiemannianMetric I M) (T : SmoothCcTensor g 0 2)
     (hTsymm : ∀ (x : M) (v w : TangentSpace I x),

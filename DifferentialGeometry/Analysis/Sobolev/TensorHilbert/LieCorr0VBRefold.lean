@@ -2,15 +2,6 @@ import DifferentialGeometry.Analysis.Sobolev.TensorHilbert.LieCorr0CoefficientRe
 import DifferentialGeometry.Analysis.Sobolev.TensorHilbert.LieCorr0AMixRefold
 import DifferentialGeometry.Analysis.Sobolev.TensorHilbert.DeTurckVFEndoInsertTower
 
-/-!
-# Low-regularity normal form for the `lc0VB` correction
-
-This module exposes the nested operator-field factorization already proved by
-`lc0VB_eq_app` and `vbSplit`.  It keeps the exact Ricci--DeTurck contraction
-visible to low-regularity estimates without importing the unfinished
-`LieCorr0LowJet` module.
--/
-
 noncomputable section
 
 set_option autoImplicit false
@@ -37,7 +28,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
-/-- At the base background, `wXi` is the `g₀`-lowered connection difference. -/
 theorem wXi_self_eq (g₀ g₁ : SmoothRiemannianMetric I M) :
     wXi (I := I) (M := M) g₀ g₁ g₀ =
       connDiffLoweredCc (I := I) g₀ g₁ := by
@@ -47,8 +37,6 @@ theorem wXi_self_eq (g₀ g₁ : SmoothRiemannianMetric I M) :
   intro m
   rw [wXi_unitModel_apply, connDiffLoweredCc_unitModel_apply']
 
-/-- On a covariant passenger, the moving cometric trace is represented by
-`lc0TraceRF` without identifying the ambient mixed-tensor bundles. -/
 theorem trace_app_refold (g₀ g₁ : SmoothRiemannianMetric I M)
     (W : SmoothCcTensor g₀ 0 3) :
     appCcRS (I := I) (M := M) g₀ 0 3 1
@@ -75,8 +63,6 @@ theorem trace_app_refold (g₀ g₁ : SmoothRiemannianMetric I M)
         (lc0TraceRF_fiber (I := I) (M := M) g₀ g₁ 1 (Equiv.refl _) x)) Z]
   rfl
 
-/-- The base-background DeTurck covector as a rank-one trace applied to the
-`g₀`-lowered connection difference. -/
 theorem wOmega_refold (g₀ g₁ : SmoothRiemannianMetric I M) :
     wOmega (I := I) (M := M) g₀ g₁ g₀ =
       appCcRS (I := I) (M := M) g₀ 0 3 1
@@ -93,8 +79,6 @@ theorem wOmega_refold (g₀ g₁ : SmoothRiemannianMetric I M) :
         (cometricCastG0 (I := I) g₀ g₁) (connDiffLoweredCc (I := I) g₀ g₁)).symm
     _ = _ := trace_app_refold (I := I) (M := M) g₀ g₁ _
 
-/-- Changing the fixed DeTurck background cancels the common moving
-connection difference before the moving trace is estimated. -/
 theorem wOmega_sub_refold (g₀ g₁ gA gB : SmoothRiemannianMetric I M) :
     wOmega (I := I) (M := M) g₀ g₁ gA -
         wOmega (I := I) (M := M) g₀ g₁ gB =
@@ -140,7 +124,6 @@ theorem wOmega_sub_refold (g₀ g₁ gA gB : SmoothRiemannianMetric I M) :
           connDiffLoweredCc (I := I) g₀ gA) := congrArg _ hXi
     _ = _ := trace_app_refold (I := I) (M := M) g₀ g₁ _
 
-/-- The nested RicciFlower operator form of the vector--bilinear correction. -/
 noncomputable def lc0VBFormRF (g₀ g₁ : SmoothRiemannianMetric I M) :
     SmoothCcTensor g₀ 2 2 :=
   (2 : ℝ) • appCcRS (I := I) (M := M) g₀ 2 4 2
@@ -150,7 +133,6 @@ noncomputable def lc0VBFormRF (g₀ g₁ : SmoothRiemannianMetric I M) :
       (ipLowCc (I := I) (M := M) g₀
         (wOmega (I := I) (M := M) g₀ g₁ g₀)))
 
-/-- The vector--bilinear correction equals its nested RicciFlower operator form. -/
 theorem vb_refold_rf (g₀ g₁ : SmoothRiemannianMetric I M) :
     lc0VB (I := I) (M := M) g₀ g₁ =
       lc0VBFormRF (I := I) (M := M) g₀ g₁ := by

@@ -3,14 +3,6 @@ import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurckCoefficients.LieC
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.MovingPairTrace
 import DifferentialGeometry.Analysis.Parabolic.RicciLinearization.RicciLinearizationConnDiffUniformBounds
 
-/-!
-# Integrated low-regularity Ricci--DeTurck refold
-
-This module supplies the joint-smoothness input needed to integrate the exact
-Ricci--DeTurck refold along the metric segment.  The construction keeps the
-returned second-order coefficient together with the complete top arm.
--/
-
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
@@ -217,8 +209,6 @@ private theorem mvPairTrace_joint
     (E := fun z : M => TensorRSSpace 6 2 I z) p.1 t) ?_
   rfl
 
-/-- A fixed Hessian-state Palatini pair monomial varies jointly smoothly along
-the realized radial metric path. -/
 theorem edgePairMono_joint
     (g : SmoothRiemannianMetric I M) (T : SmoothCcTensor g 0 2)
     {delta : Real}
@@ -242,8 +232,6 @@ theorem edgePairMono_joint
     (mvPairTrace_joint (I := I) (M := M) g T hdelta hdeltaZ)
   simpa only [edgePairMono] using h
 
-/-- The closed-edge Lie formal-pair coefficient varies jointly smoothly in
-space and along the realized radial path. -/
 theorem edgeLiePair_joint
     (g : SmoothRiemannianMetric I M) (T : SmoothCcTensor g 0 2)
     {delta : Real}
@@ -393,7 +381,6 @@ private theorem endo_joint
   simpa only [deTurckLieCoeffField_eq_covDerivArm_add_endoArm,
     add_sub_cancel_left] using hsub
 
-/-- The lower DeTurck refold coefficient is jointly smooth along the realized metric segment. -/
 theorem lieRefold_joint
     (g g_bg : SmoothRiemannianMetric I M) (T : SmoothCcTensor g 0 2)
     {delta : Real}
@@ -411,8 +398,6 @@ theorem lieRefold_joint
     (edgeLiePair_joint (I := I) (M := M)
       g T hdelta hdeltaZ lieRefoldQ lieRefoldEps)
 
-/-- The complete refolded order-zero Ricci--DeTurck coefficient is jointly
-smooth along the realized metric segment. -/
 theorem rhsRefold0_joint
     (g g_bg : SmoothRiemannianMetric I M) (T : SmoothCcTensor g 0 2)
     {delta : Real}
@@ -441,8 +426,6 @@ theorem rhsRefold0_joint
   have hall := threeArmJoint_add (I := I) (M := M) g _ _ hhead htail
   simpa only [rhsRefold0] using hall
 
-/-- The complete refolded zero-order coefficient integrated along the segment
-from the background carrier to `T`. -/
 def rhsRefold0Int
     (g g_bg : SmoothRiemannianMetric I M) (T : SmoothCcTensor g 0 2)
     {delta : Real} (hdelta_lt : delta < 1)
@@ -459,8 +442,6 @@ def rhsRefold0Int
       exact Icc_subset_realizedSmallSet hdelta_lt hdelta_lt)
     (rhsRefold0_joint (I := I) (M := M) g g_bg T hdelta hdeltaZ)
 
-/-- The complete refolded second-order coefficient integrated along the
-segment from the background carrier to `T`. -/
 def rhsRefoldTopInt
     (g g_bg : SmoothRiemannianMetric I M) (T : SmoothCcTensor g 0 2)
     {delta : Real} (hdelta_lt : delta < 1)
@@ -480,8 +461,6 @@ def rhsRefoldTopInt
 
 set_option maxHeartbeats 6400000 in
 set_option synthInstance.maxHeartbeats 3200000 in
-/-- The Ricci--DeTurck right-hand side relative to the background carrier is
-the exact sum of the integrated refolded zero-, one-, and two-order arms. -/
 theorem rhs_sub_zero_refold
     (g g_bg : SmoothRiemannianMetric I M) (T : SmoothCcTensor g 0 2)
     (hTsymm : ∀ (x : M) (v w : TangentSpace I x),

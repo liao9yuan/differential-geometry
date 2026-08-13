@@ -13,10 +13,3 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.CurvatureCoefficien
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.CurvatureCoefficientDifferenceJetTower.ResidualFree
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.CurvatureCoefficientDifferenceJetTower.ResidualBase
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.CurvatureCoefficientDifferenceJetTower.ResidualAllOrd
-
-/-!
-# Curvature-coefficient background-difference jet tower
-
-Umbrella module. The mathematics lives in the chunk modules imported above;
-this file keeps the original module path as a stable re-exporting API.
--/

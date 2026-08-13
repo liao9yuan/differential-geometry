@@ -4,28 +4,6 @@ import DifferentialGeometry.Analysis.Sobolev.TensorHilbert.SelfLowCapWindows
 import DifferentialGeometry.Analysis.Sobolev.TensorHilbert.Lc0InsertDiffWindow
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.SelfLowArmCaps
 
-/-!
-# All-order jet towers of the low-base first- and zeroth-order coefficients
-
-`LowRegC2JetTower.lean` supplies the all-order jet tower of the second-order
-coefficient `A.C2`.  This module supplies the two remaining coefficients of the
-same split,
-
-* `A.C1 = rhsLow1PathIntegral g g T 0 …`, valence `(3,2)`, and
-* `A.C0 = selfLowInt g g T … + phiMetCurvCoeff g g g`, valence `(2,2)`,
-
-whose actions assemble `LowBaseActionData.a1`.  Because `a1` carries only **one**
-derivative of the state, both towers may spend an `m`-dependent constant; no
-smallness beyond `δ ≤ 1/3` is used, and neither the resolvent commutator nor an
-a-priori Sobolev ball enters.
-
-Both coefficients are path integrals over the radial segment, so each tower has
-two layers: a uniform-in-`s` jet bound for the integrand (`low1Ker_jet`,
-`selfLow_jet`), obtained on the ball-free Moser route of
-`LowRegOpJetWindows.lean`, and the passage through the parameter integral, which
-is `path_jetL2_le`.
--/
-
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
@@ -57,20 +35,6 @@ section Integrand
 
 set_option linter.unusedVariables false in
 set_option linter.unusedSectionVars false in
-/-- **The all-order jet window of the order-one path integrand.**
-
-Uniformly in the radial parameter `s ∈ [0,1]`, the order-one integrand
-`rhsLow1Coeff g g T 0 s` has its `i`-th covariant `L²` jet controlled by the
-state's own jets through order `i + 1`, with constants depending on neither the
-state nor `s`.
-
-This is the `C1` sibling of `topKer_jet`.  The `IsMoserWin` vocabulary of
-`LowRegOpJetWindows.lean` cannot express it — the bare connection difference
-carries no order-zero fibre cap — so the currency is the radius-free
-antidiagonal-grid window of `Low1KerRadiusFree.lean`: `low1Atgw` bounds the
-integrand's fibre jets pointwise at offset `+2`, and `atgwToJet` integrates that
-into the `range (i + 2)` budget.  `pathPert_rad` supplies the perturbation data
-uniformly in `s`, which is why no constant here sees the path parameter. -/
 theorem low1Ker_jet_bg
     (hDim : Module.finrank ℝ E = 3)
     (g g_bg : SmoothRiemannianMetric I M) :
@@ -104,7 +68,6 @@ theorem low1Ker_jet_bg
       (Finset.sum_nonneg (fun k _ => hKint_nn k))), ?_⟩
   intro T hT δ hδ0 hδ_le hδg hδZ i s hs
   have hδ_lt : δ < 1 := lt_of_le_of_lt hδ_le h31
-  -- the state is its own `L∞` witness: symmetry identifies it with `symmS g T`
   have hTsup : ∀ x : M, riemannianFiberNormSq (I := I) (M := M) g 0 2 x
       (T.toSection x) ≤ ((Module.finrank ℝ E : ℝ) * (1 / 3)) ^ 2 := by
     intro x
@@ -116,14 +79,12 @@ theorem low1Ker_jet_bg
     rwa [hsT] at h
   obtain ⟨⟨δ', hδ'0, hδ'_le, hP⟩, htie, hPsup, hPjet⟩ :=
     pathPert_rad (I := I) (M := M) g T hδ0 hδ_le hδ_lt hδg hδZ hTsup hs
-  -- the integrand, in the shape the radius-free window covers
   have heq : rhsLow1Coeff (I := I) (M := M) g g_bg T
         (0 : SmoothCcTensor g 0 2) hδg hδZ s =
       (-2 : ℝ) • linearizedRicciConnDiffOrder1CoeffField (I := I) (M := M) g
           (realizedFam (I := I) g T 0 hδg hδZ s) +
         deTurckLieArm1Coeff (I := I) (M := M) g
           (realizedFam (I := I) g T 0 hδg hδZ s) g_bg := rfl
-  -- the per-order jet bound, uniformly in `s`
   have hq : ∀ q : ℕ, ‖iteratedCovGrad (I := I) g 3 2 q
         (rhsLow1Coeff (I := I) (M := M) g g_bg T
           (0 : SmoothCcTensor g 0 2) hδg hδZ s)‖ ^ 2 ≤
@@ -138,7 +99,6 @@ theorem low1Ker_jet_bg
     rw [heq]
     exact hw (realizedFam (I := I) g T 0 hδg hδZ s)
       (convexPerturbation (I := I) g T 0 s) htie hδ'_le hδ'0 hP hPsup q x
-  -- the state dominates the perturbation's jets, at every order below `i + 1`
   have hPS : ∀ q : ℕ, q ≤ i →
       (∑ j ∈ Finset.range (q + 2), ‖iteratedCovGrad (I := I) g 0 2 j
           (convexPerturbation (I := I) g T 0 s)‖ ^ 2) ≤
@@ -176,7 +136,6 @@ theorem low1Ker_jet_bg
 
 set_option linter.unusedVariables false in
 set_option linter.unusedSectionVars false in
-/-- Diagonal-background compatibility wrapper for `low1Ker_jet_bg`. -/
 theorem low1Ker_jet
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M) :
@@ -199,10 +158,6 @@ theorem low1Ker_jet
             ‖iteratedCovGrad (I := I) g 0 2 j T‖ ^ 2) :=
   low1Ker_jet_bg (I := I) (M := M) hDim g g
 
-/-- Cancellation-preserving zero-arm split at an arbitrary fixed background.
-
-The two background corrections are retained explicitly: the difference of the
-DeTurck endomorphism arms and the difference of the `lc0Insert` arms. -/
 theorem selfLow_split_bg
     (g g_bg : SmoothRiemannianMetric I M) (T : SmoothCcTensor g 0 2)
     (hT : ∀ (x : M) (u v : TangentSpace I x),
@@ -252,7 +207,6 @@ theorem selfLow_split_bg
   rw [h']
   abel
 
-/-- Diagonal-background cancellation-preserving zero-arm split. -/
 theorem selfLow_split
     (g : SmoothRiemannianMetric I M) (T : SmoothCcTensor g 0 2)
     (hT : ∀ (x : M) (u v : TangentSpace I x),
@@ -292,12 +246,6 @@ theorem selfLow_split
   abel
 
 set_option linter.unusedVariables false in
-/-- **Capped window of the symmetrized first-order Ricci coefficient.**
-
-`ricciGoodLow g₀ g₁ P = ccInputSymm (ricciAAArm g₀ g₁ + ricciDALow g₀ g₁ P)`.
-Both arms are quadratic in `∇P` — `A·A` for the first, `∇A ⋆ ∇P` for the second
-— so both need the `Λ`-capped currency; the input-slot symmetrization is a
-product with a fixed slot-swap field and therefore free. -/
 private theorem ricciGoodCap (g₀ : SmoothRiemannianMetric I M)
     {δ₀ : ℝ} (hδ₀ : δ₀ < 1) {Λ : ℝ} (hΛ1 : 1 ≤ Λ) :
     ∃ K : ℕ → ℝ, (∀ i, 0 ≤ K i) ∧
@@ -342,34 +290,6 @@ private theorem ricciGoodCap (g₀ : SmoothRiemannianMetric I M)
 
 set_option linter.unusedVariables false in
 set_option linter.unusedSectionVars false in
-/-- **The all-order jet window of the zero-order path integrand.**
-
-Uniformly in the radial parameter `s ∈ [0,1]`, the zero-arm self-action
-integrand `rhsSelfLow g g T s` has its `i`-th covariant `L²` jet controlled by
-the state's own jets through order `i + 1`, for states in a fixed `H^{a+2}`
-ball.
-
-This is the `C0` sibling of `topKer_jet`.  The Palatini refold that trades the
-second metric derivative of the DeTurck Lie arm for curvature is what keeps the
-derivative offset at one: it is the subtracted `edgeLiePairFam` inside
-`rhsSelfLow` itself, and `selfLow_split` is the grouping in which that
-cancellation is visible.
-
-**Why the ball is a hypothesis and not decoration.**  Unlike the `C1` sibling
-`low1Ker_jet`, which is *linear* in the connection difference and therefore
-holds radius-free, two of `selfLow_split`'s five summands are *quadratic* in
-`∇P`: the `A·A` arm inside `ricciGoodLow`, and `lc0VB`.  With only the fibre
-bound `δ ≤ 1/3` on `P` the `range (i + 2)` budget is **false** — concentrate a
-bump at `i = 0` and `‖T‖, ‖∇T‖` stay bounded in `L²` while `‖ |∇T|² ‖_{L²}`
-blows up.  Gagliardo–Nirenberg closes the gap only through a cap on `∇P`, and
-the `H^{a+2}` ball supplies exactly that: `1 ≤ a` gives `H³ ⊂ C¹` in dimension
-three.  The gate is stated at its weakest useful value, so any consumer with a
-larger bottom (`a2_ladder`'s `3 ≤ a`) discharges it arithmetically.
-
-The six per-arm capped windows it consumes are `SelfLowCapWindows.lean`'s
-(`ricciAACap`, `lc0AMixCap`, `lc0RiemCap`), `Lc0VBCapWindow.lean`'s
-(`lc0VBCapAtgw`) and `SelfLowArmCaps.lean`'s (`ricciDACap`, `lieCovCap`); see
-`LowRegC01JetTower.md`. -/
 theorem selfLow_jet
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M) (a : ℕ) (ha : 1 ≤ a)
@@ -394,7 +314,6 @@ theorem selfLow_jet
   classical
   have h30 : (0 : ℝ) ≤ 1 / 3 := by norm_num
   have h31 : (1 / 3 : ℝ) < 1 := by norm_num
-  -- the two pointwise caps, both fixed before the state is seen
   obtain ⟨Λ₁, hΛ₁0, hΛ₁⟩ := gradCapOfBall (I := I) (M := M) hDim g a ha hR₀
   set Λ : ℝ := max 1 (max (((Module.finrank ℝ E : ℝ) * (1 / 3)) ^ 2) (Λ₁ ^ 2)) with hΛdef
   have hΛ1 : (1 : ℝ) ≤ Λ := le_max_left _ _
@@ -402,7 +321,6 @@ theorem selfLow_jet
   have hΛA : ((Module.finrank ℝ E : ℝ) * (1 / 3)) ^ 2 ≤ Λ :=
     le_trans (le_max_left _ _) (le_max_right _ _)
   have hΛB : Λ₁ ^ 2 ≤ Λ := le_trans (le_max_right _ _) (le_max_right _ _)
-  -- the five capped windows and the capped integration step
   obtain ⟨K1, hK1_nn, w1⟩ := ricciGoodCap (I := I) (M := M) g h31 hΛ1
   obtain ⟨K2, hK2_nn, w2⟩ := lieCovCap (I := I) (M := M) g h31 hΛ1
   obtain ⟨K3, hK3_nn, w3⟩ := lc0VBCapAtgw (I := I) (M := M) g h31 hΛ1
@@ -426,7 +344,6 @@ theorem selfLow_jet
   have hδ_lt : δ < 1 := lt_of_le_of_lt hδ_le h31
   have hs0 : (0 : ℝ) ≤ s := hs.1
   have hs1 : s ≤ 1 := hs.2
-  -- the state is its own `L∞` witness
   have hTsup : ∀ x : M, riemannianFiberNormSq (I := I) (M := M) g 0 2 x
       (T.toSection x) ≤ ((Module.finrank ℝ E : ℝ) * (1 / 3)) ^ 2 := by
     intro x
@@ -441,7 +358,6 @@ theorem selfLow_jet
   set P : SmoothCcTensor g 0 2 := convexPerturbation (I := I) g T 0 s with hP_def
   have hPeq : P = s • T := by
     rw [hP_def, convexPerturbation, smul_zero, zero_add]
-  -- the two caps on the perturbation
   have hP0 : ∀ x : M, gridBase (I := I) (M := M) g P x 0 ≤ Λ := by
     intro x
     refine le_trans ?_ hΛA
@@ -467,7 +383,6 @@ theorem selfLow_jet
           ((iteratedCovGrad (I := I) g 0 2 1 P).toSection x) := rfl
     rw [hgb, hsm]
     nlinarith [hT1, hnn, hsq]
-  -- the capped window of the whole integrand, summand by summand
   have hwin : HasCapWin (I := I) (M := M) g P
       (rhsSelfLow (I := I) (M := M) g g T hδg hδZ s) KS := by
     have e1 := capSmul (I := I) (M := M) g P (-2 : ℝ)
@@ -484,7 +399,6 @@ theorem selfLow_jet
           (capAdd (I := I) (M := M) g P e1 e2) e3) e4) e5
     refine capCongr (I := I) (M := M) g P ?_ hsum
     rw [selfLow_split (I := I) (M := M) g T hT hδ_lt hδg hδZ hs, hPeq]
-  -- integrate, and dominate the perturbation's jets by the state's
   have hq : ∀ q : ℕ, ‖iteratedCovGrad (I := I) g 2 2 q
         (rhsSelfLow (I := I) (M := M) g g T hδg hδZ s)‖ ^ 2 ≤
       KS q * (∑ k ∈ Finset.range (q + 1), Kint k) *
@@ -523,22 +437,7 @@ theorem selfLow_jet
             ‖iteratedCovGrad (I := I) g 0 2 j T‖ ^ 2) := by
         rw [Finset.sum_mul]
 
-/-! ### The quadratic (cap-free) sibling
-
-`selfLow_jet` spends the `H^{a+2}` ball on a pointwise cap `Λ`, and its constant
-carries a `Λ`-degree growing with the order.  The *marked* currency
-(`TameMarkWin.lean`) replaces the cap by a single explicit power of `‖T‖²_{H³}`:
-every arm of `selfLow_split` now has a marked window with STATE-FREE constants,
-and `markJet`/`markJet0` integrate them into the same `range (i + 2)` budget.  The
-resulting `selfLow_jet_quad` has no `R₀` and no ball hypothesis at all. -/
-
 set_option linter.unusedVariables false in
-/-- **Marked window of the symmetrized first-order Ricci coefficient.**
-
-The marked sibling of `ricciGoodCap`.  Both arms of `ricciGoodLow` are twice
-marked — `ricciAAArm` by `ricciAAMark` and `ricciDALow` by `ricciDAMark` — and the
-input-slot symmetrization is a product with the fixed slot-swap field, so the
-mark count survives it. -/
 private theorem ricciGoodMark (g₀ : SmoothRiemannianMetric I M) {δ₀ : ℝ} (hδ₀ : δ₀ < 1) :
     ∃ K : ℕ → ℝ, (∀ i, 0 ≤ K i) ∧
       ∀ (g₁ : SmoothRiemannianMetric I M) (P : SmoothCcTensor g₀ 0 2)
@@ -580,8 +479,6 @@ private theorem ricciGoodMark (g₀ : SmoothRiemannianMetric I M) {δ₀ : ℝ} 
     (mkAdd (I := I) (M := M) g₀ P hLow happ)
 
 set_option linter.unusedSectionVars false in
-/-- Summing a per-order tame bound over `range (i + 1)`: the constants add and
-the single power of the `H³` factor is preserved. -/
 private lemma jetFold (g : SmoothRiemannianMetric I M) {r c : ℕ}
     (X : SmoothCcTensor g r c) (i : ℕ) (A B : ℕ → ℝ) {u v : ℝ}
     (hstep : ∀ q ∈ Finset.range (i + 1),
@@ -598,13 +495,6 @@ private lemma jetFold (g : SmoothRiemannianMetric I M) {r c : ℕ}
   ring
 
 set_option linter.unusedSectionVars false in
-/-- **From a per-order tame bound in the perturbation to a jet bound in the
-state.**
-
-Both the `H³` factor and the `range (q + 2)` budget are monotone along
-`‖∇ᵏP‖ ≤ ‖∇ᵏT‖`, which is what `P = s·T` with `s ∈ [0,1]` supplies; the constants
-then add over `q ≤ i` by `jetFold`, and the single power of the `H³` factor is
-preserved. -/
 private lemma jetTrans (g : SmoothRiemannianMetric I M) {r c : ℕ}
     (X : SmoothCcTensor g r c) (i : ℕ) (A B : ℕ → ℝ)
     (hA : ∀ q, 0 ≤ A q) (hB : ∀ q, 0 ≤ B q)
@@ -658,10 +548,6 @@ private lemma jetTrans (g : SmoothRiemannianMetric I M) {r c : ℕ}
 
 set_option linter.unusedVariables false in
 set_option linter.unusedSectionVars false in
-/-- The cancellation-preserving DeTurck Lie residual at an arbitrary fixed
-background has the same quadratic all-order jet currency as its diagonal
-counterpart.  Both background corrections are included: the covariant-derivative
-arm and the endomorphism arm. -/
 theorem lieBgJet
     (hDim : Module.finrank ℝ E = 3)
     (g g_bg : SmoothRiemannianMetric I M) {δ₀ : ℝ} (hδ₀ : δ₀ < 1) :
@@ -867,8 +753,6 @@ theorem lieBgJet
 
 set_option linter.unusedVariables false in
 set_option linter.unusedSectionVars false in
-/-- The fixed-background change in the zeroth-order insertion arm has a
-state-free `range (i + 2)` jet bound along the radial path. -/
 theorem insBgJet
     (g g_bg : SmoothRiemannianMetric I M) {δ₀ : ℝ} (hδ₀ : δ₀ < 1) :
     ∃ K0 : ℕ → ℝ, (∀ i, 0 ≤ K0 i) ∧
@@ -958,10 +842,6 @@ theorem insBgJet
 
 set_option linter.unusedVariables false in
 set_option linter.unusedSectionVars false in
-/-- **Tame `L²` jet bound of the symmetrized first-order Ricci coefficient.**
-
-`ricciGoodMark` integrated by `markJet`; the sibling of `ricciAAJet` for the
-whole `ricciGoodLow` arm. -/
 private theorem ricciGoodJet (hDim : Module.finrank ℝ E = 3)
     (g₀ : SmoothRiemannianMetric I M) {δ₀ : ℝ} (hδ₀ : δ₀ < 1) :
     ∃ K0 K2 : ℕ → ℝ, (∀ i, 0 ≤ K0 i) ∧ (∀ i, 0 ≤ K2 i) ∧
@@ -1012,27 +892,6 @@ private theorem ricciGoodJet (hDim : Module.finrank ℝ E = 3)
 
 set_option linter.unusedVariables false in
 set_option linter.unusedSectionVars false in
-/-- **The all-order jet window of the zero-order path integrand, at quadratic
-cost and with no ball.**
-
-```
-lowJetSq i (rhsSelfLow g g T …) ≤
-  (K₀ i + K₂ i · ‖T‖²_{H³}) · (1 + ∑_{j < i+2} ‖∇ʲT‖²)
-```
-
-with `K₀, K₂` chosen before the state — background metric and order only — and
-`‖T‖²_{H³}` spelled `∑_{j<3} ‖∇^{1+j}T‖²` (`gradCapLin`'s convention).  Compare
-`selfLow_jet`, which buys the same left-hand side with an `H^{a+2}` ball and a
-constant of `Λ`-degree growing with `i`.
-
-The six tame summands are the Ricci-good arm, the combined background Lie
-residual, the insertion-background correction, `lc0VB`, full-background
-`lc0AMix`, and `lc0Riem`.  The δ-anchor
-`|P|²_∞ ≤ 1` that each of them spends is supplied by `hDim` together with
-`δ ≤ 1/3`: `(dim · 1/3)² = 1` in dimension three.
-
-Class-3 residuals of the marked integration flow through the single declared
-frontier `gridIntHigh`; nothing else in the chain is conditional. -/
 theorem selfLowJetQBg
     (hDim : Module.finrank ℝ E = 3)
     (g g_bg : SmoothRiemannianMetric I M) :
@@ -1120,7 +979,6 @@ theorem selfLowJetQBg
     intro x
     have h := hPsup x
     rwa [hone] at h
-  -- the perturbation's jets are dominated by the state's, order by order
   have hPk : ∀ k : ℕ, ‖iteratedCovGrad (I := I) g 0 2 k P‖ ^ 2 ≤
       ‖iteratedCovGrad (I := I) g 0 2 k T‖ ^ 2 := by
     intro k
@@ -1133,7 +991,6 @@ theorem selfLowJetQBg
     ‖iteratedCovGrad (I := I) g 0 2 (1 + j) T‖ ^ 2 with hH3_def
   set JS : ℝ := 1 + ∑ j ∈ Finset.range (i + 2),
     ‖iteratedCovGrad (I := I) g 0 2 j T‖ ^ 2 with hJS_def
-  -- the five summands
   have e1 : lowJetSq (I := I) (M := M) g i
       ((-2 : ℝ) • ricciGoodLow (I := I) (M := M) g gm P) ≤
       4 * (((∑ q ∈ Finset.range (i + 1), A1 q) +
@@ -1182,7 +1039,6 @@ theorem selfLowJetQBg
     have h := w6 gm P htie hδ'_le hδ'0 hP hP0 q
     refine h.trans (le_of_eq ?_)
     ring
-  -- assemble along the cancellation-preserving fixed-background split
   have hrw : rhsSelfLow (I := I) (M := M) g g_bg T hδg hδZ s =
       ((((((-2 : ℝ) • ricciGoodLow (I := I) (M := M) g gm P + L) + X) +
         lc0VB (I := I) (M := M) g gm) +
@@ -1234,7 +1090,6 @@ theorem selfLowJetQBg
   linarith [j1, j2, j3, j4, j5, e1, e2, e3, e4, e5, e6]
 
 set_option linter.unusedVariables false in
-/-- Diagonal-background compatibility wrapper for `selfLowJetQBg`. -/
 theorem selfLow_jet_quad
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M) :
@@ -1262,16 +1117,6 @@ end Integrand
 
 section Towers
 
-/-- **The all-order `L²` jet tower of `A.C1`, with no a-priori ball.**
-
-`‖∇ⁱ (lowBaseData g g T …).C1‖² ≤ Kc i * (1 + ∑_{j < i+2} ‖∇ʲ T‖²)`,
-with `Kc` chosen before the state — background metric and order only.
-
-This is the ball-free form of `c1_jet_tower`.  No quadratic correction term is
-needed here (unlike `c0_jet_tower_quad`): the `H^{a+2}` ball binder of
-`c1_jet_tower` was **vestigial**, because the whole first-order integrand
-window `low1Ker_jet` is driven by `hδ_le : δ ≤ 1/3` alone.  `c1_jet_tower` is
-now the ball-carrying wrapper of this statement. -/
 theorem c1JetTowerQBg
     (hDim : Module.finrank ℝ E = 3)
     (g g_bg : SmoothRiemannianMetric I M) :
@@ -1332,7 +1177,6 @@ theorem c1JetTowerQBg
     (Finset.mem_range.mpr (Nat.lt_succ_self i))
 
 set_option linter.unusedVariables false in
-/-- Diagonal-background compatibility wrapper for `c1JetTowerQBg`. -/
 theorem c1JetTowerQ
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M) :
@@ -1356,20 +1200,6 @@ theorem c1JetTowerQ
   c1JetTowerQBg (I := I) (M := M) hDim g g
 
 set_option linter.unusedVariables false in
-/-- **The all-order `L²` jet tower of the low-base first-order coefficient
-`A.C1`.**
-
-`‖∇ⁱ (lowBaseData g g T …).C1‖² ≤ Kc i * (1 + ∑_{j < i+2} ‖∇ʲ T‖²)`.
-
-This is hypothesis (b) of the order-generic operator-norm engine for the
-first-order arm, and it is the `C1` input of `a1_ladder`.  Statement shape is
-`c2_jet_tower`'s with valence `4 2` replaced by `3 2`: constants before the
-state, `range (i + 2)` budget, `δ ≤ 1/3` the only smallness input.
-
-The `H^{a+2}` ball hypothesis is inert — the statement quantifies over an
-arbitrary `a` — and is kept only because `a1_ladder` and the operator-norm
-engine carry it.  The ball-free content is `c1JetTowerQ`, of which this is the
-compatibility wrapper. -/
 theorem c1_jet_tower_bg
     (hDim : Module.finrank ℝ E = 3)
     (g g_bg : SmoothRiemannianMetric I M)
@@ -1398,7 +1228,6 @@ theorem c1_jet_tower_bg
   exact h T hT hδ0 hδ_le hδg hδZ i
 
 set_option linter.unusedVariables false in
-/-- Diagonal-background compatibility wrapper for `c1_jet_tower_bg`. -/
 theorem c1_jet_tower
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M) (a : ℕ) {R₀ : ℝ} (hR₀ : 0 ≤ R₀) :
@@ -1423,20 +1252,6 @@ theorem c1_jet_tower
   c1_jet_tower_bg (I := I) (M := M) hDim g g a hR₀
 
 set_option linter.unusedVariables false in
-/-- **The all-order `L²` jet tower of the low-base zeroth-order coefficient
-`A.C0`.**
-
-`‖∇ⁱ (lowBaseData g g T …).C0‖² ≤ Kc i * (1 + ∑_{j < i+2} ‖∇ʲ T‖²)`.
-
-Statement shape is `c2_jet_tower`'s with valence `4 2` replaced by `2 2`.  The
-fixed curvature summand `phiMetCurvCoeff g g g` of `A.C0` is state-free, so it
-contributes only to the constant.
-
-Unlike `c1_jet_tower`, the `H^{a+2}` ball hypothesis here is **live**: it is
-consumed by the integrand window `selfLow_jet`, whose quadratic-in-`∇P`
-summands are unbounded on the ball-free class.  The gate `1 ≤ a` is inherited
-from that window (dimension three: `H³ ⊂ C¹`) and is below `a2_ladder`'s
-`3 ≤ a` bottom. -/
 theorem c0_jet_tower
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M) (a : ℕ) (ha : 1 ≤ a)
@@ -1526,24 +1341,6 @@ theorem c0_jet_tower
     (Finset.mem_range.mpr (Nat.lt_succ_self i))
 
 set_option linter.unusedVariables false in
-/-- **The all-order `L²` jet tower of `A.C0` at quadratic cost, with no ball.**
-
-```
-‖∇ⁱ (lowBaseData g g_bg T …).C0‖² ≤
-  (K0 i + K2 i · ‖T‖²_{H³}) · (1 + ∑_{j < i+2} ‖∇ʲT‖²)
-```
-
-with `K0, K2` chosen before the state — background metric and order only — and
-`‖T‖²_{H³}` spelled `∑_{j<3}‖∇^{1+j}T‖²` (`gradCapLin`'s convention).
-
-This is `c0_jet_tower`'s sibling with the `H^{a+2}` ball hypothesis **replaced**
-by an explicit quadratic dependence on the state's own `H³` norm.  The ball
-entered `c0_jet_tower` only through the integrand window `selfLow_jet`; the
-ball-free `selfLow_jet_quad` buys the same left-hand side, so the passage
-through the radial parameter integral (`path_jetL2_le`) and the treatment of
-the state-free curvature summand `phiMetCurvCoeff g g_bg g` — which still
-contributes to `K0` alone — are unchanged.  This is the shape the low-mass
-consumer reads: no `a`, no `R₀`, no `Λ`-degree growth in `i`. -/
 theorem c0JetTowerQBg
     (hDim : Module.finrank ℝ E = 3)
     (g g_bg : SmoothRiemannianMetric I M) :
@@ -1649,7 +1446,6 @@ theorem c0JetTowerQBg
     (Finset.mem_range.mpr (Nat.lt_succ_self i))
 
 set_option linter.unusedVariables false in
-/-- Ball-form arbitrary-background wrapper of `c0JetTowerQBg`. -/
 theorem c0_jet_tower_bg
     (hDim : Module.finrank ℝ E = 3)
     (g g_bg : SmoothRiemannianMetric I M) (a : ℕ) (ha : 1 ≤ a)
@@ -1725,7 +1521,6 @@ theorem c0_jet_tower_bg
     (add_le_add (le_refl (K0 i))
       (mul_le_mul_of_nonneg_left hH3 (hK2_nn i))) hJS
 
-/-- Diagonal-background compatibility wrapper for `c0JetTowerQBg`. -/
 theorem c0_jet_tower_quad
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M) :

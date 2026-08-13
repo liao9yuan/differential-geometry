@@ -17,7 +17,6 @@ import DifferentialGeometry.Geometry.Curvature.CurvatureOperator.DifferentiatedS
 import DifferentialGeometry.Geometry.Curvature.CurvatureOperator.PointwiseCurvatureDerivative
 import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.RiemannianFiberNormSq.UniformDiffCurvatureNormBound
 
-
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
@@ -1422,8 +1421,6 @@ theorem exists_pointwiseTensorCurv_fiberNormSq_bound
   exact ⟨K_R s, K_dR s, hK_R_nn s, hK_dR_nn s, fun S x => hbound s S x⟩
 
 omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] in
-/-- A supplied tangent curvature-operator cap induces the corresponding rank-`s` covariant-tensor
-curvature cap, with the structural slot factor `s²`. -/
 private theorem tensorCurv_le_of
     (g : SmoothRiemannianMetric I M) (s : ℕ) {C0 : ℝ}
     (hR0 : ∀ (x : M) (v w u : TangentSpace I x),
@@ -1562,8 +1559,6 @@ private theorem tensorCurv_le_of
       ring
 
 omit [CompactSpace M] in
-/-- A supplied bound on the frame-contracted first derivative of the base curvature operator
-controls the differentiated-curvature arm on rank-`s` covariant tensors. -/
 private theorem frameNablaR_le_of
     (g : SmoothRiemannianMetric I M) (s : ℕ) {Kw : ℝ} (hKw_nn : 0 ≤ Kw)
     (hKw : ∀ (x : M) (a : Fin (Module.finrank ℝ E)) (u : TangentSpace I x),
@@ -1688,8 +1683,6 @@ omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [CompactSpace M]
     [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [CompactSpace M]
     [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
-/-- A uniform bound on the metric lengths of finitely many tangent vectors controls the metric
-square of their sum. -/
 private theorem frameSum_sq_le
     (g : SmoothRiemannianMetric I M) (x : M) {n : ℕ} (C : ℝ) (hC : 0 ≤ C)
     (u : TangentSpace I x) (F : Fin n → TangentSpace I x)
@@ -1738,8 +1731,6 @@ private theorem frameSum_sq_le
     _ = ((n : ℝ) ^ 2 * C ^ 2) * ‖u‖ ^ 2 := by ring
 
 omit [CompactSpace M] in
-/-- An uncontracted first-curvature-derivative cap controls the frame-contracted tangent
-endomorphism with coefficient `n² C1²`. -/
 private theorem frameNablaCap_of
     (g : SmoothRiemannianMetric I M) {C1 : ℝ} (hC1 : 0 ≤ C1)
     (hR1 : ∀ (x : M) (D X Y Z : TangentSpace I x),
@@ -1805,17 +1796,6 @@ private theorem frameNablaCap_of
   exact frameSum_sq_le (I := I) (M := M) g x C1 hC1 u F hF_len
 
 omit [NeZero (Module.finrank ℝ E)] in
-/-- **Per-frame-direction slot-`0` slice domination.** For a `g_x`-orthonormal frame `e` (with the
-rank-`s` and rank-`(s + 1)` fibre-norm frame representations `hreprS`, `hreprSucc` it induces), the
-directional covariant derivative `∇_{e j} S (x) = (tensorCov g 0 s).toFun S x (e j)` of a smooth
-`(0, s)`-tensor `S` is fibre-dominated by the full gradient fibre norm:
-```
-rfns( (tensorCov g 0 s).toFun S x (e j) ) ≤ rfns(∇S)(x),    ∇S := covGrad g 0 s S.
-```
-The slot-`0` slice `slot0Curry ((∇S).toSection x) (e j)` of the gradient at the unit `(0, 0)`-tensor
-coincides with the directional derivative value (`slot0Curry_eq_tensor0SToTensorRS_curry_unitZeroSec`,
-`curry_covGrad_unit_eval_general`, `tensor0SAsRS_unit_recover`), and the slot-`0` Parseval domination
-`riemannianFiberNormSq_slot0Curry_le_of_frame` bounds the slice by the whole gradient fibre norm. -/
 private lemma rfns_tensorCovDerivAt_frame_le
     (g : SmoothRiemannianMetric I M) (s : ℕ) (S : SmoothCcTensor g 0 s) (x : M)
     {n : ℕ} (e : Fin n → TangentSpace I x) (K₀ : Fin 0 → Fin n)
@@ -1851,18 +1831,6 @@ private lemma rfns_tensorCovDerivAt_frame_le
   exact riemannianFiberNormSq_slot0Curry_le_of_frame (I := I) (M := M) g s x e K₀
     hreprS hreprSucc ((covGrad (I := I) (M := M) g 0 s S).toSection x) j
 
-/-- **General-direction slot-`0` slice domination.** For an arbitrary tangent direction `w`, the
-directional covariant derivative `∇_w S (x) = (tensorCov g 0 s).toFun S x w` of a smooth
-`(0, s)`-tensor `S` is fibre-bounded by the full gradient fibre norm, scaled by `n · g(w, w)`:
-```
-rfns( (tensorCov g 0 s).toFun S x w ) ≤ n · g(w, w) · rfns(∇S)(x),    ∇S := covGrad g 0 s S.
-```
-Expanding `w = ∑ⱼ g(e j, w) • e j` over a `g_x`-orthonormal frame, the covariant derivative is
-continuous-linear in the direction, so `∇_w S = ∑ⱼ g(e j, w) • ∇_{e j} S`; each Parseval frame
-component is therefore the `g(e j, w)`-weighted sum of the per-frame-direction components, and
-componentwise Cauchy–Schwarz against `∑ⱼ g(e j, w)² = g(w, w)` (Parseval) reduces the squared fibre
-norm to `g(w, w) · ∑ⱼ rfns(∇_{e j} S)`. Each per-frame-direction slice is dominated by `rfns(∇S)`
-(`rfns_tensorCovDerivAt_frame_le`), giving the `n`-fold factor. -/
 private lemma rfns_tensorCovDerivAt_direction_le
     (g : SmoothRiemannianMetric I M) (s : ℕ) (S : SmoothCcTensor g 0 s) (x : M)
     (w : TangentSpace I x) :
@@ -1946,8 +1914,6 @@ private lemma rfns_tensorCovDerivAt_direction_le
         rw [Finset.sum_const, Finset.card_univ, Fintype.card_fin, nsmul_eq_mul, hnE]
         ring
 
-/-- A cap on one tangent direction transfers the general directional covariant-derivative
-estimate to the same cap times the full gradient fibre norm. -/
 private lemma covDeriv_dir_le
     (g : SmoothRiemannianMetric I M) (s : ℕ) (S : SmoothCcTensor g 0 s) (x : M)
     (w : TangentSpace I x) {Kbase : ℝ} (hw : g.inner x w w ≤ Kbase) :
@@ -1972,7 +1938,6 @@ private lemma covDeriv_dir_le
 
 omit [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M]
     [SigmaCompactSpace M] in
-/-- A common fibre bound for a finite family controls the fibre norm of its sum. -/
 private lemma rfns_finSum_le
     (g : SmoothRiemannianMetric I M) (s : ℕ) (x : M) {n : ℕ}
     (F : Fin n → TensorRSSpace 0 s I x) {K : ℝ}
@@ -1995,7 +1960,6 @@ private lemma rfns_finSum_le
       rw [Finset.sum_const, Finset.card_univ, Fintype.card_fin, nsmul_eq_mul]
       ring
 
-/-- Uniformly bounded directions give a finite-sum covariant-derivative estimate. -/
 private lemma covDeriv_sum_le
     (g : SmoothRiemannianMetric I M) (s : ℕ) (S : SmoothCcTensor g 0 s) (x : M)
     {n : ℕ} (w : Fin n → TangentSpace I x) {Kbase : ℝ}
@@ -2012,7 +1976,6 @@ private lemma covDeriv_sum_le
     (fun i => covDeriv_dir_le (I := I) (M := M) g s S x (w i) (hw i))
 
 omit [CompactSpace M] [I.Boundaryless] in
-/-- The supplied tangent curvature cap bounds each diagonal moving-frame curvature direction. -/
 private lemma frameCurvVec_le
     (g : SmoothRiemannianMetric I M) {Kbase : ℝ}
     (hKbase : ∀ (x : M) (v w u : TangentSpace I x),
@@ -2033,8 +1996,6 @@ private lemma frameCurvVec_le
     (smoothOrthoFrame (I := I) g x a x) (smoothOrthoFrame (I := I) g x i x)
   simpa only [hi, ha, mul_one] using h
 
-/-- A supplied tangent curvature-operator cap controls the frame-summed
-curvature-direction covariant-derivative arm on every rank-`s` tensor. -/
 private theorem frameCurvDir_le_of
     (g : SmoothRiemannianMetric I M) (s : ℕ) {Kbase : ℝ}
     (hKbase : ∀ (x : M) (v w u : TangentSpace I x),
@@ -2074,9 +2035,6 @@ private theorem frameCurvDir_le_of
           ((covGrad (I := I) (M := M) g 0 s S).toSection x) := by
       ring
 
-/-- Explicit rank-fixed, order-zero curvature-action coefficient from supplied tangent `R` and `∇R`
-caps. The two square-root arms are respectively the `R · ∇S` and `(∇R) · S` coefficients in the
-pointwise squared commutator estimate. -/
 noncomputable def ptCurvRankC (d s : ℕ) (C0 C1 : ℝ) : ℝ :=
   let dR : ℝ := d
   let Kpure : ℝ := dR * (dR * ((s : ℝ) ^ 2 * C0 ^ 2))
@@ -2086,22 +2044,16 @@ noncomputable def ptCurvRankC (d s : ℕ) (C0 C1 : ℝ) : ℝ :=
   max (Real.sqrt (dR * (16 * Kpure + 2 * Cc)))
     (Real.sqrt (dR * (4 * Cd)))
 
-/-- The explicit rank-fixed curvature-action coefficient is nonnegative. -/
 theorem ptCurvRankC_nonneg (d s : ℕ) (C0 C1 : ℝ) : 0 ≤ ptCurvRankC d s C0 C1 := by
   dsimp [ptCurvRankC]
   exact le_trans (Real.sqrt_nonneg _) (le_max_left _ _)
 
-/-- Explicit rank-two specialization of `ptCurvRankC`. -/
 noncomputable def ptCurvZeroC (d : ℕ) (C0 C1 : ℝ) : ℝ :=
   ptCurvRankC d 2 C0 C1
 
-/-- The explicit rank-two, order-zero curvature-action coefficient is nonnegative. -/
 theorem ptCurvZeroC_nonneg (d : ℕ) (C0 C1 : ℝ) : 0 ≤ ptCurvZeroC d C0 C1 := by
   exact ptCurvRankC_nonneg d 2 C0 C1
 
-/-- **Rank-fixed `p = 0` curvature action from supplied `R` and `∇R` caps.** A tangent curvature
-cap `C0` and a nonnegative first-curvature-derivative cap `C1` give an explicit `L²`
-first-order bound for the rank-`s` Bochner commutator, with no compactness-chosen constants. -/
 theorem ptCurv_zero_rank_of
     (g : SmoothRiemannianMetric I M) (s : ℕ) {C0 C1 : ℝ}
     (hR0 : ∀ (x : M) (v w u : TangentSpace I x),
@@ -2244,7 +2196,6 @@ theorem ptCurv_zero_rank_of
           (mul_le_mul_of_nonneg_right hQle hbase)
       _ = C ^ 2 * (base + grad) := by ring
 
-/-- **Rank-two `p = 0` curvature action from supplied `R` and `∇R` caps.** -/
 theorem ptCurv_zero_of
     (g : SmoothRiemannianMetric I M) {C0 C1 : ℝ}
     (hR0 : ∀ (x : M) (v w u : TangentSpace I x),

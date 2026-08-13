@@ -2,16 +2,6 @@ import DifferentialGeometry.Analysis.Parabolic.QuasiLinear.TensorMaximalRegulari
 import DifferentialGeometry.Analysis.Parabolic.QuasiLinear.TensorMaximalRegularity.StrongDuhamelBack
 import DifferentialGeometry.Analysis.Parabolic.QuasiLinear.CrossScaleParabolicTraceEnergy
 
-/-!
-# Intrinsic realization of an adjacent-scale non-autonomous lift
-
-The output of `nonautL2_lift` is converted here into the canonical intrinsic
-strong-pair package.  The resulting `CrossScaleField` retains the high
-maximal-regularity carrier and top field, satisfies the clean tensor heat
-equation with the produced forcing, and has an intermediate representative
-equal almost everywhere to the prescribed lower-scale Duhamel field.
--/
-
 noncomputable section
 
 open Bundle Manifold MeasureTheory Set Filter
@@ -71,10 +61,6 @@ private theorem crossRepr_hi_ae
   rw [u.repr_coeff hT ht, tensorHsInclusion_coeff_apply]
   exact hcoeff i
 
-/-- The six conclusions of `nonautL2_lift` determine a canonical intrinsic
-strong pair on the same horizon.  Its intermediate `H^(a+1)` representative
-realizes the prescribed lower `H^(a+1)` Duhamel field almost everywhere, while
-its carrier satisfies the clean equation `∂ₜu = Δu + fHi`. -/
 theorem nonautL2_realize
     (hT : 0 < T) (hT1 : T ≤ 1)
     (hcompact : IsCompactOperator (tensorResolventL2

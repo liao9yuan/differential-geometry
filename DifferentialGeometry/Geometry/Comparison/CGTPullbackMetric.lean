@@ -7,14 +7,6 @@ import DifferentialGeometry.Geometry.Topology.SigmaCompactOpen
 
 set_option autoImplicit false
 
-/-!
-# The intrinsic exponential pullback metric for CGT
-
-On a model ball where the intrinsic framed exponential is a local
-diffeomorphism, its pullback form is a genuine smooth Riemannian metric.  The
-exponential need not be injective on the ball.
--/
-
 noncomputable section
 
 open Bundle Manifold Metric Set TopologicalSpace
@@ -41,11 +33,9 @@ variable [RiemannianBundle (fun x : M ↦ TangentSpace I x)]
 variable [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
   [IsContinuousRiemannianBundle E (fun x : M ↦ TangentSpace I x)]
 
-/-- The open model ball carrying the CGT pullback geometry. -/
 def intrPullBall (R : Real) : Opens E :=
   ⟨Metric.ball (0 : E) R, Metric.isOpen_ball⟩
 
-/-- The intrinsic framed exponential restricted to its model ball. -/
 noncomputable def intrExpOn
     (g : SmoothRiemannianMetric I M)
     (hEnorm : ∀ (x : M) (v : TangentSpace I x),
@@ -54,8 +44,6 @@ noncomputable def intrExpOn
     intrPullBall (E := E) R → M :=
   fun z => intrinsicFramedExp (I := I) g hEnorm p z
 
-/-- Local-diffeomorphism property of the exponential restricted to the CGT
-model ball. -/
 theorem intrExpOn_local
     (g : SmoothRiemannianMetric I M)
     (hEnorm : ∀ (x : M) (v : TangentSpace I x),
@@ -69,8 +57,6 @@ theorem intrExpOn_local
       (intrExpOn (I := I) g hEnorm p R) := by
   exact hloc_restrict_open (intrPullBall (E := E) R) hloc
 
-/-- Restricting the intrinsic framed exponential to an open model ball does
-not change its differential under the model-fiber identification. -/
 theorem intrExpOn_mfderiv
     (g : SmoothRiemannianMetric I M)
     (hEnorm : ∀ (x : M) (v : TangentSpace I x),
@@ -98,8 +84,6 @@ theorem intrExpOn_mfderiv
         (Subtype.val : intrPullBall (E := E) R → E)) z v = _
   rw [mfderiv_comp_apply z hF hval v, mfderiv_subtype_val_apply]
 
-/-- The smooth pullback Riemannian metric on a locally nonsingular intrinsic
-exponential ball.  No whole-ball injectivity is assumed. -/
 noncomputable def intrPullMetric
     (g : SmoothRiemannianMetric I M)
     (hEnorm : ∀ (x : M) (v : TangentSpace I x),
@@ -118,8 +102,6 @@ noncomputable def intrPullMetric
     (intrExpOn (I := I) g hEnorm p R)
     (intrExpOn_local (I := I) g hEnorm p hloc)
 
-/-- The CGT pullback metric is exactly `intrFrameMetric` on the ambient model
-coordinates. -/
 theorem intrPullMetric_inner
     (g : SmoothRiemannianMetric I M)
     (hEnorm : ∀ (x : M) (v : TangentSpace I x),
@@ -140,8 +122,6 @@ theorem intrPullMetric_inner
     intrExpOn_mfderiv, intrExpOn_mfderiv]
   rfl
 
-/-- The intrinsic framed exponential preserves path length from the CGT
-pullback metric to the ambient metric. -/
 theorem intrPull_pathLen
     (g : SmoothRiemannianMetric I M)
     (hEnorm : ∀ (x : M) (v : TangentSpace I x),
@@ -173,8 +153,6 @@ theorem intrPull_pathLen
     (intrExpOn (I := I) g hEnorm p R)
     (intrExpOn_local (I := I) g hEnorm p hloc) hγ
 
-/-- The lowered Riemann tensor of the CGT pullback metric is the ambient
-tensor evaluated on the intrinsic framed exponential differentials. -/
 theorem intrPull_rm04
     (g : SmoothRiemannianMetric I M)
     (hEnorm : ∀ (x : M) (v : TangentSpace I x),
@@ -211,8 +189,6 @@ theorem intrPull_rm04
     intrExpOn_mfderiv]
   rfl
 
-/-- An ambient pointwise lowered-curvature bound gives the same sectional
-quadratic bound for the CGT pullback metric. -/
 theorem intrPull_quad_le
     (g : SmoothRiemannianMetric I M)
     (hEnorm : ∀ (x : M) (v : TangentSpace I x),

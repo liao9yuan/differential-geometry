@@ -4,13 +4,6 @@ import DifferentialGeometry.Geometry.Geodesic.PullbackCross
 
 set_option autoImplicit false
 
-/-!
-# Geodesics in controlled normal-ball charts
-
-This file packages geodesic naturality for the branch-parametric normal chart
-interface. It is independent of the construction of the controlled branch.
--/
-
 noncomputable section
 
 universe u uE uH
@@ -34,18 +27,14 @@ variable [T2Space (TangentBundle I M)]
 
 namespace NormalBallChart
 
-/-- The quarter-radius open on which the total metric agrees with the chart
-pullback metric. -/
 def inner {p : M} (c : NormalBallChart (I := I) p) : Opens E :=
   ⟨Metric.ball (0 : E) (c.radius / 4), Metric.isOpen_ball⟩
 
-/-- The image of the controlled quarter-radius open. -/
 def innerImage {p : M} (c : NormalBallChart (I := I) p) : Opens M :=
   ⟨c.restrictBall '' (c.inner : Set E), image_opens_isOpen c.restrictBall
     (by
       simpa only [restrictBall_source] using c.inner_subset)⟩
 
-/-- The controlled branch restricted to the quarter-radius open. -/
 noncomputable def innerDiffeo {p : M}
     (c : NormalBallChart (I := I) p) :
     Diffeomorph (modelWithCornersSelf Real E) I c.inner c.innerImage ∞ := by
@@ -104,8 +93,6 @@ private theorem metric_ext
   subst hi
   rfl
 
-/-- On the controlled quarter ball, the total model metric is exactly the
-pullback of the ambient metric under the provider branch. -/
 theorem totalMetric_inner_eq
     (g : SmoothRiemannianMetric I M) {p : M}
     (c : NormalBallChart (I := I) p) :
@@ -126,8 +113,6 @@ theorem totalMetric_inner_eq
   rw [c.totalMetric_inner g (z : E) z.2 v w]
   exact c.metric_apply g (z : E) v w
 
-/-- Levi-Civita derivatives commute with a controlled normal-ball chart when
-the model and ambient vector fields represent the same local germ. -/
 theorem cov_map_germ
     (g : SmoothRiemannianMetric I M) {p : M}
     (c : NormalBallChart (I := I) p)
@@ -225,8 +210,6 @@ theorem cov_map_germ
   rw [← hleft, ← hres, ← hdir, ← hbase]
   exact hpbAmbient
 
-/-- A smooth geodesic of the total model metric that stays in the controlled
-quarter ball maps under the provider branch to an ambient geodesic. -/
 theorem geo_map (g : SmoothRiemannianMetric I M) {p : M}
     (c : NormalBallChart (I := I) p)
     (gamma : Real → E) (s : Set Real) (hs : IsOpen s)

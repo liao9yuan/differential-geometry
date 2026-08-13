@@ -1,33 +1,5 @@
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.DeTurckRemainderLowBasePair
 
-/-!
-# Bundle-generic facts about one low-base first-order action
-
-For ANY low-base action bundle — in particular for an arbitrary DeTurck
-background — the two adjacent-scale completions `a1Hi : H3 → H2` and
-`a1Lo : H2 → H1` are the completions of one smooth-core formula.  This
-module records the three consequences that need no coefficient estimate at
-the call site:
-
-* `a1_comm`: the commuting square `incl ∘ a1Hi = a1Lo ∘ incl`;
-* `a1Hi_app` / `a1Lo_app`: each completion realizes the smooth-core action
-  `A.a1` on the dense smooth range;
-* `a1Hi_add` / `a1Lo_add`: both completions are additive in the coefficient
-  data, so a bundle whose `C0` and `C1` split as a sum has completions that
-  split the same way.
-
-The additivity pair is what lets a refolded bundle be certified by summing
-the affine packets of its summands: the packet produces a sum of `a1Hi`s,
-while the refold identity is phrased on the summed bundle.
-
-Everything is re-assembled from the PUBLIC producers `a1_pair`, `a1_h3_h2`,
-`a1_h2_h1` rather than by editing the oversized settled module
-`DeTurckRemainderLowBaseLip.lean` (which keeps a private `a1_comm_any`),
-whose full re-elaboration exceeds the focused-check memory budget.  If that
-module is ever legitimately rebuilt, its private `a1_comm_any` should be
-replaced by `a1_comm` (this file does not import it, so no cycle arises).
--/
-
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
@@ -63,10 +35,6 @@ private theorem jetNN
     0 ≤ lowJetSq (I := I) (M := M) g m S :=
   Finset.sum_nonneg fun _ _ => sq_nonneg _
 
-/-- The two smooth-core jet estimates of one first-order low-base action hold
-with a single explicit constant assembled from the action's own coefficient
-jets.  No hypothesis on the bundle is needed, so every bundle-generic
-consequence of `a1_pair` is available through this producer. -/
 private theorem a1_jetQ
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M) (A : LowBaseActionData g) :
@@ -158,9 +126,6 @@ private theorem a1_jetQ
           hDsq]
   exact ⟨Q, hQ, hHi, hLo⟩
 
-/-- The adjacent-scale commuting square of one first-order low-base action,
-for ANY action bundle: the `H3 → H2` and `H2 → H1` completions realize one
-smooth-core formula. -/
 theorem a1_comm
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M) (A : LowBaseActionData g) :
@@ -174,8 +139,6 @@ theorem a1_comm
   obtain ⟨Q, hQ, hHi, hLo⟩ := a1_jetQ (I := I) (M := M) hDim g A
   exact (hpair A Q hQ hHi hLo).2.2.2.2
 
-/-- The `H3 → H2` completion of one first-order low-base action realizes the
-smooth-core action on the dense smooth range, for ANY action bundle. -/
 theorem a1Hi_app
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M) (A : LowBaseActionData g)
@@ -188,8 +151,6 @@ theorem a1Hi_app
   obtain ⟨Q, hQ, hHi, hLo⟩ := a1_jetQ (I := I) (M := M) hDim g A
   exact (hpair A Q hQ hHi hLo).2.2.1 W
 
-/-- The `H2 → H1` completion of one first-order low-base action realizes the
-smooth-core action on the dense smooth range, for ANY action bundle. -/
 theorem a1Lo_app
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M) (A : LowBaseActionData g)
@@ -203,7 +164,6 @@ theorem a1Lo_app
   exact (hpair A Q hQ hHi hLo).2.2.2.1 W
 
 omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] in
-/-- The smooth-core first-order action is additive in the coefficient data. -/
 private theorem a1_add_core
     (g : SmoothRiemannianMetric I M) (A B F : LowBaseActionData g)
     (h0 : F.C0 = A.C0 + B.C0) (h1 : F.C1 = A.C1 + B.C1)
@@ -213,10 +173,6 @@ private theorem a1_add_core
   simp only [LowBaseActionData.a1, h0, h1, appCc_add_left]
   abel
 
-/-- **The `H3 → H2` completion is additive in the coefficient data.**  A bundle
-whose order-zero and order-one coefficients are the sums of those of two other
-bundles has the sum of their completions.  This is what lets a summed affine
-packet certify a refolded bundle. -/
 theorem a1Hi_add
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M) (A B F : LowBaseActionData g)
@@ -240,8 +196,6 @@ theorem a1Hi_add
     a1_add_core (I := I) (M := M) g A B F h0 h1 W,
     ccTensorToHs_add]
 
-/-- **The `H2 → H1` completion is additive in the coefficient data**, the
-adjacent-scale partner of `a1Hi_add`. -/
 theorem a1Lo_add
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M) (A B F : LowBaseActionData g)

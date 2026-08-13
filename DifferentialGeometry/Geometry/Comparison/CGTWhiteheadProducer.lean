@@ -2,14 +2,6 @@ import DifferentialGeometry.Geometry.Comparison.CGTWhiteheadBigon
 
 set_option autoImplicit false
 
-/-!
-# Consumer-facing localized Whitehead producers for CGT
-
-This module packages the localized short-bigon theorem as regular uniqueness
-of the selected minimizing vector, then identifies one inverse-branch energy
-with the true half-squared distance on an endpoint germ.
--/
-
 noncomputable section
 
 open Bundle Manifold Metric Set TopologicalSpace
@@ -44,9 +36,6 @@ noncomputable local instance {R : Real} :
       𝓘(Real, E) (intrPullBall (E := E) R).isOpen)
 
 set_option maxHeartbeats 800000 in
-/-- On the controlled pullback core, the selected minimizing launch is
-nonconjugate and is the unique launch realizing both the endpoint and the
-minimal length. -/
 theorem intrCore_minimizingVec_regular_unique
     (g : SmoothRiemannianMetric I M)
     (hEnorm : ∀ (x : M) (v : TangentSpace I x),
@@ -171,9 +160,6 @@ theorem intrCore_minimizingVec_regular_unique
         hpt hq huL hvL huEnd hvEnd').symm
 
 set_option maxHeartbeats 800000 in
-/-- On the controlled core, one inverse branch through the selected minimizing
-launch represents the true half-squared distance on a neighborhood of the
-endpoint. -/
 theorem intrCore_dist_germ
     (g : SmoothRiemannianMetric I M)
     (hEnorm : ∀ (x : M) (v : TangentSpace I x),

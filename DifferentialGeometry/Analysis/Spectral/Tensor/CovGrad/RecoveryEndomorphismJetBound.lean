@@ -1,6 +1,5 @@
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.RaisedKoszulCovariantJetTower
 
-
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
@@ -307,7 +306,6 @@ lemma riemannianFiberNormSq_iteratedCovGrad_cometricRaiseSlot0Field_eq
   rw [rfns_domDomCongrSection_eq]
   rw [rfns_castRankCc_rk]
 
-/-- Compatibility name for the cometric-raise jet isometry. -/
 alias rfns_iteratedCovGrad_cometricRaiseSlot0Field_eq :=
   riemannianFiberNormSq_iteratedCovGrad_cometricRaiseSlot0Field_eq
 
@@ -493,8 +491,6 @@ private lemma omRecoverEndoCc_eq_idEndo_add_raise
   rw [htie]
 
 omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] [SigmaCompactSpace M] in
-/-- The self sharp-flat endomorphism has a dimension-only squared fibre-norm
-bound, uniformly over the metric. -/
 theorem rfns_idEndo_le (g₀ : SmoothRiemannianMetric I M) (x : M) :
     riemannianFiberNormSq (I := I) (M := M) g₀ 1 1 x
         ((sharpFlatEndoCc (I := I) g₀ g₀).toSection x) ≤

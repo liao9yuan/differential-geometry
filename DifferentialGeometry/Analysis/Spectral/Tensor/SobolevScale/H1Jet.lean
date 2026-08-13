@@ -1,14 +1,6 @@
 import DifferentialGeometry.Analysis.Spectral.Tensor.SobolevScale.IteratedCovGradHsJetBound
 import DifferentialGeometry.Analysis.Spectral.Tensor.SobolevScale.SpectralNormLIterateLadder
 
-/-!
-# Exact spectral H1 jet identity
-
-This module identifies the rank-two spectral `H¹` norm with the intrinsic
-zeroth- and first-order covariant `L²` jet.  The result removes unnecessary
-metric-dependent comparison constants from low-regularity product estimates.
--/
-
 set_option autoImplicit false
 
 noncomputable section
@@ -40,8 +32,6 @@ private theorem cc_toHs_eq_smooth
   funext i
   simp only [ccTensorToHs_coeff, smoothCcToTensorHs_coeff]
 
-/-- For a smooth covariant rank-two tensor, the spectral `H¹` norm squared is
-exactly the sum of the intrinsic zeroth- and first-order `L²` norms squared. -/
 theorem cc_h1_jet_sq
     (g : SmoothRiemannianMetric I M) (T : SmoothCcTensor g 0 2) :
     ‖ccTensorToHs (I := I) (M := M) g 2 (1 : ℝ) T‖ ^ 2 =

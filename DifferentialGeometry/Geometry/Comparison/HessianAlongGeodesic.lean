@@ -4,15 +4,6 @@ import DifferentialGeometry.Geometry.Comparison.Variation.PerpFrame
 import DifferentialGeometry.Geometry.Connection.ChartBridge.Hessian
 import Mathlib.Analysis.Convex.Deriv
 
-
-
-
-
-
-
-
-
-
 noncomputable section
 
 open Bundle Filter Function Manifold Set
@@ -80,9 +71,6 @@ private theorem deriv_comp_grad
   exact (gradFun_metricDual (I := I) g f (γ t)
     ((mfderiv 𝓘(ℝ, ℝ) I γ t : ℝ →L[ℝ] TangentSpace I (γ t)) 1)).symm
 
-
-
-
 omit [InnerProductSpace ℝ E] in
 omit [NeZero (Module.finrank ℝ E)] in
 theorem deriv2_comp_geo_at
@@ -140,8 +128,6 @@ theorem deriv2_comp_geo_at
 
 omit [InnerProductSpace ℝ E] in
 omit [NeZero (Module.finrank ℝ E)] in
-/-- Along a smooth geodesic, the ordinary second derivative of a globally
-smooth scalar function is its Riemannian Hessian on the geodesic velocity. -/
 theorem deriv2_comp_geo
     (g : SmoothRiemannianMetric I M) {f : M → ℝ}
     (hf : ContMDiff I 𝓘(ℝ, ℝ) ∞ f)
@@ -152,8 +138,6 @@ theorem deriv2_comp_geo
         ((mfderiv 𝓘(ℝ, ℝ) I γ t : ℝ →L[ℝ] TangentSpace I (γ t)) 1)
         ((mfderiv 𝓘(ℝ, ℝ) I γ t : ℝ →L[ℝ] TangentSpace I (γ t)) 1) :=
   deriv2_comp_geo_at (I := I) g hf hγ (hgeo t)
-
-
 
 omit [InnerProductSpace ℝ E] in
 omit [NeZero (Module.finrank ℝ E)] in
@@ -184,7 +168,6 @@ theorem deriv2_geo_on_at
 
 omit [InnerProductSpace ℝ E] in
 omit [NeZero (Module.finrank ℝ E)] in
-/-- Local-smoothness form along a globally geodesic curve. -/
 theorem deriv2_comp_geo_on
     (g : SmoothRiemannianMetric I M) {f : M → ℝ} {U : Set M}
     (hU : IsOpen U) (hf : ContMDiffOn I 𝓘(ℝ, ℝ) ∞ f U)
@@ -195,8 +178,6 @@ theorem deriv2_comp_geo_on
         ((mfderiv 𝓘(ℝ, ℝ) I γ t : ℝ →L[ℝ] TangentSpace I (γ t)) 1)
         ((mfderiv 𝓘(ℝ, ℝ) I γ t : ℝ →L[ℝ] TangentSpace I (γ t)) 1) :=
   deriv2_geo_on_at (I := I) g hU hf hγ (hgeo t) ht
-
-
 
 omit [InnerProductSpace ℝ E] in
 omit [NeZero (Module.finrank ℝ E)] in
@@ -221,8 +202,6 @@ theorem strictConvex_geo_on
 
 omit [InnerProductSpace ℝ E] in
 omit [NeZero (Module.finrank ℝ E)] in
-/-- Positive Hessian along a smooth geodesic implies strict convexity of the
-restricted scalar function. -/
 theorem strictConvex_geo
     (g : SmoothRiemannianMetric I M) {f : M → ℝ} {U : Set M}
     (hU : IsOpen U) (hf : ContMDiffOn I 𝓘(ℝ, ℝ) ∞ f U)

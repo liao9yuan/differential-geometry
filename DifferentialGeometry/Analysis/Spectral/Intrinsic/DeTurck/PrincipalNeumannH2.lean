@@ -4,14 +4,6 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.SobolevScale.Defs
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.PrincipalPerturbH2
 import DifferentialGeometry.Analysis.Spectral.Tensor.SobolevScale.AppH2Hs
 
-/-!
-# Neumann inversion of the low-regularity principal coefficient
-
-This file inverts the identity plus the fixed-background principal
-perturbation on a small spectral `H2` metric ball.  The resulting correction
-is linear in the `H2` size of the metric deviation, with no higher metric norm.
--/
-
 noncomputable section
 
 open Bundle Manifold
@@ -114,17 +106,12 @@ private lemma inv_add_le_two
     _ ≤ 2 * ‖B‖ + 1 := add_le_add hcorr hnorm1
     _ ≤ 2 := by linarith
 
-/-- The nonlinear inverse-cometric correction on rank-four spectral `H2`:
-the inverse of the identity plus the background-linear metric perturbation,
-minus the identity. -/
 noncomputable def invPerturbH2
     (g : SmoothRiemannianMetric I M)
     (T : metricH2 (I := I) (M := M) g) :
     rank4End (I := I) (M := M) g :=
   Ring.inverse (1 + perturbH2 (I := I) (M := M) g T) - 1
 
-/-- Whenever the linear principal perturbation has norm less than one, the
-Neumann correction is its two-sided inverse on the displayed side. -/
 theorem invPerturbH2_mul
     (g : SmoothRiemannianMetric I M)
     (T : metricH2 (I := I) (M := M) g)
@@ -145,9 +132,6 @@ theorem invPerturbH2_mul
   rw [hone]
   exact Ring.inverse_mul_cancel (1 + B) hu
 
-/-- In dimension three there is a positive spectral `H2` metric radius on
-which the Neumann principal correction is uniformly linear in the metric
-deviation. -/
 theorem invPerturbH2_norm
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M) :
@@ -196,11 +180,7 @@ theorem invPerturbH2_norm
       dsimp only [C]
       ring
 
--- The nested endomorphism ring in the resolvent estimate needs a larger local
--- elaboration budget.
 set_option maxHeartbeats 1600000 in
-/-- On a fixed small spectral `H2` ball, the Neumann correction is uniformly
-Lipschitz in the metric deviation. -/
 theorem invPerturbH2_lip
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M) :

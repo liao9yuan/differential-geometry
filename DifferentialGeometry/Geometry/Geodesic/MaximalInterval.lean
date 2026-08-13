@@ -5,8 +5,6 @@ import DifferentialGeometry.Geometry.Comparison.Variation.SecondVariation
 import Mathlib.Geometry.Manifold.Riemannian.PathELength
 import Mathlib.MeasureTheory.Integral.IntervalIntegral.Basic
 
-
-
 noncomputable section
 
 open Bundle Manifold Set Filter Function
@@ -321,8 +319,6 @@ attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
 omit [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M]
     [SigmaCompactSpace M] in
-/-- Identify Mathlib's path length with intrinsic Riemannian arc length when the
-tangent fibres carry the norm supplied by a `RiemannianBundle`. -/
 theorem pathELength_eq_arcLength_riemannianBundle
     (g : SmoothRiemannianMetric I M) {γ : ℝ → M} {a b : ℝ}
     (hab : a ≤ b)
@@ -405,7 +401,6 @@ theorem pathELength_eq_arcLength_riemannianBundle
     unfold DifferentialGeometry.Geometry.Riemannian.Variation.arcLength
     rfl
   rw [h_arcLength, h_intInterval, ← h_Icc_Ioc]
-
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in

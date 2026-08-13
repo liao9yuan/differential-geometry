@@ -8,15 +8,6 @@ import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.LowRegBaseForce
 import DifferentialGeometry.Analysis.Spectral.Tensor.SobolevScale.SmoothEmbedInj
 import DifferentialGeometry.Analysis.Spectral.Tensor.Spectrum.SlotSwapEquivariance
 
-/-!
-# Low-base Ricci--DeTurck time families
-
-This module starts the low-regularity time realization of the canonical
-low-base action.  The first step is the smooth radial core used by both
-operator families: it symmetrizes a smooth rank-two tensor and retracts its
-spectral `H2` image to a fixed small ball.
--/
-
 noncomputable section
 
 open Bundle Manifold MeasureTheory
@@ -258,8 +249,6 @@ private theorem symmFun_smul
     trivial
   exact hu
 
-/-- Spectral symmetrization of covariant rank-two tensors at any
-nonnegative Sobolev order. -/
 noncomputable def symmHs
     (g : SmoothRiemannianMetric I M) {σ : ℝ} (hσ : 0 ≤ σ) :
     tensorHs (I := I) (M := M) g 0 2 σ →L[ℝ]
@@ -275,8 +264,6 @@ noncomputable def symmHs
         dist_zero_right, dist_zero_right] at h
       simpa only [one_mul] using h)
 
-/-- Spectral symmetrization agrees with smooth tensor symmetrization on the
-dense smooth core. -/
 theorem symmHs_core
     (g : SmoothRiemannianMetric I M) {σ : ℝ} (hσ : 0 ≤ σ)
     (T : SmoothCcTensor g 0 2) :
@@ -286,8 +273,6 @@ theorem symmHs_core
         (symmS (I := I) (M := M) g T) :=
   symmFun_core (I := I) (M := M) g hσ T
 
-/-- Spectral symmetrization is a contraction at every nonnegative Sobolev
-order. -/
 theorem symmHs_le
     (g : SmoothRiemannianMetric I M) {σ : ℝ} (hσ : 0 ≤ σ)
     (u : tensorHs (I := I) (M := M) g 0 2 σ) :
@@ -309,8 +294,6 @@ private theorem hsIncl_core
   simp only [tensorHsInclusion_coeff_apply, ccToHsLin_apply,
     ccTensorToHs_coeff]
 
-/-- Spectral symmetrization commutes with every adjacent-scale Sobolev
-inclusion. -/
 theorem symmHs_incl
     (g : SmoothRiemannianMetric I M) {τ σ : ℝ}
     (hτ : 0 ≤ τ) (hσ : 0 ≤ σ) (hτσ : τ ≤ σ) :
@@ -339,8 +322,6 @@ theorem symmHs_incl
       hsIncl_core (I := I) (M := M) g hτσ,
       symmHs_core (I := I) (M := M) g hτ]
 
-/-- Scalar used to freeze the nonlinear radial retraction into a continuous
-linear passenger operator. -/
 noncomputable def radialScale
     (g : SmoothRiemannianMetric I M) (ρ : ℝ)
     (v : tensorHs (I := I) (M := M) g 0 2 (2 : ℝ)) : ℝ :=
@@ -360,8 +341,6 @@ private theorem radialScale_le
     radialScale (I := I) (M := M) g ρ v ≤ 1 := by
   exact min_le_left _ _
 
-/-- The frozen radial passenger at Sobolev order `σ`: one scalar selected
-from the lower `H2` state multiplies spectral symmetrization. -/
 noncomputable def radialCLM
     (g : SmoothRiemannianMetric I M) {σ : ℝ} (hσ : 0 ≤ σ)
     (ρ : ℝ) (v : tensorHs (I := I) (M := M) g 0 2 (2 : ℝ)) :
@@ -370,8 +349,6 @@ noncomputable def radialCLM
   radialScale (I := I) (M := M) g ρ v •
     symmHs (I := I) (M := M) g hσ
 
-/-- A frozen radial passenger has operator norm at most one for a
-nonnegative cutoff radius. -/
 theorem radialCLM_le
     (g : SmoothRiemannianMetric I M) {σ ρ : ℝ}
     (hσ : 0 ≤ σ) (hρ : 0 ≤ ρ)
@@ -391,7 +368,6 @@ theorem radialCLM_le
     _ = ‖symmHs (I := I) (M := M) g hσ u‖ := one_mul _
     _ ≤ ‖u‖ := symmHs_le (I := I) (M := M) g hσ u
 
-/-- Every frozen radial passenger is a contraction in operator norm. -/
 theorem radialCLM_norm
     (g : SmoothRiemannianMetric I M) {σ ρ : ℝ}
     (hσ : 0 ≤ σ) (hρ : 0 ≤ ρ)
@@ -401,9 +377,6 @@ theorem radialCLM_norm
   simpa only [one_mul] using
     radialCLM_le (I := I) (M := M) g hσ hρ v u
 
-/-- A measurable lower-state path gives an almost-everywhere strongly
-measurable family of frozen radial passenger operators.  No continuity of the
-scalar selector at the zero state is asserted or needed. -/
 theorem radialCLM_aemeas
     {Ω : Type*} [MeasurableSpace Ω] {μ : Measure Ω}
     (g : SmoothRiemannianMetric I M) {σ ρ : ℝ} (hσ : 0 ≤ σ)
@@ -431,8 +404,6 @@ theorem radialCLM_aemeas
     aestronglyMeasurable_const
   simpa only [radialCLM, radialScale] using hscale.smul hconst
 
-/-- Frozen radial passenger operators commute with Sobolev inclusion when
-they use the same lower-state scaling coefficient. -/
 theorem radialCLM_incl
     (g : SmoothRiemannianMetric I M) {τ σ : ℝ}
     (hτ : 0 ≤ τ) (hσ : 0 ≤ σ) (hτσ : τ ≤ σ)
@@ -453,7 +424,6 @@ theorem radialCLM_incl
   exact congrArg
     (fun z => radialScale (I := I) (M := M) g ρ v • z) h
 
-/-- The symmetric smooth representative radially retracted to an `H2` ball. -/
 noncomputable def lowRadial
     (g : SmoothRiemannianMetric I M) (ρ : ℝ)
     (T : SmoothCcTensor g 0 2) : SmoothCcTensor g 0 2 :=
@@ -463,7 +433,6 @@ noncomputable def lowRadial
           (symmS (I := I) (M := M) g T)‖)) •
     symmS (I := I) (M := M) g T
 
-/-- The smooth radial representative fixes the zero tensor. -/
 @[simp] theorem lowRadial_zero
     (g : SmoothRiemannianMetric I M) (ρ : ℝ) :
     lowRadial (I := I) (M := M) g ρ
@@ -475,8 +444,6 @@ noncomputable def lowRadial
         (0 : SmoothCcTensor g 0 2)
   rw [lowRadial, hs, smul_zero]
 
-/-- The `H2` image of `lowRadial` is the Hilbert-ball retraction of the
-symmetrized `H2` image. -/
 theorem lowRadial_embed
     (g : SmoothRiemannianMetric I M) (ρ : ℝ)
     (T : SmoothCcTensor g 0 2) :
@@ -487,8 +454,6 @@ theorem lowRadial_embed
           (symmS (I := I) (M := M) g T)) := by
   rw [lowRadial, ccTensorToHs_smul, ballRetraction]
 
-/-- The radial smooth representative lies in the selected spectral `H2`
-ball. -/
 theorem lowRadial_norm
     (g : SmoothRiemannianMetric I M) {ρ : ℝ} (hρ : 0 ≤ ρ)
     (T : SmoothCcTensor g 0 2) :
@@ -497,10 +462,6 @@ theorem lowRadial_norm
   rw [lowRadial_embed (I := I) (M := M)]
   exact ballRetraction_mem_closedBall hρ _
 
-/-- Inside the cutoff ball the radial retraction is inactive: `lowRadial` is
-then exactly spectral symmetrization.  This is the smooth-tensor sibling of
-`lowRadialHs_eq_self` / `lowRadialH3_eq_self`; unlike those it needs no
-separate symmetry hypothesis, because `lowRadial` symmetrizes first. -/
 theorem lowRadial_eq_self
     (g : SmoothRiemannianMetric I M) {ρ : ℝ}
     (T : SmoothCcTensor g 0 2)
@@ -520,7 +481,6 @@ theorem lowRadial_eq_self
     rw [lowRadial, hS, smul_zero]
   · rw [lowRadial, min_eq_left ((one_le_div hz).mpr hT), one_smul]
 
-/-- The radial smooth representative is fibrewise symmetric. -/
 theorem lowRadial_symm
     (g : SmoothRiemannianMetric I M) (ρ : ℝ)
     (T : SmoothCcTensor g 0 2)
@@ -533,7 +493,6 @@ theorem lowRadial_symm
     ccTensorBilin_symmS, ccTensorBilin_symmS,
     ccTensorBilinSymm_symm (I := I) g T x u v]
 
-/-- Radial symmetrization is nonexpansive in the spectral `H2` embedding. -/
 theorem lowRadial_lip
     (g : SmoothRiemannianMetric I M) {ρ : ℝ} (hρ : 0 ≤ ρ)
     (T U : SmoothCcTensor g 0 2) :
@@ -596,8 +555,6 @@ private theorem incl32_ccToHs
   funext i
   simp only [incl32, tensorHsInclusion_coeff_apply, ccTensorToHs_coeff]
 
-/-- At the top state scale, the smooth radial representative is exactly the
-lower-scale cutoff associated to the spectral inclusion `H3 → H2`. -/
 theorem lowRadial_h3_eq
     (g : SmoothRiemannianMetric I M) (ρ : ℝ)
     (T : SmoothCcTensor g 0 2) :
@@ -609,9 +566,6 @@ theorem lowRadial_h3_eq
   rw [lowRadial, lowScaleCutoff, ccTensorToHs_smul,
     incl32_ccToHs (I := I) (M := M)]
 
-/-- The smooth radial representative obeys the mixed `H3/H2` cutoff
-difference estimate.  Its top norm is unrestricted; only the cutoff radius is
-positive. -/
 theorem lowRadial_h3_sub
     (g : SmoothRiemannianMetric I M) {ρ : ℝ} (hρ : 0 < ρ)
     (T U : SmoothCcTensor g 0 2) :
@@ -895,8 +849,6 @@ private theorem radialHigh_cont
   apply (hK.continuousOn x hxclosed).continuousAt
   simpa only [Metric.mem_closedBall, Set.mem_setOf_eq] using hpre
 
-/-- The total top-state radial map, obtained by continuously extending the
-smooth `H3` core while its cutoff radius is measured in `H2`. -/
 noncomputable def lowRadialH3
     (g : SmoothRiemannianMetric I M) (ρ : ℝ) :
     metricH3 (I := I) (M := M) g → metricH3 (I := I) (M := M) g :=
@@ -904,8 +856,6 @@ noncomputable def lowRadialH3
     (ccToHsLin_dense (I := I) (M := M) g 2 (by positivity))
     (radialHighCore (I := I) (M := M) g ρ)
 
-/-- The total mixed-scale radial map is continuous at every positive cutoff
-radius. -/
 theorem lowRadialH3_cont
     (g : SmoothRiemannianMetric I M) {ρ : ℝ} (hρ : 0 < ρ) :
     Continuous (lowRadialH3 (I := I) (M := M) g ρ) := by
@@ -914,8 +864,6 @@ theorem lowRadialH3_cont
     (radialHighCore (I := I) (M := M) g ρ) 0
     (radialHigh_balls (I := I) (M := M) g hρ)
 
-/-- On smooth tensors, the total mixed-scale radial map is exactly the
-spectral embedding of `lowRadial`. -/
 theorem lowRadialH3_core
     (g : SmoothRiemannianMetric I M) {ρ : ℝ} (hρ : 0 < ρ)
     (T : SmoothCcTensor g 0 2) :
@@ -934,7 +882,6 @@ theorem lowRadialH3_core
       highRep_spec (I := I) (M := M) g x
   simpa only [lowRadialH3, radialHighCore, x, hrep] using hext
 
-/-- The total mixed-scale radial map fixes zero. -/
 @[simp] theorem lowRadialH3_zero
     (g : SmoothRiemannianMetric I M) {ρ : ℝ} (hρ : 0 < ρ) :
     lowRadialH3 (I := I) (M := M) g ρ 0 = 0 := by
@@ -942,8 +889,6 @@ theorem lowRadialH3_core
     lowRadialH3_core (I := I) (M := M) g hρ
       (0 : SmoothCcTensor g 0 2)
 
-/-- The total mixed-scale radial map does not increase the top `H3` norm.
-The cutoff radius is still measured only after inclusion into `H2`. -/
 theorem lowRadialH3_le
     (g : SmoothRiemannianMetric I M) {ρ : ℝ} (hρ : 0 < ρ)
     (u : metricH3 (I := I) (M := M) g) :
@@ -1004,8 +949,6 @@ theorem lowRadialH3_le
     trivial
   exact hu
 
-/-- The total top-state radial map retains the smooth mixed `H3/H2`
-difference estimate. -/
 theorem lowRadialH3_sub
     (g : SmoothRiemannianMetric I M) {ρ : ℝ} (hρ : 0 < ρ)
     (u v : metricH3 (I := I) (M := M) g) :
@@ -1131,8 +1074,6 @@ private theorem dense_ext_lip
     LipschitzWith.of_dist_le_mul fun x y => by
       simpa only [Subtype.dist_eq] using hF x y
 
-/-- The total spectral `H2` radial state map obtained by extending the
-nonexpansive smooth core. -/
 noncomputable def lowRadialHs
     (g : SmoothRiemannianMetric I M) (ρ : ℝ) :
     metricH2 (I := I) (M := M) g → metricH2 (I := I) (M := M) g :=
@@ -1140,7 +1081,6 @@ noncomputable def lowRadialHs
     (ccToHsLin_dense (I := I) (M := M) g 2 (by positivity))
     (radialCore (I := I) (M := M) g ρ)
 
-/-- The total spectral radial state map is nonexpansive. -/
 theorem lowRadialHs_lip
     (g : SmoothRiemannianMetric I M) {ρ : ℝ} (hρ : 0 ≤ ρ) :
     LipschitzWith 1 (lowRadialHs (I := I) (M := M) g ρ) := by
@@ -1151,14 +1091,11 @@ theorem lowRadialHs_lip
   simpa only [Subtype.dist_eq] using
     (radialCore_lip (I := I) (M := M) g hρ).dist_le_mul x y
 
-/-- The total spectral radial state map is continuous. -/
 theorem lowRadialHs_cont
     (g : SmoothRiemannianMetric I M) {ρ : ℝ} (hρ : 0 ≤ ρ) :
     Continuous (lowRadialHs (I := I) (M := M) g ρ) :=
   (lowRadialHs_lip (I := I) (M := M) g hρ).continuous
 
-/-- Continuous radialization preserves almost-everywhere strong
-measurability under composition. -/
 theorem lowRadialHs_aemeas
     {Ω : Type*} [MeasurableSpace Ω] {μ : Measure Ω}
     (g : SmoothRiemannianMetric I M) {ρ : ℝ} (hρ : 0 ≤ ρ)
@@ -1168,8 +1105,6 @@ theorem lowRadialHs_aemeas
       (fun t => lowRadialHs (I := I) (M := M) g ρ (u t)) μ :=
   (lowRadialHs_cont (I := I) (M := M) g hρ).comp_aestronglyMeasurable hu
 
-/-- On a smooth spectral state, the total radial map is exactly the
-embedding of the smooth radial representative. -/
 theorem lowRadialHs_core
     (g : SmoothRiemannianMetric I M) {ρ : ℝ} (hρ : 0 ≤ ρ)
     (T : SmoothCcTensor g 0 2) :
@@ -1188,7 +1123,6 @@ theorem lowRadialHs_core
       lowRep_spec (I := I) (M := M) g x
   simpa only [lowRadialHs, radialCore, x, hrep] using hext
 
-/-- The total lower-state radial map fixes zero. -/
 @[simp] theorem lowRadialHs_zero
     (g : SmoothRiemannianMetric I M) {ρ : ℝ} (hρ : 0 ≤ ρ) :
     lowRadialHs (I := I) (M := M) g ρ 0 = 0 := by
@@ -1196,8 +1130,6 @@ theorem lowRadialHs_core
     lowRadialHs_core (I := I) (M := M) g hρ
       (0 : SmoothCcTensor g 0 2)
 
-/-- The total `H3` radial map commutes with the spectral inclusion to `H2`;
-both adjacent state scales therefore use one canonical radialized state. -/
 theorem lowRadialH3_incl
     (g : SmoothRiemannianMetric I M) {ρ : ℝ} (hρ : 0 < ρ)
     (u : metricH3 (I := I) (M := M) g) :
@@ -1219,8 +1151,6 @@ theorem lowRadialH3_incl
     simpa only [ccToHsLin_apply] using
       (lowRadialHs_core (I := I) (M := M) g hρ.le T).symm
 
-/-- The total mixed-scale radial map is the low-topology cutoff of spectral
-symmetrization. -/
 theorem lowRadialH3_eq
     (g : SmoothRiemannianMetric I M) {ρ : ℝ} (hρ : 0 < ρ)
     (u : metricH3 (I := I) (M := M) g) :
@@ -1246,8 +1176,6 @@ theorem lowRadialH3_eq
     simp only [ccToHsLin_apply] at hs
     rw [hs]
 
-/-- Freezing the lower-state radial scalar and applying it to the same `H3`
-passenger recovers the canonical total mixed-scale radial state. -/
 theorem radialCLM_h3
     (g : SmoothRiemannianMetric I M) {ρ : ℝ} (hρ : 0 < ρ)
     (u : metricH3 (I := I) (M := M) g) :
@@ -1264,8 +1192,6 @@ theorem radialCLM_h3
   simp only [ContinuousLinearMap.comp_apply] at h
   rw [h]
 
-/-- The total `H2` radial map is ordinary ball retraction after spectral
-symmetrization. -/
 theorem lowRadialHs_eq
     (g : SmoothRiemannianMetric I M) {ρ : ℝ} (hρ : 0 ≤ ρ)
     (v : metricH2 (I := I) (M := M) g) :
@@ -1285,8 +1211,6 @@ theorem lowRadialHs_eq
     simp only [ccToHsLin_apply, lowRadial, ballRetraction,
       ccTensorToHs_smul]
 
-/-- Freezing the lower-state radial scalar and applying it to the same `H2`
-passenger recovers the canonical total radial state. -/
 theorem radialCLM_h2
     (g : SmoothRiemannianMetric I M) {ρ : ℝ} (hρ : 0 ≤ ρ)
     (v : metricH2 (I := I) (M := M) g) :
@@ -1295,8 +1219,6 @@ theorem radialCLM_h2
   rw [lowRadialHs_eq (I := I) (M := M) g hρ]
   rfl
 
-/-- Continuous mixed-scale radialization preserves almost-everywhere strong
-measurability of `H3`-valued time states. -/
 theorem lowRadialH3_aemeas
     {Ω : Type*} [MeasurableSpace Ω] {μ : Measure Ω}
     (g : SmoothRiemannianMetric I M) {ρ : ℝ} (hρ : 0 < ρ)
@@ -1306,8 +1228,6 @@ theorem lowRadialH3_aemeas
       (fun t => lowRadialH3 (I := I) (M := M) g ρ (u t)) μ :=
   (lowRadialH3_cont (I := I) (M := M) g hρ).comp_aestronglyMeasurable hu
 
-/-- The total radial state map takes values in the closed spectral `H2`
-ball selected by its radius. -/
 theorem lowRadialHs_norm
     (g : SmoothRiemannianMetric I M) {ρ : ℝ} (hρ : 0 ≤ ρ)
     (u : metricH2 (I := I) (M := M) g) :
@@ -1338,8 +1258,6 @@ theorem lowRadialHs_norm
     trivial
   exact hu
 
-/-- The total `H3` radial state lies in the selected closed `H2` ball after
-spectral inclusion. -/
 theorem lowRadialH3_norm
     (g : SmoothRiemannianMetric I M) {ρ : ℝ} (hρ : 0 < ρ)
     (u : metricH3 (I := I) (M := M) g) :
@@ -1363,8 +1281,6 @@ private theorem zeroBound
     (mul_nonneg hδ (Real.sqrt_nonneg _))
     (Real.sqrt_nonneg _)
 
-/-- In dimension three there is a positive spectral `H2` radius on which one
-common fibre-smallness constant `δ ≤ 1/3` realizes every smooth state. -/
 theorem exists_lowRadius
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M) :
@@ -1395,9 +1311,6 @@ theorem exists_lowRadius
     (mul_le_mul_of_nonneg_right hscale (Real.sqrt_nonneg _))
     (Real.sqrt_nonneg _)
 
-/-- The canonical low-base coefficient bundle evaluated on the smooth radial
-state.  The only realization input is a uniform fibre bound on the selected
-spectral `H2` ball. -/
 noncomputable def lowCoreData
     (g : SmoothRiemannianMetric I M)
     {ρ δ : ℝ} (hρ : 0 ≤ ρ) (hδ0 : 0 ≤ δ) (hδ_le : δ ≤ 1 / 3)
@@ -1488,10 +1401,6 @@ private theorem lowA2LoCore_value
 
 namespace LowBaseTimeInternal
 
-/-! Internal bridge used by the adjacent-scale completion modules.  These
-aliases expose the already canonical dense core without adding a second
-coefficient construction. -/
-
 abbrev LowCore (g : SmoothRiemannianMetric I M) :=
   lowCore (I := I) (M := M) g
 
@@ -1551,8 +1460,6 @@ theorem a2LoCore_value
 
 end LowBaseTimeInternal
 
-/-- The total canonical radial second-order coefficient as an `H4 → H2`
-operator-valued map on the `H2` state space. -/
 noncomputable def lowA2Hi
     (g : SmoothRiemannianMetric I M)
     {ρ δ : ℝ} (hρ : 0 ≤ ρ) (hδ0 : 0 ≤ δ) (hδ_le : δ ≤ 1 / 3)
@@ -1565,8 +1472,6 @@ noncomputable def lowA2Hi
     (ccToHsLin_dense (I := I) (M := M) g 2 (by positivity))
     (lowA2HiCore (I := I) (M := M) g hρ hδ0 hδ_le hreal)
 
-/-- The same total canonical radial second-order coefficient as an
-`H3 → H1` operator-valued map on the `H2` state space. -/
 noncomputable def lowA2Lo
     (g : SmoothRiemannianMetric I M)
     {ρ δ : ℝ} (hρ : 0 ≤ ρ) (hδ0 : 0 ≤ δ) (hδ_le : δ ≤ 1 / 3)
@@ -1714,8 +1619,6 @@ theorem a1LoCore_value
 
 end LowBaseTimeInternal
 
-/-- The total canonical radial first-order coefficient as an `H3 → H2`
-operator-valued map on the `H3` state space. -/
 noncomputable def lowA1Hi
     (g : SmoothRiemannianMetric I M)
     {ρ δ : ℝ} (hρ : 0 ≤ ρ) (hδ0 : 0 ≤ δ) (hδ_le : δ ≤ 1 / 3)
@@ -1728,8 +1631,6 @@ noncomputable def lowA1Hi
     (ccToHsLin_dense (I := I) (M := M) g 2 (by positivity))
     (lowA1HiCore (I := I) (M := M) g hρ hδ0 hδ_le hreal)
 
-/-- The same total canonical radial first-order coefficient as an `H2 → H1`
-operator-valued map on the `H3` state space. -/
 noncomputable def lowA1Lo
     (g : SmoothRiemannianMetric I M)
     {ρ δ : ℝ} (hρ : 0 ≤ ρ) (hδ0 : 0 ≤ δ) (hδ_le : δ ≤ 1 / 3)
@@ -1742,8 +1643,6 @@ noncomputable def lowA1Lo
     (ccToHsLin_dense (I := I) (M := M) g 2 (by positivity))
     (lowA1LoCore (I := I) (M := M) g hρ hδ0 hδ_le hreal)
 
-/-- The canonical radial coefficient bundle gives the exact zero-based
-smooth remainder split on its radial state. -/
 theorem lowCore_split
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M)

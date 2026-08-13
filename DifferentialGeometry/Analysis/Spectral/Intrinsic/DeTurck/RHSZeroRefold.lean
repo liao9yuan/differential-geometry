@@ -1,15 +1,6 @@
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.RefoldPairingCore
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurckCoefficients.RHSLowCoeff
 
-/-!
-# Low-regularity order-zero Ricci--DeTurck refold
-
-The raw order-zero Ricci--DeTurck coefficient contains second derivatives of
-the moving metric.  This file removes those derivatives by exact Palatini
-pairing before any Sobolev estimate is taken.  The resulting order-zero and
-order-two coefficients are explicit and require no high-jet hypotheses.
--/
-
 noncomputable section
 
 set_option linter.style.setOption false
@@ -39,28 +30,21 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
   [IsManifold I ∞ M] [CompactSpace M] [I.Boundaryless]
   [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M]
 
-/-- The first canonical Palatini permutation family for the Ricci refold. -/
 def ricciRefoldQA : Fin 4 → Equiv.Perm (Fin 4) :=
   ![Equiv.swap (0 : Fin 4) 2, Equiv.swap (1 : Fin 4) 3,
     Equiv.swap (0 : Fin 4) 2 * Equiv.swap (1 : Fin 4) 3, 1]
 
-/-- The paired canonical Palatini permutation family for the Ricci refold. -/
 def ricciRefoldQB : Fin 4 → Equiv.Perm (Fin 4) :=
   fun k => Equiv.swap (0 : Fin 4) 1 * ricciRefoldQA k
 
-/-- The canonical permutation family for the DeTurck covariant-derivative
-refold. -/
 def lieRefoldQ : Fin 3 → Equiv.Perm (Fin 4) :=
   ![Equiv.swap (0 : Fin 4) 1 * Equiv.swap (0 : Fin 4) 2,
     Equiv.swap (2 : Fin 4) 3 * Equiv.swap (1 : Fin 4) 2 *
       Equiv.swap (0 : Fin 4) 1,
     Equiv.swap (0 : Fin 4) 2 * Equiv.swap (1 : Fin 4) 3]
 
-/-- The signs of the three canonical DeTurck refold monomials. -/
 def lieRefoldEps : Fin 3 → ℝ := ![(-1 : ℝ), -1, 1]
 
-/-- The explicit lower Ricci coefficient after the Palatini second-derivative
-piece has been removed. -/
 def ricciRefold0
     (g g₁ : SmoothRiemannianMetric I M) (P : SmoothCcTensor g 0 2) :
     SmoothCcTensor g 2 2 :=
@@ -75,8 +59,6 @@ def ricciRefold0
             ricciArmSharpGradKoszulResidualField (I := I) (M := M) g g₁ P -
           ricciArmRicciFoldRemainderField (I := I) (M := M) g g₁ P))
 
-/-- The Ricci second-order coefficient carrying the derivatives removed from
-`ricciRefold0`. -/
 def ricciRefold2
     (g : SmoothRiemannianMetric I M) (T : SmoothCcTensor g 0 2) {δ : ℝ}
     (hδ : gFibreOpBound (I := I) (M := M) g
@@ -87,8 +69,6 @@ def ricciRefold2
   (2 : ℝ) • riemannPalatiniRefoldC2Family
     (I := I) (M := M) g T hδ hδZ ricciRefoldQA ricciRefoldQB s
 
-/-- The lower DeTurck covariant-derivative coefficient after its second-order
-pair trace has been removed. -/
 def lieRefold0
     (g g₁ g_bg : SmoothRiemannianMetric I M) (T : SmoothCcTensor g 0 2)
     {δ : ℝ}
@@ -101,8 +81,6 @@ def lieRefold0
     edgeLiePairFam (I := I) (M := M) g T hδ hδZ
       lieRefoldQ lieRefoldEps s
 
-/-- The DeTurck second-order coefficient carrying the derivatives removed
-from `lieRefold0`. -/
 def lieRefold2
     (g : SmoothRiemannianMetric I M) (T : SmoothCcTensor g 0 2) {δ : ℝ}
     (hδ : gFibreOpBound (I := I) (M := M) g
@@ -113,8 +91,6 @@ def lieRefold2
   deTurckLieCovDerivRefoldC2Family
     (I := I) (M := M) g T hδ hδZ lieRefoldQ lieRefoldEps s
 
-/-- The complete lower order-zero coefficient after the Ricci and DeTurck
-second-derivative pieces have been refolded. -/
 def rhsRefold0
     (g g_bg : SmoothRiemannianMetric I M) (T : SmoothCcTensor g 0 2)
     {δ : ℝ}
@@ -130,8 +106,6 @@ def rhsRefold0
       deTurckLieEndoArmField (I := I) (M := M) g g₁ g_bg +
       lieCorr0Field (I := I) (M := M) g g₁ g_bg)
 
-/-- The complete second-order coefficient produced by the order-zero
-Ricci--DeTurck refold. -/
 def rhsRefold2
     (g : SmoothRiemannianMetric I M) (T : SmoothCcTensor g 0 2) {δ : ℝ}
     (hδ : gFibreOpBound (I := I) (M := M) g
@@ -186,8 +160,6 @@ private lemma ricciRefold2_eq
     hsymm, smul_smul]
   rfl
 
-/-- The Ricci order-zero action is exactly its lower refold plus the new
-second-order action. -/
 theorem ricciRefold_app
     (g : SmoothRiemannianMetric I M) (T : SmoothCcTensor g 0 2)
     (hT : ∀ (x : M) (v w : TangentSpace I x),
@@ -249,8 +221,6 @@ theorem ricciRefold_app
   rw [htwice]
   module
 
-/-- The DeTurck covariant-derivative action is exactly its lower pair-trace
-remainder plus the new second-order action. -/
 theorem lieRefold_app
     (g g₁ g_bg : SmoothRiemannianMetric I M)
     (T : SmoothCcTensor g 0 2) {δ : ℝ}
@@ -270,9 +240,6 @@ theorem lieRefold_app
     edgeLiePair_apply (I := I) (M := M) g T hδ hδZ lieRefoldQ lieRefoldEps s]
   abel
 
-/-- The actual order-zero Ricci--DeTurck path coefficient, applied to the
-metric deviation, is the sum of a genuinely lower coefficient and an
-explicit second-order coefficient.  No high-regularity radius is assumed. -/
 theorem rhsLow0_refold
     (g g_bg : SmoothRiemannianMetric I M) (T : SmoothCcTensor g 0 2)
     (hT : ∀ (x : M) (v w : TangentSpace I x),

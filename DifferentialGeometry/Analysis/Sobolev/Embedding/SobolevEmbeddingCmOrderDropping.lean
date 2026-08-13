@@ -3,7 +3,6 @@ import DifferentialGeometry.Analysis.Sobolev.HebeyBlock.NablaTensor.NablaTensorF
 import DifferentialGeometry.Analysis.Sobolev.HebeyBlock.ChartParallelTransportOpNorm.ChristoffelCkBound
 import DifferentialGeometry.Analysis.Spectral.Tensor.EllipticBridge.EigenvectorWeakSolution.CovGrad.EigenvectorCovGradChartIdentity
 
-
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
@@ -1490,7 +1489,6 @@ theorem iteratedCovGrad_toSobolev_embedding_C2_singleNorm
 attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
   Tensor0SBundle.tensorRSSpace_normedSpace in
 omit [BoundarylessManifold I M] in
-/-- Compatibility name for the unconditional collapsed `C²` estimate. -/
 theorem iteratedCovGrad_toSobolev_embedding_C2_unconditional
     (g : SmoothRiemannianMetric I M) (k : ℕ)
     (h_super : 2 * k > Module.finrank ℝ E + 4) :

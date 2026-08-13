@@ -1,17 +1,6 @@
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.CurvatureCoefficientDifferenceJetTower.TsRungs
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.CurvatureCoefficientDifferenceJetTower.ResidualFree
 
-/-!
-# Radius-free top-separated base-coefficient bound
-
-Chunk of the `CurvatureCoefficientDifferenceJetTower` tower, split
-out of the former 15111-line monolith (no longer elaborable in a
-single Lean process).  Every declaration is verbatim.  The former
-`private` helpers were promoted into the internal `CurvatureCoefficientDifferenceJetTower`
-scope, so the public `Connection` API is unchanged.  Chunk map:
-`CurvatureCoefficientDifferenceJetTower.md`.
--/
-
 noncomputable section
 
 set_option linter.style.setOption false
@@ -55,13 +44,6 @@ open DifferentialGeometry.Integral.DivergenceTheorem
 set_option backward.isDefEq.respectTransparency false
 
 set_option linter.unusedVariables false in
-/-- Fibre-small zeroth-order bridge.  From fibre operator-norm smallness
-`gFibreOpBound g₀ (ccTensorBilinSymm g₀ T) δ` with `δ ≤ δ₀`, the symmetrized
-metric-perturbation tensor `symmS g₀ T` has pointwise `g₀`-fibre norm squared
-bounded by the FIXED radius-free constant `((dim E)·δ₀)²`.  This produces the
-`Λ₀ := (dim E)·δ₀` pointwise input for the radius-free grid integrators
-`antidiagonalTupleGrid_integral_radiusFree` and
-`boundedFactorGridWindow_integral_radiusFree_topSeparated`. -/
 theorem rfns_symmS_zero_le_fibreSmall
     (g₀ : SmoothRiemannianMetric I M) {δ₀ : ℝ} (hδ₀0 : 0 ≤ δ₀)
     (T : SmoothCcTensor g₀ 0 2) {δ : ℝ} (hδ_le : δ ≤ δ₀) (hδ0 : 0 ≤ δ)

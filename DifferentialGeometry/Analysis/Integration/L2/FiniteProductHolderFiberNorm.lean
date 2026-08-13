@@ -3,9 +3,7 @@ import DifferentialGeometry.Analysis.Integration.L2.SmoothSections.Integrability
 import DifferentialGeometry.Analysis.Integration.Measure.Properties
 import Mathlib.MeasureTheory.Integral.MeanInequalities
 
-
 noncomputable section
-
 
 open Manifold MeasureTheory Set Filter Bundle
 open scoped Manifold Topology ContDiff ENNReal NNReal BigOperators
@@ -60,20 +58,6 @@ theorem holder_integral_prod_rpow_le_prod_integral_rpow
           MeasureTheory.integral_eq_lintegral_of_nonneg_ae (hf_nn i hi)
             (hf_int i hi).aestronglyMeasurable]
 
-/-- **Lyapunov interpolation between two powers of a nonnegative function.**
-
-For `0 ≤ F` and an exponent `c` on the segment between `a` and `b`,
-`c = lam·a + (1 - lam)·b` with `lam ∈ [0,1]`,
-```
-∫ F^c ≤ (∫ F^a)^lam · (∫ F^b)^(1 - lam).
-```
-
-Equivalently `p ↦ ‖F‖_{L^p}` is log-convex.  This is the missing bridge BETWEEN
-two `Lᵖ` scales: a quantity controlled separately at exponents `a` and `b` is
-controlled at every intermediate exponent, with the two controls entering at the
-interpolation weights.  It is the two-function case of
-`holder_integral_prod_rpow_le_prod_integral_rpow`, applied to the constant
-factorization `F^c = (F^a)^lam · (F^b)^(1-lam)`. -/
 theorem lyapunov_pow_le (F : α → ℝ) (hF_nn : ∀ᵐ x ∂μ, 0 ≤ F x)
     {a b c lam : ℝ} (ha : 0 < a) (hb : 0 < b)
     (hlam0 : 0 ≤ lam) (hlam1 : lam ≤ 1)
@@ -154,7 +138,6 @@ private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
-
 omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [BoundarylessManifold I M] in
 theorem holder_integral_prod_riemannianFiberNormSq_le
     (g : SmoothRiemannianMetric I M) {ι : Type*} (t : Finset ι)
@@ -218,7 +201,6 @@ theorem holder_integral_prod_riemannianFiberNormSq_le
               ^ (1 / θ m))
           θ hF_int hF_nn (fun m hm => (hθ m hm).le) hθ1
 
-
 omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [BoundarylessManifold I M] in
 theorem holder_integral_prod_riemannianFiberNormSq_le_of_sup_bound
     (g : SmoothRiemannianMetric I M) {ι : Type*} [DecidableEq ι]
@@ -280,7 +262,6 @@ theorem holder_integral_prod_riemannianFiberNormSq_le_of_sup_bound
   exact mul_le_mul_of_nonneg_left
     (holder_integral_prod_riemannianFiberNormSq_le (I := I) (M := M) g (t \ t₀) r s S θ hθ hθ1)
     (Finset.prod_nonneg hΛ_nn)
-
 
 omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [BoundarylessManifold I M] in
 theorem holder_integral_prod_riemannianFiberNormSq_natWeight_le_of_sup_bound

@@ -3,16 +3,6 @@ import DifferentialGeometry.Geometry.Comparison.CGTEvenCover
 
 set_option autoImplicit false
 
-/-!
-# Finite-center assembly for the CGT propeller
-
-This file consumes the localized Whitehead/Jensen theorem.  It packages the
-center-and-fixed-point part of the Cheeger--Gromov--Taylor propeller argument
-for a core-preserving local isometry that permutes a finite point family.
-Constructing that canonical loop transport remains a separate geometric
-producer.
--/
-
 noncomputable section
 
 open Bundle Function Manifold Metric Set
@@ -45,8 +35,6 @@ noncomputable local instance {R : Real} :
     (Geometry.isSigmaCompact_of_isOpen
       𝓘(Real, E) (intrPullBall (E := E) R).isOpen)
 
-/-- Append a based loop to the canonical flat radial path ending at the
-intrinsic exponential image of `z`. -/
 noncomputable def loopRadial
     (g : SmoothRiemannianMetric I M)
     (hEnorm : ∀ (x : M) (v : TangentSpace I x),
@@ -55,7 +43,6 @@ noncomputable def loopRadial
     Path p (intrinsicFramedExp (I := I) g hEnorm p z) :=
   c.trans (radialFlat (I := I) g hEnorm p z)
 
-/-- A flat based loop followed by a flat radial path is flat `C¹`. -/
 theorem loopRadial_flat
     (g : SmoothRiemannianMetric I M)
     (hEnorm : ∀ (x : M) (v : TangentSpace I x),
@@ -64,8 +51,6 @@ theorem loopRadial_flat
     IsFlatC1Path (I := I) (loopRadial (I := I) g hEnorm p c z) :=
   hc.trans (radialFlat_flat (I := I) g hEnorm p z)
 
-/-- The loop-radial concatenation has the sum of the loop length and the model
-norm of its radial endpoint. -/
 theorem loopRadial_len
     (g : SmoothRiemannianMetric I M)
     (hEnorm : ∀ (x : M) (v : TangentSpace I x),
@@ -77,8 +62,6 @@ theorem loopRadial_len
     (radialFlat_flat (I := I) g hEnorm p z),
     radialFlat_len (I := I) g hEnorm p z]
 
-/-- A loop shorter than `L`, followed by a radial endpoint in the radius-`a`
-core, has total length shorter than `L + a`. -/
 theorem loopRadial_len_lt
     (g : SmoothRiemannianMetric I M)
     (hEnorm : ∀ (x : M) (v : TangentSpace I x),
@@ -97,8 +80,6 @@ theorem loopRadial_len_lt
         hcLen (ENNReal.ofReal_le_ofReal hz)
     _ = ENNReal.ofReal (L + a) := (ENNReal.ofReal_add hL ha).symm
 
-/-- The short loop-radial concatenation admits a lift through the intrinsic
-framed exponential, normalized at the model origin. -/
 theorem loopLift_exists
     (g : SmoothRiemannianMetric I M)
     (hEnorm : ∀ (x : M) (v : TangentSpace I x),
@@ -128,8 +109,6 @@ theorem loopLift_exists
     (by simp only [Path.extend_zero, loopRadial])
     hR hlenR hloc
 
-/-- The selected short lift used to transport a point after prefixing its
-radial path by a based loop. -/
 noncomputable def loopTransportLift
     (g : SmoothRiemannianMetric I M)
     (hEnorm : ∀ (x : M) (v : TangentSpace I x),
@@ -149,8 +128,6 @@ noncomputable def loopTransportLift
   Classical.choice
     (loopLift_exists (I := I) g hEnorm p hL ha hfit hloc c hc hcLen z hz)
 
-/-- Canonical short loop transport on a controlled core, defined as the final
-value of the selected loop-radial lift. -/
 noncomputable def loopTransport
     (g : SmoothRiemannianMetric I M)
     (hEnorm : ∀ (x : M) (v : TangentSpace I x),
@@ -180,10 +157,6 @@ noncomputable def loopTransport
   simpa only [Metric.mem_ball, dist_zero_right] using
     P.norm_lt hR hlenR ⟨zero_le_one, le_rfl⟩
 
-/-- Total extension of controlled loop transport, equal to the identity
-outside its radius-`a` core.  Iterated-orbit statements use this total map;
-all geometric conclusions are proved only after showing the relevant orbit
-points lie in the core. -/
 noncomputable def loopTransportExt
     (g : SmoothRiemannianMetric I M)
     (hEnorm : ∀ (x : M) (v : TangentSpace I x),
@@ -205,7 +178,6 @@ noncomputable def loopTransportExt
         c hc hcLen z hz
     else z
 
-/-- On the controlled core, the total extension is canonical loop transport. -/
 theorem loopTransportExt_eq
     (g : SmoothRiemannianMetric I M)
     (hEnorm : ∀ (x : M) (v : TangentSpace I x),
@@ -226,8 +198,6 @@ theorem loopTransportExt_eq
         c hc hcLen z hz := by
   simp only [loopTransportExt, dif_pos hz]
 
-/-- Loop transport stays in the same intrinsic-exponential fibre as its input
-point. -/
 theorem loopTransport_exp
     (g : SmoothRiemannianMetric I M)
     (hEnorm : ∀ (x : M) (v : TangentSpace I x),
@@ -252,8 +222,6 @@ theorem loopTransport_exp
   simpa only [loopTransport, P, Function.comp_apply, Path.extend_one,
     loopRadial] using hP
 
-/-- The total extension also preserves the intrinsic-exponential fibre:
-inside the core this is `loopTransport_exp`, while outside it is the identity. -/
 theorem loopTransportExt_exp
     (g : SmoothRiemannianMetric I M)
     (hEnorm : ∀ (x : M) (v : TangentSpace I x),
@@ -279,8 +247,6 @@ theorem loopTransportExt_exp
       c hc hcLen z hz
   · simp only [loopTransportExt, dif_neg hz]
 
-/-- Every iterate of total loop transport stays in the same
-intrinsic-exponential fibre. -/
 theorem loopIter_exp
     (g : SmoothRiemannianMetric I M)
     (hEnorm : ∀ (x : M) (v : TangentSpace I x),
@@ -309,8 +275,6 @@ theorem loopIter_exp
           (((loopTransportExt (I := I) g hEnorm p hL ha hfit hloc
             c hc hcLen)^[n]) z)).trans ih
 
-/-- Every total loop-transport iterate of the model origin lies over the
-basepoint `p`. -/
 theorem intrIter_exp
     (g : SmoothRiemannianMetric I M)
     (hEnorm : ∀ (x : M) (v : TangentSpace I x),
@@ -340,10 +304,6 @@ theorem intrIter_exp
       rw [intrFrame_apply, intrZero, map_zero,
         expMapIntrinsic_zero (I := I) g hEnorm p]
 
-/-- Loop transport increases the model norm by strictly less than the loop
-length budget.  Unlike `loopTransport_bound`, this keeps the actual input norm
-and therefore iterates without losing a full core-radius allowance at each
-step. -/
 theorem loopTransport_norm
     (g : SmoothRiemannianMetric I M)
     (hEnorm : ∀ (x : M) (v : TangentSpace I x),
@@ -381,8 +341,6 @@ theorem loopTransport_norm
     P.norm_lt hsumPos hlen
       (show (1 : Real) ∈ Set.Icc 0 1 by exact ⟨zero_le_one, le_rfl⟩)
 
-/-- Loop transport enlarges the model-norm budget by strictly less than the
-length budget of the prefixed loop. -/
 theorem loopTransport_bound
     (g : SmoothRiemannianMetric I M)
     (hEnorm : ∀ (x : M) (v : TangentSpace I x),
@@ -411,8 +369,6 @@ theorem loopTransport_bound
     P.norm_lt hLa hlen
       (show (1 : Real) ∈ Set.Icc 0 1 by exact ⟨zero_le_one, le_rfl⟩)
 
-/-- The `n`-th total loop-transport iterate of the model origin has norm at
-most `n * L`, provided that budget remains inside the transport core. -/
 theorem intrIter_norm
     (g : SmoothRiemannianMetric I M)
     (hEnorm : ∀ (x : M) (v : TangentSpace I x),
@@ -472,8 +428,6 @@ theorem intrIter_norm
           push_cast
           ring
 
-/-- Set-valued form of `loopTransport_bound`: transport sends a radius-`a`
-core into the larger radius-`L+a` core. -/
 theorem loopTransport_maps
     (g : SmoothRiemannianMetric I M)
     (hEnorm : ∀ (x : M) (v : TangentSpace I x),
@@ -497,10 +451,6 @@ theorem loopTransport_maps
   exact (loopTransport_bound (I := I) g hEnorm p hL ha hfit hloc
     c hc hcLen z.1 z.2).le
 
-/-- Canonical short loop transport varies continuously with its endpoint on
-the controlled core.  The pointwise-selected lifts are coherent because the
-intrinsic exponential is a separated local homeomorphism on the pullback
-ball. -/
 theorem loopTransport_cont
     (g : SmoothRiemannianMetric I M)
     (hEnorm : ∀ (x : M) (v : TangentSpace I x),
@@ -631,8 +581,6 @@ theorem loopTransport_cont
   apply Subtype.ext
   rfl
 
-/-- Canonical loop transport sends every `C¹` curve in the controlled core to
-a `C¹` curve of the same pullback length. -/
 theorem loopTransport_curve
     (g : SmoothRiemannianMetric I M)
     (hEnorm : ∀ (x : M) (v : TangentSpace I x),
@@ -761,7 +709,6 @@ theorem loopTransport_curve
       Manifold.pathELength_congr hproj
     _ = Manifold.pathELength 𝓘(Real, E) γ s t := hγlen
 
-/-- Length-only projection of `loopTransport_curve`. -/
 theorem loopTransport_len
     (g : SmoothRiemannianMetric I M)
     (hEnorm : ∀ (x : M) (v : TangentSpace I x),
@@ -791,9 +738,6 @@ theorem loopTransport_len
     c hc hcLen hγ hγcore).2
 
 attribute [-instance] Subtype.metricSpace Subtype.pseudoMetricSpace in
-/-- On a Whitehead core, canonical loop transport does not increase the
-pullback distance.  A core-valued minimizing join is transported with equal
-length, so the endpoint distance can only decrease. -/
 theorem loopTransport_nonexp
     (g : SmoothRiemannianMetric I M)
     (hEnorm : ∀ (x : M) (v : TangentSpace I x),
@@ -966,9 +910,6 @@ theorem loopTransport_nonexp
         (I := 𝓘(Real, E)) (M := intrPullBall (E := E) R) x y).symm
 
 attribute [-instance] Subtype.metricSpace Subtype.pseudoMetricSpace in
-/-- Iterating controlled loop transport does not increase the distance
-between two orbit points while both intermediate orbits remain in the
-Whitehead core. -/
 theorem loopIter_nonexp
     (g : SmoothRiemannianMetric I M)
     (hEnorm : ∀ (x : M) (v : TangentSpace I x),
@@ -1065,8 +1006,6 @@ theorem loopIter_nonexp
           ih (fun k hk => hx k (hk.trans (Nat.lt_succ_self n)))
             (fun k hk => hy k (hk.trans (Nat.lt_succ_self n)))
 
-/-- If the selected lift of the based loop has nonzero endpoint, its canonical
-short loop transport has no fixed point on the controlled core. -/
 theorem loopTransport_ne
     (g : SmoothRiemannianMetric I M)
     (hEnorm : ∀ (x : M) (v : TangentSpace I x),
@@ -1163,10 +1102,6 @@ theorem loopTransport_ne
   exact hA (hmid.symm.trans (hhalf.trans hBhalf))
 
 attribute [-instance] Subtype.metricSpace Subtype.pseudoMetricSpace in
-/-- A finite family lying in the inner half of a controlled pullback core has
-a unique global metric center.  Compactness gives a constrained center, while
-the exact origin-distance formula and the `2r` energy barrier make it global.
-This is the paper-faithful center producer for a periodic CGT orbit. -/
 theorem intrCore_center
     (g : SmoothRiemannianMetric I M)
     (hEnorm : ∀ (x : M) (v : TangentSpace I x),
@@ -1271,9 +1206,6 @@ theorem intrCore_center
     (fun i => hjensen (pts i) (hptsCore i))
 
 attribute [-instance] Subtype.metricSpace Subtype.pseudoMetricSpace in
-/-- A finite cyclic family has a unique global metric center in a Whitehead
-core when its points grow at most linearly from one marked orbit point and the
-complement of the core lies beyond one full cycle length. -/
 theorem intrCycle_center
     (g : SmoothRiemannianMetric I M)
     (hEnorm : ∀ (x : M) (v : TangentSpace I x),
@@ -1412,9 +1344,6 @@ theorem intrCycle_center
     (fun i => hjensen (pts i) (hptsCore i))
 
 attribute [-instance] Subtype.metricSpace Subtype.pseudoMetricSpace in
-/-- A nontrivial short loop transport cannot cyclically permute a finite
-orbit whose marked-point growth and exterior separation fit in one Whitehead
-core. -/
 theorem intrCycle_not_fin
     (g : SmoothRiemannianMetric I M)
     (hEnorm : ∀ (x : M) (v : TangentSpace I x),
@@ -1516,11 +1445,6 @@ theorem intrCycle_not_fin
       c hc hcLen A hA z hz) hfix
 
 attribute [-instance] Subtype.metricSpace Subtype.pseudoMetricSpace in
-/-- A nontrivial short loop transport cannot permute a finite orbit contained
-in the inner half of a Whitehead core.  The orbit has a unique global metric
-center; transport is nonexpanding on core minimizing joins, hence fixes that
-center, contradicting the nonzero lift endpoint.  This is the fixed-center
-contradiction at the heart of the CGT propeller argument. -/
 theorem intrOrbit_not_finite
     (g : SmoothRiemannianMetric I M)
     (hEnorm : ∀ (x : M) (v : TangentSpace I x),
@@ -1625,10 +1549,6 @@ theorem intrOrbit_not_finite
     (loopTransport_ne (I := I) g hEnorm p hL ha hfit hloc
       c hc hcLen A hA z hz) hfix
 
-/-- No positive iterate of total loop transport can return a controlled orbit
-point to itself while every preceding point remains in the inner center ball.
-The proof indexes the alleged cycle by `ZMod n` and feeds its cyclic
-permutation to `intrOrbit_not_finite`. -/
 theorem intrIter_ne
     (g : SmoothRiemannianMetric I M)
     (hEnorm : ∀ (x : M) (v : TangentSpace I x),
@@ -1718,9 +1638,6 @@ theorem intrIter_ne
       omega
     rw [hiSucc, hperiod]
 
-/-- Two controlled iterates of total loop transport with different indices are
-distinct.  The interval between the two indices would otherwise be a positive
-cycle, contradicting `intrIter_ne`. -/
 theorem intrIter_ne_of_lt
     (g : SmoothRiemannianMetric I M)
     (hEnorm : ∀ (x : M) (v : TangentSpace I x),
@@ -1779,9 +1696,6 @@ theorem intrIter_ne_of_lt
       hK hsmall hRm c hc hcLen A hA (n := j - i)
       hr h2ra ((T^[i]) q) hsub) hcycle
 
-/-- **CGT finite-orbit propeller.**  If the first `N` loop-length budgets fit
-inside the inner center ball, the total loop-transport iterates of the model
-origin indexed by `Fin (N + 1)` are pairwise distinct. -/
 theorem intrIter_injective
     (g : SmoothRiemannianMetric I M)
     (hEnorm : ∀ (x : M) (v : TangentSpace I x),
@@ -1847,9 +1761,6 @@ theorem intrIter_injective
             (hk.le.trans (Nat.lt_succ_iff.mp i.isLt)))) heq.symm
 
 attribute [-instance] Subtype.metricSpace Subtype.pseudoMetricSpace in
-/-- **Sharp CGT finite-orbit propeller.**  The first `N + 1` loop-transport
-iterates of the model origin are pairwise distinct as soon as the full
-`N * L` orbit budget fits in one Whitehead core. -/
 theorem intrIter_inj_core
     (g : SmoothRiemannianMetric I M)
     (hEnorm : ∀ (x : M) (v : TangentSpace I x),
@@ -2064,9 +1975,6 @@ theorem intrIter_inj_core
   · exact
       (hdistinct hji (Nat.lt_succ_iff.mp i.isLt)) heq.symm
 
-/-- **CGT Lemma 4.6, intrinsic finite-family form.**  The first `N + 1`
-iterated loop-transport endpoints form a distinct family in the fibre over
-`p`, and the endpoint with index `i` has model norm at most `i * L`. -/
 theorem intrIter_family
     (g : SmoothRiemannianMetric I M)
     (hEnorm : ∀ (x : M) (v : TangentSpace I x),
@@ -2119,9 +2027,6 @@ theorem intrIter_family
     exact intrIter_norm (I := I) g hEnorm p hR hL ha hfit hloc
       c hc hcLen i.val hia
 
-/-- **Sharp intrinsic form of CGT Lemma 4.6.**  The first `N + 1`
-loop-transport endpoints are distinct, remain over the basepoint, and obey
-the sharp `i * L` norm bound when `N * L` fits in one Whitehead core. -/
 theorem intrIter_family_core
     (g : SmoothRiemannianMetric I M)
     (hEnorm : ∀ (x : M) (v : TangentSpace I x),
@@ -2169,8 +2074,6 @@ theorem intrIter_family_core
     exact intrIter_norm (I := I) g hEnorm p hR hL ha hfit hloc
       c hc hcLen i.val (hiMul.trans_lt hNLa)
 
-/-- The sharp CGT finite-orbit family gives `N + 1` inverse images in the
-basepoint fibre inside the same Whitehead-core radius. -/
 theorem intrFiber_card_core
     (g : SmoothRiemannianMetric I M)
     (hEnorm : ∀ (x : M) (v : TangentSpace I x),
@@ -2235,8 +2138,6 @@ theorem intrFiber_card_core
     _ ≤ (intrFiber (I := I) g hEnorm p p a).encard :=
       Set.encard_le_encard hrange
 
-/-- Lemmas 4.5 and the sharp form of Lemma 4.6 give the same `N + 1`
-multiplicity lower bound over every point of a short target ball. -/
 theorem intrFiber_count_core
     (g : SmoothRiemannianMetric I M)
     (hEnorm : ∀ (x : M) (v : TangentSpace I x),
@@ -2276,8 +2177,6 @@ theorem intrFiber_count_core
       N hNLa).trans
       (fiber_encard_le (I := I) g hEnorm haPos hs hqs has hloc)
 
-/-- The CGT finite-orbit family gives an explicit lower bound for the inverse
-fibre cardinality over the basepoint. -/
 theorem intrFiber_encard_ge
     (g : SmoothRiemannianMetric I M)
     (hEnorm : ∀ (x : M) (v : TangentSpace I x),
@@ -2343,8 +2242,6 @@ theorem intrFiber_encard_ge
     _ ≤ (intrFiber (I := I) g hEnorm p p r).encard :=
       Set.encard_le_encard hrange
 
-/-- Lemmas 4.5 and 4.6 together give the same finite multiplicity lower bound
-over every point of a short target ball. -/
 theorem intrFiber_count_ge
     (g : SmoothRiemannianMetric I M)
     (hEnorm : ∀ (x : M) (v : TangentSpace I x),
@@ -2381,9 +2278,6 @@ theorem intrFiber_count_ge
     (fiber_encard_le (I := I) g hEnorm hr hs hqs hrs hloc)
 
 attribute [-instance] Subtype.metricSpace Subtype.pseudoMetricSpace in
-/-- Conditional constrained-center variant.  Unlike `intrCore_center`, this
-requires a map to preserve the entire core; canonical loop transport generally
-only maps a radius-`a` core into the larger radius-`L+a` core. -/
 theorem intrCore_center_fix
     (g : SmoothRiemannianMetric I M)
     (hEnorm : ∀ (x : M) (v : TangentSpace I x),

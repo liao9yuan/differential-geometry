@@ -16,7 +16,6 @@ import DifferentialGeometry.Analysis.Parabolic.RicciLinearization.RiemannCoeffic
 import DifferentialGeometry.Analysis.Parabolic.RicciLinearization.RiemannCoefficientPalatiniRefoldLieCovDerivFamily
 import DifferentialGeometry.Analysis.Parabolic.RicciLinearization.RiemannCoefficientPalatiniRefoldEndoArmGridWindow
 
-
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
@@ -83,7 +82,6 @@ def armPairTraceSlotPerm6 : Equiv.Perm (Fin 6) :=
    fun i => (![4, 0, 5, 1, 2, 3] : Fin 6 → Fin 6) i,
    by decide, by decide⟩
 
-/-- Compatibility name for the fixed six-slot pair-trace permutation. -/
 abbrev lieCovSigma : Equiv.Perm (Fin 6) :=
   armPairTraceSlotPerm6
 
@@ -474,7 +472,6 @@ def armPairTraceOpCc (g₀ g₁ : SmoothRiemannianMetric I M) : SmoothCcTensor g
     (cometricDoubleTraceCc (I := I) (M := M) g₀ g₁ 2)
     (cometricDoubleTraceCc (I := I) (M := M) g₀ g₁ 4)
 
-/-- Compatibility name for the pair-cometric contraction operator. -/
 abbrev lieCovPair (g₀ g₁ : SmoothRiemannianMetric I M) : SmoothCcTensor g₀ 6 2 :=
   armPairTraceOpCc (I := I) (M := M) g₀ g₁
 
@@ -806,7 +803,6 @@ lemma bdSlotInsertZero_fullRaisedRev_eq_omRecover
   rw [g₁.symm x w (inverseMetricSharpFib (I := I) g₀ x om)]
 
 omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] [SigmaCompactSpace M] in
-/-- The reverse raised endomorphism in the leading slot is the metric-recovery endomorphism. -/
 theorem fullRev0_eq (g₀ g₁ : SmoothRiemannianMetric I M) :
     slotInsertEndoCc (I := I) (M := M) g₀ 0
         (fullRaisedEndoField (I := I) (M := M) g₁ g₀) =
@@ -941,7 +937,6 @@ private lemma bdOmRecover_eq_idEndo_add_raise
     ring]
 
 omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] [SigmaCompactSpace M] in
-/-- Under an additive metric perturbation, recovery is identity plus the raised perturbation. -/
 theorem omRecover_add
     (g₀ g₁ : SmoothRiemannianMetric I M) (T : SmoothCcTensor g₀ 0 2)
     (htie : ∀ (y : M) (v w : TangentSpace I y),
@@ -1201,7 +1196,6 @@ def connDiffEndo (g₀ gc : SmoothRiemannianMetric I M) :
       (fun x : M => PDE.DeTurck.connDiff (I := I) gc g₀ x)
       (fun V0 W => PDE.DeTurck.connDiff_contMDiff (I := I) gc g₀ V0.contMDiff W.contMDiff)⟩
 
-/-- Compatibility name for the background connection-difference endomorphism pair. -/
 abbrev bdConnPair := @connDiffEndo
 
 omit [CompactSpace M] [I.Boundaryless] in
@@ -1213,7 +1207,6 @@ lemma bdConnPair_apply (g₀ gc : SmoothRiemannianMetric I M) (x : M) :
 set_option backward.isDefEq.respectTransparency false in
 omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 omit [SigmaCompactSpace M] in
-/-- The connection-difference section is the zeroth arm insertion of its endomorphism pair. -/
 lemma bdConnDiffSection_eq_armSlotEndoCc_zero (g₀ g₁ : SmoothRiemannianMetric I M) :
     connDiffSection (I := I) g₁ g₀ =
       armSlotEndoCc (I := I) (M := M) g₀ 0 (connDiffEndo (I := I) (M := M) g₀ g₁) := by
@@ -1681,12 +1674,10 @@ private lemma bdArmSlot2_sub_le
   refine mul_le_mul_of_nonneg_left (le_of_eq ?_) (Nat.cast_nonneg _)
   rw [hAS]
 
-/-- Compatibility name for the lifted connection-difference operator in the quadratic arm. -/
 def lieCovArm2 (g₀ g₁ : SmoothRiemannianMetric I M) : SmoothCcTensor g₀ 3 4 :=
   armSlotEndoCc (I := I) (M := M) g₀ 2
     (connDiffEndo (I := I) (M := M) g₀ g₁)
 
-/-- Fibre bound for each covariant jet of the lifted connection-difference arm. -/
 theorem lieCovArm2_l2 (g₀ g₁ : SmoothRiemannianMetric I M) (j : ℕ) (x : M) :
     riemannianFiberNormSq (I := I) (M := M) g₀ 3 (4 + j) x
         ((iteratedCovGrad (I := I) g₀ 3 4 j
@@ -1698,8 +1689,6 @@ theorem lieCovArm2_l2 (g₀ g₁ : SmoothRiemannianMetric I M) (j : ℕ) (x : M)
   simpa only [lieCovArm2] using
     bdArmSlot2_rfns_le (I := I) (M := M) g₀ g₁ j x
 
-/-- Each covariant jet of a two-metric lifted-arm difference is controlled by the
-corresponding connection-difference jet. -/
 theorem lieCovArm2_sub_l2
     (g₀ g₁ g₂ : SmoothRiemannianMetric I M) (j : ℕ) (x : M) :
     riemannianFiberNormSq (I := I) (M := M) g₀ 3 (4 + j) x
@@ -3429,7 +3418,6 @@ theorem bdCovDerivArmDiff_pointwise_gridWindow (g₀ g_bg : SmoothRiemannianMetr
     (appCcGdiag_nonneg (E := E) i)) ?_
   rw [← Finset.sum_mul, ← mul_assoc]
 
-
 theorem exists_deTurckLieCovDerivArm_backgroundDifference_perOrder_l2_tameEnvelope_generic
     (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
     (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) {R : ℝ} (hR : 0 ≤ R)
@@ -3481,7 +3469,6 @@ theorem exists_deTurckLieCovDerivArm_backgroundDifference_perOrder_l2_tameEnvelo
     have hK_nn : 0 ≤ C i * ∑ k ∈ Finset.range (i + 2), Kg k :=
       mul_nonneg (hC_nn i) (Finset.sum_nonneg fun k _ => hKg_nn k)
     nlinarith [hwin_nn, hK_nn]
-
 
 theorem exists_deTurckLieCovDerivArm_backgroundDifference_l2JetWindow
     (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
@@ -3572,13 +3559,9 @@ def deTurckLieCovDerivRefoldPairTraceFamily (g₀ : SmoothRiemannianMetric I M)
                 (Equiv.swap (0 : Fin 4) 2 * Equiv.swap (1 : Fin 4) 3))
               (iteratedCovGrad (I := I) g₀ 0 2 2 T))))))
 
-/-- The three fixed input permutations in the low-order `DLa` background
-correction. -/
 def lieBgPerm : Fin 3 → Equiv.Perm (Fin 4) :=
   ![bdSigma2, bdSigma3, bdSigma4]
 
-/-- The four-covariant low coefficient in the fixed-background `DLa`
-normal form. Its state dependence is only through the connection difference. -/
 def lieBgLow (g₀ g₁ g_bg : SmoothRiemannianMetric I M) : SmoothCcTensor g₀ 0 4 :=
   (-1 : ℝ) • bdFixLoweredCc (I := I) (M := M) g₀ g_bg g₀
     + domDomCongrSection (I := I) g₀ (lieBgPerm 0)
@@ -3633,8 +3616,6 @@ private theorem lieBg_dom_sub
   simp only [ContinuousMultilinearMap.sub_apply,
     ContinuousMultilinearMap.domDomCongr_apply]
 
-/-- The state difference of the low `DLa` background coefficient has exactly
-three first-order telescoping arms. -/
 theorem lieBgLow_sub
     (g₀ gT gU g_bg : SmoothRiemannianMetric I M) :
     lieBgLow (I := I) (M := M) g₀ gT g_bg -
@@ -3658,8 +3639,6 @@ theorem lieBgLow_sub
   simp only [appCcRS_sub_right, appCcRS_sub_left, lieBg_dom_sub]
   module
 
-/-- The complete four-covariant core acted on by the pair-cometric in the
-fixed-background `DLa` normal form. -/
 def lieBgCore (g₀ g₁ g_bg : SmoothRiemannianMetric I M) : SmoothCcTensor g₀ 0 4 :=
   let half := appCcRS (I := I) (M := M) g₀ 0 4 4
     (slotInsertEndoCc (I := I) (M := M) g₀ 3
@@ -3673,8 +3652,6 @@ private theorem lieBgCore_eq_canonical
       deTurckArmCoeffDiffCc (I := I) (M := M) g₀ g₁ g_bg := by
   rfl
 
-/-- The fixed-background `DLa` correction is the pair-cometric action on its
-explicit four-covariant low core. -/
 theorem dlaBg_eq
     (g₀ g_bg g₁ : SmoothRiemannianMetric I M) :
     deTurckLieDLaCoeffField (I := I) (M := M) g₀ g₁ g_bg -

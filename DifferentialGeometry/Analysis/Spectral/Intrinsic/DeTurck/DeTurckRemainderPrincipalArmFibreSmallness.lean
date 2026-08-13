@@ -549,12 +549,6 @@ theorem exists_coeffAction_iteratedCovGrad_l2_coeffJetEnvelope_dataJetWindow_le_
     · rw [h]; have := hD_nn 0 q; linarith
   exact mul_le_mul_of_nonneg_right hDle (Real.sqrt_nonneg _)
 
-/-- The order-generic jet window of the first-order low-base arms.
-
-The derivative budget is `2 * (finrank ℝ E / 2) ≤ a`.  Splitting at
-`finrank ℝ E / 2 + m` keeps the coefficient's Sobolev jet window inside the
-a-priori ball in the low band and the data's sup-window inside the output
-window in the high band. -/
 theorem exists_coeffAction_iteratedCovGrad_l2_coeffJetEnvelope_dataJetWindow_le
     (g₀ : SmoothRiemannianMetric I M) (a : ℕ)
     (ha : 2 * (Module.finrank ℝ E / 2) ≤ a) {R₀ : ℝ} (hR₀ : 0 ≤ R₀)
@@ -597,7 +591,6 @@ theorem exists_coeffAction_iteratedCovGrad_l2_coeffJetEnvelope_dataJetWindow_le
       (show CmB q ≤ CmA q + CmB q by have := hCmA_nn q; linarith) hsqrt_nn
     linarith
 
-/-- Compatibility name for the coefficient-action jet-window estimate. -/
 alias exists_appCc_iteratedCovGrad_l2_coeffJetEnvelope_dataJetWindow_le :=
   exists_coeffAction_iteratedCovGrad_l2_coeffJetEnvelope_dataJetWindow_le
 
@@ -1109,7 +1102,6 @@ private lemma gFibreOpBound_delta_nonneg [Nonempty M] (g₀ : SmoothRiemannianMe
     rw [horth i0 i0, if_pos rfl]
   rw [hgi, Real.sqrt_one, mul_one, mul_one] at hb
   exact le_trans (abs_nonneg _) hb
-
 
 omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
     [T2Space M] [SigmaCompactSpace M] in

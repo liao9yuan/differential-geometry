@@ -1,13 +1,5 @@
 import DifferentialGeometry.Analysis.Sobolev.TensorHilbert.DeTurckLieKernelL2JetBound
 
-/-!
-# Top-separated pointwise bounds for the DLa coefficient field
-
-This file isolates the pointwise top-order contribution in the connection-derivative half of the
-DeTurck-Lie coefficient field.  The protected top derivative is kept separate from the lower-order
-antidiagonal grid window, with an order-independent top coefficient.
--/
-
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
@@ -57,11 +49,6 @@ theorem symmC0_rfns_le (g₀ : SmoothRiemannianMetric I M)
       (Module.finrank ℝ E : ℝ) ^ 2 * δ ^ 2 :=
   rfns_symmS_zero_le_dla (I := I) (M := M) g₀ T hδ0 hbound x
 
-/-! ### DLa top-separated tower (keeps the `A1 = covGrad (connDiffSection g₁ g₀)` head separate). -/
-
-/-- Reshape the `connDiffSection` top-separated engine remainder
-`∑_{k<j} b(j-k)·antidiagonalTupleGrid b (k+1)` into `antidiagonalTupleGridPartialSum` currency (`R`-independent
-combinatorial count times `antidiagonalTupleGridPartialSum b (j+2)`).  Pure combinatorial. -/
 private lemma engineRem_le_dLaGridWin (b : ℕ → ℝ) (hb : ∀ j, 0 ≤ b j) (j : ℕ) :
     ∑ k ∈ Finset.range j,
         b (j - k) * Combinatorics.antidiagonalTupleGrid b (k + 1) ≤
@@ -91,11 +78,6 @@ private lemma engineRem_le_dLaGridWin (b : ℕ → ℝ) (hb : ∀ j, 0 ≤ b j) 
         mul_le_mul_of_nonneg_left h3
           (mul_nonneg (Combinatorics.antidiagonalTupleGridCount_nonneg _) (Combinatorics.antidiagonalTupleGridCount_nonneg _))
 
-/-- **connDiffSection top-separated jet bound in `antidiagonalTupleGridPartialSum` currency.**  The top coefficient
-`Ktop = 2·Kt0` (`Kt0` = engine head `10·S 0`) is `R`-independent; the remainder is `antidiagonalTupleGridPartialSum`
-(house `R`-pattern).  This is the `antidiagonalTupleGridPartialSum`-currency sibling of the head cell
-`covGradConnDiffSection_perOrder_rfns_topSeparated`, in the shape the DLa 8-summand kernel triangle's
-`A1` slot consumes. -/
 private theorem exists_rfns_connDiffSection_topsep_dla
     (g₀ : SmoothRiemannianMetric I M) {δ₀ : ℝ} (hδ₀ : δ₀ < 1) :
     ∃ Ktop : ℝ, 0 ≤ Ktop ∧ ∃ Kc : ℕ → ℝ, (∀ j, 0 ≤ Kc j) ∧
@@ -173,11 +155,6 @@ private theorem exists_rfns_connDiffSection_topsep_dla
         (2 * Kc0 j * (∑ k ∈ Finset.range j,
           Combinatorics.antidiagonalTupleGridCount (j - k) * Combinatorics.antidiagonalTupleGridCount (k + 1))) * antidiagonalTupleGridPartialSum b (j + 2) := by ring
 
-/-- **Kernel top-separated bound.**  Top-separated twin of `exists_rfns_dLaKernelRaised_tgrid`:
-the isolated `A1 = covGrad (connDiffSection g₁ g₀)` head is kept separate via the top-separated
-connDiffSection bound (`R`-independent top coefficient `Ktop = 128·KtopA`), while the 7 lower
-summands (`A2 = covGrad (connDiffSection g_bg g₀)` and the 6 quad terms) go entirely into the
-`antidiagonalTupleGridPartialSum` remainder. -/
 private theorem exists_rfns_dLaKernelRaised_topsep (g₀ g_bg : SmoothRiemannianMetric I M)
     {δ₀ : ℝ} (hδ₀ : δ₀ < 1) :
     ∃ Ktop : ℝ, 0 ≤ Ktop ∧ ∃ Kc : ℕ → ℝ, (∀ i, 0 ≤ Kc i) ∧
@@ -337,10 +314,6 @@ private theorem exists_rfns_dLaKernelRaised_topsep (g₀ g_bg : SmoothRiemannian
     mul_assoc (128 : ℝ) KtopA (riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + (i + 2)) x
       ((iteratedCovGrad (I := I) g₀ 0 2 (i + 2) T).toSection x))]
 
-/-! ### Piece 4 — field-level lift of the DLa top-separated bound. -/
-
-
-/-- Pure-real grid split: pull the `(i'=0, l=i)` top cell out of the ccOperatorFieldComp product grid. -/
 private lemma gridSplit_dla (G cΦ0 τ Wtop Wrem gridB : ℝ) (i : ℕ) (pΦ qW : ℕ → ℝ)
     (hG_nn : 0 ≤ G) (hcΦ0 : 0 ≤ cΦ0) (hpΦ_nn : ∀ i', 0 ≤ pΦ i') (hqW_nn : ∀ l, 0 ≤ qW l)
     (hΦ0 : pΦ 0 ≤ cΦ0) (hWi : qW i ≤ Wtop * τ + Wrem)
@@ -379,8 +352,6 @@ private lemma gridSplit_dla (G cΦ0 τ Wtop Wrem gridB : ℝ) (i : ℕ) (pΦ qW 
     _ = G * cΦ0 * Wtop * τ + (G * cΦ0 * Wrem + gridB) := by ring
 
 omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] in
-/-- Shared ccOperatorFieldComp full-grid bound (`hfull` producer for both DLa extractions;
-both use window shape `(i'+1)(l+3) → (i+3)`). -/
 private lemma appCcGrid_le_dla (b : ℕ → ℝ) (hb : ∀ j, 0 ≤ b j) (i : ℕ)
     (pΦ cΦ qW cW : ℕ → ℝ)
     (hqW_nn : ∀ l, 0 ≤ qW l) (hcΦ_nn : ∀ i', 0 ≤ cΦ i') (hcW_nn : ∀ l, 0 ≤ cW l)
@@ -435,8 +406,6 @@ private lemma appCcGrid_le_dla (b : ℕ → ℝ) (hb : ∀ j, 0 ≤ b j) (i : �
           antidiagonalTupleGridPartialSum b (i + 3) := by
         rw [← Finset.sum_mul, ← mul_assoc]
 
-/-- **dLaLoweredCc top-separated.**  Raise-eq bridge into the kernel top-separation (piece 3).
-`R`-independent top coefficient (`= 256·Kt0`). -/
 private theorem exists_rfns_dLaLowered_topsep (g₀ g_bg : SmoothRiemannianMetric I M)
     {δ₀ : ℝ} (hδ₀ : δ₀ < 1) :
     ∃ Ktop : ℝ, 0 ≤ Ktop ∧ ∃ Kc : ℕ → ℝ, (∀ i, 0 ≤ Kc i) ∧
@@ -471,10 +440,6 @@ private theorem exists_rfns_dLaLowered_topsep (g₀ g_bg : SmoothRiemannianMetri
   rw [hbridge]
   exact hker g₁ T htie hδ_le hδ0 hbound i x
 
--- The top-separated coefficient assembly requires additional elaboration budget.
-/-- **dLaSymCc top-separated.**  Exported top coefficient `Ktop_sym` is a FIXED `R`-free real;
-the `diagonalGridGrowthFactor i` power is explicit so the summed layer fixes one constant via
-`diagonalGridGrowthFactor i ≤ diagonalGridGrowthFactor a`. -/
 private theorem exists_rfns_dLaSym_topsep (g₀ g_bg : SmoothRiemannianMetric I M)
     {δ₀ : ℝ} (hδ₀ : δ₀ < 1) :
     ∃ Ktop : ℝ, 0 ≤ Ktop ∧ ∃ Kc : ℕ → ℝ, (∀ i, 0 ≤ Kc i) ∧
@@ -532,7 +497,6 @@ private theorem exists_rfns_dLaSym_topsep (g₀ g_bg : SmoothRiemannianMetric I 
     exact one_le_pow₀ (by
       have : (0 : ℝ) ≤ (Module.finrank ℝ E : ℝ) := Nat.cast_nonneg _
       linarith)
-  -- perturb slotInsert Φ-per-order (`CP i'` constant, R-free), for `hfull`.
   have hPfac : ∀ i', i' ≤ i →
       riemannianFiberNormSq (I := I) (M := M) g₀ 4 (4 + i') x
         ((iteratedCovGrad (I := I) g₀ 4 4 i'
@@ -585,7 +549,6 @@ private theorem exists_rfns_dLaSym_topsep (g₀ g_bg : SmoothRiemannianMetric I 
               refine mul_le_mul_of_nonneg_right ?_ hwin_nn
               calc fr ^ 3 = fr ^ 3 * 1 := by ring
                 _ ≤ fr ^ 3 * (fr ^ 2 * δ₀ ^ 2 + 1) := mul_le_mul_of_nonneg_left hfac1 hfr3_nn
-  -- perturb order-0 (`cPer`), for the top cell.
   have hPer0 : riemannianFiberNormSq (I := I) (M := M) g₀ 4 (4 + 0) x
       ((iteratedCovGrad (I := I) g₀ 4 4 0
         (endoSlotZeroCcTensor (I := I) (M := M) g₀ 3
@@ -605,7 +568,6 @@ private theorem exists_rfns_dLaSym_topsep (g₀ g_bg : SmoothRiemannianMetric I 
           mul_le_mul_of_nonneg_left (mul_le_mul_of_nonneg_left hδsq (by positivity))
             (by positivity)
       _ = fr ^ 5 * δ₀ ^ 2 := by ring
-  -- perturb top-separated.
   have hPer : riemannianFiberNormSq (I := I) (M := M) g₀ 0 (4 + i) x
       ((iteratedCovGrad (I := I) g₀ 0 4 i
         (dLaLoweredPerturbCc (I := I) (M := M) g₀ T g₁ g_bg)).toSection x) ≤
@@ -645,7 +607,6 @@ private theorem exists_rfns_dLaSym_topsep (g₀ g_bg : SmoothRiemannianMetric I 
         (fun l => riemannianFiberNormSq_nonneg (I := I) (M := M) g₀ 0 (4 + l) x _)
         hCP_nn hCL_nn hPfac (fun l _ => hCL g₁ T htie hδ_le hδ0 hbound l x))
         (le_of_eq (by rw [hCLT_def, hW_def])))
-  -- G1 = dLaLoweredCc + dLaLoweredPerturbCc.
   have hG1 : riemannianFiberNormSq (I := I) (M := M) g₀ 0 (4 + i) x
       ((iteratedCovGrad (I := I) g₀ 0 4 i
         (dLaLoweredG1Cc (I := I) (M := M) g₀ T g₁ g_bg)).toSection x) ≤
@@ -689,7 +650,6 @@ private theorem exists_rfns_dLaSym_topsep (g₀ g_bg : SmoothRiemannianMetric I 
               ((iteratedCovGrad (I := I) g₀ 0 2 (i + 2) T).toSection x) +
           (2 * KcL i + 2 * diagonalGridGrowthFactor (E := E) i * cPer * KcL i + 2 * CLT i) * W :=
           add_le_add (mul_le_mul_of_nonneg_right htoplift hτ_nn) (le_refl _)
-  -- sym = domDomCongr(swap 0 1)(G1) + G1.
   have hperm : riemannianFiberNormSq (I := I) (M := M) g₀ 0 (4 + i) x
       ((iteratedCovGrad (I := I) g₀ 0 4 i
         (domDomCongrSection (I := I) g₀ (Equiv.swap (0 : Fin 4) 1)
@@ -724,11 +684,6 @@ private theorem exists_rfns_dLaSym_topsep (g₀ g_bg : SmoothRiemannianMetric I 
             ((iteratedCovGrad (I := I) g₀ 0 2 (i + 2) T).toSection x) +
         (8 * KcL i + 8 * diagonalGridGrowthFactor (E := E) i * cPer * KcL i + 8 * CLT i) * W := by ring
 
-
--- The nested coefficient-field extraction requires additional elaboration budget.
-/-- **Field pointwise top-separated bound** for `deTurckLieConnDiffDerivCoeffField`.  Exported base top
-coefficient `Ktop` is `R`-free; the `diagonalGridGrowthFactor i` powers are explicit (the field carries TWO
-nested ccOperatorFieldComp extractions, so `(diagonalGridGrowthFactor i)²`). -/
 theorem riemannianFiberNormSq_iteratedCovGrad_deTurckLieConnDiffDerivCoeffField_topSeparated_le (g₀ g_bg : SmoothRiemannianMetric I M)
     {δ₀ : ℝ} (hδ₀ : δ₀ < 1) :
     ∃ Ktop : ℝ, 0 ≤ Ktop ∧ ∃ Kc : ℕ → ℝ, (∀ i, 0 ≤ Kc i) ∧
@@ -777,7 +732,6 @@ theorem riemannianFiberNormSq_iteratedCovGrad_deTurckLieConnDiffDerivCoeffField_
   set W : ℝ := antidiagonalTupleGridPartialSum b (i + 3) with hW_def
   have hW_nn : 0 ≤ W := dLaGridWin_nonneg b hb (i + 3)
   have happ_nn : 0 ≤ diagonalGridGrowthFactor (E := E) i := appCcGdiag_nonneg (E := E) i
-  -- X-tower reduction `rfns(∇^l X) ≤ fr²·rfns(∇^l dLaSymCc)`.
   have hXfr : ∀ l, riemannianFiberNormSq (I := I) (M := M) g₀ 2 (6 + l) x
         ((iteratedCovGrad (I := I) g₀ 2 6 l
           (rsDomDomCongrSection (I := I) (M := M) g₀ 2 6 sigmaE0dla
@@ -821,7 +775,6 @@ theorem riemannianFiberNormSq_iteratedCovGrad_deTurckLieConnDiffDerivCoeffField_
       _ = fr ^ 2 * riemannianFiberNormSq (I := I) (M := M) g₀ 0 (4 + l) x
             ((iteratedCovGrad (I := I) g₀ 0 4 l
               (dLaSymCc (I := I) (M := M) g₀ T g₁ g_bg)).toSection x) := by ring
-  -- pairTrace order-0 for the top cell.
   have hPT0 : riemannianFiberNormSq (I := I) (M := M) g₀ 6 (2 + 0) x
       ((iteratedCovGrad (I := I) g₀ 6 2 0 (pairTraceOpDla (I := I) (M := M) g₀ g₁)).toSection x) ≤
       CPT 0 := by
@@ -829,7 +782,6 @@ theorem riemannianFiberNormSq_iteratedCovGrad_deTurckLieConnDiffDerivCoeffField_
     rwa [show antidiagonalTupleGridPartialSum b (0 + 1) = 1 from by
           rw [antidiagonalTupleGridPartialSum, Finset.sum_range_one, Combinatorics.antidiagonalTupleGrid_zero],
         mul_one] at h
-  -- top cell (via X-tower at `l = i` + dLaSym top-sep).
   have hWi : riemannianFiberNormSq (I := I) (M := M) g₀ 2 (6 + i) x
       ((iteratedCovGrad (I := I) g₀ 2 6 i
         (rsDomDomCongrSection (I := I) (M := M) g₀ 2 6 sigmaE0dla
@@ -852,7 +804,6 @@ theorem riemannianFiberNormSq_iteratedCovGrad_deTurckLieConnDiffDerivCoeffField_
             riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + (i + 2)) x
               ((iteratedCovGrad (I := I) g₀ 0 2 (i + 2) T).toSection x) + fr ^ 2 * KcS i * W := by
           ring
-  -- field ↔ ccOperatorFieldComp lift.
   have hlift : riemannianFiberNormSq (I := I) (M := M) g₀ 2 (2 + i) x
       ((iteratedCovGrad (I := I) g₀ 2 2 i
         (deTurckLieConnDiffDerivCoeffField (I := I) (M := M) g₀ g₁ g_bg)).toSection x) =
@@ -923,8 +874,6 @@ theorem riemannianFiberNormSq_iteratedCovGrad_deTurckLieConnDiffDerivCoeffField_
       (le_of_eq (by rw [hCfield_def, hW_def])))) ?_
   exact le_of_eq (by ring)
 
-/-- Compatibility statement of the pointwise top-separated DLa coefficient
-bound in the original DLa grid notation. -/
 theorem rfns_iCG_dLaField_topsep (g₀ g_bg : SmoothRiemannianMetric I M)
     {δ₀ : ℝ} (hδ₀ : δ₀ < 1) :
     ∃ Ktop : ℝ, 0 ≤ Ktop ∧ ∃ Kc : ℕ → ℝ, (∀ i, 0 ≤ Kc i) ∧
@@ -946,8 +895,6 @@ theorem rfns_iCG_dLaField_topsep (g₀ g_bg : SmoothRiemannianMetric I M)
   simpa only [deTurckLieDLaCoeffField, appCcGdiag, dLaGridWin] using
     riemannianFiberNormSq_iteratedCovGrad_deTurckLieConnDiffDerivCoeffField_topSeparated_le
       (I := I) (M := M) g₀ g_bg hδ₀
-
-/-! ### Summation helpers (copied verbatim from `DLaTopSeparated`). -/
 
 end DLaGridBrick
 

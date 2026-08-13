@@ -1,14 +1,6 @@
 import DifferentialGeometry.Analysis.Parabolic.QuasiLinear.TensorMaximalRegularity.ZeroDuhamelCross
 import DifferentialGeometry.Analysis.Parabolic.MaximalRegularity.TimeL2InterpolationLimit
 
-/-!
-# Cross-scale helpers for non-autonomous maximal regularity
-
-This file contains the finite-time `L²` coefficient estimate and the
-cross-scale identities used to apply the non-autonomous fixed-point theorem at
-two adjacent Sobolev levels.
--/
-
 noncomputable section
 
 open Bundle Manifold MeasureTheory Filter
@@ -25,9 +17,6 @@ open DifferentialGeometry.Analysis.Parabolic.TensorHeatEquation
 open DifferentialGeometry.Analysis.Parabolic.MaximalRegularity
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral
 
-/-- A strongly measurable operator family with an affine pointwise bound by a
-time-`L²` field is itself in time `L²`, with the corresponding Minkowski norm
-bound. -/
 theorem memLp_clm_affine
     {T : ℝ} {X Y Z : Type*}
     [NormedAddCommGroup X] [InnerProductSpace ℝ X] [CompleteSpace X]
@@ -93,8 +82,6 @@ private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
 omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] in
-/-- Including the full Duhamel field down by one Sobolev order gives its
-canonical intermediate-order realization. -/
 theorem duhamel_incl
     {g : SmoothRiemannianMetric I M} {r s : ℕ} {a T : ℝ}
     (hT : 0 < T) (hT1 : T ≤ 1)

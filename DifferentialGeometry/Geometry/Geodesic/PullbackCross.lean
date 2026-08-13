@@ -2,14 +2,6 @@ import DifferentialGeometry.Geometry.Connection.ParallelTransport.PullbackCross
 
 set_option autoImplicit false
 
-
-
-
-
-
-
-
-
 noncomputable section
 
 namespace DifferentialGeometry
@@ -171,8 +163,6 @@ private theorem geoEq_of_covVel_C2
   exact ⟨deriv u t, deriv (deriv u) t, hu_hasDerivAt,
     hu_eventually_hasDerivAt, hderiv_hasDerivAt, hzero⟩
 
-
-
 omit [NeZero (Module.finrank ℝ E)] [NeZero (Module.finrank ℝ F)] in
 theorem geoEq_mapCrossAt
     [I.Boundaryless] [J.Boundaryless]
@@ -249,8 +239,6 @@ theorem geoEq_mapCrossAt
       (WithTop.coe_le_coe.mpr (le_top : (2 : ℕ∞) ≤ ⊤))) htargetVelZero
 
 omit [NeZero (Module.finrank ℝ E)] [NeZero (Module.finrank ℝ F)] in
-/-- A cross-model diffeomorphism reflects the moving-foot geodesic equation
-at a specified time. -/
 theorem geoEq_of_mapCrossAt
     [I.Boundaryless] [J.Boundaryless]
     [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M]
@@ -338,8 +326,6 @@ theorem geoEq_of_mapCrossAt
     (Diffeomorph.pullbackMetricCross (I := I) (J := J) g Phi)
     gamma t hgamma2 (by simpa [V] using hsourceZero)
 
-
-
 omit [NeZero (Module.finrank ℝ E)] [NeZero (Module.finrank ℝ F)] in
 theorem geoEq_mapCross
     [I.Boundaryless] [J.Boundaryless]
@@ -356,8 +342,6 @@ theorem geoEq_mapCross
   geoEq_mapCrossAt (I := I) (J := J) g Phi gamma t
     hgamma.contMDiffAt hgeo
 
-
-
 omit [NeZero (Module.finrank ℝ E)] [NeZero (Module.finrank ℝ F)] in
 theorem geodesic_mapCross
     [I.Boundaryless] [J.Boundaryless]
@@ -371,7 +355,6 @@ theorem geodesic_mapCross
       (Diffeomorph.pullbackMetricCross (I := I) (J := J) g Phi) gamma) :
     IsGeodesic (I := J) g (fun s => Phi (gamma s)) :=
   fun t => geoEq_mapCross (I := I) (J := J) g Phi gamma t hgamma (hgeo t)
-
 
 omit [NeZero (Module.finrank ℝ E)] [NeZero (Module.finrank ℝ F)] in
 theorem geodesicOn_mapCross
@@ -387,8 +370,6 @@ theorem geodesicOn_mapCross
       (Diffeomorph.pullbackMetricCross (I := I) (J := J) g Phi) gamma s) :
     IsGeodesicOn (I := J) g (fun t => Phi (gamma t)) s :=
   fun t ht => geoEq_mapCross (I := I) (J := J) g Phi gamma t hgamma (hgeo t ht)
-
-
 
 omit [NeZero (Module.finrank ℝ E)] [NeZero (Module.finrank ℝ F)] in
 theorem geodesicOn_mapLocal

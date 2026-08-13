@@ -5,7 +5,6 @@ import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.RiemannianFibe
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.DeTurckRemainderDefs
 import DifferentialGeometry.Analysis.Elliptic.MetricBounds
 
-
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
@@ -34,7 +33,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
-
 private lemma sum_fun_fin_four_eval_zero_one {n : ℕ} (F : Fin n → Fin n → ℝ) :
     ∑ K : Fin 4 → Fin n, F (K 0) (K 1) =
       ((n : ℝ) ^ 2) * ∑ k : Fin n, ∑ l : Fin n, F k l := by
@@ -61,7 +59,6 @@ private lemma sum_fun_fin_four_eval_zero_one {n : ℕ} (F : Fin n → Fin n → 
     rw [Finset.sum_congr rfl (fun l _ => h4 l), ← Finset.mul_sum]
   rw [Finset.sum_congr rfl (fun k _ => h2 k), ← Finset.mul_sum]
 
-
 omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless]
     [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private lemma metric_inner_right_sum (g : SmoothRiemannianMetric I M) (x : M)
@@ -69,7 +66,6 @@ private lemma metric_inner_right_sum (g : SmoothRiemannianMetric I M) (x : M)
     g.inner x u (∑ b, c b • v b) = ∑ b, c b * g.inner x u (v b) := by
   rw [map_sum]
   exact Finset.sum_congr rfl (fun b _ => by rw [map_smul, smul_eq_mul])
-
 
 omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless]
     [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
@@ -82,7 +78,6 @@ private lemma metric_inner_left_sum (g : SmoothRiemannianMetric I M) (x : M)
   rw [h1, ContinuousLinearMap.sum_apply]
   exact Finset.sum_congr rfl (fun a _ => by
     rw [ContinuousLinearMap.smul_apply, smul_eq_mul])
-
 
 omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless]
     [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
@@ -98,7 +93,6 @@ private lemma metric_inner_orthonormal_pair (g₁ : SmoothRiemannianMetric I M) 
   rw [Finset.sum_congr rfl (fun b _ => by rw [hB a b, mul_ite, mul_one, mul_zero])]
   rw [Finset.sum_ite_eq]
   exact if_pos (Finset.mem_univ a)
-
 
 omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless]
     [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
@@ -129,16 +123,13 @@ private lemma sum_sq_component_le_of_orthonormal
       ≤ (∑ a, (c a) ^ 2) / (1 - δ) := (le_div_iff₀ h1mδ).mpr h4
     _ = (1 / (1 - δ)) * ∑ a, (c a) ^ 2 := by ring
 
-
 private lemma div_pow_div_arith {t : ℝ} (ht : t ≠ 0) (u : ℝ) :
     (u / t) ^ 2 / t = u ^ 2 / t ^ 3 := by
   field_simp
 
-
 private lemma one_div_mul_pow_arith {t : ℝ} (ht : t ≠ 0) (D u : ℝ) :
     (1 / t) * (D * (u / t ^ 3)) = D * (u / t ^ 4) := by
   field_simp
-
 
 omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless]
     [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
@@ -569,7 +560,6 @@ attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
   Tensor0SBundle.tensorRSSpace_normedSpace in
 omit [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M]
     [SigmaCompactSpace M] in
-/-- Compatibility form of the curvature-refold monomial fibre bound. -/
 theorem rfns_curvatureRefoldMonomialBiContrFib_le
     (g₀ g₁ : SmoothRiemannianMetric I M) (P : SmoothCcTensor g₀ 0 2)
     (htie : ∀ (y : M) (v w : TangentSpace I y),

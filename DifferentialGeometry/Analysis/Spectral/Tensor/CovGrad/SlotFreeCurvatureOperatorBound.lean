@@ -1,15 +1,6 @@
 import DifferentialGeometry.Geometry.Curvature.CurvatureOperator.SlotFreeCurvatureOperatorDerivative
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.OperatorFieldFibreNormJet
 
-/-!
-# Pointwise bounds for the rank-one free-slot curvature operator
-
-This module converts tangent-operator bounds for `Rm` and `∇Rm` into intrinsic
-fibre bounds for `slotFreeOpCc g 1`.  Unlike the rank-two gradient-slot
-coefficient, the rank-one operator has a single curvature insertion, so its
-Parseval estimate does not use a triangle bound between slots.
--/
-
 set_option autoImplicit false
 
 noncomputable section
@@ -223,8 +214,6 @@ private lemma sfOne_comp1_le
   simpa only [hunit 0, hunit 1, hunit 2, hm,
     Real.sqrt_one, mul_one] using hb
 
-/-- A tangent-operator curvature cap controls the order-zero fibre norm of the
-canonical rank-one free-slot curvature operator. -/
 theorem sfOne_rfns_zero
     (g : SmoothRiemannianMetric I M) {C : ℝ} (hC : 0 ≤ C)
     (hR : ∀ (x : M) (v w u : TangentSpace I x),
@@ -263,8 +252,6 @@ theorem sfOne_rfns_zero
       push_cast
       ring
 
-/-- A tangent-operator `∇Rm` cap controls the first fibre jet of the canonical
-rank-one free-slot curvature operator. -/
 theorem sfOne_rfns_one
     (g : SmoothRiemannianMetric I M) {C : ℝ} (hC : 0 ≤ C)
     (hR : ∀ (x : M) (D X Y Z : TangentSpace I x),

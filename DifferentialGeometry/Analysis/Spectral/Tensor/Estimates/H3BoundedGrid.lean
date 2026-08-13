@@ -2,13 +2,6 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.Estimates.H3GridIntegral
 import DifferentialGeometry.Analysis.Sobolev.BoundedFactorProductGrid
 import DifferentialGeometry.Analysis.Sobolev.TensorHilbert.RemainderCoeffPerOrderJetEnvelopes
 
-/-!
-# Low-regularity bounded jet-grid integrals
-
-This module supplies the dimension-three, `H3` bounded-factor window used by
-the low-regularity Ricci--DeTurck coefficient estimates.
--/
-
 namespace DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral
 
 open Bundle Manifold MeasureTheory Set Tensor0SBundle
@@ -401,8 +394,6 @@ private theorem h3_bfg_four_int
         (mul_nonneg (by norm_num) (sq_nonneg (Q A)))
     _ = K A := by rfl
 
-/-- On a closed three-manifold, the bounded-factor jet window through total
-order four is integrable and uniformly controlled by the intrinsic `H3` jet. -/
 theorem h3_bfg5_int
     (hDim : Module.finrank Real E = 3)
     (g : SmoothRiemannianMetric I M) :
@@ -506,9 +497,6 @@ theorem h3_bfg5_int
             hfour'.2
         _ = K A := by rfl
 
-/-- In dimension three, a coefficient whose first three covariant derivatives
-are controlled by the refold residual windows has a uniform intrinsic `H2`
-jet bound from only the metric `H3` jet. -/
 theorem h2_of_bfg5
     (hDim : Module.finrank Real E = 3)
     (g : SmoothRiemannianMetric I M) {r s : Nat} (C : Nat -> Real)
@@ -603,10 +591,6 @@ theorem h2_of_bfg5
       rw [Finset.sum_mul]
     _ = Q A := by rfl
 
-/-- In dimension three, the low part of a bounded-factor coefficient window
-is controlled by the metric `H3` jet, while one explicitly separated head
-derivative is retained.  This is the tame variant needed when the order-two
-coefficient contains a term linear in the metric `H4` jet. -/
 theorem h2_of_bfg5_top
     (hDim : Module.finrank Real E = 3)
     (g : SmoothRiemannianMetric I M) {r s : Nat}

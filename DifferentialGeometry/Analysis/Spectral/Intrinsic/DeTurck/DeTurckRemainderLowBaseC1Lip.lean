@@ -4,16 +4,6 @@ import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.PrincipalLowRegC
 import DifferentialGeometry.Analysis.Sobolev.TensorHilbert.LieCorr0CoeffDiffRadiusFree
 import DifferentialGeometry.Analysis.Sobolev.TensorHilbert.DeTurckVFEndoInsertTopSep
 
-/-!
-# Low-base moving-connection coefficient Lipschitz estimates
-
-This module develops the fixed-order two-endpoint estimate for the
-background-lowered connection arm.  The exact algebra first lowers the
-connection difference by one moving endpoint and then raises that last slot
-back with the same endpoint inverse.  This avoids differentiating a
-two-endpoint inverse resolvent.
--/
-
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
@@ -1479,8 +1469,6 @@ private theorem sharp_eq_slot0
   rw [g.symm x w (inverseMetricSharpFib (I := I) gm x om)]
 
 set_option linter.unusedVariables false in
-/-- A radius-free low-order `H²` bound for the inverse-metric endomorphism on
-a fixed fibre-small metric neighborhood. -/
 theorem sharp_h2_low
     (g : SmoothRiemannianMetric I M)
     {δ₀ : ℝ} (hδ₀0 : 0 ≤ δ₀) (hδ₀ : δ₀ < 1) :
@@ -1981,8 +1969,6 @@ private theorem corr_diff_h2_low
       ring
 
 set_option linter.unusedVariables false in
-/-- On a closed three-manifold, the background-lowered connection coefficient
-is radius-free `H²`-Lipschitz on a common fibre-small metric neighborhood. -/
 theorem wXi_sub_h2
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M)
@@ -2131,9 +2117,6 @@ theorem wXi_sub_h2
 
 set_option maxHeartbeats 1600000 in
 set_option linter.unusedVariables false in
-/-- The background-lowered connection difference has the low-scale
-`H2 → H1` tame modulus.  Only the endpoint `U` low radius and the endpoint
-`T` high size enter; the state difference is measured solely in `H2`. -/
 theorem wXi_pair_h1
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M)
@@ -2347,10 +2330,6 @@ theorem wXi_pair_h1
       nlinarith [mul_nonneg ha0 hb0]
 
 set_option linter.unusedVariables false in
-/-- The background-lowered connection difference obeys the critical tame
-two-arm estimate: its `H³` difference has a coefficient depending only on
-the endpoint `H²` radius, while endpoint `H³` size multiplies only the
-`H²` difference. -/
 theorem wXi_sub_tame
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M)
@@ -2566,8 +2545,6 @@ theorem wXi_sub_tame
         mul_nonneg hb0 hc0]
 
 set_option linter.unusedVariables false in
-/-- The mixed connection-difference section inherits the low-scale
-`H2 → H1` pair estimate from its background-lowered realization. -/
 theorem connSec_pair_h1
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M)
@@ -2631,8 +2608,6 @@ theorem connSec_pair_h1
         R A D2 hR hA hD2 hU2 hT3 hTU2
 
 set_option linter.unusedVariables false in
-/-- The mixed connection-difference section inherits the critical two-arm
-`H²` pair estimate from its background-lowered covariant realization. -/
 theorem connSec_sub_tame
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M)
@@ -2697,9 +2672,6 @@ theorem connSec_sub_tame
         R A D2 D3 hR hA hD2 hD3 hU2 hT3 hTU2 hTU3
 
 set_option linter.unusedVariables false in
-/-- The connection insertion kernel preserves the critical two-arm pair
-shape; in dimension three its two slot extensions contribute only a fixed
-factor. -/
 theorem connIns_sub_tame
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M)
@@ -2779,8 +2751,6 @@ theorem connIns_sub_tame
       ring
 
 set_option linter.unusedVariables false in
-/-- The order-one Ricci connection kernel inherits the same critical
-two-arm estimate from the insertion field. -/
 theorem ricciKer_sub_tame
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M)
@@ -3378,8 +3348,6 @@ private theorem ricciKer_zero
 set_option maxHeartbeats 1600000 in
 set_option synthInstance.maxHeartbeats 1600000 in
 set_option linter.unusedVariables false in
-/-- On a sufficiently small spectral `H²` metric ball, the order-one Ricci
-coefficient is Lipschitz with the critical `H³/H²` two-arm modulus. -/
 theorem ricci1_pair_h2
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M) :
@@ -3769,8 +3737,6 @@ private theorem liePiece_sub
   module
 
 set_option maxHeartbeats 800000 in
-/-- The generic `H²` two-factor pair estimate for one order-one DeTurck Lie
-piece. -/
 theorem liePiece_pair
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M) :
@@ -3987,8 +3953,6 @@ private theorem jet_neg1
 
 set_option maxHeartbeats 1200000 in
 set_option linter.unusedVariables false in
-/-- The inverse-metric endomorphism is `H²`-Lipschitz on a sufficiently small
-spectral `H²` metric ball. -/
 theorem sharp_pair_h2
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M)
@@ -4313,8 +4277,6 @@ private theorem corr_h1_mul
       nlinarith
 
 set_option linter.unusedVariables false in
-/-- The moving-lowering correction is Lipschitz at the low endpoint with an
-`H²` coefficient slot and an `H¹` connection slot. -/
 theorem metricCorr_pair_h1
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M) :
@@ -4410,8 +4372,6 @@ private theorem mcd_sub_eq
 
 namespace LowBaseInternal
 
-/-- At fixed covariant background, the reverse raised-endomorphism difference
-is exactly the raised symmetric metric perturbation difference. -/
 theorem fullRev_sub
     (g gT gU : SmoothRiemannianMetric I M)
     (T U : SmoothCcTensor g 0 2)
@@ -4479,8 +4439,6 @@ theorem fullRev_sub
     ← raise_rev (I := I) (M := M) g gU U hUtie, hsub]
   module
 
-/-- The reverse raised-endomorphism factor is exactly linear in a tied
-metric perturbation difference at fixed covariant background. -/
 theorem revSlot_pair_h2
     (g gT gU : SmoothRiemannianMetric I M)
     (T U : SmoothCcTensor g 0 2)
@@ -4528,8 +4486,6 @@ theorem revSlot_pair_h2
         perturb_h2_eq (I := I) (M := M) g (T - U) hsymm]
 
 set_option linter.unusedVariables false in
-/-- A reverse raised-endomorphism factor tied to an `H²` perturbation has a
-fixed-order `H²` bound depending only on that low radius. -/
 theorem revSlot_bdd_h2
     (g : SmoothRiemannianMetric I M) :
     ∃ C : ℝ, 0 ≤ C ∧
@@ -4893,9 +4849,6 @@ theorem mcd_h2_bdd
 
 set_option maxHeartbeats 1600000 in
 set_option linter.unusedVariables false in
-/-- `H¹` two-state modulus for the moving-metric lowered connection
-difference, with the `D2`-only (third-difference-free) right-hand side
-required by the `C0` low-regularity lane. -/
 theorem mcd_pair_h1
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M)
@@ -5062,9 +5015,6 @@ theorem mcd_pair_h1
       ring
 
 set_option linter.unusedVariables false in
-/-- Raw fixed-order `H²` bound for the moving-second raised-endomorphism
-factor inserted at the rank-two slot, in the `H²` size of the tied metric
-perturbation. -/
 private theorem fullSlot1_h2
     (g : SmoothRiemannianMetric I M)
     {δ₀ : ℝ} (hδ₀0 : 0 ≤ δ₀) (hδ₀ : δ₀ < 1) :
@@ -5114,9 +5064,6 @@ private theorem fullSlot1_h2
       ring
 
 set_option linter.unusedVariables false in
-/-- Single-state `H²` bound for the moving-second raised-endomorphism factor
-`endoSlotZeroCcTensor g 1 (fullRaisedEndoField g gm)` used by `daMono`: the size
-is controlled by the `H²` radius of the tied metric perturbation alone. -/
 theorem fullSlot_bdd_h2
     (g : SmoothRiemannianMetric I M)
     {δ₀ : ℝ} (hδ₀0 : 0 ≤ δ₀) (hδ₀ : δ₀ < 1) :
@@ -5163,11 +5110,6 @@ theorem fullSlot_bdd_h2
 
 set_option maxHeartbeats 1600000 in
 set_option linter.unusedVariables false in
-/-- `H¹` two-state modulus for the moving-second raised-endomorphism factor,
-with the `D2`-only (third-difference-free) right-hand side required by the
-`C0` low-regularity lane.  The difference is handled by the resolvent
-factorisation `invSlot_sub_factor`, so only the `H²` size `D2` of the
-perturbation difference enters. -/
 theorem fullSlot_pair_h1
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M)
@@ -5908,9 +5850,6 @@ theorem connSec_self_h2
 set_option maxHeartbeats 4000000 in
 set_option synthInstance.maxHeartbeats 4000000 in
 set_option linter.unusedVariables false in
-/-- On a sufficiently small spectral `H²` metric ball, the complete
-order-one DeTurck Lie coefficient is Lipschitz with the critical
-`H³/H²` two-arm modulus. -/
 theorem lie1_pair_h2
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M) :
@@ -6342,8 +6281,6 @@ theorem lie1_pair_h2
 set_option maxHeartbeats 1800000 in
 set_option synthInstance.maxHeartbeats 1800000 in
 set_option linter.unusedVariables false in
-/-- On a common small spectral `H²` ball, the complete order-one
-Ricci--DeTurck coefficient has the critical `H³/H²` two-arm modulus. -/
 theorem rhs1_pair_h2
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M) :

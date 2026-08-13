@@ -1,13 +1,6 @@
 import DifferentialGeometry.Geometry.Connection.LeviCivita.Curvature.Realized
 import DifferentialGeometry.Geometry.Curvature.CurvatureOperator.ParsevalFrameDiffCurvatureTrace
 
-/-!
-# Pointwise covariant derivative of the curvature operator
-
-This file packages the already-proved value-determinacy of
-`nablaBaseSlotCurv` as a pointwise operator on four tangent vectors.
--/
-
 noncomputable section
 
 set_option autoImplicit false
@@ -34,8 +27,6 @@ private noncomputable def tangentExt
     (smoothExtensionTangent (I := I) x v)
     (smoothExtensionTangent_contMDiff (I := I) x v)
 
-/-- The pointwise covariant derivative `(nabla_D R)(X,Y)Z` of the
-Levi-Civita curvature operator. -/
 noncomputable def nablaRiemannOp
     (g : SmoothRiemannianMetric I M) (x : M)
     (D X Y Z : TangentSpace I x) : TangentSpace I x :=
@@ -55,9 +46,6 @@ private theorem nablaRiemannOp_eq_curvCov
         (tangentExt (I := I) x Z) x := by
   rfl
 
-/-- The canonical covariant derivative of the lowered Riemann tensor is the
-metric lowering of the pointwise covariant derivative of the curvature
-operator. -/
 theorem canNablaRm_apply
     (g : SmoothRiemannianMetric I M)
     (D X Y Z W : ContMDiffSection I E (∞ : WithTop ℕ∞)
@@ -250,8 +238,6 @@ theorem canNablaRm_apply
       simp only [curvCovDerivOpAt, sub_eq_add_neg, map_add, map_neg]
       ring
 
-/-- Pointwise form of `canNablaRm_apply`: evaluating the canonical
-`(0,5)`-tensor on tangent vectors lowers `nablaRiemannOp` in its final slot. -/
 theorem nablaRm04_apply
     (g : SmoothRiemannianMetric I M) (x : M)
     (D X Y Z W : TangentSpace I x) :
@@ -280,8 +266,6 @@ theorem nablaRm04_apply
   rw [LeviCivita_eq_leviCivitaConnectionOfMetric]
   exact h
 
-/-- The pointwise curvature derivative agrees with the section-level
-Leibniz formula for any smooth extensions of its four tangent arguments. -/
 theorem nablaRiemannOp_eq
     (g : SmoothRiemannianMetric I M)
     (D X Y Z : ContMDiffSection I E (∞ : WithTop ℕ∞)
@@ -313,8 +297,6 @@ theorem nablaRiemannOp_eq
     exact (ne_of_gt (g.pos x (lhs - rhs) hne)) hzero
   exact sub_eq_zero.mp hsub
 
-/-- The pointwise curvature derivative is the section-level covariant
-derivative of curvature for any smooth extensions of its four slots. -/
 theorem nablaRiemannOp_sec
     (g : SmoothRiemannianMetric I M)
     (D X Y Z : ContMDiffSection I E (∞ : WithTop ℕ∞)

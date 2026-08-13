@@ -10,13 +10,6 @@ import Mathlib.GroupTheory.Perm.Sign
 
 set_option autoImplicit false
 
-/-!
-# Directional iterated derivatives
-
-This file relates ordinary iterated derivatives along affine lines to repeated
-directional evaluations of iterated Fréchet derivatives.
--/
-
 noncomputable section
 
 open Set Filter Topology
@@ -31,9 +24,6 @@ variable {E F G : Type*}
 
 namespace Analysis
 
-/-- A fixed directional derivative commutes with every iterated derivative of a
-`C∞` map on a regular unique-differentiability set. Equivalently, the new
-leading derivative slot can be moved to the trailing slot. -/
 theorem fderivWithin_iteratedFDerivWithin_apply_eq {G W : Type*}
     [NormedAddCommGroup G] [NormedSpace ℝ G]
     [NormedAddCommGroup W] [NormedSpace ℝ W]
@@ -103,8 +93,6 @@ theorem fderivWithin_iteratedFDerivWithin_apply_eq {G W : Type*}
 
 end Analysis
 
-/-- A fixed directional derivative commutes with every iterated derivative of
-a `C∞` germ. -/
 theorem fderiv_iter_apply
     {f : E → F} {x : E} (hf : ContDiffAt ℝ ∞ f x)
     (n : ℕ) (u : E) :
@@ -149,8 +137,6 @@ theorem fderiv_iter_apply
     (Filter.EventuallyEq.iteratedFDeriv ℝ hfirst n).eq_of_nhds
   exact hcomm.trans hright
 
-/-- Evaluating a smooth continuous-linear-map-valued germ at a fixed vector
-commutes with every iterated derivative. -/
 theorem iterFDeriv_clm_apply
     {c : E → F →L[ℝ] G} {x : E} (hc : ContDiffAt ℝ ∞ c x)
     (n : ℕ) (u : F) (m : Fin n → E) :
@@ -170,8 +156,6 @@ theorem iterFDeriv_clm_apply
     iteratedFDerivWithin_of_isOpen n hU hxU] at hwithin
   exact hwithin
 
-/-- Evaluating both slots of a smooth nested continuous-linear-map-valued germ
-commutes with every iterated derivative. -/
 theorem iterFDeriv_apply₂
     {W : Type*} [NormedAddCommGroup W] [NormedSpace ℝ W]
     {c : E → F →L[ℝ] G →L[ℝ] W} {x : E}
@@ -187,8 +171,6 @@ theorem iterFDeriv_apply₂
     _ = iteratedFDeriv ℝ n c x m u v := by
       rw [iterFDeriv_clm_apply hc n u m]
 
-/-- Every iterated derivative of a smooth germ is invariant under cyclic
-rotation of its derivative slots. -/
 theorem iterFDeriv_rotate
     {f : E → F} {x : E} (hf : ContDiffAt ℝ ∞ f x) (n : ℕ) :
     (iteratedFDeriv ℝ n f x).domDomCongr (finRotate n) =
@@ -246,8 +228,6 @@ private def iterFDerivStab {n : ℕ}
     have h := hσ (fun i => v (σ⁻¹ i))
     simpa only [Equiv.Perm.coe_inv, Equiv.symm_apply_apply] using h.symm
 
-/-- Every iterated derivative of a smooth real germ is invariant under all
-permutations of its derivative slots. -/
 theorem iterFDeriv_perm
     {f : E → F} {x : E} (hf : ContDiffAt ℝ ∞ f x)
     {n : ℕ} (σ : Equiv.Perm (Fin n)) :
@@ -405,8 +385,6 @@ theorem iterFDeriv_perm
           rw [ContinuousMultilinearMap.domDomCongr_apply]
           exact hσH v
 
-/-- Restricting a smooth germ to the affine line `x + t • v` evaluates each
-iterated Fréchet derivative on the repeated direction `v`. -/
 theorem iteratedDeriv_line
     {f : E → F} {x v : E} (hf : ContDiffAt ℝ ∞ f x) (n : ℕ) :
     iteratedDeriv n (fun t : ℝ => f (x + t • v)) 0 =
@@ -476,8 +454,6 @@ theorem iteratedDeriv_line
     Function.comp_apply, L, ContinuousLinearMap.smulRight_apply,
     ContinuousLinearMap.one_apply, one_smul] using happ
 
-/-- Postcomposition by a continuous linear map commutes with ordinary
-iterated derivatives. -/
 theorem iteratedDeriv_clm
     {f : ℝ → F} {x : ℝ} (L : F →L[ℝ] G)
     (hf : ContDiffAt ℝ ∞ f x) (n : ℕ) :
@@ -489,8 +465,6 @@ theorem iteratedDeriv_clm
     L.iteratedFDeriv_comp_left hf (by exact_mod_cast le_top)]
   rfl
 
-/-- Evaluating both slots of a smooth nested continuous-linear-map-valued
-real germ commutes with every ordinary iterated derivative. -/
 theorem iteratedDeriv_apply₂
     {W : Type*} [NormedAddCommGroup W] [NormedSpace ℝ W]
     {c : ℝ → F →L[ℝ] G →L[ℝ] W} {x : ℝ}

@@ -1,14 +1,6 @@
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.DeTurckRemainderLowBasePair
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.DeTurckRemainderLowBaseTime
 
-/-!
-# Radial low-base first-order operators
-
-This module promotes the canonical radial smooth-core first-order coefficient
-to its two compatible adjacent-scale operator realizations.  Its constants
-depend only on the background metric.
--/
-
 noncomputable section
 
 open Bundle Manifold
@@ -161,9 +153,6 @@ private theorem radial_j3
       (mul_nonneg hC (norm_nonneg _))
       (mul_le_mul_of_nonneg_left hnorm hC) 2
 
-/-- On any realized positive spectral `H2` ball, the canonical radial
-first-order coefficient gives bounded compatible `H3 → H2` and `H2 → H1`
-operators with polynomial growth in the radial three-jet. -/
 theorem radialA1_pair
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M)

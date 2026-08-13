@@ -1,7 +1,6 @@
 import DifferentialGeometry.Analysis.Parabolic.RicciLinearization.RicciLinearizationConnDiffCoefficients
 import DifferentialGeometry.Analysis.Sobolev.TensorHilbert.RicciArmOrder1KoszulTameEnvelope
 
-
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
@@ -31,7 +30,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
-
 omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] in
 omit [BoundarylessManifold I M] [SigmaCompactSpace M] in
 theorem ricciCometricFourTraceCastG0Fib_contMDiff (g₁ : SmoothRiemannianMetric I M) :
@@ -51,7 +49,6 @@ theorem ricciCometricFourTraceCastG0Fib_contMDiff (g₁ : SmoothRiemannianMetric
   refine hCK.congr (fun x => ?_)
   exact congrArg (fun t => TotalSpace.mk' (Tensor0SBundle.Tensor0SModel 2 ℝ E)
     (E := fun z : M => Tensor0SBundle.Tensor0SSpace 2 I z) x t) rfl
-
 
 omit [I.Boundaryless] in
 omit [NeZero (Module.finrank ℝ E)] in
@@ -115,7 +112,6 @@ omit [SigmaCompactSpace M] in
         linearizedRicciConnDiffOrder1CLM (I := I) x
           ((connDiffSection (I := I) g₁ g₀).toSection x)) := rfl
 
-
 omit [NeZero (Module.finrank ℝ E)] in
 omit [SigmaCompactSpace M] in
 theorem linearizedRicciConnDiffOrder1CoeffField_eq_appCcRS
@@ -138,15 +134,12 @@ def fourTraceSwap13Perm : Equiv.Perm (Fin 4) :=
 def fourTraceDoubleTranspositionPerm : Equiv.Perm (Fin 4) :=
   ⟨![2, 3, 0, 1], ![2, 3, 0, 1], by decide, by decide⟩
 
-/-- Compatibility name for the `0,2,3,1` four-trace permutation. -/
 abbrev fourTraceArgPerm0231 : Equiv.Perm (Fin 4) :=
   fourTraceCyclePerm123
 
-/-- Compatibility name for the `0,3,2,1` four-trace permutation. -/
 abbrev fourTraceArgPerm0321 : Equiv.Perm (Fin 4) :=
   fourTraceSwap13Perm
 
-/-- Compatibility name for the `2,3,0,1` four-trace permutation. -/
 abbrev fourTraceArgPerm2301 : Equiv.Perm (Fin 4) :=
   fourTraceDoubleTranspositionPerm
 
@@ -184,7 +177,6 @@ private lemma ricciArmPrincipalCoeffPure_sub_doubleTrace_clm
   have hcast : (ricciArmPrincipalCoeffPure (I := I) (M := M) g₀ g₁).toSection x
       = (cometricDoubleTraceField (I := I) g₁ 2).toSection x := rfl
   rw [hcast, cometricDoubleTraceField_toSection, cometricDoubleTraceField_toSection]
-
 
 omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] in
 theorem ricciArmPrincipalCoeffPure_eq_doubleTrace_add_appCcRS
@@ -250,7 +242,6 @@ private lemma fourTrace_sq_add_tame {u v A D T : ℝ}
     (hu2 : u ^ 2 ≤ A * T) (hv2 : v ^ 2 ≤ D * T) :
     (u + v) ^ 2 ≤ (2 * A + 2 * D) * T := by
   nlinarith [sq_nonneg (u - v)]
-
 
 theorem ricciCometricFourTraceCastG0_order0sup_perOrder_l2_tameEnvelope_generic
     (g₀ : SmoothRiemannianMetric I M) (a : ℕ)
@@ -700,12 +691,8 @@ private def kernelInnerSlotSwap01Perm : Equiv.Perm (Fin 3) :=
 private def kernelInnerSlotCyclePerm : Equiv.Perm (Fin 3) :=
   ⟨![1, 2, 0], ![2, 0, 1], by decide, by decide⟩
 
-/-- Compatibility name for the contravariant transposition used by the
-first, second, and fourth Ricci kernel arms. -/
 def kInPerm102 : Equiv.Perm (Fin 3) := kernelInnerSlotSwap01Perm
 
-/-- Compatibility name for the contravariant cycle used by the third and
-fifth Ricci kernel arms. -/
 def kInPerm120 : Equiv.Perm (Fin 3) := kernelInnerSlotCyclePerm
 
 omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
@@ -935,10 +922,7 @@ private lemma c3_norm_five_le {V : Type*} [SeminormedAddCommGroup V] {a b c d e 
 def connDiffContrInsertionReindexPerm : Equiv.Perm (Fin 3) :=
   ⟨![2, 0, 1], ![1, 2, 0], by decide, by decide⟩
 
-/-- Compatibility name for the input permutation in the connection-
-difference contraction insertion. -/
 def coreInPerm201 : Equiv.Perm (Fin 3) := connDiffContrInsertionReindexPerm
-
 
 omit [I.Boundaryless] in
 omit [NeZero (Module.finrank ℝ E)] in
@@ -1029,7 +1013,6 @@ theorem connDiffContrInsertionField_eq_reindex_slotExtend_two
     funext j
     fin_cases j <;> rfl
   exact hL.trans hR.symm
-
 
 theorem connDiffContrInsertionField_order0sup_perOrder_l2_tameEnvelope_generic
     (g₀ : SmoothRiemannianMetric I M) (a : ℕ)
@@ -1286,7 +1269,6 @@ theorem connDiffContrInsertionField_order0sup_perOrder_l2_tameEnvelope_generic
             (1 + ∑ j ∈ Finset.range (l + 2),
               ‖iteratedCovGrad (I := I) g₀ 0 2 j P‖ ^ 2) :=
           mul_nonneg hK_nn (by linarith [hwin2_nn l])
-
 
 theorem linearizedRicciConnDiffOrder1KernelField_order0sup_perOrder_l2_tameEnvelope_generic
     (g₀ : SmoothRiemannianMetric I M) (a : ℕ)

@@ -1,12 +1,6 @@
 import DifferentialGeometry.Analysis.Sobolev.TensorHilbert.DeTurckVFEndoInsertTower
 import DifferentialGeometry.Analysis.Sobolev.TensorHilbert.DeTurckVectorFieldL2JetBoundRaisedKoszulJetNorm
 
-/-! # DeTurck vector-field endo-insert jet-L² producers (split 2/3)
-
-Jet-L² integrators, `RaisedKoszulSuccHelpers`, bottom producers and residual generics through
-`norm_iCG_wEndoInsert_eq_wAlpha`. Built on `DeTurckVFEndoInsertTower`; consumed by
-`DeTurckVFEndoInsertTopSep`. -/
-
 noncomputable section
 
 set_option linter.style.setOption false
@@ -617,7 +611,6 @@ private theorem diagonalProductGrid_rfns_integral_ballUniform_succ
       refine le_trans hle1 ?_
       rw [heq2]
       exact le_add_of_nonneg_right hvol_nn
-
 
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.DeTurck in
 open DifferentialGeometry.Analysis.Sobolev.TensorHilbert in

@@ -2,40 +2,6 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.Estimates.H2Pointwise
 import DifferentialGeometry.Analysis.Sobolev.TensorHilbert.AppCcJetWindowTame
 import DifferentialGeometry.Analysis.Sobolev.TensorHilbert.RemainderCoeffPerOrderJetEnvelopes
 
-/-!
-# Split-envelope member of the `appCc` estimate family
-
-Every existing member of the `appCc` operator-action family
-(`appCc_h2_h3_h1`, `appCc_h2_h4_h2`, `appCc_h2_h2_h2`, …) bounds the action of a
-mixed coefficient field on `nabla^2 U` by a **single** envelope `A` controlling
-both the pointwise fibre norm of the coefficient and its covariant `L2` jet; the
-only two-constant member, `appCc_c1_h2_h1`, *adds* the two constants.  Neither
-shape can carry a dissipation ladder, because the ladder needs the coefficient's
-`k`-free pointwise smallness to multiply the *top* data order while the
-coefficient's (merely bounded) jet multiplies a *lower* data order.
-
-This file supplies the missing member: an order-generic estimate in which each
-coefficient norm is paired with its own data factor,
-
-`‖appCc Φ (∇²U)‖_{H^{k+1}} ≤ C k * (‖Φ‖_{C⁰} ‖U‖_{H^{k+3}} + ‖Φ‖_{H^{k+1}} Λ)`,
-
-with `Λ` a pointwise fibre bound for `∇²U`.  The main statement is gate-free and
-carries no dimension hypothesis; the dimension-three corollary converts `Λ` into
-a spectral norm through the sharp `C⁰` window, which costs two Sobolev orders and
-therefore lands the literal ladder shape
-`C k * (‖Φ‖_{C⁰} ‖U‖_{H^{m+3}} + ‖Φ‖_{H^{m+1}} ‖U‖_{H^{m+2}})` at the rungs
-`m ≥ 2` (`m = 0, 1` are the pre-existing fixed-order members).
-
-The proof composes two order-generic facts that already exist in the tree: the
-pointwise Leibniz diagonal product grid
-`appCc_iteratedCovGrad_diagonalProductGrid_le` and the integrated
-Gagliardo–Nirenberg two-arm bound for that grid,
-`exists_integrated_iteratedCovGrad_diagonalProductGrid_twoArm_rs_le`.  The whole
-content of the split is that the two-arm bound is applied with the coefficient in
-the `L∞` slot and the data in the `L2`-jet slot on one arm, and the other way
-round on the other arm.
--/
-
 noncomputable section
 
 namespace DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral
@@ -56,9 +22,6 @@ variable
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
-/-- The covariant `L2` jet of `nabla^2 U` below order `n` is controlled by the
-spectral `H^m` norm of `U` whenever `n + 1 ≤ m`.  Order-generic form of the
-two-derivative shift used by every rung of the dissipation ladder. -/
 private theorem icg2_jet_le
     (g : SmoothRiemannianMetric I M) (s : ℕ) :
     ∃ C : ℕ → ℝ, (∀ m, 0 ≤ C m) ∧
@@ -92,21 +55,6 @@ private theorem icg2_jet_le
         (Finset.range_subset_range.mpr (by omega))
         (fun _ _ _ => norm_nonneg _)
 
-/-- **Split-envelope member of the `appCc` family, order-generic.**
-
-For every `k`, a mixed coefficient `Φ` acting on `nabla^2 U` satisfies
-
-`‖appCc Φ (∇²U)‖_{H^{k+1}} ≤ C k * (A * ‖U‖_{H^{k+3}} + B * Λ)`,
-
-where `A` bounds the *pointwise* fibre norm of `Φ`, `B` bounds the covariant
-`L2` jet of `Φ` through order `k + 1`, and `Λ` bounds the pointwise fibre norm of
-`nabla^2 U`.  The point is the pairing: the pointwise coefficient bound `A`
-multiplies the **top** data order `H^{k+3}`, while the coefficient jet `B`
-multiplies only the data factor `Λ`.  No dimension hypothesis and no gate.
-
-`C k` grows with `k` (it contains the `k`-th Leibniz grid weight
-`appCcGdiag`, which is exponential in `k`); the statement asserts no `k`-uniform
-constant. -/
 theorem appCc_split_env
     (g : SmoothRiemannianMetric I M) (s c : ℕ) :
     ∃ C : ℕ → ℝ, (∀ k, 0 ≤ C k) ∧
@@ -141,7 +89,6 @@ theorem appCc_split_env
   intro k Φ U A B Λ hA hB hΛ hΦsup hΦjet hWsup
   have hNnn : (0 : ℝ) ≤
       ‖ccTensorToHs (I := I) (M := M) g s ((k + 3 : ℕ) : ℝ) U‖ := norm_nonneg _
-  -- the data jet, two derivatives above `U`, sits in the top spectral order
   have hWjet :
       ∑ l ∈ Finset.range (k + 2),
           ‖iteratedCovGrad (I := I) g 0 (s + 2) l
@@ -158,7 +105,6 @@ theorem appCc_split_env
   have hXnn : (0 : ℝ) ≤ A * (Cin (k + 3) * N) + B * Λ :=
     add_nonneg (mul_nonneg hA (mul_nonneg (hCin (k + 3)) hNnn))
       (mul_nonneg hB hΛ)
-  -- every covariant jet of the action, one order at a time
   have hterm : ∀ j ∈ Finset.range (k + 2),
       ‖iteratedCovGrad (I := I) g 0 c j
           (appCc (I := I) (M := M) g (s + 2) c Φ W)‖ ≤
@@ -261,18 +207,6 @@ theorem appCc_split_env
           Real.sqrt (appCcGdiag (E := E) j * Cg j)) * (Cin (k + 3) + 1) *
         (A * N + B * Λ) := by ring
 
-/-- **Dimension-three spectral split envelope, at the dissipation rungs `≥ 2`.**
-
-Converting the pointwise factor `Λ` of `appCc_split_env` into a spectral norm
-costs two Sobolev orders (the sharp `C⁰` window is `H²` in dimension three), so
-the literal ladder shape
-
-`‖appCc Φ (∇²U)‖_{H^{m+1}} ≤ C * (A ‖U‖_{H^{m+3}} + B ‖U‖_{H^{m+2}})`
-
-is obtained here at the rungs `m = k + 2`.  `A` bounds the pointwise fibre norm
-of `Φ`, `B` its covariant `L2` jet through order `m + 1 = k + 3`.  The rungs
-`m = 0, 1` are the pre-existing fixed-order members `appCc_h2_h3_h1` and
-`appCc_h2_h4_h2`. -/
 theorem appCc_split_hs
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M) (s c : ℕ) :
@@ -308,7 +242,6 @@ theorem appCc_split_hs
       Cpt * Cj (k + 4) *
         ‖ccTensorToHs (I := I) (M := M) g s ((k + 4 : ℕ) : ℝ) U‖ :=
     mul_nonneg (mul_nonneg hCpt (hCj (k + 4))) hN4
-  -- the sharp `C⁰` window on `∇²U`, paid for by two extra Sobolev orders
   have hWsup : ∀ x : M,
       riemannianFiberNormSq (I := I) (M := M) g 0 (s + 2) x
           ((iteratedCovGrad (I := I) g 0 s 2 U).toSection x) ≤

@@ -1,16 +1,5 @@
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.CurvatureCoefficientDifferenceJetTower.ResidualBase
 
-/-!
-# All-orders base-coefficient bound and Koszul export
-
-Chunk of the `CurvatureCoefficientDifferenceJetTower` tower, split
-out of the former 15111-line monolith (no longer elaborable in a
-single Lean process).  Every declaration is verbatim.  The former
-`private` helpers were promoted into the internal `CurvatureCoefficientDifferenceJetTower`
-scope, so the public `Connection` API is unchanged.  Chunk map:
-`CurvatureCoefficientDifferenceJetTower.md`.
--/
-
 noncomputable section
 
 set_option linter.style.setOption false
@@ -391,9 +380,6 @@ theorem rfns_iteratedCovGrad_raisedKoszul_pointwise_le
         ((iteratedCovGrad (I := I) g₀ 0 2 (i + 1) T).toSection x) :=
   rfns_iteratedCovGrad_raisedKoszul_pointwise (I := I) (M := M) g₀ g₁ T htie i x
 
-/-- The lowered Koszul covector costs exactly one metric derivative in `L2`.
-This is the low-regularity form used after the moving lowering metric cancels
-the inverse metric in a self-background connection difference. -/
 theorem koszul_l2_succ
     (g₀ : SmoothRiemannianMetric I M) (T : SmoothCcTensor g₀ 0 2)
     (n : ℕ) :

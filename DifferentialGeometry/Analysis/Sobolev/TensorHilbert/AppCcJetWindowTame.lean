@@ -4,7 +4,6 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.SobolevScale.IteratedCovGra
 
 noncomputable section
 
-
 open MeasureTheory Set Filter Topology Bundle Manifold Tensor0SBundle ContinuousLinearMap
 open scoped ENNReal NNReal BigOperators Manifold ContDiff
 
@@ -135,13 +134,9 @@ theorem operatorFieldApply_l2_le_of_pointwise_fiberNormSq_bound_right
   exact operatorFieldCompose_l2_le_of_pointwise_fiberNormSq_bound_right (I := I) (M := M) g 0 r s Φ
     W B hB hW
 
-/-- Compatibility name for the left-pointwise operator-field application
-estimate. -/
 abbrev appCc_l2_le_of_pointwise_fiberNormSq_bound_left :=
   @operatorFieldApply_l2_le_of_pointwise_fiberNormSq_bound_left
 
-/-- Compatibility name for the right-pointwise operator-field application
-estimate. -/
 abbrev appCc_l2_le_of_pointwise_fiberNormSq_bound_right :=
   @operatorFieldApply_l2_le_of_pointwise_fiberNormSq_bound_right
 
@@ -1090,7 +1085,6 @@ theorem deTurckPrincipalCometricCoeff_perOrder_l2_tame_generic
     _ = Real.sqrt Ktot * Real.sqrt (1 + H ^ 2) := Real.sqrt_mul hKtot_nn _
     _ ≤ Real.sqrt Ktot * (1 + H) := mul_le_mul_of_nonneg_left hsqrt_le (Real.sqrt_nonneg _)
 
-
 theorem appCc_jet_l2Sq_le
     (g : SmoothRiemannianMetric I M) (b c j : ℕ)
     (Φ : SmoothCcTensor g b c) (W : SmoothCcTensor g 0 b) (K : ℕ → ℝ)
@@ -1153,7 +1147,6 @@ theorem appCc_jet_l2Sq_le
     rw [SmoothCcTensor.norm_def,
       tensorL2Norm_sq_toFun_eq_integral_riemannianFiberNormSq_rs
         (I := I) (M := M) g 0 (b + l)])
-
 
 end DifferentialGeometry.Integral.Connection
 

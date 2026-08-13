@@ -1,17 +1,6 @@
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.CurvatureCoefficientDifferenceJetTower.Grid
 import DifferentialGeometry.Geometry.Connection.TensorNabla.OperatorFieldOutputSlotPermutation
 
-/-!
-# Lowered Riemann background difference and connection-difference jets
-
-Chunk of the `CurvatureCoefficientDifferenceJetTower` tower, split
-out of the former 15111-line monolith (no longer elaborable in a
-single Lean process).  Every declaration is verbatim.  The former
-`private` helpers were promoted into the internal `CurvatureCoefficientDifferenceJetTower`
-scope, so the public `Connection` API is unchanged.  Chunk map:
-`CurvatureCoefficientDifferenceJetTower.md`.
--/
-
 noncomputable section
 
 set_option linter.style.setOption false
@@ -628,8 +617,6 @@ lemma rfns_iteratedCovGrad_raisedKoszul_pointwise (g₀ g₁ : SmoothRiemannianM
   exact rfns_iteratedCovGrad_koszulCovecCc_pointwise (I := I) (M := M) g₀ T i x
 
 set_option linter.unusedVariables false in
-/-- A single fibre-smallness ceiling fixes the sharp-flat endomorphism grid
-before either metric varies. -/
 theorem sharpFlat_grid_unif
     {δ₀ : ℝ} (hδ₀ : δ₀ < 1) :
     ∃ S : ℕ → ℝ, (∀ l, 0 ≤ S l) ∧
@@ -721,7 +708,6 @@ theorem sharpFlat_grid_unif
     _ = (2 * CD l + 2 * cid) * Combinatorics.antidiagonalTupleGrid b l := by ring
 
 set_option linter.unusedVariables false in
-/-- Metric-local compatibility wrapper for `sharpFlat_grid_unif`. -/
 theorem exists_rfns_iteratedCovGrad_sharpFlatEndoCc_tgrid
     (g₀ : SmoothRiemannianMetric I M) {δ₀ : ℝ} (hδ₀ : δ₀ < 1) :
     ∃ S : ℕ → ℝ, (∀ l, 0 ≤ S l) ∧
@@ -1172,8 +1158,6 @@ lemma rfns_iteratedCovGrad_armSlotPass_connDiffArm_le
 end CurvatureCoefficientDifferenceJetTower
 
 set_option linter.unusedVariables false in
-/-- A single fibre-smallness ceiling fixes the connection-difference grid
-before either metric varies. -/
 theorem connDiff_grid_unif
     {δ₀ : ℝ} (hδ₀ : δ₀ < 1) :
     ∃ CA : ℕ → ℝ, (∀ j, 0 ≤ CA j) ∧
@@ -1284,7 +1268,6 @@ theorem connDiff_grid_unif
         ring
 
 set_option linter.unusedVariables false in
-/-- Metric-local compatibility wrapper for `connDiff_grid_unif`. -/
 theorem exists_rfns_iteratedCovGrad_connDiffSection_tgrid
     (g₀ : SmoothRiemannianMetric I M) {δ₀ : ℝ} (hδ₀ : δ₀ < 1) :
     ∃ CA : ℕ → ℝ, (∀ j, 0 ≤ CA j) ∧

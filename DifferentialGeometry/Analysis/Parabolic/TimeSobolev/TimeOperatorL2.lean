@@ -1,13 +1,5 @@
 import DifferentialGeometry.Analysis.Parabolic.TimeSobolev.TimeOperator
 
-/-!
-# Square-integrable time-dependent operators on bounded paths
-
-This file treats operator families that are square-integrable, rather than
-uniformly bounded, in time.  Such a family may be applied to an essentially
-bounded measurable path while retaining a square-integrable output.
--/
-
 noncomputable section
 
 open MeasureTheory
@@ -20,8 +12,6 @@ variable [NormedAddCommGroup Y] [InnerProductSpace ℝ Y] [CompleteSpace Y]
 variable {T : ℝ}
 
 omit [CompleteSpace Y] in
-/-- A square-integrable operator family sends an essentially bounded
-measurable path to a time-`L2` path by pointwise application. -/
 theorem memLp_timeOpL2
     (A : ℝ → X →L[ℝ] Y)
     (hA : MemLp A 2 (timeMeasure T))
@@ -43,9 +33,6 @@ theorem memLp_timeOpL2
       mul_le_mul_of_nonneg_left ht (norm_nonneg _)
     _ = (C : ℝ) * ‖A t‖ := mul_comm _ _
 
-/-- Pointwise application of a square-integrable operator family to an
-essentially bounded measurable path, represented in the output time-`L2`
-space. -/
 def timeOpL2
     (A : ℝ → X →L[ℝ] Y)
     (hA : MemLp A 2 (timeMeasure T))
@@ -56,8 +43,6 @@ def timeOpL2
     timeL2 Y T :=
   (memLp_timeOpL2 A hA u hu C hC).toLp (fun t => A t (u t))
 
-/-- The `timeOpL2` representative agrees almost everywhere with pointwise
-operator application. -/
 theorem timeOpL2_apply_ae
     (A : ℝ → X →L[ℝ] Y)
     (hA : MemLp A 2 (timeMeasure T))
@@ -69,9 +54,6 @@ theorem timeOpL2_apply_ae
       fun t => A t (u t) :=
   (memLp_timeOpL2 A hA u hu C hC).coeFn_toLp
 
-/-- Pointwise operator application commutes with subtraction, independently
-of the measurable representatives and bounds used to construct the three
-output `L2` elements. -/
 theorem timeOpL2_sub
     (A : ℝ → X →L[ℝ] Y)
     (hA : MemLp A 2 (timeMeasure T))
@@ -94,9 +76,6 @@ theorem timeOpL2_sub
     with t hout hu' hv' huv'
   rw [hout, Pi.sub_apply, hu', hv', huv', map_sub]
 
-/-- The `timeOpL2` output depends only on the almost-everywhere class of the
-input path, not on its representative or the bound proof used to construct
-the output. -/
 theorem timeOpL2_congr
     (A : ℝ → X →L[ℝ] Y)
     (hA : MemLp A 2 (timeMeasure T))
@@ -115,8 +94,6 @@ theorem timeOpL2_congr
     with t hu' hv' huv'
   rw [hu', hv', huv']
 
-/-- The output norm is bounded by the operator-family `L2` norm times the
-essential bound on the input path. -/
 theorem timeOpL2_norm_le
     (A : ℝ → X →L[ℝ] Y)
     (hA : MemLp A 2 (timeMeasure T))

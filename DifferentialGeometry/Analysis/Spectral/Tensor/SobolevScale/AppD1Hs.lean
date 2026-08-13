@@ -1,14 +1,6 @@
 import DifferentialGeometry.Analysis.Spectral.Tensor.Estimates.H2H3FirstOrder
 import DifferentialGeometry.Analysis.Spectral.Tensor.SobolevScale.SmoothCcDense
 
-/-!
-# Completed first-derivative tensor actions
-
-This file completes the smooth-core action `U ↦ Φ(∇U)` from spectral `H3` to
-spectral `H2`.  In dimension three its operator norm is controlled by the
-intrinsic `H2` jet of the mixed-tensor coefficient.
--/
-
 noncomputable section
 
 open Bundle Manifold MeasureTheory Set Filter Tensor0SBundle
@@ -46,8 +38,6 @@ private noncomputable def appD1CcLin
   map_smul' := fun a U => by
     simp only [RingHom.id_apply, iteratedCovGrad_smul, appCc_smul_right]
 
-/-- A fixed smooth mixed-tensor coefficient acting on one covariant
-derivative, completed from spectral `H3` to spectral `H2`. -/
 noncomputable def appD1Hs
     (g : SmoothRiemannianMetric I M) (s c : ℕ)
     (Φ : SmoothCcTensor g (s + 1) c) :
@@ -57,8 +47,6 @@ noncomputable def appD1Hs
       (appD1CcLin (I := I) (M := M) g s c Φ)).extendOfNorm
     (ccToHsLin (I := I) (M := M) g s (3 : ℝ))
 
-/-- In dimension three, the norm of the completed first-derivative action is
-linear in an intrinsic `H2` coefficient-jet envelope. -/
 theorem appD1Hs_norm
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M) (s c : ℕ) :
@@ -85,8 +73,6 @@ theorem appD1Hs_norm
         ‖ccTensorToHs (I := I) (M := M) g s (3 : ℝ) U‖
   simpa only [mul_assoc] using happ Φ U A hA hΦ
 
-/-- The completed first-derivative action agrees with its geometric
-smooth-core formula. -/
 theorem appD1Hs_core
     (hDim : Module.finrank ℝ E = 3)
     (g : SmoothRiemannianMetric I M) (s c : ℕ)

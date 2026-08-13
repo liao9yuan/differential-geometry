@@ -4,22 +4,6 @@ set_option autoImplicit false
 set_option linter.style.longLine false
 set_option linter.unusedSectionVars false
 
-/-!
-# The rank-generic frozen-slot one-form field `freezeAllBut0SField`
-
-`freezeAllBut04Field` (`Evolution/RmFrozenSlotField.lean`) freezes all but one slot
-of a `(0,4)` tensor field, leaving a smooth `(0,1)` one-form field.  The all-`k`
-raise-Leibniz needs the same construction for `∇ᵏRm`, a `(0, 4+k)` field, so this
-file ports it to an arbitrary rank `s`: `freezeAllBut0SField (A : (0,s) field) q Y`
-is the bundled field of slot-frozen one-forms `p ↦ oneFormAtSlot0S (A p) (Y·p) q`.
-
-The proof is the verbatim rank-uniform generalisation of `freezeAllBut04Field`
-(`Fin 4 ↦ Fin s`, `n := 4 ↦ n := s`); all the smoothness inputs
-(`contMDiff_multilinearSection_iff_coord`,
-`TensorMultilinear.contMDiffAt_section_apply_gen`, the coordinate-frame trivialisation
-lemmas) are already rank-uniform.
--/
-
 noncomputable section
 
 namespace DifferentialGeometry.PDE.RicciFlow
@@ -35,11 +19,6 @@ variable {I : ModelWithCorners Real E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 
 set_option backward.isDefEq.respectTransparency false in
-/-- Freeze all but slot `q` of a smooth `(0,s)` tensor field against the smooth
-tangent sections `Y` (slot `q`'s frozen value is irrelevant), leaving a smooth
-`(0,1)` tensor field — the bundled field of slot-frozen one-forms
-`p ↦ oneFormAtSlot0S (A p) (fun i => Y i p) q`.  Rank-uniform generalisation of
-`freezeAllBut04Field`. -/
 noncomputable def freezeAllBut0SField {s : ℕ}
     [CompleteSpace E]
     (A : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
@@ -161,7 +140,6 @@ theorem freezeAllBut0SField_apply_vec {s : ℕ}
   rw [freezeAllBut0SField_apply]
   exact oneFormAtSlot0S_apply (I := I) (A x) (fun i : Fin s => Y i x) q W
 
-/-- Pointwise evaluation of `Function.update Y q Z` (update commutes with `· p`). -/
 private theorem updateSlots_apply {s : ℕ}
     (Y : Fin s → ContMDiffSection I E (∞ : WithTop ℕ∞) (TangentSpace I : M → Type _))
     (q : Fin s)
@@ -174,8 +152,6 @@ private theorem updateSlots_apply {s : ℕ}
   · subst hi; simp
   · simp [Function.update_of_ne hi]
 
-/-- The covariant derivative of a frozen-slot one-form is the derivative of
-the tensor plus the sum of the derivatives of the frozen slots. -/
 theorem freezeNabla_leibniz {s : ℕ}
     [T2Space M] [CompleteSpace E] [I.Boundaryless] [IsManifold I 1 M]
     [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
@@ -358,8 +334,6 @@ theorem freezeNabla_leibniz {s : ℕ}
               ((cov (fun p : M => Y i p) x) (X x))) := by
         rw [hAtot]
 
-/-- The frozen-slot Leibniz formula when every frozen section is covariantly
-constant at the evaluation point. -/
 theorem allBut0SFreezeNabla {s : ℕ}
     [T2Space M] [CompleteSpace E] [I.Boundaryless] [IsManifold I 1 M]
     [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
