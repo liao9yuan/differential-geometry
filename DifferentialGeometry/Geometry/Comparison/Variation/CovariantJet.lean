@@ -23,8 +23,7 @@ variable {I : ModelWithCorners Real E H} [I.Boundaryless]
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
   [IsManifold I ∞ M] [T2Space M] [SigmaCompactSpace M]
 
-omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
-omit [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 private theorem covFst_shift
     (g : SmoothRiemannianMetric I M) (f : Real -> Real -> M)
     (V : forall s t : Real, TangentSpace I (f s t))
@@ -36,9 +35,7 @@ private theorem covFst_shift
     (covDerivAlong_const_add_shift
       (I := I) g (fun s : Real => f s t) (fun s : Real => V s t) c)
 
-omit [InnerProductSpace Real E] [FiniteDimensional Real E]
-  [NeZero (Module.finrank Real E)] [I.Boundaryless] [T2Space M]
-  [SigmaCompactSpace M] in
+omit [InnerProductSpace ℝ E] [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 theorem varFst_shift
     (f : Real -> Real -> M) (hf : IsSmoothVariation (I := I) f)
     (c t : Real) :
@@ -97,8 +94,7 @@ theorem varFst_shift
       (fun s : Real => f s t) c (1 : Real)
   rw [add_zero]
 
-omit [InnerProductSpace Real E] [NeZero (Module.finrank Real E)]
-  [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 private theorem covSnd_shift
     (g : SmoothRiemannianMetric I M) (f : Real -> Real -> M)
     (V : forall s t : Real, TangentSpace I (f s t))
@@ -108,8 +104,7 @@ private theorem covSnd_shift
       covSnd (I := I) g f V (c + a) t :=
   rfl
 
-omit [InnerProductSpace Real E] [NeZero (Module.finrank Real E)]
-  [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 private theorem covSnd2_shift
     (g : SmoothRiemannianMetric I M) (f : Real -> Real -> M)
     (V : forall s t : Real, TangentSpace I (f s t))
@@ -119,9 +114,7 @@ private theorem covSnd2_shift
       covSnd2 (I := I) g f V (c + a) t :=
   rfl
 
-omit [InnerProductSpace Real E] [FiniteDimensional Real E]
-  [NeZero (Module.finrank Real E)] [I.Boundaryless]
-  [IsManifold I ∞ M] [T2Space M] [SigmaCompactSpace M] in
+omit [InnerProductSpace ℝ E] [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [IsManifold I ∞ M] [T2Space M] [SigmaCompactSpace M] in
 private theorem varSnd_shift
     (f : Real -> Real -> M) (c t : Real) :
     varSnd (I := I) (fun r v => f (c + r) v) 0 t =
@@ -282,6 +275,7 @@ theorem cov_commute_at
   rw [hleft, hright, hcurv] at hraw
   exact hraw
 
+omit [InnerProductSpace ℝ E] [SigmaCompactSpace M] in
 theorem cov_snd2_expand_at
     (g : SmoothRiemannianMetric I M) (f : Real -> Real -> M)
     (hf : IsSmoothVariation (I := I) f)
@@ -487,6 +481,7 @@ noncomputable def jacStepCorr
         covFst (I := I) g f
           (fun a v => varSnd (I := I) f a v) r t) s
 
+omit [InnerProductSpace ℝ E] [SigmaCompactSpace M] in
 theorem jacResidual_step
     (g : SmoothRiemannianMetric I M) (f : Real -> Real -> M)
     (hf : IsSmoothVariation (I := I) f)
@@ -553,8 +548,7 @@ noncomputable def covFstIter
       covFst (I := I) g f
         (fun r v => covFstIter g f n V r v) s t
 
-omit [InnerProductSpace Real E] [NeZero (Module.finrank Real E)]
-  [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 @[simp]
 theorem covFstIter_zero
     (g : SmoothRiemannianMetric I M) (f : Real -> Real -> M)
@@ -562,8 +556,7 @@ theorem covFstIter_zero
     covFstIter (I := I) g f 0 V = V :=
   rfl
 
-omit [InnerProductSpace Real E] [NeZero (Module.finrank Real E)]
-  [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 @[simp]
 theorem covFstIter_succ
     (g : SmoothRiemannianMetric I M) (f : Real -> Real -> M)
@@ -574,8 +567,7 @@ theorem covFstIter_succ
         (fun r v => covFstIter (I := I) g f n V r v) s t :=
   rfl
 
-omit [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
-omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 theorem covFstIter_zero_of
     (g : SmoothRiemannianMetric I M) (f : Real -> Real -> M)
     (V : forall s t : Real, TangentSpace I (f s t))
@@ -642,6 +634,7 @@ noncomputable def jacJetCorr
     (n : Nat) (s t : Real) : TangentSpace I (f s t) :=
   jacStepCorr (I := I) g f (covFstIter (I := I) g f n V) s t
 
+omit [InnerProductSpace ℝ E] [SigmaCompactSpace M] in
 theorem jacJetResidual_succ
     (g : SmoothRiemannianMetric I M) (f : Real -> Real -> M)
     (hf : IsSmoothVariation (I := I) f)

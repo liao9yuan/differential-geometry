@@ -561,7 +561,7 @@ theorem bPair_sub (g : SmoothRiemannianMetric I M) (σ : Fin 8 ≃ Fin 8)
   rw [metricTraceFirstTwoField_add (I := I) (M := M) (s := 4) g]
 
 
-omit [I.Boundaryless] in
+omit [SigmaCompactSpace M] [T2Space M] [I.Boundaryless] in
 theorem bMetSq_le (g₁ g₂ : SmoothRiemannianMetric I M) (σ : Fin 8 ≃ Fin 8)
     (A B : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
       (n := (∞ : WithTop ℕ∞)) 4)
@@ -737,7 +737,7 @@ theorem bMetSq_le (g₁ g₂ : SmoothRiemannianMetric I M) (σ : Fin 8 ≃ Fin 8
     _ = _ := by rw [hnR, hH0, hNA, hNB]
 
 
-omit [I.Boundaryless] in
+omit [SigmaCompactSpace M] [T2Space M] [I.Boundaryless] in
 theorem bDiffSq_le (g₁ g₂ : SmoothRiemannianMetric I M) (σ : Fin 8 ≃ Fin 8)
     (A B : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
       (n := (∞ : WithTop ℕ∞)) 4)
@@ -823,7 +823,7 @@ theorem bDiffSq_le (g₁ g₂ : SmoothRiemannianMetric I M) (σ : Fin 8 ≃ Fin 
       ring
 
 
-omit [I.Boundaryless] in
+omit [SigmaCompactSpace M] [T2Space M] [I.Boundaryless] in
 theorem bCombDiffSq_le (g₁ g₂ : SmoothRiemannianMetric I M)
     (A B : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
       (n := (∞ : WithTop ℕ∞)) 4)

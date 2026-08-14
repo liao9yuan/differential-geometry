@@ -464,7 +464,7 @@ def lapCommRem (g : SmoothRiemannianMetric I M)
   covDiv0SField (I := I) g (L (s + 1) (metricNabla0S (I := I) g T)) -
     L s (covDiv0SField (I := I) g (metricNabla0S (I := I) g T))
 
-omit [BoundarylessManifold I M] in
+omit [SigmaCompactSpace M] [BoundarylessManifold I M] in
 theorem lapComm_eq_div_flux (g : SmoothRiemannianMetric I M)
     (L : ∀ k : ℕ, Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
         (n := (∞ : WithTop ℕ∞)) k ->
@@ -478,7 +478,7 @@ theorem lapComm_eq_div_flux (g : SmoothRiemannianMetric I M)
   rw [lapCommFlux, covDiv0SField_sub, lapCommRem, roughLap0SField, roughLap0SField]
   abel
 
-omit [BoundarylessManifold I M] in
+omit [SigmaCompactSpace M] [BoundarylessManifold I M] in
 theorem lapComm_self (g : SmoothRiemannianMetric I M)
     (L : ∀ k : ℕ, Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
         (n := (∞ : WithTop ℕ∞)) k ->

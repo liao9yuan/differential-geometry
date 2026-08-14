@@ -95,7 +95,7 @@ theorem energy_nonneg (g₁ g₂ : ℝ → SmoothRiemannianMetric I M) (t : ℝ)
     0 ≤ forwardUniqueEnergy (I := I) (M := M) g₁ g₂ t :=
   integral_nonneg fun x => density_nonneg (I := I) g₁ g₂ t x
 
-omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] in
 theorem density_eq_zero_of_eq (g₁ g₂ : ℝ → SmoothRiemannianMetric I M) {t : ℝ}
     (h : g₁ t = g₂ t) (x : M) :
     forwardUniqueDensity (I := I) g₁ g₂ t x = 0 := by

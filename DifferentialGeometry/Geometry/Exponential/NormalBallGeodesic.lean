@@ -17,7 +17,7 @@ namespace Riemannian
 namespace NormalCoordinates
 
 variable {E : Type uE} [NormedAddCommGroup E] [InnerProductSpace Real E]
-variable [FiniteDimensional Real E] [CompleteSpace E]
+variable [FiniteDimensional Real E]
 variable [NeZero (Module.finrank Real E)]
 variable {H : Type uH} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H} [I.Boundaryless]
@@ -59,14 +59,14 @@ noncomputable def innerDiffeo {p : M}
   rw [← hrange]
   exact isSigmaCompact_range c.innerDiffeo.continuous
 
-omit [FiniteDimensional ℝ E] [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [IsManifold I ∞ M] [T2Space M] [SigmaCompactSpace M] [T2Space (TangentBundle I M)] in
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [IsManifold I ∞ M] [T2Space M] [SigmaCompactSpace M] [T2Space (TangentBundle I M)] in
 private theorem innerDiffeo_apply {p : M}
     (c : NormalBallChart (I := I) p) (z : c.inner) :
     ((c.innerDiffeo z : c.innerImage) : M) = c.hom (z : E) := by
   change c.restrictBall (z : E) = c.hom (z : E)
   exact c.restrictBall_apply (z : E)
 
-omit [FiniteDimensional ℝ E] [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [IsManifold I ∞ M] [T2Space M] [SigmaCompactSpace M] [T2Space (TangentBundle I M)] in
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [IsManifold I ∞ M] [T2Space M] [SigmaCompactSpace M] [T2Space (TangentBundle I M)] in
 private theorem innerDiffeo_mfd {p : M}
     (c : NormalBallChart (I := I) p) (z : c.inner) (v : E) :
     mfderiv (modelWithCornersSelf Real E) I
@@ -78,8 +78,7 @@ private theorem innerDiffeo_mfd {p : M}
       simpa only [restrictBall_source] using c.inner_subset) z v
   simpa only [innerDiffeo, restrictBall_apply] using h
 
-omit [FiniteDimensional Real E] [CompleteSpace E]
-  [NeZero (Module.finrank Real E)] in
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] in
 private theorem metric_ext
     {N : Type*} [TopologicalSpace N] [ChartedSpace E N]
     [IsManifold (modelWithCornersSelf Real E) ∞ N]
@@ -95,6 +94,7 @@ private theorem metric_ext
   subst hi
   rfl
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [SigmaCompactSpace M] [T2Space (TangentBundle I M)] in
 theorem totalMetric_inner_eq
     (g : SmoothRiemannianMetric I M) {p : M}
     (c : NormalBallChart (I := I) p) :
@@ -115,6 +115,7 @@ theorem totalMetric_inner_eq
   rw [c.totalMetric_inner g (z : E) z.2 v w]
   exact c.metric_apply g (z : E) v w
 
+omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space (TangentBundle I M)] in
 theorem cov_map_germ
     (g : SmoothRiemannianMetric I M) {p : M}
     (c : NormalBallChart (I := I) p)
@@ -212,6 +213,7 @@ theorem cov_map_germ
   rw [← hleft, ← hres, ← hdir, ← hbase]
   exact hpbAmbient
 
+omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space (TangentBundle I M)] in
 theorem geo_map (g : SmoothRiemannianMetric I M) {p : M}
     (c : NormalBallChart (I := I) p)
     (gamma : Real → E) (s : Set Real) (hs : IsOpen s)

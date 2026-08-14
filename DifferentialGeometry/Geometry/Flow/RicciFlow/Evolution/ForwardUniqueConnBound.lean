@@ -19,12 +19,12 @@ variable [FiniteDimensional Real E]
 variable {H : Type*} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
-variable [IsManifold I 1 M] [IsManifold I 2 M]
-variable [CompleteSpace E] [SigmaCompactSpace M] [T2Space M]
+
+variable [SigmaCompactSpace M] [T2Space M]
 
 section Frame
 
-omit [IsManifold I 1 M] [IsManifold I 2 M] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
+omit [SigmaCompactSpace M] [T2Space M] in
 private theorem exists_onFrame (g : SmoothRiemannianMetric I M) (x : M) :
     ∃ b : Module.Basis (Fin (Module.finrank Real (TangentSpace I x))) Real
         (TangentSpace I x),
@@ -48,7 +48,7 @@ private theorem exists_onFrame (g : SmoothRiemannianMetric I M) (x : M) :
   rw [← hinner]
   exact ob.inner_eq_ite i j
 
-omit [FiniteDimensional ℝ E] [IsManifold I 1 M] [IsManifold I 2 M] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
+omit [FiniteDimensional ℝ E] [SigmaCompactSpace M] [T2Space M] in
 private theorem onFrame_inv {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
     (g : SmoothRiemannianMetric I M) {x : M}
     (b : Module.Basis Idx Real (TangentSpace I x))
@@ -57,8 +57,8 @@ private theorem onFrame_inv {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
   intro i j
   constructor <;> simp [identityInvMetric, diagonalInvMetric, hON]
 
-omit [IsManifold I 2 M] in
-omit [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
+
+omit [SigmaCompactSpace M] [T2Space M] in
 private theorem repr_inner {Idx : Type*} [Finite Idx] [DecidableEq Idx]
     (g : SmoothRiemannianMetric I M) {x : M}
     (b : Module.Basis Idx Real (TangentSpace I x))
@@ -79,7 +79,7 @@ private theorem repr_inner {Idx : Type*} [Finite Idx] [DecidableEq Idx]
     simpa using hON l k
   simp only [hbb, mul_ite, mul_one, mul_zero, Finset.sum_ite_eq', Finset.mem_univ, if_true]
 
-omit [IsManifold I 2 M] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
+omit [SigmaCompactSpace M] [T2Space M] in
 private theorem normSq0S_reindex (g : SmoothRiemannianMetric I M) {x : M} {s s' : ℕ}
     (e : Fin s ≃ Fin s')
     (N : Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) s x) :
@@ -129,6 +129,7 @@ end SlotSums
 
 section Contraction
 
+omit [SigmaCompactSpace M] [T2Space M] in
 theorem connDiffLow_eq_lower (g₁ g₂ : SmoothRiemannianMetric I M) (x : M) :
     connDiffLowAt (I := I) g₁ g₂ x =
       lowerBilin (I := I) (metricTensorField (I := I) g₁ x)
@@ -138,7 +139,8 @@ theorem connDiffLow_eq_lower (g₁ g₂ : SmoothRiemannianMetric I M) (x : M) :
   rw [connDiffLowAt_apply, lowerBilin_apply, metricTensorField_apply]
   simp
 
-omit [IsManifold I 2 M] in
+
+omit [SigmaCompactSpace M] [T2Space M] in
 private theorem comp_lowerBilin {Idx : Type*} [Fintype Idx] {x : M}
     (b : Module.Basis Idx Real (TangentSpace I x))
     (q : Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) 2 x)
@@ -151,7 +153,8 @@ private theorem comp_lowerBilin {Idx : Type*} [Fintype Idx] {x : M}
   rw [component0S_apply, lowerBilin_apply]
   congr 1
 
-omit [IsManifold I 2 M] in
+
+omit [SigmaCompactSpace M] [T2Space M] in
 theorem lowerBilin_normSq_le (g : SmoothRiemannianMetric I M) (x : M)
     (q : Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) 2 x)
     (A : TangentSpace I x →L[Real] TangentSpace I x →L[Real] TangentSpace I x) :
@@ -271,6 +274,7 @@ end Carrier
 
 section NablaRicci
 
+omit [SigmaCompactSpace M] in
 theorem nablaRicDiff_split (g₁ g₂ : SmoothRiemannianMetric I M)
     (Ric₁ Ric₂ : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
       (n := (∞ : WithTop ℕ∞)) 2) :
@@ -279,6 +283,7 @@ theorem nablaRicDiff_split (g₁ g₂ : SmoothRiemannianMetric I M)
   rw [metricNabla0S_sub, lapDiffFlux]
   abel
 
+omit [SigmaCompactSpace M] in
 theorem nablaRicDiff_le (g₁ g₂ : SmoothRiemannianMetric I M)
     (Ric₁ Ric₂ : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
       (n := (∞ : WithTop ℕ∞)) 2) (x : M) :
@@ -332,6 +337,7 @@ private theorem nabla_trace_field [I.Boundaryless] {s : ℕ}
       (totalNabla0S_realizes (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) (s + 2)
         (metricCov (I := I) g) A _))
 
+omit [SigmaCompactSpace M] [T2Space M] in
 private theorem traceShuffle_normSq_le {s : ℕ}
     (g : SmoothRiemannianMetric I M) (x : M)
     (N : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
@@ -365,6 +371,7 @@ private theorem traceShuffle_normSq_le {s : ℕ}
     normSq0S_reindex (I := I) g _ (N x)
   rwa [hiso] at hle
 
+omit [SigmaCompactSpace M] in
 private theorem nablaTracePerm_normSq_le [I.Boundaryless] {s : ℕ}
     (g : SmoothRiemannianMetric I M) (e : Equiv.Perm (Fin (s + 2)))
     (A : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
@@ -503,7 +510,7 @@ theorem coeff_adot_eq
   rw [hcoeff k, ← hbcoe i, ← hbcoe j]
   exact huniq
 
-omit [FiniteDimensional ℝ E] [IsManifold I 1 M] [IsManifold I 2 M] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
+omit [FiniteDimensional ℝ E] [SigmaCompactSpace M] [T2Space M] in
 theorem lower_raise_cancel [DecidableEq Idx]
     (g : SmoothRiemannianMetric I M)
     (b : Module.Basis Idx Real (TangentSpace I x))
@@ -529,7 +536,8 @@ theorem lower_raise_cancel [DecidableEq Idx]
   rw [Finset.sum_congr rfl fun l _ => hcol l]
   simp
 
-omit [IsManifold I 2 M] in
+
+omit [SigmaCompactSpace M] [T2Space M] in
 private theorem lowerBilin_basis
     (q : Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) 2 x)
     (A : TangentSpace I x →L[Real] TangentSpace I x →L[Real] TangentSpace I x)
@@ -539,8 +547,8 @@ private theorem lowerBilin_basis
         q (fun a : Fin 2 => if a = 0 then b m else b (v 2)) := by
   rw [lowerBilin_apply, tensor02_expand (I := I) q b _ (b (v 2))]
 
-omit [IsManifold I 2 M] in
-omit [IsManifold I ∞ M] [IsManifold I 1 M] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
+
+omit [IsManifold I ∞ M] [SigmaCompactSpace M] [T2Space M] in
 private theorem repr_bilinOfComp
     (b : Module.Basis Idx Real (TangentSpace I x))
     (c : Idx -> Idx -> Idx -> Real) (i j m : Idx) :
@@ -549,6 +557,7 @@ private theorem repr_bilinOfComp
   rw [bilinOfComp_basis]
   simp [Finsupp.single_apply]
 
+omit [SigmaCompactSpace M] [T2Space M] in
 theorem connSpeedLow_eq
     (g₁ g₂ : Real → SmoothRiemannianMetric I M)
     (frame : Idx -> (y : M) -> TangentSpace I y)
@@ -627,7 +636,8 @@ theorem connSpeedLow_eq
   simp only []
   ring
 
-omit [IsManifold I 2 M] in
+
+omit [SigmaCompactSpace M] [T2Space M] in
 theorem lowerHamRHS_comp [DecidableEq Idx]
     (g : SmoothRiemannianMetric I M)
     (b : Module.Basis Idx Real (TangentSpace I x))
@@ -668,13 +678,14 @@ def perm3 (e : Equiv.Perm (Fin 3))
     Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) 3 x :=
   N.domDomCongr e
 
-omit [FiniteDimensional ℝ E] [IsManifold I ∞ M] [IsManifold I 2 M] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
+omit [FiniteDimensional ℝ E] [SigmaCompactSpace M] [T2Space M] in
 @[simp] theorem perm3_apply (e : Equiv.Perm (Fin 3))
     (N : Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) 3 x)
     (v : Fin 3 -> TangentSpace I x) :
     perm3 (I := I) e N v = N (fun a : Fin 3 => v (e a)) :=
   Tensor0SSpace.domDomCongr_apply (I := I) e N v
 
+omit [SigmaCompactSpace M] [T2Space M] in
 theorem normSq0S_perm3 (g : SmoothRiemannianMetric I M) (e : Equiv.Perm (Fin 3))
     (N : Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) 3 x) :
     normSq0S (I := I) g x 3 (perm3 (I := I) e N) = normSq0S (I := I) g x 3 N :=
@@ -685,6 +696,7 @@ def hamSum (N : Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
   (-1 : Real) • N + (-1 : Real) • perm3 (I := I) (Equiv.swap (0 : Fin 3) 1) N +
     perm3 (I := I) hamPerm N
 
+omit [SigmaCompactSpace M] [T2Space M] in
 theorem lowerHam_eq_perm [DecidableEq Idx]
     (g : SmoothRiemannianMetric I M)
     (b : Module.Basis Idx Real (TangentSpace I x))
@@ -757,17 +769,19 @@ theorem lowerHam_eq_perm [DecidableEq Idx]
     funext a; fin_cases a <;> simp [hamPerm]
   rw [h0, h1, h2]
 
-omit [FiniteDimensional ℝ E] [IsManifold I ∞ M] [IsManifold I 2 M] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
+omit [FiniteDimensional ℝ E] [SigmaCompactSpace M] [T2Space M] in
 theorem perm3_sub (e : Equiv.Perm (Fin 3))
     (A B : Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) 3 x) :
     perm3 (I := I) e (A - B) = perm3 (I := I) e A - perm3 (I := I) e B :=
   domDomCongr_sub (I := I) e A B
 
+omit [FiniteDimensional ℝ E] [SigmaCompactSpace M] [T2Space M] in
 theorem hamSum_sub (A B : Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) 3 x) :
     hamSum (I := I) A - hamSum (I := I) B = hamSum (I := I) (A - B) := by
   rw [hamSum, hamSum, hamSum, perm3_sub, perm3_sub]
   module
 
+omit [SigmaCompactSpace M] [T2Space M] in
 theorem hamSum_normSq_le (g : SmoothRiemannianMetric I M)
     (N : Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) 3 x) :
     normSq0S (I := I) g x 3 (hamSum (I := I) N) ≤ 10 * normSq0S (I := I) g x 3 N := by
@@ -794,7 +808,8 @@ end Hamilton
 
 section MetricCompare
 
-omit [IsManifold I 2 M] in
+
+omit [SigmaCompactSpace M] [T2Space M] in
 private theorem inner_le_sum_sq {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
     (g₁ g₂ : SmoothRiemannianMetric I M) {x : M}
     (b : Module.Basis Idx Real (TangentSpace I x))
@@ -836,6 +851,7 @@ private theorem inner_le_sum_sq {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
   · rw [← hN0]; positivity
   · nlinarith [hsq, hCS, hNpos, sq_nonneg Λ, hQnn]
 
+omit [SigmaCompactSpace M] [T2Space M] in
 theorem lowerBilin_metric_le (g₁ g₂ : SmoothRiemannianMetric I M) (x : M)
     {Λ : Real} (hΛ : ∀ v : TangentSpace I x, g₁.inner x v v ≤ Λ * g₂.inner x v v)
     (A : TangentSpace I x →L[Real] TangentSpace I x →L[Real] TangentSpace I x) :
@@ -951,7 +967,7 @@ private theorem connSpeed_arith
   rw [hexp]
   linarith
 
-omit [IsManifold I 2 M] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
+omit [SigmaCompactSpace M] [T2Space M] in
 private theorem normSq0S_sub_le (g : SmoothRiemannianMetric I M) (x : M) (s : Nat)
     (A B : Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) s x) :
     normSq0S (I := I) g x s (A - B) ≤
@@ -963,6 +979,7 @@ private theorem normSq0S_sub_le (g : SmoothRiemannianMetric I M) (x : M) (s : Na
   rw [normSq0S_smul]
   norm_num
 
+omit [SigmaCompactSpace M] [T2Space M] in
 theorem connDiffDot_le_speed
     (g₁ g₂ : Real → SmoothRiemannianMetric I M)
     (Adot : (y : M) →
@@ -1000,6 +1017,7 @@ theorem connDiffDot_le_speed
     exact mul_le_mul_of_nonneg_right hΛric (normSq0S_nonneg (I := I) (g₁ t) x 3 _)
   linarith
 
+omit [SigmaCompactSpace M] in
 theorem connSpeedRHS_self (g₁ g₂ : Real → SmoothRiemannianMetric I M) {t : Real} (x : M)
     (S : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
       (n := (∞ : WithTop ℕ∞)) 4)
