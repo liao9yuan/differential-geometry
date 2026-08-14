@@ -15,7 +15,7 @@ variable {H : Type} [TopologicalSpace H] {M : Type} [TopologicalSpace M] [Charte
 variable {I : ModelWithCorners ℝ E H}
 
 set_option backward.isDefEq.respectTransparency false in
-theorem hasDerivAt_df_comp_integralCurve [IsManifold I (⊤ : WithTop ℕ∞) M]
+theorem hasDerivAt_df_comp_integralCurve
     (f : M → ℝ) (hf : ContMDiff I 𝓘(ℝ, ℝ) (↑(⊤ : ℕ∞) : WithTop ℕ∞) f)
     (v : (x : M) → TangentSpace I x)
     {γ : ℝ → M} (hγ : IsMIntegralCurve γ v) (t : ℝ) :

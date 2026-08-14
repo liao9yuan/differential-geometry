@@ -50,7 +50,7 @@ theorem curveAt_injective' [I.Boundaryless] [IsManifold I (⊤ : WithTop ℕ∞)
 
 theorem exists_uniform_localFlow_on_compact [FiniteDimensional ℝ E] [CompleteSpace E]
     [I.Boundaryless]
-    [IsManifold I (⊤ : WithTop ℕ∞) M] [T2Space M]
+    [IsManifold I (⊤ : WithTop ℕ∞) M]
     (v : (x : M) → TangentSpace I x)
     (hv : ContMDiff I (I.prod 𝓘(ℝ, E)) ∞
       (fun x : M => (⟨x, v x⟩ : TangentBundle I M)))
