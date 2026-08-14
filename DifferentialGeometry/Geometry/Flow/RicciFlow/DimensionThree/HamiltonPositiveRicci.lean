@@ -2491,23 +2491,14 @@ theorem limit_mid_regular
 
 omit [NeZero (Module.finrank ℝ E)] in
 theorem limit_ric_nonneg
-    (_hM : Closed3Manifold (I := I) (M := M))
     (g0 : SmoothRiemannianMetric I M)
-    (_hpos : PosRicciMetric (I := I) (M := M) g0)
     (P : Ham3FiniteTimeFlow (I := I) (M := M) g0)
     (Q : Ham3Blowup M)
     (hsel : Ham3PointSel (I := I) P Q)
     (hric : Ham3RescaledRicNonneg (I := I) P Q)
     {L : Ham3CGHLimit (I := I) M}
     (hreal : Ham3SourceRealizes (I := I) P Q hsel L)
-    (htransfer : Ham3RicNonnegTransfer (I := I) P Q hsel L)
-    (_hlimit :
-      Ham3LimitSubseq (I := I) L /\
-      Ham3LimitWindow (I := I) L /\
-        Ham3LimitRegWin (I := I) L /\
-        Ham3LimitConnected (I := I) L /\
-        Ham3LimitBoundaryless (I := I) /\
-        Ham3LimitFlow (I := I) L) :
+    (htransfer : Ham3RicNonnegTransfer (I := I) P Q hsel L) :
     LimitRicNonneg (I := I) L := by
   exact htransfer hreal hric
 
@@ -2642,8 +2633,8 @@ theorem limit_inherit
         Ham3LimitFlow (I := I) L :=
     ⟨hsubseq, hwindow, hregwin, hconn, hbdry, hflow⟩
   have hnonneg : LimitRicNonneg (I := I) L :=
-    limit_ric_nonneg (I := I) (M := M) hM g0 hpos P Q hsel _hric
-      hreal hricTransfer hlimit
+    limit_ric_nonneg (I := I) (M := M) g0 P Q hsel _hric
+      hreal hricTransfer
   have hbase : LimitBaseScalarOne (I := I) L :=
     limit_base_scalar_one (I := I) (M := M) P Q hsel hbaseconv
   exact ⟨L, hreal, hsubseq, hwindow, hregwin, hconn, hbdry, hflow,
