@@ -338,21 +338,6 @@ theorem iterCovG1_three
     exact le_max_left _ _
   · exact iterCovThree_le (I := I) g₁ g₂ r hEq hjet hJet1 hJet2 hJet3
 
-theorem hAcc_of_jets
-    {K : Set M} (g₁ g₂ : SmoothRiemannianMetric I M) (r m : ℕ)
-    {Λ Λ' : ℝ} (Λs : ℕ → ℝ)
-    (hEq : MetricUniformEquivalentOn (I := I) K g₁ g₂ Λ)
-    (hjet : MetricCovDerivOrderBoundOn (I := I) K 1 g₂ g₁ Λ')
-    (hJets : ∀ j, 1 ≤ j → j ≤ m + 1 → MetricCovDerivOrderBoundOn (I := I) K j g₁ g₂ (Λs j)) :
-    ∃ C : ℝ, 0 ≤ C ∧
-      ∀ (T : Tensor0SBundle.Tensor0SField (𝕜 := Real) (E := E) (H := H)
-          (I := I) (M := M) (n := (∞ : WithTop ℕ∞)) r) (x : M), x ∈ K →
-        Real.sqrt (normSq0S (I := I) g₂ x (r + m + 1)
-            (covStep (I := I) g₂ (r + m) (telescAccum (I := I) g₁ g₂ r T m) x)) ≤
-          C * ∑ k ∈ Finset.range (m + 2),
-            Real.sqrt (normSq0S (I := I) g₂ x (r + k) (iterCov (I := I) g₂ r T k x)) := by
-  sorry
-
 end RicciFlow
 end PDE
 end DifferentialGeometry
