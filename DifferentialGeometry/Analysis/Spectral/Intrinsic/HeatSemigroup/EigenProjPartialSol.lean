@@ -466,6 +466,7 @@ theorem projForce_fixed (g₀ : SmoothRiemannianMetric I M) (a : ℕ) {R T : ℝ
   simp only [projNfun]
   exact spatialProj_idem (I := I) (M := M) g₀ (a : ℝ) N _
 
+omit [BoundarylessManifold I M] in
 theorem projField_fixed (g₀ : SmoothRiemannianMetric I M) (a : ℕ) {R T : ℝ}
     (hT : 0 < T) (hT1 : T ≤ 1) (N : ℕ)
     {Nfun : lowerState (I := I) (M := M) g₀ a R →

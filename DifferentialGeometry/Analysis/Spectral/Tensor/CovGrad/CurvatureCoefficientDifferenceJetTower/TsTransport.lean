@@ -41,8 +41,7 @@ set_option backward.isDefEq.respectTransparency false
 
 namespace CurvatureCoefficientDifferenceJetTower
 
-omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] in
-omit [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 lemma tsCastRankCc_db_refl (g₀ : SmoothRiemannianMetric I M) (r : ℕ) {a : ℕ} (h : a = a)
     (W : SmoothCcTensor g₀ r a) : castRankCc_db g₀ r h W = W := rfl
 
@@ -67,8 +66,7 @@ lemma tsCastRankCc_db_sub (g₀ : SmoothRiemannianMetric I M) (r : ℕ) {a b : �
     castRankCc_db g₀ r h (W - W') = castRankCc_db g₀ r h W - castRankCc_db g₀ r h W' := by
   subst h; rfl
 
-omit [NeZero (Module.finrank ℝ E)] in
-omit [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 lemma tsCastRankCc_db_add (g₀ : SmoothRiemannianMetric I M) (r : ℕ) {a b : ℕ}
     (h : a = b) (W W' : SmoothCcTensor g₀ r a) :
     castRankCc_db g₀ r h (W + W') = castRankCc_db g₀ r h W + castRankCc_db g₀ r h W' := by
@@ -523,8 +521,7 @@ lemma tsRfns_domDomCongrSection_zero (g₀ : SmoothRiemannianMetric I M) {s : �
   rw [iteratedCovGrad_zero, iteratedCovGrad_zero] at h
   exact h
 
-omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [BoundarylessManifold I M] [SigmaCompactSpace M] in
-omit [CompactSpace M] [T2Space M] in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 lemma tsRfns_castRankCc_db_zero (g₀ : SmoothRiemannianMetric I M) (r : ℕ) {a b : ℕ}
     (h : a = b) (W : SmoothCcTensor g₀ r a) (x : M) :
     riemannianFiberNormSq (I := I) (M := M) g₀ r b x
@@ -594,8 +591,7 @@ lemma tsAppCc_sub_left (g₀ : SmoothRiemannianMetric I M) (r s : ℕ)
     rw [SmoothCcTensor.toSection_sub]; rfl]
   rw [ContinuousLinearMap.sub_comp]
 
-omit [NeZero (Module.finrank ℝ E)] in
-omit [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 lemma tsRsDomDomCongr_sub {r s : ℕ} {x : M} (σ : Equiv.Perm (Fin s))
     (T T' : TensorRSSpace r s I x) :
     rsDomDomCongr (I := I) (M := M) σ (T - T') =
@@ -1038,8 +1034,7 @@ lemma tsResSum_le_boundedWindow (b : ℕ → ℝ) (hb : ∀ j, 0 ≤ b j) (j : �
     _ = (j : ℝ) * Combinatorics.boundedFactorGridWindow b j (j + 2) := by
         rw [Finset.sum_const, Finset.card_range, nsmul_eq_mul]
 
-omit [NeZero (Module.finrank ℝ E)] in
-omit [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 lemma tsRfns_sub_le (g : SmoothRiemannianMetric I M) (r s : ℕ) (x : M)
     (P Q : TensorRSSpace r s I x) :
     riemannianFiberNormSq (I := I) (M := M) g r s x (P - Q) ≤
