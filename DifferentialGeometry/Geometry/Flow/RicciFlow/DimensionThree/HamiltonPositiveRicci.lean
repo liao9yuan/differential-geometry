@@ -2650,13 +2650,6 @@ theorem limit_tracefree_decay
     (hreal : Ham3SourceRealizes (I := I) P Q hsel L)
     (htransfer : Ham3PinchTransfer (I := I) P Q hsel L)
     (hpinch : Ham3PinchEstimate (I := I) P)
-    (_hlimit :
-      Ham3LimitSubseq (I := I) L /\
-      Ham3LimitWindow (I := I) L /\
-        Ham3LimitRegWin (I := I) L /\
-        Ham3LimitConnected (I := I) L /\
-        Ham3LimitBoundaryless (I := I) /\
-        Ham3LimitFlow (I := I) L)
     (hscalarPos : LimitScalarPos (I := I) L) :
     LimitTracefreeDecay (I := I) L := by
   exact htransfer hreal hpinch hscalarPos
@@ -2731,7 +2724,7 @@ theorem limit_tracefree_zero
     LimitTracefreeZero (I := I) L := by
   exact limit_tracefree_zero_of_decay (I := I) (M := M) hdim
     (limit_tracefree_decay (I := I) (M := M) P Q hsel hreal htransfer hpinch
-      _hlimit _hscalarPos)
+      _hscalarPos)
 
 omit [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [SigmaCompactSpace M] [T2Space M] in
 theorem limitEinstein_of_tf0
