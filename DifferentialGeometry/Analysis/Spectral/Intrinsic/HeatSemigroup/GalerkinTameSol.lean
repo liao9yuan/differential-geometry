@@ -250,6 +250,7 @@ theorem galTameStateC_mem (g₀ : SmoothRiemannianMetric I M) (a : ℕ) {R : ℝ
   exact ballRetraction_mem_closedBall (X :=
     tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 1)) hR _
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [BoundarylessManifold I M] in
 theorem galTameRetr_eq (g₀ : SmoothRiemannianMetric I M) (a : ℕ) {R : ℝ}
     (S : Finset (TensorEigenIdx (I := I) (M := M) g₀ 0 2))
     {w : EuclideanSpace ℝ {i // i ∈ S}}
@@ -356,6 +357,7 @@ def galTameBall (g₀ : SmoothRiemannianMetric I M) (a : ℕ) (R κ : ℝ) :
     dist (x : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2))
       (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2)) ≤ Real.sqrt κ * R}
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [BoundarylessManifold I M] in
 theorem galTameRetr_ball (g₀ : SmoothRiemannianMetric I M) (a : ℕ) {R : ℝ}
     (hR : 0 ≤ R) (S : Finset (TensorEigenIdx (I := I) (M := M) g₀ 0 2))
     {κ : ℝ} (hκ0 : 0 ≤ κ)
@@ -372,6 +374,7 @@ theorem galTameRetr_ball (g₀ : SmoothRiemannianMetric I M) (a : ℕ) {R : ℝ}
   rw [dist_zero_right]
   exact galTameRetr_top (I := I) (M := M) g₀ a hR S hκ0 hκ w
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [BoundarylessManifold I M] in
 theorem galTameField_lip (g₀ : SmoothRiemannianMetric I M) (a : ℕ) {R : ℝ}
     (hR : 0 ≤ R)
     (Nfun : lowerState (I := I) (M := M) g₀ a R →
@@ -428,6 +431,7 @@ theorem galTameField_lip (g₀ : SmoothRiemannianMetric I M) (a : ℕ) {R : ℝ}
   rw [Real.coe_toNNReal']
   exact le_max_left _ _
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [BoundarylessManifold I M] in
 theorem galTameField_aff (g₀ : SmoothRiemannianMetric I M) (a : ℕ) {R : ℝ}
     (hR : 0 ≤ R)
     (Nfun : lowerState (I := I) (M := M) g₀ a R →
@@ -559,6 +563,7 @@ omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] in
       else 0 := rfl
 
 open scoped Classical in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [BoundarylessManifold I M] in
 theorem galTameForce_contOn (g₀ : SmoothRiemannianMetric I M) (a : ℕ) {R : ℝ}
     (hR : 0 ≤ R)
     (Nfun : lowerState (I := I) (M := M) g₀ a R →
@@ -618,6 +623,7 @@ theorem galTameForce_contOn (g₀ : SmoothRiemannianMetric I M) (a : ℕ) {R : �
     rw [galTameForce_apply, if_neg hi]
 
 open scoped Classical in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [BoundarylessManifold I M] in
 theorem galTameSolOne (g₀ : SmoothRiemannianMetric I M) (a : ℕ) {R : ℝ}
     (hR : 0 ≤ R)
     (Nfun : lowerState (I := I) (M := M) g₀ a R →
@@ -746,6 +752,7 @@ theorem galTameSolOne (g₀ : SmoothRiemannianMetric I M) (a : ℕ) {R : ℝ}
     simp only [dif_neg hi]
 
 open DifferentialGeometry.Analysis.Parabolic.MaximalRegularity in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [BoundarylessManifold I M] in
 theorem galTamePerMode (g₀ : SmoothRiemannianMetric I M) (a : ℕ) {R : ℝ}
     (hR : 0 ≤ R)
     (Nfun : lowerState (I := I) (M := M) g₀ a R →

@@ -143,6 +143,7 @@ theorem insert_base (g₀ g₁ g_bg : SmoothRiemannianMetric I M) :
   rw [e0, e1]
   ring
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem lc0_decomp (g₀ g₁ g_bg : SmoothRiemannianMetric I M) :
     lieCorr0Field (I := I) (M := M) g₀ g₁ g_bg =
       ((lc0Insert (I := I) (M := M) g₀ g₁ g_bg +
@@ -157,6 +158,7 @@ theorem lc0_decomp (g₀ g₁ g_bg : SmoothRiemannianMetric I M) :
   rw [lieCorr0TotalFib]
   rfl
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem tail_base_split (g₀ g₁ g_bg : SmoothRiemannianMetric I M) :
     lieCorr0Field (I := I) (M := M) g₀ g₁ g_bg +
         deTurckLieEndoArmField (I := I) (M := M) g₀ g₁ g₀ =

@@ -127,6 +127,7 @@ def palatiniOneC (Λ : ℝ) : ℝ :=
     4 * (3 / 2 * Λ ^ 3 * Λ) * (3 / 2 * Λ ^ 4 * (Λ + Λ * Λ ^ 2))
 
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [SigmaCompactSpace M] in
 theorem unifPalatini1_le
     (gBase g₀ : SmoothRiemannianMetric I M) {Λ : ℝ}
     (hΛ : 1 ≤ Λ)
@@ -383,6 +384,7 @@ theorem unifPalatini1_le
       dsimp [palatiniOneC, C₀, C₁, C₂]
 
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [SigmaCompactSpace M] in
 theorem unifPalatini1
     (gBase g₀ : SmoothRiemannianMetric I M) {Λ : ℝ}
     (hΛ : 1 ≤ Λ)

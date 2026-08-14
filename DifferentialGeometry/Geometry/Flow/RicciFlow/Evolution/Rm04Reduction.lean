@@ -124,6 +124,7 @@ private theorem quadB (gInv : ι → ι → Real) (Rm : ι → ι → ι → ι 
   rw [bComp_quad]
   exact quadSwapPR gInv (fun p q r s => Rm a r b p * Rm c s d q)
 
+omit [DecidableEq ι] in
 theorem bComp_swap (gInv : ι → ι → Real) {Rm : ι → ι → ι → ι → Real}
     (hsym : Rm04Symm Rm) (a b c d : ι) :
     bComp gInv Rm a b c d = bComp gInv Rm b a d c := by
@@ -167,6 +168,7 @@ theorem rmQ4_eq_b (gInv : ι → ι → Real) {Rm : ι → ι → ι → ι → 
           rw [hsym.swap12 p i r l, hsym.swap34 i p r l]; ring
     _ = bComp gInv Rm i l j k := (bComp_quad gInv Rm i l j k).symm
 
+omit [DecidableEq ι] in
 theorem rmQ1_eq_b (gInv : ι → ι → Real) {Rm : ι → ι → ι → ι → Real}
     (hsym : Rm04Symm Rm) (hgi : ∀ a b : ι, gInv a b = gInv b a) (i j k l : ι) :
     rmQ1 gInv Rm i j k l = -2 * (bComp gInv Rm i j k l - bComp gInv Rm i j l k) := by
@@ -208,6 +210,7 @@ theorem rmQ1_eq_b (gInv : ι → ι → Real) {Rm : ι → ι → ι → ι → 
         rw [bComp_swap gInv hsym j i l k, bComp_swap gInv hsym j i k l]
         ring
 
+omit [DecidableEq ι] in
 theorem rmQuad_eq_b (gInv : ι → ι → Real) {Rm : ι → ι → ι → ι → Real}
     (hsym : Rm04Symm Rm) (hgi : ∀ a b : ι, gInv a b = gInv b a) (i j k l : ι) :
     rmQuad gInv Rm i j k l
@@ -477,6 +480,7 @@ private theorem lapHessW (gInv : ι → ι → Real) {Ric : ι → ι → Real}
   rw [hsplit, hswap, tracedBi gInv hin i j k l, tracedBi gInv hin j i k l, rmHess]
   ring
 
+omit [DecidableEq ι] in
 private theorem wEq (gInv : ι → ι → Real) {Ric Rup : ι → ι → Real}
     {Rm : ι → ι → ι → ι → Real} (hsym : Rm04Symm Rm)
     (hgi : ∀ a b : ι, gInv a b = gInv b a)
@@ -531,6 +535,7 @@ private theorem wEq (gInv : ι → ι → Real) {Ric Rup : ι → ι → Real}
     h2, h3, h4, h5, h7, h8, rmQuad]
   linarith [h16]
 
+omit [DecidableEq ι] in
 theorem rmHess_eq_lap (gInv : ι → ι → Real) {Ric Rup : ι → ι → Real}
     {Rm : ι → ι → ι → ι → Real} {n2Ric : ι → ι → ι → ι → Real}
     {n2Rm : ι → ι → ι → ι → ι → ι → Real}
@@ -582,8 +587,8 @@ variable [NeZero (Module.finrank Real E)]
 variable {H : Type*} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H} [I.Boundaryless]
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
-variable [IsManifold I 1 M]
-variable [CompleteSpace E] [SigmaCompactSpace M] [T2Space M]
+
+variable [SigmaCompactSpace M] [T2Space M]
 
 omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 theorem rm04Var_eq_uhl

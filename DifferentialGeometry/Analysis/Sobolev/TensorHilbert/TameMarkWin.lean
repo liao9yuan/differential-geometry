@@ -332,6 +332,7 @@ theorem mkSmul (g₀ : SmoothRiemannianMetric I M) (P : SmoothCcTensor g₀ 0 2)
   rw [heq, mul_assoc]
   exact mul_le_mul_of_nonneg_left (hX i x) (sq_nonneg t)
 
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] in
 theorem mkNeg (g₀ : SmoothRiemannianMetric I M) (P : SmoothCcTensor g₀ 0 2)
     {r c u : ℕ} {X : SmoothCcTensor g₀ r c} {K : ℕ → ℝ}
     (hX : HasMarkWin (I := I) (M := M) g₀ P X u K) :
@@ -342,6 +343,7 @@ theorem mkNeg (g₀ : SmoothRiemannianMetric I M) (P : SmoothCcTensor g₀ 0 2)
     (mkSmul (I := I) (M := M) g₀ P (-1 : ℝ) hX)
   norm_num
 
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] in
 theorem mkSub (g₀ : SmoothRiemannianMetric I M) (P : SmoothCcTensor g₀ 0 2)
     {r c u : ℕ} {X Y : SmoothCcTensor g₀ r c} {KX KY : ℕ → ℝ}
     (hX : HasMarkWin (I := I) (M := M) g₀ P X u KX)
@@ -726,6 +728,7 @@ private lemma contGrid (g₀ : SmoothRiemannianMetric I M) (P : SmoothCcTensor g
   exact continuous_finset_sum _ (fun n' _ => continuous_finset_sum _ (fun e _ =>
     continuous_finset_prod _ (fun q _ => contGB (I := I) (M := M) g₀ P (e q))))
 
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] in
 private lemma contMk (g₀ : SmoothRiemannianMetric I M) (P : SmoothCcTensor g₀ 0 2)
     (u w : ℕ) : Continuous (fun x : M =>
       Combinatorics.markGrid (gridBase (I := I) (M := M) g₀ P x) u w) := by

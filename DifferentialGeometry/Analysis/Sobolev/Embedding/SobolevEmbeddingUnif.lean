@@ -138,7 +138,7 @@ lemma morreyUnifConst_sq {Λ Cb Kjet : ℝ} (hΛ : 0 ≤ Λ) (n s : ℕ) :
   rw [mul_pow, Real.sq_sqrt (pow_nonneg hΛ s)]
   ring
 
-omit [NeZero (Module.finrank ℝ E)] in
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] in
 theorem fibreMorrey_unif
     (gBase g₀ : SmoothRiemannianMetric I M) {Λ : ℝ} (hΛ : 1 ≤ Λ)
     (hequiv : ∀ (x : M) (v : TangentSpace I x),
@@ -234,6 +234,7 @@ lemma fibreNormSq_le_baseMorreyConst
   (exists_riemannianFiberNorm_le_iteratedCovGrad_l2_jetSum_supercritical
     (I := I) (M := M) gBase r s).choose_spec.2 W x
 
+omit [BoundarylessManifold I M] in
 theorem fibreMorrey_unif_base
     (gBase g₀ : SmoothRiemannianMetric I M) {Λ : ℝ} (hΛ : 1 ≤ Λ)
     (hequiv : ∀ (x : M) (v : TangentSpace I x),

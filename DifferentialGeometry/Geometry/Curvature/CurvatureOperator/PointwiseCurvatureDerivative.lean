@@ -300,6 +300,7 @@ theorem nablaRiemannOp_eq
     exact (ne_of_gt (g.pos x (lhs - rhs) hne)) hzero
   exact sub_eq_zero.mp hsub
 
+omit [I.Boundaryless] [BoundarylessManifold I M] [SigmaCompactSpace M] in
 theorem nablaRiemannOp_sec
     (g : SmoothRiemannianMetric I M)
     (D X Y Z : ContMDiffSection I E (∞ : WithTop ℕ∞)

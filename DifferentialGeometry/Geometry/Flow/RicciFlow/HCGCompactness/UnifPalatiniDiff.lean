@@ -37,7 +37,7 @@ theorem curvJet1_eval (g : SmoothRiemannianMetric I M) (x : M)
   nablaRm04_apply (I := I) (M := M) g x D X Y Z W
 
 
-omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [SigmaCompactSpace M] in
 theorem curvJet1_normSq_le_of_op
     (g : SmoothRiemannianMetric I M) {K : ℝ} (hK : 0 ≤ K)
     (hop : ∀ (x : M) (D X Y Z : TangentSpace I x),

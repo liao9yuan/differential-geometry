@@ -365,6 +365,7 @@ omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpac
       (curvOpNForm (I := I) g k Y x) = _
   rw [curvOpNForm_apply]
 
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] in
 theorem curvOpN_smoothAlong
     (g : SmoothRiemannianMetric I M) (k : Nat)
     (gamma : Real -> M)
@@ -686,6 +687,7 @@ private theorem curvOpNabla_eval_sum
       _
   rfl
 
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] in
 private theorem curvOpNabla_curry
     (g : SmoothRiemannianMetric I M) (k : Nat)
     (X : ContMDiffSection I E (∞ : WithTop ℕ∞)
@@ -817,6 +819,7 @@ private theorem curvOpNabla_eval
       (curvCovDeriv (I := I) (M := M) g k) (Fin.last (k + 3))
       X Yfull hYfull U)
 
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] in
 theorem curvOpN_cov_sum
     (g : SmoothRiemannianMetric I M) (k : Nat)
     (X : ContMDiffSection I E (∞ : WithTop ℕ∞)
@@ -890,6 +893,7 @@ theorem curvOpN_cov_sum
         (Function.update (fun j : Fin (k + 3) => Y j x) i
           (curvSlotCov (I := I) g k X Y x i))).symm
 
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
 theorem curvOpN_cov_restrict
     (g : SmoothRiemannianMetric I M) (k : Nat)
     (γ : Real -> M)
@@ -1012,6 +1016,7 @@ private theorem curvOpNDeriv_congr
     simp only [Function.update_self, hslot]
   · rw [Function.update_of_ne hji, Function.update_of_ne hji, hval j]
 
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] in
 private theorem curvOpNDeriv_smul
     (g : SmoothRiemannianMetric I M) (k : Nat)
     (gamma : Real -> M)
@@ -1161,6 +1166,7 @@ private theorem curvOpNDeriv_smul
   rw [hsumcorr]
   module
 
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] in
 private theorem curvOpNDeriv_add
     (g : SmoothRiemannianMetric I M) (k : Nat)
     (gamma : Real -> M)
@@ -1378,6 +1384,7 @@ private theorem curvOpNDeriv_add
   rw [hsumcorr]
   abel
 
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] in
 private theorem curvOpNDeriv_sum
     (g : SmoothRiemannianMetric I M) (k : Nat)
     (gamma : Real -> M)
@@ -1419,6 +1426,7 @@ private theorem curvOpNDeriv_sum
       rw [hsumfun, hadd, ih]
       rw [Finset.sum_insert ha]
 
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] in
 private theorem curvOpNDeriv_slot
     (g : SmoothRiemannianMetric I M) (k : Nat)
     (gamma : Real -> M)
@@ -1562,6 +1570,7 @@ private theorem curvOpNDeriv_slot
     _ = curvOpNDerivAlong (I := I) g k gamma
           (Function.update Y i B) t := hCongrD.symm
 
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] in
 private theorem curvOpNDeriv_all
     (g : SmoothRiemannianMetric I M) (k : Nat)
     (gamma : Real -> M)
@@ -1634,6 +1643,7 @@ private theorem curvOpNDeriv_all
   rw [hUniv] at hall
   exact hall
 
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
 theorem curvOpNDeriv_comp
     (g : SmoothRiemannianMetric I M) (k : Nat)
     (γ : Real -> M)
@@ -1660,6 +1670,7 @@ theorem curvOpNDeriv_comp
   rw [curvOpN_cov_restrict (I := I) g k γ Y t hγ]
   abel
 
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
 theorem curvOpN_covAlong
     (g : SmoothRiemannianMetric I M) (k : Nat)
     (gamma : Real -> M)
@@ -1913,7 +1924,7 @@ theorem curvOpN_zero
             x X Y Z) W :=
       (g.symm x _ _).symm
 
-omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [SigmaCompactSpace M] in
 theorem curvOpN_one
     (g : SmoothRiemannianMetric I M) (x : M)
     (D X Y Z : TangentSpace I x) :
@@ -1957,6 +1968,7 @@ theorem curvAlong_eq_op0
   simpa only [curvAlong] using
     (curvOpN_zero (I := I) g (gamma t) (X t) (Y t) (Z t)).symm
 
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
 theorem curvDeriv_eq_op1
     (g : SmoothRiemannianMetric I M) (gamma : Real -> M)
     (X Y Z : forall s : Real, TangentSpace I (gamma s)) (t : Real)

@@ -170,6 +170,7 @@ lemma chartRep_fst_diff
     chartRep_snd_diff (I := I) (fun a b => f b a)
       (fun a b => V b a) hVswap t s
 
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 theorem covFst_add
     (g : SmoothRiemannianMetric I M) (f : Real -> Real -> M)
     (V W : forall s t : Real, TangentSpace I (f s t))
@@ -196,6 +197,7 @@ theorem covFst_add
       (chartRep_fst_diff (I := I) f V hV s t)
       (chartRep_fst_diff (I := I) f W hW s t)
 
+omit [InnerProductSpace ℝ E] [SigmaCompactSpace M] in
 theorem cov_commute_at
     (g : SmoothRiemannianMetric I M) (f : Real -> Real -> M)
     (hf : IsSmoothVariation (I := I) f)
@@ -597,6 +599,7 @@ theorem covFstIter_zero_of
       rw [hfield]
       exact covDerivAlong_zero (I := I) g (fun r : Real => f r t) s
 
+omit [InnerProductSpace ℝ E] [T2Space M] [SigmaCompactSpace M] in
 theorem covFstIter_smooth
     (g : SmoothRiemannianMetric I M) (f : Real -> Real -> M)
     (V : forall s t : Real, TangentSpace I (f s t))
@@ -672,6 +675,7 @@ theorem jacJetResidual_succ
       (covFstIter_smooth (I := I) g f V hV n) hJn s t
   simpa only [jacJetResidual, jacJetCorr, covFstIter_succ] using hstep
 
+omit [InnerProductSpace ℝ E] [T2Space M] [SigmaCompactSpace M] in
 theorem innerJet_deriv
     (g : SmoothRiemannianMetric I M) (f : Real -> Real -> M)
     (V W : forall s t : Real, TangentSpace I (f s t))

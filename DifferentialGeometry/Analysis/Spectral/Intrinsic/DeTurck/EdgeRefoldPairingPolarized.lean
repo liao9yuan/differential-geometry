@@ -531,6 +531,7 @@ theorem edgePair_point_bi (g gm : SmoothRiemannianMetric I M)
         simp only [edgePartnerBi_eval, fullRaisedEndoField_apply,
           Equiv.apply_symm_apply]
 
+omit [BoundarylessManifold I M] in
 theorem edgePair_l2_bi (g gm : SmoothRiemannianMetric I M)
     (P V : SmoothCcTensor g 0 2) (G : SmoothCcTensor g 0 4)
     (σ : Equiv.Perm (Fin 4)) :
@@ -545,6 +546,7 @@ theorem edgePair_l2_bi (g gm : SmoothRiemannianMetric I M)
     (Filter.Eventually.of_forall fun x => ?_)
   exact edgePair_point_bi (I := I) (M := M) g gm P V G σ x
 
+omit [BoundarylessManifold I M] in
 theorem edgePair_inner_bi (g gm : SmoothRiemannianMetric I M)
     (P V : SmoothCcTensor g 0 2) (G : SmoothCcTensor g 0 4)
     (σ : Equiv.Perm (Fin 4)) :
@@ -709,6 +711,7 @@ def edgeTopPartnerBi (g : SmoothRiemannianMetric I M)
         edgePairPartnerBi (I := I) (M := M) g gm P V
           ((q i).trans (Equiv.swap (0 : Fin 4) 1))))
 
+omit [BoundarylessManifold I M] in
 theorem edgeTop_point_bi
     (g : SmoothRiemannianMetric I M) (T P U V : SmoothCcTensor g 0 2)
     {delta : Real}
@@ -755,6 +758,7 @@ theorem edgeTop_point_bi
   simp_rw [tensorInnerPointwise_add_left, tensorInnerPointwise_add_right]
   simp_rw [edgePair_point_bi (I := I) (M := M) g]
 
+omit [BoundarylessManifold I M] in
 theorem edgeTop_inner_bi
     (g : SmoothRiemannianMetric I M) (T P U V : SmoothCcTensor g 0 2)
     {delta : Real}

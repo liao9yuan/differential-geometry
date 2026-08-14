@@ -153,6 +153,7 @@ theorem h6_buffer_mem
   rw [dist_eq_norm] at hw
   nlinarith
 
+omit [CompleteSpace E] in
 theorem pair_overlap_at
     (inp : MetricCompactCore (I := I) X)
     (d : H6NormalData (I := I) X inp.decay)
@@ -365,6 +366,7 @@ theorem pair_overlap_at
     simpa only [H6NormalData.chartTransition, H6NormalData.chartMap] using
       (hpoint z hz).2.2.2
 
+omit [CompleteSpace E] in
 theorem h6_pair_tail
     (inp : MetricCompactCore (I := I) X)
     (d : H6NormalData (I := I) X inp.decay)
@@ -401,6 +403,7 @@ theorem h6_pair_tail
   exact d.pair_overlap_at inp aMin hphys P L hcomplete hconn hratio
     (hcentersK alpha) (hcentersK gamma) hinter hinterK
 
+omit [CompleteSpace E] in
 theorem h6_patch_tail
     (inp : MetricCompactCore (I := I) X)
     (d : H6NormalData (I := I) X inp.decay)
@@ -652,6 +655,7 @@ theorem h6_patch_tail
     hbuffer (Metric.mem_closedBall_self heta)
   exact mem_iUnion.mpr ⟨alpha, ⟨z, hzCore, hzy⟩⟩
 
+omit [CompleteSpace E] in
 theorem h6_rad72_tail
     (inp : MetricCompactCore (I := I) X)
     (d : H6NormalData (I := I) X inp.decay)
@@ -903,6 +907,7 @@ private theorem normBump_smooth
     exact (real_inner_self_eq_norm_sq _).symm
   exact (stepCBump lam hlam).contDiff.comp_contDiffOn hnorm
 
+omit [CompleteSpace E] in
 theorem atomOn_live_conv
     (inp : MetricCompactCore (I := I) X)
     (d : H6NormalData (I := I) X inp.decay)

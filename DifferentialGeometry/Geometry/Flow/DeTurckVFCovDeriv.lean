@@ -207,6 +207,7 @@ private theorem cov_sum (cov : CovariantDerivative I E (TangentSpace I : M → T
     rw [hstep, cov.isCovariantDerivativeOnUniv.add ((hσ a x).mdifferentiableAt (by simp))
       ((hsm x).mdifferentiableAt (by simp)) (Set.mem_univ x), ih, Finset.sum_insert ha]
 
+omit [InnerProductSpace ℝ E] [SigmaCompactSpace M] in
 theorem deTurckVF_covDeriv_eq (g g_bg : SmoothRiemannianMetric I M) (x : M)
     (v : TangentSpace I x) :
     (LeviCivita (I := I) g).toFun

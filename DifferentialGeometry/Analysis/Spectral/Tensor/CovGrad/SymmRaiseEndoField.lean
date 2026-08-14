@@ -183,6 +183,7 @@ private lemma ccBilinSymm_add (g : SmoothRiemannianMetric I M)
     ContinuousMultilinearMap.add_apply]
   ring
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [BoundarylessManifold I M] in
 lemma symmRaiseEndo_add (g : SmoothRiemannianMetric I M)
     (T U : SmoothCcTensor g 0 2) :
     symmRaiseEndo (I := I) (M := M) g (T + U) =
@@ -266,7 +267,7 @@ private lemma toModel_om_single (x : M) (om : Tensor0SSpace 1 I x)
   rw [cotangentToDual_apply]
   rfl
 
-omit [BoundarylessManifold I M] in
+omit [BoundarylessManifold I M] [NeZero (Module.finrank ℝ E)] in
 lemma insert_symmRaise_eq (g : SmoothRiemannianMetric I M)
     (T : SmoothCcTensor g 0 2) :
     slotInsertEndoCc (I := I) (M := M) g 0

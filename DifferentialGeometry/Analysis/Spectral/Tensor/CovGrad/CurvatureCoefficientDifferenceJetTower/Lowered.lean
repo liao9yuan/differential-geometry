@@ -200,6 +200,7 @@ lemma riemannLoweredCc_unitModel (g₀ gm gc : SmoothRiemannianMetric I M) (x : 
     ContinuousMultilinearMap.constOfIsEmpty_apply, one_smul]
   rfl
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [SigmaCompactSpace M] in
 lemma riemannLoweredCc_unitModel_apply (g₀ gm gc : SmoothRiemannianMetric I M) (x : M)
     (m : Fin 4 → TangentSpace I x) :
     unitModel (I := I) (M := M) g₀ 4 (riemannLoweredCc (I := I) (M := M) g₀ gm gc) x m =
@@ -212,6 +213,7 @@ def riemannLoweredBackgroundDifference (g₀ g₁ : SmoothRiemannianMetric I M) 
   riemannLoweredCc (I := I) (M := M) g₀ g₀ g₁ - riemannLoweredCc (I := I) (M := M) g₀ g₀ g₀
 
 set_option backward.isDefEq.respectTransparency false in
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [SigmaCompactSpace M] in
 lemma riemannLoweredBackgroundDifference_unitModel_apply
     (g₀ g₁ : SmoothRiemannianMetric I M) (x : M) (m : Fin 4 → TangentSpace I x) :
     unitModel (I := I) (M := M) g₀ 4

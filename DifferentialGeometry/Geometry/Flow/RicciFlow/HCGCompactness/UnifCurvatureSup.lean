@@ -394,6 +394,7 @@ private theorem curvSup_of_diff
     _ = (Λ ^ 2 * (Cd + Real.sqrt Kb)) ^ 2 *
           g₀.inner x v v * g₀.inner x w w * g₀.inner x u u := by ring
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [SigmaCompactSpace M] in
 theorem unifCurvSup_of
     (gBase g₀ : SmoothRiemannianMetric I M) {Λ Kb : ℝ} (hΛ : 1 ≤ Λ)
     (hKb0 : 0 ≤ Kb)

@@ -66,6 +66,7 @@ theorem lc0AMix_eq_lc0AMixField (g₀ g₁ g_bg : SmoothRiemannianMetric I M) :
   change lieCorr0AMixFib (I := I) g₀ g₁ g_bg x D = _
   exact (lc0b_amix_fiber (I := I) (M := M) g₀ g₁ g_bg x D).symm
 
+omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] in
 theorem lc0Riem_eq_lc0RiemField (g₀ g₁ : SmoothRiemannianMetric I M) :
     lc0Riem (I := I) (M := M) g₀ g₁ =
       lc0RiemField (I := I) (M := M) g₀ g₁ := by

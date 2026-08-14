@@ -243,6 +243,7 @@ lemma slotExtendIter_parallel (g₀ : SmoothRiemannianMetric I M) (b c : ℕ)
         (slotExtendIter (I := I) (M := M) g₀ b c j Φ)
         (slotExtendIter_parallel g₀ b c Φ hΦ j)
 
+omit [NeZero (Module.finrank ℝ E)] in
 lemma iteratedCovGrad_appCcRS_parallel (g₀ : SmoothRiemannianMetric I M)
     (a b c : ℕ) (Φ : SmoothCcTensor g₀ b c)
     (hΦ : covGrad (I := I) (M := M) g₀ b c Φ = 0) (W : SmoothCcTensor g₀ a b) :
@@ -1983,7 +1984,7 @@ omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] [SigmaCompactSpa
       (show TensorRSSpace (s + 2) s I x from
         cometricDoubleTraceFib (I := I) g₁ s x) := rfl
 
-omit [BoundarylessManifold I M] in
+omit [BoundarylessManifold I M] [SigmaCompactSpace M] in
 theorem pureTrace_split (g₀ g₁ : SmoothRiemannianMetric I M) (s : ℕ) :
     pureTrace (I := I) (M := M) g₀ g₁ s =
       appCcRS (I := I) (M := M) g₀ (s + 2) (s + 2) s

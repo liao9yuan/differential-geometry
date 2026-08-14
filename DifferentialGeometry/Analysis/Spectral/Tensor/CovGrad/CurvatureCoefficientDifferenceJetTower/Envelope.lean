@@ -832,6 +832,7 @@ lemma tame_sq_le_two_add (t u v c1 c2 : ℝ) (ht : 0 ≤ t) (hu : 0 ≤ u) (hv :
 
 end CurvatureCoefficientDifferenceJetTower
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem raisedKoszul_perOrder_l2_le_iteratedCovGrad_succ
     (g₀ g₁ : SmoothRiemannianMetric I M) (T : SmoothCcTensor g₀ 0 2)
     (htie : ∀ (y : M) (v w : TangentSpace I y),

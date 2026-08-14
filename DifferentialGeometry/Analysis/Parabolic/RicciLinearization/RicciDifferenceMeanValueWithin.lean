@@ -264,6 +264,7 @@ theorem partRiemWithin {S : Set ℝ} (hG : GenJointGramOn (I := I) gfam α S)
   partialDerivWithin (fun s y => chartRiemannTensor (I := I) (gfam s) α i j k l y) m
     isOpen_interior hs hy (riemannWithin (I := I) gfam α hG i j k l hs hy)
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem partRicciWithin {S : Set ℝ} (hG : GenJointGramOn (I := I) gfam α S)
     (m i k : Fin (Module.finrank ℝ E)) {s₀ : ℝ} {y₀ : E} (hs : s₀ ∈ S)
     (hy : y₀ ∈ interior (extChartAt I α).target) :
@@ -410,6 +411,7 @@ theorem riemWithinM (g : ℝ → SmoothRiemannianMetric I M) {J : Set ℝ} (α :
   jointOnMWithin (I := I) α (fun s y => chartRiemannTensor (I := I) (g s) α i j k l y)
     (riemannWithin (I := I) g α hG i j k l ht (chart_mem_interior (I := I) α hx)) hx
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem ricciWithinM (g : ℝ → SmoothRiemannianMetric I M) {J : Set ℝ} (α : M)
     (hG : GenJointGramOn (I := I) g α J) (i k : Fin (Module.finrank ℝ E))
     {t : ℝ} (ht : t ∈ J) {x : M} (hx : x ∈ (chartAt H α).source) :
@@ -419,6 +421,7 @@ theorem ricciWithinM (g : ℝ → SmoothRiemannianMetric I M) {J : Set ℝ} (α 
   jointOnMWithin (I := I) α (fun s y => chartRicciTensor (I := I) (g s) α i k y)
     (ricciWithin (I := I) g α hG i k ht (chart_mem_interior (I := I) α hx)) hx
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem partRiemWithinM (g : ℝ → SmoothRiemannianMetric I M) {J : Set ℝ} (α : M)
     (hG : GenJointGramOn (I := I) g α J) (m i j k l : Fin (Module.finrank ℝ E))
     {t : ℝ} (ht : t ∈ J) {x : M} (hx : x ∈ (chartAt H α).source) :
@@ -432,6 +435,7 @@ theorem partRiemWithinM (g : ℝ → SmoothRiemannianMetric I M) {J : Set ℝ} (
       partialDeriv (E := E) m (fun z => chartRiemannTensor (I := I) (g s) α i j k l z) y)
     (partRiemWithin (I := I) g α hG m i j k l ht (chart_mem_interior (I := I) α hx)) hx
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem partRicciWithinM (g : ℝ → SmoothRiemannianMetric I M) {J : Set ℝ} (α : M)
     (hG : GenJointGramOn (I := I) g α J) (m i k : Fin (Module.finrank ℝ E))
     {t : ℝ} (ht : t ∈ J) {x : M} (hx : x ∈ (chartAt H α).source) :
@@ -484,6 +488,7 @@ theorem christSlabCont (g : ℝ → SmoothRiemannianMetric I M) {a b c : ℝ} (h
   exact ((christWithinM (I := I) g x₀ hG i j k (hsub hp).1
     (hsub hp).2).continuousWithinAt).mono hsub
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem riemSlabCont (g : ℝ → SmoothRiemannianMetric I M) {a b c : ℝ} (hcb : c < b) (x₀ : M)
     (hgram : ∀ i j : Fin (Module.finrank ℝ E),
       ContMDiffOn (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ) ∞
@@ -517,6 +522,7 @@ theorem christSlabContAt (g : ℝ → SmoothRiemannianMetric I M) {a b c : ℝ} 
   have hbase := christSlabCont (I := I) g hcb x₀ hgram i j k (t, x₀) ⟨ht, hx₀⟩
   exact hbase.mono_of_mem_nhdsWithin (slabBase_nhdsWithin (I := I) x₀ a c t)
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem riemSlabContAt (g : ℝ → SmoothRiemannianMetric I M) {a b c : ℝ} (hcb : c < b) (x₀ : M)
     (hgram : ∀ i j : Fin (Module.finrank ℝ E),
       ContMDiffOn (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ) ∞

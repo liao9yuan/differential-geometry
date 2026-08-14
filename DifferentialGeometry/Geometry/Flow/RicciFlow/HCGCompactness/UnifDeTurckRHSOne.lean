@@ -207,6 +207,7 @@ noncomputable def revJetThreeC (Λ : ℝ) : ℝ :=
   let D := iterCovThreeC (E := E) 2 Λ L₁ Λ Λ
   Real.sqrt (Λ ^ 5) * (D * Real.sqrt (Module.finrank ℝ E : ℝ))
 
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] [SigmaCompactSpace M] in
 private theorem reverseJetThree
     (gBase g₀ : SmoothRiemannianMetric I M) {Λ : ℝ}
     (hEq : MetricUniformEquivalentOn (I := I) Set.univ gBase g₀ Λ)
@@ -352,6 +353,7 @@ private theorem connLowOne_eval
   simp only [map_sub, ContinuousLinearMap.sub_apply]
   ring
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [SigmaCompactSpace M] in
 private theorem connLowTwo_eval
     (gBase g₀ : SmoothRiemannianMetric I M)
     (D X Y Z W : ContMDiffSection I E (∞ : WithTop ℕ∞)

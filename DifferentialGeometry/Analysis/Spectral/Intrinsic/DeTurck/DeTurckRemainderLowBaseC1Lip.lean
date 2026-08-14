@@ -2829,7 +2829,7 @@ theorem ricciKer_sub_tame
       simp only [B0, B1, X]
       ring
 
-omit [BoundarylessManifold I M] in
+omit [BoundarylessManifold I M] [NeZero (Module.finrank ℝ E)] [CompactSpace M] in
 private theorem raise_rev
     (g gm : SmoothRiemannianMetric I M) (T : SmoothCcTensor g 0 2)
     (htie : ∀ (y : M) (v w : TangentSpace I y),
@@ -3344,6 +3344,7 @@ private theorem connIns_zero
     connSec_zero (I := I) (M := M) g]
   simpa only [sub_self] using h.symm
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 private theorem ricciKer_zero
     (g : SmoothRiemannianMetric I M) :
     linearizedRicciConnDiffOrder1KernelField (I := I) g g = 0 := by
@@ -4363,6 +4364,7 @@ theorem metricCorr_pair_h1
       simp only [C]
       ring
 
+omit [SigmaCompactSpace M] in
 private theorem mcd_sub_eq
     (g gT gU : SmoothRiemannianMetric I M)
     (T U : SmoothCcTensor g 0 2)
@@ -5835,6 +5837,7 @@ private theorem jet14
       mul_le_mul_of_nonneg_left (add_le_add hO2 h13) (by norm_num)
     _ ≤ (47 * Q) ^ 2 := by nlinarith [sq_nonneg Q]
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem connSec_self_h2
     (g gm : SmoothRiemannianMetric I M) :
     lowJetSq (I := I) (M := M) g 2

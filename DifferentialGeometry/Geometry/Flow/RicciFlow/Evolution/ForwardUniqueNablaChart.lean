@@ -19,16 +19,17 @@ open DifferentialGeometry.Integral.DivergenceTheorem
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]
 variable [InnerProductSpace Real E]
-variable [Module.Finite Real E] [FiniteDimensional Real E]
+variable [FiniteDimensional Real E]
 variable [NeZero (Module.finrank Real E)]
 variable {H : Type*} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
-variable [IsManifold I 1 M] [IsManifold I 2 M]
 
-variable [CompleteSpace E] [SigmaCompactSpace M] [T2Space M]
-variable [I.Boundaryless] [BoundarylessManifold I M]
 
+variable [SigmaCompactSpace M] [T2Space M]
+variable [I.Boundaryless]
+
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] in
 theorem nablaRicChartComp
     (g : SmoothRiemannianMetric I M)
     (Ric : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)

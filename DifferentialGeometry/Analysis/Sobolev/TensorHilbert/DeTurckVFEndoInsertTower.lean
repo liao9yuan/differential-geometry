@@ -287,6 +287,7 @@ private lemma tensor0SCovariantDerivative01_consEval_leibnizDefect
     rw [hfun]
   rw [hpeel, hbase]
 
+omit [SigmaCompactSpace M] in
 private lemma wOmega_toSection_unitZero (g₀ g₁ g_bg : SmoothRiemannianMetric I M) (b : M) :
     (show Tensor0SSpace 0 I b →L[ℝ] Tensor0SSpace 1 I b from
         (wOmega (I := I) (M := M) g₀ g₁ g_bg).toSection b)
@@ -294,6 +295,7 @@ private lemma wOmega_toSection_unitZero (g₀ g₁ g_bg : SmoothRiemannianMetric
       g0FlatCLM (I := I) g₀ b (wVF (I := I) (M := M) g₁ g_bg b) :=
   wOmega_toSection_unit_eq_flat (I := I) (M := M) g₀ g₁ g_bg b
 
+omit [SigmaCompactSpace M] in
 private lemma unitEvalSection_wOmega_toModel (g₀ g₁ g_bg : SmoothRiemannianMetric I M)
     (b : M) (z : TangentSpace I b) :
     Tensor0SSpace.toModel (unitEvalSection (I := I) (M := M) g₀ 1
@@ -388,6 +390,7 @@ lemma wAlphaA_unit_apply (g₀ g₁ g_bg : SmoothRiemannianMetric I M) (x : M)
   rw [hYx]
   ring
 
+omit [SigmaCompactSpace M] in
 lemma wAlphaB_unitModel_apply (g₀ g₁ g_bg : SmoothRiemannianMetric I M) (x : M)
     (u w : TangentSpace I x) :
     unitModel (I := I) (M := M) g₀ 2 (wAlphaB (I := I) (M := M) g₀ g₁ g_bg) x ![u, w] =

@@ -364,6 +364,7 @@ theorem ricciArmOrder0BaseCoeff_perOrder_l2_topSeparated_generic_allOrders
 
 section TopSeparatedKoszulExport
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem rfns_iteratedCovGrad_raisedKoszul_pointwise_le
     (g₀ g₁ : SmoothRiemannianMetric I M) (T : SmoothCcTensor g₀ 0 2)
     (htie : ∀ (y : M) (v w : TangentSpace I y),

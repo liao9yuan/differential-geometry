@@ -561,7 +561,7 @@ private theorem monoExt_jet_c2
   rw [monoExtC2, rsperm_jet_c2]
   exact slot4_jet_c2 (I := I) (M := M) g S
 
-omit [BoundarylessManifold I M] in
+omit [BoundarylessManifold I M] [NeZero (Module.finrank ℝ E)] [CompactSpace M] in
 private theorem raise_eq_rev
     (g gm : SmoothRiemannianMetric I M) (T : SmoothCcTensor g 0 2)
     (htie : ∀ (y : M) (v w : TangentSpace I y),

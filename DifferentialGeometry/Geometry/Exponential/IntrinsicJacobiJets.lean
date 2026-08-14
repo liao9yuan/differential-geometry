@@ -222,6 +222,7 @@ theorem intrLaunchJet_succ
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
+omit [InnerProductSpace ℝ E] in
 theorem intrLaunchJet_smooth
     [PseudoEMetricSpace M]
     [IsRiemannianManifold I M] [CompleteSpace M]
@@ -259,6 +260,7 @@ theorem intrLaunchJet_smooth
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
+omit [InnerProductSpace ℝ E] in
 theorem intrLaunchMix_smooth
     [PseudoEMetricSpace M]
     [IsRiemannianManifold I M] [CompleteSpace M]
@@ -299,6 +301,7 @@ theorem intrLaunchMix_smooth
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
+omit [InnerProductSpace ℝ E] in
 theorem intrMixDeriv_smooth
     [PseudoEMetricSpace M]
     [IsRiemannianManifold I M] [CompleteSpace M]
@@ -638,6 +641,7 @@ theorem intrLaunchA_self
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
+omit [InnerProductSpace ℝ E] in
 theorem intrAJet_self
     [PseudoEMetricSpace M]
     [IsRiemannianManifold I M] [CompleteSpace M]
@@ -690,6 +694,7 @@ theorem intrLaunchJ_time0
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
+omit [InnerProductSpace ℝ E] in
 theorem intrLaunchJet_time0
     [PseudoEMetricSpace M]
     [IsRiemannianManifold I M] [CompleteSpace M]
@@ -835,6 +840,7 @@ theorem intrLaunchDA_zero
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
+omit [InnerProductSpace ℝ E] in
 theorem intrLaunchDJ_zero
     [PseudoEMetricSpace M]
     [IsRiemannianManifold I M] [CompleteSpace M]
@@ -1004,6 +1010,7 @@ theorem intrLaunch_commute
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
+omit [InnerProductSpace ℝ E] in
 theorem intrLaunch_dmix0
     [PseudoEMetricSpace M]
     [IsRiemannianManifold I M] [CompleteSpace M]
@@ -1143,6 +1150,7 @@ theorem intrLaunch_dmix0
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
+omit [InnerProductSpace ℝ E] in
 theorem intrLaunch_var_eq
     [PseudoEMetricSpace M]
     [IsRiemannianManifold I M] [CompleteSpace M]
@@ -1280,6 +1288,7 @@ theorem intrJetResidual_zero
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
+omit [InnerProductSpace ℝ E] in
 theorem intrJetCurv_smooth
     [PseudoEMetricSpace M]
     [IsRiemannianManifold I M] [CompleteSpace M]

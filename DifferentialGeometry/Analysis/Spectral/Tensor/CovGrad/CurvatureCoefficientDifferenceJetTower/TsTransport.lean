@@ -367,6 +367,7 @@ lemma tsMetricCc_toSection_unit (g₀ : SmoothRiemannianMetric I M) (x : M) :
   rw [unitModel] at h
   exact h
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [BoundarylessManifold I M] [SigmaCompactSpace M] in
 lemma tsLoweredSlot0_unitModel_apply (g₀ : SmoothRiemannianMetric I M) (s : ℕ)
     (Z : SmoothCcTensor g₀ 1 (s + 1)) (x : M) (m : Fin (s + 2) → TangentSpace I x) :
     unitModel (I := I) (M := M) g₀ (s + 2) (tsLoweredSlot0 (I := I) (M := M) g₀ s Z) x m =
@@ -427,6 +428,7 @@ lemma tsInteriorProduct_toModel_eval (s : ℕ) (x : M) (vv : TangentSpace I x)
   rw [h1]
   rfl
 
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] [SigmaCompactSpace M] in
 theorem tsLoweredSlot0_cometricRaise (g₀ : SmoothRiemannianMetric I M) (s : ℕ)
     (W : SmoothCcTensor g₀ 0 (s + 2)) :
     tsLoweredSlot0 (I := I) (M := M) g₀ s

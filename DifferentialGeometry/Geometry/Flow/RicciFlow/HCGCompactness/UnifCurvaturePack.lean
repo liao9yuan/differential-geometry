@@ -46,6 +46,7 @@ omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [BoundarylessManifold I M]
   MixedSection.toMultilinearSection_fromMultilinearSection (𝕜 := ℝ) (F := E) (IB := I)
     (E := (TangentSpace I : M → Type _)) ∞ A
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem rfns_ccOfField_eq (g : SmoothRiemannianMetric I M) (s j : ℕ)
     (A : Tensor0SBundle.Tensor0SField (𝕜 := ℝ) (E := E) (H := H) (I := I) (M := M) ∞ s)
     (x : M) :
@@ -121,6 +122,7 @@ omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [BoundarylessManifold I M]
       metricRm04 (I := I) (M := M) g :=
   ccOfField_unit (I := I) g 4 (metricRm04 (I := I) (M := M) g)
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem rfns_rmSection_eq (g : SmoothRiemannianMetric I M) (j : ℕ) (x : M) :
     riemannianFiberNormSq (I := I) (M := M) g 0 (4 + j) x
         ((iteratedCovGrad (I := I) g 0 4 j (rmSection (I := I) (M := M) g)).toSection x) =
@@ -139,6 +141,7 @@ private theorem sqLeOfSqrtLe {a K : ℝ} (ha : 0 ≤ a) (h : Real.sqrt a ≤ K) 
     a ≤ K ^ 2 := by
   nlinarith [Real.sq_sqrt ha, Real.sqrt_nonneg a]
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem exists_rmJetSup (g : SmoothRiemannianMetric I M) (a : ℕ) :
     ∃ K : ℝ, 0 ≤ K ∧ ∀ x : M,
       riemannianFiberNormSq (I := I) (M := M) g 0 (4 + a) x
@@ -150,6 +153,7 @@ theorem exists_rmJetSup (g : SmoothRiemannianMetric I M) (a : ℕ) :
   rw [rfns_rmSection_eq (I := I) g a x]
   exact hK x
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem exists_rmJetSups (g : SmoothRiemannianMetric I M) (a : ℕ) :
     ∃ K : ℝ, 0 ≤ K ∧ ∀ j ≤ a, ∀ x : M,
       riemannianFiberNormSq (I := I) (M := M) g 0 (4 + j) x

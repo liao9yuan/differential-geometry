@@ -543,6 +543,7 @@ theorem curvDeriv_restrict
   rw [← hD]
   rfl
 
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
 theorem curvDeriv_eq_nabla
     (g : SmoothRiemannianMetric I M) (γ : Real -> M)
     (X Y Z : ∀ s, TangentSpace I (γ s)) (t : Real)

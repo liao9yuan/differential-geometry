@@ -212,6 +212,7 @@ private lemma lowerCc_grad_rel (g : SmoothRiemannianMetric I M) (r s : ℕ)
   congr 1
   exact hlower.symm
 
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma lowerCc_grad_rfns (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (T : SmoothCcTensor g r s) (x : M) :
     riemannianFiberNormSq (I := I) (M := M) g 0 ((r + s) + 1) x
@@ -231,6 +232,7 @@ private lemma lowerCc_grad_rfns (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (covGrad (I := I) (M := M) g r s T) x
   simpa only [iteratedCovGrad_zero, Nat.add_zero] using hperm.trans hlower
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem lowerCc_jet_rfns (g : SmoothRiemannianMetric I M) (r s j : ℕ)
     (T : SmoothCcTensor g r s) (hj : j ≤ 2) (x : M) :
     riemannianFiberNormSq (I := I) (M := M) g 0 ((r + s) + j) x
@@ -259,6 +261,7 @@ theorem lowerCc_jet_rfns (g : SmoothRiemannianMetric I M) (r s j : ℕ)
     simpa only [iteratedCovGrad_succ, iteratedCovGrad_zero, Nat.add_zero] using
       hperm.trans hnext
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem lowerCc_jet_norm (g : SmoothRiemannianMetric I M) (r s j : ℕ)
     (T : SmoothCcTensor g r s) (hj : j ≤ 2) :
     ‖PDE.RicciFlow.iteratedCovGrad

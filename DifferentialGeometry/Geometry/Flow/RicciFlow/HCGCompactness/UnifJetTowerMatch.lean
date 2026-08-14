@@ -320,6 +320,7 @@ private theorem towerCrossOne_le
       (fun _ => le_refl 0) hEq hjet (Set.mem_univ x) 1 hacc
     nlinarith
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem sqrtRfns_one_le
     (gBase g₀ : SmoothRiemannianMetric I M) {Λ Λ' : ℝ}
     (hEq : MetricUniformEquivalentOn (I := I) Set.univ gBase g₀ Λ)
@@ -546,6 +547,7 @@ lemma kjetOneC_nonneg {Λ Λ' : ℝ} (hΛ' : 0 ≤ Λ') (n s : ℕ) :
     0 ≤ kjetOneC n Λ Λ' s :=
   mul_nonneg (Real.sqrt_nonneg _) (jetOnePt_nonneg hΛ' n s)
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem jetCross_l2_one
     (gBase g₀ : SmoothRiemannianMetric I M) {Λ Λ' : ℝ}
     (hEq : MetricUniformEquivalentOn (I := I) Set.univ gBase g₀ Λ)

@@ -155,6 +155,7 @@ private lemma slotLift_23 (g₀ : SmoothRiemannianMetric I M)
       | rfl
       | (congr 1; funext k; fin_cases k <;> rfl)
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [BoundarylessManifold I M] [SigmaCompactSpace M] in
 private lemma slotLift_33 (g₀ : SmoothRiemannianMetric I M)
     (K : SmoothCcTensor g₀ 0 3) (x : M) (D : Tensor0SSpace 3 I x) :
     (show Tensor0SSpace 3 I x →L[ℝ] Tensor0SSpace 6 I x from
@@ -297,6 +298,7 @@ def lc0AMixFormRF (g₀ g₁ gB : SmoothRiemannianMetric I M) :
       lc0AMixHalfRF (I := I) (M := M) g₀ g₁ gB
         (lc0SwapPermRF * lieCorr0AMixPerm2))
 
+omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] in
 private lemma amixHalf_fiber (g₀ g₁ gB : SmoothRiemannianMetric I M)
     (σlast : Equiv.Perm (Fin 4)) (x : M) (D : Tensor0SSpace 2 I x) :
     (show Tensor0SSpace 2 I x →L[ℝ] Tensor0SSpace 2 I x from
@@ -344,6 +346,7 @@ private lemma amixHalf_fiber (g₀ g₁ gB : SmoothRiemannianMetric I M)
   exact congrFun (congrArg DFunLike.coe
     (lc0TraceRF_fiber (I := I) (M := M) g₀ g₁ 2 σlast x)) _
 
+omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] in
 private lemma amixForm_fiber (g₀ g₁ gB : SmoothRiemannianMetric I M) (x : M)
     (D : Tensor0SSpace 2 I x) :
     (show Tensor0SSpace 2 I x →L[ℝ] Tensor0SSpace 2 I x from
@@ -372,6 +375,7 @@ private lemma amixForm_fiber (g₀ g₁ gB : SmoothRiemannianMetric I M) (x : M)
       ContinuousLinearMap.add_apply, ContinuousLinearMap.comp_apply]]
   rfl
 
+omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] in
 theorem amix_refold_rf (g₀ g₁ gB : SmoothRiemannianMetric I M) :
     lc0AMix (I := I) (M := M) g₀ g₁ gB =
       lc0AMixFormRF (I := I) (M := M) g₀ g₁ gB := by
@@ -413,6 +417,7 @@ theorem amix_half_bg_rf
   rw [← appCcRS_sub_right, ← appCcRS_sub_right,
     ← appCcRS_sub_left, ← slotIterSub]
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem amix_bg_refold_rf
     (g₀ g₁ gB : SmoothRiemannianMetric I M) :
     lc0AMix (I := I) (M := M) g₀ g₁ gB -

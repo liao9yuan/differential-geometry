@@ -386,6 +386,7 @@ theorem nablaRicSlabSup (gN gC : Real → SmoothRiemannianMetric I M)
     hgramN
     (fun x₀ K _ ht => nablaRicChartJoint (I := I) gC x₀ (hgramC x₀) K ht)
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem nablaKRmSlabSup (gN gC : Real → SmoothRiemannianMetric I M)
     (hgramN : ∀ (x₀ : M) (i j : Fin (Module.finrank Real E)),
       ContMDiffOn (𝓘(Real, Real).prod I) 𝓘(Real, Real) ∞
@@ -407,6 +408,7 @@ theorem nablaKRmSlabSup (gN gC : Real → SmoothRiemannianMetric I M)
     hgramN
     (fun x₀ K _ ht => nablaKRmChartJoint (I := I) gC x₀ (hgramC x₀) k K ht)
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem crossRm1SlabSup
     (gN gL gC gD : Real → SmoothRiemannianMetric I M)
     (hgramN : ∀ (x₀ : M) (i j : Fin (Module.finrank Real E)),
@@ -442,6 +444,7 @@ theorem crossRm1SlabSup
       crossRm1ChartJoint (I := I) gL gC gD x₀
         (hgramL x₀) (hgramC x₀) (hgramD x₀) K ht)
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem crossRm2SlabSup
     (gN gL gC gD : Real → SmoothRiemannianMetric I M)
     (hgramN : ∀ (x₀ : M) (i j : Fin (Module.finrank Real E)),

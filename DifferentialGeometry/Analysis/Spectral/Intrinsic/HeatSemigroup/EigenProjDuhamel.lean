@@ -146,6 +146,7 @@ theorem proj_homModeCoeff {a T : ℝ} (N : ℕ)
       with t h1 h2
     rw [h1, h2, spatialProj_coeff, if_neg hi, mul_zero, Pi.zero_apply]
 
+omit [BoundarylessManifold I M] in
 theorem proj_solField_comm {a T : ℝ} (hT : 0 ≤ T) (N : ℕ)
     (h_compact : IsCompactOperator (tensorResolventL2 (I := I) (M := M) g 0 2))
     (f : timeL2 (tensorHs (I := I) (M := M) g 0 2 a) T) :
@@ -163,6 +164,7 @@ theorem proj_solField_comm {a T : ℝ} (hT : 0 ≤ T) (N : ℕ)
     maximalRegularitySolField_timeModeCoeff (I := I) (M := M) (a := a) hT
       h_compact f i]
 
+omit [BoundarylessManifold I M] in
 theorem proj_derivField_comm {a T : ℝ} (hT : 0 ≤ T) (N : ℕ)
     (h_compact : IsCompactOperator (tensorResolventL2 (I := I) (M := M) g 0 2))
     (f : timeL2 (tensorHs (I := I) (M := M) g 0 2 a) T) :
@@ -198,6 +200,7 @@ theorem proj_homField_comm {a T : ℝ} (hT : 0 ≤ T) (N : ℕ)
     maxRegHomogeneousSolField_timeModeCoeff (I := I) (M := M) (a := a) (T := T)
       hT u₀ i]
 
+omit [BoundarylessManifold I M] in
 theorem proj_duhamel_comm {a T : ℝ} (hT : 0 < T) (hT1 : T ≤ 1) (N : ℕ)
     (h_compact : IsCompactOperator (tensorResolventL2 (I := I) (M := M) g 0 2))
     (u₀ : tensorHs (I := I) (M := M) g 0 2 (a + 2))
@@ -211,6 +214,7 @@ theorem proj_duhamel_comm {a T : ℝ} (hT : 0 < T) (hT1 : T ≤ 1) (N : ℕ)
     proj_homField_comm (I := I) (M := M) g hT.le N h_compact u₀,
     proj_solField_comm (I := I) (M := M) g hT.le N h_compact f]
 
+omit [BoundarylessManifold I M] in
 theorem projDuhamel_zero {a T : ℝ} (hT : 0 < T) (hT1 : T ≤ 1) (N : ℕ)
     (h_compact : IsCompactOperator (tensorResolventL2 (I := I) (M := M) g 0 2))
     (f : timeL2 (tensorHs (I := I) (M := M) g 0 2 a) T) :
@@ -224,6 +228,7 @@ theorem projDuhamel_zero {a T : ℝ} (hT : 0 < T) (hT1 : T ≤ 1) (N : ℕ)
     (0 : tensorHs (I := I) (M := M) g 0 2 (a + 2)) f
   rwa [map_zero] at h
 
+omit [BoundarylessManifold I M] in
 theorem proj_maxRegOp_deriv {a T : ℝ} (hT : 0 < T) (hT1 : T ≤ 1) (N : ℕ)
     (h_compact : IsCompactOperator (tensorResolventL2 (I := I) (M := M) g 0 2))
     (f : timeL2 (tensorHs (I := I) (M := M) g 0 2 a) T) :
@@ -236,6 +241,7 @@ theorem proj_maxRegOp_deriv {a T : ℝ} (hT : 0 < T) (hT1 : T ≤ 1) (N : ℕ)
   rw [maximalRegularityOp_timeDeriv, maximalRegularityOp_timeDeriv,
     proj_derivField_comm (I := I) (M := M) g hT.le N h_compact f]
 
+omit [BoundarylessManifold I M] in
 theorem projSol_mode_zero {a T : ℝ} (hT : 0 ≤ T) (N : ℕ)
     (h_compact : IsCompactOperator (tensorResolventL2 (I := I) (M := M) g 0 2))
     (f : timeL2 (tensorHs (I := I) (M := M) g 0 2 a) T)
@@ -248,6 +254,7 @@ theorem projSol_mode_zero {a T : ℝ} (hT : 0 ≤ T) (N : ℕ)
       h_compact (timeL2EigenProj (I := I) (M := M) g a T N f) i,
     proj_solModeCoeff (I := I) (M := M) g hT N f i, if_neg hi]
 
+omit [BoundarylessManifold I M] in
 theorem projSol_fixed {a T : ℝ} (hT : 0 ≤ T) (N : ℕ)
     (h_compact : IsCompactOperator (tensorResolventL2 (I := I) (M := M) g 0 2))
     (f : timeL2 (tensorHs (I := I) (M := M) g 0 2 a) T) :

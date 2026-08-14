@@ -116,6 +116,7 @@ lemma covectorExtensionSection_self (g₀ : SmoothRiemannianMetric I M) (x : M)
   exact g0FlatCLM_inverseMetricSharpFib (I := I) g₀ x om
 
 set_option backward.isDefEq.respectTransparency false in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem riemannLoweredBackgroundDifference_palatini_repr
     (g₀ g₁ : SmoothRiemannianMetric I M) :
     cometricRaiseSlot0Field (I := I) (M := M) g₀ 2
@@ -615,6 +616,7 @@ lemma slotInsert_perturbationSharp_eq_raise_symmS (g₀ : SmoothRiemannianMetric
   rw [ccTensorBilin_symmS (I := I) (M := M) g₀ T x]
 
 set_option backward.isDefEq.respectTransparency false in
+omit [NeZero (Module.finrank ℝ E)] in
 lemma riemannG1LoweringDifference_slotInsert_repr (g₀ g₁ : SmoothRiemannianMetric I M)
     (T : SmoothCcTensor g₀ 0 2)
     (htie : ∀ (y : M) (v w : TangentSpace I y),
@@ -2169,6 +2171,7 @@ theorem riemannMixedBiContrFib_eq_fixedFrame_on_nbhd (g₀ g₁ : SmoothRiemanni
     (fun i j => smoothOrthoFrame_orthonormal_at_center (I := I) g₀ y i j)
     (fun i j => smoothOrthoFrame_orthonormal (I := I) g₀ x₀ hy i j)
 
+omit [CompactSpace M] [I.Boundaryless] in
 theorem riemannMixedBiContrFib_contMDiff (g₀ g₁ : SmoothRiemannianMetric I M) :
     ContMDiff I (I.prod 𝓘(ℝ, TensorRSModel 2 2 ℝ E)) ∞
       (fun x : M => TotalSpace.mk' (TensorRSModel 2 2 ℝ E)
@@ -2199,12 +2202,14 @@ def ricciArmOrder0RiemannMixedCoeff (g₀ g₁ : SmoothRiemannianMetric I M) :
       contMDiff_toFun := riemannMixedBiContrFib_contMDiff (I := I) (M := M) g₀ g₁ }
   hasCompactSupport := HasCompactSupport.of_compactSpace _
 
+omit [I.Boundaryless] in
 theorem ricciArmOrder0RiemannMixedCoeff_toSection (g₀ g₁ : SmoothRiemannianMetric I M) (x : M) :
     (ricciArmOrder0RiemannMixedCoeff (I := I) (M := M) g₀ g₁).toSection x =
       (show TensorRSSpace 2 2 I x from
         TensorRSSpace.ofCLM (riemannMixedBiContrFib (I := I) (M := M) g₀ g₁ x)) := rfl
 
 set_option backward.isDefEq.respectTransparency false in
+omit [I.Boundaryless] in
 theorem ricciArmOrder0RiemannMixedCoeff_self (g₀ : SmoothRiemannianMetric I M) :
     ricciArmOrder0RiemannMixedCoeff (I := I) (M := M) g₀ g₀ =
       ricciArmOrder0RiemannCoeff (I := I) (M := M) g₀ g₀ := by

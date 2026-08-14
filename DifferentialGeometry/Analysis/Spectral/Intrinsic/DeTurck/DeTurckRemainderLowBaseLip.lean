@@ -5448,6 +5448,7 @@ private lemma vbmcd_rel_lip (g₀ g₁ : SmoothRiemannianMetric I M) :
     (ContinuousMultilinearMap.domDomCongr LieCorr0Core.lieCorr0VBPerm)
     (vbPK_slotExt_lip (I := I) (M := M) g₀ g₁ y d)
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [SigmaCompactSpace M] in
 private theorem vbmcd_perm_eq
     (g gm : SmoothRiemannianMetric I M) :
     vbMcdArm (I := I) (M := M) g gm =

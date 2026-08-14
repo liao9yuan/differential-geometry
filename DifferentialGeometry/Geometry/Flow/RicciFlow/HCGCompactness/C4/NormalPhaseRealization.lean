@@ -20,7 +20,7 @@ variable {H : Type uH} [TopologicalSpace H]
 
 section RawPhaseRealization
 
-variable [NormedSpace Real E] [FiniteDimensional Real E] [CompleteSpace E]
+variable [NormedSpace Real E] [FiniteDimensional Real E]
 variable [NeZero (Module.finrank Real E)]
 variable {I : ModelWithCorners Real E H} [I.Boundaryless]
 
@@ -164,7 +164,7 @@ end RawPhaseRealization
 
 section ControlledPhaseRealization
 
-variable [InnerProductSpace Real E] [FiniteDimensional Real E] [CompleteSpace E]
+variable [InnerProductSpace Real E] [FiniteDimensional Real E]
 variable [NeZero (Module.finrank Real E)]
 variable {I : ModelWithCorners Real E H} [I.Boundaryless]
 
@@ -252,6 +252,7 @@ theorem chartGeoOn_of_phase (g : SmoothRiemannianMetric I M) {p : M}
     rw [← hneg]
     abel
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [SigmaCompactSpace M] [T2Space (TangentBundle I M)] in
 theorem chartGeoOn_of_right (g : SmoothRiemannianMetric I M) {p : M}
     (c : NormalBallChart (I := I) p)
     {Z : Real → E × E} {a b : Real} (hab : a < b)
@@ -268,6 +269,7 @@ theorem chartGeoOn_of_right (g : SmoothRiemannianMetric I M) {p : M}
   intro t ht
   exact hasDerivAt_of_right hab hZcont hfield hZright ht
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [SigmaCompactSpace M] [T2Space (TangentBundle I M)] in
 theorem chartFlow_contDiff (g : SmoothRiemannianMetric I M) {p : M}
     (c : NormalBallChart (I := I) p)
     {Z : Real → E × E} {a b : Real} (hab : a < b)

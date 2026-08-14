@@ -1687,6 +1687,7 @@ theorem cov_commute_smooth
     cov_commute_curv (I := I) g f hf V t hV2 hinnerL hinnerR
       houterL houterR
 
+omit [InnerProductSpace ℝ E] [SigmaCompactSpace M] in
 theorem cov_snd2_commute
     (g : SmoothRiemannianMetric I M) (f : Real → Real → M)
     (hf : IsSmoothVariation (I := I) f)
@@ -1834,6 +1835,7 @@ theorem cov_jacCurv
       (fun r : Real => varSnd (I := I) f r t)
       (fun r : Real => varSnd (I := I) f r t) s
 
+omit [InnerProductSpace ℝ E] [SigmaCompactSpace M] in
 theorem cov_snd2_expand
     (g : SmoothRiemannianMetric I M) (f : Real → Real → M)
     (hf : IsSmoothVariation (I := I) f)
@@ -1975,6 +1977,7 @@ theorem cov_snd2_expand
   rw [hlead, hlast] at hraw
   linear_combination (norm := module) hraw
 
+omit [InnerProductSpace ℝ E] [SigmaCompactSpace M] in
 theorem jacobi_var_eq
     (g : SmoothRiemannianMetric I M) (f : Real → Real → M)
     (hf : IsSmoothVariation (I := I) f)

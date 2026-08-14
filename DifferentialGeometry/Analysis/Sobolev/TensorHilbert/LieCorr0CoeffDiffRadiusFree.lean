@@ -1314,6 +1314,7 @@ theorem metricCorr_sub
     appCcRS_sub_right, appCc_sub_left]
   module
 
+omit [SigmaCompactSpace M] in
 theorem mcd_lower_split
     (g₀ g₁ g_bg : SmoothRiemannianMetric I M)
     (P : SmoothCcTensor g₀ 0 2)

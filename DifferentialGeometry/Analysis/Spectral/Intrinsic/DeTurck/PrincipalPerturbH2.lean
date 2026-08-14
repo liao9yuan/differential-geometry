@@ -60,7 +60,7 @@ private lemma perturbCoeff4_add
         perturbCoeff4 (I := I) (M := M) g U := by
   simp only [perturbCoeff4, symmRaiseEndo_add, slotInsertEndoCc_add]
 
-omit [BoundarylessManifold I M] in
+omit [BoundarylessManifold I M] [NeZero (Module.finrank ℝ E)] in
 private lemma perturbCoeff4_smul
     (g : SmoothRiemannianMetric I M) (a : ℝ) (T : SmoothCcTensor g 0 2) :
     perturbCoeff4 (I := I) (M := M) g (a • T) =

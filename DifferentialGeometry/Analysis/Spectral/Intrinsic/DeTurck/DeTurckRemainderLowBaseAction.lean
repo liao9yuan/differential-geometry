@@ -361,6 +361,7 @@ private def dagTopOp
     (permCoeff (I := I) (M := M) g daPermA)
     (slotExtend (I := I) (M := M) g 3 3
       (connLowOp (I := I) (M := M) g gm))
+omit [NeZero (Module.finrank ℝ E)] in
 private theorem ricciDAG_split
     (g gm : SmoothRiemannianMetric I M) (T : SmoothCcTensor g 0 2)
     (hT : ∀ (x : M) (u v : TangentSpace I x),
@@ -3401,6 +3402,7 @@ noncomputable def connLowOp
         (fullRaisedEndoField (I := I) (M := M) g gm))
       (koszulOp (I := I) (M := M) g))
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem connLow_app
     (g gm : SmoothRiemannianMetric I M) (T : SmoothCcTensor g 0 2)
     (hT : ∀ (x : M) (u v : TangentSpace I x),
@@ -3484,6 +3486,7 @@ noncomputable def daTrans
   daTransMono (I := I) (M := M) g gm W daPermA -
     daTransMono (I := I) (M := M) g gm W daPermB
 
+omit [BoundarylessManifold I M] in
 theorem daTrans_cap
     (g : SmoothRiemannianMetric I M) (T : SmoothCcTensor g 0 2)
     (hT : ∀ (x : M) (u v : TangentSpace I x),
@@ -3549,6 +3552,7 @@ noncomputable def ricciDAOne
     (daTrans (I := I) (M := M) g gm W)
     (dagLowOp (I := I) (M := M) g gm)
 
+omit [BoundarylessManifold I M] in
 theorem ricciDA_one
     (g gm : SmoothRiemannianMetric I M) (P W : SmoothCcTensor g 0 2) :
     operatorFieldApply (I := I) (M := M) g 2 2

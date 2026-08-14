@@ -258,6 +258,7 @@ private lemma lc0RiemPass_sum
   rw [hYval]
   rfl
 
+omit [SigmaCompactSpace M] in
 theorem lc0RiemPass_eval
     (g : SmoothRiemannianMetric I M) (x : M)
     (D : Tensor0SSpace 2 I x) (v : Fin 4 → TangentSpace I x) :
@@ -478,6 +479,7 @@ private theorem lc0RiemFib_eq (g₀ g₁ : SmoothRiemannianMetric I M) (x : M) :
   rw [lieCorr0RiemFib, lc0RiemLive_fiber, neg_one_smul]
   rfl
 
+omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] in
 theorem lc0Riem_eq_app (g₀ g₁ : SmoothRiemannianMetric I M) :
     lc0Riem (I := I) (M := M) g₀ g₁ =
       -appCcRS (I := I) (M := M) g₀ 2 4 2
@@ -1269,6 +1271,7 @@ lemma vbMcdArm_l2_le (g₀ g₁ : SmoothRiemannianMetric I M) (m : ℕ) :
         (metricConnDiffLoweredCc (I := I) (M := M) g₀ g₁ g₀)),
     ← SmoothCcTensor.norm_def]
 
+omit [SigmaCompactSpace M] in
 theorem vbSplit (g₀ g₁ : SmoothRiemannianMetric I M) :
     lc0VBPass (I := I) (M := M) g₀ g₁ =
       appCcRS (I := I) (M := M) g₀ 2 1 4 (vbMcdArm (I := I) (M := M) g₀ g₁)

@@ -617,6 +617,7 @@ def lieCorr0Field (g₀ g₁ g_bg : SmoothRiemannianMetric I M) :
   hasCompactSupport := HasCompactSupport.of_compactSpace _
 
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem lieCorr0Field_apply
     (g₀ g₁ g_bg : SmoothRiemannianMetric I M) (x : M) :
     (lieCorr0Field (I := I) (M := M) g₀ g₁ g_bg).toSection x =

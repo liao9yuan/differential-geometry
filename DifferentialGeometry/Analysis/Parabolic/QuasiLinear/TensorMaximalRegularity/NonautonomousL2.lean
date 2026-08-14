@@ -74,6 +74,7 @@ def a1L2Term (hT : 0 < T) (hT1 : T ≤ 1)
     (zeroReprNN (I := I) (M := M) hT f)
     (zeroRepr_ae_le (I := I) (M := M) hT hT1 h_compact f)
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] in
 theorem a1L2Term_sub (hT : 0 < T) (hT1 : T ≤ 1)
     (h_compact : IsCompactOperator (tensorResolventL2
       (I := I) (M := M) g r s))
@@ -160,6 +161,7 @@ theorem a1L2Term_norm (hT : 0 < T) (hT1 : T ≤ 1)
   rw [zeroReprNN_coe]
   ring
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] in
 theorem a1L2_dist_le (hT : 0 < T) (hT1 : T ≤ 1)
     (h_compact : IsCompactOperator (tensorResolventL2
       (I := I) (M := M) g r s))
@@ -192,6 +194,7 @@ def nonautL2Map (hT : 0 < T) (hT1 : T ≤ 1)
         (maxRegDuhamelSolField (I := I) (M := M) a hT hT1 0 f) +
       a1L2Term (I := I) (M := M) hT hT1 h_compact A1 hA1 f
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] in
 theorem nonautL2_dist_le
     (hT : 0 < T) (hT1 : T ≤ 1)
     (h_compact : IsCompactOperator (tensorResolventL2
@@ -276,6 +279,7 @@ theorem nonautL2_dist_le
           2 * Real.sqrt (1 + T) * ‖hA1.toLp A1‖) * ‖f - f'‖ := by
       ring
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] in
 theorem nonautL2_contract
     (hT : 0 < T) (hT1 : T ≤ 1)
     (h_compact : IsCompactOperator (tensorResolventL2
@@ -306,6 +310,7 @@ theorem nonautL2_contract
       hT hT1 h_compact A2 hA2 C2 hC2 A1 hA1 f f'
     simpa only [NNReal.coe_mk] using h
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] in
 theorem nonautL2_forced
     (hT : 0 < T) (hT1 : T ≤ 1)
     (h_compact : IsCompactOperator (tensorResolventL2

@@ -13,14 +13,14 @@ open scoped Manifold Topology ContDiff BigOperators
 open DifferentialGeometry.Integral.Measure
 
 variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace Real E]
-variable [Module.Finite Real E] [FiniteDimensional Real E]
+variable [FiniteDimensional Real E]
 variable [NeZero (Module.finrank Real E)]
 variable {H : Type*} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
-variable [IsManifold I 1 M] [IsManifold I 2 M]
-variable [CompleteSpace E] [SigmaCompactSpace M] [T2Space M]
-variable [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
+
+variable [T2Space M]
+variable [CompactSpace M] [I.Boundaryless]
 
 section ChartFrame
 
@@ -29,12 +29,14 @@ def chartFrame (x₀ : M) : Fin (Module.finrank Real E) → (y : M) → TangentS
   (trivializationAt E (TangentSpace I) x₀).localFrame (chartModelBasis E)
 
 variable (I) in
+omit [NeZero (Module.finrank ℝ E)] [T2Space M] [CompactSpace M] [I.Boundaryless] in
 theorem chartFrame_isFrame (x₀ : M) :
     IsLocalFrameOn I E 1 (chartFrame I x₀) (trivializationAt E (TangentSpace I) x₀).baseSet :=
   (trivializationAt E (TangentSpace I) x₀).isLocalFrameOn_localFrame_baseSet I 1
     (chartModelBasis E)
 
 variable (I) in
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [T2Space M] [CompactSpace M] [I.Boundaryless] in
 theorem chartFrame_mem (x₀ : M) :
     x₀ ∈ (trivializationAt E (TangentSpace I) x₀).baseSet :=
   FiberBundle.mem_baseSet_trivializationAt E (TangentSpace I) x₀
@@ -56,6 +58,7 @@ def rmSpeed (g₁ g₂ : Real → SmoothRiemannianMetric I M)
     Real → (x : M) → Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) 4 x :=
   fun t x => rmDiffDot (I := I) g₁ g₂ (Svec t) t x
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 theorem connSpeed_hasDerivAt (g₁ g₂ : Real → SmoothRiemannianMetric I M)
     (Avec : Real → (y : M) →
       TangentSpace I y →L[Real] TangentSpace I y →L[Real] TangentSpace I y)
@@ -80,6 +83,7 @@ theorem connSpeed_hasDerivAt (g₁ g₂ : Real → SmoothRiemannianMetric I M)
     (trivializationAt E (TangentSpace I) x).open_baseSet (chartFrame_mem I x) (Avec t)
     hPDE₁ hgamma v
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem rmSpeed_hasDerivAt (g₁ g₂ : Real → SmoothRiemannianMetric I M)
     (Svec : Real → (y : M) →
       TangentSpace I y →L[Real] TangentSpace I y →L[Real] TangentSpace I y →L[Real]
@@ -101,6 +105,7 @@ end Speeds
 
 section PDEUpgrade
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] in
 theorem pde_hasDerivAt (g : Real → SmoothRiemannianMetric I M) {a b : Real}
     (hpde : ∀ t ∈ Ico a b, ∀ x : M, ∀ v w : TangentSpace I x,
       HasDerivWithinAt (fun s : Real => (g s).inner x v w)

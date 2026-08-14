@@ -15,7 +15,7 @@ open Filter
 open scoped ContDiff Manifold Topology
 
 variable {E : Type uE} [NormedAddCommGroup E] [InnerProductSpace Real E]
-variable [FiniteDimensional Real E] [CompleteSpace E]
+variable [FiniteDimensional Real E]
 variable [NeZero (Module.finrank Real E)]
 variable {H : Type uH} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H} [I.Boundaryless]

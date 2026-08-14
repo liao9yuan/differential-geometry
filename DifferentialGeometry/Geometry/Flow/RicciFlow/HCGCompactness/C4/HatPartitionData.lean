@@ -38,7 +38,7 @@ noncomputable def decodedCompPts (g : SmoothRiemannianMetric I M)
       (A gamma b
         (B gamma a ((NormalCoordinates.normalChartAt (I := I) g (center gamma)) x)))
 
-omit [FiniteDimensional ℝ E] in
+omit [FiniteDimensional ℝ E] [CompleteSpace E] in
 theorem hatPOUDataTwo
     [FiniteDimensional Real E]
     (hd : InjRadiusDecayInput (I := I) X) {D : Real}
@@ -91,7 +91,7 @@ theorem hatPOUDataTwo
     (NetLimitData.hatPOU_active_data (I := I) (X := X) (hd := hd) (D := D) (P := P) (L := L)
       (pb := pb) (r := r) (k := n) (ρ := rho) (hρ := hrho) (x := x) hx)
 
-omit [FiniteDimensional ℝ E] in
+omit [FiniteDimensional ℝ E] [CompleteSpace E] in
 theorem exists_hat_radius
     [FiniteDimensional Real E]
     (hd : InjRadiusDecayInput (I := I) X) {D : Real}

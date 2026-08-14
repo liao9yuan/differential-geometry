@@ -404,6 +404,7 @@ private theorem a1L2_down
       (a := a - 1) hT hT1 hcompact fLo).repr t)
   rw [happ', hrept']
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] in
 private theorem nonautL2_down
     (hT : 0 < T) (hT1 : T ≤ 1)
     (hcompact : IsCompactOperator (tensorResolventL2
@@ -460,6 +461,7 @@ private theorem nonautL2_down
     a1L2_down (I := I) (M := M)
       hT hT1 hcompact A1Hi hA1Hi A1Lo hA1Lo hA1compat f]
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] in
 private theorem affine_unique
     (hT : 0 < T) (hT1 : T ≤ 1)
     (hcompact : IsCompactOperator (tensorResolventL2
@@ -517,6 +519,7 @@ private theorem affine_unique
     exact hq.symm
   exact hcontr.fixedPoint_unique' hfixf hfixq
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] in
 theorem nonautL2_lift
     (hT : 0 < T) (hT1 : T ≤ 1)
     (hcompact : IsCompactOperator (tensorResolventL2
