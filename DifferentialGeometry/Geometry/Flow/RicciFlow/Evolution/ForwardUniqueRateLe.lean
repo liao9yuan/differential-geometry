@@ -21,19 +21,19 @@ open DifferentialGeometry.Integral.Connection
 open DifferentialGeometry.Integral.L2
 
 variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace Real E]
-variable [Module.Finite Real E] [FiniteDimensional Real E]
+variable [FiniteDimensional Real E]
 variable [NeZero (Module.finrank Real E)]
 variable {H : Type*} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
-variable [IsManifold I 1 M] [IsManifold I 2 M]
-variable [CompleteSpace E] [SigmaCompactSpace M] [T2Space M]
-variable [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
+variable [T2Space M]
+variable [CompactSpace M] [I.Boundaryless]
 
 section Young
 
 variable {s : Nat}
 
+omit [NeZero (Module.finrank ℝ E)] [T2Space M] [CompactSpace M] [I.Boundaryless] in
 theorem two_inner0S_le_eps (g : SmoothRiemannianMetric I M) (x : M) (s : Nat)
     (A B : Tensor0SSpace s I x) {ε : Real} (hε : 0 < ε) :
     2 * inner0S (I := I) g x s A B ≤
@@ -55,6 +55,7 @@ theorem two_inner0S_le_eps (g : SmoothRiemannianMetric I M) (x : M) (s : Nat)
   rw [← hp2, ← hq2]
   linarith [hcs, hkey, hexp]
 
+omit [NeZero (Module.finrank ℝ E)] [T2Space M] [CompactSpace M] [I.Boundaryless] in
 theorem neg_two_inner0S_le_eps (g : SmoothRiemannianMetric I M) (x : M) (s : Nat)
     (A B : Tensor0SSpace s I x) {ε : Real} (hε : 0 < ε) :
     -(2 * inner0S (I := I) g x s A B) ≤
@@ -76,6 +77,7 @@ theorem neg_two_inner0S_le_eps (g : SmoothRiemannianMetric I M) (x : M) (s : Nat
   rw [← hp2, ← hq2]
   linarith [hcs, hkey, hexp]
 
+omit [NeZero (Module.finrank ℝ E)] [T2Space M] [CompactSpace M] [I.Boundaryless] in
 theorem normSq0S_smul (g : SmoothRiemannianMetric I M) (x : M) (s : Nat)
     (c : Real) (A : Tensor0SSpace s I x) :
     normSq0S (I := I) g x s (c • A) = c ^ 2 * normSq0S (I := I) g x s A := by
@@ -86,6 +88,7 @@ end Young
 
 section Density
 
+omit [NeZero (Module.finrank ℝ E)] [T2Space M] [CompactSpace M] [I.Boundaryless] in
 theorem density_nonneg (g₁ g₂ : Real → SmoothRiemannianMetric I M) (t : Real) (x : M) :
     0 ≤ forwardUniqueDensity (I := I) g₁ g₂ t x := by
   have h₁ : (0 : Real) ≤ metricDiffSq (I := I) (g₁ t) (g₂ t) x := by
@@ -97,6 +100,7 @@ theorem density_nonneg (g₁ g₂ : Real → SmoothRiemannianMetric I M) (t : Re
   rw [forwardUniqueDensity]
   linarith
 
+omit [NeZero (Module.finrank ℝ E)] [T2Space M] [CompactSpace M] [I.Boundaryless] in
 theorem metricDiffSq_le_dens (g₁ g₂ : Real → SmoothRiemannianMetric I M) (t : Real) (x : M) :
     metricDiffSq (I := I) (g₁ t) (g₂ t) x ≤ forwardUniqueDensity (I := I) g₁ g₂ t x := by
   have h₂ : (0 : Real) ≤ connDiffSq (I := I) (g₁ t) (g₂ t) x := by
@@ -106,6 +110,7 @@ theorem metricDiffSq_le_dens (g₁ g₂ : Real → SmoothRiemannianMetric I M) (
   rw [forwardUniqueDensity]
   linarith
 
+omit [NeZero (Module.finrank ℝ E)] [T2Space M] [CompactSpace M] [I.Boundaryless] in
 theorem connDiffSq_le_dens (g₁ g₂ : Real → SmoothRiemannianMetric I M) (t : Real) (x : M) :
     connDiffSq (I := I) (g₁ t) (g₂ t) x ≤ forwardUniqueDensity (I := I) g₁ g₂ t x := by
   have h₁ : (0 : Real) ≤ metricDiffSq (I := I) (g₁ t) (g₂ t) x := by
@@ -115,6 +120,7 @@ theorem connDiffSq_le_dens (g₁ g₂ : Real → SmoothRiemannianMetric I M) (t 
   rw [forwardUniqueDensity]
   linarith
 
+omit [NeZero (Module.finrank ℝ E)] [T2Space M] [CompactSpace M] [I.Boundaryless] in
 theorem rmDiffSq_le_dens (g₁ g₂ : Real → SmoothRiemannianMetric I M) (t : Real) (x : M) :
     rmDiffSq (I := I) (g₁ t) (g₂ t) x ≤ forwardUniqueDensity (I := I) g₁ g₂ t x := by
   have h₁ : (0 : Real) ≤ metricDiffSq (I := I) (g₁ t) (g₂ t) x := by
@@ -128,7 +134,6 @@ end Density
 
 section Dissipation
 
-variable [CompactSpace M]
 
 def forwardUniqueDissipation (g₁ : Real → SmoothRiemannianMetric I M)
     (Sfield : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
@@ -137,6 +142,7 @@ def forwardUniqueDissipation (g₁ : Real → SmoothRiemannianMetric I M)
   ∫ x, normSq0S (I := I) (g₁ t) x 5 (metricNabla0S (I := I) (g₁ t) Sfield x)
     ∂(riemannianMeasureFamily (I := I) (M := M) g₁ t)
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 theorem dissipation_nonneg (g₁ : Real → SmoothRiemannianMetric I M)
     (Sfield : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
       (n := (∞ : WithTop ℕ∞)) 4)
@@ -150,6 +156,7 @@ section Pairing
 
 variable {s : Nat}
 
+omit [NeZero (Module.finrank ℝ E)] [T2Space M] [CompactSpace M] [I.Boundaryless] in
 private theorem lowerZero_unit (g : SmoothRiemannianMetric I M) (s : Nat) (x : M)
     (W : TensorRSSpace 0 s I x) (w : Fin (0 + s) → TangentSpace I x) :
     lowerAllUpperIndices (I := I) (M := M) g 0 s x (TensorRSSpace.toModel W) w =
@@ -161,6 +168,7 @@ private theorem lowerZero_unit (g : SmoothRiemannianMetric I M) (s : Nat) (x : M
   rw [← toModel_tensorRS_apply (I := I) (M := M) 0 s x W (unitZeroSec (I := I) (M := M) x)]
   rfl
 
+omit [NeZero (Module.finrank ℝ E)] [T2Space M] [CompactSpace M] [I.Boundaryless] in
 private theorem innerPtDiag (g : SmoothRiemannianMetric I M) (s : Nat) (x : M)
     (W : TensorRSSpace 0 s I x) :
     tensorInnerPointwise (I := I) (M := M) g 0 s x
@@ -193,6 +201,7 @@ private theorem innerPtDiag (g : SmoothRiemannianMetric I M) (s : Nat) (x : M)
      apply Fin.ext;
      simp)
 
+omit [NeZero (Module.finrank ℝ E)] [T2Space M] [CompactSpace M] [I.Boundaryless] in
 theorem innerPt_eq_inner0S (g : SmoothRiemannianMetric I M) (s : Nat) (x : M)
     (W₁ W₂ : TensorRSSpace 0 s I x) :
     tensorInnerPointwise (I := I) (M := M) g 0 s x
@@ -218,6 +227,7 @@ theorem innerPt_eq_inner0S (g : SmoothRiemannianMetric I M) (s : Nat) (x : M)
       (TensorRSSpace.toModel W₂) (TensorRSSpace.toModel W₁)] at h
   linarith
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 theorem l2Inner_eq_integral (g : SmoothRiemannianMetric I M)
     (T T' : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
       (n := (∞ : WithTop ℕ∞)) s) :
@@ -240,6 +250,7 @@ end Pairing
 
 section RicciDiff
 
+omit [NeZero (Module.finrank ℝ E)] [T2Space M] [CompactSpace M] [I.Boundaryless] in
 theorem ricciDiffSq_le (g₁ g₂ : SmoothRiemannianMetric I M) (x : M)
     (V : Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) 4 x) {B : Real}
     (htr : metricRicciAt (I := I) g₁ x - metricRicciAt (I := I) g₂ x =
@@ -258,7 +269,6 @@ end RicciDiff
 
 section RateSplit
 
-variable [CompactSpace M]
 
 def rateRest (g₁ g₂ : Real → SmoothRiemannianMetric I M)
     (Adot : Real → (x : M) → Tensor0SSpace 3 I x) (t : Real) (x : M) : Real :=
@@ -275,6 +285,7 @@ def rateRest (g₁ g₂ : Real → SmoothRiemannianMetric I M)
   (1 / 2 : Real) * traceTimeDerivMetric (I := I) g₁ t x *
     forwardUniqueDensity (I := I) g₁ g₂ t x
 
+omit [NeZero (Module.finrank ℝ E)] [T2Space M] [CompactSpace M] [I.Boundaryless] in
 theorem rateIntegrand_eq (g₁ g₂ : Real → SmoothRiemannianMetric I M)
     (Adot : Real → (x : M) → Tensor0SSpace 3 I x)
     (Sdot : Real → (x : M) → Tensor0SSpace 4 I x) (t : Real) (x : M) :
@@ -287,6 +298,7 @@ theorem rateIntegrand_eq (g₁ g₂ : Real → SmoothRiemannianMetric I M)
   rw [forwardUniqueDensityDot, rateRest]
   ring
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 theorem rate_eq_add (g₁ g₂ : Real → SmoothRiemannianMetric I M)
     (Adot : Real → (x : M) → Tensor0SSpace 3 I x)
     (Sdot : Real → (x : M) → Tensor0SSpace 4 I x) (t : Real)
@@ -311,7 +323,7 @@ end RateSplit
 
 section IBPCurrency
 
-variable [CompactSpace M] {s : Nat}
+variable {s : Nat}
 
 theorem intInner_lap_eq_neg (g : SmoothRiemannianMetric I M)
     (T : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
@@ -361,7 +373,6 @@ end IBPCurrency
 
 section SPart
 
-variable [CompactSpace M]
 
 theorem sPart_le
     (g₁ g₂ : Real → SmoothRiemannianMetric I M)
@@ -526,8 +537,8 @@ end SPart
 
 section RestPart
 
-variable [CompactSpace M]
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] in
 theorem rateRest_le (g₁ g₂ : Real → SmoothRiemannianMetric I M)
     (Adot : Real → (x : M) → Tensor0SSpace 3 I x)
     (Sfield : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
@@ -615,6 +626,7 @@ theorem rateRest_le (g₁ g₂ : Real → SmoothRiemannianMetric I M)
   rw [rateRest]
   linarith
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 theorem intRateRest_le (g₁ g₂ : Real → SmoothRiemannianMetric I M)
     (Adot : Real → (x : M) → Tensor0SSpace 3 I x)
     (Sfield : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
@@ -664,7 +676,6 @@ end RestPart
 
 section Capstone
 
-variable [CompactSpace M]
 
 theorem forwardUniqueRate_le
     (g₁ g₂ : Real → SmoothRiemannianMetric I M)
