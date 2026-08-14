@@ -321,7 +321,7 @@ def LimitScalarNonneg (L : Ham3CGHLimitData (I := I) M) : Prop :=
   forall t : Real, t ∈ L.D.carrier -> forall x : L.N,
     0 <= L.S.scalar t x
 
-def LimitTfZeroAt (L : Ham3CGHLimitData (I := I) M) (t : Real) : Prop :=
+def LimitTracefreeZeroAt (L : Ham3CGHLimitData (I := I) M) (t : Real) : Prop :=
   letI : TopologicalSpace L.N := L.topology
   letI : ChartedSpace H L.N := L.charted
   letI : IsManifold I ∞ L.N := L.smooth
@@ -332,10 +332,10 @@ def LimitTfZeroAt (L : Ham3CGHLimitData (I := I) M) (t : Real) : Prop :=
     DifferentialGeometry.PDE.RicciFlow.tfRicNormSq L.S.scalar
       (DifferentialGeometry.PDE.RicciFlow.ricciNorm (I := I) L.S) t x = 0
 
-def LimitTfZero (L : Ham3CGHLimitData (I := I) M) : Prop :=
-  forall t : Real, t ∈ L.D.regular -> LimitTfZeroAt (I := I) L t
+def LimitTracefreeZero (L : Ham3CGHLimitData (I := I) M) : Prop :=
+  forall t : Real, t ∈ L.D.regular -> LimitTracefreeZeroAt (I := I) L t
 
-def LimitTfDecayAt (L : Ham3CGHLimitData (I := I) M) (t : Real) : Prop :=
+def LimitTracefreeDecayAt (L : Ham3CGHLimitData (I := I) M) (t : Real) : Prop :=
   letI : TopologicalSpace L.N := L.topology
   letI : ChartedSpace H L.N := L.charted
   letI : IsManifold I ∞ L.N := L.smooth
@@ -346,8 +346,8 @@ def LimitTfDecayAt (L : Ham3CGHLimitData (I := I) M) (t : Real) : Prop :=
     DifferentialGeometry.PDE.RicciFlow.tfRicNormSq L.S.scalar
       (DifferentialGeometry.PDE.RicciFlow.ricciNorm (I := I) L.S) t x <= η
 
-def LimitTfDecay (L : Ham3CGHLimitData (I := I) M) : Prop :=
-  forall t : Real, t ∈ L.D.regular -> LimitTfDecayAt (I := I) L t
+def LimitTracefreeDecay (L : Ham3CGHLimitData (I := I) M) : Prop :=
+  forall t : Real, t ∈ L.D.regular -> LimitTracefreeDecayAt (I := I) L t
 
 def LimitEinsteinAt (L : Ham3CGHLimitData (I := I) M) (t : Real) : Prop :=
   letI : TopologicalSpace L.N := L.topology
@@ -618,7 +618,7 @@ noncomputable def ham3RescaledSol
     (hsel.1 i) (hsel.2.2.1 i)
 
 omit [NeZero (Module.finrank ℝ E)] in
-theorem ham3_tf_display
+theorem ham3_tracefree_display
     {g0 : SmoothRiemannianMetric I M}
     (P : Ham3FlowPackage (I := I) (M := M) g0)
     (Q : Ham3BlowupData M) (hsel : Ham3PointSel (I := I) P Q) (i : Nat) :
@@ -769,7 +769,7 @@ private theorem scaled_pinch_le
   exact hmain.trans (by simpa using mul_le_mul_of_nonneg_left hrpow hcoef)
 
 omit [NeZero (Module.finrank ℝ E)] in
-theorem ham3_tf_bound0
+theorem ham3_tracefree_bound0
     {g0 : SmoothRiemannianMetric I M}
     (P : Ham3FlowPackage (I := I) (M := M) g0)
     (Q : Ham3BlowupData M) (hsel : Ham3PointSel (I := I) P Q)
@@ -844,7 +844,7 @@ theorem ham3_tf_bound0
         (DifferentialGeometry.PDE.RicciFlow.ricciNorm (I := I)
           (ham3RescaledSol (I := I) P Q hsel i)))
       (τ := Q.time i) (R := R) hR hscalarDisplay
-      (by simpa only [R] using ham3_tf_display (I := I) P Q hsel i)
+      (by simpa only [R] using ham3_tracefree_display (I := I) P Q hsel i)
       0 x
   have hratio_le :
       q / r ^ 2 ≤ C * (R * r) ^ (-epsilon) := by
@@ -863,7 +863,7 @@ def Ham3PinchTransfer
   Ham3SourceRealizes (I := I) P Q hsel L ->
     Ham3PinchEstimate (I := I) P ->
     LimitScalarPos (I := I) L ->
-      LimitTfDecay (I := I) L
+      LimitTracefreeDecay (I := I) L
 
 def Ham3CGHLimitExists
     {g0 : SmoothRiemannianMetric I M}
@@ -2656,7 +2656,7 @@ theorem limit_inherit
     hricTransfer, hpinchTransfer, hnonneg, hbase, hscalarPos⟩
 
 omit [NeZero (Module.finrank ℝ E)] in
-theorem limit_tf_decay
+theorem limit_tracefree_decay
     {g0 : SmoothRiemannianMetric I M}
     (P : Ham3FlowPackage (I := I) (M := M) g0)
     (Q : Ham3BlowupData M)
@@ -2673,19 +2673,19 @@ theorem limit_tf_decay
         Ham3LimitBoundaryless (I := I) L /\
         Ham3LimitFlow (I := I) L)
     (hscalarPos : LimitScalarPos (I := I) L) :
-    LimitTfDecay (I := I) L := by
+    LimitTracefreeDecay (I := I) L := by
   exact htransfer hreal hpinch hscalarPos
 
 omit [NeZero (Module.finrank ℝ E)]
   [IsManifold I ∞ M]
   [SigmaCompactSpace M]
   [T2Space M] in
-theorem tf_zero_of_decay
+theorem tracefree_zero_of_decay
     {L : Ham3CGHLimitData (I := I) M}
     (hdim : Module.finrank Real E = 3)
     {t : Real}
-    (hdecay : LimitTfDecayAt (I := I) L t) :
-    LimitTfZeroAt (I := I) L t := by
+    (hdecay : LimitTracefreeDecayAt (I := I) L t) :
+    LimitTracefreeZeroAt (I := I) L t := by
   classical
   letI : TopologicalSpace L.N := L.topology
   letI : ChartedSpace H L.N := L.charted
@@ -2716,16 +2716,16 @@ omit [NeZero (Module.finrank ℝ E)]
   [IsManifold I ∞ M]
   [SigmaCompactSpace M]
   [T2Space M] in
-theorem limit_tf_zero_of_decay
+theorem limit_tracefree_zero_of_decay
     {L : Ham3CGHLimitData (I := I) M}
     (hdim : Module.finrank Real E = 3)
-    (hdecay : LimitTfDecay (I := I) L) :
-    LimitTfZero (I := I) L := by
+    (hdecay : LimitTracefreeDecay (I := I) L) :
+    LimitTracefreeZero (I := I) L := by
   intro t ht
-  exact tf_zero_of_decay (I := I) (M := M) hdim (hdecay t ht)
+  exact tracefree_zero_of_decay (I := I) (M := M) hdim (hdecay t ht)
 
 omit [NeZero (Module.finrank ℝ E)] in
-theorem limit_tf_zero
+theorem limit_tracefree_zero
     (hdim : Module.finrank Real E = 3)
     {g0 : SmoothRiemannianMetric I M}
     (P : Ham3FlowPackage (I := I) (M := M) g0)
@@ -2743,16 +2743,16 @@ theorem limit_tf_zero
         Ham3LimitBoundaryless (I := I) L /\
         Ham3LimitFlow (I := I) L)
     (_hscalarPos : LimitScalarPos (I := I) L) :
-    LimitTfZero (I := I) L := by
-  exact limit_tf_zero_of_decay (I := I) (M := M) hdim
-    (limit_tf_decay (I := I) (M := M) P Q hsel hreal htransfer hpinch
+    LimitTracefreeZero (I := I) L := by
+  exact limit_tracefree_zero_of_decay (I := I) (M := M) hdim
+    (limit_tracefree_decay (I := I) (M := M) P Q hsel hreal htransfer hpinch
       _hlimit _hscalarPos)
 
 omit [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [SigmaCompactSpace M] [T2Space M] in
 theorem limitEinstein_of_tf0
     {L : Ham3CGHLimitData (I := I) M}
     (hdim : Module.finrank Real E = 3)
-    {t0 : Real} (htf : LimitTfZeroAt (I := I) L t0) :
+    {t0 : Real} (htf : LimitTracefreeZeroAt (I := I) L t0) :
     LimitEinsteinAt (I := I) L t0 := by
   classical
   letI : TopologicalSpace L.N := L.topology
@@ -3034,7 +3034,7 @@ theorem const_pos_of_tf0
     (hbdry : Ham3LimitBoundaryless (I := I) L)
     {t0 : Real}
     (hscalar : LimitScalarPosAt (I := I) L t0)
-    (htf : LimitTfZeroAt (I := I) L t0) :
+    (htf : LimitTracefreeZeroAt (I := I) L t0) :
     LimitConstPosSec (I := I) L := by
   letI : NeZero (Module.finrank Real E) := ⟨by omega⟩
   have heinstein : LimitEinsteinAt (I := I) L t0 :=
@@ -3050,7 +3050,7 @@ theorem limit_const_pos
     (hconn : Ham3LimitConnected (I := I) L)
     (hbdry : Ham3LimitBoundaryless (I := I) L)
     (hscalarPos : LimitScalarPos (I := I) L)
-    (htf : LimitTfZero (I := I) L) :
+    (htf : LimitTracefreeZero (I := I) L) :
     LimitConstPosSec (I := I) L := by
   let t0 : Real := -(ham3_r0 ^ 2) / 2
   have ht0 : t0 ∈ L.D.regular := by

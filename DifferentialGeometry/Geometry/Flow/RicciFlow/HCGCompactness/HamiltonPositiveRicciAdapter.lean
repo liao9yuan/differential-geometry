@@ -2100,7 +2100,7 @@ theorem tf_decay0_of_cgh
     (L : Ham3CGHLimitData (I := I) M)
     (h0 : (0 : Real) ∈ L.D.carrier)
     (hreal : Ham3SourceRealizes (I := I) (M := M) P Q hsel L) :
-    LimitTfDecayAt (I := I) L 0 := by
+    LimitTracefreeDecayAt (I := I) L 0 := by
   classical
   letI : TopologicalSpace L.N := L.topology
   letI : ChartedSpace H L.N := L.charted
@@ -2108,7 +2108,7 @@ theorem tf_decay0_of_cgh
   letI : IsManifold I ((∞ : WithTop ℕ∞) + 1) L.N := L.smooth_plus
   letI : SigmaCompactSpace L.N := L.sigmaCompact
   letI : T2Space L.N := L.t2
-  rcases ham3_tf_bound0 (I := I) P Q hsel hscalar hpinch with
+  rcases ham3_tracefree_bound0 (I := I) P Q hsel hscalar hpinch with
     ⟨epsilon, C, hepsilon, _hepsilon1, _hC, hbound⟩
   have hconv :
       FunctionPullbackTendsto (I := I) L.cgh.spatial.maps
@@ -2241,11 +2241,11 @@ theorem round0_of_cgh
     simpa [Lh] using
       (Ham3SourceLink.realizes (I := I) (M := M) P Q hsel hsource
         L subseq hsubseq hconv hcomplete)
-  have hdecay : LimitTfDecayAt (I := I) (M := M) Lh 0 :=
+  have hdecay : LimitTracefreeDecayAt (I := I) (M := M) Lh 0 :=
     tf_decay0_of_cgh (I := I) (M := M) h0omega P hD Q hsel hscalar
       hpinch Lh h0h hreal
-  have htf : LimitTfZeroAt (I := I) (M := M) Lh 0 :=
-    tf_zero_of_decay (I := I) (M := M) hdim hdecay
+  have htf : LimitTracefreeZeroAt (I := I) (M := M) Lh 0 :=
+    tracefree_zero_of_decay (I := I) (M := M) hdim hdecay
   have heinstein : LimitEinsteinAt (I := I) (M := M) Lh 0 :=
     limitEinstein_of_tf0 (I := I) (M := M) hdim htf
   have hbaseConv : Ham3LimitBaseScalarConv (I := I) (M := M) P Q Lh := by
