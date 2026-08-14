@@ -2614,8 +2614,8 @@ theorem ham3_const_hcg
           0 < c0 ∧ omega ≤ 3 / (2 * c0) := by
     rcases hfinite_core with ⟨c0, hc0, hbound⟩
     exact ⟨omega, c0, h0omega, hD, hc0, hbound⟩
-  have hnonneg9 : Ham3Section9RicNonneg (I := I) P omega :=
-    ham3_ric_nonneg9 (I := I) (M := M) h0omega hM hg0 P hD
+  have hnonneg9 : Ham3RicciNonneg (I := I) P omega :=
+    ham3_ricci_nonneg (I := I) (M := M) h0omega hM hg0 P hD
   have hscalarBlow : Ham3ScalarBlowup (I := I) P :=
     ham3_scalar_blowup (I := I) (M := M) h0omega hM P hD hnonneg9
   rcases ham3_point_select (I := I) (M := M) hM g0 hg0 P hfinite
@@ -2624,8 +2624,8 @@ theorem ham3_const_hcg
   have hric : Ham3RescaledRicNonneg (I := I) P Q :=
     ham3_rescaled_ric_nonneg
       (I := I) (M := M) h0omega hM g0 hg0 P hD Q hsel
-  have hsec9 : Ham3Section9Pinch (I := I) P omega :=
-    ham3_pinch9 (I := I) (M := M) h0omega hM hg0 P hD
+  have hsec9 : Ham3Pinching (I := I) P omega :=
+    ham3_pinching (I := I) (M := M) h0omega hM hg0 P hD
   have hpinch : Ham3PinchEstimate (I := I) P :=
     ham3_pinch_imp_can
       (I := I) (M := M) h0omega hM g0 hg0 P hD Q hsel hric hsec9

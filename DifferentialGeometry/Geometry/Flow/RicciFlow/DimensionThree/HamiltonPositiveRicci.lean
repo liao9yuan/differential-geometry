@@ -676,7 +676,7 @@ def Ham3RescaledRicNonneg
       0 <= P.S.ricciAt (ham3RescaledTime (I := I) P Q i s) x
         (DifferentialGeometry.Integral.Connection.vec2 (I := I) v v)
 
-def Ham3Section9Pinch
+def Ham3Pinching
     {g0 : SmoothRiemannianMetric I M}
     (P : Ham3FlowPackage (I := I) (M := M) g0) (omega : Real) : Prop :=
   forall T : Real, 0 <= T -> T < omega ->
@@ -688,7 +688,7 @@ def Ham3Section9Pinch
             P.S.ricci)
           P.S.scalar T delta
 
-def Ham3Section9PinchFixed
+def Ham3PinchingFixed
     {g0 : SmoothRiemannianMetric I M}
     (P : Ham3FlowPackage (I := I) (M := M) g0) (omega : Real) : Prop :=
   exists delta : Real,
@@ -701,16 +701,16 @@ def Ham3Section9PinchFixed
           P.S.scalar T delta
 
 omit [NeZero (Module.finrank ℝ E)] in
-theorem Ham3Section9PinchFixed.toVarying
+theorem Ham3PinchingFixed.toVarying
     {g0 : SmoothRiemannianMetric I M}
     {P : Ham3FlowPackage (I := I) (M := M) g0} {omega : Real}
-    (h : Ham3Section9PinchFixed (I := I) P omega) :
-    Ham3Section9Pinch (I := I) P omega := by
+    (h : Ham3PinchingFixed (I := I) P omega) :
+    Ham3Pinching (I := I) P omega := by
   rcases h with ⟨delta, hdelta0, hdelta13, hpres⟩
   intro T hT hTω
   exact ⟨delta, hdelta0, hdelta13, hpres T hT hTω⟩
 
-def Ham3Section9RicNonneg
+def Ham3RicciNonneg
     {g0 : SmoothRiemannianMetric I M}
     (P : Ham3FlowPackage (I := I) (M := M) g0) (omega : Real) : Prop :=
   forall T : Real, 0 <= T -> T < omega ->
@@ -1392,7 +1392,7 @@ private theorem ham3_rm_scalar_ctl
     {g0 : SmoothRiemannianMetric I M}
     (P : Ham3FlowPackage (I := I) (M := M) g0)
     (hD : P.D = DifferentialGeometry.Integral.Connection.RealTimeInterval.closedOpen 0 omega h0ω)
-    (hsec9 : Ham3Section9RicNonneg (I := I) P omega)
+    (hsec9 : Ham3RicciNonneg (I := I) P omega)
     {t : Real} {x : M} (htD : t ∈ P.D.carrier) :
     0 <= ham3Scalar (I := I) P t x ∧
       ham3RmNormSq (I := I) (M := M) P t x <=
@@ -1540,7 +1540,7 @@ theorem ham3_scalar_blowup
     {g0 : SmoothRiemannianMetric I M}
     (P : Ham3FlowPackage (I := I) (M := M) g0)
     (hD : P.D = DifferentialGeometry.Integral.Connection.RealTimeInterval.closedOpen 0 omega h0ω)
-    (hsec9 : Ham3Section9RicNonneg (I := I) P omega) :
+    (hsec9 : Ham3RicciNonneg (I := I) P omega) :
     Ham3ScalarBlowup (I := I) P := by
   intro A
   by_cases hA : 0 < A
@@ -1765,7 +1765,7 @@ theorem ham3_point_select
     simpa [hone] using hmul
 
 omit [NeZero (Module.finrank ℝ E)] in
-theorem ham3_pinch9_fixed
+theorem ham3_pinching_fixed
     [VectorBundle Real E (TangentSpace I : M -> Type _)]
     [ContMDiffVectorBundle (1 : WithTop ℕ∞) E (TangentSpace I : M -> Type _) I]
     [ContMDiffVectorBundle (∞ : WithTop ℕ∞) E (TangentSpace I : M -> Type _) I]
@@ -1775,7 +1775,7 @@ theorem ham3_pinch9_fixed
     (hpos : PosRicciMetric (I := I) (M := M) g0)
     (P : Ham3FlowPackage (I := I) (M := M) g0)
     (hD : P.D = DifferentialGeometry.Integral.Connection.RealTimeInterval.closedOpen 0 omega h0ω) :
-    Ham3Section9PinchFixed (I := I) P omega := by
+    Ham3PinchingFixed (I := I) P omega := by
   rcases hM with ⟨hcompact, hconnected, hboundaryless, hdim⟩
   letI : CompactSpace M := hcompact
   letI : ConnectedSpace M := hconnected
@@ -1820,7 +1820,7 @@ theorem ham3_pinch9_fixed
     P.isSmooth hT hdelta0 hdelta13 hdimT hTsub hTreg hpinch0
 
 omit [NeZero (Module.finrank ℝ E)] in
-theorem ham3_pinch9
+theorem ham3_pinching
     [VectorBundle Real E (TangentSpace I : M -> Type _)]
     [ContMDiffVectorBundle (1 : WithTop ℕ∞) E (TangentSpace I : M -> Type _) I]
     [ContMDiffVectorBundle (∞ : WithTop ℕ∞) E (TangentSpace I : M -> Type _) I]
@@ -1830,11 +1830,11 @@ theorem ham3_pinch9
     (hpos : PosRicciMetric (I := I) (M := M) g0)
     (P : Ham3FlowPackage (I := I) (M := M) g0)
     (hD : P.D = DifferentialGeometry.Integral.Connection.RealTimeInterval.closedOpen 0 omega h0ω) :
-    Ham3Section9Pinch (I := I) P omega := by
-  exact (ham3_pinch9_fixed (I := I) (M := M) h0ω hM hpos P hD).toVarying
+    Ham3Pinching (I := I) P omega := by
+  exact (ham3_pinching_fixed (I := I) (M := M) h0ω hM hpos P hD).toVarying
 
 omit [NeZero (Module.finrank ℝ E)] in
-theorem ham3_ric_nonneg9
+theorem ham3_ricci_nonneg
     [VectorBundle Real E (TangentSpace I : M -> Type _)]
     [ContMDiffVectorBundle (1 : WithTop ℕ∞) E (TangentSpace I : M -> Type _) I]
     [ContMDiffVectorBundle (∞ : WithTop ℕ∞) E (TangentSpace I : M -> Type _) I]
@@ -1844,7 +1844,7 @@ theorem ham3_ric_nonneg9
     (hpos : PosRicciMetric (I := I) (M := M) g0)
     (P : Ham3FlowPackage (I := I) (M := M) g0)
     (hD : P.D = DifferentialGeometry.Integral.Connection.RealTimeInterval.closedOpen 0 omega h0ω) :
-    Ham3Section9RicNonneg (I := I) P omega := by
+    Ham3RicciNonneg (I := I) P omega := by
   rcases hM with ⟨hcompact, hconnected, hboundaryless, hdim⟩
   letI : CompactSpace M := hcompact
   letI : ConnectedSpace M := hconnected
@@ -1899,8 +1899,8 @@ theorem ham3_rescaled_ric_nonneg
     (hsel : Ham3PointSel (I := I) P Q) :
     Ham3RescaledRicNonneg (I := I) P Q := by
   rcases hsel with ⟨hscale, htime, htimeMem, _hprod, _hbase, _hscalarMax⟩
-  have hricOn : Ham3Section9RicNonneg (I := I) P omega :=
-    ham3_ric_nonneg9 (I := I) (M := M) h0ω hM hpos P hD
+  have hricOn : Ham3RicciNonneg (I := I) P omega :=
+    ham3_ricci_nonneg (I := I) (M := M) h0ω hM hpos P hD
   intro i s x v hsleft hsright
   have hQiω : Q.time i < omega := by
     have hmem := htimeMem i
@@ -2064,7 +2064,7 @@ theorem ham3_pinch_imp_can
     (Q : Ham3BlowupData M)
     (_hsel : Ham3PointSel (I := I) P Q)
     (_hric : Ham3RescaledRicNonneg (I := I) P Q)
-    (_hsec9 : Ham3Section9Pinch (I := I) P omega) :
+    (_hsec9 : Ham3Pinching (I := I) P omega) :
     Ham3PinchEstimate (I := I) P := by
   rcases hM with ⟨hcompact, hconnected, hboundaryless, hdim⟩
   letI : CompactSpace M := hcompact
@@ -2074,11 +2074,11 @@ theorem ham3_pinch_imp_can
   have hdimT : ∀ x : M, Module.finrank Real (TangentSpace I x) = 3 := by
     intro x
     simpa using hdim
-  have hfixed : Ham3Section9PinchFixed (I := I) P omega :=
-    ham3_pinch9_fixed (I := I) (M := M) h0ω
+  have hfixed : Ham3PinchingFixed (I := I) P omega :=
+    ham3_pinching_fixed (I := I) (M := M) h0ω
       ⟨hcompact, hconnected, hboundaryless, hdim⟩ hpos P hD
-  have hnonneg : Ham3Section9RicNonneg (I := I) P omega :=
-    ham3_ric_nonneg9 (I := I) (M := M) h0ω
+  have hnonneg : Ham3RicciNonneg (I := I) P omega :=
+    ham3_ricci_nonneg (I := I) (M := M) h0ω
       ⟨hcompact, hconnected, hboundaryless, hdim⟩ hpos P hD
   have hscalar :
       ∀ t : Real, t ∈ P.D.carrier -> ∀ x : M, 0 < P.S.scalar t x :=
@@ -2103,7 +2103,7 @@ theorem ham3_pinch_imp
     (Q : Ham3BlowupData M)
     (hsel : Ham3PointSel (I := I) P Q)
     (hric : Ham3RescaledRicNonneg (I := I) P Q)
-    (hsec9 : Ham3Section9Pinch (I := I) P omega) :
+    (hsec9 : Ham3Pinching (I := I) P omega) :
     exists tracefreeRmNormSq scalar weight : Real -> M -> Real, exists C : Real,
       DifferentialGeometry.PDE.RicciFlow.HamiltonTracefreePinchingEstimateOn
         tracefreeRmNormSq scalar weight C := by
