@@ -1196,6 +1196,7 @@ noncomputable def ricciOneC (Λ Kb₀ Kb₁ : ℝ) : ℝ :=
   Real.sqrt ((Module.finrank ℝ E : ℝ) ^ 5 *
     rmOneC (E := E) Λ Kb₀ Kb₁ ^ 2)
 
+omit [NeZero (Module.finrank ℝ E)] in
 private theorem unifRicOne_of
     (gBase g₀ : SmoothRiemannianMetric I M) {Λ : ℝ}
     (hΛ : 1 ≤ Λ)

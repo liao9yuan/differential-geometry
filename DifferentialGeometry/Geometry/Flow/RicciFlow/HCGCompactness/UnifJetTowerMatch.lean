@@ -386,6 +386,7 @@ theorem sqrtRfns_one_le
               Real.sqrt (normSq0S (I := I) g₀ x (s + k)
                 (iterCov (I := I) g₀ s (ccUnitField (I := I) g₀ s T) k x)) := by ring
 
+omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] in
 private theorem towerCross_le
     (gBase g₀ : SmoothRiemannianMetric I M) {Λ Λ' Λ'' : ℝ}
     (hEq : MetricUniformEquivalentOn (I := I) Set.univ gBase g₀ Λ)
@@ -462,6 +463,7 @@ private theorem towerCross_le
   · have h2 := iterCovG1_two (I := I) gBase g₀ s U x hEq hjet hJet1 hJet2 (Set.mem_univ x)
     nlinarith
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem sqrtRfns_cross_le
     (gBase g₀ : SmoothRiemannianMetric I M) {Λ Λ' Λ'' : ℝ}
     (hEq : MetricUniformEquivalentOn (I := I) Set.univ gBase g₀ Λ)
@@ -700,6 +702,7 @@ lemma kjetConst_nonneg {Λ Λ' Λ'' : ℝ} (hΛ : 0 ≤ Λ) (hΛ' : 0 ≤ Λ') (
     (n s : ℕ) : 0 ≤ kjetConst n Λ Λ' Λ'' s :=
   mul_nonneg (Real.sqrt_nonneg _) (jetTowerPt_nonneg hΛ hΛ' hΛ'' n s)
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem jetCross_l2
     (gBase g₀ : SmoothRiemannianMetric I M) {Λ Λ' Λ'' : ℝ}
     (hEq : MetricUniformEquivalentOn (I := I) Set.univ gBase g₀ Λ)
@@ -823,6 +826,7 @@ theorem jetCross_l2
   have := Real.sqrt_le_sqrt hfinal
   rwa [Real.sqrt_sq (norm_nonneg _), Real.sqrt_sq hKnn] at this
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem kjet_of_class
     (gBase g₀ : SmoothRiemannianMetric I M) {Λ Λ' Λ'' : ℝ}
     (hEq : MetricUniformEquivalentOn (I := I) Set.univ gBase g₀ Λ)

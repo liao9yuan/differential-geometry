@@ -191,6 +191,7 @@ theorem reverseJetOne
   dsimp [revJetOneC]
   exact mul_le_mul_of_nonneg_left hmetric (by positivity)
 
+omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] in
 theorem reverseJetTwo
     (gBase g₀ : SmoothRiemannianMetric I M) {Λ : ℝ}
     (hEq : MetricUniformEquivalentOn (I := I) Set.univ gBase g₀ Λ)
@@ -237,6 +238,7 @@ theorem reverseJetTwo
     (Real.sqrt_nonneg _)).trans ?_)
   exact le_max_right _ _
 
+omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] in
 theorem reverseJetPack
     (gBase g₀ : SmoothRiemannianMetric I M) {Λ : ℝ}
     (hEq : MetricUniformEquivalentOn (I := I) Set.univ gBase g₀ Λ)

@@ -19,7 +19,7 @@ open scoped Manifold ContDiff Bundle
 
 variable {E : Type uE} [NormedAddCommGroup E]
 variable [InnerProductSpace Real E] [FiniteDimensional Real E]
-variable [NeZero (Module.finrank Real E)] [CompleteSpace E]
+variable [NeZero (Module.finrank Real E)]
 variable {H : Type uH} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H} [I.Boundaryless]
 
@@ -188,7 +188,7 @@ theorem exists_pairR_of_seqBoundedGeometry
   intro s hs hsd
   simpa [Y, hgeom_k] using hsmall (s := s) hs hsd
 
-omit [NeZero (Module.finrank Real E)] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem ricciLower_of_seq
     (X : PointedRiemannianSeq.{u, uE, uH} (I := I))
     (hgeom : SeqBoundedGeometry (I := I) X) (k : Nat) :

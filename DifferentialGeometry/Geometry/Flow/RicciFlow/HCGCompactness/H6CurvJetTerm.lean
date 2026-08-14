@@ -541,6 +541,7 @@ noncomputable def CurvJetTerm.eval
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
+omit [CompleteSpace E] in
 theorem CurvJetTerm.eval_le_at
     [PseudoEMetricSpace M]
     [IsRiemannianManifold I M] [CompleteSpace M]
@@ -662,6 +663,7 @@ theorem CurvJetTerm.eval_le_at
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
+omit [CompleteSpace E] in
 theorem CurvJetTerm.eval_le_atoms
     [PseudoEMetricSpace M]
     [IsRiemannianManifold I M] [CompleteSpace M]
@@ -701,6 +703,7 @@ theorem CurvJetTerm.eval_le_atoms
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
+omit [CompleteSpace E] in
 theorem CurvJetTerm.eval_le_of
     [PseudoEMetricSpace M]
     [IsRiemannianManifold I M] [CompleteSpace M]
@@ -904,6 +907,7 @@ private theorem IntrJetAtom.eval_smooth
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
+omit [CompleteSpace E] in
 private theorem CurvJetTerm.finSum_eval
     [PseudoEMetricSpace M]
     [IsRiemannianManifold I M] [CompleteSpace M]
