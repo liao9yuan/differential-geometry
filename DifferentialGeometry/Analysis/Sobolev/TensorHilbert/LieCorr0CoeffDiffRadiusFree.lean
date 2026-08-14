@@ -3193,20 +3193,6 @@ theorem lieCorr0Field_summed_l2_radiusFree
       linarith
     linarith
 
-#print axioms lieCorr0Field_perOrder_l2_radiusFree
-#print axioms lieCorr0Field_summed_l2_radiusFree
-#print axioms lc0Base_perOrder_rf
-#print axioms lc0Diff_perOrder_rf
-#print axioms lc0Riem_perOrder_rf
-#print axioms b4_phi_atgw
-#print axioms b4_app_atgw
-#print axioms b4_mcd_atgw
-#print axioms b4_wOmega_atgw
-#print axioms b4_vbPass_atgw
-#print axioms b4_vb_atgw
-#print axioms lc0VB_perOrder_rf
-#print axioms lc0AMix_perOrder_rf
-#print axioms lc0VBAMix_perOrder_rf
 
 end DifferentialGeometry.Integral.Connection
 

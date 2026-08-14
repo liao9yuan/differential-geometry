@@ -1241,8 +1241,6 @@ private theorem wAlpha_L2_topsep
 
 end DLbTopSeparated
 
-#print axioms connDiffDVFInsert_eq_cometricRaise
-#print axioms connDiffDVFInsertDiff_realizedFam_jetL2_perOrder_ballUniform
 end DifferentialGeometry.Integral.Connection
 
 end

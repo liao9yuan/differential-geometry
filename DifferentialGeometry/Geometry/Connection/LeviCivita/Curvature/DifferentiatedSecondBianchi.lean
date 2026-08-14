@@ -19,28 +19,14 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 variable [IsManifold I 1 M]
 variable [SigmaCompactSpace M] [T2Space M]
 
-/-!
-# Differentiated second Bianchi identity
-
-This file differentiates the canonical lowered second Bianchi identity while
-keeping the new leading covariant-derivative slot fixed.  The result is the
-rank-six cyclic identity needed before contracting `∇²Rm04` in the
-arbitrary-dimensional Hamilton curvature evolution formula.
--/
-
-/-- Cyclically route the first three slots of a rank-five tensor. -/
 private def rmBianchiCyc : Fin 5 ≃ Fin 5 :=
   Equiv.ofBijective ![1, 2, 0, 3, 4] (by decide)
 
-/-- Apply the inverse cyclic routing to the first three rank-five slots. -/
 private def rmBianchiCyc2 : Fin 5 ≃ Fin 5 :=
   Equiv.ofBijective ![2, 0, 1, 3, 4] (by decide)
 
 omit [I.Boundaryless]
   [SigmaCompactSpace M] in
-/-- The second covariant derivative of canonical lowered Riemann satisfies the
-differentiated second Bianchi identity.  Its slots are
-`(outer derivative, inner derivative, X, Y, Z, W)`. -/
 theorem canRmSecond_nabla
     (g : SmoothRiemannianMetric I M)
     {x : M} (V A X Y Z W : TangentSpace I x) :

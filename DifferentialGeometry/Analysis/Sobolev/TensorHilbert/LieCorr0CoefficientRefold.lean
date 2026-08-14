@@ -1652,17 +1652,6 @@ private theorem lc0VB_realizedFam_perOrder_topSep
     Finset.sum_nonneg (fun j _ => add_nonneg (sq_nonneg _) (sq_nonneg _))
   nlinarith [hb, hK_nn i, hlow_nn, mul_nonneg (hK_nn i) hlow_nn]
 
-#print axioms endoArm_eq_dlb
-#print axioms lc0Insert_base_eq_neg_dlb
-#print axioms lc0InsertBase_realizedFam_perOrder_topSeparated
-#print axioms sq_le_five_add
-#print axioms lc0Riem_realizedFam_perOrder_topSep
-#print axioms lc0InsertDiff_ballUniform
-#print axioms lc0InsertDiff_realizedFam_perOrder_topSep
-#print axioms lc0VB_eq_app
-#print axioms vbPass_jetL2
-#print axioms lc0VB_ballUniform
-#print axioms lc0VB_realizedFam_perOrder_topSep
 
 end DifferentialGeometry.Integral.Connection
 
