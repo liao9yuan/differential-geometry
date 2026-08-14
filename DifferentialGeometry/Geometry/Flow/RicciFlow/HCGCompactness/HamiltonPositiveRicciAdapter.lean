@@ -1138,7 +1138,6 @@ private theorem nablaK_restrict
 noncomputable def source_deriv
     {omega : Real} (h0omega : 0 < omega)
     (hcompact : CompactSpace M)
-    (_hdim : Module.finrank Real E = 3)
     {g0 : SmoothRiemannianMetric I M}
     (P : Ham3FiniteTimeFlow (I := I) (M := M) g0)
     (hD : P.D =
@@ -2387,7 +2386,7 @@ theorem ham3_const_of_inj
     change @ConnectedSpace (X.term k).M (X.term k).topology
     simpa only [X, ham3SourceSeq] using hM.2.1
   let hderiv : FlowDerivativeInput (I := I) X :=
-    source_deriv (I := I) h0omega hM.1 hM.2.2.2 P hD Q hsel hrm hwindow
+    source_deriv (I := I) h0omega hM.1 P hD Q hsel hrm hwindow
   let seed : MetricCompactSeed (I := I) (X.atZero (I := I)) :=
     metricSeedOfBG (I := I) (X.atZero (I := I))
       hcpl hderiv.at_zero_geom hinj hconn
@@ -2567,7 +2566,7 @@ theorem ham3_const_of_vol
     change @ConnectedSpace (X.term k).M (X.term k).topology
     simpa only [X, ham3SourceSeq] using hM.2.1
   let hderiv : FlowDerivativeInput (I := I) X :=
-    source_deriv (I := I) h0omega hM.1 hM.2.2.2 P hD Q hsel hrm hwindow
+    source_deriv (I := I) h0omega hM.1 P hD Q hsel hrm hwindow
   have hinj : FlowBaseInjBound (I := I) X :=
     flowInj_of_vol (I := I) X hcpl hconn hderiv.at_zero_geom V hvol
   exact ham3_const_of_inj
