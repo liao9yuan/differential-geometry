@@ -35,8 +35,7 @@ noncomputable def chartedSpaceOfHomeomorph {H : Type u} [TopologicalSpace H]
     intro x
     exact ⟨(chartAt (H := H) (M := M) (h x)), chart_mem_atlas (H := H) (M := M) (h x), rfl⟩
 
-@[reducible]
-noncomputable def isManifoldOfHomeomorph {𝕜 : Type*} [NontriviallyNormedField 𝕜]
+theorem isManifoldOfHomeomorph {𝕜 : Type*} [NontriviallyNormedField 𝕜]
     {E H : Type*} [NormedAddCommGroup E] [NormedSpace 𝕜 E] [TopologicalSpace H]
     (I : ModelWithCorners 𝕜 E H) {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
     {n : WithTop ℕ∞} {M' : Type*} [TopologicalSpace M'] (h : M' ≃ₜ M)
@@ -1588,8 +1587,7 @@ theorem closedCellChart_transition_mem_groupoid {m : ℕ} (x₁ x₂ : ClosedCel
           have hnot : ¬ ‖x₂.1‖ < 1 := hx₂
           linarith))))
 
-@[reducible]
-noncomputable def closedCellHasGroupoid (m : ℕ) :
+theorem closedCellHasGroupoid (m : ℕ) :
     @HasGroupoid (EuclideanHalfSpace (m + 1)) _ (ClosedCell (m + 1)) _
       (closedCellChartedSpaceSucc m) (contDiffGroupoid (⊤ : ℕ∞)
         (modelWithCornersEuclideanHalfSpace (m + 1))) := by
@@ -1600,8 +1598,7 @@ noncomputable def closedCellHasGroupoid (m : ℕ) :
   rcases he' with ⟨x₂, rfl⟩
   exact closedCellChart_transition_mem_groupoid x₁ x₂
 
-@[reducible]
-noncomputable def closedCellIsManifold (m : ℕ) :
+theorem closedCellIsManifold (m : ℕ) :
     @IsManifold ℝ _ (EuclideanSpace ℝ (Fin (m + 1))) _ _ (EuclideanHalfSpace (m + 1)) _
       (modelWithCornersEuclideanHalfSpace (m + 1)) (⊤ : ℕ∞) (ClosedCell (m + 1)) _
       (closedCellChartedSpaceSucc m) := by
@@ -2155,8 +2152,7 @@ noncomputable def standardHandleChartedSpaceSucc (m n : ℕ) :
   exact prodChartedSpace (EuclideanHalfSpace (m + 1)) (ClosedCell (m + 1))
     (EuclideanHalfSpace (n + 1)) (ClosedCell (n + 1))
 
-@[reducible]
-noncomputable def standardHandleHasGroupoid (m n : ℕ) :
+theorem standardHandleHasGroupoid (m n : ℕ) :
     @HasGroupoid (ModelProd (EuclideanHalfSpace (m + 1)) (EuclideanHalfSpace (n + 1))) _
       (ClosedCell (m + 1) × ClosedCell (n + 1)) _ (standardHandleChartedSpaceSucc m n)
       (contDiffGroupoid (⊤ : ℕ∞)
@@ -2172,8 +2168,7 @@ noncomputable def standardHandleHasGroupoid (m n : ℕ) :
       (modelWithCornersEuclideanHalfSpace (n + 1))) := closedCellHasGroupoid n
   exact hasGroupoid_prod
 
-@[reducible]
-noncomputable def standardHandleIsManifold (m n : ℕ) :
+theorem standardHandleIsManifold (m n : ℕ) :
     @IsManifold ℝ _ (EuclideanSpace ℝ (Fin (m + 1)) × EuclideanSpace ℝ (Fin (n + 1))) _ _
       (ModelProd (EuclideanHalfSpace (m + 1)) (EuclideanHalfSpace (n + 1))) _
       ((modelWithCornersEuclideanHalfSpace (m + 1)).prod
@@ -2229,7 +2224,7 @@ instance (k : ℕ) [NeZero k] : Fact (k = (k - 1) + 1) := by
     have hk : 0 < k := NeZero.pos k
     omega⟩
 
-noncomputable def cellBoundaryChart (k : ℕ) [NeZero k]
+noncomputable def cellBoundaryChart (k : ℕ)
     [Fact (Module.finrank ℝ (EuclideanSpace ℝ (Fin k)) = (k - 1) + 1)]
     (v : CellBoundary k) :
     OpenPartialHomeomorph (CellBoundary k) (EuclideanSpace ℝ (Fin (k - 1))) :=
@@ -2237,7 +2232,7 @@ noncomputable def cellBoundaryChart (k : ℕ) [NeZero k]
     stereographic' (k - 1) (cellBoundarySphereHomeomorph k v)
 
 @[reducible]
-noncomputable def cellBoundaryChartedSpace (k : ℕ) [NeZero k]
+noncomputable def cellBoundaryChartedSpace (k : ℕ)
     [Fact (Module.finrank ℝ (EuclideanSpace ℝ (Fin k)) = (k - 1) + 1)] :
     ChartedSpace (EuclideanSpace ℝ (Fin (k - 1))) (CellBoundary k) where
   atlas := Set.range (fun v : CellBoundary k => cellBoundaryChart k v)
@@ -2271,8 +2266,7 @@ noncomputable def cellBoundaryChartedSpace (k : ℕ) [NeZero k]
         exact Subtype.ext hh')
   chart_mem_atlas := fun v => ⟨-v, rfl⟩
 
-@[reducible]
-noncomputable def cellBoundaryHasGroupoid (k : ℕ) [NeZero k]
+theorem cellBoundaryHasGroupoid (k : ℕ)
     [Fact (Module.finrank ℝ (EuclideanSpace ℝ (Fin k)) = (k - 1) + 1)] :
     @HasGroupoid (EuclideanSpace ℝ (Fin (k - 1))) _ (CellBoundary k) _
       (cellBoundaryChartedSpace k)
@@ -2322,15 +2316,14 @@ noncomputable def cellBoundaryHasGroupoid (k : ℕ) [NeZero k]
     simpa [contDiffGroupoid] using hmemInfty
   exact (mem_groupoid_of_pregroupoid.mp hm).1
 
-@[reducible]
-noncomputable def cellBoundaryIsManifold (k : ℕ) [NeZero k]
+theorem cellBoundaryIsManifold (k : ℕ)
     [Fact (Module.finrank ℝ (EuclideanSpace ℝ (Fin k)) = (k - 1) + 1)] :
     @IsManifold ℝ _ (EuclideanSpace ℝ (Fin (k - 1))) _ _ (EuclideanSpace ℝ (Fin (k - 1))) _
       (𝓡 (k - 1)) (⊤ : ℕ∞) (CellBoundary k) _ (cellBoundaryChartedSpace k) := by
   letI := cellBoundaryChartedSpace k
   exact { toHasGroupoid := cellBoundaryHasGroupoid k }
 
-theorem cellBoundaryInclusion_contMDiff (k : ℕ) [NeZero k]
+theorem cellBoundaryInclusion_contMDiff (k : ℕ)
     [Fact (Module.finrank ℝ (EuclideanSpace ℝ (Fin k)) = (k - 1) + 1)] :
     @ContMDiff ℝ _ (EuclideanSpace ℝ (Fin (k - 1))) _ _ (EuclideanSpace ℝ (Fin (k - 1))) _
       (𝓡 (k - 1)) (CellBoundary k) _ (cellBoundaryChartedSpace k)
@@ -2428,12 +2421,12 @@ theorem cellBoundaryInclusion_contMDiff (k : ℕ) [NeZero k]
     simpa [hchart] using (mem_chart_source (H := EuclideanSpace ℝ (Fin (k - 1)))
       (M := CellBoundary k) u)))
 
-noncomputable def closedCellReindex (l : ℕ) [NeZero l] [Fact (l = (l - 1) + 1)] :
+noncomputable def closedCellReindex (l : ℕ) [Fact (l = (l - 1) + 1)] :
     EuclideanSpace ℝ (Fin l) ≃ₗᵢ[ℝ] EuclideanSpace ℝ (Fin ((l - 1) + 1)) :=
   (EuclideanSpace.basisFun (Fin l) ℝ).reindex
     (Equiv.cast (congrArg Fin (Fact.out : l = (l - 1) + 1))) |>.repr
 
-noncomputable def closedCellReindexHomeo (l : ℕ) [NeZero l] [Fact (l = (l - 1) + 1)] :
+noncomputable def closedCellReindexHomeo (l : ℕ) [Fact (l = (l - 1) + 1)] :
     ClosedCell l ≃ₜ ClosedCell ((l - 1) + 1) := by
   let e : EuclideanSpace ℝ (Fin l) ≃ₗᵢ[ℝ] EuclideanSpace ℝ (Fin ((l - 1) + 1)) :=
     closedCellReindex l
@@ -2451,7 +2444,7 @@ noncomputable def closedCellReindexHomeo (l : ℕ) [NeZero l] [Fact (l = (l - 1)
                exact (le_of_eq (e.symm.norm_map x.1)).trans x.2) }
 
 @[reducible]
-noncomputable def closedCellChartedSpace (l : ℕ) [NeZero l]
+noncomputable def closedCellChartedSpace (l : ℕ)
     [Fact (l = (l - 1) + 1)] :
     ChartedSpace (EuclideanHalfSpace ((l - 1) + 1)) (ClosedCell l) := by
   letI : ChartedSpace (EuclideanHalfSpace ((l - 1) + 1)) (ClosedCell ((l - 1) + 1)) :=
@@ -2459,7 +2452,7 @@ noncomputable def closedCellChartedSpace (l : ℕ) [NeZero l]
   exact chartedSpaceOfHomeomorph (closedCellReindexHomeo l)
 
 @[reducible]
-noncomputable def standardHandleChartedSpace (k l : ℕ) [NeZero k] [NeZero l]
+noncomputable def standardHandleChartedSpace (k l : ℕ)
     [Fact (k = (k - 1) + 1)] [Fact (l = (l - 1) + 1)] :
     ChartedSpace (ModelProd (EuclideanHalfSpace ((k - 1) + 1)) (EuclideanHalfSpace ((l - 1) + 1)))
       (StandardHandle k l) := by
@@ -2510,7 +2503,7 @@ theorem closedCellZeroInclusion_contMDiff :
     exact Subsingleton.elim _ _
 
 @[reducible]
-noncomputable def standardHandleZeroChartedSpace (l : ℕ) [NeZero l] [Fact (l = (l - 1) + 1)] :
+noncomputable def standardHandleZeroChartedSpace (l : ℕ) [Fact (l = (l - 1) + 1)] :
     ChartedSpace (ModelProd (EuclideanSpace ℝ (Fin 0)) (EuclideanHalfSpace ((l - 1) + 1)))
       (StandardHandle 0 l) := by
   letI : ChartedSpace (EuclideanSpace ℝ (Fin 0)) (ClosedCell 0) :=
@@ -2521,7 +2514,7 @@ noncomputable def standardHandleZeroChartedSpace (l : ℕ) [NeZero l] [Fact (l =
     (EuclideanHalfSpace ((l - 1) + 1)) (ClosedCell l)
 
 @[reducible]
-noncomputable def standardHandleTopChartedSpace (k : ℕ) [NeZero k] [Fact (k = (k - 1) + 1)] :
+noncomputable def standardHandleTopChartedSpace (k : ℕ) [Fact (k = (k - 1) + 1)] :
     ChartedSpace (ModelProd (EuclideanHalfSpace ((k - 1) + 1)) (EuclideanSpace ℝ (Fin 0)))
       (StandardHandle k 0) := by
   letI : ChartedSpace (EuclideanHalfSpace ((k - 1) + 1)) (ClosedCell k) :=
@@ -2558,7 +2551,7 @@ noncomputable def closedCellSubSelfChartedSpace (n : ℕ) :
   exact chartedSpaceOfHomeomorph (closedCellSubSelfHomeo n)
 
 @[reducible]
-noncomputable def standardHandleTopSubChartedSpace (n : ℕ) [NeZero n] [Fact (n = (n - 1) + 1)] :
+noncomputable def standardHandleTopSubChartedSpace (n : ℕ) [Fact (n = (n - 1) + 1)] :
     ChartedSpace (ModelProd (EuclideanHalfSpace ((n - 1) + 1)) (EuclideanSpace ℝ (Fin 0)))
       (StandardHandle n (n - n)) := by
   letI : ChartedSpace (EuclideanHalfSpace ((n - 1) + 1)) (ClosedCell n) :=
@@ -2602,7 +2595,7 @@ theorem closedCellSubSelfInclusion_contMDiff (n : ℕ) :
   dsimp [h, e, closedCellSubSelfHomeo, finSubSelfIso]
   simp
 
-theorem closedCellInclusion_contMDiff_of (l : ℕ) [NeZero l] [Fact (l = (l - 1) + 1)] :
+theorem closedCellInclusion_contMDiff_of (l : ℕ) [Fact (l = (l - 1) + 1)] :
     @ContMDiff ℝ _ (EuclideanSpace ℝ (Fin ((l - 1) + 1))) _ _
       (EuclideanHalfSpace ((l - 1) + 1)) _ (modelWithCornersEuclideanHalfSpace ((l - 1) + 1))
       (ClosedCell l) _ (closedCellChartedSpace l)
@@ -2813,7 +2806,7 @@ theorem closedCellInclusion_contMDiff_of (l : ℕ) [NeZero l] [Fact (l = (l - 1)
     exact hcong.contMDiffAt ((r.toOpenPartialHomeomorph ≫ₕ closedCellBoundaryChart (l - 1) i σ).open_source.mem_nhds hxsrc)
 
 @[reducible]
-noncomputable def attachingRegionChartedSpace (k l : ℕ) [NeZero k] [NeZero l]
+noncomputable def attachingRegionChartedSpace (k l : ℕ)
     [Fact (Module.finrank ℝ (EuclideanSpace ℝ (Fin k)) = (k - 1) + 1)]
     [Fact (l = (l - 1) + 1)] :
     ChartedSpace (ModelProd (EuclideanSpace ℝ (Fin (k - 1))) (EuclideanHalfSpace ((l - 1) + 1)))
@@ -2824,15 +2817,14 @@ noncomputable def attachingRegionChartedSpace (k l : ℕ) [NeZero k] [NeZero l]
     closedCellChartedSpace l
   infer_instance
 
-instance attachingRegionChartedSpaceInst (k l : ℕ) [NeZero k] [NeZero l]
+instance attachingRegionChartedSpaceInst (k l : ℕ)
     [Fact (Module.finrank ℝ (EuclideanSpace ℝ (Fin k)) = (k - 1) + 1)]
     [Fact (l = (l - 1) + 1)] :
     ChartedSpace (ModelProd (EuclideanSpace ℝ (Fin (k - 1))) (EuclideanHalfSpace ((l - 1) + 1)))
       (AttachingRegion k l) :=
   attachingRegionChartedSpace k l
 
-@[reducible]
-noncomputable def attachingRegionIsManifold (k l : ℕ) [NeZero k] [NeZero l]
+theorem attachingRegionIsManifold (k l : ℕ)
     [Fact (Module.finrank ℝ (EuclideanSpace ℝ (Fin k)) = (k - 1) + 1)]
     [Fact (l = (l - 1) + 1)] :
     @IsManifold ℝ _
@@ -2861,7 +2853,7 @@ noncomputable def attachingRegionIsManifold (k l : ℕ) [NeZero k] [NeZero l]
     (I' := modelWithCornersEuclideanHalfSpace ((l - 1) + 1)) (n := (⊤ : ℕ∞))
     (CellBoundary k) (ClosedCell l)
 
-instance attachingRegionIsManifoldInst (k l : ℕ) [NeZero k] [NeZero l]
+instance attachingRegionIsManifoldInst (k l : ℕ)
     [Fact (Module.finrank ℝ (EuclideanSpace ℝ (Fin k)) = (k - 1) + 1)]
     [Fact (l = (l - 1) + 1)] :
     IsManifold ((𝓡 (k - 1)).prod (modelWithCornersEuclideanHalfSpace ((l - 1) + 1))) (⊤ : ℕ∞)

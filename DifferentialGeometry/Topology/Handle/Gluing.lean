@@ -175,8 +175,7 @@ noncomputable def adjunctionChartedSpace {X : Type u} {Y : Type v} [TopologicalS
     {H : Type w} [TopologicalSpace H] [ChartedSpace H Y] : ChartedSpace H (AdjunctionSpace k l φ) :=
   chartedSpaceOfHomeomorph h
 
-@[reducible]
-noncomputable def adjunctionIsManifold {𝕜 : Type*} [NontriviallyNormedField 𝕜]
+theorem adjunctionIsManifold {𝕜 : Type*} [NontriviallyNormedField 𝕜]
     {E H : Type*} [NormedAddCommGroup E] [NormedSpace 𝕜 E] [TopologicalSpace H]
     (I : ModelWithCorners 𝕜 E H) {X : Type u} {Y : Type v} [TopologicalSpace X]
     [TopologicalSpace Y] [ChartedSpace H Y] (φ : AttachingRegion k l → X)
@@ -207,7 +206,7 @@ theorem contMDiff_lower_of_contMDiff {𝕜 : Type*} [NontriviallyNormedField �
     {E H : Type*} [NormedAddCommGroup E] [NormedSpace 𝕜 E] [TopologicalSpace H]
     (I : ModelWithCorners 𝕜 E H) {X : Type u} {Y : Type v} [TopologicalSpace X]
     [TopologicalSpace Y] [ChartedSpace H X] [ChartedSpace H Y] (φ : AttachingRegion k l → X)
-    (h : AdjunctionSpace k l φ ≃ₜ Y) {n : WithTop ℕ∞} [IsManifold I n X] [IsManifold I n Y]
+    (h : AdjunctionSpace k l φ ≃ₜ Y) {n : WithTop ℕ∞} [IsManifold I n Y]
     (hf : @ContMDiff 𝕜 _ E _ _ H _ I X _ _ E _ _ H _ I Y _ _ n
       (fun x : X => h.toFun (lower φ x))) :
     @ContMDiff 𝕜 _ E _ _ H _ I X _ _ E _ _ H _ I (AdjunctionSpace k l φ) _
@@ -227,7 +226,7 @@ theorem contMDiff_lower_of_contMDiff {𝕜 : Type*} [NontriviallyNormedField �
 theorem contMDiff_cell_of_contMDiff {E H : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
     [TopologicalSpace H] (I : ModelWithCorners ℝ E H) {X : Type u} {Y : Type v}
     [TopologicalSpace X] [TopologicalSpace Y] [ChartedSpace H Y] (φ : AttachingRegion k l → X)
-    (h : AdjunctionSpace k l φ ≃ₜ Y) {n : WithTop ℕ∞} [NeZero k] [NeZero l]
+    (h : AdjunctionSpace k l φ ≃ₜ Y) {n : WithTop ℕ∞}
     [Fact (k = (k - 1) + 1)] [Fact (l = (l - 1) + 1)] [IsManifold I n Y]
     (hf : @ContMDiff ℝ _ (EuclideanSpace ℝ (Fin ((k - 1) + 1)) ×
         EuclideanSpace ℝ (Fin ((l - 1) + 1))) _ _
