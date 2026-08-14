@@ -949,17 +949,7 @@ structure Ham3CompactInput
   noncollapse : Ham3Noncollapse (I := I) P Q hsel kappa ham3_r0
 
 omit [NeZero (Module.finrank ℝ E)] in
-theorem ham3_time74
-    {omega : Real} (h0ω : 0 < omega)
-    {g0 : SmoothRiemannianMetric I M}
-    (P : Ham3FlowPackage (I := I) (M := M) g0)
-    (hD : P.D = DifferentialGeometry.Integral.Connection.RealTimeInterval.closedOpen 0 omega h0ω) :
-    exists omega' : Real, exists h0ω' : 0 < omega',
-      P.D = DifferentialGeometry.Integral.Connection.RealTimeInterval.closedOpen 0 omega' h0ω' := by
-  exact ⟨omega, h0ω, hD⟩
-
-omit [NeZero (Module.finrank ℝ E)] in
-theorem ham3_scalar0_cont74
+theorem ham3_scalar_initial_continuous
     {g0 : SmoothRiemannianMetric I M}
     (P : Ham3FlowPackage (I := I) (M := M) g0) :
     Continuous (fun x : M => ham3Scalar (I := I) P 0 x) := by
@@ -1031,7 +1021,7 @@ theorem ham3_ricci_pos0
     DifferentialGeometry.PDE.RicciFlow.SolutionFamily.ricciAt] using hpos0
 
 omit [NeZero (Module.finrank ℝ E)] in
-theorem ham3_scalar0_pos74
+theorem ham3_scalar_initial_pos
     (hdim : Module.finrank Real E = 3)
     {omega : Real} (h0ω : 0 < omega)
     {g0 : SmoothRiemannianMetric I M}
@@ -1062,7 +1052,7 @@ theorem ham3_scalar0_pos74
       hdimx hpos0
 
 omit [NeZero (Module.finrank ℝ E)] in
-theorem ham3_init74
+theorem ham3_initial_scalar_minimum
     [CompactSpace M] [Nonempty M]
     (hdim : Module.finrank Real E = 3)
     {omega : Real} (h0ω : 0 < omega)
@@ -1074,14 +1064,14 @@ theorem ham3_init74
       DifferentialGeometry.PDE.RicciFlow.InitialScalarMinimum (M := M) (ham3Scalar (I := I) P) c0 ∧
         forall x : M, 0 < ham3Scalar (I := I) P 0 x := by
   have hcont : Continuous (fun x : M => ham3Scalar (I := I) P 0 x) :=
-    ham3_scalar0_cont74 (I := I) (M := M) P
+    ham3_scalar_initial_continuous (I := I) (M := M) P
   rcases DifferentialGeometry.PDE.RicciFlow.exists_initialScalarMinimum_of_continuous
       (M := M) (ham3Scalar (I := I) P) hcont with
     ⟨c0, hmin⟩
-  exact ⟨c0, hmin, ham3_scalar0_pos74 (I := I) (M := M) hdim h0ω hpos P hD⟩
+  exact ⟨c0, hmin, ham3_scalar_initial_pos (I := I) (M := M) hdim h0ω hpos P hD⟩
 
 omit [NeZero (Module.finrank ℝ E)] in
-theorem ham3_cont74
+theorem ham3_scalar_slab_continuousOn
     {omega : Real} (h0ω : 0 < omega)
     {g0 : SmoothRiemannianMetric I M}
     (P : Ham3FlowPackage (I := I) (M := M) g0)
@@ -1105,7 +1095,7 @@ theorem ham3_cont74
         exact ⟨ht.1, lt_of_le_of_lt ht.2 hTω⟩)
 
 omit [NeZero (Module.finrank ℝ E)] in
-theorem ham3_evol74
+theorem ham3_scalar_evolution_equation
     {omega : Real} (h0ω : 0 < omega)
     {g0 : SmoothRiemannianMetric I M}
     (P : Ham3FlowPackage (I := I) (M := M) g0)
@@ -1141,7 +1131,7 @@ theorem ham3_evol74
   simpa [ham3Scalar, ham3ScalarLap, ham3RicNormSq, ham3Solution] using h
 
 omit [NeZero (Module.finrank ℝ E)] in
-theorem ham3_lap74
+theorem ham3_scalar_laplacian_realizes_heat
     {g0 : SmoothRiemannianMetric I M}
     (P : Ham3FlowPackage (I := I) (M := M) g0) (T : Real) :
     DifferentialGeometry.PDE.RicciFlow.ScalarLaplacianRealizesHeatOperatorOn
@@ -1158,7 +1148,7 @@ theorem ham3_lap74
         rfl)
 
 omit [NeZero (Module.finrank ℝ E)] in
-theorem ham3_reg74
+theorem ham3_scalar_wmp_regularity
     {omega : Real} (h0ω : 0 < omega)
     {g0 : SmoothRiemannianMetric I M}
     (P : Ham3FlowPackage (I := I) (M := M) g0)
@@ -1188,7 +1178,7 @@ theorem ham3_reg74
     ham3_scalarRegular (I := I) (M := M) P c0 K T hsubset hden
 
 omit [NeZero (Module.finrank ℝ E)] in
-theorem ham3_ricBound74
+theorem ham3_scalar_sq_le_three_ric_normSq
     (hdim : Module.finrank Real E = 3)
     {g0 : SmoothRiemannianMetric I M}
     (P : Ham3FlowPackage (I := I) (M := M) g0)
@@ -1230,7 +1220,7 @@ theorem ham3_ricBound74
     using h
 
 omit [NeZero (Module.finrank ℝ E)] in
-theorem ham3_lip74
+theorem ham3_scalar_slab_lipschitz
     [CompactSpace M]
     {omega : Real}
     {g0 : SmoothRiemannianMetric I M}
@@ -1304,7 +1294,7 @@ theorem ham3_lip74
   exact Classical.choose_spec (hExists T hT hTω hPole) t ht
 
 omit [NeZero (Module.finrank ℝ E)] in
-theorem ham3_scalar74
+theorem ham3_scalar_family_package
     {omega : Real} (h0ω : 0 < omega)
     (hM : Closed3Manifold (I := I) (M := M))
     (g0 : SmoothRiemannianMetric I M)
@@ -1345,28 +1335,28 @@ theorem ham3_scalar74
   rcases hM with ⟨hcompact, _hconnected, _hboundaryless, hdim⟩
   letI : CompactSpace M := hcompact
   letI : Nonempty M := inferInstance
-  rcases ham3_init74 (I := I) (M := M) hdim h0ω hpos P hD with
+  rcases ham3_initial_scalar_minimum (I := I) (M := M) hdim h0ω hpos P hD with
     ⟨c0, hinit_min, hinit_pos⟩
   have hcont :
       forall T : Real, 0 <= T -> T < omega ->
         ContinuousOn (fun p : Real × M => ham3Scalar (I := I) P p.1 p.2)
           (DifferentialGeometry.Integral.Connection.spacetimeSlab (M := M) T) := by
     intro T _hT hTω
-    exact ham3_cont74 (I := I) (M := M) h0ω P hD T hTω
+    exact ham3_scalar_slab_continuousOn (I := I) (M := M) h0ω P hD T hTω
   have hc0 : 0 < c0 :=
     DifferentialGeometry.PDE.RicciFlow.InitialScalarMinimum.pos_of_forall_pos
       (M := M) hinit_min hinit_pos
-  rcases ham3_lip74 (I := I) (M := M) (omega := omega) P c0 hc0 hcont with
+  rcases ham3_scalar_slab_lipschitz (I := I) (M := M) (omega := omega) P c0 hc0 hcont with
     ⟨K, hK⟩
   refine ⟨ham3RealFamily (I := I) P, c0,
     ham3Scalar (I := I) P, ham3ScalarLap (I := I) P,
     ham3RicNormSq (I := I) P, K, hinit_min, hinit_pos, hcont, ?_, ?_, ?_, ?_, ?_⟩
-  · exact ham3_reg74 (I := I) (M := M) h0ω P hD c0 hc0 K
-  · exact ham3_evol74 (I := I) (M := M) h0ω P hD
+  · exact ham3_scalar_wmp_regularity (I := I) (M := M) h0ω P hD c0 hc0 K
+  · exact ham3_scalar_evolution_equation (I := I) (M := M) h0ω P hD
   · intro T _hT _hTω _hPole
-    exact ham3_lap74 (I := I) (M := M) P T
+    exact ham3_scalar_laplacian_realizes_heat (I := I) (M := M) P T
   · intro _T _hT _hTω _hPole t _ht x
-    exact ham3_ricBound74 (I := I) (M := M) hdim P t x
+    exact ham3_scalar_sq_le_three_ric_normSq (I := I) (M := M) hdim P t x
   · intro T hT hTω hPole
     exact hK T hT hTω hPole
 
@@ -1385,7 +1375,7 @@ theorem ham3_finite_time
   letI : ConnectedSpace M := hconnected
   letI : I.Boundaryless := hboundaryless
   letI : Nonempty M := inferInstance
-  rcases ham3_scalar74 (I := I) (M := M) h0ω hMcopy g0 hpos P hD with
+  rcases ham3_scalar_family_package (I := I) (M := M) h0ω hMcopy g0 hpos P hD with
     ⟨G, c0, scalar, scalarLap, ricciNormSq, K,
       hinit_min, hinit_pos, hscalar_cont, hreg, hevol, hlap, hricci, hF_lip⟩
   have hfinite :
@@ -1495,7 +1485,7 @@ private theorem ham3_scalar_cont_slab
       (fun p : Real × M => ham3Scalar (I := I) P p.1 p.2)
       (DifferentialGeometry.Integral.Connection.spacetimeSlab (M := M) T) := by
   intro hTω
-  exact ham3_cont74 (I := I) (M := M) h0ω P hD T hTω
+  exact ham3_scalar_slab_continuousOn (I := I) (M := M) h0ω P hD T hTω
 
 omit [SigmaCompactSpace M] [T2Space M] in
 private theorem slab_max_of_continuousOn
@@ -1963,18 +1953,18 @@ theorem ham3_scalar_pos
   letI : CompactSpace M := hcompact
   letI : I.Boundaryless := hboundaryless
   letI : Nonempty M := inferInstance
-  rcases ham3_init74 (I := I) (M := M) hdim h0ω hpos P hD with
+  rcases ham3_initial_scalar_minimum (I := I) (M := M) hdim h0ω hpos P hD with
     ⟨c0, hinit_min, hinit_pos⟩
   have hcont :
       forall T : Real, 0 <= T -> T < omega ->
         ContinuousOn (fun p : Real × M => ham3Scalar (I := I) P p.1 p.2)
           (DifferentialGeometry.Integral.Connection.spacetimeSlab (M := M) T) := by
     intro T _hT hTω
-    exact ham3_cont74 (I := I) (M := M) h0ω P hD T hTω
+    exact ham3_scalar_slab_continuousOn (I := I) (M := M) h0ω P hD T hTω
   have hc0 : 0 < c0 :=
     DifferentialGeometry.PDE.RicciFlow.InitialScalarMinimum.pos_of_forall_pos
       (M := M) hinit_min hinit_pos
-  rcases ham3_lip74 (I := I) (M := M) (omega := omega) P c0 hc0 hcont with
+  rcases ham3_scalar_slab_lipschitz (I := I) (M := M) (omega := omega) P c0 hc0 hcont with
     ⟨K, hK⟩
   have hreg :
       ∀ T : Real, 0 < T -> T < omega ->
@@ -1982,14 +1972,14 @@ theorem ham3_scalar_pos
           DifferentialGeometry.PDE.RicciFlow.ScalarLowerBoundWMPRegularity
             (I := I) (ham3RealFamily (I := I) P) T 3 c0
             (ham3Scalar (I := I) P) (K T) :=
-    ham3_reg74 (I := I) (M := M) h0ω P hD c0 hc0 K
+    ham3_scalar_wmp_regularity (I := I) (M := M) h0ω P hD c0 hc0 K
   have hevol :
       DifferentialGeometry.PDE.RicciFlow.ScalarEvolutionEquationOn
         (D := DifferentialGeometry.Integral.Connection.RealTimeInterval.closedOpen 0 omega h0ω)
         (ham3Scalar (I := I) P)
         (ham3ScalarLap (I := I) P)
         (ham3RicNormSq (I := I) P) :=
-    ham3_evol74 (I := I) (M := M) h0ω P hD
+    ham3_scalar_evolution_equation (I := I) (M := M) h0ω P hD
   have hlap :
       ∀ T : Real, 0 < T -> T < omega ->
         T < DifferentialGeometry.PDE.RicciFlow.scalarBlowupTime 3 c0 ->
@@ -1998,7 +1988,7 @@ theorem ham3_scalar_pos
             (ham3Scalar (I := I) P)
             (ham3ScalarLap (I := I) P) := by
     intro T _hT _hTω _hPole
-    exact ham3_lap74 (I := I) (M := M) P T
+    exact ham3_scalar_laplacian_realizes_heat (I := I) (M := M) P T
   have hricci :
       ∀ T : Real, 0 < T -> T < omega ->
         T < DifferentialGeometry.PDE.RicciFlow.scalarBlowupTime 3 c0 ->
@@ -2006,7 +1996,7 @@ theorem ham3_scalar_pos
             (1 / 3 : Real) * (ham3Scalar (I := I) P t x) ^ 2 <=
               ham3RicNormSq (I := I) P t x := by
     intro _T _hT _hTω _hPole t _ht x
-    exact ham3_ricBound74 (I := I) (M := M) hdim P t x
+    exact ham3_scalar_sq_le_three_ric_normSq (I := I) (M := M) hdim P t x
   have hF :
       ∀ T : Real, 0 < T -> T < omega ->
         T < DifferentialGeometry.PDE.RicciFlow.scalarBlowupTime 3 c0 ->
