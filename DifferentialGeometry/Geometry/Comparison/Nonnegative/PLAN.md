@@ -115,6 +115,14 @@ This phase needs real convex-set, distance-to-boundary, normal-bundle, and
 normal-exponential producers.  It should not be represented by a single
 `SoulInput` record whose fields merely restate the theorem.
 
+The canonical all-geodesic predicate `IsTotallyConvex` now lives in
+`GeodesicConvexity.lean`, together with arbitrary-intersection closure and an
+adapter to the existing Hopf--Rinow selected join.  It intentionally quantifies
+every geodesic segment, not only minimizing segments.  The first missing
+mathematical producer is still the Toponogov-based construction of a nontrivial
+compact totally convex set or exhaustion under nonnegative sectional
+curvature.
+
 ## Honest progress
 
 - Busemann metric theorem layer: 100%.
@@ -124,6 +132,7 @@ normal-exponential producers.  It should not be represented by a single
   yet selected.
 - Cheeger--Gromoll splitting theorem: unstated, therefore 0%; dedicated metric
   machinery approximately 20%.
+- Total-convexity interface: 100%; Toponogov convex-set producer: 0%.
 - Soul theorem: unstated, therefore 0%; dedicated machinery approximately
   5--10% through general exponential/compactness infrastructure.
 - Whole B1 nonnegative-curvature lane: approximately 10--13%.

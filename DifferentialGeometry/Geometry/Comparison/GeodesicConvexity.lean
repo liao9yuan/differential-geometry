@@ -49,6 +49,55 @@ theorem joinedIn_inter (hS : IsGeodesicallyConvexWith join S)
 
 end IsGeodesicallyConvexWith
 
+section TotalConvexity
+
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
+  [Module.Finite ℝ E]
+variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
+variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
+
+def IsTotallyConvex (g : SmoothRiemannianMetric I M) (S : Set M) : Prop :=
+  ∀ ⦃γ : ℝ → M⦄ ⦃a b : ℝ⦄, a ≤ b →
+    Geodesic.IsGeodesicOn (I := I) g γ (Set.Icc a b) →
+    γ a ∈ S → γ b ∈ S → Set.MapsTo γ (Set.Icc a b) S
+
+namespace IsTotallyConvex
+
+variable {g : SmoothRiemannianMetric I M} {S T : Set M}
+
+theorem mapsTo (hS : IsTotallyConvex (I := I) g S) {γ : ℝ → M}
+    {a b : ℝ} (hab : a ≤ b)
+    (hγ : Geodesic.IsGeodesicOn (I := I) g γ (Set.Icc a b))
+    (ha : γ a ∈ S) (hb : γ b ∈ S) :
+    Set.MapsTo γ (Set.Icc a b) S :=
+  hS hab hγ ha hb
+
+theorem univ : IsTotallyConvex (I := I) g (Set.univ : Set M) := by
+  intro γ a b hab hγ ha hb t ht
+  exact Set.mem_univ _
+
+theorem empty : IsTotallyConvex (I := I) g (∅ : Set M) := by
+  intro γ a b hab hγ ha
+  exact ha.elim
+
+theorem inter (hS : IsTotallyConvex (I := I) g S)
+    (hT : IsTotallyConvex (I := I) g T) :
+    IsTotallyConvex (I := I) g (S ∩ T) := by
+  rintro γ a b hab hγ ⟨haS, haT⟩ ⟨hbS, hbT⟩ t ht
+  exact ⟨hS hab hγ haS hbS ht, hT hab hγ haT hbT ht⟩
+
+theorem sInter {C : Set (Set M)}
+    (hC : ∀ S ∈ C, IsTotallyConvex (I := I) g S) :
+    IsTotallyConvex (I := I) g (⋂₀ C) := by
+  intro γ a b hab hγ ha hb t ht
+  rw [Set.mem_sInter] at ha hb ⊢
+  intro S hSC
+  exact hC S hSC hab hγ (ha S hSC) (hb S hSC) ht
+
+end IsTotallyConvex
+
+end TotalConvexity
+
 section IntrinsicBall
 
 open DifferentialGeometry.Geometry.Riemannian.Exponential
@@ -156,6 +205,32 @@ theorem minJoin_cont
     (a b : M) : Continuous (minJoin (I := I) g hEnorm a b) :=
   intrinsicGeodesic_continuous (I := I) g hEnorm a
     (minimizingVec (I := I) g hEnorm a b)
+
+
+theorem IsTotallyConvex.minJoin {g : SmoothRiemannianMetric I M} {S : Set M}
+    (hS : IsTotallyConvex (I := I) g S)
+    (hEnorm : ∀ (x : M) (w : TangentSpace I x),
+      ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner x w w)))
+    {a b : M} (ha : a ∈ S) (hb : b ∈ S) :
+    Set.MapsTo (minJoin (I := I) g hEnorm a b) unitInterval S := by
+  apply hS (a := 0) (b := 1) zero_le_one
+  · exact (intrinsicGeodesic_isGeodesic (I := I) g hEnorm a
+      (minimizingVec (I := I) g hEnorm a b)).isGeodesicOn _
+  · simpa only [minJoin_zero] using ha
+  · simpa only [minJoin_one] using hb
+
+
+theorem IsTotallyConvex.joinedIn {g : SmoothRiemannianMetric I M} {S : Set M}
+    (hS : IsTotallyConvex (I := I) g S)
+    (hEnorm : ∀ (x : M) (w : TangentSpace I x),
+      ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner x w w)))
+    {a b : M} (ha : a ∈ S) (hb : b ∈ S) : JoinedIn S a b := by
+  refine JoinedIn.ofLine
+    (minJoin_cont (I := I) g hEnorm a b).continuousOn
+    (minJoin_zero (I := I) g hEnorm a b)
+    (minJoin_one (I := I) g hEnorm a b) ?_
+  rintro x ⟨t, ht, rfl⟩
+  exact hS.minJoin hEnorm ha hb ht
 
 
 theorem minJoin_edist_le
