@@ -27,7 +27,7 @@ def metricCanon
     (hconn : forall k : Nat,
       letI : TopologicalSpace (X.obj k).M := (X.obj k).topology
       ConnectedSpace (X.obj k).M) :
-    StepDCanonData (I := I) X := by
+    StepDCanon (I := I) X := by
   let P : forall j : Nat, ProperMetricOn (I := I) (X.obj j) :=
     fun j => properMetricOn (I := I) (X.obj j)
       (hcomplete.complete j) (hconn j)
@@ -38,7 +38,7 @@ def metricCanon
   have B := hraw_spec.2
   let Ppsi : forall k : Nat, ProperMetricOn (I := I) ((X.subseq psi).obj k) :=
     fun k => P (psi k)
-  let canon : StepDCanonData (I := I) (X.subseq psi) :=
+  let canon : StepDCanon (I := I) (X.subseq psi) :=
     compactness_canon Ppsi B
   exact canon.ofSeqSubseq psi hpsi
 

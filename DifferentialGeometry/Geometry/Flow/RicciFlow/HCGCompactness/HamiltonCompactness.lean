@@ -32,7 +32,7 @@ theorem compactnessSol_cond
         ((X.atZero (I := I)).obj k).topology
       ConnectedSpace ((X.atZero (I := I)).obj k).M)
     (hderiv : FlowDerivativeInput (I := I) X)
-    (hflow : FlowUpgradeData (I := I) X
+    (hflow : FlowUpgrade (I := I) X
       (MetricCompactnessInputs.metricCompactness (I := I)
         inp hcomplete0 hderiv.at_zero_geom hflowInj hconn)) :
     CompactnessConclusion (I := I) X :=
@@ -75,7 +75,7 @@ theorem compactnessSol
   have hd : Nonempty (H6NormalData (I := I) (X.atZero (I := I)) seed.decay) :=
     exists_h6NormalData (I := I) (X.atZero (I := I))
       hcomplete0 hconn0 hgeom0 seed.decay seed.realizes
-  let canon : StepDCanonData (I := I) (X.atZero (I := I)) :=
+  let canon : StepDCanon (I := I) (X.atZero (I := I)) :=
     seed.metricCanonH6 (Classical.choice hd) hcomplete0 hconn0
   obtain ⟨d, hcompleteL⟩ :=
     open_upgrade_canon (I := I) canon h0 hD hcomplete hcurv

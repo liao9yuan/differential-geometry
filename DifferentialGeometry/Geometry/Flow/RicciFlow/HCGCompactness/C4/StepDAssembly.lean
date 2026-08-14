@@ -475,7 +475,7 @@ noncomputable def tailMemberConv
   have Cu := Cr.unrepoint bTail hbase'
   exact Cu.ofSubseq (fun n => σ (j₀ + n))
 
-namespace StepDCanonData
+namespace StepDCanon
 
 noncomputable def canonSrc
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
@@ -540,7 +540,7 @@ noncomputable def canonDomain
     (Φ := Phi) (k := k) (canonSrc (I := I) Phi k)
     (canonTgt (I := I) Phi k) (canonRef (I := I) Phi k)
 
-end StepDCanonData
+end StepDCanon
 
 omit [I.Boundaryless] [NeZero (Module.finrank ℝ E)] in
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
@@ -555,7 +555,7 @@ private theorem chain_canon_eq
     (gInf : ∀ n, SmoothRiemannianMetric I (U n))
     (hgInf : S.MetricCocycle gInf) (k : ℕ) :
     let Φ := chainAmbientMaps (I := I) j₀ U S O₀ g gInf hgInf
-    let D := StepDCanonData.canonDomain (I := I) Φ k
+    let D := StepDCanon.canonDomain (I := I) Φ k
     letI : TopologicalSpace (MetricSourceDomain (I := I) Φ k) := D.topology
     letI : ChartedSpace H (MetricSourceDomain (I := I) Φ k) := D.charted
     letI : T2Space (MetricSourceDomain (I := I) Φ k) := D.t2
@@ -564,7 +564,7 @@ private theorem chain_canon_eq
     D.limitMetric = Diffeomorph.pullbackMetric (I := I) (gInf k)
       (metricSourceTargetDiff (I := I) Φ k) := by
   let Φ := chainAmbientMaps (I := I) j₀ U S O₀ g gInf hgInf
-  let D := StepDCanonData.canonDomain (I := I) Φ k
+  let D := StepDCanon.canonDomain (I := I) Φ k
   letI : TopologicalSpace (limitPointedCoc S O₀ gInf hgInf).M :=
     (limitPointedCoc S O₀ gInf hgInf).topology
   letI : ChartedSpace H (limitPointedCoc S O₀ gInf hgInf).M :=
@@ -589,7 +589,7 @@ private theorem chain_canon_eq
   letI : IsManifold I ∞ (MetricTargetDomain (I := I) Φ k) :=
     metricTargetDomSmooth (I := I) Φ k
   letI : SigmaCompactSpace (MetricTargetDomain (I := I) Φ k) :=
-    metricTargetDomSigmaOf (I := I) Φ k (StepDCanonData.canonTgt (I := I) Φ k)
+    metricTargetDomSigmaOf (I := I) Φ k (StepDCanon.canonTgt (I := I) Φ k)
   let F := metricSourceTargetDiff (I := I) Φ k
   have metric_ext : ∀ (g₁ g₂ : SmoothRiemannianMetric I
       (MetricSourceDomain (I := I) Φ k)),
@@ -844,11 +844,11 @@ private theorem D6ChainData.stage_bounds
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-structure StepDCanonData
+structure StepDCanon
     (X : PointedRiemannianSeq.{u, uE, uH} (I := I)) where
   mc : MetricCompactnessConclusion (I := I) X
   domain_eq : forall k : Nat,
-    mc.convergence.metrics.domain k = StepDCanonData.canonDomain (I := I) mc.maps k
+    mc.convergence.metrics.domain k = StepDCanon.canonDomain (I := I) mc.maps k
   ref_eq : forall k : Nat,
     let D := mc.convergence.metrics.domain k
     letI : TopologicalSpace (MetricSourceDomain (I := I) mc.maps k) := D.topology
@@ -874,13 +874,13 @@ structure StepDCanonData
       letI : SigmaCompactSpace (MetricSourceDomain (I := I) mc.maps k) := D.sigmaCompact
       metricCovDerivNorm (I := I) q D.pullbackMetric D.limitMetric x <= Cq
 
-namespace StepDCanonData
+namespace StepDCanon
 
 def ofSeqSubseq
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
     (f : Nat -> Nat) (hf : StrictMono f)
-    (D : StepDCanonData (I := I) (X.subseq f)) :
-    StepDCanonData (I := I) X where
+    (D : StepDCanon (I := I) (X.subseq f)) :
+    StepDCanon (I := I) X where
   mc := D.mc.ofSeqSubseq f hf
   domain_eq := by
     intro k
@@ -911,7 +911,7 @@ def ofSeqSubseq
       MetricCGConvergenceData.ofSeqSubseq,
       MetricSourceData.ofSeqSubseq] using hcov k x
 
-end StepDCanonData
+end StepDCanon
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
@@ -921,7 +921,7 @@ noncomputable def compactness_canon
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
     (P : ∀ k, ProperMetricOn (I := I) (X.obj k))
     (B : StepB1RawInput (X := X) P) :
-    StepDCanonData (I := I) X := by
+    StepDCanon (I := I) X := by
   classical
   let hdirectedEx := directed_of_b1 (I := I) P B
   let σ := Classical.choose hdirectedEx
@@ -1021,7 +1021,7 @@ noncomputable def compactness_canon
       limitPointedCoc, limitPointed]
   have hchain_domain : forall k : Nat,
       hchain.metrics.domain k =
-        StepDCanonData.canonDomain (I := I)
+        StepDCanon.canonDomain (I := I)
           (chainAmbientMaps (I := I) j₀ (tailBallOpen b j₀) S
             (tailCenter b j₀ 0) g gTail hgTail) k := by
     intro k
@@ -1029,7 +1029,7 @@ noncomputable def compactness_canon
       PointedRiemannianCGConverges.ofRestrictPullback,
       MetricCGConvergenceData.ofRestrictPullback,
       MetricCGConvergenceData.of_derivNormSupOn,
-      StepDCanonData.canonDomain, StepDCanonData.canonRef,
+      StepDCanon.canonDomain, StepDCanon.canonRef,
       limitPointedCoc, limitPointed]
     rfl
   have hstage : HasStageBounds (I := I) b Ψ g D :=
@@ -1045,7 +1045,7 @@ noncomputable def compactness_canon
         limitPointedCoc, limitPointed]
       let Φc := chainAmbientMaps (I := I) j₀ (tailBallOpen b j₀) S
         (tailCenter b j₀ 0) g gTail hgTail
-      let Dc := StepDCanonData.canonDomain (I := I) Φc k
+      let Dc := StepDCanon.canonDomain (I := I) Φc k
       letI : TopologicalSpace (MetricSourceDomain (I := I) Φc k) := Dc.topology
       letI : ChartedSpace H (MetricSourceDomain (I := I) Φc k) := Dc.charted
       letI : T2Space (MetricSourceDomain (I := I) Φc k) := Dc.t2
@@ -1061,7 +1061,7 @@ noncomputable def compactness_canon
         metricTargetDomSmooth (I := I) Φc k
       letI : SigmaCompactSpace (MetricTargetDomain (I := I) Φc k) :=
         metricTargetDomSigmaOf (I := I) Φc k
-          (StepDCanonData.canonTgt (I := I) Φc k)
+          (StepDCanon.canonTgt (I := I) Φc k)
       let F := metricSourceTargetDiff (I := I) Φc k
       change MetricUniformEquivalentOn (I := I) Set.univ
         Dc.limitMetric Dc.pullbackMetric Crel
@@ -1085,7 +1085,7 @@ noncomputable def compactness_canon
         limitPointedCoc, limitPointed]
       let Φc := chainAmbientMaps (I := I) j₀ (tailBallOpen b j₀) S
         (tailCenter b j₀ 0) g gTail hgTail
-      let Dc := StepDCanonData.canonDomain (I := I) Φc k
+      let Dc := StepDCanon.canonDomain (I := I) Φc k
       letI : TopologicalSpace (MetricSourceDomain (I := I) Φc k) := Dc.topology
       letI : ChartedSpace H (MetricSourceDomain (I := I) Φc k) := Dc.charted
       letI : T2Space (MetricSourceDomain (I := I) Φc k) := Dc.t2
@@ -1101,7 +1101,7 @@ noncomputable def compactness_canon
         metricTargetDomSmooth (I := I) Φc k
       letI : SigmaCompactSpace (MetricTargetDomain (I := I) Φc k) :=
         metricTargetDomSigmaOf (I := I) Φc k
-          (StepDCanonData.canonTgt (I := I) Φc k)
+          (StepDCanon.canonTgt (I := I) Φc k)
       let F := metricSourceTargetDiff (I := I) Φc k
       change metricCovDerivNorm (I := I) q
         Dc.pullbackMetric Dc.limitMetric x ≤ Cq
@@ -1159,12 +1159,12 @@ noncomputable def compactness_canon
       MetricCGConvergenceData.ofSeqSubseq] using hchain_ref k
   have hconverges_domain : forall k : Nat,
       hconverges.metrics.domain k =
-        StepDCanonData.canonDomain (I := I) maps k := by
+        StepDCanon.canonDomain (I := I) maps k := by
     intro k
     change MetricSourceData.ofSubseq (I := I) (fun n => σ (j₀ + n)) k
         (MetricSourceData.unrepoint (I := I) bTail hbase' k
           (hchain.metrics.domain k)) =
-      StepDCanonData.canonDomain (I := I) maps k
+      StepDCanon.canonDomain (I := I) maps k
     rw [hchain_domain k]
     rfl
   let mc : MetricCompactnessConclusion (I := I) X :=

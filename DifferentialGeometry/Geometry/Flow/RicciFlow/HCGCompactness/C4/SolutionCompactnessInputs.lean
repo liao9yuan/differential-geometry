@@ -31,7 +31,7 @@ theorem solutionComp_cond
         ((X.atZero (I := I)).obj k).topology
       ConnectedSpace ((X.atZero (I := I)).obj k).M)
     (hderiv : FlowDerivativeInput (I := I) X)
-    (hflow : FlowUpgradeData (I := I) X
+    (hflow : FlowUpgrade (I := I) X
       (MetricCompactnessInputs.metricCompactness (I := I)
         inp hcomplete0 hderiv.at_zero_geom hinj hconn)) :
     CompactnessConclusion (I := I) X :=

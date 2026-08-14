@@ -26,7 +26,7 @@ def metricCanonH6
     (hconn : ∀ k : Nat,
       letI : TopologicalSpace (X.obj k).M := (X.obj k).topology
       ConnectedSpace (X.obj k).M) :
-    StepDCanonData (I := I) X := by
+    StepDCanon (I := I) X := by
   let P : ∀ j : Nat, ProperMetricOn (I := I) (X.obj j) :=
     fun j => properMetricOn (I := I) (X.obj j)
       (hcomplete.complete j) (hconn j)
@@ -37,7 +37,7 @@ def metricCanonH6
   have B := hraw_spec.2
   let Ppsi : ∀ k : Nat, ProperMetricOn (I := I) ((X.subseq psi).obj k) :=
     fun k => P (psi k)
-  let canon : StepDCanonData (I := I) (X.subseq psi) :=
+  let canon : StepDCanon (I := I) (X.subseq psi) :=
     compactness_canon Ppsi B
   exact canon.ofSeqSubseq psi hpsi
 
@@ -64,7 +64,7 @@ theorem metricCanonH6_conn
     letI : TopologicalSpace C.mc.limit.M := C.mc.limit.topology
     ConnectedSpace C.mc.limit.M := by
   classical
-  dsimp only [metricCanonH6, StepDCanonData.ofSeqSubseq,
+  dsimp only [metricCanonH6, StepDCanon.ofSeqSubseq,
     MetricCompactnessConclusion.ofSeqSubseq]
   exact compactness_conn (I := I) _ _
 
@@ -80,7 +80,7 @@ def metricCanonH6
     (hconn : ∀ k : Nat,
       letI : TopologicalSpace (X.obj k).M := (X.obj k).topology
       ConnectedSpace (X.obj k).M) :
-    StepDCanonData (I := I) X :=
+    StepDCanon (I := I) X :=
   b.toSeed.metricCanonH6 d hcomplete hconn
 
 def metricCompactH6

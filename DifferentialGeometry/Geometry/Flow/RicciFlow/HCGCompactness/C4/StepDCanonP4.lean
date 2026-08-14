@@ -20,14 +20,14 @@ variable {H : Type uH} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H} [I.Boundaryless]
 variable [NeZero (Module.finrank Real E)]
 
-namespace StepDCanonData
+namespace StepDCanon
 
 variable {X : PointedFlowSeq.{u, uE, uH} (I := I)}
 
 omit [I.Boundaryless]
   [NeZero (Module.finrank ℝ E)] in
 theorem canon_cp
-    (D : StepDCanonData (I := I) (X.atZero (I := I)))
+    (D : StepDCanon (I := I) (X.atZero (I := I)))
     (hsrc : SrcSigma (pointedCGHMaps_of_manifold (I := I) X
       D.mc.limit D.mc.subseq D.mc.maps))
     (htgt : TgtSigma (pointedCGHMaps_of_manifold (I := I) X
@@ -61,13 +61,13 @@ theorem canon_cp
   refine ⟨k0, fun k hk => ?_⟩
   have hk' := hk0 k hk
   rw [D.domain_eq k] at hk'
-  simpa only [MetricSourceData.derivNormSupOn, StepDCanonData.canonDomain,
-    StepDCanonData.canonRef] using hk'
+  simpa only [MetricSourceData.derivNormSupOn, StepDCanon.canonDomain,
+    StepDCanon.canonRef] using hk'
 
 omit [I.Boundaryless]
   [NeZero (Module.finrank ℝ E)] in
 theorem canon_rel
-    (D : StepDCanonData (I := I) (X.atZero (I := I)))
+    (D : StepDCanon (I := I) (X.atZero (I := I)))
     (hsrc : SrcSigma (pointedCGHMaps_of_manifold (I := I) X
       D.mc.limit D.mc.subseq D.mc.maps))
     (htgt : TgtSigma (pointedCGHMaps_of_manifold (I := I) X
@@ -96,12 +96,12 @@ theorem canon_rel
   refine ⟨Crel, hCrel, fun k => ?_⟩
   have hk := hrel k
   rw [D.domain_eq k] at hk
-  simpa only [StepDCanonData.canonDomain, StepDCanonData.canonRef] using hk
+  simpa only [StepDCanon.canonDomain, StepDCanon.canonRef] using hk
 
 omit [I.Boundaryless]
   [NeZero (Module.finrank ℝ E)] in
 theorem canon_init
-    (D : StepDCanonData (I := I) (X.atZero (I := I)))
+    (D : StepDCanon (I := I) (X.atZero (I := I)))
     (hsrc : SrcSigma (pointedCGHMaps_of_manifold (I := I) X
       D.mc.limit D.mc.subseq D.mc.maps))
     (htgt : TgtSigma (pointedCGHMaps_of_manifold (I := I) X
@@ -134,9 +134,9 @@ theorem canon_init
   refine ⟨Cq, hCq, fun k y => ?_⟩
   have hk := hcov k y
   rw [D.domain_eq k] at hk
-  simpa only [StepDCanonData.canonDomain, StepDCanonData.canonRef] using hk
+  simpa only [StepDCanon.canonDomain, StepDCanon.canonRef] using hk
 
-end StepDCanonData
+end StepDCanon
 
 end HCGCompactness
 end DifferentialGeometry

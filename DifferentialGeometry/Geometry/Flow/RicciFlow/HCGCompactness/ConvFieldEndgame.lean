@@ -212,7 +212,7 @@ noncomputable def flowUpgrade_of_maps
     (ricciNorm : RicNormPullback (I := I)
       (hPL.symm ▸ (Φ.compSubseq co.φ co.hφ) :
         PointedCGHMaps (I := I) X (L.atTime 0) (mc.subseq ∘ co.φ))) :
-    FlowUpgradeData (I := I) X mc := by
+    FlowUpgrade (I := I) X mc := by
   have hL0 : L.atTime (I := I) 0 = mc.limit := hPL.trans hPlim
   subst hPL
   letI : TopologicalSpace L.M := L.topology
@@ -416,7 +416,7 @@ noncomputable def flowUpgrade_of_mc
         PointedCGHMaps (I := I) X
           ((flowOfMetric (I := I) X.D mc.limit co.gInf hsol).atTime 0)
           (mc.subseq ∘ co.φ))) :
-    FlowUpgradeData (I := I) X mc := by
+    FlowUpgrade (I := I) X mc := by
   have hL0 :
       (flowOfMetric (I := I) X.D mc.limit co.gInf hsol).atTime (I := I) 0 = mc.limit :=
     flowOfMetric_atTime (I := I) X.D mc.limit co.gInf hsol 0 hzero

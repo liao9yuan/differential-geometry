@@ -26,12 +26,12 @@ variable {I : ModelWithCorners Real E H} [I.Boundaryless]
 variable {X : PointedFlowSeq.{u, uE, uH} (I := I)}
 
 theorem open_upgrade_canon
-    (canon : StepDCanonData (I := I) (X.atZero (I := I)))
+    (canon : StepDCanon (I := I) (X.atZero (I := I)))
     {a b : Real} (hzero : (0 : Real) ∈ Set.Ioo a b)
     (hD : X.D = RealTimeInterval.openInterval a b 0 hzero)
     (hcomplete : CompleteInput (I := I) X)
     (hcurv : CurvBoundInput (I := I) X) :
-    ∃ d : FlowUpgradeData (I := I) X canon.mc,
+    ∃ d : FlowUpgrade (I := I) X canon.mc,
       ∀ t : Real, t ∈ X.D.carrier →
         MetricComplete (I := I) (d.data.L.atTime (I := I) t) := by
   classical
@@ -78,7 +78,7 @@ theorem open_upgrade_canon
       letI : SigmaCompactSpace (X.term (mc.subseq k)).M :=
         (X.term (mc.subseq k)).sigmaCompact
       (X.term (mc.subseq k)).S.family.metric 0
-  have hcanonRel := StepDCanonData.canon_rel (I := I) canon hsrc htgt
+  have hcanonRel := StepDCanon.canon_rel (I := I) canon hsrc htgt
   dsimp only at hcanonRel
   obtain ⟨Crel, hCrel, hrelZero⟩ := hcanonRel
   have hsrcZero (k : Nat) :
@@ -111,9 +111,9 @@ theorem open_upgrade_canon
     intro k
     rw [hsrcZero k]
     exact hrelZero k
-  have hinit := StepDCanonData.canon_init (I := I) canon hsrc htgt
+  have hinit := StepDCanon.canon_init (I := I) canon hsrc htgt
   dsimp only at hinit
-  have hcp := StepDCanonData.canon_cp (I := I) canon hsrc htgt
+  have hcp := StepDCanon.canon_cp (I := I) canon hsrc htgt
   dsimp only at hcp
   let beta : Nat → Real := fun n => RealTimeInterval.openWindowLeft a 0 n
   let psi : Nat → Real := fun n => RealTimeInterval.openWindowRight b 0 n

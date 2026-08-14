@@ -100,7 +100,7 @@ theorem flowLimit_upgrade
     ⟨SmoothCGHConverges.ofRestrictPullback (I := I)
       d.maps d.scalar d.ricciNorm d.hσsrc d.hσtgt d.refMetric (letI : TopologicalSpace d.L.M := d.L.topology; letI : ChartedSpace H d.L.M := d.L.charted; letI : IsManifold I ∞ d.L.M := d.L.smooth; letI : IsManifold I ((∞ : WithTop ℕ∞) + 1) d.L.M := (by change IsManifold I ∞ d.L.M; infer_instance); letI : SigmaCompactSpace d.L.M := d.L.sigmaCompact; letI : T2Space d.L.M := d.L.t2; d.L.S.family.metric) d.conv⟩⟩
 
-structure FlowUpgradeData
+structure FlowUpgrade
     (X : PointedFlowSeq.{u, uE, uH} (I := I))
     (mc : MetricCompactnessConclusion (I := I) (X.atZero (I := I))) where
 
@@ -110,17 +110,17 @@ structure FlowUpgradeData
 
   data : FlowLimitData (I := I) X (mc.compSubseq φ hφ)
 
-namespace FlowUpgradeData
+namespace FlowUpgrade
 
 omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 theorem toConclusion
     {X : PointedFlowSeq.{u, uE, uH} (I := I)}
     {mc : MetricCompactnessConclusion (I := I) (X.atZero (I := I))}
-    (d : FlowUpgradeData (I := I) X mc) :
+    (d : FlowUpgrade (I := I) X mc) :
     CompactnessConclusion (I := I) X :=
   flowLimit_upgrade (I := I) X (mc.compSubseq d.φ d.hφ) d.data
 
-end FlowUpgradeData
+end FlowUpgrade
 
 end HCGCompactness
 end DifferentialGeometry
