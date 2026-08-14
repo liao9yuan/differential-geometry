@@ -2126,7 +2126,6 @@ omit [NeZero (Module.finrank ℝ E)] in
 theorem ham3_rm_bound
     (hM : Closed3Manifold (I := I) (M := M))
     (g0 : SmoothRiemannianMetric I M)
-    (_hpos : PosRicciMetric (I := I) (M := M) g0)
     (P : Ham3FiniteTimeFlow (I := I) (M := M) g0)
     (Q : Ham3Blowup M)
     (hsel : Ham3PointSel (I := I) P Q)
