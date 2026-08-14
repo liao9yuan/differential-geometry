@@ -2055,8 +2055,7 @@ theorem ham3_pinching_implies_pinch_estimate
     (g0 : SmoothRiemannianMetric I M)
     (hpos : PosRicciMetric (I := I) (M := M) g0)
     (P : Ham3FiniteTimeFlow (I := I) (M := M) g0)
-    (hD : P.D = DifferentialGeometry.Integral.Connection.RealTimeInterval.closedOpen 0 omega h0ω)
-    (Q : Ham3Blowup M) :
+    (hD : P.D = DifferentialGeometry.Integral.Connection.RealTimeInterval.closedOpen 0 omega h0ω) :
     Ham3PinchEstimate (I := I) P := by
   rcases hM with ⟨hcompact, hconnected, hboundaryless, hdim⟩
   letI : CompactSpace M := hcompact
@@ -2099,7 +2098,7 @@ theorem ham3_pinching_implies_tracefree_pinch_estimate
     exists tracefreeRmNormSq scalar weight : Real -> M -> Real, exists C : Real,
       DifferentialGeometry.PDE.RicciFlow.HamiltonTracefreePinchingEstimateOn
         tracefreeRmNormSq scalar weight C := by
-  rcases ham3_pinching_implies_pinch_estimate (I := I) (M := M) h0ω hM g0 hpos P hD Q with
+  rcases ham3_pinching_implies_pinch_estimate (I := I) (M := M) h0ω hM g0 hpos P hD with
     ⟨epsilon, C, _heps0, _heps1, _hC0, hest⟩
   let tracefreeRmNormSq : Real -> M -> Real :=
     DifferentialGeometry.PDE.RicciFlow.carrierZeroExt (M := M) P.D

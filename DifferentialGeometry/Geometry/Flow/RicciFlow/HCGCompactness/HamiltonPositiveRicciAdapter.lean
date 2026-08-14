@@ -2627,7 +2627,7 @@ theorem ham3_const_hcg
     ham3_pinching (I := I) (M := M) h0omega hM hg0 P hD
   have hpinch : Ham3PinchEstimate (I := I) P :=
     ham3_pinching_implies_pinch_estimate
-      (I := I) (M := M) h0omega hM g0 hg0 P hD Q
+      (I := I) (M := M) h0omega hM g0 hg0 P hD
   have hrm : Ham3RmBound (I := I) P Q :=
     ham3_rm_bound (I := I) (M := M) hM g0 P Q hsel hric
   have hwindow : Ham3Window (I := I) P Q ham3_r0 :=
