@@ -1824,6 +1824,8 @@ import DifferentialGeometry.Geometry.Comparison.HopfRinowProper
 import DifferentialGeometry.Geometry.Comparison.InjectivityRadius
 import DifferentialGeometry.Geometry.Comparison.LocalGeodesicSeed
 import DifferentialGeometry.Geometry.Comparison.NormalCoordinates
+import DifferentialGeometry.Geometry.Comparison.Nonnegative.Busemann
+import DifferentialGeometry.Geometry.Comparison.Nonnegative.Ray
 import DifferentialGeometry.Geometry.Comparison.RadialLaplacian
 import DifferentialGeometry.Geometry.Comparison.RadialSurjectivity
 import DifferentialGeometry.Geometry.Comparison.RiemannianDistContinuity

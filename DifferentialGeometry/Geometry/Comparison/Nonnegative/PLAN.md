@@ -50,6 +50,12 @@ minimizing segments.
 Do not use the legacy sorry-bearing Hopf--Rinow capstone when the intrinsic
 minimizing-exponential API suffices.
 
+The ray half is now implemented in `Ray.lean`.  `minRay_of_escape` performs the
+compact limiting-direction argument, and
+`RiemannianMetricComplete.exists_minRay` constructs the required escaping
+sequence on a complete connected noncompact Riemannian manifold.  The
+two-sided minimizing-line producer is the remaining N1 frontier.
+
 ## Phase N2: weak Laplacian comparison
 
 This is the first genuine missing API.  The repository has parabolic weak
@@ -99,7 +105,9 @@ available.  Follow the classical exhaustion/shaving route:
 3. iteratively remove boundary by maximal-distance-to-boundary sets until a
    boundaryless compact totally convex core remains;
 4. prove the core is a totally geodesic submanifold;
-5. prove the normal exponential map is a diffeomorphism;
+5. construct a diffeomorphism from the total space of the soul's normal bundle
+   to the ambient manifold; use the normal exponential only for the local
+   tubular identification unless a separate global result is proved;
 6. under positive sectional curvature, exclude a positive-dimensional soul
    and obtain the point-soul corollary.
 
@@ -110,13 +118,14 @@ normal-exponential producers.  It should not be represented by a single
 ## Honest progress
 
 - Busemann metric theorem layer: 100%.
-- Ray/line existence producers: 0%; related Hopf--Rinow machinery exists.
+- Minimizing-ray producer package: 100%; the minimizing-line producer is 0%,
+  so Phase N1 as a whole is approximately 50%.
 - Weak Laplacian comparison theorem: 0%; required elliptic interface is not
   yet selected.
 - Cheeger--Gromoll splitting theorem: unstated, therefore 0%; dedicated metric
   machinery approximately 20%.
 - Soul theorem: unstated, therefore 0%; dedicated machinery approximately
   5--10% through general exponential/compactness infrastructure.
-- Whole B1 nonnegative-curvature lane: approximately 8--12%.
+- Whole B1 nonnegative-curvature lane: approximately 10--13%.
 - Whole post-HCG Poincare program: still approximately 15--20%; this first B1
   brick does not materially change that large denominator.
