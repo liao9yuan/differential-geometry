@@ -20,7 +20,7 @@ namespace Riemannian
 namespace NormalCoordinates
 
 variable {E : Type uE} [NormedAddCommGroup E] [InnerProductSpace Real E]
-variable [FiniteDimensional Real E] [CompleteSpace E]
+variable [FiniteDimensional Real E]
 variable [NeZero (Module.finrank Real E)]
 variable {H : Type uH} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H} [I.Boundaryless]
@@ -61,15 +61,14 @@ noncomputable def ballDiffeo {p : M}
   rw [← hrange]
   exact isSigmaCompact_range c.ballDiffeo.continuous
 
-omit [NeZero (Module.finrank ℝ E)] [T2Space M] [SigmaCompactSpace M] in
-omit [FiniteDimensional ℝ E] [CompleteSpace E] [I.Boundaryless] [IsManifold I ∞ M] [T2Space (TangentBundle I M)] in
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [IsManifold I ∞ M] [T2Space M] [SigmaCompactSpace M] [T2Space (TangentBundle I M)] in
 private theorem ballDiffeo_apply {p : M}
     (c : NormalBallChart (I := I) p) (z : c.ball) :
     ((c.ballDiffeo z : c.image) : M) = c.hom (z : E) := by
   change c.restrictBall (z : E) = c.hom (z : E)
   exact c.restrictBall_apply (z : E)
 
-omit [FiniteDimensional ℝ E] [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [IsManifold I ∞ M] [T2Space M] [SigmaCompactSpace M] [T2Space (TangentBundle I M)] in
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [IsManifold I ∞ M] [T2Space M] [SigmaCompactSpace M] [T2Space (TangentBundle I M)] in
 private theorem ballDiffeo_mfd {p : M}
     (c : NormalBallChart (I := I) p) (z : c.ball) (v : E) :
     mfderiv (modelWithCornersSelf Real E) I
@@ -90,8 +89,7 @@ noncomputable def localMetric (g : SmoothRiemannianMetric I M) {p : M}
   exact Diffeomorph.pullbackMetricCross
     (g.restrictOpen (I := I) c.image) c.ballDiffeo
 
-omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] in
-omit [CompleteSpace E] [I.Boundaryless] [T2Space (TangentBundle I M)] in
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [SigmaCompactSpace M] [T2Space (TangentBundle I M)] in
 theorem localMetric_inner (g : SmoothRiemannianMetric I M) {p : M}
     (c : NormalBallChart (I := I) p) (z : c.ball) (v w : E) :
     (c.localMetric g).inner z v w = c.metric g z v w := by
@@ -108,18 +106,18 @@ noncomputable def cut {p : M}
     div_pos c.radius_pos (by norm_num),
     by linarith [c.radius_pos]⟩
 
-omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [IsManifold I ∞ M] [T2Space M] [SigmaCompactSpace M] [T2Space (TangentBundle I M)] in
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [IsManifold I ∞ M] [T2Space M] [SigmaCompactSpace M] [T2Space (TangentBundle I M)] in
 theorem cut_smooth {p : M} (c : NormalBallChart (I := I) p) :
     ContMDiff (modelWithCornersSelf Real E)
       (modelWithCornersSelf Real Real) ∞ (c.cut : E → Real) :=
   c.cut.contDiff.contMDiff
 
-omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [IsManifold I ∞ M] [T2Space M] [SigmaCompactSpace M] [T2Space (TangentBundle I M)] in
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [IsManifold I ∞ M] [T2Space M] [SigmaCompactSpace M] [T2Space (TangentBundle I M)] in
 theorem cut_range {p : M} (c : NormalBallChart (I := I) p) (z : E) :
     c.cut z ∈ Set.Icc (0 : Real) 1 :=
   ⟨c.cut.nonneg, c.cut.le_one⟩
 
-omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [IsManifold I ∞ M] [T2Space M] [SigmaCompactSpace M] [T2Space (TangentBundle I M)] in
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [IsManifold I ∞ M] [T2Space M] [SigmaCompactSpace M] [T2Space (TangentBundle I M)] in
 theorem cut_support {p : M} (c : NormalBallChart (I := I) p) :
     tsupport (c.cut : E → Real) ⊆ (c.ball : Set E) := by
   rw [c.cut.tsupport_eq]
@@ -127,13 +125,13 @@ theorem cut_support {p : M} (c : NormalBallChart (I := I) p) :
     Metric.ball (0 : E) c.radius
   exact Metric.closedBall_subset_ball (by linarith [c.radius_pos])
 
-omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [IsManifold I ∞ M] [T2Space M] [SigmaCompactSpace M] [T2Space (TangentBundle I M)] in
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [IsManifold I ∞ M] [T2Space M] [SigmaCompactSpace M] [T2Space (TangentBundle I M)] in
 theorem cut_one {p : M} (c : NormalBallChart (I := I) p)
     {z : E} (hz : z ∈ Metric.ball (0 : E) (c.radius / 4)) :
     c.cut z = 1 :=
   c.cut.one_of_mem_closedBall (Metric.ball_subset_closedBall hz)
 
-omit [FiniteDimensional ℝ E] [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [IsManifold I ∞ M] [T2Space M] [SigmaCompactSpace M] [T2Space (TangentBundle I M)] in
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [IsManifold I ∞ M] [T2Space M] [SigmaCompactSpace M] [T2Space (TangentBundle I M)] in
 theorem inner_subset {p : M} (c : NormalBallChart (I := I) p) :
     Metric.ball (0 : E) (c.radius / 4) ⊆ (c.ball : Set E) :=
   Metric.ball_subset_ball (by linarith [c.radius_pos])
@@ -153,7 +151,7 @@ noncomputable def totalMetric (g : SmoothRiemannianMetric I M) {p : M}
   exact (flatMetric (E := E)).bumpExtendOpen c.ball (c.localMetric g)
     (c.cut : E → Real) c.cut_smooth c.cut_range c.cut_support
 
-omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [SigmaCompactSpace M] [T2Space (TangentBundle I M)] in
 theorem totalMetric_inner (g : SmoothRiemannianMetric I M) {p : M}
     (c : NormalBallChart (I := I) p) (z : E)
     (hz : z ∈ Metric.ball (0 : E) (c.radius / 4)) (v w : E) :
@@ -172,6 +170,7 @@ theorem totalMetric_inner (g : SmoothRiemannianMetric I M) {p : M}
           (fun q hq => c.cut_one hq) hsub z hz v w
     _ = c.metric g z v w := c.localMetric_inner g ⟨z, hsub hz⟩ v w
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [SigmaCompactSpace M] [T2Space (TangentBundle I M)] in
 theorem totalMetric_eq (g : SmoothRiemannianMetric I M) {p : M}
     (c : NormalBallChart (I := I) p) (z : E)
     (hz : z ∈ Metric.ball (0 : E) (c.radius / 4)) :
@@ -182,6 +181,7 @@ theorem totalMetric_eq (g : SmoothRiemannianMetric I M) {p : M}
   intro w
   exact c.totalMetric_inner g z hz v w
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [SigmaCompactSpace M] [T2Space (TangentBundle I M)] in
 theorem total_cov_const (g : SmoothRiemannianMetric I M) {p : M}
     (c : NormalBallChart (I := I) p) (z : E)
     (hz : z ∈ Metric.ball (0 : E) (c.radius / 4))
@@ -202,6 +202,7 @@ theorem total_cov_const (g : SmoothRiemannianMetric I M) {p : M}
   exact _root_.DifferentialGeometry.Integral.Connection.const_cov_eq_nhds
     (c.totalMetric g) (c.metric g) hEq hdiff hco v w
 
+omit [I.Boundaryless] [SigmaCompactSpace M] [T2Space (TangentBundle I M)] in
 theorem total_cov_fderiv (g : SmoothRiemannianMetric I M) {p : M}
     (c : NormalBallChart (I := I) p) (z : E)
     (hz : z ∈ Metric.ball (0 : E) (c.radius / 4))
@@ -250,6 +251,7 @@ omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [SigmaCompactSpace M] [T2S
     ContinuousLinearMap.map_zero _
   rw [hz, neg_zero]
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [SigmaCompactSpace M] [T2Space (TangentBundle I M)] in
 theorem accel_eq (g : SmoothRiemannianMetric I M) {p : M}
     (c : NormalBallChart (I := I) p) (z : E × E)
     (hz : z.1 ∈ Metric.ball (0 : E) (c.radius / 4))
