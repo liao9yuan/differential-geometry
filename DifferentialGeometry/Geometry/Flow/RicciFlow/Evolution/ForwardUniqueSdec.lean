@@ -559,19 +559,16 @@ theorem sdec_core
   have hnhds : D.carrier ∈ 𝓝 t := D.regular_mem_nhds (hreg ht)
   set P : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
     (n := (∞ : WithTop ℕ∞)) 4 := Tf₁ t - Sfield t with hPdef
-
   have hPreal : ∀ y : M, P y =
       CovariantDerivative.riemannCurvature04At (I := I) (g₁ t) (metricCov (I := I) (g₂ t))
         (metricCov_smooth (I := I) (g₂ t)) y := by
     intro y
     have hval : P y = Tf₁ t y - Sfield t y := rfl
     rw [hval, hT₁ t ht y, hcar t ht y, ← rm2Low_eq_sub]
-
   have hRl : reLower (I := I) (g₂ t) (g₁ t) P = Tf₂ t := by
     refine DFunLike.ext _ _ fun y => ?_
     rw [reLower_rm2Low (I := I) (g₁ t) (g₂ t) P y (hPreal y)]
     exact (hT₂ t ht y).symm
-
   have hsplit : Tf₁ t - Tf₂ t = Sfield t - (reLower (I := I) (g₂ t) (g₁ t) P - P) := by
     rw [hRl, hPdef]; abel
   have hlapD : roughLap0SField (I := I) (g₁ t) (Tf₁ t - Tf₂ t) =
@@ -579,7 +576,6 @@ theorem sdec_core
         roughLap0SField (I := I) (g₁ t) (reLower (I := I) (g₂ t) (g₁ t) P - P) := by
     rw [hsplit, roughLap0SField_sub]
   have hlapG := lapGap_eq (I := I) (g₁ t) (g₂ t) P
-
   refine ContinuousMultilinearMap.toMultilinearMap_injective
     (Module.Basis.ext_multilinear (fun _ : Fin 4 => basisAt x) fun w => ?_)
   have hw : (fun p : Fin 4 => (basisAt x) (w p)) =
@@ -594,7 +590,6 @@ theorem sdec_core
   set v : Fin 4 -> TangentSpace I x :=
     frameVec4 (I := I) (fun m z => basisAt z m) x i j k l with hvdef
   have hvv : v = vec4 (I := I) (basisAt x i) (basisAt x j) (basisAt x k) (basisAt x l) := rfl
-
   have hPDE₁' : ∀ X Y : TangentSpace I x,
       HasDerivAt (fun r : Real => (g₁ r).inner x X Y)
         ((-2 : Real) * metricRicciAt (I := I) (g₁ t) x
@@ -638,7 +633,6 @@ theorem sdec_core
     funext fun r => rmDiffLow_split (I := I) (g₁ r) (g₂ r) x v
   rw [hfunS] at hS
   have huniq := hS.unique (hD.add hG)
-
   have e1 : roughLap0SField (I := I) (g₁ t) (Tf₁ t - Tf₂ t) x v =
       roughLap0SField (I := I) (g₁ t) (Sfield t) x v -
         roughLap0SField (I := I) (g₁ t) (reLower (I := I) (g₂ t) (g₁ t) P - P) x v := by

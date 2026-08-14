@@ -1231,7 +1231,6 @@ theorem covStep2_diffStep_branch2
 
 set_option backward.isDefEq.respectTransparency false in
 open DifferentialGeometry.Integral.Connection in
-
 omit [NeZero (Module.finrank ℝ E)] [T2Space M] [CompactSpace M] [I.Boundaryless] in
 theorem covStep2_branch1_mdiff
     (g₁ g₂ : SmoothRiemannianMetric I M) (s : Nat)
@@ -1307,7 +1306,6 @@ theorem covStep2_branch1_mdiff
 
 set_option backward.isDefEq.respectTransparency false in
 open DifferentialGeometry.Integral.Connection in
-
 omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] in
 theorem covStep2_branch2_mdiff
     (g₁ g₂ : SmoothRiemannianMetric I M) (s : Nat)
@@ -1900,7 +1898,6 @@ theorem covStep2_pieceB_eval
   exact key
 
 open DifferentialGeometry.Integral.Connection in
-
 omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] in
 theorem covStep2_diffStep_eval
     (g₁ g₂ : SmoothRiemannianMetric I M) (s : Nat)
@@ -1931,7 +1928,6 @@ theorem covStep2_diffStep_eval
                   (leviCivitaConnectionOfMetric (I := I) g₂) x
                   (Vslots a x)) (V x))))) := by
   classical
-
   have hsplitS : (∑ a : Fin s, (S x) (Function.update (fun b : Fin s => Vslots b x) a
         (covDerivConnDiff2 (I := I) g₂ g₁
             (fun z => U z) (fun z => W z) (fun z => V z) (fun z => Vslots a z) x
@@ -1962,7 +1958,6 @@ theorem covStep2_diffStep_eval
     rw [Tensor0SBundle.Tensor0SSpace.map_update_add,
       Tensor0SBundle.Tensor0SSpace.map_update_add,
       Tensor0SBundle.Tensor0SSpace.map_update_add]
-
   have hsplitD : (∑ a : Fin s, covStep (I := I) g₂ s S x
         (Fin.cons (W x) (Function.update (fun b : Fin s => Vslots b x) a
           (covDerivConnDiff (I := I) g₂ g₁
@@ -1998,7 +1993,6 @@ theorem covStep2_diffStep_eval
     rw [Fin.cons_update, Tensor0SBundle.Tensor0SSpace.map_update_add,
       Tensor0SBundle.Tensor0SSpace.map_update_add]
     simp only [← Fin.cons_update]
-
   have hFub1 : (∑ a₀ : Fin s, ∑ a ∈ Finset.univ.erase a₀, (S x) (Function.update
         (Function.update (fun c : Fin s => Vslots c x) a₀
           ((leviCivitaConnectionOfMetric (I := I) g₂ (fun z => Vslots a₀ z) x) (U x))) a
@@ -2016,7 +2010,6 @@ theorem covStep2_diffStep_eval
         exact ⟨Ne.symm, Ne.symm⟩)]
     refine Finset.sum_congr rfl (fun a _ => Finset.sum_congr rfl (fun a₀ ha₀ => ?_))
     rw [Function.update_comm (Finset.ne_of_mem_erase ha₀)]
-
   have hFub2 : (∑ a₀ : Fin s, ∑ a ∈ Finset.univ.erase a₀, covStep (I := I) g₂ s S x
         (Fin.cons (W x) (Function.update
           (Function.update (fun c : Fin s => Vslots c x) a₀
@@ -2040,7 +2033,6 @@ theorem covStep2_diffStep_eval
         exact ⟨Ne.symm, Ne.symm⟩)]
     refine Finset.sum_congr rfl (fun a _ => Finset.sum_congr rfl (fun a₀ ha₀ => ?_))
     rw [Function.update_comm (Finset.ne_of_mem_erase ha₀)]
-
   rw [covStep2_diffStep_peel (I := I) g₁ g₂ s S U W V Vslots x,
     covStep2_diffStep_split (I := I) g₁ g₂ s S U W V Vslots x,
     covStep2_diffStep_OCsplit (I := I) g₁ g₂ s S U W V Vslots x,

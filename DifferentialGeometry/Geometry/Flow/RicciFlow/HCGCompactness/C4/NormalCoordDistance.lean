@@ -92,7 +92,6 @@ variable {J : ModelWithCorners Real F H'} [J.Boundaryless]
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-
 omit [NeZero (Module.finrank ℝ F)] in
 omit [CompleteSpace F] [J.Boundaryless] in
 theorem NormalBallChart.MetricEquivOn.hom_dist_le

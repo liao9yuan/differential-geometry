@@ -316,7 +316,6 @@ theorem rmDiffLow_hasDerivAt
     ((rmDiffVec (I := I) (g₁ r) (g₂ r) x (v 0)) (v 1)) (v 2) with hF
   set Fdot : TangentSpace I x := ((Sdot x (v 0)) (v 1)) (v 2) with hFdot
   have hFderiv : HasDerivAt F Fdot t := hRm (v 0) (v 1) (v 2)
-
   have hcomp : ∀ k, HasDerivAt (fun r : Real => b.repr (F r) k) (b.repr Fdot k) t := by
     intro k
     have hL : HasDerivAt (fun r : Real =>
@@ -324,12 +323,10 @@ theorem rmDiffLow_hasDerivAt
         ((LinearMap.toContinuousLinearMap (b.coord k)) Fdot) t :=
       (LinearMap.toContinuousLinearMap (b.coord k)).hasFDerivAt.comp_hasDerivAt t hFderiv
     simpa using hL
-
   have hmet : ∀ k, HasDerivAt
       (fun r : Real => (g₁ r).inner x (b k) (v 3))
       ((-2 : Real) * metricRicciAt (I := I) (g₁ t) x
         (fun a : Fin 2 => if a = 0 then b k else v 3)) t := fun k => hPDE₁ (b k) (v 3)
-
   have hsum : ∀ r : Real,
       rmDiffLowAt (I := I) (g₁ r) (g₂ r) x v =
         ∑ k, b.repr (F r) k * (g₁ r).inner x (b k) (v 3) := by

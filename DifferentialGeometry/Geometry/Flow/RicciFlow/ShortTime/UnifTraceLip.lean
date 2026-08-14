@@ -343,7 +343,6 @@ theorem trace24_h2_lip_unif
     endoSlotZeroCcTensor (I := I) (M := M) g 3 dEndo
   let D₄ : SmoothCcTensor g 6 6 :=
     endoSlotZeroCcTensor (I := I) (M := M) g 5 dEndo
-
   have hF₂ : (∑ j ∈ Finset.range 3,
       ‖iteratedCovGrad (I := I) g 4 2 j F₂‖ ^ 2) ≤ A₂ ^ 2 := by
     rw [hA₂sq]
@@ -356,7 +355,6 @@ theorem trace24_h2_lip_unif
     refine (dtJet (I := I) (M := M) g 4).trans ?_
     have hfr : (0 : ℝ) ≤ (Module.finrank ℝ E : ℝ) ^ (4 + 6) := by positivity
     exact mul_le_mul_of_nonneg_left hvolg hfr
-
   have hslot1 :
       endoSlotZeroCcTensor (I := I) (M := M) g 1 dEndo =
         gInvDiffSlotCoeff (I := I) g gT -
@@ -409,7 +407,6 @@ theorem trace24_h2_lip_unif
       _ ≤ 81 * (Cinv * N) ^ 2 :=
         mul_le_mul_of_nonneg_left hinvJet (by norm_num)
       _ = (9 * Cinv * N) ^ 2 := by ring
-
   have htrace₂ :
       pureTrace (I := I) (M := M) g gT 2 -
           pureTrace (I := I) (M := M) g gU 2 =
@@ -580,7 +577,6 @@ private theorem pairSplit (g gT gU : SmoothRiemannianMetric I M) :
   abel
 
 omit [BoundarylessManifold I M] in
-
 omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 private theorem zeroTie (g : SmoothRiemannianMetric I M)
     (y : M) (v w : TangentSpace I y) :

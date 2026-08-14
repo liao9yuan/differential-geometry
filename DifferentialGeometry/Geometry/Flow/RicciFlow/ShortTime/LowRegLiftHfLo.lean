@@ -109,7 +109,6 @@ private theorem duhH3_ae
         (0 : tensorHs (I := I) (M := M) g 0 2 ((1 : ℝ) + 2)) f)
 
 omit [BoundarylessManifold I M] in
-
 omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] in
 theorem norm_congrLp (g : SmoothRiemannianMetric I M) {a b T : ℝ} (h : a = b)
     (u : timeL2 (tensorHs (I := I) (M := M) g 0 2 a) T) :

@@ -386,7 +386,6 @@ theorem fuRmContAt (g : Real → SmoothRiemannianMetric I M) {a b t₀ : Real} {
   classical
   have htab : t ∈ Ico a b := ⟨(lt_trans ha ht.1).le, ht.2⟩
   have hsubIci : Ico t₀ b ⊆ Ici a := fun s hs => le_trans ha.le hs.1
-
   have hmul : ∀ r : Real,
       (Matrix.of fun l m : CoordinateIdx (𝕜 := Real) E =>
           (g r).inner y (coordBasisAt (I := I) y l) (coordBasisAt (I := I) y m)) *
@@ -434,11 +433,9 @@ theorem fuRmContAt (g : Real → SmoothRiemannianMetric I M) {a b t₀ : Real} {
       funext r; rw [hinvEq r]; rfl
     rw [hfun]
     exact continuousWithinAt_pi.1 (continuousWithinAt_pi.1 hInvCont p) l
-
   have hc : ∀ l : CoordinateIdx (𝕜 := Real) E,
       ContinuousWithinAt (fun r : Real => fuRm04 (I := I) g r y i j k l) (Ico t₀ b) t :=
     fun l => (fuEvolTail (I := I) (hb := hb) g hS ha ⟨t, ht⟩ y i j k l).continuousWithinAt
-
   have hV : ∀ r : Real,
       riemannOp (metricCov (I := I) (g r)) y (coordBasisAt (I := I) y i)
           (coordBasisAt (I := I) y j) (coordBasisAt (I := I) y k) =

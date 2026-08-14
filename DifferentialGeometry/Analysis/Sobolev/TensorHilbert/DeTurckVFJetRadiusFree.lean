@@ -93,7 +93,6 @@ theorem cometricCastG0_order0sup_jetL2_radiusFree
     have h := cometricCastG0_eq_doubleTrace_add_appCcRS (I := I) g₀ g₁
     rw [← hΦ_def, ← hW_def] at h
     exact h
-
   have hΛT : ∀ x : M,
       riemannianFiberNormSq (I := I) (M := M) g₀ 3 3 x (W.toSection x) ≤ ΛT2 := by
     intro x
@@ -113,7 +112,6 @@ theorem cometricCastG0_order0sup_jetL2_radiusFree
               (gInvDiffRaisedEndoField (I := I) g₀ g₁)).toSection x) := h1
       _ ≤ fr ^ 2 * C_base 0 := mul_le_mul_of_nonneg_left h2 (sq_nonneg fr)
       _ = ΛT2 := hΛT2_def.symm
-
   have hstep2 : ∀ q : ℕ,
       ‖iteratedCovGrad (I := I) g₀ 3 3 q W‖ ^ 2 ≤
         KW_rf q * (1 + ‖iteratedCovGrad (I := I) g₀ 0 2 q P‖ ^ 2) := by
@@ -165,7 +163,6 @@ theorem cometricCastG0_order0sup_jetL2_radiusFree
         ≤ fr ^ 2 * C_base q * (K_rf q * (1 + ‖iteratedCovGrad (I := I) g₀ 0 2 q P‖ ^ 2)) :=
           mul_le_mul_of_nonneg_left hgb (mul_nonneg (sq_nonneg fr) (hC_base_nn q))
       _ = fr ^ 2 * C_base q * K_rf q * (1 + ‖iteratedCovGrad (I := I) g₀ 0 2 q P‖ ^ 2) := by ring
-
   refine ⟨?_, ?_⟩
   · intro x
     rw [Real.sq_sqrt (by
@@ -189,7 +186,6 @@ theorem cometricCastG0_order0sup_jetL2_radiusFree
     set S : ℝ := ∑ j ∈ Finset.range (i + 1),
       ‖iteratedCovGrad (I := I) g₀ 0 2 j P‖ ^ 2 with hS_def
     have hS_nn : 0 ≤ S := Finset.sum_nonneg (fun _ _ => sq_nonneg _)
-
     have hstep3 : ∀ l : ℕ, l ≤ i →
         ‖iteratedCovGrad (I := I) g₀ 3 1 l (appCcRS (I := I) (M := M) g₀ 3 3 1 Φ W)‖ ^ 2 ≤
           kd l * (1 + S) := by
@@ -244,7 +240,6 @@ theorem cometricCastG0_order0sup_jetL2_radiusFree
           tensorL2Norm_sq_toFun_eq_integral_riemannianFiberNormSq_rs (I := I) (M := M) g₀ 3 (3 + q)
             (iteratedCovGrad (I := I) g₀ 3 3 q W)]
       rw [Finset.sum_congr rfl hconv]
-
       have hWsum : (∑ q ∈ Finset.range (l + 1), ‖iteratedCovGrad (I := I) g₀ 3 3 q W‖ ^ 2) ≤
           (∑ q ∈ Finset.range (l + 1), KW_rf q) * (1 + S) := by
         calc (∑ q ∈ Finset.range (l + 1), ‖iteratedCovGrad (I := I) g₀ 3 3 q W‖ ^ 2)
@@ -267,7 +262,6 @@ theorem cometricCastG0_order0sup_jetL2_radiusFree
             mul_le_mul_of_nonneg_left hWsum
               (mul_nonneg (appCcGdiag_nonneg _) (Finset.sum_nonneg (fun i' _ => hSΦ_nn i')))
         _ = kd l * (1 + S) := by rw [hkd_def]; ring
-
     have hterm : ∀ l ∈ Finset.range (i + 1),
         ‖iteratedCovGrad (I := I) g₀ 3 1 l (cometricCastG0 (I := I) g₀ g₁)‖ ^ 2 ≤
           (2 * aL l + 2 * kd l) * (1 + S) := by
@@ -435,7 +429,6 @@ theorem sharpFlatEndoCc_lowOrder_jetL2_radiusFree
     rw [sharpFlatEndoCc_eq_insert_fullRaised_rf (I := I) (M := M) g₀ g₁,
       fullRaisedEndoField_decomp_rf (I := I) (M := M) g₀ g₁,
       slotInsertEndoCc_add_rf (I := I) (M := M) g₀ 0]
-
   have hDiff_pt : ∀ (n : ℕ) (x : M),
       riemannianFiberNormSq (I := I) (M := M) g₀ 1 (1 + n) x
           ((iteratedCovGrad (I := I) g₀ 1 1 n DiffIns).toSection x) ≤
@@ -446,7 +439,6 @@ theorem sharpFlatEndoCc_lowOrder_jetL2_radiusFree
     intro n x
     have h2 := hC_base g₁ P htie hδ_le hδ0 hδ n x
     simpa only [hDiffIns_def] using h2
-
   have hDiff2 : ∀ q : ℕ,
       ‖iteratedCovGrad (I := I) g₀ 1 1 q DiffIns‖ ^ 2 ≤
         KW q * (1 + ‖iteratedCovGrad (I := I) g₀ 0 2 q P‖ ^ 2) := by
@@ -552,7 +544,6 @@ theorem connDiffSection_lowOrder_jetL2_radiusFree
   refine ⟨fun i => ∑ q ∈ Finset.range (i + 1), D q,
     fun i => Finset.sum_nonneg (fun q _ => hD_nn q), ?_⟩
   intro g₁ P htie δ hδ_le hδ0 hδ hsup i hi
-
   have hAG : ∀ k : ℕ,
       MeasureTheory.Integrable
           (fun x => Combinatorics.antidiagonalTupleGrid
@@ -573,7 +564,6 @@ theorem connDiffSection_lowOrder_jetL2_radiusFree
               ((iteratedCovGrad (I := I) g₀ 0 2 (e m) P).toSection x)) := by
       funext x; rw [Combinatorics.antidiagonalTupleGrid]
     rw [hExpand]; exact hK_rf P hsup k
-
   have hL2 : ∀ q : ℕ,
       ‖iteratedCovGrad (I := I) g₀ 1 2 q (connDiffSection (I := I) g₁ g₀)‖ ^ 2 ≤
         D q * (1 + ‖iteratedCovGrad (I := I) g₀ 0 2 (q + 1) P‖ ^ 2) := by
@@ -649,7 +639,6 @@ theorem connDiffSection_lowOrder_jetL2_radiusFree
             (by have := hKt0_nn; have := hKc0_nn q; positivity)
       _ = (2 * Kt0 + 2 * Kc0 q * (q : ℝ)) * K_rf (q + 1) *
             (1 + ‖iteratedCovGrad (I := I) g₀ 0 2 (q + 1) P‖ ^ 2) := by ring
-
   set S' : ℝ := ∑ j ∈ Finset.range (i + 2),
     ‖iteratedCovGrad (I := I) g₀ 0 2 j P‖ ^ 2 with hS'_def
   have hS'_nn : 0 ≤ S' := Finset.sum_nonneg (fun _ _ => sq_nonneg _)
@@ -1059,7 +1048,6 @@ theorem wOmega_lowOrder_jetL2_radiusFree
     fun i => Finset.sum_nonneg (fun q _ => mul_nonneg (hKomega_nn q)
       (Finset.sum_nonneg (fun k _ => hK_rf_nn k))), ?_⟩
   intro g₁ P htie δ hδ_le hδ0 hδ hsup i hi
-
   have hpt : ∀ (n : ℕ) (x : M),
       riemannianFiberNormSq (I := I) (M := M) g₀ 0 (1 + n) x
           ((iteratedCovGrad (I := I) g₀ 0 1 n (wOmega (I := I) (M := M) g₀ g₁ g_bg)).toSection x) ≤
@@ -1076,7 +1064,6 @@ theorem wOmega_lowOrder_jetL2_radiusFree
     refine le_trans hleib ?_
     rw [hKomega_def, mul_assoc]
     refine mul_le_mul_of_nonneg_left ?_ (appCcGdiag_nonneg (E := E) n)
-
     have hterm : ∀ i' ∈ Finset.range (n + 1),
         riemannianFiberNormSq (I := I) (M := M) g₀ 3 (1 + i') x
             ((iteratedCovGrad (I := I) g₀ 3 1 i' (cometricCastG0 (I := I) g₀ g₁)).toSection x) *
@@ -1090,7 +1077,6 @@ theorem wOmega_lowOrder_jetL2_radiusFree
       have hi'n : i' ≤ n := by rw [Finset.mem_range] at hi'; omega
       have hcgi := hcg g₁ P htie hδ_le hδ0 hδ i' x
       rw [Finset.mul_sum]
-
       refine le_trans (Finset.sum_le_sum (fun l hl => ?_))
         (Finset.sum_le_sum_of_subset_of_nonneg (Finset.range_mono (by omega)) (fun l _ _ => ?_))
       swap
@@ -1146,7 +1132,6 @@ theorem wOmega_lowOrder_jetL2_radiusFree
             Combinatorics.antidiagonalTupleGridWindow bP (n + 2) := by
           rw [Finset.sum_mul]
           exact Finset.sum_congr rfl (fun i' _ => by rw [Finset.sum_mul])
-
   have hAG : ∀ k : ℕ,
       MeasureTheory.Integrable
           (fun x => Combinatorics.antidiagonalTupleGrid
@@ -1167,7 +1152,6 @@ theorem wOmega_lowOrder_jetL2_radiusFree
               ((iteratedCovGrad (I := I) g₀ 0 2 (e m) P).toSection x)) := by
       funext x; rw [Combinatorics.antidiagonalTupleGrid]
     rw [hExpand]; exact hK_rf P hsup k
-
   have hL2 : ∀ n : ℕ,
       ‖iteratedCovGrad (I := I) g₀ 0 1 n (wOmega (I := I) (M := M) g₀ g₁ g_bg)‖ ^ 2 ≤
         Komega n * ∑ k ∈ Finset.range (n + 2),
@@ -1201,7 +1185,6 @@ theorem wOmega_lowOrder_jetL2_radiusFree
       rw [MeasureTheory.integral_finset_sum _ (fun k _ => (hAG k).1)]
       exact Finset.sum_le_sum (fun k _ => (hAG k).2)
     exact hwin_bd
-
   set S' : ℝ := ∑ j ∈ Finset.range (i + 2),
     ‖iteratedCovGrad (I := I) g₀ 0 2 j P‖ ^ 2 with hS'_def
   have hS'_nn : 0 ≤ S' := Finset.sum_nonneg (fun _ _ => sq_nonneg _)
@@ -1340,7 +1323,6 @@ theorem connDiff_L2_topsep_rf
   set S' : ℝ := ∑ j ∈ Finset.range (n + 2),
     ‖iteratedCovGrad (I := I) g₀ 0 2 j P‖ ^ 2 with hS'_def
   have hS'_nn : 0 ≤ S' := Finset.sum_nonneg (fun _ _ => sq_nonneg _)
-
   have hAG : ∀ k : ℕ,
       MeasureTheory.Integrable
           (fun x => Combinatorics.antidiagonalTupleGrid
@@ -1610,7 +1592,6 @@ private lemma exists_rfns_wOmega_topsep_rf
     (cometricCastG0 (I := I) g₀ g₁) (wXi (I := I) (M := M) g₀ g₁ g_bg) n]
   rw [SmoothCcTensor.toSection_add, ContMDiffSection.coe_add, Pi.add_apply]
   refine le_trans (riemannianFiberNormSq_add_le (I := I) (M := M) g₀ 0 (1 + n) x _ _) ?_
-
   have hcorner : riemannianFiberNormSq (I := I) (M := M) g₀ 0 (1 + n) x
       ((appCcRS (I := I) (M := M) g₀ 0 (3 + n) (1 + n)
         (appCcLeibnizPsi (I := I) (M := M) g₀ 3 1 (cometricCastG0 (I := I) g₀ g₁) n n)
@@ -1623,7 +1604,6 @@ private lemma exists_rfns_wOmega_topsep_rf
       (iteratedCovGrad (I := I) g₀ 0 3 n (wXi (I := I) (M := M) g₀ g₁ g_bg)) x) ?_
     exact mul_le_mul_of_nonneg_right (hCsup x)
       (riemannianFiberNormSq_nonneg (I := I) (M := M) g₀ 0 (3 + n) x _)
-
   have hlower : riemannianFiberNormSq (I := I) (M := M) g₀ 0 (1 + n) x
       ((∑ k ∈ Finset.range n,
         appCcRS (I := I) (M := M) g₀ 0 (3 + k) (1 + n)
@@ -1687,7 +1667,6 @@ private lemma exists_rfns_wOmega_topsep_rf
           ≤ ∑ k ∈ Finset.range n, A (n - k) * ∑ l ∈ Finset.range (n + 1 - (n - k)), B l := hstep1
         _ = ∑ k ∈ Finset.range n, A (k + 1) * ∑ l ∈ Finset.range (n + 1 - (k + 1)), B l := hstep2
         _ ≤ ∑ i ∈ Finset.range (n + 1), A i * ∑ l ∈ Finset.range (n + 1 - i), B l := hstep3
-
   have hlower_fold : riemannianFiberNormSq (I := I) (M := M) g₀ 0 (1 + n) x
       ((∑ k ∈ Finset.range n,
         appCcRS (I := I) (M := M) g₀ 0 (3 + k) (1 + n)
@@ -1752,7 +1731,6 @@ theorem wOmega_L2_topsep_rf
               (fun j => riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + j) x
                 ((iteratedCovGrad (I := I) g₀ 0 2 j P).toSection x)) (n + 2) :=
     fun x => hpt_gen g₁ P htie hδ_le hδ0 hδ hsup n x
-
   have hAG : ∀ k : ℕ,
       MeasureTheory.Integrable
           (fun x => Combinatorics.antidiagonalTupleGrid
@@ -2004,7 +1982,6 @@ lemma wAlphaB_L2_perOrder_rf
   set S' : ℝ := ∑ j ∈ Finset.range (i + 3),
     ‖iteratedCovGrad (I := I) g₀ 0 2 j P‖ ^ 2 with hS'_def
   have hS'_nn : 0 ≤ S' := Finset.sum_nonneg (fun _ _ => sq_nonneg _)
-
   have hpt : ∀ x : M,
       riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + i) x
           ((iteratedCovGrad (I := I) g₀ 0 2 i (wAlphaB (I := I) (M := M) g₀ g₁ g_bg)).toSection x) ≤
@@ -2017,7 +1994,6 @@ lemma wAlphaB_L2_perOrder_rf
     rw [mul_assoc]
     exact mul_le_mul_of_nonneg_left (hfoldB g₁ P htie hδ_le hδ0 hδ i x)
       (appCcGdiag_nonneg (E := E) i)
-
   have hAG : ∀ k : ℕ,
       MeasureTheory.Integrable
           (fun x => Combinatorics.antidiagonalTupleGrid

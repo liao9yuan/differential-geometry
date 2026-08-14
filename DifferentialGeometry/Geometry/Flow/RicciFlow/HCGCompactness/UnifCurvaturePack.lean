@@ -56,7 +56,6 @@ theorem rfns_ccOfField_eq (g : SmoothRiemannianMetric I M) (s j : ℕ)
   rw [rfns_iterCovGrad_eq (I := I) g s j (ccOfField (I := I) g s A) x, ccOfField_unit]
 
 omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] in
-
 omit [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private theorem zeroS_eq_unit (x : M) (D : Tensor0SSpace 0 I x) :
     D = (Tensor0SNabla.tensor0Iso I M x D) • (unitZeroSec (I := I) (M := M) x) := by

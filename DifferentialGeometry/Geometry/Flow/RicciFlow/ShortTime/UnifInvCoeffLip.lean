@@ -383,14 +383,12 @@ theorem invCoeff_h2_lip_unif
   have hNT : 0 ≤ NT := norm_nonneg _
   have hNU : 0 ≤ NU := norm_nonneg _
   have hN : 0 ≤ N := norm_nonneg _
-
   have hid : (∑ j ∈ Finset.range 3,
       ‖iteratedCovGrad (I := I) g 2 2 j
         (slotInsertEndoCc (I := I) (M := M) g 1
           (fullRaisedEndoField (I := I) (M := M) g g))‖ ^ 2) ≤ 27 * vol := by
     refine (idSlotJet (I := I) (M := M) hDim g).trans ?_
     exact mul_le_mul_of_nonneg_left hvolg (by norm_num)
-
   have hfull : ∀ gm : SmoothRiemannianMetric I M,
       ∀ W : SmoothCcTensor g 0 2,
       ‖ccTensorToHs (I := I) (M := M) g 2 (2 : ℝ) W‖ ≤ ρ →
@@ -422,7 +420,6 @@ theorem invCoeff_h2_lip_unif
       _ = A ^ 2 := by rw [hAsq]
   have hfullT := hfull gT T hT hTtie
   have hfullU := hfull gU U hU hUtie
-
   have hpert : (∑ j ∈ Finset.range 3,
       ‖iteratedCovGrad (I := I) g 2 2 j
         (slotInsertEndoCc (I := I) (M := M) g 1
@@ -454,7 +451,6 @@ theorem invCoeff_h2_lip_unif
       _ ≤ 9 * (Ch * N) ^ 2 :=
         mul_le_mul_of_nonneg_left hsq (by norm_num)
       _ = (Cp * N) ^ 2 := by dsimp only [Cp]; ring
-
   have hMid : (∑ j ∈ Finset.range 3,
       ‖iteratedCovGrad (I := I) g 2 2 j
         (appCcRS (I := I) (M := M) g 2 2 2

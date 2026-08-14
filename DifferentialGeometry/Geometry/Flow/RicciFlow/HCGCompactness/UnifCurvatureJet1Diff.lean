@@ -28,7 +28,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
 omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [BoundarylessManifold I M] in
-
 omit [SigmaCompactSpace M] in
 theorem exists_curvJet_sup (g : SmoothRiemannianMetric I M) (a : ℕ) :
     ∃ K : ℝ, 0 ≤ K ∧
@@ -41,7 +40,6 @@ theorem exists_curvJet_sup (g : SmoothRiemannianMetric I M) (a : ℕ) :
   exact ⟨C, hC0, fun x => hC x (Set.mem_univ x)⟩
 
 omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] in
-
 omit [BoundarylessManifold I M] [SigmaCompactSpace M] in
 theorem curvJet1_diff_eq (g₀ gBase : SmoothRiemannianMetric I M) :
     iterCov (I := I) g₀ 4 (metricRm04 (I := I) (M := M) g₀) 1 -

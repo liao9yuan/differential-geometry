@@ -28,7 +28,6 @@ variable
       [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M]
 
 omit [BoundarylessManifold I M] in
-
 omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] in
 theorem tensorHsCongr_coeff (g : SmoothRiemannianMetric I M) (r s : ℕ) {a b : ℝ}
     (h : a = b) (v : tensorHs (I := I) (M := M) g r s a)
