@@ -28,7 +28,7 @@ attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace
 
 variable {E : Type uE} [NormedAddCommGroup E] [InnerProductSpace Real E]
-variable [FiniteDimensional Real E] [CompleteSpace E]
+variable [FiniteDimensional Real E]
 variable [NeZero (Module.finrank Real E)]
 variable {H : Type uH} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H} [I.Boundaryless]
@@ -100,8 +100,7 @@ private theorem exists_smooth_q
     nlinarith
   · simpa only [threshold] using herrQ
 
-omit [CompleteSpace E] [I.Boundaryless] in
-omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] in
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 theorem normal_enorm
     (Y : PointedRiemannianManifold.{u, uE, uH} (I := I)) :
     letI : TopologicalSpace Y.M := Y.topology

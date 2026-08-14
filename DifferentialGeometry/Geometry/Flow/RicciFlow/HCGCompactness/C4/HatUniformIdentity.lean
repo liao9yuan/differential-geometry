@@ -29,7 +29,7 @@ variable {M : Type u} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ 
 
 namespace NetLimitData
 
-omit [FiniteDimensional ℝ E] in
+omit [FiniteDimensional ℝ E] [CompleteSpace E] in
 theorem unifHatIdOn
     [FiniteDimensional Real E]
     (hd : InjRadiusDecayInput (I := I) X) {D : Real}
@@ -270,7 +270,7 @@ theorem unifHatIdOn
         (hrho := hrho) a b hy)
     hstrict hpts
 
-omit [FiniteDimensional ℝ E] in
+omit [FiniteDimensional ℝ E] [CompleteSpace E] in
 theorem unifHatIdSelfOn
     [FiniteDimensional Real E]
     (hd : InjRadiusDecayInput (I := I) X) {D : Real}

@@ -197,6 +197,7 @@ noncomputable def ricciZeroC (Λ Kb : ℝ) : ℝ :=
     (Λ ^ 2 * (riemannDiffC Λ Λ Λ + Real.sqrt Kb))
 
 
+omit [CompactSpace M] [I.Boundaryless] [SigmaCompactSpace M] in
 theorem ricciBilin_of
     (gBase g₀ : SmoothRiemannianMetric I M) {Λ : ℝ} (hΛ : 1 ≤ Λ)
     {Kb : ℝ} (hKb0 : 0 ≤ Kb)

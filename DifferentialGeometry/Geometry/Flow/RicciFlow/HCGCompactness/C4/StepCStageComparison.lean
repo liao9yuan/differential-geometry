@@ -28,7 +28,7 @@ attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace
 
 variable {E : Type uE} [NormedAddCommGroup E] [InnerProductSpace Real E]
-variable [FiniteDimensional Real E] [CompleteSpace E]
+variable [FiniteDimensional Real E]
 variable [NeZero (Module.finrank Real E)]
 variable {H : Type uH} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H} [I.Boundaryless]
@@ -861,7 +861,7 @@ theorem HasSuppConvData.actual_cm_tail
 
 namespace H6NormalData
 
-omit [CompleteSpace E] in
+
 theorem ratio_gt_48
     {hd : InjRadiusDecayInput (I := I) X}
     (d : H6NormalData (I := I) X hd) {aMin R : Real} {q : NNReal}
@@ -872,7 +872,7 @@ theorem ratio_gt_48
   dsimp only [phaseRadius] at hqRadius
   nlinarith
 
-omit [CompleteSpace E] in
+
 theorem pair_lam_lt_three
     (inp : MetricCompactCore (I := I) X)
     (d : H6NormalData (I := I) X inp.decay)
@@ -979,7 +979,7 @@ theorem pair_lam_lt_three
     (mul_lt_mul_of_pos_right hexp
       (inp.decay.lambda_pos inp.hD (L.rInf alpha)))
 
-omit [CompleteSpace E] in
+
 theorem stage_radius_gt
     (inp : MetricCompactCore (I := I) X)
     (d : H6NormalData (I := I) X inp.decay)
@@ -1040,7 +1040,7 @@ theorem stage_radius_gt
   rw [d.radius_eq]
   nlinarith [lamInf_lt_halfMin inp.decay inp.hD hphys P L gamma]
 
-omit [CompleteSpace E] in
+
 theorem stage_rho_le
     (inp : MetricCompactCore (I := I) X)
     (d : H6NormalData (I := I) X inp.decay)
@@ -2944,7 +2944,7 @@ def HasStageMetricOn
       (1 / 2 : Real) * ‖v‖ ^ 2 ≤ gInf alpha z v v ∧
         gInf alpha z v v ≤ 2 * ‖v‖ ^ 2
 
-omit [CompleteSpace E] in
+
 theorem HasStageMetricOn.subseq
     (inp : MetricCompactCore (I := I) X)
     (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k))

@@ -22,7 +22,7 @@ attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace
 
 variable {E : Type uE} [NormedAddCommGroup E] [InnerProductSpace Real E]
-variable [FiniteDimensional Real E] [NeZero (Module.finrank Real E)] [CompleteSpace E]
+variable [FiniteDimensional Real E] [NeZero (Module.finrank Real E)]
 variable {H : Type uH} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H} [I.Boundaryless]
 
@@ -210,7 +210,7 @@ noncomputable def seqAtom (hd : InjRadiusDecayInput (I := I) X) {D : Real}
         stepCBump (L.lamInf (gamma : Nat))
           (hd.lambda_pos hD (L.rInf (gamma : Nat))) ((dist c q) ^ 2)
 
-omit [CompleteSpace E] in
+
 @[simp] theorem seqAtom_subseq (hd : InjRadiusDecayInput (I := I) X) {D : Real}
     (hD : 0 < D) (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k))
     (L : NetLimitData hd D P) (pb : hd.PackingBound D) (r : Real)
@@ -225,7 +225,7 @@ omit [CompleteSpace E] in
   | none => rfl
   | some c => congr 2
 
-omit [CompleteSpace E] in
+
 @[simp] theorem seqAtom_none (hd : InjRadiusDecayInput (I := I) X) {D : Real}
     (hD : 0 < D) (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k))
     (L : NetLimitData hd D P) (pb : hd.PackingBound D) (r : Real) (k : Nat)
@@ -234,7 +234,7 @@ omit [CompleteSpace E] in
     seqAtom hd hD P L pb r k gamma = 0 := by
   simp [seqAtom, hc]
 
-omit [CompleteSpace E] in
+
 theorem seqAtom_some (hd : InjRadiusDecayInput (I := I) X) {D : Real}
     (hD : 0 < D) (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k))
     (L : NetLimitData hd D P) (pb : hd.PackingBound D) (r : Real) (k : Nat)
@@ -288,7 +288,7 @@ theorem seqAtom_contMDiff (hd : InjRadiusDecayInput (I := I) X) {D : Real}
         quadNormal_contMDiff (X.obj (L.φ k)).metric c
           (stepCBump lam hlam) ((stepCBump_out_lt lam hlam).trans hR)
 
-omit [CompleteSpace E] in
+
 theorem seqAtom_Icc (hd : InjRadiusDecayInput (I := I) X) {D : Real}
     (hD : 0 < D) (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k))
     (L : NetLimitData hd D P) (pb : hd.PackingBound D) (r : Real) (k : Nat)
@@ -308,7 +308,7 @@ theorem seqAtom_nonneg (hd : InjRadiusDecayInput (I := I) X) {D : Real}
     0 ≤ seqAtom hd hD P L pb r k gamma q :=
   (seqAtom_Icc hd hD P L pb r k gamma q).1
 
-omit [CompleteSpace E] in
+
 theorem seqAtom_one_raw (hd : InjRadiusDecayInput (I := I) X) {D : Real}
     (hD : 0 < D) (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k))
     (L : NetLimitData hd D P) (pb : hd.PackingBound D) (r : Real) (k : Nat)
@@ -339,7 +339,7 @@ theorem seqAtom_one (hd : InjRadiusDecayInput (I := I) X) {D : Real}
     seqAtom hd hD P L pb r k gamma q = 1 :=
   seqAtom_one_raw hd hD P L pb r k gamma hq
 
-omit [CompleteSpace E] in
+
 theorem seqAtom_mem_hat_raw (hd : InjRadiusDecayInput (I := I) X) {D : Real}
     (hD : 0 < D) (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k))
     (L : NetLimitData hd D P) (pb : hd.PackingBound D) (r : Real) (k : Nat)
@@ -427,7 +427,7 @@ theorem seqWeights_ev (hd : InjRadiusDecayInput (I := I) X) {D : Real}
   filter_upwards [L.innerBall_cover hd hD P hre pb r, hgp] with k hcover hgpAt
   exact seqWeights_data hd hD P L pb r k hgpAt i0 hcover
 
-omit [CompleteSpace E] in
+
 private theorem packA_pos (hd : InjRadiusDecayInput (I := I) X) {D : Real}
     (hre : hd.RealizesEdist) (pb : hd.PackingBound D) {r : Real} (hr : 0 ≤ r) :
     0 < pb.A r := by
@@ -453,7 +453,7 @@ noncomputable def baseIndex (hd : InjRadiusDecayInput (I := I) X) {D : Real}
     Fin (pb.A r) :=
   ⟨0, packA_pos hd hre pb hr⟩
 
-omit [CompleteSpace E] in
+
 @[simp] theorem baseIndex_val (hd : InjRadiusDecayInput (I := I) X) {D : Real}
     (hre : hd.RealizesEdist) (pb : hd.PackingBound D) {r : Real} (hr : 0 ≤ r) :
     (baseIndex hd hre pb hr : Nat) = 0 := rfl

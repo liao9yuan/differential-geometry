@@ -22,7 +22,7 @@ variable {E : Type uE} [NormedAddCommGroup E]
 variable {H : Type uH} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H} [I.Boundaryless]
 
-omit [NeZero (Module.finrank ℝ E)] in
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] in
 theorem curvAlong_le
     (P : PointedRiemannianManifold.{u, uE, uH} (I := I))
     {C : Real} (hP : HasCurvDerivBound (I := I) P 0 C) :
@@ -50,6 +50,7 @@ theorem curvAlong_le
     (HasCurvDerivBound.riemannOp_le (I := I) P hP
       (γ t) (X t) (Y t) (Z t))
 
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] in
 theorem curvDerivAlong_le
     (P : PointedRiemannianManifold.{u, uE, uH} (I := I))
     {C : Real} (hP : HasCurvDerivBound (I := I) P 1 C) :
@@ -124,6 +125,7 @@ private theorem sqrt_six_add_le
       (a + b + c + d + e) f
   linarith
 
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] in
 theorem jacVarForce_le
     (P : PointedRiemannianManifold.{u, uE, uH} (I := I))
     {C0 C1 : Real}
@@ -326,6 +328,7 @@ theorem jacVarForce_le
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
+omit [CompleteSpace E] in
 theorem intrJacForce_le
     (P : PointedRiemannianManifold.{u, uE, uH} (I := I))
     (hcomplete : MetricComplete (I := I) P)

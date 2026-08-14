@@ -576,8 +576,7 @@ private theorem pairSplit (g gT gU : SmoothRiemannianMetric I M) :
     appCcRS_sub_left, appCcRS_sub_right]
   abel
 
-omit [BoundarylessManifold I M] in
-omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private theorem zeroTie (g : SmoothRiemannianMetric I M)
     (y : M) (v w : TangentSpace I y) :
     g.inner y v w =
@@ -860,6 +859,7 @@ theorem pairTr_h2_bdd_unif
   dsimp only [B]
   exact happ g hEq hjet1 hjet2 _ _ B₂ B₄ hB₂ hB₄ hT₂ hT₄
 
+omit [BoundarylessManifold I M] in
 private theorem monoSplit (g gT gU : SmoothRiemannianMetric I M)
     (S R : SmoothCcTensor g 0 2) (σ : Equiv.Perm (Fin 4)) :
     curvatureRefoldMonomialCoeffField (I := I) (M := M) g gT

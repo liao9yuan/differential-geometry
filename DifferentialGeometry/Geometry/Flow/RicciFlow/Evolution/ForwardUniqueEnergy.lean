@@ -18,8 +18,8 @@ variable [FiniteDimensional Real E]
 variable {H : Type*} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
-variable [IsManifold I 1 M]
-variable [CompleteSpace E] [SigmaCompactSpace M] [T2Space M]
+
+variable [T2Space M]
 
 section MovingNorm
 
@@ -38,7 +38,7 @@ def movingReact0S (g : SmoothRiemannianMetric I M) (x : M) (s : Nat)
       tensor0SComponent (I := I) W
         (fun i => Module.finBasis Real (TangentSpace I x) i) J0)
 
-omit [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
+omit [T2Space M] in
 theorem normSq0S_moving_deriv {s : Nat} {x : M} {t : Real}
     (g : Real → SmoothRiemannianMetric I M)
     (Q : Tensor0SSpace 2 I x)
@@ -118,7 +118,7 @@ def metricDiffDot (g₁ g₂ : Real → SmoothRiemannianMetric I M) (t : Real) (
   (-2 : Real) •
     (metricRicciAt (I := I) (g₁ t) x - metricRicciAt (I := I) (g₂ t) x)
 
-omit [SigmaCompactSpace M] [T2Space M] in
+omit [T2Space M] in
 theorem metricDiff_hasDerivAt
     (g₁ g₂ : Real → SmoothRiemannianMetric I M) {x : M} {t : Real}
     (hPDE₁ : ∀ X Y : TangentSpace I x,
@@ -215,7 +215,7 @@ def forwardUniqueRate
         forwardUniqueDensity (I := I) g₁ g₂ t x
     ∂(riemannianMeasureFamily (I := I) (M := M) g₁ t)
 
-omit [CompactSpace M] in
+omit [CompactSpace M] [T2Space M] in
 theorem density_hasDerivAt
     (g₁ g₂ : Real → SmoothRiemannianMetric I M)
     (Adot : Real → (x : M) → Tensor0SSpace 3 I x)

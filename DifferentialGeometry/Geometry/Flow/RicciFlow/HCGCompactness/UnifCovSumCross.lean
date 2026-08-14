@@ -166,9 +166,9 @@ section DiffStepNorm
 
 open DifferentialGeometry.Integral.Connection
 
-variable [T2Space M] [SigmaCompactSpace M] [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M]
+variable [T2Space M] [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M]
 
-omit [SigmaCompactSpace M] [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] in
 private theorem covStep_zero' (gRef : SmoothRiemannianMetric I M) (s : ℕ) :
     covStep (I := I) gRef s 0 = 0 := by
   have h := covStep_add (I := I) gRef s 0 0
@@ -177,7 +177,7 @@ private theorem covStep_zero' (gRef : SmoothRiemannianMetric I M) (s : ℕ) :
       covStep (I := I) gRef s 0 + 0 := by rw [add_zero]; exact h.symm
   exact add_left_cancel hc
 
-omit [SigmaCompactSpace M] [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] in
 private theorem iterCov_one_eq
     (g₁ g₂ : SmoothRiemannianMetric I M) (r : ℕ)
     (T : Tensor0SBundle.Tensor0SField (𝕜 := Real) (E := E) (H := H)
@@ -191,7 +191,7 @@ private theorem iterCov_one_eq
   rw [covStep_zero', zero_add]
   rfl
 
-omit [SigmaCompactSpace M]
+omit
   [NeZero (Module.finrank ℝ E)]
   [BoundarylessManifold I M] in
 theorem diffStep_norm_le
@@ -359,7 +359,7 @@ theorem diffStep_norm_le
     _ = (s : ℝ) * Real.sqrt ((Module.finrank ℝ E : ℝ) ^ (s + 1)) * NA * NS := by
         rw [hB]; ring
 
-omit [SigmaCompactSpace M] [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] in
 private theorem diff_swap
     (cov cov' : CovariantDerivative I E (TangentSpace I : M → Type _)) (x : M)
     (w u : TangentSpace I x) :
@@ -391,7 +391,7 @@ private theorem diff_swap
     rw [← hσ]; simpa using h
   rw [h1, h2]; abel
 
-omit [SigmaCompactSpace M] [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] in
 private theorem connDiffTensor_normSqRS_swap
     (g₀ : SmoothRiemannianMetric I M)
     (cov cov' : CovariantDerivative I E (TangentSpace I : M → Type _)) (x : M) :
@@ -429,7 +429,7 @@ private theorem connDiffTensor_normSqRS_swap
   rw [hc1, hc2, diff_swap cov cov' x (basis (low 1)) (basis (low 0)), map_neg]
   ring
 
-omit [SigmaCompactSpace M] [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] in
 private theorem metricCovDeriv_self_one_zero (g : SmoothRiemannianMetric I M) (x : M) :
     metricCovDeriv (I := I) g g 1 x = 0 := by
   classical
@@ -446,7 +446,7 @@ private theorem metricCovDeriv_self_one_zero (g : SmoothRiemannianMetric I M) (x
       (leviCivitaConnectionOfMetric_isMetricCompatible (I := I) g) X x]
   rfl
 
-omit [SigmaCompactSpace M] [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] in
 private theorem metricDeriv_eq_covDeriv_norm (g₁ g₂ : SmoothRiemannianMetric I M) (x : M) :
     metricDerivNorm (I := I) 1 g₂ g₁ g₁ x = metricCovDerivNorm (I := I) 1 g₂ g₁ x := by
   unfold metricDerivNorm metricCovDerivNorm metricDiffCovDerivAt
@@ -455,7 +455,7 @@ private theorem metricDeriv_eq_covDeriv_norm (g₁ g₂ : SmoothRiemannianMetric
     rw [metricCovDeriv_self_one_zero (I := I) g₁ x]; abel
   rw [h0]
 
-omit [SigmaCompactSpace M] [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] in
 theorem diffStep_jet_one_le
     [I.Boundaryless] [CompactSpace M]
     {K : Set M} (g₁ g₂ : SmoothRiemannianMetric I M) (s : ℕ)
@@ -500,7 +500,7 @@ theorem diffStep_jet_one_le
   refine mul_le_mul_of_nonneg_right ?_ (Real.sqrt_nonneg _)
   exact mul_le_mul_of_nonneg_left hconn (by positivity)
 
-omit [SigmaCompactSpace M]
+omit
   [NeZero (Module.finrank ℝ E)]
   [BoundarylessManifold I M] in
 theorem covStepDiff_norm_le
@@ -699,7 +699,7 @@ theorem covStepDiff_norm_le
     _ = (s : ℝ) * Real.sqrt ((Module.finrank ℝ E : ℝ) ^ (s + 2)) * (CA * NS + NA * NcovS) := by
         rw [hB]; ring
 
-omit [SigmaCompactSpace M] [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] in
 theorem covStepDiff_jet_le
     [I.Boundaryless] [CompactSpace M]
     {K : Set M} (g₁ g₂ : SmoothRiemannianMetric I M) (s : ℕ)
@@ -778,7 +778,7 @@ theorem covStepDiff_jet_le
     _ = (s : ℝ) * Real.sqrt ((Module.finrank ℝ E : ℝ) ^ (s + 2)) *
           (CA + (3 / 2 : Real) * (Real.sqrt (Λ ^ 3) * Λ')) * (NS + NcovS) := by ring
 
-omit [SigmaCompactSpace M] [NeZero (Module.finrank ℝ E)] in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem covStepDiff_of_jets
     [I.Boundaryless] [CompactSpace M]
     {K : Set M} (g₁ g₂ : SmoothRiemannianMetric I M) (s : ℕ)
@@ -808,7 +808,7 @@ theorem covStepDiff_of_jets
       (I := I) hEq hJet1 hJet2 hx v w u)
     (metricUniformEquivalentOn_symm (I := I) hEq) hJet1' hx
 
-omit [T2Space M] [SigmaCompactSpace M] [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] in
+omit [T2Space M] [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] in
 private theorem exists_g_onbasis (g : SmoothRiemannianMetric I M) (x : M) :
     ∃ basis : Module.Basis (Fin (Module.finrank Real (TangentSpace I x))) Real (TangentSpace I x),
       (∀ i j, g.inner x (basis i) (basis j) = if i = j then (1 : Real) else 0) ∧
@@ -838,7 +838,7 @@ private theorem exists_g_onbasis (g : SmoothRiemannianMetric I M) (x : M) :
     constructor <;> simp [identityInvMetric, diagonalInvMetric, hON]
   exact ⟨basis, hON, hinv⟩
 
-omit [T2Space M] [SigmaCompactSpace M] [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] in
+omit [T2Space M] [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] in
 private theorem sqrt_normSq0S_zero (g : SmoothRiemannianMetric I M) (x : M) (s : ℕ) :
     Real.sqrt (normSq0S (I := I) g x s (0 : Tensor0SBundle.Tensor0SSpace s I x)) = 0 := by
   classical
@@ -870,7 +870,7 @@ private theorem Dtower_nonneg (n : ℕ) {q : ℝ} (hq : 0 ≤ q) (r : ℕ) {Racc
 set_option maxHeartbeats 1600000 in
 set_option synthInstance.maxHeartbeats 400000 in
 
-omit [SigmaCompactSpace M] [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] in
 theorem iterCovG1_le
     [I.Boundaryless] [CompactSpace M]
     {K : Set M} (g₁ g₂ : SmoothRiemannianMetric I M) (r : ℕ)
@@ -975,7 +975,7 @@ theorem iterCovG1_le
         mul_nonneg (mul_nonneg hcstep_nn hDN_nn) hSN_nn,
         mul_nonneg hRN_nn hSN_nn, mul_nonneg hRN_nn hAterm_nn]
 
-omit [SigmaCompactSpace M] [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] in
 private theorem telescAccum_one (g₁ g₂ : SmoothRiemannianMetric I M) (r : ℕ)
     (T : Tensor0SBundle.Tensor0SField (𝕜 := Real) (E := E) (H := H)
       (I := I) (M := M) (n := (∞ : WithTop ℕ∞)) r) :
@@ -987,6 +987,7 @@ private theorem telescAccum_one (g₁ g₂ : SmoothRiemannianMetric I M) (r : �
 
 set_option maxHeartbeats 1600000 in
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem iterCovG1_two
     [I.Boundaryless] [CompactSpace M]
     {K : Set M} (g₁ g₂ : SmoothRiemannianMetric I M) (r : ℕ)
@@ -1088,7 +1089,7 @@ section VolumeMeasure
 open MeasureTheory
 open scoped ENNReal
 
-variable [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
+variable [T2Space M] [CompactSpace M]
 
 private local instance : MeasurableSpace E := borel E
 private local instance : BorelSpace E := ⟨rfl⟩

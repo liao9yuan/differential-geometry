@@ -58,7 +58,7 @@ def rmSpeed (g₁ g₂ : Real → SmoothRiemannianMetric I M)
     Real → (x : M) → Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) 4 x :=
   fun t x => rmDiffDot (I := I) g₁ g₂ (Svec t) t x
 
-omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
+omit [NeZero (Module.finrank ℝ E)] [T2Space M] [CompactSpace M] [I.Boundaryless] in
 theorem connSpeed_hasDerivAt (g₁ g₂ : Real → SmoothRiemannianMetric I M)
     (Avec : Real → (y : M) →
       TangentSpace I y →L[Real] TangentSpace I y →L[Real] TangentSpace I y)

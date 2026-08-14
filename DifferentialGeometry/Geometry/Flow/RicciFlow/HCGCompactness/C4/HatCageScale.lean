@@ -19,12 +19,12 @@ attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace
 
 variable {E : Type uE} [NormedAddCommGroup E] [InnerProductSpace Real E]
-variable [FiniteDimensional Real E] [CompleteSpace E]
+variable [FiniteDimensional Real E]
 variable [NeZero (Module.finrank Real E)]
 variable {H : Type uH} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H} [I.Boundaryless]
 
-omit [CompleteSpace E] in
+
 theorem aliveSlots_tail
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
     (hd : InjRadiusDecayInput (I := I) X) {D : Real}
@@ -35,7 +35,7 @@ theorem aliveSlots_tail
         L.alive (gamma : Nat) :=
   Filter.eventually_all.mpr fun gamma => L.alive_eventually (gamma : Nat)
 
-omit [CompleteSpace E] in
+
 theorem hat_mem_live
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
     (hd : InjRadiusDecayInput (I := I) X) {D : Real}
@@ -50,7 +50,7 @@ theorem hat_mem_live
   | none => simp [NetLimitData.hatBall, hc] at hx
   | some c => simpa [hc] using hstable.symm
 
-omit [CompleteSpace E] in
+
 theorem hat_dist_centerD
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
     (hd : InjRadiusDecayInput (I := I) X) {D : Real}
@@ -66,7 +66,7 @@ theorem hat_dist_centerD
   | none => simp [NetLimitData.hatBall, hc] at hx
   | some c => simpa [NetLimitData.hatBall, seqCenterD, hc] using hx
 
-omit [CompleteSpace E] in
+
 theorem seqCenterD_dist_le
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
     (hd : InjRadiusDecayInput (I := I) X) {D : Real} (hD : 0 < D)
@@ -89,7 +89,7 @@ theorem seqCenterD_dist_le
   rw [← hr]
   exact (seqRadius_mem hd hD P (L.φ k) gamma).2
 
-omit [CompleteSpace E] in
+
 theorem seqCenterD_rInf_lt
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
     (hd : InjRadiusDecayInput (I := I) X) {D : Real}
@@ -107,7 +107,7 @@ theorem seqCenterD_rInf_lt
     ← seqCenterD_dist_eq (I := I) hd P L k gamma]
   exact hk
 
-omit [CompleteSpace E] in
+
 theorem liveCenters_rInf
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
     (hd : InjRadiusDecayInput (I := I) X) {D : Real}
@@ -120,7 +120,7 @@ theorem liveCenters_rInf
   Filter.eventually_all.mpr fun gamma =>
     seqCenterD_rInf_lt (I := I) hd P hre L (gamma.1 : Nat)
 
-omit [CompleteSpace E] in
+
 theorem lamInf_lt_halfMin
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
     (hd : InjRadiusDecayInput (I := I) X) {D aMin : Real} (hD : 0 < D)
@@ -150,7 +150,7 @@ theorem lamInf_lt_halfMin
     _ < (aMin * hd.mu (L.rInf gamma + 1)) / 2 :=
       div_lt_div_of_pos_right hhat (by norm_num)
 
-omit [CompleteSpace E] in
+
 theorem exists_cage_rad
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
     (hd : InjRadiusDecayInput (I := I) X) {D aMin : Real} (hD : 0 < D)
@@ -181,7 +181,7 @@ theorem exists_cage_rad
     (div_pos (mul_pos haMin (hd.mu_pos _)) (by norm_num))).2 (by
       simpa only [rho] using hreal)
 
-omit [CompleteSpace E] in
+
 theorem exists_rad_cage
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
     (hd : InjRadiusDecayInput (I := I) X) {D aMin : Real} (hD : 0 < D)

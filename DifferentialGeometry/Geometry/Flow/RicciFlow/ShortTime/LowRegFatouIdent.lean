@@ -32,16 +32,14 @@ def lowregProjMode (g₀ : SmoothRiemannianMetric I M) {T : ℝ}
   perModeConv (TensorEigenIdx.lambda (I := I) (M := M) i)
     (fun u => (timeModeCoeff (I := I) (M := M) (fseq N) i) u) t
 
-omit [BoundarylessManifold I M] in
-omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [BoundarylessManifold I M] in
 @[simp] theorem lowregProjMode_zero (g₀ : SmoothRiemannianMetric I M) {T : ℝ}
     (fseq : ℕ → timeL2 (tensorHs (I := I) (M := M) g₀ 0 2 ((1 : ℕ) : ℝ)) T)
     (N : ℕ) (i : TensorEigenIdx (I := I) (M := M) g₀ 0 2) :
     lowregProjMode (I := I) (M := M) g₀ fseq N 0 i = 0 :=
   perModeConv_zero_left _ _
 
-omit [BoundarylessManifold I M] in
-omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [BoundarylessManifold I M] in
 theorem lowregProjMode_cont (g₀ : SmoothRiemannianMetric I M) {T : ℝ}
     (hT : 0 ≤ T)
     (fseq : ℕ → timeL2 (tensorHs (I := I) (M := M) g₀ 0 2 ((1 : ℕ) : ℝ)) T)
@@ -50,6 +48,7 @@ theorem lowregProjMode_cont (g₀ : SmoothRiemannianMetric I M) {T : ℝ}
       (Set.Icc (0 : ℝ) T) :=
   continuousOn_perModeConv_timeL2 _ _ hT
 
+omit [BoundarylessManifold I M] in
 theorem lowregFieldCombo (g₀ : SmoothRiemannianMetric I M) {R T : ℝ}
     (hT : 0 < T) (hT1 : T ≤ 1) (N : ℕ)
     {Nfun : lowerState (I := I) (M := M) g₀ 1 R →
@@ -92,6 +91,7 @@ theorem lowregFieldCombo (g₀ : SmoothRiemannianMetric I M) {R T : ℝ}
   · rw [if_pos hj, if_pos hj, h2 j hj]
   · rw [if_neg hj, if_neg hj]
 
+omit [BoundarylessManifold I M] in
 theorem lowregForceMode (g₀ : SmoothRiemannianMetric I M) {R T : ℝ}
     (hR : 0 ≤ R) (hT : 0 < T) (hT1 : T ≤ 1) (N : ℕ)
     {Nfun : lowerState (I := I) (M := M) g₀ 1 R →
@@ -456,6 +456,7 @@ theorem lowregFatouE3 (hDim : Module.finrank ℝ E = 3)
     hB1 hρ hP hreal hcore htame fseq hball hnem hL2H3 hrung hε
     (by simpa only [Cδ] using habs)
 
+omit [BoundarylessManifold I M] in
 theorem lowregL2H3 (g₀ : SmoothRiemannianMetric I M) {R T b : ℝ}
     (hT : 0 < T) (hT1 : T ≤ 1) (N : ℕ)
     {Nfun : lowerState (I := I) (M := M) g₀ 1 R →

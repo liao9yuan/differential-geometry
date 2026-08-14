@@ -26,7 +26,7 @@ variable [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H]
 variable {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
-variable [IsManifold I 1 M]
+
 variable [T2Space M]
 variable [CompactSpace M] [I.Boundaryless]
 
@@ -274,7 +274,7 @@ end MetricDiff
 
 section ChartComponents
 
-omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [IsManifold I 1 M] [T2Space M] [CompactSpace M] [I.Boundaryless] in
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [T2Space M] [CompactSpace M] [I.Boundaryless] in
 private theorem inner_sum_left (g : SmoothRiemannianMetric I M) (x : M)
     (c : Fin (Module.finrank ℝ E) → ℝ) (w : Fin (Module.finrank ℝ E) → TangentSpace I x)
     (u : TangentSpace I x) :
@@ -284,7 +284,7 @@ private theorem inner_sum_left (g : SmoothRiemannianMetric I M) (x : M)
   refine Finset.sum_congr rfl fun m _ => ?_
   rw [map_smul, ContinuousLinearMap.smul_apply, smul_eq_mul]
 
-omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [IsManifold I 1 M] [T2Space M] [CompactSpace M] [I.Boundaryless] in
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [T2Space M] [CompactSpace M] [I.Boundaryless] in
 private theorem inner_sum_right (g : SmoothRiemannianMetric I M) (x : M)
     (u : TangentSpace I x)
     (c : Fin (Module.finrank ℝ E) → ℝ) (w : Fin (Module.finrank ℝ E) → TangentSpace I x) :
@@ -417,7 +417,7 @@ end ChartComponents
 
 section JointChart
 
-omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [IsManifold I 1 M] [T2Space M] [CompactSpace M] in
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [T2Space M] [CompactSpace M] in
 private theorem good_nhdsWithin (x₀ : M) (J : Set ℝ) (t : ℝ) :
     J ×ˢ chartLeviCivitaGoodSet (I := I) x₀ ∈
       𝓝[J ×ˢ (Set.univ : Set M)] ((t, x₀) : ℝ × M) :=
@@ -528,6 +528,7 @@ theorem rmChartJoint (g₁ g₂ : ℝ → SmoothRiemannianMetric I M) {J : Set �
     exact rmChartComp (I := I) (g₁ p.1) (g₂ p.1) x₀ K hp.2
   exact hΦ.congr_of_eventuallyEq heq (heq.self_of_nhdsWithin ⟨ht, Set.mem_univ x₀⟩)
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] in
 theorem nablaRicChartJoint (g : ℝ → SmoothRiemannianMetric I M) {J : Set ℝ}
     (x₀ : M)
     (hgram : ∀ i j : Fin (Module.finrank ℝ E),
@@ -752,7 +753,7 @@ private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
-omit [NeZero (Module.finrank ℝ E)] [IsManifold I 1 M] [I.Boundaryless] in
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 theorem integrable_of_continuous (g : ℝ → SmoothRiemannianMetric I M) (t : ℝ)
     {f : M → ℝ} (hf : Continuous f) :
     Integrable f (riemannianMeasureFamily (I := I) (M := M) g t) := by

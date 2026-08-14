@@ -15,7 +15,7 @@ open scoped Topology Manifold ContDiff
 
 variable {E : Type uE} [NormedAddCommGroup E]
 variable [InnerProductSpace Real E] [FiniteDimensional Real E]
-variable [NeZero (Module.finrank Real E)] [CompleteSpace E]
+variable [NeZero (Module.finrank Real E)]
 variable {H : Type uH} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H}
 variable [I.Boundaryless]
@@ -40,8 +40,7 @@ noncomputable def pouOfFinite {s : Set M} (w : ι → M → Real)
   sum_le_one' x := by
     simpa only [ContMDiffMap.coeFn_mk, finsum_eq_sum_of_fintype] using hle x
 
-omit [FiniteDimensional ℝ E] [CompleteSpace E] [I.Boundaryless] in
-omit [NeZero (Module.finrank ℝ E)] in
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 theorem pouOfFinite_sub {s : Set M} {U : ι → Set M} (w : ι → M → Real)
     (hw : ∀ i, ContMDiff I 𝓘(Real) ∞ (w i))
     (hnonneg : ∀ i x, 0 ≤ w i x)
@@ -74,8 +73,7 @@ theorem cutoffDenom_pos {a : ι → M → Real} {τ : M → Real}
   have hrest : 0 < 1 - τ x := sub_pos.mpr (lt_of_le_of_ne hτ1 hτone)
   exact add_pos_of_nonneg_of_pos hmul hrest
 
-omit [FiniteDimensional ℝ E] [CompleteSpace E] [I.Boundaryless] in
-omit [NeZero (Module.finrank ℝ E)] in
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 theorem cutoffWeights_smooth {a : ι → M → Real} {τ : M → Real}
     (ha : ∀ i, ContMDiff I 𝓘(Real) ∞ (a i))
     (hτ : ContMDiff I 𝓘(Real) ∞ τ)
@@ -149,8 +147,7 @@ noncomputable def pouOfCutoff {s : Set M} (a : ι → M → Real) (τ : M → Re
     (fun _ hx => cutoffWeights_one hτone hpos hx)
     (cutoffWeights_le hτrange hpos)
 
-omit [FiniteDimensional ℝ E] [CompleteSpace E] [I.Boundaryless] in
-omit [NeZero (Module.finrank ℝ E)] in
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 theorem pouOfCutoff_sub {s : Set M} {U : ι → Set M}
     (a : ι → M → Real) (τ : M → Real)
     (ha : ∀ i, ContMDiff I 𝓘(Real) ∞ (a i))
@@ -187,7 +184,7 @@ noncomputable def innerBall (hd : InjRadiusDecayInput (I := I) X) (D : Real)
   | some c => Metric.ball c (3 * L.lamInf (γ : Nat))
   | none => ∅
 
-omit [CompleteSpace E] in
+
 @[simp] theorem innerBall_subseq (hd : InjRadiusDecayInput (I := I) X) (D : Real)
     (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k)) (L : NetLimitData hd D P)
     (pb : hd.PackingBound D) (r : Real) (k : Nat) (γ : Fin (pb.A r))
@@ -203,7 +200,7 @@ omit [CompleteSpace E] in
         hcenter]
       rfl
 
-omit [CompleteSpace E] in
+
 theorem innerBall_open (hd : InjRadiusDecayInput (I := I) X) (D : Real)
     (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k)) (L : NetLimitData hd D P)
     (pb : hd.PackingBound D) (r : Real) (k : Nat) (γ : Fin (pb.A r)) :
@@ -215,7 +212,7 @@ theorem innerBall_open (hd : InjRadiusDecayInput (I := I) X) (D : Real)
   · exact Metric.isOpen_ball
   · exact isOpen_empty
 
-omit [CompleteSpace E] in
+
 theorem innerBall_subset_hat (hd : InjRadiusDecayInput (I := I) X) {D : Real}
     (hD : 0 < D) (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k))
     (L : NetLimitData hd D P) (pb : hd.PackingBound D) (r : Real) (k : Nat)
@@ -231,7 +228,7 @@ theorem innerBall_subset_hat (hd : InjRadiusDecayInput (I := I) X) {D : Real}
       have hpos : 0 < L.lamInf (γ : Nat) := hd.lambda_pos hD (L.rInf (γ : Nat))
       nlinarith
 
-omit [CompleteSpace E] in
+
 @[simp] theorem hatBall_subseq (hd : InjRadiusDecayInput (I := I) X) (D : Real)
     (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k)) (L : NetLimitData hd D P)
     (pb : hd.PackingBound D) (r : Real) (k : Nat) (γ : Fin (pb.A r))
@@ -247,7 +244,7 @@ omit [CompleteSpace E] in
         hcenter]
       rfl
 
-omit [CompleteSpace E] in
+
 theorem hatBall_open (hd : InjRadiusDecayInput (I := I) X) (D : Real)
     (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k)) (L : NetLimitData hd D P)
     (pb : hd.PackingBound D) (r : Real) (k : Nat) (γ : Fin (pb.A r)) :
@@ -293,7 +290,7 @@ theorem innerBall_cover (hd : InjRadiusDecayInput (I := I) X) {D : Real}
   refine mem_iUnion.mpr ⟨⟨γ, hγ⟩, ?_⟩
   simp [innerBall, hc, Metric.mem_ball, hpc]
 
-omit [CompleteSpace E] in
+
 theorem hatPOU_of_cover (hd : InjRadiusDecayInput (I := I) X) {D : Real}
     (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k))
     (L : NetLimitData hd D P) (pb : hd.PackingBound D) (r : Real) (k : Nat)
@@ -372,7 +369,7 @@ theorem hatPOU_eventually (hd : InjRadiusDecayInput (I := I) X) {D : Real}
   filter_upwards [L.hatBall_cover hd hD P hre pb r] with k hcover
   exact L.hatPOU_of_cover hd P pb r k hcover
 
-omit [CompleteSpace E] in
+
 theorem hatPOU_nonneg (hd : InjRadiusDecayInput (I := I) X) {D : Real}
     (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k))
     (L : NetLimitData hd D P) (pb : hd.PackingBound D) (r : Real) (k : Nat)
@@ -401,7 +398,7 @@ theorem hatPOU_nonneg (hd : InjRadiusDecayInput (I := I) X) {D : Real}
   letI : MetricSpace (X.obj (L.φ k)).M := (P (L.φ k)).ms
   exact ρ.nonneg γ x
 
-omit [CompleteSpace E] in
+
 theorem hatPOU_sum_one (hd : InjRadiusDecayInput (I := I) X) {D : Real}
     (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k))
     (L : NetLimitData hd D P) (pb : hd.PackingBound D) (r : Real) (k : Nat)
@@ -437,7 +434,7 @@ theorem hatPOU_sum_one (hd : InjRadiusDecayInput (I := I) X) {D : Real}
       at hsum
   rwa [Fintype.sum_subset (by simp)] at hsum
 
-omit [CompleteSpace E] in
+
 theorem hatPOU_pos (hd : InjRadiusDecayInput (I := I) X) {D : Real}
     (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k))
     (L : NetLimitData hd D P) (pb : hd.PackingBound D) (r : Real) (k : Nat)
@@ -469,7 +466,7 @@ theorem hatPOU_pos (hd : InjRadiusDecayInput (I := I) X) {D : Real}
   letI : MetricSpace (X.obj (L.φ k)).M := (P (L.φ k)).ms
   exact ρ.exists_pos_of_mem hx
 
-omit [CompleteSpace E] in
+
 theorem hatPOU_active_mem (hd : InjRadiusDecayInput (I := I) X) {D : Real}
     (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k))
     (L : NetLimitData hd D P) (pb : hd.PackingBound D) (r : Real) (k : Nat)
@@ -510,7 +507,7 @@ theorem hatPOU_active_mem (hd : InjRadiusDecayInput (I := I) X) {D : Real}
     simpa [Function.mem_support] using hγx
   exact hρ γ (subset_tsupport (ρ γ) hx_support)
 
-omit [CompleteSpace E] in
+
 theorem binter_of_mem_hat (hd : InjRadiusDecayInput (I := I) X) {D : Real}
     (hD : 0 < D) (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k))
     (L : NetLimitData hd D P) (pb : hd.PackingBound D) (r : Real) (k : Nat)
@@ -539,7 +536,7 @@ theorem binter_of_mem_hat (hd : InjRadiusDecayInput (I := I) X) {D : Real}
           · rw [Metric.mem_ball] at hβ' ⊢
             nlinarith
 
-omit [CompleteSpace E] in
+
 theorem binter_of_active (hd : InjRadiusDecayInput (I := I) X) {D : Real}
     (hD : 0 < D) (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k))
     (L : NetLimitData hd D P) (pb : hd.PackingBound D) (r : Real) (k : Nat)
@@ -582,7 +579,7 @@ theorem binter_of_active (hd : InjRadiusDecayInput (I := I) X) {D : Real}
   exact L.binter_of_mem_hat hd hD P pb r k hβx
     (L.hatPOU_active_mem hd P pb r k ρ hρ hγx)
 
-omit [CompleteSpace E] in
+
 theorem hatPOU_weights (hd : InjRadiusDecayInput (I := I) X) {D : Real}
     (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k))
     (L : NetLimitData hd D P) (pb : hd.PackingBound D) (r : Real) (k : Nat)
@@ -618,7 +615,7 @@ theorem hatPOU_weights (hd : InjRadiusDecayInput (I := I) X) {D : Real}
     L.hatPOU_pos hd P pb r k ρ hx,
     L.hatPOU_sum_one hd P pb r k ρ hx⟩
 
-omit [CompleteSpace E] in
+
 theorem hatPOU_active_data (hd : InjRadiusDecayInput (I := I) X) {D : Real}
     (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k))
     (L : NetLimitData hd D P) (pb : hd.PackingBound D) (r : Real) (k : Nat)

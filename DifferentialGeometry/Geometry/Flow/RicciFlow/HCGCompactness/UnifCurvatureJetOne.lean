@@ -241,8 +241,7 @@ theorem nablaRm_split
           nablaRiemannOp (I := I) gBase x (Ds x) (Xs x) (Ys x) (Zs x) := by
             rw [hconn, hpal, hB']
 
-omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] in
-omit [I.Boundaryless] [BoundarylessManifold I M] [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [SigmaCompactSpace M] in
 private theorem jet1_eval (g : SmoothRiemannianMetric I M) (x : M)
     (D X Y Z W : TangentSpace I x) :
     iterCov (I := I) g 4 (metricRm04 (I := I) (M := M) g) 1 x
@@ -303,6 +302,7 @@ theorem rmOneOpC_nonneg {Λ Kb₀ Kb₁ : ℝ}
 noncomputable def rmOneC (Λ Kb₀ Kb₁ : ℝ) : ℝ :=
   Real.sqrt ((Module.finrank ℝ E : ℝ) ^ 5) * rmOneOpC Λ Kb₀ Kb₁
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [SigmaCompactSpace M] in
 private theorem curvConn_le_of
     (gBase g₀ : SmoothRiemannianMetric I M) {Λ : ℝ}
     (hΛ : 1 ≤ Λ)
@@ -661,6 +661,7 @@ private theorem jet1_norm_le
       rw [Real.sqrt_mul (by positivity), Real.sqrt_sq hK]
 
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [SigmaCompactSpace M] in
 theorem unifRmOpOne_of
     (gBase g₀ : SmoothRiemannianMetric I M) {Λ : ℝ}
     (hΛ : 1 ≤ Λ)
@@ -822,6 +823,7 @@ private theorem unifRmOpOne
       hKb₀0 hKb₀ hKb₁0 hKb₁ hcomp hjet1 hjet2 hjet3
 
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [SigmaCompactSpace M] in
 theorem unifRmJetOne_of
     (gBase g₀ : SmoothRiemannianMetric I M) {Λ Kb₀ Kb₁ : ℝ}
     (hΛ : 1 ≤ Λ)
@@ -884,6 +886,7 @@ private theorem sq_le_of_sqrt_le {a K : ℝ}
   nlinarith [Real.sq_sqrt ha, Real.sqrt_nonneg a]
 
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem unifRmSecOne_of
     (gBase g₀ : SmoothRiemannianMetric I M) {Λ Kb₀ Kb₁ : ℝ}
     (hΛ : 1 ≤ Λ)

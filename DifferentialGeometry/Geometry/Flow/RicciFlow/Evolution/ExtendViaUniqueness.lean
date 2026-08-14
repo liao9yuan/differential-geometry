@@ -119,6 +119,7 @@ theorem ricci_flow_interior_restart
   obtain ⟨rr, hrr0, hrrS, hrrC, hrrP⟩ := hexist (g_fam t_star) hell_star hcov_star
   exact ⟨t_star, hstar_mem_αω, τ₀, hreach, rr, hrr0, hrrS, hrrC, hrrP⟩
 
+omit [SigmaCompactSpace M] in
 theorem ricci_flow_forward_unique
     (g₁ g₂ : ℝ → SmoothRiemannianMetric I M) {a b : ℝ} (hab : a < b)
     (h1smooth : ∀ (x₀ : M) (i j : Fin (Module.finrank ℝ E)),
@@ -150,8 +151,7 @@ theorem ricci_flow_forward_unique
     (fuSlab_of_gram (I := I) g₁ g₂ h1smooth h2smooth h1pde h2pde)
     (energyEdgeCont (I := I) g₁ g₂ hab h1smooth h2smooth)
 
-omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] in
-omit [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [SigmaCompactSpace M] in
 theorem extend_construction_of_restart
     (g_fam : ℝ → SmoothRiemannianMetric I M) {α omega : ℝ} (_hαω : α < omega)
     (hleft : ∀ t ∈ Set.Ico α omega, ∀ x : M, ∀ v w : TangentSpace I x,
@@ -347,9 +347,7 @@ private theorem expBounds_of_logDiff {fa fb R : ℝ}
     calc fb = (fb / fa) * fa := by field_simp
       _ ≤ Real.exp R * fa := mul_le_mul_of_nonneg_right hratio_upper hfa.le
 
-omit [CompactSpace M] [I.Boundaryless] in
-omit [NeZero (Module.finrank ℝ E)] in
-omit [SigmaCompactSpace M] in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [SigmaCompactSpace M] in
 theorem metricEquiv_of_ricBound
     (g_fam : ℝ → SmoothRiemannianMetric I M) {α omega : ℝ} (hαω : α < omega)
     {K : ℝ} (hK : 0 ≤ K)

@@ -15,7 +15,7 @@ open scoped Manifold ContDiff Topology
 
 variable {E : Type uE} [NormedAddCommGroup E]
 variable [InnerProductSpace Real E] [FiniteDimensional Real E]
-variable [NeZero (Module.finrank Real E)] [CompleteSpace E]
+variable [NeZero (Module.finrank Real E)]
 variable {H : Type uH} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H}
 variable [I.Boundaryless]
@@ -27,7 +27,7 @@ variable {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
 noncomputable def lambda (hd : InjRadiusDecayInput (I := I) X) (D r : Real) : Real :=
   hd.mu r / D
 
-omit [CompleteSpace E] in
+
 theorem mu_hasInj_of_le (hd : InjRadiusDecayInput (I := I) X)
     {k : Nat} {x : (X.obj k).M} {R : Real}
     (hx : hd.dist k x (X.obj k).basepoint <= R) :
@@ -37,29 +37,29 @@ theorem mu_hasInj_of_le (hd : InjRadiusDecayInput (I := I) X)
     simpa [mu] using hd.decay k x
   exact HasInjRadiusAt.mono (I := I) hdecay (hd.mu_pos R) (hd.mu_antitone hx)
 
-omit [CompleteSpace E] in
+
 theorem lambda_pos (hd : InjRadiusDecayInput (I := I) X) {D : Real} (hD : 0 < D)
     (r : Real) : 0 < hd.lambda D r :=
   div_pos (hd.mu_pos r) hD
 
-omit [CompleteSpace E] in
+
 theorem lambda_antitone (hd : InjRadiusDecayInput (I := I) X) {D : Real} (hD : 0 < D) :
     Antitone (hd.lambda D) := by
   intro r₁ r₂ h
   exact mul_le_mul_of_nonneg_right (hd.mu_antitone h) (inv_nonneg.mpr hD.le)
 
-omit [CompleteSpace E] in
+
 theorem lambda_le_mu (hd : InjRadiusDecayInput (I := I) X) {D : Real} (hD : 1 ≤ D)
     (r : Real) : hd.lambda D r ≤ hd.mu r :=
   div_le_self (hd.mu_nonneg r) hD
 
-omit [CompleteSpace E] in
+
 theorem lambda_continuous (hd : InjRadiusDecayInput (I := I) X) (D : Real) :
     Continuous (hd.lambda D) := by
   unfold InjRadiusDecayInput.lambda InjRadiusDecayInput.mu
   fun_prop
 
-omit [CompleteSpace E] in
+
 theorem lambda_le_one_at_zero (hd : InjRadiusDecayInput (I := I) X) {D : Real}
     (hD : hd.a * (min hd.baseInj.ρ 1) ^ (Module.finrank Real E) ≤ D) :
     hd.lambda D 0 ≤ 1 := by
@@ -70,7 +70,7 @@ theorem lambda_le_one_at_zero (hd : InjRadiusDecayInput (I := I) X) {D : Real}
   rw [mul_zero, Real.exp_zero, mul_one]
   exact (div_le_one hDpos).mpr hD
 
-omit [CompleteSpace E] in
+
 theorem lambda_hasInjRadiusAt (hd : InjRadiusDecayInput (I := I) X) {D : Real}
     (hD : 1 ≤ D) (k : Nat) (x : (X.obj k).M) :
     HasInjRadiusAt (I := I) (X.obj k) x
@@ -127,7 +127,7 @@ def lambdaBall (hd : InjRadiusDecayInput (I := I) X) (D : Real) (k : Nat)
   letI : EMetricSpace (X.obj k).M := (X.obj k).emetricSpace
   Metric.eball x (ENNReal.ofReal (hd.lambda D (hd.dist k x (X.obj k).basepoint)))
 
-omit [CompleteSpace E] in
+
 theorem exists_lambdaNet (hd : InjRadiusDecayInput (I := I) X) (D : Real) (k : Nat) :
     ∃ S : Set ((X.obj k).M),
       S.PairwiseDisjoint (hd.lambdaBall D k) ∧
@@ -135,7 +135,7 @@ theorem exists_lambdaNet (hd : InjRadiusDecayInput (I := I) X) (D : Real) (k : N
         S ⊆ T → T.PairwiseDisjoint (hd.lambdaBall D k) → T ⊆ S :=
   exists_maximal_pairwiseDisjoint (hd.lambdaBall D k)
 
-omit [CompleteSpace E] in
+
 theorem lambdaNet_cover (hd : InjRadiusDecayInput (I := I) X) (D : Real) (k : Nat)
     (hD : 0 < D) {S : Set ((X.obj k).M)}
     (hS : S.PairwiseDisjoint (hd.lambdaBall D k))
@@ -162,7 +162,7 @@ theorem lambdaNet_cover (hd : InjRadiusDecayInput (I := I) X) (D : Real) (k : Na
     calc edist z x ≤ edist z w + edist w x := edist_triangle z w x
       _ < _ := by rw [edist_comm z w]; exact ENNReal.add_lt_add e1 e2
 
-omit [CompleteSpace E] in
+
 theorem lambdaNet_separated (hd : InjRadiusDecayInput (I := I) X) (D : Real) (k : Nat)
     (hD : 0 < D) {S : Set ((X.obj k).M)}
     (hS : S.PairwiseDisjoint (hd.lambdaBall D k))
@@ -178,7 +178,7 @@ theorem lambdaNet_separated (hd : InjRadiusDecayInput (I := I) X) (D : Real) (k 
   have hyy : y ∈ hd.lambdaBall D k y :=
     lt_of_eq_of_lt (edist_self y) (ENNReal.ofReal_pos.mpr (hd.lambda_pos hD _))
   exact hdisj hyx hyy
-omit [CompleteSpace E] in
+
 theorem RealizesEdist.dist_comm {hd : InjRadiusDecayInput (I := I) X}
     (hre : hd.RealizesEdist) (k : Nat) (x y : (X.obj k).M) :
     hd.dist k x y = hd.dist k y x := by
@@ -188,7 +188,7 @@ theorem RealizesEdist.dist_comm {hd : InjRadiusDecayInput (I := I) X}
   exact (ENNReal.ofReal_eq_ofReal_iff (hre.dist_nonneg k x y)
     (hre.dist_nonneg k y x)).mp this
 
-omit [CompleteSpace E] in
+
 theorem RealizesEdist.dist_triangle {hd : InjRadiusDecayInput (I := I) X}
     (hre : hd.RealizesEdist) (k : Nat) (x y z : (X.obj k).M) :
     hd.dist k x z ≤ hd.dist k x y + hd.dist k y z := by
@@ -201,7 +201,7 @@ theorem RealizesEdist.dist_triangle {hd : InjRadiusDecayInput (I := I) X}
   exact (ENNReal.ofReal_le_ofReal_iff
     (add_nonneg (hre.dist_nonneg k x y) (hre.dist_nonneg k y z))).mp h1
 
-omit [CompleteSpace E] in
+
 theorem RealizesEdist.distO_sub_le {hd : InjRadiusDecayInput (I := I) X}
     (hre : hd.RealizesEdist) (k : Nat) (x y : (X.obj k).M) :
     hd.dist k y (X.obj k).basepoint - hd.dist k x (X.obj k).basepoint ≤ hd.dist k x y := by
@@ -209,14 +209,14 @@ theorem RealizesEdist.distO_sub_le {hd : InjRadiusDecayInput (I := I) X}
   have hc := hre.dist_comm k y x
   linarith
 
-omit [CompleteSpace E] in
+
 theorem lambda_eq (hd : InjRadiusDecayInput (I := I) X) (D r : Real) :
     hd.lambda D r =
       (hd.a * (min hd.baseInj.ρ 1) ^ (Module.finrank Real E) / D) * Real.exp (-hd.C * r) := by
   unfold InjRadiusDecayInput.lambda InjRadiusDecayInput.mu
   ring
 
-omit [CompleteSpace E] in
+
 theorem lambda_exp_le (hd : InjRadiusDecayInput (I := I) X) {D : Real} (hD : 0 < D)
     {s t d : Real} (h : s - t ≤ d) :
     hd.lambda D t ≤ Real.exp (hd.C * d) * hd.lambda D s := by
@@ -233,7 +233,7 @@ theorem lambda_exp_le (hd : InjRadiusDecayInput (I := I) X) {D : Real} (hD : 0 <
   apply Real.exp_le_exp.mpr
   nlinarith [mul_le_mul_of_nonneg_left h hd.C_nonneg]
 
-omit [CompleteSpace E] in
+
 theorem lambda_ratio_le (hd : InjRadiusDecayInput (I := I) X) (hre : hd.RealizesEdist)
     (D : Real) (k : Nat) (hD : 0 < D) (x y : (X.obj k).M) :
     hd.lambda D (hd.dist k x (X.obj k).basepoint) ≤
@@ -252,7 +252,7 @@ theorem lambda_ratio_le (hd : InjRadiusDecayInput (I := I) X) (hre : hd.Realizes
   apply Real.exp_le_exp.mpr
   nlinarith [mul_le_mul_of_nonneg_left (hre.distO_sub_le k x y) hd.C_nonneg]
 
-omit [CompleteSpace E] in
+
 theorem lambdaNet_dist_separated (hd : InjRadiusDecayInput (I := I) X) (D : Real)
     (k : Nat) (hD : 0 < D) (hre : hd.RealizesEdist) {S : Set ((X.obj k).M)}
     (hS : S.PairwiseDisjoint (hd.lambdaBall D k))
@@ -388,7 +388,7 @@ structure GoodCovering (hd : InjRadiusDecayInput (I := I) X) (D : Real) (k : Nat
     (letI : EMetricSpace (X.obj k).M := (X.obj k).emetricSpace
      ENNReal.ofReal (hd.lambda D (hd.dist k x (X.obj k).basepoint)) ≤ edist x y)
 
-omit [CompleteSpace E] in
+
 theorem exists_goodCovering (hd : InjRadiusDecayInput (I := I) X) (D : Real) (k : Nat)
     (hD : 0 < D) : Nonempty (hd.GoodCovering D k hD) := by
   obtain ⟨S, hSdisj, hSmax⟩ := hd.exists_lambdaNet D k
@@ -403,7 +403,7 @@ def lambdaBallC (hd : InjRadiusDecayInput (I := I) X) (D : Real) (k : Nat) (c : 
   letI : EMetricSpace (X.obj k).M := (X.obj k).emetricSpace
   Metric.eball x (ENNReal.ofReal (c * hd.lambda D (hd.dist k x (X.obj k).basepoint)))
 
-omit [CompleteSpace E] in
+
 theorem lambdaBallC_subset (hd : InjRadiusDecayInput (I := I) X) (D : Real) (k : Nat)
     (hD : 0 < D) {c : Real} (hc : c ≤ 1) (x : (X.obj k).M) :
     hd.lambdaBallC D k c x ⊆ hd.lambdaBall D k x := by
@@ -412,14 +412,14 @@ theorem lambdaBallC_subset (hd : InjRadiusDecayInput (I := I) X) (D : Real) (k :
   exact lt_of_lt_of_le hw (ENNReal.ofReal_le_ofReal (by
     nlinarith [hd.lambda_pos hD (hd.dist k x (X.obj k).basepoint)]))
 
-omit [CompleteSpace E] in
+
 theorem lambdaBallC_pairwiseDisjoint (hd : InjRadiusDecayInput (I := I) X) (D : Real)
     (k : Nat) (hD : 0 < D) {c : Real} (hc : c ≤ 1) {S : Set ((X.obj k).M)}
     (hS : S.PairwiseDisjoint (hd.lambdaBall D k)) :
     S.PairwiseDisjoint (hd.lambdaBallC D k c) :=
   hS.mono (fun x => hd.lambdaBallC_subset D k hD hc x)
 
-omit [CompleteSpace E] in
+
 theorem mem_lambdaBallC_dist (hd : InjRadiusDecayInput (I := I) X) (hre : hd.RealizesEdist)
     (D : Real) (k : Nat) (c : Real) (x z : (X.obj k).M) :
     z ∈ hd.lambdaBallC D k c x ↔
@@ -429,7 +429,7 @@ theorem mem_lambdaBallC_dist (hd : InjRadiusDecayInput (I := I) X) (hre : hd.Rea
   rw [hre.edist_eq k z x]
   exact ENNReal.ofReal_lt_ofReal_iff_of_nonneg (hre.dist_nonneg k z x)
 
-omit [CompleteSpace E] in
+
 theorem lambdaBallC_subset_of_inter (hd : InjRadiusDecayInput (I := I) X)
     (hre : hd.RealizesEdist) (D : Real) (k : Nat) {c₁ c₂ : Real} (x y : (X.obj k).M)
     (hinter : (hd.lambdaBallC D k c₁ x ∩ hd.lambdaBallC D k c₁ y).Nonempty)

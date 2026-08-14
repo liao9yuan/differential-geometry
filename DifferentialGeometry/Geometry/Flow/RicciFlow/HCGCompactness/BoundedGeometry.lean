@@ -16,7 +16,7 @@ namespace HCGCompactness
 open scoped Manifold ContDiff
 
 variable {E : Type uE} [NormedAddCommGroup E] [NormedSpace Real E]
-variable [FiniteDimensional Real E] [CompleteSpace E]
+variable [FiniteDimensional Real E]
 variable {H : Type uH} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H}
 
@@ -120,8 +120,7 @@ theorem curvZero_apply
       (I := I) (M := M) g) x X Y Z]
   rfl
 
-omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
-omit [SigmaCompactSpace M] [I.Boundaryless] in
+omit [SigmaCompactSpace M] [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 theorem curvOne_apply
     (g : SmoothRiemannianMetric I M) (x : M)
     (D X Y Z W : TangentSpace I x) :
@@ -180,7 +179,7 @@ private theorem sqrt_le_of_sq_le_mul {q A : Real}
     exact hA
   · exact le_of_mul_le_mul_right (by simpa [pow_two] using h) hqpos
 
-omit [FiniteDimensional ℝ E] [CompleteSpace E] in
+omit [FiniteDimensional ℝ E] in
 private theorem inner_self_nonneg
     {M : Type u} [TopologicalSpace M] [ChartedSpace H M]
     [IsManifold I ∞ M] (g : SmoothRiemannianMetric I M)
@@ -289,7 +288,7 @@ theorem riemannOp_le
     simpa [A, mul_assoc] using hbound
   exact sqrt_le_of_sq_le_mul (Real.sqrt_nonneg _) hA hquad
 
-omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 theorem nablaRiemannOp_le
     (P : PointedRiemannianManifold.{u, uE, uH} (I := I))
     {C : Real} (hP : HasCurvDerivBound (I := I) P 1 C) :

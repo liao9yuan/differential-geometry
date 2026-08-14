@@ -19,15 +19,15 @@ open DifferentialGeometry.PDE.RicciFlow
 open Tensor0SBundle
 
 variable {E : Type uE} [NormedAddCommGroup E] [NormedSpace Real E]
-variable [FiniteDimensional Real E] [CompleteSpace E]
+variable [FiniteDimensional Real E]
 variable {H : Type uH} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H} [I.Boundaryless]
 variable {M : Type u} [TopologicalSpace M] [ChartedSpace H M]
-variable [IsManifold I ∞ M] [IsManifold I 1 M] [IsManifold I 2 M]
+variable [IsManifold I ∞ M]
 
 variable [SigmaCompactSpace M] [T2Space M]
 
-omit [I.Boundaryless] [IsManifold I 2 M] [SigmaCompactSpace M] in
+omit [I.Boundaryless] [SigmaCompactSpace M] in
 theorem curvStep_eq_covStep
     (g : SmoothRiemannianMetric I M) (a : Nat)
     (A : Tensor0SField (𝕜 := Real) (E := E) (H := H)
@@ -42,7 +42,7 @@ private def curvEquiv : (m : Nat) → Fin (4 + m) ≃ Fin (m + 4)
   | 0 => Equiv.refl _
   | (m + 1) => frontExtendEquiv (curvEquiv m)
 
-omit [I.Boundaryless] [IsManifold I 2 M] [SigmaCompactSpace M] in
+omit [I.Boundaryless] [SigmaCompactSpace M] in
 private theorem curv_apply_iterCov
     (g : SmoothRiemannianMetric I M) :
     ∀ (m : Nat) (x : M) (v : Fin (m + 4) → TangentSpace I x),
@@ -102,6 +102,7 @@ private theorem curv_apply_iterCov
                   (I := I) (M := M) g) (m + 1)) x)) v := by
           rfl
 
+omit [I.Boundaryless] [SigmaCompactSpace M] in
 theorem curvCovDeriv_normSq_eq
     (g : SmoothRiemannianMetric I M) (m : Nat) (x : M) :
     normSq0S (I := I) g x (m + 4) (curvCovDeriv (I := I) (M := M) g m x) =
@@ -132,6 +133,7 @@ theorem curvCovDeriv_normSq_eq
       (DifferentialGeometry.Integral.Connection.metricRm04
         (I := I) (M := M) g) m) x)
 
+omit [I.Boundaryless] [SigmaCompactSpace M] in
 theorem curvNormSq_eq
     {D : RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)

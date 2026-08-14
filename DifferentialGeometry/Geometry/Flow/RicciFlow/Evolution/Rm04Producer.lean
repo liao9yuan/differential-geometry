@@ -19,8 +19,8 @@ variable [NeZero (Module.finrank Real E)]
 variable {H : Type*} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H} [I.Boundaryless]
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
-variable [IsManifold I 1 M]
-variable [CompleteSpace E] [SigmaCompactSpace M] [T2Space M]
+
+variable [SigmaCompactSpace M] [T2Space M]
 
 def rmComp
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
@@ -104,27 +104,27 @@ private def rotA : Equiv.Perm (Fin 5) :=
 private def rotB : Equiv.Perm (Fin 5) :=
   ⟨![2, 0, 1, 3, 4], ![1, 2, 0, 3, 4], by decide, by decide⟩
 
-omit [FiniteDimensional ℝ E] [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [IsManifold I ∞ M] [IsManifold I 1 M] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
+omit [FiniteDimensional ℝ E] [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [IsManifold I ∞ M] [SigmaCompactSpace M] [T2Space M] in
 private theorem vec5_rotA {x : M} (A B C V W : TangentSpace I x) :
     DifferentialGeometry.Integral.Connection.vec5 (I := I) A B C V W ∘ rotA =
       DifferentialGeometry.Integral.Connection.vec5 (I := I) B C A V W := by
   funext i
   fin_cases i <;> rfl
 
-omit [FiniteDimensional ℝ E] [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [IsManifold I ∞ M] [IsManifold I 1 M] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
+omit [FiniteDimensional ℝ E] [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [IsManifold I ∞ M] [SigmaCompactSpace M] [T2Space M] in
 private theorem vec5_rotB {x : M} (A B C V W : TangentSpace I x) :
     DifferentialGeometry.Integral.Connection.vec5 (I := I) A B C V W ∘ rotB =
       DifferentialGeometry.Integral.Connection.vec5 (I := I) C A B V W := by
   funext i
   fin_cases i <;> rfl
 
-omit [FiniteDimensional ℝ E] [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [IsManifold I ∞ M] [IsManifold I 1 M] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
+omit [FiniteDimensional ℝ E] [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [IsManifold I ∞ M] [SigmaCompactSpace M] [T2Space M] in
 private theorem vec5_self {x : M} (u : Fin 5 → TangentSpace I x) :
     DifferentialGeometry.Integral.Connection.vec5 (I := I) (u 0) (u 1) (u 2) (u 3) (u 4) = u := by
   funext i
   fin_cases i <;> rfl
 
-omit [FiniteDimensional ℝ E] [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
+omit [FiniteDimensional ℝ E] [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [SigmaCompactSpace M] [T2Space M] in
 private theorem secondCyc {x : M}
     {al : Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) 5 x}
     (h : DifferentialGeometry.Integral.Connection.SecondBianchiAt (I := I) al)
@@ -134,7 +134,7 @@ private theorem secondCyc {x : M}
   rw [← vec5_self (I := I) u, vec5_rotA, vec5_rotB]
   exact h5
 
-omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [SigmaCompactSpace M] [T2Space M] in
 private theorem nabPerm
     (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
     (X : ContMDiffSection I E (∞ : WithTop ℕ∞) (TangentSpace I : M → Type _))
@@ -166,7 +166,7 @@ private theorem nabPerm
   · have hne : sg b ≠ sg a := fun hh => hb (sg.injective hh)
     simp [hb, hne]
 
-omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [SigmaCompactSpace M] [T2Space M] in
 private theorem nabCyc
     (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
     (X : ContMDiffSection I E (∞ : WithTop ℕ∞) (TangentSpace I : M → Type _))
@@ -349,8 +349,7 @@ private theorem coordNab2Eq
   simpa only [solNab2Ric, solNabRic] using
     coordNab2Ric_eq_nabla2RicField (I := I) S x₀ t d a i j
 
-omit [I.Boundaryless] in
-omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
+omit [I.Boundaryless] [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
 theorem n2RicTr
     [I.Boundaryless] [IsManifold I (∞ + 1) M]
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
@@ -551,7 +550,7 @@ theorem rmRicciId
   rw [coordInvSymmOn (I := I) S x₀ (t : Real) hx₀ r p]
   ring
 
-omit [I.Boundaryless] in
+omit [I.Boundaryless] [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
 theorem rm04LapInOfSol
     [I.Boundaryless] [IsManifold I (∞ + 1) M]
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
@@ -761,8 +760,7 @@ theorem ricRicciIdAt
     (solNab2Ric (I := I) S (t : Real) x)
     (rm13OfSol (I := I) S (t : Real) (D.regular_subset t.2)) rfl rfl h20 htor
 
-omit [I.Boundaryless] in
-omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
+omit [I.Boundaryless] [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
 theorem ricCommOfSol
     [I.Boundaryless] [IsManifold I (∞ + 1) M]
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
@@ -889,7 +887,7 @@ theorem ricCommOfSol
         (t : Real) x₀ k p)]
   linarith [hri]
 
-omit [I.Boundaryless] in
+omit [I.Boundaryless] [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
 theorem rm04StaticOfSol
     [I.Boundaryless] [IsManifold I (∞ + 1) M]
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
@@ -928,7 +926,7 @@ theorem rm04StaticOfSol
     (ricCommOfSol (I := I) S hS x₀ t)
     (rm04LapInOfSol (I := I) S hS x₀ t) m
 
-omit [I.Boundaryless] in
+omit [I.Boundaryless] [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
 theorem rm04Evol_at
     [I.Boundaryless] [IsManifold I (∞ + 1) M]
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
@@ -976,7 +974,7 @@ def coordBasisAt (y : M) :
   (coordinateFrameAt_isLocalFrame_one (I := I) y).toBasisAt
     (coordinateFrameAt_mem (I := I) y)
 
-omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [IsManifold I 1 M] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [SigmaCompactSpace M] [T2Space M] in
 @[simp] theorem coordBasisAt_coe (y : M) (i : CoordinateIdx (𝕜 := Real) E) :
     (coordBasisAt (I := I) y i : TangentSpace I y) = coordinateFrameAt (I := I) y i y := by
   simp [coordBasisAt, IsLocalFrameOn.toBasisAt_coe]
@@ -1021,7 +1019,7 @@ def ricUpFam
     ricciOneUpCompInFrame (I := I) S (coordInv (I := I) S y)
       (coordinateFrameAt (I := I) y) r y i k
 
-omit [I.Boundaryless] in
+omit [I.Boundaryless] [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
 theorem rm04EvolFam
     [I.Boundaryless] [IsManifold I (∞ + 1) M]
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
@@ -1051,8 +1049,7 @@ theorem rm04EvolFam
         if q = 0 then i else if q = 1 then j else if q = 2 then k else l) 3) = l from rfl]
     using h
 
-omit [I.Boundaryless] in
-omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
+omit [I.Boundaryless] [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
 theorem rm04LapFam_real
     [I.Boundaryless] [IsManifold I (∞ + 1) M]
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}

@@ -16,15 +16,15 @@ variable [FiniteDimensional Real E]
 variable {H : Type*} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
-variable [IsManifold I 1 M] [IsManifold I 2 M]
-variable [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] [I.Boundaryless]
-variable [BoundarylessManifold I M]
+
+variable [SigmaCompactSpace M] [T2Space M] [I.Boundaryless]
+
 
 section Slots
 
 variable {x : M}
 
-omit [IsManifold I 1 M] [IsManifold I 2 M] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] [I.Boundaryless] [BoundarylessManifold I M] in
+omit [SigmaCompactSpace M] [T2Space M] [I.Boundaryless] in
 private theorem drift_onFrame (g : SmoothRiemannianMetric I M) (x : M) :
     ∃ b : Module.Basis (Fin (Module.finrank Real (TangentSpace I x))) Real
         (TangentSpace I x),
@@ -48,7 +48,7 @@ private theorem drift_onFrame (g : SmoothRiemannianMetric I M) (x : M) :
   rw [← hinner]
   exact ob.inner_eq_ite i j
 
-omit [FiniteDimensional ℝ E] [IsManifold I 1 M] [IsManifold I 2 M] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] [I.Boundaryless] [BoundarylessManifold I M] in
+omit [FiniteDimensional ℝ E] [SigmaCompactSpace M] [T2Space M] [I.Boundaryless] in
 private theorem drift_onFrame_inv {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
     (g : SmoothRiemannianMetric I M) {x : M}
     (b : Module.Basis Idx Real (TangentSpace I x))
@@ -71,7 +71,7 @@ private def driftPerm (e : Equiv.Perm (Fin 4))
     Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) 4 x :=
   T.domDomCongr e
 
-omit [FiniteDimensional ℝ E] [IsManifold I ∞ M] [IsManifold I 2 M] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] [I.Boundaryless] [BoundarylessManifold I M] in
+omit [FiniteDimensional ℝ E] [SigmaCompactSpace M] [T2Space M] [I.Boundaryless] in
 @[simp] private theorem driftPerm_apply (e : Equiv.Perm (Fin 4))
     (T : Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) 4 x)
     (v : Fin 4 → TangentSpace I x) :
@@ -84,7 +84,7 @@ def driftSlots
   (T - driftPerm (I := I) driftPerm1 T) +
     (driftPerm (I := I) driftPerm2 T - driftPerm (I := I) driftPerm3 T)
 
-omit [FiniteDimensional ℝ E] [IsManifold I ∞ M] [IsManifold I 2 M] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] [I.Boundaryless] [BoundarylessManifold I M] in
+omit [FiniteDimensional ℝ E] [SigmaCompactSpace M] [T2Space M] [I.Boundaryless] in
 theorem driftSlots_apply
     (T : Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) 4 x)
     (X Y Z W : TangentSpace I x) :
@@ -100,7 +100,7 @@ theorem driftSlots_apply
       funext a
       fin_cases a <;> simp [driftPerm1, driftPerm2, driftPerm3, vec4]
 
-omit [FiniteDimensional ℝ E] [IsManifold I ∞ M] [IsManifold I 2 M] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] [I.Boundaryless] [BoundarylessManifold I M] in
+omit [FiniteDimensional ℝ E] [SigmaCompactSpace M] [T2Space M] [I.Boundaryless] in
 theorem driftSlots_add
     (A B : Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) 4 x) :
     driftSlots (I := I) (A + B) =
@@ -110,7 +110,7 @@ theorem driftSlots_add
     Tensor0SSpace.sub_apply (I := I) 4 x, driftPerm_apply]
   ring
 
-omit [FiniteDimensional ℝ E] [IsManifold I ∞ M] [IsManifold I 2 M] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] [I.Boundaryless] [BoundarylessManifold I M] in
+omit [FiniteDimensional ℝ E] [SigmaCompactSpace M] [T2Space M] [I.Boundaryless] in
 theorem driftSlots_sub
     (A B : Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) 4 x) :
     driftSlots (I := I) A - driftSlots (I := I) B =
@@ -123,8 +123,7 @@ theorem driftSlots_sub
 variable [NeZero (Module.finrank Real E)]
 
 
-omit [NeZero (Module.finrank ℝ E)] in
-omit [IsManifold I 2 M] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] [I.Boundaryless] [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [I.Boundaryless] in
 theorem driftSlotsSq_le (g : SmoothRiemannianMetric I M)
     (T : Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) 4 x) :
     normSq0S (I := I) g x 4 (driftSlots (I := I) T) ≤
@@ -159,7 +158,7 @@ section Core
 
 variable {x : M}
 
-omit [FiniteDimensional ℝ E] [IsManifold I ∞ M] [IsManifold I 2 M] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] [I.Boundaryless] [BoundarylessManifold I M] in
+omit [FiniteDimensional ℝ E] [SigmaCompactSpace M] [T2Space M] [I.Boundaryless] in
 private theorem drift02_add_left
     (q : Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) 2 x)
     (u₁ u₂ Z : TangentSpace I x) :
@@ -181,7 +180,7 @@ private theorem drift02_add_left
     _ = q (fun a : Fin 2 => if a = 0 then u₁ else Z) +
         q (fun a : Fin 2 => if a = 0 then u₂ else Z) := by rw [hupd, hupd]
 
-omit [FiniteDimensional ℝ E] [IsManifold I ∞ M] [IsManifold I 2 M] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] [I.Boundaryless] [BoundarylessManifold I M] in
+omit [FiniteDimensional ℝ E] [SigmaCompactSpace M] [T2Space M] [I.Boundaryless] in
 private theorem drift02_sub_left
     (q : Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) 2 x)
     (u₁ u₂ Z : TangentSpace I x) :
@@ -209,8 +208,7 @@ theorem lowerTri_split
   rw [hA, drift02_sub_left]
   ring
 
-omit [I.Boundaryless] in
-omit [IsManifold I 2 M] in
+
 theorem lowerRm_eq_rm04 (g : SmoothRiemannianMetric I M) (x : M) :
     lowerTri (I := I) (metricTensorField (I := I) g x)
         (riemannOp (metricCov (I := I) g) x) =
@@ -244,6 +242,7 @@ theorem ricciDrift_sub (g₁ g₂ : SmoothRiemannianMetric I M) (x : M) :
 variable [NeZero (Module.finrank Real E)]
 
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem ricciDriftSq_le (g₁ g₂ : SmoothRiemannianMetric I M) (x : M) :
     normSq0S (I := I) g₁ x 4
         (ricciDrift04 (I := I) g₁ x - ricciDrift04 (I := I) g₂ x) ≤
@@ -313,7 +312,7 @@ section Components
 variable [InnerProductSpace Real E] [NeZero (Module.finrank Real E)]
 variable {Idx : Type*} [Fintype Idx] [DecidableEq Idx] {x : M}
 
-omit [IsManifold I 2 M] [SigmaCompactSpace M] [I.Boundaryless] [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
+omit [SigmaCompactSpace M] [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
 private theorem ricciAt_symm' (g : SmoothRiemannianMetric I M) (x : M)
     (X Y : TangentSpace I x) :
     metricRicciAt (I := I) g x (vec2 (I := I) X Y) =
@@ -321,8 +320,7 @@ private theorem ricciAt_symm' (g : SmoothRiemannianMetric I M) (x : M)
   rw [metricRicciAt_apply_eq_ricciTensor, metricRicciAt_apply_eq_ricciTensor]
   exact ricciTensor_symm (I := I) g x X Y
 
-omit [I.Boundaryless] [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
-omit [IsManifold I 2 M] [SigmaCompactSpace M] in
+omit [SigmaCompactSpace M] [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
 private theorem rm04_swap12 (g : SmoothRiemannianMetric I M) (x : M)
     (A B C D : TangentSpace I x) :
     metricRm04At (I := I) g x (vec4 (I := I) A B C D) =
@@ -331,8 +329,7 @@ private theorem rm04_swap12 (g : SmoothRiemannianMetric I M) (x : M)
     riemannOp_swap (metricCov (I := I) g) x A B C]
   simp
 
-omit [I.Boundaryless] [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
-omit [IsManifold I 2 M] [SigmaCompactSpace M] in
+omit [SigmaCompactSpace M] [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
 private theorem rm04_swap34 (g : SmoothRiemannianMetric I M) (x : M)
     (A B C D : TangentSpace I x) :
     metricRm04At (I := I) g x (vec4 (I := I) A B C D) =
@@ -349,8 +346,7 @@ private theorem rm04_swap34 (g : SmoothRiemannianMetric I M) (x : M)
     _ = -g.inner x (riemannOp (LeviCivita (I := I) g) x A B D) C := by
       rw [g.symm x C]
 
-omit [I.Boundaryless] [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
-omit [IsManifold I 2 M] [SigmaCompactSpace M] in
+omit [SigmaCompactSpace M] [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
 private theorem rm04_pair (g : SmoothRiemannianMetric I M) (x : M)
     (A B C D : TangentSpace I x) :
     metricRm04At (I := I) g x (vec4 (I := I) A B C D) =
@@ -358,7 +354,7 @@ private theorem rm04_pair (g : SmoothRiemannianMetric I M) (x : M)
   rw [metricRm04At_inner, metricRm04At_inner]
   exact riemannOp_inner_pair_symm (I := I) g x A B C D
 
-omit [IsManifold I 2 M] [I.Boundaryless] [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
 private theorem ricciLow_comp
     (g : SmoothRiemannianMetric I M)
     (basis : Module.Basis Idx Real (TangentSpace I x))
@@ -424,6 +420,7 @@ private theorem ricciLow_comp
             refine Finset.sum_congr rfl fun p _ => ?_
             rw [Finset.sum_mul]
 
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
 theorem ricciDrift_comp
     (g : SmoothRiemannianMetric I M)
     (basis : Module.Basis Idx Real (TangentSpace I x))
@@ -502,6 +499,7 @@ theorem ricciDrift_comp
   rw [h1, h2, h3]
   ring
 
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
 theorem ricciDrift_low
     (g : SmoothRiemannianMetric I M)
     (basis : Module.Basis Idx Real (TangentSpace I x))

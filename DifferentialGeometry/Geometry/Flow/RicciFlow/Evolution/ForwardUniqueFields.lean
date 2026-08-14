@@ -18,8 +18,8 @@ variable [FiniteDimensional Real E]
 variable {H : Type*} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
-variable [IsManifold I 1 M]
-variable [CompleteSpace E] [SigmaCompactSpace M] [T2Space M]
+
+variable [SigmaCompactSpace M] [T2Space M]
 
 section Carriers
 
@@ -27,7 +27,7 @@ def metricDiffAt (g₁ g₂ : SmoothRiemannianMetric I M) (x : M) :
     Tensor0SSpace 2 I x :=
   metricTensorField (I := I) g₁ x - metricTensorField (I := I) g₂ x
 
-omit [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
+omit [SigmaCompactSpace M] [T2Space M] in
 @[simp]
 theorem metricDiffAt_apply (g₁ g₂ : SmoothRiemannianMetric I M) (x : M)
     (v : Fin 2 -> TangentSpace I x) :
@@ -39,13 +39,13 @@ theorem metricDiffAt_apply (g₁ g₂ : SmoothRiemannianMetric I M) (x : M)
       (metricTensorField (I := I) g₁ x) (metricTensorField (I := I) g₂ x) v
   rw [h, metricTensorField_apply, metricTensorField_apply]
 
-omit [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
+omit [SigmaCompactSpace M] [T2Space M] in
 @[simp]
 theorem metricDiffAt_self (g : SmoothRiemannianMetric I M) (x : M) :
     metricDiffAt (I := I) g g x = 0 :=
   sub_self _
 
-omit [CompleteSpace E] [SigmaCompactSpace M] in
+omit [SigmaCompactSpace M] in
 private theorem covDiff_self
     (cov : CovariantDerivative I E (TangentSpace I : M -> Type _)) (x : M) :
     CovariantDerivative.difference cov cov x = 0 := by
@@ -75,7 +75,7 @@ private def connDiffStdPerm : Equiv.Perm (Fin 3) where
   left_inv i := by fin_cases i <;> simp
   right_inv i := by fin_cases i <;> simp
 
-omit [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
+omit [SigmaCompactSpace M] [T2Space M] in
 private theorem connDiffOutAt_apply (g : SmoothRiemannianMetric I M)
     (cov cov' : CovariantDerivative I E (TangentSpace I : M -> Type _)) (x : M)
     (w : Fin 3 -> TangentSpace I x) :
@@ -126,6 +126,7 @@ theorem connDiffLowAt_apply (g₁ g₂ : SmoothRiemannianMetric I M) (x : M)
     (CovariantDerivative.difference (metricCov (I := I) g₁) (metricCov (I := I) g₂) x
       (v 1) (v 0))
 
+omit [SigmaCompactSpace M] in
 @[simp]
 theorem connDiffLowAt_self (g : SmoothRiemannianMetric I M) (x : M) :
     connDiffLowAt (I := I) g g x = 0 := by
@@ -196,7 +197,7 @@ def connDiffSq (g₁ g₂ : SmoothRiemannianMetric I M) (x : M) : Real :=
 def rmDiffSq (g₁ g₂ : SmoothRiemannianMetric I M) (x : M) : Real :=
   normSq0S (I := I) g₁ x 4 (rmDiffLowAt (I := I) g₁ g₂ x)
 
-omit [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
+omit [SigmaCompactSpace M] [T2Space M] in
 theorem metricDiffSq_def (g₁ g₂ : SmoothRiemannianMetric I M) (x : M) :
     metricDiffSq (I := I) g₁ g₂ x =
       normSq0S (I := I) g₁ x 2 (metricDiffAt (I := I) g₁ g₂ x) := rfl
