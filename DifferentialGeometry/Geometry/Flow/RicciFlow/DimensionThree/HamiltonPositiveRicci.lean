@@ -2051,7 +2051,7 @@ theorem ham3_scalar_pos
     simpa [ham3Scalar, ham3Solution] using hpos_t
 
 omit [NeZero (Module.finrank ℝ E)] in
-theorem ham3_pinch_imp_can
+theorem ham3_pinching_implies_pinch_estimate
     [VectorBundle Real E (TangentSpace I : M -> Type _)]
     [ContMDiffVectorBundle (1 : WithTop ℕ∞) E (TangentSpace I : M -> Type _) I]
     [ContMDiffVectorBundle (∞ : WithTop ℕ∞) E (TangentSpace I : M -> Type _) I]
@@ -2090,7 +2090,7 @@ theorem ham3_pinch_imp_can
   exact ⟨epsilon, C, heps0, heps1, hC0, hest⟩
 
 omit [NeZero (Module.finrank ℝ E)] in
-theorem ham3_pinch_imp
+theorem ham3_pinching_implies_tracefree_pinch_estimate
     [VectorBundle Real E (TangentSpace I : M -> Type _)]
     [ContMDiffVectorBundle (1 : WithTop ℕ∞) E (TangentSpace I : M -> Type _) I]
     [ContMDiffVectorBundle (∞ : WithTop ℕ∞) E (TangentSpace I : M -> Type _) I]
@@ -2107,7 +2107,7 @@ theorem ham3_pinch_imp
     exists tracefreeRmNormSq scalar weight : Real -> M -> Real, exists C : Real,
       DifferentialGeometry.PDE.RicciFlow.HamiltonTracefreePinchingEstimateOn
         tracefreeRmNormSq scalar weight C := by
-  rcases ham3_pinch_imp_can (I := I) (M := M) h0ω hM g0 hpos P hD Q
+  rcases ham3_pinching_implies_pinch_estimate (I := I) (M := M) h0ω hM g0 hpos P hD Q
       hsel hric hsec9 with
     ⟨epsilon, C, _heps0, _heps1, _hC0, hest⟩
   let tracefreeRmNormSq : Real -> M -> Real :=

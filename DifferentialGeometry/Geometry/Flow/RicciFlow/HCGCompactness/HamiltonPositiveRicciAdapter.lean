@@ -1370,7 +1370,7 @@ theorem ham3_src_covlip
     dsimp only [ham3ShiLeft]
     nlinarith [sq_pos_of_pos ham3_r0_pos, hs.1]
 
-theorem ham3_closed_upg
+theorem ham3_closed_flow_upgrade
     {omega : Real} (h0omega : 0 < omega)
     (hcompact : CompactSpace M)
     {g0 : SmoothRiemannianMetric I M}
@@ -1827,7 +1827,7 @@ theorem ham3_closed_cgh
             t ∈ (ham3SourceSeq (I := I) h0omega P hD Q hsel hwindow).D.carrier →
               MetricComplete (I := I) (L.atTime (I := I) t) := by
   obtain ⟨d, hcomplete⟩ :=
-    ham3_closed_upg (I := I) h0omega hcompact P hD Q hsel hrm
+    ham3_closed_flow_upgrade (I := I) h0omega hcompact P hD Q hsel hrm
       hwindow canon
   let X := ham3SourceSeq (I := I) h0omega P hD Q hsel hwindow
   let mc := canon.mc.compSubseq d.φ d.hφ
@@ -2402,7 +2402,7 @@ theorem ham3_const_of_inj
     simpa only [canon] using
       seed.metricCanonH6_conn (Classical.choice hd) hcpl hconn
   obtain ⟨d, hlimCpl⟩ :=
-    ham3_closed_upg (I := I) h0omega hM.1 P hD Q hsel hrm
+    ham3_closed_flow_upgrade (I := I) h0omega hM.1 P hD Q hsel hrm
       hwindow canon
   have hlimitConn :
       letI : TopologicalSpace d.data.L.M := d.data.L.topology
@@ -2627,7 +2627,7 @@ theorem ham3_const_hcg
   have hsec9 : Ham3Pinching (I := I) P omega :=
     ham3_pinching (I := I) (M := M) h0omega hM hg0 P hD
   have hpinch : Ham3PinchEstimate (I := I) P :=
-    ham3_pinch_imp_can
+    ham3_pinching_implies_pinch_estimate
       (I := I) (M := M) h0omega hM g0 hg0 P hD Q hsel hric hsec9
   have hrm : Ham3RmBound (I := I) P Q :=
     ham3_rm_bound (I := I) (M := M) hM g0 hg0 P Q hsel hric
