@@ -16,8 +16,8 @@ variable [FiniteDimensional Real E]
 variable {H : Type*} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
-variable [IsManifold I 1 M]
-variable [CompleteSpace E] [SigmaCompactSpace M] [T2Space M]
+
+variable [SigmaCompactSpace M] [T2Space M]
 
 section Lowering
 
@@ -48,7 +48,7 @@ def bilin12At
         rw [connectionDifferenceOutput_apply]
         rfl }
 
-omit [IsManifold I ∞ M] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
+omit [SigmaCompactSpace M] [T2Space M] in
 @[simp]
 theorem bilin12At_apply
     (A : TangentSpace I x →L[Real] TangentSpace I x →L[Real] TangentSpace I x)
@@ -79,7 +79,7 @@ private def lowerBilinOut (q : Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I
           rw [map_smul]
           exact (bilin12At (I := I) A).toCLM.map_smul c _ })
 
-omit [IsManifold I ∞ M] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
+omit [SigmaCompactSpace M] [T2Space M] in
 private theorem lowerBilinOut_apply
     (q : Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) 2 x)
     (A : TangentSpace I x →L[Real] TangentSpace I x →L[Real] TangentSpace I x)
@@ -111,6 +111,7 @@ def lowerBilin (q : Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M :
     (lowerBilinOut (I := I)
       (ContinuousMultilinearMap.domDomCongr (Equiv.swap (0 : Fin 2) 1) q) A)
 
+omit [SigmaCompactSpace M] [T2Space M] in
 theorem lowerBilin_apply
     (q : Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) 2 x)
     (A : TangentSpace I x →L[Real] TangentSpace I x →L[Real] TangentSpace I x)
@@ -134,7 +135,7 @@ section Expansion
 
 variable {x : M}
 
-omit [FiniteDimensional ℝ E] [IsManifold I ∞ M] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
+omit [FiniteDimensional ℝ E] [SigmaCompactSpace M] [T2Space M] in
 theorem tensor02_expand {ι : Type*} [Fintype ι]
     (q : Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) 2 x)
     (b : Module.Basis ι Real (TangentSpace I x)) (W Z : TangentSpace I x) :
@@ -156,7 +157,7 @@ theorem tensor02_expand {ι : Type*} [Fintype ι]
         refine Finset.sum_congr rfl fun k _ => ?_
         rw [q.map_update_smul, hupd, smul_eq_mul]
 
-omit [FiniteDimensional ℝ E] [IsManifold I ∞ M] [IsManifold I 1 M] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
+omit [FiniteDimensional ℝ E] [IsManifold I ∞ M] [SigmaCompactSpace M] [T2Space M] in
 theorem bilin_expand {ι : Type*} [Fintype ι]
     (A : TangentSpace I x →L[Real] TangentSpace I x →L[Real] TangentSpace I x)
     (b : Module.Basis ι Real (TangentSpace I x)) (X Y : TangentSpace I x) :
@@ -193,6 +194,7 @@ def connDiffDot (g₁ g₂ : Real → SmoothRiemannianMetric I M)
           (metricCov (I := I) (g₂ t)) x) +
     lowerBilin (I := I) (metricTensorField (I := I) (g₁ t) x) (Adot x)
 
+omit [SigmaCompactSpace M] [T2Space M] in
 theorem connDiffDot_apply (g₁ g₂ : Real → SmoothRiemannianMetric I M)
     (Adot : (x : M) →
       TangentSpace I x →L[Real] TangentSpace I x →L[Real] TangentSpace I x)
@@ -231,6 +233,7 @@ section Adapter
 
 variable {x : M}
 
+omit [SigmaCompactSpace M] [T2Space M] in
 theorem connDiffLow_hasDerivAt
     (g₁ g₂ : Real → SmoothRiemannianMetric I M)
     (Adot : (x : M) →
@@ -444,6 +447,7 @@ theorem connDiffVec_hasDerivAt
       HasDerivAt.fun_sum fun i _ => (hvec i j).const_smul _
   simpa only [← hexp] using hstep
 
+omit [SigmaCompactSpace M] [T2Space M] in
 theorem connDiffLow_hasDerivAt_frame
     (g₁ g₂ : Real → SmoothRiemannianMetric I M)
     (frame : Idx -> (y : M) -> TangentSpace I y)
@@ -475,7 +479,7 @@ def bilinOfComp (b : Module.Basis Idx Real (TangentSpace I x))
     (b.constr Real fun j =>
       LinearMap.toContinuousLinearMap (b.constr Real fun i => ∑ k, c i j k • b k))
 
-omit [IsManifold I ∞ M] [IsManifold I 1 M] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
+omit [IsManifold I ∞ M] [SigmaCompactSpace M] [T2Space M] in
 @[simp]
 theorem bilinOfComp_basis (b : Module.Basis Idx Real (TangentSpace I x))
     (c : Idx -> Idx -> Idx -> Real) (i j : Idx) :
@@ -489,7 +493,7 @@ theorem bilinOfComp_basis (b : Module.Basis Idx Real (TangentSpace I x))
   change (b.constr Real fun i' => ∑ k, c i' j k • b k) (b i) = _
   rw [Module.Basis.constr_basis]
 
-omit [IsManifold I ∞ M] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
+omit [SigmaCompactSpace M] [T2Space M] in
 theorem coeff_bilinOfComp (frame : Idx -> (y : M) -> TangentSpace I y)
     (hframe : IsLocalFrameOn I E 1 frame u) (hx : x ∈ u)
     (c : Idx -> Idx -> Idx -> Real) (i j k : Idx) :
