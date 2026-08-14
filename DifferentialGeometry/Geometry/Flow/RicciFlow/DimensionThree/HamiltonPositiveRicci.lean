@@ -2701,13 +2701,6 @@ theorem limit_tracefree_zero
     (hreal : Ham3SourceRealizes (I := I) P Q hsel L)
     (htransfer : Ham3PinchTransfer (I := I) P Q hsel L)
     (hpinch : Ham3PinchEstimate (I := I) P)
-    (_hlimit :
-      Ham3LimitSubseq (I := I) L /\
-      Ham3LimitWindow (I := I) L /\
-        Ham3LimitRegWin (I := I) L /\
-        Ham3LimitConnected (I := I) L /\
-        Ham3LimitBoundaryless (I := I) /\
-        Ham3LimitFlow (I := I) L)
     (_hscalarPos : LimitScalarPos (I := I) L) :
     LimitTracefreeZero (I := I) L := by
   exact limit_tracefree_zero_of_decay (I := I) (M := M) hdim
