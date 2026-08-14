@@ -2617,7 +2617,7 @@ theorem ham3_const_hcg
     ham3_ricci_nonneg (I := I) (M := M) h0omega hM hg0 P hD
   have hscalarBlow : Ham3ScalarBlowup (I := I) P :=
     ham3_scalar_blowup (I := I) (M := M) h0omega hM P hD hnonneg9
-  rcases ham3_point_select (I := I) (M := M) hM g0 hg0 P hfinite
+  rcases ham3_point_select (I := I) (M := M) hM g0 P hfinite
       hscalarBlow with
     ⟨Q, hsel⟩
   have hric : Ham3RescaledRicNonneg (I := I) P Q :=

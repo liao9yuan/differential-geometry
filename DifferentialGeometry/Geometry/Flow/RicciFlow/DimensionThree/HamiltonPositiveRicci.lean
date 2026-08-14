@@ -1571,7 +1571,6 @@ omit [NeZero (Module.finrank ℝ E)] in
 theorem ham3_point_select
     (hM : Closed3Manifold (I := I) (M := M))
     (g0 : SmoothRiemannianMetric I M)
-    (_hpos : PosRicciMetric (I := I) (M := M) g0)
     (P : Ham3FiniteTimeFlow (I := I) (M := M) g0)
     (hfinite : exists omega c0 : Real, exists h0ω : 0 < omega,
       P.D = DifferentialGeometry.Integral.Connection.RealTimeInterval.closedOpen 0 omega h0ω /\
