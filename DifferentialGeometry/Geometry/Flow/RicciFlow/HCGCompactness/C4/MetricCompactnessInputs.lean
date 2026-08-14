@@ -18,7 +18,7 @@ open scoped Manifold ContDiff Topology
 
 variable {E : Type uE} [NormedAddCommGroup E]
 variable [InnerProductSpace Real E] [FiniteDimensional Real E]
-variable [NeZero (Module.finrank Real E)] [CompleteSpace E]
+variable [NeZero (Module.finrank Real E)]
 variable {H : Type uH} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H}
 variable [I.Boundaryless]
@@ -482,7 +482,7 @@ def withDivisor
   stepA_cap_le := hcap
   realizes := s.realizes
 
-omit [CompleteSpace E] in
+
 theorem exists_core
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
     (s : MetricCompactSeed (I := I) X) (c : Real) :

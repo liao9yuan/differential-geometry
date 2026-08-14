@@ -16,7 +16,7 @@ open DifferentialGeometry.Geometry.Riemannian.Exponential
 open scoped Manifold ContDiff Topology
 
 variable {E : Type uE} [NormedAddCommGroup E] [InnerProductSpace Real E]
-variable [FiniteDimensional Real E] [NeZero (Module.finrank Real E)] [CompleteSpace E]
+variable [FiniteDimensional Real E] [NeZero (Module.finrank Real E)]
 variable {H : Type uH} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H} [I.Boundaryless]
 

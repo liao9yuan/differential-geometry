@@ -21,7 +21,7 @@ attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
 
 variable {E : Type uE} [NormedAddCommGroup E]
 variable [InnerProductSpace Real E] [FiniteDimensional Real E]
-variable [NeZero (Module.finrank Real E)] [CompleteSpace E]
+variable [NeZero (Module.finrank Real E)]
 variable {H : Type uH} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H}
 variable [I.Boundaryless]
@@ -34,7 +34,7 @@ def phaseRadius
     (d : H6NormalData (I := I) X hd) (R : Real) : Real :=
   d.ratio * hd.mu R / 4
 
-omit [CompleteSpace E] in
+
 theorem phaseRadius_pos
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
     {hd : InjRadiusDecayInput (I := I) X}
@@ -42,7 +42,7 @@ theorem phaseRadius_pos
     0 < d.phaseRadius R := by
   exact div_pos (mul_pos d.ratio_pos (hd.mu_pos R)) (by norm_num)
 
-omit [CompleteSpace E] in
+
 theorem phaseRadius_metric
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
     {hd : InjRadiusDecayInput (I := I) X}
@@ -67,7 +67,7 @@ theorem phaseRadius_metric
     (by norm_num)).trans
       (mul_le_mul_of_nonneg_left (hd.mu_antitone hx) d.ratio_pos.le)
 
-omit [CompleteSpace E] in
+
 theorem phaseRadius_chart
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
     {hd : InjRadiusDecayInput (I := I) X}
@@ -107,7 +107,7 @@ def phaseK
       (mul_nonneg (mul_nonneg (by norm_num) (d.metricC_nonneg 1))
         R.coe_nonneg)
 
-omit [CompleteSpace E] in
+
 theorem chartPhaseK_eq
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
     {hd : InjRadiusDecayInput (I := I) X}
@@ -127,7 +127,7 @@ theorem chartPhaseK_eq
   apply NNReal.eq
   rfl
 
-omit [CompleteSpace E] in
+
 theorem phaseErr_lt_ev
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
     {hd : InjRadiusDecayInput (I := I) X}
@@ -146,7 +146,7 @@ theorem phaseErr_lt_ev
   simpa only [b₀, d.chartPhaseK_eq] using
     chartPhaseErr_lt_ev (I := I) Y.metric b₀ heps
 
-omit [CompleteSpace E] in
+
 theorem exists_phase_scale
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
     {hd : InjRadiusDecayInput (I := I) X}

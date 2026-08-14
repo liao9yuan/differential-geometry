@@ -151,7 +151,7 @@ theorem reLowerPairSq_le (g : SmoothRiemannianMetric I M) {s : ℕ}
   rw [hcongr, hprod] at htr
   exact htr
 
-omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] in
 theorem sdecFluxSq_le (g₁ g₂ : SmoothRiemannianMetric I M)
     (Rm2 P : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
       (n := (∞ : WithTop ℕ∞)) 4)
@@ -328,7 +328,7 @@ theorem rm04SlabSup (gN gL gC : Real → SmoothRiemannianMetric I M)
       (metricCov (I := I) (gC t)) (metricCov_smooth (I := I) (gC t)) x) hgramN
     (fun x₀ K _ ht => rm04ChartJoint (I := I) gL gC x₀ (hgramL x₀) (hgramC x₀) K ht)
 
-omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
+omit [NeZero (Module.finrank ℝ E)] [T2Space M] [CompactSpace M] [I.Boundaryless] in
 theorem ricciSq_le_rm04 (g₁ g₂ : SmoothRiemannianMetric I M) (x : M) :
     normSq0S (I := I) g₁ x 2 (metricRicciAt (I := I) g₂ x) ≤
       (Module.finrank Real E : Real) ^ 4 *
@@ -364,6 +364,7 @@ theorem ricciSlabSup (g₁ g₂ : Real → SmoothRiemannianMetric I M)
   exact (ricciSq_le_rm04 (I := I) (g₁ t) (g₂ t) x).trans
     (mul_le_mul_of_nonneg_left (hB t ht x) hpow)
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem nablaRicSlabSup (gN gC : Real → SmoothRiemannianMetric I M)
     (hgramN : ∀ (x₀ : M) (i j : Fin (Module.finrank Real E)),
       ContMDiffOn (𝓘(Real, Real).prod I) 𝓘(Real, Real) ∞

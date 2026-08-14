@@ -22,7 +22,7 @@ variable {H : Type uH} [TopologicalSpace H]
 
 section RawNormalPhase
 
-variable [NormedSpace Real E] [FiniteDimensional Real E] [CompleteSpace E]
+variable [NormedSpace Real E] [FiniteDimensional Real E]
 variable [NeZero (Module.finrank Real E)]
 variable {I : ModelWithCorners Real E H} [I.Boundaryless]
 
@@ -344,7 +344,7 @@ end RawNormalPhase
 
 section ControlledChartPhase
 
-variable [InnerProductSpace Real E] [FiniteDimensional Real E] [CompleteSpace E]
+variable [InnerProductSpace Real E] [FiniteDimensional Real E]
 variable [NeZero (Module.finrank Real E)]
 variable {I : ModelWithCorners Real E H} [I.Boundaryless]
 
@@ -368,10 +368,7 @@ def chartPhaseK (g : SmoothRiemannianMetric I M) {p : M}
       (mul_nonneg hA (sq_nonneg (R : Real)))
       (mul_nonneg (mul_nonneg (by norm_num) (b.C_nonneg 1)) R.coe_nonneg)
 
-omit [FiniteDimensional Real E] [CompleteSpace E]
-  [NeZero (Module.finrank Real E)] [I.Boundaryless]
-  [SigmaCompactSpace M] [T2Space M]
-  [T2Space (TangentBundle I M)] in
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [SigmaCompactSpace M] [T2Space M] [T2Space (TangentBundle I M)] in
 theorem chartPhaseK_mono (g : SmoothRiemannianMetric I M) {p : M}
     {c : NormalBallChart (I := I) p} (b : c.MetricBounds g)
     {R S : ℝ≥0} (hRS : R ≤ S) :
@@ -390,6 +387,7 @@ theorem chartPhaseK_mono (g : SmoothRiemannianMetric I M) {p : M}
     (mul_le_mul_of_nonneg_left hsq hA)
     (mul_le_mul_of_nonneg_left hRS' hB)
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [SigmaCompactSpace M] [T2Space (TangentBundle I M)] in
 theorem chartAccel_norm (g : SmoothRiemannianMetric I M) {p : M}
     (c : NormalBallChart (I := I) p) (b : c.MetricBounds g)
     {r : Real}
@@ -414,6 +412,7 @@ theorem chartAccel_norm (g : SmoothRiemannianMetric I M) {p : M}
         (mul_self_le_mul_self (norm_nonneg z.2) hz.2) hC
     _ = 3 * b.C 1 * (R : Real) ^ 2 := by ring
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [SigmaCompactSpace M] [T2Space (TangentBundle I M)] in
 theorem chartAccel_lip (g : SmoothRiemannianMetric I M) {p : M}
     (c : NormalBallChart (I := I) p) (b : c.MetricBounds g)
     {r : Real}
@@ -444,6 +443,7 @@ theorem chartAccel_lip (g : SmoothRiemannianMetric I M) {p : M}
   rw [norm_sub_rev]
   simpa only [chartPhaseK, NNReal.coe_mk] using hraw
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [SigmaCompactSpace M] [T2Space (TangentBundle I M)] in
 theorem chartDiag_approx (g : SmoothRiemannianMetric I M) {p : M}
     (c : NormalBallChart (I := I) p) (b : c.MetricBounds g)
     {r : Real}
@@ -464,6 +464,7 @@ theorem chartDiag_approx (g : SmoothRiemannianMetric I M) {p : M}
     (chartAccel_lip g c b hrMetric hrQuarter R)
     hinit hcont hderiv hmem
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [SigmaCompactSpace M] [T2Space (TangentBundle I M)] in
 theorem exists_chartFlow (g : SmoothRiemannianMetric I M) {p : M}
     (c : NormalBallChart (I := I) p) (b : c.MetricBounds g)
     {r : Real}

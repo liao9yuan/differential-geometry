@@ -27,7 +27,7 @@ open DifferentialGeometry.Geometry.Riemannian.VolumeComparison
 
 variable {E : Type uE} [NormedAddCommGroup E]
 variable [InnerProductSpace Real E] [FiniteDimensional Real E]
-variable [NeZero (Module.finrank Real E)] [CompleteSpace E]
+variable [NeZero (Module.finrank Real E)]
 variable {H : Type uH} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H}
 variable [I.Boundaryless]
@@ -258,8 +258,7 @@ def FramedRm04Bound
         (radialCurve (I := I) Y.metric x
           (normalFrame (I := I) Y.metric x z) t))) ≤ R
 
-omit [NeZero (Module.finrank ℝ E)]
-  [I.Boundaryless] in
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 theorem framed_rm04_of_seq
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
     (hX : SeqBoundedGeometry (I := I) X) (k : Nat)
@@ -567,7 +566,7 @@ private lemma exists_pos_mul_sq_le {S κ : Real} (hκ : 0 < κ) :
     _ = T * (κ / T) := by rw [Real.sq_sqrt hdiv.le]
     _ = κ := by field_simp [hT.ne']
 
-omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [CompleteSpace E] in
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] in
 private lemma exists_smul_lt (v : E) {r : Real} (hr : 0 < r) :
     ∃ a : Real, 0 < a ∧ ‖a • v‖ < r := by
   let d : Real := ‖v‖ + 1
@@ -1235,7 +1234,7 @@ theorem framed_equiv_jacobi
   rw [framed_metric_jacobi (I := I) Y x z v v (hsmall z hz)]
   exact hJ z hz v
 
-omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [CompleteSpace E] in
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] in
 private lemma half_two_of_close
     (G G₀ : E →L[Real] E →L[Real] Real)
     (hG : ‖G - G₀‖ ≤ 1 / 2)
@@ -1325,9 +1324,9 @@ theorem framedMetric_continuousAt_zero
     exact framedMetric_eq_pullback_normalCoordMetric (I := I) Y x z hz
   exact hF.congr hev.symm
 
-omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [CompleteSpace E] in
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] in
 private lemma exists_close_ball
     (f : E → E →L[Real] E →L[Real] Real)
     (hf : ContinuousAt f 0) :

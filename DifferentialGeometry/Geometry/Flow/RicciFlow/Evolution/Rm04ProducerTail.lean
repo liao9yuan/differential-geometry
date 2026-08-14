@@ -13,15 +13,16 @@ open DifferentialGeometry.Integral.Connection
 open scoped Manifold ContDiff BigOperators
 
 variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace Real E]
-variable [FiniteDimensional Real E] [CompleteSpace E]
+variable [FiniteDimensional Real E]
 variable [NeZero (Module.finrank Real E)]
 variable {H : Type*} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H} [I.Boundaryless]
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
-variable [IsManifold I ∞ M] [IsManifold I 1 M]
+variable [IsManifold I ∞ M]
 
-variable [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M]
+variable [SigmaCompactSpace M] [T2Space M]
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem rm04EvolTail_at
     {alpha t0 omega : Real} {hAlphaOmega : alpha < omega} {hT0Omega : t0 < omega}
     {S : SolutionOn (I := I) (M := M)
@@ -56,6 +57,7 @@ theorem rm04EvolTail_at
     (coordInvDt (I := I) _ x₀)
     (tailCoordFrameReg (I := I) hS hAlphaT0 hT0Omega x₀) t m
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem rm04EvolFamTail
     {alpha t0 omega : Real} {hAlphaOmega : alpha < omega} {hT0Omega : t0 < omega}
     {S : SolutionOn (I := I) (M := M)

@@ -18,14 +18,14 @@ variable [FiniteDimensional Real E]
 variable {H : Type*} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
-variable [IsManifold I 1 M]
-variable [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M]
+
+variable [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M]
 
 section Lowering
 
 variable {x : M}
 
-omit [FiniteDimensional ℝ E] [IsManifold I ∞ M] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
+omit [FiniteDimensional ℝ E] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 private theorem tensor02_add_left
     (q : Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) 2 x)
     (u₁ u₂ Z : TangentSpace I x) :
@@ -45,7 +45,7 @@ private theorem tensor02_add_left
     _ = q (fun a : Fin 2 => if a = 0 then u₁ else Z) +
           q (fun a : Fin 2 => if a = 0 then u₂ else Z) := by rw [hupd, hupd]
 
-omit [FiniteDimensional ℝ E] [IsManifold I ∞ M] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
+omit [FiniteDimensional ℝ E] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 private theorem tensor02_smul_left
     (q : Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) 2 x)
     (c : Real) (u Z : TangentSpace I x) :
@@ -63,7 +63,7 @@ private theorem tensor02_smul_left
     _ = c • q (Function.update m 0 u) := q.map_update_smul m 0 c u
     _ = c * q (fun a : Fin 2 => if a = 0 then u else Z) := by rw [hupd, smul_eq_mul]
 
-omit [BoundarylessManifold I M] in
+omit [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 private theorem lowerBilin_add
     (q : Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) 2 x)
     (A B : TangentSpace I x →L[Real] TangentSpace I x →L[Real] TangentSpace I x) :
@@ -77,7 +77,7 @@ private theorem lowerBilin_add
   have hAB : ((A + B) (v 1)) (v 0) = (A (v 1)) (v 0) + (B (v 1)) (v 0) := rfl
   rw [hAB, tensor02_add_left]
 
-omit [BoundarylessManifold I M] in
+omit [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 private theorem lowerBilin_smul
     (q : Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) 2 x)
     (c : Real)
@@ -110,6 +110,7 @@ private def lowerTriOut
           rw [map_smul]
           exact lowerBilin_smul (I := I) q c (A X) })
 
+omit [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 private theorem lowerTriOut_apply
     (q : Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) 2 x)
     (A : TangentSpace I x →L[Real] TangentSpace I x →L[Real] TangentSpace I x →L[Real]
@@ -132,6 +133,7 @@ def lowerTri
   ContinuousMultilinearMap.domDomCongr (Equiv.swap (1 : Fin 4) 2)
     (lowerTriOut (I := I) q A)
 
+omit [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 theorem lowerTri_apply
     (q : Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) 2 x)
     (A : TangentSpace I x →L[Real] TangentSpace I x →L[Real] TangentSpace I x →L[Real]
@@ -149,7 +151,7 @@ section RaisedDifference
 
 variable {x : M}
 
-omit [FiniteDimensional ℝ E] [IsManifold I ∞ M] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
+omit [FiniteDimensional ℝ E] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 private theorem tensor02_sub_left
     (q : Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) 2 x)
     (u₁ u₂ Z : TangentSpace I x) :
@@ -160,7 +162,7 @@ private theorem tensor02_sub_left
   rw [sub_add_cancel] at h
   exact eq_sub_of_add_eq h.symm
 
-omit [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
+omit [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 private theorem metricField_slot0 (g : SmoothRiemannianMetric I M) (x : M)
     (u Z : TangentSpace I x) :
     metricTensorField (I := I) g x (fun a : Fin 2 => if a = 0 then u else Z) =
@@ -185,6 +187,7 @@ theorem rmDiffVec_self (g : SmoothRiemannianMetric I M) (x : M) :
   rw [rmDiffVec]
   exact sub_self (DifferentialGeometry.Integral.Connection.riemannOp (metricCov (I := I) g) x)
 
+omit [SigmaCompactSpace M] in
 theorem rmDiffLowAt_eq_lowerTri (g₁ g₂ : SmoothRiemannianMetric I M) (x : M) :
     rmDiffLowAt (I := I) g₁ g₂ x =
       lowerTri (I := I) (metricTensorField (I := I) g₁ x) (rmDiffVec (I := I) g₁ g₂ x) := by
@@ -258,6 +261,7 @@ def rmDiffDot (g₁ g₂ : Real → SmoothRiemannianMetric I M)
         (rmDiffVec (I := I) (g₁ t) (g₂ t) x) +
     lowerTri (I := I) (metricTensorField (I := I) (g₁ t) x) (Sdot x)
 
+omit [SigmaCompactSpace M] in
 theorem rmDiffDot_apply (g₁ g₂ : Real → SmoothRiemannianMetric I M)
     (Sdot : (x : M) →
       TangentSpace I x →L[Real] TangentSpace I x →L[Real] TangentSpace I x →L[Real]
@@ -291,6 +295,7 @@ section Adapter
 
 variable {x : M}
 
+omit [SigmaCompactSpace M] in
 theorem rmDiffLow_hasDerivAt
     (g₁ g₂ : Real → SmoothRiemannianMetric I M)
     (Sdot : (x : M) →
@@ -404,7 +409,7 @@ section LaplacianAlgebra
 
 variable {s : ℕ}
 
-omit [BoundarylessManifold I M] in
+omit [SigmaCompactSpace M] [BoundarylessManifold I M] in
 theorem roughLap0SField_sub (g : SmoothRiemannianMetric I M)
     (T U : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
       (n := (∞ : WithTop ℕ∞)) s) :
@@ -413,7 +418,7 @@ theorem roughLap0SField_sub (g : SmoothRiemannianMetric I M)
   rw [roughLap0SField, roughLap0SField, roughLap0SField, metricNabla0S_sub,
     covDiv0SField_sub]
 
-omit [BoundarylessManifold I M] in
+omit [SigmaCompactSpace M] [BoundarylessManifold I M] in
 theorem roughLapSub_apply (g : SmoothRiemannianMetric I M)
     (T U : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
       (n := (∞ : WithTop ℕ∞)) s) (x : M) (v : Fin s -> TangentSpace I x) :
@@ -425,7 +430,7 @@ theorem roughLapSub_apply (g : SmoothRiemannianMetric I M)
   rw [hfield]
   exact Tensor0SSpace.sub_apply (I := I) s x _ _ v
 
-omit [BoundarylessManifold I M] in
+omit [SigmaCompactSpace M] [BoundarylessManifold I M] in
 theorem lapDiffFlux_apply_vec (g₁ g₂ : SmoothRiemannianMetric I M)
     (T : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
       (n := (∞ : WithTop ℕ∞)) s) (x : M) (v : Fin s -> TangentSpace I x) :
@@ -460,6 +465,7 @@ section Capstone
 
 variable {Idx : Type*} [Fintype Idx]
 
+omit [SigmaCompactSpace M] [BoundarylessManifold I M] in
 theorem rmDiffComp_deriv
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (g₁ g₂ : SmoothRiemannianMetric I M)
@@ -498,6 +504,7 @@ theorem rmDiffComp_deriv
   rw [rmDotRem]
   linarith [hlap]
 
+omit [SigmaCompactSpace M] [BoundarylessManifold I M] in
 theorem rmLowComp_deriv
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (g₁ g₂ : Real → SmoothRiemannianMetric I M)
