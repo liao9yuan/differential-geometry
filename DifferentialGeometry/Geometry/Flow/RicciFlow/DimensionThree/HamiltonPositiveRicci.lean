@@ -2590,9 +2590,7 @@ theorem limit_scalar_nonneg
 
 omit [NeZero (Module.finrank ℝ E)] in
 theorem limit_inherit
-    (hM : Closed3Manifold (I := I) (M := M))
     (g0 : SmoothRiemannianMetric I M)
-    (hpos : PosRicciMetric (I := I) (M := M) g0)
     (P : Ham3FiniteTimeFlow (I := I) (M := M) g0)
     (Q : Ham3Blowup M)
     (hsel : Ham3PointSel (I := I) P Q)
