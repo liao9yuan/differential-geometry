@@ -2443,7 +2443,6 @@ theorem ham3_noncollapse
     {omega : Real} (h0omega : 0 < omega)
     (hM : Closed3Manifold (I := I) (M := M))
     (g0 : SmoothRiemannianMetric I M)
-    (_hpos : PosRicciMetric (I := I) (M := M) g0)
     (P : Ham3FiniteTimeFlow (I := I) (M := M) g0)
     (hD : P.D = DifferentialGeometry.Integral.Connection.RealTimeInterval.closedOpen
       0 omega h0omega)
