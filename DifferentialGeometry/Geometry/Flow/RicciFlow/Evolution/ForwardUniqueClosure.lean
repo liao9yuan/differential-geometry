@@ -70,21 +70,23 @@ theorem gronwall_zero_on {a c K : ℝ} (hac : a < c)
 end ScalarGronwall
 
 variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace Real E]
-variable [Module.Finite Real E] [FiniteDimensional Real E]
+variable [FiniteDimensional Real E]
 variable [NeZero (Module.finrank Real E)]
 variable {H : Type*} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
-variable [IsManifold I 1 M] [IsManifold I 2 M]
-variable [CompleteSpace E] [SigmaCompactSpace M] [T2Space M]
-variable [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
+
+variable [T2Space M]
+variable [CompactSpace M] [I.Boundaryless]
 
 section EdgeValue
 
+omit [NeZero (Module.finrank ℝ E)] [T2Space M] [CompactSpace M] [I.Boundaryless] in
 private theorem normSq0S_zero (g : SmoothRiemannianMetric I M) (x : M) (s : ℕ) :
     normSq0S (I := I) g x s 0 = 0 :=
   ((tensor0SMetricData (I := I) g x s).inner_self_eq_zero_iff 0).2 rfl
 
+omit [NeZero (Module.finrank ℝ E)] [T2Space M] [CompactSpace M] [I.Boundaryless] in
 private theorem eq_zero_of_normSq0S (g : SmoothRiemannianMetric I M) (x : M) (s : ℕ)
     {A : Tensor0SSpace s I x} (h : normSq0S (I := I) g x s A = 0) : A = 0 :=
   ((tensor0SMetricData (I := I) g x s).inner_self_eq_zero_iff A).1 h
@@ -93,6 +95,7 @@ theorem energy_nonneg (g₁ g₂ : ℝ → SmoothRiemannianMetric I M) (t : ℝ)
     0 ≤ forwardUniqueEnergy (I := I) (M := M) g₁ g₂ t :=
   integral_nonneg fun x => density_nonneg (I := I) g₁ g₂ t x
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 theorem density_eq_zero_of_eq (g₁ g₂ : ℝ → SmoothRiemannianMetric I M) {t : ℝ}
     (h : g₁ t = g₂ t) (x : M) :
     forwardUniqueDensity (I := I) g₁ g₂ t x = 0 := by
@@ -101,6 +104,7 @@ theorem density_eq_zero_of_eq (g₁ g₂ : ℝ → SmoothRiemannianMetric I M) {
     normSq0S_zero, normSq0S_zero, normSq0S_zero]
   ring
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 theorem energy_eq_zero_of_eq (g₁ g₂ : ℝ → SmoothRiemannianMetric I M) {t : ℝ}
     (h : g₁ t = g₂ t) :
     forwardUniqueEnergy (I := I) (M := M) g₁ g₂ t = 0 := by
@@ -210,6 +214,7 @@ end EnergyZero
 
 section IntegralZero
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [T2Space M] [CompactSpace M] [I.Boundaryless] in
 private theorem metricExtInner {g g' : SmoothRiemannianMetric I M}
     (h : ∀ (x : M) (v w : TangentSpace I x), g.inner x v w = g'.inner x v w) : g = g' := by
   obtain ⟨i₁, s₁, p₁, b₁, c₁⟩ := g
@@ -342,6 +347,7 @@ theorem metrics_eq_on
   exact fun t ht => metric_eq_of_energy_zero (I := I) g₁ g₂ (hdcont t ht) (hidens t ht)
     (hzero t ht)
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [T2Space M] [CompactSpace M] [I.Boundaryless] in
 theorem metrics_eq_ico (g₁ g₂ : ℝ → SmoothRiemannianMetric I M) {a b : ℝ}
     (h : ∀ c ∈ Ioo a b, ∀ t ∈ Icc a c, g₁ t = g₂ t) :
     ∀ t ∈ Ico a b, g₁ t = g₂ t := by

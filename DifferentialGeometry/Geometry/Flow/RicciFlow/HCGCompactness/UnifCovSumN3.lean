@@ -14,14 +14,15 @@ namespace PDE
 namespace RicciFlow
 
 variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
-variable [Module.Finite ℝ E] [FiniteDimensional ℝ E] [CompleteSpace E]
+variable [FiniteDimensional ℝ E]
   [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H]
 variable {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
-variable [T2Space M] [IsManifold I ∞ M] [SigmaCompactSpace M] [BoundarylessManifold I M]
+variable [T2Space M] [IsManifold I ∞ M]
 variable [CompactSpace M] [I.Boundaryless]
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] in
 private theorem covStep_zero' (gRef : SmoothRiemannianMetric I M) (s : ℕ) :
     covStep (I := I) gRef s 0 = 0 := by
   have h := covStep_add (I := I) gRef s 0 0
@@ -30,6 +31,7 @@ private theorem covStep_zero' (gRef : SmoothRiemannianMetric I M) (s : ℕ) :
       covStep (I := I) gRef s 0 + 0 := by rw [add_zero]; exact h.symm
   exact add_left_cancel hc
 
+omit [NeZero (Module.finrank ℝ E)] [T2Space M] [CompactSpace M] [I.Boundaryless] in
 private theorem sqrt_normSq0S_zero (g : SmoothRiemannianMetric I M) (x : M) (s : ℕ) :
     Real.sqrt (normSq0S (I := I) g x s (0 : Tensor0SBundle.Tensor0SSpace s I x)) = 0 := by
   classical
@@ -45,6 +47,7 @@ private theorem sqrt_normSq0S_zero (g : SmoothRiemannianMetric I M) (x : M) (s :
   · refine Finset.sum_eq_zero (fun slots _ => ?_)
     rw [component0S_apply]; simp
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] in
 private theorem telescAccum_one (g₁ g₂ : SmoothRiemannianMetric I M) (r : ℕ)
     (T : Tensor0SBundle.Tensor0SField (𝕜 := Real) (E := E) (H := H)
       (I := I) (M := M) (n := (∞ : WithTop ℕ∞)) r) :
@@ -68,6 +71,7 @@ noncomputable def covStepAcc2C (r : ℕ) (Λ Λ' Λ'' Λ''' : ℝ) : ℝ :=
 set_option maxHeartbeats 1600000 in
 set_option synthInstance.maxHeartbeats 400000 in
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem covStepAcc2_bound
     {K : Set M} (g₁ g₂ : SmoothRiemannianMetric I M) (r : ℕ)
     {Λ Λ' Λ'' Λ''' : ℝ}
@@ -213,6 +217,7 @@ theorem covStepAcc2_bound
     _ ≤ (C₂ + CA1 * (cs0 + CA0 + 1)) * (p0 + p1 + p2) := hSle
     _ ≤ max 0 (C₂ + CA1 * (cs0 + CA0 + 1)) * (p0 + p1 + p2) := hfin
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem covStepAcc2_le
     {K : Set M} (g₁ g₂ : SmoothRiemannianMetric I M) (r : ℕ)
     {Λ Λ' Λ'' Λ''' : ℝ}
@@ -245,6 +250,7 @@ noncomputable def iterCovThreeC (r : ℕ) (Λ Λ' Λ'' Λ''' : ℝ) : ℝ :=
 set_option maxHeartbeats 1600000 in
 set_option synthInstance.maxHeartbeats 400000 in
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem iterCovThree_le
     {K : Set M} (g₁ g₂ : SmoothRiemannianMetric I M) (r : ℕ)
     {Λ Λ' Λ'' Λ''' : ℝ}
@@ -312,6 +318,7 @@ theorem iterCovThree_le
   · exact mul_le_mul_of_nonneg_right (le_max_right _ _)
       (Finset.sum_nonneg fun k _ => Real.sqrt_nonneg _)
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem iterCovG1_three
     {K : Set M} (g₁ g₂ : SmoothRiemannianMetric I M) (r : ℕ)
     {Λ Λ' Λ'' Λ''' : ℝ}

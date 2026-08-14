@@ -20,14 +20,14 @@ open scoped Manifold ContDiff BigOperators
 namespace DifferentialGeometry.PDE.RicciFlow
 
 variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace Real E]
-variable [Module.Finite Real E] [FiniteDimensional Real E]
+variable [FiniteDimensional Real E]
 variable [NeZero (Module.finrank Real E)]
 variable {H : Type*} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
-variable [IsManifold I 1 M] [IsManifold I 2 M]
-variable [CompleteSpace E] [SigmaCompactSpace M] [T2Space M]
-variable [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
+
+variable [T2Space M]
+variable [CompactSpace M] [I.Boundaryless]
 
 section Lift
 
@@ -40,12 +40,14 @@ def ccLift0S (g : SmoothRiemannianMetric I M)
   toSection := unitScalarRSLiftCₛ (I := I) (M := M) T
   hasCompactSupport := HasCompactSupport.of_compactSpace _
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 @[simp] theorem ccLift0S_toSection (g : SmoothRiemannianMetric I M)
     (T : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
       (n := (∞ : WithTop ℕ∞)) s) (x : M) :
     (ccLift0S (I := I) g T).toSection x =
       unitScalarRSLiftSection (I := I) (M := M) (fun y : M => T y) x := rfl
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 @[simp] theorem ccLift0S_unit (g : SmoothRiemannianMetric I M)
     (T : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
       (n := (∞ : WithTop ℕ∞)) s) (x : M) :
@@ -54,6 +56,7 @@ def ccLift0S (g : SmoothRiemannianMetric I M)
         (unitZeroSec (I := I) (M := M) x) = T x :=
   unitScalarRSLiftSection_apply_unit (I := I) (M := M) (fun y : M => T y) x
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 @[simp] theorem ccLift0S_unitModel (g : SmoothRiemannianMetric I M)
     (T : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
       (n := (∞ : WithTop ℕ∞)) s) (x : M) :
@@ -71,6 +74,7 @@ section Identification
 
 variable {s : ℕ}
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem covDerivLift_unit (g : SmoothRiemannianMetric I M)
     (T : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
       (n := (∞ : WithTop ℕ∞)) s)
@@ -109,6 +113,7 @@ theorem covDerivLift_unit (g : SmoothRiemannianMetric I M)
       (LeviCivita (I := I) g) X T x slots).symm
   exact (congrArg (fun A : Tensor0SSpace s I x => A slots) key).trans hslot
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [T2Space M] [CompactSpace M] [I.Boundaryless] in
 private theorem tensor0SSum_apply {x : M} {s : ℕ} {ι : Type*} (t : Finset ι)
     (F : ι → Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) s x)
     (m : Fin s → TangentSpace I x) :
@@ -120,6 +125,7 @@ private theorem tensor0SSum_apply {x : M} {s : ℕ} {ι : Type*} (t : Finset ι)
     rw [Finset.sum_cons, Finset.sum_cons, ← ih]
     rfl
 
+omit [T2Space M] [CompactSpace M] [I.Boundaryless] in
 private theorem orthoBasisAt (g : SmoothRiemannianMetric I M) (x : M) :
     ∃ frame : Module.Basis (Fin (Module.finrank Real E)) Real (TangentSpace I x),
       (∀ i, frame i = smoothOrthoFrame (I := I) g x i x) ∧
@@ -169,6 +175,7 @@ private theorem orthoBasisAt (g : SmoothRiemannianMetric I M) (x : M) :
           rw [coe_basisOfLinearIndependentOfCardEqFinrank]]
     exact hON i j
 
+omit [NeZero (Module.finrank ℝ E)] [T2Space M] [CompactSpace M] [I.Boundaryless] in
 private theorem traceFirstTwo_eq_frame_sum (g : SmoothRiemannianMetric I M) {x : M}
     (frame : Module.Basis (Fin (Module.finrank Real E)) Real (TangentSpace I x))
     (hON : ∀ i j, g.inner x (frame i) (frame j) = if i = j then (1 : Real) else 0)
@@ -261,6 +268,7 @@ theorem covDivLift_eq (g : SmoothRiemannianMetric I M)
     Tensor0SSpace.toModel (covDiv0SField (I := I) g V x)
   rw [covDivLift_unit]
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem covGradLift_eq (g : SmoothRiemannianMetric I M)
     (T : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
       (n := (∞ : WithTop ℕ∞)) s) :

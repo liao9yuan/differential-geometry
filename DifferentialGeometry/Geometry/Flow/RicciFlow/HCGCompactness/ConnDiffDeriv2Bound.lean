@@ -15,14 +15,15 @@ namespace DifferentialGeometry
 namespace HCGCompactness
 
 variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
-variable [Module.Finite ℝ E] [FiniteDimensional ℝ E] [CompleteSpace E]
+variable [FiniteDimensional ℝ E]
   [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H]
 variable {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
-variable [T2Space M] [IsManifold I ∞ M] [SigmaCompactSpace M] [BoundarylessManifold I M]
+variable [T2Space M] [IsManifold I ∞ M]
 variable [CompactSpace M] [I.Boundaryless]
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] in
 theorem covStepDiff2_opLeibniz
     (g₁ g₂ : SmoothRiemannianMetric I M) (s : ℕ)
     (S : Tensor0SBundle.Tensor0SField (𝕜 := ℝ) (E := E) (H := H)
@@ -42,6 +43,7 @@ theorem covStepDiff2_opLeibniz
   rw [diffStep_leibniz (I := I) g₁ g₂ s S, covStep_add, covStep_sub,
     diffStep_leibniz (I := I) g₁ g₂ (s + 1) (covStep (I := I) g₂ s S)]
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] in
 theorem field1_eq_mcd1
     [VectorBundle ℝ E (TangentSpace I : M → Type _)]
     [ContMDiffVectorBundle 1 E (TangentSpace I : M → Type _) I]
@@ -60,6 +62,7 @@ theorem field1_eq_mcd1
   exact (metricCovDerivStep_apply (I := I) g₂ 0
     (Tensor0SBundle.metricTensorField (I := I) g₁) x).symm
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] in
 theorem field2_eq_mcd2
     [VectorBundle ℝ E (TangentSpace I : M → Type _)]
     [ContMDiffVectorBundle 1 E (TangentSpace I : M → Type _) I]
@@ -80,6 +83,7 @@ theorem field2_eq_mcd2
   rw [Tensor0SBundle.totalNabla0S_apply, field1_eq_mcd1 (I := I) g₁ g₂]
   exact (metricCovDerivStep_apply (I := I) g₂ 1 (metricCovDeriv (I := I) g₁ g₂ 1) x).symm
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] in
 theorem nabla3_eq_mcd2
     [VectorBundle ℝ E (TangentSpace I : M → Type _)]
     [ContMDiffVectorBundle 1 E (TangentSpace I : M → Type _) I]
@@ -101,6 +105,7 @@ theorem nabla3_eq_mcd2
     3 (DifferentialGeometry.Integral.Connection.LeviCivita (I := I) g₂) W
     (metricCovDeriv (I := I) g₁ g₂ 1) x slots).symm
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] in
 theorem nabla4_eq_mcd3
     [VectorBundle ℝ E (TangentSpace I : M → Type _)]
     [ContMDiffVectorBundle 1 E (TangentSpace I : M → Type _) I]
@@ -125,6 +130,7 @@ theorem nabla4_eq_mcd3
     4 (DifferentialGeometry.Integral.Connection.LeviCivita (I := I) g₂) V
     (metricCovDeriv (I := I) g₁ g₂ 2) x slots).symm
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] in
 theorem nabla2_eq_mcd1
     [VectorBundle ℝ E (TangentSpace I : M → Type _)]
     [ContMDiffVectorBundle 1 E (TangentSpace I : M → Type _) I]
@@ -152,6 +158,7 @@ def covDerivConnDiff2 (g₂ g₁ : SmoothRiemannianMetric I M)
         (DifferentialGeometry.Integral.Connection.covApply
           (DifferentialGeometry.Integral.Connection.LeviCivita (I := I) g₂) V Y) x
 
+omit [NeZero (Module.finrank ℝ E)] [T2Space M] [CompactSpace M] [I.Boundaryless] in
 theorem covDerivConnDiff2_eq (g₂ g₁ : SmoothRiemannianMetric I M)
     (V W X Y : Π b : M, TangentSpace I b) (x : M) :
     covDerivConnDiff2 (I := I) g₂ g₁ V W X Y x =
@@ -171,6 +178,7 @@ theorem covDerivConnDiff2_eq (g₂ g₁ : SmoothRiemannianMetric I M)
   rfl
 
 open DifferentialGeometry.Integral.Connection in
+omit [NeZero (Module.finrank ℝ E)] [T2Space M] [CompactSpace M] [I.Boundaryless] in
 theorem covDerivConnDiff_contMDiff
     (g₂ g₁ : SmoothRiemannianMetric I M)
     (W X Y : ContMDiffSection I E (∞ : WithTop ℕ∞) (TangentSpace I : M → Type _)) :
@@ -227,6 +235,7 @@ theorem covDerivConnDiff_contMDiff
   rfl
 
 open DifferentialGeometry.Integral.Connection in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] in
 theorem koszul2_clean
     [VectorBundle ℝ E (TangentSpace I : M → Type _)]
     [ContMDiffVectorBundle 1 E (TangentSpace I : M → Type _) I]
@@ -423,6 +432,7 @@ open DifferentialGeometry.Analysis.Laplacian (metric_inner_self_nonneg) in
 set_option maxHeartbeats 1600000 in
 set_option backward.isDefEq.respectTransparency false in
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] in
 theorem covDConnDiff2_g1_le
     [VectorBundle ℝ E (TangentSpace I : M → Type _)]
     [ContMDiffVectorBundle 1 E (TangentSpace I : M → Type _) I]
@@ -653,6 +663,7 @@ noncomputable def mixedCommC (s : ℕ) (Λ Λ' Λ'' Λ''' : ℝ) : ℝ :=
 open DifferentialGeometry.Integral.Connection in
 set_option maxHeartbeats 1600000 in
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] in
 theorem covDConnDiff2_gJet_le
     [VectorBundle ℝ E (TangentSpace I : M → Type _)]
     [ContMDiffVectorBundle 1 E (TangentSpace I : M → Type _) I]
@@ -843,6 +854,7 @@ theorem covDConnDiff2_gJet_le
             Real.sqrt (g₂.inner x w w) * Real.sqrt (g₂.inner x u u))) * hs2
 
 open DifferentialGeometry.Integral.Connection in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] in
 theorem covStep2_diffStep_peel
     (g₁ g₂ : SmoothRiemannianMetric I M) (s : Nat)
     (S : Tensor0SBundle.Tensor0SField (𝕜 := ℝ) (E := E) (H := H)
@@ -922,6 +934,7 @@ theorem covStep2_diffStep_peel
   rw [hInner]
 
 open DifferentialGeometry.Integral.Connection in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] in
 theorem covStep2_diffStep_branch1
     (g₁ g₂ : SmoothRiemannianMetric I M) (s : Nat)
     (S : Tensor0SBundle.Tensor0SField (𝕜 := ℝ) (E := E) (H := H)
@@ -1052,6 +1065,7 @@ theorem covStep2_diffStep_branch1
   abel
 
 open DifferentialGeometry.Integral.Connection in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] in
 theorem covStep2_diffStep_branch2
     (g₁ g₂ : SmoothRiemannianMetric I M) (s : Nat)
     (S : Tensor0SBundle.Tensor0SField (𝕜 := ℝ) (E := E) (H := H)
@@ -1218,6 +1232,7 @@ theorem covStep2_diffStep_branch2
 set_option backward.isDefEq.respectTransparency false in
 open DifferentialGeometry.Integral.Connection in
 
+omit [NeZero (Module.finrank ℝ E)] [T2Space M] [CompactSpace M] [I.Boundaryless] in
 theorem covStep2_branch1_mdiff
     (g₁ g₂ : SmoothRiemannianMetric I M) (s : Nat)
     (S : Tensor0SBundle.Tensor0SField (𝕜 := ℝ) (E := E) (H := H)
@@ -1293,6 +1308,7 @@ theorem covStep2_branch1_mdiff
 set_option backward.isDefEq.respectTransparency false in
 open DifferentialGeometry.Integral.Connection in
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] in
 theorem covStep2_branch2_mdiff
     (g₁ g₂ : SmoothRiemannianMetric I M) (s : Nat)
     (S : Tensor0SBundle.Tensor0SField (𝕜 := ℝ) (E := E) (H := H)
@@ -1378,6 +1394,7 @@ theorem covStep2_branch2_mdiff
   exact hSAt.mdifferentiableAt (by simp)
 
 open DifferentialGeometry.Integral.Connection in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] in
 theorem covStep2_diffStep_split
     (g₁ g₂ : SmoothRiemannianMetric I M) (s : Nat)
     (S : Tensor0SBundle.Tensor0SField (𝕜 := ℝ) (E := E) (H := H)
@@ -1520,6 +1537,7 @@ theorem covStep2_diffStep_split
   rw [hsub, e1, e2]
 
 open DifferentialGeometry.Integral.Connection in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] in
 theorem covStep2_diffStep_OCsplit
     (g₁ g₂ : SmoothRiemannianMetric I M) (s : Nat)
     (S : Tensor0SBundle.Tensor0SField (𝕜 := ℝ) (E := E) (H := H)
@@ -1574,6 +1592,7 @@ theorem covStep2_diffStep_OCsplit
   ring
 
 open DifferentialGeometry.Integral.Connection in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] in
 theorem covStep2_OC_q0
     (g₁ g₂ : SmoothRiemannianMetric I M) (s : Nat)
     (S : Tensor0SBundle.Tensor0SField (𝕜 := ℝ) (E := E) (H := H)
@@ -1634,6 +1653,7 @@ theorem covStep2_OC_q0
   exact key
 
 open DifferentialGeometry.Integral.Connection in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] in
 theorem covStep2_OC_q1
     (g₁ g₂ : SmoothRiemannianMetric I M) (s : Nat)
     (S : Tensor0SBundle.Tensor0SField (𝕜 := ℝ) (E := E) (H := H)
@@ -1696,6 +1716,7 @@ theorem covStep2_OC_q1
   exact key
 
 open DifferentialGeometry.Integral.Connection in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] in
 theorem covStep2_OC_int
     (g₁ g₂ : SmoothRiemannianMetric I M) (s : Nat)
     (S : Tensor0SBundle.Tensor0SField (𝕜 := ℝ) (E := E) (H := H)
@@ -1837,6 +1858,7 @@ theorem covStep2_OC_int
   rw [hs1, hs2]
 
 open DifferentialGeometry.Integral.Connection in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] in
 theorem covStep2_pieceB_eval
     (g₁ g₂ : SmoothRiemannianMetric I M) (s : Nat)
     (S : Tensor0SBundle.Tensor0SField (𝕜 := ℝ) (E := E) (H := H)
@@ -1879,6 +1901,7 @@ theorem covStep2_pieceB_eval
 
 open DifferentialGeometry.Integral.Connection in
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] in
 theorem covStep2_diffStep_eval
     (g₁ g₂ : SmoothRiemannianMetric I M) (s : Nat)
     (S : Tensor0SBundle.Tensor0SField (𝕜 := ℝ) (E := E) (H := H)
@@ -2031,6 +2054,7 @@ theorem covStep2_diffStep_eval
   abel
 
 open DifferentialGeometry.Integral.Connection in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] in
 theorem diffStep_rank0_eq_zero
     (g₁ g₂ : SmoothRiemannianMetric I M)
     (S : Tensor0SBundle.Tensor0SField (𝕜 := ℝ) (E := E) (H := H)
@@ -2043,6 +2067,7 @@ theorem diffStep_rank0_eq_zero
   rw [hev]
   simp
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] in
 theorem covStep2_mixedComm_split
     (g₁ g₂ : SmoothRiemannianMetric I M) (s : ℕ)
     (S : Tensor0SBundle.Tensor0SField (𝕜 := ℝ) (E := E) (H := H)
@@ -2061,6 +2086,7 @@ theorem covStep2_mixedComm_split
 
 set_option backward.isDefEq.respectTransparency false in
 open DifferentialGeometry.Integral.Connection in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] in
 theorem covStep2_mixedComm_eval_sub
     (g₁ g₂ : SmoothRiemannianMetric I M) (s : ℕ)
     (S : Tensor0SBundle.Tensor0SField (𝕜 := ℝ) (E := E) (H := H)
@@ -2083,6 +2109,7 @@ theorem covStep2_mixedComm_eval_sub
     Tensor0SSpace.sub_apply]
 
 open DifferentialGeometry.Integral.Connection in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] in
 theorem covStep2_mixedComm_eval
     (g₁ g₂ : SmoothRiemannianMetric I M) (s : ℕ)
     (S : Tensor0SBundle.Tensor0SField (𝕜 := ℝ) (E := E) (H := H)
@@ -2135,6 +2162,7 @@ theorem covStep2_mixedComm_eval
 open DifferentialGeometry.Integral.Connection in
 set_option maxHeartbeats 1600000 in
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] in
 private theorem mixedComm_le
     {K : Set M} (g₁ g₂ : SmoothRiemannianMetric I M) (s : ℕ)
     {Λ Λ' Λ'' Λ''' : ℝ}
@@ -2682,6 +2710,7 @@ private theorem mixedComm_le
           (add_nonneg (add_nonneg hNSnn hN1nn) hN2nn)
 
 open DifferentialGeometry.Integral.Connection in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] in
 theorem covStepDiff2_mixedComm_le
     {K : Set M} (g₁ g₂ : SmoothRiemannianMetric I M) (s : ℕ)
     {Λ Λ' Λ'' Λ''' : ℝ}
@@ -2710,6 +2739,7 @@ noncomputable def covStepDiff2C (s : ℕ) (Λ Λ' Λ'' Λ''' : ℝ) : ℝ :=
         3 / 2 * (Real.sqrt (Λ ^ 3) * Λ'))) +
     mixedCommC (E := E) s Λ Λ' Λ'' Λ''')
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem covStepDiff2_le
     {K : Set M} (g₁ g₂ : SmoothRiemannianMetric I M) (s : ℕ)
     {Λ Λ' Λ'' Λ''' : ℝ}
@@ -2792,6 +2822,7 @@ theorem covStepDiff2_le
     mul_nonneg (sub_nonneg.mpr (le_max_right 0 (K1 + Cbr)))
       (add_nonneg (add_nonneg ha hb) hc), ha, hb, hc, hK1nn, hCbr_nn]
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem covStepDiff2_exists_const
     {K : Set M} (g₁ g₂ : SmoothRiemannianMetric I M) (s : ℕ)
     {Λ Λ' Λ'' Λ''' : ℝ}
