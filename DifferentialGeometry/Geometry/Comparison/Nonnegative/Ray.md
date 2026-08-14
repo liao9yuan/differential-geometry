@@ -7,9 +7,16 @@ curvature hypothesis and does not assert the existence of a minimizing line.
 
 The public endpoints are:
 
+- `Geometry.Riemannian.IsMinGeodesicRay`, which binds both minimizing distance
+  and positive-half-line geodesicity to the same explicit metric `g`;
 - `Geometry.Riemannian.minRay_of_escape`, which extracts a unit initial
   direction from minimizing segments to a sequence whose intrinsic distance
   from the base point tends to infinity;
+- `Geometry.Riemannian.minRay_in_of_escape`, which additionally preserves a
+  closed totally convex set along the limiting ray;
+- `RiemannianMetricComplete.exists_minRay_in`, which produces such an internal
+  minimizing geodesic ray from any point of a closed noncompact totally convex
+  set;
 - `RiemannianMetricComplete.exists_minRay`, which constructs such an escaping
   sequence on a complete connected noncompact Riemannian manifold and returns
   a minimizing geodesic ray from any chosen base point.
@@ -22,6 +29,12 @@ convergent subsequence.  Star-shapedness and closedness of `SegDom` show that
 every nonnegative multiple of the limiting direction remains minimizing.
 Exact radial distance, the triangle inequality, and the geodesic length upper
 bound then prove the `IsMinRay` identity on every nonnegative subsegment.
+For the set-preserving version, total convexity keeps every finite minimizing
+segment in the set, continuity of the intrinsic exponential map passes this
+membership to the limiting ray, and closedness supplies the limit step.
+The generic escape theorem keeps its ambient-distance conclusion under the
+explicit norm-identification hypothesis; the complete-metric wrapper installs
+`g` canonically before constructing `IsMinGeodesicRay`.
 
 This route uses the intrinsic minimizing-exponential API and does not pass
 through the legacy sorry-bearing Hopf--Rinow capstone.
@@ -33,12 +46,12 @@ argument needed to produce a two-sided minimizing line is still absent, so the
 line producer remains 0% and Phase N1 as a whole is approximately 50%.
 
 The Soul theorem itself remains unstated and therefore 0%.  Its dedicated
-machinery remains approximately 5--10%; this ray theorem is shared
+machinery is approximately 15%; this ray theorem is shared
 nonnegative-curvature infrastructure, not a proof of the Soul theorem.
-The whole B1 nonnegative-curvature lane is approximately 10--13%, while the
+The whole B1 nonnegative-curvature lane is approximately 12--15%, while the
 whole post-HCG Poincare program remains approximately 15--20%.
 
 ## Verification
 
-Focused verification passed with no warnings or placeholders.  The public
-endpoints have no `sorryAx` dependency.
+Focused verification passed with no warnings or placeholders, and the
+full-project build passed.  The public endpoints have no `sorryAx` dependency.

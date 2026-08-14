@@ -2,6 +2,7 @@ import DifferentialGeometry.Geometry.Exponential.GaussLemma
 import DifferentialGeometry.Geometry.Exponential.IntrinsicExp
 import DifferentialGeometry.Geometry.Exponential.IntrinsicExpContinuity
 import DifferentialGeometry.Geometry.Exponential.MinimizingGeodesic
+import Mathlib.Analysis.Convex.Function
 import Mathlib.Topology.Connected.PathConnected
 import Mathlib.Topology.UnitInterval
 
@@ -56,10 +57,55 @@ variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 
+def IsGeodesicConvex (g : SmoothRiemannianMetric I M) (f : M → ℝ) : Prop :=
+  ∀ ⦃γ : ℝ → M⦄ ⦃a b : ℝ⦄, a ≤ b →
+    Geodesic.IsGeodesicOn (I := I) g γ (Set.Icc a b) →
+    ConvexOn ℝ (Set.Icc a b) (f ∘ γ)
+
+def IsGeodesicConcave (g : SmoothRiemannianMetric I M) (f : M → ℝ) : Prop :=
+  ∀ ⦃γ : ℝ → M⦄ ⦃a b : ℝ⦄, a ≤ b →
+    Geodesic.IsGeodesicOn (I := I) g γ (Set.Icc a b) →
+    ConcaveOn ℝ (Set.Icc a b) (f ∘ γ)
+
 def IsTotallyConvex (g : SmoothRiemannianMetric I M) (S : Set M) : Prop :=
   ∀ ⦃γ : ℝ → M⦄ ⦃a b : ℝ⦄, a ≤ b →
     Geodesic.IsGeodesicOn (I := I) g γ (Set.Icc a b) →
     γ a ∈ S → γ b ∈ S → Set.MapsTo γ (Set.Icc a b) S
+
+namespace IsGeodesicConvex
+
+variable {g : SmoothRiemannianMetric I M} {f : M → ℝ}
+
+theorem sublevel (hf : IsGeodesicConvex (I := I) g f) (c : ℝ) :
+    IsTotallyConvex (I := I) g {x | f x ≤ c} := by
+  intro γ a b hab hγ ha hb t ht
+  have ht' : t ∈ segment ℝ a b := by
+    rw [segment_eq_Icc hab]
+    exact ht
+  have hbound := (hf hab hγ).le_on_segment
+    (show a ∈ Set.Icc a b from ⟨le_rfl, hab⟩)
+    (show b ∈ Set.Icc a b from ⟨hab, le_rfl⟩) ht'
+  exact hbound.trans (max_le ha hb)
+
+end IsGeodesicConvex
+
+namespace IsGeodesicConcave
+
+variable {g : SmoothRiemannianMetric I M} {f : M → ℝ}
+
+theorem superlevel (hf : IsGeodesicConcave (I := I) g f) (c : ℝ) :
+    IsTotallyConvex (I := I) g {x | c ≤ f x} := by
+  intro γ a b hab hγ ha hb t ht
+  have ht' : t ∈ segment ℝ a b := by
+    rw [segment_eq_Icc hab]
+    exact ht
+  have hbound := (hf hab hγ).ge_on_segment
+    (show a ∈ Set.Icc a b from ⟨le_rfl, hab⟩)
+    (show b ∈ Set.Icc a b from ⟨hab, le_rfl⟩) ht'
+  simpa only [Function.comp_apply, min_self] using
+    (min_le_min ha hb).trans hbound
+
+end IsGeodesicConcave
 
 namespace IsTotallyConvex
 

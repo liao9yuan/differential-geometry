@@ -29,8 +29,9 @@ consumer assumption.
 
 `Busemann.lean` now defines minimizing rays and lines, distance-minus-time
 approximants, and their infimum Busemann function.  It proves monotonicity,
-lower bounds, one-Lipschitz continuity, the exact value along a ray, and the
-two-sided line inequality/equality used by splitting.
+convergence of the approximants to the infimum, lower bounds, one-Lipschitz
+continuity, the exact value along a ray, and the two-sided line
+inequality/equality used by splitting.
 
 Status:
 
@@ -54,7 +55,9 @@ The ray half is now implemented in `Ray.lean`.  `minRay_of_escape` performs the
 compact limiting-direction argument, and
 `RiemannianMetricComplete.exists_minRay` constructs the required escaping
 sequence on a complete connected noncompact Riemannian manifold.  The
-two-sided minimizing-line producer is the remaining N1 frontier.
+stronger `minRay_in_of_escape` and `exists_minRay_in` preserve a closed totally
+convex set along the limiting minimizing geodesic ray.  The two-sided
+minimizing-line producer is the remaining N1 frontier.
 
 ## Phase N2: weak Laplacian comparison
 
@@ -97,8 +100,8 @@ Smoothness and `norm (grad b) = 1` alone do not prove an isometric product.
 
 ## Phase N4: soul theorem
 
-The soul lane starts only after the selected Toponogov convexity lemmas are
-available.  Follow the classical exhaustion/shaving route:
+The Soul lane is active at the comparison-prerequisite stage.  Follow the
+classical exhaustion/shaving route:
 
 1. construct a proper convex exhaustion from Busemann-type functions;
 2. take a compact totally convex minimum set;
@@ -118,10 +121,28 @@ normal-exponential producers.  It should not be represented by a single
 The canonical all-geodesic predicate `IsTotallyConvex` now lives in
 `GeodesicConvexity.lean`, together with arbitrary-intersection closure and an
 adapter to the existing Hopf--Rinow selected join.  It intentionally quantifies
-every geodesic segment, not only minimizing segments.  The first missing
-mathematical producer is still the Toponogov-based construction of a nontrivial
-compact totally convex set or exhaustion under nonnegative sectional
-curvature.
+every geodesic segment, not only minimizing segments.  The same module now has
+all-geodesic scalar convexity and concavity predicates with sublevel and
+superlevel adapters.
+
+`ConvexExhaustion.lean` implements the correctly signed Busemann half-spaces,
+their ray-family intersections, closedness, monotonicity, natural-level cover,
+strict interior nesting, and the compactness contradiction.  In particular,
+`raySublevel_compact` proves compactness of every real level once all
+basepoint-ray Busemann functions are geodesically concave.  This conditional
+compactness route is complete; the curvature-dependent compact exhaustion
+theorem remains unstated.
+
+`Variation/EndpointNonnegative.lean` supplies the first genuine comparison
+producer, `jacobi_pair_le_flat`, from `NonnegSecMetric`.  Its statement is for a
+unit-speed geodesic on `[0, L]`; the existing intrinsic selected branch is
+parameterized on `[0, 1]` with speed equal to its radial length.  The smallest
+remaining bridge is therefore a unit-speed reparameterization and minimizing-
+tail lemma.  It is routine geometric plumbing, but it must precede the
+selected-branch Hessian comparison theorem.  Calabi upper support across the
+cut locus and the one-dimensional barrier argument then give geodesic
+concavity of Busemann functions.  No complete Toponogov hierarchy is required
+before this selected consequence.
 
 ## Honest progress
 
@@ -132,9 +153,15 @@ curvature.
   yet selected.
 - Cheeger--Gromoll splitting theorem: unstated, therefore 0%; dedicated metric
   machinery approximately 20%.
-- Total-convexity interface: 100%; Toponogov convex-set producer: 0%.
+- Total-convexity and elementary convex-exhaustion interfaces: 100%.
+- `jacobi_pair_le_flat`: 100%; selected-branch Hessian comparison: unstated,
+  0%, with dedicated endpoint machinery approximately 60%.
+- Busemann geodesic-concavity theorem: unstated, 0%; dedicated comparison
+  machinery approximately 20%.
+- Compact exhaustion under nonnegative sectional curvature: unstated, 0%; its
+  downstream conditional compactness argument is 100%.
 - Soul theorem: unstated, therefore 0%; dedicated machinery approximately
-  5--10% through general exponential/compactness infrastructure.
-- Whole B1 nonnegative-curvature lane: approximately 10--13%.
+  15% through ray, convexity, exhaustion, and endpoint-comparison infrastructure.
+- Whole B1 nonnegative-curvature lane: approximately 12--15%.
 - Whole post-HCG Poincare program: still approximately 15--20%; this first B1
   brick does not materially change that large denominator.

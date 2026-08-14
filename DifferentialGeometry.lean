@@ -1825,6 +1825,7 @@ import DifferentialGeometry.Geometry.Comparison.InjectivityRadius
 import DifferentialGeometry.Geometry.Comparison.LocalGeodesicSeed
 import DifferentialGeometry.Geometry.Comparison.NormalCoordinates
 import DifferentialGeometry.Geometry.Comparison.Nonnegative.Busemann
+import DifferentialGeometry.Geometry.Comparison.Nonnegative.ConvexExhaustion
 import DifferentialGeometry.Geometry.Comparison.Nonnegative.Ray
 import DifferentialGeometry.Geometry.Comparison.RadialLaplacian
 import DifferentialGeometry.Geometry.Comparison.RadialSurjectivity
@@ -3256,6 +3257,7 @@ import DifferentialGeometry.Geometry.Comparison.CGTWhiteheadProducer
 import DifferentialGeometry.Geometry.Comparison.IntrinsicInjectivityRadius
 import DifferentialGeometry.Geometry.Comparison.Variation.CovariantJet
 import DifferentialGeometry.Geometry.Comparison.Variation.CurvatureDerivativeAlong
+import DifferentialGeometry.Geometry.Comparison.Variation.EndpointNonnegative
 import DifferentialGeometry.Geometry.Comparison.Variation.EndpointPositive
 import DifferentialGeometry.Geometry.Comparison.Variation.GeneralCurvatureCommutation
 import DifferentialGeometry.Geometry.Comparison.Volume.IntrinsicBallVolume

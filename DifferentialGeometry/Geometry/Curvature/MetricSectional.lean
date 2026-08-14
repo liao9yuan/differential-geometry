@@ -26,6 +26,26 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 variable [IsManifold I 1 M] [IsManifold I 2 M] [IsManifold I 3 M]
 variable [SigmaCompactSpace M] [T2Space M]
 
+def NonnegSecMetric (g : SmoothRiemannianMetric I M) : Prop :=
+  ∀ (x : M) (X Y : TangentSpace I x),
+    0 ≤ metricRm04StdAt (I := I) (M := M) g x X Y Y X
+
+namespace NonnegSecMetric
+
+omit [IsManifold I 2 M] [IsManifold I 3 M] in
+omit [SigmaCompactSpace M] in
+theorem riemann {g : SmoothRiemannianMetric I M}
+    [I.Boundaryless] [BoundarylessManifold I M]
+    (hg : NonnegSecMetric (I := I) (M := M) g)
+    (x : M) (X Y : TangentSpace I x) :
+    0 ≤ g.inner x
+      (riemannOp (LeviCivita (I := I) g) x X Y Y) X := by
+  rw [g.symm, riemannOp_eq_chartRiemannCLM_apply,
+    ← metricRm04StdAt_eq_chartRiemannCLM]
+  exact hg x X Y
+
+end NonnegSecMetric
+
 private noncomputable def negRmForm
     (g : SmoothRiemannianMetric I M) (x : M) :
     TangentSpace I x → TangentSpace I x → TangentSpace I x →

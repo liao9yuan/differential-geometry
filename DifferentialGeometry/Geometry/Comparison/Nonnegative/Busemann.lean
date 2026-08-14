@@ -1,4 +1,6 @@
 import DifferentialGeometry.Geometry.Exponential.MinimizingGeodesic
+import DifferentialGeometry.Geometry.Metric.DistanceScaling
+import Mathlib.Topology.Order.MonotoneConvergence
 
 /-!
 # Busemann functions: the metric layer
@@ -16,7 +18,7 @@ purely metric makes those analytic and geometric frontiers explicit.
 
 noncomputable section
 
-open Set Bundle Manifold
+open Set Filter Bundle Manifold
 open scoped Topology Manifold ContDiff ENNReal
 
 namespace DifferentialGeometry
@@ -50,6 +52,9 @@ variable [InnerProductSpace ℝ E] [FiniteDimensional ℝ E]
   [SigmaCompactSpace M] [ConnectedSpace M]
   [IsContinuousRiemannianBundle E (fun x : M => TangentSpace I x)]
 
+omit [InnerProductSpace ℝ E] [FiniteDimensional ℝ E]
+  [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M]
+  [T2Space (TangentBundle I M)] [SigmaCompactSpace M] in
 /-- The real value of the intrinsic Riemannian distance satisfies the triangle
 inequality on a connected manifold. -/
 theorem riemDist_triangle (x y z : M) :
@@ -65,6 +70,11 @@ the differential-geometric ray constructor. -/
 def IsMinRay (γ : ℝ → M) : Prop :=
   ∀ ⦃s t : ℝ⦄, 0 ≤ s → s ≤ t →
     (riemannianEDist I (γ s) (γ t)).toReal = t - s
+
+def IsMinRayOf (g : SmoothRiemannianMetric I M) (γ : ℝ → M) : Prop :=
+  letI : RiemannianBundle (fun x : M ↦ TangentSpace I x) :=
+    ⟨g.toRiemannianMetric⟩
+  IsMinRay (I := I) γ
 
 /-- A unit-speed minimizing line, recorded by exact distance between ordered
 parameters. -/
@@ -100,6 +110,9 @@ theorem minLine_neg {γ : ℝ → M} (hγ : IsMinLine (I := I) γ) :
 def buseApprox (γ : ℝ → M) (t : ℝ) (x : M) : ℝ :=
   (riemannianEDist I (γ t) x).toReal - t
 
+omit [InnerProductSpace ℝ E] [FiniteDimensional ℝ E]
+  [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M]
+  [T2Space (TangentBundle I M)] [SigmaCompactSpace M] in
 /-- Busemann approximants decrease as their ray parameter increases. -/
 theorem buseApprox_anti {γ : ℝ → M} (hγ : IsMinRay (I := I) γ)
     {s t : ℝ} (hs : 0 ≤ s) (hst : s ≤ t) (x : M) :
@@ -112,6 +125,9 @@ theorem buseApprox_anti {γ : ℝ → M} (hγ : IsMinRay (I := I) γ)
   dsimp only [buseApprox]
   linarith
 
+omit [InnerProductSpace ℝ E] [FiniteDimensional ℝ E]
+  [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M]
+  [T2Space (TangentBundle I M)] [SigmaCompactSpace M] in
 /-- Every Busemann approximant is bounded below by minus the distance from the
 ray origin. -/
 theorem buseApprox_lower {γ : ℝ → M} (hγ : IsMinRay (I := I) γ)
@@ -127,6 +143,9 @@ theorem buseApprox_lower {γ : ℝ → M} (hγ : IsMinRay (I := I) γ)
   dsimp only [buseApprox]
   linarith
 
+omit [InnerProductSpace ℝ E] [FiniteDimensional ℝ E]
+  [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M]
+  [T2Space (TangentBundle I M)] [SigmaCompactSpace M] in
 /-- At a fixed time, two Busemann approximants differ by at most the distance
 between their evaluation points. -/
 theorem buseApprox_dist (γ : ℝ → M) (t : ℝ) (x y : M) :
@@ -150,6 +169,9 @@ private theorem buseSet_nonempty (γ : ℝ → M) (x : M) :
     (buseSet (I := I) γ x).Nonempty := by
   exact ⟨buseApprox (I := I) γ 0 x, ⟨0, self_mem_Ici, rfl⟩⟩
 
+omit [InnerProductSpace ℝ E] [FiniteDimensional ℝ E]
+  [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M]
+  [T2Space (TangentBundle I M)] [SigmaCompactSpace M] in
 private theorem buseSet_bddBelow {γ : ℝ → M} (hγ : IsMinRay (I := I) γ)
     (x : M) : BddBelow (buseSet (I := I) γ x) := by
   refine ⟨-(riemannianEDist I (γ 0) x).toReal, ?_⟩
@@ -162,12 +184,23 @@ distance-minus-time approximants over nonnegative time. -/
 def busemann (γ : ℝ → M) (x : M) : ℝ :=
   sInf (buseSet (I := I) γ x)
 
+def busemannOf (g : SmoothRiemannianMetric I M) (γ : ℝ → M) (x : M) : ℝ :=
+  letI : RiemannianBundle (fun y : M ↦ TangentSpace I y) :=
+    ⟨g.toRiemannianMetric⟩
+  busemann (I := I) γ x
+
+omit [InnerProductSpace ℝ E] [FiniteDimensional ℝ E]
+  [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M]
+  [T2Space (TangentBundle I M)] [SigmaCompactSpace M] in
 /-- The Busemann function lies below every nonnegative-time approximant. -/
 theorem busemann_le_approx {γ : ℝ → M} (hγ : IsMinRay (I := I) γ)
     {t : ℝ} (ht : 0 ≤ t) (x : M) :
     busemann (I := I) γ x ≤ buseApprox (I := I) γ t x := by
   exact csInf_le (buseSet_bddBelow (I := I) hγ x) ⟨t, ht, rfl⟩
 
+omit [InnerProductSpace ℝ E] [FiniteDimensional ℝ E]
+  [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M]
+  [T2Space (TangentBundle I M)] [SigmaCompactSpace M] in
 /-- The Busemann function has the same origin-distance lower bound as all of
 its approximants. -/
 theorem busemann_lower {γ : ℝ → M} (hγ : IsMinRay (I := I) γ) (x : M) :
@@ -177,6 +210,42 @@ theorem busemann_lower {γ : ℝ → M} (hγ : IsMinRay (I := I) γ) (x : M) :
   rcases ha with ⟨t, ht, rfl⟩
   exact buseApprox_lower (I := I) hγ ht x
 
+omit [InnerProductSpace ℝ E] [FiniteDimensional ℝ E]
+  [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M]
+  [T2Space (TangentBundle I M)] [SigmaCompactSpace M] in
+theorem buseApprox_tendsto {γ : ℝ → M} (hγ : IsMinRay (I := I) γ) (x : M) :
+    Tendsto (fun t => buseApprox (I := I) γ t x) atTop
+      (𝓝 (busemann (I := I) γ x)) := by
+  let f : ℝ → ℝ := fun t => buseApprox (I := I) γ t x
+  let f₀ : ℝ → ℝ := fun t => f (max 0 t)
+  have hanti : Antitone f₀ := by
+    intro s t hst
+    exact buseApprox_anti (I := I) hγ (le_max_left 0 s)
+      (max_le_max_left 0 hst) x
+  have hbdd : BddBelow (Set.range f₀) := by
+    refine ⟨-(riemannianEDist I (γ 0) x).toReal, ?_⟩
+    intro a ha
+    rcases ha with ⟨t, rfl⟩
+    exact buseApprox_lower (I := I) hγ (le_max_left 0 t) x
+  have hrange : Set.range f₀ = buseSet (I := I) γ x := by
+    ext a
+    constructor
+    · rintro ⟨t, rfl⟩
+      exact ⟨max 0 t, le_max_left 0 t, rfl⟩
+    · rintro ⟨t, ht, rfl⟩
+      exact ⟨t, by simp only [f₀, f, max_eq_right (show 0 ≤ t from ht)]⟩
+  have hlim : Tendsto f₀ atTop (𝓝 (busemann (I := I) γ x)) := by
+    rw [busemann, ← hrange, sInf_range]
+    exact tendsto_atTop_ciInf hanti hbdd
+  have heq : f₀ =ᶠ[atTop] f := by
+    filter_upwards [eventually_ge_atTop (0 : ℝ)] with t ht
+    change 0 ≤ t at ht
+    simp only [f₀, max_eq_right ht]
+  exact hlim.congr' heq
+
+omit [InnerProductSpace ℝ E] [FiniteDimensional ℝ E]
+  [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M]
+  [T2Space (TangentBundle I M)] [SigmaCompactSpace M] in
 /-- The Busemann function is one-Lipschitz with respect to the real intrinsic
 Riemannian distance. -/
 theorem busemann_dist {γ : ℝ → M} (hγ : IsMinRay (I := I) γ) (x y : M) :
@@ -203,6 +272,9 @@ theorem busemann_dist {γ : ℝ → M} (hγ : IsMinRay (I := I) γ) (x y : M) :
   rw [abs_le]
   constructor <;> linarith
 
+omit [InnerProductSpace ℝ E] [FiniteDimensional ℝ E]
+  [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M]
+  [T2Space (TangentBundle I M)] [SigmaCompactSpace M] in
 /-- The Busemann function of a minimizing ray is continuous in the manifold
 topology. -/
 theorem busemann_continuous {γ : ℝ → M} (hγ : IsMinRay (I := I) γ) :
@@ -220,6 +292,9 @@ theorem busemann_continuous {γ : ℝ → M} (hγ : IsMinRay (I := I) γ) :
   rw [riemDist_comm (I := I) y x] at hdist
   exact lt_of_le_of_lt hdist (ENNReal.toReal_lt_of_lt_ofReal hy)
 
+omit [InnerProductSpace ℝ E] [FiniteDimensional ℝ E]
+  [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M]
+  [T2Space (TangentBundle I M)] [SigmaCompactSpace M] in
 /-- The sum of the two Busemann functions associated to the opposite halves of
 a minimizing line is nonnegative. -/
 theorem buse_sum_nonneg {γ : ℝ → M} (hγ : IsMinLine (I := I) γ) (x : M) :
@@ -254,6 +329,9 @@ theorem buse_sum_nonneg {γ : ℝ → M} (hγ : IsMinLine (I := I) γ) (x : M) :
     linarith
   linarith
 
+omit [InnerProductSpace ℝ E] [FiniteDimensional ℝ E]
+  [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M]
+  [T2Space (TangentBundle I M)] [SigmaCompactSpace M] in
 /-- Along a minimizing ray, its Busemann function has the exact value `-s`. -/
 theorem busemann_ray {γ : ℝ → M} (hγ : IsMinRay (I := I) γ)
     {s : ℝ} (hs : 0 ≤ s) :
@@ -266,6 +344,9 @@ theorem busemann_ray {γ : ℝ → M} (hγ : IsMinRay (I := I) γ)
       simpa using hγ (s := 0) (t := s) le_rfl hs
     simpa [h0s] using hlower
 
+omit [InnerProductSpace ℝ E] [FiniteDimensional ℝ E]
+  [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M]
+  [T2Space (TangentBundle I M)] [SigmaCompactSpace M] in
 /-- On a minimizing line, the sum of the Busemann functions of its two halves
 vanishes at every point of the line. -/
 theorem buse_sum_line {γ : ℝ → M} (hγ : IsMinLine (I := I) γ) (u : ℝ) :
@@ -300,10 +381,95 @@ theorem buse_sum_line {γ : ℝ → M} (hγ : IsMinLine (I := I) γ) (u : ℝ) :
       linarith
   · exact buse_sum_nonneg (I := I) hγ (γ u)
 
+omit [InnerProductSpace ℝ E] [FiniteDimensional ℝ E]
+  [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M]
+  [T2Space (TangentBundle I M)] [SigmaCompactSpace M] in
 /-- The Busemann function vanishes at the origin of its minimizing ray. -/
 @[simp] theorem busemann_zero {γ : ℝ → M} (hγ : IsMinRay (I := I) γ) :
     busemann (I := I) γ (γ 0) = 0 := by
   simpa using busemann_ray (I := I) hγ (s := 0) le_rfl
+
+namespace busemannOf
+
+variable {g : SmoothRiemannianMetric I M} {γ : ℝ → M}
+
+omit [RiemannianBundle (fun x : M => TangentSpace I x)]
+  [InnerProductSpace ℝ E] [FiniteDimensional ℝ E]
+  [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M]
+  [T2Space (TangentBundle I M)] [SigmaCompactSpace M]
+  [IsContinuousRiemannianBundle E (fun x : M => TangentSpace I x)] in
+theorem lower (hγ : IsMinRayOf (I := I) g γ) (x : M) :
+    -(riemannianEDistOf (I := I) g (γ 0) x).toReal ≤
+      busemannOf (I := I) g γ x := by
+  letI : RiemannianBundle (fun y : M ↦ TangentSpace I y) :=
+    ⟨g.toRiemannianMetric⟩
+  letI : IsContinuousRiemannianBundle E
+      (fun y : M ↦ TangentSpace I y) :=
+    ⟨⟨g.inner, g.contMDiff.continuous, by intro y v w; rfl⟩⟩
+  change IsMinRay (I := I) γ at hγ
+  change -(riemannianEDist I (γ 0) x).toReal ≤ busemann (I := I) γ x
+  exact busemann_lower (I := I) hγ x
+
+omit [RiemannianBundle (fun x : M => TangentSpace I x)]
+  [InnerProductSpace ℝ E] [FiniteDimensional ℝ E]
+  [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M]
+  [T2Space (TangentBundle I M)] [SigmaCompactSpace M]
+  [IsContinuousRiemannianBundle E (fun x : M => TangentSpace I x)] in
+theorem dist (hγ : IsMinRayOf (I := I) g γ) (x y : M) :
+    |busemannOf (I := I) g γ x - busemannOf (I := I) g γ y| ≤
+      (riemannianEDistOf (I := I) g x y).toReal := by
+  letI : RiemannianBundle (fun z : M ↦ TangentSpace I z) :=
+    ⟨g.toRiemannianMetric⟩
+  letI : IsContinuousRiemannianBundle E
+      (fun z : M ↦ TangentSpace I z) :=
+    ⟨⟨g.inner, g.contMDiff.continuous, by intro z v w; rfl⟩⟩
+  change IsMinRay (I := I) γ at hγ
+  change |busemann (I := I) γ x - busemann (I := I) γ y| ≤
+    (riemannianEDist I x y).toReal
+  exact busemann_dist (I := I) hγ x y
+
+omit [RiemannianBundle (fun x : M => TangentSpace I x)]
+  [InnerProductSpace ℝ E] [FiniteDimensional ℝ E]
+  [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M]
+  [T2Space (TangentBundle I M)] [SigmaCompactSpace M]
+  [IsContinuousRiemannianBundle E (fun x : M => TangentSpace I x)] in
+theorem continuous (hγ : IsMinRayOf (I := I) g γ) :
+    Continuous (busemannOf (I := I) g γ) := by
+  letI : RiemannianBundle (fun y : M ↦ TangentSpace I y) :=
+    ⟨g.toRiemannianMetric⟩
+  letI : IsContinuousRiemannianBundle E
+      (fun y : M ↦ TangentSpace I y) :=
+    ⟨⟨g.inner, g.contMDiff.continuous, by intro y v w; rfl⟩⟩
+  change IsMinRay (I := I) γ at hγ
+  change Continuous (busemann (I := I) γ)
+  exact busemann_continuous (I := I) hγ
+
+omit [RiemannianBundle (fun x : M => TangentSpace I x)]
+  [InnerProductSpace ℝ E] [FiniteDimensional ℝ E]
+  [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M]
+  [T2Space (TangentBundle I M)] [SigmaCompactSpace M]
+  [IsContinuousRiemannianBundle E (fun x : M => TangentSpace I x)] in
+theorem ray (hγ : IsMinRayOf (I := I) g γ) {s : ℝ} (hs : 0 ≤ s) :
+    busemannOf (I := I) g γ (γ s) = -s := by
+  letI : RiemannianBundle (fun y : M ↦ TangentSpace I y) :=
+    ⟨g.toRiemannianMetric⟩
+  letI : IsContinuousRiemannianBundle E
+      (fun y : M ↦ TangentSpace I y) :=
+    ⟨⟨g.inner, g.contMDiff.continuous, by intro y v w; rfl⟩⟩
+  change IsMinRay (I := I) γ at hγ
+  change busemann (I := I) γ (γ s) = -s
+  exact busemann_ray (I := I) hγ hs
+
+omit [RiemannianBundle (fun x : M => TangentSpace I x)]
+  [InnerProductSpace ℝ E] [FiniteDimensional ℝ E]
+  [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M]
+  [T2Space (TangentBundle I M)] [SigmaCompactSpace M]
+  [IsContinuousRiemannianBundle E (fun x : M => TangentSpace I x)] in
+@[simp] theorem zero (hγ : IsMinRayOf (I := I) g γ) :
+    busemannOf (I := I) g γ (γ 0) = 0 := by
+  simpa only [neg_zero] using ray hγ (s := 0) le_rfl
+
+end busemannOf
 
 end Riemannian
 end Geometry
